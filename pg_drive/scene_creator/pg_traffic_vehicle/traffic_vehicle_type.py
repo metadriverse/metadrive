@@ -26,8 +26,7 @@ class LVehicle(PgTrafficVehicle):
     LENGTH = 8.0
     WIDTH = 2.2
     HEIGHT = 3.5
-    path = [
-        ['new/truck/scene.gltf', (factor * 0.025, factor * 0.025, factor * 0.025), factor * 0, 0] ]
+    path = [['new/truck/scene.gltf', (factor * 0.025, factor * 0.025, factor * 0.025), factor * 0, 0]]
 
 
 car_type = {"s": SVehicle, "m": MVehicle, "l": LVehicle}
