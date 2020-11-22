@@ -1,6 +1,32 @@
 import numpy as np
 
 
+def _check_keys(new_config, old_config, prefix=""):
+    assert isinstance(new_config, dict)
+    assert isinstance(old_config, dict)
+    own_keys = set(old_config)
+    new_keys = set(new_config)
+    if own_keys >= new_keys:
+        return True
+    else:
+        raise KeyError(
+            "Unexpected keys: {} in new dict{} when update config. Existing keys: {}.".format(
+                new_keys - own_keys, "'s '{}'".format(prefix) if prefix else "", own_keys
+            )
+        )
+
+
+def _recursive_check_keys(new_config, old_config, prefix=""):
+    _check_keys(new_config, old_config, prefix)
+    for k, v in new_config.items():
+        new_prefix = prefix + "/" + k if prefix else k
+        if isinstance(v, dict):
+            _recursive_check_keys(new_config[k], old_config[k], new_prefix)
+        if isinstance(v, list):
+            for new, old in zip(v, old_config[k]):
+                _recursive_check_keys(new, old, new_prefix)
+
+
 class PgConfig:
     """
     This class aims to check whether user config exists if default config system,
@@ -10,17 +36,9 @@ class PgConfig:
         self._config = config
 
     def update(self, new_dict: dict):
-        own_keys = set(self._config.keys())
-        new_keys = set(new_dict.keys())
-        if own_keys >= new_keys:
-            for key, value in new_dict.items():
-                self[key] = value
-        else:
-            raise KeyError(
-                "Unexpected keys: {} in new dict when update config. Existing keys: {}.".format(
-                    new_keys - own_keys, own_keys
-                )
-            )
+        _recursive_check_keys(new_dict, self._config)
+        for key, value in new_dict.items():
+            self._config[key] = value
 
     def __getitem__(self, item):
         assert item in self._config, "KeyError: {} doesn't exist in config".format(item)
