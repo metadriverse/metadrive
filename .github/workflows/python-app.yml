@@ -1,0 +1,28 @@
+# This workflow will install Python dependencies, run tests and lint with a single version of Python
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+
+name: Check If Formatted
+
+on:
+  #  push:
+  #    branches: [ master ]
+  pull_request:
+    branches: [ pre-release ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+      - name: Install Dependencies
+        run: |
+          pip install "yapf==0.30.0"
+      - name: Check If Formatted
+        run: |
+          bash format.sh --test
