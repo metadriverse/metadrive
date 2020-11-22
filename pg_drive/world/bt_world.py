@@ -41,6 +41,8 @@ class BtWorld(ShowBase.ShowBase):
     if sys.platform == "darwin":
         loadPrcFileData("", "gl-version 3 2")
 
+    CLEAR_SKY_COLOR = Vec3(179/255, 211/255, 216/255)
+
     def __init__(self, config: dict = None):
         self.bt_config = self.default_config()
         if config is not None:
@@ -97,12 +99,15 @@ class BtWorld(ShowBase.ShowBase):
 
             # set main cam
             self.cam.node().setCameraMask(CamMask.MainCam)
+            self.cam.node().getDisplayRegion(0).setClearColorActive(True)
+            self.cam.node().getDisplayRegion(0).setClearColor(self.CLEAR_SKY_COLOR)
             lens = self.cam.node().getLens()
             lens.setFov(70)
             lens.setAspectRatio(1.2)
 
             self.sky_box = SkyBox()
-            self.sky_box.add_to_render_module(self.render)
+            if not sys.platform == "darwin":
+                self.sky_box.add_to_render_module(self.render)
 
             self.light = Light(self.bt_config)
             self.light.add_to_render_module(self.render)
@@ -248,7 +253,8 @@ class BtWorld(ShowBase.ShowBase):
             self.debugnode.hide()
 
     def close_world(self):
-        self._clear_display_region_and_buffers()
+        if self.bt_config["use_render"] or self.bt_config["use_rgb"]:
+            self._clear_display_region_and_buffers()
 
 
 if __name__ == "__main__":

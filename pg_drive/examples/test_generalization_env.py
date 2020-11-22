@@ -12,13 +12,13 @@ class ResetEnv(GeneralizationRacing):
         super(ResetEnv, self).__init__(
             {
                 "environment_num": 1,
-                "traffic_density": 0.2,
+                "traffic_density": 0.,
                 "start_seed": 4,
                 "debug": False,
-                "bt_world_config": {
-                    "force_fps": 40,
-                    "debug_physics_world": False
-                },
+                # "bt_world_config": {
+                #     "force_fps": 40,
+                #     "debug_physics_world": False
+                # },
                 "traffic_mode": TrafficMode.Reborn,
                 "manual_control": True,
                 "use_render": True,
