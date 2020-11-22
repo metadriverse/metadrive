@@ -69,4 +69,4 @@ class SkyBox(DynamicElement):
             self._accumulate = 0
         self._accumulate += 1
         factor = self.f * (1 - abs(self._accumulate - self.ROTATION_MAX / 2) * 2 / self.ROTATION_MAX)
-        self.node_path.setH(self.node_path.getH() + factor * 0.0015)
+        self.node_path.setH(self.node_path.getH() + factor * 0.0035)

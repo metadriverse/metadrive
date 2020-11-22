@@ -41,7 +41,7 @@ class BtWorld(ShowBase.ShowBase):
     if sys.platform == "darwin":
         loadPrcFileData("", "gl-version 3 2")
 
-    CLEAR_SKY_COLOR = Vec3(179/255, 211/255, 216/255)
+    CLEAR_SKY_COLOR = Vec3(179 / 255, 211 / 255, 216 / 255)
 
     def __init__(self, config: dict = None):
         self.bt_config = self.default_config()
@@ -186,6 +186,9 @@ class BtWorld(ShowBase.ShowBase):
         self.onScreenDebug.clear()
         self.onScreenDebug.render()
         self.graphicsEngine.renderFrame()
+        if self.bt_config["use_render"]:
+            with self.force_fps:
+                self.sky_box.step()
 
     def clear_world(self):
         """
@@ -227,9 +230,6 @@ class BtWorld(ShowBase.ShowBase):
     def step(self):
         dt = self.bt_config["bullet_world_step_size"]
         self.physics_world.doPhysics(dt, 1, dt)
-        if self.bt_config["use_render"]:
-            with self.force_fps:
-                self.sky_box.step()
 
     def _debug_mode(self):
         debugNode = BulletDebugNode('Debug')

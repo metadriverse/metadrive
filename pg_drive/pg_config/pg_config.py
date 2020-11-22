@@ -20,8 +20,8 @@ def _recursive_check_keys(new_config, old_config, prefix=""):
     _check_keys(new_config, old_config, prefix)
     for k, v in new_config.items():
         new_prefix = prefix + "/" + k if prefix else k
-        if isinstance(v, dict):
-            _recursive_check_keys(new_config[k], old_config[k], new_prefix)
+        # if isinstance(v, dict):
+        #     _recursive_check_keys(new_config[k], old_config[k], new_prefix)
         if isinstance(v, list):
             for new, old in zip(v, old_config[k]):
                 _recursive_check_keys(new, old, new_prefix)
@@ -31,6 +31,10 @@ class PgConfig:
     """
     This class aims to check whether user config exists if default config system,
     Mostly, Config is sampled from parameter space in PgDrive
+
+    Besides, the value type will also be checked, but sometimes the value type is not unique (maybe Union[str, int]).
+    For these <key, value> items, use PgConfig["your key"] = None to init your PgConfig, then it will not implement
+    type check at the first time. key "config" in map.py and key "force_fps" in world.py are good examples.
     """
     def __init__(self, config: dict):
         self._config = config
@@ -38,7 +42,7 @@ class PgConfig:
     def update(self, new_dict: dict):
         _recursive_check_keys(new_dict, self._config)
         for key, value in new_dict.items():
-            self._config[key] = value
+            self[key] = value
 
     def __getitem__(self, item):
         assert item in self._config, "KeyError: {} doesn't exist in config".format(item)

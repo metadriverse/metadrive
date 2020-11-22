@@ -15,10 +15,10 @@ class ResetEnv(GeneralizationRacing):
                 "traffic_density": 0.,
                 "start_seed": 4,
                 "debug": False,
-                # "bt_world_config": {
-                #     "force_fps": 40,
-                #     "debug_physics_world": False
-                # },
+                "bt_world_config": {
+                    "force_fps": 40,
+                    "debug_physics_world": False
+                },
                 "traffic_mode": TrafficMode.Reborn,
                 "manual_control": True,
                 "use_render": True,
@@ -26,7 +26,7 @@ class ResetEnv(GeneralizationRacing):
                 "use_increment_steering": False,
                 "map_config": {
                     "type": BigGenerateMethod.BLOCK_NUM,
-                    "config": 20,
+                    "config": 7,
                 }
             }
         )

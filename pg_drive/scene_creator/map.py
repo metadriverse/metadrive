@@ -1,6 +1,6 @@
 import logging
-from typing import Union
 from panda3d.bullet import BulletWorld
+from pg_drive.pg_config.pg_config import PgConfig
 from panda3d.core import NodePath
 
 from pg_drive.scene_creator.algorithm.BIG import BIG, BigGenerateMethod
@@ -8,7 +8,7 @@ from pg_drive.scene_creator.road.road_network import RoadNetwork
 
 
 class Map:
-    def __init__(self):
+    def __init__(self, config: dict = None):
         """
         Scene can be stored and recover to save time when we access scenes encountered before
         Scene should contain road_network, blocks and vehicles
@@ -18,13 +18,19 @@ class Map:
         self.lane_width = None
         self.lane_num = None
         self.random_seed = None
+        self.config = self.default_config()
+        if config:
+            self.config.update(config)
+
+    @staticmethod
+    def default_config():
+        return PgConfig({"type": BigGenerateMethod.BLOCK_NUM, "config": None})
 
     def big_generate(
-        self, lane_width: float, lane_num: int, generate_method: BigGenerateMethod, generate_para: Union[str, int],
-        seed: int, parent_node_path: NodePath, physics_world: BulletWorld
+        self, lane_width: float, lane_num: int, seed: int, parent_node_path: NodePath, physics_world: BulletWorld
     ):
         map = BIG(lane_num, lane_width, self.road_network, parent_node_path, physics_world, seed)
-        map.generate(generate_method, generate_para)
+        map.generate(self.config["type"], self.config["config"])
         self.random_seed = seed
         self.blocks = map.blocks
         self.lane_num = lane_num

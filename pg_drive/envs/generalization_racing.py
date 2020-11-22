@@ -34,7 +34,6 @@ class GeneralizationRacing(gym.Env):
                 "use_render": self.use_render,
                 "use_rgb": self.config["use_rgb"],
                 "debug": self.config["debug"],
-                "force_fps": self.config["force_fps"]
             }
         )
         self.bt_world_config = bt_world_config
@@ -201,10 +200,10 @@ class GeneralizationRacing(gym.Env):
         # create map
         self.current_seed = self.current_seed + 1 if self.current_seed < self.start_seed + self.env_num - 1 else self.start_seed
         if self.maps.get(self.current_seed, None) is None:
-            new_map = Map()
+            new_map = Map(self.config["map_config"])
             new_map.big_generate(
-                self.config["lane_width"], self.config["lane_num"], self.map_config["type"], self.map_config["config"],
-                self.current_seed, self.bullet_world.worldNP, self.bullet_world.physics_world
+                self.config["lane_width"], self.config["lane_num"], self.current_seed, self.bullet_world.worldNP,
+                self.bullet_world.physics_world
             )
             self.maps[self.current_seed] = new_map
             self.current_map = self.maps[self.current_seed]
