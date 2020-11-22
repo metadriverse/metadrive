@@ -24,6 +24,7 @@ from pg_drive.world.terrain import Terrain
 from pg_drive.world.bt_world import BtWorld
 from pg_drive.pg_config.body_name import BodyName
 from .vehicle_module.routing_localization import RoutingLocalizationModule
+import copy
 
 
 class BaseVehicle(DynamicElement):
@@ -56,7 +57,7 @@ class BaseVehicle(DynamicElement):
         BodyName.Traffic_vehicle: "red"
     }
 
-    vehicle_config = PgConfig(
+    default_vehicle_config = PgConfig(
         dict(
             lidar=(240, 50, 4),  # laser num, distance, other vehicle info num
             mini_map=250,
@@ -79,7 +80,7 @@ class BaseVehicle(DynamicElement):
         self.set_config(self.PARAMETER_SPACE.sample())
         if config is not None:
             self.set_config(config)
-        self.vehicle_config.update(vehicle_config)
+        self.vehicle_config = self.get_vehicle_config(vehicle_config)
         self.increment_steering = self.vehicle_config["increment_steering"]
         self.max_speed = self.get_config()[Parameter.speed_max]
         self.max_steering = self.get_config()[Parameter.steering_max]
@@ -125,6 +126,12 @@ class BaseVehicle(DynamicElement):
         self.add_to_physics_world(self.bt_world.physics_world)
         if self.render:
             self.add_to_render_module(self.bt_world.pbr_render)
+
+    @classmethod
+    def get_vehicle_config(cls, new_config):
+        default = copy.deepcopy(cls.default_vehicle_config)
+        default.update(new_config)
+        return default
 
     def prepare_step(self, action):
         """

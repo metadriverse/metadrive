@@ -18,9 +18,11 @@ class GeneralizationRacing(gym.Env):
             self.config.update(config)
 
         # set their value after vehicle created
-        self.observation = None
-        self.observation_space = None
-        self.action_space = None
+        vehicle_config = BaseVehicle.get_vehicle_config(self.config["vehicle_config"])
+        self.observation = ArrayObservationType(vehicle_config) if not self.config["use_rgb"] \
+            else GrayScaleObservation(vehicle_config)
+        self.observation_space = self.observation.observation_space
+        self.action_space = gym.spaces.Box(-1.0, 1.0, shape=(2, ), dtype=np.float32)
 
         self.start_seed = self.config["start_seed"]
         self.env_num = self.config["environment_num"]
@@ -74,10 +76,6 @@ class GeneralizationRacing(gym.Env):
         # init vehicle
         v_config = self.config["vehicle_config"]
         self.vehicle = BaseVehicle(self.bullet_world, v_config)
-        self.observation = ArrayObservationType(self.vehicle.vehicle_config) if not self.config["use_rgb"] \
-            else GrayScaleObservation(self.vehicle.vehicle_config)
-        self.observation_space = self.observation.observation_space
-        self.action_space = gym.spaces.Box(-1.0, 1.0, shape=(2, ), dtype=np.float32)
 
         if self.use_render or self.config["use_rgb"]:
             self.control_camera.reset(self.vehicle.position)
@@ -120,7 +118,7 @@ class GeneralizationRacing(gym.Env):
             out_of_road_penalty=5,
             crash_penalty=10,
             acceleration_penalty=0.0,
-            steering_penalty=1.0,
+            steering_penalty=0.0,
             low_speed_penalty=0.1,
             driving_reward=1.0,
             general_penalty=0.0,
