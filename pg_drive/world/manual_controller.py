@@ -1,9 +1,4 @@
-import array
 import pygame
-import os
-import struct
-from fcntl import ioctl
-
 from direct.controls.InputState import InputState
 
 from pg_drive.world.bt_world import BtWorld
