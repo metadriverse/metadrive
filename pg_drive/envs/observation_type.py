@@ -164,9 +164,9 @@ class LidarStateObservation(ObservationType):
         super(LidarStateObservation, self).__init__(config)
 
     def get_obs_shape(self, config: Dict):
-        shape = self.state_obs.observation_shape
-        shape += (self.config["lidar"][0] + self.config["lidar"][2] * 4, )
-        return shape
+        shape = list(self.state_obs.observation_shape)
+        shape[0] += self.config["lidar"][0] + self.config["lidar"][2] * 4
+        return tuple(shape)
 
     def observe(self, vehicle):
         state = self.state_obs.observe(vehicle)
