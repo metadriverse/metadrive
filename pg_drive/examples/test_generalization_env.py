@@ -22,7 +22,7 @@ class ResetEnv(GeneralizationRacing):
                 "traffic_mode": TrafficMode.Reborn,
                 "manual_control": True,
                 "use_render": True,
-                "use_rgb": False,
+                "use_rgb": True,
                 "use_increment_steering": False,
                 "map_config": {
                     "type": BigGenerateMethod.BLOCK_NUM,
@@ -48,6 +48,7 @@ if __name__ == "__main__":
         # start = time.time()
         # print("Step: ", i)
         o, r, d, info = env.step([0.1, 0])
+        print(len(o))
         # print(time.time() - start)
         # print(len(o), "Vs.", env.observation_space.shape[0])
         # print(info)

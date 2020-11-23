@@ -8,7 +8,7 @@ from pg_drive.scene_creator.algorithm.BIG import BigGenerateMethod
 from pg_drive.scene_creator.ego_vehicle.base_vehicle import BaseVehicle
 from pg_drive.world.manual_controller import KeyboardController, JoystickController
 from pg_drive.scene_manager.traffic_manager import TrafficManager, TrafficMode
-from pg_drive.envs.observation_type import ArrayObservationType, GrayScaleObservation
+from pg_drive.envs.observation_type import LidarStateObservation, ImageStateObservation
 
 
 class GeneralizationRacing(gym.Env):
@@ -19,10 +19,10 @@ class GeneralizationRacing(gym.Env):
 
         # set their value after vehicle created
         vehicle_config = BaseVehicle.get_vehicle_config(self.config["vehicle_config"])
-        self.observation = ArrayObservationType(vehicle_config) if not self.config["use_rgb"] \
-            else GrayScaleObservation(vehicle_config)
+        self.observation = LidarStateObservation(vehicle_config) if not self.config["use_rgb"] \
+            else ImageStateObservation(vehicle_config)
         self.observation_space = self.observation.observation_space
-        self.action_space = gym.spaces.Box(-1.0, 1.0, shape=(2, ), dtype=np.float32)
+        self.action_space = gym.spaces.Box(-1.0, 1.0, shape=(2,), dtype=np.float32)
 
         self.start_seed = self.config["start_seed"]
         self.env_num = self.config["environment_num"]
@@ -229,7 +229,7 @@ class GeneralizationRacing(gym.Env):
         steering_penalty = self.config["steering_penalty"] * steering_change * self.vehicle.speed / 20
         reward -= steering_penalty
         # Penalty for frequent acceleration / brake
-        acceleration_penalty = self.config["acceleration_penalty"] * ((action[1])**2)
+        acceleration_penalty = self.config["acceleration_penalty"] * ((action[1]) ** 2)
         reward -= acceleration_penalty
 
         # Penalty for waiting

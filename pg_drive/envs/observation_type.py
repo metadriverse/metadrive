@@ -20,53 +20,9 @@ class ObservationType(ABC):
         raise NotImplementedError
 
     @staticmethod
-    def vehicle_to_left_right(vehicle):
-        from pg_drive.scene_creator.lanes.circular_lane import CircularLane
-        current_reference_lane = vehicle.routing_localization.current_ref_lanes[-1]
-        lane_num = len(vehicle.routing_localization.current_ref_lanes)
-        _, lateral_to_reference = current_reference_lane.local_coordinates(vehicle.position)
-
-        if isinstance(current_reference_lane, CircularLane) \
-                and lane_num == 1 and current_reference_lane.direction == -1:
-
-            lateral_to_right = abs(lateral_to_reference) + vehicle.routing_localization.map.lane_width * (
-                    vehicle.routing_localization.map.lane_num - 0.5) if lateral_to_reference < 0 \
-                else vehicle.routing_localization.map.lane_width * vehicle.routing_localization.map.lane_num - \
-                     vehicle.routing_localization.map.lane_width / 2 - lateral_to_reference
-
-        else:
-            lateral_to_right = abs(
-                lateral_to_reference) + vehicle.routing_localization.map.lane_width / 2 if lateral_to_reference < 0 \
-                else vehicle.routing_localization.map.lane_width / 2 - abs(lateral_to_reference)
-
-        lateral_to_left = vehicle.routing_localization.map.lane_width * vehicle.routing_localization.map.lane_num - lateral_to_right
-        return lateral_to_left, lateral_to_right
-
-
-class ArrayObservationType(ObservationType):
-    def __init__(self, config):
-        super(ArrayObservationType, self).__init__(config)
-
-    def get_obs_shape(self, config: Dict):
-        # lidar + other scalar obs
-        from pg_drive.scene_creator.ego_vehicle.base_vehicle import BaseVehicle
-        from pg_drive.scene_creator.ego_vehicle.vehicle_module.routing_localization import RoutingLocalizationModule
-        shape = BaseVehicle.Ego_state_obs_dim + RoutingLocalizationModule.Navi_obs_dim
-        shape += self.config["lidar"][0] + self.config["lidar"][2] * 4
-        return (shape, )
-
-    def observe(self, vehicle):
-        navi_info = vehicle.routing_localization.get_navi_info()
-        ego_state = self.vehicle_state(vehicle)
-        other_v_info = []
-        other_v_info = vehicle.lidar.get_surrounding_vehicles_info(vehicle, self.config["lidar"][2])
-        other_v_info += vehicle.lidar.get_cloud_points()
-        return np.asarray(ego_state + navi_info + other_v_info, dtype=np.float32)
-
-    @staticmethod
     def vehicle_state(vehicle):
         """
-        Used to train
+        Wrap vehicle states to list
         """
         from pg_drive.utils.math_utils import clip
         current_reference_lane = vehicle.routing_localization.current_ref_lanes[-1]
@@ -101,32 +57,28 @@ class ArrayObservationType(ObservationType):
         info.append(clip((lateral * 2 / vehicle.routing_localization.map.lane_width + 1.0) / 2.0, 0.0, 1.0))
         return info
 
+    @staticmethod
+    def vehicle_to_left_right(vehicle):
+        from pg_drive.scene_creator.lanes.circular_lane import CircularLane
+        current_reference_lane = vehicle.routing_localization.current_ref_lanes[-1]
+        lane_num = len(vehicle.routing_localization.current_ref_lanes)
+        _, lateral_to_reference = current_reference_lane.local_coordinates(vehicle.position)
 
-class GrayScaleObservation(ObservationType):
-    STACK_SIZE = 3  # use continuous 4 image as the input
+        if isinstance(current_reference_lane, CircularLane) \
+                and lane_num == 1 and current_reference_lane.direction == -1:
 
-    def __init__(self, config):
-        super(GrayScaleObservation, self).__init__(config)
-        self.rgb_clip = True if "rgb_clip" in config and config["rgb_clip"] else False
-        if not self.rgb_clip:
-            self.observation_space = gym.spaces.Box(0, 255, shape=self.observation_shape, dtype=np.uint8)
-        self.state = np.zeros(self.observation_shape)
+            lateral_to_right = abs(lateral_to_reference) + vehicle.routing_localization.map.lane_width * (
+                    vehicle.routing_localization.map.lane_num - 0.5) if lateral_to_reference < 0 \
+                else vehicle.routing_localization.map.lane_width * vehicle.routing_localization.map.lane_num - \
+                     vehicle.routing_localization.map.lane_width / 2 - lateral_to_reference
 
-    def get_obs_shape(self, config: Dict):
-        shape = tuple(config["front_cam"]) + (self.STACK_SIZE, )
-        return shape
+        else:
+            lateral_to_right = abs(
+                lateral_to_reference) + vehicle.routing_localization.map.lane_width / 2 if lateral_to_reference < 0 \
+                else vehicle.routing_localization.map.lane_width / 2 - abs(lateral_to_reference)
 
-    def observe(self, vehicle):
-        new_obs = vehicle.front_cam.get_gray_pixels_array(self.rgb_clip)
-        self.show_gray_scale_array(new_obs)
-        self.state = np.roll(self.state, -1, axis=-1)
-        self.state[:, :, -1] = new_obs
-
-        # update out of road
-        lateral_to_left, lateral_to_right = ObservationType.vehicle_to_left_right(vehicle)
-        if lateral_to_left < 0 or lateral_to_right < 0:
-            vehicle.out_of_road = True
-        return self.state
+        lateral_to_left = vehicle.routing_localization.map.lane_width * vehicle.routing_localization.map.lane_num - lateral_to_right
+        return lateral_to_left, lateral_to_right
 
     @staticmethod
     def resize_img(array, dim_1, dim_2):
@@ -154,3 +106,101 @@ class GrayScaleObservation(ObservationType):
         plt.plot()
         plt.imshow(img, cmap=plt.cm.gray)
         plt.show()
+
+
+class StateObservationType(ObservationType):
+    """
+    Use vehicle state info, navigation info and lidar point clouds info as input
+    """
+
+    def __init__(self, config):
+        super(StateObservationType, self).__init__(config)
+
+    def get_obs_shape(self, config: Dict):
+        # lidar + other scalar obs
+        from pg_drive.scene_creator.ego_vehicle.base_vehicle import BaseVehicle
+        from pg_drive.scene_creator.ego_vehicle.vehicle_module.routing_localization import RoutingLocalizationModule
+        shape = BaseVehicle.Ego_state_obs_dim + RoutingLocalizationModule.Navi_obs_dim
+        return (shape,)
+
+    def observe(self, vehicle):
+        navi_info = vehicle.routing_localization.get_navi_info()
+        ego_state = self.vehicle_state(vehicle)
+        return np.asarray(ego_state + navi_info, dtype=np.float32)
+
+
+class ImageObservation(ObservationType):
+    """
+    Use only image info as input
+    """
+    STACK_SIZE = 3  # use continuous 4 image as the input
+
+    def __init__(self, config):
+        super(ImageObservation, self).__init__(config)
+        self.rgb_clip = True if "rgb_clip" in config and config["rgb_clip"] else False
+        if not self.rgb_clip:
+            self.observation_space = gym.spaces.Box(0, 255, shape=self.observation_shape, dtype=np.uint8)
+        self.state = np.zeros(self.observation_shape)
+
+    def get_obs_shape(self, config: Dict):
+        shape = tuple(config["front_cam"]) + (self.STACK_SIZE,)
+        return shape
+
+    def observe(self, vehicle):
+        new_obs = vehicle.front_cam.get_gray_pixels_array(self.rgb_clip)
+        # self.show_gray_scale_array(new_obs)
+        self.state = np.roll(self.state, -1, axis=-1)
+        self.state[:, :, -1] = new_obs
+
+        # update out of road
+        lateral_to_left, lateral_to_right = ObservationType.vehicle_to_left_right(vehicle)
+        if lateral_to_left < 0 or lateral_to_right < 0:
+            vehicle.out_of_road = True
+        return self.state
+
+
+class LidarStateObservation(ObservationType):
+    def __init__(self, config):
+        self.state_obs = StateObservationType(config)
+        super(LidarStateObservation, self).__init__(config)
+
+    def get_obs_shape(self, config: Dict):
+        shape = self.state_obs.observation_shape
+        shape += (self.config["lidar"][0] + self.config["lidar"][2] * 4,)
+        return shape
+
+    def observe(self, vehicle):
+        state = self.state_obs.observe(vehicle)
+        other_v_info = []
+        other_v_info += vehicle.lidar.get_surrounding_vehicles_info(vehicle, self.config["lidar"][2])
+        other_v_info += vehicle.lidar.get_cloud_points()
+        return np.concatenate((state, np.asarray(other_v_info)))
+
+
+class ImageStateObservation(ObservationType):
+    """
+    Use ego state info, navigation info and front cam image as input
+    The shape needs special handling
+    """
+    IMAGE = "image"
+    STATE = "state"
+
+    def __init__(self, config):
+        super(ImageStateObservation, self).__init__(config)
+        self.img_obs = ImageObservation(config)
+        self.state_obs = StateObservationType(config)
+        self.observation_space = gym.spaces.Dict({self.IMAGE: self.img_obs.observation_space,
+                                                  self.STATE: self.state_obs.observation_space})
+        from pg_drive.scene_creator.ego_vehicle.base_vehicle import BaseVehicle
+        from pg_drive.scene_creator.ego_vehicle.vehicle_module.routing_localization import RoutingLocalizationModule
+        self.observation_shape = {self.IMAGE: self.img_obs.observation_shape,
+                                  self.STATE: self.state_obs.observation_shape}
+
+    def get_obs_shape(self, config: Dict):
+        """
+        Useless, only a place holder
+        """
+        return (1,)
+
+    def observe(self, vehicle):
+        return {self.IMAGE: self.img_obs.observe(vehicle), self.STATE: self.state_obs.observe(vehicle)}
