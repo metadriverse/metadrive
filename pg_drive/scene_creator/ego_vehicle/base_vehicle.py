@@ -61,7 +61,7 @@ class BaseVehicle(DynamicElement):
         dict(
             lidar=(240, 50, 4),  # laser num, distance, other vehicle info num
             mini_map=250,
-            front_cam=None,
+            front_cam=(84, 84),  # length, width
             show_navi_point=False,
             increment_steering=False
         )
@@ -72,6 +72,10 @@ class BaseVehicle(DynamicElement):
     WIDTH = None
 
     def __init__(self, bt_world: BtWorld, vehicle_config: dict = None, random_seed: int = 0, config: dict = None):
+        """
+        This Vehicle Config is different from self.get_config(), and it is used to define which modules to use, and
+        module parameters.
+        """
         super(BaseVehicle, self).__init__(random_seed)
         self.bt_world = bt_world
         self.node_path = NodePath("vehicle")
@@ -102,7 +106,8 @@ class BaseVehicle(DynamicElement):
         if not bt_world.bt_config["use_rgb"]:
             self.add_lidar(self.vehicle_config["lidar"][0], self.vehicle_config["lidar"][1])
         if bt_world.bt_config["use_rgb"] or bt_world.bt_config["use_render"]:
-            self.add_front_cam(SensorCamera(self.chassis_np, bt_world))
+            front_cam_config = self.vehicle_config["front_cam"]
+            self.add_front_cam(SensorCamera(front_cam_config[0], front_cam_config[1], self.chassis_np, bt_world))
             self.add_mini_map(MiniMap(self.vehicle_config["mini_map"], bt_world))
 
         # other info

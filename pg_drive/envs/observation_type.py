@@ -113,12 +113,12 @@ class GrayScaleObservation(ObservationType):
         self.state = np.zeros(self.observation_shape)
 
     def get_obs_shape(self, config: Dict):
-        shape = (84, 84) + (self.STACK_SIZE, )
+        shape = tuple(config["front_cam"]) + (self.STACK_SIZE, )
         return shape
 
     def observe(self, vehicle):
         new_obs = vehicle.front_cam.get_gray_pixels_array(self.rgb_clip)
-        # self.show_gray_scale_array(new_obs)
+        self.show_gray_scale_array(new_obs)
         self.state = np.roll(self.state, -1, axis=-1)
         self.state[:, :, -1] = new_obs
 

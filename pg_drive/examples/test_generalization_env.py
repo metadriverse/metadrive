@@ -27,6 +27,9 @@ class ResetEnv(GeneralizationRacing):
                 "map_config": {
                     "type": BigGenerateMethod.BLOCK_NUM,
                     "config": 7,
+                },
+                "vehicle_config": {
+                    "front_cam": (200, 200)
                 }
             }
         )
