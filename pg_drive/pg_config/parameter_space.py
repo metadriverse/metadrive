@@ -75,25 +75,25 @@ class BlockParameterSpace:
     Make sure the range of curve parameters covers the parameter space of other blocks,
     otherwise, an error may happen in navigation info normalization
     """
-    STRAIGHT = {Parameter.length: PgBoxSpace(min=20.0, max=100.0)}
+    STRAIGHT = {Parameter.length: PgBoxSpace(min=40.0, max=80.0)}
     CURVE = {
-        Parameter.length: PgBoxSpace(min=20.0, max=50.0),
+        Parameter.length: PgBoxSpace(min=40.0, max=80.0),
         Parameter.radius: PgBoxSpace(min=25.0, max=60.0),
-        Parameter.angle: PgBoxSpace(min=30, max=180),
+        Parameter.angle: PgBoxSpace(min=45, max=135),
         Parameter.dir: PgDiscreteSpace(2)
     }
     INTERSECTION = {
-        Parameter.radius: PgBoxSpace(min=5, max=15),
-        Parameter.change_lane_num: PgDiscreteSpace(number=2),  # 0,1
+        Parameter.radius: PgConstantSpace(10),
+        Parameter.change_lane_num: PgDiscreteSpace(number=2),  # 0, 1
         Parameter.decrease_increase: PgDiscreteSpace(number=2)  # 0, decrease, 1 increase
     }
     ROUNDABOUT = {
-        Parameter.radius_exit: PgBoxSpace(min=5, max=15),
-        Parameter.radius_inner: PgBoxSpace(min=15, max=45),
-        Parameter.angle: PgBoxSpace(min=60, max=70)
+        Parameter.radius_exit: PgBoxSpace(min=5, max=15),  # TODO Should we reduce this?
+        Parameter.radius_inner: PgBoxSpace(min=15, max=45),  # TODO Should we reduce this?
+        Parameter.angle: PgConstantSpace(60)
     }
     T_INTERSECTION = {
-        Parameter.radius: PgBoxSpace(min=5, max=15),
+        Parameter.radius: PgConstantSpace(10),
         Parameter.t_intersection_type: PgDiscreteSpace(number=3),  # 3 different t type for previous socket
         Parameter.change_lane_num: PgDiscreteSpace(2),  # 0,1
         Parameter.decrease_increase: PgDiscreteSpace(2)  # 0, decrease, 1 increase

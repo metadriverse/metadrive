@@ -63,7 +63,7 @@ class GeneralizationRacing(gym.Env):
 
         # for manual_control and camera type
         if self.config["use_chase_camera"]:
-            self.control_camera = ChaseCamera(1.8, 7, self.bullet_world)
+            self.control_camera = ChaseCamera(self.config["camera_height"], 7, self.bullet_world)
         if self.config["manual_control"]:
             if self.config["controller"] == "keyboard":
                 self.controller = KeyboardController()
@@ -90,6 +90,7 @@ class GeneralizationRacing(gym.Env):
             manual_control=False,
             controller="keyboard",  # "joystick" or "keyboard"
             use_chase_camera=True,
+            camera_height=1.8,
 
             # ===== Traffic =====
             traffic_density=0.1,
@@ -198,7 +199,9 @@ class GeneralizationRacing(gym.Env):
             self.current_map.remove_from_render_module()
 
         # create map
-        self.current_seed = self.current_seed + 1 if self.current_seed < self.start_seed + self.env_num - 1 else self.start_seed
+        self.current_seed = np.random.randint(self.start_seed, self.start_seed + self.env_num)
+        # self.current_seed = self.current_seed + 1 if self.current_seed < self.start_seed + \
+        # self.env_num - 1 else self.start_seed
         if self.maps.get(self.current_seed, None) is None:
             new_map = Map(self.config["map_config"])
             new_map.big_generate(
