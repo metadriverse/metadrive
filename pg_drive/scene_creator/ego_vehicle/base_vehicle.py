@@ -84,7 +84,10 @@ class BaseVehicle(DynamicElement):
         self.set_config(self.PARAMETER_SPACE.sample())
         if config is not None:
             self.set_config(config)
-        self.vehicle_config = self.get_vehicle_config(vehicle_config)
+
+        self.vehicle_config = self.get_vehicle_config(
+            vehicle_config
+        ) if vehicle_config is not None else self.default_vehicle_config
         self.increment_steering = self.vehicle_config["increment_steering"]
         self.max_speed = self.get_config()[Parameter.speed_max]
         self.max_steering = self.get_config()[Parameter.steering_max]
