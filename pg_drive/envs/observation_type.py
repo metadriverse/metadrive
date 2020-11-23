@@ -112,7 +112,6 @@ class StateObservationType(ObservationType):
     """
     Use vehicle state info, navigation info and lidar point clouds info as input
     """
-
     def __init__(self, config):
         super(StateObservationType, self).__init__(config)
 
@@ -121,7 +120,7 @@ class StateObservationType(ObservationType):
         from pg_drive.scene_creator.ego_vehicle.base_vehicle import BaseVehicle
         from pg_drive.scene_creator.ego_vehicle.vehicle_module.routing_localization import RoutingLocalizationModule
         shape = BaseVehicle.Ego_state_obs_dim + RoutingLocalizationModule.Navi_obs_dim
-        return (shape,)
+        return (shape, )
 
     def observe(self, vehicle):
         navi_info = vehicle.routing_localization.get_navi_info()
@@ -143,7 +142,7 @@ class ImageObservation(ObservationType):
         self.state = np.zeros(self.observation_shape)
 
     def get_obs_shape(self, config: Dict):
-        shape = tuple(config["front_cam"]) + (self.STACK_SIZE,)
+        shape = tuple(config["front_cam"]) + (self.STACK_SIZE, )
         return shape
 
     def observe(self, vehicle):
@@ -166,7 +165,7 @@ class LidarStateObservation(ObservationType):
 
     def get_obs_shape(self, config: Dict):
         shape = self.state_obs.observation_shape
-        shape += (self.config["lidar"][0] + self.config["lidar"][2] * 4,)
+        shape += (self.config["lidar"][0] + self.config["lidar"][2] * 4, )
         return shape
 
     def observe(self, vehicle):
@@ -189,18 +188,24 @@ class ImageStateObservation(ObservationType):
         super(ImageStateObservation, self).__init__(config)
         self.img_obs = ImageObservation(config)
         self.state_obs = StateObservationType(config)
-        self.observation_space = gym.spaces.Dict({self.IMAGE: self.img_obs.observation_space,
-                                                  self.STATE: self.state_obs.observation_space})
+        self.observation_space = gym.spaces.Dict(
+            {
+                self.IMAGE: self.img_obs.observation_space,
+                self.STATE: self.state_obs.observation_space
+            }
+        )
         from pg_drive.scene_creator.ego_vehicle.base_vehicle import BaseVehicle
         from pg_drive.scene_creator.ego_vehicle.vehicle_module.routing_localization import RoutingLocalizationModule
-        self.observation_shape = {self.IMAGE: self.img_obs.observation_shape,
-                                  self.STATE: self.state_obs.observation_shape}
+        self.observation_shape = {
+            self.IMAGE: self.img_obs.observation_shape,
+            self.STATE: self.state_obs.observation_shape
+        }
 
     def get_obs_shape(self, config: Dict):
         """
         Useless, only a place holder
         """
-        return (1,)
+        return (1, )
 
     def observe(self, vehicle):
         return {self.IMAGE: self.img_obs.observe(vehicle), self.STATE: self.state_obs.observe(vehicle)}
