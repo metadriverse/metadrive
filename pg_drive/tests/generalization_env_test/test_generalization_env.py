@@ -4,7 +4,7 @@ import logging
 from pg_drive.scene_manager.traffic_manager import TrafficMode
 from pg_drive.utils import setup_logger
 
-setup_logger(debug=True)
+# setup_logger(debug=True)
 
 
 class ResetEnv(GeneralizationRacing):
@@ -12,8 +12,8 @@ class ResetEnv(GeneralizationRacing):
         super(ResetEnv, self).__init__(
             {
                 "environment_num": 1,
-                "traffic_density": 0.,
-                "start_seed": 4,
+                "traffic_density": 0.2,
+                "start_seed": 40,
                 "debug": False,
                 "bt_world_config": {
                     "force_fps": 40,
@@ -48,7 +48,8 @@ if __name__ == "__main__":
         # start = time.time()
         # print("Step: ", i)
         o, r, d, info = env.step([0.1, 0])
-        print(len(o))
+        out = not env.vehicle.lane.on_lane(env.vehicle.position)
+        print(env.vehicle.lane_index)
         # print(time.time() - start)
         # print(len(o), "Vs.", env.observation_space.shape[0])
         # print(info)

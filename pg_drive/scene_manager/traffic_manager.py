@@ -186,13 +186,13 @@ class TrafficManager:
 
     def neighbour_vehicles(self, vehicle, lane_index: LaneIndex = None) -> Tuple:
         """
-        Find the preceding and following vehicles of a given chrono_vehicle.
+        Find the preceding and following vehicles of a given vehicle.
 
-        :param vehicle: the chrono_vehicle whose neighbours must be found
+        :param vehicle: the vehicle whose neighbours must be found
         :param lane_index: the lane on which to look for preceding and following vehicles.
-                     It doesn't have to be the current chrono_vehicle lane but can also be another lane, in which case the
-                     chrono_vehicle is projected on it considering its local coordinates in the lane.
-        :return: its preceding chrono_vehicle, its following chrono_vehicle
+                     It doesn't have to be the current vehicle lane but can also be another lane, in which case the
+                     vehicle is projected on it considering its local coordinates in the lane.
+        :return: its preceding vehicle, its following vehicle
         """
         lane_index = lane_index or vehicle.lane_index
         if not lane_index:

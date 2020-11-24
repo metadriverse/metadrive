@@ -13,9 +13,9 @@ from pg_drive.scene_manager.traffic_manager import TrafficManager, LaneIndex
 
 class Vehicle:
     """
-    A moving chrono_vehicle on a road, and its kinematics.
+    A moving vehicle on a road, and its kinematics.
 
-    The chrono_vehicle is represented by a dynamical system: a modified bicycle model.
+    The vehicle is represented by a dynamical system: a modified bicycle model.
     It's state is propagated depending on its steering and acceleration actions.
     """
 
@@ -63,8 +63,8 @@ class Vehicle:
         """
         Create a vehicle on a given lane at a longitudinal position.
 
-        :param scene: the road where the chrono_vehicle is driving
-        :param lane_index: index of the lane where the chrono_vehicle is located
+        :param scene: the road where the vehicle is driving
+        :param lane_index: index of the lane where the vehicle is located
         :param longitudinal: longitudinal position along the lane
         :param speed: initial speed in [m/s]
         :return: A vehicle with at the specified position
@@ -104,12 +104,12 @@ class Vehicle:
     @classmethod
     def create_from(cls, vehicle: "Vehicle") -> "Vehicle":
         """
-        Create a new chrono_vehicle from an existing one.
+        Create a new vehicle from an existing one.
 
-        Only the chrono_vehicle dynamics are copied, other properties are default.
+        Only the vehicle dynamics are copied, other properties are default.
 
-        :param vehicle: a chrono_vehicle
-        :return: a new chrono_vehicle at the same dynamical state
+        :param vehicle: a vehicle
+        :return: a new vehicle at the same dynamical state
         """
         v = cls(vehicle.scene, vehicle.position, vehicle.heading, vehicle.speed)
         return v
@@ -125,11 +125,11 @@ class Vehicle:
 
     def step(self, dt: float) -> None:
         """
-        Propagate the chrono_vehicle state given its actions.
+        Propagate the vehicle state given its actions.
 
         Integrate a modified bicycle model with a 1st-order response on the steering wheel dynamics.
-        If the chrono_vehicle is crashed, the actions are overridden with erratic steering and braking until complete stop.
-        The chrono_vehicle's current lane is updated.
+        If the vehicle is crashed, the actions are overridden with erratic steering and braking until complete stop.
+        The vehicle's current lane is updated.
 
         :param dt: timestep of integration of the model [s]
         """
@@ -161,11 +161,11 @@ class Vehicle:
 
     def lane_distance_to(self, vehicle: "Vehicle", lane: AbstractLane = None) -> float:
         """
-        Compute the signed distance to another chrono_vehicle along a lane.
+        Compute the signed distance to another vehicle along a lane.
 
-        :param vehicle: the other chrono_vehicle
+        :param vehicle: the other vehicle
         :param lane: a lane
-        :return: the distance to the other chrono_vehicle [m]
+        :return: the distance to the other vehicle [m]
         """
         if not vehicle:
             return np.nan
@@ -175,9 +175,9 @@ class Vehicle:
 
     def check_collision(self, other: Union['Vehicle', 'RoadObject']) -> None:
         """
-        Check for collision with another chrono_vehicle.
+        Check for collision with another vehicle.
 
-        :param other: the other chrono_vehicle or object
+        :param other: the other vehicle or object
         """
         if self.crashed or other is self:
             return
@@ -235,7 +235,7 @@ class Vehicle:
 
     @property
     def on_road(self) -> bool:
-        """ Is the chrono_vehicle on its current lane, or off-scene ? """
+        """ Is the vehicle on its current lane, or off-scene ? """
         return self.lane.on_lane(self.position)
 
     def front_distance_to(self, other: "Vehicle") -> float:

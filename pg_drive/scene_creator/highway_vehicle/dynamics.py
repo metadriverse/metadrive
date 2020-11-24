@@ -10,7 +10,7 @@ class BicycleVehicle(Vehicle):
     """
     This model is based on the following assumptions:
 
-    - the chrono_vehicle is moving with a constant longitudinal speed
+    - the vehicle is moving with a constant longitudinal speed
     - the steering input to front tires and the corresponding slip angles are small
 
     See https://pdfs.semanticscholar.org/bb9c/d2892e9327ec1ee647c30c320f2089b290c1.pdf, Chapter 3.

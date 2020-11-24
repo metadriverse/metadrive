@@ -31,7 +31,6 @@ class TestBlock(ShowBase.ShowBase):
         self.accept("f4", self.render.analyze)
         self.vehicle = None
         self.inputs = None
-        self.bt_config[""]
 
     def vis_big(self, big):
         # self.cam.setPos(200, 700, 1000)

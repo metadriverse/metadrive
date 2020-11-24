@@ -278,15 +278,15 @@ class IntervalVehicle(LinearVehicle):
         return polytope(a_theta, parameter_box)
 
     def get_front_interval(self) -> "VehicleInterval":
-        # TODO: For now, we assume the front chrono_vehicle follows the models' front chrono_vehicle
+        # TODO: For now, we assume the front vehicle follows the models' front vehicle
         front_vehicle, _ = self.road.neighbour_vehicles(self)
         if front_vehicle:
             if isinstance(front_vehicle, IntervalVehicle):
-                # Use interval from the observer estimate of the front chrono_vehicle
+                # Use interval from the observer estimate of the front vehicle
                 front_interval = front_vehicle.interval
             else:
-                # The front chrono_vehicle trajectory interval is not being estimated, so it should be considered as certain.
-                # We use a new observer created from that current chrono_vehicle state, which will have full certainty.
+                # The front vehicle trajectory interval is not being estimated, so it should be considered as certain.
+                # We use a new observer created from that current vehicle state, which will have full certainty.
                 front_interval = IntervalVehicle.create_from(front_vehicle).interval
         else:
             front_interval = None
@@ -294,9 +294,9 @@ class IntervalVehicle(LinearVehicle):
 
     def get_followed_lanes(self, lane_change_model: str = "model", squeeze: bool = True) -> List[LaneIndex]:
         """
-        Get the list of lanes that could be followed by this chrono_vehicle.
+        Get the list of lanes that could be followed by this vehicle.
 
-        :param lane_change_model: - model: assume that the chrono_vehicle will follow the lane of its model behaviour.
+        :param lane_change_model: - model: assume that the vehicle will follow the lane of its model behaviour.
                                   - all: assume that any lane change decision is possible at any timestep
                                   - right: assume that a right lane change decision is possible at any timestep
         :param squeeze: if True, remove duplicate lanes (at boundaries of the road)
@@ -369,7 +369,7 @@ class IntervalVehicle(LinearVehicle):
         For robust planning, we assume that MDPVehicles collide with the uncertainty set of an IntervalVehicle,
         which corresponds to worst-case outcome.
 
-        :param other: the other chrono_vehicle
+        :param other: the other vehicle
         """
         if not isinstance(other, MDPVehicle):
             super().check_collision(other)
@@ -383,8 +383,8 @@ class IntervalVehicle(LinearVehicle):
                                         self.interval.position[1] + self.LENGTH):
             return
 
-        # Projection of other chrono_vehicle to uncertainty rectangle. This is the possible position of this chrono_vehicle which is
-        # the most likely to collide with other chrono_vehicle
+        # Projection of other vehicle to uncertainty rectangle. This is the possible position of this vehicle which is
+        # the most likely to collide with other vehicle
         projection = np.minimum(np.maximum(other.position, self.interval.position[0]), self.interval.position[1])
         # Accurate rectangular check
         if utils.rotated_rectangles_intersect((projection, self.LENGTH, self.WIDTH, self.heading),
