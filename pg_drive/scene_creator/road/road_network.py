@@ -178,7 +178,7 @@ class RoadNetwork:
         - Else, pick next road's closest lane.
         :param current_index: the index of the current lane.
         :param route: the planned route, if any.
-        :param position: the chrono_vehicle position.
+        :param position: the vehicle position.
         :param np_random: a source of randomness.
         :return: the index of the next lane to be followed when current lane is finished.
         """

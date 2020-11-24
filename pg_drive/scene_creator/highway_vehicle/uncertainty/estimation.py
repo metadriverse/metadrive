@@ -60,7 +60,7 @@ class MultipleModelVehicle(LinearVehicle):
 
     def update_possible_routes(self) -> None:
         """
-        Update a list of possible routes that this chrono_vehicle could be following.
+        Update a list of possible routes that this vehicle could be following.
 
         - Add routes at the next intersection
         - Step the current lane in each route
@@ -94,10 +94,10 @@ class MultipleModelVehicle(LinearVehicle):
 
     def assume_model_is_valid(self, index: int) -> "LinearVehicle":
         """
-        Get a copy of this chrono_vehicle behaving according to one of its possible routes.
+        Get a copy of this vehicle behaving according to one of its possible routes.
 
         :param index: index of the route to consider
-        :return: a copy of the chrono_vehicle
+        :return: a copy of the vehicle
         """
         if not self.data:
             return self.create_from(self)

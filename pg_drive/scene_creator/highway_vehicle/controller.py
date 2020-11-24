@@ -12,7 +12,7 @@ from pg_drive.utils.math_utils import clip
 
 class ControlledVehicle(Vehicle):
     """
-    A chrono_vehicle piloted by two low-level controller, allowing high-level actions such as cruise control and lane changes.
+    A vehicle piloted by two low-level controller, allowing high-level actions such as cruise control and lane changes.
 
     - The longitudinal controller is a speed controller;
     - The lateral controller is a heading controller cascaded with a lateral position controller.
@@ -49,12 +49,12 @@ class ControlledVehicle(Vehicle):
     @classmethod
     def create_from(cls, vehicle: "ControlledVehicle") -> "ControlledVehicle":
         """
-        Create a new chrono_vehicle from an existing one.
+        Create a new vehicle from an existing one.
 
-        The chrono_vehicle dynamics and target dynamics are copied, other properties are default.
+        The vehicle dynamics and target dynamics are copied, other properties are default.
 
-        :param vehicle: a chrono_vehicle
-        :return: a new chrono_vehicle at the same dynamical state
+        :param vehicle: a vehicle
+        :return: a new vehicle at the same dynamical state
         """
         v = cls(
             vehicle.scene,
@@ -124,7 +124,7 @@ class ControlledVehicle(Vehicle):
 
     def steering_control(self, target_lane_index: LaneIndex) -> float:
         """
-        Steer the chrono_vehicle to follow the center of an given lane.
+        Steer the vehicle to follow the center of an given lane.
 
         1. Lateral position is controlled by a proportional controller yielding a lateral speed command
         2. Lateral speed command is converted to a heading reference
@@ -153,7 +153,7 @@ class ControlledVehicle(Vehicle):
 
     def speed_control(self, target_speed: float) -> float:
         """
-        Control the speed of the chrono_vehicle.
+        Control the speed of the vehicle.
 
         Using a simple proportional controller.
 
@@ -199,7 +199,7 @@ class ControlledVehicle(Vehicle):
 
     def predict_trajectory_constant_speed(self, times: np.ndarray) -> Tuple[List[np.ndarray], List[float]]:
         """
-        Predict the future positions of the chrono_vehicle along its planned route, under constant speed
+        Predict the future positions of the vehicle along its planned route, under constant speed
 
         :param times: timesteps of prediction
         :return: positions, headings
@@ -217,7 +217,7 @@ class ControlledVehicle(Vehicle):
 
 
 class MDPVehicle(ControlledVehicle):
-    """A controlled chrono_vehicle with a specified discrete range of allowed target speeds."""
+    """A controlled vehicle with a specified discrete range of allowed target speeds."""
 
     SPEED_COUNT: int = 3  # []
     SPEED_MIN: float = 20  # [m/s]
@@ -285,11 +285,11 @@ class MDPVehicle(ControlledVehicle):
     def predict_trajectory(self, actions: List, action_duration: float, trajectory_timestep: float, dt: float) \
             -> List[ControlledVehicle]:
         """
-        Predict the future trajectory of the chrono_vehicle given a sequence of actions.
+        Predict the future trajectory of the vehicle given a sequence of actions.
 
         :param actions: a sequence of future actions.
         :param action_duration: the duration of each action.
-        :param trajectory_timestep: the duration between each save of the chrono_vehicle state.
+        :param trajectory_timestep: the duration between each save of the vehicle state.
         :param dt: the timestep of the simulation
         :return: the sequence of future states
         """

@@ -12,9 +12,9 @@ from pg_drive.utils.math_utils import clip
 
 class IDMVehicle(ControlledVehicle):
     """
-    A chrono_vehicle using both a longitudinal and a lateral decision policies.
+    A vehicle using both a longitudinal and a lateral decision policies.
 
-    - Longitudinal: the IDM model computes an acceleration given the preceding chrono_vehicle's distance and speed.
+    - Longitudinal: the IDM model computes an acceleration given the preceding vehicle's distance and speed.
     - Lateral: the MOBIL model decides when to change lane by maximizing the acceleration of nearby vehicles.
     """
 
@@ -29,10 +29,10 @@ class IDMVehicle(ControlledVehicle):
     """Desired maximum deceleration."""
 
     DISTANCE_WANTED = 5.0 + ControlledVehicle.LENGTH  # [m]
-    """Desired jam distance to the front chrono_vehicle."""
+    """Desired jam distance to the front vehicle."""
 
     TIME_WANTED = 1.5  # [s]
-    """Desired time gap to the front chrono_vehicle."""
+    """Desired time gap to the front vehicle."""
 
     DELTA = 4.0  # []
     """Exponent of the velocity term."""
@@ -66,12 +66,12 @@ class IDMVehicle(ControlledVehicle):
     @classmethod
     def create_from(cls, vehicle: ControlledVehicle) -> "IDMVehicle":
         """
-        Create a new chrono_vehicle from an existing one.
+        Create a new vehicle from an existing one.
 
-        The chrono_vehicle dynamics and target dynamics are copied, other properties are default.
+        The vehicle dynamics and target dynamics are copied, other properties are default.
 
-        :param vehicle: a chrono_vehicle
-        :return: a new chrono_vehicle at the same dynamical state
+        :param vehicle: a vehicle
+        :return: a new vehicle at the same dynamical state
         """
         v = cls(
             vehicle.scene,
@@ -119,7 +119,7 @@ class IDMVehicle(ControlledVehicle):
         """
         Step the simulation.
 
-        Increases a timer used for decision policies, and step the chrono_vehicle dynamics.
+        Increases a timer used for decision policies, and step the vehicle dynamics.
 
         :param dt: timestep
         """
@@ -134,14 +134,14 @@ class IDMVehicle(ControlledVehicle):
 
         The acceleration is chosen so as to:
         - reach a target speed;
-        - maintain a minimum safety distance (and safety time) w.r.t the front chrono_vehicle.
+        - maintain a minimum safety distance (and safety time) w.r.t the front vehicle.
 
-        :param ego_vehicle: the chrono_vehicle whose desired acceleration is to be computed. It does not have to be an
-                            IDM chrono_vehicle, which is why this method is a class method. This allows an IDM chrono_vehicle to
+        :param ego_vehicle: the vehicle whose desired acceleration is to be computed. It does not have to be an
+                            IDM vehicle, which is why this method is a class method. This allows an IDM vehicle to
                             reason about other vehicles behaviors even though they may not IDMs.
-        :param front_vehicle: the chrono_vehicle preceding the ego-chrono_vehicle
-        :param rear_vehicle: the chrono_vehicle following the ego-chrono_vehicle
-        :return: the acceleration command for the ego-chrono_vehicle [m/s2]
+        :param front_vehicle: the vehicle preceding the ego-vehicle
+        :param rear_vehicle: the vehicle following the ego-vehicle
+        :return: the acceleration command for the ego-vehicle [m/s2]
         """
         if not ego_vehicle or isinstance(ego_vehicle, RoadObject):
             return 0
@@ -156,10 +156,10 @@ class IDMVehicle(ControlledVehicle):
 
     def desired_gap(self, ego_vehicle: Vehicle, front_vehicle: Vehicle = None) -> float:
         """
-        Compute the desired distance between a chrono_vehicle and its leading chrono_vehicle.
+        Compute the desired distance between a vehicle and its leading vehicle.
 
-        :param ego_vehicle: the chrono_vehicle being controlled
-        :param front_vehicle: its leading chrono_vehicle
+        :param ego_vehicle: the vehicle being controlled
+        :param front_vehicle: its leading vehicle
         :return: the desired distance between the two [m]
         """
         d0 = self.DISTANCE_WANTED
@@ -173,11 +173,11 @@ class IDMVehicle(ControlledVehicle):
         """
         Compute the maximum allowed speed to avoid Inevitable Collision States.
 
-        Assume the front chrono_vehicle is going to brake at full deceleration and that
+        Assume the front vehicle is going to brake at full deceleration and that
         it will be noticed after a given delay, and compute the maximum speed
-        which allows the ego-chrono_vehicle to brake enough to avoid the collision.
+        which allows the ego-vehicle to brake enough to avoid the collision.
 
-        :param front_vehicle: the preceding chrono_vehicle
+        :param front_vehicle: the preceding vehicle
         :return: the maximum allowed speed, and suggested acceleration
         """
         if not front_vehicle:
@@ -240,14 +240,14 @@ class IDMVehicle(ControlledVehicle):
         """
         MOBIL lane change model: Minimizing Overall Braking Induced by a Lane change
 
-            The chrono_vehicle should change lane only if:
+            The vehicle should change lane only if:
             - after changing it (and/or following vehicles) can accelerate more;
-            - it doesn't impose an unsafe braking on its new following chrono_vehicle.
+            - it doesn't impose an unsafe braking on its new following vehicle.
 
         :param lane_index: the candidate lane for the change
         :return: whether the lane change should be performed
         """
-        # Is the maneuver unsafe for the new following chrono_vehicle?
+        # Is the maneuver unsafe for the new following vehicle?
         new_preceding, new_following = self.scene.neighbour_vehicles(self, lane_index)
         new_following_a = self.acceleration(ego_vehicle=new_following, front_vehicle=new_preceding)
         new_following_pred_a = self.acceleration(ego_vehicle=new_following, front_vehicle=self)
@@ -289,7 +289,7 @@ class IDMVehicle(ControlledVehicle):
         """
         stopped_speed = 5
         safe_distance = 200
-        # Is the chrono_vehicle stopped on the wrong lane?
+        # Is the vehicle stopped on the wrong lane?
         if self.target_lane_index != self.lane_index and self.speed < stopped_speed:
             _, rear = self.scene.neighbour_vehicles(self)
             _, new_rear = self.scene.neighbour_vehicles(self, self.scene.network.get_lane(self.target_lane_index))
@@ -354,15 +354,15 @@ class LinearVehicle(IDMVehicle):
 
         The acceleration is chosen so as to:
         - reach a target speed;
-        - reach the speed of the leading (resp following) chrono_vehicle, if it is lower (resp higher) than ego's;
-        - maintain a minimum safety distance w.r.t the leading chrono_vehicle.
+        - reach the speed of the leading (resp following) vehicle, if it is lower (resp higher) than ego's;
+        - maintain a minimum safety distance w.r.t the leading vehicle.
 
-        :param ego_vehicle: the chrono_vehicle whose desired acceleration is to be computed. It does not have to be an
-                            Linear chrono_vehicle, which is why this method is a class method. This allows a Linear chrono_vehicle to
+        :param ego_vehicle: the vehicle whose desired acceleration is to be computed. It does not have to be an
+                            Linear vehicle, which is why this method is a class method. This allows a Linear vehicle to
                             reason about other vehicles behaviors even though they may not Linear.
-        :param front_vehicle: the chrono_vehicle preceding the ego-chrono_vehicle
-        :param rear_vehicle: the chrono_vehicle following the ego-chrono_vehicle
-        :return: the acceleration command for the ego-chrono_vehicle [m/s2]
+        :param front_vehicle: the vehicle preceding the ego-vehicle
+        :param rear_vehicle: the vehicle following the ego-vehicle
+        :return: the acceleration command for the ego-vehicle [m/s2]
         """
         return float(
             np.dot(self.ACCELERATION_PARAMETERS, self.acceleration_features(ego_vehicle, front_vehicle, rear_vehicle))

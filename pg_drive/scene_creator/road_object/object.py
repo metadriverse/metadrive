@@ -27,7 +27,7 @@ class RoadObject(ABC):
         self.position = np.array(position, dtype=np.float)
         self.speed = speed
         self.heading = heading
-        # store whether object is hit by any chrono_vehicle
+        # store whether object is hit by any vehicle
         self.hit = False
 
     @classmethod
