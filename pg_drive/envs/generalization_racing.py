@@ -157,7 +157,7 @@ class GeneralizationRacing(gym.Env):
 
         # update states
         self.vehicle.update_state()
-        self.traffic_manager.update_state()
+        self.traffic_manager.update_state(self.bullet_world.physics_world)
 
         #  panda3d loop
         self.bullet_world.taskMgr.step()

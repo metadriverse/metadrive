@@ -11,15 +11,15 @@ class ResetEnv(GeneralizationRacing):
     def __init__(self):
         super(ResetEnv, self).__init__(
             {
-                "environment_num": 5,
-                "traffic_density": 0.0,
+                "environment_num": 1,
+                "traffic_density": 0.1,
                 "start_seed": 4,
                 "debug": True,
                 "bt_world_config": {
                     "force_fps": None,
-                    "debug_physics_world": False
+                    "debug_physics_world": True
                 },
-                "traffic_mode": TrafficMode.Reborn,
+                # "traffic_mode": TrafficMode.Reborn,
                 "manual_control": True,
                 "use_render": True,
                 "use_rgb": False,
@@ -41,15 +41,19 @@ if __name__ == "__main__":
     import time
 
     env.reset()
-    for i in range(1, 200):
-        # start = time.time()
+    t = 0.0
+    for i in range(1, 200000):
+        start = time.time()
         # print("Step: ", i)
         o, r, d, info = env.step([0.1, 0])
-        # print(time.time() - start)
+        t += time.time() - start
         # print(len(o), "Vs.", env.observation_space.shape[0])
         # print(info)
         env.render(text={"can you see me": i})
-        if i % 20 == 0:
-            print("Reset")
+        # if i % 100 == 0:
+        #     print(t / 50)
+        #     t = 0.0
+        #     env.reset()
+        if d:
             env.reset()
     env.close()
