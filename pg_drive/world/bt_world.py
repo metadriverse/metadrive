@@ -29,13 +29,14 @@ class BtWorld(ShowBase.ShowBase):
     loadPrcFileData("", "multisamples 8")
     loadPrcFileData("", 'bullet-filter-algorithm groups-mask')
     loadPrcFileData("", "audio-library-name null")
+    # loadPrcFileData("", "load-display p3tinydisplay")
     # loadPrcFileData("", "geom-cache-size 50000")
 
     # v-sync, it seems useless
     # loadPrcFileData("", "sync-video 1")
 
     # for debug use
-    loadPrcFileData("", "want-pstats 1")
+    # loadPrcFileData("", "want-pstats 1")
     # loadPrcFileData("", "notify-level-glgsg fatal")
 
     if sys.platform == "darwin":
