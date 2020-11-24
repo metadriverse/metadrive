@@ -315,6 +315,19 @@ class GeneralizationRacing(gym.Env):
         if self.bullet_world is not None:
             self.vehicle.destroy(self.bullet_world.physics_world)
             self.traffic_manager.destroy(self.bullet_world.physics_world)
+
+            del self.traffic_manager
+            self.traffic_manager = None
+
+            del self.control_camera
+            self.control_camera = None
+
+            del self.controller
+            self.controller = None
+
+            del self.vehicle
+            self.vehicle = None
+
             self.bullet_world.close_world()
             del self.bullet_world
             self.bullet_world = None

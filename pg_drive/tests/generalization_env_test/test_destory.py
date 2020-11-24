@@ -21,11 +21,20 @@ class ResetEnv(GeneralizationRacing):
 
 
 if __name__ == "__main__":
+    # Close and reset
     env = ResetEnv()
     env.reset()
-
     for i in range(1, 20):
         env.step([1, 1])
-        # env.render(text={"can you see me": i})
+
+    env.close()
     env.reset()
-    # env.close()
+    env.close()
+
+    # Again!
+    env2 = ResetEnv()
+    env2.reset()
+    for i in range(1, 20):
+        env2.step([1, 1])
+    env2.reset()
+    env2.close()
