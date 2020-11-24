@@ -256,10 +256,12 @@ class BtWorld(ShowBase.ShowBase):
             self.debugnode.hide()
 
     def report_body_nums(self, task):
-        logging.debug("Body Nums: {}".format(
-            self.physics_world.getNumRigidBodies() +
-            self.physics_world.getNumGhosts() +
-            self.physics_world.getNumVehicles()))
+        logging.debug(
+            "Body Nums: {}".format(
+                self.physics_world.getNumRigidBodies() + self.physics_world.getNumGhosts() +
+                self.physics_world.getNumVehicles()
+            )
+        )
         return task.done
 
     def close_world(self):
