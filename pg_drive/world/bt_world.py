@@ -1,7 +1,7 @@
 import os
 import sys
 from typing import List
-
+import logging
 import gltf
 import simplepbr
 from direct.showbase import ShowBase
@@ -198,6 +198,8 @@ class BtWorld(ShowBase.ShowBase):
         # attach all node to this node path
         self.worldNP.node().removeAllChildren()
         self.pbr_worldNP.node().removeAllChildren()
+        if self.bt_config["debug_physics_world"]:
+            self.addTask(self.report_body_nums, "report_num")
 
     def _clear_display_region_and_buffers(self):
         for r in self.my_display_regions:
@@ -252,6 +254,13 @@ class BtWorld(ShowBase.ShowBase):
             self.debugnode.show()
         else:
             self.debugnode.hide()
+
+    def report_body_nums(self, task):
+        logging.debug("Body Nums: {}".format(
+            self.physics_world.getNumRigidBodies() +
+            self.physics_world.getNumGhosts() +
+            self.physics_world.getNumVehicles()))
+        return task.done
 
     def close_world(self):
         if self.bt_config["use_render"] or self.bt_config["use_rgb"]:

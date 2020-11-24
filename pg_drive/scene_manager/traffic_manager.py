@@ -42,13 +42,13 @@ class TrafficManager:
         self.random_seed = None
 
     def generate_traffic(
-        self,
-        bullet_world: BtWorld,
-        map: Map,
-        ego_vehicle,
-        random_seed: int,
-        traffic_density: float,
-        road_objects: List = None
+            self,
+            bullet_world: BtWorld,
+            map: Map,
+            ego_vehicle,
+            random_seed: int,
+            traffic_density: float,
+            road_objects: List = None
     ):
         """
         For garbage collecting using, ensure to release the memory of all traffic vehicles
@@ -72,6 +72,10 @@ class TrafficManager:
         if self.traffic_vehicles is not None:
             for v in self.traffic_vehicles:
                 v.destroy(bt_physics_world)
+        if self.block_triggered_vehicles is not None:
+            for block_vs in self.block_triggered_vehicles:
+                for v in block_vs.vehicles:
+                    v.destroy(bt_physics_world)
 
     def add_vehicles(self, bt_world):
         if self.traffic_mode == TrafficMode.Reborn:
@@ -140,7 +144,7 @@ class TrafficManager:
         vehicles = [
             v for v in self.vehicles
             if norm((v.position - vehicle.position)[0], (v.position - vehicle.position)[1]) < distance
-            and v is not vehicle and (see_behind or -2 * vehicle.LENGTH < vehicle.lane_distance_to(v))
+               and v is not vehicle and (see_behind or -2 * vehicle.LENGTH < vehicle.lane_distance_to(v))
         ]
 
         vehicles = sorted(vehicles, key=lambda v: abs(vehicle.lane_distance_to(v)))
@@ -169,7 +173,7 @@ class TrafficManager:
         for v in self.traffic_vehicles:
             v.step(dt)
 
-    def update_state(self):
+    def update_state(self, bt_physics_world: BulletWorld):
         vehicles_to_remove = []
         for v in self.traffic_vehicles:
             if v.out_of_road():
@@ -183,6 +187,7 @@ class TrafficManager:
         for v in vehicles_to_remove:
             self.traffic_vehicles.remove(v)
             self.vehicles.remove(v.vehicle_node.kinematic_model)
+            v.destroy(bt_physics_world)
 
     def neighbour_vehicles(self, vehicle, lane_index: LaneIndex = None) -> Tuple:
         """
