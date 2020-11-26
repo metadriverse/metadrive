@@ -1,5 +1,5 @@
 import os
-from panda3d.core import SamplerState, Shader
+from panda3d.core import SamplerState, Shader, NodePath
 from pg_drive.utils.visualization_loader import VisLoader
 from pg_drive.utils.element import DynamicElement
 
@@ -10,13 +10,16 @@ class SkyBox(DynamicElement):
     """
     ROTATION_MAX = 5000
 
-    def __init__(self):
+    def __init__(self, pure_background: bool = False):
         super(SkyBox, self).__init__()
-        if not self.render:
+        self._accumulate = 0
+        self.f = 1
+        if not self.render or pure_background:
+            self.node_path = NodePath("pure_background")
             return
         skybox = self.loader.loadModel(os.path.join(VisLoader.path, "models/skybox.bam"))
         from pg_drive.pg_config.cam_mask import CamMask
-        skybox.hide(CamMask.MiniMap)
+        skybox.hide(CamMask.MiniMap | CamMask.FrontCam)
         # skybox.setScale(512)
         # skybox_texture = self.loader.loadTexture(os.path.join(VisLoader.path, 'textures/skybox.jpg'))
         # # skybox.setBin(
@@ -58,8 +61,6 @@ class SkyBox(DynamicElement):
         self.node_path = skybox
         skybox.setZ(-4400)
         skybox.setH(30)
-        self._accumulate = 0
-        self.f = 1
 
     def step(self):
         if not self.render:

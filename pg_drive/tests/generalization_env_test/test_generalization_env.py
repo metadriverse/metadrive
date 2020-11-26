@@ -12,17 +12,18 @@ class ResetEnv(GeneralizationRacing):
         super(ResetEnv, self).__init__(
             {
                 "environment_num": 1,
-                "traffic_density": 0.2,
+                "traffic_density": 0.1,
                 "start_seed": 40,
                 "debug": False,
                 "bt_world_config": {
-                    "force_fps": 40,
-                    "debug_physics_world": False
+                    "force_fps": None,
+                    "debug_physics_world": False,
+                    "rgb_headless": False
                 },
                 "traffic_mode": TrafficMode.Reborn,
                 "manual_control": True,
                 "use_render": True,
-                "use_rgb": True,
+                "use_rgb": False,
                 "use_increment_steering": False,
                 "map_config": {
                     "type": BigGenerateMethod.BLOCK_NUM,
@@ -33,8 +34,8 @@ class ResetEnv(GeneralizationRacing):
                 }
             }
         )
-        self.reset()
-        self.bullet_world.accept("r", self.reset)
+        # self.reset()
+        # self.bullet_world.accept("r", self.reset)
         # self.bullet_world.cam.setPos(0, 0, 1500)
         # self.bullet_world.cam.lookAt(0, 0, 0)
 
@@ -47,9 +48,8 @@ if __name__ == "__main__":
     for i in range(1, 100000):
         # start = time.time()
         # print("Step: ", i)
-        o, r, d, info = env.step([0.1, 0])
-        out = not env.vehicle.lane.on_lane(env.vehicle.position)
-        print(env.vehicle.lane_index)
+        o, r, d, info = env.step([0, 1])
+        # print(o)
         # print(time.time() - start)
         # print(len(o), "Vs.", env.observation_space.shape[0])
         # print(info)

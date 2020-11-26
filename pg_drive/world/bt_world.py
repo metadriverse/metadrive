@@ -29,7 +29,7 @@ class BtWorld(ShowBase.ShowBase):
     loadPrcFileData("", "multisamples 8")
     loadPrcFileData("", 'bullet-filter-algorithm groups-mask')
     loadPrcFileData("", "audio-library-name null")
-    # loadPrcFileData("", "load-display p3tinydisplay")
+
     # loadPrcFileData("", "geom-cache-size 50000")
 
     # v-sync, it seems useless
@@ -39,8 +39,7 @@ class BtWorld(ShowBase.ShowBase):
     # loadPrcFileData("", "want-pstats 1")
     # loadPrcFileData("", "notify-level-glgsg fatal")
 
-    if sys.platform == "darwin":
-        loadPrcFileData("", "gl-version 3 2")
+    # loadPrcFileData("", "gl-version 3 2")
 
     CLEAR_SKY_COLOR = Vec3(179 / 255, 211 / 255, 216 / 255)
 
@@ -53,6 +52,9 @@ class BtWorld(ShowBase.ShowBase):
             loadPrcFileData("", "threading-model Cull/Draw")  # multi-thread render, accelerate simulation when evaluate
         else:
             mode = "offscreen" if self.bt_config["use_rgb"] else "none"
+        if self.bt_config["rgb_headless"]:
+            # for headless cluster rgb training.
+            loadPrcFileData("", "load-display pandagles2")
         super(BtWorld, self).__init__(windowType=mode)
         if not self.bt_config["debug_physics_world"] and (self.bt_config["use_render"] or self.bt_config["use_rgb"]):
             VisLoader.init_loader(self.loader, bullet_path)
@@ -91,12 +93,13 @@ class BtWorld(ShowBase.ShowBase):
             self._init_collision_info_render()
 
             # reset pbr
-            self.pbrpipe = simplepbr.init()
-            self.pbrpipe.render_node = self.pbr_render
-            self.pbrpipe.render_node.set_antialias(AntialiasAttrib.M_auto)
-            self.pbrpipe._recompile_pbr()
-            self.pbrpipe._setup_tonemapping()
-            self.pbrpipe.manager.cleanup()
+            if not self.bt_config["rgb_headless"]:
+                self.pbrpipe = simplepbr.init()
+                self.pbrpipe.render_node = self.pbr_render
+                self.pbrpipe.render_node.set_antialias(AntialiasAttrib.M_auto)
+                self.pbrpipe._recompile_pbr()
+                self.pbrpipe._setup_tonemapping()
+                self.pbrpipe.manager.cleanup()
 
             # set main cam
             self.cam.node().setCameraMask(CamMask.MainCam)
@@ -106,9 +109,10 @@ class BtWorld(ShowBase.ShowBase):
             lens.setFov(70)
             lens.setAspectRatio(1.2)
 
-            self.sky_box = SkyBox()
-            if not sys.platform == "darwin":
-                self.sky_box.add_to_render_module(self.render)
+            self.sky_box = SkyBox(
+                (self.bt_config["rgb_headless"] or self.bt_config["use_rgb"]) or sys.platform == "darwin"
+            )
+            self.sky_box.add_to_render_module(self.render)
 
             self.light = Light(self.bt_config)
             self.light.add_to_render_module(self.render)
@@ -227,6 +231,9 @@ class BtWorld(ShowBase.ShowBase):
                 mini_map=True,
                 force_fps=None,
                 debug_physics_world=False,  # only render physics world without model
+
+                # headless cluster can not open window or buffer, and thus a EGL env is required
+                rgb_headless=False
             )
         )
 
