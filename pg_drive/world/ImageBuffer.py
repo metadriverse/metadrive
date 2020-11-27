@@ -1,21 +1,22 @@
-from panda3d.core import NodePath, Vec3, Vec4
 import logging
 from typing import Union
+
 import numpy as np
-from panda3d.core import Texture, GraphicsOutput, PNMImage, Ostream, PNMFileType
+from panda3d.core import NodePath, Vec3, Vec4
 
 
 class ImageBuffer:
     CAM_MASK = None
     BUFFER_L = 800
     BUFFER_W = 800
-    BKG_COLOR = Vec4(0., 0., 0., 0.1)
+    BKG_COLOR = Vec3(179 / 255, 211 / 255, 216 / 255)
     display_bottom = 0.8
     display_top = 1
 
     def __init__(
-        self, length: float, width: float, pos: Vec3, bkg_color: Union[Vec4, Vec3], make_buffer_func, make_camera_func,
-        parent_node: NodePath
+            self, length: float, width: float, pos: Vec3, bkg_color: Union[Vec4, Vec3], make_buffer_func,
+            make_camera_func,
+            parent_node: NodePath
     ):
         assert self.CAM_MASK is not None, "define a camera mask for every image buffer"
         # self.texture = Texture()
@@ -35,13 +36,19 @@ class ImageBuffer:
         """
         Bugs here! when use offscreen mode, thus the front cam obs is not from front cam now
         """
-        from panda3d.core import Texture, GraphicsOutput, PNMImage, Ostream, PNMFileType
-        import numpy as np
+        from panda3d.core import PNMImage
         img = PNMImage()
         self.buffer.getScreenshot(img)
-        #  save for debug
-        # img.write("img.jpg")
         return img
+
+    def save_image(self):
+        """
+        for debug use
+        """
+        from panda3d.core import PNMImage
+        img = PNMImage()
+        self.buffer.getScreenshot(img)
+        img.write("debug.jpg")
 
     def get_gray_pixels_array(self, clip) -> np.ndarray:
         img = self.get_image()

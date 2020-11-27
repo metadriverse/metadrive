@@ -41,8 +41,6 @@ class BtWorld(ShowBase.ShowBase):
 
     # loadPrcFileData("", "gl-version 3 2")
 
-    CLEAR_SKY_COLOR = Vec3(179 / 255, 211 / 255, 216 / 255)
-
     def __init__(self, config: dict = None):
         self.bt_config = self.default_config()
         if config is not None:
@@ -104,7 +102,7 @@ class BtWorld(ShowBase.ShowBase):
             # set main cam
             self.cam.node().setCameraMask(CamMask.MainCam)
             self.cam.node().getDisplayRegion(0).setClearColorActive(True)
-            self.cam.node().getDisplayRegion(0).setClearColor(self.CLEAR_SKY_COLOR)
+            self.cam.node().getDisplayRegion(0).setClearColor(ImageBuffer.BKG_COLOR)
             lens = self.cam.node().getLens()
             lens.setFov(70)
             lens.setAspectRatio(1.2)
