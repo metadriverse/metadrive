@@ -60,8 +60,8 @@ class BaseVehicle(DynamicElement):
     default_vehicle_config = PgConfig(
         dict(
             lidar=(240, 50, 4),  # laser num, distance, other vehicle info num
-            mini_map=250,
-            front_cam=(84, 84),  # length, width
+            mini_map=(84, 84, 250),  # buffer length, width
+            front_cam=(84, 84),  # buffer length, width
             show_navi_point=False,
             increment_steering=False
         )

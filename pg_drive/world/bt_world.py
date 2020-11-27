@@ -13,7 +13,7 @@ from panda3d.core import loadPrcFileData, TextNode, LineSegs
 from pg_drive.pg_config.cam_mask import CamMask
 from pg_drive.pg_config.pg_config import PgConfig
 from pg_drive.utils.visualization_loader import VisLoader
-from pg_drive.world.ImageBuffer import ImageBuffer
+from pg_drive.world.image_buffer import ImageBuffer
 from pg_drive.world.force_fps import ForceFPS
 from pg_drive.world.light import Light
 from pg_drive.world.sky_box import SkyBox

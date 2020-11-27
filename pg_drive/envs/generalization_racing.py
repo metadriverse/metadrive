@@ -20,7 +20,7 @@ class GeneralizationRacing(gym.Env):
         # set their value after vehicle created
         vehicle_config = BaseVehicle.get_vehicle_config(self.config["vehicle_config"])
         self.observation = LidarStateObservation(vehicle_config) if not self.config["use_rgb"] \
-            else ImageStateObservation(vehicle_config)
+            else ImageStateObservation(vehicle_config, self.config["image_buffer_name"])
         self.observation_space = self.observation.observation_space
         self.action_space = gym.spaces.Box(-1.0, 1.0, shape=(2, ), dtype=np.float32)
 
@@ -100,6 +100,7 @@ class GeneralizationRacing(gym.Env):
             use_rgb=False,
             rgb_clip=True,
             vehicle_config=dict(),  # use default vehicle modules see more in BaseVehicle
+            image_buffer_name="front_cam",  # mini_map or front_cam, the name must be as same as the module name
 
             # ===== Road Network =====
             lane_width=3.5,

@@ -1,6 +1,6 @@
 from abc import ABC
 from typing import Dict
-import matplotlib.pyplot as plt
+from pg_drive.world.image_buffer import ImageBuffer
 import gym
 import numpy as np
 
@@ -10,10 +10,9 @@ PERCEIVE_DIST = 50
 class ObservationType(ABC):
     def __init__(self, config):
         self.config = config
-        self.observation_shape = self.get_obs_shape(self.config)
-        self.observation_space = gym.spaces.Box(-0.0, 1.0, shape=self.observation_shape, dtype=np.float32)
 
-    def get_obs_shape(self, config: Dict):
+    @property
+    def observation_space(self):
         raise NotImplementedError
 
     def observe(self, *args, **kwargs):
@@ -24,6 +23,7 @@ class ObservationType(ABC):
         """
         Wrap vehicle states to list
         """
+        # update out of road
         from pg_drive.utils.math_utils import clip
         current_reference_lane = vehicle.routing_localization.current_ref_lanes[-1]
         lateral_to_left, lateral_to_right = ObservationType.vehicle_to_left_right(vehicle)
@@ -108,19 +108,20 @@ class ObservationType(ABC):
         plt.show()
 
 
-class StateObservationType(ObservationType):
+class StateObservation(ObservationType):
     """
     Use vehicle state info, navigation info and lidar point clouds info as input
     """
     def __init__(self, config):
-        super(StateObservationType, self).__init__(config)
+        super(StateObservation, self).__init__(config)
 
-    def get_obs_shape(self, config: Dict):
+    @property
+    def observation_space(self):
         # lidar + other scalar obs
         from pg_drive.scene_creator.ego_vehicle.base_vehicle import BaseVehicle
         from pg_drive.scene_creator.ego_vehicle.vehicle_module.routing_localization import RoutingLocalizationModule
         shape = BaseVehicle.Ego_state_obs_dim + RoutingLocalizationModule.Navi_obs_dim
-        return (shape, )
+        return gym.spaces.Box(-0.0, 1.0, shape=(shape, ), dtype=np.float32)
 
     def observe(self, vehicle):
         navi_info = vehicle.routing_localization.get_navi_info()
@@ -134,39 +135,38 @@ class ImageObservation(ObservationType):
     """
     STACK_SIZE = 3  # use continuous 4 image as the input
 
-    def __init__(self, config):
+    def __init__(self, config, image_buffer_name: str):
+        self.image_buffer_name = image_buffer_name
         super(ImageObservation, self).__init__(config)
         self.rgb_clip = True if "rgb_clip" in config and config["rgb_clip"] else False
-        if not self.rgb_clip:
-            self.observation_space = gym.spaces.Box(0, 255, shape=self.observation_shape, dtype=np.uint8)
-        self.state = np.zeros(self.observation_shape)
+        self.state = np.zeros(self.observation_space.shape)
 
-    def get_obs_shape(self, config: Dict):
-        shape = tuple(config["front_cam"]) + (self.STACK_SIZE, )
-        return shape
+    @property
+    def observation_space(self):
+        shape = tuple(self.config[self.image_buffer_name][0:2]) + (self.STACK_SIZE, )
+        if self.rgb_clip:
+            return gym.spaces.Box(-0.0, 1.0, shape=shape, dtype=np.float32)
+        else:
+            return gym.spaces.Box(0, 255, shape=shape, dtype=np.uint8)
 
-    def observe(self, vehicle):
-        new_obs = vehicle.front_cam.get_gray_pixels_array(self.rgb_clip)
+    def observe(self, image_buffer: ImageBuffer):
+        new_obs = image_buffer.get_gray_pixels_array(self.rgb_clip)
         # self.show_gray_scale_array(new_obs)
         self.state = np.roll(self.state, -1, axis=-1)
         self.state[:, :, -1] = new_obs
-
-        # update out of road
-        lateral_to_left, lateral_to_right = ObservationType.vehicle_to_left_right(vehicle)
-        if lateral_to_left < 0 or lateral_to_right < 0:
-            vehicle.out_of_road = True
         return self.state
 
 
 class LidarStateObservation(ObservationType):
     def __init__(self, config):
-        self.state_obs = StateObservationType(config)
+        self.state_obs = StateObservation(config)
         super(LidarStateObservation, self).__init__(config)
 
-    def get_obs_shape(self, config: Dict):
-        shape = list(self.state_obs.observation_shape)
+    @property
+    def observation_space(self):
+        shape = list(self.state_obs.observation_space.shape)
         shape[0] += self.config["lidar"][0] + self.config["lidar"][2] * 4
-        return tuple(shape)
+        return gym.spaces.Box(-0.0, 1.0, shape=tuple(shape), dtype=np.float32)
 
     def observe(self, vehicle):
         state = self.state_obs.observe(vehicle)
@@ -178,34 +178,31 @@ class LidarStateObservation(ObservationType):
 
 class ImageStateObservation(ObservationType):
     """
-    Use ego state info, navigation info and front cam image as input
+    Use ego state info, navigation info and front cam image/top down image as input
     The shape needs special handling
     """
     IMAGE = "image"
     STATE = "state"
 
-    def __init__(self, config):
+    def __init__(self, config, image_buffer_name: str):
         super(ImageStateObservation, self).__init__(config)
-        self.img_obs = ImageObservation(config)
-        self.state_obs = StateObservationType(config)
-        self.observation_space = gym.spaces.Dict(
+        self.img_obs = ImageObservation(config, image_buffer_name)
+        self.state_obs = StateObservation(config)
+
+    @property
+    def observation_space(self):
+        return gym.spaces.Dict(
             {
                 self.IMAGE: self.img_obs.observation_space,
                 self.STATE: self.state_obs.observation_space
             }
         )
-        from pg_drive.scene_creator.ego_vehicle.base_vehicle import BaseVehicle
-        from pg_drive.scene_creator.ego_vehicle.vehicle_module.routing_localization import RoutingLocalizationModule
-        self.observation_shape = {
-            self.IMAGE: self.img_obs.observation_shape,
-            self.STATE: self.state_obs.observation_shape
-        }
-
-    def get_obs_shape(self, config: Dict):
-        """
-        Useless, only a place holder
-        """
-        return (1, )
 
     def observe(self, vehicle):
-        return {self.IMAGE: self.img_obs.observe(vehicle), self.STATE: self.state_obs.observe(vehicle)}
+        if self.img_obs.image_buffer_name == "front_cam":
+            image_buffer = vehicle.front_cam
+        elif self.img_obs.image_buffer_name == "mini_map":
+            image_buffer = vehicle.mini_map
+        else:
+            raise ValueError("No such as module named {} in vehicle".format(self.img_obs.image_buffer_name))
+        return {self.IMAGE: self.img_obs.observe(image_buffer), self.STATE: self.state_obs.observe(vehicle)}

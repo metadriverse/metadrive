@@ -1,18 +1,22 @@
 from pg_drive.world.bt_world import BtWorld
-from pg_drive.world.ImageBuffer import ImageBuffer
+from pg_drive.world.image_buffer import ImageBuffer
 from panda3d.core import Vec3
 from copy import copy
 from pg_drive.pg_config.cam_mask import CamMask
+from typing import Tuple
 
 
 class MiniMap(ImageBuffer):
-    # shape(1200, 600)
+    # shape(1200, 600) default
     BUFFER_L = 1200
     BUFFER_W = 600
     TOP_CAM_DIST = 10
     CAM_MASK = CamMask.MiniMap
 
-    def __init__(self, height: float, bt_world: BtWorld):
+    def __init__(self, para: Tuple, bt_world: BtWorld):
+        self.BUFFER_L = para[0]
+        self.BUFFER_W = para[1]
+        height = para[2]
         super(MiniMap, self).__init__(
             self.BUFFER_L, self.BUFFER_W, Vec3(0, 0, height), self.BKG_COLOR, bt_world.win.makeTextureBuffer,
             bt_world.makeCamera, bt_world.render

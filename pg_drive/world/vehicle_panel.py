@@ -1,5 +1,5 @@
 from panda3d.core import NodePath, PGTop, TextNode, Vec3, TextFont
-from pg_drive.world.ImageBuffer import ImageBuffer
+from pg_drive.world.image_buffer import ImageBuffer
 from pg_drive.pg_config.cam_mask import CamMask
 
 
