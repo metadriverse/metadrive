@@ -30,6 +30,8 @@ class BtWorld(ShowBase.ShowBase):
     loadPrcFileData("", 'bullet-filter-algorithm groups-mask')
     loadPrcFileData("", "audio-library-name null")
 
+    # loadPrcFileData("", "load-display  p3tinydisplay")
+
     # loadPrcFileData("", "geom-cache-size 50000")
 
     # v-sync, it seems useless

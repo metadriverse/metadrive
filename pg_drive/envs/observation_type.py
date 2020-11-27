@@ -101,8 +101,7 @@ class ObservationType(ABC):
     @staticmethod
     def show_gray_scale_array(obs):
         import matplotlib.pyplot as plt
-        img = np.rot90(obs)
-        img = img[::-1]
+        img = obs[::-1]
         plt.plot()
         plt.imshow(img, cmap=plt.cm.gray)
         plt.show()
@@ -136,10 +135,10 @@ class ImageObservation(ObservationType):
     """
     STACK_SIZE = 3  # use continuous 4 image as the input
 
-    def __init__(self, config, image_buffer_name: str):
+    def __init__(self, config, image_buffer_name: str, clip_rgb:bool):
         self.image_buffer_name = image_buffer_name
         super(ImageObservation, self).__init__(config)
-        self.rgb_clip = True if "rgb_clip" in config and config["rgb_clip"] else False
+        self.rgb_clip = clip_rgb
         self.state = np.zeros(self.observation_space.shape)
 
     @property
@@ -152,7 +151,6 @@ class ImageObservation(ObservationType):
 
     def observe(self, image_buffer: ImageBuffer):
         new_obs = image_buffer.get_gray_pixels_array(self.rgb_clip)
-        # self.show_gray_scale_array(new_obs)
         self.state = np.roll(self.state, -1, axis=-1)
         self.state[:, :, -1] = new_obs
         return self.state
@@ -185,9 +183,9 @@ class ImageStateObservation(ObservationType):
     IMAGE = "image"
     STATE = "state"
 
-    def __init__(self, config, image_buffer_name: str):
+    def __init__(self, config, image_buffer_name: str, clip_rgb:bool):
         super(ImageStateObservation, self).__init__(config)
-        self.img_obs = ImageObservation(config, image_buffer_name)
+        self.img_obs = ImageObservation(config, image_buffer_name, clip_rgb)
         self.state_obs = StateObservation(config)
 
     @property

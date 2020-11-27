@@ -54,12 +54,17 @@ class ImageBuffer:
         img.makeGrayscale()
         if not clip:
             numpy_array = np.array(
-                [[int(img.getGray(i, j) * 255) for j in range(img.getYSize())] for i in range(img.getXSize())],
+                [
+                    [int(img.getGray(j, i) * 255) for j in range(img.getYSize())]
+                    for i in range(img.getXSize() - 1, -1, -1)
+                ],
                 dtype=np.uint8
             )
             return np.clip(numpy_array, 0, 255)
         else:
-            numpy_array = np.array([[img.getGray(i, j) for j in range(img.getYSize())] for i in range(img.getXSize())])
+            numpy_array = np.array(
+                [[img.getGray(j, i) for j in range(img.getYSize())] for i in range(img.getXSize() - 1, -1, -1)]
+            )
             return np.clip(numpy_array, 0, 1)
 
     def add_to_display(self, bt_world, display_region: List[float]):

@@ -20,7 +20,7 @@ class GeneralizationRacing(gym.Env):
         # set their value after vehicle created
         vehicle_config = BaseVehicle.get_vehicle_config(self.config["vehicle_config"])
         self.observation = LidarStateObservation(vehicle_config) if not self.config["use_rgb"] \
-            else ImageStateObservation(vehicle_config, self.config["image_buffer_name"])
+            else ImageStateObservation(vehicle_config, self.config["image_buffer_name"], self.config["rgb_clip"])
         self.observation_space = self.observation.observation_space
         self.action_space = gym.spaces.Box(-1.0, 1.0, shape=(2, ), dtype=np.float32)
 
