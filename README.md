@@ -14,7 +14,7 @@ cd pg-drive
 git checkout pre-release
 pip install -e .
 ```
-# Run on cluster
+## Run on cluster
 
 Panda3d needs to be compiled from the source code to turn off the X11 support.
 
