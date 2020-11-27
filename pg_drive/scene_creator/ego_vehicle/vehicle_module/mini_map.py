@@ -23,5 +23,5 @@ class MiniMap(ImageBuffer):
         self.cam.lookAt(Vec3(0, 20, 0))
         # lens = self.cam.node().getLens()
         # lens.setFilmOffset(1.0, 2.0)
-        bt_world.add_to_console(self, [0., 0.33, self.display_bottom, self.display_top])
+        self.add_to_display(bt_world, [0., 0.33, self.display_bottom, self.display_top])
         self.buffer.setSort(0)

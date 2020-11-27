@@ -18,7 +18,8 @@ class SensorCamera(ImageBuffer):
             self.BUFFER_L, self.BUFFER_W, Vec3(0.0, 0.8, 1.5), self.BKG_COLOR, bt_world.win.makeTextureBuffer,
             bt_world.makeCamera, chassis_np
         )
-        bt_world.add_to_console(self, [0.33, 0.67, self.display_bottom, self.display_top])
+        self.add_to_display(bt_world, [0.33, 0.67, self.display_bottom, self.display_top])
         self.cam.lookAt(0, 2.4, 1.2)
         lens = self.cam.node().getLens()
         lens.setFov(60)
+        lens.setAspectRatio(2.0)
