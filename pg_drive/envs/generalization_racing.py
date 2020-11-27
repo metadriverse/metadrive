@@ -128,6 +128,7 @@ class GeneralizationRacing(gym.Env):
             # ===== Others =====
             bt_world_config=dict(),
             use_increment_steering=False,
+            action_check=False,
         )
         return PgConfig(env_config)
 
@@ -143,6 +144,12 @@ class GeneralizationRacing(gym.Env):
         return
 
     def step(self, action: np.ndarray):
+
+        if self.config["action_check"]:
+            assert self.action_space.contains(action), "Input {} is not compatible with action space {}!".format(
+                action, self.action_space
+            )
+
         # prepare step
         if self.config["manual_control"] and self.use_render:
             action = self.controller.process_input()
