@@ -119,11 +119,11 @@ class GeneralizationRacing(gym.Env):
             out_of_road_penalty=5,
             crash_penalty=10,
             acceleration_penalty=0.0,
-            steering_penalty=0.0,
-            low_speed_penalty=0.1,
+            steering_penalty=0.1,
+            low_speed_penalty=0.0,
             driving_reward=1.0,
             general_penalty=0.0,
-            speed_reward=0.0,
+            speed_reward=0.1,
 
             # ===== Others =====
             bt_world_config=dict(),
