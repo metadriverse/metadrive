@@ -177,7 +177,12 @@ class GeneralizationRacing(gym.Env):
         obs = self.observation.observe(self.vehicle)
         reward = self.reward(action)
         done_reward, done_info = self._done_episode()
-        info = {"cost": 0, "velocity": self.vehicle.speed, "steering": self.vehicle.steering, "step_reward": reward}
+        info = {
+            "cost": float(0),
+            "velocity": float(self.vehicle.speed),
+            "steering": float(self.vehicle.steering),
+            "step_reward": float(reward)
+        }
         info.update(done_info)
         return obs, reward + done_reward, self.done, info
 
@@ -311,10 +316,12 @@ class GeneralizationRacing(gym.Env):
         elif self.vehicle.crash:
             self.done = True
             reward_ -= self.config["crash_penalty"]
+            print("crash")
             done_info["crash"] = True
         elif self.vehicle.out_of_road or self.vehicle.out_of_road:
             self.done = True
             reward_ -= self.config["out_of_road_penalty"]
+            print("out_of_road")
             done_info["out_of_road"] = True
 
         return reward_, done_info
