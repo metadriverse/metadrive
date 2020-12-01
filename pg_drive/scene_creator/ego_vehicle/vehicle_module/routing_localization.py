@@ -1,12 +1,14 @@
-from pg_drive.scene_creator.map import Map
-from panda3d.core import NodePath
-from pg_drive.scene_creator.blocks.first_block import FirstBlock
+import os
+
 import numpy as np
+from panda3d.core import NodePath
+
+from pg_drive.pg_config.parameter_space import BlockParameterSpace, Parameter
+from pg_drive.scene_creator.blocks.first_block import FirstBlock
+from pg_drive.scene_creator.lanes.circular_lane import CircularLane
+from pg_drive.scene_creator.map import Map
 from pg_drive.utils.math_utils import clip, norm
 from pg_drive.utils.visualization_loader import VisLoader
-from pg_drive.scene_creator.lanes.circular_lane import CircularLane
-from pg_drive.pg_config.parameter_space import BlockParameterSpace, Parameter
-import os
 
 
 class RoutingLocalizationModule:

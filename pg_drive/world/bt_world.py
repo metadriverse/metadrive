@@ -1,19 +1,17 @@
+import logging
 import os
 import sys
-from typing import List
-import logging
+
 import gltf
 from direct.showbase import ShowBase
-from panda3d.bullet import BulletDebugNode
-from panda3d.bullet import BulletWorld
-from panda3d.core import Vec3, AntialiasAttrib, NodePath
-from panda3d.core import loadPrcFileData, TextNode, LineSegs
+from panda3d.bullet import BulletDebugNode, BulletWorld
+from panda3d.core import Vec3, AntialiasAttrib, NodePath, loadPrcFileData, TextNode, LineSegs
 
 from pg_drive.pg_config.cam_mask import CamMask
 from pg_drive.pg_config.pg_config import PgConfig
 from pg_drive.utils.visualization_loader import VisLoader
-from pg_drive.world.image_buffer import ImageBuffer
 from pg_drive.world.force_fps import ForceFPS
+from pg_drive.world.image_buffer import ImageBuffer
 from pg_drive.world.light import Light
 from pg_drive.world.sky_box import SkyBox
 from pg_drive.world.terrain import Terrain
@@ -118,7 +116,8 @@ class BtWorld(ShowBase.ShowBase):
             lens.setAspectRatio(1.2)
 
             self.sky_box = SkyBox(
-                self.bt_config["headless_rgb"] or sys.platform == "darwin")  # openGl shader didn't work for mac...
+                self.bt_config["headless_rgb"] or sys.platform == "darwin"
+            )  # openGl shader didn't work for mac...
             self.sky_box.add_to_render_module(self.render)
 
             self.light = Light(self.bt_config)

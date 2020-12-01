@@ -1,10 +1,9 @@
 from pg_drive.pg_config.parameter_space import Parameter, BlockParameterSpace
-from pg_drive.scene_creator.lanes.lane import LineType, LineColor
 from pg_drive.pg_config.pg_space import PgSpace
-from pg_drive.scene_creator.road.road import Road
-from pg_drive.scene_creator.blocks.intersection import InterSection
 from pg_drive.scene_creator.basic_utils import Goal
-from pg_drive.scene_creator.basic_utils import Decoration
+from pg_drive.scene_creator.blocks.intersection import InterSection
+from pg_drive.scene_creator.lanes.lane import LineType, LineColor
+from pg_drive.scene_creator.road.road import Road
 
 
 class TInterSection(InterSection):

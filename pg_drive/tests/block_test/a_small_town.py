@@ -1,15 +1,12 @@
-from pg_drive.scene_creator.blocks.straight import Straight
-from pg_drive.scene_creator.blocks.curve import Curve
-from pg_drive.scene_creator.blocks.t_intersection import TInterSection
-from pg_drive.scene_creator.blocks.intersection import InterSection
-from pg_drive.scene_creator.blocks.std_intersection import StdInterSection
-from pg_drive.scene_creator.blocks.std_t_intersection import StdTInterSection
-from pg_drive.scene_creator.blocks.roundabout import Roundabout
-from pg_drive.scene_creator.blocks.ramp import InRampOnStraight, OutRampOnStraight
-from pg_drive.tests.block_test.test_block_base import TestBlock
-from pg_drive.scene_creator.blocks.first_block import FirstBlock
-from pg_drive.scene_creator.road.road_network import RoadNetwork
 from pg_drive.pg_config.parameter_space import Parameter
+from pg_drive.scene_creator.blocks.curve import Curve
+from pg_drive.scene_creator.blocks.first_block import FirstBlock
+from pg_drive.scene_creator.blocks.roundabout import Roundabout
+from pg_drive.scene_creator.blocks.std_intersection import StdInterSection
+from pg_drive.scene_creator.blocks.straight import Straight
+from pg_drive.scene_creator.blocks.t_intersection import TInterSection
+from pg_drive.scene_creator.road.road_network import RoadNetwork
+from pg_drive.tests.block_test.test_block_base import TestBlock
 from pg_drive.utils.visualization_loader import VisLoader
 
 if __name__ == "__main__":

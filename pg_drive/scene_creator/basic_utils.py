@@ -1,6 +1,8 @@
 import copy
 from typing import Tuple, Union, List
+
 import numpy as np
+
 from pg_drive.scene_creator.blocks.block import Block, BlockSocket
 from pg_drive.scene_creator.lanes.circular_lane import CircularLane
 from pg_drive.scene_creator.lanes.lane import LineType, AbstractLane, LineColor

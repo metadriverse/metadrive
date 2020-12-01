@@ -1,8 +1,9 @@
 from abc import ABC
-from typing import Dict
-from pg_drive.world.image_buffer import ImageBuffer
+
 import gym
 import numpy as np
+
+from pg_drive.world.image_buffer import ImageBuffer
 
 PERCEIVE_DIST = 50
 

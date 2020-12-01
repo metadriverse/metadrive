@@ -5,8 +5,8 @@ from typing import List, Tuple, Union
 import numpy as np
 
 import pg_drive.utils.math_utils as utils
-from pg_drive.scene_manager.traffic_manager import TrafficManager, LaneIndex, Route
 from pg_drive.scene_creator.highway_vehicle.kinematics import Vehicle
+from pg_drive.scene_manager.traffic_manager import TrafficManager, LaneIndex, Route
 from pg_drive.utils.math_utils import clip
 
 

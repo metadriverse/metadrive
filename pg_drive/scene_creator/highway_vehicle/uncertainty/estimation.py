@@ -1,7 +1,6 @@
 from typing import Callable, Union
 
 import numpy as np
-
 from city_drive.highway_env import Vector
 from city_drive.highway_env.road.road import Road, LaneIndex, Route
 from city_drive.highway_env.utils import confidence_polytope, is_consistent_dataset

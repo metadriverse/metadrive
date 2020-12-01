@@ -1,12 +1,13 @@
 import logging
+from typing import Union
 
 from numpy.random import RandomState
 from panda3d.bullet import BulletWorld
 from panda3d.core import NodePath
-from typing import Union
+
+from pg_drive.pg_config.pg_blocks import PgBlock
 from pg_drive.scene_creator.blocks.block import Block
 from pg_drive.scene_creator.blocks.first_block import FirstBlock
-from pg_drive.pg_config.pg_blocks import PgBlock
 from pg_drive.scene_creator.road.road_network import RoadNetwork
 
 

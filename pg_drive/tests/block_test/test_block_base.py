@@ -1,14 +1,10 @@
-from panda3d.bullet import BulletWorld
 from direct.controls.InputState import InputState
-from panda3d.bullet import BulletPlaneShape
-from panda3d.bullet import BulletRigidBodyNode
-from panda3d.bullet import BulletDebugNode
-from panda3d.core import Vec3
-from panda3d.core import BitMask32
 from direct.showbase import ShowBase
+from panda3d.bullet import BulletWorld, BulletPlaneShape, BulletRigidBodyNode, BulletDebugNode
+from panda3d.core import Vec3, BitMask32
+
 from pg_drive.scene_creator.algorithm.BIG import NextStep
 from pg_drive.scene_creator.map import Map
-from pg_drive.scene_creator.algorithm.BIG import BigGenerateMethod
 
 
 class TestBlock(ShowBase.ShowBase):

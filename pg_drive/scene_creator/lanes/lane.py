@@ -1,8 +1,8 @@
+import math
 from abc import ABCMeta, abstractmethod
 from typing import Tuple, Union, Sequence
 
 import numpy as np
-import math
 
 Vector = Union[np.ndarray, Sequence[float]]
 

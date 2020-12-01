@@ -1,21 +1,22 @@
 import logging
 import os
 from typing import Dict, Union, List
-from pg_drive.pg_config.cam_mask import CamMask
+
 import numpy
 from panda3d.bullet import BulletBoxShape, BulletRigidBodyNode, BulletWorld
-from panda3d.core import Vec3, LQuaternionf, BitMask32, NodePath, Vec4, CardMaker, TextureStage, RigidBodyCombiner
-from panda3d.core import TransparencyAttrib, SamplerState
+from panda3d.core import Vec3, LQuaternionf, BitMask32, NodePath, Vec4, CardMaker, TextureStage, RigidBodyCombiner, \
+    TransparencyAttrib, SamplerState
+
+from pg_drive.pg_config.body_name import BodyName
+from pg_drive.pg_config.cam_mask import CamMask
 from pg_drive.scene_creator.lanes.circular_lane import CircularLane
-from pg_drive.scene_creator.lanes.lane import AbstractLane
-from pg_drive.scene_creator.lanes.lane import LineType
+from pg_drive.scene_creator.lanes.lane import AbstractLane, LineType
 from pg_drive.scene_creator.lanes.straight_lane import StraightLane
 from pg_drive.scene_creator.road.road import Road
 from pg_drive.scene_creator.road.road_network import RoadNetwork
 from pg_drive.utils.element import Element
 from pg_drive.utils.math_utils import norm
 from pg_drive.utils.visualization_loader import VisLoader
-from pg_drive.pg_config.body_name import BodyName
 
 
 class BlockSocket:

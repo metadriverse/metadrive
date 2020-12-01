@@ -1,6 +1,7 @@
+import copy
+
 import numpy as np
 from scipy.optimize import minimize
-import copy
 
 
 class PhysicSetting:

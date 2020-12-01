@@ -1,7 +1,9 @@
 import os
+
 from panda3d.core import SamplerState, Shader, NodePath
-from pg_drive.utils.visualization_loader import VisLoader
+
 from pg_drive.utils.element import DynamicElement
+from pg_drive.utils.visualization_loader import VisLoader
 
 
 class SkyBox(DynamicElement):

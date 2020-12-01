@@ -1,7 +1,7 @@
-from gym.spaces import Dict
-from gym.spaces import Box, Discrete
-from collections import namedtuple
 import typing as tp
+from collections import namedtuple
+
+from gym.spaces import Dict, Box, Discrete
 
 PgBoxSpace = namedtuple("PgBoxSpace", "max min")
 PgDiscreteSpace = namedtuple("PgDiscreteSpace", "number")

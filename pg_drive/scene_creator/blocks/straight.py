@@ -1,5 +1,3 @@
-from typing import Dict
-
 from pg_drive.pg_config.parameter_space import BlockParameterSpace, Parameter
 from pg_drive.pg_config.pg_space import PgSpace
 from pg_drive.scene_creator.basic_utils import ExtendStraightLane, CreateRoadFrom, CreateAdverseRoad

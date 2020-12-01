@@ -1,6 +1,7 @@
-from direct.showbase.Loader import Loader
 import logging
 from typing import Union
+
+from direct.showbase.Loader import Loader
 
 
 class VisLoader:

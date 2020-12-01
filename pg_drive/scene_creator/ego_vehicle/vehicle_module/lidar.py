@@ -1,16 +1,17 @@
 import logging
 import math
 import os
+from typing import Set
 
 import numpy as np
 from panda3d.bullet import BulletGhostNode, BulletSphereShape
-from pg_drive.scene_creator.highway_vehicle.behavior import IDMVehicle
-from pg_drive.scene_creator.pg_traffic_vehicle.traffic_vehicle import PgTrafficVehicle
-from panda3d.core import Point3, BitMask32, DrawMask, Vec3, NodePath, RigidBodyCombiner
-from pg_drive.utils.visualization_loader import VisLoader
+from panda3d.core import Point3, BitMask32, Vec3, NodePath
+
 from pg_drive.pg_config.body_name import BodyName
 from pg_drive.pg_config.cam_mask import CamMask
-from typing import Set
+from pg_drive.scene_creator.highway_vehicle.behavior import IDMVehicle
+from pg_drive.scene_creator.pg_traffic_vehicle.traffic_vehicle import PgTrafficVehicle
+from pg_drive.utils.visualization_loader import VisLoader
 
 
 class Lidar:

@@ -1,13 +1,8 @@
-from typing import Dict
-
 import numpy as np
 
-from pg_drive.pg_config.parameter_space import BlockParameterSpace
-from pg_drive.pg_config.parameter_space import Parameter
+from pg_drive.pg_config.parameter_space import BlockParameterSpace, Parameter
 from pg_drive.pg_config.pg_space import PgSpace
-from pg_drive.scene_creator.basic_utils import CreateAdverseRoad
-from pg_drive.scene_creator.basic_utils import CreateRoadFrom
-from pg_drive.scene_creator.basic_utils import sharpbend
+from pg_drive.scene_creator.basic_utils import CreateAdverseRoad, CreateRoadFrom, sharpbend
 from pg_drive.scene_creator.blocks.block import Block
 from pg_drive.scene_creator.lanes.lane import LineType
 from pg_drive.scene_creator.road.road import Road

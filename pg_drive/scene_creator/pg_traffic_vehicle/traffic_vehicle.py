@@ -1,10 +1,10 @@
 import os
 from random import choice
 from typing import Union
-from panda3d.bullet import BulletWorld
+
 import numpy as np
-from panda3d.bullet import BulletRigidBodyNode, BulletBoxShape
-from panda3d.core import BitMask32, TransformState, Point3, NodePath, LQuaternionf, Vec3
+from panda3d.bullet import BulletWorld, BulletRigidBodyNode, BulletBoxShape
+from panda3d.core import BitMask32, TransformState, Point3, NodePath, Vec3
 
 from pg_drive.pg_config.body_name import BodyName
 from pg_drive.scene_creator.highway_vehicle.behavior import IDMVehicle

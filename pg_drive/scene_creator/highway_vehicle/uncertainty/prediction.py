@@ -2,7 +2,6 @@ import copy
 from typing import List, Tuple, Callable, Union, TYPE_CHECKING
 
 import numpy as np
-
 from city_drive.highway_env import utils
 from city_drive.highway_env.interval import polytope, vector_interval_section, integrator_interval, \
     interval_negative_part, intervals_diff, intervals_product, LPV, interval_absolute_to_local, \

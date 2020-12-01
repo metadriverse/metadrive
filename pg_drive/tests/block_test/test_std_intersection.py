@@ -1,6 +1,6 @@
 from pg_drive.scene_creator.blocks.first_block import FirstBlock
-from pg_drive.scene_creator.blocks.std_t_intersection import StdTInterSection
 from pg_drive.scene_creator.blocks.std_intersection import StdInterSection
+from pg_drive.scene_creator.blocks.std_t_intersection import StdTInterSection
 from pg_drive.scene_creator.road.road_network import RoadNetwork
 from pg_drive.tests.block_test.test_block_base import TestBlock
 

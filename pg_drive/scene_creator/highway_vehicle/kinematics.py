@@ -1,13 +1,11 @@
 from collections import deque
-import pandas as pd
+from typing import Union, List
+
+import numpy as np
 
 import pg_drive.utils.math_utils as utils
 from pg_drive.scene_creator.lanes.lane import AbstractLane
 from pg_drive.scene_creator.road_object.object import Landmark, Obstacle, RoadObject
-
-from typing import Union, List
-
-import numpy as np
 from pg_drive.scene_manager.traffic_manager import TrafficManager, LaneIndex
 
 
@@ -216,7 +214,7 @@ class Vehicle:
 
     @property
     def velocity(self) -> np.ndarray:
-        return self.speed * self.direction  # TODO: slip angle beta should be used here
+        return self.speed * self.direction
 
     @property
     def destination(self) -> np.ndarray:

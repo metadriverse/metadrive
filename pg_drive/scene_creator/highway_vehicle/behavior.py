@@ -3,10 +3,10 @@ from typing import Tuple, Union, List
 import numpy as np
 
 import pg_drive.utils.math_utils as utils
+from pg_drive.scene_creator.highway_vehicle.controller import ControlledVehicle
+from pg_drive.scene_creator.highway_vehicle.kinematics import Vehicle
 from pg_drive.scene_creator.road_object.object import RoadObject
 from pg_drive.scene_manager.traffic_manager import TrafficManager, Route, LaneIndex
-from pg_drive.scene_creator.highway_vehicle.kinematics import Vehicle
-from pg_drive.scene_creator.highway_vehicle.controller import ControlledVehicle
 from pg_drive.utils.math_utils import clip
 
 

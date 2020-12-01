@@ -1,14 +1,12 @@
 import numpy as np
-from pg_drive.pg_config.pg_space import PgSpace
+
 from pg_drive.pg_config.parameter_space import Parameter, BlockParameterSpace
-from pg_drive.scene_creator.basic_utils import CreateAdverseRoad
-from pg_drive.scene_creator.basic_utils import CreateRoadFrom
-from pg_drive.scene_creator.basic_utils import sharpbend
+from pg_drive.pg_config.pg_space import PgSpace
+from pg_drive.scene_creator.basic_utils import CreateAdverseRoad, CreateRoadFrom, sharpbend
 from pg_drive.scene_creator.blocks.block import Block, BlockSocket
 from pg_drive.scene_creator.lanes.lane import LineType
 from pg_drive.scene_creator.lanes.straight_lane import StraightLane
 from pg_drive.scene_creator.road.road import Road
-from typing import Dict
 
 
 class Roundabout(Block):

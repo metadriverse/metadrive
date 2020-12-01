@@ -1,6 +1,7 @@
-from panda3d.core import NodePath, PGTop, TextNode, Vec3, TextFont
-from pg_drive.world.image_buffer import ImageBuffer
+from panda3d.core import NodePath, PGTop, TextNode, Vec3
+
 from pg_drive.pg_config.cam_mask import CamMask
+from pg_drive.world.image_buffer import ImageBuffer
 
 
 class VehiclePanel(ImageBuffer):

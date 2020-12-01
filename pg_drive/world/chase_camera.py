@@ -1,5 +1,7 @@
 import queue
+
 from panda3d.core import Vec3
+
 from pg_drive.world.bt_world import BtWorld
 
 

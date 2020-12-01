@@ -1,8 +1,10 @@
 import math
 import time
-import numpy as np
-from pg_drive.scene_creator.road.road_network import RoadNetwork
 from typing import Tuple
+
+import numpy as np
+
+from pg_drive.scene_creator.road.road_network import RoadNetwork
 
 
 def wrap_to_pi(x: float) -> float:
@@ -10,9 +12,6 @@ def wrap_to_pi(x: float) -> float:
 
 
 def get_vertical_vector(vector: np.array):
-    # len = np.linalg.norm(vector)
-    # return np.array([vector[1], -vector[0]]) / len, np.array([-vector[1], vector[0]]) / len
-
     length = norm(vector[0], vector[1])
     return (vector[1] / length, -vector[0] / length), (-vector[1] / length, vector[0] / length)
 

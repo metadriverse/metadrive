@@ -1,7 +1,8 @@
+from panda3d.core import Vec3, NodePath
+
+from pg_drive.pg_config.cam_mask import CamMask
 from pg_drive.world.bt_world import BtWorld
 from pg_drive.world.image_buffer import ImageBuffer
-from panda3d.core import Vec3, NodePath
-from pg_drive.pg_config.cam_mask import CamMask
 
 
 class SensorCamera(ImageBuffer):

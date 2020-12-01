@@ -1,30 +1,31 @@
-import numpy as np
-from pg_drive.scene_creator.map import Map
+import copy
 import logging
 from collections import deque
-from pg_drive.scene_creator.ego_vehicle.vehicle_module.lidar import Lidar
+from os import path
+
+import numpy as np
+from panda3d.bullet import BulletVehicle, BulletBoxShape, BulletRigidBodyNode, ZUp, BulletWorld, BulletGhostNode
+from panda3d.core import Vec3, TransformState, NodePath, LQuaternionf, BitMask32, Vec4
+
+from pg_drive.pg_config.body_name import BodyName
+from pg_drive.pg_config.parameter_space import Parameter, VehicleParameterSpace
+from pg_drive.pg_config.pg_config import PgConfig
+from pg_drive.pg_config.pg_space import PgSpace
 from pg_drive.scene_creator.blocks.block import Block
+from pg_drive.scene_creator.ego_vehicle.vehicle_module.lidar import Lidar
 from pg_drive.scene_creator.ego_vehicle.vehicle_module.mini_map import MiniMap
 from pg_drive.scene_creator.ego_vehicle.vehicle_module.sensor_camera import SensorCamera
-from panda3d.bullet import BulletVehicle, BulletBoxShape, BulletRigidBodyNode, ZUp, BulletWorld, BulletGhostNode
-from pg_drive.scene_creator.pg_traffic_vehicle.traffic_vehicle import PgTrafficVehicle
-from panda3d.core import Vec3, TransformState, NodePath, LQuaternionf, BitMask32, Vec4
-from os import path
-from pg_drive.utils.visualization_loader import VisLoader
-from pg_drive.pg_config.parameter_space import Parameter
-from pg_drive.pg_config.pg_config import PgConfig
-from pg_drive.pg_config.parameter_space import VehicleParameterSpace
-from pg_drive.pg_config.pg_space import PgSpace
 from pg_drive.scene_creator.lanes.circular_lane import CircularLane
 from pg_drive.scene_creator.lanes.lane import AbstractLane
 from pg_drive.scene_creator.lanes.straight_lane import StraightLane
+from pg_drive.scene_creator.map import Map
+from pg_drive.scene_creator.pg_traffic_vehicle.traffic_vehicle import PgTrafficVehicle
 from pg_drive.utils.element import DynamicElement
 from pg_drive.utils.math_utils import get_vertical_vector, norm, clip
-from pg_drive.world.terrain import Terrain
+from pg_drive.utils.visualization_loader import VisLoader
 from pg_drive.world.bt_world import BtWorld
-from pg_drive.pg_config.body_name import BodyName
+from pg_drive.world.terrain import Terrain
 from .vehicle_module.routing_localization import RoutingLocalizationModule
-import copy
 
 
 class BaseVehicle(DynamicElement):

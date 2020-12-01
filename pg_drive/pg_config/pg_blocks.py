@@ -1,9 +1,9 @@
 from pg_drive.scene_creator.blocks.curve import Curve
-from pg_drive.scene_creator.blocks.std_intersection import StdInterSection
 from pg_drive.scene_creator.blocks.ramp import InRampOnStraight, OutRampOnStraight
 from pg_drive.scene_creator.blocks.roundabout import Roundabout
-from pg_drive.scene_creator.blocks.straight import Straight
+from pg_drive.scene_creator.blocks.std_intersection import StdInterSection
 from pg_drive.scene_creator.blocks.std_t_intersection import StdTInterSection
+from pg_drive.scene_creator.blocks.straight import Straight
 
 
 class PgBlock:

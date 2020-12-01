@@ -1,8 +1,8 @@
+from pg_drive.scene_creator.blocks.curve import Curve
 from pg_drive.scene_creator.blocks.first_block import FirstBlock
 from pg_drive.scene_creator.blocks.roundabout import Roundabout
 from pg_drive.scene_creator.road.road_network import RoadNetwork
 from pg_drive.tests.block_test.test_block_base import TestBlock
-from pg_drive.scene_creator.blocks.curve import Curve
 
 if __name__ == "__main__":
     test = TestBlock(False)

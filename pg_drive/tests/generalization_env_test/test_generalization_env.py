@@ -1,8 +1,5 @@
 from pg_drive.envs.generalization_racing import GeneralizationRacing
 from pg_drive.scene_creator.algorithm.BIG import BigGenerateMethod
-import logging
-from pg_drive.scene_manager.traffic_manager import TrafficMode
-from pg_drive.utils import setup_logger
 
 # setup_logger(debug=True)
 
@@ -38,7 +35,6 @@ class ResetEnv(GeneralizationRacing):
 
 if __name__ == "__main__":
     env = ResetEnv()
-    import time
 
     env.reset()
     for i in range(1, 100000):

@@ -1,11 +1,13 @@
+import os
+
 import numpy
 from panda3d.bullet import BulletRigidBodyNode, BulletPlaneShape
 from panda3d.core import Vec3, CardMaker, LQuaternionf, BitMask32, NodePath, TextureStage, Texture, SamplerState
-from pg_drive.utils.element import Element
-import os
-from pg_drive.utils.visualization_loader import VisLoader
-from pg_drive.pg_config.cam_mask import CamMask
+
 from pg_drive.pg_config.body_name import BodyName
+from pg_drive.pg_config.cam_mask import CamMask
+from pg_drive.utils.element import Element
+from pg_drive.utils.visualization_loader import VisLoader
 
 
 class Terrain(Element):

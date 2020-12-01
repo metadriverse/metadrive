@@ -1,6 +1,6 @@
 import copy
 import logging
-from typing import List, Tuple, Dict, Union
+from typing import List, Tuple, Dict
 
 import numpy as np
 

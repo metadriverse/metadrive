@@ -26,7 +26,6 @@ if __name__ == "__main__":
     env.reset()
     env.bullet_world.accept("m", env.vehicle.mini_map.save_image)
     env.bullet_world.accept("c", env.vehicle.front_cam.save_image)
-    import time
     from pg_drive.envs.observation_type import ObservationType, ImageObservation
 
     for i in range(1, 100000):

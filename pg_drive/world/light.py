@@ -1,7 +1,8 @@
-from pg_drive.pg_config.pg_config import PgConfig
 from panda3d.core import LVector4, NodePath, DirectionalLight, AmbientLight
-from pg_drive.utils.element import DynamicElement
+
 from pg_drive.pg_config.cam_mask import CamMask
+from pg_drive.pg_config.pg_config import PgConfig
+from pg_drive.utils.element import DynamicElement
 
 
 class Light(DynamicElement):

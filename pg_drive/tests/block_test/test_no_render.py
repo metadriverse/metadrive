@@ -1,7 +1,8 @@
-from pg_drive.scene_creator.algorithm.BIG import BIG, BigGenerateMethod
+import logging
+
+from pg_drive.scene_creator.algorithm.BIG import BIG
 from pg_drive.scene_creator.road.road_network import RoadNetwork
 from pg_drive.tests.block_test.test_block_base import TestBlock
-import logging
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)

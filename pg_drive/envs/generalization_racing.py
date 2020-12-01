@@ -1,14 +1,15 @@
-from pg_drive.pg_config.pg_config import PgConfig
-import numpy as np
-from pg_drive.world.chase_camera import ChaseCamera
 import gym
-from pg_drive.scene_creator.map import Map
-from pg_drive.world.bt_world import BtWorld
+import numpy as np
+
+from pg_drive.envs.observation_type import LidarStateObservation, ImageStateObservation
+from pg_drive.pg_config.pg_config import PgConfig
 from pg_drive.scene_creator.algorithm.BIG import BigGenerateMethod
 from pg_drive.scene_creator.ego_vehicle.base_vehicle import BaseVehicle
-from pg_drive.world.manual_controller import KeyboardController, JoystickController
+from pg_drive.scene_creator.map import Map
 from pg_drive.scene_manager.traffic_manager import TrafficManager, TrafficMode
-from pg_drive.envs.observation_type import LidarStateObservation, ImageStateObservation
+from pg_drive.world.bt_world import BtWorld
+from pg_drive.world.chase_camera import ChaseCamera
+from pg_drive.world.manual_controller import KeyboardController, JoystickController
 
 
 class GeneralizationRacing(gym.Env):
@@ -238,8 +239,6 @@ class GeneralizationRacing(gym.Env):
         lateral_factor = 1 - 2 * abs(lateral_now) / self.config["lane_width"]
         reward += self.config["driving_reward"] * (long_now - long_last) * lateral_factor
 
-        # print(f"[REWARD] Long now {long_now}, Long last {long_last}, reward {reward}")
-
         # Penalty for frequent steering
         steering_change = abs(self.vehicle.last_current_action[0][0] - self.vehicle.last_current_action[1][0])
         steering_penalty = self.config["steering_penalty"] * steering_change * self.vehicle.speed / 20
@@ -249,7 +248,6 @@ class GeneralizationRacing(gym.Env):
         reward -= acceleration_penalty
 
         # Penalty for waiting
-        # reward -= 0.1
         low_speed_penalty = 0
         if self.vehicle.speed < 1:
             low_speed_penalty = self.config["low_speed_penalty"]  # encourage car
@@ -258,47 +256,6 @@ class GeneralizationRacing(gym.Env):
         reward -= self.config["general_penalty"]
 
         reward += self.config["speed_reward"] * (self.vehicle.speed / self.vehicle.max_speed)
-
-        # print(f"reward {reward} steering {steering_penalty} acce {acceleration_penalty} low speed {low_speed_penalty}")
-
-        # reward = reward - steering_penalty - acceleration_penalty - low_speed_penalty
-        # # from city_drive.highway_env.utils import wrap_to_pi
-        # lane_heading = current_right_lane.heading_at(long_now)
-        # lane_direction = np.array([math.cos(lane_heading), math.sin(lane_heading)])
-        # heading_dir = np.array([math.cos(self.vehicle.heading_theta), math.sin(self.vehicle.heading_theta)])
-        #
-        # heading_diff = wrap_to_pi(self.vehicle.heading_theta - lane_heading)
-        #
-        # speed_reward = self.vehicle.speed * (heading_dir[0] * lane_direction[0] + heading_dir[1] * lane_direction[1])
-
-        # def f(a):
-        #     return a / np.pi * 180
-        #
-        # def f2(v):
-        #     return f(np.arctan2(v[1], v[0]))
-
-        # if speed_reward < -1:
-        #     print("Stop here")
-        # raise ValueError("Wrong")
-
-        # print("speed reward {:.5f} Longitude reward {:.5f}. Highway heading {:.5f}, Highway heading from vec {:.5f}, "
-        #       "bullet heading {:.5f}, velocity dir {:.5f}, cur dir {:.5f}, ori {:.5f}. heading_diff {:.5f}".format(
-        #     speed_reward,
-        #     long_now - long_last,
-        #     f(self.vehicle.heading_theta),
-        #     f2(self.vehicle.heading),
-        #     self.vehicle.chassis_np.getHpr()[0],
-        #     # @f2(self.vehicle.forward_direction),
-        #     # None,
-        #     f2(self.vehicle.velocity_direction),
-        #     f(current_right_lane.heading_at(long_now)),
-        #     f2(self.vehicle.vehicle.get_forward_vector()),
-        #     heading_diff
-        #     # f(heading_dir)
-        #     # long_now - long_last
-        # ))
-
-        # print("Longitude reward: ", long_now - long_last)
 
         return reward
 

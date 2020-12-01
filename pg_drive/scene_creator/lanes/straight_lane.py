@@ -1,5 +1,6 @@
 import math
 from typing import Tuple
+
 import numpy as np
 
 from pg_drive.scene_creator.lanes.lane import AbstractLane, Vector, LineType
