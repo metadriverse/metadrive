@@ -117,7 +117,8 @@ class BtWorld(ShowBase.ShowBase):
             lens.setFov(70)
             lens.setAspectRatio(1.2)
 
-            self.sky_box = SkyBox(sys.platform == "darwin")  # openGl shader didn't work for mac...
+            self.sky_box = SkyBox(
+                self.bt_config["headless_rgb"] or sys.platform == "darwin")  # openGl shader didn't work for mac...
             self.sky_box.add_to_render_module(self.render)
 
             self.light = Light(self.bt_config)

@@ -6,7 +6,7 @@ class ResetEnv(GeneralizationRacing):
         super(ResetEnv, self).__init__(
             {
                 "environment_num": 1,
-                "traffic_density": 0.0,
+                "traffic_density": 0.1,
                 "start_seed": 4,
                 "image_buffer_name": "front_cam",
                 "manual_control": True,
@@ -34,6 +34,7 @@ if __name__ == "__main__":
         # print("Step: ", i)
         o, r, d, info = env.step([0, 1])
         assert env.observation_space.contains(o)
+        # env.vehicle.front_cam.save_image()
         # # print(r)
         # # print(o)
         # # print(time.time() - start)
