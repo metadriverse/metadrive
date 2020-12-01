@@ -6,8 +6,8 @@ from pg_drive.pg_config.cam_mask import CamMask
 class VehiclePanel(ImageBuffer):
     PARA_VIS_LENGTH = 12
     MAX_SPEED = 120
-    BUFFER_L = 800
-    BUFFER_W = 400
+    BUFFER_X = 800
+    BUFFER_Y = 400
     CAM_MASK = CamMask.PARA_VIS
     GAP = 4.1
 
@@ -34,7 +34,7 @@ class VehiclePanel(ImageBuffer):
             textNodePath.setPos(-1.125111, 0, 0.9 - i * 0.08)
             self.para_vis_np.append(textNodePath)
         super(VehiclePanel, self).__init__(
-            self.BUFFER_L, self.BUFFER_W, Vec3(-0.9, -1.01, 0.78), self.BKG_COLOR, make_buffer_func, make_camera_func,
+            self.BUFFER_X, self.BUFFER_Y, Vec3(-0.9, -1.01, 0.78), self.BKG_COLOR, make_buffer_func, make_camera_func,
             self.aspect2d_np
         )
 

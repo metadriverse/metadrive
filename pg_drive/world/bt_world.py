@@ -3,7 +3,6 @@ import sys
 from typing import List
 import logging
 import gltf
-import simplepbr
 from direct.showbase import ShowBase
 from panda3d.bullet import BulletDebugNode
 from panda3d.bullet import BulletWorld
@@ -30,7 +29,7 @@ class BtWorld(ShowBase.ShowBase):
     loadPrcFileData("", 'bullet-filter-algorithm groups-mask')
     loadPrcFileData("", "audio-library-name null")
 
-    # loadPrcFileData("", "load-display  p3tinydisplay")
+    # loadPrcFileData("", " framebuffer-srgb truein")
 
     # loadPrcFileData("", "geom-cache-size 50000")
 
@@ -52,6 +51,8 @@ class BtWorld(ShowBase.ShowBase):
             loadPrcFileData("", "threading-model Cull/Draw")  # multi-thread render, accelerate simulation when evaluate
         else:
             mode = "offscreen" if self.bt_config["use_rgb"] else "none"
+        if self.bt_config["headless_rgb"]:
+            loadPrcFileData("", "load-display  pandagles2")
         super(BtWorld, self).__init__(windowType=mode)
         if not self.bt_config["debug_physics_world"] and (self.bt_config["use_render"] or self.bt_config["use_rgb"]):
             VisLoader.init_loader(self.loader, bullet_path)
@@ -89,11 +90,23 @@ class BtWorld(ShowBase.ShowBase):
             self.collision_info_np = NodePath(TextNode("collision_info"))
             self._init_collision_info_render()
 
-            self.pbrpipe = simplepbr.init()
+            from pg_drive.world.our_pbr import OurPipeline
+            self.pbrpipe = OurPipeline(
+                render_node=None,
+                window=None,
+                camera_node=None,
+                msaa_samples=4,
+                max_lights=8,
+                use_normal_maps=False,
+                use_emission_maps=True,
+                exposure=1.0,
+                enable_shadows=False,
+                enable_fog=False,
+                use_occlusion_maps=False
+            )
             self.pbrpipe.render_node = self.pbr_render
             self.pbrpipe.render_node.set_antialias(AntialiasAttrib.M_auto)
             self.pbrpipe._recompile_pbr()
-            self.pbrpipe._setup_tonemapping()
             self.pbrpipe.manager.cleanup()
 
             # set main cam
@@ -104,7 +117,7 @@ class BtWorld(ShowBase.ShowBase):
             lens.setFov(70)
             lens.setAspectRatio(1.2)
 
-            self.sky_box = SkyBox(sys.platform == "darwin")
+            self.sky_box = SkyBox(sys.platform == "darwin")  # openGl shader didn't work for mac...
             self.sky_box.add_to_render_module(self.render)
 
             self.light = Light(self.bt_config)
@@ -218,7 +231,8 @@ class BtWorld(ShowBase.ShowBase):
                 mini_map=True,
                 force_fps=None,
                 debug_physics_world=False,  # only render physics world without model
-                use_default_layout=True  # decide the layout of white lines
+                use_default_layout=True,  # decide the layout of white lines
+                headless_rgb=False  # set to true only when on headless machine and use rgb image!!!!!!
             )
         )
 

@@ -101,7 +101,7 @@ class ObservationType(ABC):
     @staticmethod
     def show_gray_scale_array(obs):
         import matplotlib.pyplot as plt
-        img = obs[::-1]
+        img = np.moveaxis(obs, -1, 0)
         plt.plot()
         plt.imshow(img, cmap=plt.cm.gray)
         plt.show()
@@ -133,9 +133,9 @@ class ImageObservation(ObservationType):
     """
     Use only image info as input
     """
-    STACK_SIZE = 3  # use continuous 4 image as the input
+    STACK_SIZE = 3  # use continuous 3 image as the input
 
-    def __init__(self, config, image_buffer_name: str, clip_rgb:bool):
+    def __init__(self, config, image_buffer_name: str, clip_rgb: bool):
         self.image_buffer_name = image_buffer_name
         super(ImageObservation, self).__init__(config)
         self.rgb_clip = clip_rgb
@@ -183,7 +183,7 @@ class ImageStateObservation(ObservationType):
     IMAGE = "image"
     STATE = "state"
 
-    def __init__(self, config, image_buffer_name: str, clip_rgb:bool):
+    def __init__(self, config, image_buffer_name: str, clip_rgb: bool):
         super(ImageStateObservation, self).__init__(config)
         self.img_obs = ImageObservation(config, image_buffer_name, clip_rgb)
         self.state_obs = StateObservation(config)
