@@ -32,8 +32,8 @@ class Map:
     PRE_BLOCK_SOCKET_INDEX = "pre_block_socket_index"
 
     # generate_method
-    GENERATE_PARA = "generate_para"
-    GENERATE_METHOD = "generate_method"
+    GENERATE_PARA = "config"
+    GENERATE_METHOD = "type"
 
     def __init__(self, parent_node_path: NodePath, physics_world: BulletWorld, big_config: dict = None):
         """
