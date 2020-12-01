@@ -1,52 +1,99 @@
+import json
 import logging
+import os
+from typing import List
 
 from panda3d.bullet import BulletWorld
 from panda3d.core import NodePath
 
+from pg_drive.pg_config.pg_blocks import PgBlock
 from pg_drive.pg_config.pg_config import PgConfig
 from pg_drive.scene_creator.algorithm.BIG import BIG, BigGenerateMethod
+from pg_drive.scene_creator.blocks.block import Block
 from pg_drive.scene_creator.road.road_network import RoadNetwork
 
 
+class MapGenerateMethod:
+    BIG_BLOCK_NUM = BigGenerateMethod.BLOCK_NUM
+    BIG_BLOCK_SEQUENCE = BigGenerateMethod.BLOCK_SEQUENCE
+    PG_MAP_FILE = "pg_map_file"
+
+
 class Map:
-    def __init__(self, config: dict = None):
+    # only used to save and read maps
+    FILE_SUFFIX = ".pgm"
+
+    # define string in json and config
+    SEED = "seed"
+    LANE_WIDTH = "lane_width"
+    LANE_NUM = "lane_num"
+    BLOCK_ID = "id"
+    BLOCK_SEQUENCE = "block_sequence"
+    PRE_BLOCK_SOCKET_INDEX = "pre_block_socket_index"
+
+    # generate_method
+    GENERATE_PARA = "generate_para"
+    GENERATE_METHOD = "generate_method"
+
+    def __init__(self, parent_node_path: NodePath, physics_world: BulletWorld, big_config: dict = None):
         """
-        Scene can be stored and recover to save time when we access scenes encountered before
-        Scene should contain road_network, blocks and vehicles
+        Map can be stored and recover to save time when we access the map encountered before
         """
+        self.config = self.default_config()
+        if big_config:
+            self.config.update(big_config)
+        self.lane_width = self.config[self.LANE_WIDTH]
+        self.lane_num = self.config[self.LANE_NUM]
+        self.random_seed = self.config[self.SEED]
         self.road_network = RoadNetwork()
         self.blocks = []
-        self.lane_width = None
-        self.lane_num = None
-        self.random_seed = None
-        self.config = self.default_config()
-        if config:
-            self.config.update(config)
+        generate_type = self.config[self.GENERATE_METHOD]
+        if generate_type == BigGenerateMethod.BLOCK_NUM or generate_type == BigGenerateMethod.BLOCK_SEQUENCE:
+            self._big_generate(parent_node_path, physics_world)
 
-    @staticmethod
-    def default_config():
-        return PgConfig({"type": BigGenerateMethod.BLOCK_NUM, "config": None})
+        elif generate_type == MapGenerateMethod.PG_MAP_FILE:
+            # other config such as lane width, num and seed will be valid, since they will be read from file
+            blocks_config = self.read_map(self.config[self.GENERATE_PARA])
+            self._config_generate(blocks_config, parent_node_path, physics_world)
+        else:
+            raise ValueError("Map can not be created by {}".format(generate_type))
 
-    def big_generate(
-        self, lane_width: float, lane_num: int, seed: int, parent_node_path: NodePath, physics_world: BulletWorld
-    ):
-        map = BIG(lane_num, lane_width, self.road_network, parent_node_path, physics_world, seed)
-        map.generate(self.config["type"], self.config["config"])
-        self.random_seed = seed
-        self.blocks = map.blocks
-        self.lane_num = lane_num
-        self.lane_width = lane_width
-        # TODO wrap this to support more generating methods
+        #  a trick to optimize performance
         self.road_network.update_indices()
         self.road_network.build_helper()
 
-    def custom_generate(self, blocks):
-        """
-        TODO Used to read maps. Not a final edition
-        """
-        for block in blocks:
-            self.road_network += block.road_network
-        self.blocks = blocks
+    @staticmethod
+    def default_config():
+        return PgConfig(
+            {
+                Map.GENERATE_METHOD: MapGenerateMethod.BIG_BLOCK_NUM,
+                Map.GENERATE_PARA: None,  # it can be a file path / block num / block ID sequence
+                Map.LANE_WIDTH: 3.5,
+                Map.LANE_NUM: 3,
+                Map.SEED: 10
+            }
+        )
+
+    def _big_generate(self, parent_node_path: NodePath, physics_world: BulletWorld):
+        big_map = BIG(
+            self.lane_num, self.lane_width, self.road_network, parent_node_path, physics_world, self.random_seed
+        )
+        big_map.generate(self.config[self.GENERATE_METHOD], self.config[self.GENERATE_PARA])
+        self.blocks = big_map.blocks
+
+    def _config_generate(self, blocks_config: List, parent_node_path: NodePath, physics_world: BulletWorld):
+        assert len(self.road_network.graph) == 0, "These Map is not empty, please create a new map to read config"
+        from pg_drive.scene_creator.blocks.first_block import FirstBlock
+        last_block = FirstBlock(self.road_network, self.lane_width, self.lane_num, parent_node_path, physics_world, 1)
+        self.blocks.append(last_block)
+        for block_index, b in enumerate(blocks_config[1:], 1):
+            block_type = PgBlock.get_block(b.pop(self.BLOCK_ID))
+            pre_block_socket_inex = b.pop(self.PRE_BLOCK_SOCKET_INDEX)
+            last_block = block_type(
+                block_index, last_block.get_socket(pre_block_socket_inex), self.road_network, self.random_seed
+            )
+            last_block.construct_from_config(b, parent_node_path, physics_world)
+            self.blocks.append(last_block)
 
     def re_generate(self, parent_node_path: NodePath, bt_physics_world: BulletWorld):
         """
@@ -82,6 +129,49 @@ class Map:
     def destroy_map(self, bt_physics_world: BulletWorld):
         for block in self.blocks:
             block.destroy(bt_physics_world)
+
+    def save_map(self, map_name: str, save_dir: str = os.path.dirname(__file__)):
+        """
+        This func will generate a json file named 'map_name.pgm', in 'save_dir'
+        """
+        assert self.blocks is not None and len(self.blocks) > 0, "Please generate Map before saving it"
+        import numpy as np
+        map_config = []
+        for b in self.blocks:
+            assert isinstance(b, Block), "None Block type can not be saved to json file"
+            b_config = b.get_config()
+            json_config = {}
+            for k, v in b_config._config.items():
+                json_config[k] = v.tolist()[0] if isinstance(v, np.ndarray) else v
+            json_config[self.BLOCK_ID] = b.ID
+            json_config[self.PRE_BLOCK_SOCKET_INDEX] = b.pre_block_socket_index
+            map_config.append(json_config)
+        with open(os.path.join(save_dir, map_name + self.FILE_SUFFIX), 'w') as outfile:
+            json.dump(
+                {
+                    self.SEED: self.random_seed,
+                    self.LANE_NUM: self.lane_num,
+                    self.LANE_WIDTH: self.lane_width,
+                    self.BLOCK_SEQUENCE: map_config
+                }, outfile
+            )
+
+    def read_map(self, map_file_path: str):
+        """
+        Create map from a .pgm file, read it to map config and update default properties
+        """
+        with open(map_file_path, "r") as map_file:
+            map_config = json.load(map_file)
+            self.config[self.LANE_NUM] = map_config[self.LANE_NUM]
+            self.config[self.LANE_WIDTH] = map_config[self.LANE_WIDTH]
+            self.config[self.SEED] = map_config[self.SEED]
+            blocks_config = map_config[self.BLOCK_SEQUENCE]
+
+            # update the property
+            self.lane_width = self.config[self.LANE_WIDTH]
+            self.lane_num = self.config[self.LANE_NUM]
+            self.random_seed = self.config[self.SEED]
+        return blocks_config
 
     def __del__(self):
         describe = self.random_seed if self.random_seed is not None else "custom"

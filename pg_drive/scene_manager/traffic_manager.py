@@ -43,17 +43,12 @@ class TrafficManager:
         self.random_seed = None
 
     def generate_traffic(
-        self,
-        bullet_world: BtWorld,
-        map: Map,
-        ego_vehicle,
-        random_seed: int,
-        traffic_density: float,
-        road_objects: List = None
+        self, bullet_world: BtWorld, map: Map, ego_vehicle, traffic_density: float, road_objects: List = None
     ):
         """
         For garbage collecting using, ensure to release the memory of all traffic vehicles
         """
+        random_seed = map.random_seed
         logging.debug("load scene {}".format(random_seed))
         self.clear_traffic(bullet_world.physics_world)
         self.ego_vehicle = ego_vehicle
@@ -112,9 +107,11 @@ class TrafficManager:
         for block in self.blocks[1:]:
             vehicles_on_block = []
             trigger_road = block._pre_block_socket.positive_road
-            lanes = set(block.block_network.get_positive_lanes())
-            lanes.update(block.get_reborn_lanes())
-            trigger_lanes = list(lanes)
+            trigger_lanes = block.block_network.get_positive_lanes()
+            reborn_lanes = block.get_reborn_lanes()
+            for lane in reborn_lanes:
+                if lane not in trigger_lanes:
+                    trigger_lanes.append(lane)
             self.np_random.shuffle(trigger_lanes)
             for lane in trigger_lanes:
                 vehicles_on_block += self._create_vehicles_on_lane(lane)

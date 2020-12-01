@@ -68,6 +68,7 @@ def get_result(env):
 
 if __name__ == '__main__':
     from pg_drive.envs.generalization_racing import GeneralizationRacing
+    from pg_drive.scene_creator.map import Map, MapGenerateMethod
 
     for friction in [0.6, 0.8, 0.9, 1.0, 1.1, 1.2, 1.4, 1.6, 1.8, 2.0]:
         # for friction in [0.9, 1.0, 1.1]:
@@ -83,8 +84,8 @@ if __name__ == '__main__':
                 "use_render": True,
                 "use_rgb": True,
                 "map_config": {
-                    "type": "block_sequence",
-                    "config": "SSSSSSSSSS"
+                    Map.GENERATE_METHOD: MapGenerateMethod.BIG_BLOCK_SEQUENCE,
+                    Map.GENERATE_PARA: "SSSSSSSSSS"
                 }
             }
         )

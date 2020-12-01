@@ -43,6 +43,7 @@ class FirstBlock(Block):
         self._create_in_bullet()
         global_network += self.block_network
         socket = self.create_socket_from_positive_road(other_v_born_road)
+        socket.index = 0
         self.add_sockets(socket)
         self.add_to_render_module(render_root_np)
         self.add_to_physics_world(bullet_physics_world)

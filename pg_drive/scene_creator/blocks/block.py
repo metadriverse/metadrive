@@ -28,6 +28,7 @@ class BlockSocket:
     def __init__(self, positive_road: Road, negative_road: Road = None):
         self.positive_road = positive_road
         self.negative_road = negative_road if negative_road else None
+        self.index = None
 
 
 class Block(Element):
@@ -100,6 +101,7 @@ class Block(Element):
 
         # used to connect previous blocks, save its info here
         self._pre_block_socket = pre_block_socket
+        self.pre_block_socket_index = pre_block_socket.index
 
         # used to create this block, but for first block it is nonsense
         if block_index != 0:
@@ -125,7 +127,7 @@ class Block(Element):
             self.side_normal = self.loader.loadTexture(os.path.join(VisLoader.path, "textures/side_walk/normal.png"))
             self.side_walk = self.loader.loadModel(os.path.join(VisLoader.path, "models/box.bam"))
 
-    def construct_block_in_world(self, root_render_np: NodePath, bullet_physics_world: BulletWorld) -> bool:
+    def construct_block_random(self, root_render_np: NodePath, bullet_physics_world: BulletWorld) -> bool:
         self.set_config(self.PARAMETER_SPACE.sample())
         success = self._sample_topology()
         self._create_in_bullet()
@@ -133,7 +135,7 @@ class Block(Element):
         self.add_to_render_module(root_render_np)
         return success
 
-    def destruct_block_in_world(self, bullet_physics_world: BulletWorld):
+    def destruct_block(self, bullet_physics_world: BulletWorld):
         self._clear_topology()
         if len(self.bullet_nodes) != 0:
             for node in self.bullet_nodes:
@@ -150,10 +152,12 @@ class Block(Element):
         self.number_of_sample_trial += 1
         self._clear_topology()
         no_cross = self._try_plug_into_previous_block()
+        for i, s in enumerate(self._sockets):
+            s.index = i
         self._global_network += self.block_network
         return no_cross
 
-    def create_block_from_config(self, config: Dict, root_render_np: NodePath, bullet_physics_world: BulletWorld):
+    def construct_from_config(self, config: Dict, root_render_np: NodePath, bullet_physics_world: BulletWorld):
         assert set(config.keys()) == self.PARAMETER_SPACE.parameters, \
             "Make sure the parameters' name are as same as what defined in parameter_space.py"
         self.set_config(config)

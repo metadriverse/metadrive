@@ -85,7 +85,7 @@ class TestBlock(ShowBase.ShowBase):
         For reset test and map storing
         """
         self.map = Map({"type": big_type, "config": para})
-        self.map.big_generate(3, 2, 888, self.worldNP, self.world)
+        self.map._big_generate(3, 2, 888, self.worldNP, self.world)
         self.accept("c", self.clear)
         self.accept("a", self.re_add)
 

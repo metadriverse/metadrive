@@ -49,7 +49,7 @@ class Element:
         """
         if self.render:
             # double check :-)
-            assert isinstance(self.node_path, NodePath), "No render np in this block"
+            assert isinstance(self.node_path, NodePath), "No render model on node_path in this Element"
             self.node_path.reparentTo(parent_render_np)
 
     def add_to_physics_world(self, bt_world: BulletWorld):

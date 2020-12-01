@@ -13,6 +13,6 @@ if __name__ == "__main__":
     straight = FirstBlock(global_network, 3.0, 1, test.render, test.world, 1)
     for i in range(1, 3):
         straight = OutRampOnStraight(i, straight.get_socket(0), global_network, i)
-        print(straight.construct_block_in_world(test.render, test.world))
+        print(straight.construct_block_random(test.render, test.world))
         print(len(straight.bullet_nodes))
     # test.run()
