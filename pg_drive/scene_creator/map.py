@@ -11,6 +11,7 @@ from pg_drive.pg_config.pg_config import PgConfig
 from pg_drive.scene_creator.algorithm.BIG import BIG, BigGenerateMethod
 from pg_drive.scene_creator.blocks.block import Block
 from pg_drive.scene_creator.road.road_network import RoadNetwork
+import copy
 
 
 class MapGenerateMethod:
@@ -21,7 +22,7 @@ class MapGenerateMethod:
 
 class Map:
     # only used to save and read maps
-    FILE_SUFFIX = ".pgm"
+    FILE_SUFFIX = ".json"
 
     # define string in json and config
     SEED = "seed"
@@ -132,9 +133,9 @@ class Map:
         for block in self.blocks:
             block.destroy(pg_physics_world)
 
-    def save_map(self, map_name: str, save_dir: str = os.path.dirname(__file__)):
+    def save_map(self):
         """
-        This func will generate a json file named 'map_name.pgm', in 'save_dir'
+        This func will generate a json file named 'map_name.json', in 'save_dir'
         """
         assert self.blocks is not None and len(self.blocks) > 0, "Please generate Map before saving it"
         import numpy as np
@@ -148,32 +149,43 @@ class Map:
             json_config[self.BLOCK_ID] = b.ID
             json_config[self.PRE_BLOCK_SOCKET_INDEX] = b.pre_block_socket_index
             map_config.append(json_config)
-        with open(os.path.join(save_dir, map_name + self.FILE_SUFFIX), 'w') as outfile:
-            json.dump(
-                {
-                    self.SEED: self.random_seed,
-                    self.LANE_NUM: self.lane_num,
-                    self.LANE_WIDTH: self.lane_width,
-                    self.BLOCK_SEQUENCE: map_config
-                }, outfile
-            )
 
-    def read_map(self, map_file_path: str):
+        saved_data = copy.deepcopy({
+            self.SEED: self.random_seed,
+            self.LANE_NUM: self.lane_num,
+            self.LANE_WIDTH: self.lane_width,
+            self.BLOCK_SEQUENCE: map_config
+        })
+        return saved_data
+
+    def save_map_to_json(self, map_name: str, save_dir: str = os.path.dirname(__file__)):
+        data = self.save_map()
+        with open(os.path.join(save_dir, map_name + self.FILE_SUFFIX), 'w') as outfile:
+            json.dump(data, outfile)
+
+    def read_map(self, map_config: dict):
         """
-        Create map from a .pgm file, read it to map config and update default properties
+        Load the map from a dict
+        """
+        self.config[self.LANE_NUM] = map_config[self.LANE_NUM]
+        self.config[self.LANE_WIDTH] = map_config[self.LANE_WIDTH]
+        self.config[self.SEED] = map_config[self.SEED]
+        blocks_config = map_config[self.BLOCK_SEQUENCE]
+
+        # update the property
+        self.lane_width = self.config[self.LANE_WIDTH]
+        self.lane_num = self.config[self.LANE_NUM]
+        self.random_seed = self.config[self.SEED]
+        return blocks_config
+
+    def read_map_from_json(self, map_file_path: str):
+        """
+        Create map from a .json file, read it to map config and update default properties
         """
         with open(map_file_path, "r") as map_file:
             map_config = json.load(map_file)
-            self.config[self.LANE_NUM] = map_config[self.LANE_NUM]
-            self.config[self.LANE_WIDTH] = map_config[self.LANE_WIDTH]
-            self.config[self.SEED] = map_config[self.SEED]
-            blocks_config = map_config[self.BLOCK_SEQUENCE]
-
-            # update the property
-            self.lane_width = self.config[self.LANE_WIDTH]
-            self.lane_num = self.config[self.LANE_NUM]
-            self.random_seed = self.config[self.SEED]
-        return blocks_config
+            ret = self.read_map(map_config)
+        return ret
 
     def __del__(self):
         describe = self.random_seed if self.random_seed is not None else "custom"
