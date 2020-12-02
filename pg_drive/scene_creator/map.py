@@ -35,7 +35,7 @@ class Map:
     GENERATE_PARA = "config"
     GENERATE_METHOD = "type"
 
-    def __init__(self, parent_node_path: NodePath, physics_world: BulletWorld, big_config: dict = None):
+    def __init__(self, parent_node_path: NodePath, pg_physics_world: BulletWorld, big_config: dict = None):
         """
         Map can be stored and recover to save time when we access the map encountered before
         """
@@ -49,12 +49,12 @@ class Map:
         self.blocks = []
         generate_type = self.config[self.GENERATE_METHOD]
         if generate_type == BigGenerateMethod.BLOCK_NUM or generate_type == BigGenerateMethod.BLOCK_SEQUENCE:
-            self._big_generate(parent_node_path, physics_world)
+            self._big_generate(parent_node_path, pg_physics_world)
 
         elif generate_type == MapGenerateMethod.PG_MAP_FILE:
             # other config such as lane width, num and seed will be valid, since they will be read from file
             blocks_config = self.read_map(self.config[self.GENERATE_PARA])
-            self._config_generate(blocks_config, parent_node_path, physics_world)
+            self._config_generate(blocks_config, parent_node_path, pg_physics_world)
         else:
             raise ValueError("Map can not be created by {}".format(generate_type))
 
@@ -74,17 +74,19 @@ class Map:
             }
         )
 
-    def _big_generate(self, parent_node_path: NodePath, physics_world: BulletWorld):
+    def _big_generate(self, parent_node_path: NodePath, pg_physics_world: BulletWorld):
         big_map = BIG(
-            self.lane_num, self.lane_width, self.road_network, parent_node_path, physics_world, self.random_seed
+            self.lane_num, self.lane_width, self.road_network, parent_node_path, pg_physics_world, self.random_seed
         )
         big_map.generate(self.config[self.GENERATE_METHOD], self.config[self.GENERATE_PARA])
         self.blocks = big_map.blocks
 
-    def _config_generate(self, blocks_config: List, parent_node_path: NodePath, physics_world: BulletWorld):
+    def _config_generate(self, blocks_config: List, parent_node_path: NodePath, pg_physics_world: BulletWorld):
         assert len(self.road_network.graph) == 0, "These Map is not empty, please create a new map to read config"
         from pg_drive.scene_creator.blocks.first_block import FirstBlock
-        last_block = FirstBlock(self.road_network, self.lane_width, self.lane_num, parent_node_path, physics_world, 1)
+        last_block = FirstBlock(
+            self.road_network, self.lane_width, self.lane_num, parent_node_path, pg_physics_world, 1
+        )
         self.blocks.append(last_block)
         for block_index, b in enumerate(blocks_config[1:], 1):
             block_type = PgBlock.get_block(b.pop(self.BLOCK_ID))
@@ -92,14 +94,14 @@ class Map:
             last_block = block_type(
                 block_index, last_block.get_socket(pre_block_socket_inex), self.road_network, self.random_seed
             )
-            last_block.construct_from_config(b, parent_node_path, physics_world)
+            last_block.construct_from_config(b, parent_node_path, pg_physics_world)
             self.blocks.append(last_block)
 
-    def re_generate(self, parent_node_path: NodePath, bt_physics_world: BulletWorld):
+    def re_generate(self, parent_node_path: NodePath, pg_physics_world: BulletWorld):
         """
         For convenience
         """
-        self.add_to_bullet_physics_world(bt_physics_world)
+        self.add_to_physics_world(pg_physics_world)
         from pg_drive.utils.visualization_loader import VisLoader
         if VisLoader.loader is not None:
             self.add_to_render_module(parent_node_path)
@@ -111,24 +113,24 @@ class Map:
         for block in self.blocks:
             block.add_to_render_module(parent_node_path)
 
-    def add_to_bullet_physics_world(self, bt_physics_world: BulletWorld):
+    def add_to_physics_world(self, pg_physics_world: BulletWorld):
         """
         If the original bullet physics world is deleted, call this to re-add road network
         """
         for block in self.blocks:
-            block.add_to_physics_world(bt_physics_world)
+            block.add_to_physics_world(pg_physics_world)
 
-    def remove_from_physics_world(self, bt_physics_world: BulletWorld):
+    def remove_from_physics_world(self, pg_physics_world: BulletWorld):
         for block in self.blocks:
-            block.remove_from_physics_world(bt_physics_world)
+            block.remove_from_physics_world(pg_physics_world)
 
     def remove_from_render_module(self):
         for block in self.blocks:
             block.remove_from_render_module()
 
-    def destroy_map(self, bt_physics_world: BulletWorld):
+    def destroy_map(self, pg_physics_world: BulletWorld):
         for block in self.blocks:
-            block.destroy(bt_physics_world)
+            block.destroy(pg_physics_world)
 
     def save_map(self, map_name: str, save_dir: str = os.path.dirname(__file__)):
         """

@@ -24,7 +24,7 @@ class FirstBlock(Block):
 
     def __init__(
         self, global_network: RoadNetwork, lane_width: float, lane_num: int, render_root_np: NodePath,
-        bullet_physics_world: BulletWorld, random_seed
+        pg_physics_world: BulletWorld, random_seed
     ):
         place_holder = BlockSocket(Road(Decoration.start, Decoration.end), Road(Decoration.start, Decoration.end))
         super(FirstBlock, self).__init__(0, place_holder, global_network, random_seed)
@@ -40,11 +40,11 @@ class FirstBlock(Block):
         CreateRoadFrom(next_lane, lane_num, other_v_born_road, self.block_network, self._global_network)
         CreateAdverseRoad(other_v_born_road, self.block_network, self._global_network)
 
-        self._create_in_bullet()
+        self._create_in_world()
         global_network += self.block_network
         socket = self.create_socket_from_positive_road(other_v_born_road)
         socket.index = 0
         self.add_sockets(socket)
         self.add_to_render_module(render_root_np)
-        self.add_to_physics_world(bullet_physics_world)
+        self.add_to_physics_world(pg_physics_world)
         self._reborn_roads = [other_v_born_road]

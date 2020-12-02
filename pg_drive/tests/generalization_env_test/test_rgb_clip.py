@@ -14,7 +14,7 @@ class ResetEnv(GeneralizationRacing):
                 "use_rgb": True,
                 "rgb_clip": True,
                 "vehicle_config": dict(front_cam=(200, 88)),
-                "bt_world_config": {
+                "pg_world_config": {
                     "headless_rgb": True
                 }
             }
@@ -24,8 +24,8 @@ class ResetEnv(GeneralizationRacing):
 if __name__ == "__main__":
     env = ResetEnv()
     env.reset()
-    env.bullet_world.accept("m", env.vehicle.mini_map.save_image)
-    env.bullet_world.accept("c", env.vehicle.front_cam.save_image)
+    env.pg_world.accept("m", env.vehicle.mini_map.save_image)
+    env.pg_world.accept("c", env.vehicle.front_cam.save_image)
     from pg_drive.envs.observation_type import ObservationType, ImageObservation
 
     for i in range(1, 100000):

@@ -9,7 +9,7 @@ from panda3d.bullet import BulletWorld
 from pg_drive.scene_creator.map import Map
 from pg_drive.scene_creator.road_object.object import RoadObject
 from pg_drive.utils.math_utils import norm
-from pg_drive.world.bt_world import BtWorld
+from pg_drive.world.pg_world import PgWorld
 
 logger = logging.getLogger(__name__)
 
@@ -43,14 +43,14 @@ class TrafficManager:
         self.random_seed = None
 
     def generate_traffic(
-        self, bullet_world: BtWorld, map: Map, ego_vehicle, traffic_density: float, road_objects: List = None
+        self, pg_world: PgWorld, map: Map, ego_vehicle, traffic_density: float, road_objects: List = None
     ):
         """
         For garbage collecting using, ensure to release the memory of all traffic vehicles
         """
         random_seed = map.random_seed
         logging.debug("load scene {}".format(random_seed))
-        self.clear_traffic(bullet_world.physics_world)
+        self.clear_traffic(pg_world.physics_world)
         self.ego_vehicle = ego_vehicle
         self.block_triggered_vehicles = [] if self.traffic_mode == TrafficMode.Add_once else None
         self.blocks = map.blocks
@@ -62,28 +62,28 @@ class TrafficManager:
         self.objects = road_objects or []
         self.np_random = np.random.RandomState(random_seed)
         self.random_seed = random_seed
-        self.add_vehicles(bullet_world)
+        self.add_vehicles(pg_world)
 
-    def clear_traffic(self, bt_physics_world: BulletWorld):
+    def clear_traffic(self, pg_physics_world: BulletWorld):
         if self.traffic_vehicles is not None:
             for v in self.traffic_vehicles:
-                v.destroy(bt_physics_world)
+                v.destroy(pg_physics_world)
         if self.block_triggered_vehicles is not None:
             for block_vs in self.block_triggered_vehicles:
                 for v in block_vs.vehicles:
-                    v.destroy(bt_physics_world)
+                    v.destroy(pg_physics_world)
 
-    def add_vehicles(self, bt_world):
+    def add_vehicles(self, pg_world):
         if self.traffic_mode == TrafficMode.Reborn:
             # add reborn vehicle
             for lane in self.reborn_lanes:
                 self.traffic_vehicles += self._create_vehicles_on_lane(lane, True)
             for vehicle in self.traffic_vehicles:
-                vehicle.add_to_render_module(bt_world.pbr_worldNP)
-                vehicle.add_to_physics_world(bt_world.physics_world)
+                vehicle.add_to_render_module(pg_world.pbr_worldNP)
+                vehicle.add_to_physics_world(pg_world.physics_world)
             logging.debug("Init {} Traffic Vehicles".format(len(self.traffic_vehicles)))
         else:
-            self._create_vehicles_once(bt_world)
+            self._create_vehicles_once(pg_world)
 
     def _create_vehicles_on_lane(self, lane, is_reborn_lane=False):
         from pg_drive.scene_creator.pg_traffic_vehicle.traffic_vehicle_type import car_type
@@ -102,7 +102,7 @@ class TrafficManager:
             traffic_vehicles.append(random_v)
         return traffic_vehicles
 
-    def _create_vehicles_once(self, bt_world):
+    def _create_vehicles_once(self, pg_world):
         vehicle_num = 0
         for block in self.blocks[1:]:
             vehicles_on_block = []
@@ -116,8 +116,8 @@ class TrafficManager:
             for lane in trigger_lanes:
                 vehicles_on_block += self._create_vehicles_on_lane(lane)
             for vehicle in vehicles_on_block:
-                vehicle.add_to_render_module(bt_world.pbr_worldNP)
-                vehicle.add_to_physics_world(bt_world.physics_world)
+                vehicle.add_to_render_module(pg_world.pbr_worldNP)
+                vehicle.add_to_physics_world(pg_world.physics_world)
             block_vehicles = BlockVehicles(trigger_road=trigger_road, vehicles=vehicles_on_block)
             self.block_triggered_vehicles.append(block_vehicles)
             vehicle_num += len(vehicles_on_block)
@@ -171,7 +171,7 @@ class TrafficManager:
         for v in self.traffic_vehicles:
             v.step(dt)
 
-    def update_state(self, bt_physics_world: BulletWorld):
+    def update_state(self, pg_physics_world: BulletWorld):
         vehicles_to_remove = []
         for v in self.traffic_vehicles:
             if v.out_of_road():
@@ -185,7 +185,7 @@ class TrafficManager:
         for v in vehicles_to_remove:
             self.traffic_vehicles.remove(v)
             self.vehicles.remove(v.vehicle_node.kinematic_model)
-            v.destroy(bt_physics_world)
+            v.destroy(pg_physics_world)
 
     def neighbour_vehicles(self, vehicle, lane_index: LaneIndex = None) -> Tuple:
         """
@@ -231,8 +231,8 @@ class TrafficManager:
         """
         return pd.concat([v.get_log() for v in self.vehicles])
 
-    def destroy(self, bt_physics_world: BulletWorld):
-        self.clear_traffic(bt_physics_world)
+    def destroy(self, pg_physics_world: BulletWorld):
+        self.clear_traffic(pg_physics_world)
         self.blocks = None
         self.network = None
         self.reborn_lanes = None

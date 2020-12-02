@@ -2,7 +2,7 @@ import queue
 
 from panda3d.core import Vec3
 
-from pg_drive.world.bt_world import BtWorld
+from pg_drive.world.pg_world import PgWorld
 
 
 class ChaseCamera:
@@ -11,11 +11,11 @@ class ChaseCamera:
     """
     queue_length = 3
 
-    def __init__(self, camera_height: float, camera_dist: float, bt_world: BtWorld):
+    def __init__(self, camera_height: float, camera_dist: float, pg_world: PgWorld):
         self.camera_queue = None
         self.camera_height = camera_height
         self.camera_dist = camera_dist
-        self.light = bt_world.light  # light position is updated with the chase camera when control vehicle
+        self.light = pg_world.light  # light position is updated with the chase camera when control vehicle
         self.reset()
 
     def renew_camera_place(self, camera, vehicle):

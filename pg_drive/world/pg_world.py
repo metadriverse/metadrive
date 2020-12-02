@@ -20,7 +20,7 @@ from pg_drive.world.vehicle_panel import VehiclePanel
 bullet_path = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 
 
-class BtWorld(ShowBase.ShowBase):
+class PgWorld(ShowBase.ShowBase):
     loadPrcFileData("", "win-size 1200 900")
     loadPrcFileData("", "framebuffer-multisample 1")
     loadPrcFileData("", "multisamples 8")
@@ -41,18 +41,18 @@ class BtWorld(ShowBase.ShowBase):
     # loadPrcFileData("", "gl-version 3 2")
 
     def __init__(self, config: dict = None):
-        self.bt_config = self.default_config()
+        self.pg_config = self.default_config()
         if config is not None:
-            self.bt_config.update(config)
-        if self.bt_config["use_render"]:
+            self.pg_config.update(config)
+        if self.pg_config["use_render"]:
             mode = "onscreen"
             loadPrcFileData("", "threading-model Cull/Draw")  # multi-thread render, accelerate simulation when evaluate
         else:
-            mode = "offscreen" if self.bt_config["use_rgb"] else "none"
-        if self.bt_config["headless_rgb"]:
+            mode = "offscreen" if self.pg_config["use_rgb"] else "none"
+        if self.pg_config["headless_rgb"]:
             loadPrcFileData("", "load-display  pandagles2")
-        super(BtWorld, self).__init__(windowType=mode)
-        if not self.bt_config["debug_physics_world"] and (self.bt_config["use_render"] or self.bt_config["use_rgb"]):
+        super(PgWorld, self).__init__(windowType=mode)
+        if not self.pg_config["debug_physics_world"] and (self.pg_config["use_render"] or self.pg_config["use_rgb"]):
             VisLoader.init_loader(self.loader, bullet_path)
             gltf.patch_loader(self.loader)
         self.closed = False
@@ -79,7 +79,7 @@ class BtWorld(ShowBase.ShowBase):
         self.terrain.add_to_physics_world(self.physics_world)
 
         # init other world elements
-        if self.bt_config["use_rgb"] or self.bt_config["use_render"]:
+        if self.pg_config["use_rgb"] or self.pg_config["use_render"]:
 
             # terrain visualization
             self.terrain.add_to_render_module(self.render)
@@ -116,11 +116,11 @@ class BtWorld(ShowBase.ShowBase):
             lens.setAspectRatio(1.2)
 
             self.sky_box = SkyBox(
-                self.bt_config["headless_rgb"] or sys.platform == "darwin"
+                self.pg_config["headless_rgb"] or sys.platform == "darwin"
             )  # openGl shader didn't work for mac...
             self.sky_box.add_to_render_module(self.render)
 
-            self.light = Light(self.bt_config)
+            self.light = Light(self.pg_config)
             self.light.add_to_render_module(self.render)
             self.render.setLight(self.light.direction_np)
             self.render.setLight(self.light.ambient_np)
@@ -129,15 +129,15 @@ class BtWorld(ShowBase.ShowBase):
             self.render.setAntialias(AntialiasAttrib.MAuto)
 
             # ui and render property
-            if self.bt_config["show_message"]:
+            if self.pg_config["show_message"]:
                 self.onScreenDebug.enabled = True  # only show in onscreen mode
-            if self.bt_config["show_fps"]:
+            if self.pg_config["show_fps"]:
                 self.setFrameRateMeter(True)
-            self.force_fps = ForceFPS(self.bt_config["force_fps"])
+            self.force_fps = ForceFPS(self.pg_config["force_fps"])
 
             # self added display regions and cameras attached to them
             self.my_display_regions = []
-            if self.bt_config["use_default_layout"]:
+            if self.pg_config["use_default_layout"]:
                 self._init_display_region()
             self.my_buffers = []
 
@@ -152,7 +152,7 @@ class BtWorld(ShowBase.ShowBase):
         self.taskMgr.remove("igLoop")
 
         # debug setting
-        if self.bt_config["debug"] or self.bt_config["debug_physics_world"]:
+        if self.pg_config["debug"] or self.pg_config["debug_physics_world"]:
             self.accept('f1', self.toggleWireframe)
             self.accept('f2', self.toggleTexture)
             self.accept('f3', self.toggleDebug)
@@ -191,7 +191,7 @@ class BtWorld(ShowBase.ShowBase):
         self.onScreenDebug.clear()
         self.onScreenDebug.render()
         self.graphicsEngine.renderFrame()
-        if self.bt_config["use_render"]:
+        if self.pg_config["use_render"]:
             with self.force_fps:
                 self.sky_box.step()
 
@@ -202,7 +202,7 @@ class BtWorld(ShowBase.ShowBase):
         # attach all node to this node path
         self.worldNP.node().removeAllChildren()
         self.pbr_worldNP.node().removeAllChildren()
-        if self.bt_config["debug_physics_world"]:
+        if self.pg_config["debug_physics_world"]:
             self.addTask(self.report_body_nums, "report_num")
 
     def _clear_display_region_and_buffers(self):
@@ -222,7 +222,7 @@ class BtWorld(ShowBase.ShowBase):
                 debug=False,
                 use_render=False,
                 use_rgb=False,
-                bullet_world_step_size=2e-2,
+                physics_world_step_size=2e-2,
                 chase_camera=True,
                 direction_light=True,
                 ambient_light=True,
@@ -237,7 +237,7 @@ class BtWorld(ShowBase.ShowBase):
         )
 
     def step(self):
-        dt = self.bt_config["bullet_world_step_size"]
+        dt = self.pg_config["physics_world_step_size"]
         self.physics_world.doPhysics(dt, 1, dt)
 
     def _debug_mode(self):
@@ -271,11 +271,11 @@ class BtWorld(ShowBase.ShowBase):
         return task.done
 
     def close_world(self):
-        if self.bt_config["use_render"] or self.bt_config["use_rgb"]:
+        if self.pg_config["use_render"] or self.pg_config["use_rgb"]:
             self._clear_display_region_and_buffers()
         self.destroy()
 
 
 if __name__ == "__main__":
-    world = BtWorld()
+    world = PgWorld()
     world.run()

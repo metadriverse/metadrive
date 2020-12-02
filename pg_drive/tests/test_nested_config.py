@@ -27,14 +27,14 @@ def test_nested_config():
         raise ValueError("Test failed!")
 
     config = GeneralizationRacing.default_config()
-    config["bt_world_config"] = {
+    config["pg_world_config"] = {
         "use_render": False,
     }
     # Should OK
-    config.update(dict(bt_world_config=dict(use_render=True), ))
+    config.update(dict(pg_world_config=dict(use_render=True), ))
     # Should not OK
     try:
-        config.update(dict(bt_world_config=dict(bbb=0), ))
+        config.update(dict(pg_world_config=dict(bbb=0), ))
     except KeyError:
         print("Test passed!")
     else:

@@ -40,7 +40,7 @@ class Lidar:
                 ball.getChildren().reparentTo(laser_np)
             # self.node_path.flattenStrong()
 
-    def perceive(self, vehicle_position, heading_theta, bt_physics_world):
+    def perceive(self, vehicle_position, heading_theta, pg_physics_world):
         """
         Call me to update the perception info
         """
@@ -54,7 +54,7 @@ class Lidar:
 
         for laser_index in range(self.laser_num):
             laser_end = Point3(point_x[laser_index], point_y[laser_index], 1.0)
-            result = bt_physics_world.rayTestClosest(start_position, laser_end, mask)
+            result = pg_physics_world.rayTestClosest(start_position, laser_end, mask)
             self.detection_results.append(result)
             if self.cloud_points is not None:
                 if result.hasHit():

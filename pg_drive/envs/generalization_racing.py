@@ -7,7 +7,7 @@ from pg_drive.scene_creator.algorithm.BIG import BigGenerateMethod
 from pg_drive.scene_creator.ego_vehicle.base_vehicle import BaseVehicle
 from pg_drive.scene_creator.map import Map
 from pg_drive.scene_manager.traffic_manager import TrafficManager, TrafficMode
-from pg_drive.world.bt_world import BtWorld
+from pg_drive.world.pg_world import PgWorld
 from pg_drive.world.chase_camera import ChaseCamera
 from pg_drive.world.manual_controller import KeyboardController, JoystickController
 
@@ -29,18 +29,18 @@ class GeneralizationRacing(gym.Env):
         self.env_num = self.config["environment_num"]
         self.map_config = self.config["map_config"]
         self.use_render = self.config["use_render"]
-        bt_world_config = self.config["bt_world_config"]
-        bt_world_config.update(
+        pg_world_config = self.config["pg_world_config"]
+        pg_world_config.update(
             {
                 "use_render": self.use_render,
                 "use_rgb": self.config["use_rgb"],
                 "debug": self.config["debug"],
             }
         )
-        self.bt_world_config = bt_world_config
+        self.pg_world_config = pg_world_config
 
         # lazy initialization, create the main vehicle in the lazy_init() func
-        self.bullet_world = None
+        self.pg_world = None
         self.traffic_manager = None
         self.control_camera = None
         self.controller = None
@@ -53,29 +53,29 @@ class GeneralizationRacing(gym.Env):
 
     def lazy_init(self):
         # It is the true init() func to create the main vehicle and its module
-        if self.bullet_world is not None:
+        if self.pg_world is not None:
             return
 
         # init world
-        self.bullet_world = BtWorld(self.bt_world_config)
+        self.pg_world = PgWorld(self.pg_world_config)
 
         # init traffic manager
         self.traffic_manager = TrafficManager(self.config["traffic_mode"])
 
         # for manual_control and camera type
         if self.config["use_chase_camera"]:
-            self.control_camera = ChaseCamera(self.config["camera_height"], 7, self.bullet_world)
+            self.control_camera = ChaseCamera(self.config["camera_height"], 7, self.pg_world)
         if self.config["manual_control"]:
             if self.config["controller"] == "keyboard":
                 self.controller = KeyboardController()
             elif self.config["controller"] == "joystick":
-                self.controller = JoystickController(self.bullet_world)
+                self.controller = JoystickController(self.pg_world)
             else:
                 raise ValueError("No such a controller type: {}".format(self.config["controller"]))
 
         # init vehicle
         v_config = self.config["vehicle_config"]
-        self.vehicle = BaseVehicle(self.bullet_world, v_config)
+        self.vehicle = BaseVehicle(self.pg_world, v_config)
 
         if self.use_render or self.config["use_rgb"]:
             self.control_camera.reset(self.vehicle.position)
@@ -128,7 +128,7 @@ class GeneralizationRacing(gym.Env):
             speed_reward=0.1,
 
             # ===== Others =====
-            bt_world_config=dict(),
+            pg_world_config=dict(),
             use_increment_steering=False,
             action_check=False,
         )
@@ -137,10 +137,10 @@ class GeneralizationRacing(gym.Env):
     def render(self, mode='human', text: dict = None):
         assert self.use_render or self.config["use_rgb"], "render is off now, can not render"
         if self.control_camera is not None:
-            self.control_camera.renew_camera_place(self.bullet_world.cam, self.vehicle)
-        self.bullet_world.render_frame(text)
-        if self.bullet_world.vehicle_panel is not None:
-            self.bullet_world.vehicle_panel.renew_2d_car_para_visualization(
+            self.control_camera.renew_camera_place(self.pg_world.cam, self.vehicle)
+        self.pg_world.render_frame(text)
+        if self.pg_world.vehicle_panel is not None:
+            self.pg_world.vehicle_panel.renew_2d_car_para_visualization(
                 self.vehicle.steering, self.vehicle.throttle_brake, self.vehicle.speed
             )
         return
@@ -161,16 +161,16 @@ class GeneralizationRacing(gym.Env):
         # ego vehicle/ traffic step
         for _ in range(self.config["decision_repeat"]):
             # traffic vehicles step
-            self.traffic_manager.step(self.bullet_world.bt_config["bullet_world_step_size"])
-            self.bullet_world.step()
+            self.traffic_manager.step(self.pg_world.pg_config["physics_world_step_size"])
+            self.pg_world.step()
             self.vehicle.collision_check()
 
         # update states
         self.vehicle.update_state()
-        self.traffic_manager.update_state(self.bullet_world.physics_world)
+        self.traffic_manager.update_state(self.pg_world.physics_world)
 
         #  panda3d loop
-        self.bullet_world.taskMgr.step()
+        self.pg_world.taskMgr.step()
 
         # render before obtaining rgb observation
         if self.config["use_rgb"]:
@@ -193,7 +193,7 @@ class GeneralizationRacing(gym.Env):
         self.done = False
 
         # clear world and traffic manager
-        self.bullet_world.clear_world()
+        self.pg_world.clear_world()
         # select_map
         self.select_map()
 
@@ -202,7 +202,7 @@ class GeneralizationRacing(gym.Env):
 
         # generate new traffic according to the map
         self.traffic_manager.generate_traffic(
-            self.bullet_world, self.current_map, self.vehicle, self.config["traffic_density"]
+            self.pg_world, self.current_map, self.vehicle, self.config["traffic_density"]
         )
         o, *_ = self.step(np.array([0.0, 0.0]))
         return o
@@ -210,7 +210,7 @@ class GeneralizationRacing(gym.Env):
     def select_map(self):
         # remove map from world before adding
         if self.current_map is not None:
-            self.current_map.remove_from_physics_world(self.bullet_world.physics_world)
+            self.current_map.remove_from_physics_world(self.pg_world.physics_world)
             self.current_map.remove_from_render_module()
 
         # create map
@@ -218,13 +218,13 @@ class GeneralizationRacing(gym.Env):
         if self.maps.get(self.current_seed, None) is None:
             map_config = self.config["map_config"]
             map_config.update({"seed": self.current_seed})
-            new_map = Map(self.bullet_world.worldNP, self.bullet_world.physics_world, map_config)
+            new_map = Map(self.pg_world.worldNP, self.pg_world.physics_world, map_config)
             self.maps[self.current_seed] = new_map
             self.current_map = self.maps[self.current_seed]
         else:
             self.current_map = self.maps[self.current_seed]
             assert isinstance(self.current_map, Map), "map should be an instance of Map() class"
-            self.current_map.re_generate(self.bullet_world.worldNP, self.bullet_world.physics_world)
+            self.current_map.re_generate(self.pg_world.worldNP, self.pg_world.physics_world)
 
     def reward(self, action):
         # Reward for moving forward in current lane
@@ -282,9 +282,9 @@ class GeneralizationRacing(gym.Env):
         return reward_, done_info
 
     def close(self):
-        if self.bullet_world is not None:
-            self.vehicle.destroy(self.bullet_world.physics_world)
-            self.traffic_manager.destroy(self.bullet_world.physics_world)
+        if self.pg_world is not None:
+            self.vehicle.destroy(self.pg_world.physics_world)
+            self.traffic_manager.destroy(self.pg_world.physics_world)
 
             del self.traffic_manager
             self.traffic_manager = None
@@ -298,6 +298,6 @@ class GeneralizationRacing(gym.Env):
             del self.vehicle
             self.vehicle = None
 
-            self.bullet_world.close_world()
-            del self.bullet_world
-            self.bullet_world = None
+            self.pg_world.close_world()
+            del self.pg_world
+            self.pg_world = None

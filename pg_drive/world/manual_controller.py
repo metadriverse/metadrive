@@ -1,7 +1,7 @@
 import pygame
 from direct.controls.InputState import InputState
 
-from pg_drive.world.bt_world import BtWorld
+from pg_drive.world.pg_world import PgWorld
 
 
 class Controller:
@@ -41,7 +41,7 @@ class KeyboardController(Controller):
 
 
 class JoystickController(Controller):
-    def __init__(self, bt_world: BtWorld):
+    def __init__(self, pg_world: PgWorld):
         pygame.display.init()
         pygame.joystick.init()
         assert pygame.joystick.get_count() > 0, "Please connect joystick or use keyboard input"

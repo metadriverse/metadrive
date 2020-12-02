@@ -23,7 +23,7 @@ from pg_drive.scene_creator.pg_traffic_vehicle.traffic_vehicle import PgTrafficV
 from pg_drive.utils.element import DynamicElement
 from pg_drive.utils.math_utils import get_vertical_vector, norm, clip
 from pg_drive.utils.visualization_loader import VisLoader
-from pg_drive.world.bt_world import BtWorld
+from pg_drive.world.pg_world import PgWorld
 from pg_drive.world.terrain import Terrain
 from .vehicle_module.routing_localization import RoutingLocalizationModule
 
@@ -72,13 +72,13 @@ class BaseVehicle(DynamicElement):
     LENGTH = None
     WIDTH = None
 
-    def __init__(self, bt_world: BtWorld, vehicle_config: dict = None, random_seed: int = 0, config: dict = None):
+    def __init__(self, pg_world: PgWorld, vehicle_config: dict = None, random_seed: int = 0, config: dict = None):
         """
         This Vehicle Config is different from self.get_config(), and it is used to define which modules to use, and
         module parameters.
         """
         super(BaseVehicle, self).__init__(random_seed)
-        self.bt_world = bt_world
+        self.pg_world = pg_world
         self.node_path = NodePath("vehicle")
 
         # config info
@@ -94,7 +94,7 @@ class BaseVehicle(DynamicElement):
         self.max_steering = self.get_config()[Parameter.steering_max]
 
         # create
-        self._add_chassis(bt_world.physics_world)
+        self._add_chassis(pg_world.physics_world)
         self._create_wheel()
 
         # modules
@@ -107,12 +107,12 @@ class BaseVehicle(DynamicElement):
 
         # add vehicle module according to config
         self.add_routing_localization(self.vehicle_config["show_navi_point"])  # default added
-        if not bt_world.bt_config["use_rgb"]:
+        if not pg_world.pg_config["use_rgb"]:
             self.add_lidar(self.vehicle_config["lidar"][0], self.vehicle_config["lidar"][1])
-        if bt_world.bt_config["use_rgb"] or bt_world.bt_config["use_render"]:
+        if pg_world.pg_config["use_rgb"] or pg_world.pg_config["use_render"]:
             front_cam_config = self.vehicle_config["front_cam"]
-            self.add_front_cam(SensorCamera(front_cam_config[0], front_cam_config[1], self.chassis_np, bt_world))
-            self.add_mini_map(MiniMap(self.vehicle_config["mini_map"], self.chassis_np, bt_world))
+            self.add_front_cam(SensorCamera(front_cam_config[0], front_cam_config[1], self.chassis_np, pg_world))
+            self.add_mini_map(MiniMap(self.vehicle_config["mini_map"], self.chassis_np, pg_world))
 
         # other info
         self.throttle_brake = 0.0
@@ -122,19 +122,19 @@ class BaseVehicle(DynamicElement):
         self.last_heading_dir = self.heading
 
         # collision group
-        self.bt_world.physics_world.setGroupCollisionFlag(self.COLLISION_MASK, Block.COLLISION_MASK, True)
-        self.bt_world.physics_world.setGroupCollisionFlag(self.COLLISION_MASK, Terrain.COLLISION_MASK, True)
-        self.bt_world.physics_world.setGroupCollisionFlag(self.COLLISION_MASK, self.COLLISION_MASK, False)
-        self.bt_world.physics_world.setGroupCollisionFlag(self.COLLISION_MASK, PgTrafficVehicle.COLLISION_MASK, True)
+        self.pg_world.physics_world.setGroupCollisionFlag(self.COLLISION_MASK, Block.COLLISION_MASK, True)
+        self.pg_world.physics_world.setGroupCollisionFlag(self.COLLISION_MASK, Terrain.COLLISION_MASK, True)
+        self.pg_world.physics_world.setGroupCollisionFlag(self.COLLISION_MASK, self.COLLISION_MASK, False)
+        self.pg_world.physics_world.setGroupCollisionFlag(self.COLLISION_MASK, PgTrafficVehicle.COLLISION_MASK, True)
 
         # done info
         self.crash = False
         self.out_of_road = False
 
         # add to world, permanently
-        self.add_to_physics_world(self.bt_world.physics_world)
+        self.add_to_physics_world(self.pg_world.physics_world)
         if self.render:
-            self.add_to_render_module(self.bt_world.pbr_render)
+            self.add_to_render_module(self.pg_world.pbr_render)
 
     @classmethod
     def get_vehicle_config(cls, new_config):
@@ -156,7 +156,7 @@ class BaseVehicle(DynamicElement):
 
     def update_state(self):
         if self.lidar is not None:
-            self.lidar.perceive(self.position, self.heading_theta, self.bt_world.physics_world)
+            self.lidar.perceive(self.position, self.heading_theta, self.pg_world.physics_world)
         if self.routing_localization is not None:
             self.lane, self.lane_index = self.routing_localization.update_navigation_localization(self)
 
@@ -342,7 +342,7 @@ class BaseVehicle(DynamicElement):
 
     """-------------------------------------- for vehicle making ------------------------------------------"""
 
-    def _add_chassis(self, bt_physics_world: BulletWorld):
+    def _add_chassis(self, pg_physics_world: BulletWorld):
         para = self.get_config()
         chassis = BulletRigidBodyNode(BodyName.Ego_vehicle_top)
         chassis.setIntoCollideMask(BitMask32.bit(self.COLLISION_MASK))
@@ -369,7 +369,7 @@ class BaseVehicle(DynamicElement):
         self.chassis_beneath_np = self.chassis_np.attachNewNode(chassis_beneath)
         self.bullet_nodes.append(chassis_beneath)
 
-        self.system = BulletVehicle(bt_physics_world, chassis)
+        self.system = BulletVehicle(pg_physics_world, chassis)
         self.system.setCoordinateSystem(ZUp)
         self.bullet_nodes.append(self.system)
         self.LENGTH = para[Parameter.vehicle_length]
@@ -425,18 +425,18 @@ class BaseVehicle(DynamicElement):
         self.front_cam = sensor_camera
 
     def add_lidar(self, laser_num=240, distance=50):
-        self.lidar = Lidar(self.bt_world.worldNP, laser_num, distance)
+        self.lidar = Lidar(self.pg_world.worldNP, laser_num, distance)
 
     def add_routing_localization(self, show_navi_point: bool):
         self.routing_localization = RoutingLocalizationModule(show_navi_point)
 
     def update_map_info(self, map):
-        self.routing_localization.update(map, self.bt_world.worldNP)
+        self.routing_localization.update(map, self.pg_world.worldNP)
         self.lane_index = self.routing_localization.map.road_network.get_closest_lane_index((self.born_place))
         self.lane = self.routing_localization.map.road_network.get_lane(self.lane_index)
 
     def collision_check(self):
-        result = self.bt_world.physics_world.contactTest(self.chassis_beneath_np.node(), True)
+        result = self.pg_world.physics_world.contactTest(self.chassis_beneath_np.node(), True)
         contacts = set()
         for contact in result.getContacts():
             # cp = contact.getManifoldPoint()
@@ -458,23 +458,23 @@ class BaseVehicle(DynamicElement):
             self._render_on_console(contacts[0] if len(contacts) != 0 else None)
 
     def _render_on_console(self, name):
-        if self.bt_world.collision_info_np is None:
+        if self.pg_world.collision_info_np is None:
             return
         if name is None:
-            text = self.bt_world.collision_info_np.node()
+            text = self.pg_world.collision_info_np.node()
             text.setCardColor(self.COLLISION_INFO_COLOR["green"][1])
             text.setText("Normal")
         else:
-            text = self.bt_world.collision_info_np.node()
+            text = self.pg_world.collision_info_np.node()
             text.setCardColor(self.COLLISION_INFO_COLOR[self.COLOR[name]][1])
             text.setText(name)
 
-    def destroy(self, bt_world: BulletWorld):
+    def destroy(self, pg_world: BulletWorld):
         self.lidar = None
         self.front_cam = None
         self.mini_map = None
         self.routing_localization = None
-        super(BaseVehicle, self).destroy(bt_world)
+        super(BaseVehicle, self).destroy(pg_world)
 
     def __del__(self):
         super(BaseVehicle, self).__del__()

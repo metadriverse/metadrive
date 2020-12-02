@@ -12,7 +12,7 @@ class ResetEnv(GeneralizationRacing):
                 "traffic_density": 0.1,
                 "start_seed": 4,
                 "debug": True,
-                "bt_world_config": {
+                "pg_world_config": {
                     "force_fps": None,
                     "debug_physics_world": True
                 },
@@ -28,9 +28,9 @@ class ResetEnv(GeneralizationRacing):
             }
         )
         # self.reset()
-        # self.bullet_world.accept("r", self.reset)
-        # self.bullet_world.cam.setPos(0, 0, 1500)
-        # self.bullet_world.cam.lookAt(0, 0, 0)
+        # self.pg_world.accept("r", self.reset)
+        # self.pg_world.cam.setPos(0, 0, 1500)
+        # self.pg_world.cam.lookAt(0, 0, 0)
 
 
 if __name__ == "__main__":

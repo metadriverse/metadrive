@@ -15,7 +15,7 @@ class ResetEnv(GeneralizationRacing):
                 "environment_num": 1,
                 "traffic_density": 0.1,
                 "start_seed": 4,
-                "bt_world_config": {
+                "pg_world_config": {
                     "debug": False,
                 },
                 "vehicle_config": {

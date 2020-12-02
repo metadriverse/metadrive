@@ -127,19 +127,19 @@ class Block(Element):
             self.side_normal = self.loader.loadTexture(os.path.join(VisLoader.path, "textures/side_walk/normal.png"))
             self.side_walk = self.loader.loadModel(os.path.join(VisLoader.path, "models/box.bam"))
 
-    def construct_block_random(self, root_render_np: NodePath, bullet_physics_world: BulletWorld) -> bool:
+    def construct_block_random(self, root_render_np: NodePath, pg_physics_world: BulletWorld) -> bool:
         self.set_config(self.PARAMETER_SPACE.sample())
         success = self._sample_topology()
-        self._create_in_bullet()
-        self.add_to_physics_world(bullet_physics_world)
+        self._create_in_world()
+        self.add_to_physics_world(pg_physics_world)
         self.add_to_render_module(root_render_np)
         return success
 
-    def destruct_block(self, bullet_physics_world: BulletWorld):
+    def destruct_block(self, pg_physics_world: BulletWorld):
         self._clear_topology()
         if len(self.bullet_nodes) != 0:
             for node in self.bullet_nodes:
-                bullet_physics_world.remove(node)
+                pg_physics_world.remove(node)
             self.bullet_nodes.clear()
         if self.node_path is not None:
             self.node_path.removeNode()
@@ -157,13 +157,13 @@ class Block(Element):
         self._global_network += self.block_network
         return no_cross
 
-    def construct_from_config(self, config: Dict, root_render_np: NodePath, bullet_physics_world: BulletWorld):
+    def construct_from_config(self, config: Dict, root_render_np: NodePath, pg_physics_world: BulletWorld):
         assert set(config.keys()) == self.PARAMETER_SPACE.parameters, \
             "Make sure the parameters' name are as same as what defined in parameter_space.py"
         self.set_config(config)
         success = self._sample_topology()
-        self._create_in_bullet()
-        self.add_to_physics_world(bullet_physics_world)
+        self._create_in_world()
+        self.add_to_physics_world(pg_physics_world)
         self.add_to_render_module(root_render_np)
         return success
 
@@ -252,9 +252,9 @@ class Block(Element):
 
     """------------------------------------- For Render and Physics Calculation ---------------------------------- """
 
-    def _create_in_bullet(self):
+    def _create_in_world(self):
         """
-        Create NodePath and Geom node to perform collision detection and render
+        Create NodePath and Geom node to perform both collision detection and render
         """
         self.node_path = NodePath(RigidBodyCombiner(self._block_name))
         graph = self.block_network.graph

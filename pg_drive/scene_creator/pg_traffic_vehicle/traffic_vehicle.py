@@ -92,9 +92,9 @@ class PgTrafficVehicle(DynamicElement):
     def out_of_road(self):
         return not self.vehicle_node.kinematic_model.lane.on_lane(self.vehicle_node.kinematic_model.position, margin=2)
 
-    def destroy(self, bt_world: BulletWorld):
+    def destroy(self, pg_world: BulletWorld):
         self.vehicle_node.clearTag(BodyName.Traffic_vehicle)
-        super(PgTrafficVehicle, self).destroy(bt_world)
+        super(PgTrafficVehicle, self).destroy(pg_world)
 
     @classmethod
     def create_random_traffic_vehicle(

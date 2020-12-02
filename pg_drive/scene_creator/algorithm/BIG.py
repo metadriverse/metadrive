@@ -28,7 +28,7 @@ class BIG:
 
     def __init__(
         self, lane_num: int, lane_width: float, global_network: RoadNetwork, render_node_path: NodePath,
-        bullet_physics_world: BulletWorld, random_seed: int
+        pg_physics_world: BulletWorld, random_seed: int
     ):
         self._block_sequence = None
         self._random_seed = random_seed
@@ -37,11 +37,11 @@ class BIG:
         self._lane_width = lane_width
         self.block_num = None
         self._render_node_path = render_node_path
-        self._bullet_world = bullet_physics_world
+        self._physics_world = pg_physics_world
         self._global_network = global_network
         self.blocks = []
         first_block = FirstBlock(
-            self._global_network, self._lane_width, self._lane_num, self._render_node_path, self._bullet_world,
+            self._global_network, self._lane_width, self._lane_num, self._render_node_path, self._physics_world,
             self._random_seed
         )
         self.blocks.append(first_block)
@@ -92,10 +92,10 @@ class BIG:
         return block
 
     def destruct(self, block):
-        block.destruct_block(self._bullet_world)
+        block.destruct_block(self._physics_world)
 
     def construct(self, block) -> bool:
-        return block.construct_block_random(self._render_node_path, self._bullet_world)
+        return block.construct_block_random(self._render_node_path, self._physics_world)
 
     def _forward(self):
         logging.debug("forward")

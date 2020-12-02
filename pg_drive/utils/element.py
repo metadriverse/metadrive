@@ -52,19 +52,19 @@ class Element:
             assert isinstance(self.node_path, NodePath), "No render model on node_path in this Element"
             self.node_path.reparentTo(parent_render_np)
 
-    def add_to_physics_world(self, bt_world: BulletWorld):
+    def add_to_physics_world(self, pg_world: BulletWorld):
         """
         Call this to add body to physics world
         """
         for node in self.bullet_nodes:
-            bt_world.attach(node)
+            pg_world.attach(node)
 
-    def remove_from_physics_world(self, bt_physics_world: BulletWorld):
+    def remove_from_physics_world(self, pg_physics_world: BulletWorld):
         """
         Call me to remove element from bullet physics world
         """
         for node in self.bullet_nodes:
-            bt_physics_world.remove(node)
+            pg_physics_world.remove(node)
 
     def remove_from_render_module(self):
         """
@@ -72,12 +72,12 @@ class Element:
         """
         self.node_path.detachNode()
 
-    def destroy(self, bt_physics_world: BulletWorld):
+    def destroy(self, pg_physics_world: BulletWorld):
         """
         Fully delete this element and release the memory
         """
         self.node_path.removeNode()
-        self.remove_from_physics_world(bt_physics_world)
+        self.remove_from_physics_world(pg_physics_world)
         self.bullet_nodes.clear()
         self._config.clear()
 

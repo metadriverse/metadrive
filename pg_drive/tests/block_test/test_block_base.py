@@ -94,7 +94,7 @@ class TestBlock(ShowBase.ShowBase):
         self.map.remove_from_physics_world(self.world)
 
     def re_add(self):
-        self.map.add_to_bullet_physics_world(self.world)
+        self.map.add_to_physics_world(self.world)
         self.map.add_to_render_module(self.worldNP)
 
     def add_vehicle(self, vehicle):
