@@ -183,6 +183,7 @@ class GeneralizationRacing(gym.Env):
             "cost": float(0),
             "velocity": float(self.vehicle.speed),
             "steering": float(self.vehicle.steering),
+            "acceleration": float(self.vehicle.throttle_brake),
             "step_reward": float(reward)
         }
         info.update(done_info)
