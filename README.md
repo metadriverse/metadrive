@@ -15,8 +15,6 @@ git checkout pre-release
 pip install -e .
 ```
 
-It will generate a .whl file, which can be installed by pip.
-
 ## Quick Start
 
 Please run `python -m pg_drive.examples.test_generalization_env` to play with the environment with keyboard!
@@ -123,8 +121,8 @@ manual control.
 
 ## Run on cluster
 
-If your RL agent doesn't take image as observation and not access the camera image, the installation procedure on cluster 
-is as same as what we mentioned above;Otherwise, you have to compile Panda3d from the source code to turn 
+If your RL agent doesn't take images as observation and doesn't access the camera imagse, the installation procedure on cluster 
+is as same as what we mentioned above; Otherwise, you have to compile Panda3d from the source code to turn 
 off the X11 support.
 
 Use the following command to build the panda3d:
@@ -133,6 +131,7 @@ Use the following command to build the panda3d:
 python ./makepanda/makepanda.py --everything --no-x11 --python-incdir your/path/to/python/include/ --python-libdir your/path/to/python/lib/ --wheel
 ```
 
+It will generate a .whl file, which can be installed by pip on your cluster.
 The compiling procedure can be found in [panda3d github](https://github.com/panda3d/panda3d)
 
 
