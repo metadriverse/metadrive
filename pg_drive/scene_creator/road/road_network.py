@@ -62,23 +62,29 @@ class RoadNetwork:
         self.graph.clear()
 
     def get_positive_lanes(self):
+        """
+        In order to remain the lane index, ret is a 2-dim array structure like [Road_lanes[lane_1, lane_2]]
+        """
         from .road import Road
         ret = []
         for _from, _to_dict in self.graph.items():
             for _to, lanes in _to_dict.items():
                 road = Road(_from, _to)
                 if not road.is_negative_road() and road.is_valid_road():
-                    ret += lanes
+                    ret.append(lanes)
         return ret
 
     def get_negative_lanes(self):
+        """
+        In order to remain the lane index, ret is a 2-dim array structure like like [Road_lanes[lane_1, lane_2]]
+        """
         from .road import Road
         ret = []
         for _from, _to_dict in self.graph:
             for _to, lanes in _to_dict:
                 road = Road(_from, _to)
                 if road.is_negative_road() and road.is_valid_road():
-                    ret += lanes
+                    ret.append(lanes)
         return ret
 
     def remove_road(self, road):

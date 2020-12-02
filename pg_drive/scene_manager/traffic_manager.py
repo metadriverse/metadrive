@@ -55,7 +55,7 @@ class TrafficManager:
         self.block_triggered_vehicles = [] if self.traffic_mode == TrafficMode.Add_once else None
         self.blocks = map.blocks
         self.network = map.road_network
-        self.reborn_lanes = self._get_reborn_lanes()
+        self.reborn_lanes = self._get_available_reborn_lanes()
         self.traffic_density = traffic_density
         self.vehicles = [ego_vehicle]  # it is used to perform IDM and bicycle model based motion
         self.traffic_vehicles = deque()  # it is used to step all vehicles on scene
@@ -87,12 +87,14 @@ class TrafficManager:
 
     def _create_vehicles_on_lane(self, lane, is_reborn_lane=False):
         from pg_drive.scene_creator.pg_traffic_vehicle.traffic_vehicle_type import car_type
+        from pg_drive.scene_creator.blocks.ramp import InRampOnStraight
         traffic_vehicles = []
         total_num = int(lane.length / self.VEHICLE_GAP)
         vehicle_longs = [i * self.VEHICLE_GAP for i in range(total_num)]
         self.np_random.shuffle(vehicle_longs)
         for long in vehicle_longs:
-            if self.np_random.rand() > self.traffic_density:
+            if self.np_random.rand() > self.traffic_density and abs(lane.length - InRampOnStraight.RAMP_LEN) > 0.1:
+                # Do special handling for ramp, and there must be vehicles created there
                 continue
             vehicle_type = car_type[self.np_random.choice(list(car_type.keys()), p=[0.5, 0.3, 0.2])]
             random_v = vehicle_type.create_random_traffic_vehicle(
@@ -107,14 +109,19 @@ class TrafficManager:
         for block in self.blocks[1:]:
             vehicles_on_block = []
             trigger_road = block._pre_block_socket.positive_road
+
+            # trigger lanes is a two dimension array [[]], the first dim represent road consisting of lanes.
             trigger_lanes = block.block_network.get_positive_lanes()
             reborn_lanes = block.get_reborn_lanes()
-            for lane in reborn_lanes:
-                if lane not in trigger_lanes:
-                    trigger_lanes.append(lane)
+            for lanes in reborn_lanes:
+                if lanes not in trigger_lanes:
+                    trigger_lanes.append(lanes)
             self.np_random.shuffle(trigger_lanes)
-            for lane in trigger_lanes:
-                vehicles_on_block += self._create_vehicles_on_lane(lane)
+            for lanes in trigger_lanes:
+                num = min(int(len(lanes) * self.traffic_density) + 1, len(lanes))
+                lanes = self.np_random.choice(lanes, num, replace=False) if len(lanes) != 1 else lanes
+                for l in lanes:
+                    vehicles_on_block += self._create_vehicles_on_lane(l)
             for vehicle in vehicles_on_block:
                 vehicle.add_to_render_module(pg_world.pbr_worldNP)
                 vehicle.add_to_physics_world(pg_world.physics_world)
@@ -124,7 +131,7 @@ class TrafficManager:
         logging.debug("Init {} Traffic Vehicles".format(vehicle_num))
         self.block_triggered_vehicles.reverse()
 
-    def _get_reborn_lanes(self):
+    def _get_available_reborn_lanes(self):
         reborn_lanes = []
         reborn_roads = []
         for block in self.blocks:

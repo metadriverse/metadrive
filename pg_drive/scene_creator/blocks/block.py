@@ -191,10 +191,13 @@ class Block(Element):
         return self._reborn_roads
 
     def get_reborn_lanes(self):
+        """
+        return a 2-dim array [[]] to keep the lane index
+        """
         ret = []
         for road in self._reborn_roads:
             lanes = road.get_lanes(self.block_network)
-            ret += lanes
+            ret.append(lanes)
         return ret
 
     def add_sockets(self, sockets: Union[List[BlockSocket], BlockSocket]):

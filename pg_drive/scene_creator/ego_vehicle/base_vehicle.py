@@ -5,7 +5,7 @@ from os import path
 
 import numpy as np
 from panda3d.bullet import BulletVehicle, BulletBoxShape, BulletRigidBodyNode, ZUp, BulletWorld, BulletGhostNode
-from panda3d.core import Vec3, TransformState, NodePath, LQuaternionf, BitMask32, Vec4
+from panda3d.core import Vec3, TransformState, NodePath, LQuaternionf, BitMask32, Vec4, PythonCallbackObject
 
 from pg_drive.pg_config.body_name import BodyName
 from pg_drive.pg_config.parameter_space import Parameter, VehicleParameterSpace
@@ -159,6 +159,7 @@ class BaseVehicle(DynamicElement):
             self.lidar.perceive(self.position, self.heading_theta, self.pg_world.physics_world)
         if self.routing_localization is not None:
             self.lane, self.lane_index = self.routing_localization.update_navigation_localization(self)
+        self._state_check()
 
     def reset(self, map: Map, pos: np.ndarray, heading: float):
         """
@@ -361,9 +362,11 @@ class BaseVehicle(DynamicElement):
         self.chassis_np.setPos(Vec3(*self.born_place, 1))
         self.chassis_np.setQuat(LQuaternionf(np.cos(heading / 2), 0, 0, np.sin(heading / 2)))
         chassis.setDeactivationEnabled(False)
+        chassis.notifyCollisions(True)  # advance collision check
+        self.pg_world.physics_world.setContactAddedCallback(PythonCallbackObject(self._collision_check))
         self.bullet_nodes.append(chassis)
 
-        chassis_beneath = BulletGhostNode(BodyName.Ego_Vehicle)
+        chassis_beneath = BulletGhostNode(BodyName.Ego_vehicle)
         chassis_beneath.setIntoCollideMask(BitMask32.bit(self.COLLISION_MASK))
         chassis_beneath.addShape(chassis_shape)
         self.chassis_beneath_np = self.chassis_np.attachNewNode(chassis_beneath)
@@ -435,24 +438,22 @@ class BaseVehicle(DynamicElement):
         self.lane_index = self.routing_localization.map.road_network.get_closest_lane_index((self.born_place))
         self.lane = self.routing_localization.map.road_network.get_lane(self.lane_index)
 
-    def collision_check(self):
+    def _state_check(self):
+        """
+        Check States and filter to update info
+        """
         result = self.pg_world.physics_world.contactTest(self.chassis_beneath_np.node(), True)
         contacts = set()
         for contact in result.getContacts():
-            # cp = contact.getManifoldPoint()
             node0 = contact.getNode0()
             node1 = contact.getNode1()
             name = [node0.getName(), node1.getName()]
-            name.remove(BodyName.Ego_Vehicle)
+            name.remove(BodyName.Ego_vehicle)
             if name[0] == "Ground":
                 continue
-            else:
-                if name[0] == BodyName.Traffic_vehicle:
-                    self.crash = True
-                    logging.debug("Crash with {}".format(name[0]))
-                elif name[0] == BodyName.Side_walk:
-                    self.out_of_road = True
-                contacts.add(name[0])
+            elif name[0] == BodyName.Side_walk:
+                self.out_of_road = True
+            contacts.add(name[0])
         contacts = sorted(list(contacts), key=lambda c: self.COLLISION_INFO_COLOR[self.COLOR[c]][0])
         if self.render:
             self._render_on_console(contacts[0] if len(contacts) != 0 else None)
@@ -468,6 +469,18 @@ class BaseVehicle(DynamicElement):
             text = self.pg_world.collision_info_np.node()
             text.setCardColor(self.COLLISION_INFO_COLOR[self.COLOR[name]][1])
             text.setText(name)
+
+    def _collision_check(self, contact):
+        """
+        It may lower the performance if overdone
+        """
+        node0 = contact.getNode0().getName()
+        node1 = contact.getNode1().getName()
+        name = [node0, node1]
+        name.remove(BodyName.Ego_vehicle_top)
+        if name[0] == BodyName.Traffic_vehicle:
+            self.crash = True
+            logging.debug("Crash with {}".format(name[0]))
 
     def destroy(self, pg_world: BulletWorld):
         self.lidar = None

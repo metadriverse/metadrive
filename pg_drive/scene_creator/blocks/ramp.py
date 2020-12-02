@@ -30,7 +30,7 @@ class Ramp(Block):
     ANGLE = 10  # degree
     LANE_TYPE = (LineType.CONTINUOUS, LineType.CONTINUOUS)
     SPEED_LIMIT = 12  # 12 m/s ~= 40 km/h
-    CONNECT_PART_LEN = 15
+    CONNECT_PART_LEN = 20
     RAMP_LEN = 15
 
     def __init__(self, block_index: int, pre_block_socket: BlockSocket, global_network: RoadNetwork, random_seed):

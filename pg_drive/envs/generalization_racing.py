@@ -163,7 +163,6 @@ class GeneralizationRacing(gym.Env):
             # traffic vehicles step
             self.traffic_manager.step(self.pg_world.pg_config["physics_world_step_size"])
             self.pg_world.step()
-            self.vehicle.collision_check()
 
         # update states
         self.vehicle.update_state()

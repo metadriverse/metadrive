@@ -1,6 +1,7 @@
 from pg_drive.envs.generalization_racing import GeneralizationRacing
 from pg_drive.scene_creator.map import Map, MapGenerateMethod
 from pg_drive.utils import setup_logger
+from pg_drive.scene_manager.traffic_manager import TrafficMode
 
 setup_logger(debug=True)
 
@@ -9,9 +10,9 @@ class ResetEnv(GeneralizationRacing):
     def __init__(self):
         super(ResetEnv, self).__init__(
             {
-                "environment_num": 1,
+                "environment_num": 4,
                 "traffic_density": 0.1,
-                "start_seed": 0,
+                "start_seed": 3,
                 "pg_world_config": {
                     "debug": False,
                 },
@@ -26,7 +27,7 @@ class ResetEnv(GeneralizationRacing):
                     Map.GENERATE_METHOD: MapGenerateMethod.BIG_BLOCK_NUM,
                     Map.GENERATE_PARA: 12,
                     Map.LANE_WIDTH: 3.5,
-                    Map.LANE_NUM: 2,
+                    Map.LANE_NUM: 3,
                 }
             }
         )
@@ -46,7 +47,7 @@ if __name__ == "__main__":
         # print(len(o), "Vs.", env.observation_space.shape[0])
         # print(info)
         env.render(text={"can you see me": i})
-        if d:
-            print("Reset")
-            env.reset()
+        # if d:
+        #     print("Reset")
+        #     env.reset()
     env.close()
