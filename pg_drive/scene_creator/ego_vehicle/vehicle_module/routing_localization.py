@@ -48,7 +48,7 @@ class RoutingLocalizationModule:
 
         if self.show_navi_point:
             for _ in self.target_checkpoints_index:
-                navi_point_model = VisLoader.loader.loadModel(os.path.join(VisLoader.path, "models/box.egg"))
+                navi_point_model = VisLoader.loader.loadModel(VisLoader.file_path(VisLoader.path, "models", "box.egg"))
                 navi_point_model.setScale(1)
                 navi_point_model.setColor(0, 0.5, 0.5)
                 navi_point_model.reparentTo(self.ndoe_path)

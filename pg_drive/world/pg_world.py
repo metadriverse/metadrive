@@ -17,7 +17,7 @@ from pg_drive.world.sky_box import SkyBox
 from pg_drive.world.terrain import Terrain
 from pg_drive.world.vehicle_panel import VehiclePanel
 
-bullet_path = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+asset_path = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 
 
 class PgWorld(ShowBase.ShowBase):
@@ -53,7 +53,8 @@ class PgWorld(ShowBase.ShowBase):
             loadPrcFileData("", "load-display  pandagles2")
         super(PgWorld, self).__init__(windowType=mode)
         if not self.pg_config["debug_physics_world"] and (self.pg_config["use_render"] or self.pg_config["use_rgb"]):
-            VisLoader.init_loader(self.loader, bullet_path)
+            path = VisLoader.windows_style2unix_style(asset_path) if sys.platform == "win32" else asset_path
+            VisLoader.init_loader(self.loader, path)
             gltf.patch_loader(self.loader)
         self.closed = False
         self.exitFunc = self.exitFunc

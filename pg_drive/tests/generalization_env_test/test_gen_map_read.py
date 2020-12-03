@@ -31,7 +31,7 @@ class ResetEnv(GeneralizationRacing):
                 "rgb_clip": True,
                 "map_config": {
                     Map.GENERATE_METHOD: MapGenerateMethod.PG_MAP_FILE,
-                    Map.GENERATE_PARA: os.path.join(os.path.dirname(__file__), "map_1.json"),
+                    Map.GENERATE_PARA: VisLoader.file_path(os.path.dirname(__file__), "map_1.json"),
                 }
             }
         )

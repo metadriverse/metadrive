@@ -13,7 +13,7 @@ if __name__ == "__main__":
         test.physics_world,
         big_config={
             Map.GENERATE_METHOD: MapGenerateMethod.PG_MAP_FILE,
-            Map.GENERATE_PARA: os.path.join(os.path.dirname(__file__), "map_test.json")
+            Map.GENERATE_PARA: VisLoader.file_path(os.path.dirname(__file__), "map_test.json")
         }
     )
     test.run()

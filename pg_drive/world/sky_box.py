@@ -19,13 +19,13 @@ class SkyBox(DynamicElement):
         if not self.render or pure_background:
             self.node_path = NodePath("pure_background")
             return
-        skybox = self.loader.loadModel(os.path.join(VisLoader.path, "models/skybox.bam"))
+        skybox = self.loader.loadModel(VisLoader.file_path(VisLoader.path, "models", "skybox.bam"))
         from pg_drive.pg_config.cam_mask import CamMask
         skybox.hide(CamMask.MiniMap | CamMask.FrontCam)
         # skybox.setScale(512)
-        # skybox_texture = self.loader.loadTexture(os.path.join(VisLoader.path, 'textures/skybox.jpg'))
+        # skybox_texture = self.loader.loadTexture(VisLoader.file_path(VisLoader.path, 'textures/skybox.jpg'))
         # # skybox.setBin(
-        # #     os.path.join(self.bullet_path, 'textures/s1/background#.jpg')
+        # #     VisLoader.file_path(self.bullet_path, 'textures/s1/background#.jpg')
         # #     , 1)
         # # skybox.setDepthWrite(0)
         #
@@ -37,17 +37,17 @@ class SkyBox(DynamicElement):
         # # skybox.setTexGen(ts, TexGenAttrib.MWorldNormal)
         # skybox.setTexture(ts, skybox_texture)
         #
-        # # skybox.setBin(os.path.join(self.bullet_path, 'textures/s1/background'), 1)
+        # # skybox.setBin(VisLoader.file_path(self.bullet_path, 'textures/s1/background'), 1)
         # # skybox.setScale(20000)
         # # skybox.setZ(-2450)
         # self.node_path = skybox
         # # skybox.reparent_to(self.render)
         # # skybox.hide(DrawMask(self.MINIMAP_MASK))
 
-        # skybox = self.loader.loadModel(os.path.join(self.bullet_path, "models/skybox.bam"))
+        # skybox = self.loader.loadModel(VisLoader.file_path(self.bullet_path, "models/skybox.bam"))
         skybox.set_scale(20000)
 
-        skybox_texture = self.loader.loadTexture(os.path.join(VisLoader.path, "textures/skybox.jpg"))
+        skybox_texture = self.loader.loadTexture(VisLoader.file_path(VisLoader.path, "textures", "skybox.jpg"))
         skybox_texture.set_minfilter(SamplerState.FT_linear)
         skybox_texture.set_magfilter(SamplerState.FT_linear)
         skybox_texture.set_wrap_u(SamplerState.WM_repeat)
@@ -56,8 +56,8 @@ class SkyBox(DynamicElement):
         skybox.set_texture(skybox_texture)
 
         skybox_shader = Shader.load(
-            Shader.SL_GLSL, os.path.join(VisLoader.path, "models/skybox.vert.glsl"),
-            os.path.join(VisLoader.path, "models/skybox.frag.glsl")
+            Shader.SL_GLSL, VisLoader.file_path(VisLoader.path, "models", "skybox.vert.glsl"),
+            VisLoader.file_path(VisLoader.path, "models", "skybox.frag.glsl")
         )
         skybox.set_shader(skybox_shader)
         self.node_path = skybox

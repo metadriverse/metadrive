@@ -150,17 +150,19 @@ class Map:
             json_config[self.PRE_BLOCK_SOCKET_INDEX] = b.pre_block_socket_index
             map_config.append(json_config)
 
-        saved_data = copy.deepcopy({
-            self.SEED: self.random_seed,
-            self.LANE_NUM: self.lane_num,
-            self.LANE_WIDTH: self.lane_width,
-            self.BLOCK_SEQUENCE: map_config
-        })
+        saved_data = copy.deepcopy(
+            {
+                self.SEED: self.random_seed,
+                self.LANE_NUM: self.lane_num,
+                self.LANE_WIDTH: self.lane_width,
+                self.BLOCK_SEQUENCE: map_config
+            }
+        )
         return saved_data
 
     def save_map_to_json(self, map_name: str, save_dir: str = os.path.dirname(__file__)):
         data = self.save_map()
-        with open(os.path.join(save_dir, map_name + self.FILE_SUFFIX), 'w') as outfile:
+        with open(VisLoader.file_path(save_dir, map_name + self.FILE_SUFFIX), 'w') as outfile:
             json.dump(data, outfile)
 
     def read_map(self, map_config: dict):

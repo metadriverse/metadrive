@@ -28,7 +28,7 @@ class Lidar:
         self.cloud_points = [] if show else None
         if show:
             for laser_debug in range(self.laser_num):
-                ball = VisLoader.loader.loadModel(os.path.join(VisLoader.path, "models/box.egg"))
+                ball = VisLoader.loader.loadModel(VisLoader.file_path(VisLoader.path, "models", "box.egg"))
                 ball.setScale(0.001)
                 ball.setColor(0., 0.5, 0.5, 1)
                 shape = BulletSphereShape(0.1)

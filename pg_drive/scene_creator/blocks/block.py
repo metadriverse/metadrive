@@ -115,17 +115,25 @@ class Block(Element):
 
         if self.render:
             # render pre-load
-            self.road_texture = self.loader.loadTexture(os.path.join(VisLoader.path, "textures/sci/color.jpg"))
+            self.road_texture = self.loader.loadTexture(
+                VisLoader.file_path(VisLoader.path, "textures", "sci", "color.jpg")
+            )
             self.road_texture.setMinfilter(SamplerState.FT_linear_mipmap_linear)
             self.road_texture.setAnisotropicDegree(8)
-            self.road_normal = self.loader.loadTexture(os.path.join(VisLoader.path, "textures/sci/normal.jpg"))
+            self.road_normal = self.loader.loadTexture(
+                VisLoader.file_path(VisLoader.path, "textures", "sci", "normal.jpg")
+            )
             self.ts_color = TextureStage("color")
             self.ts_normal = TextureStage("normal")
-            self.side_texture = self.loader.loadTexture(os.path.join(VisLoader.path, "textures/side_walk/color.png"))
+            self.side_texture = self.loader.loadTexture(
+                VisLoader.file_path(VisLoader.path, "textures", "side_walk", "color.png")
+            )
             self.side_texture.setMinfilter(SamplerState.FT_linear_mipmap_linear)
             self.side_texture.setAnisotropicDegree(8)
-            self.side_normal = self.loader.loadTexture(os.path.join(VisLoader.path, "textures/side_walk/normal.png"))
-            self.side_walk = self.loader.loadModel(os.path.join(VisLoader.path, "models/box.bam"))
+            self.side_normal = self.loader.loadTexture(
+                VisLoader.file_path(VisLoader.path, "textures", "side_walk", "normal.png")
+            )
+            self.side_walk = self.loader.loadModel(VisLoader.file_path(VisLoader.path, "models", "box.bam"))
 
     def construct_block_random(self, root_render_np: NodePath, pg_physics_world: BulletWorld) -> bool:
         self.set_config(self.PARAMETER_SPACE.sample())
@@ -404,7 +412,7 @@ class Block(Element):
 
         if self.render:
             # For visualization
-            lane_line = self.loader.loadModel(os.path.join(VisLoader.path, "models/box.bam"))
+            lane_line = self.loader.loadModel(VisLoader.file_path(VisLoader.path, "models", "box.bam"))
             lane_line.getChildren().reparentTo(body_np)
         body_np.setScale(length, Block.LANE_LINE_WIDTH, Block.LANE_LINE_THICKNESS)
         body_np.set_color(color)

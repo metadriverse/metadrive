@@ -21,8 +21,7 @@ class VisLoader:
         """
         Due to the feature of Panda3d, keep reference of loader in static variable
         """
-        import os
-        VisLoader.path = os.path.join(pg_path, "asset")
+        VisLoader.path = VisLoader.file_path(pg_path, "asset")
         if not show_base_loader:
             logging.debug("Offscreen mode")
             return
@@ -36,15 +35,15 @@ class VisLoader:
         return cls.loader
 
     @staticmethod
-    def pre_load_lane_line_model():
-        raise ValueError("Useless for performance reason")
-        import pg_drive.scene_creator.blocks.block as block
-        import os
-        Block = block.Block
-        VisLoader.strip_lane_line = VisLoader.loader.loadModel(os.path.join(VisLoader.path, "models/box.egg"))
-        VisLoader.strip_lane_line.setScale(Block.STRIPE_LENGTH, Block.LANE_LINE_WIDTH, Block.LANE_LINE_THICKNESS)
-        VisLoader.circular_lane_line = VisLoader.loader.loadModel(os.path.join(VisLoader.path, "models/box.egg"))
-        VisLoader.circular_lane_line.setScale(
-            Block.CIRCULAR_SEGMENT_LENGTH, Block.LANE_LINE_WIDTH, Block.LANE_LINE_THICKNESS
-        )
-        VisLoader.side_walk = VisLoader.loader.loadModel(os.path.join(VisLoader.path, "models/box.egg"))
+    def windows_style2unix_style(path):
+        u_path = "/" + path[0].lower() + path[2:]
+        u_path.replace("\\", "/")
+        return u_path
+
+    @staticmethod
+    def file_path(*args):
+        import os, sys
+        path = os.path.join(*args)
+        if sys.platform.startswith("win"):
+            path = path.replace("\\", "/")
+        return path
