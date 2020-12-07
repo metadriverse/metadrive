@@ -4,9 +4,9 @@ from pg_drive.utils import setup_logger
 setup_logger(debug=True)
 
 
-class ResetEnv(GeneralizationRacing):
+class TestEnv(GeneralizationRacing):
     def __init__(self):
-        super(ResetEnv, self).__init__(
+        super(TestEnv, self).__init__(
             {
                 "environment_num": 1,
                 "start_seed": 3,
@@ -22,7 +22,7 @@ class ResetEnv(GeneralizationRacing):
 
 if __name__ == "__main__":
     # Close and reset
-    env = ResetEnv()
+    env = TestEnv()
     env.reset()
     for i in range(1, 20):
         env.step([1, 1])
@@ -32,7 +32,7 @@ if __name__ == "__main__":
     env.close()
 
     # Again!
-    env2 = ResetEnv()
+    env2 = TestEnv()
     env2.reset()
     for i in range(1, 20):
         env2.step([1, 1])

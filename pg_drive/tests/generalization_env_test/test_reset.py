@@ -19,7 +19,7 @@ class ResetEnv(GeneralizationRacing):
                 # "traffic_mode": TrafficMode.Reborn,
                 "manual_control": True,
                 "use_render": True,
-                "use_rgb": False,
+                "use_image": False,
                 "use_increment_steering": False,
                 # "map_config":{
                 #     "type":BigGenerateMethod.BLOCK_SEQUENCE,

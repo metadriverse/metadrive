@@ -6,9 +6,9 @@ from pg_drive.scene_manager.traffic_manager import TrafficMode
 setup_logger(debug=True)
 
 
-class ResetEnv(GeneralizationRacing):
+class TestEnv(GeneralizationRacing):
     def __init__(self):
-        super(ResetEnv, self).__init__(
+        super(TestEnv, self).__init__(
             {
                 "environment_num": 4,
                 "traffic_density": 0.1,
@@ -16,10 +16,10 @@ class ResetEnv(GeneralizationRacing):
                 "pg_world_config": {
                     "debug": False,
                 },
-                "image_buffer_name": "mini_map",
+                "image_source": "mini_map",
                 "manual_control": True,
                 "use_render": True,
-                "use_rgb": False,
+                "use_image": False,
                 "steering_penalty": 0.0,
                 "decision_repeat": 5,
                 "rgb_clip": True,
@@ -34,7 +34,7 @@ class ResetEnv(GeneralizationRacing):
 
 
 if __name__ == "__main__":
-    env = ResetEnv()
+    env = TestEnv()
 
     env.reset()
     for i in range(1, 100000):

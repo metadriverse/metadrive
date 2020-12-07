@@ -1,8 +1,7 @@
-import logging
 from typing import Union, List
-
 import numpy as np
-from panda3d.core import NodePath, Vec3, Vec4
+from panda3d.core import NodePath, Vec3, Vec4, Texture
+import logging
 
 
 class ImageBuffer:
@@ -12,15 +11,26 @@ class ImageBuffer:
     BKG_COLOR = Vec3(179 / 255, 211 / 255, 216 / 255)
     display_bottom = 0.8
     display_top = 1
+    display_region = None
 
     def __init__(
-        self, length: float, width: float, pos: Vec3, bkg_color: Union[Vec4, Vec3], make_buffer_func, make_camera_func,
-        parent_node: NodePath
+        self,
+        length: float,
+        width: float,
+        pos: Vec3,
+        bkg_color: Union[Vec4, Vec3],
+        make_buffer_func,
+        make_camera_func,
+        parent_node: NodePath,
+        frame_buffer_property=None
     ):
         assert self.CAM_MASK is not None, "define a camera mask for every image buffer"
         # self.texture = Texture()
-        self.buffer = make_buffer_func("camera", length, width)
-        # now we have to setup a new scene graph to make this scene
+        if frame_buffer_property is None:
+            self.buffer = make_buffer_func("camera", length, width)
+        else:
+            self.buffer = make_buffer_func("camera", length, width, fbp=frame_buffer_property)
+            # now we have to setup a new scene graph to make this scene
 
         self.node_path = NodePath("new render")
 
@@ -30,6 +40,7 @@ class ImageBuffer:
         self.cam.setPos(pos)
         self.cam.node().setCameraMask(self.CAM_MASK)
         self.node_path.reparentTo(parent_node)
+        logging.debug("Load Vehicle Module: {}".format(self.__class__.__name__))
 
     def get_image(self):
         """
@@ -44,14 +55,15 @@ class ImageBuffer:
         """
         for debug use
         """
-        from panda3d.core import PNMImage
-        img = PNMImage()
-        self.buffer.getScreenshot(img)
+        img = self.get_image()
         img.write("debug.jpg")
 
-    def get_gray_pixels_array(self, clip) -> np.ndarray:
+    def get_pixels_array(self, clip) -> np.ndarray:
+        """
+        default: For gray scale image, one channel. Override this func, when you want a new obs type
+        """
         img = self.get_image()
-        img.makeGrayscale()
+
         if not clip:
             numpy_array = np.array(
                 [[int(img.getGray(i, j) * 255) for j in range(img.getYSize())] for i in range(img.getXSize())],
@@ -65,9 +77,9 @@ class ImageBuffer:
     def add_to_display(self, pg_world, display_region: List[float]):
         if pg_world.pg_config["use_render"]:
             # only show them when onscreen
-            region = pg_world.win.makeDisplayRegion(*display_region)
-            region.setCamera(self.cam)
-            pg_world.my_display_regions.append(region)
+            self.display_region = pg_world.win.makeDisplayRegion(*display_region)
+            self.display_region.setCamera(self.cam)
+            pg_world.my_display_regions.append(self.display_region)
             pg_world.my_buffers.append(self)
 
     def __del__(self):

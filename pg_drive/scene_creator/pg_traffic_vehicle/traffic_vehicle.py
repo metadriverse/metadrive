@@ -48,7 +48,7 @@ class PgTrafficVehicle(DynamicElement):
         [path, scale, zoffset, H] = choice(self.path)
         if self.render:
             if path not in PgTrafficVehicle.model_collection:
-                carNP = self.loader.loadModel(VisLoader.file_path(VisLoader.path, "models", path))
+                carNP = self.loader.loadModel(VisLoader.file_path(VisLoader.asset_path, "models", path))
                 PgTrafficVehicle.model_collection[path] = carNP
             else:
                 carNP = PgTrafficVehicle.model_collection[path]

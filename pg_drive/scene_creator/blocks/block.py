@@ -116,24 +116,24 @@ class Block(Element):
         if self.render:
             # render pre-load
             self.road_texture = self.loader.loadTexture(
-                VisLoader.file_path(VisLoader.path, "textures", "sci", "color.jpg")
+                VisLoader.file_path(VisLoader.asset_path, "textures", "sci", "color.jpg")
             )
             self.road_texture.setMinfilter(SamplerState.FT_linear_mipmap_linear)
             self.road_texture.setAnisotropicDegree(8)
             self.road_normal = self.loader.loadTexture(
-                VisLoader.file_path(VisLoader.path, "textures", "sci", "normal.jpg")
+                VisLoader.file_path(VisLoader.asset_path, "textures", "sci", "normal.jpg")
             )
             self.ts_color = TextureStage("color")
             self.ts_normal = TextureStage("normal")
             self.side_texture = self.loader.loadTexture(
-                VisLoader.file_path(VisLoader.path, "textures", "side_walk", "color.png")
+                VisLoader.file_path(VisLoader.asset_path, "textures", "side_walk", "color.png")
             )
             self.side_texture.setMinfilter(SamplerState.FT_linear_mipmap_linear)
             self.side_texture.setAnisotropicDegree(8)
             self.side_normal = self.loader.loadTexture(
-                VisLoader.file_path(VisLoader.path, "textures", "side_walk", "normal.png")
+                VisLoader.file_path(VisLoader.asset_path, "textures", "side_walk", "normal.png")
             )
-            self.side_walk = self.loader.loadModel(VisLoader.file_path(VisLoader.path, "models", "box.bam"))
+            self.side_walk = self.loader.loadModel(VisLoader.file_path(VisLoader.asset_path, "models", "box.bam"))
 
     def construct_block_random(self, root_render_np: NodePath, pg_physics_world: BulletWorld) -> bool:
         self.set_config(self.PARAMETER_SPACE.sample())
@@ -267,7 +267,8 @@ class Block(Element):
         """
         Create NodePath and Geom node to perform both collision detection and render
         """
-        self.node_path = NodePath(RigidBodyCombiner(self._block_name))
+        self.model_node_path = NodePath(RigidBodyCombiner(self._block_name + "_model"))
+        self.card_node_path = NodePath(RigidBodyCombiner(self._block_name + "_card"))
         graph = self.block_network.graph
         for _from, to_dict in graph.items():
             for _to, lanes in to_dict.items():
@@ -276,12 +277,20 @@ class Block(Element):
                 for _id, l in enumerate(lanes):
                     line_color = l.line_color
                     self._add_lane(l, _id, line_color)
-        self.node_path.flattenStrong()
-        self.node_path.node().collect()
+        self.model_node_path.flattenStrong()
+        self.model_node_path.node().collect()
+
+        self.card_node_path.flattenStrong()
+        self.card_node_path.node().collect()
+        self.card_node_path.hide(CamMask.DepthCam)
+
+        self.node_path = NodePath(self._block_name)
         self.node_path.hide(CamMask.Shadow)
+        self.model_node_path.reparentTo(self.node_path)
+        self.card_node_path.reparentTo(self.node_path)
 
     def _add_lane(self, lane: AbstractLane, lane_id: int, colors: List[Vec4]):
-        parent_np = self.node_path
+        parent_np = self.model_node_path
         lane_width = lane.width_at(0)
         for k, i in enumerate([-1, 1]):
             line_color = colors[k]
@@ -412,7 +421,7 @@ class Block(Element):
 
         if self.render:
             # For visualization
-            lane_line = self.loader.loadModel(VisLoader.file_path(VisLoader.path, "models", "box.bam"))
+            lane_line = self.loader.loadModel(VisLoader.file_path(VisLoader.asset_path, "models", "box.bam"))
             lane_line.getChildren().reparentTo(body_np)
         body_np.setScale(length, Block.LANE_LINE_WIDTH, Block.LANE_LINE_THICKNESS)
         body_np.set_color(color)
@@ -423,7 +432,7 @@ class Block(Element):
         body_node.setActive(False)
         body_node.setKinematic(False)
         body_node.setStatic(True)
-        side_np = self.node_path.attachNewNode(body_node)
+        side_np = self.model_node_path.attachNewNode(body_node)
         shape = BulletBoxShape(Vec3(1 / 2, 1 / 2, 1 / 2))
         body_node.addShape(shape)
         body_node.setIntoCollideMask(BitMask32.bit(Block.COLLISION_MASK))
@@ -476,7 +485,7 @@ class Block(Element):
         cm.setFrame(-length / 2, length / 2, -width / 2, width / 2)
         cm.setHasNormals(True)
         cm.setUvRange((0, 0), (length / 20, width / 10))
-        card = self.node_path.attachNewNode(cm.generate())
+        card = self.card_node_path.attachNewNode(cm.generate())
         card.setPos(middle[0], -middle[1], numpy.random.rand() * 0.01 - 0.01)
 
         card.setQuat(
@@ -486,13 +495,8 @@ class Block(Element):
                 numpy.sin(theta / 2) * numpy.cos(-numpy.pi / 4)
             )
         )
-        card.setTransparency(TransparencyAttrib.MAlpha)
-        # if self.use_texture:
+        card.setTransparency(TransparencyAttrib.MMultisample)
         card.setTexture(self.ts_color, self.road_texture)
-        # card.setTexture(self.ts_normal, self.road_normal)
-        # card.setTexture(self.ts_height, self.road_height)
-        # else:
-        # card.setColor(color)
 
     @staticmethod
     def create_socket_from_positive_road(road: Road) -> BlockSocket:

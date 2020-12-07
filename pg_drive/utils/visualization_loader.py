@@ -9,7 +9,7 @@ class VisLoader:
     Load model for each element when render is needed.
     """
     loader = None
-    path = None
+    asset_path = None
 
     # pre load lane line model to save memory
     strip_lane_line = None
@@ -21,7 +21,7 @@ class VisLoader:
         """
         Due to the feature of Panda3d, keep reference of loader in static variable
         """
-        VisLoader.path = VisLoader.file_path(pg_path, "asset")
+        VisLoader.asset_path = VisLoader.file_path(pg_path, "asset")
         if not show_base_loader:
             logging.debug("Offscreen mode")
             return

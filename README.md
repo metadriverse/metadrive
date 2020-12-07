@@ -47,7 +47,7 @@ options of GeneralizationEnv.
 
 - use_render(bool): Pop a window on your screen or not
 
-- use_rgb(bool): When you want to access the image of camera, it should be set to True. 
+- use_image(bool): When you want to access the image of camera, it should be set to True. 
 
 - force_fps(Union[int, None]): Decide the render fps. "None" means that no fps limitation. 
 
@@ -87,13 +87,13 @@ start_seed+environment_num)\]
 
 #### Observation Config
 
-- use_rgb(bool): If you want to use camera data, please set this to True.
+- use_image(bool): If you want to use camera data, please set this to True.
 
 - rgb_clip(bool): Squeeze the value between \[0, 255\] to \[0.0, 1.0\]
 
 - vehicle_config(dict): Sensor parameters for vehicle
 
-- image_buffer_name(str): decided which camera image to use (mini_map or front camera). Now we only support capture one image as a part of 
+- image_source(str): decided which camera image to use (mini_map or front camera). Now we only support capture one image as a part of 
 observation.
 
 #### Action Config

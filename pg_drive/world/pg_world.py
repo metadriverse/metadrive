@@ -48,11 +48,11 @@ class PgWorld(ShowBase.ShowBase):
             mode = "onscreen"
             loadPrcFileData("", "threading-model Cull/Draw")  # multi-thread render, accelerate simulation when evaluate
         else:
-            mode = "offscreen" if self.pg_config["use_rgb"] else "none"
+            mode = "offscreen" if self.pg_config["use_image"] else "none"
         if self.pg_config["headless_rgb"]:
             loadPrcFileData("", "load-display  pandagles2")
         super(PgWorld, self).__init__(windowType=mode)
-        if not self.pg_config["debug_physics_world"] and (self.pg_config["use_render"] or self.pg_config["use_rgb"]):
+        if not self.pg_config["debug_physics_world"] and (self.pg_config["use_render"] or self.pg_config["use_image"]):
             path = VisLoader.windows_style2unix_style(asset_path) if sys.platform == "win32" else asset_path
             VisLoader.init_loader(self.loader, path)
             gltf.patch_loader(self.loader)
@@ -62,7 +62,7 @@ class PgWorld(ShowBase.ShowBase):
         # add element to render and pbr render, if is exists all the time
         self.pbr_render = self.render.attachNewNode("pbrNP")
 
-        # add element should be cleared these node path, after reset()
+        # add element should be cleared these node asset_path, after reset()
         self.worldNP = self.render.attachNewNode("world_np")
         self.pbr_worldNP = self.pbr_render.attachNewNode("pbrNP")  # This node is only used for render gltf model
 
@@ -80,7 +80,7 @@ class PgWorld(ShowBase.ShowBase):
         self.terrain.add_to_physics_world(self.physics_world)
 
         # init other world elements
-        if self.pg_config["use_rgb"] or self.pg_config["use_render"]:
+        if self.pg_config["use_image"] or self.pg_config["use_render"]:
 
             # terrain visualization
             self.terrain.add_to_render_module(self.render)
@@ -200,7 +200,7 @@ class PgWorld(ShowBase.ShowBase):
         """
         Call me to setup the whole world after _init_
         """
-        # attach all node to this node path
+        # attach all node to this node asset_path
         self.worldNP.node().removeAllChildren()
         self.pbr_worldNP.node().removeAllChildren()
         if self.pg_config["debug_physics_world"]:
@@ -222,7 +222,7 @@ class PgWorld(ShowBase.ShowBase):
             dict(
                 debug=False,
                 use_render=False,
-                use_rgb=False,
+                use_image=False,
                 physics_world_step_size=2e-2,
                 chase_camera=True,
                 direction_light=True,
@@ -272,7 +272,7 @@ class PgWorld(ShowBase.ShowBase):
         return task.done
 
     def close_world(self):
-        if self.pg_config["use_render"] or self.pg_config["use_rgb"]:
+        if self.pg_config["use_render"] or self.pg_config["use_image"]:
             self._clear_display_region_and_buffers()
         self.destroy()
 

@@ -82,7 +82,7 @@ if __name__ == '__main__':
                 },
                 "manual_control": False,
                 "use_render": True,
-                "use_rgb": True,
+                "use_image": True,
                 "map_config": {
                     Map.GENERATE_METHOD: MapGenerateMethod.BIG_BLOCK_SEQUENCE,
                     Map.GENERATE_PARA: "SSSSSSSSSS"

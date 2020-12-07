@@ -1,31 +1,29 @@
 from pg_drive.envs.generalization_racing import GeneralizationRacing
 
 
-class ResetEnv(GeneralizationRacing):
+class TestEnv(GeneralizationRacing):
     def __init__(self):
-        super(ResetEnv, self).__init__(
+        super(TestEnv, self).__init__(
             {
                 "environment_num": 1,
                 "traffic_density": 0.1,
                 "start_seed": 4,
-                "image_buffer_name": "front_cam",
+                "image_source": "mini_map",
                 "manual_control": True,
-                "use_render": False,
-                "use_rgb": True,
+                "use_render": True,
+                "use_image": True,
                 "rgb_clip": True,
-                "vehicle_config": dict(front_cam=(200, 88)),
                 "pg_world_config": {
-                    "headless_rgb": True
+                    "headless_rgb": False
                 }
             }
         )
 
 
 if __name__ == "__main__":
-    env = ResetEnv()
+    env = TestEnv()
     env.reset()
-    env.pg_world.accept("m", env.vehicle.mini_map.save_image)
-    env.pg_world.accept("c", env.vehicle.front_cam.save_image)
+    env.pg_world.accept("m", env.vehicle.image_sensors[env.config["image_source"]].save_image)
     from pg_drive.envs.observation_type import ObservationType, ImageObservation
 
     for i in range(1, 100000):
@@ -33,7 +31,7 @@ if __name__ == "__main__":
         # print("Step: ", i)
         o, r, d, info = env.step([0, 1])
         assert env.observation_space.contains(o)
-        # env.vehicle.front_cam.save_image()
+        # env.vehicle.rgb_cam.save_image()
         # # print(r)
         # # print(o)
         # # print(time.time() - start)

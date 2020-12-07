@@ -68,7 +68,7 @@ class Map:
         return PgConfig(
             {
                 Map.GENERATE_METHOD: MapGenerateMethod.BIG_BLOCK_NUM,
-                Map.GENERATE_PARA: None,  # it can be a file path / block num / block ID sequence
+                Map.GENERATE_PARA: None,  # it can be a file asset_path / block num / block ID sequence
                 Map.LANE_WIDTH: 3.5,
                 Map.LANE_NUM: 3,
                 Map.SEED: 10
@@ -109,7 +109,7 @@ class Map:
 
     def add_to_render_module(self, parent_node_path: NodePath):
         """
-        If original node path is removed, this can re attach blocks to render module
+        If original node asset_path is removed, this can re attach blocks to render module
         """
         for block in self.blocks:
             block.add_to_render_module(parent_node_path)
