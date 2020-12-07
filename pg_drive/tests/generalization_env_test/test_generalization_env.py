@@ -11,7 +11,7 @@ class TestEnv(GeneralizationRacing):
         super(TestEnv, self).__init__(
             {
                 "environment_num": 4,
-                "traffic_density": 0.5,
+                "traffic_density": 0.1,
                 "start_seed": 3,
                 "pg_world_config": {
                     "debug": False,

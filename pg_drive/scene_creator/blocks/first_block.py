@@ -45,6 +45,5 @@ class FirstBlock(Block):
         socket = self.create_socket_from_positive_road(other_v_born_road)
         socket.index = 0
         self.add_sockets(socket)
-        self.add_to_render_module(render_root_np)
-        self.add_to_physics_world(pg_physics_world)
+        self.attach_to_pg_world(render_root_np, pg_physics_world)
         self._reborn_roads = [other_v_born_road]

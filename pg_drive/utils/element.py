@@ -43,41 +43,28 @@ class Element:
         # logging.debug("Read config to " + self.class_name)
         self._config.update(copy.copy(config))
 
-    def add_to_render_module(self, parent_render_np: NodePath):
-        """
-        Call this to render bodies
-        """
+    def attach_to_pg_world(self, parent_node_path: NodePath, pg_physics_world: BulletWorld):
         if self.render:
             # double check :-)
             assert isinstance(self.node_path, NodePath), "No render model on node_path in this Element"
-            self.node_path.reparentTo(parent_render_np)
-
-    def add_to_physics_world(self, pg_world: BulletWorld):
-        """
-        Call this to add body to physics world
-        """
+            self.node_path.reparentTo(parent_node_path)
         for node in self.bullet_nodes:
-            pg_world.attach(node)
+            pg_physics_world.attach(node)
 
-    def remove_from_physics_world(self, pg_physics_world: BulletWorld):
-        """
-        Call me to remove element from bullet physics world
-        """
-        for node in self.bullet_nodes:
-            pg_physics_world.remove(node)
-
-    def remove_from_render_module(self):
+    def detach_from_pg_world(self, pg_physics_world: BulletWorld):
         """
         It is not fully remove, if this element is useless in the future, call Func delete()
         """
         self.node_path.detachNode()
+        for node in self.bullet_nodes:
+            pg_physics_world.remove(node)
 
     def destroy(self, pg_physics_world: BulletWorld):
         """
         Fully delete this element and release the memory
         """
+        self.detach_from_pg_world(pg_physics_world)
         self.node_path.removeNode()
-        self.remove_from_physics_world(pg_physics_world)
         self.bullet_nodes.clear()
         self._config.clear()
 

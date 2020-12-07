@@ -77,13 +77,10 @@ class PgWorld(ShowBase.ShowBase):
 
         # init terrain
         self.terrain = Terrain()
-        self.terrain.add_to_physics_world(self.physics_world)
+        self.terrain.attach_to_pg_world(self.render, self.physics_world)
 
         # init other world elements
         if self.pg_config["use_image"] or self.pg_config["use_render"]:
-
-            # terrain visualization
-            self.terrain.add_to_render_module(self.render)
 
             # collision info render
             self.collision_info_np = NodePath(TextNode("collision_info"))
@@ -119,10 +116,10 @@ class PgWorld(ShowBase.ShowBase):
             self.sky_box = SkyBox(
                 self.pg_config["headless_rgb"] or sys.platform == "darwin"
             )  # openGl shader didn't work for mac...
-            self.sky_box.add_to_render_module(self.render)
+            self.sky_box.attach_to_pg_world(self.render, self.physics_world)
 
             self.light = Light(self.pg_config)
-            self.light.add_to_render_module(self.render)
+            self.light.attach_to_pg_world(self.render, self.physics_world)
             self.render.setLight(self.light.direction_np)
             self.render.setLight(self.light.ambient_np)
 

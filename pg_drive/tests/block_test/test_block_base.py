@@ -84,23 +84,19 @@ class TestBlock(ShowBase.ShowBase):
         """
         For reset test and map storing
         """
-        self.map = Map({"type": big_type, "config": para})
-        self.map._big_generate(3, 2, 888, self.worldNP, self.world)
+        self.map = Map(self.worldNP, self.world, {"type": big_type, "config": para})
         self.accept("c", self.clear)
         self.accept("a", self.re_add)
 
     def clear(self):
-        self.map.remove_from_render_module()
-        self.map.remove_from_physics_world(self.world)
+        self.map.unload_from_pg_world(self.world)
 
     def re_add(self):
-        self.map.add_to_physics_world(self.world)
-        self.map.add_to_render_module(self.worldNP)
+        self.map.load_to_pg_world(self.worldNP, self.world)
 
     def add_vehicle(self, vehicle):
         self.vehicle = vehicle
-        vehicle.add_to_render_module(self.render)
-        vehicle.add_to_physics_world(self.world)
+        vehicle.attach_to_pg_world(self.worldNP, self.world)
         self.inputs = InputState()
         self.inputs.watchWithModifiers('forward', 'w')
         self.inputs.watchWithModifiers('reverse', 's')

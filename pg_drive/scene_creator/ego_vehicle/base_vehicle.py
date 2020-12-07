@@ -121,10 +121,7 @@ class BaseVehicle(DynamicElement):
         self.crash = False
         self.out_of_road = False
 
-        # add to world, permanently
-        self.add_to_physics_world(self.pg_world.physics_world)
-        if self.render:
-            self.add_to_render_module(self.pg_world.pbr_render)
+        self.attach_to_pg_world(self.pg_world.pbr_render, self.pg_world.physics_world)
 
     @classmethod
     def get_vehicle_config(cls, new_config):

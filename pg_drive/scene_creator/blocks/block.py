@@ -139,8 +139,7 @@ class Block(Element):
         self.set_config(self.PARAMETER_SPACE.sample())
         success = self._sample_topology()
         self._create_in_world()
-        self.add_to_physics_world(pg_physics_world)
-        self.add_to_render_module(root_render_np)
+        self.attach_to_pg_world(root_render_np, pg_physics_world)
         return success
 
     def destruct_block(self, pg_physics_world: BulletWorld):
@@ -171,8 +170,7 @@ class Block(Element):
         self.set_config(config)
         success = self._sample_topology()
         self._create_in_world()
-        self.add_to_physics_world(pg_physics_world)
-        self.add_to_render_module(root_render_np)
+        self.attach_to_pg_world(root_render_np, pg_physics_world)
         return success
 
     def get_socket(self, index: int) -> BlockSocket:

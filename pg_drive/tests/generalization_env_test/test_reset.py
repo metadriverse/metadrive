@@ -27,10 +27,6 @@ class ResetEnv(GeneralizationRacing):
                 # }
             }
         )
-        # self.reset()
-        # self.pg_world.accept("r", self.reset)
-        # self.pg_world.cam.setPos(0, 0, 1500)
-        # self.pg_world.cam.lookAt(0, 0, 0)
 
 
 if __name__ == "__main__":
@@ -38,6 +34,7 @@ if __name__ == "__main__":
     import time
 
     env.reset()
+    env.pg_world.accept("r", env.reset)
     t = 0.0
     for i in range(1, 200000):
         start = time.time()
