@@ -74,7 +74,8 @@ class TInterSection(InterSection):
                     lane.start = lane.position(lane.length - radius, 0)
                     lane.update_length()
                 self.block_network.add_road(Road(start_node, exit_node), lanes_on_p_road)
-                self.block_network.add_road(Road(entry_node, end_node), lanes_on_n_road)
+                # a small trick
+                self.block_network.add_road(Road(entry_node, entry_node), lanes_on_n_road)
         self._change_vis(t_type)
         self._sockets.pop(-1)
         socket = self._sockets.pop(t_type)
