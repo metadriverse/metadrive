@@ -24,8 +24,8 @@ class TestEnv(GeneralizationRacing):
                 "decision_repeat": 5,
                 "rgb_clip": True,
                 "map_config": {
-                    Map.GENERATE_METHOD: MapGenerateMethod.BIG_BLOCK_SEQUENCE,
-                    Map.GENERATE_PARA: "TTTTTTT",
+                    Map.GENERATE_METHOD: MapGenerateMethod.BIG_BLOCK_NUM,
+                    Map.GENERATE_PARA: 12,
                     Map.LANE_WIDTH: 3.5,
                     Map.LANE_NUM: 3,
                 }
