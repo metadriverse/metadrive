@@ -1,3 +1,5 @@
+![](pg_drive/assets/PG-Drive.png)
+
 # PG-Drive: An high flexible open-ended driving simulator
 
 Please install PG-Drive via:
