@@ -18,7 +18,7 @@ import os.path as osp
 from pg_drive.utils import recursive_equal
 
 pregenerated_map_file = osp.join(
-    osp.dirname(osp.dirname(osp.dirname(osp.abspath(__file__)))), "asset", "maps", "PG-Drive-maps.json"
+    osp.dirname(osp.dirname(osp.abspath(__file__))), "assets", "maps", "PG-Drive-maps.json"
 )
 
 

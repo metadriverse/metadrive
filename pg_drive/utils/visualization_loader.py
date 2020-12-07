@@ -21,7 +21,7 @@ class VisLoader:
         """
         Due to the feature of Panda3d, keep reference of loader in static variable
         """
-        VisLoader.asset_path = VisLoader.file_path(pg_path, "asset")
+        VisLoader.asset_path = VisLoader.file_path(pg_path, "assets")
         if not show_base_loader:
             logging.debug("Offscreen mode")
             return

@@ -3,8 +3,8 @@ import os.path as osp
 
 from pg_drive import GeneralizationRacing
 
-root = osp.dirname(osp.dirname(osp.dirname(osp.abspath(__file__))))
-assert_path = osp.join(root, "asset", "maps")
+root = osp.dirname(osp.dirname(osp.abspath(__file__)))
+assert_path = osp.join(root, "assets", "maps")
 
 predefined_maps = {
     "PG-Drive-maps": {

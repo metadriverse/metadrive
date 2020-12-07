@@ -24,5 +24,6 @@ setup(
         "panda3d==1.10.5",
         "panda3d-gltf",
         "panda3d-simplepbr"
-    ]
+    ],
+    include_package_data=True
 )
