@@ -135,3 +135,17 @@ It will generate a .whl file, which can be installed by pip on your cluster.
 The compiling procedure can be found in [panda3d github](https://github.com/panda3d/panda3d)
 
 
+
+## Predefined environment sets
+
+| Index | Name                    | Random Seed Range | Number of Maps | Comments                                                |
+| ----- | ----------------------- | ----------------- | -------------- | ------------------------------------------------------- |
+| 1     | `PGDrive-test-v0`       | [0, 200)          | 200            | Test set, not change for all experiments.               |
+| 2     | `PGDrive-validation-v0` | [200, 1000)       | 800            | Validation set.                                         |
+| 3     | `PGDrive-v0`            | [1000, 1100)      | 100            | Default training setting, for quick start.              |
+| 4     | `PGDrive-training0-v0`  | [3000, 4000)      | 1000           | First set of 1000 environments.                         |
+| 5     | `PGDrive-training1-v0`  | [5000, 6000)      | 1000           | Second set of 1000 environments.                        |
+| 6     | `PGDrive-training2-v0`  | [7000, 8000)      | 1000           | Thirds set of 1000 environments.                        |
+| 7     | `PGDrive-7blocks-v0`    | [1000, 1100)      | 100            | Utilize 7 blocks                                        |
+| ...   |                         |                   |                | *More map set can be added in response to the requests* |
+

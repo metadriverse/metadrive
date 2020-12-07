@@ -467,12 +467,15 @@ class BaseVehicle(DynamicElement):
             logging.debug("Crash with {}".format(name[0]))
 
     def destroy(self, pg_world: BulletWorld):
+        self.pg_world.physics_world.clearContactAddedCallback()
+        self.pg_world = None
         self.lidar = None
         self.routing_localization = None
         super(BaseVehicle, self).destroy(pg_world)
 
     def __del__(self):
         super(BaseVehicle, self).__del__()
+        self.pg_world = None
         self.lidar = None
         self.mini_map = None
         self.rgb_cam = None

@@ -272,6 +272,12 @@ class PgWorld(ShowBase.ShowBase):
         if self.pg_config["use_render"] or self.pg_config["use_image"]:
             self._clear_display_region_and_buffers()
         self.destroy()
+        self.physics_world.clearDebugNode()
+        self.physics_world.clearContactAddedCallback()
+        self.physics_world.clearFilterCallback()
+
+        # del self.physics_world  # Will cause error if del it.
+        self.physics_world = None
 
 
 if __name__ == "__main__":

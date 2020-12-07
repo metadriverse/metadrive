@@ -16,7 +16,6 @@ class ResetEnv(GeneralizationRacing):
                     "force_fps": None,
                     "debug_physics_world": True
                 },
-                # "traffic_mode": TrafficMode.Reborn,
                 "manual_control": True,
                 "use_render": True,
                 "use_image": False,

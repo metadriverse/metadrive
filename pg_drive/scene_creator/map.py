@@ -68,7 +68,7 @@ class Map:
         return PgConfig(
             {
                 Map.GENERATE_METHOD: MapGenerateMethod.BIG_BLOCK_NUM,
-                Map.GENERATE_PARA: None,  # it can be a file asset_path / block num / block ID sequence
+                Map.GENERATE_PARA: None,  # it can be a file path / block num / block ID sequence
                 Map.LANE_WIDTH: 3.5,
                 Map.LANE_NUM: 3,
                 Map.SEED: 10

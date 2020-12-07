@@ -7,11 +7,19 @@ from pg_drive.envs.observation_type import LidarStateObservation, ImageStateObse
 from pg_drive.pg_config.pg_config import PgConfig
 from pg_drive.scene_creator.algorithm.BIG import BigGenerateMethod
 from pg_drive.scene_creator.ego_vehicle.base_vehicle import BaseVehicle
-from pg_drive.scene_creator.map import Map
+from pg_drive.scene_creator.map import Map, MapGenerateMethod
 from pg_drive.scene_manager.traffic_manager import TrafficManager, TrafficMode
 from pg_drive.world.pg_world import PgWorld
 from pg_drive.world.chase_camera import ChaseCamera
 from pg_drive.world.manual_controller import KeyboardController, JoystickController
+import copy
+import json
+import os.path as osp
+from pg_drive.utils import recursive_equal
+
+pregenerated_map_file = osp.join(
+    osp.dirname(osp.dirname(osp.dirname(osp.abspath(__file__)))), "asset", "maps", "PG-Drive-maps.json"
+)
 
 
 class GeneralizationRacing(gym.Env):
@@ -43,6 +51,8 @@ class GeneralizationRacing(gym.Env):
                 Map.GENERATE_METHOD: BigGenerateMethod.BLOCK_NUM,
                 Map.GENERATE_PARA: 3
             },
+            load_map_from_json=True,  # Whether to load maps from pre-generated file
+            _load_map_from_json=pregenerated_map_file,  # The path to the pre-generated file
 
             # ===== Generalization =====
             start_seed=0,
@@ -284,11 +294,16 @@ class GeneralizationRacing(gym.Env):
             del self.vehicle
             self.vehicle = None
 
+            self.pg_world.clear_world()
             self.pg_world.close_world()
             del self.pg_world
             self.pg_world = None
 
     def select_map(self):
+        if self.config["load_map_from_json"] and self.current_map is None:
+            assert self.config["_load_map_from_json"]
+            self.load_all_maps_from_json(self.config["_load_map_from_json"])
+
         # remove map from world before adding
         if self.current_map is not None:
             self.current_map.unload_from_pg_world(self.pg_world.physics_world)
@@ -347,3 +362,82 @@ class GeneralizationRacing(gym.Env):
             else:
                 mini_map = MiniMap(vehicle_config["mini_map"], self.vehicle.chassis_np, self.pg_world)
                 self.vehicle.add_image_sensor("mini_map", mini_map)
+
+        del self.maps
+        self.maps = {_seed: None for _seed in range(self.start_seed, self.start_seed + self.env_num)}
+        del self.current_map
+        self.current_map = None
+
+    def dump_all_maps(self):
+        assert self.pg_world is None, "We assume you generate map files in independent tasks (not in training). " \
+                                      "So you should run the generating script without calling reset of the " \
+                                      "environment."
+
+        self.lazy_init()  # it only works the first time when reset() is called to avoid the error when render
+        self.pg_world.clear_world()
+
+        for seed in range(self.start_seed, self.start_seed + self.env_num):
+            map_config = copy.deepcopy(self.config["map_config"])
+            map_config.update({"seed": seed})
+            new_map = Map(self.pg_world.worldNP, self.pg_world.physics_world, map_config)
+            self.maps[seed] = new_map
+            new_map.remove_from_physics_world(self.pg_world.physics_world)
+            new_map.remove_from_render_module()
+            print("Finish generating map with seed: ", seed)
+
+        map_data = dict()
+        for seed, map in self.maps.items():
+            assert map is not None
+            map_data[seed] = map.save_map()
+
+        return_data = dict(map_config=copy.deepcopy(self.config["map_config"]), map_data=copy.deepcopy(map_data))
+        return return_data
+
+    def load_all_maps(self, data):
+        assert isinstance(data, dict)
+        assert set(data.keys()) == set(["map_config", "map_data"])
+        assert set(self.maps.keys()).issubset(set([int(v) for v in data["map_data"].keys()]))
+
+        print(
+            "Restoring the maps from pre-generated file! "
+            "We have {} maps in the file and restoring {} maps range from {} to {}".format(
+                len(data["map_data"]), len(self.maps.keys()), min(self.maps.keys()), max(self.maps.keys())
+            )
+        )
+
+        maps_collection_config = data["map_config"]
+        assert set(self.config["map_config"].keys()) == set(maps_collection_config.keys())
+        for k in self.config["map_config"]:
+            assert maps_collection_config[k] == self.config["map_config"][k]
+
+        # for seed, map_dict in data["map_data"].items():
+        for seed in self.maps.keys():
+            assert str(seed) in data["map_data"]
+            assert self.maps[seed] is None
+            map_config = {}
+            map_config[Map.GENERATE_METHOD] = MapGenerateMethod.PG_MAP_FILE
+            map_config[Map.GENERATE_PARA] = data["map_data"][str(seed)]
+            map = Map(self.pg_world.worldNP, self.pg_world.physics_world, map_config)
+            self.maps[seed] = map
+
+            # Map will be added to world automatically, so remove them after creating
+            map.remove_from_physics_world(self.pg_world.physics_world)
+            map.remove_from_render_module()
+
+    def load_all_maps_from_json(self, path):
+        assert path.endswith(".json")
+        assert osp.isfile(path)
+        with open(path, "r") as f:
+            restored_data = json.load(f)
+        if recursive_equal(self.config["map_config"], restored_data["map_config"]):
+            self.load_all_maps(restored_data)
+            return True
+        else:
+            print(
+                "Warning: The pre-generated maps is with config {}, but current environment's map "
+                "config is {}.\nWe now fallback to BIG algorithm to generate map online!".format(
+                    restored_data["map_config"], self.map_config
+                )
+            )
+            self.config["load_map_from_json"] = False  # Don't fall into this function again.
+            return False
