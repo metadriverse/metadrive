@@ -8,15 +8,24 @@ def setup_logger(debug=False):
 
 def recursive_equal(data1, data2, need_assert=False):
     if isinstance(data1, dict):
-        assert isinstance(data2, dict)
-        assert set(data1.keys()) == set(data2.keys()), (data1.keys(), data2.keys())
+        is_ins = isinstance(data2, dict)
+        key_right = set(data1.keys()) == set(data2.keys())
+        if need_assert:
+            assert is_ins and key_right, (data1.keys(), data2.keys())
+        if not (is_ins and key_right):
+            return False
         ret = []
         for k in data1:
             ret.append(recursive_equal(data1[k], data2[k]))
         return all(ret)
 
     elif isinstance(data1, list):
-        assert len(data1) == len(data2)
+        len_right = len(data1) == len(data2)
+        is_ins = isinstance(data2, list)
+        if need_assert:
+            assert len_right and is_ins, (len(data1), len(data2), data1, data2)
+        if not (is_ins and len_right):
+            return False
         ret = []
         for i in range(len(data1)):
             ret.append(recursive_equal(data1[i], data2[i]))

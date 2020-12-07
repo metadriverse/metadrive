@@ -329,12 +329,13 @@ class GeneralizationRacing(gym.Env):
             # TODO visualize lidar
             self.vehicle.add_lidar(vehicle_config["lidar"][0], vehicle_config["lidar"][1])
 
-            rgb_cam_config = vehicle_config["rgb_cam"]
-            rgb_cam = RgbCamera(rgb_cam_config[0], rgb_cam_config[1], self.vehicle.chassis_np, self.pg_world)
-            self.vehicle.add_image_sensor("rgb_cam", rgb_cam)
+            if self.config["use_render"]:
+                rgb_cam_config = vehicle_config["rgb_cam"]
+                rgb_cam = RgbCamera(rgb_cam_config[0], rgb_cam_config[1], self.vehicle.chassis_np, self.pg_world)
+                self.vehicle.add_image_sensor("rgb_cam", rgb_cam)
 
-            mini_map = MiniMap(vehicle_config["mini_map"], self.vehicle.chassis_np, self.pg_world)
-            self.vehicle.add_image_sensor("mini_map", mini_map)
+                mini_map = MiniMap(vehicle_config["mini_map"], self.vehicle.chassis_np, self.pg_world)
+                self.vehicle.add_image_sensor("mini_map", mini_map)
             return
 
         if self.config["use_image"]:
@@ -381,8 +382,7 @@ class GeneralizationRacing(gym.Env):
             map_config.update({"seed": seed})
             new_map = Map(self.pg_world.worldNP, self.pg_world.physics_world, map_config)
             self.maps[seed] = new_map
-            new_map.remove_from_physics_world(self.pg_world.physics_world)
-            new_map.remove_from_render_module()
+            new_map.unload_from_pg_world(self.pg_world.physics_world)
             print("Finish generating map with seed: ", seed)
 
         map_data = dict()
@@ -421,8 +421,7 @@ class GeneralizationRacing(gym.Env):
             self.maps[seed] = map
 
             # Map will be added to world automatically, so remove them after creating
-            map.remove_from_physics_world(self.pg_world.physics_world)
-            map.remove_from_render_module()
+            map.unload_from_pg_world(self.pg_world.physics_world)
 
     def load_all_maps_from_json(self, path):
         assert path.endswith(".json")
