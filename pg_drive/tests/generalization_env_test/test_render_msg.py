@@ -38,16 +38,6 @@ if __name__ == "__main__":
 
     env.reset()
     for i in range(1, 100000):
-        # start = time.time()
-        # print("Step: ", i)
         o, r, d, info = env.step([0, 1])
-        # print(r)
-        # print(o)
-        # print(time.time() - start)
-        # print(len(o), "Vs.", env.observation_space.shape[0])
-        # print(info)
-        env.render()
-        # if d:
-        #     print("Reset")
-        #     env.reset()
+        env.render(text={"Frame": i, "Speed": env.vehicle.speed})
     env.close()
