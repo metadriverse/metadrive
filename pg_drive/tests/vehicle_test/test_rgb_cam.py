@@ -15,7 +15,7 @@ class TestEnv(GeneralizationRacing):
                 "rgb_clip": True,
                 "vehicle_config": dict(rgb_cam=(200, 88)),
                 "pg_world_config": {
-                    "headless_rgb": False
+                    "headless_image": False
                 }
             }
         )

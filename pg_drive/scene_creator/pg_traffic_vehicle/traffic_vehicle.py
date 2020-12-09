@@ -12,7 +12,7 @@ from pg_drive.scene_creator.lanes.circular_lane import CircularLane
 from pg_drive.scene_creator.lanes.straight_lane import StraightLane
 from pg_drive.scene_manager.traffic_manager import TrafficManager
 from pg_drive.utils.element import DynamicElement
-from pg_drive.utils.visualization_loader import VisLoader
+from pg_drive.utils.asset_loader import AssetLoader
 
 
 class PgTrafficVehicleNode(BulletRigidBodyNode):
@@ -48,7 +48,7 @@ class PgTrafficVehicle(DynamicElement):
         [path, scale, zoffset, H] = choice(self.path)
         if self.render:
             if path not in PgTrafficVehicle.model_collection:
-                carNP = self.loader.loadModel(VisLoader.file_path(VisLoader.asset_path, "models", path))
+                carNP = self.loader.loadModel(AssetLoader.file_path(AssetLoader.asset_path, "models", path))
                 PgTrafficVehicle.model_collection[path] = carNP
             else:
                 carNP = PgTrafficVehicle.model_collection[path]

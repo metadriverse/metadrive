@@ -5,9 +5,9 @@ from pg_drive.tests.block_test.test_block_base import TestBlock
 
 if __name__ == "__main__":
     test = TestBlock()
-    from pg_drive.utils.visualization_loader import VisLoader
+    from pg_drive.utils.asset_loader import AssetLoader
 
-    VisLoader.init_loader(test.loader, test.asset_path)
+    AssetLoader.init_loader(test.loader, test.asset_path)
 
     global_network = RoadNetwork()
     straight = FirstBlock(global_network, 3.0, 1, test.render, test.world, 1)

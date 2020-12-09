@@ -7,7 +7,7 @@ from panda3d.core import NodePath
 
 from pg_drive.pg_config.pg_config import PgConfig
 from pg_drive.pg_config.pg_space import PgSpace
-from pg_drive.utils.visualization_loader import VisLoader
+from pg_drive.utils.asset_loader import AssetLoader
 
 
 class Element:
@@ -26,10 +26,10 @@ class Element:
         if self.PARAMETER_SPACE is not None:
             self.PARAMETER_SPACE.seed(self.random_seed)
         self.bullet_nodes = []  # Temporally store bullet nodes that have to place in bullet world (not NodePath)
-        self.render = False if VisLoader.loader is None else True
+        self.render = False if AssetLoader.loader is None else True
         self.node_path = None  # each element has its node_path to render, physics node are child nodes of it
         if self.render:
-            self.loader = VisLoader.get_loader()
+            self.loader = AssetLoader.get_loader()
 
     @property
     def class_name(self):

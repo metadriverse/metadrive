@@ -8,7 +8,7 @@ from pg_drive.scene_creator.blocks.first_block import FirstBlock
 from pg_drive.scene_creator.lanes.circular_lane import CircularLane
 from pg_drive.scene_creator.map import Map
 from pg_drive.utils.math_utils import clip, norm
-from pg_drive.utils.visualization_loader import VisLoader
+from pg_drive.utils.asset_loader import AssetLoader
 import logging
 
 
@@ -50,8 +50,8 @@ class RoutingLocalizationModule:
 
         if self.show_navi_point:
             for _ in self.target_checkpoints_index:
-                navi_point_model = VisLoader.loader.loadModel(
-                    VisLoader.file_path(VisLoader.asset_path, "models", "box.egg")
+                navi_point_model = AssetLoader.loader.loadModel(
+                    AssetLoader.file_path(AssetLoader.asset_path, "models", "box.egg")
                 )
                 navi_point_model.setScale(1)
                 navi_point_model.setColor(0, 0.5, 0.5)

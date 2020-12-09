@@ -1,5 +1,6 @@
 from pg_drive.envs.generalization_racing import GeneralizationRacing
 from pg_drive.scene_creator.map import Map, MapGenerateMethod
+from panda3d.core import loadPrcFileData
 
 
 class TestEnv(GeneralizationRacing):
@@ -16,7 +17,7 @@ class TestEnv(GeneralizationRacing):
                 "rgb_clip": True,
                 "vehicle_config": dict(depth_cam=(200, 88)),
                 "pg_world_config": {
-                    "headless_rgb": False
+                    "headless_image": False,
                 },
                 "map_config": {
                     Map.GENERATE_METHOD: MapGenerateMethod.BIG_BLOCK_NUM,
