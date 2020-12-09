@@ -1,7 +1,7 @@
 import logging
 import os
 import sys
-
+from pg_drive.world.onscreen_message import PgOnScreenMessage
 import gltf
 from direct.showbase import ShowBase
 from panda3d.bullet import BulletDebugNode, BulletWorld
@@ -145,6 +145,10 @@ class PgWorld(ShowBase.ShowBase):
                 self, [0.67, 1, self.vehicle_panel.display_bottom, self.vehicle_panel.display_top]
             )
 
+            # onscreen message
+            if self.pg_config["use_render"] and self.pg_config["onscreen_message"]:
+                self.on_screen_message = PgOnScreenMessage()
+
         # task manager
         self.taskMgr.remove('audioLoop')
         self.taskMgr.remove("igLoop")
@@ -186,8 +190,8 @@ class PgWorld(ShowBase.ShowBase):
         self.collision_info_np.reparentTo(self.aspect2d)
 
     def render_frame(self, text: dict = None):
-        self.onScreenDebug.clear()
-        self.onScreenDebug.render()
+        self.on_screen_message.update_data(text)
+        self.on_screen_message.render()
         self.graphicsEngine.renderFrame()
         if self.pg_config["use_render"]:
             with self.force_fps:
@@ -230,7 +234,8 @@ class PgWorld(ShowBase.ShowBase):
                 force_fps=None,
                 debug_physics_world=False,  # only render physics world without model
                 use_default_layout=True,  # decide the layout of white lines
-                headless_rgb=False  # set to true only when on headless machine and use rgb image!!!!!!
+                headless_rgb=False,  # set to true only when on headless machine and use rgb image!!!!!!
+                onscreen_message=True
             )
         )
 
