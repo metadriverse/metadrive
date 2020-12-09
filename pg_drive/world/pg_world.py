@@ -113,9 +113,7 @@ class PgWorld(ShowBase.ShowBase):
             lens.setFov(70)
             lens.setAspectRatio(1.2)
 
-            self.sky_box = SkyBox(
-                self.pg_config["headless_image"] or sys.platform == "darwin"
-            )  # openGl shader didn't work for mac...
+            self.sky_box = SkyBox(sys.platform == "darwin")  # openGl shader didn't work for mac...
             self.sky_box.attach_to_pg_world(self.render, self.physics_world)
 
             self.light = Light(self.pg_config)
