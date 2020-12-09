@@ -11,7 +11,7 @@ from pg_drive.pg_config.body_name import BodyName
 from pg_drive.pg_config.cam_mask import CamMask
 from pg_drive.scene_creator.highway_vehicle.behavior import IDMVehicle
 from pg_drive.scene_creator.pg_traffic_vehicle.traffic_vehicle import PgTrafficVehicle
-from pg_drive.utils.visualization_loader import VisLoader
+from pg_drive.utils.asset_loader import AssetLoader
 
 
 class Lidar:
@@ -29,7 +29,7 @@ class Lidar:
         logging.debug("Load Vehicle Module: {}".format(self.__class__.__name__))
         if show:
             for laser_debug in range(self.laser_num):
-                ball = VisLoader.loader.loadModel(VisLoader.file_path(VisLoader.asset_path, "models", "box.egg"))
+                ball = AssetLoader.loader.loadModel(AssetLoader.file_path(AssetLoader.asset_path, "models", "box.egg"))
                 ball.setScale(0.001)
                 ball.setColor(0., 0.5, 0.5, 1)
                 shape = BulletSphereShape(0.1)
