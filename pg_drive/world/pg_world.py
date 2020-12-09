@@ -145,13 +145,13 @@ class PgWorld(ShowBase.ShowBase):
                 self, [0.67, 1, self.vehicle_panel.display_bottom, self.vehicle_panel.display_top]
             )
 
-            # onscreen message
-            if self.pg_config["use_render"] and self.pg_config["onscreen_message"]:
-                self.on_screen_message = PgOnScreenMessage()
-
         # task manager
         self.taskMgr.remove('audioLoop')
         self.taskMgr.remove("igLoop")
+
+        # onscreen message
+        self.on_screen_message = PgOnScreenMessage() \
+            if self.pg_config["use_render"] and self.pg_config["onscreen_message"] else None
 
         # debug setting
         if self.pg_config["debug"] or self.pg_config["debug_physics_world"]:
@@ -190,8 +190,9 @@ class PgWorld(ShowBase.ShowBase):
         self.collision_info_np.reparentTo(self.aspect2d)
 
     def render_frame(self, text: dict = None):
-        self.on_screen_message.update_data(text)
-        self.on_screen_message.render()
+        if self.on_screen_message is not None:
+            self.on_screen_message.update_data(text)
+            self.on_screen_message.render()
         self.graphicsEngine.renderFrame()
         if self.pg_config["use_render"]:
             with self.force_fps:
