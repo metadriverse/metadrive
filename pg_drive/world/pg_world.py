@@ -9,7 +9,7 @@ from panda3d.core import Vec3, AntialiasAttrib, NodePath, loadPrcFileData, TextN
 
 from pg_drive.pg_config.cam_mask import CamMask
 from pg_drive.pg_config.pg_config import PgConfig
-from pg_drive.utils.visualization_loader import VisLoader
+from pg_drive.utils.asset_loader import AssetLoader
 from pg_drive.world.force_fps import ForceFPS
 from pg_drive.world.image_buffer import ImageBuffer
 from pg_drive.world.light import Light
@@ -49,12 +49,12 @@ class PgWorld(ShowBase.ShowBase):
             loadPrcFileData("", "threading-model Cull/Draw")  # multi-thread render, accelerate simulation when evaluate
         else:
             mode = "offscreen" if self.pg_config["use_image"] else "none"
-        if self.pg_config["headless_rgb"]:
+        if self.pg_config["headless_image"]:
             loadPrcFileData("", "load-display  pandagles2")
         super(PgWorld, self).__init__(windowType=mode)
         if not self.pg_config["debug_physics_world"] and (self.pg_config["use_render"] or self.pg_config["use_image"]):
-            path = VisLoader.windows_style2unix_style(root_path) if sys.platform == "win32" else root_path
-            VisLoader.init_loader(self.loader, path)
+            path = AssetLoader.windows_style2unix_style(root_path) if sys.platform == "win32" else root_path
+            AssetLoader.init_loader(self.loader, path)
             gltf.patch_loader(self.loader)
         self.closed = False
         self.exitFunc = self.exitFunc
@@ -114,7 +114,7 @@ class PgWorld(ShowBase.ShowBase):
             lens.setAspectRatio(1.2)
 
             self.sky_box = SkyBox(
-                self.pg_config["headless_rgb"] or sys.platform == "darwin"
+                self.pg_config["headless_image"] or sys.platform == "darwin"
             )  # openGl shader didn't work for mac...
             self.sky_box.attach_to_pg_world(self.render, self.physics_world)
 
@@ -235,7 +235,7 @@ class PgWorld(ShowBase.ShowBase):
                 force_fps=None,
                 debug_physics_world=False,  # only render physics world without model
                 use_default_layout=True,  # decide the layout of white lines
-                headless_rgb=False,  # set to true only when on headless machine and use rgb image!!!!!!
+                headless_image=False,  # set to true only when on headless machine and use rgb image!!!!!!
                 onscreen_message=True
             )
         )

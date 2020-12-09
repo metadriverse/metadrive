@@ -17,7 +17,7 @@ if __name__ == "__main__":
             manual_control=True,
             traffic_mode=0,
             use_image=True,
-            pg_world_config=dict(headless_rgb=headless)
+            pg_world_config=dict(headless_image=headless)
         )
     )
 

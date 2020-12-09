@@ -14,7 +14,7 @@ class TestEnv(GeneralizationRacing):
                 "use_image": True,
                 "rgb_clip": True,
                 "pg_world_config": {
-                    "headless_rgb": False
+                    "headless_image": False
                 }
             }
         )

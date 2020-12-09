@@ -21,7 +21,7 @@ from pg_drive.scene_creator.map import Map
 from pg_drive.scene_creator.pg_traffic_vehicle.traffic_vehicle import PgTrafficVehicle
 from pg_drive.utils.element import DynamicElement
 from pg_drive.utils.math_utils import get_vertical_vector, norm, clip
-from pg_drive.utils.visualization_loader import VisLoader
+from pg_drive.utils.asset_loader import AssetLoader
 from pg_drive.world.pg_world import PgWorld
 from pg_drive.world.terrain import Terrain
 from .vehicle_module.routing_localization import RoutingLocalizationModule
@@ -367,7 +367,7 @@ class BaseVehicle(DynamicElement):
 
         if self.render:
             model_path = 'models/ferra/scene.gltf'
-            self.chassis_vis = self.loader.loadModel(path.join(VisLoader.asset_path, model_path))
+            self.chassis_vis = self.loader.loadModel(path.join(AssetLoader.asset_path, model_path))
             self.chassis_vis.setZ(para[Parameter.vehicle_vis_z])
             self.chassis_vis.setY(para[Parameter.vehicle_vis_y])
             self.chassis_vis.setH(para[Parameter.vehicle_vis_h])
@@ -389,7 +389,7 @@ class BaseVehicle(DynamicElement):
         wheel_np = self.node_path.attachNewNode("wheel")
         if self.render:
             model_path = 'models/yugo/yugotireR.egg' if left else 'models/yugo/yugotireL.egg'
-            wheel_model = self.loader.loadModel(path.join(VisLoader.asset_path, model_path))
+            wheel_model = self.loader.loadModel(path.join(AssetLoader.asset_path, model_path))
             wheel_model.reparentTo(wheel_np)
             wheel_model.set_scale(1.4, radius / 0.25, radius / 0.25)
         wheel = self.system.create_wheel()

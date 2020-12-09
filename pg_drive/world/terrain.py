@@ -7,7 +7,7 @@ from panda3d.core import Vec3, CardMaker, LQuaternionf, BitMask32, NodePath, Tex
 from pg_drive.pg_config.body_name import BodyName
 from pg_drive.pg_config.cam_mask import CamMask
 from pg_drive.utils.element import Element
-from pg_drive.utils.visualization_loader import VisLoader
+from pg_drive.utils.asset_loader import AssetLoader
 
 
 class Terrain(Element):
@@ -27,10 +27,10 @@ class Terrain(Element):
         if self.render:
             self.node_path.hide(CamMask.MiniMap | CamMask.Shadow | CamMask.DepthCam)
             self.terrain_normal = self.loader.loadTexture(
-                VisLoader.file_path(VisLoader.asset_path, "textures", "grass2", "normal.jpg")
+                AssetLoader.file_path(AssetLoader.asset_path, "textures", "grass2", "normal.jpg")
             )
             self.terrain_texture = self.loader.loadTexture(
-                VisLoader.file_path(VisLoader.asset_path, "textures", "grass2", "color.jpg")
+                AssetLoader.file_path(AssetLoader.asset_path, "textures", "grass2", "color.jpg")
             )
             self.terrain_texture.setWrapU(Texture.WM_repeat)
             self.terrain_texture.setWrapV(Texture.WM_repeat)
