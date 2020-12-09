@@ -15,6 +15,8 @@ class PgOnScreenMessage(OnScreenDebug.OnScreenDebug):
 
     def update_data(self, data: dict):
         self.onScreenText.cleanup()
+        if not isinstance(data, dict) or data is None:
+            return
         for k, v in data.items():
             self.add(k, v)
 
