@@ -1,6 +1,6 @@
 import os
 
-from panda3d.core import SamplerState, Shader, NodePath
+from panda3d.core import SamplerState, Shader, NodePath, ConfigVariableString
 
 from pg_drive.utils.element import DynamicElement
 from pg_drive.utils.asset_loader import AssetLoader
@@ -57,10 +57,17 @@ class SkyBox(DynamicElement):
         skybox_texture.set_anisotropic_degree(16)
         skybox.set_texture(skybox_texture)
 
-        skybox_shader = Shader.load(
-            Shader.SL_GLSL, AssetLoader.file_path(AssetLoader.asset_path, "shaders", "skybox.vert.glsl"),
-            AssetLoader.file_path(AssetLoader.asset_path, "shaders", "skybox.frag.glsl")
-        )
+        gles = ConfigVariableString("load-display").getValue()
+        if gles == "pandagles2":
+            skybox_shader = Shader.load(
+                Shader.SL_GLSL, AssetLoader.file_path(AssetLoader.asset_path, "shaders", "skybox_gles.vert.glsl"),
+                AssetLoader.file_path(AssetLoader.asset_path, "shaders", "skybox_gles.frag.glsl")
+            )
+        else:
+            skybox_shader = Shader.load(
+                Shader.SL_GLSL, AssetLoader.file_path(AssetLoader.asset_path, "shaders", "skybox.vert.glsl"),
+                AssetLoader.file_path(AssetLoader.asset_path, "shaders", "skybox.frag.glsl")
+            )
         skybox.set_shader(skybox_shader)
         self.node_path = skybox
         skybox.setZ(-4400)
