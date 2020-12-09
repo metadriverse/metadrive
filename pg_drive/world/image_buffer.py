@@ -40,7 +40,7 @@ class ImageBuffer:
         self.cam.setPos(pos)
         self.cam.node().setCameraMask(self.CAM_MASK)
         self.node_path.reparentTo(parent_node)
-        logging.debug("Load Vehicle Module: {}".format(self.__class__.__name__))
+        logging.debug("Load Image Buffer: {}".format(self.__class__.__name__))
 
     def get_image(self):
         """
