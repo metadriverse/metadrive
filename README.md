@@ -37,6 +37,14 @@ for i in range(1000):
 env.close()
 ```
 
+You can also enjoy a journey carrying out by our professional driver! The provided expert can drive in 10000 maps 
+with almost 90% likelihood to achieve the destination. 
+
+Note that this script requires your system to have the capacity of rendering. Please refer to the installation guideline for more information.
+```bash
+python -m pg_drive.examples.enjoy_journey
+```
+
 
 ## Predefined environment sets
 
