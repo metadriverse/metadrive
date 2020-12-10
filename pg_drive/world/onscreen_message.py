@@ -1,5 +1,7 @@
+from typing import Optional, Union
+
 from direct.showbase import OnScreenDebug
-from panda3d.core import Vec4, TextNode
+from panda3d.core import Vec4
 
 
 class PgOnScreenMessage(OnScreenDebug.OnScreenDebug):
@@ -12,11 +14,12 @@ class PgOnScreenMessage(OnScreenDebug.OnScreenDebug):
         super(PgOnScreenMessage, self).__init__()
         self.enabled = True
         self.load()
+        self.plain_text = set()
 
-    def update_data(self, data: dict):
+    def update_data(self, data: Optional[Union[dict, str]]):
         self.onScreenText.cleanup()
         if isinstance(data, str):
-            self.add("", data)
+            self.plain_text.add(data)
         elif isinstance(data, dict):
             for k, v in data.items():
                 self.add(k, v)
@@ -33,6 +36,12 @@ class PgOnScreenMessage(OnScreenDebug.OnScreenDebug):
         if not self.onScreenText:
             self.load()
         self.onScreenText.clearText()
+
+        # Render plain text first
+        for v in self.plain_text:
+            self.onScreenText.appendText(v)
+
+        # Render numerical values
         entries = list(self.data.items())
         entries.sort()
         for k, v in entries:
@@ -56,4 +65,8 @@ class PgOnScreenMessage(OnScreenDebug.OnScreenDebug):
             else:
                 v_text = "{}\n".format(str(value))
             self.onScreenText.appendText(v_text)
+
         self.frame += 1
+
+    def clear_plain_text(self, string):
+        self.plain_text.remove(string)
