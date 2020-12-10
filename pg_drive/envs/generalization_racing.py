@@ -110,6 +110,7 @@ class GeneralizationRacing(gym.Env):
         self.traffic_manager = None
         self.control_camera = None
         self.controller = None
+        self.restored_maps = dict()
 
         self.maps = {_seed: None for _seed in range(self.start_seed, self.start_seed + self.env_num)}
         self.current_seed = self.start_seed
@@ -299,6 +300,13 @@ class GeneralizationRacing(gym.Env):
             del self.pg_world
             self.pg_world = None
 
+        del self.maps
+        self.maps = {_seed: None for _seed in range(self.start_seed, self.start_seed + self.env_num)}
+        del self.current_map
+        self.current_map = None
+        del self.restored_maps
+        self.restored_maps = dict()
+
     def select_map(self):
         if self.config["load_map_from_json"] and self.current_map is None:
             assert self.config["_load_map_from_json"]
@@ -311,8 +319,14 @@ class GeneralizationRacing(gym.Env):
         # create map
         self.current_seed = np.random.randint(self.start_seed, self.start_seed + self.env_num)
         if self.maps.get(self.current_seed, None) is None:
-            map_config = self.config["map_config"]
-            map_config.update({"seed": self.current_seed})
+
+            if self.config["load_map_from_json"]:
+                map_config = self.restored_maps.get(self.current_seed, None)
+                assert map_config is not None
+            else:
+                map_config = self.config["map_config"]
+                map_config.update({"seed": self.current_seed})
+
             new_map = Map(self.pg_world.worldNP, self.pg_world.physics_world, map_config)
             self.maps[self.current_seed] = new_map
             self.current_map = self.maps[self.current_seed]
@@ -364,11 +378,6 @@ class GeneralizationRacing(gym.Env):
                 mini_map = MiniMap(vehicle_config["mini_map"], self.vehicle.chassis_np, self.pg_world)
                 self.vehicle.add_image_sensor("mini_map", mini_map)
 
-        del self.maps
-        self.maps = {_seed: None for _seed in range(self.start_seed, self.start_seed + self.env_num)}
-        del self.current_map
-        self.current_map = None
-
     def dump_all_maps(self):
         assert self.pg_world is None, "We assume you generate map files in independent tasks (not in training). " \
                                       "So you should run the generating script without calling reset of the " \
@@ -417,11 +426,7 @@ class GeneralizationRacing(gym.Env):
             map_config = {}
             map_config[Map.GENERATE_METHOD] = MapGenerateMethod.PG_MAP_FILE
             map_config[Map.GENERATE_PARA] = data["map_data"][str(seed)]
-            map = Map(self.pg_world.worldNP, self.pg_world.physics_world, map_config)
-            self.maps[seed] = map
-
-            # Map will be added to world automatically, so remove them after creating
-            map.unload_from_pg_world(self.pg_world.physics_world)
+            self.restored_maps[seed] = map_config
 
     def load_all_maps_from_json(self, path):
         assert path.endswith(".json")
