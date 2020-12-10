@@ -19,6 +19,19 @@ from pg_drive.world.vehicle_panel import VehiclePanel
 
 root_path = os.path.dirname(os.path.dirname(__file__))
 
+help_message = "Keyboard Shortcuts:\n" \
+               "  w: Acceleration\n" \
+               "  s: Braking\n" \
+               "  a: Moving Left\n" \
+               "  d: Moving Right\n" \
+               "  r: Reset the Environment\n" \
+               "  h: Helping Message\n" \
+               "  1: Box Debug Mode\n" \
+               "  2: WireFrame Debug Mode\n" \
+               "  3: Texture Debug Mode\n" \
+               "  4: Print Debug Message\n" \
+               "  Esc: Quit\n"
+
 
 class PgWorld(ShowBase.ShowBase):
     loadPrcFileData("", "win-size 1200 900")
@@ -65,6 +78,7 @@ class PgWorld(ShowBase.ShowBase):
         # add element should be cleared these node asset_path, after reset()
         self.worldNP = self.render.attachNewNode("world_np")
         self.pbr_worldNP = self.pbr_render.attachNewNode("pbrNP")  # This node is only used for render gltf model
+        self.debug_node = None
 
         # some render attr
         self.light = None
@@ -150,14 +164,14 @@ class PgWorld(ShowBase.ShowBase):
         # onscreen message
         self.on_screen_message = PgOnScreenMessage() \
             if self.pg_config["use_render"] and self.pg_config["onscreen_message"] else None
+        self._show_help_message = False
 
         # debug setting
-        if self.pg_config["debug"] or self.pg_config["debug_physics_world"]:
-            self.accept('f1', self.toggleWireframe)
-            self.accept('f2', self.toggleTexture)
-            self.accept('f3', self.toggleDebug)
-            self.accept('f4', self.toggleAnalyze)
-            self._debug_mode()
+        self.accept('1', self.toggleDebug)
+        self.accept('2', self.toggleWireframe)
+        self.accept('3', self.toggleTexture)
+        self.accept('4', self.toggleAnalyze)
+        self.accept("h", self.toggle_help_message)
 
     def _init_display_region(self):
         # TODO maybe decided by the user in the future
@@ -251,17 +265,19 @@ class PgWorld(ShowBase.ShowBase):
         debugNP = self.render.attachNewNode(debugNode)
         debugNP.show()
         self.physics_world.setDebugNode(debugNP.node())
-        self.debugnode = debugNP
+        self.debug_node = debugNP
 
     def toggleAnalyze(self):
         self.worldNP.analyze()
         # self.worldNP.ls()
 
     def toggleDebug(self):
-        if self.debugnode.isHidden():
-            self.debugnode.show()
+        if self.debug_node is None:
+            self._debug_mode()
+        if self.debug_node.isHidden():
+            self.debug_node.show()
         else:
-            self.debugnode.hide()
+            self.debug_node.hide()
 
     def report_body_nums(self, task):
         logging.debug(
@@ -282,6 +298,14 @@ class PgWorld(ShowBase.ShowBase):
 
         # del self.physics_world  # Will cause error if del it.
         self.physics_world = None
+
+    def toggle_help_message(self):
+        if self._show_help_message:
+            self.on_screen_message.clear_plain_text(help_message)
+            self._show_help_message = False
+        else:
+            self.on_screen_message.update_data(help_message)
+            self._show_help_message = True
 
 
 if __name__ == "__main__":

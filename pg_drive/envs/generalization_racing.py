@@ -125,6 +125,8 @@ class GeneralizationRacing(gym.Env):
 
         # init world
         self.pg_world = PgWorld(self.pg_world_config)
+        self.pg_world.accept("r", self.reset)
+        self.pg_world.accept("escape", self.force_close)
 
         # init traffic manager
         self.traffic_manager = TrafficManager(self.config["traffic_mode"])
@@ -445,3 +447,7 @@ class GeneralizationRacing(gym.Env):
             )
             self.config["load_map_from_json"] = False  # Don't fall into this function again.
             return False
+
+    def force_close(self):
+        self.close()
+        raise KeyboardInterrupt()
