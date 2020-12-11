@@ -264,7 +264,6 @@ class PgWorld(ShowBase.ShowBase):
         debugNode.showBoundingBoxes(False)
         debugNode.showNormals(True)
         debugNP = self.render.attachNewNode(debugNode)
-        debugNP.show()
         self.physics_world.setDebugNode(debugNP.node())
         self.debug_node = debugNP
 
