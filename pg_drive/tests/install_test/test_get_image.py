@@ -10,7 +10,7 @@ from pg_drive.scene_creator.map import Map
 def capture_image(headless):
     env = GeneralizationRacing(
         dict(
-            use_render=not headless,
+            use_render=False,
             map_config={
                 Map.GENERATE_METHOD: BigGenerateMethod.BLOCK_NUM,
                 Map.GENERATE_PARA: 7

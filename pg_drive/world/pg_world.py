@@ -63,6 +63,8 @@ class PgWorld(ShowBase.ShowBase):
             loadPrcFileData("", "threading-model Cull/Draw")  # multi-thread render, accelerate simulation when evaluate
         else:
             mode = "offscreen" if self.pg_config["use_image"] else "none"
+        if sys.platform == "darwin" and self.pg_config["use_image"]:  # Mac don't support offscreen rendering
+            mode = "onscreen"
         if self.pg_config["headless_image"]:
             loadPrcFileData("", "load-display  pandagles2")
         super(PgWorld, self).__init__(windowType=mode)
