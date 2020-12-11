@@ -1,1 +1,1 @@
-from .generalization_racing import GeneralizationRacing
+from pg_drive.envs.generalization_racing import GeneralizationRacing

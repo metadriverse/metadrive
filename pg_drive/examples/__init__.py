@@ -1,1 +1,1 @@
-from .ppo_expert.numpy_expert import expert
+from pg_drive.examples.ppo_expert.numpy_expert import expert

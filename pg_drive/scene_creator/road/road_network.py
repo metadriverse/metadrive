@@ -6,6 +6,7 @@ import numpy as np
 
 from pg_drive.scene_creator.lanes.lane import LineType, AbstractLane
 from pg_drive.scene_creator.lanes.straight_lane import StraightLane
+from pg_drive.scene_creator.road.road import Road
 
 logger = logging.getLogger(__name__)
 
@@ -65,7 +66,6 @@ class RoadNetwork:
         """
         In order to remain the lane index, ret is a 2-dim array structure like [Road_lanes[lane_1, lane_2]]
         """
-        from .road import Road
         ret = []
         for _from, _to_dict in self.graph.items():
             for _to, lanes in _to_dict.items():
@@ -78,7 +78,6 @@ class RoadNetwork:
         """
         In order to remain the lane index, ret is a 2-dim array structure like like [Road_lanes[lane_1, lane_2]]
         """
-        from .road import Road
         ret = []
         for _from, _to_dict in self.graph:
             for _to, lanes in _to_dict:
