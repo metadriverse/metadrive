@@ -2,13 +2,12 @@ from panda3d.bullet import BulletWorld
 from panda3d.core import NodePath
 
 from pg_drive.pg_config.pg_space import PgSpace
-from pg_drive.scene_creator.basic_utils import Decoration
+from pg_drive.scene_creator.basic_utils import Decoration, CreateRoadFrom, CreateAdverseRoad, ExtendStraightLane
 from pg_drive.scene_creator.blocks.block import BlockSocket, Block
 from pg_drive.scene_creator.lanes.lane import LineType
 from pg_drive.scene_creator.lanes.straight_lane import StraightLane
 from pg_drive.scene_creator.road.road import Road
 from pg_drive.scene_creator.road.road_network import RoadNetwork
-from ..basic_utils import CreateRoadFrom, CreateAdverseRoad, ExtendStraightLane
 
 
 class FirstBlock(Block):

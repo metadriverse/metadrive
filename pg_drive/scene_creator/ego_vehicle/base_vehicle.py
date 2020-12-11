@@ -13,18 +13,18 @@ from pg_drive.pg_config.pg_config import PgConfig
 from pg_drive.pg_config.pg_space import PgSpace
 from pg_drive.scene_creator.blocks.block import Block
 from pg_drive.scene_creator.ego_vehicle.vehicle_module.lidar import Lidar
-from pg_drive.world.image_buffer import ImageBuffer
+from pg_drive.scene_creator.ego_vehicle.vehicle_module.routing_localization import RoutingLocalizationModule
 from pg_drive.scene_creator.lanes.circular_lane import CircularLane
 from pg_drive.scene_creator.lanes.lane import AbstractLane
 from pg_drive.scene_creator.lanes.straight_lane import StraightLane
 from pg_drive.scene_creator.map import Map
 from pg_drive.scene_creator.pg_traffic_vehicle.traffic_vehicle import PgTrafficVehicle
+from pg_drive.utils.asset_loader import AssetLoader
 from pg_drive.utils.element import DynamicElement
 from pg_drive.utils.math_utils import get_vertical_vector, norm, clip
-from pg_drive.utils.asset_loader import AssetLoader
+from pg_drive.world.image_buffer import ImageBuffer
 from pg_drive.world.pg_world import PgWorld
 from pg_drive.world.terrain import Terrain
-from .vehicle_module.routing_localization import RoutingLocalizationModule
 
 
 class BaseVehicle(DynamicElement):
