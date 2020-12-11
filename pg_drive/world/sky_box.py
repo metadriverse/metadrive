@@ -5,6 +5,8 @@ from panda3d.core import SamplerState, Shader, NodePath, ConfigVariableString
 from pg_drive.utils.element import DynamicElement
 from pg_drive.utils.asset_loader import AssetLoader
 
+import sys
+
 
 class SkyBox(DynamicElement):
     """
@@ -64,9 +66,15 @@ class SkyBox(DynamicElement):
                 AssetLoader.file_path(AssetLoader.asset_path, "shaders", "skybox_gles.frag.glsl")
             )
         else:
+            if sys.platform == "darwin":
+                vert_file = "skybox_mac.vert.glsl"
+                frag_file = "skybox_mac.frag.glsl"
+            else:
+                vert_file = "skybox.vert.glsl"
+                frag_file = "skybox.frag.glsl"
             skybox_shader = Shader.load(
-                Shader.SL_GLSL, AssetLoader.file_path(AssetLoader.asset_path, "shaders", "skybox.vert.glsl"),
-                AssetLoader.file_path(AssetLoader.asset_path, "shaders", "skybox.frag.glsl")
+                Shader.SL_GLSL, AssetLoader.file_path(AssetLoader.asset_path, "shaders", vert_file),
+                AssetLoader.file_path(AssetLoader.asset_path, "shaders", frag_file)
             )
         skybox.set_shader(skybox_shader)
         self.node_path = skybox
