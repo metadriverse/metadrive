@@ -39,7 +39,7 @@ Content
    self
    install
    getting_start
-   generalization-env-config
+   generalization_env_config
 
 
 
