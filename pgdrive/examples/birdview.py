@@ -1,11 +1,11 @@
-from pgdrive.envs.generalization_racing import GeneralizationRacing
+from pgdrive.envs.pgdrive_env import PGDriveEnv
 from pgdrive.scene_creator.algorithm.BIG import BigGenerateMethod
 from pgdrive.utils import setup_logger
 
 setup_logger(debug=True)
 
 if __name__ == "__main__":
-    env = GeneralizationRacing(
+    env = PGDriveEnv(
         dict(
             map_config={
                 "type": BigGenerateMethod.BLOCK_NUM,

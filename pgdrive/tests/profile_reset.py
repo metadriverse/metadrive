@@ -1,9 +1,9 @@
 import time
 
-from pgdrive import GeneralizationRacing
+from pgdrive import PGDriveEnv
 
 if __name__ == '__main__':
-    env = GeneralizationRacing(dict(environment_num=100, load_map_from_json=False))
+    env = PGDriveEnv(dict(environment_num=100, load_map_from_json=False))
     obs = env.reset()
     start = time.time()
     for s in range(1000):

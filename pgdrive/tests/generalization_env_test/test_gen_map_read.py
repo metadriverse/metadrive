@@ -1,14 +1,12 @@
 import json
 
-from pgdrive.envs.generalization_racing import GeneralizationRacing
+from pgdrive.envs.pgdrive_env import PGDriveEnv
 from pgdrive.utils import recursive_equal, setup_logger
 
 setup_logger(debug=True)
 
 if __name__ == "__main__":
-    env = GeneralizationRacing({
-        "environment_num": 10,
-    })
+    env = PGDriveEnv({"environment_num": 10, "load_map_from_json": False})
     data = env.dump_all_maps()
     env.close()
     with open("test_10maps.json", "w") as f:
@@ -17,13 +15,16 @@ if __name__ == "__main__":
     with open("test_10maps.json", "r") as f:
         restored_data = json.load(f)
 
-    env = GeneralizationRacing({
+    env = PGDriveEnv({
         "environment_num": 10,
     })
     env.lazy_init()
     env.pg_world.clear_world()
     print("Start loading.")
     env.load_all_maps(restored_data)
+
+    while any([v is None for v in env.maps.values()]):
+        env.reset()
 
     for i in range(10):
         m = env.maps[i].save_map()

@@ -1,2 +1,1 @@
-from envs import GeneralizationRacing
-from examples import run_env
+from pgdrive.envs import PGDriveEnv, GeneralizationRacing
