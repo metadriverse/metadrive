@@ -5,10 +5,10 @@ Our expert can drive in 10000 maps with almost 90% likelihood to achieve the des
 Note: This script require rendering, please following the installation instruction to setup a proper
 environment that allows popping up an window.
 """
-from pgdrive import GeneralizationRacing
+from pgdrive import PGDriveEnv
 from pgdrive.examples import expert
 
-env = GeneralizationRacing(dict(use_render=True, environment_num=10000))
+env = PGDriveEnv(dict(use_render=True, environment_num=10000))
 obs = env.reset()
 try:
     while True:

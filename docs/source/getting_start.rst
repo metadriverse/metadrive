@@ -19,7 +19,7 @@ The usage of PGDrive is as same as other **gym** environments::
     import pgdrive  # Import this package to register the environment!
     import gym
 
-    env = gym.make("GeneralizationRacing-v0", config=dict(use_render=True))
+    env = gym.make("PGDrive-v0", config=dict(use_render=True))
     env.reset()
     for i in range(1000):
         obs, reward, done, info = env.step(env.action_space.sample())

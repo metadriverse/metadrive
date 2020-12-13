@@ -1,11 +1,11 @@
 import time
 
-from pgdrive.envs.generalization_racing import GeneralizationRacing
+from pgdrive.envs.pgdrive_env import PGDriveEnv
 from pgdrive.scene_creator.algorithm.BIG import BigGenerateMethod
 from pgdrive.scene_creator.map import Map
 
 if __name__ == "__main__":
-    env = GeneralizationRacing(
+    env = PGDriveEnv(
         dict(
             use_render=True,
             map_config={

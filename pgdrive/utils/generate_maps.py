@@ -1,7 +1,7 @@
 import json
 import os.path as osp
 
-from pgdrive import GeneralizationRacing
+from pgdrive import PGDriveEnv
 
 root = osp.dirname(osp.dirname(osp.abspath(__file__)))
 assert_path = osp.join(root, "assets", "maps")
@@ -16,7 +16,7 @@ predefined_maps = {
 if __name__ == '__main__':
     print("Root path is {}. Asset path is {}.".format(root, assert_path))
     for env_name, env_config in predefined_maps.items():
-        env = GeneralizationRacing(env_config)
+        env = PGDriveEnv(env_config)
         data = env.dump_all_maps()
         file_path = osp.join(assert_path, "{}.json".format(env_name))
         with open(file_path, "w") as f:

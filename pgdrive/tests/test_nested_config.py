@@ -1,9 +1,9 @@
-from pgdrive import GeneralizationRacing
+from pgdrive import PGDriveEnv
 
 
 def test_nested_config():
     try:
-        config = GeneralizationRacing.default_config()
+        config = PGDriveEnv.default_config()
         config.update(dict(
             traffic_density=0.1,
             bbb=0,
@@ -15,7 +15,7 @@ def test_nested_config():
         raise ValueError("Test failed!")
 
     try:
-        config = GeneralizationRacing.default_config()
+        config = PGDriveEnv.default_config()
         config.update(dict(
             traffic_density=0.1,
             map_config=dict(bbb=0),
@@ -26,7 +26,7 @@ def test_nested_config():
     else:
         raise ValueError("Test failed!")
 
-    config = GeneralizationRacing.default_config()
+    config = PGDriveEnv.default_config()
     config["pg_world_config"] = {
         "use_render": False,
     }

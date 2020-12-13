@@ -67,12 +67,12 @@ def get_result(env):
 
 
 if __name__ == '__main__':
-    from pgdrive.envs.generalization_racing import GeneralizationRacing
+    from pgdrive.envs.pgdrive_env import PGDriveEnv
     from pgdrive.scene_creator.map import Map, MapGenerateMethod
 
     for friction in [0.6, 0.8, 0.9, 1.0, 1.1, 1.2, 1.4, 1.6, 1.8, 2.0]:
         # for friction in [0.9, 1.0, 1.1]:
-        env = GeneralizationRacing(
+        env = PGDriveEnv(
             {
                 "environment_num": 1,
                 "traffic_density": 0.0,
