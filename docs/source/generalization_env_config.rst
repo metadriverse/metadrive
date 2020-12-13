@@ -14,7 +14,7 @@ GeneralizationEnv Config
 We do generalization experiments under the default setting of GeneralizationEnv. To reproduce our experiment results,
 no special configuration is needed.
 
-However, Pg-Drive can also support other research topics, and we will simply introduce the meaning of some configuration
+However, PGDrive can also support other research topics, and we will simply introduce the meaning of some configuration
 options of GeneralizationEnv.
 
 Draw Scene & Visualization
