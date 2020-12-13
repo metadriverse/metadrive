@@ -1,2 +1,2 @@
 import pgdrive.register
-from pgdrive.envs import PGDriveEnv, GeneralizationRacing
+from pgdrive.envs import PGDriveEnv, GeneralizationRacing, ActionRepeat

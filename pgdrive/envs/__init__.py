@@ -1,3 +1,4 @@
+from pgdrive.envs.action_repeat_env import ActionRepeat
 from pgdrive.envs.pgdrive_env import PGDriveEnv
 
 # For compatibility
