@@ -4,3 +4,4 @@
 *.glf
 *.rar
 /docs/build/
+/docs/.idea/

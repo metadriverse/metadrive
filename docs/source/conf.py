@@ -17,7 +17,7 @@
 
 # -- Project information -----------------------------------------------------
 
-project = 'PG-Drive'
+project = 'PGDrive'
 copyright = '2020, Drivingforce Group'
 author = 'Drivingforce'
 
