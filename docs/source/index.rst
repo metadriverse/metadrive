@@ -1,15 +1,15 @@
-.. pg-drive documentation master file, created by
+.. PGDrive documentation master file, created by
    sphinx-quickstart on Tue Dec  8 13:36:14 2020.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
 #####################
-PG-Drive Home
+PGDrive Home
 #####################
 
-Welcome to the PG-Drive home.
-PG-Drive is a lightweight autonomous driving environment.
-Referring to this documentation, you can utilize PG-Drive to research diverse driving **topics**, including:
+Welcome to the PGDrive home.
+PGDrive is a lightweight autonomous driving environment.
+Referring to this documentation, you can utilize PGDrive to research diverse driving **topics**, including:
 
 - Reinforcement learning
 - Imitation leaning
@@ -23,7 +23,7 @@ We now provide several **sensors** to collect environment information:
 - Lidar
 
 Various cameras can be equipped on your autonomous driving car to sense the environment.
-Lidar in PG-Drive is a pseudu-lidar.
+Lidar in PGDrive is a pseudu-lidar.
 Besides the could points, the information of surrounding vehicles like speed, position, heading can also be obtained
 from lidar.
 

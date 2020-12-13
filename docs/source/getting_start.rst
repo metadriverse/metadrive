@@ -1,22 +1,22 @@
 .. _getting_start:
 
 #############################
-Getting Start with PG-Drive
+Getting Start with PGDrive
 #############################
 
-We provide a pre-trained RL-Agent to show the power of PG-Drive.
+We provide a pre-trained RL-Agent to show the power of PGDrive.
 Run::
 
-    python -m pg_drive.examples.enjoy_journey
+    python -m pgdrive.examples.enjoy_journey
 
 to watch its show!
 
 Environment Usage
 #########################
 
-The usage of PG-Drive is as same as other **gym** environments::
+The usage of PGDrive is as same as other **gym** environments::
 
-    import pg_drive  # Import this package to register the environment!
+    import pgdrive  # Import this package to register the environment!
     import gym
 
     env = gym.make("GeneralizationRacing-v0", config=dict(use_render=True))
@@ -28,7 +28,7 @@ The usage of PG-Drive is as same as other **gym** environments::
             env.reset()
     env.close()
 
-Any Reinforcement Algorithms and Imitation Learning Algorithms are compatible with PG-Drive.
+Any Reinforcement Algorithms and Imitation Learning Algorithms are compatible with PGDrive.
 
 Pre-defined Environments
 #############################
