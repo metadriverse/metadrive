@@ -1,10 +1,10 @@
-from pgdrive.envs.generalization_racing import GeneralizationRacing
+from pgdrive.envs.pgdrive_env import PGDriveEnv
 from pgdrive.utils import setup_logger
 
 setup_logger(debug=True)
 
 
-class TestEnv(GeneralizationRacing):
+class TestEnv(PGDriveEnv):
     def __init__(self):
         super(TestEnv, self).__init__(
             {

@@ -2,10 +2,10 @@ import time
 
 import numpy as np
 
-from pgdrive import GeneralizationRacing
+from pgdrive import PGDriveEnv
 
 if __name__ == '__main__':
-    env = GeneralizationRacing(dict(environment_num=10))
+    env = PGDriveEnv(dict(environment_num=10))
     obs = env.reset()
     start = time.time()
     total = 10000

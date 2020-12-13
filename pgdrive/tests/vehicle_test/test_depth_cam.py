@@ -1,9 +1,9 @@
-from pgdrive.envs.generalization_racing import GeneralizationRacing
+from pgdrive.envs.pgdrive_env import PGDriveEnv
 from pgdrive.scene_creator.map import Map, MapGenerateMethod
 from panda3d.core import loadPrcFileData
 
 
-class TestEnv(GeneralizationRacing):
+class TestEnv(PGDriveEnv):
     def __init__(self):
         super(TestEnv, self).__init__(
             {

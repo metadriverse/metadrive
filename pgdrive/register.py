@@ -1,6 +1,6 @@
 from gym.envs.registration import register
 
-from pgdrive.envs import GeneralizationRacing
+from pgdrive.envs import PGDriveEnv
 
 environment_dict = {
     "PGDrive-test-v0": {
@@ -38,7 +38,7 @@ environment_dict = {
 }
 
 for env_name, env_config in environment_dict.items():
-    register(id=env_name, entry_point=GeneralizationRacing, kwargs=dict(config=env_config))
+    register(id=env_name, entry_point=PGDriveEnv, kwargs=dict(config=env_config))
 
 
 def get_env_list():

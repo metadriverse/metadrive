@@ -1,11 +1,11 @@
 import unittest
 
-from pgdrive import GeneralizationRacing
+from pgdrive import PGDriveEnv
 
 
 class TestObsActionSpace(unittest.TestCase):
     def setUp(self):
-        self.env = GeneralizationRacing()
+        self.env = PGDriveEnv()
 
     def test_obs_space(self):
         obs = self.env.reset()

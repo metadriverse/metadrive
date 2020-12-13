@@ -8,7 +8,7 @@ import numpy as np
 from gym import logger, error
 from panda3d.core import PNMImage
 
-from pgdrive.envs.generalization_racing import GeneralizationRacing
+from pgdrive.envs.pgdrive_env import PGDriveEnv
 from pgdrive.scene_creator.algorithm.BIG import BigGenerateMethod
 from pgdrive.scene_creator.map import Map
 
@@ -141,7 +141,7 @@ def gen_video(frames, file="tmp"):
 
 if __name__ == '__main__':
     headless = True
-    env = GeneralizationRacing(
+    env = PGDriveEnv(
         dict(
             use_render=False,
             map_config={
