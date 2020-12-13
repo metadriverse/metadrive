@@ -19,7 +19,7 @@ pip install -e .
 
 ## Quick Start
 
-Please run `python -m pg_drive.examples.test_generalization_env` to play with the environment with keyboard!
+Please run `python -m pg_drive.examples.enjoy` to play with the environment with keyboard!
 
 To build the environment, you can simply run:
 
