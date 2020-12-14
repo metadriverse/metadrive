@@ -448,6 +448,5 @@ class PGDriveEnv(gym.Env):
         self.close()
         raise KeyboardInterrupt()
 
-    def seed(self, seed=None):
-        if seed:
-            self.current_seed = seed
+    def set_current_seed(self, seed):
+        self.current_seed = seed
