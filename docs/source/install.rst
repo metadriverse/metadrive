@@ -14,13 +14,13 @@ Install PGDrive on MacOs, Windows and Linux
 
 The installation procedure on these different platforms is same and easy, we recommend to use the command following to install::
 
-    pip install git+https://github.com/decisionforce/PGDrive.git
+    pip install git+https://github.com/decisionforce/pgdrive.git
 
 or you can install via::
 
-    git clone https://github.com/decisionforce/PGDrive.git
+    git clone https://github.com/decisionforce/pgdrive.git
 
-    cd PGDrive
+    cd pgdrive
 
     pip install -e .
 

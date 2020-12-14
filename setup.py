@@ -9,7 +9,7 @@ setup(
     name="pgdrive",
     version="0.1.0",
     description="PGDrive",
-    url="https://github.com/decisionforce/PGDrive",
+    url="https://github.com/decisionforce/pgdrive",
     author="Quanyi Li, Zhenghao Peng",
     author_email="liquanyi@bupt.edu.cn, pengzh@ie.cuhk.edu.hk",
     packages=find_packages(),
