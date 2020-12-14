@@ -13,7 +13,7 @@ class TestEnv(PGDriveEnv):
                 "use_render": True,
                 "use_image": True,
                 "rgb_clip": True,
-                "vehicle_config": dict(rgb_cam=(200, 88)),
+                # "vehicle_config": dict(rgb_cam=(200, 88)),
                 "pg_world_config": {
                     "headless_image": False
                 }

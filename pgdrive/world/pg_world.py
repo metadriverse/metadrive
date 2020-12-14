@@ -1,12 +1,12 @@
 import logging
 import os
 import sys
+from typing import Optional, Union
 
 import gltf
 from direct.showbase import ShowBase
 from panda3d.bullet import BulletDebugNode, BulletWorld
 from panda3d.core import Vec3, AntialiasAttrib, NodePath, loadPrcFileData, TextNode, LineSegs
-
 from pgdrive.pg_config.cam_mask import CamMask
 from pgdrive.pg_config.pg_config import PgConfig
 from pgdrive.utils.asset_loader import AssetLoader
@@ -35,6 +35,7 @@ help_message = "Keyboard Shortcuts:\n" \
 
 
 class PgWorld(ShowBase.ShowBase):
+    loadPrcFileData("", "window-title PGDrive v0.1.0")
     loadPrcFileData("", "win-size 1200 900")
     loadPrcFileData("", "framebuffer-multisample 1")
     loadPrcFileData("", "multisamples 8")
@@ -74,6 +75,7 @@ class PgWorld(ShowBase.ShowBase):
             gltf.patch_loader(self.loader)
         self.closed = False
         self.exitFunc = self.exitFunc
+        ImageBuffer.refresh_frame = self.graphicsEngine.renderFrame
 
         # add element to render and pbr render, if is exists all the time
         self.pbr_render = self.render.attachNewNode("pbrNP")
@@ -162,7 +164,6 @@ class PgWorld(ShowBase.ShowBase):
 
         # task manager
         self.taskMgr.remove('audioLoop')
-        self.taskMgr.remove("igLoop")
 
         # onscreen message
         self.on_screen_message = PgOnScreenMessage() \
@@ -204,12 +205,18 @@ class PgWorld(ShowBase.ShowBase):
         self.collision_info_np.setPos(-1, -0.8, -0.8)
         self.collision_info_np.reparentTo(self.aspect2d)
 
-    def render_frame(self, text: dict = None):
+    def render_frame(self, text: Optional[Union[dict, str]] = None):
+        """
+        The real rendering is conducted by the igLoop task maintained by panda3d.
+        Frame will be drawn and refresh, when taskMgr.step() is called.
+        This function is only used to pass the message that needed to be printed in the screen to underlying renderer.
+        :param text: A dict containing key and values or a string.
+        :return: None
+        """
         if self.on_screen_message is not None:
             self.on_screen_message.update_data(text)
-            self.on_screen_message.render()
-        self.graphicsEngine.renderFrame()
         if self.pg_config["use_render"]:
+            self.on_screen_message.render()
             with self.force_fps:
                 self.sky_box.step()
 
