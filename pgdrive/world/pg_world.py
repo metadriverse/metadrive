@@ -41,6 +41,7 @@ class PgWorld(ShowBase.ShowBase):
     loadPrcFileData("", "multisamples 8")
     loadPrcFileData("", 'bullet-filter-algorithm groups-mask')
     loadPrcFileData("", "audio-library-name null")
+    loadPrcFileData("", "compressed-textures 1")
 
     # loadPrcFileData("", " framebuffer-srgb truein")
 

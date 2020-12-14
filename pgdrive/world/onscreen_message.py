@@ -37,8 +37,6 @@ class PgOnScreenMessage(OnScreenDebug.OnScreenDebug):
             self.load()
         self.onScreenText.clearText()
 
-        print('Fucking you: plan test:', self.plain_text)
-
         # Render plain text first
         for v in self.plain_text:
             self.onScreenText.appendText(v)
