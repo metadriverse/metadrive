@@ -15,7 +15,7 @@ setup(
     packages=find_packages(),
     install_requires=[
         "gym",
-        "numpy",
+        "numpy<=1.19.3",
         "matplotlib",
         "pandas",
         "pygame",
