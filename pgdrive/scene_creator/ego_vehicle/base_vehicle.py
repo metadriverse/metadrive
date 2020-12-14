@@ -6,7 +6,6 @@ from os import path
 import numpy as np
 from panda3d.bullet import BulletVehicle, BulletBoxShape, BulletRigidBodyNode, ZUp, BulletWorld, BulletGhostNode
 from panda3d.core import Vec3, TransformState, NodePath, LQuaternionf, BitMask32, Vec4, PythonCallbackObject
-
 from pgdrive.pg_config.body_name import BodyName
 from pgdrive.pg_config.parameter_space import Parameter, VehicleParameterSpace
 from pgdrive.pg_config.pg_config import PgConfig
@@ -64,7 +63,8 @@ class BaseVehicle(DynamicElement):
             rgb_cam=(84, 84),  # buffer length, width
             depth_cam=(84, 84),  # buffer length, width
             show_navi_point=False,
-            increment_steering=False
+            increment_steering=False,
+            wheel_friction=0.6,
         )
     )
 
@@ -95,7 +95,7 @@ class BaseVehicle(DynamicElement):
 
         # create
         self._add_chassis(pg_world.physics_world)
-        self._create_wheel()
+        self.wheels = self._create_wheel()
 
         # modules
         self.image_sensors = {}
@@ -171,6 +171,10 @@ class BaseVehicle(DynamicElement):
         self.last_current_action = deque([(0.0, 0.0), (0.0, 0.0)], maxlen=2)
         self.last_position = self.born_place
         self.last_heading_dir = self.heading
+
+        if self.vehicle_config["wheel_friction"] != self.default_vehicle_config["wheel_friction"]:
+            for wheel in self.wheels:
+                wheel.setFrictionSlip(self.vehicle_config["wheel_friction"])
 
     def get_state(self):
         pass
@@ -382,9 +386,12 @@ class BaseVehicle(DynamicElement):
         lateral = para[Parameter.tire_lateral]
         axis_height = para[Parameter.tire_radius] + 0.05
         radius = para[Parameter.tire_radius]
+        wheels = []
         for k, pos in enumerate([Vec3(lateral, f_l, axis_height), Vec3(-lateral, f_l, axis_height),
                                  Vec3(lateral, r_l, axis_height), Vec3(-lateral, r_l, axis_height)]):
-            self._add_wheel(pos, radius, True if k < 2 else False, True if k == 0 or k == 2 else False)
+            wheel = self._add_wheel(pos, radius, True if k < 2 else False, True if k == 0 or k == 2 else False)
+            wheels.append(wheel)
+        return wheels
 
     def _add_wheel(self, pos: Vec3, radius: float, front: bool, left):
         wheel_np = self.node_path.attachNewNode("wheel")
@@ -406,8 +413,9 @@ class BaseVehicle(DynamicElement):
         wheel.setSuspensionStiffness(30)
         wheel.setWheelsDampingRelaxation(4.8)
         wheel.setWheelsDampingCompression(1.2)
-        wheel.setFrictionSlip(0.6)
+        wheel.setFrictionSlip(self.vehicle_config["wheel_friction"])
         wheel.setRollInfluence(1.5)
+        return wheel
 
     def add_image_sensor(self, name: str, sensor: ImageBuffer):
         self.image_sensors[name] = sensor
@@ -481,3 +489,4 @@ class BaseVehicle(DynamicElement):
         self.mini_map = None
         self.rgb_cam = None
         self.routing_localization = None
+        self.wheels = None
