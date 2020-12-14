@@ -115,7 +115,7 @@ class PGDriveEnv(gym.Env):
         self.maps = {_seed: None for _seed in range(self.start_seed, self.start_seed + self.env_num)}
         self.current_seed = self.start_seed
         self.current_map = None
-        self.vehicle = None
+        self.vehicle = None  # Ego vehicle
         self.done = False
 
     def lazy_init(self):
