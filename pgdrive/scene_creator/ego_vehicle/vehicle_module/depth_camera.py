@@ -24,7 +24,7 @@ class DepthCamera(ImageBuffer):
         self.cam.lookAt(0, 2.4, 1.3)
         self.lens = self.cam.node().getLens()
         self.lens.setFov(60)
-        # lens.setAspectRatio(2.0)
+        self.lens.setAspectRatio(2.0)
 
         # add shader for it
         if pg_world.pg_config["headless_image"]:

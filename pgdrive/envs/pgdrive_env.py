@@ -1,21 +1,23 @@
+import copy
+import json
+import os.path as osp
+from typing import Optional, Union
+
 import gym
 import numpy as np
-from pgdrive.scene_creator.ego_vehicle.vehicle_module.mini_map import MiniMap
-from pgdrive.scene_creator.ego_vehicle.vehicle_module.rgb_camera import RgbCamera
-from pgdrive.scene_creator.ego_vehicle.vehicle_module.depth_camera import DepthCamera
 from pgdrive.envs.observation_type import LidarStateObservation, ImageStateObservation
 from pgdrive.pg_config.pg_config import PgConfig
 from pgdrive.scene_creator.algorithm.BIG import BigGenerateMethod
 from pgdrive.scene_creator.ego_vehicle.base_vehicle import BaseVehicle
+from pgdrive.scene_creator.ego_vehicle.vehicle_module.depth_camera import DepthCamera
+from pgdrive.scene_creator.ego_vehicle.vehicle_module.mini_map import MiniMap
+from pgdrive.scene_creator.ego_vehicle.vehicle_module.rgb_camera import RgbCamera
 from pgdrive.scene_creator.map import Map, MapGenerateMethod
 from pgdrive.scene_manager.traffic_manager import TrafficManager, TrafficMode
-from pgdrive.world.pg_world import PgWorld
+from pgdrive.utils import recursive_equal
 from pgdrive.world.chase_camera import ChaseCamera
 from pgdrive.world.manual_controller import KeyboardController, JoystickController
-import copy
-import json
-import os.path as osp
-from pgdrive.utils import recursive_equal
+from pgdrive.world.pg_world import PgWorld
 
 pregenerated_map_file = osp.join(osp.dirname(osp.dirname(osp.abspath(__file__))), "assets", "maps", "PGDrive-maps.json")
 
@@ -176,10 +178,6 @@ class PGDriveEnv(gym.Env):
         #  panda3d loop
         self.pg_world.taskMgr.step()
 
-        # render before obtaining rgb observation
-        if self.config["use_image"]:
-            # when use rgb observation, the scene has to be drawn before using the camera data
-            self.render()
         obs = self.observation.observe(self.vehicle)
         reward = self.reward(action)
         done_reward, done_info = self._done_episode()
@@ -193,7 +191,7 @@ class PGDriveEnv(gym.Env):
         info.update(done_info)
         return obs, reward + done_reward, self.done, info
 
-    def render(self, mode='human', text: dict = None):
+    def render(self, mode='human', text: Optional[Union[dict, str]] = None):
         assert self.use_render or self.config["use_image"], "render is off now, can not render"
         if self.control_camera is not None:
             self.control_camera.renew_camera_place(self.pg_world.cam, self.vehicle)
