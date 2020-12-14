@@ -12,6 +12,7 @@ class ImageBuffer:
     display_bottom = 0.8
     display_top = 1
     display_region = None
+    refresh_frame = None
 
     def __init__(
         self,
@@ -46,6 +47,7 @@ class ImageBuffer:
         """
         Bugs here! when use offscreen mode, thus the front cam obs is not from front cam now
         """
+        self.refresh_frame()
         from panda3d.core import PNMImage
         img = PNMImage()
         self.buffer.getScreenshot(img)
