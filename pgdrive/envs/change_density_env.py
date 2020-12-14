@@ -3,9 +3,6 @@ import logging
 import numpy as np
 from pgdrive.envs.pgdrive_env import PGDriveEnv
 from pgdrive.pg_config.pg_config import PgConfig
-from pgdrive.utils import setup_logger
-
-setup_logger(True)
 
 
 class ChangeDensityEnv(PGDriveEnv):

@@ -1,9 +1,6 @@
 from pgdrive.envs.pgdrive_env import PGDriveEnv
 from pgdrive.scene_creator.algorithm.BIG import BigGenerateMethod
 from pgdrive.scene_manager.traffic_manager import TrafficMode
-from pgdrive.utils import setup_logger
-
-setup_logger(debug=True)
 
 if __name__ == "__main__":
     env = PGDriveEnv(
