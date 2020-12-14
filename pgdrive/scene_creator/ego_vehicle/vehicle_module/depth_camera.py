@@ -20,7 +20,7 @@ class DepthCamera(ImageBuffer):
             self.BUFFER_X, self.BUFFER_Y, Vec3(0.0, 0.8, 1.5), self.BKG_COLOR, pg_world.win.makeTextureBuffer,
             pg_world.makeCamera, chassis_np
         )
-        self.add_to_display(pg_world, [0.33, 0.67, self.display_bottom, self.display_top])
+        self.add_to_display(pg_world, [1 / 3, 2 / 3, self.display_bottom, self.display_top])
         self.cam.lookAt(0, 2.4, 1.3)
         self.lens = self.cam.node().getLens()
         self.lens.setFov(60)
