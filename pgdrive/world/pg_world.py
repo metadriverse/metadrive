@@ -9,6 +9,7 @@ from panda3d.bullet import BulletDebugNode, BulletWorld
 from panda3d.core import Vec3, AntialiasAttrib, NodePath, loadPrcFileData, TextNode, LineSegs
 from pgdrive.pg_config.cam_mask import CamMask
 from pgdrive.pg_config.pg_config import PgConfig
+from pgdrive.utils import is_mac
 from pgdrive.utils.asset_loader import AssetLoader
 from pgdrive.world.force_fps import ForceFPS
 from pgdrive.world.image_buffer import ImageBuffer
@@ -65,7 +66,7 @@ class PgWorld(ShowBase.ShowBase):
             loadPrcFileData("", "threading-model Cull/Draw")  # multi-thread render, accelerate simulation when evaluate
         else:
             mode = "offscreen" if self.pg_config["use_image"] else "none"
-        if sys.platform == "darwin" and self.pg_config["use_image"]:  # Mac don't support offscreen rendering
+        if is_mac() and self.pg_config["use_image"]:  # Mac don't support offscreen rendering
             mode = "onscreen"
         if self.pg_config["headless_image"]:
             loadPrcFileData("", "load-display  pandagles2")
