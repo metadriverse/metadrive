@@ -17,7 +17,6 @@ from pgdrive.world.light import Light
 from pgdrive.world.onscreen_message import PgOnScreenMessage
 from pgdrive.world.sky_box import SkyBox
 from pgdrive.world.terrain import Terrain
-from pgdrive.world.vehicle_panel import VehiclePanel
 
 root_path = os.path.dirname(os.path.dirname(__file__))
 
@@ -89,7 +88,6 @@ class PgWorld(ShowBase.ShowBase):
 
         # some render attr
         self.light = None
-        self.vehicle_panel = None
 
         # physics world
         self.physics_world = BulletWorld()
@@ -157,12 +155,6 @@ class PgWorld(ShowBase.ShowBase):
             if self.pg_config["use_default_layout"]:
                 self._init_display_region()
             self.my_buffers = []
-
-            # first window and display region -- a vehicle panel
-            self.vehicle_panel = VehiclePanel(self.win.makeTextureBuffer, self.makeCamera)
-            self.vehicle_panel.add_to_display(
-                self, [2 / 3, 1, self.vehicle_panel.display_bottom, self.vehicle_panel.display_top]
-            )
 
         # task manager
         self.taskMgr.remove('audioLoop')
