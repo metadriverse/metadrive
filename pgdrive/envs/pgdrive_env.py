@@ -362,7 +362,7 @@ class PGDriveEnv(gym.Env):
                 self.vehicle.add_image_sensor("mini_map", mini_map)
             elif self.config["image_source"] == "depth_cam":
                 cam_config = vehicle_config["depth_cam"]
-                depth_cam = DepthCamera(cam_config[0], cam_config[1], self.vehicle.chassis_np, self.pg_world)
+                depth_cam = DepthCamera(*cam_config, self.vehicle.chassis_np, self.pg_world)
                 self.vehicle.add_image_sensor("depth_cam", depth_cam)
             else:
                 raise ValueError("No module named {}".format(self.config["image_source"]))

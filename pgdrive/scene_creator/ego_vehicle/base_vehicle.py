@@ -2,7 +2,7 @@ import copy
 import logging
 from collections import deque
 from os import path
-
+from pgdrive.pg_config.cam_mask import CamMask
 import numpy as np
 from panda3d.bullet import BulletVehicle, BulletBoxShape, BulletRigidBodyNode, ZUp, BulletWorld, BulletGhostNode
 from panda3d.core import Vec3, TransformState, NodePath, LQuaternionf, BitMask32, Vec4, PythonCallbackObject
@@ -61,7 +61,7 @@ class BaseVehicle(DynamicElement):
             lidar=(240, 50, 4),  # laser num, distance, other vehicle info num
             mini_map=(84, 84, 250),  # buffer length, width
             rgb_cam=(84, 84),  # buffer length, width
-            depth_cam=(84, 84),  # buffer length, width
+            depth_cam=(84, 84, True),  # buffer length, width, view_ground
             show_navi_point=False,
             increment_steering=False,
             wheel_friction=0.6,
@@ -173,6 +173,10 @@ class BaseVehicle(DynamicElement):
         self.last_current_action = deque([(0.0, 0.0), (0.0, 0.0)], maxlen=2)
         self.last_position = self.born_place
         self.last_heading_dir = self.heading
+
+        if "depth_cam" in self.image_sensors and self.image_sensors["depth_cam"].view_ground:
+            for block in map.blocks:
+                block.node_path.hide(CamMask.DepthCam)
 
         # if self.vehicle_config["wheel_friction"] != self.default_vehicle_config["wheel_friction"]:
         #     for wheel in self.wheels:
