@@ -103,6 +103,8 @@ class BaseVehicle(DynamicElement):
         self.routing_localization = None
         self.lane = None
         self.lane_index = None
+        from pgdrive.scene_creator.ego_vehicle.vehicle_module.vehicle_panel import VehiclePanel
+        self.vehicle_panel = VehiclePanel(self, self.pg_world)
 
         # other info
         self.throttle_brake = 0.0

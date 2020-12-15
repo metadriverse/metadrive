@@ -4,6 +4,7 @@ import os.path as osp
 from typing import Optional, Union
 
 import gym
+from typing import Optional
 import numpy as np
 from pgdrive.envs.observation_type import LidarStateObservation, ImageStateObservation
 from pgdrive.pg_config.pg_config import PgConfig
@@ -131,9 +132,6 @@ class PGDriveEnv(gym.Env):
         # init traffic manager
         self.traffic_manager = TrafficManager(self.config["traffic_mode"])
 
-        # for manual_control and main camera type
-        if self.config["use_chase_camera"]:
-            self.control_camera = ChaseCamera(self.config["camera_height"], 7, self.pg_world)
         if self.config["manual_control"]:
             if self.config["controller"] == "keyboard":
                 self.controller = KeyboardController()
@@ -146,6 +144,11 @@ class PGDriveEnv(gym.Env):
         v_config = self.config["vehicle_config"]
         self.vehicle = BaseVehicle(self.pg_world, v_config)
 
+        # for manual_control and main camera type
+        if (self.config["use_render"] or self.config["use_image"]) and self.config["use_chase_camera"]:
+            self.control_camera = ChaseCamera(
+                self.pg_world.cam, self.vehicle, self.config["camera_height"], 7, self.pg_world
+            )
         # add sensors
         self.add_modules_for_vehicle()
 
@@ -191,16 +194,14 @@ class PGDriveEnv(gym.Env):
         info.update(done_info)
         return obs, reward + done_reward, self.done, info
 
-    def render(self, mode='human', text: Optional[Union[dict, str]] = None):
+    def render(self, mode='human', text: Optional[Union[dict, str]] = None) -> Optional[np.ndarray]:
         assert self.use_render or self.config["use_image"], "render is off now, can not render"
-        if self.control_camera is not None:
-            self.control_camera.renew_camera_place(self.pg_world.cam, self.vehicle)
         self.pg_world.render_frame(text)
-        if self.pg_world.vehicle_panel is not None:
-            self.pg_world.vehicle_panel.renew_2d_car_para_visualization(
-                self.vehicle.steering, self.vehicle.throttle_brake, self.vehicle.speed
-            )
-        return
+        if mode != "human" and self.config["use_image"]:
+            # fetch img from img stack to be make this func compatible with other render func in RL setting
+            return self.observation.img_obs.state[:, :, -1]
+        else:
+            return None
 
     def reset(self):
         self.lazy_init()  # it only works the first time when reset() is called to avoid the error when render
