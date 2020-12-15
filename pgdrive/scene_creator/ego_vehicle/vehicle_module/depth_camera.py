@@ -1,6 +1,6 @@
-from direct.filter.FilterManager import FilterManager, FrameBufferProperties
-from panda3d.core import Vec3, NodePath, Shader, Texture, RenderState, ShaderAttrib
+from panda3d.core import Vec3, NodePath, Shader, RenderState, ShaderAttrib
 from pgdrive.pg_config.cam_mask import CamMask
+from pgdrive.utils import is_mac
 from pgdrive.utils.asset_loader import AssetLoader
 from pgdrive.world.image_buffer import ImageBuffer
 from pgdrive.world.pg_world import PgWorld
@@ -31,7 +31,11 @@ class DepthCamera(ImageBuffer):
             vert_path = AssetLoader.file_path(AssetLoader.asset_path, "shaders", "depth_cam_gles.vert.glsl")
             frag_path = AssetLoader.file_path(AssetLoader.asset_path, "shaders", "depth_cam_gles.frag.glsl")
         else:
-            vert_path = AssetLoader.file_path(AssetLoader.asset_path, "shaders", "depth_cam.vert.glsl")
-            frag_path = AssetLoader.file_path(AssetLoader.asset_path, "shaders", "depth_cam.frag.glsl")
+            if is_mac():
+                vert_path = AssetLoader.file_path(AssetLoader.asset_path, "shaders", "depth_cam_mac.vert.glsl")
+                frag_path = AssetLoader.file_path(AssetLoader.asset_path, "shaders", "depth_cam_mac.frag.glsl")
+            else:
+                vert_path = AssetLoader.file_path(AssetLoader.asset_path, "shaders", "depth_cam.vert.glsl")
+                frag_path = AssetLoader.file_path(AssetLoader.asset_path, "shaders", "depth_cam.frag.glsl")
         custom_shader = Shader.load(Shader.SL_GLSL, vertex=vert_path, fragment=frag_path)
         self.cam.node().setInitialState(RenderState.make(ShaderAttrib.make(custom_shader, 1)))
