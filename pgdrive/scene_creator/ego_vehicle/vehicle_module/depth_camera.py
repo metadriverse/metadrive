@@ -1,5 +1,6 @@
-from panda3d.core import Vec3, NodePath, Shader, RenderState, ShaderAttrib
+from panda3d.core import Vec3, NodePath, Shader, RenderState, ShaderAttrib, BitMask32, PNMImage
 from pgdrive.pg_config.cam_mask import CamMask
+from panda3d.core import GeoMipTerrain
 from pgdrive.utils import is_mac
 from pgdrive.utils.asset_loader import AssetLoader
 from pgdrive.world.image_buffer import ImageBuffer
@@ -11,9 +12,18 @@ class DepthCamera(ImageBuffer):
     BUFFER_X = 84  # dim 1
     BUFFER_Y = 84  # dim 2
     CAM_MASK = CamMask.DepthCam
+    GROUND = -1.5
     display_top = 1.0
 
-    def __init__(self, length: int, width: int, chassis_np: NodePath, pg_world: PgWorld):
+    def __init__(self, length: int, width: int, view_ground: bool, chassis_np: NodePath, pg_world: PgWorld):
+        """
+        :param length: Control resolution of this sensor
+        :param width: Control resolution of this sensor
+        :param view_ground: Lane line will be invisible when set to True
+        :param chassis_np: The vehicle chassis to place this sensor
+        :param pg_world: PG-World
+        """
+        self.view_ground = view_ground
         self.BUFFER_X = length
         self.BUFFER_Y = width
         super(DepthCamera, self).__init__(
@@ -39,3 +49,26 @@ class DepthCamera(ImageBuffer):
                 frag_path = AssetLoader.file_path(AssetLoader.asset_path, "shaders", "depth_cam.frag.glsl")
         custom_shader = Shader.load(Shader.SL_GLSL, vertex=vert_path, fragment=frag_path)
         self.cam.node().setInitialState(RenderState.make(ShaderAttrib.make(custom_shader, 1)))
+
+        if self.view_ground:
+            self.ground = GeoMipTerrain("mySimpleTerrain")
+
+            self.ground.setHeightfield(AssetLoader.file_path(AssetLoader.asset_path, "textures", "height_map.png"))
+            # terrain.setBruteforce(True)
+            # # Since the terrain is a texture, shader will not calculate the depth information, we add a moving terrain
+            # # model to enable the depth information of terrain
+            self.ground_model = self.ground.getRoot()
+            self.ground_model.reparentTo(chassis_np)
+            self.ground_model.setPos(-128, 0, self.GROUND)
+            self.ground_model.hide(BitMask32.allOn())
+            self.ground_model.show(CamMask.DepthCam)
+            self.ground.generate()
+            pg_world.taskMgr.add(
+                self.renew_pos_of_ground_mode, "ground follow", extraArgs=[chassis_np], appendTask=True
+            )
+
+    def renew_pos_of_ground_mode(self, chassis_np: Vec3, task):
+        pos = chassis_np.getPos()
+        self.ground_model.setPos(-128, 0, self.GROUND)
+        self.ground_model.setP(-chassis_np.getP())
+        return task.cont
