@@ -1,3 +1,6 @@
+import sys
+
+
 def setup_logger(debug=False):
     import logging
     logging.basicConfig(
@@ -36,3 +39,7 @@ def recursive_equal(data1, data2, need_assert=False):
         if need_assert:
             assert ret, (type(data1), type(data2), data1, data2)
         return ret
+
+
+def is_mac():
+    return sys.platform == "darwin"
