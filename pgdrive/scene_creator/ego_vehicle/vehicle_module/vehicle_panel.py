@@ -1,6 +1,7 @@
 from panda3d.core import NodePath, PGTop, TextNode, Vec3
-
+from pgdrive.scene_creator.ego_vehicle.base_vehicle import BaseVehicle
 from pgdrive.pg_config.cam_mask import CamMask
+from pgdrive.world.pg_world import PgWorld
 from pgdrive.world.image_buffer import ImageBuffer
 
 
@@ -12,10 +13,13 @@ class VehiclePanel(ImageBuffer):
     CAM_MASK = CamMask.PARA_VIS
     GAP = 4.1
 
-    def __init__(self, make_buffer_func, make_camera_func):
+    def __init__(self, vehicle: BaseVehicle, pg_world: PgWorld):
+        if not (pg_world.pg_config["use_image"] or pg_world.pg_config["use_render"]):
+            return
         self.aspect2d_np = NodePath(PGTop("aspect2d"))
         self.aspect2d_np.show(self.CAM_MASK)
         self.para_vis_np = []
+        make_buffer_func, make_camera_func = pg_world.win.makeTextureBuffer, pg_world.makeCamera
 
         # don't delete the space in word, it is used to set a proper position
         for i, np_name in enumerate(["Steering", " Throttle", "     Brake", "    Speed"]):
@@ -38,8 +42,11 @@ class VehiclePanel(ImageBuffer):
             self.BUFFER_X, self.BUFFER_Y, Vec3(-0.9, -1.01, 0.78), self.BKG_COLOR, make_buffer_func, make_camera_func,
             self.aspect2d_np
         )
+        self.add_to_display(pg_world, [0.67, 1, self.display_bottom, self.display_top])
+        pg_world.taskMgr.add(self.renew_2d_car_para_visualization, "update panel", extraArgs=[vehicle], appendTask=True)
 
-    def renew_2d_car_para_visualization(self, steering, throttle_brake, speed):
+    def renew_2d_car_para_visualization(self, vehicle: BaseVehicle, task):
+        steering, throttle_brake, speed = vehicle.steering, vehicle.throttle_brake, vehicle.speed
         if throttle_brake < 0:
             self.para_vis_np[2].node().setCardAsMargin(-self.GAP, self.PARA_VIS_LENGTH * abs(throttle_brake), 0, 0)
             self.para_vis_np[1].node().setCardAsMargin(-self.GAP, 0, 0, 0)
@@ -62,3 +69,4 @@ class VehiclePanel(ImageBuffer):
             self.para_vis_np[0].node().setCardAsMargin(-self.GAP, 0, 0, 0)
         speed_value = speed / self.MAX_SPEED * self.PARA_VIS_LENGTH
         self.para_vis_np[3].node().setCardAsMargin(-self.GAP, speed_value + 0.09, 0, 0)
+        return task.cont
