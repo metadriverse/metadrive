@@ -172,9 +172,9 @@ class BaseVehicle(DynamicElement):
         self.last_position = self.born_place
         self.last_heading_dir = self.heading
 
-        if self.vehicle_config["wheel_friction"] != self.default_vehicle_config["wheel_friction"]:
-            for wheel in self.wheels:
-                wheel.setFrictionSlip(self.vehicle_config["wheel_friction"])
+        # if self.vehicle_config["wheel_friction"] != self.default_vehicle_config["wheel_friction"]:
+        #     for wheel in self.wheels:
+        #         wheel.setFrictionSlip(self.vehicle_config["wheel_friction"])
 
     def get_state(self):
         pass
@@ -300,8 +300,8 @@ class BaseVehicle(DynamicElement):
             return 0
         # cos = self.forward_direction.dot(lateral) / (np.linalg.norm(lateral) * np.linalg.norm(self.forward_direction))
         cos = (
-            (forward_direction[0] * lateral[0] + forward_direction[1] * lateral[1]) /
-            (lateral_norm * forward_direction_norm)
+                (forward_direction[0] * lateral[0] + forward_direction[1] * lateral[1]) /
+                (lateral_norm * forward_direction_norm)
         )
         # return cos
         # Normalize to 0, 1
