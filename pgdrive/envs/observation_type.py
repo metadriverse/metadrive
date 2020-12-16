@@ -1,8 +1,9 @@
 from abc import ABC
-from pgdrive.scene_creator.ego_vehicle.base_vehicle import BaseVehicle
+
 import gym
 import numpy as np
 
+from pgdrive.scene_creator.ego_vehicle.base_vehicle import BaseVehicle
 from pgdrive.world.image_buffer import ImageBuffer
 
 PERCEIVE_DIST = 50

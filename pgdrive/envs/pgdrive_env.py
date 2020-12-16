@@ -1,11 +1,11 @@
 import copy
 import json
 import os.path as osp
-from typing import Optional, Union
+from typing import Union, Optional
 
 import gym
-from typing import Optional
 import numpy as np
+
 from pgdrive.envs.observation_type import LidarStateObservation, ImageStateObservation
 from pgdrive.pg_config import PgConfig
 from pgdrive.scene_creator.algorithm.BIG import BigGenerateMethod

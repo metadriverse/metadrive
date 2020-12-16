@@ -1,4 +1,3 @@
-import os
 from random import choice
 from typing import Union
 
@@ -11,8 +10,8 @@ from pgdrive.scene_creator.highway_vehicle.behavior import IDMVehicle
 from pgdrive.scene_creator.lanes.circular_lane import CircularLane
 from pgdrive.scene_creator.lanes.straight_lane import StraightLane
 from pgdrive.scene_manager.traffic_manager import TrafficManager
-from pgdrive.utils.element import DynamicElement
 from pgdrive.utils.asset_loader import AssetLoader
+from pgdrive.utils.element import DynamicElement
 
 
 class PgTrafficVehicleNode(BulletRigidBodyNode):
@@ -104,11 +103,11 @@ class PgTrafficVehicle(DynamicElement):
         longitude: float,
         seed=0,
         enable_lane_change: bool = True,
-        enbale_reborn=False
+        enable_reborn=False
     ):
         v = IDMVehicle.create_random(scene, lane, longitude, random_seed=seed)
         v.enable_lane_change = enable_lane_change
-        return cls(v, enbale_reborn)
+        return cls(v, enable_reborn)
 
     def __del__(self):
         self.vehicle_node.clearTag(BodyName.Traffic_vehicle)

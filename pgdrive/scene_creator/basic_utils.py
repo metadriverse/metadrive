@@ -20,7 +20,7 @@ class Decoration:
 class Goal:
     """
     Goal at intersection
-    The keywors 0, 1, 2 should be reserved, and only be used in roundabout and intersection
+    The keywords 0, 1, 2 should be reserved, and only be used in roundabout and intersection
     """
 
     RIGHT = 0

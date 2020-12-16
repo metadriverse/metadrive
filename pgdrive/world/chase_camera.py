@@ -2,8 +2,8 @@ import queue
 
 from panda3d.core import Vec3, Camera
 
-from pgdrive.world.pg_world import PgWorld
 from pgdrive.scene_creator.ego_vehicle.base_vehicle import BaseVehicle
+from pgdrive.world.pg_world import PgWorld
 
 
 class ChaseCamera:

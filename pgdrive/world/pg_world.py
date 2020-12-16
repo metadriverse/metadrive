@@ -1,18 +1,19 @@
 import logging
-import numpy as np
 import os
 import sys
 from typing import Optional, Union
-from pgdrive.world.highway_render.highway_render import HighwayRender
+
 import gltf
 from direct.showbase import ShowBase
 from panda3d.bullet import BulletDebugNode, BulletWorld
 from panda3d.core import Vec3, AntialiasAttrib, NodePath, loadPrcFileData, TextNode, LineSegs
-from pgdrive.pg_config.cam_mask import CamMask
+
 from pgdrive.pg_config import PgConfig
+from pgdrive.pg_config.cam_mask import CamMask
 from pgdrive.utils import is_mac
 from pgdrive.utils.asset_loader import AssetLoader
 from pgdrive.world.force_fps import ForceFPS
+from pgdrive.world.highway_render.highway_render import HighwayRender
 from pgdrive.world.image_buffer import ImageBuffer
 from pgdrive.world.light import Light
 from pgdrive.world.onscreen_message import PgOnScreenMessage
