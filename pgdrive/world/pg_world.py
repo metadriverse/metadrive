@@ -176,21 +176,24 @@ class PgWorld(ShowBase.ShowBase):
                 self._init_display_region()
             self.my_buffers = []
 
+            # onscreen message
+            self.on_screen_message = PgOnScreenMessage() \
+                if self.pg_config["use_render"] and self.pg_config["onscreen_message"] else None
+            self._show_help_message = False
+
+            # debug setting
+            self.accept('1', self.toggleDebug)
+            self.accept('2', self.toggleWireframe)
+            self.accept('3', self.toggleTexture)
+            self.accept('4', self.toggleAnalyze)
+            self.accept("h", self.toggle_help_message)
+            self.accept("f", self.force_fps.toggle)
+
+        else:
+            self.on_screen_message = None
+
         # task manager
         self.taskMgr.remove('audioLoop')
-
-        # onscreen message
-        self.on_screen_message = PgOnScreenMessage() \
-            if self.pg_config["use_render"] and self.pg_config["onscreen_message"] else None
-        self._show_help_message = False
-
-        # debug setting
-        self.accept('1', self.toggleDebug)
-        self.accept('2', self.toggleWireframe)
-        self.accept('3', self.toggleTexture)
-        self.accept('4', self.toggleAnalyze)
-        self.accept("h", self.toggle_help_message)
-        self.accept("f", self.force_fps.toggle)
 
     def _init_display_region(self):
         scale = self.pg_config["window_size"][0] / self.pg_config["window_size"][1]
