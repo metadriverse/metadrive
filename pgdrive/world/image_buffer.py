@@ -76,7 +76,7 @@ class ImageBuffer:
         img = self.get_image()
         img.write("debug.jpg")
 
-    def get_pixels_array(self, clip) -> np.ndarray:
+    def get_pixels_array(self, clip=True) -> np.ndarray:
         """
         default: For gray scale image, one channel. Override this func, when you want a new obs type
         """
