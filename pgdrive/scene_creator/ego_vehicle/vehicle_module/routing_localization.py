@@ -1,4 +1,4 @@
-import os
+import logging
 
 import numpy as np
 from panda3d.core import NodePath
@@ -7,9 +7,8 @@ from pgdrive.pg_config.parameter_space import BlockParameterSpace, Parameter
 from pgdrive.scene_creator.blocks.first_block import FirstBlock
 from pgdrive.scene_creator.lanes.circular_lane import CircularLane
 from pgdrive.scene_creator.map import Map
-from pgdrive.utils.math_utils import clip, norm
 from pgdrive.utils.asset_loader import AssetLoader
-import logging
+from pgdrive.utils.math_utils import clip, norm
 
 
 class RoutingLocalizationModule:

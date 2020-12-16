@@ -1,4 +1,5 @@
 from panda3d.core import SamplerState, Shader, NodePath, ConfigVariableString
+
 from pgdrive.utils import is_mac
 from pgdrive.utils.asset_loader import AssetLoader
 from pgdrive.utils.element import DynamicElement

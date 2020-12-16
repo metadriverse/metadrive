@@ -6,7 +6,7 @@ from pgdrive.utils import setup_logger
 setup_logger(debug=True)
 
 
-class ResetEnv(GeneralizationRacing):
+class ResetEnv(PGDriveEnv):
     def __init__(self):
         super(ResetEnv, self).__init__(
             {

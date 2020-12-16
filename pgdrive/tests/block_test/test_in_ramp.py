@@ -8,6 +8,7 @@ if __name__ == "__main__":
 
     test = TestBlock()
     from pgdrive.utils.asset_loader import AssetLoader
+
     AssetLoader.init_loader(test.loader, test.asset_path)
 
     global_network = RoadNetwork()

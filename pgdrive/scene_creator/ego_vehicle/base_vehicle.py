@@ -2,13 +2,15 @@ import copy
 import logging
 from collections import deque
 from os import path
-from pgdrive.pg_config.cam_mask import CamMask
+
 import numpy as np
 from panda3d.bullet import BulletVehicle, BulletBoxShape, BulletRigidBodyNode, ZUp, BulletWorld, BulletGhostNode
 from panda3d.core import Vec3, TransformState, NodePath, LQuaternionf, BitMask32, Vec4, PythonCallbackObject
-from pgdrive.pg_config.body_name import BodyName
-from pgdrive.pg_config.parameter_space import Parameter, VehicleParameterSpace
+
 from pgdrive.pg_config import PgConfig
+from pgdrive.pg_config.body_name import BodyName
+from pgdrive.pg_config.cam_mask import CamMask
+from pgdrive.pg_config.parameter_space import Parameter, VehicleParameterSpace
 from pgdrive.pg_config.pg_space import PgSpace
 from pgdrive.scene_creator.blocks.block import Block
 from pgdrive.scene_creator.ego_vehicle.vehicle_module.lidar import Lidar
@@ -331,7 +333,7 @@ class BaseVehicle(DynamicElement):
         return project_on_heading, project_on_side
 
     def lane_distance_to(self, vehicle, lane: AbstractLane = None) -> float:
-        assert self.routing_localization is not None, "a routing and localization module shoud be added " \
+        assert self.routing_localization is not None, "a routing and localization module should be added " \
                                                       "to interact with other vehicles"
         if not vehicle:
             return np.nan

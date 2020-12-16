@@ -17,7 +17,7 @@ class TInterSection(InterSection):
 
     def _try_plug_into_previous_block(self) -> bool:
         no_cross = super(TInterSection, self)._try_plug_into_previous_block()
-        self._excluede_lanes()
+        self._exclude_lanes()
         return no_cross
 
     def _change_vis(self, t_type):
@@ -49,7 +49,7 @@ class TInterSection(InterSection):
                     if i == 1:
                         lane.line_types[0] = LineType.NONE
 
-    def _excluede_lanes(self):
+    def _exclude_lanes(self):
         para = self.get_config()
         t_type = para[Parameter.t_intersection_type]
         radius = para[Parameter.radius]

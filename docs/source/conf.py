@@ -18,12 +18,11 @@
 # -- Project information -----------------------------------------------------
 
 project = 'PGDrive'
-copyright = '2020, Drivingforce Group'
-author = 'Drivingforce'
+copyright = '2020, DrivingForce Group'
+author = 'DrivingForce'
 
 # The full version, including alpha/beta/rc tags
 release = '0.1.0'
-
 
 # -- General configuration ---------------------------------------------------
 
@@ -40,7 +39,6 @@ templates_path = ['_templates']
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = []
-
 
 # -- Options for HTML output -------------------------------------------------
 

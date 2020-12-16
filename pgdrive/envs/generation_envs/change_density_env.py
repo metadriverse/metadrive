@@ -1,6 +1,7 @@
 import logging
 
 import numpy as np
+
 from pgdrive.envs.pgdrive_env import PGDriveEnv
 from pgdrive.pg_config import PgConfig
 
