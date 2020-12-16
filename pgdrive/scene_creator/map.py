@@ -233,25 +233,39 @@ class Map:
 
     @staticmethod
     def fill_hole(surface: pygame.Surface):
+        def add_count(x, y, x_size, y_size, count_a):
+            for x_1 in [-1, 0, 1]:
+                for y_1 in [-1, 0, 1]:
+                    if 0 < x + x_1 < x_size and 0 < y + y_1 < y_size:
+                        count_a[x + x_1][y + y_1] += 1
+
+        threshold = 3
         res_surface = surface.copy()
-        for i in range(surface.get_height()):
-            for j in range(surface.get_width()):
+        height = surface.get_height()
+        width = surface.get_width()
+        count_a = [[0 for _ in range(width)] for _ in range(height)]
+        for i in range(height):
+            for j in range(width):
                 pix = surface.get_at((i, j))
                 if pix == (255, 255, 255, 255):
+                    add_count(i, j, height, width, count_a)
                     continue
-                count = 0
+                if count_a[i][j] >= threshold:
+                    res_surface.set_at((i, j), (255, 255, 255, 255))
+                    continue
                 for k_1 in [-1, 0, 1]:
                     for k_2 in [-1, 0, 1]:
                         if k_1 == 0 and k_2 == 0:
                             continue
-                        if 0 < i + k_1 < surface.get_height() and 0 < j + k_2 < surface.get_width():
-                            pix = surface.get_at((i + k_1, j + k_2))
-                            if pix == (255, 255, 255, 255):
-                                count += 1
+                        if 0 < i + k_1 < height and 0 < j + k_2 < width:
+                            if surface.get_at((i + k_1, j + k_2)) == (255, 255, 255, 255):
+                                add_count(i + k_1, j + k_2, height, width, count_a)
                         else:
-                            count += 1
-                    if count >= 3:
-                        res_surface.set_at((i, j), (255, 255, 255, 255))
+                            count_a[i][j] += 1
+                        if count_a[i][j] >= threshold:
+                            res_surface.set_at((i, j), (255, 255, 255, 255))
+                            break
+                    if count_a[i][j] >= threshold:
                         break
         return res_surface
 
