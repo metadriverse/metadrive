@@ -24,14 +24,18 @@ class RoadNetwork:
         self.debug = debug
 
     def __add__(self, other):
+        from pgdrive.scene_creator.basic_utils import Decoration
         graph_1 = copy.copy(self.graph)
         graph_2 = copy.copy(other)
-        set_1 = set(graph_1)
-        set_2 = set(graph_2)
+        set_1 = set(graph_1) - {Decoration.start, Decoration.end}
+        set_2 = set(graph_2) - {Decoration.start, Decoration.end}
         if len(set_1.intersection(set_2)) == 0:
+            # handle decoration lanes
+            dec_lanes = self.get_all_decoration_lanes() + other.get_all_decoration_lanes()
             graph_1.update(graph_2)
             new_road_network = RoadNetwork()
             new_road_network.graph = graph_1
+            new_road_network.update_decoration_lanes(dec_lanes)
             return new_road_network
         else:
             raise ValueError("Same start node in two road network")
@@ -41,7 +45,10 @@ class RoadNetwork:
         set_1 = set(self.graph) - {Decoration.start, Decoration.end}
         set_2 = set(other.graph) - {Decoration.start, Decoration.end}
         if len(set_1.intersection(set_2)) == 0:
+            # handle decoration_lanes
+            dec_lanes = self.get_all_decoration_lanes() + other.get_all_decoration_lanes()
             self.graph.update(copy.copy(other.graph))
+            self.update_decoration_lanes(dec_lanes)
             return self
         else:
             raise ValueError("Same start node in two road network")
@@ -58,6 +65,22 @@ class RoadNetwork:
         ret.graph = self.graph
         ret -= other
         return ret
+
+    def get_all_decoration_lanes(self) -> List:
+        from pgdrive.scene_creator.basic_utils import Decoration
+        if Decoration.start in self.graph:
+            return self.graph[Decoration.start][Decoration.end]
+        else:
+            return []
+
+    def update_decoration_lanes(self, lanes):
+        if len(lanes) == 0:
+            return
+        from pgdrive.scene_creator.basic_utils import Decoration
+        if Decoration.start in self.graph:
+            self.graph[Decoration.start][Decoration.end] = lanes
+        else:
+            self.graph[Decoration.start] = {Decoration.end: lanes}
 
     def clear(self):
         self.graph.clear()
