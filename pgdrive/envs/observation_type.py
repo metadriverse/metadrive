@@ -157,6 +157,9 @@ class ImageObservation(ObservationType):
         self.state[:, :, -1] = new_obs
         return self.state
 
+    def get_image(self):
+        return self.state.copy()[:, :, -1]
+
 
 class LidarStateObservation(ObservationType):
     def __init__(self, config):

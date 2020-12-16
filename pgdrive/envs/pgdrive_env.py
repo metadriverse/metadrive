@@ -1,5 +1,6 @@
 import copy
 import json
+import logging
 import os.path as osp
 from typing import Union, Optional
 
@@ -201,9 +202,18 @@ class PGDriveEnv(gym.Env):
         self.pg_world.render_frame(text)
         if mode != "human" and self.config["use_image"]:
             # fetch img from img stack to be make this func compatible with other render func in RL setting
-            return self.observation.img_obs.state[:, :, -1]
-        else:
-            return None
+            return self.observation.img_obs.get_image()
+
+        if self.config["use_render"]:
+            if not hasattr(self, "_temporary_img_obs"):
+                from pgdrive.envs.observation_type import ImageObservation
+                image_source = "rgb_cam"
+                self.temporary_img_obs = ImageObservation(self.vehicle.vehicle_config, image_source, False)
+            self.temporary_img_obs.observe(self.vehicle.image_sensors[image_source].get_pixels_array())
+            return self.temporary_img_obs.get_image()
+
+        logging.warning("You do not set 'use_image' or 'use_image' to True, so no image will be returned!")
+        return None
 
     def reset(self):
         self.lazy_init()  # it only works the first time when reset() is called to avoid the error when render
