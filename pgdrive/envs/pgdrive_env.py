@@ -463,3 +463,6 @@ class PGDriveEnv(gym.Env):
 
     def set_current_seed(self, seed):
         self.current_seed = seed
+
+    def get_map(self):
+        return self.current_map.get_map_image_array()

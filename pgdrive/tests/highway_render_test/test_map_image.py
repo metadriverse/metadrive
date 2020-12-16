@@ -37,7 +37,7 @@ if __name__ == "__main__":
     env = TestEnv()
     env.reset()
     env.current_map.save_map_image()
-    print(env.current_map.get_map_image_array())
+    # print(env.current_map.get_map_image_array())
 
     import numpy as np
     import cv2
