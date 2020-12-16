@@ -443,7 +443,8 @@ class PGDriveEnv(gym.Env):
         assert osp.isfile(path)
         with open(path, "r") as f:
             restored_data = json.load(f)
-        if recursive_equal(self.config["map_config"], restored_data["map_config"]):
+        if recursive_equal(self.config["map_config"], restored_data["map_config"]) and \
+                self.start_seed + self.env_num < len(restored_data["map_data"]):
             self.load_all_maps(restored_data)
             return True
         else:
