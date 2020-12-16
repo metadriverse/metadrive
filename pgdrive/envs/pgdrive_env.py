@@ -7,7 +7,7 @@ import gym
 from typing import Optional
 import numpy as np
 from pgdrive.envs.observation_type import LidarStateObservation, ImageStateObservation
-from pgdrive.pg_config.pg_config import PgConfig
+from pgdrive.pg_config import PgConfig
 from pgdrive.scene_creator.algorithm.BIG import BigGenerateMethod
 from pgdrive.scene_creator.ego_vehicle.base_vehicle import BaseVehicle
 from pgdrive.scene_creator.ego_vehicle.vehicle_module.depth_camera import DepthCamera
@@ -102,6 +102,7 @@ class PGDriveEnv(gym.Env):
                 "use_render": self.use_render,
                 "use_image": self.config["use_image"],
                 "debug": self.config["debug"],
+                "force_fps": self.config["force_fps"],
             }
         )
         self.pg_world_config = pg_world_config
@@ -313,7 +314,7 @@ class PGDriveEnv(gym.Env):
 
         # remove map from world before adding
         if self.current_map is not None:
-            self.current_map.unload_from_pg_world(self.pg_world.physics_world)
+            self.current_map.unload_from_pg_world(self.pg_world)
 
         # create map
         self.current_seed = np.random.randint(self.start_seed, self.start_seed + self.env_num)
@@ -326,13 +327,13 @@ class PGDriveEnv(gym.Env):
                 map_config = self.config["map_config"]
                 map_config.update({"seed": self.current_seed})
 
-            new_map = Map(self.pg_world.worldNP, self.pg_world.physics_world, map_config)
+            new_map = Map(self.pg_world, map_config)
             self.maps[self.current_seed] = new_map
             self.current_map = self.maps[self.current_seed]
         else:
             self.current_map = self.maps[self.current_seed]
             assert isinstance(self.current_map, Map), "map should be an instance of Map() class"
-            self.current_map.load_to_pg_world(self.pg_world.worldNP, self.pg_world.physics_world)
+            self.current_map.load_to_pg_world(self.pg_world)
 
     def add_modules_for_vehicle(self):
         # add vehicle module for training according to config
@@ -388,9 +389,9 @@ class PGDriveEnv(gym.Env):
         for seed in range(self.start_seed, self.start_seed + self.env_num):
             map_config = copy.deepcopy(self.config["map_config"])
             map_config.update({"seed": seed})
-            new_map = Map(self.pg_world.worldNP, self.pg_world.physics_world, map_config)
+            new_map = Map(self.pg_world, map_config)
             self.maps[seed] = new_map
-            new_map.unload_from_pg_world(self.pg_world.physics_world)
+            new_map.unload_from_pg_world(self.pg_world)
             print("Finish generating map with seed: ", seed)
 
         map_data = dict()

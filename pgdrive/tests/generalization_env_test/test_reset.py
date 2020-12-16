@@ -5,6 +5,31 @@ from pgdrive.utils import setup_logger
 
 setup_logger(debug=True)
 
+
+class ResetEnv(GeneralizationRacing):
+    def __init__(self):
+        super(ResetEnv, self).__init__(
+            {
+                "environment_num": 1,
+                "traffic_density": 0.1,
+                "start_seed": 4,
+                "debug": True,
+                "pg_world_config": {
+                    "force_fps": None,
+                    "debug_physics_world": True
+                },
+                "manual_control": True,
+                "use_render": True,
+                "use_image": False,
+                "use_increment_steering": False,
+                # "map_config":{
+                #     "type":BigGenerateMethod.BLOCK_SEQUENCE,
+                #     "config":"",
+                # }
+            }
+        )
+
+
 if __name__ == "__main__":
     env = PGDriveEnv(
         {

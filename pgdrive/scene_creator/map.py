@@ -1,4 +1,7 @@
 import json
+import pygame
+import numpy as np
+from pgdrive.world.pg_world import PgWorld
 import logging
 import os
 from typing import List
@@ -7,7 +10,7 @@ from panda3d.bullet import BulletWorld
 from panda3d.core import NodePath
 
 from pgdrive.pg_config.pg_blocks import PgBlock
-from pgdrive.pg_config.pg_config import PgConfig
+from pgdrive.pg_config import PgConfig
 from pgdrive.scene_creator.algorithm.BIG import BIG, BigGenerateMethod
 from pgdrive.scene_creator.blocks.block import Block
 from pgdrive.scene_creator.road.road_network import RoadNetwork
@@ -36,10 +39,15 @@ class Map:
     GENERATE_PARA = "config"
     GENERATE_METHOD = "type"
 
-    def __init__(self, parent_node_path: NodePath, pg_physics_world: BulletWorld, big_config: dict = None):
+    # draw with pygame, film size
+    DRAW_LEN = 1024  # pix
+
+    def __init__(self, pg_world: PgWorld, big_config: dict = None):
         """
         Map can be stored and recover to save time when we access the map encountered before
         """
+        self.film_size = (self.DRAW_LEN, self.DRAW_LEN)
+        parent_node_path, pg_physics_world = pg_world.worldNP, pg_world.physics_world
         self.config = self.default_config()
         if big_config:
             self.config.update(big_config)
@@ -62,6 +70,7 @@ class Map:
         #  a trick to optimize performance
         self.road_network.update_indices()
         self.road_network.build_helper()
+        self._load_to_highway_render(pg_world)
 
     @staticmethod
     def default_config():
@@ -98,13 +107,19 @@ class Map:
             last_block.construct_from_config(b, parent_node_path, pg_physics_world)
             self.blocks.append(last_block)
 
-    def load_to_pg_world(self, parent_node_path: NodePath, pg_physics_world: BulletWorld):
+    def load_to_pg_world(self, pg_world: PgWorld):
+        parent_node_path, pg_physics_world = pg_world.worldNP, pg_world.physics_world
         for block in self.blocks:
             block.attach_to_pg_world(parent_node_path, pg_physics_world)
+        self._load_to_highway_render(pg_world)
 
-    def unload_from_pg_world(self, pg_physics_world: BulletWorld):
+    def _load_to_highway_render(self, pg_world: PgWorld):
+        if pg_world.pg_config["highway_render"]:
+            pg_world.highway_render.set_map(self)
+
+    def unload_from_pg_world(self, pg_world: PgWorld):
         for block in self.blocks:
-            block.detach_from_pg_world(pg_physics_world)
+            block.detach_from_pg_world(pg_world.physics_world)
 
     def destroy_map(self, pg_physics_world: BulletWorld):
         for block in self.blocks:
@@ -165,6 +180,79 @@ class Map:
             map_config = json.load(map_file)
             ret = self.read_map(map_config)
         return ret
+
+    def draw_map_image_on_surface(self) -> pygame.Surface:
+        from pgdrive.world.highway_render.highway_render import LaneGraphics
+        from pgdrive.world.highway_render.world_surface import WorldSurface
+        surface = WorldSurface(self.film_size, 0, pygame.Surface(self.film_size))
+        b_box = self.get_map_bound_box(self.road_network)
+        x_len = b_box[1] - b_box[0]
+        y_len = b_box[3] - b_box[2]
+        max_len = max(x_len, y_len)
+        # scaling and center can be easily found by bounding box
+        scaling = self.film_size[1] / max_len - 0.1
+        surface.scaling = scaling
+        centering_pos = ((b_box[0] + b_box[1]) / 2, (b_box[2] + b_box[3]) / 2)
+        surface.move_display_window_to(centering_pos)
+        for _from in self.road_network.graph.keys():
+            for _to in self.road_network.graph[_from].keys():
+                for l in self.road_network.graph[_from][_to]:
+                    LaneGraphics.simple_draw(l, surface)
+        return surface
+
+    @staticmethod
+    def get_map_bound_box(road_network):
+        from pgdrive.utils.math_utils import get_road_bound_box
+        res_x_max = -np.inf
+        res_x_min = np.inf
+        res_y_min = np.inf
+        res_y_max = -np.inf
+        for _from, to_dict in road_network.graph.items():
+            for _to, lanes in to_dict.items():
+                x_max, x_min, y_max, y_min = get_road_bound_box(lanes)
+                res_x_max = max(res_x_max, x_max)
+                res_x_min = min(res_x_min, x_min)
+                res_y_max = max(res_y_max, y_max)
+                res_y_min = min(res_y_min, y_min)
+        return res_x_min, res_x_max, res_y_min, res_y_max
+
+    def get_map_image_array(self, fill_hole=True, only_black_white=True) -> np.ndarray:
+        surface = self.draw_map_image_on_surface()
+        if fill_hole:
+            surface = self.fill_hole(surface)
+        if only_black_white:
+            return np.clip(pygame.surfarray.pixels_red(surface), 0.0, 1.0)
+        return pygame.surfarray.array3d(surface)
+
+    def save_map_image(self, fill_hole=True):
+        surface = self.draw_map_image_on_surface()
+        if fill_hole:
+            surface = self.fill_hole(surface)
+        pygame.image.save(surface, "map_{}.png".format(self.random_seed))
+
+    @staticmethod
+    def fill_hole(surface: pygame.Surface):
+        res_surface = surface.copy()
+        for i in range(surface.get_height()):
+            for j in range(surface.get_width()):
+                pix = surface.get_at((i, j))
+                if pix == (255, 255, 255, 255):
+                    continue
+                count = 0
+                for k_1 in [-1, 0, 1]:
+                    for k_2 in [-1, 0, 1]:
+                        if k_1 == 0 and k_2 == 0:
+                            continue
+                        if 0 < i + k_1 < surface.get_height() and 0 < j + k_2 < surface.get_width():
+                            pix = surface.get_at((i + k_1, j + k_2))
+                            if pix == (255, 255, 255, 255):
+                                count += 1
+                        else:
+                            count += 1
+                    if count >= 3:
+                        res_surface.set_at((i, j), (255, 255, 255, 255))
+                        break
+        return res_surface
 
     def __del__(self):
         describe = self.random_seed if self.random_seed is not None else "custom"

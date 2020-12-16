@@ -18,11 +18,11 @@ class MiniMap(ImageBuffer):
         self.BUFFER_Y = para[1]
         height = para[2]
         super(MiniMap, self).__init__(
-            self.BUFFER_X, self.BUFFER_Y, Vec3(0, 20, height), self.BKG_COLOR, pg_world.win.makeTextureBuffer,
-            pg_world.makeCamera, chassis_np
+            self.BUFFER_X, self.BUFFER_Y, Vec3(0, 20, height), self.BKG_COLOR, pg_world.win, pg_world.makeCamera,
+            chassis_np
         )
         self.cam.lookAt(Vec3(0, 20, 0))
         # lens = self.cam.node().getLens()
         # lens.setFilmOffset(1.0, 2.0)
         self.add_to_display(pg_world, [0., 1 / 3, self.display_bottom, self.display_top])
-        self.buffer.setSort(0)
+        # self.buffer.setSort(0)
