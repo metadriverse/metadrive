@@ -1,7 +1,7 @@
 from gym.spaces import Box
 
 from pgdrive.envs.pgdrive_env import PGDriveEnv
-from pgdrive.pg_config.pg_config import PgConfig
+from pgdrive.pg_config import PgConfig
 
 
 class ActionRepeat(PGDriveEnv):

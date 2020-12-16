@@ -84,15 +84,15 @@ class TestBlock(ShowBase.ShowBase):
         """
         For reset test and map storing
         """
-        self.map = Map(self.worldNP, self.world, {"type": big_type, "config": para})
+        self.map = Map(self, {"type": big_type, "config": para})
         self.accept("c", self.clear)
         self.accept("a", self.re_add)
 
     def clear(self):
-        self.map.unload_from_pg_world(self.world)
+        self.map.unload_from_pg_world(self)
 
     def re_add(self):
-        self.map.load_to_pg_world(self.worldNP, self.world)
+        self.map.load_to_pg_world(self)
 
     def add_vehicle(self, vehicle):
         self.vehicle = vehicle

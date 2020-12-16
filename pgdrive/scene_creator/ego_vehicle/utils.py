@@ -5,6 +5,9 @@ from scipy.optimize import minimize
 
 
 class PhysicSetting:
+    """
+    Work in progress
+    """
     def __init__(self, size, hpr, offset, model_path):
         # doffset is used for 4 wheels.
         self.size = size
@@ -28,6 +31,9 @@ class PhysicSetting:
 
 
 class ModelPredictiveControl:
+    """
+    Work in progress
+    """
     def __init__(self, horizon, dim, dt):
         self.state = None
         self.target = None
@@ -152,10 +158,10 @@ class OpponentModelPredictiveControl(ModelPredictiveControl):
             while dist(pos, self.landmarks, self.target_index) > dist(pos, self.landmarks, self.target_index + 1):
                 self.target_index += 1
 
-        while (self.landmarks[self.target_index][0]-pos[0])* \
-              (self.landmarks[self.target_index+1][0]-pos[0])+ \
-              (self.landmarks[self.target_index][1]-pos[1])* \
-              (self.landmarks[self.target_index+1][1]-pos[1]) < 0:
+        while (self.landmarks[self.target_index][0] - pos[0]) * \
+                (self.landmarks[self.target_index + 1][0] - pos[0]) + \
+                (self.landmarks[self.target_index][1] - pos[1]) * \
+                (self.landmarks[self.target_index + 1][1] - pos[1]) < 0:
             self.target_index += 1
         d = dist(pos, self.landmarks, self.target_index)
         if d < 5:
