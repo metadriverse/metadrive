@@ -5,7 +5,6 @@ from typing import List, Tuple
 import numpy as np
 import pandas as pd
 from panda3d.bullet import BulletWorld
-
 from pgdrive.scene_creator.map import Map
 from pgdrive.scene_creator.road_object.object import RoadObject
 from pgdrive.utils.math_utils import norm
@@ -255,3 +254,8 @@ class TrafficManager:
 
     def __del__(self):
         logging.debug("{} is destroyed".format(self.__class__.__name__))
+
+    def get_vehicle_num(self):
+        if self.traffic_mode == TrafficMode.Reborn:
+            return len(self.traffic_vehicles)
+        return sum(len(block_vehicle_set.vehicles) for block_vehicle_set in self.block_triggered_vehicles)

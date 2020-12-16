@@ -38,7 +38,6 @@ if __name__ == "__main__":
             "start_seed": 4,
             "debug": True,
             "pg_world_config": {
-                "force_fps": None,
                 "debug_physics_world": True
             },
             "manual_control": True,

@@ -6,7 +6,6 @@ from typing import Union, Optional
 
 import gym
 import numpy as np
-
 from pgdrive.envs.observation_type import LidarStateObservation, ImageStateObservation
 from pgdrive.pg_config import PgConfig
 from pgdrive.scene_creator.algorithm.BIG import BigGenerateMethod
@@ -204,12 +203,12 @@ class PGDriveEnv(gym.Env):
             # fetch img from img stack to be make this func compatible with other render func in RL setting
             return self.observation.img_obs.get_image()
 
-        if self.config["use_render"]:
+        if mode != "human" and self.config["use_render"]:
             if not hasattr(self, "_temporary_img_obs"):
                 from pgdrive.envs.observation_type import ImageObservation
                 image_source = "rgb_cam"
                 self.temporary_img_obs = ImageObservation(self.vehicle.vehicle_config, image_source, False)
-            self.temporary_img_obs.observe(self.vehicle.image_sensors[image_source].get_pixels_array())
+            self.temporary_img_obs.observe(self.vehicle.image_sensors[image_source])
             return self.temporary_img_obs.get_image()
 
         logging.warning("You do not set 'use_image' or 'use_image' to True, so no image will be returned!")
@@ -466,3 +465,8 @@ class PGDriveEnv(gym.Env):
 
     def get_map(self):
         return self.current_map.get_map_image_array()
+
+    def get_vehicle_num(self):
+        if self.traffic_manager is None:
+            return 0
+        return self.traffic_manager.get_vehicle_num()
