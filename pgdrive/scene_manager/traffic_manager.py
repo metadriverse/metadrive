@@ -99,7 +99,7 @@ class TrafficManager:
                 continue
             vehicle_type = car_type[self.np_random.choice(list(car_type.keys()), p=[0.5, 0.3, 0.2])]
             random_v = vehicle_type.create_random_traffic_vehicle(
-                self, lane, long, self.random_seed, enbale_reborn=is_reborn_lane
+                self, lane, long, self.random_seed, enable_reborn=is_reborn_lane
             )
             self.vehicles.append(random_v.vehicle_node.kinematic_model)
             traffic_vehicles.append(random_v)

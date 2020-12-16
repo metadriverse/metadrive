@@ -1,6 +1,5 @@
 from pgdrive.envs.pgdrive_env import PGDriveEnv
 from pgdrive.scene_creator.map import Map, MapGenerateMethod
-from panda3d.core import loadPrcFileData
 
 
 class TestEnv(PGDriveEnv):
@@ -33,7 +32,6 @@ if __name__ == "__main__":
     env = TestEnv()
     env.reset()
     env.pg_world.accept("m", env.vehicle.image_sensors[env.config["image_source"]].save_image)
-    from pgdrive.envs.observation_type import ObservationType, ImageObservation
 
     for i in range(1, 100000):
         # start = time.time()

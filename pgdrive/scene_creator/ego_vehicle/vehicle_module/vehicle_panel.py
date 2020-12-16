@@ -1,8 +1,9 @@
 from panda3d.core import NodePath, PGTop, TextNode, Vec3
-from pgdrive.scene_creator.ego_vehicle.base_vehicle import BaseVehicle
+
 from pgdrive.pg_config.cam_mask import CamMask
-from pgdrive.world.pg_world import PgWorld
+from pgdrive.scene_creator.ego_vehicle.base_vehicle import BaseVehicle
 from pgdrive.world.image_buffer import ImageBuffer
+from pgdrive.world.pg_world import PgWorld
 
 
 class VehiclePanel(ImageBuffer):

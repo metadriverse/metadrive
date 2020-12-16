@@ -1,20 +1,21 @@
+import copy
 import json
-import pygame
-import numpy as np
-from pgdrive.world.pg_world import PgWorld
 import logging
 import os
 from typing import List
-from pgdrive.utils.asset_loader import AssetLoader
+
+import numpy as np
+import pygame
 from panda3d.bullet import BulletWorld
 from panda3d.core import NodePath
 
-from pgdrive.pg_config.pg_blocks import PgBlock
 from pgdrive.pg_config import PgConfig
+from pgdrive.pg_config.pg_blocks import PgBlock
 from pgdrive.scene_creator.algorithm.BIG import BIG, BigGenerateMethod
 from pgdrive.scene_creator.blocks.block import Block
 from pgdrive.scene_creator.road.road_network import RoadNetwork
-import copy
+from pgdrive.utils.asset_loader import AssetLoader
+from pgdrive.world.pg_world import PgWorld
 
 
 class MapGenerateMethod:
@@ -100,9 +101,9 @@ class Map:
         self.blocks.append(last_block)
         for block_index, b in enumerate(blocks_config[1:], 1):
             block_type = PgBlock.get_block(b.pop(self.BLOCK_ID))
-            pre_block_socket_inex = b.pop(self.PRE_BLOCK_SOCKET_INDEX)
+            pre_block_socket_index = b.pop(self.PRE_BLOCK_SOCKET_INDEX)
             last_block = block_type(
-                block_index, last_block.get_socket(pre_block_socket_inex), self.road_network, self.random_seed
+                block_index, last_block.get_socket(pre_block_socket_index), self.road_network, self.random_seed
             )
             last_block.construct_from_config(b, parent_node_path, pg_physics_world)
             self.blocks.append(last_block)

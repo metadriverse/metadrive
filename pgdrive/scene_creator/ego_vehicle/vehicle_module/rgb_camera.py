@@ -1,9 +1,8 @@
 from panda3d.core import Vec3, NodePath
 
 from pgdrive.pg_config.cam_mask import CamMask
-from pgdrive.world.pg_world import PgWorld
 from pgdrive.world.image_buffer import ImageBuffer
-from direct.filter.CommonFilters import CommonFilters
+from pgdrive.world.pg_world import PgWorld
 
 
 class RgbCamera(ImageBuffer):

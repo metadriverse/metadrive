@@ -90,7 +90,7 @@ class IDMVehicle(ControlledVehicle):
         """
         Execute an action.
 
-        For now, no action is supported because the ehicle takes all decisions
+        For now, no action is supported because the vehicle takes all decisions
         of acceleration and lane changes on its own, based on the IDM and MOBIL models.
 
         :param action: the action
@@ -113,7 +113,7 @@ class IDMVehicle(ControlledVehicle):
         # action['acceleration'] = self.recover_from_stop(action['acceleration'])
         # action['acceleration'] = np.clip(action['acceleration'], -self.ACC_MAX, self.ACC_MAX)
         action['acceleration'] = clip(action['acceleration'], -self.ACC_MAX, self.ACC_MAX)
-        Vehicle.act(self, action)  # Skip ControlledVehicle.act(), or the command will be overriden.
+        Vehicle.act(self, action)  # Skip ControlledVehicle.act(), or the command will be override.
 
     def step(self, dt: float):
         """
