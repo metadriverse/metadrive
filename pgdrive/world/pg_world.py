@@ -34,6 +34,8 @@ help_message = "Keyboard Shortcuts:\n" \
                "  2: WireFrame Debug Mode\n" \
                "  3: Texture Debug Mode\n" \
                "  4: Print Debug Message\n" \
+               "  f: Switch FPS between unlimited, 60 Hz and \n" \
+               "     real simulation frequency\n" \
                "  Esc: Quit\n"
 
 
@@ -164,7 +166,9 @@ class PgWorld(ShowBase.ShowBase):
             # ui and render property
             if self.pg_config["show_fps"]:
                 self.setFrameRateMeter(True)
-            self.force_fps = ForceFPS(self.pg_config["force_fps"])
+            self.force_fps = ForceFPS(
+                1 / (self.pg_config["physics_world_step_size"] * self.pg_config["decision_repeat"]), start=False
+            )
 
             # self added display regions and cameras attached to them
             self.my_display_regions = []
@@ -186,6 +190,7 @@ class PgWorld(ShowBase.ShowBase):
         self.accept('3', self.toggleTexture)
         self.accept('4', self.toggleAnalyze)
         self.accept("h", self.toggle_help_message)
+        self.accept("f", self.force_fps.toggle)
 
     def _init_display_region(self):
         scale = self.pg_config["window_size"][0] / self.pg_config["window_size"][1]
@@ -268,7 +273,9 @@ class PgWorld(ShowBase.ShowBase):
                 onscreen_message=True,
 
                 # limit the render fps
-                force_fps=None,
+                # Press "f" to switch FPS, this config is deprecated!
+                # force_fps=None,
+                decision_repeat=5,  # This will be written by PGDriveEnv
 
                 # only render physics world without model
                 debug_physics_world=False,
