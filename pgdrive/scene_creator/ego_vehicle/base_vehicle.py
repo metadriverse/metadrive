@@ -219,7 +219,7 @@ class BaseVehicle(DynamicElement):
         """
         km/h
         """
-        speed = self.system.get_current_speed_km_hour()
+        speed = self.chassis_np.node().get_linear_velocity().length() * 3.6
         return speed
 
     @property
