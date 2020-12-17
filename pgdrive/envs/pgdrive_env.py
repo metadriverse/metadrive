@@ -180,7 +180,7 @@ class PGDriveEnv(gym.Env):
         self.vehicle.update_state()
         self.traffic_manager.update_state(self.pg_world.physics_world)
 
-        #  panda3d loop
+        #  panda3d render and garbage collecting loop
         self.pg_world.taskMgr.step()
 
         obs = self.observation.observe(self.vehicle)
