@@ -7,6 +7,11 @@ import numpy as np
 from pgdrive.scene_creator.road.road_network import RoadNetwork
 
 
+def safe_clip(array, min_val, max_val):
+    array = np.nan_to_num(array)
+    return np.clip(array, min_val, max_val)
+
+
 def wrap_to_pi(x: float) -> float:
     return ((x + np.pi) % (2 * np.pi)) - np.pi
 

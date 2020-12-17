@@ -15,7 +15,7 @@ from pgdrive.scene_creator.ego_vehicle.vehicle_module.mini_map import MiniMap
 from pgdrive.scene_creator.ego_vehicle.vehicle_module.rgb_camera import RgbCamera
 from pgdrive.scene_creator.map import Map, MapGenerateMethod
 from pgdrive.scene_manager.traffic_manager import TrafficManager, TrafficMode
-from pgdrive.utils import recursive_equal
+from pgdrive.utils import recursive_equal, safe_clip
 from pgdrive.world.chase_camera import ChaseCamera
 from pgdrive.world.manual_controller import KeyboardController, JoystickController
 from pgdrive.world.pg_world import PgWorld
@@ -158,7 +158,6 @@ class PGDriveEnv(gym.Env):
             self.control_camera.reset(self.vehicle.position)
 
     def step(self, action: np.ndarray):
-
         if self.config["action_check"]:
             assert self.action_space.contains(action), "Input {} is not compatible with action space {}!".format(
                 action, self.action_space
@@ -167,6 +166,9 @@ class PGDriveEnv(gym.Env):
         # prepare step
         if self.config["manual_control"] and self.use_render:
             action = self.controller.process_input()
+
+        action = safe_clip(action, min_val=self.action_space.low[0], max_val=self.action_space.high[0])
+
         self.vehicle.prepare_step(action)
         self.traffic_manager.prepare_step()
 
