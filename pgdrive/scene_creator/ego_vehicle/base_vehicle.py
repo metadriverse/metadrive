@@ -5,7 +5,7 @@ from os import path
 
 import numpy as np
 from panda3d.bullet import BulletVehicle, BulletBoxShape, BulletRigidBodyNode, ZUp, BulletWorld, BulletGhostNode
-from panda3d.core import Vec3, TransformState, NodePath, LQuaternionf, BitMask32, Vec4, PythonCallbackObject
+from panda3d.core import Vec3, TransformState, NodePath, LQuaternionf, BitMask32, PythonCallbackObject
 
 from pgdrive.pg_config import PgConfig
 from pgdrive.pg_config.body_name import BodyName
@@ -43,20 +43,6 @@ class BaseVehicle(DynamicElement):
     PARAMETER_SPACE = PgSpace(VehicleParameterSpace.BASE_VEHICLE)  # it will not sample config from parameter space
     COLLISION_MASK = 1
     STEERING_INCREMENT = 0.05
-
-    # priority and color
-    COLLISION_INFO_COLOR = dict(
-        red=(0, Vec4(195 / 255, 0, 0, 1)),
-        orange=(1, Vec4(218 / 255, 80 / 255, 0, 1)),
-        yellow=(2, Vec4(218 / 255, 163 / 255, 0, 1)),
-        green=(3, Vec4(65 / 255, 163 / 255, 0, 1))
-    )
-    COLOR = {
-        BodyName.Side_walk: "red",
-        BodyName.Continuous_line: "orange",
-        BodyName.Stripped_line: "yellow",
-        BodyName.Traffic_vehicle: "red"
-    }
 
     default_vehicle_config = PgConfig(
         dict(
@@ -179,10 +165,6 @@ class BaseVehicle(DynamicElement):
         if "depth_cam" in self.image_sensors and self.image_sensors["depth_cam"].view_ground:
             for block in map.blocks:
                 block.node_path.hide(CamMask.DepthCam)
-
-        # if self.vehicle_config["wheel_friction"] != self.default_vehicle_config["wheel_friction"]:
-        #     for wheel in self.wheels:
-        #         wheel.setFrictionSlip(self.vehicle_config["wheel_friction"])
 
     def get_state(self):
         pass
@@ -455,21 +437,8 @@ class BaseVehicle(DynamicElement):
             elif name[0] == BodyName.Side_walk:
                 self.out_of_road = True
             contacts.add(name[0])
-        contacts = sorted(list(contacts), key=lambda c: self.COLLISION_INFO_COLOR[self.COLOR[c]][0])
         if self.render:
-            self._render_on_console(contacts[0] if len(contacts) != 0 else None)
-
-    def _render_on_console(self, name):
-        if self.pg_world.collision_info_np is None:
-            return
-        if name is None:
-            text = self.pg_world.collision_info_np.node()
-            text.setCardColor(self.COLLISION_INFO_COLOR["green"][1])
-            text.setText("Normal")
-        else:
-            text = self.pg_world.collision_info_np.node()
-            text.setCardColor(self.COLLISION_INFO_COLOR[self.COLOR[name]][1])
-            text.setText(name)
+            self.pg_world.render_collision_info(contacts)
 
     def _collision_check(self, contact):
         """
