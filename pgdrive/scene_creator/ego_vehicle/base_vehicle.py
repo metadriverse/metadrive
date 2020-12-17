@@ -1,5 +1,6 @@
 import copy
 import logging
+import math
 from collections import deque
 from os import path
 
@@ -220,35 +221,16 @@ class BaseVehicle(DynamicElement):
         km/h
         """
         speed = self.system.get_current_speed_km_hour()
-        return speed
+        return clip(speed, 0.0, 10000.0)
 
     @property
     def heading(self):
         real_heading = self.heading_theta
         heading = np.array([np.cos(real_heading), np.sin(real_heading)])
-
-        # # ===== Debug script to see the heading =====
-        # # This is the heading in Bullet system:
-        # print(f"Current Absolute Heading: {real_heading}")
-        # print("Absolute heading direction: {}".format(
-        #     heading
-        # ))
-        #
-        # # This is the heading reported by the forward vector (the velocity direction)
-        # forward_vector = self.vehicle.get_forward_vector()
-        # forward = (forward_vector[0], -forward_vector[1])
-        # print("Current Report Heading: {}".format(
-        #     np.arctan2(-forward[0], -forward[1]) / np.pi * 180
-        # ))
-        # print(f"Current Raw Forward Direction: {self.forward_direction}, "
-        #       f"norm {np.linalg.norm(self.forward_direction)}")
         return heading
 
     @property
     def heading_theta(self):
-        # return self.chassis_np.getHpr()[0] / 180 * math.pi
-        # print(self.chassis_np.getHpr()[0])
-        import math
         return -(self.chassis_np.getHpr()[0] + 90) / 180 * math.pi
 
     @property
@@ -290,8 +272,8 @@ class BaseVehicle(DynamicElement):
             return 0
         # cos = self.forward_direction.dot(lateral) / (np.linalg.norm(lateral) * np.linalg.norm(self.forward_direction))
         cos = (
-            (forward_direction[0] * lateral[0] + forward_direction[1] * lateral[1]) /
-            (lateral_norm * forward_direction_norm)
+                (forward_direction[0] * lateral[0] + forward_direction[1] * lateral[1]) /
+                (lateral_norm * forward_direction_norm)
         )
         # return cos
         # Normalize to 0, 1
