@@ -8,21 +8,19 @@ from pgdrive.world.pg_world import PgWorld
 
 
 class MiniMap(ImageBuffer):
-    BUFFER_X = 200
-    BUFFER_Y = 88
     CAM_MASK = CamMask.MiniMap
-    display_top = 1.13
 
     def __init__(self, para: Tuple, chassis_np: NodePath, pg_world: PgWorld):
-        self.BUFFER_X = para[0]
-        self.BUFFER_Y = para[1]
+        self.BUFFER_W = para[0]
+        self.BUFFER_H = para[1]
         height = para[2]
         super(MiniMap, self).__init__(
-            self.BUFFER_X, self.BUFFER_Y, Vec3(0, 20, height), self.BKG_COLOR, pg_world.win, pg_world.makeCamera,
+            self.BUFFER_W, self.BUFFER_H, Vec3(0, 20, height), self.BKG_COLOR, pg_world.win, pg_world.makeCamera,
             chassis_np
         )
         self.cam.lookAt(Vec3(0, 20, 0))
         # lens = self.cam.node().getLens()
-        # lens.setFilmOffset(1.0, 2.0)
+        # self.lens.setFilmOffset(1.0, 2.0)
+        self.lens.setAspectRatio(2.0)
         self.add_to_display(pg_world, [0., 1 / 3, self.display_bottom, self.display_top])
         # self.buffer.setSort(0)

@@ -7,16 +7,16 @@ from pgdrive.world.pg_world import PgWorld
 
 class RgbCamera(ImageBuffer):
     # shape(dim_1, dim_2)
-    BUFFER_X = 84  # dim 1
-    BUFFER_Y = 84  # dim 2
+    BUFFER_W = 84  # dim 1
+    BUFFER_H = 84  # dim 2
     CAM_MASK = CamMask.RgbCam
     display_top = 1.0
 
     def __init__(self, length: int, width: int, chassis_np: NodePath, pg_world: PgWorld):
-        self.BUFFER_X = length
-        self.BUFFER_Y = width
+        self.BUFFER_W = length
+        self.BUFFER_H = width
         super(RgbCamera, self).__init__(
-            self.BUFFER_X, self.BUFFER_Y, Vec3(0.0, 0.8, 1.5), self.BKG_COLOR, pg_world.win, pg_world.makeCamera,
+            self.BUFFER_W, self.BUFFER_H, Vec3(0.0, 0.8, 1.5), self.BKG_COLOR, pg_world.win, pg_world.makeCamera,
             chassis_np
         )
         self.add_to_display(pg_world, [1 / 3, 2 / 3, self.display_bottom, self.display_top])

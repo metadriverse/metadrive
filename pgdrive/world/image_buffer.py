@@ -1,16 +1,16 @@
 import logging
 from typing import Union, List
-
+from pgdrive.world.pg_world import PgWorld
 import numpy as np
 from panda3d.core import NodePath, Vec3, Vec4, Camera
 
 
 class ImageBuffer:
     enable = True
-
+    LINE_FRAME_COLOR = (0.8, 0.8, 0.8, 0)
     CAM_MASK = None
-    BUFFER_X = 800  # left to right
-    BUFFER_Y = 800  # bottom to top
+    BUFFER_W = 800  # left to right
+    BUFFER_H = 800  # bottom to top
     BKG_COLOR = Vec3(179 / 255, 211 / 255, 216 / 255)
     display_bottom = 0.8
     display_top = 1
@@ -101,6 +101,19 @@ class ImageBuffer:
             self.display_region.setCamera(self.cam)
             pg_world.my_display_regions.append(self.display_region)
             pg_world.my_buffers.append(self)
+            self.draw_border(pg_world, display_region)
+
+    def draw_border(self, pg_world: PgWorld, display_region):
+        # add white frame for display region, convert to [-1, 1]
+        left = display_region[0] * 2 - 1
+        right = display_region[1] * 2 - 1
+        bottom = display_region[2] * 2 - 1
+        top = display_region[3] * 2 - 1
+
+        pg_world.draw_line([left, bottom], [left, top], self.LINE_FRAME_COLOR, 1.5)
+        pg_world.draw_line([left, top], [right, top], self.LINE_FRAME_COLOR, 1.5)
+        pg_world.draw_line([right, top], [right, bottom], self.LINE_FRAME_COLOR, 1.5)
+        pg_world.draw_line([right, bottom], [left, bottom], self.LINE_FRAME_COLOR, 1.5)
 
     def __del__(self):
         logging.debug("{} is destroyed".format(self.__class__.__name__))

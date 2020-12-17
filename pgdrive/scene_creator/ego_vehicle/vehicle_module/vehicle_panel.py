@@ -9,8 +9,8 @@ from pgdrive.world.pg_world import PgWorld
 class VehiclePanel(ImageBuffer):
     PARA_VIS_LENGTH = 12
     MAX_SPEED = 120
-    BUFFER_X = 800
-    BUFFER_Y = 400
+    BUFFER_W = 800
+    BUFFER_H = 400
     CAM_MASK = CamMask.PARA_VIS
     GAP = 4.1
 
@@ -40,10 +40,10 @@ class VehiclePanel(ImageBuffer):
             textNodePath.setPos(-1.125111, 0, 0.9 - i * 0.08)
             self.para_vis_np.append(textNodePath)
         super(VehiclePanel, self).__init__(
-            self.BUFFER_X, self.BUFFER_Y, Vec3(-0.9, -1.01, 0.78), self.BKG_COLOR, pg_world.win, make_camera_func,
+            self.BUFFER_W, self.BUFFER_H, Vec3(-0.9, -1.01, 0.78), self.BKG_COLOR, pg_world.win, make_camera_func,
             self.aspect2d_np
         )
-        self.add_to_display(pg_world, [0.67, 1, self.display_bottom, self.display_top])
+        self.add_to_display(pg_world, [2 / 3, 1, self.display_bottom, self.display_top])
         pg_world.taskMgr.add(self.renew_2d_car_para_visualization, "update panel", extraArgs=[vehicle], appendTask=True)
 
     def renew_2d_car_para_visualization(self, vehicle: BaseVehicle, task):
