@@ -2,7 +2,7 @@ import logging
 import os
 import sys
 from typing import Optional, Union
-
+from direct.gui.OnscreenImage import OnscreenImage
 import gltf
 from direct.showbase import ShowBase
 from panda3d.bullet import BulletDebugNode, BulletWorld
@@ -14,7 +14,6 @@ from pgdrive.utils import is_mac
 from pgdrive.utils.asset_loader import AssetLoader
 from pgdrive.world.force_fps import ForceFPS
 from pgdrive.world.highway_render.highway_render import HighwayRender
-from pgdrive.world.image_buffer import ImageBuffer
 from pgdrive.world.light import Light
 from pgdrive.world.onscreen_message import PgOnScreenMessage
 from pgdrive.world.sky_box import SkyBox
@@ -30,6 +29,8 @@ help_message = "Keyboard Shortcuts:\n" \
                "  d: Moving Right\n" \
                "  r: Reset the Environment\n" \
                "  h: Helping Message\n" \
+               "  j: Main Camera Down\n" \
+               "  k: Main Camera Up\n" \
                "  1: Box Debug Mode\n" \
                "  2: WireFrame Debug Mode\n" \
                "  3: Texture Debug Mode\n" \
@@ -83,14 +84,19 @@ class PgWorld(ShowBase.ShowBase):
             if self.pg_config["headless_image"]:
                 loadPrcFileData("", "load-display  pandagles2")
         super(PgWorld, self).__init__(windowType=self.mode)
+        if self.mode == "onscreen":
+            self.disableMouse()
         if (not self.pg_config["debug_physics_world"] and (self.pg_config["use_render"] or self.pg_config["use_image"])) \
                 and not self.pg_config["highway_render"]:
             path = AssetLoader.windows_style2unix_style(root_path) if sys.platform == "win32" else root_path
             AssetLoader.init_loader(self.loader, path)
             gltf.patch_loader(self.loader)
+
         self.closed = False
         self.highway_render = HighwayRender(self.pg_config["window_size"], self.pg_config["use_render"]) if \
             self.pg_config["highway_render"] else None
+
+        from pgdrive.world.image_buffer import ImageBuffer
         ImageBuffer.refresh_frame = self.graphicsEngine.renderFrame
         ImageBuffer.enable = False if self.pg_config["highway_render"] else True
 
@@ -106,8 +112,22 @@ class PgWorld(ShowBase.ShowBase):
         self.debug_node = None
 
         # some render attr
+        self.pbrpipe = None
         self.light = None
         self.collision_info_np = None
+        self.w_scale = max(self.pg_config["window_size"][0] / self.pg_config["window_size"][1], 1)
+        self.h_scale = max(self.pg_config["window_size"][1] / self.pg_config["window_size"][0], 1)
+        if self.pg_config["use_render"]:
+            # show logo
+            self.logo = OnscreenImage(
+                image=AssetLoader.file_path(AssetLoader.asset_path, "PGDrive.png"),
+                pos=(0, 0, 0),
+                scale=(self.w_scale, 1, self.h_scale)
+            )
+            self.logo.setTransparency(True)
+            for i in range(4):
+                self.graphicsEngine.renderFrame()
+            self.taskMgr.add(self.remove_logo, "remove logo in first frame")
 
         # physics world
         self.physics_world = BulletWorld()
@@ -172,8 +192,6 @@ class PgWorld(ShowBase.ShowBase):
 
             # self added display regions and cameras attached to them
             self.my_display_regions = []
-            if self.pg_config["use_default_layout"]:
-                self._init_display_region()
             self.my_buffers = []
 
             # onscreen message
@@ -195,32 +213,13 @@ class PgWorld(ShowBase.ShowBase):
         # task manager
         self.taskMgr.remove('audioLoop')
 
-    def _init_display_region(self):
-        scale = self.pg_config["window_size"][0] / self.pg_config["window_size"][1]
-        line_seg = LineSegs("interface")
-        line_seg.setColor(0.8, 0.8, 0.8, 0)
-        line_seg.moveTo(-scale, 0, 0.6)
-        line_seg.drawTo(scale, 0, 0.6)
-        line_seg.setThickness(1.5)
-        NodePath(line_seg.create(False)).reparentTo(self.aspect2d)
-
-        line_seg.moveTo(-scale / 3, 0, 1)
-        line_seg.drawTo(-scale / 3, 0, 0.6)
-        line_seg.setThickness(1.5)
-        NodePath(line_seg.create(False)).reparentTo(self.aspect2d)
-
-        line_seg.moveTo(scale / 3, 0, 1)
-        line_seg.drawTo(scale / 3, 0, 0.6)
-        line_seg.setThickness(1.5)
-        NodePath(line_seg.create(False)).reparentTo(self.aspect2d)
-
     def _init_collision_info_render(self):
-        self.collision_info_np.node().setCardActual(-7, 7, -0.3, 1)
+        self.collision_info_np.node().setCardActual(-5 * self.w_scale, 5.1 * self.w_scale, -0.3, 1)
         self.collision_info_np.node().setCardDecal(True)
         self.collision_info_np.node().setTextColor(1, 1, 1, 1)
         self.collision_info_np.node().setAlign(TextNode.A_center)
         self.collision_info_np.setScale(0.05)
-        self.collision_info_np.setPos(-1, -0.8, -0.8)
+        self.collision_info_np.setPos(-0.75 * self.w_scale, 0, -0.8 * self.h_scale)
         self.collision_info_np.reparentTo(self.aspect2d)
 
     def render_frame(self, text: Optional[Union[dict, str]] = None):
@@ -331,6 +330,7 @@ class PgWorld(ShowBase.ShowBase):
 
     def close_world(self):
         if self.mode != "none":
+            self.taskMgr.remove('simplepbr update')
             self._clear_display_region_and_buffers()
         self.destroy()
         self.physics_world.clearDebugNode()
@@ -347,6 +347,35 @@ class PgWorld(ShowBase.ShowBase):
         else:
             self.on_screen_message.update_data(help_message)
             self._show_help_message = True
+
+    def draw_line(self, start_p, end_p, color, thickness: float):
+        """
+        Draw line use LineSegs coordinates system. Since a resolution problem is solved, the point on screen should be
+        described by [horizontal ratio, vertical ratio], each of them are ranged in [-1, 1]
+        :param start_p: 2d vec
+        :param end_p: 2d vec
+        :param color: 4d vec, line color
+        :param thickness: line thickness
+        :param pg_world: pg_world class
+        :return:
+        """
+        line_seg = LineSegs("interface")
+        line_seg.setColor(*color)
+        line_seg.moveTo(start_p[0] * self.w_scale, 0, start_p[1] * self.h_scale)
+        line_seg.drawTo(end_p[0] * self.w_scale, 0, end_p[1] * self.h_scale)
+        line_seg.setThickness(thickness)
+        NodePath(line_seg.create(False)).reparentTo(self.aspect2d)
+
+    def remove_logo(self, task):
+        alpha = self.logo.getColor()[-1]
+        if alpha < 0.1:
+            self.logo.destroy()
+            return task.done
+        else:
+            new_alpha = alpha - 0.04
+            print(new_alpha)
+            self.logo.setColor((1, 1, 1, new_alpha))
+            return task.cont
 
 
 if __name__ == "__main__":
