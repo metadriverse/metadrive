@@ -429,7 +429,7 @@ class BaseVehicle(DynamicElement):
         self.image_sensors[name] = sensor
 
     def add_lidar(self, laser_num=240, distance=50):
-        self.lidar = Lidar(self.pg_world.worldNP, laser_num, distance)
+        self.lidar = Lidar(self.pg_world.render, laser_num, distance)
 
     def add_routing_localization(self, show_navi_point: bool):
         self.routing_localization = RoutingLocalizationModule(show_navi_point)

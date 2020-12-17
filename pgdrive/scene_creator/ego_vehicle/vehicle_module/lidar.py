@@ -15,15 +15,17 @@ from pgdrive.utils.asset_loader import AssetLoader
 
 class Lidar:
     Lidar_point_cloud_obs_dim = 240
+    enable_show = False
 
-    def __init__(self, parent_node_np: NodePath, laser_num: int = 240, distance: float = 50, show=False):
+    def __init__(self, parent_node_np: NodePath, laser_num: int = 240, distance: float = 50):
+        show = self.enable_show and (AssetLoader.loader is not None)
         self.Lidar_point_cloud_obs_dim = laser_num
         self.laser_num = laser_num
         self.perceive_distance = distance
         self.radian_unit = 2 * np.pi / laser_num
         self.detection_results = None
         self.node_path = parent_node_np.attachNewNode("cloudPoints")
-        self.node_path.hide(CamMask.RgbCam | CamMask.Shadow | CamMask.Shadow | CamMask.MainCam)
+        self.node_path.hide(CamMask.RgbCam | CamMask.Shadow)
         self.cloud_points = [] if show else None
         logging.debug("Load Vehicle Module: {}".format(self.__class__.__name__))
         if show:
@@ -44,17 +46,20 @@ class Lidar:
         """
         Call me to update the perception info
         """
-        start_position = Vec3(vehicle_position[0], -vehicle_position[1], 1.0)
+        # coordinates problem here! take care
+        pg_start_position = Vec3(vehicle_position[0], -vehicle_position[1], 1.0)
         self.detection_results = []
-        heading_theta -= math.pi / 2
+
+        # lidar calculation use pg coordinates
         mask = BitMask32.bit(PgTrafficVehicle.COLLISION_MASK)
         laser_heading = np.arange(0, self.laser_num) * self.radian_unit + heading_theta
-        point_x = self.perceive_distance * np.cos(laser_heading) + start_position[0]
-        point_y = self.perceive_distance * np.sin(laser_heading) + start_position[1]
-
+        point_x = self.perceive_distance * np.cos(laser_heading) + vehicle_position[0]
+        point_y = self.perceive_distance * np.sin(laser_heading) + vehicle_position[1]
+        # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
         for laser_index in range(self.laser_num):
-            laser_end = Point3(point_x[laser_index], point_y[laser_index], 1.0)
-            result = pg_physics_world.rayTestClosest(start_position, laser_end, mask)
+            # # coordinates problem here! take care
+            laser_end = Point3(point_x[laser_index], -point_y[laser_index], 1.0)
+            result = pg_physics_world.rayTestClosest(pg_start_position, laser_end, mask)
             self.detection_results.append(result)
             if self.cloud_points is not None:
                 if result.hasHit():
