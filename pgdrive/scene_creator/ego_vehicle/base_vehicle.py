@@ -16,6 +16,7 @@ from pgdrive.pg_config.pg_space import PgSpace
 from pgdrive.scene_creator.blocks.block import Block
 from pgdrive.scene_creator.ego_vehicle.vehicle_module.lidar import Lidar
 from pgdrive.scene_creator.ego_vehicle.vehicle_module.routing_localization import RoutingLocalizationModule
+from pgdrive.scene_creator.ego_vehicle.vehicle_module.vehicle_panel import VehiclePanel
 from pgdrive.scene_creator.lanes.circular_lane import CircularLane
 from pgdrive.scene_creator.lanes.lane import AbstractLane
 from pgdrive.scene_creator.lanes.straight_lane import StraightLane
@@ -92,8 +93,11 @@ class BaseVehicle(DynamicElement):
         self.routing_localization = None
         self.lane = None
         self.lane_index = None
-        from pgdrive.scene_creator.ego_vehicle.vehicle_module.vehicle_panel import VehiclePanel
-        self.vehicle_panel = VehiclePanel(self, self.pg_world)
+
+        if (not self.pg_world.pg_config["highway_render"]) and (self.pg_world.mode != "none"):
+            self.vehicle_panel = VehiclePanel(self, self.pg_world)
+        else:
+            self.vehicle_panel = None
 
         # other info
         self.throttle_brake = 0.0
@@ -220,8 +224,8 @@ class BaseVehicle(DynamicElement):
         """
         km/h
         """
-        speed = self.system.get_current_speed_km_hour()
-        return clip(speed, 0.0, 10000.0)
+        speed = self.chassis_np.node().get_linear_velocity().length() * 3.6
+        return clip(speed, 0.0, 100000.0)
 
     @property
     def heading(self):
@@ -437,8 +441,16 @@ class BaseVehicle(DynamicElement):
     def destroy(self, pg_world: BulletWorld):
         self.pg_world.physics_world.clearContactAddedCallback()
         self.pg_world = None
-        self.lidar = None
         self.routing_localization = None
+        if self.lidar is not None:
+            self.lidar.destroy()
+            self.lidar = None
+        if len(self.image_sensors) != 0:
+            for sensor in self.image_sensors.values():
+                sensor.destroy(self.pg_world)
+        self.image_sensors = None
+        if self.vehicle_panel is not None:
+            self.vehicle_panel.destroy()
         super(BaseVehicle, self).destroy(pg_world)
 
     def __del__(self):
