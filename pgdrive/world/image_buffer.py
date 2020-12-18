@@ -114,20 +114,22 @@ class ImageBuffer:
         self.line_borders.append(pg_world.draw_line([right, bottom], [left, bottom], self.LINE_FRAME_COLOR, 1.5))
 
     def destroy(self, pg_world):
-        if self.display_region in pg_world.my_display_regions:
-            pg_world.my_display_regions.remove(self.display_region)
-            pg_world.win.removeDisplayRegion(self.display_region)
-        self.display_region = None
-        if self.buffer in pg_world.my_buffers:
-            pg_world.my_buffers.remove(self.buffer)
-            pg_world.graphicsEngine.removeWindow(self.buffer)
-        self.buffer = None
-        if self.cam in pg_world.camList:
-            pg_world.camList.remove(self.cam)
+        if pg_world is not None:
+            if self.display_region in pg_world.my_display_regions:
+                pg_world.my_display_regions.remove(self.display_region)
+                pg_world.win.removeDisplayRegion(self.display_region)
+            self.display_region = None
+            if self.buffer in pg_world.my_buffers:
+                pg_world.my_buffers.remove(self.buffer)
+                pg_world.graphicsEngine.removeWindow(self.buffer)
+            self.buffer = None
+            if self.cam in pg_world.camList:
+                pg_world.camList.remove(self.cam)
         self.cam.removeNode()
         if len(self.line_borders) != 0:
             for line_np in self.line_borders:
-                line_np.removeNode()
+                if line_np:
+                    line_np.removeNode()
         self.line_borders = None
         self.node_path.removeNode()
 
