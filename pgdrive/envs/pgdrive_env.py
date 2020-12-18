@@ -1,6 +1,8 @@
 import copy
 import json
 import os.path as osp
+import sys
+import time
 from typing import Union, Optional
 
 import gym
@@ -12,7 +14,7 @@ from pgdrive.scene_creator.algorithm.BIG import BigGenerateMethod
 from pgdrive.scene_creator.ego_vehicle.base_vehicle import BaseVehicle
 from pgdrive.scene_creator.ego_vehicle.vehicle_module.depth_camera import DepthCamera
 from pgdrive.scene_creator.ego_vehicle.vehicle_module.mini_map import MiniMap
-from pgdrive.scene_creator.ego_vehicle.vehicle_module.rgb_camera import RgbCamera
+from pgdrive.scene_creator.ego_vehicle.vehicle_module.rgb_camera import RGBCamera
 from pgdrive.scene_creator.map import Map, MapGenerateMethod
 from pgdrive.scene_manager.traffic_manager import TrafficManager, TrafficMode
 from pgdrive.utils import recursive_equal, safe_clip
@@ -129,7 +131,8 @@ class PGDriveEnv(gym.Env):
         # init world
         self.pg_world = PgWorld(self.pg_world_config)
         self.pg_world.accept("r", self.reset)
-        self.pg_world.accept("escape", self.force_close)
+        self.pg_world.accept("escape", sys.exit)
+        # self.pg_world.accept("escape", self.force_close)
 
         # init traffic manager
         self.traffic_manager = TrafficManager(self.config["traffic_mode"])
@@ -357,7 +360,7 @@ class PGDriveEnv(gym.Env):
 
             if self.config["use_render"]:
                 rgb_cam_config = vehicle_config["rgb_cam"]
-                rgb_cam = RgbCamera(rgb_cam_config[0], rgb_cam_config[1], self.vehicle.chassis_np, self.pg_world)
+                rgb_cam = RGBCamera(rgb_cam_config[0], rgb_cam_config[1], self.vehicle.chassis_np, self.pg_world)
                 self.vehicle.add_image_sensor("rgb_cam", rgb_cam)
 
                 mini_map = MiniMap(vehicle_config["mini_map"], self.vehicle.chassis_np, self.pg_world)
@@ -368,7 +371,7 @@ class PGDriveEnv(gym.Env):
             # 3 types image observation
             if self.config["image_source"] == "rgb_cam":
                 rgb_cam_config = vehicle_config["rgb_cam"]
-                rgb_cam = RgbCamera(rgb_cam_config[0], rgb_cam_config[1], self.vehicle.chassis_np, self.pg_world)
+                rgb_cam = RGBCamera(rgb_cam_config[0], rgb_cam_config[1], self.vehicle.chassis_np, self.pg_world)
                 self.vehicle.add_image_sensor("rgb_cam", rgb_cam)
             elif self.config["image_source"] == "mini_map":
                 mini_map = MiniMap(vehicle_config["mini_map"], self.vehicle.chassis_np, self.pg_world)
@@ -384,7 +387,7 @@ class PGDriveEnv(gym.Env):
         if self.config["use_render"]:
             if self.config["image_source"] == "mini_map":
                 rgb_cam_config = vehicle_config["rgb_cam"]
-                rgb_cam = RgbCamera(rgb_cam_config[0], rgb_cam_config[1], self.vehicle.chassis_np, self.pg_world)
+                rgb_cam = RGBCamera(rgb_cam_config[0], rgb_cam_config[1], self.vehicle.chassis_np, self.pg_world)
                 self.vehicle.add_image_sensor("rgb_cam", rgb_cam)
             else:
                 mini_map = MiniMap(vehicle_config["mini_map"], self.vehicle.chassis_np, self.pg_world)
@@ -460,7 +463,9 @@ class PGDriveEnv(gym.Env):
             return False
 
     def force_close(self):
+        print("Closing environment ... Please wait")
         self.close()
+        time.sleep(2)  # Sleep two seconds
         raise KeyboardInterrupt("'Esc' is pressed. PGDrive exits now.")
 
     def set_current_seed(self, seed):
