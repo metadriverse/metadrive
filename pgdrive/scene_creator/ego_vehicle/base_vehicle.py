@@ -94,7 +94,7 @@ class BaseVehicle(DynamicElement):
         self.lane = None
         self.lane_index = None
 
-        if (not self.pg_world.pg_config["highway_render"]) and (self.pg_world.mode != "none"):
+        if (not self.pg_world.pg_config["highway_render"]) and (self.pg_world.mode == "onscreen"):
             self.vehicle_panel = VehiclePanel(self, self.pg_world)
         else:
             self.vehicle_panel = None
@@ -135,6 +135,8 @@ class BaseVehicle(DynamicElement):
             self.set_incremental_action(action)
         else:
             self.set_act(action)
+        if self.vehicle_panel is not None:
+            self.vehicle_panel.renew_2d_car_para_visualization(self)
 
     def update_state(self):
         if self.lidar is not None:
@@ -342,7 +344,7 @@ class BaseVehicle(DynamicElement):
 
         self.system = BulletVehicle(pg_physics_world, chassis)
         self.system.setCoordinateSystem(ZUp)
-        self.bullet_nodes.append(self.system)
+        self.bullet_nodes.append(self.system)  # detach chassis will also detach system, so a waring will generate
         self.LENGTH = para[Parameter.vehicle_length]
         self.WIDTH = para[Parameter.vehicle_width]
 
@@ -439,9 +441,9 @@ class BaseVehicle(DynamicElement):
             logging.debug("Crash with {}".format(name[0]))
 
     def destroy(self, _=None):
-        self.pg_world.physics_world.clearContactAddedCallback()
+        self.bullet_nodes.remove(self.chassis_np.node())
         super(BaseVehicle, self).destroy(self.pg_world.physics_world)
-        self.pg_world = None
+        self.pg_world.physics_world.clearContactAddedCallback()
         self.routing_localization = None
         if self.lidar is not None:
             self.lidar.destroy()
@@ -452,6 +454,7 @@ class BaseVehicle(DynamicElement):
         self.image_sensors = None
         if self.vehicle_panel is not None:
             self.vehicle_panel.destroy(self.pg_world)
+        self.pg_world = None
 
     def __del__(self):
         super(BaseVehicle, self).__del__()

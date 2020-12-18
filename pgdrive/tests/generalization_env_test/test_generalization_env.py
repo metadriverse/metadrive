@@ -44,7 +44,7 @@ if __name__ == "__main__":
         # print(o)
         # print(time.time() - start)
         # print(len(o), "Vs.", env.observation_space.shape[0])
-        # print(info)
+        # print(info)w
         env.render("Test: {}".format(i))
         # if d:
         #     print("Reset")

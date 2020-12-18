@@ -97,8 +97,6 @@ class ImageBuffer:
             # only show them when onscreen
             self.display_region = pg_world.win.makeDisplayRegion(*display_region)
             self.display_region.setCamera(self.cam)
-            pg_world.my_display_regions.append(self.display_region)
-            pg_world.my_buffers.append(self)
             self.draw_border(pg_world, display_region)
 
     def draw_border(self, pg_world, display_region):
@@ -115,13 +113,10 @@ class ImageBuffer:
 
     def destroy(self, pg_world):
         if pg_world is not None:
-            if self.display_region in pg_world.my_display_regions:
-                pg_world.my_display_regions.remove(self.display_region)
+            if pg_world.mode == "onscreen":
                 pg_world.win.removeDisplayRegion(self.display_region)
+            pg_world.graphicsEngine.removeWindow(self.buffer)
             self.display_region = None
-            if self.buffer in pg_world.my_buffers:
-                pg_world.my_buffers.remove(self.buffer)
-                pg_world.graphicsEngine.removeWindow(self.buffer)
             self.buffer = None
             if self.cam in pg_world.camList:
                 pg_world.camList.remove(self.cam)
