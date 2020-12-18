@@ -42,7 +42,8 @@ class PgWorld(ShowBase.ShowBase):
 
     # for debug use
     # loadPrcFileData("", "want-pstats 1")
-    # loadPrcFileData("", "notify-level-glgsg fatal")
+    loadPrcFileData("", "notify-level-glgsg fatal")
+    loadPrcFileData("", "notify-level-pgraph fatal")
 
     # loadPrcFileData("", "gl-version 3 2")
 
@@ -74,6 +75,26 @@ class PgWorld(ShowBase.ShowBase):
                 loadPrcFileData("", "compressed-textures 1")
 
         super(PgWorld, self).__init__(windowType=self.mode)
+
+        # Change window size at runtime if screen too small
+        h = self.pipe.getDisplayHeight()
+        w = self.pipe.getDisplayWidth()
+        if self.mode != "none" and (self.pg_config["window_size"][0] > 0.9 * w
+                                    or self.pg_config["window_size"][1] > 0.9 * h):
+            old_scale = self.pg_config["window_size"][0] / self.pg_config["window_size"][1]
+            new_w = int(min(0.9 * w, 0.9 * h * old_scale))
+            new_h = int(min(0.9 * h, 0.9 * w / old_scale))
+            self.pg_config["window_size"] = tuple([new_w, new_h])
+            from panda3d.core import WindowProperties
+            props = WindowProperties()
+            props.setSize(self.pg_config["window_size"][0], self.pg_config["window_size"][1])
+            self.win.requestProperties(props)
+            logging.warning(
+                "Since your screen is too small ({}, {}), we resize the window to {}.".format(
+                    w, h, self.pg_config["window_size"]
+                )
+            )
+
         # screen scale factor
         self.w_scale = max(self.pg_config["window_size"][0] / self.pg_config["window_size"][1], 1)
         self.h_scale = max(self.pg_config["window_size"][1] / self.pg_config["window_size"][0], 1)
