@@ -98,11 +98,9 @@ class PgWorld(ShowBase.ShowBase):
         self.h_scale = max(self.pg_config["window_size"][1] / self.pg_config["window_size"][0], 1)
         if self.mode == "onscreen":
             self.disableMouse()
-        if (self.pg_config["use_render"] or self.pg_config["use_image"]) \
-                and not self.pg_config["highway_render"] \
-                and not self.pg_config["debug_physics_world"]:
+        if not self.pg_config["highway_render"] and not self.pg_config["debug_physics_world"]:
             path = AssetLoader.windows_style2unix_style(root_path) if sys.platform == "win32" else root_path
-            AssetLoader.init_loader(self.loader, path)
+            AssetLoader.init_loader(self, path)
             gltf.patch_loader(self.loader)
             if self.pg_config["use_render"]:
                 # show logo
@@ -197,10 +195,6 @@ class PgWorld(ShowBase.ShowBase):
                 1 / (self.pg_config["physics_world_step_size"] * self.pg_config["decision_repeat"]), start=False
             )
 
-            # self added display regions and cameras attached to them
-            self.my_display_regions = []
-            self.my_buffers = []
-
             # onscreen message
             self.on_screen_message = PgOnScreenMessage() \
                 if self.pg_config["use_render"] and self.pg_config["onscreen_message"] else None
@@ -250,7 +244,7 @@ class PgWorld(ShowBase.ShowBase):
 
     def clear_world(self):
         """
-        Call me to setup the whole world after _init_
+        Call me to setup the whole visualization world after _init_
         """
         # attach all node to this node asset_path
         self.worldNP.node().removeAllChildren()
@@ -259,16 +253,6 @@ class PgWorld(ShowBase.ShowBase):
             self.addTask(self.report_body_nums, "report_num")
 
         self._episode_start_time = time.time()
-
-    def _clear_display_region_and_buffers(self):
-        for r in self.my_display_regions:
-            self.win.removeDisplayRegion(r)
-        for my_buffer in self.my_buffers:
-            self.graphicsEngine.removeWindow(my_buffer.buffer)
-            if my_buffer.cam in self.camList:
-                self.camList.remove(my_buffer.cam)
-        self.my_display_regions = []
-        self.my_buffers = []
 
     @staticmethod
     def default_config():
@@ -339,12 +323,23 @@ class PgWorld(ShowBase.ShowBase):
         return task.done
 
     def close_world(self):
-        if self.mode != "none":
-            self._clear_display_region_and_buffers()
         self.taskMgr.stop()
+
+        # It will report a warning said AsynTaskChain is created when taskMgr.destroy() is called but a new showbase is
+        # created.
+        logging.debug(
+            "Before del taskMgr: task_chain_num={}, all_tasks={}".format(
+                self.taskMgr.mgr.getNumTaskChains(), self.taskMgr.getAllTasks()
+            )
+        )
         self.taskMgr.destroy()
-        while self.taskMgr.getAllTasks():
-            time.sleep(0.1)
+        logging.debug(
+            "After del taskMgr: task_chain_num={}, all_tasks={}".format(
+                self.taskMgr.mgr.getNumTaskChains(), self.taskMgr.getAllTasks()
+            )
+        )
+        # while self.taskMgr.getAllTasks():
+        #     time.sleep(0.1)
         self.destroy()
         self.physics_world.clearDebugNode()
         self.physics_world.clearContactAddedCallback()

@@ -48,9 +48,8 @@ class VehiclePanel(ImageBuffer):
             parent_node=self.aspect2d_np
         )
         self.add_to_display(pg_world, [2 / 3, 1, self.display_bottom, self.display_top])
-        pg_world.taskMgr.add(self.renew_2d_car_para_visualization, self.TASK_NAME, extraArgs=[vehicle], appendTask=True)
 
-    def renew_2d_car_para_visualization(self, vehicle, task):
+    def renew_2d_car_para_visualization(self, vehicle):
         steering, throttle_brake, speed = vehicle.steering, vehicle.throttle_brake, vehicle.speed
         if throttle_brake < 0:
             self.para_vis_np[2].node().setCardAsMargin(-self.GAP, self.PARA_VIS_LENGTH * abs(throttle_brake), 0, 0)
@@ -74,12 +73,9 @@ class VehiclePanel(ImageBuffer):
             self.para_vis_np[0].node().setCardAsMargin(-self.GAP, 0, 0, 0)
         speed_value = speed / self.MAX_SPEED * self.PARA_VIS_LENGTH
         self.para_vis_np[3].node().setCardAsMargin(-self.GAP, speed_value + 0.09, 0, 0)
-        return task.cont
 
     def destroy(self, pg_world=None):
         super(VehiclePanel, self).destroy(pg_world)
         for para in self.para_vis_np:
             para.removeNode()
         self.aspect2d_np.removeNode()
-        if pg_world:
-            pg_world.taskMgr.remove(self.TASK_NAME)
