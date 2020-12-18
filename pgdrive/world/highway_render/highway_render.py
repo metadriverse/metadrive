@@ -25,9 +25,9 @@ class HighwayRender:
         self.onscreen = onscreen
         self.map = None
         self.traffic_mgr = None
-        from pgdrive.world.pg_world import pg_edition
+        from pgdrive.world.pg_world import PG_EDITION
         pygame.init()
-        pygame.display.set_caption(pg_edition)
+        pygame.display.set_caption(PG_EDITION)
         if onscreen:
             self.screen = pygame.display.set_mode(resolution)
 
