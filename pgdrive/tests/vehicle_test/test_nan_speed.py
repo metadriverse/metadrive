@@ -36,7 +36,7 @@ if __name__ == "__main__":
             a = [-1, -1]
         o, r, d, info = env.step(a)
         env.render(
-            text="Old speed: {:.3f}, new speed: {:.3f}, diff: {:.3f}".format(
+            text="Old speed: {:.3f}\nnew speed: {:.3f}\ndiff: {:.3f}".format(
                 env.vehicle.system.get_current_speed_km_hour(), env.vehicle.speed,
                 env.vehicle.system.get_current_speed_km_hour() - env.vehicle.speed
             )

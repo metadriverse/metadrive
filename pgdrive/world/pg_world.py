@@ -14,9 +14,10 @@ from pgdrive.pg_config import PgConfig
 from pgdrive.pg_config.cam_mask import CamMask
 from pgdrive.utils import is_mac
 from pgdrive.utils.asset_loader import AssetLoader
-from pgdrive.world.constants import pg_edition, help_message, COLOR, COLLISION_INFO_COLOR
+from pgdrive.world.constants import PG_EDITION, COLOR, COLLISION_INFO_COLOR
 from pgdrive.world.force_fps import ForceFPS
 from pgdrive.world.highway_render.highway_render import HighwayRender
+from pgdrive.world.image_buffer import ImageBuffer
 from pgdrive.world.light import Light
 from pgdrive.world.onscreen_message import PgOnScreenMessage
 from pgdrive.world.sky_box import SkyBox
@@ -26,12 +27,11 @@ root_path = os.path.dirname(os.path.dirname(__file__))
 
 
 class PgWorld(ShowBase.ShowBase):
-    loadPrcFileData("", "window-title {}".format(pg_edition))
+    loadPrcFileData("", "window-title {}".format(PG_EDITION))
     loadPrcFileData("", "framebuffer-multisample 1")
     loadPrcFileData("", "multisamples 8")
     loadPrcFileData("", 'bullet-filter-algorithm groups-mask')
     loadPrcFileData("", "audio-library-name null")
-    loadPrcFileData("", "compressed-textures 1")
 
     # loadPrcFileData("", " framebuffer-srgb truein")
 
@@ -47,6 +47,7 @@ class PgWorld(ShowBase.ShowBase):
     # loadPrcFileData("", "gl-version 3 2")
 
     def __init__(self, config: dict = None):
+        # Setup config and Panda3d
         self.pg_config = self.default_config()
         if config is not None:
             self.pg_config.update(config)
@@ -68,22 +69,37 @@ class PgWorld(ShowBase.ShowBase):
                 self.mode = "onscreen"
             if self.pg_config["headless_image"]:
                 loadPrcFileData("", "load-display  pandagles2")
+            if self.mode != "onscreen":
+                # Compress the texture to save memory
+                loadPrcFileData("", "compressed-textures 1")
+
         super(PgWorld, self).__init__(windowType=self.mode)
+        # screen scale factor
+        self.w_scale = max(self.pg_config["window_size"][0] / self.pg_config["window_size"][1], 1)
+        self.h_scale = max(self.pg_config["window_size"][1] / self.pg_config["window_size"][0], 1)
         if self.mode == "onscreen":
             self.disableMouse()
-        if (not self.pg_config["debug_physics_world"] and (self.pg_config["use_render"] or self.pg_config["use_image"])) \
-                and not self.pg_config["highway_render"]:
+        if (self.pg_config["use_render"] or self.pg_config["use_image"]) \
+                and not self.pg_config["highway_render"] \
+                and not self.pg_config["debug_physics_world"]:
             path = AssetLoader.windows_style2unix_style(root_path) if sys.platform == "win32" else root_path
             AssetLoader.init_loader(self.loader, path)
             gltf.patch_loader(self.loader)
+            if self.pg_config["use_render"]:
+                # show logo
+                self.logo = OnscreenImage(
+                    image=AssetLoader.file_path(AssetLoader.asset_path, "PGDrive-large.png"),
+                    pos=(0, 0, 0),
+                    scale=(self.w_scale, 1, self.h_scale)
+                )
+                self.logo.setTransparency(True)
+                for i in range(4):
+                    self.graphicsEngine.renderFrame()
+                self.taskMgr.add(self.remove_logo, "remove logo in first frame")
 
         self.closed = False
         self.highway_render = HighwayRender(self.pg_config["window_size"], self.pg_config["use_render"]) if \
             self.pg_config["highway_render"] else None
-
-        from pgdrive.world.image_buffer import ImageBuffer
-        ImageBuffer.refresh_frame = self.graphicsEngine.renderFrame
-        ImageBuffer.enable = False if self.pg_config["highway_render"] else True
 
         # add element to render and pbr render, if is exists all the time.
         # these element will not be removed when clear_world() is called
@@ -100,19 +116,6 @@ class PgWorld(ShowBase.ShowBase):
         self.pbrpipe = None
         self.light = None
         self.collision_info_np = None
-        self.w_scale = max(self.pg_config["window_size"][0] / self.pg_config["window_size"][1], 1)
-        self.h_scale = max(self.pg_config["window_size"][1] / self.pg_config["window_size"][0], 1)
-        if self.pg_config["use_render"]:
-            # show logo
-            self.logo = OnscreenImage(
-                image=AssetLoader.file_path(AssetLoader.asset_path, "PGDrive.png"),
-                pos=(0, 0, 0),
-                scale=(self.w_scale, 1, self.h_scale)
-            )
-            self.logo.setTransparency(True)
-            for i in range(4):
-                self.graphicsEngine.renderFrame()
-            self.taskMgr.add(self.remove_logo, "remove logo in first frame")
 
         # physics world
         self.physics_world = BulletWorld()
@@ -318,8 +321,11 @@ class PgWorld(ShowBase.ShowBase):
 
     def close_world(self):
         if self.mode != "none":
-            self.taskMgr.remove('simplepbr update')
             self._clear_display_region_and_buffers()
+        self.taskMgr.stop()
+        self.taskMgr.destroy()
+        while self.taskMgr.getAllTasks():
+            time.sleep(0.1)
         self.destroy()
         self.physics_world.clearDebugNode()
         self.physics_world.clearContactAddedCallback()
@@ -329,12 +335,8 @@ class PgWorld(ShowBase.ShowBase):
         self.physics_world = None
 
     def toggle_help_message(self):
-        if self._show_help_message:
-            self.on_screen_message.clear_plain_text(help_message)
-            self._show_help_message = False
-        else:
-            self.on_screen_message.update_data(help_message)
-            self._show_help_message = True
+        if self.on_screen_message:
+            self.on_screen_message.toggle_help_message()
 
     def render_collision_info(self, contacts):
         contacts = sorted(list(contacts), key=lambda c: COLLISION_INFO_COLOR[COLOR[c]][0])
@@ -371,7 +373,8 @@ class PgWorld(ShowBase.ShowBase):
         line_seg.moveTo(start_p[0] * self.w_scale, 0, start_p[1] * self.h_scale)
         line_seg.drawTo(end_p[0] * self.w_scale, 0, end_p[1] * self.h_scale)
         line_seg.setThickness(thickness)
-        NodePath(line_seg.create(False)).reparentTo(self.aspect2d)
+        line_np = NodePath(line_seg.create(False)).reparentTo(self.aspect2d)
+        return line_np
 
     def remove_logo(self, task):
         alpha = self.logo.getColor()[-1]
@@ -379,8 +382,7 @@ class PgWorld(ShowBase.ShowBase):
             self.logo.destroy()
             return task.done
         else:
-            new_alpha = alpha - 0.04
-            print(new_alpha)
+            new_alpha = alpha - 0.08
             self.logo.setColor((1, 1, 1, new_alpha))
             return task.cont
 

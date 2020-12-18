@@ -102,5 +102,11 @@ class Lidar:
     def get_cloud_points(self):
         return [point.getHitFraction() for point in self.detection_results]
 
+    def destroy(self):
+        for vis_laser in self.cloud_points:
+            vis_laser.removeNode()
+        self.node_path.removeNode()
+        self.detection_results = None
+
     def __del__(self):
         logging.debug("Lidar is destroyed.")
