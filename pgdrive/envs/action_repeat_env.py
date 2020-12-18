@@ -1,5 +1,5 @@
+import numpy as np
 from gym.spaces import Box
-
 from pgdrive.envs.pgdrive_env import PGDriveEnv
 from pgdrive.pg_config import PgConfig
 
@@ -52,31 +52,58 @@ class ActionRepeat(PGDriveEnv):
                 (action_repeat - self.low) / (self.high - self.low) *
                 (self.action_repeat_high - self.action_repeat_low) + self.action_repeat_low
             )
+            # print("[DEBUG] raw action: {}, input action: {}, action repeat: {}".format(
+            # action, action[-1], action_repeat))
             assert action_repeat > 0
         else:
             action_repeat = self.fixed_action_repeat
 
-        ret = []
+        action_repeat = min(max(self.action_repeat_low, int(action_repeat)), self.action_repeat_high)
+
+        o_list = []
+        r_list = []
+        d_list = []
+        i_list = []
+        discounted_r_list = []
+
         render_list = []
         real_ret = 0.0
         for repeat in range(action_repeat):
-            o, r, d, i = super(ActionRepeat, self).step(action)
+            o, r, d, i = super(ActionRepeat, self).step(action[:2])
             if render:
                 render_list.append(self.render(**render_kwargs))
-            ret.append(r)
+            r_list.append(r)
+            o_list.append(o)
+            d_list.append(d)
+            i_list.append(i)
+            discounted_r_list.append(0.0)
             real_ret += r
             if d:
                 break
 
         discounted = 0.0
-        for r in reversed(ret):
-            discounted = self.config["gamma"] * discounted + r
+        for idx in reversed(range(len(r_list))):
+            reward = r_list[idx]
+            discounted = self.config["gamma"] * discounted + reward
+            discounted_r_list[idx] = discounted
 
         i["simulation_time"] = (repeat + 1) * self.interval
         i["real_return"] = real_ret
+        i["action_repeat"] = action_repeat
         i["render"] = render_list
-
+        i["trajectory"] = [
+            dict(
+                reward=r_list[idx],
+                discounted_reward=discounted_r_list[idx],
+                obs=o_list[idx],
+                action=action,
+            ) for idx in range(len(r_list))
+        ]
         return o, discounted, d, i
+
+    def _get_reset_return(self):
+        o, *_ = self.step(np.array([0.0, 0.0, 0.0]))
+        return o
 
 
 if __name__ == '__main__':
