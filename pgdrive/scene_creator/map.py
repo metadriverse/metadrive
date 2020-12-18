@@ -18,6 +18,24 @@ from pgdrive.utils.asset_loader import AssetLoader
 from pgdrive.world.pg_world import PgWorld
 
 
+def parse_map_config(easy_map_config, original_map_config):
+    if original_map_config:
+        # Do not override map config if user defines one.
+        return original_map_config
+    original_map_config = original_map_config or dict()
+    if isinstance(easy_map_config, int):
+        original_map_config[Map.GENERATE_METHOD] = BigGenerateMethod.BLOCK_NUM
+        original_map_config[Map.GENERATE_PARA] = easy_map_config
+    elif isinstance(easy_map_config, str):
+        original_map_config[Map.GENERATE_METHOD] = BigGenerateMethod.BLOCK_SEQUENCE
+        original_map_config[Map.GENERATE_PARA] = easy_map_config
+    else:
+        raise ValueError(
+            "Unkown easy map config: {} and original map config: {}".format(easy_map_config, original_map_config)
+        )
+    return original_map_config
+
+
 class MapGenerateMethod:
     BIG_BLOCK_NUM = BigGenerateMethod.BLOCK_NUM
     BIG_BLOCK_SEQUENCE = BigGenerateMethod.BLOCK_SEQUENCE
