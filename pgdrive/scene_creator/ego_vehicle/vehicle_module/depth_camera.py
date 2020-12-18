@@ -27,8 +27,12 @@ class DepthCamera(ImageBuffer):
         self.BUFFER_W = length
         self.BUFFER_H = width
         super(DepthCamera, self).__init__(
-            self.BUFFER_W, self.BUFFER_H, Vec3(0.0, 0.8, 1.5), self.BKG_COLOR, pg_world.win, pg_world.makeCamera,
-            chassis_np
+            self.BUFFER_W,
+            self.BUFFER_H,
+            Vec3(0.0, 0.8, 1.5),
+            self.BKG_COLOR,
+            pg_world=pg_world,
+            parent_node=chassis_np
         )
         self.add_to_display(pg_world, [1 / 3, 2 / 3, self.display_bottom, self.display_top])
         self.cam.lookAt(0, 2.4, 1.3)

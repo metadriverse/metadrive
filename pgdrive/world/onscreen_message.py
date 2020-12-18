@@ -3,6 +3,8 @@ from typing import Optional, Union
 from direct.showbase import OnScreenDebug
 from panda3d.core import Vec4
 
+from pgdrive.world.constants import HELP_MESSAGE
+
 
 class PgOnScreenMessage(OnScreenDebug.OnScreenDebug):
     """
@@ -10,15 +12,18 @@ class PgOnScreenMessage(OnScreenDebug.OnScreenDebug):
     """
     POS = (0.1, -0.2)
 
-    def __init__(self):
+    def __init__(self, refresh_plain_text=False):
         super(PgOnScreenMessage, self).__init__()
         self.enabled = True
         self.load()
         self.plain_text = set()
+        self._refresh_plain_text = refresh_plain_text
+        self._show_help_message = False
 
     def update_data(self, data: Optional[Union[dict, str]]):
         self.onScreenText.cleanup()
         if isinstance(data, str):
+            self.clear_all_plain_text()
             self.plain_text.add(data)
         elif isinstance(data, dict):
             for k, v in data.items():
@@ -36,6 +41,9 @@ class PgOnScreenMessage(OnScreenDebug.OnScreenDebug):
         if not self.onScreenText:
             self.load()
         self.onScreenText.clearText()
+        if self._show_help_message:
+            self.onScreenText.appendText(HELP_MESSAGE)
+            return
 
         # Render plain text first
         for v in self.plain_text:
@@ -69,4 +77,15 @@ class PgOnScreenMessage(OnScreenDebug.OnScreenDebug):
         self.frame += 1
 
     def clear_plain_text(self, string):
-        self.plain_text.remove(string)
+        if string in self.plain_text:
+            self.plain_text.remove(string)
+
+    def clear_all_plain_text(self):
+        self.plain_text.clear()
+
+    def toggle_help_message(self):
+        self.clear_all_plain_text()
+        if self._show_help_message:
+            self._show_help_message = False
+        else:
+            self._show_help_message = True

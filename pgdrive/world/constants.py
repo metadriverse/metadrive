@@ -2,9 +2,9 @@ from panda3d.core import Vec4
 
 from pgdrive.pg_config.body_name import BodyName
 
-pg_edition = "PGDrive v0.1.0"
+PG_EDITION = "PGDrive v0.1.0"
 
-help_message = "Keyboard Shortcuts:\n" \
+HELP_MESSAGE = "Keyboard Shortcuts:\n" \
                "  W: Acceleration\n" \
                "  S: Braking\n" \
                "  A: Moving Left\n" \
