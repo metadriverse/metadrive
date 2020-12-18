@@ -15,8 +15,7 @@ HELP_MESSAGE = "Keyboard Shortcuts:\n" \
                "  2: WireFrame Debug Mode\n" \
                "  3: Texture Debug Mode\n" \
                "  4: Print Debug Message\n" \
-               "  F: Switch FPS between unlimited, 60 Hz and \n" \
-               "     real simulation frequency\n" \
+               "  F: Switch FPS between unlimited and realtime\n" \
                "  Esc: Quit\n"
 
 # priority and color

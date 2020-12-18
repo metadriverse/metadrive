@@ -3,7 +3,7 @@ import time
 
 class ForceFPS:
     UNLIMITED = 0
-    FPS60 = 1
+    # FPS60 = 1
     FORCED = 2
 
     def __init__(self, fps, start=False):
@@ -31,10 +31,6 @@ class ForceFPS:
 
     def toggle(self):
         if self.state == self.UNLIMITED:
-            self.state = self.FPS60
-            self.fps = 60
-
-        elif self.state == self.FPS60:
             self.state = self.FORCED
             self.fps = self.init_fps
 

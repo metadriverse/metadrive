@@ -14,7 +14,7 @@ try:
     while True:
         action = expert(obs)
         obs, reward, done, info = env.step(action)
-        frame = env.render("rgb_array")  # Return numpy array as well as showing the window.
+        env.render()
         if done:
             obs = env.reset()
 finally:
