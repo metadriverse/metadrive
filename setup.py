@@ -18,7 +18,7 @@ setup(
         "numpy<=1.19.3",
         "matplotlib",
         "pandas",
-        "pygame",
+        "pygame==2.0.0",
         "yapf==0.30.0",
         "seaborn",
         "panda3d==1.10.5",
