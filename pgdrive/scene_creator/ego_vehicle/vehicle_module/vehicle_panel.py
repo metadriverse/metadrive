@@ -76,9 +76,10 @@ class VehiclePanel(ImageBuffer):
         self.para_vis_np[3].node().setCardAsMargin(-self.GAP, speed_value + 0.09, 0, 0)
         return task.cont
 
-    def destroy(self, pg_world):
+    def destroy(self, pg_world=None):
         super(VehiclePanel, self).destroy(pg_world)
         for para in self.para_vis_np:
             para.removeNode()
         self.aspect2d_np.removeNode()
-        pg_world.taskMgr.remove(self.TASK_NAME)
+        if pg_world:
+            pg_world.taskMgr.remove(self.TASK_NAME)
