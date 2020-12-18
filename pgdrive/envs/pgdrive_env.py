@@ -235,6 +235,9 @@ class PGDriveEnv(gym.Env):
         self.traffic_manager.generate_traffic(
             self.pg_world, self.current_map, self.vehicle, self.config["traffic_density"]
         )
+        return self._get_reset_return()
+
+    def _get_reset_return(self):
         o, *_ = self.step(np.array([0.0, 0.0]))
         return o
 
