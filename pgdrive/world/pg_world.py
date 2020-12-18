@@ -87,15 +87,15 @@ class PgWorld(ShowBase.ShowBase):
             gltf.patch_loader(self.loader)
             if self.pg_config["use_render"]:
                 # show logo
-                self.logo = OnscreenImage(
+                self._loading_logo = OnscreenImage(
                     image=AssetLoader.file_path(AssetLoader.asset_path, "PGDrive-large.png"),
                     pos=(0, 0, 0),
                     scale=(self.w_scale, 1, self.h_scale)
                 )
-                self.logo.setTransparency(True)
-                for i in range(4):
+                self._loading_logo.setTransparency(True)
+                for i in range(20):
                     self.graphicsEngine.renderFrame()
-                self.taskMgr.add(self.remove_logo, "remove logo in first frame")
+                self.taskMgr.add(self.remove_logo, "remove _loading_logo in first frame")
 
         self.closed = False
         self.highway_render = HighwayRender(self.pg_config["window_size"], self.pg_config["use_render"]) if \
@@ -377,13 +377,13 @@ class PgWorld(ShowBase.ShowBase):
         return line_np
 
     def remove_logo(self, task):
-        alpha = self.logo.getColor()[-1]
+        alpha = self._loading_logo.getColor()[-1]
         if alpha < 0.1:
-            self.logo.destroy()
+            self._loading_logo.destroy()
             return task.done
         else:
             new_alpha = alpha - 0.08
-            self.logo.setColor((1, 1, 1, new_alpha))
+            self._loading_logo.setColor((1, 1, 1, new_alpha))
             return task.cont
 
 
