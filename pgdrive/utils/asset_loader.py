@@ -12,16 +12,16 @@ class AssetLoader:
     asset_path = None
 
     @staticmethod
-    def init_loader(show_base_loader: Union[Loader, bool], pg_path: str):
+    def init_loader(pg_world, pg_path: str):
         """
         Due to the feature of Panda3d, keep reference of loader in static variable
         """
         AssetLoader.asset_path = AssetLoader.file_path(pg_path, "assets")
-        if not show_base_loader:
-            logging.debug("Offscreen mode")
+        if pg_world.win is None:
+            logging.debug("Physics world mode")
             return
-        logging.debug("Onscreen mode, Render Elements")
-        AssetLoader.loader = show_base_loader
+        logging.debug("Onscreen/Offscreen mode, Render/Load Elements")
+        AssetLoader.loader = pg_world.loader
 
     @classmethod
     def get_loader(cls):

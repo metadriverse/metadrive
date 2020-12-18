@@ -143,3 +143,6 @@ class RoutingLocalizationModule:
 
     def get_navi_info(self):
         return self.navi_info
+
+    def __del__(self):
+        logging.debug("{} is destroyed".format(self.__class__.__name__))

@@ -113,7 +113,7 @@ class PGDriveEnv(gym.Env):
         # lazy initialization, create the main vehicle in the lazy_init() func
         self.pg_world = None
         self.traffic_manager = None
-        self.control_camera = None
+        self.main_camera = None
         self.controller = None
         self.restored_maps = dict()
 
@@ -151,14 +151,11 @@ class PGDriveEnv(gym.Env):
 
         # for manual_control and main camera type
         if (self.config["use_render"] or self.config["use_image"]) and self.config["use_chase_camera"]:
-            self.control_camera = ChaseCamera(
+            self.main_camera = ChaseCamera(
                 self.pg_world.cam, self.vehicle, self.config["camera_height"], 7, self.pg_world
             )
         # add sensors
         self.add_modules_for_vehicle()
-
-        if self.use_render or self.config["use_image"]:
-            self.control_camera.reset(self.vehicle.position)
 
     def step(self, action: np.ndarray):
         if self.config["action_check"]:
@@ -298,22 +295,23 @@ class PGDriveEnv(gym.Env):
 
     def close(self):
         if self.pg_world is not None:
-            self.vehicle.destroy(self.pg_world.physics_world)
-            self.traffic_manager.destroy(self.pg_world.physics_world)
+            if self.main_camera is not None:
+                self.main_camera.destroy(self.pg_world)
+                del self.main_camera
+                self.main_camera = None
+            self.pg_world.clear_world()
 
+            self.traffic_manager.destroy(self.pg_world.physics_world)
             del self.traffic_manager
             self.traffic_manager = None
 
-            del self.control_camera
-            self.control_camera = None
+            self.vehicle.destroy(self.pg_world.physics_world)
+            del self.vehicle
+            self.vehicle = None
 
             del self.controller
             self.controller = None
 
-            del self.vehicle
-            self.vehicle = None
-
-            self.pg_world.clear_world()
             self.pg_world.close_world()
             del self.pg_world
             self.pg_world = None

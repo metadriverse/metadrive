@@ -14,6 +14,7 @@ class DepthCamera(ImageBuffer):
     CAM_MASK = CamMask.DepthCam
     GROUND = -1.5
     display_top = 1.0
+    TASK_NAME = "ground follow"
 
     def __init__(self, length: int, width: int, view_ground: bool, chassis_np: NodePath, pg_world: PgWorld):
         """
@@ -66,12 +67,13 @@ class DepthCamera(ImageBuffer):
             self.ground_model.hide(BitMask32.allOn())
             self.ground_model.show(CamMask.DepthCam)
             self.ground.generate()
-            pg_world.taskMgr.add(
-                self.renew_pos_of_ground_mode, "ground follow", extraArgs=[chassis_np], appendTask=True
-            )
+            pg_world.taskMgr.add(self.renew_pos_of_ground_mode, self.TASK_NAME, extraArgs=[chassis_np], appendTask=True)
 
     def renew_pos_of_ground_mode(self, chassis_np: Vec3, task):
-        pos = chassis_np.getPos()
         self.ground_model.setPos(-128, 0, self.GROUND)
         self.ground_model.setP(-chassis_np.getP())
         return task.cont
+
+    def destroy(self, pg_world):
+        super(DepthCamera, self).destroy(pg_world)
+        pg_world.taskMgr.remove(self.TASK_NAME)
