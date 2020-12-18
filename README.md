@@ -19,9 +19,30 @@ pip install -e .
 
 ## Quick Start
 
-Please run `python -m pgdrive.examples.enjoy` to play with the environment with keyboard!
+Please run the following line to play with the environment with keyboard!
 
-To build the environment, you can simply run:
+```bash
+python -m pgdrive.examples.enjoy
+```
+
+You can also enjoy a journey carrying out by our professional driver! The provided expert can drive in 10000 maps 
+with almost 90% likelihood to achieve the destination. 
+
+Note that this script requires your system to have the capacity of rendering. Please refer to the installation guideline for more information.
+
+```bash
+python -m pgdrive.examples.enjoy_journey
+```
+
+*Note that the above two scripts can not be run in headless machine.*
+
+Running the following line allows you to draw the generated maps:
+
+```bash
+python -m pgdrive.examples.draw_maps
+```
+
+To build the environment in python script, you can simply run:
 
 ```python
 import pgdrive  # Import this package to register the environment!
@@ -30,21 +51,16 @@ import gym
 env = gym.make("PGDrive-v0", config=dict(use_render=True))
 env.reset()
 for i in range(1000):
-    obs, reward, done, info = env.step(env.action_space.sample())
+    obs, reward, done, info = env.step(env.action_space.sample())  # Use random policy
     env.render()
     if done:
         env.reset()
 env.close()
 ```
 
-You can also enjoy a journey carrying out by our professional driver! The provided expert can drive in 10000 maps 
-with almost 90% likelihood to achieve the destination. 
-
-Note that this script requires your system to have the capacity of rendering. Please refer to the installation guideline for more information.
-```bash
-python -m pgdrive.examples.enjoy_journey
-```
-
+We also prepare a Colab notebook which demonstrates some basic usage of PGDrive, please enjoy it! 
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/decisionforce/PGDrive/blob/main/pgdrive/examples/Basic%20PGDrive%20Usages.ipynb)
+(TODO: The notebook is not accessible before the repo is public.)
 
 ## Predefined environment sets
 
