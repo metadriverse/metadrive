@@ -1,7 +1,4 @@
 from pgdrive.envs.pgdrive_env import PGDriveEnv
-from pgdrive.utils import setup_logger
-
-setup_logger(debug=True)
 
 
 class TestEnv(PGDriveEnv):
@@ -12,9 +9,8 @@ class TestEnv(PGDriveEnv):
                 "traffic_density": 0.1,
                 "start_seed": 3,
                 "pg_world_config": {
-                    "debug": False,
+                    "onscreen_message": True,
                 },
-                "random_traffic": True,
                 "image_source": "mini_map",
                 "manual_control": True,
                 "use_render": True,
@@ -39,7 +35,7 @@ if __name__ == "__main__":
     for i in range(1, 100000):
         # start = time.time()
         # print("Step: ", i)
-        o, r, d, info = env.step([0, 1])
+        env.step([0, 1])
         # print(r)
         # print(o)
         # print(time.time() - start)
