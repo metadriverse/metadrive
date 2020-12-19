@@ -11,12 +11,13 @@ HELP_MESSAGE = "Keyboard Shortcuts:\n" \
                "  D: Moving Right\n" \
                "  R: Reset the Environment\n" \
                "  H: Help Message\n" \
-               "  1: Box Debug Mode\n" \
-               "  2: WireFrame Debug Mode\n" \
-               "  3: Texture Debug Mode\n" \
-               "  4: Print Debug Message\n" \
                "  F: Switch FPS between unlimited and realtime\n" \
                "  Esc: Quit\n"
+
+DEBUG_MESSAGE = "  1: Box Debug Mode\n" \
+                "  2: WireFrame Debug Mode\n" \
+                "  3: Texture Debug Mode\n" \
+                "  4: Print Node Message\n"
 
 # priority and color
 COLLISION_INFO_COLOR = dict(

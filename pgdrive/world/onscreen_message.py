@@ -3,7 +3,7 @@ from typing import Optional, Union
 from direct.showbase import OnScreenDebug
 from panda3d.core import Vec4
 
-from pgdrive.world.constants import HELP_MESSAGE
+from pgdrive.world.constants import HELP_MESSAGE, DEBUG_MESSAGE
 
 
 class PgOnScreenMessage(OnScreenDebug.OnScreenDebug):
@@ -14,6 +14,8 @@ class PgOnScreenMessage(OnScreenDebug.OnScreenDebug):
 
     def __init__(self, refresh_plain_text=False):
         super(PgOnScreenMessage, self).__init__()
+        from pgdrive.world.pg_world import PgWorld
+        self.debug = PgWorld.DEBUG
         self.enabled = True
         self.load()
         self.plain_text = set()
@@ -21,6 +23,7 @@ class PgOnScreenMessage(OnScreenDebug.OnScreenDebug):
         self._show_help_message = False
 
     def update_data(self, data: Optional[Union[dict, str]]):
+        # Several Node will be destructing or constructing again and again when debug pgraph
         self.onScreenText.cleanup()
         if isinstance(data, str):
             self.clear_all_plain_text()
@@ -42,7 +45,8 @@ class PgOnScreenMessage(OnScreenDebug.OnScreenDebug):
             self.load()
         self.onScreenText.clearText()
         if self._show_help_message:
-            self.onScreenText.appendText(HELP_MESSAGE)
+            hlp_msg = HELP_MESSAGE + DEBUG_MESSAGE if self.debug else HELP_MESSAGE
+            self.onScreenText.appendText(hlp_msg)
             return
 
         # Render plain text first

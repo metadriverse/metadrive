@@ -8,13 +8,13 @@ import gltf
 from direct.gui.OnscreenImage import OnscreenImage
 from direct.showbase import ShowBase
 from panda3d.bullet import BulletDebugNode, BulletWorld
-from panda3d.core import Vec3, AntialiasAttrib, NodePath, loadPrcFileData, TextNode, LineSegs
-
+from panda3d.core import Vec3, AntialiasAttrib, NodePath, loadPrcFileData, LineSegs
 from pgdrive.pg_config import PgConfig
 from pgdrive.pg_config.cam_mask import CamMask
 from pgdrive.utils import is_mac
+from pgdrive.utils import setup_logger
 from pgdrive.utils.asset_loader import AssetLoader
-from pgdrive.world.constants import PG_EDITION, COLOR, COLLISION_INFO_COLOR
+from pgdrive.world.constants import PG_EDITION
 from pgdrive.world.force_fps import ForceFPS
 from pgdrive.world.highway_render.highway_render import HighwayRender
 from pgdrive.world.image_buffer import ImageBuffer
@@ -30,16 +30,18 @@ def _suppress_warning():
     loadPrcFileData("", "notify-level-glgsg fatal")
     loadPrcFileData("", "notify-level-pgraph fatal")
     loadPrcFileData("", "notify-level-pnmimage fatal")
+    loadPrcFileData("", "notify-level-thread fatal")
 
 
 def _free_warning():
-    # TODO: we should use a global debug option and to free those warning if such option is on.
     loadPrcFileData("", "notify-level-glgsg debug")
-    loadPrcFileData("", "notify-level-pgraph debug")
+    loadPrcFileData("", "notify-level-pgraph debug")  # press 4 to use toggle analyze to do this
     loadPrcFileData("", "notify-level-pnmimage debug")
+    loadPrcFileData("", "notify-level-thread debug")
 
 
 class PgWorld(ShowBase.ShowBase):
+    DEBUG = False
     loadPrcFileData("", "window-title {}".format(PG_EDITION))
     loadPrcFileData("", "framebuffer-multisample 1")
     loadPrcFileData("", "multisamples 8")
@@ -81,7 +83,18 @@ class PgWorld(ShowBase.ShowBase):
                 self.mode = "onscreen"
             if self.pg_config["headless_image"]:
                 loadPrcFileData("", "load-display  pandagles2")
-        _suppress_warning()
+        if self.pg_config["debug"]:
+            # debug setting
+            PgWorld.DEBUG = True
+            _free_warning()
+            setup_logger(debug=True)
+            self.accept('1', self.toggleDebug)
+            self.accept('2', self.toggleWireframe)
+            self.accept('3', self.toggleTexture)
+            self.accept('4', self.toggleAnalyze)
+        else:
+            # only report fatal error when debug is False
+            _suppress_warning()
 
         super(PgWorld, self).__init__(windowType=self.mode)
 
@@ -90,7 +103,7 @@ class PgWorld(ShowBase.ShowBase):
             loadPrcFileData("", "compressed-textures 1")  # Default to compress
             h = self.pipe.getDisplayHeight()
             w = self.pipe.getDisplayWidth()
-            if (self.pg_config["window_size"][0] > 0.9 * w or self.pg_config["window_size"][1] > 0.9 * h):
+            if self.pg_config["window_size"][0] > 0.9 * w or self.pg_config["window_size"][1] > 0.9 * h:
                 old_scale = self.pg_config["window_size"][0] / self.pg_config["window_size"][1]
                 new_w = int(min(0.9 * w, 0.9 * h * old_scale))
                 new_h = int(min(0.9 * h, 0.9 * w / old_scale))
@@ -158,10 +171,6 @@ class PgWorld(ShowBase.ShowBase):
         # init other world elements
         if self.mode != "none":
 
-            # collision info render
-            self.collision_info_np = NodePath(TextNode("collision_info"))
-            self._init_collision_info_render()
-
             from pgdrive.world.our_pbr import OurPipeline
             self.pbrpipe = OurPipeline(
                 render_node=None,
@@ -213,11 +222,6 @@ class PgWorld(ShowBase.ShowBase):
             self._show_help_message = False
             self._episode_start_time = time.time()
 
-            # debug setting
-            self.accept('1', self.toggleDebug)
-            self.accept('2', self.toggleWireframe)
-            self.accept('3', self.toggleTexture)
-            self.accept('4', self.toggleAnalyze)
             self.accept("h", self.toggle_help_message)
             self.accept("f", self.force_fps.toggle)
 
@@ -226,15 +230,6 @@ class PgWorld(ShowBase.ShowBase):
 
         # task manager
         self.taskMgr.remove('audioLoop')
-
-    def _init_collision_info_render(self):
-        self.collision_info_np.node().setCardActual(-5 * self.w_scale, 5.1 * self.w_scale, -0.3, 1)
-        self.collision_info_np.node().setCardDecal(True)
-        self.collision_info_np.node().setTextColor(1, 1, 1, 1)
-        self.collision_info_np.node().setAlign(TextNode.A_center)
-        self.collision_info_np.setScale(0.05)
-        self.collision_info_np.setPos(-0.75 * self.w_scale, 0, -0.8 * self.h_scale)
-        self.collision_info_np.reparentTo(self.aspect2d)
 
     def render_frame(self, text: Optional[Union[dict, str]] = None):
         """
@@ -247,8 +242,8 @@ class PgWorld(ShowBase.ShowBase):
         if not self.pg_config["highway_render"]:
             if self.on_screen_message is not None:
                 self.on_screen_message.update_data(text)
-            if self.pg_config["use_render"]:
                 self.on_screen_message.render()
+            if self.pg_config["use_render"]:
                 with self.force_fps:
                     self.sky_box.step()
         else:
@@ -285,7 +280,7 @@ class PgWorld(ShowBase.ShowBase):
                 # force_fps=None,
                 decision_repeat=5,  # This will be written by PGDriveEnv
 
-                # only render physics world without model
+                # only render physics world without model, a special debug option
                 debug_physics_world=False,
 
                 # decide the layout of white lines
@@ -364,25 +359,6 @@ class PgWorld(ShowBase.ShowBase):
         if self.on_screen_message:
             self.on_screen_message.toggle_help_message()
 
-    def render_collision_info(self, contacts):
-        contacts = sorted(list(contacts), key=lambda c: COLLISION_INFO_COLOR[COLOR[c]][0])
-        text = contacts[0] if len(contacts) != 0 else None
-        if text is None:
-            text = "Normal" if time.time() - self._episode_start_time > 10 else "Press H to see help message"
-            self.render_banner(text, COLLISION_INFO_COLOR["green"][1])
-        else:
-            self.render_banner(text, COLLISION_INFO_COLOR[COLOR[text]][1])
-
-    def render_banner(self, text, color=COLLISION_INFO_COLOR["green"][1]):
-        """
-        Render the banner in the left bottom corner.
-        """
-        if self.collision_info_np is None:
-            return
-        text_node = self.collision_info_np.node()
-        text_node.setCardColor(color)
-        text_node.setText(text)
-
     def draw_line(self, start_p, end_p, color, thickness: float):
         """
         Draw line use LineSegs coordinates system. Since a resolution problem is solved, the point on screen should be
@@ -414,5 +390,5 @@ class PgWorld(ShowBase.ShowBase):
 
 
 if __name__ == "__main__":
-    world = PgWorld()
+    world = PgWorld({"debug": True})
     world.run()
