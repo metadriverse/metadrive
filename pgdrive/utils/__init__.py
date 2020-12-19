@@ -1,6 +1,6 @@
 import sys
 
-from pgdrive.utils.math_utils import safe_clip
+from pgdrive.utils.math_utils import safe_clip, clip
 
 
 def setup_logger(debug=False):

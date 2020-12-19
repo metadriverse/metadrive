@@ -17,7 +17,7 @@ from pgdrive.scene_creator.ego_vehicle.vehicle_module.mini_map import MiniMap
 from pgdrive.scene_creator.ego_vehicle.vehicle_module.rgb_camera import RGBCamera
 from pgdrive.scene_creator.map import Map, MapGenerateMethod, parse_map_config
 from pgdrive.scene_manager.traffic_manager import TrafficManager, TrafficMode
-from pgdrive.utils import recursive_equal, safe_clip
+from pgdrive.utils import recursive_equal, safe_clip, clip
 from pgdrive.world.chase_camera import ChaseCamera
 from pgdrive.world.manual_controller import KeyboardController, JoystickController
 from pgdrive.world.pg_world import PgWorld
@@ -190,17 +190,22 @@ class PGDriveEnv(gym.Env):
         self.pg_world.taskMgr.step()
 
         obs = self.observation.observe(self.vehicle)
-        reward = self.reward(action)
+        step_reward = self.reward(action)
         done_reward, done_info = self._done_episode()
+
+        if self.done:
+            step_reward = 0
+
         info = {
             "cost": float(0),
             "velocity": float(self.vehicle.speed),
             "steering": float(self.vehicle.steering),
             "acceleration": float(self.vehicle.throttle_brake),
-            "step_reward": float(reward)
+            "step_reward": float(step_reward)
         }
+
         info.update(done_info)
-        return obs, reward + done_reward, self.done, info
+        return obs, step_reward + done_reward, self.done, info
 
     def render(self, mode='human', text: Optional[Union[dict, str]] = None) -> Optional[np.ndarray]:
         assert self.use_render or self.config["use_image"], "render is off now, can not render"
@@ -249,7 +254,7 @@ class PGDriveEnv(gym.Env):
         long_now, lateral_now = current_lane.local_coordinates(self.vehicle.position)
 
         reward = 0.0
-        lateral_factor = 1 - 2 * abs(lateral_now) / self.current_map.lane_width
+        lateral_factor = clip(1 - 2 * abs(lateral_now) / self.current_map.lane_width, 0.0, 1.0)
         reward += self.config["driving_reward"] * (long_now - long_last) * lateral_factor
 
         # Penalty for frequent steering
@@ -269,6 +274,9 @@ class PGDriveEnv(gym.Env):
         reward -= self.config["general_penalty"]
 
         reward += self.config["speed_reward"] * (self.vehicle.speed / self.vehicle.max_speed)
+
+        # if reward > 3.0:
+        #     print("Stop here.")
 
         return reward
 
