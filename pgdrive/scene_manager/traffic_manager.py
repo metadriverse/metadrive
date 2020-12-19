@@ -27,8 +27,13 @@ class TrafficManager:
     """Manage all traffic vehicles"""
     VEHICLE_GAP = 10  # m
 
-    def __init__(self, traffic_mode=TrafficMode.Add_once):
+    def __init__(self, traffic_mode=TrafficMode.Add_once, random_traffic: bool = False):
+        """
+        :param traffic_mode: reborn/trigger mode
+        :param random_traffic: if True, map seed is different with traffic manager seed
+        """
         self.traffic_mode = traffic_mode
+        self.random_traffic = random_traffic
         self.block_triggered_vehicles = [] if self.traffic_mode == TrafficMode.Add_once else None
         self.blocks = None
         self.network = None
@@ -47,7 +52,7 @@ class TrafficManager:
         """
         For garbage collecting using, ensure to release the memory of all traffic vehicles
         """
-        random_seed = map.random_seed
+        random_seed = map.random_seed if not self.random_traffic else np.random.random_integers(0, int(1e6))
         logging.debug("load scene {}".format(random_seed))
         self.clear_traffic(pg_world.physics_world)
         self.ego_vehicle = ego_vehicle
