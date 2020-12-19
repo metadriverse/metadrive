@@ -26,6 +26,19 @@ from pgdrive.world.terrain import Terrain
 root_path = os.path.dirname(os.path.dirname(__file__))
 
 
+def _suppress_warning():
+    loadPrcFileData("", "notify-level-glgsg fatal")
+    loadPrcFileData("", "notify-level-pgraph fatal")
+    loadPrcFileData("", "notify-level-pnmimage fatal")
+
+
+def _free_warning():
+    # TODO: we should use a global debug option and to free those warning if such option is on.
+    loadPrcFileData("", "notify-level-glgsg debug")
+    loadPrcFileData("", "notify-level-pgraph debug")
+    loadPrcFileData("", "notify-level-pnmimage debug")
+
+
 class PgWorld(ShowBase.ShowBase):
     loadPrcFileData("", "window-title {}".format(PG_EDITION))
     loadPrcFileData("", "framebuffer-multisample 1")
@@ -42,8 +55,6 @@ class PgWorld(ShowBase.ShowBase):
 
     # for debug use
     # loadPrcFileData("", "want-pstats 1")
-    loadPrcFileData("", "notify-level-glgsg fatal")
-    loadPrcFileData("", "notify-level-pgraph fatal")
 
     # loadPrcFileData("", "gl-version 3 2")
 
@@ -70,6 +81,7 @@ class PgWorld(ShowBase.ShowBase):
                 self.mode = "onscreen"
             if self.pg_config["headless_image"]:
                 loadPrcFileData("", "load-display  pandagles2")
+        _suppress_warning()
 
         super(PgWorld, self).__init__(windowType=self.mode)
 

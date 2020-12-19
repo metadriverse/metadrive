@@ -45,7 +45,7 @@ def get_env_list():
     return list(environment_dict.keys())
 
 
-print("Successfully registered the following environments: {}".format(get_env_list()))
+print("Successfully registered the following environments: {}.".format(get_env_list()))
 
 if __name__ == '__main__':
     # Test purpose only
