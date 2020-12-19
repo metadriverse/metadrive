@@ -8,12 +8,13 @@ class TestEnv(PGDriveEnv):
     def __init__(self):
         super(TestEnv, self).__init__(
             {
-                "environment_num": 4,
+                "environment_num": 1,
                 "traffic_density": 0.1,
                 "start_seed": 3,
                 "pg_world_config": {
                     "debug": False,
                 },
+                "random_traffic": True,
                 "image_source": "mini_map",
                 "manual_control": True,
                 "use_render": True,
