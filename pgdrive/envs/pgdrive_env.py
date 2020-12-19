@@ -1,5 +1,6 @@
 import copy
 import json
+import logging
 import os.path as osp
 import sys
 import time
@@ -281,17 +282,17 @@ class PGDriveEnv(gym.Env):
                 0.5 - self.current_map.lane_num) * self.current_map.lane_width:
             self.done = True
             reward_ += self.config["success_reward"]
-            print("arrive_dest")
+            logging.info("Episode ended! Reason: arrive_dest.")
             done_info["arrive_dest"] = True
         elif self.vehicle.crash:
             self.done = True
             reward_ -= self.config["crash_penalty"]
-            print("crash")
+            logging.info("Episode ended! Reason: crash. ")
             done_info["crash"] = True
         elif self.vehicle.out_of_road or self.vehicle.out_of_road:
             self.done = True
             reward_ -= self.config["out_of_road_penalty"]
-            print("out_of_road")
+            logging.info("Episode ended! Reason: out_of_road.")
             done_info["out_of_road"] = True
 
         return reward_, done_info
@@ -411,7 +412,7 @@ class PGDriveEnv(gym.Env):
             new_map = Map(self.pg_world, map_config)
             self.maps[seed] = new_map
             new_map.unload_from_pg_world(self.pg_world)
-            print("Finish generating map with seed: ", seed)
+            logging.info("Finish generating map with seed: ", seed)
 
         map_data = dict()
         for seed, map in self.maps.items():
@@ -426,7 +427,7 @@ class PGDriveEnv(gym.Env):
         assert set(data.keys()) == set(["map_config", "map_data"])
         assert set(self.maps.keys()).issubset(set([int(v) for v in data["map_data"].keys()]))
 
-        print(
+        logging.info(
             "Restoring the maps from pre-generated file! "
             "We have {} maps in the file and restoring {} maps range from {} to {}".format(
                 len(data["map_data"]), len(self.maps.keys()), min(self.maps.keys()), max(self.maps.keys())
@@ -457,7 +458,7 @@ class PGDriveEnv(gym.Env):
             self.load_all_maps(restored_data)
             return True
         else:
-            print(
+            logging.warning(
                 "Warning: The pre-generated maps is with config {}, but current environment's map "
                 "config is {}.\nWe now fallback to BIG algorithm to generate map online!".format(
                     restored_data["map_config"], self.map_config
