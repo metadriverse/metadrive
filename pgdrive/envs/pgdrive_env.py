@@ -42,6 +42,7 @@ class PGDriveEnv(gym.Env):
             # ===== Traffic =====
             traffic_density=0.1,
             traffic_mode=TrafficMode.Add_once,
+            random_traffic=False,
 
             # ===== Observation =====
             use_image=False,
@@ -139,7 +140,7 @@ class PGDriveEnv(gym.Env):
         # self.pg_world.accept("escape", self.force_close)
 
         # init traffic manager
-        self.traffic_manager = TrafficManager(self.config["traffic_mode"])
+        self.traffic_manager = TrafficManager(self.config["traffic_mode"], self.config["random_traffic"])
 
         if self.config["manual_control"]:
             if self.config["controller"] == "keyboard":
