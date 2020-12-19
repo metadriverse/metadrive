@@ -3,11 +3,11 @@ import logging
 import math
 from collections import deque
 from os import path
-
+from pgdrive.world.constants import COLOR, COLLISION_INFO_COLOR
 import numpy as np
 from panda3d.bullet import BulletVehicle, BulletBoxShape, BulletRigidBodyNode, ZUp, BulletWorld, BulletGhostNode
-from panda3d.core import Vec3, TransformState, NodePath, LQuaternionf, BitMask32, PythonCallbackObject
-
+from panda3d.core import Vec3, TransformState, NodePath, LQuaternionf, BitMask32, PythonCallbackObject, TextNode
+import time
 from pgdrive.pg_config import PgConfig
 from pgdrive.pg_config.body_name import BodyName
 from pgdrive.pg_config.cam_mask import CamMask
@@ -94,10 +94,8 @@ class BaseVehicle(DynamicElement):
         self.lane = None
         self.lane_index = None
 
-        if (not self.pg_world.pg_config["highway_render"]) and (self.pg_world.mode == "onscreen"):
-            self.vehicle_panel = VehiclePanel(self, self.pg_world)
-        else:
-            self.vehicle_panel = None
+        self.vehicle_panel = VehiclePanel(self.pg_world) \
+            if (not self.pg_world.pg_config["highway_render"]) and (self.pg_world.mode == "onscreen") else None
 
         # other info
         self.throttle_brake = 0.0
@@ -105,6 +103,11 @@ class BaseVehicle(DynamicElement):
         self.last_current_action = deque([(0.0, 0.0), (0.0, 0.0)], maxlen=2)
         self.last_position = self.born_place
         self.last_heading_dir = self.heading
+
+        # collision info render
+        self.collision_info_np = self._init_collision_info_render(pg_world)
+        self.collision_banners = {}  # to save time
+        self.current_banner = None
 
         # collision group
         self.pg_world.physics_world.setGroupCollisionFlag(self.COLLISION_MASK, Block.COLLISION_MASK, True)
@@ -426,7 +429,7 @@ class BaseVehicle(DynamicElement):
                 self.out_of_road = True
             contacts.add(name[0])
         if self.render:
-            self.pg_world.render_collision_info(contacts)
+            self.render_collision_info(contacts)
 
     def _collision_check(self, contact):
         """
@@ -439,6 +442,49 @@ class BaseVehicle(DynamicElement):
         if name[0] == BodyName.Traffic_vehicle:
             self.crash = True
             logging.debug("Crash with {}".format(name[0]))
+
+    def _init_collision_info_render(self, pg_world):
+        if pg_world.mode == "onscreen":
+            info_np = NodePath("Collision info nodepath")
+            info_np.reparentTo(pg_world.aspect2d)
+        else:
+            info_np = None
+        return info_np
+
+    def render_collision_info(self, contacts):
+        contacts = sorted(list(contacts), key=lambda c: COLLISION_INFO_COLOR[COLOR[c]][0])
+        text = contacts[0] if len(contacts) != 0 else None
+        if text is None:
+            text = "Normal" if time.time() - self.pg_world._episode_start_time > 10 else "Press H to see help message"
+            self.render_banner(text, COLLISION_INFO_COLOR["green"][1])
+        else:
+            self.render_banner(text, COLLISION_INFO_COLOR[COLOR[text]][1])
+
+    def render_banner(self, text, color=COLLISION_INFO_COLOR["green"][1]):
+        """
+        Render the banner in the left bottom corner.
+        """
+        if self.collision_info_np is None:
+            return
+        if self.current_banner is not None:
+            self.current_banner.detachNode()
+        if text in self.collision_banners:
+            self.collision_banners[text].reparentTo(self.collision_info_np)
+            self.current_banner = self.collision_banners[text]
+        else:
+            new_banner = NodePath(TextNode("collision_info:{}".format(text)))
+            self.collision_banners[text] = new_banner
+            text_node = new_banner.node()
+            text_node.setCardColor(color)
+            text_node.setText(text)
+            text_node.setCardActual(-5 * self.pg_world.w_scale, 5.1 * self.pg_world.w_scale, -0.3, 1)
+            text_node.setCardDecal(True)
+            text_node.setTextColor(1, 1, 1, 1)
+            text_node.setAlign(TextNode.A_center)
+            new_banner.setScale(0.05)
+            new_banner.setPos(-0.75 * self.pg_world.w_scale, 0, -0.8 * self.pg_world.h_scale)
+            new_banner.reparentTo(self.collision_info_np)
+            self.current_banner = new_banner
 
     def destroy(self, _=None):
         self.bullet_nodes.remove(self.chassis_np.node())
