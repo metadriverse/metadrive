@@ -244,7 +244,9 @@ class PGDriveEnv(gym.Env):
         return self._get_reset_return()
 
     def _get_reset_return(self):
-        o, *_ = self.step(np.array([0.0, 0.0]))
+        self.vehicle.prepare_step(np.array([0.0, 0.0]))
+        self.vehicle.update_state()
+        o = self.observation.observe(self.vehicle)
         return o
 
     def reward(self, action):

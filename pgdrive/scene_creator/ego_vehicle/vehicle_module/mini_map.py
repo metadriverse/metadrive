@@ -1,16 +1,13 @@
 from typing import Tuple
-
 from panda3d.core import Vec3, NodePath
-
 from pgdrive.pg_config.cam_mask import CamMask
 from pgdrive.world.image_buffer import ImageBuffer
-from pgdrive.world.pg_world import PgWorld
 
 
 class MiniMap(ImageBuffer):
     CAM_MASK = CamMask.MiniMap
 
-    def __init__(self, para: Tuple, chassis_np: NodePath, pg_world: PgWorld):
+    def __init__(self, para: Tuple, chassis_np: NodePath, pg_world):
         self.BUFFER_W = para[0]
         self.BUFFER_H = para[1]
         height = para[2]
@@ -23,8 +20,5 @@ class MiniMap(ImageBuffer):
             parent_node=chassis_np
         )
         self.cam.lookAt(Vec3(0, 20, 0))
-        # lens = self.cam.node().getLens()
-        # self.lens.setFilmOffset(1.0, 2.0)
         self.lens.setAspectRatio(2.0)
         self.add_to_display(pg_world, [0., 1 / 3, self.display_bottom, self.display_top])
-        # self.buffer.setSort(0)
