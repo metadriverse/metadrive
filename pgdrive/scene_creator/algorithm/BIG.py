@@ -32,6 +32,7 @@ class BIG:
     ):
         self._block_sequence = None
         self._random_seed = random_seed
+        # Don't change this right now, since we need to make maps identical to old one
         self.np_random = RandomState(random_seed)
         self._lane_num = lane_num
         self._lane_width = lane_width

@@ -8,7 +8,6 @@ from typing import Union, Optional
 
 import gym
 import numpy as np
-
 from pgdrive.envs.observation_type import LidarStateObservation, ImageStateObservation
 from pgdrive.pg_config import PgConfig
 from pgdrive.scene_creator.ego_vehicle.base_vehicle import BaseVehicle
@@ -17,7 +16,7 @@ from pgdrive.scene_creator.ego_vehicle.vehicle_module.mini_map import MiniMap
 from pgdrive.scene_creator.ego_vehicle.vehicle_module.rgb_camera import RGBCamera
 from pgdrive.scene_creator.map import Map, MapGenerateMethod, parse_map_config
 from pgdrive.scene_manager.traffic_manager import TrafficManager, TrafficMode
-from pgdrive.utils import recursive_equal, safe_clip, clip
+from pgdrive.utils import recursive_equal, safe_clip, clip, get_np_random
 from pgdrive.world.chase_camera import ChaseCamera
 from pgdrive.world.manual_controller import KeyboardController, JoystickController
 from pgdrive.world.pg_world import PgWorld
@@ -42,7 +41,7 @@ class PGDriveEnv(gym.Env):
             # ===== Traffic =====
             traffic_density=0.1,
             traffic_mode=TrafficMode.Add_once,
-            random_traffic=False,
+            random_traffic=True,  # Traffic is randomized at default.
 
             # ===== Observation =====
             use_image=False,
@@ -346,7 +345,7 @@ class PGDriveEnv(gym.Env):
             self.current_map.unload_from_pg_world(self.pg_world)
 
         # create map
-        self.current_seed = np.random.randint(self.start_seed, self.start_seed + self.env_num)
+        self.current_seed = get_np_random().randint(self.start_seed, self.start_seed + self.env_num)
         if self.maps.get(self.current_seed, None) is None:
 
             if self.config["load_map_from_json"]:
