@@ -36,30 +36,4 @@ class TestEnv(PGDriveEnv):
 if __name__ == "__main__":
     env = TestEnv()
     env.reset()
-    env.current_map.save_map_image(simple_draw=False)
-    # print(env.current_map.get_map_image_array())
-
-    import numpy as np
-    import cv2
-
-    # env = TestEnv()
-    # env.reset()
-    # env.current_map.save_map_image(False)
-    # print(env.current_map.get_map_image_array())
-
-    # def remove_noise(gray, num):
-    #     Y, X = gray.shape
-    #     nearest_neigbours = [[
-    #         np.argmax(
-    #             np.bincount(
-    #                 gray[max(i - num, 0):min(i + num, Y), max(j - num, 0):min(j + num, X)].ravel()))
-    #         for j in range(X)] for i in range(Y)]
-    #     result = np.array(nearest_neigbours, dtype=np.uint8)
-    #     cv2.imwrite('result2.jpg', result)
-    #     return result
-    #
-    #
-    # img = cv2.imread('map_3.png')
-    # gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    #
-    # remove_noise(gray, 10)
+    env.current_map.draw_map_with_navi_lines(env.vehicle, dest_resolution=(4096, 4096), save=True)
