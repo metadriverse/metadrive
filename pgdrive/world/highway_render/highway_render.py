@@ -287,30 +287,35 @@ class LaneGraphics(object):
                 )
 
     @classmethod
-    def simple_draw(cls, lane, surface):
+    def simple_draw(cls, lane, surface, color=(255, 255, 255)):
         from pgdrive.scene_creator.blocks.block import Block
         segment_num = int(lane.length / Block.CIRCULAR_SEGMENT_LENGTH)
-        len = Block.CIRCULAR_SEGMENT_LENGTH * 1.2
-        width = lane.width * 1.2
+        width = lane.width
         for segment in range(segment_num):
-            ground_unit = pygame.Surface((surface.pix(len), surface.pix(width)))  # per-pixel alpha
-            ground_unit.fill(surface.WHITE)
-            # Centered rotation
-            middle = lane.position((segment + 0.5) * Block.CIRCULAR_SEGMENT_LENGTH, 0)
-            h = lane.heading_at((segment + 0.5) * Block.CIRCULAR_SEGMENT_LENGTH)
-            position = [*middle]
-            VehicleGraphics.blit_rotate(surface, ground_unit, surface.vec2pix(position), np.rad2deg(-h))
+            p_1 = lane.position(segment * Block.CIRCULAR_SEGMENT_LENGTH, -width / 2)
+            p_2 = lane.position(segment * Block.CIRCULAR_SEGMENT_LENGTH, width / 2)
+            p_3 = lane.position((segment + 1) * Block.CIRCULAR_SEGMENT_LENGTH, width / 2)
+            p_4 = lane.position((segment + 1) * Block.CIRCULAR_SEGMENT_LENGTH, -width / 2)
+            pygame.draw.polygon(
+                surface, color,
+                [surface.pos2pix(*p_1),
+                 surface.pos2pix(*p_2),
+                 surface.pos2pix(*p_3),
+                 surface.pos2pix(*p_4)]
+            )
 
         # # for last part
-        ground_unit = pygame.Surface((surface.pix(len), surface.pix(width)))  # per-pixel alpha
-        ground_unit.fill(surface.WHITE)
-        start = lane.position(segment_num * Block.CIRCULAR_SEGMENT_LENGTH, 0)
-        end = lane.position(lane.length, 0)
-        middle = (start + end) / 2
-        long, _ = lane.local_coordinates(middle)
-        h = lane.heading_at(long)
-        position = [*middle]
-        VehicleGraphics.blit_rotate(surface, ground_unit, surface.vec2pix(position), np.rad2deg(-h))
+        p_1 = lane.position(segment_num * Block.CIRCULAR_SEGMENT_LENGTH, -width / 2)
+        p_2 = lane.position(segment_num * Block.CIRCULAR_SEGMENT_LENGTH, width / 2)
+        p_3 = lane.position(lane.length, width / 2)
+        p_4 = lane.position(lane.length, -width / 2)
+        pygame.draw.polygon(
+            surface, color,
+            [surface.pos2pix(*p_1),
+             surface.pos2pix(*p_2),
+             surface.pos2pix(*p_3),
+             surface.pos2pix(*p_4)]
+        )
 
     @classmethod
     def draw_ground(cls, lane, surface, color: Tuple[float], width: float, draw_surface: pygame.Surface = None) -> None:

@@ -31,7 +31,7 @@ class TestEnv(PGDriveEnv):
 if __name__ == "__main__":
     env = TestEnv()
 
-    env.reset()
+    o = env.reset()
     for i in range(1, 100000):
         # start = time.time()
         # print("Step: ", i)

@@ -20,7 +20,7 @@ class SkyBox(DynamicElement):
             return
         skybox = self.loader.loadModel(AssetLoader.file_path(AssetLoader.asset_path, "models", "skybox.bam"))
         from pgdrive.pg_config.cam_mask import CamMask
-        skybox.hide(CamMask.MiniMap | CamMask.RgbCam | CamMask.Shadow)
+        skybox.hide(CamMask.MiniMap | CamMask.RgbCam | CamMask.Shadow | CamMask.ScreenshotCam)
         # skybox.setScale(512)
         # skybox_texture = self.loader.loadTexture(AssetLoader.file_path(AssetLoader.asset_path, 'textures/skybox.jpg'))
         # # skybox.setBin(

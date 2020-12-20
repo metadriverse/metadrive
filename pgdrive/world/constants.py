@@ -32,3 +32,5 @@ COLOR = {
     BodyName.Stripped_line: "yellow",
     BodyName.Traffic_vehicle: "red"
 }
+
+Screenshot_cam = (2048, 2048)
