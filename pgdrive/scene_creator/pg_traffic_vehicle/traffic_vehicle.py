@@ -101,7 +101,7 @@ class PgTrafficVehicle(DynamicElement):
         scene: TrafficManager,
         lane: Union[StraightLane, CircularLane],
         longitude: float,
-        seed=0,
+        seed=None,
         enable_lane_change: bool = True,
         enable_reborn=False
     ):

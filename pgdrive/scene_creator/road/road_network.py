@@ -195,7 +195,8 @@ class RoadNetwork:
         current_index: LaneIndex,
         route: Route = None,
         position: np.ndarray = None,
-        np_random: np.random.RandomState = np.random
+        # Don't change this, since we need to make map identical to old version. get_np_random is used for traffic only.
+        np_random: np.random.RandomState = None
     ) -> LaneIndex:
         """
         Get the index of the next lane that should be followed after finishing the current lane.
@@ -210,6 +211,8 @@ class RoadNetwork:
         :param np_random: a source of randomness.
         :return: the index of the next lane to be followed when current lane is finished.
         """
+        assert np_random
+
         _from, _to, _id = current_index
         next_to = None
         # Pick next road according to planned route
