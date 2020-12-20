@@ -1,4 +1,3 @@
-from random import choice
 from typing import Union
 
 import numpy as np
@@ -10,6 +9,7 @@ from pgdrive.scene_creator.highway_vehicle.behavior import IDMVehicle
 from pgdrive.scene_creator.lanes.circular_lane import CircularLane
 from pgdrive.scene_creator.lanes.straight_lane import StraightLane
 from pgdrive.scene_manager.traffic_manager import TrafficManager
+from pgdrive.utils import get_np_random
 from pgdrive.utils.asset_loader import AssetLoader
 from pgdrive.utils.element import DynamicElement
 
@@ -32,7 +32,7 @@ class PgTrafficVehicle(DynamicElement):
     path = None
     model_collection = {}  # save memory, load model once
 
-    def __init__(self, kinematic_model: IDMVehicle, enable_reborn: bool = False):
+    def __init__(self, kinematic_model: IDMVehicle, enable_reborn: bool = False, np_random=None):
         super(PgTrafficVehicle, self).__init__()
         self.vehicle_node = PgTrafficVehicleNode(BodyName.Traffic_vehicle, IDMVehicle.create_from(kinematic_model))
         chassis_shape = BulletBoxShape(Vec3(kinematic_model.LENGTH / 2, kinematic_model.WIDTH / 2, self.HEIGHT / 2))
@@ -44,7 +44,10 @@ class PgTrafficVehicle(DynamicElement):
         self._initial_state = kinematic_model if enable_reborn else None
         self.bullet_nodes.append(self.vehicle_node)
         self.node_path = NodePath(self.vehicle_node)
-        [path, scale, zoffset, H] = choice(self.path)
+
+        np_random = np_random or get_np_random()
+        [path, scale, zoffset, H] = self.path[np_random.randint(0, len(self.path))]
+
         if self.render:
             if path not in PgTrafficVehicle.model_collection:
                 carNP = self.loader.loadModel(AssetLoader.file_path(AssetLoader.asset_path, "models", path))
@@ -107,7 +110,7 @@ class PgTrafficVehicle(DynamicElement):
     ):
         v = IDMVehicle.create_random(scene, lane, longitude, random_seed=seed)
         v.enable_lane_change = enable_lane_change
-        return cls(v, enable_reborn)
+        return cls(v, enable_reborn, np_random=v.np_random)
 
     def __del__(self):
         self.vehicle_node.clearTag(BodyName.Traffic_vehicle)
