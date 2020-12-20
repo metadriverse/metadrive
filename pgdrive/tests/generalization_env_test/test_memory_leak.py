@@ -1,5 +1,14 @@
-from pgdrive.envs.pgdrive_env import PGDriveEnv
 from memory_profiler import profile
+from pgdrive.envs.pgdrive_env import PGDriveEnv
+"""
+Note: please install memory profiler with: pip install memory_profiler
+
+Usage:
+
+cd this repo
+mprof run python test_memory_leak.py
+mprof plot *.dat
+"""
 
 
 class TestEnv(PGDriveEnv):

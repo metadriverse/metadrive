@@ -74,9 +74,10 @@ class PgWorld(ShowBase.ShowBase):
             loadPrcFileData("", "win-size {} {}".format(*self.pg_config["window_size"]))
             if self.pg_config["use_render"]:
                 self.mode = "onscreen"
-                loadPrcFileData(
-                    "", "threading-model Cull/Draw"
-                )  # multi-thread render, accelerate simulation when evaluate
+                # Warning it may cause memory leak
+                # loadPrcFileData(
+                #     "", "threading-model Cull/Draw"
+                # )  # multi-thread render, accelerate simulation when evaluate
             else:
                 self.mode = "offscreen" if self.pg_config["use_image"] else "none"
             if is_mac() and self.pg_config["use_image"]:  # Mac don't support offscreen rendering

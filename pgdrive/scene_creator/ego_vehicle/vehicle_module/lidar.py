@@ -23,7 +23,7 @@ class Lidar:
         self.laser_num = laser_num
         self.perceive_distance = distance
         self.radian_unit = 2 * np.pi / laser_num
-        self.detection_results = None
+        self.detection_results = []
         self.node_path = parent_node_np.attachNewNode("cloudPoints")
         self.node_path.hide(CamMask.RgbCam | CamMask.Shadow)
         self.cloud_points = [] if show else None
