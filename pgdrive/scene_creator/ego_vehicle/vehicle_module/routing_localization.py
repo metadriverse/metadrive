@@ -36,6 +36,10 @@ class RoutingLocalizationModule:
 
     def update(self, map: Map, parent_node_path):
         self.map = map
+
+        # TODO(pzh): I am not sure whether we should change the random state here.
+        #  If so, then the vehicle may have different final road in single map, this will avoid it from over-fitting
+        #  the map and memorize the routes.
         self.final_road = np.random.RandomState(map.random_seed).choice(map.blocks[-1]._sockets).positive_road
         self.checkpoints = self.map.road_network.shortest_path(FirstBlock.NODE_1, self.final_road.end_node)
         self.final_lane = self.final_road.get_lanes(map.road_network)[-1]

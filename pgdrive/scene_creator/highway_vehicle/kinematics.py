@@ -4,6 +4,7 @@ from typing import Union, List
 import numpy as np
 
 import pgdrive.utils.math_utils as utils
+from pgdrive.utils import get_np_random
 from pgdrive.scene_creator.lanes.lane import AbstractLane
 from pgdrive.scene_creator.road_object.object import Landmark, Obstacle, RoadObject
 from pgdrive.scene_manager.traffic_manager import TrafficManager, LaneIndex
@@ -47,7 +48,7 @@ class Vehicle:
         self.log = []
         self.history = deque(maxlen=30)
         assert np_random is not None
-        self.np_random = np_random if np_random else np.random.RandomState()
+        self.np_random = np_random if np_random else get_np_random()
 
     @property
     def position(self):
@@ -74,7 +75,7 @@ class Vehicle:
 
     @classmethod
     def create_random(
-        cls, scene: TrafficManager, lane: AbstractLane, longitude: float, speed: float = None, random_seed=0
+        cls, scene: TrafficManager, lane: AbstractLane, longitude: float, speed: float = None, random_seed=None
     ):
         """
         Create a random vehicle on the road.
@@ -95,7 +96,7 @@ class Vehicle:
             list(lane.position(longitude, 0)),
             lane.heading_at(longitude),
             speed,
-            np_random=np.random.RandomState(random_seed)
+            np_random=get_np_random(random_seed)
         )
         return v
 

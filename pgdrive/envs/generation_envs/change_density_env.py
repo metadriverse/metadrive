@@ -1,9 +1,8 @@
 import logging
 
-import numpy as np
-
 from pgdrive.envs.pgdrive_env import PGDriveEnv
 from pgdrive.pg_config import PgConfig
+from pgdrive.utils import get_np_random
 
 
 class ChangeDensityEnv(PGDriveEnv):
@@ -18,8 +17,9 @@ class ChangeDensityEnv(PGDriveEnv):
     def __init__(self, config):
         super(ChangeDensityEnv, self).__init__(config)
         self.density_dict = dict()
+        self._random_state = get_np_random(0)  # Use a fixed seed
         for seed in self.maps.keys():
-            self.density_dict[seed] = np.random.uniform(self.config["density_min"], self.config["density_max"])
+            self.density_dict[seed] = self._random_state.uniform(self.config["density_min"], self.config["density_max"])
 
     def reset(self):
         if self.config["change_density"]:
