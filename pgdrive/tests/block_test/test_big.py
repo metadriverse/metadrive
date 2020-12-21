@@ -5,7 +5,7 @@ from pgdrive.utils.asset_loader import AssetLoader
 
 if __name__ == "__main__":
     test = TestBlock()
-    AssetLoader.init_loader(test.loader, test.asset_path)
+    AssetLoader.init_loader(test, test.asset_path)
     global_network = RoadNetwork()
 
     big = BIG(2, 5, global_network, test.render, test.world, 888)
