@@ -29,9 +29,15 @@ class TestEnv(PGDriveEnv):
 
 
 if __name__ == "__main__":
+
+    def get_image(env):
+        env.vehicle.image_sensors[env.config["image_source"]].save_image()
+        env.pg_world.screenshot()
+
+
     env = TestEnv()
     env.reset()
-    env.pg_world.accept("m", env.vehicle.image_sensors[env.config["image_source"]].save_image)
+    env.pg_world.accept("m", get_image, extraArgs=[env])
 
     for i in range(1, 100000):
         # start = time.time()
@@ -47,7 +53,7 @@ if __name__ == "__main__":
         if env.config["use_render"]:
             # for i in range(ImageObservation.STACK_SIZE):
             #     ObservationType.show_gray_scale_array(o["image"][:, :, i])
-            env.render(text={"can you see me": i})
+            env.render()
         # if d:
         #     print("Reset")
         #     env.reset()
