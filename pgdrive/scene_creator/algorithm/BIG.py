@@ -78,6 +78,9 @@ class BIG:
         return False
 
     def sample_block(self, block_seed: int) -> Block:
+        """
+        Sample a random block type
+        """
         if self._block_sequence is None:
             block_types = PgBlock.all_blocks()
             block_probabilities = PgBlock.block_probability()
@@ -96,7 +99,7 @@ class BIG:
         block.destruct_block(self._physics_world)
 
     def construct(self, block) -> bool:
-        return block.construct_block_random(self._render_node_path, self._physics_world)
+        return block.construct_block(self._render_node_path, self._physics_world)
 
     def _forward(self):
         logging.debug("forward")

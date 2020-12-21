@@ -150,7 +150,7 @@ class Roundabout(Block):
                 else:
                     lane.line_types = [LineType.CONTINUOUS, LineType.NONE]
             else:
-                lane.line_types = [LineType.NONE, LineType.STRIPED]
+                lane.line_types = [LineType.STRIPED, LineType.STRIPED]
 
         return Road(exit_start, exit_end), none_cross
 
