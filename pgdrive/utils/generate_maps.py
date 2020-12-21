@@ -28,8 +28,9 @@ if __name__ == '__main__':
     #  with the original one.
 
     # # Generate the second round
-    # for env_name, env_config in environment_set_dict.items():
-    #     env = GeneralizationRacing(env_config)
+    #
+    # for env_name, env_config in predefined_maps.items():
+    #     env = PGDriveEnv(env_config)
     #     data = env.dump_all_maps()
     #     file_path = osp.join(assert_path, "{}-quanyi.json".format(env_name))
     #     with open(file_path, "w") as f:
@@ -38,7 +39,7 @@ if __name__ == '__main__':
     #     print("Finish environment: ", env_name)
     #
     # from pgdrive.tests.generalization_env_test.test_gen_map_read import recursive_equal
-    # for env_name, env_config in environment_set_dict.items():
+    # for env_name, env_config in predefined_maps.items():
     #     with open(osp.join(assert_path, "{}.json".format(env_name)), "r") as f:
     #         data_zhenghao = json.load(f)
     #     with open(osp.join(assert_path, "{}-quanyi2.json".format(env_name)), "r") as f:
