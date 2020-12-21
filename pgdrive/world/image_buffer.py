@@ -64,7 +64,7 @@ class ImageBuffer:
         """
         Bugs here! when use offscreen mode, thus the front cam obs is not from front cam now
         """
-        self.pg_world.render_frame()
+        self.pg_world.graphicsEngine.renderFrame()
         img = PNMImage()
         self.buffer.getScreenshot(img)
         return img
