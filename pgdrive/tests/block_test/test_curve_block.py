@@ -15,7 +15,7 @@ if __name__ == "__main__":
         curve = Curve(i, curve.get_socket(0), global_network, i)
         # print(i)
         while True:
-            success = curve.construct_block_random(test.render, test.world)
+            success = curve.construct_block(test.render, test.world)
             # print(success)
             if success:
                 break
