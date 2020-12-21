@@ -21,7 +21,7 @@ class TestEnv(PGDriveEnv):
                 "rgb_clip": True,
                 "map_config": {
                     Map.GENERATE_METHOD: MapGenerateMethod.BIG_BLOCK_SEQUENCE,
-                    Map.GENERATE_PARA: "rRRrr",
+                    Map.GENERATE_PARA: "TSTOTX",
                     Map.LANE_WIDTH: 3.5,
                     Map.LANE_NUM: 3,
                 }
@@ -37,7 +37,6 @@ if __name__ == "__main__":
         # start = time.time()
         # print("Step: ", i)
         env.step([0, 1])
-        print(env.vehicle.lane_index)
         # print(r)
         # print(o)
         # print(time.time() - start)
