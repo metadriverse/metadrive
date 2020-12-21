@@ -7,6 +7,6 @@ if __name__ == "__main__":
     Press "c" and "a" to test
     """
     test = TestBlock(True)
-    AssetLoader.init_loader(test.loader, test.asset_path)
+    AssetLoader.init_loader(test, test.asset_path)
     test.test_reset(BigGenerateMethod.BLOCK_SEQUENCE, "CrTRXOS")
     # test.run()
