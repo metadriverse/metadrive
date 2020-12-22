@@ -3,19 +3,20 @@ import json
 import logging
 import os
 from typing import List, Optional, Union
-from pgdrive.scene_creator.basic_utils import Decoration
+
 import numpy as np
-import pygame
 from panda3d.bullet import BulletWorld
 from panda3d.core import NodePath
-
 from pgdrive.pg_config import PgConfig
 from pgdrive.pg_config.pg_blocks import PgBlock
 from pgdrive.scene_creator.algorithm.BIG import BIG, BigGenerateMethod
+from pgdrive.scene_creator.basic_utils import Decoration
 from pgdrive.scene_creator.blocks.block import Block
 from pgdrive.scene_creator.road.road_network import RoadNetwork
-from pgdrive.utils.asset_loader import AssetLoader
+from pgdrive.utils import AssetLoader, import_pygame
 from pgdrive.world.pg_world import PgWorld
+
+pygame = import_pygame()
 
 
 def parse_map_config(easy_map_config, original_map_config):
