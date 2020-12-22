@@ -368,7 +368,7 @@ class PGDriveEnv(gym.Env):
     def add_modules_for_vehicle(self):
         # add vehicle module for training according to config
         vehicle_config = self.vehicle.vehicle_config
-        self.vehicle.add_routing_localization(vehicle_config["show_navi_point"])  # default added
+        self.vehicle.add_routing_localization(vehicle_config["show_navi_mark"])  # default added
         if not self.config["use_image"]:
             # TODO visualize lidar
             self.vehicle.add_lidar(vehicle_config["lidar"][0], vehicle_config["lidar"][1])

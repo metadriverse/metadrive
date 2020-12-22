@@ -52,7 +52,7 @@ class BaseVehicle(DynamicElement):
             mini_map=(84, 84, 250),  # buffer length, width
             rgb_cam=(84, 84),  # buffer length, width
             depth_cam=(84, 84, True),  # buffer length, width, view_ground
-            show_navi_point=False,
+            show_navi_mark=True,
             increment_steering=False,
             wheel_friction=0.6,
         )
@@ -405,10 +405,10 @@ class BaseVehicle(DynamicElement):
         self.lidar = Lidar(self.pg_world.render, laser_num, distance)
 
     def add_routing_localization(self, show_navi_point: bool):
-        self.routing_localization = RoutingLocalizationModule(show_navi_point)
+        self.routing_localization = RoutingLocalizationModule(self.pg_world, show_navi_point)
 
     def update_map_info(self, map):
-        self.routing_localization.update(map, self.pg_world.worldNP)
+        self.routing_localization.update(map)
         self.lane_index = self.routing_localization.map.road_network.get_closest_lane_index((self.born_place))
         self.lane = self.routing_localization.map.road_network.get_lane(self.lane_index)
 
@@ -490,6 +490,7 @@ class BaseVehicle(DynamicElement):
         self.bullet_nodes.remove(self.chassis_np.node())
         super(BaseVehicle, self).destroy(self.pg_world.physics_world)
         self.pg_world.physics_world.clearContactAddedCallback()
+        self.routing_localization.destory()
         self.routing_localization = None
         if self.lidar is not None:
             self.lidar.destroy()
