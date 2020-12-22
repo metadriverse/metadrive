@@ -10,10 +10,10 @@ Vector = Union[np.ndarray, Sequence[float]]
 class LineType:
     """A lane side line type."""
 
-    NONE = 0
-    STRIPED = 1
-    CONTINUOUS = 2
-    SIDE = 3
+    NONE = "none"
+    STRIPED = "stripped"
+    CONTINUOUS = "continuous"
+    SIDE = "side"
     CONTINUOUS_LINE = 4  # deprecated
 
     @staticmethod
