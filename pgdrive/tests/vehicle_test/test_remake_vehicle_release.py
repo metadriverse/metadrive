@@ -11,7 +11,7 @@ class TestEnv(PGDriveEnv):
             {
                 "image_source": "depth_cam",
                 "manual_control": True,
-                "use_render": True,
+                "use_render": False,
                 "use_image": True
             }
         )
@@ -21,7 +21,8 @@ class TestEnv(PGDriveEnv):
             self.vehicle.destroy()
             self.vehicle = BaseVehicle(env.pg_world, env.config["vehicle_config"])
             self.add_modules_for_vehicle()
-            self.main_camera.reset(self.vehicle, env.pg_world)
+            if self.main_camera is not None:
+                self.main_camera.reset(self.vehicle, env.pg_world)
         super(TestEnv, self).reset()
 
 
@@ -31,7 +32,7 @@ if __name__ == "__main__":
     env.reset()
     for i in range(1, 100000):
         o, r, d, info = env.step([0, 1])
-        env.render("Test: {}".format(i))
+        # env.render("Test: {}".format(i))
         if d:
             env.reset()
     env.close()
