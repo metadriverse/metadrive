@@ -24,11 +24,11 @@ class Terrain(Element):
         self.node_path = NodePath(node)
         if self.render:
             self.node_path.hide(CamMask.MiniMap | CamMask.Shadow | CamMask.DepthCam | CamMask.ScreenshotCam)
-            self.terrain_normal = self.loader.loadTexture(
-                AssetLoader.file_path(AssetLoader.asset_path, "textures", "grass2", "normal.jpg")
-            )
+            # self.terrain_normal = self.loader.loadTexture(
+            #     AssetLoader.file_path(AssetLoader.asset_path, "textures", "grass2", "normal.jpg")
+            # )
             self.terrain_texture = self.loader.loadTexture(
-                AssetLoader.file_path(AssetLoader.asset_path, "textures", "grass2", "color.jpg")
+                AssetLoader.file_path(AssetLoader.asset_path, "textures", "ground.png")
             )
             self.terrain_texture.setWrapU(Texture.WM_repeat)
             self.terrain_texture.setWrapV(Texture.WM_repeat)
@@ -38,7 +38,7 @@ class Terrain(Element):
             self.node_path.setPos(0, 0, 0)
             cm = CardMaker('card')
             scale = 20000
-            cm.setUvRange((0, 0), (scale / 5, scale / 5))
+            cm.setUvRange((0, 0), (scale / 10, scale / 10))
             card = self.node_path.attachNewNode(cm.generate())
             # scale = 1 if self.use_hollow else 20000
             card.set_scale(scale)
