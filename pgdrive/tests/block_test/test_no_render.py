@@ -17,4 +17,4 @@ if __name__ == "__main__":
     test.vis_big(big)
 
     # big.generate(BigGenerateMethod.BLOCK_NUM, 10)
-    # test.run()
+    test.run()

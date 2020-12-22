@@ -22,7 +22,7 @@ pip install -e .
 Please run the following line to play with the environment with keyboard!
 
 ```bash
-python -m pgdrive.examples.enjoy
+python -m pgdrive.examples.manual_control
 ```
 
 You can also enjoy a journey carrying out by our professional driver! The provided expert can drive in 10000 maps 

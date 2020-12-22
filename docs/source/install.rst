@@ -6,9 +6,6 @@ Installing PGDrive
 
 By leveraging the power of panda3d, PGDrive can be run on personal laptop, cluster, headless server with different OS.
 
-.. note:: There are still some problem with the visualization models, causing slight difference on different platforms.
-    We still work in progress to solve this.
-
 Install PGDrive on MacOs, Windows and Linux
 ###############################################
 
@@ -36,7 +33,7 @@ Follow the instructions on the main page of `panda3d <https://github.com/panda3d
 It will give you a panda3d which can run in EGL environment without the X11 support.
 Install the wheel file by pip install panda3d-1.10.xxx.whl, and utilize the power of cluster to train your agent!
 
-.. note:: The boolean in "pg_world_config" named "headless_rgb" must be set to True, when training the agent of image input.
+.. note:: The boolean in "pg_world_config" named "headless_image" must be set to True, when training the agent of image input.
 
 Verify Installation
 #########################

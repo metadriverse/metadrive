@@ -422,7 +422,7 @@ class PGDriveEnv(gym.Env):
             new_map = Map(self.pg_world, map_config)
             self.maps[seed] = new_map
             new_map.unload_from_pg_world(self.pg_world)
-            logging.info("Finish generating map with seed: ", seed)
+            logging.info("Finish generating map with seed: {}".format(seed))
 
         map_data = dict()
         for seed, map in self.maps.items():

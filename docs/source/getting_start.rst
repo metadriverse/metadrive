@@ -9,7 +9,10 @@ Run::
 
     python -m pgdrive.examples.enjoy_journey
 
-to watch its show!
+to watch its show! Or you can manual control a vehicle with::
+
+     python -m pgdrive.examples.manual_control
+
 
 Environment Usage
 #########################
