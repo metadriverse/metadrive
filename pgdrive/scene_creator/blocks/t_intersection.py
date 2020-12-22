@@ -4,6 +4,7 @@ from pgdrive.scene_creator.basic_utils import Goal
 from pgdrive.scene_creator.blocks.intersection import InterSection
 from pgdrive.scene_creator.lanes.lane import LineType, LineColor
 from pgdrive.scene_creator.road.road import Road
+from pgdrive.scene_creator.basic_utils import CreateRoadFrom
 
 
 class TInterSection(InterSection):
@@ -62,25 +63,42 @@ class TInterSection(InterSection):
                 continue
             exit_node = self._sockets[i].positive_road.start_node if i != Goal.ADVERSE else self._sockets[
                 i].negative_road.start_node
-            lanes_on_p_road = self.block_network.remove_road(Road(start_node, exit_node))
+            self.block_network.remove_road(Road(start_node, exit_node))
             entry_node = self._sockets[i].negative_road.end_node if i != Goal.ADVERSE else self._sockets[
                 i].positive_road.end_node
-            lanes_on_n_road = self.block_network.remove_road(Road(entry_node, end_node))
+            self.block_network.remove_road(Road(entry_node, end_node))
             if i == (t_type + 2) % 4:
-                for lane in lanes_on_n_road:
-                    lane.end = lane.position(radius, 0)
-                    lane.update_length()
-                for lane in lanes_on_p_road:
-                    lane.start = lane.position(lane.length - radius, 0)
-                    lane.update_length()
                 last_scokect = self._sockets[(t_type + 1) % 4]
                 next_scokect = self._sockets[(t_type + 3) % 4]
                 _start_node = last_scokect.negative_road.end_node if last_scokect is not self._pre_block_socket else \
                     self._pre_block_socket.positive_road.end_node
                 _end_node = next_scokect.negative_road.start_node if next_scokect is self._pre_block_socket else \
                     next_scokect.positive_road.start_node
-                self.block_network.add_road(Road(_start_node, exit_node), lanes_on_p_road)
-                self.block_network.add_road(Road(entry_node, _end_node), lanes_on_n_road)
+                p_road = Road(_start_node, exit_node)
+                lanes_on_p = p_road.get_lanes(self.block_network)
+                lane_p = lanes_on_p[0]
+                CreateRoadFrom(
+                    lane_p,
+                    self.positive_lane_num,
+                    p_road,
+                    self.block_network,
+                    self._global_network,
+                    inner_lane_line_type=LineType.NONE,
+                    center_line_type=LineType.NONE
+                )
+
+                n_road = Road(entry_node, _end_node)
+                lanes_on_n = Road(entry_node, _end_node).get_lanes(self.block_network)
+                lane_n = lanes_on_n[0]
+                CreateRoadFrom(
+                    lane_n,
+                    self.positive_lane_num,
+                    n_road,
+                    self.block_network,
+                    self._global_network,
+                    inner_lane_line_type=LineType.NONE,
+                    center_line_type=LineType.NONE
+                )
         self._change_vis(t_type)
         self._sockets.pop(-1)
         socket = self._sockets.pop(t_type)

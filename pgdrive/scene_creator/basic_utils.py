@@ -86,7 +86,8 @@ def CreateRoadFrom(
     ignore_end: str = None,
     center_line_type=Block.CENTER_LINE_TYPE,
     detect_one_side=True,
-    side_lane_line_type=LineType.SIDE
+    side_lane_line_type=LineType.SIDE,
+    inner_lane_line_type=LineType.STRIPED
 ) -> bool:
     """
         | | | |
@@ -119,9 +120,9 @@ def CreateRoadFrom(
             side_lane.radius = radius2
             side_lane.update_length()
         if i == 1:
-            side_lane.line_types = [LineType.CONTINUOUS, LineType.STRIPED]
+            side_lane.line_types = [LineType.CONTINUOUS, inner_lane_line_type]
         else:
-            side_lane.line_types = [LineType.STRIPED, LineType.STRIPED]
+            side_lane.line_types = [inner_lane_line_type, inner_lane_line_type]
         lanes.append(side_lane)
         lane = side_lane
     if toward_smaller_Lane_index:
