@@ -245,4 +245,4 @@ if __name__ == "__main__":
     block = Straight(34, t_11.get_socket(1), global_network, 1)
     block.construct_from_config({Parameter.length: 40}, test.render, test.world)
 
-    # test.run()
+    test.run()

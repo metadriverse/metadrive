@@ -31,6 +31,8 @@ def check_lane_on_road(road_network: RoadNetwork, lane, positive: float = 0, ign
         for _to, lanes in to_dict.items():
             if ignored and (_from, _to) == ignored:
                 continue
+            if len(lanes) == 0:
+                continue
             x_max_1, x_min_1, y_max_1, y_min_1 = get_road_bound_box(lanes)
             x_max_2, x_min_2, y_max_2, y_min_2 = get_road_bound_box([lane])
             if x_min_1 > x_max_2 or x_min_2 > x_max_1 or y_min_1 > y_max_2 or y_min_2 > y_max_1:

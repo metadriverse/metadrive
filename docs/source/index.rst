@@ -1,7 +1,7 @@
 .. PGDrive documentation master file, created by
-sphinx-quickstart on Tue Dec  8 13:36:14 2020.
-You can adapt this file completely to your liking, but it should at least
-contain the root `toctree` directive.
+    sphinx-quickstart on Tue Dec  8 13:36:14 2020.
+    You can adapt this file completely to your liking, but it should at least
+    contain the root `toctree` directive.
 
 #####################
 PGDrive Home
@@ -23,9 +23,8 @@ We now provide several **sensors** to collect environment information:
 - Lidar
 
 Various cameras can be equipped on your autonomous driving car to sense the environment.
-Lidar in PGDrive is a pseudu-lidar.
-Besides the could points, the information of surrounding vehicles like speed, position, heading can also be obtained
-from lidar.
+Lidar in PGDrive is a pseudu-lidar, which can provide both could points, but also
+the information of surrounding vehicles like speed, position, heading.
 
 Based on procedural generation technology, our map generator can generate numerous maps and driving scenes, in which your
 AI driver can interact with other traffic vehicles driven by IDM model.

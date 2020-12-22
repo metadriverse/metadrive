@@ -21,4 +21,4 @@ if __name__ == "__main__":
         block = Curve(id, rd.get_socket(socket_idx), global_network, id + 1)
         block.construct_block(test.render, test.world)
         id += 1
-    # test.run()
+    test.run()
