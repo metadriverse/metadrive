@@ -100,6 +100,6 @@ class VehiclePanel(ImageBuffer):
 
     def destroy(self, pg_world=None):
         super(VehiclePanel, self).destroy(pg_world)
-        for para in self.para_vis_np:
+        for para in self.para_vis_np.values():
             para.removeNode()
         self.aspect2d_np.removeNode()
