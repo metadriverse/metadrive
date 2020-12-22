@@ -122,7 +122,7 @@ class RoutingLocalizationModule:
                 # calculate ego v lane heading
                 lanes_heading.append(ref_lane.heading_at(ref_lane.local_coordinates(ego_vehicle.position)[0]))
             else:
-                lanes_heading.append(ref_lane.heading_at(self.PRE_NOTIFY_DIST))
+                lanes_heading.append(ref_lane.heading_at(min(self.PRE_NOTIFY_DIST, ref_lane.length)))
             ckpts.append(check_point)
             dir_vec = check_point - ego_vehicle.position
             dir_norm = norm(dir_vec[0], dir_vec[1])
@@ -169,7 +169,8 @@ class RoutingLocalizationModule:
         else:
             dir_0 = np.array([np.cos(lane_0_heading), np.sin(lane_0_heading), 0])
             dir_1 = np.array([np.cos(lane_1_heading), np.sin(lane_1_heading), 0])
-            left = False if np.cross(dir_1, dir_0)[-1] < 0 else True
+            cross_product = np.cross(dir_1, dir_0)
+            left = False if cross_product[-1] < 0 else True
             if not self.showing:
                 self.showing = True
             if left:
