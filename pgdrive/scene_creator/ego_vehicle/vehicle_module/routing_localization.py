@@ -35,7 +35,8 @@ class RoutingLocalizationModule:
 
         # Vis
         self.showing = True  # store the state of navigation mark
-        self.show_navi_point = show_navi_point and pg_world.mode == "onscreen"
+        self.show_navi_point = show_navi_point and pg_world.mode == "onscreen" and not pg_world.pg_config[
+            "debug_physics_world"]
         self.goal_node_path = pg_world.render.attachNewNode("target") if self.show_navi_point else None
         self.arrow_node_path = pg_world.aspect2d.attachNewNode("arrow") if self.show_navi_point else None
         if self.show_navi_point:
@@ -56,7 +57,6 @@ class RoutingLocalizationModule:
             self.arrow_node_path.show(CamMask.MainCam)
             self.arrow_node_path.setQuat(LQuaternionf(np.cos(-np.pi / 4), 0, 0, np.sin(-np.pi / 4)))
             self.arrow_node_path.setTransparency(TransparencyAttrib.M_alpha)
-
             navi_point_model = AssetLoader.loader.loadModel(
                 AssetLoader.file_path(AssetLoader.asset_path, "models", "box.egg")
             )
@@ -159,17 +159,20 @@ class RoutingLocalizationModule:
         return lane, lane_index
 
     def update_navi_arrow(self, lanes_heading):
-        lane_0_heading = wrap_to_pi(lanes_heading[0])
-        lane_1_heading = wrap_to_pi(lanes_heading[1])
+        lane_0_heading = lanes_heading[0]
+        lane_1_heading = lanes_heading[1]
         if abs(lane_0_heading - lane_1_heading) < 0.01:
             if self.showing:
                 self.left_arrow.setAlphaScale(self.MIN_ALPHA)
                 self.right_arrow.setAlphaScale(self.MIN_ALPHA)
                 self.showing = False
         else:
+            dir_0 = np.array([np.cos(lane_0_heading), np.sin(lane_0_heading), 0])
+            dir_1 = np.array([np.cos(lane_1_heading), np.sin(lane_1_heading), 0])
+            left = False if np.cross(dir_1, dir_0)[-1] < 0 else True
             if not self.showing:
                 self.showing = True
-            if lane_0_heading > lane_1_heading:
+            if left:
                 self.left_arrow.setAlphaScale(1)
                 self.right_arrow.setAlphaScale(self.MIN_ALPHA)
             else:

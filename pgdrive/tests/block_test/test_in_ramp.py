@@ -20,4 +20,4 @@ if __name__ == "__main__":
         straight = InRampOnStraight(i, straight.get_socket(0), global_network, i)
         print(straight.construct_block(test.render, test.world))
         print(len(straight.bullet_nodes))
-    # test.run()
+    test.run()

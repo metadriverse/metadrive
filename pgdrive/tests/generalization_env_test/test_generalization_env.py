@@ -1,5 +1,8 @@
 from pgdrive.envs.pgdrive_env import PGDriveEnv
 from pgdrive.scene_creator.map import Map, MapGenerateMethod
+from pgdrive.utils import setup_logger
+
+setup_logger(True)
 
 
 class TestEnv(PGDriveEnv):
@@ -21,7 +24,7 @@ class TestEnv(PGDriveEnv):
                 "rgb_clip": True,
                 "map_config": {
                     Map.GENERATE_METHOD: MapGenerateMethod.BIG_BLOCK_SEQUENCE,
-                    Map.GENERATE_PARA: "OCrRCTXRCCCCrOr",
+                    Map.GENERATE_PARA: "TTTTT",
                     Map.LANE_WIDTH: 3.5,
                     Map.LANE_NUM: 3,
                 }
@@ -34,16 +37,9 @@ if __name__ == "__main__":
 
     o = env.reset()
     for i in range(1, 100000):
-        # start = time.time()
-        # print("Step: ", i)
-        env.step([0, 1])
-        # print(r)
-        # print(o)
-        # print(time.time() - start)
-        # print(len(o), "Vs.", env.observation_space.shape[0])
-        # print(info)
+        o, r, d, info = env.step([0, 1])
         env.render("Test: {}".format(i))
-        # if d:
-        #     print("Reset")
-        #     env.reset()
+        if d:
+            print("Reset")
+            env.reset()
     env.close()

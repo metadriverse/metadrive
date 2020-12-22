@@ -14,7 +14,7 @@ from pgdrive.pg_config.cam_mask import CamMask
 from pgdrive.utils import is_mac
 from pgdrive.utils import setup_logger
 from pgdrive.utils.asset_loader import AssetLoader
-from pgdrive.world.constants import PG_EDITION, Screenshot_cam
+from pgdrive.world.constants import PG_EDITION
 from pgdrive.world.force_fps import ForceFPS
 from pgdrive.world.highway_render.highway_render import HighwayRender
 from pgdrive.world.image_buffer import ImageBuffer
@@ -160,7 +160,6 @@ class PgWorld(ShowBase.ShowBase):
         self.pbrpipe = None
         self.light = None
         self.collision_info_np = None
-        self.screenshot_cam = None
 
         # physics world
         self.physics_world = BulletWorld()
@@ -218,10 +217,6 @@ class PgWorld(ShowBase.ShowBase):
             self.force_fps = ForceFPS(
                 1 / (self.pg_config["physics_world_step_size"] * self.pg_config["decision_repeat"]), start=False
             )
-
-            # a screenShot cam, feel free to use
-            self.screenshot_cam = ScreenShotCam(*Screenshot_cam, (5, 0), 100, self.render,
-                                                self) if self.pg_config["screenshot_cam"] else None
 
             # onscreen message
             self.on_screen_message = PgOnScreenMessage() \
@@ -298,9 +293,6 @@ class PgWorld(ShowBase.ShowBase):
 
                 # to shout-out to highway-env, we call the 2D-bird-view-render highway_render
                 highway_render=False,
-
-                # screenshot cam
-                screenshot_cam=False
             )
         )
 
@@ -341,8 +333,6 @@ class PgWorld(ShowBase.ShowBase):
 
     def close_world(self):
         self.taskMgr.stop()
-        if self.screenshot_cam is not None:
-            self.screenshot_cam.destroy(self)
         # It will report a warning said AsynTaskChain is created when taskMgr.destroy() is called but a new showbase is
         # created.
         logging.debug(
