@@ -1,7 +1,15 @@
 import sys
 
+from pgdrive.utils.asset_loader import AssetLoader
 from pgdrive.utils.math_utils import safe_clip, clip, norm
 from pgdrive.utils.random import get_np_random
+
+
+def import_pygame():
+    import os
+    os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
+    import pygame
+    return pygame
 
 
 def setup_logger(debug=False):

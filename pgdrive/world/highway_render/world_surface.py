@@ -1,7 +1,9 @@
 from typing import Tuple, Union
 
 import numpy as np
-import pygame
+from pgdrive.utils import import_pygame
+
+pygame = import_pygame()
 
 PositionType = Union[Tuple[float, float], np.ndarray]
 
