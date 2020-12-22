@@ -34,7 +34,6 @@ if __name__ == "__main__":
         env.vehicle.image_sensors[env.config["image_source"]].save_image()
         env.pg_world.screenshot()
 
-
     env = TestEnv()
     env.reset()
     env.pg_world.accept("m", get_image, extraArgs=[env])

@@ -21,7 +21,7 @@ class TestEnv(PGDriveEnv):
                 "rgb_clip": True,
                 "map_config": {
                     Map.GENERATE_METHOD: MapGenerateMethod.BIG_BLOCK_SEQUENCE,
-                    Map.GENERATE_PARA: "TSTOTX",
+                    Map.GENERATE_PARA: "OCrRCTXRCCCCrOr",
                     Map.LANE_WIDTH: 3.5,
                     Map.LANE_NUM: 3,
                 }
@@ -41,7 +41,7 @@ if __name__ == "__main__":
         # print(o)
         # print(time.time() - start)
         # print(len(o), "Vs.", env.observation_space.shape[0])
-        # print(info)w
+        # print(info)
         env.render("Test: {}".format(i))
         # if d:
         #     print("Reset")
