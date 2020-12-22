@@ -20,6 +20,7 @@ class RoutingLocalizationModule:
     PRE_NOTIFY_DIST = 40
     MARK_COLOR = COLLISION_INFO_COLOR["green"][1]
     MIN_ALPHA = 0.15
+    SHOW_NAVI_POINT = False
 
     def __init__(self, pg_world, show_navi_point: False):
         """
@@ -57,10 +58,11 @@ class RoutingLocalizationModule:
             self.arrow_node_path.show(CamMask.MainCam)
             self.arrow_node_path.setQuat(LQuaternionf(np.cos(-np.pi / 4), 0, 0, np.sin(-np.pi / 4)))
             self.arrow_node_path.setTransparency(TransparencyAttrib.M_alpha)
-            navi_point_model = AssetLoader.loader.loadModel(
-                AssetLoader.file_path(AssetLoader.asset_path, "models", "box.egg")
-            )
-            navi_point_model.reparentTo(self.goal_node_path)
+            if self.SHOW_NAVI_POINT:
+                navi_point_model = AssetLoader.loader.loadModel(
+                    AssetLoader.file_path(AssetLoader.asset_path, "models", "box.egg")
+                )
+                navi_point_model.reparentTo(self.goal_node_path)
             self.goal_node_path.setTransparency(TransparencyAttrib.M_alpha)
             self.goal_node_path.setColor(0.6, 0.8, 0.5, 0.7)
             self.goal_node_path.hide(BitMask32.allOn())
