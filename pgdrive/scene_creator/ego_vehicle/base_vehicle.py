@@ -94,8 +94,7 @@ class BaseVehicle(DynamicElement):
         self.lane = None
         self.lane_index = None
 
-        self.vehicle_panel = VehiclePanel(self.pg_world) \
-            if (not self.pg_world.pg_config["highway_render"]) and (self.pg_world.mode == "onscreen") else None
+        self.vehicle_panel = VehiclePanel(self.pg_world) if (self.pg_world.mode == "onscreen") else None
 
         # other info
         self.throttle_brake = 0.0

@@ -65,26 +65,21 @@ class PgWorld(ShowBase.ShowBase):
         self.pg_config = self.default_config()
         if config is not None:
             self.pg_config.update(config)
-        if self.pg_config["highway_render"]:
-            # when use highway render, panda3d core will degenerate to a simple physics world
-            # and the scene will be drawn by PyGame
-            self.mode = "none"
-            self.pg_config["use_image"] = False
+        loadPrcFileData("", "win-size {} {}".format(*self.pg_config["window_size"]))
+        if self.pg_config["use_render"]:
+            self.mode = "onscreen"
+            # Warning it may cause memory leak, Pand3d Official has fixed this in their master branch.
+            # You can enable it if your panda version is latest.
+            # loadPrcFileData(
+            #     "", "threading-model Cull/Draw"
+            # )  # multi-thread render, accelerate simulation when evaluate
         else:
-            loadPrcFileData("", "win-size {} {}".format(*self.pg_config["window_size"]))
-            if self.pg_config["use_render"]:
-                self.mode = "onscreen"
-                # Warning it may cause memory leak, Pand3d Official has fixed this in their master branch.
-                # You can enable it if your panda version is latest.
-                # loadPrcFileData(
-                #     "", "threading-model Cull/Draw"
-                # )  # multi-thread render, accelerate simulation when evaluate
-            else:
-                self.mode = "offscreen" if self.pg_config["use_image"] else "none"
-            if is_mac() and self.pg_config["use_image"]:  # Mac don't support offscreen rendering
-                self.mode = "onscreen"
-            if self.pg_config["headless_image"]:
-                loadPrcFileData("", "load-display  pandagles2")
+            self.mode = "offscreen" if self.pg_config["use_image"] else "none"
+        if is_mac() and self.pg_config["use_image"]:  # Mac don't support offscreen rendering
+            self.mode = "onscreen"
+        if self.pg_config["headless_image"]:
+            # headless machine support
+            loadPrcFileData("", "load-display  pandagles2")
         if self.pg_config["debug"]:
             # debug setting
             PgWorld.DEBUG = True
@@ -125,11 +120,11 @@ class PgWorld(ShowBase.ShowBase):
         self.h_scale = max(self.pg_config["window_size"][1] / self.pg_config["window_size"][0], 1)
         if self.mode == "onscreen":
             self.disableMouse()
-        if not self.pg_config["highway_render"] and not self.pg_config["debug_physics_world"]:
+        if not self.pg_config["debug_physics_world"] and self.mode != "none":
             path = AssetLoader.windows_style2unix_style(root_path) if sys.platform == "win32" else root_path
             AssetLoader.init_loader(self, path)
             gltf.patch_loader(self.loader)
-            if self.pg_config["use_render"]:
+            if self.mode == "onscreen":
                 # show logo
                 self._loading_logo = OnscreenImage(
                     image=AssetLoader.file_path(AssetLoader.asset_path, "PGDrive-large.png"),
@@ -142,8 +137,9 @@ class PgWorld(ShowBase.ShowBase):
                 self.taskMgr.add(self.remove_logo, "remove _loading_logo in first frame")
 
         self.closed = False
-        self.highway_render = HighwayRender(self.pg_config["window_size"], self.pg_config["use_render"]) if \
-            self.pg_config["highway_render"] else None
+        assert self.mode != self.pg_config["highway_render"], "Only one graphics window can be opened !"
+        self.highway_render = HighwayRender(self.pg_config["highway_render"]) if \
+            self.pg_config["highway_render"] != "none" else None
 
         # add element to render and pbr render, if is exists all the time.
         # these element will not be removed when clear_world() is called
@@ -220,7 +216,7 @@ class PgWorld(ShowBase.ShowBase):
 
             # onscreen message
             self.on_screen_message = PgOnScreenMessage() \
-                if self.pg_config["use_render"] and self.pg_config["onscreen_message"] else None
+                if self.mode == "onscreen" and self.pg_config["onscreen_message"] else None
             self._show_help_message = False
             self._episode_start_time = time.time()
 
@@ -241,15 +237,15 @@ class PgWorld(ShowBase.ShowBase):
         :param text: A dict containing key and values or a string.
         :return: None
         """
-        if not self.pg_config["highway_render"]:
-            if self.on_screen_message is not None:
-                self.on_screen_message.update_data(text)
-                self.on_screen_message.render()
-            if self.pg_config["use_render"]:
-                with self.force_fps:
-                    self.sky_box.step()
-        else:
-            return self.highway_render.draw_scene()
+
+        if self.on_screen_message is not None:
+            self.on_screen_message.update_data(text)
+            self.on_screen_message.render()
+        if self.mode == "onscreen":
+            with self.force_fps:
+                self.sky_box.step()
+        if self.highway_render is not None:
+            self.highway_render.render()
 
     def clear_world(self):
         """
@@ -292,7 +288,7 @@ class PgWorld(ShowBase.ShowBase):
                 headless_image=False,
 
                 # to shout-out to highway-env, we call the 2D-bird-view-render highway_render
-                highway_render=False,
+                highway_render="none",
             )
         )
 

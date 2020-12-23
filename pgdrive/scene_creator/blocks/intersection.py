@@ -115,7 +115,7 @@ class InterSection(Block):
         self.block_network.add_lane(attach_road.end_node, intersect_nodes[0], right_bend)
 
         right_straight.line_types = [LineType.NONE, LineType.SIDE
-                                     ] if lane_num > 1 else [LineType.STRIPED, LineType.SIDE]
+                                     ] if lane_num == 1 else [LineType.STRIPED, LineType.SIDE]
         intersect_nodes.rotate(-1)
         return right_straight, non_cross
 

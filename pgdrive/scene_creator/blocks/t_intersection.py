@@ -53,8 +53,6 @@ class TInterSection(InterSection):
     def _exclude_lanes(self):
         para = self.get_config()
         t_type = para[Parameter.t_intersection_type]
-        radius = para[Parameter.radius]
-        # use a small trick here
         self.add_sockets(self._pre_block_socket)
         start_node = self._sockets[t_type].negative_road.end_node
         end_node = self._sockets[t_type].positive_road.start_node
@@ -75,7 +73,7 @@ class TInterSection(InterSection):
                 _end_node = next_scokect.negative_road.start_node if next_scokect is self._pre_block_socket else \
                     next_scokect.positive_road.start_node
                 p_road = Road(_start_node, exit_node)
-                lanes_on_p = p_road.get_lanes(self.block_network)
+                lanes_on_p = self.block_network.remove_road(p_road)
                 lane_p = lanes_on_p[0]
                 CreateRoadFrom(
                     lane_p,
@@ -88,7 +86,7 @@ class TInterSection(InterSection):
                 )
 
                 n_road = Road(entry_node, _end_node)
-                lanes_on_n = Road(entry_node, _end_node).get_lanes(self.block_network)
+                lanes_on_n = self.block_network.remove_road(n_road)
                 lane_n = lanes_on_n[0]
                 CreateRoadFrom(
                     lane_n,

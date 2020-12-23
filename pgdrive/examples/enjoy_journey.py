@@ -8,7 +8,7 @@ environment that allows popping up an window.
 from pgdrive import PGDriveEnv
 from pgdrive.examples import expert
 
-env = PGDriveEnv(dict(use_render=True, environment_num=10000))
+env = PGDriveEnv(dict(use_render=False, environment_num=10000, pg_world_config={"highway_render": "onscreen"}))
 obs = env.reset()
 try:
     while True:
