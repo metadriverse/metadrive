@@ -14,7 +14,6 @@ class TestEnv(PGDriveEnv):
                 "start_seed": 3,
                 "pg_world_config": {
                     "debug": False,
-                    "highway_render": False
                 },
                 "image_source": "mini_map",
                 "manual_control": False,

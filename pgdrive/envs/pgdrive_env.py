@@ -143,7 +143,7 @@ class PGDriveEnv(gym.Env):
 
         if self.config["manual_control"]:
             if self.config["controller"] == "keyboard":
-                self.controller = KeyboardController()
+                self.controller = KeyboardController(pg_world=self.pg_world)
             elif self.config["controller"] == "joystick":
                 self.controller = JoystickController(self.pg_world)
             else:
@@ -168,7 +168,8 @@ class PGDriveEnv(gym.Env):
             )
 
         # prepare step
-        if self.config["manual_control"] and self.use_render:
+        if self.config["manual_control"] and (self.use_render
+                                              or self.pg_world.pg_config["highway_render"] == "onscreen"):
             action = self.controller.process_input()
 
         action = safe_clip(action, min_val=self.action_space.low[0], max_val=self.action_space.high[0])
@@ -208,7 +209,8 @@ class PGDriveEnv(gym.Env):
         return obs, step_reward + done_reward, self.done, info
 
     def render(self, mode='human', text: Optional[Union[dict, str]] = None) -> Optional[np.ndarray]:
-        assert self.use_render or self.config["use_image"], "render is off now, can not render"
+        assert self.use_render or self.config["use_image"] or \
+               self.pg_world_config["highway_render"] == "onscreen", "render is off now, can not render"
         self.pg_world.render_frame(text)
         if mode != "human" and self.config["use_image"]:
             # fetch img from img stack to be make this func compatible with other render func in RL setting
