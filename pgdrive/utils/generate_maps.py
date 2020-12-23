@@ -14,34 +14,34 @@ predefined_maps = {
 }
 
 if __name__ == '__main__':
-    print("Root path is {}. Asset path is {}.".format(root, assert_path))
+    # print("Root path is {}. Asset path is {}.".format(root, assert_path))
+    # for env_name, env_config in predefined_maps.items():
+    #     env = PGDriveEnv(env_config)
+    #     data = env.dump_all_maps()
+    #     file_path = osp.join(assert_path, "{}.json".format(env_name))
+    #     with open(file_path, "w") as f:
+    #         json.dump(data, f)
+    #     env.close()
+    #     print("Finish environment: ", env_name)
+
+    # For test purpose only. Generate another group of maps with "-quanyi" suffix, and compare them
+    #  with the original one.
+
+    # Generate the second round
+
     for env_name, env_config in predefined_maps.items():
         env = PGDriveEnv(env_config)
         data = env.dump_all_maps()
-        file_path = osp.join(assert_path, "{}.json".format(env_name))
+        file_path = osp.join(assert_path, "{}-quanyi.json".format(env_name))
         with open(file_path, "w") as f:
             json.dump(data, f)
         env.close()
         print("Finish environment: ", env_name)
 
-    # For test purpose only. Generate another group of maps with "-quanyi" suffix, and compare them
-    #  with the original one.
-
-    # # Generate the second round
-    #
-    # for env_name, env_config in predefined_maps.items():
-    #     env = PGDriveEnv(env_config)
-    #     data = env.dump_all_maps()
-    #     file_path = osp.join(assert_path, "{}-quanyi.json".format(env_name))
-    #     with open(file_path, "w") as f:
-    #         json.dump(data, f)
-    #     env.close()
-    #     print("Finish environment: ", env_name)
-    #
-    # from pgdrive.tests.generalization_env_test.test_gen_map_read import recursive_equal
-    # for env_name, env_config in predefined_maps.items():
-    #     with open(osp.join(assert_path, "{}.json".format(env_name)), "r") as f:
-    #         data_zhenghao = json.load(f)
-    #     with open(osp.join(assert_path, "{}-quanyi2.json".format(env_name)), "r") as f:
-    #         data_quanyi = json.load(f)
-    #     recursive_equal(data_zhenghao, data_quanyi, True)
+    from pgdrive.tests.generalization_env_test.test_gen_map_read import recursive_equal
+    for env_name, env_config in predefined_maps.items():
+        with open(osp.join(assert_path, "{}.json".format(env_name)), "r") as f:
+            data_zhenghao = json.load(f)
+        with open(osp.join(assert_path, "{}-quanyi2.json".format(env_name)), "r") as f:
+            data_quanyi = json.load(f)
+        recursive_equal(data_zhenghao, data_quanyi, True)
