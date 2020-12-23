@@ -120,7 +120,7 @@ def CreateRoadFrom(
             side_lane.radius = radius2
             side_lane.update_length()
         if i == 1:
-            side_lane.line_types = [LineType.CONTINUOUS, inner_lane_line_type]
+            side_lane.line_types = [center_line_type, inner_lane_line_type]
         else:
             side_lane.line_types = [inner_lane_line_type, inner_lane_line_type]
         lanes.append(side_lane)
