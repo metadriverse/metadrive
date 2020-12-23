@@ -13,8 +13,9 @@ class ChangeFrictionEnv(PGDriveEnv):
     def default_config() -> PgConfig:
         config = PGDriveEnv.default_config()
         config.add("change_friction", True)
-        config.add("friction_min", 0.6)
+        config.add("friction_min", 0.8)
         config.add("friction_max", 1.2)
+        config.update({"vehicle_config": {"wheel_friction": 1.0}})
         return config
 
     def __init__(self, config=None):
@@ -68,7 +69,7 @@ class ChangeFrictionEnv(PGDriveEnv):
 
 
 if __name__ == '__main__':
-    env = ChangeFrictionEnv(config={"environment_num": 100, "start_seed": 1000})
+    env = ChangeFrictionEnv(config={"environment_num": 100, "start_seed": 1000, "change_friction": False})
     env.seed(100000)
     obs = env.reset()
     for s in range(10000):
