@@ -13,9 +13,10 @@ class Controller:
 class KeyboardController(Controller):
     INCREMENT = 2e-1
 
-    def __init__(self, pg_world: PgWorld):
+    def __init__(self, pg_world: PgWorld = None):
         # Input
-        self.pygame_control = True if pg_world.pg_config["highway_render"] == "onscreen" else False
+        # self.pygame_control = True if pg_world.highway_render is not None else False
+        self.pygame_control = False  # TODO: under development
         if not self.pygame_control:
             self.inputs = InputState()
             self.inputs.watchWithModifiers('forward', 'w')

@@ -1,13 +1,15 @@
 import logging
-from panda3d.core import BitMask32, LQuaternionf, TransparencyAttrib
+
 import numpy as np
+from panda3d.core import BitMask32, LQuaternionf, TransparencyAttrib
 from pgdrive.pg_config.cam_mask import CamMask
 from pgdrive.pg_config.parameter_space import BlockParameterSpace, Parameter
 from pgdrive.scene_creator.blocks.first_block import FirstBlock
 from pgdrive.scene_creator.lanes.circular_lane import CircularLane
 from pgdrive.scene_creator.map import Map
 from pgdrive.utils.asset_loader import AssetLoader
-from pgdrive.utils.math_utils import clip, norm, wrap_to_pi
+from pgdrive.utils.math_utils import clip, norm
+from pgdrive.world import RENDER_MODE_ONSCREEN
 from pgdrive.world.constants import COLLISION_INFO_COLOR
 
 
@@ -36,7 +38,7 @@ class RoutingLocalizationModule:
 
         # Vis
         self.showing = True  # store the state of navigation mark
-        self.show_navi_point = show_navi_point and pg_world.mode == "onscreen" and not pg_world.pg_config[
+        self.show_navi_point = show_navi_point and pg_world.mode == RENDER_MODE_ONSCREEN and not pg_world.pg_config[
             "debug_physics_world"]
         self.goal_node_path = pg_world.render.attachNewNode("target") if self.show_navi_point else None
         self.arrow_node_path = pg_world.aspect2d.attachNewNode("arrow") if self.show_navi_point else None

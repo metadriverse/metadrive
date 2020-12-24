@@ -17,6 +17,7 @@ from pgdrive.scene_creator.ego_vehicle.vehicle_module.rgb_camera import RGBCamer
 from pgdrive.scene_creator.map import Map, MapGenerateMethod, parse_map_config
 from pgdrive.scene_manager.traffic_manager import TrafficManager, TrafficMode
 from pgdrive.utils import recursive_equal, safe_clip, clip, get_np_random
+from pgdrive.world import RENDER_MODE_NONE
 from pgdrive.world.chase_camera import ChaseCamera
 from pgdrive.world.manual_controller import KeyboardController, JoystickController
 from pgdrive.world.pg_world import PgWorld
@@ -44,7 +45,8 @@ class PGDriveEnv(gym.Env):
             random_traffic=False,  # Traffic is randomized at default.
 
             # ===== Observation =====
-            use_image=False,
+            use_image=False,  # Use first view
+            use_topdown=False,  # Use topdown view
             rgb_clip=True,
             vehicle_config=dict(),  # use default vehicle modules see more in BaseVehicle
             image_source="rgb_cam",  # mini_map or rgb_cam or depth cam
@@ -107,6 +109,7 @@ class PGDriveEnv(gym.Env):
             {
                 "use_render": self.use_render,
                 "use_image": self.config["use_image"],
+                "use_topdown": self.config["use_topdown"],
                 "debug": self.config["debug"],
                 # "force_fps": self.config["force_fps"],
                 "decision_repeat": self.config["decision_repeat"],
@@ -168,8 +171,7 @@ class PGDriveEnv(gym.Env):
             )
 
         # prepare step
-        if self.config["manual_control"] and (self.use_render
-                                              or self.pg_world.pg_config["highway_render"] == "onscreen"):
+        if self.config["manual_control"] and self.use_render:
             action = self.controller.process_input()
 
         action = safe_clip(action, min_val=self.action_space.low[0], max_val=self.action_space.high[0])
@@ -209,8 +211,9 @@ class PGDriveEnv(gym.Env):
         return obs, step_reward + done_reward, self.done, info
 
     def render(self, mode='human', text: Optional[Union[dict, str]] = None) -> Optional[np.ndarray]:
-        assert self.use_render or self.config["use_image"] or \
-               self.pg_world_config["highway_render"] == "onscreen", "render is off now, can not render"
+        assert self.use_render or self.pg_world.mode != RENDER_MODE_NONE or self.pg_world.highway_render is not None, (
+            "render is off now, can not render"
+        )
         self.pg_world.render_frame(text)
         if mode != "human" and self.config["use_image"]:
             # fetch img from img stack to be make this func compatible with other render func in RL setting

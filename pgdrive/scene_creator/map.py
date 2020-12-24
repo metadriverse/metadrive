@@ -134,7 +134,7 @@ class Map:
         self._load_to_highway_render(pg_world)
 
     def _load_to_highway_render(self, pg_world: PgWorld):
-        if pg_world.pg_config["highway_render"] != "none":
+        if pg_world.highway_render is not None:
             pg_world.highway_render.set_map(self)
 
     def unload_from_pg_world(self, pg_world: PgWorld):
