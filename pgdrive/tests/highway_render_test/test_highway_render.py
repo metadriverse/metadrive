@@ -1,3 +1,5 @@
+import time
+
 from pgdrive.envs.pgdrive_env import PGDriveEnv
 from pgdrive.utils import setup_logger
 
@@ -10,7 +12,7 @@ class TestEnv(PGDriveEnv):
             {
                 "environment_num": 1,
                 "manual_control": True,
-                "use_render": False,
+                "use_render": True,
                 "use_image": False,
                 "use_topdown": True,
             }
@@ -19,12 +21,13 @@ class TestEnv(PGDriveEnv):
 
 if __name__ == "__main__":
     env = TestEnv()
-
     o = env.reset()
+    s = time.time()
     for i in range(1, 100000):
-        o, r, d, info = env.step([0.01, 0.1])
+        o, r, d, info = env.step(env.action_space.sample())
         env.render()
-        # if d:
-        #     print("Reset")
-        #     env.reset()
+        if d:
+            env.reset()
+        if i % 1000 == 0:
+            print("Steps: {}, Time: {}".format(i, time.time() - s))
     env.close()
