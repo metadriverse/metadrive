@@ -1,5 +1,4 @@
 import os
-import sys
 from typing import List, Tuple
 
 import numpy as np
@@ -19,11 +18,12 @@ class HighwayRender:
     Most of the source code is from Highway-Env, we only optimize and integrate it in PG-Drive
     See more information on its Github page: https://github.com/eleurent/highway-env
     """
-    RESOLUTION = (256, 256)  # pix x pix
-    MAP_RESOLUTION = (2048, 2048)  # pix x pix
-    CAM_REGION = 100  # 50m x (50m * HEIGHT/WIDTH)
-    FPS = 60
-    ROTATE = True
+    RESOLUTION = (200, 200)  # pix x pix
+    MAP_RESOLUTION = (2000, 2000)  # pix x pix
+
+    # CAM_REGION = 100  # 50m x (50m * HEIGHT/WIDTH)
+    # FPS = 60
+    # ROTATE = True
 
     def __init__(self, onscreen: bool, main_window_position=None):
         self.resolution = self.RESOLUTION
@@ -49,21 +49,24 @@ class HighwayRender:
         self.screen = pygame.display.set_mode(self.resolution)
         self.clock = pygame.time.Clock()
 
+        self.surface = WorldSurface(self.MAP_RESOLUTION, 0, pygame.Surface(self.MAP_RESOLUTION))
+        self.frame_surface = pygame.Surface(self.RESOLUTION)
+
     def render(self) -> np.ndarray:
-        for event in pygame.event.get():
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_j:
-                    self.CAM_REGION -= 5 if 10 < self.CAM_REGION else 0
-                if event.key == pygame.K_k:
-                    self.CAM_REGION += 5 if self.CAM_REGION < 100 else 0
-                if event.key == pygame.K_ESCAPE:
-                    sys.exit()
+        # for event in pygame.event.get():
+        #     if event.type == pygame.KEYDOWN:
+        #         if event.key == pygame.K_j:
+        #             self.CAM_REGION -= 5 if 10 < self.CAM_REGION else 0
+        #         if event.key == pygame.K_k:
+        #             self.CAM_REGION += 5 if self.CAM_REGION < 100 else 0
+        #         if event.key == pygame.K_ESCAPE:
+        #             sys.exit()
 
         self.draw_scene()
         self.screen.fill(pygame.Color("black"))
         self.screen.blit(self.frame_surface, (0, 0))
-        if self.clock is not None:
-            self.clock.tick(self.FPS)
+        # if self.clock is not None:
+        #     self.clock.tick(self.FPS)
         pygame.display.flip()
 
     def set_traffic_mgr(self, traffic_mgr):
@@ -105,15 +108,16 @@ class HighwayRender:
         self.map_surface = surface
 
     def draw_scene(self):
-        surface = WorldSurface(self.MAP_RESOLUTION, 0, pygame.Surface(self.MAP_RESOLUTION))
+        self.surface.fill(pygame.Color("black"))
+        surface = self.surface
         surface.scaling = self._scaling
         surface.move_display_window_to(self._center_pos)
+        surface.blit(self.map_surface, (0, 0))
         VehicleGraphics.display(self.traffic_mgr.ego_vehicle, surface)
         for v in self.traffic_mgr.vehicles:
             if v is self.traffic_mgr.ego_vehicle:
                 continue
             VehicleGraphics.display(v, surface)
-        surface.blit(self.map_surface, (0, 0))
         pos = surface.pos2pix(*self.traffic_mgr.ego_vehicle.position)
         width = self.MAP_RESOLUTION[0] / 2
         height = width * self.RESOLUTION[1] / self.RESOLUTION[0]
@@ -133,7 +137,6 @@ class HighwayRender:
             rotate_surface, (0, 0),
             (rotate_surface.get_width() / 4, rotate_surface.get_height() / 4, width / 2, height / 2)
         )
-        self.frame_surface = pygame.Surface(self.RESOLUTION)
         pygame.transform.scale(final_cut_surface, self.RESOLUTION, self.frame_surface)
 
     @staticmethod
