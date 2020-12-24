@@ -59,7 +59,9 @@ class RoutingLocalizationModule:
             self.arrow_node_path.hide(BitMask32.allOn())
             self.arrow_node_path.show(CamMask.MainCam)
             self.arrow_node_path.setQuat(LQuaternionf(np.cos(-np.pi / 4), 0, 0, np.sin(-np.pi / 4)))
-            self.arrow_node_path.setTransparency(TransparencyAttrib.M_alpha)
+
+            # the transparency attribute of gltf model is invalid on windows
+            # self.arrow_node_path.setTransparency(TransparencyAttrib.M_alpha)
             if self.SHOW_NAVI_POINT:
                 navi_point_model = AssetLoader.loader.loadModel(
                     AssetLoader.file_path(AssetLoader.asset_path, "models", "box.egg")
@@ -167,8 +169,8 @@ class RoutingLocalizationModule:
         lane_1_heading = lanes_heading[1]
         if abs(lane_0_heading - lane_1_heading) < 0.01:
             if self.showing:
-                self.left_arrow.setAlphaScale(self.MIN_ALPHA)
-                self.right_arrow.setAlphaScale(self.MIN_ALPHA)
+                self.left_arrow.detachNode()
+                self.right_arrow.detachNode()
                 self.showing = False
         else:
             dir_0 = np.array([np.cos(lane_0_heading), np.sin(lane_0_heading), 0])
@@ -178,11 +180,15 @@ class RoutingLocalizationModule:
             if not self.showing:
                 self.showing = True
             if left:
-                self.left_arrow.setAlphaScale(1)
-                self.right_arrow.setAlphaScale(self.MIN_ALPHA)
+                if not self.left_arrow.hasParent():
+                    self.left_arrow.reparentTo(self.arrow_node_path)
+                if self.right_arrow.hasParent():
+                    self.right_arrow.detachNode()
             else:
-                self.right_arrow.setAlphaScale(1)
-                self.left_arrow.setAlphaScale(self.MIN_ALPHA)
+                if not self.right_arrow.hasParent():
+                    self.right_arrow.reparentTo(self.arrow_node_path)
+                if self.left_arrow.hasParent():
+                    self.left_arrow.detachNode()
 
     def _update_target_checkpoints(self, ego_lane_index):
         current_road_start_point = ego_lane_index[0]
