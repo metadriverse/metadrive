@@ -32,3 +32,10 @@ COLOR = {
     BodyName.Stripped_line: "yellow",
     BodyName.Traffic_vehicle: "red"
 }
+
+RENDER_MODE_NONE = "none"  # Do not render
+RENDER_MODE_ONSCREEN = "onscreen"  # Pop up a window and draw image in it
+RENDER_MODE_OFFSCREEN = "offscreen"  # Draw image in buffer and collect image from memory
+
+# Deprecated!
+# RENDER_MODE_TOPDOWN = "topdown"  # Use pygame to draw the top down view of

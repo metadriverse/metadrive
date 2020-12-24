@@ -1,13 +1,13 @@
 import copy
 import logging
 import math
+import time
 from collections import deque
 from os import path
-from pgdrive.world.constants import COLOR, COLLISION_INFO_COLOR
+
 import numpy as np
 from panda3d.bullet import BulletVehicle, BulletBoxShape, BulletRigidBodyNode, ZUp, BulletWorld, BulletGhostNode
 from panda3d.core import Vec3, TransformState, NodePath, LQuaternionf, BitMask32, PythonCallbackObject, TextNode
-import time
 from pgdrive.pg_config import PgConfig
 from pgdrive.pg_config.body_name import BodyName
 from pgdrive.pg_config.cam_mask import CamMask
@@ -25,6 +25,8 @@ from pgdrive.scene_creator.pg_traffic_vehicle.traffic_vehicle import PgTrafficVe
 from pgdrive.utils.asset_loader import AssetLoader
 from pgdrive.utils.element import DynamicElement
 from pgdrive.utils.math_utils import get_vertical_vector, norm, clip
+from pgdrive.world import RENDER_MODE_ONSCREEN
+from pgdrive.world.constants import COLOR, COLLISION_INFO_COLOR
 from pgdrive.world.image_buffer import ImageBuffer
 from pgdrive.world.pg_world import PgWorld
 from pgdrive.world.terrain import Terrain
@@ -94,7 +96,7 @@ class BaseVehicle(DynamicElement):
         self.lane = None
         self.lane_index = None
 
-        self.vehicle_panel = VehiclePanel(self.pg_world) if (self.pg_world.mode == "onscreen") else None
+        self.vehicle_panel = VehiclePanel(self.pg_world) if (self.pg_world.mode == RENDER_MODE_ONSCREEN) else None
 
         # other info
         self.throttle_brake = 0.0

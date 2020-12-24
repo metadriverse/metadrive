@@ -1,12 +1,15 @@
-from typing import List, Tuple
+import os
 import sys
+from typing import List, Tuple
+
 import numpy as np
+from pgdrive.scene_creator.basic_utils import Decoration
 from pgdrive.scene_creator.lanes.circular_lane import CircularLane
 from pgdrive.scene_creator.lanes.lane import LineType
 from pgdrive.scene_creator.lanes.straight_lane import StraightLane
 from pgdrive.utils import import_pygame
+from pgdrive.world.constants import PG_EDITION
 from pgdrive.world.highway_render.world_surface import WorldSurface
-from pgdrive.scene_creator.basic_utils import Decoration
 
 pygame = import_pygame()
 
@@ -16,18 +19,18 @@ class HighwayRender:
     Most of the source code is from Highway-Env, we only optimize and integrate it in PG-Drive
     See more information on its Github page: https://github.com/eleurent/highway-env
     """
-    RESOLUTION = (1200, 900)  # pix x pix
+    RESOLUTION = (256, 256)  # pix x pix
     MAP_RESOLUTION = (2048, 2048)  # pix x pix
     CAM_REGION = 100  # 50m x (50m * HEIGHT/WIDTH)
     FPS = 60
     ROTATE = True
 
-    def __init__(self, onscreen: str):
+    def __init__(self, onscreen: bool, main_window_position=None):
         self.resolution = self.RESOLUTION
         self.frame_surface = None
         self._scaling = None  # automatically change, don't set the value
         self._center_pos = None  # automatically change, don't set the value
-        self.onscreen = True if onscreen == "onscreen" else False
+        self.onscreen = onscreen
 
         # map
         self.map = None
@@ -36,13 +39,15 @@ class HighwayRender:
         # traffic
         self.traffic_mgr = None
 
-        from pgdrive.world.pg_world import PG_EDITION
         pygame.init()
-        pygame.display.set_caption(PG_EDITION + "-highway-render")
+        pygame.display.set_caption(PG_EDITION + " (Top-down)")
         self.clock = None
-        if self.onscreen:
-            self.screen = pygame.display.set_mode(self.resolution)
-            self.clock = pygame.time.Clock()
+        # if self.onscreen:
+        # main_window_position means the left upper location.
+        os.environ['SDL_VIDEO_WINDOW_POS'] = \
+            '%i,%i' % (main_window_position[0] - self.RESOLUTION[0], main_window_position[1])
+        self.screen = pygame.display.set_mode(self.resolution)
+        self.clock = pygame.time.Clock()
 
     def render(self) -> np.ndarray:
         for event in pygame.event.get():

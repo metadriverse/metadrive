@@ -2,7 +2,6 @@ import logging
 from collections import deque, namedtuple
 from typing import List, Tuple
 
-import numpy as np
 import pandas as pd
 from panda3d.bullet import BulletWorld
 from pgdrive.scene_creator.map import Map
@@ -67,7 +66,7 @@ class TrafficManager:
         self.random_seed = random_seed
         self.np_random = get_np_random(self.random_seed)
         self.add_vehicles(pg_world)
-        if pg_world.pg_config["highway_render"] != "none":
+        if pg_world.highway_render is not None:
             pg_world.highway_render.set_traffic_mgr(self)
 
     def clear_traffic(self, pg_physics_world: BulletWorld):
