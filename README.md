@@ -1,7 +1,7 @@
 
 <img align=right width=300px  src="pgdrive/assets/PGDrive.png" />
 
-# PGDrive: A highly flexible open-ended driving simulator
+# PGDrive: an open-ended driving simulator with procedural generation
 
 Please install PGDrive via:
 
@@ -19,14 +19,13 @@ pip install -e .
 
 ## Quick Start
 
-Please run the following line to play with the environment with keyboard!
+Please run the following line to drive the car in the environment manually with keyboard!
 
 ```bash
 python -m pgdrive.examples.manual_control
 ```
 
-You can also enjoy a journey carrying out by our professional driver! The provided expert can drive in 10000 maps 
-with almost 90% likelihood to achieve the destination. 
+You can also enjoy a journey carrying out by our professional driver pretrained from reinforcement learning! 
 
 Note that this script requires your system to have the capacity of rendering. Please refer to the installation guideline for more information.
 
@@ -58,9 +57,8 @@ for i in range(1000):
 env.close()
 ```
 
-We also prepare a Colab notebook which demonstrates some basic usage of PGDrive, please enjoy it! 
+We also prepare a Colab which demonstrates some basic usage of PGDrive as follows:
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/decisionforce/PGDrive/blob/main/pgdrive/examples/Basic%20PGDrive%20Usages.ipynb)
-(TODO: The notebook is not accessible before the repo is public.)
 
 ## Predefined environment sets
 
@@ -72,7 +70,7 @@ import pgdrive  # Register the environment
 env = gym.make("PGDrive-v0")
 ```
 
-The following table presents some predefined environment names. Please feel free to open an issue if you want to request some new environments.
+The following table presents some predefined environment names. 
 
 | Gym Environment Name   | Random Seed Range | Number of Maps | Comments                                                |
 | ----------------------- | ----------------- | -------------- | ------------------------------------------------------- |
