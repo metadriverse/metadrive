@@ -296,9 +296,6 @@ class PgWorld(ShowBase.ShowBase):
                 # only render physics world without model, a special debug option
                 debug_physics_world=False,
 
-                # decide the layout of white lines
-                use_default_layout=True,
-
                 # set to true only when on headless machine and use rgb image!!!!!!
                 headless_image=False,
 
