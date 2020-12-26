@@ -2,7 +2,7 @@
 PGDrive Documentation
 #####################
 
-.. image:: ../../pgdrive/assets/PGDrive.png
+.. image:: ../../../pgdrive/assets/PGDrive.png
    :width: 300
    :align: center 
 
@@ -36,7 +36,7 @@ Table of Content
 
 .. toctree::
    :maxdepth: 2
-   :caption: Config
+   :caption: Configuration
 
    vehicle_config.rst
    env_config.rst
