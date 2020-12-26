@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Usage: at the root dir >> bash scripts/format.sh
 
-# Check yapf version. (20200318 latest is 0.29.0. Format might be changed in future version.)
+# Check yapf version.
 ver=$(yapf --version)
 if ! echo $ver | grep -q 0.30.0; then
   echo "Wrong YAPF version installed: 0.30.0 is required, not $ver."
