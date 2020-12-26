@@ -10,7 +10,7 @@
 Welcome to PGDrive! PGDrive is an driving simulator with many key features, including:
 
 - **Lightweight**: Extremely easy to download, install and run in almost all platform.
-- **Realistic**: Accurate physics simulation and multiple sensory input including RGB camera, Lidar and sensory data.
+- **Realistic**: Accurate physics simulation and multiple sensory inputs.
 - **Efficient**: Up to 500 simulation step per second.
 - **Open-ended**: Support generating infinite scenes and configuring various traffic, vehicle, and environmental settings.
 
@@ -39,7 +39,7 @@ python -m pgdrive.examples.profile_pgdrive
 Please run the following line to drive the car in the environment manually with keyboard!
 
 ```bash
-python -m pgdrive.examples.manual_control
+python -m pgdrive.examples.enjoy_manual
 ```
 
 You can also enjoy a journey carrying out by our professional driver pretrained from reinforcement learning! 
@@ -47,7 +47,7 @@ You can also enjoy a journey carrying out by our professional driver pretrained 
 Note that this script requires your system to have the capacity of rendering. Please refer to the installation guideline for more information.
 
 ```bash
-python -m pgdrive.examples.enjoy_journey
+python -m pgdrive.examples.enjoy_expert
 ```
 
 *Note that the above two scripts can not be run in headless machine.*
