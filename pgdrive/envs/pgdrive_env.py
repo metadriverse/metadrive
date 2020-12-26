@@ -8,6 +8,7 @@ from typing import Union, Optional
 
 import gym
 import numpy as np
+
 from pgdrive.envs.observation_type import LidarStateObservation, ImageStateObservation
 from pgdrive.pg_config import PgConfig
 from pgdrive.scene_creator.ego_vehicle.base_vehicle import BaseVehicle
@@ -122,6 +123,7 @@ class PGDriveEnv(gym.Env):
         self.traffic_manager = None
         self.main_camera = None
         self.controller = None
+        self._expert_take_over = False
         self.restored_maps = dict()
 
         self.maps = {_seed: None for _seed in range(self.start_seed, self.start_seed + self.env_num)}
@@ -139,7 +141,9 @@ class PGDriveEnv(gym.Env):
         self.pg_world = PgWorld(self.pg_world_config)
         self.pg_world.accept("r", self.reset)
         self.pg_world.accept("escape", sys.exit)
-        # self.pg_world.accept("escape", self.force_close)
+
+        # Press t can let expert take over. But this function is still experimental.
+        self.pg_world.accept("t", self.toggle_expert_take_over)
 
         # init traffic manager
         self.traffic_manager = TrafficManager(self.config["traffic_mode"], self.config["random_traffic"])
@@ -173,6 +177,7 @@ class PGDriveEnv(gym.Env):
         # prepare step
         if self.config["manual_control"] and self.use_render:
             action = self.controller.process_input()
+            action = self.expert_take_over(action)
 
         action = safe_clip(action, min_val=self.action_space.low[0], max_val=self.action_space.high[0])
 
@@ -499,3 +504,13 @@ class PGDriveEnv(gym.Env):
         if self.traffic_manager is None:
             return 0
         return self.traffic_manager.get_vehicle_num()
+
+    def expert_take_over(self, action):
+        if self._expert_take_over:
+            from pgdrive.examples.ppo_expert import expert
+            return expert(self.observation.observe(self.vehicle))
+        else:
+            return action
+
+    def toggle_expert_take_over(self):
+        self._expert_take_over = not self._expert_take_over
