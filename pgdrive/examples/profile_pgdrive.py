@@ -1,24 +1,21 @@
 import time
 
-import numpy as np
-
 from pgdrive import PGDriveEnv
 
 if __name__ == '__main__':
     env = PGDriveEnv(dict(environment_num=10))
     obs = env.reset()
     start = time.time()
-    total = 10000
-    for s in range(total):
-        if s < 30:
-            action = np.array([0.0, 1.0])
-        elif s < 200:
-            action = np.array([0.0, -1.0])
-        else:
-            action = np.array([0.0, 1.0])
+    action = [0.0, 0.1]
+    for s in range(10000):
         o, r, d, i = env.step(action)
         if d:
             env.reset()
         if (s + 1) % 100 == 0:
-            print(f"{s + 1}/{total} Time Elapse: {time.time() - start}")
+            print(
+                "Finish {}/10000 simulation steps. Time elapse: {:.4f}. Average FPS: {:.4f}".format(
+                    s + 1,
+                    time.time() - start, (s + 1) / (time.time() - start)
+                )
+            )
     print(f"Total Time Elapse: {time.time() - start}")

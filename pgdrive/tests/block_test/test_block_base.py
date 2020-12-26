@@ -13,7 +13,7 @@ class TestBlock(ShowBase.ShowBase):
     def __init__(self, debug=False):
         self.debug = debug
         super(TestBlock, self).__init__(windowType="onscreen")
-        self.setBackgroundColor(38 / 255, 38 / 255, 38 / 255, 1)
+        self.setBackgroundColor(38 / 255, 58 / 255, 102 / 255, 1)
         self.setFrameRateMeter(True)
         self.cam.setPos(0, 0, 300)
         self.cam.lookAt(0, 0, 0)

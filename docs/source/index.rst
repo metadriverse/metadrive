@@ -1,44 +1,45 @@
-.. PGDrive documentation master file, created by
-    sphinx-quickstart on Tue Dec  8 13:36:14 2020.
-    You can adapt this file completely to your liking, but it should at least
-    contain the root `toctree` directive.
-
 #####################
-PGDrive Home
+PGDrive Documentation
 #####################
 
-Welcome to the PGDrive home.
-PGDrive is a lightweight autonomous driving environment.
-Referring to this documentation, you can utilize PGDrive to research diverse driving **topics**, including:
+.. image:: ../../pgdrive/assets/PGDrive.png
+   :width: 300
+   :align: center 
 
-- Reinforcement learning
-- Imitation leaning
-- Modular autonomous driving
+Welcome to the PGDrive documentation. PGDrive is an open-ended driving simulator with infinite scenes.
+The key features of PGDrive includes:
 
-We now provide several **sensors** to collect environment information:
+- **Lightweight**: Extremely easy to download, install and run in almost all platform.
+- **Realistic**: Accurate physics simulation and multiple sensory input including RGB camera, Lidar and sensory data.
+- **Efficient**: Up to 500 simulation step per second.
+- **Open-ended**: Support generating infinite scenes and configuring various traffic, vehicle, and environmental settings.
 
-- Rgb Camera
-- Depth Camera
-- Bird-view Camera
-- Lidar
+This documentation let you get familiar with the installation and basic utilization of PGDrive.
+Please go through :doc:`install` to install PGDrive and try the examples in :doc:`get_start` to enjoy PGDrive!
 
-Various cameras can be equipped on your autonomous driving car to sense the environment.
-Lidar in PGDrive is a pseudu-lidar, which can provide both could points, but also
-the information of surrounding vehicles like speed, position, heading.
-
-Based on procedural generation technology, our map generator can generate numerous maps and driving scenes, in which your
-AI driver can interact with other traffic vehicles driven by IDM model.
+You can also visit `our webpage <https://decisionforce.github.io/pgdrive/>`_ and `GitHub repo <https://github.com/decisionforce/pgdrive>`_! Please feel free to contact us if you have any suggestion or ideas!
 
 
-Content
-#############
+Table of Content
+################
+.. toctree::
+    :caption: Home
+
+    self
+
 .. toctree::
    :maxdepth: 2
+   :caption: Quick Start
 
-   self
-   install
-   getting_start
-   generalization_env_config
+   install.rst
+   get_start.rst
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Config
+
+   vehicle_config.rst
+   env_config.rst
 
 
 
