@@ -25,14 +25,17 @@ use rendering features such as the RGB, the installation need more efforts, espe
 Verify the installation of PGDrive
 #############################################
 
-Please run::
+To check whether PGDrive v0.1.1 is successfully installed, please run::
 
     python -m pgdrive.examples.profile_pgdrive
 
-To check whether PGDrive v0.1.0 is successfully installed. At the same time, you can verify the efficiency of PGDrive through the printed messages.
-Note that please do not run the above command in the folder that has a sub-folder called :code:`./pgdrive`.
 
-Install the PGDrive with rendering functionality
+
+You can also verify the efficiency of PGDrive through the printed messages.
+Note that the above script is supposed to be runnable in all places.
+Please do not run the above command in the folder that has a sub-folder called :code:`./pgdrive`.
+
+Install the PGDrive with offscreen rendering functionality
 #################################################
 
 This section introduce the procedure to enable PGDrive with RGB rendering in headless machine.
@@ -58,7 +61,7 @@ Now, PGDrive will utilize the power of cluster to train your agent!
 .. warning:: Compiling Panda3D from source might require the **administrator permission** to install some libraries.
     We are working to provide a pre-built Panda3D for cluster users of PGDrive to make it easy to use on headless machines.
 
-Verify the rendering functionality of PGDrive
+Verify the offscreen rendering functionality of PGDrive
 #############################################
 
 .. note:: An easy installation of PGDrive in macOS will fail the following verification.
