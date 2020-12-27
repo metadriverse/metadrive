@@ -34,6 +34,8 @@ You can verify the installation and efficiency of PGDrive via running:
 python -m pgdrive.examples.profile_pgdrive
 ```
 
+Note that please do not run the above command in the folder that has a sub-folder called `./pgdrive`.
+
 ## Quick Start
 
 Please run the following line to drive the car in the environment manually with keyboard!

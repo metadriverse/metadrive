@@ -30,6 +30,7 @@ Please run::
     python -m pgdrive.examples.profile_pgdrive
 
 To check whether PGDrive v0.1.0 is successfully installed. At the same time, you can verify the efficiency of PGDrive through the printed messages.
+Note that please do not run the above command in the folder that has a sub-folder called :code:`./pgdrive`.
 
 Install the PGDrive with rendering functionality
 #################################################
