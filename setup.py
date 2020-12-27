@@ -2,7 +2,7 @@ import sys
 from distutils.core import setup
 from os import path
 
-from setuptools import find_packages
+from setuptools import find_namespace_packages
 
 assert sys.version_info.major == 3 and sys.version_info.minor >= 6, "python version >= 3.6 is required"
 
@@ -10,14 +10,17 @@ this_directory = path.abspath(path.dirname(__file__))
 with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
+packages = find_namespace_packages(exclude=("docs", "docs.*", "pgdrive.assets.*"))
+print("We will install the following packages: ", packages)
+
 setup(
-    name="PGDrive",
+    name="pgdrive",
     version="0.1.0",
-    description="PGDrive: an open-ended driving simulator with infinite scenes",
+    description="An open-ended driving simulator with infinite scenes",
     url="https://github.com/decisionforce/pgdrive",
-    author="Quanyi Li, Zhenghao Peng",
+    author="PGDrive Team",
     author_email="liquanyi@bupt.edu.cn, pengzh@ie.cuhk.edu.hk",
-    packages=find_packages(),
+    packages=packages,
     install_requires=[
         "gym",
         "numpy<=1.19.3",
@@ -32,7 +35,7 @@ setup(
         "pillow"
     ],
     include_package_data=True,
-    license="Apache License 2.0",
+    license="Apache 2.0",
     long_description=long_description,
     long_description_content_type='text/markdown'
 )
