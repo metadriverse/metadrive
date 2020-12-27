@@ -1,25 +1,24 @@
-
-<img align=right width=300px  src="pgdrive/assets/PGDrive.png" />
+<img align=right width=250px  src="pgdrive/assets/PGDrive.png" />
 
 # PGDrive: an open-ended driving simulator with infinite scenes
 
 [![Documentation](https://readthedocs.org/projects/pgdrive/badge/?version=latest)](https://pgdrive.readthedocs.io)
 
-**[ [Website](https://decisionforce.github.io/pgdrive/) | [Github Repo](https://github.com/decisionforce/pgdrive) | [Documentation](https://pgdrive.readthedocs.io/) | [Paper](#) ]**
+**[  📺 [Website](https://decisionforce.github.io/pgdrive/) | 🏗 [Github Repo](https://github.com/decisionforce/pgdrive) | 📜 [Documentation](https://pgdrive.readthedocs.io/) | 🎓 [Paper](#) ]**
 
 Welcome to PGDrive! PGDrive is an driving simulator with many key features, including:
 
-- **Lightweight**: Extremely easy to download, install and run in almost all platform.
-- **Realistic**: Accurate physics simulation and multiple sensory inputs.
-- **Efficient**: Up to 500 simulation step per second.
-- **Open-ended**: Support generating infinite scenes and configuring various traffic, vehicle, and environmental settings.
+- 🎏 **Lightweight**: Extremely easy to download, install and run in almost all platforms.
+- 📷 **Realistic**: Accurate physics simulation and multiple sensory inputs.
+- 🚀 **Efficient**: Up to 500 simulation step per second and easy to parallel.
+- 🗺 **Open-ended**: Support generating infinite scenes and configuring various traffic, vehicle, and environmental settings.
 
 
 <img src="https://raw.githubusercontent.com/decisionforce/decisionforce.github.io/master/projects/pgdrive/panel.png">
 
 
 
-## Quick Start
+## 🛠 Quick Start
 Please install PGDrive via:
 
 ```bash
@@ -43,7 +42,7 @@ python -m pgdrive.examples.profile_pgdrive
 The above script is supposed to be runnable in all places.
 Note that please do not run the above command in the folder that has a sub-folder called `./pgdrive`.
 
-## Examples
+## 🚕 Examples
 
 Please run the following line to drive the car in the environment manually with keyboard!
 
@@ -92,7 +91,7 @@ env.close()
 We also prepare a Colab which demonstrates some basic usage of PGDrive as follows:
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/decisionforce/PGDrive/blob/main/pgdrive/examples/Basic%20PGDrive%20Usages.ipynb)
 
-## Predefined environment sets
+## 📦 Predefined environment sets
 
 We also define several Gym environment names, so user can start training in the minimalist manner:
 
@@ -116,7 +115,7 @@ The following table presents some predefined environment names.
 | `PGDrive-training2-v0`  | [7000, 8000)      | 1000           | Thirds set of 1000 environments.                        |
 | ...                     |                   |                | *More map set can be added in response to the requests* |
 
-## Documentations
+## 🏫 Documentations
 
 More information about PGDrive can be found in [PGDrive Documentation](https://pgdrive.readthedocs.io).
 
