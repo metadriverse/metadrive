@@ -14,6 +14,12 @@ Welcome to PGDrive! PGDrive is an driving simulator with many key features, incl
 - **Efficient**: Up to 500 simulation step per second.
 - **Open-ended**: Support generating infinite scenes and configuring various traffic, vehicle, and environmental settings.
 
+
+<img src="https://raw.githubusercontent.com/decisionforce/decisionforce.github.io/master/projects/pgdrive/panel.png">
+
+
+
+## Quick Start
 Please install PGDrive via:
 
 ```bash
@@ -37,7 +43,7 @@ python -m pgdrive.examples.profile_pgdrive
 The above script is supposed to be runnable in all places.
 Note that please do not run the above command in the folder that has a sub-folder called `./pgdrive`.
 
-## Quick Start
+## Examples
 
 Please run the following line to drive the car in the environment manually with keyboard!
 
@@ -46,8 +52,6 @@ python -m pgdrive.examples.enjoy_manual
 ```
 
 You can also enjoy a journey carrying out by our professional driver pretrained from reinforcement learning! 
-
-Note that this script requires your system to have the capacity of rendering. Please refer to the installation guideline for more information.
 
 ```bash
 python -m pgdrive.examples.enjoy_expert
@@ -59,7 +63,8 @@ To show the main feature, procedural generation, we provide a script to show BIG
 python -m pgdrive.examples.render_big
 ```
 
-*Note that the above three scripts can not be run in headless machine.*
+*Note that the above three scripts can not be run in headless machine.* 
+Please refer to the installation guideline in documentation for more information.
 
 Running the following line allows you to draw the generated maps:
 
