@@ -4,6 +4,6 @@
 
 ## Checklist
 
-* [ ] I have merged the latest master branch into current branch.
-* [ ] I have gone through `bash scripts/format.sh` before submitting.
+* [ ] I have merged the latest main branch into current branch.
+* [ ] I have run `bash scripts/format.sh` before merging.
 * Please use "squash and merge" mode.
