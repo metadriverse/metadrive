@@ -9,3 +9,5 @@
 /dist/
 /documentation/build/
 /pgdrive.egg-info/
+.DS_Store
+**/.DS_Store
