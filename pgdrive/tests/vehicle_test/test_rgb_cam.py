@@ -25,7 +25,6 @@ if __name__ == "__main__":
     env = TestEnv()
     env.reset()
     env.pg_world.accept("m", env.vehicle.image_sensors[env.config["image_source"]].save_image)
-    from pgdrive.envs.observation_type import ObservationType
 
     for i in range(1, 100000):
         o, r, d, info = env.step([0, 1])

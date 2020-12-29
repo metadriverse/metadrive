@@ -2,6 +2,7 @@ import json
 import os.path as osp
 
 from pgdrive import PGDriveEnv
+from pgdrive.tests.generalization_env_test.test_gen_map_read import recursive_equal
 
 root = osp.dirname(osp.dirname(osp.abspath(__file__)))
 assert_path = osp.join(root, "assets", "maps")
@@ -38,7 +39,6 @@ if __name__ == '__main__':
         env.close()
         print("Finish environment: ", env_name)
 
-    from pgdrive.tests.generalization_env_test.test_gen_map_read import recursive_equal
     for env_name, env_config in predefined_maps.items():
         with open(osp.join(assert_path, "{}.json".format(env_name)), "r") as f:
             data_zhenghao = json.load(f)

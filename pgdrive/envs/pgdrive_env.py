@@ -8,7 +8,6 @@ from typing import Union, Optional
 
 import gym
 import numpy as np
-
 from pgdrive.envs.observation_type import LidarStateObservation, ImageStateObservation
 from pgdrive.pg_config import PgConfig
 from pgdrive.scene_creator.ego_vehicle.base_vehicle import BaseVehicle

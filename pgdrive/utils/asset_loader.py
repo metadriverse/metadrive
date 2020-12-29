@@ -1,7 +1,4 @@
 import logging
-from typing import Union
-
-from direct.showbase.Loader import Loader
 
 
 class AssetLoader:

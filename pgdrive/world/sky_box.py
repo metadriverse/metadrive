@@ -1,5 +1,5 @@
 from panda3d.core import SamplerState, Shader, NodePath, ConfigVariableString
-
+from pgdrive.pg_config.cam_mask import CamMask
 from pgdrive.utils import is_mac
 from pgdrive.utils.asset_loader import AssetLoader
 from pgdrive.utils.element import DynamicElement
@@ -19,31 +19,8 @@ class SkyBox(DynamicElement):
             self.node_path = NodePath("pure_background")
             return
         skybox = self.loader.loadModel(AssetLoader.file_path(AssetLoader.asset_path, "models", "skybox.bam"))
-        from pgdrive.pg_config.cam_mask import CamMask
-        skybox.hide(CamMask.MiniMap | CamMask.RgbCam | CamMask.Shadow | CamMask.ScreenshotCam)
-        # skybox.setScale(512)
-        # skybox_texture = self.loader.loadTexture(AssetLoader.file_path(AssetLoader.asset_path, 'textures/skybox.jpg'))
-        # # skybox.setBin(
-        # #     AssetLoader.file_path(self.bullet_path, 'textures/s1/background#.jpg')
-        # #     , 1)
-        # # skybox.setDepthWrite(0)
-        #
-        # skybox.setLightOff()
-        #
-        # ts = TextureStage('ts')
-        # ts.setMode(TextureStage.MReplace)
-        #
-        # # skybox.setTexGen(ts, TexGenAttrib.MWorldNormal)
-        # skybox.setTexture(ts, skybox_texture)
-        #
-        # # skybox.setBin(AssetLoader.file_path(self.bullet_path, 'textures/s1/background'), 1)
-        # # skybox.setScale(20000)
-        # # skybox.setZ(-2450)
-        # self.node_path = skybox
-        # # skybox.reparent_to(self.render)
-        # # skybox.hide(DrawMask(self.MINIMAP_MASK))
 
-        # skybox = self.loader.loadModel(AssetLoader.file_path(self.bullet_path, "models/skybox.bam"))
+        skybox.hide(CamMask.MiniMap | CamMask.RgbCam | CamMask.Shadow | CamMask.ScreenshotCam)
         skybox.set_scale(20000)
 
         skybox_texture = self.loader.loadTexture(
@@ -59,7 +36,9 @@ class SkyBox(DynamicElement):
         gles = ConfigVariableString("load-display").getValue()
         if gles == "pandagles2":
             skybox_shader = Shader.load(
-                Shader.SL_GLSL, AssetLoader.file_path(AssetLoader.asset_path, "shaders", "skybox_gles.vert.glsl"),
+                Shader.SL_GLSL,
+                AssetLoader.file_path(AssetLoader.asset_path, "shaders", "skybox_gles.vert.glsl"),
+                # FIXME a potential bug here?
                 AssetLoader.file_path(AssetLoader.asset_path, "shaders", "skybox_gles.frag.glsl")
             )
         else:
@@ -70,7 +49,9 @@ class SkyBox(DynamicElement):
                 vert_file = "skybox.vert.glsl"
                 frag_file = "skybox.frag.glsl"
             skybox_shader = Shader.load(
-                Shader.SL_GLSL, AssetLoader.file_path(AssetLoader.asset_path, "shaders", vert_file),
+                Shader.SL_GLSL,
+                AssetLoader.file_path(AssetLoader.asset_path, "shaders", vert_file),
+                # FIXME a potential bug here?
                 AssetLoader.file_path(AssetLoader.asset_path, "shaders", frag_file)
             )
         skybox.set_shader(skybox_shader)

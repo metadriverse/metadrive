@@ -3,11 +3,11 @@ from typing import Dict, Union, List
 
 import numpy
 from panda3d.bullet import BulletBoxShape, BulletRigidBodyNode, BulletWorld
-from panda3d.core import Vec3, LQuaternionf, BitMask32, NodePath, Vec4, CardMaker, TextureStage, RigidBodyCombiner, \
-    TransparencyAttrib, SamplerState
-
+from panda3d.core import Vec3, LQuaternionf, BitMask32, Vec4, CardMaker, TextureStage, RigidBodyCombiner, \
+    TransparencyAttrib, SamplerState, NodePath
 from pgdrive.pg_config.body_name import BodyName
 from pgdrive.pg_config.cam_mask import CamMask
+from pgdrive.scene_creator.blocks.constants import BlockDefault
 from pgdrive.scene_creator.lanes.circular_lane import CircularLane
 from pgdrive.scene_creator.lanes.lane import AbstractLane, LineType
 from pgdrive.scene_creator.lanes.straight_lane import StraightLane
@@ -30,7 +30,7 @@ class BlockSocket:
         self.index = None
 
 
-class Block(Element):
+class Block(Element, BlockDefault):
     """
     Abstract class of Block,
     BlockSocket: a part of previous block connecting this block
@@ -45,42 +45,13 @@ class Block(Element):
     When single-direction block created, road_2 in block socket is useless.
     But it's helpful when a town is created.
     """
-    CENTER_LINE_TYPE = LineType.CONTINUOUS
-
-    # road network property
-    ID = None  # each block must have a unique ID
-    SOCKET_NUM = None
-
-    # visualization size property
-    CIRCULAR_SEGMENT_LENGTH = 4
-    STRIPE_LENGTH = 1.5
-    LANE_LINE_WIDTH = 0.15
-    LANE_LINE_THICKNESS = 0.01
-
-    SIDE_WALK_THICKNESS = 0.4
-    SIDE_WALK_LENGTH = 3
-    SIDE_WALK_WIDTH = 3
-    SIDE_WALK_LINE_DIST = 0.6
-
-    # visualization color property
-    LAND_COLOR = (0.4, 0.4, 0.4, 1)
-    NAVI_COLOR = (0.709, 0.09, 0, 1)
-
-    # lane line collision group
-    COLLISION_MASK = 3
-
-    # for creating complex block, for example Intersection and roundabout consist of 4 part, which contain several road
-    PART_IDX = 0
-    ROAD_IDX = 0
-    DASH = "_"
-
     def __init__(self, block_index: int, pre_block_socket: BlockSocket, global_network: RoadNetwork, random_seed):
         super(Block, self).__init__(random_seed)
         # block information
         assert self.ID is not None, "Each Block must has its unique ID When define Block"
         assert self.SOCKET_NUM is not None, "The number of Socket should be specified when define a new block"
         if block_index == 0:
-            from pgdrive.scene_creator.blocks.first_block import FirstBlock
+            from pgdrive.scene_creator.blocks import FirstBlock
             assert isinstance(self, FirstBlock), "only first block can use block index 0"
         elif block_index < 0:
             logging.debug("It is recommended that block index should > 1")
