@@ -37,7 +37,7 @@ class HighwayRender:
         self.map_surface = None
 
         # traffic
-        self.traffic_mgr = None
+        self.scene_mgr = None
 
         pygame.init()
         pygame.display.set_caption(PG_EDITION + " (Top-down)")
@@ -69,8 +69,8 @@ class HighwayRender:
         #     self.clock.tick(self.FPS)
         pygame.display.flip()
 
-    def set_traffic_mgr(self, traffic_mgr):
-        self.traffic_mgr = traffic_mgr
+    def set_scene_mgr(self, scene_mgr):
+        self.scene_mgr = scene_mgr
 
     def set_map(self, map):
         """
@@ -113,12 +113,12 @@ class HighwayRender:
         surface.scaling = self._scaling
         surface.move_display_window_to(self._center_pos)
         surface.blit(self.map_surface, (0, 0))
-        VehicleGraphics.display(self.traffic_mgr.ego_vehicle, surface)
-        for v in self.traffic_mgr.vehicles:
-            if v is self.traffic_mgr.ego_vehicle:
+        VehicleGraphics.display(self.scene_mgr.ego_vehicle, surface)
+        for v in self.scene_mgr.vehicles:
+            if v is self.scene_mgr.ego_vehicle:
                 continue
             VehicleGraphics.display(v, surface)
-        pos = surface.pos2pix(*self.traffic_mgr.ego_vehicle.position)
+        pos = surface.pos2pix(*self.scene_mgr.ego_vehicle.position)
         width = self.MAP_RESOLUTION[0] / 2
         height = width * self.RESOLUTION[1] / self.RESOLUTION[0]
 
@@ -129,7 +129,7 @@ class HighwayRender:
         self.blit_rotate(
             rotate_surface,
             scale_surface, (width / 2, height / 2),
-            angle=np.rad2deg(self.traffic_mgr.ego_vehicle.heading_theta) + 90
+            angle=np.rad2deg(self.scene_mgr.ego_vehicle.heading_theta) + 90
         )
 
         final_cut_surface = pygame.Surface((width / 2, height / 2))
