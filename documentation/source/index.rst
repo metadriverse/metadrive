@@ -17,7 +17,7 @@ The key features of PGDrive includes:
 This documentation let you get familiar with the installation and basic utilization of PGDrive.
 Please go through :doc:`install` to install PGDrive and try the examples in :doc:`get_start` to enjoy PGDrive!
 
-Interesting experiment results can be found in `our paper <https://arxiv.org/abs/2012.13681>`_.
+Interesting experiment results can be found in `our paper <https://arxiv.org/pdf/2012.13681>`_.
 You can also visit `our webpage <https://decisionforce.github.io/pgdrive/>`_ and `GitHub repo <https://github.com/decisionforce/pgdrive>`_! Please feel free to contact us if you have any suggestions or ideas!
 
 
