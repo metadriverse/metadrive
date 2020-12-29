@@ -98,6 +98,9 @@ class PgWorld(ShowBase.ShowBase):
         else:
             # only report fatal error when debug is False
             _suppress_warning()
+            # a special debug mode
+            if self.pg_config["debug_physics_world"]:
+                self.accept('1', self.toggleDebug)
 
         super(PgWorld, self).__init__(windowType=self.mode)
 

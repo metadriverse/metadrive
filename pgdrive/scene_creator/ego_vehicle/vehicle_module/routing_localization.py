@@ -210,7 +210,7 @@ class RoutingLocalizationModule:
     def get_navi_info(self):
         return self.navi_info
 
-    def destory(self):
+    def destroy(self):
         if self.show_navi_point:
             self.arrow_node_path.removeNode()
             self.goal_node_path.removeNode()
