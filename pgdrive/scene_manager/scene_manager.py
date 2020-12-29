@@ -60,7 +60,7 @@ class SceneManager:
         """
         random_seed = map.random_seed if not self.random_traffic else None
         logging.debug("load scene {}, {}".format(map.random_seed, "Use random traffic" if self.random_traffic else ""))
-        self.clear_traffic(pg_world.physics_world)
+        self.clear_traffic(pg_world)
         self.ego_vehicle = ego_vehicle
         self.block_triggered_vehicles = [] if self.traffic_mode == TrafficMode.Add_once else None
         self.blocks = map.blocks
