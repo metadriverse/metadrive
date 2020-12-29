@@ -2,10 +2,14 @@
 
 # PGDrive: an open-ended driving simulator with infinite scenes
 
-[![Documentation](https://readthedocs.org/projects/pgdrive/badge/?version=latest)](https://pgdrive.readthedocs.io)
 [![build](https://github.com/decisionforce/pgdrive/workflows/pytest/badge.svg)](http://github.com/decisionforce/pgdrive/actions)
+[![Documentation](https://readthedocs.org/projects/pgdrive/badge/?version=latest)](https://pgdrive.readthedocs.io)
+[![codecov](https://codecov.io/gh/decisionforce/pgdrive/branch/main/graph/badge.svg?token=1ZYN8L5397)](https://codecov.io/gh/decisionforce/pgdrive)
+[![GitHub contributors](https://img.shields.io/github/contributors/decisionforce/pgdrive)](https://github.com/decisionforce/pgdrive/graphs/contributors)
+[![GitHub stars](https://img.shields.io/github/stars/decisionforce/pgdrive)](https://github.com/decisionforce/pgdrive/stargazers)
 
-**[  📺 [Website](https://decisionforce.github.io/pgdrive/) | 🏗 [Github Repo](https://github.com/decisionforce/pgdrive) | 📜 [Documentation](https://pgdrive.readthedocs.io/) | 🎓 [Paper](https://arxiv.org/abs/2012.13681) ]**
+
+**[  📺 [Website](https://decisionforce.github.io/pgdrive/) | 🏗 [Github Repo](https://github.com/decisionforce/pgdrive) | 📜 [Documentation](https://pgdrive.readthedocs.io/) | 🎓 [Paper](https://arxiv.org/pdf/2012.13681) ]**
 
 Welcome to PGDrive! PGDrive is an driving simulator with many key features, including:
 
@@ -118,6 +122,7 @@ The following table presents some predefined environment names.
 
 ## 🏫 Documentations
 
-More information about PGDrive can be found in [PGDrive Documentation](https://pgdrive.readthedocs.io).
+More information about PGDrive can be found in [PGDrive Documentation](https://pgdrive.readthedocs.io). 
+Besides, the training code of our [paper](https://arxiv.org/pdf/2012.13681) can be found in [this repo](https://github.com/decisionforce/pgdrive-generalization-paper).
 
 
