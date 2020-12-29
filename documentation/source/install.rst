@@ -7,7 +7,7 @@ Installing PGDrive
 By leveraging the power of panda3d, PGDrive can be run on personal laptop, cluster, headless server with different OS.
 
 Install PGDrive on macOS, Windows and Linux in the easiest way
-##############################################################
+###############################################################
 
 The installation procedure on these different platforms is same and easy, we recommend to use the command following to install::
 
@@ -36,7 +36,7 @@ Note that the above script is supposed to be runnable in all places.
 Please do not run the above command in the folder that has a sub-folder called :code:`./pgdrive`.
 
 Install the PGDrive with offscreen rendering functionality
-#################################################
+##############################################################
 
 This section introduce the procedure to enable PGDrive with RGB rendering in headless machine.
 If the lidar information is enough for your task, you can simply install PGDrive on your headless machine using the way we mentioned above.
@@ -62,7 +62,7 @@ Now, PGDrive will utilize the power of cluster to train your agent!
     We are working to provide a pre-built Panda3D for cluster users of PGDrive to make it easy to use on headless machines.
 
 Verify the offscreen rendering functionality of PGDrive
-#############################################
+############################################################
 
 .. note:: An easy installation of PGDrive in macOS will fail the following verification.
 
