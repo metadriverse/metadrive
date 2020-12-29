@@ -54,7 +54,7 @@ class ChangeFrictionEnv(PGDriveEnv):
             # add sensors
             self.add_modules_for_vehicle()
 
-            logging.debug("The friction is changed to: ", parameter["wheel_friction"])
+            logging.debug("The friction is changed to: {}".format(parameter["wheel_friction"]))
 
         # reset main vehicle
         self.vehicle.reset(self.current_map, self.vehicle.born_place, 0.0)

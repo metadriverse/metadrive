@@ -1,3 +1,4 @@
+#!/bin/bash
 # This script is deprecated.
 # Kept it here for reference only!
 xcode-select --install

@@ -9,7 +9,7 @@ from panda3d.bullet import BulletWorld
 from panda3d.core import NodePath
 from pgdrive.pg_config import PgConfig
 from pgdrive.pg_config.pg_blocks import PgBlock
-from pgdrive.scene_creator import get_road_bound_box
+from pgdrive.scene_creator import get_road_bounding_box
 from pgdrive.scene_creator.algorithm.BIG import BIG, BigGenerateMethod
 from pgdrive.scene_creator.basic_utils import Decoration
 from pgdrive.scene_creator.blocks.block import Block
@@ -19,6 +19,7 @@ from pgdrive.utils import AssetLoader, import_pygame
 from pgdrive.world.highway_render.highway_render import LaneGraphics
 from pgdrive.world.highway_render.world_surface import WorldSurface
 from pgdrive.world.pg_world import PgWorld
+from pgdrive.utils.math_utils import get_boxes_bounding_box
 
 pygame = import_pygame()
 
@@ -205,7 +206,7 @@ class Map:
 
     def draw_map_image_on_surface(self, dest_resolution=(512, 512), simple_draw=True) -> pygame.Surface:
         surface = WorldSurface(self.film_size, 0, pygame.Surface(self.film_size))
-        b_box = self.get_map_bound_box(self.road_network)
+        b_box = self.get_map_bounding_box(self.road_network)
         x_len = b_box[1] - b_box[0]
         y_len = b_box[3] - b_box[2]
         max_len = max(x_len, y_len)
@@ -228,20 +229,14 @@ class Map:
         return dest_surface
 
     @staticmethod
-    def get_map_bound_box(road_network):
-        res_x_max = -np.inf
-        res_x_min = np.inf
-        res_y_min = np.inf
-        res_y_max = -np.inf
+    def get_map_bounding_box(road_network):
+        boxes = []
         for _from, to_dict in road_network.graph.items():
             for _to, lanes in to_dict.items():
                 if len(lanes) == 0:
                     continue
-                x_max, x_min, y_max, y_min = get_road_bound_box(lanes)
-                res_x_max = max(res_x_max, x_max)
-                res_x_min = min(res_x_min, x_min)
-                res_y_max = max(res_y_max, y_max)
-                res_y_min = min(res_y_min, y_min)
+                boxes.append(get_road_bounding_box(lanes))
+        res_x_max, res_x_min, res_y_max, res_y_min = get_boxes_bounding_box(boxes)
         return res_x_min, res_x_max, res_y_min, res_y_max
 
     def get_map_image_array(
@@ -314,7 +309,7 @@ class Map:
         checkpoints = vehicle.routing_localization.checkpoints
         map_surface = self.draw_map_image_on_surface(dest_resolution=dest_resolution, simple_draw=False)
         surface = WorldSurface(self.film_size, 0, pygame.Surface(self.film_size))
-        b_box = self.get_map_bound_box(self.road_network)
+        b_box = self.get_map_bounding_box(self.road_network)
         x_len = b_box[1] - b_box[0]
         y_len = b_box[3] - b_box[2]
         max_len = max(x_len, y_len)
