@@ -58,11 +58,11 @@ class Element:
         for node in self.bullet_nodes:
             pg_physics_world.remove(node)
 
-    def destroy(self, pg_physics_world: BulletWorld):
+    def destroy(self, pg_world):
         """
         Fully delete this element and release the memory
         """
-        self.detach_from_pg_world(pg_physics_world)
+        self.detach_from_pg_world(pg_world.physics_world)
         self.node_path.removeNode()
         self.bullet_nodes.clear()
         self._config.clear()
@@ -84,15 +84,17 @@ class DynamicElement(Element):
         To avoid this, only derive from this class for elements who can do step().
         """
         super(DynamicElement, self).__init__(np_random)
-        self._state = None
 
     def get_state(self):
-        assert self._state is not None, "state of " + self.class_name + " is None, can not be read !"
-        return copy.copy(self._state)
+        raise NotImplementedError
 
     def set_state(self, state: Dict):
-        logging.debug("Read state to " + self.class_name)
-        self._state = copy.copy(state)
+        """
+        Override it in Dynamical element
+        :param state: dict
+        :return: None
+        """
+        raise NotImplementedError
 
     def step(self, *args, **kwargs):
         """

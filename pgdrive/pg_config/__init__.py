@@ -84,3 +84,6 @@ class PgConfig:
         """
         assert key in self._config
         self._types[key] = set(types)
+
+    def get_dict(self):
+        return self._config

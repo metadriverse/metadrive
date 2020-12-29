@@ -177,12 +177,6 @@ class BaseVehicle(DynamicElement):
             for block in map.blocks:
                 block.node_path.hide(CamMask.DepthCam)
 
-    def get_state(self):
-        pass
-
-    def set_state(self, state):
-        pass
-
     """------------------------------------------- act -------------------------------------------------"""
 
     def set_act(self, action):
@@ -489,9 +483,9 @@ class BaseVehicle(DynamicElement):
 
     def destroy(self, _=None):
         self.bullet_nodes.remove(self.chassis_np.node())
-        super(BaseVehicle, self).destroy(self.pg_world.physics_world)
+        super(BaseVehicle, self).destroy(self.pg_world)
         self.pg_world.physics_world.clearContactAddedCallback()
-        self.routing_localization.destory()
+        self.routing_localization.destroy()
         self.routing_localization = None
         if self.lidar is not None:
             self.lidar.destroy()
@@ -503,6 +497,33 @@ class BaseVehicle(DynamicElement):
         if self.vehicle_panel is not None:
             self.vehicle_panel.destroy(self.pg_world)
         self.pg_world = None
+
+    def set_position(self, position):
+        """
+        Should only be called when restore traffic from episode data
+        :param position: 2d array or list
+        :return: None
+        """
+        self.chassis_np.setPos(Vec3(position[0], -position[1], 0.4))
+
+    def set_heading(self, heading_theta) -> None:
+        """
+        Should only be called when restore traffic from episode data
+        :param heading_theta: float in rad
+        :return: None
+        """
+        self.chassis_np.setH((-heading_theta * 180 / np.pi) - 90)
+
+    def get_state(self):
+        return {
+            "heading": self.heading_theta,
+            "position": self.position.tolist(),
+            "done": self.crash or self.out_of_road
+        }
+
+    def set_state(self, state: dict):
+        self.set_heading(state["heading"])
+        self.set_position(state["position"])
 
     def __del__(self):
         super(BaseVehicle, self).__del__()

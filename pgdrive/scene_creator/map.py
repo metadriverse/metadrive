@@ -144,14 +144,11 @@ class Map:
         for block in self.blocks:
             block.detach_from_pg_world(pg_world.physics_world)
 
-    def destroy_map(self, pg_physics_world: BulletWorld):
+    def destroy(self, pg_world: PgWorld):
         for block in self.blocks:
-            block.destroy(pg_physics_world)
+            block.destroy(pg_world=pg_world)
 
     def save_map(self):
-        """
-        This func will generate a json file named 'map_name.json', in 'save_dir'
-        """
         assert self.blocks is not None and len(self.blocks) > 0, "Please generate Map before saving it"
         map_config = []
         for b in self.blocks:
@@ -175,6 +172,9 @@ class Map:
         return saved_data
 
     def save_map_to_json(self, map_name: str, save_dir: str = os.path.dirname(__file__)):
+        """
+        This func will generate a json file named 'map_name.json', in 'save_dir'
+        """
         data = self.save_map()
         with open(AssetLoader.file_path(save_dir, map_name + self.FILE_SUFFIX), 'w') as outfile:
             json.dump(data, outfile)
