@@ -58,7 +58,9 @@
     </div>
 
     <div class="institution">
-        <div><sup>1</sup>The Chinese University of Hong Kong, <sup>2</sup>SenseTime Research, <sup>3</sup>Zhejiang University</div>
+        <div><sup>1</sup>The Chinese University of Hong Kong, <sup>2</sup>SenseTime Research, <sup>3</sup>Zhejiang
+            University
+        </div>
     </div>
     <table border="0" align="center">
         <tr>
@@ -69,7 +71,7 @@
             </td>
         </tr>
     </table>
-    
+
     <div style="position: relative;">
         <div style="position:absolute;right:0;bottom: 0;">
             <a class="switch" id=0>[EN]</a>&nbsp;
@@ -93,56 +95,46 @@
             To better evaluate and improve the generalization of learning-based driving systems, we introduce an
             open-ended
             and highly configurable driving simulator called PGDrive.
-            PGDrive can generate a diverse set of driving scenes through procedural generalization from basic traffic building blocks. Currently the simulator is used to study the generalization of the driving agents trained from reinforcement learning. See <a href="">paper</a> for more detail. 
+            PGDrive can generate a diverse set of driving scenes through procedural generalization from basic traffic
+            building blocks. Currently the simulator is used to study the generalization of the driving agents trained
+            from reinforcement learning. See <a href="">paper</a> for more detail.
         </div>
     </div>
 </div>
 <div class="section">
     <div class="title" id="lang">Procedural Generation of Driving Scenes</div>
-      <p>
-        <div class="text">We first define the elementary road blocks as follows,</div>
-        <div class="teaser"><img
-                src="images/blocks-1row.jpg">
-        </div>
-        <div class="text">we then follow the proposed algorithm of procedural generation to synthesize maps:</div>
-        <table>
+    <p>
+    <div class="text">We first define the elementary road blocks as follows,</div>
+    <div class="teaser"><img
+            src="images/blocks-1row.jpg">
+    </div>
+    <div class="text">we then follow the proposed algorithm of procedural generation to synthesize maps:</div>
+
+    <div align="center">
+        <table width="60%" style="margin: 0 0; text-align: center;">
             <tr>
                 <td>
-                    <div class="teaser">
-                        <img src="./assets/gif/11.gif">
-                    </div>
-                </td>
-                <td>
-                    <div class="teaser">
-                        <img src="./assets/gif/30.gif">
-                    </div>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <div class="teaser">
-                        <img src="./assets/gif/77.gif">
-                    </div>
-                </td>
-                <td>
-                    <div class="teaser">
-                        <img src="./assets/gif/888.gif">
-                    </div>
+                    <video style="display:block; width:98%; height:auto;"
+                           autoplay="autoplay" controls muted loop="loop">
+                        <source src="https://github.com/decisionforce/pgdrive/releases/download/pgdrive-0.1.1/BIG.mp4"
+                                type="video/mp4"/>
+                    </video>
                 </td>
             </tr>
         </table>
-        
-        <div class="teaser"><img
-                src="">
-        </div>
-
-        <div class="text">We exhibit more generated maps as follows, which are further turned into interactive environments for reinforcement learning of end-to-end driving.</div>
-        <div class="teaser"><img
-                src="images/blocks.001.png">
-        </div>
-        </p>
-   
     </div>
+    <div class="text">We exhibit more generated maps as follows, which are further turned into interactive environments
+        for reinforcement learning of end-to-end driving.
+    </div>
+    <div class="teaser"><img
+            src="images/webpage2.001.png">
+    </div>
+    <div class="teaser"><img
+            src="images/webpage2.002.png">
+    </div>
+    </p>
+
+</div>
 </div>
 <!-- === Overview Section Ends === -->
 
@@ -151,9 +143,13 @@
 <div class="section">
     <div class="title" id="lang">Result of Improved Generalization</div>
     <div class="body">
-       <p>
+        <p>
         <div class="text">
-            We show that when trained with more procedurally generated maps, the driving agents from reinofrcement learning have better generalization performance on unseen test maps, and can handle more complex scenarios. The detailed experimental results are in the paper. You can reproduce the experiment through <a href="https://github.com/decisionforce/pgdrive-generalization-paper">our generalization experiment code</a>.
+            We show that when trained with more procedurally generated maps, the driving agents from reinofrcement
+            learning have better generalization performance on unseen test maps, and can handle more complex scenarios.
+            The detailed experimental results are in the paper. You can reproduce the experiment through <a
+                href="https://github.com/decisionforce/pgdrive-generalization-paper">our generalization experiment
+            code</a>.
         </div>
         <div class="teaser"><img
                 src="images/sac-up.jpg">
@@ -164,7 +160,9 @@
         </p>
         <p>
         <div class="text">
-            The demo video of the generalizable agent is shown as follows. You can run the agent on your local machine through the provided example in <a href="https://github.com/decisionforce/pgdrive">the simulator codebase</a>.
+            The demo video of the generalizable agent is shown as follows. You can run the agent on your local machine
+            through the provided example in <a href="https://github.com/decisionforce/pgdrive">the simulator
+            codebase</a>.
         </div>
         <div class="vedio" style="position: relative; padding-top: 50%; margin: 20pt auto; text-align: center;">
             <iframe src="https://www.youtube.com/embed/T368RveOY9g" frameborder=0
