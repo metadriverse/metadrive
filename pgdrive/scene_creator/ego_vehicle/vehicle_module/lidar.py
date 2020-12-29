@@ -1,11 +1,9 @@
 import logging
-import math
 from typing import Set
 
 import numpy as np
 from panda3d.bullet import BulletGhostNode, BulletSphereShape
 from panda3d.core import Point3, BitMask32, Vec3, NodePath
-
 from pgdrive.pg_config.body_name import BodyName
 from pgdrive.pg_config.cam_mask import CamMask
 from pgdrive.scene_creator.highway_vehicle.behavior import IDMVehicle

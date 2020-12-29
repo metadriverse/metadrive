@@ -1,9 +1,8 @@
 import numpy as np
-
 from pgdrive.pg_config.parameter_space import BlockParameterSpace, Parameter
 from pgdrive.pg_config.pg_space import PgSpace
-from pgdrive.scene_creator.basic_utils import CreateAdverseRoad, CreateRoadFrom, sharpbend
 from pgdrive.scene_creator.blocks.block import Block
+from pgdrive.scene_creator.blocks.create_block_utils import CreateAdverseRoad, CreateRoadFrom, sharpbend
 from pgdrive.scene_creator.lanes.lane import LineType
 from pgdrive.scene_creator.road.road import Road
 

@@ -1,8 +1,9 @@
-from panda3d.core import PNMImage
-from PIL import Image
-from pgdrive.envs.pgdrive_env import PGDriveEnv
 import os
 import sys
+
+from PIL import Image
+from panda3d.core import PNMImage
+from pgdrive.envs.pgdrive_env import PGDriveEnv
 
 
 class TestEnv(PGDriveEnv):

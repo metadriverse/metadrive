@@ -233,6 +233,7 @@ class PgWorld(ShowBase.ShowBase):
 
             # onscreen message
             self.on_screen_message = PgOnScreenMessage(
+                debug=self.DEBUG
             ) if self.mode == RENDER_MODE_ONSCREEN and self.pg_config["onscreen_message"] else None
             self._show_help_message = False
             self._episode_start_time = time.time()

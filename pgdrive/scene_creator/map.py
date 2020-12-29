@@ -9,11 +9,15 @@ from panda3d.bullet import BulletWorld
 from panda3d.core import NodePath
 from pgdrive.pg_config import PgConfig
 from pgdrive.pg_config.pg_blocks import PgBlock
+from pgdrive.scene_creator import get_road_bound_box
 from pgdrive.scene_creator.algorithm.BIG import BIG, BigGenerateMethod
 from pgdrive.scene_creator.basic_utils import Decoration
 from pgdrive.scene_creator.blocks.block import Block
+from pgdrive.scene_creator.blocks.first_block import FirstBlock
 from pgdrive.scene_creator.road.road_network import RoadNetwork
 from pgdrive.utils import AssetLoader, import_pygame
+from pgdrive.world.highway_render.highway_render import LaneGraphics
+from pgdrive.world.highway_render.world_surface import WorldSurface
 from pgdrive.world.pg_world import PgWorld
 
 pygame = import_pygame()
@@ -113,7 +117,6 @@ class Map:
 
     def _config_generate(self, blocks_config: List, parent_node_path: NodePath, pg_physics_world: BulletWorld):
         assert len(self.road_network.graph) == 0, "These Map is not empty, please create a new map to read config"
-        from pgdrive.scene_creator.blocks.first_block import FirstBlock
         last_block = FirstBlock(
             self.road_network, self.lane_width, self.lane_num, parent_node_path, pg_physics_world, 1
         )
@@ -150,7 +153,6 @@ class Map:
         This func will generate a json file named 'map_name.json', in 'save_dir'
         """
         assert self.blocks is not None and len(self.blocks) > 0, "Please generate Map before saving it"
-        import numpy as np
         map_config = []
         for b in self.blocks:
             assert isinstance(b, Block), "None Block type can not be saved to json file"
@@ -202,8 +204,6 @@ class Map:
         return ret
 
     def draw_map_image_on_surface(self, dest_resolution=(512, 512), simple_draw=True) -> pygame.Surface:
-        from pgdrive.world.highway_render.highway_render import LaneGraphics
-        from pgdrive.world.highway_render.world_surface import WorldSurface
         surface = WorldSurface(self.film_size, 0, pygame.Surface(self.film_size))
         b_box = self.get_map_bound_box(self.road_network)
         x_len = b_box[1] - b_box[0]
@@ -229,7 +229,6 @@ class Map:
 
     @staticmethod
     def get_map_bound_box(road_network):
-        from pgdrive.utils.math_utils import get_road_bound_box
         res_x_max = -np.inf
         res_x_min = np.inf
         res_y_min = np.inf
@@ -314,8 +313,6 @@ class Map:
     def draw_map_with_navi_lines(self, vehicle, dest_resolution=(512, 512), save=False, navi_line_color=(255, 0, 0)):
         checkpoints = vehicle.routing_localization.checkpoints
         map_surface = self.draw_map_image_on_surface(dest_resolution=dest_resolution, simple_draw=False)
-        from pgdrive.world.highway_render.highway_render import LaneGraphics
-        from pgdrive.world.highway_render.world_surface import WorldSurface
         surface = WorldSurface(self.film_size, 0, pygame.Surface(self.film_size))
         b_box = self.get_map_bound_box(self.road_network)
         x_len = b_box[1] - b_box[0]

@@ -1,7 +1,6 @@
 from typing import Tuple, Union, List
 
 import numpy as np
-
 import pgdrive.utils.math_utils as utils
 from pgdrive.scene_creator.highway_vehicle.controller import ControlledVehicle
 from pgdrive.scene_creator.highway_vehicle.kinematics import Vehicle

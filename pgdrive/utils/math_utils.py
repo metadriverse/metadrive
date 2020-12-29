@@ -4,8 +4,6 @@ from typing import Tuple
 
 import numpy as np
 
-from pgdrive.scene_creator.road.road_network import RoadNetwork
-
 
 def safe_clip(array, min_val, max_val):
     array = np.nan_to_num(array)
@@ -19,81 +17,6 @@ def wrap_to_pi(x: float) -> float:
 def get_vertical_vector(vector: np.array):
     length = norm(vector[0], vector[1])
     return (vector[1] / length, -vector[0] / length), (-vector[1] / length, vector[0] / length)
-
-
-def check_lane_on_road(road_network: RoadNetwork, lane, positive: float = 0, ignored=None) -> bool:
-    """
-    Calculate if the new lane intersects with other lanes in current road network
-    The return Value is True when cross !!!!!!!!!!!!!!!!!!!!!!!!!!
-    """
-    graph = road_network.graph
-    for _from, to_dict in graph.items():
-        for _to, lanes in to_dict.items():
-            if ignored and (_from, _to) == ignored:
-                continue
-            if len(lanes) == 0:
-                continue
-            x_max_1, x_min_1, y_max_1, y_min_1 = get_road_bound_box(lanes)
-            x_max_2, x_min_2, y_max_2, y_min_2 = get_road_bound_box([lane])
-            if x_min_1 > x_max_2 or x_min_2 > x_max_1 or y_min_1 > y_max_2 or y_min_2 > y_max_1:
-                continue
-            for _id, l in enumerate(lanes):
-                for i in range(1, int(lane.length), 1):
-                    sample_point = lane.position(i, positive * lane.width_at(i) / 2.0)
-                    longitudinal, lateral = l.local_coordinates(sample_point)
-                    is_on = math.fabs(lateral) <= l.width_at(longitudinal) / 2.0 and 0 <= longitudinal <= l.length
-                    if is_on:
-                        return True
-    return False
-
-
-def get_road_bound_box(lanes):
-    from pgdrive.scene_creator.lanes.circular_lane import CircularLane
-    line_points = get_arc_bound_box_points(lanes[0], -1) if isinstance(lanes[0], CircularLane) \
-        else get_straight_bound_box_points(lanes[0])
-    line_points += get_arc_bound_box_points(lanes[-1], 1) if isinstance(lanes[-1], CircularLane) else \
-        get_straight_bound_box_points(lanes[-1])
-    x_max = -np.inf
-    x_min = np.inf
-    y_max = -np.inf
-    y_min = np.inf
-    for p in line_points:
-        x_max = max(x_max, p[0])
-        x_min = min(x_min, p[0])
-        y_max = max(y_max, p[1])
-        y_min = min(y_min, p[1])
-    return x_max, x_min, y_max, y_min
-
-
-def get_straight_bound_box_points(lane):
-    start = lane.position(0.1, -lane.width / 2.0)
-    end = lane.position(lane.length - 0.1, -lane.width / 2.0)
-    return [start, end]
-
-
-def get_arc_bound_box_points(lane, lateral_dir):
-    pi_2 = (np.pi / 2.0)
-    points = [lane.position(0.1, lateral_dir * lane.width), lane.position(lane.length - 0.1, lateral_dir * lane.width)]
-    start_phase = (lane.start_phase // pi_2) * pi_2
-    start_phase += pi_2 if lane.direction == 1 else 0
-    for phi_index in range(4):
-        phi = start_phase + phi_index * pi_2 * lane.direction
-        if lane.direction * phi > lane.direction * lane.end_phase:
-            break
-        point = lane.center + (lane.radius - lateral_dir * lane.width *
-                               lane.direction) * np.array([math.cos(phi), math.sin(phi)])
-        points.append(point)
-    return points
-
-
-def get_all_lanes(roadnet: RoadNetwork):
-    graph = roadnet.graph
-    res = []
-    for from_, to_dict in graph.items():
-        for _to, lanes in to_dict.items():
-            for l in lanes:
-                res.append(l)
-    return res
 
 
 def time_me(fn):
@@ -187,3 +110,31 @@ def has_corner_inside(rect1: Tuple, rect2: Tuple) -> bool:
     r = np.array([[c, -s], [s, c]])
     rotated_r1_points = r.dot(r1_points.transpose()).transpose()
     return any([point_in_rotated_rectangle(c1 + np.squeeze(p), c2, l2, w2, a2) for p in rotated_r1_points])
+
+
+def get_arc_bound_box_points(lane, lateral_dir):
+    pi_2 = (np.pi / 2.0)
+    points = [lane.position(0.1, lateral_dir * lane.width), lane.position(lane.length - 0.1, lateral_dir * lane.width)]
+    start_phase = (lane.start_phase // pi_2) * pi_2
+    start_phase += pi_2 if lane.direction == 1 else 0
+    for phi_index in range(4):
+        phi = start_phase + phi_index * pi_2 * lane.direction
+        if lane.direction * phi > lane.direction * lane.end_phase:
+            break
+        point = lane.center + (lane.radius - lateral_dir * lane.width *
+                               lane.direction) * np.array([math.cos(phi), math.sin(phi)])
+        points.append(point)
+    return points
+
+
+def get_points_bound_box(line_points):
+    x_max = -np.inf
+    x_min = np.inf
+    y_max = -np.inf
+    y_min = np.inf
+    for p in line_points:
+        x_max = max(x_max, p[0])
+        x_min = min(x_min, p[0])
+        y_max = max(y_max, p[1])
+        y_min = min(y_min, p[1])
+    return x_max, x_min, y_max, y_min
