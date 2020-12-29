@@ -3,7 +3,6 @@ from typing import Union
 import numpy as np
 from panda3d.bullet import BulletWorld, BulletRigidBodyNode, BulletBoxShape
 from panda3d.core import BitMask32, TransformState, Point3, NodePath, Vec3
-
 from pgdrive.pg_config.body_name import BodyName
 from pgdrive.scene_creator.highway_vehicle.behavior import IDMVehicle
 from pgdrive.scene_creator.lanes.circular_lane import CircularLane

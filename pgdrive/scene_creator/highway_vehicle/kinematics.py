@@ -2,12 +2,11 @@ from collections import deque
 from typing import Union, List
 
 import numpy as np
-
 import pgdrive.utils.math_utils as utils
-from pgdrive.utils import get_np_random
 from pgdrive.scene_creator.lanes.lane import AbstractLane
 from pgdrive.scene_creator.road_object.object import Landmark, Obstacle, RoadObject
 from pgdrive.scene_manager.traffic_manager import TrafficManager, LaneIndex
+from pgdrive.utils import get_np_random
 
 
 class Vehicle:

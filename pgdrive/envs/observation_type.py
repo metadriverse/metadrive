@@ -2,8 +2,10 @@ from abc import ABC
 
 import gym
 import numpy as np
-
 from pgdrive.scene_creator.ego_vehicle.base_vehicle import BaseVehicle
+from pgdrive.scene_creator.ego_vehicle.vehicle_module.routing_localization import RoutingLocalizationModule
+from pgdrive.scene_creator.lanes.circular_lane import CircularLane
+from pgdrive.utils.math_utils import clip
 from pgdrive.world.image_buffer import ImageBuffer
 
 PERCEIVE_DIST = 50
@@ -26,7 +28,6 @@ class ObservationType(ABC):
         Wrap vehicle states to list
         """
         # update out of road
-        from pgdrive.utils.math_utils import clip
         current_reference_lane = vehicle.routing_localization.current_ref_lanes[-1]
         lateral_to_left, lateral_to_right = ObservationType.vehicle_to_left_right(vehicle)
         if lateral_to_left < 0 or lateral_to_right < 0:
@@ -61,7 +62,6 @@ class ObservationType(ABC):
 
     @staticmethod
     def vehicle_to_left_right(vehicle):
-        from pgdrive.scene_creator.lanes.circular_lane import CircularLane
         current_reference_lane = vehicle.routing_localization.current_ref_lanes[-1]
         lane_num = len(vehicle.routing_localization.current_ref_lanes)
         _, lateral_to_reference = current_reference_lane.local_coordinates(vehicle.position)
@@ -102,7 +102,7 @@ class ObservationType(ABC):
 
     @staticmethod
     def show_gray_scale_array(obs):
-        import matplotlib.pyplot as plt
+        import matplotlib.pyplot as plt  # Lazy import
         img = np.moveaxis(obs, -1, 0)
         plt.plot()
         plt.imshow(img, cmap=plt.cm.gray)
@@ -119,8 +119,6 @@ class StateObservation(ObservationType):
     @property
     def observation_space(self):
         # lidar + other scalar obs
-        from pgdrive.scene_creator.ego_vehicle.base_vehicle import BaseVehicle
-        from pgdrive.scene_creator.ego_vehicle.vehicle_module.routing_localization import RoutingLocalizationModule
         shape = BaseVehicle.Ego_state_obs_dim + RoutingLocalizationModule.Navi_obs_dim
 
         return gym.spaces.Box(-0.0, 1.0, shape=(shape, ), dtype=np.float32)

@@ -2,8 +2,8 @@ import math
 from typing import Tuple
 
 import numpy as np
-
 from pgdrive.scene_creator.lanes.lane import AbstractLane, Vector, LineType
+from pgdrive.utils.math_utils import norm
 
 
 class StraightLane(AbstractLane):
@@ -28,7 +28,6 @@ class StraightLane(AbstractLane):
         :param forbidden: is changing to this lane forbidden
         :param priority: priority level of the lane, for determining who has right of way
         """
-        from pgdrive.utils.math_utils import norm
         self.start = np.array(start)
         self.end = np.array(end)
         self.width = width
@@ -42,28 +41,10 @@ class StraightLane(AbstractLane):
         self.direction_lateral = np.array([-self.direction[1], self.direction[0]])
 
     def update_length(self):
-        from pgdrive.utils.math_utils import norm
         self.length = norm((self.end - self.start)[0], (self.end - self.start)[1])
         self.heading = math.atan2(self.end[1] - self.start[1], self.end[0] - self.start[0])
         self.direction = (self.end - self.start) / self.length
         self.direction_lateral = np.array([-self.direction[1], self.direction[0]])
-
-    # @property
-    # def heading(self):
-    #     return math.atan2(self.end[1] - self.start[1], self.end[0] - self.start[0])
-    #
-    # @property
-    # def direction(self):
-    #     return (self.end - self.start) / self.length
-    #
-    # @property
-    # def direction_lateral(self):
-    #     return np.array([-self.direction[1], self.direction[0]])
-    #
-    # @property
-    # def length(self):
-    #     from pgdrive.utils.math_utils import norm
-    #     return norm((self.end - self.start)[0], (self.end - self.start)[1])
 
     def position(self, longitudinal: float, lateral: float) -> np.ndarray:
         return self.start + longitudinal * self.direction + lateral * self.direction_lateral
