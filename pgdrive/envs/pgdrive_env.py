@@ -155,7 +155,7 @@ class PGDriveEnv(gym.Env):
             if self.config["controller"] == "keyboard":
                 self.controller = KeyboardController(pg_world=self.pg_world)
             elif self.config["controller"] == "joystick":
-                self.controller = JoystickController(self.pg_world)
+                self.controller = JoystickController()
             else:
                 raise ValueError("No such a controller type: {}".format(self.config["controller"]))
 
