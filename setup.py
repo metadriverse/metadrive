@@ -33,7 +33,8 @@ setup(
         "panda3d==1.10.5",
         "panda3d-gltf",
         "panda3d-simplepbr",
-        "pillow"
+        "pillow",
+        "pytest"
     ],
     include_package_data=True,
     license="Apache 2.0",
