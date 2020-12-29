@@ -1,7 +1,7 @@
 # This workflow will install Python dependencies, run tests and lint with a single version of Python
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
 
-name: Check code style
+name: pytest
 
 on:
   push:
@@ -18,9 +18,14 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: 3.7
-      - name: Install dependencies
+      - name: Check code style
         run: |
           pip install "yapf==0.30.0"
-      - name: Check if formatted
-        run: |
           bash format.sh --test
+      - name: Blackbox tests
+        run: |
+          pwd
+          pip install -e .
+          pip install pytest
+          cd pgdrive/tests/
+          pytest -sv test_pgdrive_env.py

@@ -20,3 +20,21 @@ class PIDController:
         self.p_error = 0
         self.i_error = 0
         self.d_error = 0
+
+
+class Target:
+    def __init__(self, target_lateral, target_speed):
+        self.lateral = target_lateral
+        self.speed = target_speed
+
+    def go_right(self):
+        self.lateral += 0.25 if self.lateral < 0.625 else 0
+
+    def go_left(self):
+        self.lateral -= 0.25 if self.lateral > 0.125 else 0
+
+    def faster(self):
+        self.speed += 10
+
+    def slower(self):
+        self.speed -= 10
