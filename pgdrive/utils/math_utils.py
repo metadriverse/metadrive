@@ -112,7 +112,7 @@ def has_corner_inside(rect1: Tuple, rect2: Tuple) -> bool:
     return any([point_in_rotated_rectangle(c1 + np.squeeze(p), c2, l2, w2, a2) for p in rotated_r1_points])
 
 
-def get_arc_bound_box_points(lane, lateral_dir):
+def get_arc_bounding_box_points(lane, lateral_dir):
     pi_2 = (np.pi / 2.0)
     points = [lane.position(0.1, lateral_dir * lane.width), lane.position(lane.length - 0.1, lateral_dir * lane.width)]
     start_phase = (lane.start_phase // pi_2) * pi_2
@@ -127,7 +127,7 @@ def get_arc_bound_box_points(lane, lateral_dir):
     return points
 
 
-def get_points_bound_box(line_points):
+def get_points_bounding_box(line_points):
     x_max = -np.inf
     x_min = np.inf
     y_max = -np.inf
@@ -138,3 +138,16 @@ def get_points_bound_box(line_points):
         y_max = max(y_max, p[1])
         y_min = min(y_min, p[1])
     return x_max, x_min, y_max, y_min
+
+
+def get_boxes_bounding_box(boxes):
+    res_x_max = -np.inf
+    res_x_min = np.inf
+    res_y_min = np.inf
+    res_y_max = -np.inf
+    for x_max, x_min, y_max, y_min in boxes:
+        res_x_max = max(res_x_max, x_max)
+        res_x_min = min(res_x_min, x_min)
+        res_y_max = max(res_y_max, y_max)
+        res_y_min = min(res_y_min, y_min)
+    return res_x_max, res_x_min, res_y_max, res_y_min

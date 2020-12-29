@@ -87,7 +87,7 @@ class HighwayRender:
         """
         surface = WorldSurface(self.MAP_RESOLUTION, 0, pygame.Surface(self.MAP_RESOLUTION))
         surface.set_colorkey(surface.BLACK)
-        b_box = self.map.get_map_bound_box(self.map.road_network)
+        b_box = self.map.get_map_bounding_box(self.map.road_network)
         x_len = b_box[1] - b_box[0]
         y_len = b_box[3] - b_box[2]
         max_len = max(x_len, y_len)

@@ -2,6 +2,7 @@ import copy
 from typing import Tuple, Union, List
 
 import numpy as np
+
 from pgdrive.scene_creator.basic_utils import check_lane_on_road
 from pgdrive.scene_creator.blocks.constants import BlockDefault
 from pgdrive.scene_creator.lanes.circular_lane import CircularLane
@@ -218,49 +219,3 @@ def block_socket_merge(
 
     global_network.graph[socket_2.positive_road.start_node][socket_1.negative_road.start_node] = \
         global_network.graph[socket_2.positive_road.start_node].pop(socket_2.positive_road.end_node)
-
-
-def sharpbend(
-    previous_lane: "StraightLane",
-    following_lane_length,
-    radius: float,
-    angle: float,
-    clockwise: bool = True,
-    width: float = AbstractLane.DEFAULT_WIDTH,
-    line_types: Tuple[LineType, LineType] = None,
-    forbidden: bool = False,
-    speed_limit: float = 20,
-    priority: int = 0
-):
-    bend_direction = 1 if clockwise else -1
-    center = previous_lane.position(previous_lane.length, bend_direction * radius)
-    p_lateral = previous_lane.direction_lateral
-    x, y = p_lateral
-    start_phase = 0
-    if y == 0:
-        start_phase = 0 if x < 0 else -np.pi
-    elif x == 0:
-        start_phase = np.pi / 2 if y < 0 else -np.pi / 2
-    else:
-        base_angel = np.arctan(y / x)
-        if x < 0:
-            start_phase = base_angel
-        elif y < 0:
-            start_phase = np.pi + base_angel
-        elif y > 0:
-            start_phase = -np.pi + base_angel
-    end_phase = start_phase + angle
-    if not clockwise:
-        start_phase = start_phase - np.pi
-        end_phase = start_phase - angle
-    bend = CircularLane(
-        center, radius, start_phase, end_phase, clockwise, width, line_types, forbidden, speed_limit, priority
-    )
-    length = 2 * radius * angle / 2
-    bend_end = bend.position(length, 0)
-    next_lane_heading = get_vertical_vector(bend_end - center)
-    nxt_dir = next_lane_heading[0] if not clockwise else next_lane_heading[1]
-    nxt_dir = np.asarray(nxt_dir)
-    following_lane_end = nxt_dir * following_lane_length + bend_end
-    following_lane = StraightLane(bend_end, following_lane_end, width, line_types, forbidden, speed_limit, priority)
-    return bend, following_lane

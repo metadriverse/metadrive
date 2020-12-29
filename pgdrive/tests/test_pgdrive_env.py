@@ -2,8 +2,9 @@ import os
 
 import numpy as np
 import pytest
-from pgdrive.scene_creator.ego_vehicle.vehicle_module.PID_controller import PIDController, Target
+
 from pgdrive import PGDriveEnv
+from pgdrive.scene_creator.ego_vehicle.vehicle_module.PID_controller import PIDController, Target
 
 # Key: case name, value: environmental config
 blackbox_test_configs = dict(
@@ -19,9 +20,10 @@ blackbox_test_configs = dict(
     envs_100=dict(environment_num=100),
     envs_1000=dict(environment_num=1000),
     envs_10000=dict(environment_num=10000),
-    envs_100000=dict(environment_num=100000),
-    pid_control=dict(environment_num=1, start_seed=5, map="CrXROSTR", traffic_density=0.0)
+    envs_100000=dict(environment_num=100000)
 )
+
+pid_control_config = dict(environment_num=1, start_seed=5, map="CrXROSTR", traffic_density=0.0)
 
 info_keys = ["cost", "velocity", "steering", "acceleration", "step_reward", "crash", "out_of_road", "arrive_dest"]
 
@@ -54,7 +56,7 @@ def test_pgdrive_env_blackbox(config):
 
 
 def test_zombie():
-    env = PGDriveEnv(config=blackbox_test_configs["pid_control"])
+    env = PGDriveEnv(pid_control_config)
     target = Target(0.375, 30)
     dest = [-288.88415527, -411.55871582]
     try:

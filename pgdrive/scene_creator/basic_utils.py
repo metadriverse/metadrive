@@ -3,7 +3,7 @@ from typing import List, TYPE_CHECKING
 
 from pgdrive.scene_creator.lanes.circular_lane import CircularLane
 from pgdrive.scene_creator.lanes.lane import AbstractLane
-from pgdrive.utils.math_utils import get_points_bound_box, get_arc_bound_box_points
+from pgdrive.utils.math_utils import get_points_bounding_box, get_arc_bounding_box_points
 
 if TYPE_CHECKING:
     from pgdrive.scene_creator.blocks.block import BlockSocket
@@ -54,8 +54,8 @@ def check_lane_on_road(road_network: "RoadNetwork", lane, positive: float = 0, i
                 continue
             if len(lanes) == 0:
                 continue
-            x_max_1, x_min_1, y_max_1, y_min_1 = get_road_bound_box(lanes)
-            x_max_2, x_min_2, y_max_2, y_min_2 = get_road_bound_box([lane])
+            x_max_1, x_min_1, y_max_1, y_min_1 = get_road_bounding_box(lanes)
+            x_max_2, x_min_2, y_max_2, y_min_2 = get_road_bounding_box([lane])
             if x_min_1 > x_max_2 or x_min_2 > x_max_1 or y_min_1 > y_max_2 or y_min_2 > y_max_1:
                 continue
             for _id, l in enumerate(lanes):
@@ -68,15 +68,15 @@ def check_lane_on_road(road_network: "RoadNetwork", lane, positive: float = 0, i
     return False
 
 
-def get_road_bound_box(lanes):
-    line_points = get_arc_bound_box_points(lanes[0], -1) if isinstance(lanes[0], CircularLane) \
-        else get_straight_bound_box_points(lanes[0])
-    line_points += get_arc_bound_box_points(lanes[-1], 1) if isinstance(lanes[-1], CircularLane) else \
-        get_straight_bound_box_points(lanes[-1])
-    return get_points_bound_box(line_points)
+def get_road_bounding_box(lanes):
+    line_points = get_arc_bounding_box_points(lanes[0], -1) if isinstance(lanes[0], CircularLane) \
+        else get_straight_bounding_box_points(lanes[0])
+    line_points += get_arc_bounding_box_points(lanes[-1], 1) if isinstance(lanes[-1], CircularLane) else \
+        get_straight_bounding_box_points(lanes[-1])
+    return get_points_bounding_box(line_points)
 
 
-def get_straight_bound_box_points(lane):
+def get_straight_bounding_box_points(lane):
     start = lane.position(0.1, -lane.width / 2.0)
     end = lane.position(lane.length - 0.1, -lane.width / 2.0)
     return [start, end]

@@ -2,8 +2,9 @@ import math
 from typing import Tuple
 
 import numpy as np
+
 from pgdrive.scene_creator.lanes.lane import AbstractLane, Vector, LineType
-from pgdrive.utils import math_utils
+from pgdrive.utils.math_utils import wrap_to_pi
 
 
 class CircularLane(AbstractLane):
@@ -53,7 +54,7 @@ class CircularLane(AbstractLane):
         delta_x = position[0] - self.center[0]
         delta_y = position[1] - self.center[1]
         phi = math.atan2(delta_y, delta_x)
-        phi = self.start_phase + math_utils.wrap_to_pi(phi - self.start_phase)
+        phi = self.start_phase + wrap_to_pi(phi - self.start_phase)
         r = math.sqrt(delta_x**2 + delta_y**2)
         longitudinal = self.direction * (phi - self.start_phase) * self.radius
         lateral = self.direction * (self.radius - r)
