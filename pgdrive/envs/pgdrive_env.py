@@ -4,10 +4,11 @@ import logging
 import os.path as osp
 import sys
 import time
-from typing import Union, Optional
+from typing import Union, Optional, Iterable
 
 import gym
 import numpy as np
+
 from pgdrive.envs.observation_type import LidarStateObservation, ImageStateObservation
 from pgdrive.pg_config import PgConfig
 from pgdrive.scene_creator.ego_vehicle.base_vehicle import BaseVehicle
@@ -15,8 +16,8 @@ from pgdrive.scene_creator.ego_vehicle.vehicle_module.depth_camera import DepthC
 from pgdrive.scene_creator.ego_vehicle.vehicle_module.mini_map import MiniMap
 from pgdrive.scene_creator.ego_vehicle.vehicle_module.rgb_camera import RGBCamera
 from pgdrive.scene_creator.map import Map, MapGenerateMethod, parse_map_config
-from pgdrive.scene_manager.scene_manager import SceneManager
 from pgdrive.scene_manager import TrafficMode
+from pgdrive.scene_manager.scene_manager import SceneManager
 from pgdrive.utils import recursive_equal, safe_clip, clip, get_np_random
 from pgdrive.world import RENDER_MODE_NONE
 from pgdrive.world.chase_camera import ChaseCamera
@@ -523,8 +524,8 @@ class PGDriveEnv(gym.Env):
     def set_current_seed(self, seed):
         self.current_seed = seed
 
-    def get_map(self):
-        return self.current_map.get_map_image_array()
+    def get_map(self, resolution: Iterable = (512, 512)):
+        return self.current_map.get_map_image_array(resolution)
 
     def get_vehicle_num(self):
         if self.scene_manager is None:
