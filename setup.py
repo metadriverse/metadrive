@@ -30,7 +30,7 @@ setup(
         "pygame",
         "yapf==0.30.0",
         "seaborn",
-        "panda3d==1.10.5",
+        "panda3d~=1.10.8",
         "panda3d-gltf",
         "panda3d-simplepbr",
         "pillow",
