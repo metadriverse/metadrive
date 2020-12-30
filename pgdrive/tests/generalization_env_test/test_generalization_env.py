@@ -16,8 +16,9 @@ class TestEnv(PGDriveEnv):
                     "onscreen_message": True,
                 },
                 "image_source": "mini_map",
-                # "manual_control": True,
-                # "use_render": True,
+                "manual_control": True,
+                "use_render": True,
+                "insert_frame": True,
                 "use_image": False,
                 "steering_penalty": 0.0,
                 "decision_repeat": 5,
@@ -40,7 +41,6 @@ if __name__ == "__main__":
         o, r, d, info = env.step([0, 1])
         # env.render()
         if d:
-            break
             print("Reset")
             env.reset()
     env.close()
