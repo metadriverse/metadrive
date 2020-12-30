@@ -55,7 +55,6 @@ class PgWorld(ShowBase.ShowBase):
     # loadPrcFileData("", "sync-video 1")
 
     # for debug use
-    # loadPrcFileData("", "want-pstats 1")
     # loadPrcFileData("", "gl-version 3 2")
 
     def __init__(self, config: dict = None):
@@ -63,6 +62,10 @@ class PgWorld(ShowBase.ShowBase):
         self.pg_config = self.default_config()
         if config is not None:
             self.pg_config.update(config)
+        if self.pg_config["pstats"]:
+            # pstats debug provided by panda3d
+            loadPrcFileData("", "want-pstats 1")
+
         loadPrcFileData("", "win-size {} {}".format(*self.pg_config["window_size"]))
 
         # Setup onscreen render
@@ -70,9 +73,7 @@ class PgWorld(ShowBase.ShowBase):
             self.mode = RENDER_MODE_ONSCREEN
             # Warning it may cause memory leak, Pand3d Official has fixed this in their master branch.
             # You can enable it if your panda version is latest.
-            # loadPrcFileData(
-            #     "", "threading-model Cull/Draw"
-            # )  # multi-thread render, accelerate simulation when evaluate
+            loadPrcFileData("", "threading-model Cull/Draw")  # multi-thread render, accelerate simulation when evaluate
         else:
             if self.pg_config["use_image"]:
                 self.mode = RENDER_MODE_OFFSCREEN
@@ -309,6 +310,7 @@ class PgWorld(ShowBase.ShowBase):
                 # The following two option are exclusive. Only one can be True
                 use_image=False,  # Render the first-view image in screen or buffer
                 use_topdown=False,  # Render the top-down view image in screen or buffer
+                pstats=False
             )
         )
 
