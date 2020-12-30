@@ -29,6 +29,7 @@ var text_corpus = [
     ['We show that when trained with more procedurally generated maps, the driving agents from reinofrcement learning have better generalization performance on unseen test maps, and can handle more complex scenarios. The detailed experimental results are in the paper. You can reproduce the experiment through <a href="https://github.com/decisionforce/pgdrive-generalization-paper">our generalization experiment code</a>.', '在训练中见识过更多地图的智能体展现出了更优越的测试性能。这说明了我们的PGDrive赋予了智能体更强大的泛化能力！'],
     ['The demo video of the generalizable agent is shown as follows. You can run the agent on your local machine through the provided example in <a href="https://github.com/decisionforce/pgdrive">the simulator codebase</a>.',
      '以下视频展示了我们的范化性智能体。您可以在自己的机器上通过<a href="https://github.com/decisionforce/pgdrive">模拟器代码</a>中提供的样例体验该智能体。'],
+    ['Download the vedio.','点击下载视频。'],
     ['Citation', '引用']
 ]
 var bar_corpus = [
@@ -41,7 +42,11 @@ var vedio_corpus = [
     style="position: absolute; top: 2.5%; left: 2.5%; width: 95%; height: 100%;"\
     allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"\
     allowfullscreen></iframe>', 
-    '<iframe src="//player.bilibili.com/player.html?aid=373258795&bvid=BV15Z4y137cz&cid=271979816&page=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe>'],
+    '<iframe src="https://player.bilibili.com/player.html?aid=373258795&bvid=BV15Z4y137cz&cid=271979816&page=1" frameborder=0\
+    style="position: absolute; top: 2.5%; left: 2.5%; width: 95%; height: 100%;"\
+    allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"\
+    allowfullscreen>\
+     </iframe>'],
 ]
 
 
@@ -90,13 +95,13 @@ $(document).ready(function(){
             }
         );
 
-        // i=0
-        // $(".vedio").each(
-        //     function(){
-        //         $(this).html(vedio_corpus[i][lang_flag]);
-        //         i=i+1;
-        //     }
-        // );
+        i=0
+        $(".vedio").each(
+            function(){
+                $(this).html(vedio_corpus[i][lang_flag]);
+                i=i+1;
+            }
+        );
 
         lang_flag = 1-lang_flag;
     });
