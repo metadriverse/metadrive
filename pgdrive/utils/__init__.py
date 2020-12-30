@@ -7,6 +7,15 @@ from pgdrive.utils.math_utils import safe_clip, clip, norm
 from pgdrive.utils.random import get_np_random
 
 
+def import_opencv():
+    try:
+        import cv2
+    except ImportError:
+        logging.warning("Please install opencv via: pip install opencv!")
+        cv2 = None
+    return cv2
+
+
 def import_pygame():
     os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
     import pygame

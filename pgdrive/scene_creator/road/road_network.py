@@ -1,13 +1,13 @@
 import copy
 import logging
 from typing import List, Tuple, Dict
-
+from pgdrive.utils.math_utils import get_boxes_bounding_box
 import numpy as np
 from pgdrive.scene_creator.basic_utils import Decoration
 from pgdrive.scene_creator.lanes.lane import LineType, AbstractLane
 from pgdrive.scene_creator.lanes.straight_lane import StraightLane
 from pgdrive.scene_creator.road.road import Road
-
+from pgdrive.scene_creator import get_road_bounding_box
 logger = logging.getLogger(__name__)
 
 LaneIndex = Tuple[str, str, int]
@@ -97,6 +97,21 @@ class RoadNetwork:
                 if road.is_negative_road() and road.is_valid_road():
                     ret.append(lanes)
         return ret
+
+    def get_bounding_box(self):
+        """
+        By using this bounding box, the edge length of x, y direction and the center of this road network can be
+        easily calculated.
+        :return: minimum x value, maximum x value, minimum y value, maximum y value
+        """
+        boxes = []
+        for _from, to_dict in self.graph.items():
+            for _to, lanes in to_dict.items():
+                if len(lanes) == 0:
+                    continue
+                boxes.append(get_road_bounding_box(lanes))
+        res_x_max, res_x_min, res_y_max, res_y_min = get_boxes_bounding_box(boxes)
+        return res_x_min, res_x_max, res_y_min, res_y_max
 
     def remove_road(self, road):
         assert isinstance(road, Road), "Only Road Type can be deleted"
