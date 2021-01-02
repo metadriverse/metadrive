@@ -42,5 +42,16 @@ Table of Content
    vehicle_config.rst
    env_config.rst
 
+Citation
+########
 
+If you leverage this project in your work, please consider citing it with:
 
+.. code-block:: latex
+
+    @article{li2020improving,
+      title={Improving the Generalization of End-to-End Driving through Procedural Generation},
+      author={Li, Quanyi and Peng, Zhenghao and Zhang, Qihang and Qiu, Cong and Liu, Chunxiao and Zhou, Bolei},
+      journal={arXiv preprint arXiv:2012.13681},
+      year={2020}
+    }
