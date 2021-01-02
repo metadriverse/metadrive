@@ -125,6 +125,19 @@ The following table presents some predefined environment names.
 More information about PGDrive can be found in [PGDrive Documentation](https://pgdrive.readthedocs.io). 
 Besides, the training code of our [paper](https://arxiv.org/pdf/2012.13681) can be found in [this repo](https://github.com/decisionforce/pgdrive-generalization-paper).
 
+## 📎 Citation
+
+If you leverage this project in your work, please consider citing it with:
+
+```
+@article{li2020improving,
+  title={Improving the Generalization of End-to-End Driving through Procedural Generation},
+  author={Li, Quanyi and Peng, Zhenghao and Zhang, Qihang and Qiu, Cong and Liu, Chunxiao and Zhou, Bolei},
+  journal={arXiv preprint arXiv:2012.13681},
+  year={2020}
+}
+```
+
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/2d6fabe328a644b49e1269497b741057)](https://www.codacy.com/gh/decisionforce/pgdrive/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=decisionforce/pgdrive&amp;utm_campaign=Badge_Grade)
 [![GitHub contributors](https://img.shields.io/github/contributors/decisionforce/pgdrive)](https://github.com/decisionforce/pgdrive/graphs/contributors)
 [![GitHub forks](https://img.shields.io/github/forks/decisionforce/pgdrive)](https://github.com/decisionforce/pgdrive/network)
