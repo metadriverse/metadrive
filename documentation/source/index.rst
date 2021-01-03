@@ -45,7 +45,7 @@ Table of Content
 Citation
 ########
 
-If you leverage this project in your work, please consider citing it with:
+If you find this work useful in your project, please consider to cite it through:
 
 .. code-block:: latex
 

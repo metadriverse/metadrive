@@ -127,7 +127,8 @@ Besides, the training code of our [paper](https://arxiv.org/pdf/2012.13681) can 
 
 ## 📎 Citation
 
-If you leverage this project in your work, please consider citing it with:
+
+If you find this work useful in your project, please consider to cite it through:
 
 ```
 @article{li2020improving,
