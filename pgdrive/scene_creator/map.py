@@ -263,7 +263,7 @@ class Map:
         map_surface.blit(dest_surface, (0, 0))
         if save:
             pygame.image.save(map_surface, "map_{}.png".format(self.random_seed))
-        self.film_size = (self.DRAW_MAP_RESOLUTION, self.DRAW_MAP_RESOLUTION)
+        self.film_size = (self.config["draw_map_resolution"], self.config["draw_map_resolution"])
         return map_surface
 
     def __del__(self):

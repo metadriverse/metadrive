@@ -1,7 +1,7 @@
 from panda3d.core import loadPrcFileData
 
-from pgdrive.tests.install_test.get_image import test_install
+from pgdrive.tests.test_install.vis_installation import vis_installation
 
 if __name__ == "__main__":
     loadPrcFileData("", "notify-level-task fatal")
-    test_install(False)
+    vis_installation(headless=True)

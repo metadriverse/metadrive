@@ -1,7 +1,6 @@
 from pgdrive.envs.pgdrive_env import PGDriveEnv
+from pgdrive.scene_creator.ego_vehicle.vehicle_module.lidar import Lidar
 from pgdrive.utils import setup_logger
-
-setup_logger(debug=True)
 
 
 class TestEnv(PGDriveEnv):
@@ -19,8 +18,8 @@ class TestEnv(PGDriveEnv):
         )
 
 
-if __name__ == "__main__":
-    from pgdrive.scene_creator.ego_vehicle.vehicle_module.lidar import Lidar
+def vis_lidar():
+    setup_logger(debug=True)
     Lidar.enable_show = True
     env = TestEnv()
     env.reset()
@@ -29,3 +28,7 @@ if __name__ == "__main__":
         o, r, d, info = env.step([0, 1])
         env.render("Test: {}".format(i))
     env.close()
+
+
+if __name__ == "__main__":
+    vis_lidar()

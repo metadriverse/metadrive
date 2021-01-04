@@ -4,12 +4,12 @@ from pgdrive.scene_creator.map import Map, MapGenerateMethod
 
 
 class TestEnv(PGDriveEnv):
-    def __init__(self):
+    def __init__(self, vis):
         super(TestEnv, self).__init__(
             {
                 "environment_num": 10,
                 "traffic_density": 0.0,
-                "use_render": True,
+                "use_render": vis,
                 "start_seed": 5,
                 "map_config": {
                     Map.GENERATE_METHOD: MapGenerateMethod.BIG_BLOCK_NUM,
@@ -39,14 +39,15 @@ class Target:
         self.speed -= 10
 
 
-def run_PID():
-    env = TestEnv()
+def test_navigation(vis=False):
+    env = TestEnv(vis)
     target = Target(0.375, 30)
     o = env.reset()
-    env.pg_world.accept('d', target.go_right)
-    env.pg_world.accept('a', target.go_left)
-    env.pg_world.accept('w', target.faster)
-    env.pg_world.accept('s', target.slower)
+    if vis:
+        env.pg_world.accept('d', target.go_right)
+        env.pg_world.accept('a', target.go_left)
+        env.pg_world.accept('w', target.faster)
+        env.pg_world.accept('s', target.slower)
 
     steering_controller = PIDController(1.6, 0.0008, 27.3)
     acc_controller = PIDController(0.1, 0.001, 0.3)
@@ -56,7 +57,7 @@ def run_PID():
 
     acc_error = env.vehicle.speed - target.speed
     acc = acc_controller.get_result(acc_error)
-    for i in range(1, 1000000):
+    for i in range(1, 1000000 if vis else 2000):
         o, r, d, info = env.step([-steering, acc])
         # calculate new action
 
@@ -66,19 +67,20 @@ def run_PID():
         t_speed = target.speed if abs(o[12] - 0.5) < 0.01 else target.speed - 10
         acc_error = env.vehicle.speed - t_speed
         acc = acc_controller.get_result(acc_error)
-        if i < 700:
-            env.render(
-                text={
-                    "W": "Target speed +",
-                    "S": "Target speed -",
-                    "A": "Change to left lane",
-                    "D": "Change to right lane"
-                }
-            )
-        if i == 500:
-            env.pg_world.on_screen_message.data.clear()
-        else:
-            env.render()
+        if vis:
+            if i < 700:
+                env.render(
+                    text={
+                        "W": "Target speed +",
+                        "S": "Target speed -",
+                        "A": "Change to left lane",
+                        "D": "Change to right lane"
+                    }
+                )
+            if i == 500:
+                env.pg_world.on_screen_message.data.clear()
+            else:
+                env.render()
         if d:
             print("Reset")
             o = env.reset()
@@ -94,4 +96,4 @@ def run_PID():
 
 
 if __name__ == "__main__":
-    run_PID()
+    test_navigation(vis=True)

@@ -10,33 +10,40 @@ class TestEnv(PGDriveEnv):
             {
                 "environment_num": 1,
                 "start_seed": 3,
-                "use_image": True,
+                "use_image": False,
                 "image_source": "depth_cam",
                 "pg_world_config": {
                     "debug": False
                 },
-                "manual_control": True
+                "manual_control": False
             }
         )
         # self.pg_world.cam.setPos(0, 0, 1500)
         # self.pg_world.cam.lookAt(0, 0, 0)
 
 
-if __name__ == "__main__":
+def test_destroy():
     # Close and reset
     env = TestEnv()
-    env.reset()
-    for i in range(1, 20):
-        env.step([1, 1])
+    try:
+        env.reset()
+        for i in range(1, 20):
+            env.step([1, 1])
 
-    env.close()
-    env.reset()
-    env.close()
+        env.close()
+        env.reset()
+        env.close()
 
-    # Again!
-    env2 = TestEnv()
-    env2.reset()
-    for i in range(1, 20):
-        env2.step([1, 1])
-    env2.reset()
-    env2.close()
+        # Again!
+        env = TestEnv()
+        env.reset()
+        for i in range(1, 20):
+            env.step([1, 1])
+        env.reset()
+        env.close()
+    finally:
+        env.close()
+
+
+if __name__ == "__main__":
+    test_destroy()

@@ -2,7 +2,7 @@ import logging
 
 from pgdrive.scene_creator.algorithm.BIG import BIG
 from pgdrive.scene_creator.road.road_network import RoadNetwork
-from pgdrive.tests.block_test.test_block_base import TestBlock
+from pgdrive.tests.vis_block.vis_block_base import TestBlock
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)

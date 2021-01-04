@@ -1,6 +1,3 @@
-import os.path as osp
-
-import numpy as np
 """
 The existing layer names and shapes in numpy file:
 (note that the terms with "value" in it are removed to save space).
@@ -17,6 +14,10 @@ default_policy/fc_out/bias (4,)
 default_policy/value_out/kernel (256, 1)
 default_policy/value_out/bias (1,)
 """
+
+import os.path as osp
+
+import numpy as np
 
 ckpt_path = osp.join(osp.dirname(__file__), "expert_weights.npz")
 _expert_weights = None

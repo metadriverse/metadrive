@@ -2,7 +2,7 @@ import json
 import os.path as osp
 
 from pgdrive import PGDriveEnv
-from pgdrive.tests.generalization_env_test.test_gen_map_read import recursive_equal
+from pgdrive.utils import recursive_equal
 
 root = osp.dirname(osp.dirname(osp.abspath(__file__)))
 assert_path = osp.join(root, "assets", "maps")

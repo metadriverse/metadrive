@@ -4,7 +4,7 @@ from pgdrive.envs.pgdrive_env import PGDriveEnv
 from pgdrive.utils import setup_logger
 
 
-def test_highway_render_with_panda_render():
+def vis_highway_render_with_panda_render():
     setup_logger(True)
 
     env = PGDriveEnv(
@@ -29,4 +29,4 @@ def test_highway_render_with_panda_render():
 
 
 if __name__ == '__main__':
-    test_highway_render_with_panda_render()
+    vis_highway_render_with_panda_render()
