@@ -15,7 +15,7 @@ from pgdrive.scene_creator.basic_utils import Decoration
 from pgdrive.scene_creator.blocks.block import Block
 from pgdrive.scene_creator.blocks.first_block import FirstBlock
 from pgdrive.scene_creator.road.road_network import RoadNetwork
-from pgdrive.utils import AssetLoader, import_pygame, import_opencv
+from pgdrive.utils import AssetLoader, import_pygame
 from pgdrive.world.highway_render.highway_render import LaneGraphics
 from pgdrive.world.highway_render.world_surface import WorldSurface
 from pgdrive.world.pg_world import PgWorld
@@ -224,9 +224,8 @@ class Map:
         return surface
 
     def get_map_image_array(self, resolution: Iterable = (512, 512)) -> Optional[Union[np.ndarray, pygame.Surface]]:
+        import cv2
         surface = self.draw_maximum_surface()
-        cv2 = import_opencv()
-        assert cv2 is not None
         ret = cv2.resize(pygame.surfarray.pixels_red(surface), resolution, interpolation=cv2.INTER_LINEAR)
         return ret
 
