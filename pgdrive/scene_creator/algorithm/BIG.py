@@ -4,6 +4,7 @@ from typing import Union
 from numpy.random import RandomState
 from panda3d.bullet import BulletWorld
 from panda3d.core import NodePath
+
 from pgdrive.pg_config.pg_blocks import PgBlock
 from pgdrive.scene_creator.blocks.block import Block
 from pgdrive.scene_creator.blocks.first_block import FirstBlock

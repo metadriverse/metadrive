@@ -3,11 +3,11 @@ import logging
 import math
 import time
 from collections import deque
-from os import path
 
 import numpy as np
 from panda3d.bullet import BulletVehicle, BulletBoxShape, BulletRigidBodyNode, ZUp, BulletWorld, BulletGhostNode
 from panda3d.core import Vec3, TransformState, NodePath, LQuaternionf, BitMask32, PythonCallbackObject, TextNode
+
 from pgdrive.pg_config import PgConfig
 from pgdrive.pg_config.body_name import BodyName
 from pgdrive.pg_config.cam_mask import CamMask
@@ -348,7 +348,7 @@ class BaseVehicle(DynamicElement):
 
         if self.render:
             model_path = 'models/ferra/scene.gltf'
-            self.chassis_vis = self.loader.loadModel(path.join(AssetLoader.asset_path, model_path))
+            self.chassis_vis = self.loader.loadModel(AssetLoader.file_path(model_path))
             self.chassis_vis.setZ(para[Parameter.vehicle_vis_z])
             self.chassis_vis.setY(para[Parameter.vehicle_vis_y])
             self.chassis_vis.setH(para[Parameter.vehicle_vis_h])
@@ -373,7 +373,7 @@ class BaseVehicle(DynamicElement):
         wheel_np = self.node_path.attachNewNode("wheel")
         if self.render:
             model_path = 'models/yugo/yugotireR.egg' if left else 'models/yugo/yugotireL.egg'
-            wheel_model = self.loader.loadModel(path.join(AssetLoader.asset_path, model_path))
+            wheel_model = self.loader.loadModel(AssetLoader.file_path(model_path))
             wheel_model.reparentTo(wheel_np)
             wheel_model.set_scale(1.4, radius / 0.25, radius / 0.25)
         wheel = self.system.create_wheel()

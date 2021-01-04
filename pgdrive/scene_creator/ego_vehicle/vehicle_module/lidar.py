@@ -4,6 +4,7 @@ from typing import Set
 import numpy as np
 from panda3d.bullet import BulletGhostNode, BulletSphereShape
 from panda3d.core import Point3, BitMask32, Vec3, NodePath
+
 from pgdrive.pg_config.body_name import BodyName
 from pgdrive.pg_config.cam_mask import CamMask
 from pgdrive.scene_creator.highway_vehicle.behavior import IDMVehicle
@@ -28,7 +29,7 @@ class Lidar:
         logging.debug("Load Vehicle Module: {}".format(self.__class__.__name__))
         if show:
             for laser_debug in range(self.laser_num):
-                ball = AssetLoader.loader.loadModel(AssetLoader.file_path(AssetLoader.asset_path, "models", "box.egg"))
+                ball = AssetLoader.loader.loadModel(AssetLoader.file_path("models", "box.egg"))
                 ball.setScale(0.001)
                 ball.setColor(0., 0.5, 0.5, 1)
                 shape = BulletSphereShape(0.1)

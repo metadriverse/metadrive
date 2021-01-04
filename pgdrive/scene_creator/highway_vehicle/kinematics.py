@@ -2,6 +2,7 @@ from collections import deque
 from typing import Union, List
 
 import numpy as np
+
 import pgdrive.utils.math_utils as utils
 from pgdrive.scene_creator.lanes.lane import AbstractLane
 from pgdrive.scene_creator.road_object.object import Landmark, Obstacle, RoadObject

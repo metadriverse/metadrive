@@ -1,16 +1,15 @@
 # in order to use pbr in opengles pipe on clusters, we temporally inherit from simple pbr
 
-import os
-
 from panda3d.core import Shader, ConfigVariableString
-from pgdrive.utils.asset_loader import AssetLoader
 from simplepbr import Pipeline, _add_shader_defines
+
+from pgdrive.utils.asset_loader import AssetLoader
 
 
 def _load_shader_str(shaderpath, defines=None):
-    shader_dir = AssetLoader.file_path(AssetLoader.asset_path, "shaders", "pbr_shaders")
+    shader_dir = AssetLoader.file_path("shaders", "pbr_shaders", shaderpath)
 
-    with open(os.path.join(shader_dir, shaderpath)) as shaderfile:
+    with open(shader_dir) as shaderfile:
         shaderstr = shaderfile.read()
 
     if defines is not None:

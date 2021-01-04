@@ -1,4 +1,5 @@
 from panda3d.core import Vec3
+
 from pgdrive.pg_config.cam_mask import CamMask
 from pgdrive.scene_creator.ego_vehicle.vehicle_module.mini_map import MiniMap
 

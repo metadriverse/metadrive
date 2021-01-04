@@ -1,8 +1,9 @@
 from typing import Union
 
 import numpy as np
-from panda3d.bullet import BulletWorld, BulletRigidBodyNode, BulletBoxShape
+from panda3d.bullet import BulletRigidBodyNode, BulletBoxShape
 from panda3d.core import BitMask32, TransformState, Point3, NodePath, Vec3
+
 from pgdrive.pg_config.body_name import BodyName
 from pgdrive.scene_creator.highway_vehicle.behavior import IDMVehicle
 from pgdrive.scene_creator.lanes.circular_lane import CircularLane
@@ -57,7 +58,7 @@ class PgTrafficVehicle(DynamicElement):
         [path, scale, zoffset, H] = self.path[np_random.randint(0, len(self.path))]
         if self.render:
             if path not in PgTrafficVehicle.model_collection:
-                carNP = self.loader.loadModel(AssetLoader.file_path(AssetLoader.asset_path, "models", path))
+                carNP = self.loader.loadModel(AssetLoader.file_path("models", path))
                 PgTrafficVehicle.model_collection[path] = carNP
             else:
                 carNP = PgTrafficVehicle.model_collection[path]
