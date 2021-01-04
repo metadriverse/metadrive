@@ -2,7 +2,7 @@ from pgdrive.scene_creator.blocks.curve import Curve
 from pgdrive.scene_creator.blocks.first_block import FirstBlock
 from pgdrive.scene_creator.blocks.roundabout import Roundabout
 from pgdrive.scene_creator.road.road_network import RoadNetwork
-from pgdrive.tests.block_test.test_block_base import TestBlock
+from pgdrive.tests.vis_block.vis_block_base import TestBlock
 
 if __name__ == "__main__":
     test = TestBlock(False)

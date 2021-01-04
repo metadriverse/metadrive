@@ -1,0 +1,6 @@
+[run]
+omit =
+    ./examples/*
+    ./assets/*
+    ./tests/vis*.py
+    ./tests/*/vis*.py

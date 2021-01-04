@@ -2,7 +2,7 @@ import os
 import sys
 
 from PIL import Image
-from panda3d.core import PNMImage
+from panda3d.core import PNMImage, loadPrcFileData
 
 from pgdrive.envs.pgdrive_env import PGDriveEnv
 
@@ -27,12 +27,12 @@ def capture_image(headless):
         env.step([0, 1])
     img = PNMImage()
     env.pg_world.win.getScreenshot(img)
-    img.write("test_install.png")
+    img.write("vis_installation.png")
     env.close()
     if not headless:
-        im = Image.open("test_install.png")
+        im = Image.open("vis_installation.png")
         im.show()
-        os.remove("test_install.png")
+        os.remove("vis_installation.png")
         print("Offscreen render launched successfully! \n ")
     else:
         print(
@@ -41,7 +41,8 @@ def capture_image(headless):
         )
 
 
-def test_install(headless):
+def vis_installation(headless=True):
+    loadPrcFileData("", "notify-level-task fatal")
     try:
         env = TestEnv()
         env.reset()
@@ -58,3 +59,7 @@ def test_install(headless):
         capture_image(headless)
     except:
         print("Error happens when drawing scene in offscreen mode!")
+
+
+if __name__ == "__main__":
+    vis_installation(False)
