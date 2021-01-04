@@ -42,22 +42,22 @@ class DepthCamera(ImageBuffer):
 
         # add shader for it
         if pg_world.pg_config["headless_image"]:
-            vert_path = AssetLoader.file_path(AssetLoader.asset_path, "shaders", "depth_cam_gles.vert.glsl")
-            frag_path = AssetLoader.file_path(AssetLoader.asset_path, "shaders", "depth_cam_gles.frag.glsl")
+            vert_path = AssetLoader.file_path("shaders", "depth_cam_gles.vert.glsl")
+            frag_path = AssetLoader.file_path("shaders", "depth_cam_gles.frag.glsl")
         else:
             if is_mac():
-                vert_path = AssetLoader.file_path(AssetLoader.asset_path, "shaders", "depth_cam_mac.vert.glsl")
-                frag_path = AssetLoader.file_path(AssetLoader.asset_path, "shaders", "depth_cam_mac.frag.glsl")
+                vert_path = AssetLoader.file_path("shaders", "depth_cam_mac.vert.glsl")
+                frag_path = AssetLoader.file_path("shaders", "depth_cam_mac.frag.glsl")
             else:
-                vert_path = AssetLoader.file_path(AssetLoader.asset_path, "shaders", "depth_cam.vert.glsl")
-                frag_path = AssetLoader.file_path(AssetLoader.asset_path, "shaders", "depth_cam.frag.glsl")
+                vert_path = AssetLoader.file_path("shaders", "depth_cam.vert.glsl")
+                frag_path = AssetLoader.file_path("shaders", "depth_cam.frag.glsl")
         custom_shader = Shader.load(Shader.SL_GLSL, vertex=vert_path, fragment=frag_path)
         self.cam.node().setInitialState(RenderState.make(ShaderAttrib.make(custom_shader, 1)))
 
         if self.view_ground:
             self.ground = GeoMipTerrain("mySimpleTerrain")
 
-            self.ground.setHeightfield(AssetLoader.file_path(AssetLoader.asset_path, "textures", "height_map.png"))
+            self.ground.setHeightfield(AssetLoader.file_path("textures", "height_map.png"))
             # terrain.setBruteforce(True)
             # # Since the terrain is a texture, shader will not calculate the depth information, we add a moving terrain
             # # model to enable the depth information of terrain

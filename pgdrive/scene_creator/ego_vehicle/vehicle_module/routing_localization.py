@@ -2,6 +2,7 @@ import logging
 
 import numpy as np
 from panda3d.core import BitMask32, LQuaternionf, TransparencyAttrib
+
 from pgdrive.pg_config.cam_mask import CamMask
 from pgdrive.pg_config.parameter_space import BlockParameterSpace, Parameter
 from pgdrive.scene_creator.blocks.first_block import FirstBlock
@@ -42,9 +43,7 @@ class RoutingLocalizationModule:
         self.goal_node_path = pg_world.render.attachNewNode("target") if self.show_navi_point else None
         self.arrow_node_path = pg_world.aspect2d.attachNewNode("arrow") if self.show_navi_point else None
         if self.show_navi_point:
-            navi_arrow_model = AssetLoader.loader.loadModel(
-                AssetLoader.file_path(AssetLoader.asset_path, "models", "navi_arrow.gltf")
-            )
+            navi_arrow_model = AssetLoader.loader.loadModel(AssetLoader.file_path("models", "navi_arrow.gltf"))
             navi_arrow_model.setScale(0.1, 0.12, 0.2)
             navi_arrow_model.setPos(2, 1.15, -0.221)
             self.left_arrow = self.arrow_node_path.attachNewNode("left arrow")
@@ -62,9 +61,7 @@ class RoutingLocalizationModule:
             # the transparency attribute of gltf model is invalid on windows
             # self.arrow_node_path.setTransparency(TransparencyAttrib.M_alpha)
             if show_navi_point:
-                navi_point_model = AssetLoader.loader.loadModel(
-                    AssetLoader.file_path(AssetLoader.asset_path, "models", "box.egg")
-                )
+                navi_point_model = AssetLoader.loader.loadModel(AssetLoader.file_path("models", "box.egg"))
                 navi_point_model.reparentTo(self.goal_node_path)
             self.goal_node_path.setTransparency(TransparencyAttrib.M_alpha)
             self.goal_node_path.setColor(0.6, 0.8, 0.5, 0.7)

@@ -1,4 +1,6 @@
 import logging
+import pathlib
+import sys
 
 
 class AssetLoader:
@@ -9,11 +11,14 @@ class AssetLoader:
     asset_path = None
 
     @staticmethod
-    def init_loader(pg_world, pg_path: str):
+    def init_loader(pg_world):
         """
         Due to the feature of Panda3d, keep reference of loader in static variable
         """
-        AssetLoader.asset_path = AssetLoader.file_path(pg_path, "assets")
+        root_path = pathlib.PurePosixPath(__file__).parent.parent if sys.platform != "win32" else pathlib.Path(
+            __file__
+        ).resolve().parent.parent
+        AssetLoader.asset_path = root_path.joinpath("assets")
         if pg_world.win is None:
             logging.debug("Physics world mode")
             return
@@ -26,15 +31,27 @@ class AssetLoader:
         return cls.loader
 
     @staticmethod
-    def windows_style2unix_style(path):
-        u_path = "/" + path[0].lower() + path[2:]
-        u_path.replace("\\", "/")
-        return u_path
+    def windows_style2unix_style(win_path):
+        path = win_path.as_posix()
+        panda_path = "/" + path[0].lower() + path[2:]
+        return panda_path
 
     @staticmethod
-    def file_path(*args):
-        import os, sys
-        path = os.path.join(*args)
-        if sys.platform.startswith("win"):
-            path = path.replace("\\", "/")
-        return path
+    def file_path(*path_string):
+        path = AssetLoader.asset_path.joinpath(*path_string)
+        return AssetLoader.windows_style2unix_style(path) if sys.platform.startswith("win") else str(path)
+
+    @classmethod
+    def initialized(cls):
+        return cls.asset_path is not None
+
+
+def initialize_asset_loader(pg_world):
+    if AssetLoader.initialized():
+        logging.warning(
+            "AssetLoader is initialize to root path: {}! But you are initializing again!".format(
+                AssetLoader.asset_path
+            )
+        )
+        return
+    AssetLoader.init_loader(pg_world)

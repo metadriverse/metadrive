@@ -5,6 +5,7 @@ import numpy
 from panda3d.bullet import BulletBoxShape, BulletRigidBodyNode, BulletWorld
 from panda3d.core import Vec3, LQuaternionf, BitMask32, Vec4, CardMaker, TextureStage, RigidBodyCombiner, \
     TransparencyAttrib, SamplerState, NodePath
+
 from pgdrive.pg_config.body_name import BodyName
 from pgdrive.pg_config.cam_mask import CamMask
 from pgdrive.scene_creator.blocks.constants import BlockDefault
@@ -85,25 +86,17 @@ class Block(Element, BlockDefault):
 
         if self.render:
             # render pre-load
-            self.road_texture = self.loader.loadTexture(
-                AssetLoader.file_path(AssetLoader.asset_path, "textures", "sci", "color.jpg")
-            )
+            self.road_texture = self.loader.loadTexture(AssetLoader.file_path("textures", "sci", "color.jpg"))
             self.road_texture.setMinfilter(SamplerState.FT_linear_mipmap_linear)
             self.road_texture.setAnisotropicDegree(8)
-            self.road_normal = self.loader.loadTexture(
-                AssetLoader.file_path(AssetLoader.asset_path, "textures", "sci", "normal.jpg")
-            )
+            self.road_normal = self.loader.loadTexture(AssetLoader.file_path("textures", "sci", "normal.jpg"))
             self.ts_color = TextureStage("color")
             self.ts_normal = TextureStage("normal")
-            self.side_texture = self.loader.loadTexture(
-                AssetLoader.file_path(AssetLoader.asset_path, "textures", "side_walk", "color.png")
-            )
+            self.side_texture = self.loader.loadTexture(AssetLoader.file_path("textures", "side_walk", "color.png"))
             self.side_texture.setMinfilter(SamplerState.FT_linear_mipmap_linear)
             self.side_texture.setAnisotropicDegree(8)
-            self.side_normal = self.loader.loadTexture(
-                AssetLoader.file_path(AssetLoader.asset_path, "textures", "side_walk", "normal.png")
-            )
-            self.side_walk = self.loader.loadModel(AssetLoader.file_path(AssetLoader.asset_path, "models", "box.bam"))
+            self.side_normal = self.loader.loadTexture(AssetLoader.file_path("textures", "side_walk", "normal.png"))
+            self.side_walk = self.loader.loadModel(AssetLoader.file_path("models", "box.bam"))
 
     def construct_block(self, root_render_np: NodePath, pg_physics_world: BulletWorld) -> bool:
         """
@@ -399,7 +392,7 @@ class Block(Element, BlockDefault):
 
         if self.render:
             # For visualization
-            lane_line = self.loader.loadModel(AssetLoader.file_path(AssetLoader.asset_path, "models", "box.bam"))
+            lane_line = self.loader.loadModel(AssetLoader.file_path("models", "box.bam"))
             lane_line.getChildren().reparentTo(body_np)
         body_np.setScale(length, Block.LANE_LINE_WIDTH, Block.LANE_LINE_THICKNESS)
         body_np.set_color(color)

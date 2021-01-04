@@ -2,7 +2,7 @@ import logging
 import os
 import sys
 
-from pgdrive.utils.asset_loader import AssetLoader
+from pgdrive.utils.asset_loader import AssetLoader, initialize_asset_loader
 from pgdrive.utils.math_utils import safe_clip, clip, norm
 from pgdrive.utils.random import get_np_random
 
