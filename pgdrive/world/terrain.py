@@ -25,11 +25,9 @@ class Terrain(Element):
         if self.render:
             self.node_path.hide(CamMask.MiniMap | CamMask.Shadow | CamMask.DepthCam | CamMask.ScreenshotCam)
             # self.terrain_normal = self.loader.loadTexture(
-            #     AssetLoader.file_path(AssetLoader.asset_path, "textures", "grass2", "normal.jpg")
+            #     AssetLoader.file_path( "textures", "grass2", "normal.jpg")
             # )
-            self.terrain_texture = self.loader.loadTexture(
-                AssetLoader.file_path(AssetLoader.asset_path, "textures", "ground.png")
-            )
+            self.terrain_texture = self.loader.loadTexture(AssetLoader.file_path("textures", "ground.png"))
             self.terrain_texture.setWrapU(Texture.WM_repeat)
             self.terrain_texture.setWrapV(Texture.WM_repeat)
             self.ts_color = TextureStage("color")

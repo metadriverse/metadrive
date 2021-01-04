@@ -1,6 +1,7 @@
 import random
 
 import matplotlib.pyplot as plt
+
 from pgdrive import PGDriveEnv
 
 env = PGDriveEnv(config=dict(environment_num=100, map=7, start_seed=random.randint(0, 1000)))

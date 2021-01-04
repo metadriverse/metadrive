@@ -1,6 +1,4 @@
 import logging
-import os
-import sys
 import time
 from typing import Optional, Union
 
@@ -9,10 +7,11 @@ from direct.gui.OnscreenImage import OnscreenImage
 from direct.showbase import ShowBase
 from panda3d.bullet import BulletDebugNode, BulletWorld
 from panda3d.core import Vec3, AntialiasAttrib, NodePath, loadPrcFileData, LineSegs
+
 from pgdrive.pg_config import PgConfig
 from pgdrive.pg_config.cam_mask import CamMask
 from pgdrive.utils import is_mac, setup_logger
-from pgdrive.utils.asset_loader import AssetLoader
+from pgdrive.utils.asset_loader import AssetLoader, initialize_asset_loader
 from pgdrive.world import RENDER_MODE_OFFSCREEN, RENDER_MODE_NONE, RENDER_MODE_ONSCREEN
 from pgdrive.world.constants import PG_EDITION
 from pgdrive.world.force_fps import ForceFPS
@@ -22,8 +21,6 @@ from pgdrive.world.light import Light
 from pgdrive.world.onscreen_message import PgOnScreenMessage
 from pgdrive.world.sky_box import SkyBox
 from pgdrive.world.terrain import Terrain
-
-root_path = os.path.dirname(os.path.dirname(__file__))
 
 
 def _suppress_warning():
@@ -144,14 +141,13 @@ class PgWorld(ShowBase.ShowBase):
             self.disableMouse()
 
         if not self.pg_config["debug_physics_world"] and (self.mode in [RENDER_MODE_ONSCREEN, RENDER_MODE_OFFSCREEN]):
-            path = AssetLoader.windows_style2unix_style(root_path) if sys.platform == "win32" else root_path
-            AssetLoader.init_loader(self, path)
+            initialize_asset_loader(self)
             gltf.patch_loader(self.loader)
 
             # Display logo
             if self.mode == RENDER_MODE_ONSCREEN:
                 self._loading_logo = OnscreenImage(
-                    image=AssetLoader.file_path(AssetLoader.asset_path, "PGDrive-large.png"),
+                    image=AssetLoader.file_path("PGDrive-large.png"),
                     pos=(0, 0, 0),
                     scale=(self.w_scale, 1, self.h_scale)
                 )

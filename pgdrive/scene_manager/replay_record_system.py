@@ -1,8 +1,9 @@
-from pgdrive.world.pg_world import PgWorld
-import logging
-from . import TrafficMode
 import copy
+import logging
+
 from pgdrive.scene_creator.map import Map
+from pgdrive.world.pg_world import PgWorld
+from . import TrafficMode
 
 
 class PGReplayer:

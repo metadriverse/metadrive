@@ -1,13 +1,16 @@
 import copy
 import logging
 from typing import List, Tuple, Dict
-from pgdrive.utils.math_utils import get_boxes_bounding_box
+
 import numpy as np
+
+from pgdrive.scene_creator import get_road_bounding_box
 from pgdrive.scene_creator.basic_utils import Decoration
 from pgdrive.scene_creator.lanes.lane import LineType, AbstractLane
 from pgdrive.scene_creator.lanes.straight_lane import StraightLane
 from pgdrive.scene_creator.road.road import Road
-from pgdrive.scene_creator import get_road_bounding_box
+from pgdrive.utils.math_utils import get_boxes_bounding_box
+
 logger = logging.getLogger(__name__)
 
 LaneIndex = Tuple[str, str, int]

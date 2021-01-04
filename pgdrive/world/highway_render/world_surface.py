@@ -1,6 +1,7 @@
 from typing import Tuple, Union
 
 import numpy as np
+
 from pgdrive.utils import import_pygame
 
 pygame = import_pygame()
