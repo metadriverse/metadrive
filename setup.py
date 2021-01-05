@@ -16,7 +16,7 @@ print("We will install the following packages: ", packages)
 
 setup(
     name="pgdrive",
-    version="0.1.1",
+    version="0.1.2",
     description="An open-ended driving simulator with infinite scenes",
     url="https://github.com/decisionforce/pgdrive",
     author="PGDrive Team",
@@ -47,7 +47,7 @@ setup(
 How to publish to pypi?  Noted by Zhenghao in Dec 27, 2020.
 
 1. Remove old files
-    rm -rf dist/ build/ documentation/build/ pgdrive.egg-info/
+    rm -rf dist/ build/ documentation/build/ pgdrive.egg-info/ docs/build/
     
 2. Rename current version to X.Y.Z.rcA, where A is arbitrary value represent "release candidate A". 
    This is really important since pypi do not support renaming and re-uploading.
