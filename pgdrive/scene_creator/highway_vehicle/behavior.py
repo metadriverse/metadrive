@@ -19,10 +19,10 @@ class IDMVehicle(ControlledVehicle):
     """
 
     # Longitudinal policy parameters
-    ACC_MAX = 6.0  # [m/s2]
+    ACC_MAX = 10.0  # [m/s2]
     """Maximum acceleration."""
 
-    COMFORT_ACC_MAX = 3.0  # [m/s2]
+    COMFORT_ACC_MAX = 5.0  # [m/s2]
     """Desired maximum acceleration."""
 
     COMFORT_ACC_MIN = -5.0  # [m/s2]
@@ -34,7 +34,7 @@ class IDMVehicle(ControlledVehicle):
     TIME_WANTED = 1.5  # [s]
     """Desired time gap to the front vehicle."""
 
-    DELTA = 4.0  # []
+    DELTA = 2.0  # []
     """Exponent of the velocity term."""
 
     # Lateral policy parameters

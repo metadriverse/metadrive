@@ -3,30 +3,38 @@ from pgdrive.scene_creator.pg_traffic_vehicle.traffic_vehicle import PgTrafficVe
 factor = 1
 
 
-class MVehicle(PgTrafficVehicle):
-    LENGTH = 4.2
+class LVehicle(PgTrafficVehicle):
+    LENGTH = 4.8
     WIDTH = 1.8
-    HEIGHT = 1.7
+    HEIGHT = 1.9
     path = [
-        ['new/lada/scene.gltf', (factor * 1.1, factor * 1.1, factor * 1.1), factor * -0.1, 223],
-        ['new/beetle/scene.gltf', (factor * .007, factor * .007, factor * .006), factor * -0.15, -90],
+        ['new/lada/scene.gltf', (factor * 1.1, factor * 1.1, factor * 1.1), (1.1, -13.5, factor * -0.046), 223],
     ]
 
 
 class SVehicle(PgTrafficVehicle):
-    LENGTH = 3.5
+    LENGTH = 3.2
     WIDTH = 1.8
     HEIGHT = 1.5
     path = [
-        ['new/130/scene.gltf', (factor * .0055, factor * .0055, factor * .0055), factor * 0.5, 90],
+        ['new/beetle/scene.gltf', (factor * .008, factor * .006, factor * .0062), (-0.7, 0, factor * -0.16), -90],
     ]
 
 
-class LVehicle(PgTrafficVehicle):
-    LENGTH = 8.0
-    WIDTH = 2.2
-    HEIGHT = 3.5
-    path = [['new/truck/scene.gltf', (factor * 0.025, factor * 0.025, factor * 0.025), factor * 0, 0]]
+class MVehicle(PgTrafficVehicle):
+    LENGTH = 3.9
+    WIDTH = 2.0
+    HEIGHT = 1.3
+    path = [
+        ['new/130/scene.gltf', (factor * .0055, factor * .0046, factor * .0049), (0, 0, factor * 0.33), 90],
+    ]
 
 
-car_type = {"s": SVehicle, "m": MVehicle, "l": LVehicle}
+class XLVehicle(PgTrafficVehicle):
+    LENGTH = 7.3
+    WIDTH = 2.3
+    HEIGHT = 2.7
+    path = [['new/truck/scene.gltf', (factor * 0.031, factor * 0.025, factor * 0.025), (0.35, 0, factor * 0), 0]]
+
+
+car_type = {"s": SVehicle, "m": MVehicle, "l": LVehicle, "xl": XLVehicle}
