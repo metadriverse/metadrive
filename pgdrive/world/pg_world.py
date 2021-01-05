@@ -179,6 +179,9 @@ class PgWorld(ShowBase.ShowBase):
         self.physics_world.setGroupCollisionFlag(0, 1, True)  # detect ego car collide terrain
         self.physics_world.setGravity(Vec3(0, 0, -9.81))  # set gravity
 
+        # for real time simulation
+        self.force_fps = ForceFPS(self, start=False)
+
         # init terrain
         self.terrain = Terrain()
         self.terrain.attach_to_pg_world(self.render, self.physics_world)
@@ -227,9 +230,6 @@ class PgWorld(ShowBase.ShowBase):
             # ui and render property
             if self.pg_config["show_fps"]:
                 self.setFrameRateMeter(True)
-            self.force_fps = ForceFPS(
-                1 / (self.pg_config["physics_world_step_size"] * self.pg_config["decision_repeat"]), start=False
-            )
 
             # onscreen message
             self.on_screen_message = PgOnScreenMessage(
@@ -260,8 +260,7 @@ class PgWorld(ShowBase.ShowBase):
             self.on_screen_message.update_data(text)
             self.on_screen_message.render()
         if self.mode == RENDER_MODE_ONSCREEN:
-            with self.force_fps:
-                self.sky_box.step()
+            self.sky_box.step()
         if self.highway_render is not None:
             self.highway_render.render()
 

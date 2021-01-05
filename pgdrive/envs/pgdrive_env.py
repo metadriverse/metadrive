@@ -40,7 +40,6 @@ class PGDriveEnv(gym.Env):
             controller="keyboard",  # "joystick" or "keyboard"
             use_chase_camera=True,
             camera_height=1.8,
-            insert_frame=False,  # it is only effective when render
 
             # ===== Traffic =====
             traffic_density=0.1,
@@ -194,7 +193,7 @@ class PGDriveEnv(gym.Env):
             # traffic vehicles step
             self.scene_manager.step(self.pg_world.pg_config["physics_world_step_size"])
             self.pg_world.step()
-            if self.use_render and self.config["insert_frame"] and i < self.config["decision_repeat"] - 1:
+            if self.pg_world.force_fps.real_time_simulation and i < self.config["decision_repeat"] - 1:
                 # insert frame to render in min step_size
                 self.pg_world.taskMgr.step()
 
