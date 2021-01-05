@@ -131,7 +131,7 @@ class SceneManager:
             if self.np_random.rand() > self.traffic_density and abs(lane.length - InRampOnStraight.RAMP_LEN) > 0.1:
                 # Do special handling for ramp, and there must be vehicles created there
                 continue
-            vehicle_type = car_type[self.np_random.choice(list(car_type.keys()), p=[0.5, 0.3, 0.2])]
+            vehicle_type = car_type[self.np_random.choice(list(car_type.keys()), p=[0.2, 0.3, 0.3, 0.2])]
             random_v = vehicle_type.create_random_traffic_vehicle(
                 len(self.vehicles), self, lane, long, seed=self.random_seed, enable_reborn=is_reborn_lane
             )

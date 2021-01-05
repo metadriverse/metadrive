@@ -101,7 +101,7 @@ class Roundabout(Block):
         )
 
         segment_start_node = segment_end_node
-        segment_end_node = self.add_road_node()
+        segment_end_node = self.add_road_node() if part_idx < 3 else self._pre_block_socket.negative_road.start_node
         segment_road = Road(segment_start_node, segment_end_node)
 
         none_cross = CreateRoadFrom(

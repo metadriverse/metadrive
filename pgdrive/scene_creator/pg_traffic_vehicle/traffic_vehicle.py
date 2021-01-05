@@ -28,7 +28,9 @@ class PgTrafficVehicleNode(BulletRigidBodyNode):
 
 class PgTrafficVehicle(DynamicElement):
     COLLISION_MASK = 4
-    HEIGHT = 2
+    HEIGHT = 1.8
+    LENGTH = 4
+    WIDTH = 2
     path = None
     model_collection = {}  # save memory, load model once
 
@@ -40,9 +42,11 @@ class PgTrafficVehicle(DynamicElement):
         :param enable_reborn: It will be generated at the born place again when arriving at the destination
         :param np_random: Random Engine
         """
+        kinematic_model.LENGTH = self.LENGTH
+        kinematic_model.WIDTH = self.WIDTH
         super(PgTrafficVehicle, self).__init__()
         self.vehicle_node = PgTrafficVehicleNode(BodyName.Traffic_vehicle, IDMVehicle.create_from(kinematic_model))
-        chassis_shape = BulletBoxShape(Vec3(kinematic_model.LENGTH / 2, kinematic_model.WIDTH / 2, self.HEIGHT / 2))
+        chassis_shape = BulletBoxShape(Vec3(self.LENGTH / 2, self.WIDTH / 2, self.HEIGHT / 2))
         self.index = index
         self.vehicle_node.addShape(chassis_shape, TransformState.makePos(Point3(0, 0, self.HEIGHT / 2 + 0.2)))
         self.vehicle_node.setMass(800.0)
@@ -55,7 +59,7 @@ class PgTrafficVehicle(DynamicElement):
         self.out_of_road = False
 
         np_random = np_random or get_np_random()
-        [path, scale, zoffset, H] = self.path[np_random.randint(0, len(self.path))]
+        [path, scale, x_y_z_offset, H] = self.path[np_random.randint(0, len(self.path))]
         if self.render:
             if path not in PgTrafficVehicle.model_collection:
                 carNP = self.loader.loadModel(AssetLoader.file_path("models", path))
@@ -63,15 +67,8 @@ class PgTrafficVehicle(DynamicElement):
             else:
                 carNP = PgTrafficVehicle.model_collection[path]
             carNP.setScale(scale)
-
-            if path == 'new/lada/scene.gltf':
-                carNP.setY(-13.5)
-                carNP.setX(1)
-            if path == 'new/cp/scene.gltf':
-                print('fic')
-
             carNP.setH(H)
-            carNP.setZ(zoffset)
+            carNP.setPos(x_y_z_offset)
 
             carNP.instanceTo(self.node_path)
         self.step(1e-1)
