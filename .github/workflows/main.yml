@@ -10,7 +10,7 @@ on:
     branches: [ main ]
 
 jobs:
-  build:
+  code_style:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -22,9 +22,16 @@ jobs:
         run: |
           pip install "yapf==0.30.0"
           bash format.sh --test
+  blackbox_test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.7
       - name: Blackbox tests
         run: |
-          pwd
           pip install -e .
           pip install pytest
           pip install pytest-cov
