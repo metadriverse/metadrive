@@ -29,14 +29,16 @@ def get_result(env):
         if s > 20 and env.vehicle.speed > 1.0 and not reported_start:
             print("Start the car at {}".format(s))
             reported_start = s
+            start_time = time.time()
 
         if s > 20 and env.vehicle.speed >= 100 and not reported_max_speed:
-            spend = (s - 1 - reported_start) * 0.05
+            spend = (s - 1 - reported_start) * 0.1
             print(
                 "Achieve max speed: {} at {}. Spend {} s. Current location: {}".format(
                     max_speed, s - 1, spend, env.vehicle.position
                 )
             )
+            print("real time spend to acc: {}".format(time.time() - start_time))
             reported_max_speed = s
             max_speed_loc = env.vehicle.position
 
@@ -79,7 +81,7 @@ if __name__ == '__main__':
                 "traffic_density": 0.0,
                 "start_seed": 4,
                 "pg_world_config": {
-                    "debug": False
+                    "debug": False,
                 },
                 "manual_control": False,
                 "use_render": True,

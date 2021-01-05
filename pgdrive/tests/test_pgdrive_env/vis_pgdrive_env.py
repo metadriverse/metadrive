@@ -18,7 +18,6 @@ class TestEnv(PGDriveEnv):
                 "image_source": "mini_map",
                 "manual_control": True,
                 "use_render": True,
-                "insert_frame": True,
                 "use_image": False,
                 "steering_penalty": 0.0,
                 "decision_repeat": 5,
@@ -39,7 +38,7 @@ if __name__ == "__main__":
     o = env.reset()
     for i in range(1, 100000):
         o, r, d, info = env.step([0, 1])
-        # env.render()
+        env.render()
         if d:
             print("Reset")
             env.reset()
