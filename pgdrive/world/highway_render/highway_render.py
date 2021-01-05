@@ -1,4 +1,5 @@
 import os
+import sys
 from typing import List, Tuple
 
 import numpy as np
@@ -47,28 +48,26 @@ class HighwayRender:
         # main_window_position means the left upper location.
         os.environ['SDL_VIDEO_WINDOW_POS'] = \
             '%i,%i' % (main_window_position[0] - self.RESOLUTION[0], main_window_position[1])
-        self.screen = pygame.display.set_mode(self.resolution)
+        self.screen = pygame.display.set_mode(self.resolution) if onscreen else None
         self.clock = pygame.time.Clock()
 
         self.surface = WorldSurface(self.MAP_RESOLUTION, 0, pygame.Surface(self.MAP_RESOLUTION))
         self.frame_surface = pygame.Surface(self.RESOLUTION)
 
     def render(self) -> np.ndarray:
-        # for event in pygame.event.get():
-        #     if event.type == pygame.KEYDOWN:
-        #         if event.key == pygame.K_j:
-        #             self.CAM_REGION -= 5 if 10 < self.CAM_REGION else 0
-        #         if event.key == pygame.K_k:
-        #             self.CAM_REGION += 5 if self.CAM_REGION < 100 else 0
-        #         if event.key == pygame.K_ESCAPE:
-        #             sys.exit()
+        if self.onscreen:
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        sys.exit()
 
         self.draw_scene()
-        self.screen.fill(pygame.Color("black"))
-        self.screen.blit(self.frame_surface, (0, 0))
-        # if self.clock is not None:
-        #     self.clock.tick(self.FPS)
-        pygame.display.flip()
+        if self.onscreen:
+            self.screen.fill(pygame.Color("black"))
+            self.screen.blit(self.frame_surface, (0, 0))
+            # if self.clock is not None:
+            #     self.clock.tick(self.FPS)
+            pygame.display.flip()
 
     def set_scene_mgr(self, scene_mgr):
         self.scene_mgr = scene_mgr
@@ -183,7 +182,7 @@ class VehicleGraphics(object):
     EGO_COLOR = GREEN
 
     @classmethod
-    def display(cls, vehicle, surface, offscreen: bool = False, label: bool = False) -> None:
+    def display(cls, vehicle, surface, label: bool = False) -> None:
         """
         Display a vehicle on a pygame surface.
 
@@ -219,10 +218,6 @@ class VehicleGraphics(object):
         else:
             h = v.heading_theta if abs(v.heading_theta) > 2 * np.pi / 180 else 0
         position = [*surface.pos2pix(v.position[0], v.position[1])]
-        if not offscreen:
-            # convert_alpha throws errors in offscreen mode
-            # see https://stackoverflow.com/a/19057853
-            vehicle_surface = pygame.Surface.convert_alpha(vehicle_surface)
         cls.blit_rotate(surface, vehicle_surface, position, np.rad2deg(-h))
 
         # Label
@@ -437,38 +432,3 @@ class LaneGraphics(object):
             new_dots = reversed(new_dots) if side else new_dots
             dots.extend(new_dots)
         pygame.draw.polygon(draw_surface, color, dots, 0)
-
-
-class RoadGraphics(object):
-    """A visualization of a road lanes."""
-    @staticmethod
-    def display(road, surface):
-        """
-        Display the road lanes on a surface.
-
-        :param road: the road to be displayed
-        :param surface: the pygame surface
-        """
-        surface.fill(surface.GREY)
-        for _from in road.network.graph.keys():
-            for _to in road.network.graph[_from].keys():
-                for l in road.network.graph[_from][_to]:
-                    LaneGraphics.display(l, surface)
-
-    @staticmethod
-    def display_traffic(road, surface, simulation_frequency: int = 15,
-                        offscreen: bool = False) \
-            -> None:
-        """
-        Display the road vehicles on a surface.
-
-        :param road: the road to be displayed
-        :param surface: the pygame surface
-        :param simulation_frequency: simulation frequency
-        :param offscreen: render without displaying on a screen
-        """
-        if road.record_history:
-            for v in road.vehicles:
-                VehicleGraphics.display_history(v, surface, simulation=simulation_frequency, offscreen=offscreen)
-        for v in road.vehicles:
-            VehicleGraphics.display(v, surface, offscreen=offscreen)
