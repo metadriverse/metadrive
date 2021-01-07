@@ -1,9 +1,11 @@
 import math
-from typing import List, TYPE_CHECKING
+from typing import List, TYPE_CHECKING, Tuple
+
+import numpy as np
 
 from pgdrive.scene_creator.lanes.circular_lane import CircularLane
 from pgdrive.scene_creator.lanes.lane import AbstractLane
-from pgdrive.utils.math_utils import get_points_bounding_box, get_arc_bounding_box_points
+from pgdrive.utils.math_utils import get_points_bounding_box
 
 if TYPE_CHECKING:
     from pgdrive.scene_creator.blocks.block import BlockSocket
@@ -68,18 +70,58 @@ def check_lane_on_road(road_network: "RoadNetwork", lane, positive: float = 0, i
     return False
 
 
-def get_road_bounding_box(lanes):
-    line_points = get_arc_bounding_box_points(lanes[0], -1) if isinstance(lanes[0], CircularLane) \
-        else get_straight_bounding_box_points(lanes[0])
-    line_points += get_arc_bounding_box_points(lanes[-1], 1) if isinstance(lanes[-1], CircularLane) else \
-        get_straight_bounding_box_points(lanes[-1])
+def get_road_bounding_box(lanes, extra_lateral=3) -> Tuple:
+    """
+    Return (x_max, x_min, y_max, y_min) as bounding box of this road
+    :param lanes: Lanes in this road
+    :param extra_lateral: extra width in lateral direction, usually side_walk width
+    :return: x_max, x_min, y_max, y_min
+    """
+    line_points = get_curve_contour(lanes, extra_lateral) if isinstance(lanes[0], CircularLane) \
+        else get_straight_contour(lanes, extra_lateral)
     return get_points_bounding_box(line_points)
 
 
-def get_straight_bounding_box_points(lane):
-    start = lane.position(0.1, -lane.width / 2.0)
-    end = lane.position(lane.length - 0.1, -lane.width / 2.0)
-    return [start, end]
+def get_straight_contour(lanes, extra_lateral) -> List:
+    """
+    Get several points as bounding box of this road
+    :param lanes: lanes contained in road
+    :param extra_lateral: extra length in lateral direction, usually side_walk
+    :return: points
+    :param lanes:
+    :return:
+    """
+    ret = []
+    for lane, dir in [(lanes[0], -1), (lanes[-1], 1)]:
+        ret.append(lane.position(0.1, dir * (lane.width / 2.0 + extra_lateral)))
+        ret.append(lane.position(lane.length - 0.1, dir * (lane.width / 2.0 + extra_lateral)))
+    return ret
+
+
+def get_curve_contour(lanes, extra_lateral) -> List:
+    """
+    Get several points as bounding box of this road
+    :param lanes: lanes contained in road
+    :param extra_lateral: extra length in lateral direction, usually side_walk
+    :return: points
+    """
+    points = []
+    for lane, lateral_dir in [(lanes[0], -1), (lanes[-1], 1)]:
+        pi_2 = (np.pi / 2.0)
+        points += [
+            lane.position(0.1, lateral_dir * (lane.width / 2.0 + extra_lateral)),
+            lane.position(lane.length - 0.1, lateral_dir * (lane.width / 2.0 + extra_lateral))
+        ]
+        start_phase = (lane.start_phase // pi_2) * pi_2
+        start_phase += pi_2 if lane.direction == 1 else 0
+        for phi_index in range(4):
+            phi = start_phase + phi_index * pi_2 * lane.direction
+            if lane.direction * phi > lane.direction * lane.end_phase:
+                break
+            point = lane.center + (lane.radius - lateral_dir * (lane.width / 2.0 + extra_lateral) *
+                                   lane.direction) * np.array([math.cos(phi), math.sin(phi)])
+            points.append(point)
+    return points
 
 
 def get_all_lanes(roadnet: "RoadNetwork"):

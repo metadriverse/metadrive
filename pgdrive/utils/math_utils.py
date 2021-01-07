@@ -112,22 +112,12 @@ def has_corner_inside(rect1: Tuple, rect2: Tuple) -> bool:
     return any([point_in_rotated_rectangle(c1 + np.squeeze(p), c2, l2, w2, a2) for p in rotated_r1_points])
 
 
-def get_arc_bounding_box_points(lane, lateral_dir):
-    pi_2 = (np.pi / 2.0)
-    points = [lane.position(0.1, lateral_dir * lane.width), lane.position(lane.length - 0.1, lateral_dir * lane.width)]
-    start_phase = (lane.start_phase // pi_2) * pi_2
-    start_phase += pi_2 if lane.direction == 1 else 0
-    for phi_index in range(4):
-        phi = start_phase + phi_index * pi_2 * lane.direction
-        if lane.direction * phi > lane.direction * lane.end_phase:
-            break
-        point = lane.center + (lane.radius - lateral_dir * lane.width *
-                               lane.direction) * np.array([math.cos(phi), math.sin(phi)])
-        points.append(point)
-    return points
-
-
 def get_points_bounding_box(line_points):
+    """
+    Get bounding box from several points
+    :param line_points: Key points on lines
+    :return: bounding box
+    """
     x_max = -np.inf
     x_min = np.inf
     y_max = -np.inf
@@ -141,6 +131,11 @@ def get_points_bounding_box(line_points):
 
 
 def get_boxes_bounding_box(boxes):
+    """
+    Get a max bounding box from sveral small bound boxes
+    :param boxes: List of other bounding box
+    :return: Max bounding box
+    """
     res_x_max = -np.inf
     res_x_min = np.inf
     res_y_min = np.inf
