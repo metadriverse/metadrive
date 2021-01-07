@@ -21,4 +21,5 @@ if __name__ == "__main__":
         block = StdTInterSection(id, intersection.get_socket(socket_idx), global_network, id)
         block.construct_block(test.render, test.world)
         id += 1
+    test.show_bounding_box(global_network)
     test.run()

@@ -20,4 +20,5 @@ if __name__ == "__main__":
             if success:
                 break
             curve.destruct_block(test.world)
+    test.show_bounding_box(global_network)
     test.run()
