@@ -1,7 +1,8 @@
 from direct.controls.InputState import InputState
+from typing import Union, Tuple
 from direct.showbase import ShowBase
 from panda3d.bullet import BulletWorld, BulletPlaneShape, BulletRigidBodyNode, BulletDebugNode
-from panda3d.core import Vec3, BitMask32
+from panda3d.core import Vec3, BitMask32, NodePath, LineSegs
 
 from pgdrive.scene_creator.algorithm.BIG import NextStep
 from pgdrive.scene_creator.map import Map
@@ -15,6 +16,12 @@ class TestBlock(ShowBase.ShowBase):
         self.setFrameRateMeter(True)
         self.cam.setPos(0, 0, 300)
         self.cam.lookAt(0, 0, 0)
+        self.map = None
+        self.worldNP = None
+        self.world = None
+        self.physics_world = None
+        self.debugNP = None
+        self.groundNP = None
         self.setup()
         self.taskMgr.add(self.update, 'updateWorld')
         self.taskMgr.add(self.analyze, "analyze geom node")
@@ -70,8 +77,6 @@ class TestBlock(ShowBase.ShowBase):
         dt = 1 / 60
         # self.world.doPhysics(dt)
         self.world.doPhysics(dt, 1, dt)
-        if self.vehicle is not None:
-            self.processInput(dt)
         return task.cont
 
     def analyze(self, task):
@@ -92,38 +97,20 @@ class TestBlock(ShowBase.ShowBase):
     def re_add(self):
         self.map.load_to_pg_world(self)
 
-    def add_vehicle(self, vehicle):
-        self.vehicle = vehicle
-        vehicle.attach_to_pg_world(self.worldNP, self.world)
-        self.inputs = InputState()
-        self.inputs.watchWithModifiers('forward', 'w')
-        self.inputs.watchWithModifiers('reverse', 's')
-        self.inputs.watchWithModifiers('turnLeft', 'a')
-        self.inputs.watchWithModifiers('turnRight', 'd')
+    def add_line(self, start_p: Union[Vec3, Tuple], end_p: Union[Vec3, Tuple], color, thickness: float):
+        line_seg = LineSegs("interface")
+        line_seg.setColor(*color)
+        line_seg.moveTo(start_p)
+        line_seg.drawTo(end_p)
+        line_seg.setThickness(thickness)
+        NodePath(line_seg.create(False)).reparentTo(self.render)
 
-    def processInput(self, dt):
-        if not self.inputs.isSet('turnLeft') and not self.inputs.isSet('turnRight'):
-            steering = 0.0
-            # self.bt_vehicle.steering = 0.0
-        else:
-            if self.inputs.isSet('turnLeft'):
-                # steering = dt
-                steering = 1
-
-            if self.inputs.isSet('turnRight'):
-                # steering = -dt
-                steering = -1
-
-        if not self.inputs.isSet('forward') and not self.inputs.isSet("reverse"):
-            throttle_brake = 0
-        else:
-            if self.inputs.isSet('forward'):
-                throttle_brake = 1.0
-            if self.inputs.isSet('reverse'):
-                throttle_brake = -1.0
-
-        # self.bt_vehicle.set_incremental_action(numpy.array([steering, throttle_brake]))
-        self.vehicle.step([steering, throttle_brake])
+    def show_bounding_box(self, road_network):
+        bound_box = road_network.get_bounding_box()
+        points = [(x, -y) for x in bound_box[:2] for y in bound_box[2:]]
+        for k, p in enumerate(points[:-1]):
+            for p_ in points[k + 1:]:
+                self.add_line((*p, 2), (*p_, 2), (1, 0., 0., 1), 2)
 
 
 if __name__ == "__main__":
