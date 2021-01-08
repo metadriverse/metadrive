@@ -153,7 +153,7 @@ class BaseVehicle(DynamicElement):
         """
         pos is a 2-d array, and heading is a float (unit degree)
         """
-        heading = np.deg2rad(heading - 90)
+        heading = -np.deg2rad(heading) - np.pi / 2
         self.chassis_np.setPos(Vec3(*pos, 1))
         self.chassis_np.setQuat(LQuaternionf(np.cos(heading / 2), 0, 0, np.sin(heading / 2)))
         self.update_map_info(map)
@@ -235,6 +235,10 @@ class BaseVehicle(DynamicElement):
 
     @property
     def heading_theta(self):
+        """
+        Get the heading theta of vehicle, unit [rad]
+        :return:  heading in rad
+        """
         return -(self.chassis_np.getHpr()[0] + 90) / 180 * math.pi
 
     @property
@@ -268,6 +272,8 @@ class BaseVehicle(DynamicElement):
                 lateral = self.position - target_lane.center
             else:
                 lateral = target_lane.center - self.position
+        else:
+            raise ValueError("Unknown target lane type: {}".format(type(target_lane)))
         lateral_norm = norm(lateral[0], lateral[1])
         forward_direction = self.heading
         # print(f"Old forward direction: {self.forward_direction}, new heading {self.heading}")
