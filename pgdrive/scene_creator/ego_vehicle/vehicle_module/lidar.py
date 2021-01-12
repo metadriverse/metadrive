@@ -10,6 +10,8 @@ from pgdrive.pg_config.cam_mask import CamMask
 from pgdrive.scene_creator.highway_vehicle.behavior import IDMVehicle
 from pgdrive.scene_creator.pg_traffic_vehicle.traffic_vehicle import PgTrafficVehicle
 from pgdrive.utils.asset_loader import AssetLoader
+from pgdrive.world.pg_physics_world import PgPhysicsWorld
+from pgdrive.utils.coordinates_shift import panda_position
 
 
 class Lidar:
@@ -41,12 +43,12 @@ class Lidar:
                 ball.getChildren().reparentTo(laser_np)
             # self.node_path.flattenStrong()
 
-    def perceive(self, vehicle_position, heading_theta, pg_physics_world):
+    def perceive(self, vehicle_position, heading_theta, pg_physics_world: PgPhysicsWorld):
         """
         Call me to update the perception info
         """
         # coordinates problem here! take care
-        pg_start_position = Vec3(vehicle_position[0], -vehicle_position[1], 1.0)
+        pg_start_position = panda_position(vehicle_position, 1.0)
         self.detection_results = []
 
         # lidar calculation use pg coordinates
@@ -57,8 +59,8 @@ class Lidar:
         # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
         for laser_index in range(self.laser_num):
             # # coordinates problem here! take care
-            laser_end = Point3(point_x[laser_index], -point_y[laser_index], 1.0)
-            result = pg_physics_world.rayTestClosest(pg_start_position, laser_end, mask)
+            laser_end = panda_position((point_x[laser_index], point_y[laser_index]), 1.0)
+            result = pg_physics_world.dynamic_world.rayTestClosest(pg_start_position, laser_end, mask)
             self.detection_results.append(result)
             if self.cloud_points is not None:
                 if result.hasHit():
