@@ -1,9 +1,9 @@
-from direct.controls.InputState import InputState
 from typing import Union, Tuple
+
 from direct.showbase import ShowBase
 from panda3d.bullet import BulletWorld, BulletPlaneShape, BulletRigidBodyNode, BulletDebugNode
 from panda3d.core import Vec3, BitMask32, NodePath, LineSegs
-
+from pgdrive.world.pg_physics_world import PgPhysicsWorld
 from pgdrive.scene_creator.algorithm.BIG import NextStep
 from pgdrive.scene_creator.map import Map
 
@@ -48,9 +48,8 @@ class TestBlock(ShowBase.ShowBase):
 
     def setup(self):
         self.worldNP = self.render.attachNewNode('World')
-        self.world = BulletWorld()
+        self.world = PgPhysicsWorld()
         self.physics_world = self.world
-        self.world.setGravity(Vec3(0, 0, -9.81))
 
         # World
         if self.debug:
@@ -63,7 +62,7 @@ class TestBlock(ShowBase.ShowBase):
 
             self.debugNP.showTightBounds()
             self.debugNP.showBounds()
-            self.world.setDebugNode(self.debugNP.node())
+            self.world.dynamic_world.setDebugNode(self.debugNP.node())
 
         # Ground (static)
         shape = BulletPlaneShape(Vec3(0, 0, 1), 0)
@@ -71,12 +70,12 @@ class TestBlock(ShowBase.ShowBase):
         self.groundNP.node().addShape(shape)
         self.groundNP.setPos(0, 0, 0)
         self.groundNP.setCollideMask(BitMask32.allOn())
-        self.world.attachRigidBody(self.groundNP.node())
+        self.world.dynamic_world.attachRigidBody(self.groundNP.node())
 
     def update(self, task):
         dt = 1 / 60
         # self.world.doPhysics(dt)
-        self.world.doPhysics(dt, 1, dt)
+        self.world.dynamic_world.doPhysics(dt, 1, dt)
         return task.cont
 
     def analyze(self, task):

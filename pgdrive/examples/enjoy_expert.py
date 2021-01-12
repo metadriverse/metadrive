@@ -11,7 +11,7 @@ from pgdrive import PGDriveEnv
 from pgdrive.examples import expert, get_terminal_state
 
 if __name__ == '__main__':
-    env = PGDriveEnv(dict(use_render=True, environment_num=100, start_seed=random.randint(0, 1000)))
+    env = PGDriveEnv(dict(use_render=False, environment_num=100, start_seed=random.randint(0, 1000)))
     obs = env.reset()
     success_list, reward_list, ep_reward, ep_len, ep_count = [], [], 0, 0, 0
     try:
@@ -20,7 +20,7 @@ if __name__ == '__main__':
             obs, reward, done, info = env.step(action)
             ep_reward += reward
             ep_len += 1
-            env.render()
+            # env.render()
             if done:
                 ep_count += 1
                 success_list.append(1 if get_terminal_state(info) == "Success" else 0)

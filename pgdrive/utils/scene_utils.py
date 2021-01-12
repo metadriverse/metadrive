@@ -2,32 +2,19 @@ import math
 from typing import List, TYPE_CHECKING, Tuple
 
 import numpy as np
+from panda3d.core import Vec3
 
+from pgdrive.pg_config.body_name import BodyName
 from pgdrive.scene_creator.lanes.circular_lane import CircularLane
 from pgdrive.scene_creator.lanes.lane import AbstractLane
 from pgdrive.utils.math_utils import get_points_bounding_box
+from pgdrive.world.pg_world import PgWorld
+from pgdrive.utils.coordinates_shift import panda_position
 
 if TYPE_CHECKING:
     from pgdrive.scene_creator.blocks.block import BlockSocket
     from pgdrive.scene_creator.road.road import Road
     from pgdrive.scene_creator.road.road_network import RoadNetwork
-
-
-class Decoration:
-    start = "decoration"
-    end = "decoration_"
-
-
-class Goal:
-    """
-    Goal at intersection
-    The keywords 0, 1, 2 should be reserved, and only be used in roundabout and intersection
-    """
-
-    RIGHT = 0
-    STRAIGHT = 1
-    LEFT = 2
-    ADVERSE = 3  # Useless now
 
 
 def get_lanes_on_road(road: "Road", roadnet: "RoadNetwork") -> List["AbstractLane"]:
@@ -132,3 +119,28 @@ def get_all_lanes(roadnet: "RoadNetwork"):
             for l in lanes:
                 res.append(l)
     return res
+
+
+def ray_localization(position: np.ndarray, pg_world: PgWorld) -> Tuple:
+    """
+    Get the index of the lane closest to a physx_world position.
+    Only used when smoething is on lane ! Otherwise fall back to use get_closest_lane()
+    :param position: a physx_world position [m].
+    :param pg_world: PgWorld class
+    :return: the index of the closest lane.
+    """
+    results = pg_world.physics_world.static_world.rayTestAll(
+        panda_position(position, 1.0), panda_position(position, -1.0)
+    )
+    lane_index_dist = []
+    if results.hasHits():
+        for res in results.getHits():
+            if res.getNode().getName() == BodyName.Lane:
+                lane = res.getNode().getPythonTag(BodyName.Lane)
+                lane_index_dist.append((lane.info, lane.index, lane.info.distance(position)))
+    if len(lane_index_dist) > 0:
+        ret_index = np.argmin([d for _, _, d in lane_index_dist])
+        lane, index, dist = lane_index_dist[ret_index]
+    else:
+        lane, index, dist = None, None, None
+    return lane, index

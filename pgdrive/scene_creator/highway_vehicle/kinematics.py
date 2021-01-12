@@ -41,13 +41,17 @@ class Vehicle:
         self._position = np.array(position).astype('float')
         self.heading = heading
         self.speed = speed
-        self.lane_index = self.scene.network.get_closest_lane_index(self.position) if self.scene else np.nan
+        self.lane_index, _ = self.scene.network.get_closest_lane_index(self.position) if self.scene else np.nan
         self.lane = self.scene.network.get_lane(self.lane_index) if self.scene else None
         self.action = {'steering': 0, 'acceleration': 0}
         self.crashed = False
         self.log = []
         self.history = deque(maxlen=30)
         self.np_random = np_random if np_random else get_np_random()
+
+    def update_lane_index(self, lane_index, lane):
+        self.lane_index = lane_index
+        self.lane = lane
 
     @property
     def position(self):
@@ -153,9 +157,9 @@ class Vehicle:
             self.action['acceleration'] = max(self.action['acceleration'], 1.0 * (self.MAX_SPEED - self.speed))
 
     def on_state_update(self) -> None:
-        if self.scene:
-            self.lane_index = self.scene.network.get_closest_lane_index(self.position)
-            self.lane = self.scene.network.get_lane(self.lane_index)
+        new_l_index, _ = self.scene.network.get_closest_lane_index(self.position)
+        self.lane_index = new_l_index
+        self.lane = self.scene.network.get_lane(self.lane_index)
 
     def lane_distance_to(self, vehicle: "Vehicle", lane: AbstractLane = None) -> float:
         """

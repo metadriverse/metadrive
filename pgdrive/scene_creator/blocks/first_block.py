@@ -1,19 +1,19 @@
-from panda3d.bullet import BulletWorld
 from panda3d.core import NodePath
 
 from pgdrive.pg_config.pg_space import PgSpace
-from pgdrive.scene_creator import Decoration
 from pgdrive.scene_creator.blocks.block import Block, BlockSocket
 from pgdrive.scene_creator.blocks.create_block_utils import CreateRoadFrom, CreateAdverseRoad, ExtendStraightLane
 from pgdrive.scene_creator.lanes.lane import LineType
 from pgdrive.scene_creator.lanes.straight_lane import StraightLane
 from pgdrive.scene_creator.road.road import Road
 from pgdrive.scene_creator.road.road_network import RoadNetwork
+from pgdrive.utils.constans import Decoration
+from pgdrive.world.pg_physics_world import PgPhysicsWorld
 
 
 class FirstBlock(Block):
     """
-    A special Block type, only used to create the first block. One scene has only one first block!!!
+    A special Set, only used to create the first block. One scene has only one first block!!!
     """
     NODE_1 = ">"
     NODE_2 = ">>"
@@ -24,7 +24,7 @@ class FirstBlock(Block):
 
     def __init__(
         self, global_network: RoadNetwork, lane_width: float, lane_num: int, render_root_np: NodePath,
-        pg_physics_world: BulletWorld, random_seed
+        pg_physics_world: PgPhysicsWorld, random_seed
     ):
         place_holder = BlockSocket(Road(Decoration.start, Decoration.end), Road(Decoration.start, Decoration.end))
         super(FirstBlock, self).__init__(0, place_holder, global_network, random_seed)

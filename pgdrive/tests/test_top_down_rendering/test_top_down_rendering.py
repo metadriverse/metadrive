@@ -1,5 +1,6 @@
-from pgdrive.envs.pgdrive_env import PGDriveEnv
 import pygame
+
+from pgdrive.envs.pgdrive_env import PGDriveEnv
 
 
 def test_top_down_rendering():

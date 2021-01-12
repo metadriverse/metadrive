@@ -5,15 +5,15 @@ import time
 from collections import deque
 
 import numpy as np
-from panda3d.bullet import BulletVehicle, BulletBoxShape, BulletRigidBodyNode, ZUp, BulletWorld, BulletGhostNode
+from panda3d.bullet import BulletVehicle, BulletBoxShape, BulletRigidBodyNode, ZUp, BulletGhostNode
 from panda3d.core import Vec3, TransformState, NodePath, LQuaternionf, BitMask32, PythonCallbackObject, TextNode
 
 from pgdrive.pg_config import PgConfig
 from pgdrive.pg_config.body_name import BodyName
 from pgdrive.pg_config.cam_mask import CamMask
+from pgdrive.pg_config.collision_group import CollisionGroup
 from pgdrive.pg_config.parameter_space import Parameter, VehicleParameterSpace
 from pgdrive.pg_config.pg_space import PgSpace
-from pgdrive.scene_creator.blocks.block import Block
 from pgdrive.scene_creator.ego_vehicle.vehicle_module.lidar import Lidar
 from pgdrive.scene_creator.ego_vehicle.vehicle_module.routing_localization import RoutingLocalizationModule
 from pgdrive.scene_creator.ego_vehicle.vehicle_module.vehicle_panel import VehiclePanel
@@ -21,15 +21,16 @@ from pgdrive.scene_creator.lanes.circular_lane import CircularLane
 from pgdrive.scene_creator.lanes.lane import AbstractLane
 from pgdrive.scene_creator.lanes.straight_lane import StraightLane
 from pgdrive.scene_creator.map import Map
-from pgdrive.scene_creator.pg_traffic_vehicle.traffic_vehicle import PgTrafficVehicle
 from pgdrive.utils.asset_loader import AssetLoader
 from pgdrive.utils.element import DynamicElement
 from pgdrive.utils.math_utils import get_vertical_vector, norm, clip
+from pgdrive.utils.coordinates_shift import panda_position, pgdrive_position, panda_heading, pgdrive_heading
+from pgdrive.utils.scene_utils import ray_localization
 from pgdrive.world import RENDER_MODE_ONSCREEN
 from pgdrive.world.constants import COLOR, COLLISION_INFO_COLOR
 from pgdrive.world.image_buffer import ImageBuffer
+from pgdrive.world.pg_physics_world import PgPhysicsWorld
 from pgdrive.world.pg_world import PgWorld
-from pgdrive.world.terrain import Terrain
 
 
 class BaseVehicle(DynamicElement):
@@ -45,7 +46,7 @@ class BaseVehicle(DynamicElement):
                     2       3
     """
     PARAMETER_SPACE = PgSpace(VehicleParameterSpace.BASE_VEHICLE)  # it will not sample config from parameter space
-    COLLISION_MASK = 1
+    COLLISION_MASK = CollisionGroup.EgoVehicle
     STEERING_INCREMENT = 0.05
 
     default_vehicle_config = PgConfig(
@@ -109,12 +110,6 @@ class BaseVehicle(DynamicElement):
         self.collision_info_np = self._init_collision_info_render(pg_world)
         self.collision_banners = {}  # to save time
         self.current_banner = None
-
-        # collision group
-        self.pg_world.physics_world.setGroupCollisionFlag(self.COLLISION_MASK, Block.COLLISION_MASK, True)
-        self.pg_world.physics_world.setGroupCollisionFlag(self.COLLISION_MASK, Terrain.COLLISION_MASK, True)
-        self.pg_world.physics_world.setGroupCollisionFlag(self.COLLISION_MASK, self.COLLISION_MASK, False)
-        self.pg_world.physics_world.setGroupCollisionFlag(self.COLLISION_MASK, PgTrafficVehicle.COLLISION_MASK, True)
 
         # done info
         self.crash = False
@@ -216,8 +211,7 @@ class BaseVehicle(DynamicElement):
 
     @property
     def position(self):
-        pos_3d = self.chassis_np.getPos()
-        return np.array([pos_3d[0], -pos_3d[1]])
+        return pgdrive_position(self.chassis_np.getPos())
 
     @property
     def speed(self):
@@ -239,7 +233,7 @@ class BaseVehicle(DynamicElement):
         Get the heading theta of vehicle, unit [rad]
         :return:  heading in rad
         """
-        return -(self.chassis_np.getHpr()[0] + 90) / 180 * math.pi
+        return (pgdrive_heading(self.chassis_np.getH()) - 90) / 180 * math.pi
 
     @property
     def velocity(self) -> np.ndarray:
@@ -317,7 +311,7 @@ class BaseVehicle(DynamicElement):
 
     """-------------------------------------- for vehicle making ------------------------------------------"""
 
-    def _add_chassis(self, pg_physics_world: BulletWorld):
+    def _add_chassis(self, pg_physics_world: PgPhysicsWorld):
         para = self.get_config()
         chassis = BulletRigidBodyNode(BodyName.Ego_vehicle_top)
         chassis.setIntoCollideMask(BitMask32.bit(self.COLLISION_MASK))
@@ -337,18 +331,18 @@ class BaseVehicle(DynamicElement):
         self.chassis_np.setQuat(LQuaternionf(np.cos(heading / 2), 0, 0, np.sin(heading / 2)))
         chassis.setDeactivationEnabled(False)
         chassis.notifyCollisions(True)  # advance collision check
-        self.pg_world.physics_world.setContactAddedCallback(PythonCallbackObject(self._collision_check))
-        self.bullet_nodes.append(chassis)
+        self.pg_world.physics_world.dynamic_world.setContactAddedCallback(PythonCallbackObject(self._collision_check))
+        self.dynamic_nodes.append(chassis)
 
         chassis_beneath = BulletGhostNode(BodyName.Ego_vehicle)
         chassis_beneath.setIntoCollideMask(BitMask32.bit(self.COLLISION_MASK))
         chassis_beneath.addShape(chassis_shape)
         self.chassis_beneath_np = self.chassis_np.attachNewNode(chassis_beneath)
-        self.bullet_nodes.append(chassis_beneath)
+        self.dynamic_nodes.append(chassis_beneath)
 
-        self.system = BulletVehicle(pg_physics_world, chassis)
+        self.system = BulletVehicle(pg_physics_world.dynamic_world, chassis)
         self.system.setCoordinateSystem(ZUp)
-        self.bullet_nodes.append(self.system)  # detach chassis will also detach system, so a waring will generate
+        self.dynamic_nodes.append(self.system)  # detach chassis will also detach system, so a waring will generate
         self.LENGTH = para[Parameter.vehicle_length]
         self.WIDTH = para[Parameter.vehicle_width]
 
@@ -409,22 +403,29 @@ class BaseVehicle(DynamicElement):
         self.routing_localization = RoutingLocalizationModule(self.pg_world, show_navi_point)
 
     def update_map_info(self, map):
+        """
+        Update map info after reset()
+        :param map: new map
+        :return: None
+        """
         self.routing_localization.update(map)
-        self.lane_index = self.routing_localization.map.road_network.get_closest_lane_index((self.born_place))
-        self.lane = self.routing_localization.map.road_network.get_lane(self.lane_index)
+        lane, new_l_index = ray_localization((self.born_place), self.pg_world)
+        assert lane is not None, "Born place is not on road!"
+        self.lane_index = new_l_index
+        self.lane = lane
 
     def _state_check(self):
         """
         Check States and filter to update info
         """
-        result = self.pg_world.physics_world.contactTest(self.chassis_beneath_np.node(), True)
+        result = self.pg_world.physics_world.dynamic_world.contactTest(self.chassis_beneath_np.node(), True)
         contacts = set()
         for contact in result.getContacts():
             node0 = contact.getNode0()
             node1 = contact.getNode1()
             name = [node0.getName(), node1.getName()]
             name.remove(BodyName.Ego_vehicle)
-            if name[0] == "Ground":
+            if name[0] == "Ground" or name[0] == BodyName.Lane:
                 continue
             elif name[0] == BodyName.Side_walk:
                 self.out_of_road = True
@@ -488,9 +489,9 @@ class BaseVehicle(DynamicElement):
             self.current_banner = new_banner
 
     def destroy(self, _=None):
-        self.bullet_nodes.remove(self.chassis_np.node())
+        self.dynamic_nodes.remove(self.chassis_np.node())
         super(BaseVehicle, self).destroy(self.pg_world)
-        self.pg_world.physics_world.clearContactAddedCallback()
+        self.pg_world.physics_world.dynamic_world.clearContactAddedCallback()
         self.routing_localization.destroy()
         self.routing_localization = None
         if self.lidar is not None:
@@ -510,7 +511,7 @@ class BaseVehicle(DynamicElement):
         :param position: 2d array or list
         :return: None
         """
-        self.chassis_np.setPos(Vec3(position[0], -position[1], 0.4))
+        self.chassis_np.setPos(panda_position(position, 0.4))
 
     def set_heading(self, heading_theta) -> None:
         """
@@ -518,7 +519,7 @@ class BaseVehicle(DynamicElement):
         :param heading_theta: float in rad
         :return: None
         """
-        self.chassis_np.setH((-heading_theta * 180 / np.pi) - 90)
+        self.chassis_np.setH((panda_heading(heading_theta) * 180 / np.pi) - 90)
 
     def get_state(self):
         return {

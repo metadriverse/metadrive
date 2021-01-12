@@ -5,22 +5,24 @@ from pgdrive import ActionRepeat
 
 def _test_action_repeat(config):
     env = ActionRepeat(config)
-    env.reset()
-    for i in range(100):
-        _, _, d, info = env.step(env.action_space.sample())
+    try:
+        env.reset()
+        for i in range(100):
+            _, _, d, info = env.step(env.action_space.sample())
 
-        for k in ["simulation_time", "real_return", "action_repeat", "primitive_steps_count", "max_step", "render",
-                  "trajectory"]:
-            assert k in info
+            for k in ["simulation_time", "real_return", "action_repeat", "primitive_steps_count", "max_step", "render",
+                      "trajectory"]:
+                assert k in info
 
-        assert len(info["trajectory"]) == info["action_repeat"]
-        for t in info["trajectory"]:
-            for k in ["reward", "discounted_reward", "obs", "action", "count"]:
-                assert k in t
+            assert len(info["trajectory"]) == info["action_repeat"]
+            for t in info["trajectory"]:
+                for k in ["reward", "discounted_reward", "obs", "action", "count"]:
+                    assert k in t
 
-        if d:
-            env.reset()
-    env.close()
+            if d:
+                env.reset()
+    finally:
+        env.close()
 
 
 def test_action_repeat_env():

@@ -2,7 +2,6 @@ import numpy as np
 
 from pgdrive.pg_config.parameter_space import Parameter, BlockParameterSpace
 from pgdrive.pg_config.pg_space import PgSpace
-from pgdrive.scene_creator.basic_utils import check_lane_on_road, Decoration
 from pgdrive.scene_creator.blocks.block import Block
 from pgdrive.scene_creator.blocks.create_block_utils import CreateRoadFrom, CreateAdverseRoad, ExtendStraightLane, \
     sharpbend
@@ -10,6 +9,8 @@ from pgdrive.scene_creator.blocks.ramp import Ramp
 from pgdrive.scene_creator.lanes.lane import LineType
 from pgdrive.scene_creator.lanes.straight_lane import StraightLane
 from pgdrive.scene_creator.road.road import Road
+from pgdrive.utils.constans import Decoration
+from pgdrive.utils.scene_utils import check_lane_on_road
 
 
 class Fork(Ramp):

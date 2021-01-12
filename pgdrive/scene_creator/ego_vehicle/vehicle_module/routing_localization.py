@@ -10,6 +10,7 @@ from pgdrive.scene_creator.lanes.circular_lane import CircularLane
 from pgdrive.scene_creator.map import Map
 from pgdrive.utils.asset_loader import AssetLoader
 from pgdrive.utils.math_utils import clip, norm
+from pgdrive.utils.scene_utils import ray_localization
 from pgdrive.world import RENDER_MODE_ONSCREEN
 from pgdrive.world.constants import COLLISION_INFO_COLOR
 
@@ -24,6 +25,7 @@ class RoutingLocalizationModule:
     MARK_COLOR = COLLISION_INFO_COLOR["green"][1]
     MIN_ALPHA = 0.15
     SHOW_NAVI_POINT = False
+    FORCE_CALCULATE = False
 
     def __init__(self, pg_world, show_navi_point: False):
         """
@@ -99,8 +101,12 @@ class RoutingLocalizationModule:
 
     def update_navigation_localization(self, ego_vehicle):
         position = ego_vehicle.position
-        lane_index = self.map.road_network.get_closest_lane_index(position)
-        lane = self.map.road_network.get_lane(lane_index)
+        lane, lane_index = ray_localization(position, ego_vehicle.pg_world)
+        if lane is None:
+            lane, lane_index = ego_vehicle.lane, ego_vehicle.lane_index
+            if self.FORCE_CALCULATE:
+                lane_index, _ = self.map.road_network.get_closest_lane_index(position)
+                lane = self.map.road_network.get_lane(lane_index)
         self._update_target_checkpoints(lane_index)
 
         target_road_1_start = self.checkpoints[self.target_checkpoints_index[0]]
@@ -211,6 +217,9 @@ class RoutingLocalizationModule:
         if self.show_navi_point:
             self.arrow_node_path.removeNode()
             self.goal_node_path.removeNode()
+
+    def set_force_calculate_lane_index(self, force: bool):
+        self.FORCE_CALCULATE = force
 
     def __del__(self):
         logging.debug("{} is destroyed".format(self.__class__.__name__))

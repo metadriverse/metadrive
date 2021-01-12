@@ -34,7 +34,7 @@ class PGReplayer:
         for index, state in frame.items():
             vehicle = self.restore_vehicles[index] if index != "ego" else ego_vehicle
             vehicle.set_state(state)
-            if index != "ego" and state["done"] and self.restore_traffic_mode == TrafficMode.Add_once:
+            if index != "ego" and state["done"] and self.restore_traffic_mode == TrafficMode.Trigger:
                 vehicles_to_remove.append(vehicle)
         for v in vehicles_to_remove:
             v.destroy(pg_world)

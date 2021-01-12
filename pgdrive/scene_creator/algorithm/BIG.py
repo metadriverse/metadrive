@@ -2,13 +2,13 @@ import logging
 from typing import Union
 
 from numpy.random import RandomState
-from panda3d.bullet import BulletWorld
 from panda3d.core import NodePath
 
 from pgdrive.pg_config.pg_blocks import PgBlock
 from pgdrive.scene_creator.blocks.block import Block
 from pgdrive.scene_creator.blocks.first_block import FirstBlock
 from pgdrive.scene_creator.road.road_network import RoadNetwork
+from pgdrive.world.pg_physics_world import PgPhysicsWorld
 
 
 class NextStep:
@@ -28,7 +28,7 @@ class BIG:
 
     def __init__(
         self, lane_num: int, lane_width: float, global_network: RoadNetwork, render_node_path: NodePath,
-        pg_physics_world: BulletWorld, random_seed: int
+        pg_physics_world: PgPhysicsWorld, random_seed: int
     ):
         self._block_sequence = None
         self._random_seed = random_seed

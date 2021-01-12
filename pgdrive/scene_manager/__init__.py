@@ -1,3 +1,3 @@
 class TrafficMode:
-    Reborn = 0
-    Add_once = 1
+    Reborn = "reborn"
+    Trigger = "trigger"
