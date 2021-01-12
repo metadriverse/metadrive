@@ -4,12 +4,12 @@ from typing import List, Tuple, Dict
 
 import numpy as np
 
-from pgdrive.scene_creator import get_road_bounding_box
-from pgdrive.scene_creator.basic_utils import Decoration
 from pgdrive.scene_creator.lanes.lane import LineType, AbstractLane
 from pgdrive.scene_creator.lanes.straight_lane import StraightLane
 from pgdrive.scene_creator.road.road import Road
+from pgdrive.utils.constans import Decoration
 from pgdrive.utils.math_utils import get_boxes_bounding_box
+from pgdrive.utils.scene_utils import get_road_bounding_box
 
 logger = logging.getLogger(__name__)
 
@@ -168,32 +168,8 @@ class RoadNetwork:
                     indexes.append((_from, _to, _id))
         self.indices = indexes
 
-    def get_closest_lane_index(self, position: np.ndarray) -> LaneIndex:
-        """
-        Get the index of the lane closest to a physx_world position.
-
-        :param position: a physx_world position [m].
-        :return: the index of the closest lane.
-        """
-        ret, dist = self._graph_helper.get(position)
-
-        # if self.debug:
-        #     # Old code
-        #     distances = []
-        #     for _from, to_dict in self.graph.items():
-        #         for _to, lanes in to_dict.items():
-        #             for _id, l in enumerate(lanes):
-        #                 distances.append(l.distance(position))
-        #     key = int(np.argmin(distances))
-        #     key = self.indices[key]
-        #     if ret[0] != key[0] or ret[1] != key[1] or ret[2] != key[2]:
-        #         if abs(dist - min(distances)) > 1e-4:
-        #             raise ValueError("ERROR! Different! ", ret, key, dist, min(distances))
-
-        return ret
-
-    def get_closet_lane_index_v2(self, position, current_lane):
-        pass
+    def get_closest_lane_index(self, position):
+        return self._graph_helper.get(position)
 
     def next_lane(
         self,

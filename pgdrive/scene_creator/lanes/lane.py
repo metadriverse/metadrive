@@ -3,6 +3,9 @@ from abc import ABCMeta, abstractmethod
 from typing import Tuple, Union, Sequence
 
 import numpy as np
+from panda3d.bullet import BulletRigidBodyNode
+
+from pgdrive.pg_config.body_name import BodyName
 
 Vector = Union[np.ndarray, Sequence[float]]
 
@@ -124,3 +127,20 @@ class AbstractLane(object):
         b = 0 - s
         # return abs(r) + max(s - self.length, 0) + max(0 - s, 0)
         return abs(r) + (a if a > 0 else 0) + (b if b > 0 else 0)
+
+
+class LaneNode(BulletRigidBodyNode):
+    """
+    It is the body of land in panda3d, which can help quickly find current lane of vehicles
+    """
+    def __init__(self, node_name, lane: AbstractLane, lane_index=(str, str, int)):
+        """
+        Using ray cast to query the lane information
+        :param node_name: node_name
+        :param lane: CircularLane or StraightLane
+        :param lane_index: Lane index
+        """
+        BulletRigidBodyNode.__init__(self, node_name)
+        BulletRigidBodyNode.setPythonTag(self, BodyName.Lane, self)
+        self.info = lane
+        self.index = lane_index

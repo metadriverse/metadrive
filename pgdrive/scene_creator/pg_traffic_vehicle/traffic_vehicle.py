@@ -3,8 +3,9 @@ from typing import Union
 import numpy as np
 from panda3d.bullet import BulletRigidBodyNode, BulletBoxShape
 from panda3d.core import BitMask32, TransformState, Point3, NodePath, Vec3
-
+from pgdrive.utils.coordinates_shift import panda_position, panda_heading, pgdrive_heading
 from pgdrive.pg_config.body_name import BodyName
+from pgdrive.pg_config.collision_group import CollisionGroup
 from pgdrive.scene_creator.highway_vehicle.behavior import IDMVehicle
 from pgdrive.scene_creator.lanes.circular_lane import CircularLane
 from pgdrive.scene_creator.lanes.straight_lane import StraightLane
@@ -12,6 +13,7 @@ from pgdrive.scene_manager.scene_manager import SceneManager
 from pgdrive.utils import get_np_random
 from pgdrive.utils.asset_loader import AssetLoader
 from pgdrive.utils.element import DynamicElement
+from pgdrive.utils.scene_utils import ray_localization
 
 
 class PgTrafficVehicleNode(BulletRigidBodyNode):
@@ -27,7 +29,7 @@ class PgTrafficVehicleNode(BulletRigidBodyNode):
 
 
 class PgTrafficVehicle(DynamicElement):
-    COLLISION_MASK = 4
+    COLLISION_MASK = CollisionGroup.TrafficVehicle
     HEIGHT = 1.8
     LENGTH = 4
     WIDTH = 2
@@ -54,7 +56,7 @@ class PgTrafficVehicle(DynamicElement):
         self.vehicle_node.setKinematic(False)
         self.vehicle_node.setStatic(True)
         self._initial_state = kinematic_model if enable_reborn else None
-        self.bullet_nodes.append(self.vehicle_node)
+        self.dynamic_nodes.append(self.vehicle_node)
         self.node_path = NodePath(self.vehicle_node)
         self.out_of_road = False
 
@@ -79,13 +81,16 @@ class PgTrafficVehicle(DynamicElement):
 
     def step(self, dt):
         self.vehicle_node.kinematic_model.step(dt)
-        position = (self.vehicle_node.kinematic_model.position[0], -self.vehicle_node.kinematic_model.position[1], 0)
+        position = panda_position(self.vehicle_node.kinematic_model.position, 0)
         self.node_path.setPos(position)
-        heading = np.rad2deg(-self.vehicle_node.kinematic_model.heading)
+        heading = np.rad2deg(panda_heading(self.vehicle_node.kinematic_model.heading))
         self.node_path.setH(heading)
 
     def update_state(self):
-        self.vehicle_node.kinematic_model.on_state_update()
+        scene_mgr = self.vehicle_node.kinematic_model.scene
+        lane, lane_index = ray_localization(self.position, scene_mgr.ego_vehicle.pg_world)
+        if lane is not None:
+            self.vehicle_node.kinematic_model.update_lane_index(lane_index, lane)
         self.out_of_road = not self.vehicle_node.kinematic_model.lane.on_lane(
             self.vehicle_node.kinematic_model.position, margin=2
         )
@@ -113,7 +118,7 @@ class PgTrafficVehicle(DynamicElement):
         :param position: 2d array or list
         :return: None
         """
-        self.node_path.setPos(Vec3(position[0], -position[1], 0))
+        self.node_path.setPos(panda_position(position, 0))
 
     def set_heading(self, heading_theta) -> None:
         """
@@ -121,7 +126,7 @@ class PgTrafficVehicle(DynamicElement):
         :param heading_theta: float in rad
         :return: None
         """
-        self.node_path.setH((-heading_theta * 180 / np.pi))
+        self.node_path.setH(panda_heading(heading_theta * 180 / np.pi))
 
     def get_state(self):
         return {"heading": self.heading, "position": self.position, "done": self.out_of_road}

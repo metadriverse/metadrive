@@ -5,19 +5,19 @@ import os
 from typing import List, Optional, Union, Iterable
 
 import numpy as np
-from panda3d.bullet import BulletWorld
 from panda3d.core import NodePath
 
 from pgdrive.pg_config import PgConfig
 from pgdrive.pg_config.pg_blocks import PgBlock
 from pgdrive.scene_creator.algorithm.BIG import BIG, BigGenerateMethod
-from pgdrive.scene_creator.basic_utils import Decoration
 from pgdrive.scene_creator.blocks.block import Block
 from pgdrive.scene_creator.blocks.first_block import FirstBlock
 from pgdrive.scene_creator.road.road_network import RoadNetwork
 from pgdrive.utils import AssetLoader, import_pygame
+from pgdrive.utils.constans import Decoration
 from pgdrive.world.highway_render.highway_render import LaneGraphics
 from pgdrive.world.highway_render.world_surface import WorldSurface
+from pgdrive.world.pg_physics_world import PgPhysicsWorld
 from pgdrive.world.pg_world import PgWorld
 
 pygame = import_pygame()
@@ -106,14 +106,14 @@ class Map:
             }
         )
 
-    def _big_generate(self, parent_node_path: NodePath, pg_physics_world: BulletWorld):
+    def _big_generate(self, parent_node_path: NodePath, pg_physics_world: PgPhysicsWorld):
         big_map = BIG(
             self.lane_num, self.lane_width, self.road_network, parent_node_path, pg_physics_world, self.random_seed
         )
         big_map.generate(self.config[self.GENERATE_METHOD], self.config[self.GENERATE_PARA])
         self.blocks = big_map.blocks
 
-    def _config_generate(self, blocks_config: List, parent_node_path: NodePath, pg_physics_world: BulletWorld):
+    def _config_generate(self, blocks_config: List, parent_node_path: NodePath, pg_physics_world: PgPhysicsWorld):
         assert len(self.road_network.graph) == 0, "These Map is not empty, please create a new map to read config"
         last_block = FirstBlock(
             self.road_network, self.lane_width, self.lane_num, parent_node_path, pg_physics_world, 1
@@ -150,7 +150,7 @@ class Map:
         assert self.blocks is not None and len(self.blocks) > 0, "Please generate Map before saving it"
         map_config = []
         for b in self.blocks:
-            assert isinstance(b, Block), "None Block type can not be saved to json file"
+            assert isinstance(b, Block), "None Set can not be saved to json file"
             b_config = b.get_config()
             json_config = {}
             for k, v in b_config._config.items():

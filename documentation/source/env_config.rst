@@ -45,7 +45,7 @@ Traffic Config
 #################
 
     - :code:`traffic_density` (float): Vehicle number per 10 meter, aiming to adjust the number of vehicle on road
-    - :code:`traffic_mode`: Trigger mode (Add_once) / reborn mode (Reborn). In Reborn mode vehicles will enter the map again after arriving its destination.
+    - :code:`traffic_mode`: Trigger mode (Triger) / reborn mode (Reborn). In Reborn mode vehicles will enter the map again after arriving its destination.
     - :code:`random_traffic` (bool): the traffic generation will not be controlled by current map seed. If set to *False*, each map will have same traffic flow.
 
 Map Config

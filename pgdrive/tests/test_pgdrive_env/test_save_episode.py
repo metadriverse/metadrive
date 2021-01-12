@@ -48,12 +48,7 @@ def test_save_episode(vis=False):
                     with open("test.json", "w") as f:
                         json.dump(epi_info, f)
                 break
-    finally:
-        env.close()
 
-    del env
-    env = TestEnv(False, vis=vis)
-    try:
         o = env.reset(epi_info)
         for i in range(1, 100000 if vis else 2000):
             o, r, d, info = env.step([0, 1])

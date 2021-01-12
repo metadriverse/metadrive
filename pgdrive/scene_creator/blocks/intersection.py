@@ -5,13 +5,13 @@ import numpy as np
 
 from pgdrive.pg_config.parameter_space import Parameter, BlockParameterSpace
 from pgdrive.pg_config.pg_space import PgSpace
-from pgdrive.scene_creator import check_lane_on_road
 from pgdrive.scene_creator.blocks.block import Block, BlockSocket
 from pgdrive.scene_creator.blocks.create_block_utils import CreateAdverseRoad, CreateRoadFrom, ExtendStraightLane, \
     sharpbend
 from pgdrive.scene_creator.lanes.lane import LineType
 from pgdrive.scene_creator.lanes.straight_lane import StraightLane
 from pgdrive.scene_creator.road.road import Road
+from pgdrive.utils.scene_utils import check_lane_on_road
 
 
 class InterSection(Block):

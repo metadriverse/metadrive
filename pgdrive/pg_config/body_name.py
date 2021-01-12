@@ -6,3 +6,4 @@ class BodyName:
     Ego_vehicle = "Ego Vehicle"
     Ego_vehicle_top = "Ego Vehicle Top"
     Traffic_vehicle = "Traffic Vehicle"
+    Lane = "Lane"

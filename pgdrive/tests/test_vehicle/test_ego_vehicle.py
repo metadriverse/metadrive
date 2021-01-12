@@ -37,6 +37,7 @@ def test_base_vehicle(pg_env):
     v.add_lidar()
     v.add_routing_localization(True)
     v.add_routing_localization(False)
+    v.routing_localization.set_force_calculate_lane_index(True)
     v.update_map_info(map)
 
     for heading in [-1.0, 0.0, 1.0]:
