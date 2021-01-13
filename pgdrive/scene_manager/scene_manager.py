@@ -1,7 +1,7 @@
 import logging
 from collections import deque, namedtuple
 from typing import List, Tuple
-
+from .PgLOD import PgLOD
 import pandas as pd
 
 from pgdrive.scene_creator.map import Map
@@ -214,6 +214,10 @@ class SceneManager:
             v.step(dt)
 
     def update_state(self, pg_world: PgWorld) -> bool:
+        # cull distant objects
+        PgLOD.cull_distant_blocks(self.blocks, self.ego_vehicle.position, pg_world)
+        PgLOD.cull_distant_traffic_vehicles(self.traffic_vehicles, self.ego_vehicle.position, pg_world)
+
         vehicles_to_remove = []
         for v in self.traffic_vehicles:
             if v.out_of_road:
@@ -255,6 +259,9 @@ class SceneManager:
         s_front = s_rear = None
         v_front = v_rear = None
         for v in self.vehicles + self.objects:
+            if norm(v.position[0] - vehicle.position[0], v.position[1] - vehicle.position[1]) > 100:
+                # coarse filter
+                continue
             if v is not vehicle and not isinstance(v, RoadObject):  # self.network.is_connected_road(v.lane_index,
                 # lane_index, same_lane=True):
                 s_v, lat_v = lane.local_coordinates(v.position)

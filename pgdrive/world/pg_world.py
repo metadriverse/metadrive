@@ -6,7 +6,7 @@ import gltf
 from direct.gui.OnscreenImage import OnscreenImage
 from direct.showbase import ShowBase
 from panda3d.bullet import BulletDebugNode
-from panda3d.core import AntialiasAttrib, NodePath, loadPrcFileData, LineSegs
+from panda3d.core import AntialiasAttrib, NodePath, loadPrcFileData, LineSegs, Fog
 
 from pgdrive.pg_config import PgConfig
 from pgdrive.pg_config.cam_mask import CamMask
@@ -33,7 +33,7 @@ def _suppress_warning():
 
 def _free_warning():
     loadPrcFileData("", "notify-level-glgsg debug")
-    loadPrcFileData("", "notify-level-pgraph debug")  # press 4 to use toggle analyze to do this
+    # loadPrcFileData("", "notify-level-pgraph debug")  # press 4 to use toggle analyze to do this
     loadPrcFileData("", "notify-level-pnmimage debug")
     loadPrcFileData("", "notify-level-thread debug")
 
@@ -324,6 +324,7 @@ class PgWorld(ShowBase.ShowBase):
 
     def toggleAnalyze(self):
         self.worldNP.analyze()
+        print(self.physics_world.report_bodies())
         # self.worldNP.ls()
 
     def toggleDebug(self):

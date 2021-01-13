@@ -75,6 +75,9 @@ class Block(Element, BlockDefault):
         self._pre_block_socket = pre_block_socket
         self.pre_block_socket_index = pre_block_socket.index
 
+        # a bounding box used to improve efficiency x_min, x_max, y_min, y_max
+        self.bounding_box = None
+
         # used to create this block, but for first block it is nonsense
         if block_index != 0:
             self.positive_lanes = self._pre_block_socket.positive_road.get_lanes(self._global_network)
@@ -111,17 +114,10 @@ class Block(Element, BlockDefault):
 
     def destruct_block(self, pg_physics_world: PgPhysicsWorld):
         self._clear_topology()
-        if len(self.dynamic_nodes) != 0:
-            for node in self.dynamic_nodes:
-                pg_physics_world.dynamic_world.remove(node)
-            self.dynamic_nodes.clear()
-        if len(self.static_nodes) != 0:
-            for node in self.static_nodes:
-                pg_physics_world.static_world.remove(node)
-            self.static_nodes.clear()
-        if self.node_path is not None:
-            self.node_path.removeNode()
-            self.node_path = None
+        self.detach_from_pg_world(pg_physics_world)
+        self.node_path.removeNode()
+        self.dynamic_nodes.clear()
+        self.static_nodes.clear()
 
     def _sample_topology(self) -> bool:
         """
@@ -269,6 +265,8 @@ class Block(Element, BlockDefault):
         self.lane_line_node_path.reparentTo(self.node_path)
         self.lane_node_path.reparentTo(self.node_path)
         self.lane_vis_node_path.reparentTo(self.node_path)
+
+        self.bounding_box = self.block_network.get_bounding_box()
 
     def _add_lane(self, lane: AbstractLane, lane_id: int, colors: List[Vec4]):
         parent_np = self.lane_line_node_path

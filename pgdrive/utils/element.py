@@ -3,11 +3,41 @@ import logging
 from typing import Dict
 
 from panda3d.core import NodePath
-
+from panda3d.bullet import BulletWorld
 from pgdrive.pg_config import PgConfig
 from pgdrive.pg_config.pg_space import PgSpace
 from pgdrive.utils.asset_loader import AssetLoader
 from pgdrive.world.pg_physics_world import PgPhysicsWorld
+
+
+class PhysicsNodeList(list):
+    def __init__(self):
+        super(PhysicsNodeList, self).__init__()
+        self.attached = False
+
+    def attach_to_physics_world(self, bullet_world: BulletWorld):
+        """
+        Attach the nodes in this list to bullet world
+        :param bullet_world: BulletWorld()
+        :return: None
+        """
+        if self.attached:
+            return
+        for node in self:
+            bullet_world.attach(node)
+        self.attached = True
+
+    def detach_from_physics_world(self, bullet_world: BulletWorld):
+        """
+         Detach the nodes in this list from bullet world
+         :param bullet_world: BulletWorld()
+         :return: None
+         """
+        if not self.attached:
+            return
+        for node in self:
+            bullet_world.remove(node)
+        self.attached = False
 
 
 class Element:
@@ -26,9 +56,9 @@ class Element:
         if self.PARAMETER_SPACE is not None:
             self.PARAMETER_SPACE.seed(self.random_seed)
         # Temporally store bullet nodes that have to place in bullet world (not NodePath)
-        self.dynamic_nodes = []
+        self.dynamic_nodes = PhysicsNodeList()
         # Nodes in this tuple didn't interact with other nodes! they only used to do rayTest or sweepTest
-        self.static_nodes = []
+        self.static_nodes = PhysicsNodeList()
         self.render = False if AssetLoader.loader is None else True
         self.node_path = None  # each element has its node_path to render, physics node are child nodes of it
         if self.render:
@@ -51,20 +81,16 @@ class Element:
             # double check :-)
             assert isinstance(self.node_path, NodePath), "No render model on node_path in this Element"
             self.node_path.reparentTo(parent_node_path)
-        for node in self.dynamic_nodes:
-            pg_physics_world.dynamic_world.attach(node)
-        for node in self.static_nodes:
-            pg_physics_world.static_world.attach(node)
+        self.dynamic_nodes.attach_to_physics_world(pg_physics_world.dynamic_world)
+        self.static_nodes.attach_to_physics_world(pg_physics_world.static_world)
 
     def detach_from_pg_world(self, pg_physics_world: PgPhysicsWorld):
         """
         It is not fully remove, if this element is useless in the future, call Func delete()
         """
         self.node_path.detachNode()
-        for node in self.dynamic_nodes:
-            pg_physics_world.dynamic_world.remove(node)
-        for node in self.static_nodes:
-            pg_physics_world.static_world.remove(node)
+        self.dynamic_nodes.detach_from_physics_world(pg_physics_world.dynamic_world)
+        self.static_nodes.detach_from_physics_world(pg_physics_world.static_world)
 
     def destroy(self, pg_world):
         """
