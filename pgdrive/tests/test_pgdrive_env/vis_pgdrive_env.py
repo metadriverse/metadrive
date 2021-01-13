@@ -21,6 +21,7 @@ class TestEnv(PGDriveEnv):
                     # "debug_physics_world":True,
                     "pstats": True
                 },
+                # "controller":"joystick",
                 "image_source": "mini_map",
                 "manual_control": True,
                 "use_render": True,
