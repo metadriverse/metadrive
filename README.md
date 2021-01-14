@@ -61,6 +61,14 @@ You can also enjoy a journey carrying out by our professional driver pretrained 
 python -m pgdrive.examples.enjoy_expert
 ```
 
+A fusion of expert and manual controller, 
+where the expect will try to rescue the manually controlled vehicle from danger, 
+can be experienced via:
+
+```bash
+python -m pgdrive.examples.enjoy_saver
+```
+
 To show the main feature, procedural generation, we provide a script to show BIG:
 
 ```bash
