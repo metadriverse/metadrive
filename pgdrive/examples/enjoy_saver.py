@@ -4,7 +4,7 @@ if __name__ == "__main__":
     env = PGDriveEnv(
         {
             "environment_num": 1,
-            "traffic_density": 0.1,
+            "traffic_density": 0.3,
             "traffic_mode": "reborn",
             "start_seed": 5,
             # "controller": "joystick",
