@@ -551,15 +551,16 @@ class PGDriveEnv(gym.Env):
         saver_a = expert(obs, deterministic=False)
         self.save_mode = False
         if obs[0] < 0.1 * f or obs[1] < 0.1 * f:
-            steering = saver_a[0]
-            throttle = saver_a[1]
             self.save_mode = True
-        elif action[1] >= 0 and saver_a[1] <= 0:
+            return saver_a
+        if action[1] >= 0 and saver_a[1] <= 0:
             throttle = saver_a[1]
             self.save_mode = True
         if throttle == saver_a[1] and self.vehicle.speed < 5 and throttle < 0:
             throttle = 0.5
             self.save_mode = True
+        if min(self.vehicle.lidar.get_cloud_points()) < 0.08:
+            steering = saver_a[0]
         return steering, throttle
 
     def toggle_expert_take_over(self):
