@@ -42,12 +42,21 @@ var vedio_corpus = [
     ['<iframe src="https://www.youtube.com/embed/T368RveOY9g" frameborder=0\
     style="position: absolute; top: 2.5%; left: 2.5%; width: 95%; height: 100%;"\
     allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"\
-    allowfullscreen></iframe>', 
-    '<iframe src="https://player.bilibili.com/player.html?aid=373258795&bvid=BV15Z4y137cz&cid=271979816&page=1" frameborder=0\
+    allowfullscreen></iframe>',
+    '<iframe src="https://player.bilibili.com/player.html?aid=501174481&bvid=BV1pK411u7qw&cid=284390025&page=1" frameborder=0\
     style="position: absolute; top: 2.5%; left: 2.5%; width: 95%; height: 100%;"\
     allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"\
     allowfullscreen>\
-     </iframe>'],
+     </iframe>' ],
+     ['<iframe src="https://www.youtube.com/embed/2nb8Mhriq0I" frameborder=0\
+    style="position: absolute; top: 2.5%; left: 2.5%; width: 95%; height: 100%;"\
+    allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"\
+    allowfullscreen></iframe>', 
+     '<iframe src="https://player.bilibili.com/player.html?aid=373258795&bvid=BV15Z4y137cz&cid=271979816&page=1" frameborder=0\
+     style="position: absolute; top: 2.5%; left: 2.5%; width: 95%; height: 100%;"\
+     allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"\
+     allowfullscreen>\
+      </iframe>']
 ]
 
 
