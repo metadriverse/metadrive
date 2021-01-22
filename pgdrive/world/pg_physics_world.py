@@ -6,7 +6,7 @@ from panda3d.core import Vec3
 from pgdrive.pg_config.collision_group import CollisionGroup
 
 
-class PgPhysicsWorld:
+class PGPhysicsWorld:
     def __init__(self):
         # a dynamic world, moving objects or objects which react to other objects should be placed here
         self.dynamic_world = BulletWorld()

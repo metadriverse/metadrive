@@ -6,7 +6,8 @@ import numpy as np
 
 import pgdrive.utils.math_utils as utils
 from pgdrive.scene_creator.highway_vehicle.kinematics import Vehicle
-from pgdrive.scene_manager.scene_manager import SceneManager, LaneIndex, Route
+from pgdrive.scene_manager.scene_manager import LaneIndex, Route
+from pgdrive.scene_manager.traffic_manager import TrafficManager
 from pgdrive.utils.math_utils import clip
 
 
@@ -32,7 +33,7 @@ class ControlledVehicle(Vehicle):
 
     def __init__(
         self,
-        road: SceneManager,
+        road: TrafficManager,
         position: List,
         heading: float = 0,
         speed: float = 0,
@@ -57,7 +58,7 @@ class ControlledVehicle(Vehicle):
         :return: a new vehicle at the same dynamical state
         """
         v = cls(
-            vehicle.scene,
+            vehicle.traffic_mgr,
             vehicle.position,
             heading=vehicle.heading,
             speed=vehicle.speed,
@@ -74,7 +75,7 @@ class ControlledVehicle(Vehicle):
         :param destination: a node in the road network
         """
         try:
-            path = self.scene.network.shortest_path(self.lane_index[1], destination)
+            path = self.traffic_mgr.map.road_network.shortest_path(self.lane_index[1], destination)
         except KeyError:
             path = []
         if path:
@@ -99,13 +100,19 @@ class ControlledVehicle(Vehicle):
             self.target_speed -= self.DELTA_SPEED
         elif action == "LANE_RIGHT":
             _from, _to, _id = self.target_lane_index
-            target_lane_index = _from, _to, clip(_id + 1, 0, len(self.scene.network.graph[_from][_to]) - 1)
-            if self.scene.network.get_lane(target_lane_index).is_reachable_from(self.position):
+            target_lane_index = _from, _to, clip(
+                _id + 1, 0,
+                len(self.traffic_mgr.map.road_network.graph[_from][_to]) - 1
+            )
+            if self.traffic_mgr.map.road_network.get_lane(target_lane_index).is_reachable_from(self.position):
                 self.target_lane_index = target_lane_index
         elif action == "LANE_LEFT":
             _from, _to, _id = self.target_lane_index
-            target_lane_index = _from, _to, clip(_id - 1, 0, len(self.scene.network.graph[_from][_to]) - 1)
-            if self.scene.network.get_lane(target_lane_index).is_reachable_from(self.position):
+            target_lane_index = _from, _to, clip(
+                _id - 1, 0,
+                len(self.traffic_mgr.map.road_network.graph[_from][_to]) - 1
+            )
+            if self.traffic_mgr.map.road_network.get_lane(target_lane_index).is_reachable_from(self.position):
                 self.target_lane_index = target_lane_index
 
         action = {
@@ -117,8 +124,8 @@ class ControlledVehicle(Vehicle):
 
     def follow_road(self) -> None:
         """At the end of a lane, automatically switch to a next one."""
-        if self.scene.network.get_lane(self.target_lane_index).after_end(self.position):
-            self.target_lane_index = self.scene.network.next_lane(
+        if self.traffic_mgr.map.road_network.get_lane(self.target_lane_index).after_end(self.position):
+            self.target_lane_index = self.traffic_mgr.map.road_network.next_lane(
                 self.target_lane_index, route=self.route, position=self.position, np_random=self.np_random
             )
 
@@ -134,7 +141,7 @@ class ControlledVehicle(Vehicle):
         :param target_lane_index: index of the lane to follow
         :return: a steering wheel angle command [rad]
         """
-        target_lane = self.scene.network.get_lane(target_lane_index)
+        target_lane = self.traffic_mgr.map.road_network.get_lane(target_lane_index)
         lane_coords = target_lane.local_coordinates(self.position)
         lane_next_coords = lane_coords[0] + self.speed * self.PURSUIT_TAU
         lane_future_heading = target_lane.heading_at(lane_next_coords)
@@ -168,7 +175,7 @@ class ControlledVehicle(Vehicle):
             return []
         for index in range(min(len(self.route), 3)):
             try:
-                next_destinations = self.scene.network.graph[self.route[index][1]]
+                next_destinations = self.traffic_mgr.map.road_network.graph[self.route[index][1]]
             except KeyError:
                 continue
             if len(next_destinations) >= 2:
@@ -194,7 +201,7 @@ class ControlledVehicle(Vehicle):
         routes = self.get_routes_at_intersection()
         if routes:
             if _to == "random":
-                _to = self.scene.np_random.randint(len(routes))
+                _to = self.traffic_mgr.np_random.randint(len(routes))
             self.route = routes[_to % len(routes)]
 
     def predict_trajectory_constant_speed(self, times: np.ndarray) -> Tuple[List[np.ndarray], List[float]]:
@@ -209,99 +216,8 @@ class ControlledVehicle(Vehicle):
         return tuple(
             zip(
                 *[
-                    self.scene.network.position_heading_along_route(route, coordinates[0] + self.speed * t, 0)
-                    for t in times
+                    self.traffic_mgr.map.road_network.
+                    position_heading_along_route(route, coordinates[0] + self.speed * t, 0) for t in times
                 ]
             )
         )
-
-
-class MDPVehicle(ControlledVehicle):
-    """A controlled vehicle with a specified discrete range of allowed target speeds."""
-
-    SPEED_COUNT: int = 3  # []
-    SPEED_MIN: float = 20  # [m/s]
-    SPEED_MAX: float = 30  # [m/s]
-
-    def __init__(
-        self,
-        scene: SceneManager,
-        position: List[float],
-        heading: float = 0,
-        speed: float = 0,
-        target_lane_index: LaneIndex = None,
-        target_speed: float = None,
-        route: Route = None,
-        np_random: np.random.RandomState = None,
-    ) -> None:
-        super().__init__(scene, position, heading, speed, target_lane_index, target_speed, route, np_random)
-        self.speed_index = self.speed_to_index(self.target_speed)
-        self.target_speed = self.index_to_speed(self.speed_index)
-
-    def act(self, action: Union[dict, str] = None) -> None:
-        """
-        Perform a high-level action.
-
-        - If the action is a speed change, choose speed from the allowed discrete range.
-        - Else, forward action to the ControlledVehicle handler.
-
-        :param action: a high-level action
-        """
-        if action == "FASTER":
-            self.speed_index = self.speed_to_index(self.speed) + 1
-        elif action == "SLOWER":
-            self.speed_index = self.speed_to_index(self.speed) - 1
-        else:
-            super().act(action)
-            return
-        self.speed_index = clip(self.speed_index, 0, self.SPEED_COUNT - 1)
-        self.target_speed = self.index_to_speed(self.speed_index)
-        super().act()
-
-    @classmethod
-    def index_to_speed(cls, index: int) -> float:
-        """
-        Convert an index among allowed speeds to its corresponding speed
-
-        :param index: the speed index []
-        :return: the corresponding speed [m/s]
-        """
-        if cls.SPEED_COUNT > 1:
-            return cls.SPEED_MIN + index * (cls.SPEED_MAX - cls.SPEED_MIN) / (cls.SPEED_COUNT - 1)
-        else:
-            return cls.SPEED_MIN
-
-    @classmethod
-    def speed_to_index(cls, speed: float) -> int:
-        """
-        Find the index of the closest speed allowed to a given speed.
-
-        :param speed: an input speed [m/s]
-        :return: the index of the closest speed allowed []
-        """
-        x = (speed - cls.SPEED_MIN) / (cls.SPEED_MAX - cls.SPEED_MIN)
-        return int(clip(round(x * (cls.SPEED_COUNT - 1)), 0, cls.SPEED_COUNT - 1))
-
-    def predict_trajectory(self, actions: List, action_duration: float, trajectory_timestep: float, dt: float) \
-            -> List[ControlledVehicle]:
-        """
-        Predict the future trajectory of the vehicle given a sequence of actions.
-
-        :param actions: a sequence of future actions.
-        :param action_duration: the duration of each action.
-        :param trajectory_timestep: the duration between each save of the vehicle state.
-        :param dt: the timestep of the simulation
-        :return: the sequence of future states
-        """
-        states = []
-        v = copy.deepcopy(self)
-        t = 0
-        for action in actions:
-            v.act(action)  # High-level decision
-            for _ in range(int(action_duration / dt)):
-                t += 1
-                v.act()  # Low-level control action
-                v.step(dt)
-                if (t % int(trajectory_timestep / dt)) == 0:
-                    states.append(copy.deepcopy(v))
-        return states

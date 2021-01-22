@@ -8,12 +8,12 @@ import numpy as np
 from panda3d.bullet import BulletVehicle, BulletBoxShape, BulletRigidBodyNode, ZUp, BulletGhostNode
 from panda3d.core import Vec3, TransformState, NodePath, LQuaternionf, BitMask32, PythonCallbackObject, TextNode
 
-from pgdrive.pg_config import PgConfig
+from pgdrive.pg_config import PGConfig
 from pgdrive.pg_config.body_name import BodyName
 from pgdrive.pg_config.cam_mask import CamMask
 from pgdrive.pg_config.collision_group import CollisionGroup
 from pgdrive.pg_config.parameter_space import Parameter, VehicleParameterSpace
-from pgdrive.pg_config.pg_space import PgSpace
+from pgdrive.pg_config.pg_space import PGSpace
 from pgdrive.scene_creator.ego_vehicle.vehicle_module.lidar import Lidar
 from pgdrive.scene_creator.ego_vehicle.vehicle_module.routing_localization import RoutingLocalizationModule
 from pgdrive.scene_creator.ego_vehicle.vehicle_module.vehicle_panel import VehiclePanel
@@ -29,8 +29,8 @@ from pgdrive.utils.scene_utils import ray_localization
 from pgdrive.world import RENDER_MODE_ONSCREEN
 from pgdrive.world.constants import COLOR, COLLISION_INFO_COLOR
 from pgdrive.world.image_buffer import ImageBuffer
-from pgdrive.world.pg_physics_world import PgPhysicsWorld
-from pgdrive.world.pg_world import PgWorld
+from pgdrive.world.pg_physics_world import PGPhysicsWorld
+from pgdrive.world.pg_world import PGWorld
 
 
 class BaseVehicle(DynamicElement):
@@ -45,11 +45,11 @@ class BaseVehicle(DynamicElement):
                     II-----II
                     2       3
     """
-    PARAMETER_SPACE = PgSpace(VehicleParameterSpace.BASE_VEHICLE)  # it will not sample config from parameter space
+    PARAMETER_SPACE = PGSpace(VehicleParameterSpace.BASE_VEHICLE)  # it will not sample config from parameter space
     COLLISION_MASK = CollisionGroup.EgoVehicle
     STEERING_INCREMENT = 0.05
 
-    default_vehicle_config = PgConfig(
+    default_vehicle_config = PGConfig(
         dict(
             lidar=(240, 50, 4),  # laser num, distance, other vehicle info num
             mini_map=(84, 84, 250),  # buffer length, width
@@ -65,7 +65,7 @@ class BaseVehicle(DynamicElement):
     LENGTH = None
     WIDTH = None
 
-    def __init__(self, pg_world: PgWorld, vehicle_config: dict = None, random_seed: int = 0, config: dict = None):
+    def __init__(self, pg_world: PGWorld, vehicle_config: dict = None, random_seed: int = 0, config: dict = None):
         """
         This Vehicle Config is different from self.get_config(), and it is used to define which modules to use, and
         module parameters.
@@ -125,7 +125,7 @@ class BaseVehicle(DynamicElement):
 
     def prepare_step(self, action):
         """
-        Save info before action
+        Save info and make decision before action
         """
         self.last_position = self.position
         self.last_heading_dir = self.heading
@@ -137,7 +137,7 @@ class BaseVehicle(DynamicElement):
         if self.vehicle_panel is not None:
             self.vehicle_panel.renew_2d_car_para_visualization(self)
 
-    def update_state(self):
+    def update_state(self, pg_world=None):
         if self.lidar is not None:
             self.lidar.perceive(self.position, self.heading_theta, self.pg_world.physics_world)
         if self.routing_localization is not None:
@@ -311,7 +311,7 @@ class BaseVehicle(DynamicElement):
 
     """-------------------------------------- for vehicle making ------------------------------------------"""
 
-    def _add_chassis(self, pg_physics_world: PgPhysicsWorld):
+    def _add_chassis(self, pg_physics_world: PGPhysicsWorld):
         para = self.get_config()
         chassis = BulletRigidBodyNode(BodyName.Ego_vehicle_top)
         chassis.setIntoCollideMask(BitMask32.bit(self.COLLISION_MASK))
@@ -383,7 +383,7 @@ class BaseVehicle(DynamicElement):
         wheel.setWheelDirectionCs(Vec3(0, 0, -1))
         wheel.setWheelAxleCs(Vec3(1, 0, 0))
 
-        # TODO add them to PgConfig in the future
+        # TODO add them to PGConfig in the future
         wheel.setWheelRadius(radius)
         wheel.setMaxSuspensionTravelCm(40)
         wheel.setSuspensionStiffness(30)

@@ -1,4 +1,4 @@
-from pgdrive.pg_config.pg_space import PgBoxSpace, PgDiscreteSpace, PgConstantSpace
+from pgdrive.pg_config.pg_space import PGBoxSpace, PGDiscreteSpace, PGConstantSpace
 
 
 class Parameter:
@@ -45,28 +45,28 @@ class Parameter:
 class VehicleParameterSpace:
     BASE_VEHICLE = {
         # Now the parameter sample is not available and thus the value space is incorrect
-        Parameter.vehicle_length: PgConstantSpace(4.0),
-        Parameter.vehicle_width: PgConstantSpace(1.5),
-        Parameter.vehicle_height: PgConstantSpace(1),
-        Parameter.chassis_height: PgConstantSpace(0.3),
-        Parameter.front_tire_longitude: PgConstantSpace(1.05),
-        Parameter.rear_tire_longitude: PgConstantSpace(1.17),
-        Parameter.tire_lateral: PgConstantSpace(0.8),
-        Parameter.tire_radius: PgConstantSpace(0.25),
-        Parameter.mass: PgConstantSpace(800.0),
-        Parameter.heading: PgConstantSpace(0.0),
+        Parameter.vehicle_length: PGConstantSpace(4.0),
+        Parameter.vehicle_width: PGConstantSpace(1.5),
+        Parameter.vehicle_height: PGConstantSpace(1),
+        Parameter.chassis_height: PGConstantSpace(0.3),
+        Parameter.front_tire_longitude: PGConstantSpace(1.05),
+        Parameter.rear_tire_longitude: PGConstantSpace(1.17),
+        Parameter.tire_lateral: PGConstantSpace(0.8),
+        Parameter.tire_radius: PGConstantSpace(0.25),
+        Parameter.mass: PGConstantSpace(800.0),
+        Parameter.heading: PGConstantSpace(0.0),
 
         # visualization
-        Parameter.vehicle_vis_h: PgConstantSpace(180),
-        Parameter.vehicle_vis_y: PgConstantSpace(0.1),
-        Parameter.vehicle_vis_z: PgConstantSpace(-0.31),
-        Parameter.vehicle_vis_scale: PgConstantSpace(0.013),
+        Parameter.vehicle_vis_h: PGConstantSpace(180),
+        Parameter.vehicle_vis_y: PGConstantSpace(0.1),
+        Parameter.vehicle_vis_z: PGConstantSpace(-0.31),
+        Parameter.vehicle_vis_scale: PGConstantSpace(0.013),
 
-        # TODO the following parameters will be opened soon using PgBoxSPace
-        Parameter.steering_max: PgConstantSpace(40.0),
-        Parameter.engine_force_max: PgConstantSpace(500.0),
-        Parameter.brake_force_max: PgConstantSpace(40.0),
-        Parameter.speed_max: PgConstantSpace(120),
+        # TODO the following parameters will be opened soon using PGBoxSPace
+        Parameter.steering_max: PGConstantSpace(40.0),
+        Parameter.engine_force_max: PGConstantSpace(500.0),
+        Parameter.brake_force_max: PGConstantSpace(40.0),
+        Parameter.speed_max: PGConstantSpace(120),
     }
 
 
@@ -75,33 +75,33 @@ class BlockParameterSpace:
     Make sure the range of curve parameters covers the parameter space of other blocks,
     otherwise, an error may happen in navigation info normalization
     """
-    STRAIGHT = {Parameter.length: PgBoxSpace(min=40.0, max=80.0)}
+    STRAIGHT = {Parameter.length: PGBoxSpace(min=40.0, max=80.0)}
     CURVE = {
-        Parameter.length: PgBoxSpace(min=40.0, max=80.0),
-        Parameter.radius: PgBoxSpace(min=25.0, max=60.0),
-        Parameter.angle: PgBoxSpace(min=45, max=135),
-        Parameter.dir: PgDiscreteSpace(2)
+        Parameter.length: PGBoxSpace(min=40.0, max=80.0),
+        Parameter.radius: PGBoxSpace(min=25.0, max=60.0),
+        Parameter.angle: PGBoxSpace(min=45, max=135),
+        Parameter.dir: PGDiscreteSpace(2)
     }
     INTERSECTION = {
-        Parameter.radius: PgConstantSpace(10),
-        Parameter.change_lane_num: PgDiscreteSpace(number=2),  # 0, 1
-        Parameter.decrease_increase: PgDiscreteSpace(number=2)  # 0, decrease, 1 increase
+        Parameter.radius: PGConstantSpace(10),
+        Parameter.change_lane_num: PGDiscreteSpace(number=2),  # 0, 1
+        Parameter.decrease_increase: PGDiscreteSpace(number=2)  # 0, decrease, 1 increase
     }
     ROUNDABOUT = {
-        Parameter.radius_exit: PgBoxSpace(min=5, max=15),  # TODO Should we reduce this?
-        Parameter.radius_inner: PgBoxSpace(min=15, max=45),  # TODO Should we reduce this?
-        Parameter.angle: PgConstantSpace(60)
+        Parameter.radius_exit: PGBoxSpace(min=5, max=15),  # TODO Should we reduce this?
+        Parameter.radius_inner: PGBoxSpace(min=15, max=45),  # TODO Should we reduce this?
+        Parameter.angle: PGConstantSpace(60)
     }
     T_INTERSECTION = {
-        Parameter.radius: PgConstantSpace(10),
-        Parameter.t_intersection_type: PgDiscreteSpace(number=3),  # 3 different t type for previous socket
-        Parameter.change_lane_num: PgDiscreteSpace(2),  # 0,1
-        Parameter.decrease_increase: PgDiscreteSpace(2)  # 0, decrease, 1 increase
+        Parameter.radius: PGConstantSpace(10),
+        Parameter.t_intersection_type: PGDiscreteSpace(number=3),  # 3 different t type for previous socket
+        Parameter.change_lane_num: PGDiscreteSpace(2),  # 0,1
+        Parameter.decrease_increase: PGDiscreteSpace(2)  # 0, decrease, 1 increase
     }
     RAMP_PARAMETER = {
-        Parameter.length: PgBoxSpace(min=20, max=40)  # accelerate/decelerate part length
+        Parameter.length: PGBoxSpace(min=20, max=40)  # accelerate/decelerate part length
     }
     FORK_PARAMETER = {
-        Parameter.length: PgBoxSpace(min=20, max=40),  # accelerate/decelerate part length
-        Parameter.lane_num: PgDiscreteSpace(2)
+        Parameter.length: PGBoxSpace(min=20, max=40),  # accelerate/decelerate part length
+        Parameter.lane_num: PGDiscreteSpace(2)
     }

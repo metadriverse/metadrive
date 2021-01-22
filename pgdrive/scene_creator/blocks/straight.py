@@ -1,5 +1,5 @@
 from pgdrive.pg_config.parameter_space import BlockParameterSpace, Parameter
-from pgdrive.pg_config.pg_space import PgSpace
+from pgdrive.pg_config.pg_space import PGSpace
 from pgdrive.scene_creator.blocks.block import Block, BlockSocket
 from pgdrive.scene_creator.blocks.create_block_utils import ExtendStraightLane, CreateRoadFrom, CreateAdverseRoad
 from pgdrive.scene_creator.lanes.lane import LineType
@@ -16,7 +16,7 @@ class Straight(Block):
     """
     ID = "S"
     SOCKET_NUM = 1
-    PARAMETER_SPACE = PgSpace(BlockParameterSpace.STRAIGHT)
+    PARAMETER_SPACE = PGSpace(BlockParameterSpace.STRAIGHT)
 
     def _try_plug_into_previous_block(self) -> bool:
         self.set_part_idx(0)  # only one part in simple block like straight, and curve

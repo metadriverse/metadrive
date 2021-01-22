@@ -4,7 +4,7 @@ from pgdrive.pg_config.cam_mask import CamMask
 from pgdrive.utils import is_mac
 from pgdrive.utils.asset_loader import AssetLoader
 from pgdrive.world.image_buffer import ImageBuffer
-from pgdrive.world.pg_world import PgWorld
+from pgdrive.world.pg_world import PGWorld
 
 
 class DepthCamera(ImageBuffer):
@@ -16,7 +16,7 @@ class DepthCamera(ImageBuffer):
     display_top = 1.0
     TASK_NAME = "ground follow"
 
-    def __init__(self, length: int, width: int, view_ground: bool, chassis_np: NodePath, pg_world: PgWorld):
+    def __init__(self, length: int, width: int, view_ground: bool, chassis_np: NodePath, pg_world: PGWorld):
         """
         :param length: Control resolution of this sensor
         :param width: Control resolution of this sensor

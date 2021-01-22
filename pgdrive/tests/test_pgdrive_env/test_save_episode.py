@@ -2,7 +2,7 @@ import json
 
 from pgdrive.envs.pgdrive_env import PGDriveEnv
 from pgdrive.scene_creator.map import Map, MapGenerateMethod
-from pgdrive.scene_manager import TrafficMode
+from pgdrive.scene_manager.traffic_manager import TrafficMode
 from pgdrive.utils import setup_logger
 
 
@@ -15,7 +15,7 @@ class TestEnv(PGDriveEnv):
                 "start_seed": 5,
                 "manual_control": vis,
                 "use_render": vis,
-                "traffic_mode": TrafficMode.Reborn,
+                "traffic_mode": TrafficMode.Hybrid,
                 "record_episode": save_episode,
                 "map_config": {
                     Map.GENERATE_METHOD: MapGenerateMethod.BIG_BLOCK_SEQUENCE,

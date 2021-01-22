@@ -1,6 +1,6 @@
 from panda3d.core import NodePath
 
-from pgdrive.pg_config.pg_space import PgSpace
+from pgdrive.pg_config.pg_space import PGSpace
 from pgdrive.scene_creator.blocks.block import Block, BlockSocket
 from pgdrive.scene_creator.blocks.create_block_utils import CreateRoadFrom, CreateAdverseRoad, ExtendStraightLane
 from pgdrive.scene_creator.lanes.lane import LineType
@@ -8,7 +8,7 @@ from pgdrive.scene_creator.lanes.straight_lane import StraightLane
 from pgdrive.scene_creator.road.road import Road
 from pgdrive.scene_creator.road.road_network import RoadNetwork
 from pgdrive.utils.constans import Decoration
-from pgdrive.world.pg_physics_world import PgPhysicsWorld
+from pgdrive.world.pg_physics_world import PGPhysicsWorld
 
 
 class FirstBlock(Block):
@@ -18,13 +18,13 @@ class FirstBlock(Block):
     NODE_1 = ">"
     NODE_2 = ">>"
     NODE_3 = ">>>"
-    PARAMETER_SPACE = PgSpace({})
+    PARAMETER_SPACE = PGSpace({})
     ID = "I"
     SOCKET_NUM = 1
 
     def __init__(
         self, global_network: RoadNetwork, lane_width: float, lane_num: int, render_root_np: NodePath,
-        pg_physics_world: PgPhysicsWorld, random_seed
+        pg_physics_world: PGPhysicsWorld, random_seed
     ):
         place_holder = BlockSocket(Road(Decoration.start, Decoration.end), Road(Decoration.start, Decoration.end))
         super(FirstBlock, self).__init__(0, place_holder, global_network, random_seed)

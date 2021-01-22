@@ -4,10 +4,10 @@ from typing import Dict
 
 from panda3d.core import NodePath
 from panda3d.bullet import BulletWorld
-from pgdrive.pg_config import PgConfig
-from pgdrive.pg_config.pg_space import PgSpace
+from pgdrive.pg_config import PGConfig
+from pgdrive.pg_config.pg_space import PGSpace
 from pgdrive.utils.asset_loader import AssetLoader
-from pgdrive.world.pg_physics_world import PgPhysicsWorld
+from pgdrive.world.pg_physics_world import PGPhysicsWorld
 
 
 class PhysicsNodeList(list):
@@ -41,7 +41,7 @@ class PhysicsNodeList(list):
 
 
 class Element:
-    PARAMETER_SPACE = PgSpace({})
+    PARAMETER_SPACE = PGSpace({})
 
     def __init__(self, random_seed=None):
         """
@@ -49,9 +49,9 @@ class Element:
         There parameters doesn't change, such as length of straight road, max speed of one vehicle, etc.
         """
         assert isinstance(
-            self.PARAMETER_SPACE, PgSpace
-        ) or random_seed is None, "Using PgSpace to define parameter spaces of " + self.class_name
-        self._config = PgConfig({k: None for k in self.PARAMETER_SPACE.parameters})
+            self.PARAMETER_SPACE, PGSpace
+        ) or random_seed is None, "Using PGSpace to define parameter spaces of " + self.class_name
+        self._config = PGConfig({k: None for k in self.PARAMETER_SPACE.parameters})
         self.random_seed = 0 if random_seed is None else random_seed
         if self.PARAMETER_SPACE is not None:
             self.PARAMETER_SPACE.seed(self.random_seed)
@@ -76,7 +76,7 @@ class Element:
         # logging.debug("Read config to " + self.class_name)
         self._config.update(copy.copy(config))
 
-    def attach_to_pg_world(self, parent_node_path: NodePath, pg_physics_world: PgPhysicsWorld):
+    def attach_to_pg_world(self, parent_node_path: NodePath, pg_physics_world: PGPhysicsWorld):
         if self.render:
             # double check :-)
             assert isinstance(self.node_path, NodePath), "No render model on node_path in this Element"
@@ -84,7 +84,7 @@ class Element:
         self.dynamic_nodes.attach_to_physics_world(pg_physics_world.dynamic_world)
         self.static_nodes.attach_to_physics_world(pg_physics_world.static_world)
 
-    def detach_from_pg_world(self, pg_physics_world: PgPhysicsWorld):
+    def detach_from_pg_world(self, pg_physics_world: PGPhysicsWorld):
         """
         It is not fully remove, if this element is useless in the future, call Func delete()
         """

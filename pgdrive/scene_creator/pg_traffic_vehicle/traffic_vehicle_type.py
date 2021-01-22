@@ -1,9 +1,9 @@
-from pgdrive.scene_creator.pg_traffic_vehicle.traffic_vehicle import PgTrafficVehicle
+from pgdrive.scene_creator.pg_traffic_vehicle.traffic_vehicle import PGTrafficVehicle
 
 factor = 1
 
 
-class LVehicle(PgTrafficVehicle):
+class LVehicle(PGTrafficVehicle):
     LENGTH = 4.8
     WIDTH = 1.8
     HEIGHT = 1.9
@@ -12,7 +12,7 @@ class LVehicle(PgTrafficVehicle):
     ]
 
 
-class SVehicle(PgTrafficVehicle):
+class SVehicle(PGTrafficVehicle):
     LENGTH = 3.2
     WIDTH = 1.8
     HEIGHT = 1.5
@@ -21,7 +21,7 @@ class SVehicle(PgTrafficVehicle):
     ]
 
 
-class MVehicle(PgTrafficVehicle):
+class MVehicle(PGTrafficVehicle):
     LENGTH = 3.9
     WIDTH = 2.0
     HEIGHT = 1.3
@@ -30,7 +30,7 @@ class MVehicle(PgTrafficVehicle):
     ]
 
 
-class XLVehicle(PgTrafficVehicle):
+class XLVehicle(PGTrafficVehicle):
     LENGTH = 7.3
     WIDTH = 2.3
     HEIGHT = 2.7

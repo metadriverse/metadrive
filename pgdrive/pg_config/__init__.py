@@ -27,13 +27,13 @@ def _recursive_check_keys(new_config, old_config, prefix=""):
                 _recursive_check_keys(new, old, new_prefix)
 
 
-class PgConfig:
+class PGConfig:
     """
     This class aims to check whether user config exists if default config system,
-    Mostly, Config is sampled from parameter space in PgDrive
+    Mostly, Config is sampled from parameter space in PGDrive
 
     Besides, the value type will also be checked, but sometimes the value type is not unique (maybe Union[str, int]).
-    For these <key, value> items, use PgConfig["your key"] = None to init your PgConfig, then it will not implement
+    For these <key, value> items, use PGConfig["your key"] = None to init your PgConfig, then it will not implement
     type check at the first time. key "config" in map.py and key "force_fps" in world.py are good examples.
     """
     def __init__(self, config: dict):

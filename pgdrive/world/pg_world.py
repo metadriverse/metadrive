@@ -8,7 +8,7 @@ from direct.showbase import ShowBase
 from panda3d.bullet import BulletDebugNode
 from panda3d.core import AntialiasAttrib, NodePath, loadPrcFileData, LineSegs, Fog
 
-from pgdrive.pg_config import PgConfig
+from pgdrive.pg_config import PGConfig
 from pgdrive.pg_config.cam_mask import CamMask
 from pgdrive.utils import is_mac, setup_logger
 from pgdrive.utils.asset_loader import AssetLoader, initialize_asset_loader
@@ -18,8 +18,8 @@ from pgdrive.world.force_fps import ForceFPS
 from pgdrive.world.highway_render.highway_render import HighwayRender
 from pgdrive.world.image_buffer import ImageBuffer
 from pgdrive.world.light import Light
-from pgdrive.world.onscreen_message import PgOnScreenMessage
-from pgdrive.world.pg_physics_world import PgPhysicsWorld
+from pgdrive.world.onscreen_message import PGOnScreenMessage
+from pgdrive.world.pg_physics_world import PGPhysicsWorld
 from pgdrive.world.sky_box import SkyBox
 from pgdrive.world.terrain import Terrain
 
@@ -38,7 +38,7 @@ def _free_warning():
     loadPrcFileData("", "notify-level-thread debug")
 
 
-class PgWorld(ShowBase.ShowBase):
+class PGWorld(ShowBase.ShowBase):
     DEBUG = False
     loadPrcFileData("", "window-title {}".format(PG_EDITION))
     loadPrcFileData("", "framebuffer-multisample 1")
@@ -87,7 +87,7 @@ class PgWorld(ShowBase.ShowBase):
             loadPrcFileData("", "load-display  pandagles2")
         if self.pg_config["debug"]:
             # debug setting
-            PgWorld.DEBUG = True
+            PGWorld.DEBUG = True
             _free_warning()
             setup_logger(debug=True)
             self.accept('1', self.toggleDebug)
@@ -101,7 +101,7 @@ class PgWorld(ShowBase.ShowBase):
             if self.pg_config["debug_physics_world"]:
                 self.accept('1', self.toggleDebug)
 
-        super(PgWorld, self).__init__(windowType=self.mode)
+        super(PGWorld, self).__init__(windowType=self.mode)
 
         # Change window size at runtime if screen too small
         assert int(self.pg_config["use_topdown"]) + int(self.pg_config["use_image"]) <= 1, (
@@ -176,7 +176,7 @@ class PgWorld(ShowBase.ShowBase):
         self.collision_info_np = None
 
         # physics world
-        self.physics_world = PgPhysicsWorld()
+        self.physics_world = PGPhysicsWorld()
 
         # for real time simulation
         self.force_fps = ForceFPS(self, start=False)
@@ -231,7 +231,7 @@ class PgWorld(ShowBase.ShowBase):
                 self.setFrameRateMeter(True)
 
             # onscreen message
-            self.on_screen_message = PgOnScreenMessage(
+            self.on_screen_message = PGOnScreenMessage(
                 debug=self.DEBUG
             ) if self.mode == RENDER_MODE_ONSCREEN and self.pg_config["onscreen_message"] else None
             self._show_help_message = False
@@ -277,7 +277,7 @@ class PgWorld(ShowBase.ShowBase):
 
     @staticmethod
     def default_config():
-        return PgConfig(
+        return PGConfig(
             dict(
                 window_size=(1200, 900),  # width, height
                 debug=False,
@@ -394,5 +394,5 @@ class PgWorld(ShowBase.ShowBase):
 
 
 if __name__ == "__main__":
-    world = PgWorld({"debug": True})
+    world = PGWorld({"debug": True})
     world.run()
