@@ -1,3 +1,3 @@
-class TrafficMode:
-    Reborn = "reborn"
-    Trigger = "trigger"
+"""
+This package is used to manage all runtime elements, including their moving and interaction
+"""

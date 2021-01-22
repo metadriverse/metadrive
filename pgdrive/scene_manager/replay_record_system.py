@@ -2,30 +2,30 @@ import copy
 import logging
 
 from pgdrive.scene_creator.map import Map
-from pgdrive.world.pg_world import PgWorld
-from . import TrafficMode
+from pgdrive.world.pg_world import PGWorld
+from pgdrive.scene_manager.traffic_manager import TrafficMode
+from pgdrive.scene_manager.traffic_manager import TrafficManager
 
 
 class PGReplayer:
-    def __init__(self, scene_mgr, current_map: Map, episode_data: dict, pg_world: PgWorld):
-        self.restore_traffic_mode = episode_data["traffic_mode"]
+    def __init__(self, traffic_mgr: TrafficManager, current_map: Map, episode_data: dict, pg_world: PGWorld):
         self.restore_episode_info = episode_data["frame"]
         self.restore_episode_info.reverse()
         self.restore_vehicles = {}
         self.current_map = current_map
-        self._recover_vehicles_from_data(scene_mgr, episode_data, pg_world)
+        self._recover_vehicles_from_data(traffic_mgr, episode_data, pg_world)
 
-    def _recover_vehicles_from_data(self, scene_mgr, episode_data: dict, pg_world: PgWorld):
+    def _recover_vehicles_from_data(self, traffic_mgr: TrafficManager, episode_data: dict, pg_world: PGWorld):
         assert isinstance(self.restore_vehicles, dict), "No place to restore vehicles"
         import pgdrive.scene_creator.pg_traffic_vehicle.traffic_vehicle_type as v_types
         traffics = episode_data["init_traffic"]
         for name, config in traffics.items():
             car_type = getattr(v_types, config["type"])
-            car = car_type.create_traffic_vehicle_from_config(scene_mgr, config)
+            car = car_type.create_traffic_vehicle_from_config(traffic_mgr, config)
             self.restore_vehicles[name] = car
             car.attach_to_pg_world(pg_world.pbr_worldNP, pg_world.physics_world)
 
-    def replay_frame(self, ego_vehicle, pg_world: PgWorld):
+    def replay_frame(self, ego_vehicle, pg_world: PGWorld):
         assert self.restore_episode_info is not None, "Not frame data in episode info"
         if len(self.restore_episode_info) == 0:
             return True
@@ -34,7 +34,7 @@ class PGReplayer:
         for index, state in frame.items():
             vehicle = self.restore_vehicles[index] if index != "ego" else ego_vehicle
             vehicle.set_state(state)
-            if index != "ego" and state["done"] and self.restore_traffic_mode == TrafficMode.Trigger:
+            if index != "ego" and state["done"] and not vehicle.enable_reborn:
                 vehicles_to_remove.append(vehicle)
         for v in vehicles_to_remove:
             v.destroy(pg_world)
@@ -49,14 +49,13 @@ class PGReplayer:
 
 
 class PGRecorder:
-    def __init__(self, map: Map, init_vehicle_states: dict, traffic_mode: TrafficMode):
+    def __init__(self, map: Map, init_vehicle_states: dict):
         map_data = dict()
         map_data[map.random_seed] = map.save_map()
         init_vehicle_state = init_vehicle_states
         self.episode_info = dict(
             map_config=map.config.get_dict(),
             init_traffic=init_vehicle_state,
-            traffic_mode=traffic_mode,
             map_data=copy.deepcopy(map_data),
             frame=[]
         )
@@ -67,7 +66,7 @@ class PGRecorder:
     def dump_episode(self):
         return copy.deepcopy(self.episode_info)
 
-    def destroy(self, pg_world: PgWorld):
+    def destroy(self, pg_world: PGWorld):
         self.episode_info.clear()
 
     def __del__(self):

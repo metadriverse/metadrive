@@ -1,8 +1,8 @@
-from pgdrive.world.pg_world import PgWorld
+from pgdrive.world.pg_world import PGWorld
 from pgdrive.utils.math_utils import norm
 
 
-class PgLOD:
+class PGLOD:
     """
     Used to cull distant rendering object to improve rendering efficiency
     TODO calculation efficiency can also be improved in the future
@@ -16,7 +16,7 @@ class PgLOD:
     LOD_VEHICLE_PHYSICS_DIST = 50
 
     @classmethod
-    def cull_distant_blocks(cls, blocks: list, pos, pg_world: PgWorld):
+    def cull_distant_blocks(cls, blocks: list, pos, pg_world: PGWorld):
         # A distance based LOD rendering like GTA
         for block in blocks:
             if block.bounding_box[0] - cls.LOD_MAP_VIS_DIST < pos[0] < block.bounding_box[1] + cls.LOD_MAP_VIS_DIST and \
@@ -36,7 +36,7 @@ class PgLOD:
                 block.dynamic_nodes.detach_from_physics_world(pg_world.physics_world.dynamic_world)
 
     @classmethod
-    def cull_distant_traffic_vehicles(cls, vehicles: list, pos, pg_world: PgWorld):
+    def cull_distant_traffic_vehicles(cls, vehicles: list, pos, pg_world: PGWorld):
         # Cull distant vehicles
         for v in vehicles:
             v_p = v.position

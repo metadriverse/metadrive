@@ -1,7 +1,7 @@
 import numpy as np
 
 from pgdrive.pg_config.parameter_space import Parameter, BlockParameterSpace
-from pgdrive.pg_config.pg_space import PgSpace
+from pgdrive.pg_config.pg_space import PGSpace
 from pgdrive.scene_creator.blocks.block import Block, BlockSocket
 from pgdrive.scene_creator.blocks.create_block_utils import CreateAdverseRoad, CreateRoadFrom, sharpbend
 from pgdrive.scene_creator.lanes.lane import LineType
@@ -14,7 +14,7 @@ class Roundabout(Block):
     roundabout class, the example is the same as Intersection
     """
     ID = "O"
-    PARAMETER_SPACE = PgSpace(BlockParameterSpace.ROUNDABOUT)
+    PARAMETER_SPACE = PGSpace(BlockParameterSpace.ROUNDABOUT)
     SOCKET_NUM = 3
     RADIUS_IN = 20
     ANGLE = 60

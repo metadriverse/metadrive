@@ -17,7 +17,7 @@ from pgdrive.scene_creator.road.road_network import RoadNetwork
 from pgdrive.utils.asset_loader import AssetLoader
 from pgdrive.utils.element import Element
 from pgdrive.utils.math_utils import norm
-from pgdrive.world.pg_physics_world import PgPhysicsWorld
+from pgdrive.world.pg_physics_world import PGPhysicsWorld
 
 
 class BlockSocket:
@@ -102,7 +102,7 @@ class Block(Element, BlockDefault):
             self.side_normal = self.loader.loadTexture(AssetLoader.file_path("textures", "side_walk", "normal.png"))
             self.side_walk = self.loader.loadModel(AssetLoader.file_path("models", "box.bam"))
 
-    def construct_block(self, root_render_np: NodePath, pg_physics_world: PgPhysicsWorld) -> bool:
+    def construct_block(self, root_render_np: NodePath, pg_physics_world: PGPhysicsWorld) -> bool:
         """
         Randomly Construct a block, if overlap return False
         """
@@ -112,7 +112,7 @@ class Block(Element, BlockDefault):
         self.attach_to_pg_world(root_render_np, pg_physics_world)
         return success
 
-    def destruct_block(self, pg_physics_world: PgPhysicsWorld):
+    def destruct_block(self, pg_physics_world: PGPhysicsWorld):
         self._clear_topology()
         self.detach_from_pg_world(pg_physics_world)
         self.node_path.removeNode()
@@ -131,7 +131,7 @@ class Block(Element, BlockDefault):
         self._global_network += self.block_network
         return no_cross
 
-    def construct_from_config(self, config: Dict, root_render_np: NodePath, pg_physics_world: PgPhysicsWorld):
+    def construct_from_config(self, config: Dict, root_render_np: NodePath, pg_physics_world: PGPhysicsWorld):
         assert set(config.keys()) == self.PARAMETER_SPACE.parameters, \
             "Make sure the parameters' name are as same as what defined in parameter_space.py"
         self.set_config(config)

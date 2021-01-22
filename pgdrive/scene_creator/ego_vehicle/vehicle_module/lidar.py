@@ -8,9 +8,9 @@ from panda3d.core import Point3, BitMask32, Vec3, NodePath
 from pgdrive.pg_config.body_name import BodyName
 from pgdrive.pg_config.cam_mask import CamMask
 from pgdrive.scene_creator.highway_vehicle.behavior import IDMVehicle
-from pgdrive.scene_creator.pg_traffic_vehicle.traffic_vehicle import PgTrafficVehicle
+from pgdrive.scene_creator.pg_traffic_vehicle.traffic_vehicle import PGTrafficVehicle
 from pgdrive.utils.asset_loader import AssetLoader
-from pgdrive.world.pg_physics_world import PgPhysicsWorld
+from pgdrive.world.pg_physics_world import PGPhysicsWorld
 from pgdrive.utils.coordinates_shift import panda_position
 
 
@@ -43,7 +43,7 @@ class Lidar:
                 ball.getChildren().reparentTo(laser_np)
             # self.node_path.flattenStrong()
 
-    def perceive(self, vehicle_position, heading_theta, pg_physics_world: PgPhysicsWorld):
+    def perceive(self, vehicle_position, heading_theta, pg_physics_world: PGPhysicsWorld):
         """
         Call me to update the perception info
         """
@@ -52,7 +52,7 @@ class Lidar:
         self.detection_results = []
 
         # lidar calculation use pg coordinates
-        mask = BitMask32.bit(PgTrafficVehicle.COLLISION_MASK)
+        mask = BitMask32.bit(PGTrafficVehicle.COLLISION_MASK)
         laser_heading = np.arange(0, self.laser_num) * self.radian_unit + heading_theta
         point_x = self.perceive_distance * np.cos(laser_heading) + vehicle_position[0]
         point_y = self.perceive_distance * np.sin(laser_heading) + vehicle_position[1]
@@ -86,7 +86,7 @@ class Lidar:
         res = []
         for vehicle in surrounding_vehicles[:max_v_num]:
             if vehicle is not None:
-                assert isinstance(vehicle, IDMVehicle), "Now PgDrive Doesn't support other vehicle type"
+                assert isinstance(vehicle, IDMVehicle), "Now PGDrive Doesn't support other vehicle type"
                 relative_position = ego_vehicle.projection(vehicle.position - ego_vehicle.position)
                 # It is possible that the centroid of other vehicle is too far away from ego but lidar shed on it.
                 # So the distance may greater than perceive distance.

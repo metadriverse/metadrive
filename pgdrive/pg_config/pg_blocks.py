@@ -6,7 +6,7 @@ from pgdrive.scene_creator.blocks.std_t_intersection import StdTInterSection
 from pgdrive.scene_creator.blocks.straight import Straight
 
 
-class PgBlock:
+class PGBlock:
     TYPE = {
         Curve: 0.5,
         Straight: 0.1,

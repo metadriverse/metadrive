@@ -32,11 +32,12 @@ def _evaluate(env_config, num_episode):
     return ep_reward_mean, success_rate
 
 
-def test_expert_with_traffic():
+def test_expert_with_traffic(use_render=False):
     ep_reward, success_rate = _evaluate(
-        dict(environment_num=1, start_seed=0, load_map_from_json=False, random_traffic=False), num_episode=3
+        dict(environment_num=1, start_seed=0, load_map_from_json=False, random_traffic=False, use_render=use_render),
+        num_episode=3
     )
-    assert 255 < ep_reward < 265, ep_reward
+    assert 245 < ep_reward < 265, ep_reward
     assert success_rate == 1.0, success_rate
 
 

@@ -2,14 +2,14 @@ import numpy as np
 from gym.spaces import Box
 
 from pgdrive.envs.pgdrive_env import PGDriveEnv
-from pgdrive.pg_config import PgConfig
+from pgdrive.pg_config import PGConfig
 
 
 class ActionRepeat(PGDriveEnv):
     ORIGINAL_ACTION_REPEAT = 5
 
     @classmethod
-    def default_config(cls) -> PgConfig:
+    def default_config(cls) -> PGConfig:
         config = PGDriveEnv.default_config()
 
         # Set the internal environment run in 0.02s interval.

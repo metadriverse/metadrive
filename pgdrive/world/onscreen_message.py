@@ -6,14 +6,14 @@ from panda3d.core import Vec4
 from pgdrive.world.constants import HELP_MESSAGE, DEBUG_MESSAGE
 
 
-class PgOnScreenMessage(OnScreenDebug.OnScreenDebug):
+class PGOnScreenMessage(OnScreenDebug.OnScreenDebug):
     """
     Simply inherit from the original debug class of panda3d to show debug message on screen
     """
     POS = (0.1, -0.2)
 
     def __init__(self, refresh_plain_text=False, debug=False):
-        super(PgOnScreenMessage, self).__init__()
+        super(PGOnScreenMessage, self).__init__()
         self.debug = debug
         self.enabled = True
         self.load()
@@ -32,7 +32,7 @@ class PgOnScreenMessage(OnScreenDebug.OnScreenDebug):
                 self.add(k, v)
 
     def load(self):
-        super(PgOnScreenMessage, self).load()
+        super(PGOnScreenMessage, self).load()
         self.onScreenText.setBg(Vec4(0, 0, 0, 0.5))
         self.onScreenText.setPos(*self.POS)
         self.onScreenText.textNode.setCardAsMargin(0.6, 0.6, 0.5, 0.1)

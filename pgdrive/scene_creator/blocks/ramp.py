@@ -1,7 +1,7 @@
 import numpy as np
 
 from pgdrive.pg_config.parameter_space import Parameter, BlockParameterSpace
-from pgdrive.pg_config.pg_space import PgSpace
+from pgdrive.pg_config.pg_space import PGSpace
 from pgdrive.scene_creator.blocks.block import Block, BlockSocket
 from pgdrive.scene_creator.blocks.create_block_utils import ExtendStraightLane, CreateRoadFrom, CreateAdverseRoad, \
     sharpbend
@@ -24,7 +24,7 @@ class Ramp(Block):
                       //                                                      \\                                                         
     { ---------------//                                                        \\---------------}    
     """
-    PARAMETER_SPACE = PgSpace(BlockParameterSpace.RAMP_PARAMETER)
+    PARAMETER_SPACE = PGSpace(BlockParameterSpace.RAMP_PARAMETER)
     SOCKET_NUM = 1
 
     # can be added to parameter space in the future

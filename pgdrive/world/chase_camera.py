@@ -4,7 +4,7 @@ from direct.controls.InputState import InputState
 from panda3d.core import Vec3, Camera
 
 from pgdrive.scene_creator.ego_vehicle.base_vehicle import BaseVehicle
-from pgdrive.world.pg_world import PgWorld
+from pgdrive.world.pg_world import PGWorld
 
 
 class ChaseCamera:
@@ -15,7 +15,7 @@ class ChaseCamera:
     TASK_NAME = "update main camera"
 
     def __init__(
-        self, camera: Camera, vehicle: BaseVehicle, camera_height: float, camera_dist: float, pg_world: PgWorld
+        self, camera: Camera, vehicle: BaseVehicle, camera_height: float, camera_dist: float, pg_world: PGWorld
     ):
         self.camera = camera
         self.camera_queue = None

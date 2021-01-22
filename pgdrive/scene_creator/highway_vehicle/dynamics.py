@@ -3,7 +3,7 @@ from typing import Tuple, List
 import numpy as np
 
 from pgdrive.scene_creator.highway_vehicle.kinematics import Vehicle
-from pgdrive.scene_manager.scene_manager import SceneManager
+from pgdrive.scene_manager.traffic_manager import TrafficManager
 
 
 class BicycleVehicle(Vehicle):
@@ -27,13 +27,13 @@ class BicycleVehicle(Vehicle):
 
     def __init__(
         self,
-        scene: SceneManager,
+        traffic_mgr: TrafficManager,
         position: List,
         heading: float = 0,
         speed: float = 0,
         np_random: np.random.RandomState = None,
     ) -> None:
-        super().__init__(scene, position, heading, speed, np_random=np_random)
+        super().__init__(traffic_mgr, position, heading, speed, np_random=np_random)
         self.lateral_speed = 0
         self.yaw_rate = 0
         self.theta = None

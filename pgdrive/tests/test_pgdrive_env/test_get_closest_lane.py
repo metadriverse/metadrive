@@ -15,7 +15,7 @@ def test_get_lane_index(use_render=False):
     o = env.reset()
     for i in range(1, 1000):
         o, r, d, info = env.step([0, 0])
-        for v in env.scene_manager.vehicles:
+        for v in env.scene_manager.traffic.vehicles:
             assert v.lane_index == env.current_map.road_network.get_closest_lane_index(v.position)[0]
     env.close()
 

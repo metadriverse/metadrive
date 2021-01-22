@@ -4,7 +4,7 @@ from collections import deque
 import numpy as np
 
 from pgdrive.pg_config.parameter_space import Parameter, BlockParameterSpace
-from pgdrive.pg_config.pg_space import PgSpace
+from pgdrive.pg_config.pg_space import PGSpace
 from pgdrive.scene_creator.blocks.block import Block, BlockSocket
 from pgdrive.scene_creator.blocks.create_block_utils import CreateAdverseRoad, CreateRoadFrom, ExtendStraightLane, \
     sharpbend
@@ -34,7 +34,7 @@ class InterSection(Block):
     """
 
     ID = "X"
-    PARAMETER_SPACE = PgSpace(BlockParameterSpace.INTERSECTION)
+    PARAMETER_SPACE = PGSpace(BlockParameterSpace.INTERSECTION)
     SOCKET_NUM = 3
     ANGLE = 90  # may support other angle in the future
     EXIT_PART_LENGTH = 30

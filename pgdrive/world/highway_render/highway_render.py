@@ -114,7 +114,7 @@ class HighwayRender:
         surface.move_display_window_to(self._center_pos)
         surface.blit(self.map_surface, (0, 0))
         VehicleGraphics.display(self.scene_mgr.ego_vehicle, surface)
-        for v in self.scene_mgr.vehicles:
+        for v in self.scene_mgr.traffic.vehicles:
             if v is self.scene_mgr.ego_vehicle:
                 continue
             VehicleGraphics.display(v, surface)
