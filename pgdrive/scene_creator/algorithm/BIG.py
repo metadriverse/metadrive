@@ -4,11 +4,11 @@ from typing import Union
 from numpy.random import RandomState
 from panda3d.core import NodePath
 
-from pgdrive.pg_config.pg_blocks import PgBlock
+from pgdrive.pg_config.pg_blocks import PGBlock
 from pgdrive.scene_creator.blocks.block import Block
 from pgdrive.scene_creator.blocks.first_block import FirstBlock
 from pgdrive.scene_creator.road.road_network import RoadNetwork
-from pgdrive.world.pg_physics_world import PgPhysicsWorld
+from pgdrive.world.pg_physics_world import PGPhysicsWorld
 
 
 class NextStep:
@@ -28,7 +28,7 @@ class BIG:
 
     def __init__(
         self, lane_num: int, lane_width: float, global_network: RoadNetwork, render_node_path: NodePath,
-        pg_physics_world: PgPhysicsWorld, random_seed: int
+        pg_physics_world: PGPhysicsWorld, random_seed: int
     ):
         self._block_sequence = None
         self._random_seed = random_seed
@@ -82,12 +82,12 @@ class BIG:
         Sample a random block type
         """
         if self._block_sequence is None:
-            block_types = PgBlock.all_blocks()
-            block_probabilities = PgBlock.block_probability()
+            block_types = PGBlock.all_blocks()
+            block_probabilities = PGBlock.block_probability()
             block_type = self.np_random.choice(block_types, p=block_probabilities)
         else:
             type_id = self._block_sequence[len(self.blocks)]
-            block_type = PgBlock.get_block(type_id)
+            block_type = PGBlock.get_block(type_id)
         sockets = [i for i in range(self.blocks[-1].SOCKET_NUM)]
         block = block_type(
             len(self.blocks), self.blocks[-1].get_socket(self.np_random.choice(sockets)), self._global_network,

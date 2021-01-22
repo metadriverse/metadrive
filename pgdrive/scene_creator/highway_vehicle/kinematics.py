@@ -6,7 +6,8 @@ import numpy as np
 import pgdrive.utils.math_utils as utils
 from pgdrive.scene_creator.lanes.lane import AbstractLane
 from pgdrive.scene_creator.road_object.object import Landmark, Obstacle, RoadObject
-from pgdrive.scene_manager.scene_manager import SceneManager, LaneIndex
+from pgdrive.scene_manager.scene_manager import LaneIndex
+from pgdrive.scene_manager.traffic_manager import TrafficManager
 from pgdrive.utils import get_np_random
 
 
@@ -31,18 +32,20 @@ class Vehicle:
     """ Maximum reachable speed [m/s] """
     def __init__(
         self,
-        scene: SceneManager,
+        traffic_mgr: TrafficManager,
         position: List,
         heading: float = 0,
         speed: float = 0,
         np_random: np.random.RandomState = None,
     ):
-        self.scene = scene
+        self.traffic_mgr = traffic_mgr
         self._position = np.array(position).astype('float')
         self.heading = heading
         self.speed = speed
-        self.lane_index, _ = self.scene.network.get_closest_lane_index(self.position) if self.scene else np.nan
-        self.lane = self.scene.network.get_lane(self.lane_index) if self.scene else None
+        self.lane_index, _ = self.traffic_mgr.map.road_network.get_closest_lane_index(
+            self.position
+        ) if self.traffic_mgr else (np.nan, np.nan)
+        self.lane = self.traffic_mgr.map.road_network.get_lane(self.lane_index) if self.traffic_mgr else None
         self.action = {'steering': 0, 'acceleration': 0}
         self.crashed = False
         self.log = []
@@ -61,24 +64,24 @@ class Vehicle:
         self._position = np.asarray(pos).copy()
 
     @classmethod
-    def make_on_lane(cls, scene: SceneManager, lane_index: LaneIndex, longitudinal: float, speed: float = 0):
+    def make_on_lane(cls, traffic_mgr: TrafficManager, lane_index: LaneIndex, longitudinal: float, speed: float = 0):
         """
         Create a vehicle on a given lane at a longitudinal position.
 
-        :param scene: the road where the vehicle is driving
+        :param traffic_mgr: the road where the vehicle is driving
         :param lane_index: index of the lane where the vehicle is located
         :param longitudinal: longitudinal position along the lane
         :param speed: initial speed in [m/s]
         :return: A vehicle with at the specified position
         """
-        lane = scene.network.get_lane(lane_index)
+        lane = traffic_mgr.map.road_network.get_lane(lane_index)
         if speed is None:
             speed = lane.speed_limit
-        return cls(scene, lane.position(longitudinal, 0), lane.heading_at(longitudinal), speed)
+        return cls(traffic_mgr, lane.position(longitudinal, 0), lane.heading_at(longitudinal), speed)
 
     @classmethod
     def create_random(
-        cls, scene: SceneManager, lane: AbstractLane, longitude: float, speed: float = None, random_seed=None
+        cls, traffic_mgr: TrafficManager, lane: AbstractLane, longitude: float, speed: float = None, random_seed=None
     ):
         """
         Create a random vehicle on the road.
@@ -88,14 +91,14 @@ class Vehicle:
 
         :param longitude: the longitude on lane
         :param lane: the lane where the vehicle is born
-        :param scene: the scene where the vehicle is driving
+        :param traffic_mgr: the traffic_mgr where the vehicle is driving
         :param speed: initial speed in [m/s]. If None, will be chosen randomly
         :return: A vehicle with random position and/or speed
         """
         if speed is None:
-            speed = scene.np_random.uniform(Vehicle.DEFAULT_SPEEDS[0], Vehicle.DEFAULT_SPEEDS[1])
+            speed = traffic_mgr.np_random.uniform(Vehicle.DEFAULT_SPEEDS[0], Vehicle.DEFAULT_SPEEDS[1])
         v = cls(
-            scene,
+            traffic_mgr,
             list(lane.position(longitude, 0)),
             lane.heading_at(longitude),
             speed,
@@ -113,7 +116,7 @@ class Vehicle:
         :param vehicle: a vehicle
         :return: a new vehicle at the same dynamical state
         """
-        v = cls(vehicle.scene, vehicle.position, vehicle.heading, vehicle.speed)
+        v = cls(vehicle.traffic_mgr, vehicle.position, vehicle.heading, vehicle.speed)
         return v
 
     def act(self, action: Union[dict, str] = None) -> None:
@@ -157,9 +160,9 @@ class Vehicle:
             self.action['acceleration'] = max(self.action['acceleration'], 1.0 * (self.MAX_SPEED - self.speed))
 
     def on_state_update(self) -> None:
-        new_l_index, _ = self.scene.network.get_closest_lane_index(self.position)
+        new_l_index, _ = self.traffic_mgr.map.road_network.get_closest_lane_index(self.position)
         self.lane_index = new_l_index
-        self.lane = self.scene.network.get_lane(self.lane_index)
+        self.lane = self.traffic_mgr.map.road_network.get_lane(self.lane_index)
 
     def lane_distance_to(self, vehicle: "Vehicle", lane: AbstractLane = None) -> float:
         """
@@ -223,7 +226,7 @@ class Vehicle:
     @property
     def destination(self) -> np.ndarray:
         if getattr(self, "route", None):
-            last_lane = self.scene.network.get_lane(self.route[-1])
+            last_lane = self.traffic_mgr.map.road_network.get_lane(self.route[-1])
             return last_lane.position(last_lane.length, 0)
         else:
             return self.position
@@ -237,7 +240,7 @@ class Vehicle:
 
     @property
     def on_road(self) -> bool:
-        """ Is the vehicle on its current lane, or off-scene ? """
+        """ Is the vehicle on its current lane, or off-traffic_mgr ? """
         return self.lane.on_lane(self.position)
 
     def front_distance_to(self, other: "Vehicle") -> float:
@@ -262,6 +265,19 @@ class Vehicle:
             for key in ['x', 'y', 'vx', 'vy']:
                 d[key] -= origin_dict[key]
         return d
+
+    def destroy(self, *args):
+        self.traffic_mgr = None
+        self._position = None
+        self.heading = None
+        self.speed = None
+        self.lane_index = None
+        self.lane = None
+        self.action = None
+        self.crashed = False
+        self.log = None
+        self.history = None
+        self.np_random = None
 
     def __str__(self):
         return "{} #{}: {}".format(self.__class__.__name__, id(self) % 1000, self.position)

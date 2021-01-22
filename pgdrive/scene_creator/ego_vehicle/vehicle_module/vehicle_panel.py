@@ -2,7 +2,7 @@ from panda3d.core import NodePath, PGTop, TextNode, Vec3, CardMaker
 
 from pgdrive.pg_config.cam_mask import CamMask
 from pgdrive.world.image_buffer import ImageBuffer
-from pgdrive.world.pg_world import PgWorld
+from pgdrive.world.pg_world import PGWorld
 
 
 class VehiclePanel(ImageBuffer):
@@ -15,7 +15,7 @@ class VehiclePanel(ImageBuffer):
     GAP = 4.1
     TASK_NAME = "update panel"
 
-    def __init__(self, pg_world: PgWorld):
+    def __init__(self, pg_world: PGWorld):
         if pg_world.win is None:
             return
         self.aspect2d_np = NodePath(PGTop("aspect2d"))

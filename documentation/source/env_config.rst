@@ -41,7 +41,7 @@ Manual Control
     - :code:`use_chase_camera` (bool): A perspective like racing game. usually True, when manual control
     - :code:`camera_height` (float): Chase camera height
 
-Traffic Config
+TrafficManager Config
 #################
 
     - :code:`traffic_density` (float): Vehicle number per 10 meter, aiming to adjust the number of vehicle on road

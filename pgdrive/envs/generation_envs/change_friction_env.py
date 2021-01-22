@@ -3,7 +3,7 @@ import logging
 import numpy as np
 
 from pgdrive.envs.pgdrive_env import PGDriveEnv
-from pgdrive.pg_config import PgConfig
+from pgdrive.pg_config import PGConfig
 from pgdrive.scene_creator.ego_vehicle.base_vehicle import BaseVehicle
 from pgdrive.utils import get_np_random
 from pgdrive.world.chase_camera import ChaseCamera
@@ -11,7 +11,7 @@ from pgdrive.world.chase_camera import ChaseCamera
 
 class ChangeFrictionEnv(PGDriveEnv):
     @staticmethod
-    def default_config() -> PgConfig:
+    def default_config() -> PGConfig:
         config = PGDriveEnv.default_config()
         config.add("change_friction", True)
         config.add("friction_min", 0.8)

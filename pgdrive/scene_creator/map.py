@@ -7,8 +7,8 @@ from typing import List, Optional, Union, Iterable
 import numpy as np
 from panda3d.core import NodePath
 
-from pgdrive.pg_config import PgConfig
-from pgdrive.pg_config.pg_blocks import PgBlock
+from pgdrive.pg_config import PGConfig
+from pgdrive.pg_config.pg_blocks import PGBlock
 from pgdrive.scene_creator.algorithm.BIG import BIG, BigGenerateMethod
 from pgdrive.scene_creator.blocks.block import Block
 from pgdrive.scene_creator.blocks.first_block import FirstBlock
@@ -17,8 +17,8 @@ from pgdrive.utils import AssetLoader, import_pygame
 from pgdrive.utils.constans import Decoration
 from pgdrive.world.highway_render.highway_render import LaneGraphics
 from pgdrive.world.highway_render.world_surface import WorldSurface
-from pgdrive.world.pg_physics_world import PgPhysicsWorld
-from pgdrive.world.pg_world import PgWorld
+from pgdrive.world.pg_physics_world import PGPhysicsWorld
+from pgdrive.world.pg_world import PGWorld
 
 pygame = import_pygame()
 
@@ -63,7 +63,7 @@ class Map:
     GENERATE_PARA = "config"
     GENERATE_METHOD = "type"
 
-    def __init__(self, pg_world: PgWorld, map_config: dict = None):
+    def __init__(self, pg_world: PGWorld, map_config: dict = None):
         """
         Map can be stored and recover to save time when we access the map encountered before
         """
@@ -95,7 +95,7 @@ class Map:
 
     @staticmethod
     def default_config():
-        return PgConfig(
+        return PGConfig(
             {
                 Map.GENERATE_METHOD: MapGenerateMethod.BIG_BLOCK_NUM,
                 Map.GENERATE_PARA: None,  # it can be a file path / block num / block ID sequence
@@ -106,21 +106,21 @@ class Map:
             }
         )
 
-    def _big_generate(self, parent_node_path: NodePath, pg_physics_world: PgPhysicsWorld):
+    def _big_generate(self, parent_node_path: NodePath, pg_physics_world: PGPhysicsWorld):
         big_map = BIG(
             self.lane_num, self.lane_width, self.road_network, parent_node_path, pg_physics_world, self.random_seed
         )
         big_map.generate(self.config[self.GENERATE_METHOD], self.config[self.GENERATE_PARA])
         self.blocks = big_map.blocks
 
-    def _config_generate(self, blocks_config: List, parent_node_path: NodePath, pg_physics_world: PgPhysicsWorld):
+    def _config_generate(self, blocks_config: List, parent_node_path: NodePath, pg_physics_world: PGPhysicsWorld):
         assert len(self.road_network.graph) == 0, "These Map is not empty, please create a new map to read config"
         last_block = FirstBlock(
             self.road_network, self.lane_width, self.lane_num, parent_node_path, pg_physics_world, 1
         )
         self.blocks.append(last_block)
         for block_index, b in enumerate(blocks_config[1:], 1):
-            block_type = PgBlock.get_block(b.pop(self.BLOCK_ID))
+            block_type = PGBlock.get_block(b.pop(self.BLOCK_ID))
             pre_block_socket_index = b.pop(self.PRE_BLOCK_SOCKET_INDEX)
             last_block = block_type(
                 block_index, last_block.get_socket(pre_block_socket_index), self.road_network, self.random_seed
@@ -128,21 +128,21 @@ class Map:
             last_block.construct_from_config(b, parent_node_path, pg_physics_world)
             self.blocks.append(last_block)
 
-    def load_to_pg_world(self, pg_world: PgWorld):
+    def load_to_pg_world(self, pg_world: PGWorld):
         parent_node_path, pg_physics_world = pg_world.worldNP, pg_world.physics_world
         for block in self.blocks:
             block.attach_to_pg_world(parent_node_path, pg_physics_world)
         self._load_to_highway_render(pg_world)
 
-    def _load_to_highway_render(self, pg_world: PgWorld):
+    def _load_to_highway_render(self, pg_world: PGWorld):
         if pg_world.highway_render is not None:
             pg_world.highway_render.set_map(self)
 
-    def unload_from_pg_world(self, pg_world: PgWorld):
+    def unload_from_pg_world(self, pg_world: PGWorld):
         for block in self.blocks:
             block.detach_from_pg_world(pg_world.physics_world)
 
-    def destroy(self, pg_world: PgWorld):
+    def destroy(self, pg_world: PGWorld):
         for block in self.blocks:
             block.destroy(pg_world=pg_world)
 

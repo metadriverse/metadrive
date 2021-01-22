@@ -10,26 +10,26 @@ import gym
 import numpy as np
 
 from pgdrive.envs.observation_type import LidarStateObservation, ImageStateObservation
-from pgdrive.pg_config import PgConfig
+from pgdrive.pg_config import PGConfig
 from pgdrive.scene_creator.ego_vehicle.base_vehicle import BaseVehicle
 from pgdrive.scene_creator.ego_vehicle.vehicle_module.depth_camera import DepthCamera
 from pgdrive.scene_creator.ego_vehicle.vehicle_module.mini_map import MiniMap
 from pgdrive.scene_creator.ego_vehicle.vehicle_module.rgb_camera import RGBCamera
 from pgdrive.scene_creator.map import Map, MapGenerateMethod, parse_map_config
-from pgdrive.scene_manager import TrafficMode
+from pgdrive.scene_manager.traffic_manager import TrafficMode
 from pgdrive.scene_manager.scene_manager import SceneManager
 from pgdrive.utils import recursive_equal, safe_clip, clip, get_np_random
 from pgdrive.world import RENDER_MODE_NONE
 from pgdrive.world.chase_camera import ChaseCamera
 from pgdrive.world.manual_controller import KeyboardController, JoystickController
-from pgdrive.world.pg_world import PgWorld
+from pgdrive.world.pg_world import PGWorld
 
 pregenerated_map_file = osp.join(osp.dirname(osp.dirname(osp.abspath(__file__))), "assets", "maps", "PGDrive-maps.json")
 
 
 class PGDriveEnv(gym.Env):
     @staticmethod
-    def default_config() -> PgConfig:
+    def default_config() -> PGConfig:
         env_config = dict(
 
             # ===== Rendering =====
@@ -84,7 +84,7 @@ class PGDriveEnv(gym.Env):
             record_episode=False,
             use_saver=False
         )
-        config = PgConfig(env_config)
+        config = PGConfig(env_config)
         config.register_type("map", str, int)
         return config
 
@@ -137,12 +137,16 @@ class PGDriveEnv(gym.Env):
         self.save_mode = False
 
     def lazy_init(self):
+        """
+        Only init once in runtime, variable here exists till the close_env is called
+        :return: None
+        """
         # It is the true init() func to create the main vehicle and its module
         if self.pg_world is not None:
             return
 
         # init world
-        self.pg_world = PgWorld(self.pg_world_config)
+        self.pg_world = PGWorld(self.pg_world_config)
         self.pg_world.accept("r", self.reset)
         self.pg_world.accept("escape", sys.exit)
 
@@ -151,7 +155,7 @@ class PGDriveEnv(gym.Env):
 
         # init traffic manager
         self.scene_manager = SceneManager(
-            self.config["traffic_mode"], self.config["random_traffic"], self.config["record_episode"]
+            self.pg_world, self.config["traffic_mode"], self.config["random_traffic"], self.config["record_episode"]
         )
 
         if self.config["manual_control"]:
@@ -187,26 +191,17 @@ class PGDriveEnv(gym.Env):
 
         action = safe_clip(action, min_val=self.action_space.low[0], max_val=self.action_space.high[0])
 
-        self.vehicle.prepare_step(action)
-        self.scene_manager.prepare_step()
+        # preprocess
+        self.scene_manager.prepare_step(action)
 
-        # ego vehicle/ traffic step
-        for i in range(self.config["decision_repeat"]):
-            # traffic vehicles step
-            self.scene_manager.step(self.pg_world.pg_config["physics_world_step_size"])
-            self.pg_world.step()
-            if self.pg_world.force_fps.real_time_simulation and i < self.config["decision_repeat"] - 1:
-                # insert frame to render in min step_size
-                self.pg_world.taskMgr.step()
+        # step all entities
+        self.scene_manager.step(self.config["decision_repeat"])
 
         # update states, if restore from episode data, position and heading will be force set in update_state() function
-        self.vehicle.update_state()
-        done = self.scene_manager.update_state(self.pg_world)
+        done = self.scene_manager.update_state()
+
+        # update rl info
         self.done = self.done or done
-
-        #  panda3d render and garbage collecting loop
-        self.pg_world.taskMgr.step()
-
         obs = self.observation.observe(self.vehicle)
         step_reward = self.reward(action)
         done_reward, done_info = self._done_episode()
@@ -257,6 +252,7 @@ class PGDriveEnv(gym.Env):
 
         # clear world and traffic manager
         self.pg_world.clear_world()
+
         # select_map
         self.update_map(episode_data)
 
@@ -265,7 +261,7 @@ class PGDriveEnv(gym.Env):
 
         # generate new traffic according to the map
         self.scene_manager.reset(
-            self.pg_world, self.current_map, self.vehicle, self.config["traffic_density"], episode_data=episode_data
+            self.current_map, self.vehicle, self.config["traffic_density"], episode_data=episode_data
         )
         return self._get_reset_return()
 

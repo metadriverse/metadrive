@@ -8,7 +8,7 @@ environment that allows popping up an window.
 import random
 
 from pgdrive.envs.pgdrive_env import PGDriveEnv
-from pgdrive.scene_manager import TrafficMode
+from pgdrive.scene_manager.traffic_manager import TrafficMode
 
 if __name__ == "__main__":
     env = PGDriveEnv(

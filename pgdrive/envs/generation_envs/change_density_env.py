@@ -1,13 +1,13 @@
 import logging
 
 from pgdrive.envs.pgdrive_env import PGDriveEnv
-from pgdrive.pg_config import PgConfig
+from pgdrive.pg_config import PGConfig
 from pgdrive.utils import get_np_random
 
 
 class ChangeDensityEnv(PGDriveEnv):
     @staticmethod
-    def default_config() -> PgConfig:
+    def default_config() -> PGConfig:
         config = PGDriveEnv.default_config()
         config.add("change_density", True)
         config.add("density_min", 0.0)

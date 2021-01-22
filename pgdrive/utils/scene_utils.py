@@ -8,7 +8,7 @@ from pgdrive.pg_config.body_name import BodyName
 from pgdrive.scene_creator.lanes.circular_lane import CircularLane
 from pgdrive.scene_creator.lanes.lane import AbstractLane
 from pgdrive.utils.math_utils import get_points_bounding_box
-from pgdrive.world.pg_world import PgWorld
+from pgdrive.world.pg_world import PGWorld
 from pgdrive.utils.coordinates_shift import panda_position
 
 if TYPE_CHECKING:
@@ -121,12 +121,12 @@ def get_all_lanes(roadnet: "RoadNetwork"):
     return res
 
 
-def ray_localization(position: np.ndarray, pg_world: PgWorld) -> Tuple:
+def ray_localization(position: np.ndarray, pg_world: PGWorld) -> Tuple:
     """
     Get the index of the lane closest to a physx_world position.
     Only used when smoething is on lane ! Otherwise fall back to use get_closest_lane()
     :param position: a physx_world position [m].
-    :param pg_world: PgWorld class
+    :param pg_world: PGWorld class
     :return: the index of the closest lane.
     """
     results = pg_world.physics_world.static_world.rayTestAll(

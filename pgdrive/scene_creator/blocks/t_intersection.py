@@ -1,5 +1,5 @@
 from pgdrive.pg_config.parameter_space import Parameter, BlockParameterSpace
-from pgdrive.pg_config.pg_space import PgSpace
+from pgdrive.pg_config.pg_space import PGSpace
 from pgdrive.scene_creator.blocks.create_block_utils import CreateRoadFrom
 from pgdrive.scene_creator.blocks.intersection import InterSection
 from pgdrive.scene_creator.lanes.lane import LineType, LineColor
@@ -14,7 +14,7 @@ class TInterSection(InterSection):
 
     ID = "T"
     SOCKET_NUM = 2
-    PARAMETER_SPACE = PgSpace(BlockParameterSpace.T_INTERSECTION)
+    PARAMETER_SPACE = PGSpace(BlockParameterSpace.T_INTERSECTION)
 
     def _try_plug_into_previous_block(self) -> bool:
         no_cross = super(TInterSection, self)._try_plug_into_previous_block()
