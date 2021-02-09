@@ -2,8 +2,7 @@ import math
 from typing import List, TYPE_CHECKING, Tuple
 
 import numpy as np
-from panda3d.core import Vec3
-
+from pgdrive.utils.constans import Decoration
 from pgdrive.pg_config.body_name import BodyName
 from pgdrive.scene_creator.lanes.circular_lane import CircularLane
 from pgdrive.scene_creator.lanes.lane import AbstractLane
@@ -34,12 +33,15 @@ def block_socket_merge(
 def check_lane_on_road(road_network: "RoadNetwork", lane, positive: float = 0, ignored=None) -> bool:
     """
     Calculate if the new lane intersects with other lanes in current road network
-    The return Value is True when cross !!!!!!!!!!!!!!!!!!!!!!!!!!
+    The return Value is True when cross
+    Note: the decoration road will be ignored in default
     """
     graph = road_network.graph
     for _from, to_dict in graph.items():
         for _to, lanes in to_dict.items():
             if ignored and (_from, _to) == ignored:
+                continue
+            if (_from, _to) == (Decoration.start, Decoration.end):
                 continue
             if len(lanes) == 0:
                 continue

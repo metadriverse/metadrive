@@ -10,7 +10,7 @@ from pgdrive.tests.vis_block.vis_block_base import TestBlock
 from pgdrive.utils.asset_loader import initialize_asset_loader
 
 if __name__ == "__main__":
-    test = TestBlock(True)
+    test = TestBlock(False)
     initialize_asset_loader(test)
     global_network = RoadNetwork()
     blocks = []
