@@ -1,4 +1,7 @@
 class Decoration:
+    """
+    Decoration lane didn't connect any nodes, they are individual or isolated.
+    """
     start = "decoration"
     end = "decoration_"
 

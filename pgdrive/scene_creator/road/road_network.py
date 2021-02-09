@@ -1,7 +1,7 @@
 import copy
 import logging
 from typing import List, Tuple, Dict
-
+from pgdrive.utils.constans import Decoration
 import numpy as np
 
 from pgdrive.scene_creator.lanes.lane import LineType, AbstractLane
@@ -115,6 +115,21 @@ class RoadNetwork:
                 boxes.append(get_road_bounding_box(lanes))
         res_x_max, res_x_min, res_y_max, res_y_min = get_boxes_bounding_box(boxes)
         return res_x_min, res_x_max, res_y_min, res_y_max
+
+    def remove_all_roads(self, start_node: str, end_node: str):
+        """
+        Remove all road between two road nodes
+        :param start_node: start node name
+        :param end_node: end node name
+        :return: roads removed
+        """
+        ret = []
+        paths = self.bfs_paths(start_node, end_node)
+        for path in paths:
+            for next_idx, node in enumerate(path[:-1], 1):
+                road_removed = self.remove_road(Road(node, path[next_idx]))
+                ret += road_removed
+        return ret
 
     def remove_road(self, road):
         assert isinstance(road, Road), "Only Road Type can be deleted"
@@ -380,23 +395,23 @@ class GraphLookupTable:
             first_lane_distance, (section_id, lanes_id) = log[candidate_count]
             lanes = self.graph[section_id][lanes_id]
             for lane_id, lane in enumerate(lanes):
-                if lanes_id == "decoration_":
+                if lanes_id == Decoration.start:
                     continue
                 if lane_id == 0:
                     dist = first_lane_distance
                 else:
                     dist = lane.distance(position)
                 distance_index_mapping.append((dist, (section_id, lanes_id, lane_id)))
-            if rank > 4:
-                # Take first rank 5 lanes into consideration. The number may related to the number of
-                # lanes in intersection. We have 3 lanes in intersection, so computing the first 4 ranks can make
-                # thing work. We choose take first 5 lanes into consideration.
-                # In futurem we shall refactor the whole system, so this vulnerable code would be removed.
-                break
-        if self.graph.get("decoration", False):
-            for id, lane in enumerate(self.graph["decoration"]["decoration_"]):
+            # if rank > 10:
+            #     # Take first rank 5 lanes into consideration. The number may related to the number of
+            #     # lanes in intersection. We have 3 lanes in intersection, so computing the first 4 ranks can make
+            #     # thing work. We choose take first 5 lanes into consideration.
+            #     # In futurem we shall refactor the whole system, so this vulnerable code would be removed.
+            #     break
+        if self.graph.get(Decoration.start, False):
+            for id, lane in enumerate(self.graph[Decoration.start][Decoration.end]):
                 dist = lane.distance(position)
-                distance_index_mapping.append((dist, ("decoration", "decoration_", id)))
+                distance_index_mapping.append((dist, (Decoration.start, Decoration.end, id)))
 
         ret_ind = np.argmin([d for d, _ in distance_index_mapping])
         index = distance_index_mapping[ret_ind][1]

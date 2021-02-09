@@ -31,8 +31,8 @@ class TestEnv(PGDriveEnv):
                 "rgb_clip": True,
                 # "debug":True,
                 "map_config": {
-                    Map.GENERATE_METHOD: MapGenerateMethod.BIG_BLOCK_NUM,
-                    Map.GENERATE_PARA: 30,
+                    Map.GENERATE_METHOD: MapGenerateMethod.BIG_BLOCK_SEQUENCE,
+                    Map.GENERATE_PARA: "XTX",
                     Map.LANE_WIDTH: 3.5,
                     Map.LANE_NUM: 3,
                 }
