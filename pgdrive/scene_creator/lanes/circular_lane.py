@@ -35,7 +35,7 @@ class CircularLane(AbstractLane):
         self.speed_limit = speed_limit
         self.length = self.radius * (self.end_phase - self.start_phase) * self.direction
 
-    def update_length(self):
+    def update_properties(self):
         self.length = self.radius * (self.end_phase - self.start_phase) * self.direction
 
     def position(self, longitudinal: float, lateral: float) -> np.ndarray:

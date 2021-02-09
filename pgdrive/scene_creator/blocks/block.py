@@ -1,6 +1,6 @@
 import logging
 from typing import Dict, Union, List
-from pgdrive.utils.coordinates_shift import panda_heading, panda_position
+from pgdrive.utils.constans import Decoration
 import numpy
 from panda3d.bullet import BulletBoxShape, BulletRigidBodyNode
 from panda3d.core import Vec3, LQuaternionf, BitMask32, Vec4, CardMaker, TextureStage, RigidBodyCombiner, \
@@ -15,6 +15,7 @@ from pgdrive.scene_creator.lanes.straight_lane import StraightLane
 from pgdrive.scene_creator.road.road import Road
 from pgdrive.scene_creator.road.road_network import RoadNetwork
 from pgdrive.utils.asset_loader import AssetLoader
+from pgdrive.utils.coordinates_shift import panda_position
 from pgdrive.utils.element import Element
 from pgdrive.utils.math_utils import norm
 from pgdrive.world.pg_physics_world import PGPhysicsWorld
@@ -445,6 +446,9 @@ class Block(Element, BlockDefault):
         :param lanes: All lanes of this road
         :return: None
         """
+
+        # decoration only has vis properties
+        need_body = False if (from_, to_) == (Decoration.start, Decoration.end) else True
         if isinstance(lanes[0], StraightLane):
             for index, lane in enumerate(lanes):
                 middle = lane.position(lane.length / 2, 0)

@@ -1,6 +1,6 @@
 from pgdrive.pg_config.parameter_space import Parameter, BlockParameterSpace
 from pgdrive.pg_config.pg_space import PGSpace
-from pgdrive.scene_creator.blocks.create_block_utils import CreateRoadFrom
+from pgdrive.utils.constans import Decoration
 from pgdrive.scene_creator.blocks.intersection import InterSection
 from pgdrive.scene_creator.lanes.lane import LineType, LineColor
 from pgdrive.scene_creator.road.road import Road
@@ -61,45 +61,26 @@ class TInterSection(InterSection):
                 continue
             exit_node = self._sockets[i].positive_road.start_node if i != Goal.ADVERSE else self._sockets[
                 i].negative_road.start_node
-            self.block_network.remove_road(Road(start_node, exit_node))
+            pos_lanes = self.block_network.remove_all_roads(start_node, exit_node)
             entry_node = self._sockets[i].negative_road.end_node if i != Goal.ADVERSE else self._sockets[
                 i].positive_road.end_node
-            self.block_network.remove_road(Road(entry_node, end_node))
-            if i == (t_type + 2) % 4:
-                last_scokect = self._sockets[(t_type + 1) % 4]
-                next_scokect = self._sockets[(t_type + 3) % 4]
-                _start_node = last_scokect.negative_road.end_node if last_scokect is not self._pre_block_socket else \
-                    self._pre_block_socket.positive_road.end_node
-                _end_node = next_scokect.negative_road.start_node if next_scokect is self._pre_block_socket else \
-                    next_scokect.positive_road.start_node
-                p_road = Road(_start_node, exit_node)
-                lanes_on_p = self.block_network.remove_road(p_road)
-                lane_p = lanes_on_p[0]
-                CreateRoadFrom(
-                    lane_p,
-                    self.positive_lane_num,
-                    p_road,
-                    self.block_network,
-                    self._global_network,
-                    inner_lane_line_type=LineType.NONE,
-                    center_line_type=LineType.NONE
-                )
+            neg_lanes = self.block_network.remove_all_roads(entry_node, end_node)
 
-                n_road = Road(entry_node, _end_node)
-                lanes_on_n = self.block_network.remove_road(n_road)
-                lane_n = lanes_on_n[0]
-                CreateRoadFrom(
-                    lane_n,
-                    self.positive_lane_num,
-                    n_road,
-                    self.block_network,
-                    self._global_network,
-                    inner_lane_line_type=LineType.NONE,
-                    center_line_type=LineType.NONE
-                )
+            # TODO small vis bug may raise in a corner case,
+            #  these code can fix it but will introduce a new get_closest_lane_index bug
+            # if (i + 2) % 4 == t_type:
+            #     # for vis only, solve a bug existing in a corner case,
+            #     for lane in neg_lanes:
+            #         lane.reset_start_end(lane.start, lane.position(lane.length / 2, 0))
+            #     self.block_network.add_road(Road(Decoration.start, Decoration.end), neg_lanes)
+            #
+            #     for lane in pos_lanes:
+            #         lane.reset_start_end(lane.position(lane.length / 2, 0), lane.end)
+            #     self.block_network.add_road(Road(Decoration.start, Decoration.end), pos_lanes)
+
         self._change_vis(t_type)
         self._sockets.pop(-1)
         socket = self._sockets.pop(t_type)
-        self.block_network.remove_road(socket.positive_road)
-        self.block_network.remove_road(socket.negative_road)
+        self.block_network.remove_all_roads(socket.positive_road.start_node, socket.positive_road.end_node)
+        self.block_network.remove_all_roads(socket.negative_road.start_node, socket.negative_road.end_node)
         self._reborn_roads.remove(socket.negative_road)

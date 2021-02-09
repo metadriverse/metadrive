@@ -13,23 +13,6 @@ from pgdrive.utils.math_utils import get_vertical_vector
 from pgdrive.utils.scene_utils import check_lane_on_road
 
 
-class Decoration:
-    start = "decoration"
-    end = "decoration_"
-
-
-class Goal:
-    """
-    Goal at intersection
-    The keywords 0, 1, 2 should be reserved, and only be used in roundabout and intersection
-    """
-
-    RIGHT = 0
-    STRAIGHT = 1
-    LEFT = 2
-    ADVERSE = 3  # Useless now
-
-
 def sharpbend(
     previous_lane: "StraightLane",
     following_lane_length,
@@ -82,7 +65,7 @@ def CreateRoadFrom(
     road: "Road",
     roadnet_to_add_lanes: "RoadNetwork",  # mostly, block network
     roadnet_to_check_cross: "RoadNetwork",  # mostly, previous global_network
-    toward_smaller_Lane_index: bool = True,
+    toward_smaller_lane_index: bool = True,
     ignore_start: str = None,
     ignore_end: str = None,
     center_line_type=LineType.CONTINUOUS,  # Identical to Block.CENTER_LINE_TYPE
@@ -106,7 +89,7 @@ def CreateRoadFrom(
     for i in range(lane_num, 0, -1):
         side_lane = copy.deepcopy(lane)
         if isinstance(lane, StraightLane):
-            width = -lane_width if toward_smaller_Lane_index else lane_width
+            width = -lane_width if toward_smaller_lane_index else lane_width
             start = side_lane.position(0, width)
             end = side_lane.position(side_lane.length, width)
             side_lane.start = start
@@ -114,21 +97,24 @@ def CreateRoadFrom(
         elif isinstance(lane, CircularLane):
             clockwise = True if lane.direction == 1 else False
             radius1 = lane.radius
-            if not toward_smaller_Lane_index:
+            if not toward_smaller_lane_index:
                 radius2 = radius1 - lane_width if clockwise else radius1 + lane_width
             else:
                 radius2 = radius1 + lane_width if clockwise else radius1 - lane_width
             side_lane.radius = radius2
-            side_lane.update_length()
+            side_lane.update_properties()
         if i == 1:
-            side_lane.line_types = [center_line_type, inner_lane_line_type]
+            side_lane.line_types = [center_line_type, inner_lane_line_type] if toward_smaller_lane_index else \
+                [inner_lane_line_type, side_lane_line_type]
         else:
             side_lane.line_types = [inner_lane_line_type, inner_lane_line_type]
         lanes.append(side_lane)
         lane = side_lane
-    if toward_smaller_Lane_index:
+    if toward_smaller_lane_index:
         lanes.reverse()
-    lanes.append(origin_lane)
+        lanes.append(origin_lane)
+    else:
+        lanes.insert(0, origin_lane)
 
     # check the left lane and right lane
     ignore = (ignore_start, ignore_end)
@@ -155,7 +141,7 @@ def ExtendStraightLane(lane: "StraightLane", extend_length: float, line_types: (
     new_lane.start = start_point
     new_lane.end = end_point
     new_lane.line_types = line_types
-    new_lane.update_length()
+    new_lane.update_properties()
     return new_lane
 
 
