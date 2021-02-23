@@ -122,8 +122,8 @@ class PGDriveEnv(gym.Env):
         self.pg_world_config = pg_world_config
 
         # lazy initialization, create the main vehicle in the lazy_init() func
-        self.pg_world = None
-        self.scene_manager = None
+        self.pg_world: Optional[PGWorld] = None
+        self.scene_manager: Optional[SceneManager] = None
         self.main_camera = None
         self.controller = None
         self._expert_take_over = False
@@ -221,6 +221,12 @@ class PGDriveEnv(gym.Env):
         return obs, step_reward + done_reward, self.done, info
 
     def render(self, mode='human', text: Optional[Union[dict, str]] = None) -> Optional[np.ndarray]:
+        """
+        This is a pseudo-render function, only used to update onscreen message when using panda3d backend
+        :param mode: 'rgb'/'human'
+        :param text:text to show
+        :return: when mode is 'rgb', image array is returned
+        """
         assert self.use_render or self.pg_world.mode != RENDER_MODE_NONE or self.pg_world.highway_render is not None, (
             "render is off now, can not render"
         )

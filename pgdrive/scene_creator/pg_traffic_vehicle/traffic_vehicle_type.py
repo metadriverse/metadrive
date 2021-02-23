@@ -37,4 +37,4 @@ class XLVehicle(PGTrafficVehicle):
     path = [['new/truck/scene.gltf', (factor * 0.031, factor * 0.025, factor * 0.025), (0.35, 0, factor * 0), 0]]
 
 
-car_type = {"s": SVehicle, "m": MVehicle, "l": LVehicle, "xl": XLVehicle}
+vehicle_type = {"s": SVehicle, "m": MVehicle, "l": LVehicle, "xl": XLVehicle}

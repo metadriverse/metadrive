@@ -2,7 +2,7 @@ from pgdrive.pg_config.parameter_space import Parameter, BlockParameterSpace
 from pgdrive.pg_config.pg_space import PGSpace
 from pgdrive.utils.constans import Decoration
 from pgdrive.scene_creator.blocks.intersection import InterSection
-from pgdrive.scene_creator.lanes.lane import LineType, LineColor
+from pgdrive.scene_creator.lane.abs_lane import LineType, LineColor
 from pgdrive.scene_creator.road.road import Road
 from pgdrive.utils.constans import Goal
 
@@ -42,8 +42,8 @@ class TInterSection(InterSection):
             lanes = road.get_lanes(self.block_network)
             outside_type = LineType.SIDE if i == 0 else LineType.NONE
             for k, lane in enumerate(lanes):
-                line_types = [LineType.STRIPED, LineType.STRIPED
-                              ] if k != len(lanes) - 1 else [LineType.STRIPED, outside_type]
+                line_types = [LineType.BROKEN, LineType.BROKEN
+                              ] if k != len(lanes) - 1 else [LineType.BROKEN, outside_type]
                 lane.line_types = line_types
                 if k == 0:
                     lane.line_color = [LineColor.YELLOW, LineColor.GREY]
@@ -53,7 +53,7 @@ class TInterSection(InterSection):
     def _exclude_lanes(self):
         para = self.get_config()
         t_type = para[Parameter.t_intersection_type]
-        self.add_sockets(self._pre_block_socket)
+        self.add_sockets(self.pre_block_socket)
         start_node = self._sockets[t_type].negative_road.end_node
         end_node = self._sockets[t_type].positive_road.start_node
         for i in range(4):

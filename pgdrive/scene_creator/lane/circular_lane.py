@@ -3,7 +3,7 @@ from typing import Tuple
 
 import numpy as np
 
-from pgdrive.scene_creator.lanes.lane import AbstractLane, Vector, LineType
+from pgdrive.scene_creator.lane.abs_lane import AbstractLane, Vector, LineType
 from pgdrive.utils.math_utils import wrap_to_pi
 
 
@@ -17,7 +17,7 @@ class CircularLane(AbstractLane):
         end_phase: float,
         clockwise: bool = True,
         width: float = AbstractLane.DEFAULT_WIDTH,
-        line_types: Tuple[LineType, LineType] = (LineType.STRIPED, LineType.STRIPED),
+        line_types: Tuple[LineType, LineType] = (LineType.BROKEN, LineType.BROKEN),
         forbidden: bool = False,
         speed_limit: float = 20,
         priority: int = 0

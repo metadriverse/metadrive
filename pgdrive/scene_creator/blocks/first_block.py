@@ -3,8 +3,8 @@ from panda3d.core import NodePath
 from pgdrive.pg_config.pg_space import PGSpace
 from pgdrive.scene_creator.blocks.block import Block, BlockSocket
 from pgdrive.scene_creator.blocks.create_block_utils import CreateRoadFrom, CreateAdverseRoad, ExtendStraightLane
-from pgdrive.scene_creator.lanes.lane import LineType
-from pgdrive.scene_creator.lanes.straight_lane import StraightLane
+from pgdrive.scene_creator.lane.abs_lane import LineType
+from pgdrive.scene_creator.lane.straight_lane import StraightLane
 from pgdrive.scene_creator.road.road import Road
 from pgdrive.scene_creator.road.road_network import RoadNetwork
 from pgdrive.utils.constans import Decoration
@@ -30,14 +30,14 @@ class FirstBlock(Block):
         super(FirstBlock, self).__init__(0, place_holder, global_network, random_seed)
         basic_lane = StraightLane(
             [0, lane_width * (lane_num - 1)], [10, lane_width * (lane_num - 1)],
-            line_types=(LineType.STRIPED, LineType.SIDE),
+            line_types=(LineType.BROKEN, LineType.SIDE),
             width=lane_width
         )
         ego_v_born_road = Road(self.NODE_1, self.NODE_2)
         CreateRoadFrom(basic_lane, lane_num, ego_v_born_road, self.block_network, self._global_network)
         CreateAdverseRoad(ego_v_born_road, self.block_network, self._global_network)
 
-        next_lane = ExtendStraightLane(basic_lane, 40, [LineType.STRIPED, LineType.SIDE])
+        next_lane = ExtendStraightLane(basic_lane, 40, [LineType.BROKEN, LineType.SIDE])
         other_v_born_road = Road(self.NODE_2, self.NODE_3)
         CreateRoadFrom(next_lane, lane_num, other_v_born_road, self.block_network, self._global_network)
         CreateAdverseRoad(other_v_born_road, self.block_network, self._global_network)

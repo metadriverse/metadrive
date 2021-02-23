@@ -2,8 +2,8 @@ from pgdrive.pg_config.parameter_space import BlockParameterSpace, Parameter
 from pgdrive.pg_config.pg_space import PGSpace
 from pgdrive.scene_creator.blocks.block import Block, BlockSocket
 from pgdrive.scene_creator.blocks.create_block_utils import ExtendStraightLane, CreateRoadFrom, CreateAdverseRoad
-from pgdrive.scene_creator.lanes.lane import LineType
-from pgdrive.scene_creator.lanes.straight_lane import StraightLane
+from pgdrive.scene_creator.lane.abs_lane import LineType
+from pgdrive.scene_creator.lane.straight_lane import StraightLane
 from pgdrive.scene_creator.road.road import Road
 
 
@@ -24,8 +24,8 @@ class Straight(Block):
         length = para[Parameter.length]
         basic_lane = self.positive_basic_lane
         assert isinstance(basic_lane, StraightLane), "Straight road can only connect straight type"
-        new_lane = ExtendStraightLane(basic_lane, length, [LineType.STRIPED, LineType.SIDE])
-        start = self._pre_block_socket.positive_road.end_node
+        new_lane = ExtendStraightLane(basic_lane, length, [LineType.BROKEN, LineType.SIDE])
+        start = self.pre_block_socket.positive_road.end_node
         end = self.add_road_node()
         socket = Road(start, end)
         _socket = -socket

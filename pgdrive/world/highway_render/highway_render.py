@@ -4,9 +4,9 @@ from typing import List, Tuple
 
 import numpy as np
 
-from pgdrive.scene_creator.lanes.circular_lane import CircularLane
-from pgdrive.scene_creator.lanes.lane import LineType
-from pgdrive.scene_creator.lanes.straight_lane import StraightLane
+from pgdrive.scene_creator.lane.circular_lane import CircularLane
+from pgdrive.scene_creator.lane.abs_lane import LineType
+from pgdrive.scene_creator.lane.straight_lane import StraightLane
 from pgdrive.utils import import_pygame
 from pgdrive.utils.constans import Decoration
 from pgdrive.world.constants import PG_EDITION
@@ -114,7 +114,7 @@ class HighwayRender:
         surface.move_display_window_to(self._center_pos)
         surface.blit(self.map_surface, (0, 0))
         VehicleGraphics.display(self.scene_mgr.ego_vehicle, surface)
-        for v in self.scene_mgr.traffic.vehicles:
+        for v in self.scene_mgr.traffic_mgr.vehicles:
             if v is self.scene_mgr.ego_vehicle:
                 continue
             VehicleGraphics.display(v, surface)
@@ -300,7 +300,7 @@ class LaneGraphics(object):
         s_origin, _ = lane.local_coordinates(surface.origin)
         s0 = (int(s_origin) // cls.STRIPE_SPACING - stripes_count // 2) * cls.STRIPE_SPACING
         for side in range(side):
-            if lane.line_types[side] == LineType.STRIPED:
+            if lane.line_types[side] == LineType.BROKEN:
                 cls.striped_line(lane, surface, stripes_count, s0, side)
             # circular side or continuous, it is same now
             elif lane.line_types[side] == LineType.CONTINUOUS and isinstance(lane, CircularLane):

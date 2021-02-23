@@ -4,8 +4,8 @@ from typing import Union, List
 import numpy as np
 
 import pgdrive.utils.math_utils as utils
-from pgdrive.scene_creator.lanes.lane import AbstractLane
-from pgdrive.scene_creator.road_object.object import Landmark, Obstacle, RoadObject
+from pgdrive.scene_creator.lane.abs_lane import AbstractLane
+from pgdrive.scene_creator.object.traffic_object import Object
 from pgdrive.scene_manager.scene_manager import LaneIndex
 from pgdrive.scene_manager.traffic_manager import TrafficManager
 from pgdrive.utils import get_np_random
@@ -178,7 +178,7 @@ class Vehicle:
             lane = self.lane
         return lane.local_coordinates(vehicle.position)[0] - lane.local_coordinates(self.position)[0]
 
-    def check_collision(self, other: Union['Vehicle', 'RoadObject']) -> None:
+    def check_collision(self, other: Union['Vehicle', 'Object']) -> None:
         """
         Check for collision with another vehicle.
 
@@ -194,14 +194,14 @@ class Vehicle:
             if self._is_colliding(other):
                 self.speed = other.speed = min([self.speed, other.speed], key=abs)
                 self.crashed = other.crashed = True
-        elif isinstance(other, Obstacle):
+        elif isinstance(other, Object):
             if not self.COLLISIONS_ENABLED:
                 return
 
             if self._is_colliding(other):
                 self.speed = min([self.speed, 0], key=abs)
                 self.crashed = other.hit = True
-        elif isinstance(other, Landmark):
+        elif isinstance(other, Object):
             if self._is_colliding(other):
                 other.hit = True
 
