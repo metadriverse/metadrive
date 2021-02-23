@@ -41,6 +41,12 @@ class PhysicsNodeList(list):
 
 
 class Element:
+    """
+    Element class are base class of all static objects, whose properties are fixed after calling init().
+    They have no any desire to change its state, e.g. moving, bouncing, changing color.
+    Instead, only other Elements or DynamicElements can affect them and change their states.
+    """
+
     PARAMETER_SPACE = PGSpace({})
 
     def __init__(self, random_seed=None):
@@ -55,12 +61,17 @@ class Element:
         self.random_seed = 0 if random_seed is None else random_seed
         if self.PARAMETER_SPACE is not None:
             self.PARAMETER_SPACE.seed(self.random_seed)
+        self.render = False if AssetLoader.loader is None else True
+
+        # each element has its node_path to render, physics node are child nodes of it
+        self.node_path = None
+
         # Temporally store bullet nodes that have to place in bullet world (not NodePath)
         self.dynamic_nodes = PhysicsNodeList()
+
         # Nodes in this tuple didn't interact with other nodes! they only used to do rayTest or sweepTest
         self.static_nodes = PhysicsNodeList()
-        self.render = False if AssetLoader.loader is None else True
-        self.node_path = None  # each element has its node_path to render, physics node are child nodes of it
+
         if self.render:
             self.loader = AssetLoader.get_loader()
 
@@ -131,11 +142,22 @@ class DynamicElement(Element):
         """
         raise NotImplementedError
 
+    def prepare_step(self, *args, **kwargs):
+        """
+        Do Information fusion and then analyze and make decision
+        """
+
     def step(self, *args, **kwargs):
         """
+        Implement decision and advance the PGWorld
         Although some elements won't step, please still state this function in it :)
         """
         raise NotImplementedError
+
+    def update_state(self, *args, **kwargs):
+        """
+        After advancing all elements for a time period, their state should be updated for statistic or other purpose
+        """
 
     def reset(self, *args, **kwargs):
         """

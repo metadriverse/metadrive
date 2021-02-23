@@ -14,7 +14,7 @@ class LineType:
     """A lane side line type."""
 
     NONE = "none"
-    STRIPED = "stripped"
+    BROKEN = "broken"
     CONTINUOUS = "continuous"
     SIDE = "side"
     CONTINUOUS_LINE = 4  # deprecated

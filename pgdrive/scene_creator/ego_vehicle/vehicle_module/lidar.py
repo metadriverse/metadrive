@@ -8,7 +8,7 @@ from panda3d.core import Point3, BitMask32, Vec3, NodePath
 from pgdrive.pg_config.body_name import BodyName
 from pgdrive.pg_config.cam_mask import CamMask
 from pgdrive.scene_creator.highway_vehicle.behavior import IDMVehicle
-from pgdrive.scene_creator.pg_traffic_vehicle.traffic_vehicle import PGTrafficVehicle
+from pgdrive.scene_creator.pg_traffic_vehicle.traffic_vehicle import PGTrafficVehicle, PGTrafficVehicleNode
 from pgdrive.utils.asset_loader import AssetLoader
 from pgdrive.world.pg_physics_world import PGPhysicsWorld
 from pgdrive.utils.coordinates_shift import panda_position
@@ -72,7 +72,7 @@ class Lidar:
     def _get_surrounding_vehicles(self) -> Set[IDMVehicle]:
         vehicles = set()
         for ret in self.detection_results:
-            if ret.hasHit():
+            if ret.hasHit() and isinstance(ret.getNode(), PGTrafficVehicleNode):
                 vehicles.add(ret.getNode().getPythonTag(BodyName.Traffic_vehicle).kinematic_model)
         return vehicles
 

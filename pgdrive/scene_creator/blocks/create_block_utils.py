@@ -4,9 +4,9 @@ from typing import Tuple, Union, List
 import numpy as np
 
 from pgdrive.scene_creator.blocks.constants import BlockDefault
-from pgdrive.scene_creator.lanes.circular_lane import CircularLane
-from pgdrive.scene_creator.lanes.lane import LineColor, AbstractLane, LineType
-from pgdrive.scene_creator.lanes.straight_lane import StraightLane
+from pgdrive.scene_creator.lane.circular_lane import CircularLane
+from pgdrive.scene_creator.lane.abs_lane import LineColor, AbstractLane, LineType
+from pgdrive.scene_creator.lane.straight_lane import StraightLane
 from pgdrive.scene_creator.road.road import Road
 from pgdrive.scene_creator.road.road_network import RoadNetwork
 from pgdrive.utils.math_utils import get_vertical_vector
@@ -71,7 +71,7 @@ def CreateRoadFrom(
     center_line_type=LineType.CONTINUOUS,  # Identical to Block.CENTER_LINE_TYPE
     detect_one_side=True,
     side_lane_line_type=LineType.SIDE,
-    inner_lane_line_type=LineType.STRIPED
+    inner_lane_line_type=LineType.BROKEN
 ) -> bool:
     """
         | | | |
@@ -192,7 +192,7 @@ def CreateAdverseRoad(
         ignore_end=ignore_end
     )
     inner_lane = roadnet_to_get_road.get_lane((adverse_road.start_node, adverse_road.end_node, 0))
-    inner_lane.line_types = [LineType.NONE, LineType.STRIPED] if len(lanes) > 1 else [LineType.NONE, LineType.SIDE]
+    inner_lane.line_types = [LineType.NONE, LineType.BROKEN] if len(lanes) > 1 else [LineType.NONE, LineType.SIDE]
     positive_road.get_lanes(roadnet_to_get_road)[0].line_color = [LineColor.YELLOW, LineColor.GREY]
     return success
 

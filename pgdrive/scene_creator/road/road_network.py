@@ -4,8 +4,8 @@ from typing import List, Tuple, Dict
 from pgdrive.utils.constans import Decoration
 import numpy as np
 
-from pgdrive.scene_creator.lanes.lane import LineType, AbstractLane
-from pgdrive.scene_creator.lanes.straight_lane import StraightLane
+from pgdrive.scene_creator.lane.abs_lane import LineType, AbstractLane
+from pgdrive.scene_creator.lane.straight_lane import StraightLane
 from pgdrive.scene_creator.road.road import Road
 from pgdrive.utils.constans import Decoration
 from pgdrive.utils.math_utils import get_boxes_bounding_box
@@ -349,7 +349,7 @@ class RoadNetwork:
             origin = rotation @ origin
             end = rotation @ end
             line_types = (
-                LineType.CONTINUOUS_LINE if lane == 0 else LineType.STRIPED,
+                LineType.CONTINUOUS_LINE if lane == 0 else LineType.BROKEN,
                 LineType.CONTINUOUS_LINE if lane == lanes - 1 else LineType.NONE
             )
             net.add_lane("0", "1", StraightLane(origin, end, line_types=line_types))

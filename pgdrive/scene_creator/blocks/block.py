@@ -9,9 +9,9 @@ from panda3d.core import Vec3, LQuaternionf, BitMask32, Vec4, CardMaker, Texture
 from pgdrive.pg_config.body_name import BodyName
 from pgdrive.pg_config.cam_mask import CamMask
 from pgdrive.scene_creator.blocks.constants import BlockDefault
-from pgdrive.scene_creator.lanes.circular_lane import CircularLane
-from pgdrive.scene_creator.lanes.lane import AbstractLane, LineType, LaneNode
-from pgdrive.scene_creator.lanes.straight_lane import StraightLane
+from pgdrive.scene_creator.lane.circular_lane import CircularLane
+from pgdrive.scene_creator.lane.abs_lane import AbstractLane, LineType, LaneNode
+from pgdrive.scene_creator.lane.straight_lane import StraightLane
 from pgdrive.scene_creator.road.road import Road
 from pgdrive.scene_creator.road.road_network import RoadNetwork
 from pgdrive.utils.asset_loader import AssetLoader
@@ -73,7 +73,7 @@ class Block(Element, BlockDefault):
         self._sockets = []
 
         # used to connect previous blocks, save its info here
-        self._pre_block_socket = pre_block_socket
+        self.pre_block_socket = pre_block_socket
         self.pre_block_socket_index = pre_block_socket.index
 
         # a bounding box used to improve efficiency x_min, x_max, y_min, y_max
@@ -81,8 +81,8 @@ class Block(Element, BlockDefault):
 
         # used to create this block, but for first block it is nonsense
         if block_index != 0:
-            self.positive_lanes = self._pre_block_socket.positive_road.get_lanes(self._global_network)
-            self.negative_lanes = self._pre_block_socket.negative_road.get_lanes(self._global_network)
+            self.positive_lanes = self.pre_block_socket.positive_road.get_lanes(self._global_network)
+            self.negative_lanes = self.pre_block_socket.negative_road.get_lanes(self._global_network)
             self.positive_lane_num = len(self.positive_lanes)
             self.negative_lane_num = len(self.negative_lanes)
             self.positive_basic_lane = self.positive_lanes[-1]  # most right or outside lane is the basic lane
@@ -317,7 +317,7 @@ class Block(Element, BlockDefault):
                     if norm(lane_start[0] - lane_end[0], lane_start[1] - lane_end[1]) > 1e-1:
                         self._add_side_walk2bullet(lane_start, lane_end, middle, radius, lane.direction)
 
-            elif lane.line_types[k] == LineType.STRIPED:
+            elif lane.line_types[k] == LineType.BROKEN:
                 straight = True if isinstance(lane, StraightLane) else False
                 segment_num = int(lane.length / (2 * Block.STRIPE_LENGTH))
                 for segment in range(segment_num):
@@ -344,7 +344,7 @@ class Block(Element, BlockDefault):
         if LineType.prohibit(line_type):
             node_name = BodyName.Continuous_line
         else:
-            node_name = BodyName.Stripped_line
+            node_name = BodyName.Broken_line
         body_node = BulletRigidBodyNode(node_name)
         body_node.setActive(False)
         body_node.setKinematic(False)
@@ -376,13 +376,13 @@ class Block(Element, BlockDefault):
         if LineType.prohibit(line_type):
             node_name = BodyName.Continuous_line
         else:
-            node_name = BodyName.Stripped_line
+            node_name = BodyName.Broken_line
 
         # add bullet body for it
         if straight_stripe:
             body_np = parent_np.attachNewNode(node_name)
         else:
-            scale = 2 if line_type == LineType.STRIPED else 1
+            scale = 2 if line_type == LineType.BROKEN else 1
             body_node = BulletRigidBodyNode(node_name)
             body_node.setActive(False)
             body_node.setKinematic(False)

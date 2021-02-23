@@ -3,7 +3,7 @@ from typing import Tuple
 
 import numpy as np
 
-from pgdrive.scene_creator.lanes.lane import AbstractLane, Vector, LineType
+from pgdrive.scene_creator.lane.abs_lane import AbstractLane, Vector, LineType
 from pgdrive.utils.math_utils import norm
 
 
@@ -14,7 +14,7 @@ class StraightLane(AbstractLane):
         start: Vector,
         end: Vector,
         width: float = AbstractLane.DEFAULT_WIDTH,
-        line_types: Tuple[LineType, LineType] = (LineType.STRIPED, LineType.STRIPED),
+        line_types: Tuple[LineType, LineType] = (LineType.BROKEN, LineType.BROKEN),
         forbidden: bool = False,
         speed_limit: float = 20,
         priority: int = 0
@@ -32,7 +32,7 @@ class StraightLane(AbstractLane):
         self.start = np.array(start)
         self.end = np.array(end)
         self.width = width
-        self.line_types = line_types or [LineType.STRIPED, LineType.STRIPED]
+        self.line_types = line_types or [LineType.BROKEN, LineType.BROKEN]
         self.forbidden = forbidden
         self.priority = priority
         self.speed_limit = speed_limit

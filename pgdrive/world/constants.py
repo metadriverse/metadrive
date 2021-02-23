@@ -1,5 +1,5 @@
 from panda3d.core import Vec4
-
+from pgdrive.scene_creator.object.traffic_object import TrafficCone, TrafficTriangle
 from pgdrive.pg_config.body_name import BodyName
 
 PG_EDITION = "PGDrive v0.1.2"
@@ -29,8 +29,10 @@ COLLISION_INFO_COLOR = dict(
 COLOR = {
     BodyName.Side_walk: "red",
     BodyName.Continuous_line: "orange",
-    BodyName.Stripped_line: "yellow",
-    BodyName.Traffic_vehicle: "red"
+    BodyName.Broken_line: "yellow",
+    BodyName.Traffic_vehicle: "red",
+    BodyName.Traffic_cone: "orange",
+    BodyName.Traffic_triangle: "orange",
 }
 
 RENDER_MODE_NONE = "none"  # Do not render

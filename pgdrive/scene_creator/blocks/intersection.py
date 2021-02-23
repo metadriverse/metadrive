@@ -8,8 +8,8 @@ from pgdrive.pg_config.pg_space import PGSpace
 from pgdrive.scene_creator.blocks.block import Block, BlockSocket
 from pgdrive.scene_creator.blocks.create_block_utils import CreateAdverseRoad, CreateRoadFrom, ExtendStraightLane, \
     sharpbend
-from pgdrive.scene_creator.lanes.lane import LineType
-from pgdrive.scene_creator.lanes.straight_lane import StraightLane
+from pgdrive.scene_creator.lane.abs_lane import LineType
+from pgdrive.scene_creator.lane.straight_lane import StraightLane
 from pgdrive.scene_creator.road.road import Road
 from pgdrive.utils.scene_utils import check_lane_on_road
 
@@ -51,8 +51,8 @@ class InterSection(Block):
             decrease_increase = -1
         self.lane_num_intersect = self.positive_lane_num + decrease_increase * para[Parameter.change_lane_num]
         no_cross = True
-        attach_road = self._pre_block_socket.positive_road
-        _attach_road = self._pre_block_socket.negative_road
+        attach_road = self.pre_block_socket.positive_road
+        _attach_road = self.pre_block_socket.negative_road
         attach_lanes = attach_road.get_lanes(self._global_network)
         # right straight left node name, rotate it to fit different part
         intersect_nodes = deque(

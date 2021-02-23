@@ -100,6 +100,7 @@ class PGWorld(ShowBase.ShowBase):
             # a special debug mode
             if self.pg_config["debug_physics_world"]:
                 self.accept('1', self.toggleDebug)
+                self.accept('4', self.toggleAnalyze)
 
         super(PGWorld, self).__init__(windowType=self.mode)
 

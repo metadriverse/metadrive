@@ -4,7 +4,7 @@ from pgdrive.pg_config.parameter_space import BlockParameterSpace, Parameter
 from pgdrive.pg_config.pg_space import PGSpace
 from pgdrive.scene_creator.blocks.block import Block
 from pgdrive.scene_creator.blocks.create_block_utils import CreateAdverseRoad, CreateRoadFrom, sharpbend
-from pgdrive.scene_creator.lanes.lane import LineType
+from pgdrive.scene_creator.lane.abs_lane import LineType
 from pgdrive.scene_creator.road.road import Road
 
 
@@ -26,7 +26,7 @@ class Curve(Block):
         lane_num = self.positive_lane_num
 
         # part 1
-        start_node = self._pre_block_socket.positive_road.end_node
+        start_node = self.pre_block_socket.positive_road.end_node
         end_node = self.add_road_node()
         positive_road = Road(start_node, end_node)
         length = parameters[Parameter.length]
@@ -35,7 +35,7 @@ class Curve(Block):
         radius = parameters[Parameter.radius]
         curve, straight = sharpbend(
             basic_lane, length, radius, np.deg2rad(angle), direction, basic_lane.width,
-            (LineType.STRIPED, LineType.SIDE)
+            (LineType.BROKEN, LineType.SIDE)
         )
         no_cross = CreateRoadFrom(curve, lane_num, positive_road, self.block_network, self._global_network)
         no_cross = CreateAdverseRoad(positive_road, self.block_network, self._global_network) and no_cross
