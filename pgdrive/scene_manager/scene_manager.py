@@ -130,9 +130,7 @@ class SceneManager:
             PGLOD.cull_distant_traffic_vehicles(
                 self.traffic_mgr.traffic_vehicles, self.ego_vehicle.position, self.pg_world
             )
-            PGLOD.cull_distant_traffic_vehicles(
-                self.objects_mgr.spawned_objects, self.ego_vehicle.position, self.pg_world
-            )
+            PGLOD.cull_distant_objects(self.objects_mgr.spawned_objects, self.ego_vehicle.position, self.pg_world)
         return done
 
     def dump_episode(self) -> None:
