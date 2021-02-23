@@ -7,8 +7,8 @@ from panda3d.core import BitMask32, TransformState, Point3, NodePath, Vec3
 from pgdrive.pg_config.body_name import BodyName
 from pgdrive.pg_config.collision_group import CollisionGroup
 from pgdrive.scene_creator.highway_vehicle.behavior import IDMVehicle
-from pgdrive.scene_creator.lanes.circular_lane import CircularLane
-from pgdrive.scene_creator.lanes.straight_lane import StraightLane
+from pgdrive.scene_creator.lane.circular_lane import CircularLane
+from pgdrive.scene_creator.lane.straight_lane import StraightLane
 from pgdrive.scene_manager.scene_manager import SceneManager
 from pgdrive.scene_manager.traffic_manager import TrafficManager
 from pgdrive.utils import get_np_random
@@ -104,13 +104,16 @@ class PGTrafficVehicle(DynamicElement):
 
     def need_remove(self):
         if self._initial_state is not None:
-            self.vehicle_node.reset(self._initial_state)
-            self.out_of_road = False
+            self.reset()
             return False
         else:
             self.vehicle_node.clearTag(BodyName.Traffic_vehicle)
             self.node_path.removeNode()
             return True
+
+    def reset(self):
+        self.vehicle_node.reset(self._initial_state)
+        self.out_of_road = False
 
     def destroy(self, pg_world):
         self.vehicle_node.kinematic_model.destroy(pg_world)

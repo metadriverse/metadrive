@@ -24,6 +24,7 @@ class PGReplayer:
             car = car_type.create_traffic_vehicle_from_config(traffic_mgr, config)
             self.restore_vehicles[name] = car
             car.attach_to_pg_world(pg_world.pbr_worldNP, pg_world.physics_world)
+        logging.debug("Recover {} Traffic Vehicles".format(len(self.restore_vehicles)))
 
     def replay_frame(self, ego_vehicle, pg_world: PGWorld):
         assert self.restore_episode_info is not None, "Not frame data in episode info"
@@ -49,13 +50,12 @@ class PGReplayer:
 
 
 class PGRecorder:
-    def __init__(self, map: Map, init_vehicle_states: dict):
+    def __init__(self, map: Map, init_traffic_vehicle_states: dict):
         map_data = dict()
         map_data[map.random_seed] = map.save_map()
-        init_vehicle_state = init_vehicle_states
         self.episode_info = dict(
             map_config=map.config.get_dict(),
-            init_traffic=init_vehicle_state,
+            init_traffic=init_traffic_vehicle_states,
             map_data=copy.deepcopy(map_data),
             frame=[]
         )

@@ -4,8 +4,8 @@ from pgdrive.pg_config.parameter_space import Parameter, BlockParameterSpace
 from pgdrive.pg_config.pg_space import PGSpace
 from pgdrive.scene_creator.blocks.block import Block, BlockSocket
 from pgdrive.scene_creator.blocks.create_block_utils import CreateAdverseRoad, CreateRoadFrom, sharpbend
-from pgdrive.scene_creator.lanes.lane import LineType
-from pgdrive.scene_creator.lanes.straight_lane import StraightLane
+from pgdrive.scene_creator.lane.abs_lane import LineType
+from pgdrive.scene_creator.lane.straight_lane import StraightLane
 from pgdrive.scene_creator.road.road import Road
 
 
@@ -23,7 +23,7 @@ class Roundabout(Block):
     def _try_plug_into_previous_block(self) -> bool:
         para = self.get_config()
         no_cross = True
-        attach_road = self._pre_block_socket.positive_road
+        attach_road = self.pre_block_socket.positive_road
         for i in range(4):
             exit_road, success = self._create_circular_part(
                 attach_road, i, para[Parameter.radius_exit], para[Parameter.radius_inner], para[Parameter.angle]
@@ -51,7 +51,7 @@ class Roundabout(Block):
         lanes = road.get_lanes(self._global_network) if part_idx == 0 else road.get_lanes(self.block_network)
         right_lane = lanes[-1]
         bend, straight = sharpbend(
-            right_lane, 10, radius_exit, np.deg2rad(angle), True, self.lane_width, (LineType.STRIPED, LineType.SIDE)
+            right_lane, 10, radius_exit, np.deg2rad(angle), True, self.lane_width, (LineType.BROKEN, LineType.SIDE)
         )
         ignore_last_2_part_start = self.road_node((part_idx + 3) % 4, 0)
         ignore_last_2_part_end = self.road_node((part_idx + 3) % 4, 0)
@@ -79,7 +79,7 @@ class Roundabout(Block):
 
         bend, straight_to_next_iter_part = sharpbend(
             tool_lane, 10, radius_big, np.deg2rad(2 * angle - 90), False, self.lane_width,
-            (LineType.STRIPED, LineType.SIDE)
+            (LineType.BROKEN, LineType.SIDE)
         )
 
         segment_start_node = segment_end_node
@@ -97,11 +97,11 @@ class Roundabout(Block):
         tool_lane = StraightLane(tool_lane_start, tool_lane_end)
 
         bend, straight = sharpbend(
-            tool_lane, length, radius_exit, np.deg2rad(angle), True, self.lane_width, (LineType.STRIPED, LineType.SIDE)
+            tool_lane, length, radius_exit, np.deg2rad(angle), True, self.lane_width, (LineType.BROKEN, LineType.SIDE)
         )
 
         segment_start_node = segment_end_node
-        segment_end_node = self.add_road_node() if part_idx < 3 else self._pre_block_socket.negative_road.start_node
+        segment_end_node = self.add_road_node() if part_idx < 3 else self.pre_block_socket.negative_road.start_node
         segment_road = Road(segment_start_node, segment_end_node)
 
         none_cross = CreateRoadFrom(
@@ -138,7 +138,7 @@ class Roundabout(Block):
 
         bend, _ = sharpbend(
             tool_lane, 5, radius_this_seg, np.deg2rad(180 - 2 * angle), False, self.lane_width,
-            (LineType.STRIPED, LineType.SIDE)
+            (LineType.BROKEN, LineType.SIDE)
         )
         CreateRoadFrom(bend, self.positive_lane_num, segment_road, self.block_network, self._global_network)
 
@@ -146,11 +146,11 @@ class Roundabout(Block):
         for k, lane in enumerate(segment_road.get_lanes(self.block_network)):
             if k == 0:
                 if self.positive_lane_num > 1:
-                    lane.line_types = [LineType.CONTINUOUS, LineType.STRIPED]
+                    lane.line_types = [LineType.CONTINUOUS, LineType.BROKEN]
                 else:
                     lane.line_types = [LineType.CONTINUOUS, LineType.NONE]
             else:
-                lane.line_types = [LineType.STRIPED, LineType.STRIPED]
+                lane.line_types = [LineType.BROKEN, LineType.BROKEN]
 
         return Road(exit_start, exit_end), none_cross
 

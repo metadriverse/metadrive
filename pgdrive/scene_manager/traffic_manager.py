@@ -2,12 +2,11 @@ import logging
 from collections import namedtuple, deque
 from typing import Tuple, Dict, List
 
-from pgdrive.scene_creator.lanes.lane import AbstractLane
+from pgdrive.scene_creator.lane.abs_lane import AbstractLane
 from pgdrive.scene_creator.map import Map
 from pgdrive.scene_creator.road.road import Road
 from pgdrive.utils import norm, get_np_random
 from pgdrive.world.pg_world import PGWorld
-from pgdrive.scene_manager.PGLOD import PGLOD
 
 BlockVehicles = namedtuple("block_vehicles", "trigger_road vehicles")
 
@@ -41,6 +40,7 @@ class TrafficManager:
         self.vehicles = None
         self.traffic_vehicles = None
         self.block_triggered_vehicles = None
+        self.spawned_vehicles = []
 
         # traffic property
         self.mode = traffic_mode
@@ -79,6 +79,7 @@ class TrafficManager:
         self.block_triggered_vehicles = [] if self.mode != TrafficMode.Reborn else None
         self.vehicles = [*controllable_vehicles]  # it is used to perform IDM and bicycle model based motion
         self.traffic_vehicles = deque()  # it is used to step all vehicles on scene
+        self.spawned_vehicles = []
 
         if abs(traffic_density - 0.0) < 1e-2:
             return
@@ -95,7 +96,7 @@ class TrafficManager:
             self._create_vehicles_once(pg_world, map, traffic_density)
         else:
             raise ValueError("No such mode named {}".format(self.mode))
-        logging.debug("Init {} Traffic Vehicles".format(len(self.traffic_vehicles)))
+        logging.debug("Init {} Traffic Vehicles".format(len(self.vehicles) - 1))
 
     def prepare_step(self, scene_mgr, pg_world: PGWorld):
         """
@@ -130,9 +131,6 @@ class TrafficManager:
         :param pg_world: World
         :return: if this episode should be done
         """
-        # cull distant objects
-        PGLOD.cull_distant_blocks(self.map.blocks, self.ego_vehicle.position, pg_world)
-        PGLOD.cull_distant_traffic_vehicles(self.traffic_vehicles, self.ego_vehicle.position, pg_world)
 
         vehicles_to_remove = []
         for v in self.traffic_vehicles:
@@ -152,8 +150,10 @@ class TrafficManager:
             if self.mode == TrafficMode.Hybrid:
                 # create a new one
                 lane = self.np_random.choice(self.reborn_lanes)
-                random_v = self._create_one_vehicle(lane, self.np_random.rand() * lane.length / 2, True)
+                vehicle_type = self.random_vehicle_type()
+                random_v = self.spawn_one_vehicle(vehicle_type, lane, self.np_random.rand() * lane.length / 2, True)
                 self.traffic_vehicles.append(random_v)
+                self.vehicles.append(random_v.vehicle_node.kinematic_model)
 
         return False
 
@@ -163,16 +163,14 @@ class TrafficManager:
         :param pg_world: World
         :return: None
         """
-        if self.traffic_vehicles is not None:
-            for v in self.traffic_vehicles:
+        if self.spawned_vehicles is not None:
+            for v in self.spawned_vehicles:
                 v.destroy(pg_world)
-        if self.block_triggered_vehicles is not None:
-            for block_vs in self.block_triggered_vehicles:
-                for v in block_vs.vehicles:
-                    v.destroy(pg_world)
+
         self.traffic_vehicles = None
         self.vehicles = None
         self.block_triggered_vehicles = None
+        self.spawned_vehicles = None
 
     def update_random_seed(self, random_seed: int):
         """
@@ -234,20 +232,19 @@ class TrafficManager:
                     vehicles[vehicle.index] = init_state
         return vehicles
 
-    def _create_one_vehicle(self, lane: AbstractLane, long: float, enable_reborn: bool):
+    def spawn_one_vehicle(self, vehicle_type, lane: AbstractLane, long: float, enable_reborn: bool):
         """
         Create one vehicle on lane and a specific place
+        :param vehicle_type: PGTrafficVehicle type (s,m,l,xl)
         :param lane: Straight Lane or Circular Lane
         :param long: longitude position on lane
         :param enable_reborn: Reborn or not
         :return: PGTrafficVehicle
         """
-        from pgdrive.scene_creator.pg_traffic_vehicle.traffic_vehicle_type import car_type
-        vehicle_type = car_type[self.np_random.choice(list(car_type.keys()), p=[0.2, 0.3, 0.3, 0.2])]
         random_v = vehicle_type.create_random_traffic_vehicle(
             len(self.vehicles), self, lane, long, seed=self.random_seed, enable_reborn=enable_reborn
         )
-        self.vehicles.append(random_v.vehicle_node.kinematic_model)
+        self.spawned_vehicles.append(random_v)
         return random_v
 
     def _create_vehicles_on_lane(self, traffic_density: float, lane: AbstractLane, is_reborn_lane):
@@ -268,7 +265,9 @@ class TrafficManager:
             if self.np_random.rand() > traffic_density and abs(lane.length - InRampOnStraight.RAMP_LEN) > 0.1:
                 # Do special handling for ramp, and there must be vehicles created there
                 continue
-            random_v = self._create_one_vehicle(lane, long, is_reborn_lane)
+            vehicle_type = self.random_vehicle_type()
+            random_v = self.spawn_one_vehicle(vehicle_type, lane, long, is_reborn_lane)
+            self.vehicles.append(random_v.vehicle_node.kinematic_model)
             traffic_vehicles.append(random_v)
         return traffic_vehicles
 
@@ -290,7 +289,7 @@ class TrafficManager:
         vehicle_num = 0
         for block in map.blocks[1:]:
             vehicles_on_block = []
-            trigger_road = block._pre_block_socket.positive_road
+            trigger_road = block.pre_block_socket.positive_road
 
             # trigger lanes is a two dimension array [[]], the first dim represent road consisting of lanes.
             trigger_lanes = block.block_network.get_positive_lanes()
@@ -309,7 +308,6 @@ class TrafficManager:
             block_vehicles = BlockVehicles(trigger_road=trigger_road, vehicles=vehicles_on_block)
             self.block_triggered_vehicles.append(block_vehicles)
             vehicle_num += len(vehicles_on_block)
-        logging.debug("Init {} Traffic Vehicles".format(vehicle_num))
         self.block_triggered_vehicles.reverse()
 
     @staticmethod
@@ -384,6 +382,11 @@ class TrafficManager:
                     s_rear = s_v
                     v_rear = v
         return v_front, v_rear
+
+    def random_vehicle_type(self):
+        from pgdrive.scene_creator.pg_traffic_vehicle.traffic_vehicle_type import vehicle_type
+        vehicle_type = vehicle_type[self.np_random.choice(list(vehicle_type.keys()), p=[0.2, 0.3, 0.3, 0.2])]
+        return vehicle_type
 
     def destroy(self, pg_world: PGWorld) -> None:
         """

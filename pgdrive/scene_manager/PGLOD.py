@@ -10,10 +10,12 @@ class PGLOD:
     # Visualization cull
     LOD_MAP_VIS_DIST = 300  # highly related to the render efficiency !
     LOD_VEHICLE_VIS_DIST = 500
+    LOD_OBJECT_VIS_DIST = 500
 
     # Physics world cull, which can save the time used to do collision detection
     LOD_MAP_PHYSICS_DIST = 50
     LOD_VEHICLE_PHYSICS_DIST = 50
+    LOD_OBJECT_PHYSICS_DIST = 50
 
     @classmethod
     def cull_distant_blocks(cls, blocks: list, pos, pg_world: PGWorld):
@@ -36,18 +38,25 @@ class PGLOD:
                 block.dynamic_nodes.detach_from_physics_world(pg_world.physics_world.dynamic_world)
 
     @classmethod
-    def cull_distant_traffic_vehicles(cls, vehicles: list, pos, pg_world: PGWorld):
-        # Cull distant vehicles
-        for v in vehicles:
-            v_p = v.position
-            if norm(v_p[0] - pos[0], v_p[1] - v_p[1]) < cls.LOD_VEHICLE_VIS_DIST:
-                if not v.node_path.hasParent():
-                    v.node_path.reparentTo(pg_world.pbr_worldNP)
-            else:
-                if v.node_path.hasParent():
-                    v.node_path.detachNode()
+    def cull_distant_traffic_vehicles(cls, vehicles: list, pos: tuple, pg_world: PGWorld):
+        cls._cull_elements(vehicles, pos, pg_world, cls.LOD_VEHICLE_VIS_DIST, cls.LOD_VEHICLE_PHYSICS_DIST)
 
-            if norm(v_p[0] - pos[0], v_p[1] - v_p[1]) < cls.LOD_VEHICLE_PHYSICS_DIST:
-                v.dynamic_nodes.attach_to_physics_world(pg_world.physics_world.dynamic_world)
+    @classmethod
+    def cull_distant_objects(cls, objects: list, pos, pg_world: PGWorld):
+        cls._cull_elements(objects, pos, pg_world, cls.LOD_OBJECT_VIS_DIST, cls.LOD_OBJECT_PHYSICS_DIST)
+
+    @staticmethod
+    def _cull_elements(elements: list, pos: tuple, pg_world: PGWorld, vis_distance: float, physics_distance: float):
+        for obj in elements:
+            v_p = obj.position
+            if norm(v_p[0] - pos[0], v_p[1] - v_p[1]) < vis_distance:
+                if not obj.node_path.hasParent():
+                    obj.node_path.reparentTo(pg_world.pbr_worldNP)
             else:
-                v.dynamic_nodes.detach_from_physics_world(pg_world.physics_world.dynamic_world)
+                if obj.node_path.hasParent():
+                    obj.node_path.detachNode()
+
+            if norm(v_p[0] - pos[0], v_p[1] - v_p[1]) < physics_distance:
+                obj.dynamic_nodes.attach_to_physics_world(pg_world.physics_world.dynamic_world)
+            else:
+                obj.dynamic_nodes.detach_from_physics_world(pg_world.physics_world.dynamic_world)
