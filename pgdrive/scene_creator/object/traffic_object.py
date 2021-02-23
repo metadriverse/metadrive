@@ -17,6 +17,7 @@ class Object(Element):
     NAME = None
     RADIUS = 0.25
     HEIGHT = 1.2
+    MASS = 1
 
     def __init__(self, lane, lane_index: LaneIndex, position: Sequence[float], heading: float = 0.):
         """
@@ -32,6 +33,7 @@ class Object(Element):
         self.heading = heading / np.pi * 180
         self.lane_index = lane_index
         self.lane = lane
+        self.body_node = None
 
     @classmethod
     def make_on_lane(cls, lane, lane_index: LaneIndex, longitudinal: float, lateral: float):
@@ -46,6 +48,10 @@ class Object(Element):
         """
         return cls(lane, lane_index, lane.position(longitudinal, lateral), lane.heading_at(longitudinal))
 
+    def set_static(self, static: bool = False):
+        mass = 0 if static else self.MASS
+        self.body_node.setMass(mass)
+
     @classmethod
     def type(cls):
         return cls.__subclasses__()
@@ -58,11 +64,11 @@ class TrafficCone(Object):
 
     def __init__(self, lane, lane_index: LaneIndex, position: Sequence[float], heading: float = 0.):
         super(TrafficCone, self).__init__(lane, lane_index, position, heading)
-        body_node = BulletRigidBodyNode(self.NAME)
-        body_node.addShape(BulletCylinderShape(self.RADIUS, self.HEIGHT))
-        self.node_path: NodePath = NodePath(body_node)
+        self.body_node = BulletRigidBodyNode(self.NAME)
+        self.body_node.addShape(BulletCylinderShape(self.RADIUS, self.HEIGHT))
+        self.node_path: NodePath = NodePath(self.body_node)
         self.node_path.setPos(panda_position(self.position, self.HEIGHT / 2))
-        self.dynamic_nodes.append(body_node)
+        self.dynamic_nodes.append(self.body_node)
         self.node_path.setH(panda_heading(self.heading))
         if self.render:
             model = self.loader.loadModel(AssetLoader.file_path("models", "traffic_cone", "scene.gltf"))
@@ -78,11 +84,11 @@ class TrafficTriangle(Object):
 
     def __init__(self, lane, lane_index: LaneIndex, position: Sequence[float], heading: float = 0.):
         super(TrafficTriangle, self).__init__(lane, lane_index, position, heading)
-        body_node = BulletRigidBodyNode(self.NAME)
-        body_node.addShape(BulletCylinderShape(self.RADIUS, self.HEIGHT))
-        self.node_path: NodePath = NodePath(body_node)
+        self.body_node = BulletRigidBodyNode(self.NAME)
+        self.body_node.addShape(BulletCylinderShape(self.RADIUS, self.HEIGHT))
+        self.node_path: NodePath = NodePath(self.body_node)
         self.node_path.setPos(panda_position(self.position, self.HEIGHT / 2))
-        self.dynamic_nodes.append(body_node)
+        self.dynamic_nodes.append(self.body_node)
         self.node_path.setH(panda_heading(self.heading))
         if self.render:
             model = self.loader.loadModel(AssetLoader.file_path("models", "warning", "warning.gltf"))

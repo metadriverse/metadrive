@@ -20,7 +20,13 @@ class ObjectsManager:
         self.spawned_objects = []
 
     def spawn_one_object(
-        self, object_type: str, lane: AbstractLane, lane_index: LaneIndex, longitude: float, lateral: float
+        self,
+        object_type: str,
+        lane: AbstractLane,
+        lane_index: LaneIndex,
+        longitude: float,
+        lateral: float,
+        static: bool = False
     ) -> None:
         """
         Spawn an object by assigning its type and position on the lane
@@ -29,11 +35,13 @@ class ObjectsManager:
         :param lane_index:the lane index of the spawn point
         :param longitude: longitude position on this lane
         :param lateral: lateral position on  this lane
+        :param static: static object can not be moved by any force
         :return: None
         """
         for t in Object.type():
             if t.__name__ == object_type or t.NAME == object_type:
                 obj = t.make_on_lane(lane, lane_index, longitude, lateral)
+                obj.set_static(static)
                 self.spawned_objects.append(obj)
                 return obj
         raise ValueError("No object named {}, so it can not be spawned".format(object_type))
