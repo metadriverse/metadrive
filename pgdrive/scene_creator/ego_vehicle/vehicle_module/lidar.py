@@ -1,17 +1,15 @@
 import logging
 from typing import Set
-
 import numpy as np
 from panda3d.bullet import BulletGhostNode, BulletSphereShape
-from panda3d.core import Point3, BitMask32, Vec3, NodePath
-
+from panda3d.core import BitMask32, NodePath
 from pgdrive.pg_config.body_name import BodyName
 from pgdrive.pg_config.cam_mask import CamMask
 from pgdrive.scene_creator.highway_vehicle.behavior import IDMVehicle
-from pgdrive.scene_creator.pg_traffic_vehicle.traffic_vehicle import PGTrafficVehicle, PGTrafficVehicleNode
+from pgdrive.scene_creator.pg_traffic_vehicle.traffic_vehicle import PGTrafficVehicle
 from pgdrive.utils.asset_loader import AssetLoader
-from pgdrive.world.pg_physics_world import PGPhysicsWorld
 from pgdrive.utils.coordinates_shift import panda_position
+from pgdrive.world.pg_physics_world import PGPhysicsWorld
 
 
 class Lidar:
@@ -69,16 +67,27 @@ class Lidar:
                     curpos = laser_end
                 self.cloud_points[laser_index].setPos(curpos)
 
-    def _get_surrounding_vehicles(self) -> Set[IDMVehicle]:
+    def get_surrounding_vehicles(self) -> Set[IDMVehicle]:
         vehicles = set()
         for ret in self.detection_results:
-            if ret.hasHit() and isinstance(ret.getNode(), PGTrafficVehicleNode):
+            if ret.hasHit() and ret.getNode().hasPythonTag(BodyName.Traffic_vehicle):
                 vehicles.add(ret.getNode().getPythonTag(BodyName.Traffic_vehicle).kinematic_model)
         return vehicles
 
+    # def _get_surrounding_objects(self) -> Set[Object]:
+    #     """
+    #     TODO may be static objects info should be added in obs, now this func is useless
+    #     :return: a set of objects
+    #     """
+    #     objects = set()
+    #     for ret in self.detection_results:
+    #         if ret.hasHit() and ret.getNode().getName() in [BodyName.Traffic_cone, BodyName.Traffic_triangle]:
+    #             objects.add(ret.getNode().getPythonTag(BodyName.Traffic_vehicle).kinematic_model)
+    #     return objects
+
     def get_surrounding_vehicles_info(self, ego_vehicle, max_v_num: int = 4):
         from pgdrive.utils.math_utils import norm, clip
-        surrounding_vehicles = list(self._get_surrounding_vehicles())
+        surrounding_vehicles = list(self.get_surrounding_vehicles())
         surrounding_vehicles.sort(
             key=lambda v: norm(ego_vehicle.position[0] - v.position[0], ego_vehicle.position[1] - v.position[1])
         )
