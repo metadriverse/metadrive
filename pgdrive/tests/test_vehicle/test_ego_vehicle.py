@@ -66,6 +66,7 @@ def test_base_vehicle(pg_env):
 
     v.destroy()
     del v
+    pg_env.close()
 
 
 def _nan_speed(pg_env):
