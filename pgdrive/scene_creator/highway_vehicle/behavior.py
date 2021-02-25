@@ -21,13 +21,13 @@ class IDMVehicle(ControlledVehicle):
     """
 
     # Longitudinal policy parameters
-    ACC_MAX = 10.0  # [m/s2]
+    ACC_MAX = 20.0  # [m/s2]
     """Maximum acceleration."""
 
-    COMFORT_ACC_MAX = 5.0  # [m/s2]
+    COMFORT_ACC_MAX = 10.0  # [m/s2]
     """Desired maximum acceleration."""
 
-    COMFORT_ACC_MIN = -5.0  # [m/s2]
+    COMFORT_ACC_MIN = -10.0  # [m/s2]
     """Desired maximum deceleration."""
 
     DISTANCE_WANTED = 5.0 + ControlledVehicle.LENGTH  # [m]
@@ -116,7 +116,7 @@ class IDMVehicle(ControlledVehicle):
             ego_vehicle=self, front_vehicle=front_vehicle, rear_vehicle=rear_vehicle
         )
         # action['acceleration'] = self.recover_from_stop(action['acceleration'])
-        action['acceleration'] = clip(action['acceleration'], -1e2, self.ACC_MAX)
+        action['acceleration'] = clip(action['acceleration'], -self.ACC_MAX, self.ACC_MAX)
         Vehicle.act(self, action)  # Skip ControlledVehicle.act(), or the command will be override.
 
     def step(self, dt: float):
@@ -128,6 +128,8 @@ class IDMVehicle(ControlledVehicle):
         :param dt: timestep
         """
         self.timer += dt
+        if self.action['acceleration'] < 0 and self.speed <= 0:
+            self.action['acceleration'] = -self.speed / dt
         super().step(dt)
 
     def acceleration(
