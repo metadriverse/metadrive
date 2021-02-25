@@ -87,3 +87,11 @@ class PGConfig:
 
     def get_dict(self):
         return self._config
+
+    def extend_config_with_unknown_keys(self, extra_config: dict) -> None:
+        """
+        This method will merge a new dict to PgConfig without checking the type and existence
+        :param extra_config: extra configs
+        :return: None
+        """
+        self._config.update(extra_config)

@@ -82,7 +82,11 @@ class PGDriveEnv(gym.Env):
             use_increment_steering=False,
             action_check=False,
             record_episode=False,
-            use_saver=False
+            use_saver=False,
+            save_level=0.5,
+
+            # ===== stat =====
+            overtake_stat=False
         )
         config = PGConfig(env_config)
         config.register_type("map", str, int)
@@ -134,7 +138,10 @@ class PGDriveEnv(gym.Env):
         self.current_map = None
         self.vehicle = None  # Ego vehicle
         self.done = False
-        self.save_mode = False
+        self.takeover = False
+        self.step_info = None
+        self.front_vehicles = None
+        self.back_vehicles = None
 
     def lazy_init(self):
         """
@@ -179,16 +186,22 @@ class PGDriveEnv(gym.Env):
         self.add_modules_for_vehicle()
 
     def step(self, action: np.ndarray):
+        # add custom metric in info
+        self.step_info = {"raw_action": (action[0], action[1])}
+
         if self.config["action_check"]:
             assert self.action_space.contains(action), "Input {} is not compatible with action space {}!".format(
                 action, self.action_space
             )
 
-        # prepare step
         if self.config["manual_control"] and self.use_render:
             action = self.controller.process_input()
             action = self.expert_take_over(action)
 
+        # filter by saver to protect
+        action = self.saver(action)
+
+        # protect agent from nan error
         action = safe_clip(action, min_val=self.action_space.low[0], max_val=self.action_space.high[0])
 
         # preprocess
@@ -200,25 +213,31 @@ class PGDriveEnv(gym.Env):
         # update states, if restore from episode data, position and heading will be force set in update_state() function
         done = self.scene_manager.update_state()
 
+        # update obs
+        obs = self.observation.observe(self.vehicle)
+
         # update rl info
         self.done = self.done or done
-        obs = self.observation.observe(self.vehicle)
         step_reward = self.reward(action)
-        done_reward, done_info = self._done_episode()
+        done_reward = self._done_episode()
 
         if self.done:
             step_reward = 0
 
-        info = {
-            "cost": float(0),
-            "velocity": float(self.vehicle.speed),
-            "steering": float(self.vehicle.steering),
-            "acceleration": float(self.vehicle.throttle_brake),
-            "step_reward": float(step_reward)
-        }
+        # update info
+        self.step_info.update(
+            {
+                "cost": float(0),  # it may be overwritten in callback func
+                "velocity": float(self.vehicle.speed),
+                "steering": float(self.vehicle.steering),
+                "acceleration": float(self.vehicle.throttle_brake),
+                "step_reward": float(step_reward),
+                "takeover": self.takeover,
+            }
+        )
+        self.custom_info_callback()
 
-        info.update(done_info)
-        return obs, step_reward + done_reward, self.done, info
+        return obs, step_reward + done_reward, self.done, self.step_info
 
     def render(self, mode='human', text: Optional[Union[dict, str]] = None) -> Optional[np.ndarray]:
         """
@@ -255,6 +274,7 @@ class PGDriveEnv(gym.Env):
         """
         self.lazy_init()  # it only works the first time when reset() is called to avoid the error when render
         self.done = False
+        self.takeover = False
 
         # clear world and traffic manager
         self.pg_world.clear_world()
@@ -269,6 +289,9 @@ class PGDriveEnv(gym.Env):
         self.scene_manager.reset(
             self.current_map, self.vehicle, self.config["traffic_density"], episode_data=episode_data
         )
+
+        self.front_vehicles = set()
+        self.back_vehicles = set()
         return self._get_reset_return()
 
     def _get_reset_return(self):
@@ -278,6 +301,11 @@ class PGDriveEnv(gym.Env):
         return o
 
     def reward(self, action):
+        """
+        Override this func to get a new reward function
+        :param action: [steering, throttle/brake]
+        :return: reward
+        """
         # Reward for moving forward in current lane
         current_lane = self.vehicle.lane
         long_last, _ = current_lane.local_coordinates(self.vehicle.last_position)
@@ -327,13 +355,14 @@ class PGDriveEnv(gym.Env):
             reward_ -= self.config["crash_penalty"]
             logging.info("Episode ended! Reason: crash. ")
             done_info["crash"] = True
-        elif self.vehicle.out_of_road or self.vehicle.out_of_road:
+        elif self.vehicle.out_of_route or not self.vehicle.on_lane or self.vehicle.crash_side_walk:
             self.done = True
             reward_ -= self.config["out_of_road_penalty"]
             logging.info("Episode ended! Reason: out_of_road.")
             done_info["out_of_road"] = True
 
-        return reward_, done_info
+        self.step_info.update(done_info)
+        return reward_
 
     def close(self):
         if self.pg_world is not None:
@@ -364,6 +393,30 @@ class PGDriveEnv(gym.Env):
         self.current_map = None
         del self.restored_maps
         self.restored_maps = dict()
+
+    def custom_info_callback(self):
+        """
+        Override it to add custom infomation
+        :return: None
+        """
+        if self.config["overtake_stat"]:
+            # use it only when evaluation
+            self._overtake_stat()
+        self.step_info["overtake_vehicle_num"] = len(self.front_vehicles.intersection(self.back_vehicles))
+
+    def _overtake_stat(self):
+        surrounding_vs = self.vehicle.lidar.get_surrounding_vehicles()
+        routing = self.vehicle.routing_localization
+        ckpt_idx = routing.target_checkpoints_index
+        for surrounding_v in surrounding_vs:
+            if surrounding_v.lane_index[:-1] == (routing.checkpoints[ckpt_idx[0]], routing.checkpoints[ckpt_idx[1]]):
+                if self.vehicle.lane.local_coordinates(self.vehicle.position)[0] - \
+                        self.vehicle.lane.local_coordinates(surrounding_v.position)[0] < 0:
+                    self.front_vehicles.add(surrounding_v)
+                    if surrounding_v in self.back_vehicles:
+                        self.back_vehicles.remove(surrounding_v)
+                else:
+                    self.back_vehicles.add(surrounding_v)
 
     def update_map(self, episode_data: dict = None):
         if episode_data is not None:
@@ -539,30 +592,58 @@ class PGDriveEnv(gym.Env):
         if self._expert_take_over:
             from pgdrive.examples.ppo_expert import expert
             return expert(self.observation.observe(self.vehicle))
-        elif self.config["use_saver"]:
-            return self.saver(action)
         else:
             return action
 
     def saver(self, action):
-        obs = self.observation.observe(self.vehicle)
-        f = 1
+        """
+        Rule to enable saver
+        :param action: original action
+        :return: a new action to override original action
+        """
         steering = action[0]
         throttle = action[1]
-        from pgdrive.examples.ppo_expert import expert
-        saver_a = expert(obs, deterministic=False)
-        self.save_mode = False
-        if obs[0] < 0.1 * f or obs[1] < 0.1 * f:
-            self.save_mode = True
-            return saver_a
-        if action[1] >= 0 and saver_a[1] <= 0:
-            throttle = saver_a[1]
-            self.save_mode = True
-        if throttle == saver_a[1] and self.vehicle.speed < 5 and throttle < 0:
-            throttle = 0.5
-            self.save_mode = True
-        if min(self.vehicle.lidar.get_cloud_points()) < 0.08:
-            steering = saver_a[0]
+        if self.config["use_saver"] and not self._expert_take_over:
+            # saver can be used for human or another AI
+            save_level = self.config["save_level"]
+            obs = self.observation.observe(self.vehicle)
+            from pgdrive.examples.ppo_expert import expert
+            saver_a = expert(obs, deterministic=False)
+            if save_level > 0.9:
+                steering = saver_a[0]
+                throttle = saver_a[1]
+            elif save_level > 1e-3:
+                heading_diff = self.vehicle.heading_diff(self.vehicle.lane) - 0.5
+                f = min(1 + abs(heading_diff) * self.vehicle.speed * self.vehicle.max_speed, save_level * 10)
+                # for out of road
+                if (obs[0] < 0.04 * f and heading_diff < 0) or (obs[1] < 0.04 * f and heading_diff > 0) or obs[
+                    0] <= 1e-3 or \
+                        obs[
+                            1] <= 1e-3:
+                    steering = saver_a[0]
+                    throttle = saver_a[1]
+                    if self.vehicle.speed < 5:
+                        throttle = 0.5
+                # if saver_a[1] * self.vehicle.speed < -40 and action[1] > 0:
+                #     throttle = saver_a[1]
+
+                # for collision
+                lidar_p = self.vehicle.lidar.get_cloud_points()
+                left = int(self.vehicle.lidar.laser_num / 4)
+                right = int(self.vehicle.lidar.laser_num / 4 * 3)
+                if min(lidar_p[left - 4:left + 6]) < (save_level + 0.1) / 10 or min(lidar_p[right - 4:right + 6]
+                                                                                    ) < (save_level + 0.1) / 10:
+                    # lateral safe distance 2.0m
+                    steering = saver_a[0]
+                if action[1] >= 0 and saver_a[1] <= 0 and min(min(lidar_p[0:10]), min(lidar_p[-10:])) < save_level:
+                    # longitude safe distance 15 m
+                    throttle = saver_a[1]
+
+        # indicate if current frame is takeover step
+        pre_save = self.takeover
+        self.takeover = True if action[0] != steering or action[1] != throttle else False
+        self.step_info["takeover_start"] = True if not pre_save and self.takeover else False
+        self.step_info["takeover_end"] = True if pre_save and not self.takeover else False
         return steering, throttle
 
     def toggle_expert_take_over(self):

@@ -19,7 +19,7 @@ if __name__ == "__main__":
     env.pg_world.force_fps.toggle()
     for i in range(1, 100000):
         o, r, d, info = env.step([0, 1])
-        text = {"save": env.save_mode}
+        text = {"save": env.takeover_start}
         env.render(text=text)
         if info["arrive_dest"]:
             env.reset()
