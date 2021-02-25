@@ -55,7 +55,7 @@ class BaseVehicle(DynamicElement):
             mini_map=(84, 84, 250),  # buffer length, width
             rgb_cam=(84, 84),  # buffer length, width
             depth_cam=(84, 84, True),  # buffer length, width, view_ground
-            show_navi_mark=False,
+            show_navi_mark=True,
             increment_steering=False,
             wheel_friction=0.6,
         )
@@ -99,23 +99,34 @@ class BaseVehicle(DynamicElement):
 
         self.vehicle_panel = VehiclePanel(self.pg_world) if (self.pg_world.mode == RENDER_MODE_ONSCREEN) else None
 
-        # other info
+        # state info
         self.throttle_brake = 0.0
         self.steering = 0
         self.last_current_action = deque([(0.0, 0.0), (0.0, 0.0)], maxlen=2)
         self.last_position = self.born_place
         self.last_heading_dir = self.heading
+        self.dist_to_left = None
+        self.dist_to_right = None
 
         # collision info render
         self.collision_info_np = self._init_collision_info_render(pg_world)
         self.collision_banners = {}  # to save time
         self.current_banner = None
+        self.attach_to_pg_world(self.pg_world.pbr_render, self.pg_world.physics_world)
 
         # done info
-        self.crash = False
-        self.out_of_road = False
+        self.crash = None
+        self.out_of_route = None
+        self.crash_side_walk = None
+        self.on_lane = None
+        self.init_done_info()
 
-        self.attach_to_pg_world(self.pg_world.pbr_render, self.pg_world.physics_world)
+    def init_done_info(self):
+        # done info
+        self.crash = False
+        self.crash_side_walk = False
+        self.out_of_route = False  # re-route is required if is false
+        self.on_lane = True  # on lane surface or not
 
     @classmethod
     def get_vehicle_config(cls, new_config):
@@ -137,12 +148,17 @@ class BaseVehicle(DynamicElement):
         if self.vehicle_panel is not None:
             self.vehicle_panel.renew_2d_car_para_visualization(self)
 
+        # init done info before each step
+        self.init_done_info()
+
     def update_state(self, pg_world=None):
         if self.lidar is not None:
             self.lidar.perceive(self.position, self.heading_theta, self.pg_world.physics_world)
         if self.routing_localization is not None:
             self.lane, self.lane_index = self.routing_localization.update_navigation_localization(self)
         self._state_check()
+        self.update_dist_to_left_right()
+        self.out_of_route = True if self.dist_to_right < 0 or self.dist_to_left < 0 else False
 
     def reset(self, map: Map, pos: np.ndarray, heading: float):
         """
@@ -158,8 +174,7 @@ class BaseVehicle(DynamicElement):
         self.system.resetSuspension()
 
         # done info
-        self.crash = False
-        self.out_of_road = False
+        self.init_done_info()
 
         # other info
         self.throttle_brake = 0.0
@@ -167,6 +182,7 @@ class BaseVehicle(DynamicElement):
         self.last_current_action = deque([(0.0, 0.0), (0.0, 0.0)], maxlen=2)
         self.last_position = self.born_place
         self.last_heading_dir = self.heading
+        self.update_dist_to_left_right()
 
         if "depth_cam" in self.image_sensors and self.image_sensors["depth_cam"].view_ground:
             for block in map.blocks:
@@ -208,6 +224,17 @@ class BaseVehicle(DynamicElement):
                 self.system.setBrake(abs(throttle_brake) * max_brake_force, wheel_index)
 
     """---------------------------------------- vehicle info ----------------------------------------------"""
+
+    def update_dist_to_left_right(self):
+        current_reference_lane = self.routing_localization.current_ref_lanes[-1]
+        _, lateral_to_reference = current_reference_lane.local_coordinates(self.position)
+
+        lateral_to_right = abs(
+            lateral_to_reference) + self.routing_localization.map.lane_width / 2 if lateral_to_reference < 0 \
+            else self.routing_localization.map.lane_width / 2 - abs(lateral_to_reference)
+
+        lateral_to_left = self.routing_localization.map.lane_width * self.routing_localization.map.lane_num - lateral_to_right
+        self.dist_to_left, self.dist_to_right = lateral_to_left, lateral_to_right
 
     @property
     def position(self):
@@ -428,7 +455,7 @@ class BaseVehicle(DynamicElement):
             if name[0] == "Ground" or name[0] == BodyName.Lane:
                 continue
             elif name[0] == BodyName.Side_walk:
-                self.out_of_road = True
+                self.crash_side_walk = True
             contacts.add(name[0])
         if self.render:
             self.render_collision_info(contacts)
@@ -445,7 +472,8 @@ class BaseVehicle(DynamicElement):
             self.crash = True
             logging.debug("Crash with {}".format(name[0]))
 
-    def _init_collision_info_render(self, pg_world):
+    @staticmethod
+    def _init_collision_info_render(pg_world):
         if pg_world.mode == "onscreen":
             info_np = NodePath("Collision info nodepath")
             info_np.reparentTo(pg_world.aspect2d)
@@ -525,7 +553,7 @@ class BaseVehicle(DynamicElement):
         return {
             "heading": self.heading_theta,
             "position": self.position.tolist(),
-            "done": self.crash or self.out_of_road
+            "done": self.crash or self.out_of_route or self.crash_side_walk or not self.on_lane
         }
 
     def set_state(self, state: dict):

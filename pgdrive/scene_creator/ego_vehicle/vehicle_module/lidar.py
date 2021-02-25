@@ -65,6 +65,8 @@ class Lidar:
                     curpos = result.getHitPos()
                 else:
                     curpos = laser_end
+                # if 0<=laser_index < 10 or 230 <= laser_index <=239:
+                #     self.cloud_points[laser_index].setColor(1,0,0)
                 self.cloud_points[laser_index].setPos(curpos)
 
     def get_surrounding_vehicles(self) -> Set[IDMVehicle]:

@@ -41,7 +41,40 @@ def expert(obs, deterministic=False):
     std = np.exp(log_std)
     action = np.random.normal(mean, std)
     ret = action
-    ret = np.clip(ret, -1.0, 1.0)
+    # ret = np.clip(ret, -1.0, 1.0) all clip should be implemented in env!
+    return ret
+
+
+def load_weights(path: str):
+    """
+    Load NN weights
+    :param path: weights file path path
+    :return: NN weights object
+    """
+    try:
+        model = np.load(path)
+        return model
+    except FileNotFoundError:
+        print("Can not find {}, didn't load anything".format(path))
+        return None
+
+
+def value(obs, weights):
+    """
+    Given weights, return the evaluation to one state/obseration
+    :param obs: observation
+    :param weights: variable weights of NN
+    :return: value
+    """
+    if weights is None:
+        return 0
+    obs = obs.reshape(1, -1)
+    x = np.matmul(obs, weights["default_policy/fc_value_1/kernel"]) + weights["default_policy/fc_value_1/bias"]
+    x = np.tanh(x)
+    x = np.matmul(x, weights["default_policy/fc_value_2/kernel"]) + weights["default_policy/fc_value_2/bias"]
+    x = np.tanh(x)
+    x = np.matmul(x, weights["default_policy/value_out/kernel"]) + weights["default_policy/value_out/bias"]
+    ret = x.reshape(-1)
     return ret
 
 

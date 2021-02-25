@@ -24,7 +24,6 @@ class RoutingLocalizationModule:
     PRE_NOTIFY_DIST = 40
     MARK_COLOR = COLLISION_INFO_COLOR["green"][1]
     MIN_ALPHA = 0.15
-    SHOW_NAVI_POINT = False
     FORCE_CALCULATE = False
 
     def __init__(self, pg_world, show_navi_point: False):
@@ -104,6 +103,7 @@ class RoutingLocalizationModule:
         lane, lane_index = ray_localization(position, ego_vehicle.pg_world)
         if lane is None:
             lane, lane_index = ego_vehicle.lane, ego_vehicle.lane_index
+            ego_vehicle.on_lane = False
             if self.FORCE_CALCULATE:
                 lane_index, _ = self.map.road_network.get_closest_lane_index(position)
                 lane = self.map.road_network.get_lane(lane_index)
@@ -122,9 +122,6 @@ class RoutingLocalizationModule:
         for lanes_id, lanes in enumerate([target_lanes_1, target_lanes_2]):
             ref_lane = lanes[0]
             later_middle = (float(self.map.lane_num) / 2 - 0.5) * self.map.lane_width
-            if isinstance(ref_lane, CircularLane) and ref_lane.direction == 1:
-                ref_lane = lanes[-1]
-                later_middle *= -1
             check_point = ref_lane.position(ref_lane.length, later_middle)
             if lanes_id == 0:
                 # calculate ego v lane heading
@@ -201,13 +198,13 @@ class RoutingLocalizationModule:
             return
 
         # arrive to second checkpoint
-        if current_road_start_point == self.checkpoints[self.target_checkpoints_index[1]]:
-            last_checkpoint_idx = self.target_checkpoints_index.pop(0)
-            next_checkpoint_idx = last_checkpoint_idx + 2
-            if next_checkpoint_idx == len(self.checkpoints) - 1:
-                self.target_checkpoints_index.append(next_checkpoint_idx - 1)
+        if current_road_start_point in self.checkpoints[self.target_checkpoints_index[1]:]:
+            idx = self.checkpoints.index(current_road_start_point, self.target_checkpoints_index[1], -1)
+            self.target_checkpoints_index = [idx]
+            if idx + 1 == len(self.checkpoints) - 1:
+                self.target_checkpoints_index.append(idx)
             else:
-                self.target_checkpoints_index.append(next_checkpoint_idx)
+                self.target_checkpoints_index.append(idx + 1)
             # print(self.target_checkpoints_index)
 
     def get_navi_info(self):

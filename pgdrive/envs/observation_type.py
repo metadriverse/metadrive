@@ -30,9 +30,7 @@ class ObservationType(ABC):
         """
         # update out of road
         current_reference_lane = vehicle.routing_localization.current_ref_lanes[-1]
-        lateral_to_left, lateral_to_right = ObservationType.vehicle_to_left_right(vehicle)
-        if lateral_to_left < 0 or lateral_to_right < 0:
-            vehicle.out_of_road = True
+        lateral_to_left, lateral_to_right = vehicle.dist_to_left, vehicle.dist_to_right
         total_width = float(
             (vehicle.routing_localization.map.lane_num + 1) * vehicle.routing_localization.map.lane_width
         )
@@ -60,28 +58,6 @@ class ObservationType(ABC):
         _, lateral = vehicle.lane.local_coordinates(vehicle.position)
         info.append(clip((lateral * 2 / vehicle.routing_localization.map.lane_width + 1.0) / 2.0, 0.0, 1.0))
         return info
-
-    @staticmethod
-    def vehicle_to_left_right(vehicle):
-        current_reference_lane = vehicle.routing_localization.current_ref_lanes[-1]
-        lane_num = len(vehicle.routing_localization.current_ref_lanes)
-        _, lateral_to_reference = current_reference_lane.local_coordinates(vehicle.position)
-
-        if isinstance(current_reference_lane, CircularLane) \
-                and lane_num == 1 and current_reference_lane.direction == -1:
-
-            lateral_to_right = abs(lateral_to_reference) + vehicle.routing_localization.map.lane_width * (
-                    vehicle.routing_localization.map.lane_num - 0.5) if lateral_to_reference < 0 \
-                else vehicle.routing_localization.map.lane_width * vehicle.routing_localization.map.lane_num - \
-                     vehicle.routing_localization.map.lane_width / 2 - lateral_to_reference
-
-        else:
-            lateral_to_right = abs(
-                lateral_to_reference) + vehicle.routing_localization.map.lane_width / 2 if lateral_to_reference < 0 \
-                else vehicle.routing_localization.map.lane_width / 2 - abs(lateral_to_reference)
-
-        lateral_to_left = vehicle.routing_localization.map.lane_width * vehicle.routing_localization.map.lane_num - lateral_to_right
-        return lateral_to_left, lateral_to_right
 
     @staticmethod
     def resize_img(array, dim_1, dim_2):

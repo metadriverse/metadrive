@@ -10,6 +10,9 @@ import numpy as np
 
 ckpt_path = osp.join(osp.dirname(__file__), "checkpoint_417/checkpoint-417")
 if __name__ == '__main__':
+    remove_value_network = True
+    path = "expert_weights.npz"
+
     with open(ckpt_path, "rb") as f:
         data = f.read()
     unpickled = pickle.loads(data)
@@ -18,7 +21,7 @@ if __name__ == '__main__':
         worker["state"]["default_policy"].pop("_optimizer_variables")
     pickled_worker = pickle.dumps(worker)
     weights = worker["state"]["default_policy"]
-    weights = {k: v for k, v in weights.items() if "value" not in k}
-    path = "expert_weights.npz"
+    if remove_value_network:
+        weights = {k: v for k, v in weights.items() if "value" not in k}
     np.savez_compressed(path, **weights)
     print("Numpy agent weight is saved at: {}!".format(path))
