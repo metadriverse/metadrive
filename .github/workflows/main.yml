@@ -35,6 +35,7 @@ jobs:
           pip install -e .
           pip install pytest
           pip install pytest-cov
+          pip install ray
           cd pgdrive/
           pytest --cov=./ --cov-config=.coveragerc --cov-report=xml -sv tests/
       - name: Upload coverage to Codecov
