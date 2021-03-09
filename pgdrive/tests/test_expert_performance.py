@@ -37,7 +37,7 @@ def test_expert_with_traffic(use_render=False):
         dict(environment_num=1, start_seed=3, load_map_from_json=False, random_traffic=False, use_render=use_render),
         num_episode=3
     )
-    assert 318 < ep_reward < 319, ep_reward
+    assert 318 < ep_reward < 320, ep_reward
     assert success_rate == 1.0, success_rate
 
 

@@ -104,7 +104,6 @@ class PGTrafficVehicle(DynamicElement):
 
     def need_remove(self):
         if self._initial_state is not None:
-            self.reset()
             return False
         else:
             self.vehicle_node.clearTag(BodyName.Traffic_vehicle)

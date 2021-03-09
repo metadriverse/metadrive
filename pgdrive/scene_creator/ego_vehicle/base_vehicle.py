@@ -412,6 +412,7 @@ class BaseVehicle(DynamicElement):
     def _add_wheel(self, pos: Vec3, radius: float, front: bool, left):
         wheel_np = self.node_path.attachNewNode("wheel")
         if self.render:
+            # TODO something wrong with the wheel render
             model_path = 'models/yugo/yugotireR.egg' if left else 'models/yugo/yugotireL.egg'
             wheel_model = self.loader.loadModel(AssetLoader.file_path(model_path))
             wheel_model.reparentTo(wheel_np)
