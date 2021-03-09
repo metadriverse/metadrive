@@ -8,12 +8,12 @@ setup_logger(True)
 class TestEnv(PGDriveEnv):
     def __init__(self):
         """
-        TODO a small bug exists in scene 9 (30 blocks)
+        TODO a small bug exists in scene 9 (30 blocks), traffic density > 0, reborn mode
         """
         super(TestEnv, self).__init__(
             {
                 "environment_num": 1,
-                "traffic_density": 0.0,
+                "traffic_density": 0.3,
                 "traffic_mode": "hybrid",
                 "start_seed": 5,
                 "pg_world_config": {
@@ -54,7 +54,7 @@ if __name__ == "__main__":
                 "dist_to_right:": env.vehicle.dist_to_right
             }
         )
-        # if d:
-        #     print("Reset")
-        #     env.reset()
+        if d:
+            print("Reset")
+            env.reset()
     env.close()

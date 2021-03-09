@@ -115,7 +115,9 @@ def CreateRoadFrom(
         lanes.append(origin_lane)
     else:
         lanes.insert(0, origin_lane)
-
+        if len(lanes) > 1:
+            line_type = origin_lane.line_types[0], lanes[-1].line_types[0]
+            origin_lane.line_types = line_type
     # check the left lane and right lane
     ignore = (ignore_start, ignore_end)
     factor = (BlockDefault.SIDE_WALK_WIDTH + BlockDefault.SIDE_WALK_LINE_DIST + lane_width / 2.0) * 2.0 / lane_width

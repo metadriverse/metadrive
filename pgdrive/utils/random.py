@@ -9,6 +9,21 @@ import struct
 import numpy as np
 
 
+class RandomEngine:
+    def __init__(self):
+        self.random_seed = None
+        self.np_random = None
+
+    def update_random_seed(self, random_seed: int):
+        """
+        Update the random seed and random engine of traffic
+        :param random_seed: int, random seed
+        :return: None
+        """
+        self.random_seed = random_seed
+        self.np_random = get_np_random(self.random_seed)
+
+
 def get_np_random(seed=None, return_seed=False):
     if seed is not None and not (isinstance(seed, int) and 0 <= seed):
         raise logging.error('Seed must be a non-negative integer or omitted, not {}'.format(seed))

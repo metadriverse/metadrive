@@ -11,6 +11,7 @@ class PGOnScreenMessage(OnScreenDebug.OnScreenDebug):
     Simply inherit from the original debug class of panda3d to show debug message on screen
     """
     POS = (0.1, -0.2)
+    SCALE = None
 
     def __init__(self, refresh_plain_text=False, debug=False):
         super(PGOnScreenMessage, self).__init__()
@@ -36,6 +37,11 @@ class PGOnScreenMessage(OnScreenDebug.OnScreenDebug):
         self.onScreenText.setBg(Vec4(0, 0, 0, 0.5))
         self.onScreenText.setPos(*self.POS)
         self.onScreenText.textNode.setCardAsMargin(0.6, 0.6, 0.5, 0.1)
+        if self.SCALE is not None:
+            self.onScreenText.setScale(self.SCALE)
+
+    def set_scale(self, scale=None):
+        self.SCALE = scale
 
     def render(self):
         if not self.enabled:

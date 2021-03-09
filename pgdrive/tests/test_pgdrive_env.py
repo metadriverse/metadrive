@@ -25,7 +25,9 @@ blackbox_test_configs = dict(
 
 pid_control_config = dict(environment_num=1, start_seed=5, map="CrXROSTR", traffic_density=0.0)
 
-info_keys = ["cost", "velocity", "steering", "acceleration", "step_reward", "crash", "out_of_road", "arrive_dest"]
+info_keys = [
+    "cost", "velocity", "steering", "acceleration", "step_reward", "crash_vehicle", "out_of_road", "arrive_dest"
+]
 
 assert "__init__.py" not in os.listdir(os.path.dirname(__file__)), "Please remove __init__.py in tests directory."
 
