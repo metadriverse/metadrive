@@ -31,3 +31,6 @@ class BlockDefault:
     PART_IDX = 0
     ROAD_IDX = 0
     DASH = "_"
+
+    #  when set to True, Vehicles will not generate on this block
+    PROHIBIT_TRAFFIC_GENERATION = False

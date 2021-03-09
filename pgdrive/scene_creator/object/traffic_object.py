@@ -10,6 +10,18 @@ from pgdrive.utils.asset_loader import AssetLoader
 LaneIndex = Tuple[str, str, int]
 
 
+class ObjectNode(BulletRigidBodyNode):
+    """
+    Collision Properties should place here, info here can used for collision callback
+    """
+    COST_ONCE = True  # cost will give at the first time
+
+    def __init__(self, object_body_name: str):
+        BulletRigidBodyNode.__init__(self, object_body_name)
+        BulletRigidBodyNode.setPythonTag(self, object_body_name, self)
+        self.crashed = False
+
+
 class Object(Element):
     """
     Common interface for objects that appear on the road, beside vehicles.
@@ -64,7 +76,7 @@ class TrafficCone(Object):
 
     def __init__(self, lane, lane_index: LaneIndex, position: Sequence[float], heading: float = 0.):
         super(TrafficCone, self).__init__(lane, lane_index, position, heading)
-        self.body_node = BulletRigidBodyNode(self.NAME)
+        self.body_node = ObjectNode(self.NAME)
         self.body_node.addShape(BulletCylinderShape(self.RADIUS, self.HEIGHT))
         self.node_path: NodePath = NodePath(self.body_node)
         self.node_path.setPos(panda_position(self.position, self.HEIGHT / 2))
@@ -84,7 +96,7 @@ class TrafficTriangle(Object):
 
     def __init__(self, lane, lane_index: LaneIndex, position: Sequence[float], heading: float = 0.):
         super(TrafficTriangle, self).__init__(lane, lane_index, position, heading)
-        self.body_node = BulletRigidBodyNode(self.NAME)
+        self.body_node = ObjectNode(self.NAME)
         self.body_node.addShape(BulletCylinderShape(self.RADIUS, self.HEIGHT))
         self.node_path: NodePath = NodePath(self.body_node)
         self.node_path.setPos(panda_position(self.position, self.HEIGHT / 2))

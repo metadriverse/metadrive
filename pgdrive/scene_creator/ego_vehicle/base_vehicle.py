@@ -52,6 +52,7 @@ class BaseVehicle(DynamicElement):
     default_vehicle_config = PGConfig(
         dict(
             lidar=(240, 50, 4),  # laser num, distance, other vehicle info num
+            show_lidar=False,
             mini_map=(84, 84, 250),  # buffer length, width
             rgb_cam=(84, 84),  # buffer length, width
             depth_cam=(84, 84, True),  # buffer length, width, view_ground
@@ -115,15 +116,20 @@ class BaseVehicle(DynamicElement):
         self.attach_to_pg_world(self.pg_world.pbr_render, self.pg_world.physics_world)
 
         # done info
-        self.crash = None
+        self.crash_vehicle = None
+        self.crash_object = None
         self.out_of_route = None
         self.crash_side_walk = None
         self.on_lane = None
         self.init_done_info()
 
+        # others
+        self._frame_objects_crashed = []  # inner loop, object will only be crashed for once
+
     def init_done_info(self):
-        # done info
-        self.crash = False
+        # done info will be initialized every frame
+        self.crash_vehicle = False
+        self.crash_object = False
         self.crash_side_walk = False
         self.out_of_route = False  # re-route is required if is false
         self.on_lane = True  # on lane surface or not
@@ -138,6 +144,8 @@ class BaseVehicle(DynamicElement):
         """
         Save info and make decision before action
         """
+        self._frame_objects_crashed = []
+
         self.last_position = self.position
         self.last_heading_dir = self.heading
         self.last_current_action.append(action)  # the real step of physics world is implemented in taskMgr.step()
@@ -152,6 +160,11 @@ class BaseVehicle(DynamicElement):
         self.init_done_info()
 
     def update_state(self, pg_world=None):
+        # callback
+        for obj in self._frame_objects_crashed:
+            if obj.COST_ONCE:
+                obj.crashed = True
+        # lidar
         if self.lidar is not None:
             self.lidar.perceive(self.position, self.heading_theta, self.pg_world.physics_world)
         if self.routing_localization is not None:
@@ -423,8 +436,8 @@ class BaseVehicle(DynamicElement):
     def add_image_sensor(self, name: str, sensor: ImageBuffer):
         self.image_sensors[name] = sensor
 
-    def add_lidar(self, laser_num=240, distance=50):
-        self.lidar = Lidar(self.pg_world.render, laser_num, distance)
+    def add_lidar(self, laser_num=240, distance=50, show_lidar_point=False):
+        self.lidar = Lidar(self.pg_world.render, laser_num, distance, show_lidar_point)
 
     def add_routing_localization(self, show_navi_point: bool):
         self.routing_localization = RoutingLocalizationModule(self.pg_world, show_navi_point)
@@ -468,9 +481,13 @@ class BaseVehicle(DynamicElement):
         node1 = contact.getNode1().getName()
         name = [node0, node1]
         name.remove(BodyName.Ego_vehicle_top)
-        if name[0] in [BodyName.Traffic_cone, BodyName.Traffic_triangle, BodyName.Traffic_vehicle]:
-            self.crash = True
-            logging.debug("Crash with {}".format(name[0]))
+        if name[0] in [BodyName.Traffic_vehicle]:
+            self.crash_vehicle = True
+        elif name[0] in [BodyName.Traffic_cone, BodyName.Traffic_triangle]:
+            node = contact.getNode0() if contact.getNode0().hasPythonTag(name[0]) else contact.getNode1()
+            self.crash_object = True if not node.getPythonTag(name[0]).crashed else False
+            self._frame_objects_crashed.append(node.getPythonTag(name[0]))
+        logging.debug("Crash with {}".format(name[0]))
 
     @staticmethod
     def _init_collision_info_render(pg_world):
@@ -553,7 +570,7 @@ class BaseVehicle(DynamicElement):
         return {
             "heading": self.heading_theta,
             "position": self.position.tolist(),
-            "done": self.crash or self.out_of_route or self.crash_side_walk or not self.on_lane
+            "done": self.crash_vehicle or self.out_of_route or self.crash_side_walk or not self.on_lane
         }
 
     def set_state(self, state: dict):

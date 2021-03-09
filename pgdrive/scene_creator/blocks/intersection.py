@@ -119,6 +119,7 @@ class InterSection(Block):
         )
 
         intersect_nodes.rotate(-1)
+        right_straight.line_types = [LineType.BROKEN, LineType.SIDE]
         return right_straight, non_cross
 
     def get_socket(self, index: int) -> BlockSocket:

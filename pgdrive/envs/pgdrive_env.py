@@ -1,4 +1,5 @@
 import copy
+from panda3d.core import PNMImage
 import json
 import logging
 import os.path as osp
@@ -36,6 +37,7 @@ class PGDriveEnv(gym.Env):
             use_render=False,  # pop a window to render or not
             # force_fps=None,
             debug=False,
+            cull_scene=True,  # only for debug use
             manual_control=False,
             controller="keyboard",  # "joystick" or "keyboard"
             use_chase_camera=True,
@@ -46,9 +48,12 @@ class PGDriveEnv(gym.Env):
             traffic_mode=TrafficMode.Trigger,
             random_traffic=False,  # Traffic is randomized at default.
 
+            # ===== Object =====
+            accident_prob=0.,  # accident may happen on each block with this probability, except multi-exits block
+
             # ===== Observation =====
             use_image=False,  # Use first view
-            use_topdown=False,  # Use topdown view
+            use_topdown=False,  # Use top-down view
             rgb_clip=True,
             vehicle_config=dict(),  # use default vehicle modules see more in BaseVehicle
             image_source="rgb_cam",  # mini_map or rgb_cam or depth cam
@@ -69,13 +74,19 @@ class PGDriveEnv(gym.Env):
             # ===== Reward Scheme =====
             success_reward=20,
             out_of_road_penalty=5,
-            crash_penalty=10,
+            crash_vehicle_penalty=10,
+            crash_object_penalty=2,
             acceleration_penalty=0.0,
             steering_penalty=0.1,
             low_speed_penalty=0.0,
             driving_reward=1.0,
             general_penalty=0.0,
             speed_reward=0.1,
+
+            # ===== Cost Scheme =====
+            crash_vehicle_cost=1,
+            crash_object_cost=1,
+            out_of_road_cost=1.,
 
             # ===== Others =====
             pg_world_config=dict(),
@@ -160,9 +171,13 @@ class PGDriveEnv(gym.Env):
         # Press t can let expert take over. But this function is still experimental.
         self.pg_world.accept("t", self.toggle_expert_take_over)
 
+        # capture all figs
+        self.pg_world.accept("p", self.capture)
+
         # init traffic manager
         self.scene_manager = SceneManager(
-            self.pg_world, self.config["traffic_mode"], self.config["random_traffic"], self.config["record_episode"]
+            self.pg_world, self.config["traffic_mode"], self.config["random_traffic"], self.config["record_episode"],
+            self.config["cull_scene"]
         )
 
         if self.config["manual_control"]:
@@ -187,7 +202,7 @@ class PGDriveEnv(gym.Env):
 
     def step(self, action: np.ndarray):
         # add custom metric in info
-        self.step_info = {"raw_action": (action[0], action[1])}
+        self.step_info = {"raw_action": (action[0], action[1]), "cost": 0}
 
         if self.config["action_check"]:
             assert self.action_space.contains(action), "Input {} is not compatible with action space {}!".format(
@@ -227,7 +242,6 @@ class PGDriveEnv(gym.Env):
         # update info
         self.step_info.update(
             {
-                "cost": float(0),  # it may be overwritten in callback func
                 "velocity": float(self.vehicle.speed),
                 "steering": float(self.vehicle.steering),
                 "acceleration": float(self.vehicle.throttle_brake),
@@ -287,7 +301,11 @@ class PGDriveEnv(gym.Env):
 
         # generate new traffic according to the map
         self.scene_manager.reset(
-            self.current_map, self.vehicle, self.config["traffic_density"], episode_data=episode_data
+            self.current_map,
+            self.vehicle,
+            self.config["traffic_density"],
+            self.config["accident_prob"],
+            episode_data=episode_data
         )
 
         self.front_vehicles = set()
@@ -311,6 +329,7 @@ class PGDriveEnv(gym.Env):
         long_last, _ = current_lane.local_coordinates(self.vehicle.last_position)
         long_now, lateral_now = current_lane.local_coordinates(self.vehicle.position)
 
+        # reward for lane keeping, without it vehicle can learn to overtake but fail to keep in lane
         reward = 0.0
         lateral_factor = clip(1 - 2 * abs(lateral_now) / self.current_map.lane_width, 0.0, 1.0)
         reward += self.config["driving_reward"] * (long_now - long_last) * lateral_factor
@@ -319,6 +338,7 @@ class PGDriveEnv(gym.Env):
         steering_change = abs(self.vehicle.last_current_action[0][0] - self.vehicle.last_current_action[1][0])
         steering_penalty = self.config["steering_penalty"] * steering_change * self.vehicle.speed / 20
         reward -= steering_penalty
+
         # Penalty for frequent acceleration / brake
         acceleration_penalty = self.config["acceleration_penalty"] * ((action[1])**2)
         reward -= acceleration_penalty
@@ -328,19 +348,14 @@ class PGDriveEnv(gym.Env):
         if self.vehicle.speed < 1:
             low_speed_penalty = self.config["low_speed_penalty"]  # encourage car
         reward -= low_speed_penalty
-
         reward -= self.config["general_penalty"]
-
         reward += self.config["speed_reward"] * (self.vehicle.speed / self.vehicle.max_speed)
-
-        # if reward > 3.0:
-        #     print("Stop here.")
 
         return reward
 
     def _done_episode(self) -> (float, dict):
         reward_ = 0
-        done_info = dict(crash=False, out_of_road=False, arrive_dest=False)
+        done_info = dict(crash_vehicle=False, crash_object=False, out_of_road=False, arrive_dest=False)
         long, lat = self.vehicle.routing_localization.final_lane.local_coordinates(self.vehicle.position)
 
         if self.vehicle.routing_localization.final_lane.length - 5 < long < self.vehicle.routing_localization.final_lane.length + 5 \
@@ -350,18 +365,26 @@ class PGDriveEnv(gym.Env):
             reward_ += self.config["success_reward"]
             logging.info("Episode ended! Reason: arrive_dest.")
             done_info["arrive_dest"] = True
-        elif self.vehicle.crash:
+        elif self.vehicle.crash_vehicle:
             self.done = True
-            reward_ -= self.config["crash_penalty"]
-            logging.info("Episode ended! Reason: crash. ")
-            done_info["crash"] = True
+            reward_ -= self.config["crash_vehicle_penalty"]
+            logging.info("Episode ended! Reason: crash vehicle")
+            done_info["crash_vehicle"] = True
         elif self.vehicle.out_of_route or not self.vehicle.on_lane or self.vehicle.crash_side_walk:
             self.done = True
             reward_ -= self.config["out_of_road_penalty"]
             logging.info("Episode ended! Reason: out_of_road.")
             done_info["out_of_road"] = True
+        elif self.vehicle.crash_object:
+            self.done = True
+            reward_ -= self.config["crash_object_penalty"]
+            done_info["crash_object"] = True
 
         self.step_info.update(done_info)
+
+        # ===== for old version compatibility =====
+        # crash almost equals to crashing with vehicles
+        self.step_info["crash"] = self.step_info["crash_vehicle"] or self.step_info["crash_object"]
         return reward_
 
     def close(self):
@@ -464,7 +487,7 @@ class PGDriveEnv(gym.Env):
         self.vehicle.add_routing_localization(vehicle_config["show_navi_mark"])  # default added
         if not self.config["use_image"]:
             # TODO visualize lidar
-            self.vehicle.add_lidar(vehicle_config["lidar"][0], vehicle_config["lidar"][1])
+            self.vehicle.add_lidar(vehicle_config["lidar"][0], vehicle_config["lidar"][1], vehicle_config["show_lidar"])
 
             if self.config["use_render"]:
                 rgb_cam_config = vehicle_config["rgb_cam"]
@@ -648,3 +671,15 @@ class PGDriveEnv(gym.Env):
 
     def toggle_expert_take_over(self):
         self._expert_take_over = not self._expert_take_over
+
+    def capture(self):
+        img = PNMImage()
+        self.pg_world.win.getScreenshot(img)
+        img.write("main.jpg")
+
+        for name, sensor in self.vehicle.image_sensors.items():
+            if name == "mini_map":
+                name = "lidar"
+            sensor.save_image("{}.jpg".format(name))
+        if self.pg_world.highway_render is not None:
+            self.pg_world.highway_render.get_screenshot("top_down.jpg")

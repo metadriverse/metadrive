@@ -12,7 +12,7 @@ class DepthCamera(ImageBuffer):
     BUFFER_W = 84  # dim 1
     BUFFER_H = 84  # dim 2
     CAM_MASK = CamMask.DepthCam
-    GROUND = -1.5
+    GROUND = -1.2
     display_top = 1.0
     TASK_NAME = "ground follow"
 
