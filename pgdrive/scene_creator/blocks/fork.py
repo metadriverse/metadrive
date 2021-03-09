@@ -27,7 +27,7 @@ class InFork(Fork):
     def _try_plug_into_previous_block(self) -> bool:
         acc_lane_len = self.get_config()[Parameter.length]
         no_cross = True
-        fork_lane_num = self.get_config()[Parameter.lane_num] + 1
+        fork_lane_num = 2
 
         # extend road and acc raod part, part 0
         self.set_part_idx(0)
@@ -40,7 +40,12 @@ class InFork(Fork):
         )
         extend_road = Road(self.pre_block_socket.positive_road.end_node, self.add_road_node())
         no_cross = CreateRoadFrom(
-            extend_lane, self.positive_lane_num, extend_road, self.block_network, self._global_network
+            extend_lane,
+            self.positive_lane_num,
+            extend_road,
+            self.block_network,
+            self._global_network,
+            side_lane_line_type=LineType.CONTINUOUS
         ) and no_cross
         no_cross = CreateAdverseRoad(extend_road, self.block_network, self._global_network) and no_cross
 
@@ -53,7 +58,6 @@ class InFork(Fork):
         ) and no_cross
         no_cross = CreateAdverseRoad(acc_road, self.block_network, self._global_network) and no_cross
         acc_road.get_lanes(self.block_network)[-1].line_types = [LineType.BROKEN, LineType.BROKEN]
-        self.add_sockets(Block.create_socket_from_positive_road(acc_road))
 
         # ramp part, part 1
         self.set_part_idx(1)
@@ -63,10 +67,6 @@ class InFork(Fork):
         straight_part = StraightLane(
             start_point, end_point, self.lane_width, self.LANE_TYPE, speed_limit=self.SPEED_LIMIT
         )
-        straight_road = Road(self.add_road_node(), self.add_road_node())
-        self.block_network.add_lane(straight_road.start_node, straight_road.end_node, straight_part)
-        no_cross = (not check_lane_on_road(self._global_network, straight_part, 0.95)) and no_cross
-        self.add_reborn_roads(straight_road)
 
         # p1 road 0, 1
         bend_1, connect_part = sharpbend(
@@ -79,7 +79,8 @@ class InFork(Fork):
             self.LANE_TYPE,
             speed_limit=self.SPEED_LIMIT
         )
-        bend_1_road = Road(straight_road.end_node, self.add_road_node())
+        bend_1_road = Road(self.add_road_node(), self.add_road_node())
+        self.add_reborn_roads(bend_1_road)
         connect_road = Road(bend_1_road.end_node, self.add_road_node())
         self.block_network.add_lane(bend_1_road.start_node, bend_1_road.end_node, bend_1)
         self.block_network.add_lane(connect_road.start_node, connect_road.end_node, connect_part)
@@ -93,7 +94,7 @@ class InFork(Fork):
         # p1, road 2, 3
         bend_2, acc_lane = sharpbend(
             connect_part,
-            acc_lane_len,
+            acc_lane_len + self.lane_width,
             self.RADIUS,
             np.deg2rad(self.ANGLE),
             True,
@@ -105,13 +106,25 @@ class InFork(Fork):
         bend_2_road = Road(connect_road.end_node, self.road_node(0, 0))  # end at part1 road 0, extend road
         acc_road = Road(self.road_node(0, 0), self.road_node(0, 1))
         self.block_network.add_lane(bend_2_road.start_node, bend_2_road.end_node, bend_2)
-        self.block_network.add_lane(acc_road.start_node, acc_road.end_node, acc_lane)
         no_cross = CreateRoadFrom(
-            bend_2, fork_lane_num, bend_2_road, self.block_network, self._global_network, False
+            bend_2,
+            fork_lane_num,
+            bend_2_road,
+            self.block_network,
+            self._global_network,
+            False,
+            inner_lane_line_type=LineType.BROKEN
         ) and no_cross
         no_cross = CreateRoadFrom(
-            acc_lane, fork_lane_num, acc_road, self.block_network, self._global_network, False
+            acc_lane,
+            fork_lane_num,
+            acc_road,
+            self.block_network,
+            self._global_network,
+            False,
+            inner_lane_line_type=LineType.BROKEN,
         ) and no_cross
+        self.add_sockets(Block.create_socket_from_positive_road(acc_road))
         return no_cross
 
 

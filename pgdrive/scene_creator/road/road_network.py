@@ -370,8 +370,22 @@ class RoadNetwork:
             route = route[1:]
         return self.get_lane(route[0]).position(longitudinal, lateral), self.get_lane(route[0]).heading_at(longitudinal)
 
-    def get_map(self):
-        pass
+    def get_roads(self, *, direction="all", lane_num=None) -> List:
+        """
+        Return all roads in road_network
+        :param direction: "positive"/"negative"
+        :param lane_num: only roads with lane_num lanes will be returned
+        :return: List[Road]
+        """
+        assert direction in ["positive", "negative", "all"], "incorrect road direction"
+        ret = []
+        for _from, _to_dict in self.graph.items():
+            if direction == "all" or (direction == "positive" and _from[0] != "-") or (direction == "negative"
+                                                                                       and _from[0] == "-"):
+                for _to, lanes in _to_dict.items():
+                    if lane_num is None or len(lanes) == lane_num:
+                        ret.append(Road(_from, _to))
+        return ret
 
 
 class GraphLookupTable:

@@ -10,8 +10,17 @@ class TestEnv(PGDriveEnv):
 
 def test_lidar(render=False):
     setup_logger(debug=True)
-    Lidar.enable_show = True
-    env = TestEnv({"use_render": render, "manual_control": render, "environment_num": 1, "traffic_density": 0.3})
+    env = TestEnv(
+        {
+            "use_render": render,
+            "manual_control": render,
+            "environment_num": 1,
+            "traffic_density": 0.3,
+            "vehicle_config": {
+                "show_lidar": True
+            }
+        }
+    )
     try:
         env.reset()
         detect_vehicle = False

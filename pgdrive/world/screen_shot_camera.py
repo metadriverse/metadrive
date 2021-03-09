@@ -5,6 +5,9 @@ from pgdrive.scene_creator.ego_vehicle.vehicle_module.mini_map import MiniMap
 
 
 class ScreenShotCam(MiniMap):
+    """
+    Deprecated
+    """
     CAM_MASK = CamMask.ScreenshotCam
     BKG_COLOR = (0, 0, 0, 0)
 

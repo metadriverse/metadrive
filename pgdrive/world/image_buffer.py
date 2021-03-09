@@ -71,12 +71,12 @@ class ImageBuffer:
         self.buffer.getScreenshot(img)
         return img
 
-    def save_image(self):
+    def save_image(self, name="debug.jpg"):
         """
         for debug use
         """
         img = self.get_image()
-        img.write("debug.jpg")
+        img.write(name)
 
     def get_pixels_array(self, clip=True) -> np.ndarray:
         """
@@ -113,10 +113,13 @@ class ImageBuffer:
         self.line_borders.append(pg_world.draw_line([right, top], [right, bottom], self.LINE_FRAME_COLOR, 1.5))
         self.line_borders.append(pg_world.draw_line([right, bottom], [left, bottom], self.LINE_FRAME_COLOR, 1.5))
 
+    def remove_display_region(self, pg_world):
+        if pg_world.mode == RENDER_MODE_ONSCREEN and self.display_region:
+            pg_world.win.removeDisplayRegion(self.display_region)
+
     def destroy(self, pg_world):
         if pg_world is not None:
-            if pg_world.mode == RENDER_MODE_ONSCREEN and self.display_region:
-                pg_world.win.removeDisplayRegion(self.display_region)
+            self.remove_display_region(pg_world=pg_world)
             pg_world.graphicsEngine.removeWindow(self.buffer)
             self.display_region = None
             self.buffer = None

@@ -69,6 +69,9 @@ class HighwayRender:
             #     self.clock.tick(self.FPS)
             pygame.display.flip()
 
+    def get_screenshot(self, name="screenshot.jpg"):
+        pygame.image.save(self.screen, name)
+
     def set_scene_mgr(self, scene_mgr):
         self.scene_mgr = scene_mgr
 

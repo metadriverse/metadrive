@@ -14,17 +14,16 @@ from pgdrive.world.pg_physics_world import PGPhysicsWorld
 
 class Lidar:
     Lidar_point_cloud_obs_dim = 240
-    enable_show = False
 
-    def __init__(self, parent_node_np: NodePath, laser_num: int = 240, distance: float = 50):
-        show = self.enable_show and (AssetLoader.loader is not None)
+    def __init__(self, parent_node_np: NodePath, laser_num: int = 240, distance: float = 50, enable_show=False):
+        show = enable_show and (AssetLoader.loader is not None)
         self.Lidar_point_cloud_obs_dim = laser_num
         self.laser_num = laser_num
         self.perceive_distance = distance
         self.radian_unit = 2 * np.pi / laser_num
         self.detection_results = []
         self.node_path = parent_node_np.attachNewNode("cloudPoints")
-        self.node_path.hide(CamMask.RgbCam | CamMask.Shadow)
+        self.node_path.hide(CamMask.RgbCam | CamMask.Shadow | CamMask.MainCam | CamMask.Shadow | CamMask.DepthCam)
         self.cloud_points = [] if show else None
         logging.debug("Load Vehicle Module: {}".format(self.__class__.__name__))
         if show:
