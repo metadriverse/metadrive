@@ -2,25 +2,32 @@ import os
 
 import numpy as np
 import pytest
-
 from pgdrive import PGDriveEnv
 from pgdrive.scene_creator.ego_vehicle.vehicle_module.PID_controller import PIDController, Target
 
 # Key: case name, value: environmental config
 blackbox_test_configs = dict(
-    default=dict(),
-    random_traffic=dict(random_traffic=True),
-    large_seed=dict(start_seed=1000000),
-    traffic_density_0=dict(traffic_density=0),
-    traffic_density_1=dict(traffic_density=1),
-    decision_repeat_50=dict(decision_repeat=50),
-    map_7=dict(map=7),
-    map_30=dict(map=30),
-    map_CCC=dict(map="CCC"),
-    envs_100=dict(environment_num=100),
-    envs_1000=dict(environment_num=1000),
-    envs_10000=dict(environment_num=10000),
-    envs_100000=dict(environment_num=100000)
+    # default=dict(),
+    # random_traffic=dict(random_traffic=True),
+    # large_seed=dict(start_seed=1000000),
+    # traffic_density_0=dict(traffic_density=0),
+    # traffic_density_1=dict(traffic_density=1),
+    # decision_repeat_50=dict(decision_repeat=50),
+    # map_7=dict(map=7),
+    # map_30=dict(map=30),
+    # map_CCC=dict(map="CCC"),
+    # envs_100=dict(environment_num=100),
+    # envs_1000=dict(environment_num=1000),
+    # envs_10000=dict(environment_num=10000),
+    # envs_100000=dict(environment_num=100000),
+    no_lidar0=dict(vehicle_config=dict(lidar=dict(num_lasers=0, distance=0, num_others=0))),
+    no_lidar1=dict(vehicle_config=dict(lidar=dict(num_lasers=0, distance=10, num_others=0))),
+    no_lidar2=dict(vehicle_config=dict(lidar=dict(num_lasers=10, distance=0, num_others=0))),
+    no_lidar3=dict(vehicle_config=dict(lidar=dict(num_lasers=0, distance=0, num_others=10))),
+    no_lidar4=dict(vehicle_config=dict(lidar=dict(num_lasers=10, distance=10, num_others=0))),
+    no_lidar5=dict(vehicle_config=dict(lidar=dict(num_lasers=10, distance=0, num_others=10))),
+    no_lidar6=dict(vehicle_config=dict(lidar=dict(num_lasers=0, distance=10, num_others=10))),
+    no_lidar7=dict(vehicle_config=dict(lidar=dict(num_lasers=10, distance=10, num_others=10))),
 )
 
 pid_control_config = dict(environment_num=1, start_seed=5, map="CrXROSTR", traffic_density=0.0)
