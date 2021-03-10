@@ -24,7 +24,6 @@ class TestEnv(PGDriveEnv):
                     "pstats": True
                 },
                 "vehicle_config": dict(
-                    lidar=(240, 50, 4),  # laser num, distance, other vehicle info num
                     mini_map=(168 * w_f * 6, 84 * h_f * 6, 270),  # buffer length, width
                     rgb_cam=(168 * w_f, 84 * h_f),  # buffer length, width
                     depth_cam=(168 * w_f, 84 * h_f, True),  # buffer length, width, view_ground

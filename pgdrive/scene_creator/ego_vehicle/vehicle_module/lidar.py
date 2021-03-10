@@ -15,19 +15,19 @@ from pgdrive.world.pg_physics_world import PGPhysicsWorld
 class Lidar:
     Lidar_point_cloud_obs_dim = 240
 
-    def __init__(self, parent_node_np: NodePath, laser_num: int = 240, distance: float = 50, enable_show=False):
+    def __init__(self, parent_node_np: NodePath, num_lasers: int = 240, distance: float = 50, enable_show=False):
         show = enable_show and (AssetLoader.loader is not None)
-        self.Lidar_point_cloud_obs_dim = laser_num
-        self.laser_num = laser_num
+        self.Lidar_point_cloud_obs_dim = num_lasers
+        self.num_lasers = num_lasers
         self.perceive_distance = distance
-        self.radian_unit = 2 * np.pi / laser_num
+        self.radian_unit = 2 * np.pi / num_lasers
         self.detection_results = []
         self.node_path = parent_node_np.attachNewNode("cloudPoints")
         self.node_path.hide(CamMask.RgbCam | CamMask.Shadow | CamMask.MainCam | CamMask.Shadow | CamMask.DepthCam)
         self.cloud_points = [] if show else None
         logging.debug("Load Vehicle Module: {}".format(self.__class__.__name__))
         if show:
-            for laser_debug in range(self.laser_num):
+            for laser_debug in range(self.num_lasers):
                 ball = AssetLoader.loader.loadModel(AssetLoader.file_path("models", "box.egg"))
                 ball.setScale(0.001)
                 ball.setColor(0., 0.5, 0.5, 1)
@@ -50,11 +50,11 @@ class Lidar:
 
         # lidar calculation use pg coordinates
         mask = BitMask32.bit(PGTrafficVehicle.COLLISION_MASK)
-        laser_heading = np.arange(0, self.laser_num) * self.radian_unit + heading_theta
+        laser_heading = np.arange(0, self.num_lasers) * self.radian_unit + heading_theta
         point_x = self.perceive_distance * np.cos(laser_heading) + vehicle_position[0]
         point_y = self.perceive_distance * np.sin(laser_heading) + vehicle_position[1]
         # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-        for laser_index in range(self.laser_num):
+        for laser_index in range(self.num_lasers):
             # # coordinates problem here! take care
             laser_end = panda_position((point_x[laser_index], point_y[laser_index]), 1.0)
             result = pg_physics_world.dynamic_world.rayTestClosest(pg_start_position, laser_end, mask)
@@ -86,15 +86,15 @@ class Lidar:
     #             objects.add(ret.getNode().getPythonTag(BodyName.Traffic_vehicle).kinematic_model)
     #     return objects
 
-    def get_surrounding_vehicles_info(self, ego_vehicle, max_v_num: int = 4):
+    def get_surrounding_vehicles_info(self, ego_vehicle, num_others: int = 4):
         from pgdrive.utils.math_utils import norm, clip
         surrounding_vehicles = list(self.get_surrounding_vehicles())
         surrounding_vehicles.sort(
             key=lambda v: norm(ego_vehicle.position[0] - v.position[0], ego_vehicle.position[1] - v.position[1])
         )
-        surrounding_vehicles += [None] * max_v_num
+        surrounding_vehicles += [None] * num_others
         res = []
-        for vehicle in surrounding_vehicles[:max_v_num]:
+        for vehicle in surrounding_vehicles[:num_others]:
             if vehicle is not None:
                 assert isinstance(vehicle, IDMVehicle), "Now PGDrive Doesn't support other vehicle type"
                 relative_position = ego_vehicle.projection(vehicle.position - ego_vehicle.position)
