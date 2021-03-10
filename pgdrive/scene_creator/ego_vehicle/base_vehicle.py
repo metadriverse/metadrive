@@ -51,7 +51,7 @@ class BaseVehicle(DynamicElement):
 
     default_vehicle_config = PGConfig(
         dict(
-            lidar=(240, 50, 4),  # laser num, distance, other vehicle info num
+            lidar=dict(num_lasers=240, distance=50, num_others=4),  # laser num, distance, other vehicle info num
             show_lidar=False,
             mini_map=(84, 84, 250),  # buffer length, width
             rgb_cam=(84, 84),  # buffer length, width
@@ -437,8 +437,10 @@ class BaseVehicle(DynamicElement):
     def add_image_sensor(self, name: str, sensor: ImageBuffer):
         self.image_sensors[name] = sensor
 
-    def add_lidar(self, laser_num=240, distance=50, show_lidar_point=False):
-        self.lidar = Lidar(self.pg_world.render, laser_num, distance, show_lidar_point)
+    def add_lidar(self, num_lasers=240, distance=50, show_lidar_point=False):
+        assert num_lasers > 0
+        assert distance > 0
+        self.lidar = Lidar(self.pg_world.render, num_lasers, distance, show_lidar_point)
 
     def add_routing_localization(self, show_navi_point: bool):
         self.routing_localization = RoutingLocalizationModule(self.pg_world, show_navi_point)
