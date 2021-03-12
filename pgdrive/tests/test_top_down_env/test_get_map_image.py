@@ -16,7 +16,6 @@ def test_save_map_image():
             surface = env.get_map(resolution=(128, 128))
             plt.imshow(surface, cmap="Greys")
             plt.savefig("tmp_images/map_{}.png".format(i))
-        env.current_map.draw_navi_line(env.vehicle, dest_resolution=(2048, 2048), save=False)
         env.close()
     finally:
         env.close()
