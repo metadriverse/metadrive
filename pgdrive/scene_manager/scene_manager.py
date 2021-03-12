@@ -72,8 +72,8 @@ class SceneManager:
         else:
             self.replay_system = PGReplayer(self.traffic_mgr, map, episode_data, pg_world)
 
-        if pg_world.highway_render is not None:
-            pg_world.highway_render.set_scene_mgr(self)
+        # if pg_world.highway_render is not None:
+        #     pg_world.highway_render.set_scene_mgr(self)
         if self.record_episode:
             if episode_data is None:
                 self.record_system = PGRecorder(map, self.traffic_mgr.get_global_init_states())
