@@ -28,7 +28,7 @@ class Lidar:
         logging.debug("Load Vehicle Module: {}".format(self.__class__.__name__))
         if show:
             for laser_debug in range(self.num_lasers):
-                ball = AssetLoader.loader.loadModel(AssetLoader.file_path("models", "box.egg"))
+                ball = AssetLoader.loader.loadModel(AssetLoader.file_path("models", "box.bam"))
                 ball.setScale(0.001)
                 ball.setColor(0., 0.5, 0.5, 1)
                 shape = BulletSphereShape(0.1)

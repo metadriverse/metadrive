@@ -1,7 +1,6 @@
 import sys
 from distutils.core import setup
 from os import path
-
 from setuptools import find_namespace_packages
 
 assert sys.version_info.major == 3 and sys.version_info.minor >= 6, "python version >= 3.6 is required"
@@ -9,14 +8,17 @@ assert sys.version_info.major == 3 and sys.version_info.minor >= 6, "python vers
 this_directory = path.abspath(path.dirname(__file__))
 with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
-
 packages = find_namespace_packages(
     exclude=("docs", "docs.*", "documentation", "documentation.*", "pgdrive.assets.*", "build.*"))
 print("We will install the following packages: ", packages)
 
+""" ===== Remember to modify the PG_EDITION at first ====="""
+
+version="0.1.4"
+
 setup(
     name="pgdrive",
-    version="0.1.2",
+    version=version,
     description="An open-ended driving simulator with infinite scenes",
     url="https://github.com/decisionforce/pgdrive",
     author="PGDrive Team",
@@ -54,6 +56,8 @@ How to publish to pypi?  Noted by Zhenghao in Dec 27, 2020.
     
 3. Get wheel
     python setup.py sdist bdist_wheel
+    
+    WARNING: wheel should not be created on windows, since assets will not be included in the .whl file !!!
 
 4. Upload to test channel
     twine upload --repository testpypi dist/*
