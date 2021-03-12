@@ -240,6 +240,7 @@ class PGDriveEnv(gym.Env):
         self.done = self.done or done
         step_reward = self.reward(action)
         done_reward = self._done_episode()
+        self._add_cost()
 
         if self.done:
             step_reward = 0
@@ -257,6 +258,15 @@ class PGDriveEnv(gym.Env):
         self.custom_info_callback()
 
         return obs, step_reward + done_reward, self.done, self.step_info
+
+    def _add_cost(self):
+        self.step_info["cost"] = 0
+        if self.step_info["crash_vehicle"]:
+            self.step_info["cost"] = self.config["crash_vehicle_cost"]
+        elif self.step_info["crash_object"]:
+            self.step_info["cost"] = self.config["crash_object_cost"]
+        elif self.step_info["out_of_road"]:
+            self.step_info["cost"] = self.config["out_of_road_cost"]
 
     def render(self, mode='human', text: Optional[Union[dict, str]] = None) -> Optional[np.ndarray]:
         """
