@@ -6,7 +6,7 @@ import gltf
 from direct.gui.OnscreenImage import OnscreenImage
 from direct.showbase import ShowBase
 from panda3d.bullet import BulletDebugNode
-from panda3d.core import AntialiasAttrib, NodePath, loadPrcFileData, LineSegs, Fog
+from panda3d.core import AntialiasAttrib, NodePath, loadPrcFileData, LineSegs
 
 from pgdrive.pg_config import PGConfig
 from pgdrive.pg_config.cam_mask import CamMask
@@ -15,7 +15,6 @@ from pgdrive.utils.asset_loader import AssetLoader, initialize_asset_loader
 from pgdrive.world import RENDER_MODE_OFFSCREEN, RENDER_MODE_NONE, RENDER_MODE_ONSCREEN
 from pgdrive.world.constants import PG_EDITION
 from pgdrive.world.force_fps import ForceFPS
-from pgdrive.world.highway_render.highway_render import HighwayRender
 from pgdrive.world.image_buffer import ImageBuffer
 from pgdrive.world.light import Light
 from pgdrive.world.onscreen_message import PGOnScreenMessage
@@ -108,10 +107,11 @@ class PGWorld(ShowBase.ShowBase):
         super(PGWorld, self).__init__(windowType=self.mode)
 
         # Change window size at runtime if screen too small
-        assert int(self.pg_config["use_topdown"]) + int(self.pg_config["use_image"]) <= 1, (
-            "Only one of use_topdown and use_image options can be selected."
-        )
-        main_window_position = (0, 0)
+        # assert int(self.pg_config["use_topdown"]) + int(self.pg_config["use_image"]) <= 1, (
+        #     "Only one of use_topdown and use_image options can be selected."
+        # )
+
+        # main_window_position = (0, 0)
         if self.mode == RENDER_MODE_ONSCREEN:
             loadPrcFileData("", "compressed-textures 1")  # Default to compress
             h = self.pipe.getDisplayHeight()
@@ -130,13 +130,13 @@ class PGWorld(ShowBase.ShowBase):
                         w, h, self.pg_config["window_size"]
                     )
                 )
-            main_window_position = (
-                (w - self.pg_config["window_size"][0]) / 2, (h - self.pg_config["window_size"][1]) / 2
-            )
+            # main_window_position = (
+            #     (w - self.pg_config["window_size"][0]) / 2, (h - self.pg_config["window_size"][1]) / 2
+            # )
 
-        self.highway_render = None
-        if self.pg_config["use_topdown"]:
-            self.highway_render = HighwayRender(self.pg_config["use_render"], main_window_position)
+        # self.highway_render = None
+        # if self.pg_config["use_topdown"]:
+        #     self.highway_render = HighwayRender(self.pg_config["use_render"], main_window_position)
 
         # screen scale factor
         self.w_scale = max(self.pg_config["window_size"][0] / self.pg_config["window_size"][1], 1)
@@ -264,8 +264,8 @@ class PGWorld(ShowBase.ShowBase):
             self.on_screen_message.render()
         if self.mode == RENDER_MODE_ONSCREEN:
             self.sky_box.step()
-        if self.highway_render is not None:
-            self.highway_render.render()
+        # if self.highway_render is not None:
+        #     self.highway_render.render()
 
     def clear_world(self):
         """
@@ -307,7 +307,8 @@ class PGWorld(ShowBase.ShowBase):
 
                 # The following two option are exclusive. Only one can be True
                 use_image=False,  # Render the first-view image in screen or buffer
-                use_topdown=False,  # Render the top-down view image in screen or buffer
+
+                # use_topdown=False,  # Render the top-down view image in screen or buffer
                 pstats=False
             )
         )
@@ -383,7 +384,7 @@ class PGWorld(ShowBase.ShowBase):
         line_seg.moveTo(start_p[0] * self.w_scale, 0, start_p[1] * self.h_scale)
         line_seg.drawTo(end_p[0] * self.w_scale, 0, end_p[1] * self.h_scale)
         line_seg.setThickness(thickness)
-        line_np = NodePath(line_seg.create(False)).reparentTo(self.aspect2d)
+        line_np = self.aspect2d.attachNewNode(line_seg.create(False))
         return line_np
 
     def remove_logo(self, task):

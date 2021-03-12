@@ -33,7 +33,7 @@ class ImageBuffer:
             )
             assert self.CAM_MASK is not None, "Define a camera mask for every image buffer"
         except AssertionError:
-            logging.debug("Cannot create {}, maybe the render pipe is highway render".format(self.__class__.__name__))
+            logging.debug("Cannot create {}".format(self.__class__.__name__))
             self.buffer = None
             self.cam = NodePath(Camera("non-sense camera"))
             self.lens = self.cam.node().getLens()
@@ -116,6 +116,8 @@ class ImageBuffer:
     def remove_display_region(self, pg_world):
         if pg_world.mode == RENDER_MODE_ONSCREEN and self.display_region:
             pg_world.win.removeDisplayRegion(self.display_region)
+        for line_node in self.line_borders:
+            line_node.detachNode()
 
     def destroy(self, pg_world):
         if pg_world is not None:

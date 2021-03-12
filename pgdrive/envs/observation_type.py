@@ -2,9 +2,9 @@ from abc import ABC
 
 import gym
 import numpy as np
+
 from pgdrive.scene_creator.ego_vehicle.base_vehicle import BaseVehicle
 from pgdrive.scene_creator.ego_vehicle.vehicle_module.routing_localization import RoutingLocalizationModule
-from pgdrive.utils import import_pygame
 from pgdrive.utils.math_utils import clip
 from pgdrive.world.image_buffer import ImageBuffer
 
@@ -84,6 +84,9 @@ class ObservationType(ABC):
         plt.plot()
         plt.imshow(img, cmap=plt.cm.gray)
         plt.show()
+
+    def reset(self, env):
+        pass
 
 
 class StateObservation(ObservationType):
@@ -223,29 +226,4 @@ class ImageStateObservation(ObservationType):
         return {self.IMAGE: self.img_obs.observe(image_buffer), self.STATE: self.state_obs.observe(vehicle)}
 
 
-class TopDownObservation(ObservationType):
-    def __init__(self, config, env, clip_rgb: bool):
-        super(TopDownObservation, self).__init__(config, env)
-        self.rgb_clip = clip_rgb
-        self.num_stacks = 3
-        self.obs_shape = (64, 64)
-
-        self.pygame = import_pygame()
-
-    @property
-    def observation_space(self):
-        shape = self.obs_shape + (self.num_stacks, )
-        if self.rgb_clip:
-            return gym.spaces.Box(-0.0, 1.0, shape=shape, dtype=np.float32)
-        else:
-            return gym.spaces.Box(0, 255, shape=shape, dtype=np.uint8)
-
-    def observe(self, vehicle: BaseVehicle):
-        self.env.pg_world.highway_render.render()
-        surface = self.env.pg_world.highway_render.get_observation_window()
-        img = self.pygame.surfarray.array3d(surface)
-        if self.rgb_clip:
-            img = img.astype(np.float32) / 255
-        else:
-            img = img.astype(np.uint8)
-        return np.transpose(img, (1, 0, 2))
+# Note that the top-down view observation is provided in pgdrive/world/top_down_observation/top_down_observation.py
