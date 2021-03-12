@@ -62,7 +62,7 @@ class RoutingLocalizationModule:
             # the transparency attribute of gltf model is invalid on windows
             # self.arrow_node_path.setTransparency(TransparencyAttrib.M_alpha)
             if show_navi_point:
-                navi_point_model = AssetLoader.loader.loadModel(AssetLoader.file_path("models", "box.egg"))
+                navi_point_model = AssetLoader.loader.loadModel(AssetLoader.file_path("models", "box.bam"))
                 navi_point_model.reparentTo(self.goal_node_path)
             self.goal_node_path.setTransparency(TransparencyAttrib.M_alpha)
             self.goal_node_path.setColor(0.6, 0.8, 0.5, 0.7)

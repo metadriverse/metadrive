@@ -36,10 +36,6 @@ if __name__ == '__main__':
     finally:
         print("Closing the environment!")
         env.close()
-        print(
-            "Episode count {}, Success rate: {}, Average reward: {}".format(
-                ep_count,
-                sum(success_list) / len(success_list),
-                sum(reward_list) / len(reward_list)
-            )
-        )
+        success_rate = sum(success_list) / len(success_list) if len(success_list) > 0 else 0
+        mean_reward = sum(reward_list) / len(reward_list) if len(reward_list) > 0 else 0
+        print("Episode count {}, Success rate: {}, Average reward: {}".format(ep_count, success_rate, mean_reward))
