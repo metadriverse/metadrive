@@ -55,7 +55,7 @@ def test_navigation(vis=False):
     steering_error = o[0] - target.lateral
     steering = steering_controller.get_result(steering_error)
 
-    acc_error = env.vehicle.speed - target.speed
+    acc_error = env.vehicles[env.DEFAULT_AGENT].speed - target.speed
     acc = acc_controller.get_result(acc_error)
     for i in range(1, 1000000 if vis else 2000):
         o, r, d, info = env.step([-steering, acc])
@@ -65,7 +65,7 @@ def test_navigation(vis=False):
         steering = steering_controller.get_result(steering_error)
 
         t_speed = target.speed if abs(o[12] - 0.5) < 0.01 else target.speed - 10
-        acc_error = env.vehicle.speed - t_speed
+        acc_error = env.vehicles[env.DEFAULT_AGENT].speed - t_speed
         acc = acc_controller.get_result(acc_error)
         if vis:
             if i < 700:
@@ -90,7 +90,7 @@ def test_navigation(vis=False):
             steering = steering_controller.get_result(steering_error, o[11])
 
             acc_controller.reset()
-            acc_error = env.vehicle.speed - target.speed
+            acc_error = env.vehicles[env.DEFAULT_AGENT].speed - target.speed
             acc = acc_controller.get_result(acc_error)
     env.close()
 

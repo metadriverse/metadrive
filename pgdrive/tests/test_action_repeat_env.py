@@ -16,7 +16,7 @@ def _test_action_repeat(config):
 
             assert len(info["trajectory"]) == info["action_repeat"]
             for t in info["trajectory"]:
-                for k in ["reward", "discounted_reward", "obs", "action", "count"]:
+                for k in ["reward_function", "discounted_reward", "obs", "action", "count"]:
                     assert k in t
 
             if d:

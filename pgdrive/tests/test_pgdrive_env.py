@@ -74,18 +74,19 @@ def test_zombie():
         acc_controller = PIDController(0.1, 0.001, 0.3)
         steering_error = o[0] - target.lateral
         steering = steering_controller.get_result(steering_error)
-        acc_error = env.vehicle.speed - target.speed
+        acc_error = env.vehicles[env.DEFAULT_AGENT].speed - target.speed
         acc = acc_controller.get_result(acc_error)
         for i in range(1, 1000000):
             o, r, d, info = env.step([-steering, acc])
             steering_error = o[0] - target.lateral
             steering = steering_controller.get_result(steering_error)
             t_speed = target.speed if abs(o[12] - 0.5) < 0.01 else target.speed - 10
-            acc_error = env.vehicle.speed - t_speed
+            acc_error = env.vehicles[env.DEFAULT_AGENT].speed - t_speed
             acc = acc_controller.get_result(acc_error)
             if d:
                 assert info["arrive_dest"]
-                assert abs(env.vehicle.position[0] - dest[0]) < 0.1 and abs(env.vehicle.position[1] - dest[1]) < 0.1
+                assert abs(env.vehicles[env.DEFAULT_AGENT].position[0] - dest[0]) < 0.1 and \
+                       abs(env.vehicles[env.DEFAULT_AGENT].position[1] - dest[1]) < 0.1
                 break
     finally:
         env.close()

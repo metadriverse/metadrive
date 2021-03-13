@@ -35,8 +35,7 @@ class TrafficManager(RandomEngine):
         self.map = None
 
         # traffic vehicle list
-        self.ego_vehicle = None
-        self.controllable_vehicles = None
+        self.target_vehicles = None  # This is dict!
         self.vehicles = None
         self.traffic_vehicles = None
         self.block_triggered_vehicles = None
@@ -51,12 +50,34 @@ class TrafficManager(RandomEngine):
         # control randomness of traffic
         super(TrafficManager, self).__init__()
 
-    def generate(self, pg_world: PGWorld):
+    def generate(self, pg_world: PGWorld, map: Map, target_vehicles: Dict, traffic_density: float):
         """
         Generate traffic on map, according to the mode and density
         :param pg_world: World
+        :param map: The map class containing block list and road network
+        :param target_vehicles: vehicles for a multi-agent environment support
+        :param traffic_density: Traffic density defined by: number of vehicles per meter
         :return: List of Traffic vehicles
         """
+
+        logging.debug("load scene {}, {}".format(map.random_seed, "Use random traffic" if self.random_traffic else ""))
+        self.update_random_seed(map.random_seed)
+
+        # clear traffic in last episdoe
+        # self._clear_traffic(pg_world)
+
+        self.target_vehicles = target_vehicles
+        # self.controllable_vehicles = controllable_vehicles if len(controllable_vehicles) > 1 else None
+        # update global info
+        self.map = map
+        self.density = traffic_density
+
+        # update vehicle list
+        self.block_triggered_vehicles = [] if self.mode != TrafficMode.Reborn else None
+        self.vehicles = list(self.target_vehicles.values())  # it is used to perform IDM and bicycle model based motion
+        self.traffic_vehicles = deque()  # it is used to step all vehicles on scene
+        self.spawned_vehicles = []
+
         traffic_density = self.density
         if abs(traffic_density - 0.0) < 1e-2:
             return
@@ -83,11 +104,13 @@ class TrafficManager(RandomEngine):
         :return: None
         """
         if self.mode != TrafficMode.Reborn:
-            ego_lane_idx = self.ego_vehicle.lane_index[:-1]
-            ego_road = Road(ego_lane_idx[0], ego_lane_idx[1])
-            if len(self.block_triggered_vehicles) > 0 and ego_road == self.block_triggered_vehicles[-1].trigger_road:
-                block_vehicles = self.block_triggered_vehicles.pop()
-                self.traffic_vehicles += block_vehicles.vehicles
+            for v in self.target_vehicles.values():
+                ego_lane_idx = v.lane_index[:-1]
+                ego_road = Road(ego_lane_idx[0], ego_lane_idx[1])
+                if len(self.block_triggered_vehicles) > 0 and \
+                        ego_road == self.block_triggered_vehicles[-1].trigger_road:
+                    block_vehicles = self.block_triggered_vehicles.pop()
+                    self.traffic_vehicles += block_vehicles.vehicles
         for v in self.traffic_vehicles:
             v.prepare_step(scene_mgr=scene_mgr)
 
@@ -165,15 +188,16 @@ class TrafficManager(RandomEngine):
             self.random_seed = None
 
         # single agent env
-        self.ego_vehicle = controllable_vehicles[0] if len(controllable_vehicles) == 1 else None
+        # self.ego_vehicle = controllable_vehicles[0] if len(controllable_vehicles) == 1 else None
         # TODO multi-agent env support
-        self.controllable_vehicles = controllable_vehicles if len(controllable_vehicles) > 1 else None
+        # self.controllable_vehicles = controllable_vehicles if len(controllable_vehicles) > 1 else None
+
         # update global info
         self.map = map
         self.density = traffic_density
 
         # update vehicle list
-        self.vehicles.append(*controllable_vehicles)  # it is used to perform IDM and bicycle model based motion
+        # self.vehicles.append(*controllable_vehicles)  # it is used to perform IDM and bicycle model based motion
 
     def get_vehicle_num(self):
         """
@@ -199,7 +223,9 @@ class TrafficManager(RandomEngine):
                 for vehicle in v_b.vehicles:
                     states[vehicle.index] = vehicle.get_state()
 
-        states["ego"] = self.ego_vehicle.get_state()
+        # FIXME the global state system might be wrong!
+        states["ego"] = {k: v.get_state() for k, v in self.target_vehicles.items()}
+        # states["ego"] = self.ego_vehicle.get_state()
         return states
 
     def get_global_init_states(self) -> Dict:
@@ -395,7 +421,7 @@ class TrafficManager(RandomEngine):
         self.map = None
 
         # traffic vehicle list
-        self.ego_vehicle = None
+        self.target_vehicles = None
         self.vehicles = None
         self.traffic_vehicles = None
         self.block_triggered_vehicles = None
