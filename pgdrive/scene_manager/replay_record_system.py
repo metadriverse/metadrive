@@ -1,11 +1,10 @@
 import copy
 import logging
 
+from pgdrive.constants import DEFAULT_AGENT
 from pgdrive.scene_creator.map import Map
-from pgdrive.world.pg_world import PGWorld
-from pgdrive.scene_manager.traffic_manager import TrafficMode
 from pgdrive.scene_manager.traffic_manager import TrafficManager
-from pgdrive.utils.constans import DEFAULT_AGENT
+from pgdrive.world.pg_world import PGWorld
 
 
 class PGReplayer:

@@ -4,8 +4,7 @@ from typing import Tuple, Union, Sequence
 
 import numpy as np
 from panda3d.bullet import BulletRigidBodyNode
-
-from pgdrive.pg_config.body_name import BodyName
+from pgdrive.constants import BodyName
 
 Vector = Union[np.ndarray, Sequence[float]]
 

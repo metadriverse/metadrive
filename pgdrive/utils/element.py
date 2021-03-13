@@ -2,8 +2,8 @@ import copy
 import logging
 from typing import Dict
 
-from panda3d.core import NodePath
 from panda3d.bullet import BulletWorld
+from panda3d.core import NodePath
 from pgdrive.pg_config import PGConfig
 from pgdrive.pg_config.pg_space import PGSpace
 from pgdrive.utils.asset_loader import AssetLoader

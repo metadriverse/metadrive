@@ -9,6 +9,7 @@ from typing import Union, Optional, Iterable, Dict, AnyStr
 import gym
 import numpy as np
 from panda3d.core import PNMImage
+from pgdrive.constants import DEFAULT_AGENT, RENDER_MODE_NONE
 from pgdrive.envs.observation_type import LidarStateObservation, ImageStateObservation
 from pgdrive.pg_config import PGConfig
 from pgdrive.scene_creator.ego_vehicle.base_vehicle import BaseVehicle
@@ -19,8 +20,6 @@ from pgdrive.scene_creator.map import Map, MapGenerateMethod, parse_map_config
 from pgdrive.scene_manager.scene_manager import SceneManager
 from pgdrive.scene_manager.traffic_manager import TrafficMode
 from pgdrive.utils import recursive_equal, safe_clip, clip, get_np_random
-from pgdrive.utils.constans import DEFAULT_AGENT
-from pgdrive.world import RENDER_MODE_NONE
 from pgdrive.world.chase_camera import ChaseCamera
 from pgdrive.world.manual_controller import KeyboardController, JoystickController
 from pgdrive.world.pg_world import PGWorld

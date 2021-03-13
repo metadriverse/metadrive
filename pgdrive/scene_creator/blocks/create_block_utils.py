@@ -2,10 +2,9 @@ import copy
 from typing import Tuple, Union, List
 
 import numpy as np
-
 from pgdrive.scene_creator.blocks.constants import BlockDefault
-from pgdrive.scene_creator.lane.circular_lane import CircularLane
 from pgdrive.scene_creator.lane.abs_lane import LineColor, AbstractLane, LineType
+from pgdrive.scene_creator.lane.circular_lane import CircularLane
 from pgdrive.scene_creator.lane.straight_lane import StraightLane
 from pgdrive.scene_creator.road.road import Road
 from pgdrive.scene_creator.road.road_network import RoadNetwork

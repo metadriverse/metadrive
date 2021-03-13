@@ -1,6 +1,6 @@
 import time
 
-from pgdrive.world.constants import RENDER_MODE_ONSCREEN
+from pgdrive.constants import RENDER_MODE_ONSCREEN
 
 
 class ForceFPS:

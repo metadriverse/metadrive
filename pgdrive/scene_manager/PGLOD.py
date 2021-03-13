@@ -1,5 +1,5 @@
-from pgdrive.world.pg_world import PGWorld
 from pgdrive.utils.math_utils import norm
+from pgdrive.world.pg_world import PGWorld
 
 
 class PGLOD:

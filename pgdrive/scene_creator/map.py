@@ -6,7 +6,7 @@ from typing import List, Optional, Union, Iterable
 
 import numpy as np
 from panda3d.core import NodePath
-
+from pgdrive.constants import Decoration
 from pgdrive.pg_config import PGConfig
 from pgdrive.pg_config.pg_blocks import PGBlock
 from pgdrive.scene_creator.algorithm.BIG import BIG, BigGenerateMethod
@@ -14,7 +14,6 @@ from pgdrive.scene_creator.blocks.block import Block
 from pgdrive.scene_creator.blocks.first_block import FirstBlock
 from pgdrive.scene_creator.road.road_network import RoadNetwork
 from pgdrive.utils import AssetLoader, import_pygame
-from pgdrive.utils.constans import Decoration
 from pgdrive.world.pg_physics_world import PGPhysicsWorld
 from pgdrive.world.pg_world import PGWorld
 
