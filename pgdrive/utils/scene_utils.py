@@ -2,13 +2,12 @@ import math
 from typing import List, TYPE_CHECKING, Tuple
 
 import numpy as np
-from pgdrive.utils.constans import Decoration
-from pgdrive.pg_config.body_name import BodyName
-from pgdrive.scene_creator.lane.circular_lane import CircularLane
+from pgdrive.constants import Decoration, BodyName
 from pgdrive.scene_creator.lane.abs_lane import AbstractLane
+from pgdrive.scene_creator.lane.circular_lane import CircularLane
+from pgdrive.utils.coordinates_shift import panda_position
 from pgdrive.utils.math_utils import get_points_bounding_box
 from pgdrive.world.pg_world import PGWorld
-from pgdrive.utils.coordinates_shift import panda_position
 
 if TYPE_CHECKING:
     from pgdrive.scene_creator.blocks.block import BlockSocket

@@ -2,7 +2,6 @@ import copy
 from collections import deque
 
 import numpy as np
-
 from pgdrive.pg_config.parameter_space import Parameter, BlockParameterSpace
 from pgdrive.pg_config.pg_space import PGSpace
 from pgdrive.scene_creator.blocks.block import Block, BlockSocket

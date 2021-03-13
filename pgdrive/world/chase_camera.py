@@ -1,9 +1,9 @@
 import queue
 from typing import Tuple
+
 import numpy as np
 from direct.controls.InputState import InputState
 from panda3d.core import Vec3, Camera
-
 from pgdrive.scene_creator.ego_vehicle.base_vehicle import BaseVehicle
 from pgdrive.utils.coordinates_shift import panda_heading
 from pgdrive.world.pg_world import PGWorld

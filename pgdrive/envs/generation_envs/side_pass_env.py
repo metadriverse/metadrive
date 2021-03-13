@@ -1,5 +1,5 @@
 from pgdrive import PGDriveEnv
-from pgdrive.scene_creator.pg_traffic_vehicle.traffic_vehicle_type import XLVehicle, LVehicle
+from pgdrive.scene_creator.pg_traffic_vehicle.traffic_vehicle_type import LVehicle
 
 
 class SidePassEnv(PGDriveEnv):

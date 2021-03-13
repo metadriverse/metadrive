@@ -1,7 +1,6 @@
 import time
 
 import numpy as np
-
 from pgdrive import PGDriveEnv
 from pgdrive.examples import expert, get_terminal_state
 

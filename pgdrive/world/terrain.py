@@ -2,7 +2,7 @@ import numpy
 from panda3d.bullet import BulletRigidBodyNode, BulletPlaneShape
 from panda3d.core import Vec3, CardMaker, LQuaternionf, BitMask32, NodePath, TextureStage, Texture, SamplerState
 
-from pgdrive.pg_config.body_name import BodyName
+from pgdrive.constants import BodyName
 from pgdrive.pg_config.cam_mask import CamMask
 from pgdrive.pg_config.collision_group import CollisionGroup
 from pgdrive.utils.asset_loader import AssetLoader
