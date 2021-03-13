@@ -5,6 +5,7 @@ from pgdrive.scene_creator.map import Map
 from pgdrive.world.pg_world import PGWorld
 from pgdrive.scene_manager.traffic_manager import TrafficMode
 from pgdrive.scene_manager.traffic_manager import TrafficManager
+from pgdrive.utils.constans import DEFAULT_AGENT
 
 
 class PGReplayer:
@@ -33,10 +34,16 @@ class PGReplayer:
         frame = self.restore_episode_info.pop(-1)
         vehicles_to_remove = []
         for index, state in frame.items():
-            vehicle = self.restore_vehicles[index] if index != "ego" else ego_vehicle
-            vehicle.set_state(state)
-            if index != "ego" and state["done"] and not vehicle.enable_reborn:
-                vehicles_to_remove.append(vehicle)
+            if index == "ego":
+                vehicle_to_set = ego_vehicle
+                assert len(state) == 1, "Only support single-agent now!"
+                state = state[DEFAULT_AGENT]
+                vehicle_to_set.set_state(state)
+            else:
+                vehicle_to_set = self.restore_vehicles[index]
+                vehicle_to_set.set_state(state)
+                if state["done"] and not vehicle_to_set.enable_reborn:
+                    vehicles_to_remove.append(vehicle_to_set)
         for v in vehicles_to_remove:
             v.destroy(pg_world)
 

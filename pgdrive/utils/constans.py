@@ -16,3 +16,6 @@ class Goal:
     STRAIGHT = 1
     LEFT = 2
     ADVERSE = 3  # Useless now
+
+
+DEFAULT_AGENT = "default_agent"
