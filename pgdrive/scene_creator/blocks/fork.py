@@ -1,5 +1,5 @@
 import numpy as np
-
+from pgdrive.constants import Decoration
 from pgdrive.pg_config.parameter_space import Parameter, BlockParameterSpace
 from pgdrive.pg_config.pg_space import PGSpace
 from pgdrive.scene_creator.blocks.block import Block
@@ -9,7 +9,6 @@ from pgdrive.scene_creator.blocks.ramp import Ramp
 from pgdrive.scene_creator.lane.abs_lane import LineType
 from pgdrive.scene_creator.lane.straight_lane import StraightLane
 from pgdrive.scene_creator.road.road import Road
-from pgdrive.utils.constans import Decoration
 from pgdrive.utils.scene_utils import check_lane_on_road
 
 

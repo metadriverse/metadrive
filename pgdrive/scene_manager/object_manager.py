@@ -1,7 +1,6 @@
 from pgdrive.scene_creator.blocks.curve import Curve
-from pgdrive.scene_creator.blocks.straight import Straight
 from pgdrive.scene_creator.blocks.ramp import InRampOnStraight, OutRampOnStraight
-from pgdrive.scene_creator.blocks.roundabout import Roundabout
+from pgdrive.scene_creator.blocks.straight import Straight
 from pgdrive.scene_creator.lane.abs_lane import AbstractLane
 from pgdrive.scene_creator.map import Map
 from pgdrive.scene_creator.object.traffic_object import Object

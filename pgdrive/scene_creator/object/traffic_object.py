@@ -1,11 +1,12 @@
 from typing import Sequence, Tuple
+
 import numpy as np
-from pgdrive.utils.coordinates_shift import panda_position, panda_heading
-from panda3d.core import NodePath
-from pgdrive.pg_config.body_name import BodyName
 from panda3d.bullet import BulletRigidBodyNode, BulletCylinderShape
-from pgdrive.utils.element import Element
+from panda3d.core import NodePath
+from pgdrive.constants import BodyName
 from pgdrive.utils.asset_loader import AssetLoader
+from pgdrive.utils.coordinates_shift import panda_position, panda_heading
+from pgdrive.utils.element import Element
 
 LaneIndex = Tuple[str, str, int]
 

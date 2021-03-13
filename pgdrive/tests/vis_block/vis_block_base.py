@@ -1,11 +1,11 @@
 from typing import Union, Tuple
 
 from direct.showbase import ShowBase
-from panda3d.bullet import BulletWorld, BulletPlaneShape, BulletRigidBodyNode, BulletDebugNode
+from panda3d.bullet import BulletPlaneShape, BulletRigidBodyNode, BulletDebugNode
 from panda3d.core import Vec3, BitMask32, NodePath, LineSegs
-from pgdrive.world.pg_physics_world import PGPhysicsWorld
 from pgdrive.scene_creator.algorithm.BIG import NextStep
 from pgdrive.scene_creator.map import Map
+from pgdrive.world.pg_physics_world import PGPhysicsWorld
 
 
 class TestBlock(ShowBase.ShowBase):

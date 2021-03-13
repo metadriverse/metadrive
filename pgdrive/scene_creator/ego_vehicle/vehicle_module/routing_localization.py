@@ -2,7 +2,7 @@ import logging
 
 import numpy as np
 from panda3d.core import BitMask32, LQuaternionf, TransparencyAttrib
-
+from pgdrive.constants import COLLISION_INFO_COLOR, RENDER_MODE_ONSCREEN
 from pgdrive.pg_config.cam_mask import CamMask
 from pgdrive.pg_config.parameter_space import BlockParameterSpace, Parameter
 from pgdrive.scene_creator.blocks.first_block import FirstBlock
@@ -11,8 +11,6 @@ from pgdrive.scene_creator.map import Map
 from pgdrive.utils.asset_loader import AssetLoader
 from pgdrive.utils.math_utils import clip, norm
 from pgdrive.utils.scene_utils import ray_localization
-from pgdrive.world import RENDER_MODE_ONSCREEN
-from pgdrive.world.constants import COLLISION_INFO_COLOR
 
 
 class RoutingLocalizationModule:

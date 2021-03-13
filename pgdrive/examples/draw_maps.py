@@ -1,7 +1,6 @@
 import random
 
 import matplotlib.pyplot as plt
-
 from pgdrive import PGDriveEnv
 
 if __name__ == '__main__':

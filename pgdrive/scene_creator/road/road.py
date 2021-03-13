@@ -1,6 +1,6 @@
 from typing import List, Tuple
 
-from pgdrive.utils.constans import Decoration
+from pgdrive.constants import Decoration
 from pgdrive.utils.scene_utils import get_lanes_on_road
 
 LaneIndex = Tuple[str, str, int]

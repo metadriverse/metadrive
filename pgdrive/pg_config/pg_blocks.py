@@ -1,10 +1,10 @@
 from pgdrive.scene_creator.blocks.curve import Curve
+from pgdrive.scene_creator.blocks.fork import InFork, OutFork
 from pgdrive.scene_creator.blocks.ramp import InRampOnStraight, OutRampOnStraight
 from pgdrive.scene_creator.blocks.roundabout import Roundabout
 from pgdrive.scene_creator.blocks.std_intersection import StdInterSection
 from pgdrive.scene_creator.blocks.std_t_intersection import StdTInterSection
 from pgdrive.scene_creator.blocks.straight import Straight
-from pgdrive.scene_creator.blocks.fork import InFork, OutFork
 
 
 class PGBlock:

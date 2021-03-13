@@ -1,5 +1,3 @@
-import time
-
 from pgdrive.envs.pgdrive_env import PGDriveEnv
 from pgdrive.utils import setup_logger
 

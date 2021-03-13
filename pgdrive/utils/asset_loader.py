@@ -1,7 +1,7 @@
 import logging
+import os
 import pathlib
 import sys
-import os
 
 
 class AssetLoader:

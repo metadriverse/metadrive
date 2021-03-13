@@ -1,7 +1,6 @@
 from typing import Tuple, List
 
 import numpy as np
-
 from pgdrive.scene_creator.highway_vehicle.kinematics import Vehicle
 from pgdrive.scene_manager.traffic_manager import TrafficManager
 
