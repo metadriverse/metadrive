@@ -6,7 +6,7 @@ import gym
 import numpy as np
 from pgdrive.scene_creator.ego_vehicle.base_vehicle import BaseVehicle
 from pgdrive.utils import import_pygame
-from pgdrive.utils.constans import Decoration
+from pgdrive.utils.constans import Decoration, DEFAULT_AGENT
 from pgdrive.world.top_down_observation.top_down_obs_impl import WorldSurface, COLOR_BLACK, \
     VehicleGraphics, LaneGraphics, ObservationWindowMultiChannel
 from pgdrive.world.top_down_observation.top_down_observation import TopDownObservation
@@ -107,7 +107,10 @@ class TopDownMultiChannel(TopDownObservation):
 
     def draw_scene(self):
         # Set the active area that can be modify to accelerate
-        pos = self.canvas_runtime.pos2pix(*self.scene_manager.ego_vehicle.position)
+        assert len(self.scene_manager.target_vehicles) == 1, "Don't support multi-agent top-down observation yet!"
+        vehicle = self.scene_manager.target_vehicles[DEFAULT_AGENT]
+        pos = self.canvas_runtime.pos2pix(*vehicle.position)
+
         clip_size = (int(self.obs_window.get_size()[0] * 1.1), int(self.obs_window.get_size()[0] * 1.1))
 
         self._refresh(self.canvas_ego, pos, clip_size)
@@ -116,23 +119,23 @@ class TopDownMultiChannel(TopDownObservation):
 
         # Draw vehicles
         # TODO PZH: I hate computing these in pygame-related code!!!
-        ego_heading = self.scene_manager.ego_vehicle.heading_theta
+        ego_heading = vehicle.heading_theta
         ego_heading = ego_heading if abs(ego_heading) > 2 * np.pi / 180 else 0
 
         VehicleGraphics.display(
-            vehicle=self.scene_manager.ego_vehicle,
+            vehicle=vehicle,
             surface=self.canvas_ego,  # Draw target vehicle in this canvas!
             heading=ego_heading,
             color=VehicleGraphics.GREEN
         )
         for v in self.scene_manager.traffic_mgr.vehicles:
-            if v is self.scene_manager.ego_vehicle:
+            if v is vehicle:
                 continue
             h = v.heading
             h = h if abs(h) > 2 * np.pi / 180 else 0
             VehicleGraphics.display(vehicle=v, surface=self.canvas_runtime, heading=h, color=VehicleGraphics.BLUE)
 
-        pos = self.canvas_runtime.pos2pix(*self.scene_manager.ego_vehicle.position)
+        pos = self.canvas_runtime.pos2pix(*vehicle.position)
         self.stack_past_pos.append(pos)
         for p in self._get_stack_indices(len(self.stack_past_pos)):
             p = self.stack_past_pos[p]
@@ -153,7 +156,7 @@ class TopDownMultiChannel(TopDownObservation):
                 navigation=self.canvas_navigation,
             ),
             position=pos,
-            heading=self.scene_manager.ego_vehicle.heading_theta
+            heading=vehicle.heading_theta
         )
         ret["past_pos"] = self.canvas_past_pos
         return ret

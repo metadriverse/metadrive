@@ -15,7 +15,7 @@ class ActionRepeat(PGDriveEnv):
         # Set the internal environment run in 0.02s interval.
         config["decision_repeat"] = 1
 
-        # Speed reward is given for current state, so its magnitude need to be reduced
+        # Speed reward_function is given for current state, so its magnitude need to be reduced
         config["speed_reward"] = config["speed_reward"] / cls.ORIGINAL_ACTION_REPEAT
 
         # Set the interval from 0.02s to 1s
@@ -101,7 +101,7 @@ class ActionRepeat(PGDriveEnv):
         discounted = 0.0
         for idx in reversed(range(len(r_list))):
             reward = r_list[idx]
-            # discounted = self.config["gamma"] * discounted + reward
+            # discounted = self.config["gamma"] * discounted + reward_function
             discounted = discounted + reward
             discounted_r_list[idx] = discounted
 
@@ -113,7 +113,7 @@ class ActionRepeat(PGDriveEnv):
         i["render"] = render_list
         i["trajectory"] = [
             dict(
-                reward=r_list[idx],
+                reward_function=r_list[idx],
                 discounted_reward=discounted_r_list[idx],
                 obs=o_list[idx],
                 action=action,

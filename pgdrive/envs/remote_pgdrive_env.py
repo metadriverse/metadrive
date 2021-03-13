@@ -1,5 +1,7 @@
 """
 This file provide a RemotePGDrive environment which can be easily ran in single process!
+Make sure you have installed ray via:
+    pip install ray
 """
 import gym
 from pgdrive.envs.pgdrive_env import PGDriveEnv
