@@ -755,7 +755,7 @@ class BaseVehicle(DynamicElement):
 
     @classmethod
     def _initialize_observation(cls, vehicle_config: Union[dict, PGConfig]):
-        from pgdrive.rl.observation_type import LidarStateObservation, ImageStateObservation
+        from pgdrive.rl_utils.observation_type import LidarStateObservation, ImageStateObservation
         if vehicle_config["use_image"]:
             o = ImageStateObservation(vehicle_config)
         else:
