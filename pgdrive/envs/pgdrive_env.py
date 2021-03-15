@@ -497,9 +497,6 @@ class PGDriveEnv(gym.Env):
     def set_current_seed(self, seed):
         self.current_seed = seed
 
-    def get_map(self, resolution: Iterable = (512, 512)):
-        return self.current_map.get_map_image_array(resolution)
-
     def get_vehicle_num(self):
         if self.scene_manager is None:
             return 0
