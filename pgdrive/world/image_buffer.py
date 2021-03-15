@@ -15,6 +15,7 @@ class ImageBuffer:
     display_bottom = 0.8
     display_top = 1
     display_region = None
+    default_region = [1 / 3, 2 / 3, 0.8, 1.0]
 
     def __init__(
         self,

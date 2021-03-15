@@ -4,7 +4,7 @@ from typing import Tuple
 import numpy as np
 from direct.controls.InputState import InputState
 from panda3d.core import Vec3, Camera
-from pgdrive.scene_creator.ego_vehicle.base_vehicle import BaseVehicle
+from pgdrive.scene_creator.vehicle.base_vehicle import BaseVehicle
 from pgdrive.utils.coordinates_shift import panda_heading
 from pgdrive.world.pg_world import PGWorld
 
@@ -18,9 +18,7 @@ class ChaseCamera:
     TASK_NAME = "update main camera"
     FOLLOW_LANE = False
 
-    def __init__(
-        self, camera: Camera, vehicle: BaseVehicle, camera_height: float, camera_dist: float, pg_world: PGWorld
-    ):
+    def __init__(self, camera: Camera, camera_height: float, camera_dist: float, pg_world: PGWorld):
         self.camera = camera
         self.camera_queue = None
         self.camera_height = camera_height
@@ -29,7 +27,6 @@ class ChaseCamera:
         self.inputs = InputState()
         self.inputs.watchWithModifiers('up', 'k')
         self.inputs.watchWithModifiers('down', 'j')
-        self.reset(vehicle, pg_world)
 
     def renew_camera_place(self, vehicle, task):
         if self.inputs.isSet("up"):
@@ -84,7 +81,7 @@ class ChaseCamera:
         heading = ChaseCamera._heading_of_lane(lane, pos)
         return np.cos(heading), np.sin(heading)
 
-    def reset(self, vehicle, pg_world):
+    def chase(self, vehicle, pg_world):
         """
         Use this function to chase a new vehicle !
         :param vehicle: Vehicle to chase

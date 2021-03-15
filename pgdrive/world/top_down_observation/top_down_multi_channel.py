@@ -5,7 +5,7 @@ import cv2
 import gym
 import numpy as np
 from pgdrive.constants import Decoration, DEFAULT_AGENT
-from pgdrive.scene_creator.ego_vehicle.base_vehicle import BaseVehicle
+from pgdrive.scene_creator.vehicle.base_vehicle import BaseVehicle
 from pgdrive.utils import import_pygame
 from pgdrive.world.top_down_observation.top_down_obs_impl import WorldSurface, COLOR_BLACK, \
     VehicleGraphics, LaneGraphics, ObservationWindowMultiChannel

@@ -1,4 +1,4 @@
-from pgdrive.scene_creator.pg_traffic_vehicle.traffic_vehicle import PGTrafficVehicle
+from pgdrive.scene_creator.vehicle.traffic_vehicle import PGTrafficVehicle
 
 factor = 1
 

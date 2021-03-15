@@ -4,6 +4,7 @@ from panda3d.bullet import BulletWorld
 class CollisionGroup:
     Terrain = 2
     EgoVehicle = 1
+    EgoVehicleTop = 6
     LaneLine = 3
     TrafficVehicle = 4
     LaneSurface = 5  # useless now, since it is in another physics world
@@ -32,7 +33,8 @@ class CollisionGroup:
             (cls.TrafficVehicle, cls.EgoVehicle, True),
 
             # ego vehicle collision
-            (cls.EgoVehicle, cls.EgoVehicle, False),
+            (cls.EgoVehicle, cls.EgoVehicle, True),
+            (cls.EgoVehicle, cls.EgoVehicleTop, False),
             (cls.EgoVehicle, cls.LaneSurface, False),
 
             # lane surface

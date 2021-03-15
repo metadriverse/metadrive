@@ -1,5 +1,5 @@
 from pgdrive import PGDriveEnv
-from pgdrive.scene_creator.pg_traffic_vehicle.traffic_vehicle_type import LVehicle
+from pgdrive.scene_creator.vehicle.traffic_vehicle_type import LVehicle
 
 
 class SidePassEnv(PGDriveEnv):
@@ -58,7 +58,7 @@ class SidePassEnv(PGDriveEnv):
             )
             cone.attach_to_pg_world(self.pg_world.pbr_worldNP, self.pg_world.physics_world)
             self.scene_manager.traffic_mgr.vehicles.append(cone)
-        from pgdrive.scene_creator.pg_traffic_vehicle.traffic_vehicle_type import SVehicle, XLVehicle
+        from pgdrive.scene_creator.vehicle.traffic_vehicle_type import SVehicle, XLVehicle
         v_pos = [8, 14]
         v_type = [SVehicle, XLVehicle]
         for v_long, v_t in zip(v_pos, v_type):

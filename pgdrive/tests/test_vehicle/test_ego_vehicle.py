@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 
 from pgdrive import PGDriveEnv
-from pgdrive.scene_creator.ego_vehicle.base_vehicle import BaseVehicle
+from pgdrive.scene_creator.vehicle.base_vehicle import BaseVehicle
 
 
 @pytest.fixture
