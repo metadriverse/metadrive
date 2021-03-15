@@ -6,6 +6,7 @@ from typing import List, Optional, Union, Iterable
 
 import numpy as np
 from panda3d.core import NodePath
+
 from pgdrive.constants import Decoration
 from pgdrive.pg_config import PGConfig
 from pgdrive.pg_config.pg_blocks import PGBlock
@@ -236,6 +237,10 @@ class Map:
         surface = self.draw_maximum_surface()
         ret = cv2.resize(pygame.surfarray.pixels_red(surface), resolution, interpolation=cv2.INTER_LINEAR)
         return ret
+
+    @property
+    def num_blocks(self):
+        return len(self.blocks)
 
     # def draw_navi_line(self, vehicle, dest_resolution=(512, 512), save=False, navi_line_color=(255, 0, 0)):
     #
