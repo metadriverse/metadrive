@@ -42,8 +42,10 @@ class PGDriveEnv(gym.Env):
             _load_map_from_json=pregenerated_map_file,  # The path to the pre-generated file
 
             # ==== agents config =====
-            target_vehicle_configs={DEFAULT_AGENT: BaseVehicle.get_vehicle_config()},  # agent_id: vehicle_config
             num_agents=1,
+            target_vehicle_configs={},  # agent_id: vehicle_config
+            # this take effects only in single-agent env for convenience
+            vehicle_config=BaseVehicle.get_vehicle_config(),
 
             # ===== Observation =====
             use_topdown=False,  # Use top-down view
@@ -102,9 +104,8 @@ class PGDriveEnv(gym.Env):
         if config:
             self.config.update(config)
         self.num_agents = self.config["num_agents"]
-        if self.num_agents > 1:
-            self.config["target_vehicle_configs"].pop(DEFAULT_AGENT)
-            # raise ValueError("We don't fulfill target_vehicle_configs yet!")
+        if self.num_agents == 1:
+            self.config["target_vehicle_configs"][DEFAULT_AGENT] = self.config["vehicle_config"]
         assert isinstance(self.num_agents, int) and self.num_agents > 0
         assert len(self.config["target_vehicle_configs"]) == self.num_agents, "assign born place for each vehicle"
         self.config.extend_config_with_unknown_keys({"use_image": True if self.use_image_sensor else False})
@@ -229,7 +230,10 @@ class PGDriveEnv(gym.Env):
 
         if self.config["manual_control"] and self.use_render:
             action = self.controller.process_input()
-            actions[self.current_track_vehicle_id] = action
+            if self.num_agents == 1:
+                actions = action
+            else:
+                actions[self.current_track_vehicle_id] = action
 
         if self.num_agents == 1:
             actions = {DEFAULT_AGENT: actions}
@@ -248,6 +252,7 @@ class PGDriveEnv(gym.Env):
         self.scene_manager.step(self.config["decision_repeat"])
 
         # update states, if restore from episode data, position and heading will be force set in update_state() function
+
         self.scene_manager.update_state()
 
         # update obs, dones, rewards, costs, calculate done at first !
@@ -498,15 +503,14 @@ class PGDriveEnv(gym.Env):
     def get_vehicle_num(self):
         if self.scene_manager is None:
             return 0
-        return self.scene_manager.get_vehicle_num()
+        return self.scene_manager.traffic_mgr.get_vehicle_num()
 
     def toggle_expert_takeover(self):
         """
         Only take effect whene vehicle num==1
         :return: None
         """
-        assert len(self.vehicles) == 1, "Only enable when driving in single agent env"
-        self.vehicle._expert_takeover = not self.vehicle._expert_takeover
+        self.current_track_vehicle._expert_takeover = not self.current_track_vehicle._expert_takeover
 
     def capture(self):
         img = PNMImage()
