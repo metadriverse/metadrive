@@ -9,7 +9,7 @@ class TopDownSingleFramePGDriveEnv(PGDriveEnv):
     @classmethod
     def default_config(cls) -> PGConfig:
         config = PGDriveEnv.default_config()
-        config["target_vehicle_configs"][DEFAULT_AGENT]["lidar"] = {"num_lasers": 0, "distance": 0}  # Remove lidar
+        config["vehicle_config"]["lidar"] = {"num_lasers": 0, "distance": 0}  # Remove lidar
         config.extend_config_with_unknown_keys({"frame_skip": 5, "frame_stack": 5, "rgb_clip": False})
         return config
 

@@ -62,6 +62,8 @@ class PGConfig:
         assert key in self._config, "KeyError: {} doesn't exist in config".format(key)
         if self._config[key] is not None and value is not None:
             type_correct = isinstance(value, type(self._config[key]))
+            if isinstance(self._config[key], PGConfig):
+                type_correct = type_correct or isinstance(value, dict)
             if isinstance(self._config[key], float):
                 # Int can be transformed to float
                 type_correct = type_correct or isinstance(value, int)
