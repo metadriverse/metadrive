@@ -1,5 +1,6 @@
 from pgdrive import PGDriveEnv
 from pgdrive.scene_creator.map import Map, MapGenerateMethod
+from pgdrive.utils import draw_top_down_map
 
 if __name__ == '__main__':
     env = PGDriveEnv(
@@ -15,5 +16,5 @@ if __name__ == '__main__':
     )
     for i in range(100):
         env.reset()
-        map = env.get_map()
+        map = draw_top_down_map(env.current_map)
         print("Finish {} maps!".format(i + 1))
