@@ -1,10 +1,12 @@
 import copy
+import gym
+from pgdrive.scene_creator.blocks.first_block import FirstBlock
 import logging
 import math
 import time
 from collections import deque
-from typing import Optional
-
+from typing import Optional, Union
+from pgdrive.scene_creator.vehicle_module.rgb_camera import RGBCamera
 import numpy as np
 from panda3d.bullet import BulletVehicle, BulletBoxShape, BulletRigidBodyNode, ZUp, BulletGhostNode
 from panda3d.core import Vec3, TransformState, NodePath, LQuaternionf, BitMask32, PythonCallbackObject, TextNode
@@ -14,14 +16,15 @@ from pgdrive.pg_config.cam_mask import CamMask
 from pgdrive.pg_config.collision_group import CollisionGroup
 from pgdrive.pg_config.parameter_space import Parameter, VehicleParameterSpace
 from pgdrive.pg_config.pg_space import PGSpace
-from pgdrive.scene_creator.ego_vehicle.vehicle_module.lidar import Lidar
-from pgdrive.scene_creator.ego_vehicle.vehicle_module.routing_localization import RoutingLocalizationModule
-from pgdrive.scene_creator.ego_vehicle.vehicle_module.vehicle_panel import VehiclePanel
+from pgdrive.scene_creator.vehicle_module import Lidar
+from pgdrive.scene_creator.vehicle_module.routing_localization import RoutingLocalizationModule
+from pgdrive.scene_creator.vehicle_module.vehicle_panel import VehiclePanel
 from pgdrive.scene_creator.lane.abs_lane import AbstractLane
 from pgdrive.scene_creator.lane.circular_lane import CircularLane
 from pgdrive.scene_creator.lane.straight_lane import StraightLane
 from pgdrive.scene_creator.map import Map
 from pgdrive.utils.asset_loader import AssetLoader
+from pgdrive.utils import safe_clip
 from pgdrive.utils.coordinates_shift import panda_position, pgdrive_position, panda_heading, pgdrive_heading
 from pgdrive.utils.element import DynamicElement
 from pgdrive.utils.math_utils import get_vertical_vector, norm, clip
@@ -29,6 +32,8 @@ from pgdrive.utils.scene_utils import ray_localization
 from pgdrive.world.image_buffer import ImageBuffer
 from pgdrive.world.pg_physics_world import PGPhysicsWorld
 from pgdrive.world.pg_world import PGWorld
+from pgdrive.scene_creator.vehicle_module.depth_camera import DepthCamera
+from pgdrive.scene_creator.vehicle_module import MiniMap
 
 
 class BaseVehicle(DynamicElement):
@@ -47,45 +52,92 @@ class BaseVehicle(DynamicElement):
     COLLISION_MASK = CollisionGroup.EgoVehicle
     STEERING_INCREMENT = 0.05
 
-    default_vehicle_config = PGConfig(
-        dict(
-            lidar=dict(num_lasers=240, distance=50, num_others=4),  # laser num, distance, other vehicle info num
-            show_lidar=False,
-            mini_map=(84, 84, 250),  # buffer length, width
-            rgb_cam=(84, 84),  # buffer length, width
-            depth_cam=(84, 84, True),  # buffer length, width, view_ground
-            show_navi_mark=True,
-            increment_steering=False,
-            wheel_friction=0.6,
-        )
-    )
+    @classmethod
+    def _default_vehicle_config(cls) -> PGConfig:
+        return PGConfig(
+            dict(
+                # ===== vehicle module config =====
+                lidar=dict(num_lasers=240, distance=50, num_others=4),  # laser num, distance, other vehicle info num
+                show_lidar=False,
+                mini_map=(84, 84, 250),  # buffer length, width
+                rgb_cam=(84, 84),  # buffer length, width
+                depth_cam=(84, 84, True),  # buffer length, width, view_ground
+                show_navi_mark=True,
+                increment_steering=False,
+                wheel_friction=0.6,
 
-    born_place = (5, 0)
+                # ===== use image =====
+                image_source="rgb_cam",  # take effect when only when use_image == True
+                use_image=False,
+                rgb_clip=True,
+
+                # ===== vehicle born =====
+                born_lane_index=(FirstBlock.NODE_1, FirstBlock.NODE_2, 0),
+                born_longitude=5.0,
+                born_lateral=0.0,
+
+                # ===== Reward Scheme =====
+                success_reward=20,
+                out_of_road_penalty=5,
+                crash_vehicle_penalty=10,
+                crash_object_penalty=2,
+                acceleration_penalty=0.0,
+                steering_penalty=0.1,
+                low_speed_penalty=0.0,
+                driving_reward=1.0,
+                general_penalty=0.0,
+                speed_reward=0.1,
+
+                # ===== Cost Scheme =====
+                crash_vehicle_cost=1,
+                crash_object_cost=1,
+                out_of_road_cost=1.,
+
+                # ==== others ====
+                overtake_stat=False,  # we usually set to True when evaluation
+                action_check=False,
+                use_saver=False,
+                save_level=0.5,
+            )
+        )
+
     LENGTH = None
     WIDTH = None
 
-    def __init__(self, pg_world: PGWorld, vehicle_config: dict = None, random_seed: int = 0, config: dict = None):
+    def __init__(
+        self, pg_world: PGWorld, vehicle_config: dict = None, physics_config: dict = None, random_seed: int = 0
+    ):
         """
         This Vehicle Config is different from self.get_config(), and it is used to define which modules to use, and
-        module parameters.
+        module parameters. And self.physics_config defines the physics feature of vehicles, such as length/width
+        :param pg_world: PGWorld
+        :param vehicle_config: mostly, vehicle module config
+        :param physics_config: vehicle height/width/length, find more physics para in VehicleParameterSpace
+        :param random_seed: int
         """
-        super(BaseVehicle, self).__init__(random_seed)
-        self.pg_world = pg_world
-        self.node_path = NodePath("vehicle")
 
+        self.vehicle_config = self.get_vehicle_config(vehicle_config) \
+            if vehicle_config is not None else self._default_vehicle_config()
+
+        # observation, action
+        self.observation = self._initialize_observation(self.vehicle_config)
+        self.observation_space = self.observation.observation_space
+        self.action_space = self.get_action_space_before_init()
+
+        super(BaseVehicle, self).__init__(random_seed)
         # config info
         self.set_config(self.PARAMETER_SPACE.sample())
-        if config is not None:
-            self.set_config(config)
-
-        self.vehicle_config = self.get_vehicle_config(
-            vehicle_config
-        ) if vehicle_config is not None else self.default_vehicle_config
+        if physics_config is not None:
+            self.set_config(physics_config)
         self.increment_steering = self.vehicle_config["increment_steering"]
         self.max_speed = self.get_config()[Parameter.speed_max]
         self.max_steering = self.get_config()[Parameter.steering_max]
 
+        self.pg_world = pg_world
+        self.node_path = NodePath("vehicle")
+
         # create
+        self.born_place = (0, 0)
         self._add_chassis(pg_world.physics_world)
         self.wheels = self._create_wheel()
 
@@ -95,7 +147,6 @@ class BaseVehicle(DynamicElement):
         self.routing_localization: Optional[RoutingLocalizationModule] = None
         self.lane: Optional[AbstractLane] = None
         self.lane_index = None
-
         self.vehicle_panel = VehiclePanel(self.pg_world) if (self.pg_world.mode == RENDER_MODE_ONSCREEN) else None
 
         # state info
@@ -113,37 +164,119 @@ class BaseVehicle(DynamicElement):
         self.current_banner = None
         self.attach_to_pg_world(self.pg_world.pbr_render, self.pg_world.physics_world)
 
-        # done info
+        # step info
         self.crash_vehicle = None
         self.crash_object = None
         self.out_of_route = None
         self.crash_side_walk = None
         self.on_lane = None
-        self.init_done_info()
+        self.step_info = None
+        self._init_step_info()
 
         # others
         self._frame_objects_crashed = []  # inner loop, object will only be crashed for once
+        self._add_modules_for_vehicle(pg_world.pg_config["use_render"])
+        self.takeover = False
+        self._expert_takeover = False
 
-    def init_done_info(self):
+        # overtake_stat
+        self.front_vehicles = set()
+        self.back_vehicles = set()
+
+    def _add_modules_for_vehicle(self, use_render: bool):
+        # add self module for training according to config
+        vehicle_config = self.vehicle_config
+        self.add_routing_localization(vehicle_config["show_navi_mark"])  # default added
+        if not self.vehicle_config["use_image"]:
+            if vehicle_config["lidar"]["num_lasers"] > 0 and vehicle_config["lidar"]["distance"] > 0:
+                self.add_lidar(
+                    num_lasers=vehicle_config["lidar"]["num_lasers"],
+                    distance=vehicle_config["lidar"]["distance"],
+                    show_lidar_point=vehicle_config["show_lidar"]
+                )
+            else:
+                import logging
+                logging.warning(
+                    "You have set the lidar config to: {}, which seems to be invalid!".format(vehicle_config["lidar"])
+                )
+
+            if use_render:
+                rgb_cam_config = vehicle_config["rgb_cam"]
+                rgb_cam = RGBCamera(rgb_cam_config[0], rgb_cam_config[1], self.chassis_np, self.pg_world)
+                self.add_image_sensor("rgb_cam", rgb_cam)
+
+                mini_map = MiniMap(vehicle_config["mini_map"], self.chassis_np, self.pg_world)
+                self.add_image_sensor("mini_map", mini_map)
+            return
+
+        if vehicle_config["use_image"]:
+            # 3 types image observation
+            if vehicle_config["image_source"] == "rgb_cam":
+                rgb_cam_config = vehicle_config["rgb_cam"]
+                rgb_cam = RGBCamera(rgb_cam_config[0], rgb_cam_config[1], self.chassis_np, self.pg_world)
+                self.add_image_sensor("rgb_cam", rgb_cam)
+            elif vehicle_config["image_source"] == "mini_map":
+                mini_map = MiniMap(vehicle_config["mini_map"], self.chassis_np, self.pg_world)
+                self.add_image_sensor("mini_map", mini_map)
+            elif vehicle_config["image_source"] == "depth_cam":
+                cam_config = vehicle_config["depth_cam"]
+                depth_cam = DepthCamera(*cam_config, self.chassis_np, self.pg_world)
+                self.add_image_sensor("depth_cam", depth_cam)
+            else:
+                raise ValueError("No module named {}".format(vehicle_config["image_source"]))
+
+        # load more sensors for visualization when render, only for beauty...
+        if use_render:
+            if vehicle_config["image_source"] == "mini_map":
+                rgb_cam_config = vehicle_config["rgb_cam"]
+                rgb_cam = RGBCamera(rgb_cam_config[0], rgb_cam_config[1], self.chassis_np, self.pg_world)
+                self.add_image_sensor("rgb_cam", rgb_cam)
+            else:
+                mini_map = MiniMap(vehicle_config["mini_map"], self.chassis_np, self.pg_world)
+                self.add_image_sensor("mini_map", mini_map)
+
+    def _init_step_info(self):
         # done info will be initialized every frame
         self.crash_vehicle = False
         self.crash_object = False
         self.crash_side_walk = False
         self.out_of_route = False  # re-route is required if is false
         self.on_lane = True  # on lane surface or not
+        self.step_info = {"reward": 0, "cost": 0}
 
     @classmethod
-    def get_vehicle_config(cls, new_config):
-        default = copy.deepcopy(cls.default_vehicle_config)
+    def get_vehicle_config(cls, new_config=None):
+        default = copy.deepcopy(cls._default_vehicle_config())
+        if new_config is None:
+            return default
         default.update(new_config)
         return default
+
+    def _preprocess_action(self, action):
+        self.step_info["raw_action"] = (action[0], action[1])
+        if self.vehicle_config["action_check"]:
+            assert self.action_space.contains(action), "Input {} is not compatible with action space {}!".format(
+                action, self.action_space
+            )
+
+        # filter by saver to protect
+        steering, throttle, saver_info = self.saver(action)
+        action = (steering, throttle)
+        self.step_info.update(saver_info)
+
+        # protect agent from nan error
+        action = safe_clip(action, min_val=self.action_space.low[0], max_val=self.action_space.high[0])
+        return action
 
     def prepare_step(self, action):
         """
         Save info and make decision before action
         """
-        self._frame_objects_crashed = []
+        # init step info to store info before each step
+        self._init_step_info()
+        action = self._preprocess_action(action)
 
+        self._frame_objects_crashed = []
         self.last_position = self.position
         self.last_heading_dir = self.heading
         self.last_current_action.append(action)  # the real step of physics world is implemented in taskMgr.step()
@@ -153,9 +286,6 @@ class BaseVehicle(DynamicElement):
             self.set_act(action)
         if self.vehicle_panel is not None:
             self.vehicle_panel.renew_2d_car_para_visualization(self)
-
-        # init done info before each step
-        self.init_done_info()
 
     def update_state(self, pg_world=None):
         # callback
@@ -170,11 +300,26 @@ class BaseVehicle(DynamicElement):
         self._state_check()
         self.update_dist_to_left_right()
         self.out_of_route = True if self.dist_to_right < 0 or self.dist_to_left < 0 else False
+        self._update_overtake_stat()
+        self.step_info.update(
+            {
+                "velocity": float(self.speed),
+                "steering": float(self.steering),
+                "acceleration": float(self.throttle_brake)
+            }
+        )
 
-    def reset(self, map: Map, pos: np.ndarray, heading: float):
+    def reset(self, map: Map, pos: np.ndarray = None, heading: float = 0.0):
         """
         pos is a 2-d array, and heading is a float (unit degree)
+        if pos is not None, vehicle will be reset to the position
+        else, vehicle will be reset to born place
         """
+        if pos is None:
+            self.born_place = map.road_network.get_lane(
+                self.vehicle_config["born_lane_index"]
+            ).position(self.vehicle_config["born_longitude"], self.vehicle_config["born_lateral"])
+            pos = self.born_place
         heading = -np.deg2rad(heading) - np.pi / 2
         self.chassis_np.setPos(Vec3(*pos, 1))
         self.chassis_np.setQuat(LQuaternionf(np.cos(heading / 2), 0, 0, np.sin(heading / 2)))
@@ -185,7 +330,7 @@ class BaseVehicle(DynamicElement):
         self.system.resetSuspension()
 
         # done info
-        self.init_done_info()
+        self._init_step_info()
 
         # other info
         self.throttle_brake = 0.0
@@ -194,6 +339,15 @@ class BaseVehicle(DynamicElement):
         self.last_position = self.born_place
         self.last_heading_dir = self.heading
         self.update_dist_to_left_right()
+        self.takeover = False
+
+        # overtake_stat
+        self.front_vehicles = set()
+        self.back_vehicles = set()
+
+        # for render
+        if self.vehicle_panel is not None:
+            self.vehicle_panel.renew_2d_car_para_visualization(self)
 
         if "depth_cam" in self.image_sensors and self.image_sensors["depth_cam"].view_ground:
             for block in map.blocks:
@@ -256,7 +410,8 @@ class BaseVehicle(DynamicElement):
         """
         km/h
         """
-        speed = self.chassis_np.node().get_linear_velocity().length() * 3.6
+        velocity = self.chassis_np.node().get_linear_velocity()
+        speed = norm(velocity[0], velocity[1]) * 3.6
         return clip(speed, 0.0, 100000.0)
 
     @property
@@ -279,7 +434,7 @@ class BaseVehicle(DynamicElement):
 
     @property
     def velocity_direction(self):
-        direction = self.system.get_forward_vector()
+        direction = self.system.getForwardVector()
         return np.asarray([direction[0], -direction[1]])
 
     @property
@@ -352,7 +507,7 @@ class BaseVehicle(DynamicElement):
     def _add_chassis(self, pg_physics_world: PGPhysicsWorld):
         para = self.get_config()
         chassis = BulletRigidBodyNode(BodyName.Ego_vehicle_top)
-        chassis.setIntoCollideMask(BitMask32.bit(self.COLLISION_MASK))
+        chassis.setIntoCollideMask(BitMask32.bit(CollisionGroup.EgoVehicleTop))
         chassis_shape = BulletBoxShape(
             Vec3(
                 para[Parameter.vehicle_width] / 2, para[Parameter.vehicle_length] / 2,
@@ -450,7 +605,7 @@ class BaseVehicle(DynamicElement):
         :return: None
         """
         self.routing_localization.update(map)
-        lane, new_l_index = ray_localization((self.born_place), self.pg_world)
+        lane, new_l_index = ray_localization(np.array(self.born_place), self.pg_world)
         assert lane is not None, "Born place is not on road!"
         self.lane_index = new_l_index
         self.lane = lane
@@ -482,7 +637,7 @@ class BaseVehicle(DynamicElement):
         node1 = contact.getNode1().getName()
         name = [node0, node1]
         name.remove(BodyName.Ego_vehicle_top)
-        if name[0] in [BodyName.Traffic_vehicle]:
+        if name[0] in [BodyName.Traffic_vehicle, BodyName.Ego_vehicle]:
             self.crash_vehicle = True
         elif name[0] in [BodyName.Traffic_cone, BodyName.Traffic_triangle]:
             node = contact.getNode0() if contact.getNode0().hasPythonTag(name[0]) else contact.getNode1()
@@ -577,6 +732,112 @@ class BaseVehicle(DynamicElement):
     def set_state(self, state: dict):
         self.set_heading(state["heading"])
         self.set_position(state["position"])
+
+    def _update_overtake_stat(self):
+        if self.vehicle_config["overtake_stat"]:
+            surrounding_vs = self.lidar.get_surrounding_vehicles()
+            routing = self.routing_localization
+            ckpt_idx = routing.target_checkpoints_index
+            for surrounding_v in surrounding_vs:
+                if surrounding_v.lane_index[:-1] == (routing.checkpoints[ckpt_idx[0]], routing.checkpoints[ckpt_idx[1]
+                                                                                                           ]):
+                    if self.lane.local_coordinates(self.position)[0] - \
+                            self.lane.local_coordinates(surrounding_v.position)[0] < 0:
+                        self.front_vehicles.add(surrounding_v)
+                        if surrounding_v in self.back_vehicles:
+                            self.back_vehicles.remove(surrounding_v)
+                    else:
+                        self.back_vehicles.add(surrounding_v)
+        self.step_info["overtake_vehicle_num"] = self.get_overtake_num()
+
+    def get_overtake_num(self):
+        return len(self.front_vehicles.intersection(self.back_vehicles))
+
+    @classmethod
+    def _initialize_observation(cls, vehicle_config: Union[dict, PGConfig]):
+        from pgdrive.rl.observation_type import LidarStateObservation, ImageStateObservation
+        if vehicle_config["use_image"]:
+            o = ImageStateObservation(vehicle_config)
+        else:
+            o = LidarStateObservation(vehicle_config)
+        return o
+
+    @classmethod
+    def get_observation_space_before_init(cls, vehicle_config: dict = None):
+        vehicle_config = cls.get_vehicle_config(vehicle_config) \
+            if vehicle_config is not None else cls._default_vehicle_config()
+        return cls._initialize_observation(vehicle_config).observation_space
+
+    @classmethod
+    def get_action_space_before_init(cls):
+        return gym.spaces.Box(-1.0, 1.0, shape=(2, ), dtype=np.float32)
+
+    def saver(self, action):
+        """
+        Rule to enable saver
+        :param action: original action
+        :return: a new action to override original action
+        """
+        steering = action[0]
+        throttle = action[1]
+        if self.vehicle_config["use_saver"] or self._expert_takeover:
+            # saver can be used for human or another AI
+            save_level = self.vehicle_config["save_level"] if not self._expert_takeover else 1.0
+            obs = self.observation.observe(self)
+            from pgdrive.examples.ppo_expert import expert
+            try:
+                saver_a = expert(obs, deterministic=False)
+            except ValueError:
+                print("Expert can not takeover, due to observation space mismathing!")
+                saver_a = action
+            else:
+                if save_level > 0.9:
+                    steering = saver_a[0]
+                    throttle = saver_a[1]
+                elif save_level > 1e-3:
+                    heading_diff = self.heading_diff(self.lane) - 0.5
+                    f = min(1 + abs(heading_diff) * self.speed * self.max_speed, save_level * 10)
+                    # for out of road
+                    if (obs[0] < 0.04 * f and heading_diff < 0) or (obs[1] < 0.04 * f and heading_diff > 0) or obs[
+                        0] <= 1e-3 or \
+                            obs[
+                                1] <= 1e-3:
+                        steering = saver_a[0]
+                        throttle = saver_a[1]
+                        if self.speed < 5:
+                            throttle = 0.5
+                    # if saver_a[1] * self.speed < -40 and action[1] > 0:
+                    #     throttle = saver_a[1]
+
+                    # for collision
+                    lidar_p = self.lidar.get_cloud_points()
+                    left = int(self.lidar.num_lasers / 4)
+                    right = int(self.lidar.num_lasers / 4 * 3)
+                    if min(lidar_p[left - 4:left + 6]) < (save_level + 0.1) / 10 or min(lidar_p[right - 4:right + 6]
+                                                                                        ) < (save_level + 0.1) / 10:
+                        # lateral safe distance 2.0m
+                        steering = saver_a[0]
+                    if action[1] >= 0 and saver_a[1] <= 0 and min(min(lidar_p[0:10]), min(lidar_p[-10:])) < save_level:
+                        # longitude safe distance 15 m
+                        throttle = saver_a[1]
+
+        # indicate if current frame is takeover step
+        pre_save = self.takeover
+        self.takeover = True if action[0] != steering or action[1] != throttle else False
+        saver_info = {
+            "takeover_start": True if not pre_save and self.takeover else False,
+            "takeover_end": True if pre_save and not self.takeover else False,
+            "takeover": self.takeover
+        }
+        return steering, throttle, saver_info
+
+    def remove_display_region(self):
+        for sensor in self.image_sensors.values():
+            sensor.remove_display_region(self.pg_world)
+
+    def add_to_display(self):
+        for sensor in self.image_sensors.values():
+            sensor.add_to_display(self.pg_world, sensor.default_region)
 
     def __del__(self):
         super(BaseVehicle, self).__del__()

@@ -406,7 +406,7 @@ class TrafficManager(RandomEngine):
         return v_front, v_rear
 
     def random_vehicle_type(self):
-        from pgdrive.scene_creator.pg_traffic_vehicle.traffic_vehicle_type import vehicle_type
+        from pgdrive.scene_creator.vehicle.traffic_vehicle_type import vehicle_type
         vehicle_type = vehicle_type[self.np_random.choice(list(vehicle_type.keys()), p=[0.2, 0.3, 0.3, 0.2])]
         return vehicle_type
 

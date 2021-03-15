@@ -1,6 +1,7 @@
 from pgdrive.envs.pgdrive_env import PGDriveEnv
 from pgdrive.pg_config import PGConfig
-from pgdrive.scene_creator.ego_vehicle.base_vehicle import BaseVehicle
+from pgdrive.constants import DEFAULT_AGENT
+from pgdrive.scene_creator.vehicle.base_vehicle import BaseVehicle
 from pgdrive.world.top_down_observation import TopDownMultiChannel, TopDownObservation
 
 
@@ -8,7 +9,7 @@ class TopDownSingleFramePGDriveEnv(PGDriveEnv):
     @classmethod
     def default_config(cls) -> PGConfig:
         config = PGDriveEnv.default_config()
-        config["vehicle_config"]["lidar"] = {"num_lasers": 0, "distance": 0}  # Remove lidar
+        config["target_vehicle_configs"][DEFAULT_AGENT]["lidar"] = {"num_lasers": 0, "distance": 0}  # Remove lidar
         config.extend_config_with_unknown_keys({"frame_skip": 5, "frame_stack": 5, "rgb_clip": False})
         return config
 

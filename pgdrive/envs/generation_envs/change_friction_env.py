@@ -3,7 +3,7 @@ import logging
 import numpy as np
 from pgdrive.envs.pgdrive_env import PGDriveEnv
 from pgdrive.pg_config import PGConfig
-from pgdrive.scene_creator.ego_vehicle.base_vehicle import BaseVehicle
+from pgdrive.scene_creator.vehicle.base_vehicle import BaseVehicle
 from pgdrive.utils import get_np_random
 from pgdrive.world.chase_camera import ChaseCamera
 

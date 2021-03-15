@@ -2,8 +2,8 @@ from abc import ABC
 
 import gym
 import numpy as np
-from pgdrive.scene_creator.ego_vehicle.base_vehicle import BaseVehicle
-from pgdrive.scene_creator.ego_vehicle.vehicle_module.routing_localization import RoutingLocalizationModule
+from pgdrive.scene_creator.vehicle.base_vehicle import BaseVehicle
+from pgdrive.scene_creator.vehicle_module.routing_localization import RoutingLocalizationModule
 from pgdrive.utils.math_utils import clip
 from pgdrive.world.image_buffer import ImageBuffer
 
@@ -160,11 +160,19 @@ class ImageObservation(ObservationType):
     def get_image(self):
         return self.state.copy()[:, :, -1]
 
+    def reset(self, env):
+        """
+        Clear stack
+        :param env: PGDrive
+        :return: None
+        """
+        self.state = np.zeros(self.observation_space.shape)
+
 
 class LidarStateObservation(ObservationType):
-    def __init__(self, config):
-        self.state_obs = StateObservation(config)
-        super(LidarStateObservation, self).__init__(config)
+    def __init__(self, vehicle_config):
+        self.state_obs = StateObservation(vehicle_config)
+        super(LidarStateObservation, self).__init__(vehicle_config)
 
     @property
     def observation_space(self):
@@ -206,13 +214,15 @@ class ImageStateObservation(ObservationType):
     IMAGE = "image"
     STATE = "state"
 
-    def __init__(self, config, image_source: str, clip_rgb: bool):
+    def __init__(self, vehicle_config):
+        config = vehicle_config
         super(ImageStateObservation, self).__init__(config)
-        self.img_obs = ImageObservation(config, image_source, clip_rgb)
+        self.img_obs = ImageObservation(config, config["image_cource"], config["rgb_clip"])
         self.state_obs = StateObservation(config)
 
     @property
     def observation_space(self):
+        # TODO it should be specified by different vehicle
         return gym.spaces.Dict(
             {
                 self.IMAGE: self.img_obs.observation_space,

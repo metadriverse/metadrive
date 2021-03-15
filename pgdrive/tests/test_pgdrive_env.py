@@ -3,7 +3,8 @@ import os
 import numpy as np
 import pytest
 from pgdrive import PGDriveEnv
-from pgdrive.scene_creator.ego_vehicle.vehicle_module.PID_controller import PIDController, Target
+from pgdrive.constants import DEFAULT_AGENT
+from pgdrive.scene_creator.vehicle_module.PID_controller import PIDController, Target
 
 # Key: case name, value: environmental config
 blackbox_test_configs = dict(
@@ -20,14 +21,14 @@ blackbox_test_configs = dict(
     envs_1000=dict(environment_num=1000),
     envs_10000=dict(environment_num=10000),
     envs_100000=dict(environment_num=100000),
-    no_lidar0=dict(vehicle_config=dict(lidar=dict(num_lasers=0, distance=0, num_others=0))),
-    no_lidar1=dict(vehicle_config=dict(lidar=dict(num_lasers=0, distance=10, num_others=0))),
-    no_lidar2=dict(vehicle_config=dict(lidar=dict(num_lasers=10, distance=0, num_others=0))),
-    no_lidar3=dict(vehicle_config=dict(lidar=dict(num_lasers=0, distance=0, num_others=10))),
-    no_lidar4=dict(vehicle_config=dict(lidar=dict(num_lasers=10, distance=10, num_others=0))),
-    no_lidar5=dict(vehicle_config=dict(lidar=dict(num_lasers=10, distance=0, num_others=10))),
-    no_lidar6=dict(vehicle_config=dict(lidar=dict(num_lasers=0, distance=10, num_others=10))),
-    no_lidar7=dict(vehicle_config=dict(lidar=dict(num_lasers=10, distance=10, num_others=10))),
+    no_lidar0=dict(target_vehicle_configs={DEFAULT_AGENT: dict(lidar=dict(num_lasers=0, distance=0, num_others=0))}),
+    no_lidar1=dict(target_vehicle_configs={DEFAULT_AGENT: dict(lidar=dict(num_lasers=0, distance=10, num_others=0))}),
+    no_lidar2=dict(target_vehicle_configs={DEFAULT_AGENT: dict(lidar=dict(num_lasers=10, distance=0, num_others=0))}),
+    no_lidar3=dict(target_vehicle_configs={DEFAULT_AGENT: dict(lidar=dict(num_lasers=0, distance=0, num_others=10))}),
+    no_lidar4=dict(target_vehicle_configs={DEFAULT_AGENT: dict(lidar=dict(num_lasers=10, distance=10, num_others=0))}),
+    no_lidar5=dict(target_vehicle_configs={DEFAULT_AGENT: dict(lidar=dict(num_lasers=10, distance=0, num_others=10))}),
+    no_lidar6=dict(target_vehicle_configs={DEFAULT_AGENT: dict(lidar=dict(num_lasers=0, distance=10, num_others=10))}),
+    no_lidar7=dict(target_vehicle_configs={DEFAULT_AGENT: dict(lidar=dict(num_lasers=10, distance=10, num_others=10))}),
 )
 
 pid_control_config = dict(environment_num=1, start_seed=5, map="CrXROSTR", traffic_density=0.0)
@@ -85,8 +86,8 @@ def test_zombie():
             acc = acc_controller.get_result(acc_error)
             if d:
                 assert info["arrive_dest"]
-                assert abs(env.vehicles[env.DEFAULT_AGENT].position[0] - dest[0]) < 0.1 and \
-                       abs(env.vehicles[env.DEFAULT_AGENT].position[1] - dest[1]) < 0.1
+                assert abs(env.vehicles[env.DEFAULT_AGENT].position[0] - dest[0]) < 0.15 and \
+                       abs(env.vehicles[env.DEFAULT_AGENT].position[1] - dest[1]) < 0.15
                 break
     finally:
         env.close()

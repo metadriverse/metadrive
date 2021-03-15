@@ -10,7 +10,7 @@ class RGBCamera(ImageBuffer):
     BUFFER_W = 84  # dim 1
     BUFFER_H = 84  # dim 2
     CAM_MASK = CamMask.RgbCam
-    display_top = 1.0
+    default_region = [1 / 3, 2 / 3, ImageBuffer.display_bottom, ImageBuffer.display_top]
 
     def __init__(self, length: int, width: int, chassis_np: NodePath, pg_world: PGWorld):
         self.BUFFER_W = length
@@ -23,7 +23,7 @@ class RGBCamera(ImageBuffer):
             pg_world=pg_world,
             parent_node=chassis_np
         )
-        self.add_to_display(pg_world, [1 / 3, 2 / 3, self.display_bottom, self.display_top])
+        self.add_to_display(pg_world, self.default_region)
         self.cam.lookAt(0, 2.4, 1.3)
         self.lens.setFov(60)
         self.lens.setAspectRatio(2.0)

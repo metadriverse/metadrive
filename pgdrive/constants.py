@@ -35,7 +35,7 @@ class BodyName:
     Broken_line = "Broken Line"
     Side_walk = "Side Walk"
     Ground = "Ground"
-    Ego_vehicle = "Ego Vehicle"
+    Ego_vehicle = "Target Vehicle"
     Ego_vehicle_top = "Ego Vehicle Top"
     Traffic_vehicle = "Traffic Vehicle"
     Lane = "Lane"
@@ -50,6 +50,7 @@ COLOR = {
     BodyName.Traffic_vehicle: "red",
     BodyName.Traffic_cone: "orange",
     BodyName.Traffic_triangle: "orange",
+    BodyName.Ego_vehicle: "red"
 }
 
 
