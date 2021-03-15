@@ -1,10 +1,9 @@
 import numpy as np
+
 from pgdrive.envs.pgdrive_env import PGDriveEnv
 from pgdrive.pg_config import PGConfig
 from pgdrive.scene_creator.vehicle.base_vehicle import BaseVehicle
 from pgdrive.utils import get_np_random
-
-from pgdrive.world.chase_camera import ChaseCamera
 
 
 class ChangeFrictionEnv(PGDriveEnv):
@@ -26,6 +25,23 @@ class ChangeFrictionEnv(PGDriveEnv):
                 wheel_friction=self._random_state.uniform(self.config["friction_min"], self.config["friction_max"])
             )
 
+    def _change_friction(self):
+        if self.config["change_friction"] and self.vehicle is not None:
+            self.for_each_vehicle(lambda v: v.destroy(self.pg_world))
+            del self.vehicles
+
+            # We reset the friction here!
+            parameter = self.parameter_list[self.current_seed]
+            v_config = self.config["vehicle_config"]
+            v_config["wheel_friction"] = parameter["wheel_friction"]
+
+            self.vehicles = {
+                agent_id: BaseVehicle(self.pg_world, v_config)
+                for agent_id, v_config in self.config["target_vehicle_configs"].items()
+            }
+
+            self.init_track_vehicle()
+
     def reset(self, episode_data: dict = None):
         """
         Reset the env, scene can be restored and replayed by giving episode_data
@@ -35,8 +51,8 @@ class ChangeFrictionEnv(PGDriveEnv):
         """
         self.lazy_init()  # it only works the first time when reset() is called to avoid the error when render
 
-        self.dones = {a: False for a in self.multi_agent_action_space.keys()}
-        self.takeover = False
+        self.dones = {agent_id: False for agent_id in self.vehicles.keys()}
+        self.episode_steps = 0
 
         # clear world and traffic manager
         self.pg_world.clear_world()
@@ -44,28 +60,10 @@ class ChangeFrictionEnv(PGDriveEnv):
         # select_map
         self.update_map(episode_data)
 
-        # ===== Key difference! =====
-        if self.config["change_friction"] and self.vehicle is not None:
-            for v in self.vehicles.values():
-                v.destroy(self.pg_world.physics_world)
-            del self.vehicles
-            # We reset the friction here!
-            parameter = self.parameter_list[self.current_seed]
-            v_config = self.config["vehicle_config"]
-            v_config["wheel_friction"] = parameter["wheel_friction"]
-            self.vehicles = {a: BaseVehicle(self.pg_world, v_config) for a in self.multi_agent_action_space.keys()}
-            # for manual_control and main camera type
-            if (self.config["use_render"] or self.config["use_image"]) and self.config["use_chase_camera"]:
-                self.main_camera = ChaseCamera(
-                    self.pg_world.cam, self.vehicle, self.config["camera_height"], 7, self.pg_world
-                )
-            for v in self.vehicles.values():
-                self.add_modules_for_vehicle(v)
+        self._change_friction()
 
         # reset main vehicle
-        # self.vehicle.reset(self.current_map, self.vehicle.born_place, 0.0)
-        for v in self.vehicles.values():
-            v.reset(self.current_map, v.born_place, 0.0)
+        self.for_each_vehicle(lambda v: v.reset(self.current_map))
 
         # generate new traffic according to the map
         self.scene_manager.reset(
@@ -76,8 +74,6 @@ class ChangeFrictionEnv(PGDriveEnv):
             episode_data=episode_data
         )
 
-        self.front_vehicles = set()
-        self.back_vehicles = set()
         return self._get_reset_return()
 
 
