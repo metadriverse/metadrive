@@ -14,6 +14,7 @@ class VehiclePanel(ImageBuffer):
     CAM_MASK = CamMask.PARA_VIS
     GAP = 4.1
     TASK_NAME = "update panel"
+    default_region = [2 / 3, 1, ImageBuffer.display_bottom, ImageBuffer.display_top]
 
     def __init__(self, pg_world: PGWorld):
         if pg_world.win is None:
@@ -71,7 +72,7 @@ class VehiclePanel(ImageBuffer):
             pg_world=pg_world,
             parent_node=self.aspect2d_np
         )
-        self.add_to_display(pg_world, [2 / 3, 1, self.display_bottom, self.display_top])
+        self.add_to_display(pg_world, self.default_region)
 
     def renew_2d_car_para_visualization(self, vehicle):
         steering, throttle_brake, speed = vehicle.steering, vehicle.throttle_brake, vehicle.speed

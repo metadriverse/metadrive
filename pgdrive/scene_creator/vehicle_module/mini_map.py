@@ -7,6 +7,7 @@ from pgdrive.world.image_buffer import ImageBuffer
 
 class MiniMap(ImageBuffer):
     CAM_MASK = CamMask.MiniMap
+    default_region = [0., 1 / 3, ImageBuffer.display_bottom, ImageBuffer.display_top]
 
     def __init__(self, para: Tuple, chassis_np: NodePath, pg_world):
         self.BUFFER_W = para[0]
@@ -22,4 +23,4 @@ class MiniMap(ImageBuffer):
         )
         self.cam.lookAt(Vec3(0, 20, 0))
         self.lens.setAspectRatio(2.0)
-        self.add_to_display(pg_world, [0., 1 / 3, self.display_bottom, self.display_top])
+        self.add_to_display(pg_world, self.default_region)

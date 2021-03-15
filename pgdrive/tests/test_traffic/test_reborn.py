@@ -10,7 +10,6 @@ def test_traffic_reborn(vis=False):
             "environment_num": 1,
             "manual_control": vis,
             "use_render": vis,
-            "use_image": False,
             "use_topdown": True,
             "traffic_mode": "reborn"
         }

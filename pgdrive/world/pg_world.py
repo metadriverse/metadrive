@@ -72,9 +72,7 @@ class PGWorld(ShowBase.ShowBase):
         else:
             if self.pg_config["use_image"]:
                 self.mode = RENDER_MODE_OFFSCREEN
-                # TODO It will acc the off screen sensor data retrieving to 200+fps, but I am not sure the consistence
-                #  of data if running at async mode
-                # loadPrcFileData("", "threading-model Cull/Draw")
+                loadPrcFileData("", "threading-model Cull/Draw")
             else:
                 self.mode = RENDER_MODE_NONE
 

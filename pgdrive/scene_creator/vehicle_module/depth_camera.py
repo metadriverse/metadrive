@@ -13,8 +13,8 @@ class DepthCamera(ImageBuffer):
     BUFFER_H = 84  # dim 2
     CAM_MASK = CamMask.DepthCam
     GROUND = -1.2
-    display_top = 1.0
     TASK_NAME = "ground follow"
+    default_region = [1 / 3, 2 / 3, ImageBuffer.display_bottom, 1.0]
 
     def __init__(self, length: int, width: int, view_ground: bool, chassis_np: NodePath, pg_world: PGWorld):
         """
@@ -35,7 +35,7 @@ class DepthCamera(ImageBuffer):
             pg_world=pg_world,
             parent_node=chassis_np
         )
-        self.add_to_display(pg_world, [1 / 3, 2 / 3, self.display_bottom, self.display_top])
+        self.add_to_display(pg_world, self.default_region)
         self.cam.lookAt(0, 2.4, 1.3)
         self.lens.setFov(60)
         self.lens.setAspectRatio(2.0)
