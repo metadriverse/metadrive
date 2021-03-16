@@ -6,11 +6,13 @@ pg_cost_scheme = dict(
 )
 
 
-def pg_cost_function(vehicle) -> None:
-    vehicle.step_info["cost"] = 0
-    if vehicle.step_info["crash_vehicle"]:
-        vehicle.step_info["cost"] = vehicle.vehicle_config["crash_vehicle_cost"]
-    elif vehicle.step_info["crash_object"]:
-        vehicle.step_info["cost"] = vehicle.vehicle_config["crash_object_cost"]
-    elif vehicle.step_info["out_of_road"]:
-        vehicle.step_info["cost"] = vehicle.vehicle_config["out_of_road_cost"]
+def pg_cost_function(vehicle):
+    step_info = dict()
+    step_info["cost"] = 0
+    if vehicle.crash_vehicle:
+        step_info["cost"] = vehicle.vehicle_config["crash_vehicle_cost"]
+    elif vehicle.crash_object:
+        step_info["cost"] = vehicle.vehicle_config["crash_object_cost"]
+    elif vehicle.out_of_route:
+        step_info["cost"] = vehicle.vehicle_config["out_of_road_cost"]
+    return step_info['cost'], step_info
