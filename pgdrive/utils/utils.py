@@ -63,8 +63,15 @@ def random_string(prefix=None):
     return ret
 
 
+def concat_step_infos(step_info_list):
+    old_dict = dict()
+    for new_dict in step_info_list:
+        old_dict = merge_dicts(old_dict, new_dict, new_keys_allowed=True, raise_error=False, use_pgconfig=False)
+    return old_dict
+
+
 # The following two functions is copied from ray/tune/utils/util.py, raise_error and pgconfig support is added by us!
-def merge_dicts(old_dict, new_dict, raise_error=True):
+def merge_dicts(old_dict, new_dict, new_keys_allowed=False, raise_error=True, use_pgconfig=True):
     """
     Args:
         old_dict (dict): Dict 1.
@@ -79,8 +86,8 @@ def merge_dicts(old_dict, new_dict, raise_error=True):
     if isinstance(new_dict, PGConfig):
         new_dict = new_dict.get_dict()
     merged = copy.deepcopy(old_dict)
-    deep_update(merged, new_dict, new_keys_allowed=False, allow_new_subkey_list=[], raise_error=raise_error)
-    return PGConfig(merged)
+    deep_update(merged, new_dict, new_keys_allowed=new_keys_allowed, allow_new_subkey_list=[], raise_error=raise_error)
+    return PGConfig(merged) if use_pgconfig else merged
 
 
 def deep_update(

@@ -4,18 +4,20 @@ import math
 import time
 from collections import deque
 from typing import Optional
-from pgdrive.rl_utils.cost import pg_cost_scheme
-from pgdrive.rl_utils.reward import pg_reward_scheme
+
 import gym
 import numpy as np
 from panda3d.bullet import BulletVehicle, BulletBoxShape, BulletRigidBodyNode, ZUp, BulletGhostNode
 from panda3d.core import Vec3, TransformState, NodePath, LQuaternionf, BitMask32, PythonCallbackObject, TextNode
+
 from pgdrive.constants import RENDER_MODE_ONSCREEN, COLOR, COLLISION_INFO_COLOR, BodyName
 from pgdrive.pg_config import PGConfig
 from pgdrive.pg_config.cam_mask import CamMask
 from pgdrive.pg_config.collision_group import CollisionGroup
 from pgdrive.pg_config.parameter_space import Parameter, VehicleParameterSpace
 from pgdrive.pg_config.pg_space import PGSpace
+from pgdrive.rl_utils.cost import pg_cost_scheme
+from pgdrive.rl_utils.reward import pg_reward_scheme
 from pgdrive.scene_creator.blocks.first_block import FirstBlock
 from pgdrive.scene_creator.lane.abs_lane import AbstractLane
 from pgdrive.scene_creator.lane.circular_lane import CircularLane
@@ -153,7 +155,7 @@ class BaseVehicle(DynamicElement):
         self.out_of_route = None
         self.crash_side_walk = None
         self.on_lane = None
-        self.step_info = None
+        # self.step_info = None
         self._init_step_info()
 
         # others
@@ -225,7 +227,7 @@ class BaseVehicle(DynamicElement):
         self.crash_side_walk = False
         self.out_of_route = False  # re-route is required if is false
         self.on_lane = True  # on lane surface or not
-        self.step_info = {"reward": 0, "cost": 0}
+        # self.step_info = {"reward": 0, "cost": 0}
 
     @classmethod
     def get_vehicle_config(cls, new_config=None):
@@ -236,7 +238,6 @@ class BaseVehicle(DynamicElement):
         return default
 
     def _preprocess_action(self, action):
-        self.step_info["raw_action"] = (action[0], action[1])
         if self.vehicle_config["action_check"]:
             assert self.action_space.contains(action), "Input {} is not compatible with action space {}!".format(
                 action, self.action_space
@@ -244,7 +245,7 @@ class BaseVehicle(DynamicElement):
 
         # protect agent from nan error
         action = safe_clip(action, min_val=self.action_space.low[0], max_val=self.action_space.high[0])
-        return action
+        return action, {'raw_action': (action[0], action[1])}
 
     def prepare_step(self, action):
         """
@@ -252,7 +253,7 @@ class BaseVehicle(DynamicElement):
         """
         # init step info to store info before each step
         self._init_step_info()
-        action = self._preprocess_action(action)
+        action, step_info = self._preprocess_action(action)
 
         self._frame_objects_crashed = []
         self.last_position = self.position
@@ -264,6 +265,7 @@ class BaseVehicle(DynamicElement):
             self.set_act(action)
         if self.vehicle_panel is not None:
             self.vehicle_panel.renew_2d_car_para_visualization(self)
+        return step_info
 
     def update_state(self, pg_world=None):
         # callback
@@ -278,14 +280,15 @@ class BaseVehicle(DynamicElement):
         self._state_check()
         self.update_dist_to_left_right()
         self.out_of_route = True if self.dist_to_right < 0 or self.dist_to_left < 0 else False
-        self._update_overtake_stat()
-        self.step_info.update(
+        step_info = self._update_overtake_stat()
+        step_info.update(
             {
                 "velocity": float(self.speed),
                 "steering": float(self.steering),
                 "acceleration": float(self.throttle_brake)
             }
         )
+        return step_info
 
     def reset(self, map: Map, pos: np.ndarray = None, heading: float = 0.0):
         """
@@ -726,7 +729,7 @@ class BaseVehicle(DynamicElement):
                             self.back_vehicles.remove(surrounding_v)
                     else:
                         self.back_vehicles.add(surrounding_v)
-        self.step_info["overtake_vehicle_num"] = self.get_overtake_num()
+        return {"overtake_vehicle_num": self.get_overtake_num()}
 
     def get_overtake_num(self):
         return len(self.front_vehicles.intersection(self.back_vehicles))
@@ -755,3 +758,11 @@ class BaseVehicle(DynamicElement):
         self.rgb_cam = None
         self.routing_localization = None
         self.wheels = None
+
+    @property
+    def arrive_destination(self):
+        long, lat = self.routing_localization.final_lane.local_coordinates(self.position)
+        flag = self.routing_localization.final_lane.length - 5 < long < self.routing_localization.final_lane.length + 5 \
+               and self.routing_localization.map.lane_width / 2 >= lat >= (
+                       0.5 - self.routing_localization.map.lane_num) * self.routing_localization.map.lane_width
+        return flag

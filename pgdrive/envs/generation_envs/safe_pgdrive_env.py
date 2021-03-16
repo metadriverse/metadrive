@@ -1,5 +1,6 @@
 from pgdrive.envs.pgdrive_env import PGDriveEnv
 from pgdrive.pg_config import PGConfig
+from pgdrive.rl_utils.done import pg_done_function
 
 
 class SafePGDriveEnv(PGDriveEnv):
@@ -17,35 +18,13 @@ class SafePGDriveEnv(PGDriveEnv):
         config.extend_config_with_unknown_keys(extra_config)
         return config
 
-    def custom_info_callback(self):
-        super(SafePGDriveEnv, self).custom_info_callback()
-        if self.step_info["crash_vehicle"]:
-            self.done = False
-        elif self.step_info["crash_object"]:
-            self.done = False
-
-    # def reward(self, action):
-    #     """
-    #     **No** lateral factor reward func
-    #     """
-    #     current_lane = self.vehicle.lane
-    #     long_last, _ = current_lane.local_coordinates(self.vehicle.last_position)
-    #     long_now, lateral_now = current_lane.local_coordinates(self.vehicle.position)
-    #
-    #     reward = 0.0
-    #     if abs(lateral_now) <= self.current_map.lane_width / 2:
-    #         # Out of road will get no reward
-    #         reward += self.config["driving_reward"] * (long_now - long_last)
-    #         reward += self.config["speed_reward"] * (self.vehicle.speed / self.vehicle.max_speed)
-    #
-    #     # Penalty for waiting
-    #     if self.vehicle.speed < 1:
-    #         reward -= self.config["low_speed_penalty"]  # encourage car
-    #     reward -= self.config["general_penalty"]
-    #
-    #     self.step_info["raw_step_reward"] = reward
-    #
-    #     return reward
+    def done_function(self, vehicle):
+        done, done_info = pg_done_function(vehicle)
+        if done_info["crash_vehicle"]:
+            done = False
+        elif done_info["crash_object"]:
+            done = False
+        return done, done_info
 
 
 if __name__ == "__main__":

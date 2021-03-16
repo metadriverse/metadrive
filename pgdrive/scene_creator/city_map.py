@@ -97,7 +97,7 @@ class CityBIG(BIG):
         choices = set()
         count = 0
         socket = None
-        while count < 100_000:
+        while count < 500_000:
             next_block = self.np_random.choice(self.blocks)
             choices = set(next_block.get_socket_indices()).difference(self._used_sockets)
             if len(choices) >= 1:

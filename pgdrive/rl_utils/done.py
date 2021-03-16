@@ -1,15 +1,12 @@
 import logging
+
 from pgdrive.scene_creator.vehicle.base_vehicle import BaseVehicle
 
 
-def pg_done_function(vehicle: BaseVehicle) -> float:
+def pg_done_function(vehicle: BaseVehicle):
     done = False
     done_info = dict(crash_vehicle=False, crash_object=False, out_of_road=False, arrive_dest=False)
-    long, lat = vehicle.routing_localization.final_lane.local_coordinates(vehicle.position)
-
-    if vehicle.routing_localization.final_lane.length - 5 < long < vehicle.routing_localization.final_lane.length + 5 \
-            and vehicle.routing_localization.map.lane_width / 2 >= lat >= (
-            0.5 - vehicle.routing_localization.map.lane_num) * vehicle.routing_localization.map.lane_width:
+    if vehicle.arrive_destination:
         done = True
         logging.info("Episode ended! Reason: arrive_dest.")
         done_info["arrive_dest"] = True
@@ -28,5 +25,4 @@ def pg_done_function(vehicle: BaseVehicle) -> float:
     # for compatibility
     # crash almost equals to crashing with vehicles
     done_info["crash"] = done_info["crash_vehicle"] or done_info["crash_object"]
-    vehicle.step_info.update(done_info)
-    return done
+    return done, done_info
