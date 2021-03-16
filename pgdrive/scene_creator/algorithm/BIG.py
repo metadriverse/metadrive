@@ -87,11 +87,9 @@ class BIG:
         else:
             type_id = self._block_sequence[len(self.blocks)]
             block_type = PGBlock.get_block(type_id)
-        sockets = [i for i in range(self.blocks[-1].SOCKET_NUM)]
-        block = block_type(
-            len(self.blocks), self.blocks[-1].get_socket(self.np_random.choice(sockets)), self._global_network,
-            block_seed
-        )
+
+        socket = self.np_random.choice(self.blocks[-1].get_socket_indices())
+        block = block_type(len(self.blocks), self.blocks[-1].get_socket(socket), self._global_network, block_seed)
         return block
 
     def destruct(self, block):

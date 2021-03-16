@@ -3,6 +3,7 @@ import logging
 from typing import List, Tuple, Dict
 
 import numpy as np
+
 from pgdrive.constants import Decoration
 from pgdrive.scene_creator.lane.abs_lane import LineType, AbstractLane
 from pgdrive.scene_creator.lane.straight_lane import StraightLane
@@ -25,13 +26,7 @@ class RoadNetwork:
         self._graph_helper = None
         self.debug = debug
 
-    def __add__(self, other):
-        ret = RoadNetwork()
-        ret.graph = self.graph
-        ret += other
-        return ret
-
-    def __iadd__(self, other):
+    def add(self, other):
         set_1 = set(self.graph) - {Decoration.start, Decoration.end}
         set_2 = set(other.graph) - {Decoration.start, Decoration.end}
         if len(set_1.intersection(set_2)) == 0:
@@ -384,6 +379,16 @@ class RoadNetwork:
                 for _to, lanes in _to_dict.items():
                     if lane_num is None or len(lanes) == lane_num:
                         ret.append(Road(_from, _to))
+        return ret
+
+    def __iadd__(self, other):
+        raise ValueError("Deprecated function, use road_network.add(other) instead!")
+
+    def __add__(self, other):
+        raise ValueError("Deprecated function, use road_network.add(other) instead!")
+        ret = RoadNetwork()
+        ret.graph = self.graph
+        ret += other
         return ret
 
 
