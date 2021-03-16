@@ -1,10 +1,12 @@
 import logging
+from collections import OrderedDict
 from typing import Dict, Union, List
 
 import numpy
 from panda3d.bullet import BulletBoxShape, BulletRigidBodyNode
 from panda3d.core import Vec3, LQuaternionf, BitMask32, Vec4, CardMaker, TextureStage, RigidBodyCombiner, \
     TransparencyAttrib, SamplerState, NodePath
+
 from pgdrive.constants import Decoration, BodyName
 from pgdrive.pg_config.cam_mask import CamMask
 from pgdrive.scene_creator.blocks.constants import BlockDefault
@@ -30,6 +32,13 @@ class BlockSocket:
         self.positive_road = positive_road
         self.negative_road = negative_road if negative_road else None
         self.index = None
+
+    def set_index(self, block_name: str, index: int):
+        self.index = self.get_real_index(block_name, index)
+
+    @classmethod
+    def get_real_index(cls, block_name: str, index: int):
+        return "{}-socket{}".format(block_name, index)
 
 
 class Block(Element, BlockDefault):
@@ -69,7 +78,7 @@ class Block(Element, BlockDefault):
         self._reborn_roads = []
 
         # own sockets, one block derives from a socket, but will have more sockets to connect other blocks
-        self._sockets = []
+        self._sockets = OrderedDict()
 
         # used to connect previous blocks, save its info here
         self.pre_block_socket = pre_block_socket
@@ -126,9 +135,8 @@ class Block(Element, BlockDefault):
         self.number_of_sample_trial += 1
         self._clear_topology()
         no_cross = self._try_plug_into_previous_block()
-        for i, s in enumerate(self._sockets):
-            s.index = i
-        self._global_network += self.block_network
+        self._global_network.add(self.block_network)
+
         return no_cross
 
     def construct_from_config(self, config: Dict, root_render_np: NodePath, pg_physics_world: PGPhysicsWorld):
@@ -140,13 +148,16 @@ class Block(Element, BlockDefault):
         self.attach_to_pg_world(root_render_np, pg_physics_world)
         return success
 
-    def get_socket(self, index: int) -> BlockSocket:
-        """
-        Get i th socket
-        """
-        if index < 0 or index >= len(self._sockets):
-            raise ValueError("Socket of {}: index out of range".format(self.class_name))
-        return self._sockets[index]
+    def get_socket(self, index: Union[str, int]) -> BlockSocket:
+        if isinstance(index, int):
+            if index < 0 or index >= len(self._sockets):
+                raise ValueError("Socket of {}: index out of range".format(self.class_name))
+            socket_index = list(self._sockets)[index]
+        else:
+            assert index.startswith(self._block_name)
+            socket_index = index
+        assert socket_index in self._sockets, (socket_index, self._sockets.keys())
+        return self._sockets[socket_index]
 
     def add_reborn_roads(self, reborn_roads: Union[List[Road], Road]):
         """
@@ -206,7 +217,15 @@ class Block(Element, BlockDefault):
 
     def _add_one_socket(self, socket: BlockSocket):
         assert isinstance(socket, BlockSocket), "Socket list only accept BlockSocket Type"
-        self._sockets.append(socket)
+        if socket.index is not None and not socket.index.startswith(self._block_name):
+            logging.warning(
+                "The adding socket has index {}, which is not started with this block name {}. This is dangerous! "
+                "Current block has sockets: {}.".format(socket.index, self._block_name, self.get_socket_indices())
+            )
+        if socket.index is None:
+            # if this socket is self block socket
+            socket.set_index(self._block_name, len(self._sockets))
+        self._sockets[socket.index] = socket
 
     def _add_one_reborn_road(self, reborn_road: Road):
         assert isinstance(reborn_road, Road), "Spawn roads list only accept Road Type"
@@ -524,3 +543,9 @@ class Block(Element, BlockDefault):
             "Socket can only be created from positive road"
         positive_road = Road(road.start_node, road.end_node)
         return BlockSocket(positive_road, -positive_road)
+
+    def get_socket_indices(self):
+        return list(self._sockets.keys())
+
+    def get_socket_list(self):
+        return list(self._sockets.values())

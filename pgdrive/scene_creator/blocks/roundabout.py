@@ -32,7 +32,7 @@ class Roundabout(Block):
             if i < 3:
                 no_cross = CreateAdverseRoad(exit_road, self.block_network, self._global_network) and no_cross
                 attach_road = -exit_road
-        self.add_reborn_roads([socket.negative_road for socket in self._sockets])
+        self.add_reborn_roads([socket.negative_road for socket in self.get_socket_list()])
         return no_cross
 
     def _create_circular_part(self, road: Road, part_idx: int, radius_exit: float, radius_inner: float,
