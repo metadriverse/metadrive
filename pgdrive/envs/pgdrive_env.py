@@ -44,12 +44,9 @@ class PGDriveEnv(gym.Env):
             # ==== agents config =====
             num_agents=1,
             target_vehicle_configs={},  # agent_id: vehicle_config
-            # this take effects only in single-agent env for convenience
-            vehicle_config=BaseVehicle.get_vehicle_config(),
 
             # ===== Observation =====
             use_topdown=False,  # Use top-down view
-            rgb_clip=True,
 
             # ===== Traffic =====
             traffic_density=0.1,
@@ -77,23 +74,29 @@ class PGDriveEnv(gym.Env):
             pg_world_config=dict(),
             record_episode=False,
 
-            # Reward scheme is in vehicle config now!
-            # # ===== Reward Scheme =====
-            # success_reward=20,
-            # out_of_road_penalty=5,
-            # crash_vehicle_penalty=10,
-            # crash_object_penalty=2,
-            # acceleration_penalty=0.0,
-            # steering_penalty=0.1,
-            # low_speed_penalty=0.0,
-            # driving_reward=1.0,
-            # general_penalty=0.0,
-            # speed_reward=0.1,
-            #
-            # # ===== Cost Scheme =====
-            # crash_vehicle_cost=1,
-            # crash_object_cost=1,
-            # out_of_road_cost=1.,
+            # ===== Single-agent Env Quick Config =====
+            # 1. These config only takes effect in single-agent env
+            # 2. vehicle_config=custom_config_dict <=======> target_vehicle_configs[DEFAULT_AGENT]=custom_config_dict
+            # 3. reward/cost scheme will also override and write into custom_vehicle_config
+            vehicle_config=BaseVehicle.get_vehicle_config(),
+            rgb_clip=True,
+
+            # ----- Reward Scheme -----
+            success_reward=20,
+            out_of_road_penalty=5,
+            crash_vehicle_penalty=10,
+            crash_object_penalty=2,
+            acceleration_penalty=0.0,
+            steering_penalty=0.1,
+            low_speed_penalty=0.0,
+            driving_reward=1.0,
+            general_penalty=0.0,
+            speed_reward=0.1,
+
+            # ----- Cost Scheme -----
+            crash_vehicle_cost=1,
+            crash_object_cost=1,
+            out_of_road_cost=1.,
         )
         config = PGConfig(env_config)
         config.register_type("map", str, int)
@@ -106,6 +109,7 @@ class PGDriveEnv(gym.Env):
         self.num_agents = self.config["num_agents"]
         if self.num_agents == 1:
             self.config["target_vehicle_configs"][DEFAULT_AGENT] = self.config["vehicle_config"]
+            self._sync_reward_config_in_single_agent_env()
         assert isinstance(self.num_agents, int) and self.num_agents > 0
         assert len(self.config["target_vehicle_configs"]) == self.num_agents, "assign born place for each vehicle"
         self.config.extend_config_with_unknown_keys({"use_image": True if self.use_image_sensor else False})
@@ -633,6 +637,13 @@ class PGDriveEnv(gym.Env):
         }
         vehicle.step_info.update(saver_info)
         return steering, throttle
+
+    def _sync_reward_config_in_single_agent_env(self):
+        set_1 = set(self.config.keys())
+        set_2 = set(BaseVehicle.get_vehicle_config().keys())
+        interesct = set_1.intersection(set_2)
+        for k in list(interesct):
+            self.config["target_vehicle_configs"][DEFAULT_AGENT][k] = self.config[k]
 
 
 def _auto_termination(vehicle, should_done):
