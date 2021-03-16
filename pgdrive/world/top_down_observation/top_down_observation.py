@@ -66,7 +66,7 @@ class TopDownObservation(ObservationType):
         self.canvas_runtime = WorldSurface(self.MAP_RESOLUTION, 0, pygame.Surface(self.MAP_RESOLUTION))
         self.canvas_background = WorldSurface(self.MAP_RESOLUTION, 0, pygame.Surface(self.MAP_RESOLUTION))
 
-    def reset(self, env):
+    def reset(self, env, vehicle=None):
         self.scene_manager = env.scene_manager
         self.road_network = env.current_map.road_network
         self._should_draw_map = True

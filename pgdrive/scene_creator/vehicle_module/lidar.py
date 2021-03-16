@@ -1,4 +1,5 @@
 import logging
+from pgdrive.pg_config.collision_group import CollisionGroup
 from typing import Set
 
 import numpy as np
@@ -50,7 +51,7 @@ class Lidar:
         self.detection_results = []
 
         # lidar calculation use pg coordinates
-        mask = BitMask32.bit(PGTrafficVehicle.COLLISION_MASK)
+        mask = BitMask32.bit(PGTrafficVehicle.COLLISION_MASK) | BitMask32.bit(CollisionGroup.EgoVehicle)
         laser_heading = np.arange(0, self.num_lasers) * self.radian_unit + heading_theta
         point_x = self.perceive_distance * np.cos(laser_heading) + vehicle_position[0]
         point_y = self.perceive_distance * np.sin(laser_heading) + vehicle_position[1]

@@ -84,7 +84,7 @@ class ObservationType(ABC):
         plt.imshow(img, cmap=plt.cm.gray)
         plt.show()
 
-    def reset(self, env):
+    def reset(self, env, vehicle=None):
         pass
 
 
@@ -160,10 +160,11 @@ class ImageObservation(ObservationType):
     def get_image(self):
         return self.state.copy()[:, :, -1]
 
-    def reset(self, env):
+    def reset(self, env, vehicle=None):
         """
         Clear stack
         :param env: PGDrive
+        :param vehicle: BaseVehicle
         :return: None
         """
         self.state = np.zeros(self.observation_space.shape)

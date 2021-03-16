@@ -36,7 +36,7 @@ class BodyName:
     Side_walk = "Side Walk"
     Ground = "Ground"
     Ego_vehicle = "Target Vehicle"
-    Ego_vehicle_top = "Ego Vehicle Top"
+    Ego_vehicle_beneath = "Target Vehicle Beneath"
     Traffic_vehicle = "Traffic Vehicle"
     Lane = "Lane"
     Traffic_cone = "Traffic Cone"
