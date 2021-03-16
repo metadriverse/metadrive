@@ -1,12 +1,12 @@
 import copy
-import gym
-from pgdrive.scene_creator.blocks.first_block import FirstBlock
 import logging
 import math
 import time
 from collections import deque
-from typing import Optional, Union
-from pgdrive.scene_creator.vehicle_module.rgb_camera import RGBCamera
+from typing import Optional
+from pgdrive.rl_utils.cost import pg_cost_scheme
+from pgdrive.rl_utils.reward import pg_reward_scheme
+import gym
 import numpy as np
 from panda3d.bullet import BulletVehicle, BulletBoxShape, BulletRigidBodyNode, ZUp, BulletGhostNode
 from panda3d.core import Vec3, TransformState, NodePath, LQuaternionf, BitMask32, PythonCallbackObject, TextNode
@@ -16,15 +16,18 @@ from pgdrive.pg_config.cam_mask import CamMask
 from pgdrive.pg_config.collision_group import CollisionGroup
 from pgdrive.pg_config.parameter_space import Parameter, VehicleParameterSpace
 from pgdrive.pg_config.pg_space import PGSpace
-from pgdrive.scene_creator.vehicle_module import Lidar
-from pgdrive.scene_creator.vehicle_module.routing_localization import RoutingLocalizationModule
-from pgdrive.scene_creator.vehicle_module.vehicle_panel import VehiclePanel
+from pgdrive.scene_creator.blocks.first_block import FirstBlock
 from pgdrive.scene_creator.lane.abs_lane import AbstractLane
 from pgdrive.scene_creator.lane.circular_lane import CircularLane
 from pgdrive.scene_creator.lane.straight_lane import StraightLane
 from pgdrive.scene_creator.map import Map
-from pgdrive.utils.asset_loader import AssetLoader
+from pgdrive.scene_creator.vehicle_module import Lidar, MiniMap
+from pgdrive.scene_creator.vehicle_module.depth_camera import DepthCamera
+from pgdrive.scene_creator.vehicle_module.rgb_camera import RGBCamera
+from pgdrive.scene_creator.vehicle_module.routing_localization import RoutingLocalizationModule
+from pgdrive.scene_creator.vehicle_module.vehicle_panel import VehiclePanel
 from pgdrive.utils import safe_clip
+from pgdrive.utils.asset_loader import AssetLoader
 from pgdrive.utils.coordinates_shift import panda_position, pgdrive_position, panda_heading, pgdrive_heading
 from pgdrive.utils.element import DynamicElement
 from pgdrive.utils.math_utils import get_vertical_vector, norm, clip
@@ -32,8 +35,6 @@ from pgdrive.utils.scene_utils import ray_localization
 from pgdrive.world.image_buffer import ImageBuffer
 from pgdrive.world.pg_physics_world import PGPhysicsWorld
 from pgdrive.world.pg_world import PGWorld
-from pgdrive.scene_creator.vehicle_module.depth_camera import DepthCamera
-from pgdrive.scene_creator.vehicle_module import MiniMap
 
 
 class BaseVehicle(DynamicElement):
@@ -54,52 +55,36 @@ class BaseVehicle(DynamicElement):
 
     @classmethod
     def _default_vehicle_config(cls) -> PGConfig:
-        return PGConfig(
-            dict(
-                # ===== vehicle module config =====
-                lidar=dict(num_lasers=240, distance=50, num_others=4),  # laser num, distance, other vehicle info num
-                show_lidar=False,
-                mini_map=(84, 84, 250),  # buffer length, width
-                rgb_cam=(84, 84),  # buffer length, width
-                depth_cam=(84, 84, True),  # buffer length, width, view_ground
-                show_navi_mark=True,
-                increment_steering=False,
-                wheel_friction=0.6,
+        vehicle_config = dict(
+            # ===== vehicle module config =====
+            lidar=dict(num_lasers=240, distance=50, num_others=4),  # laser num, distance, other vehicle info num
+            show_lidar=False,
+            mini_map=(84, 84, 250),  # buffer length, width
+            rgb_cam=(84, 84),  # buffer length, width
+            depth_cam=(84, 84, True),  # buffer length, width, view_ground
+            show_navi_mark=True,
+            increment_steering=False,
+            wheel_friction=0.6,
 
-                # ===== use image =====
-                image_source="rgb_cam",  # take effect when only when use_image == True
-                use_image=False,
-                rgb_clip=True,
+            # ===== use image =====
+            image_source="rgb_cam",  # take effect when only when use_image == True
+            use_image=False,
+            rgb_clip=True,
 
-                # ===== vehicle born =====
-                born_lane_index=(FirstBlock.NODE_1, FirstBlock.NODE_2, 0),
-                born_longitude=5.0,
-                born_lateral=0.0,
+            # ===== vehicle born =====
+            born_lane_index=(FirstBlock.NODE_1, FirstBlock.NODE_2, 0),
+            born_longitude=5.0,
+            born_lateral=0.0,
 
-                # ===== Reward Scheme =====
-                success_reward=20,
-                out_of_road_penalty=5,
-                crash_vehicle_penalty=10,
-                crash_object_penalty=2,
-                acceleration_penalty=0.0,
-                steering_penalty=0.1,
-                low_speed_penalty=0.0,
-                driving_reward=1.0,
-                general_penalty=0.0,
-                speed_reward=0.1,
-
-                # ===== Cost Scheme =====
-                crash_vehicle_cost=1,
-                crash_object_cost=1,
-                out_of_road_cost=1.,
-
-                # ==== others ====
-                overtake_stat=False,  # we usually set to True when evaluation
-                action_check=False,
-                use_saver=False,
-                save_level=0.5,
-            )
+            # ==== others ====
+            overtake_stat=False,  # we usually set to True when evaluation
+            action_check=False,
+            use_saver=False,
+            save_level=0.5,
         )
+        vehicle_config.update(pg_reward_scheme)
+        vehicle_config.update(pg_cost_scheme)
+        return PGConfig(vehicle_config)
 
     LENGTH = None
     WIDTH = None
@@ -499,8 +484,8 @@ class BaseVehicle(DynamicElement):
 
     def _add_chassis(self, pg_physics_world: PGPhysicsWorld):
         para = self.get_config()
-        chassis = BulletRigidBodyNode(BodyName.Ego_vehicle_top)
-        chassis.setIntoCollideMask(BitMask32.bit(CollisionGroup.EgoVehicleTop))
+        chassis = BulletRigidBodyNode(BodyName.Ego_vehicle)
+        chassis.setIntoCollideMask(BitMask32.bit(CollisionGroup.EgoVehicle))
         chassis_shape = BulletBoxShape(
             Vec3(
                 para[Parameter.vehicle_width] / 2, para[Parameter.vehicle_length] / 2,
@@ -520,8 +505,8 @@ class BaseVehicle(DynamicElement):
         self.pg_world.physics_world.dynamic_world.setContactAddedCallback(PythonCallbackObject(self._collision_check))
         self.dynamic_nodes.append(chassis)
 
-        chassis_beneath = BulletGhostNode(BodyName.Ego_vehicle)
-        chassis_beneath.setIntoCollideMask(BitMask32.bit(self.COLLISION_MASK))
+        chassis_beneath = BulletGhostNode(BodyName.Ego_vehicle_beneath)
+        chassis_beneath.setIntoCollideMask(BitMask32.bit(CollisionGroup.EgoVehicleBeneath))
         chassis_beneath.addShape(chassis_shape)
         self.chassis_beneath_np = self.chassis_np.attachNewNode(chassis_beneath)
         self.dynamic_nodes.append(chassis_beneath)
@@ -613,7 +598,7 @@ class BaseVehicle(DynamicElement):
             node0 = contact.getNode0()
             node1 = contact.getNode1()
             name = [node0.getName(), node1.getName()]
-            name.remove(BodyName.Ego_vehicle)
+            name.remove(BodyName.Ego_vehicle_beneath)
             if name[0] == "Ground" or name[0] == BodyName.Lane:
                 continue
             elif name[0] == BodyName.Side_walk:
@@ -629,7 +614,7 @@ class BaseVehicle(DynamicElement):
         node0 = contact.getNode0().getName()
         node1 = contact.getNode1().getName()
         name = [node0, node1]
-        name.remove(BodyName.Ego_vehicle_top)
+        name.remove(BodyName.Ego_vehicle)
         if name[0] in [BodyName.Traffic_vehicle, BodyName.Ego_vehicle]:
             self.crash_vehicle = True
         elif name[0] in [BodyName.Traffic_cone, BodyName.Traffic_triangle]:
@@ -747,29 +732,18 @@ class BaseVehicle(DynamicElement):
         return len(self.front_vehicles.intersection(self.back_vehicles))
 
     @classmethod
-    def _initialize_observation(cls, vehicle_config: Union[dict, PGConfig]):
-        from pgdrive.rl_utils.observation_type import LidarStateObservation, ImageStateObservation
-        if vehicle_config["use_image"]:
-            o = ImageStateObservation(vehicle_config)
-        else:
-            o = LidarStateObservation(vehicle_config)
-        return o
-
-    @classmethod
-    def get_observation_before_init(cls, vehicle_config: dict = None):
-        vehicle_config = cls.get_vehicle_config(vehicle_config) \
-            if vehicle_config is not None else cls._default_vehicle_config()
-        return cls._initialize_observation(vehicle_config)
-
-    @classmethod
     def get_action_space_before_init(cls):
         return gym.spaces.Box(-1.0, 1.0, shape=(2, ), dtype=np.float32)
 
     def remove_display_region(self):
+        if self.vehicle_panel is not None:
+            self.vehicle_panel.remove_display_region(self.pg_world)
         for sensor in self.image_sensors.values():
             sensor.remove_display_region(self.pg_world)
 
     def add_to_display(self):
+        if self.vehicle_panel is not None:
+            self.vehicle_panel.add_to_display(self.pg_world, self.vehicle_panel.default_region)
         for sensor in self.image_sensors.values():
             sensor.add_to_display(self.pg_world, sensor.default_region)
 

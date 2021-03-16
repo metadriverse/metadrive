@@ -4,7 +4,7 @@ from panda3d.bullet import BulletWorld
 class CollisionGroup:
     Terrain = 2
     EgoVehicle = 1
-    EgoVehicleTop = 6
+    EgoVehicleBeneath = 6
     LaneLine = 3
     TrafficVehicle = 4
     LaneSurface = 5  # useless now, since it is in another physics world
@@ -17,13 +17,15 @@ class CollisionGroup:
             (cls.Terrain, cls.LaneLine, False),
             (cls.Terrain, cls.LaneSurface, False),
             (cls.Terrain, cls.EgoVehicle, True),
+            (cls.Terrain, cls.EgoVehicleBeneath, False),
             # change it after we design a new traffic system !
             (cls.Terrain, cls.TrafficVehicle, False),
 
             # block collision
             (cls.LaneLine, cls.LaneLine, False),
             (cls.LaneLine, cls.LaneSurface, False),
-            (cls.LaneLine, cls.EgoVehicle, True),
+            (cls.LaneLine, cls.EgoVehicle, False),
+            (cls.LaneLine, cls.EgoVehicleBeneath, True),
             # change it after we design a new traffic system !
             (cls.LaneLine, cls.TrafficVehicle, False),
 
@@ -31,14 +33,19 @@ class CollisionGroup:
             (cls.TrafficVehicle, cls.TrafficVehicle, False),
             (cls.TrafficVehicle, cls.LaneSurface, False),
             (cls.TrafficVehicle, cls.EgoVehicle, True),
+            (cls.TrafficVehicle, cls.EgoVehicleBeneath, False),
 
             # ego vehicle collision
             (cls.EgoVehicle, cls.EgoVehicle, True),
-            (cls.EgoVehicle, cls.EgoVehicleTop, False),
+            (cls.EgoVehicle, cls.EgoVehicleBeneath, False),
             (cls.EgoVehicle, cls.LaneSurface, False),
 
             # lane surface
             (cls.LaneSurface, cls.LaneSurface, False),
+            (cls.LaneSurface, cls.EgoVehicleBeneath, False),
+
+            # vehicle beneath
+            (cls.EgoVehicleBeneath, cls.EgoVehicleBeneath, False),
         ]
 
     @classmethod

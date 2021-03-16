@@ -4,20 +4,22 @@ import logging
 import os.path as osp
 import sys
 import time
-from typing import Union, Optional, Iterable, Dict, AnyStr
+from typing import Union, Optional, Dict, AnyStr
 
 import gym
 import numpy as np
 from panda3d.core import PNMImage
-
 from pgdrive.constants import RENDER_MODE_NONE, DEFAULT_AGENT
 from pgdrive.pg_config import PGConfig
 from pgdrive.rl_utils import pg_cost_function, pg_done_function, pg_reward_function
+from pgdrive.rl_utils.cost import pg_cost_scheme
+from pgdrive.rl_utils.observation_type import LidarStateObservation, ImageStateObservation
+from pgdrive.rl_utils.reward import pg_reward_scheme
 from pgdrive.scene_creator.map import Map, MapGenerateMethod, parse_map_config
 from pgdrive.scene_creator.vehicle.base_vehicle import BaseVehicle
 from pgdrive.scene_manager.scene_manager import SceneManager
 from pgdrive.scene_manager.traffic_manager import TrafficMode
-from pgdrive.utils import recursive_equal, get_np_random
+from pgdrive.utils import recursive_equal, get_np_random, merge_dicts
 from pgdrive.world.chase_camera import ChaseCamera
 from pgdrive.world.manual_controller import KeyboardController, JoystickController
 from pgdrive.world.pg_world import PGWorld
@@ -79,25 +81,15 @@ class PGDriveEnv(gym.Env):
             # 2. vehicle_config=custom_config_dict <=======> target_vehicle_configs[DEFAULT_AGENT]=custom_config_dict
             # 3. reward/cost scheme will also override and write into custom_vehicle_config
             vehicle_config=BaseVehicle.get_vehicle_config(),
-            rgb_clip=True,
-
-            # ----- Reward Scheme -----
-            success_reward=20,
-            out_of_road_penalty=5,
-            crash_vehicle_penalty=10,
-            crash_object_penalty=2,
-            acceleration_penalty=0.0,
-            steering_penalty=0.1,
-            low_speed_penalty=0.0,
-            driving_reward=1.0,
-            general_penalty=0.0,
-            speed_reward=0.1,
-
-            # ----- Cost Scheme -----
-            crash_vehicle_cost=1,
-            crash_object_cost=1,
-            out_of_road_cost=1.,
+            rgb_clip=True
         )
+
+        # ===== Single Agent Reward Scheme =====
+        env_config.update(copy.deepcopy(pg_reward_scheme))
+
+        # ===== Single Agent Cost Scheme =====
+        env_config.update(copy.deepcopy(pg_cost_scheme))
+
         config = PGConfig(env_config)
         config.register_type("map", str, int)
         return config
@@ -108,15 +100,15 @@ class PGDriveEnv(gym.Env):
             self.config.update(config)
         self.num_agents = self.config["num_agents"]
         if self.num_agents == 1:
-            self.config["target_vehicle_configs"][DEFAULT_AGENT] = self.config["vehicle_config"]
-            self._sync_reward_config_in_single_agent_env()
+            self._sync_config_to_vehicle_config()
         assert isinstance(self.num_agents, int) and self.num_agents > 0
         assert len(self.config["target_vehicle_configs"]) == self.num_agents, "assign born place for each vehicle"
         self.config.extend_config_with_unknown_keys({"use_image": True if self.use_image_sensor else False})
 
         # obs. action space
+
         self.observation = {
-            id: BaseVehicle.get_observation_before_init(v_config)
+            id: self.get_observation(BaseVehicle.get_vehicle_config(v_config))
             for id, v_config in self.config["target_vehicle_configs"].items()
         }
         self.observation_space = gym.spaces.Dict(
@@ -354,7 +346,7 @@ class PGDriveEnv(gym.Env):
         ret = {}
         self.for_each_vehicle(lambda v: v.update_state())
         for v_id, v in self.vehicles.items():
-            self.observation[v_id].reset(v)
+            self.observation[v_id].reset(self, v)
             ret[v_id] = self.observation[v_id].observe(v)
         return ret[DEFAULT_AGENT] if self.num_agents == 1 else ret
 
@@ -638,12 +630,18 @@ class PGDriveEnv(gym.Env):
         vehicle.step_info.update(saver_info)
         return steering, throttle
 
-    def _sync_reward_config_in_single_agent_env(self):
-        set_1 = set(self.config.keys())
-        set_2 = set(BaseVehicle.get_vehicle_config().keys())
-        interesct = set_1.intersection(set_2)
-        for k in list(interesct):
-            self.config["target_vehicle_configs"][DEFAULT_AGENT][k] = self.config[k]
+    def get_observation(self, vehicle_config: Union[dict, PGConfig]):
+        if vehicle_config["use_image"]:
+            o = ImageStateObservation(vehicle_config)
+        else:
+            o = LidarStateObservation(vehicle_config)
+        return o
+
+    def _sync_config_to_vehicle_config(self):
+        assert self.num_agents == 1, "Only support single-agent sync now!"
+        vehicle_config = BaseVehicle.get_vehicle_config(self.config["vehicle_config"])
+        vehicle_config = merge_dicts(old_dict=vehicle_config, new_dict=self.config, raise_error=False)
+        self.config["target_vehicle_configs"][DEFAULT_AGENT] = vehicle_config
 
 
 def _auto_termination(vehicle, should_done):

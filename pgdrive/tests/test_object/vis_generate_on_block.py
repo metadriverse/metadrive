@@ -15,6 +15,9 @@ class TestEnv(PGDriveEnv):
                 "use_render": True,
                 "accident_prob": 1.0,
                 # "controller":"joystick",
+                "vehicle_config": {
+                    "show_lidar": True
+                },
                 "manual_control": True,
                 "map": 7
             }

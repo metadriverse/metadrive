@@ -15,10 +15,8 @@ def test_lidar(render=False):
             "manual_control": render,
             "environment_num": 1,
             "traffic_density": 0.3,
-            "target_vehicle_configs": {
-                "default_agent": {
-                    "show_lidar": True
-                }
+            "vehicle_config": {
+                "show_lidar": True
             }
         }
     )

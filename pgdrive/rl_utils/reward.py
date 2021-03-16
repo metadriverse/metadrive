@@ -1,8 +1,21 @@
 from pgdrive.utils import clip
-from pgdrive.scene_creator.vehicle.base_vehicle import BaseVehicle
+
+pg_reward_scheme = dict(
+    # ===== Reward Scheme =====
+    success_reward=20,
+    out_of_road_penalty=5,
+    crash_vehicle_penalty=10,
+    crash_object_penalty=2,
+    acceleration_penalty=0.0,
+    steering_penalty=0.1,
+    low_speed_penalty=0.0,
+    driving_reward=1.0,
+    general_penalty=0.0,
+    speed_reward=0.1
+)
 
 
-def pg_reward_function(vehicle: BaseVehicle) -> float:
+def pg_reward_function(vehicle) -> float:
     """
     Override this func to get a new reward function
     :param vehicle: BaseVehicle
