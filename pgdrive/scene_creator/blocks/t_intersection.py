@@ -4,6 +4,8 @@ from pgdrive.pg_config.pg_space import PGSpace
 from pgdrive.scene_creator.blocks.intersection import InterSection
 from pgdrive.scene_creator.lane.abs_lane import LineType, LineColor
 from pgdrive.scene_creator.road.road import Road
+from pgdrive.constants import Decoration
+from pgdrive.scene_creator.blocks.block import BlockSocket
 
 
 class TInterSection(InterSection):
@@ -22,11 +24,13 @@ class TInterSection(InterSection):
 
     def _change_vis(self, t_type):
         # not good here,
-        next_part_socket = self._sockets[(t_type + 1) % 4]
+        next_part_socket = self.get_socket_list()[(t_type + 1) % 4]
+        # next_part_socket = self._sockets[(t_type + 1) % 4]  # FIXME pzh: Help! @LQY What is in this part?
         next_positive = next_part_socket.positive_road
         next_negative = next_part_socket.negative_road
 
-        last_part_socket = self._sockets[(t_type + 3) % 4]
+        last_part_socket = self.get_socket_list()[(t_type + 3) % 4]
+        # last_part_socket = self._sockets[(t_type + 3) % 4]  # FIXME pzh: Help! @LQY
         last_positive = last_part_socket.positive_road
         last_negative = last_part_socket.negative_road
         if t_type == Goal.LEFT:
@@ -53,18 +57,19 @@ class TInterSection(InterSection):
         para = self.get_config()
         t_type = para[Parameter.t_intersection_type]
         self.add_sockets(self.pre_block_socket)
-        start_node = self._sockets[t_type].negative_road.end_node
-        end_node = self._sockets[t_type].positive_road.start_node
+
+        start_node = self._sockets[BlockSocket.get_real_index(self._block_name, t_type)].negative_road.end_node
+        end_node = self._sockets[BlockSocket.get_real_index(self._block_name, t_type)].positive_road.start_node
         for i in range(4):
             if i == t_type:
                 continue
-            exit_node = self._sockets[i].positive_road.start_node if i != Goal.ADVERSE else self._sockets[
-                i].negative_road.start_node
+            index_i = BlockSocket.get_real_index(self._block_name, i) if i < 3 else self.pre_block_socket_index
+            exit_node = self._sockets[index_i].positive_road.start_node if i != Goal.ADVERSE else self._sockets[
+                index_i].negative_road.start_node
             pos_lanes = self.block_network.remove_all_roads(start_node, exit_node)
-            entry_node = self._sockets[i].negative_road.end_node if i != Goal.ADVERSE else self._sockets[
-                i].positive_road.end_node
+            entry_node = self._sockets[index_i].negative_road.end_node if i != Goal.ADVERSE else self._sockets[
+                index_i].positive_road.end_node
             neg_lanes = self.block_network.remove_all_roads(entry_node, end_node)
-
             # TODO small vis bug may raise in a corner case,
             #  these code can fix it but will introduce a new get_closest_lane_index bug
             # if (i + 2) % 4 == t_type:
@@ -78,8 +83,8 @@ class TInterSection(InterSection):
             #     self.block_network.add_road(Road(Decoration.start, Decoration.end), pos_lanes)
 
         self._change_vis(t_type)
-        self._sockets.pop(-1)
-        socket = self._sockets.pop(t_type)
+        self._sockets.pop(self.pre_block_socket.index)
+        socket = self._sockets.pop(BlockSocket.get_real_index(self._block_name, t_type))
         self.block_network.remove_all_roads(socket.positive_road.start_node, socket.positive_road.end_node)
         self.block_network.remove_all_roads(socket.negative_road.start_node, socket.negative_road.end_node)
         self._reborn_roads.remove(socket.negative_road)
