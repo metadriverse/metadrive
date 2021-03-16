@@ -156,5 +156,6 @@ class Roundabout(Block):
 
     def get_socket(self, index: int) -> BlockSocket:
         socket = super(Roundabout, self).get_socket(index)
-        self._reborn_roads.remove(socket.negative_road)
+        if socket.negative_road in self.get_reborn_roads():
+            self._reborn_roads.remove(socket.negative_road)
         return socket

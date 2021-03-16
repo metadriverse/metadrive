@@ -123,7 +123,8 @@ class InterSection(Block):
 
     def get_socket(self, index: int) -> BlockSocket:
         socket = super(InterSection, self).get_socket(index)
-        self._reborn_roads.remove(socket.negative_road)
+        if socket.negative_road in self.get_reborn_roads():
+            self._reborn_roads.remove(socket.negative_road)
         return socket
 
     def _create_left_turn(self, radius, lane_num, attach_left_lane, attach_road, intersect_nodes, part_idx):
