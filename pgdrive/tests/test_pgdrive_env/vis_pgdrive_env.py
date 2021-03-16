@@ -46,7 +46,7 @@ if __name__ == "__main__":
     for i in range(1, 100000):
         o, r, d, info = env.step([0, 1])
         env.render(text=info)
-        if d:
-            print("Reset")
-            env.reset()
+        # if d:
+        #     print("Reset")
+        #     env.reset()
     env.close()

@@ -52,10 +52,10 @@ class TopDownMultiChannel(TopDownObservation):
         self.canvas_ego = WorldSurface(self.MAP_RESOLUTION, 0, pygame.Surface(self.MAP_RESOLUTION))
         self.canvas_past_pos = pygame.Surface(self.RESOLUTION)  # A local view
 
-    def reset(self, env):
+    def reset(self, env, vehicle=None):
         self.scene_manager = env.scene_manager
         self.road_network = env.current_map.road_network
-        self.target_vehicle = env.vehicle
+        self.target_vehicle = vehicle
         self._should_draw_map = True
         self._should_fill_stack = True
 
