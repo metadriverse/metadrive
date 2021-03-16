@@ -32,7 +32,8 @@ class TestEnv(PGDriveEnv):
                     Map.GENERATE_PARA: "XTX",
                     Map.LANE_WIDTH: 3.5,
                     Map.LANE_NUM: 3,
-                }
+                },
+                "driving_reward": 1.0
             }
         )
 
