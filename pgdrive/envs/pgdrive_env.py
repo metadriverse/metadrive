@@ -9,6 +9,7 @@ from typing import Union, Optional, Dict, AnyStr
 import gym
 import numpy as np
 from panda3d.core import PNMImage
+
 from pgdrive.constants import RENDER_MODE_NONE, DEFAULT_AGENT
 from pgdrive.pg_config import PGConfig
 from pgdrive.rl_utils import pg_cost_function, pg_done_function, pg_reward_function
@@ -19,7 +20,7 @@ from pgdrive.scene_creator.map import Map, MapGenerateMethod, parse_map_config
 from pgdrive.scene_creator.vehicle.base_vehicle import BaseVehicle
 from pgdrive.scene_manager.scene_manager import SceneManager
 from pgdrive.scene_manager.traffic_manager import TrafficMode
-from pgdrive.utils import recursive_equal, get_np_random, merge_dicts
+from pgdrive.utils import recursive_equal, get_np_random, merge_dicts, concat_step_infos
 from pgdrive.world.chase_camera import ChaseCamera
 from pgdrive.world.manual_controller import KeyboardController, JoystickController
 from pgdrive.world.pg_world import PGWorld
@@ -235,13 +236,15 @@ class PGDriveEnv(gym.Env):
             actions = {DEFAULT_AGENT: actions}
 
         # protect by expert
+        saver_info = {}
         for v_id, v in self.vehicles.items():
-            actions[v_id] = self.saver(v_id, v, actions)
-        return actions
+            actions[v_id], saver_info[v_id] = self.saver(v_id, v, actions)
+        return actions, saver_info
 
     def step(self, actions: Union[np.ndarray, Dict[AnyStr, np.ndarray]]):
+
         self.episode_steps += 1
-        actions = self.preprocess_actions(actions)
+        actions, saver_infos = self.preprocess_actions(actions)
 
         # Check whether some actions are left.
         given_keys = set(actions.keys())
@@ -251,35 +254,68 @@ class PGDriveEnv(gym.Env):
         )
 
         # preprocess
-        self.scene_manager.prepare_step(actions)
+        scene_manager_infos = self.scene_manager.prepare_step(actions)
 
         # step all entities
         self.scene_manager.step(self.config["decision_repeat"])
 
         # update states, if restore from episode data, position and heading will be force set in update_state() function
 
-        self.scene_manager.update_state()
+        scene_manager_dones, scene_manager_step_infos = self.scene_manager.update_state()
 
         # update obs, dones, rewards, costs, calculate done at first !
         obses = {}
+        done_infos = {}
+        cost_infos = {}
+        reward_infos = {}
+        rewards = {}
         for v_id, v in self.vehicles.items():
             obses[v_id] = self.observation[v_id].observe(v)
-        self.dones = self.for_each_vehicle(lambda v: pg_done_function(v))
-        rewards = self.for_each_vehicle(lambda v: pg_reward_function(v))
-        self.for_each_vehicle(lambda v: pg_cost_function(v))
+            done_function_result, done_infos[v_id] = self.done_function(v)
+            rewards[v_id], reward_infos[v_id] = self.reward_function(v)
+            _, cost_infos[v_id] = self.cost_function(v)
+            self.dones[v_id] = done_function_result or self.dones[v_id] or scene_manager_dones[v_id]
+        # rewards = self.for_each_vehicle(lambda v: pg_reward_function(v))
+        # self.for_each_vehicle(lambda v: pg_cost_function(v))
 
         should_done = self.config["auto_termination"] and (self.episode_steps >= (self.current_map.num_blocks * 250))
-        self.for_each_vehicle(_auto_termination, should_done)
+
+        termination_infos = self.for_each_vehicle(_auto_termination, should_done)
+
+        step_infos = concat_step_infos(
+            [
+                saver_infos,
+                scene_manager_infos,
+                scene_manager_step_infos,
+                done_infos,
+                reward_infos,
+                cost_infos,
+                termination_infos,
+            ]
+        )
+        step_infos = self.extra_step_info(step_infos)
+
         if should_done:
             for k in self.dones:
                 self.dones[k] = True
 
         if self.num_agents == 1:
-            return obses[DEFAULT_AGENT], rewards[DEFAULT_AGENT], \
-                   copy.deepcopy(self.dones[DEFAULT_AGENT]), copy.deepcopy(self.vehicle.step_info)
+            return obses[DEFAULT_AGENT], rewards[DEFAULT_AGENT], copy.deepcopy(self.dones[DEFAULT_AGENT]), \
+                   copy.deepcopy(step_infos[DEFAULT_AGENT])
         else:
-            return obses, copy.deepcopy(rewards), copy.deepcopy(self.dones), \
-                   copy.deepcopy(self.for_each_vehicle(lambda v: v.step_info))
+            return obses, copy.deepcopy(rewards), copy.deepcopy(self.dones), copy.deepcopy(step_infos)
+
+    def done_function(self, vehicle):
+        return pg_done_function(vehicle=vehicle)
+
+    def cost_function(self, vehicle):
+        return pg_cost_function(vehicle)
+
+    def reward_function(self, vehicle):
+        return pg_reward_function(vehicle)
+
+    def extra_step_info(self, step_infos):
+        return step_infos
 
     def render(self, mode='human', text: Optional[Union[dict, str]] = None) -> Optional[np.ndarray]:
         """
@@ -627,8 +663,7 @@ class PGDriveEnv(gym.Env):
             "takeover_end": True if pre_save and not vehicle.takeover else False,
             "takeover": vehicle.takeover
         }
-        vehicle.step_info.update(saver_info)
-        return steering, throttle
+        return (steering, throttle), saver_info
 
     def get_observation(self, vehicle_config: Union[dict, PGConfig]):
         if vehicle_config["use_image"]:
@@ -645,7 +680,7 @@ class PGDriveEnv(gym.Env):
 
 
 def _auto_termination(vehicle, should_done):
-    vehicle.step_info["max_step"] = True if should_done else False
+    return {"max_step": True if should_done else False}
 
 
 if __name__ == '__main__':

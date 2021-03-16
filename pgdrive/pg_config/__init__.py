@@ -65,8 +65,11 @@ class PGConfig:
             if isinstance(self._config[key], PGConfig):
                 type_correct = type_correct or isinstance(value, dict)
             if isinstance(self._config[key], float):
-                # Int can be transformed to float
+                # int can be transformed to float
                 type_correct = type_correct or isinstance(value, int)
+            if isinstance(self._config[key], int):
+                # float can be transformed to int
+                type_correct = type_correct or isinstance(value, float)
             if key in self._types:
                 type_correct = type_correct or (type(value) in self._types[key])
             assert type_correct, "TypeError: {}:{}".format(key, value)

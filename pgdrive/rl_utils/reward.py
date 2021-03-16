@@ -21,6 +21,7 @@ def pg_reward_function(vehicle) -> float:
     :param vehicle: BaseVehicle
     :return: reward
     """
+    step_info = dict()
     action = vehicle.last_current_action[1]
     # Reward for moving forward in current lane
     current_lane = vehicle.lane
@@ -49,16 +50,16 @@ def pg_reward_function(vehicle) -> float:
     reward -= vehicle.vehicle_config["general_penalty"]
 
     reward += vehicle.vehicle_config["speed_reward"] * (vehicle.speed / vehicle.max_speed)
-    vehicle.step_info["step_reward"] = reward
+    step_info["step_reward"] = reward
 
     # for done
-    if vehicle.step_info["crash_vehicle"]:
+    if vehicle.crash_vehicle:
         reward -= vehicle.vehicle_config["crash_vehicle_penalty"]
-    elif vehicle.step_info["crash_object"]:
+    elif vehicle.crash_object:
         reward -= vehicle.vehicle_config["crash_object_penalty"]
-    elif vehicle.step_info["out_of_road"]:
+    elif vehicle.out_of_route:
         reward -= vehicle.vehicle_config["out_of_road_penalty"]
-    elif vehicle.step_info["arrive_dest"]:
+    elif vehicle.arrive_destination:
         reward += vehicle.vehicle_config["success_reward"]
 
-    return reward
+    return reward, step_info
