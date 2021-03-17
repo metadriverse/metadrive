@@ -162,6 +162,7 @@ class PGDriveEnv(gym.Env):
         self.current_map = None
 
         self.vehicles = None
+        self.done_vehicles = {}
         self.dones = None
         self.current_track_vehicle: Optional[BaseVehicle] = None
         self.current_track_vehicle_id: Optional[str] = None
@@ -225,7 +226,7 @@ class PGDriveEnv(gym.Env):
         self.pg_world.accept("n", self.chase_another_v)
 
     def preprocess_actions(self, actions: Union[np.ndarray, Dict[AnyStr, np.ndarray]]):
-        if self.config["manual_control"] and self.use_render:
+        if self.config["manual_control"] and self.use_render and self.current_track_vehicle_id in self.vehicles.keys():
             action = self.controller.process_input()
             if self.num_agents == 1:
                 actions = action
@@ -355,6 +356,8 @@ class PGDriveEnv(gym.Env):
         """
         self.lazy_init()  # it only works the first time when reset() is called to avoid the error when render
 
+        self.vehicles.update(self.done_vehicles)
+        self.done_vehicles = {}
         self.dones = {agent_id: False for agent_id in self.vehicles.keys()}
         self.episode_steps = 0
 
@@ -593,7 +596,7 @@ class PGDriveEnv(gym.Env):
         return False
 
     def chase_another_v(self) -> (str, BaseVehicle):
-        vehicles = sorted(self.vehicles.items()) * 2
+        vehicles = sorted(list(self.vehicles.items()) + list(self.done_vehicles.items())) * 2
         for index, v in enumerate(vehicles):
             if vehicles[index - 1][1] == self.current_track_vehicle:
                 self.current_track_vehicle.remove_display_region()

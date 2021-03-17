@@ -302,7 +302,7 @@ class BaseVehicle(DynamicElement):
             ).position(self.vehicle_config["born_longitude"], self.vehicle_config["born_lateral"])
             pos = self.born_place
         heading = -np.deg2rad(heading) - np.pi / 2
-        self.chassis_np.setPos(Vec3(*pos, 1))
+        self.chassis_np.setPos(panda_position(Vec3(*pos, 1)))
         self.chassis_np.setQuat(LQuaternionf(np.cos(heading / 2), 0, 0, np.sin(heading / 2)))
         self.update_map_info(map)
         self.chassis_np.node().clearForces()
