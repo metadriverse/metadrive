@@ -34,7 +34,6 @@ class CityBIG(BIG):
         super(CityBIG,
               self).__init__(lane_num, lane_width, global_network, render_node_path, pg_physics_world, random_seed)
 
-        self._used_sockets = set()
         # self._block_sequence = None
         # self._random_seed = random_seed
         # # Don't change this right now, since we need to make maps identical to old one
@@ -94,23 +93,14 @@ class CityBIG(BIG):
             type_id = self._block_sequence[len(self.blocks)]
             block_type = PGBlock.get_block(type_id)
 
-        choices = set()
-        count = 0
-        socket = None
-        while count < 500_000:
-            next_block = self.np_random.choice(self.blocks)
-            choices = set(next_block.get_socket_indices()).difference(self._used_sockets)
-            if len(choices) >= 1:
-                socket = next_block.get_socket(self.np_random.choice(list(choices)))
-                break
-            count += 1
+        # exclude first block
+        socket_used = set([block.pre_block_socket for block in self.blocks[1:]])
+        socket_available = []
+        for b in self.blocks:
+            socket_available += b.get_socket_list()
+        socket_available = set(socket_available).difference(socket_used)
+        socket = self.np_random.choice(list(socket_available))
 
-        if socket is None:
-            raise ValueError((next_block.get_socket_indices(), choices, self._used_sockets))
-
-        print("Spent {} iterations!!!".format(count))
-
-        self._used_sockets.add(socket.index)
         block = block_type(len(self.blocks), socket, self._global_network, block_seed)
         return block
 
