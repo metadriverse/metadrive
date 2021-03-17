@@ -108,13 +108,13 @@ class PGDriveEnv(gym.Env):
 
         # obs. action space
 
-        self.observation = {
+        self.observations = {
             id: self.get_observation(BaseVehicle.get_vehicle_config(v_config))
             for id, v_config in self.config["target_vehicle_configs"].items()
         }
         self.observation_space = gym.spaces.Dict(
             {v_id: obs.observation_space
-             for v_id, obs in self.observation.items()}
+             for v_id, obs in self.observations.items()}
         )
         self.action_space = gym.spaces.Dict(
             {id: BaseVehicle.get_action_space_before_init()
@@ -270,7 +270,7 @@ class PGDriveEnv(gym.Env):
         reward_infos = {}
         rewards = {}
         for v_id, v in self.vehicles.items():
-            obses[v_id] = self.observation[v_id].observe(v)
+            obses[v_id] = self.observations[v_id].observe(v)
             done_function_result, done_infos[v_id] = self.done_function(v)
             rewards[v_id], reward_infos[v_id] = self.reward_function(v)
             _, cost_infos[v_id] = self.cost_function(v)
@@ -328,7 +328,7 @@ class PGDriveEnv(gym.Env):
         self.pg_world.render_frame(text)
         if mode != "human" and self.config["use_image"]:
             # fetch img from img stack to be make this func compatible with other render func in RL setting
-            return self.vehicle.observation.img_obs.get_image()
+            return self.vehicle.observations.img_obs.get_image()
 
         if mode == "rgb_array" and self.config["use_render"]:
             if not hasattr(self, "_temporary_img_obs"):
@@ -382,8 +382,8 @@ class PGDriveEnv(gym.Env):
         ret = {}
         self.for_each_vehicle(lambda v: v.update_state())
         for v_id, v in self.vehicles.items():
-            self.observation[v_id].reset(self, v)
-            ret[v_id] = self.observation[v_id].observe(v)
+            self.observations[v_id].reset(self, v)
+            ret[v_id] = self.observations[v_id].observe(v)
         return ret[DEFAULT_AGENT] if self.num_agents == 1 else ret
 
     def close(self):
@@ -617,7 +617,7 @@ class PGDriveEnv(gym.Env):
         if vehicle.vehicle_config["use_saver"] or vehicle._expert_takeover:
             # saver can be used for human or another AI
             save_level = vehicle.vehicle_config["save_level"] if not vehicle._expert_takeover else 1.0
-            obs = self.observation[v_id].observe(vehicle)
+            obs = self.observations[v_id].observe(vehicle)
             from pgdrive.examples.ppo_expert import expert
             try:
                 saver_a = expert(obs, deterministic=False)
