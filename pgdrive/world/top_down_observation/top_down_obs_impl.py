@@ -87,6 +87,9 @@ class ObservationWindow:
         assert self.canvas_rotate is not None
         return self.canvas_rotate.get_size()
 
+    def get_screen_window(self):
+        return self.get_observation_window()
+
 
 class WorldSurface(pygame.Surface):
     """
@@ -390,6 +393,15 @@ class ObservationWindowMultiChannel:
             max_range=max_range, resolution=(resolution[0] * 2, resolution[1] * 2)
         )
 
+        self.resolution = (resolution[0] * 2, resolution[1] * 2)
+        self.canvas_display = None
+
+    def get_canvas_display(self):
+        if self.canvas_display is None:
+            self.canvas_display = pygame.Surface(self.resolution)
+        self.canvas_display.fill(COLOR_BLACK)
+        return self.canvas_display
+
     def reset(self, canvas_runtime):
         for k, sub in self.sub_observations.items():
             sub.reset(canvas_runtime)
@@ -409,3 +421,22 @@ class ObservationWindowMultiChannel:
 
     def get_size(self):
         return next(iter(self.sub_observations.values())).get_size()
+
+    def get_screen_window(self):
+        canvas = self.get_canvas_display()
+        ret = self.get_observation_window()
+
+        for k in ret.keys():
+            if k == "road_network":
+                continue
+            ret[k] = pygame.transform.scale2x(ret[k])
+
+        def _draw(canvas, key, color):
+            mask = pygame.mask.from_threshold(ret[key], (0, 0, 0, 0), (10, 10, 10, 255))
+            mask.to_surface(canvas, setcolor=None, unsetcolor=color)
+
+        _draw(canvas, "navigation", pygame.Color("Blue"))
+        _draw(canvas, "road_network", pygame.Color("White"))
+        _draw(canvas, "traffic_flow", pygame.Color("Red"))
+        _draw(canvas, "target_vehicle", pygame.Color("Green"))
+        return canvas
