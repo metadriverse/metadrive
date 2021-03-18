@@ -99,11 +99,12 @@ class TopDownObservation(ObservationType):
         """
         :return: a big map surface, clip  and rotate to use a piece of it
         """
-        surface = self.canvas_background
 
         # Setup the maximize size of the canvas
         # scaling and center can be easily found by bounding box
         b_box = self.road_network.get_bounding_box()
+        self.canvas_background.fill(COLOR_BLACK)
+        self.canvas_runtime.fill(COLOR_BLACK)
         self.canvas_background.set_colorkey(self.canvas_background.BLACK)
         x_len = b_box[1] - b_box[0]
         y_len = b_box[3] - b_box[2]
@@ -120,7 +121,7 @@ class TopDownObservation(ObservationType):
         # self._center_pos = centering_pos
         self.canvas_runtime.move_display_window_to(centering_pos)
 
-        surface.move_display_window_to(centering_pos)
+        self.canvas_background.move_display_window_to(centering_pos)
         for _from in self.road_network.graph.keys():
             decoration = True if _from == Decoration.start else False
             for _to in self.road_network.graph[_from].keys():
