@@ -48,8 +48,8 @@ if __name__ == '__main__':
     # env.close()
 
     # Test multi-channel frames
-    # env = TopDownPGDriveEnv(dict(environment_num=1, map="XTO", traffic_density=0.1, frame_stack=1))
-    env = TopDownPGDriveEnv(dict(use_render=True, manual_control=True))
+    env = TopDownPGDriveEnv(dict(environment_num=1, map="XTO", traffic_density=0.1, frame_stack=5))
+    # env = TopDownPGDriveEnv(dict(use_render=True, manual_control=True))
     env.reset()
     names = [
         "road_network", "navigation", "target_vehicle", "past_pos", "traffic t", "traffic t-1", "traffic t-2",
@@ -61,7 +61,7 @@ if __name__ == '__main__':
     for _ in range(10000):
         o, *_ = env.step([1, 1])
 
-        # fig, axes = plt.subplots(1, o.shape[-1], figsize=(15, 3))
+        fig, axes = plt.subplots(1, o.shape[-1], figsize=(15, 3))
 
         # o = env.observations[env.DEFAULT_AGENT].get_screen_window()
         # import numpy as np
@@ -70,11 +70,11 @@ if __name__ == '__main__':
         # o = np.transpose(o, (1, 0, 2))
         # axes[0].imshow(o)
 
-        # for o_i in range(o.shape[-1]):
-        #     axes[o_i].imshow(o[..., o_i], cmap="gray")
-        #     axes[o_i].set_title(names[o_i])
+        for o_i in range(o.shape[-1]):
+            axes[o_i].imshow(o[..., o_i], cmap="gray")
+            axes[o_i].set_title(names[o_i])
 
-        # fig.suptitle("Multi-channel Top-down Observation")
-        # plt.show()
-        # print(o.mean())
+        fig.suptitle("Multi-channel Top-down Observation")
+        plt.show()
+        print(o.mean())
     env.close()
