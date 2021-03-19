@@ -105,11 +105,11 @@ class Block(Element, BlockDefault):
             self.road_normal = self.loader.loadTexture(AssetLoader.file_path("textures", "sci", "normal.jpg"))
             self.ts_color = TextureStage("color")
             self.ts_normal = TextureStage("normal")
-            self.side_texture = self.loader.loadTexture(AssetLoader.file_path("textures", "side_walk", "color.png"))
+            self.side_texture = self.loader.loadTexture(AssetLoader.file_path("textures", "sidewalk", "color.png"))
             self.side_texture.setMinfilter(SamplerState.FT_linear_mipmap_linear)
             self.side_texture.setAnisotropicDegree(8)
-            self.side_normal = self.loader.loadTexture(AssetLoader.file_path("textures", "side_walk", "normal.png"))
-            self.side_walk = self.loader.loadModel(AssetLoader.file_path("models", "box.bam"))
+            self.side_normal = self.loader.loadTexture(AssetLoader.file_path("textures", "sidewalk", "normal.png"))
+            self.sidewalk = self.loader.loadModel(AssetLoader.file_path("models", "box.bam"))
 
     def construct_block(self, root_render_np: NodePath, pg_physics_world: PGPhysicsWorld) -> bool:
         """
@@ -252,7 +252,7 @@ class Block(Element, BlockDefault):
         Create NodePath and Geom node to perform both collision detection and render
         """
         self.lane_line_node_path = NodePath(RigidBodyCombiner(self._block_name + "_lane_line"))
-        self.side_walk_node_path = NodePath(RigidBodyCombiner(self._block_name + "_side_walk"))
+        self.sidewalk_node_path = NodePath(RigidBodyCombiner(self._block_name + "_sidewalk"))
         self.lane_node_path = NodePath(RigidBodyCombiner(self._block_name + "_lane"))
         self.lane_vis_node_path = NodePath(RigidBodyCombiner(self._block_name + "_lane_vis"))
         graph = self.block_network.graph
@@ -265,9 +265,9 @@ class Block(Element, BlockDefault):
         self.lane_line_node_path.flattenStrong()
         self.lane_line_node_path.node().collect()
 
-        self.side_walk_node_path.flattenStrong()
-        self.side_walk_node_path.node().collect()
-        self.side_walk_node_path.hide(CamMask.ScreenshotCam)
+        self.sidewalk_node_path.flattenStrong()
+        self.sidewalk_node_path.node().collect()
+        self.sidewalk_node_path.hide(CamMask.ScreenshotCam)
 
         # only bodies reparent to this node
         self.lane_node_path.flattenStrong()
@@ -280,7 +280,7 @@ class Block(Element, BlockDefault):
         self.node_path = NodePath(self._block_name)
         self.node_path.hide(CamMask.Shadow)
 
-        self.side_walk_node_path.reparentTo(self.node_path)
+        self.sidewalk_node_path.reparentTo(self.node_path)
         self.lane_line_node_path.reparentTo(self.node_path)
         self.lane_node_path.reparentTo(self.node_path)
         self.lane_vis_node_path.reparentTo(self.node_path)
@@ -322,18 +322,18 @@ class Block(Element, BlockDefault):
 
                 if lane.line_types[k] == LineType.SIDE:
                     radius = lane.radius if isinstance(lane, CircularLane) else 0.0
-                    segment_num = int(lane.length / Block.SIDE_WALK_LENGTH)
+                    segment_num = int(lane.length / Block.SIDEWALK_LENGTH)
                     for segment in range(segment_num):
-                        lane_start = lane.position(segment * Block.SIDE_WALK_LENGTH, i * lane_width / 2)
-                        lane_end = lane.position((segment + 1) * Block.SIDE_WALK_LENGTH, i * lane_width / 2)
+                        lane_start = lane.position(segment * Block.SIDEWALK_LENGTH, i * lane_width / 2)
+                        lane_end = lane.position((segment + 1) * Block.SIDEWALK_LENGTH, i * lane_width / 2)
                         middle = (lane_start + lane_end) / 2
-                        self._add_side_walk2bullet(lane_start, lane_end, middle, radius, lane.direction)
+                        self._add_sidewalk2bullet(lane_start, lane_end, middle, radius, lane.direction)
                     # for last part
-                    lane_start = lane.position(segment_num * Block.SIDE_WALK_LENGTH, i * lane_width / 2)
+                    lane_start = lane.position(segment_num * Block.SIDEWALK_LENGTH, i * lane_width / 2)
                     lane_end = lane.position(lane.length, i * lane_width / 2)
                     middle = (lane_start + lane_end) / 2
                     if norm(lane_start[0] - lane_end[0], lane_start[1] - lane_end[1]) > 1e-1:
-                        self._add_side_walk2bullet(lane_start, lane_end, middle, radius, lane.direction)
+                        self._add_sidewalk2bullet(lane_start, lane_end, middle, radius, lane.direction)
 
             elif lane.line_types[k] == LineType.BROKEN:
                 straight = True if isinstance(lane, StraightLane) else False
@@ -424,13 +424,13 @@ class Block(Element, BlockDefault):
         body_np.setScale(length, Block.LANE_LINE_WIDTH, Block.LANE_LINE_THICKNESS)
         body_np.set_color(color)
 
-    def _add_side_walk2bullet(self, lane_start, lane_end, middle, radius=0.0, direction=0):
+    def _add_sidewalk2bullet(self, lane_start, lane_end, middle, radius=0.0, direction=0):
         length = norm(lane_end[0] - lane_start[0], lane_end[1] - lane_start[1])
-        body_node = BulletRigidBodyNode(BodyName.Side_walk)
+        body_node = BulletRigidBodyNode(BodyName.Sidewalk)
         body_node.setActive(False)
         body_node.setKinematic(False)
         body_node.setStatic(True)
-        side_np = self.side_walk_node_path.attachNewNode(body_node)
+        side_np = self.sidewalk_node_path.attachNewNode(body_node)
         shape = BulletBoxShape(Vec3(1 / 2, 1 / 2, 1 / 2))
         body_node.addShape(shape)
         body_node.setIntoCollideMask(BitMask32.bit(Block.LANE_LINE_COLLISION_MASK))
@@ -440,21 +440,21 @@ class Block(Element, BlockDefault):
             factor = 1
         else:
             if direction == 1:
-                factor = (1 - self.SIDE_WALK_LINE_DIST / radius)
+                factor = (1 - self.SIDEWALK_LINE_DIST / radius)
             else:
-                factor = (1 + self.SIDE_WALK_WIDTH / radius) * (1 + self.SIDE_WALK_LINE_DIST / radius)
+                factor = (1 + self.SIDEWALK_WIDTH / radius) * (1 + self.SIDEWALK_LINE_DIST / radius)
         direction_v = lane_end - lane_start
         vertical_v = (-direction_v[1], direction_v[0]) / numpy.linalg.norm(direction_v)
-        middle += vertical_v * (self.SIDE_WALK_WIDTH / 2 + self.SIDE_WALK_LINE_DIST)
+        middle += vertical_v * (self.SIDEWALK_WIDTH / 2 + self.SIDEWALK_LINE_DIST)
         side_np.setPos(panda_position(middle, 0))
         theta = -numpy.arctan2(direction_v[1], direction_v[0])
         side_np.setQuat(LQuaternionf(numpy.cos(theta / 2), 0, 0, numpy.sin(theta / 2)))
         side_np.setScale(
-            length * factor, self.SIDE_WALK_WIDTH, self.SIDE_WALK_THICKNESS * (1 + 0.1 * numpy.random.rand())
+            length * factor, self.SIDEWALK_WIDTH, self.SIDEWALK_THICKNESS * (1 + 0.1 * numpy.random.rand())
         )
         if self.render:
             side_np.setTexture(self.ts_color, self.side_texture)
-            self.side_walk.instanceTo(side_np)
+            self.sidewalk.instanceTo(side_np)
 
     def _add_lane_surface(self, from_: str, to_: str, lanes: List):
         """
@@ -473,7 +473,7 @@ class Block(Element, BlockDefault):
                 end = lane.position(lane.length, 0)
                 direction_v = end - middle
                 theta = -numpy.arctan2(direction_v[1], direction_v[0])
-                width = lane.width_at(0) + self.SIDE_WALK_LINE_DIST * 2
+                width = lane.width_at(0) + self.SIDEWALK_LINE_DIST * 2
                 length = lane.length
                 self._add_lane2bullet(middle, width, length, theta, lane, (from_, to_, index))
         else:
@@ -484,7 +484,7 @@ class Block(Element, BlockDefault):
                     end = lane.position(lane.length * (i + 1) / segment_num, 0)
                     direction_v = end - middle
                     theta = -numpy.arctan2(direction_v[1], direction_v[0])
-                    width = lane.width_at(0) + self.SIDE_WALK_LINE_DIST * 2
+                    width = lane.width_at(0) + self.SIDEWALK_LINE_DIST * 2
                     length = lane.length
                     self._add_lane2bullet(middle, width, length * 1.3 / segment_num, theta, lane, (from_, to_, index))
 

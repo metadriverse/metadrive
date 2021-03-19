@@ -119,7 +119,7 @@ def CreateRoadFrom(
             origin_lane.line_types = line_type
     # check the left lane and right lane
     ignore = (ignore_start, ignore_end)
-    factor = (BlockDefault.SIDE_WALK_WIDTH + BlockDefault.SIDE_WALK_LINE_DIST + lane_width / 2.0) * 2.0 / lane_width
+    factor = (BlockDefault.SIDEWALK_WIDTH + BlockDefault.SIDEWALK_LINE_DIST + lane_width / 2.0) * 2.0 / lane_width
     if not detect_one_side:
         # Because of side walk, the width of side walk should be consider
         no_cross = not (

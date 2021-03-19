@@ -33,7 +33,7 @@ COLLISION_INFO_COLOR = dict(
 class BodyName:
     Continuous_line = "Continuous Line"
     Broken_line = "Broken Line"
-    Side_walk = "Side Walk"
+    Sidewalk = "Sidewalk"
     Ground = "Ground"
     Ego_vehicle = "Target Vehicle"
     Ego_vehicle_beneath = "Target Vehicle Beneath"
@@ -44,7 +44,7 @@ class BodyName:
 
 
 COLOR = {
-    BodyName.Side_walk: "red",
+    BodyName.Sidewalk: "red",
     BodyName.Continuous_line: "orange",
     BodyName.Broken_line: "yellow",
     BodyName.Traffic_vehicle: "red",

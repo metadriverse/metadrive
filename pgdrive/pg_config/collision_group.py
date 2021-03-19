@@ -33,7 +33,7 @@ class CollisionGroup:
             (cls.TrafficVehicle, cls.TrafficVehicle, False),
             (cls.TrafficVehicle, cls.LaneSurface, False),
             (cls.TrafficVehicle, cls.EgoVehicle, True),
-            (cls.TrafficVehicle, cls.EgoVehicleBeneath, False),
+            (cls.TrafficVehicle, cls.EgoVehicleBeneath, True),
 
             # ego vehicle collision
             (cls.EgoVehicle, cls.EgoVehicle, True),

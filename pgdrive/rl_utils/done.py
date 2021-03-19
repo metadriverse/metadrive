@@ -14,7 +14,7 @@ def pg_done_function(vehicle: BaseVehicle):
         done = True
         logging.info("Episode ended! Reason: crash. ")
         done_info["crash_vehicle"] = True
-    elif vehicle.out_of_route or not vehicle.on_lane or vehicle.crash_side_walk:
+    elif vehicle.out_of_route or not vehicle.on_lane or vehicle.crash_sidewalk:
         done = True
         logging.info("Episode ended! Reason: out_of_road.")
         done_info["out_of_road"] = True
