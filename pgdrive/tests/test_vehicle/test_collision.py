@@ -27,7 +27,7 @@ def test_collision_with_sidewalk():
     try:
         for i in range(1, 100):
             o, r, d, info = env.step([-0.5, 1])
-            if env.vehicle.crash_side_walk:
+            if env.vehicle.crash_sidewalk:
                 pass_test = True
                 break
         assert pass_test, "Collision function is broken!"

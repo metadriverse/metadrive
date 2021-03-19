@@ -1,4 +1,5 @@
 import logging
+from pgdrive.world.collision_callback import pg_collision_callback
 import time
 from typing import Optional, Union
 
@@ -6,7 +7,7 @@ import gltf
 from direct.gui.OnscreenImage import OnscreenImage
 from direct.showbase import ShowBase
 from panda3d.bullet import BulletDebugNode
-from panda3d.core import AntialiasAttrib, loadPrcFileData, LineSegs
+from panda3d.core import AntialiasAttrib, loadPrcFileData, LineSegs, PythonCallbackObject
 from pgdrive.constants import RENDER_MODE_OFFSCREEN, RENDER_MODE_NONE, RENDER_MODE_ONSCREEN, PG_EDITION
 from pgdrive.pg_config import PGConfig
 from pgdrive.pg_config.cam_mask import CamMask
@@ -170,13 +171,15 @@ class PGWorld(ShowBase.ShowBase):
         self.pbr_worldNP = self.pbr_render.attachNewNode("pbrNP")
         self.debug_node = None
 
-        # some render attr
+        # some render attribute
         self.pbrpipe = None
         self.light = None
-        self.collision_info_np = None
 
         # physics world
         self.physics_world = PGPhysicsWorld()
+
+        # collision callback
+        self.physics_world.dynamic_world.setContactAddedCallback(PythonCallbackObject(pg_collision_callback))
 
         # for real time simulation
         self.force_fps = ForceFPS(self, start=False)

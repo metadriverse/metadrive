@@ -18,12 +18,12 @@ from pgdrive.utils.scene_utils import ray_localization
 from pgdrive.world.pg_world import PGWorld
 
 
-class PGTrafficVehicleNode(BulletRigidBodyNode):
+class TrafficVehicleNode(BulletRigidBodyNode):
 
     # for lidar detection and other purposes
     def __init__(self, node_name, kinematics_model: IDMVehicle):
         BulletRigidBodyNode.__init__(self, node_name)
-        PGTrafficVehicleNode.setPythonTag(self, BodyName.Traffic_vehicle, self)
+        TrafficVehicleNode.setPythonTag(self, BodyName.Traffic_vehicle, self)
         self.kinematic_model = kinematics_model
 
     def reset(self, kinematics_model):
@@ -49,7 +49,7 @@ class PGTrafficVehicle(DynamicElement):
         kinematic_model.LENGTH = self.LENGTH
         kinematic_model.WIDTH = self.WIDTH
         super(PGTrafficVehicle, self).__init__()
-        self.vehicle_node = PGTrafficVehicleNode(BodyName.Traffic_vehicle, IDMVehicle.create_from(kinematic_model))
+        self.vehicle_node = TrafficVehicleNode(BodyName.Traffic_vehicle, IDMVehicle.create_from(kinematic_model))
         chassis_shape = BulletBoxShape(Vec3(self.LENGTH / 2, self.WIDTH / 2, self.HEIGHT / 2))
         self.index = index
         self.vehicle_node.addShape(chassis_shape, TransformState.makePos(Point3(0, 0, self.HEIGHT / 2 + 0.2)))
