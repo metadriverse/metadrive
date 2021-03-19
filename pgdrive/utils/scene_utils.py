@@ -62,7 +62,7 @@ def get_road_bounding_box(lanes, extra_lateral=3) -> Tuple:
     """
     Return (x_max, x_min, y_max, y_min) as bounding box of this road
     :param lanes: Lanes in this road
-    :param extra_lateral: extra width in lateral direction, usually side_walk width
+    :param extra_lateral: extra width in lateral direction, usually sidewalk width
     :return: x_max, x_min, y_max, y_min
     """
     line_points = get_curve_contour(lanes, extra_lateral) if isinstance(lanes[0], CircularLane) \
@@ -74,7 +74,7 @@ def get_straight_contour(lanes, extra_lateral) -> List:
     """
     Get several points as bounding box of this road
     :param lanes: lanes contained in road
-    :param extra_lateral: extra length in lateral direction, usually side_walk
+    :param extra_lateral: extra length in lateral direction, usually sidewalk
     :return: points
     :param lanes:
     :return:
@@ -90,7 +90,7 @@ def get_curve_contour(lanes, extra_lateral) -> List:
     """
     Get several points as bounding box of this road
     :param lanes: lanes contained in road
-    :param extra_lateral: extra length in lateral direction, usually side_walk
+    :param extra_lateral: extra length in lateral direction, usually sidewalk
     :return: points
     """
     points = []

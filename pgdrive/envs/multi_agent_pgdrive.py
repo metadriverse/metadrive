@@ -13,7 +13,7 @@ class MultiAgentPGDrive(PGDriveEnv):
         config.update(
             {
                 "environment_num": 1,
-                "traffic_density": 0.,
+                "traffic_density": 0.2,
                 "start_seed": 5,
                 "map": "TrOCXR",
                 "target_vehicle_configs": {
@@ -21,22 +21,22 @@ class MultiAgentPGDrive(PGDriveEnv):
                         "born_longitude": 10,
                         "born_lateral": 1.5,
                         "born_lane_index": (FirstBlock.NODE_1, FirstBlock.NODE_2, 1),
-                        "show_lidar": True
+                        # "show_lidar": True
                     },
                     "agent1": {
                         "born_longitude": 10,
-                        "show_lidar": True,
+                        # "show_lidar": True,
                         "born_lateral": -1,
                     },
                     "agent2": {
                         "born_longitude": 10,
                         "born_lane_index": (FirstBlock.NODE_1, FirstBlock.NODE_2, 2),
-                        "show_lidar": True,
+                        # "show_lidar": True,
                         "born_lateral": 1,
                     },
                     "agent3": {
                         "born_longitude": 10,
-                        "show_lidar": True,
+                        # "show_lidar": True,
                         "born_lateral": 2,
                     }
                 },
@@ -44,7 +44,7 @@ class MultiAgentPGDrive(PGDriveEnv):
             }
         )
         # Some collision bugs still exist, always set to False now!!!!
-        config.extend_config_with_unknown_keys({"crash_done": False})
+        config.extend_config_with_unknown_keys({"crash_done": True})
         return config
 
     def __init__(self, config=None):
@@ -68,22 +68,31 @@ class MultiAgentPGDrive(PGDriveEnv):
             actions.pop(id)
 
         o, r, d, i = super(MultiAgentPGDrive, self).step(actions)
-        for id, done in d.items():
-            if done and id in self.vehicles.keys():
-                v = self.vehicles.pop(id)
-                v.prepare_step([0, -1])
-                self.done_vehicles[id] = v
+        # for id, done in d.items():
+        #     if done and id in self.vehicles.keys():
+        #         v = self.vehicles.pop(id)
+        #         v.prepare_step([0, -1])
+        #         self.done_vehicles[id] = v
         return o, r, d, i
 
 
 if __name__ == "__main__":
-    env = MultiAgentPGDrive({"use_render": True, "manual_control": True, "pg_world_config": {"pstats": False}})
+    env = MultiAgentPGDrive(
+        {
+            "use_render": True,
+            "debug": True,
+            "manual_control": True,
+            "pg_world_config": {
+                "pstats": False
+            }
+        }
+    )
     o = env.reset()
     for i in range(1, 100000):
         o, r, d, info = env.step({"agent0": [-1, 0], "agent1": [0, 0], "agent2": [-1, 0], "agent3": [0, 0]})
         # o, r, d, info = env.step([0,1])
         env.render(text=d)
-        if len(env.vehicles) == 0:
-            print("Reset")
-            env.reset()
+        # if len(env.vehicles) == 0:
+        #     print("Reset")
+        #     env.reset()
     env.close()

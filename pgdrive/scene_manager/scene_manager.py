@@ -147,22 +147,16 @@ class SceneManager:
         step_infos = self.for_each_target_vehicle(lambda v: v.update_state())
         # self.ego_vehicle.update_state()
 
-        # cull distant objects
-        self.for_each_target_vehicle(lambda v: PGLOD.cull_distant_blocks(self.map.blocks, v.position, self.pg_world))
+        # cull distant blocks
+        poses = [v.position for v in self.target_vehicles.values()]
+        PGLOD.cull_distant_blocks(self.map.blocks, poses, self.pg_world)
         # PGLOD.cull_distant_blocks(self.map.blocks, self.ego_vehicle.position, self.pg_world)
 
         if self.replay_system is None:
             # TODO add objects to replay system and add new cull method
 
-            def _advance(v):
-                PGLOD.cull_distant_traffic_vehicles(self.traffic_mgr.traffic_vehicles, v.position, self.pg_world)
-                PGLOD.cull_distant_objects(self.objects_mgr._spawned_objects, v.position, self.pg_world)
-
-            self.for_each_target_vehicle(_advance)
-            # PGLOD.cull_distant_traffic_vehicles(
-            #     self.traffic_mgr.traffic_vehicles, self.ego_vehicle.position, self.pg_world
-            # )
-            # PGLOD.cull_distant_objects(self.objects_mgr.spawned_objects, self.ego_vehicle.position, self.pg_world)
+            PGLOD.cull_distant_traffic_vehicles(self.traffic_mgr.traffic_vehicles, poses, self.pg_world)
+            PGLOD.cull_distant_objects(self.objects_mgr._spawned_objects, poses, self.pg_world)
 
         return dones, step_infos
 
@@ -172,14 +166,6 @@ class SceneManager:
         for k, v in self.target_vehicles.items():
             ret[k] = func(v)
         return ret
-        if self.cull_scene:
-            PGLOD.cull_distant_blocks(self.map.blocks, self.ego_vehicle.position, self.pg_world)
-            if self.replay_system is None:
-                PGLOD.cull_distant_traffic_vehicles(
-                    self.traffic_mgr.traffic_vehicles, self.ego_vehicle.position, self.pg_world
-                )
-                PGLOD.cull_distant_objects(self.objects_mgr._spawned_objects, self.ego_vehicle.position, self.pg_world)
-        return done
 
     def dump_episode(self) -> None:
         """Dump the data of an episode."""
