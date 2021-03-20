@@ -70,6 +70,7 @@ class PGDriveEnv(gym.Env):
             manual_control=False,
             controller="keyboard",  # "joystick" or "keyboard"
             use_chase_camera=True,
+            use_chase_camera_follow_lane=False,  # If true, then vision would be more stable.
             camera_height=1.8,
 
             # ===== Others =====
@@ -222,6 +223,7 @@ class PGDriveEnv(gym.Env):
         # for manual_control and main camera type
         if (self.config["use_render"] or self.config["use_image"]) and self.config["use_chase_camera"]:
             self.main_camera = ChaseCamera(self.pg_world.cam, self.config["camera_height"], 7, self.pg_world)
+            self.main_camera.set_follow_lane(self.config["use_chase_camera_follow_lane"])
             self.main_camera.chase(self.current_track_vehicle, self.pg_world)
         self.pg_world.accept("n", self.chase_another_v)
 
@@ -378,6 +380,9 @@ class PGDriveEnv(gym.Env):
             self.config["accident_prob"],
             episode_data=episode_data
         )
+
+        if self.main_camera is not None:
+            self.main_camera.reset()
 
         return self._get_reset_return()
 

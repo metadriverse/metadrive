@@ -1,10 +1,10 @@
 import queue
+from collections import deque
 from typing import Tuple
 
 import numpy as np
 from direct.controls.InputState import InputState
 from panda3d.core import Vec3, Camera
-from pgdrive.scene_creator.vehicle.base_vehicle import BaseVehicle
 from pgdrive.utils.coordinates_shift import panda_heading
 from pgdrive.world.pg_world import PGWorld
 
@@ -16,7 +16,7 @@ class ChaseCamera:
 
     queue_length = 3
     TASK_NAME = "update main camera"
-    FOLLOW_LANE = False
+    FOLLOW_LANE = True
 
     def __init__(self, camera: Camera, camera_height: float, camera_dist: float, pg_world: PGWorld):
         self.camera = camera
@@ -28,16 +28,24 @@ class ChaseCamera:
         self.inputs.watchWithModifiers('up', 'k')
         self.inputs.watchWithModifiers('down', 'j')
 
+        self.direction_running_mean = deque(maxlen=20)
+
+    def reset(self):
+        self.direction_running_mean.clear()
+
     def renew_camera_place(self, vehicle, task):
         if self.inputs.isSet("up"):
-            self.camera_height += 0.5
+            self.camera_height += 1.0
         if self.inputs.isSet("down"):
-            self.camera_height -= 0.5
+            self.camera_height -= 1.0
         self.camera_queue.put(vehicle.chassis_np.get_pos())
         if not self.FOLLOW_LANE:
             forward_dir = vehicle.system.get_forward_vector()
         else:
             forward_dir = self._dir_of_lane(vehicle.routing_localization.current_ref_lanes[0], vehicle.position)
+
+        self.direction_running_mean.append(forward_dir)
+        forward_dir = np.mean(self.direction_running_mean, axis=0)
 
         camera_pos = list(self.camera_queue.get())
         camera_pos[2] += self.camera_height
@@ -88,8 +96,11 @@ class ChaseCamera:
         :param pg_world: pg_world class
         :return: None
         """
-
-        pos = self._pos_on_lane(vehicle) if self.FOLLOW_LANE else vehicle.position
+        pos = None
+        if self.FOLLOW_LANE:
+            pos = self._pos_on_lane(vehicle)  # Return None if routing system is not ready
+        if pos is None:
+            pos = vehicle.position
 
         if pg_world.taskMgr.hasTaskNamed(self.TASK_NAME):
             pg_world.taskMgr.remove(self.TASK_NAME)
@@ -105,6 +116,9 @@ class ChaseCamera:
         :param vehicle: BaseVehicle
         :return: position on the center lane
         """
+        if vehicle.routing_localization.current_ref_lanes is None:
+            return None
+
         lane = vehicle.routing_localization.current_ref_lanes[0]
         lane_num = len(vehicle.routing_localization.current_ref_lanes)
 
@@ -112,12 +126,12 @@ class ChaseCamera:
         lateral = lane_num * lane.width / 2 - lane.width / 2
         return longitude, lateral
 
-    def set_follow_lane(self, follow: bool = True):
+    def set_follow_lane(self, flag: bool):
         """
         Camera will go follow reference lane instead of vehicle
         :return: None
         """
-        self.FOLLOW_LANE = follow
+        self.FOLLOW_LANE = flag
 
     def destroy(self, pg_world):
         if pg_world.taskMgr.hasTaskNamed(self.TASK_NAME):
