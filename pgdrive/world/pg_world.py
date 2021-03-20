@@ -43,6 +43,7 @@ class PGWorld(ShowBase.ShowBase):
     loadPrcFileData("", "multisamples 8")
     loadPrcFileData("", 'bullet-filter-algorithm groups-mask')
     loadPrcFileData("", "audio-library-name null")
+    loadPrcFileData("", "model-cache-compressed-textures 1")
 
     # loadPrcFileData("", " framebuffer-srgb truein")
     # loadPrcFileData("", "geom-cache-size 50000")
@@ -182,7 +183,7 @@ class PGWorld(ShowBase.ShowBase):
         self.physics_world.dynamic_world.setContactAddedCallback(PythonCallbackObject(pg_collision_callback))
 
         # for real time simulation
-        self.force_fps = ForceFPS(self, start=False)
+        self.force_fps = ForceFPS(self, start=True)
 
         # init terrain
         self.terrain = Terrain()
