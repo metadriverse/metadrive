@@ -100,10 +100,11 @@ class PGDriveEnv(gym.Env):
         self.config = self.default_config()
         if config:
             self.config.update(config)
+
         self.num_agents = self.config["num_agents"]
-        if self.num_agents == 1:
-            self._sync_config_to_vehicle_config()
         assert isinstance(self.num_agents, int) and self.num_agents > 0
+
+        self._sync_config_to_vehicle_config()
         assert len(self.config["target_vehicle_configs"]) == self.num_agents, "assign born place for each vehicle"
         self.config.extend_config_with_unknown_keys({"use_image": True if self.use_image_sensor else False})
 
@@ -209,6 +210,7 @@ class PGDriveEnv(gym.Env):
         }
 
         self.init_track_vehicle()
+        self._sync_config_to_vehicle_config()
 
     def init_track_vehicle(self):
         # first tracked vehicles
@@ -681,10 +683,28 @@ class PGDriveEnv(gym.Env):
         return o
 
     def _sync_config_to_vehicle_config(self):
-        assert self.num_agents == 1, "Only support single-agent sync now!"
-        vehicle_config = BaseVehicle.get_vehicle_config(self.config["vehicle_config"])
-        vehicle_config = merge_dicts(old_dict=vehicle_config, new_dict=self.config, raise_error=False)
-        self.config["target_vehicle_configs"][DEFAULT_AGENT] = vehicle_config
+        local_default_vehicle_config = BaseVehicle.get_vehicle_config(self.config["vehicle_config"])
+        local_default_vehicle_config = merge_dicts(
+            old_dict=self.config, new_dict=local_default_vehicle_config, new_keys_allowed=True, raise_error=False
+        )
+        local_default_vehicle_config.pop("vehicle_config")
+        if self.num_agents == 1:
+            self.config["target_vehicle_configs"][DEFAULT_AGENT] = merge_dicts(
+                old_dict=local_default_vehicle_config,
+                new_dict=self.config.get_dict().get("target_vehicle_configs", {}).get(DEFAULT_AGENT, {}),
+                new_keys_allowed=True,
+                raise_error=False
+            )
+        else:
+            # TODO This is only a workaround!
+            for i in range(self.num_agents):
+                k = "agent{}".format(i)
+                self.config["target_vehicle_configs"][k] = merge_dicts(
+                    old_dict=local_default_vehicle_config,
+                    new_dict=self.config.get_dict().get("target_vehicle_configs", {}).get(k, {}),
+                    new_keys_allowed=True,
+                    raise_error=False
+                )
 
 
 def _auto_termination(vehicle, should_done):

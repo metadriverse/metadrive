@@ -4,8 +4,6 @@ import os
 import sys
 import uuid
 
-from pgdrive.pg_config import PGConfig
-
 
 def import_pygame():
     os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
@@ -74,13 +72,14 @@ def concat_step_infos(step_info_list):
 def merge_dicts(old_dict, new_dict, new_keys_allowed=False, raise_error=True, use_pgconfig=True):
     """
     Args:
-        old_dict (dict): Dict 1.
-        new_dict (dict): Dict 2.
+        old_dict (dict, PGConfig): Dict 1.
+        new_dict (dict, PGConfig): Dict 2.
         raise_error (bool): Whether to raise error if new key is found.
 
     Returns:
          dict: A new dict that is d1 and d2 deep merged.
     """
+    from pgdrive.pg_config import PGConfig
     if isinstance(old_dict, PGConfig):
         old_dict = old_dict.get_dict()
     if isinstance(new_dict, PGConfig):

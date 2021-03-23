@@ -1,5 +1,6 @@
 import numpy as np
-import copy
+
+from pgdrive.utils import merge_dicts
 
 
 def _check_keys(new_config, old_config, prefix=""):
@@ -104,7 +105,9 @@ class PGConfig:
         :param extra_config: extra configs
         :return: None
         """
-        self._config.update(extra_config)
+        self._config = merge_dicts(
+            self._config, extra_config, new_keys_allowed=True, raise_error=False, use_pgconfig=False
+        )
 
     def items(self):
         return self._config.items()

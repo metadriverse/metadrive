@@ -16,8 +16,7 @@ class ActionRepeat(PGDriveEnv):
         config["decision_repeat"] = 1
 
         # Speed reward_function is given for current state, so its magnitude need to be reduced
-        config["vehicle_config"]["speed_reward"] = \
-            config["vehicle_config"]["speed_reward"] / cls.ORIGINAL_ACTION_REPEAT
+        config["speed_reward"] = config["speed_reward"] / cls.ORIGINAL_ACTION_REPEAT
 
         # Set the interval from 0.02s to 1s
         config.add("fixed_action_repeat", 0)  # 0 stands for using varying action repeat.
