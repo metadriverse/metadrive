@@ -84,8 +84,6 @@ class BaseVehicle(DynamicElement):
             use_saver=False,
             save_level=0.5,
         )
-        vehicle_config.update(pg_reward_scheme)
-        vehicle_config.update(pg_cost_scheme)
         return PGConfig(vehicle_config)
 
     LENGTH = None
@@ -229,7 +227,8 @@ class BaseVehicle(DynamicElement):
         default = copy.deepcopy(cls._default_vehicle_config())
         if new_config is None:
             return default
-        default.update(new_config)
+        # default.update(new_config)
+        default.extend_config_with_unknown_keys(new_config)
         return default
 
     def _preprocess_action(self, action):
