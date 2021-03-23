@@ -20,9 +20,10 @@ def _step(env):
 
 
 def test_naive_multi_agent_pgdrive():
-    env = PGDriveEnv(config={"num_agents": 1})
-    assert isinstance(env.action_space, gym.spaces.Box)
-    _step(env)
+    # env = PGDriveEnv(config={"num_agents": 1})
+    # assert isinstance(env.action_space, gym.spaces.Box)
+    # _step(env)
+    # env.close()
 
     env = PGDriveEnv(
         config={
