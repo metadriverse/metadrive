@@ -4,7 +4,7 @@ from pgdrive.pg_config.parameter_space import Parameter, BlockParameterSpace
 from pgdrive.pg_config.pg_space import PGSpace
 from pgdrive.scene_creator.blocks.block import Block
 from pgdrive.scene_creator.blocks.create_block_utils import CreateRoadFrom, CreateAdverseRoad, ExtendStraightLane, \
-    sharpbend
+    create_bend_straight
 from pgdrive.scene_creator.blocks.ramp import Ramp
 from pgdrive.scene_creator.lane.abs_lane import LineType
 from pgdrive.scene_creator.lane.straight_lane import StraightLane
@@ -68,7 +68,7 @@ class InFork(Fork):
         )
 
         # p1 road 0, 1
-        bend_1, connect_part = sharpbend(
+        bend_1, connect_part = create_bend_straight(
             straight_part,
             self.CONNECT_PART_LEN,
             self.RADIUS,
@@ -91,7 +91,7 @@ class InFork(Fork):
         ) and no_cross
 
         # p1, road 2, 3
-        bend_2, acc_lane = sharpbend(
+        bend_2, acc_lane = create_bend_straight(
             connect_part,
             acc_lane_len + self.lane_width,
             self.RADIUS,
@@ -137,7 +137,7 @@ class OutFork(Fork):
 
     def _get_merge_part(self, side_lane: StraightLane):
         tool_lane = StraightLane(side_lane.end, side_lane.start, side_lane.width)
-        merge_part, _ = sharpbend(
+        merge_part, _ = create_bend_straight(
             tool_lane,
             10,
             self.lane_width / 2,
@@ -183,7 +183,7 @@ class OutFork(Fork):
         self.block_network.add_lane(dec_road.start_node, self.add_road_node(), dec_side_right_lane)
         no_cross = (not check_lane_on_road(self._global_network, dec_side_right_lane, 0.95)) and no_cross
 
-        bend_1, connect_part = sharpbend(
+        bend_1, connect_part = create_bend_straight(
             dec_side_right_lane,
             self.CONNECT_PART_LEN,
             self.RADIUS,
@@ -200,7 +200,7 @@ class OutFork(Fork):
         no_cross = (not check_lane_on_road(self._global_network, bend_1, 0.95)) and no_cross
         no_cross = (not check_lane_on_road(self._global_network, connect_part, 0.95)) and no_cross
 
-        bend_2, straight_part = sharpbend(
+        bend_2, straight_part = create_bend_straight(
             connect_part,
             self.RAMP_LEN,
             self.RADIUS,

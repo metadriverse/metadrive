@@ -5,6 +5,7 @@ from pgdrive.scene_creator.blocks.roundabout import Roundabout
 from pgdrive.scene_creator.blocks.std_intersection import StdInterSection
 from pgdrive.scene_creator.blocks.std_t_intersection import StdTInterSection
 from pgdrive.scene_creator.blocks.straight import Straight
+from pgdrive.scene_creator.blocks.bottleneck import Merge, Split
 
 
 class PGBlock:
@@ -18,6 +19,8 @@ class PGBlock:
         OutRampOnStraight: 0.1,
         InFork: 0.00,
         OutFork: 0.00,
+        Merge: 0.00,
+        Split: 0.00
     }
 
     @classmethod

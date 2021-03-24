@@ -12,7 +12,7 @@ from pgdrive.utils.math_utils import get_vertical_vector
 from pgdrive.utils.scene_utils import check_lane_on_road
 
 
-def sharpbend(
+def create_bend_straight(
     previous_lane: "StraightLane",
     following_lane_length,
     radius: float,
@@ -112,6 +112,7 @@ def CreateRoadFrom(
     if toward_smaller_lane_index:
         lanes.reverse()
         lanes.append(origin_lane)
+        origin_lane.line_types = [inner_lane_line_type if len(lanes) > 1 else center_line_type, side_lane_line_type]
     else:
         lanes.insert(0, origin_lane)
         if len(lanes) > 1:
@@ -132,6 +133,7 @@ def CreateRoadFrom(
         roadnet_to_add_lanes.add_lane(road.start_node, road.end_node, l)
     if lane_num == 0:
         lanes[-1].line_types = [center_line_type, side_lane_line_type]
+    lanes[0].line_color = [LineColor.YELLOW, LineColor.GREY]
     return no_cross
 
 
@@ -155,7 +157,10 @@ def CreateAdverseRoad(
     roadnet_to_get_road: "RoadNetwork",  # mostly, block network
     roadnet_to_check_cross: "RoadNetwork",  # mostly, previous global network
     ignore_start: str = None,
-    ignore_end: str = None
+    ignore_end: str = None,
+    center_line_type=LineType.CONTINUOUS,  # Identical to Block.CENTER_LINE_TYPE
+    side_lane_line_type=LineType.SIDE,
+    inner_lane_line_type=LineType.BROKEN
 ) -> (str, str, bool):
     adverse_road = -positive_road
     lanes = get_lanes_on_road(positive_road, roadnet_to_get_road)
@@ -190,10 +195,11 @@ def CreateAdverseRoad(
         roadnet_to_get_road,
         roadnet_to_check_cross,
         ignore_start=ignore_start,
-        ignore_end=ignore_end
+        ignore_end=ignore_end,
+        side_lane_line_type=side_lane_line_type,
+        inner_lane_line_type=inner_lane_line_type,
+        center_line_type=center_line_type
     )
-    inner_lane = roadnet_to_get_road.get_lane((adverse_road.start_node, adverse_road.end_node, 0))
-    inner_lane.line_types = [LineType.NONE, LineType.BROKEN] if len(lanes) > 1 else [LineType.NONE, LineType.SIDE]
     positive_road.get_lanes(roadnet_to_get_road)[0].line_color = [LineColor.YELLOW, LineColor.GREY]
     return success
 
@@ -206,3 +212,27 @@ def block_socket_merge(
 
     global_network.graph[socket_2.positive_road.start_node][socket_1.negative_road.start_node] = \
         global_network.graph[socket_2.positive_road.start_node].pop(socket_2.positive_road.end_node)
+
+
+def create_wave_lanes(
+    pre_lane, lateral_dist: float, wave_length: float, last_straight_length: float, lane_width, toward_left=True
+):
+    """
+    Prodeuce two lanes in adverse direction
+    :param pre_lane: Previous abstract lane
+    :param lateral_dist: the dist moved in previous lane's lateral direction
+    :param wave_length: the length of two circular lanes in the previous lane's longitude direction
+    :param following_lane_length: the length of last straight lane
+    :return: List[Circular lane]
+    """
+    angle = np.pi - 2 * np.arctan(wave_length / (2 * lateral_dist))
+    radius = wave_length / (2 * np.sin(angle))
+    circular_lane_1, pre_lane = create_bend_straight(
+        pre_lane, 10, radius, angle, False if toward_left else True, lane_width, [LineType.NONE, LineType.NONE]
+    )
+    pre_lane.reset_start_end(pre_lane.position(-10, 0), pre_lane.position(pre_lane.length - 10, 0))
+    circular_lane_2, straight_lane = create_bend_straight(
+        pre_lane, last_straight_length, radius, angle, True if toward_left else False, lane_width,
+        [LineType.NONE, LineType.NONE]
+    )
+    return circular_lane_1, circular_lane_2, straight_lane

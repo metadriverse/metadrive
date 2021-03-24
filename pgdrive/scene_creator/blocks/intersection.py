@@ -6,7 +6,7 @@ from pgdrive.pg_config.parameter_space import Parameter, BlockParameterSpace
 from pgdrive.pg_config.pg_space import PGSpace
 from pgdrive.scene_creator.blocks.block import Block, BlockSocket
 from pgdrive.scene_creator.blocks.create_block_utils import CreateAdverseRoad, CreateRoadFrom, ExtendStraightLane, \
-    sharpbend
+    create_bend_straight
 from pgdrive.scene_creator.lane.abs_lane import LineType
 from pgdrive.scene_creator.lane.straight_lane import StraightLane
 from pgdrive.scene_creator.road.road import Road
@@ -99,7 +99,7 @@ class InterSection(Block):
         length = self.EXIT_PART_LENGTH
         right_turn_lane = lanes_on_road[-1]
         assert isinstance(right_turn_lane, StraightLane), "Can't create a intersection following a circular lane"
-        right_bend, right_straight = sharpbend(
+        right_bend, right_straight = create_bend_straight(
             right_turn_lane, length, radius, np.deg2rad(self.ANGLE), True, right_turn_lane.width_at(0),
             (LineType.NONE, LineType.SIDE)
         )
@@ -132,7 +132,7 @@ class InterSection(Block):
         diff = self.lane_num_intersect - self.positive_lane_num  # increase lane num
         if ((part_idx == 1 or part_idx == 3) and diff > 0) or ((part_idx == 0 or part_idx == 2) and diff < 0):
             diff = abs(diff)
-            left_bend, extra_part = sharpbend(
+            left_bend, extra_part = create_bend_straight(
                 attach_left_lane, self.lane_width * diff, left_turn_radius, np.deg2rad(self.ANGLE), False,
                 attach_left_lane.width_at(0), (LineType.NONE, LineType.NONE)
             )
@@ -163,7 +163,7 @@ class InterSection(Block):
             )
 
         else:
-            left_bend, _ = sharpbend(
+            left_bend, _ = create_bend_straight(
                 attach_left_lane, self.EXIT_PART_LENGTH, left_turn_radius, np.deg2rad(self.ANGLE), False,
                 attach_left_lane.width_at(0), (LineType.NONE, LineType.NONE)
             )
