@@ -4,7 +4,7 @@ from pgdrive.pg_config.parameter_space import Parameter, BlockParameterSpace
 from pgdrive.pg_config.pg_space import PGSpace
 from pgdrive.scene_creator.blocks.block import Block, BlockSocket
 from pgdrive.scene_creator.blocks.create_block_utils import ExtendStraightLane, CreateRoadFrom, CreateAdverseRoad, \
-    sharpbend
+    create_bend_straight
 from pgdrive.scene_creator.lane.abs_lane import LineType
 from pgdrive.scene_creator.lane.straight_lane import StraightLane
 from pgdrive.scene_creator.road.road import Road
@@ -104,7 +104,7 @@ class InRampOnStraight(Ramp):
         self.add_reborn_roads(straight_road)
 
         # p1 road 0, 1
-        bend_1, connect_part = sharpbend(
+        bend_1, connect_part = create_bend_straight(
             straight_part,
             self.CONNECT_PART_LEN,
             self.RADIUS,
@@ -122,7 +122,7 @@ class InRampOnStraight(Ramp):
         no_cross = (not check_lane_on_road(self._global_network, connect_part, 0.95)) and no_cross
 
         # p1, road 2, 3
-        bend_2, acc_lane = sharpbend(
+        bend_2, acc_lane = create_bend_straight(
             connect_part,
             acc_lane_len,
             self.RADIUS,
@@ -141,7 +141,7 @@ class InRampOnStraight(Ramp):
         no_cross = (not check_lane_on_road(self._global_network, acc_lane, 0.95)) and no_cross
 
         # p1, road 4, small circular to decorate
-        merge_lane, _ = sharpbend(
+        merge_lane, _ = create_bend_straight(
             acc_lane, 10, self.lane_width / 2, np.pi / 2, False, self.lane_width,
             (LineType.BROKEN, LineType.CONTINUOUS)
         )
@@ -161,7 +161,7 @@ class OutRampOnStraight(Ramp):
 
     def _get_merge_part(self, side_lane: StraightLane):
         tool_lane = StraightLane(side_lane.end, side_lane.start, side_lane.width)
-        merge_part, _ = sharpbend(
+        merge_part, _ = create_bend_straight(
             tool_lane,
             10,
             self.lane_width / 2,
@@ -225,7 +225,7 @@ class OutRampOnStraight(Ramp):
         self.block_network.add_lane(dec_road.start_node, self.add_road_node(), dec_side_right_lane)
         no_cross = (not check_lane_on_road(self._global_network, dec_side_right_lane, 0.95)) and no_cross
 
-        bend_1, connect_part = sharpbend(
+        bend_1, connect_part = create_bend_straight(
             dec_side_right_lane,
             self.CONNECT_PART_LEN,
             self.RADIUS,
@@ -242,7 +242,7 @@ class OutRampOnStraight(Ramp):
         no_cross = (not check_lane_on_road(self._global_network, bend_1, 0.95)) and no_cross
         no_cross = (not check_lane_on_road(self._global_network, connect_part, 0.95)) and no_cross
 
-        bend_2, straight_part = sharpbend(
+        bend_2, straight_part = create_bend_straight(
             connect_part,
             self.RAMP_LEN,
             self.RADIUS,

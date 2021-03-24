@@ -13,7 +13,7 @@ class TestEnv(PGDriveEnv):
         super(TestEnv, self).__init__(
             {
                 "environment_num": 1,
-                "traffic_density": 0.1,
+                "traffic_density": 0.4,
                 "traffic_mode": "hybrid",
                 "start_seed": 5,
                 "pg_world_config": {
@@ -28,8 +28,8 @@ class TestEnv(PGDriveEnv):
                 "rgb_clip": True,
                 # "debug":True,
                 "map_config": {
-                    Map.GENERATE_METHOD: MapGenerateMethod.BIG_BLOCK_SEQUENCE,
-                    Map.GENERATE_PARA: "XTX",
+                    Map.GENERATE_METHOD: MapGenerateMethod.BIG_BLOCK_NUM,
+                    Map.GENERATE_PARA: 10,
                     Map.LANE_WIDTH: 3.5,
                     Map.LANE_NUM: 3,
                 },
