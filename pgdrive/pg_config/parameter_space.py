@@ -105,3 +105,7 @@ class BlockParameterSpace:
         Parameter.length: PGBoxSpace(min=20, max=40),  # accelerate/decelerate part length
         Parameter.lane_num: PGDiscreteSpace(2)
     }
+    BOTTLENECK_PARAMETER = {
+        Parameter.length: PGBoxSpace(min=20, max=50),  # the length of straigh part
+        Parameter.lane_num: PGDiscreteSpace(2),  # the lane num increased or descreased now fix to 1
+    }

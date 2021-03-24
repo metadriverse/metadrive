@@ -3,7 +3,7 @@ import numpy as np
 from pgdrive.pg_config.parameter_space import Parameter, BlockParameterSpace
 from pgdrive.pg_config.pg_space import PGSpace
 from pgdrive.scene_creator.blocks.block import Block, BlockSocket
-from pgdrive.scene_creator.blocks.create_block_utils import CreateAdverseRoad, CreateRoadFrom, sharpbend
+from pgdrive.scene_creator.blocks.create_block_utils import CreateAdverseRoad, CreateRoadFrom, create_bend_straight
 from pgdrive.scene_creator.lane.abs_lane import LineType
 from pgdrive.scene_creator.lane.straight_lane import StraightLane
 from pgdrive.scene_creator.road.road import Road
@@ -50,7 +50,7 @@ class Roundabout(Block):
         segment_road = Road(segment_start_node, segment_end_node)
         lanes = road.get_lanes(self._global_network) if part_idx == 0 else road.get_lanes(self.block_network)
         right_lane = lanes[-1]
-        bend, straight = sharpbend(
+        bend, straight = create_bend_straight(
             right_lane, 10, radius_exit, np.deg2rad(angle), True, self.lane_width, (LineType.BROKEN, LineType.SIDE)
         )
         ignore_last_2_part_start = self.road_node((part_idx + 3) % 4, 0)
@@ -77,7 +77,7 @@ class Roundabout(Block):
         tool_lane_end = straight.position(0, 0)
         tool_lane = StraightLane(tool_lane_start, tool_lane_end)
 
-        bend, straight_to_next_iter_part = sharpbend(
+        bend, straight_to_next_iter_part = create_bend_straight(
             tool_lane, 10, radius_big, np.deg2rad(2 * angle - 90), False, self.lane_width,
             (LineType.BROKEN, LineType.SIDE)
         )
@@ -96,7 +96,7 @@ class Roundabout(Block):
         tool_lane_end = straight_to_next_iter_part.position(0, 0)
         tool_lane = StraightLane(tool_lane_start, tool_lane_end)
 
-        bend, straight = sharpbend(
+        bend, straight = create_bend_straight(
             tool_lane, length, radius_exit, np.deg2rad(angle), True, self.lane_width, (LineType.BROKEN, LineType.SIDE)
         )
 
@@ -136,7 +136,7 @@ class Roundabout(Block):
         cos = np.cos(np.deg2rad(angle))
         radius_this_seg = beneath / cos - radius_exit
 
-        bend, _ = sharpbend(
+        bend, _ = create_bend_straight(
             tool_lane, 5, radius_this_seg, np.deg2rad(180 - 2 * angle), False, self.lane_width,
             (LineType.BROKEN, LineType.SIDE)
         )
