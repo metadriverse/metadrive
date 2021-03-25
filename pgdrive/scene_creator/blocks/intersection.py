@@ -2,14 +2,13 @@ import copy
 from collections import deque
 
 import numpy as np
-from pgdrive.pg_config.parameter_space import Parameter, BlockParameterSpace
-from pgdrive.pg_config.pg_space import PGSpace
 from pgdrive.scene_creator.blocks.block import Block, BlockSocket
 from pgdrive.scene_creator.blocks.create_block_utils import CreateAdverseRoad, CreateRoadFrom, ExtendStraightLane, \
     create_bend_straight
 from pgdrive.scene_creator.lane.abs_lane import LineType
 from pgdrive.scene_creator.lane.straight_lane import StraightLane
 from pgdrive.scene_creator.road.road import Road
+from pgdrive.utils.pg_space import PGSpace, Parameter, BlockParameterSpace
 from pgdrive.utils.scene_utils import check_lane_on_road
 
 

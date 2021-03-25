@@ -3,13 +3,11 @@ import logging
 import os.path as osp
 
 import numpy as np
-
 from pgdrive.constants import DEFAULT_AGENT
 from pgdrive.envs.pgdrive_env import PGDriveEnv as PGDriveEnvV1
-from pgdrive.pg_config import PGConfig
 from pgdrive.scene_creator.vehicle.base_vehicle import BaseVehicle
 from pgdrive.scene_manager.traffic_manager import TrafficMode
-from pgdrive.utils import clip, merge_dicts
+from pgdrive.utils import PGConfig, clip
 
 pregenerated_map_file = osp.join(osp.dirname(osp.dirname(osp.abspath(__file__))), "assets", "maps", "PGDrive-maps.json")
 

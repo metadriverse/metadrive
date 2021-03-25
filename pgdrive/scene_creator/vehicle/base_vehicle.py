@@ -1,5 +1,4 @@
 import copy
-import logging
 import math
 import time
 from collections import deque
@@ -8,31 +7,25 @@ from typing import Optional
 import gym
 import numpy as np
 from panda3d.bullet import BulletVehicle, BulletBoxShape, ZUp, BulletGhostNode
-from panda3d.core import Vec3, TransformState, NodePath, LQuaternionf, BitMask32, PythonCallbackObject, TextNode
-from pgdrive.scene_creator.vehicle.base_vehicle_node import BaseVehilceNode
-from pgdrive.constants import RENDER_MODE_ONSCREEN, COLOR, COLLISION_INFO_COLOR, BodyName
-from pgdrive.pg_config import PGConfig
-from pgdrive.pg_config.cam_mask import CamMask
-from pgdrive.pg_config.collision_group import CollisionGroup
-from pgdrive.pg_config.parameter_space import Parameter, VehicleParameterSpace
-from pgdrive.pg_config.pg_space import PGSpace
-from pgdrive.rl_utils.cost import pg_cost_scheme
-from pgdrive.rl_utils.reward import pg_reward_scheme
+from panda3d.core import Vec3, TransformState, NodePath, LQuaternionf, BitMask32, TextNode
+from pgdrive.constants import RENDER_MODE_ONSCREEN, COLOR, COLLISION_INFO_COLOR, BodyName, CamMask, CollisionGroup
 from pgdrive.scene_creator.blocks.first_block import FirstBlock
 from pgdrive.scene_creator.lane.abs_lane import AbstractLane
 from pgdrive.scene_creator.lane.circular_lane import CircularLane
 from pgdrive.scene_creator.lane.straight_lane import StraightLane
 from pgdrive.scene_creator.map import Map
+from pgdrive.scene_creator.vehicle.base_vehicle_node import BaseVehilceNode
 from pgdrive.scene_creator.vehicle_module import Lidar, MiniMap
 from pgdrive.scene_creator.vehicle_module.depth_camera import DepthCamera
 from pgdrive.scene_creator.vehicle_module.rgb_camera import RGBCamera
 from pgdrive.scene_creator.vehicle_module.routing_localization import RoutingLocalizationModule
 from pgdrive.scene_creator.vehicle_module.vehicle_panel import VehiclePanel
-from pgdrive.utils import safe_clip
+from pgdrive.utils import PGConfig, safe_clip
 from pgdrive.utils.asset_loader import AssetLoader
 from pgdrive.utils.coordinates_shift import panda_position, pgdrive_position, panda_heading, pgdrive_heading
 from pgdrive.utils.element import DynamicElement
 from pgdrive.utils.math_utils import get_vertical_vector, norm, clip
+from pgdrive.utils.pg_space import PGSpace, Parameter, VehicleParameterSpace
 from pgdrive.utils.scene_utils import ray_localization
 from pgdrive.world.image_buffer import ImageBuffer
 from pgdrive.world.pg_physics_world import PGPhysicsWorld

@@ -1,9 +1,7 @@
 import numpy as np
-
 from pgdrive.envs.pgdrive_env import PGDriveEnv
-from pgdrive.pg_config import PGConfig
 from pgdrive.scene_creator.vehicle.base_vehicle import BaseVehicle
-from pgdrive.utils import get_np_random
+from pgdrive.utils import PGConfig, get_np_random
 
 
 class ChangeFrictionEnv(PGDriveEnv):

@@ -6,9 +6,7 @@ import numpy
 from panda3d.bullet import BulletBoxShape, BulletRigidBodyNode
 from panda3d.core import Vec3, LQuaternionf, BitMask32, Vec4, CardMaker, TextureStage, RigidBodyCombiner, \
     TransparencyAttrib, SamplerState, NodePath
-
-from pgdrive.constants import Decoration, BodyName
-from pgdrive.pg_config.cam_mask import CamMask
+from pgdrive.constants import Decoration, BodyName, CamMask
 from pgdrive.scene_creator.blocks.constants import BlockDefault
 from pgdrive.scene_creator.lane.abs_lane import AbstractLane, LineType, LaneNode
 from pgdrive.scene_creator.lane.circular_lane import CircularLane
@@ -141,7 +139,7 @@ class Block(Element, BlockDefault):
 
     def construct_from_config(self, config: Dict, root_render_np: NodePath, pg_physics_world: PGPhysicsWorld):
         assert set(config.keys()) == self.PARAMETER_SPACE.parameters, \
-            "Make sure the parameters' name are as same as what defined in parameter_space.py"
+            "Make sure the parameters' name are as same as what defined in pg_space.py"
         self.set_config(config)
         success = self._sample_topology()
         self._create_in_world()

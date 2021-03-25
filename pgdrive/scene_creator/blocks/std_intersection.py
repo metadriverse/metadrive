@@ -1,5 +1,5 @@
-from pgdrive.pg_config.parameter_space import Parameter
 from pgdrive.scene_creator.blocks.intersection import InterSection
+from pgdrive.utils.pg_space import Parameter
 
 
 class StdInterSection(InterSection):
