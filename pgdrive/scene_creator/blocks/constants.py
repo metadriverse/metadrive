@@ -1,4 +1,4 @@
-from pgdrive.pg_config.collision_group import CollisionGroup
+from pgdrive.constants import CollisionGroup
 from pgdrive.scene_creator.lane.abs_lane import LineType
 
 

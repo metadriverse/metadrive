@@ -1,6 +1,6 @@
 import numpy as np
 
-from pgdrive.utils import merge_dicts
+from pgdrive.utils.utils import merge_dicts
 
 
 def _check_keys(new_config, old_config, prefix=""):

@@ -1,6 +1,6 @@
 from pgdrive.envs.pgdrive_env import PGDriveEnv
-from pgdrive.scene_creator.vehicle_module.depth_camera import DepthCamera
 from pgdrive.scene_creator.map import Map, MapGenerateMethod
+from pgdrive.scene_creator.vehicle_module.depth_camera import DepthCamera
 from pgdrive.utils import setup_logger
 
 setup_logger(True)

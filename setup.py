@@ -1,6 +1,7 @@
 import sys
 from distutils.core import setup
 from os import path
+
 from setuptools import find_namespace_packages
 
 assert sys.version_info.major == 3 and sys.version_info.minor >= 6, "python version >= 3.6 is required"
