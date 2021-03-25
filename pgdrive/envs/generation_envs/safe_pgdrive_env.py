@@ -1,6 +1,6 @@
 from pgdrive.envs.pgdrive_env import PGDriveEnv
-from pgdrive.pg_config import PGConfig
 from pgdrive.rl_utils.done import pg_done_function
+from pgdrive.utils import PGConfig
 
 
 class SafePGDriveEnv(PGDriveEnv):

@@ -79,7 +79,7 @@ def merge_dicts(old_dict, new_dict, new_keys_allowed=False, raise_error=True, us
     Returns:
          dict: A new dict that is d1 and d2 deep merged.
     """
-    from pgdrive.pg_config import PGConfig
+    from pgdrive.utils import PGConfig
     if isinstance(old_dict, PGConfig):
         old_dict = old_dict.get_dict()
     if isinstance(new_dict, PGConfig):

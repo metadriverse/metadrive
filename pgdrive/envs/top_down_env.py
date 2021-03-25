@@ -1,6 +1,6 @@
 from pgdrive.envs.pgdrive_env import PGDriveEnv
-from pgdrive.pg_config import PGConfig
 from pgdrive.scene_creator.vehicle.base_vehicle import BaseVehicle
+from pgdrive.utils import PGConfig
 from pgdrive.world.top_down_observation import TopDownMultiChannel, TopDownObservation
 
 

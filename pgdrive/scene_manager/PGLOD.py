@@ -1,6 +1,7 @@
+from typing import List
+
 from pgdrive.utils.math_utils import norm
 from pgdrive.world.pg_world import PGWorld
-from typing import List
 
 
 class PGLOD:

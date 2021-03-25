@@ -3,7 +3,6 @@ import logging
 from typing import List, Tuple, Dict
 
 import numpy as np
-
 from pgdrive.constants import Decoration
 from pgdrive.scene_creator.lane.abs_lane import LineType, AbstractLane
 from pgdrive.scene_creator.lane.straight_lane import StraightLane

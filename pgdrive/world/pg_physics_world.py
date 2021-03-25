@@ -2,7 +2,7 @@ import logging
 
 from panda3d.bullet import BulletWorld
 from panda3d.core import Vec3
-from pgdrive.pg_config.collision_group import CollisionGroup
+from pgdrive.constants import CollisionGroup
 
 
 class PGPhysicsWorld:

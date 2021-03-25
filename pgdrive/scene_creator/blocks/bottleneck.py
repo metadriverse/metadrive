@@ -1,13 +1,9 @@
-import numpy as np
-from pgdrive.scene_creator.lane.straight_lane import StraightLane
-from pgdrive.utils.scene_utils import check_lane_on_road
-from pgdrive.pg_config.parameter_space import BlockParameterSpace, Parameter
-from pgdrive.pg_config.pg_space import PGSpace
 from pgdrive.scene_creator.blocks.block import Block, BlockSocket
-from pgdrive.scene_creator.blocks.create_block_utils import CreateAdverseRoad, CreateRoadFrom, create_bend_straight, \
-    ExtendStraightLane, create_wave_lanes
+from pgdrive.scene_creator.blocks.create_block_utils import CreateAdverseRoad, CreateRoadFrom, ExtendStraightLane, \
+    create_wave_lanes
 from pgdrive.scene_creator.lane.abs_lane import LineType
 from pgdrive.scene_creator.road.road import Road
+from pgdrive.utils.pg_space import PGSpace, Parameter, BlockParameterSpace
 
 
 class Bottleneck(Block):

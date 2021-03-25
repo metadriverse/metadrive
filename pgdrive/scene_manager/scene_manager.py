@@ -2,7 +2,6 @@ import logging
 from typing import List, Tuple, Optional, Dict, AnyStr
 
 import numpy as np
-
 from pgdrive.scene_creator.map import Map
 from pgdrive.scene_manager.PGLOD import PGLOD
 from pgdrive.scene_manager.object_manager import ObjectsManager

@@ -1,5 +1,4 @@
 from panda3d.bullet import BulletRigidBodyNode
-from pgdrive.constants import BodyName
 
 
 class BaseVehilceNode(BulletRigidBodyNode):

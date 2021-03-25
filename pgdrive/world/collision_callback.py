@@ -1,5 +1,6 @@
-from pgdrive.constants import BodyName
 import logging
+
+from pgdrive.constants import BodyName
 
 
 def pg_collision_callback(contact):

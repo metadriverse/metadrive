@@ -3,9 +3,9 @@ from typing import Union
 
 from numpy.random import RandomState
 from panda3d.core import NodePath
-from pgdrive.pg_config.pg_blocks import PGBlock
 from pgdrive.scene_creator.blocks.block import Block
 from pgdrive.scene_creator.blocks.first_block import FirstBlock
+from pgdrive.scene_creator.pg_blocks import PGBlock
 from pgdrive.scene_creator.road.road_network import RoadNetwork
 from pgdrive.world.pg_physics_world import PGPhysicsWorld
 
