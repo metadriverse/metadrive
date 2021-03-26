@@ -151,6 +151,7 @@ class BaseVehicle(DynamicElement):
         self._add_modules_for_vehicle(pg_world.pg_config["use_render"])
         self.takeover = False
         self._expert_takeover = False
+        self.energy_consumption = 0
 
         # overtake_stat
         self.front_vehicles = set()
@@ -266,6 +267,7 @@ class BaseVehicle(DynamicElement):
             self.lane, self.lane_index = self.routing_localization.update_navigation_localization(self)
         self._state_check()
         self.update_dist_to_left_right()
+        self._update_energy_consumption()
         self.out_of_route = True if self.dist_to_right < 0 or self.dist_to_left < 0 else False
         step_info = self._update_overtake_stat()
         step_info.update(
@@ -276,6 +278,17 @@ class BaseVehicle(DynamicElement):
             }
         )
         return step_info
+
+    def _update_energy_consumption(self):
+        """
+        The calculation method is from
+        https://www.researchgate.net/publication/262182035_Reduction_of_Fuel_Consumption_and_Exhaust_Pollutant_Using_Intelligent_Transport_System
+        default: 3rd gear, try to use ae^bx to fit it, dp: (90, 8), (130, 12)
+        :return: None
+        """
+        distance = norm(*(self.last_position - self.position)) / 1000  # km
+        print(distance)
+        self.energy_consumption += 3.25 * np.power(np.e, 0.01 * self.speed) * distance / 100  # L/100 km
 
     def reset(self, map: Map, pos: np.ndarray = None, heading: float = 0.0):
         """
@@ -308,6 +321,7 @@ class BaseVehicle(DynamicElement):
         self.last_heading_dir = self.heading
         self.update_dist_to_left_right()
         self.takeover = False
+        self.energy_consumption = 0
 
         # overtake_stat
         self.front_vehicles = set()
