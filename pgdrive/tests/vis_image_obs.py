@@ -144,8 +144,8 @@ if __name__ == '__main__':
         dict(
             use_render=False,
             map_config={
-                Map.GENERATE_METHOD: BigGenerateMethod.BLOCK_NUM,
-                Map.GENERATE_PARA: 7
+                Map.GENERATE_TYPE: BigGenerateMethod.BLOCK_NUM,
+                Map.GENERATE_CONFIG: 7
             },
             traffic_density=0.5,
             use_image=True,

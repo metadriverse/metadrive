@@ -9,6 +9,7 @@ from typing import Union, Dict, AnyStr, Optional
 import gym
 import numpy as np
 from panda3d.core import PNMImage
+
 from pgdrive.constants import RENDER_MODE_NONE, DEFAULT_AGENT
 from pgdrive.obs.observation_type import LidarStateObservation, ImageStateObservation
 from pgdrive.scene_creator.blocks.first_block import FirstBlock
@@ -16,7 +17,7 @@ from pgdrive.scene_creator.map import Map, MapGenerateMethod, parse_map_config
 from pgdrive.scene_creator.vehicle.base_vehicle import BaseVehicle
 from pgdrive.scene_manager.scene_manager import SceneManager
 from pgdrive.scene_manager.traffic_manager import TrafficMode
-from pgdrive.utils import clip, PGConfig, recursive_equal, get_np_random, merge_dicts, concat_step_infos, merge_config
+from pgdrive.utils import clip, PGConfig, recursive_equal, get_np_random, concat_step_infos
 from pgdrive.world.chase_camera import ChaseCamera
 from pgdrive.world.manual_controller import KeyboardController, JoystickController
 from pgdrive.world.pg_world import PGWorld
@@ -31,8 +32,8 @@ PGDriveEnvV1_DEFAULT_CONFIG = dict(
     # ===== Map Config =====
     map=3,  # int or string: an easy way to fill map_config
     map_config={
-        Map.GENERATE_METHOD: MapGenerateMethod.BIG_BLOCK_NUM,
-        Map.GENERATE_PARA: None,  # it can be a file path / block num / block ID sequence
+        Map.GENERATE_TYPE: MapGenerateMethod.BIG_BLOCK_NUM,
+        Map.GENERATE_CONFIG: None,  # it can be a file path / block num / block ID sequence
         Map.LANE_WIDTH: 3.5,
         Map.LANE_NUM: 3,
         Map.SEED: 10,
@@ -43,7 +44,6 @@ PGDriveEnvV1_DEFAULT_CONFIG = dict(
 
     # ==== agents config =====
     num_agents=1,
-    # target_vehicle_configs={},  # agent_id: vehicle_config
 
     # ===== Observation =====
     use_topdown=False,  # Use top-down view
@@ -75,7 +75,6 @@ PGDriveEnvV1_DEFAULT_CONFIG = dict(
     auto_termination=True,  # Whether to done the environment after 250*(num_blocks+1) steps.
     pg_world_config=dict(
         window_size=(1200, 900),  # width, height
-        debug=False,
         physics_world_step_size=2e-2,
         show_fps=True,
 
@@ -85,7 +84,6 @@ PGDriveEnvV1_DEFAULT_CONFIG = dict(
         # limit the render fps
         # Press "f" to switch FPS, this config is deprecated!
         # force_fps=None,
-        decision_repeat=5,  # This will be written by PGDriveEnv
 
         # only render physics world without model, a special debug option
         debug_physics_world=False,
@@ -93,21 +91,12 @@ PGDriveEnvV1_DEFAULT_CONFIG = dict(
         # set to true only when on headless machine and use rgb image!!!!!!
         headless_image=False,
 
-        # Open a window to illustrate the iimage
-        use_render=False,
-
-        # The following two option are exclusive. Only one can be True
-        use_image=False,  # Render the first-view image in screen or buffer
-
-        # use_topdown=False,  # Render the top-down view image in screen or buffer
+        # turn on to profile the efficiency
         pstats=False
     ),
     record_episode=False,
 
-    # ===== Single-agent Env Quick Config =====
-    # 1. These config only takes effect in single-agent env
-    # 2. vehicle_config=custom_config_dict <=======> target_vehicle_configs[DEFAULT_AGENT]=custom_config_dict
-    # 3. reward/cost scheme will also override and write into custom_vehicle_config
+    # ===== Single-agent vehicle config =====
     vehicle_config=dict(
         # ===== vehicle module config =====
         lidar=dict(num_lasers=240, distance=50, num_others=4),  # laser num, distance, other vehicle info num
@@ -121,8 +110,8 @@ PGDriveEnvV1_DEFAULT_CONFIG = dict(
 
         # ===== use image =====
         image_source="rgb_cam",  # take effect when only when use_image == True
-        use_image=False,
-        rgb_clip=True,
+        # use_image=False,
+        # rgb_clip=True,
 
         # ===== vehicle born =====
         born_lane_index=(FirstBlock.NODE_1, FirstBlock.NODE_2, 0),
@@ -168,26 +157,13 @@ class PGDriveEnv(gym.Env):
 
     def __init__(self, config: dict = None):
         default_config = self.default_config()
-        # check_success, check_keys = default_config.check_keys(config)
-        # assert check_success, check_keys
 
-        self.config = default_config.update(config, allow_overwrite=True)
-        # self.config = merge_config(default_config, new_dict=config, new_keys_allowed=False)
-        # self.config = self.default_config()
-        # if config:
-        #     self.config.update(config)
+        self.config = self.process_config(default_config.update(config, allow_overwrite=True))
 
         self.num_agents = self.config["num_agents"]
         assert isinstance(self.num_agents, int) and self.num_agents > 0
 
-        # self._sync_config_to_vehicle_config([])
-        # assert len(self.config["target_vehicle_configs"]) == self.num_agents, "assign born place for each vehicle"
-
-        # FIXME!!
-        # self.config.extend_config_with_unknown_keys({"use_image": True if self.use_image_sensor else False})
-
-        # obs. action space
-
+        # observation and action space
         self.observations = self.get_observations()
         self.observation_space = gym.spaces.Dict(
             {v_id: obs.observation_space
@@ -205,27 +181,6 @@ class PGDriveEnv(gym.Env):
         # map setting
         self.start_seed = self.config["start_seed"]
         self.env_num = self.config["environment_num"]
-
-        # vis
-        self.use_render = self.config["use_render"]
-
-        # process map config
-        self.config["map_config"] = parse_map_config(self.config["map"], self.config["map_config"])
-        self.map_config = self.config["map_config"]
-
-        pg_world_config = self.config["pg_world_config"]
-        pg_world_config.update(
-            {
-                "use_render": self.use_render,
-                "use_image": self.config["use_image"],
-                # "use_topdown": self.config["use_topdown"],
-                "debug": self.config["debug"],
-                # "force_fps": self.config["force_fps"],
-                "decision_repeat": self.config["decision_repeat"],
-            },
-            allow_overwrite=True
-        )
-        self.pg_world_config = pg_world_config
 
         # lazy initialization, create the main vehicle in the lazy_init() func
         self.pg_world: Optional[PGWorld] = None
@@ -245,12 +200,28 @@ class PGDriveEnv(gym.Env):
         self.current_track_vehicle: Optional[BaseVehicle] = None
         self.current_track_vehicle_id: Optional[str] = None
 
+    def process_config(self, config: Union[dict, "PGConfig"]) -> "PGConfig":
+        """Check, update, sync and overwrite some config."""
+        config["map_config"] = parse_map_config(config["map"], config["map_config"])
+        config["pg_world_config"].update(
+            {
+                "use_render": config["use_render"],
+                "use_image": config["use_image"],
+                "debug": config["debug"],
+                "decision_repeat": config["decision_repeat"],
+            },
+            allow_overwrite=True
+        )
+        config["vehicle_config"].update(
+            {
+                "use_render": config["use_render"],
+                "use_image": config["use_image"]
+            }, allow_overwrite=True
+        )
+        return config
+
     def get_observations(self):
-        return {
-            self.DEFAULT_AGENT: self.get_observation(self.config["vehicle_config"])
-            # v_id: self.get_observation(v_config)
-            # for v_id, v_config in self.config["target_vehicle_configs"].items()
-        }
+        return {self.DEFAULT_AGENT: self.get_observation(self.config["vehicle_config"])}
 
     def lazy_init(self):
         """
@@ -262,7 +233,7 @@ class PGDriveEnv(gym.Env):
             return
 
         # init world
-        self.pg_world = PGWorld(self.pg_world_config)
+        self.pg_world = PGWorld(self.config["pg_world_config"])
         self.pg_world.accept("r", self.reset)
         self.pg_world.accept("escape", sys.exit)
 
@@ -309,7 +280,8 @@ class PGDriveEnv(gym.Env):
         self.pg_world.accept("n", self.chase_another_v)
 
     def preprocess_actions(self, actions: Union[np.ndarray, Dict[AnyStr, np.ndarray]]):
-        if self.config["manual_control"] and self.use_render and self.current_track_vehicle_id in self.vehicles.keys():
+        if self.config["manual_control"] and self.config["use_render"
+                                                         ] and self.current_track_vehicle_id in self.vehicles.keys():
             action = self.controller.process_input()
             if self.num_agents == 1:
                 actions = action
@@ -326,11 +298,7 @@ class PGDriveEnv(gym.Env):
         return actions, saver_info
 
     def get_vehicles(self):
-        return {
-            self.DEFAULT_AGENT: BaseVehicle(self.pg_world, self.config["vehicle_config"])
-            # agent_id: BaseVehicle(self.pg_world, v_config)
-            # for agent_id, v_config in self.config["target_vehicle_configs"].items()
-        }
+        return {self.DEFAULT_AGENT: BaseVehicle(self.pg_world, self.config["vehicle_config"])}
 
     def step(self, actions: Union[np.ndarray, Dict[AnyStr, np.ndarray]]):
 
@@ -446,7 +414,9 @@ class PGDriveEnv(gym.Env):
 
         # reward for lane keeping, without it vehicle can learn to overtake but fail to keep in lane
         reward = 0.0
-        lateral_factor = clip(1 - 2 * abs(lateral_now) / vehicle.routing_localization.map.lane_width, 0.0, 1.0)
+        lateral_factor = clip(
+            1 - 2 * abs(lateral_now) / vehicle.routing_localization.get_current_lane_width(), 0.0, 1.0
+        )
         reward += self.config["driving_reward"] * (long_now - long_last) * lateral_factor
 
         # Penalty for frequent steering
@@ -490,7 +460,9 @@ class PGDriveEnv(gym.Env):
         :param text:text to show
         :return: when mode is 'rgb', image array is returned
         """
-        assert self.use_render or self.pg_world.mode != RENDER_MODE_NONE, ("render is off now, can not render")
+        assert self.config["use_render"] or self.pg_world.mode != RENDER_MODE_NONE, (
+            "render is off now, can not render"
+        )
         self.pg_world.render_frame(text)
         if mode != "human" and self.config["use_image"]:
             # fetch img from img stack to be make this func compatible with other render func in RL setting
@@ -603,8 +575,8 @@ class PGDriveEnv(gym.Env):
                 blocks_info = map
 
             map_config = self.config["map_config"].copy()
-            map_config[Map.GENERATE_METHOD] = MapGenerateMethod.PG_MAP_FILE
-            map_config[Map.GENERATE_PARA] = blocks_info
+            map_config[Map.GENERATE_TYPE] = MapGenerateMethod.PG_MAP_FILE
+            map_config[Map.GENERATE_CONFIG] = blocks_info
             self.current_map = Map(self.pg_world, map_config)
             return
 
@@ -683,8 +655,8 @@ class PGDriveEnv(gym.Env):
             assert str(seed) in data["map_data"]
             assert self.maps[seed] is None
             map_config = {}
-            map_config[Map.GENERATE_METHOD] = MapGenerateMethod.PG_MAP_FILE
-            map_config[Map.GENERATE_PARA] = data["map_data"][str(seed)]
+            map_config[Map.GENERATE_TYPE] = MapGenerateMethod.PG_MAP_FILE
+            map_config[Map.GENERATE_CONFIG] = data["map_data"][str(seed)]
             self.restored_maps[seed] = map_config
 
     def load_all_maps_from_json(self, path):
@@ -700,7 +672,7 @@ class PGDriveEnv(gym.Env):
             logging.warning(
                 "Warning: The pre-generated maps is with config {}, but current environment's map "
                 "config is {}.\nWe now fallback to BIG algorithm to generate map online!".format(
-                    restored_data["map_config"], self.map_config
+                    restored_data["map_config"], self.config["map_config"]
                 )
             )
             self.config["load_map_from_json"] = False  # Don't fall into this function again.
@@ -757,15 +729,6 @@ class PGDriveEnv(gym.Env):
 
     def reward(self, *args, **kwargs):
         raise ValueError("reward function is deprecated!")
-
-    @property
-    def use_image_sensor(self):
-        # FIXME!!!
-        for extra_v_config in self.config["target_vehicle_configs"].values():
-            # if BaseVehicle.get_vehicle_config(extra_v_config)["use_image"]:
-            if extra_v_config["use_image"]:
-                return True
-        return False
 
     def chase_another_v(self) -> (str, BaseVehicle):
         vehicles = sorted(list(self.vehicles.items()) + list(self.done_vehicles.items())) * 2
@@ -841,53 +804,11 @@ class PGDriveEnv(gym.Env):
         return (steering, throttle), saver_info
 
     def get_observation(self, vehicle_config: Union[dict, PGConfig]):
-        if vehicle_config["use_image"]:
+        if self.config["use_image"]:
             o = ImageStateObservation(vehicle_config)
         else:
             o = LidarStateObservation(vehicle_config)
         return o
-
-    # def _sync_config_to_vehicle_config(self, sync_keys=None):
-    #     sync_keys = set(sync_keys or ())
-    #
-    #     # merge_config_with_unknown_keys()
-    #     # local_default_vehicle_config = BaseVehicle.get_vehicle_config(self.config["vehicle_config"])
-    #     # local_default_vehicle_config = merge_config_with_unknown_keys(
-    #     #     old_dict=self.config, new_dict=local_default_vehicle_config, allow_new_keys=True, raise_error=False
-    #     # )
-    #     # local_default_vehicle_config.pop("vehicle_config")
-    #
-    #     general_vehicle_config = self.config["vehicle_config"].copy()
-    #     assert isinstance(general_vehicle_config, PGConfig)
-    #     general_vehicle_config = general_vehicle_config.update(
-    #         {k: self.config[k] for k in sync_keys}, allow_overwrite=True)
-    #
-    #     if self.num_agents == 1:
-    #         self.config["target_vehicle_configs"].update(
-    #             {DEFAULT_AGENT: general_vehicle_config}, allow_overwrite=True
-    #         )
-    #         # merge_dicts(
-    #         #     old_dict=local_default_vehicle_config,
-    #         #     new_dict=self.config.get_dict().get("target_vehicle_configs", {}).get(DEFAULT_AGENT, {}),
-    #         #     allow_new_keys=True,
-    #         #     raise_error=False
-    #         # )
-    #     else:
-    #         # TODO This is only a workaround!
-    #         self.config["target_vehicle_configs"].update(
-    #             {"agent{}".format(i): general_vehicle_config for i in range(self.num_agents)},
-    #             allow_overwrite=True
-    #         )
-
-    # for i in range(self.num_agents):
-    #
-    #     k = "agent{}".format(i)
-    #     self.config["target_vehicle_configs"][k] = merge_dicts(
-    #         old_dict=local_default_vehicle_config,
-    #         new_dict=self.config.get_dict().get("target_vehicle_configs", {}).get(k, {}),
-    #         allow_new_keys=True,
-    #         raise_error=False
-    #     )
 
 
 def _auto_termination(vehicle, should_done):

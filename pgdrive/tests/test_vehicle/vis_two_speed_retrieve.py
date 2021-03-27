@@ -13,8 +13,8 @@ class TestEnv(PGDriveEnv):
                 "traffic_density": 0.0,
                 "use_render": True,
                 "map_config": {
-                    Map.GENERATE_METHOD: MapGenerateMethod.BIG_BLOCK_SEQUENCE,
-                    Map.GENERATE_PARA: "SSSSSSSSSSSSS",
+                    Map.GENERATE_TYPE: MapGenerateMethod.BIG_BLOCK_SEQUENCE,
+                    Map.GENERATE_CONFIG: "SSSSSSSSSSSSS",
                 },
                 "manual_control": True
             }

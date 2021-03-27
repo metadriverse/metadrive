@@ -31,7 +31,8 @@ class ObservationType(ABC):
         current_reference_lane = vehicle.routing_localization.current_ref_lanes[-1]
         lateral_to_left, lateral_to_right = vehicle.dist_to_left, vehicle.dist_to_right
         total_width = float(
-            (vehicle.routing_localization.map.lane_num + 1) * vehicle.routing_localization.map.lane_width
+            (vehicle.routing_localization.get_current_lane_num() + 1) *
+            vehicle.routing_localization.get_current_lane_width()
         )
         info = [
             clip(lateral_to_left / total_width, 0.0, 1.0),
@@ -55,7 +56,7 @@ class ObservationType(ABC):
         # print(yaw_rate)
         info.append(clip(yaw_rate, 0.0, 1.0))
         _, lateral = vehicle.lane.local_coordinates(vehicle.position)
-        info.append(clip((lateral * 2 / vehicle.routing_localization.map.lane_width + 1.0) / 2.0, 0.0, 1.0))
+        info.append(clip((lateral * 2 / vehicle.routing_localization.get_current_lane_width() + 1.0) / 2.0, 0.0, 1.0))
         return info
 
     @staticmethod
