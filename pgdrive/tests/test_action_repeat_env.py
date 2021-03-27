@@ -1,5 +1,3 @@
-import pytest
-
 from pgdrive import ActionRepeat
 
 
@@ -33,4 +31,5 @@ def test_action_repeat_env():
 
 
 if __name__ == '__main__':
-    pytest.main(["-sv", "test_action_repeat_env.py"])
+    test_action_repeat_env()
+    # pytest.main(["-sv", "test_action_repeat_env.py"])

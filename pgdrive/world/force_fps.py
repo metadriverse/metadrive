@@ -8,7 +8,7 @@ class ForceFPS:
     FORCED = "ForceFPS"
 
     def __init__(self, pg_world, start=False):
-        fps = 1 / pg_world.pg_config["physics_world_step_size"]
+        fps = 1 / pg_world.world_config["physics_world_step_size"]
         self.pg_world = pg_world
         self.init_fps = fps
         if start:

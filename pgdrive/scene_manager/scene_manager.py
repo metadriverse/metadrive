@@ -110,7 +110,7 @@ class SceneManager:
         :param step_num: Decision of all entities will repeat *step_num* times
         """
         pg_world = self.pg_world
-        dt = pg_world.pg_config["physics_world_step_size"]
+        dt = pg_world.world_config["physics_world_step_size"]
         for i in range(step_num):
             if self.replay_system is None:
                 # not in replay mode

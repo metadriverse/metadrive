@@ -8,9 +8,11 @@ class ChangeDensityEnv(PGDriveEnv):
     @staticmethod
     def default_config() -> PGConfig:
         config = PGDriveEnv.default_config()
-        config.add("change_density", True)
-        config.add("density_min", 0.0)
-        config.add("density_max", 0.4)
+        config.update({
+            "change_density": True,
+            "density_min": 0.0,
+            "density_max": 0.4,
+        }, allow_overwrite=True)
         return config
 
     def __init__(self, config):

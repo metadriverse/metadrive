@@ -3,6 +3,7 @@ import pytest
 
 from pgdrive import PGDriveEnv
 from pgdrive.scene_creator.vehicle.base_vehicle import BaseVehicle
+from pgdrive.envs.pgdrive_env import PGDriveEnvV1_DEFAULT_CONFIG
 
 
 @pytest.fixture
@@ -32,8 +33,8 @@ def test_base_vehicle(pg_env):
     pg_world = pg_env.pg_world
     map = pg_env.current_map
 
-    v_config = BaseVehicle.get_vehicle_config(dict())
-    v = BaseVehicle(pg_world, vehicle_config=v_config.get_dict())
+    # v_config = BaseVehicle.get_vehicle_config(dict())
+    v = BaseVehicle(pg_world, vehicle_config=PGDriveEnvV1_DEFAULT_CONFIG["vehicle_config"])
     v.add_lidar()
     v.add_routing_localization(True)
     v.add_routing_localization(False)
