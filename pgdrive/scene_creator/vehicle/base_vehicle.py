@@ -94,8 +94,10 @@ class BaseVehicle(DynamicElement):
         :param random_seed: int
         """
 
-        self.vehicle_config = self.get_vehicle_config(vehicle_config) \
-            if vehicle_config is not None else self._default_vehicle_config()
+        self.vehicle_config = PGConfig(vehicle_config)
+
+        # self.vehicle_config = self.get_vehicle_config(vehicle_config) \
+        #     if vehicle_config is not None else self._default_vehicle_config()
 
         # observation, action
         self.action_space = self.get_action_space_before_init()
@@ -148,7 +150,7 @@ class BaseVehicle(DynamicElement):
 
         # others
         self._frame_objects_crashed = []  # inner loop, object will only be crashed for once
-        self._add_modules_for_vehicle(pg_world.pg_config["use_render"])
+        self._add_modules_for_vehicle(pg_world.world_config["use_render"])
         self.takeover = False
         self._expert_takeover = False
         self.energy_consumption = 0
@@ -218,6 +220,7 @@ class BaseVehicle(DynamicElement):
 
     @classmethod
     def get_vehicle_config(cls, new_config=None):
+        raise ValueError()
         default = copy.deepcopy(cls._default_vehicle_config())
         if new_config is None:
             return default
