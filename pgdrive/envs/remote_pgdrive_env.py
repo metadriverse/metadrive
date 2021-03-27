@@ -4,15 +4,17 @@ Make sure you have installed ray via:
     pip install ray
 """
 import gym
+
 from pgdrive.envs.pgdrive_env import PGDriveEnv
 
-try:
+
+def import_ray():
     import ray
-except ImportError:
-    ray = None
+    return ray
 
 
 def get_remote_pgdrive():
+    ray = import_ray()
     assert ray is not None
 
     @ray.remote
@@ -24,8 +26,9 @@ def get_remote_pgdrive():
 
 class RemotePGDrive(gym.Env):
     def __init__(self, env_config):
-        assert ray is not None, "Please install ray via: pip install ray " \
-                                "if you wish to use multiple PGDrive in single process."
+        self.ray = import_ray()
+        assert self.ray is not None, "Please install ray via: pip install ray " \
+                                     "if you wish to use multiple PGDrive in single process."
         # Temporary environment
         tmp = PGDriveEnv(env_config)
         self.action_space = tmp.action_space
@@ -36,21 +39,21 @@ class RemotePGDrive(gym.Env):
         self.env_config = env_config
 
     def step(self, *args, **kwargs):
-        ret = ray.get(self.env.step.remote(*args, **kwargs))
+        ret = self.ray.get(self.env.step.remote(*args, **kwargs))
         return ret
 
     def reset(self, *args, **kwargs):
         if self.env is None:
-            if not ray.is_initialized():
-                ray.init()
+            if not self.ray.is_initialized():
+                self.ray.init()
             self.env = get_remote_pgdrive().remote(self.env_config)
 
-        return ray.get(self.env.reset.remote(*args, **kwargs))
+        return self.ray.get(self.env.reset.remote(*args, **kwargs))
 
     def close(self):
-        if ray.is_initialized():
+        if self.ray.is_initialized():
             self.env.close.remote()
-            ray.shutdown()
+            self.ray.shutdown()
         del self.env
         self.env = None
 

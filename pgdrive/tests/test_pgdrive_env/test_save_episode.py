@@ -61,4 +61,4 @@ def test_save_episode(vis=False):
 
 
 if __name__ == "__main__":
-    test_save_episode(vis=True)
+    test_save_episode(vis=False)

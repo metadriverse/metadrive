@@ -1,5 +1,4 @@
 import numpy as np
-import pytest
 
 from pgdrive.envs.generation_envs.change_density_env import ChangeDensityEnv
 from pgdrive.envs.generation_envs.change_friction_env import ChangeFrictionEnv
@@ -33,4 +32,6 @@ def test_change_density_env():
 
 
 if __name__ == '__main__':
-    pytest.main(["-sv", "test_change_friction_density_envs.py"])
+    # pytest.main(["-sv", "test_change_friction_density_envs.py"])
+    # test_side_pass_env()
+    test_change_friction()
