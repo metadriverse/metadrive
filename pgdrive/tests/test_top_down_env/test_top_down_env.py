@@ -1,6 +1,6 @@
 import numpy as np
 
-from pgdrive.envs.top_down_env import TopDownSingleFramePGDriveEnv, TopDownPGDriveEnv
+from pgdrive.envs.top_down_env import TopDownSingleFramePGDriveEnv, TopDownPGDriveEnv, TopDownPGDriveEnvV2
 
 
 def test_top_down_rendering():
@@ -8,6 +8,7 @@ def test_top_down_rendering():
             TopDownSingleFramePGDriveEnv(dict(environment_num=5, map="C", traffic_density=1.0)),
             TopDownPGDriveEnv(dict(environment_num=5, map="C", traffic_density=1.0)),
             TopDownPGDriveEnv(dict(environment_num=5, map="C", frame_stack=1, post_stack=2)),
+            TopDownPGDriveEnvV2(dict(environment_num=5, map="C", frame_stack=1, post_stack=2)),
     ]:
         try:
             for _ in range(5):
