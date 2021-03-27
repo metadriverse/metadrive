@@ -8,8 +8,8 @@ if __name__ == "__main__":
             "traffic_density": 0.1,
             # "traffic_mode": 0,  # 0 for Reborn mode.
             "map_config": {
-                Map.GENERATE_METHOD: MapGenerateMethod.BIG_BLOCK_NUM,
-                Map.GENERATE_PARA: 7,
+                Map.GENERATE_TYPE: MapGenerateMethod.BIG_BLOCK_NUM,
+                Map.GENERATE_CONFIG: 7,
             }
         }
     )

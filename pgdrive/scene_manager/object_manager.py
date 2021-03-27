@@ -108,7 +108,10 @@ class ObjectsManager(RandomEngine):
 
             # generate scene
             block.PROHIBIT_TRAFFIC_GENERATION = True
-            lateral_len = scene_mgr.map.lane_width
+
+            # TODO(pzh) This might not worked in MARL envs when the route is also has changeable lanes.
+            lateral_len = scene_mgr.map.config[scene_mgr.map.LANE_WIDTH]
+
             lane = scene_mgr.map.road_network.get_lane(accident_road.lane_index(accident_lane_idx))
             if self.np_random.rand() > 0.5:
                 self.prohibit_scene(
@@ -116,7 +119,7 @@ class ObjectsManager(RandomEngine):
                     on_left
                 )
             else:
-                accident_lane_idx = self.np_random.randint(scene_mgr.map.lane_num)
+                accident_lane_idx = self.np_random.randint(scene_mgr.map.config[scene_mgr.map.LANE_NUM])
                 self.break_down_scene(scene_mgr, pg_world, lane, accident_road.lane_index(accident_lane_idx), longitude)
 
     def break_down_scene(

@@ -7,8 +7,8 @@ if __name__ == '__main__':
         dict(
             environment_num=1,
             map_config={
-                Map.GENERATE_METHOD: MapGenerateMethod.BIG_BLOCK_SEQUENCE,
-                Map.GENERATE_PARA: "OCrRCTXRCCCCrOr",
+                Map.GENERATE_TYPE: MapGenerateMethod.BIG_BLOCK_SEQUENCE,
+                Map.GENERATE_CONFIG: "OCrRCTXRCCCCrOr",
                 Map.LANE_WIDTH: 3.5,
                 Map.LANE_NUM: 3,
             }
