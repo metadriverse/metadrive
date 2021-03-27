@@ -2,7 +2,6 @@ import logging
 import os.path as osp
 
 import numpy as np
-
 from pgdrive.constants import DEFAULT_AGENT
 from pgdrive.envs.pgdrive_env import PGDriveEnv as PGDriveEnvV1
 from pgdrive.scene_manager.traffic_manager import TrafficMode
@@ -43,6 +42,10 @@ class PGDriveEnvV2(PGDriveEnvV1):
 
                 # See: https://github.com/decisionforce/pgdrive/issues/297
                 vehicle_config=dict(lidar=dict(num_lasers=120, distance=50, num_others=0)),
+
+                # Disable map loading!
+                load_map_from_json=False,
+                _load_map_from_json="",
             ),
             allow_overwrite=True
         )
@@ -103,7 +106,9 @@ class PGDriveEnvV2(PGDriveEnvV1):
 
         # reward for lane keeping, without it vehicle can learn to overtake but fail to keep in lane
         if self.config["use_lateral"]:
-            lateral_factor = clip(1 - 2 * abs(lateral_now) / vehicle.routing_localization.map.lane_width, 0.0, 1.0)
+            lateral_factor = clip(
+                1 - 2 * abs(lateral_now) / vehicle.routing_localization.get_current_lane_width(), 0.0, 1.0
+            )
         else:
             lateral_factor = 1.0
 

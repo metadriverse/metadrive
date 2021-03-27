@@ -18,8 +18,8 @@ class TestEnv(PGDriveEnv):
                 "traffic_mode": TrafficMode.Hybrid,
                 "record_episode": save_episode,
                 "map_config": {
-                    Map.GENERATE_METHOD: MapGenerateMethod.BIG_BLOCK_SEQUENCE,
-                    Map.GENERATE_PARA: "XTXTXTXTXT",
+                    Map.GENERATE_TYPE: MapGenerateMethod.BIG_BLOCK_SEQUENCE,
+                    Map.GENERATE_CONFIG: "XTXTXTXTXT",
                     Map.LANE_WIDTH: 3.5,
                     Map.LANE_NUM: 3,
                 }

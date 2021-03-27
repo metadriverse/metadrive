@@ -146,7 +146,8 @@ class CityMap(Map):
     def _generate(self, pg_world):
         parent_node_path, pg_physics_world = pg_world.worldNP, pg_world.physics_world
         big_map = CityBIG(
-            self.lane_num, self.lane_width, self.road_network, parent_node_path, pg_physics_world, self.random_seed
+            self.config[self.LANE_NUM], self.config[self.LANE_WIDTH], self.road_network, parent_node_path,
+            pg_physics_world, self.random_seed
         )
-        big_map.generate(self.config[self.GENERATE_METHOD], self.config[self.GENERATE_PARA])
+        big_map.generate(self.config[self.GENERATE_TYPE], self.config[self.GENERATE_CONFIG])
         self.blocks = big_map.blocks
