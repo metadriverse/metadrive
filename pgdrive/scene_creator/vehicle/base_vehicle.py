@@ -2,7 +2,7 @@ import math
 import time
 from collections import deque
 from typing import Optional
-
+from pgdrive.scene_creator.vehicle_module.distance_detector import SideDetector, LaneLineDetector
 import gym
 import numpy as np
 from panda3d.bullet import BulletVehicle, BulletBoxShape, ZUp, BulletGhostNode
@@ -59,6 +59,10 @@ class BaseVehicle(DynamicElement):
             show_navi_mark=True,
             increment_steering=False,
             wheel_friction=0.6,
+            side_detector=dict(num_lasers=2, distance=20),  # laser num, distance
+            show_side_detector=False,
+            lane_line_detector=dict(num_lasers=2, distance=20),  # laser num, distance
+            show_lane_line_detector=False,
 
             # ===== use image =====
             image_source="rgb_cam",  # take effect when only when use_image == True
@@ -75,6 +79,7 @@ class BaseVehicle(DynamicElement):
             action_check=False,
             use_saver=False,
             save_level=0.5,
+            use_lane_line_detector=False,
         )
         return PGConfig(vehicle_config)
 
@@ -121,6 +126,8 @@ class BaseVehicle(DynamicElement):
         # modules
         self.image_sensors = {}
         self.lidar: Optional[Lidar] = None
+        self.side_detector: Optional[SideDetector] = None
+        self.lane_line_detector: Optional[LaneLineDetector] = None
         self.routing_localization: Optional[RoutingLocalizationModule] = None
         self.lane: Optional[AbstractLane] = None
         self.lane_index = None
@@ -162,6 +169,14 @@ class BaseVehicle(DynamicElement):
         # add self module for training according to config
         vehicle_config = self.vehicle_config
         self.add_routing_localization(vehicle_config["show_navi_mark"])  # default added
+        self.side_detector = SideDetector(
+            self.pg_world.render, self.vehicle_config["side_detector"]["num_lasers"],
+            self.vehicle_config["side_detector"]["distance"], self.vehicle_config["show_side_detector"]
+        )
+        self.lane_line_detector = LaneLineDetector(
+            self.pg_world.render, self.vehicle_config["side_detector"]["num_lasers"],
+            self.vehicle_config["side_detector"]["distance"], self.vehicle_config["show_side_detector"]
+        )
         if not self.vehicle_config["use_image"]:
             if vehicle_config["lidar"]["num_lasers"] > 0 and vehicle_config["lidar"]["distance"] > 0:
                 self.add_lidar(
@@ -258,9 +273,15 @@ class BaseVehicle(DynamicElement):
                 obj.crashed = True
         # lidar
         if self.lidar is not None:
-            self.lidar.perceive(self.position, self.heading_theta, self.pg_world.physics_world)
+            self.lidar.perceive(self.position, self.heading_theta, self.pg_world.physics_world.dynamic_world)
         if self.routing_localization is not None:
-            self.lane, self.lane_index = self.routing_localization.update_navigation_localization(self)
+            self.lane, self.lane_index, = self.routing_localization.update_navigation_localization(self)
+        if self.side_detector is not None:
+            self.side_detector.perceive(self.position, self.heading_theta, self.pg_world.physics_world.dynamic_world)
+        if self.lane_line_detector is not None:
+            self.lane_line_detector.perceive(
+                self.position, self.heading_theta, self.pg_world.physics_world.dynamic_world
+            )
         self._state_check()
         self.update_dist_to_left_right()
         self._update_energy_consumption()
@@ -283,7 +304,6 @@ class BaseVehicle(DynamicElement):
         :return: None
         """
         distance = norm(*(self.last_position - self.position)) / 1000  # km
-        print(distance)
         self.energy_consumption += 3.25 * np.power(np.e, 0.01 * self.speed) * distance / 100  # L/100 km
 
     def reset(self, map: Map, pos: np.ndarray = None, heading: float = 0.0):
@@ -315,6 +335,8 @@ class BaseVehicle(DynamicElement):
         self.last_current_action = deque([(0.0, 0.0), (0.0, 0.0)], maxlen=2)
         self.last_position = self.born_place
         self.last_heading_dir = self.heading
+        self.side_detector.perceive(self.position, self.heading_theta, self.pg_world.physics_world.dynamic_world)
+        self.lane_line_detector.perceive(self.position, self.heading_theta, self.pg_world.physics_world.dynamic_world)
         self.update_dist_to_left_right()
         self.takeover = False
         self.energy_consumption = 0
@@ -369,14 +391,17 @@ class BaseVehicle(DynamicElement):
     """---------------------------------------- vehicle info ----------------------------------------------"""
 
     def update_dist_to_left_right(self):
-        current_reference_lane = self.routing_localization.current_ref_lanes[-1]
-        _, lateral_to_reference = current_reference_lane.local_coordinates(self.position)
-        if lateral_to_reference < 0:
-            lateral_to_right = abs(lateral_to_reference) + self.routing_localization.get_current_lane_width() / 2
+        if not self.vehicle_config["use_lane_line_detector"]:
+            current_reference_lane = self.routing_localization.current_ref_lanes[-1]
+            _, lateral_to_reference = current_reference_lane.local_coordinates(self.position)
+            if lateral_to_reference < 0:
+                lateral_to_right = abs(lateral_to_reference) + self.routing_localization.get_current_lane_width() / 2
+            else:
+                lateral_to_right = self.routing_localization.get_current_lane_width() / 2 - abs(lateral_to_reference)
+            lateral_to_left = self.routing_localization.get_current_lateral_range() - lateral_to_right
+            self.dist_to_left, self.dist_to_right = lateral_to_left, lateral_to_right
         else:
-            lateral_to_right = self.routing_localization.get_current_lane_width() / 2 - abs(lateral_to_reference)
-        lateral_to_left = self.routing_localization.get_current_lateral_range() - lateral_to_right
-        self.dist_to_left, self.dist_to_right = lateral_to_left, lateral_to_right
+            self.dist_to_right, self.dist_to_left = self.side_detector.get_cloud_points()
 
     @property
     def position(self):
@@ -655,6 +680,11 @@ class BaseVehicle(DynamicElement):
         self.pg_world.physics_world.dynamic_world.clearContactAddedCallback()
         self.routing_localization.destroy()
         self.routing_localization = None
+        self.side_detector.destroy()
+        self.lane_line_detector.destroy()
+        self.side_detector = None
+        self.lane_line_detector = None
+
         if self.lidar is not None:
             self.lidar.destroy()
             self.lidar = None

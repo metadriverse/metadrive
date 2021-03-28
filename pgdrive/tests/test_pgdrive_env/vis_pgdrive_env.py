@@ -13,7 +13,7 @@ class TestEnv(PGDriveEnv):
         super(TestEnv, self).__init__(
             {
                 "environment_num": 1,
-                "traffic_density": 0.4,
+                "traffic_density": 0.1,
                 "traffic_mode": "hybrid",
                 "start_seed": 5,
                 "pg_world_config": {
@@ -26,14 +26,20 @@ class TestEnv(PGDriveEnv):
                 "use_render": True,
                 "decision_repeat": 5,
                 "rgb_clip": True,
-                # "debug":True,
+                "debug": True,
                 "map_config": {
                     Map.GENERATE_TYPE: MapGenerateMethod.BIG_BLOCK_NUM,
                     Map.GENERATE_CONFIG: 10,
                     Map.LANE_WIDTH: 3.5,
                     Map.LANE_NUM: 3,
                 },
-                "driving_reward": 1.0
+                "driving_reward": 1.0,
+                "vehicle_config": {
+                    "show_lidar": False,
+                    "show_side_detector": True,
+                    "show_lane_line_detector": True,
+                    "use_lane_line_detector": True,
+                }
             }
         )
 
@@ -46,7 +52,7 @@ if __name__ == "__main__":
     for i in range(1, 100000):
         o, r, d, info = env.step([0, 1])
         info["fuel"] = env.vehicle.energy_consumption
-        env.render(text=info)
+        env.render(text={"left": env.vehicle.dist_to_left, "right": env.vehicle.dist_to_right})
         # if d:
         #     print("Reset")
         #     env.reset()
