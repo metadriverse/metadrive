@@ -30,13 +30,16 @@ class ObservationType(ABC):
         # update out of road
         current_reference_lane = vehicle.routing_localization.current_ref_lanes[-1]
         lateral_to_left, lateral_to_right = vehicle.dist_to_left, vehicle.dist_to_right
-        total_width = float(
-            (vehicle.routing_localization.get_current_lane_num() + 1) *
-            vehicle.routing_localization.get_current_lane_width()
-        )
+        if not vehicle.vehicle_config["use_lane_line_detector"]:
+            total_width = float(
+                (vehicle.routing_localization.get_current_lane_num() + 1) *
+                vehicle.routing_localization.get_current_lane_width()
+            )
+            lateral_to_left /= total_width
+            lateral_to_right /= total_width
         info = [
-            clip(lateral_to_left / total_width, 0.0, 1.0),
-            clip(lateral_to_right / total_width, 0.0, 1.0),
+            clip(lateral_to_left, 0.0, 1.0),
+            clip(lateral_to_right, 0.0, 1.0),
             vehicle.heading_diff(current_reference_lane),
             # Note: speed can be negative denoting free fall. This happen when emergency brake.
             clip((vehicle.speed + 1) / (vehicle.max_speed + 1), 0.0, 1.0),
@@ -55,7 +58,11 @@ class ObservationType(ABC):
         yaw_rate = beta_diff / 0.1
         # print(yaw_rate)
         info.append(clip(yaw_rate, 0.0, 1.0))
-        _, lateral = vehicle.lane.local_coordinates(vehicle.position)
+        if not vehicle.vehicle_config["use_lane_line_detector"]:
+            _, lateral = vehicle.lane.local_coordinates(vehicle.position)
+        else:
+            lateral = vehicle.lane_line_detector.get_cloud_points()[0]
+            print(lateral)
         info.append(clip((lateral * 2 / vehicle.routing_localization.get_current_lane_width() + 1.0) / 2.0, 0.0, 1.0))
         return info
 
