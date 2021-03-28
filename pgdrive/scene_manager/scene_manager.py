@@ -123,28 +123,23 @@ class SceneManager:
         #  panda3d render and garbage collecting loop
         pg_world.taskMgr.step()
 
-    def update_state(self) -> bool:
+    def update_state(self) -> Dict:
         """
         Update states after finishing movement
         :return: if this episode is done
         """
-        dones = {k: False for k in self.target_vehicles.keys()}
-        # done = False
 
         if self.replay_system is not None:
             self.for_each_target_vehicle(lambda v: self.replay_system.replay_frame(v, self.pg_world))
             # self.replay_system.replay_frame(self.ego_vehicle, self.pg_world)
         else:
-            global_done = self.traffic_mgr.update_state(self, self.pg_world)
-            if global_done:
-                dones = {k: True for k in self.target_vehicles.keys()}
+            self.traffic_mgr.update_state(self, self.pg_world)
 
         if self.record_system is not None:
             # didn't record while replay
             self.record_system.record_frame(self.traffic_mgr.get_global_states())
 
         step_infos = self.for_each_target_vehicle(lambda v: v.update_state())
-        # self.ego_vehicle.update_state()
 
         # cull distant blocks
         poses = [v.position for v in self.target_vehicles.values()]
@@ -157,7 +152,7 @@ class SceneManager:
             PGLOD.cull_distant_traffic_vehicles(self.traffic_mgr.traffic_vehicles, poses, self.pg_world)
             PGLOD.cull_distant_objects(self.objects_mgr._spawned_objects, poses, self.pg_world)
 
-        return dones, step_infos
+        return step_infos
 
     def for_each_target_vehicle(self, func):
         """Apply the func (a function take only the vehicle as argument) to each target vehicles and return a dict!"""

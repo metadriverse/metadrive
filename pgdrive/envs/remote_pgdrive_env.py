@@ -34,6 +34,7 @@ class RemotePGDrive(gym.Env):
         self.action_space = tmp.action_space
         self.observation_space = tmp.observation_space
         self.reward_range = tmp.reward_range
+        tmp.close()
         del tmp
         self.env = None
         self.env_config = env_config
