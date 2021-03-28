@@ -11,7 +11,7 @@ from pgdrive.constants import RENDER_MODE_NONE, DEFAULT_AGENT
 from pgdrive.obs.observation_type import ObservationType
 from pgdrive.scene_creator.vehicle.base_vehicle import BaseVehicle
 from pgdrive.scene_manager.scene_manager import SceneManager
-from pgdrive.utils import PGConfig
+from pgdrive.utils import PGConfig, merge_dicts
 from pgdrive.world.pg_world import PGWorld
 
 pregenerated_map_file = osp.join(osp.dirname(osp.dirname(osp.abspath(__file__))), "assets", "maps", "PGDrive-maps.json")
@@ -172,14 +172,14 @@ class BasePGDriveEnv(gym.Env):
 
     def _step_simulator(self, actions, action_infos):
         scene_manager_infos = self.scene_manager.prepare_step(actions)
-        action_infos.update(scene_manager_infos)
+        action_infos = merge_dicts(action_infos, scene_manager_infos, allow_new_keys=True)
 
         # step all entities
         self.scene_manager.step(self.config["decision_repeat"])
 
         # update states, if restore from episode data, position and heading will be force set in update_state() function
         scene_manager_step_infos = self.scene_manager.update_state()
-        action_infos.update(scene_manager_step_infos)
+        action_infos = merge_dicts(action_infos, scene_manager_step_infos, allow_new_keys=True)
         return action_infos
 
     def _get_step_return(self, actions, step_infos):
