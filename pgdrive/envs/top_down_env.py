@@ -12,12 +12,12 @@ class TopDownSingleFramePGDriveEnv(PGDriveEnv):
         config.update({"frame_skip": 5, "frame_stack": 5, "post_stack": 5, "rgb_clip": False}, allow_overwrite=True)
         return config
 
-    def get_observation(self, _=None):
+    def get_single_observation(self, _=None):
         return TopDownObservation(self.config["vehicle_config"], self, self.config["rgb_clip"])
 
 
 class TopDownPGDriveEnv(TopDownSingleFramePGDriveEnv):
-    def get_observation(self, _=None):
+    def get_single_observation(self, _=None):
         return TopDownMultiChannel(
             self.config["vehicle_config"],
             self,
@@ -36,7 +36,7 @@ class TopDownPGDriveEnvV2(PGDriveEnvV2):
         config.update({"frame_skip": 5, "frame_stack": 5, "post_stack": 5, "rgb_clip": False}, allow_overwrite=True)
         return config
 
-    def get_observation(self, _=None):
+    def get_single_observation(self, _=None):
         return TopDownMultiChannel(
             self.config["vehicle_config"],
             self,

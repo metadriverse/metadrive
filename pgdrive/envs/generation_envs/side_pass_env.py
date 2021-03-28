@@ -6,20 +6,26 @@ class SidePassEnv(PGDriveEnv):
     """
     now for test use and demo use only
     """
-    def __init__(self, extra_config=None):
-        config = {
-            "environment_num": 1,
-            "traffic_density": 0.1,
-            "start_seed": 5,
-            # "traffic_mode":"reborn",
-            "pg_world_config": {
-                "debug_physics_world": False,
+    @classmethod
+    def default_config(cls):
+        config = super(SidePassEnv, cls).default_config()
+        config.update(
+            {
+                "environment_num": 1,
+                "traffic_density": 0.1,
+                "start_seed": 5,
+                # "traffic_mode":"reborn",
+                "pg_world_config": {
+                    "debug_physics_world": False,
+                },
+                "debug": False,
+                "map": "CSRCR"
             },
-            "debug": False,
-            "map": "CSRCR"
-        }
-        if extra_config is not None:
-            config.update(extra_config)
+            allow_overwrite=True
+        )
+        return config
+
+    def __init__(self, config=None):
         super(SidePassEnv, self).__init__(config)
         self.breakdown_vehicle = None
         self.alert = None
@@ -62,7 +68,6 @@ class SidePassEnv(PGDriveEnv):
         v_pos = [8, 14]
         v_type = [SVehicle, XLVehicle]
         for v_long, v_t in zip(v_pos, v_type):
-
             v = self.scene_manager.traffic_mgr.spawn_one_vehicle(v_t, lane, v_long, False)
             v.attach_to_pg_world(self.pg_world.pbr_worldNP, self.pg_world.physics_world)
 
