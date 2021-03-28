@@ -51,7 +51,7 @@ class PGTrafficVehicle(DynamicElement):
         self.vehicle_node = TrafficVehicleNode(BodyName.Traffic_vehicle, IDMVehicle.create_from(kinematic_model))
         chassis_shape = BulletBoxShape(Vec3(self.LENGTH / 2, self.WIDTH / 2, self.HEIGHT / 2))
         self.index = index
-        self.vehicle_node.addShape(chassis_shape, TransformState.makePos(Point3(0, 0, self.HEIGHT / 2 + 0.2)))
+        self.vehicle_node.addShape(chassis_shape, TransformState.makePos(Point3(0, 0, self.HEIGHT / 2)))
         self.vehicle_node.setMass(800.0)
         self.vehicle_node.setIntoCollideMask(BitMask32.bit(self.COLLISION_MASK))
         self.vehicle_node.setKinematic(False)

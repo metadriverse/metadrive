@@ -3,12 +3,12 @@ from collections import OrderedDict
 from typing import Dict, Union, List
 
 import numpy
-from panda3d.bullet import BulletBoxShape, BulletRigidBodyNode
+from panda3d.bullet import BulletBoxShape, BulletRigidBodyNode, BulletGhostNode
 from panda3d.core import Vec3, LQuaternionf, BitMask32, Vec4, CardMaker, TextureStage, RigidBodyCombiner, \
     TransparencyAttrib, SamplerState, NodePath
 from pgdrive.constants import Decoration, BodyName, CamMask
 from pgdrive.scene_creator.blocks.constants import BlockDefault
-from pgdrive.scene_creator.lane.abs_lane import AbstractLane, LineType, LaneNode
+from pgdrive.scene_creator.lane.abs_lane import AbstractLane, LineType, LaneNode, LineColor
 from pgdrive.scene_creator.lane.circular_lane import CircularLane
 from pgdrive.scene_creator.lane.straight_lane import StraightLane
 from pgdrive.scene_creator.road.road import Road
@@ -349,6 +349,14 @@ class Block(Element, BlockDefault):
                         lane_start, lane_end, middle, parent_np, line_color, lane.line_types[k], straight
                     )
 
+                lane_start = lane.position(segment_num * Block.STRIPE_LENGTH * 2, i * lane_width / 2)
+                lane_end = lane.position(lane.length + Block.STRIPE_LENGTH, i * lane_width / 2)
+                middle = (lane_end[0] + lane_start[0]) / 2, (lane_end[1] + lane_start[1]) / 2
+
+                self._add_lane_line2bullet(
+                    lane_start, lane_end, middle, parent_np, line_color, lane.line_types[k], straight
+                )
+
                 if straight:
                     lane_start = lane.position(0, i * lane_width / 2)
                     lane_end = lane.position(lane.length, i * lane_width / 2)
@@ -361,17 +369,18 @@ class Block(Element, BlockDefault):
             node_name = BodyName.Continuous_line
         else:
             node_name = BodyName.Broken_line
-        body_node = BulletRigidBodyNode(node_name)
+        body_node = BulletGhostNode(node_name)
         body_node.setActive(False)
         body_node.setKinematic(False)
         body_node.setStatic(True)
         body_np = parent_np.attachNewNode(body_node)
-        shape = BulletBoxShape(Vec3(length / 2, Block.LANE_LINE_WIDTH / 2, Block.LANE_LINE_THICKNESS))
+        shape = BulletBoxShape(Vec3(length / 2, Block.LANE_LINE_WIDTH / 2, Block.LANE_LINE_GHOST_HEIGHT))
         body_np.node().addShape(shape)
-        body_np.node().setIntoCollideMask(BitMask32.bit(Block.LANE_LINE_COLLISION_MASK))
+        mask = Block.CONTINUOUS_COLLISION_MASK if line_type != LineType.BROKEN else Block.BROKEN_COLLISION_MASK
+        body_np.node().setIntoCollideMask(BitMask32.bit(mask))
         self.dynamic_nodes.append(body_np.node())
 
-        body_np.setPos(panda_position(middle, 0))
+        body_np.setPos(panda_position(middle, Block.LANE_LINE_GHOST_HEIGHT / 2))
         direction_v = lane_end - lane_start
         theta = -numpy.arctan2(direction_v[1], direction_v[0])
         body_np.setQuat(LQuaternionf(numpy.cos(theta / 2), 0, 0, numpy.sin(theta / 2)))
@@ -398,19 +407,23 @@ class Block(Element, BlockDefault):
         if straight_stripe:
             body_np = parent_np.attachNewNode(node_name)
         else:
-            scale = 2 if line_type == LineType.BROKEN else 1
-            body_node = BulletRigidBodyNode(node_name)
+            body_node = BulletGhostNode(node_name)
             body_node.setActive(False)
             body_node.setKinematic(False)
             body_node.setStatic(True)
             body_np = parent_np.attachNewNode(body_node)
-            shape = BulletBoxShape(Vec3(scale / 2, Block.LANE_LINE_WIDTH / 2, Block.LANE_LINE_THICKNESS))
+            # its scale will change by setScale
+            body_height = Block.LANE_LINE_GHOST_HEIGHT
+            shape = BulletBoxShape(
+                Vec3(length / 2 if line_type != LineType.BROKEN else length, Block.LANE_LINE_WIDTH / 2, body_height)
+            )
             body_np.node().addShape(shape)
-            body_np.node().setIntoCollideMask(BitMask32.bit(Block.LANE_LINE_COLLISION_MASK))
+            mask = Block.CONTINUOUS_COLLISION_MASK if line_type != LineType.BROKEN else Block.BROKEN_COLLISION_MASK
+            body_np.node().setIntoCollideMask(BitMask32.bit(mask))
             self.dynamic_nodes.append(body_np.node())
 
         # position and heading
-        body_np.setPos(panda_position(middle, 0))
+        body_np.setPos(panda_position(middle, Block.LANE_LINE_GHOST_HEIGHT / 2))
         direction_v = lane_end - lane_start
         theta = -numpy.arctan2(direction_v[1], direction_v[0])
         body_np.setQuat(LQuaternionf(numpy.cos(theta / 2), 0, 0, numpy.sin(theta / 2)))
@@ -418,8 +431,8 @@ class Block(Element, BlockDefault):
         if self.render:
             # For visualization
             lane_line = self.loader.loadModel(AssetLoader.file_path("models", "box.bam"))
-            lane_line.getChildren().reparentTo(body_np)
-        body_np.setScale(length, Block.LANE_LINE_WIDTH, Block.LANE_LINE_THICKNESS)
+            lane_line.setScale(length, Block.LANE_LINE_WIDTH, Block.LANE_LINE_THICKNESS)
+            lane_line.reparentTo(body_np)
         body_np.set_color(color)
 
     def _add_sidewalk2bullet(self, lane_start, lane_end, middle, radius=0.0, direction=0):
@@ -431,7 +444,7 @@ class Block(Element, BlockDefault):
         side_np = self.sidewalk_node_path.attachNewNode(body_node)
         shape = BulletBoxShape(Vec3(1 / 2, 1 / 2, 1 / 2))
         body_node.addShape(shape)
-        body_node.setIntoCollideMask(BitMask32.bit(Block.LANE_LINE_COLLISION_MASK))
+        body_node.setIntoCollideMask(BitMask32.bit(self.CONTINUOUS_COLLISION_MASK))
         self.dynamic_nodes.append(body_node)
 
         if radius == 0:

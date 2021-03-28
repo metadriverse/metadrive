@@ -89,7 +89,8 @@ class CollisionGroup:
     Terrain = 2
     EgoVehicle = 1
     EgoVehicleBeneath = 6
-    LaneLine = 3
+    BrokenLaneLine = 3
+    ContinuousLaneLine = 7
     TrafficVehicle = 4
     LaneSurface = 5  # useless now, since it is in another physics world
 
@@ -98,38 +99,46 @@ class CollisionGroup:
         return [
             # terrain collision
             (cls.Terrain, cls.Terrain, False),
-            (cls.Terrain, cls.LaneLine, False),
+            (cls.Terrain, cls.BrokenLaneLine, False),
             (cls.Terrain, cls.LaneSurface, False),
             (cls.Terrain, cls.EgoVehicle, True),
             (cls.Terrain, cls.EgoVehicleBeneath, False),
-            # change it after we design a new traffic system !
             (cls.Terrain, cls.TrafficVehicle, False),
+            (cls.Terrain, cls.ContinuousLaneLine, False),
 
             # block collision
-            (cls.LaneLine, cls.LaneLine, False),
-            (cls.LaneLine, cls.LaneSurface, False),
-            (cls.LaneLine, cls.EgoVehicle, False),
-            (cls.LaneLine, cls.EgoVehicleBeneath, True),
+            (cls.BrokenLaneLine, cls.BrokenLaneLine, False),
+            (cls.BrokenLaneLine, cls.LaneSurface, False),
+            (cls.BrokenLaneLine, cls.EgoVehicle, False),
+            (cls.BrokenLaneLine, cls.EgoVehicleBeneath, True),
             # change it after we design a new traffic system !
-            (cls.LaneLine, cls.TrafficVehicle, False),
+            (cls.BrokenLaneLine, cls.TrafficVehicle, False),
+            (cls.BrokenLaneLine, cls.ContinuousLaneLine, False),
 
             # traffic vehicles collision
             (cls.TrafficVehicle, cls.TrafficVehicle, False),
             (cls.TrafficVehicle, cls.LaneSurface, False),
             (cls.TrafficVehicle, cls.EgoVehicle, True),
             (cls.TrafficVehicle, cls.EgoVehicleBeneath, True),
+            (cls.TrafficVehicle, cls.ContinuousLaneLine, False),
 
             # ego vehicle collision
             (cls.EgoVehicle, cls.EgoVehicle, True),
             (cls.EgoVehicle, cls.EgoVehicleBeneath, False),
             (cls.EgoVehicle, cls.LaneSurface, False),
+            (cls.EgoVehicle, cls.ContinuousLaneLine, False),
 
             # lane surface
             (cls.LaneSurface, cls.LaneSurface, False),
             (cls.LaneSurface, cls.EgoVehicleBeneath, False),
+            (cls.LaneSurface, cls.ContinuousLaneLine, False),
 
             # vehicle beneath
             (cls.EgoVehicleBeneath, cls.EgoVehicleBeneath, False),
+            (cls.EgoVehicleBeneath, cls.ContinuousLaneLine, True),
+
+            # continuous lane line
+            (cls.ContinuousLaneLine, cls.ContinuousLaneLine, False),
         ]
 
     @classmethod
