@@ -80,16 +80,16 @@ class MultiAgentPGDrive(PGDriveEnv):
                 self.done_vehicles[id] = v
         return o, r, d, i
 
-    def get_vehicles(self):
+    def _get_vehicles(self):
         # TODO We only support homogenous vehicle config now!
         return {
             "agent{}".format(i): BaseVehicle(self.pg_world, self.config["vehicle_config"])
             for i in range(self.num_agents)
         }
 
-    def get_observations(self):
+    def _get_observations(self):
         return {
-            "agent{}".format(i): self.get_observation(self.config["vehicle_config"])
+            "agent{}".format(i): self.get_single_observation(self.config["vehicle_config"])
             for i in range(self.num_agents)
         }
 

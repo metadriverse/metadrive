@@ -3,19 +3,16 @@ import json
 import logging
 import os.path as osp
 import sys
-import time
-from typing import Union, Dict, AnyStr, Optional
+from typing import Union, Dict, AnyStr, Optional, Tuple
 
-import gym
 import numpy as np
-from panda3d.core import PNMImage
 
-from pgdrive.constants import RENDER_MODE_NONE, DEFAULT_AGENT
+from pgdrive.constants import DEFAULT_AGENT
+from pgdrive.envs.base_env import BasePGDriveEnv
 from pgdrive.obs.observation_type import LidarStateObservation, ImageStateObservation
 from pgdrive.scene_creator.blocks.first_block import FirstBlock
 from pgdrive.scene_creator.map import Map, MapGenerateMethod, parse_map_config
 from pgdrive.scene_creator.vehicle.base_vehicle import BaseVehicle
-from pgdrive.scene_manager.scene_manager import SceneManager
 from pgdrive.scene_manager.traffic_manager import TrafficMode
 from pgdrive.utils import clip, PGConfig, recursive_equal, get_np_random, concat_step_infos
 from pgdrive.world.chase_camera import ChaseCamera
@@ -57,44 +54,8 @@ PGDriveEnvV1_DEFAULT_CONFIG = dict(
     # ===== Object =====
     accident_prob=0.,  # accident may happen on each block with this probability, except multi-exits block
 
-    # ===== Action =====
-    decision_repeat=5,
-
-    # ===== Rendering =====
-    use_render=False,  # pop a window to render or not
-    # force_fps=None,
-    debug=False,
-    cull_scene=True,  # only for debug use
-    manual_control=False,
-    controller="keyboard",  # "joystick" or "keyboard"
-    use_chase_camera=True,
-    use_chase_camera_follow_lane=False,  # If true, then vision would be more stable.
-    camera_height=1.8,
-
     # ===== Others =====
     auto_termination=True,  # Whether to done the environment after 250*(num_blocks+1) steps.
-    pg_world_config=dict(
-        window_size=(1200, 900),  # width, height
-        physics_world_step_size=2e-2,
-        show_fps=True,
-
-        # show message when render is called
-        onscreen_message=True,
-
-        # limit the render fps
-        # Press "f" to switch FPS, this config is deprecated!
-        # force_fps=None,
-
-        # only render physics world without model, a special debug option
-        debug_physics_world=False,
-
-        # set to true only when on headless machine and use rgb image!!!!!!
-        headless_image=False,
-
-        # turn on to profile the efficiency
-        pstats=False
-    ),
-    record_episode=False,
 
     # ===== Single-agent vehicle config =====
     vehicle_config=dict(
@@ -145,62 +106,22 @@ PGDriveEnvV1_DEFAULT_CONFIG = dict(
 )
 
 
-class PGDriveEnv(gym.Env):
-    DEFAULT_AGENT = DEFAULT_AGENT
-
-    @staticmethod
-    def default_config() -> PGConfig:
-        config = PGConfig(PGDriveEnvV1_DEFAULT_CONFIG)
+class PGDriveEnv(BasePGDriveEnv):
+    @classmethod
+    def default_config(cls) -> "PGConfig":
+        config = super(PGDriveEnv, cls).default_config()
+        config.update(PGDriveEnvV1_DEFAULT_CONFIG, allow_overwrite=True)
         config.register_type("map", str, int)
         config["map_config"].register_type("config", None)
         return config
 
     def __init__(self, config: dict = None):
-        default_config = self.default_config()
+        super(PGDriveEnv, self).__init__(config)
 
-        self.config = self.process_config(default_config.update(config, allow_overwrite=True))
-
-        self.num_agents = self.config["num_agents"]
-        assert isinstance(self.num_agents, int) and self.num_agents > 0
-
-        # observation and action space
-        self.observations = self.get_observations()
-        self.observation_space = gym.spaces.Dict(
-            {v_id: obs.observation_space
-             for v_id, obs in self.observations.items()}
-        )
-        self.action_space = gym.spaces.Dict(
-            {v_id: BaseVehicle.get_action_space_before_init()
-             for v_id in self.observations.keys()}
-        )
-
-        if self.num_agents == 1:
-            self.observation_space = self.observation_space[DEFAULT_AGENT]
-            self.action_space = self.action_space[DEFAULT_AGENT]
-
-        # map setting
-        self.start_seed = self.config["start_seed"]
-        self.env_num = self.config["environment_num"]
-
-        # lazy initialization, create the main vehicle in the lazy_init() func
-        self.pg_world: Optional[PGWorld] = None
-        self.scene_manager: Optional[SceneManager] = None
-        self.main_camera = None
-        self.controller = None
-        self.restored_maps = dict()
-        self.episode_steps = 0
-
-        self.maps = {_seed: None for _seed in range(self.start_seed, self.start_seed + self.env_num)}
-        self.current_seed = self.start_seed
-        self.current_map = None
-
-        self.vehicles = dict()
-        self.done_vehicles = dict()
-        self.dones = None
         self.current_track_vehicle: Optional[BaseVehicle] = None
         self.current_track_vehicle_id: Optional[str] = None
 
-    def process_config(self, config: Union[dict, "PGConfig"]) -> "PGConfig":
+    def _process_config(self, config: Union[dict, "PGConfig"]) -> "PGConfig":
         """Check, update, sync and overwrite some config."""
         config["map_config"] = parse_map_config(config["map"], config["map_config"])
         config["pg_world_config"].update(
@@ -220,35 +141,17 @@ class PGDriveEnv(gym.Env):
         )
         return config
 
-    def get_observations(self):
-        return {self.DEFAULT_AGENT: self.get_observation(self.config["vehicle_config"])}
-
-    def lazy_init(self):
-        """
-        Only init once in runtime, variable here exists till the close_env is called
-        :return: None
-        """
-        # It is the true init() func to create the main vehicle and its module
-        if self.pg_world is not None:
-            return
-
-        # init world
-        self.pg_world = PGWorld(self.config["pg_world_config"])
-        self.pg_world.accept("r", self.reset)
-        self.pg_world.accept("escape", sys.exit)
-
+    def _setup_pg_world(self) -> "PGWorld":
+        pg_world = super(PGDriveEnv, self)._setup_pg_world()
+        pg_world.accept("r", self.reset)
+        pg_world.accept("escape", sys.exit)
         # Press t can let expert take over. But this function is still experimental.
-        self.pg_world.accept("t", self.toggle_expert_takeover)
-
+        pg_world.accept("t", self.toggle_expert_takeover)
         # capture all figs
-        self.pg_world.accept("p", self.capture)
+        pg_world.accept("p", self.capture)
+        return pg_world
 
-        # init traffic manager
-        self.scene_manager = SceneManager(
-            self.pg_world, self.config["traffic_mode"], self.config["random_traffic"], self.config["record_episode"],
-            self.config["cull_scene"]
-        )
-
+    def _after_lazy_init(self):
         if self.config["manual_control"]:
             if self.config["controller"] == "keyboard":
                 self.controller = KeyboardController(pg_world=self.pg_world)
@@ -257,12 +160,7 @@ class PGDriveEnv(gym.Env):
             else:
                 raise ValueError("No such a controller type: {}".format(self.config["controller"]))
 
-        # init vehicle
-        self.vehicles = self.get_vehicles()
-        self.init_track_vehicle()
-        # self._sync_config_to_vehicle_config()
-
-    def init_track_vehicle(self):
+        # initialize track vehicles
         # first tracked vehicles
         vehicles = sorted(self.vehicles.items())
         self.current_track_vehicle = vehicles[0][1]
@@ -279,9 +177,18 @@ class PGDriveEnv(gym.Env):
             self.main_camera.chase(self.current_track_vehicle, self.pg_world)
         self.pg_world.accept("n", self.chase_another_v)
 
-    def preprocess_actions(self, actions: Union[np.ndarray, Dict[AnyStr, np.ndarray]]):
-        if self.config["manual_control"] and self.config["use_render"
-                                                         ] and self.current_track_vehicle_id in self.vehicles.keys():
+        # for manual_control and main camera type
+        if (self.config["use_render"] or self.config["use_image"]) and self.config["use_chase_camera"]:
+            self.main_camera = ChaseCamera(self.pg_world.cam, self.config["camera_height"], 7, self.pg_world)
+            self.main_camera.set_follow_lane(self.config["use_chase_camera_follow_lane"])
+            self.main_camera.chase(self.current_track_vehicle, self.pg_world)
+        self.pg_world.accept("n", self.chase_another_v)
+
+    def _preprocess_actions(self, actions: Union[np.ndarray, Dict[AnyStr, np.ndarray]]) \
+            -> Tuple[Union[np.ndarray, Dict[AnyStr, np.ndarray]], Dict]:
+
+        if self.config["manual_control"] and self.config["use_render"] \
+                and self.current_track_vehicle_id in self.vehicles.keys():
             action = self.controller.process_input()
             if self.num_agents == 1:
                 actions = action
@@ -291,37 +198,20 @@ class PGDriveEnv(gym.Env):
         if self.num_agents == 1:
             actions = {DEFAULT_AGENT: actions}
 
-        # protect by expert
-        saver_info = {}
-        for v_id, v in self.vehicles.items():
-            actions[v_id], saver_info[v_id] = self.saver(v_id, v, actions)
-        return actions, saver_info
-
-    def get_vehicles(self):
-        return {self.DEFAULT_AGENT: BaseVehicle(self.pg_world, self.config["vehicle_config"])}
-
-    def step(self, actions: Union[np.ndarray, Dict[AnyStr, np.ndarray]]):
-
-        self.episode_steps += 1
-        actions, saver_infos = self.preprocess_actions(actions)
-
-        # Check whether some actions are left.
+        # Check whether some actions are not provided.
         given_keys = set(actions.keys())
         have_keys = set(self.vehicles.keys())
         assert given_keys == have_keys, "The input actions: {} have incompatible keys with existing {}!".format(
             given_keys, have_keys
         )
 
-        # preprocess
-        scene_manager_infos = self.scene_manager.prepare_step(actions)
+        saver_info = dict()
+        for v_id, v in self.vehicles.items():
+            actions[v_id], saver_info[v_id] = self.saver(v_id, v, actions)
+        return actions, saver_info
 
-        # step all entities
-        self.scene_manager.step(self.config["decision_repeat"])
-
-        # update states, if restore from episode data, position and heading will be force set in update_state() function
-
-        scene_manager_dones, scene_manager_step_infos = self.scene_manager.update_state()
-
+    def _get_step_return(self, actions, step_infos):
+        """Don't need to copy anything here!"""
         # update obs, dones, rewards, costs, calculate done at first !
         obses = {}
         done_infos = {}
@@ -333,36 +223,28 @@ class PGDriveEnv(gym.Env):
             done_function_result, done_infos[v_id] = self.done_function(v)
             rewards[v_id], reward_infos[v_id] = self.reward_function(v)
             _, cost_infos[v_id] = self.cost_function(v)
-            self.dones[v_id] = done_function_result or self.dones[v_id] or scene_manager_dones[v_id]
-        # rewards = self.for_each_vehicle(lambda v: pg_reward_function(v))
-        # self.for_each_vehicle(lambda v: pg_cost_function(v))
+            self.dones[v_id] = done_function_result or self.dones[v_id]
 
         should_done = self.config["auto_termination"] and (self.episode_steps >= (self.current_map.num_blocks * 250))
 
         termination_infos = self.for_each_vehicle(_auto_termination, should_done)
 
-        step_infos = concat_step_infos(
-            [
-                saver_infos,
-                scene_manager_infos,
-                scene_manager_step_infos,
-                done_infos,
-                reward_infos,
-                cost_infos,
-                termination_infos,
-            ]
-        )
-        step_infos = self.extra_step_info(step_infos)
+        step_infos = concat_step_infos([
+            step_infos,
+            done_infos,
+            reward_infos,
+            cost_infos,
+            termination_infos,
+        ])
 
         if should_done:
             for k in self.dones:
                 self.dones[k] = True
 
         if self.num_agents == 1:
-            return obses[DEFAULT_AGENT], rewards[DEFAULT_AGENT], copy.deepcopy(self.dones[DEFAULT_AGENT]), \
-                   copy.deepcopy(step_infos[DEFAULT_AGENT])
+            return obses[DEFAULT_AGENT], rewards[DEFAULT_AGENT], self.dones[DEFAULT_AGENT], step_infos[DEFAULT_AGENT]
         else:
-            return obses, copy.deepcopy(rewards), copy.deepcopy(self.dones), copy.deepcopy(step_infos)
+            return obses, rewards, self.dones, step_infos
 
     def done_function(self, vehicle):
         done = False
@@ -450,76 +332,10 @@ class PGDriveEnv(gym.Env):
 
         return reward, step_info
 
-    def extra_step_info(self, step_infos):
-        return step_infos
-
-    def render(self, mode='human', text: Optional[Union[dict, str]] = None) -> Optional[np.ndarray]:
-        """
-        This is a pseudo-render function, only used to update onscreen message when using panda3d backend
-        :param mode: 'rgb'/'human'
-        :param text:text to show
-        :return: when mode is 'rgb', image array is returned
-        """
-        assert self.config["use_render"] or self.pg_world.mode != RENDER_MODE_NONE, (
-            "render is off now, can not render"
-        )
-        self.pg_world.render_frame(text)
-        if mode != "human" and self.config["use_image"]:
-            # fetch img from img stack to be make this func compatible with other render func in RL setting
-            return self.vehicle.observations.img_obs.get_image()
-
-        if mode == "rgb_array" and self.config["use_render"]:
-            if not hasattr(self, "_temporary_img_obs"):
-                from pgdrive.obs.observation_type import ImageObservation
-                image_source = "rgb_cam"
-                assert len(self.vehicles) == 1, "Multi-agent not supported yet!"
-                self.temporary_img_obs = ImageObservation(
-                    self.vehicles[DEFAULT_AGENT].vehicle_config, image_source, False
-                )
-            else:
-                raise ValueError("Not implemented yet!")
-            self.temporary_img_obs.observe(self.vehicles[DEFAULT_AGENT].image_sensors[image_source])
-            return self.temporary_img_obs.get_image()
-
-        # logging.warning("You do not set 'use_image' or 'use_image' to True, so no image will be returned!")
-        return None
-
-    def reset(self, episode_data: dict = None):
-        """
-        Reset the env, scene can be restored and replayed by giving episode_data
-        Reset the environment or load an episode from episode data to recover is
-        :param episode_data: Feed the episode data to replay an episode
-        :return: None
-        """
-        self.lazy_init()  # it only works the first time when reset() is called to avoid the error when render
-
+    def _reset_vehicles(self):
         self.vehicles.update(self.done_vehicles)
         self.done_vehicles = {}
-        self.dones = {agent_id: False for agent_id in self.vehicles.keys()}
-        self.episode_steps = 0
-
-        # clear world and traffic manager
-        self.pg_world.clear_world()
-
-        # select_map
-        self.update_map(episode_data)
-
-        # reset main vehicle
         self.for_each_vehicle(lambda v: v.reset(self.current_map))
-
-        # generate new traffic according to the map
-        self.scene_manager.reset(
-            self.current_map,
-            self.vehicles,
-            self.config["traffic_density"],
-            self.config["accident_prob"],
-            episode_data=episode_data
-        )
-
-        if self.main_camera is not None:
-            self.main_camera.reset()
-
-        return self._get_reset_return()
 
     def _get_reset_return(self):
         ret = {}
@@ -529,44 +345,7 @@ class PGDriveEnv(gym.Env):
             ret[v_id] = self.observations[v_id].observe(v)
         return ret[DEFAULT_AGENT] if self.num_agents == 1 else ret
 
-    def close(self):
-        if self.pg_world is not None:
-            if self.main_camera is not None:
-                self.main_camera.destroy(self.pg_world)
-                del self.main_camera
-                self.main_camera = None
-            self.pg_world.clear_world()
-
-            self.scene_manager.destroy(self.pg_world)
-            del self.scene_manager
-            self.scene_manager = None
-
-            self.for_each_vehicle(lambda v: v.destroy(self.pg_world))
-            del self.vehicles
-            self.vehicles = dict()
-
-            del self.controller
-            self.controller = None
-
-            self.pg_world.close_world()
-            del self.pg_world
-            self.pg_world = None
-
-        del self.maps
-        self.maps = {_seed: None for _seed in range(self.start_seed, self.start_seed + self.env_num)}
-        del self.current_map
-        self.current_map = None
-        del self.restored_maps
-        self.restored_maps = dict()
-
-    def custom_info_callback(self, step_info, vehicle):
-        """
-        Override it to add custom infomation
-        :return: None
-        """
-        return step_info
-
-    def update_map(self, episode_data: dict = None):
+    def _update_map(self, episode_data: dict = None):
         if episode_data is not None:
             # Since in episode data map data only contains one map, values()[0] is the map_parameters
             map_data = episode_data["map_data"].values()
@@ -678,57 +457,12 @@ class PGDriveEnv(gym.Env):
             self.config["load_map_from_json"] = False  # Don't fall into this function again.
             return False
 
-    def force_close(self):
-        print("Closing environment ... Please wait")
-        self.close()
-        time.sleep(2)  # Sleep two seconds
-        raise KeyboardInterrupt("'Esc' is pressed. PGDrive exits now.")
-
-    def set_current_seed(self, seed):
-        self.current_seed = seed
-
-    def get_vehicle_num(self):
-        if self.scene_manager is None:
-            return 0
-        return self.scene_manager.traffic_mgr.get_vehicle_num()
-
     def toggle_expert_takeover(self):
         """
         Only take effect whene vehicle num==1
         :return: None
         """
         self.current_track_vehicle._expert_takeover = not self.current_track_vehicle._expert_takeover
-
-    def capture(self):
-        img = PNMImage()
-        self.pg_world.win.getScreenshot(img)
-        img.write("main.jpg")
-
-        for name, sensor in self.vehicle.image_sensors.items():
-            if name == "mini_map":
-                name = "lidar"
-            sensor.save_image("{}.jpg".format(name))
-        # if self.pg_world.highway_render is not None:
-        #     self.pg_world.highway_render.get_screenshot("top_down.jpg")
-
-    def for_each_vehicle(self, func, *args, **kwargs):
-        """
-        func is a function that take each vehicle as the first argument and *arg and **kwargs as others.
-        """
-        ret = dict()
-        for k, v in self.vehicles.items():
-            ret[k] = func(v, *args, **kwargs)
-        return ret
-
-    @property
-    def vehicle(self):
-        """A helper to return the vehicle only in the single-agent environment!"""
-        assert len(self.vehicles) == 1, "env.vehicle is only supported in single-agent environment!"
-        ego_v = self.vehicles[DEFAULT_AGENT]
-        return ego_v
-
-    def reward(self, *args, **kwargs):
-        raise ValueError("reward function is deprecated!")
 
     def chase_another_v(self) -> (str, BaseVehicle):
         vehicles = sorted(list(self.vehicles.items()) + list(self.done_vehicles.items())) * 2
@@ -803,7 +537,7 @@ class PGDriveEnv(gym.Env):
         }
         return (steering, throttle), saver_info
 
-    def get_observation(self, vehicle_config: Union[dict, PGConfig]):
+    def get_single_observation(self, vehicle_config: "PGConfig") -> "ObservationType":
         if self.config["use_image"]:
             o = ImageStateObservation(vehicle_config)
         else:

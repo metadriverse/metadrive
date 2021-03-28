@@ -124,12 +124,11 @@ class TrafficManager(RandomEngine):
         for v in self.traffic_vehicles:
             v.step(dt)
 
-    def update_state(self, scene_mgr, pg_world: PGWorld) -> bool:
+    def update_state(self, scene_mgr, pg_world: PGWorld):
         """
         Update all traffic vehicles' states,
         :param scene_mgr: Access other entities in the scene to determine the new state
         :param pg_world: World
-        :return: if this episode should be done
         """
 
         vehicles_to_remove = []
@@ -158,8 +157,6 @@ class TrafficManager(RandomEngine):
                 vehicle_type = self.random_vehicle_type()
                 random_v = self.spawn_one_vehicle(vehicle_type, lane, self.np_random.rand() * lane.length / 2, True)
                 self.traffic_vehicles.append(random_v)
-
-        return False
 
     def _clear_traffic(self, pg_world: PGWorld):
         if self._spawned_vehicles is not None:

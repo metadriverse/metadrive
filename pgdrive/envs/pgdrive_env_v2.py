@@ -2,6 +2,7 @@ import logging
 import os.path as osp
 
 import numpy as np
+
 from pgdrive.constants import DEFAULT_AGENT
 from pgdrive.envs.pgdrive_env import PGDriveEnv as PGDriveEnvV1
 from pgdrive.scene_manager.traffic_manager import TrafficMode
@@ -49,6 +50,7 @@ class PGDriveEnvV2(PGDriveEnvV1):
             ),
             allow_overwrite=True
         )
+        config.remove_keys([])
         return config
 
     def __init__(self, config: dict = None):
@@ -126,9 +128,6 @@ class PGDriveEnvV2(PGDriveEnvV1):
         elif vehicle.arrive_destination:
             reward = +self.config["success_reward"]
         return reward, step_info
-
-    def extra_step_info(self, step_infos):
-        return step_infos
 
     def _get_reset_return(self):
         ret = {}
