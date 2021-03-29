@@ -62,7 +62,7 @@ class ObservationType(ABC):
             _, lateral = vehicle.lane.local_coordinates(vehicle.position)
         else:
             lateral = vehicle.lane_line_detector.get_cloud_points()[0]
-            print(lateral)
+            # print(lateral)
         info.append(clip((lateral * 2 / vehicle.routing_localization.get_current_lane_width() + 1.0) / 2.0, 0.0, 1.0))
         return info
 

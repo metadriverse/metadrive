@@ -361,12 +361,12 @@ class Block(Element, BlockDefault):
                     lane_start = lane.position(0, i * lane_width / 2)
                     lane_end = lane.position(lane.length, i * lane_width / 2)
                     middle = lane.position(lane.length / 2, i * lane_width / 2)
-                    self._add_box_body(lane_start, lane_end, middle, parent_np, lane.line_types[k])
+                    self._add_box_body(lane_start, lane_end, middle, parent_np, lane.line_types[k], line_color)
 
-    def _add_box_body(self, lane_start, lane_end, middle, parent_np: NodePath, line_type):
+    def _add_box_body(self, lane_start, lane_end, middle, parent_np: NodePath, line_type, line_color):
         length = norm(lane_end[0] - lane_start[0], lane_end[1] - lane_start[1])
         if LineType.prohibit(line_type):
-            node_name = BodyName.Continuous_line
+            node_name = BodyName.White_continuous_line if line_color == LineColor.GREY else BodyName.Yellow_continuous_line
         else:
             node_name = BodyName.Broken_line
         body_node = BulletGhostNode(node_name)
@@ -399,7 +399,7 @@ class Block(Element, BlockDefault):
         if length <= 0:
             return
         if LineType.prohibit(line_type):
-            node_name = BodyName.Continuous_line
+            node_name = BodyName.White_continuous_line if color == LineColor.GREY else BodyName.Yellow_continuous_line
         else:
             node_name = BodyName.Broken_line
 
