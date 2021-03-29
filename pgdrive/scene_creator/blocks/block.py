@@ -432,8 +432,9 @@ class Block(Element, BlockDefault):
             # For visualization
             lane_line = self.loader.loadModel(AssetLoader.file_path("models", "box.bam"))
             lane_line.setScale(length, Block.LANE_LINE_WIDTH, Block.LANE_LINE_THICKNESS)
+            lane_line.setPos(Vec3(0, 0 - Block.LANE_LINE_GHOST_HEIGHT / 2))
             lane_line.reparentTo(body_np)
-        body_np.set_color(color)
+            body_np.set_color(color)
 
     def _add_sidewalk2bullet(self, lane_start, lane_end, middle, radius=0.0, direction=0):
         length = norm(lane_end[0] - lane_start[0], lane_end[1] - lane_start[1])
