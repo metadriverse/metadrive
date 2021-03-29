@@ -52,8 +52,14 @@ if __name__ == "__main__":
     for i in range(1, 100000):
         o, r, d, info = env.step([0, 1])
         info["fuel"] = env.vehicle.energy_consumption
-        env.render(text={"left": env.vehicle.dist_to_left, "right": env.vehicle.dist_to_right})
-        # if d:
-        #     print("Reset")
-        #     env.reset()
+        env.render(
+            text={
+                "left": env.vehicle.dist_to_left,
+                "right": env.vehicle.dist_to_right,
+                "white_lane_line": env.vehicle.on_white_continuous_line
+            }
+        )
+        if d:
+            print("Reset")
+            env.reset()
     env.close()

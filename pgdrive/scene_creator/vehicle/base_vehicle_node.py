@@ -12,7 +12,13 @@ class BaseVehilceNode(BulletRigidBodyNode):
         self.crash_object = False
         self.crash_sidewalk = False
 
+        # lane line detection
+        self.on_yellow_continuous_line = False
+        self.on_white_continuous_line = False
+
     def init_collision_info(self):
         self.crash_vehicle = False
         self.crash_object = False
         self.crash_sidewalk = False
+        self.on_yellow_continuous_line = False
+        self.on_white_continuous_line = False

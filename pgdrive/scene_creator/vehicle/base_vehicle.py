@@ -285,7 +285,7 @@ class BaseVehicle(DynamicElement):
         self._state_check()
         self.update_dist_to_left_right()
         self._update_energy_consumption()
-        self.out_of_route = True if self.dist_to_right < 0 or self.dist_to_left < 0 else False
+        self.out_of_route = self._out_of_route()
         step_info = self._update_overtake_stat()
         step_info.update(
             {
@@ -295,6 +295,10 @@ class BaseVehicle(DynamicElement):
             }
         )
         return step_info
+
+    def _out_of_route(self):
+        left, right = self._dist_to_route_left_right()
+        return True if right < 0 or left < 0 else False
 
     def _update_energy_consumption(self):
         """
@@ -392,16 +396,19 @@ class BaseVehicle(DynamicElement):
 
     def update_dist_to_left_right(self):
         if not self.vehicle_config["use_lane_line_detector"]:
-            current_reference_lane = self.routing_localization.current_ref_lanes[-1]
-            _, lateral_to_reference = current_reference_lane.local_coordinates(self.position)
-            if lateral_to_reference < 0:
-                lateral_to_right = abs(lateral_to_reference) + self.routing_localization.get_current_lane_width() / 2
-            else:
-                lateral_to_right = self.routing_localization.get_current_lane_width() / 2 - abs(lateral_to_reference)
-            lateral_to_left = self.routing_localization.get_current_lateral_range() - lateral_to_right
-            self.dist_to_left, self.dist_to_right = lateral_to_left, lateral_to_right
+            self.dist_to_left, self.dist_to_right = self._dist_to_route_left_right()
         else:
             self.dist_to_right, self.dist_to_left = self.side_detector.get_cloud_points()
+
+    def _dist_to_route_left_right(self):
+        current_reference_lane = self.routing_localization.current_ref_lanes[-1]
+        _, lateral_to_reference = current_reference_lane.local_coordinates(self.position)
+        if lateral_to_reference < 0:
+            lateral_to_right = abs(lateral_to_reference) + self.routing_localization.get_current_lane_width() / 2
+        else:
+            lateral_to_right = self.routing_localization.get_current_lane_width() / 2 - abs(lateral_to_reference)
+        lateral_to_left = self.routing_localization.get_current_lateral_range() - lateral_to_right
+        return lateral_to_left, lateral_to_right
 
     @property
     def position(self):
@@ -626,6 +633,10 @@ class BaseVehicle(DynamicElement):
                 continue
             if name[0] == BodyName.Sidewalk:
                 self.chassis_np.node().getPythonTag(BodyName.Ego_vehicle).crash_sidewalk = True
+            elif name[0] == BodyName.White_continuous_line:
+                self.chassis_np.node().getPythonTag(BodyName.Ego_vehicle).on_white_continuous_line = True
+            elif name[0] == BodyName.Yellow_continuous_line:
+                self.chassis_np.node().getPythonTag(BodyName.Ego_vehicle).on_yellow_continuous_line = True
             contacts.add(name[0])
         if self.render:
             self.render_collision_info(contacts)
@@ -795,3 +806,11 @@ class BaseVehicle(DynamicElement):
     @property
     def crash_sidewalk(self):
         return self.chassis_np.node().getPythonTag(BodyName.Ego_vehicle).crash_sidewalk
+
+    @property
+    def on_yellow_continuous_line(self):
+        return self.chassis_np.node().getPythonTag(BodyName.Ego_vehicle).on_yellow_continuous_line
+
+    @property
+    def on_white_continuous_line(self):
+        return self.chassis_np.node().getPythonTag(BodyName.Ego_vehicle).on_white_continuous_line
