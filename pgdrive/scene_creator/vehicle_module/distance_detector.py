@@ -3,10 +3,10 @@ import logging
 import numpy as np
 from panda3d.bullet import BulletGhostNode, BulletSphereShape
 from panda3d.core import BitMask32, NodePath
+
 from pgdrive.constants import CamMask, CollisionGroup
 from pgdrive.utils.asset_loader import AssetLoader
 from pgdrive.utils.coordinates_shift import panda_position
-from pgdrive.world.pg_physics_world import PGPhysicsWorld
 
 
 class DistanceDetector:

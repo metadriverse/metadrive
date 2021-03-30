@@ -1,7 +1,4 @@
 from pgdrive.envs.pgdrive_env import PGDriveEnv
-from pgdrive.utils import setup_logger
-
-setup_logger(True)
 
 
 def test_collision_with_vehicle():

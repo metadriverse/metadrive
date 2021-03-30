@@ -1,7 +1,5 @@
 from pgdrive.envs.generation_envs.side_pass_env import SidePassEnv
 
-# setup_logger(True)
-
 
 def test_object_collision(render=False):
     env = SidePassEnv({"manual_control": render, "use_render": render, "debug": False})

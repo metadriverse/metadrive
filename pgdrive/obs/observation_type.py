@@ -2,6 +2,7 @@ from abc import ABC
 
 import gym
 import numpy as np
+
 from pgdrive.scene_creator.vehicle.base_vehicle import BaseVehicle
 from pgdrive.scene_creator.vehicle_module.routing_localization import RoutingLocalizationModule
 from pgdrive.utils.math_utils import clip
@@ -65,32 +66,6 @@ class ObservationType(ABC):
             # print(lateral)
         info.append(clip((lateral * 2 / vehicle.routing_localization.get_current_lane_width() + 1.0) / 2.0, 0.0, 1.0))
         return info
-
-    @staticmethod
-    def resize_img(array, dim_1, dim_2):
-        """
-        resize to (84, 84)
-        """
-        x_step = int(dim_1 / 84)
-        y_step = int(dim_2 / 84 / 2)
-        res = []
-        for x in range(0, dim_1, x_step):
-            d = []
-            for y in range(dim_2 - 1, 0, -y_step):
-                d.append(array[x][y])
-                if len(d) > 84:
-                    break
-            res.append(d[:84])
-        res = res[:84]
-        return np.asarray(res, dtype=np.float32)
-
-    @staticmethod
-    def show_gray_scale_array(obs):
-        import matplotlib.pyplot as plt  # Lazy import
-        img = np.moveaxis(obs, -1, 0)
-        plt.plot()
-        plt.imshow(img, cmap=plt.cm.gray)
-        plt.show()
 
     def reset(self, env, vehicle=None):
         pass

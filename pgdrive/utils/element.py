@@ -1,14 +1,13 @@
-import copy
 import logging
 from typing import Dict
 
 from panda3d.bullet import BulletWorld
 from panda3d.core import NodePath
+
 from pgdrive.utils import PGConfig
 from pgdrive.utils.asset_loader import AssetLoader
 from pgdrive.utils.pg_space import PGSpace
 from pgdrive.world.pg_physics_world import PGPhysicsWorld
-import numpy as np
 
 
 class PhysicsNodeList(list):
@@ -80,13 +79,14 @@ class Element:
     def class_name(self):
         return self.__class__.__name__
 
-    def get_config(self):
-        assert self._config is not None, "config of " + self.class_name + " is None, can not be read !"
-        return self._config.copy()
+    def get_config(self, copy=True):
+        if copy:
+            return self._config.copy()
+        return self._config
 
     def set_config(self, config: dict):
         # logging.debug("Read config to " + self.class_name)
-        self._config.update(config, allow_overwrite=True)
+        self._config.update(config)
 
     def attach_to_pg_world(self, parent_node_path: NodePath, pg_physics_world: PGPhysicsWorld):
         if self.render:

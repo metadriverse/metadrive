@@ -3,6 +3,7 @@ from typing import Union, List
 
 import numpy as np
 from panda3d.core import NodePath, Vec3, Vec4, Camera, PNMImage
+
 from pgdrive.constants import RENDER_MODE_ONSCREEN
 
 

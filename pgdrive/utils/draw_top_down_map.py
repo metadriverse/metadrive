@@ -2,6 +2,7 @@ from typing import Optional, Union, Iterable
 
 import cv2
 import numpy as np
+
 from pgdrive.constants import Decoration
 from pgdrive.utils.utils import import_pygame
 

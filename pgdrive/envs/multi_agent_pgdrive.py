@@ -3,8 +3,6 @@ from pgdrive.scene_creator.blocks.first_block import FirstBlock
 from pgdrive.scene_creator.vehicle.base_vehicle import BaseVehicle
 from pgdrive.utils import setup_logger, PGConfig
 
-setup_logger(True)
-
 
 class MultiAgentPGDrive(PGDriveEnv):
     @staticmethod
@@ -42,8 +40,7 @@ class MultiAgentPGDrive(PGDriveEnv):
                 },
                 "num_agents": 4,
                 "crash_done": True
-            },
-            allow_overwrite=True
+            }
         )
         # Some collision bugs still exist, always set to False now!!!!
         # config.extend_config_with_unknown_keys({"crash_done": True})
@@ -128,6 +125,7 @@ class MultiAgentPGDrive(PGDriveEnv):
 
 
 if __name__ == "__main__":
+    setup_logger(True)
     env = MultiAgentPGDrive(
         {
             "use_render": True,

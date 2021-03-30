@@ -25,11 +25,11 @@ def test_recursive_config():
     else:
         raise ValueError()
 
-    c.update({"aa": {"bbd": 103}}, allow_overwrite=True)
+    c.update({"aa": {"bbd": 103}})
     assert c.aa.bbd == 103
     assert c.aa.bb.cc == 101
 
-    c.update({"aa": {"bb": 102}}, allow_overwrite=True)
+    c.update({"aa": {"bb": 102}})
     assert c.aa.bb == 102
 
 
@@ -43,7 +43,7 @@ def test_partially_update():
     else:
         raise ValueError()
 
-    c.update({"aa": {"bb": {"dd": 101}}}, allow_overwrite=True)
+    c.update({"aa": {"bb": {"dd": 101}}})
     assert c.aa.bb.cc == 100
     assert c.aa.bb.dd == 101
 
@@ -62,7 +62,7 @@ def test_config_identical():
     assert not c.is_identical(d)
     assert not d.is_identical(c)
 
-    c.update({"aa": {"bb": 10001}}, allow_overwrite=True)
+    c.update({"aa": {"bb": 10001}})
     assert c.is_identical(c)
     assert d.is_identical(d)
     assert not c.is_identical(d)

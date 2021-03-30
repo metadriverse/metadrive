@@ -47,8 +47,7 @@ class PGDriveEnvV2(PGDriveEnvV1):
                 # Disable map loading!
                 load_map_from_json=False,
                 _load_map_from_json="",
-            ),
-            allow_overwrite=True
+            )
         )
         config.remove_keys([])
         return config

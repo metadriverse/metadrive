@@ -12,7 +12,7 @@ class ChangeDensityEnv(PGDriveEnv):
             "change_density": True,
             "density_min": 0.0,
             "density_max": 0.4,
-        }, allow_overwrite=True)
+        })
         return config
 
     def __init__(self, config):

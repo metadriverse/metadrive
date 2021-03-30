@@ -1,4 +1,5 @@
 from panda3d.core import NodePath
+
 from pgdrive.constants import Decoration
 from pgdrive.scene_creator.blocks.block import Block, BlockSocket
 from pgdrive.scene_creator.blocks.create_block_utils import CreateRoadFrom, CreateAdverseRoad, ExtendStraightLane
