@@ -6,8 +6,6 @@ from pgdrive.utils import PGConfig
 
 
 class ActionRepeat(PGDriveEnv):
-    ORIGINAL_ACTION_REPEAT = PGDriveEnv.default_config()["decision_repeat"]
-
     @classmethod
     def default_config(cls) -> PGConfig:
         config = PGDriveEnv.default_config()
@@ -16,7 +14,8 @@ class ActionRepeat(PGDriveEnv):
         config["decision_repeat"] = 1
 
         # Speed reward_function is given for current state, so its magnitude need to be reduced
-        config["speed_reward"] = config["speed_reward"] / cls.ORIGINAL_ACTION_REPEAT
+        original_action_repeat = PGDriveEnv.default_config()["decision_repeat"]
+        config["speed_reward"] = config["speed_reward"] / original_action_repeat
 
         # Set the interval from 0.02s to 1s
         config.update(
