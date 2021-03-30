@@ -1,8 +1,6 @@
 from pgdrive.envs.pgdrive_env import PGDriveEnv
 from pgdrive.utils import setup_logger
 
-setup_logger(True)
-
 
 class TestEnv(PGDriveEnv):
     def __init__(self):
@@ -10,6 +8,7 @@ class TestEnv(PGDriveEnv):
 
 
 if __name__ == "__main__":
+    setup_logger(True)
     env = TestEnv()
 
     o = env.reset()
@@ -23,7 +22,4 @@ if __name__ == "__main__":
                 "dist_to_right:": env.vehicle.dist_to_right
             }
         )
-        # if d:
-        #     print("Reset")
-        #     env.reset()
     env.close()

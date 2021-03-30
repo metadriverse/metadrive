@@ -1,15 +1,10 @@
-import logging
 from typing import Set
 
-import numpy as np
-from panda3d.bullet import BulletGhostNode, BulletSphereShape, BulletAllHitsRayResult, BulletRayHit
 from panda3d.core import BitMask32, NodePath
+
 from pgdrive.constants import BodyName, CamMask, CollisionGroup
 from pgdrive.scene_creator.highway_vehicle.behavior import IDMVehicle
 from pgdrive.scene_creator.vehicle.traffic_vehicle import PGTrafficVehicle
-from pgdrive.utils.asset_loader import AssetLoader
-from pgdrive.utils.coordinates_shift import panda_position
-from pgdrive.world.pg_physics_world import PGPhysicsWorld
 from pgdrive.scene_creator.vehicle_module.distance_detector import DistanceDetector
 
 

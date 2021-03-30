@@ -3,6 +3,7 @@ from typing import Union
 
 from numpy.random import RandomState
 from panda3d.core import NodePath
+
 from pgdrive.scene_creator.blocks.block import Block
 from pgdrive.scene_creator.blocks.first_block import FirstBlock
 from pgdrive.scene_creator.pg_blocks import PGBlock

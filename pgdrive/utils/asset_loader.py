@@ -28,7 +28,7 @@ class AssetLoader:
 
     @classmethod
     def get_loader(cls):
-        assert AssetLoader.loader, "Initialize AssetLoader before getting it"
+        assert AssetLoader.loader, "Please initialize AssetLoader before getting it!"
         return cls.loader
 
     @staticmethod

@@ -2,6 +2,7 @@ import copy
 from collections import deque
 
 import numpy as np
+
 from pgdrive.scene_creator.blocks.block import Block, BlockSocket
 from pgdrive.scene_creator.blocks.create_block_utils import CreateAdverseRoad, CreateRoadFrom, ExtendStraightLane, \
     create_bend_straight

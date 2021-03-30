@@ -3,8 +3,6 @@ from pgdrive.scene_creator.map import Map, MapGenerateMethod
 from pgdrive.scene_creator.vehicle_module.depth_camera import DepthCamera
 from pgdrive.utils import setup_logger
 
-setup_logger(True)
-
 h_f = 2
 w_f = 2
 
@@ -54,6 +52,7 @@ class TestEnv(PGDriveEnv):
 
 
 if __name__ == "__main__":
+    setup_logger(True)
     env = TestEnv()
     o = env.reset()
 

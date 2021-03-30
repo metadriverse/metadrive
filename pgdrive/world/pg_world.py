@@ -7,8 +7,9 @@ from direct.gui.OnscreenImage import OnscreenImage
 from direct.showbase import ShowBase
 from panda3d.bullet import BulletDebugNode
 from panda3d.core import AntialiasAttrib, loadPrcFileData, LineSegs, PythonCallbackObject
+
 from pgdrive.constants import RENDER_MODE_OFFSCREEN, RENDER_MODE_NONE, RENDER_MODE_ONSCREEN, PG_EDITION, CamMask
-from pgdrive.utils import PGConfig, is_mac, setup_logger, merge_config
+from pgdrive.utils import is_mac, setup_logger
 from pgdrive.utils.asset_loader import AssetLoader, initialize_asset_loader
 from pgdrive.world.collision_callback import pg_collision_callback
 from pgdrive.world.force_fps import ForceFPS

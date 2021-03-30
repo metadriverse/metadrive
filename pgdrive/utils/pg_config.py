@@ -2,6 +2,7 @@ import copy
 from typing import Union, Any
 
 import numpy as np
+
 from pgdrive.utils.utils import merge_dicts
 
 
@@ -87,9 +88,6 @@ class PGConfig:
     def clear(self):
         self._config.clear()
 
-    def add(self, key, value):
-        raise ValueError("Deprecated!")
-
     def register_type(self, key, *types):
         """
         Register special types for item in config. This is used for mixed type declaration.
@@ -104,7 +102,7 @@ class PGConfig:
     def get_serializable_dict(self):
         return config_to_dict(self._config, serializable=True)
 
-    def update(self, new_dict: Union[dict, "PGConfig"], allow_overwrite=False):
+    def update(self, new_dict: Union[dict, "PGConfig"], allow_overwrite=True):
         new_dict = new_dict or dict()
         new_dict = copy.deepcopy(new_dict)
         for k, v in new_dict.items():
@@ -164,17 +162,11 @@ class PGConfig:
             ret[k] = v
         return ret
 
-    def extend_config_with_unknown_keys(self, extra_config: dict) -> None:
-        raise ValueError(
-            "This function is deprecated. Please explicitly use pgdrive.utils.merge_config or merge_"
-            "config_with_unknown_keys."
-        )
-
     def _check_and_raise_key_error(self, key):
         if key not in self._config:
             raise KeyError(
                 "'{}' does not exist in existing config. "
-                "Please use config.update(..., allow_overwrite=True) to update the config. Existing keys: {}.".format(
+                "Please use config.update(...) to update the config. Existing keys: {}.".format(
                     key, self._config.keys()
                 )
             )

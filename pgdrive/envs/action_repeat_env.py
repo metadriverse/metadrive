@@ -18,15 +18,12 @@ class ActionRepeat(PGDriveEnv):
         config["speed_reward"] = config["speed_reward"] / original_action_repeat
 
         # Set the interval from 0.02s to 1s
-        config.update(
-            {
-                "fixed_action_repeat": 0,
-                "max_action_repeat": 50,
-                "min_action_repeat": 1,
-                "horizon": 5000,
-            },
-            allow_overwrite=True
-        )
+        config.update({
+            "fixed_action_repeat": 0,
+            "max_action_repeat": 50,
+            "min_action_repeat": 1,
+            "horizon": 5000,
+        }, )
         # default gamma for ORIGINAL primitive step!
         # Note that we will change this term since ORIGINAL primitive steps is not the internal step!
         # It still contains ORIGINAL_ACTION_STEP internal steps!

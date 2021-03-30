@@ -115,7 +115,7 @@ class PGDriveEnv(BasePGDriveEnv):
     @classmethod
     def default_config(cls) -> "PGConfig":
         config = super(PGDriveEnv, cls).default_config()
-        config.update(PGDriveEnvV1_DEFAULT_CONFIG, allow_overwrite=True)
+        config.update(PGDriveEnvV1_DEFAULT_CONFIG)
         config.register_type("map", str, int)
         config["map_config"].register_type("config", None)
         return config
@@ -138,15 +138,9 @@ class PGDriveEnv(BasePGDriveEnv):
                 "debug": config["debug"],
                 "decision_repeat": config["decision_repeat"],
                 "fast_launch_window": config["fast"]
-            },
-            allow_overwrite=True
+            }
         )
-        config["vehicle_config"].update(
-            {
-                "use_render": config["use_render"],
-                "use_image": config["use_image"]
-            }, allow_overwrite=True
-        )
+        config["vehicle_config"].update({"use_render": config["use_render"], "use_image": config["use_image"]})
         return config
 
     def _setup_pg_world(self) -> "PGWorld":
