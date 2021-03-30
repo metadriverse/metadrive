@@ -16,8 +16,7 @@ class ChangeFrictionEnv(PGDriveEnv):
                 "vehicle_config": {
                     "wheel_friction": 1.0
                 }
-            },
-            allow_overwrite=True
+            }
         )
         return config
 

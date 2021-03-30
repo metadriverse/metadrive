@@ -1,6 +1,7 @@
 from typing import Tuple
 
 from panda3d.core import Vec3, NodePath
+
 from pgdrive.constants import CamMask
 from pgdrive.world.image_buffer import ImageBuffer
 

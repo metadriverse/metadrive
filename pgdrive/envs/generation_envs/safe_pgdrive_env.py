@@ -14,8 +14,7 @@ class SafePGDriveEnv(PGDriveEnv):
                 "crash_object_penalty": 0.,
                 "out_of_road_cost": 0.,  # only give penalty for out_of_road
                 "traffic_density": 0.2,
-            },
-            allow_overwrite=True
+            }
         )
         return config
 

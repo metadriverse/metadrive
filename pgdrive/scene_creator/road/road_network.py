@@ -389,16 +389,6 @@ class RoadNetwork:
                         ret.append(Road(_from, _to))
         return ret
 
-    def __iadd__(self, other):
-        raise ValueError("Deprecated function, use road_network.add(other) instead!")
-
-    def __add__(self, other):
-        raise ValueError("Deprecated function, use road_network.add(other) instead!")
-        ret = RoadNetwork()
-        ret.graph = self.graph
-        ret += other
-        return ret
-
 
 class GraphLookupTable:
     def __init__(self, graph, debug):

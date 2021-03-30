@@ -2,6 +2,7 @@ import math
 from typing import List, TYPE_CHECKING, Tuple
 
 import numpy as np
+
 from pgdrive.constants import Decoration, BodyName
 from pgdrive.scene_creator.lane.abs_lane import AbstractLane
 from pgdrive.scene_creator.lane.circular_lane import CircularLane

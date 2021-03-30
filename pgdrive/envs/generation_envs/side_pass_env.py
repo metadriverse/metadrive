@@ -20,8 +20,7 @@ class SidePassEnv(PGDriveEnv):
                 },
                 "debug": False,
                 "map": "CSRCR"
-            },
-            allow_overwrite=True
+            }
         )
         return config
 

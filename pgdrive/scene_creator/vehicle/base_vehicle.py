@@ -2,11 +2,12 @@ import math
 import time
 from collections import deque
 from typing import Optional
-from pgdrive.scene_creator.vehicle_module.distance_detector import SideDetector, LaneLineDetector
+
 import gym
 import numpy as np
 from panda3d.bullet import BulletVehicle, BulletBoxShape, ZUp, BulletGhostNode
 from panda3d.core import Vec3, TransformState, NodePath, LQuaternionf, BitMask32, TextNode
+
 from pgdrive.constants import RENDER_MODE_ONSCREEN, COLOR, COLLISION_INFO_COLOR, BodyName, CamMask, CollisionGroup
 from pgdrive.scene_creator.blocks.first_block import FirstBlock
 from pgdrive.scene_creator.lane.abs_lane import AbstractLane
@@ -16,6 +17,7 @@ from pgdrive.scene_creator.map import Map
 from pgdrive.scene_creator.vehicle.base_vehicle_node import BaseVehilceNode
 from pgdrive.scene_creator.vehicle_module import Lidar, MiniMap
 from pgdrive.scene_creator.vehicle_module.depth_camera import DepthCamera
+from pgdrive.scene_creator.vehicle_module.distance_detector import SideDetector, LaneLineDetector
 from pgdrive.scene_creator.vehicle_module.rgb_camera import RGBCamera
 from pgdrive.scene_creator.vehicle_module.routing_localization import RoutingLocalizationModule
 from pgdrive.scene_creator.vehicle_module.vehicle_panel import VehiclePanel
@@ -232,10 +234,6 @@ class BaseVehicle(DynamicElement):
         self.on_lane = True  # on lane surface or not
         # self.step_info = {"reward": 0, "cost": 0}
 
-    @classmethod
-    def get_vehicle_config(cls, new_config=None):
-        raise ValueError("This function is deprecated!")
-
     def _preprocess_action(self, action):
         if self.vehicle_config["action_check"]:
             assert self.action_space.contains(action), "Input {} is not compatible with action space {}!".format(
@@ -360,7 +358,7 @@ class BaseVehicle(DynamicElement):
     """------------------------------------------- act -------------------------------------------------"""
 
     def set_act(self, action):
-        para = self.get_config()
+        para = self.get_config(copy=False)
         steering = action[0]
         self.throttle_brake = action[1]
         self.steering = steering
@@ -378,8 +376,8 @@ class BaseVehicle(DynamicElement):
         self._apply_throttle_brake(action[1])
 
     def _apply_throttle_brake(self, throttle_brake):
-        para = self.get_config()
-        max_engine_force = para[Parameter.engine_force_max]
+        para = self.get_config(copy=False)
+        max_engine_force = self._config[Parameter.engine_force_max]
         max_brake_force = para[Parameter.brake_force_max]
         for wheel_index in range(4):
             if throttle_brake >= 0:
@@ -445,13 +443,6 @@ class BaseVehicle(DynamicElement):
     def velocity_direction(self):
         direction = self.system.getForwardVector()
         return np.asarray([direction[0], -direction[1]])
-
-    @property
-    def forward_direction(self):
-        raise ValueError("This function id deprecated.")
-        # print("This function id deprecated.")
-        # direction = self.vehicle.get_forward_vector()
-        # return np.array([direction[0], -direction[1]])
 
     @property
     def current_road(self):

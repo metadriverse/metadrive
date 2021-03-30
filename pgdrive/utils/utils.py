@@ -62,14 +62,15 @@ def random_string(prefix=None):
 
 
 def concat_step_infos(step_info_list):
+    """We only conduct simply shallow update here!"""
     old_dict = dict()
     for new_dict in step_info_list:
-        old_dict = merge_dicts(old_dict, new_dict, allow_new_keys=True)
+        old_dict = merge_dicts(old_dict, new_dict, allow_new_keys=True, without_copy=True)
     return old_dict
 
 
 # The following two functions is copied from ray/tune/utils/util.py, raise_error and pgconfig support is added by us!
-def merge_dicts(old_dict, new_dict, allow_new_keys=False):
+def merge_dicts(old_dict, new_dict, allow_new_keys=False, without_copy=False):
     """
     Args:
         old_dict (dict, PGConfig): Dict 1.
@@ -81,7 +82,10 @@ def merge_dicts(old_dict, new_dict, allow_new_keys=False):
     """
     old_dict = old_dict or dict()
     new_dict = new_dict or dict()
-    merged = copy.deepcopy(old_dict)
+    if without_copy:
+        merged = old_dict
+    else:
+        merged = copy.deepcopy(old_dict)
     _deep_update(
         merged, new_dict, new_keys_allowed=allow_new_keys, allow_new_subkey_list=[], raise_error=allow_new_keys
     )
