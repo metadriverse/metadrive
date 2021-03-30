@@ -70,9 +70,8 @@ class BasePGDriveEnv(gym.Env):
 
     # ===== Intialization =====
     def __init__(self, config: dict = None):
-        default_config = self.default_config()
-
-        self.config = self._process_config(default_config.update(config, allow_overwrite=True))
+        self.default_config_copy = PGConfig(self.default_config(), unchangeable=True)
+        self.config = self._process_config(self.default_config().update(config, allow_overwrite=True))
 
         self.num_agents = self.config["num_agents"]
         assert isinstance(self.num_agents, int) and self.num_agents > 0
@@ -107,7 +106,7 @@ class BasePGDriveEnv(gym.Env):
         return config
 
     def _get_observations(self) -> Dict[str, "ObservationType"]:
-        return {self.DEFAULT_AGENT: self.get_single_observation(self.config["vehicle_config"])}
+        raise NotImplementedError()
 
     def _get_observation_space(self) -> gym.Space:
         ret = gym.spaces.Dict({v_id: obs.observation_space for v_id, obs in self.observations.items()})

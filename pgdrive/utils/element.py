@@ -8,6 +8,7 @@ from pgdrive.utils import PGConfig
 from pgdrive.utils.asset_loader import AssetLoader
 from pgdrive.utils.pg_space import PGSpace
 from pgdrive.world.pg_physics_world import PGPhysicsWorld
+import numpy as np
 
 
 class PhysicsNodeList(list):
@@ -81,11 +82,11 @@ class Element:
 
     def get_config(self):
         assert self._config is not None, "config of " + self.class_name + " is None, can not be read !"
-        return copy.copy(self._config)
+        return self._config.copy()
 
     def set_config(self, config: dict):
         # logging.debug("Read config to " + self.class_name)
-        self._config.update(copy.copy(config))
+        self._config.update(config, allow_overwrite=True)
 
     def attach_to_pg_world(self, parent_node_path: NodePath, pg_physics_world: PGPhysicsWorld):
         if self.render:

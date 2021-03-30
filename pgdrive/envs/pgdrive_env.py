@@ -128,7 +128,9 @@ class PGDriveEnv(BasePGDriveEnv):
 
     def _process_config(self, config: Union[dict, "PGConfig"]) -> "PGConfig":
         """Check, update, sync and overwrite some config."""
-        config["map_config"] = parse_map_config(config["map"], config["map_config"])
+        config["map_config"] = parse_map_config(
+            easy_map_config=config["map"], new_map_config=config["map_config"], default_config=self.default_config_copy
+        )
         config["pg_world_config"].update(
             {
                 "use_render": config["use_render"],
@@ -188,6 +190,9 @@ class PGDriveEnv(BasePGDriveEnv):
             self.main_camera.set_follow_lane(self.config["use_chase_camera_follow_lane"])
             self.main_camera.chase(self.current_track_vehicle, self.pg_world)
         self.pg_world.accept("n", self.chase_another_v)
+
+    def _get_observations(self):
+        return {self.DEFAULT_AGENT: self.get_single_observation(self.config["vehicle_config"])}
 
     def _preprocess_actions(self, actions: Union[np.ndarray, Dict[AnyStr, np.ndarray]]) \
             -> Tuple[Union[np.ndarray, Dict[AnyStr, np.ndarray]], Dict]:
