@@ -11,7 +11,7 @@ from pgdrive.constants import DEFAULT_AGENT
 from pgdrive.envs.base_env import BasePGDriveEnv
 from pgdrive.obs.observation_type import LidarStateObservation, ImageStateObservation
 from pgdrive.scene_creator.blocks.first_block import FirstBlock
-from pgdrive.scene_creator.map import Map, MapGenerateMethod, parse_map_config
+from pgdrive.scene_creator.map import Map, MapGenerateMethod, parse_map_config, PGMap
 from pgdrive.scene_creator.vehicle.base_vehicle import BaseVehicle
 from pgdrive.scene_manager.traffic_manager import TrafficMode
 from pgdrive.utils import clip, PGConfig, recursive_equal, get_np_random, concat_step_infos
@@ -361,7 +361,7 @@ class PGDriveEnv(BasePGDriveEnv):
             map_config = self.config["map_config"].copy()
             map_config[Map.GENERATE_TYPE] = MapGenerateMethod.PG_MAP_FILE
             map_config[Map.GENERATE_CONFIG] = blocks_info
-            self.current_map = Map(self.pg_world, map_config)
+            self.current_map = PGMap(self.pg_world, map_config)
             return
 
         if self.config["load_map_from_json"] and self.current_map is None:
@@ -383,12 +383,12 @@ class PGDriveEnv(BasePGDriveEnv):
                 map_config = self.config["map_config"]
                 map_config.update({"seed": self.current_seed})
 
-            new_map = Map(self.pg_world, map_config)
+            new_map = PGMap(self.pg_world, map_config)
             self.maps[self.current_seed] = new_map
             self.current_map = self.maps[self.current_seed]
         else:
             self.current_map = self.maps[self.current_seed]
-            assert isinstance(self.current_map, Map), "map should be an instance of Map() class"
+            assert isinstance(self.current_map, Map), "Map should be an instance of Map() class"
             self.current_map.load_to_pg_world(self.pg_world)
 
     def dump_all_maps(self):
@@ -404,7 +404,7 @@ class PGDriveEnv(BasePGDriveEnv):
             print(seed)
             map_config = copy.deepcopy(self.config["map_config"])
             map_config.update({"seed": seed})
-            new_map = Map(self.pg_world, map_config)
+            new_map = PGMap(self.pg_world, map_config)
             self.maps[seed] = new_map
             new_map.unload_from_pg_world(self.pg_world)
             logging.info("Finish generating map with seed: {}".format(seed))

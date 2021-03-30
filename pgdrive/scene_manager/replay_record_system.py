@@ -2,13 +2,13 @@ import copy
 import logging
 
 from pgdrive.constants import DEFAULT_AGENT
-from pgdrive.scene_creator.map import Map
+from pgdrive.scene_creator.map import PGMap
 from pgdrive.scene_manager.traffic_manager import TrafficManager
 from pgdrive.world.pg_world import PGWorld
 
 
 class PGReplayer:
-    def __init__(self, traffic_mgr: TrafficManager, current_map: Map, episode_data: dict, pg_world: PGWorld):
+    def __init__(self, traffic_mgr: TrafficManager, current_map: PGMap, episode_data: dict, pg_world: PGWorld):
         self.restore_episode_info = episode_data["frame"]
         self.restore_episode_info.reverse()
         self.restore_vehicles = {}
@@ -56,7 +56,7 @@ class PGReplayer:
 
 
 class PGRecorder:
-    def __init__(self, map: Map, init_traffic_vehicle_states: dict):
+    def __init__(self, map: PGMap, init_traffic_vehicle_states: dict):
         map_data = dict()
         map_data[map.random_seed] = map.save_map()
         self.episode_info = dict(
