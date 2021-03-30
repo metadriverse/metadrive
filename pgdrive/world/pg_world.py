@@ -110,7 +110,10 @@ class PGWorld(ShowBase.ShowBase):
 
         # main_window_position = (0, 0)
         if self.mode == RENDER_MODE_ONSCREEN:
-            loadPrcFileData("", "compressed-textures 1")  # Default to compress
+            if self.world_config["fast_launch_window"]:
+                pass
+            else:
+                loadPrcFileData("", "compressed-textures 1")  # Default to compress
             h = self.pipe.getDisplayHeight()
             w = self.pipe.getDisplayWidth()
             if self.world_config["window_size"][0] > 0.9 * w or self.world_config["window_size"][1] > 0.9 * h:
