@@ -137,6 +137,7 @@ class PGDriveEnv(BasePGDriveEnv):
                 "use_image": config["use_image"],
                 "debug": config["debug"],
                 "decision_repeat": config["decision_repeat"],
+                "fast_launch_window": config["fast"]
             },
             allow_overwrite=True
         )

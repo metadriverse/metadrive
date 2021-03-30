@@ -28,6 +28,7 @@ BASE_DEFAULT_CONFIG = dict(
     use_render=False,  # pop a window to render or not
     # force_fps=None,
     debug=False,
+    fast=False,  # disable compression if you wish to launch the window quicker.
     cull_scene=True,  # only for debug use
     manual_control=False,
     controller="keyboard",  # "joystick" or "keyboard"

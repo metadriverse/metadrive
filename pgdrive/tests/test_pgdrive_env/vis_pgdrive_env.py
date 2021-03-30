@@ -27,6 +27,7 @@ class TestEnv(PGDriveEnv):
                 "decision_repeat": 5,
                 "rgb_clip": True,
                 "debug": True,
+                "fast": True,
                 "map_config": {
                     Map.GENERATE_TYPE: MapGenerateMethod.BIG_BLOCK_NUM,
                     Map.GENERATE_CONFIG: 10,
