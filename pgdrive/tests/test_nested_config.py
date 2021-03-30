@@ -12,14 +12,14 @@ def test_recursive_config():
     assert c.aa.bb.cc == 101
 
     try:
-        c.update({"aa": {"bb": 102}})
+        c.update({"aa": {"bb": 102}}, allow_overwrite=False)
     except TypeError:
         pass
     else:
         raise ValueError()
 
     try:
-        c.update({"aa": {"bbd": 102}})
+        c.update({"aa": {"bbd": 102}}, allow_overwrite=False)
     except KeyError:
         pass
     else:
@@ -48,6 +48,28 @@ def test_partially_update():
     assert c.aa.bb.dd == 101
 
 
+def test_config_identical():
+    c = PGConfig({"aa": {"bb": {"cc": 100}}})
+    d = PGConfig({"aa": {"bb": {"cc": 100}}})
+    assert c.is_identical(c)
+    assert c.is_identical(d)
+    assert d.is_identical(c)
+    assert d.is_identical(d)
+
+    c.aa.bb.cc = 101
+    assert c.is_identical(c)
+    assert d.is_identical(d)
+    assert not c.is_identical(d)
+    assert not d.is_identical(c)
+
+    c.update({"aa": {"bb": 10001}}, allow_overwrite=True)
+    assert c.is_identical(c)
+    assert d.is_identical(d)
+    assert not c.is_identical(d)
+    assert not d.is_identical(c)
+
+
 if __name__ == '__main__':
     test_recursive_config()
     test_partially_update()
+    test_config_identical()

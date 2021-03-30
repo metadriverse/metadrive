@@ -2,7 +2,6 @@ import copy
 from typing import Union, Any
 
 import numpy as np
-
 from pgdrive.utils.utils import merge_dicts
 
 
@@ -50,7 +49,7 @@ def _recursive_check_keys(new_config, old_config, prefix=""):
                 _recursive_check_keys(new, old, new_prefix)
 
 
-def config_to_dict(config: Union[Any, dict, "PGConfig"]) -> dict:
+def config_to_dict(config: Union[Any, dict, "PGConfig"], serializable=False) -> dict:
     # Return the flatten and json-able dict
     if not isinstance(config, (dict, PGConfig)):
         return config
@@ -59,8 +58,8 @@ def config_to_dict(config: Union[Any, dict, "PGConfig"]) -> dict:
         if isinstance(v, PGConfig):
             v = v.get_dict()
         elif isinstance(v, dict):
-            v = {sub_k: config_to_dict(sub_v) for sub_k, sub_v in v.items()}
-        elif isinstance(v, np.ndarray):
+            v = {sub_k: config_to_dict(sub_v, serializable) for sub_k, sub_v in v.items()}
+        elif serializable and isinstance(v, np.ndarray):
             v = v.tolist()
         ret[k] = v
     return ret
@@ -75,23 +74,21 @@ class PGConfig:
     For these <key, value> items, use PGConfig["your key"] = None to init your PgConfig, then it will not implement
     type check at the first time. key "config" in map.py and key "force_fps" in world.py are good examples.
     """
-    def __init__(self, config: Union[dict, "PGConfig"]):
+    def __init__(self, config: Union[dict, "PGConfig"], unchangeable=False):
+        self._unchangeable = False
         if isinstance(config, PGConfig):
             config = config.get_dict()
         self._config = self._internal_dict_to_config(copy.deepcopy(config))
         self._types = dict()
         for k, v in self._config.items():
             setattr(self, k, v)
+        self._unchangeable = unchangeable
 
     def clear(self):
         self._config.clear()
 
     def add(self, key, value):
         raise ValueError("Deprecated!")
-        assert key not in self._config, "KeyError: {} exists in config".format(key)
-        if isinstance(value, (dict, PGConfig)):
-            value = PGConfig(value)
-        self.__setitem__(key, value)
 
     def register_type(self, key, *types):
         """
@@ -102,16 +99,15 @@ class PGConfig:
         self._types[key] = set(types)
 
     def get_dict(self):
-        return config_to_dict(self._config)
+        return config_to_dict(self._config, serializable=False)
+
+    def get_serializable_dict(self):
+        return config_to_dict(self._config, serializable=True)
 
     def update(self, new_dict: Union[dict, "PGConfig"], allow_overwrite=False):
         new_dict = new_dict or dict()
         new_dict = copy.deepcopy(new_dict)
         for k, v in new_dict.items():
-
-            if k == "map_config":
-                print('ss')
-
             if k not in self:
                 if not allow_overwrite:
                     self._check_and_raise_key_error(k)
@@ -137,15 +133,13 @@ class PGConfig:
                     )
                 )
         if not isinstance(self[k], PGConfig):
-            self[k] = PGConfig(self[k])
+            self._set_item(k, PGConfig(self[k]), allow_overwrite)
         self[k].update(v, allow_overwrite=allow_overwrite)
         return True
 
     def _update_single_item(self, k, v, allow_overwrite):
         assert not isinstance(v, (dict, PGConfig)), (k, type(v), allow_overwrite)
-        if allow_overwrite:
-            self._config[k] = v
-        setattr(self, k, v)
+        self._set_item(k, v, allow_overwrite)
 
     def items(self):
         return self._config.items()
@@ -185,8 +179,11 @@ class PGConfig:
                 )
             )
 
-    def copy(self):
-        return copy.deepcopy(self)
+    def copy(self, unchangeable=None):
+        """If unchangeable is None, then just following the original config's setting."""
+        if unchangeable is None:
+            unchangeable = self._unchangeable
+        return PGConfig(self, unchangeable)
 
     def __getitem__(self, item):
         self._check_and_raise_key_error(item)
@@ -196,9 +193,12 @@ class PGConfig:
             ret = ret[0]
         return ret
 
-    def __setitem__(self, key, value):
+    def _set_item(self, key, value, allow_overwrite):
+        """A helper function to replace __setattr__ and __setitem__!"""
         self._check_and_raise_key_error(key)
-        if self._config[key] is not None and value is not None:
+        if self._unchangeable:
+            raise ValueError("This config is not changeable!")
+        if (not allow_overwrite) and (self._config[key] is not None and value is not None):
             type_correct = isinstance(value, type(self._config[key]))
             if isinstance(self._config[key], PGConfig):
                 type_correct = type_correct or isinstance(value, dict)
@@ -213,13 +213,14 @@ class PGConfig:
                     type_correct = True
                 type_correct = type_correct or (type(value) in self._types[key])
             assert type_correct, "TypeError: {}:{}".format(key, value)
+        self.__setitem__(key, value)
 
+    def __setitem__(self, key, value):
         self._config[key] = value
-
         super(PGConfig, self).__setattr__(key, value)
 
     def __setattr__(self, key, value):
-        if key not in ["_config", "_types"]:
+        if key not in ["_config", "_types", "_unchangeable"]:
             self.__setitem__(key, value)
         else:
             super(PGConfig, self).__setattr__(key, value)
@@ -250,3 +251,24 @@ class PGConfig:
         for k in keys:
             if k in self:
                 self.pop(k)
+
+    def is_identical(self, new_dict: Union[dict, "PGConfig"]) -> bool:
+        assert isinstance(new_dict, (dict, PGConfig))
+        return _is_identical("", self, "", new_dict)
+
+
+def _is_identical(k1, v1, k2, v2):
+    if k1 != k2:
+        return False
+    if isinstance(v1, (dict, PGConfig)) or isinstance(v2, (dict, PGConfig)):
+        if (not isinstance(v2, (dict, PGConfig))) or (not isinstance(v1, (dict, PGConfig))):
+            return False
+        if set(v1.keys()) != set(v2.keys()):
+            return False
+        for k in v1.keys():
+            if not _is_identical(k, v1[k], k, v2[k]):
+                return False
+    else:
+        if v1 != v2:
+            return False
+    return True

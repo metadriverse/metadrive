@@ -16,18 +16,26 @@ from pgdrive.world.pg_world import PGWorld
 pygame = import_pygame()
 
 
-def parse_map_config(easy_map_config, original_map_config):
-    assert isinstance(original_map_config, PGConfig)
+def parse_map_config(easy_map_config, new_map_config, default_config):
+    assert isinstance(new_map_config, PGConfig)
+    assert isinstance(default_config, PGConfig)
+
+    # Return the user specified config if overwritten
+    if not default_config["map_config"].is_identical(new_map_config):
+        new_map_config = default_config.copy(unchangeable=False).update(new_map_config, allow_overwrite=True)
+        assert default_config["map"] == easy_map_config
+        return new_map_config
+
     if isinstance(easy_map_config, int):
-        original_map_config[Map.GENERATE_TYPE] = BigGenerateMethod.BLOCK_NUM
+        new_map_config[Map.GENERATE_TYPE] = BigGenerateMethod.BLOCK_NUM
     elif isinstance(easy_map_config, str):
-        original_map_config[Map.GENERATE_TYPE] = BigGenerateMethod.BLOCK_SEQUENCE
+        new_map_config[Map.GENERATE_TYPE] = BigGenerateMethod.BLOCK_SEQUENCE
     else:
         raise ValueError(
-            "Unkown easy map config: {} and original map config: {}".format(easy_map_config, original_map_config)
+            "Unkown easy map config: {} and original map config: {}".format(easy_map_config, new_map_config)
         )
-    original_map_config[Map.GENERATE_CONFIG] = easy_map_config
-    return original_map_config
+    new_map_config[Map.GENERATE_CONFIG] = easy_map_config
+    return new_map_config
 
 
 class MapGenerateMethod:
@@ -98,7 +106,7 @@ class Map:
         for b in self.blocks:
             assert isinstance(b, Block), "None Set can not be saved to json file"
             b_config = b.get_config()
-            json_config = b_config.get_dict()
+            json_config = b_config.get_serializable_dict()
             json_config[self.BLOCK_ID] = b.ID
             json_config[self.PRE_BLOCK_SOCKET_INDEX] = b.pre_block_socket_index
             map_config.append(json_config)
