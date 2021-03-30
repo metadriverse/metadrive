@@ -47,7 +47,7 @@ class BIG:
         self.blocks.append(first_block)
         self.next_step = NextStep.forward
 
-    def generate(self, generate_method: BigGenerateMethod, parameter: Union[str, int]):
+    def generate(self, generate_method: str, parameter: Union[str, int]):
         """
         In order to embed it to the show_base loop, we implement BIG in a more complex way
         """
