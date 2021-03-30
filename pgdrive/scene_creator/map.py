@@ -1,18 +1,15 @@
 import copy
-import json
 import logging
-import os
 from typing import List
 
 import numpy as np
 from panda3d.core import NodePath
-
 from pgdrive.scene_creator.algorithm.BIG import BIG, BigGenerateMethod
 from pgdrive.scene_creator.blocks.block import Block
 from pgdrive.scene_creator.blocks.first_block import FirstBlock
 from pgdrive.scene_creator.pg_blocks import PGBlock
 from pgdrive.scene_creator.road.road_network import RoadNetwork
-from pgdrive.utils import PGConfig, AssetLoader, import_pygame
+from pgdrive.utils import PGConfig, import_pygame
 from pgdrive.world.pg_physics_world import PGPhysicsWorld
 from pgdrive.world.pg_world import PGWorld
 
@@ -40,6 +37,9 @@ class MapGenerateMethod:
 
 
 class Map:
+    """
+    Base class for Map generation!
+    """
     # only used to save and read maps
     FILE_SUFFIX = ".json"
 
@@ -64,13 +64,71 @@ class Map:
         self.film_size = (self.config["draw_map_resolution"], self.config["draw_map_resolution"])
         self.random_seed = self.config[self.SEED]
         self.road_network = RoadNetwork()
+
+        # A flatten representation of blocks, might cause chaos in city-level generation.
         self.blocks = []
 
+        # Generate map and insert blocks
         self._generate(pg_world)
+        assert self.blocks, "The generate methods does not fill blocks!"
 
         #  a trick to optimize performance
         self.road_network.after_init()
 
+    def _generate(self, pg_world):
+        """Key function! Please overwrite it!"""
+        raise NotImplementedError("Please use child class like PGMap to replace Map!")
+
+    def load_to_pg_world(self, pg_world: PGWorld):
+        parent_node_path, pg_physics_world = pg_world.worldNP, pg_world.physics_world
+        for block in self.blocks:
+            block.attach_to_pg_world(parent_node_path, pg_physics_world)
+
+    def unload_from_pg_world(self, pg_world: PGWorld):
+        for block in self.blocks:
+            block.detach_from_pg_world(pg_world.physics_world)
+
+    def destroy(self, pg_world: PGWorld):
+        for block in self.blocks:
+            block.destroy(pg_world=pg_world)
+
+    def save_map(self):
+        assert self.blocks is not None and len(self.blocks) > 0, "Please generate Map before saving it"
+        map_config = []
+        for b in self.blocks:
+            assert isinstance(b, Block), "None Set can not be saved to json file"
+            b_config = b.get_config()
+            json_config = b_config.get_dict()
+            json_config[self.BLOCK_ID] = b.ID
+            json_config[self.PRE_BLOCK_SOCKET_INDEX] = b.pre_block_socket_index
+            map_config.append(json_config)
+
+        saved_data = copy.deepcopy({self.SEED: self.random_seed, self.BLOCK_SEQUENCE: map_config})
+        return saved_data
+
+    def read_map(self, map_config: dict):
+        """
+        Load the map from a dict. Note that we don't provide a restore function in the base class.
+        """
+        self.config[self.SEED] = map_config[self.SEED]
+        blocks_config = map_config[self.BLOCK_SEQUENCE]
+        for b_id, b in enumerate(blocks_config):
+            blocks_config[b_id] = {k: np.array(v) if isinstance(v, list) else v for k, v in b.items()}
+
+        # update the property
+        self.random_seed = self.config[self.SEED]
+        return blocks_config
+
+    @property
+    def num_blocks(self):
+        return len(self.blocks)
+
+    def __del__(self):
+        describe = self.random_seed if self.random_seed is not None else "custom"
+        logging.debug("Scene {} is destroyed".format(describe))
+
+
+class PGMap(Map):
     def _generate(self, pg_world):
         """
         We can override this function to introduce other methods!
@@ -110,68 +168,3 @@ class Map:
             )
             last_block.construct_from_config(b, parent_node_path, pg_physics_world)
             self.blocks.append(last_block)
-
-    def load_to_pg_world(self, pg_world: PGWorld):
-        parent_node_path, pg_physics_world = pg_world.worldNP, pg_world.physics_world
-        for block in self.blocks:
-            block.attach_to_pg_world(parent_node_path, pg_physics_world)
-
-    def unload_from_pg_world(self, pg_world: PGWorld):
-        for block in self.blocks:
-            block.detach_from_pg_world(pg_world.physics_world)
-
-    def destroy(self, pg_world: PGWorld):
-        for block in self.blocks:
-            block.destroy(pg_world=pg_world)
-
-    def save_map(self):
-        assert self.blocks is not None and len(self.blocks) > 0, "Please generate Map before saving it"
-        map_config = []
-        for b in self.blocks:
-            assert isinstance(b, Block), "None Set can not be saved to json file"
-            b_config = b.get_config()
-            json_config = b_config.get_dict()
-            json_config[self.BLOCK_ID] = b.ID
-            json_config[self.PRE_BLOCK_SOCKET_INDEX] = b.pre_block_socket_index
-            map_config.append(json_config)
-
-        saved_data = copy.deepcopy({self.SEED: self.random_seed, self.BLOCK_SEQUENCE: map_config})
-        return saved_data
-
-    def save_map_to_json(self, map_name: str, save_dir: str = os.path.dirname(__file__)):
-        """
-        This func will generate a json file named 'map_name.json', in 'save_dir'
-        """
-        data = self.save_map()
-        with open(AssetLoader.file_path(save_dir, map_name + self.FILE_SUFFIX), 'w') as outfile:
-            json.dump(data, outfile)
-
-    def read_map(self, map_config: dict):
-        """
-        Load the map from a dict
-        """
-        self.config[self.SEED] = map_config[self.SEED]
-        blocks_config = map_config[self.BLOCK_SEQUENCE]
-        for b_id, b in enumerate(blocks_config):
-            blocks_config[b_id] = {k: np.array(v) if isinstance(v, list) else v for k, v in b.items()}
-
-        # update the property
-        self.random_seed = self.config[self.SEED]
-        return blocks_config
-
-    def read_map_from_json(self, map_file_path: str):
-        """
-        Create map from a .json file, read it to map config and update default properties
-        """
-        with open(map_file_path, "r") as map_file:
-            map_config = json.load(map_file)
-            ret = self.read_map(map_config)
-        return ret
-
-    def __del__(self):
-        describe = self.random_seed if self.random_seed is not None else "custom"
-        logging.debug("Scene {} is destroyed".format(describe))
-
-    @property
-    def num_blocks(self):
-        return len(self.blocks)
