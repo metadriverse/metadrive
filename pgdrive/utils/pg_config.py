@@ -248,6 +248,9 @@ class PGConfig:
         assert isinstance(new_dict, (dict, PGConfig))
         return _is_identical("", self, "", new_dict)
 
+    def get(self, key):
+        return copy.copy(self._config.get(key))
+
 
 def _is_identical(k1, v1, k2, v2):
     if k1 != k2:

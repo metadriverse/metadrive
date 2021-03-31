@@ -55,7 +55,8 @@ class PGDriveEnvV2(PGDriveEnvV1):
     def __init__(self, config: dict = None):
         super(PGDriveEnvV2, self).__init__(config=config)
 
-    def done_function(self, vehicle):
+    def done_function(self, vehicle_id: str):
+        vehicle = self.vehicles[vehicle_id]
         done = False
         done_info = dict(crash_vehicle=False, crash_object=False, out_of_road=False, arrive_dest=False)
         if vehicle.arrive_destination:
@@ -79,7 +80,8 @@ class PGDriveEnvV2(PGDriveEnvV1):
         done_info["crash"] = done_info["crash_vehicle"] or done_info["crash_object"]
         return done, done_info
 
-    def cost_function(self, vehicle):
+    def cost_function(self, vehicle_id: str):
+        vehicle = self.vehicles[vehicle_id]
         step_info = dict()
         step_info["cost"] = 0
         if vehicle.crash_vehicle:
@@ -90,16 +92,18 @@ class PGDriveEnvV2(PGDriveEnvV1):
             step_info["cost"] = self.config["out_of_road_cost"]
         return step_info['cost'], step_info
 
-    def reward_function(self, vehicle):
+    def reward_function(self, vehicle_id: str):
         """
         Override this func to get a new reward function
-        :param vehicle: BaseVehicle
+        :param vehicle_id: id of BaseVehicle
         :return: reward
         """
+        vehicle = self.vehicles[vehicle_id]
         step_info = dict()
 
         # Reward for moving forward in current lane
-        current_lane = vehicle.lane
+        current_lane = vehicle.lane if vehicle.lane in vehicle.routing_localization.current_ref_lanes else \
+        vehicle.routing_localization.current_ref_lanes[0]
         long_last, _ = current_lane.local_coordinates(vehicle.last_position)
         long_now, lateral_now = current_lane.local_coordinates(vehicle.position)
 

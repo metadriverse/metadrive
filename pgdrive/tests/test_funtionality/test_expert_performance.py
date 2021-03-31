@@ -46,7 +46,7 @@ def test_expert_without_traffic():
         dict(environment_num=1, start_seed=0, traffic_density=0, load_map_from_json=False, random_traffic=False),
         num_episode=3
     )
-    assert 250 <= ep_reward <= 260, ep_reward
+    assert 250 <= ep_reward <= 265, ep_reward
     assert success_rate == 1.0, success_rate
 
 

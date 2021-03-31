@@ -212,7 +212,11 @@ class Block(Element, BlockDefault):
         """
         return standard road node name
         """
-        return self._block_name + str(part_idx) + self.DASH + str(road_idx) + self.DASH
+        return self.node(self.block_index, part_idx, road_idx)
+
+    @classmethod
+    def node(cls, block_idx: int, part_idx: int, road_idx: int) -> str:
+        return str(block_idx) + cls.ID + str(part_idx) + cls.DASH + str(road_idx) + cls.DASH
 
     def _add_one_socket(self, socket: BlockSocket):
         assert isinstance(socket, BlockSocket), "Socket list only accept BlockSocket Type"
