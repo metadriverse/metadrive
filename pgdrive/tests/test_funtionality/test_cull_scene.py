@@ -7,7 +7,15 @@ def test_cull_scene(use_render=False):
     class TestCull(MultiAgentPGDrive):
         def default_config(self) -> PGConfig:
             config = PGDriveEnv.default_config()
-            config.update({"target_vehicle_configs": {}, "num_agents": 0, "crash_done": True})
+            config.update(
+                {
+                    "target_vehicle_configs": {},
+                    "num_agents": 0,
+                    "crash_done": True,
+                    "use_lateral": False
+                },
+                allow_overwrite=True
+            )
             # config.extend_config_with_unknown_keys({"crash_done": True})
             return config
 
@@ -31,6 +39,7 @@ def test_cull_scene(use_render=False):
                 }
             },
             "num_agents": 2,
+            "traffic_density": 0.4,
         }
     )
     try:

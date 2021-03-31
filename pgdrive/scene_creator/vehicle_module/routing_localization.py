@@ -1,5 +1,5 @@
 import logging
-
+from pgdrive.scene_creator.road.road import Road
 import numpy as np
 from panda3d.core import BitMask32, LQuaternionf, TransparencyAttrib
 
@@ -68,15 +68,24 @@ class RoutingLocalizationModule:
             self.goal_node_path.show(CamMask.MainCam)
         logging.debug("Load Vehicle Module: {}".format(self.__class__.__name__))
 
-    def update(self, map: Map):
+    def update(self, map: Map, start_road_node=None, final_road_node=None):
         self.map = map
 
         # TODO(pzh): I am not sure whether we should change the random state here.
         #  If so, then the vehicle may have different final road in single map, this will avoid it from over-fitting
         #  the map and memorize the routes.
-        self.final_road = np.random.RandomState(map.random_seed).choice(map.blocks[-1].get_socket_list()).positive_road
-        self.checkpoints = self.map.road_network.shortest_path(FirstBlock.NODE_1, self.final_road.end_node)
-        self.final_lane = self.final_road.get_lanes(map.road_network)[-1]
+        if start_road_node is None:
+            start_road_node = FirstBlock.NODE_1
+        if final_road_node is None:
+            final_road_node = np.random.RandomState(map.random_seed
+                                                    ).choice(map.blocks[-1].get_socket_list()).positive_road.end_node
+        self.set_route(start_road_node, final_road_node)
+
+    def set_route(self, start_road_node: str, end_road_node: str):
+        self.checkpoints = self.map.road_network.shortest_path(start_road_node, end_road_node)
+        # update routing info
+        self.final_road = Road(self.checkpoints[-2], end_road_node)
+        self.final_lane = self.final_road.get_lanes(self.map.road_network)[-1]
         self.target_checkpoints_index = [0, 1]
         self.navi_info = []
         target_road_1_start = self.checkpoints[0]

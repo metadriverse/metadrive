@@ -1,4 +1,5 @@
 import math
+from typing import Union
 import time
 from collections import deque
 from typing import Optional
@@ -49,47 +50,15 @@ class BaseVehicle(DynamicElement):
     COLLISION_MASK = CollisionGroup.EgoVehicle
     STEERING_INCREMENT = 0.05
 
-    @classmethod
-    def _default_vehicle_config(cls) -> PGConfig:
-        vehicle_config = dict(
-            # ===== vehicle module config =====
-            lidar=dict(num_lasers=240, distance=50, num_others=4),  # laser num, distance, other vehicle info num
-            show_lidar=False,
-            mini_map=(84, 84, 250),  # buffer length, width
-            rgb_cam=(84, 84),  # buffer length, width
-            depth_cam=(84, 84, True),  # buffer length, width, view_ground
-            show_navi_mark=True,
-            increment_steering=False,
-            wheel_friction=0.6,
-            side_detector=dict(num_lasers=2, distance=20),  # laser num, distance
-            show_side_detector=False,
-            lane_line_detector=dict(num_lasers=2, distance=20),  # laser num, distance
-            show_lane_line_detector=False,
-
-            # ===== use image =====
-            image_source="rgb_cam",  # take effect when only when use_image == True
-            use_image=False,
-            rgb_clip=True,
-
-            # ===== vehicle born =====
-            born_lane_index=(FirstBlock.NODE_1, FirstBlock.NODE_2, 0),
-            born_longitude=5.0,
-            born_lateral=0.0,
-
-            # ==== others ====
-            overtake_stat=False,  # we usually set to True when evaluation
-            action_check=False,
-            use_saver=False,
-            save_level=0.5,
-            use_lane_line_detector=False,
-        )
-        return PGConfig(vehicle_config)
-
     LENGTH = None
     WIDTH = None
 
     def __init__(
-        self, pg_world: PGWorld, vehicle_config: dict = None, physics_config: dict = None, random_seed: int = 0
+        self,
+        pg_world: PGWorld,
+        vehicle_config: Union[dict, PGConfig] = None,
+        physics_config: dict = None,
+        random_seed: int = 0
     ):
         """
         This Vehicle Config is different from self.get_config(), and it is used to define which modules to use, and
@@ -315,10 +284,10 @@ class BaseVehicle(DynamicElement):
         else, vehicle will be reset to born place
         """
         if pos is None:
-            self.born_place = map.road_network.get_lane(
-                self.vehicle_config["born_lane_index"]
-            ).position(self.vehicle_config["born_longitude"], self.vehicle_config["born_lateral"])
-            pos = self.born_place
+            lane = map.road_network.get_lane(self.vehicle_config["born_lane_index"])
+            pos = lane.position(self.vehicle_config["born_longitude"], self.vehicle_config["born_lateral"])
+            heading = np.rad2deg(lane.heading_at(self.vehicle_config["born_longitude"]))
+            self.born_place = pos
         heading = -np.deg2rad(heading) - np.pi / 2
         self.chassis_np.setPos(panda_position(Vec3(*pos, 1)))
         self.chassis_np.setQuat(LQuaternionf(np.cos(heading / 2), 0, 0, np.sin(heading / 2)))
