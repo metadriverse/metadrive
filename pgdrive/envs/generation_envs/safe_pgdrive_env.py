@@ -18,8 +18,8 @@ class SafePGDriveEnv(PGDriveEnv):
         )
         return config
 
-    def done_function(self, vehicle):
-        done, done_info = super(SafePGDriveEnv, self).done_function(vehicle)
+    def done_function(self, vehicle_id: str):
+        done, done_info = super(SafePGDriveEnv, self).done_function(vehicle_id)
         if done_info["crash_vehicle"]:
             done = False
         elif done_info["crash_object"]:

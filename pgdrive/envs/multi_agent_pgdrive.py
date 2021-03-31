@@ -1,30 +1,39 @@
-from pgdrive.envs.pgdrive_env import PGDriveEnv
+from pgdrive.envs.pgdrive_env_v2 import PGDriveEnvV2
 from pgdrive.scene_creator.blocks.first_block import FirstBlock
 from pgdrive.scene_creator.vehicle.base_vehicle import BaseVehicle
 from pgdrive.utils import setup_logger, PGConfig
+from pgdrive.utils.pg_config import merge_dicts
 
 
-class MultiAgentPGDrive(PGDriveEnv):
+class MultiAgentPGDrive(PGDriveEnvV2):
+    """
+    This serve as the base class for Multi-agent PGDrive!
+    """
     @staticmethod
     def default_config() -> PGConfig:
-        config = PGDriveEnv.default_config()
+        config = PGDriveEnvV2.default_config()
         config.update(
             {
                 "environment_num": 1,
                 "traffic_density": 0.,
                 "start_seed": 10,
                 "map": "yY",
+                "vehicle_config": {
+                    "use_lane_line_detector": True
+                },
                 "target_vehicle_configs": {
                     "agent0": {
                         "born_longitude": 10,
                         "born_lateral": 1.5,
                         "born_lane_index": (FirstBlock.NODE_1, FirstBlock.NODE_2, 1),
                         # "show_lidar": True
+                        "show_side_detector": True
                     },
                     "agent1": {
                         "born_longitude": 10,
                         # "show_lidar": True,
                         "born_lateral": -1,
+                        "born_lane_index": (FirstBlock.NODE_1, FirstBlock.NODE_2, 0),
                     },
                     "agent2": {
                         "born_longitude": 10,
@@ -36,6 +45,7 @@ class MultiAgentPGDrive(PGDriveEnv):
                         "born_longitude": 10,
                         # "show_lidar": True,
                         "born_lateral": 2,
+                        "born_lane_index": (FirstBlock.NODE_1, FirstBlock.NODE_2, 0),
                     }
                 },
                 "num_agents": 4,
@@ -49,9 +59,10 @@ class MultiAgentPGDrive(PGDriveEnv):
     def __init__(self, config=None):
         super(MultiAgentPGDrive, self).__init__(config)
 
-    def done_function(self, vehicle):
+    def done_function(self, vehicle_id):
+        vehicle = self.vehicles[vehicle_id]
         # crash will not done
-        done, done_info = super(MultiAgentPGDrive, self).done_function(vehicle)
+        done, done_info = super(MultiAgentPGDrive, self).done_function(vehicle_id)
         if vehicle.crash_vehicle and not self.config["crash_done"]:
             done = False
             done_info["crash_vehicle"] = False
@@ -61,6 +72,17 @@ class MultiAgentPGDrive(PGDriveEnv):
         return done, done_info
 
     def step(self, actions):
+        actions = self._preprocess_marl_actions(actions)
+        o, r, d, i = super(MultiAgentPGDrive, self).step(actions)
+        self._after_vehicle_done(d)
+        return o, r, d, i
+
+    def reset(self, episode_data: dict = None):
+        for v in self.done_vehicles.values():
+            v.chassis_np.node().setStatic(False)
+        return super(MultiAgentPGDrive, self).reset(episode_data)
+
+    def _preprocess_marl_actions(self, actions):
         # remove useless actions
         id_to_remove = []
         for id in actions.keys():
@@ -68,60 +90,36 @@ class MultiAgentPGDrive(PGDriveEnv):
                 id_to_remove.append(id)
         for id in id_to_remove:
             actions.pop(id)
+        return actions
 
-        o, r, d, i = super(MultiAgentPGDrive, self).step(actions)
-        for id, done in d.items():
+    def _after_vehicle_done(self, dones: dict):
+        for id, done in dones.items():
             if done and id in self.vehicles.keys():
                 v = self.vehicles.pop(id)
                 v.prepare_step([0, -1])
                 self.done_vehicles[id] = v
-        return o, r, d, i
+        for v in self.done_vehicles.values():
+            if v.speed < 1:
+                v.chassis_np.node().setStatic(True)
 
     def _get_vehicles(self):
-        # TODO We only support homogenous vehicle config now!
         return {
-            "agent{}".format(i): BaseVehicle(self.pg_world, self.config["vehicle_config"])
-            for i in range(self.num_agents)
+            name: BaseVehicle(self.pg_world, self._get_target_vehicle_config(new_config))
+            for name, new_config in self.config["target_vehicle_configs"].items()
         }
 
     def _get_observations(self):
         return {
-            "agent{}".format(i): self.get_single_observation(self.config["vehicle_config"])
-            for i in range(self.num_agents)
+            name: self.get_single_observation(self._get_target_vehicle_config(new_config))
+            for name, new_config in self.config["target_vehicle_configs"].items()
         }
 
-    # def reward_function(self, vehicle):
-    #     """
-    #        Override this func to get a new reward function
-    #        :param vehicle: BaseVehicle
-    #        :return: reward
-    #        """
-    #     step_info = dict()
-    #
-    #     # Reward for moving forward in current lane
-    #     current_lane = vehicle.lane
-    #     long_last, _ = current_lane.local_coordinates(vehicle.last_position)
-    #     long_now, lateral_now = current_lane.local_coordinates(vehicle.position)
-    #
-    #     reward = 0.0
-    #
-    #     # reward for lane keeping, without it vehicle can learn to overtake but fail to keep in lane
-    #
-    #     lateral_factor = 1.0
-    #
-    #     reward += vehicle.vehicle_config["driving_reward"] * (long_now - long_last) * lateral_factor
-    #
-    #     reward += vehicle.vehicle_config["speed_reward"] * (vehicle.speed / vehicle.max_speed)
-    #     step_info["step_reward"] = reward
-    #
-    #     if vehicle.crash_vehicle:
-    #         reward = -vehicle.vehicle_config["crash_vehicle_penalty"]
-    #     elif vehicle.crash_object:
-    #         reward = -vehicle.vehicle_config["crash_object_penalty"]
-    #     elif vehicle.arrive_destination:
-    #         reward = +vehicle.vehicle_config["success_reward"]
-    #
-    #     return reward, step_info
+    def _get_target_vehicle_config(self, extra_config: dict):
+        """
+        Newly introduce method
+        """
+        vehicle_config = merge_dicts(self.config["vehicle_config"], extra_config, allow_new_keys=False)
+        return PGConfig(vehicle_config)
 
 
 if __name__ == "__main__":

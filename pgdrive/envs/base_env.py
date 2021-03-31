@@ -185,18 +185,18 @@ class BasePGDriveEnv(gym.Env):
         """Return a tuple of obs, reward, dones, infos"""
         raise NotImplementedError()
 
-    def reward_function(self, vehicle: "BaseVehicle") -> Tuple[float, Dict]:
+    def reward_function(self, vehicle_id: str) -> Tuple[float, Dict]:
         """
         Override this func to get a new reward function
-        :param vehicle: BaseVehicle
+        :param vehicle_id: name of this base vehicle
         :return: reward, reward info
         """
         raise NotImplementedError()
 
-    def cost_function(self, vehicle: "BaseVehicle") -> Tuple[float, Dict]:
+    def cost_function(self, vehicle_id: str) -> Tuple[float, Dict]:
         raise NotImplementedError()
 
-    def done_function(self, vehicle: "BaseVehicle") -> Tuple[bool, Dict]:
+    def done_function(self, vehicle_id: str) -> Tuple[bool, Dict]:
         raise NotImplementedError()
 
     def render(self, mode='human', text: Optional[Union[dict, str]] = None) -> Optional[np.ndarray]:

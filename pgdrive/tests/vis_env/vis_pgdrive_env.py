@@ -56,10 +56,11 @@ if __name__ == "__main__":
             text={
                 "left": env.vehicle.dist_to_left,
                 "right": env.vehicle.dist_to_right,
-                "white_lane_line": env.vehicle.on_white_continuous_line
+                "white_lane_line": env.vehicle.on_white_continuous_line,
+                "reward": r,
             }
         )
-        if d:
-            print("Reset")
-            env.reset()
+        # if d:
+        #     print("Reset")
+        #     env.reset()
     env.close()
