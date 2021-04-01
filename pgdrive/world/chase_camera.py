@@ -16,29 +16,44 @@ class ChaseCamera:
     """
 
     queue_length = 3
-    TASK_NAME = "update main camera"
+    CHASE_TASK_NAME = "update main chase camera"
+    BIRD_TASK_NAME = "update main bird camera"
     FOLLOW_LANE = True
+    BIRD_VIEW_HEIGHT = 120
 
     def __init__(self, camera: Camera, camera_height: float, camera_dist: float, pg_world: PGWorld):
+        self._origin_height = camera_height
+
+        # vehicle chase camera
         self.camera = camera
         self.camera_queue = None
-        self.camera_height = camera_height
         self.camera_dist = camera_dist
+        self.direction_running_mean = deque(maxlen=20)
         self.light = pg_world.light  # light position is updated with the chase camera when control vehicle
         self.inputs = InputState()
-        self.inputs.watchWithModifiers('up', 'k')
-        self.inputs.watchWithModifiers('down', 'j')
 
-        self.direction_running_mean = deque(maxlen=20)
+        # height control
+        self.chase_camera_height = camera_height
+        self.inputs.watchWithModifiers('high', '+')
+        self.inputs.watchWithModifiers('high', '=')
+        self.inputs.watchWithModifiers('low', '-')
+        self.inputs.watchWithModifiers('low', '_')
+
+        # free bird view camera
+        pg_world.accept("b", self.stop_chase, extraArgs=[pg_world])
+        self.bird_camera_height = self.BIRD_VIEW_HEIGHT
+        self.camera_x = 0
+        self.camera_y = 0
+        self.inputs.watchWithModifiers('up', 'i')
+        self.inputs.watchWithModifiers('down', 'k')
+        self.inputs.watchWithModifiers('left', 'j')
+        self.inputs.watchWithModifiers('right', 'l')
 
     def reset(self):
         self.direction_running_mean.clear()
 
     def renew_camera_place(self, vehicle, task):
-        if self.inputs.isSet("up"):
-            self.camera_height += 1.0
-        if self.inputs.isSet("down"):
-            self.camera_height -= 1.0
+        self.chase_camera_height = self._update_height(self.chase_camera_height)
         self.camera_queue.put(vehicle.chassis_np.get_pos())
         if not self.FOLLOW_LANE:
             forward_dir = vehicle.system.get_forward_vector()
@@ -49,7 +64,7 @@ class ChaseCamera:
         forward_dir = np.mean(self.direction_running_mean, axis=0)
 
         camera_pos = list(self.camera_queue.get())
-        camera_pos[2] += self.camera_height
+        camera_pos[2] += self.chase_camera_height
         camera_pos[0] += -forward_dir[0] * self.camera_dist
         camera_pos[1] += -forward_dir[1] * self.camera_dist
 
@@ -102,9 +117,11 @@ class ChaseCamera:
         if pos is None:
             pos = vehicle.position
 
-        if pg_world.taskMgr.hasTaskNamed(self.TASK_NAME):
-            pg_world.taskMgr.remove(self.TASK_NAME)
-        pg_world.taskMgr.add(self.renew_camera_place, self.TASK_NAME, extraArgs=[vehicle], appendTask=True)
+        if pg_world.taskMgr.hasTaskNamed(self.CHASE_TASK_NAME):
+            pg_world.taskMgr.remove(self.CHASE_TASK_NAME)
+        if pg_world.taskMgr.hasTaskNamed(self.BIRD_TASK_NAME):
+            pg_world.taskMgr.remove(self.BIRD_TASK_NAME)
+        pg_world.taskMgr.add(self.renew_camera_place, self.CHASE_TASK_NAME, extraArgs=[vehicle], appendTask=True)
         self.camera_queue = queue.Queue(self.queue_length)
         for i in range(self.queue_length - 1):
             self.camera_queue.put(Vec3(pos[0], -pos[1], 0))
@@ -117,7 +134,7 @@ class ChaseCamera:
         :return: position on the center lane
         """
         if vehicle.routing_localization.current_ref_lanes is None:
-            return None
+            raise ValueError("No routing module, I don't know which lane to follow")
 
         lane = vehicle.routing_localization.current_ref_lanes[0]
         lane_num = len(vehicle.routing_localization.current_ref_lanes)
@@ -134,5 +151,36 @@ class ChaseCamera:
         self.FOLLOW_LANE = flag
 
     def destroy(self, pg_world):
-        if pg_world.taskMgr.hasTaskNamed(self.TASK_NAME):
-            pg_world.taskMgr.remove(self.TASK_NAME)
+        if pg_world.taskMgr.hasTaskNamed(self.CHASE_TASK_NAME):
+            pg_world.taskMgr.remove(self.CHASE_TASK_NAME)
+        if pg_world.taskMgr.hasTaskNamed(self.BIRD_TASK_NAME):
+            pg_world.taskMgr.remove(self.BIRD_TASK_NAME)
+
+    def stop_chase(self, pg_world: PGWorld):
+        if pg_world.taskMgr.hasTaskNamed(self.CHASE_TASK_NAME):
+            pg_world.taskMgr.remove(self.CHASE_TASK_NAME)
+        if not pg_world.taskMgr.hasTaskNamed(self.BIRD_TASK_NAME):
+            # adjust hpr
+            current_pos = self.camera.getPos()
+            self.camera.lookAt(current_pos[0], current_pos[1], 0)
+            pg_world.taskMgr.add(self.manual_control_camera, self.BIRD_TASK_NAME, extraArgs=[], appendTask=True)
+
+    def manual_control_camera(self, task):
+        self.bird_camera_height = self._update_height(self.bird_camera_height)
+        if self.inputs.isSet("up"):
+            self.camera_y += 1.0
+        if self.inputs.isSet("down"):
+            self.camera_y -= 1.0
+        if self.inputs.isSet("left"):
+            self.camera_x -= 1.0
+        if self.inputs.isSet("right"):
+            self.camera_x += 1.0
+        self.camera.setPos(self.camera_x, self.camera_y, self.bird_camera_height)
+        return task.cont
+
+    def _update_height(self, height):
+        if self.inputs.isSet("high"):
+            height += 1.0
+        if self.inputs.isSet("low"):
+            height -= 1.0
+        return height
