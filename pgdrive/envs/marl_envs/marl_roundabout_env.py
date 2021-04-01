@@ -2,6 +2,7 @@ from pgdrive.envs.multi_agent_pgdrive import MultiAgentPGDrive
 from pgdrive.utils import get_np_random
 from pgdrive.scene_creator.blocks.roundabout import Roundabout
 from pgdrive.utils import PGConfig
+from pgdrive.scene_creator.map import Map, MapGenerateMethod
 
 
 class MultiAgentRoundaboutEnv(MultiAgentPGDrive):
@@ -16,26 +17,27 @@ class MultiAgentRoundaboutEnv(MultiAgentPGDrive):
         Roundabout.node(1, 3, 1),
     ]
 
-    def default_config(self) -> PGConfig:
+    @staticmethod
+    def default_config() -> PGConfig:
         config = MultiAgentPGDrive.default_config()
-        config["target_vehicle_configs"] = {}
         config.update(
             {
                 "map": "O",
                 "vehicle_config": {
                     "born_longitude": 0,
-                    "born_lateral": 0
+                    "born_lateral": 0,
+                    "use_lane_line_detector": False,
                 },
                 # clear base config
                 "num_agents": 4,
-                "map_config": {
-                    "lane_num": 3
-                },
             },
             allow_overwrite=True
         )
-        config = self._update_agent_pos_configs(config)
         return config
+
+    def _process_extra_config(self, config) -> "PGConfig":
+        ret_config = super(MultiAgentRoundaboutEnv, self)._process_extra_config(config)
+        return self._update_agent_pos_configs(ret_config)
 
     def _update_agent_pos_configs(self, config):
         target_vehicle_configs = []
@@ -54,10 +56,11 @@ class MultiAgentRoundaboutEnv(MultiAgentPGDrive):
             replace=False
         )
         ret = {}
-        for idx in target_agents:
+        for real_idx, idx in enumerate(target_agents):
             agent_name, v_config = target_vehicle_configs[idx]
-            ret[agent_name] = dict(born_lane_index=v_config)
-        config["target_vehicle_configs"] = ret
+            # for rllib compatibility
+            ret["agent{}".format(real_idx)] = dict(born_lane_index=v_config)
+        config.update({"target_vehicle_configs": ret}, allow_overwrite=False, recursive_update=False)
         return config
 
     def step(self, actions):
@@ -85,9 +88,17 @@ if __name__ == "__main__":
                 "pstats": True
             },
             "crash_done": False,
+            "num_agents": 6,
+            "map_config": {
+                Map.GENERATE_TYPE: MapGenerateMethod.BIG_BLOCK_SEQUENCE,
+                Map.GENERATE_CONFIG: "O",
+                Map.LANE_WIDTH: 3.5,
+                Map.LANE_NUM: 2,
+            }
         }
     )
     o = env.reset()
+    env.main_camera.set_follow_lane(True)
     total_r = 0
     for i in range(1, 100000):
         o, r, d, info = env.step(env.action_space.sample())
