@@ -6,7 +6,6 @@ import sys
 from typing import Union, Dict, AnyStr, Optional, Tuple
 
 import numpy as np
-
 from pgdrive.constants import DEFAULT_AGENT
 from pgdrive.envs.base_env import BasePGDriveEnv
 from pgdrive.obs.observation_type import LidarStateObservation, ImageStateObservation
@@ -128,6 +127,11 @@ class PGDriveEnv(BasePGDriveEnv):
 
     def _process_extra_config(self, config: Union[dict, "PGConfig"]) -> "PGConfig":
         """Check, update, sync and overwrite some config."""
+        if not config["rgb_clip"]:
+            logging.warning(
+                "You have set rgb_clip = False, which means the observation will be uint8 values in [0, 255]. "
+                "Please make sure you have parsed them later before feeding them to network!"
+            )
         config["map_config"] = parse_map_config(
             easy_map_config=config["map"], new_map_config=config["map_config"], default_config=self.default_config_copy
         )
