@@ -9,7 +9,7 @@ class TopDownSingleFramePGDriveEnv(PGDriveEnv):
     def default_config(cls) -> PGConfig:
         config = PGDriveEnv.default_config()
         config["vehicle_config"]["lidar"] = {"num_lasers": 0, "distance": 0}  # Remove lidar
-        config.update({"frame_skip": 5, "frame_stack": 5, "post_stack": 5, "rgb_clip": False})
+        config.update({"frame_skip": 5, "frame_stack": 5, "post_stack": 5, "rgb_clip": True})
         return config
 
     def get_single_observation(self, _=None):
@@ -33,7 +33,7 @@ class TopDownPGDriveEnvV2(PGDriveEnvV2):
     def default_config(cls) -> PGConfig:
         config = PGDriveEnvV2.default_config()
         config["vehicle_config"]["lidar"] = {"num_lasers": 0, "distance": 0}  # Remove lidar
-        config.update({"frame_skip": 5, "frame_stack": 5, "post_stack": 5, "rgb_clip": False})
+        config.update({"frame_skip": 5, "frame_stack": 1, "post_stack": 5, "rgb_clip": True})
         return config
 
     def get_single_observation(self, _=None):
