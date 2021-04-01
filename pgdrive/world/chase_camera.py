@@ -56,9 +56,8 @@ class ChaseCamera:
         self.camera.setPos(*camera_pos)
         current_pos = vehicle.chassis_np.getPos()
         current_pos[2] += 2
-        if not self.FOLLOW_LANE:
-            self.camera.lookAt(current_pos)
-        else:
+        self.camera.lookAt(current_pos)
+        if self.FOLLOW_LANE:
             self.camera.setH(
                 self._heading_of_lane(vehicle.routing_localization.current_ref_lanes[0], vehicle.position) / np.pi *
                 180 - 90

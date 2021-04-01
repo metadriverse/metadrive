@@ -126,7 +126,7 @@ class PGDriveEnv(BasePGDriveEnv):
         self.current_track_vehicle: Optional[BaseVehicle] = None
         self.current_track_vehicle_id: Optional[str] = None
 
-    def _process_config(self, config: Union[dict, "PGConfig"]) -> "PGConfig":
+    def _process_extra_config(self, config: Union[dict, "PGConfig"]) -> "PGConfig":
         """Check, update, sync and overwrite some config."""
         config["map_config"] = parse_map_config(
             easy_map_config=config["map"], new_map_config=config["map_config"], default_config=self.default_config_copy

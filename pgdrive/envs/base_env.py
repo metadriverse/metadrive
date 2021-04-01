@@ -72,7 +72,7 @@ class BasePGDriveEnv(gym.Env):
     # ===== Intialization =====
     def __init__(self, config: dict = None):
         self.default_config_copy = PGConfig(self.default_config(), unchangeable=True)
-        self.config = self._process_config(self.default_config().update(config))
+        self.config = self._process_extra_config(self.default_config().update(config))
 
         self.num_agents = self.config["num_agents"]
         assert isinstance(self.num_agents, int) and self.num_agents > 0
@@ -102,7 +102,7 @@ class BasePGDriveEnv(gym.Env):
         self.done_vehicles = dict()
         self.dones = None
 
-    def _process_config(self, config: Union[dict, "PGConfig"]) -> "PGConfig":
+    def _process_extra_config(self, config: Union[dict, "PGConfig"]) -> "PGConfig":
         """Check, update, sync and overwrite some config."""
         return config
 
