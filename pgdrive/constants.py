@@ -15,6 +15,10 @@ HELP_MESSAGE = "Keyboard Shortcuts:\n" \
                "  R: Reset the Environment\n" \
                "  H: Help Message\n" \
                "  F: Switch FPS between unlimited and realtime\n" \
+               "  Q: Track Another Vehicle\n" \
+               "  B: Bird-View Camera (control: I, J, K, L)\n" \
+               "  +: Lift Camera\n" \
+               "  -: Lower Camera\n" \
                "  Esc: Quit\n"
 
 DEBUG_MESSAGE = "  1: Box Debug Mode\n" \
