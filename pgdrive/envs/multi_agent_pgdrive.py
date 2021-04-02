@@ -59,6 +59,12 @@ class MultiAgentPGDrive(PGDriveEnvV2):
     def __init__(self, config=None):
         super(MultiAgentPGDrive, self).__init__(config)
 
+    def _process_extra_config(self, config) -> "PGConfig":
+        ret_config = self.default_config().update(
+            config, allow_overwrite=False, stop_recursive_update=["target_vehicle_configs"]
+        )
+        return ret_config
+
     def done_function(self, vehicle_id):
         vehicle = self.vehicles[vehicle_id]
         # crash will not done
@@ -131,13 +137,28 @@ if __name__ == "__main__":
             "manual_control": True,
             "pg_world_config": {
                 "pstats": False
+            },
+            "target_vehicle_configs": {
+                "agent0": {
+                    "born_longitude": 10,
+                    "born_lateral": 1.5,
+                    "born_lane_index": (FirstBlock.NODE_1, FirstBlock.NODE_2, 1),
+                    # "show_lidar": True
+                    "show_side_detector": True
+                },
+                "agent1": {
+                    "born_longitude": 10,
+                    # "show_lidar": True,
+                    "born_lateral": -1,
+                    "born_lane_index": (FirstBlock.NODE_1, FirstBlock.NODE_2, 0),
+                },
             }
         }
     )
     o = env.reset()
     total_r = 0
     for i in range(1, 100000):
-        o, r, d, info = env.step({"agent0": [-1, 0], "agent1": [0, 0], "agent2": [-1, 0], "agent3": [0, 0]})
+        o, r, d, info = env.step(env.action_space.sample())
         for r_ in r.values():
             total_r += r_
         # o, r, d, info = env.step([0,1])

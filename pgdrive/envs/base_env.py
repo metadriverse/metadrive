@@ -72,7 +72,8 @@ class BasePGDriveEnv(gym.Env):
     # ===== Intialization =====
     def __init__(self, config: dict = None):
         self.default_config_copy = PGConfig(self.default_config(), unchangeable=True)
-        self.config = self._process_extra_config(self.default_config().update(config))
+        merged_config = self._process_extra_config(config)
+        self.config = self._post_process_config(merged_config)
 
         self.num_agents = self.config["num_agents"]
         assert isinstance(self.num_agents, int) and self.num_agents > 0
@@ -104,6 +105,10 @@ class BasePGDriveEnv(gym.Env):
 
     def _process_extra_config(self, config: Union[dict, "PGConfig"]) -> "PGConfig":
         """Check, update, sync and overwrite some config."""
+        return config
+
+    def _post_process_config(self, config):
+        """Add more special process to merged config"""
         return config
 
     def _get_observations(self) -> Dict[str, "ObservationType"]:
