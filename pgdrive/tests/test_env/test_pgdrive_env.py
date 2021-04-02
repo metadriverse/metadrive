@@ -22,14 +22,14 @@ blackbox_test_configs = dict(
     envs_1000=dict(environment_num=1000),
     envs_10000=dict(environment_num=10000),
     envs_100000=dict(environment_num=100000),
-    no_lidar0=dict(target_vehicle_configs={DEFAULT_AGENT: dict(lidar=dict(num_lasers=0, distance=0, num_others=0))}),
-    no_lidar1=dict(target_vehicle_configs={DEFAULT_AGENT: dict(lidar=dict(num_lasers=0, distance=10, num_others=0))}),
-    no_lidar2=dict(target_vehicle_configs={DEFAULT_AGENT: dict(lidar=dict(num_lasers=10, distance=0, num_others=0))}),
-    no_lidar3=dict(target_vehicle_configs={DEFAULT_AGENT: dict(lidar=dict(num_lasers=0, distance=0, num_others=10))}),
-    no_lidar4=dict(target_vehicle_configs={DEFAULT_AGENT: dict(lidar=dict(num_lasers=10, distance=10, num_others=0))}),
-    no_lidar5=dict(target_vehicle_configs={DEFAULT_AGENT: dict(lidar=dict(num_lasers=10, distance=0, num_others=10))}),
-    no_lidar6=dict(target_vehicle_configs={DEFAULT_AGENT: dict(lidar=dict(num_lasers=0, distance=10, num_others=10))}),
-    no_lidar7=dict(target_vehicle_configs={DEFAULT_AGENT: dict(lidar=dict(num_lasers=10, distance=10, num_others=10))}),
+    no_lidar0={"vehicle_config": dict(lidar=dict(num_lasers=0, distance=0, num_others=0))},
+    no_lidar1={"vehicle_config": dict(lidar=dict(num_lasers=0, distance=10, num_others=0))},
+    no_lidar2={"vehicle_config": dict(lidar=dict(num_lasers=10, distance=0, num_others=0))},
+    no_lidar3={"vehicle_config": dict(lidar=dict(num_lasers=0, distance=0, num_others=10))},
+    no_lidar4={"vehicle_config": dict(lidar=dict(num_lasers=10, distance=10, num_others=0))},
+    no_lidar5={"vehicle_config": dict(lidar=dict(num_lasers=10, distance=0, num_others=10))},
+    no_lidar6={"vehicle_config": dict(lidar=dict(num_lasers=0, distance=10, num_others=10))},
+    no_lidar7={"vehicle_config": dict(lidar=dict(num_lasers=10, distance=10, num_others=10))},
 )
 
 pid_control_config = dict(environment_num=1, start_seed=5, map="CrXROSTR", traffic_density=0.0)
