@@ -6,22 +6,13 @@ setup_logger(debug=True)
 
 class TestEnv(PGDriveEnv):
     def __init__(self):
-        super(TestEnv, self).__init__(
-            {
-                "environment_num": 1,
-                "start_seed": 3,
-                "target_vehicle_configs": {
-                    "default_agent": {
-                        "use_image": False,
-                        "image_source": "depth_cam"
-                    }
-                },
-                "pg_world_config": {
-                    "debug": False
-                },
-                "manual_control": False
-            }
-        )
+        super(TestEnv,
+              self).__init__({
+                  "environment_num": 1,
+                  "start_seed": 3,
+                  "pg_world_config": {},
+                  "manual_control": False
+              })
         # self.pg_world.cam.setPos(0, 0, 1500)
         # self.pg_world.cam.lookAt(0, 0, 0)
 

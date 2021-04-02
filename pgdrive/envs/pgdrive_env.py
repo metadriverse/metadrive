@@ -127,6 +127,10 @@ class PGDriveEnv(BasePGDriveEnv):
 
     def _process_extra_config(self, config: Union[dict, "PGConfig"]) -> "PGConfig":
         """Check, update, sync and overwrite some config."""
+        config = self.default_config().update(config, allow_overwrite=False)
+        return config
+
+    def _post_process_config(self, config):
         if not config["rgb_clip"]:
             logging.warning(
                 "You have set rgb_clip = False, which means the observation will be uint8 values in [0, 255]. "
@@ -209,7 +213,7 @@ class PGDriveEnv(BasePGDriveEnv):
 
         saver_info = dict()
         for v_id, v in self.vehicles.items():
-            actions[v_id], saver_info[v_id] = self.saver(v_id, v, actions)
+            actions[v_id], saver_info[v_id] = self.saver(v_id, actions)
         return actions, saver_info
 
     def _get_step_return(self, actions, step_infos):
@@ -481,7 +485,7 @@ class PGDriveEnv(BasePGDriveEnv):
                 self.main_camera.chase(self.current_track_vehicle, self.pg_world)
                 return
 
-    def saver(self, v_id: str, vehicle: BaseVehicle, actions):
+    def saver(self, v_id: str, actions):
         """
         Rule to enable saver
         :param v_id: id of a vehicle
@@ -489,6 +493,7 @@ class PGDriveEnv(BasePGDriveEnv):
         :param actions: original actions of all vehicles
         :return: a new action to override original action
         """
+        vehicle = self.vehicles[v_id]
         action = actions[v_id]
         steering = action[0]
         throttle = action[1]
