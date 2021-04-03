@@ -26,7 +26,6 @@ class MultiAgentRoundaboutEnv(MultiAgentPGDrive):
                 "vehicle_config": {
                     "born_longitude": 0,
                     "born_lateral": 0,
-                    "use_lane_line_detector": False,
                 },
                 # clear base config
                 "num_agents": 4,

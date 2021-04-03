@@ -32,7 +32,7 @@ blackbox_test_configs = dict(
     no_lidar7={"vehicle_config": dict(lidar=dict(num_lasers=10, distance=10, num_others=10))},
 )
 
-pid_control_config = dict(environment_num=1, start_seed=5, map="CrXROSTR", traffic_density=0.0)
+pid_control_config = dict(environment_num=1, start_seed=5, map="CrXROSTR", traffic_density=0.0, use_render=False)
 
 info_keys = [
     "cost", "velocity", "steering", "acceleration", "step_reward", "crash_vehicle", "out_of_road", "arrive_dest"
@@ -95,4 +95,5 @@ def test_zombie():
 
 
 if __name__ == '__main__':
-    pytest.main(["-s", "test_pgdrive_env.py"])
+    # pytest.main(["-s", "test_pgdrive_env.py"])
+    test_zombie()

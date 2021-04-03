@@ -36,7 +36,9 @@ class TestEnv(PGDriveEnv):
                     "show_lidar": False,
                     "show_side_detector": True,
                     "show_lane_line_detector": True,
-                    "use_lane_line_detector": True,
+                    "lane_line_detector": {
+                        "num_lasers": 100
+                    }
                 }
             }
         )
