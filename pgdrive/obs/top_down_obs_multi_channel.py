@@ -27,9 +27,16 @@ class TopDownMultiChannel(TopDownObservation):
     CHANNEL_NAMES = ["road_network", "traffic_flow", "target_vehicle", "navigation", "past_pos"]
 
     def __init__(
-        self, vehicle_config, env, clip_rgb: bool, frame_stack: int = 5, post_stack: int = 5, frame_skip: int = 5
+        self,
+        vehicle_config,
+        env,
+        clip_rgb: bool,
+        frame_stack: int = 5,
+        post_stack: int = 5,
+        frame_skip: int = 5,
+        resolution=None
     ):
-        super(TopDownMultiChannel, self).__init__(vehicle_config, env, clip_rgb)
+        super(TopDownMultiChannel, self).__init__(vehicle_config, env, clip_rgb, resolution=resolution)
         self.num_stacks = 4 + frame_stack
         self.stack_traffic_flow = deque([], maxlen=(frame_stack - 1) * frame_skip + 1)
         self.stack_past_pos = deque(
@@ -42,7 +49,7 @@ class TopDownMultiChannel(TopDownObservation):
     def init_obs_window(self):
         names = self.CHANNEL_NAMES.copy()
         names.remove("past_pos")
-        self.obs_window = ObservationWindowMultiChannel(names, self.MAX_RANGE, self.RESOLUTION)
+        self.obs_window = ObservationWindowMultiChannel(names, self.MAX_RANGE, self.resolution)
 
     def init_canvas(self):
         self.canvas_background = WorldSurface(self.MAP_RESOLUTION, 0, pygame.Surface(self.MAP_RESOLUTION))
@@ -50,7 +57,7 @@ class TopDownMultiChannel(TopDownObservation):
         self.canvas_road_network = WorldSurface(self.MAP_RESOLUTION, 0, pygame.Surface(self.MAP_RESOLUTION))
         self.canvas_runtime = WorldSurface(self.MAP_RESOLUTION, 0, pygame.Surface(self.MAP_RESOLUTION))
         self.canvas_ego = WorldSurface(self.MAP_RESOLUTION, 0, pygame.Surface(self.MAP_RESOLUTION))
-        self.canvas_past_pos = pygame.Surface(self.RESOLUTION)  # A local view
+        self.canvas_past_pos = pygame.Surface(self.resolution)  # A local view
 
     def reset(self, env, vehicle=None):
         self.scene_manager = env.scene_manager
@@ -150,7 +157,7 @@ class TopDownMultiChannel(TopDownObservation):
             p = pygame.math.Vector2(p)
             p = p.rotate(np.rad2deg(ego_heading) + 90)
             p = (p[1], p[0])
-            p = (p[0] + self.RESOLUTION[0] / 2, p[1] + self.RESOLUTION[1] / 2)
+            p = (p[0] + self.resolution[0] / 2, p[1] + self.resolution[1] / 2)
             pygame.draw.circle(self.canvas_past_pos, color=COLOR_WHITE, radius=1, center=p)
 
         ret = self.obs_window.render(
@@ -203,7 +210,7 @@ class TopDownMultiChannel(TopDownObservation):
 
         # Reorder
         img_road_network = img_dict["road_network"]
-        img_road_network = cv2.resize(img_road_network, self.RESOLUTION, interpolation=cv2.INTER_LINEAR)
+        img_road_network = cv2.resize(img_road_network, self.resolution, interpolation=cv2.INTER_LINEAR)
         img = [
             img_road_network,
             img_dict["navigation"],

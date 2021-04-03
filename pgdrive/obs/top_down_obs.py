@@ -27,13 +27,14 @@ class TopDownObservation(ObservationType):
     MAP_RESOLUTION = (2000, 2000)  # pix x pix
     MAX_RANGE = (50, 50)  # maximum detection distance = 50 M
 
-    def __init__(self, vehicle_config, env, clip_rgb: bool):
+    def __init__(self, vehicle_config, env, clip_rgb: bool, resolution=None):
+        self.resolution = resolution or self.RESOLUTION
         super(TopDownObservation, self).__init__(vehicle_config, env)
         self.rgb_clip = clip_rgb
         self.num_stacks = 3
 
         # self.obs_shape = (64, 64)
-        self.obs_shape = self.RESOLUTION
+        self.obs_shape = self.resolution
 
         self.pygame = import_pygame()
 
@@ -53,10 +54,10 @@ class TopDownObservation(ObservationType):
         pygame.display.set_caption(PG_EDITION + " (Top-down)")
         # main_window_position means the left upper location.
         os.environ['SDL_VIDEO_WINDOW_POS'] = '{},{}' \
-            .format(main_window_position[0] - self.RESOLUTION[0], main_window_position[1])
+            .format(main_window_position[0] - self.resolution[0], main_window_position[1])
         # Used for display only!
         self.screen = pygame.display.set_mode(
-            (self.RESOLUTION[0] * 2, self.RESOLUTION[1] * 2)
+            (self.resolution[0] * 2, self.resolution[1] * 2)
         ) if self.onscreen else None
 
         # canvas
@@ -64,7 +65,7 @@ class TopDownObservation(ObservationType):
         self.init_obs_window()
 
     def init_obs_window(self):
-        self.obs_window = ObservationWindow(self.MAX_RANGE, self.RESOLUTION)
+        self.obs_window = ObservationWindow(self.MAX_RANGE, self.resolution)
 
     def init_canvas(self):
         self.canvas_runtime = WorldSurface(self.MAP_RESOLUTION, 0, pygame.Surface(self.MAP_RESOLUTION))
