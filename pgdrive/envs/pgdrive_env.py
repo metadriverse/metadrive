@@ -8,7 +8,7 @@ from typing import Union, Dict, AnyStr, Optional, Tuple
 import numpy as np
 from pgdrive.constants import DEFAULT_AGENT
 from pgdrive.envs.base_env import BasePGDriveEnv
-from pgdrive.obs.observation_type import LidarStateObservation, ImageStateObservation
+from pgdrive.obs import LidarStateObservation, ImageStateObservation
 from pgdrive.scene_creator.blocks.first_block import FirstBlock
 from pgdrive.scene_creator.map import Map, MapGenerateMethod, parse_map_config, PGMap
 from pgdrive.scene_creator.vehicle.base_vehicle import BaseVehicle
@@ -67,9 +67,9 @@ PGDriveEnvV1_DEFAULT_CONFIG = dict(
         show_navi_mark=True,
         increment_steering=False,
         wheel_friction=0.6,
-        side_detector=dict(num_lasers=2, distance=50),  # laser num, distance
+        side_detector=dict(num_lasers=0, distance=50),  # laser num, distance
         show_side_detector=False,
-        lane_line_detector=dict(num_lasers=2, distance=20),  # laser num, distance
+        lane_line_detector=dict(num_lasers=0, distance=20),  # laser num, distance
         show_lane_line_detector=False,
 
         # ===== use image =====
@@ -87,7 +87,6 @@ PGDriveEnvV1_DEFAULT_CONFIG = dict(
         action_check=False,
         use_saver=False,
         save_level=0.5,
-        use_lane_line_detector=False,
     ),
     rgb_clip=True,
 

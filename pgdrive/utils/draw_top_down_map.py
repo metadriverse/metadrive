@@ -11,7 +11,7 @@ pygame = import_pygame()
 
 def draw_top_down_map(map, resolution: Iterable = (512, 512)) -> Optional[Union[np.ndarray, pygame.Surface]]:
     # Have to import internally!
-    from pgdrive.world.top_down_observation.top_down_obs_impl import WorldSurface, LaneGraphics
+    from pgdrive.obs.top_down_obs_impl import WorldSurface, LaneGraphics
     simple_draw = True
     surface = WorldSurface(map.film_size, 0, pygame.Surface(map.film_size))
     b_box = map.road_network.get_bounding_box()

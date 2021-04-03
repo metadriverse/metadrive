@@ -22,6 +22,7 @@ class DistanceDetector:
 
     def __init__(self, parent_node_np: NodePath, num_lasers: int = 16, distance: float = 50, enable_show=False):
         # properties
+        assert num_lasers > 0
         show = enable_show and (AssetLoader.loader is not None)
         self.dim = num_lasers
         self.num_lasers = num_lasers

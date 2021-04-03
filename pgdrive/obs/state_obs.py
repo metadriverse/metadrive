@@ -1,0 +1,150 @@
+import gym
+import numpy as np
+from pgdrive.obs.observation_type import ObservationType
+from pgdrive.scene_creator.vehicle.base_vehicle import BaseVehicle
+from pgdrive.scene_creator.vehicle_module.routing_localization import RoutingLocalizationModule
+from pgdrive.utils.math_utils import clip
+
+PERCEIVE_DIST = 50
+
+
+class StateObservation(ObservationType):
+    Ego_state_obs_dim = 6
+    """
+    Use vehicle state info, navigation info and lidar point clouds info as input
+    """
+    def __init__(self, config):
+        super(StateObservation, self).__init__(config)
+
+    @property
+    def observation_space(self):
+        # Navi info + Other states
+        shape = self.Ego_state_obs_dim + RoutingLocalizationModule.Navi_obs_dim + self.get_side_detector_dim()
+        return gym.spaces.Box(-0.0, 1.0, shape=(shape, ), dtype=np.float32)
+
+    def observe(self, vehicle):
+        """
+        Ego states: [
+                    [Distance to left yellow Continuous line,
+                    Distance to right Side Walk], if NOT use lane_line detector else:
+                    [Side_detector cloud_points]
+
+                    Difference of heading between ego vehicle and current lane,
+                    Current speed,
+                    Current steering,
+                    Throttle/brake of last frame,
+                    Steering of last frame,
+                    Yaw Rate,
+
+                     [Lateral Position on current lane.], if use lane_line detector, else:
+                     [lane_line_detector cloud points]
+                    ], dim >= 9
+        Navi info: [
+                    Projection of distance between ego vehicle and checkpoint on ego vehicle's heading direction,
+                    Projection of distance between ego vehicle and checkpoint on ego vehicle's side direction,
+                    Radius of the lane whose end node is the checkpoint (0 if this lane is straight),
+                    Clockwise (1) or anticlockwise (0) (0 if lane is straight),
+                    Angle of the lane (0 if lane is straight)
+                   ] * 2, dim = 10
+        Since agent observes current lane info and next lane info, and two checkpoints exist, the dimension of navi info
+        is 10.
+        :param vehicle: BaseVehicle
+        :return: Vehicle State + Navigation information
+        """
+        navi_info = vehicle.routing_localization.get_navi_info()
+        ego_state = self.vehicle_state(vehicle)
+        return np.asarray(ego_state + navi_info, dtype=np.float32)
+
+    @staticmethod
+    def vehicle_state(vehicle):
+        """
+        Wrap vehicle states to list
+        """
+        # update out of road
+        info = []
+        if vehicle.side_detector is not None:
+            info += vehicle.side_detector.get_cloud_points()
+        else:
+            lateral_to_left, lateral_to_right, = vehicle.dist_to_left, vehicle.dist_to_right
+            total_width = float(
+                (vehicle.routing_localization.get_current_lane_num() + 1) *
+                vehicle.routing_localization.get_current_lane_width()
+            )
+            lateral_to_left /= total_width
+            lateral_to_right /= total_width
+            info += [clip(lateral_to_left, 0.0, 1.0), clip(lateral_to_right, 0.0, 1.0)]
+
+        current_reference_lane = vehicle.routing_localization.current_ref_lanes[-1]
+        info += [
+            vehicle.heading_diff(current_reference_lane),
+            # Note: speed can be negative denoting free fall. This happen when emergency brake.
+            clip((vehicle.speed + 1) / (vehicle.max_speed + 1), 0.0, 1.0),
+            clip((vehicle.steering / vehicle.max_steering + 1) / 2, 0.0, 1.0),
+            clip((vehicle.last_current_action[0][0] + 1) / 2, 0.0, 1.0),
+            clip((vehicle.last_current_action[0][1] + 1) / 2, 0.0, 1.0)
+        ]
+        heading_dir_last = vehicle.last_heading_dir
+        heading_dir_now = vehicle.heading
+        cos_beta = heading_dir_now.dot(heading_dir_last
+                                       ) / (np.linalg.norm(heading_dir_now) * np.linalg.norm(heading_dir_last))
+        beta_diff = np.arccos(clip(cos_beta, 0.0, 1.0))
+        # print(beta)
+        yaw_rate = beta_diff / 0.1
+        # print(yaw_rate)
+        info.append(clip(yaw_rate, 0.0, 1.0))
+
+        if vehicle.lane_line_detector is not None:
+            info += vehicle.lane_line_detector.get_cloud_points()
+        else:
+            _, lateral = vehicle.lane.local_coordinates(vehicle.position)
+            info.append(
+                clip((lateral * 2 / vehicle.routing_localization.get_current_lane_width() + 1.0) / 2.0, 0.0, 1.0)
+            )
+
+        return info
+
+    def get_side_detector_dim(self):
+        dim = 0
+        dim += 2 if self.config["side_detector"]["num_lasers"] == 0 else \
+            self.config["side_detector"]["num_lasers"]
+        dim += 1 if self.config["lane_line_detector"]["num_lasers"] == 0 else \
+            self.config["lane_line_detector"]["num_lasers"]
+        return dim
+
+
+class LidarStateObservation(ObservationType):
+    def __init__(self, vehicle_config):
+        self.state_obs = StateObservation(vehicle_config)
+        super(LidarStateObservation, self).__init__(vehicle_config)
+
+    @property
+    def observation_space(self):
+        shape = list(self.state_obs.observation_space.shape)
+        if self.config["lidar"]["num_lasers"] > 0 and self.config["lidar"]["distance"] > 0:
+            # Number of lidar rays and distance should be positive!
+            shape[0] += self.config["lidar"]["num_lasers"] + self.config["lidar"]["num_others"] * 4
+        return gym.spaces.Box(-0.0, 1.0, shape=tuple(shape), dtype=np.float32)
+
+    def observe(self, vehicle):
+        """
+        State observation + Navi info + 4 * closest vehicle info + Lidar points ,
+        Definition of State Observation and Navi information can be found in **class StateObservation**
+        Other vehicles' info: [
+                              Projection of distance between ego and another vehicle on ego vehicle's heading direction,
+                              Projection of distance between ego and another vehicle on ego vehicle's side direction,
+                              Projection of speed between ego and another vehicle on ego vehicle's heading direction,
+                              Projection of speed between ego and another vehicle on ego vehicle's side direction,
+                              ] * 4, dim = 16
+
+        Lidar points: 240 lidar points surrounding vehicle, starting from the vehicle head in clockwise direction
+
+        :param vehicle: BaseVehicle
+        :return: observation in 9 + 10 + 16 + 240 dim
+        """
+        state = self.state_obs.observe(vehicle)
+        other_v_info = []
+        if vehicle.lidar is not None:
+            if self.config["lidar"]["num_others"] > 0:
+                other_v_info += vehicle.lidar.get_surrounding_vehicles_info(vehicle, self.config["lidar"]["num_others"])
+            other_v_info += vehicle.lidar.get_cloud_points()
+        return np.concatenate((state, np.asarray(other_v_info)))

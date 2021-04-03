@@ -36,17 +36,20 @@ def test_naive_multi_agent_pgdrive():
                                        for i in range(4)}
         }
     )
-    assert isinstance(env.action_space, gym.spaces.Dict)
-    obs = env.reset()
-    assert isinstance(obs, dict)
-    a = env.action_space.sample()
-    assert isinstance(a, dict)
-    o, r, d, i = env.step(a)
-    assert isinstance(o, dict)
-    assert isinstance(r, dict)
-    assert isinstance(d, dict)
-    assert isinstance(i, dict)
-    _step(env)
+    try:
+        assert isinstance(env.action_space, gym.spaces.Dict)
+        obs = env.reset()
+        assert isinstance(obs, dict)
+        a = env.action_space.sample()
+        assert isinstance(a, dict)
+        o, r, d, i = env.step(a)
+        assert isinstance(o, dict)
+        assert isinstance(r, dict)
+        assert isinstance(d, dict)
+        assert isinstance(i, dict)
+        _step(env)
+    finally:
+        env.close()
 
 
 if __name__ == '__main__':
