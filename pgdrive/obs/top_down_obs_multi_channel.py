@@ -4,13 +4,12 @@ from collections import deque
 import cv2
 import gym
 import numpy as np
-
 from pgdrive.constants import Decoration, DEFAULT_AGENT
+from pgdrive.obs.top_down_obs_impl import WorldSurface, COLOR_BLACK, VehicleGraphics, LaneGraphics, \
+    ObservationWindowMultiChannel
+from pgdrive.obs.top_down_obs import TopDownObservation
 from pgdrive.scene_creator.vehicle.base_vehicle import BaseVehicle
 from pgdrive.utils import import_pygame
-from pgdrive.world.top_down_observation.top_down_obs_impl import WorldSurface, COLOR_BLACK, \
-    VehicleGraphics, LaneGraphics, ObservationWindowMultiChannel
-from pgdrive.world.top_down_observation.top_down_observation import TopDownObservation
 
 pygame = import_pygame()
 COLOR_WHITE = pygame.Color("white")

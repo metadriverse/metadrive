@@ -1,16 +1,13 @@
 import math
-from typing import Union
 import time
 from collections import deque
-from typing import Optional
+from typing import Union, Optional
 
 import gym
 import numpy as np
 from panda3d.bullet import BulletVehicle, BulletBoxShape, ZUp, BulletGhostNode
 from panda3d.core import Vec3, TransformState, NodePath, LQuaternionf, BitMask32, TextNode
-
 from pgdrive.constants import RENDER_MODE_ONSCREEN, COLOR, COLLISION_INFO_COLOR, BodyName, CamMask, CollisionGroup
-from pgdrive.scene_creator.blocks.first_block import FirstBlock
 from pgdrive.scene_creator.lane.abs_lane import AbstractLane
 from pgdrive.scene_creator.lane.circular_lane import CircularLane
 from pgdrive.scene_creator.lane.straight_lane import StraightLane
@@ -35,7 +32,6 @@ from pgdrive.world.pg_world import PGWorld
 
 
 class BaseVehicle(DynamicElement):
-    Ego_state_obs_dim = 9
     """
     Vehicle chassis and its wheels index
                     0       1
@@ -140,14 +136,19 @@ class BaseVehicle(DynamicElement):
         # add self module for training according to config
         vehicle_config = self.vehicle_config
         self.add_routing_localization(vehicle_config["show_navi_mark"])  # default added
-        self.side_detector = SideDetector(
-            self.pg_world.render, self.vehicle_config["side_detector"]["num_lasers"],
-            self.vehicle_config["side_detector"]["distance"], self.vehicle_config["show_side_detector"]
-        )
-        self.lane_line_detector = LaneLineDetector(
-            self.pg_world.render, self.vehicle_config["side_detector"]["num_lasers"],
-            self.vehicle_config["side_detector"]["distance"], self.vehicle_config["show_side_detector"]
-        )
+
+        if self.vehicle_config["side_detector"]["num_lasers"] > 0:
+            self.side_detector = SideDetector(
+                self.pg_world.render, self.vehicle_config["side_detector"]["num_lasers"],
+                self.vehicle_config["side_detector"]["distance"], self.vehicle_config["show_side_detector"]
+            )
+
+        if self.vehicle_config["lane_line_detector"]["num_lasers"] > 0:
+            self.lane_line_detector = LaneLineDetector(
+                self.pg_world.render, self.vehicle_config["lane_line_detector"]["num_lasers"],
+                self.vehicle_config["lane_line_detector"]["distance"], self.vehicle_config["show_lane_line_detector"]
+            )
+
         if not self.vehicle_config["use_image"]:
             if vehicle_config["lidar"]["num_lasers"] > 0 and vehicle_config["lidar"]["distance"] > 0:
                 self.add_lidar(
@@ -306,8 +307,7 @@ class BaseVehicle(DynamicElement):
         self.last_current_action = deque([(0.0, 0.0), (0.0, 0.0)], maxlen=2)
         self.last_position = self.born_place
         self.last_heading_dir = self.heading
-        self.side_detector.perceive(self.position, self.heading_theta, self.pg_world.physics_world.dynamic_world)
-        self.lane_line_detector.perceive(self.position, self.heading_theta, self.pg_world.physics_world.dynamic_world)
+
         self.update_dist_to_left_right()
         self.takeover = False
         self.energy_consumption = 0
@@ -362,10 +362,7 @@ class BaseVehicle(DynamicElement):
     """---------------------------------------- vehicle info ----------------------------------------------"""
 
     def update_dist_to_left_right(self):
-        if not self.vehicle_config["use_lane_line_detector"]:
-            self.dist_to_left, self.dist_to_right = self._dist_to_route_left_right()
-        else:
-            self.dist_to_right, self.dist_to_left = self.side_detector.get_cloud_points()
+        self.dist_to_left, self.dist_to_right = self._dist_to_route_left_right()
 
     def _dist_to_route_left_right(self):
         current_reference_lane = self.routing_localization.current_ref_lanes[-1]
@@ -651,8 +648,13 @@ class BaseVehicle(DynamicElement):
         self.pg_world.physics_world.dynamic_world.clearContactAddedCallback()
         self.routing_localization.destroy()
         self.routing_localization = None
-        self.side_detector.destroy()
-        self.lane_line_detector.destroy()
+
+        if self.side_detector is not None:
+            self.side_detector.destroy()
+
+        if self.lane_line_detector is not None:
+            self.lane_line_detector.destroy()
+
         self.side_detector = None
         self.lane_line_detector = None
 
