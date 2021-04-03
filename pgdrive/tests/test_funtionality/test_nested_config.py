@@ -69,7 +69,14 @@ def test_config_identical():
     assert not d.is_identical(c)
 
 
+def test_dict_as_attribute():
+    c = PGConfig({"aa": {"bb": {"cc": 100, "ee": 102}}})
+    c.update({"ff": {"gg": 104}})
+    assert hasattr(c, "ff")
+
+
 if __name__ == '__main__':
-    test_recursive_config()
-    test_partially_update()
-    test_config_identical()
+    # test_recursive_config()
+    # test_partially_update()
+    # test_config_identical()
+    test_dict_as_attribute()
