@@ -200,10 +200,9 @@ class ImageStateObservation(ObservationType):
     STATE = "state"
 
     def __init__(self, vehicle_config):
-        config = vehicle_config
-        super(ImageStateObservation, self).__init__(config)
-        self.img_obs = ImageObservation(config, config["image_cource"], config["rgb_clip"])
-        self.state_obs = StateObservation(config)
+        super(ImageStateObservation, self).__init__(vehicle_config)
+        self.img_obs = ImageObservation(vehicle_config, vehicle_config["image_source"], vehicle_config["rgb_clip"])
+        self.state_obs = StateObservation(vehicle_config)
 
     @property
     def observation_space(self):
