@@ -34,7 +34,7 @@ class TestEnv(PGDriveEnv):
                 },
                 "driving_reward": 1.0,
                 "vehicle_config": {
-                    "show_lidar": False,
+                    "show_lidar": True,
                     "show_side_detector": True,
                     "show_lane_line_detector": True,
                 }
