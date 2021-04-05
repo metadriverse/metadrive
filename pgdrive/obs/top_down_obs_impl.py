@@ -1,7 +1,6 @@
 from typing import List, Tuple, Union
 
 import numpy as np
-
 from pgdrive.scene_creator.lane.abs_lane import LineType
 from pgdrive.scene_creator.lane.circular_lane import CircularLane
 from pgdrive.scene_creator.lane.straight_lane import StraightLane
@@ -381,17 +380,19 @@ class LaneGraphics:
 
 
 class ObservationWindowMultiChannel:
-    CHANNEL_NAMES = ["road_network", "traffic_flow", "target_vehicle", "navigation", "past_pos"]
+    CHANNEL_NAMES = ["road_network", "traffic_flow", "target_vehicle", "past_pos"]
 
     def __init__(self, names, max_range, resolution):
         assert isinstance(names, list)
         assert set(self.CHANNEL_NAMES)
         self.sub_observations = {
             k: ObservationWindow(max_range=max_range, resolution=resolution)
-            for k in ["traffic_flow", "target_vehicle", "navigation"]
+            for k in ["traffic_flow", "target_vehicle"]
         }
         self.sub_observations["road_network"] = ObservationWindow(
-            max_range=max_range, resolution=(resolution[0] * 2, resolution[1] * 2)
+            max_range=max_range,
+            resolution=(resolution[0] * 2, resolution[1] * 2)
+            # max_range=max_range, resolution=resolution
         )
 
         self.resolution = (resolution[0] * 2, resolution[1] * 2)

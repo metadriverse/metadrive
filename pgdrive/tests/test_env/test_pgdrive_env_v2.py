@@ -17,5 +17,23 @@ def test_pgdrive_env_v2():
         env.close()
 
 
+def test_pgdrive_env_v2_long_run():
+    try:
+        for m in ["X", "O", "C", "S", "R", "r", "T"]:
+            env = PGDriveEnvV2({"map": m})
+            o = env.reset()
+            for _ in range(300):
+                assert env.observation_space.contains(o)
+                o, r, d, i = env.step([0, 1])
+                if d:
+                    break
+            env.close()
+    finally:
+        if "env" in locals():
+            env = locals()["env"]
+            env.close()
+
+
 if __name__ == '__main__':
-    test_pgdrive_env_v2()
+    # test_pgdrive_env_v2()
+    test_pgdrive_env_v2_long_run()

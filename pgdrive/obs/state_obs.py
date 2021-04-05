@@ -9,7 +9,7 @@ PERCEIVE_DIST = 50
 
 
 class StateObservation(ObservationType):
-    Ego_state_obs_dim = 6
+    ego_state_obs_dim = 6
     """
     Use vehicle state info, navigation info and lidar point clouds info as input
     """
@@ -19,7 +19,7 @@ class StateObservation(ObservationType):
     @property
     def observation_space(self):
         # Navi info + Other states
-        shape = self.Ego_state_obs_dim + RoutingLocalizationModule.Navi_obs_dim + self.get_side_detector_dim()
+        shape = self.ego_state_obs_dim + RoutingLocalizationModule.Navi_obs_dim + self.get_side_detector_dim()
         return gym.spaces.Box(-0.0, 1.0, shape=(shape, ), dtype=np.float32)
 
     def observe(self, vehicle):
@@ -62,7 +62,7 @@ class StateObservation(ObservationType):
         """
         # update out of road
         info = []
-        if vehicle.side_detector is not None:
+        if hasattr(vehicle, "side_detector") and vehicle.side_detector is not None:
             info += vehicle.side_detector.get_cloud_points()
         else:
             lateral_to_left, lateral_to_right, = vehicle.dist_to_left, vehicle.dist_to_right
