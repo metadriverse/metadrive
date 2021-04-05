@@ -59,7 +59,8 @@ PGDriveEnvV1_DEFAULT_CONFIG = dict(
     # ===== Single-agent vehicle config =====
     vehicle_config=dict(
         # ===== vehicle module config =====
-        lidar=dict(num_lasers=240, distance=50, num_others=4),  # laser num, distance, other vehicle info num
+        # laser num, distance, other vehicle info num
+        lidar=dict(num_lasers=240, distance=50, num_others=4, gaussian_noise=0.0, dropout_prob=0.0),
         show_lidar=False,
         mini_map=(84, 84, 250),  # buffer length, width
         rgb_cam=(84, 84),  # buffer length, width

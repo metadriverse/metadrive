@@ -42,7 +42,9 @@ class PGDriveEnvV2(PGDriveEnvV1):
                 use_lateral=False,
 
                 # See: https://github.com/decisionforce/pgdrive/issues/297
-                vehicle_config=dict(lidar=dict(num_lasers=120, distance=50, num_others=0)),
+                vehicle_config=dict(
+                    lidar=dict(num_lasers=120, distance=50, num_others=0, gaussian_noise=0.0, dropout_prob=0.0)
+                ),
 
                 # Disable map loading!
                 load_map_from_json=False,
@@ -103,7 +105,7 @@ class PGDriveEnvV2(PGDriveEnvV1):
 
         # Reward for moving forward in current lane
         current_lane = vehicle.lane if vehicle.lane in vehicle.routing_localization.current_ref_lanes else \
-        vehicle.routing_localization.current_ref_lanes[0]
+            vehicle.routing_localization.current_ref_lanes[0]
         long_last, _ = current_lane.local_coordinates(vehicle.last_position)
         long_now, lateral_now = current_lane.local_coordinates(vehicle.position)
 
