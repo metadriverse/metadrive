@@ -549,9 +549,9 @@ class PGDriveEnv(BasePGDriveEnv):
         saver_info = {
             "takeover_start": True if not pre_save and vehicle.takeover else False,
             "takeover_end": True if pre_save and not vehicle.takeover else False,
-            "takeover": vehicle.takeover
+            "takeover": vehicle.takeover if pre_save else False
         }
-        return (steering, throttle), saver_info
+        return (steering, throttle) if saver_info["takeover"] else action, saver_info
 
     def get_single_observation(self, vehicle_config: "PGConfig") -> "ObservationType":
         if self.config["use_image"]:
