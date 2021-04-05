@@ -1,7 +1,7 @@
 import gym
 import numpy as np
+
 from pgdrive.obs.observation_type import ObservationType
-from pgdrive.scene_creator.vehicle.base_vehicle import BaseVehicle
 from pgdrive.scene_creator.vehicle_module.routing_localization import RoutingLocalizationModule
 from pgdrive.utils.math_utils import clip
 
@@ -146,5 +146,20 @@ class LidarStateObservation(ObservationType):
         if vehicle.lidar is not None:
             if self.config["lidar"]["num_others"] > 0:
                 other_v_info += vehicle.lidar.get_surrounding_vehicles_info(vehicle, self.config["lidar"]["num_others"])
-            other_v_info += vehicle.lidar.get_cloud_points()
+            other_v_info += self._add_noise_to_cloud_points(vehicle.lidar.get_cloud_points())
         return np.concatenate((state, np.asarray(other_v_info)))
+
+    def _add_noise_to_cloud_points(self, points):
+        if self.config["lidar"]["gaussian_noise"] > 0.0:
+            points = np.asarray(points)
+            points = np.clip(
+                points + np.random.normal(loc=0.0, scale=self.config["lidar"]["gaussian_noise"], size=points.shape),
+                0.0, 1.0
+            )
+
+        if self.config["lidar"]["dropout_prob"] > 0.0:
+            assert self.config["lidar"]["dropout_prob"] <= 1.0
+            points = np.asarray(points)
+            points[np.random.uniform(0, 1, size=points.shape) < self.config["lidar"]["dropout_prob"]] = 0.0
+
+        return list(points)
