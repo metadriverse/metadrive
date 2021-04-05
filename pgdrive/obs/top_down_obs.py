@@ -193,7 +193,8 @@ class TopDownObservation(ObservationType):
             pos[0] - origin_pos[0] + min_box[0] - pivot_move[0], pos[1] - origin_pos[1] - max_box[1] + pivot_move[1]
         )
         # get a rotated image
-        rotated_image = pygame.transform.rotate(image, angle)
+        # rotated_image = pygame.transform.rotate(image, angle)
+        rotated_image = pygame.transform.rotozoom(image, angle, 1.0)
         # rotate and blit the image
         surf.blit(rotated_image, origin)
         return origin

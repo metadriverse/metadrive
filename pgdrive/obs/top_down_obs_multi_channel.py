@@ -1,15 +1,14 @@
 import math
 from collections import deque
 
-import cv2
 import gym
 import numpy as np
 from pgdrive.constants import Decoration, DEFAULT_AGENT
+from pgdrive.obs.top_down_obs import TopDownObservation
 from pgdrive.obs.top_down_obs_impl import WorldSurface, COLOR_BLACK, VehicleGraphics, LaneGraphics, \
     ObservationWindowMultiChannel
-from pgdrive.obs.top_down_obs import TopDownObservation
 from pgdrive.scene_creator.vehicle.base_vehicle import BaseVehicle
-from pgdrive.utils import import_pygame
+from pgdrive.utils import import_pygame, clip
 
 pygame = import_pygame()
 COLOR_WHITE = pygame.Color("white")
@@ -24,7 +23,8 @@ class TopDownMultiChannel(TopDownObservation):
     MAP_RESOLUTION = (2000, 2000)  # pix x pix
     MAX_RANGE = (50, 50)  # maximum detection distance = 50 M
 
-    CHANNEL_NAMES = ["road_network", "traffic_flow", "target_vehicle", "navigation", "past_pos"]
+    # CHANNEL_NAMES = ["road_network", "traffic_flow", "target_vehicle", "navigation", "past_pos"]
+    CHANNEL_NAMES = ["road_network", "traffic_flow", "navigation", "past_pos"]
 
     def __init__(
         self,
@@ -37,7 +37,7 @@ class TopDownMultiChannel(TopDownObservation):
         resolution=None
     ):
         super(TopDownMultiChannel, self).__init__(vehicle_config, env, clip_rgb, resolution=resolution)
-        self.num_stacks = 4 + frame_stack
+        self.num_stacks = 2 + frame_stack
         self.stack_traffic_flow = deque([], maxlen=(frame_stack - 1) * frame_skip + 1)
         self.stack_past_pos = deque(
             [], maxlen=(post_stack - 1) * frame_skip + 1
@@ -45,6 +45,8 @@ class TopDownMultiChannel(TopDownObservation):
         self.frame_stack = frame_stack
         self.frame_skip = frame_skip
         self._should_fill_stack = True
+        self.scaling = self.resolution[0] / self.MAX_RANGE[0]
+        assert self.scaling == self.resolution[1] / self.MAX_RANGE[1]
 
     def init_obs_window(self):
         names = self.CHANNEL_NAMES.copy()
@@ -99,6 +101,9 @@ class TopDownMultiChannel(TopDownObservation):
         self.canvas_background.move_display_window_to(centering_pos)
         self.canvas_road_network.move_display_window_to(centering_pos)
 
+        # self.draw_navigation(self.canvas_navigation)
+        self.draw_navigation(self.canvas_background, (64, 64, 64))
+
         for _from in self.road_network.graph.keys():
             decoration = True if _from == Decoration.start else False
             for _to in self.road_network.graph[_from].keys():
@@ -108,10 +113,7 @@ class TopDownMultiChannel(TopDownObservation):
                     LaneGraphics.display(l, self.canvas_background, two_side)
         self.canvas_road_network.blit(self.canvas_background, (0, 0))
         self.obs_window.reset(self.canvas_runtime)
-
         self._should_draw_map = False
-
-        self.draw_navigation()
 
     def _refresh(self, canvas, pos, clip_size):
         canvas.set_clip((pos[0] - clip_size[0] / 2, pos[1] - clip_size[1] / 2, clip_size[0], clip_size[1]))
@@ -125,21 +127,16 @@ class TopDownMultiChannel(TopDownObservation):
 
         clip_size = (int(self.obs_window.get_size()[0] * 1.1), int(self.obs_window.get_size()[0] * 1.1))
 
-        self._refresh(self.canvas_ego, pos, clip_size)
+        # self._refresh(self.canvas_ego, pos, clip_size)
         self._refresh(self.canvas_runtime, pos, clip_size)
         self.canvas_past_pos.fill(COLOR_BLACK)
+        self._draw_ego_vehicle()
 
         # Draw vehicles
         # TODO PZH: I hate computing these in pygame-related code!!!
         ego_heading = vehicle.heading_theta
         ego_heading = ego_heading if abs(ego_heading) > 2 * np.pi / 180 else 0
 
-        VehicleGraphics.display(
-            vehicle=vehicle,
-            surface=self.canvas_ego,  # Draw target vehicle in this canvas!
-            heading=ego_heading,
-            color=VehicleGraphics.GREEN
-        )
         for v in self.scene_manager.traffic_mgr.vehicles:
             if v is vehicle:
                 continue
@@ -147,31 +144,48 @@ class TopDownMultiChannel(TopDownObservation):
             h = h if abs(h) > 2 * np.pi / 180 else 0
             VehicleGraphics.display(vehicle=v, surface=self.canvas_runtime, heading=h, color=VehicleGraphics.BLUE)
 
-        pos = self.canvas_runtime.pos2pix(*vehicle.position)
-        self.stack_past_pos.append(pos)
-        for p in self._get_stack_indices(len(self.stack_past_pos)):
-            p = self.stack_past_pos[p]
-            # TODO PZH: Could you help me check this part? I just engineering out the equation. Not sure if correct!@LQY
-            p = (p[0] - pos[0], p[1] - pos[1])
-            p = (p[1], p[0])
-            p = pygame.math.Vector2(p)
+        raw_pos = vehicle.position
+        self.stack_past_pos.append(raw_pos)
+        for p_index in self._get_stack_indices(len(self.stack_past_pos)):
+            p_old = self.stack_past_pos[p_index]
+            diff = p_old - raw_pos
+            diff = (diff[0] * self.scaling, diff[1] * self.scaling)
+            # p = (p_old[0] - pos[0], p_old[1] - pos[1])
+            diff = (diff[1], diff[0])
+            p = pygame.math.Vector2(tuple(diff))
+            # p = pygame.math.Vector2(p)
             p = p.rotate(np.rad2deg(ego_heading) + 90)
             p = (p[1], p[0])
-            p = (p[0] + self.resolution[0] / 2, p[1] + self.resolution[1] / 2)
-            pygame.draw.circle(self.canvas_past_pos, color=COLOR_WHITE, radius=1, center=p)
+            p = (
+                clip(p[0] + self.resolution[0] / 2, -self.resolution[0],
+                     self.resolution[0]), clip(p[1] + self.resolution[1] / 2, -self.resolution[1], self.resolution[1])
+            )
+            # p = self.canvas_background.pos2pix(p[0], p[1])
+            self.canvas_past_pos.fill((255, 255, 255), (p, (1, 1)))
+            # pygame.draw.circle(self.canvas_past_pos, (255, 255, 255), p, radius=1)
 
         ret = self.obs_window.render(
             canvas_dict=dict(
-                road_network=self.canvas_road_network,  # TODO
+                road_network=self.canvas_road_network,
                 traffic_flow=self.canvas_runtime,
-                target_vehicle=self.canvas_ego,  # TODO
-                navigation=self.canvas_navigation,
+                target_vehicle=self.canvas_ego,
+                # navigation=self.canvas_navigation,
             ),
             position=pos,
             heading=vehicle.heading_theta
         )
         ret["past_pos"] = self.canvas_past_pos
         return ret
+
+    def _draw_ego_vehicle(self):
+        vehicle = self.scene_manager.target_vehicles[DEFAULT_AGENT]
+        w = vehicle.WIDTH * self.scaling
+        h = vehicle.LENGTH * self.scaling
+        position = (self.resolution[0] / 2, self.resolution[1] / 2)
+        angle = 90
+        box = [pygame.math.Vector2(p) for p in [(-h / 2, -w / 2), (-h / 2, w / 2), (h / 2, w / 2), (h / 2, -w / 2)]]
+        box_rotate = [p.rotate(angle) + position for p in box]
+        pygame.draw.polygon(self.canvas_past_pos, color=(128, 128, 128), points=box_rotate)
 
     def get_observation_window(self):
         ret = self.obs_window.get_observation_window()
@@ -195,6 +209,7 @@ class TopDownMultiChannel(TopDownObservation):
     def observe(self, vehicle: BaseVehicle):
         self.render()
         surface_dict = self.get_observation_window()
+        surface_dict["road_network"] = pygame.transform.smoothscale(surface_dict["road_network"], self.resolution)
         img_dict = {k: pygame.surfarray.array3d(surface) for k, surface in surface_dict.items()}
 
         # Gray scale
@@ -208,35 +223,47 @@ class TopDownMultiChannel(TopDownObservation):
             self._should_fill_stack = False
         self.stack_traffic_flow.append(img_dict["traffic_flow"])
 
-        # Reorder
-        img_road_network = img_dict["road_network"]
-        img_road_network = cv2.resize(img_road_network, self.resolution, interpolation=cv2.INTER_LINEAR)
         img = [
-            img_road_network,
-            img_dict["navigation"],
-            img_dict["target_vehicle"],
+            img_dict["road_network"] * 2,
+            # img_navigation,
+            # img_dict["navigation"],
+            # img_dict["target_vehicle"],
             img_dict["past_pos"],
         ]  # + list(self.stack_traffic_flow)
 
-        for i in self._get_stack_indices(len(self.stack_traffic_flow)):
-            img.append(self.stack_traffic_flow[i])
+        # Stacked traffic flow
+        # stacked = np.zeros_like(img_navigation)
+        indices = self._get_stack_indices(len(self.stack_traffic_flow))
+        # for i in reversed(indices):
+        #     stacked = self.stack_traffic_flow[i] + stacked / 2
+        # if self.rgb_clip:
+        #     stacked = np.clip(stacked, 0.0, 1.0)
+        # else:
+        #     stacked = np.clip(stacked, 0, 255)
+        for i in indices:
+            img.append(self.stack_traffic_flow[i] * 2)
 
         # Stack
         img = np.stack(img, axis=2)
+        if self.rgb_clip:
+            img = np.clip(img, 0, 1.0)
+        else:
+            img = np.clip(img, 0, 255)
         return np.transpose(img, (1, 0, 2))
 
-    def draw_navigation(self):
+    def draw_navigation(self, canvas, color=(128, 128, 128)):
         checkpoints = self.target_vehicle.routing_localization.checkpoints
         for i, c in enumerate(checkpoints[:-1]):
             lanes = self.road_network.graph[c][checkpoints[i + 1]]
             for lane in lanes:
-                LaneGraphics.simple_draw(lane, self.canvas_navigation, color=(255, 255, 255))
+                LaneGraphics.simple_draw(lane, canvas, color=color)
 
-    def _get_stack_indices(self, length):
-        num = int(math.ceil(length / self.frame_skip))
+    def _get_stack_indices(self, length, frame_skip=None):
+        frame_skip = frame_skip or self.frame_skip
+        num = int(math.ceil(length / frame_skip))
         indices = []
         for i in range(num):
-            indices.append(length - 1 - i * self.frame_skip)
+            indices.append(length - 1 - i * frame_skip)
         return indices
 
     @property
