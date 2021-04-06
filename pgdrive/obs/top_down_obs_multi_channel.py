@@ -21,7 +21,7 @@ class TopDownMultiChannel(TopDownObservation):
     """
     RESOLUTION = (100, 100)  # pix x pix
     MAP_RESOLUTION = (2000, 2000)  # pix x pix
-    MAX_RANGE = (50, 50)  # maximum detection distance = 50 M
+    # MAX_RANGE = (50, 50)  # maximum detection distance = 50 M
 
     # CHANNEL_NAMES = ["road_network", "traffic_flow", "target_vehicle", "navigation", "past_pos"]
     CHANNEL_NAMES = ["road_network", "traffic_flow", "navigation", "past_pos"]
@@ -34,9 +34,12 @@ class TopDownMultiChannel(TopDownObservation):
         frame_stack: int = 5,
         post_stack: int = 5,
         frame_skip: int = 5,
-        resolution=None
+        resolution=None,
+        max_distance=50
     ):
-        super(TopDownMultiChannel, self).__init__(vehicle_config, env, clip_rgb, resolution=resolution)
+        super(TopDownMultiChannel, self).__init__(
+            vehicle_config, env, clip_rgb, resolution=resolution, max_distance=max_distance
+        )
         self.num_stacks = 2 + frame_stack
         self.stack_traffic_flow = deque([], maxlen=(frame_stack - 1) * frame_skip + 1)
         self.stack_past_pos = deque(
@@ -45,13 +48,14 @@ class TopDownMultiChannel(TopDownObservation):
         self.frame_stack = frame_stack
         self.frame_skip = frame_skip
         self._should_fill_stack = True
-        self.scaling = self.resolution[0] / self.MAX_RANGE[0]
-        assert self.scaling == self.resolution[1] / self.MAX_RANGE[1]
+        self.max_distance = max_distance
+        self.scaling = self.resolution[0] / max_distance
+        assert self.scaling == self.resolution[1] / self.max_distance
 
     def init_obs_window(self):
         names = self.CHANNEL_NAMES.copy()
         names.remove("past_pos")
-        self.obs_window = ObservationWindowMultiChannel(names, self.MAX_RANGE, self.resolution)
+        self.obs_window = ObservationWindowMultiChannel(names, (self.max_distance, self.max_distance), self.resolution)
 
     def init_canvas(self):
         self.canvas_background = WorldSurface(self.MAP_RESOLUTION, 0, pygame.Surface(self.MAP_RESOLUTION))

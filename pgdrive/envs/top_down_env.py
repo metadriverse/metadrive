@@ -9,11 +9,22 @@ class TopDownSingleFramePGDriveEnv(PGDriveEnv):
     def default_config(cls) -> PGConfig:
         config = PGDriveEnv.default_config()
         config["vehicle_config"]["lidar"].update({"num_lasers": 0, "distance": 0})  # Remove lidar
-        config.update({"frame_skip": 5, "frame_stack": 5, "post_stack": 5, "rgb_clip": True, "resolution_size": 100})
+        config.update(
+            {
+                "frame_skip": 3,
+                "frame_stack": 5,
+                "post_stack": 5,
+                "rgb_clip": True,
+                "resolution_size": 100,
+                "distance": 50
+            }
+        )
         return config
 
     def get_single_observation(self, _=None):
-        return TopDownObservation(self.config["vehicle_config"], self, self.config["rgb_clip"])
+        return TopDownObservation(
+            self.config["vehicle_config"], self, self.config["rgb_clip"], max_distance=self.config["distance"]
+        )
 
 
 class TopDownPGDriveEnv(TopDownSingleFramePGDriveEnv):
@@ -25,7 +36,8 @@ class TopDownPGDriveEnv(TopDownSingleFramePGDriveEnv):
             frame_stack=self.config["frame_stack"],
             post_stack=self.config["post_stack"],
             frame_skip=self.config["frame_skip"],
-            resolution=(self.config["resolution_size"], self.config["resolution_size"])
+            resolution=(self.config["resolution_size"], self.config["resolution_size"]),
+            max_distance=self.config["distance"]
         )
 
 
@@ -34,7 +46,16 @@ class TopDownPGDriveEnvV2(PGDriveEnvV2):
     def default_config(cls) -> PGConfig:
         config = PGDriveEnvV2.default_config()
         config["vehicle_config"]["lidar"] = {"num_lasers": 0, "distance": 0}  # Remove lidar
-        config.update({"frame_skip": 5, "frame_stack": 1, "post_stack": 5, "rgb_clip": True, "resolution_size": 100})
+        config.update(
+            {
+                "frame_skip": 3,
+                "frame_stack": 1,
+                "post_stack": 5,
+                "rgb_clip": True,
+                "resolution_size": 100,
+                "distance": 50
+            }
+        )
         return config
 
     def get_single_observation(self, _=None):
@@ -45,7 +66,8 @@ class TopDownPGDriveEnvV2(PGDriveEnvV2):
             frame_stack=self.config["frame_stack"],
             post_stack=self.config["post_stack"],
             frame_skip=self.config["frame_skip"],
-            resolution=(self.config["resolution_size"], self.config["resolution_size"])
+            resolution=(self.config["resolution_size"], self.config["resolution_size"]),
+            max_distance=self.config["distance"]
         )
 
 
@@ -68,7 +90,7 @@ if __name__ == '__main__':
 
     # Test multi-channel frames
     env = TopDownPGDriveEnvV2(
-        dict(environment_num=1, map="SS", traffic_density=0.5, frame_stack=3, frame_skip=5, resolution_size=84)
+        dict(environment_num=1, map="SS", traffic_density=0.5, frame_stack=3, frame_skip=5, distance=10)
     )
     # env = TopDownPGDriveEnv(dict(environment_num=1, map="XTO", traffic_density=0.1, frame_stack=5))
     # env = TopDownPGDriveEnv(dict(use_render=True, manual_control=True))
