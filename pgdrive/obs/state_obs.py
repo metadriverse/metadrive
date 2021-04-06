@@ -5,8 +5,6 @@ from pgdrive.obs.observation_type import ObservationType
 from pgdrive.scene_creator.vehicle_module.routing_localization import RoutingLocalizationModule
 from pgdrive.utils.math_utils import clip
 
-PERCEIVE_DIST = 50
-
 
 class StateObservation(ObservationType):
     ego_state_obs_dim = 6

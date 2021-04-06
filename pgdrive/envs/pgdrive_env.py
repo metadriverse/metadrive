@@ -128,6 +128,8 @@ class PGDriveEnv(BasePGDriveEnv):
     def _process_extra_config(self, config: Union[dict, "PGConfig"]) -> "PGConfig":
         """Check, update, sync and overwrite some config."""
         config = self.default_config().update(config, allow_overwrite=False)
+        if config["vehicle_config"]["lidar"]["distance"] > 50:
+            config["pg_world_config"]["max_distance"] = config["vehicle_config"]["lidar"]["distance"]
         return config
 
     def _post_process_config(self, config):

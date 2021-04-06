@@ -20,7 +20,7 @@ class PGLOD:
     LOD_OBJECT_PHYSICS_DIST = 50
 
     @classmethod
-    def cull_distant_blocks(cls, blocks: list, poses: List[tuple], pg_world: PGWorld):
+    def cull_distant_blocks(cls, blocks: list, poses: List[tuple], pg_world: PGWorld, max_distance=None):
         # A distance based LOD rendering like GTA
         for block in blocks:
             if not PGLOD.all_out_of_bounding_box(block.bounding_box, poses, cls.LOD_MAP_VIS_DIST):
@@ -29,18 +29,22 @@ class PGLOD:
             else:
                 if block.node_path.hasParent():
                     block.node_path.detachNode()
-            if not PGLOD.all_out_of_bounding_box(block.bounding_box, poses, cls.LOD_MAP_PHYSICS_DIST):
+            if not PGLOD.all_out_of_bounding_box(block.bounding_box, poses, max_distance or cls.LOD_MAP_PHYSICS_DIST):
                 block.dynamic_nodes.attach_to_physics_world(pg_world.physics_world.dynamic_world)
             else:
                 block.dynamic_nodes.detach_from_physics_world(pg_world.physics_world.dynamic_world)
 
     @classmethod
-    def cull_distant_traffic_vehicles(cls, vehicles: list, poses: List[tuple], pg_world: PGWorld):
-        cls._cull_elements(vehicles, poses, pg_world, cls.LOD_VEHICLE_VIS_DIST, cls.LOD_VEHICLE_PHYSICS_DIST)
+    def cull_distant_traffic_vehicles(cls, vehicles: list, poses: List[tuple], pg_world: PGWorld, max_distance=None):
+        cls._cull_elements(
+            vehicles, poses, pg_world, cls.LOD_VEHICLE_VIS_DIST, max_distance or cls.LOD_VEHICLE_PHYSICS_DIST
+        )
 
     @classmethod
-    def cull_distant_objects(cls, objects: list, poses: List[tuple], pg_world: PGWorld):
-        cls._cull_elements(objects, poses, pg_world, cls.LOD_OBJECT_VIS_DIST, cls.LOD_OBJECT_PHYSICS_DIST)
+    def cull_distant_objects(cls, objects: list, poses: List[tuple], pg_world: PGWorld, max_distance=None):
+        cls._cull_elements(
+            objects, poses, pg_world, cls.LOD_OBJECT_VIS_DIST, max_distance or cls.LOD_OBJECT_PHYSICS_DIST
+        )
 
     @staticmethod
     def _cull_elements(
