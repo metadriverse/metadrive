@@ -1,8 +1,7 @@
 from pgdrive.envs.multi_agent_pgdrive import MultiAgentPGDrive
-from pgdrive.utils import get_np_random
 from pgdrive.scene_creator.blocks.roundabout import Roundabout
-from pgdrive.utils import PGConfig
 from pgdrive.scene_creator.map import Map, MapGenerateMethod
+from pgdrive.utils import get_np_random, PGConfig
 
 
 class MultiAgentRoundaboutEnv(MultiAgentPGDrive):
@@ -22,6 +21,12 @@ class MultiAgentRoundaboutEnv(MultiAgentPGDrive):
         config = MultiAgentPGDrive.default_config()
         config.update(
             {
+                "map_config": {
+                    Map.GENERATE_TYPE: MapGenerateMethod.BIG_BLOCK_SEQUENCE,
+                    Map.GENERATE_CONFIG: "O",
+                    Map.LANE_WIDTH: 3.5,
+                    Map.LANE_NUM: 2,
+                },
                 "map": "O",
                 "vehicle_config": {
                     "born_longitude": 0,
@@ -34,13 +39,25 @@ class MultiAgentRoundaboutEnv(MultiAgentPGDrive):
         )
         return config
 
+    def _after_lazy_init(self):
+        super(MultiAgentRoundaboutEnv, self)._after_lazy_init()
+        if hasattr(self, "main_camera") and self.main_camera is not None:
+            self.main_camera.camera.setPos(0, 0, 100)
+            self.main_camera.stop_chase(self.pg_world)
+            self.main_camera.camera_x += 60
+
     def _process_extra_config(self, config):
+        config = super(MultiAgentRoundaboutEnv, self)._process_extra_config(config)
         config = self._update_agent_pos_configs(config)
         return super(MultiAgentRoundaboutEnv, self)._process_extra_config(config)
 
     def _update_agent_pos_configs(self, config):
         target_vehicle_configs = []
-        assert config["num_agents"] < config["map_config"]["lane_num"] * len(self.target_nodes), "Too many agents!"
+        assert config["num_agents"] <= config["map_config"]["lane_num"] * len(self.target_nodes), (
+            "Too many agents! We only accepet {} agents, but you have {} agents!".format(
+                config["map_config"]["lane_num"] * len(self.target_nodes), config["num_agents"]
+            )
+        )
         for i in range(-1, len(self.target_nodes) - 1):
             for lane_idx in range(config["map_config"]["lane_num"]):
                 target_vehicle_configs.append(
