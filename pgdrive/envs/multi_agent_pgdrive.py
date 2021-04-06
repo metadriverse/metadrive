@@ -17,11 +17,11 @@ class MultiAgentPGDrive(PGDriveEnvV2):
                 "environment_num": 1,
                 "traffic_density": 0.,
                 "start_seed": 10,
-                "map": "yY",
+                # "map": "yY",
                 "vehicle_config": {
-                    "lane_line_detector": {
-                        "num_lasers": 100
-                    }
+                    # "lane_line_detector": {
+                    #     "num_lasers": 100
+                    # }
                 },
                 "target_vehicle_configs": {
                     "agent0": {
@@ -51,7 +51,7 @@ class MultiAgentPGDrive(PGDriveEnvV2):
                     }
                 },
                 "num_agents": 4,
-                "crash_done": True
+                "crash_done": False
             }
         )
         # Some collision bugs still exist, always set to False now!!!!
