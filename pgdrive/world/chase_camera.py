@@ -44,10 +44,10 @@ class ChaseCamera:
         self.bird_camera_height = self.BIRD_VIEW_HEIGHT
         self.camera_x = 0
         self.camera_y = 0
-        self.inputs.watchWithModifiers('up', 'i')
-        self.inputs.watchWithModifiers('down', 'k')
-        self.inputs.watchWithModifiers('left', 'j')
-        self.inputs.watchWithModifiers('right', 'l')
+        self.inputs.watchWithModifiers('up', 'w')
+        self.inputs.watchWithModifiers('down', 's')
+        self.inputs.watchWithModifiers('left', 'a')
+        self.inputs.watchWithModifiers('right', 'd')
 
     def reset(self):
         self.direction_running_mean.clear()
