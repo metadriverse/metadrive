@@ -56,7 +56,10 @@ BASE_DEFAULT_CONFIG = dict(
         headless_image=False,
 
         # turn on to profile the efficiency
-        pstats=False
+        pstats=False,
+
+        # The maximum distance used in PGLOD. Set to None will use the default values.
+        max_distance=None,
     ),
     record_episode=False,
 )
