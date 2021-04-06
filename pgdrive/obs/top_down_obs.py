@@ -25,9 +25,10 @@ class TopDownObservation(ObservationType):
     """
     RESOLUTION = (200, 200)  # pix x pix
     MAP_RESOLUTION = (2000, 2000)  # pix x pix
-    MAX_RANGE = (50, 50)  # maximum detection distance = 50 M
 
-    def __init__(self, vehicle_config, env, clip_rgb: bool, resolution=None):
+    # MAX_RANGE = (50, 50)  # maximum detection distance = 50 M
+
+    def __init__(self, vehicle_config, env, clip_rgb: bool, resolution=None, max_distance=50):
         self.resolution = resolution or self.RESOLUTION
         super(TopDownObservation, self).__init__(vehicle_config, env)
         self.rgb_clip = clip_rgb
@@ -44,6 +45,7 @@ class TopDownObservation(ObservationType):
         self._center_pos = None  # automatically change, don't set the value
         self._should_draw_map = True
         self._canvas_to_display_scaling = 0.0
+        self.max_distance = max_distance
 
         # scene
         self.road_network = None
@@ -65,7 +67,7 @@ class TopDownObservation(ObservationType):
         self.init_obs_window()
 
     def init_obs_window(self):
-        self.obs_window = ObservationWindow(self.MAX_RANGE, self.resolution)
+        self.obs_window = ObservationWindow((self.max_distance, self.max_distance), self.resolution)
 
     def init_canvas(self):
         self.canvas_runtime = WorldSurface(self.MAP_RESOLUTION, 0, pygame.Surface(self.MAP_RESOLUTION))
