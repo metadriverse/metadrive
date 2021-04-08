@@ -134,7 +134,7 @@ class TopDownMultiChannel(TopDownObservation):
         # self._refresh(self.canvas_ego, pos, clip_size)
         self._refresh(self.canvas_runtime, pos, clip_size)
         self.canvas_past_pos.fill(COLOR_BLACK)
-        self._draw_ego_vehicle()
+        # self._draw_ego_vehicle()
 
         # Draw vehicles
         # TODO PZH: I hate computing these in pygame-related code!!!
@@ -245,7 +245,7 @@ class TopDownMultiChannel(TopDownObservation):
         # else:
         #     stacked = np.clip(stacked, 0, 255)
         for i in indices:
-            img.append(self.stack_traffic_flow[i] * 2)
+            img.append(self.stack_traffic_flow[i])
 
         # Stack
         img = np.stack(img, axis=2)

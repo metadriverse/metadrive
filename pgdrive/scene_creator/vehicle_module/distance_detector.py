@@ -81,7 +81,8 @@ class DistanceDetector:
             p_vis_pos = results.to_pos
             hit_fraction = 1.0
             hits = results.getHits()
-            for result in sorted(hits, key=lambda ret: ret.getHitFraction()):
+            hits = sorted(hits, key=lambda ret: ret.getHitFraction())
+            for result in hits:
                 if result.getNode() in extra_filter_node:
                     continue
                 self.detected_objects.append(result)

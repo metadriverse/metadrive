@@ -3,8 +3,7 @@ from pgdrive.tests.test_env.test_pgdrive_env import _act
 
 
 def test_pgdrive_env_v2():
-    env = PGDriveEnvV2()
-    assert env.observation_space.shape[0] == 120 + 19
+    env = PGDriveEnvV2({"vehicle_config": {"wheel_friction": 1.2}})
     try:
         obs = env.reset()
         assert env.observation_space.contains(obs)
@@ -35,5 +34,5 @@ def test_pgdrive_env_v2_long_run():
 
 
 if __name__ == '__main__':
-    # test_pgdrive_env_v2()
-    test_pgdrive_env_v2_long_run()
+    test_pgdrive_env_v2()
+    # test_pgdrive_env_v2_long_run()

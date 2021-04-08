@@ -14,14 +14,16 @@ class MinimalObservation(LidarStateObservation):
     _traffic_vehicle_state_dim = 18
     _traffic_vehicle_state_dim_wo_extra = 6
 
-    def __init__(self, config):
+    def __init__(self, config, env):
         super(MinimalObservation, self).__init__(vehicle_config=config)
         self._state_obs_dim = list(self.state_obs.observation_space.shape)[0]
+        self._env = env
 
     @property
     def observation_space(self):
         shape = list(self.state_obs.observation_space.shape)
         shape[0] += 5
+        assert self.config["lidar"]["num_others"] >= 0
         if self.config["use_extra_state"]:
             shape[0] = shape[0] + self.config["lidar"]["num_others"] * self._traffic_vehicle_state_dim
         else:
@@ -97,20 +99,25 @@ class MinimalObservation(LidarStateObservation):
         return np.concatenate((state, np.asarray(other_v_info)))
 
     def overwritten_get_surrounding_vehicles_info(self, lidar, ego_vehicle, num_others: int = 4):
-        surrounding_vehicles = list(lidar.get_surrounding_vehicles())
+        # surrounding_vehicles = list(lidar.get_surrounding_vehicles())
+        surrounding_vehicles = list(self._env.scene_manager.traffic_mgr.vehicles)[1:]
         surrounding_vehicles.sort(
             key=lambda v: norm(ego_vehicle.position[0] - v.position[0], ego_vehicle.position[1] - v.position[1])
         )
+
+        # dis = [(str(v), norm(ego_vehicle.position[0] - v.position[0], ego_vehicle.position[1] - v.position[1]))
+        # for v in surrounding_vehicles]
+
         surrounding_vehicles += [None] * num_others
         res = []
         for vehicle in surrounding_vehicles[:num_others]:
             if vehicle is not None:
                 relative_position = ego_vehicle.projection(vehicle.position - ego_vehicle.position)
                 relative_velocity = ego_vehicle.projection(vehicle.velocity - ego_vehicle.velocity)
-                res.append(clip(norm(relative_position[0], relative_position[1]) / lidar.perceive_distance, 0.0, 1.0))
+                res.append(clip(norm(relative_position[0], relative_position[1]) / 50, 0.0, 1.0))
                 res.append(clip(norm(relative_velocity[0], relative_velocity[1]) / ego_vehicle.max_speed, 0.0, 1.0))
-                res.append(clip((relative_position[0] / lidar.perceive_distance + 1) / 2, 0.0, 1.0))
-                res.append(clip((relative_position[1] / lidar.perceive_distance + 1) / 2, 0.0, 1.0))
+                res.append(clip((relative_position[0] / 50 + 1) / 2, 0.0, 1.0))
+                res.append(clip((relative_position[1] / 50 + 1) / 2, 0.0, 1.0))
                 res.append(clip((relative_velocity[0] / ego_vehicle.max_speed + 1) / 2, 0.0, 1.0))
                 res.append(clip((relative_velocity[1] / ego_vehicle.max_speed + 1) / 2, 0.0, 1.0))
 
@@ -137,7 +144,7 @@ class MinimalObservation(LidarStateObservation):
         s.append(np.cos(vehicle.heading))
         s.append(np.sin(vehicle.heading))
         s.append(vehicle.action["steering"])
-        s.append(vehicle.action["acceleration"])
+        s.append(vehicle.action["acceleration"] / 5)
         s = [self._to_zero_and_one(v) for v in s]
         return s
 
@@ -150,19 +157,24 @@ class PGDriveEnvV2Minimal(PGDriveEnvV2):
     @classmethod
     def default_config(cls) -> PGConfig:
         config = super(PGDriveEnvV2Minimal, cls).default_config()
-        config.update({"num_others": 4, "use_extra_state": False})
-        config["vehicle_config"]["lidar"]["distance"] = 200
+        config.update({"num_others": 4, "use_extra_state": True})
+        config["vehicle_config"]["lidar"]["distance"] = 0
+        config["vehicle_config"]["lidar"]["num_lasers"] = 0
+        config["vehicle_config"]["lidar"]["num_others"] = 0
         config["vehicle_config"]["side_detector"]["num_lasers"] = 0
+        config["vehicle_config"]["side_detector"]["distance"] = 0
         config["vehicle_config"]["lane_line_detector"]["num_lasers"] = 0
+        config["vehicle_config"]["lane_line_detector"]["distance"] = 0
         return config
 
     def get_single_observation(self, vehicle_config: "PGConfig") -> "ObservationType":
-        return MinimalObservation(vehicle_config)
+        return MinimalObservation(vehicle_config, self)
 
     def _post_process_config(self, config):
         config = super(PGDriveEnvV2Minimal, self)._post_process_config(config)
         assert config["vehicle_config"]["lidar"]["num_others"] == 0
-        assert config["vehicle_config"]["lidar"]["num_lasers"] == 120
+        assert config["vehicle_config"]["lidar"]["num_lasers"] == 0
+        assert config["num_others"] >= 0
         config["vehicle_config"]["lidar"]["num_others"] = config["num_others"]
         config["vehicle_config"]["use_extra_state"] = config["use_extra_state"]
         return config

@@ -104,7 +104,7 @@ if __name__ == "__main__":
                 "pstats": True
             },
             "crash_done": False,
-            "num_agents": 12,
+            "num_agents": 16,
             "map_config": {
                 Map.GENERATE_TYPE: MapGenerateMethod.BIG_BLOCK_SEQUENCE,
                 Map.GENERATE_CONFIG: "O",

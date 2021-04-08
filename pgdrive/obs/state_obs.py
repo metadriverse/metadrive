@@ -139,25 +139,29 @@ class LidarStateObservation(ObservationType):
         :param vehicle: BaseVehicle
         :return: observation in 9 + 10 + 16 + 240 dim
         """
-        state = self.state_obs.observe(vehicle)
+        state = self.state_observe(vehicle)
         other_v_info = []
         if vehicle.lidar is not None:
             if self.config["lidar"]["num_others"] > 0:
                 other_v_info += vehicle.lidar.get_surrounding_vehicles_info(vehicle, self.config["lidar"]["num_others"])
-            other_v_info += self._add_noise_to_cloud_points(vehicle.lidar.get_cloud_points())
+            other_v_info += self._add_noise_to_cloud_points(
+                vehicle.lidar.get_cloud_points(),
+                gaussian_noise=self.config["lidar"]["gaussian_noise"],
+                dropout_prob=self.config["lidar"]["dropout_prob"]
+            )
         return np.concatenate((state, np.asarray(other_v_info)))
 
-    def _add_noise_to_cloud_points(self, points):
-        if self.config["lidar"]["gaussian_noise"] > 0.0:
-            points = np.asarray(points)
-            points = np.clip(
-                points + np.random.normal(loc=0.0, scale=self.config["lidar"]["gaussian_noise"], size=points.shape),
-                0.0, 1.0
-            )
+    def state_observe(self, vehicle):
+        return self.state_obs.observe(vehicle)
 
-        if self.config["lidar"]["dropout_prob"] > 0.0:
-            assert self.config["lidar"]["dropout_prob"] <= 1.0
+    def _add_noise_to_cloud_points(self, points, gaussian_noise, dropout_prob):
+        if gaussian_noise > 0.0:
             points = np.asarray(points)
-            points[np.random.uniform(0, 1, size=points.shape) < self.config["lidar"]["dropout_prob"]] = 0.0
+            points = np.clip(points + np.random.normal(loc=0.0, scale=gaussian_noise, size=points.shape), 0.0, 1.0)
+
+        if dropout_prob > 0.0:
+            assert dropout_prob <= 1.0
+            points = np.asarray(points)
+            points[np.random.uniform(0, 1, size=points.shape) < dropout_prob] = 0.0
 
         return list(points)

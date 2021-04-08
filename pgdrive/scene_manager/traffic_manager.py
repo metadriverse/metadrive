@@ -327,8 +327,7 @@ class TrafficManager(RandomEngine):
             vehicle_num += len(vehicles_on_block)
         self.block_triggered_vehicles.reverse()
 
-    @staticmethod
-    def _get_available_reborn_lanes(map: Map) -> list:
+    def _get_available_reborn_lanes(self, map: Map) -> list:
         """
         Used to find some reborn lanes
         :param map: select born lanes from this map
