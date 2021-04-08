@@ -5,6 +5,7 @@ import hashlib
 import logging
 import os
 import struct
+from typing import Union
 
 import numpy as np
 
@@ -14,7 +15,7 @@ class RandomEngine:
         self.random_seed = None
         self.np_random = None
 
-    def update_random_seed(self, random_seed: int):
+    def update_random_seed(self, random_seed: Union[int, None]):
         """
         Update the random seed and random engine of traffic
         :param random_seed: int, random seed
