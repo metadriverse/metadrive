@@ -2,7 +2,7 @@ import time
 
 import numpy as np
 
-from pgdrive.envs.pgdrive_env import PGDriveEnv
+from pgdrive.envs import PGDriveEnvV2
 from pgdrive.scene_creator.map import Map, MapGenerateMethod
 
 
@@ -44,7 +44,7 @@ def get_result(env):
 
         max_speed = max(max_speed, env.vehicle.speed)
 
-        if s > 20 and env.vehicle.speed <= 0.1 and reported_max_speed and not reported_end:
+        if s > 20 and env.vehicle.speed <= 1.0 and reported_max_speed and not reported_end:
             dist = env.vehicle.position - max_speed_loc
             dist = dist[0]
             print("Stop the car at {}. Distance {}. Current location: {}".format(s, dist, env.vehicle.position))
@@ -67,25 +67,29 @@ def get_result(env):
 
         if reported_max_speed and reported_start and reported_end and reported_rotation:
             break
-        env.render()
+        # env.render()
     return spend, dist, rotate_displacement
 
 
 if __name__ == '__main__':
 
-    for friction in [0.6, 0.8, 0.9, 1.0, 1.1, 1.2, 1.4, 1.6, 1.8, 2.0]:
+    for friction in [0.6, 0.8, 1.0, 1.2, 2.0]:
         # for friction in [0.9, 1.0, 1.1]:
-        env = PGDriveEnv(
+        env = PGDriveEnvV2(
             {
                 "environment_num": 1,
                 "traffic_density": 0.0,
                 "start_seed": 4,
-                "pg_world_config": {
-                    "debug": False,
+                # "pg_world_config": {
+                #     "debug": False,
+                # },
+                # "manual_control": False,
+                # "use_render": True,
+                "fast": True,
+                # "use_image": True,
+                "vehicle_config": {
+                    "wheel_friction": friction
                 },
-                "manual_control": False,
-                "use_render": True,
-                "use_image": True,
                 "map_config": {
                     Map.GENERATE_TYPE: MapGenerateMethod.BIG_BLOCK_SEQUENCE,
                     Map.GENERATE_CONFIG: "SSSSSSSSSS"
@@ -94,7 +98,7 @@ if __name__ == '__main__':
         )
         acc_time, brake_dist, rotate_dis = get_result(env)
         print(
-            "Friction {}. Acceleration time: {:.3f}. Brake distance: {:.3f}. Rotation 90 degree displacement X: {:.3f}, Y: {:.3f}"
+            "Friction {}. Acceleration time: {:.3f}. Brake distance: {:.3f}. Rotation 90 degree displacement X: {:.3f}, Y: {:.3f}\n\n"
             .format(friction, acc_time, brake_dist, rotate_dis[0], rotate_dis[1])
         )
         env.close()
