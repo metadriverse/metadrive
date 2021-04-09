@@ -60,6 +60,9 @@ BASE_DEFAULT_CONFIG = dict(
 
         # The maximum distance used in PGLOD. Set to None will use the default values.
         max_distance=None,
+
+        # Force to generate objects in the left lane.
+        _debug_crash_object=False
     ),
     record_episode=False,
 )
