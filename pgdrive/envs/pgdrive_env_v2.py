@@ -19,7 +19,7 @@ class PGDriveEnvV2(PGDriveEnvV1):
             dict(
                 # ===== Traffic =====
                 traffic_density=0.1,
-                traffic_mode=TrafficMode.Reborn,  # "reborn", "trigger", "hybrid"
+                traffic_mode=TrafficMode.Hybrid,  # "Reborn", "Trigger", "Hybrid"
                 random_traffic=False,  # Traffic is randomized at default.
 
                 # ===== Cost Scheme =====
@@ -140,7 +140,7 @@ class PGDriveEnvV2(PGDriveEnvV1):
             )
         else:
             lateral_factor = 1.0
-        current_road = Road(*vehicle.lane_index[:-1])
+        current_road = vehicle.current_road
         positive_road = 1 if not current_road.is_negative_road() else -1
 
         reward = 0.0

@@ -47,7 +47,7 @@ PGDriveEnvV1_DEFAULT_CONFIG = dict(
 
     # ===== Traffic =====
     traffic_density=0.1,
-    traffic_mode=TrafficMode.Trigger,  # "reborn", "trigger", "hybrid"
+    traffic_mode=TrafficMode.Trigger,  # "Reborn", "Trigger", "Hybrid"
     random_traffic=False,  # Traffic is randomized at default.
 
     # ===== Object =====
