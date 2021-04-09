@@ -16,7 +16,7 @@ class TestEnv(PGDriveEnv):
                 "start_seed": 5,
                 "pg_world_config": {
                     "onscreen_message": True,
-                    "debug_physics_world": True,
+                    # "debug_physics_world": True,
                     "pstats": True
                 },
                 # "controller":"joystick",
@@ -24,11 +24,11 @@ class TestEnv(PGDriveEnv):
                 "use_render": True,
                 "decision_repeat": 5,
                 "rgb_clip": True,
-                "debug": False,
+                "debug": True,
                 "fast": False,
                 "map_config": {
-                    Map.GENERATE_TYPE: MapGenerateMethod.BIG_BLOCK_NUM,
-                    Map.GENERATE_CONFIG: 10,
+                    Map.GENERATE_TYPE: MapGenerateMethod.BIG_BLOCK_SEQUENCE,
+                    Map.GENERATE_CONFIG: "O",
                     Map.LANE_WIDTH: 3.5,
                     Map.LANE_NUM: 3,
                 },
