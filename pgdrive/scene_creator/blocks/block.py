@@ -383,7 +383,7 @@ class Block(Element, BlockDefault):
         body_np.node().addShape(shape)
         mask = Block.CONTINUOUS_COLLISION_MASK if line_type != LineType.BROKEN else Block.BROKEN_COLLISION_MASK
         body_np.node().setIntoCollideMask(BitMask32.bit(mask))
-        self.dynamic_nodes.append(body_np.node())
+        self.static_nodes.append(body_np.node())
 
         body_np.setPos(panda_position(middle, Block.LANE_LINE_GHOST_HEIGHT / 2))
         direction_v = lane_end - lane_start
@@ -425,7 +425,7 @@ class Block(Element, BlockDefault):
             body_np.node().addShape(shape)
             mask = Block.CONTINUOUS_COLLISION_MASK if line_type != LineType.BROKEN else Block.BROKEN_COLLISION_MASK
             body_np.node().setIntoCollideMask(BitMask32.bit(mask))
-            self.dynamic_nodes.append(body_np.node())
+            self.static_nodes.append(body_np.node())
 
         # position and heading
         body_np.setPos(panda_position(middle, Block.LANE_LINE_GHOST_HEIGHT / 2))

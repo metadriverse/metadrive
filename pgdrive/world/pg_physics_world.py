@@ -14,6 +14,7 @@ class PGPhysicsWorld:
         self.dynamic_world.setGravity(Vec3(0, 0, -9.81))  # set gravity
         # a static world which used to query position/overlap .etc. Don't implement doPhysics() in this world
         self.static_world = BulletWorld()
+        CollisionGroup.set_collision_rule(self.static_world)
 
     def report_bodies(self):
         dynamic_bodies = \
