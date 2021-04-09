@@ -357,10 +357,10 @@ class Block(Element, BlockDefault):
                 lane_start = lane.position(segment_num * Block.STRIPE_LENGTH * 2, i * lane_width / 2)
                 lane_end = lane.position(lane.length + Block.STRIPE_LENGTH, i * lane_width / 2)
                 middle = (lane_end[0] + lane_start[0]) / 2, (lane_end[1] + lane_start[1]) / 2
-
-                self._add_lane_line2bullet(
-                    lane_start, lane_end, middle, parent_np, line_color, lane.line_types[k], straight
-                )
+                if not straight:
+                    self._add_lane_line2bullet(
+                        lane_start, lane_end, middle, parent_np, line_color, lane.line_types[k], straight
+                    )
 
                 if straight:
                     lane_start = lane.position(0, i * lane_width / 2)
