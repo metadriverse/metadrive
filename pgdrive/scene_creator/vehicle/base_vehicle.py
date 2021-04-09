@@ -1,4 +1,5 @@
 import math
+from pgdrive.scene_creator.road.road import Road
 import time
 from collections import deque
 from typing import Union, Optional
@@ -417,7 +418,7 @@ class BaseVehicle(DynamicElement):
 
     @property
     def current_road(self):
-        return self.lane_index[0:-1]
+        return Road(*self.lane_index[0:-1])
 
     """---------------------------------------- some math tool ----------------------------------------------"""
 

@@ -1,5 +1,5 @@
 from typing import List, Tuple
-
+import re
 from pgdrive.constants import Decoration
 from pgdrive.utils.scene_utils import get_lanes_on_road
 
@@ -38,6 +38,12 @@ class Road:
 
     def lane_num(self, road_network):
         return len(self.get_lanes(road_network))
+
+    def block_ID(self):
+        if re.search(">", self.end_node) is not None:
+            return ">"
+        block_id = re.search("[a-zA-Z]", self.end_node).group(0)
+        return block_id
 
     def __eq__(self, other):
         return True if self.start_node == other.start_node and self.end_node == other.end_node else False
