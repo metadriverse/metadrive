@@ -100,6 +100,10 @@ class ObjectsManager(RandomEngine):
             on_left = True if self.np_random.rand() > 0.5 or (accident_road is road_2 and is_ramp) else False
             accident_lane_idx = 0 if on_left else -1
 
+            _debug = pg_world.world_config["_debug_crash_object"]
+            if _debug:
+                on_left = True
+
             lane = accident_road.get_lanes(scene_mgr.map.road_network)[accident_lane_idx]
             longitude = lane.length - self.ACCIDENT_AREA_LEN
 
@@ -113,7 +117,7 @@ class ObjectsManager(RandomEngine):
             lateral_len = scene_mgr.map.config[scene_mgr.map.LANE_WIDTH]
 
             lane = scene_mgr.map.road_network.get_lane(accident_road.lane_index(accident_lane_idx))
-            if self.np_random.rand() > 0.5:
+            if self.np_random.rand() > 0.5 or _debug:
                 self.prohibit_scene(
                     scene_mgr, pg_world, lane, accident_road.lane_index(accident_lane_idx), longitude, lateral_len,
                     on_left
