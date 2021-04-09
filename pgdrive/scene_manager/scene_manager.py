@@ -151,18 +151,19 @@ class SceneManager:
 
         # cull distant blocks
         poses = [v.position for v in self.target_vehicles.values()]
-        PGLOD.cull_distant_blocks(self.map.blocks, poses, self.pg_world, self.pg_world.world_config["max_distance"])
-        # PGLOD.cull_distant_blocks(self.map.blocks, self.ego_vehicle.position, self.pg_world)
+        if self.cull_scene:
+            PGLOD.cull_distant_blocks(self.map.blocks, poses, self.pg_world, self.pg_world.world_config["max_distance"])
+            # PGLOD.cull_distant_blocks(self.map.blocks, self.ego_vehicle.position, self.pg_world)
 
-        if self.replay_system is None:
-            # TODO add objects to replay system and add new cull method
+            if self.replay_system is None:
+                # TODO add objects to replay system and add new cull method
 
-            PGLOD.cull_distant_traffic_vehicles(
-                self.traffic_mgr.traffic_vehicles, poses, self.pg_world, self.pg_world.world_config["max_distance"]
-            )
-            PGLOD.cull_distant_objects(
-                self.objects_mgr._spawned_objects, poses, self.pg_world, self.pg_world.world_config["max_distance"]
-            )
+                PGLOD.cull_distant_traffic_vehicles(
+                    self.traffic_mgr.traffic_vehicles, poses, self.pg_world, self.pg_world.world_config["max_distance"]
+                )
+                PGLOD.cull_distant_objects(
+                    self.objects_mgr._spawned_objects, poses, self.pg_world, self.pg_world.world_config["max_distance"]
+                )
 
         return step_infos
 

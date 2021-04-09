@@ -148,6 +148,6 @@ class CollisionGroup:
         ]
 
     @classmethod
-    def set_collision_rule(cls, dynamic_world: BulletWorld):
+    def set_collision_rule(cls, world: BulletWorld):
         for rule in cls.collision_rules():
-            dynamic_world.setGroupCollisionFlag(*rule)
+            world.setGroupCollisionFlag(*rule)
