@@ -251,10 +251,10 @@ class BaseVehicle(DynamicElement):
         if self.routing_localization is not None:
             self.lane, self.lane_index, = self.routing_localization.update_navigation_localization(self)
         if self.side_detector is not None:
-            self.side_detector.perceive(self.position, self.heading_theta, self.pg_world.physics_world.dynamic_world)
+            self.side_detector.perceive(self.position, self.heading_theta, self.pg_world.physics_world.static_world)
         if self.lane_line_detector is not None:
             self.lane_line_detector.perceive(
-                self.position, self.heading_theta, self.pg_world.physics_world.dynamic_world
+                self.position, self.heading_theta, self.pg_world.physics_world.static_world
             )
         self._state_check()
         self.update_dist_to_left_right()
@@ -585,9 +585,10 @@ class BaseVehicle(DynamicElement):
         """
         Check States and filter to update info
         """
-        result = self.pg_world.physics_world.dynamic_world.contactTest(self.chassis_beneath_np.node(), True)
+        result_1 = self.pg_world.physics_world.static_world.contactTest(self.chassis_beneath_np.node(), True)
+        result_2 = self.pg_world.physics_world.dynamic_world.contactTest(self.chassis_beneath_np.node(), True)
         contacts = set()
-        for contact in result.getContacts():
+        for contact in result_1.getContacts() + result_2.getContacts():
             node0 = contact.getNode0()
             node1 = contact.getNode1()
             name = [node0.getName(), node1.getName()]
@@ -600,6 +601,8 @@ class BaseVehicle(DynamicElement):
                 self.chassis_np.node().getPythonTag(BodyName.Ego_vehicle).on_white_continuous_line = True
             elif name[0] == BodyName.Yellow_continuous_line:
                 self.chassis_np.node().getPythonTag(BodyName.Ego_vehicle).on_yellow_continuous_line = True
+            elif name[0] == BodyName.Broken_line:
+                self.chassis_np.node().getPythonTag(BodyName.Ego_vehicle).on_broken_line = True
             contacts.add(name[0])
         if self.render:
             self.render_collision_info(contacts)
@@ -782,3 +785,7 @@ class BaseVehicle(DynamicElement):
     @property
     def on_white_continuous_line(self):
         return self.chassis_np.node().getPythonTag(BodyName.Ego_vehicle).on_white_continuous_line
+
+    @property
+    def on_broken_line(self):
+        return self.chassis_np.node().getPythonTag(BodyName.Ego_vehicle).on_broken_line
