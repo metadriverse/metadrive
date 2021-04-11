@@ -123,7 +123,6 @@ class BaseVehicle(DynamicElement):
         self._init_step_info()
 
         # others
-        self._frame_objects_crashed = []  # inner loop, object will only be crashed for once
         self._add_modules_for_vehicle(self.vehicle_config["use_render"])
         self.takeover = False
         self._expert_takeover = False
@@ -223,7 +222,6 @@ class BaseVehicle(DynamicElement):
         self._init_step_info()
         action, step_info = self._preprocess_action(action)
 
-        self._frame_objects_crashed = []
         self.last_position = self.position
         self.last_heading_dir = self.heading
         self.last_current_action.append(action)  # the real step of physics world is implemented in taskMgr.step()
@@ -236,10 +234,6 @@ class BaseVehicle(DynamicElement):
         return step_info
 
     def update_state(self, pg_world=None):
-        # callback
-        for obj in self._frame_objects_crashed:
-            if obj.COST_ONCE:
-                obj.crashed = True
         # lidar
         if self.lidar is not None:
             self.lidar.perceive(
