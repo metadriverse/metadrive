@@ -13,7 +13,7 @@ from pgdrive.scene_creator.lane.abs_lane import AbstractLane
 from pgdrive.scene_creator.lane.circular_lane import CircularLane
 from pgdrive.scene_creator.lane.straight_lane import StraightLane
 from pgdrive.scene_creator.map import Map
-from pgdrive.scene_creator.vehicle.base_vehicle_node import BaseVehilceNode
+from pgdrive.scene_creator.vehicle.base_vehicle_node import BaseVehicleNode
 from pgdrive.scene_creator.vehicle_module import Lidar, MiniMap
 from pgdrive.scene_creator.vehicle_module.depth_camera import DepthCamera
 from pgdrive.scene_creator.vehicle_module.distance_detector import SideDetector, LaneLineDetector
@@ -199,7 +199,7 @@ class BaseVehicle(DynamicElement):
 
     def _init_step_info(self):
         # done info will be initialized every frame
-        self.chassis_np.node().getPythonTag(BodyName.Ego_vehicle).init_collision_info()
+        self.chassis_np.node().getPythonTag(BodyName.Base_vehicle).init_collision_info()
         self.out_of_route = False  # re-route is required if is false
         self.on_lane = True  # on lane surface or not
         # self.step_info = {"reward": 0, "cost": 0}
@@ -472,7 +472,7 @@ class BaseVehicle(DynamicElement):
 
     def _add_chassis(self, pg_physics_world: PGPhysicsWorld):
         para = self.get_config()
-        chassis = BaseVehilceNode(BodyName.Ego_vehicle)
+        chassis = BaseVehicleNode(BodyName.Base_vehicle, self)
         chassis.setIntoCollideMask(BitMask32.bit(CollisionGroup.EgoVehicle))
         chassis_shape = BulletBoxShape(
             Vec3(
@@ -492,7 +492,7 @@ class BaseVehicle(DynamicElement):
         chassis.notifyCollisions(True)  # advance collision check, do callback in pg_collision_callback
         self.dynamic_nodes.append(chassis)
 
-        chassis_beneath = BulletGhostNode(BodyName.Ego_vehicle_beneath)
+        chassis_beneath = BulletGhostNode(BodyName.Base_vehicle_beneath)
         chassis_beneath.setIntoCollideMask(BitMask32.bit(CollisionGroup.EgoVehicleBeneath))
         chassis_beneath.addShape(chassis_shape)
         self.chassis_beneath_np = self.chassis_np.attachNewNode(chassis_beneath)
@@ -569,8 +569,8 @@ class BaseVehicle(DynamicElement):
         :param map: new map
         :return: None
         """
-        self.routing_localization.update(map)
         lane, new_l_index = ray_localization(np.array(self.born_place), self.pg_world)
+        self.routing_localization.update(map, start_road_node=new_l_index[0])
         assert lane is not None, "Born place is not on road!"
         self.lane_index = new_l_index
         self.lane = lane
@@ -586,17 +586,17 @@ class BaseVehicle(DynamicElement):
             node0 = contact.getNode0()
             node1 = contact.getNode1()
             name = [node0.getName(), node1.getName()]
-            name.remove(BodyName.Ego_vehicle_beneath)
+            name.remove(BodyName.Base_vehicle_beneath)
             if name[0] == "Ground" or name[0] == BodyName.Lane:
                 continue
             if name[0] == BodyName.Sidewalk:
-                self.chassis_np.node().getPythonTag(BodyName.Ego_vehicle).crash_sidewalk = True
+                self.chassis_np.node().getPythonTag(BodyName.Base_vehicle).crash_sidewalk = True
             elif name[0] == BodyName.White_continuous_line:
-                self.chassis_np.node().getPythonTag(BodyName.Ego_vehicle).on_white_continuous_line = True
+                self.chassis_np.node().getPythonTag(BodyName.Base_vehicle).on_white_continuous_line = True
             elif name[0] == BodyName.Yellow_continuous_line:
-                self.chassis_np.node().getPythonTag(BodyName.Ego_vehicle).on_yellow_continuous_line = True
+                self.chassis_np.node().getPythonTag(BodyName.Base_vehicle).on_yellow_continuous_line = True
             elif name[0] == BodyName.Broken_line:
-                self.chassis_np.node().getPythonTag(BodyName.Ego_vehicle).on_broken_line = True
+                self.chassis_np.node().getPythonTag(BodyName.Base_vehicle).on_broken_line = True
             contacts.add(name[0])
         if self.render:
             self.render_collision_info(contacts)
@@ -646,6 +646,7 @@ class BaseVehicle(DynamicElement):
             self.current_banner = new_banner
 
     def destroy(self, _=None):
+        self.chassis_np.node().getPythonTag(BodyName.Base_vehicle).destroy()
         self.dynamic_nodes.remove(self.chassis_np.node())
         super(BaseVehicle, self).destroy(self.pg_world)
         self.pg_world.physics_world.dynamic_world.clearContactAddedCallback()
@@ -762,24 +763,24 @@ class BaseVehicle(DynamicElement):
 
     @property
     def crash_vehicle(self):
-        return self.chassis_np.node().getPythonTag(BodyName.Ego_vehicle).crash_vehicle
+        return self.chassis_np.node().getPythonTag(BodyName.Base_vehicle).crash_vehicle
 
     @property
     def crash_object(self):
-        return self.chassis_np.node().getPythonTag(BodyName.Ego_vehicle).crash_object
+        return self.chassis_np.node().getPythonTag(BodyName.Base_vehicle).crash_object
 
     @property
     def crash_sidewalk(self):
-        return self.chassis_np.node().getPythonTag(BodyName.Ego_vehicle).crash_sidewalk
+        return self.chassis_np.node().getPythonTag(BodyName.Base_vehicle).crash_sidewalk
 
     @property
     def on_yellow_continuous_line(self):
-        return self.chassis_np.node().getPythonTag(BodyName.Ego_vehicle).on_yellow_continuous_line
+        return self.chassis_np.node().getPythonTag(BodyName.Base_vehicle).on_yellow_continuous_line
 
     @property
     def on_white_continuous_line(self):
-        return self.chassis_np.node().getPythonTag(BodyName.Ego_vehicle).on_white_continuous_line
+        return self.chassis_np.node().getPythonTag(BodyName.Base_vehicle).on_white_continuous_line
 
     @property
     def on_broken_line(self):
-        return self.chassis_np.node().getPythonTag(BodyName.Ego_vehicle).on_broken_line
+        return self.chassis_np.node().getPythonTag(BodyName.Base_vehicle).on_broken_line

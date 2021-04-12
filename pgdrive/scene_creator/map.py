@@ -42,6 +42,7 @@ def parse_map_config(easy_map_config, new_map_config, default_config):
 class MapGenerateMethod:
     BIG_BLOCK_NUM = BigGenerateMethod.BLOCK_NUM
     BIG_BLOCK_SEQUENCE = BigGenerateMethod.BLOCK_SEQUENCE
+    BIG_SINGLE_BLOCK = BigGenerateMethod.SINGLE_BLOCK
     PG_MAP_FILE = "pg_map_file"
 
 
