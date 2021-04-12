@@ -123,13 +123,13 @@ class BasePGDriveEnv(gym.Env):
     def _get_observation_space(self) -> gym.Space:
         ret = gym.spaces.Dict({v_id: obs.observation_space for v_id, obs in self.observations.items()})
         if self.num_agents == 1:
-            ret = ret[DEFAULT_AGENT]
+            ret = next(iter((ret.spaces.values())))
         return ret
 
     def _get_action_space(self) -> gym.Space:
         ret = gym.spaces.Dict({v_id: BaseVehicle.get_action_space_before_init() for v_id in self.observations.keys()})
         if self.num_agents == 1:
-            ret = ret[DEFAULT_AGENT]
+            ret = next(iter((ret.spaces.values())))
         return ret
 
     def _setup_pg_world(self) -> "PGWorld":
@@ -347,3 +347,6 @@ class BasePGDriveEnv(gym.Env):
 
     def get_single_observation(self, vehicle_config: "PGConfig") -> "ObservationType":
         raise NotImplementedError()
+
+    def _wrap_as_single_agent(self, data):
+        return data[next(iter(self.vehicles.keys()))]

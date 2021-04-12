@@ -82,25 +82,35 @@ class MultiAgentPGDrive(PGDriveEnvV2):
     def step(self, actions):
         actions = self._preprocess_marl_actions(actions)
         o, r, d, i = super(MultiAgentPGDrive, self).step(actions)
-        self._after_vehicle_done(d)
+        o, r, d, i = self._after_vehicle_done(o, r, d, i)
         return o, r, d, i
 
     def reset(self, episode_data: dict = None):
         for v in self.done_vehicles.values():
             v.chassis_np.node().setStatic(False)
+
+        # Multi-agent related reset
+        self.observations = {
+            k: v
+            for k, v in zip(self.config["target_vehicle_configs"].keys(), self.observations.values())
+        }
+        self.observation_space = self._get_observation_space()
+        self.action_space = self._get_action_space()
+        self.vehicles = {k: v for k, v in zip(self.observations.keys(), self.vehicles.values())}
         return super(MultiAgentPGDrive, self).reset(episode_data)
 
     def _preprocess_marl_actions(self, actions):
-        # remove useless actions
-        id_to_remove = []
-        for id in actions.keys():
-            if id in self.done_vehicles.keys():
-                id_to_remove.append(id)
-        for id in id_to_remove:
-            actions.pop(id)
         return actions
+        # remove useless actions
+        # id_to_remove = []
+        # for id in actions.keys():
+        #     if id in self.done_vehicles.keys():
+        #         id_to_remove.append(id)
+        # for id in id_to_remove:
+        #     actions.pop(id)
+        # return actions
 
-    def _after_vehicle_done(self, dones: dict):
+    def _after_vehicle_done(self, obs=None, reward=None, dones: dict = None, info=None):
         for id, done in dones.items():
             if done and id in self.vehicles.keys():
                 v = self.vehicles.pop(id)
@@ -109,6 +119,7 @@ class MultiAgentPGDrive(PGDriveEnvV2):
         for v in self.done_vehicles.values():
             if v.speed < 1:
                 v.chassis_np.node().setStatic(True)
+        return obs, reward, dones, info
 
     def _get_vehicles(self):
         return {
@@ -128,6 +139,11 @@ class MultiAgentPGDrive(PGDriveEnvV2):
         """
         vehicle_config = merge_dicts(self.config["vehicle_config"], extra_config, allow_new_keys=False)
         return PGConfig(vehicle_config)
+
+    def _wrap_as_multi_agent(self, data):
+        if self.num_agents == 1:
+            return {self.DEFAULT_AGENT: data}
+        return data
 
 
 if __name__ == "__main__":

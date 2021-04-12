@@ -22,6 +22,7 @@ class RoutingLocalizationModule:
     PRE_NOTIFY_DIST = 40
     MARK_COLOR = COLLISION_INFO_COLOR["green"][1]
     MIN_ALPHA = 0.15
+    CKPT_UPDATE_RANGE = 5
     FORCE_CALCULATE = False
 
     def __init__(self, pg_world, show_navi_point: False):
@@ -82,6 +83,12 @@ class RoutingLocalizationModule:
         self.set_route(start_road_node, final_road_node)
 
     def set_route(self, start_road_node: str, end_road_node: str):
+        """
+        Find a shorest path from start road to end road
+        :param start_road_node: start road node
+        :param end_road_node: end road node
+        :return: None
+        """
         self.checkpoints = self.map.road_network.shortest_path(start_road_node, end_road_node)
         # update routing info
         self.final_road = Road(self.checkpoints[-2], end_road_node)
@@ -114,7 +121,8 @@ class RoutingLocalizationModule:
             if self.FORCE_CALCULATE:
                 lane_index, _ = self.map.road_network.get_closest_lane_index(position)
                 lane = self.map.road_network.get_lane(lane_index)
-        self._update_target_checkpoints(lane_index)
+        long, _ = lane.local_coordinates(position)
+        self._update_target_checkpoints(lane_index, long)
 
         target_road_1_start = self.checkpoints[self.target_checkpoints_index[0]]
         target_road_1_end = self.checkpoints[self.target_checkpoints_index[0] + 1]
@@ -197,8 +205,7 @@ class RoutingLocalizationModule:
                 if self.left_arrow.hasParent():
                     self.left_arrow.detachNode()
 
-    def _update_target_checkpoints(self, ego_lane_index):
-        current_road_start_point = ego_lane_index[0]
+    def _update_target_checkpoints(self, ego_lane_index, ego_lane_longitude):
         # print(current_road_start_point, self.vehicle.lane_index[1])
         # print(self.checkpoints[self.target_checkpoints_index[0]], self.checkpoints[self.target_checkpoints_index[1]])
         if self.target_checkpoints_index[0] == self.target_checkpoints_index[1]:
@@ -206,14 +213,15 @@ class RoutingLocalizationModule:
             return
 
         # arrive to second checkpoint
-        if current_road_start_point in self.checkpoints[self.target_checkpoints_index[1]:]:
+        current_road_start_point = ego_lane_index[0]
+        if current_road_start_point in self.checkpoints[self.target_checkpoints_index[1]:
+                                                        ] and ego_lane_longitude < self.CKPT_UPDATE_RANGE:
             idx = self.checkpoints.index(current_road_start_point, self.target_checkpoints_index[1], -1)
             self.target_checkpoints_index = [idx]
             if idx + 1 == len(self.checkpoints) - 1:
                 self.target_checkpoints_index.append(idx)
             else:
                 self.target_checkpoints_index.append(idx + 1)
-            # print(self.target_checkpoints_index)
 
     def get_navi_info(self):
         return self.navi_info

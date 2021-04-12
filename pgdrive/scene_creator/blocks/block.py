@@ -110,11 +110,15 @@ class Block(Element, BlockDefault):
             self.side_normal = self.loader.loadTexture(AssetLoader.file_path("textures", "sidewalk", "normal.png"))
             self.sidewalk = self.loader.loadModel(AssetLoader.file_path("models", "box.bam"))
 
-    def construct_block(self, root_render_np: NodePath, pg_physics_world: PGPhysicsWorld) -> bool:
+    def construct_block(
+        self, root_render_np: NodePath, pg_physics_world: PGPhysicsWorld, extra_config: Dict = None
+    ) -> bool:
         """
         Randomly Construct a block, if overlap return False
         """
         self.set_config(self.PARAMETER_SPACE.sample())
+        if extra_config:
+            self.set_config(extra_config)
         success = self._sample_topology()
         self._create_in_world()
         self.attach_to_pg_world(root_render_np, pg_physics_world)

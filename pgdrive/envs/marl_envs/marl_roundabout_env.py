@@ -114,7 +114,7 @@ if __name__ == "__main__":
         }
     )
     o = env.reset()
-    env.main_camera.set_follow_lane(True)
+    # env.main_camera.set_follow_lane(True)
     total_r = 0
     for i in range(1, 100000):
         o, r, d, info = env.step(env.action_space.sample())

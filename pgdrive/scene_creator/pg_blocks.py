@@ -9,6 +9,7 @@ from pgdrive.scene_creator.blocks.straight import Straight
 
 
 class PGBlock:
+    # Register the block types here! Set their probability to 0.0 if you don't wish it appears in standard PGDrive.
     TYPE = {
         Curve: 0.5,
         Straight: 0.1,
