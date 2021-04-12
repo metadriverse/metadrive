@@ -42,6 +42,10 @@ def pgdrive_position(position: Vec3) -> np.array:
     return np.array([position[0], -position[1]])
 
 
+def pgdrive_vector(vec: Vec3) -> np.array:
+    return pgdrive_position(vec)
+
+
 def panda_heading(heading: float) -> float:
     """
     Transform the heading in PGDrive to Panda3d

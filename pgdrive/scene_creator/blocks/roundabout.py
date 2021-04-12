@@ -20,7 +20,7 @@ class Roundabout(Block):
     EXIT_PART_LENGTH = 30
 
     def _try_plug_into_previous_block(self) -> bool:
-        para = self.get_config()
+        para = self.get_config(copy=False)
         no_cross = True
         attach_road = self.pre_block_socket.positive_road
         for i in range(4):

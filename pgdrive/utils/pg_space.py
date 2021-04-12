@@ -185,6 +185,7 @@ class Parameter:
     dir = "dir"
     radius_inner = "inner_radius"  # only for roundabout use
     radius_exit = "exit_radius"
+    exit_length = "exit_length"  # The length of the exit parts straight lane, for roundabout use only.
     t_intersection_type = "t_type"
     lane_num = "lane_num"
     change_lane_num = "change_lane_num"
@@ -260,6 +261,7 @@ class BlockParameterSpace:
         Parameter.decrease_increase: PGDiscreteSpace(number=2)  # 0, decrease, 1 increase
     }
     ROUNDABOUT = {
+        # The radius of the
         Parameter.radius_exit: PGBoxSpace(min=5, max=15),  # TODO Should we reduce this?
         Parameter.radius_inner: PGBoxSpace(min=15, max=45),  # TODO Should we reduce this?
         Parameter.angle: PGConstantSpace(60)
