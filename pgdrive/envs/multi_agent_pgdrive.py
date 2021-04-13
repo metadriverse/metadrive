@@ -14,6 +14,7 @@ class MultiAgentPGDrive(PGDriveEnvV2):
         config = PGDriveEnvV2.default_config()
         config.update(
             {
+                "is_multi_agent": True,
                 "environment_num": 1,
                 "traffic_density": 0.,
                 "start_seed": 10,
@@ -51,7 +52,10 @@ class MultiAgentPGDrive(PGDriveEnvV2):
                     }
                 },
                 "num_agents": 4,
-                "crash_done": False
+                "crash_done": False,
+                "out_of_road_penalty": 5.0,
+                "crash_vehicle_penalty": 1.0,
+                "crash_object_penalty": 1.0,
             }
         )
         # Some collision bugs still exist, always set to False now!!!!
@@ -60,13 +64,18 @@ class MultiAgentPGDrive(PGDriveEnvV2):
 
     def __init__(self, config=None):
         super(MultiAgentPGDrive, self).__init__(config)
-        self.is_multi_agent = True  # Force set it to True
         self.done_observations = dict()
 
     def _process_extra_config(self, config) -> "PGConfig":
         ret_config = self.default_config().update(
             config, allow_overwrite=False, stop_recursive_update=["target_vehicle_configs"]
         )
+        if not ret_config["crash_done"]:
+            assert ret_config["crash_vehicle_penalty"] <= 2, (
+                "Are you sure you wish to set crash_vehicle_penalty={} when crash_done=False?".format(
+                    ret_config["crash_vehicle_penalty"]
+                )
+            )
         return ret_config
 
     def done_function(self, vehicle_id):
@@ -74,11 +83,13 @@ class MultiAgentPGDrive(PGDriveEnvV2):
         # crash will not done
         done, done_info = super(MultiAgentPGDrive, self).done_function(vehicle_id)
         if vehicle.crash_vehicle and not self.config["crash_done"]:
+            assert done_info["crash_vehicle"] or done_info["arrive_dest"]
             done = False
-            done_info["crash_vehicle"] = False
+            # done_info["crash_vehicle"] = False
         elif vehicle.out_of_route and vehicle.on_lane and not vehicle.crash_sidewalk:
-            done = False
-            done_info["out_of_road"] = False
+            pass  # Do nothing when out of the road!! This is not the SAFETY environment!
+            # done = False
+            # done_info["out_of_road"] = False
         return done, done_info
 
     def step(self, actions):
@@ -88,7 +99,7 @@ class MultiAgentPGDrive(PGDriveEnvV2):
         o, r, d, i = self._after_vehicle_done(o, r, d, i)
         return o, r, d, i
 
-    def reset(self, episode_data: dict = None):
+    def reset(self, *args, **kwargs):
         for v in self.done_vehicles.values():
             v.chassis_np.node().setStatic(False)
 
@@ -99,9 +110,10 @@ class MultiAgentPGDrive(PGDriveEnvV2):
         self.done_observations = dict()
         self.observation_space = self._get_observation_space()
         self.action_space = self._get_action_space()
-        return super(MultiAgentPGDrive, self).reset(episode_data)
+        return super(MultiAgentPGDrive, self).reset(*args, **kwargs)
 
     def _reset_vehicles(self):
+        # TODO(pzh) deprecated this function in future!
         vehicles = list(self.vehicles.values()) + list(self.done_vehicles.values())
         assert len(vehicles) == len(self.observations)
         self.vehicles = {k: v for k, v in zip(self.observations.keys(), vehicles)}

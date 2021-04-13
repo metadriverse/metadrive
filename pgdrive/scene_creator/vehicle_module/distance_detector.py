@@ -1,9 +1,8 @@
 import logging
 
 import numpy as np
-from panda3d.bullet import BulletGhostNode, BulletSphereShape, BulletRayHit, BulletAllHitsRayResult
+from panda3d.bullet import BulletGhostNode, BulletSphereShape, BulletAllHitsRayResult
 from panda3d.core import BitMask32, NodePath
-
 from pgdrive.constants import CamMask, CollisionGroup
 from pgdrive.utils.asset_loader import AssetLoader
 from pgdrive.utils.coordinates_shift import panda_position
@@ -31,15 +30,15 @@ class DistanceDetector:
         self.radian_unit = 2 * np.pi / num_lasers
         self.start_phase_offset = 0
         self.node_path = parent_node_np.attachNewNode("Could_points")
+        self._lidar_range = np.arange(0, self.num_lasers) * self.radian_unit + self.start_phase_offset
 
         # detection result
-        self.cloud_points = []
+        self.cloud_points = np.ones((self.num_lasers, ), dtype=float)
         self.detected_objects = []
 
         # override these properties to decide which elements to detect and show
         self.node_path.hide(CamMask.RgbCam | CamMask.Shadow | CamMask.Shadow | CamMask.DepthCam)
         self.mask = BitMask32.bit(CollisionGroup.BrokenLaneLine)
-
         self.cloud_points_vis = [] if show else None
         logging.debug("Load Vehicle Module: {}".format(self.__class__.__name__))
         if show:
@@ -56,51 +55,57 @@ class DistanceDetector:
                 ball.getChildren().reparentTo(laser_np)
             # self.node_path.flattenStrong()
 
-    def perceive(self, vehicle_position, heading_theta, pg_physics_world, extra_filter_node=None):
+    def perceive(self, vehicle_position, heading_theta, pg_physics_world, extra_filter_node: set = None):
         """
         Call me to update the perception info
         """
         # coordinates problem here! take care
-        extra_filter_node = extra_filter_node or []
+        extra_filter_node = extra_filter_node or set()
         pg_start_position = panda_position(vehicle_position, self.height)
 
         # init
-        self.cloud_points = []
+        self.cloud_points.fill(1.0)
         self.detected_objects = []
 
         # lidar calculation use pg coordinates
         mask = self.mask
-        laser_heading = np.arange(0, self.num_lasers) * self.radian_unit + heading_theta + self.start_phase_offset
+        laser_heading = self._lidar_range + heading_theta
         point_x = self.perceive_distance * np.cos(laser_heading) + vehicle_position[0]
         point_y = self.perceive_distance * np.sin(laser_heading) + vehicle_position[1]
+
         # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
         for laser_index in range(self.num_lasers):
             # # coordinates problem here! take care
             laser_end = panda_position((point_x[laser_index], point_y[laser_index]), self.height)
-            results: BulletAllHitsRayResult = pg_physics_world.rayTestAll(pg_start_position, laser_end, mask)
-            p_vis_pos = results.to_pos
-            hit_fraction = 1.0
-            hits = results.getHits()
-            hits = sorted(hits, key=lambda ret: ret.getHitFraction())
-            for result in hits:
-                if result.getNode() in extra_filter_node:
-                    continue
-                self.detected_objects.append(result)
-                hit_fraction = result.getHitFraction()
-                p_vis_pos = result.getHitPos()
-                # find the nearest
-                break
-            self.cloud_points.append(hit_fraction)
+            result = pg_physics_world.rayTestClosest(pg_start_position, laser_end, mask)
+            node = result.getNode()
+            if node in extra_filter_node:
+                # Fall back to all tests.
+                results: BulletAllHitsRayResult = pg_physics_world.rayTestAll(pg_start_position, laser_end, mask)
+                hits = results.getHits()
+                hits = sorted(hits, key=lambda ret: ret.getHitFraction())
+                for result in hits:
+                    if result.getNode() in extra_filter_node:
+                        continue
+                    self.detected_objects.append(result)
+                    self.cloud_points[laser_index] = result.getHitFraction()
+                    break
+            else:
+                self.cloud_points[laser_index] = result.getHitFraction()
+                if node:
+                    self.detected_objects.append(result)
+                    hits = result.hasHit()
+
             # update vis
             if self.cloud_points_vis is not None:
-                self.cloud_points_vis[laser_index].setPos(p_vis_pos)
+                self.cloud_points_vis[laser_index].setPos(result.getHitPos() if hits else laser_end)
                 f = laser_index / self.num_lasers if self.ANGLE_FACTOR else 1
                 self.cloud_points_vis[laser_index].setColor(
                     f * self.MARK_COLOR[0], f * self.MARK_COLOR[1], f * self.MARK_COLOR[2]
                 )
 
     def get_cloud_points(self):
-        return self.cloud_points
+        return self.cloud_points.tolist()
 
     def get_detected_objects(self):
         return self.detected_objects
@@ -120,6 +125,7 @@ class DistanceDetector:
         :return: None
         """
         self.start_phase_offset = np.deg2rad(angle)
+        self._lidar_range = np.arange(0, self.num_lasers) * self.radian_unit + self.start_phase_offset
 
     def __del__(self):
         logging.debug("Lidar is destroyed.")
