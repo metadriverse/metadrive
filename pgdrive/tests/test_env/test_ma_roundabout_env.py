@@ -111,7 +111,59 @@ def test_ma_roundabout_reset():
         env.close()
 
 
+def test_ma_roundabout_reward_sign():
+    """
+    If agent is simply moving forward without any steering, it will at least gain ~100 rewards, since we have a long
+    straight road before coming into roundabout.
+    However, some bugs cause the vehicles receive negative reward by doing this behavior!
+    """
+    class TestEnv(MultiAgentRoundaboutEnv):
+        _reborn_count = 0
+
+        def _reborn(self, dead_vehicle_id):
+            v = self.vehicles.pop(dead_vehicle_id)
+            v.prepare_step([0, -1])
+            new_id = "agent{}".format(self._next_agent_id)
+            self._next_agent_id += 1
+            self.vehicles[new_id] = v  # Put it to new vehicle id.
+            self.dones[new_id] = False  # Put it in the internal dead-tracking dict.
+            new_born_place = self._safe_born_places[self._reborn_count]  # <<=== Here!
+            print("Current reborn count ", self._reborn_count)
+            new_born_place_config = new_born_place["config"]
+            v.vehicle_config.update(new_born_place_config)
+            v.reset(self.current_map)
+            v.update_state()
+            obs = self.observations[dead_vehicle_id]
+            self.observations[new_id] = obs
+            self.observations[new_id].reset(self, v)
+            new_obs = self.observations[new_id].observe(v)
+            self.observation_space.spaces[new_id] = self.observation_space.spaces[dead_vehicle_id]
+            old_act_space = self.action_space.spaces.pop(dead_vehicle_id)
+            self.action_space.spaces[new_id] = old_act_space
+            return new_obs, new_id
+
+    env = TestEnv({"num_agents": 1})
+    try:
+        obs = env.reset()
+        ep_reward = 0.0
+        for step in range(1000):
+            act = {k: [0, 1] for k in env.vehicles.keys()}
+            o, r, d, i = env.step(act)
+            ep_reward += next(iter(r.values()))
+            if any(d.values()):
+                env._reborn_count += 1
+                assert ep_reward > 50, ep_reward
+                ep_reward = 0
+            if env._reborn_count > len(env._safe_born_places):
+                break
+            if d["__all__"]:
+                break
+    finally:
+        env.close()
+
+
 if __name__ == '__main__':
     # test_ma_roundabout_env()
     # test_ma_roundabout_horizon()
-    test_ma_roundabout_reset()
+    # test_ma_roundabout_reset()
+    test_ma_roundabout_reward_sign()
