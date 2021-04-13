@@ -18,7 +18,7 @@ class PGDriveEnvV2(PGDriveEnvV1):
                 # ===== Traffic =====
                 traffic_density=0.1,
                 traffic_mode=TrafficMode.Hybrid,  # "Reborn", "Trigger", "Hybrid"
-                random_traffic=False,  # Traffic is randomized at default.
+                random_traffic=True,  # Traffic is randomized at default.
 
                 # ===== Cost Scheme =====
                 crash_vehicle_cost=1.,
@@ -38,16 +38,23 @@ class PGDriveEnvV2(PGDriveEnvV1):
                 use_lateral=False,
                 gaussian_noise=0.0,
                 dropout_prob=0.0,
-
-                # See: https://github.com/decisionforce/pgdrive/issues/297
                 vehicle_config=dict(
                     wheel_friction=0.8,
+
+                    # See: https://github.com/decisionforce/pgdrive/issues/297
                     lidar=dict(num_lasers=240, distance=50, num_others=4, gaussian_noise=0.0, dropout_prob=0.0),
                     side_detector=dict(num_lasers=0, distance=50, gaussian_noise=0.0, dropout_prob=0.0),
                     lane_line_detector=dict(num_lasers=0, distance=50, gaussian_noise=0.0, dropout_prob=0.0),
+
+                    # Following the examples: https://docs.panda3d.org/1.10/python/programming/physics/bullet/vehicles
+                    max_engine_force=1000,
+                    max_brake_force=100,
+                    max_steering=40,
+                    max_speed=120,
                 ),
 
                 # Disable map loading!
+                auto_termination=False,
                 load_map_from_json=False,
                 _load_map_from_json="",
             )
@@ -63,10 +70,16 @@ class PGDriveEnvV2(PGDriveEnvV1):
     def _post_process_config(self, config):
         config = super(PGDriveEnvV2, self)._post_process_config(config)
         if config.get("gaussian_noise", 0) > 0:
+            assert config["vehicle_config"]["lidar"]["gaussian_noise"] == 0, "You already provide config!"
+            assert config["vehicle_config"]["side_detector"]["gaussian_noise"] == 0, "You already provide config!"
+            assert config["vehicle_config"]["lane_line_detector"]["gaussian_noise"] == 0, "You already provide config!"
             config["vehicle_config"]["lidar"]["gaussian_noise"] = config["gaussian_noise"]
             config["vehicle_config"]["side_detector"]["gaussian_noise"] = config["gaussian_noise"]
             config["vehicle_config"]["lane_line_detector"]["gaussian_noise"] = config["gaussian_noise"]
         if config.get("dropout_prob", 0) > 0:
+            assert config["vehicle_config"]["lidar"]["dropout_prob"] == 0, "You already provide config!"
+            assert config["vehicle_config"]["side_detector"]["dropout_prob"] == 0, "You already provide config!"
+            assert config["vehicle_config"]["lane_line_detector"]["dropout_prob"] == 0, "You already provide config!"
             config["vehicle_config"]["lidar"]["dropout_prob"] = config["dropout_prob"]
             config["vehicle_config"]["side_detector"]["dropout_prob"] = config["dropout_prob"]
             config["vehicle_config"]["lane_line_detector"]["dropout_prob"] = config["dropout_prob"]
@@ -75,8 +88,9 @@ class PGDriveEnvV2(PGDriveEnvV1):
     def _is_out_of_road(self, vehicle):
         # A specified function to determine whether this vehicle should be done.
         # return vehicle.on_yellow_continuous_line or (not vehicle.on_lane) or vehicle.crash_sidewalk
-        return vehicle.on_yellow_continuous_line or vehicle.on_white_continuous_line or \
+        ret = vehicle.on_yellow_continuous_line or vehicle.on_white_continuous_line or \
                (not vehicle.on_lane) or vehicle.crash_sidewalk
+        return ret
 
     def done_function(self, vehicle_id: str):
         vehicle = self.vehicles[vehicle_id]
@@ -178,14 +192,15 @@ if __name__ == '__main__':
         assert np.isscalar(reward)
         assert isinstance(info, dict)
 
-    env = PGDriveEnvV2()
+    env = PGDriveEnvV2({'use_render': True, "fast": True, "manual_control": True})
     try:
         obs = env.reset()
         assert env.observation_space.contains(obs)
-        _act(env, env.action_space.sample())
-        for x in [-1, 0, 1]:
-            env.reset()
-            for y in [-1, 0, 1]:
-                _act(env, [x, y])
+        for _ in range(100000000):
+            _act(env, env.action_space.sample())
+        # for x in [-1, 0, 1]:
+        #     env.reset()
+        #     for y in [-1, 0, 1]:
+        #         _act(env, [x, y])
     finally:
         env.close()

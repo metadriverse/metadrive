@@ -38,9 +38,6 @@ PGDriveEnvV1_DEFAULT_CONFIG = dict(
     load_map_from_json=True,  # Whether to load maps from pre-generated file
     _load_map_from_json=pregenerated_map_file,  # The path to the pre-generated file
 
-    # ==== agents config =====
-    num_agents=1,
-
     # ===== Observation =====
     use_topdown=False,  # Use top-down view
     use_image=False,
@@ -84,6 +81,10 @@ PGDriveEnvV1_DEFAULT_CONFIG = dict(
         born_lateral=0.0,
 
         # ==== others ====
+        max_engine_force=500,
+        max_brake_force=40,
+        max_steering=40,
+        max_speed=120,
         overtake_stat=False,  # we usually set to True when evaluation
         action_check=False,
         use_saver=False,
@@ -237,7 +238,8 @@ class PGDriveEnv(BasePGDriveEnv):
             done_function_result, done_infos[v_id] = self.done_function(v_id)
             rewards[v_id], reward_infos[v_id] = self.reward_function(v_id)
             _, cost_infos[v_id] = self.cost_function(v_id)
-            self.dones[v_id] = done_function_result or self.dones[v_id]
+            done = done_function_result or self.dones[v_id]
+            self.dones[v_id] = done
 
         should_done = self.config["auto_termination"] and (self.episode_steps >= (self.current_map.num_blocks * 250))
 
@@ -265,7 +267,7 @@ class PGDriveEnv(BasePGDriveEnv):
     def done_function(self, vehicle_id: str):
         vehicle = self.vehicles[vehicle_id]
         done = False
-        done_info = dict(crash_vehicle=False, crash_object=False, out_of_road=False, arrive_dest=False)
+        done_info = dict(crash=False, crash_vehicle=False, crash_object=False, out_of_road=False, arrive_dest=False)
         if vehicle.arrive_destination:
             done = True
             logging.info("Episode ended! Reason: arrive_dest.")
@@ -365,7 +367,7 @@ class PGDriveEnv(BasePGDriveEnv):
             ret[v_id] = self.observations[v_id].observe(v)
         return ret if self.is_multi_agent else ret[DEFAULT_AGENT]
 
-    def _update_map(self, episode_data: dict = None):
+    def _update_map(self, episode_data: dict = None, force_seed=None):
         if episode_data is not None:
             # Since in episode data map data only contains one map, values()[0] is the map_parameters
             map_data = episode_data["map_data"].values()
@@ -388,7 +390,10 @@ class PGDriveEnv(BasePGDriveEnv):
             self.current_map.unload_from_pg_world(self.pg_world)
 
         # create map
-        self.current_seed = get_np_random().randint(self.start_seed, self.start_seed + self.env_num)
+        if force_seed is None:
+            self.current_seed = get_np_random().randint(self.start_seed, self.start_seed + self.env_num)
+        else:
+            self.current_seed = force_seed
         if self.maps.get(self.current_seed, None) is None:
 
             if self.config["load_map_from_json"]:

@@ -18,6 +18,7 @@ class MultiAgentRoundaboutEnv(MultiAgentPGDrive):
 
     @staticmethod
     def default_config() -> PGConfig:
+        raise ValueError("This class is deprecated! Please use MultiAgentRoundaboutEnv instead!")
         config = MultiAgentPGDrive.default_config()
         config.update(
             {
@@ -80,6 +81,7 @@ class MultiAgentRoundaboutEnv(MultiAgentPGDrive):
         return config
 
     def step(self, actions):
+        raise ValueError("This class is deprecated! Please use MultiAgentRoundaboutEnv instead!")
         o, r, d, i = super(MultiAgentRoundaboutEnv, self).step(actions)
         self._update_target()
         return o, r, d, i
@@ -95,6 +97,7 @@ class MultiAgentRoundaboutEnv(MultiAgentPGDrive):
 
 
 if __name__ == "__main__":
+    raise ValueError("This class is deprecated! Please use MultiAgentRoundaboutEnv instead!")
     env = MultiAgentRoundaboutEnv(
         {
             "use_render": True,

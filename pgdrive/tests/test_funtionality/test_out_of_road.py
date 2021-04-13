@@ -1,6 +1,7 @@
 import math
 
 from pgdrive.envs.pgdrive_env_v2 import PGDriveEnvV2
+from pgdrive.utils import clip
 
 
 def test_out_of_road():
@@ -33,5 +34,39 @@ def test_out_of_road():
                 env.close()
 
 
+def useless_left_right_distance_printing():
+    # env = PGDriveEnvV2(dict(vehicle_config=dict(side_detector=dict(num_lasers=8))))
+    for steering in [-0.01, 0.01, -1, 1]:
+        # for distance in [10, 50, 100]:
+        env = PGDriveEnvV2(
+            dict(
+                map="SSSSSSSSSSS",
+                vehicle_config=dict(side_detector=dict(num_lasers=0, distance=50)),
+                use_render=False,
+                fast=True
+            )
+        )
+        try:
+            for _ in range(100000000):
+                o, r, d, i = env.step([steering, 1])
+                vehicle = env.vehicle
+                l, r = vehicle.dist_to_left, vehicle.dist_to_right
+                total_width = float(
+                    (vehicle.routing_localization.get_current_lane_num() + 1) *
+                    vehicle.routing_localization.get_current_lane_width()
+                )
+                print(
+                    "Left {}, Right {}, Total {}. Clip Total {}".format(
+                        l / total_width, r / total_width, (l + r) / total_width,
+                        clip(l / total_width, 0, 1) + clip(r / total_width, 0, 1)
+                    )
+                )
+                if d:
+                    break
+        finally:
+            env.close()
+
+
 if __name__ == '__main__':
-    test_out_of_road()
+    # test_out_of_road()
+    useless_left_right_distance_printing()

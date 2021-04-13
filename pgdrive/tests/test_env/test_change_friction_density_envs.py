@@ -7,7 +7,6 @@ from pgdrive.envs.generation_envs.change_friction_env import ChangeFrictionEnv
 
 def _run(env):
     try:
-        env.seed(100000)
         for _ in range(5):
             obs = env.reset()
             for s in range(100):
@@ -35,6 +34,6 @@ def test_change_density_env():
 
 
 if __name__ == '__main__':
-    pytest.main(["-sv", "test_change_friction_density_envs.py"])
+    # pytest.main(["-sv", "test_change_friction_density_envs.py"])
     # test_side_pass_env()
-    # test_change_friction()
+    test_change_friction()

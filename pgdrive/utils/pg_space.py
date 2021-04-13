@@ -203,10 +203,10 @@ class Parameter:
     mass = "mass"
     chassis_height = "chassis_height"
     heading = "heading"
-    steering_max = "steering_max"
-    engine_force_max = "e_f_max"
-    brake_force_max = "b_f_max"
-    speed_max = "s_max"
+    # steering_max = "steering_max"
+    # engine_force_max = "e_f_max"
+    # brake_force_max = "b_f_max"
+    # speed_max = "s_max"
 
     # vehicle visualization
     vehicle_vis_z = "vis_z"
@@ -236,10 +236,10 @@ class VehicleParameterSpace:
         Parameter.vehicle_vis_scale: PGConstantSpace(0.013),
 
         # TODO the following parameters will be opened soon using PGBoxSPace
-        Parameter.steering_max: PGConstantSpace(40.0),
-        Parameter.engine_force_max: PGConstantSpace(500.0),
-        Parameter.brake_force_max: PGConstantSpace(40.0),
-        Parameter.speed_max: PGConstantSpace(120),
+        # Parameter.steering_max: PGConstantSpace(40.0),
+        # Parameter.engine_force_max: PGConstantSpace(500.0),
+        # Parameter.brake_force_max: PGConstantSpace(40.0),
+        # Parameter.speed_max: PGConstantSpace(120),
     }
 
 

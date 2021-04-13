@@ -128,6 +128,13 @@ class SceneManager:
                 # insert frame to render in min step_size
                 pg_world.taskMgr.step()
 
+            # print("Step {}/{}. Steering {}. Acceleration {}. Brake {}.".format(
+            #     i + 1, step_num,
+            #     [self.target_vehicles['default_agent'].system.get_steering_value(ii) for ii in range(4)],
+            #     [self.target_vehicles['default_agent'].system.get_wheel(ii).engine_force for ii in range(4)],
+            #     [self.target_vehicles['default_agent'].system.get_wheel(ii).brake for ii in range(4)],
+            # ))
+
         #  panda3d render and garbage collecting loop
         pg_world.taskMgr.step()
 

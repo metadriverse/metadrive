@@ -12,6 +12,7 @@ def test_pgdrive_env_v2():
             env.reset()
             for y in [-1, 0, 1]:
                 _act(env, [x, y])
+                # print('finish {}! \n'.format((x, y)))
     finally:
         env.close()
 
