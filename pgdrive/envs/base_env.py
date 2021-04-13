@@ -6,7 +6,6 @@ from typing import Union, Dict, AnyStr, Optional, Tuple
 import gym
 import numpy as np
 from panda3d.core import PNMImage
-
 from pgdrive.constants import RENDER_MODE_NONE, DEFAULT_AGENT
 from pgdrive.obs.observation_type import ObservationType
 from pgdrive.scene_creator.vehicle.base_vehicle import BaseVehicle
@@ -82,6 +81,7 @@ class BasePGDriveEnv(gym.Env):
         self.config = self._post_process_config(merged_config)
 
         self.num_agents = self.config["num_agents"]
+        self.is_multi_agent = self.num_agents > 1
         assert isinstance(self.num_agents, int) and self.num_agents > 0
 
         # observation and action space
@@ -122,13 +122,13 @@ class BasePGDriveEnv(gym.Env):
 
     def _get_observation_space(self) -> gym.Space:
         ret = gym.spaces.Dict({v_id: obs.observation_space for v_id, obs in self.observations.items()})
-        if self.num_agents == 1:
+        if not self.is_multi_agent:
             ret = next(iter((ret.spaces.values())))
         return ret
 
     def _get_action_space(self) -> gym.Space:
         ret = gym.spaces.Dict({v_id: BaseVehicle.get_action_space_before_init() for v_id in self.observations.keys()})
-        if self.num_agents == 1:
+        if not self.is_multi_agent:
             ret = next(iter((ret.spaces.values())))
         return ret
 

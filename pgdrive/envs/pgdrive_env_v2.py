@@ -1,10 +1,8 @@
 import logging
 
 import numpy as np
-
 from pgdrive.constants import DEFAULT_AGENT
 from pgdrive.envs.pgdrive_env import PGDriveEnv as PGDriveEnvV1
-from pgdrive.scene_creator.road.road import Road
 from pgdrive.scene_manager.traffic_manager import TrafficMode
 from pgdrive.utils import PGConfig, clip
 
@@ -165,7 +163,7 @@ class PGDriveEnvV2(PGDriveEnvV1):
         for v_id, v in self.vehicles.items():
             self.observations[v_id].reset(self, v)
             ret[v_id] = self.observations[v_id].observe(v)
-        return self._wrap_as_single_agent(ret) if self.num_agents == 1 else ret
+        return ret if self.is_multi_agent else self._wrap_as_single_agent(ret)
 
 
 if __name__ == '__main__':
