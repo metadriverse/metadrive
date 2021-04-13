@@ -72,6 +72,11 @@ class StateObservation(ObservationType):
             lateral_to_right /= total_width
             info += [clip(lateral_to_left, 0.0, 1.0), clip(lateral_to_right, 0.0, 1.0)]
 
+        # print("Heading Diff: ", [
+        #     vehicle.heading_diff(current_reference_lane)
+        #     for current_reference_lane in vehicle.routing_localization.current_ref_lanes
+        # ])
+
         current_reference_lane = vehicle.routing_localization.current_ref_lanes[-1]
         info += [
             vehicle.heading_diff(current_reference_lane),

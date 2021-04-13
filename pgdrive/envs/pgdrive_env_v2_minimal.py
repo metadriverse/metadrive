@@ -113,11 +113,18 @@ class MinimalObservation(LidarStateObservation):
         for vehicle in surrounding_vehicles[:num_others]:
             if vehicle is not None:
                 relative_position = ego_vehicle.projection(vehicle.position - ego_vehicle.position)
+                dist = norm(relative_position[0], relative_position[1])
+                if dist > DISTANCE:
+                    if self.config["use_extra_state"]:
+                        res += [0.0] * self._traffic_vehicle_state_dim
+                    else:
+                        res += [0.0] * self._traffic_vehicle_state_dim_wo_extra
+                    continue
                 relative_velocity = ego_vehicle.projection(vehicle.velocity - ego_vehicle.velocity)
-                res.append(clip(norm(relative_position[0], relative_position[1]) / 50, 0.0, 1.0))
+                res.append(clip(dist / DISTANCE, 0.0, 1.0))
                 res.append(clip(norm(relative_velocity[0], relative_velocity[1]) / ego_vehicle.max_speed, 0.0, 1.0))
-                res.append(clip((relative_position[0] / 50 + 1) / 2, 0.0, 1.0))
-                res.append(clip((relative_position[1] / 50 + 1) / 2, 0.0, 1.0))
+                res.append(clip((relative_position[0] / DISTANCE + 1) / 2, 0.0, 1.0))
+                res.append(clip((relative_position[1] / DISTANCE + 1) / 2, 0.0, 1.0))
                 res.append(clip((relative_velocity[0] / ego_vehicle.max_speed + 1) / 2, 0.0, 1.0))
                 res.append(clip((relative_velocity[1] / ego_vehicle.max_speed + 1) / 2, 0.0, 1.0))
 
@@ -128,6 +135,17 @@ class MinimalObservation(LidarStateObservation):
                     res += [0.0] * self._traffic_vehicle_state_dim
                 else:
                     res += [0.0] * self._traffic_vehicle_state_dim_wo_extra
+
+        # p1 = []
+        # p2 = []
+        # for vehicle in surrounding_vehicles[:num_others]:
+        #     if vehicle is not None:
+        #         relative_position = ego_vehicle.projection(vehicle.position - ego_vehicle.position)
+        #         relative_velocity = ego_vehicle.projection(vehicle.velocity - ego_vehicle.velocity)
+        #         p1.append(relative_position)
+        #         p2.append(relative_velocity)
+        # print("Detected Others Position: {}, Velocity: {}".format(p1, p2))
+
         return res
 
     def traffic_vehicle_state(self, vehicle):
@@ -144,9 +162,11 @@ class MinimalObservation(LidarStateObservation):
         s.append(np.cos(vehicle.heading))
         s.append(np.sin(vehicle.heading))
         s.append(vehicle.action["steering"])
-        s.append(vehicle.action["acceleration"] / 5)
-        s = [self._to_zero_and_one(v) for v in s]
-        return s
+        s.append(vehicle.action["acceleration"] / vehicle.ACC_MAX)
+        ret = []
+        for v in s:
+            ret.append(self._to_zero_and_one(v))
+        return ret
 
     @staticmethod
     def _to_zero_and_one(v):
