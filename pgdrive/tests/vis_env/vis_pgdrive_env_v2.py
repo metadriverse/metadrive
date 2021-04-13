@@ -7,7 +7,6 @@ if __name__ == "__main__":
         {
             "start_seed": 0,
             "environment_num": 5,
-            "camera_height": 500,
             "fast": True,
             "use_render": True,
             "manual_control": True,

@@ -277,7 +277,7 @@ def _vis():
             "use_render": True,
             "debug": True,
             "manual_control": True,
-            "num_agents": 8,
+            "num_agents": 2,
         }
     )
     o = env.reset()
@@ -290,7 +290,7 @@ def _vis():
         o, r, d, info = env.step(env.action_space.sample())
         ep_s += 1
         d.update({"total_r": total_r, "episode length": ep_s})
-        env.render(text=d)
+        env.render(text=r)
         if len(env.vehicles) == 0:
             total_r = 0
             print("Reset")
@@ -319,5 +319,5 @@ def _profile():
 
 if __name__ == "__main__":
     # _draw()
-    # _vis()
-    _profile()
+    _vis()
+    # _profile()
