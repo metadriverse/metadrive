@@ -30,7 +30,13 @@ def test_naive_multi_agent_pgdrive():
         config={
             "map": "SSS",
             "num_agents": 4,
-            "target_vehicle_configs": {"agent{}".format(i): {"born_longitude": i * 5} for i in range(4)}
+            "target_vehicle_configs": {
+                "agent{}".format(i): \
+                    {
+                        "born_longitude": i * 5
+                    }
+                for i in range(4)
+            }
         }
     )
     try:

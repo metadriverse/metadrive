@@ -60,6 +60,8 @@ class MultiAgentPGDrive(PGDriveEnvV2):
 
     def __init__(self, config=None):
         super(MultiAgentPGDrive, self).__init__(config)
+        self.is_multi_agent = True  # Force set it to True
+        self.done_observations = dict()
 
     def _process_extra_config(self, config) -> "PGConfig":
         ret_config = self.default_config().update(
@@ -80,6 +82,7 @@ class MultiAgentPGDrive(PGDriveEnvV2):
         return done, done_info
 
     def step(self, actions):
+        self._update_spaces_if_needed()
         actions = self._preprocess_marl_actions(actions)
         o, r, d, i = super(MultiAgentPGDrive, self).step(actions)
         o, r, d, i = self._after_vehicle_done(o, r, d, i)
@@ -90,14 +93,20 @@ class MultiAgentPGDrive(PGDriveEnvV2):
             v.chassis_np.node().setStatic(False)
 
         # Multi-agent related reset
-        self.observations = {
-            k: v
-            for k, v in zip(self.config["target_vehicle_configs"].keys(), self.observations.values())
-        }
+        # avoid create new observation!
+        obses = list(self.done_observations.values()) + list(self.observations.values())
+        self.observations = {k: v for k, v in zip(self.config["target_vehicle_configs"].keys(), obses)}
+        self.done_observations = dict()
         self.observation_space = self._get_observation_space()
         self.action_space = self._get_action_space()
-        self.vehicles = {k: v for k, v in zip(self.observations.keys(), self.vehicles.values())}
         return super(MultiAgentPGDrive, self).reset(episode_data)
+
+    def _reset_vehicles(self):
+        vehicles = list(self.vehicles.values()) + list(self.done_vehicles.values())
+        assert len(vehicles) == len(self.observations)
+        self.vehicles = {k: v for k, v in zip(self.observations.keys(), vehicles)}
+        self.done_vehicles = {}
+        self.for_each_vehicle(lambda v: v.reset(self.current_map))
 
     def _preprocess_marl_actions(self, actions):
         return actions
@@ -140,10 +149,15 @@ class MultiAgentPGDrive(PGDriveEnvV2):
         vehicle_config = merge_dicts(self.config["vehicle_config"], extra_config, allow_new_keys=False)
         return PGConfig(vehicle_config)
 
-    def _wrap_as_multi_agent(self, data):
-        if self.num_agents == 1:
-            return {self.DEFAULT_AGENT: data}
-        return data
+    def _update_spaces_if_needed(self):
+        assert self.is_multi_agent
+        current_obs_keys = set(self.observations.keys())
+        for k in current_obs_keys:
+            if k not in set(self.vehicles.keys()):
+                o = self.observations.pop(k)
+                self.observation_space.spaces.pop(k)
+                self.done_observations[k] = o
+                # self.action_space.spaces.pop(k)  # Action space is updated in _reborn
 
 
 if __name__ == "__main__":

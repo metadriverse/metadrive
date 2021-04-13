@@ -1,7 +1,6 @@
 import logging
 
 import numpy as np
-
 from pgdrive.envs.multi_agent_pgdrive import MultiAgentPGDrive
 from pgdrive.scene_creator.blocks.first_block import FirstBlock
 from pgdrive.scene_creator.blocks.roundabout import Roundabout
@@ -61,6 +60,7 @@ class MultiAgentRoundaboutEnv(MultiAgentPGDrive):
         config = MultiAgentPGDrive.default_config()
         config.update(
             {
+                "horizon": 1000,
                 "camera_height": 4,
                 "map": "M",
                 "vehicle_config": {
@@ -168,21 +168,30 @@ class MultiAgentRoundaboutEnv(MultiAgentPGDrive):
                 ret["agent{}".format(real_idx)] = v_config
         else:
             agent_name, v_config = target_vehicle_configs[0]
-            ret[self.DEFAULT_AGENT] = dict(born_lane_index=v_config)
+            ret["agent0"] = v_config
         config["target_vehicle_configs"] = ret
         return config
 
     def reset(self, episode_data: dict = None):
         self._next_agent_id = self.num_agents
         self._last_born_identifier = 0
+        self._do_not_reborn = False
         ret = super(MultiAgentRoundaboutEnv, self).reset(episode_data)
+        assert len(self.vehicles) == self.num_agents
         self.for_each_vehicle(self._update_destination_for)
         return ret
 
     def step(self, actions):
         o, r, d, i = super(MultiAgentRoundaboutEnv, self).step(actions)
-        if self.num_agents > 1:
-            d["__all__"] = False  # Never done
+        if self.episode_steps >= self.config["horizon"]:
+            self._do_not_reborn = True
+        d["__all__"] = (
+            ((self.episode_steps >= self.config["horizon"]) and (all(d.values()))) or (len(self.vehicles) == 0)
+            or (self.episode_steps >= 5 * self.config["horizon"])
+        )
+        if d["__all__"]:
+            for k in d.keys():
+                d[k] = True
         return o, r, d, i
 
     def _update_destination_for(self, vehicle):
@@ -191,7 +200,7 @@ class MultiAgentRoundaboutEnv(MultiAgentPGDrive):
         vehicle.routing_localization.set_route(vehicle.lane_index[0], end_road.end_node)
 
     def _reborn(self, dead_vehicle_id):
-        assert dead_vehicle_id in self.vehicles
+        assert dead_vehicle_id in self.vehicles, (dead_vehicle_id, self.vehicles.keys())
         # Switch to track other vehicle if in first-person view.
         # if self.config["use_render"] and self.current_track_vehicle_id == id:
         #     self.chase_another_v()
@@ -213,24 +222,29 @@ class MultiAgentRoundaboutEnv(MultiAgentPGDrive):
         self._last_born_identifier = new_born_place["identifier"]
         v.vehicle_config.update(new_born_place_config)
         v.reset(self.current_map)
+        v.update_state()
 
         # reset observation space
-        obs = self.observations.pop(dead_vehicle_id)
+        obs = self.observations[dead_vehicle_id]
         self.observations[new_id] = obs
         self.observations[new_id].reset(self, v)
-        new_obs = self.observations[new_id].observe(v)
-        self.observation_space = self._get_observation_space()
 
-        # reset action space
-        self.action_space = self._get_action_space()
+        new_obs = self.observations[new_id].observe(v)
+        self.observation_space.spaces[new_id] = self.observation_space.spaces[dead_vehicle_id]
+        old_act_space = self.action_space.spaces.pop(dead_vehicle_id)
+        self.action_space.spaces[new_id] = old_act_space
         return new_obs, new_id
 
     def _after_vehicle_done(self, obs=None, reward=None, dones: dict = None, info=None):
-        dones = self._wrap_as_multi_agent(dones)
         new_dones = dict()
         for dead_vehicle_id, done in dones.items():
             new_dones[dead_vehicle_id] = done
-            if done:
+            if done and self._do_not_reborn:
+                v = self.vehicles.pop(dead_vehicle_id)
+                v.prepare_step([0, -1])
+                self.done_vehicles[dead_vehicle_id] = v
+                self.action_space.spaces.pop(dead_vehicle_id)
+            if done and (not self._do_not_reborn):
                 new_obs, new_id = self._reborn(dead_vehicle_id)
                 obs[new_id] = new_obs
                 reward[new_id] = 0.0
@@ -271,8 +285,6 @@ def _vis():
     ep_s = 0
     for i in range(1, 100000):
         o, r, d, info = env.step(env.action_space.sample())
-        if env.num_agents == 1:
-            r = env._wrap_as_multi_agent(r)
         for r_ in r.values():
             total_r += r_
         o, r, d, info = env.step(env.action_space.sample())

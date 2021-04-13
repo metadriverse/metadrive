@@ -6,7 +6,6 @@ import sys
 from typing import Union, Dict, AnyStr, Optional, Tuple
 
 import numpy as np
-
 from pgdrive.constants import DEFAULT_AGENT
 from pgdrive.envs.base_env import BasePGDriveEnv
 from pgdrive.obs import LidarStateObservation, ImageStateObservation
@@ -205,12 +204,12 @@ class PGDriveEnv(BasePGDriveEnv):
         if self.config["manual_control"] and self.config["use_render"] \
                 and self.current_track_vehicle_id in self.vehicles.keys():
             action = self.controller.process_input()
-            if self.num_agents == 1:
-                actions = action
-            else:
+            if self.is_multi_agent:
                 actions[self.current_track_vehicle_id] = action
+            else:
+                actions = action
 
-        if self.num_agents == 1:
+        if not self.is_multi_agent:
             actions = {v_id: actions for v_id in self.vehicles.keys()}
         else:
             # Check whether some actions are not provided.
@@ -257,7 +256,7 @@ class PGDriveEnv(BasePGDriveEnv):
                 self.dones[k] = True
 
         dones = {k: self.dones[k] for k in self.vehicles.keys()}
-        if self.num_agents == 1:
+        if not self.is_multi_agent:
             return self._wrap_as_single_agent(obses), self._wrap_as_single_agent(rewards), \
                    self._wrap_as_single_agent(dones), self._wrap_as_single_agent(step_infos)
         else:
@@ -364,7 +363,7 @@ class PGDriveEnv(BasePGDriveEnv):
         for v_id, v in self.vehicles.items():
             self.observations[v_id].reset(self, v)
             ret[v_id] = self.observations[v_id].observe(v)
-        return ret[DEFAULT_AGENT] if self.num_agents == 1 else ret
+        return ret if self.is_multi_agent else ret[DEFAULT_AGENT]
 
     def _update_map(self, episode_data: dict = None):
         if episode_data is not None:
