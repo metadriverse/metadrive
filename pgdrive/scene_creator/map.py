@@ -158,7 +158,7 @@ class PGMap(Map):
     def _big_generate(self, parent_node_path: NodePath, pg_physics_world: PGPhysicsWorld):
         big_map = BIG(
             self.config[self.LANE_NUM], self.config[self.LANE_WIDTH], self.road_network, parent_node_path,
-            pg_physics_world, self.random_seed
+            pg_physics_world, self.random_seed, self.config["block_type_version"]
         )
         big_map.generate(self.config[self.GENERATE_TYPE], self.config[self.GENERATE_CONFIG])
         self.blocks = big_map.blocks
@@ -171,7 +171,7 @@ class PGMap(Map):
         )
         self.blocks.append(last_block)
         for block_index, b in enumerate(blocks_config[1:], 1):
-            block_type = PGBlock.get_block(b.pop(self.BLOCK_ID))
+            block_type = PGBlock.get_block(b.pop(self.BLOCK_ID), self.config["block_type_version"])
             pre_block_socket_index = b.pop(self.PRE_BLOCK_SOCKET_INDEX)
             last_block = block_type(
                 block_index, last_block.get_socket(pre_block_socket_index), self.road_network, self.random_seed
