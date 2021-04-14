@@ -106,7 +106,8 @@ class SceneManager:
         step_infos = {}
         if self.replay_system is None:
             # not in replay mode
-            for k, a in target_actions.items():
+            for k in self.target_vehicles.keys():
+                a = target_actions[k]
                 step_infos[k] = self.target_vehicles[k].prepare_step(a)
             self.traffic_mgr.prepare_step(self)
         return step_infos

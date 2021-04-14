@@ -1,11 +1,13 @@
 import copy
 import os.path as osp
 import time
+from collections import defaultdict
 from typing import Union, Dict, AnyStr, Optional, Tuple
 
 import gym
 import numpy as np
 from panda3d.core import PNMImage
+
 from pgdrive.constants import RENDER_MODE_NONE, DEFAULT_AGENT
 from pgdrive.obs.observation_type import ObservationType
 from pgdrive.scene_creator.vehicle.base_vehicle import BaseVehicle
@@ -114,6 +116,9 @@ class BasePGDriveEnv(gym.Env):
         self.vehicles = dict()
         self.done_vehicles = dict()
         self.dones = None
+        self.episode_rewards = defaultdict(float)
+        # In MARL envs with reborn mechanism, varying episode lengths might happen.
+        self.episode_lengths = defaultdict(int)
 
     def _process_extra_config(self, config: Union[dict, "PGConfig"]) -> "PGConfig":
         """Check, update, sync and overwrite some config."""
@@ -263,6 +268,7 @@ class BasePGDriveEnv(gym.Env):
 
         self.dones = {agent_id: False for agent_id in self.vehicles.keys()}
         self.episode_steps = 0
+        self.episode_rewards = defaultdict(float)
 
         # generate new traffic according to the map
         self.scene_manager.reset(
