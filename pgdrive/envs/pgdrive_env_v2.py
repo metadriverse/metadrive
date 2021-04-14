@@ -52,6 +52,7 @@ class PGDriveEnvV2(PGDriveEnvV1):
                     max_steering=40,
                     max_speed=120,
                 ),
+                map_config=dict(block_type_version="v2"),
 
                 # Disable map loading!
                 auto_termination=False,
