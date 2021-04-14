@@ -1,6 +1,8 @@
 import logging
 
 import numpy as np
+from gym.spaces import Box
+from pgdrive.envs import PGDriveEnvV2
 from pgdrive.envs.multi_agent_pgdrive import MultiAgentPGDrive
 from pgdrive.scene_creator.blocks.first_block import FirstBlock
 from pgdrive.scene_creator.blocks.roundabout import Roundabout
@@ -61,7 +63,11 @@ class TargetVehicleManager:
         self.next_agent_count = len(vehicles)
         self.observations = {vehicles[k].name: v for k, v in observations.items()}
         self.observation_spaces = {vehicles[k].name: v for k, v in observation_spaces.items()}
+        for o in observation_spaces.values():
+            assert isinstance(o, Box)
         self.action_spaces = {vehicles[k].name: v for k, v in action_spaces.items()}
+        for o in action_spaces.values():
+            assert isinstance(o, Box)
         self.pending_vehicles = {}
         self.allow_reborn = True
 
@@ -113,6 +119,15 @@ class TargetVehicleManager:
 
     def get_vehicle_list(self):
         return list(self.active_vehicles.values()) + list(self.pending_vehicles.values())
+
+    def get_observations(self):
+        return list(self.observations.values())
+
+    def get_observation_spaces(self):
+        return list(self.observation_spaces.values())
+
+    def get_action_spaces(self):
+        return list(self.action_spaces.values())
 
 
 class MARoundaboutMap(PGMap):
@@ -296,9 +311,33 @@ class MultiAgentRoundaboutEnv(MultiAgentPGDrive):
     def reset(self, *args, **kwargs):
         # Shuffle born places!
         self.config = self._update_agent_pos_configs(self.config)
-        ret = super(MultiAgentRoundaboutEnv, self).reset(*args, **kwargs)
+
+        for v in self.done_vehicles.values():
+            v.chassis_np.node().setStatic(False)
+
+        # Multi-agent related reset
+        # avoid create new observation!
+        obses = self.target_vehicle_manager.get_observations() or list(self.observations.values())
+        assert len(obses) == len(self.config["target_vehicle_configs"].keys())
+        self.observations = {k: v for k, v in zip(self.config["target_vehicle_configs"].keys(), obses)}
+        self.done_observations = dict()
+
+        # Must change in-place!
+        obs_spaces = self.target_vehicle_manager.get_observation_spaces() or list(
+            self.observation_space.spaces.values()
+        )
+        assert len(obs_spaces) == len(self.config["target_vehicle_configs"].keys())
+        for o in obs_spaces:
+            assert isinstance(o, Box)
+        self.observation_space.spaces = {k: v for k, v in zip(self.observations.keys(), obs_spaces)}
+        action_spaces = self.target_vehicle_manager.get_action_spaces() or list(self.action_space.spaces.values())
+        self.action_space.spaces = {k: v for k, v in zip(self.observations.keys(), action_spaces)}
+
+        ret = PGDriveEnvV2.reset(self, *args, **kwargs)
+
         assert len(self.vehicles) == self.num_agents
         self.for_each_vehicle(self._update_destination_for)
+
         self.target_vehicle_manager.reset(
             vehicles=self.vehicles,
             observation_spaces=self.observation_space.spaces,
@@ -311,19 +350,19 @@ class MultiAgentRoundaboutEnv(MultiAgentPGDrive):
         o, r, d, i = super(MultiAgentRoundaboutEnv, self).step(actions)
 
         # Check return alignment
-        o_set_1 = set(kkk for kkk, rrr in r.items() if rrr == -self.config["out_of_road_penalty"])
-        o_set_2 = set(kkk for kkk, iii in i.items() if iii.get("out_of_road"))
-        condition = o_set_1 == o_set_2
-        condition = set(kkk for kkk, rrr in r.items() if rrr == self.config["success_reward"]) == \
-                    set(kkk for kkk, iii in i.items() if iii.get("arrive_dest")) and condition
-        condition = (
-            not self.config["crash_done"] or (
-                set(kkk for kkk, rrr in r.items() if rrr == -self.config["crash_vehicle_penalty"])
-                == set(kkk for kkk, iii in i.items() if iii.get("crash_vehicle"))
-            )
-        ) and condition
-        if not condition:
-            raise ValueError("Observation not aligned!")
+        # o_set_1 = set(kkk for kkk, rrr in r.items() if rrr == -self.config["out_of_road_penalty"])
+        # o_set_2 = set(kkk for kkk, iii in i.items() if iii.get("out_of_road"))
+        # condition = o_set_1 == o_set_2
+        # condition = set(kkk for kkk, rrr in r.items() if rrr == self.config["success_reward"]) == \
+        #             set(kkk for kkk, iii in i.items() if iii.get("arrive_dest")) and condition
+        # condition = (
+        #                     not self.config["crash_done"] or (
+        #                     set(kkk for kkk, rrr in r.items() if rrr == -self.config["crash_vehicle_penalty"])
+        #                     == set(kkk for kkk, iii in i.items() if iii.get("crash_vehicle"))
+        #             )
+        #             ) and condition
+        # if not condition:
+        #     raise ValueError("Observation not aligned!")
 
         # Update reborn manager
         if self.episode_steps >= self.config["horizon"]:
@@ -375,9 +414,9 @@ class MultiAgentRoundaboutEnv(MultiAgentPGDrive):
 
             self.observations[new_id] = vehicle_info["observation"]
             self.observations[new_id].reset(self, v)
-            new_obs = self.observations[new_id].observe(v)
             self.observation_space.spaces[new_id] = vehicle_info["observation_space"]
             self.action_space.spaces[new_id] = vehicle_info["action_space"]
+            new_obs = self.observations[new_id].observe(v)
             new_obs_dict[new_id] = new_obs
         return new_obs_dict
 
@@ -408,6 +447,7 @@ class MultiAgentRoundaboutEnv(MultiAgentPGDrive):
         new_born_place_config = new_born_place["config"]
         v.vehicle_config.update(new_born_place_config)
         v.reset(self.current_map)
+        self._update_destination_for(v)
         v.update_state()
         return bp_index
 
@@ -587,6 +627,6 @@ def _long_run():
 
 if __name__ == "__main__":
     # _draw()
-    _vis()
+    # _vis()
     # _profile()
-    # _long_run()
+    _long_run()

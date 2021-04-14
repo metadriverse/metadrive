@@ -266,6 +266,7 @@ class RoadNetwork:
         :param goal: goal node
         :return: shortest checkpoints from start to goal.
         """
+        assert start != goal
         return next(self.bfs_paths(start, goal), [])
 
     def all_side_lanes(self, lane_index: LaneIndex) -> List[LaneIndex]:
