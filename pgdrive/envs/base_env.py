@@ -299,7 +299,8 @@ class BasePGDriveEnv(gym.Env):
             del self.scene_manager
             self.scene_manager = None
 
-            self.for_each_vehicle(lambda v: v.destroy(self.pg_world))
+            if self.vehicles:
+                self.for_each_vehicle(lambda v: v.destroy(self.pg_world))
             del self.vehicles
             self.vehicles = dict()
 
@@ -340,6 +341,7 @@ class BasePGDriveEnv(gym.Env):
         """
         func is a function that take each vehicle as the first argument and *arg and **kwargs as others.
         """
+        assert len(self.vehicles) > 0, "No vehicles exist!"
         ret = dict()
         for k, v in self.vehicles.items():
             ret[k] = func(v, *args, **kwargs)

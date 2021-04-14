@@ -1,12 +1,12 @@
 import logging
-from pgdrive.scene_creator.road.road import Road
+
 import numpy as np
 from panda3d.core import BitMask32, LQuaternionf, TransparencyAttrib
-
 from pgdrive.constants import COLLISION_INFO_COLOR, RENDER_MODE_ONSCREEN, CamMask
 from pgdrive.scene_creator.blocks.first_block import FirstBlock
 from pgdrive.scene_creator.lane.circular_lane import CircularLane
 from pgdrive.scene_creator.map import Map
+from pgdrive.scene_creator.road.road import Road
 from pgdrive.utils.asset_loader import AssetLoader
 from pgdrive.utils.math_utils import clip, norm
 from pgdrive.utils.pg_space import Parameter, BlockParameterSpace
@@ -78,6 +78,7 @@ class RoutingLocalizationModule:
         if start_road_node is None:
             start_road_node = FirstBlock.NODE_1
         if final_road_node is None:
+            # TODO This part should use global random engine!
             final_road_node = np.random.RandomState(map.random_seed
                                                     ).choice(map.blocks[-1].get_socket_list()).positive_road.end_node
         self.set_route(start_road_node, final_road_node)
@@ -90,6 +91,7 @@ class RoutingLocalizationModule:
         :return: None
         """
         self.checkpoints = self.map.road_network.shortest_path(start_road_node, end_road_node)
+        assert len(self.checkpoints) >= 2
         # update routing info
         self.final_road = Road(self.checkpoints[-2], end_road_node)
         self.final_lane = self.final_road.get_lanes(self.map.road_network)[-1]
@@ -216,6 +218,8 @@ class RoutingLocalizationModule:
         current_road_start_point = ego_lane_index[0]
         if current_road_start_point in self.checkpoints[self.target_checkpoints_index[1]:
                                                         ] and ego_lane_longitude < self.CKPT_UPDATE_RANGE:
+            if current_road_start_point not in self.checkpoints[self.target_checkpoints_index[1]:-1]:
+                return
             idx = self.checkpoints.index(current_road_start_point, self.target_checkpoints_index[1], -1)
             self.target_checkpoints_index = [idx]
             if idx + 1 == len(self.checkpoints) - 1:
@@ -224,6 +228,7 @@ class RoutingLocalizationModule:
                 self.target_checkpoints_index.append(idx + 1)
 
     def get_navi_info(self):
+        assert self.navi_info
         return self.navi_info
 
     def destroy(self):

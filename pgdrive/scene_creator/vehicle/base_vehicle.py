@@ -12,15 +12,15 @@ from pgdrive.scene_creator.lane.abs_lane import AbstractLane
 from pgdrive.scene_creator.lane.circular_lane import CircularLane
 from pgdrive.scene_creator.lane.straight_lane import StraightLane
 from pgdrive.scene_creator.map import Map
-from pgdrive.scene_creator.vehicle.base_vehicle_node import BaseVehicleNode
 from pgdrive.scene_creator.road.road import Road
+from pgdrive.scene_creator.vehicle.base_vehicle_node import BaseVehicleNode
 from pgdrive.scene_creator.vehicle_module import Lidar, MiniMap
 from pgdrive.scene_creator.vehicle_module.depth_camera import DepthCamera
 from pgdrive.scene_creator.vehicle_module.distance_detector import SideDetector, LaneLineDetector
 from pgdrive.scene_creator.vehicle_module.rgb_camera import RGBCamera
 from pgdrive.scene_creator.vehicle_module.routing_localization import RoutingLocalizationModule
 from pgdrive.scene_creator.vehicle_module.vehicle_panel import VehiclePanel
-from pgdrive.utils import PGConfig, safe_clip
+from pgdrive.utils import PGConfig, safe_clip, random_string
 from pgdrive.utils.asset_loader import AssetLoader
 from pgdrive.utils.coordinates_shift import panda_position, pgdrive_position, panda_heading, pgdrive_heading
 from pgdrive.utils.element import DynamicElement
@@ -30,7 +30,6 @@ from pgdrive.utils.scene_utils import ray_localization
 from pgdrive.world.image_buffer import ImageBuffer
 from pgdrive.world.pg_physics_world import PGPhysicsWorld
 from pgdrive.world.pg_world import PGWorld
-from pgdrive.utils import random_string
 
 
 class BaseVehicle(DynamicElement):
@@ -299,6 +298,7 @@ class BaseVehicle(DynamicElement):
         self.chassis_np.node().setLinearVelocity(Vec3(0, 0, 0))
         self.chassis_np.node().setAngularVelocity(Vec3(0, 0, 0))
         self.system.resetSuspension()
+        np.testing.assert_almost_equal(self.position, pos, decimal=4)
 
         # done info
         self._init_step_info()
@@ -325,6 +325,11 @@ class BaseVehicle(DynamicElement):
         if "depth_cam" in self.image_sensors and self.image_sensors["depth_cam"].view_ground:
             for block in map.blocks:
                 block.node_path.hide(CamMask.DepthCam)
+
+        assert self.routing_localization
+        # Please note that if you reborn agent to some new place and might have a new destination,
+        # you should reset the routing localization too! Via: vehicle.routing_localization.set_route or
+        # vehicle.update
 
     """------------------------------------------- act -------------------------------------------------"""
 

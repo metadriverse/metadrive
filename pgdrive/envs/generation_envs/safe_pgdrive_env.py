@@ -59,17 +59,17 @@ class SafePGDriveEnv(PGDriveEnv):
 
         step_info["step_reward"] = reward
 
-        if vehicle.crash_vehicle:
+        if vehicle.arrive_destination:
+            reward = +self.config["success_reward"]
+        elif vehicle.out_of_route:
+            reward = -self.config["out_of_road_penalty"]
+            print(reward)
+        elif vehicle.crash_vehicle:
             reward = -self.config["crash_vehicle_penalty"]
             print(reward)
         elif vehicle.crash_object:
             reward = -self.config["crash_object_penalty"]
             print(reward)
-        elif vehicle.out_of_route:
-            reward = -self.config["out_of_road_penalty"]
-            print(reward)
-        elif vehicle.arrive_destination:
-            reward = +self.config["success_reward"]
         return reward, step_info
 
 
