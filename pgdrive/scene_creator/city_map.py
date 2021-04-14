@@ -2,7 +2,6 @@ import logging
 from typing import Union
 
 from panda3d.core import NodePath
-
 from pgdrive.scene_creator.algorithm.BIG import BIG
 from pgdrive.scene_creator.blocks.block import Block
 from pgdrive.scene_creator.blocks.first_block import FirstBlock
@@ -29,28 +28,11 @@ class CityBIG(BIG):
 
     def __init__(
         self, lane_num: int, lane_width: float, global_network: RoadNetwork, render_node_path: NodePath,
-        pg_physics_world: PGPhysicsWorld, random_seed: int
+        pg_physics_world: PGPhysicsWorld, random_seed: int, block_type_version: str
     ):
-        super(CityBIG,
-              self).__init__(lane_num, lane_width, global_network, render_node_path, pg_physics_world, random_seed)
-
-        # self._block_sequence = None
-        # self._random_seed = random_seed
-        # # Don't change this right now, since we need to make maps identical to old one
-        # self.np_random = RandomState(random_seed)
-        # self._lane_num = lane_num
-        # self._lane_width = lane_width
-        # self.block_num = None
-        # self._render_node_path = render_node_path
-        # self._physics_world = pg_physics_world
-        # self._global_network = global_network
-        # self.blocks = []
-        # first_block = FirstBlock(
-        #     self._global_network, self._lane_width, self._lane_num, self._render_node_path, self._physics_world,
-        #     self._random_seed
-        # )
-        # self.blocks.append(first_block)
-        # self.next_step = NextStep.forward
+        super(CityBIG, self).__init__(
+            lane_num, lane_width, global_network, render_node_path, pg_physics_world, random_seed, block_type_version
+        )
 
     def generate(self, generate_method: BigGenerateMethod, parameter: Union[str, int]):
         """
@@ -86,12 +68,12 @@ class CityBIG(BIG):
         Sample a random block type
         """
         if self._block_sequence is None:
-            block_types = PGBlock.all_blocks()
-            block_probabilities = PGBlock.block_probability()
+            block_types = PGBlock.all_blocks(self.block_type_version)
+            block_probabilities = PGBlock.block_probability(self.block_type_version)
             block_type = self.np_random.choice(block_types, p=block_probabilities)
         else:
             type_id = self._block_sequence[len(self.blocks)]
-            block_type = PGBlock.get_block(type_id)
+            block_type = PGBlock.get_block(type_id, self.block_type_version)
 
         # exclude first block
         socket_used = set([block.pre_block_socket for block in self.blocks[1:]])
@@ -148,7 +130,7 @@ class CityMap(Map):
         parent_node_path, pg_physics_world = pg_world.worldNP, pg_world.physics_world
         big_map = CityBIG(
             self.config[self.LANE_NUM], self.config[self.LANE_WIDTH], self.road_network, parent_node_path,
-            pg_physics_world, self.random_seed
+            pg_physics_world, self.random_seed, self.config["block_type_version"]
         )
         big_map.generate(self.config[self.GENERATE_TYPE], self.config[self.GENERATE_CONFIG])
         self.blocks = big_map.blocks
