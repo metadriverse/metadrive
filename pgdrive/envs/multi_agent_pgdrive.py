@@ -83,8 +83,10 @@ class MultiAgentPGDrive(PGDriveEnvV2):
         # crash will not done
         done, done_info = super(MultiAgentPGDrive, self).done_function(vehicle_id)
         if vehicle.crash_vehicle and not self.config["crash_done"]:
-            assert done_info["crash_vehicle"] or done_info["arrive_dest"]
-            done = False
+            assert done_info["crash_vehicle"] or done_info["arrive_dest"] or done_info["out_of_road"]
+            if not (done_info["arrive_dest"] or done_info["out_of_road"]):
+                # Does not revert done if high-priority termination happens!
+                done = False
             # done_info["crash_vehicle"] = False
         elif vehicle.out_of_route and vehicle.on_lane and not vehicle.crash_sidewalk:
             pass  # Do nothing when out of the road!! This is not the SAFETY environment!
@@ -106,10 +108,14 @@ class MultiAgentPGDrive(PGDriveEnvV2):
         # Multi-agent related reset
         # avoid create new observation!
         obses = list(self.done_observations.values()) + list(self.observations.values())
+        assert len(obses) == len(self.config["target_vehicle_configs"].keys())
         self.observations = {k: v for k, v in zip(self.config["target_vehicle_configs"].keys(), obses)}
         self.done_observations = dict()
+
+        # FIXME it would be better to change in-place!
         self.observation_space = self._get_observation_space()
         self.action_space = self._get_action_space()
+
         return super(MultiAgentPGDrive, self).reset(*args, **kwargs)
 
     def _reset_vehicles(self):
