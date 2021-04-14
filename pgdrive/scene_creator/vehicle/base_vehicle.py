@@ -7,6 +7,7 @@ import gym
 import numpy as np
 from panda3d.bullet import BulletVehicle, BulletBoxShape, ZUp, BulletGhostNode
 from panda3d.core import Vec3, TransformState, NodePath, LQuaternionf, BitMask32, TextNode
+
 from pgdrive.constants import RENDER_MODE_ONSCREEN, COLOR, COLLISION_INFO_COLOR, BodyName, CamMask, CollisionGroup
 from pgdrive.scene_creator.lane.abs_lane import AbstractLane
 from pgdrive.scene_creator.lane.circular_lane import CircularLane
@@ -291,6 +292,7 @@ class BaseVehicle(DynamicElement):
             heading = np.rad2deg(lane.heading_at(self.vehicle_config["born_longitude"]))
             self.born_place = pos
         heading = -np.deg2rad(heading) - np.pi / 2
+        self.set_static(False)
         self.chassis_np.setPos(panda_position(Vec3(*pos, 1)))
         self.chassis_np.setQuat(LQuaternionf(np.cos(heading / 2), 0, 0, np.sin(heading / 2)))
         self.update_map_info(map)
@@ -790,3 +792,6 @@ class BaseVehicle(DynamicElement):
     @property
     def on_broken_line(self):
         return self.chassis_np.node().getPythonTag(BodyName.Base_vehicle).on_broken_line
+
+    def set_static(self, flag):
+        self.chassis_np.node().setStatic(flag)

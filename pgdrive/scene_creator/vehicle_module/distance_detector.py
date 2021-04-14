@@ -79,6 +79,7 @@ class DistanceDetector:
             laser_end = panda_position((point_x[laser_index], point_y[laser_index]), self.height)
             result = pg_physics_world.rayTestClosest(pg_start_position, laser_end, mask)
             node = result.getNode()
+            hits = None
             if node in extra_filter_node:
                 # Fall back to all tests.
                 results: BulletAllHitsRayResult = pg_physics_world.rayTestAll(pg_start_position, laser_end, mask)
