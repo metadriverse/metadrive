@@ -55,7 +55,6 @@ if __name__ == "__main__":
     for i in range(1, 100000):
         o, r, d, info = env.step([1.0, 0.])
         info["fuel"] = env.vehicle.energy_consumption
-        print(env.vehicle.on_broken_line)
         # env.render(
         #     text={
         #         "left": env.vehicle.dist_to_left,
