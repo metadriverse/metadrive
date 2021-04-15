@@ -1,10 +1,11 @@
 import queue
+from pgdrive.constants import CollisionGroup
 from collections import deque
 from typing import Tuple
 
 import numpy as np
 from direct.controls.InputState import InputState
-from panda3d.core import Vec3, Camera
+from panda3d.core import Vec3, Camera, Point3, BitMask32
 
 from pgdrive.utils.coordinates_shift import panda_heading
 from pgdrive.world.pg_world import PGWorld
@@ -20,6 +21,7 @@ class ChaseCamera:
     BIRD_TASK_NAME = "update main bird camera"
     FOLLOW_LANE = True
     BIRD_VIEW_HEIGHT = 120
+    WHEEL_SCROLL_SPEED = 10
 
     def __init__(self, camera: Camera, camera_height: float, camera_dist: float, pg_world: PGWorld):
         self._origin_height = camera_height
@@ -48,6 +50,10 @@ class ChaseCamera:
         self.inputs.watchWithModifiers('down', 's')
         self.inputs.watchWithModifiers('left', 'a')
         self.inputs.watchWithModifiers('right', 'd')
+
+        pg_world.accept("wheel_up", self._wheel_up_height, extraArgs=[pg_world])
+        pg_world.accept("wheel_down", self._wheel_down_height, extraArgs=[pg_world])
+        pg_world.accept("mouse1", self._move_to_pointer, extraArgs=[pg_world])
 
     def reset(self):
         self.direction_running_mean.clear()
@@ -167,6 +173,7 @@ class ChaseCamera:
 
     def manual_control_camera(self, task):
         self.bird_camera_height = self._update_height(self.bird_camera_height)
+
         if self.inputs.isSet("up"):
             self.camera_y += 1.0
         if self.inputs.isSet("down"):
@@ -184,3 +191,30 @@ class ChaseCamera:
         if self.inputs.isSet("low"):
             height -= 1.0
         return height
+
+    def _wheel_down_height(self, pg_world):
+        if pg_world.taskMgr.hasTaskNamed(self.BIRD_TASK_NAME):
+            self.bird_camera_height += self.WHEEL_SCROLL_SPEED
+        else:
+            self.chase_camera_height += self.WHEEL_SCROLL_SPEED
+
+    def _wheel_up_height(self, pg_world):
+        if pg_world.taskMgr.hasTaskNamed(self.BIRD_TASK_NAME):
+            self.bird_camera_height -= self.WHEEL_SCROLL_SPEED
+        else:
+            self.chase_camera_height -= self.WHEEL_SCROLL_SPEED
+
+    def _move_to_pointer(self, pg_world):
+        if pg_world.taskMgr.hasTaskNamed(self.BIRD_TASK_NAME):
+            # Get to and from pos in camera coordinates
+            pMouse = pg_world.mouseWatcherNode.getMouse()
+            pFrom = Point3()
+            pTo = Point3()
+            self.camera.node().getLens().extrude(pMouse, pFrom, pTo)
+
+            # Transform to global coordinates
+            pFrom = pg_world.render.getRelativePoint(self.camera, pFrom)
+            pTo = pg_world.render.getRelativePoint(self.camera, pTo)
+            ret = pg_world.physics_world.dynamic_world.rayTestClosest(pFrom, pTo, BitMask32.bit(CollisionGroup.Terrain))
+            self.camera_x = ret.getHitPos()[0]
+            self.camera_y = ret.getHitPos()[1]

@@ -92,10 +92,10 @@ class DistanceDetector:
                     self.cloud_points[laser_index] = result.getHitFraction()
                     break
             else:
+                hits = result.hasHit()
                 self.cloud_points[laser_index] = result.getHitFraction()
                 if node:
                     self.detected_objects.append(result)
-                    hits = result.hasHit()
 
             # update vis
             if self.cloud_points_vis is not None:

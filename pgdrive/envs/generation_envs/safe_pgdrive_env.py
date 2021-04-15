@@ -1,5 +1,6 @@
 from pgdrive.envs.pgdrive_env import PGDriveEnv
 from pgdrive.utils import PGConfig
+from pgdrive.utils.math_utils import clip
 
 
 class SafePGDriveEnv(PGDriveEnv):
@@ -63,13 +64,10 @@ class SafePGDriveEnv(PGDriveEnv):
             reward = +self.config["success_reward"]
         elif vehicle.out_of_route:
             reward = -self.config["out_of_road_penalty"]
-            print(reward)
         elif vehicle.crash_vehicle:
             reward = -self.config["crash_vehicle_penalty"]
-            print(reward)
         elif vehicle.crash_object:
             reward = -self.config["crash_object_penalty"]
-            print(reward)
         return reward, step_info
 
 
