@@ -152,7 +152,8 @@ class PGWorld(ShowBase.ShowBase):
             gltf.patch_loader(self.loader)
 
             # Display logo
-            if self.mode == RENDER_MODE_ONSCREEN:
+            if self.mode == RENDER_MODE_ONSCREEN and (not self.world_config["debug"]) \
+                        and (not self.world_config["fast_launch_window"]):
                 self._loading_logo = OnscreenImage(
                     image=AssetLoader.file_path("PGDrive-large.png"),
                     pos=(0, 0, 0),
