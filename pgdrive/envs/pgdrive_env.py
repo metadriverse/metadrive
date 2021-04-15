@@ -403,10 +403,14 @@ class PGDriveEnv(BasePGDriveEnv):
             self.current_map.unload_from_pg_world(self.pg_world)
 
         # create map
-        if force_seed is None:
-            self.current_seed = get_np_random().randint(self.start_seed, self.start_seed + self.env_num)
-        else:
+        if force_seed is not None:
             self.current_seed = force_seed
+        elif self._pending_force_seed is not None:
+            self.current_seed = self._pending_force_seed
+            self._pending_force_seed = None
+        else:
+            self.current_seed = get_np_random().randint(self.start_seed, self.start_seed + self.env_num)
+
         if self.maps.get(self.current_seed, None) is None:
 
             if self.config["load_map_from_json"]:
