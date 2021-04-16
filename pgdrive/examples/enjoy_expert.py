@@ -7,11 +7,11 @@ environment that allows popping up an window.
 """
 import random
 
-from pgdrive import PGDriveEnv
+from pgdrive import PGDriveEnvV2
 from pgdrive.examples import expert, get_terminal_state
 
 if __name__ == '__main__':
-    env = PGDriveEnv(dict(use_render=True, environment_num=100, start_seed=random.randint(0, 1000)))
+    env = PGDriveEnvV2(dict(use_render=True, environment_num=100, start_seed=random.randint(0, 1000)))
     obs = env.reset()
     success_list, reward_list, ep_reward, ep_len, ep_count = [], [], 0, 0, 0
     try:
