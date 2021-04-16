@@ -7,16 +7,14 @@ environment that allows popping up an window.
 """
 import random
 
-from pgdrive.envs.pgdrive_env import PGDriveEnv
-from pgdrive.scene_manager.traffic_manager import TrafficMode
+from pgdrive import PGDriveEnvV2
 
 if __name__ == "__main__":
-    env = PGDriveEnv(
+    env = PGDriveEnvV2(
         dict(
             use_render=True,
             manual_control=True,
             traffic_density=0.2,
-            traffic_mode=TrafficMode.Reborn,
             environment_num=100,
             map=7,
             start_seed=random.randint(0, 1000)
