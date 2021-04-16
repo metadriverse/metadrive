@@ -65,8 +65,6 @@ class PGDriveEnvV2(PGDriveEnvV1):
 
     def __init__(self, config: dict = None):
         super(PGDriveEnvV2, self).__init__(config=config)
-        # assert self.config["vehicle_config"]["lidar"]["num_others"] == 0
-        # assert self.config["vehicle_config"]["side_detector"]["num_lasers"] > 0
 
     def _post_process_config(self, config):
         config = super(PGDriveEnvV2, self)._post_process_config(config)
@@ -90,7 +88,7 @@ class PGDriveEnvV2(PGDriveEnvV1):
         # A specified function to determine whether this vehicle should be done.
         # return vehicle.on_yellow_continuous_line or (not vehicle.on_lane) or vehicle.crash_sidewalk
         ret = vehicle.on_yellow_continuous_line or vehicle.on_white_continuous_line or \
-               (not vehicle.on_lane) or vehicle.crash_sidewalk
+              (not vehicle.on_lane) or vehicle.crash_sidewalk
         return ret
 
     def done_function(self, vehicle_id: str):
@@ -177,7 +175,7 @@ class PGDriveEnvV2(PGDriveEnvV1):
 
     def _get_reset_return(self):
         ret = {}
-        self.for_each_vehicle(lambda v: v.update_state())
+        self.scene_manager.update_state_for_all_target_vehicles()
         for v_id, v in self.vehicles.items():
             self.observations[v_id].reset(self, v)
             ret[v_id] = self.observations[v_id].observe(v)
@@ -193,7 +191,8 @@ if __name__ == '__main__':
         assert np.isscalar(reward)
         assert isinstance(info, dict)
 
-    env = PGDriveEnvV2({'use_render': True, "fast": True, "manual_control": True})
+    # env = PGDriveEnvV2({'use_render': True, "fast": True, "manual_control": True})
+    env = PGDriveEnvV2()
     try:
         obs = env.reset()
         assert env.observation_space.contains(obs)

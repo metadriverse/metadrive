@@ -45,7 +45,7 @@ def test_base_vehicle():
                 v_pos = v.position
                 # v_pos[1] = -v_pos[1], this position is converted to pg_position in reset() now
                 assert np.all(v_pos == pos)
-                v.update_state()
+                v.update_state(detector_mask=None)
         v.reset(map, pos=np.array([10, 0]))
         for a_x in [-1, 0, 0.5, 1]:
             for a_y in [-1, 0, 0.5, 1]:

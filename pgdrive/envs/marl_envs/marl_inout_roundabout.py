@@ -466,7 +466,7 @@ class MultiAgentRoundaboutEnv(MultiAgentPGDrive):
         v.vehicle_config.update(new_born_place_config)
         v.reset(self.current_map)
         self._update_destination_for(v)
-        v.update_state()
+        v.update_state(detector_mask=None)
         return bp_index
 
 
@@ -572,11 +572,15 @@ def _vis():
 
 def _profile():
     import time
-    env = MultiAgentRoundaboutEnv({"num_agents": 16})
+    env = MultiAgentRoundaboutEnv({"num_agents": 40})
     obs = env.reset()
     start = time.time()
     for s in range(10000):
         o, r, d, i = env.step(env.action_space.sample())
+
+        # mask_ratio = env.scene_manager.detector_mask.get_mask_ratio()
+        # print("Mask ratio: ", mask_ratio)
+
         if all(d.values()):
             env.reset()
         if (s + 1) % 100 == 0:
@@ -647,6 +651,6 @@ def _long_run():
 
 if __name__ == "__main__":
     # _draw()
-    _vis()
-    # _profile()
+    # _vis()
+    _profile()
     # _long_run()
