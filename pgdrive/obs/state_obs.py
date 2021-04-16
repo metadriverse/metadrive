@@ -17,7 +17,7 @@ class StateObservation(ObservationType):
     @property
     def observation_space(self):
         # Navi info + Other states
-        shape = self.ego_state_obs_dim + RoutingLocalizationModule.Navi_obs_dim + self.get_side_detector_dim()
+        shape = self.ego_state_obs_dim + RoutingLocalizationModule.navigation_info_dim + self.get_side_detector_dim()
         return gym.spaces.Box(-0.0, 1.0, shape=(shape, ), dtype=np.float32)
 
     def observe(self, vehicle):
@@ -51,7 +51,7 @@ class StateObservation(ObservationType):
         """
         navi_info = vehicle.routing_localization.get_navi_info()
         ego_state = self.vehicle_state(vehicle)
-        return np.asarray(ego_state + navi_info, dtype=np.float32)
+        return np.concatenate([ego_state, navi_info])
 
     @staticmethod
     def vehicle_state(vehicle):
