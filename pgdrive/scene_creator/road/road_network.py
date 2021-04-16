@@ -1,9 +1,9 @@
 import copy
 import logging
+import math
 from typing import List, Tuple, Dict
 
 import numpy as np
-
 from pgdrive.constants import Decoration
 from pgdrive.scene_creator.lane.abs_lane import LineType, AbstractLane
 from pgdrive.scene_creator.lane.straight_lane import StraightLane
@@ -348,7 +348,7 @@ class RoadNetwork:
         for lane in range(lanes):
             origin = np.array([0, lane * StraightLane.DEFAULT_WIDTH])
             end = np.array([length, lane * StraightLane.DEFAULT_WIDTH])
-            rotation = np.array([[np.cos(angle), np.sin(angle)], [-np.sin(angle), np.cos(angle)]])
+            rotation = np.array([[math.cos(angle), math.sin(angle)], [-math.sin(angle), math.cos(angle)]])
             origin = rotation @ origin
             end = rotation @ end
             line_types = (

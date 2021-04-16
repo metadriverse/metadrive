@@ -13,7 +13,8 @@ if __name__ == "__main__":
             "vehicle_config": {
                 "show_side_detector": True,
                 "show_lane_line_detector": True,
-                "show_navi_mark": True
+                "show_navi_mark": True,
+                "show_lidar": True,
             }
         }
     )
@@ -33,5 +34,5 @@ if __name__ == "__main__":
         )
         if d:
             print("Reset")
-            env.reset()
+            # env.reset()
     env.close()

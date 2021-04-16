@@ -66,7 +66,7 @@ class BicycleVehicle(Vehicle):
             f_yr = -self.MASS * self.lateral_speed + self.INERTIA_Z / self.LENGTH_A * self.yaw_rate
         d_lateral_speed = 1 / self.MASS * (f_yf + f_yr) - self.yaw_rate * self.speed  # (2.21)
         d_yaw_rate = 1 / self.INERTIA_Z * (self.LENGTH_A * f_yf - self.LENGTH_B * f_yr)  # (2.22)
-        c, s = np.cos(self.heading), np.sin(self.heading)
+        c, s = math.cos(self.heading), math.sin(self.heading)
         R = np.array(((c, -s), (s, c)))
         speed = R @ np.array([self.speed, self.lateral_speed])
         return np.array(
@@ -79,7 +79,7 @@ class BicycleVehicle(Vehicle):
         u = np.array([[self.action['steering']]])
         self.A_lat, self.B_lat = self.lateral_lpv_dynamics()
         dx = self.A_lat @ x + self.B_lat @ u
-        c, s = np.cos(self.heading), np.sin(self.heading)
+        c, s = math.cos(self.heading), math.sin(self.heading)
         R = np.array(((c, -s), (s, c)))
         speed = R @ np.array([self.speed, self.lateral_speed])
         return np.array([[speed[0]], [speed[1]], [self.yaw_rate], [self.action['acceleration']], dx[0], dx[1]])

@@ -108,7 +108,7 @@ class ChaseCamera:
         :return: dir, tuple
         """
         heading = ChaseCamera._heading_of_lane(lane, pos)
-        return np.cos(heading), np.sin(heading)
+        return math.cos(heading), math.sin(heading)
 
     def chase(self, vehicle, pg_world):
         """

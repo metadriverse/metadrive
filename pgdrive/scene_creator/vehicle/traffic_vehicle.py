@@ -77,7 +77,7 @@ class PGTrafficVehicle(DynamicElement):
 
             carNP.instanceTo(self.node_path)
         self.step(1e-1)
-        # self.carNP.setQuat(LQuaternionf(np.cos(-1 * np.pi / 4), 0, 0, np.sin(-1 * np.pi / 4)))
+        # self.carNP.setQuat(LQuaternionf(math.cos(-1 * np.pi / 4), 0, 0, math.sin(-1 * np.pi / 4)))
 
     def prepare_step(self, scene_mgr: SceneManager) -> None:
         """

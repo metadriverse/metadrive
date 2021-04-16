@@ -40,11 +40,17 @@ def test_base_vehicle():
 
         for heading in [-1.0, 0.0, 1.0]:
             for pos in [[0., 0.], [-100., -100.], [100., 100.]]:
-                v.reset(map, pos=np.array(pos), heading=heading)
+                v.reset(map, pos=pos, heading=heading)
                 np.testing.assert_almost_equal(_get_heading_deg(v.heading_theta), heading, decimal=3)
+
                 v_pos = v.position
                 # v_pos[1] = -v_pos[1], this position is converted to pg_position in reset() now
-                assert np.all(v_pos == pos)
+                np.testing.assert_almost_equal(v_pos, pos)
+
+                v.set_position(pos)
+                v_pos = v.position
+                np.testing.assert_almost_equal(v_pos, pos)
+
                 v.update_state(detector_mask=None)
         v.reset(map, pos=np.array([10, 0]))
         for a_x in [-1, 0, 0.5, 1]:

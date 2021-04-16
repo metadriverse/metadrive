@@ -13,6 +13,8 @@ from pgdrive.utils.asset_loader import AssetLoader
 from pgdrive.utils.pg_space import Parameter, BlockParameterSpace
 from pgdrive.utils.scene_utils import ray_localization
 
+import math
+
 
 class RoutingLocalizationModule:
     navigation_info_dim = 10
@@ -181,8 +183,8 @@ class RoutingLocalizationModule:
                 self._right_arrow.detachNode()
                 self._is_showing = False
         else:
-            dir_0 = np.array([np.cos(lane_0_heading), np.sin(lane_0_heading), 0])
-            dir_1 = np.array([np.cos(lane_1_heading), np.sin(lane_1_heading), 0])
+            dir_0 = np.array([math.cos(lane_0_heading), math.sin(lane_0_heading), 0])
+            dir_1 = np.array([math.cos(lane_1_heading), math.sin(lane_1_heading), 0])
             cross_product = np.cross(dir_1, dir_0)
             left = False if cross_product[-1] < 0 else True
             if not self._is_showing:

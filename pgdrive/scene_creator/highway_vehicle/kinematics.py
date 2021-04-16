@@ -1,3 +1,4 @@
+import math
 from collections import deque
 from typing import Union, List
 
@@ -142,9 +143,9 @@ class Vehicle:
         self.clip_actions()
         delta_f = self.action['steering']
         beta = np.arctan(1 / 2 * np.tan(delta_f))
-        v = self.speed * np.array([np.cos(self.heading + beta), np.sin(self.heading + beta)])
+        v = self.speed * np.array([math.cos(self.heading + beta), math.sin(self.heading + beta)])
         self._position += v * dt
-        self.heading += self.speed * np.sin(beta) / (self.LENGTH / 2) * dt
+        self.heading += self.speed * math.sin(beta) / (self.LENGTH / 2) * dt
         self.speed += self.action['acceleration'] * dt
         # for performance reason,
         # self.on_state_update()
@@ -218,7 +219,7 @@ class Vehicle:
 
     @property
     def direction(self) -> np.ndarray:
-        return np.array([np.cos(self.heading), np.sin(self.heading)])
+        return np.array([math.cos(self.heading), math.sin(self.heading)])
 
     @property
     def velocity(self) -> np.ndarray:

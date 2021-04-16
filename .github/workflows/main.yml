@@ -32,6 +32,8 @@ jobs:
           python-version: 3.7
       - name: Blackbox tests
         run: |
+          pip install cython
+          pip install numpy
           pip install -e .
           pip install pytest
           pip install pytest-cov
