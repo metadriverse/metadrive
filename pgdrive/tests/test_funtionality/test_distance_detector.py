@@ -22,7 +22,8 @@ def test_lidar(render=False):
                 "show_lidar": True,
                 "side_detector": dict(num_lasers=2, distance=50),
                 "lane_line_detector": dict(num_lasers=2, distance=50),
-            }
+            },
+            "_disable_detector_mask": True
         }
     )
     try:
@@ -50,10 +51,12 @@ def test_lidar(render=False):
                     detect_base_vehicle = True
             if d:
                 break
+        if not (detect_traffic_vehicle and detect_base_vehicle):
+            print("Lidar detection failed")
         assert detect_traffic_vehicle and detect_base_vehicle, "Lidar detection failed"
     finally:
         env.close()
 
 
 if __name__ == "__main__":
-    test_lidar(render=True)
+    test_lidar(render=False)

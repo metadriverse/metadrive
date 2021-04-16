@@ -2,7 +2,6 @@ import logging
 from typing import List, Tuple, Optional, Dict, AnyStr, Union
 
 import numpy as np
-
 from pgdrive.scene_creator.map import Map
 from pgdrive.scene_manager.PGLOD import PGLOD
 from pgdrive.scene_manager.object_manager import ObjectsManager
@@ -21,6 +20,7 @@ class SceneManager:
     """Manage all traffic vehicles, and all runtime elements (in the future)"""
     def __init__(
         self,
+        config,
         pg_world: PGWorld,
         traffic_config: Union[Dict, "PGConfig"],
         # traffic_mode=TrafficMode.Trigger,
@@ -51,6 +51,7 @@ class SceneManager:
 
         # cull scene
         self.cull_scene = cull_scene
+        self.detector_mask = None
 
     def _get_traffic_manager(self, traffic_config):
         return TrafficManager(traffic_config["traffic_mode"], traffic_config["random_traffic"])
@@ -70,6 +71,8 @@ class SceneManager:
         # FIXME
         self.traffic_mgr.reset(pg_world, map, target_vehicles, traffic_density)
         self.objects_mgr.reset(pg_world, map, accident_prob)
+        if self.detector_mask is not None:
+            self.detector_mask.clear()
 
         if self.replay_system is not None:
             self.replay_system.destroy(pg_world)
@@ -86,6 +89,8 @@ class SceneManager:
             )
         else:
             self.replay_system = PGReplayer(self.traffic_mgr, map, episode_data, pg_world)
+            logging.warning("You are replaying episodes! Delete detector mask!")
+            self.detector_mask = None
 
         # if pg_world.highway_render is not None:
         #     pg_world.highway_render.set_scene_mgr(self)
@@ -155,7 +160,7 @@ class SceneManager:
             # didn't record while replay
             self.record_system.record_frame(self.traffic_mgr.get_global_states())
 
-        step_infos = self.for_each_target_vehicle(lambda v: v.update_state())
+        step_infos = self.update_state_for_all_target_vehicles()
 
         # cull distant blocks
         poses = [v.position for v in self.target_vehicles.values()]
@@ -175,8 +180,27 @@ class SceneManager:
 
         return step_infos
 
+    def update_state_for_all_target_vehicles(self):
+        if self.detector_mask is not None:
+            # a = set([v.name for v in self.traffic_mgr.vehicles])
+            # b = set([v.name for v in self.target_vehicles.values()])
+            # assert b.issubset(a)  # This may only happen during episode replays!
+            is_target_vehicle_dict = {v.name: self.traffic_mgr.is_target_vehicle(v) for v in self.traffic_mgr.vehicles}
+            self.detector_mask.update_mask(
+                position_dict={v.name: v.position
+                               for v in self.traffic_mgr.vehicles},
+                heading_dict={v.name: v.heading_theta
+                              for v in self.traffic_mgr.vehicles},
+                is_target_vehicle_dict=is_target_vehicle_dict
+            )
+        step_infos = self.for_each_target_vehicle(
+            lambda v: v.update_state(detector_mask=self.detector_mask.get_mask(v.name) if self.detector_mask else None)
+        )
+        return step_infos
+
     def for_each_target_vehicle(self, func):
         """Apply the func (a function take only the vehicle as argument) to each target vehicles and return a dict!"""
+        assert len(self.target_vehicles) > 0
         ret = dict()
         for k, v in self.target_vehicles.items():
             ret[k] = func(v)

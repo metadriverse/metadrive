@@ -4,7 +4,7 @@ from typing import Dict
 from panda3d.bullet import BulletWorld
 from panda3d.core import NodePath
 
-from pgdrive.utils import PGConfig
+from pgdrive.utils import PGConfig, random_string
 from pgdrive.utils.asset_loader import AssetLoader
 from pgdrive.utils.pg_space import PGSpace
 from pgdrive.world.pg_physics_world import PGPhysicsWorld
@@ -54,6 +54,7 @@ class Element:
         Config is a static conception, which specified the parameters of one element.
         There parameters doesn't change, such as length of straight road, max speed of one vehicle, etc.
         """
+        self.name = random_string()
         assert isinstance(
             self.PARAMETER_SPACE, PGSpace
         ) or random_seed is None, "Using PGSpace to define parameter spaces of " + self.class_name
@@ -116,6 +117,10 @@ class Element:
 
     def __del__(self):
         logging.debug("{} is destroyed".format(self.class_name))
+
+    @property
+    def heading_theta(self):
+        return 0.0  # Not used!
 
 
 class DynamicElement(Element):
