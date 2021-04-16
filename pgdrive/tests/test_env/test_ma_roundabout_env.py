@@ -366,7 +366,7 @@ def test_ma_roundabout_reward_sign():
             v.vehicle_config.update(new_born_place_config)
             v.reset(self.current_map)
             self._update_destination_for(v)
-            v.update_state()
+            v.update_state(detector_mask=None)
             return bp_index
 
     env = TestEnv({"num_agents": 1})
@@ -392,8 +392,8 @@ def test_ma_roundabout_reward_sign():
 
 if __name__ == '__main__':
     test_ma_roundabout_env()
-    test_ma_roundabout_horizon()
-    test_ma_roundabout_reset()
-    test_ma_roundabout_reward_done_alignment()
-    test_ma_roundabout_close_born()
+    # test_ma_roundabout_horizon()
+    # test_ma_roundabout_reset()
+    # test_ma_roundabout_reward_done_alignment()
+    # test_ma_roundabout_close_born()
     test_ma_roundabout_reward_sign()

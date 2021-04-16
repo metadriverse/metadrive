@@ -235,14 +235,15 @@ class BaseVehicle(DynamicElement):
             self.vehicle_panel.renew_2d_car_para_visualization(self)
         return step_info
 
-    def update_state(self, pg_world=None):
+    def update_state(self, pg_world=None, detector_mask="WRONG"):
         # lidar
         if self.lidar is not None:
             self.lidar.perceive(
                 self.position,
                 self.heading_theta,
                 self.pg_world.physics_world.dynamic_world,
-                extra_filter_node={self.chassis_np.node()}
+                extra_filter_node={self.chassis_np.node()},
+                detector_mask=detector_mask
             )
         if self.routing_localization is not None:
             self.lane, self.lane_index, = self.routing_localization.update_navigation_localization(self)
