@@ -1,5 +1,5 @@
-import numpy as np
 from panda3d.core import Vec3
+from pgdrive.utils.math_utils import PGVector
 
 # In PGDrive, the direction of y axis is adverse to Panda3d. It is required to use these function to transform when sync
 # the two coordinates.
@@ -30,22 +30,22 @@ def panda_position(position, z=0.0) -> Vec3:
     """
     if len(position) == 3:
         z = position[2]
-    # return Vec3(position[0], -position[1], z)
-    ret = (position[0], -position[1], z)
-    return ret
+    return Vec3(position[0], -position[1], z)
 
 
-def pgdrive_position(position: Vec3) -> np.array:
+def pgdrive_position(position: Vec3) -> "PGVector":
     """
     Transform the position in Panda3d to PGDrive world
     :param position: Vec3, position in Panda3d
     :return: 2d position
     """
-    return np.array([position[0], -position[1]])
+    # return np.array([position[0], -position[1]])
+    # return position[0], -position[1]
+    return PGVector((position[0], -position[1]))
 
 
-def pgdrive_vector(vec: Vec3) -> np.array:
-    return pgdrive_position(vec)
+# def pgdrive_vector(vec: Vec3) -> np.array:
+#     return pgdrive_position(vec)
 
 
 def panda_heading(heading: float) -> float:

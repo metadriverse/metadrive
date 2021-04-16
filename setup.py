@@ -1,8 +1,12 @@
+# Please don't change the order of following packages!
 import sys
+from setuptools import find_namespace_packages  # This should be place at top!
 from distutils.core import setup
+from distutils.extension import Extension
 from os import path
 
-from setuptools import find_namespace_packages
+import numpy
+from Cython.Build import cythonize
 
 assert sys.version_info.major == 3 and sys.version_info.minor >= 6, "python version >= 3.6 is required"
 
@@ -15,7 +19,13 @@ print("We will install the following packages: ", packages)
 
 """ ===== Remember to modify the PG_EDITION at first ====="""
 
-version="0.1.4"
+version = "0.1.4"
+
+ext_modules = cythonize([Extension(
+    "pgdrive.cutils", ["pgdrive/cutils.pyx"], include_dirs=[numpy.get_include()]
+)])
+for ele in ext_modules:
+    assert isinstance(ele, Extension)
 
 setup(
     name="pgdrive",
@@ -38,13 +48,26 @@ setup(
         "panda3d-simplepbr",
         "pillow",
         "pytest",
-        "opencv-python-headless"
+        "opencv-python-headless",
+        "Cython==0.29.6"
     ],
     include_package_data=True,
     license="Apache 2.0",
     long_description=long_description,
-    long_description_content_type='text/markdown'
+    long_description_content_type='text/markdown',
+
+    ext_modules=ext_modules
 )
+
+msg = """
+      If you encounter the following error:
+      
+          error: Microsoft Visual C++ 14.0 or greater is required. Get it with "Microsoft C++ Build Tools": https://visualstudio.microsoft.com/visual-cpp-build-tools/
+
+      Please feel free to continue! We will disable cython utility and fall back to all python code. Please enjoy!
+      
+      """
+print(msg)
 
 """
 How to publish to pypi?  Noted by Zhenghao in Dec 27, 2020.

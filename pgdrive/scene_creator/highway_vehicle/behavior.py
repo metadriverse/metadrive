@@ -107,7 +107,7 @@ class IDMVehicle(ControlledVehicle):
         if self.enable_lane_change:
             self.change_lane_policy()
         action['steering'] = self.steering_control(self.target_lane_index)
-        action['steering'] = np.clip(action['steering'], -self.MAX_STEERING_ANGLE, self.MAX_STEERING_ANGLE)
+        action['steering'] = clip(action['steering'], -self.MAX_STEERING_ANGLE, self.MAX_STEERING_ANGLE)
 
         # Longitudinal: IDM
         action['acceleration'] = self.acceleration(
@@ -372,7 +372,11 @@ class LinearVehicle(IDMVehicle):
         :return: the acceleration command for the ego-vehicle [m/s2]
         """
         return float(
-            np.dot(self.ACCELERATION_PARAMETERS, self.acceleration_features(ego_vehicle, front_vehicle, rear_vehicle))
+            utils.dot3(
+                self.ACCELERATION_PARAMETERS,
+                self.acceleration_features(ego_vehicle, front_vehicle, rear_vehicle)
+                # np.dot(self.ACCELERATION_PARAMETERS, self.acceleration_features(ego_vehicle, front_vehicle, rear_vehicle))
+            )
         )
 
     def acceleration_features(

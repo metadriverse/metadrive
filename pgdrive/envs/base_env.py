@@ -187,7 +187,8 @@ class BasePGDriveEnv(gym.Env):
         actions, action_infos = self._preprocess_actions(actions)
         step_infos = self._step_simulator(actions, action_infos)
         o, r, d, i = self._get_step_return(actions, step_infos)
-        return o, copy.deepcopy(r), copy.deepcopy(d), copy.deepcopy(i)
+        # return o, copy.deepcopy(r), copy.deepcopy(d), copy.deepcopy(i)
+        return o, r, d, i
 
     def _preprocess_actions(self, actions: Union[np.ndarray, Dict[AnyStr, np.ndarray]]) \
             -> Tuple[Union[np.ndarray, Dict[AnyStr, np.ndarray]], Dict]:
