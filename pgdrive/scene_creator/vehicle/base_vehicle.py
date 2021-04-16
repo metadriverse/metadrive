@@ -568,8 +568,8 @@ class BaseVehicle(DynamicElement):
         assert distance > 0
         self.lidar = Lidar(self.pg_world.render, num_lasers, distance, show_lidar_point)
 
-    def add_routing_localization(self, show_navi_point: bool):
-        self.routing_localization = RoutingLocalizationModule(self.pg_world, show_navi_point)
+    def add_routing_localization(self, show_navi_mark: bool = False):
+        self.routing_localization = RoutingLocalizationModule(self.pg_world, show_navi_mark=show_navi_mark)
 
     def update_map_info(self, map):
         """
@@ -713,7 +713,7 @@ class BaseVehicle(DynamicElement):
         if self.vehicle_config["overtake_stat"]:
             surrounding_vs = self.lidar.get_surrounding_vehicles()
             routing = self.routing_localization
-            ckpt_idx = routing.target_checkpoints_index
+            ckpt_idx = routing._target_checkpoints_index
             for surrounding_v in surrounding_vs:
                 if surrounding_v.lane_index[:-1] == (routing.checkpoints[ckpt_idx[0]], routing.checkpoints[ckpt_idx[1]
                                                                                                            ]):
@@ -737,7 +737,7 @@ class BaseVehicle(DynamicElement):
         if self.render:
             self.vehicle_panel.remove_display_region(self.pg_world)
             self.collision_info_np.detachNode()
-            self.routing_localization.arrow_node_path.detachNode()
+            self.routing_localization._arrow_node_path.detachNode()
         for sensor in self.image_sensors.values():
             sensor.remove_display_region(self.pg_world)
 
@@ -745,7 +745,7 @@ class BaseVehicle(DynamicElement):
         if self.render:
             self.vehicle_panel.add_to_display(self.pg_world, self.vehicle_panel.default_region)
             self.collision_info_np.reparentTo(self.pg_world.aspect2d)
-            self.routing_localization.arrow_node_path.reparentTo(self.pg_world.aspect2d)
+            self.routing_localization._arrow_node_path.reparentTo(self.pg_world.aspect2d)
         for sensor in self.image_sensors.values():
             sensor.add_to_display(self.pg_world, sensor.default_region)
 
