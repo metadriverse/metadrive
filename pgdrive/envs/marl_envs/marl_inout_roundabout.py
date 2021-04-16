@@ -4,7 +4,6 @@ from math import floor
 
 import numpy as np
 from gym.spaces import Box
-
 from pgdrive.envs import PGDriveEnvV2
 from pgdrive.envs.multi_agent_pgdrive import MultiAgentPGDrive
 from pgdrive.scene_creator.blocks.first_block import FirstBlock
@@ -537,7 +536,7 @@ def _vis():
                     "num_others": 0,
                     "distance": 40
                 },
-                # "show_lidar": True,
+                "show_lidar": True,
             },
             "fast": True,
             "use_render": True,
@@ -651,6 +650,6 @@ def _long_run():
 
 if __name__ == "__main__":
     # _draw()
-    # _vis()
-    _profile()
+    _vis()
+    # _profile()
     # _long_run()

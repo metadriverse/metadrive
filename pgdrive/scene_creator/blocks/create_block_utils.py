@@ -1,8 +1,8 @@
 import copy
+import math
 from typing import Tuple, Union, List
 
 import numpy as np
-
 from pgdrive.scene_creator.blocks.constants import BlockDefault
 from pgdrive.scene_creator.lane.abs_lane import LineColor, AbstractLane, LineType
 from pgdrive.scene_creator.lane.circular_lane import CircularLane
@@ -227,7 +227,7 @@ def create_wave_lanes(
     :return: List[Circular lane]
     """
     angle = np.pi - 2 * np.arctan(wave_length / (2 * lateral_dist))
-    radius = wave_length / (2 * np.sin(angle))
+    radius = wave_length / (2 * math.sinsin(angle))
     circular_lane_1, pre_lane = create_bend_straight(
         pre_lane, 10, radius, angle, False if toward_left else True, lane_width, [LineType.NONE, LineType.NONE]
     )

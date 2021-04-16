@@ -3,7 +3,7 @@ import numpy as np
 
 from pgdrive.obs.observation_type import ObservationType
 from pgdrive.scene_creator.vehicle_module.routing_localization import RoutingLocalizationModule
-from pgdrive.utils.math_utils import clip
+from pgdrive.utils.math_utils import clip, norm
 
 
 class StateObservation(ObservationType):
@@ -88,8 +88,7 @@ class StateObservation(ObservationType):
         ]
         heading_dir_last = vehicle.last_heading_dir
         heading_dir_now = vehicle.heading
-        cos_beta = heading_dir_now.dot(heading_dir_last
-                                       ) / (np.linalg.norm(heading_dir_now) * np.linalg.norm(heading_dir_last))
+        cos_beta = heading_dir_now.dot(heading_dir_last) / (norm(*heading_dir_now) * norm(*heading_dir_last))
         beta_diff = np.arccos(clip(cos_beta, 0.0, 1.0))
         # print(beta)
         yaw_rate = beta_diff / 0.1

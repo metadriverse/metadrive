@@ -1,5 +1,6 @@
-import numpy as np
+import math
 
+import numpy as np
 from pgdrive.scene_creator.blocks.block import Block, BlockSocket
 from pgdrive.scene_creator.blocks.create_block_utils import CreateAdverseRoad, CreateRoadFrom, create_bend_straight
 from pgdrive.scene_creator.lane.abs_lane import LineType
@@ -132,7 +133,7 @@ class Roundabout(Block):
         tool_lane = StraightLane(tool_lane_start, tool_lane_end)
 
         beneath = (self.positive_lane_num * 2 - 1) * self.lane_width / 2 + radius_exit
-        cos = np.cos(np.deg2rad(angle))
+        cos = math.cos(np.deg2rad(angle))
         radius_this_seg = beneath / cos - radius_exit
 
         bend, _ = create_bend_straight(

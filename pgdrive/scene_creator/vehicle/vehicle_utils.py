@@ -103,7 +103,7 @@ class OpponentModelPredictiveControl(ModelPredictiveControl):
                     )
                     d = (p[0] - x)**2 + (p[1] + y)**2
                     alpha = -vehicle.heading
-                    c, s = np.cos(alpha), np.sin(alpha)
+                    c, s = math.cos(alpha), math.sin(alpha)
                     ratio = 4
                     # print(alpha)
                     d = p @ np.array(
@@ -146,8 +146,8 @@ class OpponentModelPredictiveControl(ModelPredictiveControl):
                 v = new_v = 0
 
         new_phi = phi + v / 2 / 2 * np.tan(steering / 180 * np.pi) * dt
-        new_x = x + v * np.cos(phi + beta) * dt
-        new_y = y + v * np.sin(phi + beta) * dt
+        new_x = x + v * math.cos(phi + beta) * dt
+        new_y = y + v * math.sin(phi + beta) * dt
         new_state = [new_x, new_y, new_v, new_phi, new_beta]
         return new_state
 

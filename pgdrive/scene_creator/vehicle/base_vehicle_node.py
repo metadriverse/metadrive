@@ -1,6 +1,4 @@
 from panda3d.bullet import BulletRigidBodyNode
-from pgdrive.utils.coordinates_shift import pgdrive_vector, pgdrive_heading
-from pgdrive.utils.math_utils import clip, norm
 
 
 class BaseVehicleNode(BulletRigidBodyNode):
