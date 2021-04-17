@@ -683,13 +683,13 @@ class BaseVehicle(DynamicElement):
             self.vehicle_panel.destroy(self.pg_world)
         self.pg_world = None
 
-    def set_position(self, position):
+    def set_position(self, position, height=0.4):
         """
         Should only be called when restore traffic from episode data
         :param position: 2d array or list
         :return: None
         """
-        self.chassis_np.setPos(panda_position(position, 0.4))
+        self.chassis_np.setPos(panda_position(position, height))
 
     def set_heading(self, heading_theta) -> None:
         """

@@ -39,3 +39,6 @@ class BaseVehicleNode(BulletRigidBodyNode):
     def destroy(self):
         # release pointer
         self._base_vehicle = None
+
+    def get_vehicle(self):
+        return self._base_vehicle
