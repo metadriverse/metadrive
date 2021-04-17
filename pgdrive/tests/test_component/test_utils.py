@@ -45,6 +45,6 @@ def test_utils():
 
 
 if __name__ == '__main__':
-    # test_cutils()
-    # test_fake_cutils()
+    test_cutils()
+    test_fake_cutils()
     test_utils()
