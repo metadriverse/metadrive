@@ -3,7 +3,6 @@ from typing import Union
 import numpy as np
 from panda3d.bullet import BulletRigidBodyNode, BulletBoxShape
 from panda3d.core import BitMask32, TransformState, Point3, NodePath, Vec3
-
 from pgdrive.constants import BodyName, CollisionGroup
 from pgdrive.scene_creator.highway_vehicle.behavior import IDMVehicle
 from pgdrive.scene_creator.lane.circular_lane import CircularLane
@@ -38,12 +37,12 @@ class PGTrafficVehicle(DynamicElement):
     path = None
     model_collection = {}  # save memory, load model once
 
-    def __init__(self, index: int, kinematic_model: IDMVehicle, enable_reborn: bool = False, np_random=None):
+    def __init__(self, index: int, kinematic_model: IDMVehicle, enable_respawn: bool = False, np_random=None):
         """
         A traffic vehicle class.
         :param index: Each Traffic vehicle has an unique index, and the name of this vehicle will contain this index
         :param kinematic_model: IDM Model or other models
-        :param enable_reborn: It will be generated at the born place again when arriving at the destination
+        :param enable_respawn: It will be generated at the spawn place again when arriving at the destination
         :param np_random: Random Engine
         """
         kinematic_model.LENGTH = self.LENGTH
@@ -57,8 +56,8 @@ class PGTrafficVehicle(DynamicElement):
         self.vehicle_node.setIntoCollideMask(BitMask32.bit(self.COLLISION_MASK))
         self.vehicle_node.setKinematic(False)
         self.vehicle_node.setStatic(True)
-        self.enable_reborn = enable_reborn
-        self._initial_state = kinematic_model if enable_reborn else None
+        self.enable_respawn = enable_respawn
+        self._initial_state = kinematic_model if enable_respawn else None
         self.dynamic_nodes.append(self.vehicle_node)
         self.node_path = NodePath(self.vehicle_node)
         self.out_of_road = False
@@ -162,16 +161,16 @@ class PGTrafficVehicle(DynamicElement):
         longitude: float,
         seed=None,
         enable_lane_change: bool = True,
-        enable_reborn=False
+        enable_respawn=False
     ):
         v = IDMVehicle.create_random(traffic_mgr, lane, longitude, random_seed=seed)
         v.enable_lane_change = enable_lane_change
-        return cls(index, v, enable_reborn, np_random=v.np_random)
+        return cls(index, v, enable_respawn, np_random=v.np_random)
 
     @classmethod
     def create_traffic_vehicle_from_config(cls, traffic_mgr: TrafficManager, config: dict):
         v = IDMVehicle(traffic_mgr, config["position"], config["heading"], np_random=None)
-        return cls(config["index"], v, config["enable_reborn"])
+        return cls(config["index"], v, config["enable_respawn"])
 
     def __del__(self):
         self.vehicle_node.clearTag(BodyName.Traffic_vehicle)

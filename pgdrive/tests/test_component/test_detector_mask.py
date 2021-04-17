@@ -1,7 +1,6 @@
 import copy
 
 import numpy as np
-
 from pgdrive.envs import PGDriveEnvV2
 from pgdrive.scene_creator.vehicle.base_vehicle import BaseVehicle
 from pgdrive.scene_creator.vehicle_module.distance_detector import DetectorMask

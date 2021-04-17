@@ -11,7 +11,7 @@ class TestEnv(PGDriveEnv):
                 "pg_world_config": {
                     "pstats": True
                 },
-                "traffic_mode": "reborn"
+                "traffic_mode": "respawn"
             }
         )
 

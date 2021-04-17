@@ -79,7 +79,7 @@ class InFork(Fork):
             speed_limit=self.SPEED_LIMIT
         )
         bend_1_road = Road(self.add_road_node(), self.add_road_node())
-        self.add_reborn_roads(bend_1_road)
+        self.add_respawn_roads(bend_1_road)
         connect_road = Road(bend_1_road.end_node, self.add_road_node())
         self.block_network.add_lane(bend_1_road.start_node, bend_1_road.end_node, bend_1)
         self.block_network.add_lane(connect_road.start_node, connect_road.end_node, connect_part)

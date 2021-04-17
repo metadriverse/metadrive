@@ -29,7 +29,7 @@ class SceneManager:
         cull_scene: bool = True,
     ):
         """
-        :param traffic_mode: reborn/trigger mode
+        :param traffic_mode: respawn/trigger mode
         :param random_traffic: if True, map seed is different with traffic manager seed
         """
         # scene manager control all movements in pg_world

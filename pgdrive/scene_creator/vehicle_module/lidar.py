@@ -1,7 +1,6 @@
 from typing import Set
 
 from panda3d.core import BitMask32, NodePath
-
 from pgdrive.constants import BodyName, CamMask, CollisionGroup
 from pgdrive.scene_creator.vehicle.traffic_vehicle import PGTrafficVehicle
 from pgdrive.scene_creator.vehicle_module.distance_detector import DistanceDetector

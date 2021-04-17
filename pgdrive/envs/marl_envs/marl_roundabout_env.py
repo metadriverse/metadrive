@@ -30,8 +30,8 @@ class MultiAgentRoundaboutEnv(MultiAgentPGDrive):
                 },
                 "map": "O",
                 "vehicle_config": {
-                    "born_longitude": 0,
-                    "born_lateral": 0,
+                    "spawn_longitude": 0,
+                    "spawn_lateral": 0,
                 },
                 # clear base config
                 "num_agents": 4,
@@ -76,7 +76,7 @@ class MultiAgentRoundaboutEnv(MultiAgentPGDrive):
         for real_idx, idx in enumerate(target_agents):
             agent_name, v_config = target_vehicle_configs[idx]
             # for rllib compatibility
-            ret["agent{}".format(real_idx)] = dict(born_lane_index=v_config)
+            ret["agent{}".format(real_idx)] = dict(spawn_lane_index=v_config)
         config["target_vehicle_configs"] = ret
         return config
 
