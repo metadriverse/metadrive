@@ -1,3 +1,5 @@
+import logging
+
 from pgdrive.envs.pgdrive_env_v2 import PGDriveEnvV2
 from pgdrive.scene_creator.blocks.first_block import FirstBlock
 from pgdrive.scene_creator.vehicle.base_vehicle import BaseVehicle
@@ -71,12 +73,13 @@ class MultiAgentPGDrive(PGDriveEnvV2):
             config, allow_overwrite=False, stop_recursive_update=["target_vehicle_configs"]
         )
         if not ret_config["crash_done"] and ret_config["crash_vehicle_penalty"] > 2:
-            import logging
             logging.warning(
                 "Are you sure you wish to set crash_vehicle_penalty={} when crash_done=False?".format(
                     ret_config["crash_vehicle_penalty"]
                 )
             )
+        if ret_config["use_render"] and ret_config["fast"]:
+            logging.warning("Turn fast=False can accelerate Multi-agent rendering performance!")
         return ret_config
 
     def done_function(self, vehicle_id):
@@ -172,10 +175,13 @@ class MultiAgentPGDrive(PGDriveEnvV2):
         assert self.is_multi_agent
         current_obs_keys = set(self.observations.keys())
         for k in current_obs_keys:
-            if k not in set(self.vehicles.keys()):
+            if k not in self.vehicles:
                 o = self.observations.pop(k)
-                self.observation_space.spaces.pop(k)
                 self.done_observations[k] = o
+        current_obs_keys = set(self.observation_space.spaces.keys())
+        for k in current_obs_keys:
+            if k not in self.vehicles:
+                self.observation_space.spaces.pop(k)
                 # self.action_space.spaces.pop(k)  # Action space is updated in _reborn
 
 

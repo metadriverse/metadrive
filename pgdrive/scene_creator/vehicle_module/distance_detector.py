@@ -176,6 +176,7 @@ class DistanceDetector:
         extra_filter_node: set = None,
         detector_mask: np.ndarray = None
     ):
+        assert not isinstance(detector_mask, str), "Please specify detector_mask either with None or a numpy array."
         self.cloud_points, self.detected_objects, colors = cutils.cutils_perceive(
             cloud_points=self.cloud_points,
             detector_mask=detector_mask.astype(dtype=np.uint8) if detector_mask is not None else None,

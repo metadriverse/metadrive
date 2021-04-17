@@ -2,15 +2,19 @@ import copy
 import logging
 from math import floor
 
+import gym
 import numpy as np
 from gym.spaces import Box
 from pgdrive.envs import PGDriveEnvV2
 from pgdrive.envs.multi_agent_pgdrive import MultiAgentPGDrive
+from pgdrive.envs.pgdrive_env_v2 import PGDriveEnvV2
+from pgdrive.obs import ObservationType
+from pgdrive.obs.state_obs import StateObservation
 from pgdrive.scene_creator.blocks.first_block import FirstBlock
 from pgdrive.scene_creator.blocks.roundabout import Roundabout
 from pgdrive.scene_creator.map import PGMap
 from pgdrive.scene_creator.road.road import Road
-from pgdrive.utils import get_np_random, PGConfig, distance_greater
+from pgdrive.utils import get_np_random, distance_greater, norm, PGConfig
 
 MARoundaboutConfig = {
     "num_agents": 2,  # Number of maximum agents in the scenarios.
@@ -40,6 +44,7 @@ MARoundaboutConfig = {
     "crash_object_penalty": 1.0,
     "auto_termination": False,
     "camera_height": 4,
+    "bird_camera_height": 120
 }
 
 
@@ -252,6 +257,76 @@ class BornPlaceManager:
         return ret
 
 
+class LidarStateObservationMARound(ObservationType):
+    def __init__(self, vehicle_config):
+        self.state_obs = StateObservation(vehicle_config)
+        super(LidarStateObservationMARound, self).__init__(vehicle_config)
+        self.state_length = list(self.state_obs.observation_space.shape)[0]
+
+    @property
+    def observation_space(self):
+        shape = list(self.state_obs.observation_space.shape)
+        if self.config["lidar"]["num_lasers"] > 0 and self.config["lidar"]["distance"] > 0:
+            # Number of lidar rays and distance should be positive!
+            shape[0] += self.config["lidar"]["num_lasers"] + self.config["lidar"]["num_others"] * self.state_length
+        return gym.spaces.Box(-0.0, 1.0, shape=tuple(shape), dtype=np.float32)
+
+    def observe(self, vehicle):
+        """
+        State observation + Navi info + 4 * closest vehicle info + Lidar points ,
+        Definition of State Observation and Navi information can be found in **class StateObservation**
+        Other vehicles' info: [
+                              Projection of distance between ego and another vehicle on ego vehicle's heading direction,
+                              Projection of distance between ego and another vehicle on ego vehicle's side direction,
+                              Projection of speed between ego and another vehicle on ego vehicle's heading direction,
+                              Projection of speed between ego and another vehicle on ego vehicle's side direction,
+                              ] * 4, dim = 16
+
+        Lidar points: 240 lidar points surrounding vehicle, starting from the vehicle head in clockwise direction
+
+        :param vehicle: BaseVehicle
+        :return: observation in 9 + 10 + 16 + 240 dim
+        """
+        num_others = self.config["lidar"]["num_others"]
+        state = self.state_observe(vehicle)
+        other_v_info = []
+        if vehicle.lidar is not None:
+            if self.config["lidar"]["num_others"] > 0:
+                # other_v_info += vehicle.lidar.get_surrounding_vehicles_info(vehicle, self.config["lidar"]["num_others"])
+                surrounding_vehicles = list(vehicle.lidar.get_surrounding_vehicles())
+                surrounding_vehicles.sort(
+                    key=lambda v: norm(vehicle.position[0] - v.position[0], vehicle.position[1] - v.position[1])
+                )
+                surrounding_vehicles += [None] * num_others
+                for tmp_v in surrounding_vehicles[:num_others]:
+                    if tmp_v is not None:
+                        tmp_v = tmp_v.get_vehicle()
+                        other_v_info += self.state_observe(tmp_v).tolist()
+                    else:
+                        other_v_info += [0] * self.state_length
+            other_v_info += self._add_noise_to_cloud_points(
+                vehicle.lidar.get_cloud_points(),
+                gaussian_noise=self.config["lidar"]["gaussian_noise"],
+                dropout_prob=self.config["lidar"]["dropout_prob"]
+            )
+        return np.concatenate((state, np.asarray(other_v_info)))
+
+    def state_observe(self, vehicle):
+        return self.state_obs.observe(vehicle)
+
+    def _add_noise_to_cloud_points(self, points, gaussian_noise, dropout_prob):
+        if gaussian_noise > 0.0:
+            points = np.asarray(points)
+            points = np.clip(points + np.random.normal(loc=0.0, scale=gaussian_noise, size=points.shape), 0.0, 1.0)
+
+        if dropout_prob > 0.0:
+            assert dropout_prob <= 1.0
+            points = np.asarray(points)
+            points[np.random.uniform(0, 1, size=points.shape) < dropout_prob] = 0.0
+
+        return list(points)
+
+
 class MultiAgentRoundaboutEnv(MultiAgentPGDrive):
     _DEBUG_RANDOM_SEED = None
     born_roads = [
@@ -286,13 +361,13 @@ class MultiAgentRoundaboutEnv(MultiAgentPGDrive):
 
         # Use top-down view by default
         if hasattr(self, "main_camera") and self.main_camera is not None:
-            bird_camera_height = 160
+            bird_camera_height = self.config["bird_camera_height"]
             self.main_camera.camera.setPos(0, 0, bird_camera_height)
             self.main_camera.bird_camera_height = bird_camera_height
             self.main_camera.stop_chase(self.pg_world)
             # self.main_camera.camera.setPos(300, 20, bird_camera_height)
-            self.main_camera.camera_x += 100
-            self.main_camera.camera_y += 20
+            self.main_camera.camera_x += 95
+            self.main_camera.camera_y += 15
 
     def _process_extra_config(self, config):
         config = super(MultiAgentRoundaboutEnv, self)._process_extra_config(config)
@@ -353,21 +428,6 @@ class MultiAgentRoundaboutEnv(MultiAgentPGDrive):
     def step(self, actions):
         o, r, d, i = super(MultiAgentRoundaboutEnv, self).step(actions)
 
-        # Check return alignment
-        # o_set_1 = set(kkk for kkk, rrr in r.items() if rrr == -self.config["out_of_road_penalty"])
-        # o_set_2 = set(kkk for kkk, iii in i.items() if iii.get("out_of_road"))
-        # condition = o_set_1 == o_set_2
-        # condition = set(kkk for kkk, rrr in r.items() if rrr == self.config["success_reward"]) == \
-        #             set(kkk for kkk, iii in i.items() if iii.get("arrive_dest")) and condition
-        # condition = (
-        #                     not self.config["crash_done"] or (
-        #                     set(kkk for kkk, rrr in r.items() if rrr == -self.config["crash_vehicle_penalty"])
-        #                     == set(kkk for kkk, iii in i.items() if iii.get("crash_vehicle"))
-        #             )
-        #             ) and condition
-        # if not condition:
-        #     raise ValueError("Observation not aligned!")
-
         # Update reborn manager
         if self.episode_steps >= self.config["horizon"]:
             self.target_vehicle_manager.set_allow_reborn(False)
@@ -388,6 +448,7 @@ class MultiAgentRoundaboutEnv(MultiAgentPGDrive):
         if d["__all__"]:
             for k in d.keys():
                 d[k] = True
+
         return o, r, d, i
 
     def _update_destination_for(self, vehicle):
@@ -398,40 +459,65 @@ class MultiAgentRoundaboutEnv(MultiAgentPGDrive):
     def _reborn(self):
         new_obs_dict = {}
         while True:
-            allow_reborn, vehicle_info = self.target_vehicle_manager.propose_new_vehicle()
-            if vehicle_info is None:  # No more vehicle to be assigned.
+            new_id, new_obs = self._reborn_single_vehicle()
+            if new_obs is not None:
+                new_obs_dict[new_id] = new_obs
+            else:
                 break
-            if not allow_reborn:
-                # If not allow to reborn, move agents to some rural places.
-                v = vehicle_info["vehicle"]
-                v.set_position((-999, -999))
-                v.set_static(True)
-                self.target_vehicle_manager.confirm_reborn(False, vehicle_info)
-                break
-            v = vehicle_info["vehicle"]
-            dead_vehicle_id = vehicle_info["old_name"]
-            bp_index = self._replace_vehicles(v)
-            if bp_index is None:  # No more born places to be assigned.
-                self.target_vehicle_manager.confirm_reborn(False, vehicle_info)
-                break
-
-            self.target_vehicle_manager.confirm_reborn(True, vehicle_info)
-
-            new_id = vehicle_info["new_name"]
-            self.vehicles[new_id] = v  # Put it to new vehicle id.
-            self.dones[new_id] = False  # Put it in the internal dead-tracking dict.
-            self._born_places_manager.confirm_reborn(born_place_id=bp_index, vehicle_id=new_id)
-            logging.debug("{} Dead. {} Reborn!".format(dead_vehicle_id, new_id))
-
-            self.observations[new_id] = vehicle_info["observation"]
-            self.observations[new_id].reset(self, v)
-            self.observation_space.spaces[new_id] = vehicle_info["observation_space"]
-            self.action_space.spaces[new_id] = vehicle_info["action_space"]
-            new_obs = self.observations[new_id].observe(v)
-            new_obs_dict[new_id] = new_obs
         return new_obs_dict
 
+    def _force_reborn(self, agent_name):
+        """
+        This function can force a given vehicle to reborn!
+        """
+        self.target_vehicle_manager.finish(agent_name)
+        new_id, new_obs = self._reborn_single_vehicle()
+        return new_id, new_obs
+
+    def _reborn_single_vehicle(self):
+        """
+        Arbitrary insert a new vehicle to a new born place if possible.
+        """
+        allow_reborn, vehicle_info = self.target_vehicle_manager.propose_new_vehicle()
+        if vehicle_info is None:  # No more vehicle to be assigned.
+            return None, None
+        if not allow_reborn:
+            # If not allow to reborn, move agents to some rural places.
+            v = vehicle_info["vehicle"]
+            v.set_position((-999, -999))
+            v.set_static(True)
+            self.target_vehicle_manager.confirm_reborn(False, vehicle_info)
+            return None, None
+        v = vehicle_info["vehicle"]
+        dead_vehicle_id = vehicle_info["old_name"]
+        bp_index = self._replace_vehicles(v)
+        if bp_index is None:  # No more born places to be assigned.
+            self.target_vehicle_manager.confirm_reborn(False, vehicle_info)
+            return None, None
+
+        self.target_vehicle_manager.confirm_reborn(True, vehicle_info)
+
+        new_id = vehicle_info["new_name"]
+        v.set_static(False)
+        self.vehicles[new_id] = v  # Put it to new vehicle id.
+        self.dones[new_id] = False  # Put it in the internal dead-tracking dict.
+        self._born_places_manager.confirm_reborn(born_place_id=bp_index, vehicle_id=new_id)
+        logging.debug("{} Dead. {} Reborn!".format(dead_vehicle_id, new_id))
+
+        self.observations[new_id] = vehicle_info["observation"]
+        self.observations[new_id].reset(self, v)
+        self.observation_space.spaces[new_id] = vehicle_info["observation_space"]
+        self.action_space.spaces[new_id] = vehicle_info["action_space"]
+        new_obs = self.observations[new_id].observe(v)
+        return new_id, new_obs
+
     def _after_vehicle_done(self, obs=None, reward=None, dones: dict = None, info=None):
+        for v_id, v_info in info.items():
+            if v_info.get("episode_length", 0) >= self.config["horizon"]:
+                if dones[v_id] is not None:
+                    info[v_id]["max_step"] = True
+                    dones[v_id] = True
+                    self.dones[v_id] = True
         for dead_vehicle_id, done in dones.items():
             if done:
                 self.target_vehicle_manager.finish(dead_vehicle_id)
@@ -467,6 +553,9 @@ class MultiAgentRoundaboutEnv(MultiAgentPGDrive):
         self._update_destination_for(v)
         v.update_state(detector_mask=None)
         return bp_index
+
+    def get_single_observation(self, vehicle_config: "PGConfig") -> "ObservationType":
+        return LidarStateObservationMARound(vehicle_config)
 
 
 def _draw():
@@ -553,15 +642,22 @@ def _vis():
         for r_ in r.values():
             total_r += r_
         ep_s += 1
-        d.update({"total_r": total_r, "episode length": ep_s})
-        env.render(text=d)
+        # d.update({"total_r": total_r, "episode length": ep_s})
+        render_text = {
+            "total_r": total_r,
+            "episode length": ep_s,
+            "cam_x": env.main_camera.camera_x,
+            "cam_y": env.main_camera.camera_y,
+            "cam_z": env.main_camera.bird_camera_height
+        }
+        env.render(text=render_text)
         if d["__all__"]:
             print(
                 "Finish! Current step {}. Group Reward: {}. Average reward: {}".format(
                     i, total_r, total_r / env.target_vehicle_manager.next_agent_count
                 )
             )
-            break
+            # break
         if len(env.vehicles) == 0:
             total_r = 0
             print("Reset")
@@ -571,7 +667,7 @@ def _vis():
 
 def _profile():
     import time
-    env = MultiAgentRoundaboutEnv({"num_agents": 40})
+    env = MultiAgentRoundaboutEnv({"num_agents": 16})
     obs = env.reset()
     start = time.time()
     for s in range(10000):
