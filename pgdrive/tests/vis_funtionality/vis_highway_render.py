@@ -13,7 +13,7 @@ def vis_top_down_render_with_panda_render():
             "manual_control": True,
             "use_render": True,
             "use_image": False,
-            "traffic_mode": "reborn"
+            "traffic_mode": "respawn"
         }
     )
     o = env.reset()

@@ -1,10 +1,70 @@
 import logging
 
 from pgdrive.envs.pgdrive_env_v2 import PGDriveEnvV2
-from pgdrive.scene_creator.blocks.first_block import FirstBlock
 from pgdrive.scene_creator.vehicle.base_vehicle import BaseVehicle
 from pgdrive.utils import setup_logger, PGConfig
 from pgdrive.utils.pg_config import merge_dicts
+
+MULTI_AGENT_PGDRIVE_DEFAULT_CONFIG = dict(
+    # ===== Multi-agent =====
+    is_multi_agent=True,
+    num_agents=2,
+
+    # Whether to terminate a vehicle if it crash with others. Since in MA env the crash is extremely dense, so
+    # frequently done might not be a good idea.
+    crash_done=False,
+
+    # Whether the vehicle can rejoin the episode
+    allow_respawn=True,
+
+    # The maximum length of the episode. If allow respawn, then this is the maximum step that respawn can happen. After
+    # that, the episode won't terminate until all existing vehicles reach their horizon or done. The vehicle specified
+    # horizon is also this value.
+    horizon=1000,
+
+    # ===== Vehicle Setting =====
+    vehicle_config=dict(lidar=dict(num_lasers=72, distance=40, num_others=0)),
+    target_vehicle_configs=dict(),
+
+    # ===== New Reward Setting =====
+    out_of_road_penalty=5.0,
+    crash_vehicle_penalty=1.0,
+    crash_object_penalty=1.0,
+
+    # ===== Environmental Setting =====
+    bird_camera_height=120,
+    traffic_density=0.,
+    auto_termination=False,
+    camera_height=4,
+)
+
+# target_vehicle_configs=dict(
+# agent0=dict(
+#     spawn_longitude=10,
+#     spawn_lateral=1.5,
+#     spawn_lane_index=(FirstBlock.NODE_1, FirstBlock.NODE_2, 1),
+#     # show_lidar=True
+#     show_side_detector=True
+# ),
+# agent1=dict(
+#     spawn_longitude=10,
+#     # show_lidar=True,
+#     spawn_lateral=-1,
+#     spawn_lane_index=(FirstBlock.NODE_1, FirstBlock.NODE_2, 0),
+# ),
+# agent2=dict(
+#     spawn_longitude=10,
+#     spawn_lane_index=(FirstBlock.NODE_1, FirstBlock.NODE_2, 2),
+#     # show_lidar=True,
+#     spawn_lateral=1,
+# ),
+# agent3=dict(
+#     spawn_longitude=10,
+#     # show_lidar=True,
+#     spawn_lateral=2,
+#     spawn_lane_index=(FirstBlock.NODE_1, FirstBlock.NODE_2, 0),
+# )
+# ),
 
 
 class MultiAgentPGDrive(PGDriveEnvV2):
@@ -14,54 +74,7 @@ class MultiAgentPGDrive(PGDriveEnvV2):
     @staticmethod
     def default_config() -> PGConfig:
         config = PGDriveEnvV2.default_config()
-        config.update(
-            {
-                "is_multi_agent": True,
-                "environment_num": 1,
-                "traffic_density": 0.,
-                "start_seed": 10,
-                # "map": "yY",
-                "vehicle_config": {
-                    # "lane_line_detector": {
-                    #     "num_lasers": 100
-                    # }
-                },
-                "target_vehicle_configs": {
-                    "agent0": {
-                        "born_longitude": 10,
-                        "born_lateral": 1.5,
-                        "born_lane_index": (FirstBlock.NODE_1, FirstBlock.NODE_2, 1),
-                        # "show_lidar": True
-                        "show_side_detector": True
-                    },
-                    "agent1": {
-                        "born_longitude": 10,
-                        # "show_lidar": True,
-                        "born_lateral": -1,
-                        "born_lane_index": (FirstBlock.NODE_1, FirstBlock.NODE_2, 0),
-                    },
-                    "agent2": {
-                        "born_longitude": 10,
-                        "born_lane_index": (FirstBlock.NODE_1, FirstBlock.NODE_2, 2),
-                        # "show_lidar": True,
-                        "born_lateral": 1,
-                    },
-                    "agent3": {
-                        "born_longitude": 10,
-                        # "show_lidar": True,
-                        "born_lateral": 2,
-                        "born_lane_index": (FirstBlock.NODE_1, FirstBlock.NODE_2, 0),
-                    }
-                },
-                "num_agents": 4,
-                "crash_done": False,
-                "out_of_road_penalty": 5.0,
-                "crash_vehicle_penalty": 1.0,
-                "crash_object_penalty": 1.0,
-            }
-        )
-        # Some collision bugs still exist, always set to False now!!!!
-        # config.extend_config_with_unknown_keys({"crash_done": True})
+        config.update(MULTI_AGENT_PGDRIVE_DEFAULT_CONFIG)
         return config
 
     def __init__(self, config=None):
@@ -116,7 +129,6 @@ class MultiAgentPGDrive(PGDriveEnvV2):
         self.observations = {k: v for k, v in zip(self.config["target_vehicle_configs"].keys(), obses)}
         self.done_observations = dict()
 
-        # FIXME it would be better to change in-place!
         self.observation_space = self._get_observation_space()
         self.action_space = self._get_action_space()
 
@@ -182,10 +194,12 @@ class MultiAgentPGDrive(PGDriveEnvV2):
         for k in current_obs_keys:
             if k not in self.vehicles:
                 self.observation_space.spaces.pop(k)
-                # self.action_space.spaces.pop(k)  # Action space is updated in _reborn
+                # self.action_space.spaces.pop(k)  # Action space is updated in _respawn
 
 
 if __name__ == "__main__":
+    from pgdrive.scene_creator.blocks.first_block import FirstBlock
+
     setup_logger(True)
     env = MultiAgentPGDrive(
         {
@@ -197,17 +211,17 @@ if __name__ == "__main__":
             },
             "target_vehicle_configs": {
                 "agent0": {
-                    "born_longitude": 10,
-                    "born_lateral": 1.5,
-                    "born_lane_index": (FirstBlock.NODE_1, FirstBlock.NODE_2, 1),
+                    "spawn_longitude": 10,
+                    "spawn_lateral": 1.5,
+                    "spawn_lane_index": (FirstBlock.NODE_1, FirstBlock.NODE_2, 1),
                     # "show_lidar": True
                     "show_side_detector": True
                 },
                 "agent1": {
-                    "born_longitude": 10,
+                    "spawn_longitude": 10,
                     # "show_lidar": True,
-                    "born_lateral": -1,
-                    "born_lane_index": (FirstBlock.NODE_1, FirstBlock.NODE_2, 0),
+                    "spawn_lateral": -1,
+                    "spawn_lane_index": (FirstBlock.NODE_1, FirstBlock.NODE_2, 0),
                 },
             }
         }

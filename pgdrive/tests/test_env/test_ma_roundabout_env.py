@@ -2,7 +2,6 @@ import time
 
 import numpy as np
 from gym.spaces import Box, Dict
-
 from pgdrive.envs.marl_envs.marl_inout_roundabout import MultiAgentRoundaboutEnv
 from pgdrive.utils import distance_greater, norm
 
@@ -292,8 +291,8 @@ def test_ma_roundabout_reset():
         env.close()
 
 
-def test_ma_roundabout_close_born():
-    def _no_close_born(vehicles):
+def test_ma_roundabout_close_spawn():
+    def _no_close_spawn(vehicles):
         vehicles = list(vehicles.values())
         for c1, v1 in enumerate(vehicles):
             for c2 in range(c1 + 1, len(vehicles)):
@@ -312,7 +311,7 @@ def test_ma_roundabout_close_born():
             for _ in range(10):
                 o, r, d, i = env.step({k: [0, 0] for k in env.vehicles.keys()})
                 assert not any(d.values())
-            _no_close_born(env.vehicles)
+            _no_close_spawn(env.vehicles)
             print('Finish {} resets.'.format(num_r))
     finally:
         env.close()
@@ -502,21 +501,21 @@ def test_ma_roundabout_reward_sign():
     However, some bugs cause the vehicles receive negative reward by doing this behavior!
     """
     class TestEnv(MultiAgentRoundaboutEnv):
-        _reborn_count = 0
+        _respawn_count = 0
 
         def _update_agent_pos_configs(self, config):
             config = super(TestEnv, self)._update_agent_pos_configs(config)
             safe_places = []
-            for c, bid in enumerate(self._born_places_manager.safe_born_places.keys()):
-                safe_places.append((bid, self._born_places_manager.safe_born_places[bid]))
+            for c, bid in enumerate(self._spawn_manager.safe_spawn_places.keys()):
+                safe_places.append((bid, self._spawn_manager.safe_spawn_places[bid]))
             self._safe_places = safe_places
             return config
 
         def _replace_vehicles(self, v):
             v.prepare_step([0, -1])
-            bp_index, new_born_place = self._safe_places[self._reborn_count]
-            new_born_place_config = new_born_place["config"]
-            v.vehicle_config.update(new_born_place_config)
+            bp_index, new_spawn_place = self._safe_places[self._respawn_count]
+            new_spawn_place_config = new_spawn_place["config"]
+            v.vehicle_config.update(new_spawn_place_config)
             v.reset(self.current_map)
             self._update_destination_for(v)
             v.update_state(detector_mask=None)
@@ -533,11 +532,11 @@ def test_ma_roundabout_reward_sign():
             o, r, d, i = env.step(act)
             ep_reward += next(iter(r.values()))
             if any(d.values()):
-                print("Finish reborn count: {}, reward {}".format(env._reborn_count, ep_reward))
-                env._reborn_count += 1
+                print("Finish respawn count: {}, reward {}".format(env._respawn_count, ep_reward))
+                env._respawn_count += 1
                 assert ep_reward > 10, ep_reward
                 ep_reward = 0
-            if env._reborn_count >= len(env._safe_places):
+            if env._respawn_count >= len(env._safe_places):
                 break
             if d["__all__"]:
                 break
@@ -629,7 +628,7 @@ def test_ma_roundabout_horizon_termination():
             obs = env.reset()
             _check_spaces_after_reset(env, obs)
             assert env.observation_space.contains(obs)
-            should_reborn = set()
+            should_respawn = set()
             special_agents = set(["agent0", "agent7"])
             for step in range(1, 10000):
                 act = {k: [0, 0] for k in env.vehicles.keys()}
@@ -643,13 +642,13 @@ def test_ma_roundabout_horizon_termination():
                 if step == 0 or step == 1:
                     assert not any(d.values())
 
-                if should_reborn:
-                    for kkk in should_reborn:
-                        assert kkk not in obs, "It seems the max_step agents is not reborn!"
+                if should_respawn:
+                    for kkk in should_respawn:
+                        assert kkk not in obs, "It seems the max_step agents is not respawn!"
                         assert kkk not in r
                         assert kkk not in d
                         assert kkk not in i
-                    should_reborn.clear()
+                    should_respawn.clear()
 
                 for kkk, ddd in d.items():
                     if ddd and kkk == "__all__":
@@ -660,11 +659,11 @@ def test_ma_roundabout_horizon_termination():
                         assert not i[kkk]["out_of_road"]
                         assert not i[kkk]["crash"]
                         assert not i[kkk]["crash_vehicle"]
-                        should_reborn.add(kkk)
+                        should_respawn.add(kkk)
 
                 if d["__all__"]:
                     obs = env.reset()
-                    should_reborn.clear()
+                    should_respawn.clear()
                     break
     finally:
         env.close()
@@ -675,7 +674,7 @@ if __name__ == '__main__':
     test_ma_roundabout_horizon()
     test_ma_roundabout_reset()
     test_ma_roundabout_reward_done_alignment()
-    test_ma_roundabout_close_born()
+    test_ma_roundabout_close_spawn()
     test_ma_roundabout_reward_sign()
     test_ma_roundabout_init_space()
     test_ma_roundabout_no_short_episode()

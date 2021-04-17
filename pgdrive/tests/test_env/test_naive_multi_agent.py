@@ -33,7 +33,7 @@ def test_naive_multi_agent_pgdrive():
             "target_vehicle_configs": {
                 "agent{}".format(i): \
                     {
-                        "born_longitude": i * 5
+                        "spawn_longitude": i * 5
                     }
                 for i in range(4)
             }

@@ -22,11 +22,11 @@ class TestEnv(PGDriveEnv):
                 "map": "XTX",
                 "target_vehicle_configs": {
                     "agent0": {
-                        "born_longitude": 40,
+                        "spawn_longitude": 40,
                         "show_lidar": True,
                     },
                     "agent1": {
-                        "born_longitude": 10,
+                        "spawn_longitude": 10,
                         "show_lidar": True,
                     }
                 },

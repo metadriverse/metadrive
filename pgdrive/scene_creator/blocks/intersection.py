@@ -2,7 +2,6 @@ import copy
 from collections import deque
 
 import numpy as np
-
 from pgdrive.scene_creator.blocks.block import Block, BlockSocket
 from pgdrive.scene_creator.blocks.create_block_utils import CreateAdverseRoad, CreateRoadFrom, ExtendStraightLane, \
     create_bend_straight
@@ -73,7 +72,7 @@ class InterSection(Block):
                 ) and no_cross
                 no_cross = CreateAdverseRoad(exit_road, self.block_network, self._global_network) and no_cross
                 socket = BlockSocket(exit_road, -exit_road)
-                self.add_reborn_roads(socket.negative_road)
+                self.add_respawn_roads(socket.negative_road)
                 self.add_sockets(socket)
                 attach_road = -exit_road
                 attach_lanes = attach_road.get_lanes(self.block_network)
@@ -123,8 +122,8 @@ class InterSection(Block):
 
     def get_socket(self, index: int) -> BlockSocket:
         socket = super(InterSection, self).get_socket(index)
-        if socket.negative_road in self.get_reborn_roads():
-            self._reborn_roads.remove(socket.negative_road)
+        if socket.negative_road in self.get_respawn_roads():
+            self._respawn_roads.remove(socket.negative_road)
         return socket
 
     def _create_left_turn(self, radius, lane_num, attach_left_lane, attach_road, intersect_nodes, part_idx):

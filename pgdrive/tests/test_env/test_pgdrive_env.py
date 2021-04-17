@@ -5,7 +5,6 @@ import numpy as np
 import pytest
 from pgdrive import PGDriveEnv
 from pgdrive.scene_creator.vehicle_module.PID_controller import PIDController, Target
-from pgdrive.utils import distance_greater
 
 # Key: case name, value: environmental config
 blackbox_test_configs = dict(

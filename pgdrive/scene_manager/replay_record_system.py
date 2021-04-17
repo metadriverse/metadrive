@@ -41,7 +41,7 @@ class PGReplayer:
             else:
                 vehicle_to_set = self.restore_vehicles[index]
                 vehicle_to_set.set_state(state)
-                if state["done"] and not vehicle_to_set.enable_reborn:
+                if state["done"] and not vehicle_to_set.enable_respawn:
                     vehicles_to_remove.append(vehicle_to_set)
         for v in vehicles_to_remove:
             v.destroy(pg_world)

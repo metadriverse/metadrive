@@ -70,9 +70,9 @@ class MultiAgentIntersectPGDrive(PGDriveEnvV2):
 
         for agent_id in range(self.DEFAULT_AGENT_NUM):
             config["target_vehicle_configs"][f"agent{agent_id}"] = dict()
-            config["target_vehicle_configs"][f"agent{agent_id}"]["born_longitude"] = 10
-            config["target_vehicle_configs"][f"agent{agent_id}"]["born_lateral"] = 1
-            config["target_vehicle_configs"][f"agent{agent_id}"]["born_lane_index"] = \
+            config["target_vehicle_configs"][f"agent{agent_id}"]["spawn_longitude"] = 10
+            config["target_vehicle_configs"][f"agent{agent_id}"]["spawn_lateral"] = 1
+            config["target_vehicle_configs"][f"agent{agent_id}"]["spawn_lane_index"] = \
                 self.get_available_spot(agent_id)
         super(MultiAgentIntersectPGDrive, self).__init__(config)
 

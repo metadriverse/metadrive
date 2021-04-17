@@ -14,7 +14,7 @@ class SidePassEnv(PGDriveEnv):
                 "environment_num": 1,
                 "traffic_density": 0.1,
                 "start_seed": 5,
-                # "traffic_mode":"reborn",
+                # "traffic_mode":"respawn",
                 "pg_world_config": {
                     "debug_physics_world": False,
                 },

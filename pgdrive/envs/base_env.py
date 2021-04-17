@@ -1,4 +1,3 @@
-import copy
 import os.path as osp
 import time
 from collections import defaultdict
@@ -116,7 +115,7 @@ class BasePGDriveEnv(gym.Env):
         self.done_vehicles = dict()
         self.dones = None
         self.episode_rewards = defaultdict(float)
-        # In MARL envs with reborn mechanism, varying episode lengths might happen.
+        # In MARL envs with respawn mechanism, varying episode lengths might happen.
         self.episode_lengths = defaultdict(int)
         self._pending_force_seed = None
 

@@ -6,7 +6,6 @@ import sys
 from typing import Union, Dict, AnyStr, Optional, Tuple
 
 import numpy as np
-
 from pgdrive.constants import DEFAULT_AGENT
 from pgdrive.envs.base_env import BasePGDriveEnv
 from pgdrive.obs import LidarStateObservation, ImageStateObservation
@@ -48,7 +47,7 @@ PGDriveEnvV1_DEFAULT_CONFIG = dict(
 
     # ===== Traffic =====
     traffic_density=0.1,
-    traffic_mode=TrafficMode.Trigger,  # "Reborn", "Trigger", "Hybrid"
+    traffic_mode=TrafficMode.Trigger,  # "Respawn", "Trigger", "Hybrid"
     random_traffic=False,  # Traffic is randomized at default.
 
     # ===== Object =====
@@ -79,10 +78,10 @@ PGDriveEnvV1_DEFAULT_CONFIG = dict(
         # use_image=False,
         # rgb_clip=True,
 
-        # ===== vehicle born =====
-        born_lane_index=(FirstBlock.NODE_1, FirstBlock.NODE_2, 0),
-        born_longitude=5.0,
-        born_lateral=0.0,
+        # ===== vehicle spawn =====
+        spawn_lane_index=(FirstBlock.NODE_1, FirstBlock.NODE_2, 0),
+        spawn_longitude=5.0,
+        spawn_lateral=0.0,
 
         # ==== others ====
         max_engine_force=500,

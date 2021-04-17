@@ -6,7 +6,6 @@ import numpy
 from panda3d.bullet import BulletBoxShape, BulletRigidBodyNode, BulletGhostNode
 from panda3d.core import Vec3, LQuaternionf, BitMask32, Vec4, CardMaker, TextureStage, RigidBodyCombiner, \
     TransparencyAttrib, SamplerState, NodePath
-
 from pgdrive.constants import Decoration, BodyName, CamMask
 from pgdrive.scene_creator.blocks.constants import BlockDefault
 from pgdrive.scene_creator.lane.abs_lane import AbstractLane, LineType, LaneNode, LineColor
@@ -74,7 +73,7 @@ class Block(Element, BlockDefault):
         self.block_network = RoadNetwork()
 
         # used to spawn npc
-        self._reborn_roads = []
+        self._respawn_roads = []
 
         # own sockets, one block derives from a socket, but will have more sockets to connect other blocks
         self._sockets = OrderedDict()
@@ -162,27 +161,27 @@ class Block(Element, BlockDefault):
         assert socket_index in self._sockets, (socket_index, self._sockets.keys())
         return self._sockets[socket_index]
 
-    def add_reborn_roads(self, reborn_roads: Union[List[Road], Road]):
+    def add_respawn_roads(self, respawn_roads: Union[List[Road], Road]):
         """
         Use this to add spawn roads instead of modifying the list directly
         """
-        if isinstance(reborn_roads, List):
-            for road in reborn_roads:
-                self._add_one_reborn_road(road)
-        elif isinstance(reborn_roads, Road):
-            self._add_one_reborn_road(reborn_roads)
+        if isinstance(respawn_roads, List):
+            for road in respawn_roads:
+                self._add_one_respawn_road(road)
+        elif isinstance(respawn_roads, Road):
+            self._add_one_respawn_road(respawn_roads)
         else:
             raise ValueError("Only accept List[Road] or Road in this func")
 
-    def get_reborn_roads(self):
-        return self._reborn_roads
+    def get_respawn_roads(self):
+        return self._respawn_roads
 
-    def get_reborn_lanes(self):
+    def get_respawn_lanes(self):
         """
         return a 2-dim array [[]] to keep the lane index
         """
         ret = []
-        for road in self._reborn_roads:
+        for road in self._respawn_roads:
             lanes = road.get_lanes(self.block_network)
             ret.append(lanes)
         return ret
@@ -234,16 +233,16 @@ class Block(Element, BlockDefault):
             socket.set_index(self._block_name, len(self._sockets))
         self._sockets[socket.index] = socket
 
-    def _add_one_reborn_road(self, reborn_road: Road):
-        assert isinstance(reborn_road, Road), "Spawn roads list only accept Road Type"
-        self._reborn_roads.append(reborn_road)
+    def _add_one_respawn_road(self, respawn_road: Road):
+        assert isinstance(respawn_road, Road), "Spawn roads list only accept Road Type"
+        self._respawn_roads.append(respawn_road)
 
     def _clear_topology(self):
         self._global_network -= self.block_network
         self.block_network.graph.clear()
         self.PART_IDX = 0
         self.ROAD_IDX = 0
-        self._reborn_roads.clear()
+        self._respawn_roads.clear()
         self._sockets.clear()
 
     def _try_plug_into_previous_block(self) -> bool:

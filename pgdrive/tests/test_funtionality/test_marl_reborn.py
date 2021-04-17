@@ -2,7 +2,7 @@ from pgdrive.envs.marl_envs.marl_inout_roundabout import MultiAgentRoundaboutEnv
 from pgdrive.utils import setup_logger
 
 
-def test_reborn():
+def test_respawn():
     out_of_road_cost = 5555
     out_of_road_penalty = 2222
     env = MultiAgentRoundaboutEnv(
@@ -70,4 +70,4 @@ def test_reborn():
 
 if __name__ == '__main__':
     setup_logger(True)
-    test_reborn()
+    test_respawn()
