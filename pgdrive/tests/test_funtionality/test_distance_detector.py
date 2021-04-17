@@ -1,7 +1,6 @@
+from pgdrive.constants import BodyName
 from pgdrive.envs.pgdrive_env import PGDriveEnv
-from pgdrive.constants import BodyName
 from pgdrive.scene_creator.vehicle.base_vehicle import BaseVehicle
-from pgdrive.constants import BodyName
 from pgdrive.utils import setup_logger
 
 
@@ -29,8 +28,8 @@ def test_lidar(render=False):
     try:
         env.reset()
         v_config = env.config["vehicle_config"]
-        v_config["born_longitude"] = 80
-        v_config["born_lateral"] = 5
+        v_config["spawn_longitude"] = 80
+        v_config["spawn_lateral"] = 5
         another_v = BaseVehicle(env.pg_world, v_config)
         another_v.reset(env.current_map)
         objs = env.vehicle.side_detector.get_detected_objects() + env.vehicle.lane_line_detector.get_detected_objects()

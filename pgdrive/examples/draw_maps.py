@@ -1,7 +1,6 @@
 import random
 
 import matplotlib.pyplot as plt
-
 from pgdrive import PGDriveEnvV2
 from pgdrive.utils import draw_top_down_map
 

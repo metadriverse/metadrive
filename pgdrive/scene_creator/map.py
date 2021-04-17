@@ -4,7 +4,6 @@ from typing import List
 
 import numpy as np
 from panda3d.core import NodePath
-
 from pgdrive.scene_creator.algorithm.BIG import BIG, BigGenerateMethod
 from pgdrive.scene_creator.blocks.block import Block
 from pgdrive.scene_creator.blocks.first_block import FirstBlock

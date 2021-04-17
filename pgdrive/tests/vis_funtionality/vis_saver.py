@@ -9,7 +9,7 @@ class TestEnv(PGDriveEnv):
             {
                 "environment_num": 5,
                 "traffic_density": 0.1,
-                "traffic_mode": "reborn",
+                "traffic_mode": "respawn",
                 "start_seed": 5,
                 # "controller": "joystick",
                 "manual_control": True,

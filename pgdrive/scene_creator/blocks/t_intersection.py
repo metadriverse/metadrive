@@ -85,4 +85,4 @@ class TInterSection(InterSection):
         socket = self._sockets.pop(BlockSocket.get_real_index(self._block_name, t_type))
         self.block_network.remove_all_roads(socket.positive_road.start_node, socket.positive_road.end_node)
         self.block_network.remove_all_roads(socket.negative_road.start_node, socket.negative_road.end_node)
-        self._reborn_roads.remove(socket.negative_road)
+        self._respawn_roads.remove(socket.negative_road)

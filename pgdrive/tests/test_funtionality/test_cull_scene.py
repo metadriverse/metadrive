@@ -1,5 +1,4 @@
 from pgdrive.envs.multi_agent_pgdrive import MultiAgentPGDrive
-from pgdrive.envs.pgdrive_env import PGDriveEnv
 from pgdrive.utils import PGConfig
 
 
@@ -24,14 +23,14 @@ def test_cull_scene(use_render=False):
                 "debug": True,
                 "target_vehicle_configs": {
                     "agent0": {
-                        "born_longitude": 10,
-                        "born_lateral": 2.5,
-                        "born_lane_index": ("5C0_0_", "5C0_1_", 1),
+                        "spawn_longitude": 10,
+                        "spawn_lateral": 2.5,
+                        "spawn_lane_index": ("5C0_0_", "5C0_1_", 1),
                     },
                     "agent1": {
-                        "born_longitude": 12,  # locate a little forward
-                        "born_lateral": 2.2,
-                        "born_lane_index": ("5C0_0_", "5C0_1_", 1),
+                        "spawn_longitude": 12,  # locate a little forward
+                        "spawn_lateral": 2.2,
+                        "spawn_lane_index": ("5C0_0_", "5C0_1_", 1),
                     }
                 },
                 "num_agents": 2,

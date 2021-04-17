@@ -7,7 +7,6 @@ import gym
 import numpy as np
 from panda3d.bullet import BulletVehicle, BulletBoxShape, ZUp, BulletGhostNode
 from panda3d.core import Vec3, TransformState, NodePath, LQuaternionf, BitMask32, TextNode
-
 from pgdrive.constants import RENDER_MODE_ONSCREEN, COLOR, COLLISION_INFO_COLOR, BodyName, CamMask, CollisionGroup
 from pgdrive.scene_creator.lane.abs_lane import AbstractLane
 from pgdrive.scene_creator.lane.circular_lane import CircularLane
@@ -89,7 +88,7 @@ class BaseVehicle(DynamicElement):
         self.node_path = NodePath("vehicle")
 
         # create
-        self.born_place = (0, 0)
+        self.spawn_place = (0, 0)
         self._add_chassis(pg_world.physics_world)
         self.wheels = self._create_wheel()
 
@@ -107,7 +106,7 @@ class BaseVehicle(DynamicElement):
         self.throttle_brake = 0.0
         self.steering = 0
         self.last_current_action = deque([(0.0, 0.0), (0.0, 0.0)], maxlen=2)
-        self.last_position = self.born_place
+        self.last_position = self.spawn_place
         self.last_heading_dir = self.heading
         self.dist_to_left = None
         self.dist_to_right = None
@@ -285,13 +284,13 @@ class BaseVehicle(DynamicElement):
         """
         pos is a 2-d array, and heading is a float (unit degree)
         if pos is not None, vehicle will be reset to the position
-        else, vehicle will be reset to born place
+        else, vehicle will be reset to spawn place
         """
         if pos is None:
-            lane = map.road_network.get_lane(self.vehicle_config["born_lane_index"])
-            pos = lane.position(self.vehicle_config["born_longitude"], self.vehicle_config["born_lateral"])
-            heading = np.rad2deg(lane.heading_at(self.vehicle_config["born_longitude"]))
-            self.born_place = pos
+            lane = map.road_network.get_lane(self.vehicle_config["spawn_lane_index"])
+            pos = lane.position(self.vehicle_config["spawn_longitude"], self.vehicle_config["spawn_lateral"])
+            heading = np.rad2deg(lane.heading_at(self.vehicle_config["spawn_longitude"]))
+            self.spawn_place = pos
         heading = -np.deg2rad(heading) - np.pi / 2
         self.set_static(False)
         self.chassis_np.setPos(panda_position(Vec3(*pos, 1)))
@@ -310,7 +309,7 @@ class BaseVehicle(DynamicElement):
         self.throttle_brake = 0.0
         self.steering = 0
         self.last_current_action = deque([(0.0, 0.0), (0.0, 0.0)], maxlen=2)
-        self.last_position = self.born_place
+        self.last_position = self.spawn_place
         self.last_heading_dir = self.heading
 
         self.update_dist_to_left_right()
@@ -330,7 +329,7 @@ class BaseVehicle(DynamicElement):
                 block.node_path.hide(CamMask.DepthCam)
 
         assert self.routing_localization
-        # Please note that if you reborn agent to some new place and might have a new destination,
+        # Please note that if you respawn agent to some new place and might have a new destination,
         # you should reset the routing localization too! Via: vehicle.routing_localization.set_route or
         # vehicle.update
 
@@ -494,8 +493,8 @@ class BaseVehicle(DynamicElement):
         heading = np.deg2rad(-para[Parameter.heading] - 90)
         chassis.setMass(para[Parameter.mass])
         self.chassis_np = self.node_path.attachNewNode(chassis)
-        # not random born now
-        self.chassis_np.setPos(Vec3(*self.born_place, 1))
+        # not random spawn now
+        self.chassis_np.setPos(Vec3(*self.spawn_place, 1))
         self.chassis_np.setQuat(LQuaternionf(math.cos(heading / 2), 0, 0, math.sin(heading / 2)))
         chassis.setDeactivationEnabled(False)
         chassis.notifyCollisions(True)  # advance collision check, do callback in pg_collision_callback
@@ -578,9 +577,9 @@ class BaseVehicle(DynamicElement):
         :param map: new map
         :return: None
         """
-        lane, new_l_index = ray_localization(np.array(self.born_place), self.pg_world)
+        lane, new_l_index = ray_localization(np.array(self.spawn_place), self.pg_world)
         self.routing_localization.update(map, start_road_node=new_l_index[0])
-        assert lane is not None, "Born place is not on road!"
+        assert lane is not None, "spawn place is not on road!"
         self.lane_index = new_l_index
         self.lane = lane
 

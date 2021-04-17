@@ -2,7 +2,7 @@ from pgdrive.envs.pgdrive_env import PGDriveEnv
 from pgdrive.utils import setup_logger
 
 
-def test_traffic_reborn(vis=False):
+def test_traffic_respawn(vis=False):
     setup_logger(vis)
 
     env = PGDriveEnv(
@@ -11,7 +11,7 @@ def test_traffic_reborn(vis=False):
             "manual_control": vis,
             "use_render": vis,
             "use_topdown": True,
-            "traffic_mode": "reborn"
+            "traffic_mode": "respawn"
         }
     )
     env.reset()
@@ -32,4 +32,4 @@ def test_traffic_reborn(vis=False):
 
 
 if __name__ == '__main__':
-    test_traffic_reborn(vis=False)
+    test_traffic_respawn(vis=False)

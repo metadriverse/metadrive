@@ -1,5 +1,6 @@
-from typing import List, Tuple
 import re
+from typing import List, Tuple
+
 from pgdrive.constants import Decoration
 from pgdrive.utils.scene_utils import get_lanes_on_road
 

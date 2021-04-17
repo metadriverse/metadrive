@@ -102,7 +102,7 @@ class InRampOnStraight(Ramp):
         straight_road = Road(self.add_road_node(), self.add_road_node())
         self.block_network.add_lane(straight_road.start_node, straight_road.end_node, straight_part)
         no_cross = (not check_lane_on_road(self._global_network, straight_part, 0.95)) and no_cross
-        self.add_reborn_roads(straight_road)
+        self.add_respawn_roads(straight_road)
 
         # p1 road 0, 1
         bend_1, connect_part = create_bend_straight(

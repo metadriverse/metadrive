@@ -6,7 +6,7 @@ from pgdrive.utils import norm
 def test_random_traffic():
     env = PGDriveEnvV2({
         "random_traffic": True,
-        "traffic_mode": "reborn",
+        "traffic_mode": "respawn",
         # "fast": True, "use_render": True
     })
     try:

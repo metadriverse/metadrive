@@ -7,7 +7,7 @@ def test_get_lane_index(use_render=False):
             "map": "rRCXSOTCR",
             "environment_num": 1,
             "traffic_density": 0.3,
-            "traffic_mode": "reborn",
+            "traffic_mode": "respawn",
             "use_render": use_render
         }
     )

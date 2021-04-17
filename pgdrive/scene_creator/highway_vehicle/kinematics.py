@@ -92,7 +92,7 @@ class Vehicle:
         vehicle in the road with density based on the number of lanes.
 
         :param longitude: the longitude on lane
-        :param lane: the lane where the vehicle is born
+        :param lane: the lane where the vehicle is spawn
         :param traffic_mgr: the traffic_mgr where the vehicle is driving
         :param speed: initial speed in [m/s]. If None, will be chosen randomly
         :return: A vehicle with random position and/or speed

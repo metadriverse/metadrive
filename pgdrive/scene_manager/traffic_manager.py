@@ -12,8 +12,8 @@ BlockVehicles = namedtuple("block_vehicles", "trigger_road vehicles")
 
 
 class TrafficMode:
-    # Traffic vehicles will be reborn, once they arrive at the destinations
-    Reborn = "reborn"
+    # Traffic vehicles will be respawn, once they arrive at the destinations
+    Respawn = "respawn"
 
     # Traffic vehicles will be triggered only once
     Trigger = "trigger"
@@ -28,7 +28,7 @@ class TrafficManager(RandomEngine):
     def __init__(self, traffic_mode: TrafficMode, random_traffic: bool):
         """
         Control the whole traffic flow
-        :param traffic_mode: Reborn mode or Trigger mode
+        :param traffic_mode: Respawn mode or Trigger mode
         :param random_traffic: the distribution of vehicles will be different in different episdoes
         """
         # current map TODO maintain one map in scene_mgr
@@ -46,7 +46,7 @@ class TrafficManager(RandomEngine):
         self.mode = traffic_mode
         self.random_traffic = random_traffic
         self.density = 0
-        self.reborn_lanes = None
+        self.respawn_lanes = None
 
         # control randomness of traffic
         super(TrafficManager, self).__init__()
@@ -74,7 +74,7 @@ class TrafficManager(RandomEngine):
         self.density = traffic_density
 
         # update vehicle list
-        self.block_triggered_vehicles = [] if self.mode != TrafficMode.Reborn else None
+        self.block_triggered_vehicles = [] if self.mode != TrafficMode.Respawn else None
         self.vehicles = list(self.target_vehicles.values())  # it is used to perform IDM and bicycle model based motion
         for v in self.vehicles:
             self.is_target_vehicle_dict[v.name] = True
@@ -86,15 +86,15 @@ class TrafficManager(RandomEngine):
         if abs(traffic_density - 0.0) < 1e-2:
             return
         map = self.map
-        self.reborn_lanes = None
-        if self.mode == TrafficMode.Reborn:
-            # add reborn vehicle
-            self._create_reborn_vehicles(pg_world, map, traffic_density)
+        self.respawn_lanes = None
+        if self.mode == TrafficMode.Respawn:
+            # add respawn vehicle
+            self._create_respawn_vehicles(pg_world, map, traffic_density)
         elif self.mode == TrafficMode.Trigger:
             self._create_vehicles_once(pg_world, map, traffic_density)
         elif self.mode == TrafficMode.Hybrid:
-            # vehicles will be reborn after arriving destination
-            self.reborn_lanes = self._get_available_reborn_lanes(map)
+            # vehicles will be respawn after arriving destination
+            self.respawn_lanes = self._get_available_respawn_lanes(map)
             self._create_vehicles_once(pg_world, map, traffic_density)
         else:
             raise ValueError("No such mode named {}".format(self.mode))
@@ -107,7 +107,7 @@ class TrafficManager(RandomEngine):
         :param pg_world: World
         :return: None
         """
-        if self.mode != TrafficMode.Reborn:
+        if self.mode != TrafficMode.Respawn:
             for v in self.target_vehicles.values():
                 ego_lane_idx = v.lane_index[:-1]
                 ego_road = Road(ego_lane_idx[0], ego_lane_idx[1])
@@ -157,7 +157,7 @@ class TrafficManager(RandomEngine):
 
             if self.mode == TrafficMode.Hybrid:
                 # create a new one
-                lane = self.np_random.choice(self.reborn_lanes)
+                lane = self.np_random.choice(self.respawn_lanes)
                 vehicle_type = self.random_vehicle_type()
                 random_v = self.spawn_one_vehicle(vehicle_type, lane, self.np_random.rand() * lane.length / 2, True)
                 self.traffic_vehicles.append(random_v)
@@ -180,7 +180,7 @@ class TrafficManager(RandomEngine):
 
         self.vehicles = []
         self.is_target_vehicle_dict.clear()
-        self.block_triggered_vehicles = [] if self.mode != TrafficMode.Reborn else None
+        self.block_triggered_vehicles = [] if self.mode != TrafficMode.Respawn else None
         self.traffic_vehicles = deque()  # it is used to step all vehicles on scene
         self._spawned_vehicles = []
 
@@ -204,7 +204,7 @@ class TrafficManager(RandomEngine):
         Get the vehicles on road
         :return:
         """
-        if self.mode == TrafficMode.Reborn:
+        if self.mode == TrafficMode.Respawn:
             return len(self.traffic_vehicles)
         return sum(len(block_vehicle_set.vehicles) for block_vehicle_set in self.block_triggered_vehicles)
 
@@ -218,7 +218,7 @@ class TrafficManager(RandomEngine):
             states[vehicle.index] = vehicle.get_state()
 
         # collect other vehicles
-        if self.mode != TrafficMode.Reborn:
+        if self.mode != TrafficMode.Respawn:
             for v_b in self.block_triggered_vehicles:
                 for vehicle in v_b.vehicles:
                     states[vehicle.index] = vehicle.get_state()
@@ -238,42 +238,42 @@ class TrafficManager(RandomEngine):
             init_state = vehicle.get_state()
             init_state["index"] = vehicle.index
             init_state["type"] = vehicle.class_name
-            init_state["enable_reborn"] = vehicle.enable_reborn
+            init_state["enable_respawn"] = vehicle.enable_respawn
             vehicles[vehicle.index] = init_state
 
         # collect other vehicles
-        if self.mode != TrafficMode.Reborn:
+        if self.mode != TrafficMode.Respawn:
             for v_b in self.block_triggered_vehicles:
                 for vehicle in v_b.vehicles:
                     init_state = vehicle.get_state()
                     init_state["type"] = vehicle.class_name
                     init_state["index"] = vehicle.index
-                    init_state["enable_reborn"] = vehicle.enable_reborn
+                    init_state["enable_respawn"] = vehicle.enable_respawn
                     vehicles[vehicle.index] = init_state
         return vehicles
 
-    def spawn_one_vehicle(self, vehicle_type, lane: AbstractLane, long: float, enable_reborn: bool):
+    def spawn_one_vehicle(self, vehicle_type, lane: AbstractLane, long: float, enable_respawn: bool):
         """
         Create one vehicle on lane and a specific place
         :param vehicle_type: PGTrafficVehicle type (s,m,l,xl)
         :param lane: Straight Lane or Circular Lane
         :param long: longitude position on lane
-        :param enable_reborn: Reborn or not
+        :param enable_respawn: Respawn or not
         :return: PGTrafficVehicle
         """
         random_v = vehicle_type.create_random_traffic_vehicle(
-            len(self.vehicles), self, lane, long, seed=self.random_seed, enable_reborn=enable_reborn
+            len(self.vehicles), self, lane, long, seed=self.random_seed, enable_respawn=enable_respawn
         )
         self._spawned_vehicles.append(random_v)
         self.vehicles.append(random_v.vehicle_node.kinematic_model)
         return random_v
 
-    def _create_vehicles_on_lane(self, traffic_density: float, lane: AbstractLane, is_reborn_lane):
+    def _create_vehicles_on_lane(self, traffic_density: float, lane: AbstractLane, is_respawn_lane):
         """
         Create vehicles on a lane
         :param traffic_density: traffic density according to num of vehicles per meter
         :param lane: Circular lane or Straight lane
-        :param is_reborn_lane: Whether vehicles should be reborn on this lane or not
+        :param is_respawn_lane: Whether vehicles should be respawn on this lane or not
         :return: List of vehicles
         """
 
@@ -287,13 +287,13 @@ class TrafficManager(RandomEngine):
                 # Do special handling for ramp, and there must be vehicles created there
                 continue
             vehicle_type = self.random_vehicle_type()
-            random_v = self.spawn_one_vehicle(vehicle_type, lane, long, is_reborn_lane)
+            random_v = self.spawn_one_vehicle(vehicle_type, lane, long, is_respawn_lane)
             traffic_vehicles.append(random_v)
         return traffic_vehicles
 
-    def _create_reborn_vehicles(self, pg_world: PGWorld, map: Map, traffic_density: float):
-        reborn_lanes = self._get_available_reborn_lanes(map)
-        for lane in reborn_lanes:
+    def _create_respawn_vehicles(self, pg_world: PGWorld, map: Map, traffic_density: float):
+        respawn_lanes = self._get_available_respawn_lanes(map)
+        for lane in respawn_lanes:
             self.traffic_vehicles += self._create_vehicles_on_lane(traffic_density, lane, True)
         for vehicle in self.traffic_vehicles:
             vehicle.attach_to_pg_world(pg_world.pbr_worldNP, pg_world.physics_world)
@@ -315,8 +315,8 @@ class TrafficManager(RandomEngine):
 
             # trigger lanes is a two dimension array [[]], the first dim represent road consisting of lanes.
             trigger_lanes = block.block_network.get_positive_lanes()
-            reborn_lanes = block.get_reborn_lanes()
-            for lanes in reborn_lanes:
+            respawn_lanes = block.get_respawn_lanes()
+            for lanes in respawn_lanes:
                 if lanes not in trigger_lanes:
                     trigger_lanes.append(lanes)
             self.np_random.shuffle(trigger_lanes)
@@ -332,24 +332,24 @@ class TrafficManager(RandomEngine):
             vehicle_num += len(vehicles_on_block)
         self.block_triggered_vehicles.reverse()
 
-    def _get_available_reborn_lanes(self, map: Map) -> list:
+    def _get_available_respawn_lanes(self, map: Map) -> list:
         """
-        Used to find some reborn lanes
-        :param map: select born lanes from this map
-        :return: reborn_lanes
+        Used to find some respawn lanes
+        :param map: select spawn lanes from this map
+        :return: respawn_lanes
         """
-        reborn_lanes = []
-        reborn_roads = []
+        respawn_lanes = []
+        respawn_roads = []
         for block in map.blocks:
-            roads = block.get_reborn_roads()
+            roads = block.get_respawn_roads()
             for road in roads:
-                if road in reborn_roads:
-                    reborn_roads.remove(road)
+                if road in respawn_roads:
+                    respawn_roads.remove(road)
                 else:
-                    reborn_roads.append(road)
-        for road in reborn_roads:
-            reborn_lanes += road.get_lanes(map.road_network)
-        return reborn_lanes
+                    respawn_roads.append(road)
+        for road in respawn_roads:
+            respawn_lanes += road.get_lanes(map.road_network)
+        return respawn_lanes
 
     def close_vehicles_to(self, vehicle, distance: float, count: int = None, see_behind: bool = True) -> object:
         """
