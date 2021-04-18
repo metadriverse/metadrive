@@ -12,7 +12,7 @@ def _assert_vehicle(vehicle):
     speed = vehicle.speed
     assert 0 <= speed <= 120
     velocity_direction = vehicle.velocity_direction
-    np.testing.assert_almost_equal(np.linalg.norm(velocity_direction), 1.0)
+    np.testing.assert_almost_equal(abs(np.linalg.norm(velocity_direction)), 1.0)
     current_road = vehicle.current_road
     np.testing.assert_almost_equal(vehicle.heading_diff(vehicle.lane), 0.5, decimal=3)
 

@@ -7,6 +7,7 @@ import gym
 import numpy as np
 from panda3d.bullet import BulletVehicle, BulletBoxShape, ZUp, BulletGhostNode
 from panda3d.core import Vec3, TransformState, NodePath, LQuaternionf, BitMask32, TextNode
+
 from pgdrive.constants import RENDER_MODE_ONSCREEN, COLOR, COLLISION_INFO_COLOR, BodyName, CamMask, CollisionGroup
 from pgdrive.scene_creator.lane.abs_lane import AbstractLane
 from pgdrive.scene_creator.lane.circular_lane import CircularLane
@@ -20,7 +21,7 @@ from pgdrive.scene_creator.vehicle_module.distance_detector import SideDetector,
 from pgdrive.scene_creator.vehicle_module.rgb_camera import RGBCamera
 from pgdrive.scene_creator.vehicle_module.routing_localization import RoutingLocalizationModule
 from pgdrive.scene_creator.vehicle_module.vehicle_panel import VehiclePanel
-from pgdrive.utils import PGConfig, safe_clip_for_small_array, random_string, PGVector
+from pgdrive.utils import PGConfig, safe_clip_for_small_array, PGVector
 from pgdrive.utils.asset_loader import AssetLoader
 from pgdrive.utils.coordinates_shift import panda_position, pgdrive_position, panda_heading, pgdrive_heading
 from pgdrive.utils.element import DynamicElement
@@ -66,7 +67,6 @@ class BaseVehicle(DynamicElement):
         :param physics_config: vehicle height/width/length, find more physics para in VehicleParameterSpace
         :param random_seed: int
         """
-        self.name = name or random_string()
         self.vehicle_config = PGConfig(vehicle_config)
 
         # self.vehicle_config = self.get_vehicle_config(vehicle_config) \
@@ -75,7 +75,7 @@ class BaseVehicle(DynamicElement):
         # observation, action
         self.action_space = self.get_action_space_before_init()
 
-        super(BaseVehicle, self).__init__(random_seed)
+        super(BaseVehicle, self).__init__(random_seed, name=name)
         # config info
         self.set_config(self.PARAMETER_SPACE.sample())
         if physics_config is not None:
@@ -300,7 +300,7 @@ class BaseVehicle(DynamicElement):
         self.chassis_np.node().setLinearVelocity(Vec3(0, 0, 0))
         self.chassis_np.node().setAngularVelocity(Vec3(0, 0, 0))
         self.system.resetSuspension()
-        np.testing.assert_almost_equal(self.position, pos, decimal=4)
+        # np.testing.assert_almost_equal(self.position, pos, decimal=4)
 
         # done info
         self._init_step_info()
@@ -441,7 +441,6 @@ class BaseVehicle(DynamicElement):
         forward_direction_norm = norm(forward_direction[0], forward_direction[1])
         if not lateral_norm * forward_direction_norm:
             return 0
-        # cos = self.forward_direction.dot(lateral) / (np.linalg.norm(lateral) * np.linalg.norm(self.forward_direction))
         cos = (
             (forward_direction[0] * lateral[0] + forward_direction[1] * lateral[1]) /
             (lateral_norm * forward_direction_norm)

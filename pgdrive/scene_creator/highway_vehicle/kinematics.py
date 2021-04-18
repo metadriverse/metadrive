@@ -8,7 +8,7 @@ from pgdrive.scene_creator.lane.abs_lane import AbstractLane
 from pgdrive.scene_creator.object.traffic_object import Object
 from pgdrive.scene_manager.scene_manager import LaneIndex
 from pgdrive.scene_manager.traffic_manager import TrafficManager
-from pgdrive.utils import get_np_random, random_string
+from pgdrive.utils import get_np_random, random_string, distance_greater, norm
 
 
 class Vehicle:
@@ -39,7 +39,7 @@ class Vehicle:
         np_random: np.random.RandomState = None,
         name: str = None
     ):
-        self.name = name or random_string()
+        self.name = random_string() if name is None else name
         self.traffic_mgr = traffic_mgr
         self._position = np.array(position).astype('float')
         self.heading = heading
@@ -209,7 +209,7 @@ class Vehicle:
 
     def _is_colliding(self, other):
         # Fast spherical pre-check
-        if np.linalg.norm(other.position - self.position) > self.LENGTH:
+        if distance_greater(other.position, self.position, self.LENGTH):
             return False
         # Accurate rectangular check
         return utils.rotated_rectangles_intersect(
@@ -236,7 +236,7 @@ class Vehicle:
     @property
     def destination_direction(self) -> np.ndarray:
         if (self.destination != self.position).any():
-            return (self.destination - self.position) / np.linalg.norm(self.destination - self.position)
+            return (self.destination - self.position) / norm(*(self.destination - self.position))
         else:
             return np.zeros((2, ))
 

@@ -35,7 +35,8 @@ PGDriveEnvV1_DEFAULT_CONFIG = dict(
         Map.LANE_NUM: 3,
         Map.SEED: 10,
         "draw_map_resolution": 1024,  # Drawing the map in a canvas of (x, x) pixels.
-        "block_type_version": "v1"
+        "block_type_version": "v1",
+        "exit_length": 50,
     },
     load_map_from_json=True,  # Whether to load maps from pre-generated file
     _load_map_from_json=pregenerated_map_file,  # The path to the pre-generated file
