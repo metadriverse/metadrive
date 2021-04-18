@@ -17,9 +17,9 @@ class ChaseCamera:
 
     queue_length = 3
     CHASE_TASK_NAME = "update main chase camera"
-    BIRD_TASK_NAME = "update main bird camera"
-    FOLLOW_LANE = True
-    BIRD_VIEW_HEIGHT = 120
+    TOP_DOWN_TASK_NAME = "update main bird camera"
+    FOLLOW_LANE = False
+    TOP_DOWN_VIEW_HEIGHT = 120
     WHEEL_SCROLL_SPEED = 10
 
     def __init__(self, camera: Camera, camera_height: float, camera_dist: float, pg_world: PGWorld):
@@ -42,7 +42,7 @@ class ChaseCamera:
 
         # free bird view camera
         pg_world.accept("b", self.stop_chase, extraArgs=[pg_world])
-        self.bird_camera_height = self.BIRD_VIEW_HEIGHT
+        self.top_down_camera_height = self.TOP_DOWN_VIEW_HEIGHT
         self.camera_x = 0
         self.camera_y = 0
         self.inputs.watchWithModifiers('up', 'w')
@@ -124,8 +124,8 @@ class ChaseCamera:
 
         if pg_world.taskMgr.hasTaskNamed(self.CHASE_TASK_NAME):
             pg_world.taskMgr.remove(self.CHASE_TASK_NAME)
-        if pg_world.taskMgr.hasTaskNamed(self.BIRD_TASK_NAME):
-            pg_world.taskMgr.remove(self.BIRD_TASK_NAME)
+        if pg_world.taskMgr.hasTaskNamed(self.TOP_DOWN_TASK_NAME):
+            pg_world.taskMgr.remove(self.TOP_DOWN_TASK_NAME)
         pg_world.taskMgr.add(self.renew_camera_place, self.CHASE_TASK_NAME, extraArgs=[vehicle], appendTask=True)
         self.camera_queue = queue.Queue(self.queue_length)
         for i in range(self.queue_length - 1):
@@ -158,20 +158,20 @@ class ChaseCamera:
     def destroy(self, pg_world):
         if pg_world.taskMgr.hasTaskNamed(self.CHASE_TASK_NAME):
             pg_world.taskMgr.remove(self.CHASE_TASK_NAME)
-        if pg_world.taskMgr.hasTaskNamed(self.BIRD_TASK_NAME):
-            pg_world.taskMgr.remove(self.BIRD_TASK_NAME)
+        if pg_world.taskMgr.hasTaskNamed(self.TOP_DOWN_TASK_NAME):
+            pg_world.taskMgr.remove(self.TOP_DOWN_TASK_NAME)
 
     def stop_chase(self, pg_world: PGWorld):
         if pg_world.taskMgr.hasTaskNamed(self.CHASE_TASK_NAME):
             pg_world.taskMgr.remove(self.CHASE_TASK_NAME)
-        if not pg_world.taskMgr.hasTaskNamed(self.BIRD_TASK_NAME):
+        if not pg_world.taskMgr.hasTaskNamed(self.TOP_DOWN_TASK_NAME):
             # adjust hpr
             current_pos = self.camera.getPos()
             self.camera.lookAt(current_pos[0], current_pos[1], 0)
-            pg_world.taskMgr.add(self.manual_control_camera, self.BIRD_TASK_NAME, extraArgs=[], appendTask=True)
+            pg_world.taskMgr.add(self.manual_control_camera, self.TOP_DOWN_TASK_NAME, extraArgs=[], appendTask=True)
 
     def manual_control_camera(self, task):
-        self.bird_camera_height = self._update_height(self.bird_camera_height)
+        self.top_down_camera_height = self._update_height(self.top_down_camera_height)
 
         if self.inputs.isSet("up"):
             self.camera_y += 1.0
@@ -181,7 +181,7 @@ class ChaseCamera:
             self.camera_x -= 1.0
         if self.inputs.isSet("right"):
             self.camera_x += 1.0
-        self.camera.setPos(self.camera_x, self.camera_y, self.bird_camera_height)
+        self.camera.setPos(self.camera_x, self.camera_y, self.top_down_camera_height)
         return task.cont
 
     def _update_height(self, height):
@@ -192,19 +192,19 @@ class ChaseCamera:
         return height
 
     def _wheel_down_height(self, pg_world):
-        if pg_world.taskMgr.hasTaskNamed(self.BIRD_TASK_NAME):
-            self.bird_camera_height += self.WHEEL_SCROLL_SPEED
+        if pg_world.taskMgr.hasTaskNamed(self.TOP_DOWN_TASK_NAME):
+            self.top_down_camera_height += self.WHEEL_SCROLL_SPEED
         else:
             self.chase_camera_height += self.WHEEL_SCROLL_SPEED
 
     def _wheel_up_height(self, pg_world):
-        if pg_world.taskMgr.hasTaskNamed(self.BIRD_TASK_NAME):
-            self.bird_camera_height -= self.WHEEL_SCROLL_SPEED
+        if pg_world.taskMgr.hasTaskNamed(self.TOP_DOWN_TASK_NAME):
+            self.top_down_camera_height -= self.WHEEL_SCROLL_SPEED
         else:
             self.chase_camera_height -= self.WHEEL_SCROLL_SPEED
 
     def _move_to_pointer(self, pg_world):
-        if pg_world.taskMgr.hasTaskNamed(self.BIRD_TASK_NAME):
+        if pg_world.taskMgr.hasTaskNamed(self.TOP_DOWN_TASK_NAME):
             # Get to and from pos in camera coordinates
             pMouse = pg_world.mouseWatcherNode.getMouse()
             pFrom = Point3()

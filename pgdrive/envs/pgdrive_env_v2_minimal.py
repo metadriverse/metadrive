@@ -79,8 +79,7 @@ class MinimalObservation(LidarStateObservation):
         else:
             info.extend([0.0, 0.0])
 
-        cos_beta = heading_dir_now.dot(heading_dir_last
-                                       ) / (np.linalg.norm(heading_dir_now) * np.linalg.norm(heading_dir_last))
+        cos_beta = heading_dir_now.dot(heading_dir_last) / (norm(*heading_dir_now) * norm(*heading_dir_last))
         beta_diff = np.arccos(clip(cos_beta, 0.0, 1.0))
         yaw_rate = beta_diff / 0.1
         info.append(clip(yaw_rate, 0.0, 1.0))

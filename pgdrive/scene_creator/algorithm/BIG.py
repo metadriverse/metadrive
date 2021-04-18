@@ -27,8 +27,15 @@ class BIG:
     MAX_TRIAL = 2
 
     def __init__(
-        self, lane_num: int, lane_width: float, global_network: RoadNetwork, render_node_path: NodePath,
-        pg_physics_world: PGPhysicsWorld, random_seed: int, block_type_version: str
+        self,
+        lane_num: int,
+        lane_width: float,
+        global_network: RoadNetwork,
+        render_node_path: NodePath,
+        pg_physics_world: PGPhysicsWorld,
+        random_seed: int,
+        block_type_version: str,
+        exit_length=50
     ):
         self._block_sequence = None
         self._random_seed = random_seed
@@ -41,9 +48,15 @@ class BIG:
         self._physics_world = pg_physics_world
         self._global_network = global_network
         self.blocks = []
+        self._exit_length = exit_length
         first_block = FirstBlock(
-            self._global_network, self._lane_width, self._lane_num, self._render_node_path, self._physics_world,
-            self._random_seed
+            self._global_network,
+            self._lane_width,
+            self._lane_num,
+            self._render_node_path,
+            self._physics_world,
+            self._random_seed,
+            length=self._exit_length
         )
         self.blocks.append(first_block)
         self.next_step = NextStep.forward

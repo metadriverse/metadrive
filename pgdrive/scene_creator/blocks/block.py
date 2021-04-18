@@ -6,6 +6,7 @@ import numpy
 from panda3d.bullet import BulletBoxShape, BulletRigidBodyNode, BulletGhostNode
 from panda3d.core import Vec3, LQuaternionf, BitMask32, Vec4, CardMaker, TextureStage, RigidBodyCombiner, \
     TransparencyAttrib, SamplerState, NodePath
+
 from pgdrive.constants import Decoration, BodyName, CamMask
 from pgdrive.scene_creator.blocks.constants import BlockDefault
 from pgdrive.scene_creator.lane.abs_lane import AbstractLane, LineType, LaneNode, LineColor
@@ -16,7 +17,7 @@ from pgdrive.scene_creator.road.road_network import RoadNetwork
 from pgdrive.utils.asset_loader import AssetLoader
 from pgdrive.utils.coordinates_shift import panda_position
 from pgdrive.utils.element import Element
-from pgdrive.utils.math_utils import norm
+from pgdrive.utils.math_utils import norm, PGVector
 from pgdrive.world.pg_physics_world import PGPhysicsWorld
 
 
@@ -464,7 +465,7 @@ class Block(Element, BlockDefault):
             else:
                 factor = (1 + self.SIDEWALK_WIDTH / radius) * (1 + self.SIDEWALK_LINE_DIST / radius)
         direction_v = lane_end - lane_start
-        vertical_v = (-direction_v[1], direction_v[0]) / numpy.linalg.norm(direction_v)
+        vertical_v = PGVector((-direction_v[1], direction_v[0])) / norm(*direction_v)
         middle += vertical_v * (self.SIDEWALK_WIDTH / 2 + self.SIDEWALK_LINE_DIST)
         side_np.setPos(panda_position(middle, 0))
         theta = -numpy.arctan2(direction_v[1], direction_v[0])
