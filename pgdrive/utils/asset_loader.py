@@ -51,6 +51,11 @@ class AssetLoader:
     def initialized(cls):
         return cls.asset_path is not None
 
+    @classmethod
+    def destroy(self):
+        self.loader = None
+        self.asset_path = None
+
 
 def initialize_asset_loader(pg_world):
     # load model file in utf-8

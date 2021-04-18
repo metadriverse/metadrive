@@ -152,7 +152,7 @@ class PGWorld(ShowBase.ShowBase):
 
             # Display logo
             if self.mode == RENDER_MODE_ONSCREEN and (not self.world_config["debug"]) \
-                        and (not self.world_config["fast_launch_window"]):
+                    and (not self.world_config["fast_launch_window"]):
                 self._loading_logo = OnscreenImage(
                     image=AssetLoader.file_path("PGDrive-large.png"),
                     pos=(0, 0, 0),
@@ -333,6 +333,16 @@ class PGWorld(ShowBase.ShowBase):
         #     time.sleep(0.1)
         self.physics_world.destroy()
         self.destroy()
+
+        AssetLoader.destroy()
+
+        import sys
+        if sys.version_info >= (3, 0):
+            import builtins
+        else:
+            import __builtin__ as builtins
+        if hasattr(builtins, 'base'):
+            del builtins.base
 
     def toggle_help_message(self):
         if self.on_screen_message:
