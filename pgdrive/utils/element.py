@@ -75,6 +75,10 @@ class Element:
         if self.render:
             self.loader = AssetLoader.get_loader()
 
+            if not hasattr(self.loader, "loader"):
+                # It is closed before!
+                self.loader.__init__()
+
     @property
     def class_name(self):
         return self.__class__.__name__
