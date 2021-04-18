@@ -21,6 +21,7 @@ class FirstBlock(Block):
     PARAMETER_SPACE = PGSpace({})
     ID = "I"
     SOCKET_NUM = 1
+    ENTRANCE_LENGTH = 10
 
     def __init__(
         self,
@@ -34,9 +35,9 @@ class FirstBlock(Block):
     ):
         place_holder = BlockSocket(Road(Decoration.start, Decoration.end), Road(Decoration.start, Decoration.end))
         super(FirstBlock, self).__init__(0, place_holder, global_network, random_seed)
-        assert length > 10
+        assert length > self.ENTRANCE_LENGTH
         basic_lane = StraightLane(
-            [0, lane_width * (lane_num - 1)], [10, lane_width * (lane_num - 1)],
+            [0, lane_width * (lane_num - 1)], [self.ENTRANCE_LENGTH, lane_width * (lane_num - 1)],
             line_types=(LineType.BROKEN, LineType.SIDE),
             width=lane_width
         )
@@ -44,7 +45,7 @@ class FirstBlock(Block):
         CreateRoadFrom(basic_lane, lane_num, ego_v_spawn_road, self.block_network, self._global_network)
         CreateAdverseRoad(ego_v_spawn_road, self.block_network, self._global_network)
 
-        next_lane = ExtendStraightLane(basic_lane, length - 10, [LineType.BROKEN, LineType.SIDE])
+        next_lane = ExtendStraightLane(basic_lane, length - self.ENTRANCE_LENGTH, [LineType.BROKEN, LineType.SIDE])
         other_v_spawn_road = Road(self.NODE_2, self.NODE_3)
         CreateRoadFrom(next_lane, lane_num, other_v_spawn_road, self.block_network, self._global_network)
         CreateAdverseRoad(other_v_spawn_road, self.block_network, self._global_network)

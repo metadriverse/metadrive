@@ -19,6 +19,6 @@ if __name__ == '__main__':
             ax.set_xticks([])
             ax.set_yticks([])
             print("Drawing {}-th map!".format(count))
-    fig.suptitle("Bird's-eye view of genertaed maps")
+    fig.suptitle("Top-down view of generated maps")
     plt.show()
     env.close()

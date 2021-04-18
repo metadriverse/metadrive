@@ -48,12 +48,12 @@ class Element:
 
     PARAMETER_SPACE = PGSpace({})
 
-    def __init__(self, random_seed=None):
+    def __init__(self, random_seed=None, name=None):
         """
         Config is a static conception, which specified the parameters of one element.
         There parameters doesn't change, such as length of straight road, max speed of one vehicle, etc.
         """
-        self.name = random_string()
+        self.name = random_string() if name is None else name
         assert isinstance(
             self.PARAMETER_SPACE, PGSpace
         ) or random_seed is None, "Using PGSpace to define parameter spaces of " + self.class_name
@@ -123,7 +123,7 @@ class Element:
 
 
 class DynamicElement(Element):
-    def __init__(self, np_random=None):
+    def __init__(self, np_random=None, name=None):
         """
         State is a runtime conception used to create a snapshot of scenario at one moment.
         A scenario can be saved to file and recovered to debug or something else.
@@ -134,7 +134,7 @@ class DynamicElement(Element):
         And sometimes config == state in the whole simulation episode, such as radius of a curve block.
         To avoid this, only derive from this class for elements who can do step().
         """
-        super(DynamicElement, self).__init__(np_random)
+        super(DynamicElement, self).__init__(np_random, name=name)
 
     def get_state(self):
         raise NotImplementedError

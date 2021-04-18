@@ -74,6 +74,9 @@ BASE_DEFAULT_CONFIG = dict(
 class BasePGDriveEnv(gym.Env):
     DEFAULT_AGENT = DEFAULT_AGENT
 
+    # Force to use this seed if necessary. Note that the recipient of the forced seed should be explicitly implemented.
+    _DEBUG_RANDOM_SEED = None
+
     @classmethod
     def default_config(cls) -> "PGConfig":
         return PGConfig(BASE_DEFAULT_CONFIG)

@@ -37,6 +37,7 @@ def test_cull_scene(use_render=False):
                 "traffic_density": 0.4,
             }
         )
+        env._DEBUG_RANDOM_SEED = 1
         try:
             pass_test = False
             o = env.reset()
@@ -54,6 +55,7 @@ def test_cull_scene(use_render=False):
             assert pass_test, "Cull scene error! collision function is invalid!"
         finally:
             env.close()
+            env._DEBUG_RANDOM_SEED = None
 
 
 if __name__ == "__main__":

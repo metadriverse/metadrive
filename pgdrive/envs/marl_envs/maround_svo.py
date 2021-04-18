@@ -151,7 +151,7 @@ if __name__ == '__main__':
         if d["__all__"]:
             print(
                 "Finish! Current step {}. Group Reward: {}. Average reward: {}".format(
-                    i, total_r, total_r / env.target_vehicle_manager.next_agent_count
+                    i, total_r, total_r / env._agent_manager.next_agent_count
                 )
             )
             break

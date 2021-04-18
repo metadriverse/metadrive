@@ -90,7 +90,7 @@ class RoutingLocalizationModule:
         :return: None
         """
         self.checkpoints = self.map.road_network.shortest_path(start_road_node, end_road_node)
-        assert len(self.checkpoints) >= 2
+        assert len(self.checkpoints) > 2
         # update routing info
         self.final_road = Road(self.checkpoints[-2], end_road_node)
         self.final_lane = self.final_road.get_lanes(self.map.road_network)[-1]
@@ -111,6 +111,8 @@ class RoutingLocalizationModule:
                 lane = self.map.road_network.get_lane(lane_index)
         long, _ = lane.local_coordinates(position)
         self._update_target_checkpoints(lane_index, long)
+
+        assert len(self.checkpoints) > 2
 
         target_road_1_start = self.checkpoints[self._target_checkpoints_index[0]]
         target_road_1_end = self.checkpoints[self._target_checkpoints_index[0] + 1]

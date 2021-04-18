@@ -3,7 +3,7 @@ import numpy as np
 
 from pgdrive.envs.pgdrive_env_v2 import PGDriveEnvV2
 from pgdrive.obs import ImageStateObservation, ObservationType, LidarStateObservation
-from pgdrive.utils import PGConfig, clip
+from pgdrive.utils import PGConfig, clip, norm
 
 
 class LidarStateObservationV2(LidarStateObservation):
@@ -52,8 +52,7 @@ class LidarStateObservationV2(LidarStateObservation):
         ]
         heading_dir_last = vehicle.last_heading_dir
         heading_dir_now = vehicle.heading
-        cos_beta = heading_dir_now.dot(heading_dir_last
-                                       ) / (np.linalg.norm(heading_dir_now) * np.linalg.norm(heading_dir_last))
+        cos_beta = heading_dir_now.dot(heading_dir_last) / (norm(*heading_dir_now) * norm(*heading_dir_last))
         beta_diff = np.arccos(clip(cos_beta, 0.0, 1.0))
         # print(beta)
         yaw_rate = beta_diff / 0.1
