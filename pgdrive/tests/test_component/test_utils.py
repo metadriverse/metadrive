@@ -7,7 +7,7 @@ def _test_cutils(cutils):
     for _ in range(20):
         pos = np.random.normal(1000, 1000, size=(2, ))
         n = cutils.cutils_norm(*pos.tolist())
-        assert n == np.linalg.norm(pos)
+        assert n == np.linalg.norm(pos, ord=2)
 
         clip0 = cutils.cutils_clip(pos[0], 999, 1001)
         clip1 = cutils.cutils_clip(pos[1], 999, 1001)
@@ -41,7 +41,7 @@ def test_utils():
 
     for _ in range(20):
         pos = np.random.normal(0, 1, size=(2, ))
-        assert distance_greater(pos, (0, 0), 0.5) == (np.linalg.norm(pos) > 0.5)
+        assert distance_greater(pos, (0, 0), 0.5) == (np.linalg.norm(pos, ord=2) > 0.5)
 
 
 if __name__ == '__main__':
