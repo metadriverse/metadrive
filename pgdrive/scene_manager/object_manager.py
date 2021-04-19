@@ -182,3 +182,7 @@ class ObjectsManager(RandomEngine):
     def destroy(self, pg_world: PGWorld):
         self._clear_objects(pg_world)
         self._spawned_objects = None
+
+    @property
+    def objects(self):
+        return self._spawned_objects
