@@ -26,6 +26,11 @@ class SpawnManager:
         self.initialized = False
         self.target_vehicle_configs = target_vehicle_configs
 
+        if self.num_agents is None:
+            assert not self.target_vehicle_configs, (
+                "You should now specify config if requiring infinite number of vehicles."
+            )
+
     def update_spawn_roads(self, spawn_roads):
         if self.target_vehicle_configs:
             target_vehicle_configs, safe_spawn_places = self._update_spawn_roads_with_configs(spawn_roads)
@@ -38,7 +43,7 @@ class SpawnManager:
         self.need_update_spawn_places = True
         self.initialized = True
 
-    def _update_spawn_roads_with_configs(self, spawn_roads):
+    def _update_spawn_roads_with_configs(self, spawn_roads=None):
         assert self.num_agents <= len(self.target_vehicle_configs), (
             "Too many agents! We only accept {} agents, which is specified by the number of configs in "
             "target_vehicle_configs, but you have {} agents! "
@@ -61,11 +66,13 @@ class SpawnManager:
         interval = 10
         num_slots = int(floor(self.exit_length / interval))
         interval = self.exit_length / num_slots
-        assert self.num_agents <= self.lane_num * len(spawn_roads) * num_slots, (
-            "Too many agents! We only accepet {} agents, but you have {} agents!".format(
-                self.lane_num * len(spawn_roads) * num_slots, self.num_agents
+        if self.num_agents is not None:
+            assert self.num_agents > 0
+            assert self.num_agents <= self.lane_num * len(spawn_roads) * num_slots, (
+                "Too many agents! We only accepet {} agents, but you have {} agents!".format(
+                    self.lane_num * len(spawn_roads) * num_slots, self.num_agents
+                )
             )
-        )
 
         # We can spawn agents in the middle of road at the initial time, but when some vehicles need to be respawn,
         # then we have to set it to the farthest places to ensure safety (otherwise the new vehicles may suddenly
@@ -92,7 +99,8 @@ class SpawnManager:
                         safe_spawn_places.append(target_vehicle_configs[-1].copy())
         return target_vehicle_configs, safe_spawn_places
 
-    def get_target_vehicle_configs(self, num_agents, seed=None):
+    def get_target_vehicle_configs(self, seed=None):
+        num_agents = self.num_agents if self.num_agents is not None else len(self.target_vehicle_configs)
         assert len(self.target_vehicle_configs) > 0
         target_agents = get_np_random(seed).choice(
             [i for i in range(len(self.target_vehicle_configs))], num_agents, replace=False

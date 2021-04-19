@@ -12,11 +12,12 @@ from pgdrive.utils.pg_config import merge_dicts
 MULTI_AGENT_PGDRIVE_DEFAULT_CONFIG = dict(
     # ===== Multi-agent =====
     is_multi_agent=True,
-    num_agents=2,
+    num_agents=2,  # If num_agents is set to None, then endless vehicles will be added only the empty spawn points exist
 
     # Whether to terminate a vehicle if it crash with others. Since in MA env the crash is extremely dense, so
     # frequently done might not be a good idea.
     crash_done=False,
+    out_of_road_done=True,
 
     # Whether the vehicle can rejoin the episode
     allow_respawn=True,
@@ -32,8 +33,8 @@ MULTI_AGENT_PGDRIVE_DEFAULT_CONFIG = dict(
 
     # ===== New Reward Setting =====
     out_of_road_penalty=5.0,
-    crash_vehicle_penalty=1.0,
-    crash_object_penalty=1.0,
+    crash_vehicle_penalty=5.0,
+    crash_object_penalty=5.0,
 
     # ===== Environmental Setting =====
     top_down_camera_initial_x=0,
@@ -104,22 +105,22 @@ class MultiAgentPGDrive(PGDriveEnvV2):
         return ret_config
 
     def _update_agent_pos_configs(self, config):
-        config["target_vehicle_configs"] = self._spawn_manager.get_target_vehicle_configs(
-            config["num_agents"], seed=self._DEBUG_RANDOM_SEED
-        )
+        config["target_vehicle_configs"] = self._spawn_manager.get_target_vehicle_configs(seed=self._DEBUG_RANDOM_SEED)
         return config
 
     def done_function(self, vehicle_id):
-        vehicle = self.vehicles[vehicle_id]
-        # crash will not done
         done, done_info = super(MultiAgentPGDrive, self).done_function(vehicle_id)
-        if vehicle.crash_vehicle and not self.config["crash_done"]:
+        if done_info["crash"] and (not self.config["crash_done"]):
             assert done_info["crash_vehicle"] or done_info["arrive_dest"] or done_info["out_of_road"]
             if not (done_info["arrive_dest"] or done_info["out_of_road"]):
                 # Does not revert done if high-priority termination happens!
                 done = False
-        elif vehicle.out_of_route and vehicle.on_lane and not vehicle.crash_sidewalk:
-            pass  # Do nothing when out of the road!! This is not the SAFETY environment!
+
+        if done_info["out_of_road"] and (not self.config["out_of_road_done"]):
+            assert done_info["crash_vehicle"] or done_info["arrive_dest"] or done_info["out_of_road"]
+            if not done_info["arrive_dest"]:
+                done = False
+
         return done, done_info
 
     def step(self, actions):
