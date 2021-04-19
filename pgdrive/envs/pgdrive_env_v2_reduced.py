@@ -84,6 +84,14 @@ class PGDriveEnvV2Reduced(PGDriveEnvV2):
             o = LidarStateObservationV2(vehicle_config)
         return o
 
+    def reward_function(self, vehicle_id: str):
+        r, r_info = super(PGDriveEnvV2Reduced, self).reward_function(vehicle_id)
+        r_info["out_of_route"] = False
+        if self.vehicles[vehicle_id].out_of_route:
+            r = -abs(r)
+            r_info["out_of_route"] = True
+        return r, r_info
+
 
 if __name__ == '__main__':
 
