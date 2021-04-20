@@ -144,6 +144,13 @@ class LidarStateObservation(ObservationType):
         :return: observation in 9 + 10 + 16 + 240 dim
         """
         state = self.state_observe(vehicle)
+        other_v_info = self.lidar_observe(vehicle)
+        return np.concatenate((state, np.asarray(other_v_info)))
+
+    def state_observe(self, vehicle):
+        return self.state_obs.observe(vehicle)
+
+    def lidar_observe(self, vehicle):
         other_v_info = []
         if vehicle.lidar is not None:
             if self.config["lidar"]["num_others"] > 0:
@@ -153,10 +160,7 @@ class LidarStateObservation(ObservationType):
                 gaussian_noise=self.config["lidar"]["gaussian_noise"],
                 dropout_prob=self.config["lidar"]["dropout_prob"]
             )
-        return np.concatenate((state, np.asarray(other_v_info)))
-
-    def state_observe(self, vehicle):
-        return self.state_obs.observe(vehicle)
+        return other_v_info
 
     def _add_noise_to_cloud_points(self, points, gaussian_noise, dropout_prob):
         if gaussian_noise > 0.0:

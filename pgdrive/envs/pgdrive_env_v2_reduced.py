@@ -1,3 +1,5 @@
+from collections import deque
+
 import gym
 import numpy as np
 
@@ -9,13 +11,15 @@ from pgdrive.utils import PGConfig, clip, norm
 class LidarStateObservationV2(LidarStateObservation):
     def __init__(self, vehicle_config):
         super(LidarStateObservationV2, self).__init__(vehicle_config)
+        self._cloud_point_stack = deque(maxlen=vehicle_config["num_stacks"])
 
     @property
     def observation_space(self):
         shape = [6 + 4 + self.config["lane_line_detector"]["num_lasers"] + self.config["side_detector"]["num_lasers"]]
         if self.config["lidar"]["num_lasers"] > 0 and self.config["lidar"]["distance"] > 0:
             # Number of lidar rays and distance should be positive!
-            shape[0] += self.config["lidar"]["num_lasers"] + self.config["lidar"]["num_others"] * 4
+            shape[0] += self.config["lidar"]["num_lasers"] * self.config["num_stacks"] + \
+                        self.config["lidar"]["num_others"] * 4
         return gym.spaces.Box(-0.0, 1.0, shape=tuple(shape), dtype=np.float32)
 
     def state_observe(self, vehicle):
@@ -23,6 +27,15 @@ class LidarStateObservationV2(LidarStateObservation):
         navi_info = [navi_info[0], navi_info[1], navi_info[5], navi_info[6]]  # Only keep the checkpoints information!
         ego_state = self.vehicle_state(vehicle)
         return np.asarray(ego_state + navi_info, dtype=np.float32)
+
+    def lidar_observe(self, vehicle):
+        assert self.config["lidar"]["num_others"] == 0
+        cloud_points = super(LidarStateObservationV2, self).lidar_observe(vehicle)
+        self._cloud_point_stack.append(cloud_points)
+        ret = []
+        for ps in self._cloud_point_stack:
+            ret += ps
+        return ret
 
     def vehicle_state(self, vehicle):
         """
@@ -67,6 +80,13 @@ class LidarStateObservationV2(LidarStateObservation):
             )
         return info
 
+    def reset(self, env, vehicle=None):
+        ret = super(LidarStateObservationV2, self).reset(env, vehicle)
+        self._cloud_point_stack.clear()
+        for _ in range(self.config["num_stacks"]):
+            self._cloud_point_stack.append([1.0] * self.config["lidar"]["num_lasers"])
+        return ret
+
 
 class PGDriveEnvV2Reduced(PGDriveEnvV2):
     @classmethod
@@ -74,7 +94,8 @@ class PGDriveEnvV2Reduced(PGDriveEnvV2):
         config = PGDriveEnvV2.default_config()
         config["vehicle_config"]["lidar"]["num_others"] = 0
         config["vehicle_config"]["lidar"]["num_lasers"] = 240
-        config["vehicle_config"]["side_detector"]["num_lasers"] = 240
+        config["vehicle_config"]["side_detector"]["num_lasers"] = 120
+        config["vehicle_config"]["num_stacks"] = 1
         return config
 
     def get_single_observation(self, vehicle_config: "PGConfig") -> "ObservationType":
@@ -102,7 +123,7 @@ if __name__ == '__main__':
         assert np.isscalar(reward)
         assert isinstance(info, dict)
 
-    env = PGDriveEnvV2Reduced()
+    env = PGDriveEnvV2Reduced({"vehicle_config": {"num_stacks": 2}})
     try:
         obs = env.reset()
         assert env.observation_space.contains(obs)
@@ -111,7 +132,8 @@ if __name__ == '__main__':
             env.reset()
         _act(env, env.action_space.sample())
         for x in [-1, 0, 1]:
-            env.reset()
+            obs = env.reset()
+            assert env.observation_space.contains(obs)
             for y in [-1, 0, 1]:
                 _act(env, [x, y])
     finally:
