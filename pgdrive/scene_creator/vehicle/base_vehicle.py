@@ -2,7 +2,6 @@ import math
 import time
 from collections import deque
 from typing import Union, Optional
-
 import gym
 import numpy as np
 from panda3d.bullet import BulletVehicle, BulletBoxShape, ZUp, BulletGhostNode
@@ -34,6 +33,7 @@ from pgdrive.world.pg_world import PGWorld
 
 
 class BaseVehicle(DynamicElement):
+    MODEL = None
     """
     Vehicle chassis and its wheels index
                     0       1
@@ -512,13 +512,14 @@ class BaseVehicle(DynamicElement):
         self.WIDTH = para[Parameter.vehicle_width]
 
         if self.render:
-            model_path = 'models/ferra/scene.gltf'
-            self.chassis_vis = self.loader.loadModel(AssetLoader.file_path(model_path))
-            self.chassis_vis.setZ(para[Parameter.vehicle_vis_z])
-            self.chassis_vis.setY(para[Parameter.vehicle_vis_y])
-            self.chassis_vis.setH(para[Parameter.vehicle_vis_h])
-            self.chassis_vis.set_scale(para[Parameter.vehicle_vis_scale])
-            self.chassis_vis.reparentTo(self.chassis_np)
+            if self.MODEL is None:
+                model_path = 'models/ferra/scene.gltf'
+                self.MODEL = self.loader.loadModel(AssetLoader.file_path(model_path))
+                self.MODEL.setZ(para[Parameter.vehicle_vis_z])
+                self.MODEL.setY(para[Parameter.vehicle_vis_y])
+                self.MODEL.setH(para[Parameter.vehicle_vis_h])
+                self.MODEL.set_scale(para[Parameter.vehicle_vis_scale])
+            self.MODEL.instanceTo(self.chassis_np)
 
     def _create_wheel(self):
         para = self.get_config()
@@ -735,18 +736,22 @@ class BaseVehicle(DynamicElement):
     def remove_display_region(self):
         if self.render:
             self.vehicle_panel.remove_display_region(self.pg_world)
+            self.vehicle_panel.buffer.set_active(False)
             self.collision_info_np.detachNode()
             self.routing_localization._arrow_node_path.detachNode()
         for sensor in self.image_sensors.values():
             sensor.remove_display_region(self.pg_world)
+            sensor.buffer.set_active(False)
 
     def add_to_display(self):
         if self.render:
             self.vehicle_panel.add_to_display(self.pg_world, self.vehicle_panel.default_region)
+            self.vehicle_panel.buffer.set_active(True)
             self.collision_info_np.reparentTo(self.pg_world.aspect2d)
             self.routing_localization._arrow_node_path.reparentTo(self.pg_world.aspect2d)
         for sensor in self.image_sensors.values():
             sensor.add_to_display(self.pg_world, sensor.default_region)
+            sensor.buffer.set_active(True)
 
     def __del__(self):
         super(BaseVehicle, self).__del__()

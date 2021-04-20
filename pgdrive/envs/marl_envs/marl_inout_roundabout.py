@@ -206,11 +206,11 @@ def _vis():
                     "num_others": 0,
                     "distance": 40
                 },
-                "show_lidar": True,
+                "show_lidar": False,
             },
             "fast": True,
             "use_render": True,
-            "debug": True,
+            "debug": False,
             "manual_control": True,
             "num_agents": 8,
         }
@@ -219,7 +219,7 @@ def _vis():
     total_r = 0
     ep_s = 0
     for i in range(1, 100000):
-        o, r, d, info = env.step({k: [0.0, 1.0] for k in env.vehicles.keys()})
+        o, r, d, info = env.step({k: [0.0, .0] for k in env.vehicles.keys()})
         for r_ in r.values():
             total_r += r_
         ep_s += 1
