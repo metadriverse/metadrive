@@ -379,7 +379,7 @@ class Block(Element, BlockDefault):
         else:
             node_name = BodyName.Broken_line
         body_node = BulletGhostNode(node_name)
-        body_node.setActive(False)
+        body_node.set_active(False)
         body_node.setKinematic(False)
         body_node.setStatic(True)
         body_np = parent_np.attachNewNode(body_node)
@@ -417,7 +417,7 @@ class Block(Element, BlockDefault):
             body_np = parent_np.attachNewNode(node_name)
         else:
             body_node = BulletGhostNode(node_name)
-            body_node.setActive(False)
+            body_node.set_active(False)
             body_node.setKinematic(False)
             body_node.setStatic(True)
             body_np = parent_np.attachNewNode(body_node)
@@ -448,7 +448,7 @@ class Block(Element, BlockDefault):
     def _add_sidewalk2bullet(self, lane_start, lane_end, middle, radius=0.0, direction=0):
         length = norm(lane_end[0] - lane_start[0], lane_end[1] - lane_start[1])
         body_node = BulletRigidBodyNode(BodyName.Sidewalk)
-        body_node.setActive(False)
+        body_node.set_active(False)
         body_node.setKinematic(False)
         body_node.setStatic(True)
         side_np = self.sidewalk_node_path.attachNewNode(body_node)
@@ -521,7 +521,7 @@ class Block(Element, BlockDefault):
         """
         segment_np = NodePath(LaneNode(BodyName.Lane, lane, lane_index))
         segment_node = segment_np.node()
-        segment_node.setActive(False)
+        segment_node.set_active(False)
         segment_node.setKinematic(False)
         segment_node.setStatic(True)
         shape = BulletBoxShape(Vec3(length / 2, 0.1, width / 2))
