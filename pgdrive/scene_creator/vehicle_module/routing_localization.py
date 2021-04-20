@@ -1,8 +1,9 @@
 import logging
 import math
-
+from pgdrive.scene_creator.blocks.bottleneck import Merge, Split
 import numpy as np
 from panda3d.core import BitMask32, LQuaternionf, TransparencyAttrib
+from pgdrive.scene_creator.lane.straight_lane import StraightLane
 from pgdrive.constants import COLLISION_INFO_COLOR, RENDER_MODE_ONSCREEN, CamMask
 from pgdrive.scene_creator.blocks.first_block import FirstBlock
 from pgdrive.scene_creator.lane.circular_lane import CircularLane
@@ -12,6 +13,7 @@ from pgdrive.utils import clip, norm, get_np_random
 from pgdrive.utils.asset_loader import AssetLoader
 from pgdrive.utils.pg_space import Parameter, BlockParameterSpace
 from pgdrive.utils.scene_utils import ray_localization
+from pgdrive.utils.coordinates_shift import panda_position
 
 
 class RoutingLocalizationModule:
@@ -33,6 +35,7 @@ class RoutingLocalizationModule:
         self.checkpoints = None
         self.final_lane = None
         self.current_ref_lanes = None
+        self.current_road = None
         self._target_checkpoints_index = None
         self._navi_info = np.zeros((self.navigation_info_dim, ))  # navi information res
 
@@ -99,10 +102,11 @@ class RoutingLocalizationModule:
         target_road_1_start = self.checkpoints[0]
         target_road_1_end = self.checkpoints[1]
         self.current_ref_lanes = self.map.road_network.graph[target_road_1_start][target_road_1_end]
+        self.current_road = Road(target_road_1_start, target_road_1_end)
 
     def update_navigation_localization(self, ego_vehicle):
         position = ego_vehicle.position
-        lane, lane_index = ray_localization(position, ego_vehicle.pg_world)
+        lane, lane_index = self.get_current_lane(ego_vehicle)
         if lane is None:
             lane, lane_index = ego_vehicle.lane, ego_vehicle.lane_index
             ego_vehicle.on_lane = False
@@ -121,6 +125,7 @@ class RoutingLocalizationModule:
         target_lanes_1 = self.map.road_network.graph[target_road_1_start][target_road_1_end]
         target_lanes_2 = self.map.road_network.graph[target_road_2_start][target_road_2_end]
         self.current_ref_lanes = target_lanes_1
+        self.current_road = Road(target_road_1_start, target_road_1_end)
 
         self._navi_info.fill(0.0)
         half = self.navigation_info_dim // 2
@@ -236,25 +241,46 @@ class RoutingLocalizationModule:
     def __del__(self):
         logging.debug("{} is destroyed".format(self.__class__.__name__))
 
-    def get_current_lateral_range(self) -> float:
+    def get_current_lateral_range(self, current_position, pg_world) -> float:
         """Return the maximum lateral distance from left to right."""
-        return self.get_current_lane_width() * self.get_current_lane_num()
+        # special process for special block
+        current_block_id = self.current_road.block_ID()
+        if current_block_id == Split.ID or current_block_id == Merge.ID:
+            left_lane = self.current_ref_lanes[0]
+            assert isinstance(left_lane, StraightLane), "Reference lane should be straight lane here"
+            long, lat = left_lane.local_coordinates(current_position)
+            current_position = left_lane.position(long, -left_lane.width / 2)
+            return self._ray_lateral_range(pg_world, current_position, self.current_ref_lanes[0].direction_lateral)
+        else:
+            return self.get_current_lane_width() * self.get_current_lane_num()
 
     def get_current_lane_width(self) -> float:
         return self.map.config[self.map.LANE_WIDTH]
 
     def get_current_lane_num(self) -> float:
-        return self.map.config[self.map.LANE_NUM]
+        return len(self.current_ref_lanes)
 
-    # def get_navigate_landmarks(self, distance):
-    #     ret = []
-    #     for L in range(len(self.checkpoints) - 1):
-    #         start = self.checkpoints[L]
-    #         end = self.checkpoints[L + 1]
-    #         target_lanes = self.map.road_network.graph[start][end]
-    #         idx = self.get_current_lane_num() // 2 - 1
-    #         ref_lane = target_lanes[idx]
-    #         for tll in range(3, int(ref_lane.length), 3):
-    #             check_point = ref_lane.position(tll, 0)
-    #             ret.append([check_point[0], -check_point[1]])
-    #     return ret
+    def get_current_lane(self, ego_vehicle):
+        possible_lanes = ray_localization(ego_vehicle.position, ego_vehicle.pg_world, return_all_result=True)
+        for lane, index, l_1_dist in possible_lanes:
+            if lane in self.current_ref_lanes:
+                return lane, index
+        return possible_lanes[0][:-1] if len(possible_lanes) > 0 else (None, None)
+
+    def _ray_lateral_range(self, pg_world, start_position, dir, length=50):
+        """
+        It is used to measure the lateral range of special blocks
+        :param start_position: start_point
+        :param dir: ray direction
+        :param length: length of ray
+        :return: lateral range [m]
+        """
+        end_position = start_position[0] + dir[0] * length, start_position[1] + dir[1] * length
+        start_position = panda_position(start_position, z=0.15)
+        end_position = panda_position(end_position, z=0.15)
+        mask = BitMask32.bit(FirstBlock.CONTINUOUS_COLLISION_MASK)
+        res = pg_world.physics_world.static_world.rayTestClosest(start_position, end_position, mask=mask)
+        if not res.hasHit():
+            return length
+        else:
+            return res.getHitFraction() * length
