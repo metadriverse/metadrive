@@ -28,8 +28,8 @@ class TestEnv(PGDriveEnv):
                 "debug": True,
                 "fast": False,
                 "map_config": {
-                    Map.GENERATE_TYPE: MapGenerateMethod.BIG_BLOCK_NUM,
-                    Map.GENERATE_CONFIG: 20,
+                    Map.GENERATE_TYPE: MapGenerateMethod.BIG_BLOCK_SEQUENCE,
+                    Map.GENERATE_CONFIG: "Yy",
                     Map.LANE_WIDTH: 3.5,
                     Map.LANE_NUM: 3,
                 },
@@ -55,14 +55,15 @@ if __name__ == "__main__":
     for i in range(1, 100000):
         o, r, d, info = env.step([1.0, 0.])
         info["fuel"] = env.vehicle.energy_consumption
-        # env.render(
-        #     text={
-        #         "left": env.vehicle.dist_to_left,
-        #         "right": env.vehicle.dist_to_right,
-        #         "white_lane_line": env.vehicle.on_white_continuous_line,
-        #         "reward": r,
-        #     }
-        # )
+        env.render(
+            text={
+                "reward": r,
+                "lane_index": env.vehicle.lane_index,
+                "dist_to_left": env.vehicle.dist_to_left,
+                "dist_to_right": env.vehicle.dist_to_right,
+                "out_of_route": env.vehicle.out_of_route
+            }
+        )
         # if d:
         #     print("Reset")
         #     env.reset()
