@@ -48,7 +48,6 @@ class Object(Element):
         self.lane_index = lane_index
         self.lane = lane
         self.body_node = None
-        self.name = random_string() if name is None else name
 
     @classmethod
     def make_on_lane(cls, lane, lane_index: LaneIndex, longitudinal: float, lateral: float):

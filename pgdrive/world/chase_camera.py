@@ -41,7 +41,6 @@ class ChaseCamera:
         self.inputs.watchWithModifiers('low', '_')
 
         # free bird view camera
-        pg_world.accept("b", self.stop_chase, extraArgs=[pg_world])
         self.top_down_camera_height = self.TOP_DOWN_VIEW_HEIGHT
         self.camera_x = 0
         self.camera_y = 0
@@ -109,7 +108,7 @@ class ChaseCamera:
         heading = ChaseCamera._heading_of_lane(lane, pos)
         return math.cos(heading), math.sin(heading)
 
-    def chase(self, vehicle, pg_world):
+    def track(self, vehicle, pg_world):
         """
         Use this function to chase a new vehicle !
         :param vehicle: Vehicle to chase
@@ -161,9 +160,10 @@ class ChaseCamera:
         if pg_world.taskMgr.hasTaskNamed(self.TOP_DOWN_TASK_NAME):
             pg_world.taskMgr.remove(self.TOP_DOWN_TASK_NAME)
 
-    def stop_chase(self, pg_world: PGWorld):
+    def stop_track(self, pg_world: PGWorld, current_chase_vehicle):
         if pg_world.taskMgr.hasTaskNamed(self.CHASE_TASK_NAME):
             pg_world.taskMgr.remove(self.CHASE_TASK_NAME)
+        current_chase_vehicle.remove_display_region()
         if not pg_world.taskMgr.hasTaskNamed(self.TOP_DOWN_TASK_NAME):
             # adjust hpr
             current_pos = self.camera.getPos()

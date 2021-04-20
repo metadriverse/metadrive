@@ -260,7 +260,7 @@ class MultiAgentPGDrive(PGDriveEnvV2):
             top_down_camera_height = self.config["top_down_camera_initial_z"]
             self.main_camera.camera.setPos(0, 0, top_down_camera_height)
             self.main_camera.top_down_camera_height = top_down_camera_height
-            self.main_camera.stop_chase(self.pg_world)
+            self.main_camera.stop_track(self.pg_world, self.current_track_vehicle)
             self.main_camera.camera_x += self.config["top_down_camera_initial_x"]
             self.main_camera.camera_y += self.config["top_down_camera_initial_y"]
 

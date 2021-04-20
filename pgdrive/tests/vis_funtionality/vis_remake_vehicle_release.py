@@ -17,7 +17,7 @@ class TestEnv(PGDriveEnv):
             self.vehicle.destroy()
             self.vehicles["default_agent"] = BaseVehicle(env.pg_world)
             if self.main_camera is not None:
-                self.main_camera.chase(self.vehicle, env.pg_world)
+                self.main_camera.track(self.vehicle, env.pg_world)
         super(TestEnv, self).reset()
 
 
