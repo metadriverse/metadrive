@@ -70,6 +70,7 @@ class MultiAgentPGDrive(PGDriveEnvV2):
         self._agent_manager = AgentManager(
             never_allow_respawn=not self.config["allow_respawn"], debug=self.config["debug"]
         )
+        self._top_down_renderer = None
 
     def _process_extra_config(self, config) -> "PGConfig":
         ret_config = self.default_config().update(
@@ -347,8 +348,21 @@ class MultiAgentPGDrive(PGDriveEnvV2):
         # end_road = -get_np_random(self._DEBUG_RANDOM_SEED).choice(self.spawn_roads)  # Use negative road!
         # vehicle.routing_localization.set_route(vehicle.lane_index[0], end_road.end_node)
 
+    def render(self, mode='human', text=None, *args, **kwargs):
+        if mode == "top_down":
+            ret = self._render_topdown(*args, **kwargs)
+        else:
+            ret = super(MultiAgentPGDrive, self).render(mode=mode, text=text)
+        return ret
 
-if __name__ == "__main__":
+    def _render_topdown(self, *args, **kwargs):
+        if self._top_down_renderer is None:
+            from pgdrive.obs.top_down_renderer import TopDownRenderer
+            self._top_down_renderer = TopDownRenderer(self.current_map, *args, **kwargs)
+        self._top_down_renderer.render(list(self.vehicles.values()))
+
+
+def _test():
     setup_logger(True)
     env = MultiAgentPGDrive(
         {
@@ -378,3 +392,38 @@ if __name__ == "__main__":
             print("Reset")
             env.reset()
     env.close()
+
+
+def _vis():
+    setup_logger(True)
+    env = MultiAgentPGDrive(
+        {
+            # "use_render": True,
+            # "fast": True,
+            "num_agents": 12,
+            "allow_respawn": False,
+            "manual_control": True,
+            "pg_world_config": {
+                "pstats": False
+            },
+        }
+    )
+    o = env.reset()
+    total_r = 0
+    for i in range(1, 100000):
+        # o, r, d, info = env.step(env.action_space.sample())
+        o, r, d, info = env.step({v_id: [0.0, 0.0] for v_id in env.vehicles.keys()})
+        for r_ in r.values():
+            total_r += r_
+        # o, r, d, info = env.step([0,1])
+        # d.update({"total_r": total_r})
+        env.render(mode="top_down")
+        if len(env.vehicles) == 0:
+            total_r = 0
+            print("Reset")
+            env.reset()
+    env.close()
+
+
+if __name__ == '__main__':
+    _vis()

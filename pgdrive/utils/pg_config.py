@@ -201,14 +201,18 @@ class PGConfig:
     def __getitem__(self, item):
         self._check_and_raise_key_error(item)
         ret = self._config[item]
-        if isinstance(ret, np.ndarray) and len(ret) == 1:
-            # handle 1-d box shape sample
-            ret = ret[0]
         return ret
 
     def _set_item(self, key, value, allow_overwrite):
         """A helper function to replace __setattr__ and __setitem__!"""
         self._check_and_raise_key_error(key)
+        if isinstance(value, np.ndarray) and len(value) == 1:
+            # handle 1-d box shape sample
+            value = value[0]
+            if isinstance(value, (np.float32, np.float64, np.float)):
+                value = float(value)
+            if isinstance(value, (np.int, np.int32, np.int64, np.uint)):
+                value = int(value)
         if self._unchangeable:
             raise ValueError("This config is not changeable!")
         if (not allow_overwrite) and (self._config[key] is not None and value is not None):
