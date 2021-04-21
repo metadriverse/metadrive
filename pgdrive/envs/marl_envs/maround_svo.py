@@ -38,6 +38,9 @@ class MARoundSVO(MARound):
                 # "angle": util = r_me * cos(svo) + r_other * sin(svo), svo in [0, pi/2]
                 # "angle" seems to be more stable!
                 svo_mode="angle",
+
+                # Whether to force set the svo
+                force_svo=-1
             )
         )
         return config
@@ -104,7 +107,10 @@ class MARoundSVO(MARound):
         return ret, new_rewards, d, i
 
     def _add_svo(self, o, svo=None):
-        svo = get_np_random().uniform(0, 1) if svo is None else svo
+        if self.config["force_svo"] != -1:
+            svo = self.config["force_svo"]
+        else:
+            svo = get_np_random().uniform(0, 1) if svo is None else svo
         return svo, np.concatenate([o, [svo]])
 
     def _find_k_nearest(self, v_id, K):
@@ -134,7 +140,7 @@ class MARoundSVO(MARound):
 
 
 if __name__ == '__main__':
-    env = MARoundSVO({"num_agents": 8, "num_neighbours": 8, "svo_mode": "angle"})
+    env = MARoundSVO({"num_agents": 8, "num_neighbours": 8, "svo_mode": "angle", "force_svo": 0.9})
     o = env.reset()
     assert env.observation_space.contains(o)
     assert all([0 <= oo[-1] <= 1.0 for oo in o.values()])
