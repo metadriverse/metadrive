@@ -4,7 +4,7 @@ import numpy as np
 from pgdrive.scene_creator.lane.abs_lane import LineType
 from pgdrive.scene_creator.lane.circular_lane import CircularLane
 from pgdrive.scene_creator.lane.straight_lane import StraightLane
-from pgdrive.utils import import_pygame
+from pgdrive.utils.utils import import_pygame
 
 PositionType = Union[Tuple[float, float], np.ndarray]
 pygame = import_pygame()
@@ -110,6 +110,9 @@ class WorldSurface(pygame.Surface):
     def __init__(self, size: Tuple[int, int], flags: object, surf: pygame.SurfaceType) -> None:
         surf.fill(pygame.Color("Black"))
         super().__init__(size, flags, surf)
+        self.raw_size = size
+        self.raw_flags = flags
+        self.raw_surface = surf
         self.origin = np.array([0, 0])
         self.scaling = self.INITIAL_SCALING
         self.centering_position = self.INITIAL_CENTERING
@@ -182,6 +185,14 @@ class WorldSurface(pygame.Surface):
             if event.key == pygame.K_k:
                 self.centering_position[0] += self.MOVING_FACTOR
 
+    def copy(self):
+        ret = WorldSurface(size=self.raw_size, flags=self.raw_flags, surf=self.raw_surface)
+        ret.origin = self.origin
+        ret.scaling = self.scaling
+        ret.centering_position = self.centering_position
+        ret.blit(self, (0, 0))
+        return ret
+
 
 class VehicleGraphics:
     RED = (255, 100, 100)
@@ -195,7 +206,7 @@ class VehicleGraphics:
     font = None
 
     @classmethod
-    def display(cls, vehicle, surface, color, heading, label: bool = False) -> None:
+    def display(cls, vehicle, surface, color, heading, label: bool = False, draw_countour=False) -> None:
         """
         Display a vehicle on a pygame surface.
 
@@ -214,6 +225,8 @@ class VehicleGraphics:
         box = [pygame.math.Vector2(p) for p in [(-h / 2, -w / 2), (-h / 2, w / 2), (h / 2, w / 2), (h / 2, -w / 2)]]
         box_rotate = [p.rotate(angle) + position for p in box]
         pygame.draw.polygon(surface, color=color, points=box_rotate)
+        if draw_countour:
+            pygame.draw.polygon(surface, cls.BLACK, box_rotate, width=1)  #, 1)
 
         # Label
         if label:
