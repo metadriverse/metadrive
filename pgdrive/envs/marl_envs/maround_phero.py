@@ -1,6 +1,7 @@
+import time
+
 import numpy as np
 from gym.spaces import Box, Dict
-
 from pgdrive.envs.marl_envs.marl_inout_roundabout import MultiAgentRoundaboutEnv as MARound, \
     LidarStateObservationMARound
 from pgdrive.envs.marl_envs.pheromone_map import PheromoneMap
@@ -12,7 +13,10 @@ class PheroObs(LidarStateObservationMARound):
         space = super(PheroObs, self).observation_space
         assert isinstance(space, Box)
         assert len(space.shape) == 1
-        length = space.shape[0] + self.config["num_neighbours"]  # Add extra 9 pheromones information!
+
+        # Add extra 9 pheromones information!
+        length = space.shape[0] + self.config["num_neighbours"] * self.config["num_channels"]
+
         space = Box(
             low=np.array([space.low[0]] * length),
             high=np.array([space.high[0]] * length),
@@ -44,6 +48,7 @@ class MARoundPhero(MARound):
     def _post_process_config(self, config):
         config = super(MARoundPhero, self)._post_process_config(config)
         config["vehicle_config"]["num_neighbours"] = config["num_neighbours"]
+        config["vehicle_config"]["num_channels"] = config["num_channels"]
         return config
 
     def get_single_observation(self, vehicle_config):
@@ -100,9 +105,33 @@ class MARoundPhero(MARound):
             ret = self.phero_map.get_nearest_pheromone(self.vehicles[v_id].position, self.config["num_neighbours"])
         return np.concatenate([o, ret])
 
+    def _render_topdown(self, *args, **kwargs):
+        if self._top_down_renderer is None:
+            from pgdrive.obs.top_down_renderer import PheromoneRenderer
+            self._top_down_renderer = PheromoneRenderer(self.current_map, *args, **kwargs)
+        self._top_down_renderer.render(list(self.vehicles.values()), pheromone_map=self.phero_map)
 
-if __name__ == '__main__':
-    env = MARoundPhero()
+
+def _profile():
+    env = MARoundPhero({"num_agents": 40})
+    obs = env.reset()
+    start = time.time()
+    for s in range(10000):
+        o, r, d, i = env.step(env.action_space.sample())
+        if all(d.values()):
+            env.reset()
+        if (s + 1) % 100 == 0:
+            print(
+                "Finish {}/10000 simulation steps. Time elapse: {:.4f}. Average FPS: {:.4f}".format(
+                    s + 1,
+                    time.time() - start, (s + 1) / (time.time() - start)
+                )
+            )
+    print(f"(PGDriveEnvV2) Total Time Elapse: {time.time() - start}")
+
+
+def _test():
+    env = MARoundPhero({"num_channels": 3})
     o = env.reset()
     assert env.observation_space.contains(o)
     assert all([0 <= oo[-1] <= 1.0 for oo in o.values()])
@@ -127,3 +156,31 @@ if __name__ == '__main__':
             print("Reset")
             env.reset()
     env.close()
+
+
+def _vis():
+    env = MARoundPhero({"num_channels": 1, "num_agents": 40})
+    o = env.reset()
+    start = time.time()
+    for s in range(1, 100000):
+        # o, r, d, info = env.step(env.action_space.sample())
+        o, r, d, info = env.step({k: [0, 1, 0.8] for k in env.vehicles.keys()})
+        env.render(mode="top_down")
+        # env.render(mode="top_down")
+        # env.render(mode="top_down", film_size=(1000, 1000))
+        if d["__all__"]:
+            env.reset()
+        if (s + 1) % 100 == 0:
+            print(
+                "Finish {}/10000 simulation steps. Time elapse: {:.4f}. Average FPS: {:.4f}".format(
+                    s + 1,
+                    time.time() - start, (s + 1) / (time.time() - start)
+                )
+            )
+    env.close()
+
+
+if __name__ == '__main__':
+    # _test()
+    # _profile()
+    _vis()
