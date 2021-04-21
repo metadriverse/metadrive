@@ -15,14 +15,14 @@ class PheromoneMap:
         min_x=0,
         min_y=0
     ):
-        self.total_width = total_width
-        self.total_length = total_length
-        self.num_widths = int(math.ceil(total_width / granularity)) + 1
-        self.num_lengths = int(math.ceil(total_length / granularity)) + 1
+        self.total_width = total_width * 1.2
+        self.total_length = total_length * 1.2
+        self.num_widths = int(math.ceil(self.total_width / granularity)) + 1
+        self.num_lengths = int(math.ceil(self.total_length / granularity)) + 1
         self.num_channels = num_channels
         self.granularity = granularity
-        self.min_x = min_x
-        self.min_y = min_y
+        self.min_x = min_x - total_width * 0.1
+        self.min_y = min_y - total_length * 0.1
 
         assert 0.0 <= attenuation_rate <= 1.0
         self.attenuation_rate = attenuation_rate
@@ -41,8 +41,6 @@ class PheromoneMap:
 
     def get_indices(self, position):
         position = (position[0] - self.min_x, position[1] - self.min_y)
-        assert position[0] <= self.total_width
-        assert position[1] <= self.total_length
         x = int(math.floor(position[0] / self.granularity))
         y = int(math.floor(position[1] / self.granularity))
         return x, y
