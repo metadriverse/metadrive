@@ -105,13 +105,14 @@ class TopDownRenderer:
 
 
 class PheromoneRenderer(TopDownRenderer):
-    def __init__(self, map, film_size=(2000, 2000), screen_size=(1000, 1000), zoomin=1.5, draw_vehicle_first=True):
+    def __init__(self, map, film_size=(2000, 2000), screen_size=(1000, 1000), zoomin=1.3, draw_vehicle_first=False):
         super(PheromoneRenderer, self).__init__(
             map, film_size=film_size, screen_size=screen_size, light_background=True, zoomin=zoomin
         )
         self._pheromone_surface = None
         self._bounding_box = self._map.road_network.get_bounding_box()
         self._draw_vehicle_first = draw_vehicle_first
+        self._color_map = None
 
     def render(self, vehicles, pheromone_map):
         self.refresh()
@@ -131,12 +132,26 @@ class PheromoneRenderer(TopDownRenderer):
         if self._pheromone_surface is None:
             self._pheromone_surface = pygame.Surface(phero.shape[:2])
 
-        c = (0, 150, 0)  # Dark green!
-        c = (255 - c[0], 255 - c[1], 255 - c[2])
+        if self._color_map is None:
+            color_map = np.zeros(phero.shape[:2] + (3, ), dtype=np.uint8)
+            color_map[0:100, :70] = (255, 150, 255)
+            color_map[100:120, :70] = (155, 92, 155)
+            color_map[120:140, :70] = (55, 32, 55)
+            color_map[140:160, :70] = (5, 3, 5)
+            self._color_map = color_map
 
         phero = np.squeeze(phero, -1)
-        phero = np.stack([phero * c[0], phero * c[1], phero * c[2]], axis=-1)
-        pygame.surfarray.blit_array(self._pheromone_surface, phero)
+
+        mask = phero > 0
+        # self._color_map.fill(0)
+        self._color_map[160:, :] = 0
+        self._color_map[:, 70:] = 0
+
+        self._color_map[mask, 0] = 255 * phero[mask]
+        self._color_map[mask, 1] = 150 * phero[mask]
+        self._color_map[mask, 2] = 255 * phero[mask]
+
+        pygame.surfarray.blit_array(self._pheromone_surface, self._color_map)
         tmp = pygame.transform.scale(self._pheromone_surface, self._background.get_size())
         self._runtime.blit(
             tmp, (0, 0), special_flags=pygame.BLEND_RGB_SUB if self._light_background else pygame.BLEND_RGB_ADD
