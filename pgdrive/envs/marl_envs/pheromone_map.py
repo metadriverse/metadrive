@@ -1,6 +1,7 @@
 import math
 
 import numpy as np
+from pgdrive.utils import safe_clip_for_small_array, safe_clip
 
 
 class PheromoneMap:
@@ -34,10 +35,11 @@ class PheromoneMap:
         self._tmp_map = np.zeros((self.num_widths, self.num_lengths, self.num_channels))
 
     def add(self, position, values):
-        values = np.asarray(values)
+        values = safe_clip(np.asarray(values), -1.0, 1.0)
         values = (values + 1) / 2  # Rescale to 0, 1 for observation!
         x, y = self.get_indices(position)
-        self._map[x, y] = values
+        self._map[x, y] = max(min(1.0, values + self.get_value(x, y)), 0.0)
+        # self._map[x, y] = values
 
     def get_indices(self, position):
         position = (position[0] - self.min_x, position[1] - self.min_y)

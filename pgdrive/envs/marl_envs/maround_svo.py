@@ -3,6 +3,7 @@ from math import cos, sin
 
 import numpy as np
 from gym.spaces import Box
+
 from pgdrive.envs.marl_envs.marl_inout_roundabout import MultiAgentRoundaboutEnv as MARound, \
     LidarStateObservationMARound
 from pgdrive.utils import get_np_random, norm
@@ -50,6 +51,7 @@ class MARoundSVO(MARound):
         self.svo_map = {}
         self.distance_map = defaultdict(lambda: defaultdict(lambda: float("inf")))
         assert self.config["svo_mode"] in ["linear", "angle"]
+        self.force_svo = self.config["force_svo"]
 
     def get_single_observation(self, vehicle_config):
         return SVOObs(vehicle_config)
@@ -106,9 +108,12 @@ class MARoundSVO(MARound):
             new_rewards = r
         return ret, new_rewards, d, i
 
+    def set_force_svo(self, v):
+        self.force_svo = v
+
     def _add_svo(self, o, svo=None):
-        if self.config["force_svo"] != -1:
-            svo = self.config["force_svo"]
+        if self.force_svo != -1:
+            svo = self.force_svo
         else:
             svo = get_np_random().uniform(0, 1) if svo is None else svo
         return svo, np.concatenate([o, [svo]])
