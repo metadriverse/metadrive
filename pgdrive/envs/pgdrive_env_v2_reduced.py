@@ -2,9 +2,8 @@ from collections import deque
 
 import gym
 import numpy as np
-
 from pgdrive.envs.pgdrive_env_v2 import PGDriveEnvV2
-from pgdrive.obs import ImageStateObservation, ObservationType, LidarStateObservation
+from pgdrive.obs import ObservationType, LidarStateObservation
 from pgdrive.utils import PGConfig, clip, norm
 
 
@@ -12,6 +11,8 @@ class LidarStateObservationV2(LidarStateObservation):
     def __init__(self, vehicle_config):
         super(LidarStateObservationV2, self).__init__(vehicle_config)
         self._cloud_point_stack = deque(maxlen=vehicle_config["num_stacks"])
+        self.obs_mode = self.config["obs_mode"]
+        assert self.obs_mode in ["w_navi", "w_ego", "w_both"]
 
     @property
     def observation_space(self):
@@ -20,11 +21,24 @@ class LidarStateObservationV2(LidarStateObservation):
             # Number of lidar rays and distance should be positive!
             shape[0] += self.config["lidar"]["num_lasers"] * self.config["num_stacks"] + \
                         self.config["lidar"]["num_others"] * 4
+
+        if self.obs_mode in ["w_navi", "w_both"]:
+            shape[0] += 6
+
+        if self.obs_mode in ["w_ego", "w_both"]:
+            shape[0] += 4
+
         return gym.spaces.Box(-0.0, 1.0, shape=tuple(shape), dtype=np.float32)
 
     def state_observe(self, vehicle):
         navi_info = vehicle.routing_localization.get_navi_info()
-        navi_info = [navi_info[0], navi_info[1], navi_info[5], navi_info[6]]  # Only keep the checkpoints information!
+
+        if self.config["obs_mode"] in ["w_navi", "w_both"]:
+            navi_info = navi_info.tolist()
+        else:
+            # Only keep the checkpoints information!
+            navi_info = [navi_info[0], navi_info[1], navi_info[5], navi_info[6]]
+
         ego_state = self.vehicle_state(vehicle)
         return np.asarray(ego_state + navi_info, dtype=np.float32)
 
@@ -54,6 +68,24 @@ class LidarStateObservationV2(LidarStateObservation):
             # raise ValueError()
         # print("Current side detector min: {}, max: {}, mean: {}".format(min(info), max(info), np.mean(info)))
         # current_reference_lane = vehicle.routing_localization.current_ref_lanes[-1]
+
+        if self.obs_mode in ["w_ego", "w_both"]:
+            lateral_to_left, lateral_to_right, = vehicle.dist_to_left, vehicle.dist_to_right
+            total_width = float(
+                (vehicle.routing_localization.get_current_lane_num() + 1) *
+                vehicle.routing_localization.get_current_lane_width()
+            )
+            lateral_to_left /= total_width
+            lateral_to_right /= total_width
+            info += [clip(lateral_to_left, 0.0, 1.0), clip(lateral_to_right, 0.0, 1.0)]
+            current_reference_lane = vehicle.routing_localization.current_ref_lanes[-1]
+            info.append(vehicle.heading_diff(current_reference_lane))
+
+            _, lateral = vehicle.lane.local_coordinates(vehicle.position)
+            info.append(
+                clip((lateral * 2 / vehicle.routing_localization.get_current_lane_width() + 1.0) / 2.0, 0.0, 1.0)
+            )
+
         info += [
             # vehicle.heading_diff(current_reference_lane),
             # Note: speed can be negative denoting free fall. This happen when emergency brake.
@@ -96,14 +128,13 @@ class PGDriveEnvV2Reduced(PGDriveEnvV2):
         config["vehicle_config"]["lidar"]["num_lasers"] = 240
         config["vehicle_config"]["side_detector"]["num_lasers"] = 120
         config["vehicle_config"]["num_stacks"] = 1
+        config["obs_mode"] = None  # ["w_navi", "w_ego", "w_both"]
         return config
 
     def get_single_observation(self, vehicle_config: "PGConfig") -> "ObservationType":
-        if self.config["use_image"]:
-            o = ImageStateObservation(vehicle_config)
-        else:
-            o = LidarStateObservationV2(vehicle_config)
-        return o
+        assert not self.config["use_image"]
+        vehicle_config["obs_mode"] = self.config["obs_mode"]
+        return LidarStateObservationV2(vehicle_config)
 
     def reward_function(self, vehicle_id: str):
         r, r_info = super(PGDriveEnvV2Reduced, self).reward_function(vehicle_id)
@@ -123,18 +154,22 @@ if __name__ == '__main__':
         assert np.isscalar(reward)
         assert isinstance(info, dict)
 
-    env = PGDriveEnvV2Reduced({"vehicle_config": {"num_stacks": 2}})
-    try:
-        obs = env.reset()
-        assert env.observation_space.contains(obs)
-        for _ in range(10):
-            o, r, d, i = env.step(env.action_space.sample())
-            env.reset()
-        _act(env, env.action_space.sample())
-        for x in [-1, 0, 1]:
+    # env = PGDriveEnvV2Reduced({"vehicle_config": {"num_stacks": 2}})
+
+    for om in ["w_ego", "w_navi", "w_both"]:
+        env = PGDriveEnvV2Reduced({"obs_mode": om})
+        try:
             obs = env.reset()
             assert env.observation_space.contains(obs)
-            for y in [-1, 0, 1]:
-                _act(env, [x, y])
-    finally:
-        env.close()
+            for _ in range(10):
+                o, r, d, i = env.step(env.action_space.sample())
+                env.reset()
+            _act(env, env.action_space.sample())
+            for x in [-1, 0, 1]:
+                obs = env.reset()
+                assert env.observation_space.contains(obs)
+                for y in [-1, 0, 1]:
+                    _act(env, [x, y])
+        finally:
+            env.close()
+            print("Finish om: ", om)
