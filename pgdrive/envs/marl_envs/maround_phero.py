@@ -164,7 +164,11 @@ def _vis():
     start = time.time()
     for s in range(1, 100000):
         # o, r, d, info = env.step(env.action_space.sample())
-        o, r, d, info = env.step({k: [0, 1, 0.8] for k in env.vehicles.keys()})
+        o, r, d, info = env.step(
+            {k: [np.random.uniform(-0.01, 0.01), 1, np.random.uniform(0, 1)]
+             for k in env.vehicles.keys()}
+        )
+        # o, r, d, info = env.step({k: [np.random.uniform(-0.01, 0.01), 1, np.random.uyni] for k in env.vehicles.keys()})
         env.render(mode="top_down")
         # env.render(mode="top_down")
         # env.render(mode="top_down", film_size=(1000, 1000))
