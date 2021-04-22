@@ -1,7 +1,7 @@
 import math
 
 import numpy as np
-from pgdrive.utils import safe_clip_for_small_array, safe_clip
+from scipy.signal import convolve
 
 
 class PheromoneMap:
@@ -32,14 +32,16 @@ class PheromoneMap:
         self.diffusion_rate = diffusion_rate
 
         self._map = np.zeros((self.num_widths, self.num_lengths, self.num_channels))
-        self._tmp_map = np.zeros((self.num_widths, self.num_lengths, self.num_channels))
+
+        dif = (1 - self.diffusion_rate) / 9
+        self._kernel = np.array([[dif, dif, dif], [dif, dif + self.diffusion_rate, dif], [dif, dif,
+                                                                                          dif]]).reshape([3, 3, 1])
 
     def add(self, position, values):
-        values = safe_clip(np.asarray(values), -1.0, 1.0)
-        values = (values + 1) / 2  # Rescale to 0, 1 for observation!
+        values = np.asarray(values)
+        values = (values + 1) / 2 / 2  # Rescale to 0 - 0.5 for observation!
         x, y = self.get_indices(position)
-        self._map[x, y] = max(min(1.0, values + self.get_value(x, y)), 0.0)
-        # self._map[x, y] = values
+        self._map[x, y] = np.clip(values + self._map[x, y], 0.0, 1.0)
 
     def get_indices(self, position):
         position = (position[0] - self.min_x, position[1] - self.min_y)
@@ -49,7 +51,6 @@ class PheromoneMap:
 
     def clear(self):
         self._map.fill(0.0)
-        self._tmp_map.fill(0.0)
 
     def step(self):
         """This function should be called when environment was stepped!"""
@@ -64,24 +65,10 @@ class PheromoneMap:
     def diffuse(self):
         if self.diffusion_rate == 1.0:
             return
-        self._tmp_map.fill(0.0)
-        for x in range(1, self.num_widths - 1):
-            for y in range(1, self.num_lengths - 1):
-                val = self._map[x, y]
-                if np.all(val == 0.0):
-                    continue
-                diffused_val = (val * (1 - self.diffusion_rate)) / 8
-                self._tmp_map[[x - 1, x, x + 1], y - 1] += diffused_val
-                self._tmp_map[[x - 1, x, x + 1], y + 1] += diffused_val
-                self._tmp_map[[x - 1, x + 1], y] += diffused_val
-                self._tmp_map[x, y] += val * self.diffusion_rate
-
-        # in-place replacement
-        self._map[...] = self._tmp_map
+        self._map = convolve(self._map, self._kernel, mode="same")
 
     def get_nearest_pheromone(self, position, number=1):
         x, y = self.get_indices(position)
-
         if number == 1:
             return np.asarray(self.get_value(x, y)).reshape(-1)
         elif number == 9:
