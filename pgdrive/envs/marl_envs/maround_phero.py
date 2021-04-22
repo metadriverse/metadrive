@@ -30,12 +30,15 @@ class MARoundPhero(MARound):
     @classmethod
     def default_config(cls):
         config = super(MARoundPhero, cls).default_config()
-        config.update(dict(
-            attenuation_rate=1.0,
-            diffusion_rate=1.0,
-            num_channels=1,
-            num_neighbours=1  # or 9.
-        ))
+        config.update(
+            dict(
+                attenuation_rate=0.99,
+                diffusion_rate=0.95,
+                num_channels=1,
+                num_neighbours=1,  # or 9.
+                granularity=0.5
+            )
+        )
         return config
 
     def __init__(self, config=None):
@@ -78,7 +81,8 @@ class MARoundPhero(MARound):
             total_length=max_y - min_y + 1,
             num_channels=self.config["num_channels"],
             diffusion_rate=self.config["diffusion_rate"],
-            attenuation_rate=self.config["attenuation_rate"]
+            attenuation_rate=self.config["attenuation_rate"],
+            granularity=self.config["granularity"]
         )
 
     def _get_reset_return(self):
@@ -91,6 +95,7 @@ class MARoundPhero(MARound):
         ret = super(MARoundPhero, self)._step_simulator(actions, action_infos)
         for v_id, act in actions.items():
             self.phero_map.add(self.vehicles[v_id].position, act[2:])
+        self.phero_map.step()
         return ret
 
     def step(self, actions):
@@ -159,7 +164,15 @@ def _test():
 
 
 def _vis():
-    env = MARoundPhero({"num_channels": 1, "num_agents": 40})
+    env = MARoundPhero(
+        {
+            "num_channels": 1,
+            "num_agents": 40,
+            "diffusion_rate": 0.95,
+            "attenuation_rate": 0.99,
+            "granularity": 0.5
+        }
+    )
     o = env.reset()
     start = time.time()
     for s in range(1, 100000):

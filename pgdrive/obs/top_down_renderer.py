@@ -47,7 +47,7 @@ color_white = (255, 255, 255)
 class TopDownRenderer:
     def __init__(self, map, film_size=None, screen_size=None, light_background=True, zoomin=None):
         film_size = film_size or (1000, 1000)
-        self._zoomin = zoomin
+        self._zoomin = zoomin or 1.0
         self._screen_size = screen_size
         self._map = map
 
