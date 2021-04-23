@@ -32,7 +32,8 @@ class MARoundSVO(MARound):
         config.update(
             dict(
                 # Number of near vehicles that participates in reward computing
-                num_neighbours=4,
+                num_neighbours=-1,  # Deprecated
+                neighbours_distance=0,
 
                 # Two mode to compute utility for each vehicle:
                 # "linear": util = r_me * svo + r_other * (1 - svo), svo in [0, 1]
@@ -82,30 +83,34 @@ class MARoundSVO(MARound):
 
         # compute the SVO-weighted rewards
         new_rewards = {}
-        K = self.config["num_neighbours"]
-        if K >= 1:
-            for k, own_r in r.items():
-                other_rewards = []
-                neighbours = self._find_k_nearest(k, K)
-                for other_k in neighbours:
-                    if other_k is None:
-                        break
-                    else:
-                        other_rewards.append(r[other_k])
-                if len(other_rewards) == 0:
-                    other_reward = own_r
+        # K = self.config["num_neighbours"]
+        # if K >= 1:
+
+        for k, own_r in r.items():
+            other_rewards = []
+            # neighbours = self._find_k_nearest(k, K)
+            neighbours = self._find_in_range(k, self.config["neighbours_distance"])
+            for other_k in neighbours:
+                if other_k is None:
+                    break
                 else:
-                    other_reward = np.mean(other_rewards)
-                if self.config["svo_mode"] == "linear":
-                    new_r = self.svo_map[k] * own_r + (1 - self.svo_map[k]) * other_reward
-                elif self.config["svo_mode"] == "angle":
-                    svo = self.svo_map[k] * np.pi / 2
-                    new_r = cos(svo) * own_r + sin(svo) * other_reward
-                else:
-                    raise ValueError("Unknown SVO mode: {}".format(self.config["svo_mode"]))
-                new_rewards[k] = new_r
-        else:
-            new_rewards = r
+                    other_rewards.append(r[other_k])
+            if len(other_rewards) == 0:
+                other_reward = own_r
+            else:
+                other_reward = np.mean(other_rewards)
+            if self.config["svo_mode"] == "linear":
+                new_r = self.svo_map[k] * own_r + (1 - self.svo_map[k]) * other_reward
+            elif self.config["svo_mode"] == "angle":
+                svo = self.svo_map[k] * np.pi / 2
+                new_r = cos(svo) * own_r + sin(svo) * other_reward
+            else:
+                raise ValueError("Unknown SVO mode: {}".format(self.config["svo_mode"]))
+            new_rewards[k] = new_r
+
+        # else:
+        #     new_rewards = r
+
         return ret, new_rewards, d, i
 
     def set_force_svo(self, v):
@@ -118,16 +123,28 @@ class MARoundSVO(MARound):
             svo = get_np_random().uniform(0, 1) if svo is None else svo
         return svo, np.concatenate([o, [svo]])
 
-    def _find_k_nearest(self, v_id, K):
-        max_distance = self.config["vehicle_config"]["lidar"]["distance"]
+    # def _find_k_nearest(self, v_id, K):
+    #     max_distance = self.config["vehicle_config"]["lidar"]["distance"]
+    #     dist_to_others = self.distance_map[v_id]
+    #     dist_to_others_list = sorted(dist_to_others, key=lambda k: dist_to_others[k])
+    #     ret = [
+    #         dist_to_others_list[i] for i in range(min(K, len(dist_to_others_list)))
+    #         if dist_to_others[dist_to_others_list[i]] < max_distance
+    #     ]
+    #     if len(ret) < K:
+    #         ret += [None] * (K - len(ret))
+    #     return ret
+
+    def _find_in_range(self, v_id, distance):
+        if distance <= 0:
+            return []
+        max_distance = distance
         dist_to_others = self.distance_map[v_id]
         dist_to_others_list = sorted(dist_to_others, key=lambda k: dist_to_others[k])
         ret = [
-            dist_to_others_list[i] for i in range(min(K, len(dist_to_others_list)))
+            dist_to_others_list[i] for i in range(len(dist_to_others_list))
             if dist_to_others[dist_to_others_list[i]] < max_distance
         ]
-        if len(ret) < K:
-            ret += [None] * (K - len(ret))
         return ret
 
     def _update_distance_map(self):
@@ -145,7 +162,7 @@ class MARoundSVO(MARound):
 
 
 if __name__ == '__main__':
-    env = MARoundSVO({"num_agents": 8, "num_neighbours": 8, "svo_mode": "angle", "force_svo": 0.9})
+    env = MARoundSVO({"num_agents": 8, "neighbours_distance": 3, "svo_mode": "angle", "force_svo": 0.9})
     o = env.reset()
     assert env.observation_space.contains(o)
     assert all([0 <= oo[-1] <= 1.0 for oo in o.values()])
