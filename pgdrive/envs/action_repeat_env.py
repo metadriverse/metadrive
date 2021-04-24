@@ -38,13 +38,6 @@ class ActionRepeat(PGDriveEnv):
             self.fixed_action_repeat = self.config["fixed_action_repeat"]
         else:
             self.fixed_action_repeat = None
-            self.action_space = Box(
-                shape=(self.action_space.shape[0] + 1, ),
-                high=self.action_space.high[0],
-                low=self.action_space.low[0],
-                dtype=self.action_space.dtype
-            )
-
         # self.gamma = self.config["gamma"]
         # Modify gamma to make sure it behaves like the one applied to ORIGINAL steps.
         # self.gamma =
@@ -126,6 +119,16 @@ class ActionRepeat(PGDriveEnv):
     def _get_reset_return(self):
         o, *_ = self.step(np.array([0.0, 0.0, 0.0]))
         return o
+
+    @property
+    def action_space(self):
+        super_action_space = super(ActionRepeat, self).action_space
+        return Box(
+            shape=(super_action_space.shape[0] + 1, ),
+            high=super_action_space.high[0],
+            low=super_action_space.low[0],
+            dtype=super_action_space.dtype
+        )
 
 
 if __name__ == '__main__':

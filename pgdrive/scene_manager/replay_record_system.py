@@ -36,7 +36,7 @@ class PGReplayer:
             if index == "ego":
                 vehicle_to_set = ego_vehicle
                 assert len(state) == 1, "Only support single-agent now!"
-                state = state[DEFAULT_AGENT]
+                state = state[ego_vehicle.name]
                 vehicle_to_set.set_state(state)
             else:
                 vehicle_to_set = self.restore_vehicles[index]
