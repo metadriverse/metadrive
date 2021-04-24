@@ -4,7 +4,7 @@ from collections import deque
 from typing import Union, Optional
 import gym
 import numpy as np
-from panda3d.bullet import BulletVehicle, BulletBoxShape, ZUp, BulletGhostNode
+from panda3d.bullet import BulletVehicle, BulletBoxShape, ZUp, BulletGhostNode, BulletWheel
 from panda3d.core import Vec3, TransformState, NodePath, LQuaternionf, BitMask32, TextNode
 
 from pgdrive.constants import RENDER_MODE_ONSCREEN, COLOR, COLLISION_INFO_COLOR, BodyName, CamMask, CollisionGroup
@@ -803,3 +803,8 @@ class BaseVehicle(DynamicElement):
     @property
     def reference_lanes(self):
         return self.routing_localization.current_ref_lanes
+
+    def set_wheel_friction(self, new_friction):
+        raise DeprecationWarning("Bug exists here")
+        for wheel in self.wheels:
+            wheel.setFrictionSlip(new_friction)

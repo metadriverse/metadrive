@@ -128,7 +128,6 @@ class PGDriveEnv(BasePGDriveEnv):
         super(PGDriveEnv, self).__init__(config)
 
         self.current_track_vehicle: Optional[BaseVehicle] = None
-        self.current_track_vehicle_id: Optional[str] = None
 
     def _process_extra_config(self, config: Union[dict, "PGConfig"]) -> "PGConfig":
         """Check, update, sync and overwrite some config."""
@@ -184,11 +183,9 @@ class PGDriveEnv(BasePGDriveEnv):
                 raise ValueError("No such a controller type: {}".format(self.config["controller"]))
 
         # initialize track vehicles
-        # first tracked vehicles
-        vehicles = sorted(self.vehicles.items())
-        self.current_track_vehicle = vehicles[0][1]
-        self.current_track_vehicle_id = vehicles[0][0]
-        for _, vehicle in vehicles:
+        vehicles = self._agent_manager.get_vehicle_list()
+        self.current_track_vehicle = vehicles[0]
+        for vehicle in vehicles:
             if vehicle is not self.current_track_vehicle:
                 # for display
                 vehicle.remove_display_region()
@@ -216,12 +213,12 @@ class PGDriveEnv(BasePGDriveEnv):
 
     def _preprocess_actions(self, actions: Union[np.ndarray, Dict[AnyStr, np.ndarray]]) \
             -> Tuple[Union[np.ndarray, Dict[AnyStr, np.ndarray]], Dict]:
-
+        self._agent_manager.prepare_step()
         if self.config["manual_control"] and self.config["use_render"] \
-                and self.current_track_vehicle_id in self.vehicles.keys():
+                and self.current_track_vehicle in self._agent_manager.get_vehicle_list():
             action = self.controller.process_input()
             if self.is_multi_agent:
-                actions[self.current_track_vehicle_id] = action
+                actions[self._agent_manager.object_to_agent(self.current_track_vehicle.name)] = action
             else:
                 actions = action
 
@@ -381,9 +378,8 @@ class PGDriveEnv(BasePGDriveEnv):
 
         return reward, step_info
 
-    def _reset_vehicles(self):
-        self.vehicles.update(self.done_vehicles)
-        self.done_vehicles = {}
+    def _reset_agents(self):
+        super(PGDriveEnv, self)._reset_agents()
         self.for_each_vehicle(lambda v: v.reset(self.current_map))
 
     def _get_reset_return(self):
@@ -521,15 +517,14 @@ class PGDriveEnv(BasePGDriveEnv):
         self.current_track_vehicle._expert_takeover = not self.current_track_vehicle._expert_takeover
 
     def chase_another_v(self) -> (str, BaseVehicle):
-        vehicles = sorted(list(self.vehicles.items()) + list(self.done_vehicles.items())) * 2
-        for index, v in enumerate(vehicles):
-            if vehicles[index - 1][1] == self.current_track_vehicle:
-                self.current_track_vehicle.remove_display_region()
-                self.current_track_vehicle = v[1]
-                self.current_track_vehicle_id = v[0]
-                self.current_track_vehicle.add_to_display()
-                self.main_camera.track(self.current_track_vehicle, self.pg_world)
-                return
+        vehicles = self._agent_manager.get_vehicle_list()
+        vehicles.remove(self.current_track_vehicle)
+        self.current_track_vehicle.remove_display_region()
+        new_v = get_np_random().choice(vehicles)
+        self.current_track_vehicle = new_v
+        self.current_track_vehicle.add_to_display()
+        self.main_camera.track(self.current_track_vehicle, self.pg_world)
+        return
 
     def bird_view_camera(self):
         self.main_camera.stop_track(self.pg_world, self.current_track_vehicle)
