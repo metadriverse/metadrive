@@ -66,10 +66,6 @@ class MultiAgentPGDrive(PGDriveEnvV2):
 
     def __init__(self, config=None):
         super(MultiAgentPGDrive, self).__init__(config)
-        self.done_observations = dict()
-        self._agent_manager = AgentManager(
-            never_allow_respawn=not self.config["allow_respawn"], debug=self.config["debug"]
-        )
         self._top_down_renderer = None
 
     def _process_extra_config(self, config) -> "PGConfig":
@@ -125,7 +121,6 @@ class MultiAgentPGDrive(PGDriveEnvV2):
         return done, done_info
 
     def step(self, actions):
-        self._update_spaces_if_needed()
         o, r, d, i = super(MultiAgentPGDrive, self).step(actions)
         o, r, d, i = self._after_vehicle_done(o, r, d, i)
 
@@ -154,58 +149,16 @@ class MultiAgentPGDrive(PGDriveEnvV2):
 
     def reset(self, *args, **kwargs):
         self.config = self._update_agent_pos_configs(self.config)
-
-        for v in self.done_vehicles.values():
-            v.chassis_np.node().setStatic(False)
-
-        obses = self._agent_manager.get_observations() or list(self.observations.values())
-        assert len(obses) == len(self.config["target_vehicle_configs"].keys())
-        self.observations = {k: v for k, v in zip(self.config["target_vehicle_configs"].keys(), obses)}
-        self.done_observations = dict()
-
-        # Must change in-place!
-        obs_spaces = self._agent_manager.get_observation_spaces() or list(self.observation_space.spaces.values())
-        assert len(obs_spaces) == len(self.config["target_vehicle_configs"].keys())
-        self.observation_space.spaces = {k: v for k, v in zip(self.observations.keys(), obs_spaces)}
-        action_spaces = self._agent_manager.get_action_spaces() or list(self.action_space.spaces.values())
-        self.action_space.spaces = {k: v for k, v in zip(self.observations.keys(), action_spaces)}
-
-        # Multi-agent related reset
-        # avoid create new observation!
-        # obses = list(self.done_observations.values()) + list(self.observations.values())
-        # assert len(obses) == len(self.config["target_vehicle_configs"].keys())
-        # self.observations = {k: v for k, v in zip(self.config["target_vehicle_configs"].keys(), obses)}
-        # self.done_observations = dict()
-
-        # self.observation_space = self._get_observation_space()
-        # self.action_space = self._get_action_space()
-
         ret = super(MultiAgentPGDrive, self).reset(*args, **kwargs)
-
         assert len(self.vehicles) == self.num_agents
-        self.for_each_vehicle(self._update_destination_for)
-
-        self._agent_manager.reset(
-            vehicles=self.vehicles,
-            observation_spaces=self.observation_space.spaces,
-            observations=self.observations,
-            action_spaces=self.action_space.spaces
-        )
-
         return ret
 
-    def _reset_vehicles(self):
-        vehicles = self._agent_manager.get_vehicle_list() or list(self.vehicles.values())
-        assert len(vehicles) == len(self.observations)
-        self.vehicles = {k: v for k, v in zip(self.observations.keys(), vehicles)}
-        self.done_vehicles = {}
-
+    def _reset_agents(self):
         # update config (for new possible spawn places)
+        super(MultiAgentPGDrive, self)._reset_agents()
         for v_id, v in self.vehicles.items():
             v.vehicle_config = self._get_target_vehicle_config(self.config["target_vehicle_configs"][v_id])
-
-        # reset
-        self.for_each_vehicle(lambda v: v.reset(self.current_map))
+        self.for_each_vehicle(self._update_destination_for)
 
     def _after_vehicle_done(self, obs=None, reward=None, dones: dict = None, info=None):
         for v_id, v_info in info.items():
@@ -217,8 +170,6 @@ class MultiAgentPGDrive(PGDriveEnvV2):
         for dead_vehicle_id, done in dones.items():
             if done:
                 self._agent_manager.finish(dead_vehicle_id)
-                self.vehicles.pop(dead_vehicle_id)
-                self.action_space.spaces.pop(dead_vehicle_id)
         return obs, reward, dones, info
 
     def _get_vehicles(self):
@@ -239,19 +190,6 @@ class MultiAgentPGDrive(PGDriveEnvV2):
         """
         vehicle_config = merge_dicts(self.config["vehicle_config"], extra_config, allow_new_keys=False)
         return PGConfig(vehicle_config)
-
-    def _update_spaces_if_needed(self):
-        assert self.is_multi_agent
-        current_obs_keys = set(self.observations.keys())
-        for k in current_obs_keys:
-            if k not in self.vehicles:
-                o = self.observations.pop(k)
-                self.done_observations[k] = o
-        current_obs_keys = set(self.observation_space.spaces.keys())
-        for k in current_obs_keys:
-            if k not in self.vehicles:
-                self.observation_space.spaces.pop(k)
-                # self.action_space.spaces.pop(k)  # Action space is updated in _respawn
 
     def _after_lazy_init(self):
         super(MultiAgentPGDrive, self)._after_lazy_init()
@@ -307,15 +245,9 @@ class MultiAgentPGDrive(PGDriveEnvV2):
 
         new_id = vehicle_info["new_name"]
         v.set_static(False)
-        self.vehicles[new_id] = v  # Put it to new vehicle id.
         self.dones[new_id] = False  # Put it in the internal dead-tracking dict.
         self._spawn_manager.confirm_respawn(spawn_place_id=bp_index, vehicle_id=new_id)
         logging.debug("{} Dead. {} Respawn!".format(dead_vehicle_id, new_id))
-
-        self.observations[new_id] = vehicle_info["observation"]
-        self.observations[new_id].reset(self, v)
-        self.observation_space.spaces[new_id] = vehicle_info["observation_space"]
-        self.action_space.spaces[new_id] = vehicle_info["action_space"]
         new_obs = self.observations[new_id].observe(v)
         return new_id, new_obs
 

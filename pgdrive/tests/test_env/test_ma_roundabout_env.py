@@ -59,7 +59,8 @@ def _act(env, action):
     _check_shape(env)
     if not done["__all__"]:
         assert len(env.vehicles) > 0
-    assert set(obs.keys()) == set(reward.keys()) == set(env.observation_space.spaces.keys())
+    if not (set(obs.keys()) == set(reward.keys()) == set(env.observation_space.spaces.keys())):
+        raise ValueError
     assert env.observation_space.contains(obs)
     assert isinstance(reward, dict)
     assert isinstance(info, dict)

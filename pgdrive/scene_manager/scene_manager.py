@@ -1,5 +1,5 @@
 import logging
-from typing import List, Tuple, Optional, Dict, AnyStr, Union
+from typing import List, Tuple, Optional, Dict, AnyStr, Union, Callable
 
 import numpy as np
 from pgdrive.scene_creator.map import Map
@@ -25,8 +25,11 @@ class SceneManager:
         traffic_config: Union[Dict, "PGConfig"],
         # traffic_mode=TrafficMode.Trigger,
         # random_traffic: bool = False,
-        record_episode: bool = False,
-        cull_scene: bool = True,
+        record_episode: bool,
+        cull_scene: bool,
+        object_to_agent: Callable,
+        agent_to_object: Callable,
+        get_active_objects: Callable
     ):
         """
         :param traffic_mode: respawn/trigger mode
@@ -39,9 +42,10 @@ class SceneManager:
         self.objects_mgr = self._get_object_manager()
 
         # common variable
-
-        # FIXME! We need multi-agent variant of vehicles here!
-        self.target_vehicles = None
+        self.__target_vehicles = None
+        self.get_active_vehicles = get_active_objects
+        self.object_to_agent: Callable = object_to_agent
+        self.agent_to_object: Callable = agent_to_object
         self.map = None
 
         # for recovering, they can not exist together
@@ -59,16 +63,15 @@ class SceneManager:
     def _get_object_manager(self, object_config=None):
         return ObjectsManager()
 
-    def reset(self, map: Map, target_vehicles, traffic_density: float, accident_prob: float, episode_data=None):
+    def reset(self, map: Map, target_vehicles: List, traffic_density: float, accident_prob: float, episode_data=None):
         """
         For garbage collecting using, ensure to release the memory of all traffic vehicles
         """
         pg_world = self.pg_world
-        assert isinstance(target_vehicles, dict)
-        self.target_vehicles = target_vehicles
+        assert isinstance(target_vehicles, list)
+        self.__target_vehicles = self.get_active_vehicles()
         self.map = map
 
-        # FIXME
         self.traffic_mgr.reset(pg_world, map, target_vehicles, traffic_density)
         self.objects_mgr.reset(pg_world, map, accident_prob)
         if self.detector_mask is not None:
@@ -85,7 +88,10 @@ class SceneManager:
             # FIXME
             self.objects_mgr.generate(self, pg_world)
             self.traffic_mgr.generate(
-                pg_world=pg_world, map=self.map, target_vehicles=self.target_vehicles, traffic_density=traffic_density
+                pg_world=pg_world,
+                map=self.map,
+                target_vehicles=self.__target_vehicles,
+                traffic_density=traffic_density
             )
         else:
             self.replay_system = PGReplayer(self.traffic_mgr, map, episode_data, pg_world)
@@ -104,16 +110,16 @@ class SceneManager:
         """
         Entities make decision here, and prepare for step
         All entities can access this global manager to query or interact with others
-        :param pg_world: World
-        :param ego_vehicle_action: Ego_vehicle action
-        :return: None
+        :param target_actions: Dict[agent_id:action]
+        :return:
         """
+        object_to_agent = self.object_to_agent
         step_infos = {}
         if self.replay_system is None:
             # not in replay mode
-            for k in self.target_vehicles.keys():
-                a = target_actions[k]
-                step_infos[k] = self.target_vehicles[k].prepare_step(a)
+            for k in self.__target_vehicles.keys():
+                a = target_actions[object_to_agent(k)]
+                step_infos[object_to_agent(k)] = self.__target_vehicles[k].prepare_step(a)
             self.traffic_mgr.prepare_step(self)
         return step_infos
 
@@ -136,9 +142,9 @@ class SceneManager:
 
             # print("Step {}/{}. Steering {}. Acceleration {}. Brake {}.".format(
             #     i + 1, step_num,
-            #     [self.target_vehicles['default_agent'].system.get_steering_value(ii) for ii in range(4)],
-            #     [self.target_vehicles['default_agent'].system.get_wheel(ii).engine_force for ii in range(4)],
-            #     [self.target_vehicles['default_agent'].system.get_wheel(ii).brake for ii in range(4)],
+            #     [self.__target_vehicles['default_agent'].system.get_steering_value(ii) for ii in range(4)],
+            #     [self.__target_vehicles['default_agent'].system.get_wheel(ii).engine_force for ii in range(4)],
+            #     [self.__target_vehicles['default_agent'].system.get_wheel(ii).brake for ii in range(4)],
             # ))
 
         #  panda3d render and garbage collecting loop
@@ -163,7 +169,7 @@ class SceneManager:
         step_infos = self.update_state_for_all_target_vehicles()
 
         # cull distant blocks
-        poses = [v.position for v in self.target_vehicles.values()]
+        poses = [v.position for v in self.__target_vehicles.values()]
         if self.cull_scene:
             PGLOD.cull_distant_blocks(self.map.blocks, poses, self.pg_world, self.pg_world.world_config["max_distance"])
             # PGLOD.cull_distant_blocks(self.map.blocks, self.ego_vehicle.position, self.pg_world)
@@ -183,7 +189,7 @@ class SceneManager:
     def update_state_for_all_target_vehicles(self):
         if self.detector_mask is not None:
             # a = set([v.name for v in self.traffic_mgr.vehicles])
-            # b = set([v.name for v in self.target_vehicles.values()])
+            # b = set([v.name for v in self.__target_vehicles.values()])
             # assert b.issubset(a)  # This may only happen during episode replays!
             is_target_vehicle_dict = {
                 v_obj.name: self.traffic_mgr.is_target_vehicle(v_obj)
@@ -207,10 +213,10 @@ class SceneManager:
 
     def for_each_target_vehicle(self, func):
         """Apply the func (a function take only the vehicle as argument) to each target vehicles and return a dict!"""
-        assert len(self.target_vehicles) > 0
+        assert len(self.__target_vehicles) > 0
         ret = dict()
-        for k, v in self.target_vehicles.items():
-            ret[k] = func(v)
+        for k, v in self.__target_vehicles.items():
+            ret[self.object_to_agent(k)] = func(v)
         return ret
 
     def dump_episode(self) -> None:
@@ -242,4 +248,8 @@ class SceneManager:
         logging.debug("{} is destroyed".format(self.__class__.__name__))
 
     def is_target_vehicle(self, v):
-        return v in self.target_vehicles.values()
+        return v in self.__target_vehicles.values()
+
+    @property
+    def target_vehicles(self):
+        return {self.object_to_agent(k): v for k, v in self.__target_vehicles.items()}
