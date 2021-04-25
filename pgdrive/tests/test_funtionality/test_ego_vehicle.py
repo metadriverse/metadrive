@@ -1,8 +1,9 @@
 import numpy as np
-
 from pgdrive import PGDriveEnv
+from pgdrive.envs.base_env import BASE_DEFAULT_CONFIG
 from pgdrive.envs.pgdrive_env import PGDriveEnvV1_DEFAULT_CONFIG
 from pgdrive.scene_creator.vehicle.base_vehicle import BaseVehicle
+from pgdrive.utils import PGConfig
 
 
 def _assert_vehicle(vehicle):
@@ -29,7 +30,7 @@ def test_base_vehicle():
         map = env.current_map
 
         # v_config = BaseVehicle.get_vehicle_config(dict())
-        v_config = PGDriveEnvV1_DEFAULT_CONFIG["vehicle_config"]
+        v_config = PGConfig(BASE_DEFAULT_CONFIG["vehicle_config"]).update(PGDriveEnvV1_DEFAULT_CONFIG["vehicle_config"])
         v_config.update({"use_render": False, "use_image": False})
         v = BaseVehicle(pg_world, vehicle_config=v_config)
         v.add_lidar()

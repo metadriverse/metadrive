@@ -54,6 +54,8 @@ class AgentManager:
         """
         For getting env.observation_space/action_space before making vehicles
         """
+        assert isinstance(init_action_space, dict)
+        assert isinstance(init_observation_space, dict)
         self.__init_observation_spaces = init_observation_space
         self.observation_spaces = copy.copy(init_observation_space)
 
