@@ -177,6 +177,7 @@ class PGConfig:
     @classmethod
     def _internal_dict_to_config(cls, d: dict) -> dict:
         ret = dict()
+        d = d or dict()
         for k, v in d.items():
             if isinstance(v, dict):
                 v = cls(v)

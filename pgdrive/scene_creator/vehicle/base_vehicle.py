@@ -73,7 +73,7 @@ class BaseVehicle(DynamicElement):
         #     if vehicle_config is not None else self._default_vehicle_config()
 
         # observation, action
-        self.action_space = self.get_action_space_before_init()
+        self.action_space = self.get_action_space_before_init(extra_action_dim=self.vehicle_config["extra_action_dim"])
 
         super(BaseVehicle, self).__init__(random_seed, name=name)
         # config info
@@ -729,8 +729,8 @@ class BaseVehicle(DynamicElement):
         return len(self.front_vehicles.intersection(self.back_vehicles))
 
     @classmethod
-    def get_action_space_before_init(cls):
-        return gym.spaces.Box(-1.0, 1.0, shape=(2, ), dtype=np.float32)
+    def get_action_space_before_init(cls, extra_action_dim: int = 0):
+        return gym.spaces.Box(-1.0, 1.0, shape=(2 + extra_action_dim, ), dtype=np.float32)
 
     def remove_display_region(self):
         if self.render:

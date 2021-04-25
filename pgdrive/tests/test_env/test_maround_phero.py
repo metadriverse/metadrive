@@ -63,5 +63,51 @@ def test_maround_phero():
             print('Finish config: ', c)
 
 
+def test_get_spaces_before_reset():
+    configs = [
+        {
+            "num_agents": 8,
+            "num_neighbours": 9,
+            "num_channels": 1,
+            "horizon": 200
+        },
+        {
+            "num_agents": 8,
+            "num_neighbours": 1,
+            "num_channels": 1,
+            "horizon": 200
+        },
+        {
+            "num_agents": 8,
+            "num_neighbours": 9,
+            "num_channels": 3,
+            "horizon": 200
+        },
+        {
+            "num_agents": 8,
+            "num_neighbours": 1,
+            "num_channels": 3,
+            "horizon": 200
+        },
+        {
+            "num_agents": 8,
+            "num_neighbours": 9,
+            "num_channels": 3,
+            "attenuation_rate": 0.0,
+            "diffusion_rate": 0.0,
+            "horizon": 200
+        },
+    ]
+    for c in configs:
+        env = MARoundPhero(c)
+        try:
+            print("Action: ", env.action_space)
+            print("Observation: ", env.observation_space)
+        finally:
+            env.close()
+            print('Finish config: ', c)
+
+
 if __name__ == '__main__':
-    test_maround_phero()
+    # test_maround_phero()
+    test_get_spaces_before_reset()
