@@ -66,9 +66,7 @@ PGDriveEnvV1_DEFAULT_CONFIG = dict(
         mini_map=(84, 84, 250),  # buffer length, width
         rgb_cam=(84, 84),  # buffer length, width
         depth_cam=(84, 84, True),  # buffer length, width, view_ground
-        show_navi_mark=True,
         increment_steering=False,
-        wheel_friction=0.6,
         side_detector=dict(num_lasers=0, distance=50),  # laser num, distance
         show_side_detector=False,
         lane_line_detector=dict(num_lasers=0, distance=20),  # laser num, distance
@@ -85,10 +83,6 @@ PGDriveEnvV1_DEFAULT_CONFIG = dict(
         spawn_lateral=0.0,
 
         # ==== others ====
-        max_engine_force=500,
-        max_brake_force=40,
-        max_steering=40,
-        max_speed=120,
         overtake_stat=False,  # we usually set to True when evaluation
         action_check=False,
         use_saver=False,

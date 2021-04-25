@@ -52,18 +52,11 @@ class MARoundPhero(MARound):
         config = super(MARoundPhero, self)._post_process_config(config)
         config["vehicle_config"]["num_neighbours"] = config["num_neighbours"]
         config["vehicle_config"]["num_channels"] = config["num_channels"]
+        config["vehicle_config"]["extra_action_dim"] = config["num_channels"]
         return config
 
     def get_single_observation(self, vehicle_config):
         return PheroObs(vehicle_config)
-
-    def _get_action_space(self):
-        ret = super(MARoundPhero, self)._get_action_space()
-        new_ret = {}
-        for v_id, space in ret.items():
-            new_ret[v_id] = Box(-1.0, 1.0, (2 + self.config["num_channels"], ), dtype=np.float32)
-        new_ret = Dict(new_ret)
-        return new_ret
 
     def _after_lazy_init(self):
         super(MARoundPhero, self)._after_lazy_init()
