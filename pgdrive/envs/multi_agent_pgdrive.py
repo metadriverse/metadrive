@@ -4,7 +4,6 @@ from pgdrive.envs.pgdrive_env_v2 import PGDriveEnvV2
 from pgdrive.scene_creator.blocks.first_block import FirstBlock
 from pgdrive.scene_creator.road.road import Road
 from pgdrive.scene_creator.vehicle.base_vehicle import BaseVehicle
-from pgdrive.scene_manager.agent_manager import AgentManager
 from pgdrive.scene_manager.spawn_manager import SpawnManager
 from pgdrive.utils import setup_logger, get_np_random, PGConfig
 from pgdrive.utils.pg_config import merge_dicts
@@ -96,7 +95,7 @@ class MultiAgentPGDrive(PGDriveEnvV2):
             target_vehicle_configs=ret_config["target_vehicle_configs"],
         )
 
-        self._spawn_manager.update_spawn_roads(self.spawn_roads)
+        self._spawn_manager.set_spawn_roads(self.spawn_roads)
 
         ret_config = self._update_agent_pos_configs(ret_config)
         return ret_config
@@ -127,8 +126,8 @@ class MultiAgentPGDrive(PGDriveEnvV2):
         # Update respawn manager
         if self.episode_steps >= self.config["horizon"]:
             self._agent_manager.set_allow_respawn(False)
-        self._spawn_manager.update(self.vehicles, self.current_map)
-        new_obs_dict = self._respawn()
+        self._spawn_manager.step()
+        new_obs_dict = self._respawn_vehicles()
         if new_obs_dict:
             for new_id, new_obs in new_obs_dict.items():
                 o[new_id] = new_obs
@@ -155,9 +154,9 @@ class MultiAgentPGDrive(PGDriveEnvV2):
 
     def _reset_agents(self):
         # update config (for new possible spawn places)
-        super(MultiAgentPGDrive, self)._reset_agents()
         for v_id, v in self.vehicles.items():
             v.vehicle_config = self._get_target_vehicle_config(self.config["target_vehicle_configs"][v_id])
+        super(MultiAgentPGDrive, self)._reset_agents()  # Update config before actually resetting!
         self.for_each_vehicle(self._update_destination_for)
 
     def _after_vehicle_done(self, obs=None, reward=None, dones: dict = None, info=None):
@@ -170,7 +169,14 @@ class MultiAgentPGDrive(PGDriveEnvV2):
         for dead_vehicle_id, done in dones.items():
             if done:
                 self._agent_manager.finish(dead_vehicle_id)
+                self._update_camera_after_finish(dead_vehicle_id)
         return obs, reward, dones, info
+
+    def _update_camera_after_finish(self, dead_vehicle_id):
+        if self.main_camera is not None and dead_vehicle_id == self._agent_manager.object_to_agent(
+                self.current_track_vehicle.name) \
+                and self.pg_world.taskMgr.hasTaskNamed(self.main_camera.CHASE_TASK_NAME):
+            self.chase_another_v()
 
     def _get_vehicles(self):
         return {
@@ -203,7 +209,7 @@ class MultiAgentPGDrive(PGDriveEnvV2):
             self.main_camera.camera_x += self.config["top_down_camera_initial_x"]
             self.main_camera.camera_y += self.config["top_down_camera_initial_y"]
 
-    def _respawn(self):
+    def _respawn_vehicles(self):
         new_obs_dict = {}
         while True:
             new_id, new_obs = self._respawn_single_vehicle()
@@ -218,6 +224,7 @@ class MultiAgentPGDrive(PGDriveEnvV2):
         This function can force a given vehicle to respawn!
         """
         self._agent_manager.finish(agent_name)
+        self._update_camera_after_finish(agent_name)
         new_id, new_obs = self._respawn_single_vehicle()
         return new_id, new_obs
 
@@ -225,53 +232,28 @@ class MultiAgentPGDrive(PGDriveEnvV2):
         """
         Arbitrary insert a new vehicle to a new spawn place if possible.
         """
-        allow_respawn, vehicle_info = self._agent_manager.propose_new_vehicle()
-        if vehicle_info is None:  # No more vehicle to be assigned.
-            return None, None
-        if not allow_respawn:
-            # If not allow to respawn, move agents to some rural places.
-            v = vehicle_info["vehicle"]
-            v.set_position((-999, -999))
-            self._agent_manager.confirm_respawn(False, vehicle_info)
-            return None, None
-        v = vehicle_info["vehicle"]
-        dead_vehicle_id = vehicle_info["old_name"]
-        bp_index = self._replace_vehicles(vehicle_info)
-        if bp_index is None:  # No more spawn places to be assigned.
-            self._agent_manager.confirm_respawn(False, vehicle_info)
-            return None, None
-
-        self._agent_manager.confirm_respawn(True, vehicle_info)
-
-        new_id = vehicle_info["new_name"]
-        v.set_static(False)
-        self.dones[new_id] = False  # Put it in the internal dead-tracking dict.
-        self._spawn_manager.confirm_respawn(spawn_place_id=bp_index, vehicle_id=new_id)
-        logging.debug("{} Dead. {} Respawn!".format(dead_vehicle_id, new_id))
-        new_obs = self.observations[new_id].observe(v)
-        return new_id, new_obs
-
-    def _replace_vehicles(self, vehicle_info):
-        v = vehicle_info["vehicle"]
-        v.prepare_step([0, -1])
-        safe_places_dict = self._spawn_manager.get_available_spawn_places()
-        if len(safe_places_dict) == 0:
+        safe_places_dict = self._spawn_manager.get_available_spawn_places(self.pg_world, self.current_map)
+        if len(safe_places_dict) == 0 or not self._agent_manager.allow_respawn:
             # No more run, just wait!
-            return None
+            return None, None
         assert len(safe_places_dict) > 0
         bp_index = get_np_random(self._DEBUG_RANDOM_SEED).choice(list(safe_places_dict.keys()), 1)[0]
         new_spawn_place = safe_places_dict[bp_index]
 
         if new_spawn_place[self._spawn_manager.FORCE_AGENT_NAME] is not None:
-            if new_spawn_place[self._spawn_manager.FORCE_AGENT_NAME] != vehicle_info["new_name"]:
-                return None
+            if new_spawn_place[self._spawn_manager.FORCE_AGENT_NAME] != self._agent_manager.next_agent_id():
+                return None, None
 
+        new_agent_id, vehicle = self._agent_manager.propose_new_vehicle()
         new_spawn_place_config = new_spawn_place["config"]
-        v.vehicle_config.update(new_spawn_place_config)
-        v.reset(self.current_map)
-        self._update_destination_for(v)
-        v.update_state(detector_mask=None)
-        return bp_index
+        vehicle.vehicle_config.update(new_spawn_place_config)
+        vehicle.reset(self.current_map)
+        self._update_destination_for(vehicle)
+        vehicle.update_state(detector_mask=None)
+        self.dones[new_agent_id] = False  # Put it in the internal dead-tracking dict.
+
+        new_obs = self.observations[new_agent_id].observe(vehicle)
+        return new_agent_id, new_obs
 
     def _update_destination_for(self, vehicle):
         pass

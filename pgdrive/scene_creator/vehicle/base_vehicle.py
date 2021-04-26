@@ -624,6 +624,8 @@ class BaseVehicle(DynamicElement):
             text = "Normal" if time.time() - self.pg_world._episode_start_time > 10 else "Press H to see help message"
             self.render_banner(text, COLLISION_INFO_COLOR["green"][1])
         else:
+            if text == BodyName.Base_vehicle_beneath:
+                text = BodyName.Traffic_vehicle
             self.render_banner(text, COLLISION_INFO_COLOR[COLOR[text]][1])
 
     def render_banner(self, text, color=COLLISION_INFO_COLOR["green"][1]):

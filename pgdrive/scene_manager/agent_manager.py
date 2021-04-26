@@ -1,4 +1,5 @@
 from gym.spaces import Box
+import logging
 import copy
 # from pgdrive.scene_creator.vehicle.base_vehicle import BaseVehicle
 from typing import List, Dict
@@ -15,6 +16,7 @@ class AgentManager:
     object name: The unique name for each object, typically be random string.
     """
     INITIALIZED = False  # when vehicles instances are created, it will be set to True
+    HELL_POSITION = (-999, -999, -999)  # a place to store pending vehicles
 
     def __init__(self, init_observations, never_allow_respawn, debug=False):
         # when new agent joins in the game, we only change this two maps.
@@ -33,7 +35,7 @@ class AgentManager:
         self.action_spaces = {}
 
         self.next_agent_count = 0
-        self.allow_respawn = True if not never_allow_respawn else False
+        self._allow_respawn = True if not never_allow_respawn else False
         self.never_allow_respawn = never_allow_respawn
         self._debug = debug
 
@@ -110,12 +112,13 @@ class AgentManager:
         self.next_agent_count = len(vehicles)
         self.__active_objects = {v.name: v for v in origin_agent_id_vehicles.values()}
         self.__pending_objects = {}
-        self.allow_respawn = True if not self.never_allow_respawn else False
+        self._allow_respawn = True if not self.never_allow_respawn else False
 
     def finish(self, agent_name):
         vehicle_name = self.__agent_to_object[agent_name]
         v = self.__active_objects.pop(vehicle_name)
-        v.chassis_np.node().setStatic(True)
+        # move to invisible place
+        self._put_to_pending_place(v)
         assert vehicle_name not in self.__active_objects
         self.__pending_objects[vehicle_name] = v
         self.__agents_finished_this_frame[agent_name] = v.name
@@ -129,42 +132,35 @@ class AgentManager:
 
     def propose_new_vehicle(self):
         self._check()
-        if len(self.__pending_objects) > 0:
-            obj_name = list(self.__pending_objects.keys())[0]
-            self._check()
-            v = self.__pending_objects.pop(obj_name)
-            v.prepare_step([0, -1])
-            v.chassis_np.node().setStatic(False)
-            self.observations[obj_name].reset(v)
-            return self.allow_respawn, dict(
-                vehicle=v,
-                observation=self.observations[obj_name],
-                observation_space=self.observation_spaces[obj_name],
-                action_space=self.action_spaces[obj_name],
-                old_name=self.__object_to_agent[obj_name],
-                new_name="agent{}".format(self.next_agent_count)
-            )
-        return None, None
-
-    def confirm_respawn(self, success: bool, vehicle_info):
-        vehicle = vehicle_info['vehicle']
-        if success:
-            vehicle.set_static(False)
-            self.next_agent_count += 1
-            self.__active_objects[vehicle.name] = vehicle
-            self.__object_to_agent[vehicle.name] = vehicle_info["new_name"]
-            self.__agent_to_object.pop(vehicle_info["old_name"])
-            self.__agent_to_object[vehicle_info["new_name"]] = vehicle.name
-        else:
-            vehicle.set_static(True)
-            self.__pending_objects[vehicle.name] = vehicle
+        obj_name = list(self.__pending_objects.keys())[0]
         self._check()
+        vehicle = self.__pending_objects.pop(obj_name)
+        vehicle.prepare_step([0, -1])
+        self.observations[obj_name].reset(vehicle)
+        new_agent_id = self.next_agent_id()
+        dead_vehicle_id = self.__object_to_agent[obj_name]
+        vehicle.set_static(False)
+        self.__active_objects[vehicle.name] = vehicle
+        self.__object_to_agent[vehicle.name] = new_agent_id
+        self.__agent_to_object.pop(dead_vehicle_id)
+        self.__agent_to_object[new_agent_id] = vehicle.name
+        self.next_agent_count += 1
+        self._check()
+        logging.debug("{} Dead. {} Respawn!".format(dead_vehicle_id, new_agent_id))
+        return new_agent_id, vehicle
+
+    def next_agent_id(self):
+        return "agent{}".format(self.next_agent_count)
+
+    @property
+    def allow_respawn(self):
+        return True if len(self.__pending_objects) > 0 and self._allow_respawn else False
 
     def set_allow_respawn(self, flag: bool):
         if self.never_allow_respawn:
-            self.allow_respawn = False
+            self._allow_respawn = False
         else:
-            self.allow_respawn = flag
+            self._allow_respawn = flag
 
     def prepare_step(self):
         self.__agents_finished_this_frame = dict()
@@ -233,8 +229,8 @@ class AgentManager:
         :param obj_name: BaseVehicle name
         :return: agent id
         """
-        if obj_name not in self.__active_objects.keys() and self.INITIALIZED:
-            raise ValueError("You can not access a pending Object(BaseVehicle) outside the agent_manager!")
+        # if obj_name not in self.__active_objects.keys() and self.INITIALIZED:
+        #     raise ValueError("You can not access a pending Object(BaseVehicle) outside the agent_manager!")
         return self.__object_to_agent[obj_name]
 
     def agent_to_object(self, agent_id):
@@ -257,3 +253,7 @@ class AgentManager:
         self.action_spaces = {}
 
         self.next_agent_count = 0
+
+    def _put_to_pending_place(self, v):
+        v.chassis_np.node().setStatic(True)
+        v.set_position(self.HELL_POSITION[:-1], height=self.HELL_POSITION[-1])
