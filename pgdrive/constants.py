@@ -57,7 +57,8 @@ COLOR = {
     BodyName.Traffic_vehicle: "red",
     BodyName.Traffic_cone: "orange",
     BodyName.Traffic_triangle: "orange",
-    BodyName.Base_vehicle: "red"
+    BodyName.Base_vehicle: "red",
+    BodyName.Base_vehicle_beneath: "red"
 }
 
 
@@ -140,7 +141,7 @@ class CollisionGroup:
             (cls.LaneSurface, cls.ContinuousLaneLine, False),
 
             # vehicle beneath
-            (cls.EgoVehicleBeneath, cls.EgoVehicleBeneath, False),
+            (cls.EgoVehicleBeneath, cls.EgoVehicleBeneath, True),
             (cls.EgoVehicleBeneath, cls.ContinuousLaneLine, True),
 
             # continuous lane line

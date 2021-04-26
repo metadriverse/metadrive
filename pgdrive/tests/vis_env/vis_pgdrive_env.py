@@ -11,12 +11,12 @@ class TestEnv(PGDriveEnv):
         super(TestEnv, self).__init__(
             {
                 "environment_num": 1,
-                "traffic_density": 0,
+                "traffic_density": 0.3,
                 "traffic_mode": "respawn",
                 "start_seed": 5,
                 "pg_world_config": {
                     "onscreen_message": True,
-                    "debug_physics_world": True,
+                    # "debug_physics_world": True,
                     "pstats": True
                 },
                 "cull_scene": True,
@@ -28,8 +28,8 @@ class TestEnv(PGDriveEnv):
                 "debug": True,
                 "fast": False,
                 "map_config": {
-                    Map.GENERATE_TYPE: MapGenerateMethod.BIG_BLOCK_SEQUENCE,
-                    Map.GENERATE_CONFIG: "Yy",
+                    Map.GENERATE_TYPE: MapGenerateMethod.BIG_BLOCK_NUM,
+                    Map.GENERATE_CONFIG: 5,
                     Map.LANE_WIDTH: 3.5,
                     Map.LANE_NUM: 3,
                 },
