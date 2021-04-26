@@ -373,7 +373,6 @@ class PGDriveEnv(BasePGDriveEnv):
         return reward, step_info
 
     def _reset_agents(self):
-        super(PGDriveEnv, self)._reset_agents()
         self.for_each_vehicle(lambda v: v.reset(self.current_map))
 
     def _get_reset_return(self):
@@ -511,8 +510,14 @@ class PGDriveEnv(BasePGDriveEnv):
         self.current_track_vehicle._expert_takeover = not self.current_track_vehicle._expert_takeover
 
     def chase_another_v(self) -> (str, BaseVehicle):
-        vehicles = self._agent_manager.get_vehicle_list()
-        vehicles.remove(self.current_track_vehicle)
+        if self.main_camera is None:
+            return
+        self.main_camera.reset()
+        vehicles = list(self._agent_manager.active_objects.values())
+        if self.current_track_vehicle in vehicles:
+            vehicles.remove(self.current_track_vehicle)
+        if len(vehicles) == 0:
+            return
         self.current_track_vehicle.remove_display_region()
         new_v = get_np_random().choice(vehicles)
         self.current_track_vehicle = new_v
