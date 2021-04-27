@@ -87,6 +87,8 @@ PGDriveEnvV1_DEFAULT_CONFIG = dict(
         action_check=False,
         use_saver=False,
         save_level=0.5,
+        vehicle_length=4,
+        vehicle_width=1.5
     ),
     rgb_clip=True,
 

@@ -279,6 +279,16 @@ class PGConfig:
     def get(self, key, *args):
         return copy.copy(self._config.get(key, *args))
 
+    def force_update(self, new_config):
+        self._unchangeable = False
+        self.update(new_config)
+        self._unchangeable = True
+
+    def force_set(self, key, value):
+        self._unchangeable = False
+        self[key] = value
+        self._unchangeable = True
+
 
 def _is_identical(k1, v1, k2, v2):
     if k1 != k2:
