@@ -234,6 +234,8 @@ class PGConfig:
         self.__setitem__(key, value)
 
     def __setitem__(self, key, value):
+        if self._unchangeable:
+            raise ValueError("This config is not changeable!")
         self._config[key] = value
         super(PGConfig, self).__setattr__(key, value)
 
