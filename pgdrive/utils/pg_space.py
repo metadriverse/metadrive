@@ -191,8 +191,8 @@ class Parameter:
     decrease_increase = "decrease_increase"
 
     # vehicle
-    vehicle_length = "v_len"
-    vehicle_width = "v_width"
+    # vehicle_length = "v_len"
+    # vehicle_width = "v_width"
     vehicle_height = "v_height"
     front_tire_longitude = "f_tire_long"
     rear_tire_longitude = "r_tire_long"
@@ -217,8 +217,6 @@ class Parameter:
 class VehicleParameterSpace:
     BASE_VEHICLE = {
         # Now the parameter sample is not available and thus the value space is incorrect
-        Parameter.vehicle_length: PGConstantSpace(4.0),
-        Parameter.vehicle_width: PGConstantSpace(1.5),
         Parameter.vehicle_height: PGConstantSpace(1),
         Parameter.chassis_height: PGConstantSpace(0.3),
         Parameter.front_tire_longitude: PGConstantSpace(1.05),

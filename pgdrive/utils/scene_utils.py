@@ -173,6 +173,16 @@ def rect_region_detection(
 ):
     """
 
+     ----------------------------------
+     |               *                |  --->>>
+     ----------------------------------
+     * position
+     --->>> heading direction
+     ------ longitude length
+     | lateral width
+
+     **CAUTION**: position is the middle point of longitude edge
+
     :param pg_world: PGWorld
     :param position: position in PGDrive
     :param heading: heading in PGDrive [degree]

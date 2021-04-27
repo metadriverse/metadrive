@@ -257,3 +257,6 @@ class AgentManager:
     def _put_to_pending_place(self, v):
         v.chassis_np.node().setStatic(True)
         v.set_position(self.HELL_POSITION[:-1], height=self.HELL_POSITION[-1])
+
+    def has_pending_objects(self):
+        return False if len(self.__pending_objects) == 0 else True
