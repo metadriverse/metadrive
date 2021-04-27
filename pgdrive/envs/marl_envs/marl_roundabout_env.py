@@ -49,10 +49,10 @@ class MultiAgentRoundaboutEnv(MultiAgentPGDrive):
 
     def _process_extra_config(self, config):
         config = super(MultiAgentRoundaboutEnv, self)._process_extra_config(config)
-        config = self._update_agent_pos_configs(config)
+        config = self._init_agent_pos_configs(config)
         return super(MultiAgentRoundaboutEnv, self)._process_extra_config(config)
 
-    def _update_agent_pos_configs(self, config):
+    def _init_agent_pos_configs(self, config):
         target_vehicle_configs = []
         assert config["num_agents"] <= config["map_config"]["lane_num"] * len(self.target_nodes), (
             "Too many agents! We only accepet {} agents, but you have {} agents!".format(
