@@ -68,6 +68,81 @@ def test_respawn():
     print("Finish {} dones.".format(done_count))
 
 
+def test_delay_done():
+    # Put agent 0 in the left, agent 1 in the right, and let agent 0 dead at first.
+    # We wish to see agent 1 hits the dead body of agent 0.
+    env = MultiAgentRoundaboutEnv(
+        {
+            # "use_render": True,
+            # "fast": True,
+            "target_vehicle_configs": {
+                "agent0": {
+                    "spawn_longitude": 12,
+                    "spawn_lateral": 0,
+                    "spawn_lane_index": (">", ">>", 0),
+                },
+                "agent1": {
+                    "spawn_longitude": 10,  # locate a little forward
+                    "spawn_lateral": 0,
+                    "spawn_lane_index": (">", ">>", 1),
+                }
+            },
+            "num_agents": 2,
+            "traffic_density": 0,
+            "delay_done": 100,
+            "horizon": 100
+        }
+    )
+    try:
+        agent0_done = False
+        agent1_already_hit = False
+        o = env.reset()
+        for i in range(1, 300):
+            actions = {"agent0": [1, 1], "agent1": [1, 1]}
+            if "agent0" not in env.vehicles:
+                actions.pop("agent0")
+            if "agent1" not in env.vehicles:
+                actions.pop("agent1")
+            o, r, d, info = env.step(actions)
+            if agent0_done:
+                assert "agent0" not in o
+                assert "agent0" not in info
+                assert "agent0" not in d
+            if d.get("agent0"):
+                agent0_done = True
+            if agent0_done:
+                if info["agent1"]["crash_vehicle"]:
+                    agent1_already_hit = True
+                    print("Hit!")
+            if d["__all__"]:
+                assert agent1_already_hit
+                agent0_done = False
+                agent1_already_hit = False
+                env.reset()
+    finally:
+        env.close()
+
+    env = MultiAgentRoundaboutEnv({"num_agents": 5, "delay_done": 10, "horizon": 100})
+    try:
+        env.reset()
+        dead = set()
+        for _ in range(300):
+            o, r, d, i = env.step({k: [1, 1] for k in env.vehicles.keys()})
+            for dead_name in dead:
+                assert dead_name not in o
+            print("{} there!".format(env.vehicles.keys()))
+            print("{} dead!".format([kkk for kkk, ddd in d.items() if ddd]))
+            for kkk, ddd in d.items():
+                if ddd and kkk != "__all__":
+                    dead.add(kkk)
+            if d["__all__"]:
+                env.reset()
+                dead.clear()
+    finally:
+        env.close()
+
+
 if __name__ == '__main__':
     setup_logger(True)
-    test_respawn()
+    # test_respawn()
+    test_delay_done()

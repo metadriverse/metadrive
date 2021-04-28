@@ -25,6 +25,7 @@ BASE_DEFAULT_CONFIG = dict(
     num_agents=1,
     is_multi_agent=False,
     allow_respawn=False,
+    delay_done=0,  # How many steps for the agent to stay static at the death place after done.
 
     # ===== Action =====
     decision_repeat=5,
@@ -110,7 +111,8 @@ class BasePGDriveEnv(gym.Env):
         self._agent_manager = AgentManager(
             init_observations=self._get_observations(),
             never_allow_respawn=not self.config["allow_respawn"],
-            debug=self.config["debug"]
+            debug=self.config["debug"],
+            delay_done=self.config["delay_done"]
         )
         self._agent_manager.init_space(
             init_observation_space=self._get_observation_space(), init_action_space=self._get_action_space()
