@@ -172,11 +172,15 @@ class AgentManager:
 
     def prepare_step(self):
         self.__agents_finished_this_frame = dict()
+        finished = set()
         for v_name in self.__dying_objects.keys():
             self.__dying_objects[v_name][1] -= 1
             if self.__dying_objects[v_name][1] == 0:  # Countdown goes to 0, it's time to remove the vehicles!
                 v = self.__dying_objects[v_name][0]
                 self._put_to_pending_place(v, v_name)
+                finished.add(v_name)
+        for v_name in finished:
+            self.__dying_objects.pop(v_name)
 
     def _translate(self, d):
         return {self.__object_to_agent[k]: v for k, v in d.items()}

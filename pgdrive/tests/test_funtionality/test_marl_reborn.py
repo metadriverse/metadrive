@@ -10,6 +10,7 @@ def test_respawn():
             "num_agents": 2,
             "out_of_road_cost": out_of_road_cost,
             "out_of_road_penalty": out_of_road_penalty,
+            "delay_done": 0,  # Since we are testing respawn!
             # "use_render": True, "fast": True
         }
     )
@@ -144,5 +145,5 @@ def test_delay_done():
 
 if __name__ == '__main__':
     setup_logger(True)
-    # test_respawn()
+    test_respawn()
     test_delay_done()
