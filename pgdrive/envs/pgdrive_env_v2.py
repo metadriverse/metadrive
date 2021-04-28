@@ -50,7 +50,7 @@ class PGDriveEnvV2(PGDriveEnvV1):
                     max_engine_force=1000,
                     max_brake_force=100,
                     max_steering=40,
-                    max_speed=120,
+                    max_speed=80,
                 ),
                 map_config=dict(block_type_version="v2"),
 
