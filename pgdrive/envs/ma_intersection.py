@@ -104,7 +104,7 @@ class MultiAgentIntersectPGDrive(PGDriveEnvV2):
         for idx in range(len(self.agent_spawn_tracker)):
             self.agent_spawn_tracker[idx]["taken_agent"] = -1
         for v in self.done_vehicles.values():
-            v.chassis_np.node().setStatic(False)
+            v.set_static(False)
         return super(MultiAgentIntersectPGDrive, self).reset(episode_data)
 
     def _preprocess_marl_actions(self, actions):
@@ -125,7 +125,7 @@ class MultiAgentIntersectPGDrive(PGDriveEnvV2):
                 self.done_vehicles[id] = v
         for v in self.done_vehicles.values():
             if v.speed < 1:
-                v.chassis_np.node().setStatic(True)
+                v.set_static(True)
 
     def _get_vehicles(self):
         return {
