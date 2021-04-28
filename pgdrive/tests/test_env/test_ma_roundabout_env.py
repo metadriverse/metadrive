@@ -748,6 +748,6 @@ if __name__ == '__main__':
     # test_ma_roundabout_init_space()
     # test_ma_roundabout_no_short_episode()
     # test_ma_roundabout_horizon_termination()
-    # test_ma_roundabout_40_agent_reset_after_respawn()
+    test_ma_roundabout_40_agent_reset_after_respawn()
     # test_ma_no_reset_error()
-    test_randomize_spawn_place()
+    # test_randomize_spawn_place()
