@@ -2,7 +2,6 @@ import time
 
 import numpy as np
 from gym.spaces import Box, Dict
-
 from pgdrive.envs.marl_envs.marl_inout_roundabout import MultiAgentRoundaboutEnv
 from pgdrive.utils import distance_greater, norm
 
@@ -70,77 +69,28 @@ def _act(env, action):
 
 
 def test_ma_roundabout_env():
-    env = MultiAgentRoundaboutEnv({"num_agents": 1, "vehicle_config": {"lidar": {"num_others": 8}}})
-    try:
-        _check_spaces_before_reset(env)
-        obs = env.reset()
-        _check_spaces_after_reset(env, obs)
-        assert env.observation_space.contains(obs)
-        for step in range(100):
-            act = {k: [1, 1] for k in env.vehicles.keys()}
-            assert len(act) == 1
-            o, r, d, i = _act(env, act)
-            if step == 0 or step == 1:
-                assert not any(d.values())
-    finally:
-        env.close()
-
-    env = MultiAgentRoundaboutEnv({"num_agents": 1, "vehicle_config": {"lidar": {"num_others": 0}}})
-    try:
-        _check_spaces_before_reset(env)
-        obs = env.reset()
-        _check_spaces_after_reset(env, obs)
-        assert env.observation_space.contains(obs)
-        for step in range(100):
-            act = {k: [1, 1] for k in env.vehicles.keys()}
-            assert len(act) == 1
-            o, r, d, i = _act(env, act)
-            if step == 0 or step == 1:
-                assert not any(d.values())
-    finally:
-        env.close()
-
-    env = MultiAgentRoundaboutEnv({"num_agents": 4, "vehicle_config": {"lidar": {"num_others": 8}}})
-    try:
-        _check_spaces_before_reset(env)
-        obs = env.reset()
-        _check_spaces_after_reset(env)
-        assert env.observation_space.contains(obs)
-        for step in range(100):
-            act = {k: [1, 1] for k in env.vehicles.keys()}
-            o, r, d, i = _act(env, act)
-            if step == 0:
-                assert not any(d.values())
-    finally:
-        env.close()
-
-    env = MultiAgentRoundaboutEnv({"num_agents": 4, "vehicle_config": {"lidar": {"num_others": 0}}})
-    try:
-        _check_spaces_before_reset(env)
-        obs = env.reset()
-        _check_spaces_after_reset(env, obs)
-        assert env.observation_space.contains(obs)
-        for step in range(100):
-            act = {k: [1, 1] for k in env.vehicles.keys()}
-            o, r, d, i = _act(env, act)
-            if step == 0:
-                assert not any(d.values())
-    finally:
-        env.close()
-
-    env = MultiAgentRoundaboutEnv({"num_agents": 8, "vehicle_config": {"lidar": {"num_others": 0}}})
-    try:
-        _check_spaces_before_reset(env)
-        obs = env.reset()
-        _check_spaces_after_reset(env, obs)
-        assert env.observation_space.contains(obs)
-        for step in range(100):
-            act = {k: [1, 1] for k in env.vehicles.keys()}
-            o, r, d, i = _act(env, act)
-            if step == 0:
-                assert not any(d.values())
-    finally:
-        env.close()
+    for env in [MultiAgentRoundaboutEnv({"delay_done": 0, "num_agents": 1,
+                                         "vehicle_config": {"lidar": {"num_others": 8}}}),
+                MultiAgentRoundaboutEnv({"num_agents": 1, "delay_done": 0,
+                                         "vehicle_config": {"lidar": {"num_others": 0}}}),
+                MultiAgentRoundaboutEnv({"num_agents": 4, "delay_done": 0,
+                                         "vehicle_config": {"lidar": {"num_others": 8}}}),
+                MultiAgentRoundaboutEnv({"num_agents": 4, "delay_done": 0,
+                                         "vehicle_config": {"lidar": {"num_others": 0}}}),
+                MultiAgentRoundaboutEnv({"num_agents": 8, "delay_done": 0,
+                                         "vehicle_config": {"lidar": {"num_others": 0}}})]:
+        try:
+            _check_spaces_before_reset(env)
+            obs = env.reset()
+            _check_spaces_after_reset(env, obs)
+            assert env.observation_space.contains(obs)
+            for step in range(100):
+                act = {k: [1, 1] for k in env.vehicles.keys()}
+                o, r, d, i = _act(env, act)
+                if step == 0:
+                    assert not any(d.values())
+        finally:
+            env.close()
 
 
 def test_ma_roundabout_horizon():
@@ -322,31 +272,31 @@ def test_ma_roundabout_close_spawn():
 
 def test_ma_roundabout_reward_done_alignment():
     # out of road
-    # env = MultiAgentRoundaboutEnv({"horizon": 200, "num_agents": 4, "out_of_road_penalty": 777, "crash_done": False})
-    # try:
-    #     _check_spaces_before_reset(env)
-    #     obs = env.reset()
-    #     _check_spaces_after_reset(env, obs)
-    #     assert env.observation_space.contains(obs)
-    #     for action in [-1, 1]:
-    #         for step in range(5000):
-    #             act = {k: [action, 1] for k in env.vehicles.keys()}
-    #             o, r, d, i = _act(env, act)
-    #             for kkk, ddd in d.items():
-    #                 if ddd and kkk != "__all__":
-    #                     assert r[kkk] == -777
-    #                     assert i[kkk]["out_of_road"]
-    #                     # print('{} done passed!'.format(kkk))
-    #             for kkk, rrr in r.items():
-    #                 if rrr == -777:
-    #                     assert d[kkk]
-    #                     assert i[kkk]["out_of_road"]
-    #                     # print('{} reward passed!'.format(kkk))
-    #             if d["__all__"]:
-    #                 env.reset()
-    #                 break
-    # finally:
-    #     env.close()
+    env = MultiAgentRoundaboutEnv({"horizon": 200, "num_agents": 4, "out_of_road_penalty": 777, "crash_done": False})
+    try:
+        _check_spaces_before_reset(env)
+        obs = env.reset()
+        _check_spaces_after_reset(env, obs)
+        assert env.observation_space.contains(obs)
+        for action in [-1, 1]:
+            for step in range(5000):
+                act = {k: [action, 1] for k in env.vehicles.keys()}
+                o, r, d, i = _act(env, act)
+                for kkk, ddd in d.items():
+                    if ddd and kkk != "__all__":
+                        assert r[kkk] == -777
+                        assert i[kkk]["out_of_road"]
+                        # print('{} done passed!'.format(kkk))
+                for kkk, rrr in r.items():
+                    if rrr == -777:
+                        assert d[kkk]
+                        assert i[kkk]["out_of_road"]
+                        # print('{} reward passed!'.format(kkk))
+                if d["__all__"]:
+                    env.reset()
+                    break
+    finally:
+        env.close()
 
     # crash
     env = MultiAgentRoundaboutEnv(
@@ -355,6 +305,7 @@ def test_ma_roundabout_reward_done_alignment():
             "num_agents": 2,
             "crash_vehicle_penalty": 1.7777,
             "crash_done": True,
+            "delay_done": 0,
 
             # "use_render": True,
             # "fast": True,
@@ -706,7 +657,7 @@ def test_ma_no_reset_error():
             assert not v_1.crash_vehicle, "Vehicles overlap after reset()"
             vehicles.remove(v_1)
 
-    env = MultiAgentRoundaboutEnv({"horizon": 300, "num_agents": 40})
+    env = MultiAgentRoundaboutEnv({"horizon": 300, "num_agents": 40, "delay_done": 0})
     try:
         _check_spaces_before_reset(env)
         obs = env.reset()
