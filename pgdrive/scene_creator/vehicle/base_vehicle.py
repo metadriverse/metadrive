@@ -254,14 +254,16 @@ class BaseVehicle(DynamicElement):
             )
         self._state_check()
         self.update_dist_to_left_right()
-        self._update_energy_consumption()
+        step_energy, episode_energy = self._update_energy_consumption()
         self.out_of_route = self._out_of_route()
         step_info = self._update_overtake_stat()
         step_info.update(
             {
                 "velocity": float(self.speed),
                 "steering": float(self.steering),
-                "acceleration": float(self.throttle_brake)
+                "acceleration": float(self.throttle_brake),
+                "step_energy": step_energy,
+                "episode_energy": episode_energy
             }
         )
         return step_info
@@ -278,7 +280,11 @@ class BaseVehicle(DynamicElement):
         :return: None
         """
         distance = norm(*(self.last_position - self.position)) / 1000  # km
-        self.energy_consumption += 3.25 * np.power(np.e, 0.01 * self.speed) * distance / 100  # L/100 km
+        step_energy = 3.25 * math.pow(np.e, 0.01 * self.speed) * distance / 100
+        # step_energy is in Liter, we return mL
+        step_energy = step_energy * 1000
+        self.energy_consumption += step_energy  # L/100 km
+        return step_energy, self.energy_consumption
 
     def reset(self, map: Map, pos: np.ndarray = None, heading: float = 0.0):
         """
