@@ -1,5 +1,5 @@
 import logging
-from typing import List, Tuple, Optional, Dict, AnyStr, Union
+from typing import Optional, Dict, AnyStr, Union
 
 import numpy as np
 from pgdrive.scene_creator.map import Map
@@ -12,9 +12,6 @@ from pgdrive.utils import PGConfig
 from pgdrive.world.pg_world import PGWorld
 
 logger = logging.getLogger(__name__)
-
-LaneIndex = Tuple[str, str, int]
-Route = List[LaneIndex]
 
 
 class SceneManager:
@@ -89,7 +86,7 @@ class SceneManager:
             self.detector_mask = None
 
         # if pg_world.highway_render is not None:
-        #     pg_world.highway_render.set_scene_mgr(self)
+        #     pg_world.highway_render.set_scene_manager(self)
         if self.record_episode:
             if episode_data is None:
                 self.record_system = PGRecorder(map, self.traffic_manager.get_global_init_states())
@@ -172,24 +169,24 @@ class SceneManager:
     def update_state_for_all_target_vehicles(self):
         if self.detector_mask is not None:
             is_target_vehicle_dict = {
-                v_obj.name: self.traffic_manager.is_target_vehicle(v_obj)
-                for v_obj in self.traffic_manager.vehicles + self.object_manager.objects
+                v_obj.name: self.agent_manager.is_active_object(v_obj.name)
+                for v_obj in self.get_interactive_objects()
             }
             self.detector_mask.update_mask(
-                position_dict={
-                    v_obj.name: v_obj.position
-                    for v_obj in self.traffic_manager.vehicles + self.object_manager.objects
-                },
-                heading_dict={
-                    v_obj.name: v_obj.heading_theta
-                    for v_obj in self.traffic_manager.vehicles + self.object_manager.objects
-                },
+                position_dict={v_obj.name: v_obj.position
+                               for v_obj in self.get_interactive_objects()},
+                heading_dict={v_obj.name: v_obj.heading_theta
+                              for v_obj in self.get_interactive_objects()},
                 is_target_vehicle_dict=is_target_vehicle_dict
             )
         step_infos = self.agent_manager.for_each_active_agents(
             lambda v: v.update_state(detector_mask=self.detector_mask.get_mask(v.name) if self.detector_mask else None)
         )
         return step_infos
+
+    def get_interactive_objects(self):
+        objs = self.agent_manager.get_vehicle_list() + self.object_manager.objects
+        return objs
 
     def dump_episode(self) -> None:
         """Dump the data of an episode."""

@@ -74,17 +74,17 @@ class ObjectManager(RandomEngine):
                 return obj
         raise ValueError("No object named {}, so it can not be spawned".format(object_type))
 
-    def generate(self, scene_mgr, pg_world: PGWorld):
+    def generate(self, scene_manager, pg_world: PGWorld):
         """
         Generate an accident scene or construction scene on block
-        :param scene_mgr: SceneManager used to access other managers
+        :param scene_manager: SceneManager used to access other managers
         :param pg_world: PGWorld class
         :return: None
         """
         accident_prob = self.accident_prob
         if abs(accident_prob - 0.0) < 1e-2:
             return
-        for block in scene_mgr.map.blocks:
+        for block in scene_manager.map.blocks:
             if type(block) not in [Straight, Curve, InRampOnStraight, OutRampOnStraight]:
                 # blocks with exists do not generate accident scene
                 continue
@@ -104,7 +104,7 @@ class ObjectManager(RandomEngine):
             if _debug:
                 on_left = True
 
-            lane = accident_road.get_lanes(scene_mgr.map.road_network)[accident_lane_idx]
+            lane = accident_road.get_lanes(scene_manager.map.road_network)[accident_lane_idx]
             longitude = lane.length - self.ACCIDENT_AREA_LEN
 
             if lane.length < self.ACCIDENT_LANE_MIN_LEN:
@@ -114,34 +114,36 @@ class ObjectManager(RandomEngine):
             block.PROHIBIT_TRAFFIC_GENERATION = True
 
             # TODO(pzh) This might not worked in MARL envs when the route is also has changeable lanes.
-            lateral_len = scene_mgr.map.config[scene_mgr.map.LANE_WIDTH]
+            lateral_len = scene_manager.map.config[scene_manager.map.LANE_WIDTH]
 
-            lane = scene_mgr.map.road_network.get_lane(accident_road.lane_index(accident_lane_idx))
+            lane = scene_manager.map.road_network.get_lane(accident_road.lane_index(accident_lane_idx))
             if self.np_random.rand() > 0.5 or _debug:
                 self.prohibit_scene(
-                    scene_mgr, pg_world, lane, accident_road.lane_index(accident_lane_idx), longitude, lateral_len,
+                    scene_manager, pg_world, lane, accident_road.lane_index(accident_lane_idx), longitude, lateral_len,
                     on_left
                 )
             else:
-                accident_lane_idx = self.np_random.randint(scene_mgr.map.config[scene_mgr.map.LANE_NUM])
-                self.break_down_scene(scene_mgr, pg_world, lane, accident_road.lane_index(accident_lane_idx), longitude)
+                accident_lane_idx = self.np_random.randint(scene_manager.map.config[scene_manager.map.LANE_NUM])
+                self.break_down_scene(
+                    scene_manager, pg_world, lane, accident_road.lane_index(accident_lane_idx), longitude
+                )
 
     def break_down_scene(
-        self, scene_mgr, pg_world: PGWorld, lane: AbstractLane, lane_index: LaneIndex, longitude: float
+        self, scene_manager, pg_world: PGWorld, lane: AbstractLane, lane_index: LaneIndex, longitude: float
     ):
 
-        breakdown_vehicle = scene_mgr.traffic_manager.spawn_one_vehicle(
-            scene_mgr.traffic_manager.random_vehicle_type(), lane, longitude, False
+        breakdown_vehicle = scene_manager.traffic_manager.spawn_one_vehicle(
+            scene_manager.traffic_manager.random_vehicle_type(), lane, longitude, False
         )
         breakdown_vehicle.attach_to_pg_world(pg_world.pbr_worldNP, pg_world.physics_world)
 
         alert = self.spawn_one_object("Traffic Triangle", lane, lane_index, longitude - self.ALERT_DIST, 0)
         alert.attach_to_pg_world(pg_world.pbr_worldNP, pg_world.physics_world)
-        scene_mgr.traffic_manager.vehicles.append(alert)
+        scene_manager.traffic_manager.vehicles.append(alert)
 
     def prohibit_scene(
         self,
-        scene_mgr,
+        scene_manager,
         pg_world: PGWorld,
         lane: AbstractLane,
         lane_index: LaneIndex,
@@ -151,7 +153,7 @@ class ObjectManager(RandomEngine):
     ):
         """
         Generate an accident scene on the most left or most right lane
-        :param scene_mgr: SceneManager class
+        :param scene_manager: SceneManager class
         :param pg_world: PGWorld class
         :param lane lane object
         :param lane_index: lane index used to find the lane in map
@@ -177,7 +179,7 @@ class ObjectManager(RandomEngine):
             cone = self.spawn_one_object("Traffic Cone", lane, lane_index, *p_)
             cone.attach_to_pg_world(pg_world.pbr_worldNP, pg_world.physics_world)
             # TODO refactor traffic and traffic system to make it compatible
-            scene_mgr.traffic_manager.vehicles.append(cone)
+            scene_manager.traffic_manager.vehicles.append(cone)
 
     def destroy(self, pg_world: PGWorld):
         self._clear_objects(pg_world)
