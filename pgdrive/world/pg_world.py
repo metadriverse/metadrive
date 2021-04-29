@@ -181,7 +181,7 @@ class PGWorld(ShowBase.ShowBase):
         self.light = None
 
         # physics world
-        self.physics_world = PGPhysicsWorld()
+        self.physics_world = PGPhysicsWorld(self.world_config["debug_static_world"])
 
         # collision callback
         self.physics_world.dynamic_world.setContactAddedCallback(PythonCallbackObject(pg_collision_callback))
