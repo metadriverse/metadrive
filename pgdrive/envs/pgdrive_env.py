@@ -179,7 +179,7 @@ class PGDriveEnv(BasePGDriveEnv):
                 raise ValueError("No such a controller type: {}".format(self.config["controller"]))
 
         # initialize track vehicles
-        vehicles = self._agent_manager.get_vehicle_list()
+        vehicles = self.agent_manager.get_vehicle_list()
         self.current_track_vehicle = vehicles[0]
         for vehicle in vehicles:
             if vehicle is not self.current_track_vehicle:
@@ -209,12 +209,12 @@ class PGDriveEnv(BasePGDriveEnv):
 
     def _preprocess_actions(self, actions: Union[np.ndarray, Dict[AnyStr, np.ndarray]]) \
             -> Tuple[Union[np.ndarray, Dict[AnyStr, np.ndarray]], Dict]:
-        self._agent_manager.prepare_step()
+        self.agent_manager.prepare_step()
         if self.config["manual_control"] and self.config["use_render"] \
-                and self.current_track_vehicle in self._agent_manager.get_vehicle_list():
+                and self.current_track_vehicle in self.agent_manager.get_vehicle_list():
             action = self.controller.process_input()
             if self.is_multi_agent:
-                actions[self._agent_manager.object_to_agent(self.current_track_vehicle.name)] = action
+                actions[self.agent_manager.object_to_agent(self.current_track_vehicle.name)] = action
             else:
                 actions = action
 
@@ -516,7 +516,7 @@ class PGDriveEnv(BasePGDriveEnv):
         if self.main_camera is None:
             return
         self.main_camera.reset()
-        vehicles = list(self._agent_manager.active_objects.values())
+        vehicles = list(self.agent_manager.active_agents.values())
         if self.current_track_vehicle in vehicles:
             vehicles.remove(self.current_track_vehicle)
         if len(vehicles) == 0:

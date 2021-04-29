@@ -253,7 +253,16 @@ def test_ma_intersection_close_spawn():
                 assert distance_greater(v1.position, v2.position, length=2.2)
 
     MultiAgentIntersectionEnv._DEBUG_RANDOM_SEED = 1
-    env = MultiAgentIntersectionEnv({"horizon": 50, "num_agents": 16, "map_config": {"exit_length": 30}})
+    env = MultiAgentIntersectionEnv(
+        {
+            # "use_render": True, "fast": True,
+            "horizon": 50,
+            "num_agents": 16,
+            "map_config": {
+                "exit_length": 30
+            }
+        }
+    )
     env.seed(100)
     try:
         _check_spaces_before_reset(env)
@@ -635,7 +644,7 @@ def test_ma_intersection_40_agent_reset_after_respawn():
             env.reset()
             check_pos(list(env.vehicles.values()))
             for v_id in list(env.vehicles.keys())[:20]:
-                env._agent_manager.finish(v_id)
+                env.agent_manager.finish(v_id)
             env.step({k: [1, 1] for k in env.vehicles.keys()})
             env.step({k: [1, 1] for k in env.vehicles.keys()})
             env.step({k: [1, 1] for k in env.vehicles.keys()})
@@ -693,15 +702,15 @@ def test_randomize_spawn_place():
 
 
 if __name__ == '__main__':
-    test_ma_intersection_env()
-    test_ma_intersection_horizon()
-    test_ma_intersection_reset()
-    test_ma_intersection_reward_done_alignment()
+    # test_ma_intersection_env()
+    # test_ma_intersection_horizon()
+    # test_ma_intersection_reset()
+    # test_ma_intersection_reward_done_alignment()
     test_ma_intersection_close_spawn()
-    test_ma_intersection_reward_sign()
-    test_ma_intersection_init_space()
-    test_ma_intersection_no_short_episode()
-    test_ma_intersection_horizon_termination()
+    # test_ma_intersection_reward_sign()
+    # test_ma_intersection_init_space()
+    # test_ma_intersection_no_short_episode()
+    # test_ma_intersection_horizon_termination()
     test_ma_intersection_40_agent_reset_after_respawn()
-    test_ma_no_reset_error()
-    test_randomize_spawn_place()
+    # test_ma_no_reset_error()
+    # test_randomize_spawn_place()

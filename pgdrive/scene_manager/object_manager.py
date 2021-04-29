@@ -10,7 +10,7 @@ from pgdrive.utils import RandomEngine
 from pgdrive.world.pg_world import PGWorld
 
 
-class ObjectsManager(RandomEngine):
+class ObjectManager(RandomEngine):
     """
     This class is used to manager all static object, such as traffic cones, warning tripod.
     """
@@ -32,7 +32,7 @@ class ObjectsManager(RandomEngine):
         self.accident_prob = 0.
 
         # init random engine
-        super(ObjectsManager, self).__init__()
+        super(ObjectManager, self).__init__()
 
     def reset(self, pg_world: PGWorld, map: Map, accident_prob: float = 0):
         """
@@ -130,14 +130,14 @@ class ObjectsManager(RandomEngine):
         self, scene_mgr, pg_world: PGWorld, lane: AbstractLane, lane_index: LaneIndex, longitude: float
     ):
 
-        breakdown_vehicle = scene_mgr.traffic_mgr.spawn_one_vehicle(
-            scene_mgr.traffic_mgr.random_vehicle_type(), lane, longitude, False
+        breakdown_vehicle = scene_mgr.traffic_manager.spawn_one_vehicle(
+            scene_mgr.traffic_manager.random_vehicle_type(), lane, longitude, False
         )
         breakdown_vehicle.attach_to_pg_world(pg_world.pbr_worldNP, pg_world.physics_world)
 
         alert = self.spawn_one_object("Traffic Triangle", lane, lane_index, longitude - self.ALERT_DIST, 0)
         alert.attach_to_pg_world(pg_world.pbr_worldNP, pg_world.physics_world)
-        scene_mgr.traffic_mgr.vehicles.append(alert)
+        scene_mgr.traffic_manager.vehicles.append(alert)
 
     def prohibit_scene(
         self,
@@ -177,7 +177,7 @@ class ObjectsManager(RandomEngine):
             cone = self.spawn_one_object("Traffic Cone", lane, lane_index, *p_)
             cone.attach_to_pg_world(pg_world.pbr_worldNP, pg_world.physics_world)
             # TODO refactor traffic and traffic system to make it compatible
-            scene_mgr.traffic_mgr.vehicles.append(cone)
+            scene_mgr.traffic_manager.vehicles.append(cone)
 
     def destroy(self, pg_world: PGWorld):
         self._clear_objects(pg_world)
