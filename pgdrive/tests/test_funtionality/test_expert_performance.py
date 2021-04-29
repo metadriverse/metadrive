@@ -43,7 +43,7 @@ def test_expert_with_traffic(use_render=False):
         ),
         num_episode=3
     )
-    assert 465 < ep_reward < 485, ep_reward
+    assert 470 < ep_reward < 500, ep_reward
     assert success_rate == 1.0, success_rate
 
 

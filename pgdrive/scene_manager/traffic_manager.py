@@ -31,7 +31,7 @@ class TrafficManager(RandomEngine):
         :param traffic_mode: Respawn mode or Trigger mode
         :param random_traffic: the distribution of vehicles will be different in different episdoes
         """
-        # current map TODO maintain one map in scene_mgr
+        # current map TODO maintain one map in scene_manager
         self.map = None
 
         # traffic vehicle list
@@ -100,10 +100,10 @@ class TrafficManager(RandomEngine):
             raise ValueError("No such mode named {}".format(self.mode))
         logging.debug("Init {} Traffic Vehicles".format(len(self._spawned_vehicles)))
 
-    def prepare_step(self, scene_mgr):
+    def prepare_step(self, scene_manager):
         """
         All traffic vehicles make driving decision here
-        :param scene_mgr: access other elements in scene
+        :param scene_manager: access other elements in scene
         :param pg_world: World
         :return: None
         """
@@ -116,7 +116,7 @@ class TrafficManager(RandomEngine):
                     block_vehicles = self.block_triggered_vehicles.pop()
                     self.traffic_vehicles += block_vehicles.vehicles
         for v in self.traffic_vehicles:
-            v.prepare_step(scene_mgr=scene_mgr)
+            v.prepare_step(scene_manager=scene_manager)
 
     def step(self, dt: float):
         """
@@ -128,10 +128,10 @@ class TrafficManager(RandomEngine):
         for v in self.traffic_vehicles:
             v.step(dt)
 
-    def update_state(self, scene_mgr, pg_world: PGWorld):
+    def update_state(self, scene_manager, pg_world: PGWorld):
         """
         Update all traffic vehicles' states,
-        :param scene_mgr: Access other entities in the scene to determine the new state
+        :param scene_manager: Access other entities in the scene to determine the new state
         :param pg_world: World
         """
 

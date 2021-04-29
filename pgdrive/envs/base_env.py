@@ -6,6 +6,7 @@ from typing import Union, Dict, AnyStr, Optional, Tuple
 import gym
 import numpy as np
 from panda3d.core import PNMImage
+
 from pgdrive.constants import RENDER_MODE_NONE, DEFAULT_AGENT
 from pgdrive.obs.observation_type import ObservationType
 from pgdrive.scene_creator.vehicle.base_vehicle import BaseVehicle
@@ -22,7 +23,7 @@ BASE_DEFAULT_CONFIG = dict(
     environment_num=1,
 
     # ==== agents config =====
-    num_agents=1,
+    num_agents=1,  # Note that this can be set to >1 in MARL envs, or set to -1 for as many vehicles as possible.
     is_multi_agent=False,
     allow_respawn=False,
     delay_done=0,  # How many steps for the agent to stay static at the death place after done.
@@ -108,14 +109,15 @@ class BasePGDriveEnv(gym.Env):
         self.is_multi_agent = self.config["is_multi_agent"]
         if not self.is_multi_agent:
             assert self.num_agents == 1
-        assert isinstance(self.num_agents, int) and self.num_agents > 0
+        assert isinstance(self.num_agents, int) and (self.num_agents > 0 or self.num_agents == -1)
 
         # observation and action space
         self.agent_manager = AgentManager(
             init_observations=self._get_observations(),
             never_allow_respawn=not self.config["allow_respawn"],
             debug=self.config["debug"],
-            delay_done=self.config["delay_done"]
+            delay_done=self.config["delay_done"],
+            infinite_agents=self.num_agents == -1
         )
         self.agent_manager.init_space(
             init_observation_space=self._get_observation_space(), init_action_space=self._get_action_space()
@@ -194,13 +196,13 @@ class BasePGDriveEnv(gym.Env):
         self.scene_manager = self._get_scene_manager()
 
         # init vehicle
-        self.agent_manager.init(self._get_vehicles())
+        self.agent_manager.init(pg_world=self.pg_world, config_dict=self._get_target_vehicle_config())
 
         # other optional initialization
         self._after_lazy_init()
 
-    def _get_vehicles(self):
-        return {self.DEFAULT_AGENT: BaseVehicle(self.pg_world, self.config["vehicle_config"])}
+    def _get_target_vehicle_config(self):
+        return {self.DEFAULT_AGENT: self.config["vehicle_config"]}
 
     def _after_lazy_init(self):
         pass

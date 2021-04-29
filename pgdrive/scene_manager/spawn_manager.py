@@ -89,7 +89,7 @@ class SpawnManager:
         interval = self.exit_length / num_slots
         self._longitude_spawn_interval = interval
         if self.num_agents is not None:
-            assert self.num_agents > 0
+            assert self.num_agents > 0 or self.num_agents == -1
             assert self.num_agents <= self.lane_num * len(spawn_roads) * num_slots, (
                 "Too many agents! We only accepet {} agents, but you have {} agents!".format(
                     self.lane_num * len(spawn_roads) * num_slots, self.num_agents
@@ -135,9 +135,13 @@ class SpawnManager:
 
         num_agents = self.num_agents if self.num_agents is not None else len(self.target_vehicle_configs)
         assert len(self.target_vehicle_configs) > 0
-        target_agents = get_np_random(seed).choice(
-            [i for i in range(len(self.target_vehicle_configs))], num_agents, replace=False
-        )
+
+        if num_agents == -1:  # Infinite number of agents
+            target_agents = list(range(len(self.target_vehicle_configs)))
+        else:
+            target_agents = get_np_random(seed).choice(
+                [i for i in range(len(self.target_vehicle_configs))], num_agents, replace=False
+            )
 
         # for rllib compatibility
         ret = {}

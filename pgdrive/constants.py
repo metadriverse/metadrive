@@ -1,3 +1,5 @@
+from typing import List, Tuple
+
 from panda3d.bullet import BulletWorld
 from panda3d.core import Vec4, BitMask32
 
@@ -162,3 +164,7 @@ class CollisionGroup:
     def set_collision_rule(cls, world: BulletWorld):
         for rule in cls.collision_rules():
             world.setGroupCollisionFlag(*rule)
+
+
+LaneIndex = Tuple[str, str, int]
+Route = List[LaneIndex]
