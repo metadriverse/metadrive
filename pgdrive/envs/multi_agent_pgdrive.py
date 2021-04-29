@@ -156,13 +156,14 @@ class MultiAgentPGDrive(PGDriveEnvV2):
     def reset(self, *args, **kwargs):
         self.config = self._update_agent_pos_configs(self.config)
         ret = super(MultiAgentPGDrive, self).reset(*args, **kwargs)
-        assert len(self.vehicles) == self.num_agents
+        assert (len(self.vehicles) == self.num_agents) or (self.num_agents == -1)
         return ret
 
     def _reset_agents(self):
         # update config (for new possible spawn places)
         for v_id, v in self.vehicles.items():
-            v.vehicle_config = self._get_target_vehicle_config(self.config["target_vehicle_configs"][v_id])
+            if v_id in self.config["target_vehicle_configs"]:
+                v.vehicle_config = self._get_single_vehicle_config(self.config["target_vehicle_configs"][v_id])
         super(MultiAgentPGDrive, self)._reset_agents()  # Update config before actually resetting!
         self.for_each_vehicle(self._update_destination_for)
 
@@ -187,19 +188,19 @@ class MultiAgentPGDrive(PGDriveEnvV2):
                 and self.pg_world.taskMgr.hasTaskNamed(self.main_camera.CHASE_TASK_NAME):
             self.chase_another_v()
 
-    def _get_vehicles(self):
+    def _get_target_vehicle_config(self):
         return {
-            name: BaseVehicle(self.pg_world, self._get_target_vehicle_config(new_config))
+            name: self._get_single_vehicle_config(new_config)
             for name, new_config in self.config["target_vehicle_configs"].items()
         }
 
     def _get_observations(self):
         return {
-            name: self.get_single_observation(self._get_target_vehicle_config(new_config))
+            name: self.get_single_observation(self._get_single_vehicle_config(new_config))
             for name, new_config in self.config["target_vehicle_configs"].items()
         }
 
-    def _get_target_vehicle_config(self, extra_config: dict):
+    def _get_single_vehicle_config(self, extra_config: dict):
         """
         Newly introduce method
         """

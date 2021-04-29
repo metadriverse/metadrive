@@ -7,7 +7,6 @@ from pgdrive.constants import BodyName, CollisionGroup
 from pgdrive.scene_creator.highway_vehicle.behavior import IDMVehicle
 from pgdrive.scene_creator.lane.circular_lane import CircularLane
 from pgdrive.scene_creator.lane.straight_lane import StraightLane
-from pgdrive.scene_manager.scene_manager import SceneManager
 from pgdrive.scene_manager.traffic_manager import TrafficManager
 from pgdrive.utils import get_np_random
 from pgdrive.utils.asset_loader import AssetLoader
@@ -78,13 +77,13 @@ class PGTrafficVehicle(DynamicElement):
         self.step(1e-1)
         # self.carNP.setQuat(LQuaternionf(math.cos(-1 * np.pi / 4), 0, 0, math.sin(-1 * np.pi / 4)))
 
-    def prepare_step(self, scene_mgr: SceneManager) -> None:
+    def prepare_step(self, scene_manager) -> None:
         """
         Determine the action according to the elements in scene
-        :param scene_mgr: scene
+        :param scene_manager: scene
         :return: None
         """
-        self.vehicle_node.kinematic_model.act(scene_mgr=scene_mgr)
+        self.vehicle_node.kinematic_model.act(scene_manager=scene_manager)
 
     def step(self, dt):
         self.vehicle_node.kinematic_model.step(dt)
