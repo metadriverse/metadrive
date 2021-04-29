@@ -93,7 +93,7 @@ class Vehicle:
 
         :param longitude: the longitude on lane
         :param lane: the lane where the vehicle is spawn
-        :param traffic_mgr: the traffic_mgr where the vehicle is driving
+        :param traffic_mgr: the traffic_manager where the vehicle is driving
         :param speed: initial speed in [m/s]. If None, will be chosen randomly
         :return: A vehicle with random position and/or speed
         """
@@ -242,7 +242,7 @@ class Vehicle:
 
     @property
     def on_road(self) -> bool:
-        """ Is the vehicle on its current lane, or off-traffic_mgr ? """
+        """ Is the vehicle on its current lane, or off-traffic_manager ? """
         return self.lane.on_lane(self.position)
 
     def front_distance_to(self, other: "Vehicle") -> float:

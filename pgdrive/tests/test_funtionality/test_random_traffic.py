@@ -13,9 +13,9 @@ def test_random_traffic():
         last_pos = None
         for i in range(20):
             obs = env.reset()
-            assert env.scene_manager.traffic_mgr.random_traffic
-            assert env.scene_manager.traffic_mgr.random_seed is None
-            new_pos = [v.position for v in env.scene_manager.traffic_mgr.vehicles]
+            assert env.scene_manager.traffic_manager.random_traffic
+            assert env.scene_manager.traffic_manager.random_seed is None
+            new_pos = [v.position for v in env.scene_manager.traffic_manager.vehicles]
             if last_pos is not None and len(new_pos) == len(last_pos):
                 assert sum(
                     [norm(lastp[0] - newp[0], lastp[1] - newp[1]) >= 0.5 for lastp, newp in zip(last_pos, new_pos)]

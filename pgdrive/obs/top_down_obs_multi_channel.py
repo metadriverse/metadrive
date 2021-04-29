@@ -141,7 +141,7 @@ class TopDownMultiChannel(TopDownObservation):
         ego_heading = vehicle.heading_theta
         ego_heading = ego_heading if abs(ego_heading) > 2 * np.pi / 180 else 0
 
-        for v in self.scene_manager.traffic_mgr.vehicles:
+        for v in self.scene_manager.traffic_manager.vehicles:
             if v is vehicle:
                 continue
             h = v.heading
