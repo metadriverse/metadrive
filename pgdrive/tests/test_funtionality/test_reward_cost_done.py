@@ -1,3 +1,4 @@
+from pgdrive.constants import TerminationState
 from pgdrive.envs import PGDriveEnvV2
 from pgdrive.utils import setup_logger
 
@@ -24,7 +25,7 @@ def test_reward_cost_done():
     #         o, r, d, i = env.step([0, 1])
     #         if d:
     #             break
-    #     assert i["arrive_dest"]
+    #     assert i[TerminationState.SUCCESS]
     #     assert i["cost"] == 0
     #     assert r == rewards["success_reward"]
     # finally:
@@ -42,7 +43,7 @@ def test_reward_cost_done():
     #         o, r, d, i = env.step([1, 1])
     #         if d:
     #             break
-    #     assert i["out_of_road"]
+    #     assert i[TerminationState.OUT_OF_ROAD]
     #     assert i["cost"] == rewards["out_of_road_cost"]
     #     assert r == -rewards["out_of_road_penalty"]
     # finally:
@@ -64,8 +65,8 @@ def test_reward_cost_done():
             if d:
                 epr = 0
                 break
-        assert i["crash"]
-        assert i["crash_vehicle"]
+        assert i[TerminationState.CRASH]
+        assert i[TerminationState.CRASH_VEHICLE]
         assert i["cost"] == rewards["crash_vehicle_cost"]
         assert r == -rewards["crash_vehicle_penalty"]
     finally:
@@ -87,8 +88,8 @@ def test_reward_cost_done():
     #         o, r, d, i = env.step([0, 1])
     #         if d:
     #             break
-    #     assert i["crash"]
-    #     assert i["crash_object"]
+    #     assert i[TerminationState.CRASH]
+    #     assert i[TerminationState.CRASH_OBJECT]
     #     assert i["cost"] == rewards["crash_object_cost"]
     #     assert r == -rewards["crash_object_penalty"]
     # finally:

@@ -1,6 +1,6 @@
 import numpy as np
 from gym.spaces import Box
-
+from pgdrive.constants import TerminationState
 from pgdrive.envs.pgdrive_env import PGDriveEnv
 from pgdrive.utils import PGConfig
 
@@ -99,7 +99,7 @@ class ActionRepeat(PGDriveEnv):
         i["real_return"] = real_ret
         i["action_repeat"] = action_repeat
         i["primitive_steps_count"] = self.primitive_steps_count
-        i["max_step"] = self.primitive_steps_count > self.config["horizon"]
+        i[TerminationState.MAX_STEP] = self.primitive_steps_count > self.config["horizon"]
         i["render"] = render_list
         i["trajectory"] = [
             dict(
@@ -136,7 +136,7 @@ if __name__ == '__main__':
     env.reset()
     for i in range(5000):
         _, _, d, info = env.step([0, 0])
-        print("max_step: ", info["max_step"], i, info["primitive_steps_count"])
+        print("max_step: ", info[TerminationState.MAX_STEP], i, info["primitive_steps_count"])
         if d:
             break
     env.close()

@@ -15,6 +15,7 @@ import matplotlib
 import numpy as np
 import ray
 from pgdrive import GeneralizationRacing
+from pgdrive.constants import TerminationState
 from ray.rllib.agents.callbacks import DefaultCallbacks
 from ray.rllib.agents.ppo import PPOTrainer
 from ray.rllib.env import BaseEnv
@@ -50,9 +51,9 @@ class DrivingCallbacks(DefaultCallbacks):
         self, worker: RolloutWorker, base_env: BaseEnv, policies: Dict[str, Policy], episode: MultiAgentEpisode,
         **kwargs
     ):
-        arrive_dest = episode.last_info_for()["arrive_dest"]
-        crash_vehicle = episode.last_info_for()["crash_vehicle"]
-        out_of_road = episode.last_info_for()["out_of_road"]
+        arrive_dest = episode.last_info_for()[TerminationState.SUCCESS]
+        crash_vehicle = episode.last_info_for()[TerminationState.CRASH_VEHICLE]
+        out_of_road = episode.last_info_for()[TerminationState.OUT_OF_ROAD]
         max_step_rate = not (arrive_dest or crash_vehicle or out_of_road)
         episode.custom_metrics["success_rate"] = float(arrive_dest)
         episode.custom_metrics["crash_vehicle_rate"] = float(crash_vehicle)
@@ -73,15 +74,15 @@ class DrivingCallbacks(DefaultCallbacks):
 
     def on_train_result(self, *, trainer, result: dict, **kwargs):
         result["success"] = np.nan
-        result["crash_vehicle"] = np.nan
+        result[TerminationState.CRASH_VEHICLE] = np.nan
         result["out"] = np.nan
-        result["max_step"] = np.nan
+        result[TerminationState.MAX_STEP] = np.nan
         result["length"] = result["episode_len_mean"]
         if "success_rate_mean" in result["custom_metrics"]:
             result["success"] = result["custom_metrics"]["success_rate_mean"]
-            result["crash_vehicle"] = result["custom_metrics"]["crash_vehicle_rate_mean"]
+            result[TerminationState.CRASH_VEHICLE] = result["custom_metrics"]["crash_vehicle_rate_mean"]
             result["out"] = result["custom_metrics"]["out_of_road_rate_mean"]
-            result["max_step"] = result["custom_metrics"]["max_step_rate_mean"]
+            result[TerminationState.MAX_STEP] = result["custom_metrics"]["max_step_rate_mean"]
 
 
 def initialize_ray(local_mode=False, num_gpus=None, test_mode=False, **kwargs):
@@ -145,9 +146,9 @@ def evaluate(trainer, num_episodes=20):
 
         ret_reward.extend([e["rewards"].sum() for e in episodes])
         ret_length.extend([e.count for e in episodes])
-        ret_success_rate.extend([e["infos"][-1]["arrive_dest"] for e in episodes])
-        ret_out_rate.extend([e["infos"][-1]["out_of_road"] for e in episodes])
-        ret_crash_vehicle_rate.extend([e["infos"][-1]["crash_vehicle"] for e in episodes])
+        ret_success_rate.extend([e["infos"][-1][TerminationState.SUCCESS] for e in episodes])
+        ret_out_rate.extend([e["infos"][-1][TerminationState.OUT_OF_ROAD] for e in episodes])
+        ret_crash_vehicle_rate.extend([e["infos"][-1][TerminationState.CRASH_VEHICLE] for e in episodes])
 
         episode_count += len(episodes)
         print("Finish {} episodes".format(episode_count))

@@ -1,3 +1,4 @@
+from pgdrive.constants import TerminationState
 from pgdrive.envs.multi_agent_pgdrive import MultiAgentPGDrive
 from pgdrive.utils import PGConfig
 
@@ -49,7 +50,7 @@ def test_cull_scene(use_render=False):
                     actions.pop("agent1")
                 o, r, d, info = env.step(actions)
                 if any(d.values()):
-                    if info["agent0"]["crash_vehicle"]:
+                    if info["agent0"][TerminationState.CRASH_VEHICLE]:
                         pass_test = True
                     break
             assert pass_test, "Cull scene error! collision function is invalid!"

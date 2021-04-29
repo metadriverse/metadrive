@@ -1,5 +1,6 @@
 from pgdrive.envs.marl_envs.marl_inout_roundabout import MultiAgentRoundaboutEnv
 from pgdrive.utils import setup_logger
+from pgdrive.constants import TerminationState
 
 
 def test_respawn():
@@ -39,14 +40,14 @@ def test_respawn():
         assert set(o.keys()).union({"__all__"}) == set(d.keys())
         tracks.append(d)
         if d[v_id_0]:
-            assert info[v_id_0]["out_of_road"]
+            assert info[v_id_0][TerminationState.OUT_OF_ROAD]
             assert info[v_id_0]["cost"] == out_of_road_cost
             assert r[v_id_0] == -out_of_road_penalty
             v_id_0 = "agent{}".format(count)
             count += 1
             done_count += 1
         if d[v_id_1]:
-            assert info[v_id_1]["out_of_road"]
+            assert info[v_id_1][TerminationState.OUT_OF_ROAD]
             assert info[v_id_1]["cost"] == out_of_road_cost
             assert r[v_id_1] == -out_of_road_penalty
             v_id_1 = "agent{}".format(count)
@@ -112,7 +113,7 @@ def test_delay_done():
             if d.get("agent0"):
                 agent0_done = True
             if agent0_done:
-                if info["agent1"]["crash_vehicle"]:
+                if info["agent1"][TerminationState.CRASH_VEHICLE]:
                     agent1_already_hit = True
                     print("Hit!")
             if d["__all__"]:
