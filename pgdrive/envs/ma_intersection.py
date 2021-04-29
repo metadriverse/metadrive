@@ -1,3 +1,4 @@
+from pgdrive.constants import TerminationState
 from pgdrive.envs.pgdrive_env_v2 import PGDriveEnvV2
 from pgdrive.scene_creator.blocks.first_block import FirstBlock
 from pgdrive.scene_creator.vehicle.base_vehicle import BaseVehicle
@@ -88,10 +89,10 @@ class MultiAgentIntersectPGDrive(PGDriveEnvV2):
         done, done_info = super(MultiAgentIntersectPGDrive, self).done_function(vehicle_id)
         if vehicle.crash_vehicle and not self.config["crash_done"]:
             done = False
-            done_info["crash_vehicle"] = False
+            done_info[TerminationState.CRASH_VEHICLE] = False
         elif vehicle.out_of_route and vehicle.on_lane and not vehicle.crash_sidewalk:
             done = False
-            done_info["out_of_road"] = False
+            done_info[TerminationState.OUT_OF_ROAD] = False
         return done, done_info
 
     def step(self, actions):

@@ -7,6 +7,16 @@ RENDER_MODE_NONE = "none"  # Do not render
 RENDER_MODE_ONSCREEN = "onscreen"  # Pop up a window and draw image in it
 RENDER_MODE_OFFSCREEN = "offscreen"  # Draw image in buffer and collect image from memory
 
+
+class TerminationState:
+    SUCCESS = "arrive_dest"
+    OUT_OF_ROAD = "out_of_road"
+    MAX_STEP = "max_step"
+    CRASH = "crash"
+    CRASH_VEHICLE = "crash_vehicle"
+    CRASH_OBJECT = "crash_object"
+
+
 HELP_MESSAGE = "Keyboard Shortcuts:\n" \
                "  W: Acceleration\n" \
                "  S: Braking\n" \

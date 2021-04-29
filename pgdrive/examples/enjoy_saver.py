@@ -1,4 +1,5 @@
-from pgdrive.envs.pgdrive_env import PGDriveEnvV2
+from pgdrive.constants import TerminationState
+from pgdrive.envs.pgdrive_env_v2 import PGDriveEnvV2
 
 if __name__ == "__main__":
     env = PGDriveEnvV2(
@@ -22,6 +23,6 @@ if __name__ == "__main__":
         o, r, d, info = env.step([0, 1])
         text = {"save": info["takeover_start"]}
         env.render(text=text)
-        if info["arrive_dest"]:
+        if info[TerminationState.SUCCESS]:
             env.reset()
     env.close()
