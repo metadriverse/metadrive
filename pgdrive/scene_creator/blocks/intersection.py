@@ -38,6 +38,8 @@ class InterSection(Block):
     ANGLE = 90  # may support other angle in the future
     EXIT_PART_LENGTH = 30
 
+    enable_u_turn = False
+
     # LEFT_TURN_NUM = 1 now it is useless
 
     def _try_plug_into_previous_block(self) -> bool:
@@ -86,6 +88,11 @@ class InterSection(Block):
         # first left part
         assert isinstance(attach_left_lane, StraightLane), "Can't create a intersection following a circular lane"
         self._create_left_turn(radius, lane_num, attach_left_lane, attach_road, intersect_nodes, part_idx)
+
+        # u-turn
+        if self.enable_u_turn:
+            adverse_road = -attach_road
+            self._create_u_turn(attach_road, part_idx)
 
         # go forward part
         lanes_on_road = copy.deepcopy(attach_lanes)
@@ -178,3 +185,30 @@ class InterSection(Block):
                 side_lane_line_type=LineType.NONE,
                 inner_lane_line_type=LineType.NONE
             )
+
+    def _create_u_turn(self, attach_road, part_idx):
+        # set to CONTINUOUS to debug
+        line_type = LineType.NONE
+        lanes = attach_road.get_lanes(self.block_network) if part_idx != 0 else self.positive_lanes
+        attach_left_lane = lanes[0]
+        lane_num = len(lanes)
+        left_turn_radius = self.lane_width / 2
+        left_bend, _ = create_bend_straight(
+            attach_left_lane, 0.1, left_turn_radius, np.deg2rad(180), False, attach_left_lane.width_at(0),
+            (LineType.NONE, LineType.NONE)
+        )
+        left_road_start = (-attach_road).start_node
+        CreateRoadFrom(
+            left_bend,
+            lane_num,
+            Road(attach_road.end_node, left_road_start),
+            self.block_network,
+            self._global_network,
+            toward_smaller_lane_index=False,
+            center_line_type=line_type,
+            side_lane_line_type=line_type,
+            inner_lane_line_type=line_type
+        )
+
+    def add_u_turn(self, enable_u_turn: bool):
+        self.enable_u_turn = enable_u_turn

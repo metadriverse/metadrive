@@ -81,7 +81,15 @@ class RoutingLocalizationModule:
             start_road_node = FirstBlock.NODE_1
         if final_road_node is None:
             random_seed = random_seed if random_seed is not False else map.random_seed
-            socket = get_np_random(random_seed).choice(map.blocks[-1].get_socket_list())
+            sockets = map.blocks[-1].get_socket_list()
+            while True:
+                socket = get_np_random(random_seed).choice(sockets)
+                if not socket.is_socket_node(start_road_node):
+                    break
+                else:
+                    sockets.remove(socket)
+                    if len(sockets) == 0:
+                        raise ValueError("Can not set a destination!")
             final_road_node = socket.positive_road.end_node
         self.set_route(start_road_node, final_road_node)
 
