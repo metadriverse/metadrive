@@ -69,6 +69,9 @@ BASE_DEFAULT_CONFIG = dict(
         # only render physics world without model, a special debug option
         debug_physics_world=False,
 
+        # debug static world
+        debug_static_world=False,
+
         # set to true only when on headless machine and use rgb image!!!!!!
         headless_image=False,
 

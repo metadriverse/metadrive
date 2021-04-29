@@ -1,7 +1,7 @@
 import logging
 from collections import OrderedDict
 from typing import Dict, Union, List
-
+import copy
 import numpy
 from panda3d.bullet import BulletBoxShape, BulletRigidBodyNode, BulletGhostNode
 from panda3d.core import Vec3, LQuaternionf, BitMask32, Vec4, CardMaker, TextureStage, RigidBodyCombiner, \
@@ -38,6 +38,13 @@ class BlockSocket:
     @classmethod
     def get_real_index(cls, block_name: str, index: int):
         return "{}-socket{}".format(block_name, index)
+
+    def is_socket_node(self, road_node):
+        if road_node == self.positive_road.start_node or road_node == self.positive_road.end_node or \
+                road_node == self.negative_road.start_node or road_node == self.negative_road.end_node:
+            return True
+        else:
+            return False
 
 
 class Block(Element, BlockDefault):

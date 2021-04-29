@@ -6,13 +6,13 @@ from pgdrive.constants import CollisionGroup
 
 
 class PGPhysicsWorld:
-    def __init__(self):
+    def __init__(self, debug=False):
         # a dynamic world, moving objects or objects which react to other objects should be placed here
         self.dynamic_world = BulletWorld()
         CollisionGroup.set_collision_rule(self.dynamic_world)
         self.dynamic_world.setGravity(Vec3(0, 0, -9.81))  # set gravity
         # a static world which used to query position/overlap .etc. Don't implement doPhysics() in this world
-        self.static_world = BulletWorld()
+        self.static_world = BulletWorld() if not debug else self.dynamic_world
         CollisionGroup.set_collision_rule(self.static_world)
 
     def report_bodies(self):
