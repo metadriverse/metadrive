@@ -1,5 +1,5 @@
+from pgdrive.constants import BodyName, TerminationState
 from pgdrive.envs.generation_envs.side_pass_env import SidePassEnv
-from pgdrive.constants import BodyName
 
 
 def test_object_collision_detection(render=False):
@@ -34,7 +34,7 @@ def test_object_collision_detection(render=False):
                     detect_obj = True
             if render:
                 env.render()
-            if info["crash_object"]:
+            if info[TerminationState.CRASH_OBJECT]:
                 crash_obj = True
                 break
         assert crash_obj and detect_obj, "Can not crash with object!"

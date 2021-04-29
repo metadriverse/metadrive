@@ -1,12 +1,13 @@
+from pgdrive.constants import TerminationState
 from pgdrive.examples.ppo_expert.numpy_expert import expert
 
 
 def get_terminal_state(info):
-    if info["crash_vehicle"]:
+    if info[TerminationState.CRASH_VEHICLE]:
         state = "Crash Vehicle"
-    elif info["out_of_road"]:
+    elif info[TerminationState.OUT_OF_ROAD]:
         state = "Out of Road"
-    elif info["arrive_dest"]:
+    elif info[TerminationState.SUCCESS]:
         state = "Success"
     else:
         state = "Max Step"

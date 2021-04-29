@@ -1,7 +1,7 @@
 import logging
 
 import numpy as np
-from pgdrive.constants import DEFAULT_AGENT
+from pgdrive.constants import DEFAULT_AGENT, TerminationState
 from pgdrive.envs.pgdrive_env import PGDriveEnv as PGDriveEnvV1
 from pgdrive.scene_manager.traffic_manager import TrafficMode
 from pgdrive.utils import PGConfig, clip
@@ -98,23 +98,24 @@ class PGDriveEnvV2(PGDriveEnvV1):
         if vehicle.arrive_destination:
             done = True
             logging.info("Episode ended! Reason: arrive_dest.")
-            done_info["arrive_dest"] = True
+            done_info[TerminationState.SUCCESS] = True
         elif self._is_out_of_road(vehicle):
             done = True
             logging.info("Episode ended! Reason: out_of_road.")
-            done_info["out_of_road"] = True
+            done_info[TerminationState.OUT_OF_ROAD] = True
         elif vehicle.crash_vehicle:
             done = True
             logging.info("Episode ended! Reason: crash. ")
-            done_info["crash_vehicle"] = True
+            done_info[TerminationState.CRASH_VEHICLE] = True
         # elif vehicle.out_of_route or not vehicle.on_lane or vehicle.crash_sidewalk:
         elif vehicle.crash_object:
             done = True
-            done_info["crash_object"] = True
+            done_info[TerminationState.CRASH_OBJECT] = True
 
         # for compatibility
         # crash almost equals to crashing with vehicles
-        done_info["crash"] = done_info["crash_vehicle"] or done_info["crash_object"]
+        done_info[TerminationState.CRASH
+                  ] = done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
         return done, done_info
 
     def cost_function(self, vehicle_id: str):

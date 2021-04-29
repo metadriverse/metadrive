@@ -1,3 +1,4 @@
+from pgdrive.constants import TerminationState
 from pgdrive.envs.pgdrive_env import PGDriveEnv
 from pgdrive.utils import PGConfig
 from pgdrive.utils.math_utils import clip
@@ -23,9 +24,9 @@ class SafePGDriveEnv(PGDriveEnv):
 
     def done_function(self, vehicle_id: str):
         done, done_info = super(SafePGDriveEnv, self).done_function(vehicle_id)
-        if done_info["crash_vehicle"]:
+        if done_info[TerminationState.CRASH_VEHICLE]:
             done = False
-        elif done_info["crash_object"]:
+        elif done_info[TerminationState.CRASH_OBJECT]:
             done = False
         return done, done_info
 

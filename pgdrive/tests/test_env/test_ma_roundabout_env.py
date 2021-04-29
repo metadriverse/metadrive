@@ -4,6 +4,7 @@ import numpy as np
 from gym.spaces import Box, Dict
 from pgdrive.envs.marl_envs.marl_inout_roundabout import MultiAgentRoundaboutEnv
 from pgdrive.utils import distance_greater, norm
+from pgdrive.constants import TerminationState
 
 
 def _check_spaces_before_reset(env):
@@ -134,13 +135,13 @@ def test_ma_roundabout_horizon():
                     if rrr == -777:
                         assert d[kkk]
                         assert i[kkk]["cost"] == 778
-                        assert i[kkk]["out_of_road"]
+                        assert i[kkk][TerminationState.OUT_OF_ROAD]
 
                 for kkk, iii in i.items():
-                    if iii and (iii["out_of_road"] or iii["cost"] == 778):
+                    if iii and (iii[TerminationState.OUT_OF_ROAD] or iii["cost"] == 778):
                         assert d[kkk]
                         assert i[kkk]["cost"] == 778
-                        assert i[kkk]["out_of_road"]
+                        assert i[kkk][TerminationState.OUT_OF_ROAD]
                         assert r[kkk] == -777
 
                 if d["__all__"]:
@@ -220,13 +221,13 @@ def test_ma_roundabout_reset():
                     assert len(v.routing_localization.checkpoints) > 2
 
                 for kkk, iii in i.items():
-                    if iii and iii["arrive_dest"]:
+                    if iii and iii[TerminationState.SUCCESS]:
                         # print("{} success!".format(kkk))
                         success_count += 1
 
                 for kkk, ddd in d.items():
                     if ddd and kkk != "__all__":
-                        assert i[kkk]["arrive_dest"]
+                        assert i[kkk][TerminationState.SUCCESS]
                         agent_count += 1
 
                 for kkk, rrr in r.items():
@@ -285,12 +286,12 @@ def test_ma_roundabout_reward_done_alignment():
                 for kkk, ddd in d.items():
                     if ddd and kkk != "__all__":
                         assert r[kkk] == -777
-                        assert i[kkk]["out_of_road"]
+                        assert i[kkk][TerminationState.OUT_OF_ROAD]
                         # print('{} done passed!'.format(kkk))
                 for kkk, rrr in r.items():
                     if rrr == -777:
                         assert d[kkk]
-                        assert i[kkk]["out_of_road"]
+                        assert i[kkk][TerminationState.OUT_OF_ROAD]
                         # print('{} reward passed!'.format(kkk))
                 if d["__all__"]:
                     env.reset()
@@ -334,22 +335,22 @@ def test_ma_roundabout_reward_done_alignment():
 
             for kkk in ['agent0', 'agent1']:
                 iii = i[kkk]
-                assert iii["crash_vehicle"]
-                assert iii["crash"]
+                assert iii[TerminationState.CRASH_VEHICLE]
+                assert iii[TerminationState.CRASH]
                 assert r[kkk] == -1.7777
                 # for kkk, ddd in d.items():
                 ddd = d[kkk]
                 if ddd and kkk != "__all__":
                     assert r[kkk] == -1.7777
-                    assert i[kkk]["crash_vehicle"]
-                    assert i[kkk]["crash"]
+                    assert i[kkk][TerminationState.CRASH_VEHICLE]
+                    assert i[kkk][TerminationState.CRASH]
                     # print('{} done passed!'.format(kkk))
                 # for kkk, rrr in r.items():
                 rrr = r[kkk]
                 if rrr == -1.7777:
                     assert d[kkk]
-                    assert i[kkk]["crash_vehicle"]
-                    assert i[kkk]["crash"]
+                    assert i[kkk][TerminationState.CRASH_VEHICLE]
+                    assert i[kkk][TerminationState.CRASH]
                     # print('{} reward passed!'.format(kkk))
             # assert d["__all__"]
             # if d["__all__"]:
@@ -390,20 +391,20 @@ def test_ma_roundabout_reward_done_alignment():
             act = {k: [0, 1] for k in env.vehicles.keys()}
             o, r, d, i = _act(env, act)
             for kkk, iii in i.items():
-                if iii["crash"]:
-                    assert iii["crash_vehicle"]
-                if iii["crash_vehicle"]:
-                    assert iii["crash"]
+                if iii[TerminationState.CRASH]:
+                    assert iii[TerminationState.CRASH_VEHICLE]
+                if iii[TerminationState.CRASH_VEHICLE]:
+                    assert iii[TerminationState.CRASH]
                     assert r[kkk] == -1.7777
             for kkk, ddd in d.items():
                 if ddd and kkk != "__all__":
-                    assert i[kkk]["out_of_road"]
+                    assert i[kkk][TerminationState.OUT_OF_ROAD]
                     # print('{} done passed!'.format(kkk))
             for kkk, rrr in r.items():
                 if rrr == -1.7777:
                     # assert d[kkk]
-                    assert i[kkk]["crash_vehicle"]
-                    assert i[kkk]["crash"]
+                    assert i[kkk][TerminationState.CRASH_VEHICLE]
+                    assert i[kkk][TerminationState.CRASH]
                     # print('{} reward passed!'.format(kkk))
             if d["agent0"]:
                 break
@@ -435,12 +436,12 @@ def test_ma_roundabout_reward_done_alignment():
                 break
             kkk = "agent0"
             assert r[kkk] == 999
-            assert i[kkk]["arrive_dest"]
+            assert i[kkk][TerminationState.SUCCESS]
             assert d[kkk]
 
             kkk = "agent1"
             assert r[kkk] != 999
-            assert not i[kkk]["arrive_dest"]
+            assert not i[kkk][TerminationState.SUCCESS]
             assert not d[kkk]
             break
     finally:
@@ -598,10 +599,10 @@ def test_ma_roundabout_horizon_termination():
                         print("Current: ", step)
                         continue
                     if ddd and kkk not in special_agents:
-                        assert i[kkk]["max_step"]
-                        assert not i[kkk]["out_of_road"]
-                        assert not i[kkk]["crash"]
-                        assert not i[kkk]["crash_vehicle"]
+                        assert i[kkk][TerminationState.MAX_STEP]
+                        assert not i[kkk][TerminationState.OUT_OF_ROAD]
+                        assert not i[kkk][TerminationState.CRASH]
+                        assert not i[kkk][TerminationState.CRASH_VEHICLE]
                         should_respawn.add(kkk)
 
                 if d["__all__"]:

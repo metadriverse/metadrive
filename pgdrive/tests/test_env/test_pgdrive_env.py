@@ -4,6 +4,7 @@ import os
 import numpy as np
 import pytest
 from pgdrive import PGDriveEnv
+from pgdrive.constants import TerminationState
 from pgdrive.scene_creator.vehicle_module.PID_controller import PIDController, Target
 
 # Key: case name, value: environmental config
@@ -34,7 +35,8 @@ blackbox_test_configs = dict(
 pid_control_config = dict(environment_num=1, start_seed=5, map="CrXROSTR", traffic_density=0.0, use_render=False)
 
 info_keys = [
-    "cost", "velocity", "steering", "acceleration", "step_reward", "crash_vehicle", "out_of_road", "arrive_dest"
+    "cost", "velocity", "steering", "acceleration", "step_reward", TerminationState.CRASH_VEHICLE,
+    TerminationState.OUT_OF_ROAD, TerminationState.SUCCESS
 ]
 
 assert "__init__.py" not in os.listdir(os.path.dirname(__file__)), "Please remove __init__.py in tests directory."
@@ -94,7 +96,7 @@ def test_zombie():
             acc = acc_controller.get_result(acc_error)
             if d:
                 # We assert the vehicle should arrive the middle lane in the final block.
-                assert info["arrive_dest"]
+                assert info[TerminationState.SUCCESS]
                 assert len(env.current_map.blocks[-1].positive_lanes) == 3
                 middle_lane = env.vehicle.routing_localization.final_road.get_lanes(env.current_map.road_network)[1]
 

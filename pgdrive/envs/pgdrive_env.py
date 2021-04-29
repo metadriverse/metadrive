@@ -6,7 +6,7 @@ import sys
 from typing import Union, Dict, AnyStr, Optional, Tuple
 
 import numpy as np
-from pgdrive.constants import DEFAULT_AGENT
+from pgdrive.constants import DEFAULT_AGENT, TerminationState
 from pgdrive.envs.base_env import BasePGDriveEnv
 from pgdrive.obs import LidarStateObservation, ImageStateObservation
 from pgdrive.scene_creator.blocks.first_block import FirstBlock
@@ -291,22 +291,23 @@ class PGDriveEnv(BasePGDriveEnv):
         if vehicle.arrive_destination:
             done = True
             logging.info("Episode ended! Reason: arrive_dest.")
-            done_info["arrive_dest"] = True
+            done_info[TerminationState.SUCCESS] = True
         elif vehicle.crash_vehicle:
             done = True
             logging.info("Episode ended! Reason: crash. ")
-            done_info["crash_vehicle"] = True
+            done_info[TerminationState.CRASH_VEHICLE] = True
         elif vehicle.out_of_route or not vehicle.on_lane or vehicle.crash_sidewalk:
             done = True
             logging.info("Episode ended! Reason: out_of_road.")
-            done_info["out_of_road"] = True
+            done_info[TerminationState.OUT_OF_ROAD] = True
         elif vehicle.crash_object:
             done = True
-            done_info["crash_object"] = True
+            done_info[TerminationState.CRASH_OBJECT] = True
 
         # for compatibility
         # crash almost equals to crashing with vehicles
-        done_info["crash"] = done_info["crash_vehicle"] or done_info["crash_object"]
+        done_info[TerminationState.CRASH
+                  ] = done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
         return done, done_info
 
     def cost_function(self, vehicle_id: str):
@@ -602,7 +603,7 @@ class PGDriveEnv(BasePGDriveEnv):
 
 
 def _auto_termination(vehicle, should_done):
-    return {"max_step": True if should_done else False}
+    return {TerminationState.MAX_STEP: True if should_done else False}
 
 
 if __name__ == '__main__':

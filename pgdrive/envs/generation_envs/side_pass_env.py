@@ -1,4 +1,5 @@
 from pgdrive import PGDriveEnv
+from pgdrive.constants import TerminationState
 from pgdrive.scene_creator.vehicle.traffic_vehicle_type import LVehicle
 
 
@@ -150,7 +151,7 @@ if __name__ == "__main__":
     total_cost = 0
     for i in range(1, 100000):
         o, r, d, info = env.step([0, 1])
-        total_cost += 1 if info["crash_object"] else 0
+        total_cost += 1 if info[TerminationState.CRASH_OBJECT] else 0
         env.render(text={"cost": total_cost})
         if d:
             # total_cost = 0
