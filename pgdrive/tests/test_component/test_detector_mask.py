@@ -143,7 +143,7 @@ def test_detector_mask_in_lidar():
 
             mask_ratio = env.scene_manager.detector_mask.get_mask_ratio()
             print("Mask ratio: ", mask_ratio)
-            print("We have: {} vehicles!".format(env.scene_manager.traffic_mgr.get_vehicle_num()))
+            print("We have: {} vehicles!".format(env.scene_manager.traffic_manager.get_vehicle_num()))
 
             v = env.vehicle
             v.lidar.perceive(
@@ -158,7 +158,7 @@ def test_detector_mask_in_lidar():
             position_dict = {}
             heading_dict = {}
             is_target_vehicle_dict = {}
-            for v in env.scene_manager.traffic_mgr.vehicles:
+            for v in env.scene_manager.traffic_manager.vehicles:
                 position_dict[v.name] = v.position
                 heading_dict[v.name] = v.heading_theta
                 is_target_vehicle_dict[v.name] = True if isinstance(v, BaseVehicle) else False

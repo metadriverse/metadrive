@@ -636,7 +636,7 @@ def test_ma_roundabout_40_agent_reset_after_respawn():
             env.reset()
             check_pos(list(env.vehicles.values()))
             for v_id in list(env.vehicles.keys())[:20]:
-                env._agent_manager.finish(v_id)
+                env.agent_manager.finish(v_id)
             env.step({k: [1, 1] for k in env.vehicles.keys()})
             env.step({k: [1, 1] for k in env.vehicles.keys()})
             env.step({k: [1, 1] for k in env.vehicles.keys()})

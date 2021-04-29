@@ -225,13 +225,14 @@ class AgentManager:
         return True if object_name in self.__active_objects.keys() else False
 
     @property
-    def active_objects(self):
+    def active_agents(self):
         """
         Return Map<agent_id, BaseVehicle>
         """
         return {self.__object_to_agent[k]: v for k, v in self.__active_objects.items()}
 
-    def meta_active_objects(self):
+    @property
+    def active_objects(self):
         """
         Return meta-data, a pointer, Caution !
         :return: Map<obj_name, obj>
@@ -246,6 +247,20 @@ class AgentManager:
         ret = {self.__object_to_agent[k]: v for k, v in self.__pending_objects.items()}
         ret.update({self.__object_to_agent[k]: v for k, (v, _) in self.__dying_objects.items()})
         return ret
+
+    def get_agent(self, agent_name):
+        object_name = self.__agent_to_object[agent_name]
+        return self.get_object(object_name)
+
+    def get_object(self, object_name):
+        if object_name in self.__active_objects:
+            return self.__active_objects[object_name]
+        elif object_name in self.__pending_objects:
+            return self.__pending_objects[object_name]
+        elif object_name in self.__dying_objects:
+            return self.__dying_objects[object_name]
+        else:
+            raise ValueError("Object {} not found!".format(object_name))
 
     def object_to_agent(self, obj_name):
         """
@@ -294,3 +309,13 @@ class AgentManager:
     @property
     def allow_respawn(self):
         return self.has_pending_objects() and self._allow_respawn
+
+    def for_each_active_agents(self, func, *args, **kwargs):
+        """
+        This func is a function that take each vehicle as the first argument and *arg and **kwargs as others.
+        """
+        assert len(self.active_agents) > 0, "Not enough vehicles exist!"
+        ret = dict()
+        for k, v in self.active_agents.items():
+            ret[k] = func(v, *args, **kwargs)
+        return ret

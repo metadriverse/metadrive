@@ -100,7 +100,7 @@ class MinimalObservation(LidarStateObservation):
 
     def overwritten_get_surrounding_vehicles_info(self, lidar, ego_vehicle, num_others: int = 4):
         # surrounding_vehicles = list(lidar.get_surrounding_vehicles())
-        surrounding_vehicles = list(self._env.scene_manager.traffic_mgr.vehicles)[1:]
+        surrounding_vehicles = list(self._env.scene_manager.traffic_manager.vehicles)[1:]
         surrounding_vehicles.sort(
             key=lambda v: norm(ego_vehicle.position[0] - v.position[0], ego_vehicle.position[1] - v.position[1])
         )

@@ -72,7 +72,7 @@ if __name__ == "__main__":
         o, r, d, info = env.step([0, 1])
         env.render(
             # text={
-            #     "vehicle_num": len(env.scene_manager.traffic_mgr.traffic_vehicles),
+            #     "vehicle_num": len(env.scene_manager.traffic_manager.traffic_vehicles),
             #     "dist_to_left:": env.vehicle.dist_to_left,
             #     "dist_to_right:": env.vehicle.dist_to_right,
             #     "env_seed": env.current_map.random_seed

@@ -162,7 +162,7 @@ class TopDownObservation(ObservationType):
         VehicleGraphics.display(
             vehicle=vehicle, surface=self.canvas_runtime, heading=ego_heading, color=VehicleGraphics.GREEN
         )
-        for v in self.scene_manager.traffic_mgr.vehicles:
+        for v in self.scene_manager.traffic_manager.vehicles:
             if v is vehicle:
                 continue
             h = v.heading
