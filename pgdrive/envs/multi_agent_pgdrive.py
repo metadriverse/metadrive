@@ -98,6 +98,7 @@ class MultiAgentPGDrive(PGDriveEnvV2):
             num_agents=ret_config["num_agents"],
             vehicle_config=ret_config["vehicle_config"],
             target_vehicle_configs=ret_config["target_vehicle_configs"],
+            seed=self._DEBUG_RANDOM_SEED
         )
 
         self._spawn_manager.set_spawn_roads(self.spawn_roads)

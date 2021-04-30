@@ -1,20 +1,17 @@
 import copy
-from pgdrive.utils import PGConfig
-from pgdrive.scene_creator.vehicle.base_vehicle import BaseVehicle
-from pgdrive.scene_creator.lane.straight_lane import StraightLane
 from math import floor
 
 import numpy as np
 from panda3d.bullet import BulletBoxShape, BulletGhostNode
-from panda3d.core import TransformState
 from panda3d.core import Vec3, BitMask32
 
 from pgdrive.constants import CollisionGroup
 from pgdrive.scene_creator.blocks.first_block import FirstBlock
-from pgdrive.utils import get_np_random
+from pgdrive.scene_creator.lane.straight_lane import StraightLane
+from pgdrive.utils import PGConfig, get_np_random
 from pgdrive.utils.coordinates_shift import panda_position, panda_heading
-from pgdrive.world.pg_world import PGWorld
 from pgdrive.utils.scene_utils import rect_region_detection
+from pgdrive.world.pg_world import PGWorld
 
 
 class SpawnManager:
@@ -26,9 +23,14 @@ class SpawnManager:
     RESPAWN_REGION_LONGITUDE = 8.
     RESPAWN_REGION_LATERAL = 3.
 
-    def __init__(self, exit_length, lane_num, num_agents, vehicle_config, target_vehicle_configs=None):
+    def __init__(self, exit_length, lane_num, num_agents, vehicle_config, target_vehicle_configs=None, seed=None):
         self.num_agents = num_agents
         self.exit_length = (exit_length - FirstBlock.ENTRANCE_LENGTH)
+        assert self.exit_length >= self.RESPAWN_REGION_LONGITUDE, (
+            "The exist length {} should greater than minimal longitude interval {}.".format(
+                self.exit_length, self.RESPAWN_REGION_LONGITUDE
+            )
+        )
         self.lane_num = lane_num
         self.vehicle_config = vehicle_config
         self.spawn_roads = []
@@ -43,6 +45,7 @@ class SpawnManager:
         self.custom_target_vehicle_config = True if target_vehicle_configs is not None and len(
             target_vehicle_configs
         ) > 0 else False
+        self._seed = seed
 
         if self.num_agents is None:
             assert not self.target_vehicle_configs, (
@@ -86,6 +89,9 @@ class SpawnManager:
         assert len(spawn_roads) > 0
         interval = self.RESPAWN_REGION_LONGITUDE
         num_slots = int(floor(self.exit_length / interval))
+        assert num_slots > 0, "The exist length {} should greater than minimal longitude interval {}.".format(
+            self.exit_length, interval
+        )
         interval = self.exit_length / num_slots
         self._longitude_spawn_interval = interval
         if self.num_agents is not None:
@@ -211,6 +217,6 @@ class SpawnManager:
         vehicle_config = copy.deepcopy(target_vehicle_config)
         long = self.RESPAWN_REGION_LONGITUDE - self.vehicle_length
         lat = self.RESPAWN_REGION_LATERAL - self.vehicle_width
-        vehicle_config["spawn_longitude"] += get_np_random().uniform(-long / 2, long / 2)
-        vehicle_config["spawn_lateral"] += get_np_random().uniform(-lat / 2, lat / 2)
+        vehicle_config["spawn_longitude"] += get_np_random(self._seed).uniform(-long / 2, long / 2)
+        vehicle_config["spawn_lateral"] += get_np_random(self._seed).uniform(-lat / 2, lat / 2)
         return vehicle_config

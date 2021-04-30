@@ -37,6 +37,7 @@ class AgentManager:
         self.action_spaces = {}
 
         self.next_agent_count = 0
+        self.next_newly_added_agent_count = -1
         self._allow_respawn = True if not never_allow_respawn else False
         self.never_allow_respawn = never_allow_respawn
         self._debug = debug
@@ -122,8 +123,6 @@ class AgentManager:
 
         # free them in physics world
         vehicles = self.get_vehicle_list()
-        for v in vehicles:
-            v.set_static(False)
         assert len(vehicles) == len(self.observations) == len(self.observation_spaces) == len(self.action_spaces)
 
         self._active_objects.clear()
@@ -135,14 +134,19 @@ class AgentManager:
                 self._active_objects[v.name] = v
                 self._agent_to_object[self._init_object_to_agent[v.name]] = v.name
                 self._object_to_agent[v.name] = self._init_object_to_agent[v.name]
+                v.set_static(False)
             elif v.name in self._newly_added_object_to_agent:
+                agent_name = self._newly_added_object_to_agent[v.name]
                 self._pending_objects[v.name] = v
-                self._agent_to_object[self._newly_added_object_to_agent[v.name]] = v.name
-                self._object_to_agent[v.name] = self._newly_added_object_to_agent[v.name]
+                self._agent_to_object[agent_name] = v.name
+                self._object_to_agent[v.name] = agent_name
+                v.set_static(True)
             else:
                 raise ValueError()
 
         self.next_agent_count = len(vehicles)
+        # Note: We don't reset next_newly_added_agent_count here! Since it is always counting!
+
         self._allow_respawn = True if not self.never_allow_respawn else False
 
     def finish(self, agent_name, ignore_delay_done=False):
@@ -183,7 +187,8 @@ class AgentManager:
         vehicle.set_static(False)
         self._active_objects[vehicle.name] = vehicle
         self._object_to_agent[vehicle.name] = new_agent_id
-        self._agent_to_object.pop(dead_vehicle_id)
+        if dead_vehicle_id in self._agent_to_object:  # dead_vehicle_id might not in self._agent_to_object
+            self._agent_to_object.pop(dead_vehicle_id)
         self._agent_to_object[new_agent_id] = vehicle.name
         self.next_agent_count += 1
         self._check()
@@ -191,8 +196,11 @@ class AgentManager:
         return new_agent_id, vehicle
 
     def _add_new_vehicle(self):
-        agent_name = self.next_agent_id()
-        new_v = self._get_vehicles({agent_name: self._init_config_dict["agent0"]})[agent_name]
+        agent_name = "newly_added{}".format(self.next_newly_added_agent_count)
+        next_config = self._init_config_dict["agent{}".format(
+            ((-self.next_newly_added_agent_count - 1) % len(self._init_object_to_agent))
+        )]
+        new_v = self._get_vehicles({agent_name: next_config})[agent_name]
         new_v_name = new_v.name
         self._newly_added_object_to_agent[new_v_name] = agent_name
         self._agent_to_object[agent_name] = new_v_name
@@ -201,6 +209,7 @@ class AgentManager:
         self.observations[new_v_name] = self._init_observations["agent0"]
         self.observation_spaces[new_v_name] = self._init_observation_spaces["agent0"]
         self.action_spaces[new_v_name] = self._init_action_spaces["agent0"]
+        self.next_newly_added_agent_count += 1
 
     def next_agent_id(self):
         return "agent{}".format(self.next_agent_count)
@@ -287,7 +296,7 @@ class AgentManager:
         return ret
 
     def get_agent(self, agent_name):
-        object_name = self._agent_to_object[agent_name]
+        object_name = self.agent_to_object(agent_name)
         return self.get_object(object_name)
 
     def get_object(self, object_name):

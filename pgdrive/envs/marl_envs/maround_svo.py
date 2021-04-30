@@ -33,7 +33,7 @@ class MARoundSVO(MARound):
             dict(
                 # Number of near vehicles that participates in reward computing
                 num_neighbours=-1,  # Deprecated
-                neighbours_distance=0,
+                neighbours_distance=10,
 
                 # Two mode to compute utility for each vehicle:
                 # "linear": util = r_me * svo + r_other * (1 - svo), svo in [0, 1]
