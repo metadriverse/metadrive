@@ -415,7 +415,8 @@ class PGDriveEnv(BasePGDriveEnv):
             self.current_seed = self._pending_force_seed
             self._pending_force_seed = None
         else:
-            self.current_seed = get_np_random().randint(self.start_seed, self.start_seed + self.env_num)
+            self.current_seed = get_np_random(self._DEBUG_RANDOM_SEED
+                                              ).randint(self.start_seed, self.start_seed + self.env_num)
 
         if self.maps.get(self.current_seed, None) is None:
 
