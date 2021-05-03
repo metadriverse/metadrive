@@ -33,7 +33,7 @@ class Merge(Bottleneck):
     def _try_plug_into_previous_block(self) -> bool:
         no_cross = True
         parameters = self.get_config()
-        lane_num_changed = parameters[Parameter.lane_num] + 1
+        lane_num_changed = parameters[Parameter.lane_num]
 
         start_ndoe = self.pre_block_socket.positive_road.end_node
         straight_lane_num = int(self.positive_lane_num - lane_num_changed)
@@ -167,7 +167,7 @@ class Split(Bottleneck):
     def _try_plug_into_previous_block(self) -> bool:
         no_cross = True
         parameters = self.get_config()
-        lane_num_changed = parameters[Parameter.lane_num] + 1
+        lane_num_changed = parameters[Parameter.lane_num]
 
         start_ndoe = self.pre_block_socket.positive_road.end_node
         straight_lane_num = self.positive_lane_num

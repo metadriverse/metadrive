@@ -55,8 +55,8 @@ if __name__ == "__main__":
         info["fuel"] = env.vehicle.energy_consumption
         env.render(
             text={
-                "left": env.vehicle.dist_to_left,
-                "right": env.vehicle.dist_to_right,
+                "left": env.vehicle.dist_to_left_side,
+                "right": env.vehicle.dist_to_right_side,
                 "white_lane_line": env.vehicle.on_white_continuous_line
             }
         )
