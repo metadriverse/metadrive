@@ -61,8 +61,8 @@ class TrafficManager(RandomEngine):
         logging.debug("load scene {}, {}".format(map.random_seed, "Use random traffic" if self.random_traffic else ""))
         self.update_random_seed(map.random_seed if not self.random_traffic else None)
 
-        # clear traffic in last episdoe
-        self._clear_traffic(pg_world)
+        # clear traffic in last episdoe, they are cleared in reset() func!
+        # self._clear_traffic(pg_world)
 
         # self.controllable_vehicles = controllable_vehicles if len(controllable_vehicles) > 1 else None
         # update global info
