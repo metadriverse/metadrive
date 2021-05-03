@@ -75,13 +75,17 @@ class RoutingLocalizationModule:
             self._goal_node_path.show(CamMask.MainCam)
         logging.debug("Load Vehicle Module: {}".format(self.__class__.__name__))
 
-    def update(self, map: Map, start_road_node=None, final_road_node=None, random_seed=False):
+    def update(self, map: Map, current_lane_index, final_road_node=None, random_seed=False):
+        start_road_node = current_lane_index[0]
         self.map = map
         if start_road_node is None:
             start_road_node = FirstBlock.NODE_1
         if final_road_node is None:
+            current_road_negative = Road(*current_lane_index[:-1]).is_negative_road()
             random_seed = random_seed if random_seed is not False else map.random_seed
-            sockets = map.blocks[-1].get_socket_list()
+            # choose first block when born on negative road
+            block = map.blocks[0] if current_road_negative else map.blocks[-1]
+            sockets = block.get_socket_list()
             while True:
                 socket = get_np_random(random_seed).choice(sockets)
                 if not socket.is_socket_node(start_road_node):
@@ -90,7 +94,8 @@ class RoutingLocalizationModule:
                     sockets.remove(socket)
                     if len(sockets) == 0:
                         raise ValueError("Can not set a destination!")
-            final_road_node = socket.positive_road.end_node
+            # choose negative road end node when current road is negative road
+            final_road_node = socket.negative_road.end_node if current_road_negative else socket.positive_road.end_node
         self.set_route(start_road_node, final_road_node)
 
     def set_route(self, start_road_node: str, end_road_node: str):

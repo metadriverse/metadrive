@@ -211,7 +211,7 @@ class PGDriveEnv(BasePGDriveEnv):
             -> Tuple[Union[np.ndarray, Dict[AnyStr, np.ndarray]], Dict]:
         self.agent_manager.prepare_step()
         if self.config["manual_control"] and self.config["use_render"] \
-                and self.current_track_vehicle in self.agent_manager.get_vehicle_list():
+                and self.current_track_vehicle in self.agent_manager.get_vehicle_list() and not self.main_camera.is_bird_view_camera(self.pg_world):
             action = self.controller.process_input()
             if self.is_multi_agent:
                 actions[self.agent_manager.object_to_agent(self.current_track_vehicle.name)] = action

@@ -6,7 +6,7 @@ import numpy as np
 from pgdrive.utils import get_np_random
 
 PGBoxSpace = namedtuple("PGBoxSpace", "max min")
-PGDiscreteSpace = namedtuple("PGDiscreteSpace", "number")
+PGDiscreteSpace = namedtuple("PGDiscreteSpace", "max min")
 PGConstantSpace = namedtuple("PGConstantSpace", "value")
 """
 This filed is mostly copied from gym==0.17.2
@@ -164,7 +164,7 @@ class PGSpace(Dict):
             if isinstance(value, PGBoxSpace):
                 ret[key] = Box(low=value.min, high=value.max, shape=(1, ))
             elif isinstance(value, PGDiscreteSpace):
-                ret[key] = Discrete(value.number)
+                ret[key] = Box(low=value.min, high=value.max, shape=(1, ), dtype=np.int64)
             elif isinstance(value, PGConstantSpace):
                 ret[key] = Box(low=value.value, high=value.value, shape=(1, ))
             else:
@@ -250,12 +250,12 @@ class BlockParameterSpace:
         Parameter.length: PGBoxSpace(min=40.0, max=80.0),
         Parameter.radius: PGBoxSpace(min=25.0, max=60.0),
         Parameter.angle: PGBoxSpace(min=45, max=135),
-        Parameter.dir: PGDiscreteSpace(2)
+        Parameter.dir: PGDiscreteSpace(min=0, max=1)
     }
     INTERSECTION = {
         Parameter.radius: PGConstantSpace(10),
-        Parameter.change_lane_num: PGDiscreteSpace(number=2),  # 0, 1
-        Parameter.decrease_increase: PGDiscreteSpace(number=2)  # 0, decrease, 1 increase
+        Parameter.change_lane_num: PGDiscreteSpace(min=0, max=1),  # 0, 1
+        Parameter.decrease_increase: PGDiscreteSpace(min=0, max=1)  # 0, decrease, 1 increase
     }
     ROUNDABOUT = {
         # The radius of the
@@ -265,20 +265,20 @@ class BlockParameterSpace:
     }
     T_INTERSECTION = {
         Parameter.radius: PGConstantSpace(10),
-        Parameter.t_intersection_type: PGDiscreteSpace(number=3),  # 3 different t type for previous socket
-        Parameter.change_lane_num: PGDiscreteSpace(2),  # 0,1
-        Parameter.decrease_increase: PGDiscreteSpace(2)  # 0, decrease, 1 increase
+        Parameter.t_intersection_type: PGDiscreteSpace(min=0, max=2),  # 3 different t type for previous socket
+        Parameter.change_lane_num: PGDiscreteSpace(min=0, max=1),  # 0,1
+        Parameter.decrease_increase: PGDiscreteSpace(min=0, max=1)  # 0, decrease, 1 increase
     }
     RAMP_PARAMETER = {
         Parameter.length: PGBoxSpace(min=20, max=40)  # accelerate/decelerate part length
     }
     FORK_PARAMETER = {
         Parameter.length: PGBoxSpace(min=20, max=40),  # accelerate/decelerate part length
-        Parameter.lane_num: PGDiscreteSpace(2)
+        Parameter.lane_num: PGDiscreteSpace(min=0, max=1)
     }
     BOTTLENECK_PARAMETER = {
         Parameter.length: PGBoxSpace(min=20, max=50),  # the length of straigh part
-        Parameter.lane_num: PGDiscreteSpace(2),  # the lane num increased or descreased now fix to 1
+        Parameter.lane_num: PGDiscreteSpace(min=1, max=2),  # the lane num increased or descreased now 1-2
     }
 
 
@@ -460,7 +460,7 @@ if __name__ == "__main__":
     config = {
         "length": PGBoxSpace(min=10.0, max=80.0),
         "angle": PGBoxSpace(min=50.0, max=360.0),
-        "goal": PGDiscreteSpace(number=3)
+        "goal": PGDiscreteSpace(min=0, max=2)
     }
     config = PGSpace(config)
     print(config.sample())
