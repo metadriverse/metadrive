@@ -139,7 +139,6 @@ class ObjectManager(RandomEngine):
 
         alert = self.spawn_one_object("Traffic Triangle", lane, lane_index, longitude - self.ALERT_DIST, 0)
         alert.attach_to_pg_world(pg_world.pbr_worldNP, pg_world.physics_world)
-        scene_manager.traffic_manager.vehicles.append(alert)
 
     def prohibit_scene(
         self,
@@ -179,7 +178,6 @@ class ObjectManager(RandomEngine):
             cone = self.spawn_one_object("Traffic Cone", lane, lane_index, *p_)
             cone.attach_to_pg_world(pg_world.pbr_worldNP, pg_world.physics_world)
             # TODO refactor traffic and traffic system to make it compatible
-            scene_manager.traffic_manager.vehicles.append(cone)
 
     def destroy(self, pg_world: PGWorld):
         self._clear_objects(pg_world)

@@ -48,7 +48,7 @@ class SceneManager:
         self.detector_mask = None
 
     def _get_traffic_manager(self, traffic_config):
-        return TrafficManager(traffic_config["traffic_mode"], traffic_config["random_traffic"])
+        return TrafficManager(self, traffic_config["traffic_mode"], traffic_config["random_traffic"])
 
     def _get_object_manager(self, object_config=None):
         return ObjectManager()
@@ -60,7 +60,7 @@ class SceneManager:
         pg_world = self.pg_world
         self.map = map
 
-        self.traffic_manager.reset(pg_world, map, self.agent_manager.get_vehicle_list(), traffic_density)
+        self.traffic_manager.reset(pg_world, map, traffic_density)
         self.object_manager.reset(pg_world, map, accident_prob)
         if self.detector_mask is not None:
             self.detector_mask.clear()
@@ -74,12 +74,7 @@ class SceneManager:
 
         if episode_data is None:
             self.object_manager.generate(self, pg_world)
-            self.traffic_manager.generate(
-                pg_world=pg_world,
-                map=self.map,
-                target_vehicles=self.agent_manager.active_objects,
-                traffic_density=traffic_density
-            )
+            self.traffic_manager.generate(pg_world=pg_world, map=self.map, traffic_density=traffic_density)
         else:
             self.replay_system = PGReplayer(self.traffic_manager, map, episode_data, pg_world)
             logging.warning("You are replaying episodes! Delete detector mask!")
@@ -106,7 +101,7 @@ class SceneManager:
             for k in self.agent_manager.active_agents.keys():
                 a = target_actions[k]
                 step_infos[k] = self.agent_manager.get_agent(k).prepare_step(a)
-            self.traffic_manager.prepare_step(self)
+            self.traffic_manager.prepare_step()
         return step_infos
 
     def step(self, step_num: int = 1) -> None:
@@ -138,7 +133,7 @@ class SceneManager:
             self.agent_manager.for_each_active_agents(lambda v: self.replay_system.replay_frame(v, self.pg_world))
             # self.replay_system.replay_frame(self.ego_vehicle, self.pg_world)
         else:
-            self.traffic_manager.update_state(self, self.pg_world)
+            self.traffic_manager.update_state()
 
         if self.record_system is not None:
             # didn't record while replay
@@ -170,13 +165,17 @@ class SceneManager:
         if self.detector_mask is not None:
             is_target_vehicle_dict = {
                 v_obj.name: self.agent_manager.is_active_object(v_obj.name)
-                for v_obj in self.get_interactive_objects()
+                for v_obj in self.get_interactive_objects() + self.traffic_manager.traffic_vehicles
             }
             self.detector_mask.update_mask(
-                position_dict={v_obj.name: v_obj.position
-                               for v_obj in self.get_interactive_objects()},
-                heading_dict={v_obj.name: v_obj.heading_theta
-                              for v_obj in self.get_interactive_objects()},
+                position_dict={
+                    v_obj.name: v_obj.position
+                    for v_obj in self.get_interactive_objects() + self.traffic_manager.traffic_vehicles
+                },
+                heading_dict={
+                    v_obj.name: v_obj.heading_theta
+                    for v_obj in self.get_interactive_objects() + self.traffic_manager.traffic_vehicles
+                },
                 is_target_vehicle_dict=is_target_vehicle_dict
             )
         step_infos = self.agent_manager.for_each_active_agents(

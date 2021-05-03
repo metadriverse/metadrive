@@ -30,7 +30,7 @@ class TestEnv(PGDriveEnv):
                 "fast": False,
                 "map_config": {
                     Map.GENERATE_TYPE: MapGenerateMethod.BIG_BLOCK_SEQUENCE,
-                    Map.GENERATE_CONFIG: "X",
+                    Map.GENERATE_CONFIG: "SXO",
                     Map.LANE_WIDTH: 3.5,
                     Map.LANE_NUM: 3,
                 },
@@ -51,10 +51,6 @@ if __name__ == "__main__":
     env = TestEnv()
 
     o = env.reset()
-    print(env.pg_world.physics_world.report_bodies())
-    print("vehicle num", len(env.scene_manager.traffic_manager.vehicles))
-    current_road = env.vehicle.routing_localization.current_road
-    env.vehicle.routing_localization.set_route(current_road.start_node, (-current_road).end_node)
     for i in range(1, 100000):
         o, r, d, info = env.step([1.0, 0.])
         info["fuel"] = env.vehicle.energy_consumption
