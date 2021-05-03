@@ -518,13 +518,14 @@ class PGDriveEnv(BasePGDriveEnv):
             return
         self.main_camera.reset()
         vehicles = list(self.agent_manager.active_agents.values())
-        if self.current_track_vehicle in vehicles:
-            vehicles.remove(self.current_track_vehicle)
-        if len(vehicles) == 0:
-            return
-        self.current_track_vehicle.remove_display_region()
-        new_v = get_np_random().choice(vehicles)
-        self.current_track_vehicle = new_v
+        if not self.main_camera.is_bird_view_camera(self.pg_world):
+            if self.current_track_vehicle in vehicles:
+                vehicles.remove(self.current_track_vehicle)
+            if len(vehicles) == 0:
+                return
+            self.current_track_vehicle.remove_display_region()
+            new_v = get_np_random().choice(vehicles)
+            self.current_track_vehicle = new_v
         self.current_track_vehicle.add_to_display()
         self.main_camera.track(self.current_track_vehicle, self.pg_world)
         return

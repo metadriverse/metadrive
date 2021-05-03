@@ -25,7 +25,7 @@ class TrafficMode:
 class TrafficManager(RandomEngine):
     VEHICLE_GAP = 10  # m
 
-    def __init__(self, traffic_mode: TrafficMode, random_traffic: bool):
+    def __init__(self, scene_manager, traffic_mode: TrafficMode, random_traffic: bool):
         """
         Control the whole traffic flow
         :param traffic_mode: Respawn mode or Trigger mode
@@ -33,11 +33,9 @@ class TrafficManager(RandomEngine):
         """
         # current map TODO maintain one map in scene_manager
         self.map = None
+        self._scene_mgr = scene_manager
 
-        # traffic vehicle list
-        self.target_vehicles = None  # This is dict!
-        self.vehicles = None
-        self.traffic_vehicles = None
+        self._traffic_vehicles = None
         self.block_triggered_vehicles = None
         self._spawned_vehicles = []  # auto-destroy
         self.is_target_vehicle_dict = {}
@@ -51,12 +49,11 @@ class TrafficManager(RandomEngine):
         # control randomness of traffic
         super(TrafficManager, self).__init__()
 
-    def generate(self, pg_world: PGWorld, map: Map, target_vehicles: Dict, traffic_density: float):
+    def generate(self, pg_world: PGWorld, map: Map, traffic_density: float):
         """
         Generate traffic on map, according to the mode and density
         :param pg_world: World
         :param map: The map class containing block list and road network
-        :param target_vehicles: vehicles for a multi-agent environment support
         :param traffic_density: Traffic density defined by: number of vehicles per meter
         :return: List of Traffic vehicles
         """
@@ -65,9 +62,8 @@ class TrafficManager(RandomEngine):
         self.update_random_seed(map.random_seed if not self.random_traffic else None)
 
         # clear traffic in last episdoe
-        # self._clear_traffic(pg_world)
+        self._clear_traffic(pg_world)
 
-        self.target_vehicles = target_vehicles
         # self.controllable_vehicles = controllable_vehicles if len(controllable_vehicles) > 1 else None
         # update global info
         self.map = map
@@ -75,17 +71,14 @@ class TrafficManager(RandomEngine):
 
         # update vehicle list
         self.block_triggered_vehicles = [] if self.mode != TrafficMode.Respawn else None
-        self.vehicles = list(self.target_vehicles.values())  # it is used to perform IDM and bicycle model based motion
         for v in self.vehicles:
             self.is_target_vehicle_dict[v.name] = True
 
-        self.traffic_vehicles = deque()  # it is used to step all vehicles on scene
-        self.spawned_vehicles = []
+        self._traffic_vehicles = deque()  # it is used to step all vehicles on scene
 
         traffic_density = self.density
         if abs(traffic_density - 0.0) < 1e-2:
             return
-        map = self.map
         self.respawn_lanes = None
         if self.mode == TrafficMode.Respawn:
             # add respawn vehicle
@@ -100,22 +93,22 @@ class TrafficManager(RandomEngine):
             raise ValueError("No such mode named {}".format(self.mode))
         logging.debug("Init {} Traffic Vehicles".format(len(self._spawned_vehicles)))
 
-    def prepare_step(self, scene_manager):
+    def prepare_step(self):
         """
         All traffic vehicles make driving decision here
-        :param scene_manager: access other elements in scene
-        :param pg_world: World
         :return: None
         """
+        # trigger vehicles
+        scene_manager = self._scene_mgr
         if self.mode != TrafficMode.Respawn:
-            for v in self.target_vehicles.values():
+            for v in scene_manager.agent_manager.active_objects.values():
                 ego_lane_idx = v.lane_index[:-1]
                 ego_road = Road(ego_lane_idx[0], ego_lane_idx[1])
                 if len(self.block_triggered_vehicles) > 0 and \
                         ego_road == self.block_triggered_vehicles[-1].trigger_road:
                     block_vehicles = self.block_triggered_vehicles.pop()
-                    self.traffic_vehicles += block_vehicles.vehicles
-        for v in self.traffic_vehicles:
+                    self._traffic_vehicles += block_vehicles.vehicles
+        for v in self._traffic_vehicles:
             v.prepare_step(scene_manager=scene_manager)
 
     def step(self, dt: float):
@@ -125,72 +118,61 @@ class TrafficManager(RandomEngine):
         :return: None
         """
         dt /= 3.6  # 1m/s = 3.6km/h
-        for v in self.traffic_vehicles:
+        for v in self._traffic_vehicles:
             v.step(dt)
 
-    def update_state(self, scene_manager, pg_world: PGWorld):
+    def update_state(self):
         """
         Update all traffic vehicles' states,
-        :param scene_manager: Access other entities in the scene to determine the new state
-        :param pg_world: World
         """
-
+        scene_manager = self._scene_mgr
+        pg_world = scene_manager.pg_world
         vehicles_to_remove = []
-        for v in self.traffic_vehicles:
+        for v in self._traffic_vehicles:
             if v.out_of_road:
                 remove = v.need_remove()
                 if remove:
                     vehicles_to_remove.append(v)
                 else:
-                    # TODO traffic system will be updated soon
-                    self.vehicles.remove(v.vehicle_node.kinematic_model)
                     v.reset()
-                    self.vehicles.append(v.vehicle_node.kinematic_model)
             else:
                 v.update_state(pg_world)
 
         # remove vehicles out of road
         for v in vehicles_to_remove:
-            self.traffic_vehicles.remove(v)
-            self.vehicles.remove(v.vehicle_node.kinematic_model)
-            v.destroy(pg_world)
+            self._traffic_vehicles.remove(v)
+            v.destroy(scene_manager.pg_world)
+            self._spawned_vehicles.remove(v)
 
             if self.mode == TrafficMode.Hybrid:
                 # create a new one
                 lane = self.np_random.choice(self.respawn_lanes)
                 vehicle_type = self.random_vehicle_type()
                 random_v = self.spawn_one_vehicle(vehicle_type, lane, self.np_random.rand() * lane.length / 2, True)
-                self.traffic_vehicles.append(random_v)
+                self._traffic_vehicles.append(random_v)
 
     def _clear_traffic(self, pg_world: PGWorld):
         if self._spawned_vehicles is not None:
             for v in self._spawned_vehicles:
                 v.destroy(pg_world)
+        self._spawned_vehicles = []
 
-    def reset(self, pg_world: PGWorld, map: Map, controllable_vehicles: List, traffic_density: float) -> None:
+    def reset(self, pg_world: PGWorld, map: Map, traffic_density: float) -> None:
         """
         Clear the scene and then reset the scene to empty
         :param pg_world: PGWorld class
         :param map: Map class containing road_network
-        :param controllable_vehicles: a list of controllable vehicles
         :param traffic_density: the density of traffic in this episode
         :return: None
         """
         self._clear_traffic(pg_world)
 
-        self.vehicles = []
         self.is_target_vehicle_dict.clear()
         self.block_triggered_vehicles = [] if self.mode != TrafficMode.Respawn else None
-        self.traffic_vehicles = deque()  # it is used to step all vehicles on scene
-        self._spawned_vehicles = []
+        self._traffic_vehicles = deque()  # it is used to step all vehicles on scene
 
         logging.debug("load scene {}, {}".format(map.random_seed, "Use random traffic" if self.random_traffic else ""))
         self.update_random_seed(map.random_seed if not self.random_traffic else None)
-
-        # single agent env
-        # self.ego_vehicle = controllable_vehicles[0] if len(controllable_vehicles) == 1 else None
-        # TODO multi-agent env support
-        # self.controllable_vehicles = controllable_vehicles if len(controllable_vehicles) > 1 else None
 
         # update global info
         self.map = map
@@ -205,7 +187,7 @@ class TrafficManager(RandomEngine):
         :return:
         """
         if self.mode == TrafficMode.Respawn:
-            return len(self.traffic_vehicles)
+            return len(self._traffic_vehicles)
         return sum(len(block_vehicle_set.vehicles) for block_vehicle_set in self.block_triggered_vehicles)
 
     def get_global_states(self) -> Dict:
@@ -214,7 +196,7 @@ class TrafficManager(RandomEngine):
         :return: States of all vehicles
         """
         states = dict()
-        for vehicle in self.traffic_vehicles:
+        for vehicle in self._traffic_vehicles:
             states[vehicle.index] = vehicle.get_state()
 
         # collect other vehicles
@@ -224,7 +206,7 @@ class TrafficManager(RandomEngine):
                     states[vehicle.index] = vehicle.get_state()
 
         # FIXME the global state system might be wrong!
-        states["ego"] = {k: v.get_state() for k, v in self.target_vehicles.items()}
+        states["ego"] = {k: v.get_state() for k, v in self._scene_mgr.agent_manager.active_agents.items()}
         # states["ego"] = self.ego_vehicle.get_state()
         return states
 
@@ -234,7 +216,7 @@ class TrafficManager(RandomEngine):
         :return: States of all vehicles
         """
         vehicles = dict()
-        for vehicle in self.traffic_vehicles:
+        for vehicle in self._traffic_vehicles:
             init_state = vehicle.get_state()
             init_state["index"] = vehicle.index
             init_state["type"] = vehicle.class_name
@@ -262,10 +244,9 @@ class TrafficManager(RandomEngine):
         :return: PGTrafficVehicle
         """
         random_v = vehicle_type.create_random_traffic_vehicle(
-            len(self.vehicles), self, lane, long, seed=self.random_seed, enable_respawn=enable_respawn
+            len(self._spawned_vehicles), self, lane, long, seed=self.random_seed, enable_respawn=enable_respawn
         )
         self._spawned_vehicles.append(random_v)
-        self.vehicles.append(random_v.vehicle_node.kinematic_model)
         return random_v
 
     def _create_vehicles_on_lane(self, traffic_density: float, lane: AbstractLane, is_respawn_lane):
@@ -278,7 +259,7 @@ class TrafficManager(RandomEngine):
         """
 
         from pgdrive.scene_creator.blocks.ramp import InRampOnStraight
-        traffic_vehicles = []
+        _traffic_vehicles = []
         total_num = int(lane.length / self.VEHICLE_GAP)
         vehicle_longs = [i * self.VEHICLE_GAP for i in range(total_num)]
         self.np_random.shuffle(vehicle_longs)
@@ -288,14 +269,14 @@ class TrafficManager(RandomEngine):
                 continue
             vehicle_type = self.random_vehicle_type()
             random_v = self.spawn_one_vehicle(vehicle_type, lane, long, is_respawn_lane)
-            traffic_vehicles.append(random_v)
-        return traffic_vehicles
+            _traffic_vehicles.append(random_v)
+        return _traffic_vehicles
 
     def _create_respawn_vehicles(self, pg_world: PGWorld, map: Map, traffic_density: float):
         respawn_lanes = self._get_available_respawn_lanes(map)
         for lane in respawn_lanes:
-            self.traffic_vehicles += self._create_vehicles_on_lane(traffic_density, lane, True)
-        for vehicle in self.traffic_vehicles:
+            self._traffic_vehicles += self._create_vehicles_on_lane(traffic_density, lane, True)
+        for vehicle in self._traffic_vehicles:
             vehicle.attach_to_pg_world(pg_world.pbr_worldNP, pg_world.physics_world)
 
     def _create_vehicles_once(self, pg_world: PGWorld, map: Map, traffic_density: float) -> None:
@@ -360,6 +341,7 @@ class TrafficManager(RandomEngine):
         :param see_behind: Whether find vehicles behind this IDM vehicle or not
         :return:
         """
+        raise DeprecationWarning("This func is Deprecated")
         vehicles = [
             v for v in self.vehicles
             if norm((v.position - vehicle.position)[0], (v.position - vehicle.position)[1]) < distance
@@ -420,9 +402,7 @@ class TrafficManager(RandomEngine):
         self.map = None
 
         # traffic vehicle list
-        self.target_vehicles = None
-        self.vehicles = None
-        self.traffic_vehicles = None
+        self._traffic_vehicles = None
         self.block_triggered_vehicles = None
 
         # traffic property
@@ -444,3 +424,12 @@ class TrafficManager(RandomEngine):
         if v.name in self.is_target_vehicle_dict and self.is_target_vehicle_dict[v.name]:
             return True
         return False
+
+    @property
+    def vehicles(self):
+        return list(self._scene_mgr.agent_manager.active_objects.values()) + \
+               [v.vehicle_node.kinematic_model for v in self._spawned_vehicles]
+
+    @property
+    def traffic_vehicles(self):
+        return list(self._traffic_vehicles)
