@@ -95,6 +95,7 @@ class TrafficTriangle(Object):
     """Placed behind the vehicle when it breaks down"""
 
     NAME = BodyName.Traffic_triangle
+    RADIUS = 0.5
 
     def __init__(self, lane, lane_index: LaneIndex, position: Sequence[float], heading: float = 0.):
         super(TrafficTriangle, self).__init__(lane, lane_index, position, heading)
