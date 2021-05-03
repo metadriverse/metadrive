@@ -108,8 +108,8 @@ class BaseVehicle(DynamicElement):
         self.last_current_action = deque([(0.0, 0.0), (0.0, 0.0)], maxlen=2)
         self.last_position = self.spawn_place
         self.last_heading_dir = self.heading
-        self.dist_to_left = None
-        self.dist_to_right = None
+        self.dist_to_left_side = None
+        self.dist_to_right_side = None
 
         # collision info render
         self.collision_info_np = self._init_collision_info_render(pg_world)
@@ -375,7 +375,7 @@ class BaseVehicle(DynamicElement):
     """---------------------------------------- vehicle info ----------------------------------------------"""
 
     def update_dist_to_left_right(self):
-        self.dist_to_left, self.dist_to_right = self._dist_to_route_left_right()
+        self.dist_to_left_side, self.dist_to_right_side = self._dist_to_route_left_right()
 
     def _dist_to_route_left_right(self):
         current_reference_lane = self.routing_localization.current_ref_lanes[0]
@@ -578,7 +578,7 @@ class BaseVehicle(DynamicElement):
         :return: None
         """
         lane, new_l_index = ray_localization(np.array(self.spawn_place), self.pg_world)
-        self.routing_localization.update(map, start_road_node=new_l_index[0])
+        self.routing_localization.update(map, current_lane_index=new_l_index)
         assert lane is not None, "spawn place is not on road!"
         self.lane_index = new_l_index
         self.lane = lane

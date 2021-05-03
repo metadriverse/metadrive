@@ -39,7 +39,7 @@ class MinimalObservation(LidarStateObservation):
     def vehicle_state(self, vehicle):
         # update out of road
         info = []
-        lateral_to_left, lateral_to_right, = vehicle.dist_to_left, vehicle.dist_to_right
+        lateral_to_left, lateral_to_right, = vehicle.dist_to_left_side, vehicle.dist_to_right_side
         total_width = float(
             (vehicle.routing_localization.get_current_lane_num() + 1) *
             vehicle.routing_localization.get_current_lane_width()

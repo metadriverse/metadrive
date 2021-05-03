@@ -70,7 +70,7 @@ class LidarStateObservationV2(LidarStateObservation):
         # current_reference_lane = vehicle.routing_localization.current_ref_lanes[-1]
 
         if self.obs_mode in ["w_ego", "w_both"]:
-            lateral_to_left, lateral_to_right, = vehicle.dist_to_left, vehicle.dist_to_right
+            lateral_to_left, lateral_to_right, = vehicle.dist_to_left_side, vehicle.dist_to_right_side
             total_width = float(
                 (vehicle.routing_localization.get_current_lane_num() + 1) *
                 vehicle.routing_localization.get_current_lane_width()

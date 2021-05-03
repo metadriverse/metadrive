@@ -217,3 +217,6 @@ class ChaseCamera:
             ret = pg_world.physics_world.dynamic_world.rayTestClosest(pFrom, pTo, BitMask32.bit(CollisionGroup.Terrain))
             self.camera_x = ret.getHitPos()[0]
             self.camera_y = ret.getHitPos()[1]
+
+    def is_bird_view_camera(self, pg_world):
+        return True if pg_world.taskMgr.hasTaskNamed(self.TOP_DOWN_TASK_NAME) else False
