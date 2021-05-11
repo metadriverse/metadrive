@@ -68,8 +68,7 @@ class TInterSection(InterSection):
             entry_node = self._sockets[index_i].negative_road.end_node if i != Goal.ADVERSE else self._sockets[
                 index_i].positive_road.end_node
             neg_lanes = self.block_network.remove_all_roads(entry_node, end_node)
-            # TODO small vis bug may raise in a corner case,
-            #  these code can fix it but will introduce a new get_closest_lane_index bug
+
             # if (i + 2) % 4 == t_type:
             #     # for vis only, solve a bug existing in a corner case,
             #     for lane in neg_lanes:
@@ -86,3 +85,21 @@ class TInterSection(InterSection):
         self.block_network.remove_all_roads(socket.positive_road.start_node, socket.positive_road.end_node)
         self.block_network.remove_all_roads(socket.negative_road.start_node, socket.negative_road.end_node)
         self._respawn_roads.remove(socket.negative_road)
+
+    def _add_one_socket(self, socket: BlockSocket):
+        assert isinstance(socket, BlockSocket), "Socket list only accept BlockSocket Type"
+
+        # mute warning in T interection
+
+        # if socket.index is not None and not socket.index.startswith(self._block_name):
+        #     logging.warning(
+        #         "The adding socket has index {}, which is not started with this block name {}. This is dangerous! "
+        #         "Current block has sockets: {}.".format(socket.index, self._block_name, self.get_socket_indices())
+        #     )
+        if socket.index is None:
+            # if this socket is self block socket
+            socket.set_index(self._block_name, len(self._sockets))
+        self._sockets[socket.index] = socket
+
+    def add_u_turn(self, enable_u_turn: bool):
+        raise ValueError("T intersection didn't support u_turn now")

@@ -189,6 +189,7 @@ class Parameter:
     lane_num = "lane_num"
     change_lane_num = "change_lane_num"
     decrease_increase = "decrease_increase"
+    one_side_vehicle_num = "one_side_vehicle_number"
 
     # vehicle
     # vehicle_length = "v_len"
@@ -279,6 +280,11 @@ class BlockParameterSpace:
     BOTTLENECK_PARAMETER = {
         Parameter.length: PGBoxSpace(min=20, max=50),  # the length of straigh part
         Parameter.lane_num: PGDiscreteSpace(min=1, max=2),  # the lane num increased or descreased now 1-2
+    }
+    PARKING_LOT_PARAMETER = {
+        Parameter.one_side_vehicle_num: PGDiscreteSpace(min=2, max=10),
+        Parameter.radius: PGConstantSpace(value=4),
+        Parameter.length: PGConstantSpace(value=8)
     }
 
 
