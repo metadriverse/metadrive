@@ -37,14 +37,15 @@ class RoadNetwork:
         assert not self.is_initialized, "Adding new blocks should be done before road network initialization!"
         set_1 = set(self.graph) - {Decoration.start, Decoration.end}
         set_2 = set(other.graph) - {Decoration.start, Decoration.end}
-        if len(set_1.intersection(set_2)) == 0:
+        intersect = set_1.intersection(set_2)
+        if len(intersect) == 0:
             # handle decoration_lanes
             dec_lanes = self.get_all_decoration_lanes() + other.get_all_decoration_lanes()
             self.graph.update(copy.copy(other.graph))
             self.update_decoration_lanes(dec_lanes)
             return self
         else:
-            raise ValueError("Same start node in two road network")
+            raise ValueError("Same start node {} in two road network".format(intersect))
 
     def __isub__(self, other):
         intersection = self.graph.keys() & other.graph.keys() - {Decoration.start, Decoration.end}
@@ -185,8 +186,8 @@ class RoadNetwork:
                     indexes.append((_from, _to, _id))
         self.indices = indexes
 
-    def get_closest_lane_index(self, position):
-        return self._graph_helper.get(position)
+    def get_closest_lane_index(self, position, return_all=False):
+        return self._graph_helper.get(position, return_all)
 
     def next_lane(
         self,
@@ -396,7 +397,7 @@ class GraphLookupTable:
         self.graph = graph
         self.debug = debug
 
-    def get(self, position):
+    def get(self, position, return_all):
         log = dict()
         count = 0
         for _, (_from, to_dict) in enumerate(self.graph.items()):
@@ -430,7 +431,11 @@ class GraphLookupTable:
                 dist = lane.distance(position)
                 distance_index_mapping.append((dist, (Decoration.start, Decoration.end, id)))
 
-        ret_ind = np.argmin([d for d, _ in distance_index_mapping])
-        index = distance_index_mapping[ret_ind][1]
-        distance = distance_index_mapping[ret_ind][0]
-        return index, distance
+        distance_index_mapping = sorted(distance_index_mapping, key=lambda d: d[0])
+        if return_all:
+            return distance_index_mapping
+        else:
+            ret_ind = 0
+            index = distance_index_mapping[ret_ind][1]
+            distance = distance_index_mapping[ret_ind][0]
+            return index, distance

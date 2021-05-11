@@ -1,4 +1,5 @@
 from typing import Union
+import math
 
 import numpy as np
 from panda3d.bullet import BulletRigidBodyNode, BulletBoxShape
@@ -93,7 +94,8 @@ class PGTrafficVehicle(DynamicElement):
         self.node_path.setH(heading)
 
     def update_state(self, pg_world: PGWorld):
-        lane, lane_index = ray_localization(self.position, pg_world)
+        dir = np.array([math.cos(self.heading), math.sin(self.heading)])
+        lane, lane_index = ray_localization(dir, self.position, pg_world)
         if lane is not None:
             self.vehicle_node.kinematic_model.update_lane_index(lane_index, lane)
         self.out_of_road = not self.vehicle_node.kinematic_model.lane.on_lane(
