@@ -46,6 +46,17 @@ class BlockSocket:
         else:
             return False
 
+    def get_socket_in_reverse(self):
+        """
+        Return a new socket whose positive road=self.negative_road, negative_road=self.positive_road
+        """
+        new_socket = copy.deepcopy(self)
+        new_socket.positive_road, new_socket.negative_road = self.negative_road, self.positive_road
+        return new_socket
+
+    def is_same_socket(self, other):
+        return True if self.positive_road == other.positive_road and self.negative_road == other.negative_road else False
+
 
 class Block(Element, BlockDefault):
     """
@@ -66,6 +77,7 @@ class Block(Element, BlockDefault):
         super(Block, self).__init__(random_seed)
         # block information
         assert self.ID is not None, "Each Block must has its unique ID When define Block"
+        assert len(self.ID) == 1, "Block ID must be a character "
         assert self.SOCKET_NUM is not None, "The number of Socket should be specified when define a new block"
         if block_index == 0:
             from pgdrive.scene_creator.blocks import FirstBlock

@@ -1,4 +1,5 @@
 import copy
+import logging
 from math import floor
 
 import numpy as np
@@ -52,8 +53,8 @@ class SpawnManager:
                 "You should now specify config if requiring infinite number of vehicles."
             )
 
-    def set_spawn_roads(self, spawn_roads):
-        if self.target_vehicle_configs:
+    def set_spawn_roads(self, spawn_roads, force_update_all=False):
+        if self.target_vehicle_configs and not force_update_all:
             target_vehicle_configs, safe_spawn_places = self._update_spawn_roads_with_configs(spawn_roads)
         else:
             target_vehicle_configs, safe_spawn_places = self._update_spawn_roads_randomly(spawn_roads)

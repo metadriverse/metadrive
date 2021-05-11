@@ -78,7 +78,8 @@ class MultiAgentIntersectionEnv(MultiAgentPGDrive):
             self.maps[self.current_seed] = new_map
             self.current_map = self.maps[self.current_seed]
 
-    def _update_destination_for(self, vehicle):
+    def _update_destination_for(self, vehicle_id):
+        vehicle = self.vehicles[vehicle_id]
         # when agent re-joined to the game, call this to set the new route to destination
         end_roads = copy.deepcopy(self.spawn_roads)
         end_road = -get_np_random(self._DEBUG_RANDOM_SEED).choice(end_roads)  # Use negative road!

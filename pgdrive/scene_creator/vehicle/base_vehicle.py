@@ -81,6 +81,7 @@ class BaseVehicle(DynamicElement):
         if physics_config is not None:
             self.set_config(physics_config)
         self.increment_steering = self.vehicle_config["increment_steering"]
+        self.enable_reverse = self.vehicle_config["enable_reverse"]
         self.max_speed = self.vehicle_config["max_speed"]
         self.max_steering = self.vehicle_config["max_steering"]
 
@@ -369,8 +370,12 @@ class BaseVehicle(DynamicElement):
                 else:
                     self.system.applyEngineForce(max_engine_force * throttle_brake, wheel_index)
             else:
-                self.system.applyEngineForce(0.0, wheel_index)
-                self.system.setBrake(abs(throttle_brake) * max_brake_force, wheel_index)
+                if self.enable_reverse:
+                    self.system.applyEngineForce(max_engine_force * throttle_brake, wheel_index)
+                    self.system.setBrake(0, wheel_index)
+                else:
+                    self.system.applyEngineForce(0.0, wheel_index)
+                    self.system.setBrake(abs(throttle_brake) * max_brake_force, wheel_index)
 
     """---------------------------------------- vehicle info ----------------------------------------------"""
 
@@ -569,7 +574,13 @@ class BaseVehicle(DynamicElement):
         self.lidar = Lidar(self.pg_world.render, num_lasers, distance, show_lidar_point)
 
     def add_routing_localization(self, show_navi_mark: bool = False):
-        self.routing_localization = RoutingLocalizationModule(self.pg_world, show_navi_mark=show_navi_mark)
+        config = self.vehicle_config
+        self.routing_localization = RoutingLocalizationModule(
+            self.pg_world,
+            show_navi_mark=show_navi_mark,
+            random_navi_mark_color=config["random_navi_mark_color"],
+            show_dest_mark=config["show_dest_mark"]
+        )
 
     def update_map_info(self, map):
         """
@@ -577,7 +588,7 @@ class BaseVehicle(DynamicElement):
         :param map: new map
         :return: None
         """
-        lane, new_l_index = ray_localization(np.array(self.spawn_place), self.pg_world)
+        lane, new_l_index = ray_localization(np.array(self.heading.tolist()), np.array(self.spawn_place), self.pg_world)
         self.routing_localization.update(map, current_lane_index=new_l_index)
         assert lane is not None, "spawn place is not on road!"
         self.lane_index = new_l_index

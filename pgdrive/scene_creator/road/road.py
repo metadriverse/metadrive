@@ -51,3 +51,6 @@ class Road:
 
     def __repr__(self):
         return "Road from {} to {}".format(self.start_node, self.end_node)
+
+    def __hash__(self):
+        return hash((self.start_node, self.end_node))

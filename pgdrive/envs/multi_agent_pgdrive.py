@@ -166,7 +166,8 @@ class MultiAgentPGDrive(PGDriveEnvV2):
             if v_id in self.config["target_vehicle_configs"]:
                 v.vehicle_config = self._get_single_vehicle_config(self.config["target_vehicle_configs"][v_id])
         super(MultiAgentPGDrive, self)._reset_agents()  # Update config before actually resetting!
-        self.for_each_vehicle(self._update_destination_for)
+        for v_id, _ in self.vehicles.items():
+            self._update_destination_for(v_id)
 
     def _after_vehicle_done(self, obs=None, reward=None, dones: dict = None, info=None):
         for v_id, v_info in info.items():
@@ -263,14 +264,14 @@ class MultiAgentPGDrive(PGDriveEnvV2):
         new_spawn_place_config = new_spawn_place["config"]
         vehicle.vehicle_config.update(new_spawn_place_config)
         vehicle.reset(self.current_map)
-        self._update_destination_for(vehicle)
+        self._update_destination_for(new_agent_id)
         vehicle.update_state(detector_mask=None)
         self.dones[new_agent_id] = False  # Put it in the internal dead-tracking dict.
 
         new_obs = self.observations[new_agent_id].observe(vehicle)
         return new_agent_id, new_obs
 
-    def _update_destination_for(self, vehicle):
+    def _update_destination_for(self, vehicle_id):
         pass
 
         # when agent re-joined to the game, call this to set the new route to destination
