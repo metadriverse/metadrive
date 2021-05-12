@@ -55,6 +55,7 @@ BASE_DEFAULT_CONFIG = dict(
         enable_reverse=False,
         random_navi_mark_color=False,
         show_dest_mark=False,
+        show_line_to_dest=False,
     ),
 
     # ===== Others =====
