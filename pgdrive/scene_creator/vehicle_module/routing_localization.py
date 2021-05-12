@@ -57,6 +57,7 @@ class RoutingLocalizationModule:
         self._goal_node_path = None
         self._arrow_node_path = None
         self._line_to_dest = None
+        self._show_line_to_dest = show_line_to_dest
         if self._show_navi_info:
             # nodepath
             self._line_to_dest = pg_world.render.attachNewNode("line")
@@ -350,6 +351,8 @@ class RoutingLocalizationModule:
             return res.getHitFraction() * length
 
     def _draw_line_to_dest(self, pg_world, start_position, end_position):
+        if not self._show_line_to_dest:
+            return
         line_seg = self._line_to_dest
         line_seg.moveTo(panda_position(start_position, self.LINE_TO_DEST_HEIGHT))
         line_seg.drawTo(panda_position(end_position, self.LINE_TO_DEST_HEIGHT))
