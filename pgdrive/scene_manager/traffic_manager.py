@@ -370,7 +370,7 @@ class TrafficManager(RandomEngine):
         s = self.map.road_network.get_lane(lane_index).local_coordinates(vehicle.position)[0]
         s_front = s_rear = None
         v_front = v_rear = None
-        for v in self.vehicles:
+        for v in self.vehicles + self._scene_mgr.object_manager.objects:
             if norm(v.position[0] - vehicle.position[0], v.position[1] - vehicle.position[1]) > 100:
                 # coarse filter
                 continue

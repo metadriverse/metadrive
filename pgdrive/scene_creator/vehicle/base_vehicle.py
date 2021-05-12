@@ -579,7 +579,8 @@ class BaseVehicle(DynamicElement):
             self.pg_world,
             show_navi_mark=show_navi_mark,
             random_navi_mark_color=config["random_navi_mark_color"],
-            show_dest_mark=config["show_dest_mark"]
+            show_dest_mark=config["show_dest_mark"],
+            show_line_to_dest=config["show_line_to_dest"]
         )
 
     def update_map_info(self, map):

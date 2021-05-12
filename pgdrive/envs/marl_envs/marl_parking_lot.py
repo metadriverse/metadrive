@@ -20,7 +20,9 @@ MAParkingLotConfig = dict(
     vehicle_config={
         "enable_reverse": True,
         "random_navi_mark_color": True,
-        "show_dest_mark": True
+        "show_dest_mark": True,
+        "show_navi_mark": False,
+        "show_line_to_dest": True,
     },
     parking_space_num=8
 )
@@ -201,7 +203,8 @@ class MultiAgentParkingLotEnv(MultiAgentPGDrive):
         for id, config in safe_places_dict.items():
             spawn_l_index = config["config"]["spawn_lane_index"]
             spawn_road = Road(spawn_l_index[0], spawn_l_index[1])
-            if spawn_road in self.in_spawn_roads:
+            if spawn_road in self.in_spawn_roads and len(self.current_map.parking_space_manager.parking_space_available
+                                                         ) > 0:
                 filter_ret[id] = config
                 continue
             spawn_road = self.current_map.parking_lot.in_direction_parking_space(spawn_road)
@@ -245,6 +248,13 @@ class MultiAgentParkingLotEnv(MultiAgentPGDrive):
         if done:
             self.current_map.parking_space_manager.after_vehicle_done(vehicle_id)
         return done, info
+
+    def _is_out_of_road(self, vehicle):
+        # A specified function to determine whether this vehicle should be done.
+        # return vehicle.on_yellow_continuous_line or (not vehicle.on_lane) or vehicle.crash_sidewalk
+        ret = vehicle.on_white_continuous_line or \
+              (not vehicle.on_lane) or vehicle.crash_sidewalk
+        return ret
 
 
 def _draw():

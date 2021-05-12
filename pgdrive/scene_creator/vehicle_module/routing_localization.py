@@ -2,7 +2,7 @@ import logging
 import math
 from pgdrive.scene_creator.blocks.bottleneck import Merge, Split
 import numpy as np
-from panda3d.core import BitMask32, LQuaternionf, TransparencyAttrib
+from panda3d.core import BitMask32, LQuaternionf, TransparencyAttrib, LineSegs, NodePath
 from pgdrive.scene_creator.lane.straight_lane import StraightLane
 from pgdrive.constants import COLLISION_INFO_COLOR, RENDER_MODE_ONSCREEN, CamMask
 from pgdrive.scene_creator.blocks.first_block import FirstBlock
@@ -24,8 +24,16 @@ class RoutingLocalizationModule:
     MIN_ALPHA = 0.15
     CKPT_UPDATE_RANGE = 5
     FORCE_CALCULATE = False
+    LINE_TO_DEST_HEIGHT = 0.6
 
-    def __init__(self, pg_world, show_navi_mark: bool = False, random_navi_mark_color=False, show_dest_mark=False):
+    def __init__(
+        self,
+        pg_world,
+        show_navi_mark: bool = False,
+        random_navi_mark_color=False,
+        show_dest_mark=False,
+        show_line_to_dest=False
+    ):
         """
         This class define a helper for localizing vehicles and retrieving navigation information.
         It now only support from first block start to the end node, but can be extended easily.
@@ -48,10 +56,14 @@ class RoutingLocalizationModule:
         self._dest_node_path = None
         self._goal_node_path = None
         self._arrow_node_path = None
+        self._line_to_dest = None
         if self._show_navi_info:
+            # nodepath
+            self._line_to_dest = pg_world.render.attachNewNode("line")
             self._goal_node_path = pg_world.render.attachNewNode("target")
             self._dest_node_path = pg_world.render.attachNewNode("dest")
             self._arrow_node_path = pg_world.aspect2d.attachNewNode("arrow")
+
             navi_arrow_model = AssetLoader.loader.loadModel(AssetLoader.file_path("models", "navi_arrow.gltf"))
             navi_arrow_model.setScale(0.1, 0.12, 0.2)
             navi_arrow_model.setPos(2, 1.15, -0.221)
@@ -72,9 +84,17 @@ class RoutingLocalizationModule:
             if show_navi_mark:
                 navi_point_model = AssetLoader.loader.loadModel(AssetLoader.file_path("models", "box.bam"))
                 navi_point_model.reparentTo(self._goal_node_path)
-
+            if show_dest_mark:
                 dest_point_model = AssetLoader.loader.loadModel(AssetLoader.file_path("models", "box.bam"))
                 dest_point_model.reparentTo(self._dest_node_path)
+            if show_line_to_dest:
+                line_seg = LineSegs("line_to_dest")
+                line_seg.setColor(self.navi_mark_color[0], self.navi_mark_color[1], self.navi_mark_color[2], 0.7)
+                line_seg.setThickness(2)
+                self._dynamic_line_np = NodePath(line_seg.create(True))
+                self._dynamic_line_np.reparentTo(pg_world.render)
+                self._line_to_dest = line_seg
+
             self._goal_node_path.setTransparency(TransparencyAttrib.M_alpha)
             self._dest_node_path.setTransparency(TransparencyAttrib.M_alpha)
 
@@ -176,6 +196,12 @@ class RoutingLocalizationModule:
             self._goal_node_path.setPos(pos_of_goal[0], -pos_of_goal[1], 1.8)
             self._goal_node_path.setH(self._goal_node_path.getH() + 3)
             self._update_navi_arrow([lanes_heading1, lanes_heading2])
+            dest_pos = self._dest_node_path.getPos()
+            self._draw_line_to_dest(
+                pg_world=ego_vehicle.pg_world,
+                start_position=ego_vehicle.position,
+                end_position=(dest_pos[0], -dest_pos[1])
+            )
 
         return lane, lane_index
 
@@ -267,6 +293,8 @@ class RoutingLocalizationModule:
     def destroy(self):
         if self._show_navi_info:
             self._arrow_node_path.removeNode()
+            self._line_to_dest.removeNode()
+            self._dest_node_path.removeNode()
             self._goal_node_path.removeNode()
 
     def set_force_calculate_lane_index(self, force: bool):
@@ -320,3 +348,12 @@ class RoutingLocalizationModule:
             return length
         else:
             return res.getHitFraction() * length
+
+    def _draw_line_to_dest(self, pg_world, start_position, end_position):
+        line_seg = self._line_to_dest
+        line_seg.moveTo(panda_position(start_position, self.LINE_TO_DEST_HEIGHT))
+        line_seg.drawTo(panda_position(end_position, self.LINE_TO_DEST_HEIGHT))
+        self._dynamic_line_np.removeNode()
+        self._dynamic_line_np = NodePath(line_seg.create(False))
+        self._dynamic_line_np.hide(CamMask.Shadow | CamMask.RgbCam)
+        self._dynamic_line_np.reparentTo(pg_world.render)
