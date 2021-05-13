@@ -9,12 +9,19 @@ class SafePGDriveEnv(PGDriveEnv):
         config = super(SafePGDriveEnv, self).default_config()
         config.update(
             {
+                "environment_num": 100,
                 "accident_prob": 0.5,
-                "crash_vehicle_cost": 1,
-                "crash_object_cost": 1,
+                "safe_rl_env": True,  # Should always be True. But we just leave it here for historical reason.
+
+                # ===== reward scheme =====
                 "crash_vehicle_penalty": 0.,
                 "crash_object_penalty": 0.,
-                "out_of_road_cost": 0.,  # only give penalty for out_of_road
+                "out_of_road_penalty": 0.,
+
+                # ===== cost scheme
+                "crash_vehicle_cost": 1,
+                "crash_object_cost": 0.5,
+                "out_of_road_cost": 1.,  # only give penalty for out_of_road
                 "traffic_density": 0.2,
                 "use_lateral": False
             },
@@ -24,10 +31,11 @@ class SafePGDriveEnv(PGDriveEnv):
 
     def done_function(self, vehicle_id: str):
         done, done_info = super(SafePGDriveEnv, self).done_function(vehicle_id)
-        if done_info[TerminationState.CRASH_VEHICLE]:
-            done = False
-        elif done_info[TerminationState.CRASH_OBJECT]:
-            done = False
+        if self.config["safe_rl_env"]:
+            if done_info[TerminationState.CRASH_VEHICLE]:
+                done = False
+            elif done_info[TerminationState.CRASH_OBJECT]:
+                done = False
         return done, done_info
 
     def reward_function(self, vehicle_id: str):
@@ -46,29 +54,37 @@ class SafePGDriveEnv(PGDriveEnv):
         long_now, lateral_now = current_lane.local_coordinates(vehicle.position)
 
         # reward for lane keeping, without it vehicle can learn to overtake but fail to keep in lane
+        reward = 0.0
         if self.config["use_lateral"]:
             lateral_factor = clip(
                 1 - 2 * abs(lateral_now) / vehicle.routing_localization.get_current_lane_width(), 0.0, 1.0
             )
         else:
             lateral_factor = 1.0
-        current_road = vehicle.current_road
-        positive_road = 1 if not current_road.is_negative_road() else -1
+        reward += self.config["driving_reward"] * (long_now - long_last) * lateral_factor
 
-        reward = 0.0
-        reward += self.config["driving_reward"] * (long_now - long_last) * lateral_factor * positive_road
-        reward += self.config["speed_reward"] * (vehicle.speed / vehicle.max_speed) * positive_road
+        # Penalty for waiting
+        low_speed_penalty = 0
+        if vehicle.speed < 1:
+            low_speed_penalty = self.config["low_speed_penalty"]  # encourage car
+        reward -= low_speed_penalty
+        reward -= self.config["general_penalty"]
 
+        reward += self.config["speed_reward"] * (vehicle.speed / vehicle.max_speed)
         step_info["step_reward"] = reward
 
-        if vehicle.arrive_destination:
-            reward = +self.config["success_reward"]
-        elif vehicle.out_of_route:
-            reward = -self.config["out_of_road_penalty"]
-        elif vehicle.crash_vehicle:
-            reward = -self.config["crash_vehicle_penalty"]
+        # for done
+        if vehicle.crash_vehicle:
+            reward = self.config["crash_vehicle_penalty"]
         elif vehicle.crash_object:
-            reward = -self.config["crash_object_penalty"]
+            reward = self.config["crash_object_penalty"]
+        elif vehicle.out_of_route:
+            reward = self.config["out_of_road_penalty"]
+        elif vehicle.crash_sidewalk:
+            reward = self.config["out_of_road_penalty"]
+        elif vehicle.arrive_destination:
+            reward += self.config["success_reward"]
+
         return reward, step_info
 
     def cost_function(self, vehicle_id: str):
