@@ -142,7 +142,7 @@ class RoutingLocalizationModule:
         :return: None
         """
         self.checkpoints = self.map.road_network.shortest_path(start_road_node, end_road_node)
-        assert len(self.checkpoints) > 2
+        assert len(self.checkpoints) > 2, "Can not find a route from {} to {}".format(start_road_node, end_road_node)
         # update routing info
         self.final_road = Road(self.checkpoints[-2], end_road_node)
         final_lanes = self.final_road.get_lanes(self.map.road_network)

@@ -1,10 +1,10 @@
+import copy
 import logging
 
 from pgdrive.constants import TerminationState
 from pgdrive.envs.pgdrive_env_v2 import PGDriveEnvV2
 from pgdrive.scene_creator.blocks.first_block import FirstBlock
 from pgdrive.scene_creator.road.road import Road
-from pgdrive.scene_creator.vehicle.base_vehicle import BaseVehicle
 from pgdrive.scene_manager.spawn_manager import SpawnManager
 from pgdrive.utils import setup_logger, get_np_random, PGConfig
 from pgdrive.utils.pg_config import merge_dicts
@@ -69,6 +69,7 @@ class MultiAgentPGDrive(PGDriveEnvV2):
         return config
 
     def __init__(self, config=None):
+        self._raw_input_config = copy.deepcopy(config)
         super(MultiAgentPGDrive, self).__init__(config)
         self._top_down_renderer = None
 
@@ -290,6 +291,12 @@ class MultiAgentPGDrive(PGDriveEnvV2):
             from pgdrive.obs.top_down_renderer import TopDownRenderer
             self._top_down_renderer = TopDownRenderer(self.current_map, *args, **kwargs)
         self._top_down_renderer.render(list(self.vehicles.values()))
+
+    def close_and_reset_num_agents(self, num_agents):
+        config = copy.deepcopy(self._raw_input_config)
+        self.close()
+        config["num_agents"] = num_agents
+        super(MultiAgentPGDrive, self).__init__(config)
 
 
 def _test():
