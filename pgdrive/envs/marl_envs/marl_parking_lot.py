@@ -203,14 +203,18 @@ class MultiAgentParkingLotEnv(MultiAgentPGDrive):
         for id, config in safe_places_dict.items():
             spawn_l_index = config["config"]["spawn_lane_index"]
             spawn_road = Road(spawn_l_index[0], spawn_l_index[1])
-            if spawn_road in self.in_spawn_roads and len(self.current_map.parking_space_manager.parking_space_available
-                                                         ) > 0:
-                filter_ret[id] = config
-                continue
-            spawn_road = self.current_map.parking_lot.in_direction_parking_space(spawn_road)
-            if spawn_road in self.current_map.parking_space_manager.parking_space_available:
-                # not other vehicle's destination
-                filter_ret[id] = config
+            if spawn_road in self.in_spawn_roads:
+                if len(self.current_map.parking_space_manager.parking_space_available) > 0:
+                    filter_ret[id] = config
+            else:
+                # spawn in parking space
+                if ParkingLot.is_in_direction_parking_space(spawn_road):
+                    # avoid sweep test bug
+                    spawn_road = self.current_map.parking_lot.out_direction_parking_space(spawn_road)
+                    config["config"]["spawn_lane_index"] = (spawn_road.start_node, spawn_road.end_node, 0)
+                if spawn_road in self.current_map.parking_space_manager.parking_space_available:
+                    # not other vehicle's destination
+                    filter_ret[id] = config
 
         # ===== same as super() =====
         safe_places_dict = filter_ret
@@ -251,10 +255,9 @@ class MultiAgentParkingLotEnv(MultiAgentPGDrive):
 
     def _is_out_of_road(self, vehicle):
         # A specified function to determine whether this vehicle should be done.
-        # return vehicle.on_yellow_continuous_line or (not vehicle.on_lane) or vehicle.crash_sidewalk
-        ret = vehicle.on_white_continuous_line or \
-              (not vehicle.on_lane) or vehicle.crash_sidewalk
-        return ret
+        return vehicle.on_yellow_continuous_line or (not vehicle.on_lane) or vehicle.crash_sidewalk
+        # ret = vehicle.out_of_route
+        # return ret
 
 
 def _draw():
@@ -381,13 +384,16 @@ def _vis():
                 },
                 "show_lidar": False,
             },
+            "pg_world_config": {
+                "debug_static_world": True
+            },
             "fast": True,
             "use_render": True,
-            "debug": False,
+            "debug": True,
             "manual_control": True,
-            "num_agents": 7,
+            "num_agents": 8,
             "delay_done": 10,
-            "parking_space_num": 4
+            # "parking_space_num": 4
         }
     )
     o = env.reset()
@@ -402,6 +408,14 @@ def _vis():
             total_r += r_
         ep_s += 1
         # d.update({"total_r": total_r, "episode length": ep_s})
+        if len(env.vehicles) != 0:
+            v = env.current_track_vehicle
+            dist = v.dist_to_left_side, v.dist_to_right_side
+            ckpt_idx = v.routing_localization._target_checkpoints_index
+        else:
+            dist = (0, 0)
+            ckpt_idx = (0, 0)
+
         render_text = {
             "total_r": total_r,
             "episode length": ep_s,
@@ -409,8 +423,15 @@ def _vis():
             "cam_y": env.main_camera.camera_y,
             "cam_z": env.main_camera.top_down_camera_height,
             "alive": len(env.vehicles),
+            "dist_right_left": dist,
+            "ckpt_idx": ckpt_idx,
             "parking_space_num": len(env.current_map.parking_space_manager.parking_space_available)
         }
+        if len(env.vehicles) > 0:
+            v = env.current_track_vehicle
+            # print(v.routing_localization.checkpoints)
+            render_text["current_road"] = v.current_road
+
         env.render(text=render_text)
         for kkk, ddd in d.items():
             if ddd and kkk != "__all__":
