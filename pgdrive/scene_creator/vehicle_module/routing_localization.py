@@ -161,7 +161,7 @@ class RoutingLocalizationModule:
 
     def update_navigation_localization(self, ego_vehicle):
         position = ego_vehicle.position
-        lane, lane_index = self.get_current_lane(ego_vehicle)
+        lane, lane_index = self.get_current_lane(ego_vehicle, )
         if lane is None:
             lane, lane_index = ego_vehicle.lane, ego_vehicle.lane_index
             ego_vehicle.on_lane = False
@@ -271,22 +271,22 @@ class RoutingLocalizationModule:
         Return should_update: True or False
         """
         if self._target_checkpoints_index[0] == self._target_checkpoints_index[1]:  # on last road
-            return False
+            return
 
         # arrive to second checkpoint
         current_road_start_point = ego_lane_index[0]
         if current_road_start_point in self.checkpoints[self._target_checkpoints_index[1]:] \
                 and ego_lane_longitude < self.CKPT_UPDATE_RANGE:
             if current_road_start_point not in self.checkpoints[self._target_checkpoints_index[1]:-1]:
-                return False
+                return
             idx = self.checkpoints.index(current_road_start_point, self._target_checkpoints_index[1], -1)
             self._target_checkpoints_index = [idx]
             if idx + 1 == len(self.checkpoints) - 1:
                 self._target_checkpoints_index.append(idx)
             else:
                 self._target_checkpoints_index.append(idx + 1)
-            return True
-        return False
+            return
+        return
 
     def get_navi_info(self):
         return self._navi_info
@@ -329,6 +329,15 @@ class RoutingLocalizationModule:
         )
         for lane, index, l_1_dist in possible_lanes:
             if lane in self.current_ref_lanes:
+                return lane, index
+        nx_ckpt = self._target_checkpoints_index[-1]
+        if nx_ckpt == self.checkpoints[-1]:
+            return possible_lanes[0][:-1] if len(possible_lanes) > 0 else (None, None)
+
+        nx_nx_ckpt = nx_ckpt + 1
+        next_ref_lanes = self.map.road_network.graph[self.checkpoints[nx_ckpt]][self.checkpoints[nx_nx_ckpt]]
+        for lane, index, l_1_dist in possible_lanes:
+            if lane in next_ref_lanes:
                 return lane, index
         return possible_lanes[0][:-1] if len(possible_lanes) > 0 else (None, None)
 
