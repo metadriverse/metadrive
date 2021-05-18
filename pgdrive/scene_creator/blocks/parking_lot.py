@@ -325,7 +325,10 @@ class ParkingLot(Block):
         """
         start_node = copy.deepcopy(road.start_node)
         end_node = copy.deepcopy(road.end_node)
-        assert start_node[-2] == "5" and end_node[-2] == "6", "It is not out-direction of this parking space"
+        assert start_node[-2] == "5" and end_node[
+            -2] == "6", "It is not out-direction of this parking space, start_node:{}, end_node:{}".format(
+                start_node, end_node
+            )
         start_node = start_node[:-2] + "1" + Block.DASH
         end_node = end_node[:-2] + "2" + Block.DASH
         return Road(start_node, end_node)
@@ -337,7 +340,34 @@ class ParkingLot(Block):
         """
         start_node = copy.deepcopy(road.start_node)
         end_node = copy.deepcopy(road.end_node)
-        assert start_node[-2] == "1" and end_node[-2] == "2", "It is not in-direction of this parking space"
+        assert start_node[-2] == "1" and end_node[
+            -2] == "2", "It is not in-direction of this parking space, start_node:{}, end_node:{}".format(
+                start_node, end_node
+            )
         start_node = start_node[:-2] + "5" + Block.DASH
         end_node = end_node[:-2] + "6" + Block.DASH
         return Road(start_node, end_node)
+
+    @staticmethod
+    def is_out_direction_parking_space(road: Road):
+        start_node = road.start_node
+        end_node = road.end_node
+        assert (start_node[-2] == "1"
+                and end_node[-2] == "2") or (start_node[-2] == "5" and end_node[-2]
+                                             == "6"), "{} to {} is not parking space".format(start_node, end_node)
+        if start_node[-2] == "5" and end_node[-2] == "6":
+            return True
+        else:
+            return False
+
+    @staticmethod
+    def is_in_direction_parking_space(road: Road):
+        start_node = road.start_node
+        end_node = road.end_node
+        assert (start_node[-2] == "1"
+                and end_node[-2] == "2") or (start_node[-2] == "5" and end_node[-2]
+                                             == "6"), "{} to {} is not parking space".format(start_node, end_node)
+        if start_node[-2] == "1" and end_node[-2] == "2":
+            return True
+        else:
+            return False
