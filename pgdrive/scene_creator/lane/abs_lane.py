@@ -42,6 +42,12 @@ class AbstractLane(object):
     forbidden = None
     line_color = [LineColor.GREY, LineColor.GREY]
 
+    def __init__(self):
+        self.speed_limit = 1000  # should be set manually
+
+    def set_speed_limit(self, speed_limit):
+        self.speed_limit = speed_limit
+
     @abstractmethod
     def position(self, longitudinal: float, lateral: float) -> np.ndarray:
         """

@@ -3,7 +3,8 @@ from pgdrive.scene_creator.blocks.ramp import InRampOnStraight, OutRampOnStraigh
 from pgdrive.scene_creator.blocks.straight import Straight
 from pgdrive.scene_creator.lane.abs_lane import AbstractLane
 from pgdrive.scene_creator.map import Map
-from pgdrive.scene_creator.object.traffic_object import Object
+from pgdrive.scene_creator.object.traffic_object import TrafficObject
+from pgdrive.scene_creator.object.base_object import BaseObject
 from pgdrive.scene_creator.road.road import Road
 from pgdrive.scene_creator.road.road_network import LaneIndex
 from pgdrive.utils import RandomEngine
@@ -29,6 +30,7 @@ class ObjectManager(RandomEngine):
 
     def __init__(self):
         self._spawned_objects = []
+        self._block_objects = []
         self.accident_prob = 0.
 
         # init random engine
@@ -41,11 +43,18 @@ class ObjectManager(RandomEngine):
         self._clear_objects(pg_world)
         self.update_random_seed(map.random_seed)
         self.accident_prob = accident_prob
+        for block in map.blocks:
+            block.construct_block_buildings(self)
 
     def _clear_objects(self, pg_world: PGWorld):
+        # only destroy self-generated objects
         for obj in self._spawned_objects:
             obj.destroy(pg_world=pg_world)
         self._spawned_objects = []
+        self._block_objects = []
+
+    def add_block_buildings(self, building: BaseObject):
+        self._block_objects.append(building)
 
     def spawn_one_object(
         self,
@@ -55,7 +64,7 @@ class ObjectManager(RandomEngine):
         longitude: float,
         lateral: float,
         static: bool = False
-    ) -> Object:
+    ) -> TrafficObject:
         """
         Spawn an object by assigning its type and position on the lane
         :param object_type: object name or the class name of the object
@@ -66,7 +75,7 @@ class ObjectManager(RandomEngine):
         :param static: static object can not be moved by any force
         :return: None
         """
-        for t in Object.type():
+        for t in TrafficObject.type():
             if t.__name__ == object_type or t.NAME == object_type:
                 obj = t.make_on_lane(lane, lane_index, longitude, lateral)
                 obj.set_static(static)
@@ -136,6 +145,7 @@ class ObjectManager(RandomEngine):
             scene_manager.traffic_manager.random_vehicle_type(), lane, longitude, False
         )
         breakdown_vehicle.attach_to_pg_world(pg_world.pbr_worldNP, pg_world.physics_world)
+        breakdown_vehicle.set_break_down()
 
         alert = self.spawn_one_object("Traffic Triangle", lane, lane_index, longitude - self.ALERT_DIST, 0)
         alert.attach_to_pg_world(pg_world.pbr_worldNP, pg_world.physics_world)
@@ -182,7 +192,8 @@ class ObjectManager(RandomEngine):
     def destroy(self, pg_world: PGWorld):
         self._clear_objects(pg_world)
         self._spawned_objects = None
+        self._block_objects = None
 
     @property
     def objects(self):
-        return self._spawned_objects
+        return self._spawned_objects + self._block_objects

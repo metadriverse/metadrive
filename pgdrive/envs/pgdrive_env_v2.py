@@ -94,7 +94,9 @@ class PGDriveEnvV2(PGDriveEnvV1):
     def done_function(self, vehicle_id: str):
         vehicle = self.vehicles[vehicle_id]
         done = False
-        done_info = dict(crash_vehicle=False, crash_object=False, out_of_road=False, arrive_dest=False)
+        done_info = dict(
+            crash_vehicle=False, crash_object=False, crash_building=False, out_of_road=False, arrive_dest=False
+        )
         if vehicle.arrive_destination:
             done = True
             logging.info("Episode ended! Reason: arrive_dest.")
@@ -105,17 +107,23 @@ class PGDriveEnvV2(PGDriveEnvV1):
             done_info[TerminationState.OUT_OF_ROAD] = True
         elif vehicle.crash_vehicle:
             done = True
-            logging.info("Episode ended! Reason: crash. ")
+            logging.info("Episode ended! Reason: crash vehicle ")
             done_info[TerminationState.CRASH_VEHICLE] = True
         # elif vehicle.out_of_route or not vehicle.on_lane or vehicle.crash_sidewalk:
         elif vehicle.crash_object:
             done = True
             done_info[TerminationState.CRASH_OBJECT] = True
+            logging.info("Episode ended! Reason: crash object ")
+        elif vehicle.crash_building:
+            done = True
+            done_info[TerminationState.CRASH_BUILDING] = True
+            logging.info("Episode ended! Reason: crash building ")
 
         # for compatibility
         # crash almost equals to crashing with vehicles
         done_info[TerminationState.CRASH
-                  ] = done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
+        ] = done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT] or \
+            done_info[TerminationState.CRASH_BUILDING]
         return done, done_info
 
     def cost_function(self, vehicle_id: str):

@@ -6,7 +6,7 @@ from panda3d.core import NodePath
 from pgdrive.constants import BodyName
 from pgdrive.utils.asset_loader import AssetLoader
 from pgdrive.utils.coordinates_shift import panda_position, panda_heading
-from pgdrive.utils.element import Element
+from pgdrive.scene_creator.object.base_object import BaseObject
 from pgdrive.utils import get_np_random, random_string, distance_greater, norm
 
 LaneIndex = Tuple[str, str, int]
@@ -24,7 +24,7 @@ class ObjectNode(BulletRigidBodyNode):
         self.crashed = False
 
 
-class Object(Element):
+class TrafficObject(BaseObject):
     """
     Common interface for objects that appear on the road, beside vehicles.
     """
@@ -41,7 +41,7 @@ class Object(Element):
         :param heading: the angle from positive direction of horizontal axis
         """
         assert self.NAME is not None, "Assign a name for this class for finding it easily"
-        super(Object, self).__init__()
+        super(TrafficObject, self).__init__(lane, lane_index, position, heading)
         self.position = position
         self.speed = 0
         self.heading = heading / np.pi * 180
@@ -71,7 +71,7 @@ class Object(Element):
         return cls.__subclasses__()
 
 
-class TrafficCone(Object):
+class TrafficCone(TrafficObject):
     """Placed near the construction section to indicate that traffic is prohibited"""
 
     NAME = BodyName.Traffic_cone
@@ -91,7 +91,7 @@ class TrafficCone(Object):
             model.reparentTo(self.node_path)
 
 
-class TrafficTriangle(Object):
+class TrafficTriangle(TrafficObject):
     """Placed behind the vehicle when it breaks down"""
 
     NAME = BodyName.Traffic_triangle

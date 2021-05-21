@@ -14,6 +14,7 @@ class BaseVehicleNode(BulletRigidBodyNode):
         self.crash_vehicle = False
         self.crash_object = False
         self.crash_sidewalk = False
+        self.crash_building = False
 
         # lane line detection
         self.on_yellow_continuous_line = False
@@ -24,6 +25,7 @@ class BaseVehicleNode(BulletRigidBodyNode):
         self.crash_vehicle = False
         self.crash_object = False
         self.crash_sidewalk = False
+        self.crash_building = False
         self.on_yellow_continuous_line = False
         self.on_white_continuous_line = False
         self.on_broken_line = False

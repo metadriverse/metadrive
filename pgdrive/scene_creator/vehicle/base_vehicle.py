@@ -825,6 +825,10 @@ class BaseVehicle(DynamicElement):
         self.chassis_np.node().setStatic(flag)
 
     @property
+    def crash_building(self):
+        return self.chassis_np.node().getPythonTag(BodyName.Base_vehicle).crash_building
+
+    @property
     def reference_lanes(self):
         return self.routing_localization.current_ref_lanes
 
@@ -832,3 +836,7 @@ class BaseVehicle(DynamicElement):
         raise DeprecationWarning("Bug exists here")
         for wheel in self.wheels:
             wheel.setFrictionSlip(new_friction)
+
+    @property
+    def overspeed(self):
+        return True if self.lane.speed_limit < self.speed else False

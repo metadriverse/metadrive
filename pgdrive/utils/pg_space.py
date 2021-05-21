@@ -280,6 +280,10 @@ class BlockParameterSpace:
     BOTTLENECK_PARAMETER = {
         Parameter.length: PGBoxSpace(min=20, max=50),  # the length of straigh part
         Parameter.lane_num: PGDiscreteSpace(min=1, max=2),  # the lane num increased or descreased now 1-2
+        "bottle_len": PGConstantSpace(20)
+    }
+    TOLLGATE_PARAMETER = {
+        Parameter.length: PGConstantSpace(20),  # the length of straigh part
     }
     PARKING_LOT_PARAMETER = {
         Parameter.one_side_vehicle_num: PGDiscreteSpace(min=2, max=10),

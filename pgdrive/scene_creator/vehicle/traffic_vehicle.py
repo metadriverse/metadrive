@@ -35,6 +35,7 @@ class PGTrafficVehicle(DynamicElement):
     LENGTH = 4
     WIDTH = 2
     path = None
+    break_down = False
     model_collection = {}  # save memory, load model once
 
     def __init__(self, index: int, kinematic_model: IDMVehicle, enable_respawn: bool = False, np_random=None):
@@ -87,6 +88,8 @@ class PGTrafficVehicle(DynamicElement):
         self.vehicle_node.kinematic_model.act(scene_manager=scene_manager)
 
     def step(self, dt):
+        if self.break_down:
+            return
         self.vehicle_node.kinematic_model.step(dt)
         position = panda_position(self.vehicle_node.kinematic_model.position, 0)
         self.node_path.setPos(position)
@@ -172,6 +175,9 @@ class PGTrafficVehicle(DynamicElement):
     def create_traffic_vehicle_from_config(cls, traffic_mgr: TrafficManager, config: dict):
         v = IDMVehicle(traffic_mgr, config["position"], config["heading"], np_random=None)
         return cls(config["index"], v, config["enable_respawn"])
+
+    def set_break_down(self, break_down=True):
+        self.break_down = break_down
 
     def __del__(self):
         self.vehicle_node.clearTag(BodyName.Traffic_vehicle)
