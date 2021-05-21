@@ -14,7 +14,9 @@ class Lidar(DistanceDetector):
     def __init__(self, parent_node_np: NodePath, num_lasers: int = 240, distance: float = 50, enable_show=False):
         super(Lidar, self).__init__(parent_node_np, num_lasers, distance, enable_show)
         self.node_path.hide(CamMask.RgbCam | CamMask.Shadow | CamMask.Shadow | CamMask.DepthCam)
-        self.mask = BitMask32.bit(PGTrafficVehicle.COLLISION_MASK) | BitMask32.bit(CollisionGroup.EgoVehicle)
+        self.mask = BitMask32.bit(PGTrafficVehicle.COLLISION_MASK) | BitMask32.bit(
+            CollisionGroup.EgoVehicle
+        ) | BitMask32.bit(CollisionGroup.InvisibleWall)
 
     def get_surrounding_vehicles(self) -> Set:
         vehicles = set()

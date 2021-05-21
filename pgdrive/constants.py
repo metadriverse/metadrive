@@ -17,6 +17,7 @@ class TerminationState:
     CRASH = "crash"
     CRASH_VEHICLE = "crash_vehicle"
     CRASH_OBJECT = "crash_object"
+    CRASH_BUILDING = "crash_building"
 
 
 HELP_MESSAGE = "Keyboard Shortcuts:\n" \
@@ -53,12 +54,14 @@ class BodyName:
     Broken_line = "Broken Line"
     Sidewalk = "Sidewalk"
     Ground = "Ground"
+    InvisibleWall = "InvisibleWall"
     Base_vehicle = "Target Vehicle"
     Base_vehicle_beneath = "Target Vehicle Beneath"
     Traffic_vehicle = "Traffic Vehicle"
     Lane = "Lane"
     Traffic_cone = "Traffic Cone"
     Traffic_triangle = "Traffic Triangle"
+    TollGate = "Toll Gate"
 
 
 COLOR = {
@@ -70,7 +73,9 @@ COLOR = {
     BodyName.Traffic_cone: "orange",
     BodyName.Traffic_triangle: "orange",
     BodyName.Base_vehicle: "red",
-    BodyName.Base_vehicle_beneath: "red"
+    BodyName.Base_vehicle_beneath: "red",
+    BodyName.InvisibleWall: "red",
+    BodyName.TollGate: "red",
 }
 
 
@@ -110,6 +115,7 @@ class CollisionGroup:
     EgoVehicleBeneath = 6
     BrokenLaneLine = 3
     ContinuousLaneLine = 7
+    InvisibleWall = 8
     TrafficVehicle = 4
     LaneSurface = 5  # useless now, since it is in another physics world
 
@@ -124,6 +130,7 @@ class CollisionGroup:
             (cls.Terrain, cls.EgoVehicleBeneath, False),
             (cls.Terrain, cls.TrafficVehicle, False),
             (cls.Terrain, cls.ContinuousLaneLine, False),
+            (cls.Terrain, cls.InvisibleWall, False),
 
             # block collision
             (cls.BrokenLaneLine, cls.BrokenLaneLine, False),
@@ -133,6 +140,7 @@ class CollisionGroup:
             # change it after we design a new traffic system !
             (cls.BrokenLaneLine, cls.TrafficVehicle, False),
             (cls.BrokenLaneLine, cls.ContinuousLaneLine, False),
+            (cls.BrokenLaneLine, cls.InvisibleWall, False),
 
             # traffic vehicles collision
             (cls.TrafficVehicle, cls.TrafficVehicle, False),
@@ -140,24 +148,30 @@ class CollisionGroup:
             (cls.TrafficVehicle, cls.EgoVehicle, True),
             (cls.TrafficVehicle, cls.EgoVehicleBeneath, True),
             (cls.TrafficVehicle, cls.ContinuousLaneLine, False),
+            # FIXME maybe set to True in the future
+            (cls.TrafficVehicle, cls.InvisibleWall, False),
 
             # ego vehicle collision
             (cls.EgoVehicle, cls.EgoVehicle, True),
             (cls.EgoVehicle, cls.EgoVehicleBeneath, False),
             (cls.EgoVehicle, cls.LaneSurface, False),
             (cls.EgoVehicle, cls.ContinuousLaneLine, False),
+            (cls.EgoVehicle, cls.InvisibleWall, True),
 
             # lane surface
             (cls.LaneSurface, cls.LaneSurface, False),
             (cls.LaneSurface, cls.EgoVehicleBeneath, False),
             (cls.LaneSurface, cls.ContinuousLaneLine, False),
+            (cls.LaneSurface, cls.InvisibleWall, False),
 
             # vehicle beneath
             (cls.EgoVehicleBeneath, cls.EgoVehicleBeneath, True),
             (cls.EgoVehicleBeneath, cls.ContinuousLaneLine, True),
+            (cls.EgoVehicleBeneath, cls.InvisibleWall, True),
 
             # continuous lane line
             (cls.ContinuousLaneLine, cls.ContinuousLaneLine, False),
+            (cls.ContinuousLaneLine, cls.InvisibleWall, False),
         ]
 
     @classmethod

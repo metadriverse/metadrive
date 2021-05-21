@@ -1,13 +1,13 @@
 import logging
 from collections import OrderedDict
-from typing import Dict, Union, List
+from typing import Dict, Union, List, Tuple
 import copy
 import numpy
 from panda3d.bullet import BulletBoxShape, BulletRigidBodyNode, BulletGhostNode
 from panda3d.core import Vec3, LQuaternionf, BitMask32, Vec4, CardMaker, TextureStage, RigidBodyCombiner, \
     TransparencyAttrib, SamplerState, NodePath
 
-from pgdrive.constants import Decoration, BodyName, CamMask
+from pgdrive.constants import Decoration, BodyName, CamMask, CollisionGroup
 from pgdrive.scene_creator.blocks.constants import BlockDefault
 from pgdrive.scene_creator.lane.abs_lane import AbstractLane, LineType, LaneNode, LineColor
 from pgdrive.scene_creator.lane.circular_lane import CircularLane
@@ -15,7 +15,7 @@ from pgdrive.scene_creator.lane.straight_lane import StraightLane
 from pgdrive.scene_creator.road.road import Road
 from pgdrive.scene_creator.road.road_network import RoadNetwork
 from pgdrive.utils.asset_loader import AssetLoader
-from pgdrive.utils.coordinates_shift import panda_position
+from pgdrive.utils.coordinates_shift import panda_position, panda_heading
 from pgdrive.utils.element import Element
 from pgdrive.utils.math_utils import norm, PGVector
 from pgdrive.world.pg_physics_world import PGPhysicsWorld
@@ -91,6 +91,7 @@ class Block(Element, BlockDefault):
         # each block contains its own road network and a global network
         self._global_network = global_network
         self.block_network = RoadNetwork()
+        self._block_objects = None
 
         # used to spawn npc
         self._respawn_roads = []
@@ -136,8 +137,14 @@ class Block(Element, BlockDefault):
         Randomly Construct a block, if overlap return False
         """
         self.set_config(self.PARAMETER_SPACE.sample())
+        self.node_path = NodePath(self._block_name)
+        self._block_objects = []
         if extra_config:
-            self.set_config(extra_config)
+            assert set(extra_config.keys()).issubset(self.PARAMETER_SPACE.parameters), \
+                "Make sure the parameters' name are as same as what defined in pg_space.py"
+            raw_config = self.get_config()
+            raw_config.update(extra_config)
+            self.set_config(raw_config)
         success = self._sample_topology()
         self._create_in_world()
         self.attach_to_pg_world(root_render_np, pg_physics_world)
@@ -149,6 +156,9 @@ class Block(Element, BlockDefault):
         self.node_path.removeNode()
         self.dynamic_nodes.clear()
         self.static_nodes.clear()
+        for obj in self._block_objects:
+            obj.destroy(pg_physics_world)
+        self._block_objects = None
 
     def _sample_topology(self) -> bool:
         """
@@ -162,12 +172,7 @@ class Block(Element, BlockDefault):
         return no_cross
 
     def construct_from_config(self, config: Dict, root_render_np: NodePath, pg_physics_world: PGPhysicsWorld):
-        assert set(config.keys()) == self.PARAMETER_SPACE.parameters, \
-            "Make sure the parameters' name are as same as what defined in pg_space.py"
-        self.set_config(config)
-        success = self._sample_topology()
-        self._create_in_world()
-        self.attach_to_pg_world(root_render_np, pg_physics_world)
+        success = self.construct_block(root_render_np, pg_physics_world, config)
         return success
 
     def get_socket(self, index: Union[str, int]) -> BlockSocket:
@@ -303,7 +308,6 @@ class Block(Element, BlockDefault):
         self.lane_vis_node_path.node().collect()
         self.lane_vis_node_path.hide(CamMask.DepthCam | CamMask.ScreenshotCam)
 
-        self.node_path = NodePath(self._block_name)
         self.node_path.hide(CamMask.Shadow)
 
         self.sidewalk_node_path.reparentTo(self.node_path)
@@ -589,3 +593,53 @@ class Block(Element, BlockDefault):
 
     def get_socket_list(self):
         return list(self._sockets.values())
+
+    def _generate_invisible_static_wall(
+        self,
+        position: Tuple,
+        heading: float,
+        heading_length: float,
+        side_width: float,
+        height=10,
+        name=BodyName.InvisibleWall,
+        collision_group=CollisionGroup.InvisibleWall
+    ):
+        """
+        Add an invisible physics wall to physics world
+        You can add some building models to the same location, add make it be detected by lidar
+        ----------------------------------
+        |               *                |  --->>>
+        ----------------------------------
+        * position
+        --->>> heading direction
+        ------ longitude length
+        | lateral width
+
+        **CAUTION**: position is the middle point of longitude edge
+        :param position: position in PGDrive
+        :param heading: heading in PGDrive [degree]
+        :param heading_length: rect length in heading direction
+        :param side_width: rect width in side direction
+        :param height: the detect will be executed from this height to 0
+        :param name: name of this invisible wall
+        :param collision_group: control the collision of this static wall and other elements
+        :return node_path
+        """
+        shape = BulletBoxShape(Vec3(heading_length / 2, side_width / 2, height))
+        body_node = BulletRigidBodyNode(name)
+        body_node.setActive(False)
+        body_node.setKinematic(False)
+        body_node.setStatic(True)
+        wall_np = self.node_path.attachNewNode(body_node)
+        body_node.addShape(shape)
+        body_node.setIntoCollideMask(BitMask32.bit(collision_group))
+        self.dynamic_nodes.append(body_node)
+        wall_np.setPos(panda_position(position))
+        wall_np.setH(panda_heading(heading))
+        return wall_np
+
+    def construct_block_buildings(self, object_manager):
+        """
+        Buildings will be added to object_manager as static object automatically
+        """
+        pass

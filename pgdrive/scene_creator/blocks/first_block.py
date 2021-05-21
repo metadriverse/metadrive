@@ -50,6 +50,7 @@ class FirstBlock(Block):
         CreateRoadFrom(next_lane, lane_num, other_v_spawn_road, self.block_network, self._global_network)
         CreateAdverseRoad(other_v_spawn_road, self.block_network, self._global_network)
 
+        self.node_path = NodePath(self._block_name)
         self._create_in_world()
 
         # global_network += self.block_network

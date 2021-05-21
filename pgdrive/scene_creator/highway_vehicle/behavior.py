@@ -6,7 +6,8 @@ import pgdrive.utils.math_utils as utils
 from pgdrive.constants import Route, LaneIndex
 from pgdrive.scene_creator.highway_vehicle.controller import ControlledVehicle
 from pgdrive.scene_creator.highway_vehicle.kinematics import Vehicle
-from pgdrive.scene_creator.object.traffic_object import Object
+from pgdrive.scene_creator.object.traffic_object import TrafficObject
+from pgdrive.scene_creator.object.base_object import BaseObject
 from pgdrive.scene_manager.traffic_manager import TrafficManager
 from pgdrive.utils.math_utils import clip
 
@@ -148,12 +149,13 @@ class IDMVehicle(ControlledVehicle):
         :param rear_vehicle: the vehicle following the ego-vehicle
         :return: the acceleration command for the ego-vehicle [m/s2]
         """
-        if not ego_vehicle or isinstance(ego_vehicle, Object):
+        if not ego_vehicle or isinstance(ego_vehicle, BaseObject):
             return 0
         ego_target_speed = utils.not_zero(getattr(ego_vehicle, "target_speed", 0))
         acceleration = self.COMFORT_ACC_MAX * (1 - np.power(max(ego_vehicle.speed, 0) / ego_target_speed, self.DELTA))
 
         if front_vehicle:
+            from pgdrive.scene_creator.buildings.base_building import BaseBuilding
             d = ego_vehicle.lane_distance_to(front_vehicle)
             acceleration -= self.COMFORT_ACC_MAX * \
                             np.power(self.desired_gap(ego_vehicle, front_vehicle) / utils.not_zero(d), 2)

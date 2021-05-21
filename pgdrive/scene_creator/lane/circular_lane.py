@@ -18,7 +18,7 @@ class CircularLane(AbstractLane):
         width: float = AbstractLane.DEFAULT_WIDTH,
         line_types: Tuple[LineType, LineType] = (LineType.BROKEN, LineType.BROKEN),
         forbidden: bool = False,
-        speed_limit: float = 20,
+        speed_limit: float = 1000,
         priority: int = 0
     ) -> None:
         super().__init__()
@@ -31,7 +31,6 @@ class CircularLane(AbstractLane):
         self.line_types = line_types
         self.forbidden = forbidden
         self.priority = priority
-        self.speed_limit = speed_limit
         self.length = self.radius * (self.end_phase - self.start_phase) * self.direction
 
     def update_properties(self):
