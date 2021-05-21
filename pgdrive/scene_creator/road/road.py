@@ -41,9 +41,10 @@ class Road:
         return len(self.get_lanes(road_network))
 
     def block_ID(self):
-        if re.search(">", self.end_node) is not None:
+        search_node = self.end_node if not self.is_negative_road() else self.start_node
+        if re.search(">", search_node) is not None:
             return ">"
-        block_id = re.search("[a-zA-Z]", self.end_node).group(0)
+        block_id = re.search("[a-zA-Z$]", search_node).group(0)
         return block_id
 
     def __eq__(self, other):

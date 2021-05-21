@@ -74,8 +74,6 @@ class TrafficManager(RandomEngine):
         for v in self.vehicles:
             self.is_target_vehicle_dict[v.name] = True
 
-        self._traffic_vehicles = deque()  # it is used to step all vehicles on scene
-
         traffic_density = self.density
         if abs(traffic_density - 0.0) < 1e-2:
             return
@@ -148,14 +146,14 @@ class TrafficManager(RandomEngine):
                 # create a new one
                 lane = self.np_random.choice(self.respawn_lanes)
                 vehicle_type = self.random_vehicle_type()
-                random_v = self.spawn_one_vehicle(vehicle_type, lane, self.np_random.rand() * lane.length / 2, True)
-                self._traffic_vehicles.append(random_v)
+                self.spawn_one_vehicle(vehicle_type, lane, self.np_random.rand() * lane.length / 2, True)
 
     def _clear_traffic(self, pg_world: PGWorld):
         if self._spawned_vehicles is not None:
             for v in self._spawned_vehicles:
                 v.destroy(pg_world)
         self._spawned_vehicles = []
+        self._traffic_vehicles = deque()  # it is used to step all vehicles on scene
 
     def reset(self, pg_world: PGWorld, map: Map, traffic_density: float) -> None:
         """
@@ -247,6 +245,7 @@ class TrafficManager(RandomEngine):
             len(self._spawned_vehicles), self, lane, long, seed=self.random_seed, enable_respawn=enable_respawn
         )
         self._spawned_vehicles.append(random_v)
+        self._traffic_vehicles.append(random_v)
         return random_v
 
     def _create_vehicles_on_lane(self, traffic_density: float, lane: AbstractLane, is_respawn_lane):
@@ -268,8 +267,7 @@ class TrafficManager(RandomEngine):
                 # Do special handling for ramp, and there must be vehicles created there
                 continue
             vehicle_type = self.random_vehicle_type()
-            random_v = self.spawn_one_vehicle(vehicle_type, lane, long, is_respawn_lane)
-            _traffic_vehicles.append(random_v)
+            self.spawn_one_vehicle(vehicle_type, lane, long, is_respawn_lane)
         return _traffic_vehicles
 
     def _create_respawn_vehicles(self, pg_world: PGWorld, map: Map, traffic_density: float):

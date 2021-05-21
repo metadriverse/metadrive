@@ -41,16 +41,7 @@ class MAIntersectionMap(PGMap):
         InterSection.EXIT_PART_LENGTH = length
         last_block = InterSection(1, last_block.get_socket(index=0), self.road_network, random_seed=1)
         last_block.add_u_turn(True)
-        last_block.construct_block(
-            parent_node_path,
-            pg_physics_world,
-            extra_config={
-                "exit_radius": 10,
-                "inner_radius": 30,
-                "angle": 70,
-                # Note: lane_num is set in config.map_config.lane_num
-            }
-        )
+        last_block.construct_block(parent_node_path, pg_physics_world)
         self.blocks.append(last_block)
 
 

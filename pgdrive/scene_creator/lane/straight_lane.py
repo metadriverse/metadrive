@@ -15,7 +15,7 @@ class StraightLane(AbstractLane):
         width: float = AbstractLane.DEFAULT_WIDTH,
         line_types: Tuple[LineType, LineType] = (LineType.BROKEN, LineType.BROKEN),
         forbidden: bool = False,
-        speed_limit: float = 20,
+        speed_limit: float = 1000,
         priority: int = 0
     ) -> None:
         """
@@ -28,19 +28,20 @@ class StraightLane(AbstractLane):
         :param forbidden: is changing to this lane forbidden
         :param priority: priority level of the lane, for determining who has right of way
         """
+        super(StraightLane, self).__init__()
         self.start = np.array(start)
         self.end = np.array(end)
         self.width = width
         self.line_types = line_types or [LineType.BROKEN, LineType.BROKEN]
         self.forbidden = forbidden
         self.priority = priority
-        self.speed_limit = speed_limit
         self.length = norm((self.end - self.start)[0], (self.end - self.start)[1])
         self.heading = math.atan2(self.end[1] - self.start[1], self.end[0] - self.start[0])
         self.direction = (self.end - self.start) / self.length
         self.direction_lateral = np.array([-self.direction[1], self.direction[0]])
 
     def update_properties(self):
+        super(StraightLane, self).__init__()
         self.length = norm((self.end - self.start)[0], (self.end - self.start)[1])
         self.heading = math.atan2(self.end[1] - self.start[1], self.end[0] - self.start[0])
         self.direction = (self.end - self.start) / self.length
@@ -63,6 +64,7 @@ class StraightLane(AbstractLane):
         return float(longitudinal), float(lateral)
 
     def reset_start_end(self, start: Vector, end: Vector):
+        super(StraightLane, self).__init__()
         self.start = start
         self.end = end
         self.update_properties()

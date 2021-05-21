@@ -15,7 +15,7 @@ class Bottleneck(Block):
     PARAMETER_SPACE = PGSpace(BlockParameterSpace.BOTTLENECK_PARAMETER)
 
     # property of bottleneck
-    BOTTLENECK_LEN = 20  # Add to parameter sapce in the future
+    BOTTLENECK_LEN = None
 
 
 class Merge(Bottleneck):
@@ -33,6 +33,7 @@ class Merge(Bottleneck):
     def _try_plug_into_previous_block(self) -> bool:
         no_cross = True
         parameters = self.get_config()
+        self.BOTTLENECK_LEN = parameters["bottle_len"]
         lane_num_changed = parameters[Parameter.lane_num]
 
         start_ndoe = self.pre_block_socket.positive_road.end_node
@@ -167,6 +168,7 @@ class Split(Bottleneck):
     def _try_plug_into_previous_block(self) -> bool:
         no_cross = True
         parameters = self.get_config()
+        self.BOTTLENECK_LEN = parameters["bottle_len"]
         lane_num_changed = parameters[Parameter.lane_num]
 
         start_ndoe = self.pre_block_socket.positive_road.end_node
