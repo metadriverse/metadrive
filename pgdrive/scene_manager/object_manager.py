@@ -44,17 +44,20 @@ class ObjectManager(RandomEngine):
         self.update_random_seed(map.random_seed)
         self.accident_prob = accident_prob
         for block in map.blocks:
-            block.construct_block_buildings(self)
+            block.construct_block_buildings(self, pg_world)
 
     def _clear_objects(self, pg_world: PGWorld):
         # only destroy self-generated objects
         for obj in self._spawned_objects:
             obj.destroy(pg_world=pg_world)
         self._spawned_objects = []
+        for obj in self._block_objects:
+            obj.node_path.detachNode()
         self._block_objects = []
 
-    def add_block_buildings(self, building: BaseObject):
+    def add_block_buildings(self, building: BaseObject, render_node):
         self._block_objects.append(building)
+        building.node_path.reparentTo(render_node)
 
     def spawn_one_object(
         self,
