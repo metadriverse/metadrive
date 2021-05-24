@@ -1,5 +1,6 @@
 import gym
 import numpy as np
+
 from pgdrive.envs.multi_agent_pgdrive import MultiAgentPGDrive
 from pgdrive.obs import ObservationType
 from pgdrive.obs.state_obs import StateObservation
@@ -13,7 +14,9 @@ MARoundaboutConfig = dict(
     map_config=dict(exit_length=60, lane_num=2),
     top_down_camera_initial_x=95,
     top_down_camera_initial_y=15,
-    top_down_camera_initial_z=120
+    top_down_camera_initial_z=120,
+    num_agents=40,
+    crash_done=True
 )
 
 

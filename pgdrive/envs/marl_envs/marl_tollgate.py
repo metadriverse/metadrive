@@ -1,5 +1,6 @@
 import gym
 import numpy as np
+
 from pgdrive.constants import TerminationState
 from pgdrive.envs.multi_agent_pgdrive import MultiAgentPGDrive
 from pgdrive.obs.state_obs import LidarStateObservation, StateObservation
@@ -11,6 +12,8 @@ from pgdrive.scene_creator.road.road import Road
 from pgdrive.utils import PGConfig, clip
 
 MATollConfig = dict(
+    num_agents=40,
+    crash_done=True,
     map_config=dict(exit_length=70, lane_num=3, toll_lane_num=8, toll_length=10),
     top_down_camera_initial_x=125,
     top_down_camera_initial_y=0,
