@@ -13,6 +13,9 @@ from pgdrive.scene_manager.spawn_manager import SpawnManager
 from pgdrive.utils import get_np_random, PGConfig
 
 MAParkingLotConfig = dict(
+    num_agents=10,
+    crash_done=True,
+    parking_space_num=8,
     map_config=dict(exit_length=20, lane_num=1),
     top_down_camera_initial_x=80,
     top_down_camera_initial_y=0,
@@ -24,7 +27,6 @@ MAParkingLotConfig = dict(
         "show_navi_mark": False,
         "show_line_to_dest": True,
     },
-    parking_space_num=8
 )
 
 

@@ -1,16 +1,18 @@
-import gym
 import copy
-import numpy as np
+
+from pgdrive.envs.marl_envs.marl_inout_roundabout import LidarStateObservationMARound
 from pgdrive.envs.multi_agent_pgdrive import MultiAgentPGDrive
 from pgdrive.obs import ObservationType
-from pgdrive.envs.marl_envs.marl_inout_roundabout import LidarStateObservationMARound
 from pgdrive.scene_creator.blocks.first_block import FirstBlock
 from pgdrive.scene_creator.blocks.intersection import InterSection
 from pgdrive.scene_creator.map import PGMap
 from pgdrive.scene_creator.road.road import Road
-from pgdrive.utils import get_np_random, norm, PGConfig
+from pgdrive.utils import get_np_random, PGConfig
 
 MAIntersectionConfig = dict(
+    num_agents=30,
+    crash_done=True,
+    neighbours_distance=40,
     map_config=dict(exit_length=60, lane_num=2),
     top_down_camera_initial_x=80,
     top_down_camera_initial_y=0,

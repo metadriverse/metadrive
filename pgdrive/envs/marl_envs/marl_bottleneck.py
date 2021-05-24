@@ -1,17 +1,16 @@
-import gym
-import copy
-import numpy as np
 from pgdrive.envs.multi_agent_pgdrive import MultiAgentPGDrive
 from pgdrive.envs.marl_envs.marl_inout_roundabout import LidarStateObservationMARound
+from pgdrive.envs.multi_agent_pgdrive import MultiAgentPGDrive
 from pgdrive.obs import ObservationType
-from pgdrive.obs.state_obs import StateObservation
-from pgdrive.scene_creator.blocks.first_block import FirstBlock
 from pgdrive.scene_creator.blocks.bottleneck import Merge, Split
+from pgdrive.scene_creator.blocks.first_block import FirstBlock
 from pgdrive.scene_creator.map import PGMap
 from pgdrive.scene_creator.road.road import Road
-from pgdrive.utils import get_np_random, norm, PGConfig
+from pgdrive.utils import PGConfig
 
 MABottleneckConfig = dict(
+    num_agents=20,
+    crash_done=True,
     map_config=dict(exit_length=60, bottle_lane_num=4, neck_lane_num=1, neck_length=20),
     top_down_camera_initial_x=95,
     top_down_camera_initial_y=15,
