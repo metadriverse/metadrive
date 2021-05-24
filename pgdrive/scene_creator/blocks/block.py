@@ -630,7 +630,7 @@ class Block(Element, BlockDefault):
         body_node.setActive(False)
         body_node.setKinematic(False)
         body_node.setStatic(True)
-        wall_np = self.node_path.attachNewNode(body_node)
+        wall_np = NodePath(body_node)
         body_node.addShape(shape)
         body_node.setIntoCollideMask(BitMask32.bit(collision_group))
         self.dynamic_nodes.append(body_node)
@@ -638,7 +638,7 @@ class Block(Element, BlockDefault):
         wall_np.setH(panda_heading(heading))
         return wall_np
 
-    def construct_block_buildings(self, object_manager):
+    def construct_block_buildings(self, object_manager, pg_world):
         """
         Buildings will be added to object_manager as static object automatically
         """
