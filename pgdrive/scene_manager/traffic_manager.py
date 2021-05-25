@@ -1,11 +1,13 @@
 import logging
+import copy
 from collections import namedtuple, deque
-from typing import Tuple, Dict, List
+from typing import Tuple, Dict
 
+from pgdrive.constants import TARGET_VEHICLES, TRAFFIC_VEHICLES, OBJECT_TO_AGENT, AGENT_TO_OBJECT
 from pgdrive.scene_creator.lane.abs_lane import AbstractLane
 from pgdrive.scene_creator.map import Map
 from pgdrive.scene_creator.road.road import Road
-from pgdrive.utils import norm, RandomEngine
+from pgdrive.utils import norm, RandomEngine, merge_dicts
 from pgdrive.world.pg_world import PGWorld
 
 BlockVehicles = namedtuple("block_vehicles", "trigger_road vehicles")
@@ -194,18 +196,32 @@ class TrafficManager(RandomEngine):
         :return: States of all vehicles
         """
         states = dict()
+        traffic_states = dict()
         for vehicle in self._traffic_vehicles:
-            states[vehicle.index] = vehicle.get_state()
+            traffic_states[vehicle.index] = vehicle.get_state()
 
         # collect other vehicles
         if self.mode != TrafficMode.Respawn:
             for v_b in self.block_triggered_vehicles:
                 for vehicle in v_b.vehicles:
-                    states[vehicle.index] = vehicle.get_state()
+                    traffic_states[vehicle.index] = vehicle.get_state()
+        states[TRAFFIC_VEHICLES] = traffic_states
+        active_obj = copy.copy(self._scene_mgr.agent_manager._active_objects)
+        pending_obj = copy.copy(self._scene_mgr.agent_manager._pending_objects)
+        dying_obj = copy.copy(self._scene_mgr.agent_manager._dying_objects)
+        states[TARGET_VEHICLES] = {k: v.get_state() for k, v in active_obj.items()}
+        states[TARGET_VEHICLES] = merge_dicts(
+            states[TARGET_VEHICLES], {k: v.get_state()
+                                      for k, v in pending_obj.items()}, allow_new_keys=True
+        )
+        states[TARGET_VEHICLES] = merge_dicts(
+            states[TARGET_VEHICLES], {k: v_count[0].get_state()
+                                      for k, v_count in dying_obj.items()},
+            allow_new_keys=True
+        )
 
-        # FIXME the global state system might be wrong!
-        states["ego"] = {k: v.get_state() for k, v in self._scene_mgr.agent_manager.active_agents.items()}
-        # states["ego"] = self.ego_vehicle.get_state()
+        states[OBJECT_TO_AGENT] = copy.deepcopy(self._scene_mgr.agent_manager._object_to_agent)
+        states[AGENT_TO_OBJECT] = copy.deepcopy(self._scene_mgr.agent_manager._agent_to_object)
         return states
 
     def get_global_init_states(self) -> Dict:

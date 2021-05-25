@@ -122,8 +122,8 @@ class MultiAgentRoundaboutEnv(MultiAgentPGDrive):
         return MultiAgentPGDrive.default_config().update(MARoundaboutConfig, allow_overwrite=True)
 
     def _update_map(self, episode_data: dict = None, force_seed=None):
-        if episode_data is not None:
-            raise ValueError()
+        # if episode_data is not None:
+        #     raise ValueError()
         map_config = self.config["map_config"]
         map_config.update({"seed": self.current_seed})
 

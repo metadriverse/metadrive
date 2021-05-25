@@ -5,6 +5,7 @@ from pgdrive.constants import DEFAULT_AGENT
 from pgdrive.scene_creator.map import PGMap
 from pgdrive.scene_manager.traffic_manager import TrafficManager
 from pgdrive.world.pg_world import PGWorld
+from pgdrive.constants import TARGET_VEHICLES, TRAFFIC_VEHICLES, OBJECT_TO_AGENT
 
 
 class PGReplayer:
@@ -14,6 +15,11 @@ class PGReplayer:
         self.restore_vehicles = {}
         self.current_map = current_map
         self._recover_vehicles_from_data(traffic_mgr, episode_data, pg_world)
+        self._init_obj_to_agent = self._record_obj_to_agent()
+
+    def _record_obj_to_agent(self):
+        frame = self.restore_episode_info[-1]
+        return frame[OBJECT_TO_AGENT]
 
     def _recover_vehicles_from_data(self, traffic_mgr: TrafficManager, episode_data: dict, pg_world: PGWorld):
         assert isinstance(self.restore_vehicles, dict), "No place to restore vehicles"
@@ -26,25 +32,27 @@ class PGReplayer:
             car.attach_to_pg_world(pg_world.pbr_worldNP, pg_world.physics_world)
         logging.debug("Recover {} Traffic Vehicles".format(len(self.restore_vehicles)))
 
-    def replay_frame(self, ego_vehicle, pg_world: PGWorld):
-        assert self.restore_episode_info is not None, "Not frame data in episode info"
+    def replay_frame(self, target_vehicles, pg_world: PGWorld, last_step=False):
+        assert self.restore_episode_info is not None, "No frame data in episode info"
         if len(self.restore_episode_info) == 0:
             return True
         frame = self.restore_episode_info.pop(-1)
         vehicles_to_remove = []
         for index, state in frame.items():
-            if index == "ego":
-                vehicle_to_set = ego_vehicle
-                assert len(state) == 1, "Only support single-agent now!"
-                state = state[DEFAULT_AGENT]
-                vehicle_to_set.set_state(state)
-            else:
-                vehicle_to_set = self.restore_vehicles[index]
-                vehicle_to_set.set_state(state)
-                if state["done"] and not vehicle_to_set.enable_respawn:
-                    vehicles_to_remove.append(vehicle_to_set)
-        for v in vehicles_to_remove:
-            v.destroy(pg_world)
+            if index == TARGET_VEHICLES:
+                for t_v_idx, t_v_s in state.items():
+                    agent_idx = self._init_obj_to_agent[t_v_idx]
+                    vehicle_to_set = target_vehicles[agent_idx]
+                    vehicle_to_set.set_state(t_v_s)
+            elif index == TRAFFIC_VEHICLES:
+                for t_v_idx, t_v_s in state.items():
+                    vehicle_to_set = self.restore_vehicles[t_v_idx]
+                    vehicle_to_set.set_state(t_v_s)
+                    if t_v_s["done"] and not vehicle_to_set.enable_respawn:
+                        vehicles_to_remove.append(vehicle_to_set)
+        if last_step:
+            for v in vehicles_to_remove:
+                v.destroy(pg_world)
 
     def destroy(self, pg_world):
         for vehicle in self.restore_vehicles.values():

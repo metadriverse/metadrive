@@ -27,7 +27,7 @@ class TestEnv(PGDriveEnv):
         )
 
 
-def test_save_episode(vis=False):
+def test_save_episode(vis=True):
     setup_logger(True)
 
     test_dump = False
@@ -61,4 +61,4 @@ def test_save_episode(vis=False):
 
 
 if __name__ == "__main__":
-    test_save_episode(vis=False)
+    test_save_episode(vis=True)
