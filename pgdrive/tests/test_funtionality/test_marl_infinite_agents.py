@@ -28,7 +28,7 @@ def test_infinite_agents():
             # env.render(mode="top_down")
             for kkk, iii in info.items():
                 if d[kkk]:
-                    assert iii["episode_length"] > 1
+                    assert iii["episode_length"] >= 1
             if d["__all__"]:
                 o = env.reset()
                 print("Finish {} steps.".format(i))
@@ -48,7 +48,7 @@ def test_infinite_agents():
             # env.render(mode="top_down")
             for kkk, iii in info.items():
                 if d[kkk]:
-                    assert iii["episode_length"] > 1
+                    assert iii["episode_length"] >= 1
             if d["__all__"]:
                 o = env.reset()
                 print("Finish {} steps.".format(i))
