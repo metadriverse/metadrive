@@ -382,6 +382,7 @@ def test_ma_toll_reward_done_alignment():
             "horizon": 200,
             "num_agents": 24,
             "crash_vehicle_penalty": 1.7777,
+            "crash_done": False
         }
     )
     try:
@@ -574,6 +575,7 @@ def test_ma_toll_horizon_termination():
     env = MultiAgentTollgateEnv({
         "horizon": 100,
         "num_agents": 8,
+        "crash_done": False,
     })
     try:
         for _ in range(3):  # This function is really easy to break, repeat multiple times!

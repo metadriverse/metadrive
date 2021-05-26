@@ -381,6 +381,7 @@ def test_ma_intersection_reward_done_alignment():
             "horizon": 200,
             "num_agents": 40,
             "crash_vehicle_penalty": 1.7777,
+            "crash_done": False
         }
     )
     try:
@@ -570,10 +571,7 @@ def test_ma_intersection_no_short_episode():
 
 def test_ma_intersection_horizon_termination():
     # test horizon
-    env = MultiAgentIntersectionEnv({
-        "horizon": 100,
-        "num_agents": 8,
-    })
+    env = MultiAgentIntersectionEnv({"horizon": 100, "num_agents": 8, "crash_done": False})
     try:
         for _ in range(3):  # This function is really easy to break, repeat multiple times!
             _check_spaces_before_reset(env)
