@@ -373,6 +373,7 @@ def test_ma_roundabout_reward_done_alignment():
             "horizon": 200,
             "num_agents": 40,
             "crash_vehicle_penalty": 1.7777,
+            "crash_done": False
         }
     )
     try:
@@ -562,10 +563,7 @@ def test_ma_roundabout_no_short_episode():
 
 def test_ma_roundabout_horizon_termination():
     # test horizon
-    env = MultiAgentRoundaboutEnv({
-        "horizon": 100,
-        "num_agents": 8,
-    })
+    env = MultiAgentRoundaboutEnv({"horizon": 100, "num_agents": 8, "crash_done": False})
     try:
         for _ in range(3):  # This function is really easy to break, repeat multiple times!
             _check_spaces_before_reset(env)
@@ -699,7 +697,7 @@ if __name__ == '__main__':
     # test_ma_roundabout_reward_sign()
     # test_ma_roundabout_init_space()
     # test_ma_roundabout_no_short_episode()
-    # test_ma_roundabout_horizon_termination()
-    test_ma_roundabout_40_agent_reset_after_respawn()
+    test_ma_roundabout_horizon_termination()
+    # test_ma_roundabout_40_agent_reset_after_respawn()
     # test_ma_no_reset_error()
     # test_randomize_spawn_place()

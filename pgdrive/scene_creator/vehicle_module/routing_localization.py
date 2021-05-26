@@ -294,7 +294,10 @@ class RoutingLocalizationModule:
     def destroy(self):
         if self._show_navi_info:
             self._arrow_node_path.removeNode()
-            self._line_to_dest.removeNode()
+            try:
+                self._line_to_dest.removeNode()
+            except AttributeError:
+                pass
             self._dest_node_path.removeNode()
             self._goal_node_path.removeNode()
 
