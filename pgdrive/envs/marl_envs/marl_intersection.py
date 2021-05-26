@@ -207,7 +207,7 @@ def _vis():
             },
             "fast": True,
             "use_render": True,
-            "debug": False,
+            "debug": True,
             "manual_control": True,
             "num_agents": 48,
             "delay_done": 1000,
@@ -328,9 +328,32 @@ def _long_run():
         env.close()
 
 
+def show_map_and_traj():
+    import matplotlib.pyplot as plt
+    from pgdrive.obs.top_down_renderer import draw_top_down_map, draw_top_down_trajectory
+    import json
+    import cv2
+    import pygame
+    env = MultiAgentIntersectionEnv()
+    env.reset()
+    with open("ccppo_inter_0.json", "r") as f:
+        traj = json.load(f)
+    m = draw_top_down_map(env.current_map, simple_draw=False, return_surface=True, reverse_color=True)
+    m = draw_top_down_trajectory(
+        m, traj, entry_differ_color=True, color_list=[(255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0)]
+    )
+    ret = cv2.resize(pygame.surfarray.pixels_red(m), (512, 512), interpolation=cv2.INTER_LINEAR)
+    #
+    plt.imshow(ret)
+    plt.show()
+    pygame.image.save(m, "image.jpg")
+    env.close()
+
+
 if __name__ == "__main__":
     # _draw()
     # _vis()
-    _vis_debug_respawn()
+    # _vis_debug_respawn()
     # _profiwdle()
     # _long_run()
+    show_map_and_traj()
