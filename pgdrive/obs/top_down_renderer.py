@@ -7,15 +7,24 @@ from pgdrive.obs.top_down_obs_impl import WorldSurface, VehicleGraphics, LaneGra
 from pgdrive.utils.utils import import_pygame
 
 pygame = import_pygame()
+from pgdrive.constants import TARGET_VEHICLES
+
+color_white = (255, 255, 255)
 
 
-def draw_top_down_map(map,
-                      resolution: Iterable = (512, 512),
-                      simple_draw=True,
-                      return_surface=False,
-                      film_size=None) -> Optional[Union[np.ndarray, pygame.Surface]]:
+def draw_top_down_map(
+    map,
+    resolution: Iterable = (512, 512),
+    simple_draw=True,
+    return_surface=False,
+    film_size=None,
+    reverse_color=False
+) -> Optional[Union[np.ndarray, pygame.Surface]]:
     film_size = film_size or map.film_size
     surface = WorldSurface(film_size, 0, pygame.Surface(film_size))
+    if reverse_color:
+        surface.WHITE, surface.BLACK = surface.BLACK, surface.WHITE
+        surface.__init__(film_size, 0, pygame.Surface(film_size))
     b_box = map.road_network.get_bounding_box()
     x_len = b_box[1] - b_box[0]
     y_len = b_box[3] - b_box[2]
@@ -41,7 +50,40 @@ def draw_top_down_map(map,
     return ret
 
 
-color_white = (255, 255, 255)
+def draw_top_down_trajectory(
+    surface: WorldSurface, episode_data: dict, entry_differ_color=False, exit_differ_color=False, color_list=None
+):
+    if entry_differ_color or exit_differ_color:
+        assert color_list is not None
+    color_map = {}
+    if not exit_differ_color and not entry_differ_color:
+        color_type = 0
+    elif exit_differ_color ^ entry_differ_color:
+        color_type = 1
+    else:
+        color_type = 2
+
+    for frame in episode_data["frame"]:
+        for k, state, in frame[TARGET_VEHICLES].items():
+            if color_type == 0:
+                color = color_white
+            elif color_type == 1:
+                key = state["destination"][1] if exit_differ_color else state["spawn_road"][0]
+                if key not in color_map:
+                    color_map[key] = color_list.pop()
+                color = color_map[key]
+            else:
+                key_1 = state["spawn_road"][0]
+                key_2 = state["destination"][1]
+                if key_1 not in color_map:
+                    color_map[key_1] = dict()
+                if key_2 not in color_map[key_1]:
+                    color_map[key_1][key_2] = color_list.pop()
+                color = color_map[key_1][key_2]
+
+            start = state["position"]
+            pygame.draw.circle(surface, color, surface.pos2pix(start[0], start[1]), 1)
+    return surface
 
 
 class TopDownRenderer:
