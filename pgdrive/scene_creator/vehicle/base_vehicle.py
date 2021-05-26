@@ -722,10 +722,14 @@ class BaseVehicle(DynamicElement):
         self.chassis_np.setH((panda_heading(heading_theta) * 180 / np.pi) - 90)
 
     def get_state(self):
+        final_road = self.routing_localization.final_road
         return {
             "heading": self.heading_theta,
             "position": self.position.tolist(),
-            "done": self.crash_vehicle or self.out_of_route or self.crash_sidewalk or not self.on_lane
+            "done": self.crash_vehicle or self.out_of_route or self.crash_sidewalk or not self.on_lane,
+            "speed": self.speed,
+            "spawn_road": self.vehicle_config["spawn_lane_index"][:-1],
+            "destination": (final_road.start_node, final_road.end_node)
         }
 
     def set_state(self, state: dict):
