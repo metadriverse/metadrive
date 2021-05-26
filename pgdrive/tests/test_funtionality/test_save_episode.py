@@ -27,7 +27,7 @@ class TestEnv(PGDriveEnv):
         )
 
 
-def test_save_episode(vis=True):
+def test_save_episode(vis=False):
     setup_logger(True)
 
     test_dump = False
