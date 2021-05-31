@@ -106,6 +106,7 @@ class WorldSurface(pygame.Surface):
     INITIAL_CENTERING = [0.5, 0.5]
     SCALING_FACTOR = 1.3
     MOVING_FACTOR = 0.1
+    LANE_LINE_COLOR = (35, 35, 35)
 
     def __init__(self, size: Tuple[int, int], flags: object, surf: pygame.SurfaceType) -> None:
         surf.fill(pygame.Color("Black"))
@@ -206,7 +207,9 @@ class VehicleGraphics:
     font = None
 
     @classmethod
-    def display(cls, vehicle, surface, color, heading, label: bool = False, draw_countour=False) -> None:
+    def display(
+        cls, vehicle, surface, color, heading, label: bool = False, draw_countour=False, contour_width=1
+    ) -> None:
         """
         Display a vehicle on a pygame surface.
 
@@ -226,7 +229,7 @@ class VehicleGraphics:
         box_rotate = [p.rotate(angle) + position for p in box]
         pygame.draw.polygon(surface, color=color, points=box_rotate)
         if draw_countour:
-            pygame.draw.polygon(surface, cls.BLACK, box_rotate, width=1)  #, 1)
+            pygame.draw.polygon(surface, cls.BLACK, box_rotate, width=contour_width)  # , 1)
 
         # Label
         if label:
@@ -355,7 +358,7 @@ class LaneGraphics:
         for k, _ in enumerate(starts):
             if abs(starts[k] - ends[k]) > 0.5 * cls.STRIPE_LENGTH:
                 pygame.draw.line(
-                    surface, surface.WHITE, (surface.vec2pix(lane.position(starts[k], lats[k]))),
+                    surface, surface.LANE_LINE_COLOR, (surface.vec2pix(lane.position(starts[k], lats[k]))),
                     (surface.vec2pix(lane.position(ends[k], lats[k]))),
                     max(surface.pix(cls.STRIPE_WIDTH), surface.pix(cls.LANE_LINE_WIDTH))
                 )

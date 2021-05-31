@@ -1,4 +1,4 @@
-from pgdrive.envs.multi_agent_pgdrive import MultiAgentPGDrive
+from pgdrive.envs.multi_agent_pgdrive import pygame_replay
 from pgdrive.envs.marl_envs.marl_inout_roundabout import LidarStateObservationMARound
 from pgdrive.envs.multi_agent_pgdrive import MultiAgentPGDrive
 from pgdrive.obs import ObservationType
@@ -75,8 +75,6 @@ class MultiAgentBottleneckEnv(MultiAgentPGDrive):
         return MultiAgentPGDrive.default_config().update(MABottleneckConfig, allow_overwrite=True)
 
     def _update_map(self, episode_data: dict = None, force_seed=None):
-        if episode_data is not None:
-            raise ValueError()
         map_config = self.config["map_config"]
         map_config.update({"seed": self.current_seed})
 
@@ -85,6 +83,7 @@ class MultiAgentBottleneckEnv(MultiAgentPGDrive):
             new_map = MABottleneckMap(self.pg_world, map_config)
             self.maps[self.current_seed] = new_map
             self.current_map = self.maps[self.current_seed]
+            self.current_map.spawn_roads = self.spawn_roads
 
     def get_single_observation(self, vehicle_config: "PGConfig") -> "ObservationType":
         return LidarStateObservationMARound(vehicle_config)
@@ -386,7 +385,8 @@ def _long_run():
 
 if __name__ == "__main__":
     # _draw()
-    _vis()
+    # _vis()
     # _vis_debug_respawn()
     # _profile()
     # _long_run()
+    pygame_replay("bottle")
