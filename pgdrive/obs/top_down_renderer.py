@@ -1,4 +1,6 @@
 from typing import Optional, Union, Iterable
+import seaborn as sns
+from collections import deque, namedtuple
 
 import cv2
 import numpy as np
@@ -10,6 +12,7 @@ pygame = import_pygame()
 from pgdrive.constants import TARGET_VEHICLES
 
 color_white = (255, 255, 255)
+history_vehicle = namedtuple("history_vehicle", "position heading_theta WIDTH LENGTH color")
 
 
 def draw_top_down_map(
@@ -18,7 +21,7 @@ def draw_top_down_map(
     simple_draw=True,
     return_surface=False,
     film_size=None,
-    reverse_color=False
+    reverse_color=False,
 ) -> Optional[Union[np.ndarray, pygame.Surface]]:
     film_size = film_size or map.film_size
     surface = WorldSurface(film_size, 0, pygame.Surface(film_size))
@@ -63,15 +66,31 @@ def draw_top_down_trajectory(
     else:
         color_type = 2
 
+    if entry_differ_color:
+        # init only once
+        if "spawn_roads" in episode_data:
+            spawn_roads = episode_data["spawn_roads"]
+        else:
+            spawn_roads = set()
+            first_frame = episode_data["frame"][0]
+            for state in first_frame[TARGET_VEHICLES].values():
+                spawn_roads.add((state["spawn_road"][0], state["spawn_road"][1]))
+        keys = [road[0] for road in list(spawn_roads)]
+        keys.sort()
+        color_map = {key: color for key, color in zip(keys, color_list)}
+
     for frame in episode_data["frame"]:
         for k, state, in frame[TARGET_VEHICLES].items():
             if color_type == 0:
                 color = color_white
             elif color_type == 1:
-                key = state["destination"][1] if exit_differ_color else state["spawn_road"][0]
-                if key not in color_map:
-                    color_map[key] = color_list.pop()
-                color = color_map[key]
+                if exit_differ_color:
+                    key = state["destination"][1]
+                    if key not in color_map:
+                        color_map[key] = color_list.pop()
+                    color = color_map[key]
+                else:
+                    color = color_map[state["spawn_road"][0]]
             else:
                 key_1 = state["spawn_road"][0]
                 key_2 = state["destination"][1]
@@ -87,11 +106,16 @@ def draw_top_down_trajectory(
 
 
 class TopDownRenderer:
-    def __init__(self, map, film_size=None, screen_size=None, light_background=True, zoomin=None):
+    def __init__(
+        self, map, film_size=None, screen_size=None, light_background=True, zoomin=None, num_stack=5, history_smooth=0
+    ):
         film_size = film_size or (1000, 1000)
         self._zoomin = zoomin or 1.0
         self._screen_size = screen_size
         self._map = map
+        self.stack_frames = deque(maxlen=num_stack)
+        self.history_vehicles = deque(maxlen=num_stack)
+        self.history_smooth = history_smooth
 
         self._background = draw_top_down_map(map, simple_draw=False, return_surface=True, film_size=film_size)
         self._film_size = self._background.get_size()
@@ -124,7 +148,9 @@ class TopDownRenderer:
 
     def render(self, vehicles, *args, **kwargs):
         self.refresh()
-        self._draw_vehicles(vehicles)
+        this_frame_vehicles = self._append_frame_vehicles(vehicles)
+        self.history_vehicles.append(this_frame_vehicles)
+        self._draw_history_vehicles()
         self.blit()
 
     def blit(self):
@@ -137,12 +163,69 @@ class TopDownRenderer:
         pygame.display.update()
 
     def _draw_vehicles(self, vehicles):
-        for v in vehicles:
+        frame_vehicles = []
+        for i, v in enumerate(vehicles, 1):
             h = v.heading_theta
             h = h if abs(h) > 2 * np.pi / 180 else 0
 
             VehicleGraphics.display(
                 vehicle=v, surface=self._runtime, heading=h, color=VehicleGraphics.BLUE, draw_countour=True
+            )
+            frame_vehicles.append(
+                history_vehicle(heading_theta=v.heading_theta, WIDTH=v.WIDTH, LENGTH=v.LENGTH, position=v.position)
+            )
+        return frame_vehicles
+
+    @staticmethod
+    def _append_frame_vehicles(vehicles):
+        frame_vehicles = []
+        for i, v in enumerate(vehicles, 1):
+            frame_vehicles.append(
+                history_vehicle(
+                    heading_theta=v.heading_theta,
+                    WIDTH=v.WIDTH,
+                    LENGTH=v.LENGTH,
+                    position=v.position,
+                    color=v.top_down_color
+                )
+            )
+        return frame_vehicles
+
+    def _draw_history_vehicles(self):
+        if len(self.history_vehicles) == 0:
+            return
+        for i, vehicles in enumerate(self.history_vehicles):
+            i = len(self.history_vehicles) - i
+            if self.history_smooth != 0 and (i % self.history_smooth != 0):
+                continue
+            for v in vehicles:
+                c = v.color
+                h = v.heading_theta
+                h = h if abs(h) > 2 * np.pi / 180 else 0
+                x = abs(int(i))
+                alpha_f = x / len(self.history_vehicles)
+                VehicleGraphics.display(
+                    vehicle=v,
+                    surface=self._runtime,
+                    heading=h,
+                    color=(c[0] + alpha_f * (255 - c[0]), c[1] + alpha_f * (255 - c[1]), c[2] + alpha_f * (255 - c[2])),
+                    draw_countour=False
+                )
+
+        i = int(len(self.history_vehicles) / 2)
+        for v in self.history_vehicles[i]:
+            h = v.heading_theta
+            c = v.color
+            h = h if abs(h) > 2 * np.pi / 180 else 0
+            x = abs(int(i))
+            alpha_f = x / len(self.history_vehicles)
+            VehicleGraphics.display(
+                vehicle=v,
+                surface=self._runtime,
+                heading=h,
+                color=(c[0] + alpha_f * (255 - c[0]), c[1] + alpha_f * (255 - c[1]), c[2] + alpha_f * (255 - c[2])),
+                draw_countour=True,
+                contour_width=2
             )
 
 

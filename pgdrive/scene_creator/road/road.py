@@ -55,3 +55,6 @@ class Road:
 
     def __hash__(self):
         return hash((self.start_node, self.end_node))
+
+    def to_json(self):
+        return (self.start_node, self.end_node)

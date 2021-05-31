@@ -60,8 +60,6 @@ class MultiAgentIntersectionEnv(MultiAgentPGDrive):
         return MultiAgentPGDrive.default_config().update(MAIntersectionConfig, allow_overwrite=True)
 
     def _update_map(self, episode_data: dict = None, force_seed=None):
-        if episode_data is not None:
-            raise ValueError()
         map_config = self.config["map_config"]
         map_config.update({"seed": self.current_seed})
 
@@ -70,6 +68,7 @@ class MultiAgentIntersectionEnv(MultiAgentPGDrive):
             new_map = MAIntersectionMap(self.pg_world, map_config)
             self.maps[self.current_seed] = new_map
             self.current_map = self.maps[self.current_seed]
+            self.current_map.spawn_roads = self.spawn_roads
 
     def _update_destination_for(self, vehicle_id):
         vehicle = self.vehicles[vehicle_id]
@@ -336,7 +335,7 @@ def show_map_and_traj():
     import pygame
     env = MultiAgentIntersectionEnv()
     env.reset()
-    with open("ccppo_inter_0.json", "r") as f:
+    with open("metasvodist_inter_best.json", "r") as f:
         traj = json.load(f)
     m = draw_top_down_map(env.current_map, simple_draw=False, return_surface=True, reverse_color=True)
     m = draw_top_down_trajectory(
@@ -350,10 +349,29 @@ def show_map_and_traj():
     env.close()
 
 
+def pygame_replay():
+    import json
+    import pygame
+    env = MultiAgentIntersectionEnv({"use_topdown": True})
+    with open("metasvodist_inter_best.json", "r") as f:
+        traj = json.load(f)
+    o = env.reset(copy.deepcopy(traj))
+    frame_count = 0
+    while True:
+        o, r, d, i = env.step(env.action_space.sample())
+        env.pg_world.force_fps.toggle()
+        env.render(mode="top_down", num_stack=50, film_size=(4000, 4000), history_smooth=0)
+        pygame.image.save(env._top_down_renderer._runtime, "inter_{}.png".format(frame_count))
+        frame_count += 1
+        if len(env.scene_manager.replay_system.restore_episode_info) == 0:
+            env.close()
+
+
 if __name__ == "__main__":
     # _draw()
     # _vis()
     # _vis_debug_respawn()
     # _profiwdle()
     # _long_run()
-    show_map_and_traj()
+    # show_map_and_traj()
+    pygame_replay()
