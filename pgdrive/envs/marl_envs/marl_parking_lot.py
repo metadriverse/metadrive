@@ -2,7 +2,7 @@ import copy
 import logging
 
 from pgdrive.envs.marl_envs.marl_inout_roundabout import LidarStateObservationMARound
-from pgdrive.envs.multi_agent_pgdrive import MultiAgentPGDrive
+from pgdrive.envs.multi_agent_pgdrive import MultiAgentPGDrive, pygame_replay
 from pgdrive.obs import ObservationType
 from pgdrive.scene_creator.blocks.first_block import FirstBlock
 from pgdrive.scene_creator.blocks.parking_lot import ParkingLot
@@ -172,8 +172,6 @@ class MultiAgentParkingLotEnv(MultiAgentPGDrive):
         return ret_config
 
     def _update_map(self, episode_data: dict = None, force_seed=None):
-        if episode_data is not None:
-            raise ValueError()
         map_config = self.config["map_config"]
         map_config.update({"seed": self.current_seed})
 
@@ -182,6 +180,7 @@ class MultiAgentParkingLotEnv(MultiAgentPGDrive):
             new_map = MAParkingLotMap(self.pg_world, map_config)
             self.maps[self.current_seed] = new_map
             self.current_map = self.maps[self.current_seed]
+            self.current_map.spawn_roads = self.spawn_roads
 
     def _update_destination_for(self, vehicle_id):
         vehicle = self.vehicles[vehicle_id]
@@ -543,7 +542,8 @@ def _long_run():
 
 if __name__ == "__main__":
     # _draw()
-    _vis()
+    # _vis()
     # _vis_debug_respawn()
     # _profile()
     # _long_run()
+    pygame_replay("parking", MultiAgentParkingLotEnv, True, other_ckpt="metasvodist_parking_3.json")

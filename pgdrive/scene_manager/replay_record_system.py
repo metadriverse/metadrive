@@ -71,6 +71,7 @@ class PGRecorder:
             map_config=map.config.get_dict(),
             init_traffic=init_traffic_vehicle_states,
             map_data=copy.deepcopy(map_data),
+            spawn_roads=[road.to_json() for road in map.spawn_roads],
             frame=[]
         )
 

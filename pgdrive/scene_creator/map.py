@@ -1,4 +1,5 @@
 import copy
+from pgdrive.scene_creator.road.road import Road
 import logging
 from typing import List
 
@@ -83,6 +84,7 @@ class Map:
 
         #  a trick to optimize performance
         self.road_network.after_init()
+        self.spawn_roads = [Road(FirstBlock.NODE_2, FirstBlock.NODE_3)]
 
     def _generate(self, pg_world):
         """Key function! Please overwrite it!"""
