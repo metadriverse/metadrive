@@ -304,6 +304,11 @@ class MultiAgentPGDrive(PGDriveEnvV2):
         config["num_agents"] = num_agents
         super(MultiAgentPGDrive, self).__init__(config)
 
+    def close(self):
+        super(MultiAgentPGDrive, self).close()
+        if self._top_down_renderer is not None:
+            self._top_down_renderer.close()
+
 
 def _test():
     setup_logger(True)
@@ -330,6 +335,7 @@ def _test():
         # o, r, d, info = env.step([0,1])
         d.update({"total_r": total_r})
         # env.render(text=d)
+        env.render(mode="top_down")
         if len(env.vehicles) == 0:
             total_r = 0
             print("Reset")
@@ -414,4 +420,5 @@ def panda_replay(name, env_class, save=False, other_traj=None, extra_config={}):
 
 
 if __name__ == '__main__':
-    _vis()
+    _test()
+    # _vis()
