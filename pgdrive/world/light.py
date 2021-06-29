@@ -11,6 +11,7 @@ class Light(DynamicElement):
     """
     def __init__(self, config: PGConfig):
         super(Light, self).__init__()
+        self.global_light = config["global_light"]
         self.node_path = NodePath("Light")
         self.direction_np = NodePath(DirectionalLight("direction light"))
         # self.light.node().setScene(self.render)
@@ -18,7 +19,12 @@ class Light(DynamicElement):
         # Too large will cause the graphics card out of memory.
         # self.direction_np.node().setShadowCaster(True, 8192, 8192)
         # self.direction_np.node().setShadowCaster(True, 4096, 4096)
-        self.direction_np.node().setShadowCaster(True, 128, 128)
+        if self.global_light:
+            self.direction_np.node().setShadowCaster(True, 16384, 16384)
+            self.direction_np.setPos(0, 0, 50)
+            self.direction_np.lookAt(100, -30, 0)
+        else:
+            self.direction_np.node().setShadowCaster(True, 128, 128)
 
         # self.direction_np.node().showFrustum()
         # self.light.node().getLens().setNearFar(10, 100)
@@ -27,7 +33,10 @@ class Light(DynamicElement):
         self.direction_np.node().setCameraMask(CamMask.Shadow)
 
         dlens = self.direction_np.node().getLens()
-        dlens.setFilmSize(8, 8)
+        if self.global_light:
+            dlens.setFilmSize(256, 256)
+        else:
+            dlens.setFilmSize(8, 8)
         # dlens.setFocalLength(1)
         # dlens.setNear(3)
 
@@ -39,11 +48,12 @@ class Light(DynamicElement):
         self.ambient_np.reparentTo(self.node_path)
 
     def step(self, pos):
-        self.direction_np.setPos(pos[0] - 200, pos[1] + 100, 150)
-        self.direction_np.lookAt(pos[0], pos[1], 0)
+        if not self.global_light:
+            self.direction_np.setPos(pos[0] - 200, pos[1] + 100, 150)
+            self.direction_np.lookAt(pos[0], pos[1], 0)
 
     def reset(self):
-        if self.direction_np is not None:
+        if self.direction_np is not None and not self.global_light:
             self.direction_np.setHpr(-90, -120, 0)
             self.direction_np.setY(20)
             self.direction_np.setX(0)

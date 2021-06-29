@@ -1,12 +1,14 @@
 import math
-from pgdrive.utils import get_np_random
-import seaborn as sns
 import time
 from collections import deque
 from typing import Union, Optional
+
 import gym
 import numpy as np
 from panda3d.bullet import BulletVehicle, BulletBoxShape, ZUp, BulletGhostNode, BulletWheel
+from panda3d.core import Vec3, TransformState, NodePath, LQuaternionf, BitMask32, TextNode, Vec4, Material
+import seaborn as sns
+from panda3d.bullet import BulletVehicle, BulletBoxShape, ZUp, BulletGhostNode
 from panda3d.core import Vec3, TransformState, NodePath, LQuaternionf, BitMask32, TextNode
 
 from pgdrive.constants import RENDER_MODE_ONSCREEN, COLOR, COLLISION_INFO_COLOR, BodyName, CamMask, CollisionGroup
@@ -22,7 +24,7 @@ from pgdrive.scene_creator.vehicle_module.distance_detector import SideDetector,
 from pgdrive.scene_creator.vehicle_module.rgb_camera import RGBCamera
 from pgdrive.scene_creator.vehicle_module.routing_localization import RoutingLocalizationModule
 from pgdrive.scene_creator.vehicle_module.vehicle_panel import VehiclePanel
-from pgdrive.utils import PGConfig, safe_clip_for_small_array, PGVector
+from pgdrive.utils import get_np_random, PGConfig, safe_clip_for_small_array, PGVector
 from pgdrive.utils.asset_loader import AssetLoader
 from pgdrive.utils.coordinates_shift import panda_position, pgdrive_position, panda_heading, pgdrive_heading
 from pgdrive.utils.element import DynamicElement
@@ -53,6 +55,13 @@ class BaseVehicle(DynamicElement):
     LENGTH = None
     WIDTH = None
 
+    # for random color
+    MATERIAL_COLOR_COEFF = 10  # to resist other factors, since other setting may make color dark
+    MATERIAL_METAL_COEFF = 1  # 0-1
+    MATERIAL_ROUGHNESS = 0.8  # smaller to make it more smooth, and reflect more light
+    MATERIAL_SHININESS = 1  # 0-128 smaller to make it more smooth, and reflect more light
+    MATERIAL_SPECULAR_COLOR = (3, 3, 3, 3)
+
     def __init__(
         self,
         pg_world: PGWorld,
@@ -60,6 +69,7 @@ class BaseVehicle(DynamicElement):
         physics_config: dict = None,
         random_seed: int = 0,
         name: str = None,
+        am_i_the_special_one=False
     ):
         """
         This Vehicle Config is different from self.get_config(), and it is used to define which modules to use, and
@@ -89,6 +99,13 @@ class BaseVehicle(DynamicElement):
 
         self.pg_world = pg_world
         self.node_path = NodePath("vehicle")
+
+        # color
+        color = sns.color_palette("colorblind")
+        idx = get_np_random().randint(len(color))
+        rand_c = color[idx]
+        self.top_down_color = (rand_c[0] * 255, rand_c[1] * 255, rand_c[2] * 255)
+        self.panda_color = rand_c
 
         # create
         self.spawn_place = (0, 0)
@@ -140,6 +157,8 @@ class BaseVehicle(DynamicElement):
         color = sns.color_palette("colorblind")
         idx = get_np_random().randint(len(color))
         rand_c = color[idx]
+        if am_i_the_special_one:
+            rand_c = color[2]  # A pretty green
         self.top_down_color = (rand_c[0] * 255, rand_c[1] * 255, rand_c[2] * 255)
 
     def _add_modules_for_vehicle(self, use_render: bool):
@@ -533,6 +552,22 @@ class BaseVehicle(DynamicElement):
                 self.MODEL.setH(para[Parameter.vehicle_vis_h])
                 self.MODEL.set_scale(para[Parameter.vehicle_vis_scale])
             self.MODEL.instanceTo(self.chassis_np)
+            if self.vehicle_config["random_color"]:
+                material = Material()
+                material.setBaseColor(
+                    (
+                        self.panda_color[0] * self.MATERIAL_COLOR_COEFF,
+                        self.panda_color[1] * self.MATERIAL_COLOR_COEFF,
+                        self.panda_color[2] * self.MATERIAL_COLOR_COEFF, 0.2
+                    )
+                )
+                material.setMetallic(self.MATERIAL_METAL_COEFF)
+                material.setSpecular(self.MATERIAL_SPECULAR_COLOR)
+                material.setRefractiveIndex(1.5)
+                material.setRoughness(self.MATERIAL_ROUGHNESS)
+                material.setShininess(self.MATERIAL_SHININESS)
+                material.setTwoside(False)
+                self.chassis_np.setMaterial(material, True)
 
     def _create_wheel(self):
         para = self.get_config()
@@ -743,6 +778,8 @@ class BaseVehicle(DynamicElement):
     def set_state(self, state: dict):
         self.set_heading(state["heading"])
         self.set_position(state["position"])
+        self._replay_done = state["done"]
+        self.set_position(state["position"], height=0.28)
 
     def _update_overtake_stat(self):
         if self.vehicle_config["overtake_stat"]:
@@ -852,3 +889,12 @@ class BaseVehicle(DynamicElement):
     @property
     def overspeed(self):
         return True if self.lane.speed_limit < self.speed else False
+
+    @property
+    def replay_done(self):
+        print(111)
+        return self._replay_done if hasattr(self, "_replay_done") else (
+            self.crash_building or self.crash_vehicle or
+            # self.on_white_continuous_line or
+            self.on_yellow_continuous_line
+        )
