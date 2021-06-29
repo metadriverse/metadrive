@@ -892,7 +892,6 @@ class BaseVehicle(DynamicElement):
 
     @property
     def replay_done(self):
-        print(111)
         return self._replay_done if hasattr(self, "_replay_done") else (
             self.crash_building or self.crash_vehicle or
             # self.on_white_continuous_line or
