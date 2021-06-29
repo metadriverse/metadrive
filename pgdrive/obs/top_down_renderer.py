@@ -3,6 +3,7 @@ from typing import Optional, Union, Iterable
 
 import cv2
 import numpy as np
+
 from pgdrive.constants import Decoration, TARGET_VEHICLES
 from pgdrive.obs.top_down_obs_impl import WorldSurface, VehicleGraphics, LaneGraphics
 from pgdrive.utils.utils import import_pygame
@@ -349,6 +350,9 @@ class TopDownRenderer:
                     (new_position[0] - img.get_width() / 2, new_position[1] - img.get_height() / 2),
                     # special_flags=pygame.BLEND_RGBA_MULT
                 )
+
+    def close(self):
+        pygame.quit()
 
 
 class PheromoneRenderer(TopDownRenderer):
