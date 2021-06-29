@@ -4,6 +4,7 @@ from collections import deque, namedtuple
 
 import cv2
 import numpy as np
+
 from pgdrive.constants import Decoration
 from pgdrive.obs.top_down_obs_impl import WorldSurface, VehicleGraphics, LaneGraphics
 from pgdrive.utils.utils import import_pygame
@@ -22,6 +23,7 @@ def draw_top_down_map(
     return_surface=False,
     film_size=None,
     reverse_color=False,
+    color=color_white
 ) -> Optional[Union[np.ndarray, pygame.Surface]]:
     film_size = film_size or map.film_size
     surface = WorldSurface(film_size, 0, pygame.Surface(film_size))
@@ -42,10 +44,10 @@ def draw_top_down_map(
         for _to in map.road_network.graph[_from].keys():
             for l in map.road_network.graph[_from][_to]:
                 if simple_draw:
-                    LaneGraphics.simple_draw(l, surface)
+                    LaneGraphics.simple_draw(l, surface, color=color)
                 else:
                     two_side = True if l is map.road_network.graph[_from][_to][-1] or decoration else False
-                    LaneGraphics.display(l, surface, two_side)
+                    LaneGraphics.display(l, surface, two_side, color=color)
 
     if return_surface:
         return surface
@@ -90,7 +92,11 @@ def draw_top_down_trajectory(
                         color_map[key] = color_list.pop()
                     color = color_map[key]
                 else:
-                    color = color_map[state["spawn_road"][0]]
+                    k = state["spawn_road"][0]
+                    if k not in color_map:
+                        color = list(color_map.values())[3]
+                    else:
+                        color = color_map[k]
             else:
                 key_1 = state["spawn_road"][0]
                 key_2 = state["destination"][1]
@@ -99,15 +105,29 @@ def draw_top_down_trajectory(
                 if key_2 not in color_map[key_1]:
                     color_map[key_1][key_2] = color_list.pop()
                 color = color_map[key_1][key_2]
-
             start = state["position"]
             pygame.draw.circle(surface, color, surface.pos2pix(start[0], start[1]), 1)
+    for step, frame in enumerate(episode_data["frame"]):
+        for k, state in frame[TARGET_VEHICLES].items():
+            if not state["done"]:
+                continue
+            start = state["position"]
+            if state["done"]:
+                pygame.draw.circle(surface, (0, 0, 0), surface.pos2pix(start[0], start[1]), 5)
     return surface
 
 
 class TopDownRenderer:
     def __init__(
-        self, map, film_size=None, screen_size=None, light_background=True, zoomin=None, num_stack=5, history_smooth=0
+        self,
+        map,
+        film_size=None,
+        screen_size=None,
+        light_background=True,
+        zoomin=None,
+        road_color=(35, 35, 35),
+        num_stack=15,
+        history_smooth=0
     ):
         film_size = film_size or (1000, 1000)
         self._zoomin = zoomin or 1.0
@@ -117,7 +137,9 @@ class TopDownRenderer:
         self.history_vehicles = deque(maxlen=num_stack)
         self.history_smooth = history_smooth
 
-        self._background = draw_top_down_map(map, simple_draw=False, return_surface=True, film_size=film_size)
+        self._background = draw_top_down_map(
+            map, simple_draw=False, return_surface=True, film_size=film_size, color=road_color
+        )
         self._film_size = self._background.get_size()
 
         self._light_background = light_background
@@ -152,6 +174,7 @@ class TopDownRenderer:
         self.history_vehicles.append(this_frame_vehicles)
         self._draw_history_vehicles()
         self.blit()
+        return self._runtime.copy()
 
     def blit(self):
         if self._screen_size is None and self._zoomin is None:
@@ -212,7 +235,8 @@ class TopDownRenderer:
                     draw_countour=False
                 )
 
-        i = int(len(self.history_vehicles) / 2)
+        # i = int(len(self.history_vehicles) / 2)
+        i = -1
         for v in self.history_vehicles[i]:
             h = v.heading_theta
             c = v.color

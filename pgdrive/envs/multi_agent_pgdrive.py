@@ -292,7 +292,7 @@ class MultiAgentPGDrive(PGDriveEnvV2):
         if self._top_down_renderer is None:
             from pgdrive.obs.top_down_renderer import TopDownRenderer
             self._top_down_renderer = TopDownRenderer(self.current_map, *args, **kwargs)
-        self._top_down_renderer.render(list(self.vehicles.values()))
+        return self._top_down_renderer.render(list(self.vehicles.values()))
 
     def close_and_reset_num_agents(self, num_agents):
         config = copy.deepcopy(self._raw_input_config)
