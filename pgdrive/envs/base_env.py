@@ -6,7 +6,6 @@ from typing import Union, Dict, AnyStr, Optional, Tuple
 import gym
 import numpy as np
 from panda3d.core import PNMImage
-
 from pgdrive.constants import RENDER_MODE_NONE, DEFAULT_AGENT
 from pgdrive.obs.observation_type import ObservationType
 from pgdrive.scene_creator.vehicle.base_vehicle import BaseVehicle
@@ -42,6 +41,7 @@ BASE_DEFAULT_CONFIG = dict(
     use_chase_camera=True,
     use_chase_camera_follow_lane=False,  # If true, then vision would be more stable.
     camera_height=1.8,
+    prefer_track_agent=None,
 
     # ===== Vehicle =====
     vehicle_config=dict(
@@ -56,6 +56,7 @@ BASE_DEFAULT_CONFIG = dict(
         random_navi_mark_color=False,
         show_dest_mark=False,
         show_line_to_dest=False,
+        am_i_the_special_one=False
     ),
 
     # ===== Others =====
@@ -63,6 +64,7 @@ BASE_DEFAULT_CONFIG = dict(
         window_size=(1200, 900),  # width, height
         physics_world_step_size=2e-2,
         show_fps=True,
+        global_light=False,
 
         # show message when render is called
         onscreen_message=True,
