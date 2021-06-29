@@ -1,5 +1,5 @@
 import copy
-
+from pgdrive.envs.multi_agent_pgdrive import pygame_replay, panda_replay
 from pgdrive.envs.marl_envs.marl_inout_roundabout import LidarStateObservationMARound
 from pgdrive.envs.multi_agent_pgdrive import MultiAgentPGDrive
 from pgdrive.obs import ObservationType
@@ -204,8 +204,8 @@ def _vis():
                 },
                 "show_lidar": False,
             },
-            "fast": True,
-            "use_render": True,
+            # "fast": True,
+            # "use_render": True,
             "debug": True,
             "manual_control": True,
             "num_agents": 48,
@@ -218,7 +218,7 @@ def _vis():
     for i in range(1, 100000):
         actions = {k: [0.0, 1.0] for k in env.vehicles.keys()}
         if len(env.vehicles) == 1:
-            actions = {k: [-1.0, 1.0] for k in env.vehicles.keys()}
+            actions = {k: [-0, 1.0] for k in env.vehicles.keys()}
         o, r, d, info = env.step(actions)
         for r_ in r.values():
             total_r += r_
@@ -350,24 +350,6 @@ def show_map_and_traj():
     env.close()
 
 
-def pygame_replay():
-    import json
-    import pygame
-    env = MultiAgentIntersectionEnv({"use_topdown": True})
-    with open("metasvodist_inter_best.json", "r") as f:
-        traj = json.load(f)
-    o = env.reset(copy.deepcopy(traj))
-    frame_count = 0
-    while True:
-        o, r, d, i = env.step(env.action_space.sample())
-        env.pg_world.force_fps.toggle()
-        env.render(mode="top_down", num_stack=50, film_size=(4000, 4000), history_smooth=0)
-        pygame.image.save(env._top_down_renderer._runtime, "inter_{}.png".format(frame_count))
-        frame_count += 1
-        if len(env.scene_manager.replay_system.restore_episode_info) == 0:
-            env.close()
-
-
 if __name__ == "__main__":
     # _draw()
     _vis()
@@ -375,4 +357,14 @@ if __name__ == "__main__":
     # _profiwdle()
     # _long_run()
     # show_map_and_traj()
+    # pygame_replay("parking", MultiAgentParkingLotEnv, False, other_traj="metasvodist_parking_best.json")
+    # panda_replay(
+    #     "parking",
+    #     MultiAgentIntersectionEnv,
+    #     False,
+    #     other_traj="metasvodist_inter.json",
+    #     extra_config={"pg_world_config": {
+    #         "global_light": True
+    #     }}
+    # )
     # pygame_replay()

@@ -378,6 +378,7 @@ def pygame_replay(name, env_class, save=False, other_traj=None, film_size=(1000,
     with open(ckpt, "r") as f:
         traj = json.load(f)
     o = env.reset(copy.deepcopy(traj))
+    env.main_camera.set_follow_lane(True)
     frame_count = 0
     while True:
         o, r, d, i = env.step(env.action_space.sample())
