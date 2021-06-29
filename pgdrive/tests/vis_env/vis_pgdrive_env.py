@@ -18,6 +18,7 @@ class TestEnv(PGDriveEnv):
                     "onscreen_message": True,
                     # "debug_physics_world": True,
                     "pstats": True,
+                    "global_light": True,
                     # "debug_static_world":True,
                 },
                 "cull_scene": True,

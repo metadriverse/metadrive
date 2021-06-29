@@ -88,7 +88,8 @@ PGDriveEnvV1_DEFAULT_CONFIG = dict(
         use_saver=False,
         save_level=0.5,
         vehicle_length=4,
-        vehicle_width=1.5
+        vehicle_width=1.5,
+        random_color=False,
     ),
     rgb_clip=True,
 
@@ -211,7 +212,8 @@ class PGDriveEnv(BasePGDriveEnv):
             -> Tuple[Union[np.ndarray, Dict[AnyStr, np.ndarray]], Dict]:
         self.agent_manager.prepare_step()
         if self.config["manual_control"] and self.config["use_render"] \
-                and self.current_track_vehicle in self.agent_manager.get_vehicle_list() and not self.main_camera.is_bird_view_camera(self.pg_world):
+                and self.current_track_vehicle in self.agent_manager.get_vehicle_list() and not self.main_camera.is_bird_view_camera(
+            self.pg_world):
             action = self.controller.process_input()
             if self.is_multi_agent:
                 actions[self.agent_manager.object_to_agent(self.current_track_vehicle.name)] = action
@@ -514,6 +516,12 @@ class PGDriveEnv(BasePGDriveEnv):
         self.current_track_vehicle._expert_takeover = not self.current_track_vehicle._expert_takeover
 
     def chase_another_v(self) -> (str, BaseVehicle):
+        done = False
+        if self.config["prefer_track_agent"] is not None:
+            if self.config["prefer_track_agent"] in self.vehicles.keys():
+                new_v = self.vehicles[self.config["prefer_track_agent"]]
+                self.current_track_vehicle = new_v
+                done = True
         if self.main_camera is None:
             return
         self.main_camera.reset()
@@ -524,8 +532,9 @@ class PGDriveEnv(BasePGDriveEnv):
             if len(vehicles) == 0:
                 return
             self.current_track_vehicle.remove_display_region()
-            new_v = get_np_random().choice(vehicles)
-            self.current_track_vehicle = new_v
+            if not done:
+                new_v = get_np_random().choice(vehicles)
+                self.current_track_vehicle = new_v
         self.current_track_vehicle.add_to_display()
         self.main_camera.track(self.current_track_vehicle, self.pg_world)
         return

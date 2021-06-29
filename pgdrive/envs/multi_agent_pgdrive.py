@@ -29,7 +29,7 @@ MULTI_AGENT_PGDRIVE_DEFAULT_CONFIG = dict(
     horizon=1000,
 
     # ===== Vehicle Setting =====
-    vehicle_config=dict(lidar=dict(num_lasers=72, distance=40, num_others=0)),
+    vehicle_config=dict(lidar=dict(num_lasers=72, distance=40, num_others=0), random_color=True),
     target_vehicle_configs=dict(),
 
     # ===== New Reward Setting =====
@@ -194,10 +194,13 @@ class MultiAgentPGDrive(PGDriveEnvV2):
             self.chase_another_v()
 
     def _get_target_vehicle_config(self):
-        return {
+        ret = {
             name: self._get_single_vehicle_config(new_config)
             for name, new_config in self.config["target_vehicle_configs"].items()
         }
+        if "prefer_track_agent" in self.config and self.config["prefer_track_agent"]:
+            ret[self.config["prefer_track_agent"]]["am_i_the_special_one"] = True
+        return ret
 
     def _get_observations(self):
         return {
@@ -289,10 +292,11 @@ class MultiAgentPGDrive(PGDriveEnvV2):
         return ret
 
     def _render_topdown(self, *args, **kwargs):
+        # dones = kwargs.pop("dones")
         if self._top_down_renderer is None:
             from pgdrive.obs.top_down_renderer import TopDownRenderer
-            self._top_down_renderer = TopDownRenderer(self.current_map, *args, **kwargs)
-        return self._top_down_renderer.render(list(self.vehicles.values()))
+            self._top_down_renderer = TopDownRenderer(self, self.current_map, *args, **kwargs)
+        return self._top_down_renderer.render(list(self.vehicles.values()), self.agent_manager)
 
     def close_and_reset_num_agents(self, num_agents):
         config = copy.deepcopy(self._raw_input_config)
@@ -364,12 +368,13 @@ def _vis():
     env.close()
 
 
-def pygame_replay(name, env_class, save=True, other_ckpt=None):
+def pygame_replay(name, env_class, save=False, other_traj=None, film_size=(1000, 1000), extra_config={}):
     import copy
     import json
     import pygame
-    env = env_class({"use_topdown": True})
-    ckpt = "metasvodist_{}_best.json".format(name) if other_ckpt is None else other_ckpt
+    extra_config["use_render"] = True
+    env = env_class(extra_config)
+    ckpt = "metasvodist_{}_best.json".format(name) if other_traj is None else other_traj
     with open(ckpt, "r") as f:
         traj = json.load(f)
     o = env.reset(copy.deepcopy(traj))
@@ -377,7 +382,29 @@ def pygame_replay(name, env_class, save=True, other_ckpt=None):
     while True:
         o, r, d, i = env.step(env.action_space.sample())
         env.pg_world.force_fps.toggle()
-        env.render(mode="top_down", num_stack=50, film_size=(4000, 4000), history_smooth=0)
+        env.render(mode="top_down", num_stack=50, film_size=film_size, history_smooth=0)
+        if save:
+            pygame.image.save(env._top_down_renderer._runtime, "{}_{}.png".format(name, frame_count))
+        frame_count += 1
+        if len(env.scene_manager.replay_system.restore_episode_info) == 0:
+            env.close()
+
+
+def panda_replay(name, env_class, save=False, other_traj=None, extra_config={}):
+    import copy
+    import json
+    import pygame
+    extra_config.update({"use_render": True})
+    env = env_class(extra_config)
+    ckpt = "metasvodist_{}_best.json".format(name) if other_traj is None else other_traj
+    with open(ckpt, "r") as f:
+        traj = json.load(f)
+    o = env.reset(copy.deepcopy(traj))
+    env.main_camera.set_follow_lane(True)
+    frame_count = 0
+    while True:
+        o, r, d, i = env.step(env.action_space.sample())
+        env.pg_world.force_fps.toggle()
         if save:
             pygame.image.save(env._top_down_renderer._runtime, "{}_{}.png".format(name, frame_count))
         frame_count += 1

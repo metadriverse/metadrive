@@ -16,6 +16,9 @@ logger = logging.getLogger(__name__)
 
 class SceneManager:
     """Manage all traffic vehicles, and all runtime elements (in the future)"""
+    IN_REPLAY = False
+    STOP_REPLAY = False
+
     def __init__(
         self,
         pg_world: PGWorld,
@@ -42,6 +45,7 @@ class SceneManager:
         self.record_episode = record_episode
         self.replay_system: Optional[PGReplayer] = None
         self.record_system: Optional[PGRecorder] = None
+        pg_world.accept("s", self._stop_replay)
 
         # cull scene
         self.cull_scene = cull_scene
@@ -75,10 +79,12 @@ class SceneManager:
         if episode_data is None:
             self.object_manager.generate(self, pg_world)
             self.traffic_manager.generate(pg_world=pg_world, map=self.map, traffic_density=traffic_density)
+            self.IN_REPLAY = False
         else:
             self.replay_system = PGReplayer(self.traffic_manager, map, episode_data, pg_world)
             logging.warning("You are replaying episodes! Delete detector mask!")
             self.detector_mask = None
+            self.IN_REPLAY = True
 
         # if pg_world.highway_render is not None:
         #     pg_world.highway_render.set_scene_manager(self)
@@ -120,7 +126,8 @@ class SceneManager:
                 self.traffic_manager.step(dt)
                 pg_world.step()
             else:
-                self.replay_system.replay_frame(self.target_vehicles, self.pg_world, i == step_num - 1)
+                if not self.STOP_REPLAY:
+                    self.replay_system.replay_frame(self.target_vehicles, self.pg_world, i == step_num - 1)
             # record every step
             if self.record_system is not None:
                 # didn't record while replay
@@ -224,3 +231,8 @@ class SceneManager:
     @property
     def target_vehicles(self):
         return {k: v for k, v in self.agent_manager.active_agents.items()}
+
+    def _stop_replay(self):
+        if not self.IN_REPLAY:
+            return
+        self.STOP_REPLAY = not self.STOP_REPLAY
