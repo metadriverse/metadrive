@@ -74,8 +74,6 @@ PGDriveEnvV1_DEFAULT_CONFIG = dict(
 
         # ===== use image =====
         image_source="rgb_cam",  # take effect when only when use_image == True
-        # use_image=False,
-        # rgb_clip=True,
 
         # ===== vehicle spawn =====
         spawn_lane_index=(FirstBlock.NODE_1, FirstBlock.NODE_2, 0),
