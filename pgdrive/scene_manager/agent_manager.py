@@ -2,7 +2,8 @@ import copy
 import logging
 from typing import Dict
 
-from gym.spaces import Box
+from gym.spaces import Box, Dict
+
 from pgdrive.scene_creator.vehicle.base_vehicle import BaseVehicle
 
 
@@ -112,7 +113,10 @@ class AgentManager:
 
             obs_space = self._init_observation_spaces[agent_id]
             self.observation_spaces[vehicle.name] = obs_space
-            assert isinstance(obs_space, Box)
+            if not vehicle.vehicle_config["use_image"]:
+                assert isinstance(obs_space, Box)
+            else:
+                assert isinstance(obs_space, Dict), "Multi-agent observation should be gym.Dict"
             action_space = self._init_action_spaces[agent_id]
             self.action_spaces[vehicle.name] = action_space
             assert isinstance(action_space, Box)
