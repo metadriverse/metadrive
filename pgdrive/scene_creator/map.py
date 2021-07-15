@@ -1,4 +1,5 @@
 import copy
+from pgdrive.utils.engine_utils import get_pgdrive_engine
 from pgdrive.scene_creator.road.road import Road
 import logging
 from typing import List
@@ -11,8 +12,7 @@ from pgdrive.scene_creator.blocks.first_block import FirstBlock
 from pgdrive.scene_creator.pg_blocks import PGBlock
 from pgdrive.scene_creator.road.road_network import RoadNetwork
 from pgdrive.utils import PGConfig, import_pygame
-from pgdrive.world.pg_physics_world import PGPhysicsWorld
-from pgdrive.world.pg_world import PGWorld
+from pgdrive.engine.world.pg_physics_world import PGPhysicsWorld
 
 pygame = import_pygame()
 
@@ -66,7 +66,7 @@ class Map:
     GENERATE_CONFIG = "config"
     GENERATE_TYPE = "type"
 
-    def __init__(self, pg_world: PGWorld, map_config: dict = None):
+    def __init__(self, map_config: dict = None):
         """
         Map can be stored and recover to save time when we access the map encountered before
         """
@@ -79,29 +79,30 @@ class Map:
         self.blocks = []
 
         # Generate map and insert blocks
-        self._generate(pg_world)
+        self.pgdrive_engine = get_pgdrive_engine()
+        self._generate()
         assert self.blocks, "The generate methods does not fill blocks!"
 
         #  a trick to optimize performance
         self.road_network.after_init()
         self.spawn_roads = [Road(FirstBlock.NODE_2, FirstBlock.NODE_3)]
 
-    def _generate(self, pg_world):
+    def _generate(self):
         """Key function! Please overwrite it!"""
         raise NotImplementedError("Please use child class like PGMap to replace Map!")
 
-    def load_to_pg_world(self, pg_world: PGWorld):
-        parent_node_path, pg_physics_world = pg_world.worldNP, pg_world.physics_world
+    def load_to_pg_world(self):
+        parent_node_path, pg_physics_world = self.pgdrive_engine.worldNP, self.pgdrive_engine.physics_world
         for block in self.blocks:
             block.attach_to_pg_world(parent_node_path, pg_physics_world)
 
-    def unload_from_pg_world(self, pg_world: PGWorld):
+    def unload_from_pg_world(self):
         for block in self.blocks:
-            block.detach_from_pg_world(pg_world.physics_world)
+            block.detach_from_pg_world(self.pgdrive_engine.physics_world)
 
-    def destroy(self, pg_world: PGWorld):
+    def destroy(self):
         for block in self.blocks:
-            block.destroy(pg_world=pg_world)
+            block.destroy()
 
     def save_map(self):
         assert self.blocks is not None and len(self.blocks) > 0, "Please generate Map before saving it"
@@ -140,11 +141,11 @@ class Map:
 
 
 class PGMap(Map):
-    def _generate(self, pg_world):
+    def _generate(self):
         """
         We can override this function to introduce other methods!
         """
-        parent_node_path, pg_physics_world = pg_world.worldNP, pg_world.physics_world
+        parent_node_path, pg_physics_world = self.pgdrive_engine.worldNP, self.pgdrive_engine.physics_world
         generate_type = self.config[self.GENERATE_TYPE]
         if generate_type == BigGenerateMethod.BLOCK_NUM or generate_type == BigGenerateMethod.BLOCK_SEQUENCE:
             self._big_generate(parent_node_path, pg_physics_world)

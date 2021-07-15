@@ -7,17 +7,18 @@ from direct.gui.OnscreenImage import OnscreenImage
 from direct.showbase import ShowBase
 from panda3d.bullet import BulletDebugNode
 from panda3d.core import AntialiasAttrib, loadPrcFileData, LineSegs, PythonCallbackObject
-from pgdrive.constants import RENDER_MODE_OFFSCREEN, RENDER_MODE_NONE, RENDER_MODE_ONSCREEN, PG_EDITION, CamMask
-from pgdrive.utils import is_mac, setup_logger
+from pgdrive.constants import RENDER_MODE_OFFSCREEN, RENDER_MODE_NONE, RENDER_MODE_ONSCREEN, PG_EDITION, CamMask, \
+    BKG_COLOR
+
 from pgdrive.utils.asset_loader import AssetLoader, initialize_asset_loader
-from pgdrive.world.collision_callback import pg_collision_callback
-from pgdrive.world.force_fps import ForceFPS
-from pgdrive.world.image_buffer import ImageBuffer
-from pgdrive.world.light import Light
-from pgdrive.world.onscreen_message import PGOnScreenMessage
-from pgdrive.world.pg_physics_world import PGPhysicsWorld
-from pgdrive.world.sky_box import SkyBox
-from pgdrive.world.terrain import Terrain
+from pgdrive.engine.world.collision_callback import pg_collision_callback
+from pgdrive.engine.world.force_fps import ForceFPS
+from pgdrive.engine.world.light import Light
+from pgdrive.engine.world.onscreen_message import PGOnScreenMessage
+from pgdrive.engine.world.pg_physics_world import PGPhysicsWorld
+from pgdrive.engine.world.sky_box import SkyBox
+from pgdrive.engine.world.terrain import Terrain
+from pgdrive.utils import is_mac, setup_logger
 
 
 def _suppress_warning():
@@ -178,7 +179,7 @@ class PGWorld(ShowBase.ShowBase):
 
         # some render attribute
         self.pbrpipe = None
-        self.light = None
+        self.world_light = None
 
         # physics world
         self.physics_world = PGPhysicsWorld(self.world_config["debug_static_world"])
@@ -196,7 +197,7 @@ class PGWorld(ShowBase.ShowBase):
         # init other world elements
         if self.mode != RENDER_MODE_NONE:
 
-            from pgdrive.world.our_pbr import OurPipeline
+            from pgdrive.engine.world.our_pbr import OurPipeline
             self.pbrpipe = OurPipeline(
                 render_node=None,
                 window=None,
@@ -218,7 +219,7 @@ class PGWorld(ShowBase.ShowBase):
             # set main cam
             self.cam.node().setCameraMask(CamMask.MainCam)
             self.cam.node().getDisplayRegion(0).setClearColorActive(True)
-            self.cam.node().getDisplayRegion(0).setClearColor(ImageBuffer.BKG_COLOR)
+            self.cam.node().getDisplayRegion(0).setClearColor(BKG_COLOR)
             lens = self.cam.node().getLens()
             lens.setFov(70)
             lens.setAspectRatio(1.2)
@@ -226,10 +227,10 @@ class PGWorld(ShowBase.ShowBase):
             self.sky_box = SkyBox()
             self.sky_box.attach_to_pg_world(self.render, self.physics_world)
 
-            self.light = Light(self.world_config)
-            self.light.attach_to_pg_world(self.render, self.physics_world)
-            self.render.setLight(self.light.direction_np)
-            self.render.setLight(self.light.ambient_np)
+            self.world_light = Light(self.world_config)
+            self.world_light.attach_to_pg_world(self.render, self.physics_world)
+            self.render.setLight(self.world_light.direction_np)
+            self.render.setLight(self.world_light.ambient_np)
 
             self.render.setShaderAuto()
             self.render.setAntialias(AntialiasAttrib.MAuto)
@@ -283,7 +284,7 @@ class PGWorld(ShowBase.ShowBase):
 
         self._episode_start_time = time.time()
 
-    def step(self):
+    def step_physics_world(self):
         dt = self.world_config["physics_world_step_size"]
         self.physics_world.dynamic_world.doPhysics(dt, 1, dt)
 

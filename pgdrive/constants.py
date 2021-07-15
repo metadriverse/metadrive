@@ -1,4 +1,5 @@
 from typing import List, Tuple
+from panda3d.core import Vec3
 
 from panda3d.bullet import BulletWorld
 from panda3d.core import Vec4, BitMask32
@@ -186,3 +187,4 @@ TARGET_VEHICLES = "target_vehicles"
 TRAFFIC_VEHICLES = "traffic_vehicles"
 OBJECT_TO_AGENT = "object_to_agent"
 AGENT_TO_OBJECT = "agent_to_object"
+BKG_COLOR = Vec3(179 / 255, 211 / 255, 216 / 255)

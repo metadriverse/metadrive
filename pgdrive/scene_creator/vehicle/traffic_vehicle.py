@@ -1,4 +1,5 @@
 from typing import Union
+from pgdrive.utils.engine_utils import get_pgdrive_engine
 import math
 
 import numpy as np
@@ -14,7 +15,6 @@ from pgdrive.utils.asset_loader import AssetLoader
 from pgdrive.utils.coordinates_shift import panda_position, panda_heading
 from pgdrive.utils.element import DynamicElement
 from pgdrive.utils.scene_utils import ray_localization
-from pgdrive.world.pg_world import PGWorld
 
 
 class TrafficVehicleNode(BulletRigidBodyNode):
@@ -79,13 +79,12 @@ class PGTrafficVehicle(DynamicElement):
         self.step(1e-1)
         # self.carNP.setQuat(LQuaternionf(math.cos(-1 * np.pi / 4), 0, 0, math.sin(-1 * np.pi / 4)))
 
-    def prepare_step(self, scene_manager) -> None:
+    def prepare_step(self) -> None:
         """
         Determine the action according to the elements in scene
-        :param scene_manager: scene
         :return: None
         """
-        self.vehicle_node.kinematic_model.act(scene_manager=scene_manager)
+        self.vehicle_node.kinematic_model.act()
 
     def step(self, dt):
         if self.break_down:
@@ -96,9 +95,10 @@ class PGTrafficVehicle(DynamicElement):
         heading = np.rad2deg(panda_heading(self.vehicle_node.kinematic_model.heading))
         self.node_path.setH(heading)
 
-    def update_state(self, pg_world: PGWorld):
+    def update_state(self):
+        engine = get_pgdrive_engine()
         dir = np.array([math.cos(self.heading), math.sin(self.heading)])
-        lane, lane_index = ray_localization(dir, self.position, pg_world)
+        lane, lane_index = ray_localization(dir, self.position, engine)
         if lane is not None:
             self.vehicle_node.kinematic_model.update_lane_index(lane_index, lane)
         self.out_of_road = not self.vehicle_node.kinematic_model.lane.on_lane(
@@ -117,10 +117,10 @@ class PGTrafficVehicle(DynamicElement):
         self.vehicle_node.reset(self._initial_state)
         self.out_of_road = False
 
-    def destroy(self, pg_world):
-        self.vehicle_node.kinematic_model.destroy(pg_world)
+    def destroy(self):
+        self.vehicle_node.kinematic_model.destroy()
         self.vehicle_node.clearTag(BodyName.Traffic_vehicle)
-        super(PGTrafficVehicle, self).destroy(pg_world)
+        super(PGTrafficVehicle, self).destroy()
 
     def get_name(self):
         return self.vehicle_node.getName() + "_" + str(self.index)

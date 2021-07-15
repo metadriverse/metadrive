@@ -30,7 +30,7 @@ def test_save_episode(vis=False):
             if vis:
                 env.render()
             if d["__all__"]:
-                epi_info = env.scene_manager.dump_episode()
+                epi_info = env.pgdrive_engine.dump_episode()
                 # test dump json
                 if test_dump:
                     with open("test_dump_{}.json".format(dump_count), "w") as f:

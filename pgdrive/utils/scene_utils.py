@@ -1,11 +1,11 @@
 import math
+from pgdrive.engine.world.pg_world import PGWorld
 from typing import List, TYPE_CHECKING, Tuple, Union
-from panda3d.bullet import BulletBoxShape, BulletGhostNode
+from panda3d.bullet import BulletBoxShape
 from panda3d.core import TransformState
 from panda3d.core import Vec3, BitMask32
 
-from pgdrive.constants import CollisionGroup
-from pgdrive.utils.coordinates_shift import panda_position, panda_heading
+from pgdrive.utils.coordinates_shift import panda_heading
 import numpy as np
 
 from pgdrive.constants import Decoration, BodyName
@@ -13,7 +13,6 @@ from pgdrive.scene_creator.lane.abs_lane import AbstractLane
 from pgdrive.scene_creator.lane.circular_lane import CircularLane
 from pgdrive.utils.coordinates_shift import panda_position
 from pgdrive.utils.math_utils import get_points_bounding_box
-from pgdrive.world.pg_world import PGWorld
 
 if TYPE_CHECKING:
     from pgdrive.scene_creator.blocks.block import BlockSocket
@@ -130,18 +129,18 @@ def get_all_lanes(roadnet: "RoadNetwork"):
 
 def ray_localization(heading: np.ndarray,
                      position: np.ndarray,
-                     pg_world: PGWorld,
+                     pgdrive_engine: PGWorld,
                      return_all_result=False) -> Union[List[Tuple], Tuple]:
     """
     Get the index of the lane closest to a physx_world position.
     Only used when smoething is on lane ! Otherwise fall back to use get_closest_lane()
     :param heading: heading to help filter lanes
     :param position: a physx_world position [m].
-    :param pg_world: PGWorld class
+    :param pgdrive_engine: PGWorld class
     :param return_all_result: return a list instead of the lane with min L1 distance
     :return: list(closest lane) or closest lane.
     """
-    results = pg_world.physics_world.static_world.rayTestAll(
+    results = pgdrive_engine.physics_world.static_world.rayTestAll(
         panda_position(position, 1.0), panda_position(position, -1.0)
     )
     lane_index_dist = []
@@ -172,7 +171,7 @@ def ray_localization(heading: np.ndarray,
 
 
 def rect_region_detection(
-    pg_world: PGWorld,
+    pgdrive_engine: PGWorld,
     position: Tuple,
     heading: float,
     heading_direction_length: float,
@@ -192,7 +191,7 @@ def rect_region_detection(
 
      **CAUTION**: position is the middle point of longitude edge
 
-    :param pg_world: PGWorld
+    :param pgdrive_engine: PGWorld class
     :param position: position in PGDrive
     :param heading: heading in PGDrive [degree]
     :param heading_direction_length: rect length in heading direction
@@ -209,7 +208,7 @@ def rect_region_detection(
     shape = BulletBoxShape(Vec3(heading_direction_length / 2, side_direction_width / 2, 1))
     penetration = 0.0
 
-    result = pg_world.physics_world.dynamic_world.sweep_test_closest(
+    result = pgdrive_engine.physics_world.dynamic_world.sweep_test_closest(
         shape, tsFrom, tsTo, BitMask32.bit(detection_group), penetration
     )
     return result

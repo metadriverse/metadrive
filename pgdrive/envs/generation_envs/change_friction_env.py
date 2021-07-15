@@ -32,12 +32,12 @@ class ChangeFrictionEnv(PGDriveEnv):
     def _reset_agents(self):
         if self.config["change_friction"] and self.vehicle is not None:
             if self.vehicles:
-                self.for_each_vehicle(lambda v: v.destroy(self.pg_world))
+                self.for_each_vehicle(lambda v: v.destroy())
             # self.agent_manager.destroy()
             # We reset the friction here!
             parameter = self.parameter_list[self.current_seed]
             self.config["vehicle_config"]["wheel_friction"] = parameter["wheel_friction"]
-            self.agent_manager.init(pg_world=self.pg_world, config_dict=self._get_target_vehicle_config())
+            self.agent_manager.init(config_dict=self._get_target_vehicle_config())
 
             # initialize track vehicles
             vehicles = self.agent_manager.get_vehicle_list()

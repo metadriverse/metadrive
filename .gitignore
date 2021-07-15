@@ -11,5 +11,6 @@
 /pgdrive.egg-info/
 .DS_Store
 **/.DS_Store
-/test_10maps.json
-/tmp_images/
+**/test_10maps.json
+**/tmp_images/
+**/*.jpg

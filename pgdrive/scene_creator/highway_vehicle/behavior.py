@@ -90,7 +90,7 @@ class IDMVehicle(ControlledVehicle):
         )
         return v
 
-    def act(self, action: Union[dict, str] = None, scene_manager=None):
+    def act(self, action: Union[dict, str] = None):
         """
         Execute an action.
 
@@ -98,7 +98,6 @@ class IDMVehicle(ControlledVehicle):
         of acceleration and lane changes on its own, based on the IDM and MOBIL models.
 
         :param action: the action
-        :param scene_manager: access other elements in scene
         """
         if self.crashed:
             return
@@ -346,8 +345,8 @@ class LinearVehicle(IDMVehicle):
         )
         self.data = data if data is not None else {}
 
-    def act(self, action: Union[dict, str] = None, scene_manager=None):
-        super().act(action, scene_manager)
+    def act(self, action: Union[dict, str] = None):
+        super().act(action)
 
     def randomize_behavior(self):
         ua = self.traffic_mgr.np_random.uniform(size=np.shape(self.ACCELERATION_PARAMETERS))

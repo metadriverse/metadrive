@@ -269,7 +269,7 @@ class Vehicle:
                 d[key] -= origin_dict[key]
         return d
 
-    def destroy(self, *args):
+    def destroy(self):
         self.traffic_mgr = None
         self._position = None
         self.heading = None

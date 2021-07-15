@@ -1,4 +1,5 @@
 import queue
+from pgdrive.utils.engine_utils import get_pgdrive_engine
 from collections import deque
 from typing import Tuple
 import math
@@ -7,7 +8,6 @@ from direct.controls.InputState import InputState
 from panda3d.core import Vec3, Camera, Point3, BitMask32
 from pgdrive.constants import CollisionGroup
 from pgdrive.utils.coordinates_shift import panda_heading
-from pgdrive.world.pg_world import PGWorld
 
 
 class ChaseCamera:
@@ -22,15 +22,16 @@ class ChaseCamera:
     TOP_DOWN_VIEW_HEIGHT = 120
     WHEEL_SCROLL_SPEED = 10
 
-    def __init__(self, camera: Camera, camera_height: float, camera_dist: float, pg_world: PGWorld):
+    def __init__(self, camera: Camera, camera_height: float, camera_dist: float):
         self._origin_height = camera_height
+        self.engine = get_pgdrive_engine()
 
         # vehicle chase camera
         self.camera = camera
         self.camera_queue = None
         self.camera_dist = camera_dist
         self.direction_running_mean = deque(maxlen=20)
-        self.light = pg_world.light  # light position is updated with the chase camera when control vehicle
+        self.world_light = self.engine.world_light  # light chases the chase camera, when not using global light
         self.inputs = InputState()
 
         # height control
@@ -49,9 +50,9 @@ class ChaseCamera:
         self.inputs.watchWithModifiers('left', 'a')
         self.inputs.watchWithModifiers('right', 'd')
 
-        pg_world.accept("wheel_up", self._wheel_up_height, extraArgs=[pg_world])
-        pg_world.accept("wheel_down", self._wheel_down_height, extraArgs=[pg_world])
-        pg_world.accept("mouse1", self._move_to_pointer, extraArgs=[pg_world])
+        self.engine.accept("wheel_up", self._wheel_up_height)
+        self.engine.accept("wheel_down", self._wheel_down_height)
+        self.engine.accept("mouse1", self._move_to_pointer)
 
     def reset(self):
         self.direction_running_mean.clear()
@@ -82,8 +83,8 @@ class ChaseCamera:
                 180 - 90
             )
 
-        if self.light is not None:
-            self.light.step(current_pos)
+        if self.world_light is not None:
+            self.world_light.step(current_pos)
         return task.cont
 
     @staticmethod
@@ -108,11 +109,11 @@ class ChaseCamera:
         heading = ChaseCamera._heading_of_lane(lane, pos)
         return math.cos(heading), math.sin(heading)
 
-    def track(self, vehicle, pg_world):
+    def track(self, vehicle):
         """
         Use this function to chase a new vehicle !
         :param vehicle: Vehicle to chase
-        :param pg_world: pg_world class
+        :param self.engine: self.engine class
         :return: None
         """
         pos = None
@@ -121,11 +122,13 @@ class ChaseCamera:
         if pos is None:
             pos = vehicle.position
 
-        if pg_world.taskMgr.hasTaskNamed(self.CHASE_TASK_NAME):
-            pg_world.taskMgr.remove(self.CHASE_TASK_NAME)
-        if pg_world.taskMgr.hasTaskNamed(self.TOP_DOWN_TASK_NAME):
-            pg_world.taskMgr.remove(self.TOP_DOWN_TASK_NAME)
-        pg_world.taskMgr.add(self.renew_camera_place, self.CHASE_TASK_NAME, extraArgs=[vehicle], appendTask=True)
+        if self.engine.task_manager.hasTaskNamed(self.CHASE_TASK_NAME):
+            self.engine.task_manager.remove(self.CHASE_TASK_NAME)
+        if self.engine.task_manager.hasTaskNamed(self.TOP_DOWN_TASK_NAME):
+            self.engine.task_manager.remove(self.TOP_DOWN_TASK_NAME)
+        self.engine.task_manager.add(
+            self.renew_camera_place, self.CHASE_TASK_NAME, extraArgs=[vehicle], appendTask=True
+        )
         self.camera_queue = queue.Queue(self.queue_length)
         for i in range(self.queue_length - 1):
             self.camera_queue.put(Vec3(pos[0], -pos[1], 0))
@@ -154,21 +157,24 @@ class ChaseCamera:
         """
         self.FOLLOW_LANE = flag
 
-    def destroy(self, pg_world):
-        if pg_world.taskMgr.hasTaskNamed(self.CHASE_TASK_NAME):
-            pg_world.taskMgr.remove(self.CHASE_TASK_NAME)
-        if pg_world.taskMgr.hasTaskNamed(self.TOP_DOWN_TASK_NAME):
-            pg_world.taskMgr.remove(self.TOP_DOWN_TASK_NAME)
+    def destroy(self):
+        engine = get_pgdrive_engine()
+        if engine.task_manager.hasTaskNamed(self.CHASE_TASK_NAME):
+            engine.task_manager.remove(self.CHASE_TASK_NAME)
+        if engine.task_manager.hasTaskNamed(self.TOP_DOWN_TASK_NAME):
+            engine.task_manager.remove(self.TOP_DOWN_TASK_NAME)
 
-    def stop_track(self, pg_world: PGWorld, current_chase_vehicle):
-        if pg_world.taskMgr.hasTaskNamed(self.CHASE_TASK_NAME):
-            pg_world.taskMgr.remove(self.CHASE_TASK_NAME)
+    def stop_track(self, current_chase_vehicle):
+        if self.engine.task_manager.hasTaskNamed(self.CHASE_TASK_NAME):
+            self.engine.task_manager.remove(self.CHASE_TASK_NAME)
         current_chase_vehicle.remove_display_region()
-        if not pg_world.taskMgr.hasTaskNamed(self.TOP_DOWN_TASK_NAME):
+        if not self.engine.task_manager.hasTaskNamed(self.TOP_DOWN_TASK_NAME):
             # adjust hpr
             current_pos = self.camera.getPos()
             self.camera.lookAt(current_pos[0], current_pos[1], 0)
-            pg_world.taskMgr.add(self.manual_control_camera, self.TOP_DOWN_TASK_NAME, extraArgs=[], appendTask=True)
+            self.engine.task_manager.add(
+                self.manual_control_camera, self.TOP_DOWN_TASK_NAME, extraArgs=[], appendTask=True
+            )
 
     def manual_control_camera(self, task):
         self.top_down_camera_height = self._update_height(self.top_down_camera_height)
@@ -191,32 +197,34 @@ class ChaseCamera:
             height -= 1.0
         return height
 
-    def _wheel_down_height(self, pg_world):
-        if pg_world.taskMgr.hasTaskNamed(self.TOP_DOWN_TASK_NAME):
+    def _wheel_down_height(self):
+        if self.engine.task_manager.hasTaskNamed(self.TOP_DOWN_TASK_NAME):
             self.top_down_camera_height += self.WHEEL_SCROLL_SPEED
         else:
             self.chase_camera_height += self.WHEEL_SCROLL_SPEED
 
-    def _wheel_up_height(self, pg_world):
-        if pg_world.taskMgr.hasTaskNamed(self.TOP_DOWN_TASK_NAME):
+    def _wheel_up_height(self):
+        if self.engine.task_manager.hasTaskNamed(self.TOP_DOWN_TASK_NAME):
             self.top_down_camera_height -= self.WHEEL_SCROLL_SPEED
         else:
             self.chase_camera_height -= self.WHEEL_SCROLL_SPEED
 
-    def _move_to_pointer(self, pg_world):
-        if pg_world.taskMgr.hasTaskNamed(self.TOP_DOWN_TASK_NAME):
+    def _move_to_pointer(self):
+        if self.engine.task_manager.hasTaskNamed(self.TOP_DOWN_TASK_NAME):
             # Get to and from pos in camera coordinates
-            pMouse = pg_world.mouseWatcherNode.getMouse()
+            pMouse = self.engine.mouseWatcherNode.getMouse()
             pFrom = Point3()
             pTo = Point3()
             self.camera.node().getLens().extrude(pMouse, pFrom, pTo)
 
             # Transform to global coordinates
-            pFrom = pg_world.render.getRelativePoint(self.camera, pFrom)
-            pTo = pg_world.render.getRelativePoint(self.camera, pTo)
-            ret = pg_world.physics_world.dynamic_world.rayTestClosest(pFrom, pTo, BitMask32.bit(CollisionGroup.Terrain))
+            pFrom = self.engine.render.getRelativePoint(self.camera, pFrom)
+            pTo = self.engine.render.getRelativePoint(self.camera, pTo)
+            ret = self.engine.physics_world.dynamic_world.rayTestClosest(
+                pFrom, pTo, BitMask32.bit(CollisionGroup.Terrain)
+            )
             self.camera_x = ret.getHitPos()[0]
             self.camera_y = ret.getHitPos()[1]
 
-    def is_bird_view_camera(self, pg_world):
-        return True if pg_world.taskMgr.hasTaskNamed(self.TOP_DOWN_TASK_NAME) else False
+    def is_bird_view_camera(self):
+        return True if self.engine.task_manager.hasTaskNamed(self.TOP_DOWN_TASK_NAME) else False

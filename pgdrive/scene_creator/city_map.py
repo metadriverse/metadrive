@@ -8,7 +8,7 @@ from pgdrive.scene_creator.blocks.first_block import FirstBlock
 from pgdrive.scene_creator.map import Map
 from pgdrive.scene_creator.pg_blocks import PGBlock
 from pgdrive.scene_creator.road.road_network import RoadNetwork
-from pgdrive.world.pg_physics_world import PGPhysicsWorld
+from pgdrive.engine.world.pg_physics_world import PGPhysicsWorld
 
 
 class NextStep:
@@ -126,8 +126,8 @@ class CityBIG(BIG):
 
 
 class CityMap(Map):
-    def _generate(self, pg_world):
-        parent_node_path, pg_physics_world = pg_world.worldNP, pg_world.physics_world
+    def _generate(self):
+        parent_node_path, pg_physics_world = self.pgdrive_engine.worldNP, self.pgdrive_engine.physics_world
         big_map = CityBIG(
             self.config[self.LANE_NUM], self.config[self.LANE_WIDTH], self.road_network, parent_node_path,
             pg_physics_world, self.random_seed, self.config["block_type_version"]

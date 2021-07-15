@@ -5,7 +5,7 @@ from panda3d.bullet import BulletPlaneShape, BulletRigidBodyNode, BulletDebugNod
 from panda3d.core import Vec3, BitMask32, NodePath, LineSegs
 from pgdrive.scene_creator.algorithm.BIG import NextStep
 from pgdrive.scene_creator.map import Map
-from pgdrive.world.pg_physics_world import PGPhysicsWorld
+from pgdrive.engine.world.pg_physics_world import PGPhysicsWorld
 
 
 class TestBlock(ShowBase.ShowBase):
@@ -23,8 +23,8 @@ class TestBlock(ShowBase.ShowBase):
         self.debugNP = None
         self.groundNP = None
         self.setup()
-        self.taskMgr.add(self.update, 'updateWorld')
-        self.taskMgr.add(self.analyze, "analyze geom node")
+        self.task_manager.add(self.update, 'updateWorld')
+        self.task_manager.add(self.analyze, "analyze geom node")
         self.add_block_func = None  # function pointer
         self.last_block = None
         self.block_index = 1
