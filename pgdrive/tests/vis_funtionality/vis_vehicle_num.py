@@ -13,9 +13,9 @@ if __name__ == "__main__":
         env.reset()
         print(
             "Current map {}, vehicle number {}.".format(
-                env.current_seed, env.scene_manager.traffic_manager.get_vehicle_num()
+                env.current_seed, env.pgdrive_engine.traffic_manager.get_vehicle_num()
             )
         )
-        count.append(env.scene_manager.traffic_manager.get_vehicle_num())
+        count.append(env.pgdrive_engine.traffic_manager.get_vehicle_num())
     print(min(count), sum(count) / len(count), max(count))
     env.close()

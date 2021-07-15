@@ -1,4 +1,5 @@
 from pgdrive.scene_creator.object.base_object import BaseObject
+from pgdrive.utils.engine_utils import get_pgdrive_engine
 
 
 class BaseBuilding(BaseObject):
@@ -7,8 +8,9 @@ class BaseBuilding(BaseObject):
         assert node_path is not None
         self.node_path = node_path
 
-    def destroy(self, pg_physics_world):
-        self.detach_from_pg_world(pg_physics_world)
+    def destroy(self):
+        engine = get_pgdrive_engine()
+        self.detach_from_pg_world(engine.pg_physics_world)
         self.node_path.removeNode()
         self.dynamic_nodes.clear()
         self.static_nodes.clear()

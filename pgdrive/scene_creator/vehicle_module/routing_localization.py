@@ -161,7 +161,7 @@ class RoutingLocalizationModule:
 
     def update_navigation_localization(self, ego_vehicle):
         position = ego_vehicle.position
-        lane, lane_index = self.get_current_lane(ego_vehicle, )
+        lane, lane_index = self.get_current_lane(ego_vehicle)
         if lane is None:
             lane, lane_index = ego_vehicle.lane, ego_vehicle.lane_index
             ego_vehicle.on_lane = False
@@ -199,7 +199,7 @@ class RoutingLocalizationModule:
             self._update_navi_arrow([lanes_heading1, lanes_heading2])
             dest_pos = self._dest_node_path.getPos()
             self._draw_line_to_dest(
-                pg_world=ego_vehicle.pg_world,
+                pgdrive_engine=ego_vehicle.pgdrive_engine,
                 start_position=ego_vehicle.position,
                 end_position=(dest_pos[0], -dest_pos[1])
             )
@@ -328,7 +328,10 @@ class RoutingLocalizationModule:
 
     def get_current_lane(self, ego_vehicle):
         possible_lanes = ray_localization(
-            np.array(ego_vehicle.heading.tolist()), ego_vehicle.position, ego_vehicle.pg_world, return_all_result=True
+            np.array(ego_vehicle.heading.tolist()),
+            ego_vehicle.position,
+            ego_vehicle.pgdrive_engine,
+            return_all_result=True
         )
         for lane, index, l_1_dist in possible_lanes:
             if lane in self.current_ref_lanes:
@@ -362,7 +365,7 @@ class RoutingLocalizationModule:
         else:
             return res.getHitFraction() * length
 
-    def _draw_line_to_dest(self, pg_world, start_position, end_position):
+    def _draw_line_to_dest(self, pgdrive_engine, start_position, end_position):
         if not self._show_line_to_dest:
             return
         line_seg = self._line_to_dest
@@ -371,4 +374,4 @@ class RoutingLocalizationModule:
         self._dynamic_line_np.removeNode()
         self._dynamic_line_np = NodePath(line_seg.create(False))
         self._dynamic_line_np.hide(CamMask.Shadow | CamMask.RgbCam)
-        self._dynamic_line_np.reparentTo(pg_world.render)
+        self._dynamic_line_np.reparentTo(pgdrive_engine.render)

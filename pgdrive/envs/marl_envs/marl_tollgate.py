@@ -110,10 +110,10 @@ class TollGateObservation(LidarStateObservation):
 class MATollGateMap(PGMap):
     BOTTLE_LENGTH = 35
 
-    def _generate(self, pg_world):
+    def _generate(self):
         length = self.config["exit_length"]
 
-        parent_node_path, pg_physics_world = pg_world.worldNP, pg_world.physics_world
+        parent_node_path, pg_physics_world = self.pgdrive_engine.worldNP, self.pgdrive_engine.physics_world
         assert len(self.road_network.graph) == 0, "These Map is not empty, please create a new map to read config"
 
         # Build a first-block
@@ -179,7 +179,7 @@ class MultiAgentTollgateEnv(MultiAgentPGDrive):
 
         if self.current_map is None:
             self.current_seed = 0
-            new_map = MATollGateMap(self.pg_world, map_config)
+            new_map = MATollGateMap(map_config)
             self.maps[self.current_seed] = new_map
             self.current_map = self.maps[self.current_seed]
             self.current_map.spawn_roads = self.spawn_roads
@@ -459,7 +459,7 @@ def _profile():
     for s in range(10000):
         o, r, d, i = env.step(env.action_space.sample())
 
-        # mask_ratio = env.scene_manager.detector_mask.get_mask_ratio()
+        # mask_ratio = env.pgdrive_engine.detector_mask.get_mask_ratio()
         # print("Mask ratio: ", mask_ratio)
 
         if all(d.values()):

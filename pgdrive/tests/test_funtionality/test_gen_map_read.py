@@ -21,7 +21,7 @@ def test_gen_map_read():
             "environment_num": 10,
         })
         env.lazy_init()
-        env.pg_world.clear_world()
+        env.pgdrive_engine.clear_world()
         print("Start loading.")
         env.load_all_maps(restored_data)
 

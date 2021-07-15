@@ -1,7 +1,7 @@
 from abc import ABC
 
 
-class ObservationType(ABC):
+class ObservationBase(ABC):
     def __init__(self, config, env=None):
         self.config = config
         self.env = env

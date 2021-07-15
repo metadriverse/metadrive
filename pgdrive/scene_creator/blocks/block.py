@@ -18,7 +18,7 @@ from pgdrive.utils.asset_loader import AssetLoader
 from pgdrive.utils.coordinates_shift import panda_position, panda_heading
 from pgdrive.utils.element import Element
 from pgdrive.utils.math_utils import norm, PGVector
-from pgdrive.world.pg_physics_world import PGPhysicsWorld
+from pgdrive.engine.world.pg_physics_world import PGPhysicsWorld
 
 
 class BlockSocket:
@@ -638,7 +638,7 @@ class Block(Element, BlockDefault):
         wall_np.setH(panda_heading(heading))
         return wall_np
 
-    def construct_block_buildings(self, object_manager, pg_world):
+    def construct_block_buildings(self, object_manager):
         """
         Buildings will be added to object_manager as static object automatically
         """
