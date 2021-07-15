@@ -11,7 +11,7 @@ class TestEnv(PGDriveEnv):
         super(TestEnv, self).__init__(
             {
                 "environment_num": 1,
-                "traffic_density": 0.,
+                "traffic_density": 0.2,
                 "traffic_mode": "respawn",
                 "start_seed": 5,
                 "pg_world_config": {
@@ -27,8 +27,8 @@ class TestEnv(PGDriveEnv):
                 "use_render": True,
                 "decision_repeat": 5,
                 "rgb_clip": True,
-                "debug": True,
-                "fast": False,
+                "debug": False,
+                "fast": True,
                 "map_config": {
                     Map.GENERATE_TYPE: MapGenerateMethod.BIG_BLOCK_SEQUENCE,
                     Map.GENERATE_CONFIG: "SXO",
@@ -67,7 +67,7 @@ if __name__ == "__main__":
                 "out_of_route": env.vehicle.out_of_route
             }
         )
-        # if d:
-        #     print("Reset")
-        #     env.reset()
+        if d:
+            print("Reset")
+            env.reset()
     env.close()

@@ -1,7 +1,6 @@
 import copy
-import logging
 from math import floor
-
+from pgdrive.utils.engine_utils import get_pgdrive_engine
 import numpy as np
 from panda3d.bullet import BulletBoxShape, BulletGhostNode
 from panda3d.core import Vec3, BitMask32
@@ -12,7 +11,6 @@ from pgdrive.scene_creator.lane.straight_lane import StraightLane
 from pgdrive.utils import PGConfig, get_np_random
 from pgdrive.utils.coordinates_shift import panda_position, panda_heading
 from pgdrive.utils.scene_utils import rect_region_detection
-from pgdrive.world.pg_world import PGWorld
 
 
 class SpawnManager:
@@ -164,11 +162,12 @@ class SpawnManager:
     def step(self):
         self.spawn_places_used = []
 
-    def get_available_respawn_places(self, pg_world: PGWorld, map, randomize=False):
+    def get_available_respawn_places(self, map, randomize=False):
         """
         In each episode, we allow the vehicles to respawn at the start of road, randomize will give vehicles a random
         position in the respawn region
         """
+        engine = get_pgdrive_engine()
         ret = {}
         for bid, bp in self.safe_spawn_places.items():
             if bid in self.spawn_places_used:
@@ -190,17 +189,17 @@ class SpawnManager:
             spawn_point_position = bp["spawn_point_position"]
             lane_heading = bp["spawn_point_heading"]
             result = rect_region_detection(
-                pg_world, spawn_point_position, lane_heading, self.RESPAWN_REGION_LONGITUDE,
-                self.RESPAWN_REGION_LATERAL, CollisionGroup.EgoVehicle
+                engine, spawn_point_position, lane_heading, self.RESPAWN_REGION_LONGITUDE, self.RESPAWN_REGION_LATERAL,
+                CollisionGroup.EgoVehicle
             )
-            if (pg_world.world_config["debug"] or pg_world.world_config["debug_physics_world"]) \
+            if (engine.world_config["debug"] or engine.world_config["debug_physics_world"]) \
                     and bp.get("need_debug", True):
                 shape = BulletBoxShape(Vec3(self.RESPAWN_REGION_LONGITUDE / 2, self.RESPAWN_REGION_LATERAL / 2, 1))
-                vis_body = pg_world.render.attach_new_node(BulletGhostNode("debug"))
+                vis_body = engine.render.attach_new_node(BulletGhostNode("debug"))
                 vis_body.node().addShape(shape)
                 vis_body.setH(panda_heading(lane_heading))
                 vis_body.setPos(panda_position(spawn_point_position, z=2))
-                pg_world.physics_world.dynamic_world.attach(vis_body.node())
+                engine.physics_world.dynamic_world.attach(vis_body.node())
                 vis_body.node().setIntoCollideMask(BitMask32.allOff())
                 bp.force_set("need_debug", False)
 
@@ -210,8 +209,6 @@ class SpawnManager:
                     new_bp["config"] = self._randomize_position_in_slot(new_bp["config"])
                 ret[bid] = new_bp
                 self.spawn_places_used.append(bid)
-            # elif pg_world.world_config["debug"] or pg_world.world_config["debug_physics_world"]:
-            #     print(result.getNode())
         return ret
 
     def _randomize_position_in_slot(self, target_vehicle_config):

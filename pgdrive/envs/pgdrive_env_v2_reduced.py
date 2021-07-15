@@ -3,7 +3,8 @@ from collections import deque
 import gym
 import numpy as np
 from pgdrive.envs.pgdrive_env_v2 import PGDriveEnvV2
-from pgdrive.obs import ObservationType, LidarStateObservation
+from pgdrive.obs.observation_base import ObservationBase
+from pgdrive.obs.state_obs import LidarStateObservation
 from pgdrive.utils import PGConfig, clip, norm
 
 
@@ -131,7 +132,7 @@ class PGDriveEnvV2Reduced(PGDriveEnvV2):
         config["obs_mode"] = None  # ["w_navi", "w_ego", "w_both"]
         return config
 
-    def get_single_observation(self, vehicle_config: "PGConfig") -> "ObservationType":
+    def get_single_observation(self, vehicle_config: "PGConfig") -> "ObservationBase":
         assert not self.config["use_image"]
         vehicle_config["obs_mode"] = self.config["obs_mode"]
         return LidarStateObservationV2(vehicle_config)

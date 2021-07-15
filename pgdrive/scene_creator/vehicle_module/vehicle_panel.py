@@ -1,8 +1,8 @@
 from panda3d.core import NodePath, PGTop, TextNode, Vec3, CardMaker
 
 from pgdrive.constants import CamMask
-from pgdrive.world.image_buffer import ImageBuffer
-from pgdrive.world.pg_world import PGWorld
+from pgdrive.engine.world.image_buffer import ImageBuffer
+from pgdrive.engine.world.pg_world import PGWorld
 
 
 class VehiclePanel(ImageBuffer):
@@ -65,14 +65,9 @@ class VehiclePanel(ImageBuffer):
                 card.setPos(0.2 + self.PARA_VIS_LENGTH / 2, 0, 0.22)
                 self.para_vis_np[name] = card
         super(VehiclePanel, self).__init__(
-            self.BUFFER_W,
-            self.BUFFER_H,
-            Vec3(-0.9, -1.01, 0.78),
-            self.BKG_COLOR,
-            pg_world=pg_world,
-            parent_node=self.aspect2d_np
+            self.BUFFER_W, self.BUFFER_H, Vec3(-0.9, -1.01, 0.78), self.BKG_COLOR, parent_node=self.aspect2d_np
         )
-        self.add_to_display(pg_world, self.default_region)
+        self.add_to_display(self.default_region)
 
     def renew_2d_car_para_visualization(self, vehicle):
         steering, throttle_brake, speed = vehicle.steering, vehicle.throttle_brake, vehicle.speed
@@ -99,8 +94,8 @@ class VehiclePanel(ImageBuffer):
         speed_value = speed / self.MAX_SPEED
         self.para_vis_np["Speed"].setScale(speed_value, 1, 1)
 
-    def destroy(self, pg_world=None):
-        super(VehiclePanel, self).destroy(pg_world)
+    def destroy(self):
+        super(VehiclePanel, self).destroy()
         for para in self.para_vis_np.values():
             para.removeNode()
         self.aspect2d_np.removeNode()

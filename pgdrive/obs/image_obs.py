@@ -1,12 +1,12 @@
 import gym
 import numpy as np
-from pgdrive.obs.observation_type import ObservationType
+from pgdrive.obs.observation_base import ObservationBase
 from pgdrive.obs.state_obs import StateObservation
 from pgdrive.scene_creator.vehicle.base_vehicle import BaseVehicle
-from pgdrive.world.image_buffer import ImageBuffer
+from pgdrive.engine.world.image_buffer import ImageBuffer
 
 
-class ImageStateObservation(ObservationType):
+class ImageStateObservation(ObservationBase):
     """
     Use ego state info, navigation info and front cam image/top down image as input
     The shape needs special handling
@@ -35,7 +35,7 @@ class ImageStateObservation(ObservationType):
         return {self.IMAGE: self.img_obs.observe(image_buffer), self.STATE: self.state_obs.observe(vehicle)}
 
 
-class ImageObservation(ObservationType):
+class ImageObservation(ObservationBase):
     """
     Use only image info as input
     """

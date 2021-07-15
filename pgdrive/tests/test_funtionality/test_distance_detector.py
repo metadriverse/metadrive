@@ -30,7 +30,7 @@ def test_original_lidar(render=False):
         v_config = env.config["vehicle_config"]
         v_config["spawn_longitude"] = 80
         v_config["spawn_lateral"] = 5
-        another_v = BaseVehicle(env.pg_world, v_config)
+        another_v = BaseVehicle(v_config)
         another_v.reset(env.current_map)
         objs = env.vehicle.side_detector.get_detected_objects() + env.vehicle.lane_line_detector.get_detected_objects()
         yellow = 0
@@ -79,7 +79,7 @@ def test_lidar_with_mask(render=False):
         v_config = env.config["vehicle_config"]
         v_config["spawn_longitude"] = 80
         v_config["spawn_lateral"] = 5
-        another_v = BaseVehicle(env.pg_world, v_config)
+        another_v = BaseVehicle(v_config)
         another_v.reset(env.current_map)
         # for test
         env.agent_manager._pending_objects[another_v.name] = another_v

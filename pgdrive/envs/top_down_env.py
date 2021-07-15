@@ -1,6 +1,7 @@
 from pgdrive.envs.pgdrive_env import PGDriveEnv
 from pgdrive.envs.pgdrive_env_v2 import PGDriveEnvV2
-from pgdrive.obs import TopDownMultiChannel, TopDownObservation
+from pgdrive.obs.top_down_obs import TopDownObservation
+from pgdrive.obs.top_down_obs_multi_channel import TopDownMultiChannel
 from pgdrive.utils import PGConfig
 
 

@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 
 from pgdrive.scene_creator.city_map import CityMap
 from pgdrive.utils import draw_top_down_map
-from pgdrive.world.pg_world import PGWorld
+from pgdrive.engine.world.pg_world import PGWorld
 
 if __name__ == '__main__':
     num_blocks = 100

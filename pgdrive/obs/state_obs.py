@@ -1,12 +1,12 @@
 import gym
 import numpy as np
 
-from pgdrive.obs.observation_type import ObservationType
+from pgdrive.obs.observation_base import ObservationBase
 from pgdrive.scene_creator.vehicle_module.routing_localization import RoutingLocalizationModule
 from pgdrive.utils.math_utils import clip, norm
 
 
-class StateObservation(ObservationType):
+class StateObservation(ObservationBase):
     ego_state_obs_dim = 6
     """
     Use vehicle state info, navigation info and lidar point clouds info as input
@@ -114,7 +114,7 @@ class StateObservation(ObservationType):
         return dim
 
 
-class LidarStateObservation(ObservationType):
+class LidarStateObservation(ObservationBase):
     def __init__(self, vehicle_config):
         self.state_obs = StateObservation(vehicle_config)
         super(LidarStateObservation, self).__init__(vehicle_config)

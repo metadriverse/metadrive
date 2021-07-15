@@ -40,7 +40,7 @@ if __name__ == "__main__":
     env = TestEnv()
 
     o = env.reset()
-    print("vehicle num", len(env.scene_manager.traffic_manager.vehicles))
+    print("vehicle num", len(env.pgdrive_engine.traffic_manager.vehicles))
     for i in range(1, 100000):
         o, r, d, info = env.step({"agent0": [0, 0], "agent1": [0, 0]})
         # o, r, d, info = env.step([0,1])

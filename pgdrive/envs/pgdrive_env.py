@@ -4,20 +4,20 @@ import logging
 import os.path as osp
 import sys
 from typing import Union, Dict, AnyStr, Optional, Tuple
-
+from pgdrive.utils.engine_utils import pgdrive_engine_initialized
 import numpy as np
 from pgdrive.constants import DEFAULT_AGENT, TerminationState
 from pgdrive.envs.base_env import BasePGDriveEnv
-from pgdrive.obs import LidarStateObservation, ImageStateObservation
+from pgdrive.obs.image_obs import ImageStateObservation
+from pgdrive.obs.state_obs import LidarStateObservation
 from pgdrive.scene_creator.blocks.first_block import FirstBlock
 from pgdrive.scene_creator.map import Map, MapGenerateMethod, parse_map_config, PGMap
 from pgdrive.scene_creator.vehicle.base_vehicle import BaseVehicle
 from pgdrive.scene_creator.vehicle_module.distance_detector import DetectorMask
 from pgdrive.scene_manager.traffic_manager import TrafficMode
 from pgdrive.utils import clip, PGConfig, recursive_equal, get_np_random, concat_step_infos
-from pgdrive.world.chase_camera import ChaseCamera
-from pgdrive.world.manual_controller import KeyboardController, JoystickController
-from pgdrive.world.pg_world import PGWorld
+from pgdrive.engine.world.chase_camera import ChaseCamera
+from pgdrive.engine.world.manual_controller import KeyboardController, JoystickController
 
 pregenerated_map_file = osp.join(osp.dirname(osp.dirname(osp.abspath(__file__))), "assets", "maps", "PGDrive-maps.json")
 
@@ -158,20 +158,10 @@ class PGDriveEnv(BasePGDriveEnv):
         )
         return config
 
-    def _setup_pg_world(self) -> "PGWorld":
-        pg_world = super(PGDriveEnv, self)._setup_pg_world()
-        pg_world.accept("r", self.reset)
-        pg_world.accept("escape", sys.exit)
-        # Press t can let expert take over. But this function is still experimental.
-        pg_world.accept("t", self.toggle_expert_takeover)
-        # capture all figs
-        pg_world.accept("p", self.capture)
-        return pg_world
-
     def _after_lazy_init(self):
         if self.config["manual_control"]:
             if self.config["controller"] == "keyboard":
-                self.controller = KeyboardController(pg_world=self.pg_world)
+                self.controller = KeyboardController()
             elif self.config["controller"] == "joystick":
                 self.controller = JoystickController()
             else:
@@ -188,18 +178,18 @@ class PGDriveEnv(BasePGDriveEnv):
         # for manual_control and main camera type
         if (self.config["use_render"] or self.config["use_image"]) and self.config["use_chase_camera"]:
             self.main_camera = ChaseCamera(
-                self.pg_world.cam, self.config["camera_height"], self.config["camera_dist"], self.pg_world
+                self.pgdrive_engine.cam, self.config["camera_height"], self.config["camera_dist"]
             )
             self.main_camera.set_follow_lane(self.config["use_chase_camera_follow_lane"])
-            self.main_camera.track(self.current_track_vehicle, self.pg_world)
-            self.pg_world.accept("b", self.bird_view_camera)
-        self.pg_world.accept("q", self.chase_another_v)
+            self.main_camera.track(self.current_track_vehicle)
+            self.pgdrive_engine.accept("b", self.bird_view_camera)
+        self.pgdrive_engine.accept("q", self.chase_another_v)
 
         # setup the detector mask
 
         if any([v.lidar is not None for v in self.vehicles.values()]) and (not self.config["_disable_detector_mask"]):
             v = next(iter(self.vehicles.values()))
-            self.scene_manager.detector_mask = DetectorMask(
+            self.pgdrive_engine.detector_mask = DetectorMask(
                 num_lasers=self.config["vehicle_config"]["lidar"]["num_lasers"],
                 max_distance=self.config["vehicle_config"]["lidar"]["distance"],
                 max_span=v.WIDTH + v.LENGTH
@@ -212,8 +202,7 @@ class PGDriveEnv(BasePGDriveEnv):
             -> Tuple[Union[np.ndarray, Dict[AnyStr, np.ndarray]], Dict]:
         self.agent_manager.prepare_step()
         if self.config["manual_control"] and self.config["use_render"] \
-                and self.current_track_vehicle in self.agent_manager.get_vehicle_list() and not self.main_camera.is_bird_view_camera(
-            self.pg_world):
+                and self.current_track_vehicle in self.agent_manager.get_vehicle_list() and not self.main_camera.is_bird_view_camera():
             action = self.controller.process_input()
             if self.is_multi_agent:
                 actions[self.agent_manager.object_to_agent(self.current_track_vehicle.name)] = action
@@ -382,7 +371,7 @@ class PGDriveEnv(BasePGDriveEnv):
 
     def _get_reset_return(self):
         ret = {}
-        self.scene_manager.update_state_for_all_target_vehicles()
+        self.pgdrive_engine.update_state_for_all_target_vehicles()
         for v_id, v in self.vehicles.items():
             self.observations[v_id].reset(self, v)
             ret[v_id] = self.observations[v_id].observe(v)
@@ -399,7 +388,7 @@ class PGDriveEnv(BasePGDriveEnv):
             map_config = self.config["map_config"].copy()
             map_config[Map.GENERATE_TYPE] = MapGenerateMethod.PG_MAP_FILE
             map_config[Map.GENERATE_CONFIG] = blocks_info
-            self.current_map = PGMap(self.pg_world, map_config)
+            self.current_map = PGMap(map_config)
             return
 
         if self.config["load_map_from_json"] and self.current_map is None:
@@ -408,7 +397,7 @@ class PGDriveEnv(BasePGDriveEnv):
 
         # remove map from world before adding
         if self.current_map is not None:
-            self.current_map.unload_from_pg_world(self.pg_world)
+            self.current_map.unload_from_pg_world()
 
         # create map
         if force_seed is not None:
@@ -429,30 +418,30 @@ class PGDriveEnv(BasePGDriveEnv):
                 map_config = self.config["map_config"]
                 map_config.update({"seed": self.current_seed})
 
-            new_map = PGMap(self.pg_world, map_config)
+            new_map = PGMap(map_config)
             self.maps[self.current_seed] = new_map
             self.current_map = self.maps[self.current_seed]
         else:
             self.current_map = self.maps[self.current_seed]
             assert isinstance(self.current_map, Map), "Map should be an instance of Map() class"
-            self.current_map.load_to_pg_world(self.pg_world)
+            self.current_map.load_to_pg_world()
 
     def dump_all_maps(self):
-        assert self.pg_world is None, "We assume you generate map files in independent tasks (not in training). " \
-                                      "So you should run the generating script without calling reset of the " \
-                                      "environment."
+        assert not pgdrive_engine_initialized(), "We assume you generate map files in independent tasks (not in training). " \
+                                                 "So you should run the generating script without calling reset of the " \
+                                                 "environment."
 
         self.lazy_init()  # it only works the first time when reset() is called to avoid the error when render
-        assert self.pg_world is not None
-        self.pg_world.clear_world()
+        assert pgdrive_engine_initialized()
+        self.pgdrive_engine.clear_world()
 
         for seed in range(self.start_seed, self.start_seed + self.env_num):
             print(seed)
             map_config = copy.deepcopy(self.config["map_config"])
             map_config.update({"seed": seed})
-            new_map = PGMap(self.pg_world, map_config)
+            new_map = PGMap(map_config)
             self.maps[seed] = new_map
-            new_map.unload_from_pg_world(self.pg_world)
+            new_map.unload_from_pg_world()
             logging.info("Finish generating map with seed: {}".format(seed))
 
         map_data = dict()
@@ -526,7 +515,7 @@ class PGDriveEnv(BasePGDriveEnv):
             return
         self.main_camera.reset()
         vehicles = list(self.agent_manager.active_agents.values())
-        if not self.main_camera.is_bird_view_camera(self.pg_world):
+        if not self.main_camera.is_bird_view_camera():
             if self.current_track_vehicle in vehicles:
                 vehicles.remove(self.current_track_vehicle)
             if len(vehicles) == 0:
@@ -536,11 +525,11 @@ class PGDriveEnv(BasePGDriveEnv):
                 new_v = get_np_random().choice(vehicles)
                 self.current_track_vehicle = new_v
         self.current_track_vehicle.add_to_display()
-        self.main_camera.track(self.current_track_vehicle, self.pg_world)
+        self.main_camera.track(self.current_track_vehicle)
         return
 
     def bird_view_camera(self):
-        self.main_camera.stop_track(self.pg_world, self.current_track_vehicle)
+        self.main_camera.stop_track(self.current_track_vehicle)
 
     def saver(self, v_id: str, actions):
         """
@@ -611,6 +600,11 @@ class PGDriveEnv(BasePGDriveEnv):
         else:
             o = LidarStateObservation(vehicle_config)
         return o
+
+    def setup_engine(self):
+        super(PGDriveEnv, self).setup_engine()
+        # Press t can let expert take over. But this function is still experimental.
+        self.pgdrive_engine.accept("t", self.toggle_expert_takeover)
 
 
 def _auto_termination(vehicle, should_done):

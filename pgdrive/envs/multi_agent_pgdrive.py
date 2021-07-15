@@ -133,7 +133,7 @@ class MultiAgentPGDrive(PGDriveEnvV2):
         o, r, d, i = self._after_vehicle_done(o, r, d, i)
 
         # Update respawn manager
-        if self.episode_steps >= self.config["horizon"] or self.scene_manager.replay_system is not None:
+        if self.episode_steps >= self.config["horizon"] or self.pgdrive_engine.replay_system is not None:
             self.agent_manager.set_allow_respawn(False)
         self._spawn_manager.step()
         new_obs_dict = self._respawn_vehicles(randomize_position=self.config["random_traffic"])
@@ -171,7 +171,7 @@ class MultiAgentPGDrive(PGDriveEnvV2):
             self._update_destination_for(v_id)
 
     def _after_vehicle_done(self, obs=None, reward=None, dones: dict = None, info=None):
-        if self.scene_manager.replay_system is not None:
+        if self.pgdrive_engine.replay_system is not None:
             return obs, reward, dones, info
         for v_id, v_info in info.items():
             if v_info.get("episode_length", 0) >= self.config["horizon"]:
@@ -190,7 +190,7 @@ class MultiAgentPGDrive(PGDriveEnvV2):
     def _update_camera_after_finish(self, dead_vehicle_id):
         if self.main_camera is not None and dead_vehicle_id == self.agent_manager.object_to_agent(
                 self.current_track_vehicle.name) \
-                and self.pg_world.taskMgr.hasTaskNamed(self.main_camera.CHASE_TASK_NAME):
+                and self.pgdrive_engine.task_manager.hasTaskNamed(self.main_camera.CHASE_TASK_NAME):
             self.chase_another_v()
 
     def _get_target_vehicle_config(self):
@@ -223,7 +223,7 @@ class MultiAgentPGDrive(PGDriveEnvV2):
             top_down_camera_height = self.config["top_down_camera_initial_z"]
             self.main_camera.camera.setPos(0, 0, top_down_camera_height)
             self.main_camera.top_down_camera_height = top_down_camera_height
-            self.main_camera.stop_track(self.pg_world, self.current_track_vehicle)
+            self.main_camera.stop_track(self.current_track_vehicle)
             self.main_camera.camera_x += self.config["top_down_camera_initial_x"]
             self.main_camera.camera_y += self.config["top_down_camera_initial_y"]
 
@@ -253,7 +253,7 @@ class MultiAgentPGDrive(PGDriveEnvV2):
         Arbitrary insert a new vehicle to a new spawn place if possible.
         """
         safe_places_dict = self._spawn_manager.get_available_respawn_places(
-            self.pg_world, self.current_map, randomize=randomize_position
+            self.current_map, randomize=randomize_position
         )
         if len(safe_places_dict) == 0 or not self.agent_manager.allow_respawn:
             # No more run, just wait!
@@ -388,12 +388,12 @@ def pygame_replay(name, env_class, save=False, other_traj=None, film_size=(1000,
     frame_count = 0
     while True:
         o, r, d, i = env.step(env.action_space.sample())
-        env.pg_world.force_fps.toggle()
+        env.pgdrive_engine.force_fps.toggle()
         env.render(mode="top_down", num_stack=50, film_size=film_size, history_smooth=0)
         if save:
             pygame.image.save(env._top_down_renderer._runtime, "{}_{}.png".format(name, frame_count))
         frame_count += 1
-        if len(env.scene_manager.replay_system.restore_episode_info) == 0:
+        if len(env.pgdrive_engine.replay_system.restore_episode_info) == 0:
             env.close()
 
 
@@ -411,11 +411,11 @@ def panda_replay(name, env_class, save=False, other_traj=None, extra_config={}):
     frame_count = 0
     while True:
         o, r, d, i = env.step(env.action_space.sample())
-        env.pg_world.force_fps.toggle()
+        env.pgdrive_engine.force_fps.toggle()
         if save:
             pygame.image.save(env._top_down_renderer._runtime, "{}_{}.png".format(name, frame_count))
         frame_count += 1
-        if len(env.scene_manager.replay_system.restore_episode_info) == 0:
+        if len(env.pgdrive_engine.replay_system.restore_episode_info) == 0:
             env.close()
 
 

@@ -4,8 +4,6 @@ from typing import Dict
 
 from gym.spaces import Box, Dict
 
-from pgdrive.scene_creator.vehicle.base_vehicle import BaseVehicle
-
 
 class AgentManager:
     """
@@ -43,14 +41,13 @@ class AgentManager:
         self._debug = debug
         self._delay_done = delay_done
         self._infinite_agents = infinite_agents
-        self._pg_world = None
         self._init_config_dict = None
 
         self._init_object_to_agent = None
         self._newly_added_object_to_agent = None
         self._agents_finished_this_frame = dict()  # for
 
-        # fake init. before creating pg_world and vehicles, it is necessary when all vehicles re-created in runtime
+        # fake init. before creating engine and vehicles, it is necessary when all vehicles re-created in runtime
         self.observations = copy.copy(init_observations)  # its value is map<agent_id, obs> before init() is called
         self._init_observations = init_observations  # map <agent_id, observation>
         self._init_observation_spaces = None  # map <agent_id, space>
@@ -61,9 +58,9 @@ class AgentManager:
         self._object_to_agent = {k: k for k in self.observations.keys()}  # no target vehicles created, fake init
 
     def _get_vehicles(self, config_dict):
+        from pgdrive.scene_creator.vehicle.base_vehicle import BaseVehicle
         ret = {
-            key:
-            BaseVehicle(self._pg_world, v_config, am_i_the_special_one=v_config.get("am_i_the_special_one", False))
+            key: BaseVehicle(v_config, am_i_the_special_one=v_config.get("am_i_the_special_one", False))
             for key, v_config in config_dict.items()
         }
         return ret
@@ -80,11 +77,10 @@ class AgentManager:
         self._init_action_spaces = init_action_space
         self.action_spaces = copy.copy(init_action_space)
 
-    def init(self, pg_world, config_dict: Dict):
+    def init(self, config_dict: Dict):
         """
         Agent manager is really initialized after the BaseVehicle Instances are created
         """
-        self._pg_world = pg_world
         self._init_config_dict = config_dict
         init_vehicles = self._get_vehicles(config_dict=config_dict)
         vehicles_created = set(init_vehicles.keys())

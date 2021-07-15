@@ -2,7 +2,7 @@ import copy
 from pgdrive.envs.multi_agent_pgdrive import pygame_replay, panda_replay
 from pgdrive.envs.marl_envs.marl_inout_roundabout import LidarStateObservationMARound
 from pgdrive.envs.multi_agent_pgdrive import MultiAgentPGDrive
-from pgdrive.obs import ObservationType
+from pgdrive.obs.observation_base import ObservationBase
 from pgdrive.scene_creator.blocks.first_block import FirstBlock
 from pgdrive.scene_creator.blocks.intersection import InterSection
 from pgdrive.scene_creator.map import PGMap
@@ -21,10 +21,10 @@ MAIntersectionConfig = dict(
 
 
 class MAIntersectionMap(PGMap):
-    def _generate(self, pg_world):
+    def _generate(self):
         length = self.config["exit_length"]
 
-        parent_node_path, pg_physics_world = pg_world.worldNP, pg_world.physics_world
+        parent_node_path, pg_physics_world = self.pgdrive_engine.worldNP, self.pgdrive_engine.physics_world
         assert len(self.road_network.graph) == 0, "These Map is not empty, please create a new map to read config"
 
         # Build a first-block
@@ -65,7 +65,7 @@ class MultiAgentIntersectionEnv(MultiAgentPGDrive):
 
         if self.current_map is None:
             self.current_seed = 0
-            new_map = MAIntersectionMap(self.pg_world, map_config)
+            new_map = MAIntersectionMap(map_config)
             self.maps[self.current_seed] = new_map
             self.current_map = self.maps[self.current_seed]
             self.current_map.spawn_roads = self.spawn_roads
@@ -77,7 +77,7 @@ class MultiAgentIntersectionEnv(MultiAgentPGDrive):
         end_road = -get_np_random(self._DEBUG_RANDOM_SEED).choice(end_roads)  # Use negative road!
         vehicle.routing_localization.set_route(vehicle.lane_index[0], end_road.end_node)
 
-    def get_single_observation(self, vehicle_config: "PGConfig") -> "ObservationType":
+    def get_single_observation(self, vehicle_config: "PGConfig") -> "ObservationBase":
         return LidarStateObservationMARound(vehicle_config)
 
 
@@ -257,7 +257,7 @@ def _profile():
     for s in range(10000):
         o, r, d, i = env.step(env.action_space.sample())
 
-        # mask_ratio = env.scene_manager.detector_mask.get_mask_ratio()
+        # mask_ratio = env.pgdrive_engine.detector_mask.get_mask_ratio()
         # print("Mask ratio: ", mask_ratio)
 
         if all(d.values()):

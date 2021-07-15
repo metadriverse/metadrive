@@ -22,8 +22,8 @@ def vis_top_down_render_with_panda_render():
         o, r, d, info = env.step(env.action_space.sample())
         env.render(
             text={
-                "vehicle_num": len(env.scene_manager.traffic_manager.vehicles),
-                "traffic_vehicle": len(env.scene_manager.traffic_manager.traffic_vehicles)
+                "vehicle_num": len(env.pgdrive_engine.traffic_manager.vehicles),
+                "traffic_vehicle": len(env.pgdrive_engine.traffic_manager.traffic_vehicles)
             }
         )
         # if d:

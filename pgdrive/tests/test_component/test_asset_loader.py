@@ -1,6 +1,6 @@
 from pgdrive import PGDriveEnv
 from pgdrive.utils.asset_loader import initialize_asset_loader, AssetLoader
-from pgdrive.world.pg_world import PGWorld
+from pgdrive.engine.world.pg_world import PGWorld
 
 
 def test_asset_loader():

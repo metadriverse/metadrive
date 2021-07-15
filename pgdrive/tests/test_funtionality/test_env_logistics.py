@@ -5,11 +5,11 @@ def test_seeding():
     env = PGDriveEnvV2()
     try:
         env.seed(999999)
-        assert env.pg_world is None
+        assert env.pgdrive_engine is None
         assert env.current_seed != 999999
         env.reset()
         assert env.current_seed == 999999
-        assert env.pg_world is not None
+        assert env.pgdrive_engine is not None
     finally:
         env.close()
 
