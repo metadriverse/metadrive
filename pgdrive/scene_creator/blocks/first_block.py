@@ -8,7 +8,7 @@ from pgdrive.scene_creator.lane.straight_lane import StraightLane
 from pgdrive.scene_creator.road.road import Road
 from pgdrive.scene_creator.road.road_network import RoadNetwork
 from pgdrive.utils.pg_space import PGSpace
-from pgdrive.engine.world.pg_physics_world import PGPhysicsWorld
+from pgdrive.engine.core.pg_physics_world import PGPhysicsWorld
 
 
 class FirstBlock(Block):
@@ -30,12 +30,12 @@ class FirstBlock(Block):
         lane_num: int,
         render_root_np: NodePath,
         pg_physics_world: PGPhysicsWorld,
-        random_seed,
         length: float = 50
     ):
         place_holder = BlockSocket(Road(Decoration.start, Decoration.end), Road(Decoration.start, Decoration.end))
-        super(FirstBlock, self).__init__(0, place_holder, global_network, random_seed)
+        super(FirstBlock, self).__init__(0, place_holder, global_network, random_seed=0)
         assert length > self.ENTRANCE_LENGTH
+        self._block_objects = []
         basic_lane = StraightLane(
             [0, lane_width * (lane_num - 1)], [self.ENTRANCE_LENGTH, lane_width * (lane_num - 1)],
             line_types=(LineType.BROKEN, LineType.SIDE),
@@ -60,5 +60,5 @@ class FirstBlock(Block):
         socket.set_index(self._block_name, 0)
 
         self.add_sockets(socket)
-        self.attach_to_pg_world(render_root_np, pg_physics_world)
+        self.attach_to_world(render_root_np, pg_physics_world)
         self._respawn_roads = [other_v_spawn_road]

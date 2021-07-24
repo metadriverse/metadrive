@@ -7,10 +7,10 @@ from pgdrive.scene_creator.lane.straight_lane import StraightLane
 from pgdrive.constants import COLLISION_INFO_COLOR, RENDER_MODE_ONSCREEN, CamMask
 from pgdrive.scene_creator.blocks.first_block import FirstBlock
 from pgdrive.scene_creator.lane.circular_lane import CircularLane
-from pgdrive.scene_creator.map import Map
+from pgdrive.scene_creator.map.map import Map
 from pgdrive.scene_creator.road.road import Road
 from pgdrive.utils import clip, norm, get_np_random
-from pgdrive.utils.asset_loader import AssetLoader
+from pgdrive.engine.asset_loader import AssetLoader
 from pgdrive.utils.pg_space import Parameter, BlockParameterSpace
 from pgdrive.utils.scene_utils import ray_localization
 from pgdrive.utils.coordinates_shift import panda_position
@@ -321,7 +321,7 @@ class RoutingLocalizationModule:
             return self.get_current_lane_width() * self.get_current_lane_num()
 
     def get_current_lane_width(self) -> float:
-        return self.map.config[self.map.LANE_WIDTH]
+        return self.map._config[self.map.LANE_WIDTH]
 
     def get_current_lane_num(self) -> float:
         return len(self.current_ref_lanes)

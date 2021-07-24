@@ -2,7 +2,7 @@ from typing import Tuple, List
 
 import numpy as np
 from pgdrive.scene_creator.highway_vehicle.kinematics import Vehicle
-from pgdrive.scene_manager.traffic_manager import TrafficManager
+from pgdrive.scene_managers.traffic_manager import TrafficManager
 
 
 class BicycleVehicle(Vehicle):

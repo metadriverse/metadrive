@@ -6,9 +6,9 @@ import pgdrive.utils.math_utils as utils
 from pgdrive.constants import Route, LaneIndex
 from pgdrive.scene_creator.highway_vehicle.controller import ControlledVehicle
 from pgdrive.scene_creator.highway_vehicle.kinematics import Vehicle
-from pgdrive.scene_creator.object.traffic_object import TrafficObject
-from pgdrive.scene_creator.object.base_object import BaseObject
-from pgdrive.scene_manager.traffic_manager import TrafficManager
+from pgdrive.scene_creator.object.traffic_object import TrafficSign
+from pgdrive.scene_creator.object.static_object import StaticObject
+from pgdrive.scene_managers.traffic_manager import TrafficManager
 from pgdrive.utils.math_utils import clip
 
 
@@ -148,7 +148,7 @@ class IDMVehicle(ControlledVehicle):
         :param rear_vehicle: the vehicle following the ego-vehicle
         :return: the acceleration command for the ego-vehicle [m/s2]
         """
-        if not ego_vehicle or isinstance(ego_vehicle, BaseObject):
+        if not ego_vehicle or isinstance(ego_vehicle, StaticObject):
             return 0
         ego_target_speed = utils.not_zero(getattr(ego_vehicle, "target_speed", 0))
         acceleration = self.COMFORT_ACC_MAX * (1 - np.power(max(ego_vehicle.speed, 0) / ego_target_speed, self.DELTA))
@@ -236,9 +236,9 @@ class IDMVehicle(ControlledVehicle):
         self.timer = 0
 
         # decide to make a lane change
-        for lane_index in self.traffic_mgr.map.road_network.side_lanes(self.lane_index):
+        for lane_index in self.traffic_mgr.current_map.road_network.side_lanes(self.lane_index):
             # Is the candidate lane close enough?
-            if not self.traffic_mgr.map.road_network.get_lane(lane_index).is_reachable_from(self.position):
+            if not self.traffic_mgr.current_map.road_network.get_lane(lane_index).is_reachable_from(self.position):
                 continue
             # Does the MOBIL model recommend a lane change?
             if self.mobil(lane_index):
@@ -301,7 +301,7 @@ class IDMVehicle(ControlledVehicle):
         if self.target_lane_index != self.lane_index and self.speed < stopped_speed:
             _, rear = self.traffic_mgr.neighbour_vehicles(self)
             _, new_rear = self.traffic_mgr.neighbour_vehicles(
-                self, self.traffic_mgr.map.road_network.get_lane(self.target_lane_index)
+                self, self.traffic_mgr.current_map.road_network.get_lane(self.target_lane_index)
             )
             # Check for free room behind on both lanes
             if (not rear or rear.lane_distance_to(self) > safe_distance) and \
@@ -415,7 +415,7 @@ class LinearVehicle(IDMVehicle):
         :param target_lane_index: index of the lane to follow
         :return: a array of features
         """
-        lane = self.traffic_mgr.map.road_network.get_lane(target_lane_index)
+        lane = self.traffic_mgr.current_map.road_network.get_lane(target_lane_index)
         lane_coords = lane.local_coordinates(self.position)
         lane_next_coords = lane_coords[0] + self.speed * self.PURSUIT_TAU
         lane_future_heading = lane.heading_at(lane_next_coords)

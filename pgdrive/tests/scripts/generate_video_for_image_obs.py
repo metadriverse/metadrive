@@ -9,7 +9,7 @@ from gym import logger, error
 from panda3d.core import PNMImage
 from pgdrive.envs.pgdrive_env import PGDriveEnv
 from pgdrive.scene_creator.algorithm.BIG import BigGenerateMethod
-from pgdrive.scene_creator.map import Map
+from pgdrive.scene_creator.map.map import Map
 
 
 class ImageEncoder(object):

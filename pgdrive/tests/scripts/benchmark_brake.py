@@ -2,7 +2,7 @@ import time
 
 import numpy as np
 from pgdrive.envs import PGDriveEnvV2
-from pgdrive.scene_creator.map import Map, MapGenerateMethod
+from pgdrive.scene_creator.map.map import Map, MapGenerateMethod
 
 
 def get_result(env):

@@ -1,5 +1,4 @@
 import gym
-from pgdrive.envs.multi_agent_pgdrive import pygame_replay
 import numpy as np
 
 from pgdrive.envs.multi_agent_pgdrive import MultiAgentPGDrive
@@ -7,7 +6,7 @@ from pgdrive.obs.observation_base import ObservationBase
 from pgdrive.obs.state_obs import StateObservation
 from pgdrive.scene_creator.blocks.first_block import FirstBlock
 from pgdrive.scene_creator.blocks.roundabout import Roundabout
-from pgdrive.scene_creator.map import PGMap
+from pgdrive.scene_creator.map.pg_map import PGMap
 from pgdrive.scene_creator.road.road import Road
 from pgdrive.utils import get_np_random, norm, PGConfig
 
@@ -35,7 +34,6 @@ class MARoundaboutMap(PGMap):
             self.config[self.LANE_NUM],
             parent_node_path,
             pg_physics_world,
-            1,
             length=length
         )
         self.blocks.append(last_block)
@@ -124,13 +122,13 @@ class MultiAgentRoundaboutEnv(MultiAgentPGDrive):
 
     def _update_map(self, episode_data: dict = None, force_seed=None):
         map_config = self.config["map_config"]
-        map_config.update({"seed": self.current_seed})
 
         if self.current_map is None:
-            self.current_seed = 0
-            new_map = MARoundaboutMap(map_config)
-            self.maps[self.current_seed] = new_map
-            self.current_map = self.maps[self.current_seed]
+            self.seed(map_config["seed"])
+            new_map = self.pgdrive_engine.map_manager.spawn_object(
+                MARoundaboutMap, map_config=map_config, random_seed=self.current_seed
+            )
+            self.pgdrive_engine.map_manager.load_map(new_map)
             self.current_map.spawn_roads = self.spawn_roads
 
     def _update_destination_for(self, vehicle_id):
@@ -388,8 +386,8 @@ def _long_run():
 
 if __name__ == "__main__":
     # _draw()
-    # _vis()
+    _vis()
     # _vis_debug_respawn()
     # _profiwdle()
-    _long_run()
+    # _long_run()
     # pygame_replay("round", MultiAgentRoundaboutEnv)

@@ -2,7 +2,6 @@ import copy
 import json
 import logging
 import os.path as osp
-import sys
 from typing import Union, Dict, AnyStr, Optional, Tuple
 from pgdrive.utils.engine_utils import pgdrive_engine_initialized
 import numpy as np
@@ -11,13 +10,15 @@ from pgdrive.envs.base_env import BasePGDriveEnv
 from pgdrive.obs.image_obs import ImageStateObservation
 from pgdrive.obs.state_obs import LidarStateObservation
 from pgdrive.scene_creator.blocks.first_block import FirstBlock
-from pgdrive.scene_creator.map import Map, MapGenerateMethod, parse_map_config, PGMap
+from pgdrive.scene_creator.map.map import Map, MapGenerateMethod, parse_map_config
+from pgdrive.scene_creator.map.pg_map import PGMap
 from pgdrive.scene_creator.vehicle.base_vehicle import BaseVehicle
 from pgdrive.scene_creator.vehicle_module.distance_detector import DetectorMask
-from pgdrive.scene_manager.traffic_manager import TrafficMode
-from pgdrive.utils import clip, PGConfig, recursive_equal, get_np_random, concat_step_infos
-from pgdrive.engine.world.chase_camera import ChaseCamera
-from pgdrive.engine.world.manual_controller import KeyboardController, JoystickController
+from pgdrive.scene_managers.traffic_manager import TrafficMode
+from pgdrive.utils import clip, PGConfig, get_np_random, concat_step_infos
+from pgdrive.engine.core.chase_camera import ChaseCamera
+from pgdrive.utils.engine_utils import set_global_random_seed
+from pgdrive.engine.core.manual_controller import KeyboardController, JoystickController
 
 pregenerated_map_file = osp.join(osp.dirname(osp.dirname(osp.abspath(__file__))), "assets", "maps", "PGDrive-maps.json")
 
@@ -146,7 +147,8 @@ class PGDriveEnv(BasePGDriveEnv):
                 "use_image": config["use_image"],
                 "debug": config["debug"],
                 "decision_repeat": config["decision_repeat"],
-                "fast_launch_window": config["fast"]
+                "fast_launch_window": config["fast"],
+                "cull_scene": config["cull_scene"]
             }
         )
         config["vehicle_config"].update(
@@ -200,7 +202,7 @@ class PGDriveEnv(BasePGDriveEnv):
 
     def _preprocess_actions(self, actions: Union[np.ndarray, Dict[AnyStr, np.ndarray]]) \
             -> Tuple[Union[np.ndarray, Dict[AnyStr, np.ndarray]], Dict]:
-        self.agent_manager.prepare_step()
+        self.agent_manager.before_step()
         if self.config["manual_control"] and self.config["use_render"] \
                 and self.current_track_vehicle in self.agent_manager.get_vehicle_list() and not self.main_camera.is_bird_view_camera():
             action = self.controller.process_input()
@@ -377,71 +379,57 @@ class PGDriveEnv(BasePGDriveEnv):
             ret[v_id] = self.observations[v_id].observe(v)
         return ret if self.is_multi_agent else ret[DEFAULT_AGENT]
 
-    def _update_map(self, episode_data: dict = None, force_seed=None):
+    def _update_map(self, episode_data: dict = None):
+        map_manager = self.pgdrive_engine.map_manager
         if episode_data is not None:
+            # TODO restore/replay here
             # Since in episode data map data only contains one map, values()[0] is the map_parameters
             map_data = episode_data["map_data"].values()
             assert len(map_data) > 0, "Can not find map info in episode data"
-            for map in map_data:
-                blocks_info = map
+            blocks_info = map_data[0]
 
             map_config = self.config["map_config"].copy()
             map_config[Map.GENERATE_TYPE] = MapGenerateMethod.PG_MAP_FILE
             map_config[Map.GENERATE_CONFIG] = blocks_info
-            self.current_map = PGMap(map_config)
+            map_manager.spawn_object(PGMap, map_config=map_config)
             return
 
         if self.config["load_map_from_json"] and self.current_map is None:
             assert self.config["_load_map_from_json"]
-            self.load_all_maps_from_json(self.config["_load_map_from_json"])
+            map_manager.load_all_maps_from_json(self.config["_load_map_from_json"])
 
         # remove map from world before adding
         if self.current_map is not None:
-            self.current_map.unload_from_pg_world()
+            map_manager.unload_map(self.current_map)
 
-        # create map
-        if force_seed is not None:
-            self.current_seed = force_seed
-        elif self._pending_force_seed is not None:
-            self.current_seed = self._pending_force_seed
-            self._pending_force_seed = None
-        else:
-            self.current_seed = get_np_random(self._DEBUG_RANDOM_SEED
-                                              ).randint(self.start_seed, self.start_seed + self.env_num)
-
-        if self.maps.get(self.current_seed, None) is None:
-
+        if map_manager.pg_maps[self.current_seed] is None:
             if self.config["load_map_from_json"]:
-                map_config = self.restored_maps.get(self.current_seed, None)
+                map_config = map_manager.restored_pg_map_configs.get(self.current_seed, None)
                 assert map_config is not None
             else:
                 map_config = self.config["map_config"]
                 map_config.update({"seed": self.current_seed})
-
-            new_map = PGMap(map_config)
-            self.maps[self.current_seed] = new_map
-            self.current_map = self.maps[self.current_seed]
+                map = map_manager.spawn_object(PGMap, map_config=map_config)
         else:
-            self.current_map = self.maps[self.current_seed]
-            assert isinstance(self.current_map, Map), "Map should be an instance of Map() class"
-            self.current_map.load_to_pg_world()
+            map = map_manager.pg_maps[self.current_seed]
+        map_manager.load_map(map)
 
     def dump_all_maps(self):
-        assert not pgdrive_engine_initialized(), "We assume you generate map files in independent tasks (not in training). " \
-                                                 "So you should run the generating script without calling reset of the " \
-                                                 "environment."
+        assert not pgdrive_engine_initialized(), \
+            "We assume you generate map files in independent tasks (not in training). " \
+            "So you should run the generating script without calling reset of the " \
+            "environment."
 
         self.lazy_init()  # it only works the first time when reset() is called to avoid the error when render
         assert pgdrive_engine_initialized()
         self.pgdrive_engine.clear_world()
 
         for seed in range(self.start_seed, self.start_seed + self.env_num):
-            print(seed)
             map_config = copy.deepcopy(self.config["map_config"])
             map_config.update({"seed": seed})
-            new_map = PGMap(map_config)
-            self.maps[seed] = new_map
-            new_map.unload_from_pg_world()
+            set_global_random_seed(seed)
+            new_map = self.pgdrive_engine.map_manager.spawn_object(PGMap, map_config=map_config)
+            self.pgdrive_engine.map_manager.unload_map(new_map)
             logging.info("Finish generating map with seed: {}".format(seed))
 
         map_data = dict()
@@ -451,51 +439,6 @@ class PGDriveEnv(BasePGDriveEnv):
 
         return_data = dict(map_config=self.config["map_config"].copy().get_dict(), map_data=copy.deepcopy(map_data))
         return return_data
-
-    def load_all_maps(self, data):
-        assert isinstance(data, dict)
-        assert set(data.keys()) == set(["map_config", "map_data"])
-        assert set(self.maps.keys()).issubset(set([int(v) for v in data["map_data"].keys()]))
-
-        logging.info(
-            "Restoring the maps from pre-generated file! "
-            "We have {} maps in the file and restoring {} maps range from {} to {}".format(
-                len(data["map_data"]), len(self.maps.keys()), min(self.maps.keys()), max(self.maps.keys())
-            )
-        )
-
-        maps_collection_config = data["map_config"]
-        assert set(self.config["map_config"].keys()) == set(maps_collection_config.keys())
-        for k in self.config["map_config"]:
-            assert maps_collection_config[k] == self.config["map_config"][k]
-
-        # for seed, map_dict in data["map_data"].items():
-        for seed in self.maps.keys():
-            assert str(seed) in data["map_data"]
-            assert self.maps[seed] is None
-            map_config = {}
-            map_config[Map.GENERATE_TYPE] = MapGenerateMethod.PG_MAP_FILE
-            map_config[Map.GENERATE_CONFIG] = data["map_data"][str(seed)]
-            self.restored_maps[seed] = map_config
-
-    def load_all_maps_from_json(self, path):
-        assert path.endswith(".json")
-        assert osp.isfile(path)
-        with open(path, "r") as f:
-            restored_data = json.load(f)
-        if recursive_equal(self.config["map_config"], restored_data["map_config"]) and \
-                self.start_seed + self.env_num < len(restored_data["map_data"]):
-            self.load_all_maps(restored_data)
-            return True
-        else:
-            logging.warning(
-                "Warning: The pre-generated maps is with config {}, but current environment's map "
-                "config is {}.\nWe now fallback to BIG algorithm to generate map online!".format(
-                    restored_data["map_config"], self.config["map_config"]
-                )
-            )
-            self.config["load_map_from_json"] = False  # Don't fall into this function again.
-            return False
 
     def toggle_expert_takeover(self):
         """

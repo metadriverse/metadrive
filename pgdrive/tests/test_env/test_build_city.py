@@ -1,8 +1,9 @@
-from pgdrive import PGDriveEnv
 import pygame
-from pgdrive.scene_creator.city_map import CityMap
-from pgdrive.utils.engine_utils import initialize_pgdrive_engine, close_pgdrive_engine
+
+from pgdrive import PGDriveEnv
 from pgdrive.obs.top_down_renderer import draw_top_down_map
+from pgdrive.scene_creator.map.city_map import CityMap
+from pgdrive.utils.engine_utils import initialize_pgdrive_engine, close_pgdrive_engine
 
 
 def _t(num_blocks):
@@ -12,7 +13,7 @@ def _t(num_blocks):
     try:
         map_config = default_config["map_config"]
         map_config.update(dict(type="block_num", config=num_blocks))
-        map = CityMap(map_config)
+        map = CityMap(map_config, random_seed=map_config["seed"])
         m = draw_top_down_map(map, return_surface=True)
         pygame.image.save(m, "{}.jpg".format(num_blocks))
     finally:

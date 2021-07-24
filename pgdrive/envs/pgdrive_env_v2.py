@@ -3,7 +3,7 @@ import logging
 import numpy as np
 from pgdrive.constants import DEFAULT_AGENT, TerminationState
 from pgdrive.envs.pgdrive_env import PGDriveEnv as PGDriveEnvV1
-from pgdrive.scene_manager.traffic_manager import TrafficMode
+from pgdrive.scene_managers.traffic_manager import TrafficMode
 from pgdrive.utils import PGConfig, clip
 
 

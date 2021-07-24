@@ -33,7 +33,6 @@ class ChangeFrictionEnv(PGDriveEnv):
         if self.config["change_friction"] and self.vehicle is not None:
             if self.vehicles:
                 self.for_each_vehicle(lambda v: v.destroy())
-            # self.agent_manager.destroy()
             # We reset the friction here!
             parameter = self.parameter_list[self.current_seed]
             self.config["vehicle_config"]["wheel_friction"] = parameter["wheel_friction"]

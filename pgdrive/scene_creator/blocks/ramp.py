@@ -35,9 +35,6 @@ class Ramp(Block):
     CONNECT_PART_LEN = 20
     RAMP_LEN = 15
 
-    def __init__(self, block_index: int, pre_block_socket: BlockSocket, global_network: RoadNetwork, random_seed):
-        super(Ramp, self).__init__(block_index, pre_block_socket, global_network, random_seed)
-
 
 class InRampOnStraight(Ramp):
     ID = "r"
@@ -181,7 +178,7 @@ class OutRampOnStraight(Ramp):
 
         self.set_part_idx(0)
         # part 0 road 0
-        dec_lane_len = self.PARAMETER_SPACE.sample()[Parameter.length]
+        dec_lane_len = self.get_config()[Parameter.length]
         dec_lane = ExtendStraightLane(
             self.positive_basic_lane, dec_lane_len + self.lane_width,
             [self.positive_basic_lane.line_types[0], LineType.SIDE]

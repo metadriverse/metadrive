@@ -7,7 +7,7 @@ from panda3d.bullet import BulletGhostNode, BulletSphereShape
 from panda3d.core import BitMask32, NodePath
 from pgdrive.constants import CamMask, CollisionGroup
 from pgdrive.utils import import_cutils
-from pgdrive.utils.asset_loader import AssetLoader
+from pgdrive.engine.asset_loader import AssetLoader
 from pgdrive.utils.coordinates_shift import panda_position
 
 cutils = import_cutils()

@@ -54,6 +54,10 @@ def is_mac():
     return sys.platform == "darwin"
 
 
+def is_win():
+    return sys.platform == "win32"
+
+
 def random_string(prefix=None):
     ret = str(uuid.uuid4())
     if prefix is not None:

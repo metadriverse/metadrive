@@ -2,14 +2,14 @@ import copy
 import logging
 
 from pgdrive.envs.marl_envs.marl_inout_roundabout import LidarStateObservationMARound
-from pgdrive.envs.multi_agent_pgdrive import MultiAgentPGDrive, pygame_replay, panda_replay
+from pgdrive.envs.multi_agent_pgdrive import MultiAgentPGDrive, panda_replay
 from pgdrive.obs.observation_base import ObservationBase
 from pgdrive.scene_creator.blocks.first_block import FirstBlock
 from pgdrive.scene_creator.blocks.parking_lot import ParkingLot
 from pgdrive.scene_creator.blocks.t_intersection import TInterSection
-from pgdrive.scene_creator.map import PGMap
+from pgdrive.scene_creator.map.pg_map import PGMap
 from pgdrive.scene_creator.road.road import Road
-from pgdrive.scene_manager.spawn_manager import SpawnManager
+from pgdrive.scene_managers.spawn_manager import SpawnManager
 from pgdrive.utils import get_np_random, PGConfig
 
 MAParkingLotConfig = dict(
@@ -76,7 +76,6 @@ class MAParkingLotMap(PGMap):
             self.config[self.LANE_NUM],
             parent_node_path,
             pg_physics_world,
-            1,
             length=length
         )
         self.blocks.append(last_block)
@@ -173,13 +172,13 @@ class MultiAgentParkingLotEnv(MultiAgentPGDrive):
 
     def _update_map(self, episode_data: dict = None, force_seed=None):
         map_config = self.config["map_config"]
-        map_config.update({"seed": self.current_seed})
 
         if self.current_map is None:
-            self.current_seed = 0
-            new_map = MAParkingLotMap(map_config)
-            self.maps[self.current_seed] = new_map
-            self.current_map = self.maps[self.current_seed]
+            self.seed(map_config["seed"])
+            new_map = self.pgdrive_engine.map_manager.spawn_object(
+                MAParkingLotMap, map_config=map_config, random_seed=self.current_seed
+            )
+            self.pgdrive_engine.map_manager.load_map(new_map)
             self.current_map.spawn_roads = self.spawn_roads
 
     def _update_destination_for(self, vehicle_id):
@@ -235,7 +234,7 @@ class MultiAgentParkingLotEnv(MultiAgentPGDrive):
         vehicle.vehicle_config.update(new_spawn_place_config)
         vehicle.reset(self.current_map)
         self._update_destination_for(new_agent_id)
-        vehicle.update_state(detector_mask=None)
+        vehicle.after_step(detector_mask=None)
         self.dones[new_agent_id] = False  # Put it in the internal dead-tracking dict.
 
         new_obs = self.observations[new_agent_id].observe(vehicle)
