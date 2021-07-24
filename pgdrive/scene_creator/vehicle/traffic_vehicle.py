@@ -9,11 +9,11 @@ from pgdrive.constants import BodyName, CollisionGroup
 from pgdrive.scene_creator.highway_vehicle.behavior import IDMVehicle
 from pgdrive.scene_creator.lane.circular_lane import CircularLane
 from pgdrive.scene_creator.lane.straight_lane import StraightLane
-from pgdrive.scene_manager.traffic_manager import TrafficManager
+from pgdrive.scene_managers.traffic_manager import TrafficManager
 from pgdrive.utils import get_np_random
-from pgdrive.utils.asset_loader import AssetLoader
+from pgdrive.engine.asset_loader import AssetLoader
 from pgdrive.utils.coordinates_shift import panda_position, panda_heading
-from pgdrive.utils.element import DynamicElement
+from pgdrive.utils.object import Object
 from pgdrive.utils.scene_utils import ray_localization
 
 
@@ -29,7 +29,7 @@ class TrafficVehicleNode(BulletRigidBodyNode):
         self.kinematic_model = IDMVehicle.create_from(kinematics_model)
 
 
-class PGTrafficVehicle(DynamicElement):
+class PGTrafficVehicle(Object):
     COLLISION_MASK = CollisionGroup.TrafficVehicle
     HEIGHT = 1.8
     LENGTH = 4
@@ -38,17 +38,17 @@ class PGTrafficVehicle(DynamicElement):
     break_down = False
     model_collection = {}  # save memory, load model once
 
-    def __init__(self, index: int, kinematic_model: IDMVehicle, enable_respawn: bool = False, np_random=None):
+    def __init__(self, index: int, kinematic_model: IDMVehicle, enable_respawn: bool = False, random_seed=None):
         """
         A traffic vehicle class.
         :param index: Each Traffic vehicle has an unique index, and the name of this vehicle will contain this index
         :param kinematic_model: IDM Model or other models
         :param enable_respawn: It will be generated at the spawn place again when arriving at the destination
-        :param np_random: Random Engine
+        :param random_seed: Random Engine seed
         """
         kinematic_model.LENGTH = self.LENGTH
         kinematic_model.WIDTH = self.WIDTH
-        super(PGTrafficVehicle, self).__init__()
+        super(PGTrafficVehicle, self).__init__(random_seed=random_seed)
         self.vehicle_node = TrafficVehicleNode(BodyName.Traffic_vehicle, IDMVehicle.create_from(kinematic_model))
         chassis_shape = BulletBoxShape(Vec3(self.LENGTH / 2, self.WIDTH / 2, self.HEIGHT / 2))
         self.index = index
@@ -63,8 +63,7 @@ class PGTrafficVehicle(DynamicElement):
         self.node_path = NodePath(self.vehicle_node)
         self.out_of_road = False
 
-        np_random = np_random or get_np_random()
-        [path, scale, x_y_z_offset, H] = self.path[np_random.randint(0, len(self.path))]
+        [path, scale, x_y_z_offset, H] = self.path[self.np_random.randint(0, len(self.path))]
         if self.render:
             if path not in PGTrafficVehicle.model_collection:
                 carNP = self.loader.loadModel(AssetLoader.file_path("models", path))
@@ -79,7 +78,7 @@ class PGTrafficVehicle(DynamicElement):
         self.step(1e-1)
         # self.carNP.setQuat(LQuaternionf(math.cos(-1 * np.pi / 4), 0, 0, math.sin(-1 * np.pi / 4)))
 
-    def prepare_step(self) -> None:
+    def before_step(self) -> None:
         """
         Determine the action according to the elements in scene
         :return: None
@@ -95,7 +94,7 @@ class PGTrafficVehicle(DynamicElement):
         heading = np.rad2deg(panda_heading(self.vehicle_node.kinematic_model.heading))
         self.node_path.setH(heading)
 
-    def update_state(self):
+    def after_step(self):
         engine = get_pgdrive_engine()
         dir = np.array([math.cos(self.heading), math.sin(self.heading)])
         lane, lane_index = ray_localization(dir, self.position, engine)
@@ -153,6 +152,10 @@ class PGTrafficVehicle(DynamicElement):
         return self.vehicle_node.kinematic_model.heading
 
     @property
+    def heading_theta(self):
+        return self.vehicle_node.kinematic_model.heading_theta
+
+    @property
     def position(self):
         return self.vehicle_node.kinematic_model.position.tolist()
 
@@ -163,13 +166,13 @@ class PGTrafficVehicle(DynamicElement):
         traffic_mgr: TrafficManager,
         lane: Union[StraightLane, CircularLane],
         longitude: float,
-        seed=None,
+        random_seed=None,
         enable_lane_change: bool = True,
         enable_respawn=False
     ):
-        v = IDMVehicle.create_random(traffic_mgr, lane, longitude, random_seed=seed)
+        v = IDMVehicle.create_random(traffic_mgr, lane, longitude, random_seed=random_seed)
         v.enable_lane_change = enable_lane_change
-        return cls(index, v, enable_respawn, np_random=v.np_random)
+        return cls(index, v, enable_respawn, random_seed=random_seed)
 
     @classmethod
     def create_traffic_vehicle_from_config(cls, traffic_mgr: TrafficManager, config: dict):

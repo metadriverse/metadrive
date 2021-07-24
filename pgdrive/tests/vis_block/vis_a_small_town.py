@@ -6,7 +6,7 @@ from pgdrive.scene_creator.blocks.straight import Straight
 from pgdrive.scene_creator.blocks.t_intersection import TInterSection
 from pgdrive.scene_creator.road.road_network import RoadNetwork
 from pgdrive.tests.vis_block.vis_block_base import TestBlock
-from pgdrive.utils.asset_loader import initialize_asset_loader
+from pgdrive.engine.asset_loader import initialize_asset_loader
 from pgdrive.utils.pg_space import Parameter
 
 if __name__ == "__main__":

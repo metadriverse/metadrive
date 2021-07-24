@@ -1,5 +1,5 @@
 import math
-from pgdrive.engine.world.pg_world import PGWorld
+from pgdrive.engine.core.pg_world import PGWorld
 from typing import List, TYPE_CHECKING, Tuple, Union
 from panda3d.bullet import BulletBoxShape
 from panda3d.core import TransformState

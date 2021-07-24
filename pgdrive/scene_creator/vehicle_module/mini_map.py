@@ -2,7 +2,7 @@ from typing import Tuple
 
 from panda3d.core import Vec3, NodePath
 from pgdrive.constants import CamMask
-from pgdrive.engine.world.image_buffer import ImageBuffer
+from pgdrive.engine.core.image_buffer import ImageBuffer
 
 
 class MiniMap(ImageBuffer):

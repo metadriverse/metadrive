@@ -1,5 +1,5 @@
 from pgdrive.envs.pgdrive_env import PGDriveEnv
-from pgdrive.scene_creator.map import Map, MapGenerateMethod
+from pgdrive.scene_creator.map.map import Map, MapGenerateMethod
 
 
 class TestEnv(PGDriveEnv):
