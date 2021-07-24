@@ -36,6 +36,7 @@ setup(
     author_email="liquanyi@bupt.edu.cn, pengzh@ie.cuhk.edu.hk",
     packages=packages,
     install_requires=[
+        "evdev",
         "gym",
         "numpy<=1.19.3",
         "matplotlib",
@@ -49,7 +50,8 @@ setup(
         "pillow",
         "pytest",
         "opencv-python-headless",
-        "Cython==0.29.6"
+        "Cython==0.29.6",
+
     ],
     include_package_data=True,
     license="Apache 2.0",

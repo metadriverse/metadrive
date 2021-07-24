@@ -30,23 +30,23 @@ class SidePassEnv(PGDriveEnv):
         self.breakdown_vehicle = None
         self.alert = None
 
-    def reset(self, episode_data: dict = None):
+    def reset(self, episode_data: dict = None, force_seed=None):
         ret = super(SidePassEnv, self).reset(episode_data)
         self.vehicle.max_speed = 60
         lane = self.current_map.road_network.graph[">>>"]["1C0_0_"][0]
-        self.breakdown_vehicle = self.pgdrive_engine.traffic_manager.spawn_one_vehicle(
+        self.breakdown_vehicle = self.pgdrive_engine.traffic_manager.spawn_object(
             self.pgdrive_engine.traffic_manager.random_vehicle_type(), lane, 30, False
         )
-        self.breakdown_vehicle.attach_to_pg_world(self.pgdrive_engine.pbr_worldNP, self.pgdrive_engine.physics_world)
+        self.breakdown_vehicle.attach_to_world(self.pgdrive_engine.pbr_worldNP, self.pgdrive_engine.physics_world)
 
         lane_ = self.current_map.road_network.graph[">>>"]["1C0_0_"][1]
-        breakdown_vehicle = self.pgdrive_engine.traffic_manager.spawn_one_vehicle(LVehicle, lane_, 30, False)
-        breakdown_vehicle.attach_to_pg_world(self.pgdrive_engine.pbr_worldNP, self.pgdrive_engine.physics_world)
+        breakdown_vehicle = self.pgdrive_engine.traffic_manager.spawn_object(LVehicle, lane_, 30, False)
+        breakdown_vehicle.attach_to_world(self.pgdrive_engine.pbr_worldNP, self.pgdrive_engine.physics_world)
 
-        self.alert = self.pgdrive_engine.object_manager.spawn_one_object(
+        self.alert = self.pgdrive_engine.object_manager.spawn_object(
             "Traffic Triangle", lane, (">>>", "1C0_0_", 0), 22, 0
         )
-        self.alert.attach_to_pg_world(self.pgdrive_engine.pbr_worldNP, self.pgdrive_engine.physics_world)
+        self.alert.attach_to_world(self.pgdrive_engine.pbr_worldNP, self.pgdrive_engine.physics_world)
 
         # part 1
         lane = self.current_map.road_network.graph["1C0_1_"]["2S0_0_"][2]
@@ -58,16 +58,16 @@ class SidePassEnv(PGDriveEnv):
         ]
 
         for p in pos:
-            cone = self.pgdrive_engine.object_manager.spawn_one_object(
-                "Traffic Cone", lane, ("1C0_1_", "2S0_0_", 2), p[0], p[1] * 2 / 3
+            cone = self.pgdrive_engine.object_manager.spawn_object(
+                "Traffic Cone", lane, ("1C0_1_", "2S0_0_", 2), p[0], p[1]
             )
-            cone.attach_to_pg_world(self.pgdrive_engine.pbr_worldNP, self.pgdrive_engine.physics_world)
+            cone.attach_to_world(self.pgdrive_engine.pbr_worldNP, self.pgdrive_engine.physics_world)
         from pgdrive.scene_creator.vehicle.traffic_vehicle_type import SVehicle, XLVehicle
         v_pos = [8, 14]
         v_type = [SVehicle, XLVehicle]
         for v_long, v_t in zip(v_pos, v_type):
-            v = self.pgdrive_engine.traffic_manager.spawn_one_vehicle(v_t, lane, v_long, False)
-            v.attach_to_pg_world(self.pgdrive_engine.pbr_worldNP, self.pgdrive_engine.physics_world)
+            v = self.pgdrive_engine.traffic_manager.spawn_object(v_t, lane, v_long, False)
+            v.attach_to_world(self.pgdrive_engine.pbr_worldNP, self.pgdrive_engine.physics_world)
 
         # part 2
         lane = self.current_map.road_network.graph["3R0_0_"]["3R0_1_"][0]
@@ -80,27 +80,27 @@ class SidePassEnv(PGDriveEnv):
 
         for p in pos:
             p_ = (p[0] + 5, -p[1])
-            cone = self.pgdrive_engine.object_manager.spawn_one_object(
-                "Traffic Cone", lane, ("3R0_0_", "3R0_1_", 0), *p_
+            cone = self.pgdrive_engine.object_manager.spawn_object(
+                "Traffic Cone", lane, ("3R0_0_", "3R0_1_", 0), p_[0], p_[1]
             )
-            cone.attach_to_pg_world(self.pgdrive_engine.pbr_worldNP, self.pgdrive_engine.physics_world)
+            cone.attach_to_world(self.pgdrive_engine.pbr_worldNP, self.pgdrive_engine.physics_world)
 
         v_pos = [14, 19]
         for v_long in v_pos:
-            v = self.pgdrive_engine.traffic_manager.spawn_one_vehicle(
+            v = self.pgdrive_engine.traffic_manager.spawn_object(
                 self.pgdrive_engine.traffic_manager.random_vehicle_type(), lane, v_long, False
             )
-            v.attach_to_pg_world(self.pgdrive_engine.pbr_worldNP, self.pgdrive_engine.physics_world)
+            v.attach_to_world(self.pgdrive_engine.pbr_worldNP, self.pgdrive_engine.physics_world)
 
-        alert = self.pgdrive_engine.object_manager.spawn_one_object(
+        alert = self.pgdrive_engine.object_manager.spawn_object(
             "Traffic Triangle", lane, ("3R0_0_", "3R0_1_", 0), -35, 0
         )
-        alert.attach_to_pg_world(self.pgdrive_engine.pbr_worldNP, self.pgdrive_engine.physics_world)
+        alert.attach_to_world(self.pgdrive_engine.pbr_worldNP, self.pgdrive_engine.physics_world)
 
-        alert = self.pgdrive_engine.object_manager.spawn_one_object(
+        alert = self.pgdrive_engine.object_manager.spawn_object(
             "Traffic Triangle", lane, ("3R0_0_", "3R0_1_", 0), -60, 0
         )
-        alert.attach_to_pg_world(self.pgdrive_engine.pbr_worldNP, self.pgdrive_engine.physics_world)
+        alert.attach_to_world(self.pgdrive_engine.pbr_worldNP, self.pgdrive_engine.physics_world)
 
         # part 3
         lane = self.current_map.road_network.graph["4C0_0_"]["4C0_1_"][2]
@@ -112,17 +112,17 @@ class SidePassEnv(PGDriveEnv):
 
         for p in pos:
             p_ = (p[0] + 5, p[1] * 3.5 / 3)
-            cone = self.pgdrive_engine.object_manager.spawn_one_object(
-                "Traffic Cone", lane, ("4C0_0_", "4C0_1_", 2), *p_
+            cone = self.pgdrive_engine.object_manager.spawn_object(
+                "Traffic Cone", lane, ("4C0_0_", "4C0_1_", 2), p_[0], p_[1]
             )
-            cone.attach_to_pg_world(self.pgdrive_engine.pbr_worldNP, self.pgdrive_engine.physics_world)
+            cone.attach_to_world(self.pgdrive_engine.pbr_worldNP, self.pgdrive_engine.physics_world)
 
         v_pos = [14, 19]
         for v_long in v_pos:
-            v = self.pgdrive_engine.traffic_manager.spawn_one_vehicle(
+            v = self.pgdrive_engine.traffic_manager.spawn_object(
                 self.pgdrive_engine.traffic_manager.random_vehicle_type(), lane, v_long, False
             )
-            v.attach_to_pg_world(self.pgdrive_engine.pbr_worldNP, self.pgdrive_engine.physics_world)
+            v.attach_to_world(self.pgdrive_engine.pbr_worldNP, self.pgdrive_engine.physics_world)
 
         # part 4
         lane = self.current_map.road_network.graph["4C0_1_"]["5R0_0_"][0]
@@ -130,10 +130,10 @@ class SidePassEnv(PGDriveEnv):
 
         for p in pos:
             p_ = (p[0] + 60, -p[1] * 3.5 / 3)
-            cone = self.pgdrive_engine.object_manager.spawn_one_object(
-                "Traffic Cone", lane, ("4C0_1_", "5R0_0_", 0), *p_
+            cone = self.pgdrive_engine.object_manager.spawn_object(
+                "Traffic Cone", lane, ("4C0_1_", "5R0_0_", 0), p_[0], p_[1]
             )
-            cone.attach_to_pg_world(self.pgdrive_engine.pbr_worldNP, self.pgdrive_engine.physics_world)
+            cone.attach_to_world(self.pgdrive_engine.pbr_worldNP, self.pgdrive_engine.physics_world)
 
         return ret
 

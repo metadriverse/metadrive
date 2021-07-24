@@ -156,7 +156,7 @@ class OutFork(Fork):
 
         self.set_part_idx(0)
         # part 0 road 0
-        dec_lane_len = self.PARAMETER_SPACE.sample()[Parameter.length]
+        dec_lane_len = self.get_config()[Parameter.length]
         dec_lane = ExtendStraightLane(
             self.positive_basic_lane, dec_lane_len + self.lane_width, [LineType.BROKEN, LineType.CONTINUOUS]
         )

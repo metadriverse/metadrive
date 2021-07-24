@@ -4,8 +4,8 @@ from direct.showbase import ShowBase
 from panda3d.bullet import BulletPlaneShape, BulletRigidBodyNode, BulletDebugNode
 from panda3d.core import Vec3, BitMask32, NodePath, LineSegs
 from pgdrive.scene_creator.algorithm.BIG import NextStep
-from pgdrive.scene_creator.map import Map
-from pgdrive.engine.world.pg_physics_world import PGPhysicsWorld
+from pgdrive.scene_creator.map.map import Map
+from pgdrive.engine.core.pg_physics_world import PGPhysicsWorld
 
 
 class TestBlock(ShowBase.ShowBase):
@@ -23,8 +23,8 @@ class TestBlock(ShowBase.ShowBase):
         self.debugNP = None
         self.groundNP = None
         self.setup()
-        self.task_manager.add(self.update, 'updateWorld')
-        self.task_manager.add(self.analyze, "analyze geom node")
+        self.taskMgr.add(self.update, 'updateWorld')
+        self.taskMgr.add(self.analyze, "analyze geom node")
         self.add_block_func = None  # function pointer
         self.last_block = None
         self.block_index = 1
@@ -91,10 +91,10 @@ class TestBlock(ShowBase.ShowBase):
         self.accept("a", self.re_add)
 
     def clear(self):
-        self.map.unload_from_pg_world(self)
+        self.map.unload_map(self)
 
     def re_add(self):
-        self.map.load_to_pg_world(self)
+        self.map.load_map(self)
 
     def add_line(self, start_p: Union[Vec3, Tuple], end_p: Union[Vec3, Tuple], color, thickness: float):
         line_seg = LineSegs("interface")

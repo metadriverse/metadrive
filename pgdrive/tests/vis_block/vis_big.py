@@ -1,7 +1,8 @@
+from pgdrive.engine.asset_loader import initialize_asset_loader
 from pgdrive.scene_creator.algorithm.BIG import BIG
 from pgdrive.scene_creator.road.road_network import RoadNetwork
 from pgdrive.tests.vis_block.vis_block_base import TestBlock
-from pgdrive.utils.asset_loader import initialize_asset_loader
+from pgdrive.utils.engine_utils import set_global_random_seed
 
 
 def vis_big(debug: bool = False, block_type_version="v1", random_seed=None):
@@ -15,11 +16,10 @@ def vis_big(debug: bool = False, block_type_version="v1", random_seed=None):
         test.cam.setPos(300, 400, 2000)
 
     initialize_asset_loader(test)
+    set_global_random_seed(4)
     global_network = RoadNetwork()
 
-    big = BIG(
-        2, 3.5, global_network, test.render, test.world, random_seed=random_seed, block_type_version=block_type_version
-    )
+    big = BIG(2, 3.5, global_network, test.render, test.world, block_type_version=block_type_version)
     test.vis_big(big)
     test.big.block_num = 40
     # big.generate(BigGenerateMethod.BLOCK_NUM, 10)

@@ -1,11 +1,10 @@
-from pgdrive.envs.multi_agent_pgdrive import pygame_replay
 from pgdrive.utils.math_utils import clip
 from pgdrive.envs.marl_envs.marl_inout_roundabout import LidarStateObservationMARound
 from pgdrive.envs.multi_agent_pgdrive import MultiAgentPGDrive
 from pgdrive.obs.observation_base import ObservationBase
 from pgdrive.scene_creator.blocks.bottleneck import Merge, Split
 from pgdrive.scene_creator.blocks.first_block import FirstBlock
-from pgdrive.scene_creator.map import PGMap
+from pgdrive.scene_creator.map.pg_map import PGMap
 from pgdrive.scene_creator.road.road import Road
 from pgdrive.utils import PGConfig
 
@@ -41,7 +40,6 @@ class MABottleneckMap(PGMap):
             self.config["bottle_lane_num"],
             parent_node_path,
             pg_physics_world,
-            1,
             length=length
         )
         self.blocks.append(last_block)
@@ -77,13 +75,13 @@ class MultiAgentBottleneckEnv(MultiAgentPGDrive):
 
     def _update_map(self, episode_data: dict = None, force_seed=None):
         map_config = self.config["map_config"]
-        map_config.update({"seed": self.current_seed})
 
         if self.current_map is None:
-            self.current_seed = 0
-            new_map = MABottleneckMap(map_config)
-            self.maps[self.current_seed] = new_map
-            self.current_map = self.maps[self.current_seed]
+            self.seed(map_config["seed"])
+            new_map = self.pgdrive_engine.map_manager.spawn_object(
+                MABottleneckMap, map_config=map_config, random_seed=self.current_seed
+            )
+            self.pgdrive_engine.map_manager.load_map(new_map)
             self.current_map.spawn_roads = self.spawn_roads
 
     def get_single_observation(self, vehicle_config: "PGConfig") -> "ObservationBase":

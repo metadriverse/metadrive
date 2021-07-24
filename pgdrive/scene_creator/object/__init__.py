@@ -1,1 +1,1 @@
-from pgdrive.scene_creator.object.traffic_object import TrafficObject
+from pgdrive.scene_creator.object.traffic_object import TrafficSign

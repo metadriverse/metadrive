@@ -1,8 +1,8 @@
 from panda3d.core import NodePath, PGTop, TextNode, Vec3, CardMaker
 
 from pgdrive.constants import CamMask
-from pgdrive.engine.world.image_buffer import ImageBuffer
-from pgdrive.engine.world.pg_world import PGWorld
+from pgdrive.engine.core.image_buffer import ImageBuffer
+from pgdrive.engine.core.pg_world import PGWorld
 
 
 class VehiclePanel(ImageBuffer):

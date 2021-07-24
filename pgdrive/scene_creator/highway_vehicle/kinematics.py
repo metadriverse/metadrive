@@ -7,8 +7,8 @@ import numpy as np
 import pgdrive.utils.math_utils as utils
 from pgdrive.constants import LaneIndex
 from pgdrive.scene_creator.lane.abs_lane import AbstractLane
-from pgdrive.scene_creator.object.traffic_object import TrafficObject
-from pgdrive.scene_manager.traffic_manager import TrafficManager
+from pgdrive.scene_creator.object.traffic_object import TrafficSign
+from pgdrive.scene_managers.traffic_manager import TrafficManager
 from pgdrive.utils import get_np_random, random_string, distance_greater, norm
 
 
@@ -45,10 +45,10 @@ class Vehicle:
         self._position = np.array(position).astype('float')
         self.heading = heading
         self.speed = speed
-        self.lane_index, _ = self.traffic_mgr.map.road_network.get_closest_lane_index(
+        self.lane_index, _ = self.traffic_mgr.current_map.road_network.get_closest_lane_index(
             self.position
         ) if self.traffic_mgr else (np.nan, np.nan)
-        self.lane = self.traffic_mgr.map.road_network.get_lane(self.lane_index) if self.traffic_mgr else None
+        self.lane = self.traffic_mgr.current_map.road_network.get_lane(self.lane_index) if self.traffic_mgr else None
         self.action = {'steering': 0, 'acceleration': 0}
         self.crashed = False
         self.log = []
@@ -77,7 +77,7 @@ class Vehicle:
         :param speed: initial speed in [m/s]
         :return: A vehicle with at the specified position
         """
-        lane = traffic_mgr.map.road_network.get_lane(lane_index)
+        lane = traffic_mgr.current_map.road_network.get_lane(lane_index)
         if speed is None:
             speed = lane.speed_limit
         return cls(traffic_mgr, lane.position(longitudinal, 0), lane.heading_at(longitudinal), speed)
@@ -163,9 +163,9 @@ class Vehicle:
             self.action['acceleration'] = max(self.action['acceleration'], 1.0 * (self.MAX_SPEED - self.speed))
 
     def on_state_update(self) -> None:
-        new_l_index, _ = self.traffic_mgr.map.road_network.get_closest_lane_index(self.position)
+        new_l_index, _ = self.traffic_mgr.current_map.road_network.get_closest_lane_index(self.position)
         self.lane_index = new_l_index
-        self.lane = self.traffic_mgr.map.road_network.get_lane(self.lane_index)
+        self.lane = self.traffic_mgr.current_map.road_network.get_lane(self.lane_index)
 
     def lane_distance_to(self, vehicle: "Vehicle", lane: AbstractLane = None) -> float:
         """
@@ -181,7 +181,7 @@ class Vehicle:
             lane = self.lane
         return lane.local_coordinates(vehicle.position)[0] - lane.local_coordinates(self.position)[0]
 
-    def check_collision(self, other: Union['Vehicle', 'TrafficObject']) -> None:
+    def check_collision(self, other: Union['Vehicle', 'TrafficSign']) -> None:
         """
         Check for collision with another vehicle.
 
@@ -197,14 +197,14 @@ class Vehicle:
             if self._is_colliding(other):
                 self.speed = other.speed = min([self.speed, other.speed], key=abs)
                 self.crashed = other.crashed = True
-        elif isinstance(other, TrafficObject):
+        elif isinstance(other, TrafficSign):
             if not self.COLLISIONS_ENABLED:
                 return
 
             if self._is_colliding(other):
                 self.speed = min([self.speed, 0], key=abs)
                 self.crashed = other.hit = True
-        elif isinstance(other, TrafficObject):
+        elif isinstance(other, TrafficSign):
             if self._is_colliding(other):
                 other.hit = True
 
@@ -229,7 +229,7 @@ class Vehicle:
     @property
     def destination(self) -> np.ndarray:
         if getattr(self, "route", None):
-            last_lane = self.traffic_mgr.map.road_network.get_lane(self.route[-1])
+            last_lane = self.traffic_mgr.current_map.road_network.get_lane(self.route[-1])
             return last_lane.position(last_lane.length, 0)
         else:
             return self.position

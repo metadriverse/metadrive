@@ -5,7 +5,7 @@ from pgdrive.constants import TerminationState
 from pgdrive.envs.pgdrive_env_v2 import PGDriveEnvV2
 from pgdrive.scene_creator.blocks.first_block import FirstBlock
 from pgdrive.scene_creator.road.road import Road
-from pgdrive.scene_manager.spawn_manager import SpawnManager
+from pgdrive.scene_managers.spawn_manager import SpawnManager
 from pgdrive.utils import setup_logger, get_np_random, PGConfig
 from pgdrive.utils.pg_config import merge_dicts
 
@@ -58,8 +58,7 @@ class MultiAgentPGDrive(PGDriveEnvV2):
     # A list of road instances denoting which roads afford spawn points. If not set, then search for all
     # possible roads and spawn new agents in them if possible.
     spawn_roads = [
-        # Road(FirstBlock.NODE_1, FirstBlock.NODE_2),
-        Road(FirstBlock.NODE_2, FirstBlock.NODE_3)
+        Road(FirstBlock.NODE_2, FirstBlock.NODE_3),
     ]
 
     @staticmethod
@@ -156,7 +155,7 @@ class MultiAgentPGDrive(PGDriveEnvV2):
         return o, r, d, i
 
     def reset(self, *args, **kwargs):
-        self.config = self._update_agent_pos_configs(self.config)
+        self.config.update(self._update_agent_pos_configs(self.config))
         ret = super(MultiAgentPGDrive, self).reset(*args, **kwargs)
         assert (len(self.vehicles) == self.num_agents) or (self.num_agents == -1)
         return ret
@@ -271,7 +270,7 @@ class MultiAgentPGDrive(PGDriveEnvV2):
         vehicle.vehicle_config.update(new_spawn_place_config)
         vehicle.reset(self.current_map)
         self._update_destination_for(new_agent_id)
-        vehicle.update_state(detector_mask=None)
+        vehicle.after_step(detector_mask=None)
         self.dones[new_agent_id] = False  # Put it in the internal dead-tracking dict.
 
         new_obs = self.observations[new_agent_id].observe(vehicle)

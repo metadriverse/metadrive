@@ -6,7 +6,7 @@ import numpy as np
 import pgdrive.utils.math_utils as utils
 from pgdrive.constants import LaneIndex, Route
 from pgdrive.scene_creator.highway_vehicle.kinematics import Vehicle
-from pgdrive.scene_manager.traffic_manager import TrafficManager
+from pgdrive.scene_managers.traffic_manager import TrafficManager
 from pgdrive.utils.math_utils import clip
 
 
@@ -74,7 +74,7 @@ class ControlledVehicle(Vehicle):
         :param destination: a node in the road network
         """
         try:
-            path = self.traffic_mgr.map.road_network.shortest_path(self.lane_index[1], destination)
+            path = self.traffic_mgr.current_map.road_network.shortest_path(self.lane_index[1], destination)
         except KeyError:
             path = []
         if path:
@@ -101,17 +101,17 @@ class ControlledVehicle(Vehicle):
             _from, _to, _id = self.target_lane_index
             target_lane_index = _from, _to, clip(
                 _id + 1, 0,
-                len(self.traffic_mgr.map.road_network.graph[_from][_to]) - 1
+                len(self.traffic_mgr.current_map.road_network.graph[_from][_to]) - 1
             )
-            if self.traffic_mgr.map.road_network.get_lane(target_lane_index).is_reachable_from(self.position):
+            if self.traffic_mgr.current_map.road_network.get_lane(target_lane_index).is_reachable_from(self.position):
                 self.target_lane_index = target_lane_index
         elif action == "LANE_LEFT":
             _from, _to, _id = self.target_lane_index
             target_lane_index = _from, _to, clip(
                 _id - 1, 0,
-                len(self.traffic_mgr.map.road_network.graph[_from][_to]) - 1
+                len(self.traffic_mgr.current_map.road_network.graph[_from][_to]) - 1
             )
-            if self.traffic_mgr.map.road_network.get_lane(target_lane_index).is_reachable_from(self.position):
+            if self.traffic_mgr.current_map.road_network.get_lane(target_lane_index).is_reachable_from(self.position):
                 self.target_lane_index = target_lane_index
 
         action = {
@@ -123,8 +123,8 @@ class ControlledVehicle(Vehicle):
 
     def follow_road(self) -> None:
         """At the end of a lane, automatically switch to a next one."""
-        if self.traffic_mgr.map.road_network.get_lane(self.target_lane_index).after_end(self.position):
-            self.target_lane_index = self.traffic_mgr.map.road_network.next_lane(
+        if self.traffic_mgr.current_map.road_network.get_lane(self.target_lane_index).after_end(self.position):
+            self.target_lane_index = self.traffic_mgr.current_map.road_network.next_lane(
                 self.target_lane_index, route=self.route, position=self.position, np_random=self.np_random
             )
 
@@ -140,7 +140,7 @@ class ControlledVehicle(Vehicle):
         :param target_lane_index: index of the lane to follow
         :return: a steering wheel angle command [rad]
         """
-        target_lane = self.traffic_mgr.map.road_network.get_lane(target_lane_index)
+        target_lane = self.traffic_mgr.current_map.road_network.get_lane(target_lane_index)
         lane_coords = target_lane.local_coordinates(self.position)
         lane_next_coords = lane_coords[0] + self.speed * self.PURSUIT_TAU
         lane_future_heading = target_lane.heading_at(lane_next_coords)
@@ -174,7 +174,7 @@ class ControlledVehicle(Vehicle):
             return []
         for index in range(min(len(self.route), 3)):
             try:
-                next_destinations = self.traffic_mgr.map.road_network.graph[self.route[index][1]]
+                next_destinations = self.traffic_mgr.current_map.road_network.graph[self.route[index][1]]
             except KeyError:
                 continue
             if len(next_destinations) >= 2:
@@ -215,7 +215,7 @@ class ControlledVehicle(Vehicle):
         return tuple(
             zip(
                 *[
-                    self.traffic_mgr.map.road_network.
+                    self.traffic_mgr.current_map.road_network.
                     position_heading_along_route(route, coordinates[0] + self.speed * t, 0) for t in times
                 ]
             )
