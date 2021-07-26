@@ -1,12 +1,21 @@
 # Please don't change the order of following packages!
 import sys
-from setuptools import find_namespace_packages  # This should be place at top!
 from distutils.core import setup
 from distutils.extension import Extension
 from os import path
 
 import numpy
 from Cython.Build import cythonize
+from setuptools import find_namespace_packages  # This should be place at top!
+
+
+def is_mac():
+    return sys.platform == "darwin"
+
+
+def is_win():
+    return sys.platform == "win32"
+
 
 assert sys.version_info.major == 3 and sys.version_info.minor >= 6, "python version >= 3.6 is required"
 
@@ -18,7 +27,6 @@ packages = find_namespace_packages(
 print("We will install the following packages: ", packages)
 
 """ ===== Remember to modify the PG_EDITION at first ====="""
-
 version = "0.1.4"
 
 ext_modules = cythonize([Extension(
@@ -26,6 +34,26 @@ ext_modules = cythonize([Extension(
 )])
 for ele in ext_modules:
     assert isinstance(ele, Extension)
+
+install_requires = [
+    "gym",
+    "numpy<=1.19.3",
+    "matplotlib",
+    "pandas",
+    "pygame",
+    "yapf==0.30.0",
+    "seaborn",
+    "panda3d~=1.10.8",
+    "panda3d-gltf",
+    "panda3d-simplepbr",
+    "pillow",
+    "pytest",
+    "opencv-python-headless",
+    "Cython==0.29.6",
+]
+
+if (not is_mac()) and (not is_win()):
+    install_requires.append("evdev")
 
 setup(
     name="pgdrive",
@@ -35,24 +63,7 @@ setup(
     author="PGDrive Team",
     author_email="liquanyi@bupt.edu.cn, pengzh@ie.cuhk.edu.hk",
     packages=packages,
-    install_requires=[
-        "evdev",
-        "gym",
-        "numpy<=1.19.3",
-        "matplotlib",
-        "pandas",
-        "pygame",
-        "yapf==0.30.0",
-        "seaborn",
-        "panda3d~=1.10.8",
-        "panda3d-gltf",
-        "panda3d-simplepbr",
-        "pillow",
-        "pytest",
-        "opencv-python-headless",
-        "Cython==0.29.6",
-
-    ],
+    install_requires=install_requires,
     include_package_data=True,
     license="Apache 2.0",
     long_description=long_description,
