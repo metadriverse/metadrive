@@ -1,11 +1,12 @@
 from direct.controls.InputState import InputState
-from pgdrive.utils import is_win
-if not is_win():
+
+from pgdrive.utils import is_win, is_mac
+
+if (not is_win()) and (not is_mac()):
     import evdev
     from evdev import ecodes, InputDevice
 
 from pgdrive.utils import import_pygame
-from pgdrive.engine.core.pg_world import PGWorld
 
 pygame = import_pygame()
 
@@ -79,6 +80,6 @@ class JoystickController(Controller):
         val = int(65535 * (vehicle.speed + offset) / (120 + offset)) if vehicle is not None else 0
         self.ffb_dev.write(ecodes.EV_FF, ecodes.FF_AUTOCENTER, val)
 
-        #throttle_brake=0.2
+        # throttle_brake=0.2
 
         return [steering, throttle_brake / 2]
