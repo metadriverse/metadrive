@@ -4,8 +4,8 @@ import math
 from typing import List, Tuple, Dict
 
 import numpy as np
-from pgdrive.constants import Decoration
-from pgdrive.scene_creator.lane.abs_lane import LineType, AbstractLane
+from pgdrive.constants import Decoration, LineType
+from pgdrive.scene_creator.lane.abs_lane import AbstractLane
 from pgdrive.scene_creator.lane.straight_lane import StraightLane
 from pgdrive.scene_creator.road.road import Road
 from pgdrive.utils.math_utils import get_boxes_bounding_box
@@ -33,19 +33,18 @@ class RoadNetwork:
         self._init_graph_helper()
         self.is_initialized = True
 
-    def add(self, other):
+    def add(self, other, no_intersect=True):
         assert not self.is_initialized, "Adding new blocks should be done before road network initialization!"
         set_1 = set(self.graph) - {Decoration.start, Decoration.end}
         set_2 = set(other.graph) - {Decoration.start, Decoration.end}
         intersect = set_1.intersection(set_2)
-        if len(intersect) == 0:
-            # handle decoration_lanes
-            dec_lanes = self.get_all_decoration_lanes() + other.get_all_decoration_lanes()
-            self.graph.update(copy.copy(other.graph))
-            self.update_decoration_lanes(dec_lanes)
-            return self
-        else:
+        if len(intersect) != 0 and no_intersect:
             raise ValueError("Same start node {} in two road network".format(intersect))
+        # handle decoration_lanes
+        dec_lanes = self.get_all_decoration_lanes() + other.get_all_decoration_lanes()
+        self.graph.update(copy.copy(other.graph))
+        self.update_decoration_lanes(dec_lanes)
+        return self
 
     def __isub__(self, other):
         intersection = self.graph.keys() & other.graph.keys() - {Decoration.start, Decoration.end}
@@ -342,22 +341,6 @@ class RoadNetwork:
 
     def lanes_list(self) -> List[AbstractLane]:
         return [lane for to in self.graph.values() for ids in to.values() for lane in ids]
-
-    @staticmethod
-    def straight_road_network(lanes: int = 4, length: float = 10000, angle: float = 0) -> 'RoadNetwork':
-        net = RoadNetwork()
-        for lane in range(lanes):
-            origin = np.array([0, lane * StraightLane.DEFAULT_WIDTH])
-            end = np.array([length, lane * StraightLane.DEFAULT_WIDTH])
-            rotation = np.array([[math.cos(angle), math.sin(angle)], [-math.sin(angle), math.cos(angle)]])
-            origin = rotation @ origin
-            end = rotation @ end
-            line_types = (
-                LineType.CONTINUOUS_LINE if lane == 0 else LineType.BROKEN,
-                LineType.CONTINUOUS_LINE if lane == lanes - 1 else LineType.NONE
-            )
-            net.add_lane("0", "1", StraightLane(origin, end, line_types=line_types))
-        return net
 
     def position_heading_along_route(self, route: Route, longitudinal: float, lateral: float) \
             -> Tuple[np.ndarray, float]:

@@ -4,7 +4,7 @@ import logging
 from pgdrive.envs.marl_envs.marl_inout_roundabout import LidarStateObservationMARound
 from pgdrive.envs.multi_agent_pgdrive import MultiAgentPGDrive, panda_replay
 from pgdrive.obs.observation_base import ObservationBase
-from pgdrive.scene_creator.blocks.first_block import FirstBlock
+from pgdrive.scene_creator.blocks.first_block import FirstPGBlock
 from pgdrive.scene_creator.blocks.parking_lot import ParkingLot
 from pgdrive.scene_creator.blocks.t_intersection import TInterSection
 from pgdrive.scene_creator.map.pg_map import PGMap
@@ -70,7 +70,7 @@ class MAParkingLotMap(PGMap):
         assert len(self.road_network.graph) == 0, "These Map is not empty, please create a new map to read config"
 
         # Build a first-block
-        last_block = FirstBlock(
+        last_block = FirstPGBlock(
             self.road_network,
             self.config[self.LANE_WIDTH],
             self.config[self.LANE_NUM],
@@ -108,7 +108,7 @@ class MultiAgentParkingLotEnv(MultiAgentPGDrive):
     Env will be done when vehicle is on yellow or white continuous lane line!
     """
     in_spawn_roads = [
-        Road(FirstBlock.NODE_2, FirstBlock.NODE_3),
+        Road(FirstPGBlock.NODE_2, FirstPGBlock.NODE_3),
         -Road(TInterSection.node(2, 0, 0), TInterSection.node(2, 0, 1)),
         -Road(TInterSection.node(2, 2, 0), TInterSection.node(2, 2, 1)),
     ]

@@ -116,7 +116,8 @@ class PGDriveEngine(PGWorld):
             if self.replay_system is None:
                 # not in replay mode
                 for manager in self._managers.values():
-                    manager.step()
+                    if isinstance(manager, BaseManager):
+                        manager.step()
                 pg_world.step_physics_world()
             else:
                 if not self.STOP_REPLAY:

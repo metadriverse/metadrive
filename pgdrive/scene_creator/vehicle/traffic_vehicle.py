@@ -1,33 +1,22 @@
 from typing import Union
 
 import numpy as np
-from panda3d.bullet import BulletRigidBodyNode, BulletBoxShape
+from panda3d.bullet import BulletBoxShape
 from panda3d.core import BitMask32, TransformState, Point3, NodePath, Vec3
 
 from pgdrive.constants import BodyName, CollisionGroup
 from pgdrive.engine.asset_loader import AssetLoader
+from pgdrive.engine.physics_node import TrafficVehicleNode
+from pgdrive.scene_creator.base_object import BaseObject
 from pgdrive.scene_creator.highway_vehicle.behavior import IDMVehicle
 from pgdrive.scene_creator.lane.circular_lane import CircularLane
 from pgdrive.scene_creator.lane.straight_lane import StraightLane
 from pgdrive.scene_managers.traffic_manager import TrafficManager
 from pgdrive.utils.coordinates_shift import panda_position, panda_heading
 from pgdrive.utils.engine_utils import get_pgdrive_engine
-from pgdrive.utils.object import Object
 
 
-class TrafficVehicleNode(BulletRigidBodyNode):
-
-    # for lidar detection and other purposes
-    def __init__(self, node_name, kinematics_model: IDMVehicle):
-        BulletRigidBodyNode.__init__(self, node_name)
-        TrafficVehicleNode.setPythonTag(self, BodyName.Traffic_vehicle, self)
-        self.kinematic_model = kinematics_model
-
-    def reset(self, kinematics_model):
-        self.kinematic_model = IDMVehicle.create_from(kinematics_model)
-
-
-class PGTrafficVehicle(Object):
+class PGTrafficVehicle(BaseObject):
     COLLISION_MASK = CollisionGroup.TrafficVehicle
     HEIGHT = 1.8
     LENGTH = 4

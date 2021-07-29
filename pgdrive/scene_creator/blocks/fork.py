@@ -1,11 +1,10 @@
 import numpy as np
 
-from pgdrive.constants import Decoration
-from pgdrive.scene_creator.blocks.block import Block
+from pgdrive.constants import Decoration, LineType
+from pgdrive.scene_creator.blocks.pg_block import PGBlock
 from pgdrive.scene_creator.blocks.create_block_utils import CreateRoadFrom, CreateAdverseRoad, ExtendStraightLane, \
     create_bend_straight
 from pgdrive.scene_creator.blocks.ramp import Ramp
-from pgdrive.scene_creator.lane.abs_lane import LineType
 from pgdrive.scene_creator.lane.straight_lane import StraightLane
 from pgdrive.scene_creator.road.road import Road
 from pgdrive.utils.pg_space import PGSpace, Parameter, BlockParameterSpace
@@ -123,7 +122,7 @@ class InFork(Fork):
             False,
             inner_lane_line_type=LineType.BROKEN,
         ) and no_cross
-        self.add_sockets(Block.create_socket_from_positive_road(acc_road))
+        self.add_sockets(PGBlock.create_socket_from_positive_road(acc_road))
         return no_cross
 
 

@@ -1,29 +1,18 @@
-from typing import Sequence, Tuple
+from typing import Tuple
 
 import numpy as np
-from panda3d.bullet import BulletRigidBodyNode, BulletCylinderShape
+from panda3d.bullet import BulletCylinderShape
 from panda3d.core import NodePath
 from pgdrive.constants import BodyName
 from pgdrive.engine.asset_loader import AssetLoader
+from pgdrive.engine.physics_node import TrafficSignNode
 from pgdrive.utils.coordinates_shift import panda_position, panda_heading
-from pgdrive.scene_creator.object.static_object import StaticObject
+from pgdrive.scene_creator.static_object.base_static_object import BaseStaticObject
 
 LaneIndex = Tuple[str, str, int]
 
 
-class TrafficSignNode(BulletRigidBodyNode):
-    """
-    Collision Properties should place here, info here can used for collision callback
-    """
-    COST_ONCE = True  # cost will give at the first time
-
-    def __init__(self, object_body_name: str):
-        BulletRigidBodyNode.__init__(self, object_body_name)
-        BulletRigidBodyNode.setPythonTag(self, object_body_name, self)
-        self.crashed = False
-
-
-class TrafficSign(StaticObject):
+class TrafficSign(BaseStaticObject):
     """
     Common interface for objects that appear on the road, beside vehicles.
     """

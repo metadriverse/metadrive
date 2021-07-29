@@ -1,120 +1,53 @@
-import logging
-from collections import OrderedDict
 from typing import Dict, Union, List, Tuple
-import copy
+from pgdrive.scene_creator.lane.waypoint_lane import WayPointLane
+
 import numpy
 from panda3d.bullet import BulletBoxShape, BulletRigidBodyNode, BulletGhostNode
 from panda3d.core import Vec3, LQuaternionf, BitMask32, Vec4, CardMaker, TextureStage, RigidBodyCombiner, \
     TransparencyAttrib, SamplerState, NodePath
 
-from pgdrive.constants import Decoration, BodyName, CamMask, CollisionGroup
-from pgdrive.scene_creator.blocks.constants import BlockDefault
-from pgdrive.scene_creator.lane.abs_lane import AbstractLane, LineType, LaneNode, LineColor
+from pgdrive.constants import BodyName, CamMask, CollisionGroup, LineType, LineColor, DrivableAreaProperty
+from pgdrive.engine.asset_loader import AssetLoader
+from pgdrive.engine.core.pg_physics_world import PGPhysicsWorld
+from pgdrive.engine.physics_node import LaneNode
+from pgdrive.scene_creator.base_object import BaseObject
+from pgdrive.scene_creator.lane.abs_lane import AbstractLane
 from pgdrive.scene_creator.lane.circular_lane import CircularLane
 from pgdrive.scene_creator.lane.straight_lane import StraightLane
 from pgdrive.scene_creator.road.road import Road
 from pgdrive.scene_creator.road.road_network import RoadNetwork
-from pgdrive.engine.asset_loader import AssetLoader
 from pgdrive.utils.coordinates_shift import panda_position, panda_heading
-from pgdrive.utils.object import Object
 from pgdrive.utils.math_utils import norm, PGVector
-from pgdrive.engine.core.pg_physics_world import PGPhysicsWorld
 
 
-class BlockSocket:
+class BaseBlock(BaseObject, DrivableAreaProperty):
     """
-    A pair of roads in reverse direction
-    Positive_road is right road, and Negative road is left road on which cars drive in reverse direction
-    BlockSocket is a part of block used to connect other blocks
+    Block is a driving area consisting of several roads
+    Note: overriding the _sample() function to fill block_network/respawn_roads/_block_objects in subclass
+    Call Block.construct_block() to add it to world
     """
-    def __init__(self, positive_road: Road, negative_road: Road = None):
-        self.positive_road = positive_road
-        self.negative_road = negative_road if negative_road else None
-        self.index = None
 
-    def set_index(self, block_name: str, index: int):
-        self.index = self.get_real_index(block_name, index)
+    ID = "B"
 
-    @classmethod
-    def get_real_index(cls, block_name: str, index: int):
-        return "{}-socket{}".format(block_name, index)
-
-    def is_socket_node(self, road_node):
-        if road_node == self.positive_road.start_node or road_node == self.positive_road.end_node or \
-                road_node == self.negative_road.start_node or road_node == self.negative_road.end_node:
-            return True
-        else:
-            return False
-
-    def get_socket_in_reverse(self):
-        """
-        Return a new socket whose positive road=self.negative_road, negative_road=self.positive_road
-        """
-        new_socket = copy.deepcopy(self)
-        new_socket.positive_road, new_socket.negative_road = self.negative_road, self.positive_road
-        return new_socket
-
-    def is_same_socket(self, other):
-        return True if self.positive_road == other.positive_road and self.negative_road == other.negative_road else False
-
-
-class Block(Object, BlockDefault):
-    """
-    Abstract class of Block,
-    BlockSocket: a part of previous block connecting this block
-
-    <----------------------------------------------
-    road_2_end <---------------------- road_2_start
-    <~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~>
-    road_1_start ----------------------> road_1_end
-    ---------------------------------------------->
-    BlockSocket = tuple(road_1, road_2)
-
-    When single-direction block created, road_2 in block socket is useless.
-    But it's helpful when a town is created.
-    """
-    def __init__(self, block_index: int, pre_block_socket: BlockSocket, global_network: RoadNetwork, random_seed):
+    def __init__(self, block_index: int, global_network: RoadNetwork, random_seed):
         self._block_name = str(block_index) + self.ID
-        super(Block, self).__init__(self._block_name, random_seed)
+        super(BaseBlock, self).__init__(self._block_name, random_seed)
         # block information
         assert self.ID is not None, "Each Block must has its unique ID When define Block"
         assert len(self.ID) == 1, "Block ID must be a character "
-        assert self.SOCKET_NUM is not None, "The number of Socket should be specified when define a new block"
-        if block_index == 0:
-            from pgdrive.scene_creator.blocks import FirstBlock
-            assert isinstance(self, FirstBlock), "only first block can use block index 0"
-        elif block_index < 0:
-            logging.debug("It is recommended that block index should > 1")
+
         self.block_index = block_index
-        self.number_of_sample_trial = 0
 
         # each block contains its own road network and a global network
         self._global_network = global_network
         self.block_network = RoadNetwork()
-        self._block_objects = None
-
-        # used to spawn npc
-        self._respawn_roads = []
-
-        # own sockets, one block derives from a socket, but will have more sockets to connect other blocks
-        self._sockets = OrderedDict()
-
-        # used to connect previous blocks, save its info here
-        self.pre_block_socket = pre_block_socket
-        self.pre_block_socket_index = pre_block_socket.index
 
         # a bounding box used to improve efficiency x_min, x_max, y_min, y_max
         self.bounding_box = None
 
-        # used to create this block, but for first block it is nonsense
-        if block_index != 0:
-            self.positive_lanes = self.pre_block_socket.positive_road.get_lanes(self._global_network)
-            self.negative_lanes = self.pre_block_socket.negative_road.get_lanes(self._global_network)
-            self.positive_lane_num = len(self.positive_lanes)
-            self.negative_lane_num = len(self.negative_lanes)
-            self.positive_basic_lane = self.positive_lanes[-1]  # most right or outside lane is the basic lane
-            self.negative_basic_lane = self.negative_lanes[-1]  # most right or outside lane is the basic lane
-            self.lane_width = self.positive_basic_lane.width_at(0)
+        # used to spawn npc
+        self._respawn_roads = []
+        self._block_objects = None
 
         if self.render:
             # render pre-load
@@ -130,8 +63,18 @@ class Block(Object, BlockDefault):
             self.side_normal = self.loader.loadTexture(AssetLoader.file_path("textures", "sidewalk", "normal.png"))
             self.sidewalk = self.loader.loadModel(AssetLoader.file_path("models", "box.bam"))
 
+    def _sample_topology(self) -> bool:
+        """
+        Sample a new topology to fill self.block_network
+        """
+        raise NotImplementedError
+
     def construct_block(
-        self, root_render_np: NodePath, pg_physics_world: PGPhysicsWorld, extra_config: Dict = None
+        self,
+        root_render_np: NodePath,
+        pg_physics_world: PGPhysicsWorld,
+        extra_config: Dict = None,
+        no_same_node=True
     ) -> bool:
         """
         Randomly Construct a block, if overlap return False
@@ -145,7 +88,9 @@ class Block(Object, BlockDefault):
             raw_config = self.get_config()
             raw_config.update(extra_config)
             self.set_config(raw_config)
+        self._clear_topology()
         success = self._sample_topology()
+        self._global_network.add(self.block_network, no_same_node)
         self._create_in_world()
         self.attach_to_world(root_render_np, pg_physics_world)
         return success
@@ -160,43 +105,9 @@ class Block(Object, BlockDefault):
             obj.destroy(pg_physics_world)
         self._block_objects = None
 
-    def _sample_topology(self) -> bool:
-        """
-        Sample a new topology, clear the previous settings at first
-        """
-        self.number_of_sample_trial += 1
-        self._clear_topology()
-        no_cross = self._try_plug_into_previous_block()
-        self._global_network.add(self.block_network)
-
-        return no_cross
-
     def construct_from_config(self, config: Dict, root_render_np: NodePath, pg_physics_world: PGPhysicsWorld):
         success = self.construct_block(root_render_np, pg_physics_world, config)
         return success
-
-    def get_socket(self, index: Union[str, int]) -> BlockSocket:
-        if isinstance(index, int):
-            if index < 0 or index >= len(self._sockets):
-                raise ValueError("Socket of {}: index out of range".format(self.class_name))
-            socket_index = list(self._sockets)[index]
-        else:
-            assert index.startswith(self._block_name)
-            socket_index = index
-        assert socket_index in self._sockets, (socket_index, self._sockets.keys())
-        return self._sockets[socket_index]
-
-    def add_respawn_roads(self, respawn_roads: Union[List[Road], Road]):
-        """
-        Use this to add spawn roads instead of modifying the list directly
-        """
-        if isinstance(respawn_roads, List):
-            for road in respawn_roads:
-                self._add_one_respawn_road(road)
-        elif isinstance(respawn_roads, Road):
-            self._add_one_respawn_road(respawn_roads)
-        else:
-            raise ValueError("Only accept List[Road] or Road in this func")
 
     def get_respawn_roads(self):
         return self._respawn_roads
@@ -211,53 +122,6 @@ class Block(Object, BlockDefault):
             ret.append(lanes)
         return ret
 
-    def add_sockets(self, sockets: Union[List[BlockSocket], BlockSocket]):
-        """
-        Use this to add sockets instead of modifying the list directly
-        """
-        if isinstance(sockets, BlockSocket):
-            self._add_one_socket(sockets)
-        elif isinstance(sockets, List):
-            for socket in sockets:
-                self._add_one_socket(socket)
-
-    def set_part_idx(self, x):
-        """
-        It is necessary to divide block to some parts in complex block and give them unique id according to part idx
-        """
-        self.PART_IDX = x
-        self.ROAD_IDX = 0  # clear the road idx when create new part
-
-    def add_road_node(self):
-        """
-        Call me to get a new node name of this block.
-        It is more accurate and recommended to use road_node() to get a node name
-        """
-        self.ROAD_IDX += 1
-        return self.road_node(self.PART_IDX, self.ROAD_IDX - 1)
-
-    def road_node(self, part_idx: int, road_idx: int) -> str:
-        """
-        return standard road node name
-        """
-        return self.node(self.block_index, part_idx, road_idx)
-
-    @classmethod
-    def node(cls, block_idx: int, part_idx: int, road_idx: int) -> str:
-        return str(block_idx) + cls.ID + str(part_idx) + cls.DASH + str(road_idx) + cls.DASH
-
-    def _add_one_socket(self, socket: BlockSocket):
-        assert isinstance(socket, BlockSocket), "Socket list only accept BlockSocket Type"
-        if socket.index is not None and not socket.index.startswith(self._block_name):
-            logging.warning(
-                "The adding socket has index {}, which is not started with this block name {}. This is dangerous! "
-                "Current block has sockets: {}.".format(socket.index, self._block_name, self.get_socket_indices())
-            )
-        if socket.index is None:
-            # if this socket is self block socket
-            socket.set_index(self._block_name, len(self._sockets))
-        self._sockets[socket.index] = socket
-
     def _add_one_respawn_road(self, respawn_road: Road):
         assert isinstance(respawn_road, Road), "Spawn roads list only accept Road Type"
         self._respawn_roads.append(respawn_road)
@@ -268,13 +132,6 @@ class Block(Object, BlockDefault):
         self.PART_IDX = 0
         self.ROAD_IDX = 0
         self._respawn_roads.clear()
-        self._sockets.clear()
-
-    def _try_plug_into_previous_block(self) -> bool:
-        """
-        Try to plug this Block to previous block's socket, return True for success, False for road cross
-        """
-        raise NotImplementedError
 
     """------------------------------------- For Render and Physics Calculation ---------------------------------- """
 
@@ -317,9 +174,8 @@ class Block(Object, BlockDefault):
 
         self.bounding_box = self.block_network.get_bounding_box()
 
-    def _add_lane(self, lane: AbstractLane, lane_id: int, colors: List[Vec4]):
-        parent_np = self.lane_line_node_path
-        lane_width = lane.width_at(0)
+    def _add_pgdrive_lanes(self, lane, lane_id, lane_width, colors, parent_np):
+        # for pgdrive structure
         for k, i in enumerate([-1, 1]):
             line_color = colors[k]
             if lane.line_types[k] == LineType.NONE or (lane_id != 0 and k == 0):
@@ -335,31 +191,39 @@ class Block(Object, BlockDefault):
                     middle = lane.position(lane.length / 2, i * lane_width / 2)
                     self._add_lane_line2bullet(lane_start, lane_end, middle, parent_np, line_color, lane.line_types[k])
                 elif isinstance(lane, CircularLane):
-                    segment_num = int(lane.length / Block.CIRCULAR_SEGMENT_LENGTH)
+                    segment_num = int(lane.length / DrivableAreaProperty.CIRCULAR_SEGMENT_LENGTH)
                     for segment in range(segment_num):
-                        lane_start = lane.position(segment * Block.CIRCULAR_SEGMENT_LENGTH, i * lane_width / 2)
-                        lane_end = lane.position((segment + 1) * Block.CIRCULAR_SEGMENT_LENGTH, i * lane_width / 2)
+                        lane_start = lane.position(
+                            segment * DrivableAreaProperty.CIRCULAR_SEGMENT_LENGTH, i * lane_width / 2
+                        )
+                        lane_end = lane.position(
+                            (segment + 1) * DrivableAreaProperty.CIRCULAR_SEGMENT_LENGTH, i * lane_width / 2
+                        )
                         middle = (lane_start + lane_end) / 2
 
                         self._add_lane_line2bullet(
                             lane_start, lane_end, middle, parent_np, line_color, lane.line_types[k]
                         )
                     # for last part
-                    lane_start = lane.position(segment_num * Block.CIRCULAR_SEGMENT_LENGTH, i * lane_width / 2)
+                    lane_start = lane.position(
+                        segment_num * DrivableAreaProperty.CIRCULAR_SEGMENT_LENGTH, i * lane_width / 2
+                    )
                     lane_end = lane.position(lane.length, i * lane_width / 2)
                     middle = (lane_start + lane_end) / 2
                     self._add_lane_line2bullet(lane_start, lane_end, middle, parent_np, line_color, lane.line_types[k])
 
                 if lane.line_types[k] == LineType.SIDE:
                     radius = lane.radius if isinstance(lane, CircularLane) else 0.0
-                    segment_num = int(lane.length / Block.SIDEWALK_LENGTH)
+                    segment_num = int(lane.length / DrivableAreaProperty.SIDEWALK_LENGTH)
                     for segment in range(segment_num):
-                        lane_start = lane.position(segment * Block.SIDEWALK_LENGTH, i * lane_width / 2)
-                        lane_end = lane.position((segment + 1) * Block.SIDEWALK_LENGTH, i * lane_width / 2)
+                        lane_start = lane.position(segment * DrivableAreaProperty.SIDEWALK_LENGTH, i * lane_width / 2)
+                        lane_end = lane.position(
+                            (segment + 1) * DrivableAreaProperty.SIDEWALK_LENGTH, i * lane_width / 2
+                        )
                         middle = (lane_start + lane_end) / 2
                         self._add_sidewalk2bullet(lane_start, lane_end, middle, radius, lane.direction)
                     # for last part
-                    lane_start = lane.position(segment_num * Block.SIDEWALK_LENGTH, i * lane_width / 2)
+                    lane_start = lane.position(segment_num * DrivableAreaProperty.SIDEWALK_LENGTH, i * lane_width / 2)
                     lane_end = lane.position(lane.length, i * lane_width / 2)
                     middle = (lane_start + lane_end) / 2
                     if norm(lane_start[0] - lane_end[0], lane_start[1] - lane_end[1]) > 1e-1:
@@ -367,33 +231,53 @@ class Block(Object, BlockDefault):
 
             elif lane.line_types[k] == LineType.BROKEN:
                 straight = True if isinstance(lane, StraightLane) else False
-                segment_num = int(lane.length / (2 * Block.STRIPE_LENGTH))
+                segment_num = int(lane.length / (2 * DrivableAreaProperty.STRIPE_LENGTH))
                 for segment in range(segment_num):
-                    lane_start = lane.position(segment * Block.STRIPE_LENGTH * 2, i * lane_width / 2)
+                    lane_start = lane.position(segment * DrivableAreaProperty.STRIPE_LENGTH * 2, i * lane_width / 2)
                     lane_end = lane.position(
-                        segment * Block.STRIPE_LENGTH * 2 + Block.STRIPE_LENGTH, i * lane_width / 2
+                        segment * DrivableAreaProperty.STRIPE_LENGTH * 2 + DrivableAreaProperty.STRIPE_LENGTH,
+                        i * lane_width / 2
                     )
                     middle = lane.position(
-                        segment * Block.STRIPE_LENGTH * 2 + Block.STRIPE_LENGTH / 2, i * lane_width / 2
+                        segment * DrivableAreaProperty.STRIPE_LENGTH * 2 + DrivableAreaProperty.STRIPE_LENGTH / 2,
+                        i * lane_width / 2
                     )
 
                     self._add_lane_line2bullet(
                         lane_start, lane_end, middle, parent_np, line_color, lane.line_types[k], straight
                     )
 
-                lane_start = lane.position(segment_num * Block.STRIPE_LENGTH * 2, i * lane_width / 2)
-                lane_end = lane.position(lane.length + Block.STRIPE_LENGTH, i * lane_width / 2)
+                lane_start = lane.position(segment_num * DrivableAreaProperty.STRIPE_LENGTH * 2, i * lane_width / 2)
+                lane_end = lane.position(lane.length + DrivableAreaProperty.STRIPE_LENGTH, i * lane_width / 2)
                 middle = (lane_end[0] + lane_start[0]) / 2, (lane_end[1] + lane_start[1]) / 2
                 if not straight:
                     self._add_lane_line2bullet(
                         lane_start, lane_end, middle, parent_np, line_color, lane.line_types[k], straight
                     )
-
                 if straight:
                     lane_start = lane.position(0, i * lane_width / 2)
                     lane_end = lane.position(lane.length, i * lane_width / 2)
                     middle = lane.position(lane.length / 2, i * lane_width / 2)
                     self._add_box_body(lane_start, lane_end, middle, parent_np, lane.line_types[k], line_color)
+
+    def _add_lane(self, lane: AbstractLane, lane_id: int, colors: List[Vec4]):
+        parent_np = self.lane_line_node_path
+        lane_width = lane.width_at(0)
+        if isinstance(lane, CircularLane) or isinstance(lane, StraightLane):
+            self._add_pgdrive_lanes(lane, lane_id, lane_width, colors, parent_np)
+        elif isinstance(lane, WayPointLane):
+            for c, i in enumerate([-1, 1]):
+                line_color = colors[c]
+                acc_length = 0
+                if lane.line_types[c] != LineType.NONE:
+                    for segment in lane.segment_property:
+                        lane_start = lane.position(acc_length, i * lane_width / 2)
+                        acc_length += segment["length"]
+                        lane_end = lane.position(acc_length, i * lane_width / 2)
+                        middle = (lane_start + lane_end) / 2
+                        self._add_lane_line2bullet(
+                            lane_start, lane_end, middle, parent_np, line_color, lane.line_types[c]
+                        )
 
     def _add_box_body(self, lane_start, lane_end, middle, parent_np: NodePath, line_type, line_color):
         length = norm(lane_end[0] - lane_start[0], lane_end[1] - lane_start[1])
@@ -406,13 +290,15 @@ class Block(Object, BlockDefault):
         body_node.setKinematic(False)
         body_node.setStatic(True)
         body_np = parent_np.attachNewNode(body_node)
-        shape = BulletBoxShape(Vec3(length / 2, Block.LANE_LINE_WIDTH / 2, Block.LANE_LINE_GHOST_HEIGHT))
+        shape = BulletBoxShape(
+            Vec3(length / 2, DrivableAreaProperty.LANE_LINE_WIDTH / 2, DrivableAreaProperty.LANE_LINE_GHOST_HEIGHT)
+        )
         body_np.node().addShape(shape)
-        mask = Block.CONTINUOUS_COLLISION_MASK if line_type != LineType.BROKEN else Block.BROKEN_COLLISION_MASK
+        mask = DrivableAreaProperty.CONTINUOUS_COLLISION_MASK if line_type != LineType.BROKEN else DrivableAreaProperty.BROKEN_COLLISION_MASK
         body_np.node().setIntoCollideMask(BitMask32.bit(mask))
         self.static_nodes.append(body_np.node())
 
-        body_np.setPos(panda_position(middle, Block.LANE_LINE_GHOST_HEIGHT / 2))
+        body_np.setPos(panda_position(middle, DrivableAreaProperty.LANE_LINE_GHOST_HEIGHT / 2))
         direction_v = lane_end - lane_start
         theta = -numpy.arctan2(direction_v[1], direction_v[0])
         body_np.setQuat(LQuaternionf(numpy.cos(theta / 2), 0, 0, numpy.sin(theta / 2)))
@@ -445,17 +331,20 @@ class Block(Object, BlockDefault):
             body_node.setStatic(True)
             body_np = parent_np.attachNewNode(body_node)
             # its scale will change by setScale
-            body_height = Block.LANE_LINE_GHOST_HEIGHT
+            body_height = DrivableAreaProperty.LANE_LINE_GHOST_HEIGHT
             shape = BulletBoxShape(
-                Vec3(length / 2 if line_type != LineType.BROKEN else length, Block.LANE_LINE_WIDTH / 2, body_height)
+                Vec3(
+                    length / 2 if line_type != LineType.BROKEN else length, DrivableAreaProperty.LANE_LINE_WIDTH / 2,
+                    body_height
+                )
             )
             body_np.node().addShape(shape)
-            mask = Block.CONTINUOUS_COLLISION_MASK if line_type != LineType.BROKEN else Block.BROKEN_COLLISION_MASK
+            mask = DrivableAreaProperty.CONTINUOUS_COLLISION_MASK if line_type != LineType.BROKEN else DrivableAreaProperty.BROKEN_COLLISION_MASK
             body_np.node().setIntoCollideMask(BitMask32.bit(mask))
             self.static_nodes.append(body_np.node())
 
         # position and heading
-        body_np.setPos(panda_position(middle, Block.LANE_LINE_GHOST_HEIGHT / 2))
+        body_np.setPos(panda_position(middle, DrivableAreaProperty.LANE_LINE_GHOST_HEIGHT / 2))
         direction_v = lane_end - lane_start
         theta = -numpy.arctan2(direction_v[1], direction_v[0])
         body_np.setQuat(LQuaternionf(numpy.cos(theta / 2), 0, 0, numpy.sin(theta / 2)))
@@ -463,8 +352,8 @@ class Block(Object, BlockDefault):
         if self.render:
             # For visualization
             lane_line = self.loader.loadModel(AssetLoader.file_path("models", "box.bam"))
-            lane_line.setScale(length, Block.LANE_LINE_WIDTH, Block.LANE_LINE_THICKNESS)
-            lane_line.setPos(Vec3(0, 0 - Block.LANE_LINE_GHOST_HEIGHT / 2))
+            lane_line.setScale(length, DrivableAreaProperty.LANE_LINE_WIDTH, DrivableAreaProperty.LANE_LINE_THICKNESS)
+            lane_line.setPos(Vec3(0, 0 - DrivableAreaProperty.LANE_LINE_GHOST_HEIGHT / 2))
             lane_line.reparentTo(body_np)
             body_np.set_color(color)
 
@@ -506,11 +395,8 @@ class Block(Object, BlockDefault):
         :param from_: From node
         :param to_: To Node
         :param lanes: All lanes of this road
-        :return: None
         """
 
-        # decoration only has vis properties
-        need_body = False if (from_, to_) == (Decoration.start, Decoration.end) else True
         if isinstance(lanes[0], StraightLane):
             for index, lane in enumerate(lanes):
                 middle = lane.position(lane.length / 2, 0)
@@ -520,7 +406,7 @@ class Block(Object, BlockDefault):
                 width = lane.width_at(0) + self.SIDEWALK_LINE_DIST * 2
                 length = lane.length
                 self._add_lane2bullet(middle, width, length, theta, lane, (from_, to_, index))
-        else:
+        elif isinstance(lanes[0], CircularLane):
             for index, lane in enumerate(lanes):
                 segment_num = int(lane.length / self.CIRCULAR_SEGMENT_LENGTH)
                 for i in range(segment_num):
@@ -531,6 +417,17 @@ class Block(Object, BlockDefault):
                     width = lane.width_at(0) + self.SIDEWALK_LINE_DIST * 2
                     length = lane.length
                     self._add_lane2bullet(middle, width, length * 1.3 / segment_num, theta, lane, (from_, to_, index))
+        elif isinstance(lanes[0], WayPointLane):
+            for index, lane in enumerate(lanes):
+                for segment in lane.segment_property:
+                    lane_start = segment["start_point"]
+                    lane_end = segment["end_point"]
+                    middle = (lane_start + lane_end) / 2
+                    direction_v = lane_end - middle
+                    theta = -numpy.arctan2(direction_v[1], direction_v[0])
+                    width = lane.width_at(0)
+                    length = segment["length"]
+                    self._add_lane2bullet(middle, width, length, theta, lane, (from_, to_, index))
 
     def _add_lane2bullet(self, middle, width, length, theta, lane: Union[StraightLane, CircularLane], lane_index):
         """
@@ -576,23 +473,6 @@ class Block(Object, BlockDefault):
             )
             card.setTransparency(TransparencyAttrib.MMultisample)
             card.setTexture(self.ts_color, self.road_texture)
-
-    @staticmethod
-    def create_socket_from_positive_road(road: Road) -> BlockSocket:
-        """
-        We usually create road from positive road, thus this func can get socket easily.
-        Note: it is not recommended to generate socket from negative road
-        """
-        assert road.start_node[0] != Road.NEGATIVE_DIR and road.end_node[0] != Road.NEGATIVE_DIR, \
-            "Socket can only be created from positive road"
-        positive_road = Road(road.start_node, road.end_node)
-        return BlockSocket(positive_road, -positive_road)
-
-    def get_socket_indices(self):
-        return list(self._sockets.keys())
-
-    def get_socket_list(self):
-        return list(self._sockets.values())
 
     def _generate_invisible_static_wall(
         self,

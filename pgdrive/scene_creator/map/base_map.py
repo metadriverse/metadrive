@@ -1,12 +1,12 @@
 import copy
-from pgdrive.utils.engine_utils import get_pgdrive_engine, set_global_random_seed
+from pgdrive.utils.engine_utils import get_pgdrive_engine
 from pgdrive.scene_creator.road.road import Road
 import logging
-from pgdrive.utils.object import Object
+from pgdrive.scene_creator.base_object import BaseObject
 import numpy as np
 from pgdrive.scene_creator.algorithm.BIG import BigGenerateMethod
-from pgdrive.scene_creator.blocks.block import Block
-from pgdrive.scene_creator.blocks.first_block import FirstBlock
+from pgdrive.scene_creator.blocks.pg_block import PGBlock
+from pgdrive.scene_creator.blocks.first_block import FirstPGBlock
 from pgdrive.scene_creator.road.road_network import RoadNetwork
 from pgdrive.utils import PGConfig, import_pygame
 
@@ -24,14 +24,14 @@ def parse_map_config(easy_map_config, new_map_config, default_config):
         return new_map_config
 
     if isinstance(easy_map_config, int):
-        new_map_config[Map.GENERATE_TYPE] = BigGenerateMethod.BLOCK_NUM
+        new_map_config[BaseMap.GENERATE_TYPE] = BigGenerateMethod.BLOCK_NUM
     elif isinstance(easy_map_config, str):
-        new_map_config[Map.GENERATE_TYPE] = BigGenerateMethod.BLOCK_SEQUENCE
+        new_map_config[BaseMap.GENERATE_TYPE] = BigGenerateMethod.BLOCK_SEQUENCE
     else:
         raise ValueError(
             "Unkown easy map config: {} and original map config: {}".format(easy_map_config, new_map_config)
         )
-    new_map_config[Map.GENERATE_CONFIG] = easy_map_config
+    new_map_config[BaseMap.GENERATE_CONFIG] = easy_map_config
     return new_map_config
 
 
@@ -42,7 +42,7 @@ class MapGenerateMethod:
     PG_MAP_FILE = "pg_map_file"
 
 
-class Map(Object):
+class BaseMap(BaseObject):
     """
     Base class for Map generation!
     """
@@ -69,7 +69,7 @@ class Map(Object):
         assert random_seed == map_config[
             self.SEED
         ], "Global seed {} should equal to seed in map config {}".format(random_seed, map_config[self.SEED])
-        super(Map, self).__init__(random_seed=map_config[self.SEED])
+        super(BaseMap, self).__init__(random_seed=map_config[self.SEED])
         self.set_config(map_config)
         self.film_size = (self._config["draw_map_resolution"], self._config["draw_map_resolution"])
         self.road_network = RoadNetwork()
@@ -84,11 +84,11 @@ class Map(Object):
 
         #  a trick to optimize performance
         self.road_network.after_init()
-        self.spawn_roads = [Road(FirstBlock.NODE_2, FirstBlock.NODE_3)]
+        self.spawn_roads = [Road(FirstPGBlock.NODE_2, FirstPGBlock.NODE_3)]
         self.unload_from_world()
 
     def _generate(self):
-        """Key function! Please overwrite it!"""
+        """Key function! Please overwrite it! This func aims at fill the self.road_network adn self.blocks"""
         raise NotImplementedError("Please use child class like PGMap to replace Map!")
 
     def load_to_world(self):
@@ -107,7 +107,7 @@ class Map(Object):
         assert self.blocks is not None and len(self.blocks) > 0, "Please generate Map before saving it"
         map_config = []
         for b in self.blocks:
-            assert isinstance(b, Block), "None Set can not be saved to json file"
+            assert isinstance(b, PGBlock), "None Set can not be saved to json file"
             b_config = b.get_config()
             json_config = b_config.get_serializable_dict()
             json_config[self.BLOCK_ID] = b.ID
@@ -136,7 +136,7 @@ class Map(Object):
     def destroy(self):
         for block in self.blocks:
             block.destroy()
-        super(Map, self).destroy()
+        super(BaseMap, self).destroy()
 
     def __del__(self):
         describe = self.random_seed if self.random_seed is not None else "custom"

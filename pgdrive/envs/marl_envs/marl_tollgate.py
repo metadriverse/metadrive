@@ -5,7 +5,7 @@ from pgdrive.constants import TerminationState
 from pgdrive.envs.multi_agent_pgdrive import MultiAgentPGDrive, pygame_replay
 from pgdrive.obs.state_obs import LidarStateObservation, StateObservation
 from pgdrive.scene_creator.blocks.bottleneck import Merge, Split
-from pgdrive.scene_creator.blocks.first_block import FirstBlock
+from pgdrive.scene_creator.blocks.first_block import FirstPGBlock
 from pgdrive.scene_creator.blocks.tollgate import TollGate
 from pgdrive.scene_creator.map.pg_map import PGMap
 from pgdrive.scene_creator.road.road import Road
@@ -117,7 +117,7 @@ class MATollGateMap(PGMap):
         assert len(self.road_network.graph) == 0, "These Map is not empty, please create a new map to read config"
 
         # Build a first-block
-        last_block = FirstBlock(
+        last_block = FirstPGBlock(
             self.road_network,
             self.config[self.LANE_WIDTH],
             self.config["lane_num"],
@@ -156,7 +156,7 @@ class MATollGateMap(PGMap):
 
 
 class MultiAgentTollgateEnv(MultiAgentPGDrive):
-    spawn_roads = [Road(FirstBlock.NODE_2, FirstBlock.NODE_3), -Road(Merge.node(3, 0, 0), Merge.node(3, 0, 1))]
+    spawn_roads = [Road(FirstPGBlock.NODE_2, FirstPGBlock.NODE_3), -Road(Merge.node(3, 0, 0), Merge.node(3, 0, 1))]
 
     def __init__(self, config):
         super(MultiAgentTollgateEnv, self).__init__(config)

@@ -3,8 +3,8 @@ from typing import Union
 
 from pgdrive.utils import get_np_random
 from panda3d.core import NodePath
-from pgdrive.scene_creator.blocks.block import Block
-from pgdrive.scene_creator.blocks.first_block import FirstBlock
+from pgdrive.scene_creator.blocks.pg_block import PGBlock
+from pgdrive.scene_creator.blocks.first_block import FirstPGBlock
 from pgdrive.scene_creator.algorithm.blocks_prob_dist import PGBlock
 from pgdrive.scene_creator.road.road_network import RoadNetwork
 from pgdrive.engine.core.pg_physics_world import PGPhysicsWorld
@@ -50,7 +50,7 @@ class BIG:
         self._global_network = global_network
         self.blocks = []
         self._exit_length = exit_length
-        first_block = FirstBlock(
+        first_block = FirstPGBlock(
             self._global_network,
             self._lane_width,
             self._lane_num,
@@ -73,7 +73,7 @@ class BIG:
         elif generate_method == BigGenerateMethod.BLOCK_SEQUENCE:
             assert isinstance(parameter, str), "When generating map from block sequence, the parameter should be a str"
             self.block_num = len(parameter) + 1
-            self._block_sequence = FirstBlock.ID + parameter
+            self._block_sequence = FirstPGBlock.ID + parameter
         while True:
             if self.big_helper_func():
                 break
@@ -92,7 +92,7 @@ class BIG:
             self._go_back()
         return False
 
-    def sample_block(self) -> Block:
+    def sample_block(self) -> PGBlock:
         """
         Sample a random block type
         """

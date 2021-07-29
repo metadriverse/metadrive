@@ -1,5 +1,5 @@
 from pgdrive.envs.pgdrive_env import PGDriveEnv
-from pgdrive.scene_creator.map.map import Map, MapGenerateMethod
+from pgdrive.scene_creator.map.base_map import BaseMap, MapGenerateMethod
 from pgdrive.utils import setup_logger
 
 
@@ -26,10 +26,10 @@ class TestEnv(PGDriveEnv):
                 "rgb_clip": True,
                 "debug": True,
                 "map_config": {
-                    Map.GENERATE_TYPE: MapGenerateMethod.BIG_BLOCK_SEQUENCE,
-                    Map.GENERATE_CONFIG: "yY",
-                    Map.LANE_WIDTH: 3.5,
-                    Map.LANE_NUM: 3,
+                    BaseMap.GENERATE_TYPE: MapGenerateMethod.BIG_BLOCK_SEQUENCE,
+                    BaseMap.GENERATE_CONFIG: "yY",
+                    BaseMap.LANE_WIDTH: 3.5,
+                    BaseMap.LANE_NUM: 3,
                 },
                 "driving_reward": 1.0,
                 "vehicle_config": {

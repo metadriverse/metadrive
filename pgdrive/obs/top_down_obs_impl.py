@@ -2,7 +2,7 @@ from typing import List, Tuple, Union
 
 import numpy as np
 
-from pgdrive.scene_creator.lane.abs_lane import LineType
+from pgdrive.constants import LineType
 from pgdrive.scene_creator.lane.circular_lane import CircularLane
 from pgdrive.scene_creator.lane.straight_lane import StraightLane
 from pgdrive.utils.utils import import_pygame
@@ -368,14 +368,14 @@ class LaneGraphics:
 
     @classmethod
     def simple_draw(cls, lane, surface, color=(255, 255, 255)):
-        from pgdrive.scene_creator.blocks.block import Block
-        segment_num = int(lane.length / Block.CIRCULAR_SEGMENT_LENGTH)
+        from pgdrive.scene_creator.blocks.pg_block import PGBlock
+        segment_num = int(lane.length / PGBlock.CIRCULAR_SEGMENT_LENGTH)
         width = lane.width
         for segment in range(segment_num):
-            p_1 = lane.position(segment * Block.CIRCULAR_SEGMENT_LENGTH, -width / 2)
-            p_2 = lane.position(segment * Block.CIRCULAR_SEGMENT_LENGTH, width / 2)
-            p_3 = lane.position((segment + 1) * Block.CIRCULAR_SEGMENT_LENGTH, width / 2)
-            p_4 = lane.position((segment + 1) * Block.CIRCULAR_SEGMENT_LENGTH, -width / 2)
+            p_1 = lane.position(segment * PGBlock.CIRCULAR_SEGMENT_LENGTH, -width / 2)
+            p_2 = lane.position(segment * PGBlock.CIRCULAR_SEGMENT_LENGTH, width / 2)
+            p_3 = lane.position((segment + 1) * PGBlock.CIRCULAR_SEGMENT_LENGTH, width / 2)
+            p_4 = lane.position((segment + 1) * PGBlock.CIRCULAR_SEGMENT_LENGTH, -width / 2)
             pygame.draw.polygon(
                 surface, color,
                 [surface.pos2pix(*p_1),
@@ -385,8 +385,8 @@ class LaneGraphics:
             )
 
         # # for last part
-        p_1 = lane.position(segment_num * Block.CIRCULAR_SEGMENT_LENGTH, -width / 2)
-        p_2 = lane.position(segment_num * Block.CIRCULAR_SEGMENT_LENGTH, width / 2)
+        p_1 = lane.position(segment_num * PGBlock.CIRCULAR_SEGMENT_LENGTH, -width / 2)
+        p_2 = lane.position(segment_num * PGBlock.CIRCULAR_SEGMENT_LENGTH, width / 2)
         p_3 = lane.position(lane.length, width / 2)
         p_4 = lane.position(lane.length, -width / 2)
         pygame.draw.polygon(

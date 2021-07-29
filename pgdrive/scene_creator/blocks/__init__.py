@@ -1,6 +1,6 @@
-from pgdrive.scene_creator.blocks.block import Block, BlockSocket
+from pgdrive.scene_creator.blocks.pg_block import PGBlock, PGBlockSocket
 from pgdrive.scene_creator.blocks.curve import Curve
-from pgdrive.scene_creator.blocks.first_block import FirstBlock
+from pgdrive.scene_creator.blocks.first_block import FirstPGBlock
 from pgdrive.scene_creator.blocks.fork import Fork
 from pgdrive.scene_creator.blocks.intersection import InterSection
 from pgdrive.scene_creator.blocks.ramp import Ramp

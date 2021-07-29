@@ -4,7 +4,7 @@ import numpy as np
 from pgdrive.envs.multi_agent_pgdrive import MultiAgentPGDrive
 from pgdrive.obs.observation_base import ObservationBase
 from pgdrive.obs.state_obs import StateObservation
-from pgdrive.scene_creator.blocks.first_block import FirstBlock
+from pgdrive.scene_creator.blocks.first_block import FirstPGBlock
 from pgdrive.scene_creator.blocks.roundabout import Roundabout
 from pgdrive.scene_creator.map.pg_map import PGMap
 from pgdrive.scene_creator.road.road import Road
@@ -28,7 +28,7 @@ class MARoundaboutMap(PGMap):
         assert len(self.road_network.graph) == 0, "These Map is not empty, please create a new map to read config"
 
         # Build a first-block
-        last_block = FirstBlock(
+        last_block = FirstPGBlock(
             self.road_network,
             self.config[self.LANE_WIDTH],
             self.config[self.LANE_NUM],
@@ -110,7 +110,7 @@ class LidarStateObservationMARound(ObservationBase):
 
 class MultiAgentRoundaboutEnv(MultiAgentPGDrive):
     spawn_roads = [
-        Road(FirstBlock.NODE_2, FirstBlock.NODE_3),
+        Road(FirstPGBlock.NODE_2, FirstPGBlock.NODE_3),
         -Road(Roundabout.node(1, 0, 2), Roundabout.node(1, 0, 3)),
         -Road(Roundabout.node(1, 1, 2), Roundabout.node(1, 1, 3)),
         -Road(Roundabout.node(1, 2, 2), Roundabout.node(1, 2, 3)),

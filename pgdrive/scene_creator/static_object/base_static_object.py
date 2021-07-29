@@ -2,12 +2,12 @@ from typing import Sequence, Tuple
 
 import numpy as np
 
-from pgdrive.utils.object import Object
+from pgdrive.scene_creator.base_object import BaseObject
 
 LaneIndex = Tuple[str, str, int]
 
 
-class StaticObject(Object):
+class BaseStaticObject(BaseObject):
     def __init__(self, lane, lane_index: LaneIndex, position: Sequence[float], heading: float = 0., random_seed=None):
         """
         :param lane: the lane to spawn object
@@ -15,7 +15,7 @@ class StaticObject(Object):
         :param position: cartesian position of object in the surface
         :param heading: the angle from positive direction of horizontal axis
         """
-        super(StaticObject, self).__init__(random_seed=random_seed)
+        super(BaseStaticObject, self).__init__(random_seed=random_seed)
         self.position = position
         self.speed = 0
         self.heading = heading / np.pi * 180

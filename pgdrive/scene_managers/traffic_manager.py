@@ -5,7 +5,7 @@ from typing import Tuple, Dict
 
 from pgdrive.constants import TARGET_VEHICLES, TRAFFIC_VEHICLES, OBJECT_TO_AGENT, AGENT_TO_OBJECT
 from pgdrive.scene_creator.lane.abs_lane import AbstractLane
-from pgdrive.scene_creator.map.map import Map
+from pgdrive.scene_creator.map.base_map import BaseMap
 from pgdrive.scene_creator.road.road import Road
 from pgdrive.scene_managers.base_manager import BaseManager
 from pgdrive.utils import norm, merge_dicts
@@ -272,7 +272,7 @@ class TrafficManager(BaseManager):
             self.spawn_object(vehicle_type, lane, long, is_respawn_lane)
         return _traffic_vehicles
 
-    def _create_respawn_vehicles(self, map: Map, traffic_density: float):
+    def _create_respawn_vehicles(self, map: BaseMap, traffic_density: float):
         respawn_lanes = self._get_available_respawn_lanes(map)
         engine = get_pgdrive_engine()
         for lane in respawn_lanes:
@@ -280,7 +280,7 @@ class TrafficManager(BaseManager):
         for vehicle in self._traffic_vehicles:
             vehicle.attach_to_world(engine.pbr_worldNP, engine.physics_world)
 
-    def _create_vehicles_once(self, map: Map, traffic_density: float) -> None:
+    def _create_vehicles_once(self, map: BaseMap, traffic_density: float) -> None:
         """
         Trigger mode, vehicles will be triggered only once, and disappear when arriving destination
         :param map: Map
@@ -314,7 +314,7 @@ class TrafficManager(BaseManager):
             vehicle_num += len(vehicles_on_block)
         self.block_triggered_vehicles.reverse()
 
-    def _get_available_respawn_lanes(self, map: Map) -> list:
+    def _get_available_respawn_lanes(self, map: BaseMap) -> list:
         """
         Used to find some respawn lanes
         :param map: select spawn lanes from this map

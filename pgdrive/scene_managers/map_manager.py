@@ -3,7 +3,7 @@ import os.path as osp
 import logging
 import json
 from pgdrive.utils import recursive_equal
-from pgdrive.scene_creator.map.map import Map, MapGenerateMethod
+from pgdrive.scene_creator.map.base_map import BaseMap, MapGenerateMethod
 
 
 class MapManager(BaseManager):
@@ -69,8 +69,8 @@ class MapManager(BaseManager):
         # for seed, map_dict in data["map_data"].items():
         for seed, config in data["map_data"].items():
             map_config = {}
-            map_config[Map.GENERATE_TYPE] = MapGenerateMethod.PG_MAP_FILE
-            map_config[Map.GENERATE_CONFIG] = config
+            map_config[BaseMap.GENERATE_TYPE] = MapGenerateMethod.PG_MAP_FILE
+            map_config[BaseMap.GENERATE_CONFIG] = config
             self.restored_pg_map_configs[seed] = map_config
 
     def load_map(self, map):

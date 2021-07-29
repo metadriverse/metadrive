@@ -15,3 +15,4 @@
 **/tmp_images/
 **/*.jpg
 /pgdrive/cutils.cpython-37m-x86_64-linux-gnu.so
+**/*.ipynb_checkpoints/
