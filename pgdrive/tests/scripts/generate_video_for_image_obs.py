@@ -149,7 +149,7 @@ if __name__ == '__main__':
             },
             traffic_density=0.5,
             use_image=True,
-            engine_config=dict(headless_image=headless)
+            headless_image=headless
         )
     )
     start = time.time()

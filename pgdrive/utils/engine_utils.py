@@ -6,7 +6,7 @@ from typing import Optional
 from pgdrive.engine.base_engine import BaseEngine
 
 
-def initialize_engine(env_global_config, agent_manager):
+def initialize_engine(env_global_config, agent_manager=None):
     cls = BaseEngine
     if cls.singleton is None:
         # assert cls.global_config is not None, "Set global config before initialization BaseEngine"
@@ -14,6 +14,7 @@ def initialize_engine(env_global_config, agent_manager):
     else:
         raise PermissionError("There should be only one BaseEngine instance in one process")
     add_managers(agent_manager)
+    return cls.singleton
 
 
 def add_managers(agent_manager):
@@ -24,7 +25,8 @@ def add_managers(agent_manager):
 
     engine = get_engine()
     # Add managers to BaseEngine, the order will determine the function implement order, e.g. reset(), step()
-    engine.register_manager("agent_manager", agent_manager)
+    if agent_manager is not None:
+        engine.register_manager("agent_manager", agent_manager)
     engine.register_manager("map_manager", MapManager())
     engine.register_manager("object_manager", TrafficSignManager())
     engine.register_manager("traffic_manager", TrafficManager())

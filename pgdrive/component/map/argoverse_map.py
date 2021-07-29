@@ -1,4 +1,5 @@
 import logging
+from pgdrive.utils.coordinates_shift import panda_position
 from argoverse.map_representation.map_api import ArgoverseMap as AGMap
 from pgdrive.component.blocks.argoverse_block import ArgoverseBlock
 import os
@@ -69,7 +70,7 @@ class ArgoverseMap(BaseMap):
                 logger.error("Unknown XML item encountered.")
                 raise ValueError("Unknown XML item encountered.")
         lane_ids = ArgoverseMap.AGMap.get_lane_ids_in_xy_bbox(
-            *self.config["center"], self.config["city"], self.config["radius"]
+            *self.argoverse_position(self.config["center"]), self.config["city"], self.config["radius"]
         )
         self.lane_id_lane = lane_objs
         self._construct_road_network([lane_objs[k] for k in lane_ids])
@@ -134,32 +135,44 @@ class ArgoverseMap(BaseMap):
         )
         return lane_segment, lane_id
 
+    @staticmethod
+    def argoverse_position(pos):
+        pos[1] *= -1
+        return pos
+
+    @staticmethod
+    def pgdrive_position(pos):
+        pos[1] *= -1
+        return pos
+
 
 if __name__ == "__main__":
-    from pgdrive.utils.engine_utils import initialize_engine
-    from pgdrive.envs.base_env import BASE_DEFAULT_CONFIG
+    from pgdrive.utils.engine_utils import initialize_engine, get_engine
+    from pgdrive.envs.pgdrive_env import PGDriveEnv
 
-    default_config = BASE_DEFAULT_CONFIG
-    default_config["engine_config"].update(
-        {
-            "use_render": True,
-            "use_image": False,
-            "debug": True,
-            "fast_launch_window": True,
-            "debug_static_world": True,
-            "debug_physics_world": False
-        }
-    )
-    initialize_engine(default_config, None)
+    default_config = PGDriveEnv.default_config()
+    default_config["use_render"] = True
+    default_config["debug"] = True
+    engine = initialize_engine(default_config)
+
+    # in argoverse coordinates
     xcenter, ycenter = 2599.5505965123866, 1200.0214763629717
     xmin = xcenter - 80  # 150
     xmax = xcenter + 80  # 150
     ymin = ycenter - 80  # 150
     ymax = ycenter + 80  # 150
-    map = ArgoverseMap({"city": "PIT", "draw_map_resolution": 1024, "center": [xcenter, ycenter], "radius": 10})
-    map.load_to_world()
-    map.engine.enableMouse()
-    map.engine.cam.setPos(xcenter, -ycenter, 800)
-    map.engine.cam.lookAt(xcenter, -ycenter, 0)
+    map = ArgoverseMap(
+        {
+            "city": "PIT",
+            "draw_map_resolution": 1024,
+            "center": ArgoverseMap.pgdrive_position([xcenter, ycenter]),
+            "radius": 100
+        }
+    )
+    engine.map_manager.load_map(map)
+    engine.enableMouse()
+
+    # argoverse data set is as the same coordinates as panda3d
+    engine.main_camera.set_bird_view_pos(ArgoverseMap.pgdrive_position([xcenter, ycenter]))
     while True:
         map.engine.step()

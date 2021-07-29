@@ -78,13 +78,10 @@ if __name__ == '__main__':
                 "environment_num": 1,
                 "traffic_density": 0.0,
                 "start_seed": 4,
-                # "engine_config": {
-                #     "debug": False,
-                # },
-                # "manual_control": True,
-                # "use_render": True,
-                # "fast": True,
-                # "use_image": True,
+                "manual_control": True,
+                "use_render": True,
+                "fast": True,
+                "use_image": True,
                 "vehicle_config": {
                     "max_engine_force": 1000,
                     "max_brake_force": 100,

@@ -95,7 +95,7 @@ class ImageBuffer:
             return np.clip(numpy_array, 0, 1)
 
     def add_to_display(self, display_region: List[float]):
-        if self.engine.world_config["use_render"]:
+        if self.engine.global_config["use_render"]:
             # only show them when onscreen
             self.display_region = self.engine.win.makeDisplayRegion(*display_region)
             self.display_region.setCamera(self.cam)

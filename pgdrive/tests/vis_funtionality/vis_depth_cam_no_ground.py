@@ -14,9 +14,7 @@ class TestEnv(PGDriveEnv):
                 "use_image": True,
                 "rgb_clip": True,
                 "vehicle_config": dict(depth_cam=(200, 88, False), image_source="depth_cam"),
-                "engine_config": {
-                    "headless_image": False,
-                },
+                "headless_image": False,
                 "map_config": {
                     BaseMap.GENERATE_TYPE: MapGenerateMethod.BIG_BLOCK_NUM,
                     BaseMap.GENERATE_CONFIG: 12,

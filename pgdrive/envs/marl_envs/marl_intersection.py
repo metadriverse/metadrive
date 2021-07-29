@@ -102,9 +102,7 @@ def _expert():
                 "use_saver": True,
                 "save_level": 1.
             },
-            "engine_config": {
-                "debug_physics_world": True
-            },
+            "debug_physics_world": True,
             "fast": True,
             # "use_render": True,
             "debug": True,
@@ -148,9 +146,7 @@ def _vis_debug_respawn():
                 },
                 "show_lidar": False,
             },
-            "engine_config": {
-                "debug_physics_world": True
-            },
+            "debug_physics_world": True,
             "fast": True,
             "use_render": True,
             "debug": False,
@@ -361,8 +357,8 @@ if __name__ == "__main__":
     #     MultiAgentIntersectionEnv,
     #     False,
     #     other_traj="metasvodist_inter.json",
-    #     extra_config={"engine_config": {
+    #     extra_config={
     #         "global_light": True
-    #     }}
+    #     }
     # )
     # pygame_replay()
