@@ -1,15 +1,11 @@
 import math
-from collections import deque
-from typing import Union, List
+from typing import List
 
 import numpy as np
 
-import pgdrive.utils.math_utils as utils
-from pgdrive.constants import LaneIndex
 from pgdrive.scene_creator.lane.abs_lane import AbstractLane
-from pgdrive.scene_creator.object.traffic_object import TrafficSign
 from pgdrive.scene_managers.traffic_manager import TrafficManager
-from pgdrive.utils import get_np_random, random_string, distance_greater, norm
+from pgdrive.utils import get_np_random, random_string, deprecation_warning
 
 
 class Vehicle:
@@ -40,47 +36,54 @@ class Vehicle:
         np_random: np.random.RandomState = None,
         name: str = None
     ):
+
+        deprecation_warning("Vehicle", "Policy Class", error=False)
+
         self.name = random_string() if name is None else name
         self.traffic_mgr = traffic_mgr
         self._position = np.array(position).astype('float')
         self.heading = heading
         self.speed = speed
-        self.lane_index, _ = self.traffic_mgr.current_map.road_network.get_closest_lane_index(
-            self.position
-        ) if self.traffic_mgr else (np.nan, np.nan)
-        self.lane = self.traffic_mgr.current_map.road_network.get_lane(self.lane_index) if self.traffic_mgr else None
+        # self.lane_index, _ = self.traffic_mgr.current_map.road_network.get_closest_lane_index(
+        #     self.position
+        # ) if self.traffic_mgr else (np.nan, np.nan)
+        # self.lane = self.traffic_mgr.current_map.road_network.get_lane(self.lane_index) if self.traffic_mgr else None
         self.action = {'steering': 0, 'acceleration': 0}
         self.crashed = False
-        self.log = []
-        self.history = deque(maxlen=30)
+        # self.log = []
+        # self.history = deque(maxlen=30)
         self.np_random = np_random if np_random else get_np_random()
 
-    def update_lane_index(self, lane_index, lane):
-        self.lane_index = lane_index
-        self.lane = lane
+    # def update_lane_index(self, lane_index, lane):
+    #     raise ValueError("Deprecated!")
+    #     self.lane_index = lane_index
+    #     self.lane = lane
 
     @property
     def position(self):
-        return self._position.copy()
+        if self._position is None:
+            return np.array([np.nan, np.nan])
+        else:
+            return self._position.copy()
 
     def set_position(self, pos):
         self._position = np.asarray(pos).copy()
 
-    @classmethod
-    def make_on_lane(cls, traffic_mgr: TrafficManager, lane_index: LaneIndex, longitudinal: float, speed: float = 0):
-        """
-        Create a vehicle on a given lane at a longitudinal position.
-
-        :param traffic_mgr: the road where the vehicle is driving
-        :param lane_index: index of the lane where the vehicle is located
-        :param longitudinal: longitudinal position along the lane
-        :param speed: initial speed in [m/s]
-        :return: A vehicle with at the specified position
-        """
-        lane = traffic_mgr.current_map.road_network.get_lane(lane_index)
-        if speed is None:
-            speed = lane.speed_limit
-        return cls(traffic_mgr, lane.position(longitudinal, 0), lane.heading_at(longitudinal), speed)
+    # @classmethod
+    # def make_on_lane(cls, traffic_manager: TrafficManager, lane_index: LaneIndex, longitudinal: float, speed: float = 0):
+    #     """
+    #     Create a vehicle on a given lane at a longitudinal position.
+    #
+    #     :param traffic_manager: the road where the vehicle is driving
+    #     :param lane_index: index of the lane where the vehicle is located
+    #     :param longitudinal: longitudinal position along the lane
+    #     :param speed: initial speed in [m/s]
+    #     :return: A vehicle with at the specified position
+    #     """
+    #     lane = traffic_manager.current_map.road_network.get_lane(lane_index)
+    #     if speed is None:
+    #         speed = lane.speed_limit
+    #     return cls(traffic_manager, lane.position(longitudinal, 0), lane.heading_at(longitudinal), speed)
 
     @classmethod
     def create_random(
@@ -105,7 +108,8 @@ class Vehicle:
             list(lane.position(longitude, 0)),
             lane.heading_at(longitude),
             speed,
-            np_random=get_np_random(random_seed)
+            # random_seed=get_np_random(random_seed)
+            # np_random=get_np_random(random_seed)
         )
         return v
 
@@ -122,16 +126,16 @@ class Vehicle:
         v = cls(vehicle.traffic_mgr, vehicle.position, vehicle.heading, vehicle.speed)
         return v
 
-    def act(self, action: Union[dict, str] = None) -> None:
-        """
-        Store an action to be repeated.
+    # def act(self, action: Union[dict, str] = None) -> None:
+    #     """
+    #     Store an action to be repeated.
+    #
+    #     :param action: the input action
+    #     """
+    #     if action:
+    #         self.action = action
 
-        :param action: the input action
-        """
-        if action:
-            self.action = action
-
-    def step(self, dt: float) -> None:
+    def step(self, dt: float, action) -> None:
         """
         Propagate the vehicle state given its actions.
 
@@ -141,82 +145,35 @@ class Vehicle:
 
         :param dt: timestep of integration of the model [s]
         """
-        self.clip_actions()
-        delta_f = self.action['steering']
+        assert isinstance(action, dict)
+        # self.action = action
+        action = self.clip_actions(action)
+        delta_f = action['steering']
         beta = np.arctan(1 / 2 * np.tan(delta_f))
         v = self.speed * np.array([math.cos(self.heading + beta), math.sin(self.heading + beta)])
+
+        # TODO(pzh): The real position of the traffic vehicle is changed here!!!!
+        #  we should merge this with BaseVehicle, TrafficVehicle and so on.
         self._position += v * dt
+
         self.heading += self.speed * math.sin(beta) / (self.LENGTH / 2) * dt
-        self.speed += self.action['acceleration'] * dt
+        self.speed += action['acceleration'] * dt
         # for performance reason,
+        # TODO(pzh): This part is done in the policy. Check!
         # self.on_state_update()
 
-    def clip_actions(self) -> None:
+    def clip_actions(self, action) -> None:
+        # TODO(pzh): This part is done in policy. Check!
         if self.crashed:
-            self.action['steering'] = 0
-            self.action['acceleration'] = -1.0 * self.speed
-        self.action['steering'] = float(self.action['steering'])
-        self.action['acceleration'] = float(self.action['acceleration'])
+            action['steering'] = 0
+            action['acceleration'] = -1.0 * self.speed
+        action['steering'] = float(action['steering'])
+        action['acceleration'] = float(action['acceleration'])
         if self.speed > self.MAX_SPEED:
-            self.action['acceleration'] = min(self.action['acceleration'], 1.0 * (self.MAX_SPEED - self.speed))
+            action['acceleration'] = min(action['acceleration'], 1.0 * (self.MAX_SPEED - self.speed))
         elif self.speed < -self.MAX_SPEED:
-            self.action['acceleration'] = max(self.action['acceleration'], 1.0 * (self.MAX_SPEED - self.speed))
-
-    def on_state_update(self) -> None:
-        new_l_index, _ = self.traffic_mgr.current_map.road_network.get_closest_lane_index(self.position)
-        self.lane_index = new_l_index
-        self.lane = self.traffic_mgr.current_map.road_network.get_lane(self.lane_index)
-
-    def lane_distance_to(self, vehicle: "Vehicle", lane: AbstractLane = None) -> float:
-        """
-        Compute the signed distance to another vehicle along a lane.
-
-        :param vehicle: the other vehicle
-        :param lane: a lane
-        :return: the distance to the other vehicle [m]
-        """
-        if not vehicle:
-            return np.nan
-        if not lane:
-            lane = self.lane
-        return lane.local_coordinates(vehicle.position)[0] - lane.local_coordinates(self.position)[0]
-
-    def check_collision(self, other: Union['Vehicle', 'TrafficSign']) -> None:
-        """
-        Check for collision with another vehicle.
-
-        :param other: the other vehicle or object
-        """
-        if self.crashed or other is self:
-            return
-
-        if isinstance(other, Vehicle):
-            if not self.COLLISIONS_ENABLED or not other.COLLISIONS_ENABLED:
-                return
-
-            if self._is_colliding(other):
-                self.speed = other.speed = min([self.speed, other.speed], key=abs)
-                self.crashed = other.crashed = True
-        elif isinstance(other, TrafficSign):
-            if not self.COLLISIONS_ENABLED:
-                return
-
-            if self._is_colliding(other):
-                self.speed = min([self.speed, 0], key=abs)
-                self.crashed = other.hit = True
-        elif isinstance(other, TrafficSign):
-            if self._is_colliding(other):
-                other.hit = True
-
-    def _is_colliding(self, other):
-        # Fast spherical pre-check
-        if distance_greater(other.position, self.position, self.LENGTH):
-            return False
-        # Accurate rectangular check
-        return utils.rotated_rectangles_intersect(
-            (self.position, 0.9 * self.LENGTH, 0.9 * self.WIDTH, self.heading),
-            (other.position, 0.9 * other.LENGTH, 0.9 * other.WIDTH, other.heading)
-        )
+            action['acceleration'] = max(action['acceleration'], 1.0 * (self.MAX_SPEED - self.speed))
+        return action
 
     @property
     def direction(self) -> np.ndarray:
@@ -227,6 +184,67 @@ class Vehicle:
         return self.speed * self.direction
 
     @property
+    def heading_theta(self):
+        return self.heading
+
+    # def on_state_update(self) -> None:
+    #     new_l_index, _ = self.traffic_manager.current_map.road_network.get_closest_lane_index(self.position)
+    #     self.lane_index = new_l_index
+    #     self.lane = self.traffic_manager.current_map.road_network.get_lane(self.lane_index)
+
+    # def lane_distance_to(self, vehicle: "Vehicle", lane: AbstractLane = None) -> float:
+    #     """
+    #     Compute the signed distance to another vehicle along a lane.
+    #
+    #     :param vehicle: the other vehicle
+    #     :param lane: a lane
+    #     :return: the distance to the other vehicle [m]
+    #     """
+    #     deprecation_warning(1, 2, True)
+    #     if not vehicle:
+    #         return np.nan
+    #     if not lane:
+    #         lane = self.lane
+    #     return lane.local_coordinates(vehicle.position)[0] - lane.local_coordinates(self.position)[0]
+
+    # def check_collision(self, other: Union['Vehicle', 'TrafficSign']) -> None:
+    #     """
+    #     Check for collision with another vehicle.
+    #
+    #     :param other: the other vehicle or object
+    #     """
+    #     if self.crashed or other is self:
+    #         return
+    #
+    #     if isinstance(other, Vehicle):
+    #         if not self.COLLISIONS_ENABLED or not other.COLLISIONS_ENABLED:
+    #             return
+    #
+    #         if self._is_colliding(other):
+    #             self.speed = other.speed = min([self.speed, other.speed], key=abs)
+    #             self.crashed = other.crashed = True
+    #     elif isinstance(other, TrafficSign):
+    #         if not self.COLLISIONS_ENABLED:
+    #             return
+    #
+    #         if self._is_colliding(other):
+    #             self.speed = min([self.speed, 0], key=abs)
+    #             self.crashed = other.hit = True
+    #     elif isinstance(other, TrafficSign):
+    #         if self._is_colliding(other):
+    #             other.hit = True
+
+    # def _is_colliding(self, other):
+    #     # Fast spherical pre-check
+    #     if distance_greater(other.position, self.position, self.LENGTH):
+    #         return False
+    #     # Accurate rectangular check
+    #     return utils.rotated_rectangles_intersect(
+    #         (self.position, 0.9 * self.LENGTH, 0.9 * self.WIDTH, self.heading),
+    #         (other.position, 0.9 * other.LENGTH, 0.9 * other.WIDTH, other.heading)
+    #     )
+
+    # @property
     def destination(self) -> np.ndarray:
         if getattr(self, "route", None):
             last_lane = self.traffic_mgr.current_map.road_network.get_lane(self.route[-1])
@@ -234,20 +252,21 @@ class Vehicle:
         else:
             return self.position
 
-    @property
-    def destination_direction(self) -> np.ndarray:
-        if (self.destination != self.position).any():
-            return (self.destination - self.position) / norm(*(self.destination - self.position))
-        else:
-            return np.zeros((2, ))
+    # #
+    # @property
+    # def destination_direction(self) -> np.ndarray:
+    #     if (self.destination != self.position).any():
+    #         return (self.destination - self.position) / norm(*(self.destination - self.position))
+    #     else:
+    #         return np.zeros((2, ))
 
-    @property
-    def on_road(self) -> bool:
-        """ Is the vehicle on its current lane, or off-traffic_manager ? """
-        return self.lane.on_lane(self.position)
-
-    def front_distance_to(self, other: "Vehicle") -> float:
-        return self.direction.dot(other.position - self.position)
+    # @property
+    # def on_road(self) -> bool:
+    #     """ Is the vehicle on its current lane, or off-traffic_manager ? """
+    #     return self.lane.on_lane(self.position)
+    #
+    # def front_distance_to(self, other: "Vehicle") -> float:
+    #     return self.direction.dot(other.position - self.position)
 
     def to_dict(self, origin_vehicle: "Vehicle" = None, observe_intentions: bool = True) -> dict:
         d = {
@@ -258,8 +277,8 @@ class Vehicle:
             'vy': self.velocity[1],
             'cos_h': self.direction[0],
             'sin_h': self.direction[1],
-            'cos_d': self.destination_direction[0],
-            'sin_d': self.destination_direction[1]
+            # 'cos_d': self.destination_direction[0],
+            # 'sin_d': self.destination_direction[1]
         }
         if not observe_intentions:
             d["cos_d"] = d["sin_d"] = 0
@@ -287,7 +306,3 @@ class Vehicle:
 
     def __repr__(self):
         return self.__str__()
-
-    @property
-    def heading_theta(self):
-        return self.heading

@@ -16,8 +16,8 @@ from pgdrive.scene_managers.agent_manager import AgentManager
 from pgdrive.scene_managers.map_manager import MapManager
 from pgdrive.scene_managers.object_manager import TrafficSignManager
 from pgdrive.scene_managers.traffic_manager import TrafficManager
-from pgdrive.utils import PGConfig, merge_dicts
-from pgdrive.utils import get_np_random
+from pgdrive.scene_managers.policy_manager import PolicyManager
+from pgdrive.utils import PGConfig, merge_dicts, get_np_random
 from pgdrive.utils.engine_utils import get_pgdrive_engine, initialize_pgdrive_engine, close_pgdrive_engine, \
     pgdrive_engine_initialized, set_global_random_seed
 
@@ -53,6 +53,7 @@ BASE_DEFAULT_CONFIG = dict(
 
     # ===== Vehicle =====
     vehicle_config=dict(
+        increment_steering=False,
         show_navi_mark=True,
         wheel_friction=0.6,
         max_engine_force=500,
@@ -347,7 +348,10 @@ class BasePGDriveEnv(gym.Env):
     @property
     def vehicle(self):
         """A helper to return the vehicle only in the single-agent environment!"""
-        assert len(self.vehicles) == 1, "env.vehicle is only supported in single-agent environment!"
+        assert len(self.vehicles) == 1, (
+            "env.vehicle is only supported in single-agent environment!"
+            if len(self.vehicles) > 1 else "Please initialize the environment first!"
+        )
         ego_v = self.vehicles[DEFAULT_AGENT]
         return ego_v
 
@@ -424,6 +428,7 @@ class BasePGDriveEnv(gym.Env):
         self.pgdrive_engine.register_manager("traffic_manager", TrafficManager())
         self.pgdrive_engine.register_manager("map_manager", MapManager())
         self.pgdrive_engine.register_manager("object_manager", TrafficSignManager())
+        self.pgdrive_engine.register_manager("policy_manager", PolicyManager())
 
     @property
     def current_map(self):

@@ -51,18 +51,23 @@ class IDMVehicle(ControlledVehicle):
         position: List,
         heading: float = 0,
         speed: float = 0,
-        target_lane_index: int = None,
-        target_speed: float = None,
-        route: Route = None,
-        enable_lane_change: bool = True,
-        timer: float = None,
+        # target_lane_index: int = None,
+        # target_speed: float = None,
+        # route: Route = None,
+        # enable_lane_change: bool = True,
+        # timer: float = None,
         np_random: np.random.RandomState = None,
     ):
         super().__init__(
-            traffic_mgr, position, heading, speed, target_lane_index, target_speed, route, np_random=np_random
+            traffic_mgr,
+            position,
+            heading,
+            speed,
+            # target_lane_index, target_speed, route,
+            np_random=np_random
         )
-        self.enable_lane_change = enable_lane_change
-        self.timer = timer or (np.sum(self.position) * np.pi) % self.LANE_CHANGE_DELAY
+        # self.enable_lane_change = enable_lane_change
+        # self.timer = timer or (np.sum(self.position) * np.pi) % self.LANE_CHANGE_DELAY
 
     def randomize_behavior(self):
         pass
@@ -82,10 +87,10 @@ class IDMVehicle(ControlledVehicle):
             vehicle.position,
             heading=vehicle.heading,
             speed=vehicle.speed,
-            target_lane_index=vehicle.target_lane_index,
-            target_speed=vehicle.target_speed,
-            route=vehicle.route,
-            timer=getattr(vehicle, 'timer', None),
+            # target_lane_index=vehicle.target_lane_index,
+            # target_speed=vehicle.target_speed,
+            # route=vehicle.route,
+            # timer=getattr(vehicle, 'timer', None),
             np_random=vehicle.np_random
         )
         return v
@@ -118,18 +123,18 @@ class IDMVehicle(ControlledVehicle):
         action['acceleration'] = clip(action['acceleration'], -self.ACC_MAX, self.ACC_MAX)
         Vehicle.act(self, action)  # Skip ControlledVehicle.act(), or the command will be override.
 
-    def step(self, dt: float):
-        """
-        Step the simulation.
-
-        Increases a timer used for decision policies, and step the vehicle dynamics.
-
-        :param dt: timestep
-        """
-        self.timer += dt
-        if self.action['acceleration'] < 0 and self.speed <= 0:
-            self.action['acceleration'] = -self.speed / dt
-        super().step(dt)
+    # def step(self, dt: float):
+    #     """
+    #     Step the simulation.
+    #
+    #     Increases a timer used for decision policies, and step the vehicle dynamics.
+    #
+    #     :param dt: timestep
+    #     """
+    #     self.timer += dt
+    #     if self.action['acceleration'] < 0 and self.speed <= 0:
+    #         self.action['acceleration'] = -self.speed / dt
+    #     super().step(dt)
 
     def acceleration(
         self, ego_vehicle: ControlledVehicle, front_vehicle: Vehicle = None, rear_vehicle: Vehicle = None

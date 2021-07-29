@@ -67,7 +67,6 @@ PGDriveEnvV1_DEFAULT_CONFIG = dict(
         mini_map=(84, 84, 250),  # buffer length, width
         rgb_cam=(84, 84),  # buffer length, width
         depth_cam=(84, 84, True),  # buffer length, width, view_ground
-        increment_steering=False,
         side_detector=dict(num_lasers=0, distance=50),  # laser num, distance
         show_side_detector=False,
         lane_line_detector=dict(num_lasers=0, distance=20),  # laser num, distance

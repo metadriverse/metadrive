@@ -121,6 +121,7 @@ class AbstractLane(object):
         return is_close
 
     def after_end(self, position: np.ndarray, longitudinal: float = None, lateral: float = None) -> bool:
+        # TODO: We should remove this function. It is used to compute whether you are out of a given lane.
         if not longitudinal:
             longitudinal, _ = self.local_coordinates(position)
         return longitudinal > self.length - self.VEHICLE_LENGTH / 2
