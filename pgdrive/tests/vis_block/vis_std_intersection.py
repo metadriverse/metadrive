@@ -1,7 +1,7 @@
-from pgdrive.scene_creator.blocks.first_block import FirstPGBlock
-from pgdrive.scene_creator.blocks.std_intersection import StdInterSection
-from pgdrive.scene_creator.blocks.std_t_intersection import StdTInterSection
-from pgdrive.scene_creator.road.road_network import RoadNetwork
+from pgdrive.component.blocks.first_block import FirstPGBlock
+from pgdrive.component.blocks.std_intersection import StdInterSection
+from pgdrive.component.blocks.std_t_intersection import StdTInterSection
+from pgdrive.component.road.road_network import RoadNetwork
 from pgdrive.tests.vis_block.vis_block_base import TestBlock
 
 if __name__ == "__main__":

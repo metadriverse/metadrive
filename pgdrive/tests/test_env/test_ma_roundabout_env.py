@@ -30,7 +30,7 @@ def _check_shape(env):
     b = set(env.observation_space.spaces.keys())
     c = set(env.action_space.spaces.keys())
     d = set(env.vehicles.keys())
-    e = set(env.pgdrive_engine.target_vehicles.keys())
+    e = set(env.engine.target_vehicles.keys())
     f = set([k for k in env.observation_space.spaces.keys() if not env.dones[k]])
     assert d == e == f, (b, c, d, e, f)
     assert c.issuperset(d)

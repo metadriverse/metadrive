@@ -2,8 +2,8 @@ import copy
 
 import numpy as np
 from pgdrive.envs import PGDriveEnvV2
-from pgdrive.scene_creator.vehicle.base_vehicle import BaseVehicle
-from pgdrive.scene_creator.vehicle_module.distance_detector import DetectorMask
+from pgdrive.component.vehicle.base_vehicle import BaseVehicle
+from pgdrive.component.vehicle_module.distance_detector import DetectorMask
 from pgdrive.utils import panda_position
 
 
@@ -141,15 +141,15 @@ def test_detector_mask_in_lidar():
         for _ in range(3000):
             o, r, d, i = env.step([0, 1])
 
-            mask_ratio = env.pgdrive_engine.detector_mask.get_mask_ratio()
+            mask_ratio = env.engine.detector_mask.get_mask_ratio()
             print("Mask ratio: ", mask_ratio)
-            print("We have: {} vehicles!".format(env.pgdrive_engine.traffic_manager.get_vehicle_num()))
+            print("We have: {} vehicles!".format(env.engine.traffic_manager.get_vehicle_num()))
 
             v = env.vehicle
             v.lidar.perceive(
                 v.position,
                 v.heading_theta,
-                v.pgdrive_engine.physics_world.dynamic_world,
+                v.engine.physics_world.dynamic_world,
                 extra_filter_node={v.chassis_np.node()},
                 detector_mask=None
             )
@@ -158,7 +158,7 @@ def test_detector_mask_in_lidar():
             position_dict = {}
             heading_dict = {}
             is_target_vehicle_dict = {}
-            for v in env.pgdrive_engine.traffic_manager.vehicles:
+            for v in env.engine.traffic_manager.vehicles:
                 position_dict[v.name] = v.position
                 heading_dict[v.name] = v.heading_theta
                 is_target_vehicle_dict[v.name] = True if isinstance(v, BaseVehicle) else False
@@ -186,7 +186,7 @@ def test_detector_mask_in_lidar():
             v.lidar.perceive(
                 v.position,
                 v.heading_theta,
-                v.pgdrive_engine.physics_world.dynamic_world,
+                v.engine.physics_world.dynamic_world,
                 extra_filter_node={v.chassis_np.node()},
                 detector_mask=mask
             )
@@ -207,7 +207,7 @@ def test_cutils_lidar():
         self,
         vehicle_position,
         heading_theta,
-        pg_physics_world,
+        physics_world,
         extra_filter_node: set = None,
         detector_mask: np.ndarray = None
     ):
@@ -241,11 +241,11 @@ def test_cutils_lidar():
                 continue
 
             laser_end = self._get_laser_end(laser_index, heading_theta, vehicle_position)
-            result = pg_physics_world.rayTestClosest(pg_start_position, laser_end, mask)
+            result = physics_world.rayTestClosest(pg_start_position, laser_end, mask)
             node = result.getNode()
             if node in extra_filter_node:
                 # Fall back to all tests.
-                results = pg_physics_world.rayTestAll(pg_start_position, laser_end, mask)
+                results = physics_world.rayTestAll(pg_start_position, laser_end, mask)
                 hits = results.getHits()
                 hits = sorted(hits, key=lambda ret: ret.getHitFraction())
                 for result in hits:
@@ -272,7 +272,7 @@ def test_cutils_lidar():
         self,
         vehicle_position,
         heading_theta,
-        pg_physics_world,
+        physics_world,
         extra_filter_node: set = None,
         detector_mask: np.ndarray = None
     ):
@@ -287,7 +287,7 @@ def test_cutils_lidar():
             vehicle_position_y=vehicle_position[1],
             num_lasers=self.num_lasers,
             height=self.height,
-            pg_physics_world=pg_physics_world,
+            physics_world=physics_world,
             extra_filter_node=extra_filter_node if extra_filter_node else set(),
             require_colors=self.cloud_points_vis is not None,
             ANGLE_FACTOR=self.ANGLE_FACTOR,
@@ -309,14 +309,14 @@ def test_cutils_lidar():
                 new_cloud_points = v.lidar.perceive(
                     v.position,
                     v.heading_theta,
-                    v.pgdrive_engine.physics_world.dynamic_world,
+                    v.engine.physics_world.dynamic_world,
                     extra_filter_node={v.chassis_np.node()},
                     detector_mask=None
                 )
                 new_cloud_points = np.array(copy.deepcopy(new_cloud_points))
                 old_cloud_points = _old_perceive(
-                    v.lidar, v.position, v.heading_theta, v.pgdrive_engine.physics_world.dynamic_world,
-                    {v.chassis_np.node()}, None
+                    v.lidar, v.position, v.heading_theta, v.engine.physics_world.dynamic_world, {v.chassis_np.node()},
+                    None
                 )
                 np.testing.assert_almost_equal(new_cloud_points, old_cloud_points)
 
@@ -324,7 +324,7 @@ def test_cutils_lidar():
                     v.lidar,
                     v.position,
                     v.heading_theta,
-                    v.pgdrive_engine.physics_world.dynamic_world,
+                    v.engine.physics_world.dynamic_world,
                     extra_filter_node={v.chassis_np.node()},
                     detector_mask=None
                 )
@@ -335,9 +335,9 @@ def test_cutils_lidar():
                 v.lidar.perceive(
                     v.position,
                     v.heading_theta,
-                    v.pgdrive_engine.physics_world.dynamic_world,
+                    v.engine.physics_world.dynamic_world,
                     extra_filter_node={v.chassis_np.node()},
-                    detector_mask=env.pgdrive_engine.detector_mask.get_mask(v.name)
+                    detector_mask=env.engine.detector_mask.get_mask(v.name)
                 )
                 new_cloud_points = np.array(copy.deepcopy(env.vehicle.lidar.get_cloud_points()))
                 np.testing.assert_almost_equal(old_cloud_points, new_cloud_points)

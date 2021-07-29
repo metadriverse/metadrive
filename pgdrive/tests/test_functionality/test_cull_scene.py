@@ -1,11 +1,11 @@
 from pgdrive.constants import TerminationState
 from pgdrive.envs.multi_agent_pgdrive import MultiAgentPGDrive
-from pgdrive.utils import PGConfig
+from pgdrive.utils import Config
 
 
 def test_cull_scene(use_render=False):
     class TestCull(MultiAgentPGDrive):
-        def default_config(self) -> PGConfig:
+        def default_config(self) -> Config:
             config = MultiAgentPGDrive.default_config()
             config.update({
                 "target_vehicle_configs": {},

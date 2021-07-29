@@ -69,8 +69,8 @@ def concat_step_infos(step_info_list):
 def merge_dicts(old_dict, new_dict, allow_new_keys=False, without_copy=False):
     """
     Args:
-        old_dict (dict, PGConfig): Dict 1.
-        new_dict (dict, PGConfig): Dict 2.
+        old_dict (dict, Config): Dict 1.
+        new_dict (dict, Config): Dict 2.
         raise_error (bool): Whether to raise error if new key is found.
 
     Returns:

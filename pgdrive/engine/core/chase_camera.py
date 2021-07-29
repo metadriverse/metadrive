@@ -1,5 +1,5 @@
 import queue
-from pgdrive.utils.engine_utils import get_pgdrive_engine
+from pgdrive.utils.engine_utils import get_engine
 from collections import deque
 from typing import Tuple
 import math
@@ -24,7 +24,7 @@ class ChaseCamera:
 
     def __init__(self, camera: Camera, camera_height: float, camera_dist: float):
         self._origin_height = camera_height
-        self.engine = get_pgdrive_engine()
+        self.engine = get_engine()
 
         # vehicle chase camera
         self.camera = camera
@@ -158,7 +158,7 @@ class ChaseCamera:
         self.FOLLOW_LANE = flag
 
     def destroy(self):
-        engine = get_pgdrive_engine()
+        engine = get_engine()
         if engine.task_manager.hasTaskNamed(self.CHASE_TASK_NAME):
             engine.task_manager.remove(self.CHASE_TASK_NAME)
         if engine.task_manager.hasTaskNamed(self.TOP_DOWN_TASK_NAME):

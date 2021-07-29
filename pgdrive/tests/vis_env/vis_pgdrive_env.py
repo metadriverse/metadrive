@@ -1,5 +1,5 @@
 from pgdrive.envs.pgdrive_env import PGDriveEnv
-from pgdrive.scene_creator.map.base_map import BaseMap, MapGenerateMethod
+from pgdrive.component.map.base_map import BaseMap, MapGenerateMethod
 from pgdrive.utils import setup_logger
 
 
@@ -14,7 +14,7 @@ class TestEnv(PGDriveEnv):
                 "traffic_density": 0.2,
                 "traffic_mode": "respawn",
                 "start_seed": 4,
-                "pg_world_config": {
+                "engine_config": {
                     "onscreen_message": True,
                     # "debug_physics_world": True,
                     "pstats": True,

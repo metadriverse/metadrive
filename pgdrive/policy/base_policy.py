@@ -1,4 +1,4 @@
-from pgdrive.scene_creator.base_object import BaseObject
+from pgdrive.component.base_object import BaseObject
 
 
 class BasePolicy(BaseObject):

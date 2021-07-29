@@ -1,11 +1,11 @@
 from pgdrive.constants import TerminationState
 from pgdrive.envs.pgdrive_env import PGDriveEnv
-from pgdrive.utils import PGConfig
+from pgdrive.utils import Config
 from pgdrive.utils.math_utils import clip
 
 
 class SafePGDriveEnv(PGDriveEnv):
-    def default_config(self) -> PGConfig:
+    def default_config(self) -> Config:
         config = super(SafePGDriveEnv, self).default_config()
         config.update(
             {
@@ -111,7 +111,7 @@ if __name__ == "__main__":
             "out_of_road_cost": 1,
             "debug": True,
             "cull_scene": True,
-            "pg_world_config": {
+            "engine_config": {
                 "pstats": True
             },
             "vehicle_config": {
@@ -130,7 +130,7 @@ if __name__ == "__main__":
         o, r, d, info = env.step([0, 1])
         total_cost += info["cost"]
         env.render(text={"cost": total_cost, "seed": env.current_map.random_seed, "reward": r})
-        print(len(env.pgdrive_engine.traffic_manager.traffic_vehicles))
+        print(len(env.engine.traffic_manager.traffic_vehicles))
         if d:
             total_cost = 0
             print("done_cost:{}".format(info["cost"]))

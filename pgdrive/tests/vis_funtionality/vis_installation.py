@@ -18,14 +18,14 @@ def capture_image(headless):
             start_seed=666,
             traffic_density=0.1,
             use_image=True,
-            pg_world_config=dict(headless_image=headless)
+            engine_config=dict(headless_image=headless)
         )
     )
     env.reset()
     for i in range(10):
         env.step([0, 1])
     img = PNMImage()
-    env.pg_world.win.getScreenshot(img)
+    env.engine.win.getScreenshot(img)
     img.write("vis_installation.png")
     env.close()
     if not headless:

@@ -6,8 +6,8 @@ import numpy as np
 from pgdrive.envs.pgdrive_env_v2 import PGDriveEnvV2
 from pgdrive.obs.observation_base import ObservationBase
 from pgdrive.obs.state_obs import LidarStateObservation
-from pgdrive.utils import PGConfig
-from pgdrive.utils.engine_utils import get_pgdrive_engine
+from pgdrive.utils import Config
+from pgdrive.utils.engine_utils import get_engine
 from pgdrive.utils.math_utils import norm, clip
 
 DISTANCE = 50
@@ -102,7 +102,7 @@ class MinimalObservation(LidarStateObservation):
 
     def overwritten_get_surrounding_vehicles_info(self, lidar, ego_vehicle, num_others: int = 4):
         # surrounding_vehicles = list(lidar.get_surrounding_vehicles())
-        surrounding_vehicles = list(self._env.pgdrive_engine.traffic_manager.vehicles)[1:]
+        surrounding_vehicles = list(self._env.engine.traffic_manager.vehicles)[1:]
         surrounding_vehicles.sort(
             key=lambda v: norm(ego_vehicle.position[0] - v.position[0], ego_vehicle.position[1] - v.position[1])
         )
@@ -159,7 +159,7 @@ class MinimalObservation(LidarStateObservation):
         s.append(state["sin_h"])
 
         # TODO(pzh): This is stupid here!!
-        pm = get_pgdrive_engine().policy_manager
+        pm = get_engine().policy_manager
         p = pm.get_policy(vehicle.name)
         # s.append(state["cos_d"])
         # s.append(state["sin_d"])
@@ -192,7 +192,7 @@ class MinimalObservation(LidarStateObservation):
 
 class PGDriveEnvV2Minimal(PGDriveEnvV2):
     @classmethod
-    def default_config(cls) -> PGConfig:
+    def default_config(cls) -> Config:
         config = super(PGDriveEnvV2Minimal, cls).default_config()
         config.update({"num_others": 4, "use_extra_state": True})
         config["vehicle_config"]["lidar"]["distance"] = 0
@@ -204,7 +204,7 @@ class PGDriveEnvV2Minimal(PGDriveEnvV2):
         config["vehicle_config"]["lane_line_detector"]["distance"] = 0
         return config
 
-    def get_single_observation(self, vehicle_config: "PGConfig") -> "ObservationBase":
+    def get_single_observation(self, vehicle_config: "Config") -> "ObservationBase":
         return MinimalObservation(vehicle_config, self)
 
     def _post_process_config(self, config):

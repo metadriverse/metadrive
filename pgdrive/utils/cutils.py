@@ -35,7 +35,7 @@ def _get_fake_cutils():
         @classmethod
         def cutils_perceive(
             cls, cloud_points, detector_mask, mask, lidar_range, perceive_distance, heading_theta, vehicle_position_x,
-            vehicle_position_y, num_lasers, height, pg_physics_world, extra_filter_node, require_colors, ANGLE_FACTOR,
+            vehicle_position_y, num_lasers, height, physics_world, extra_filter_node, require_colors, ANGLE_FACTOR,
             MARK_COLOR0, MARK_COLOR1, MARK_COLOR2
         ):
             """A naive re-implement of code in cutils.pyx"""
@@ -66,12 +66,12 @@ def _get_fake_cutils():
                     lidar_range, perceive_distance, laser_index, heading_theta, vehicle_position_x, vehicle_position_y
                 )
                 laser_end = cls.cutils_panda_position(point_x, point_y, height)
-                result = pg_physics_world.rayTestClosest(pg_start_position, laser_end, mask)
+                result = physics_world.rayTestClosest(pg_start_position, laser_end, mask)
                 node = result.getNode()
                 hits = None
                 if node in extra_filter_node:
                     # Fall back to all tests.
-                    results = pg_physics_world.rayTestAll(pg_start_position, laser_end, mask)
+                    results = physics_world.rayTestAll(pg_start_position, laser_end, mask)
                     hits = results.getHits()
                     hits = sorted(hits, key=lambda ret: ret.getHitFraction())
                     for result in hits:

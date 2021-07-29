@@ -10,11 +10,11 @@ class TestEnv(PGDriveEnv):
               self).__init__({
                   "environment_num": 1,
                   "start_seed": 3,
-                  "pg_world_config": {},
+                  "engine_config": {},
                   "manual_control": False
               })
-        # self.pg_world.cam.setPos(0, 0, 1500)
-        # self.pg_world.cam.lookAt(0, 0, 0)
+        # self.engine.cam.setPos(0, 0, 1500)
+        # self.engine.cam.lookAt(0, 0, 0)
 
 
 def test_destroy():

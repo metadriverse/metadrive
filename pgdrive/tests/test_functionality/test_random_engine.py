@@ -7,11 +7,11 @@ def test_seeding():
     env = PGDriveEnv({"environment_num": 1000})
     try:
         env.seed(999)
-        assert env.pgdrive_engine is None
+        assert env.engine is None
         assert env.current_seed == 999
         env.reset(force_seed=999)
         assert env.current_seed == 999
-        assert env.pgdrive_engine is not None
+        assert env.engine is not None
     finally:
         env.close()
 
@@ -60,8 +60,8 @@ def test_fixed_traffic():
         last_pos = None
         for i in range(20):
             obs = env.reset()
-            assert env.pgdrive_engine.traffic_manager.random_seed == env.current_seed
-            new_pos = [v.position for v in env.pgdrive_engine.traffic_manager.vehicles]
+            assert env.engine.traffic_manager.random_seed == env.current_seed
+            new_pos = [v.position for v in env.engine.traffic_manager.vehicles]
             if last_pos is not None and len(new_pos) == len(last_pos):
                 assert sum(
                     [norm(lastp[0] - newp[0], lastp[1] - newp[1]) <= 1e-3 for lastp, newp in zip(last_pos, new_pos)]
@@ -87,8 +87,8 @@ def test_random_traffic():
         last_pos = None
         for i in range(20):
             obs = env.reset(force_seed=5)
-            assert env.pgdrive_engine.traffic_manager.random_traffic
-            new_pos = [v.position for v in env.pgdrive_engine.traffic_manager.traffic_vehicles]
+            assert env.engine.traffic_manager.random_traffic
+            new_pos = [v.position for v in env.engine.traffic_manager.traffic_vehicles]
             if len(new_pos) > 0:
                 has_traffic = True
             if last_pos is not None and len(new_pos) == len(last_pos):

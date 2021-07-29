@@ -26,10 +26,10 @@ class ImageBuffer:
         parent_node: NodePath,
         frame_buffer_property=None,
     ):
-        from pgdrive.utils.engine_utils import get_pgdrive_engine
-        self.pgdrive_engine = get_pgdrive_engine()
+        from pgdrive.utils.engine_utils import get_engine
+        self.engine = get_engine()
         try:
-            assert self.pgdrive_engine.win is not None, "{} cannot be made without use_render or use_image".format(
+            assert self.engine.win is not None, "{} cannot be made without use_render or use_image".format(
                 self.__class__.__name__
             )
             assert self.CAM_MASK is not None, "Define a camera mask for every image buffer"
@@ -46,15 +46,15 @@ class ImageBuffer:
 
         # self.texture = Texture()
         if frame_buffer_property is None:
-            self.buffer = self.pgdrive_engine.win.makeTextureBuffer("camera", length, width)
+            self.buffer = self.engine.win.makeTextureBuffer("camera", length, width)
         else:
-            self.buffer = self.pgdrive_engine.win.makeTextureBuffer("camera", length, width, fbp=frame_buffer_property)
+            self.buffer = self.engine.win.makeTextureBuffer("camera", length, width, fbp=frame_buffer_property)
             # now we have to setup a new scene graph to make this scene
 
         self.node_path = NodePath("new render")
         self.line_borders = []
         # this takes care of setting up their camera properly
-        self.cam = self.pgdrive_engine.makeCamera(self.buffer, clearColor=bkg_color)
+        self.cam = self.engine.makeCamera(self.buffer, clearColor=bkg_color)
         self.cam.reparentTo(self.node_path)
         self.cam.setPos(pos)
         self.lens = self.cam.node().getLens()
@@ -66,7 +66,7 @@ class ImageBuffer:
         """
         Bugs here! when use offscreen mode, thus the front cam obs is not from front cam now
         """
-        self.pgdrive_engine.graphicsEngine.renderFrame()
+        self.engine.graphicsEngine.renderFrame()
         img = PNMImage()
         self.buffer.getScreenshot(img)
         return img
@@ -95,14 +95,14 @@ class ImageBuffer:
             return np.clip(numpy_array, 0, 1)
 
     def add_to_display(self, display_region: List[float]):
-        if self.pgdrive_engine.world_config["use_render"]:
+        if self.engine.world_config["use_render"]:
             # only show them when onscreen
-            self.display_region = self.pgdrive_engine.win.makeDisplayRegion(*display_region)
+            self.display_region = self.engine.win.makeDisplayRegion(*display_region)
             self.display_region.setCamera(self.cam)
             self.draw_border(display_region)
 
     def draw_border(self, display_region):
-        engine = self.pgdrive_engine
+        engine = self.engine
         # add white frame for display region, convert to [-1, 1]
         left = display_region[0] * 2 - 1
         right = display_region[1] * 2 - 1
@@ -115,14 +115,14 @@ class ImageBuffer:
         self.line_borders.append(engine.draw_line([right, bottom], [left, bottom], self.LINE_FRAME_COLOR, 1.5))
 
     def remove_display_region(self):
-        engine = self.pgdrive_engine
+        engine = self.engine
         if engine.mode == RENDER_MODE_ONSCREEN and self.display_region:
             engine.win.removeDisplayRegion(self.display_region)
         for line_node in self.line_borders:
             line_node.detachNode()
 
     def destroy(self):
-        engine = self.pgdrive_engine
+        engine = self.engine
         if engine is not None:
             self.remove_display_region()
             engine.graphicsEngine.removeWindow(self.buffer)

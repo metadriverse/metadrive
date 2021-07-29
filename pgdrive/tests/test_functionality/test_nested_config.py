@@ -1,11 +1,11 @@
-from pgdrive.utils.pg_config import PGConfig
+from pgdrive.utils.config import Config
 
 
 def test_recursive_config():
-    c = PGConfig({"aa": {"bb": {"cc": 100}}})
+    c = Config({"aa": {"bb": {"cc": 100}}})
     assert c.aa.bb.cc == 100
-    assert isinstance(c.aa, PGConfig)
-    assert isinstance(c.aa.bb, PGConfig)
+    assert isinstance(c.aa, Config)
+    assert isinstance(c.aa.bb, Config)
     assert isinstance(c.aa.bb.cc, int)
 
     c.update({"aa": {"bb": {"cc": 101}}})
@@ -34,7 +34,7 @@ def test_recursive_config():
 
 
 def test_partially_update():
-    c = PGConfig({"aa": {"bb": {"cc": 100}}})
+    c = Config({"aa": {"bb": {"cc": 100}}})
 
     try:
         c.update({"aa": {"bb": {"dd": 101}}}, allow_overwrite=False)
@@ -49,8 +49,8 @@ def test_partially_update():
 
 
 def test_config_identical():
-    c = PGConfig({"aa": {"bb": {"cc": 100}}})
-    d = PGConfig({"aa": {"bb": {"cc": 100}}})
+    c = Config({"aa": {"bb": {"cc": 100}}})
+    d = Config({"aa": {"bb": {"cc": 100}}})
     assert c.is_identical(c)
     assert c.is_identical(d)
     assert d.is_identical(c)
@@ -70,7 +70,7 @@ def test_config_identical():
 
 
 def test_dict_as_attribute():
-    c = PGConfig({"aa": {"bb": {"cc": 100, "ee": 102}}})
+    c = Config({"aa": {"bb": {"cc": 100, "ee": 102}}})
     c.update({"ff": {"gg": 104}})
     assert hasattr(c, "ff")
 

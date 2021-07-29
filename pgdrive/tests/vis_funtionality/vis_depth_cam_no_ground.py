@@ -1,5 +1,5 @@
 from pgdrive.envs.pgdrive_env import PGDriveEnv
-from pgdrive.scene_creator.map.base_map import BaseMap, MapGenerateMethod
+from pgdrive.component.map.base_map import BaseMap, MapGenerateMethod
 
 
 class TestEnv(PGDriveEnv):
@@ -14,7 +14,7 @@ class TestEnv(PGDriveEnv):
                 "use_image": True,
                 "rgb_clip": True,
                 "vehicle_config": dict(depth_cam=(200, 88, False), image_source="depth_cam"),
-                "pg_world_config": {
+                "engine_config": {
                     "headless_image": False,
                 },
                 "map_config": {
@@ -30,7 +30,7 @@ class TestEnv(PGDriveEnv):
 if __name__ == "__main__":
     env = TestEnv()
     env.reset()
-    env.pg_world.accept("m", env.vehicle.image_sensors[env.vehicle.vehicle_config["image_source"]].save_image)
+    env.engine.accept("m", env.vehicle.image_sensors[env.vehicle.vehicle_config["image_source"]].save_image)
 
     for i in range(1, 100000):
         o, r, d, info = env.step([0, 1])
