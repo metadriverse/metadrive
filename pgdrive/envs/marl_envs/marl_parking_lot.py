@@ -2,7 +2,7 @@ import copy
 import logging
 
 from pgdrive.envs.marl_envs.marl_inout_roundabout import LidarStateObservationMARound
-from pgdrive.envs.multi_agent_pgdrive import MultiAgentPGDrive, panda_replay
+from pgdrive.envs.marl_envs.multi_agent_pgdrive import MultiAgentPGDrive, panda_replay
 from pgdrive.obs.observation_base import ObservationBase
 from pgdrive.component.blocks.first_block import FirstPGBlock
 from pgdrive.component.blocks.parking_lot import ParkingLot

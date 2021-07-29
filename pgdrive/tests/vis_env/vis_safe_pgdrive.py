@@ -1,4 +1,4 @@
-from pgdrive.envs.generation_envs.safe_pgdrive_env import SafePGDriveEnv
+from pgdrive.envs.safe_pgdrive_env import SafePGDriveEnv
 from pgdrive.utils import setup_logger
 
 
