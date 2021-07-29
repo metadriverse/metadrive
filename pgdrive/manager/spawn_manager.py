@@ -31,7 +31,7 @@ class SpawnManager:
             )
         )
         self.lane_num = lane_num
-        self.vehicle_config = vehicle_config
+        self.config = vehicle_config
         self.spawn_roads = []
         self.target_vehicle_configs = []
         self.safe_spawn_places = {}

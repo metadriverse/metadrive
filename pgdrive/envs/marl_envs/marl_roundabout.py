@@ -36,7 +36,7 @@ class MultiAgentRoundaboutEnv(MultiAgentPGDrive):
                 # clear base config
                 "num_agents": 4,
             },
-            allow_overwrite=True
+            allow_add_new_key=True
         )
         return config
 

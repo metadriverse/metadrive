@@ -25,7 +25,7 @@ class SafePGDriveEnv(PGDriveEnv):
                 "traffic_density": 0.2,
                 "use_lateral": False
             },
-            allow_overwrite=True
+            allow_add_new_key=True
         )
         return config
 

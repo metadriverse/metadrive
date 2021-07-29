@@ -70,7 +70,7 @@ class BaseMap(BaseObject):
             self.SEED
         ], "Global seed {} should equal to seed in map config {}".format(random_seed, map_config[self.SEED])
         super(BaseMap, self).__init__(random_seed=map_config[self.SEED])
-        self.set_config(map_config)
+        self.update_config(map_config, allow_add_new_key=True)
         self.film_size = (self._config["draw_map_resolution"], self._config["draw_map_resolution"])
         self.road_network = RoadNetwork()
 
