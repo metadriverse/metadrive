@@ -188,3 +188,62 @@ TRAFFIC_VEHICLES = "traffic_vehicles"
 OBJECT_TO_AGENT = "object_to_agent"
 AGENT_TO_OBJECT = "agent_to_object"
 BKG_COLOR = Vec3(179 / 255, 211 / 255, 216 / 255)
+
+
+class LineType:
+    """A lane side line type."""
+
+    NONE = "none"
+    BROKEN = "broken"
+    CONTINUOUS = "continuous"
+    SIDE = "side"
+
+    @staticmethod
+    def prohibit(line_type) -> bool:
+        if line_type in [LineType.CONTINUOUS, LineType.SIDE]:
+            return True
+        else:
+            return False
+
+
+class LineColor:
+    GREY = (1, 1, 1, 1)
+    YELLOW = (245 / 255, 192 / 255, 67 / 255, 1)
+
+
+class DrivableAreaProperty:
+    CENTER_LINE_TYPE = LineType.CONTINUOUS
+
+    # road network property
+    ID = None  # each block must have a unique ID
+    SOCKET_NUM = None
+
+    # visualization size property
+    CIRCULAR_SEGMENT_LENGTH = 4
+    STRIPE_LENGTH = 1.5
+    LANE_LINE_WIDTH = 0.15
+    LANE_LINE_THICKNESS = 0.01
+
+    SIDEWALK_THICKNESS = 0.4
+    SIDEWALK_LENGTH = 3
+    SIDEWALK_WIDTH = 3
+    SIDEWALK_LINE_DIST = 0.6
+
+    # visualization color property
+    LAND_COLOR = (0.4, 0.4, 0.4, 1)
+    NAVI_COLOR = (0.709, 0.09, 0, 1)
+
+    # for detection
+    LANE_LINE_GHOST_HEIGHT = 0.4
+
+    # lane line collision group
+    CONTINUOUS_COLLISION_MASK = CollisionGroup.ContinuousLaneLine
+    BROKEN_COLLISION_MASK = CollisionGroup.BrokenLaneLine
+
+    # for creating complex block, for example Intersection and roundabout consist of 4 part, which contain several road
+    PART_IDX = 0
+    ROAD_IDX = 0
+    DASH = "_"
+
+    #  when set to True, Vehicles will not generate on this block
+    PROHIBIT_TRAFFIC_GENERATION = False

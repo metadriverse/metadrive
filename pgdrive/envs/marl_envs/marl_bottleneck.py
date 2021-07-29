@@ -3,7 +3,7 @@ from pgdrive.envs.marl_envs.marl_inout_roundabout import LidarStateObservationMA
 from pgdrive.envs.multi_agent_pgdrive import MultiAgentPGDrive
 from pgdrive.obs.observation_base import ObservationBase
 from pgdrive.scene_creator.blocks.bottleneck import Merge, Split
-from pgdrive.scene_creator.blocks.first_block import FirstBlock
+from pgdrive.scene_creator.blocks.first_block import FirstPGBlock
 from pgdrive.scene_creator.map.pg_map import PGMap
 from pgdrive.scene_creator.road.road import Road
 from pgdrive.utils import PGConfig
@@ -34,7 +34,7 @@ class MABottleneckMap(PGMap):
         assert len(self.road_network.graph) == 0, "These Map is not empty, please create a new map to read config"
 
         # Build a first-block
-        last_block = FirstBlock(
+        last_block = FirstPGBlock(
             self.road_network,
             self.config[self.LANE_WIDTH],
             self.config["bottle_lane_num"],
@@ -64,7 +64,7 @@ class MABottleneckMap(PGMap):
 
 
 class MultiAgentBottleneckEnv(MultiAgentPGDrive):
-    spawn_roads = [Road(FirstBlock.NODE_2, FirstBlock.NODE_3), -Road(Split.node(2, 0, 0), Split.node(2, 0, 1))]
+    spawn_roads = [Road(FirstPGBlock.NODE_2, FirstPGBlock.NODE_3), -Road(Split.node(2, 0, 0), Split.node(2, 0, 1))]
 
     @staticmethod
     def default_config() -> PGConfig:

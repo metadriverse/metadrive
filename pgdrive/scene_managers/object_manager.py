@@ -4,9 +4,9 @@ from pgdrive.scene_creator.blocks.curve import Curve
 from pgdrive.scene_creator.blocks.ramp import InRampOnStraight, OutRampOnStraight
 from pgdrive.scene_creator.blocks.straight import Straight
 from pgdrive.scene_creator.lane.abs_lane import AbstractLane
-from pgdrive.scene_creator.map.map import Map
-from pgdrive.scene_creator.object.static_object import StaticObject
-from pgdrive.scene_creator.object.traffic_object import TrafficSign
+from pgdrive.scene_creator.map.base_map import BaseMap
+from pgdrive.scene_creator.static_object.base_static_object import BaseStaticObject
+from pgdrive.scene_creator.static_object.traffic_object import TrafficSign
 from pgdrive.scene_creator.road.road import Road
 from pgdrive.scene_creator.road.road_network import LaneIndex
 from pgdrive.scene_managers.base_manager import BaseManager
@@ -54,7 +54,7 @@ class TrafficSignManager(BaseManager):
             block_object.node_path.detachNode()
         self._block_objects = {}
 
-    def add_block_buildings(self, building: StaticObject, render_node):
+    def add_block_buildings(self, building: BaseStaticObject, render_node):
         self._block_objects[building.id] = building
         building.node_path.reparentTo(render_node)
 

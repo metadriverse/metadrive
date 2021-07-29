@@ -2,7 +2,8 @@ import math
 from typing import Tuple
 
 import numpy as np
-from pgdrive.scene_creator.lane.abs_lane import AbstractLane, Vector, LineType
+from pgdrive.scene_creator.lane.abs_lane import AbstractLane, Vector
+from pgdrive.constants import LineType
 from pgdrive.utils.math_utils import wrap_to_pi, norm, PGVector
 
 
@@ -22,6 +23,7 @@ class CircularLane(AbstractLane):
         priority: int = 0
     ) -> None:
         super().__init__()
+        self.set_speed_limit(speed_limit)
         self.center = PGVector(center)
         self.radius = radius
         self.start_phase = start_phase

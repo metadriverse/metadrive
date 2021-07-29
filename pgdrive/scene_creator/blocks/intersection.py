@@ -2,17 +2,17 @@ import copy
 from collections import deque
 
 import numpy as np
-from pgdrive.scene_creator.blocks.block import Block, BlockSocket
+from pgdrive.scene_creator.blocks.pg_block import PGBlock, PGBlockSocket
 from pgdrive.scene_creator.blocks.create_block_utils import CreateAdverseRoad, CreateRoadFrom, ExtendStraightLane, \
     create_bend_straight
-from pgdrive.scene_creator.lane.abs_lane import LineType
+from pgdrive.constants import LineType
 from pgdrive.scene_creator.lane.straight_lane import StraightLane
 from pgdrive.scene_creator.road.road import Road
 from pgdrive.utils.pg_space import PGSpace, Parameter, BlockParameterSpace
 from pgdrive.utils.scene_utils import check_lane_on_road
 
 
-class InterSection(Block):
+class InterSection(PGBlock):
     """
                                 up(Goal:1)
                                    ||
@@ -73,7 +73,7 @@ class InterSection(Block):
                     right_lane, lane_num, exit_road, self.block_network, self._global_network
                 ) and no_cross
                 no_cross = CreateAdverseRoad(exit_road, self.block_network, self._global_network) and no_cross
-                socket = BlockSocket(exit_road, -exit_road)
+                socket = PGBlockSocket(exit_road, -exit_road)
                 self.add_respawn_roads(socket.negative_road)
                 self.add_sockets(socket)
                 attach_road = -exit_road
@@ -127,7 +127,7 @@ class InterSection(Block):
         right_straight.line_types = [LineType.BROKEN, LineType.SIDE]
         return right_straight, non_cross
 
-    def get_socket(self, index: int) -> BlockSocket:
+    def get_socket(self, index: int) -> PGBlockSocket:
         socket = super(InterSection, self).get_socket(index)
         if socket.negative_road in self.get_respawn_roads():
             self._respawn_roads.remove(socket.negative_road)

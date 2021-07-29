@@ -9,7 +9,7 @@ from gym import logger, error
 from panda3d.core import PNMImage
 from pgdrive.envs.pgdrive_env import PGDriveEnv
 from pgdrive.scene_creator.algorithm.BIG import BigGenerateMethod
-from pgdrive.scene_creator.map.map import Map
+from pgdrive.scene_creator.map.base_map import BaseMap
 
 
 class ImageEncoder(object):
@@ -144,8 +144,8 @@ if __name__ == '__main__':
         dict(
             use_render=False,
             map_config={
-                Map.GENERATE_TYPE: BigGenerateMethod.BLOCK_NUM,
-                Map.GENERATE_CONFIG: 7
+                BaseMap.GENERATE_TYPE: BigGenerateMethod.BLOCK_NUM,
+                BaseMap.GENERATE_CONFIG: 7
             },
             traffic_density=0.5,
             use_image=True,

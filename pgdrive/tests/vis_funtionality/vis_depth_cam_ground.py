@@ -1,5 +1,5 @@
 from pgdrive.envs.pgdrive_env import PGDriveEnv
-from pgdrive.scene_creator.map.map import Map, MapGenerateMethod
+from pgdrive.scene_creator.map.base_map import BaseMap, MapGenerateMethod
 
 
 class TestEnv(PGDriveEnv):
@@ -18,10 +18,10 @@ class TestEnv(PGDriveEnv):
                     "headless_image": False,
                 },
                 "map_config": {
-                    Map.GENERATE_TYPE: MapGenerateMethod.BIG_BLOCK_NUM,
-                    Map.GENERATE_CONFIG: 12,
-                    Map.LANE_WIDTH: 3.5,
-                    Map.LANE_NUM: 3,
+                    BaseMap.GENERATE_TYPE: MapGenerateMethod.BIG_BLOCK_NUM,
+                    BaseMap.GENERATE_CONFIG: 12,
+                    BaseMap.LANE_WIDTH: 3.5,
+                    BaseMap.LANE_NUM: 3,
                 }
             }
         )

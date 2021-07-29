@@ -15,7 +15,7 @@ from pgdrive.utils.coordinates_shift import panda_position
 from pgdrive.utils.math_utils import get_points_bounding_box
 
 if TYPE_CHECKING:
-    from pgdrive.scene_creator.blocks.block import BlockSocket
+    from pgdrive.scene_creator.blocks.pg_block import PGBlockSocket
     from pgdrive.scene_creator.road.road import Road
     from pgdrive.scene_creator.road.road_network import RoadNetwork
 
@@ -25,7 +25,7 @@ def get_lanes_on_road(road: "Road", roadnet: "RoadNetwork") -> List["AbstractLan
 
 
 def block_socket_merge(
-    socket_1: "BlockSocket", socket_2: "BlockSocket", global_network: "RoadNetwork", positive_merge: False
+    socket_1: "PGBlockSocket", socket_2: "PGBlockSocket", global_network: "RoadNetwork", positive_merge: False
 ):
     global_network.graph[socket_1.positive_road.start_node][socket_2.negative_road.start_node] = \
         global_network.graph[socket_1.positive_road.start_node].pop(socket_1.positive_road.end_node)

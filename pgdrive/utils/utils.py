@@ -2,7 +2,6 @@ import copy
 import logging
 import os
 import sys
-import uuid
 
 
 def import_pygame():
@@ -56,13 +55,6 @@ def is_mac():
 
 def is_win():
     return sys.platform == "win32"
-
-
-def random_string(prefix=None):
-    ret = str(uuid.uuid4())
-    if prefix is not None:
-        ret = "{}-{}".format(prefix, ret)
-    return ret
 
 
 def concat_step_infos(step_info_list):

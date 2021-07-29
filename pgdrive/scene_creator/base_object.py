@@ -8,8 +8,7 @@ from pgdrive.engine.asset_loader import AssetLoader
 from pgdrive.engine.core.pg_physics_world import PGPhysicsWorld
 from pgdrive.utils.pg_config import PGConfig
 from pgdrive.utils.pg_space import PGSpace
-from pgdrive.utils.random import RandomEngine
-from pgdrive.utils.utils import random_string
+from pgdrive.utils.random import random_string, RandomEngine
 
 
 class PhysicsNodeList(list):
@@ -42,7 +41,7 @@ class PhysicsNodeList(list):
         self.attached = False
 
 
-class Object(RandomEngine):
+class BaseObject(RandomEngine):
     """
     Properties and parameters in PARAMETER_SPACE of the object are fixed after calling init().
 
@@ -61,8 +60,7 @@ class Object(RandomEngine):
         assert random_seed is not None, "Please assign a random seed for {} class in super().__init__()".format(
             self.class_name
         )
-
-        super(Object, self).__init__(random_seed)
+        super(BaseObject, self).__init__(random_seed)
 
         # ID for object
         self.name = random_string() if name is None else name

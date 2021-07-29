@@ -3,7 +3,7 @@ import logging
 
 from pgdrive.constants import TerminationState
 from pgdrive.envs.pgdrive_env_v2 import PGDriveEnvV2
-from pgdrive.scene_creator.blocks.first_block import FirstBlock
+from pgdrive.scene_creator.blocks.first_block import FirstPGBlock
 from pgdrive.scene_creator.road.road import Road
 from pgdrive.scene_managers.spawn_manager import SpawnManager
 from pgdrive.utils import setup_logger, get_np_random, PGConfig
@@ -58,7 +58,7 @@ class MultiAgentPGDrive(PGDriveEnvV2):
     # A list of road instances denoting which roads afford spawn points. If not set, then search for all
     # possible roads and spawn new agents in them if possible.
     spawn_roads = [
-        Road(FirstBlock.NODE_2, FirstBlock.NODE_3),
+        Road(FirstPGBlock.NODE_2, FirstPGBlock.NODE_3),
     ]
 
     @staticmethod

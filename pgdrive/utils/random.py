@@ -5,6 +5,7 @@ import hashlib
 import logging
 import os
 import struct
+import uuid
 from typing import Optional
 import numpy as np
 
@@ -116,3 +117,10 @@ class RandomEngine:
 
     def randint(self):
         return self.np_random.randint(0, self.MAX_RAND_INT)
+
+
+def random_string(prefix=None):
+    ret = str(uuid.uuid4())
+    if prefix is not None:
+        ret = "{}-{}".format(prefix, ret)
+    return ret

@@ -2,7 +2,7 @@ import copy
 from pgdrive.envs.marl_envs.marl_inout_roundabout import LidarStateObservationMARound
 from pgdrive.envs.multi_agent_pgdrive import MultiAgentPGDrive
 from pgdrive.obs.observation_base import ObservationBase
-from pgdrive.scene_creator.blocks.first_block import FirstBlock
+from pgdrive.scene_creator.blocks.first_block import FirstPGBlock
 from pgdrive.scene_creator.blocks.intersection import InterSection
 from pgdrive.scene_creator.map.pg_map import PGMap
 from pgdrive.scene_creator.road.road import Road
@@ -27,7 +27,7 @@ class MAIntersectionMap(PGMap):
         assert len(self.road_network.graph) == 0, "These Map is not empty, please create a new map to read config"
 
         # Build a first-block
-        last_block = FirstBlock(
+        last_block = FirstPGBlock(
             self.road_network,
             self.config[self.LANE_WIDTH],
             self.config[self.LANE_NUM],
@@ -47,7 +47,7 @@ class MAIntersectionMap(PGMap):
 
 class MultiAgentIntersectionEnv(MultiAgentPGDrive):
     spawn_roads = [
-        Road(FirstBlock.NODE_2, FirstBlock.NODE_3),
+        Road(FirstPGBlock.NODE_2, FirstPGBlock.NODE_3),
         -Road(InterSection.node(1, 0, 0), InterSection.node(1, 0, 1)),
         -Road(InterSection.node(1, 1, 0), InterSection.node(1, 1, 1)),
         -Road(InterSection.node(1, 2, 0), InterSection.node(1, 2, 1)),

@@ -4,10 +4,10 @@ from panda3d.core import Vec3, CardMaker, LQuaternionf, BitMask32, NodePath, Tex
 
 from pgdrive.constants import BodyName, CamMask, CollisionGroup
 from pgdrive.engine.asset_loader import AssetLoader
-from pgdrive.utils.object import Object
+from pgdrive.scene_creator.base_object import BaseObject
 
 
-class Terrain(Object):
+class Terrain(BaseObject):
     COLLISION_MASK = CollisionGroup.Terrain
     HEIGHT = 0.0
 

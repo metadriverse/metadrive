@@ -1,9 +1,8 @@
 from panda3d.core import NodePath
 
-from pgdrive.constants import Decoration
-from pgdrive.scene_creator.blocks.block import Block, BlockSocket
+from pgdrive.constants import Decoration, LineType
+from pgdrive.scene_creator.blocks.pg_block import PGBlock, PGBlockSocket
 from pgdrive.scene_creator.blocks.create_block_utils import CreateRoadFrom, CreateAdverseRoad, ExtendStraightLane
-from pgdrive.scene_creator.lane.abs_lane import LineType
 from pgdrive.scene_creator.lane.straight_lane import StraightLane
 from pgdrive.scene_creator.road.road import Road
 from pgdrive.scene_creator.road.road_network import RoadNetwork
@@ -11,7 +10,7 @@ from pgdrive.utils.pg_space import PGSpace
 from pgdrive.engine.core.pg_physics_world import PGPhysicsWorld
 
 
-class FirstBlock(Block):
+class FirstPGBlock(PGBlock):
     """
     A special Set, only used to create the first block. One scene has only one first block!!!
     """
@@ -32,8 +31,8 @@ class FirstBlock(Block):
         pg_physics_world: PGPhysicsWorld,
         length: float = 50
     ):
-        place_holder = BlockSocket(Road(Decoration.start, Decoration.end), Road(Decoration.start, Decoration.end))
-        super(FirstBlock, self).__init__(0, place_holder, global_network, random_seed=0)
+        place_holder = PGBlockSocket(Road(Decoration.start, Decoration.end), Road(Decoration.start, Decoration.end))
+        super(FirstPGBlock, self).__init__(0, place_holder, global_network, random_seed=0)
         assert length > self.ENTRANCE_LENGTH
         self._block_objects = []
         basic_lane = StraightLane(

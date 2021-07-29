@@ -1,12 +1,12 @@
-from pgdrive.scene_creator.blocks.block import Block, BlockSocket
+from pgdrive.scene_creator.blocks.pg_block import PGBlock, PGBlockSocket
 from pgdrive.scene_creator.blocks.create_block_utils import ExtendStraightLane, CreateRoadFrom, CreateAdverseRoad
-from pgdrive.scene_creator.lane.abs_lane import LineType
+from pgdrive.constants import LineType
 from pgdrive.scene_creator.lane.straight_lane import StraightLane
 from pgdrive.scene_creator.road.road import Road
 from pgdrive.utils.pg_space import PGSpace, Parameter, BlockParameterSpace
 
 
-class Straight(Block):
+class Straight(PGBlock):
     """
     Straight Road
     ----------------------------------------
@@ -33,5 +33,5 @@ class Straight(Block):
         no_cross = CreateRoadFrom(new_lane, self.positive_lane_num, socket, self.block_network, self._global_network)
         # create negative road
         no_cross = CreateAdverseRoad(socket, self.block_network, self._global_network) and no_cross
-        self.add_sockets(BlockSocket(socket, _socket))
+        self.add_sockets(PGBlockSocket(socket, _socket))
         return no_cross
