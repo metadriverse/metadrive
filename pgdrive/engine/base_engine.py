@@ -1,7 +1,7 @@
 import logging
 from typing import Dict, AnyStr
-
 import numpy as np
+from collections import OrderedDict
 
 from pgdrive.engine.core.engine_core import EngineCore
 from pgdrive.engine.scene_cull import SceneCull
@@ -22,20 +22,11 @@ class BaseEngine(EngineCore):
     IN_REPLAY = False
     STOP_REPLAY = False
 
-    def __init__(
-        self,
-        global_config,
-        agent_manager,
-    ):
+    def __init__(self, global_config):
         self.global_config = global_config
         super(BaseEngine, self).__init__(self.global_config["engine_config"])
         self.task_manager = self.taskMgr  # use the inner TaskMgr of Panda3D as PGDrive task manager
-        self._managers = dict(agent_manager=agent_manager)
-
-        self.agent_manager = agent_manager  # Only a reference
-
-        # common variable
-        self.current_map = None
+        self._managers = OrderedDict()
 
         # for recovering, they can not exist together
         # TODO new record/replay
@@ -48,11 +39,12 @@ class BaseEngine(EngineCore):
         self.cull_scene = self.global_config["cull_scene"]
         self.detector_mask = None
 
+        # add default engines
+
     def reset(self, episode_data=None):
         """
         For garbage collecting using, ensure to release the memory of all traffic vehicles
         """
-        self.current_map = self.map_manager.current_map
 
         for manager in self._managers.values():
             manager.before_reset()
@@ -200,8 +192,6 @@ class BaseEngine(EngineCore):
         Instead of calling this func directly, close Engine by using engine_utils.close_engine
         """
 
-        self.current_map = None
-
         if len(self._managers) > 0:
             for name, manager in self._managers.items():
                 setattr(self, name, None)
@@ -235,9 +225,14 @@ class BaseEngine(EngineCore):
         assert manger_name not in self._managers, "Manager already exists in BaseEngine"
         assert not hasattr(self, manger_name), "Manager name can not be same as the attribute in BaseEngine"
         self._managers[manger_name] = manager
+        self._managers.move_to_end(manger_name)
         setattr(self, manger_name, manager)
 
     def seed(self, random_seed):
         self.global_random_seed = random_seed
         for mgr in self._managers.values():
             mgr.seed(random_seed)
+
+    @property
+    def current_map(self):
+        return self.map_manager.current_map

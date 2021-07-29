@@ -13,10 +13,6 @@ from pgdrive.engine.base_engine import BaseEngine
 from pgdrive.obs.observation_base import ObservationBase
 from pgdrive.component.vehicle.base_vehicle import BaseVehicle
 from pgdrive.manager.agent_manager import AgentManager
-from pgdrive.manager.map_manager import MapManager
-from pgdrive.manager.object_manager import TrafficSignManager
-from pgdrive.manager.traffic_manager import TrafficManager
-from pgdrive.manager.policy_manager import PolicyManager
 from pgdrive.utils import Config, merge_dicts, get_np_random
 from pgdrive.utils.engine_utils import get_engine, initialize_engine, close_engine, \
     engine_initialized, set_global_random_seed
@@ -419,12 +415,6 @@ class BasePGDriveEnv(gym.Env):
         self.engine.accept("r", self.reset)
         self.engine.accept("escape", sys.exit)
         self.engine.accept("p", self.capture)
-
-        # Add managers to BaseEngine
-        self.engine.register_manager("traffic_manager", TrafficManager())
-        self.engine.register_manager("map_manager", MapManager())
-        self.engine.register_manager("object_manager", TrafficSignManager())
-        self.engine.register_manager("policy_manager", PolicyManager())
 
     @property
     def current_map(self):
