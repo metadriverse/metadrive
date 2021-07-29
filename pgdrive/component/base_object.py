@@ -103,11 +103,11 @@ class BaseObject(RandomEngine):
             return self._config.copy()
         return self._config
 
-    def set_config(self, config: dict):
+    def update_config(self, config: dict, allow_add_new_key=False):
         """
         Merge config and self._config
         """
-        self._config.update(config)
+        self._config.update(config, allow_add_new_key=allow_add_new_key)
 
     def sample_parameters(self):
         """
@@ -116,7 +116,7 @@ class BaseObject(RandomEngine):
         random_seed = self.np_random.randint(low=0, high=int(1e6))
         self.PARAMETER_SPACE.seed(random_seed)
         ret = self.PARAMETER_SPACE.sample()
-        self.set_config(ret)
+        self.update_config(ret)
 
     def get_state(self) -> Dict:
         """

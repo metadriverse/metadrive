@@ -30,7 +30,7 @@ class TestEnv(PGDriveEnv):
 if __name__ == "__main__":
 
     def get_image(env):
-        env.vehicle.image_sensors[env.vehicle.vehicle_config["image_source"]].save_image()
+        env.vehicle.image_sensors[env.vehicle.config["image_source"]].save_image()
         env.engine.screenshot()
 
     env = TestEnv()

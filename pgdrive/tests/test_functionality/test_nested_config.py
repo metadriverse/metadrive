@@ -12,14 +12,14 @@ def test_recursive_config():
     assert c.aa.bb.cc == 101
 
     try:
-        c.update({"aa": {"bb": 102}}, allow_overwrite=False)
+        c.update({"aa": {"bb": 102}}, allow_add_new_key=False)
     except TypeError:
         pass
     else:
         raise ValueError()
 
     try:
-        c.update({"aa": {"bbd": 102}}, allow_overwrite=False)
+        c.update({"aa": {"bbd": 102}}, allow_add_new_key=False)
     except KeyError:
         pass
     else:
@@ -37,7 +37,7 @@ def test_partially_update():
     c = Config({"aa": {"bb": {"cc": 100}}})
 
     try:
-        c.update({"aa": {"bb": {"dd": 101}}}, allow_overwrite=False)
+        c.update({"aa": {"bb": {"dd": 101}}}, allow_add_new_key=False)
     except KeyError:
         pass
     else:

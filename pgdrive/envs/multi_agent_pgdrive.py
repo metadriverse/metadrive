@@ -74,7 +74,7 @@ class MultiAgentPGDrive(PGDriveEnvV2):
 
     def _process_extra_config(self, config) -> "Config":
         ret_config = self.default_config().update(
-            config, allow_overwrite=False, stop_recursive_update=["target_vehicle_configs"]
+            config, allow_add_new_key=False, stop_recursive_update=["target_vehicle_configs"]
         )
         if not ret_config["crash_done"] and ret_config["crash_vehicle_penalty"] > 2:
             logging.warning(
@@ -164,7 +164,7 @@ class MultiAgentPGDrive(PGDriveEnvV2):
         # update config (for new possible spawn places)
         for v_id, v in self.vehicles.items():
             if v_id in self.config["target_vehicle_configs"]:
-                v.vehicle_config = self._get_single_vehicle_config(self.config["target_vehicle_configs"][v_id])
+                v.update_config(self._get_single_vehicle_config(self.config["target_vehicle_configs"][v_id]))
         super(MultiAgentPGDrive, self)._reset_agents()  # Update config before actually resetting!
         for v_id, _ in self.vehicles.items():
             self._update_destination_for(v_id)
@@ -267,7 +267,7 @@ class MultiAgentPGDrive(PGDriveEnvV2):
 
         new_agent_id, vehicle = self.agent_manager.propose_new_vehicle()
         new_spawn_place_config = new_spawn_place["config"]
-        vehicle.vehicle_config.update(new_spawn_place_config)
+        vehicle.config.update(new_spawn_place_config)
         vehicle.reset(self.current_map)
         self._update_destination_for(new_agent_id)
         vehicle.after_step(detector_mask=None)

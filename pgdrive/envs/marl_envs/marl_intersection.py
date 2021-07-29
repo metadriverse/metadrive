@@ -55,7 +55,7 @@ class MultiAgentIntersectionEnv(MultiAgentPGDrive):
 
     @staticmethod
     def default_config() -> Config:
-        return MultiAgentPGDrive.default_config().update(MAIntersectionConfig, allow_overwrite=True)
+        return MultiAgentPGDrive.default_config().update(MAIntersectionConfig, allow_add_new_key=True)
 
     def _update_map(self, episode_data: dict = None, force_seed=None):
         map_config = self.config["map_config"]

@@ -98,8 +98,7 @@ class TollGateObservation(LidarStateObservation):
             toll_obs = [0.0, 0.0]
         else:
             toll_obs = [
-                1.0 if cur_block_is_toll else 0.0,
-                1.0 if self.in_toll_time > vehicle.vehicle_config["min_pass_steps"] else 0.0
+                1.0 if cur_block_is_toll else 0.0, 1.0 if self.in_toll_time > vehicle.config["min_pass_steps"] else 0.0
             ]
         # print(toll_obs)
         state = self.state_observe(vehicle)
@@ -170,7 +169,7 @@ class MultiAgentTollgateEnv(MultiAgentPGDrive):
     def default_config() -> Config:
         assert MATollConfig["vehicle_config"]["side_detector"]["num_lasers"] > 2
         assert MATollConfig["vehicle_config"]["lane_line_detector"]["num_lasers"] > 2
-        return MultiAgentPGDrive.default_config().update(MATollConfig, allow_overwrite=True)
+        return MultiAgentPGDrive.default_config().update(MATollConfig, allow_add_new_key=True)
 
     def _update_map(self, episode_data: dict = None, force_seed=None):
         map_config = self.config["map_config"]

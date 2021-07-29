@@ -66,7 +66,6 @@ class BaseVehicle(BaseObject):
     def __init__(
         self,
         vehicle_config: Union[dict, Config] = None,
-        physics_config: dict = None,
         name: str = None,
         am_i_the_special_one=False,
         random_seed=None,
@@ -75,20 +74,17 @@ class BaseVehicle(BaseObject):
         This Vehicle Config is different from self.get_config(), and it is used to define which modules to use, and
         module parameters. And self.physics_config defines the physics feature of vehicles, such as length/width
         :param vehicle_config: mostly, vehicle module config
-        :param physics_config: vehicle height/width/length, find more physics para in VehicleParameterSpace
         :param random_seed: int
         """
-        assert vehicle_config is not None, "Please specify the vehicle config."
-        self.vehicle_config = Config(vehicle_config)
-        self.action_space = self.get_action_space_before_init(extra_action_dim=self.vehicle_config["extra_action_dim"])
-
         super(BaseVehicle, self).__init__(name, random_seed)
-        if physics_config is not None:
-            self.set_config(physics_config)
-        self.increment_steering = self.vehicle_config["increment_steering"]
-        self.enable_reverse = self.vehicle_config["enable_reverse"]
-        self.max_speed = self.vehicle_config["max_speed"]
-        self.max_steering = self.vehicle_config["max_steering"]
+        self.update_config(vehicle_config, allow_add_new_key=True)
+        assert vehicle_config is not None, "Please specify the vehicle config."
+        self.action_space = self.get_action_space_before_init(extra_action_dim=self.config["extra_action_dim"])
+
+        self.increment_steering = self.config["increment_steering"]
+        self.enable_reverse = self.config["enable_reverse"]
+        self.max_speed = self.config["max_speed"]
+        self.max_steering = self.config["max_steering"]
 
         self.engine = get_engine()
         assert self.engine is not None, "Please make sure PGDrive engine is successfully initialized!"
@@ -139,7 +135,7 @@ class BaseVehicle(BaseObject):
         self._init_step_info()
 
         # others
-        self._add_modules_for_vehicle(self.vehicle_config["use_render"])
+        self._add_modules_for_vehicle(self.config["use_render"])
         self.takeover = False
         self._expert_takeover = False
         self.energy_consumption = 0
@@ -158,22 +154,22 @@ class BaseVehicle(BaseObject):
 
     def _add_modules_for_vehicle(self, use_render: bool):
         # add self module for training according to config
-        vehicle_config = self.vehicle_config
+        vehicle_config = self.config
         self.add_routing_localization(vehicle_config["show_navi_mark"])  # default added
 
-        if self.vehicle_config["side_detector"]["num_lasers"] > 0:
+        if self.config["side_detector"]["num_lasers"] > 0:
             self.side_detector = SideDetector(
-                self.engine.render, self.vehicle_config["side_detector"]["num_lasers"],
-                self.vehicle_config["side_detector"]["distance"], self.vehicle_config["show_side_detector"]
+                self.engine.render, self.config["side_detector"]["num_lasers"],
+                self.config["side_detector"]["distance"], self.config["show_side_detector"]
             )
 
-        if self.vehicle_config["lane_line_detector"]["num_lasers"] > 0:
+        if self.config["lane_line_detector"]["num_lasers"] > 0:
             self.lane_line_detector = LaneLineDetector(
-                self.engine.render, self.vehicle_config["lane_line_detector"]["num_lasers"],
-                self.vehicle_config["lane_line_detector"]["distance"], self.vehicle_config["show_lane_line_detector"]
+                self.engine.render, self.config["lane_line_detector"]["num_lasers"],
+                self.config["lane_line_detector"]["distance"], self.config["show_lane_line_detector"]
             )
 
-        if not self.vehicle_config["use_image"]:
+        if not self.config["use_image"]:
             if vehicle_config["lidar"]["num_lasers"] > 0 and vehicle_config["lidar"]["distance"] > 0:
                 self.add_lidar(
                     num_lasers=vehicle_config["lidar"]["num_lasers"],
@@ -229,7 +225,7 @@ class BaseVehicle(BaseObject):
         # self.step_info = {"reward": 0, "cost": 0}
 
     def _preprocess_action(self, action):
-        if self.vehicle_config["action_check"]:
+        if self.config["action_check"]:
             assert self.action_space.contains(action), "Input {} is not compatible with action space {}!".format(
                 action, self.action_space
             )
@@ -314,9 +310,9 @@ class BaseVehicle(BaseObject):
         else, vehicle will be reset to spawn place
         """
         if pos is None:
-            lane = map.road_network.get_lane(self.vehicle_config["spawn_lane_index"])
-            pos = lane.position(self.vehicle_config["spawn_longitude"], self.vehicle_config["spawn_lateral"])
-            heading = np.rad2deg(lane.heading_at(self.vehicle_config["spawn_longitude"]))
+            lane = map.road_network.get_lane(self.config["spawn_lane_index"])
+            pos = lane.position(self.config["spawn_longitude"], self.config["spawn_lateral"])
+            heading = np.rad2deg(lane.heading_at(self.config["spawn_longitude"]))
             self.spawn_place = pos
         heading = -np.deg2rad(heading) - np.pi / 2
         self.set_static(False)
@@ -382,8 +378,8 @@ class BaseVehicle(BaseObject):
         self._apply_throttle_brake(action[1])
 
     def _apply_throttle_brake(self, throttle_brake):
-        max_engine_force = self.vehicle_config["max_engine_force"]
-        max_brake_force = self.vehicle_config["max_brake_force"]
+        max_engine_force = self.config["max_engine_force"]
+        max_brake_force = self.config["max_brake_force"]
         for wheel_index in range(4):
             if throttle_brake >= 0:
                 self.system.setBrake(2.0, wheel_index)
@@ -513,8 +509,8 @@ class BaseVehicle(BaseObject):
 
     def _add_chassis(self, physics_world: PhysicsWorld):
         para = self.get_config()
-        self.LENGTH = self.vehicle_config["vehicle_length"]
-        self.WIDTH = self.vehicle_config["vehicle_width"]
+        self.LENGTH = self.config["vehicle_length"]
+        self.WIDTH = self.config["vehicle_width"]
         chassis = BaseVehicleNode(BodyName.Base_vehicle, self)
         chassis.setIntoCollideMask(BitMask32.bit(CollisionGroup.EgoVehicle))
         chassis_shape = BulletBoxShape(Vec3(self.WIDTH / 2, self.LENGTH / 2, para[Parameter.vehicle_height] / 2))
@@ -549,7 +545,7 @@ class BaseVehicle(BaseObject):
                 self.MODEL.setH(para[Parameter.vehicle_vis_h])
                 self.MODEL.set_scale(para[Parameter.vehicle_vis_scale])
             self.MODEL.instanceTo(self.chassis_np)
-            if self.vehicle_config["random_color"]:
+            if self.config["random_color"]:
                 material = Material()
                 material.setBaseColor(
                     (
@@ -601,7 +597,7 @@ class BaseVehicle(BaseObject):
         wheel.setSuspensionStiffness(30)
         wheel.setWheelsDampingRelaxation(4.8)
         wheel.setWheelsDampingCompression(1.2)
-        wheel.setFrictionSlip(self.vehicle_config["wheel_friction"])
+        wheel.setFrictionSlip(self.config["wheel_friction"])
         wheel.setRollInfluence(1.5)
         return wheel
 
@@ -614,7 +610,7 @@ class BaseVehicle(BaseObject):
         self.lidar = Lidar(self.engine.render, num_lasers, distance, show_lidar_point)
 
     def add_routing_localization(self, show_navi_mark: bool = False):
-        config = self.vehicle_config
+        config = self.config
         self.routing_localization = RoutingLocalizationModule(
             self.engine,
             show_navi_mark=show_navi_mark,
@@ -634,12 +630,12 @@ class BaseVehicle(BaseObject):
         )
         possible_lane_indexes = [lane_index for lane, lane_index, dist in possible_lanes]
         try:
-            idx = possible_lane_indexes.index(self.vehicle_config["spawn_lane_index"])
+            idx = possible_lane_indexes.index(self.config["spawn_lane_index"])
         except ValueError:
             lane, new_l_index = possible_lanes[0][:-1]
         else:
             lane, new_l_index = possible_lanes[idx][:-1]
-        dest = self.vehicle_config["destination_lane_index"]
+        dest = self.config["destination_lane_index"]
         self.routing_localization.update(
             map, current_lane_index=new_l_index, final_road_node=dest[1] if dest is not None else None
         )
@@ -771,7 +767,7 @@ class BaseVehicle(BaseObject):
             "position": self.position.tolist(),
             "done": self.crash_vehicle or self.out_of_route or self.crash_sidewalk or not self.on_lane,
             "speed": self.speed,
-            "spawn_road": self.vehicle_config["spawn_lane_index"][:-1],
+            "spawn_road": self.config["spawn_lane_index"][:-1],
             "destination": (final_road.start_node, final_road.end_node)
         }
 
@@ -782,7 +778,7 @@ class BaseVehicle(BaseObject):
         self.set_position(state["position"], height=0.28)
 
     def _update_overtake_stat(self):
-        if self.vehicle_config["overtake_stat"]:
+        if self.config["overtake_stat"]:
             surrounding_vs = self.lidar.get_surrounding_vehicles()
             routing = self.routing_localization
             ckpt_idx = routing._target_checkpoints_index

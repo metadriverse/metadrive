@@ -101,18 +101,17 @@ class Config:
     def get_serializable_dict(self):
         return config_to_dict(self._config, serializable=True)
 
-    def update(self, new_dict: Union[dict, "Config"], allow_overwrite=True, stop_recursive_update=None):
+    def update(self, new_dict: Union[dict, "Config"], allow_add_new_key=True, stop_recursive_update=None):
         """
         Update this dict with extra configs
         :param new_dict: extra configs
-        :param allow_overwrite: whether allowing to add new keys to existing configs or not
+        :param allow_add_new_key: whether allowing to add new keys to existing configs or not
         :param stop_recursive_update: Deep update and recursive-check will NOT be applied to keys in stop_recursive_update
-        :return: None
         """
         stop_recursive_update = stop_recursive_update or []
         new_dict = new_dict or dict()
         new_dict = copy.deepcopy(new_dict)
-        if not allow_overwrite:
+        if not allow_add_new_key:
             old_keys = set(self._config)
             new_keys = set(new_dict)
             diff = new_keys.difference(old_keys)
@@ -131,12 +130,12 @@ class Config:
             success = False
             if isinstance(self._config[k], (dict, Config)):
                 if k not in stop_recursive_update:
-                    success = self._update_dict_item(k, v, allow_overwrite)
+                    success = self._update_dict_item(k, v, allow_add_new_key)
                 else:
-                    self._set_item(k, v, allow_overwrite)
+                    self._set_item(k, v, allow_add_new_key)
                     success = True
             if not success:
-                self._update_single_item(k, v, allow_overwrite)
+                self._update_single_item(k, v, allow_add_new_key)
             if k in self._config and not hasattr(self, k):
                 self.__setattr__(k, self._config[k])
         return self
@@ -153,7 +152,7 @@ class Config:
                 )
         if not isinstance(self[k], Config):
             self._set_item(k, Config(self[k]), allow_overwrite)
-        self[k].update(v, allow_overwrite=allow_overwrite)
+        self[k].update(v, allow_add_new_key=allow_overwrite)
         return True
 
     def _update_single_item(self, k, v, allow_overwrite):
