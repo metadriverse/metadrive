@@ -1,6 +1,6 @@
 from pgdrive.envs.multi_agent_pgdrive import MultiAgentPGDrive
 from pgdrive.scene_creator.blocks.roundabout import Roundabout
-from pgdrive.scene_creator.map.map import Map, MapGenerateMethod
+from pgdrive.scene_creator.map.base_map import BaseMap, MapGenerateMethod
 from pgdrive.utils import get_np_random, PGConfig
 
 
@@ -23,10 +23,10 @@ class MultiAgentRoundaboutEnv(MultiAgentPGDrive):
         config.update(
             {
                 "map_config": {
-                    Map.GENERATE_TYPE: MapGenerateMethod.BIG_BLOCK_SEQUENCE,
-                    Map.GENERATE_CONFIG: "O",
-                    Map.LANE_WIDTH: 3.5,
-                    Map.LANE_NUM: 2,
+                    BaseMap.GENERATE_TYPE: MapGenerateMethod.BIG_BLOCK_SEQUENCE,
+                    BaseMap.GENERATE_CONFIG: "O",
+                    BaseMap.LANE_WIDTH: 3.5,
+                    BaseMap.LANE_NUM: 2,
                 },
                 "map": "O",
                 "vehicle_config": {

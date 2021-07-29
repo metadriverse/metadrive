@@ -5,7 +5,8 @@ import numpy as np
 
 from pgdrive.scene_creator.lane.abs_lane import AbstractLane
 from pgdrive.scene_managers.traffic_manager import TrafficManager
-from pgdrive.utils import get_np_random, random_string, deprecation_warning
+from pgdrive.utils import get_np_random, random_string
+from pgdrive.utils.utils import deprecation_warning
 
 
 class Vehicle:
@@ -129,11 +130,6 @@ class Vehicle:
     # def act(self, action: Union[dict, str] = None) -> None:
     #     """
     #     Store an action to be repeated.
-    #
-    #     :param action: the input action
-    #     """
-    #     if action:
-    #         self.action = action
 
     def step(self, dt: float, action) -> None:
         """

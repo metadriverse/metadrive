@@ -1,5 +1,5 @@
 from pgdrive.envs.pgdrive_env import PGDriveEnv
-from pgdrive.scene_creator.map.map import Map, MapGenerateMethod
+from pgdrive.scene_creator.map.base_map import BaseMap, MapGenerateMethod
 from pgdrive.utils import setup_logger
 
 
@@ -59,6 +59,7 @@ if __name__ == "__main__":
     for i in range(1, 100000):
         o, r, d, info = env.step([1.0, 0.])
         info["fuel"] = env.vehicle.energy_consumption
+        env.render(text={"heading_diff": env.vehicle.heading_diff(env.vehicle.lane)})
         # # env.render(
         # #     text={
         # #         "reward": r,

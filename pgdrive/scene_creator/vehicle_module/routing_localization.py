@@ -5,9 +5,9 @@ import numpy as np
 from panda3d.core import BitMask32, LQuaternionf, TransparencyAttrib, LineSegs, NodePath
 from pgdrive.scene_creator.lane.straight_lane import StraightLane
 from pgdrive.constants import COLLISION_INFO_COLOR, RENDER_MODE_ONSCREEN, CamMask
-from pgdrive.scene_creator.blocks.first_block import FirstBlock
+from pgdrive.scene_creator.blocks.first_block import FirstPGBlock
 from pgdrive.scene_creator.lane.circular_lane import CircularLane
-from pgdrive.scene_creator.map.map import Map
+from pgdrive.scene_creator.map.base_map import BaseMap
 from pgdrive.scene_creator.road.road import Road
 from pgdrive.utils import clip, norm, get_np_random
 from pgdrive.engine.asset_loader import AssetLoader
@@ -111,11 +111,11 @@ class RoutingLocalizationModule:
             self._dest_node_path.show(CamMask.MainCam)
         logging.debug("Load Vehicle Module: {}".format(self.__class__.__name__))
 
-    def update(self, map: Map, current_lane_index, final_road_node=None, random_seed=False):
+    def update(self, map: BaseMap, current_lane_index, final_road_node=None, random_seed=False):
         start_road_node = current_lane_index[0]
         self.map = map
         if start_road_node is None:
-            start_road_node = FirstBlock.NODE_1
+            start_road_node = FirstPGBlock.NODE_1
         if final_road_node is None:
             current_road_negative = Road(*current_lane_index[:-1]).is_negative_road()
             random_seed = random_seed if random_seed is not False else map.random_seed
@@ -310,7 +310,10 @@ class RoutingLocalizationModule:
     def get_current_lateral_range(self, current_position, pg_world) -> float:
         """Return the maximum lateral distance from left to right."""
         # special process for special block
-        current_block_id = self.current_road.block_ID()
+        try:
+            current_block_id = self.current_road.block_ID()
+        except AttributeError:
+            return self.get_current_lane_width() * self.get_current_lane_num()
         if current_block_id == Split.ID or current_block_id == Merge.ID:
             left_lane = self.current_ref_lanes[0]
             assert isinstance(left_lane, StraightLane), "Reference lane should be straight lane here"
@@ -358,7 +361,7 @@ class RoutingLocalizationModule:
         end_position = start_position[0] + dir[0] * length, start_position[1] + dir[1] * length
         start_position = panda_position(start_position, z=0.15)
         end_position = panda_position(end_position, z=0.15)
-        mask = BitMask32.bit(FirstBlock.CONTINUOUS_COLLISION_MASK)
+        mask = BitMask32.bit(FirstPGBlock.CONTINUOUS_COLLISION_MASK)
         res = pg_world.physics_world.static_world.rayTestClosest(start_position, end_position, mask=mask)
         if not res.hasHit():
             return length

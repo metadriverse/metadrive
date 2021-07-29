@@ -1,7 +1,7 @@
-from pgdrive.utils.object import Object
+from pgdrive.scene_creator.base_object import BaseObject
 
 
-class BasePolicy(Object):
+class BasePolicy(BaseObject):
     def __init__(self, name=None, random_seed=None):
         super(BasePolicy, self).__init__(name=name, random_seed=random_seed)
 

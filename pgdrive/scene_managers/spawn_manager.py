@@ -6,7 +6,7 @@ from panda3d.bullet import BulletBoxShape, BulletGhostNode
 from panda3d.core import Vec3, BitMask32
 
 from pgdrive.constants import CollisionGroup
-from pgdrive.scene_creator.blocks.first_block import FirstBlock
+from pgdrive.scene_creator.blocks.first_block import FirstPGBlock
 from pgdrive.scene_creator.lane.straight_lane import StraightLane
 from pgdrive.utils import PGConfig, get_np_random
 from pgdrive.utils.coordinates_shift import panda_position, panda_heading
@@ -24,7 +24,7 @@ class SpawnManager:
 
     def __init__(self, exit_length, lane_num, num_agents, vehicle_config, target_vehicle_configs=None, seed=None):
         self.num_agents = num_agents
-        self.exit_length = (exit_length - FirstBlock.ENTRANCE_LENGTH)
+        self.exit_length = (exit_length - FirstPGBlock.ENTRANCE_LENGTH)
         assert self.exit_length >= self.RESPAWN_REGION_LONGITUDE, (
             "The exist length {} should greater than minimal longitude interval {}.".format(
                 self.exit_length, self.RESPAWN_REGION_LONGITUDE

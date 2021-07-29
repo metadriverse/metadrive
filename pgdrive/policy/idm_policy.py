@@ -9,7 +9,7 @@ from pgdrive.constants import Route, LaneIndex
 from pgdrive.policy.base_policy import BasePolicy
 from pgdrive.scene_creator.highway_vehicle.controller import ControlledVehicle, Vehicle
 from pgdrive.scene_creator.lane.abs_lane import AbstractLane
-from pgdrive.scene_creator.object.static_object import StaticObject
+from pgdrive.scene_creator.static_object import BaseStaticObject
 # from pgdrive.scene_creator.highway_vehicle.kinematics import Vehicle
 from pgdrive.scene_creator.vehicle.base_vehicle import BaseVehicle
 from pgdrive.scene_managers.traffic_manager import TrafficManager
@@ -270,7 +270,7 @@ class IDMPolicy(BasePolicy):
         :param rear_vehicle: the vehicle following the ego-vehicle
         :return: the acceleration command for the ego-vehicle [m/s2]
         """
-        if not ego_vehicle or isinstance(ego_vehicle, StaticObject):
+        if not ego_vehicle or isinstance(ego_vehicle, BaseStaticObject):
             return 0
 
         ego_target_speed = utils.not_zero(self.target_speed)

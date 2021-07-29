@@ -2,7 +2,7 @@ import time
 
 import numpy as np
 from pgdrive.envs import PGDriveEnvV2
-from pgdrive.scene_creator.map.map import Map, MapGenerateMethod
+from pgdrive.scene_creator.map.base_map import BaseMap, MapGenerateMethod
 
 
 def get_result(env):
@@ -92,8 +92,8 @@ if __name__ == '__main__':
                     "wheel_friction": friction
                 },
                 "map_config": {
-                    Map.GENERATE_TYPE: MapGenerateMethod.BIG_BLOCK_SEQUENCE,
-                    Map.GENERATE_CONFIG: "SSSSSSSSSS"
+                    BaseMap.GENERATE_TYPE: MapGenerateMethod.BIG_BLOCK_SEQUENCE,
+                    BaseMap.GENERATE_CONFIG: "SSSSSSSSSS"
                 }
             }
         )

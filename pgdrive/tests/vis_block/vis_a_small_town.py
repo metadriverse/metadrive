@@ -1,5 +1,5 @@
 from pgdrive.scene_creator.blocks.curve import Curve
-from pgdrive.scene_creator.blocks.first_block import FirstBlock
+from pgdrive.scene_creator.blocks.first_block import FirstPGBlock
 from pgdrive.scene_creator.blocks.roundabout import Roundabout
 from pgdrive.scene_creator.blocks.std_intersection import StdInterSection
 from pgdrive.scene_creator.blocks.straight import Straight
@@ -14,7 +14,7 @@ if __name__ == "__main__":
     initialize_asset_loader(test)
     global_network = RoadNetwork()
     blocks = []
-    init_block = FirstBlock(global_network, 3.0, 3, test.render, test.world, 1)
+    init_block = FirstPGBlock(global_network, 3.0, 3, test.render, test.world, 1)
 
     block = StdInterSection(1, init_block.get_socket(0), global_network, 1)
     block.construct_from_config(

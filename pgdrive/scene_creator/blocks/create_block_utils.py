@@ -3,8 +3,8 @@ import math
 from typing import Tuple, Union, List
 
 import numpy as np
-from pgdrive.scene_creator.blocks.constants import BlockDefault
-from pgdrive.scene_creator.lane.abs_lane import LineColor, AbstractLane, LineType
+from pgdrive.constants import LineType, LineColor, DrivableAreaProperty
+from pgdrive.scene_creator.lane.abs_lane import AbstractLane
 from pgdrive.scene_creator.lane.circular_lane import CircularLane
 from pgdrive.scene_creator.lane.straight_lane import StraightLane
 from pgdrive.scene_creator.road.road import Road
@@ -122,7 +122,9 @@ def CreateRoadFrom(
             origin_lane.line_types = line_type
     # check the left lane and right lane
     ignore = (ignore_start, ignore_end)
-    factor = (BlockDefault.SIDEWALK_WIDTH + BlockDefault.SIDEWALK_LINE_DIST + lane_width / 2.0) * 2.0 / lane_width
+    factor = (
+        DrivableAreaProperty.SIDEWALK_WIDTH + DrivableAreaProperty.SIDEWALK_LINE_DIST + lane_width / 2.0
+    ) * 2.0 / lane_width
     if not detect_one_side:
         # Because of side walk, the width of side walk should be consider
         no_cross = not (

@@ -1,8 +1,8 @@
-from pgdrive.scene_creator.object.static_object import StaticObject
+from pgdrive.scene_creator.static_object.base_static_object import BaseStaticObject
 from pgdrive.utils.engine_utils import get_pgdrive_engine
 
 
-class BaseBuilding(StaticObject):
+class BaseBuilding(BaseStaticObject):
     def __init__(self, lane, lane_index, position, heading: float = 0., node_path=None, random_seed=None):
         super(BaseBuilding, self).__init__(lane, lane_index, position, heading, random_seed)
         assert node_path is not None

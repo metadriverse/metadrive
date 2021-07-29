@@ -1,5 +1,5 @@
 from pgdrive.envs.pgdrive_env import PGDriveEnv
-from pgdrive.scene_creator.map.map import Map, MapGenerateMethod
+from pgdrive.scene_creator.map.base_map import BaseMap, MapGenerateMethod
 from pgdrive.scene_creator.vehicle_module.PID_controller import PIDController
 
 
@@ -12,10 +12,10 @@ class TestEnv(PGDriveEnv):
                 "use_render": vis,
                 "start_seed": 5,
                 "map_config": {
-                    Map.GENERATE_TYPE: MapGenerateMethod.BIG_BLOCK_NUM,
-                    Map.GENERATE_CONFIG: 7,
-                    Map.LANE_WIDTH: 3.5,
-                    Map.LANE_NUM: 3,
+                    BaseMap.GENERATE_TYPE: MapGenerateMethod.BIG_BLOCK_NUM,
+                    BaseMap.GENERATE_CONFIG: 7,
+                    BaseMap.LANE_WIDTH: 3.5,
+                    BaseMap.LANE_NUM: 3,
                 }
             }
         )

@@ -1,5 +1,5 @@
 from pgdrive.envs.pgdrive_env import PGDriveEnv
-from pgdrive.scene_creator.map.map import Map, MapGenerateMethod
+from pgdrive.scene_creator.map.base_map import BaseMap, MapGenerateMethod
 from pgdrive.utils import setup_logger
 
 setup_logger(debug=True)
@@ -13,8 +13,8 @@ class TestEnv(PGDriveEnv):
                 "traffic_density": 0.0,
                 "use_render": True,
                 "map_config": {
-                    Map.GENERATE_TYPE: MapGenerateMethod.BIG_BLOCK_SEQUENCE,
-                    Map.GENERATE_CONFIG: "SSSSSSSSSSSSS",
+                    BaseMap.GENERATE_TYPE: MapGenerateMethod.BIG_BLOCK_SEQUENCE,
+                    BaseMap.GENERATE_CONFIG: "SSSSSSSSSSSSS",
                 },
                 "manual_control": True
             }

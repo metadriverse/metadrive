@@ -1,13 +1,13 @@
 import numpy as np
 
-from pgdrive.scene_creator.blocks.block import Block
+from pgdrive.scene_creator.blocks.pg_block import PGBlock
 from pgdrive.scene_creator.blocks.create_block_utils import CreateAdverseRoad, CreateRoadFrom, create_bend_straight
-from pgdrive.scene_creator.lane.abs_lane import LineType
+from pgdrive.constants import LineType
 from pgdrive.scene_creator.road.road import Road
 from pgdrive.utils.pg_space import PGSpace, Parameter, BlockParameterSpace
 
 
-class Curve(Block):
+class Curve(PGBlock):
     """
         2 - - - - - - - - - -
        / 3 - - - - - - - - - -

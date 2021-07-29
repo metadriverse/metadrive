@@ -1,8 +1,8 @@
-from pgdrive.envs.pgdrive_env import PGDriveEnv
+from pgdrive.envs.generation_envs.safe_pgdrive_env import SafePGDriveEnv
 from pgdrive.utils import setup_logger
 
 
-class TestEnv(PGDriveEnv):
+class TestEnv(SafePGDriveEnv):
     def __init__(self):
         super(TestEnv, self).__init__({"use_render": True, "manual_control": True, "environment_num": 100})
 

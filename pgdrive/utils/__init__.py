@@ -4,6 +4,6 @@ from pgdrive.utils.draw_top_down_map import draw_top_down_map
 from pgdrive.utils.engine_utils import get_pgdrive_engine, get_global_config
 from pgdrive.utils.math_utils import safe_clip, clip, norm, distance_greater, safe_clip_for_small_array, PGVector
 from pgdrive.utils.pg_config import PGConfig, merge_config_with_unknown_keys, merge_config
-from pgdrive.utils.random import get_np_random, RandomEngine
-from pgdrive.utils.utils import is_mac, import_pygame, recursive_equal, setup_logger, random_string, merge_dicts, \
-    concat_step_infos, is_win, deprecation_warning
+from pgdrive.utils.random import get_np_random, RandomEngine, random_string, get_np_random, RandomEngine
+from pgdrive.utils.utils import is_mac, import_pygame, recursive_equal, setup_logger, merge_dicts, \
+    concat_step_infos, is_win

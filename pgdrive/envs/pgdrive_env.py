@@ -1,24 +1,25 @@
 import copy
-import json
 import logging
 import os.path as osp
 from typing import Union, Dict, AnyStr, Optional, Tuple
-from pgdrive.utils.engine_utils import pgdrive_engine_initialized
+
 import numpy as np
+
 from pgdrive.constants import DEFAULT_AGENT, TerminationState
+from pgdrive.engine.core.chase_camera import ChaseCamera
+from pgdrive.engine.core.manual_controller import KeyboardController, JoystickController
 from pgdrive.envs.base_env import BasePGDriveEnv
 from pgdrive.obs.image_obs import ImageStateObservation
 from pgdrive.obs.state_obs import LidarStateObservation
-from pgdrive.scene_creator.blocks.first_block import FirstBlock
-from pgdrive.scene_creator.map.map import Map, MapGenerateMethod, parse_map_config
+from pgdrive.scene_creator.blocks.first_block import FirstPGBlock
+from pgdrive.scene_creator.map.base_map import BaseMap, MapGenerateMethod, parse_map_config
 from pgdrive.scene_creator.map.pg_map import PGMap
 from pgdrive.scene_creator.vehicle.base_vehicle import BaseVehicle
 from pgdrive.scene_creator.vehicle_module.distance_detector import DetectorMask
 from pgdrive.scene_managers.traffic_manager import TrafficMode
 from pgdrive.utils import clip, PGConfig, get_np_random, concat_step_infos
-from pgdrive.engine.core.chase_camera import ChaseCamera
+from pgdrive.utils.engine_utils import pgdrive_engine_initialized
 from pgdrive.utils.engine_utils import set_global_random_seed
-from pgdrive.engine.core.manual_controller import KeyboardController, JoystickController
 
 pregenerated_map_file = osp.join(osp.dirname(osp.dirname(osp.abspath(__file__))), "assets", "maps", "PGDrive-maps.json")
 
@@ -30,11 +31,11 @@ PGDriveEnvV1_DEFAULT_CONFIG = dict(
     # ===== Map Config =====
     map=3,  # int or string: an easy way to fill map_config
     map_config={
-        Map.GENERATE_TYPE: MapGenerateMethod.BIG_BLOCK_NUM,
-        Map.GENERATE_CONFIG: None,  # it can be a file path / block num / block ID sequence
-        Map.LANE_WIDTH: 3.5,
-        Map.LANE_NUM: 3,
-        Map.SEED: 10,
+        BaseMap.GENERATE_TYPE: MapGenerateMethod.BIG_BLOCK_NUM,
+        BaseMap.GENERATE_CONFIG: None,  # it can be a file path / block num / block ID sequence
+        BaseMap.LANE_WIDTH: 3.5,
+        BaseMap.LANE_NUM: 3,
+        BaseMap.SEED: 10,
         "draw_map_resolution": 1024,  # Drawing the map in a canvas of (x, x) pixels.
         "block_type_version": "v1",
         "exit_length": 50,
@@ -76,7 +77,8 @@ PGDriveEnvV1_DEFAULT_CONFIG = dict(
         image_source="rgb_cam",  # take effect when only when use_image == True
 
         # ===== vehicle spawn =====
-        spawn_lane_index=(FirstBlock.NODE_1, FirstBlock.NODE_2, 0),
+        spawn_lane_index=(FirstPGBlock.NODE_1, FirstPGBlock.NODE_2, 0),
+        destination_lane_index=None,
         spawn_longitude=5.0,
         spawn_lateral=0.0,
 
@@ -388,8 +390,8 @@ class PGDriveEnv(BasePGDriveEnv):
             blocks_info = map_data[0]
 
             map_config = self.config["map_config"].copy()
-            map_config[Map.GENERATE_TYPE] = MapGenerateMethod.PG_MAP_FILE
-            map_config[Map.GENERATE_CONFIG] = blocks_info
+            map_config[BaseMap.GENERATE_TYPE] = MapGenerateMethod.PG_MAP_FILE
+            map_config[BaseMap.GENERATE_CONFIG] = blocks_info
             map_manager.spawn_object(PGMap, map_config=map_config)
             return
 

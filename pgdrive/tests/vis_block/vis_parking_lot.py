@@ -1,4 +1,4 @@
-from pgdrive.scene_creator.blocks.first_block import FirstBlock
+from pgdrive.scene_creator.blocks.first_block import FirstPGBlock
 from pgdrive.scene_creator.blocks.parking_lot import ParkingLot
 from pgdrive.scene_creator.blocks.std_intersection import StdInterSection
 from pgdrive.scene_creator.road.road_network import RoadNetwork
@@ -12,7 +12,7 @@ if __name__ == "__main__":
     initialize_asset_loader(test)
 
     global_network = RoadNetwork()
-    last = FirstBlock(global_network, 3, 1, test.render, test.world, 1)
+    last = FirstPGBlock(global_network, 3, 1, test.render, test.world, 1)
 
     last = StdInterSection(1, last.get_socket(0), global_network, 1)
     last.construct_block(test.render, test.world, dict(radius=4))

@@ -2,7 +2,8 @@ import math
 from typing import Tuple
 
 import numpy as np
-from pgdrive.scene_creator.lane.abs_lane import AbstractLane, Vector, LineType
+from pgdrive.scene_creator.lane.abs_lane import AbstractLane, Vector
+from pgdrive.constants import LineType
 from pgdrive.utils.math_utils import norm
 
 
@@ -29,6 +30,7 @@ class StraightLane(AbstractLane):
         :param priority: priority level of the lane, for determining who has right of way
         """
         super(StraightLane, self).__init__()
+        self.set_speed_limit(speed_limit)
         self.start = np.array(start)
         self.end = np.array(end)
         self.width = width
