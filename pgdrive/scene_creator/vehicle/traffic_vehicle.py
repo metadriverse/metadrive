@@ -1,20 +1,18 @@
 from typing import Union
-from pgdrive.utils.engine_utils import get_pgdrive_engine
-import math
 
 import numpy as np
 from panda3d.bullet import BulletRigidBodyNode, BulletBoxShape
 from panda3d.core import BitMask32, TransformState, Point3, NodePath, Vec3
+
 from pgdrive.constants import BodyName, CollisionGroup
+from pgdrive.engine.asset_loader import AssetLoader
 from pgdrive.scene_creator.highway_vehicle.behavior import IDMVehicle
 from pgdrive.scene_creator.lane.circular_lane import CircularLane
 from pgdrive.scene_creator.lane.straight_lane import StraightLane
 from pgdrive.scene_managers.traffic_manager import TrafficManager
-from pgdrive.utils import get_np_random
-from pgdrive.engine.asset_loader import AssetLoader
 from pgdrive.utils.coordinates_shift import panda_position, panda_heading
+from pgdrive.utils.engine_utils import get_pgdrive_engine
 from pgdrive.utils.object import Object
-from pgdrive.utils.scene_utils import ray_localization
 
 
 class TrafficVehicleNode(BulletRigidBodyNode):
@@ -61,7 +59,7 @@ class PGTrafficVehicle(Object):
         self._initial_state = kinematic_model if enable_respawn else None
         self.dynamic_nodes.append(self.vehicle_node)
         self.node_path = NodePath(self.vehicle_node)
-        self.out_of_road = False
+        # self.out_of_road = False
 
         [path, scale, x_y_z_offset, H] = self.path[self.np_random.randint(0, len(self.path))]
         if self.render:
@@ -75,34 +73,53 @@ class PGTrafficVehicle(Object):
             carNP.setPos(x_y_z_offset)
 
             carNP.instanceTo(self.node_path)
-        self.step(1e-1)
+        self.step(1e-1, None)
         # self.carNP.setQuat(LQuaternionf(math.cos(-1 * np.pi / 4), 0, 0, math.sin(-1 * np.pi / 4)))
 
-    def before_step(self) -> None:
-        """
-        Determine the action according to the elements in scene
-        :return: None
-        """
-        self.vehicle_node.kinematic_model.act()
+    # def before_step(self) -> None:
+    #     """
+    #     Determine the action according to the elements in scene
+    #     :return: None
+    #     """
+    #     self.vehicle_node.kinematic_model.act()
 
-    def step(self, dt):
+    def step(self, dt, action=None):
         if self.break_down:
             return
-        self.vehicle_node.kinematic_model.step(dt)
+
+        # TODO: We ignore this part here! Because the code is in IDM policy right now!
+        #  Is that OK now?
+        if action is None:
+            action = {"steering": 0, "acceleration": 0}
+        self.vehicle_node.kinematic_model.step(dt, action)
+
         position = panda_position(self.vehicle_node.kinematic_model.position, 0)
         self.node_path.setPos(position)
         heading = np.rad2deg(panda_heading(self.vehicle_node.kinematic_model.heading))
         self.node_path.setH(heading)
 
     def after_step(self):
-        engine = get_pgdrive_engine()
-        dir = np.array([math.cos(self.heading), math.sin(self.heading)])
-        lane, lane_index = ray_localization(dir, self.position, engine)
-        if lane is not None:
-            self.vehicle_node.kinematic_model.update_lane_index(lane_index, lane)
-        self.out_of_road = not self.vehicle_node.kinematic_model.lane.on_lane(
-            self.vehicle_node.kinematic_model.position, margin=2
-        )
+        # engine = get_pgdrive_engine()
+        # dir = np.array([math.cos(self.heading), math.sin(self.heading)])
+        # lane, lane_index = ray_localization(dir, self.position, engine)
+        # if lane is not None:
+        # e = get_pgdrive_engine()
+        # p = e.policy_manager.get_policy(self.name)
+        # p.update_lane_index(lane_index, lane)
+        # self.vehicle_node.kinematic_model.update_lane_index(lane_index, lane)
+
+        # self.out_of_road = not self.vehicle_node.kinematic_model.lane.on_lane(
+        #     self.vehicle_node.kinematic_model.position, margin=2
+        # )
+        # if self.out_of_road:
+        #     print('stop here')
+        pass
+
+    @property
+    def out_of_road(self):
+        p = get_pgdrive_engine().policy_manager.get_policy(self.name)
+        ret = not p.lane.on_lane(self.vehicle_node.kinematic_model.position, margin=2)
+        return ret
 
     def need_remove(self):
         if self._initial_state is not None:
@@ -110,11 +127,12 @@ class PGTrafficVehicle(Object):
         else:
             self.vehicle_node.clearTag(BodyName.Traffic_vehicle)
             self.node_path.removeNode()
+            print("The vehicle is removed!")
             return True
 
     def reset(self):
         self.vehicle_node.reset(self._initial_state)
-        self.out_of_road = False
+        # self.out_of_road = False
 
     def destroy(self):
         self.vehicle_node.kinematic_model.destroy()
@@ -185,3 +203,8 @@ class PGTrafficVehicle(Object):
     def __del__(self):
         self.vehicle_node.clearTag(BodyName.Traffic_vehicle)
         super(PGTrafficVehicle, self).__del__()
+
+    # TODO(pzh): This is only workaround! We should not have so many speed all around!
+    @property
+    def speed(self):
+        return self.vehicle_node.kinematic_model.speed

@@ -1,12 +1,15 @@
 from pgdrive.envs.pgdrive_env import PGDriveEnv
 
 
-def test_collision_with_vehicle():
-    env = PGDriveEnv({"traffic_density": 1.0, "map": "SXS"})
+def test_collision_with_vehicle(use_render=False):
+    if not use_render:
+        env = PGDriveEnv({"traffic_density": 1.0, "map": "SSS"})
+    else:
+        env = PGDriveEnv({"traffic_density": 1.0, "map": "SSS", "use_render": True, "fast": True})
     o = env.reset()
     pass_test = False
     try:
-        for i in range(1, 100):
+        for i in range(1, 500):
             o, r, d, info = env.step([0, 1])
             if env.vehicle.crash_vehicle:
                 pass_test = True
@@ -44,3 +47,7 @@ def test_line_contact():
         assert on_broken_line and on_continuous_line, "Collision function is broken!"
     finally:
         env.close()
+
+
+if __name__ == '__main__':
+    test_collision_with_vehicle(True)

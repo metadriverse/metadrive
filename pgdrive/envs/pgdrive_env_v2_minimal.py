@@ -2,10 +2,12 @@ import math
 
 import gym
 import numpy as np
+
 from pgdrive.envs.pgdrive_env_v2 import PGDriveEnvV2
-from pgdrive.obs.state_obs import LidarStateObservation
 from pgdrive.obs.observation_base import ObservationBase
+from pgdrive.obs.state_obs import LidarStateObservation
 from pgdrive.utils import PGConfig
+from pgdrive.utils.engine_utils import get_pgdrive_engine
 from pgdrive.utils.math_utils import norm, clip
 
 DISTANCE = 50
@@ -155,9 +157,24 @@ class MinimalObservation(LidarStateObservation):
         s.append(state['vy'] / vehicle.MAX_SPEED)
         s.append(state["cos_h"])
         s.append(state["sin_h"])
-        s.append(state["cos_d"])
-        s.append(state["sin_d"])
-        s.append(vehicle.target_speed / vehicle.MAX_SPEED)
+
+        # TODO(pzh): This is stupid here!!
+        pm = get_pgdrive_engine().policy_manager
+        p = pm.get_policy(vehicle.name)
+        # s.append(state["cos_d"])
+        # s.append(state["sin_d"])
+
+        # TODO(pzh): This is a workaround!!
+        if p is None:
+            s.append(0.0)
+            s.append(0.0)
+            s.append(0.0)
+        else:
+            s.append(p.destination[0])
+            s.append(p.destination[1])
+            target_speed = p.target_speed
+            s.append(target_speed / vehicle.MAX_SPEED)
+
         s.append(vehicle.speed / vehicle.MAX_SPEED)
         s.append(math.cos(vehicle.heading))
         s.append(math.sin(vehicle.heading))
