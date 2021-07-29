@@ -1,7 +1,7 @@
-from pgdrive.scene_creator.blocks.curve import Curve
-from pgdrive.scene_creator.blocks.first_block import FirstPGBlock
-from pgdrive.scene_creator.blocks.roundabout import Roundabout
-from pgdrive.scene_creator.road.road_network import RoadNetwork
+from pgdrive.component.blocks.curve import Curve
+from pgdrive.component.blocks.first_block import FirstPGBlock
+from pgdrive.component.blocks.roundabout import Roundabout
+from pgdrive.component.road.road_network import RoadNetwork
 from pgdrive.tests.vis_block.vis_block_base import TestBlock
 
 if __name__ == "__main__":

@@ -15,12 +15,12 @@ def test_get_lane_index(use_render=False):
         o = env.reset()
         for i in range(1, 1000):
             o, r, d, info = env.step([0, 0])
-            for v in env.pgdrive_engine.traffic_manager.vehicles:
+            for v in env.engine.traffic_manager.vehicles:
                 old_res = env.current_map.road_network.get_closest_lane_index(v.position, True)
                 old_lane_idx = [index[1] for index in old_res]
 
                 # TODO(pzh): Change this!!
-                p = env.pgdrive_engine.policy_manager.get_policy(v.name)
+                p = env.engine.policy_manager.get_policy(v.name)
                 if p is None:
                     continue
 

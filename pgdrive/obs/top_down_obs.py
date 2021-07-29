@@ -8,11 +8,11 @@ from typing import Tuple
 
 import gym
 import numpy as np
-from pgdrive.constants import Decoration, DEFAULT_AGENT, PG_EDITION
+from pgdrive.constants import Decoration, DEFAULT_AGENT, EDITION
 from pgdrive.obs.observation_base import ObservationBase
 from pgdrive.obs.top_down_obs_impl import WorldSurface, ObservationWindow, COLOR_BLACK, \
     VehicleGraphics, LaneGraphics
-from pgdrive.scene_creator.vehicle.base_vehicle import BaseVehicle
+from pgdrive.component.vehicle.base_vehicle import BaseVehicle
 from pgdrive.utils import import_pygame
 
 pygame = import_pygame()
@@ -49,11 +49,11 @@ class TopDownObservation(ObservationBase):
 
         # scene
         self.road_network = None
-        self.pgdrive_engine = None
+        self.engine = None
 
         # initialize
         pygame.init()
-        pygame.display.set_caption(PG_EDITION + " (Top-down)")
+        pygame.display.set_caption(EDITION + " (Top-down)")
         # main_window_position means the left upper location.
         os.environ['SDL_VIDEO_WINDOW_POS'] = '{},{}' \
             .format(main_window_position[0] - self.resolution[0], main_window_position[1])
@@ -74,7 +74,7 @@ class TopDownObservation(ObservationBase):
         self.canvas_background = WorldSurface(self.MAP_RESOLUTION, 0, pygame.Surface(self.MAP_RESOLUTION))
 
     def reset(self, env, vehicle=None):
-        self.pgdrive_engine = env.pgdrive_engine
+        self.engine = env.engine
         self.road_network = env.current_map.road_network
         self._should_draw_map = True
 
@@ -146,8 +146,8 @@ class TopDownObservation(ObservationBase):
 
     def draw_scene(self):
         # Set the active area that can be modify to accelerate
-        assert len(self.pgdrive_engine.target_vehicles) == 1, "Don't support multi-agent top-down observation yet!"
-        vehicle = self.pgdrive_engine.target_vehicles[DEFAULT_AGENT]
+        assert len(self.engine.target_vehicles) == 1, "Don't support multi-agent top-down observation yet!"
+        vehicle = self.engine.target_vehicles[DEFAULT_AGENT]
         pos = self.canvas_runtime.pos2pix(*vehicle.position)
         clip_size = (int(self.obs_window.get_size()[0] * 1.1), int(self.obs_window.get_size()[0] * 1.1))
         self.canvas_runtime.set_clip((pos[0] - clip_size[0] / 2, pos[1] - clip_size[1] / 2, clip_size[0], clip_size[1]))
@@ -162,7 +162,7 @@ class TopDownObservation(ObservationBase):
         VehicleGraphics.display(
             vehicle=vehicle, surface=self.canvas_runtime, heading=ego_heading, color=VehicleGraphics.GREEN
         )
-        for v in self.pgdrive_engine.traffic_manager.vehicles:
+        for v in self.engine.traffic_manager.vehicles:
             if v is vehicle:
                 continue
             h = v.heading

@@ -1948,7 +1948,7 @@ static const char __pyx_k_rayTestClosest[] = "rayTestClosest";
 static const char __pyx_k_require_colors[] = "require_colors";
 static const char __pyx_k_cutils_perceive[] = "cutils_perceive";
 static const char __pyx_k_detected_objects[] = "detected_objects";
-static const char __pyx_k_pg_physics_world[] = "pg_physics_world";
+static const char __pyx_k_physics_world[] = "physics_world";
 static const char __pyx_k_extra_filter_node[] = "extra_filter_node";
 static const char __pyx_k_perceive_distance[] = "perceive_distance";
 static const char __pyx_k_pg_start_position[] = "pg_start_position";
@@ -2018,7 +2018,7 @@ static PyObject *__pyx_n_s_num_lasers;
 static PyObject *__pyx_kp_s_numpy_core_multiarray_failed_to;
 static PyObject *__pyx_kp_s_numpy_core_umath_failed_to_impor;
 static PyObject *__pyx_n_s_perceive_distance;
-static PyObject *__pyx_n_s_pg_physics_world;
+static PyObject *__pyx_n_s_physics_world;
 static PyObject *__pyx_n_s_pg_start_position;
 static PyObject *__pyx_n_s_pgdrive_cutils;
 static PyObject *__pyx_kp_s_pgdrive_cutils_pyx;
@@ -2045,7 +2045,7 @@ static PyObject *__pyx_pf_7pgdrive_6cutils_cutils_panda_position(CYTHON_UNUSED P
 static PyObject *__pyx_pf_7pgdrive_6cutils_2cutils_add_cloud_point_vis(CYTHON_UNUSED PyObject *__pyx_self, __pyx_t_7pgdrive_6cutils_np_float64_t __pyx_v_point_x, __pyx_t_7pgdrive_6cutils_np_float64_t __pyx_v_point_y, __pyx_t_7pgdrive_6cutils_np_float64_t __pyx_v_height, __pyx_t_7pgdrive_6cutils_np_float64_t __pyx_v_num_lasers, int __pyx_v_laser_index, PyBoolObject *__pyx_v_ANGLE_FACTOR, __pyx_t_7pgdrive_6cutils_np_float64_t __pyx_v_MARK_COLOR0, __pyx_t_7pgdrive_6cutils_np_float64_t __pyx_v_MARK_COLOR1, __pyx_t_7pgdrive_6cutils_np_float64_t __pyx_v_MARK_COLOR2); /* proto */
 static PyObject *__pyx_pf_7pgdrive_6cutils_4cutils_get_laser_end(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_lidar_range, __pyx_t_7pgdrive_6cutils_np_float64_t __pyx_v_perceive_distance, int __pyx_v_laser_index, __pyx_t_7pgdrive_6cutils_np_float64_t __pyx_v_heading_theta, __pyx_t_7pgdrive_6cutils_np_float64_t __pyx_v_vehicle_position_x, __pyx_t_7pgdrive_6cutils_np_float64_t __pyx_v_vehicle_position_y); /* proto */
 static PyObject *__pyx_lambda_funcdef_lambda(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_ret); /* proto */
-static PyObject *__pyx_pf_7pgdrive_6cutils_6cutils_perceive(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_cloud_points, PyArrayObject *__pyx_v_detector_mask, PyObject *__pyx_v_mask, PyArrayObject *__pyx_v_lidar_range, __pyx_t_7pgdrive_6cutils_np_float64_t __pyx_v_perceive_distance, __pyx_t_7pgdrive_6cutils_np_float64_t __pyx_v_heading_theta, __pyx_t_7pgdrive_6cutils_np_float64_t __pyx_v_vehicle_position_x, __pyx_t_7pgdrive_6cutils_np_float64_t __pyx_v_vehicle_position_y, int __pyx_v_num_lasers, __pyx_t_7pgdrive_6cutils_np_float64_t __pyx_v_height, PyObject *__pyx_v_pg_physics_world, PyObject *__pyx_v_extra_filter_node, PyBoolObject *__pyx_v_require_colors, PyBoolObject *__pyx_v_ANGLE_FACTOR, __pyx_t_7pgdrive_6cutils_np_float64_t __pyx_v_MARK_COLOR0, __pyx_t_7pgdrive_6cutils_np_float64_t __pyx_v_MARK_COLOR1, __pyx_t_7pgdrive_6cutils_np_float64_t __pyx_v_MARK_COLOR2); /* proto */
+static PyObject *__pyx_pf_7pgdrive_6cutils_6cutils_perceive(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_cloud_points, PyArrayObject *__pyx_v_detector_mask, PyObject *__pyx_v_mask, PyArrayObject *__pyx_v_lidar_range, __pyx_t_7pgdrive_6cutils_np_float64_t __pyx_v_perceive_distance, __pyx_t_7pgdrive_6cutils_np_float64_t __pyx_v_heading_theta, __pyx_t_7pgdrive_6cutils_np_float64_t __pyx_v_vehicle_position_x, __pyx_t_7pgdrive_6cutils_np_float64_t __pyx_v_vehicle_position_y, int __pyx_v_num_lasers, __pyx_t_7pgdrive_6cutils_np_float64_t __pyx_v_height, PyObject *__pyx_v_physics_world, PyObject *__pyx_v_extra_filter_node, PyBoolObject *__pyx_v_require_colors, PyBoolObject *__pyx_v_ANGLE_FACTOR, __pyx_t_7pgdrive_6cutils_np_float64_t __pyx_v_MARK_COLOR0, __pyx_t_7pgdrive_6cutils_np_float64_t __pyx_v_MARK_COLOR1, __pyx_t_7pgdrive_6cutils_np_float64_t __pyx_v_MARK_COLOR2); /* proto */
 static PyObject *__pyx_pf_7pgdrive_6cutils_8cutils_norm(CYTHON_UNUSED PyObject *__pyx_self, __pyx_t_7pgdrive_6cutils_np_float64_t __pyx_v_x1, __pyx_t_7pgdrive_6cutils_np_float64_t __pyx_v_x2); /* proto */
 static PyObject *__pyx_pf_7pgdrive_6cutils_10cutils_clip(CYTHON_UNUSED PyObject *__pyx_self, __pyx_t_7pgdrive_6cutils_np_float64_t __pyx_v_a, __pyx_t_7pgdrive_6cutils_np_float64_t __pyx_v_low, __pyx_t_7pgdrive_6cutils_np_float64_t __pyx_v_high); /* proto */
 static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, Py_buffer *__pyx_v_info, int __pyx_v_flags); /* proto */
@@ -2749,7 +2749,7 @@ static PyObject *__pyx_pw_7pgdrive_6cutils_7cutils_perceive(PyObject *__pyx_self
   __pyx_t_7pgdrive_6cutils_np_float64_t __pyx_v_vehicle_position_y;
   int __pyx_v_num_lasers;
   __pyx_t_7pgdrive_6cutils_np_float64_t __pyx_v_height;
-  PyObject *__pyx_v_pg_physics_world = 0;
+  PyObject *__pyx_v_physics_world = 0;
   PyObject *__pyx_v_extra_filter_node = 0;
   PyBoolObject *__pyx_v_require_colors = 0;
   PyBoolObject *__pyx_v_ANGLE_FACTOR = 0;
@@ -2760,7 +2760,7 @@ static PyObject *__pyx_pw_7pgdrive_6cutils_7cutils_perceive(PyObject *__pyx_self
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("cutils_perceive (wrapper)", 0);
   {
-    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_cloud_points,&__pyx_n_s_detector_mask,&__pyx_n_s_mask,&__pyx_n_s_lidar_range,&__pyx_n_s_perceive_distance,&__pyx_n_s_heading_theta,&__pyx_n_s_vehicle_position_x,&__pyx_n_s_vehicle_position_y,&__pyx_n_s_num_lasers,&__pyx_n_s_height,&__pyx_n_s_pg_physics_world,&__pyx_n_s_extra_filter_node,&__pyx_n_s_require_colors,&__pyx_n_s_ANGLE_FACTOR,&__pyx_n_s_MARK_COLOR0,&__pyx_n_s_MARK_COLOR1,&__pyx_n_s_MARK_COLOR2,0};
+    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_cloud_points,&__pyx_n_s_detector_mask,&__pyx_n_s_mask,&__pyx_n_s_lidar_range,&__pyx_n_s_perceive_distance,&__pyx_n_s_heading_theta,&__pyx_n_s_vehicle_position_x,&__pyx_n_s_vehicle_position_y,&__pyx_n_s_num_lasers,&__pyx_n_s_height,&__pyx_n_s_physics_world,&__pyx_n_s_extra_filter_node,&__pyx_n_s_require_colors,&__pyx_n_s_ANGLE_FACTOR,&__pyx_n_s_MARK_COLOR0,&__pyx_n_s_MARK_COLOR1,&__pyx_n_s_MARK_COLOR2,0};
     PyObject* values[17] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
     if (unlikely(__pyx_kwds)) {
       Py_ssize_t kw_args;
@@ -2864,7 +2864,7 @@ static PyObject *__pyx_pw_7pgdrive_6cutils_7cutils_perceive(PyObject *__pyx_self
         }
         CYTHON_FALLTHROUGH;
         case 10:
-        if (likely((values[10] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_pg_physics_world)) != 0)) kw_args--;
+        if (likely((values[10] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_physics_world)) != 0)) kw_args--;
         else {
           __Pyx_RaiseArgtupleInvalid("cutils_perceive", 1, 17, 17, 10); __PYX_ERR(0, 60, __pyx_L3_error)
         }
@@ -2939,7 +2939,7 @@ static PyObject *__pyx_pw_7pgdrive_6cutils_7cutils_perceive(PyObject *__pyx_self
     __pyx_v_vehicle_position_y = __pyx_PyFloat_AsDouble(values[7]); if (unlikely((__pyx_v_vehicle_position_y == ((npy_float64)-1)) && PyErr_Occurred())) __PYX_ERR(0, 68, __pyx_L3_error)
     __pyx_v_num_lasers = __Pyx_PyInt_As_int(values[8]); if (unlikely((__pyx_v_num_lasers == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 69, __pyx_L3_error)
     __pyx_v_height = __pyx_PyFloat_AsDouble(values[9]); if (unlikely((__pyx_v_height == ((npy_float64)-1)) && PyErr_Occurred())) __PYX_ERR(0, 70, __pyx_L3_error)
-    __pyx_v_pg_physics_world = values[10];
+    __pyx_v_physics_world = values[10];
     __pyx_v_extra_filter_node = ((PyObject*)values[11]);
     __pyx_v_require_colors = ((PyBoolObject *)values[12]);
     __pyx_v_ANGLE_FACTOR = ((PyBoolObject *)values[13]);
@@ -2961,7 +2961,7 @@ static PyObject *__pyx_pw_7pgdrive_6cutils_7cutils_perceive(PyObject *__pyx_self
   if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_extra_filter_node), (&PySet_Type), 1, "extra_filter_node", 1))) __PYX_ERR(0, 72, __pyx_L1_error)
   if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_require_colors), __pyx_ptype_7cpython_4bool_bool, 1, "require_colors", 0))) __PYX_ERR(0, 73, __pyx_L1_error)
   if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_ANGLE_FACTOR), __pyx_ptype_7cpython_4bool_bool, 1, "ANGLE_FACTOR", 0))) __PYX_ERR(0, 74, __pyx_L1_error)
-  __pyx_r = __pyx_pf_7pgdrive_6cutils_6cutils_perceive(__pyx_self, __pyx_v_cloud_points, __pyx_v_detector_mask, __pyx_v_mask, __pyx_v_lidar_range, __pyx_v_perceive_distance, __pyx_v_heading_theta, __pyx_v_vehicle_position_x, __pyx_v_vehicle_position_y, __pyx_v_num_lasers, __pyx_v_height, __pyx_v_pg_physics_world, __pyx_v_extra_filter_node, __pyx_v_require_colors, __pyx_v_ANGLE_FACTOR, __pyx_v_MARK_COLOR0, __pyx_v_MARK_COLOR1, __pyx_v_MARK_COLOR2);
+  __pyx_r = __pyx_pf_7pgdrive_6cutils_6cutils_perceive(__pyx_self, __pyx_v_cloud_points, __pyx_v_detector_mask, __pyx_v_mask, __pyx_v_lidar_range, __pyx_v_perceive_distance, __pyx_v_heading_theta, __pyx_v_vehicle_position_x, __pyx_v_vehicle_position_y, __pyx_v_num_lasers, __pyx_v_height, __pyx_v_physics_world, __pyx_v_extra_filter_node, __pyx_v_require_colors, __pyx_v_ANGLE_FACTOR, __pyx_v_MARK_COLOR0, __pyx_v_MARK_COLOR1, __pyx_v_MARK_COLOR2);
 
   /* function exit code */
   goto __pyx_L0;
@@ -2973,7 +2973,7 @@ static PyObject *__pyx_pw_7pgdrive_6cutils_7cutils_perceive(PyObject *__pyx_self
 }
 
 /* "pgdrive/cutils.pyx":115
- *             results = pg_physics_world.rayTestAll(pg_start_position, laser_end, mask)
+ *             results = physics_world.rayTestAll(pg_start_position, laser_end, mask)
  *             hits = results.getHits()
  *             hits = sorted(hits, key=lambda ret: ret.getHitFraction())             # <<<<<<<<<<<<<<
  *             for result in hits:
@@ -3044,7 +3044,7 @@ static PyObject *__pyx_lambda_funcdef_lambda(CYTHON_UNUSED PyObject *__pyx_self,
  *         cnp.ndarray[np_uint8_t, ndim=1] detector_mask,
  */
 
-static PyObject *__pyx_pf_7pgdrive_6cutils_6cutils_perceive(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_cloud_points, PyArrayObject *__pyx_v_detector_mask, PyObject *__pyx_v_mask, PyArrayObject *__pyx_v_lidar_range, __pyx_t_7pgdrive_6cutils_np_float64_t __pyx_v_perceive_distance, __pyx_t_7pgdrive_6cutils_np_float64_t __pyx_v_heading_theta, __pyx_t_7pgdrive_6cutils_np_float64_t __pyx_v_vehicle_position_x, __pyx_t_7pgdrive_6cutils_np_float64_t __pyx_v_vehicle_position_y, int __pyx_v_num_lasers, __pyx_t_7pgdrive_6cutils_np_float64_t __pyx_v_height, PyObject *__pyx_v_pg_physics_world, PyObject *__pyx_v_extra_filter_node, PyBoolObject *__pyx_v_require_colors, PyBoolObject *__pyx_v_ANGLE_FACTOR, __pyx_t_7pgdrive_6cutils_np_float64_t __pyx_v_MARK_COLOR0, __pyx_t_7pgdrive_6cutils_np_float64_t __pyx_v_MARK_COLOR1, __pyx_t_7pgdrive_6cutils_np_float64_t __pyx_v_MARK_COLOR2) {
+static PyObject *__pyx_pf_7pgdrive_6cutils_6cutils_perceive(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_cloud_points, PyArrayObject *__pyx_v_detector_mask, PyObject *__pyx_v_mask, PyArrayObject *__pyx_v_lidar_range, __pyx_t_7pgdrive_6cutils_np_float64_t __pyx_v_perceive_distance, __pyx_t_7pgdrive_6cutils_np_float64_t __pyx_v_heading_theta, __pyx_t_7pgdrive_6cutils_np_float64_t __pyx_v_vehicle_position_x, __pyx_t_7pgdrive_6cutils_np_float64_t __pyx_v_vehicle_position_y, int __pyx_v_num_lasers, __pyx_t_7pgdrive_6cutils_np_float64_t __pyx_v_height, PyObject *__pyx_v_physics_world, PyObject *__pyx_v_extra_filter_node, PyBoolObject *__pyx_v_require_colors, PyBoolObject *__pyx_v_ANGLE_FACTOR, __pyx_t_7pgdrive_6cutils_np_float64_t __pyx_v_MARK_COLOR0, __pyx_t_7pgdrive_6cutils_np_float64_t __pyx_v_MARK_COLOR1, __pyx_t_7pgdrive_6cutils_np_float64_t __pyx_v_MARK_COLOR2) {
   PyObject *__pyx_v_detected_objects = 0;
   PyObject *__pyx_v_colors = 0;
   PyObject *__pyx_v_pg_start_position = 0;
@@ -3931,7 +3931,7 @@ static PyObject *__pyx_pf_7pgdrive_6cutils_6cutils_perceive(CYTHON_UNUSED PyObje
  *             vehicle_position_y
  *         )
  *         laser_end = cutils_panda_position(point_x, point_y, height)             # <<<<<<<<<<<<<<
- *         result = pg_physics_world.rayTestClosest(pg_start_position, laser_end, mask)
+ *         result = physics_world.rayTestClosest(pg_start_position, laser_end, mask)
  *         node = result.getNode()
  */
     __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_n_s_cutils_panda_position); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 107, __pyx_L1_error)
@@ -4002,11 +4002,11 @@ static PyObject *__pyx_pf_7pgdrive_6cutils_6cutils_perceive(CYTHON_UNUSED PyObje
     /* "pgdrive/cutils.pyx":108
  *         )
  *         laser_end = cutils_panda_position(point_x, point_y, height)
- *         result = pg_physics_world.rayTestClosest(pg_start_position, laser_end, mask)             # <<<<<<<<<<<<<<
+ *         result = physics_world.rayTestClosest(pg_start_position, laser_end, mask)             # <<<<<<<<<<<<<<
  *         node = result.getNode()
  *         hits = None
  */
-    __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_pg_physics_world, __pyx_n_s_rayTestClosest); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 108, __pyx_L1_error)
+    __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_physics_world, __pyx_n_s_rayTestClosest); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 108, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
     __pyx_t_22 = NULL;
     __pyx_t_15 = 0;
@@ -4061,7 +4061,7 @@ static PyObject *__pyx_pf_7pgdrive_6cutils_6cutils_perceive(CYTHON_UNUSED PyObje
 
     /* "pgdrive/cutils.pyx":109
  *         laser_end = cutils_panda_position(point_x, point_y, height)
- *         result = pg_physics_world.rayTestClosest(pg_start_position, laser_end, mask)
+ *         result = physics_world.rayTestClosest(pg_start_position, laser_end, mask)
  *         node = result.getNode()             # <<<<<<<<<<<<<<
  *         hits = None
  *         if node in extra_filter_node:
@@ -4087,7 +4087,7 @@ static PyObject *__pyx_pf_7pgdrive_6cutils_6cutils_perceive(CYTHON_UNUSED PyObje
     __pyx_t_1 = 0;
 
     /* "pgdrive/cutils.pyx":110
- *         result = pg_physics_world.rayTestClosest(pg_start_position, laser_end, mask)
+ *         result = physics_world.rayTestClosest(pg_start_position, laser_end, mask)
  *         node = result.getNode()
  *         hits = None             # <<<<<<<<<<<<<<
  *         if node in extra_filter_node:
@@ -4101,7 +4101,7 @@ static PyObject *__pyx_pf_7pgdrive_6cutils_6cutils_perceive(CYTHON_UNUSED PyObje
  *         hits = None
  *         if node in extra_filter_node:             # <<<<<<<<<<<<<<
  *             # Fall back to all tests.
- *             results = pg_physics_world.rayTestAll(pg_start_position, laser_end, mask)
+ *             results = physics_world.rayTestAll(pg_start_position, laser_end, mask)
  */
     if (unlikely(__pyx_v_extra_filter_node == Py_None)) {
       PyErr_SetString(PyExc_TypeError, "'NoneType' object is not iterable");
@@ -4114,11 +4114,11 @@ static PyObject *__pyx_pf_7pgdrive_6cutils_6cutils_perceive(CYTHON_UNUSED PyObje
       /* "pgdrive/cutils.pyx":113
  *         if node in extra_filter_node:
  *             # Fall back to all tests.
- *             results = pg_physics_world.rayTestAll(pg_start_position, laser_end, mask)             # <<<<<<<<<<<<<<
+ *             results = physics_world.rayTestAll(pg_start_position, laser_end, mask)             # <<<<<<<<<<<<<<
  *             hits = results.getHits()
  *             hits = sorted(hits, key=lambda ret: ret.getHitFraction())
  */
-      __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_pg_physics_world, __pyx_n_s_rayTestAll); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 113, __pyx_L1_error)
+      __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_physics_world, __pyx_n_s_rayTestAll); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 113, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_6);
       __pyx_t_8 = NULL;
       __pyx_t_15 = 0;
@@ -4173,7 +4173,7 @@ static PyObject *__pyx_pf_7pgdrive_6cutils_6cutils_perceive(CYTHON_UNUSED PyObje
 
       /* "pgdrive/cutils.pyx":114
  *             # Fall back to all tests.
- *             results = pg_physics_world.rayTestAll(pg_start_position, laser_end, mask)
+ *             results = physics_world.rayTestAll(pg_start_position, laser_end, mask)
  *             hits = results.getHits()             # <<<<<<<<<<<<<<
  *             hits = sorted(hits, key=lambda ret: ret.getHitFraction())
  *             for result in hits:
@@ -4199,7 +4199,7 @@ static PyObject *__pyx_pf_7pgdrive_6cutils_6cutils_perceive(CYTHON_UNUSED PyObje
       __pyx_t_1 = 0;
 
       /* "pgdrive/cutils.pyx":115
- *             results = pg_physics_world.rayTestAll(pg_start_position, laser_end, mask)
+ *             results = physics_world.rayTestAll(pg_start_position, laser_end, mask)
  *             hits = results.getHits()
  *             hits = sorted(hits, key=lambda ret: ret.getHitFraction())             # <<<<<<<<<<<<<<
  *             for result in hits:
@@ -4396,7 +4396,7 @@ static PyObject *__pyx_pf_7pgdrive_6cutils_6cutils_perceive(CYTHON_UNUSED PyObje
  *         hits = None
  *         if node in extra_filter_node:             # <<<<<<<<<<<<<<
  *             # Fall back to all tests.
- *             results = pg_physics_world.rayTestAll(pg_start_position, laser_end, mask)
+ *             results = physics_world.rayTestAll(pg_start_position, laser_end, mask)
  */
       goto __pyx_L15;
     }
@@ -7676,7 +7676,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_kp_s_numpy_core_multiarray_failed_to, __pyx_k_numpy_core_multiarray_failed_to, sizeof(__pyx_k_numpy_core_multiarray_failed_to), 0, 0, 1, 0},
   {&__pyx_kp_s_numpy_core_umath_failed_to_impor, __pyx_k_numpy_core_umath_failed_to_impor, sizeof(__pyx_k_numpy_core_umath_failed_to_impor), 0, 0, 1, 0},
   {&__pyx_n_s_perceive_distance, __pyx_k_perceive_distance, sizeof(__pyx_k_perceive_distance), 0, 0, 1, 1},
-  {&__pyx_n_s_pg_physics_world, __pyx_k_pg_physics_world, sizeof(__pyx_k_pg_physics_world), 0, 0, 1, 1},
+  {&__pyx_n_s_physics_world, __pyx_k_physics_world, sizeof(__pyx_k_physics_world), 0, 0, 1, 1},
   {&__pyx_n_s_pg_start_position, __pyx_k_pg_start_position, sizeof(__pyx_k_pg_start_position), 0, 0, 1, 1},
   {&__pyx_n_s_pgdrive_cutils, __pyx_k_pgdrive_cutils, sizeof(__pyx_k_pgdrive_cutils), 0, 0, 1, 1},
   {&__pyx_kp_s_pgdrive_cutils_pyx, __pyx_k_pgdrive_cutils_pyx, sizeof(__pyx_k_pgdrive_cutils_pyx), 0, 0, 1, 0},
@@ -7836,7 +7836,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  *         cnp.ndarray[np_float64_t, ndim=1] cloud_points,
  *         cnp.ndarray[np_uint8_t, ndim=1] detector_mask,
  */
-  __pyx_tuple__14 = PyTuple_Pack(29, __pyx_n_s_cloud_points, __pyx_n_s_detector_mask, __pyx_n_s_mask, __pyx_n_s_lidar_range, __pyx_n_s_perceive_distance, __pyx_n_s_heading_theta, __pyx_n_s_vehicle_position_x, __pyx_n_s_vehicle_position_y, __pyx_n_s_num_lasers, __pyx_n_s_height, __pyx_n_s_pg_physics_world, __pyx_n_s_extra_filter_node, __pyx_n_s_require_colors, __pyx_n_s_ANGLE_FACTOR, __pyx_n_s_MARK_COLOR0, __pyx_n_s_MARK_COLOR1, __pyx_n_s_MARK_COLOR2, __pyx_n_s_detected_objects, __pyx_n_s_colors, __pyx_n_s_pg_start_position, __pyx_n_s_point_x, __pyx_n_s_point_y, __pyx_n_s_point_z, __pyx_n_s_laser_index, __pyx_n_s_laser_end, __pyx_n_s_result, __pyx_n_s_node, __pyx_n_s_hits, __pyx_n_s_results); if (unlikely(!__pyx_tuple__14)) __PYX_ERR(0, 60, __pyx_L1_error)
+  __pyx_tuple__14 = PyTuple_Pack(29, __pyx_n_s_cloud_points, __pyx_n_s_detector_mask, __pyx_n_s_mask, __pyx_n_s_lidar_range, __pyx_n_s_perceive_distance, __pyx_n_s_heading_theta, __pyx_n_s_vehicle_position_x, __pyx_n_s_vehicle_position_y, __pyx_n_s_num_lasers, __pyx_n_s_height, __pyx_n_s_physics_world, __pyx_n_s_extra_filter_node, __pyx_n_s_require_colors, __pyx_n_s_ANGLE_FACTOR, __pyx_n_s_MARK_COLOR0, __pyx_n_s_MARK_COLOR1, __pyx_n_s_MARK_COLOR2, __pyx_n_s_detected_objects, __pyx_n_s_colors, __pyx_n_s_pg_start_position, __pyx_n_s_point_x, __pyx_n_s_point_y, __pyx_n_s_point_z, __pyx_n_s_laser_index, __pyx_n_s_laser_end, __pyx_n_s_result, __pyx_n_s_node, __pyx_n_s_hits, __pyx_n_s_results); if (unlikely(!__pyx_tuple__14)) __PYX_ERR(0, 60, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__14);
   __Pyx_GIVEREF(__pyx_tuple__14);
   __pyx_codeobj__15 = (PyObject*)__Pyx_PyCode_New(17, 0, 29, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__14, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_pgdrive_cutils_pyx, __pyx_n_s_cutils_perceive, 60, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__15)) __PYX_ERR(0, 60, __pyx_L1_error)

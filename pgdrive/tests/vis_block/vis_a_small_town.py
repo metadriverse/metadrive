@@ -1,13 +1,13 @@
-from pgdrive.scene_creator.blocks.curve import Curve
-from pgdrive.scene_creator.blocks.first_block import FirstPGBlock
-from pgdrive.scene_creator.blocks.roundabout import Roundabout
-from pgdrive.scene_creator.blocks.std_intersection import StdInterSection
-from pgdrive.scene_creator.blocks.straight import Straight
-from pgdrive.scene_creator.blocks.t_intersection import TInterSection
-from pgdrive.scene_creator.road.road_network import RoadNetwork
+from pgdrive.component.blocks.curve import Curve
+from pgdrive.component.blocks.first_block import FirstPGBlock
+from pgdrive.component.blocks.roundabout import Roundabout
+from pgdrive.component.blocks.std_intersection import StdInterSection
+from pgdrive.component.blocks.straight import Straight
+from pgdrive.component.blocks.t_intersection import TInterSection
+from pgdrive.component.road.road_network import RoadNetwork
 from pgdrive.tests.vis_block.vis_block_base import TestBlock
 from pgdrive.engine.asset_loader import initialize_asset_loader
-from pgdrive.utils.pg_space import Parameter
+from pgdrive.utils.space import Parameter
 
 if __name__ == "__main__":
     test = TestBlock(False)

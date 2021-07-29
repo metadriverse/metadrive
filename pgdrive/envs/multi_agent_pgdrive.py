@@ -3,11 +3,11 @@ import logging
 
 from pgdrive.constants import TerminationState
 from pgdrive.envs.pgdrive_env_v2 import PGDriveEnvV2
-from pgdrive.scene_creator.blocks.first_block import FirstPGBlock
-from pgdrive.scene_creator.road.road import Road
-from pgdrive.scene_managers.spawn_manager import SpawnManager
-from pgdrive.utils import setup_logger, get_np_random, PGConfig
-from pgdrive.utils.pg_config import merge_dicts
+from pgdrive.component.blocks.first_block import FirstPGBlock
+from pgdrive.component.road.road import Road
+from pgdrive.manager.spawn_manager import SpawnManager
+from pgdrive.utils import setup_logger, get_np_random, Config
+from pgdrive.utils.config import merge_dicts
 
 MULTI_AGENT_PGDRIVE_DEFAULT_CONFIG = dict(
     # ===== Multi-agent =====
@@ -62,7 +62,7 @@ class MultiAgentPGDrive(PGDriveEnvV2):
     ]
 
     @staticmethod
-    def default_config() -> PGConfig:
+    def default_config() -> Config:
         config = PGDriveEnvV2.default_config()
         config.update(MULTI_AGENT_PGDRIVE_DEFAULT_CONFIG)
         return config
@@ -72,7 +72,7 @@ class MultiAgentPGDrive(PGDriveEnvV2):
         super(MultiAgentPGDrive, self).__init__(config)
         self._top_down_renderer = None
 
-    def _process_extra_config(self, config) -> "PGConfig":
+    def _process_extra_config(self, config) -> "Config":
         ret_config = self.default_config().update(
             config, allow_overwrite=False, stop_recursive_update=["target_vehicle_configs"]
         )
@@ -132,7 +132,7 @@ class MultiAgentPGDrive(PGDriveEnvV2):
         o, r, d, i = self._after_vehicle_done(o, r, d, i)
 
         # Update respawn manager
-        if self.episode_steps >= self.config["horizon"] or self.pgdrive_engine.replay_system is not None:
+        if self.episode_steps >= self.config["horizon"] or self.engine.replay_system is not None:
             self.agent_manager.set_allow_respawn(False)
         self._spawn_manager.step()
         new_obs_dict = self._respawn_vehicles(randomize_position=self.config["random_traffic"])
@@ -170,7 +170,7 @@ class MultiAgentPGDrive(PGDriveEnvV2):
             self._update_destination_for(v_id)
 
     def _after_vehicle_done(self, obs=None, reward=None, dones: dict = None, info=None):
-        if self.pgdrive_engine.replay_system is not None:
+        if self.engine.replay_system is not None:
             return obs, reward, dones, info
         for v_id, v_info in info.items():
             if v_info.get("episode_length", 0) >= self.config["horizon"]:
@@ -189,7 +189,7 @@ class MultiAgentPGDrive(PGDriveEnvV2):
     def _update_camera_after_finish(self, dead_vehicle_id):
         if self.main_camera is not None and dead_vehicle_id == self.agent_manager.object_to_agent(
                 self.current_track_vehicle.name) \
-                and self.pgdrive_engine.task_manager.hasTaskNamed(self.main_camera.CHASE_TASK_NAME):
+                and self.engine.task_manager.hasTaskNamed(self.main_camera.CHASE_TASK_NAME):
             self.chase_another_v()
 
     def _get_target_vehicle_config(self):
@@ -212,7 +212,7 @@ class MultiAgentPGDrive(PGDriveEnvV2):
         Newly introduce method
         """
         vehicle_config = merge_dicts(self.config["vehicle_config"], extra_config, allow_new_keys=False)
-        return PGConfig(vehicle_config)
+        return Config(vehicle_config)
 
     def _after_lazy_init(self):
         super(MultiAgentPGDrive, self)._after_lazy_init()
@@ -319,7 +319,7 @@ def _test():
             "debug": False,
             "fast": True,
             "manual_control": True,
-            "pg_world_config": {
+            "engine_config": {
                 "pstats": False
             },
         }
@@ -351,7 +351,7 @@ def _vis():
             "num_agents": 12,
             "allow_respawn": False,
             "manual_control": True,
-            "pg_world_config": {
+            "engine_config": {
                 "pstats": False
             },
         }
@@ -387,12 +387,12 @@ def pygame_replay(name, env_class, save=False, other_traj=None, film_size=(1000,
     frame_count = 0
     while True:
         o, r, d, i = env.step(env.action_space.sample())
-        env.pgdrive_engine.force_fps.toggle()
+        env.engine.force_fps.toggle()
         env.render(mode="top_down", num_stack=50, film_size=film_size, history_smooth=0)
         if save:
             pygame.image.save(env._top_down_renderer._runtime, "{}_{}.png".format(name, frame_count))
         frame_count += 1
-        if len(env.pgdrive_engine.replay_system.restore_episode_info) == 0:
+        if len(env.engine.replay_system.restore_episode_info) == 0:
             env.close()
 
 
@@ -410,11 +410,11 @@ def panda_replay(name, env_class, save=False, other_traj=None, extra_config={}):
     frame_count = 0
     while True:
         o, r, d, i = env.step(env.action_space.sample())
-        env.pgdrive_engine.force_fps.toggle()
+        env.engine.force_fps.toggle()
         if save:
             pygame.image.save(env._top_down_renderer._runtime, "{}_{}.png".format(name, frame_count))
         frame_count += 1
-        if len(env.pgdrive_engine.replay_system.restore_episode_info) == 0:
+        if len(env.engine.replay_system.restore_episode_info) == 0:
             env.close()
 
 

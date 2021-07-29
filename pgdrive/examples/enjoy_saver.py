@@ -18,7 +18,7 @@ if __name__ == "__main__":
     )
 
     o = env.reset()
-    env.pgdrive_engine.force_fps.toggle()
+    env.engine.force_fps.toggle()
     for i in range(1, 100000):
         o, r, d, info = env.step([0, 1])
         text = {"save": info["takeover_start"]}

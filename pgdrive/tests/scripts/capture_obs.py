@@ -1,6 +1,6 @@
 from pgdrive.envs.pgdrive_env import PGDriveEnv
-from pgdrive.scene_creator.map.base_map import BaseMap, MapGenerateMethod
-from pgdrive.scene_creator.vehicle_module.depth_camera import DepthCamera
+from pgdrive.component.map.base_map import BaseMap, MapGenerateMethod
+from pgdrive.component.vehicle_module.depth_camera import DepthCamera
 from pgdrive.utils import setup_logger
 
 h_f = 2
@@ -15,7 +15,7 @@ class TestEnv(PGDriveEnv):
                 # "traffic_density": 1.0,
                 "traffic_mode": "hybrid",
                 "start_seed": 82,
-                "pg_world_config": {
+                "engine_config": {
                     "onscreen_message": True,
                     # "debug_physics_world": True,
                     # "pstats": True,
@@ -57,13 +57,13 @@ if __name__ == "__main__":
     o = env.reset()
 
     depth_cam = env.config["vehicle_config"]["depth_cam"]
-    depth_cam = DepthCamera(*depth_cam, chassis_np=env.vehicle.chassis_np, pg_world=env.pg_world)
+    depth_cam = DepthCamera(*depth_cam, chassis_np=env.vehicle.chassis_np, engine=env.engine)
     env.vehicle.add_image_sensor("depth_cam", depth_cam)
-    depth_cam.remove_display_region(env.pg_world)
+    depth_cam.remove_display_region(env.engine)
 
     # for sensor in env.vehicle.image_sensors.values():
-    #     sensor.remove_display_region(env.pg_world)
-    # env.vehicle.vehicle_panel.remove_display_region(env.pg_world)
+    #     sensor.remove_display_region(env.engine)
+    # env.vehicle.vehicle_panel.remove_display_region(env.engine)
     # env.vehicle.collision_info_np.detachNode()
     # env.vehicle.routing_localization._right_arrow.detachNode()
 
@@ -72,7 +72,7 @@ if __name__ == "__main__":
         o, r, d, info = env.step([0, 1])
         env.render(
             # text={
-            #     "vehicle_num": len(env.pgdrive_engine.traffic_manager.traffic_vehicles),
+            #     "vehicle_num": len(env.engine.traffic_manager.traffic_vehicles),
             #     "dist_to_left:": env.vehicle.dist_to_left,
             #     "dist_to_right:": env.vehicle.dist_to_right,
             #     "env_seed": env.current_map.random_seed

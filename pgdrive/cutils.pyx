@@ -68,7 +68,7 @@ def cutils_perceive(
         np_float64_t vehicle_position_y,
         int num_lasers,
         np_float64_t height,
-        pg_physics_world,
+        physics_world,
         set_t extra_filter_node,
         bool_t require_colors,
         bool_t ANGLE_FACTOR,
@@ -105,12 +105,12 @@ def cutils_perceive(
             vehicle_position_y
         )
         laser_end = cutils_panda_position(point_x, point_y, height)
-        result = pg_physics_world.rayTestClosest(pg_start_position, laser_end, mask)
+        result = physics_world.rayTestClosest(pg_start_position, laser_end, mask)
         node = result.getNode()
         hits = None
         if node in extra_filter_node:
             # Fall back to all tests.
-            results = pg_physics_world.rayTestAll(pg_start_position, laser_end, mask)
+            results = physics_world.rayTestAll(pg_start_position, laser_end, mask)
             hits = results.getHits()
             hits = sorted(hits, key=lambda ret: ret.getHitFraction())
             for result in hits:

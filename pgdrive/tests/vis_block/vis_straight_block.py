@@ -1,6 +1,6 @@
-from pgdrive.scene_creator.blocks.first_block import FirstPGBlock
-from pgdrive.scene_creator.blocks.straight import Straight
-from pgdrive.scene_creator.road.road_network import RoadNetwork
+from pgdrive.component.blocks.first_block import FirstPGBlock
+from pgdrive.component.blocks.straight import Straight
+from pgdrive.component.road.road_network import RoadNetwork
 from pgdrive.tests.vis_block.vis_block_base import TestBlock
 from pgdrive.engine.asset_loader import initialize_asset_loader
 

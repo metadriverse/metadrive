@@ -2,7 +2,7 @@ import time
 
 import numpy as np
 from pgdrive.envs import PGDriveEnvV2
-from pgdrive.scene_creator.map.base_map import BaseMap, MapGenerateMethod
+from pgdrive.component.map.base_map import BaseMap, MapGenerateMethod
 
 
 def get_result(env):
@@ -78,7 +78,7 @@ if __name__ == '__main__':
                 "environment_num": 1,
                 "traffic_density": 0.0,
                 "start_seed": 4,
-                # "pg_world_config": {
+                # "engine_config": {
                 #     "debug": False,
                 # },
                 # "manual_control": True,

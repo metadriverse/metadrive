@@ -2,12 +2,12 @@ from pgdrive.envs.pgdrive_env import PGDriveEnv
 from pgdrive.envs.pgdrive_env_v2 import PGDriveEnvV2
 from pgdrive.obs.top_down_obs import TopDownObservation
 from pgdrive.obs.top_down_obs_multi_channel import TopDownMultiChannel
-from pgdrive.utils import PGConfig
+from pgdrive.utils import Config
 
 
 class TopDownSingleFramePGDriveEnv(PGDriveEnv):
     @classmethod
-    def default_config(cls) -> PGConfig:
+    def default_config(cls) -> Config:
         config = PGDriveEnv.default_config()
         config["vehicle_config"]["lidar"].update({"num_lasers": 0, "distance": 0})  # Remove lidar
         config.update(
@@ -44,7 +44,7 @@ class TopDownPGDriveEnv(TopDownSingleFramePGDriveEnv):
 
 class TopDownPGDriveEnvV2(PGDriveEnvV2):
     @classmethod
-    def default_config(cls) -> PGConfig:
+    def default_config(cls) -> Config:
         config = PGDriveEnvV2.default_config()
         config["vehicle_config"]["lidar"] = {"num_lasers": 0, "distance": 0}  # Remove lidar
         config.update(

@@ -4,12 +4,12 @@ import numpy as np
 from pgdrive.constants import TerminationState
 from pgdrive.envs.multi_agent_pgdrive import MultiAgentPGDrive, pygame_replay
 from pgdrive.obs.state_obs import LidarStateObservation, StateObservation
-from pgdrive.scene_creator.blocks.bottleneck import Merge, Split
-from pgdrive.scene_creator.blocks.first_block import FirstPGBlock
-from pgdrive.scene_creator.blocks.tollgate import TollGate
-from pgdrive.scene_creator.map.pg_map import PGMap
-from pgdrive.scene_creator.road.road import Road
-from pgdrive.utils import PGConfig, clip
+from pgdrive.component.blocks.bottleneck import Merge, Split
+from pgdrive.component.blocks.first_block import FirstPGBlock
+from pgdrive.component.blocks.tollgate import TollGate
+from pgdrive.component.map.pg_map import PGMap
+from pgdrive.component.road.road import Road
+from pgdrive.utils import Config, clip
 
 MATollConfig = dict(
     num_agents=40,
@@ -113,7 +113,7 @@ class MATollGateMap(PGMap):
     def _generate(self):
         length = self.config["exit_length"]
 
-        parent_node_path, pg_physics_world = self.pgdrive_engine.worldNP, self.pgdrive_engine.physics_world
+        parent_node_path, physics_world = self.engine.worldNP, self.engine.physics_world
         assert len(self.road_network.graph) == 0, "These Map is not empty, please create a new map to read config"
 
         # Build a first-block
@@ -122,14 +122,14 @@ class MATollGateMap(PGMap):
             self.config[self.LANE_WIDTH],
             self.config["lane_num"],
             parent_node_path,
-            pg_physics_world,
+            physics_world,
             length=length
         )
         self.blocks.append(last_block)
 
         split = Split(1, last_block.get_socket(index=0), self.road_network, random_seed=1)
         split.construct_block(
-            parent_node_path, pg_physics_world, {
+            parent_node_path, physics_world, {
                 "length": 2,
                 "lane_num": self.config["toll_lane_num"] - self.config["lane_num"],
                 "bottle_len": self.BOTTLE_LENGTH,
@@ -137,7 +137,7 @@ class MATollGateMap(PGMap):
         )
         self.blocks.append(split)
         toll = TollGate(2, split.get_socket(index=0), self.road_network, random_seed=1)
-        toll.construct_block(parent_node_path, pg_physics_world, {
+        toll.construct_block(parent_node_path, physics_world, {
             "length": self.config["toll_length"],
         })
 
@@ -150,7 +150,7 @@ class MATollGateMap(PGMap):
                 lane_num=self.config["toll_lane_num"] - self.config["lane_num"],
                 length=self.config["exit_length"],
                 bottle_len=self.BOTTLE_LENGTH,
-            ), parent_node_path, pg_physics_world
+            ), parent_node_path, physics_world
         )
         self.blocks.append(merge)
 
@@ -167,7 +167,7 @@ class MultiAgentTollgateEnv(MultiAgentPGDrive):
         return super(MultiAgentTollgateEnv, self).reset(*args, **kwargs)
 
     @staticmethod
-    def default_config() -> PGConfig:
+    def default_config() -> Config:
         assert MATollConfig["vehicle_config"]["side_detector"]["num_lasers"] > 2
         assert MATollConfig["vehicle_config"]["lane_line_detector"]["num_lasers"] > 2
         return MultiAgentPGDrive.default_config().update(MATollConfig, allow_overwrite=True)
@@ -177,10 +177,10 @@ class MultiAgentTollgateEnv(MultiAgentPGDrive):
 
         if self.current_map is None:
             self.seed(map_config["seed"])
-            new_map = self.pgdrive_engine.map_manager.spawn_object(
+            new_map = self.engine.map_manager.spawn_object(
                 MATollGateMap, map_config=map_config, random_seed=self.current_seed
             )
-            self.pgdrive_engine.map_manager.load_map(new_map)
+            self.engine.map_manager.load_map(new_map)
             self.current_map.spawn_roads = self.spawn_roads
 
     def reward_function(self, vehicle_id: str):
@@ -298,7 +298,7 @@ def _expert():
                 "use_saver": True,
                 "save_level": 1.
             },
-            "pg_world_config": {
+            "engine_config": {
                 "debug_physics_world": True
             },
             "fast": True,
@@ -344,7 +344,7 @@ def _vis_debug_respawn():
                 },
                 "show_lidar": False,
             },
-            "pg_world_config": {
+            "engine_config": {
                 "debug_physics_world": True
             },
             "fast": True,
@@ -458,7 +458,7 @@ def _profile():
     for s in range(10000):
         o, r, d, i = env.step(env.action_space.sample())
 
-        # mask_ratio = env.pgdrive_engine.detector_mask.get_mask_ratio()
+        # mask_ratio = env.engine.detector_mask.get_mask_ratio()
         # print("Mask ratio: ", mask_ratio)
 
         if all(d.values()):

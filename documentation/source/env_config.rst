@@ -120,7 +120,7 @@ Misc.
 
     - :code:`use_increment_steering` (bool): Keyboard control use discretized action such as -1, 0, +1. You can set this value to True to make the keyboard strokes serve as increments to existing action.
     - :code:`action_check` (bool): Check whether the value of action is between \[0.0, 1.0\] or not.
-    - :code:`pg_world_config` (dict): Some basic settings for low-level physics world. More information can be found in source code.
+    - :code:`engine_config` (dict): Some basic settings for low-level physics world. More information can be found in source code.
 
 PGWorld Config
 ################

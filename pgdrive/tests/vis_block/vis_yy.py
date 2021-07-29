@@ -1,5 +1,5 @@
 from pgdrive.envs.pgdrive_env import PGDriveEnv
-from pgdrive.scene_creator.map.base_map import BaseMap, MapGenerateMethod
+from pgdrive.component.map.base_map import BaseMap, MapGenerateMethod
 from pgdrive.utils import setup_logger
 
 
@@ -14,7 +14,7 @@ class TestEnv(PGDriveEnv):
                 "traffic_density": 0.1,
                 "traffic_mode": "hybrid",
                 "start_seed": 5,
-                "pg_world_config": {
+                "engine_config": {
                     "onscreen_message": True,
                     # "debug_physics_world": True,
                     "pstats": True
@@ -49,7 +49,7 @@ if __name__ == "__main__":
     env = TestEnv()
 
     o = env.reset()
-    print("vehicle num", len(env.pgdrive_engine.traffic_manager.vehicles))
+    print("vehicle num", len(env.engine.traffic_manager.vehicles))
     for i in range(1, 100000):
         o, r, d, info = env.step([0, 1])
         info["fuel"] = env.vehicle.energy_consumption

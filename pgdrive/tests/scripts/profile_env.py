@@ -8,7 +8,7 @@ class TestEnv(PGDriveEnv):
                 "map": 30,
                 "environment_num": 1,
                 "traffic_density": 0.1,
-                "pg_world_config": {
+                "engine_config": {
                     "pstats": True
                 },
                 "traffic_mode": "respawn"

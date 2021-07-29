@@ -1,7 +1,7 @@
 import logging
 
-from pgdrive.scene_creator.algorithm.BIG import BIG
-from pgdrive.scene_creator.road.road_network import RoadNetwork
+from pgdrive.component.algorithm.BIG import BIG
+from pgdrive.component.road.road_network import RoadNetwork
 from pgdrive.tests.vis_block.vis_block_base import TestBlock
 
 if __name__ == "__main__":

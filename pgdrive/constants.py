@@ -4,7 +4,7 @@ from panda3d.core import Vec3
 from panda3d.bullet import BulletWorld
 from panda3d.core import Vec4, BitMask32
 
-PG_EDITION = "PGDrive v0.1.4"
+EDITION = "PGDrive v0.1.4"
 DEFAULT_AGENT = "default_agent"
 RENDER_MODE_NONE = "none"  # Do not render
 RENDER_MODE_ONSCREEN = "onscreen"  # Pop up a window and draw image in it

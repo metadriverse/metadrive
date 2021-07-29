@@ -1,8 +1,8 @@
 import json
 
 from pgdrive.envs.pgdrive_env import PGDriveEnv
-from pgdrive.scene_creator.map.base_map import BaseMap, MapGenerateMethod
-from pgdrive.scene_managers.traffic_manager import TrafficMode
+from pgdrive.component.map.base_map import BaseMap, MapGenerateMethod
+from pgdrive.manager.traffic_manager import TrafficMode
 from pgdrive.utils import setup_logger
 
 
@@ -41,7 +41,7 @@ def test_save_episode(vis=False):
             if vis:
                 env.render()
             if d:
-                epi_info = env.pgdrive_engine.dump_episode()
+                epi_info = env.engine.dump_episode()
 
                 # test dump json
                 if test_dump:

@@ -16,15 +16,15 @@ def test_object_collision_detection(render=False):
     try:
         o = env.reset()
         lane_index = (">>", ">>>", 0)
-        alert = env.pgdrive_engine.object_manager.spawn_object(
+        alert = env.engine.object_manager.spawn_object(
             "Traffic Triangle", env.current_map.road_network.get_lane(lane_index), lane_index, 22, 0
         )
-        env.alert.attach_to_world(env.pgdrive_engine.pbr_worldNP, env.pgdrive_engine.physics_world)
+        env.alert.attach_to_world(env.engine.pbr_worldNP, env.engine.physics_world)
         lane_index = (">>", ">>>", 2)
-        alert = env.pgdrive_engine.object_manager.spawn_object(
+        alert = env.engine.object_manager.spawn_object(
             BodyName.Traffic_cone, env.current_map.road_network.get_lane(lane_index), lane_index, 22, 0
         )
-        env.alert.attach_to_world(env.pgdrive_engine.pbr_worldNP, env.pgdrive_engine.physics_world)
+        env.alert.attach_to_world(env.engine.pbr_worldNP, env.engine.physics_world)
         crash_obj = False
         detect_obj = False
         for i in range(1, 100000 if render else 2000):

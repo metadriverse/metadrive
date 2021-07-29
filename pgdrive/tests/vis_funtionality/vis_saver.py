@@ -24,7 +24,7 @@ if __name__ == "__main__":
     env = TestEnv()
 
     o = env.reset()
-    # env.pg_world.force_fps.toggle()
+    # env.engine.force_fps.toggle()
     for i in range(1, 100000):
         o, r, d, info = env.step([0, 1])
         text = {"save": env.save_mode}
