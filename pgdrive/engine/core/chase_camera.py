@@ -7,7 +7,7 @@ import numpy as np
 from direct.controls.InputState import InputState
 from panda3d.core import Vec3, Camera, Point3, BitMask32
 from pgdrive.constants import CollisionGroup
-from pgdrive.utils.coordinates_shift import panda_heading
+from pgdrive.utils.coordinates_shift import panda_heading, panda_position
 
 
 class ChaseCamera:
@@ -22,12 +22,12 @@ class ChaseCamera:
     TOP_DOWN_VIEW_HEIGHT = 120
     WHEEL_SCROLL_SPEED = 10
 
-    def __init__(self, camera: Camera, camera_height: float, camera_dist: float):
+    def __init__(self, engine, camera_height: float, camera_dist: float):
         self._origin_height = camera_height
-        self.engine = get_engine()
+        self.engine = engine
 
         # vehicle chase camera
-        self.camera = camera
+        self.camera = engine.cam
         self.camera_queue = None
         self.camera_dist = camera_dist
         self.direction_running_mean = deque(maxlen=20)
@@ -53,6 +53,23 @@ class ChaseCamera:
         self.engine.accept("wheel_up", self._wheel_up_height)
         self.engine.accept("wheel_down", self._wheel_down_height)
         self.engine.accept("mouse1", self._move_to_pointer)
+
+        if not self.engine.task_manager.hasTaskNamed(self.TOP_DOWN_TASK_NAME):
+            # adjust hpr
+            current_pos = self.camera.getPos()
+            self.camera.lookAt(current_pos[0], current_pos[1], 0)
+            self.engine.task_manager.add(
+                self.manual_control_camera, self.TOP_DOWN_TASK_NAME, extraArgs=[], appendTask=True
+            )
+
+    def set_bird_view_pos(self, position):
+        if self.engine.task_manager.hasTaskNamed(self.TOP_DOWN_TASK_NAME):
+            # adjust hpr
+            p_pos = panda_position(position)
+            self.camera_x, self.camera_y = p_pos[0], p_pos[1]
+            self.engine.task_manager.add(
+                self.manual_control_camera, self.TOP_DOWN_TASK_NAME, extraArgs=[], appendTask=True
+            )
 
     def reset(self):
         self.direction_running_mean.clear()
@@ -113,7 +130,6 @@ class ChaseCamera:
         """
         Use this function to chase a new vehicle !
         :param vehicle: Vehicle to chase
-        :param self.engine: self.engine class
         :return: None
         """
         pos = None
@@ -171,7 +187,7 @@ class ChaseCamera:
         if not self.engine.task_manager.hasTaskNamed(self.TOP_DOWN_TASK_NAME):
             # adjust hpr
             current_pos = self.camera.getPos()
-            self.camera.lookAt(current_pos[0], current_pos[1], 0)
+            self.camera_x, self.camera_y = current_pos[0], current_pos[1]
             self.engine.task_manager.add(
                 self.manual_control_camera, self.TOP_DOWN_TASK_NAME, extraArgs=[], appendTask=True
             )
@@ -188,6 +204,7 @@ class ChaseCamera:
         if self.inputs.isSet("right"):
             self.camera_x += 1.0
         self.camera.setPos(self.camera_x, self.camera_y, self.top_down_camera_height)
+        self.camera.lookAt(self.camera_x, self.camera_y, 0)
         return task.cont
 
     def _update_height(self, height):

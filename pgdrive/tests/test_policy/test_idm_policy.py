@@ -15,12 +15,10 @@ def _create_vehicle():
     config = Config(BASE_DEFAULT_CONFIG)
     config.update(
         {
-            "engine_config": {
-                "use_render": False,
-                "pstats": False,
-                "use_image": False,
-                "debug": False
-            },
+            "use_render": False,
+            "pstats": False,
+            "use_image": False,
+            "debug": False,
             "vehicle_config": v_config
         }
     )

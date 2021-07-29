@@ -8,13 +8,12 @@ from pgdrive.utils.engine_utils import initialize_engine, close_engine, set_glob
 
 def _t(num_blocks):
     default_config = PGDriveEnv.default_config()
-    default_config["engine_config"].update({"use_render": False, "use_image": False, "debug": False})
-    initialize_engine(default_config, None)
+    initialize_engine(default_config)
     set_global_random_seed(0)
     try:
         map_config = default_config["map_config"]
         map_config.update(dict(type="block_num", config=num_blocks))
-        map = CityMap(map_config)
+        map = CityMap(map_config, random_seed=map_config["seed"])
         fig = draw_top_down_map(map, (1024, 1024))
         plt.imshow(fig, cmap="bone")
         plt.xticks([])

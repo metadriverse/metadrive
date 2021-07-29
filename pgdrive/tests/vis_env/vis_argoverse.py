@@ -29,13 +29,11 @@ class TestEnv(ArgoverseEnv):
         super(TestEnv, self).__init__(
             {
                 "traffic_density": 0.,
-                "engine_config": {
-                    "onscreen_message": True,
-                    # "debug_physics_world": True,
-                    "pstats": True,
-                    "global_light": True,
-                    # "debug_static_world":True,
-                },
+                "onscreen_message": True,
+                # "debug_physics_world": True,
+                "pstats": True,
+                "global_light": True,
+                # "debug_static_world":True,
                 "cull_scene": False,
                 # "controller":"joystick",
                 "manual_control": True,

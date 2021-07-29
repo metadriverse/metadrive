@@ -6,13 +6,7 @@ setup_logger(debug=True)
 
 class TestEnv(PGDriveEnv):
     def __init__(self):
-        super(TestEnv,
-              self).__init__({
-                  "environment_num": 1,
-                  "start_seed": 3,
-                  "engine_config": {},
-                  "manual_control": False
-              })
+        super(TestEnv, self).__init__({"environment_num": 1, "start_seed": 3, "manual_control": False})
         # self.engine.cam.setPos(0, 0, 1500)
         # self.engine.cam.lookAt(0, 0, 0)
 

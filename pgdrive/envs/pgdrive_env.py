@@ -5,18 +5,17 @@ from typing import Union, Dict, AnyStr, Optional, Tuple
 
 import numpy as np
 
-from pgdrive.constants import DEFAULT_AGENT, TerminationState
-from pgdrive.engine.core.chase_camera import ChaseCamera
-from pgdrive.engine.core.manual_controller import KeyboardController, JoystickController
-from pgdrive.envs.base_env import BasePGDriveEnv
-from pgdrive.obs.image_obs import ImageStateObservation
-from pgdrive.obs.state_obs import LidarStateObservation
 from pgdrive.component.blocks.first_block import FirstPGBlock
 from pgdrive.component.map.base_map import BaseMap, MapGenerateMethod, parse_map_config
 from pgdrive.component.map.pg_map import PGMap
 from pgdrive.component.vehicle.base_vehicle import BaseVehicle
 from pgdrive.component.vehicle_module.distance_detector import DetectorMask
+from pgdrive.constants import DEFAULT_AGENT, TerminationState
+from pgdrive.engine.core.manual_controller import KeyboardController, JoystickController
+from pgdrive.envs.base_env import BasePGDriveEnv
 from pgdrive.manager.traffic_manager import TrafficMode
+from pgdrive.obs.image_obs import ImageStateObservation
+from pgdrive.obs.state_obs import LidarStateObservation
 from pgdrive.utils import clip, Config, get_np_random, concat_step_infos
 from pgdrive.utils.engine_utils import engine_initialized
 from pgdrive.utils.engine_utils import set_global_random_seed
@@ -130,7 +129,7 @@ class PGDriveEnv(BasePGDriveEnv):
         """Check, update, sync and overwrite some config."""
         config = self.default_config().update(config, allow_add_new_key=False)
         if config["vehicle_config"]["lidar"]["distance"] > 50:
-            config["engine_config"]["max_distance"] = config["vehicle_config"]["lidar"]["distance"]
+            config["max_distance"] = config["vehicle_config"]["lidar"]["distance"]
         return config
 
     def _post_process_config(self, config):
@@ -141,16 +140,6 @@ class PGDriveEnv(BasePGDriveEnv):
             )
         config["map_config"] = parse_map_config(
             easy_map_config=config["map"], new_map_config=config["map_config"], default_config=self.default_config_copy
-        )
-        config["engine_config"].update(
-            {
-                "use_render": config["use_render"],
-                "use_image": config["use_image"],
-                "debug": config["debug"],
-                "decision_repeat": config["decision_repeat"],
-                "fast_launch_window": config["fast"],
-                "cull_scene": config["cull_scene"]
-            }
         )
         config["vehicle_config"].update(
             {
@@ -179,8 +168,7 @@ class PGDriveEnv(BasePGDriveEnv):
                 vehicle.remove_display_region()
 
         # for manual_control and main camera type
-        if (self.config["use_render"] or self.config["use_image"]) and self.config["use_chase_camera"]:
-            self.main_camera = ChaseCamera(self.engine.cam, self.config["camera_height"], self.config["camera_dist"])
+        if self.config["use_render"] or self.config["use_image"]:
             self.main_camera.set_follow_lane(self.config["use_chase_camera_follow_lane"])
             self.main_camera.track(self.current_track_vehicle)
             self.engine.accept("b", self.bird_view_camera)
@@ -547,6 +535,10 @@ class PGDriveEnv(BasePGDriveEnv):
         super(PGDriveEnv, self).setup_engine()
         # Press t can let expert take over. But this function is still experimental.
         self.engine.accept("t", self.toggle_expert_takeover)
+
+    @property
+    def main_camera(self):
+        return self.engine.main_camera
 
 
 def _auto_termination(vehicle, should_done):

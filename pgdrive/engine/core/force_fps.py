@@ -9,7 +9,7 @@ class ForceFPS:
 
     def __init__(self, engine, start=False):
         self.engine = engine
-        fps = 1 / self.engine.world_config["physics_world_step_size"]
+        fps = 1 / self.engine.global_config["physics_world_step_size"]
         self.init_fps = fps
         if start:
             self.state = self.FORCED

@@ -53,26 +53,22 @@ class EngineCore(ShowBase.ShowBase):
     # for debug use
     # loadPrcFileData("", "gl-version 3 2")
 
-    def __init__(self, config: dict = None):
-        # Setup config and Panda3d
-        self.world_config = config
-        # self.world_config = merge_config(self.default_config(), config)
-        # if config is not None:
-        #     self.world_config.merge(config)
-        if self.world_config["pstats"]:
+    def __init__(self, global_config):
+        self.global_config = global_config
+        if self.global_config["pstats"]:
             # pstats debug provided by panda3d
             loadPrcFileData("", "want-pstats 1")
 
-        loadPrcFileData("", "win-size {} {}".format(*self.world_config["window_size"]))
+        loadPrcFileData("", "win-size {} {}".format(*self.global_config["window_size"]))
 
         # Setup onscreen render
-        if self.world_config["use_render"]:
+        if self.global_config["use_render"]:
             self.mode = RENDER_MODE_ONSCREEN
             # Warning it may cause memory leak, Pand3d Official has fixed this in their master branch.
             # You can enable it if your panda version is latest.
             loadPrcFileData("", "threading-model Cull/Draw")  # multi-thread render, accelerate simulation when evaluate
         else:
-            if self.world_config["use_image"]:
+            if self.global_config["use_image"]:
                 self.mode = RENDER_MODE_OFFSCREEN
                 loadPrcFileData("", "threading-model Cull/Draw")
             else:
@@ -82,10 +78,10 @@ class EngineCore(ShowBase.ShowBase):
             self.mode = RENDER_MODE_ONSCREEN
 
         # Setup some debug options
-        if self.world_config["headless_image"]:
+        if self.global_config["headless_image"]:
             # headless machine support
             loadPrcFileData("", "load-display  pandagles2")
-        if self.world_config["debug"]:
+        if self.global_config["debug"]:
             # debug setting
             EngineCore.DEBUG = True
             _free_warning()
@@ -98,62 +94,62 @@ class EngineCore(ShowBase.ShowBase):
             # only report fatal error when debug is False
             _suppress_warning()
             # a special debug mode
-            if self.world_config["debug_physics_world"]:
+            if self.global_config["debug_physics_world"]:
                 self.accept('1', self.toggleDebug)
                 self.accept('4', self.toggleAnalyze)
 
         super(EngineCore, self).__init__(windowType=self.mode)
 
         # Change window size at runtime if screen too small
-        # assert int(self.world_config["use_topdown"]) + int(self.world_config["use_image"]) <= 1, (
+        # assert int(self.global_config["use_topdown"]) + int(self.global_config["use_image"]) <= 1, (
         #     "Only one of use_topdown and use_image options can be selected."
         # )
 
         # main_window_position = (0, 0)
         if self.mode == RENDER_MODE_ONSCREEN:
-            if self.world_config["fast_launch_window"]:
+            if self.global_config["fast"]:
                 pass
             else:
                 loadPrcFileData("", "compressed-textures 1")  # Default to compress
             h = self.pipe.getDisplayHeight()
             w = self.pipe.getDisplayWidth()
-            if self.world_config["window_size"][0] > 0.9 * w or self.world_config["window_size"][1] > 0.9 * h:
-                old_scale = self.world_config["window_size"][0] / self.world_config["window_size"][1]
+            if self.global_config["window_size"][0] > 0.9 * w or self.global_config["window_size"][1] > 0.9 * h:
+                old_scale = self.global_config["window_size"][0] / self.global_config["window_size"][1]
                 new_w = int(min(0.9 * w, 0.9 * h * old_scale))
                 new_h = int(min(0.9 * h, 0.9 * w / old_scale))
-                self.world_config["window_size"] = tuple([new_w, new_h])
+                self.global_config["window_size"] = tuple([new_w, new_h])
                 from panda3d.core import WindowProperties
                 props = WindowProperties()
-                props.setSize(self.world_config["window_size"][0], self.world_config["window_size"][1])
+                props.setSize(self.global_config["window_size"][0], self.global_config["window_size"][1])
                 self.win.requestProperties(props)
                 logging.warning(
                     "Since your screen is too small ({}, {}), we resize the window to {}.".format(
-                        w, h, self.world_config["window_size"]
+                        w, h, self.global_config["window_size"]
                     )
                 )
             # main_window_position = (
-            #     (w - self.world_config["window_size"][0]) / 2, (h - self.world_config["window_size"][1]) / 2
+            #     (w - self.global_config["window_size"][0]) / 2, (h - self.global_config["window_size"][1]) / 2
             # )
 
         # self.highway_render = None
-        # if self.world_config["use_topdown"]:
-        #     self.highway_render = HighwayRender(self.world_config["use_render"], main_window_position)
+        # if self.global_config["use_topdown"]:
+        #     self.highway_render = HighwayRender(self.global_config["use_render"], main_window_position)
 
         # screen scale factor
-        self.w_scale = max(self.world_config["window_size"][0] / self.world_config["window_size"][1], 1)
-        self.h_scale = max(self.world_config["window_size"][1] / self.world_config["window_size"][0], 1)
+        self.w_scale = max(self.global_config["window_size"][0] / self.global_config["window_size"][1], 1)
+        self.h_scale = max(self.global_config["window_size"][1] / self.global_config["window_size"][0], 1)
 
         if self.mode == RENDER_MODE_ONSCREEN:
             self.disableMouse()
 
-        if not self.world_config["debug_physics_world"] and (self.mode in [RENDER_MODE_ONSCREEN, RENDER_MODE_OFFSCREEN
-                                                                           ]):
+        if not self.global_config["debug_physics_world"] and (self.mode in [RENDER_MODE_ONSCREEN, RENDER_MODE_OFFSCREEN
+                                                                            ]):
             initialize_asset_loader(self)
             gltf.patch_loader(self.loader)
 
             # Display logo
-            if self.mode == RENDER_MODE_ONSCREEN and (not self.world_config["debug"]) \
-                    and (not self.world_config["fast_launch_window"]):
+            if self.mode == RENDER_MODE_ONSCREEN and (not self.global_config["debug"]) \
+                    and (not self.global_config["fast"]):
                 self._loading_logo = OnscreenImage(
                     image=AssetLoader.file_path("PGDrive-large.png"),
                     pos=(0, 0, 0),
@@ -182,7 +178,7 @@ class EngineCore(ShowBase.ShowBase):
         self.world_light = None
 
         # physics world
-        self.physics_world = PhysicsWorld(self.world_config["debug_static_world"])
+        self.physics_world = PhysicsWorld(self.global_config["debug_static_world"])
 
         # collision callback
         self.physics_world.dynamic_world.setContactAddedCallback(PythonCallbackObject(collision_callback))
@@ -227,7 +223,7 @@ class EngineCore(ShowBase.ShowBase):
             self.sky_box = SkyBox()
             self.sky_box.attach_to_world(self.render, self.physics_world)
 
-            self.world_light = Light(self.world_config)
+            self.world_light = Light(self.global_config)
             self.world_light.attach_to_world(self.render, self.physics_world)
             self.render.setLight(self.world_light.direction_np)
             self.render.setLight(self.world_light.ambient_np)
@@ -236,13 +232,13 @@ class EngineCore(ShowBase.ShowBase):
             self.render.setAntialias(AntialiasAttrib.MAuto)
 
             # ui and render property
-            if self.world_config["show_fps"]:
+            if self.global_config["show_fps"]:
                 self.setFrameRateMeter(True)
 
             # onscreen message
             self.on_screen_message = ScreenMessage(
                 debug=self.DEBUG
-            ) if self.mode == RENDER_MODE_ONSCREEN and self.world_config["onscreen_message"] else None
+            ) if self.mode == RENDER_MODE_ONSCREEN and self.global_config["onscreen_message"] else None
             self._show_help_message = False
             self._episode_start_time = time.time()
 
@@ -279,13 +275,13 @@ class EngineCore(ShowBase.ShowBase):
         # attach all node to this node asset_path
         self.worldNP.node().removeAllChildren()
         self.pbr_worldNP.node().removeAllChildren()
-        if self.world_config["debug_physics_world"]:
+        if self.global_config["debug_physics_world"]:
             self.addTask(self.report_body_nums, "report_num")
 
         self._episode_start_time = time.time()
 
     def step_physics_world(self):
-        dt = self.world_config["physics_world_step_size"]
+        dt = self.global_config["physics_world_step_size"]
         self.physics_world.dynamic_world.doPhysics(dt, 1, dt)
 
     def _debug_mode(self):

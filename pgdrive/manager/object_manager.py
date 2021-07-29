@@ -101,7 +101,7 @@ class TrafficSignManager(BaseManager):
             on_left = True if self.np_random.rand() > 0.5 or (accident_road is road_2 and is_ramp) else False
             accident_lane_idx = 0 if on_left else -1
 
-            _debug = engine.world_config["_debug_crash_object"]
+            _debug = engine.global_config["_debug_crash_object"]
             if _debug:
                 on_left = True
 

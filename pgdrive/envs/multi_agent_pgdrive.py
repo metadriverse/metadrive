@@ -319,9 +319,6 @@ def _test():
             "debug": False,
             "fast": True,
             "manual_control": True,
-            "engine_config": {
-                "pstats": False
-            },
         }
     )
     o = env.reset()
@@ -351,9 +348,6 @@ def _vis():
             "num_agents": 12,
             "allow_respawn": False,
             "manual_control": True,
-            "engine_config": {
-                "pstats": False
-            },
         }
     )
     o = env.reset()

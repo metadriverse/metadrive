@@ -41,7 +41,6 @@ BASE_DEFAULT_CONFIG = dict(
     cull_scene=True,  # only for debug use
     manual_control=False,
     controller="keyboard",  # "joystick" or "keyboard"
-    use_chase_camera=True,
     use_chase_camera_follow_lane=False,  # If true, then vision would be more stable.
     camera_height=1.8,
     camera_dist=7,
@@ -65,37 +64,35 @@ BASE_DEFAULT_CONFIG = dict(
     ),
 
     # ===== Others =====
-    engine_config=dict(
-        window_size=(1200, 900),  # width, height
-        physics_world_step_size=2e-2,
-        show_fps=True,
-        global_light=False,
+    window_size=(1200, 900),  # width, height
+    physics_world_step_size=2e-2,
+    show_fps=True,
+    global_light=False,
 
-        # show message when render is called
-        onscreen_message=True,
+    # show message when render is called
+    onscreen_message=True,
 
-        # limit the render fps
-        # Press "f" to switch FPS, this config is deprecated!
-        # force_fps=None,
+    # limit the render fps
+    # Press "f" to switch FPS, this config is deprecated!
+    # force_fps=None,
 
-        # only render physics world without model, a special debug option
-        debug_physics_world=False,
+    # only render physics world without model, a special debug option
+    debug_physics_world=False,
 
-        # debug static world
-        debug_static_world=False,
+    # debug static world
+    debug_static_world=False,
 
-        # set to true only when on headless machine and use rgb image!!!!!!
-        headless_image=False,
+    # set to true only when on headless machine and use rgb image!!!!!!
+    headless_image=False,
 
-        # turn on to profile the efficiency
-        pstats=False,
+    # turn on to profile the efficiency
+    pstats=False,
 
-        # The maximum distance used in PGLOD. Set to None will use the default values.
-        max_distance=None,
+    # The maximum distance used in PGLOD. Set to None will use the default values.
+    max_distance=None,
 
-        # Force to generate objects in the left lane.
-        _debug_crash_object=False
-    ),
+    # Force to generate objects in the left lane.
+    _debug_crash_object=False,
     record_episode=False,
 )
 
@@ -141,7 +138,6 @@ class BasePGDriveEnv(gym.Env):
 
         # lazy initialization, create the main vehicle in the lazy_init() func
         self.engine: Optional[BaseEngine] = None
-        self.main_camera = None
         self.controller = None
         self.episode_steps = 0
         self.current_seed = None
@@ -179,8 +175,7 @@ class BasePGDriveEnv(gym.Env):
         # It is the true init() func to create the main vehicle and its module, to avoid incompatible with ray
         if engine_initialized():
             return
-        initialize_engine(self.config, self.agent_manager)
-        self.engine = get_engine()
+        self.engine = initialize_engine(self.config, self.agent_manager)
 
         # engine setup
         self.setup_engine()
@@ -308,10 +303,6 @@ class BasePGDriveEnv(gym.Env):
 
     def close(self):
         if self.engine is not None:
-            if self.main_camera is not None:
-                self.main_camera.destroy()
-                del self.main_camera
-                self.main_camera = None
             close_engine()
 
             del self.controller
