@@ -1,7 +1,7 @@
 import gym
 import numpy as np
 
-from pgdrive.envs.multi_agent_pgdrive import MultiAgentPGDrive
+from pgdrive.envs.marl_envs.multi_agent_pgdrive import MultiAgentPGDrive
 from pgdrive.obs.observation_base import ObservationBase
 from pgdrive.obs.state_obs import StateObservation
 from pgdrive.component.blocks.first_block import FirstPGBlock

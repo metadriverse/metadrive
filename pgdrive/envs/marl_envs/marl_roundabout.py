@@ -1,4 +1,4 @@
-from pgdrive.envs.multi_agent_pgdrive import MultiAgentPGDrive
+from pgdrive.envs.marl_envs.multi_agent_pgdrive import MultiAgentPGDrive
 from pgdrive.component.blocks.roundabout import Roundabout
 from pgdrive.component.map.base_map import BaseMap, MapGenerateMethod
 from pgdrive.utils import get_np_random, Config
