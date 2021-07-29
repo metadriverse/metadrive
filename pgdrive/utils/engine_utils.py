@@ -1,10 +1,8 @@
+import copy
 import logging
 from typing import Optional
 
 from pgdrive.engine.pgdrive_engine import PGDriveEngine
-import copy
-
-from pgdrive.utils import get_np_random
 
 
 def initialize_pgdrive_engine(env_global_config, agent_manager):

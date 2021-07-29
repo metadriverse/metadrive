@@ -16,7 +16,7 @@ def _evaluate(env_config, num_episode, has_traffic=True):
         while ep_count < num_episode:
             action = expert(obs, deterministic=True)
             obs, reward, done, info = env.step(action)
-            # double  check lidar
+            # double check lidar
             lidar = [True if p == 1.0 else False for p in env.vehicle.lidar.cloud_points]
             if not all(lidar):
                 lidar_success = True
@@ -79,5 +79,5 @@ def test_expert_without_traffic():
 
 
 if __name__ == '__main__':
-    test_expert_without_traffic()
-    test_expert_with_traffic()
+    # test_expert_without_traffic()
+    test_expert_with_traffic(use_render=True)

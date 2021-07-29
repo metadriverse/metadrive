@@ -1,5 +1,5 @@
 import logging
-from pgdrive.utils import is_win
+from pgdrive.utils.utils import is_win
 import os
 import pathlib
 import sys

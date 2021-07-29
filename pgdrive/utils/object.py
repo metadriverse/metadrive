@@ -1,12 +1,15 @@
 import logging
-
 from typing import Dict, Union
+
 from panda3d.bullet import BulletWorld
 from panda3d.core import NodePath
-from pgdrive.utils import PGConfig, random_string, get_np_random, RandomEngine
+
 from pgdrive.engine.asset_loader import AssetLoader
-from pgdrive.utils.pg_space import PGSpace
 from pgdrive.engine.core.pg_physics_world import PGPhysicsWorld
+from pgdrive.utils.pg_config import PGConfig
+from pgdrive.utils.pg_space import PGSpace
+from pgdrive.utils.random import RandomEngine
+from pgdrive.utils.utils import random_string
 
 
 class PhysicsNodeList(list):
@@ -54,9 +57,11 @@ class Object(RandomEngine):
         Config is a static conception, which specified the parameters of one element.
         There parameters doesn't change, such as length of straight road, max speed of one vehicle, etc.
         """
-        assert random_seed is not None, "Assign a random seed for {} class in super().__init__()".format(
+
+        assert random_seed is not None, "Please assign a random seed for {} class in super().__init__()".format(
             self.class_name
         )
+
         super(Object, self).__init__(random_seed)
 
         # ID for object
@@ -133,6 +138,7 @@ class Object(RandomEngine):
         """
         Do Information fusion and then analyze and wait for decision
         """
+        pass
 
     def set_action(self, *args, **kwargs):
         """
@@ -186,7 +192,12 @@ class Object(RandomEngine):
         return self.__class__.__name__
 
     def __del__(self):
-        logging.debug("{} is destroyed".format(str(self)))
+        try:
+            str(self)
+        except AttributeError:
+            pass
+        else:
+            logging.debug("{} is destroyed".format(str(self)))
 
     def __repr__(self):
         return "{}".format(str(self))

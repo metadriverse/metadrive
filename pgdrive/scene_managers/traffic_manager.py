@@ -91,6 +91,9 @@ class TrafficManager(BaseManager):
                     block_vehicles = self.block_triggered_vehicles.pop()
                     self._traffic_vehicles += block_vehicles.vehicles
         for v in self._traffic_vehicles:
+            p = self.pgdrive_engine.policy_manager.get_policy(v.name)
+            # TODO(pzh): Why we input None here? Is that correct?
+            p.before_step(vehicle=v, front_vehicle=None, rear_vehicle=None, current_map=engine.current_map)
             v.before_step()
 
     def step(self):
@@ -102,7 +105,9 @@ class TrafficManager(BaseManager):
         dt = self.pgdrive_engine.world_config["physics_world_step_size"]
         dt /= 3.6  # 1m/s = 3.6km/h
         for v in self._traffic_vehicles:
-            v.step(dt)
+            p = self.pgdrive_engine.policy_manager.get_policy(v.name)
+            action = p.step(dt)
+            v.step(dt, action)
 
     def after_step(self):
         """
@@ -110,6 +115,8 @@ class TrafficManager(BaseManager):
         """
         vehicles_to_remove = []
         for v in self._traffic_vehicles:
+            p = self.pgdrive_engine.policy_manager.get_policy(v.name)
+            p.after_step()
             if v.out_of_road:
                 remove = v.need_remove()
                 if remove:
@@ -230,6 +237,17 @@ class TrafficManager(BaseManager):
         )
         self._spawned_objects[random_v.id] = random_v
         self._traffic_vehicles.append(random_v)
+
+        # TODO(pzh): Clean this part!
+        # TODO(pzh): Check whether delay_time is correct!
+        # TODO(pzh): Check whether the random seed is correct!
+        # Register the IDM policy for each traffic vehicle
+        from pgdrive.policy.idm_policy import IDMPolicy
+        e = get_pgdrive_engine()
+        e.policy_manager.register_new_policy(
+            IDMPolicy, vehicle=random_v, traffic_manager=self, random_seed=0, delay_time=1, target_speed=random_v.speed
+        )
+
         return random_v
 
     def _create_vehicles_on_lane(self, traffic_density: float, lane: AbstractLane, is_respawn_lane):

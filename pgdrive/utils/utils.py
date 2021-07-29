@@ -132,3 +132,23 @@ def _deep_update(
         else:
             original[k] = value
     return original
+
+
+def deprecation_warning(old, new, error=False) -> None:
+    """Warns (via the `logger` object) or throws a deprecation warning/error.
+
+    Args:
+        old (str): A description of the "thing" that is to be deprecated.
+        new (Optional[str]): A description of the new "thing" that replaces it.
+        error (Optional[Union[bool, Exception]]): Whether or which exception to
+            throw. If True, throw ValueError. If False, just warn.
+            If Exception, throw that Exception.
+    """
+    msg = "`{}` has been deprecated.{}".format(old, (" Use `{}` instead.".format(new) if new else ""))
+    if error is True:
+        raise ValueError(msg)
+    elif error and issubclass(error, Exception):
+        raise error(msg)
+    else:
+        logger = logging.getLogger(__name__)
+        logger.warning("DeprecationWarning: " + msg + " This will raise an error in the future!")

@@ -7,9 +7,9 @@ from direct.gui.OnscreenImage import OnscreenImage
 from direct.showbase import ShowBase
 from panda3d.bullet import BulletDebugNode
 from panda3d.core import AntialiasAttrib, loadPrcFileData, LineSegs, PythonCallbackObject
+
 from pgdrive.constants import RENDER_MODE_OFFSCREEN, RENDER_MODE_NONE, RENDER_MODE_ONSCREEN, PG_EDITION, CamMask, \
     BKG_COLOR
-
 from pgdrive.engine.asset_loader import AssetLoader, initialize_asset_loader, close_asset_loader
 from pgdrive.engine.core.collision_callback import pg_collision_callback
 from pgdrive.engine.core.force_fps import ForceFPS
@@ -18,7 +18,7 @@ from pgdrive.engine.core.onscreen_message import PGOnScreenMessage
 from pgdrive.engine.core.pg_physics_world import PGPhysicsWorld
 from pgdrive.engine.core.sky_box import SkyBox
 from pgdrive.engine.core.terrain import Terrain
-from pgdrive.utils import is_mac, setup_logger
+from pgdrive.utils.utils import is_mac, setup_logger
 
 
 def _suppress_warning():
