@@ -1,6 +1,6 @@
 import gym
 
-from pgdrive.envs.multi_agent_pgdrive import MultiAgentPGDrive
+from pgdrive.envs.marl_envs.multi_agent_pgdrive import MultiAgentPGDrive
 
 
 def _a(env, action):

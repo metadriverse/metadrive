@@ -1,6 +1,6 @@
 import copy
 from pgdrive.envs.marl_envs.marl_inout_roundabout import LidarStateObservationMARound
-from pgdrive.envs.multi_agent_pgdrive import MultiAgentPGDrive
+from pgdrive.envs.marl_envs.multi_agent_pgdrive import MultiAgentPGDrive
 from pgdrive.obs.observation_base import ObservationBase
 from pgdrive.component.blocks.first_block import FirstPGBlock
 from pgdrive.component.blocks.intersection import InterSection

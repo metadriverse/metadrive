@@ -2,7 +2,7 @@ import gym
 import numpy as np
 
 from pgdrive.constants import TerminationState
-from pgdrive.envs.multi_agent_pgdrive import MultiAgentPGDrive, pygame_replay
+from pgdrive.envs.marl_envs.multi_agent_pgdrive import MultiAgentPGDrive, pygame_replay
 from pgdrive.obs.state_obs import LidarStateObservation, StateObservation
 from pgdrive.component.blocks.bottleneck import Merge, Split
 from pgdrive.component.blocks.first_block import FirstPGBlock
