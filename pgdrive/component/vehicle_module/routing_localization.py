@@ -50,7 +50,7 @@ class RoutingLocalizationModule:
 
         # Vis
         self._is_showing = True  # store the state of navigation mark
-        self._show_navi_info = (engine.mode == RENDER_MODE_ONSCREEN and not engine.world_config["debug_physics_world"])
+        self._show_navi_info = (engine.mode == RENDER_MODE_ONSCREEN and not engine.global_config["debug_physics_world"])
         self._dest_node_path = None
         self._goal_node_path = None
         self._arrow_node_path = None

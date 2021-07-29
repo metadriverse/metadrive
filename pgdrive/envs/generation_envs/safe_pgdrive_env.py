@@ -111,9 +111,7 @@ if __name__ == "__main__":
             "out_of_road_cost": 1,
             "debug": True,
             "cull_scene": True,
-            "engine_config": {
-                "pstats": True
-            },
+            "pstats": True,
             "vehicle_config": {
                 "show_lidar": True,
                 "show_side_detector": True,

@@ -192,7 +192,7 @@ class SpawnManager:
                 engine, spawn_point_position, lane_heading, self.RESPAWN_REGION_LONGITUDE, self.RESPAWN_REGION_LATERAL,
                 CollisionGroup.EgoVehicle
             )
-            if (engine.world_config["debug"] or engine.world_config["debug_physics_world"]) \
+            if (engine.global_config["debug"] or engine.global_config["debug_physics_world"]) \
                     and bp.get("need_debug", True):
                 shape = BulletBoxShape(Vec3(self.RESPAWN_REGION_LONGITUDE / 2, self.RESPAWN_REGION_LATERAL / 2, 1))
                 vis_body = engine.render.attach_new_node(BulletGhostNode("debug"))

@@ -1,7 +1,7 @@
 import logging
+from collections import OrderedDict
 from typing import Dict, AnyStr
 import numpy as np
-from collections import OrderedDict
 
 from pgdrive.engine.core.engine_core import EngineCore
 from pgdrive.engine.scene_cull import SceneCull
@@ -23,8 +23,9 @@ class BaseEngine(EngineCore):
     STOP_REPLAY = False
 
     def __init__(self, global_config):
-        self.global_config = global_config
-        super(BaseEngine, self).__init__(self.global_config["engine_config"])
+        super(BaseEngine, self).__init__(global_config)
+
+        # managers
         self.task_manager = self.taskMgr  # use the inner TaskMgr of Panda3D as PGDrive task manager
         self._managers = OrderedDict()
 
@@ -39,7 +40,8 @@ class BaseEngine(EngineCore):
         self.cull_scene = self.global_config["cull_scene"]
         self.detector_mask = None
 
-        # add default engines
+        # add camera or not
+        self.main_camera = self.setup_main_camera()
 
     def reset(self, episode_data=None):
         """
@@ -108,8 +110,7 @@ class BaseEngine(EngineCore):
             if self.replay_system is None:
                 # not in replay mode
                 for manager in self._managers.values():
-                    if isinstance(manager, BaseManager):
-                        manager.step()
+                    manager.step()
                 engine.step_physics_world()
             else:
                 if not self.STOP_REPLAY:
@@ -143,12 +144,12 @@ class BaseEngine(EngineCore):
         poses = [v.position for v in self.agent_manager.active_agents.values()]
         if self.cull_scene:
             # TODO use a for loop
-            SceneCull.cull_distant_blocks(self, self.current_map.blocks, poses, self.world_config["max_distance"])
+            SceneCull.cull_distant_blocks(self, self.current_map.blocks, poses, self.global_config["max_distance"])
 
             SceneCull.cull_distant_traffic_vehicles(
-                self, self.traffic_manager.traffic_vehicles, poses, self.world_config["max_distance"]
+                self, self.traffic_manager.traffic_vehicles, poses, self.global_config["max_distance"]
             )
-            SceneCull.cull_distant_objects(self, self.object_manager.objects, poses, self.world_config["max_distance"])
+            SceneCull.cull_distant_objects(self, self.object_manager.objects, poses, self.global_config["max_distance"])
 
         return step_infos
 
@@ -191,7 +192,8 @@ class BaseEngine(EngineCore):
         Note:
         Instead of calling this func directly, close Engine by using engine_utils.close_engine
         """
-
+        if self.main_camera is not None:
+            self.main_camera.destroy(self)
         if len(self._managers) > 0:
             for name, manager in self._managers.items():
                 setattr(self, name, None)
@@ -236,3 +238,10 @@ class BaseEngine(EngineCore):
     @property
     def current_map(self):
         return self.map_manager.current_map
+
+    def setup_main_camera(self):
+        from pgdrive.engine.core.chase_camera import ChaseCamera
+        if self.global_config["use_render"] or self.global_config["use_image"]:
+            return ChaseCamera(self, self.global_config["camera_height"], self.global_config["camera_dist"])
+        else:
+            return None

@@ -13,9 +13,7 @@ class TestEnv(PGDriveEnv):
                 "use_render": True,
                 "use_image": True,
                 "rgb_clip": True,
-                "engine_config": {
-                    "headless_image": False
-                }
+                "headless_image": False
             }
         )
 

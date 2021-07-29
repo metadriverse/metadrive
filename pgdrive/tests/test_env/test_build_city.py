@@ -8,8 +8,7 @@ from pgdrive.utils.engine_utils import initialize_engine, close_engine
 
 def _t(num_blocks):
     default_config = PGDriveEnv.default_config()
-    default_config["engine_config"].update({"use_render": False, "use_image": False, "debug": False})
-    initialize_engine(default_config, None)
+    initialize_engine(default_config)
     try:
         map_config = default_config["map_config"]
         map_config.update(dict(type="block_num", config=num_blocks))

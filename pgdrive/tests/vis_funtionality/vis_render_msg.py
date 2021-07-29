@@ -12,9 +12,6 @@ class TestEnv(PGDriveEnv):
                 "environment_num": 4,
                 "traffic_density": 0.1,
                 "start_seed": 3,
-                "engine_config": {
-                    "debug": False,
-                },
                 "image_source": "mini_map",
                 "manual_control": True,
                 "use_render": True,

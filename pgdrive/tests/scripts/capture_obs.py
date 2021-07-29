@@ -15,12 +15,11 @@ class TestEnv(PGDriveEnv):
                 # "traffic_density": 1.0,
                 "traffic_mode": "hybrid",
                 "start_seed": 82,
-                "engine_config": {
-                    "onscreen_message": True,
-                    # "debug_physics_world": True,
-                    # "pstats": True,
-                    # "show_fps":False,
-                },
+                "onscreen_message": True,
+                # "debug_physics_world": True,
+                # "pstats": True,
+                # "show_fps":False,
+
                 # "random_traffic":True,
                 "vehicle_config": dict(
                     mini_map=(168 * w_f * 6, 84 * h_f * 6, 270),  # buffer length, width

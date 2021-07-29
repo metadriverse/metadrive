@@ -16,9 +16,7 @@ class TestEnv(PGDriveEnv):
                 "traffic_density": 0.1,
                 "start_seed": 5,
                 # "traffic_mode":"respawn",
-                "engine_config": {
-                    "debug_physics_world": False,
-                },
+                "debug_physics_world": False,
                 "debug": False,
                 "map": "CSRCR"
             }

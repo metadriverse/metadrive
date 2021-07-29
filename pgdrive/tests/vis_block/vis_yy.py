@@ -14,11 +14,9 @@ class TestEnv(PGDriveEnv):
                 "traffic_density": 0.1,
                 "traffic_mode": "hybrid",
                 "start_seed": 5,
-                "engine_config": {
-                    "onscreen_message": True,
-                    # "debug_physics_world": True,
-                    "pstats": True
-                },
+                "onscreen_message": True,
+                # "debug_physics_world": True,
+                "pstats": True,
                 # "controller":"joystick",
                 "manual_control": True,
                 "use_render": True,
