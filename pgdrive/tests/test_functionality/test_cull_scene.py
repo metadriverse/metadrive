@@ -7,11 +7,13 @@ def test_cull_scene(use_render=False):
     class TestCull(MultiAgentPGDrive):
         def default_config(self) -> Config:
             config = MultiAgentPGDrive.default_config()
-            config.update({
-                "target_vehicle_configs": {},
-                "num_agents": 0,
-                "crash_done": True,
-            }, allow_overwrite=True)
+            config.update(
+                {
+                    "target_vehicle_configs": {},
+                    "num_agents": 0,
+                    "crash_done": True,
+                }, allow_add_new_key=True
+            )
             return config
 
     for _ in range(5):

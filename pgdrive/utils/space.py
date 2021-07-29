@@ -1,3 +1,8 @@
+"""
+This filed is mostly copied from gym==0.17.2
+We use the gym.spaces as helpers, but it may cause problem if user using some old version of gym.
+"""
+
 import logging
 import typing as tp
 from collections import namedtuple, OrderedDict
@@ -6,13 +11,9 @@ import numpy as np
 
 from pgdrive.utils.random import get_np_random
 
-PGBoxSpace = namedtuple("PGBoxSpace", "max min")
-PGDiscreteSpace = namedtuple("PGDiscreteSpace", "max min")
-PGConstantSpace = namedtuple("PGConstantSpace", "value")
-"""
-This filed is mostly copied from gym==0.17.2
-We use the gym.spaces as helpers, but it may cause problem if user using some old version of gym.
-"""
+BoxSpace = namedtuple("BoxSpace", "max min")
+DiscreteSpace = namedtuple("DiscreteSpace", "max min")
+ConstantSpace = namedtuple("ConstantSpace", "value")
 
 
 class Space:
@@ -154,7 +155,7 @@ class ParameterSpace(Dict):
     Usage:
     PGSpace({"lane_length":length})
     """
-    def __init__(self, our_config: tp.Dict[str, tp.Union[PGBoxSpace, PGDiscreteSpace, PGConstantSpace]]):
+    def __init__(self, our_config: tp.Dict[str, tp.Union[BoxSpace, DiscreteSpace, ConstantSpace]]):
         super(ParameterSpace, self).__init__(ParameterSpace.wrap2gym_space(our_config))
         self.parameters = set(our_config.keys())
 
@@ -162,11 +163,11 @@ class ParameterSpace(Dict):
     def wrap2gym_space(our_config):
         ret = dict()
         for key, value in our_config.items():
-            if isinstance(value, PGBoxSpace):
+            if isinstance(value, BoxSpace):
                 ret[key] = Box(low=value.min, high=value.max, shape=(1, ))
-            elif isinstance(value, PGDiscreteSpace):
+            elif isinstance(value, DiscreteSpace):
                 ret[key] = Box(low=value.min, high=value.max, shape=(1, ), dtype=np.int64)
-            elif isinstance(value, PGConstantSpace):
+            elif isinstance(value, ConstantSpace):
                 ret[key] = Box(low=value.value, high=value.value, shape=(1, ))
             else:
                 raise ValueError("{} can not be wrapped in gym space".format(key))
@@ -219,26 +220,20 @@ class Parameter:
 class VehicleParameterSpace:
     BASE_VEHICLE = {
         # Now the parameter sample is not available and thus the value space is incorrect
-        Parameter.vehicle_height: PGConstantSpace(1),
-        Parameter.chassis_height: PGConstantSpace(0.3),
-        Parameter.front_tire_longitude: PGConstantSpace(1.05),
-        Parameter.rear_tire_longitude: PGConstantSpace(1.17),
-        Parameter.tire_lateral: PGConstantSpace(0.8),
-        Parameter.tire_radius: PGConstantSpace(0.25),
-        Parameter.mass: PGConstantSpace(800.0),
-        Parameter.heading: PGConstantSpace(0.0),
+        Parameter.vehicle_height: ConstantSpace(1),
+        Parameter.chassis_height: ConstantSpace(0.3),
+        Parameter.front_tire_longitude: ConstantSpace(1.05),
+        Parameter.rear_tire_longitude: ConstantSpace(1.17),
+        Parameter.tire_lateral: ConstantSpace(0.8),
+        Parameter.tire_radius: ConstantSpace(0.25),
+        Parameter.mass: ConstantSpace(800.0),
+        Parameter.heading: ConstantSpace(0.0),
 
         # visualization
-        Parameter.vehicle_vis_h: PGConstantSpace(180),
-        Parameter.vehicle_vis_y: PGConstantSpace(0.1),
-        Parameter.vehicle_vis_z: PGConstantSpace(-0.31),
-        Parameter.vehicle_vis_scale: PGConstantSpace(0.013),
-
-        # TODO the following parameters will be opened soon using PGBoxSPace
-        # Parameter.steering_max: PGConstantSpace(40.0),
-        # Parameter.engine_force_max: PGConstantSpace(500.0),
-        # Parameter.brake_force_max: PGConstantSpace(40.0),
-        # Parameter.speed_max: PGConstantSpace(120),
+        Parameter.vehicle_vis_h: ConstantSpace(180),
+        Parameter.vehicle_vis_y: ConstantSpace(0.1),
+        Parameter.vehicle_vis_z: ConstantSpace(-0.31),
+        Parameter.vehicle_vis_scale: ConstantSpace(0.013),
     }
 
 
@@ -247,49 +242,49 @@ class BlockParameterSpace:
     Make sure the range of curve parameters covers the parameter space of other blocks,
     otherwise, an error may happen in navigation info normalization
     """
-    STRAIGHT = {Parameter.length: PGBoxSpace(min=40.0, max=80.0)}
+    STRAIGHT = {Parameter.length: BoxSpace(min=40.0, max=80.0)}
     CURVE = {
-        Parameter.length: PGBoxSpace(min=40.0, max=80.0),
-        Parameter.radius: PGBoxSpace(min=25.0, max=60.0),
-        Parameter.angle: PGBoxSpace(min=45, max=135),
-        Parameter.dir: PGDiscreteSpace(min=0, max=1)
+        Parameter.length: BoxSpace(min=40.0, max=80.0),
+        Parameter.radius: BoxSpace(min=25.0, max=60.0),
+        Parameter.angle: BoxSpace(min=45, max=135),
+        Parameter.dir: DiscreteSpace(min=0, max=1)
     }
     INTERSECTION = {
-        Parameter.radius: PGConstantSpace(10),
-        Parameter.change_lane_num: PGDiscreteSpace(min=0, max=1),  # 0, 1
-        Parameter.decrease_increase: PGDiscreteSpace(min=0, max=1)  # 0, decrease, 1 increase
+        Parameter.radius: ConstantSpace(10),
+        Parameter.change_lane_num: DiscreteSpace(min=0, max=1),  # 0, 1
+        Parameter.decrease_increase: DiscreteSpace(min=0, max=1)  # 0, decrease, 1 increase
     }
     ROUNDABOUT = {
         # The radius of the
-        Parameter.radius_exit: PGBoxSpace(min=5, max=15),  # TODO Should we reduce this?
-        Parameter.radius_inner: PGBoxSpace(min=15, max=45),  # TODO Should we reduce this?
-        Parameter.angle: PGConstantSpace(60)
+        Parameter.radius_exit: BoxSpace(min=5, max=15),  # TODO Should we reduce this?
+        Parameter.radius_inner: BoxSpace(min=15, max=45),  # TODO Should we reduce this?
+        Parameter.angle: ConstantSpace(60)
     }
     T_INTERSECTION = {
-        Parameter.radius: PGConstantSpace(10),
-        Parameter.t_intersection_type: PGDiscreteSpace(min=0, max=2),  # 3 different t type for previous socket
-        Parameter.change_lane_num: PGDiscreteSpace(min=0, max=1),  # 0,1
-        Parameter.decrease_increase: PGDiscreteSpace(min=0, max=1)  # 0, decrease, 1 increase
+        Parameter.radius: ConstantSpace(10),
+        Parameter.t_intersection_type: DiscreteSpace(min=0, max=2),  # 3 different t type for previous socket
+        Parameter.change_lane_num: DiscreteSpace(min=0, max=1),  # 0,1
+        Parameter.decrease_increase: DiscreteSpace(min=0, max=1)  # 0, decrease, 1 increase
     }
     RAMP_PARAMETER = {
-        Parameter.length: PGBoxSpace(min=20, max=40)  # accelerate/decelerate part length
+        Parameter.length: BoxSpace(min=20, max=40)  # accelerate/decelerate part length
     }
     FORK_PARAMETER = {
-        Parameter.length: PGBoxSpace(min=20, max=40),  # accelerate/decelerate part length
-        Parameter.lane_num: PGDiscreteSpace(min=0, max=1)
+        Parameter.length: BoxSpace(min=20, max=40),  # accelerate/decelerate part length
+        Parameter.lane_num: DiscreteSpace(min=0, max=1)
     }
     BOTTLENECK_PARAMETER = {
-        Parameter.length: PGBoxSpace(min=20, max=50),  # the length of straigh part
-        Parameter.lane_num: PGDiscreteSpace(min=1, max=2),  # the lane num increased or descreased now 1-2
-        "bottle_len": PGConstantSpace(20)
+        Parameter.length: BoxSpace(min=20, max=50),  # the length of straigh part
+        Parameter.lane_num: DiscreteSpace(min=1, max=2),  # the lane num increased or descreased now 1-2
+        "bottle_len": ConstantSpace(20)
     }
     TOLLGATE_PARAMETER = {
-        Parameter.length: PGConstantSpace(20),  # the length of straigh part
+        Parameter.length: ConstantSpace(20),  # the length of straigh part
     }
     PARKING_LOT_PARAMETER = {
-        Parameter.one_side_vehicle_num: PGDiscreteSpace(min=2, max=10),
-        Parameter.radius: PGConstantSpace(value=4),
-        Parameter.length: PGConstantSpace(value=8)
+        Parameter.one_side_vehicle_num: DiscreteSpace(min=2, max=10),
+        Parameter.radius: ConstantSpace(value=4),
+        Parameter.length: ConstantSpace(value=8)
     }
 
 
@@ -469,9 +464,9 @@ if __name__ == "__main__":
     Test
     """
     config = {
-        "length": PGBoxSpace(min=10.0, max=80.0),
-        "angle": PGBoxSpace(min=50.0, max=360.0),
-        "goal": PGDiscreteSpace(min=0, max=2)
+        "length": BoxSpace(min=10.0, max=80.0),
+        "angle": BoxSpace(min=50.0, max=360.0),
+        "goal": DiscreteSpace(min=0, max=2)
     }
     config = ParameterSpace(config)
     print(config.sample())

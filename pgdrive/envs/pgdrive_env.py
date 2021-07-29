@@ -128,7 +128,7 @@ class PGDriveEnv(BasePGDriveEnv):
 
     def _process_extra_config(self, config: Union[dict, "Config"]) -> "Config":
         """Check, update, sync and overwrite some config."""
-        config = self.default_config().update(config, allow_overwrite=False)
+        config = self.default_config().update(config, allow_add_new_key=False)
         if config["vehicle_config"]["lidar"]["distance"] > 50:
             config["engine_config"]["max_distance"] = config["vehicle_config"]["lidar"]["distance"]
         return config
@@ -485,9 +485,9 @@ class PGDriveEnv(BasePGDriveEnv):
         action = actions[v_id]
         steering = action[0]
         throttle = action[1]
-        if vehicle.vehicle_config["use_saver"] or vehicle._expert_takeover:
+        if vehicle.config["use_saver"] or vehicle._expert_takeover:
             # saver can be used for human or another AI
-            save_level = vehicle.vehicle_config["save_level"] if not vehicle._expert_takeover else 1.0
+            save_level = vehicle.config["save_level"] if not vehicle._expert_takeover else 1.0
             obs = self.observations[v_id].observe(vehicle)
             from pgdrive.examples.ppo_expert import expert
             try:

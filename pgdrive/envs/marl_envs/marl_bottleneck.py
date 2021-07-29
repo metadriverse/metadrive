@@ -71,7 +71,7 @@ class MultiAgentBottleneckEnv(MultiAgentPGDrive):
         assert MABottleneckConfig["vehicle_config"]["side_detector"]["num_lasers"] > 2
         assert MABottleneckConfig["vehicle_config"]["lane_line_detector"]["num_lasers"] > 2
         MABottleneckConfig["map_config"]["lane_num"] = MABottleneckConfig["map_config"]["bottle_lane_num"]
-        return MultiAgentPGDrive.default_config().update(MABottleneckConfig, allow_overwrite=True)
+        return MultiAgentPGDrive.default_config().update(MABottleneckConfig, allow_add_new_key=True)
 
     def _update_map(self, episode_data: dict = None, force_seed=None):
         map_config = self.config["map_config"]

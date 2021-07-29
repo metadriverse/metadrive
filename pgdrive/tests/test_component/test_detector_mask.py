@@ -135,7 +135,7 @@ def test_detector_mask_in_lidar():
         env.reset()
         span = 2 * max(env.vehicle.WIDTH, env.vehicle.LENGTH)
         detector_mask = DetectorMask(
-            env.config.vehicle_config.lidar.num_lasers, span, max_distance=env.config.vehicle_config.lidar.distance
+            env.vehicle.config.lidar.num_lasers, span, max_distance=env.vehicle.config.lidar.distance
         )
         ep_count = 0
         for _ in range(3000):

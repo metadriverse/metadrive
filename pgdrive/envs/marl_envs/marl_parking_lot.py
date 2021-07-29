@@ -121,7 +121,7 @@ class MultiAgentParkingLotEnv(MultiAgentPGDrive):
 
     @staticmethod
     def default_config() -> Config:
-        return MultiAgentPGDrive.default_config().update(MAParkingLotConfig, allow_overwrite=True)
+        return MultiAgentPGDrive.default_config().update(MAParkingLotConfig, allow_add_new_key=True)
 
     @staticmethod
     def _get_out_spawn_roads(parking_space_num):
@@ -132,7 +132,7 @@ class MultiAgentParkingLotEnv(MultiAgentPGDrive):
 
     def _process_extra_config(self, config) -> "Config":
         ret_config = self.default_config().update(
-            config, allow_overwrite=False, stop_recursive_update=["target_vehicle_configs"]
+            config, allow_add_new_key=False, stop_recursive_update=["target_vehicle_configs"]
         )
         if not ret_config["crash_done"] and ret_config["crash_vehicle_penalty"] > 2:
             logging.warning(
@@ -231,7 +231,7 @@ class MultiAgentParkingLotEnv(MultiAgentPGDrive):
 
         new_agent_id, vehicle = self.agent_manager.propose_new_vehicle()
         new_spawn_place_config = new_spawn_place["config"]
-        vehicle.vehicle_config.update(new_spawn_place_config)
+        vehicle.config.update(new_spawn_place_config)
         vehicle.reset(self.current_map)
         self._update_destination_for(new_agent_id)
         vehicle.after_step(detector_mask=None)

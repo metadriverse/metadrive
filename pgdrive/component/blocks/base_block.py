@@ -87,7 +87,7 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
                 "Make sure the parameters' name are as same as what defined in pg_space.py"
             raw_config = self.get_config()
             raw_config.update(extra_config)
-            self.set_config(raw_config)
+            self.update_config(raw_config)
         self._clear_topology()
         success = self._sample_topology()
         self._global_network.add(self.block_network, no_same_node)

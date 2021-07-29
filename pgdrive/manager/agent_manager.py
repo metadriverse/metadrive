@@ -115,7 +115,7 @@ class AgentManager(BaseManager):
 
             obs_space = self._init_observation_spaces[agent_id]
             self.observation_spaces[vehicle.name] = obs_space
-            if not vehicle.vehicle_config["use_image"]:
+            if not vehicle.config["use_image"]:
                 assert isinstance(obs_space, Box)
             else:
                 assert isinstance(obs_space, Dict), "Multi-agent observation should be gym.Dict"
