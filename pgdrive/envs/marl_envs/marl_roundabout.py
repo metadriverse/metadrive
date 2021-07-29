@@ -1,7 +1,7 @@
 from pgdrive.envs.multi_agent_pgdrive import MultiAgentPGDrive
-from pgdrive.scene_creator.blocks.roundabout import Roundabout
-from pgdrive.scene_creator.map.base_map import BaseMap, MapGenerateMethod
-from pgdrive.utils import get_np_random, PGConfig
+from pgdrive.component.blocks.roundabout import Roundabout
+from pgdrive.component.map.base_map import BaseMap, MapGenerateMethod
+from pgdrive.utils import get_np_random, Config
 
 
 class MultiAgentRoundaboutEnv(MultiAgentPGDrive):
@@ -17,7 +17,7 @@ class MultiAgentRoundaboutEnv(MultiAgentPGDrive):
     ]
 
     @staticmethod
-    def default_config() -> PGConfig:
+    def default_config() -> Config:
         raise ValueError("This class is deprecated! Please use MultiAgentRoundaboutEnv instead!")
         config = MultiAgentPGDrive.default_config()
         config.update(
@@ -44,7 +44,7 @@ class MultiAgentRoundaboutEnv(MultiAgentPGDrive):
         super(MultiAgentRoundaboutEnv, self)._after_lazy_init()
         if hasattr(self, "main_camera") and self.main_camera is not None:
             self.main_camera.camera.setPos(0, 0, 100)
-            self.main_camera.stop_chase(self.pg_world)
+            self.main_camera.stop_chase(self.engine)
             self.main_camera.camera_x += 60
 
     def _process_extra_config(self, config):
@@ -103,7 +103,7 @@ if __name__ == "__main__":
             "use_render": True,
             "debug": False,
             "manual_control": True,
-            "pg_world_config": {
+            "engine_config": {
                 "pstats": True
             },
             "crash_done": False,

@@ -3,15 +3,15 @@ import logging
 import numpy as np
 from pgdrive.constants import DEFAULT_AGENT, TerminationState
 from pgdrive.envs.pgdrive_env import PGDriveEnv as PGDriveEnvV1
-from pgdrive.scene_managers.traffic_manager import TrafficMode
-from pgdrive.utils import PGConfig, clip
+from pgdrive.manager.traffic_manager import TrafficMode
+from pgdrive.utils import Config, clip
 
 
 class PGDriveEnvV2(PGDriveEnvV1):
     DEFAULT_AGENT = DEFAULT_AGENT
 
     @staticmethod
-    def default_config() -> PGConfig:
+    def default_config() -> Config:
         config = PGDriveEnvV1.default_config()
         config.update(
             dict(
@@ -184,7 +184,7 @@ class PGDriveEnvV2(PGDriveEnvV1):
 
     def _get_reset_return(self):
         ret = {}
-        self.pgdrive_engine.update_state_for_all_target_vehicles()
+        self.engine.update_state_for_all_target_vehicles()
         for v_id, v in self.vehicles.items():
             self.observations[v_id].reset(self, v)
             ret[v_id] = self.observations[v_id].observe(v)

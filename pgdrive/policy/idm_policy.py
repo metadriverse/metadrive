@@ -7,14 +7,14 @@ import numpy as np
 import pgdrive.utils.math_utils as utils
 from pgdrive.constants import Route, LaneIndex
 from pgdrive.policy.base_policy import BasePolicy
-from pgdrive.scene_creator.highway_vehicle.controller import ControlledVehicle, Vehicle
-from pgdrive.scene_creator.lane.abs_lane import AbstractLane
-from pgdrive.scene_creator.static_object import BaseStaticObject
-# from pgdrive.scene_creator.highway_vehicle.kinematics import Vehicle
-from pgdrive.scene_creator.vehicle.base_vehicle import BaseVehicle
-from pgdrive.scene_managers.traffic_manager import TrafficManager
+from pgdrive.component.highway_vehicle.controller import ControlledVehicle, Vehicle
+from pgdrive.component.lane.abs_lane import AbstractLane
+from pgdrive.component.static_object import BaseStaticObject
+# from pgdrive.component.highway_vehicle.kinematics import Vehicle
+from pgdrive.component.vehicle.base_vehicle import BaseVehicle
+from pgdrive.manager.traffic_manager import TrafficManager
 from pgdrive.utils import norm
-from pgdrive.utils.engine_utils import get_pgdrive_engine
+from pgdrive.utils.engine_utils import get_engine
 from pgdrive.utils.math_utils import clip
 from pgdrive.utils.scene_utils import ray_localization
 
@@ -188,7 +188,7 @@ class IDMPolicy(BasePolicy):
         # self.speed += self.action['acceleration'] * dt
 
     def after_step(self, *args, **kwargs):
-        engine = get_pgdrive_engine()
+        engine = get_engine()
         dir = np.array([math.cos(self.heading), math.sin(self.heading)])
         lane, lane_index = ray_localization(dir, self.position, engine)
         if lane is not None:
@@ -279,7 +279,7 @@ class IDMPolicy(BasePolicy):
         acceleration = self.COMFORT_ACC_MAX * (1 - np.power(max(self.speed, 0) / ego_target_speed, self.DELTA))
 
         if front_vehicle:
-            # if isinstance(ego_vehicle, PGTrafficVehicle):
+            # if isinstance(ego_vehicle, TrafficVehicle):
             d = self.lane_distance_to(front_vehicle)
 
             if d > 0:
@@ -358,7 +358,7 @@ class IDMPolicy(BasePolicy):
             if self.lane_index[:2] == self.target_lane_index[:2]:
                 for v in self.traffic_manager.vehicles:
 
-                    e = get_pgdrive_engine()
+                    e = get_engine()
                     p = e.policy_manager.get_policy(v.name)
                     if p is None:
                         continue

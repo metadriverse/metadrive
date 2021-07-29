@@ -80,7 +80,7 @@ def test_reward_cost_done():
     # config['accident_prob'] = 1.0
     # # config["use_render"] = True
     # # config["fast"] = True
-    # config["pg_world_config"] = {"_debug_crash_object": True}
+    # config["engine_config"] = {"_debug_crash_object": True}
     # try:
     #     env = PGDriveEnvV2(config=config)
     #     env.reset()

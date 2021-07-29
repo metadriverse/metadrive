@@ -3,8 +3,8 @@ from typing import List, Tuple, Union
 import numpy as np
 
 from pgdrive.constants import LineType
-from pgdrive.scene_creator.lane.circular_lane import CircularLane
-from pgdrive.scene_creator.lane.straight_lane import StraightLane
+from pgdrive.component.lane.circular_lane import CircularLane
+from pgdrive.component.lane.straight_lane import StraightLane
 from pgdrive.utils.utils import import_pygame
 
 PositionType = Union[Tuple[float, float], np.ndarray]
@@ -368,7 +368,7 @@ class LaneGraphics:
 
     @classmethod
     def simple_draw(cls, lane, surface, color=(255, 255, 255)):
-        from pgdrive.scene_creator.blocks.pg_block import PGBlock
+        from pgdrive.component.blocks.pg_block import PGBlock
         segment_num = int(lane.length / PGBlock.CIRCULAR_SEGMENT_LENGTH)
         width = lane.width
         for segment in range(segment_num):

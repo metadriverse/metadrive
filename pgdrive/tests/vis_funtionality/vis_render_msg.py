@@ -1,5 +1,5 @@
 from pgdrive.envs.pgdrive_env import PGDriveEnv
-from pgdrive.scene_creator.map.base_map import BaseMap, MapGenerateMethod
+from pgdrive.component.map.base_map import BaseMap, MapGenerateMethod
 from pgdrive.utils import setup_logger
 
 setup_logger(debug=True)
@@ -12,7 +12,7 @@ class TestEnv(PGDriveEnv):
                 "environment_num": 4,
                 "traffic_density": 0.1,
                 "start_seed": 3,
-                "pg_world_config": {
+                "engine_config": {
                     "debug": False,
                 },
                 "image_source": "mini_map",

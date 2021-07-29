@@ -184,28 +184,28 @@ def get_boxes_bounding_box(boxes):
     return res_x_max, res_x_min, res_y_max, res_y_min
 
 
-class PGVector(tuple):
+class Vector(tuple):
     def __sub__(self, other):
-        return PGVector((self[0] - other[0], self[1] - other[1]))
+        return Vector((self[0] - other[0], self[1] - other[1]))
 
     def __rmul__(self, other):
         return self.__mul__(other)
 
     def __mul__(self, other):
         if isinstance(other, float) or np.isscalar(other):
-            return PGVector((self[0] * other, self[1] * other))
+            return Vector((self[0] * other, self[1] * other))
         else:
-            return PGVector((self[0] * other[0], self[1] * other[1]))
+            return Vector((self[0] * other[0], self[1] * other[1]))
 
     def __add__(self, other):
         if isinstance(other, float) or np.isscalar(other):
-            return PGVector((self[0] + other, self[1] + other))
+            return Vector((self[0] + other, self[1] + other))
         else:
-            return PGVector((self[0] + other[0], self[1] + other[1]))
+            return Vector((self[0] + other[0], self[1] + other[1]))
 
     def __truediv__(self, other):
         if isinstance(other, float) or np.isscalar(other):
-            ret = PGVector((self[0] / other, self[1] / other))
+            ret = Vector((self[0] / other, self[1] / other))
             return ret
         raise ValueError()
 
@@ -213,10 +213,10 @@ class PGVector(tuple):
         return list(self)
 
     def __rsub__(self, other):
-        return PGVector(other) - self
+        return Vector(other) - self
 
     def __neg__(self):
-        return PGVector((-self[0], -self[1]))
+        return Vector((-self[0], -self[1]))
 
     def dot(self, other):
         return self[0] * other[0] + self[1] * other[1]

@@ -1,6 +1,6 @@
 from pgdrive.envs.pgdrive_env import PGDriveEnv
-from pgdrive.scene_creator.map.base_map import BaseMap, MapGenerateMethod
-from pgdrive.scene_creator.vehicle_module.PID_controller import PIDController
+from pgdrive.component.map.base_map import BaseMap, MapGenerateMethod
+from pgdrive.component.vehicle_module.PID_controller import PIDController
 
 
 class TestEnv(PGDriveEnv):
@@ -44,10 +44,10 @@ def test_navigation(vis=False):
     target = Target(0.375, 30)
     o = env.reset()
     if vis:
-        env.pg_world.accept('d', target.go_right)
-        env.pg_world.accept('a', target.go_left)
-        env.pg_world.accept('w', target.faster)
-        env.pg_world.accept('s', target.slower)
+        env.engine.accept('d', target.go_right)
+        env.engine.accept('a', target.go_left)
+        env.engine.accept('w', target.faster)
+        env.engine.accept('s', target.slower)
 
     steering_controller = PIDController(1.6, 0.0008, 27.3)
     acc_controller = PIDController(0.1, 0.001, 0.3)
@@ -78,7 +78,7 @@ def test_navigation(vis=False):
                     }
                 )
             if i == 500:
-                env.pg_world.on_screen_message.data.clear()
+                env.engine.on_screen_message.data.clear()
             else:
                 env.render()
         if d:

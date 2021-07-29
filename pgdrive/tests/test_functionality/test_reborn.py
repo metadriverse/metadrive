@@ -18,14 +18,14 @@ def test_traffic_respawn(vis=False):
     try:
         for i in range(1, 3000):
             env.step([0, 0])
-            current_v = set(env.pgdrive_engine.traffic_manager.vehicles)
-            for v in list(env.pgdrive_engine.traffic_manager.traffic_vehicles) + [env.vehicle]:
+            current_v = set(env.engine.traffic_manager.vehicles)
+            for v in list(env.engine.traffic_manager.traffic_vehicles) + [env.vehicle]:
                 if v is env.vehicle:
                     current_v.discard(v)
                 else:
                     current_v.discard(v.vehicle_node.kinematic_model)
             assert len(current_v) == 0, "vehicles didn't release"
-            assert len(env.pgdrive_engine.traffic_manager.vehicles) - len(env.pgdrive_engine.traffic_manager.traffic_vehicles) == 1, \
+            assert len(env.engine.traffic_manager.vehicles) - len(env.engine.traffic_manager.traffic_vehicles) == 1, \
                 "vehicles didn't release"
     finally:
         env.close()

@@ -1,12 +1,12 @@
 import numpy as np
 
 from pgdrive.envs.pgdrive_env import PGDriveEnv
-from pgdrive.utils import PGConfig, get_np_random
+from pgdrive.utils import Config, get_np_random
 
 
 class ChangeFrictionEnv(PGDriveEnv):
     @staticmethod
-    def default_config() -> PGConfig:
+    def default_config() -> Config:
         config = PGDriveEnv.default_config()
         config.update(
             {

@@ -13,18 +13,18 @@ class AssetLoader:
     asset_path = None
 
     @staticmethod
-    def init_loader(pg_world):
+    def init_loader(engine):
         """
         Due to the feature of Panda3d, keep reference of loader in static variable
         """
         root_path = pathlib.PurePosixPath(__file__).parent.parent if not is_win() else pathlib.Path(__file__).resolve(
         ).parent.parent
         AssetLoader.asset_path = root_path.joinpath("assets")
-        if pg_world.win is None:
+        if engine.win is None:
             logging.debug("Physics world mode")
             return
         logging.debug("Onscreen/Offscreen mode, Render/Load Elements")
-        AssetLoader.loader = pg_world.loader
+        AssetLoader.loader = engine.loader
 
     @classmethod
     def get_loader(cls):
@@ -62,7 +62,7 @@ class AssetLoader:
         return cls.asset_path is not None
 
 
-def initialize_asset_loader(pg_world):
+def initialize_asset_loader(engine):
     # load model file in utf-8
     os.environ["PYTHONUTF8"] = "on"
     if AssetLoader.initialized():
@@ -72,7 +72,7 @@ def initialize_asset_loader(pg_world):
             )
         )
         return
-    AssetLoader.init_loader(pg_world)
+    AssetLoader.init_loader(engine)
 
 
 def close_asset_loader():

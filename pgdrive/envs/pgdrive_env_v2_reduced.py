@@ -5,7 +5,7 @@ import numpy as np
 from pgdrive.envs.pgdrive_env_v2 import PGDriveEnvV2
 from pgdrive.obs.observation_base import ObservationBase
 from pgdrive.obs.state_obs import LidarStateObservation
-from pgdrive.utils import PGConfig, clip, norm
+from pgdrive.utils import Config, clip, norm
 
 
 class LidarStateObservationV2(LidarStateObservation):
@@ -123,7 +123,7 @@ class LidarStateObservationV2(LidarStateObservation):
 
 class PGDriveEnvV2Reduced(PGDriveEnvV2):
     @classmethod
-    def default_config(cls) -> PGConfig:
+    def default_config(cls) -> Config:
         config = PGDriveEnvV2.default_config()
         config["vehicle_config"]["lidar"]["num_others"] = 0
         config["vehicle_config"]["lidar"]["num_lasers"] = 240
@@ -132,7 +132,7 @@ class PGDriveEnvV2Reduced(PGDriveEnvV2):
         config["obs_mode"] = None  # ["w_navi", "w_ego", "w_both"]
         return config
 
-    def get_single_observation(self, vehicle_config: "PGConfig") -> "ObservationBase":
+    def get_single_observation(self, vehicle_config: "Config") -> "ObservationBase":
         assert not self.config["use_image"]
         vehicle_config["obs_mode"] = self.config["obs_mode"]
         return LidarStateObservationV2(vehicle_config)

@@ -1,5 +1,5 @@
 from pgdrive import PGDriveEnv
-from pgdrive.scene_creator.map.base_map import BaseMap, MapGenerateMethod
+from pgdrive.component.map.base_map import BaseMap, MapGenerateMethod
 from pgdrive.utils import draw_top_down_map
 
 if __name__ == '__main__':

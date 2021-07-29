@@ -21,7 +21,7 @@ class KeyboardController(Controller):
 
     def __init__(self):
         # Input
-        # self.pygame_control = True if pg_world.highway_render is not None else False
+        # self.pygame_control = True if engine.highway_render is not None else False
         self.pygame_control = False
         if not self.pygame_control:
             self.inputs = InputState()

@@ -4,7 +4,7 @@ from panda3d.core import Vec3, CardMaker, LQuaternionf, BitMask32, NodePath, Tex
 
 from pgdrive.constants import BodyName, CamMask, CollisionGroup
 from pgdrive.engine.asset_loader import AssetLoader
-from pgdrive.scene_creator.base_object import BaseObject
+from pgdrive.component.base_object import BaseObject
 
 
 class Terrain(BaseObject):

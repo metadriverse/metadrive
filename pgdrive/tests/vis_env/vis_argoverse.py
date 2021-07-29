@@ -1,5 +1,5 @@
 from pgdrive.envs.pgdrive_env import PGDriveEnv
-from pgdrive.scene_creator.map.argoverse_map import ArgoverseMap
+from pgdrive.component.map.argoverse_map import ArgoverseMap
 
 
 class ArgoverseEnv(PGDriveEnv):
@@ -21,7 +21,7 @@ class ArgoverseEnv(PGDriveEnv):
                 }
             )
             map = ArgoverseMap(self.config["map_config"])
-            self.pgdrive_engine.map_manager.load_map(map)
+            self.engine.map_manager.load_map(map)
 
 
 class TestEnv(ArgoverseEnv):
@@ -29,7 +29,7 @@ class TestEnv(ArgoverseEnv):
         super(TestEnv, self).__init__(
             {
                 "traffic_density": 0.,
-                "pg_world_config": {
+                "engine_config": {
                     "onscreen_message": True,
                     # "debug_physics_world": True,
                     "pstats": True,

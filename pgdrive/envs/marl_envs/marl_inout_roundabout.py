@@ -4,11 +4,11 @@ import numpy as np
 from pgdrive.envs.multi_agent_pgdrive import MultiAgentPGDrive
 from pgdrive.obs.observation_base import ObservationBase
 from pgdrive.obs.state_obs import StateObservation
-from pgdrive.scene_creator.blocks.first_block import FirstPGBlock
-from pgdrive.scene_creator.blocks.roundabout import Roundabout
-from pgdrive.scene_creator.map.pg_map import PGMap
-from pgdrive.scene_creator.road.road import Road
-from pgdrive.utils import get_np_random, norm, PGConfig
+from pgdrive.component.blocks.first_block import FirstPGBlock
+from pgdrive.component.blocks.roundabout import Roundabout
+from pgdrive.component.map.pg_map import PGMap
+from pgdrive.component.road.road import Road
+from pgdrive.utils import get_np_random, norm, Config
 
 MARoundaboutConfig = dict(
     map_config=dict(exit_length=60, lane_num=2),
@@ -24,7 +24,7 @@ class MARoundaboutMap(PGMap):
     def _generate(self):
         length = self.config["exit_length"]
 
-        parent_node_path, pg_physics_world = self.pgdrive_engine.worldNP, self.pgdrive_engine.physics_world
+        parent_node_path, physics_world = self.engine.worldNP, self.engine.physics_world
         assert len(self.road_network.graph) == 0, "These Map is not empty, please create a new map to read config"
 
         # Build a first-block
@@ -33,7 +33,7 @@ class MARoundaboutMap(PGMap):
             self.config[self.LANE_WIDTH],
             self.config[self.LANE_NUM],
             parent_node_path,
-            pg_physics_world,
+            physics_world,
             length=length
         )
         self.blocks.append(last_block)
@@ -43,7 +43,7 @@ class MARoundaboutMap(PGMap):
         last_block = Roundabout(1, last_block.get_socket(index=0), self.road_network, random_seed=1)
         last_block.construct_block(
             parent_node_path,
-            pg_physics_world,
+            physics_world,
             extra_config={
                 "exit_radius": 10,
                 "inner_radius": 30,
@@ -117,7 +117,7 @@ class MultiAgentRoundaboutEnv(MultiAgentPGDrive):
     ]
 
     @staticmethod
-    def default_config() -> PGConfig:
+    def default_config() -> Config:
         return MultiAgentPGDrive.default_config().update(MARoundaboutConfig, allow_overwrite=True)
 
     def _update_map(self, episode_data: dict = None, force_seed=None):
@@ -125,10 +125,10 @@ class MultiAgentRoundaboutEnv(MultiAgentPGDrive):
 
         if self.current_map is None:
             self.seed(map_config["seed"])
-            new_map = self.pgdrive_engine.map_manager.spawn_object(
+            new_map = self.engine.map_manager.spawn_object(
                 MARoundaboutMap, map_config=map_config, random_seed=self.current_seed
             )
-            self.pgdrive_engine.map_manager.load_map(new_map)
+            self.engine.map_manager.load_map(new_map)
             self.current_map.spawn_roads = self.spawn_roads
 
     def _update_destination_for(self, vehicle_id):
@@ -137,7 +137,7 @@ class MultiAgentRoundaboutEnv(MultiAgentPGDrive):
         end_road = -get_np_random(self._DEBUG_RANDOM_SEED).choice(self.spawn_roads)  # Use negative road!
         vehicle.routing_localization.set_route(vehicle.lane_index[0], end_road.end_node)
 
-    def get_single_observation(self, vehicle_config: "PGConfig") -> "ObservationBase":
+    def get_single_observation(self, vehicle_config: "Config") -> "ObservationBase":
         return LidarStateObservationMARound(vehicle_config)
 
 
@@ -164,7 +164,7 @@ def _expert():
                 "use_saver": True,
                 "save_level": 1.
             },
-            "pg_world_config": {
+            "engine_config": {
                 "debug_physics_world": True
             },
             "fast": True,
@@ -210,7 +210,7 @@ def _vis_debug_respawn():
                 },
                 "show_lidar": False,
             },
-            "pg_world_config": {
+            "engine_config": {
                 "debug_physics_world": True
             },
             "fast": True,
@@ -310,7 +310,7 @@ def _profile():
     for s in range(10000):
         o, r, d, i = env.step(env.action_space.sample())
 
-        # mask_ratio = env.pgdrive_engine.detector_mask.get_mask_ratio()
+        # mask_ratio = env.engine.detector_mask.get_mask_ratio()
         # print("Mask ratio: ", mask_ratio)
 
         if all(d.values()):
@@ -336,7 +336,7 @@ def _long_run():
                     "num_others": 8
                 },
             },
-            "pg_world_config": {
+            "engine_config": {
                 "pstats": True
             },
             **dict(

@@ -7,7 +7,7 @@ from pgdrive.constants import Decoration, DEFAULT_AGENT
 from pgdrive.obs.top_down_obs import TopDownObservation
 from pgdrive.obs.top_down_obs_impl import WorldSurface, COLOR_BLACK, VehicleGraphics, LaneGraphics, \
     ObservationWindowMultiChannel
-from pgdrive.scene_creator.vehicle.base_vehicle import BaseVehicle
+from pgdrive.component.vehicle.base_vehicle import BaseVehicle
 from pgdrive.utils import import_pygame, clip
 
 pygame = import_pygame()
@@ -66,7 +66,7 @@ class TopDownMultiChannel(TopDownObservation):
         self.canvas_past_pos = pygame.Surface(self.resolution)  # A local view
 
     def reset(self, env, vehicle=None):
-        self.pgdrive_engine = env.pgdrive_engine
+        self.engine = env.engine
         self.road_network = env.current_map.road_network
         self.target_vehicle = vehicle
         self._should_draw_map = True
@@ -125,8 +125,8 @@ class TopDownMultiChannel(TopDownObservation):
 
     def draw_scene(self):
         # Set the active area that can be modify to accelerate
-        assert len(self.pgdrive_engine.target_vehicles) == 1, "Don't support multi-agent top-down observation yet!"
-        vehicle = self.pgdrive_engine.target_vehicles[DEFAULT_AGENT]
+        assert len(self.engine.target_vehicles) == 1, "Don't support multi-agent top-down observation yet!"
+        vehicle = self.engine.target_vehicles[DEFAULT_AGENT]
         pos = self.canvas_runtime.pos2pix(*vehicle.position)
 
         clip_size = (int(self.obs_window.get_size()[0] * 1.1), int(self.obs_window.get_size()[0] * 1.1))
@@ -141,7 +141,7 @@ class TopDownMultiChannel(TopDownObservation):
         ego_heading = vehicle.heading_theta
         ego_heading = ego_heading if abs(ego_heading) > 2 * np.pi / 180 else 0
 
-        for v in self.pgdrive_engine.traffic_manager.vehicles:
+        for v in self.engine.traffic_manager.vehicles:
             if v is vehicle:
                 continue
             h = v.heading
@@ -182,7 +182,7 @@ class TopDownMultiChannel(TopDownObservation):
         return ret
 
     def _draw_ego_vehicle(self):
-        vehicle = self.pgdrive_engine.target_vehicles[DEFAULT_AGENT]
+        vehicle = self.engine.target_vehicles[DEFAULT_AGENT]
         w = vehicle.WIDTH * self.scaling
         h = vehicle.LENGTH * self.scaling
         position = (self.resolution[0] / 2, self.resolution[1] / 2)

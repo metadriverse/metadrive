@@ -34,7 +34,7 @@ class LaneNode(BulletRigidBodyNode):
         """
         BulletRigidBodyNode.__init__(self, node_name)
         BulletRigidBodyNode.setPythonTag(self, BodyName.Lane, self)
-        from pgdrive.scene_creator.lane.abs_lane import AbstractLane
+        from pgdrive.component.lane.abs_lane import AbstractLane
         assert isinstance(lane, AbstractLane)
         self.info = lane
         self.index = lane_index
@@ -94,5 +94,5 @@ class TrafficVehicleNode(BulletRigidBodyNode):
         self.kinematic_model = kinematics_model
 
     def reset(self, kinematics_model):
-        from pgdrive.scene_creator.highway_vehicle.behavior import IDMVehicle
+        from pgdrive.component.highway_vehicle.behavior import IDMVehicle
         self.kinematic_model = IDMVehicle.create_from(kinematics_model)

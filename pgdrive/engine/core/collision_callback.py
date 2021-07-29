@@ -3,7 +3,7 @@ import logging
 from pgdrive.constants import BodyName
 
 
-def pg_collision_callback(contact):
+def collision_callback(contact):
     """
     All collision callback should be here, and a notify() method can turn it on
     It may lower the performance if overdone

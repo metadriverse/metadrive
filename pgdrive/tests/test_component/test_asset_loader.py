@@ -1,13 +1,13 @@
 from pgdrive import PGDriveEnv
 from pgdrive.engine.asset_loader import initialize_asset_loader, AssetLoader
-from pgdrive.engine.core.pg_world import PGWorld
+from pgdrive.engine.core.engine_core import EngineCore
 
 
 def test_asset_loader():
     default_config = PGDriveEnv.default_config()
-    world_config = default_config["pg_world_config"]
+    world_config = default_config["engine_config"]
     world_config.update({"use_render": False, "use_image": False, "debug": False})
-    world = PGWorld(config=world_config)
+    world = EngineCore(config=world_config)
     try:
         world.clear_world()
         initialize_asset_loader(world)
