@@ -6,6 +6,7 @@ Physics Callbacks and Object class
 """
 
 from panda3d.bullet import BulletRigidBodyNode
+
 from pgdrive.constants import BodyName
 
 

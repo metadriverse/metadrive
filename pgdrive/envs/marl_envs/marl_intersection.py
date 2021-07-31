@@ -1,11 +1,12 @@
 import copy
-from pgdrive.envs.marl_envs.marl_inout_roundabout import LidarStateObservationMARound
-from pgdrive.envs.marl_envs.multi_agent_pgdrive import MultiAgentPGDrive
-from pgdrive.obs.observation_base import ObservationBase
+
 from pgdrive.component.blocks.first_block import FirstPGBlock
 from pgdrive.component.blocks.intersection import InterSection
 from pgdrive.component.map.pg_map import PGMap
 from pgdrive.component.road.road import Road
+from pgdrive.envs.marl_envs.marl_inout_roundabout import LidarStateObservationMARound
+from pgdrive.envs.marl_envs.multi_agent_pgdrive import MultiAgentPGDrive
+from pgdrive.obs.observation_base import ObservationBase
 from pgdrive.utils import get_np_random, Config
 
 MAIntersectionConfig = dict(
@@ -82,7 +83,7 @@ class MultiAgentIntersectionEnv(MultiAgentPGDrive):
 def _draw():
     env = MultiAgentIntersectionEnv()
     o = env.reset()
-    from pgdrive.utils import draw_top_down_map
+    from pgdrive.utils.draw_top_down_map import draw_top_down_map
     import matplotlib.pyplot as plt
 
     plt.imshow(draw_top_down_map(env.current_map))

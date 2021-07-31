@@ -1,13 +1,14 @@
 import numpy as np
-from pgdrive.constants import CamMask, LineType, LineColor
-from pgdrive.utils.engine_utils import get_engine
-from pgdrive.constants import BodyName
-from pgdrive.component.blocks.pg_block import PGBlockSocket
+
 from pgdrive.component.blocks.bottleneck import PGBlock
 from pgdrive.component.blocks.create_block_utils import CreateAdverseRoad, CreateRoadFrom, ExtendStraightLane
+from pgdrive.component.blocks.pg_block import PGBlockSocket
 from pgdrive.component.buildings.base_building import BaseBuilding
 from pgdrive.component.road.road import Road
+from pgdrive.constants import BodyName
+from pgdrive.constants import CamMask, LineType, LineColor
 from pgdrive.engine.asset_loader import AssetLoader
+from pgdrive.engine.engine_utils import get_engine
 from pgdrive.utils.space import ParameterSpace, Parameter, BlockParameterSpace
 
 TollGateBuilding = BaseBuilding
@@ -99,4 +100,4 @@ class TollGate(PGBlock):
         for building in self._block_objects:
             object_manager.add_block_buildings(building, engine.pbr_worldNP)
             # for performance reason
-            building.node_path.hide(CamMask.Shadow)
+            building.origin.hide(CamMask.Shadow)

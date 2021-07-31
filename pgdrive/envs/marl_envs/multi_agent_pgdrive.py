@@ -1,10 +1,10 @@
 import copy
 import logging
 
-from pgdrive.constants import TerminationState
-from pgdrive.envs.pgdrive_env_v2 import PGDriveEnvV2
 from pgdrive.component.blocks.first_block import FirstPGBlock
 from pgdrive.component.road.road import Road
+from pgdrive.constants import TerminationState
+from pgdrive.envs.pgdrive_env_v2 import PGDriveEnvV2
 from pgdrive.manager.spawn_manager import SpawnManager
 from pgdrive.utils import setup_logger, get_np_random, Config
 from pgdrive.utils.config import merge_dicts

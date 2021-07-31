@@ -5,9 +5,10 @@ from collections import defaultdict
 import numpy as np
 from panda3d.bullet import BulletGhostNode, BulletSphereShape
 from panda3d.core import BitMask32, NodePath
+
 from pgdrive.constants import CamMask, CollisionGroup
-from pgdrive.utils import import_cutils
 from pgdrive.engine.asset_loader import AssetLoader
+from pgdrive.utils import import_cutils
 from pgdrive.utils.coordinates_shift import panda_position
 
 cutils = import_cutils()
@@ -141,7 +142,7 @@ class DistanceDetector:
         self.height = self.DEFAULT_HEIGHT
         self.radian_unit = 2 * np.pi / num_lasers
         self.start_phase_offset = 0
-        self.node_path = parent_node_np.attachNewNode("Could_points")
+        self.origin = parent_node_np.attachNewNode("Could_points")
         self._lidar_range = np.arange(0, self.num_lasers) * self.radian_unit + self.start_phase_offset
 
         # detection result
@@ -149,7 +150,7 @@ class DistanceDetector:
         self.detected_objects = []
 
         # override these properties to decide which elements to detect and show
-        self.node_path.hide(CamMask.RgbCam | CamMask.Shadow | CamMask.Shadow | CamMask.DepthCam)
+        self.origin.hide(CamMask.RgbCam | CamMask.Shadow | CamMask.Shadow | CamMask.DepthCam)
         self.mask = BitMask32.bit(CollisionGroup.BrokenLaneLine)
         self.cloud_points_vis = [] if show else None
         logging.debug("Load Vehicle Module: {}".format(self.__class__.__name__))
@@ -162,10 +163,10 @@ class DistanceDetector:
                 ghost = BulletGhostNode('Lidar Point')
                 ghost.setIntoCollideMask(BitMask32.allOff())
                 ghost.addShape(shape)
-                laser_np = self.node_path.attachNewNode(ghost)
+                laser_np = self.origin.attachNewNode(ghost)
                 self.cloud_points_vis.append(laser_np)
                 ball.getChildren().reparentTo(laser_np)
-            # self.node_path.flattenStrong()
+            # self.origin.flattenStrong()
 
     def perceive(
         self,
@@ -226,7 +227,7 @@ class DistanceDetector:
         if self.cloud_points_vis:
             for vis_laser in self.cloud_points_vis:
                 vis_laser.removeNode()
-        self.node_path.removeNode()
+        self.origin.removeNode()
         self.cloud_points = None
         self.detected_objects = None
 
@@ -247,7 +248,7 @@ class SideDetector(DistanceDetector):
     def __init__(self, parent_node_np: NodePath, num_lasers: int = 2, distance: float = 50, enable_show=False):
         super(SideDetector, self).__init__(parent_node_np, num_lasers, distance, enable_show)
         self.set_start_phase_offset(90)
-        self.node_path.hide(CamMask.RgbCam | CamMask.Shadow | CamMask.Shadow | CamMask.DepthCam)
+        self.origin.hide(CamMask.RgbCam | CamMask.Shadow | CamMask.Shadow | CamMask.DepthCam)
         self.mask = BitMask32.bit(CollisionGroup.ContinuousLaneLine)
 
 
@@ -257,5 +258,5 @@ class LaneLineDetector(SideDetector):
     def __init__(self, parent_node_np: NodePath, num_lasers: int = 2, distance: float = 50, enable_show=False):
         super(SideDetector, self).__init__(parent_node_np, num_lasers, distance, enable_show)
         self.set_start_phase_offset(90)
-        self.node_path.hide(CamMask.RgbCam | CamMask.Shadow | CamMask.Shadow | CamMask.DepthCam)
+        self.origin.hide(CamMask.RgbCam | CamMask.Shadow | CamMask.Shadow | CamMask.DepthCam)
         self.mask = BitMask32.bit(CollisionGroup.ContinuousLaneLine) | BitMask32.bit(CollisionGroup.BrokenLaneLine)

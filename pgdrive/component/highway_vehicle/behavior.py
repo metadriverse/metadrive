@@ -3,11 +3,10 @@ from typing import Tuple, Union, List
 import numpy as np
 
 import pgdrive.utils.math_utils as utils
-from pgdrive.constants import Route, LaneIndex
 from pgdrive.component.highway_vehicle.controller import ControlledVehicle
 from pgdrive.component.highway_vehicle.kinematics import Vehicle
-from pgdrive.component.static_object.traffic_object import TrafficSign
 from pgdrive.component.static_object.base_static_object import BaseStaticObject
+from pgdrive.constants import Route, LaneIndex
 from pgdrive.manager.traffic_manager import TrafficManager
 from pgdrive.utils.math_utils import clip
 
@@ -159,7 +158,6 @@ class IDMVehicle(ControlledVehicle):
         acceleration = self.COMFORT_ACC_MAX * (1 - np.power(max(ego_vehicle.speed, 0) / ego_target_speed, self.DELTA))
 
         if front_vehicle:
-            from pgdrive.component.buildings.base_building import BaseBuilding
             d = ego_vehicle.lane_distance_to(front_vehicle)
             acceleration -= self.COMFORT_ACC_MAX * \
                             np.power(self.desired_gap(ego_vehicle, front_vehicle) / utils.not_zero(d), 2)

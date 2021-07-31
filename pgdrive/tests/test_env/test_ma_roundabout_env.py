@@ -2,9 +2,10 @@ import time
 
 import numpy as np
 from gym.spaces import Box, Dict
+
+from pgdrive.constants import TerminationState
 from pgdrive.envs.marl_envs.marl_inout_roundabout import MultiAgentRoundaboutEnv
 from pgdrive.utils import distance_greater, norm
-from pgdrive.constants import TerminationState
 
 
 def _check_spaces_before_reset(env):

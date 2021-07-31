@@ -1,8 +1,10 @@
 import os
 
 import matplotlib.pyplot as plt
+
 from pgdrive.envs.pgdrive_env import PGDriveEnv
-from pgdrive.utils import setup_logger, draw_top_down_map
+from pgdrive.utils import setup_logger
+from pgdrive.utils.draw_top_down_map import draw_top_down_map
 
 
 def test_save_map_image():

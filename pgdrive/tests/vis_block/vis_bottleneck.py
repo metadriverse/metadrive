@@ -1,8 +1,8 @@
 from pgdrive.component.blocks.bottleneck import Merge, Split
 from pgdrive.component.blocks.first_block import FirstPGBlock
 from pgdrive.component.road.road_network import RoadNetwork
-from pgdrive.tests.vis_block.vis_block_base import TestBlock
 from pgdrive.engine.asset_loader import initialize_asset_loader
+from pgdrive.tests.vis_block.vis_block_base import TestBlock
 
 if __name__ == "__main__":
     test = TestBlock()

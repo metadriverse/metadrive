@@ -2,8 +2,8 @@ from pgdrive.component.blocks.first_block import FirstPGBlock
 from pgdrive.component.blocks.ramp import InRampOnStraight
 from pgdrive.component.blocks.straight import Straight
 from pgdrive.component.road.road_network import RoadNetwork
-from pgdrive.tests.vis_block.vis_block_base import TestBlock
 from pgdrive.engine.asset_loader import initialize_asset_loader
+from pgdrive.tests.vis_block.vis_block_base import TestBlock
 
 if __name__ == "__main__":
 

@@ -3,9 +3,10 @@ import os
 
 import numpy as np
 import pytest
+
 from pgdrive import PGDriveEnv
-from pgdrive.constants import TerminationState
 from pgdrive.component.vehicle_module.PID_controller import PIDController, Target
+from pgdrive.constants import TerminationState
 
 # Key: case name, value: environmental config
 blackbox_test_configs = dict(

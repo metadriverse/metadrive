@@ -1,4 +1,5 @@
 from panda3d.core import Vec3
+
 from pgdrive.utils.math_utils import Vector
 
 

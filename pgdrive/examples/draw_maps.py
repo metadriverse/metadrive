@@ -1,8 +1,9 @@
 import random
 
 import matplotlib.pyplot as plt
+
 from pgdrive import PGDriveEnvV2
-from pgdrive.utils import draw_top_down_map
+from pgdrive.utils.draw_top_down_map import draw_top_down_map
 
 if __name__ == '__main__':
     env = PGDriveEnvV2(config=dict(environment_num=100, map=7, start_seed=random.randint(0, 1000)))

@@ -1,14 +1,14 @@
 import gym
 import numpy as np
 
-from pgdrive.constants import TerminationState
-from pgdrive.envs.marl_envs.multi_agent_pgdrive import MultiAgentPGDrive, pygame_replay
-from pgdrive.obs.state_obs import LidarStateObservation, StateObservation
 from pgdrive.component.blocks.bottleneck import Merge, Split
 from pgdrive.component.blocks.first_block import FirstPGBlock
 from pgdrive.component.blocks.tollgate import TollGate
 from pgdrive.component.map.pg_map import PGMap
 from pgdrive.component.road.road import Road
+from pgdrive.constants import TerminationState
+from pgdrive.envs.marl_envs.multi_agent_pgdrive import MultiAgentPGDrive, pygame_replay
+from pgdrive.obs.state_obs import LidarStateObservation, StateObservation
 from pgdrive.utils import Config, clip
 
 MATollConfig = dict(
@@ -277,7 +277,7 @@ class MultiAgentTollgateEnv(MultiAgentPGDrive):
 def _draw():
     env = MultiAgentTollgateEnv()
     o = env.reset()
-    from pgdrive.utils import draw_top_down_map
+    from pgdrive.utils.draw_top_down_map import draw_top_down_map
     import matplotlib.pyplot as plt
 
     plt.imshow(draw_top_down_map(env.current_map))

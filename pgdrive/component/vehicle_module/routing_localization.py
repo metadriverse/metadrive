@@ -1,19 +1,22 @@
 import logging
 import math
-from pgdrive.component.blocks.bottleneck import Merge, Split
+
 import numpy as np
 from panda3d.core import BitMask32, LQuaternionf, TransparencyAttrib, LineSegs, NodePath
-from pgdrive.component.lane.straight_lane import StraightLane
-from pgdrive.constants import COLLISION_INFO_COLOR, RENDER_MODE_ONSCREEN, CamMask
+
+from pgdrive.component.blocks.bottleneck import Merge, Split
 from pgdrive.component.blocks.first_block import FirstPGBlock
 from pgdrive.component.lane.circular_lane import CircularLane
+from pgdrive.component.lane.straight_lane import StraightLane
 from pgdrive.component.map.base_map import BaseMap
 from pgdrive.component.road.road import Road
-from pgdrive.utils import clip, norm, get_np_random
+from pgdrive.constants import COLLISION_INFO_COLOR, RENDER_MODE_ONSCREEN, CamMask
 from pgdrive.engine.asset_loader import AssetLoader
-from pgdrive.utils.space import Parameter, BlockParameterSpace
-from pgdrive.utils.scene_utils import ray_localization
+from pgdrive.utils import clip, norm
+from pgdrive.utils import get_np_random
 from pgdrive.utils.coordinates_shift import panda_position
+from pgdrive.utils.scene_utils import ray_localization
+from pgdrive.utils.space import Parameter, BlockParameterSpace
 
 
 class RoutingLocalizationModule:

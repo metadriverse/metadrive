@@ -1,8 +1,8 @@
 import gym
 import numpy as np
 
-from pgdrive.obs.observation_base import ObservationBase
 from pgdrive.component.vehicle_module.routing_localization import RoutingLocalizationModule
+from pgdrive.obs.observation_base import ObservationBase
 from pgdrive.utils.math_utils import clip, norm
 
 

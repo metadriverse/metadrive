@@ -1,7 +1,7 @@
 from panda3d.core import LVector4, NodePath, DirectionalLight, AmbientLight
 
+from pgdrive.component.base_class.base_object import BaseObject
 from pgdrive.constants import CamMask
-from pgdrive.component.base_object import BaseObject
 
 
 class Light(BaseObject):
@@ -11,7 +11,6 @@ class Light(BaseObject):
     def __init__(self, config):
         super(Light, self).__init__(random_seed=0)
         self.global_light = config["global_light"]
-        self.node_path = NodePath("Light")
         self.direction_np = NodePath(DirectionalLight("direction light"))
         # self.light.node().setScene(self.render)
 
@@ -40,11 +39,11 @@ class Light(BaseObject):
         # dlens.setNear(3)
 
         self.direction_np.node().setColorTemperature(4000)
-        self.direction_np.reparentTo(self.node_path)
+        self.direction_np.reparentTo(self.origin)
 
         self.ambient_np = NodePath(AmbientLight("Ambient"))
         self.ambient_np.node().setColor(LVector4(0.8, 0.8, 0.8, 1))
-        self.ambient_np.reparentTo(self.node_path)
+        self.ambient_np.reparentTo(self.origin)
 
     def step(self, pos):
         if not self.global_light:

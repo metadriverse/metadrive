@@ -1,10 +1,10 @@
 import math
 from abc import ABCMeta, abstractmethod
-from typing import Tuple, Union, Sequence
-
-from pgdrive.constants import LineType, LineColor
+from typing import Tuple
 
 import numpy as np
+
+from pgdrive.constants import LineType, LineColor
 
 
 class AbstractLane:

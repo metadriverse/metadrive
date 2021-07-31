@@ -1,13 +1,15 @@
+import math
 import queue
-from pgdrive.utils.engine_utils import get_engine
 from collections import deque
 from typing import Tuple
-import math
+
 import numpy as np
 from direct.controls.InputState import InputState
-from panda3d.core import Vec3, Camera, Point3, BitMask32
+from panda3d.core import Vec3, Point3, BitMask32
+
 from pgdrive.constants import CollisionGroup
 from pgdrive.utils.coordinates_shift import panda_heading, panda_position
+from pgdrive.engine.engine_utils import get_engine
 
 
 class ChaseCamera:
@@ -76,7 +78,7 @@ class ChaseCamera:
 
     def renew_camera_place(self, vehicle, task):
         self.chase_camera_height = self._update_height(self.chase_camera_height)
-        self.camera_queue.put(vehicle.chassis_np.get_pos())
+        self.camera_queue.put(vehicle.chassis.get_pos())
         if not self.FOLLOW_LANE:
             forward_dir = vehicle.system.get_forward_vector()
         else:
@@ -91,7 +93,7 @@ class ChaseCamera:
         camera_pos[1] += -forward_dir[1] * self.camera_dist
 
         self.camera.setPos(*camera_pos)
-        current_pos = vehicle.chassis_np.getPos()
+        current_pos = vehicle.chassis.getPos()
         current_pos[2] += 2
         self.camera.lookAt(current_pos)
         if self.FOLLOW_LANE:

@@ -1,15 +1,15 @@
 import math
 
 import numpy as np
-from pgdrive.constants import Decoration, LineType
-from pgdrive.component.blocks.pg_block import PGBlock, PGBlockSocket
+
 from pgdrive.component.blocks.create_block_utils import ExtendStraightLane, CreateRoadFrom, CreateAdverseRoad, \
     create_bend_straight
+from pgdrive.component.blocks.pg_block import PGBlock
 from pgdrive.component.lane.straight_lane import StraightLane
 from pgdrive.component.road.road import Road
-from pgdrive.component.road.road_network import RoadNetwork
-from pgdrive.utils.space import ParameterSpace, Parameter, BlockParameterSpace
+from pgdrive.constants import Decoration, LineType
 from pgdrive.utils.scene_utils import check_lane_on_road
+from pgdrive.utils.space import ParameterSpace, Parameter, BlockParameterSpace
 
 
 class Ramp(PGBlock):

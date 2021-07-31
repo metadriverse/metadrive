@@ -1,16 +1,16 @@
 from pgdrive.component.blocks.bottleneck import Merge, Split
 from pgdrive.component.blocks.curve import Curve
 from pgdrive.component.blocks.fork import InFork, OutFork
+from pgdrive.component.blocks.parking_lot import ParkingLot
 from pgdrive.component.blocks.ramp import InRampOnStraight, OutRampOnStraight
 from pgdrive.component.blocks.roundabout import Roundabout
 from pgdrive.component.blocks.std_intersection import StdInterSection
 from pgdrive.component.blocks.std_t_intersection import StdTInterSection
 from pgdrive.component.blocks.straight import Straight
-from pgdrive.component.blocks.parking_lot import ParkingLot
 from pgdrive.component.blocks.tollgate import TollGate
 
 
-class PGBlock:
+class PGBlockConfig:
     # Register the block types here! Set their probability to 0.0 if you don't wish it appears in standard PGDrive.
     BLOCK_TYPE_DISTRIBUTION_V1 = {
         Curve: 0.5,
