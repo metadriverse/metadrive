@@ -1,6 +1,6 @@
+from pgdrive.constants import TerminationState
 from pgdrive.envs.marl_envs.marl_inout_roundabout import MultiAgentRoundaboutEnv
 from pgdrive.utils import setup_logger
-from pgdrive.constants import TerminationState
 
 
 def test_respawn():

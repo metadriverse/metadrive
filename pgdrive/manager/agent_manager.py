@@ -1,8 +1,10 @@
 import copy
 import logging
 from typing import Dict
-from pgdrive.manager.base_manager import BaseManager
+
 from gym.spaces import Box, Dict
+
+from pgdrive.manager.base_manager import BaseManager
 
 
 class AgentManager(BaseManager):

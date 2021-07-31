@@ -1,5 +1,5 @@
-from pyrosm import OSM, get_data
 import osmnx as ox
+from pyrosm import OSM
 
 # get real map in PBF fromat from https://extract.bbbike.org/
 # install pyrosm and all dependencies via pip install pyrosm osmnx networkx

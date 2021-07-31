@@ -1,6 +1,6 @@
 from pgdrive import PGDriveEnv
 from pgdrive.component.map.base_map import BaseMap, MapGenerateMethod
-from pgdrive.utils import draw_top_down_map
+from pgdrive.utils.draw_top_down_map import draw_top_down_map
 
 if __name__ == '__main__':
     env = PGDriveEnv(

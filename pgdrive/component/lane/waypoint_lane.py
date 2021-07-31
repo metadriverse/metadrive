@@ -1,9 +1,11 @@
-from pgdrive.component.lane.abs_lane import AbstractLane
-from typing import Tuple, Union
 import math
+from typing import Tuple, Union
+
 import numpy as np
-from pgdrive.utils import norm
+
+from pgdrive.component.lane.abs_lane import AbstractLane
 from pgdrive.constants import LineType
+from pgdrive.utils import norm
 
 
 class WayPointLane(AbstractLane):

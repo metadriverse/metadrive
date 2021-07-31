@@ -1,8 +1,8 @@
-from panda3d.core import SamplerState, Shader, NodePath, ConfigVariableString
+from panda3d.core import SamplerState, Shader, ConfigVariableString
 
+from pgdrive.component.base_class.base_object import BaseObject
 from pgdrive.constants import CamMask
 from pgdrive.engine.asset_loader import AssetLoader
-from pgdrive.component.base_object import BaseObject
 from pgdrive.utils.utils import is_mac
 
 
@@ -17,7 +17,6 @@ class SkyBox(BaseObject):
         self._accumulate = 0
         self.f = 1
         if not self.render or pure_background:
-            self.node_path = NodePath("pure_background")
             return
         skybox = self.loader.loadModel(AssetLoader.file_path("models", "skybox.bam"))
 
@@ -50,7 +49,7 @@ class SkyBox(BaseObject):
                 AssetLoader.file_path("shaders", frag_file)
             )
         skybox.set_shader(skybox_shader)
-        self.node_path = skybox
+        skybox.reparentTo(self.origin)
         skybox.setZ(-4400)
         skybox.setH(30)
 
@@ -62,4 +61,4 @@ class SkyBox(BaseObject):
             self._accumulate = 0
         self._accumulate += 1
         factor = self.f * (1 - abs(self._accumulate - self.ROTATION_MAX / 2) * 2 / self.ROTATION_MAX)
-        self.node_path.setH(self.node_path.getH() + factor * 0.0035)
+        self.origin.setH(self.origin.getH() + factor * 0.0035)

@@ -3,12 +3,13 @@ import math
 from typing import Tuple, Union, List
 
 import numpy as np
-from pgdrive.constants import LineType, LineColor, DrivableAreaProperty
+
 from pgdrive.component.lane.abs_lane import AbstractLane
 from pgdrive.component.lane.circular_lane import CircularLane
 from pgdrive.component.lane.straight_lane import StraightLane
 from pgdrive.component.road.road import Road
 from pgdrive.component.road.road_network import RoadNetwork
+from pgdrive.constants import LineType, LineColor, DrivableAreaProperty
 from pgdrive.utils.math_utils import get_vertical_vector
 from pgdrive.utils.scene_utils import check_lane_on_road
 

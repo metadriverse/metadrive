@@ -5,16 +5,16 @@ from typing import Tuple
 import numpy as np
 
 import pgdrive.utils.math_utils as utils
-from pgdrive.constants import Route, LaneIndex
-from pgdrive.policy.base_policy import BasePolicy
 from pgdrive.component.highway_vehicle.controller import ControlledVehicle, Vehicle
 from pgdrive.component.lane.abs_lane import AbstractLane
 from pgdrive.component.static_object import BaseStaticObject
 # from pgdrive.component.highway_vehicle.kinematics import Vehicle
 from pgdrive.component.vehicle.base_vehicle import BaseVehicle
+from pgdrive.constants import Route, LaneIndex
 from pgdrive.manager.traffic_manager import TrafficManager
+from pgdrive.policy.base_policy import BasePolicy
 from pgdrive.utils import norm
-from pgdrive.utils.engine_utils import get_engine
+from pgdrive.engine.engine_utils import get_engine
 from pgdrive.utils.math_utils import clip
 from pgdrive.utils.scene_utils import ray_localization
 

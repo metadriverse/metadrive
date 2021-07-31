@@ -1,6 +1,6 @@
+from pgdrive.component.vehicle.base_vehicle import BaseVehicle
 from pgdrive.constants import BodyName
 from pgdrive.envs.pgdrive_env import PGDriveEnv
-from pgdrive.component.vehicle.base_vehicle import BaseVehicle
 from pgdrive.utils import setup_logger
 
 

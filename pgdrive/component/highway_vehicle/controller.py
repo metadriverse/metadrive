@@ -1,13 +1,9 @@
-import math
-from typing import List, Tuple, Union
+from typing import List
 
 import numpy as np
 
-import pgdrive.utils.math_utils as utils
-from pgdrive.constants import LaneIndex, Route
 from pgdrive.component.highway_vehicle.kinematics import Vehicle
 from pgdrive.manager.traffic_manager import TrafficManager
-from pgdrive.utils.math_utils import clip
 
 
 class ControlledVehicle(Vehicle):

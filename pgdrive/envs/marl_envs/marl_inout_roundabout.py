@@ -1,13 +1,13 @@
 import gym
 import numpy as np
 
-from pgdrive.envs.marl_envs.multi_agent_pgdrive import MultiAgentPGDrive
-from pgdrive.obs.observation_base import ObservationBase
-from pgdrive.obs.state_obs import StateObservation
 from pgdrive.component.blocks.first_block import FirstPGBlock
 from pgdrive.component.blocks.roundabout import Roundabout
 from pgdrive.component.map.pg_map import PGMap
 from pgdrive.component.road.road import Road
+from pgdrive.envs.marl_envs.multi_agent_pgdrive import MultiAgentPGDrive
+from pgdrive.obs.observation_base import ObservationBase
+from pgdrive.obs.state_obs import StateObservation
 from pgdrive.utils import get_np_random, norm, Config
 
 MARoundaboutConfig = dict(
@@ -144,7 +144,7 @@ class MultiAgentRoundaboutEnv(MultiAgentPGDrive):
 def _draw():
     env = MultiAgentRoundaboutEnv()
     o = env.reset()
-    from pgdrive.utils import draw_top_down_map
+    from pgdrive.utils.draw_top_down_map import draw_top_down_map
     import matplotlib.pyplot as plt
 
     plt.imshow(draw_top_down_map(env.current_map))

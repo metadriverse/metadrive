@@ -2,11 +2,11 @@ from typing import List
 
 from panda3d.core import NodePath
 
-from pgdrive.engine.core.physics_world import PhysicsWorld
 from pgdrive.component.algorithm.BIG import BigGenerateMethod, BIG
-from pgdrive.component.algorithm.blocks_prob_dist import PGBlock
+from pgdrive.component.algorithm.blocks_prob_dist import PGBlockConfig
 from pgdrive.component.blocks import FirstPGBlock
 from pgdrive.component.map.base_map import BaseMap, MapGenerateMethod
+from pgdrive.engine.core.physics_world import PhysicsWorld
 
 
 class PGMap(BaseMap):
@@ -48,7 +48,7 @@ class PGMap(BaseMap):
         )
         self.blocks.append(last_block)
         for block_index, b in enumerate(blocks_config[1:], 1):
-            block_type = PGBlock.get_block(b.pop(self.BLOCK_ID), self._config["block_type_version"])
+            block_type = PGBlockConfig.get_block(b.pop(self.BLOCK_ID), self._config["block_type_version"])
             pre_block_socket_index = b.pop(self.PRE_BLOCK_SOCKET_INDEX)
             last_block = block_type(block_index, last_block.get_socket(pre_block_socket_index), self.road_network)
             last_block.construct_from_config(b, parent_node_path, physics_world)

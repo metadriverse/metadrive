@@ -1,6 +1,6 @@
-from pgdrive.envs.pgdrive_env import PGDriveEnv
 from pgdrive.component.map.base_map import BaseMap, MapGenerateMethod
 from pgdrive.component.vehicle_module.depth_camera import DepthCamera
+from pgdrive.envs.pgdrive_env import PGDriveEnv
 from pgdrive.utils import setup_logger
 
 h_f = 2
@@ -56,7 +56,7 @@ if __name__ == "__main__":
     o = env.reset()
 
     depth_cam = env.config["vehicle_config"]["depth_cam"]
-    depth_cam = DepthCamera(*depth_cam, chassis_np=env.vehicle.chassis_np, engine=env.engine)
+    depth_cam = DepthCamera(*depth_cam, chassis_np=env.vehicle.chassis, engine=env.engine)
     env.vehicle.add_image_sensor("depth_cam", depth_cam)
     depth_cam.remove_display_region(env.engine)
 
@@ -66,7 +66,7 @@ if __name__ == "__main__":
     # env.vehicle.collision_info_np.detachNode()
     # env.vehicle.routing_localization._right_arrow.detachNode()
 
-    env.vehicle.chassis_np.setPos(244, 0, 1.5)
+    env.vehicle.chassis.setPos(244, 0, 1.5)
     for i in range(1, 100000):
         o, r, d, info = env.step([0, 1])
         env.render(

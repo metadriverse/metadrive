@@ -1,6 +1,7 @@
 import logging
 from collections import OrderedDict
 from typing import Dict, AnyStr
+
 import numpy as np
 
 from pgdrive.engine.core.engine_core import EngineCore
@@ -193,7 +194,7 @@ class BaseEngine(EngineCore):
         Instead of calling this func directly, close Engine by using engine_utils.close_engine
         """
         if self.main_camera is not None:
-            self.main_camera.destroy(self)
+            self.main_camera.destroy()
         if len(self._managers) > 0:
             for name, manager in self._managers.items():
                 setattr(self, name, None)

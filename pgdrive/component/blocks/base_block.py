@@ -1,21 +1,21 @@
 from typing import Dict, Union, List, Tuple
-from pgdrive.component.lane.waypoint_lane import WayPointLane
 
 import numpy
 from panda3d.bullet import BulletBoxShape, BulletRigidBodyNode, BulletGhostNode
 from panda3d.core import Vec3, LQuaternionf, BitMask32, Vec4, CardMaker, TextureStage, RigidBodyCombiner, \
     TransparencyAttrib, SamplerState, NodePath
 
+from pgdrive.component.base_class.base_object import BaseObject
+from pgdrive.component.lane.abs_lane import AbstractLane
+from pgdrive.component.lane.circular_lane import CircularLane
+from pgdrive.component.lane.straight_lane import StraightLane
+from pgdrive.component.lane.waypoint_lane import WayPointLane
+from pgdrive.component.road.road import Road
+from pgdrive.component.road.road_network import RoadNetwork
 from pgdrive.constants import BodyName, CamMask, CollisionGroup, LineType, LineColor, DrivableAreaProperty
 from pgdrive.engine.asset_loader import AssetLoader
 from pgdrive.engine.core.physics_world import PhysicsWorld
 from pgdrive.engine.physics_node import LaneNode
-from pgdrive.component.base_object import BaseObject
-from pgdrive.component.lane.abs_lane import AbstractLane
-from pgdrive.component.lane.circular_lane import CircularLane
-from pgdrive.component.lane.straight_lane import StraightLane
-from pgdrive.component.road.road import Road
-from pgdrive.component.road.road_network import RoadNetwork
 from pgdrive.utils.coordinates_shift import panda_position, panda_heading
 from pgdrive.utils.math_utils import norm, Vector
 
@@ -30,8 +30,7 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
     ID = "B"
 
     def __init__(self, block_index: int, global_network: RoadNetwork, random_seed):
-        self._block_name = str(block_index) + self.ID
-        super(BaseBlock, self).__init__(self._block_name, random_seed)
+        super(BaseBlock, self).__init__(str(block_index) + self.ID, random_seed)
         # block information
         assert self.ID is not None, "Each Block must has its unique ID When define Block"
         assert len(self.ID) == 1, "Block ID must be a character "
@@ -80,7 +79,7 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
         Randomly Construct a block, if overlap return False
         """
         self.sample_parameters()
-        self.node_path = NodePath(self._block_name)
+        self.origin = NodePath(self.name)
         self._block_objects = []
         if extra_config:
             assert set(extra_config.keys()).issubset(self.PARAMETER_SPACE.parameters), \
@@ -98,7 +97,7 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
     def destruct_block(self, physics_world: PhysicsWorld):
         self._clear_topology()
         self.detach_from_world(physics_world)
-        self.node_path.removeNode()
+        self.origin.removeNode()
         self.dynamic_nodes.clear()
         self.static_nodes.clear()
         for obj in self._block_objects:
@@ -139,10 +138,10 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
         """
         Create NodePath and Geom node to perform both collision detection and render
         """
-        self.lane_line_node_path = NodePath(RigidBodyCombiner(self._block_name + "_lane_line"))
-        self.sidewalk_node_path = NodePath(RigidBodyCombiner(self._block_name + "_sidewalk"))
-        self.lane_node_path = NodePath(RigidBodyCombiner(self._block_name + "_lane"))
-        self.lane_vis_node_path = NodePath(RigidBodyCombiner(self._block_name + "_lane_vis"))
+        self.lane_line_node_path = NodePath(RigidBodyCombiner(self.name + "_lane_line"))
+        self.sidewalk_node_path = NodePath(RigidBodyCombiner(self.name + "_sidewalk"))
+        self.lane_node_path = NodePath(RigidBodyCombiner(self.name + "_lane"))
+        self.lane_vis_node_path = NodePath(RigidBodyCombiner(self.name + "_lane_vis"))
         graph = self.block_network.graph
         for _from, to_dict in graph.items():
             for _to, lanes in to_dict.items():
@@ -165,12 +164,12 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
         self.lane_vis_node_path.node().collect()
         self.lane_vis_node_path.hide(CamMask.DepthCam | CamMask.ScreenshotCam)
 
-        self.node_path.hide(CamMask.Shadow)
+        self.origin.hide(CamMask.Shadow)
 
-        self.sidewalk_node_path.reparentTo(self.node_path)
-        self.lane_line_node_path.reparentTo(self.node_path)
-        self.lane_node_path.reparentTo(self.node_path)
-        self.lane_vis_node_path.reparentTo(self.node_path)
+        self.sidewalk_node_path.reparentTo(self.origin)
+        self.lane_line_node_path.reparentTo(self.origin)
+        self.lane_node_path.reparentTo(self.origin)
+        self.lane_vis_node_path.reparentTo(self.origin)
 
         self.bounding_box = self.block_network.get_bounding_box()
 
@@ -360,13 +359,12 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
     def _add_sidewalk2bullet(self, lane_start, lane_end, middle, radius=0.0, direction=0):
         length = norm(lane_end[0] - lane_start[0], lane_end[1] - lane_start[1])
         body_node = BulletRigidBodyNode(BodyName.Sidewalk)
-        body_node.set_active(False)
         body_node.setKinematic(False)
         body_node.setStatic(True)
         side_np = self.sidewalk_node_path.attachNewNode(body_node)
         shape = BulletBoxShape(Vec3(1 / 2, 1 / 2, 1 / 2))
         body_node.addShape(shape)
-        body_node.setIntoCollideMask(BitMask32.bit(self.CONTINUOUS_COLLISION_MASK))
+        body_node.setIntoCollideMask(BitMask32.bit(self.SIDEWALK_COLLISION_MASK))
         self.dynamic_nodes.append(body_node)
 
         if radius == 0:

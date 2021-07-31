@@ -1,8 +1,9 @@
+from typing import Iterable
+
 from pgdrive.component.blocks.base_block import BaseBlock
+from pgdrive.component.lane.argoverse_lane import ArgoverseLane
 from pgdrive.component.road.road import Road
 from pgdrive.component.road.road_network import RoadNetwork
-from typing import Iterable
-from pgdrive.component.lane.argoverse_lane import ArgoverseLane
 
 
 class ArgoverseBlock(BaseBlock):

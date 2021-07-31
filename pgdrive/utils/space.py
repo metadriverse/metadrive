@@ -9,7 +9,7 @@ from collections import namedtuple, OrderedDict
 
 import numpy as np
 
-from pgdrive.utils.random import get_np_random
+from pgdrive.utils import get_np_random
 
 BoxSpace = namedtuple("BoxSpace", "max min")
 DiscreteSpace = namedtuple("DiscreteSpace", "max min")

@@ -1,9 +1,9 @@
 import numpy as np
 
-from pgdrive.component.blocks.pg_block import PGBlock
 from pgdrive.component.blocks.create_block_utils import CreateAdverseRoad, CreateRoadFrom, create_bend_straight
-from pgdrive.constants import LineType
+from pgdrive.component.blocks.pg_block import PGBlock
 from pgdrive.component.road.road import Road
+from pgdrive.constants import LineType
 from pgdrive.utils.space import ParameterSpace, Parameter, BlockParameterSpace
 
 

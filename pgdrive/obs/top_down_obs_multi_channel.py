@@ -3,11 +3,12 @@ from collections import deque
 
 import gym
 import numpy as np
+
+from pgdrive.component.vehicle.base_vehicle import BaseVehicle
 from pgdrive.constants import Decoration, DEFAULT_AGENT
 from pgdrive.obs.top_down_obs import TopDownObservation
 from pgdrive.obs.top_down_obs_impl import WorldSurface, COLOR_BLACK, VehicleGraphics, LaneGraphics, \
     ObservationWindowMultiChannel
-from pgdrive.component.vehicle.base_vehicle import BaseVehicle
 from pgdrive.utils import import_pygame, clip
 
 pygame = import_pygame()

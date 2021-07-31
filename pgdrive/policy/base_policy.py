@@ -1,9 +1,9 @@
-from pgdrive.component.base_object import BaseObject
+from pgdrive.component.base_class.base_runable import BaseRunnable
 
 
-class BasePolicy(BaseObject):
-    def __init__(self, name=None, random_seed=None):
-        super(BasePolicy, self).__init__(name=name, random_seed=random_seed)
+class BasePolicy(BaseRunnable):
+    def __init__(self, name=None, random_seed=None, config=None):
+        BaseRunnable.__init__(self, name, random_seed, config)
 
     def destroy(self):
         pass

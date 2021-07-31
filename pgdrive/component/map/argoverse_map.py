@@ -1,7 +1,4 @@
 import logging
-from pgdrive.utils.coordinates_shift import panda_position
-from argoverse.map_representation.map_api import ArgoverseMap as AGMap
-from pgdrive.component.blocks.argoverse_block import ArgoverseBlock
 import os
 import xml.etree.ElementTree as ET
 from pathlib import Path
@@ -10,8 +7,10 @@ from typing import Any, Dict, List, Mapping, Tuple, Union, cast
 from argoverse.data_loading.vector_map_loader import Node, append_additional_key_value_pair, \
     append_unique_key_value_pair, convert_node_id_list_to_xy, extract_node_waypt, get_lane_identifier, str_to_bool, \
     extract_node_from_ET_element
+from argoverse.map_representation.map_api import ArgoverseMap as AGMap
 from argoverse.map_representation.map_api import PITTSBURGH_ID, MIAMI_ID, ROOT
 
+from pgdrive.component.blocks.argoverse_block import ArgoverseBlock
 from pgdrive.component.lane.argoverse_lane import ArgoverseLane
 
 logger = logging.getLogger(__name__)
@@ -147,7 +146,7 @@ class ArgoverseMap(BaseMap):
 
 
 if __name__ == "__main__":
-    from pgdrive.utils.engine_utils import initialize_engine, get_engine
+    from pgdrive.engine.engine_utils import initialize_engine
     from pgdrive.envs.pgdrive_env import PGDriveEnv
 
     default_config = PGDriveEnv.default_config()
