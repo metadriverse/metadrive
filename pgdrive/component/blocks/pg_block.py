@@ -3,7 +3,6 @@ import logging
 from collections import OrderedDict
 from typing import Union, List
 
-from pgdrive.constants import DrivableAreaProperty
 from pgdrive.component.blocks.base_block import BaseBlock
 from pgdrive.component.road.road import Road
 from pgdrive.component.road.road_network import RoadNetwork
@@ -62,7 +61,7 @@ class PGBlock(BaseBlock):
     But it's helpful when a town is created.
     """
     def __init__(self, block_index: int, pre_block_socket: PGBlockSocket, global_network: RoadNetwork, random_seed):
-        self._block_name = str(block_index) + self.ID
+        self.name = str(block_index) + self.ID
         super(PGBlock, self).__init__(block_index, global_network, random_seed)
         # block information
         assert self.SOCKET_NUM is not None, "The number of Socket should be specified when define a new block"
@@ -104,7 +103,7 @@ class PGBlock(BaseBlock):
                 raise ValueError("Socket of {}: index out of range".format(self.class_name))
             socket_index = list(self._sockets)[index]
         else:
-            assert index.startswith(self._block_name)
+            assert index.startswith(self.name)
             socket_index = index
         assert socket_index in self._sockets, (socket_index, self._sockets.keys())
         return self._sockets[socket_index]
@@ -133,14 +132,14 @@ class PGBlock(BaseBlock):
 
     def _add_one_socket(self, socket: PGBlockSocket):
         assert isinstance(socket, PGBlockSocket), "Socket list only accept BlockSocket Type"
-        if socket.index is not None and not socket.index.startswith(self._block_name):
+        if socket.index is not None and not socket.index.startswith(self.name):
             logging.warning(
                 "The adding socket has index {}, which is not started with this block name {}. This is dangerous! "
-                "Current block has sockets: {}.".format(socket.index, self._block_name, self.get_socket_indices())
+                "Current block has sockets: {}.".format(socket.index, self.name, self.get_socket_indices())
             )
         if socket.index is None:
             # if this socket is self block socket
-            socket.set_index(self._block_name, len(self._sockets))
+            socket.set_index(self.name, len(self._sockets))
         self._sockets[socket.index] = socket
 
     def _clear_topology(self):

@@ -1,10 +1,10 @@
 import numpy
 from panda3d.bullet import BulletRigidBodyNode, BulletPlaneShape
-from panda3d.core import Vec3, CardMaker, LQuaternionf, BitMask32, NodePath, TextureStage, Texture, SamplerState
+from panda3d.core import Vec3, CardMaker, LQuaternionf, BitMask32, TextureStage, Texture, SamplerState
 
+from pgdrive.component.base_class.base_object import BaseObject
 from pgdrive.constants import BodyName, CamMask, CollisionGroup
 from pgdrive.engine.asset_loader import AssetLoader
-from pgdrive.component.base_object import BaseObject
 
 
 class Terrain(BaseObject):
@@ -21,9 +21,9 @@ class Terrain(BaseObject):
         node.setIntoCollideMask(BitMask32.bit(self.COLLISION_MASK))
         self.dynamic_nodes.append(node)
 
-        self.node_path = NodePath(node)
+        self.origin.attachNewNode(node)
         if self.render:
-            self.node_path.hide(CamMask.MiniMap | CamMask.Shadow | CamMask.DepthCam | CamMask.ScreenshotCam)
+            self.origin.hide(CamMask.MiniMap | CamMask.Shadow | CamMask.DepthCam | CamMask.ScreenshotCam)
             # self.terrain_normal = self.loader.loadTexture(
             #     AssetLoader.file_path( "textures", "grass2", "normal.jpg")
             # )
@@ -33,11 +33,11 @@ class Terrain(BaseObject):
             self.ts_color = TextureStage("color")
             self.ts_normal = TextureStage("normal")
             self.ts_normal.set_mode(TextureStage.M_normal)
-            self.node_path.setPos(0, 0, self.HEIGHT)
+            self.origin.setPos(0, 0, self.HEIGHT)
             cm = CardMaker('card')
             scale = 20000
             cm.setUvRange((0, 0), (scale / 10, scale / 10))
-            card = self.node_path.attachNewNode(cm.generate())
+            card = self.origin.attachNewNode(cm.generate())
             # scale = 1 if self.use_hollow else 20000
             card.set_scale(scale)
             card.setPos(-scale / 2, -scale / 2, -0.1)

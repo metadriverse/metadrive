@@ -3,11 +3,12 @@ from typing import Tuple
 import numpy as np
 from panda3d.bullet import BulletCylinderShape
 from panda3d.core import NodePath
+
+from pgdrive.component.static_object.base_static_object import BaseStaticObject
 from pgdrive.constants import BodyName
 from pgdrive.engine.asset_loader import AssetLoader
 from pgdrive.engine.physics_node import TrafficSignNode
 from pgdrive.utils.coordinates_shift import panda_position, panda_heading
-from pgdrive.component.static_object.base_static_object import BaseStaticObject
 
 LaneIndex = Tuple[str, str, int]
 
@@ -59,15 +60,15 @@ class TrafficCone(TrafficSign):
         super(TrafficCone, self).__init__(lane, lane_index, longitude, lateral, random_seed)
         self.body_node = TrafficSignNode(self.NAME)
         self.body_node.addShape(BulletCylinderShape(self.RADIUS, self.HEIGHT))
-        self.node_path: NodePath = NodePath(self.body_node)
-        self.node_path.setPos(panda_position(self.position, self.HEIGHT / 2))
+        self.origin: NodePath = NodePath(self.body_node)
+        self.origin.setPos(panda_position(self.position, self.HEIGHT / 2))
         self.dynamic_nodes.append(self.body_node)
-        self.node_path.setH(panda_heading(self.heading))
+        self.origin.setH(panda_heading(self.heading))
         if self.render:
             model = self.loader.loadModel(AssetLoader.file_path("models", "traffic_cone", "scene.gltf"))
             model.setScale(0.02)
             model.setPos(0, 0, -self.HEIGHT / 2)
-            model.reparentTo(self.node_path)
+            model.reparentTo(self.origin)
         self.set_static(static)
 
 
@@ -83,14 +84,14 @@ class TrafficTriangle(TrafficSign):
         super(TrafficTriangle, self).__init__(lane, lane_index, longitude, lateral, random_seed)
         self.body_node = TrafficSignNode(self.NAME)
         self.body_node.addShape(BulletCylinderShape(self.RADIUS, self.HEIGHT))
-        self.node_path: NodePath = NodePath(self.body_node)
-        self.node_path.setPos(panda_position(self.position, self.HEIGHT / 2))
+        self.origin: NodePath = NodePath(self.body_node)
+        self.origin.setPos(panda_position(self.position, self.HEIGHT / 2))
         self.dynamic_nodes.append(self.body_node)
-        self.node_path.setH(panda_heading(self.heading))
+        self.origin.setH(panda_heading(self.heading))
         if self.render:
             model = self.loader.loadModel(AssetLoader.file_path("models", "warning", "warning.gltf"))
             model.setScale(0.02)
             model.setH(-90)
             model.setPos(0, 0, -self.HEIGHT / 2)
-            model.reparentTo(self.node_path)
+            model.reparentTo(self.origin)
         self.set_static(static)

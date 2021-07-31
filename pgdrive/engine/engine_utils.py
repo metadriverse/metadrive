@@ -1,5 +1,4 @@
 import copy
-
 import logging
 from typing import Optional
 
@@ -55,7 +54,7 @@ def get_global_config():
 def set_global_random_seed(random_seed: Optional[int]):
     """
     Update the random seed and random engine
-    All subclasses of RandomEngine will hold the same random engine, after calling this function
+    All subclasses of Randomizable will hold the same random engine, after calling this function
     :param random_seed: int, random seed
     """
     engine = get_engine()

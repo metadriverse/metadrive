@@ -45,7 +45,7 @@ def test_naive_multi_agent_pgdrive():
             assert isinstance(a, dict)
             o, r, d, i = env.step(a)
 
-            pos_z_list = [v.chassis_np.getNode(0).transform.pos[2] for v in env.vehicles.values()]
+            pos_z_list = [v.chassis.getNode(0).transform.pos[2] for v in env.vehicles.values()]
             for p in pos_z_list:
                 assert p < 0.3 or step < 10
 

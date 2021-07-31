@@ -1,8 +1,8 @@
-from pgdrive.component.blocks.pg_block import PGBlock, PGBlockSocket
 from pgdrive.component.blocks.create_block_utils import CreateAdverseRoad, CreateRoadFrom, ExtendStraightLane, \
     create_wave_lanes
-from pgdrive.constants import LineType
+from pgdrive.component.blocks.pg_block import PGBlock, PGBlockSocket
 from pgdrive.component.road.road import Road
+from pgdrive.constants import LineType
 from pgdrive.utils.space import ParameterSpace, Parameter, BlockParameterSpace
 
 

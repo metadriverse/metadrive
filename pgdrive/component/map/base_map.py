@@ -1,14 +1,16 @@
 import copy
-from pgdrive.utils.engine_utils import get_engine
-from pgdrive.component.road.road import Road
 import logging
-from pgdrive.component.base_object import BaseObject
+
 import numpy as np
+
 from pgdrive.component.algorithm.BIG import BigGenerateMethod
-from pgdrive.component.blocks.pg_block import PGBlock
+from pgdrive.component.base_class.base_runable import BaseRunnable
 from pgdrive.component.blocks.first_block import FirstPGBlock
+from pgdrive.component.blocks.pg_block import PGBlock
+from pgdrive.component.road.road import Road
 from pgdrive.component.road.road_network import RoadNetwork
 from pgdrive.utils import Config, import_pygame
+from pgdrive.engine.engine_utils import get_engine
 
 pygame = import_pygame()
 
@@ -42,7 +44,7 @@ class MapGenerateMethod:
     PG_MAP_FILE = "pg_map_file"
 
 
-class BaseMap(BaseObject):
+class BaseMap(BaseRunnable):
     """
     Base class for Map generation!
     """
@@ -69,8 +71,7 @@ class BaseMap(BaseObject):
         assert random_seed == map_config[
             self.SEED
         ], "Global seed {} should equal to seed in map config {}".format(random_seed, map_config[self.SEED])
-        super(BaseMap, self).__init__(random_seed=map_config[self.SEED])
-        self.update_config(map_config, allow_add_new_key=True)
+        super(BaseMap, self).__init__(random_seed=map_config[self.SEED], config=map_config)
         self.film_size = (self._config["draw_map_resolution"], self._config["draw_map_resolution"])
         self.road_network = RoadNetwork()
 

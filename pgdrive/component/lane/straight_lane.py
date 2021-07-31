@@ -2,6 +2,7 @@ import math
 from typing import Tuple, Sequence, Union
 
 import numpy as np
+
 from pgdrive.component.lane.abs_lane import AbstractLane
 from pgdrive.constants import LineType
 from pgdrive.utils.math_utils import norm

@@ -1,13 +1,14 @@
 import logging
 from typing import Union
 
-from pgdrive.utils import get_np_random
 from panda3d.core import NodePath
-from pgdrive.component.blocks.pg_block import PGBlock
+
+from pgdrive.component.algorithm.blocks_prob_dist import PGBlockConfig
 from pgdrive.component.blocks.first_block import FirstPGBlock
-from pgdrive.component.algorithm.blocks_prob_dist import PGBlock
+from pgdrive.component.blocks.pg_block import PGBlock
 from pgdrive.component.road.road_network import RoadNetwork
 from pgdrive.engine.core.physics_world import PhysicsWorld
+from pgdrive.utils import get_np_random
 
 
 class NextStep:
@@ -97,12 +98,12 @@ class BIG:
         Sample a random block type
         """
         if self._block_sequence is None:
-            block_types = PGBlock.all_blocks(self.block_type_version)
-            block_probabilities = PGBlock.block_probability(self.block_type_version)
+            block_types = PGBlockConfig.all_blocks(self.block_type_version)
+            block_probabilities = PGBlockConfig.block_probability(self.block_type_version)
             block_type = self.np_random.choice(block_types, p=block_probabilities)
         else:
             type_id = self._block_sequence[len(self.blocks)]
-            block_type = PGBlock.get_block(type_id, self.block_type_version)
+            block_type = PGBlockConfig.get_block(type_id, self.block_type_version)
 
         socket = self.np_random.choice(self.blocks[-1].get_socket_indices())
         block = block_type(

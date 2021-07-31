@@ -3,6 +3,7 @@ import time
 from typing import Tuple
 
 import numpy as np
+
 from pgdrive.utils.cutils import import_cutils
 
 cutils = import_cutils()

@@ -1,15 +1,13 @@
 import copy
-from collections import deque
 
 import numpy as np
-from pgdrive.component.blocks.pg_block import PGBlock, PGBlockSocket
+
 from pgdrive.component.blocks.create_block_utils import CreateAdverseRoad, CreateRoadFrom, ExtendStraightLane, \
     CreateTwoWayRoad, create_bend_straight
-from pgdrive.constants import LineType, LineColor
-from pgdrive.component.lane.straight_lane import StraightLane
+from pgdrive.component.blocks.pg_block import PGBlock, PGBlockSocket
 from pgdrive.component.road.road import Road
+from pgdrive.constants import LineType, LineColor
 from pgdrive.utils.space import ParameterSpace, Parameter, BlockParameterSpace
-from pgdrive.utils.scene_utils import check_lane_on_road
 
 
 class ParkingLot(PGBlock):

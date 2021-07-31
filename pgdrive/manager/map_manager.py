@@ -1,9 +1,10 @@
-from pgdrive.manager.base_manager import BaseManager
-import os.path as osp
-import logging
 import json
-from pgdrive.utils import recursive_equal
+import logging
+import os.path as osp
+
 from pgdrive.component.map.base_map import BaseMap, MapGenerateMethod
+from pgdrive.manager.base_manager import BaseManager
+from pgdrive.utils import recursive_equal
 
 
 class MapManager(BaseManager):

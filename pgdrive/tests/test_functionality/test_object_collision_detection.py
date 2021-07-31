@@ -1,5 +1,5 @@
-from pgdrive.constants import BodyName, TerminationState
 from pgdrive.component.vehicle.traffic_vehicle_type import LVehicle
+from pgdrive.constants import BodyName, TerminationState
 from pgdrive.envs import PGDriveEnv
 
 

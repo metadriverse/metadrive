@@ -7,9 +7,10 @@ import time
 import numpy as np
 from gym import logger, error
 from panda3d.core import PNMImage
-from pgdrive.envs.pgdrive_env import PGDriveEnv
+
 from pgdrive.component.algorithm.BIG import BigGenerateMethod
 from pgdrive.component.map.base_map import BaseMap
+from pgdrive.envs.pgdrive_env import PGDriveEnv
 
 
 class ImageEncoder(object):

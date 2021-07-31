@@ -1,15 +1,16 @@
 import copy
 from math import floor
-from pgdrive.utils.engine_utils import get_engine
+
 import numpy as np
 from panda3d.bullet import BulletBoxShape, BulletGhostNode
 from panda3d.core import Vec3, BitMask32
 
-from pgdrive.constants import CollisionGroup
 from pgdrive.component.blocks.first_block import FirstPGBlock
 from pgdrive.component.lane.straight_lane import StraightLane
+from pgdrive.constants import CollisionGroup
 from pgdrive.utils import Config, get_np_random
 from pgdrive.utils.coordinates_shift import panda_position, panda_heading
+from pgdrive.engine.engine_utils import get_engine
 from pgdrive.utils.scene_utils import rect_region_detection
 
 

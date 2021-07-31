@@ -1,8 +1,9 @@
 import logging
-from pgdrive.utils.utils import is_win
 import os
 import pathlib
 import sys
+
+from pgdrive.utils.utils import is_win
 
 
 class AssetLoader:

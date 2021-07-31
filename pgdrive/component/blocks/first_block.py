@@ -1,13 +1,13 @@
 from panda3d.core import NodePath
 
-from pgdrive.constants import Decoration, LineType
-from pgdrive.component.blocks.pg_block import PGBlock, PGBlockSocket
 from pgdrive.component.blocks.create_block_utils import CreateRoadFrom, CreateAdverseRoad, ExtendStraightLane
+from pgdrive.component.blocks.pg_block import PGBlock, PGBlockSocket
 from pgdrive.component.lane.straight_lane import StraightLane
 from pgdrive.component.road.road import Road
 from pgdrive.component.road.road_network import RoadNetwork
-from pgdrive.utils.space import ParameterSpace
+from pgdrive.constants import Decoration, LineType
 from pgdrive.engine.core.physics_world import PhysicsWorld
+from pgdrive.utils.space import ParameterSpace
 
 
 class FirstPGBlock(PGBlock):
@@ -49,14 +49,13 @@ class FirstPGBlock(PGBlock):
         CreateRoadFrom(next_lane, lane_num, other_v_spawn_road, self.block_network, self._global_network)
         CreateAdverseRoad(other_v_spawn_road, self.block_network, self._global_network)
 
-        self.node_path = NodePath(self._block_name)
         self._create_in_world()
 
         # global_network += self.block_network
         global_network.add(self.block_network)
 
         socket = self.create_socket_from_positive_road(other_v_spawn_road)
-        socket.set_index(self._block_name, 0)
+        socket.set_index(self.name, 0)
 
         self.add_sockets(socket)
         self.attach_to_world(render_root_np, physics_world)

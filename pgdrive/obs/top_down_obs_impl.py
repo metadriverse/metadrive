@@ -2,9 +2,9 @@ from typing import List, Tuple, Union
 
 import numpy as np
 
-from pgdrive.constants import LineType
 from pgdrive.component.lane.circular_lane import CircularLane
 from pgdrive.component.lane.straight_lane import StraightLane
+from pgdrive.constants import LineType
 from pgdrive.utils.utils import import_pygame
 
 PositionType = Union[Tuple[float, float], np.ndarray]

@@ -5,8 +5,8 @@ from pgdrive.component.blocks.std_intersection import StdInterSection
 from pgdrive.component.blocks.straight import Straight
 from pgdrive.component.blocks.t_intersection import TInterSection
 from pgdrive.component.road.road_network import RoadNetwork
-from pgdrive.tests.vis_block.vis_block_base import TestBlock
 from pgdrive.engine.asset_loader import initialize_asset_loader
+from pgdrive.tests.vis_block.vis_block_base import TestBlock
 from pgdrive.utils.space import Parameter
 
 if __name__ == "__main__":

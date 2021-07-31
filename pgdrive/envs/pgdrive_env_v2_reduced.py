@@ -2,6 +2,7 @@ from collections import deque
 
 import gym
 import numpy as np
+
 from pgdrive.envs.pgdrive_env_v2 import PGDriveEnvV2
 from pgdrive.obs.observation_base import ObservationBase
 from pgdrive.obs.state_obs import LidarStateObservation

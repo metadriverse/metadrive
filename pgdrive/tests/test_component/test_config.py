@@ -1,6 +1,5 @@
-from pgdrive.utils import Config, recursive_equal
-
 from pgdrive.envs.pgdrive_env import PGDriveEnv
+from pgdrive.utils import Config, recursive_equal
 
 
 def test_config_unchangeable():

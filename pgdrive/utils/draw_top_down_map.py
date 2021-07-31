@@ -1,6 +1,7 @@
 from typing import Optional, Union, Iterable
 
 import numpy as np
+
 from pgdrive.obs.top_down_renderer import draw_top_down_map as native_draw
 from pgdrive.utils.utils import import_pygame
 

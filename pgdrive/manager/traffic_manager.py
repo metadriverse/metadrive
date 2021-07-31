@@ -3,13 +3,13 @@ import logging
 from collections import namedtuple, deque
 from typing import Tuple, Dict
 
-from pgdrive.constants import TARGET_VEHICLES, TRAFFIC_VEHICLES, OBJECT_TO_AGENT, AGENT_TO_OBJECT
 from pgdrive.component.lane.abs_lane import AbstractLane
 from pgdrive.component.map.base_map import BaseMap
 from pgdrive.component.road.road import Road
+from pgdrive.constants import TARGET_VEHICLES, TRAFFIC_VEHICLES, OBJECT_TO_AGENT, AGENT_TO_OBJECT
 from pgdrive.manager.base_manager import BaseManager
 from pgdrive.utils import norm, merge_dicts
-from pgdrive.utils.engine_utils import get_engine
+from pgdrive.engine.engine_utils import get_engine
 
 BlockVehicles = namedtuple("block_vehicles", "trigger_road vehicles")
 

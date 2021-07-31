@@ -26,11 +26,11 @@ class SceneCull:
         # A distance based LOD rendering
         for block in blocks:
             if not cls.all_out_of_bounding_box(block.bounding_box, poses, cls.LOD_MAP_VIS_DIST):
-                if not block.node_path.hasParent():
-                    block.node_path.reparentTo(engine.worldNP)
+                if not block.origin.hasParent():
+                    block.origin.reparentTo(engine.worldNP)
             else:
-                if block.node_path.hasParent():
-                    block.node_path.detachNode()
+                if block.origin.hasParent():
+                    block.origin.detachNode()
             if not cls.all_out_of_bounding_box(block.bounding_box, poses, max_distance or cls.LOD_MAP_PHYSICS_DIST):
                 block.dynamic_nodes.attach_to_physics_world(engine.physics_world.dynamic_world)
             else:
@@ -51,11 +51,11 @@ class SceneCull:
         for obj in elements:
             v_p = obj.position
             if not cls.all_distance_greater_than(vis_distance, poses, v_p):
-                if not obj.node_path.hasParent():
-                    obj.node_path.reparentTo(engine.pbr_worldNP)
+                if not obj.origin.hasParent():
+                    obj.origin.reparentTo(engine.pbr_worldNP)
             else:
-                if obj.node_path.hasParent():
-                    obj.node_path.detachNode()
+                if obj.origin.hasParent():
+                    obj.origin.detachNode()
 
             if not cls.all_distance_greater_than(physics_distance, poses, v_p):
                 obj.dynamic_nodes.attach_to_physics_world(engine.physics_world.dynamic_world)

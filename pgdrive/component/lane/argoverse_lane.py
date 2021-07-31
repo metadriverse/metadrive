@@ -1,7 +1,9 @@
-from pgdrive.component.lane.waypoint_lane import WayPointLane
-from argoverse.map_representation.lane_segment import LaneSegment
 from typing import Optional, List
+
 import numpy as np
+from argoverse.map_representation.lane_segment import LaneSegment
+
+from pgdrive.component.lane.waypoint_lane import WayPointLane
 from pgdrive.constants import LineType, LineColor
 
 

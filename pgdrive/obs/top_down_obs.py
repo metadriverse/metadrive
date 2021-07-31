@@ -8,11 +8,12 @@ from typing import Tuple
 
 import gym
 import numpy as np
+
+from pgdrive.component.vehicle.base_vehicle import BaseVehicle
 from pgdrive.constants import Decoration, DEFAULT_AGENT, EDITION
 from pgdrive.obs.observation_base import ObservationBase
 from pgdrive.obs.top_down_obs_impl import WorldSurface, ObservationWindow, COLOR_BLACK, \
     VehicleGraphics, LaneGraphics
-from pgdrive.component.vehicle.base_vehicle import BaseVehicle
 from pgdrive.utils import import_pygame
 
 pygame = import_pygame()
