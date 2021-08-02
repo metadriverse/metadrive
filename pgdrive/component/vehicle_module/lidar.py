@@ -1,4 +1,5 @@
 from typing import Set
+from pgdrive.utils.utils import get_object_from_node
 
 from panda3d.core import BitMask32, NodePath
 
@@ -24,9 +25,9 @@ class Lidar(DistanceDetector):
         objs = self.get_detected_objects()
         for ret in objs:
             if ret.getNode().hasPythonTag(BodyName.Traffic_vehicle):
-                vehicles.add(ret.getNode().getPythonTag(BodyName.Traffic_vehicle).kinematic_model)
+                vehicles.add(get_object_from_node(ret.getNode()).kinematic_model)
             elif ret.getNode().hasPythonTag(BodyName.Base_vehicle):
-                vehicles.add(ret.getNode().getPythonTag(BodyName.Base_vehicle))
+                vehicles.add(get_object_from_node(ret.getNode()))
         return vehicles
 
     # def _get_surrounding_objects(self) -> Set[Object]:

@@ -7,7 +7,7 @@ from panda3d.core import NodePath
 from pgdrive.component.static_object.base_static_object import BaseStaticObject
 from pgdrive.constants import BodyName
 from pgdrive.engine.asset_loader import AssetLoader
-from pgdrive.engine.physics_node import TrafficSignNode
+from pgdrive.engine.physics_node import BaseRigidBodyNode
 from pgdrive.utils.coordinates_shift import panda_position, panda_heading
 
 LaneIndex = Tuple[str, str, int]
@@ -21,6 +21,8 @@ class TrafficSign(BaseStaticObject):
     RADIUS = 0.25
     HEIGHT = 1.2
     MASS = 1
+
+    COST_ONCE = True  # cost will give at the first time
 
     def __init__(self, lane, lane_index: LaneIndex, longitude: float, lateral: float, random_seed):
         """
@@ -40,6 +42,8 @@ class TrafficSign(BaseStaticObject):
         self.lane = lane
         self.body_node = None
 
+        self.crashed = False
+
     def set_static(self, static: bool = False):
         mass = 0 if static else self.MASS
         self.body_node.setMass(mass)
@@ -58,7 +62,7 @@ class TrafficCone(TrafficSign):
         self, lane, lane_index: LaneIndex, longitude: float, lateral: float, static: bool = False, random_seed=None
     ):
         super(TrafficCone, self).__init__(lane, lane_index, longitude, lateral, random_seed)
-        self.body_node = TrafficSignNode(self.NAME)
+        self.body_node = BaseRigidBodyNode(self, self.NAME)
         self.body_node.addShape(BulletCylinderShape(self.RADIUS, self.HEIGHT))
         self.origin: NodePath = NodePath(self.body_node)
         self.origin.setPos(panda_position(self.position, self.HEIGHT / 2))
@@ -82,7 +86,7 @@ class TrafficTriangle(TrafficSign):
         self, lane, lane_index: LaneIndex, longitude: float, lateral: float, static: bool = False, random_seed=None
     ):
         super(TrafficTriangle, self).__init__(lane, lane_index, longitude, lateral, random_seed)
-        self.body_node = TrafficSignNode(self.NAME)
+        self.body_node = BaseRigidBodyNode(self, self.NAME)
         self.body_node.addShape(BulletCylinderShape(self.RADIUS, self.HEIGHT))
         self.origin: NodePath = NodePath(self.body_node)
         self.origin.setPos(panda_position(self.position, self.HEIGHT / 2))

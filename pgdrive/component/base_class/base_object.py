@@ -56,7 +56,7 @@ class BaseObject(BaseRunnable):
         )
 
         # Following properties are available when this object needs visualization and physics property
-        self.body = None
+        self._body = None
 
         # each element has its node_path to render, physics node are child nodes of it
         self.origin = NodePath(self.name)
@@ -76,18 +76,25 @@ class BaseObject(BaseRunnable):
                 # It is closed before!
                 self.loader.__init__()
 
-    def add_physics_body(self, physics_body):
-        if self.body is None:
+    def add_body(self, physics_body):
+        if self._body is None:
             # add it to physics world, in which this object will interact with other object (like collision)
             if not isinstance(physics_body, BulletBodyNode):
                 raise ValueError("The physics body is not BulletBodyNode type")
-            self.body = physics_body
-            new_origin = NodePath(self.body)
+            self._body = physics_body
+            new_origin = NodePath(self._body)
             self.origin.getChildren().reparentTo(new_origin)
             self.origin = new_origin
             self.dynamic_nodes.append(physics_body)
         else:
             raise AttributeError("You can not set the object body for twice")
+
+    @property
+    def body(self):
+        if self._body.hasPythonTag(self._body.getName()):
+            return self._body.getPythonTag(self._body.getName())
+        else:
+            return self._body
 
     def attach_to_world(self, parent_node_path: NodePath, physics_world: PhysicsWorld):
         if self.render:
