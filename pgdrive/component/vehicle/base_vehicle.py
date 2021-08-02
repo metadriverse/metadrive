@@ -25,18 +25,41 @@ from pgdrive.component.vehicle_module.vehicle_panel import VehiclePanel
 from pgdrive.constants import RENDER_MODE_ONSCREEN, COLOR, COLLISION_INFO_COLOR, BodyName, CamMask, CollisionGroup
 from pgdrive.engine.asset_loader import AssetLoader
 from pgdrive.engine.core.image_buffer import ImageBuffer
-from pgdrive.engine.physics_node import BaseVehicleNode
-from pgdrive.utils import Config, safe_clip_for_small_array, Vector
-from pgdrive.utils.coordinates_shift import panda_position, pgdrive_position, panda_heading, pgdrive_heading
 from pgdrive.engine.engine_utils import get_engine, engine_initialized
-from pgdrive.utils.math_utils import get_vertical_vector, norm, clip
+from pgdrive.engine.physics_node import BaseRigidBodyNode
+from pgdrive.utils import Config, safe_clip_for_small_array, Vector
 from pgdrive.utils import get_np_random
+from pgdrive.utils.coordinates_shift import panda_position, pgdrive_position, panda_heading, pgdrive_heading
+from pgdrive.utils.math_utils import get_vertical_vector, norm, clip
 from pgdrive.utils.scene_utils import ray_localization
 from pgdrive.utils.scene_utils import rect_region_detection
 from pgdrive.utils.space import ParameterSpace, Parameter, VehicleParameterSpace
 
 
-class BaseVehicle(BaseObject):
+class BaseVehicleState:
+    def __init__(self):
+        self.crash_vehicle = False
+        self.crash_object = False
+        self.crash_sidewalk = False
+        self.crash_building = False
+
+        # lane line detection
+        self.on_yellow_continuous_line = False
+        self.on_white_continuous_line = False
+        self.on_broken_line = False
+
+    def init_state_info(self):
+        self.crash_vehicle = False
+        self.crash_object = False
+        self.crash_sidewalk = False
+        self.crash_building = False
+
+        self.on_yellow_continuous_line = False
+        self.on_white_continuous_line = False
+        self.on_broken_line = False
+
+
+class BaseVehicle(BaseObject, BaseVehicleState):
     MODEL = None
     """
     Vehicle chassis and its wheels index
@@ -83,11 +106,12 @@ class BaseVehicle(BaseObject):
 
         # NOTE: it is the game engine, not vehicle drivetrain
         self.engine = get_engine()
-        super(BaseVehicle, self).__init__(name, random_seed, vehicle_config)
+        BaseObject.__init__(self, name, random_seed, vehicle_config)
+        BaseVehicleState.__init__(self)
 
         # build vehicle physics model
         vehicle_chassis = self._create_vehicle_chassis()
-        self.add_physics_body(vehicle_chassis.getChassis())
+        self.add_body(vehicle_chassis.getChassis())
         self.system = vehicle_chassis
         self.chassis = self.origin
         self.wheels = self._create_wheel()
@@ -217,7 +241,7 @@ class BaseVehicle(BaseObject):
 
     def _init_step_info(self):
         # done info will be initialized every frame
-        self.origin.node().getPythonTag(BodyName.Base_vehicle).init_collision_info()
+        self.init_state_info()
         self.out_of_route = False  # re-route is required if is false
         self.on_lane = True  # on lane surface or not
 
@@ -257,7 +281,7 @@ class BaseVehicle(BaseObject):
                 self.position,
                 self.heading_theta,
                 self.engine.physics_world.dynamic_world,
-                extra_filter_node={self.origin.node()},
+                extra_filter_node={self.body},
                 detector_mask=detector_mask
             )
         if self.routing_localization is not None:
@@ -316,9 +340,9 @@ class BaseVehicle(BaseObject):
         self.origin.setPos(panda_position(Vec3(*pos, 1)))
         self.origin.setQuat(LQuaternionf(math.cos(heading / 2), 0, 0, math.sin(heading / 2)))
         self.update_map_info(map)
-        self.origin.node().clearForces()
-        self.origin.node().setLinearVelocity(Vec3(0, 0, 0))
-        self.origin.node().setAngularVelocity(Vec3(0, 0, 0))
+        self.body.clearForces()
+        self.body.setLinearVelocity(Vec3(0, 0, 0))
+        self.body.setAngularVelocity(Vec3(0, 0, 0))
         self.system.resetSuspension()
         # np.testing.assert_almost_equal(self.position, pos, decimal=4)
 
@@ -415,7 +439,7 @@ class BaseVehicle(BaseObject):
         """
         km/h
         """
-        velocity = self.origin.node().get_linear_velocity()
+        velocity = self.body.get_linear_velocity()
         speed = norm(velocity[0], velocity[1]) * 3.6
         return clip(speed, 0.0, 100000.0)
 
@@ -508,7 +532,7 @@ class BaseVehicle(BaseObject):
         para = self.get_config()
         self.LENGTH = self.config["vehicle_length"]
         self.WIDTH = self.config["vehicle_width"]
-        chassis = BaseVehicleNode(BodyName.Base_vehicle, self)
+        chassis = BaseRigidBodyNode(self, BodyName.Base_vehicle)
         chassis.setIntoCollideMask(BitMask32.bit(CollisionGroup.EgoVehicle))
         chassis_shape = BulletBoxShape(Vec3(self.WIDTH / 2, self.LENGTH / 2, para[Parameter.vehicle_height] / 2))
         ts = TransformState.makePos(Vec3(0, 0, para[Parameter.chassis_height] * 2))
@@ -646,18 +670,18 @@ class BaseVehicle(BaseObject):
             if name[0] == "Ground" or name[0] == BodyName.Lane:
                 continue
             elif name[0] == BodyName.White_continuous_line:
-                self.origin.node().getPythonTag(BodyName.Base_vehicle).on_white_continuous_line = True
+                self.on_white_continuous_line = True
             elif name[0] == BodyName.Yellow_continuous_line:
-                self.origin.node().getPythonTag(BodyName.Base_vehicle).on_yellow_continuous_line = True
+                self.on_yellow_continuous_line = True
             elif name[0] == BodyName.Broken_line:
-                self.origin.node().getPythonTag(BodyName.Base_vehicle).on_broken_line = True
+                self.on_broken_line = True
             contacts.add(name[0])
         # side walk detect
         res = rect_region_detection(
             self.engine, self.position, np.rad2deg(self.heading_theta), self.LENGTH, self.WIDTH, CollisionGroup.Sidewalk
         )
         if res.hasHit():
-            self.origin.node().getPythonTag(BodyName.Base_vehicle).crash_sidewalk = True
+            self.crash_sidewalk = True
             contacts.add(BodyName.Sidewalk)
         if self.render:
             self.render_collision_info(contacts)
@@ -709,11 +733,13 @@ class BaseVehicle(BaseObject):
             self.current_banner = new_banner
 
     def destroy(self):
-        self.origin.node().getPythonTag(BodyName.Base_vehicle).destroy()
-        if self.origin.node() in self.dynamic_nodes:
-            self.dynamic_nodes.remove(self.origin.node())
+        self.body.destroy()
+        if self.body in self.dynamic_nodes:
+            self.dynamic_nodes.remove(self.body)
+        if self.system in self.dynamic_nodes:
+            self.dynamic_nodes.remove(self.system)
         super(BaseVehicle, self).destroy()
-        self.engine.physics_world.dynamic_world.clearContactAddedCallback()
+
         self.routing_localization.destroy()
         self.routing_localization = None
 
@@ -835,36 +861,8 @@ class BaseVehicle(BaseObject):
         )
         return flag
 
-    @property
-    def crash_vehicle(self):
-        return self.origin.node().getPythonTag(BodyName.Base_vehicle).crash_vehicle
-
-    @property
-    def crash_object(self):
-        return self.origin.node().getPythonTag(BodyName.Base_vehicle).crash_object
-
-    @property
-    def crash_sidewalk(self):
-        return self.origin.node().getPythonTag(BodyName.Base_vehicle).crash_sidewalk
-
-    @property
-    def on_yellow_continuous_line(self):
-        return self.origin.node().getPythonTag(BodyName.Base_vehicle).on_yellow_continuous_line
-
-    @property
-    def on_white_continuous_line(self):
-        return self.origin.node().getPythonTag(BodyName.Base_vehicle).on_white_continuous_line
-
-    @property
-    def on_broken_line(self):
-        return self.origin.node().getPythonTag(BodyName.Base_vehicle).on_broken_line
-
     def set_static(self, flag):
-        self.origin.node().setStatic(flag)
-
-    @property
-    def crash_building(self):
-        return self.origin.node().getPythonTag(BodyName.Base_vehicle).crash_building
+        self.body.setStatic(flag)
 
     @property
     def reference_lanes(self):

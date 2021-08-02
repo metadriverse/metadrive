@@ -326,6 +326,7 @@ class EngineCore(ShowBase.ShowBase):
                 self.taskMgr.mgr.getNumTaskChains(), self.taskMgr.getAllTasks()
             )
         )
+        self.physics_world.dynamic_world.clearContactAddedCallback()
         self.physics_world.destroy()
         self.destroy()
         close_asset_loader()

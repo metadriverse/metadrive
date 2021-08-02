@@ -424,7 +424,7 @@ class TrafficManager(BaseManager):
     @property
     def vehicles(self):
         return list(self.engine.agent_manager.active_objects.values()) + \
-               [v.vehicle_node.kinematic_model for v in self._spawned_objects.values()]
+               [v.kinematic_model for v in self._spawned_objects.values()]
 
     @property
     def traffic_vehicles(self):

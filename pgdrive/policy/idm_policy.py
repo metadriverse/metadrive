@@ -175,7 +175,7 @@ class IDMPolicy(BasePolicy):
             self.action['acceleration'] = -self.speed / dt
 
         # TODO: This is a workaround.
-        # self.vehicle.vehicle_node.kinematic_model.step(dt, action=self.action)
+        # self.vehicle.kinematic_model.step(dt, action=self.action)
         # self.vehicle.step(dt, self.action)
         return copy.copy(self.action)
 
