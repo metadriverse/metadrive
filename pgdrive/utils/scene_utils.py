@@ -1,4 +1,5 @@
 import math
+from pgdrive.utils.utils import get_object_from_node
 from typing import List, TYPE_CHECKING, Tuple, Union
 
 import numpy as np
@@ -147,13 +148,13 @@ def ray_localization(heading: np.ndarray,
     if results.hasHits():
         for res in results.getHits():
             if res.getNode().getName() == BodyName.Lane:
-                lane = res.getNode().getPythonTag(BodyName.Lane)
-                long, _ = lane.info.local_coordinates(position)
-                lane_heading = lane.info.heading_at(long)
+                lane = get_object_from_node(res.getNode())
+                long, _ = lane.local_coordinates(position)
+                lane_heading = lane.heading_at(long)
                 dir = np.array([math.cos(lane_heading), math.sin(lane_heading)])
                 cosangle = dir.dot(heading) / (np.linalg.norm(dir) * np.linalg.norm(heading))
                 if cosangle > 0:
-                    lane_index_dist.append((lane.info, lane.index, lane.info.distance(position)))
+                    lane_index_dist.append((lane, lane.index, lane.distance(position)))
     if return_all_result:
         ret = []
         if len(lane_index_dist) > 0:

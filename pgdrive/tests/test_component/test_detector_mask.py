@@ -298,7 +298,7 @@ def test_cutils_lidar():
         )
         return cloud_points
 
-    env = PGDriveEnvV2({"map": "C", "traffic_density": 1.0, "environment_num": 10})
+    env = PGDriveEnvV2({"map": "C", "traffic_density": 1.0, "environment_num": 10, "use_render": False})
     try:
         for _ in range(3):
             env.reset()

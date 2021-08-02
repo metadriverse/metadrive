@@ -2,6 +2,7 @@ import copy
 import logging
 import os
 import sys
+from panda3d.bullet import BulletBodyNode
 
 
 def import_pygame():
@@ -144,3 +145,12 @@ def deprecation_warning(old, new, error=False) -> None:
     else:
         logger = logging.getLogger(__name__)
         logger.warning("DeprecationWarning: " + msg + " This will raise an error in the future!")
+
+
+def get_object_from_node(node: BulletBodyNode):
+    """
+    Use this api to get the python object from bullet RayCast/SweepTest/CollisionCallback result
+    """
+    if node.getPythonTag(node.getName()) is None:
+        return None
+    return node.getPythonTag(node.getName()).object

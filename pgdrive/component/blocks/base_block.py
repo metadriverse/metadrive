@@ -15,7 +15,7 @@ from pgdrive.component.road.road_network import RoadNetwork
 from pgdrive.constants import BodyName, CamMask, CollisionGroup, LineType, LineColor, DrivableAreaProperty
 from pgdrive.engine.asset_loader import AssetLoader
 from pgdrive.engine.core.physics_world import PhysicsWorld
-from pgdrive.engine.physics_node import LaneNode
+from pgdrive.engine.physics_node import BaseRigidBodyNode
 from pgdrive.utils.coordinates_shift import panda_position, panda_heading
 from pgdrive.utils.math_utils import norm, Vector
 
@@ -437,7 +437,8 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
         :param lane: Lane info
         :return: None
         """
-        segment_np = NodePath(LaneNode(BodyName.Lane, lane, lane_index))
+        lane.index = lane_index
+        segment_np = NodePath(BaseRigidBodyNode(lane, BodyName.Lane))
         segment_node = segment_np.node()
         segment_node.set_active(False)
         segment_node.setKinematic(False)
@@ -521,3 +522,10 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
         Buildings will be added to object_manager as static object automatically
         """
         pass
+
+    def add_body(self, physics_body):
+        raise DeprecationWarning(
+            "Different from common objects like vehicle/traffic sign, Block has several bodies!"
+            "Therefore, you should create BulletBody and then add them to self.dynamics_nodes "
+            "manually. See in construct() method"
+        )

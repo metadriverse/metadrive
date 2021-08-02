@@ -20,6 +20,7 @@ class AbstractLane:
 
     def __init__(self):
         self.speed_limit = 1000  # should be set manually
+        self.index = None
 
     def set_speed_limit(self, speed_limit):
         self.speed_limit = speed_limit

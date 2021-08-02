@@ -81,7 +81,7 @@ class LidarStateObservationMARound(ObservationBase):
                 surrounding_vehicles += [None] * num_others
                 for tmp_v in surrounding_vehicles[:num_others]:
                     if tmp_v is not None:
-                        tmp_v = tmp_v.get_vehicle()
+                        tmp_v = tmp_v
                         other_v_info += self.state_observe(tmp_v).tolist()
                     else:
                         other_v_info += [0] * self.state_length
