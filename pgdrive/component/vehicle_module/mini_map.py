@@ -1,22 +1,24 @@
-from typing import Tuple
+from panda3d.core import Vec3
 
-from panda3d.core import Vec3, NodePath
-
+from pgdrive.component.vehicle_module.base_camera import BaseCamera
 from pgdrive.constants import CamMask
-from pgdrive.engine.core.image_buffer import ImageBuffer
+from pgdrive.engine.engine_utils import get_global_config, engine_initialized
 
 
-class MiniMap(ImageBuffer):
+class MiniMap(BaseCamera):
     CAM_MASK = CamMask.MiniMap
-    default_region = [0., 1 / 3, ImageBuffer.display_bottom, ImageBuffer.display_top]
+    display_region_size = [0., 1 / 3, BaseCamera.display_bottom, BaseCamera.display_top]
 
-    def __init__(self, para: Tuple, chassis_np: NodePath):
-        self.BUFFER_W = para[0]
-        self.BUFFER_H = para[1]
-        height = para[2]
-        super(MiniMap, self).__init__(
-            self.BUFFER_W, self.BUFFER_H, Vec3(0, 20, height), self.BKG_COLOR, parent_node=chassis_np
-        )
-        self.cam.lookAt(Vec3(0, 20, 0))
-        self.lens.setAspectRatio(2.0)
-        self.add_to_display(self.default_region)
+    def __init__(self):
+        assert engine_initialized(), "You should initialize engine before adding camera to vehicle"
+        config = get_global_config()["vehicle_config"]["mini_map"]
+        self.BUFFER_W, self.BUFFER_H = config[0], config[1]
+        height = config[2]
+        super(MiniMap, self).__init__()
+
+        cam = self.get_cam()
+        lens = self.get_lens()
+
+        cam.setZ(height)
+        cam.lookAt(Vec3(0, 20, 0))
+        lens.setAspectRatio(2.0)

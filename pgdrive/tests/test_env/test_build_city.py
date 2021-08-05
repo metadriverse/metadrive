@@ -2,8 +2,8 @@ import pygame
 
 from pgdrive import PGDriveEnv
 from pgdrive.component.map.city_map import CityMap
-from pgdrive.obs.top_down_renderer import draw_top_down_map
 from pgdrive.engine.engine_utils import initialize_engine, close_engine
+from pgdrive.obs.top_down_renderer import draw_top_down_map
 
 
 def _t(num_blocks):

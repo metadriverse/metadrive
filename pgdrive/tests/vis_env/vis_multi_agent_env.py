@@ -18,7 +18,7 @@ class TestEnv(MultiAgentRoundaboutEnv):
                 "use_render": True,
                 # "debug":True,
                 "map": "XTX",
-                # "target_vehicle_configs": {
+                # "target_vehicle_configs": {sss
                 #     "agent0": {
                 #         "spawn_longitude": 40,
                 #         "show_lidar": True,
@@ -28,7 +28,7 @@ class TestEnv(MultiAgentRoundaboutEnv):
                 #         "show_lidar": True,
                 #     }
                 # },
-                "num_agents": 2
+                "num_agents": 8
             }
         )
 
@@ -40,9 +40,9 @@ if __name__ == "__main__":
     o = env.reset()
     print("vehicle num", len(env.engine.traffic_manager.vehicles))
     for i in range(1, 100000):
-        o, r, d, info = env.step({"agent0": [0, 0], "agent1": [0, 0]})
+        o, r, d, info = env.step({key: [0, 0] for key in env.action_space.sample()})
         # o, r, d, info = env.step([0,1])
-        env.render(text=d)
+        env.render(text={"display_regions": len(env.engine.win.getDisplayRegions())})
         if True in d.values():
             print("Reset")
             env.reset()

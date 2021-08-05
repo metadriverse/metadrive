@@ -1,7 +1,7 @@
 import copy
 import logging
 import os.path as osp
-from typing import Union, Dict, AnyStr, Optional, Tuple
+from typing import Union, Dict, AnyStr, Tuple
 
 import numpy as np
 
@@ -9,17 +9,16 @@ from pgdrive.component.blocks.first_block import FirstPGBlock
 from pgdrive.component.map.base_map import BaseMap, MapGenerateMethod, parse_map_config
 from pgdrive.component.map.pg_map import PGMap
 from pgdrive.component.vehicle.base_vehicle import BaseVehicle
-from pgdrive.component.vehicle_module.distance_detector import DetectorMask
 from pgdrive.constants import DEFAULT_AGENT, TerminationState
 from pgdrive.engine.core.manual_controller import KeyboardController, JoystickController
+from pgdrive.engine.engine_utils import engine_initialized
+from pgdrive.engine.engine_utils import set_global_random_seed
 from pgdrive.envs.base_env import BasePGDriveEnv
 from pgdrive.manager.traffic_manager import TrafficMode
 from pgdrive.obs.image_obs import ImageStateObservation
 from pgdrive.obs.state_obs import LidarStateObservation
-from pgdrive.utils import get_np_random
 from pgdrive.utils import clip, Config, concat_step_infos
-from pgdrive.engine.engine_utils import engine_initialized
-from pgdrive.engine.engine_utils import set_global_random_seed
+from pgdrive.utils import get_np_random
 
 pregenerated_map_file = osp.join(osp.dirname(osp.dirname(osp.abspath(__file__))), "assets", "maps", "PGDrive-maps.json")
 
@@ -45,7 +44,7 @@ PGDriveEnvV1_DEFAULT_CONFIG = dict(
 
     # ===== Observation =====
     use_topdown=False,  # Use top-down view
-    use_image=False,
+    offscreen_render=False,
     _disable_detector_mask=False,
 
     # ===== Traffic =====
@@ -66,15 +65,15 @@ PGDriveEnvV1_DEFAULT_CONFIG = dict(
         lidar=dict(num_lasers=240, distance=50, num_others=4, gaussian_noise=0.0, dropout_prob=0.0),
         show_lidar=False,
         mini_map=(84, 84, 250),  # buffer length, width
-        rgb_cam=(84, 84),  # buffer length, width
-        depth_cam=(84, 84, True),  # buffer length, width, view_ground
+        rgb_camera=(84, 84),  # buffer length, width
+        depth_camera=(84, 84, True),  # buffer length, width, view_ground
         side_detector=dict(num_lasers=0, distance=50),  # laser num, distance
         show_side_detector=False,
         lane_line_detector=dict(num_lasers=0, distance=20),  # laser num, distance
         show_lane_line_detector=False,
 
         # ===== use image =====
-        image_source="rgb_cam",  # take effect when only when use_image == True
+        image_source="rgb_camera",  # take effect when only when offscreen_render == True
 
         # ===== vehicle spawn =====
         spawn_lane_index=(FirstPGBlock.NODE_1, FirstPGBlock.NODE_2, 0),
@@ -124,8 +123,6 @@ class PGDriveEnv(BasePGDriveEnv):
     def __init__(self, config: dict = None):
         super(PGDriveEnv, self).__init__(config)
 
-        self.current_track_vehicle: Optional[BaseVehicle] = None
-
     def _process_extra_config(self, config: Union[dict, "Config"]) -> "Config":
         """Check, update, sync and overwrite some config."""
         config = self.default_config().update(config, allow_add_new_key=False)
@@ -145,7 +142,7 @@ class PGDriveEnv(BasePGDriveEnv):
         config["vehicle_config"].update(
             {
                 "use_render": config["use_render"],
-                "use_image": config["use_image"],
+                "offscreen_render": config["offscreen_render"],
                 "rgb_clip": config["rgb_clip"]
             }
         )
@@ -162,28 +159,14 @@ class PGDriveEnv(BasePGDriveEnv):
 
         # initialize track vehicles
         vehicles = self.agent_manager.get_vehicle_list()
-        self.current_track_vehicle = vehicles[0]
-        for vehicle in vehicles:
-            if vehicle is not self.current_track_vehicle:
-                # for display
-                vehicle.remove_display_region()
+        current_track_vehicle = vehicles[0]
 
         # for manual_control and main camera type
-        if self.config["use_render"] or self.config["use_image"]:
+        if self.config["use_render"] or self.config["offscreen_render"]:
             self.main_camera.set_follow_lane(self.config["use_chase_camera_follow_lane"])
-            self.main_camera.track(self.current_track_vehicle)
+            self.main_camera.track(current_track_vehicle)
             self.engine.accept("b", self.bird_view_camera)
-        self.engine.accept("q", self.chase_another_v)
-
-        # setup the detector mask
-
-        if any([v.lidar is not None for v in self.vehicles.values()]) and (not self.config["_disable_detector_mask"]):
-            v = next(iter(self.vehicles.values()))
-            self.engine.detector_mask = DetectorMask(
-                num_lasers=self.config["vehicle_config"]["lidar"]["num_lasers"],
-                max_distance=self.config["vehicle_config"]["lidar"]["distance"],
-                max_span=v.WIDTH + v.LENGTH
-            )
+        self.engine.accept("q", self.chase_camera)
 
     def _get_observations(self):
         return {self.DEFAULT_AGENT: self.get_single_observation(self.config["vehicle_config"])}
@@ -193,7 +176,7 @@ class PGDriveEnv(BasePGDriveEnv):
         self.agent_manager.before_step()
         if self.config["manual_control"] and self.config["use_render"] \
                 and self.current_track_vehicle in self.agent_manager.get_vehicle_list() and not self.main_camera.is_bird_view_camera():
-            action = self.controller.process_input()
+            action = self.controller.process_input(self.current_track_vehicle)
             if self.is_multi_agent:
                 actions[self.agent_manager.object_to_agent(self.current_track_vehicle.name)] = action
             else:
@@ -435,32 +418,29 @@ class PGDriveEnv(BasePGDriveEnv):
         """
         self.current_track_vehicle._expert_takeover = not self.current_track_vehicle._expert_takeover
 
-    def chase_another_v(self) -> (str, BaseVehicle):
-        done = False
-        if self.config["prefer_track_agent"] is not None:
-            if self.config["prefer_track_agent"] in self.vehicles.keys():
-                new_v = self.vehicles[self.config["prefer_track_agent"]]
-                self.current_track_vehicle = new_v
-                done = True
+    def chase_camera(self) -> (str, BaseVehicle):
         if self.main_camera is None:
             return
         self.main_camera.reset()
-        vehicles = list(self.agent_manager.active_agents.values())
-        if not self.main_camera.is_bird_view_camera():
-            if self.current_track_vehicle in vehicles:
-                vehicles.remove(self.current_track_vehicle)
-            if len(vehicles) == 0:
-                return
-            self.current_track_vehicle.remove_display_region()
-            if not done:
+        if self.config["prefer_track_agent"] is not None and self.config["prefer_track_agent"] in self.vehicles.keys():
+            new_v = self.vehicles[self.config["prefer_track_agent"]]
+            current_track_vehicle = new_v
+        else:
+            if self.main_camera.is_bird_view_camera():
+                current_track_vehicle = self.current_track_vehicle
+            else:
+                vehicles = list(self.agent_manager.active_agents.values())
+                if len(vehicles) <= 1:
+                    return
+                if self.current_track_vehicle in vehicles:
+                    vehicles.remove(self.current_track_vehicle)
                 new_v = get_np_random().choice(vehicles)
-                self.current_track_vehicle = new_v
-        self.current_track_vehicle.add_to_display()
-        self.main_camera.track(self.current_track_vehicle)
+                current_track_vehicle = new_v
+        self.main_camera.track(current_track_vehicle)
         return
 
     def bird_view_camera(self):
-        self.main_camera.stop_track(self.current_track_vehicle)
+        self.main_camera.stop_track()
 
     def saver(self, v_id: str, actions):
         """
@@ -504,7 +484,7 @@ class PGDriveEnv(BasePGDriveEnv):
                     #     throttle = saver_a[1]
 
                     # for collision
-                    lidar_p = vehicle.lidar.get_cloud_points()
+                    lidar_p = env.observations[DEFAULT_AGENT].cloud_points
                     left = int(vehicle.lidar.num_lasers / 4)
                     right = int(vehicle.lidar.num_lasers / 4 * 3)
                     if min(lidar_p[left - 4:left + 6]) < (save_level + 0.1) / 10 or min(lidar_p[right - 4:right + 6]
@@ -526,7 +506,7 @@ class PGDriveEnv(BasePGDriveEnv):
         return (steering, throttle) if saver_info["takeover"] else action, saver_info
 
     def get_single_observation(self, vehicle_config: "Config") -> "ObservationType":
-        if self.config["use_image"]:
+        if self.config["offscreen_render"]:
             o = ImageStateObservation(vehicle_config)
         else:
             o = LidarStateObservation(vehicle_config)
@@ -540,6 +520,10 @@ class PGDriveEnv(BasePGDriveEnv):
     @property
     def main_camera(self):
         return self.engine.main_camera
+
+    @property
+    def current_track_vehicle(self):
+        return self.engine.current_track_vehicle
 
 
 def _auto_termination(vehicle, should_done):

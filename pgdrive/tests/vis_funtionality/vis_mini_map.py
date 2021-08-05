@@ -11,9 +11,9 @@ class TestEnv(PGDriveEnv):
                 "image_source": "mini_map",
                 "manual_control": True,
                 "use_render": True,
-                "use_image": True,
+                "offscreen_render": True,
                 "rgb_clip": True,
-                "headless_image": False
+                "headless_machine_render": False
             }
         )
 

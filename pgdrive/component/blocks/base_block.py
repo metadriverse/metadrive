@@ -505,7 +505,7 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
         :return node_path
         """
         shape = BulletBoxShape(Vec3(heading_length / 2, side_width / 2, height))
-        body_node = BulletRigidBodyNode(name)
+        body_node = BaseRigidBodyNode(name, name)
         body_node.setActive(False)
         body_node.setKinematic(False)
         body_node.setStatic(True)

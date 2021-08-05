@@ -8,11 +8,11 @@ from direct.controls.InputState import InputState
 from panda3d.core import Vec3, Point3, BitMask32
 
 from pgdrive.constants import CollisionGroup
-from pgdrive.utils.coordinates_shift import panda_heading, panda_position
 from pgdrive.engine.engine_utils import get_engine
+from pgdrive.utils.coordinates_shift import panda_heading, panda_position
 
 
-class ChaseCamera:
+class MainCamera:
     """
     Only chase vehicle now
     """
@@ -35,6 +35,7 @@ class ChaseCamera:
         self.direction_running_mean = deque(maxlen=20)
         self.world_light = self.engine.world_light  # light chases the chase camera, when not using global light
         self.inputs = InputState()
+        self.current_track_vehicle = None
 
         # height control
         self.chase_camera_height = camera_height
@@ -60,23 +61,19 @@ class ChaseCamera:
             # adjust hpr
             current_pos = self.camera.getPos()
             self.camera.lookAt(current_pos[0], current_pos[1], 0)
-            self.engine.task_manager.add(
-                self.manual_control_camera, self.TOP_DOWN_TASK_NAME, extraArgs=[], appendTask=True
-            )
+            self.engine.task_manager.add(self._top_down_task, self.TOP_DOWN_TASK_NAME, extraArgs=[], appendTask=True)
 
     def set_bird_view_pos(self, position):
         if self.engine.task_manager.hasTaskNamed(self.TOP_DOWN_TASK_NAME):
             # adjust hpr
             p_pos = panda_position(position)
             self.camera_x, self.camera_y = p_pos[0], p_pos[1]
-            self.engine.task_manager.add(
-                self.manual_control_camera, self.TOP_DOWN_TASK_NAME, extraArgs=[], appendTask=True
-            )
+            self.engine.task_manager.add(self._top_down_task, self.TOP_DOWN_TASK_NAME, extraArgs=[], appendTask=True)
 
     def reset(self):
         self.direction_running_mean.clear()
 
-    def renew_camera_place(self, vehicle, task):
+    def _chase_task(self, vehicle, task):
         self.chase_camera_height = self._update_height(self.chase_camera_height)
         self.camera_queue.put(vehicle.chassis.get_pos())
         if not self.FOLLOW_LANE:
@@ -125,7 +122,7 @@ class ChaseCamera:
         :param pos: pgdrive position, tuple
         :return: dir, tuple
         """
-        heading = ChaseCamera._heading_of_lane(lane, pos)
+        heading = MainCamera._heading_of_lane(lane, pos)
         return math.cos(heading), math.sin(heading)
 
     def track(self, vehicle):
@@ -134,6 +131,8 @@ class ChaseCamera:
         :param vehicle: Vehicle to chase
         :return: None
         """
+        self.current_track_vehicle = vehicle
+        self.engine.interface.track(vehicle)
         pos = None
         if self.FOLLOW_LANE:
             pos = self._pos_on_lane(vehicle)  # Return None if routing system is not ready
@@ -144,9 +143,7 @@ class ChaseCamera:
             self.engine.task_manager.remove(self.CHASE_TASK_NAME)
         if self.engine.task_manager.hasTaskNamed(self.TOP_DOWN_TASK_NAME):
             self.engine.task_manager.remove(self.TOP_DOWN_TASK_NAME)
-        self.engine.task_manager.add(
-            self.renew_camera_place, self.CHASE_TASK_NAME, extraArgs=[vehicle], appendTask=True
-        )
+        self.engine.task_manager.add(self._chase_task, self.CHASE_TASK_NAME, extraArgs=[vehicle], appendTask=True)
         self.camera_queue = queue.Queue(self.queue_length)
         for i in range(self.queue_length - 1):
             self.camera_queue.put(Vec3(pos[0], -pos[1], 0))
@@ -181,20 +178,19 @@ class ChaseCamera:
             engine.task_manager.remove(self.CHASE_TASK_NAME)
         if engine.task_manager.hasTaskNamed(self.TOP_DOWN_TASK_NAME):
             engine.task_manager.remove(self.TOP_DOWN_TASK_NAME)
+        self.current_track_vehicle = None
 
-    def stop_track(self, current_chase_vehicle):
+    def stop_track(self):
+        self.engine.interface.stop_track()
         if self.engine.task_manager.hasTaskNamed(self.CHASE_TASK_NAME):
             self.engine.task_manager.remove(self.CHASE_TASK_NAME)
-        current_chase_vehicle.remove_display_region()
         if not self.engine.task_manager.hasTaskNamed(self.TOP_DOWN_TASK_NAME):
             # adjust hpr
             current_pos = self.camera.getPos()
             self.camera_x, self.camera_y = current_pos[0], current_pos[1]
-            self.engine.task_manager.add(
-                self.manual_control_camera, self.TOP_DOWN_TASK_NAME, extraArgs=[], appendTask=True
-            )
+            self.engine.task_manager.add(self._top_down_task, self.TOP_DOWN_TASK_NAME, extraArgs=[], appendTask=True)
 
-    def manual_control_camera(self, task):
+    def _top_down_task(self, task):
         self.top_down_camera_height = self._update_height(self.top_down_camera_height)
 
         if self.inputs.isSet("up"):

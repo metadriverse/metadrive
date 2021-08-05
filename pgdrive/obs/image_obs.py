@@ -32,8 +32,7 @@ class ImageStateObservation(ObservationBase):
         )
 
     def observe(self, vehicle: BaseVehicle):
-        image_buffer = vehicle.image_sensors[self.img_obs.image_source]
-        return {self.IMAGE: self.img_obs.observe(image_buffer), self.STATE: self.state_obs.observe(vehicle)}
+        return {self.IMAGE: self.img_obs.observe(vehicle), self.STATE: self.state_obs.observe(vehicle)}
 
 
 class ImageObservation(ObservationBase):
@@ -56,8 +55,8 @@ class ImageObservation(ObservationBase):
         else:
             return gym.spaces.Box(0, 255, shape=shape, dtype=np.uint8)
 
-    def observe(self, image_buffer: ImageBuffer):
-        new_obs = image_buffer.get_pixels_array(self.rgb_clip)
+    def observe(self, vehicle):
+        new_obs = vehicle.image_sensors[self.image_source].get_pixels_array(vehicle, self.rgb_clip)
         self.state = np.roll(self.state, -1, axis=-1)
         self.state[:, :, -1] = new_obs
         return self.state
