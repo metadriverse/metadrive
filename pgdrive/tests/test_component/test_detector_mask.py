@@ -308,10 +308,7 @@ def test_detector_mask_in_lidar():
             v = env.vehicle
             c_p, objs = v.lidar.perceive(v)
             new_cloud_points = np.array(copy.deepcopy(c_p))
-            try:
-                np.testing.assert_almost_equal(old_cloud_points, new_cloud_points)
-            except AssertionError:
-                pass
+            np.testing.assert_almost_equal(old_cloud_points, new_cloud_points)
 
             if d:
                 env.reset()
