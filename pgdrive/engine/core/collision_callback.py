@@ -1,7 +1,7 @@
 import logging
-from pgdrive.utils.utils import get_object_from_node
 
 from pgdrive.constants import BodyName
+from pgdrive.utils.utils import get_object_from_node
 
 
 def collision_callback(contact):

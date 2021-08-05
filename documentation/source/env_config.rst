@@ -29,7 +29,7 @@ Draw Scene & Visualization
 ###########################
 
     - :code:`use_render` (bool): Pop a window on your screen or not
-    - :code:`use_image` (bool): When you want to access the image of camera, it should be set to True.
+    - :code:`offscreen_render` (bool): When you want to access the image of camera, it should be set to True.
     - :code:`force_fps` (Union[int, None]): Decide the render fps. "None" means that no fps limitation.
     - :code:`debug` (bool): For developing use, draw the scene with bounding box
 
@@ -96,7 +96,7 @@ Generalization Environment Config
 Observation Config
 ######################
 
-    - :code:`use_image` (bool): If you want to use camera data, please set this to True.
+    - :code:`offscreen_render` (bool): If you want to use camera data, please set this to True.
     - :code:`rgb_clip` (bool): Squeeze the value between \[0, 255\] to \[0.0, 1.0\]
     - :code:`vehicle_config` (dict): Sensor parameters for vehicle
     - :code:`image_source` (str): decided which camera image to use (mini_map or front camera). Now we only support capture one image as a part of
@@ -133,6 +133,6 @@ PGWorld Config
      - :code:`force_fps` (None or float): *None* means no render fps limit, while *float* indicates the maximum render FPS.
      - :code:`decision_repeat` (int): This will be written by PGDriveEnv to do ForceFPS.
      - :code:`debug_physics_world` (bool): Only render physics world without model, a special debug option.
-     - :code:`headless_image` (bool): Set this to true only when training on headless machine and use rgb image!!!!!!
+     - :code:`headless_machine_render` (bool): Set this to true only when training on headless machine and use rgb image!!!!!!
      - :code:`use_render` (bool): The value is same as *use_render* in PGDriveEnv
-     - :code:`use_image` (bool): The value is same as *use_image* in PGDriveEnv.
+     - :code:`offscreen_render` (bool): The value is same as *offscreen_render* in PGDriveEnv.

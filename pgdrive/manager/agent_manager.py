@@ -117,7 +117,7 @@ class AgentManager(BaseManager):
 
             obs_space = self._init_observation_spaces[agent_id]
             self.observation_spaces[vehicle.name] = obs_space
-            if not vehicle.config["use_image"]:
+            if not vehicle.config["offscreen_render"]:
                 assert isinstance(obs_space, Box)
             else:
                 assert isinstance(obs_space, Dict), "Multi-agent observation should be gym.Dict"
@@ -214,7 +214,6 @@ class AgentManager(BaseManager):
         )]
         new_v = self._get_vehicles({agent_name: next_config})[agent_name]
         new_v_name = new_v.name
-        new_v.remove_display_region()
         self._newly_added_object_to_agent[new_v_name] = agent_name
         self._agent_to_object[agent_name] = new_v_name
         self._object_to_agent[new_v_name] = agent_name

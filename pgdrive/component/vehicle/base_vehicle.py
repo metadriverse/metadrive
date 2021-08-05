@@ -1,5 +1,4 @@
 import math
-import time
 from collections import deque
 from typing import Union, Optional
 
@@ -7,7 +6,7 @@ import gym
 import numpy as np
 import seaborn as sns
 from panda3d.bullet import BulletVehicle, BulletBoxShape, ZUp
-from panda3d.core import Material, Vec3, TransformState, NodePath, LQuaternionf, BitMask32, TextNode
+from panda3d.core import Material, Vec3, TransformState, LQuaternionf, BitMask32
 
 from pgdrive.component.base_class.base_object import BaseObject
 from pgdrive.component.lane.abs_lane import AbstractLane
@@ -16,13 +15,13 @@ from pgdrive.component.lane.straight_lane import StraightLane
 from pgdrive.component.lane.waypoint_lane import WayPointLane
 from pgdrive.component.map.base_map import BaseMap
 from pgdrive.component.road.road import Road
-from pgdrive.component.vehicle_module import Lidar, MiniMap
+from pgdrive.component.vehicle_module.lidar import Lidar
+from pgdrive.component.vehicle_module.mini_map import MiniMap
 from pgdrive.component.vehicle_module.depth_camera import DepthCamera
 from pgdrive.component.vehicle_module.distance_detector import SideDetector, LaneLineDetector
 from pgdrive.component.vehicle_module.rgb_camera import RGBCamera
 from pgdrive.component.vehicle_module.routing_localization import RoutingLocalizationModule
-from pgdrive.component.vehicle_module.vehicle_panel import VehiclePanel
-from pgdrive.constants import RENDER_MODE_ONSCREEN, COLOR, COLLISION_INFO_COLOR, BodyName, CamMask, CollisionGroup
+from pgdrive.constants import BodyName, CamMask, CollisionGroup
 from pgdrive.engine.asset_loader import AssetLoader
 from pgdrive.engine.core.image_buffer import ImageBuffer
 from pgdrive.engine.engine_utils import get_engine, engine_initialized
@@ -48,7 +47,13 @@ class BaseVehicleState:
         self.on_white_continuous_line = False
         self.on_broken_line = False
 
+        # contact results, a set containing objects type name for rendering
+        self.contact_results = None
+
     def init_state_info(self):
+        """
+        Call this before reset()/step()
+        """
         self.crash_vehicle = False
         self.crash_object = False
         self.crash_sidewalk = False
@@ -58,9 +63,11 @@ class BaseVehicleState:
         self.on_white_continuous_line = False
         self.on_broken_line = False
 
+        # contact results
+        self.contact_results = None
+
 
 class BaseVehicle(BaseObject, BaseVehicleState):
-    MODEL = None
     """
     Vehicle chassis and its wheels index
                     0       1
@@ -71,6 +78,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
                     II-----II
                     2       3
     """
+    MODEL = None
     PARAMETER_SPACE = ParameterSpace(
         VehicleParameterSpace.BASE_VEHICLE
     )  # it will not sample config from parameter space
@@ -79,8 +87,9 @@ class BaseVehicle(BaseObject, BaseVehicleState):
 
     LENGTH = None
     WIDTH = None
+    HEIGHT = None
 
-    # for random color
+    # for random color choosing
     MATERIAL_COLOR_COEFF = 10  # to resist other factors, since other setting may make color dark
     MATERIAL_METAL_COEFF = 1  # 0-1
     MATERIAL_ROUGHNESS = 0.8  # smaller to make it more smooth, and reflect more light
@@ -132,15 +141,14 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self.panda_color = rand_c
         self._add_visualization()
 
-        # modules
-        self.image_sensors = {}
-        self.lidar: Optional[Lidar] = None
-        self.side_detector: Optional[SideDetector] = None
-        self.lane_line_detector: Optional[LaneLineDetector] = None
-        self.routing_localization: Optional[RoutingLocalizationModule] = None
+        # modules, get observation by using these modules
         self.lane: Optional[AbstractLane] = None
         self.lane_index = None
-        self.vehicle_panel = VehiclePanel(self.engine) if (self.engine.mode == RENDER_MODE_ONSCREEN) else None
+        self.routing_localization: Optional[RoutingLocalizationModule] = None
+        self.lidar: Optional[Lidar] = None  # detect surrounding vehicles
+        self.side_detector: Optional[SideDetector] = None  # detect road side
+        self.lane_line_detector: Optional[LaneLineDetector] = None  # detect nearest lane lines
+        self.image_sensors = {}
 
         # state info
         self.throttle_brake = 0.0
@@ -151,10 +159,6 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self.dist_to_left_side = None
         self.dist_to_right_side = None
 
-        # collision info render
-        self.collision_info_np = self._init_collision_info_render(self.engine)
-        self.collision_banners = {}  # to save time
-        self.current_banner = None
         self.attach_to_world(self.engine.pbr_render, self.engine.physics_world)
 
         # step info
@@ -164,7 +168,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self._init_step_info()
 
         # others
-        self._add_modules_for_vehicle(self.config["use_render"])
+        self._add_modules_for_vehicle()
         self.takeover = False
         self._expert_takeover = False
         self.energy_consumption = 0
@@ -174,70 +178,31 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self.front_vehicles = set()
         self.back_vehicles = set()
 
-    def _add_modules_for_vehicle(self, use_render: bool):
-        # add self module for training according to config
-        vehicle_config = self.config
-        self.add_routing_localization(vehicle_config["show_navi_mark"])  # default added
+    def _add_modules_for_vehicle(self, ):
+        config = self.config
 
-        if self.config["side_detector"]["num_lasers"] > 0:
+        # add routing module
+        self.add_routing_localization(config["show_navi_mark"])  # default added
+
+        # add distance detector/lidar
+        if config["side_detector"]["num_lasers"] > 0:
             self.side_detector = SideDetector(
-                self.engine.render, self.config["side_detector"]["num_lasers"],
-                self.config["side_detector"]["distance"], self.config["show_side_detector"]
+                config["side_detector"]["num_lasers"], config["side_detector"]["distance"], config["show_side_detector"]
             )
 
-        if self.config["lane_line_detector"]["num_lasers"] > 0:
+        if config["lane_line_detector"]["num_lasers"] > 0:
             self.lane_line_detector = LaneLineDetector(
-                self.engine.render, self.config["lane_line_detector"]["num_lasers"],
-                self.config["lane_line_detector"]["distance"], self.config["show_lane_line_detector"]
+                config["lane_line_detector"]["num_lasers"], config["lane_line_detector"]["distance"],
+                config["show_lane_line_detector"]
             )
 
-        if not self.config["use_image"]:
-            if vehicle_config["lidar"]["num_lasers"] > 0 and vehicle_config["lidar"]["distance"] > 0:
-                self.add_lidar(
-                    num_lasers=vehicle_config["lidar"]["num_lasers"],
-                    distance=vehicle_config["lidar"]["distance"],
-                    show_lidar_point=vehicle_config["show_lidar"]
-                )
-            else:
-                import logging
-                logging.warning(
-                    "You have set the lidar config to: {}, which seems to be invalid!".format(vehicle_config["lidar"])
-                )
+        if config["lidar"]["num_lasers"] > 0 and config["lidar"]["distance"] > 0:
+            self.lidar = Lidar(config["lidar"]["num_lasers"], config["lidar"]["distance"], config["show_lidar"])
 
-            if use_render:
-                rgb_cam_config = vehicle_config["rgb_cam"]
-                rgb_cam = RGBCamera(rgb_cam_config[0], rgb_cam_config[1], self.origin)
-                self.add_image_sensor("rgb_cam", rgb_cam)
-
-                mini_map = MiniMap(vehicle_config["mini_map"], self.origin)
-                self.add_image_sensor("mini_map", mini_map)
-            return
-
-        if vehicle_config["use_image"]:
-            # 3 types image observation
-            if vehicle_config["image_source"] == "rgb_cam":
-                rgb_cam_config = vehicle_config["rgb_cam"]
-                rgb_cam = RGBCamera(rgb_cam_config[0], rgb_cam_config[1], self.origin)
-                self.add_image_sensor("rgb_cam", rgb_cam)
-            elif vehicle_config["image_source"] == "mini_map":
-                mini_map = MiniMap(vehicle_config["mini_map"], self.origin)
-                self.add_image_sensor("mini_map", mini_map)
-            elif vehicle_config["image_source"] == "depth_cam":
-                cam_config = vehicle_config["depth_cam"]
-                depth_cam = DepthCamera(*cam_config, self.origin, self.engine)
-                self.add_image_sensor("depth_cam", depth_cam)
-            else:
-                raise ValueError("No module named {}".format(vehicle_config["image_source"]))
-
-        # load more sensors for visualization when render, only for beauty...
-        if use_render:
-            if vehicle_config["image_source"] == "mini_map":
-                rgb_cam_config = vehicle_config["rgb_cam"]
-                rgb_cam = RGBCamera(rgb_cam_config[0], rgb_cam_config[1], self.origin)
-                self.add_image_sensor("rgb_cam", rgb_cam)
-            else:
-                mini_map = MiniMap(vehicle_config["mini_map"], self.origin)
-                self.add_image_sensor("mini_map", mini_map)
+        # vision modules
+        self.add_image_sensor("rgb_camera", RGBCamera())
+        self.add_image_sensor("mini_map", MiniMap())
+        self.add_image_sensor("depth_camera", DepthCamera())
 
     def _init_step_info(self):
         # done info will be initialized every frame
@@ -270,26 +235,11 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             self.set_incremental_action(action)
         else:
             self.set_act(action)
-        if self.vehicle_panel is not None:
-            self.vehicle_panel.renew_2d_car_para_visualization(self)
         return step_info
 
-    def after_step(self, engine=None, detector_mask="WRONG"):
-        # lidar
-        if self.lidar is not None:
-            self.lidar.perceive(
-                self.position,
-                self.heading_theta,
-                self.engine.physics_world.dynamic_world,
-                extra_filter_node={self.body},
-                detector_mask=detector_mask
-            )
+    def after_step(self):
         if self.routing_localization is not None:
             self.lane, self.lane_index, = self.routing_localization.update_navigation_localization(self)
-        if self.side_detector is not None:
-            self.side_detector.perceive(self.position, self.heading_theta, self.engine.physics_world.static_world)
-        if self.lane_line_detector is not None:
-            self.lane_line_detector.perceive(self.position, self.heading_theta, self.engine.physics_world.static_world)
         self._state_check()
         self.update_dist_to_left_right()
         step_energy, episode_energy = self._update_energy_consumption()
@@ -361,18 +311,12 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self.energy_consumption = 0
 
         # overtake_stat
-        # TODO: Remove this!! A single instance of the vehicle should not access its context!!!
         self.front_vehicles = set()
         self.back_vehicles = set()
 
-        # TODO: This should be put into the render-object of this vehicle!
-        # for render
-        if self.vehicle_panel is not None:
-            self.vehicle_panel.renew_2d_car_para_visualization(self)
-
-        if "depth_cam" in self.image_sensors and self.image_sensors["depth_cam"].view_ground:
-            for block in map.blocks:
-                block.origin.hide(CamMask.DepthCam)
+        # if "depth_camera" in self.image_sensors and self.image_sensors["depth_camera"].view_ground:
+        #     for block in map.blocks:
+        #         block.origin.hide(CamMask.DepthCam)
 
         assert self.routing_localization
         # Please note that if you respawn agent to some new place and might have a new destination,
@@ -530,11 +474,12 @@ class BaseVehicle(BaseObject, BaseVehicleState):
 
     def _create_vehicle_chassis(self):
         para = self.get_config()
-        self.LENGTH = self.config["vehicle_length"]
-        self.WIDTH = self.config["vehicle_width"]
+        self.LENGTH = type(self).LENGTH or self.config["vehicle_length"]
+        self.WIDTH = type(self).WIDTH or self.config["vehicle_width"]
+        self.HEIGHT = type(self).HEIGHT or self.config[Parameter.vehicle_height]
         chassis = BaseRigidBodyNode(self, BodyName.Base_vehicle)
         chassis.setIntoCollideMask(BitMask32.bit(CollisionGroup.EgoVehicle))
-        chassis_shape = BulletBoxShape(Vec3(self.WIDTH / 2, self.LENGTH / 2, para[Parameter.vehicle_height] / 2))
+        chassis_shape = BulletBoxShape(Vec3(self.WIDTH / 2, self.LENGTH / 2, self.HEIGHT / 2))
         ts = TransformState.makePos(Vec3(0, 0, para[Parameter.chassis_height] * 2))
         chassis.addShape(chassis_shape, ts)
         chassis.setMass(para[Parameter.mass])
@@ -616,11 +561,6 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     def add_image_sensor(self, name: str, sensor: ImageBuffer):
         self.image_sensors[name] = sensor
 
-    def add_lidar(self, num_lasers=240, distance=50, show_lidar_point=False):
-        assert num_lasers > 0
-        assert distance > 0
-        self.lidar = Lidar(self.engine.render, num_lasers, distance, show_lidar_point)
-
     def add_routing_localization(self, show_navi_mark: bool = False):
         config = self.config
         self.routing_localization = RoutingLocalizationModule(
@@ -667,14 +607,15 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             node1 = contact.getNode1()
             name = [node0.getName(), node1.getName()]
             name.remove(BodyName.Base_vehicle)
-            if name[0] == "Ground" or name[0] == BodyName.Lane:
-                continue
-            elif name[0] == BodyName.White_continuous_line:
+            if name[0] == BodyName.White_continuous_line:
                 self.on_white_continuous_line = True
             elif name[0] == BodyName.Yellow_continuous_line:
                 self.on_yellow_continuous_line = True
             elif name[0] == BodyName.Broken_line:
                 self.on_broken_line = True
+            else:
+                # didn't add
+                continue
             contacts.add(name[0])
         # side walk detect
         res = rect_region_detection(
@@ -683,61 +624,10 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         if res.hasHit():
             self.crash_sidewalk = True
             contacts.add(BodyName.Sidewalk)
-        if self.render:
-            self.render_collision_info(contacts)
-
-    @staticmethod
-    def _init_collision_info_render(engine):
-        if engine.mode == "onscreen":
-            info_np = NodePath("Collision info nodepath")
-            info_np.reparentTo(engine.aspect2d)
-        else:
-            info_np = None
-        return info_np
-
-    def render_collision_info(self, contacts):
-        contacts = sorted(list(contacts), key=lambda c: COLLISION_INFO_COLOR[COLOR[c]][0])
-        text = contacts[0] if len(contacts) != 0 else None
-        if text is None:
-            text = "Normal" if time.time() - self.engine._episode_start_time > 10 else "Press H to see help message"
-            self.render_banner(text, COLLISION_INFO_COLOR["green"][1])
-        else:
-            if text == BodyName.Base_vehicle:
-                text = BodyName.Traffic_vehicle
-            self.render_banner(text, COLLISION_INFO_COLOR[COLOR[text]][1])
-
-    def render_banner(self, text, color=COLLISION_INFO_COLOR["green"][1]):
-        """
-        Render the banner in the left bottom corner.
-        """
-        if self.collision_info_np is None:
-            return
-        if self.current_banner is not None:
-            self.current_banner.detachNode()
-        if text in self.collision_banners:
-            self.collision_banners[text].reparentTo(self.collision_info_np)
-            self.current_banner = self.collision_banners[text]
-        else:
-            new_banner = NodePath(TextNode("collision_info:{}".format(text)))
-            self.collision_banners[text] = new_banner
-            text_node = new_banner.node()
-            text_node.setCardColor(color)
-            text_node.setText(text)
-            text_node.setCardActual(-5 * self.engine.w_scale, 5.1 * self.engine.w_scale, -0.3, 1)
-            text_node.setCardDecal(True)
-            text_node.setTextColor(1, 1, 1, 1)
-            text_node.setAlign(TextNode.A_center)
-            new_banner.setScale(0.05)
-            new_banner.setPos(-0.75 * self.engine.w_scale, 0, -0.8 * self.engine.h_scale)
-            new_banner.reparentTo(self.collision_info_np)
-            self.current_banner = new_banner
+        self.contact_results = contacts
 
     def destroy(self):
         self.body.destroy()
-        if self.body in self.dynamic_nodes:
-            self.dynamic_nodes.remove(self.body)
-        if self.system in self.dynamic_nodes:
-            self.dynamic_nodes.remove(self.system)
         super(BaseVehicle, self).destroy()
 
         self.routing_localization.destroy()
@@ -759,8 +649,6 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             for sensor in self.image_sensors.values():
                 sensor.destroy()
         self.image_sensors = None
-        if self.vehicle_panel is not None:
-            self.vehicle_panel.destroy()
         self.engine = None
 
     def set_position(self, position, height=0.4):
@@ -797,7 +685,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self.set_position(state["position"], height=0.28)
 
     def _update_overtake_stat(self):
-        if self.config["overtake_stat"]:
+        if self.config["overtake_stat"] and self.lidar is not None:
             surrounding_vs = self.lidar.get_surrounding_vehicles()
             routing = self.routing_localization
             ckpt_idx = routing._target_checkpoints_index
@@ -820,32 +708,12 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     def get_action_space_before_init(cls, extra_action_dim: int = 0):
         return gym.spaces.Box(-1.0, 1.0, shape=(2 + extra_action_dim, ), dtype=np.float32)
 
-    def remove_display_region(self):
-        if self.render:
-            self.vehicle_panel.remove_display_region()
-            self.vehicle_panel.buffer.set_active(False)
-            self.collision_info_np.detachNode()
-            self.routing_localization._arrow_node_path.detachNode()
-        for sensor in self.image_sensors.values():
-            sensor.remove_display_region()
-            sensor.buffer.set_active(False)
-
-    def add_to_display(self):
-        if self.render:
-            self.vehicle_panel.add_to_display(self.vehicle_panel.default_region)
-            self.vehicle_panel.buffer.set_active(True)
-            self.collision_info_np.reparentTo(self.engine.aspect2d)
-            self.routing_localization._arrow_node_path.reparentTo(self.engine.aspect2d)
-        for sensor in self.image_sensors.values():
-            sensor.add_to_display(sensor.default_region)
-            sensor.buffer.set_active(True)
-
     def __del__(self):
         super(BaseVehicle, self).__del__()
         self.engine = None
         self.lidar = None
         self.mini_map = None
-        self.rgb_cam = None
+        self.rgb_camera = None
         self.routing_localization = None
         self.wheels = None
 

@@ -2,6 +2,7 @@ import copy
 import logging
 import os
 import sys
+
 from panda3d.bullet import BulletBodyNode
 
 

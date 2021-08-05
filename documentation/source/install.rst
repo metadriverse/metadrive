@@ -41,7 +41,7 @@ Install the PGDrive with offscreen rendering functionality
 This section introduce the procedure to enable PGDrive with RGB rendering in headless machine.
 If the lidar information is enough for your task, you can simply install PGDrive on your headless machine using the way we mentioned above.
 
-.. note:: You have to set the :code:`config["engine_config"]["headless_image"] = True` when training the agent using image as input.
+.. note:: You have to set the :code:`config["engine_config"]["headless_machine_render"] = True` when training the agent using image as input.
 
 However, if you want to use image to train your agent on headless machine, you have to compile a customized Panda3D.
 The customized Panda3D is built from the source code of panda3d, following the instructions in `Panda3D: Building Panda3D <https://github.com/panda3d/panda3d#building-panda3d>`_.

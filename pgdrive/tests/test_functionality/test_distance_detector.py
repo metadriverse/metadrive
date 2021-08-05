@@ -1,4 +1,5 @@
 from pgdrive.component.vehicle.base_vehicle import BaseVehicle
+from pgdrive.constants import DEFAULT_AGENT
 from pgdrive.constants import BodyName
 from pgdrive.envs.pgdrive_env import PGDriveEnv
 from pgdrive.utils import setup_logger
@@ -33,7 +34,10 @@ def test_original_lidar(render=False):
         v_config["spawn_lateral"] = 7.5
         another_v = BaseVehicle(v_config, random_seed=0)
         another_v.reset(env.current_map)
-        objs = env.vehicle.side_detector.get_detected_objects() + env.vehicle.lane_line_detector.get_detected_objects()
+        objs = env.vehicle.side_detector.perceive(env.vehicle, env.vehicle.engine.physics_world.static_world
+                                                  ).detected_objects + env.vehicle.lane_line_detector.perceive(
+                                                      env.vehicle, env.vehicle.engine.physics_world.static_world
+                                                  ).detected_objects
         yellow = 0
         for obj in objs:
             if obj.getNode().getName() == BodyName.Yellow_continuous_line:
@@ -43,9 +47,9 @@ def test_original_lidar(render=False):
         detect_base_vehicle = False
         for i in range(1, 100000):
             o, r, d, info = env.step([0, 1])
-            if len(env.vehicle.lidar.get_surrounding_vehicles()) > 2:
+            if len(env.vehicle.lidar.get_surrounding_vehicles(env.observations[DEFAULT_AGENT].detected_objects)) > 2:
                 detect_traffic_vehicle = True
-            for hit in env.vehicle.lidar.get_detected_objects():
+            for hit in env.observations[DEFAULT_AGENT].detected_objects:
                 v = hit.getNode()
                 if v.hasPythonTag(BodyName.Base_vehicle):
                     detect_base_vehicle = True
@@ -84,7 +88,10 @@ def test_lidar_with_mask(render=False):
         another_v.reset(env.current_map)
         # for test
         env.agent_manager._pending_objects[another_v.name] = another_v
-        objs = env.vehicle.side_detector.get_detected_objects() + env.vehicle.lane_line_detector.get_detected_objects()
+        objs = env.vehicle.side_detector.perceive(env.vehicle, env.vehicle.engine.physics_world.static_world
+                                                  ).detected_objects + env.vehicle.lane_line_detector.perceive(
+                                                      env.vehicle, env.vehicle.engine.physics_world.static_world
+                                                  ).detected_objects
         yellow = 0
         for obj in objs:
             if obj.getNode().getName() == BodyName.Yellow_continuous_line:
@@ -94,9 +101,9 @@ def test_lidar_with_mask(render=False):
         detect_base_vehicle = False
         for i in range(1, 100000):
             o, r, d, info = env.step([0, 1])
-            if len(env.vehicle.lidar.get_surrounding_vehicles()) > 2:
+            if len(env.vehicle.lidar.get_surrounding_vehicles(env.observations[DEFAULT_AGENT].detected_objects)) > 2:
                 detect_traffic_vehicle = True
-            for hit in env.vehicle.lidar.get_detected_objects():
+            for hit in env.observations[DEFAULT_AGENT].detected_objects:
                 v = hit.getNode()
                 if v.hasPythonTag(BodyName.Base_vehicle):
                     detect_base_vehicle = True

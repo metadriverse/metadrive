@@ -61,7 +61,7 @@ class LidarStateObservationV2(LidarStateObservation):
         info = []
         if hasattr(vehicle, "side_detector") and vehicle.side_detector is not None:
             info += self._add_noise_to_cloud_points(
-                vehicle.side_detector.get_cloud_points(),
+                vehicle.side_detector.perceive(vehicle, vehicle.engine.physics_world.static_world).cloud_points,
                 gaussian_noise=self.config["side_detector"]["gaussian_noise"],
                 dropout_prob=self.config["side_detector"]["dropout_prob"]
             )
@@ -108,7 +108,7 @@ class LidarStateObservationV2(LidarStateObservation):
 
         if vehicle.lane_line_detector is not None:
             info += self._add_noise_to_cloud_points(
-                vehicle.lane_line_detector.get_cloud_points(),
+                vehicle.lane_line_detector.perceive(vehicle, vehicle.engine.physics_world.static_world).cloud_points,
                 gaussian_noise=self.config["lane_line_detector"]["gaussian_noise"],
                 dropout_prob=self.config["lane_line_detector"]["dropout_prob"]
             )
@@ -134,7 +134,7 @@ class PGDriveEnvV2Reduced(PGDriveEnvV2):
         return config
 
     def get_single_observation(self, vehicle_config: "Config") -> "ObservationBase":
-        assert not self.config["use_image"]
+        assert not self.config["offscreen_render"]
         vehicle_config["obs_mode"] = self.config["obs_mode"]
         return LidarStateObservationV2(vehicle_config)
 

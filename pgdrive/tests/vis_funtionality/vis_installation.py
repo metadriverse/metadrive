@@ -9,12 +9,18 @@ from pgdrive.envs.pgdrive_env import PGDriveEnv
 
 class TestEnv(PGDriveEnv):
     def __init__(self):
-        super(TestEnv, self).__init__({"use_render": False, "use_image": False})
+        super(TestEnv, self).__init__({"use_render": False, "offscreen_render": False})
 
 
 def capture_image(headless):
     env = PGDriveEnv(
-        dict(use_render=False, start_seed=666, traffic_density=0.1, use_image=True, headless_image=headless)
+        dict(
+            use_render=False,
+            start_seed=666,
+            traffic_density=0.1,
+            offscreen_render=True,
+            headless_machine_render=headless
+        )
     )
     env.reset()
     for i in range(10):

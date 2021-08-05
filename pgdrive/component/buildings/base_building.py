@@ -8,6 +8,9 @@ class BaseBuilding(BaseStaticObject):
         assert node_path is not None
         self.origin = node_path
 
+        # This is a work around
+        self.origin.node().getPythonTag(self.origin.node().getName()).object = self
+
     def destroy(self):
         engine = get_engine()
         self.detach_from_world(engine.physics_world)

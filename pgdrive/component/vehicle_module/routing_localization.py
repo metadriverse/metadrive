@@ -23,7 +23,6 @@ class RoutingLocalizationModule:
     navigation_info_dim = 10
     NAVI_POINT_DIST = 50
     PRE_NOTIFY_DIST = 40
-    MARK_COLOR = COLLISION_INFO_COLOR["green"][1]
     MIN_ALPHA = 0.15
     CKPT_UPDATE_RANGE = 5
     FORCE_CALCULATE = False
@@ -50,13 +49,13 @@ class RoutingLocalizationModule:
         self._target_checkpoints_index = None
         self._navi_info = np.zeros((self.navigation_info_dim, ))  # navi information res
         self.navi_mark_color = (0.6, 0.8, 0.5) if not random_navi_mark_color else get_np_random().rand(3)
+        self.navi_arrow_dir = None
 
         # Vis
-        self._is_showing = True  # store the state of navigation mark
         self._show_navi_info = (engine.mode == RENDER_MODE_ONSCREEN and not engine.global_config["debug_physics_world"])
         self._dest_node_path = None
         self._goal_node_path = None
-        self._arrow_node_path = None
+
         self._line_to_dest = None
         self._show_line_to_dest = show_line_to_dest
         if self._show_navi_info:
@@ -64,25 +63,7 @@ class RoutingLocalizationModule:
             self._line_to_dest = engine.render.attachNewNode("line")
             self._goal_node_path = engine.render.attachNewNode("target")
             self._dest_node_path = engine.render.attachNewNode("dest")
-            self._arrow_node_path = engine.aspect2d.attachNewNode("arrow")
 
-            navi_arrow_model = AssetLoader.loader.loadModel(AssetLoader.file_path("models", "navi_arrow.gltf"))
-            navi_arrow_model.setScale(0.1, 0.12, 0.2)
-            navi_arrow_model.setPos(2, 1.15, -0.221)
-            self._left_arrow = self._arrow_node_path.attachNewNode("left arrow")
-            self._left_arrow.setP(180)
-            self._right_arrow = self._arrow_node_path.attachNewNode("right arrow")
-            self._left_arrow.setColor(self.MARK_COLOR)
-            self._right_arrow.setColor(self.MARK_COLOR)
-            navi_arrow_model.instanceTo(self._left_arrow)
-            navi_arrow_model.instanceTo(self._right_arrow)
-            self._arrow_node_path.setPos(0, 0, 0.08)
-            self._arrow_node_path.hide(BitMask32.allOn())
-            self._arrow_node_path.show(CamMask.MainCam)
-            self._arrow_node_path.setQuat(LQuaternionf(np.cos(-np.pi / 4), 0, 0, np.sin(-np.pi / 4)))
-
-            # the transparency attribute of gltf model is invalid on windows
-            # self._arrow_node_path.setTransparency(TransparencyAttrib.M_alpha)
             if show_navi_mark:
                 navi_point_model = AssetLoader.loader.loadModel(AssetLoader.file_path("models", "box.bam"))
                 navi_point_model.reparentTo(self._goal_node_path)
@@ -197,7 +178,7 @@ class RoutingLocalizationModule:
             pos_of_goal = checkpoint
             self._goal_node_path.setPos(pos_of_goal[0], -pos_of_goal[1], 1.8)
             self._goal_node_path.setH(self._goal_node_path.getH() + 3)
-            self._update_navi_arrow([lanes_heading1, lanes_heading2])
+            self.navi_arrow_dir = [lanes_heading1, lanes_heading2]
             dest_pos = self._dest_node_path.getPos()
             self._draw_line_to_dest(
                 engine=ego_vehicle.engine,
@@ -241,32 +222,6 @@ class RoutingLocalizationModule:
             clip((np.rad2deg(angle) / BlockParameterSpace.CURVE[Parameter.angle].max + 1) / 2, 0.0, 1.0)
         ), lanes_heading, check_point
 
-    def _update_navi_arrow(self, lanes_heading):
-        lane_0_heading = lanes_heading[0]
-        lane_1_heading = lanes_heading[1]
-        if abs(lane_0_heading - lane_1_heading) < 0.01:
-            if self._is_showing:
-                self._left_arrow.detachNode()
-                self._right_arrow.detachNode()
-                self._is_showing = False
-        else:
-            dir_0 = np.array([math.cos(lane_0_heading), math.sin(lane_0_heading), 0])
-            dir_1 = np.array([math.cos(lane_1_heading), math.sin(lane_1_heading), 0])
-            cross_product = np.cross(dir_1, dir_0)
-            left = False if cross_product[-1] < 0 else True
-            if not self._is_showing:
-                self._is_showing = True
-            if left:
-                if not self._left_arrow.hasParent():
-                    self._left_arrow.reparentTo(self._arrow_node_path)
-                if self._right_arrow.hasParent():
-                    self._right_arrow.detachNode()
-            else:
-                if not self._right_arrow.hasParent():
-                    self._right_arrow.reparentTo(self._arrow_node_path)
-                if self._left_arrow.hasParent():
-                    self._left_arrow.detachNode()
-
     def _update_target_checkpoints(self, ego_lane_index, ego_lane_longitude):
         """
         Return should_update: True or False
@@ -294,7 +249,6 @@ class RoutingLocalizationModule:
 
     def destroy(self):
         if self._show_navi_info:
-            self._arrow_node_path.removeNode()
             try:
                 self._line_to_dest.removeNode()
             except AttributeError:

@@ -1,4 +1,5 @@
 import logging
+from pgdrive.engine.interface import Interface
 from collections import OrderedDict
 from typing import Dict, AnyStr
 
@@ -25,6 +26,8 @@ class BaseEngine(EngineCore):
 
     def __init__(self, global_config):
         super(BaseEngine, self).__init__(global_config)
+        BaseEngine.singleton = self
+        self.interface = Interface(self)
 
         # managers
         self.task_manager = self.taskMgr  # use the inner TaskMgr of Panda3D as PGDrive task manager
@@ -39,7 +42,6 @@ class BaseEngine(EngineCore):
 
         # cull scene
         self.cull_scene = self.global_config["cull_scene"]
-        self.detector_mask = None
 
         # add camera or not
         self.main_camera = self.setup_main_camera()
@@ -51,8 +53,6 @@ class BaseEngine(EngineCore):
 
         for manager in self._managers.values():
             manager.before_reset()
-        if self.detector_mask is not None:
-            self.detector_mask.clear()
 
         if self.replay_system is not None:
             self.replay_system.destroy()
@@ -70,7 +70,6 @@ class BaseEngine(EngineCore):
         else:
             self.replay_system = None
             logging.warning("You are replaying episodes! Delete detector mask!")
-            self.detector_mask = None
             self.IN_REPLAY = True
 
         # TODO recorder
@@ -133,12 +132,10 @@ class BaseEngine(EngineCore):
         Update states after finishing movement
         :return: if this episode is done
         """
-
         if self.replay_system is None:
             for manager in self._managers.values():
                 manager.after_step()
 
-        # TODO make detector mask a manager and do after_step!
         step_infos = self.update_state_for_all_target_vehicles()
 
         # cull distant blocks
@@ -151,37 +148,12 @@ class BaseEngine(EngineCore):
                 self, self.traffic_manager.traffic_vehicles, poses, self.global_config["max_distance"]
             )
             SceneCull.cull_distant_objects(self, self.object_manager.objects, poses, self.global_config["max_distance"])
-
+        self.interface.after_step()
         return step_infos
 
     def update_state_for_all_target_vehicles(self):
-
-        # TODO(pzh): What is this function? Should we need to call it all steps?
-
-        if self.detector_mask is not None:
-            is_target_vehicle_dict = {
-                v_obj.name: self.agent_manager.is_active_object(v_obj.name)
-                for v_obj in self.get_interactive_objects() + self.traffic_manager.traffic_vehicles
-            }
-            self.detector_mask.update_mask(
-                position_dict={
-                    v_obj.name: v_obj.position
-                    for v_obj in self.get_interactive_objects() + self.traffic_manager.traffic_vehicles
-                },
-                heading_dict={
-                    v_obj.name: v_obj.heading_theta
-                    for v_obj in self.get_interactive_objects() + self.traffic_manager.traffic_vehicles
-                },
-                is_target_vehicle_dict=is_target_vehicle_dict
-            )
-        step_infos = self.agent_manager.for_each_active_agents(
-            lambda v: v.after_step(detector_mask=self.detector_mask.get_mask(v.name) if self.detector_mask else None)
-        )
+        step_infos = self.agent_manager.for_each_active_agents(lambda v: v.after_step())
         return step_infos
-
-    def get_interactive_objects(self):
-        objs = self.agent_manager.get_vehicle_list() + self.object_manager.objects
-        return objs
 
     def dump_episode(self) -> None:
         """Dump the data of an episode."""
@@ -200,7 +172,7 @@ class BaseEngine(EngineCore):
                 setattr(self, name, None)
                 if manager is not None:
                     manager.destroy()
-
+        self.interface.destroy()
         self.clear_world()
         self.close_world()
 
@@ -241,8 +213,15 @@ class BaseEngine(EngineCore):
         return self.map_manager.current_map
 
     def setup_main_camera(self):
-        from pgdrive.engine.core.chase_camera import ChaseCamera
-        if self.global_config["use_render"] or self.global_config["use_image"]:
-            return ChaseCamera(self, self.global_config["camera_height"], self.global_config["camera_dist"])
+        from pgdrive.engine.core.chase_camera import MainCamera
+        if self.global_config["use_render"] or self.global_config["offscreen_render"]:
+            return MainCamera(self, self.global_config["camera_height"], self.global_config["camera_dist"])
+        else:
+            return None
+
+    @property
+    def current_track_vehicle(self):
+        if self.main_camera is not None:
+            return self.main_camera.current_track_vehicle
         else:
             return None

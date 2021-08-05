@@ -1,5 +1,5 @@
 from pgdrive.component.vehicle.traffic_vehicle_type import LVehicle
-from pgdrive.constants import BodyName, TerminationState
+from pgdrive.constants import BodyName, TerminationState, DEFAULT_AGENT
 from pgdrive.envs import PGDriveEnv
 
 
@@ -149,7 +149,7 @@ def test_object_collision_detection(render=False):
         detect_obj = False
         for i in range(1, 100000 if render else 2000):
             o, r, d, info = env.step([0, 1])
-            for obj in env.vehicle.lidar.get_detected_objects():
+            for obj in env.observations[DEFAULT_AGENT].detected_objects:
                 if obj.getNode().hasPythonTag(BodyName.Traffic_cone):
                     detect_obj = True
             if render:

@@ -12,7 +12,7 @@ pygame = import_pygame()
 
 
 class Controller:
-    def process_input(self):
+    def process_input(self, vehicle):
         raise NotImplementedError
 
 
@@ -30,7 +30,7 @@ class KeyboardController(Controller):
             self.inputs.watchWithModifiers('turnLeft', 'a')
             self.inputs.watchWithModifiers('turnRight', 'd')
 
-    def process_input(self):
+    def process_input(self, vehicle):
         if not self.pygame_control:
             steering = 0.0
             throttle_brake = 0.0

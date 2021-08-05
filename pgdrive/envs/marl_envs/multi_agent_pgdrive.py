@@ -190,7 +190,7 @@ class MultiAgentPGDrive(PGDriveEnvV2):
         if self.main_camera is not None and dead_vehicle_id == self.agent_manager.object_to_agent(
                 self.current_track_vehicle.name) \
                 and self.engine.task_manager.hasTaskNamed(self.main_camera.CHASE_TASK_NAME):
-            self.chase_another_v()
+            self.chase_camera()
 
     def _get_target_vehicle_config(self):
         ret = {
@@ -222,7 +222,7 @@ class MultiAgentPGDrive(PGDriveEnvV2):
             top_down_camera_height = self.config["top_down_camera_initial_z"]
             self.main_camera.camera.setPos(0, 0, top_down_camera_height)
             self.main_camera.top_down_camera_height = top_down_camera_height
-            self.main_camera.stop_track(self.current_track_vehicle)
+            self.main_camera.stop_track()
             self.main_camera.camera_x += self.config["top_down_camera_initial_x"]
             self.main_camera.camera_y += self.config["top_down_camera_initial_y"]
 
@@ -270,7 +270,7 @@ class MultiAgentPGDrive(PGDriveEnvV2):
         vehicle.config.update(new_spawn_place_config)
         vehicle.reset(self.current_map)
         self._update_destination_for(new_agent_id)
-        vehicle.after_step(detector_mask=None)
+        vehicle.after_step()
         self.dones[new_agent_id] = False  # Put it in the internal dead-tracking dict.
 
         new_obs = self.observations[new_agent_id].observe(vehicle)

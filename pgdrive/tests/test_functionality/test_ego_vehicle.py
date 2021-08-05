@@ -1,4 +1,5 @@
 import numpy as np
+from pgdrive.component.vehicle_module.lidar import Lidar
 
 from pgdrive import PGDriveEnv
 from pgdrive.component.vehicle.base_vehicle import BaseVehicle
@@ -32,9 +33,9 @@ def test_base_vehicle():
 
         # v_config = BaseVehicle.get_vehicle_config(dict())
         v_config = Config(BASE_DEFAULT_CONFIG["vehicle_config"]).update(PGDriveEnvV1_DEFAULT_CONFIG["vehicle_config"])
-        v_config.update({"use_render": False, "use_image": False})
+        v_config.update({"use_render": False, "offscreen_render": False})
         v = BaseVehicle(vehicle_config=v_config, random_seed=0)
-        v.add_lidar()
+        v.lidar = Lidar()
         v.add_routing_localization(True)
         v.add_routing_localization(False)
         v.routing_localization.set_force_calculate_lane_index(True)
@@ -53,7 +54,7 @@ def test_base_vehicle():
                 v_pos = v.position
                 np.testing.assert_almost_equal(v_pos, pos)
 
-                v.after_step(detector_mask=None)
+                v.after_step()
         v.reset(map, pos=np.array([10, 0]))
         for a_x in [-1, 0, 0.5, 1]:
             for a_y in [-1, 0, 0.5, 1]:

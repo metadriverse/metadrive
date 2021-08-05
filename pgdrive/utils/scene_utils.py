@@ -1,9 +1,8 @@
 import math
-from pgdrive.utils.utils import get_object_from_node
 from typing import List, TYPE_CHECKING, Tuple, Union
 
 import numpy as np
-from panda3d.bullet import BulletBoxShape
+from panda3d.bullet import BulletBoxShape, BulletCylinderShape, ZUp
 from panda3d.core import TransformState
 from panda3d.core import Vec3, BitMask32
 
@@ -14,6 +13,7 @@ from pgdrive.engine.core.engine_core import EngineCore
 from pgdrive.utils.coordinates_shift import panda_heading
 from pgdrive.utils.coordinates_shift import panda_position
 from pgdrive.utils.math_utils import get_points_bounding_box
+from pgdrive.utils.utils import get_object_from_node
 
 if TYPE_CHECKING:
     from pgdrive.component.blocks.pg_block import PGBlockSocket
@@ -178,7 +178,8 @@ def rect_region_detection(
     heading_direction_length: float,
     side_direction_width: float,
     detection_group: int,
-    height=10
+    height=10,
+    in_static_world=False
 ):
     """
 
@@ -192,13 +193,14 @@ def rect_region_detection(
 
      **CAUTION**: position is the middle point of longitude edge
 
-    :param engine: PGWorld class
+    :param engine: BaseEngine class
     :param position: position in PGDrive
     :param heading: heading in PGDrive [degree]
     :param heading_direction_length: rect length in heading direction
     :param side_direction_width: rect width in side direction
     :param detection_group: which group to detect
     :param height: the detect will be executed from this height to 0
+    :param in_static_world: execute detection in static world
     :return: detection result
     """
     region_detect_start = panda_position(position, z=height)
@@ -209,7 +211,33 @@ def rect_region_detection(
     shape = BulletBoxShape(Vec3(heading_direction_length / 2, side_direction_width / 2, 1))
     penetration = 0.0
 
-    result = engine.physics_world.dynamic_world.sweep_test_closest(
-        shape, tsFrom, tsTo, BitMask32.bit(detection_group), penetration
-    )
+    physics_world = engine.physics_world.dynamic_world if not in_static_world else engine.physics_world.static_world
+
+    result = physics_world.sweep_test_closest(shape, tsFrom, tsTo, BitMask32.bit(detection_group), penetration)
+    return result
+
+
+def circle_region_detection(
+    engine: EngineCore, position: Tuple, radius: float, detection_group: int, height=10, in_static_world=False
+):
+    """
+    :param engine: BaseEngine class
+    :param position: position in PGDrive
+    :param radius: radius of the region to be detected
+    :param detection_group: which group to detect
+    :param height: the detect will be executed from this height to 0
+    :param in_static_world: execute detection in static world
+    :return: detection result
+    """
+    region_detect_start = panda_position(position, z=height)
+    region_detect_end = panda_position(position, z=-1)
+    tsFrom = TransformState.makePos(region_detect_start)
+    tsTo = TransformState.makePos(region_detect_end)
+
+    shape = BulletCylinderShape(radius, 5, ZUp)
+    penetration = 0.0
+
+    physics_world = engine.physics_world.dynamic_world if not in_static_world else engine.physics_world.static_world
+
+    result = physics_world.sweep_test_closest(shape, tsFrom, tsTo, BitMask32.bit(detection_group), penetration)
     return result

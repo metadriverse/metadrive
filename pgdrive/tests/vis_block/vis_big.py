@@ -1,8 +1,8 @@
 from pgdrive.component.algorithm.BIG import BIG
 from pgdrive.component.road.road_network import RoadNetwork
 from pgdrive.engine.asset_loader import initialize_asset_loader
-from pgdrive.tests.vis_block.vis_block_base import TestBlock
 from pgdrive.engine.engine_utils import set_global_random_seed
+from pgdrive.tests.vis_block.vis_block_base import TestBlock
 
 
 def vis_big(debug: bool = False, block_type_version="v1", random_seed=None):
