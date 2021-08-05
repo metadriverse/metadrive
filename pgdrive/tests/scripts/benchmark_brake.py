@@ -82,7 +82,7 @@ if __name__ == '__main__':
                 "manual_control": True,
                 "use_render": True,
                 "fast": True,
-                "use_image": True,
+                "offscreen_render": True,
                 "vehicle_config": {
                     "max_engine_force": 1000,
                     "max_brake_force": 100,

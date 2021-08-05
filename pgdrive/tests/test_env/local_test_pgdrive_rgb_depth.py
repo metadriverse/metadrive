@@ -3,7 +3,7 @@ from pgdrive.tests.test_env.test_pgdrive_env import _act
 
 
 def test_pgdrive_env_rgb():
-    env = PGDriveEnvV2(dict(use_image=True))
+    env = PGDriveEnvV2(dict(offscreen_render=True))
     try:
         obs = env.reset()
         assert env.observation_space.contains(obs)

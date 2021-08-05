@@ -68,7 +68,7 @@ class EngineCore(ShowBase.ShowBase):
             # You can enable it if your panda version is latest.
             loadPrcFileData("", "threading-model Cull/Draw")  # multi-thread render, accelerate simulation when evaluate
         else:
-            if self.global_config["use_image"]:
+            if self.global_config["offscreen_render"]:
                 self.mode = RENDER_MODE_OFFSCREEN
                 loadPrcFileData("", "threading-model Cull/Draw")
             else:
@@ -78,7 +78,7 @@ class EngineCore(ShowBase.ShowBase):
             self.mode = RENDER_MODE_ONSCREEN
 
         # Setup some debug options
-        if self.global_config["headless_image"]:
+        if self.global_config["headless_machine_render"]:
             # headless machine support
             loadPrcFileData("", "load-display  pandagles2")
         if self.global_config["debug"]:
@@ -101,8 +101,8 @@ class EngineCore(ShowBase.ShowBase):
         super(EngineCore, self).__init__(windowType=self.mode)
 
         # Change window size at runtime if screen too small
-        # assert int(self.global_config["use_topdown"]) + int(self.global_config["use_image"]) <= 1, (
-        #     "Only one of use_topdown and use_image options can be selected."
+        # assert int(self.global_config["use_topdown"]) + int(self.global_config["offscreen_render"]) <= 1, (
+        #     "Only one of use_topdown and offscreen_render options can be selected."
         # )
 
         # main_window_position = (0, 0)

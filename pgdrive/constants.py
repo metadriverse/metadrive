@@ -113,10 +113,11 @@ class CollisionGroup:
     Terrain = 2
     BrokenLaneLine = 3
     TrafficVehicle = 4
-    LaneSurface = 5  # useless now, since it is in another physics world
+    LaneSurface = 5  # useless now, since it is in another bullet world
     Sidewalk = 6
     ContinuousLaneLine = 7
     InvisibleWall = 8
+    LidarBroadDetector = 9
 
     @classmethod
     def collision_rules(cls):
@@ -130,6 +131,7 @@ class CollisionGroup:
             (cls.Terrain, cls.ContinuousLaneLine, False),
             (cls.Terrain, cls.InvisibleWall, False),
             (cls.Terrain, cls.Sidewalk, True),
+            (cls.Terrain, cls.LidarBroadDetector, False),
 
             # block collision
             (cls.BrokenLaneLine, cls.BrokenLaneLine, False),
@@ -140,6 +142,7 @@ class CollisionGroup:
             (cls.BrokenLaneLine, cls.ContinuousLaneLine, False),
             (cls.BrokenLaneLine, cls.InvisibleWall, False),
             (cls.BrokenLaneLine, cls.Sidewalk, False),
+            (cls.BrokenLaneLine, cls.LidarBroadDetector, False),
 
             # traffic vehicles collision
             (cls.TrafficVehicle, cls.TrafficVehicle, False),
@@ -148,6 +151,7 @@ class CollisionGroup:
             (cls.TrafficVehicle, cls.ContinuousLaneLine, False),
             (cls.TrafficVehicle, cls.InvisibleWall, True),
             (cls.TrafficVehicle, cls.Sidewalk, False),
+            (cls.TrafficVehicle, cls.LidarBroadDetector, True),
 
             # ego vehicle collision
             (cls.EgoVehicle, cls.EgoVehicle, True),
@@ -155,24 +159,32 @@ class CollisionGroup:
             (cls.EgoVehicle, cls.ContinuousLaneLine, True),
             (cls.EgoVehicle, cls.InvisibleWall, True),
             (cls.EgoVehicle, cls.Sidewalk, True),
+            (cls.EgoVehicle, cls.LidarBroadDetector, True),
 
             # lane surface
             (cls.LaneSurface, cls.LaneSurface, False),
             (cls.LaneSurface, cls.ContinuousLaneLine, False),
             (cls.LaneSurface, cls.InvisibleWall, False),
             (cls.LaneSurface, cls.Sidewalk, False),
+            (cls.LaneSurface, cls.LidarBroadDetector, False),
 
             # continuous lane line
             (cls.ContinuousLaneLine, cls.ContinuousLaneLine, False),
             (cls.ContinuousLaneLine, cls.InvisibleWall, False),
             (cls.ContinuousLaneLine, cls.Sidewalk, False),
+            (cls.ContinuousLaneLine, cls.LidarBroadDetector, False),
 
             # invisible wall
             (cls.InvisibleWall, cls.InvisibleWall, False),
             (cls.InvisibleWall, cls.Sidewalk, False),
+            (cls.InvisibleWall, cls.LidarBroadDetector, True),
 
             # side walk
             (cls.Sidewalk, cls.Sidewalk, False),
+            (cls.Sidewalk, cls.LidarBroadDetector, False),
+
+            #
+            (cls.LidarBroadDetector, cls.LidarBroadDetector, False),
         ]
 
     @classmethod

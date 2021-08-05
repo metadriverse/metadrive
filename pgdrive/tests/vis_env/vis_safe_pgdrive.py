@@ -4,7 +4,16 @@ from pgdrive.utils import setup_logger
 
 class TestEnv(SafePGDriveEnv):
     def __init__(self):
-        super(TestEnv, self).__init__({"use_render": True, "manual_control": True, "environment_num": 100})
+        super(TestEnv, self).__init__(
+            {
+                "use_render": True,
+                "manual_control": True,
+                "environment_num": 100,
+                "vehicle_config": {
+                    "show_lidar": True
+                }
+            }
+        )
 
 
 if __name__ == "__main__":

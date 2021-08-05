@@ -15,7 +15,7 @@ class TestEnv(PGDriveEnv):
                 "image_source": "mini_map",
                 "manual_control": True,
                 "use_render": True,
-                "use_image": False,
+                "offscreen_render": False,
                 "steering_penalty": 0.0,
                 "decision_repeat": 5,
                 "rgb_clip": True,

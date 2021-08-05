@@ -9,8 +9,8 @@ class TestEnv(PGDriveEnv):
         """
         super(TestEnv, self).__init__(
             {
-                "environment_num": 2,
-                "traffic_density": 0.2,
+                "environment_num": 10,
+                "traffic_density": 1.0,
                 "traffic_mode": "respawn",
                 "start_seed": 4,
                 "onscreen_message": True,
@@ -32,11 +32,11 @@ class TestEnv(PGDriveEnv):
                 #     Map.LANE_WIDTH: 3.5,
                 #     Map.LANE_NUM: 3,
                 # },
-                "map": "CCCCCC",
+                "map": "S",
                 "driving_reward": 1.0,
                 "vehicle_config": {
                     "enable_reverse": True,
-                    # "show_lidar": True,
+                    "show_lidar": True,
                     # "show_side_detector": True,
                     # "show_lane_line_detector": True,
                     "side_detector": dict(num_lasers=2, distance=50),
@@ -57,6 +57,7 @@ if __name__ == "__main__":
         o, r, d, info = env.step([1.0, 0.])
         info["fuel"] = env.vehicle.energy_consumption
         # env.render(text={"heading_diff": env.vehicle.heading_diff(env.vehicle.lane)})
+        assert env.observation_space.contains(o)
         env.render(
             text={
                 "reward": r,
@@ -69,9 +70,7 @@ if __name__ == "__main__":
                 "lane_heading": env.vehicle.lane.heading_at(0)
             }
         )
-        # if d:
-        #     print("Reset")
-        #     env.reset()
-        # if env.vehicle.crash_sidewalk:
-        #     env.close()
+        if d:
+            print("Reset")
+            env.reset()
     env.close()

@@ -9,8 +9,8 @@ from pgdrive.component.blocks.first_block import FirstPGBlock
 from pgdrive.component.blocks.pg_block import PGBlock
 from pgdrive.component.road.road import Road
 from pgdrive.component.road.road_network import RoadNetwork
-from pgdrive.utils import Config, import_pygame
 from pgdrive.engine.engine_utils import get_engine
+from pgdrive.utils import Config, import_pygame
 
 pygame = import_pygame()
 

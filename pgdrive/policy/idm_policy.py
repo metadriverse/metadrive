@@ -11,10 +11,10 @@ from pgdrive.component.static_object import BaseStaticObject
 # from pgdrive.component.highway_vehicle.kinematics import Vehicle
 from pgdrive.component.vehicle.base_vehicle import BaseVehicle
 from pgdrive.constants import Route, LaneIndex
+from pgdrive.engine.engine_utils import get_engine
 from pgdrive.manager.traffic_manager import TrafficManager
 from pgdrive.policy.base_policy import BasePolicy
 from pgdrive.utils import norm
-from pgdrive.engine.engine_utils import get_engine
 from pgdrive.utils.math_utils import clip
 from pgdrive.utils.scene_utils import ray_localization
 
@@ -246,8 +246,6 @@ class IDMPolicy(BasePolicy):
         if not lane:
             lane = self.lane
         ret = lane.local_coordinates(vehicle.position)[0] - lane.local_coordinates(self.position)[0]
-        if ret == 0:
-            print('Fuck you!')
         return ret
 
     def acceleration(
@@ -282,9 +280,6 @@ class IDMPolicy(BasePolicy):
             # if isinstance(ego_vehicle, TrafficVehicle):
             d = self.lane_distance_to(front_vehicle)
 
-            if d > 0:
-                print('1111111111111')
-
             # else:
             #     d = ego_vehicle.lane_distance_to(front_vehicle)
 
@@ -292,9 +287,6 @@ class IDMPolicy(BasePolicy):
                             np.power(self.desired_gap(ego_vehicle, front_vehicle) / utils.not_zero(d), 2)
         if acceleration < 0 and self.speed < 0:
             acceleration = -self.speed / 0.2
-
-        if abs(acceleration) > 10_0000:
-            print("Your acceleration {} is too large?".format(acceleration))
 
         return acceleration
 

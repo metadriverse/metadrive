@@ -23,8 +23,8 @@ class TestEnv(PGDriveEnv):
                 # "random_traffic":True,
                 "vehicle_config": dict(
                     mini_map=(168 * w_f * 6, 84 * h_f * 6, 270),  # buffer length, width
-                    rgb_cam=(168 * w_f, 84 * h_f),  # buffer length, width
-                    depth_cam=(168 * w_f, 84 * h_f, True),  # buffer length, width, view_ground
+                    rgb_camera=(168 * w_f, 84 * h_f),  # buffer length, width
+                    depth_camera=(168 * w_f, 84 * h_f, True),  # buffer length, width, view_ground
                     show_navi_mark=False,
                     increment_steering=False,
                     wheel_friction=0.6,
@@ -55,15 +55,15 @@ if __name__ == "__main__":
     env = TestEnv()
     o = env.reset()
 
-    depth_cam = env.config["vehicle_config"]["depth_cam"]
-    depth_cam = DepthCamera(*depth_cam, chassis_np=env.vehicle.chassis, engine=env.engine)
-    env.vehicle.add_image_sensor("depth_cam", depth_cam)
-    depth_cam.remove_display_region(env.engine)
+    depth_camera = env.config["vehicle_config"]["depth_camera"]
+    depth_camera = DepthCamera(*depth_camera, chassis_np=env.vehicle.chassis, engine=env.engine)
+    env.vehicle.add_image_sensor("depth_camera", depth_camera)
+    depth_camera.remove_display_region(env.engine)
 
     # for sensor in env.vehicle.image_sensors.values():
     #     sensor.remove_display_region(env.engine)
     # env.vehicle.vehicle_panel.remove_display_region(env.engine)
-    # env.vehicle.collision_info_np.detachNode()
+    # env.vehicle.contact_result_render.detachNode()
     # env.vehicle.routing_localization._right_arrow.detachNode()
 
     env.vehicle.chassis.setPos(244, 0, 1.5)

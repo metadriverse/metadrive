@@ -16,7 +16,8 @@ class ImageBuffer:
     display_bottom = 0.8
     display_top = 1
     display_region = None
-    default_region = [1 / 3, 2 / 3, 0.8, 1.0]
+    display_region_size = [1 / 3, 2 / 3, 0.8, 1.0]
+    line_borders = []
 
     def __init__(
         self,
@@ -24,13 +25,14 @@ class ImageBuffer:
         width: float,
         pos: Vec3,
         bkg_color: Union[Vec4, Vec3],
-        parent_node: NodePath,
+        parent_node: NodePath = None,
         frame_buffer_property=None,
+        engine=None
     ):
         from pgdrive.engine.engine_utils import get_engine
-        self.engine = get_engine()
+        self.engine = engine or get_engine()
         try:
-            assert self.engine.win is not None, "{} cannot be made without use_render or use_image".format(
+            assert self.engine.win is not None, "{} cannot be made without use_render or offscreen_render".format(
                 self.__class__.__name__
             )
             assert self.CAM_MASK is not None, "Define a camera mask for every image buffer"
@@ -53,14 +55,14 @@ class ImageBuffer:
             # now we have to setup a new scene graph to make this scene
 
         self.origin = NodePath("new render")
-        self.line_borders = []
         # this takes care of setting up their camera properly
         self.cam = self.engine.makeCamera(self.buffer, clearColor=bkg_color)
         self.cam.reparentTo(self.origin)
         self.cam.setPos(pos)
         self.lens = self.cam.node().getLens()
         self.cam.node().setCameraMask(self.CAM_MASK)
-        self.origin.reparentTo(parent_node)
+        if parent_node is not None:
+            self.origin.reparentTo(parent_node)
         logging.debug("Load Image Buffer: {}".format(self.__class__.__name__))
 
     def get_image(self):
@@ -84,7 +86,10 @@ class ImageBuffer:
         default: For gray scale image, one channel. Override this func, when you want a new obs type
         """
         img = self.get_image()
+        return self.convert_to_array(img, clip)
 
+    @staticmethod
+    def convert_to_array(img, clip=True):
         if not clip:
             numpy_array = np.array(
                 [[int(img.getGray(i, j) * 255) for j in range(img.getYSize())] for i in range(img.getXSize())],
@@ -95,8 +100,8 @@ class ImageBuffer:
             numpy_array = np.array([[img.getGray(i, j) for j in range(img.getYSize())] for i in range(img.getXSize())])
             return np.clip(numpy_array, 0, 1)
 
-    def add_to_display(self, display_region: List[float]):
-        if self.engine.global_config["use_render"]:
+    def add_display_region(self, display_region: List[float]):
+        if self.engine.mode == RENDER_MODE_ONSCREEN and self.display_region is None:
             # only show them when onscreen
             self.display_region = self.engine.win.makeDisplayRegion(*display_region)
             self.display_region.setCamera(self.cam)
@@ -117,8 +122,9 @@ class ImageBuffer:
 
     def remove_display_region(self):
         engine = self.engine
-        if engine.mode == RENDER_MODE_ONSCREEN and self.display_region:
+        if engine.mode == RENDER_MODE_ONSCREEN and self.display_region is not None:
             engine.win.removeDisplayRegion(self.display_region)
+            self.display_region = None
         for line_node in self.line_borders:
             line_node.detachNode()
 
@@ -126,7 +132,8 @@ class ImageBuffer:
         engine = self.engine
         if engine is not None:
             self.remove_display_region()
-            engine.graphicsEngine.removeWindow(self.buffer)
+            if self.buffer is not None:
+                engine.graphicsEngine.removeWindow(self.buffer)
             self.display_region = None
             self.buffer = None
             if self.cam in engine.camList:
@@ -136,8 +143,9 @@ class ImageBuffer:
             for line_np in self.line_borders:
                 if line_np:
                     line_np.removeNode()
-        self.line_borders = None
-        self.origin.removeNode()
+        self.line_borders = []
+        if hasattr(self, "origin"):
+            self.origin.removeNode()
 
     def __del__(self):
         logging.debug("{} is destroyed".format(self.__class__.__name__))

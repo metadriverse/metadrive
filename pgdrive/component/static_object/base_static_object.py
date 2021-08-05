@@ -22,4 +22,7 @@ class BaseStaticObject(BaseObject):
         self.lane_index = lane_index
         self.lane = lane
         self.body_node = None
-        self.heading_theta = 0
+
+    @property
+    def heading_theta(self):
+        return self.heading

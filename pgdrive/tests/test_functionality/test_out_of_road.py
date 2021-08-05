@@ -22,7 +22,9 @@ def test_out_of_road():
                 for _ in range(100000000):
                     o, r, d, i = env.step([steering, 1])
                     if d:
-                        points = env.vehicle.side_detector.get_cloud_points()
+                        points = \
+                            env.vehicle.side_detector.perceive(env.vehicle,
+                                                               env.vehicle.engine.physics_world.static_world).cloud_points
                         assert min(points) < tolerance, (min(points), tolerance)
                         print(
                             "Side detector minimal distance: {}, Current distance: {}, steering: {}".format(

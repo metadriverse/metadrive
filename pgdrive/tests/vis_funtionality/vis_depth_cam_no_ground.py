@@ -11,10 +11,10 @@ class TestEnv(PGDriveEnv):
                 "start_seed": 4,
                 "manual_control": True,
                 "use_render": True,
-                "use_image": True,
+                "offscreen_render": True,
                 "rgb_clip": True,
-                "vehicle_config": dict(depth_cam=(200, 88, False), image_source="depth_cam"),
-                "headless_image": False,
+                "vehicle_config": dict(depth_camera=(200, 88, False), image_source="depth_camera"),
+                "headless_machine_render": False,
                 "map_config": {
                     BaseMap.GENERATE_TYPE: MapGenerateMethod.BIG_BLOCK_NUM,
                     BaseMap.GENERATE_CONFIG: 12,

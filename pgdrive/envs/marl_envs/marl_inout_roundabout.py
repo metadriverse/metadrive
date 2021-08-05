@@ -59,6 +59,8 @@ class LidarStateObservationMARound(ObservationBase):
         self.state_obs = StateObservation(vehicle_config)
         super(LidarStateObservationMARound, self).__init__(vehicle_config)
         self.state_length = list(self.state_obs.observation_space.shape)[0]
+        self.cloud_points = None
+        self.detected_objects = None
 
     @property
     def observation_space(self):
@@ -73,8 +75,9 @@ class LidarStateObservationMARound(ObservationBase):
         state = self.state_observe(vehicle)
         other_v_info = []
         if vehicle.lidar is not None:
+            cloud_points, detected_objects = vehicle.lidar.perceive(vehicle)
             if self.config["lidar"]["num_others"] > 0:
-                surrounding_vehicles = list(vehicle.lidar.get_surrounding_vehicles())
+                surrounding_vehicles = list(vehicle.lidar.get_surrounding_vehicles(detected_objects))
                 surrounding_vehicles.sort(
                     key=lambda v: norm(vehicle.position[0] - v.position[0], vehicle.position[1] - v.position[1])
                 )
@@ -86,10 +89,12 @@ class LidarStateObservationMARound(ObservationBase):
                     else:
                         other_v_info += [0] * self.state_length
             other_v_info += self._add_noise_to_cloud_points(
-                vehicle.lidar.get_cloud_points(),
+                cloud_points,
                 gaussian_noise=self.config["lidar"]["gaussian_noise"],
                 dropout_prob=self.config["lidar"]["dropout_prob"]
             )
+            self.cloud_points = cloud_points
+            self.detected_objects = detected_objects
         return np.concatenate((state, np.asarray(other_v_info)))
 
     def state_observe(self, vehicle):
@@ -271,7 +276,7 @@ def _vis():
     total_r = 0
     ep_s = 0
     for i in range(1, 100000):
-        o, r, d, info = env.step({k: [1.0, 1.0] for k in env.vehicles.keys()})
+        o, r, d, info = env.step({k: [0, .0] for k in env.vehicles.keys()})
         for r_ in r.values():
             total_r += r_
         ep_s += 1
@@ -300,7 +305,7 @@ def _vis():
 
 def _profile():
     import time
-    env = MultiAgentRoundaboutEnv({"num_agents": 16})
+    env = MultiAgentRoundaboutEnv({"num_agents": 40})
     obs = env.reset()
     start = time.time()
     for s in range(10000):
@@ -379,8 +384,8 @@ def _long_run():
 
 if __name__ == "__main__":
     # _draw()
-    _vis()
+    # _vis()
     # _vis_debug_respawn()
-    # _profiwdle()
+    _profile()
     # _long_run()
     # pygame_replay("round", MultiAgentRoundaboutEnv)
