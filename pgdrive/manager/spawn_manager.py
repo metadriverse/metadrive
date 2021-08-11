@@ -12,6 +12,7 @@ from pgdrive.engine.engine_utils import get_engine
 from pgdrive.utils import Config, get_np_random
 from pgdrive.utils.coordinates_shift import panda_position, panda_heading
 from pgdrive.utils.scene_utils import rect_region_detection
+from pgdrive.component.vehicle.base_vehicle import BaseVehicle
 
 
 class SpawnManager:
@@ -40,8 +41,13 @@ class SpawnManager:
         self.initialized = False
         self.target_vehicle_configs = target_vehicle_configs
         self.spawn_places_used = []
-        self.vehicle_length = vehicle_config["vehicle_length"]
-        self.vehicle_width = vehicle_config["vehicle_width"]
+
+        # self.vehicle_length = vehicle_config["vehicle_length"]
+        # self.vehicle_width = vehicle_config["vehicle_width"]
+
+        self.vehicle_length = BaseVehicle.LENGTH
+        self.vehicle_width = BaseVehicle.WIDTH
+
         self.custom_target_vehicle_config = True if target_vehicle_configs is not None and len(
             target_vehicle_configs
         ) > 0 else False

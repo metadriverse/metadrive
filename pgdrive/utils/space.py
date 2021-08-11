@@ -230,10 +230,10 @@ class VehicleParameterSpace:
         Parameter.heading: ConstantSpace(0.0),
 
         # visualization
-        Parameter.vehicle_vis_h: ConstantSpace(180),
-        Parameter.vehicle_vis_y: ConstantSpace(0.1),
-        Parameter.vehicle_vis_z: ConstantSpace(-0.31),
-        Parameter.vehicle_vis_scale: ConstantSpace(0.013),
+        Parameter.vehicle_vis_h: ConstantSpace(0),
+        Parameter.vehicle_vis_y: ConstantSpace(0),
+        Parameter.vehicle_vis_z: ConstantSpace(0),
+        Parameter.vehicle_vis_scale: ConstantSpace(1),
     }
 
 
