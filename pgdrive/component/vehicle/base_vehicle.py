@@ -85,9 +85,9 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     COLLISION_MASK = CollisionGroup.EgoVehicle
     STEERING_INCREMENT = 0.05
 
-    LENGTH = None
-    WIDTH = None
-    HEIGHT = None
+    LENGTH = 4.51
+    WIDTH = 1.852
+    HEIGHT = 1.19
 
     # for random color choosing
     MATERIAL_COLOR_COEFF = 10  # to resist other factors, since other setting may make color dark
@@ -474,9 +474,11 @@ class BaseVehicle(BaseObject, BaseVehicleState):
 
     def _create_vehicle_chassis(self):
         para = self.get_config()
-        self.LENGTH = type(self).LENGTH or self.config["vehicle_length"]
-        self.WIDTH = type(self).WIDTH or self.config["vehicle_width"]
-        self.HEIGHT = type(self).HEIGHT or self.config[Parameter.vehicle_height]
+
+        self.LENGTH = type(self).LENGTH  # or self.config["vehicle_length"]
+        self.WIDTH = type(self).WIDTH  # or self.config["vehicle_width"]
+        self.HEIGHT = type(self).HEIGHT  # or self.config[Parameter.vehicle_height]
+
         chassis = BaseRigidBodyNode(self, BodyName.Base_vehicle)
         chassis.setIntoCollideMask(BitMask32.bit(CollisionGroup.EgoVehicle))
         chassis_shape = BulletBoxShape(Vec3(self.WIDTH / 2, self.LENGTH / 2, self.HEIGHT / 2))
@@ -495,13 +497,18 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     def _add_visualization(self):
         para = self.config
         if self.render:
+
             if self.MODEL is None:
                 model_path = 'models/ferra/scene.gltf'
                 self.MODEL = self.loader.loadModel(AssetLoader.file_path(model_path))
-                self.MODEL.setZ(para[Parameter.vehicle_vis_z])
-                self.MODEL.setY(para[Parameter.vehicle_vis_y])
-                self.MODEL.setH(para[Parameter.vehicle_vis_h])
-                self.MODEL.set_scale(para[Parameter.vehicle_vis_scale])
+
+                # self.MODEL.setZ(para[Parameter.vehicle_vis_z])
+                # self.MODEL.setY(para[Parameter.vehicle_vis_y])
+                # self.MODEL.setH(para[Parameter.vehicle_vis_h])
+                # self.MODEL.set_scale(para[Parameter.vehicle_vis_scale])
+
+                self.MODEL.set_scale(1)
+
             self.MODEL.instanceTo(self.origin)
             if self.config["random_color"]:
                 material = Material()
