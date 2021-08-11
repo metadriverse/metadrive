@@ -34,5 +34,5 @@ if __name__ == "__main__":
         )
         if d:
             print("Reset")
-            # env.reset()
+            env.reset()
     env.close()
