@@ -34,7 +34,7 @@ class MinimalObservation(LidarStateObservation):
         return gym.spaces.Box(-0.0, 1.0, shape=tuple(shape), dtype=np.float32)
 
     def observe_ego_state(self, vehicle):
-        navi_info = vehicle.routing_localization.get_navi_info()
+        navi_info = vehicle.navigation.get_navi_info()
         ego_state = self.vehicle_state(vehicle)
         return np.concatenate([ego_state, navi_info])
 
@@ -43,14 +43,13 @@ class MinimalObservation(LidarStateObservation):
         info = []
         lateral_to_left, lateral_to_right, = vehicle.dist_to_left_side, vehicle.dist_to_right_side
         total_width = float(
-            (vehicle.routing_localization.get_current_lane_num() + 1) *
-            vehicle.routing_localization.get_current_lane_width()
+            (vehicle.navigation.get_current_lane_num() + 1) * vehicle.navigation.get_current_lane_width()
         )
         lateral_to_left /= total_width
         lateral_to_right /= total_width
         info += [clip(lateral_to_left, 0.0, 1.0), clip(lateral_to_right, 0.0, 1.0)]
 
-        current_reference_lane = vehicle.routing_localization.current_ref_lanes[-1]
+        current_reference_lane = vehicle.navigation.current_ref_lanes[-1]
         info += [
             vehicle.heading_diff(current_reference_lane),
             # Note: speed can be negative denoting free fall. This happen when emergency brake.
@@ -87,7 +86,7 @@ class MinimalObservation(LidarStateObservation):
         info.append(clip(yaw_rate, 0.0, 1.0))
 
         long, lateral = vehicle.lane.local_coordinates(vehicle.position)
-        info.append(clip((lateral * 2 / vehicle.routing_localization.get_current_lane_width() + 1.0) / 2.0, 0.0, 1.0))
+        info.append(clip((lateral * 2 / vehicle.navigation.get_current_lane_width() + 1.0) / 2.0, 0.0, 1.0))
         info.append(clip(long / DISTANCE, 0.0, 1.0))
         return info
 
@@ -151,38 +150,43 @@ class MinimalObservation(LidarStateObservation):
         return res
 
     def traffic_vehicle_state(self, vehicle):
+        # FIXME not available now
         s = []
-        state = vehicle.to_dict()
-        s.append(state['vx'] / vehicle.MAX_SPEED)
-        s.append(state['vy'] / vehicle.MAX_SPEED)
-        s.append(state["cos_h"])
-        s.append(state["sin_h"])
+        s.append(0.0)
+        s.append(0.0)
+        s.append(0.0)
+        s.append(0.0)
+        # s.append(0.0)
+        # s.append(0.0)
+        # state = vehicle.to_dict()
+        # s.append(state['vx'] / vehicle.MAX_SPEED)
+        # s.append(state['vy'] / vehicle.MAX_SPEED)
+        # s.append(state["cos_h"])
+        # s.append(state["sin_h"])
+        #
+        # p = pm.get_policy(vehicle.name)
+        # # s.append(state["cos_d"])
+        # # s.append(state["sin_d"])
+        #
+        # if p is None:
+        s.append(0.0)
+        s.append(0.0)
+        s.append(0.0)
+        # else:
+        # s.append(p.destination[0])
+        # s.append(p.destination[1])
+        # target_speed = p.target_speed
+        # s.append(target_speed / vehicle.MAX_SPEED)
 
-        # TODO(pzh): This is stupid here!!
-        pm = get_engine().policy_manager
-        p = pm.get_policy(vehicle.name)
-        # s.append(state["cos_d"])
-        # s.append(state["sin_d"])
-
-        # TODO(pzh): This is a workaround!!
-        if p is None:
-            s.append(0.0)
-            s.append(0.0)
-            s.append(0.0)
-        else:
-            s.append(p.destination[0])
-            s.append(p.destination[1])
-            target_speed = p.target_speed
-            s.append(target_speed / vehicle.MAX_SPEED)
-
-        s.append(vehicle.speed / vehicle.MAX_SPEED)
-        s.append(math.cos(vehicle.heading))
-        s.append(math.sin(vehicle.heading))
-        s.append(vehicle.action["steering"])
-        s.append(vehicle.action["acceleration"] / vehicle.ACC_MAX)
+        s.append(vehicle.speed / vehicle.max_speed)
+        s.append(math.cos(vehicle.heading_theta))
+        s.append(math.sin(vehicle.heading_theta))
+        s.append(vehicle.current_action[0])
+        s.append(vehicle.current_action[1])
         ret = []
         for v in s:
-            ret.append(self._to_zero_and_one(v))
+            v = self._to_zero_and_one(v)
+            ret.append(v)
         return ret
 
     @staticmethod

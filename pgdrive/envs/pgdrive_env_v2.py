@@ -149,11 +149,11 @@ class PGDriveEnvV2(PGDriveEnvV1):
         step_info = dict()
 
         # Reward for moving forward in current lane
-        if vehicle.lane in vehicle.routing_localization.current_ref_lanes:
+        if vehicle.lane in vehicle.navigation.current_ref_lanes:
             current_lane = vehicle.lane
             positive_road = 1
         else:
-            current_lane = vehicle.routing_localization.current_ref_lanes[0]
+            current_lane = vehicle.navigation.current_ref_lanes[0]
             current_road = vehicle.current_road
             positive_road = 1 if not current_road.is_negative_road() else -1
         long_last, _ = current_lane.local_coordinates(vehicle.last_position)
@@ -161,9 +161,7 @@ class PGDriveEnvV2(PGDriveEnvV1):
 
         # reward for lane keeping, without it vehicle can learn to overtake but fail to keep in lane
         if self.config["use_lateral"]:
-            lateral_factor = clip(
-                1 - 2 * abs(lateral_now) / vehicle.routing_localization.get_current_lane_width(), 0.0, 1.0
-            )
+            lateral_factor = clip(1 - 2 * abs(lateral_now) / vehicle.navigation.get_current_lane_width(), 0.0, 1.0)
         else:
             lateral_factor = 1.0
 
@@ -185,7 +183,7 @@ class PGDriveEnvV2(PGDriveEnvV1):
 
     def _get_reset_return(self):
         ret = {}
-        self.engine.update_state_for_all_target_vehicles()
+        self.engine.after_step()
         for v_id, v in self.vehicles.items():
             self.observations[v_id].reset(self, v)
             ret[v_id] = self.observations[v_id].observe(v)

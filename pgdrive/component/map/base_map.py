@@ -4,7 +4,7 @@ import logging
 import numpy as np
 
 from pgdrive.component.algorithm.BIG import BigGenerateMethod
-from pgdrive.component.base_class.base_runable import BaseRunnable
+from pgdrive.base_class.base_runnable import BaseRunnable
 from pgdrive.component.blocks.first_block import FirstPGBlock
 from pgdrive.component.blocks.pg_block import PGBlock
 from pgdrive.component.road.road import Road
@@ -86,20 +86,20 @@ class BaseMap(BaseRunnable):
         #  a trick to optimize performance
         self.road_network.after_init()
         self.spawn_roads = [Road(FirstPGBlock.NODE_2, FirstPGBlock.NODE_3)]
-        self.unload_from_world()
+        self.detach_from_world()
 
     def _generate(self):
         """Key function! Please overwrite it! This func aims at fill the self.road_network adn self.blocks"""
         raise NotImplementedError("Please use child class like PGMap to replace Map!")
 
-    def load_to_world(self):
-        parent_node_path, physics_world = self.engine.worldNP, self.engine.physics_world
+    def attach_to_world(self, parent_np=None, physics_world=None):
+        parent_node_path, physics_world = self.engine.worldNP or parent_np, self.engine.physics_world or physics_world
         for block in self.blocks:
             block.attach_to_world(parent_node_path, physics_world)
 
-    def unload_from_world(self):
+    def detach_from_world(self, physics_world=None):
         for block in self.blocks:
-            block.detach_from_world(self.engine.physics_world)
+            block.detach_from_world(self.engine.physics_world or physics_world)
 
     def save_map(self):
         """

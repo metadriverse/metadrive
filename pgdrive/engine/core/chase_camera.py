@@ -5,7 +5,7 @@ from typing import Tuple
 
 import numpy as np
 from direct.controls.InputState import InputState
-from panda3d.core import Vec3, Point3, BitMask32
+from panda3d.core import Vec3, Point3
 
 from pgdrive.constants import CollisionGroup
 from pgdrive.engine.engine_utils import get_engine
@@ -79,7 +79,7 @@ class MainCamera:
         if not self.FOLLOW_LANE:
             forward_dir = vehicle.system.get_forward_vector()
         else:
-            forward_dir = self._dir_of_lane(vehicle.routing_localization.current_ref_lanes[0], vehicle.position)
+            forward_dir = self._dir_of_lane(vehicle.navigation.current_ref_lanes[0], vehicle.position)
 
         self.direction_running_mean.append(forward_dir)
         forward_dir = np.mean(self.direction_running_mean, axis=0)
@@ -95,8 +95,7 @@ class MainCamera:
         self.camera.lookAt(current_pos)
         if self.FOLLOW_LANE:
             self.camera.setH(
-                self._heading_of_lane(vehicle.routing_localization.current_ref_lanes[0], vehicle.position) / np.pi *
-                180 - 90
+                self._heading_of_lane(vehicle.navigation.current_ref_lanes[0], vehicle.position) / np.pi * 180 - 90
             )
 
         if self.world_light is not None:
@@ -155,11 +154,11 @@ class MainCamera:
         :param vehicle: BaseVehicle
         :return: position on the center lane
         """
-        if vehicle.routing_localization.current_ref_lanes is None:
+        if vehicle.navigation.current_ref_lanes is None:
             raise ValueError("No routing module, I don't know which lane to follow")
 
-        lane = vehicle.routing_localization.current_ref_lanes[0]
-        lane_num = len(vehicle.routing_localization.current_ref_lanes)
+        lane = vehicle.navigation.current_ref_lanes[0]
+        lane_num = len(vehicle.navigation.current_ref_lanes)
 
         longitude, _ = lane.local_coordinates(vehicle.position)
         lateral = lane_num * lane.width / 2 - lane.width / 2
@@ -235,9 +234,7 @@ class MainCamera:
             # Transform to global coordinates
             pFrom = self.engine.render.getRelativePoint(self.camera, pFrom)
             pTo = self.engine.render.getRelativePoint(self.camera, pTo)
-            ret = self.engine.physics_world.dynamic_world.rayTestClosest(
-                pFrom, pTo, BitMask32.bit(CollisionGroup.Terrain)
-            )
+            ret = self.engine.physics_world.dynamic_world.rayTestClosest(pFrom, pTo, CollisionGroup.Terrain)
             self.camera_x = ret.getHitPos()[0]
             self.camera_y = ret.getHitPos()[1]
 

@@ -74,7 +74,7 @@ class LidarStateObservationMARound(ObservationBase):
         num_others = self.config["lidar"]["num_others"]
         state = self.state_observe(vehicle)
         other_v_info = []
-        if vehicle.lidar is not None:
+        if vehicle.lidar.available:
             cloud_points, detected_objects = vehicle.lidar.perceive(vehicle)
             if self.config["lidar"]["num_others"] > 0:
                 surrounding_vehicles = list(vehicle.lidar.get_surrounding_vehicles(detected_objects))
@@ -130,9 +130,7 @@ class MultiAgentRoundaboutEnv(MultiAgentPGDrive):
 
         if self.current_map is None:
             self.seed(map_config["seed"])
-            new_map = self.engine.map_manager.spawn_object(
-                MARoundaboutMap, map_config=map_config, random_seed=self.current_seed
-            )
+            new_map = self.engine.spawn_object(MARoundaboutMap, map_config=map_config, random_seed=self.current_seed)
             self.engine.map_manager.load_map(new_map)
             self.current_map.spawn_roads = self.spawn_roads
 
@@ -140,7 +138,7 @@ class MultiAgentRoundaboutEnv(MultiAgentPGDrive):
         vehicle = self.vehicles[vehicle_id]
         # when agent re-joined to the game, call this to set the new route to destination
         end_road = -get_np_random(self._DEBUG_RANDOM_SEED).choice(self.spawn_roads)  # Use negative road!
-        vehicle.routing_localization.set_route(vehicle.lane_index[0], end_road.end_node)
+        vehicle.navigation.set_route(vehicle.lane_index, end_road.end_node)
 
     def get_single_observation(self, vehicle_config: "Config") -> "ObservationBase":
         return LidarStateObservationMARound(vehicle_config)
@@ -384,8 +382,8 @@ def _long_run():
 
 if __name__ == "__main__":
     # _draw()
-    # _vis()
+    _vis()
     # _vis_debug_respawn()
-    _profile()
+    # _profile()
     # _long_run()
     # pygame_replay("round", MultiAgentRoundaboutEnv)

@@ -18,8 +18,8 @@ class SceneCull:
 
     # Physics world cull, which can save the time used to do collision detection
     LOD_MAP_PHYSICS_DIST = 50
-    LOD_VEHICLE_PHYSICS_DIST = 50
-    LOD_OBJECT_PHYSICS_DIST = 50
+    LOD_VEHICLE_PHYSICS_DIST = 100000
+    LOD_OBJECT_PHYSICS_DIST = 100000
 
     @classmethod
     def cull_distant_blocks(cls, engine, blocks: list, poses: List[tuple], max_distance=None):

@@ -19,16 +19,11 @@ def test_get_lane_index(use_render=False):
                 old_res = env.current_map.road_network.get_closest_lane_index(v.position, True)
                 old_lane_idx = [index[1] for index in old_res]
 
-                # TODO(pzh): Change this!!
-                p = env.engine.policy_manager.get_policy(v.name)
-                if p is None:
-                    continue
-
-                if p.lane_index not in old_lane_idx:
-                    raise ValueError((p.lane_index), old_lane_idx)
+                if v.lane_index not in old_lane_idx:
+                    raise ValueError((v.lane_index), old_lane_idx)
                 else:
-                    idx = old_lane_idx.index(p.lane_index)
-                    if old_res[idx][0] > 2. and idx > 2:
+                    idx = old_lane_idx.index(v.lane_index)
+                    if old_res[idx][0] > 4. and idx > 2:
                         raise ValueError("L1 dist:{} of {} is too large".format(old_res[idx][0], idx))
     finally:
         env.close()

@@ -1,8 +1,9 @@
 import time
 
 import numpy as np
-from pgdrive.constants import DEFAULT_AGENT
+
 from pgdrive import PGDriveEnv
+from pgdrive.constants import DEFAULT_AGENT
 from pgdrive.examples import expert, get_terminal_state
 
 

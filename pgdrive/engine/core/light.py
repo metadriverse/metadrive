@@ -1,6 +1,6 @@
 from panda3d.core import LVector4, NodePath, DirectionalLight, AmbientLight
 
-from pgdrive.component.base_class.base_object import BaseObject
+from pgdrive.base_class.base_object import BaseObject
 from pgdrive.constants import CamMask
 
 
@@ -50,7 +50,7 @@ class Light(BaseObject):
             self.direction_np.setPos(pos[0] - 200, pos[1] + 100, 150)
             self.direction_np.lookAt(pos[0], pos[1], 0)
 
-    def reset(self):
+    def reset(self, random_seed=None, *args, **kwargs):
         if self.direction_np is not None and not self.global_light:
             self.direction_np.setHpr(-90, -120, 0)
             self.direction_np.setY(20)

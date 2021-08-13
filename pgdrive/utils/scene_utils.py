@@ -4,7 +4,7 @@ from typing import List, TYPE_CHECKING, Tuple, Union
 import numpy as np
 from panda3d.bullet import BulletBoxShape, BulletCylinderShape, ZUp
 from panda3d.core import TransformState
-from panda3d.core import Vec3, BitMask32
+from panda3d.core import Vec3
 
 from pgdrive.component.lane.abs_lane import AbstractLane
 from pgdrive.component.lane.circular_lane import CircularLane
@@ -213,7 +213,7 @@ def rect_region_detection(
 
     physics_world = engine.physics_world.dynamic_world if not in_static_world else engine.physics_world.static_world
 
-    result = physics_world.sweep_test_closest(shape, tsFrom, tsTo, BitMask32.bit(detection_group), penetration)
+    result = physics_world.sweep_test_closest(shape, tsFrom, tsTo, detection_group, penetration)
     return result
 
 
@@ -239,5 +239,14 @@ def circle_region_detection(
 
     physics_world = engine.physics_world.dynamic_world if not in_static_world else engine.physics_world.static_world
 
-    result = physics_world.sweep_test_closest(shape, tsFrom, tsTo, BitMask32.bit(detection_group), penetration)
+    result = physics_world.sweep_test_closest(shape, tsFrom, tsTo, detection_group, penetration)
     return result
+
+
+def is_same_lane_index(lane_index_1, lane_index_2):
+    return all([lane_index_1[i] == lane_index_2[i] for i in range(3)])
+
+
+def is_following_lane_index(current_lane_index, next_lane_index):
+    return True if current_lane_index[1] == next_lane_index[0] and current_lane_index[-1] == next_lane_index[
+        -1] else False

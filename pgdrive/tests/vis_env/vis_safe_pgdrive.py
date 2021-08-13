@@ -9,6 +9,7 @@ class TestEnv(SafePGDriveEnv):
                 "use_render": True,
                 "manual_control": True,
                 "environment_num": 100,
+                "accident_prob": 1.0,
                 "vehicle_config": {
                     "show_lidar": True
                 }

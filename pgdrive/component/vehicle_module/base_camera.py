@@ -1,5 +1,5 @@
 import numpy as np
-from panda3d.core import Vec3, NodePath
+from panda3d.core import Vec3
 
 from pgdrive.engine.core.image_buffer import ImageBuffer
 

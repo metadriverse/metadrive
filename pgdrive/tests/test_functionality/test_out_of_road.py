@@ -54,8 +54,7 @@ def useless_left_right_distance_printing():
                 vehicle = env.vehicle
                 l, r = vehicle.dist_to_left_side, vehicle.dist_to_right_side
                 total_width = float(
-                    (vehicle.routing_localization.get_current_lane_num() + 1) *
-                    vehicle.routing_localization.get_current_lane_width()
+                    (vehicle.navigation.get_current_lane_num() + 1) * vehicle.navigation.get_current_lane_width()
                 )
                 print(
                     "Left {}, Right {}, Total {}. Clip Total {}".format(

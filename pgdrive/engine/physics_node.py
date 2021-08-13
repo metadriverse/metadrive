@@ -16,5 +16,5 @@ class BaseRigidBodyNode(BulletRigidBodyNode):
         self.object = base_object
 
     def destroy(self):
-        self.clearPythonTag(self.getName())
         self.object = None
+        self.clearPythonTag(self.getName())

@@ -68,7 +68,6 @@ def _get_fake_cutils():
                 laser_end = cls.cutils_panda_position(point_x, point_y, height)
                 result = physics_world.rayTestClosest(pg_start_position, laser_end, mask)
                 node = result.getNode()
-                hits = None
                 if node in extra_filter_node:
                     # Fall back to all tests.
                     results = physics_world.rayTestAll(pg_start_position, laser_end, mask)
@@ -79,29 +78,21 @@ def _get_fake_cutils():
                             continue
                         detected_objects.append(result)
                         cloud_points[laser_index] = result.getHitFraction()
+                        laser_end = result.getHitPos()
                         break
                 else:
                     cloud_points[laser_index] = result.getHitFraction()
+                    if result.hasHit():
+                        laser_end = result.getHitPos()
                     if node:
                         detected_objects.append(result)
-                        hits = result.hasHit()
                 if require_colors:
-                    if hits:
-                        colors.append(
-                            cls.cutils_add_cloud_point_vis(
-                                result.getHitPos()[0],
-                                result.getHitPos()[1],
-                                result.getHitPos()[2], num_lasers, laser_index, ANGLE_FACTOR, MARK_COLOR0, MARK_COLOR1,
-                                MARK_COLOR2
-                            )
+                    colors.append(
+                        cls.cutils_add_cloud_point_vis(
+                            laser_end[0], laser_end[1], height, num_lasers, laser_index, ANGLE_FACTOR, MARK_COLOR0,
+                            MARK_COLOR1, MARK_COLOR2
                         )
-                    else:
-                        colors.append(
-                            cls.cutils_add_cloud_point_vis(
-                                laser_end[0], laser_end[1], height, num_lasers, laser_index, ANGLE_FACTOR, MARK_COLOR0,
-                                MARK_COLOR1, MARK_COLOR2
-                            )
-                        )
+                    )
 
             return cloud_points, detected_objects, colors
 

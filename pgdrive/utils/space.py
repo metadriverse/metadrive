@@ -202,8 +202,7 @@ class Parameter:
     tire_lateral = "tire_lateral"
     tire_axis_height = "tire_axis_height"
     tire_radius = "tire_radius"
-    mass = "mass"
-    chassis_height = "chassis_height"
+    mass = "mass"  # kg
     heading = "heading"
     # steering_max = "steering_max"
     # engine_force_max = "e_f_max"
@@ -221,7 +220,6 @@ class VehicleParameterSpace:
     BASE_VEHICLE = {
         # Now the parameter sample is not available and thus the value space is incorrect
         Parameter.vehicle_height: ConstantSpace(1),
-        Parameter.chassis_height: ConstantSpace(0.3),
         Parameter.front_tire_longitude: ConstantSpace(1.05),
         Parameter.rear_tire_longitude: ConstantSpace(1.17),
         Parameter.tire_lateral: ConstantSpace(0.8),
