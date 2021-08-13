@@ -29,20 +29,24 @@ MAParkingLotConfig = dict(
     },
 )
 
+from pgdrive.manager.base_manager import BaseManager
 
-class ParkingSpaceManager:
+
+class ParkingSpaceManager(BaseManager):
     """
     Manage parking spaces, when env.reset() is called, vehicles will be assigned to different spawn points including:
     parking space and entrances of parking lot, vehicle can not respawn in parking space which has been assigned to a
     vehicle who drives into this parking lot.
     """
-    def __init__(self, parking_spaces: list):
+    def __init__(self):
+        super(ParkingSpaceManager, self).__init__()
         self.parking_space_available = set()
-        self._parking_spaces = parking_spaces
+        self._parking_spaces = None
         self.v_dest_pair = {}
-        self.reset()
 
     def get_parking_space(self, v_id):
+        if self._parking_spaces is None:
+            self.reset()
         parking_space_idx = get_np_random().choice([i for i in range(len(self.parking_space_available))])
         parking_space = list(self.parking_space_available)[parking_space_idx]
         self.parking_space_available.remove(parking_space)
@@ -58,6 +62,7 @@ class ParkingSpaceManager:
             self.parking_space_available.add(dest)
 
     def reset(self):
+        self._parking_spaces = self.engine.map_manager.current_map.parking_space
         self.v_dest_pair = {}
         self.parking_space_available = set(copy.deepcopy(self._parking_spaces))
 
@@ -85,7 +90,7 @@ class MAParkingLotMap(PGMap):
             parent_node_path, physics_world, {"one_side_vehicle_number": int(self.config["parking_space_num"] / 2)}
         )
         self.blocks.append(last_block)
-        self.parking_space_manager = ParkingSpaceManager(last_block.dest_roads)
+        self.parking_space = last_block.dest_roads
         self.parking_lot = last_block
 
         # Build ParkingLot
@@ -130,7 +135,7 @@ class MultiAgentParkingLotEnv(MultiAgentPGDrive):
             ret.append(Road(ParkingLot.node(1, i, 5), ParkingLot.node(1, i, 6)))
         return ret
 
-    def _process_extra_config(self, config) -> "Config":
+    def _merge_extra_config(self, config) -> "Config":
         ret_config = self.default_config().update(
             config, allow_add_new_key=False, stop_recursive_update=["target_vehicle_configs"]
         )
@@ -179,15 +184,15 @@ class MultiAgentParkingLotEnv(MultiAgentPGDrive):
             self.engine.map_manager.load_map(new_map)
             self.current_map.spawn_roads = self.spawn_roads
 
-    def _update_destination_for(self, vehicle_id):
-        vehicle = self.vehicles[vehicle_id]
+    def _update_destination_for(self, vehicle_id, vehicle_config):
         # when agent re-joined to the game, call this to set the new route to destination
         end_roads = copy.deepcopy(self.in_spawn_roads)
-        if vehicle.navigation.current_road in end_roads:
-            end_road = self.current_map.parking_space_manager.get_parking_space(vehicle_id)
+        if Road(*vehicle_config["spawn_lane_index"][:-1]) in end_roads:
+            end_road = self.engine.parking_space_manager.get_parking_space(vehicle_id)
         else:
             end_road = -get_np_random(self._DEBUG_RANDOM_SEED).choice(end_roads)  # Use negative road!
-        vehicle.navigation.set_route(vehicle.lane_index, end_road.end_node)
+        vehicle_config["destination_node"] = end_road.end_node
+        return vehicle_config
 
     def _respawn_single_vehicle(self, randomize_position=False):
         """
@@ -202,7 +207,7 @@ class MultiAgentParkingLotEnv(MultiAgentPGDrive):
             spawn_l_index = config["config"]["spawn_lane_index"]
             spawn_road = Road(spawn_l_index[0], spawn_l_index[1])
             if spawn_road in self.in_spawn_roads:
-                if len(self.current_map.parking_space_manager.parking_space_available) > 0:
+                if len(self.engine.parking_space_manager.parking_space_available) > 0:
                     filter_ret[id] = config
             else:
                 # spawn in parking space
@@ -210,7 +215,7 @@ class MultiAgentParkingLotEnv(MultiAgentPGDrive):
                     # avoid sweep test bug
                     spawn_road = self.current_map.parking_lot.out_direction_parking_space(spawn_road)
                     config["config"]["spawn_lane_index"] = (spawn_road.start_node, spawn_road.end_node, 0)
-                if spawn_road in self.current_map.parking_space_manager.parking_space_available:
+                if spawn_road in self.engine.parking_space_manager.parking_space_available:
                     # not other vehicle's destination
                     filter_ret[id] = config
 
@@ -229,9 +234,9 @@ class MultiAgentParkingLotEnv(MultiAgentPGDrive):
 
         new_agent_id, vehicle = self.agent_manager.propose_new_vehicle()
         new_spawn_place_config = new_spawn_place["config"]
+        new_spawn_place_config = self._update_destination_for(new_agent_id, new_spawn_place_config)
         vehicle.config.update(new_spawn_place_config)
         vehicle.reset()
-        self._update_destination_for(new_agent_id)
         vehicle.after_step()
         self.dones[new_agent_id] = False  # Put it in the internal dead-tracking dict.
 
@@ -241,14 +246,10 @@ class MultiAgentParkingLotEnv(MultiAgentPGDrive):
     def get_single_observation(self, vehicle_config: "Config") -> "ObservationBase":
         return LidarStateObservationMARound(vehicle_config)
 
-    def _reset_agents(self):
-        self.current_map.parking_space_manager.reset()
-        super(MultiAgentParkingLotEnv, self)._reset_agents()
-
     def done_function(self, vehicle_id):
         done, info = super(MultiAgentParkingLotEnv, self).done_function(vehicle_id)
         if done:
-            self.current_map.parking_space_manager.after_vehicle_done(vehicle_id)
+            self.engine.parking_space_manager.after_vehicle_done(vehicle_id)
         return done, info
 
     def _is_out_of_road(self, vehicle):
@@ -256,6 +257,11 @@ class MultiAgentParkingLotEnv(MultiAgentPGDrive):
         return vehicle.on_yellow_continuous_line or (not vehicle.on_lane) or vehicle.crash_sidewalk
         # ret = vehicle.out_of_route
         # return ret
+
+    def setup_engine(self):
+        super(MultiAgentParkingLotEnv, self).setup_engine()
+        self.parking_space_manager = ParkingSpaceManager()
+        self.engine.register_manager("parking_space_manager", self.parking_space_manager)
 
 
 def _draw():
@@ -418,7 +424,7 @@ def _vis():
             "alive": len(env.vehicles),
             "dist_right_left": dist,
             "ckpt_idx": ckpt_idx,
-            "parking_space_num": len(env.current_map.parking_space_manager.parking_space_available)
+            "parking_space_num": len(env.engine.parking_space_manager.parking_space_available)
         }
         if len(env.vehicles) > 0:
             v = env.current_track_vehicle

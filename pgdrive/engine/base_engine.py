@@ -100,8 +100,8 @@ class BaseEngine(EngineCore, Randomizable):
         """
         if "random_seed" not in kwargs:
             kwargs["random_seed"] = self.generate_seed()
-        if force_spawn or object_class.__name__ not in self._dying_objects or len(self._dying_objects[
-            object_class.__name__]) == 0:
+        if force_spawn or object_class.__name__ not in self._dying_objects or len(
+                self._dying_objects[object_class.__name__]) == 0:
             obj = object_class(**kwargs)
         else:
             obj = self._dying_objects[object_class.__name__].pop()
@@ -289,8 +289,8 @@ class BaseEngine(EngineCore, Randomizable):
         assert manger_name not in self._managers, "Manager already exists in BaseEngine"
         assert not hasattr(self, manger_name), "Manager name can not be same as the attribute in BaseEngine"
         self._managers[manger_name] = manager
-        self._managers.move_to_end(manger_name)
         setattr(self, manger_name, manager)
+        self._managers = OrderedDict(sorted(self._managers.items(), key=lambda k_v: k_v[-1].PRIORITY))
 
     def seed(self, random_seed):
         self.global_random_seed = random_seed

@@ -75,11 +75,11 @@ PGDriveEnvV1_DEFAULT_CONFIG = dict(
         # ===== use image =====
         image_source="rgb_camera",  # take effect when only when offscreen_render == True
 
-        # ===== vehicle spawn =====
+        # ===== vehicle spawn and destination =====
         spawn_lane_index=(FirstPGBlock.NODE_1, FirstPGBlock.NODE_2, 0),
-        destination_lane_index=None,
         spawn_longitude=5.0,
         spawn_lateral=0.0,
+        destination_node=None,
 
         # ==== others ====
         overtake_stat=False,  # we usually set to True when evaluation
@@ -123,7 +123,7 @@ class PGDriveEnv(BasePGDriveEnv):
     def __init__(self, config: dict = None):
         super(PGDriveEnv, self).__init__(config)
 
-    def _process_extra_config(self, config: Union[dict, "Config"]) -> "Config":
+    def _merge_extra_config(self, config: Union[dict, "Config"]) -> "Config":
         """Check, update, sync and overwrite some config."""
         config = self.default_config().update(config, allow_add_new_key=False)
         if config["vehicle_config"]["lidar"]["distance"] > 50:
@@ -139,13 +139,7 @@ class PGDriveEnv(BasePGDriveEnv):
         config["map_config"] = parse_map_config(
             easy_map_config=config["map"], new_map_config=config["map_config"], default_config=self.default_config_copy
         )
-        config["vehicle_config"].update(
-            {
-                "use_render": config["use_render"],
-                "offscreen_render": config["offscreen_render"],
-                "rgb_clip": config["rgb_clip"]
-            }
-        )
+        config["vehicle_config"]["rgb_clip"] = config["rgb_clip"]
         return config
 
     def _after_lazy_init(self):
@@ -335,9 +329,6 @@ class PGDriveEnv(BasePGDriveEnv):
             reward -= self.config["crash_object_penalty"]
 
         return reward, step_info
-
-    def _reset_agents(self):
-        self.for_each_vehicle(lambda v: v.reset())
 
     def _get_reset_return(self):
         ret = {}

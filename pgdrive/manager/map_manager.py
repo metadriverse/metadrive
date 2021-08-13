@@ -11,6 +11,8 @@ class MapManager(BaseManager):
     """
     MapManager contains a list of maps
     """
+    PRIORITY = 0  # Map update has the most high priority
+
     def __init__(self):
         super(MapManager, self).__init__()
         self.current_map = None

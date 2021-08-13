@@ -6,7 +6,7 @@ class ArgoverseEnv(PGDriveEnv):
     def _post_process_config(self, config):
         config = super(ArgoverseEnv, self)._post_process_config(config)
         config["vehicle_config"]["spawn_lane_index"] = ("11713", "4250", 0)
-        config["vehicle_config"]["destination_lane_index"] = ("4250", "968", 0)
+        config["vehicle_config"]["destination_node"] = "968"
         return config
 
     def _update_map(self, episode_data: dict = None):
