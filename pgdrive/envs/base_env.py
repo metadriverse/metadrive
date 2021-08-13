@@ -111,10 +111,11 @@ class BasePGDriveEnv(gym.Env):
     # ===== Intialization =====
     def __init__(self, config: dict = None):
         self.default_config_copy = Config(self.default_config(), unchangeable=True)
-        merged_config = self._process_extra_config(config)
+        merged_config = self._merge_extra_config(config)
         global_config = self._post_process_config(merged_config)
         self.config = global_config
 
+        # agent check
         self.num_agents = self.config["num_agents"]
         self.is_multi_agent = self.config["is_multi_agent"]
         if not self.is_multi_agent:
@@ -143,12 +144,12 @@ class BasePGDriveEnv(gym.Env):
         self.episode_steps = 0
         self.current_seed = None
 
+        # In MARL envs with respawn mechanism, varying episode lengths might happen.
         self.dones = None
         self.episode_rewards = defaultdict(float)
-        # In MARL envs with respawn mechanism, varying episode lengths might happen.
         self.episode_lengths = defaultdict(int)
 
-    def _process_extra_config(self, config: Union[dict, "Config"]) -> "Config":
+    def _merge_extra_config(self, config: Union[dict, "Config"]) -> "Config":
         """Check, update, sync and overwrite some config."""
         return config
 
@@ -177,13 +178,10 @@ class BasePGDriveEnv(gym.Env):
         if engine_initialized():
             return
         self.engine = initialize_engine(self.config)
-
         # engine setup
         self.setup_engine()
-
-        # init vehicle
+        # init agent
         self.agent_manager.init(config_dict=self._get_target_vehicle_config())
-
         # other optional initialization
         self._after_lazy_init()
 
@@ -275,25 +273,19 @@ class BasePGDriveEnv(gym.Env):
         self.lazy_init()  # it only works the first time when reset() is called to avoid the error when render
         self._reset_global_seed(force_seed)
         self._update_map(episode_data)
-        self.agent_manager.reset()
 
-        self._reset_agents()
+        self._reset_config()
+        self.engine.reset()
 
         self.dones = {agent_id: False for agent_id in self.vehicles.keys()}
         self.episode_steps = 0
         self.episode_rewards = defaultdict(float)
         self.episode_lengths = defaultdict(int)
 
-        # generate new traffic according to the map
-        self.engine.reset()
-
         return self._get_reset_return()
 
     def _update_map(self, episode_data: Union[None, dict] = None):
         raise NotImplementedError()
-
-    def _reset_agents(self):
-        raise NotImplementedError
 
     def _get_reset_return(self):
         raise NotImplementedError()
@@ -424,3 +416,9 @@ class BasePGDriveEnv(gym.Env):
     @property
     def maps(self):
         return self.engine.map_manager.pg_maps
+
+    def _reset_config(self):
+        """
+        You may need to modify the global config in the new episode, do it here
+        """
+        pass

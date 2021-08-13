@@ -98,11 +98,10 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     MATERIAL_SPECULAR_COLOR = (3, 3, 3, 3)
 
     def __init__(
-            self,
-            vehicle_config: Union[dict, Config] = None,
-            name: str = None,
-            am_i_the_special_one=False,
-            random_seed=None,
+        self,
+        vehicle_config: Union[dict, Config] = None,
+        name: str = None,
+        random_seed=None,
     ):
         """
         This Vehicle Config is different from self.get_config(), and it is used to define which modules to use, and
@@ -119,6 +118,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         BaseObject.__init__(self, name, random_seed, self.engine.global_config["vehicle_config"])
         BaseVehicleState.__init__(self)
         self.update_config(vehicle_config)
+        am_i_the_special_one = self.config["am_i_the_special_one"]
 
         # build vehicle physics model
         vehicle_chassis = self._create_vehicle_chassis()
@@ -433,8 +433,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         if not lateral_norm * forward_direction_norm:
             return 0
         cos = (
-                (forward_direction[0] * lateral[0] + forward_direction[1] * lateral[1]) /
-                (lateral_norm * forward_direction_norm)
+            (forward_direction[0] * lateral[0] + forward_direction[1] * lateral[1]) /
+            (lateral_norm * forward_direction_norm)
         )
         # return cos
         # Normalize to 0, 1
@@ -584,10 +584,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             lane, new_l_index = possible_lanes[0][:-1]
         else:
             lane, new_l_index = possible_lanes[idx][:-1]
-        dest = self.config["destination_lane_index"]
-        self.navigation.update(
-            map, current_lane_index=new_l_index, final_road_node=dest[1] if dest is not None else None
-        )
+        dest = self.config["destination_node"]
+        self.navigation.update(map, current_lane_index=new_l_index, final_road_node=dest if dest is not None else None)
         assert lane is not None, "spawn place is not on road!"
         self.lane_index = new_l_index
         self.lane = lane
@@ -681,7 +679,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             ckpt_idx = routing._target_checkpoints_index
             for surrounding_v in surrounding_vs:
                 if surrounding_v.lane_index[:-1] == (routing.checkpoints[ckpt_idx[0]], routing.checkpoints[ckpt_idx[1]
-                ]):
+                                                                                                           ]):
                     if self.lane.local_coordinates(self.position)[0] - \
                             self.lane.local_coordinates(surrounding_v.position)[0] < 0:
                         self.front_vehicles.add(surrounding_v)
@@ -696,7 +694,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
 
     @classmethod
     def get_action_space_before_init(cls, extra_action_dim: int = 0):
-        return gym.spaces.Box(-1.0, 1.0, shape=(2 + extra_action_dim,), dtype=np.float32)
+        return gym.spaces.Box(-1.0, 1.0, shape=(2 + extra_action_dim, ), dtype=np.float32)
 
     def __del__(self):
         super(BaseVehicle, self).__del__()
@@ -711,8 +709,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     def arrive_destination(self):
         long, lat = self.navigation.final_lane.local_coordinates(self.position)
         flag = (self.navigation.final_lane.length - 5 < long < self.navigation.final_lane.length + 5) and (
-                self.navigation.get_current_lane_width() / 2 >= lat >=
-                (0.5 - self.navigation.get_current_lane_num()) * self.navigation.get_current_lane_width()
+            self.navigation.get_current_lane_width() / 2 >= lat >=
+            (0.5 - self.navigation.get_current_lane_num()) * self.navigation.get_current_lane_width()
         )
         return flag
 
@@ -735,9 +733,9 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     @property
     def replay_done(self):
         return self._replay_done if hasattr(self, "_replay_done") else (
-                self.crash_building or self.crash_vehicle or
-                # self.on_white_continuous_line or
-                self.on_yellow_continuous_line
+            self.crash_building or self.crash_vehicle or
+            # self.on_white_continuous_line or
+            self.on_yellow_continuous_line
         )
 
     @property

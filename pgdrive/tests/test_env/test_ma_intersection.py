@@ -177,7 +177,7 @@ def test_ma_intersection_reset():
         env.close()
 
     # Put vehicles to destination and then reset. This might cause error if agent is assigned destination BEFORE reset.
-    env = MultiAgentIntersectionEnv({"horizon": 100, "num_agents": 32, "success_reward": 777})
+    env = MultiAgentIntersectionEnv({"horizon": 100, "num_agents": 32, "success_reward": 777, "use_render": False})
     try:
         _check_spaces_before_reset(env)
         success_count = 0
@@ -629,7 +629,7 @@ def test_ma_intersection_40_agent_reset_after_respawn():
             assert not v_1.crash_vehicle, "Vehicles overlap after reset()"
             vehicles.remove(v_1)
 
-    env = MultiAgentIntersectionEnv({"horizon": 50, "num_agents": 40})
+    env = MultiAgentIntersectionEnv({"horizon": 50, "num_agents": 40, "use_render": False})
     try:
         _check_spaces_before_reset(env)
         obs = env.reset()

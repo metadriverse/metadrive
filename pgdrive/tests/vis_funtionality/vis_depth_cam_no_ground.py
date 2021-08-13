@@ -28,7 +28,7 @@ class TestEnv(PGDriveEnv):
 if __name__ == "__main__":
     env = TestEnv()
     env.reset()
-    env.engine.accept("m", env.vehicle.image_sensors[env.vehicle.config["image_source"]].save_image)
+    env.engine.accept("m", env.vehicle.image_sensors["depth_camera"].save_image, extraArgs=[env.vehicle])
 
     for i in range(1, 100000):
         o, r, d, info = env.step([0, 1])
@@ -38,6 +38,7 @@ if __name__ == "__main__":
             #     ObservationType.show_gray_scale_array(o["image"][:, :, i])
             env.render(text={"can you see me": i})
         if d:
+            env.vehicle.image_sensors["rgb_camera"].save_image(env.vehicle)
             print("Reset")
             env.reset()
     env.close()

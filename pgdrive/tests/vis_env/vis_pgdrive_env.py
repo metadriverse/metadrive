@@ -10,7 +10,7 @@ class TestEnv(PGDriveEnv):
         super(TestEnv, self).__init__(
             {
                 "environment_num": 1,
-                "traffic_density": .2,
+                "traffic_density": .0,
                 "traffic_mode": "trigger",
                 "start_seed": 12,
                 # "_disable_detector_mask":True,
@@ -68,4 +68,6 @@ if __name__ == "__main__":
         #             time.time() - start, (s + 1) / (time.time() - start)
         #         )
         #     )
-    env.close()
+        if s % 100 == 0:
+            env.close()
+            env.reset()

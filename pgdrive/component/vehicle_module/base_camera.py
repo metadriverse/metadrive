@@ -16,7 +16,6 @@ class BaseCamera(ImageBuffer):
     CAM_MASK = None
     display_region_size = [1 / 3, 2 / 3, ImageBuffer.display_bottom, ImageBuffer.display_top]
     _singleton = None
-    _init_num = 0
 
     attached_object = None
 
@@ -25,17 +24,19 @@ class BaseCamera(ImageBuffer):
         return True if cls._singleton is not None else False
 
     def __init__(self):
-        type(self)._init_num += 1
         if not self.initialized():
             super(BaseCamera, self).__init__(self.BUFFER_W, self.BUFFER_H, Vec3(0.0, 0.8, 1.5), self.BKG_COLOR)
             type(self)._singleton = self
+            self.init_num = 0
+        else:
+            type(self)._singleton.init_num += 1
 
     def get_image(self, base_object):
         """
         Borrow the camera to get observations
         """
         type(self)._singleton.origin.reparentTo(base_object.origin)
-        ret = super(BaseCamera, self).get_image()
+        ret = super(BaseCamera, type(self)._singleton).get_image()
         self.track(self.attached_object)
         return ret
 
@@ -49,13 +50,12 @@ class BaseCamera(ImageBuffer):
 
     def destroy(self):
         if self.initialized():
-            if type(self)._init_num > 1:
-                type(self)._init_num -= 1
+            if type(self)._singleton.init_num > 1:
+                type(self)._singleton.init_num -= 1
             else:
+                assert type(self)._singleton.init_num == 1
                 ImageBuffer.destroy(type(self)._singleton)
                 type(self)._singleton = None
-                type(self)._init_num -= 1
-                assert type(self)._init_num == 0
 
     def get_cam(self):
         return type(self)._singleton.cam
