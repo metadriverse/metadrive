@@ -1,8 +1,8 @@
 import numpy as np
-from pgdrive.component.vehicle_module.lidar import Lidar
 
 from pgdrive import PGDriveEnv
 from pgdrive.component.vehicle.base_vehicle import BaseVehicle
+from pgdrive.component.vehicle_module.lidar import Lidar
 from pgdrive.envs.base_env import BASE_DEFAULT_CONFIG
 from pgdrive.envs.pgdrive_env import PGDriveEnvV1_DEFAULT_CONFIG
 from pgdrive.utils import Config
@@ -34,16 +34,16 @@ def test_base_vehicle():
         # v_config = BaseVehicle.get_vehicle_config(dict())
         v_config = Config(BASE_DEFAULT_CONFIG["vehicle_config"]).update(PGDriveEnvV1_DEFAULT_CONFIG["vehicle_config"])
         v_config.update({"use_render": False, "offscreen_render": False})
-        v = BaseVehicle(vehicle_config=v_config, random_seed=0)
-        v.lidar = Lidar()
+        v = engine.spawn_object(BaseVehicle, vehicle_config=v_config, random_seed=0)
+
         v.add_routing_localization(True)
         v.add_routing_localization(False)
-        v.routing_localization.set_force_calculate_lane_index(True)
+        v.navigation.set_force_calculate_lane_index(True)
         v.update_map_info(map)
 
         for heading in [-1.0, 0.0, 1.0]:
             for pos in [[0., 0.], [-100., -100.], [100., 100.]]:
-                v.reset(map, pos=pos, heading=heading)
+                v.reset(pos=pos, heading=heading)
                 np.testing.assert_almost_equal(_get_heading_deg(v.heading_theta), heading, decimal=3)
 
                 v_pos = v.position
@@ -55,13 +55,13 @@ def test_base_vehicle():
                 np.testing.assert_almost_equal(v_pos, pos)
 
                 v.after_step()
-        v.reset(map, pos=np.array([10, 0]))
+        v.reset(pos=np.array([10, 0]))
         for a_x in [-1, 0, 0.5, 1]:
             for a_y in [-1, 0, 0.5, 1]:
                 v.before_step([a_x, a_y])
-                v.set_act([a_x, a_y])
+                v._set_action([a_x, a_y])
                 _assert_vehicle(v)
-                v.set_incremental_action([a_x, a_y])
+                v._set_incremental_action([a_x, a_y])
                 _assert_vehicle(v)
                 state = v.get_state()
                 v.set_state(state)

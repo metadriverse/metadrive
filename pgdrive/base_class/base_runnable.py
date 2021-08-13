@@ -1,8 +1,8 @@
 from typing import Dict
 
-from pgdrive.component.base_class.configurable import Configurable
-from pgdrive.component.base_class.nameable import Nameable
-from pgdrive.component.base_class.randomizable import Randomizable
+from pgdrive.base_class.configurable import Configurable
+from pgdrive.base_class.nameable import Nameable
+from pgdrive.base_class.randomizable import Randomizable
 from pgdrive.utils.space import ParameterSpace
 
 
@@ -71,11 +71,12 @@ class BaseRunnable(Configurable, Nameable, Randomizable):
         After advancing all objects for a time period, their state should be updated for statistic or other purpose
         """
 
-    def reset(self, *args, **kwargs):
+    def reset(self, random_seed, *args, **kwargs):
         """
-        Although some elements do not need to call reset, please still state this function in it :)
+        Call this function to re-init objects. Since some __init__ process of creating objects is redundant, reset can
+        help us reuse this object by resetting some necessary attributes
         """
-        raise NotImplementedError
+        self.__init__(random_seed=random_seed, *args, **kwargs)
 
     def sample_parameters(self):
         """

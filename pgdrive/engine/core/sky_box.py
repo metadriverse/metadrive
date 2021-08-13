@@ -1,6 +1,6 @@
 from panda3d.core import SamplerState, Shader, ConfigVariableString
 
-from pgdrive.component.base_class.base_object import BaseObject
+from pgdrive.base_class.base_object import BaseObject
 from pgdrive.constants import CamMask
 from pgdrive.engine.asset_loader import AssetLoader
 from pgdrive.utils.utils import is_mac

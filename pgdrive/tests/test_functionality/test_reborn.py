@@ -23,7 +23,7 @@ def test_traffic_respawn(vis=False):
                 if v is env.vehicle:
                     current_v.discard(v)
                 else:
-                    current_v.discard(v.kinematic_model)
+                    current_v.discard(v)
             assert len(current_v) == 0, "vehicles didn't release"
             assert len(env.engine.traffic_manager.vehicles) - len(env.engine.traffic_manager.traffic_vehicles) == 1, \
                 "vehicles didn't release"

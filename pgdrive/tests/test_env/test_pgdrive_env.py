@@ -99,7 +99,7 @@ def test_zombie():
                 # We assert the vehicle should arrive the middle lane in the final block.
                 assert info[TerminationState.SUCCESS]
                 assert len(env.current_map.blocks[-1].positive_lanes) == 3
-                middle_lane = env.vehicle.routing_localization.final_road.get_lanes(env.current_map.road_network)[1]
+                middle_lane = env.vehicle.navigation.final_road.get_lanes(env.current_map.road_network)[1]
 
                 # Current recorded lane of ego should be exactly the same as the final-middle-lane.
                 assert middle_lane == env.vehicle.lane

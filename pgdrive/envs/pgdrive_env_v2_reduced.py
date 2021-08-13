@@ -33,7 +33,7 @@ class LidarStateObservationV2(LidarStateObservation):
         return gym.spaces.Box(-0.0, 1.0, shape=tuple(shape), dtype=np.float32)
 
     def state_observe(self, vehicle):
-        navi_info = vehicle.routing_localization.get_navi_info()
+        navi_info = vehicle.navigation.get_navi_info()
 
         if self.config["obs_mode"] in ["w_navi", "w_both"]:
             navi_info = navi_info.tolist()
@@ -59,7 +59,7 @@ class LidarStateObservationV2(LidarStateObservation):
         """
         # update out of road
         info = []
-        if hasattr(vehicle, "side_detector") and vehicle.side_detector is not None:
+        if hasattr(vehicle, "side_detector") and vehicle.side_detector.available:
             info += self._add_noise_to_cloud_points(
                 vehicle.side_detector.perceive(vehicle, vehicle.engine.physics_world.static_world).cloud_points,
                 gaussian_noise=self.config["side_detector"]["gaussian_noise"],
@@ -69,24 +69,21 @@ class LidarStateObservationV2(LidarStateObservation):
             pass
             # raise ValueError()
         # print("Current side detector min: {}, max: {}, mean: {}".format(min(info), max(info), np.mean(info)))
-        # current_reference_lane = vehicle.routing_localization.current_ref_lanes[-1]
+        # current_reference_lane = vehicle.navigation.current_ref_lanes[-1]
 
         if self.obs_mode in ["w_ego", "w_both"]:
             lateral_to_left, lateral_to_right, = vehicle.dist_to_left_side, vehicle.dist_to_right_side
             total_width = float(
-                (vehicle.routing_localization.get_current_lane_num() + 1) *
-                vehicle.routing_localization.get_current_lane_width()
+                (vehicle.navigation.get_current_lane_num() + 1) * vehicle.navigation.get_current_lane_width()
             )
             lateral_to_left /= total_width
             lateral_to_right /= total_width
             info += [clip(lateral_to_left, 0.0, 1.0), clip(lateral_to_right, 0.0, 1.0)]
-            current_reference_lane = vehicle.routing_localization.current_ref_lanes[-1]
+            current_reference_lane = vehicle.navigation.current_ref_lanes[-1]
             info.append(vehicle.heading_diff(current_reference_lane))
 
             _, lateral = vehicle.lane.local_coordinates(vehicle.position)
-            info.append(
-                clip((lateral * 2 / vehicle.routing_localization.get_current_lane_width() + 1.0) / 2.0, 0.0, 1.0)
-            )
+            info.append(clip((lateral * 2 / vehicle.navigation.get_current_lane_width() + 1.0) / 2.0, 0.0, 1.0))
 
         info += [
             # vehicle.heading_diff(current_reference_lane),
@@ -106,7 +103,7 @@ class LidarStateObservationV2(LidarStateObservation):
         # print(yaw_rate)
         info.append(clip(yaw_rate, 0.0, 1.0))
 
-        if vehicle.lane_line_detector is not None:
+        if vehicle.lane_line_detector.available:
             info += self._add_noise_to_cloud_points(
                 vehicle.lane_line_detector.perceive(vehicle, vehicle.engine.physics_world.static_world).cloud_points,
                 gaussian_noise=self.config["lane_line_detector"]["gaussian_noise"],

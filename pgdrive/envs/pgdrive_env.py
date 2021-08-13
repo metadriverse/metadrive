@@ -173,7 +173,6 @@ class PGDriveEnv(BasePGDriveEnv):
 
     def _preprocess_actions(self, actions: Union[np.ndarray, Dict[AnyStr, np.ndarray]]) \
             -> Tuple[Union[np.ndarray, Dict[AnyStr, np.ndarray]], Dict]:
-        self.agent_manager.before_step()
         if self.config["manual_control"] and self.config["use_render"] \
                 and self.current_track_vehicle in self.agent_manager.get_vehicle_list() and not self.main_camera.is_bird_view_camera():
             action = self.controller.process_input(self.current_track_vehicle)
@@ -296,16 +295,14 @@ class PGDriveEnv(BasePGDriveEnv):
         step_info = dict()
         action = vehicle.last_current_action[1]
         # Reward for moving forward in current lane
-        current_lane = vehicle.lane if vehicle.lane in vehicle.routing_localization.current_ref_lanes else \
-            vehicle.routing_localization.current_ref_lanes[0]
+        current_lane = vehicle.lane if vehicle.lane in vehicle.navigation.current_ref_lanes else \
+            vehicle.navigation.current_ref_lanes[0]
         long_last, _ = current_lane.local_coordinates(vehicle.last_position)
         long_now, lateral_now = current_lane.local_coordinates(vehicle.position)
 
         # reward for lane keeping, without it vehicle can learn to overtake but fail to keep in lane
         reward = 0.0
-        lateral_factor = clip(
-            1 - 2 * abs(lateral_now) / vehicle.routing_localization.get_current_lane_width(), 0.0, 1.0
-        )
+        lateral_factor = clip(1 - 2 * abs(lateral_now) / vehicle.navigation.get_current_lane_width(), 0.0, 1.0)
         reward += self.config["driving_reward"] * (long_now - long_last) * lateral_factor
 
         # Penalty for frequent steering
@@ -340,11 +337,11 @@ class PGDriveEnv(BasePGDriveEnv):
         return reward, step_info
 
     def _reset_agents(self):
-        self.for_each_vehicle(lambda v: v.reset(self.current_map))
+        self.for_each_vehicle(lambda v: v.reset())
 
     def _get_reset_return(self):
         ret = {}
-        self.engine.update_state_for_all_target_vehicles()
+        self.engine.after_step()
         for v_id, v in self.vehicles.items():
             self.observations[v_id].reset(self, v)
             ret[v_id] = self.observations[v_id].observe(v)
@@ -367,7 +364,7 @@ class PGDriveEnv(BasePGDriveEnv):
 
         if self.config["load_map_from_json"] and self.current_map is None:
             assert self.config["_load_map_from_json"]
-            map_manager.load_all_maps_from_json(self.config["_load_map_from_json"])
+            map_manager.read_all_maps_from_json(self.config["_load_map_from_json"])
 
         # remove map from world before adding
         if self.current_map is not None:
@@ -380,7 +377,7 @@ class PGDriveEnv(BasePGDriveEnv):
             else:
                 map_config = self.config["map_config"]
                 map_config.update({"seed": self.current_seed})
-                map = map_manager.spawn_object(PGMap, map_config=map_config)
+            map = map_manager.spawn_object(PGMap, map_config=map_config)
         else:
             map = map_manager.pg_maps[self.current_seed]
         map_manager.load_map(map)
@@ -393,7 +390,6 @@ class PGDriveEnv(BasePGDriveEnv):
 
         self.lazy_init()  # it only works the first time when reset() is called to avoid the error when render
         assert engine_initialized()
-        self.engine.clear_world()
 
         for seed in range(self.start_seed, self.start_seed + self.env_num):
             map_config = copy.deepcopy(self.config["map_config"])
@@ -516,6 +512,11 @@ class PGDriveEnv(BasePGDriveEnv):
         super(PGDriveEnv, self).setup_engine()
         # Press t can let expert take over. But this function is still experimental.
         self.engine.accept("t", self.toggle_expert_takeover)
+
+        from pgdrive.manager.object_manager import TrafficSignManager
+        from pgdrive.manager.traffic_manager import TrafficManager
+        self.engine.register_manager("traffic_manager", TrafficManager())
+        self.engine.register_manager("object_manager", TrafficSignManager())
 
     @property
     def main_camera(self):

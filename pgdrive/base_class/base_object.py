@@ -1,7 +1,7 @@
 from panda3d.bullet import BulletWorld, BulletBodyNode
 from panda3d.core import NodePath
 
-from pgdrive.component.base_class.base_runable import BaseRunnable
+from pgdrive.base_class.base_runnable import BaseRunnable
 from pgdrive.engine.asset_loader import AssetLoader
 from pgdrive.engine.core.physics_world import PhysicsWorld
 
@@ -97,6 +97,9 @@ class BaseObject(BaseRunnable):
             return self._body
 
     def attach_to_world(self, parent_node_path: NodePath, physics_world: PhysicsWorld):
+        """
+        Load to world from memory
+        """
         if self.render:
             # double check :-)
             assert isinstance(self.origin, NodePath), "No render model on node_path in this Element"
@@ -106,7 +109,7 @@ class BaseObject(BaseRunnable):
 
     def detach_from_world(self, physics_world: PhysicsWorld):
         """
-        It is not fully remove, if this element is useless in the future, call Func delete()
+        It is not fully remove, it will be left in memory. if this element is useless in the future, call Func delete()
         """
         if self.origin is not None:
             self.origin.detachNode()
@@ -120,6 +123,8 @@ class BaseObject(BaseRunnable):
         from pgdrive.engine.engine_utils import get_engine
         engine = get_engine()
         self.detach_from_world(engine.physics_world)
+        if self._body is not None and hasattr(self.body, "object"):
+            self.body.object = None
         if self.origin is not None:
             self.origin.removeNode()
         self.dynamic_nodes.clear()

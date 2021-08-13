@@ -1,4 +1,5 @@
 import math
+from pgdrive.utils.math_utils import time_me
 from collections import deque
 from typing import Union, Optional
 
@@ -6,22 +7,22 @@ import gym
 import numpy as np
 import seaborn as sns
 from panda3d.bullet import BulletVehicle, BulletBoxShape, ZUp
-from panda3d.core import Material, Vec3, TransformState, LQuaternionf, BitMask32
+from panda3d.core import Material, Vec3, TransformState, LQuaternionf
 
-from pgdrive.component.base_class.base_object import BaseObject
+from pgdrive.base_class.base_object import BaseObject
 from pgdrive.component.lane.abs_lane import AbstractLane
 from pgdrive.component.lane.circular_lane import CircularLane
 from pgdrive.component.lane.straight_lane import StraightLane
 from pgdrive.component.lane.waypoint_lane import WayPointLane
 from pgdrive.component.map.base_map import BaseMap
 from pgdrive.component.road.road import Road
-from pgdrive.component.vehicle_module.lidar import Lidar
-from pgdrive.component.vehicle_module.mini_map import MiniMap
 from pgdrive.component.vehicle_module.depth_camera import DepthCamera
 from pgdrive.component.vehicle_module.distance_detector import SideDetector, LaneLineDetector
+from pgdrive.component.vehicle_module.lidar import Lidar
+from pgdrive.component.vehicle_module.mini_map import MiniMap
 from pgdrive.component.vehicle_module.rgb_camera import RGBCamera
-from pgdrive.component.vehicle_module.routing_localization import RoutingLocalizationModule
-from pgdrive.constants import BodyName, CamMask, CollisionGroup
+from pgdrive.component.vehicle_module.navigation import Navigation
+from pgdrive.constants import BodyName, CollisionGroup
 from pgdrive.engine.asset_loader import AssetLoader
 from pgdrive.engine.core.image_buffer import ImageBuffer
 from pgdrive.engine.engine_utils import get_engine, engine_initialized
@@ -82,7 +83,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     PARAMETER_SPACE = ParameterSpace(
         VehicleParameterSpace.BASE_VEHICLE
     )  # it will not sample config from parameter space
-    COLLISION_MASK = CollisionGroup.EgoVehicle
+    COLLISION_MASK = CollisionGroup.Vehicle
     STEERING_INCREMENT = 0.05
 
     LENGTH = 4.51
@@ -97,11 +98,11 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     MATERIAL_SPECULAR_COLOR = (3, 3, 3, 3)
 
     def __init__(
-        self,
-        vehicle_config: Union[dict, Config] = None,
-        name: str = None,
-        am_i_the_special_one=False,
-        random_seed=None,
+            self,
+            vehicle_config: Union[dict, Config] = None,
+            name: str = None,
+            am_i_the_special_one=False,
+            random_seed=None,
     ):
         """
         This Vehicle Config is different from self.get_config(), and it is used to define which modules to use, and
@@ -115,8 +116,9 @@ class BaseVehicle(BaseObject, BaseVehicleState):
 
         # NOTE: it is the game engine, not vehicle drivetrain
         self.engine = get_engine()
-        BaseObject.__init__(self, name, random_seed, vehicle_config)
+        BaseObject.__init__(self, name, random_seed, self.engine.global_config["vehicle_config"])
         BaseVehicleState.__init__(self)
+        self.update_config(vehicle_config)
 
         # build vehicle physics model
         vehicle_chassis = self._create_vehicle_chassis()
@@ -144,7 +146,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         # modules, get observation by using these modules
         self.lane: Optional[AbstractLane] = None
         self.lane_index = None
-        self.routing_localization: Optional[RoutingLocalizationModule] = None
+        self.navigation: Optional[Navigation] = None
         self.lidar: Optional[Lidar] = None  # detect surrounding vehicles
         self.side_detector: Optional[SideDetector] = None  # detect road side
         self.lane_line_detector: Optional[LaneLineDetector] = None  # detect nearest lane lines
@@ -158,8 +160,6 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self.last_heading_dir = self.heading
         self.dist_to_left_side = None
         self.dist_to_right_side = None
-
-        self.attach_to_world(self.engine.pbr_render, self.engine.physics_world)
 
         # step info
         self.out_of_route = None
@@ -178,6 +178,9 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self.front_vehicles = set()
         self.back_vehicles = set()
 
+        if self.engine.current_map is not None:
+            self.reset()
+
     def _add_modules_for_vehicle(self, ):
         config = self.config
 
@@ -185,19 +188,16 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self.add_routing_localization(config["show_navi_mark"])  # default added
 
         # add distance detector/lidar
-        if config["side_detector"]["num_lasers"] > 0:
-            self.side_detector = SideDetector(
-                config["side_detector"]["num_lasers"], config["side_detector"]["distance"], config["show_side_detector"]
-            )
+        self.side_detector = SideDetector(
+            config["side_detector"]["num_lasers"], config["side_detector"]["distance"], config["show_side_detector"]
+        )
 
-        if config["lane_line_detector"]["num_lasers"] > 0:
-            self.lane_line_detector = LaneLineDetector(
-                config["lane_line_detector"]["num_lasers"], config["lane_line_detector"]["distance"],
-                config["show_lane_line_detector"]
-            )
+        self.lane_line_detector = LaneLineDetector(
+            config["lane_line_detector"]["num_lasers"], config["lane_line_detector"]["distance"],
+            config["show_lane_line_detector"]
+        )
 
-        if config["lidar"]["num_lasers"] > 0 and config["lidar"]["distance"] > 0:
-            self.lidar = Lidar(config["lidar"]["num_lasers"], config["lidar"]["distance"], config["show_lidar"])
+        self.lidar = Lidar(config["lidar"]["num_lasers"], config["lidar"]["distance"], config["show_lidar"])
 
         # vision modules
         self.add_image_sensor("rgb_camera", RGBCamera())
@@ -232,14 +232,14 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self.last_heading_dir = self.heading
         self.last_current_action.append(action)  # the real step of physics world is implemented in taskMgr.step()
         if self.increment_steering:
-            self.set_incremental_action(action)
+            self._set_incremental_action(action)
         else:
-            self.set_act(action)
+            self._set_action(action)
         return step_info
 
     def after_step(self):
-        if self.routing_localization is not None:
-            self.lane, self.lane_index, = self.routing_localization.update_navigation_localization(self)
+        if self.navigation is not None:
+            self.lane, self.lane_index, = self.navigation.update_localization(self)
         self._state_check()
         self.update_dist_to_left_right()
         step_energy, episode_energy = self._update_energy_consumption()
@@ -274,12 +274,17 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self.energy_consumption += step_energy  # L/100 km
         return step_energy, self.energy_consumption
 
-    def reset(self, map: BaseMap, pos: np.ndarray = None, heading: float = 0.0):
+    def reset(self, random_seed=None, vehicle_config=None, pos: np.ndarray = None, heading: float = 0.0):
         """
         pos is a 2-d array, and heading is a float (unit degree)
         if pos is not None, vehicle will be reset to the position
         else, vehicle will be reset to spawn place
         """
+        if random_seed is not None:
+            self.seed(random_seed)
+        if vehicle_config is not None:
+            self.update_config(vehicle_config)
+        map = self.engine.current_map
         if pos is None:
             lane = map.road_network.get_lane(self.config["spawn_lane_index"])
             pos = lane.position(self.config["spawn_longitude"], self.config["spawn_lateral"])
@@ -287,7 +292,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             self.spawn_place = pos
         heading = -np.deg2rad(heading) - np.pi / 2
         self.set_static(False)
-        self.origin.setPos(panda_position(Vec3(*pos, 1)))
+        self.origin.setPos(panda_position(Vec3(*pos, self.HEIGHT / 2 + 1)))
         self.origin.setQuat(LQuaternionf(math.cos(heading / 2), 0, 0, math.sin(heading / 2)))
         self.update_map_info(map)
         self.body.clearForces()
@@ -314,18 +319,11 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self.front_vehicles = set()
         self.back_vehicles = set()
 
-        # if "depth_camera" in self.image_sensors and self.image_sensors["depth_camera"].view_ground:
-        #     for block in map.blocks:
-        #         block.origin.hide(CamMask.DepthCam)
-
-        assert self.routing_localization
-        # Please note that if you respawn agent to some new place and might have a new destination,
-        # you should reset the routing localization too! Via: vehicle.routing_localization.set_route or
-        # vehicle.update
+        assert self.navigation
 
     """------------------------------------------- act -------------------------------------------------"""
 
-    def set_act(self, action):
+    def _set_action(self, action):
         steering = action[0]
         self.throttle_brake = action[1]
         self.steering = steering
@@ -333,7 +331,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self.system.setSteeringValue(self.steering * self.max_steering, 1)
         self._apply_throttle_brake(action[1])
 
-    def set_incremental_action(self, action: np.ndarray):
+    def _set_incremental_action(self, action: np.ndarray):
         self.throttle_brake = action[1]
         self.steering += action[0] * self.STEERING_INCREMENT
         self.steering = clip(self.steering, -1, 1)
@@ -366,12 +364,10 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self.dist_to_left_side, self.dist_to_right_side = self._dist_to_route_left_right()
 
     def _dist_to_route_left_right(self):
-        current_reference_lane = self.routing_localization.current_ref_lanes[0]
+        current_reference_lane = self.navigation.current_ref_lanes[0]
         _, lateral_to_reference = current_reference_lane.local_coordinates(self.position)
-        lateral_to_left = lateral_to_reference + self.routing_localization.get_current_lane_width() / 2
-        lateral_to_right = self.routing_localization.get_current_lateral_range(
-            self.position, self.engine
-        ) - lateral_to_left
+        lateral_to_left = lateral_to_reference + self.navigation.get_current_lane_width() / 2
+        lateral_to_right = self.navigation.get_current_lateral_range(self.position, self.engine) - lateral_to_left
         return lateral_to_left, lateral_to_right
 
     @property
@@ -437,8 +433,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         if not lateral_norm * forward_direction_norm:
             return 0
         cos = (
-            (forward_direction[0] * lateral[0] + forward_direction[1] * lateral[1]) /
-            (lateral_norm * forward_direction_norm)
+                (forward_direction[0] * lateral[0] + forward_direction[1] * lateral[1]) /
+                (lateral_norm * forward_direction_norm)
         )
         # return cos
         # Normalize to 0, 1
@@ -462,8 +458,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         return project_on_heading, project_on_side
 
     def lane_distance_to(self, vehicle, lane: AbstractLane = None) -> float:
-        assert self.routing_localization is not None, "a routing and localization module should be added " \
-                                                      "to interact with other vehicles"
+        assert self.navigation is not None, "a routing and localization module should be added " \
+                                            "to interact with other vehicles"
         if not vehicle:
             return np.nan
         if not lane:
@@ -479,10 +475,10 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self.WIDTH = type(self).WIDTH  # or self.config["vehicle_width"]
         self.HEIGHT = type(self).HEIGHT  # or self.config[Parameter.vehicle_height]
 
-        chassis = BaseRigidBodyNode(self, BodyName.Base_vehicle)
-        chassis.setIntoCollideMask(BitMask32.bit(CollisionGroup.EgoVehicle))
+        chassis = BaseRigidBodyNode(self, BodyName.Vehicle)
+        chassis.setIntoCollideMask(CollisionGroup.Vehicle)
         chassis_shape = BulletBoxShape(Vec3(self.WIDTH / 2, self.LENGTH / 2, self.HEIGHT / 2))
-        ts = TransformState.makePos(Vec3(0, 0, para[Parameter.chassis_height] * 2))
+        ts = TransformState.makePos(Vec3(0, 0, self.HEIGHT / 2))
         chassis.addShape(chassis_shape, ts)
         chassis.setMass(para[Parameter.mass])
         chassis.setDeactivationEnabled(False)
@@ -495,18 +491,12 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         return vehicle_chassis
 
     def _add_visualization(self):
-        para = self.config
         if self.render:
 
             if self.MODEL is None:
                 model_path = 'models/ferra/scene.gltf'
                 self.MODEL = self.loader.loadModel(AssetLoader.file_path(model_path))
-
-                # self.MODEL.setZ(para[Parameter.vehicle_vis_z])
-                # self.MODEL.setY(para[Parameter.vehicle_vis_y])
-                # self.MODEL.setH(para[Parameter.vehicle_vis_h])
-                # self.MODEL.set_scale(para[Parameter.vehicle_vis_scale])
-
+                self.MODEL.setZ(-self.config[Parameter.tire_radius] - 0.2)
                 self.MODEL.set_scale(1)
 
             self.MODEL.instanceTo(self.origin)
@@ -532,7 +522,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         f_l = para[Parameter.front_tire_longitude]
         r_l = -para[Parameter.rear_tire_longitude]
         lateral = para[Parameter.tire_lateral]
-        axis_height = para[Parameter.tire_radius] + 0.05
+        axis_height = para[Parameter.tire_radius] - 0.2  # 0.2 suspension length
         radius = para[Parameter.tire_radius]
         wheels = []
         for k, pos in enumerate([Vec3(lateral, f_l, axis_height), Vec3(-lateral, f_l, axis_height),
@@ -570,7 +560,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
 
     def add_routing_localization(self, show_navi_mark: bool = False):
         config = self.config
-        self.routing_localization = RoutingLocalizationModule(
+        self.navigation = Navigation(
             self.engine,
             show_navi_mark=show_navi_mark,
             random_navi_mark_color=config["random_navi_mark_color"],
@@ -595,7 +585,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         else:
             lane, new_l_index = possible_lanes[idx][:-1]
         dest = self.config["destination_lane_index"]
-        self.routing_localization.update(
+        self.navigation.update(
             map, current_lane_index=new_l_index, final_road_node=dest[1] if dest is not None else None
         )
         assert lane is not None, "spawn place is not on road!"
@@ -613,7 +603,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             node0 = contact.getNode0()
             node1 = contact.getNode1()
             name = [node0.getName(), node1.getName()]
-            name.remove(BodyName.Base_vehicle)
+            name.remove(BodyName.Vehicle)
             if name[0] == BodyName.White_continuous_line:
                 self.on_white_continuous_line = True
             elif name[0] == BodyName.Yellow_continuous_line:
@@ -634,24 +624,17 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self.contact_results = contacts
 
     def destroy(self):
-        self.body.destroy()
         super(BaseVehicle, self).destroy()
 
-        self.routing_localization.destroy()
-        self.routing_localization = None
+        self.navigation.destroy()
+        self.navigation = None
 
-        if self.side_detector is not None:
-            self.side_detector.destroy()
-
-        if self.lane_line_detector is not None:
-            self.lane_line_detector.destroy()
-
+        self.side_detector.destroy()
+        self.lane_line_detector.destroy()
+        self.lidar.destroy()
         self.side_detector = None
         self.lane_line_detector = None
-
-        if self.lidar is not None:
-            self.lidar.destroy()
-            self.lidar = None
+        self.lidar = None
         if len(self.image_sensors) != 0:
             for sensor in self.image_sensors.values():
                 sensor.destroy()
@@ -675,7 +658,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self.origin.setH((panda_heading(heading_theta) * 180 / np.pi) - 90)
 
     def get_state(self):
-        final_road = self.routing_localization.final_road
+        final_road = self.navigation.final_road
         return {
             "heading": self.heading_theta,
             "position": self.position.tolist(),
@@ -692,13 +675,13 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self.set_position(state["position"], height=0.28)
 
     def _update_overtake_stat(self):
-        if self.config["overtake_stat"] and self.lidar is not None:
+        if self.config["overtake_stat"] and self.lidar.available:
             surrounding_vs = self.lidar.get_surrounding_vehicles()
-            routing = self.routing_localization
+            routing = self.navigation
             ckpt_idx = routing._target_checkpoints_index
             for surrounding_v in surrounding_vs:
                 if surrounding_v.lane_index[:-1] == (routing.checkpoints[ckpt_idx[0]], routing.checkpoints[ckpt_idx[1]
-                                                                                                           ]):
+                ]):
                     if self.lane.local_coordinates(self.position)[0] - \
                             self.lane.local_coordinates(surrounding_v.position)[0] < 0:
                         self.front_vehicles.add(surrounding_v)
@@ -713,7 +696,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
 
     @classmethod
     def get_action_space_before_init(cls, extra_action_dim: int = 0):
-        return gym.spaces.Box(-1.0, 1.0, shape=(2 + extra_action_dim, ), dtype=np.float32)
+        return gym.spaces.Box(-1.0, 1.0, shape=(2 + extra_action_dim,), dtype=np.float32)
 
     def __del__(self):
         super(BaseVehicle, self).__del__()
@@ -721,18 +704,15 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self.lidar = None
         self.mini_map = None
         self.rgb_camera = None
-        self.routing_localization = None
+        self.navigation = None
         self.wheels = None
 
     @property
     def arrive_destination(self):
-        long, lat = self.routing_localization.final_lane.local_coordinates(self.position)
-        flag = (
-            self.routing_localization.final_lane.length - 5 < long < self.routing_localization.final_lane.length + 5
-        ) and (
-            self.routing_localization.get_current_lane_width() / 2 >= lat >=
-            (0.5 - self.routing_localization.get_current_lane_num()) *
-            self.routing_localization.get_current_lane_width()
+        long, lat = self.navigation.final_lane.local_coordinates(self.position)
+        flag = (self.navigation.final_lane.length - 5 < long < self.navigation.final_lane.length + 5) and (
+                self.navigation.get_current_lane_width() / 2 >= lat >=
+                (0.5 - self.navigation.get_current_lane_num()) * self.navigation.get_current_lane_width()
         )
         return flag
 
@@ -741,7 +721,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
 
     @property
     def reference_lanes(self):
-        return self.routing_localization.current_ref_lanes
+        return self.navigation.current_ref_lanes
 
     def set_wheel_friction(self, new_friction):
         raise DeprecationWarning("Bug exists here")
@@ -755,7 +735,15 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     @property
     def replay_done(self):
         return self._replay_done if hasattr(self, "_replay_done") else (
-            self.crash_building or self.crash_vehicle or
-            # self.on_white_continuous_line or
-            self.on_yellow_continuous_line
+                self.crash_building or self.crash_vehicle or
+                # self.on_white_continuous_line or
+                self.on_yellow_continuous_line
         )
+
+    @property
+    def current_action(self):
+        return self.last_current_action[-1]
+
+    @property
+    def last_current(self):
+        return self.last_current_action[0]

@@ -1,3 +1,4 @@
+from pgdrive.component.vehicle.base_vehicle import BaseVehicle
 import copy
 import logging
 from collections import namedtuple, deque
@@ -33,11 +34,9 @@ class TrafficManager(BaseManager):
         Control the whole traffic flow
         """
         super(TrafficManager, self).__init__()
-        self.current_map = None
 
         self._traffic_vehicles = []
-        self.block_triggered_vehicles = None
-        self.is_target_vehicle_dict = {}
+        self.block_triggered_vehicles = []
 
         # traffic property
         self.mode = self.engine.global_config["traffic_mode"]
@@ -54,26 +53,19 @@ class TrafficManager(BaseManager):
         logging.debug("load scene {}, {}".format(map.random_seed, "Use random traffic" if self.random_traffic else ""))
 
         # update vehicle list
-        self.block_triggered_vehicles = [] if self.mode != TrafficMode.Respawn else None
-        for v in self.vehicles:
-            self.is_target_vehicle_dict[v.name] = True
+        self.block_triggered_vehicles = []
 
         traffic_density = self.density
         if abs(traffic_density - 0.0) < 1e-2:
             return
-        self.respawn_lanes = None
+        self.respawn_lanes = self.respawn_lanes = self._get_available_respawn_lanes(map)
         if self.mode == TrafficMode.Respawn:
             # add respawn vehicle
             self._create_respawn_vehicles(map, traffic_density)
-        elif self.mode == TrafficMode.Trigger:
-            self._create_vehicles_once(map, traffic_density)
-        elif self.mode == TrafficMode.Hybrid:
-            # vehicles will be respawn after arriving destination
-            self.respawn_lanes = self._get_available_respawn_lanes(map)
+        elif self.mode == TrafficMode.Trigger or self.mode == TrafficMode.Hybrid:
             self._create_vehicles_once(map, traffic_density)
         else:
             raise ValueError("No such mode named {}".format(self.mode))
-        logging.debug("Init {} Traffic Vehicles".format(len(self._spawned_objects)))
 
     def before_step(self):
         """
@@ -91,70 +83,42 @@ class TrafficManager(BaseManager):
                     block_vehicles = self.block_triggered_vehicles.pop()
                     self._traffic_vehicles += block_vehicles.vehicles
         for v in self._traffic_vehicles:
-            p = self.engine.policy_manager.get_policy(v.name)
-            # TODO(pzh): Why we input None here? Is that correct?
-            p.before_step(vehicle=v, front_vehicle=None, rear_vehicle=None, current_map=engine.current_map)
-            v.before_step()
-
-    def step(self):
-        """
-        Move all traffic vehicles
-        :param dt: Decision keeping time
-        :return: None
-        """
-        dt = self.engine.global_config["physics_world_step_size"]
-        dt /= 3.6  # 1m/s = 3.6km/h
-        for v in self._traffic_vehicles:
-            p = self.engine.policy_manager.get_policy(v.name)
-            action = p.step(dt)
-            v.step(dt, action)
+            p = self.engine.get_policy(v.name)
+            v.before_step(p.act())
+        return dict()
 
     def after_step(self):
         """
         Update all traffic vehicles' states,
         """
-        vehicles_to_remove = []
+        v_to_remove = []
         for v in self._traffic_vehicles:
-            p = self.engine.policy_manager.get_policy(v.name)
-            p.after_step()
-            if v.out_of_road:
-                remove = v.need_remove()
-                if remove:
-                    vehicles_to_remove.append(v)
-                else:
-                    v.reset()
-            else:
-                v.after_step()
-
-        # remove vehicles out of road
-        for v in vehicles_to_remove:
+            v.after_step()
+            if not v.on_lane:
+                v_to_remove.append(v)
+                # lane = self.respawn_lanes[self.np_random.randint(0, len(self.respawn_lanes))]
+                # lane_idx = lane.index
+                # long = self.np_random.rand() * lane.length / 2
+                # v.update_config({"spawn_lane_index": lane_idx, "spawn_longitude": long})
+                # v.reset(self.current_map)
+                # self.engine.get_policy(v.id).reset()
+        for v in v_to_remove:
+            self.engine.clear_objects([v.id])
             self._traffic_vehicles.remove(v)
-            v.destroy()
-            self._spawned_objects.pop(v.id)
-
-            if self.mode == TrafficMode.Hybrid:
-                # create a new one
-                lane = self.np_random.choice(self.respawn_lanes)
-                vehicle_type = self.random_vehicle_type()
-                self.spawn_object(vehicle_type, lane, self.np_random.rand() * lane.length / 2, True)
-
-    def clear_objects(self, filter_func=None):
-        super(TrafficManager, self).clear_objects()
-        self._traffic_vehicles = deque()  # it is used to step all vehicles on scene
+        return dict()
 
     def before_reset(self) -> None:
         """
         Clear the scene and then reset the scene to empty
         :return: None
         """
-        # update global info
-        self.current_map = self.engine.map_manager.current_map
         self.density = self.engine.global_config["traffic_density"]
-        self.clear_objects()
-
-        self.is_target_vehicle_dict.clear()
-        self.block_triggered_vehicles = [] if self.mode != TrafficMode.Respawn else None
-        self._traffic_vehicles = deque()  # it is used to step all vehicles on scene
+        bv = []
+        for vs in self.block_triggered_vehicles:
+            bv += vs.vehicles
+        self.engine.clear_objects(filter=[v.id for v in self._traffic_vehicles + bv])
+        self.block_triggered_vehicles = []
+        self._traffic_vehicles = []
 
     def get_vehicle_num(self):
         """
@@ -223,33 +187,6 @@ class TrafficManager(BaseManager):
                     vehicles[vehicle.index] = init_state
         return vehicles
 
-    def spawn_object(self, vehicle_type, lane: AbstractLane, long: float, enable_respawn: bool, *args, **kwargs):
-        """
-        Create one vehicle on lane and a specific place
-        :param vehicle_type: TrafficVehicle type (s,m,l,xl)
-        :param lane: Straight Lane or Circular Lane
-        :param long: longitude position on lane
-        :param enable_respawn: Respawn or not
-        :return: TrafficVehicle
-        """
-        random_v = vehicle_type.create_random_traffic_vehicle(
-            len(self._spawned_objects), self, lane, long, random_seed=self.randint(), enable_respawn=enable_respawn
-        )
-        self._spawned_objects[random_v.id] = random_v
-        self._traffic_vehicles.append(random_v)
-
-        # TODO(pzh): Clean this part!
-        # TODO(pzh): Check whether delay_time is correct!
-        # TODO(pzh): Check whether the random seed is correct!
-        # Register the IDM policy for each traffic vehicle
-        from pgdrive.policy.idm_policy import IDMPolicy
-        e = get_engine()
-        e.policy_manager.register_new_policy(
-            IDMPolicy, vehicle=random_v, traffic_manager=self, random_seed=0, delay_time=1, target_speed=random_v.speed
-        )
-
-        return random_v
-
     def _create_vehicles_on_lane(self, traffic_density: float, lane: AbstractLane, is_respawn_lane):
         """
         Create vehicles on a lane
@@ -269,16 +206,23 @@ class TrafficManager(BaseManager):
                 # Do special handling for ramp, and there must be vehicles created there
                 continue
             vehicle_type = self.random_vehicle_type()
-            self.spawn_object(vehicle_type, lane, long, is_respawn_lane)
+            random_v = self.engine.spawn_object(
+                vehicle_type,
+                vehicle_config={
+                    "spawn_lane_index": lane.index,
+                    "spawn_longitude": long,
+                    "enable_reverse": False
+                }
+            )
+            from pgdrive.policy.idm_policy import IDMPolicy
+            self.engine.add_policy(random_v.id, IDMPolicy(random_v, self.generate_seed()))
+            _traffic_vehicles.append(random_v)
         return _traffic_vehicles
 
     def _create_respawn_vehicles(self, map: BaseMap, traffic_density: float):
         respawn_lanes = self._get_available_respawn_lanes(map)
-        engine = get_engine()
         for lane in respawn_lanes:
             self._traffic_vehicles += self._create_vehicles_on_lane(traffic_density, lane, True)
-        for vehicle in self._traffic_vehicles:
-            vehicle.attach_to_world(engine.pbr_worldNP, engine.physics_world)
 
     def _create_vehicles_once(self, map: BaseMap, traffic_density: float) -> None:
         """
@@ -287,7 +231,6 @@ class TrafficManager(BaseManager):
         :param traffic_density: it can be adjusted each episode
         :return: None
         """
-        engine = get_engine()
         vehicle_num = 0
         for block in map.blocks[1:]:
             if block.PROHIBIT_TRAFFIC_GENERATION:
@@ -307,8 +250,6 @@ class TrafficManager(BaseManager):
                 lanes = self.np_random.choice(lanes, num, replace=False) if len(lanes) != 1 else lanes
                 for l in lanes:
                     vehicles_on_block += self._create_vehicles_on_lane(traffic_density, l, False)
-            for vehicle in vehicles_on_block:
-                vehicle.attach_to_world(engine.pbr_worldNP, engine.physics_world)
             block_vehicles = BlockVehicles(trigger_road=trigger_road, vehicles=vehicles_on_block)
             self.block_triggered_vehicles.append(block_vehicles)
             vehicle_num += len(vehicles_on_block)
@@ -333,60 +274,6 @@ class TrafficManager(BaseManager):
             respawn_lanes += road.get_lanes(map.road_network)
         return respawn_lanes
 
-    def close_vehicles_to(self, vehicle, distance: float, count: int = None, see_behind: bool = True) -> object:
-        """
-        Find the closest vehicles for IDM vehicles
-        :param vehicle: IDM vehicle
-        :param distance: How much distance
-        :param count: Num of vehicles to return
-        :param see_behind: Whether find vehicles behind this IDM vehicle or not
-        :return:
-        """
-        raise DeprecationWarning("This func is Deprecated")
-        vehicles = [
-            v for v in self.vehicles
-            if norm((v.position - vehicle.position)[0], (v.position - vehicle.position)[1]) < distance
-            and v is not vehicle and (see_behind or -2 * vehicle.LENGTH < vehicle.lane_distance_to(v))
-        ]
-
-        vehicles = sorted(vehicles, key=lambda v: abs(vehicle.lane_distance_to(v)))
-        if count:
-            vehicles = vehicles[:count]
-        return vehicles
-
-    def neighbour_vehicles(self, vehicle, lane_index: Tuple = None) -> Tuple:
-        """
-        Find the preceding and following vehicles of a given vehicle.
-
-        :param vehicle: the vehicle whose neighbours must be found
-        :param lane_index: the lane on which to look for preceding and following vehicles.
-                     It doesn't have to be the current vehicle lane but can also be another lane, in which case the
-                     vehicle is projected on it considering its local coordinates in the lane.
-        :return: its preceding vehicle, its following vehicle
-        """
-        lane_index = lane_index or vehicle.lane_index
-        if not lane_index:
-            return None, None
-        lane = self.current_map.road_network.get_lane(lane_index)
-        s = self.current_map.road_network.get_lane(lane_index).local_coordinates(vehicle.position)[0]
-        s_front = s_rear = None
-        v_front = v_rear = None
-        for v in self.vehicles + self.engine.object_manager.objects:
-            if norm(v.position[0] - vehicle.position[0], v.position[1] - vehicle.position[1]) > 100:
-                # coarse filter
-                continue
-            if v is not vehicle:
-                s_v, lat_v = lane.local_coordinates(v.position)
-                if not lane.on_lane(v.position, s_v, lat_v, margin=1):
-                    continue
-                if s <= s_v and (s_front is None or s_v <= s_front):
-                    s_front = s_v
-                    v_front = v
-                if s_v < s and (s_rear is None or s_v > s_rear):
-                    s_rear = s_v
-                    v_rear = v
-        return v_front, v_rear
-
     def random_vehicle_type(self):
         from pgdrive.component.vehicle.traffic_vehicle_type import vehicle_type
         vehicle_type = vehicle_type[self.np_random.choice(list(vehicle_type.keys()), p=[0.2, 0.3, 0.3, 0.2])]
@@ -397,9 +284,9 @@ class TrafficManager(BaseManager):
         Destory func, release resource
         :return: None
         """
-        self.clear_objects()
+        self.engine.clear_objects([v.id for v in self._traffic_vehicles])
+        self._traffic_vehicles = []
         # current map
-        self.current_map = None
 
         # traffic vehicle list
         self._traffic_vehicles = None
@@ -416,15 +303,9 @@ class TrafficManager(BaseManager):
     def __repr__(self):
         return self.vehicles.__repr__()
 
-    def is_target_vehicle(self, v):
-        if v.name in self.is_target_vehicle_dict and self.is_target_vehicle_dict[v.name]:
-            return True
-        return False
-
     @property
     def vehicles(self):
-        return list(self.engine.agent_manager.active_objects.values()) + \
-               [v.kinematic_model for v in self._spawned_objects.values()]
+        return list(self.engine.get_objects(filter=lambda o: isinstance(o, BaseVehicle)).values())
 
     @property
     def traffic_vehicles(self):
@@ -433,3 +314,7 @@ class TrafficManager(BaseManager):
     def seed(self, random_seed):
         if not self.random_traffic:
             super(TrafficManager, self).seed(random_seed)
+
+    @property
+    def current_map(self):
+        return self.engine.map_manager.current_map

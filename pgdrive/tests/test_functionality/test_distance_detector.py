@@ -1,6 +1,6 @@
 from pgdrive.component.vehicle.base_vehicle import BaseVehicle
-from pgdrive.constants import DEFAULT_AGENT
 from pgdrive.constants import BodyName
+from pgdrive.constants import DEFAULT_AGENT
 from pgdrive.envs.pgdrive_env import PGDriveEnv
 from pgdrive.utils import setup_logger
 
@@ -33,7 +33,7 @@ def test_original_lidar(render=False):
         v_config["spawn_longitude"] = 0
         v_config["spawn_lateral"] = 7.5
         another_v = BaseVehicle(v_config, random_seed=0)
-        another_v.reset(env.current_map)
+        another_v.reset()
         objs = env.vehicle.side_detector.perceive(env.vehicle, env.vehicle.engine.physics_world.static_world
                                                   ).detected_objects + env.vehicle.lane_line_detector.perceive(
                                                       env.vehicle, env.vehicle.engine.physics_world.static_world
@@ -51,7 +51,7 @@ def test_original_lidar(render=False):
                 detect_traffic_vehicle = True
             for hit in env.observations[DEFAULT_AGENT].detected_objects:
                 v = hit.getNode()
-                if v.hasPythonTag(BodyName.Base_vehicle):
+                if v.hasPythonTag(BodyName.Vehicle):
                     detect_base_vehicle = True
             if d:
                 break
@@ -85,7 +85,7 @@ def test_lidar_with_mask(render=False):
         v_config["spawn_longitude"] = 0
         v_config["spawn_lateral"] = 7.5
         another_v = BaseVehicle(v_config, random_seed=0)
-        another_v.reset(env.current_map)
+        another_v.reset()
         # for test
         env.agent_manager._pending_objects[another_v.name] = another_v
         objs = env.vehicle.side_detector.perceive(env.vehicle, env.vehicle.engine.physics_world.static_world
@@ -105,7 +105,7 @@ def test_lidar_with_mask(render=False):
                 detect_traffic_vehicle = True
             for hit in env.observations[DEFAULT_AGENT].detected_objects:
                 v = hit.getNode()
-                if v.hasPythonTag(BodyName.Base_vehicle):
+                if v.hasPythonTag(BodyName.Vehicle):
                     detect_base_vehicle = True
             if d:
                 break

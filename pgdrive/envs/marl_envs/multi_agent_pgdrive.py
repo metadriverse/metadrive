@@ -268,7 +268,7 @@ class MultiAgentPGDrive(PGDriveEnvV2):
         new_agent_id, vehicle = self.agent_manager.propose_new_vehicle()
         new_spawn_place_config = new_spawn_place["config"]
         vehicle.config.update(new_spawn_place_config)
-        vehicle.reset(self.current_map)
+        vehicle.reset()
         self._update_destination_for(new_agent_id)
         vehicle.after_step()
         self.dones[new_agent_id] = False  # Put it in the internal dead-tracking dict.
@@ -281,7 +281,7 @@ class MultiAgentPGDrive(PGDriveEnvV2):
 
         # when agent re-joined to the game, call this to set the new route to destination
         # end_road = -get_np_random(self._DEBUG_RANDOM_SEED).choice(self.spawn_roads)  # Use negative road!
-        # vehicle.routing_localization.set_route(vehicle.lane_index[0], end_road.end_node)
+        # vehicle.navigation.set_route(vehicle.lane_index[0], end_road.end_node)
 
     def render(self, mode='human', text=None, *args, **kwargs):
         if mode == "top_down":

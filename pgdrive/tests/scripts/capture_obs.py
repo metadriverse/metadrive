@@ -64,7 +64,7 @@ if __name__ == "__main__":
     #     sensor.remove_display_region(env.engine)
     # env.vehicle.vehicle_panel.remove_display_region(env.engine)
     # env.vehicle.contact_result_render.detachNode()
-    # env.vehicle.routing_localization._right_arrow.detachNode()
+    # env.vehicle.navigation._right_arrow.detachNode()
 
     env.vehicle.chassis.setPos(244, 0, 1.5)
     for i in range(1, 100000):

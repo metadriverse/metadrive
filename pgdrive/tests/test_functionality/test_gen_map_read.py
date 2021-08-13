@@ -21,9 +21,8 @@ def test_gen_map_read():
             "environment_num": 10,
         })
         env.lazy_init()
-        env.engine.clear_world()
         print("Start loading.")
-        env.engine.map_manager.load_all_maps(restored_data)
+        env.engine.map_manager.read_all_maps(restored_data)
 
         while any([v is None for v in env.maps.values()]):
             env.reset()

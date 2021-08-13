@@ -1,8 +1,7 @@
 import logging
-import math
 
 import numpy as np
-from panda3d.core import BitMask32, LQuaternionf, TransparencyAttrib, LineSegs, NodePath
+from panda3d.core import TransparencyAttrib, LineSegs, NodePath
 
 from pgdrive.component.blocks.bottleneck import Merge, Split
 from pgdrive.component.blocks.first_block import FirstPGBlock
@@ -10,7 +9,8 @@ from pgdrive.component.lane.circular_lane import CircularLane
 from pgdrive.component.lane.straight_lane import StraightLane
 from pgdrive.component.map.base_map import BaseMap
 from pgdrive.component.road.road import Road
-from pgdrive.constants import COLLISION_INFO_COLOR, RENDER_MODE_ONSCREEN, CamMask
+from pgdrive.constants import Mask
+from pgdrive.constants import RENDER_MODE_ONSCREEN, CamMask
 from pgdrive.engine.asset_loader import AssetLoader
 from pgdrive.utils import clip, norm
 from pgdrive.utils import get_np_random
@@ -19,7 +19,7 @@ from pgdrive.utils.scene_utils import ray_localization
 from pgdrive.utils.space import Parameter, BlockParameterSpace
 
 
-class RoutingLocalizationModule:
+class Navigation:
     navigation_info_dim = 10
     NAVI_POINT_DIST = 50
     PRE_NOTIFY_DIST = 40
@@ -42,16 +42,18 @@ class RoutingLocalizationModule:
         """
         self.map = None
         self.final_road = None
-        self.checkpoints = None
         self.final_lane = None
+        self.checkpoints = None
         self.current_ref_lanes = None
+        self.next_ref_lanes = None
         self.current_road = None
+        self.next_road = None
         self._target_checkpoints_index = None
         self._navi_info = np.zeros((self.navigation_info_dim, ))  # navi information res
-        self.navi_mark_color = (0.6, 0.8, 0.5) if not random_navi_mark_color else get_np_random().rand(3)
-        self.navi_arrow_dir = None
 
         # Vis
+        self.navi_mark_color = (0.6, 0.8, 0.5) if not random_navi_mark_color else get_np_random().rand(3)
+        self.navi_arrow_dir = None
         self._show_navi_info = (engine.mode == RENDER_MODE_ONSCREEN and not engine.global_config["debug_physics_world"])
         self._dest_node_path = None
         self._goal_node_path = None
@@ -87,8 +89,8 @@ class RoutingLocalizationModule:
             self._dest_node_path.setColor(
                 self.navi_mark_color[0], self.navi_mark_color[1], self.navi_mark_color[2], 0.7
             )
-            self._goal_node_path.hide(BitMask32.allOn())
-            self._dest_node_path.hide(BitMask32.allOn())
+            self._goal_node_path.hide(CamMask.AllOn)
+            self._dest_node_path.hide(CamMask.AllOn)
             self._goal_node_path.show(CamMask.MainCam)
             self._dest_node_path.show(CamMask.MainCam)
         logging.debug("Load Vehicle Module: {}".format(self.__class__.__name__))
@@ -99,6 +101,7 @@ class RoutingLocalizationModule:
         if start_road_node is None:
             start_road_node = FirstPGBlock.NODE_1
         if final_road_node is None:
+            # auto find if PGMap
             current_road_negative = Road(*current_lane_index[:-1]).is_negative_road()
             random_seed = random_seed if random_seed is not False else map.random_seed
             # choose first block when born on negative road
@@ -106,7 +109,7 @@ class RoutingLocalizationModule:
             sockets = block.get_socket_list()
             while True:
                 socket = get_np_random(random_seed).choice(sockets)
-                if not socket.is_socket_node(start_road_node):
+                if not socket.is_socket_node(start_road_node) or len(sockets) == 1:
                     break
                 else:
                     sockets.remove(socket)
@@ -114,34 +117,41 @@ class RoutingLocalizationModule:
                         raise ValueError("Can not set a destination!")
             # choose negative road end node when current road is negative road
             final_road_node = socket.negative_road.end_node if current_road_negative else socket.positive_road.end_node
-        self.set_route(start_road_node, final_road_node)
+        self.set_route(current_lane_index, final_road_node)
 
-    def set_route(self, start_road_node: str, end_road_node: str):
+    def set_route(self, current_lane_index: str, end_road_node: str):
         """
-        Find a shorest path from start road to end road
-        :param start_road_node: start road node
+        Find a shortest path from start road to end road
+        :param current_lane_index: start road node
         :param end_road_node: end road node
         :return: None
         """
+        start_road_node = current_lane_index[0]
         self.checkpoints = self.map.road_network.shortest_path(start_road_node, end_road_node)
-        assert len(self.checkpoints) > 2, "Can not find a route from {} to {}".format(start_road_node, end_road_node)
+        self._target_checkpoints_index = [0, 1]
         # update routing info
-        self.final_road = Road(self.checkpoints[-2], end_road_node)
+        if len(self.checkpoints) <= 2:
+            self.checkpoints = [current_lane_index[0], current_lane_index[1]]
+            self._target_checkpoints_index = [0, 0]
+        assert len(self.checkpoints) >= 2, "Can not find a route from {} to {}".format(start_road_node, end_road_node)
+        self.final_road = Road(self.checkpoints[-2], self.checkpoints[-1])
         final_lanes = self.final_road.get_lanes(self.map.road_network)
         self.final_lane = final_lanes[-1]
-        self._target_checkpoints_index = [0, 1]
         self._navi_info.fill(0.0)
         target_road_1_start = self.checkpoints[0]
         target_road_1_end = self.checkpoints[1]
         self.current_ref_lanes = self.map.road_network.graph[target_road_1_start][target_road_1_end]
+        self.next_ref_lanes = self.map.road_network.graph[self.checkpoints[1]][self.checkpoints[2]
+        ] if len(self.checkpoints) > 2 else None
         self.current_road = Road(target_road_1_start, target_road_1_end)
+        self.next_road = Road(self.checkpoints[1], self.checkpoints[2]) if len(self.checkpoints) > 2 else None
         if self._dest_node_path is not None:
             ref_lane = final_lanes[0]
             later_middle = (float(self.get_current_lane_num()) / 2 - 0.5) * self.get_current_lane_width()
             check_point = ref_lane.position(ref_lane.length, later_middle)
             self._dest_node_path.setPos(check_point[0], -check_point[1], 1.8)
 
-    def update_navigation_localization(self, ego_vehicle):
+    def update_localization(self, ego_vehicle):
         position = ego_vehicle.position
         lane, lane_index = self.get_current_lane(ego_vehicle)
         if lane is None:
@@ -153,7 +163,7 @@ class RoutingLocalizationModule:
         long, _ = lane.local_coordinates(position)
         self._update_target_checkpoints(lane_index, long)
 
-        assert len(self.checkpoints) > 2
+        assert len(self.checkpoints) >= 2
 
         target_road_1_start = self.checkpoints[self._target_checkpoints_index[0]]
         target_road_1_end = self.checkpoints[self._target_checkpoints_index[0] + 1]
@@ -162,7 +172,14 @@ class RoutingLocalizationModule:
         target_lanes_1 = self.map.road_network.graph[target_road_1_start][target_road_1_end]
         target_lanes_2 = self.map.road_network.graph[target_road_2_start][target_road_2_end]
         self.current_ref_lanes = target_lanes_1
+
         self.current_road = Road(target_road_1_start, target_road_1_end)
+        if target_road_1_start == target_road_2_start:
+            self.next_road = None
+            self.next_ref_lanes = None
+        else:
+            self.next_road = Road(target_road_2_start, target_road_2_end)
+            self.next_ref_lanes = target_lanes_2
 
         self._navi_info.fill(0.0)
         half = self.navigation_info_dim // 2
@@ -255,6 +272,10 @@ class RoutingLocalizationModule:
                 pass
             self._dest_node_path.removeNode()
             self._goal_node_path.removeNode()
+        self.next_road = None
+        self.current_road = None
+        self.next_ref_lanes = None
+        self.current_ref_lanes = None
 
     def set_force_calculate_lane_index(self, force: bool):
         self.FORCE_CALCULATE = force
@@ -292,7 +313,7 @@ class RoutingLocalizationModule:
             if lane in self.current_ref_lanes:
                 return lane, index
         nx_ckpt = self._target_checkpoints_index[-1]
-        if nx_ckpt == self.checkpoints[-1]:
+        if nx_ckpt == self.checkpoints[-1] or self.next_road is None:
             return possible_lanes[0][:-1] if len(possible_lanes) > 0 else (None, None)
 
         nx_nx_ckpt = nx_ckpt + 1
@@ -313,7 +334,7 @@ class RoutingLocalizationModule:
         end_position = start_position[0] + dir[0] * length, start_position[1] + dir[1] * length
         start_position = panda_position(start_position, z=0.15)
         end_position = panda_position(end_position, z=0.15)
-        mask = BitMask32.bit(FirstPGBlock.CONTINUOUS_COLLISION_MASK)
+        mask = FirstPGBlock.CONTINUOUS_COLLISION_MASK
         res = engine.physics_world.static_world.rayTestClosest(start_position, end_position, mask=mask)
         if not res.hasHit():
             return length
