@@ -33,7 +33,6 @@ def test_base_vehicle():
 
         # v_config = BaseVehicle.get_vehicle_config(dict())
         v_config = Config(BASE_DEFAULT_CONFIG["vehicle_config"]).update(PGDriveEnvV1_DEFAULT_CONFIG["vehicle_config"])
-        v_config.update({"use_render": False, "offscreen_render": False})
         v = engine.spawn_object(BaseVehicle, vehicle_config=v_config, random_seed=0)
 
         v.add_routing_localization(True)

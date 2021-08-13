@@ -72,7 +72,7 @@ class MultiAgentPGDrive(PGDriveEnvV2):
         super(MultiAgentPGDrive, self).__init__(config)
         self._top_down_renderer = None
 
-    def _process_extra_config(self, config) -> "Config":
+    def _merge_extra_config(self, config) -> "Config":
         ret_config = self.default_config().update(
             config, allow_add_new_key=False, stop_recursive_update=["target_vehicle_configs"]
         )
@@ -160,14 +160,12 @@ class MultiAgentPGDrive(PGDriveEnvV2):
         assert (len(self.vehicles) == self.num_agents) or (self.num_agents == -1)
         return ret
 
-    def _reset_agents(self):
+    def _reset_config(self):
         # update config (for new possible spawn places)
-        for v_id, v in self.vehicles.items():
-            if v_id in self.config["target_vehicle_configs"]:
-                v.update_config(self._get_single_vehicle_config(self.config["target_vehicle_configs"][v_id]))
-        super(MultiAgentPGDrive, self)._reset_agents()  # Update config before actually resetting!
-        for v_id, _ in self.vehicles.items():
-            self._update_destination_for(v_id)
+        for v_id, config in self.config["target_vehicle_configs"].items():
+            self.config["target_vehicle_configs"][v_id] = self._update_destination_for(
+                v_id, self.config["target_vehicle_configs"][v_id]
+            )
 
     def _after_vehicle_done(self, obs=None, reward=None, dones: dict = None, info=None):
         if self.engine.replay_system is not None:
@@ -267,21 +265,20 @@ class MultiAgentPGDrive(PGDriveEnvV2):
 
         new_agent_id, vehicle = self.agent_manager.propose_new_vehicle()
         new_spawn_place_config = new_spawn_place["config"]
+        new_spawn_place_config = self._update_destination_for(new_agent_id, new_spawn_place_config)
         vehicle.config.update(new_spawn_place_config)
         vehicle.reset()
-        self._update_destination_for(new_agent_id)
         vehicle.after_step()
         self.dones[new_agent_id] = False  # Put it in the internal dead-tracking dict.
 
         new_obs = self.observations[new_agent_id].observe(vehicle)
         return new_agent_id, new_obs
 
-    def _update_destination_for(self, vehicle_id):
-        pass
-
+    def _update_destination_for(self, vehicle_id, vehicle_config):
         # when agent re-joined to the game, call this to set the new route to destination
         # end_road = -get_np_random(self._DEBUG_RANDOM_SEED).choice(self.spawn_roads)  # Use negative road!
         # vehicle.navigation.set_route(vehicle.lane_index[0], end_road.end_node)
+        return vehicle_config
 
     def render(self, mode='human', text=None, *args, **kwargs):
         if mode == "top_down":

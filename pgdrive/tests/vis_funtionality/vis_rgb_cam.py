@@ -9,7 +9,7 @@ class TestEnv(PGDriveEnv):
                 "traffic_density": 0.1,
                 "start_seed": 4,
                 "manual_control": True,
-                "use_render": False,
+                "use_render": True,
                 "offscreen_render": True,  # it is a switch telling pgdrive to use rgb as observation
                 "rgb_clip": True,  # clip rgb to range(0,1) instead of (0, 255)
                 "pstats": True,
@@ -21,7 +21,9 @@ if __name__ == "__main__":
     env = TestEnv()
     env.reset()
     # print m to capture rgb observation
-    env.engine.accept("m", env.vehicle.image_sensors[env.vehicle.config["image_source"]].save_image)
+    env.engine.accept(
+        "m", env.vehicle.image_sensors[env.vehicle.config["image_source"]].save_image, extraArgs=[env.vehicle]
+    )
 
     for i in range(1, 100000):
         o, r, d, info = env.step([0, 1])
