@@ -63,9 +63,7 @@ class MultiAgentIntersectionEnv(MultiAgentPGDrive):
 
         if self.current_map is None:
             self.seed(map_config["seed"])
-            new_map = self.engine.map_manager.spawn_object(
-                MAIntersectionMap, map_config=map_config, random_seed=self.current_seed
-            )
+            new_map = self.engine.spawn_object(MAIntersectionMap, map_config=map_config, random_seed=self.current_seed)
             self.engine.map_manager.load_map(new_map)
             self.current_map.spawn_roads = self.spawn_roads
 
@@ -74,7 +72,7 @@ class MultiAgentIntersectionEnv(MultiAgentPGDrive):
         # when agent re-joined to the game, call this to set the new route to destination
         end_roads = copy.deepcopy(self.spawn_roads)
         end_road = -get_np_random(self._DEBUG_RANDOM_SEED).choice(end_roads)  # Use negative road!
-        vehicle.routing_localization.set_route(vehicle.lane_index[0], end_road.end_node)
+        vehicle.navigation.set_route(vehicle.lane_index, end_road.end_node)
 
     def get_single_observation(self, vehicle_config: "Config") -> "ObservationBase":
         return LidarStateObservationMARound(vehicle_config)

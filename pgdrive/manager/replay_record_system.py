@@ -45,8 +45,8 @@ class Replayer:
                     agent_idx = self._init_obj_to_agent[t_v_idx]
                     vehicle_to_set = target_vehicles[agent_idx]
                     vehicle_to_set.set_state(t_v_s)
-                    if vehicle_to_set.routing_localization.final_road != Road(*t_v_s["destination"]):
-                        vehicle_to_set.routing_localization.set_route(t_v_s["spawn_road"][0], t_v_s["destination"][-1])
+                    if vehicle_to_set.navigation.final_road != Road(*t_v_s["destination"]):
+                        vehicle_to_set.navigation.set_route(t_v_s["spawn_road"], t_v_s["destination"][-1])
                     vehicle_to_set.after_step()
             elif index == TRAFFIC_VEHICLES:
                 for t_v_idx, t_v_s in state.items():

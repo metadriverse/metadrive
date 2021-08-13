@@ -2,10 +2,11 @@ from typing import Union, Tuple
 
 from direct.showbase import ShowBase
 from panda3d.bullet import BulletPlaneShape, BulletRigidBodyNode, BulletDebugNode
-from panda3d.core import Vec3, BitMask32, NodePath, LineSegs
+from panda3d.core import Vec3, NodePath, LineSegs
 
 from pgdrive.component.algorithm.BIG import NextStep
 from pgdrive.component.map.base_map import BaseMap
+from pgdrive.constants import CollisionGroup
 from pgdrive.engine.core.physics_world import PhysicsWorld
 
 
@@ -70,7 +71,7 @@ class TestBlock(ShowBase.ShowBase):
         self.groundNP = self.worldNP.attachNewNode(BulletRigidBodyNode('Ground'))
         self.groundNP.node().addShape(shape)
         self.groundNP.setPos(0, 0, 0)
-        self.groundNP.setCollideMask(BitMask32.allOn())
+        self.groundNP.setCollideMask(CollisionGroup.AllOn)
         self.world.dynamic_world.attachRigidBody(self.groundNP.node())
 
     def update(self, task):

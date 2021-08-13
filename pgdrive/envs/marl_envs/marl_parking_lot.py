@@ -175,9 +175,7 @@ class MultiAgentParkingLotEnv(MultiAgentPGDrive):
 
         if self.current_map is None:
             self.seed(map_config["seed"])
-            new_map = self.engine.map_manager.spawn_object(
-                MAParkingLotMap, map_config=map_config, random_seed=self.current_seed
-            )
+            new_map = self.engine.spawn_object(MAParkingLotMap, map_config=map_config, random_seed=self.current_seed)
             self.engine.map_manager.load_map(new_map)
             self.current_map.spawn_roads = self.spawn_roads
 
@@ -185,11 +183,11 @@ class MultiAgentParkingLotEnv(MultiAgentPGDrive):
         vehicle = self.vehicles[vehicle_id]
         # when agent re-joined to the game, call this to set the new route to destination
         end_roads = copy.deepcopy(self.in_spawn_roads)
-        if vehicle.routing_localization.current_road in end_roads:
+        if vehicle.navigation.current_road in end_roads:
             end_road = self.current_map.parking_space_manager.get_parking_space(vehicle_id)
         else:
             end_road = -get_np_random(self._DEBUG_RANDOM_SEED).choice(end_roads)  # Use negative road!
-        vehicle.routing_localization.set_route(vehicle.lane_index[0], end_road.end_node)
+        vehicle.navigation.set_route(vehicle.lane_index, end_road.end_node)
 
     def _respawn_single_vehicle(self, randomize_position=False):
         """
@@ -232,7 +230,7 @@ class MultiAgentParkingLotEnv(MultiAgentPGDrive):
         new_agent_id, vehicle = self.agent_manager.propose_new_vehicle()
         new_spawn_place_config = new_spawn_place["config"]
         vehicle.config.update(new_spawn_place_config)
-        vehicle.reset(self.current_map)
+        vehicle.reset()
         self._update_destination_for(new_agent_id)
         vehicle.after_step()
         self.dones[new_agent_id] = False  # Put it in the internal dead-tracking dict.
@@ -406,7 +404,7 @@ def _vis():
         if len(env.vehicles) != 0:
             v = env.current_track_vehicle
             dist = v.dist_to_left_side, v.dist_to_right_side
-            ckpt_idx = v.routing_localization._target_checkpoints_index
+            ckpt_idx = v.navigation._target_checkpoints_index
         else:
             dist = (0, 0)
             ckpt_idx = (0, 0)
@@ -424,7 +422,7 @@ def _vis():
         }
         if len(env.vehicles) > 0:
             v = env.current_track_vehicle
-            # print(v.routing_localization.checkpoints)
+            # print(v.navigation.checkpoints)
             render_text["current_road"] = v.current_road
 
         env.render(text=render_text)

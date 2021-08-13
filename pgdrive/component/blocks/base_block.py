@@ -2,10 +2,10 @@ from typing import Dict, Union, List, Tuple
 
 import numpy
 from panda3d.bullet import BulletBoxShape, BulletRigidBodyNode, BulletGhostNode
-from panda3d.core import Vec3, LQuaternionf, BitMask32, Vec4, CardMaker, TextureStage, RigidBodyCombiner, \
+from panda3d.core import Vec3, LQuaternionf, Vec4, CardMaker, TextureStage, RigidBodyCombiner, \
     TransparencyAttrib, SamplerState, NodePath
 
-from pgdrive.component.base_class.base_object import BaseObject
+from pgdrive.base_class.base_object import BaseObject
 from pgdrive.component.lane.abs_lane import AbstractLane
 from pgdrive.component.lane.circular_lane import CircularLane
 from pgdrive.component.lane.straight_lane import StraightLane
@@ -294,7 +294,7 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
         )
         body_np.node().addShape(shape)
         mask = DrivableAreaProperty.CONTINUOUS_COLLISION_MASK if line_type != LineType.BROKEN else DrivableAreaProperty.BROKEN_COLLISION_MASK
-        body_np.node().setIntoCollideMask(BitMask32.bit(mask))
+        body_np.node().setIntoCollideMask(mask)
         self.static_nodes.append(body_np.node())
 
         body_np.setPos(panda_position(middle, DrivableAreaProperty.LANE_LINE_GHOST_HEIGHT / 2))
@@ -339,7 +339,7 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
             )
             body_np.node().addShape(shape)
             mask = DrivableAreaProperty.CONTINUOUS_COLLISION_MASK if line_type != LineType.BROKEN else DrivableAreaProperty.BROKEN_COLLISION_MASK
-            body_np.node().setIntoCollideMask(BitMask32.bit(mask))
+            body_np.node().setIntoCollideMask(mask)
             self.static_nodes.append(body_np.node())
 
         # position and heading
@@ -364,7 +364,7 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
         side_np = self.sidewalk_node_path.attachNewNode(body_node)
         shape = BulletBoxShape(Vec3(1 / 2, 1 / 2, 1 / 2))
         body_node.addShape(shape)
-        body_node.setIntoCollideMask(BitMask32.bit(self.SIDEWALK_COLLISION_MASK))
+        body_node.setIntoCollideMask(self.SIDEWALK_COLLISION_MASK)
         self.dynamic_nodes.append(body_node)
 
         if radius == 0:
@@ -437,6 +437,7 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
         :param lane: Lane info
         :return: None
         """
+        length += 0.1
         lane.index = lane_index
         segment_np = NodePath(BaseRigidBodyNode(lane, BodyName.Lane))
         segment_node = segment_np.node()
@@ -511,7 +512,7 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
         body_node.setStatic(True)
         wall_np = NodePath(body_node)
         body_node.addShape(shape)
-        body_node.setIntoCollideMask(BitMask32.bit(collision_group))
+        body_node.setIntoCollideMask(collision_group)
         self.dynamic_nodes.append(body_node)
         wall_np.setPos(panda_position(position))
         wall_np.setH(panda_heading(heading))

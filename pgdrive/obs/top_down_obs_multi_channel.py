@@ -126,8 +126,8 @@ class TopDownMultiChannel(TopDownObservation):
 
     def draw_scene(self):
         # Set the active area that can be modify to accelerate
-        assert len(self.engine.target_vehicles) == 1, "Don't support multi-agent top-down observation yet!"
-        vehicle = self.engine.target_vehicles[DEFAULT_AGENT]
+        assert len(self.engine.agents) == 1, "Don't support multi-agent top-down observation yet!"
+        vehicle = self.engine.agents[DEFAULT_AGENT]
         pos = self.canvas_runtime.pos2pix(*vehicle.position)
 
         clip_size = (int(self.obs_window.get_size()[0] * 1.1), int(self.obs_window.get_size()[0] * 1.1))
@@ -145,7 +145,7 @@ class TopDownMultiChannel(TopDownObservation):
         for v in self.engine.traffic_manager.vehicles:
             if v is vehicle:
                 continue
-            h = v.heading
+            h = v.heading_theta
             h = h if abs(h) > 2 * np.pi / 180 else 0
             VehicleGraphics.display(vehicle=v, surface=self.canvas_runtime, heading=h, color=VehicleGraphics.BLUE)
 
@@ -183,7 +183,7 @@ class TopDownMultiChannel(TopDownObservation):
         return ret
 
     def _draw_ego_vehicle(self):
-        vehicle = self.engine.target_vehicles[DEFAULT_AGENT]
+        vehicle = self.engine.agents[DEFAULT_AGENT]
         w = vehicle.WIDTH * self.scaling
         h = vehicle.LENGTH * self.scaling
         position = (self.resolution[0] / 2, self.resolution[1] / 2)
@@ -257,7 +257,7 @@ class TopDownMultiChannel(TopDownObservation):
         return np.transpose(img, (1, 0, 2))
 
     def draw_navigation(self, canvas, color=(128, 128, 128)):
-        checkpoints = self.target_vehicle.routing_localization.checkpoints
+        checkpoints = self.target_vehicle.navigation.checkpoints
         for i, c in enumerate(checkpoints[:-1]):
             lanes = self.road_network.graph[c][checkpoints[i + 1]]
             for lane in lanes:

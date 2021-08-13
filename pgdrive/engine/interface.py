@@ -1,11 +1,12 @@
-import time
 import math
+import time
 
-from panda3d.core import NodePath, TextNode, PGTop, CardMaker, Vec3, LQuaternionf, BitMask32
-from pgdrive.engine.asset_loader import AssetLoader
-from pgdrive.constants import RENDER_MODE_ONSCREEN, COLLISION_INFO_COLOR, COLOR, BodyName, CamMask
-from pgdrive.engine.core.engine_core import EngineCore
 import numpy as np
+from panda3d.core import NodePath, TextNode, PGTop, CardMaker, Vec3, LQuaternionf
+
+from pgdrive.constants import RENDER_MODE_ONSCREEN, COLLISION_INFO_COLOR, COLOR, BodyName, CamMask
+from pgdrive.engine.asset_loader import AssetLoader
+from pgdrive.engine.core.engine_core import EngineCore
 from pgdrive.engine.core.image_buffer import ImageBuffer
 
 
@@ -27,22 +28,24 @@ class Interface:
         self._right_arrow = None
         self._contact_banners = {}  # to save time/memory
         self.current_banner = None
+        self.need_interface = self.engine.mode == RENDER_MODE_ONSCREEN and not self.engine.global_config[
+            "debug_physics_world"]
         self.init_interface()
         self._is_showing_arrow = True  # store the state of navigation mark
 
     def after_step(self):
-        if self.engine.current_track_vehicle is not None and self.engine.mode == RENDER_MODE_ONSCREEN:
+        if self.engine.current_track_vehicle is not None and self.need_interface:
             track_v = self.engine.current_track_vehicle
             self.vehicle_panel.update_vehicle_state(track_v)
             self._render_contact_result(track_v.contact_results)
             if hasattr(track_v, "routing_localization"):
-                self._update_navi_arrow(track_v.routing_localization.navi_arrow_dir)
+                self._update_navi_arrow(track_v.navigation.navi_arrow_dir)
 
     def init_interface(self):
         from pgdrive.component.vehicle_module.mini_map import MiniMap
         from pgdrive.component.vehicle_module.rgb_camera import RGBCamera
         from pgdrive.component.vehicle_module.depth_camera import DepthCamera
-        if self.engine.mode == RENDER_MODE_ONSCREEN:
+        if self.need_interface:
             info_np = NodePath("Collision info nodepath")
             info_np.reparentTo(self.engine.aspect2d)
             self.contact_result_render = info_np
@@ -63,14 +66,14 @@ class Interface:
             navi_arrow_model.instanceTo(self._left_arrow)
             navi_arrow_model.instanceTo(self._right_arrow)
             self.arrow.setPos(0, 0, 0.08)
-            self.arrow.hide(BitMask32.allOn())
+            self.arrow.hide(CamMask.AllOn)
             self.arrow.show(CamMask.MainCam)
             self.arrow.setQuat(LQuaternionf(np.cos(-np.pi / 4), 0, 0, np.sin(-np.pi / 4)))
             # the transparency attribute of gltf model is invalid on windows
             # self.arrow.setTransparency(TransparencyAttrib.M_alpha)
 
     def stop_track(self):
-        if self.engine.mode == RENDER_MODE_ONSCREEN:
+        if self.need_interface:
             self.vehicle_panel.remove_display_region()
             self.vehicle_panel.buffer.set_active(False)
             self.contact_result_render.detachNode()
@@ -78,7 +81,7 @@ class Interface:
             self.left_panel.remove_display_region()
 
     def track(self, vehicle):
-        if self.engine.mode == RENDER_MODE_ONSCREEN:
+        if self.need_interface:
             self.vehicle_panel.buffer.set_active(True)
             self.contact_result_render.reparentTo(self.engine.aspect2d)
             self.vehicle_panel.add_display_region(self.vehicle_panel.display_region_size)
@@ -119,12 +122,12 @@ class Interface:
             text = "Normal" if time.time() - self.engine._episode_start_time > 10 else "Press H to see help message"
             self._render_banner(text, COLLISION_INFO_COLOR["green"][1])
         else:
-            if text == BodyName.Base_vehicle:
-                text = BodyName.Traffic_vehicle
+            if text == BodyName.Vehicle:
+                text = BodyName.Vehicle
             self._render_banner(text, COLLISION_INFO_COLOR[COLOR[text]][1])
 
     def destroy(self):
-        if self.engine.mode == RENDER_MODE_ONSCREEN:
+        if self.need_interface:
             self.stop_track()
             self.vehicle_panel.destroy()
             self.contact_result_render.removeNode()

@@ -17,12 +17,12 @@ def collision_callback(contact):
     nodes = [node0, node1]
     another_nodes = [node1, node0]
     for i in range(2):
-        if nodes[i].hasPythonTag(BodyName.Base_vehicle):
+        if nodes[i].hasPythonTag(BodyName.Vehicle):
             obj_1 = get_object_from_node(nodes[i])
             obj_2 = get_object_from_node(another_nodes[i])
             another_node_name = another_nodes[i].getName()
             # crash vehicles
-            if another_node_name in [BodyName.Traffic_vehicle, BodyName.Base_vehicle]:
+            if another_node_name == BodyName.Vehicle:
                 obj_1.crash_vehicle = True
             # crash objects
             elif another_node_name in [BodyName.Traffic_cone, BodyName.Traffic_triangle]:
@@ -33,4 +33,4 @@ def collision_callback(contact):
             # crash invisible wall or building
             elif another_node_name in [BodyName.InvisibleWall, BodyName.TollGate]:
                 obj_1.crash_building = True
-            logging.debug("{} crash with {}".format(nodes[i].getName(), another_nodes[i].getName()))
+            # logging.debug("{} crash with {}".format(nodes[i].getName(), another_nodes[i].getName()))

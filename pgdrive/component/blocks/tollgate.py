@@ -90,9 +90,7 @@ class TollGate(PGBlock):
                     building_model.reparentTo(node_path)
                     gate_model.reparentTo(node_path)
 
-                building = TollGateBuilding(
-                    lane, (road.start_node, road.end_node, idx), position, lane.heading_at(0), node_path, random_seed=0
-                )
+                building = TollGateBuilding(lane, position, lane.heading_at(0), node_path, random_seed=0)
                 self._block_objects.append(building)
 
     def construct_block_buildings(self, object_manager):

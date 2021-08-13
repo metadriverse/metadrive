@@ -2,7 +2,6 @@ import gym
 import numpy as np
 
 from pgdrive.component.vehicle.base_vehicle import BaseVehicle
-from pgdrive.engine.core.image_buffer import ImageBuffer
 from pgdrive.obs.observation_base import ObservationBase
 from pgdrive.obs.state_obs import StateObservation
 

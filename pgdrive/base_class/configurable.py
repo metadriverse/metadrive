@@ -35,4 +35,4 @@ class Configurable:
 
     @property
     def config(self):
-        return self.get_config(True)
+        return self._config

@@ -6,13 +6,10 @@ Note: This script require rendering, please following the installation instructi
 environment that allows popping up an window.
 """
 import random
-import sys
-sys.path.remove('/opt/ros/kinetic/lib/python2.7/dist-packages')
 
 from pgdrive import PGDriveEnvV2
 
 if __name__ == "__main__":
-    env.reset()
     env = PGDriveEnvV2(
         dict(
             use_render=True,
@@ -25,6 +22,7 @@ if __name__ == "__main__":
             start_seed=random.randint(0, 1000)
         )
     )
+    env.reset()
     for i in range(1, 100000):
         o, r, d, info = env.step([0, 0])
         env.render()

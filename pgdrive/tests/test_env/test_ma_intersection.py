@@ -30,7 +30,7 @@ def _check_shape(env):
     b = set(env.observation_space.spaces.keys())
     c = set(env.action_space.spaces.keys())
     d = set(env.vehicles.keys())
-    e = set(env.engine.target_vehicles.keys())
+    e = set(env.engine.agents.keys())
     f = set([k for k in env.observation_space.spaces.keys() if not env.dones[k]])
     assert d == e == f, (b, c, d, e, f)
     assert c.issuperset(d)
@@ -195,20 +195,16 @@ def test_ma_intersection_reset():
 
                 # Force vehicle to success!
                 for v_id, v in env.vehicles.items():
-                    loc = v.routing_localization.final_lane.end
+                    loc = v.navigation.final_lane.end
                     v.set_position(loc)
                     pos = v.position
                     np.testing.assert_almost_equal(pos, loc, decimal=3)
-                    new_loc = v.routing_localization.final_lane.end
-                    long, lat = v.routing_localization.final_lane.local_coordinates(v.position)
-                    flag1 = (
-                        v.routing_localization.final_lane.length - 5 < long <
-                        v.routing_localization.final_lane.length + 5
-                    )
+                    new_loc = v.navigation.final_lane.end
+                    long, lat = v.navigation.final_lane.local_coordinates(v.position)
+                    flag1 = (v.navigation.final_lane.length - 5 < long < v.navigation.final_lane.length + 5)
                     flag2 = (
-                        v.routing_localization.get_current_lane_width() / 2 >= lat >=
-                        (0.5 - v.routing_localization.get_current_lane_num()) *
-                        v.routing_localization.get_current_lane_width()
+                        v.navigation.get_current_lane_width() / 2 >= lat >=
+                        (0.5 - v.navigation.get_current_lane_num()) * v.navigation.get_current_lane_width()
                     )
                     if not v.arrive_destination:
                         print('sss')
@@ -218,7 +214,7 @@ def test_ma_intersection_reset():
                 o, r, d, i = _act(env, act)
 
                 for v in env.vehicles.values():
-                    assert len(v.routing_localization.checkpoints) > 2
+                    assert len(v.navigation.checkpoints) > 2
 
                 for kkk, iii in i.items():
                     if iii and iii["arrive_dest"]:
@@ -437,7 +433,7 @@ def test_ma_intersection_reward_done_alignment():
         _check_spaces_before_reset(env)
         obs = env.reset()
         _check_spaces_after_reset(env)
-        env.vehicles["agent0"].set_position(env.vehicles["agent0"].routing_localization.final_lane.end)
+        env.vehicles["agent0"].set_position(env.vehicles["agent0"].navigation.final_lane.end)
         assert env.observation_space.contains(obs)
         for step in range(5000):
             act = {k: [0, 0] for k in env.vehicles.keys()}

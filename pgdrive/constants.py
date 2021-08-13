@@ -1,3 +1,4 @@
+import math
 from typing import List, Tuple
 
 from panda3d.bullet import BulletWorld
@@ -56,8 +57,7 @@ class BodyName:
     Sidewalk = "Sidewalk"
     Ground = "Ground"
     InvisibleWall = "InvisibleWall"
-    Base_vehicle = "Target Vehicle"
-    Traffic_vehicle = "Traffic Vehicle"
+    Vehicle = "Vehicle"
     Lane = "Lane"
     Traffic_cone = "Traffic Cone"
     Traffic_triangle = "Traffic Triangle"
@@ -69,10 +69,9 @@ COLOR = {
     BodyName.White_continuous_line: "orange",
     BodyName.Yellow_continuous_line: "red",
     BodyName.Broken_line: "yellow",
-    BodyName.Traffic_vehicle: "red",
+    BodyName.Vehicle: "red",
     BodyName.Traffic_cone: "orange",
     BodyName.Traffic_triangle: "orange",
-    BodyName.Base_vehicle: "red",
     BodyName.InvisibleWall: "red",
     BodyName.TollGate: "red",
 }
@@ -98,7 +97,12 @@ class Goal:
     ADVERSE = 3  # Useless now
 
 
-class CamMask:
+class Mask:
+    AllOn = BitMask32.allOn()
+    AllOff = BitMask32.allOff()
+
+
+class CamMask(Mask):
     MainCam = BitMask32.bit(9)
     Shadow = BitMask32.bit(10)
     RgbCam = BitMask32.bit(11)
@@ -108,16 +112,16 @@ class CamMask:
     ScreenshotCam = BitMask32.bit(15)
 
 
-class CollisionGroup:
-    EgoVehicle = 1
-    Terrain = 2
-    BrokenLaneLine = 3
-    TrafficVehicle = 4
-    LaneSurface = 5  # useless now, since it is in another bullet world
-    Sidewalk = 6
-    ContinuousLaneLine = 7
-    InvisibleWall = 8
-    LidarBroadDetector = 9
+class CollisionGroup(Mask):
+    Vehicle = BitMask32.bit(1)
+    Terrain = BitMask32.bit(2)
+    BrokenLaneLine = BitMask32.bit(3)
+    # TrafficVehicle = BitMask32.bit(4)
+    LaneSurface = BitMask32.bit(5)  # useless now, since it is in another bullet world
+    Sidewalk = BitMask32.bit(6)
+    ContinuousLaneLine = BitMask32.bit(7)
+    InvisibleWall = BitMask32.bit(8)
+    LidarBroadDetector = BitMask32.bit(9)
 
     @classmethod
     def collision_rules(cls):
@@ -126,8 +130,7 @@ class CollisionGroup:
             (cls.Terrain, cls.Terrain, False),
             (cls.Terrain, cls.BrokenLaneLine, False),
             (cls.Terrain, cls.LaneSurface, False),
-            (cls.Terrain, cls.EgoVehicle, True),
-            (cls.Terrain, cls.TrafficVehicle, False),
+            (cls.Terrain, cls.Vehicle, True),
             (cls.Terrain, cls.ContinuousLaneLine, False),
             (cls.Terrain, cls.InvisibleWall, False),
             (cls.Terrain, cls.Sidewalk, True),
@@ -136,30 +139,20 @@ class CollisionGroup:
             # block collision
             (cls.BrokenLaneLine, cls.BrokenLaneLine, False),
             (cls.BrokenLaneLine, cls.LaneSurface, False),
-            (cls.BrokenLaneLine, cls.EgoVehicle, True),
+            (cls.BrokenLaneLine, cls.Vehicle, True),
             # change it after we design a new traffic system !
-            (cls.BrokenLaneLine, cls.TrafficVehicle, False),
             (cls.BrokenLaneLine, cls.ContinuousLaneLine, False),
             (cls.BrokenLaneLine, cls.InvisibleWall, False),
             (cls.BrokenLaneLine, cls.Sidewalk, False),
             (cls.BrokenLaneLine, cls.LidarBroadDetector, False),
 
-            # traffic vehicles collision
-            (cls.TrafficVehicle, cls.TrafficVehicle, False),
-            (cls.TrafficVehicle, cls.LaneSurface, False),
-            (cls.TrafficVehicle, cls.EgoVehicle, True),
-            (cls.TrafficVehicle, cls.ContinuousLaneLine, False),
-            (cls.TrafficVehicle, cls.InvisibleWall, True),
-            (cls.TrafficVehicle, cls.Sidewalk, False),
-            (cls.TrafficVehicle, cls.LidarBroadDetector, True),
-
             # ego vehicle collision
-            (cls.EgoVehicle, cls.EgoVehicle, True),
-            (cls.EgoVehicle, cls.LaneSurface, True),
-            (cls.EgoVehicle, cls.ContinuousLaneLine, True),
-            (cls.EgoVehicle, cls.InvisibleWall, True),
-            (cls.EgoVehicle, cls.Sidewalk, True),
-            (cls.EgoVehicle, cls.LidarBroadDetector, True),
+            (cls.Vehicle, cls.Vehicle, True),
+            (cls.Vehicle, cls.LaneSurface, True),
+            (cls.Vehicle, cls.ContinuousLaneLine, True),
+            (cls.Vehicle, cls.InvisibleWall, True),
+            (cls.Vehicle, cls.Sidewalk, True),
+            (cls.Vehicle, cls.LidarBroadDetector, True),
 
             # lane surface
             (cls.LaneSurface, cls.LaneSurface, False),
@@ -190,7 +183,10 @@ class CollisionGroup:
     @classmethod
     def set_collision_rule(cls, world: BulletWorld):
         for rule in cls.collision_rules():
-            world.setGroupCollisionFlag(*rule)
+            group_1 = int(math.log(rule[0].getWord(), 2))
+            group_2 = int(math.log(rule[1].getWord(), 2))
+            relation = rule[-1]
+            world.setGroupCollisionFlag(group_1, group_2, relation)
 
 
 LaneIndex = Tuple[str, str, int]

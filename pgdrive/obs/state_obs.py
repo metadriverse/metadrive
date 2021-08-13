@@ -1,7 +1,7 @@
 import gym
 import numpy as np
 
-from pgdrive.component.vehicle_module.routing_localization import RoutingLocalizationModule
+from pgdrive.component.vehicle_module.navigation import Navigation
 from pgdrive.obs.observation_base import ObservationBase
 from pgdrive.utils.math_utils import clip, norm
 
@@ -17,7 +17,7 @@ class StateObservation(ObservationBase):
     @property
     def observation_space(self):
         # Navi info + Other states
-        shape = self.ego_state_obs_dim + RoutingLocalizationModule.navigation_info_dim + self.get_side_detector_dim()
+        shape = self.ego_state_obs_dim + Navigation.navigation_info_dim + self.get_side_detector_dim()
         return gym.spaces.Box(-0.0, 1.0, shape=(shape, ), dtype=np.float32)
 
     def observe(self, vehicle):
@@ -49,7 +49,7 @@ class StateObservation(ObservationBase):
         :param vehicle: BaseVehicle
         :return: Vehicle State + Navigation information
         """
-        navi_info = vehicle.routing_localization.get_navi_info()
+        navi_info = vehicle.navigation.get_navi_info()
         ego_state = self.vehicle_state(vehicle)
         return np.concatenate([ego_state, navi_info])
 
@@ -60,13 +60,12 @@ class StateObservation(ObservationBase):
         """
         # update out of road
         info = []
-        if hasattr(vehicle, "side_detector") and vehicle.side_detector is not None:
+        if hasattr(vehicle, "side_detector") and vehicle.side_detector.available:
             info += vehicle.side_detector.perceive(vehicle, vehicle.engine.physics_world.static_world).cloud_points
         else:
             lateral_to_left, lateral_to_right, = vehicle.dist_to_left_side, vehicle.dist_to_right_side
             total_width = float(
-                (vehicle.routing_localization.get_current_lane_num() + 1) *
-                vehicle.routing_localization.get_current_lane_width()
+                (vehicle.navigation.get_current_lane_num() + 1) * vehicle.navigation.get_current_lane_width()
             )
             lateral_to_left /= total_width
             lateral_to_right /= total_width
@@ -74,10 +73,10 @@ class StateObservation(ObservationBase):
 
         # print("Heading Diff: ", [
         #     vehicle.heading_diff(current_reference_lane)
-        #     for current_reference_lane in vehicle.routing_localization.current_ref_lanes
+        #     for current_reference_lane in vehicle.navigation.current_ref_lanes
         # ])
 
-        current_reference_lane = vehicle.routing_localization.current_ref_lanes[-1]
+        current_reference_lane = vehicle.navigation.current_ref_lanes[-1]
         info += [
             vehicle.heading_diff(current_reference_lane),
             # Note: speed can be negative denoting free fall. This happen when emergency brake.
@@ -95,13 +94,11 @@ class StateObservation(ObservationBase):
         # print(yaw_rate)
         info.append(clip(yaw_rate, 0.0, 1.0))
 
-        if vehicle.lane_line_detector is not None:
+        if vehicle.lane_line_detector.available:
             info += vehicle.lane_line_detector.perceive(vehicle, vehicle.engine.physics_world.static_world).cloud_points
         else:
             _, lateral = vehicle.lane.local_coordinates(vehicle.position)
-            info.append(
-                clip((lateral * 2 / vehicle.routing_localization.get_current_lane_width() + 1.0) / 2.0, 0.0, 1.0)
-            )
+            info.append(clip((lateral * 2 / vehicle.navigation.get_current_lane_width() + 1.0) / 2.0, 0.0, 1.0))
 
         return info
 
@@ -154,7 +151,7 @@ class LidarStateObservation(ObservationBase):
 
     def lidar_observe(self, vehicle):
         other_v_info = []
-        if vehicle.lidar is not None:
+        if vehicle.lidar.available:
             cloud_points, detected_objects = vehicle.lidar.perceive(vehicle, )
             if self.config["lidar"]["num_others"] > 0:
                 other_v_info += vehicle.lidar.get_surrounding_vehicles_info(
