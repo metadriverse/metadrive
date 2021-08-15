@@ -49,25 +49,25 @@ class PGBlockConfig:
     }
 
     @classmethod
-    def all_blocks(cls, version: str):
+    def all_blocks(cls, version: str = "v2"):
         return list(cls._get_dist(version).keys())
 
     @classmethod
-    def get_block(cls, block_id: str, version: str):
+    def get_block(cls, block_id: str, version: str = "v2"):
         for block in cls.all_blocks(version):
             if block.ID == block_id:
                 return block
         raise ValueError("No {} block type".format(block_id))
 
     @classmethod
-    def block_probability(cls, version: str):
+    def block_probability(cls, version: str = "v2"):
         return list(cls._get_dist(version).values())
 
     @classmethod
     def _get_dist(cls, version: str):
-        if version == "v1":
-            return cls.BLOCK_TYPE_DISTRIBUTION_V1
-        elif version == "v2":
+        # if version == "v1":
+        #     return cls.BLOCK_TYPE_DISTRIBUTION_V1
+        if version == "v2":
             return cls.BLOCK_TYPE_DISTRIBUTION_V2
         else:
             raise ValueError("Unknown version: {}".format(version))

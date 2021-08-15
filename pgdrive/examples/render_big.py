@@ -4,4 +4,4 @@ from pgdrive.utils import setup_logger
 
 if __name__ == "__main__":
     setup_logger(True)
-    vis_big(block_type_version="v2")
+    vis_big()

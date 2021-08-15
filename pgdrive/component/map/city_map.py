@@ -33,7 +33,7 @@ class CityBIG(BIG):
         global_network: RoadNetwork,
         render_node_path: NodePath,
         physics_world: PhysicsWorld,
-        block_type_version: str,
+        # block_type_version: str,
         random_seed=None
     ):
         super(CityBIG, self).__init__(
@@ -42,7 +42,7 @@ class CityBIG(BIG):
             global_network,
             render_node_path,
             physics_world,
-            block_type_version,
+            # block_type_version,
             random_seed=random_seed
         )
 
@@ -67,12 +67,12 @@ class CityBIG(BIG):
         Sample a random block type
         """
         if self._block_sequence is None:
-            block_types = PGBlockConfig.all_blocks(self.block_type_version)
-            block_probabilities = PGBlockConfig.block_probability(self.block_type_version)
+            block_types = PGBlockConfig.all_blocks()
+            block_probabilities = PGBlockConfig.block_probability()
             block_type = self.np_random.choice(block_types, p=block_probabilities)
         else:
             type_id = self._block_sequence[len(self.blocks)]
-            block_type = PGBlockConfig.get_block(type_id, self.block_type_version)
+            block_type = PGBlockConfig.get_block(type_id)
 
         # exclude first block
         socket_used = set([block.pre_block_socket for block in self.blocks[1:]])
@@ -90,8 +90,12 @@ class CityMap(BaseMap):
     def _generate(self):
         parent_node_path, physics_world = self.engine.worldNP, self.engine.physics_world
         big_map = CityBIG(
-            self._config[self.LANE_NUM], self._config[self.LANE_WIDTH], self.road_network, parent_node_path,
-            physics_world, self._config["block_type_version"]
+            self._config[self.LANE_NUM],
+            self._config[self.LANE_WIDTH],
+            self.road_network,
+            parent_node_path,
+            physics_world,
+            # self._config["block_type_version"]
         )
         big_map.generate(self._config[self.GENERATE_TYPE], self._config[self.GENERATE_CONFIG])
         self.blocks = big_map.blocks

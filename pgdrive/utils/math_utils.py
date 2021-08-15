@@ -3,7 +3,6 @@ import time
 from typing import Tuple
 
 import numpy as np
-
 from pgdrive.utils.cutils import import_cutils
 
 cutils = import_cutils()
@@ -155,16 +154,12 @@ def get_points_bounding_box(line_points):
     :param line_points: Key points on lines
     :return: bounding box
     """
-    x_max = -np.inf
-    x_min = np.inf
-    y_max = -np.inf
-    y_min = np.inf
-    for p in line_points:
-        x_max = max(x_max, p[0])
-        x_min = min(x_min, p[0])
-        y_max = max(y_max, p[1])
-        y_min = min(y_min, p[1])
-    return x_max, x_min, y_max, y_min
+    new_line_points = np.array(line_points)
+    new_x_max = new_line_points[:, 0].max()
+    new_x_min = new_line_points[:, 0].min()
+    new_y_max = new_line_points[:, 1].max()
+    new_y_min = new_line_points[:, 1].min()
+    return new_x_max, new_x_min, new_y_max, new_y_min
 
 
 def get_boxes_bounding_box(boxes):

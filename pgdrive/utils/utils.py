@@ -20,6 +20,13 @@ def setup_logger(debug=False):
 
 
 def recursive_equal(data1, data2, need_assert=False):
+
+    from pgdrive.utils.config import Config
+    if isinstance(data1, Config):
+        data1 = data1.get_dict()
+    if isinstance(data2, Config):
+        data2 = data2.get_dict()
+
     if isinstance(data1, dict):
         is_ins = isinstance(data2, dict)
         key_right = set(data1.keys()) == set(data2.keys())

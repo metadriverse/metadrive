@@ -30,7 +30,7 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
     ID = "B"
 
     def __init__(self, block_index: int, global_network: RoadNetwork, random_seed):
-        super(BaseBlock, self).__init__(str(block_index) + self.ID, random_seed)
+        super(BaseBlock, self).__init__(str(block_index) + self.ID, random_seed, escape_random_seed_assertion=True)
         # block information
         assert self.ID is not None, "Each Block must has its unique ID When define Block"
         assert len(self.ID) == 1, "Block ID must be a character "

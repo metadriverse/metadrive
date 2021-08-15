@@ -3,6 +3,7 @@ import logging
 import os.path as osp
 
 from pgdrive.component.map.base_map import BaseMap, MapGenerateMethod
+from pgdrive.component.map.pg_map import PGMap
 from pgdrive.manager.base_manager import BaseManager
 from pgdrive.utils import recursive_equal
 
@@ -13,7 +14,7 @@ class MapManager(BaseManager):
     """
     PRIORITY = 0  # Map update has the most high priority
 
-    def __init__(self):
+    def __init__(self, single_block=None):
         super(MapManager, self).__init__()
         self.current_map = None
 
@@ -23,12 +24,11 @@ class MapManager(BaseManager):
         self.restored_pg_map_configs = None
         self.pg_maps = {_seed: None for _seed in range(start_seed, start_seed + env_num)}
 
+        # TODO(pzh): clean this!
+        self.single_block_class = single_block
+
     def spawn_object(self, object_class, *args, **kwargs):
-        if "random_seed" in kwargs:
-            assert kwargs["random_seed"] == self.random_seed, "The random seed assigned is not same as map.seed"
-            kwargs.pop("random_seed")
-        map = self.engine.spawn_object(object_class, random_seed=self.random_seed, *args, **kwargs)
-        self.pg_maps[map.random_seed] = map
+        map = self.engine.spawn_object(object_class, auto_fill_random_seed=False, *args, **kwargs)
         return map
 
     def load_map(self, map):
@@ -41,7 +41,7 @@ class MapManager(BaseManager):
 
     def read_all_maps_from_json(self, path):
         assert path.endswith(".json")
-        assert osp.isfile(path)
+        assert osp.isfile(path), path
         with open(path, "r") as f:
             config_and_data = json.load(f)
         global_config = self.engine.global_config
@@ -79,12 +79,74 @@ class MapManager(BaseManager):
         self.restored_pg_map_configs = {}
         # for seed, map_dict in data["map_data"].items():
         for seed, config in data["map_data"].items():
-            map_config = {}
+            seed = int(seed)
+            map_config = maps_collection_config.copy()
             map_config[BaseMap.GENERATE_TYPE] = MapGenerateMethod.PG_MAP_FILE
             map_config[BaseMap.GENERATE_CONFIG] = config
+
+            # map_config.update(config)
+
             self.restored_pg_map_configs[seed] = map_config
+            # self.restored_pg_map_configs[seed] = config
 
     def destroy(self):
         self.pg_maps = None
         self.restored_pg_map_configs = None
         super(MapManager, self).destroy()
+
+    def update_map(self, config, current_seed, episode_data: dict = None, single_block_class=None, spawn_roads=None):
+        # TODO(pzh): Remove the config as the input args.
+        if episode_data is not None:
+            # TODO restore/replay here
+            # Since in episode data map data only contains one map, values()[0] is the map_parameters
+            map_data = episode_data["map_data"].values()
+            assert len(map_data) > 0, "Can not find map info in episode data"
+            blocks_info = map_data[0]
+
+            map_config = config["map_config"].copy()
+            # map_config[BaseMap.GENERATE_TYPE] = MapGenerateMethod.PG_MAP_FILE
+            # map_config[BaseMap.GENERATE_CONFIG] = blocks_info
+            map_config.update(map_data)
+            self.spawn_object(PGMap, map_config=map_config)
+            return
+
+        # Build single block for multi-agent system!
+        if config["is_multi_agent"] and single_block_class is not None:
+            assert single_block_class is not None
+            assert spawn_roads is not None
+            if self.current_map is None:
+                new_map = self.spawn_object(single_block_class, map_config=config["map_config"], random_seed=None)
+                self.load_map(new_map)
+                self.current_map.spawn_roads = spawn_roads
+            return
+
+        # If we choose to load maps from json file.
+        if config["load_map_from_json"] and self.current_map is None:
+            assert config["_load_map_from_json"]
+            logging.info("Loading maps from: {}".format(config["_load_map_from_json"]))
+            self.read_all_maps_from_json(config["_load_map_from_json"])
+
+        # remove map from world before adding
+        if self.current_map is not None:
+            self.unload_map(self.current_map)
+
+        if self.pg_maps[current_seed] is None:
+            if config["load_map_from_json"]:
+                map_config = self.restored_pg_map_configs.get(current_seed, None)
+                assert map_config is not None
+                logging.debug(
+                    "We are spawning predefined map (seed {}). This is the config: {}".format(current_seed, map_config)
+                )
+            else:
+                map_config = config["map_config"]
+                map_config.update({"seed": current_seed})
+                logging.debug(
+                    "We are spawning new map (seed {}). This is the config: {}".format(current_seed, map_config)
+                )
+            map = self.spawn_object(PGMap, map_config=map_config, random_seed=None)
+            self.pg_maps[current_seed] = map
+        else:
+            logging.debug("We are loading map from pg_maps (seed {}): {}".format(current_seed, len(self.pg_maps)))
+            map = self.pg_maps[current_seed]
+        # print("WE ARE LOADING MAP SEED {}.".format(current_seed))
+        self.load_map(map)
