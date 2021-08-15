@@ -31,7 +31,12 @@ class Roundabout(PGBlock):
             )
             no_cross = no_cross and success
             if i < 3:
-                no_cross = CreateAdverseRoad(exit_road, self.block_network, self._global_network) and no_cross
+                no_cross = CreateAdverseRoad(
+                    exit_road,
+                    self.block_network,
+                    self._global_network,
+                    ignore_intersection_checking=self.ignore_intersection_checking
+                ) and no_cross
                 attach_road = -exit_road
         self.add_respawn_roads([socket.negative_road for socket in self.get_socket_list()])
         return no_cross
@@ -63,7 +68,8 @@ class Roundabout(PGBlock):
             self.block_network,
             self._global_network,
             ignore_start=ignore_last_2_part_start,
-            ignore_end=ignore_last_2_part_end
+            ignore_end=ignore_last_2_part_end,
+            ignore_intersection_checking=self.ignore_intersection_checking
         ) and none_cross
 
         # set circular part 0 visualization
@@ -88,7 +94,12 @@ class Roundabout(PGBlock):
         segment_road = Road(segment_start_node, segment_end_node)
 
         none_cross = CreateRoadFrom(
-            bend, self.positive_lane_num, segment_road, self.block_network, self._global_network
+            bend,
+            self.positive_lane_num,
+            segment_road,
+            self.block_network,
+            self._global_network,
+            ignore_intersection_checking=self.ignore_intersection_checking
         ) and none_cross
 
         # circular part 2 and exit straight part
@@ -106,7 +117,12 @@ class Roundabout(PGBlock):
         segment_road = Road(segment_start_node, segment_end_node)
 
         none_cross = CreateRoadFrom(
-            bend, self.positive_lane_num, segment_road, self.block_network, self._global_network
+            bend,
+            self.positive_lane_num,
+            segment_road,
+            self.block_network,
+            self._global_network,
+            ignore_intersection_checking=self.ignore_intersection_checking
         ) and none_cross
 
         # set circular part 2 (curve) visualization
@@ -121,7 +137,12 @@ class Roundabout(PGBlock):
         segment_road = Road(exit_start, exit_end)
         if part_idx < 3:
             none_cross = CreateRoadFrom(
-                straight, self.positive_lane_num, segment_road, self.block_network, self._global_network
+                straight,
+                self.positive_lane_num,
+                segment_road,
+                self.block_network,
+                self._global_network,
+                ignore_intersection_checking=self.ignore_intersection_checking
             ) and none_cross
             self.add_sockets(self.create_socket_from_positive_road(segment_road))
 
@@ -141,7 +162,14 @@ class Roundabout(PGBlock):
             tool_lane, 5, radius_this_seg, np.deg2rad(180 - 2 * angle), False, self.lane_width,
             (LineType.BROKEN, LineType.SIDE)
         )
-        CreateRoadFrom(bend, self.positive_lane_num, segment_road, self.block_network, self._global_network)
+        CreateRoadFrom(
+            bend,
+            self.positive_lane_num,
+            segment_road,
+            self.block_network,
+            self._global_network,
+            ignore_intersection_checking=self.ignore_intersection_checking
+        )
 
         # set circular part 2 visualization
         for k, lane in enumerate(segment_road.get_lanes(self.block_network)):

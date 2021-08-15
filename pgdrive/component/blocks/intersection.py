@@ -71,9 +71,19 @@ class InterSection(PGBlock):
                 lane_num = self.positive_lane_num if i == 1 else self.lane_num_intersect
                 exit_road = Road(self.road_node(i, 0), self.road_node(i, 1))
                 no_cross = CreateRoadFrom(
-                    right_lane, lane_num, exit_road, self.block_network, self._global_network
+                    right_lane,
+                    lane_num,
+                    exit_road,
+                    self.block_network,
+                    self._global_network,
+                    ignore_intersection_checking=self.ignore_intersection_checking
                 ) and no_cross
-                no_cross = CreateAdverseRoad(exit_road, self.block_network, self._global_network) and no_cross
+                no_cross = CreateAdverseRoad(
+                    exit_road,
+                    self.block_network,
+                    self._global_network,
+                    ignore_intersection_checking=self.ignore_intersection_checking
+                ) and no_cross
                 socket = PGBlockSocket(exit_road, -exit_road)
                 self.add_respawn_roads(socket.negative_road)
                 self.add_sockets(socket)
@@ -111,7 +121,11 @@ class InterSection(PGBlock):
             (LineType.NONE, LineType.SIDE)
         )
 
-        non_cross = (not check_lane_on_road(self._global_network, right_bend, 1)) and non_cross
+        non_cross = (
+            not check_lane_on_road(
+                self._global_network, right_bend, 1, ignore_intersection_checking=self.ignore_intersection_checking
+            )
+        ) and non_cross
         CreateRoadFrom(
             right_bend,
             min(self.positive_lane_num, self.lane_num_intersect),
@@ -121,7 +135,8 @@ class InterSection(PGBlock):
             toward_smaller_lane_index=True,
             side_lane_line_type=LineType.SIDE,
             inner_lane_line_type=LineType.NONE,
-            center_line_type=LineType.NONE
+            center_line_type=LineType.NONE,
+            ignore_intersection_checking=self.ignore_intersection_checking
         )
 
         intersect_nodes.rotate(-1)
@@ -154,7 +169,8 @@ class InterSection(PGBlock):
                 toward_smaller_lane_index=False,
                 center_line_type=LineType.NONE,
                 side_lane_line_type=LineType.NONE,
-                inner_lane_line_type=LineType.NONE
+                inner_lane_line_type=LineType.NONE,
+                ignore_intersection_checking=self.ignore_intersection_checking
             )
 
             CreateRoadFrom(
@@ -166,7 +182,8 @@ class InterSection(PGBlock):
                 toward_smaller_lane_index=False,
                 center_line_type=LineType.NONE,
                 side_lane_line_type=LineType.NONE,
-                inner_lane_line_type=LineType.NONE
+                inner_lane_line_type=LineType.NONE,
+                ignore_intersection_checking=self.ignore_intersection_checking
             )
 
         else:
@@ -184,7 +201,8 @@ class InterSection(PGBlock):
                 toward_smaller_lane_index=False,
                 center_line_type=LineType.NONE,
                 side_lane_line_type=LineType.NONE,
-                inner_lane_line_type=LineType.NONE
+                inner_lane_line_type=LineType.NONE,
+                ignore_intersection_checking=self.ignore_intersection_checking
             )
 
     def _create_u_turn(self, attach_road, part_idx):
@@ -208,7 +226,8 @@ class InterSection(PGBlock):
             toward_smaller_lane_index=False,
             center_line_type=line_type,
             side_lane_line_type=line_type,
-            inner_lane_line_type=line_type
+            inner_lane_line_type=line_type,
+            ignore_intersection_checking=self.ignore_intersection_checking
         )
 
     def add_u_turn(self, enable_u_turn: bool):

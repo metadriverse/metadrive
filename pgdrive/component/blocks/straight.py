@@ -30,8 +30,20 @@ class Straight(PGBlock):
         _socket = -socket
 
         # create positive road
-        no_cross = CreateRoadFrom(new_lane, self.positive_lane_num, socket, self.block_network, self._global_network)
+        no_cross = CreateRoadFrom(
+            new_lane,
+            self.positive_lane_num,
+            socket,
+            self.block_network,
+            self._global_network,
+            ignore_intersection_checking=self.ignore_intersection_checking
+        )
         # create negative road
-        no_cross = CreateAdverseRoad(socket, self.block_network, self._global_network) and no_cross
+        no_cross = CreateAdverseRoad(
+            socket,
+            self.block_network,
+            self._global_network,
+            ignore_intersection_checking=self.ignore_intersection_checking
+        ) and no_cross
         self.add_sockets(PGBlockSocket(socket, _socket))
         return no_cross
