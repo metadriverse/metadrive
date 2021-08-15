@@ -168,6 +168,8 @@ class AgentManager(BaseManager):
                 if len(self.active_agents) > 1 else None
             )
         )
+        for obj in self._active_objects.keys():
+            self.engine.get_policy(obj).reset()
 
     def finish(self, agent_name, ignore_delay_done=False):
         """
