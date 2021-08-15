@@ -1,17 +1,16 @@
 import numpy as np
+from pgdrive.utils.scene_utils import generate_invisible_static_wall
 
 from pgdrive.component.blocks.bottleneck import PGBlock
 from pgdrive.component.blocks.create_block_utils import CreateAdverseRoad, CreateRoadFrom, ExtendStraightLane
 from pgdrive.component.blocks.pg_block import PGBlockSocket
-from pgdrive.component.buildings.base_building import BaseBuilding
+from pgdrive.component.buildings.tollgate_building import TollGateBuilding
 from pgdrive.component.road.road import Road
 from pgdrive.constants import BodyName
 from pgdrive.constants import CamMask, LineType, LineColor
 from pgdrive.engine.asset_loader import AssetLoader
 from pgdrive.engine.engine_utils import get_engine
 from pgdrive.utils.space import ParameterSpace, Parameter, BlockParameterSpace
-
-TollGateBuilding = BaseBuilding
 
 
 class TollGate(PGBlock):
@@ -23,8 +22,6 @@ class TollGate(PGBlock):
     ID = "$"
 
     SPEED_LIMIT = 3  # m/s ~= 5 miles per hour https://bestpass.com/feed/61-speeding-through-tolls
-    BUILDING_LENGTH = 10
-    BUILDING_HEIGHT = 5
 
     def _try_plug_into_previous_block(self) -> bool:
         self.set_part_idx(0)  # only one part in simple block like straight, and curve
@@ -75,27 +72,8 @@ class TollGate(PGBlock):
             if idx % 2 == 1:
                 # add toll
                 position = lane.position(lane.length / 2, 0)
-                node_path = self._generate_invisible_static_wall(
-                    position,
-                    np.rad2deg(lane.heading_at(0)),
-                    self.BUILDING_LENGTH,
-                    self.lane_width,
-                    self.BUILDING_HEIGHT / 2,
-                    name=BodyName.TollGate
+                building = get_engine().spawn_object(
+                    TollGateBuilding, lane=lane, position=position, heading=lane.heading_at(0)
                 )
-                if self.render:
-                    building_model = self.loader.loadModel(AssetLoader.file_path("models", "tollgate", "booth.gltf"))
-                    gate_model = self.loader.loadModel(AssetLoader.file_path("models", "tollgate", "gate.gltf"))
-                    building_model.setH(90)
-                    building_model.reparentTo(node_path)
-                    gate_model.reparentTo(node_path)
-
-                building = TollGateBuilding(lane, position, lane.heading_at(0), node_path, random_seed=0)
+                self.dynamic_nodes.append(building.body)
                 self._block_objects.append(building)
-
-    def construct_block_buildings(self, object_manager):
-        engine = get_engine()
-        for building in self._block_objects:
-            object_manager.add_block_buildings(building, engine.pbr_worldNP)
-            # for performance reason
-            building.origin.hide(CamMask.Shadow)

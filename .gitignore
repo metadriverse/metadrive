@@ -18,11 +18,4 @@
 **/*.ipynb_checkpoints/
 /pgdrive/cutils.cpython-38-x86_64-linux-gnu.so
 **/*.c
-/seed0_v1.json
-/seed0_v2.json
-/seed1_v1.json
-/seed1_v2.json
-/seed2_v1.json
-/seed2_v2.json
-/seed99_v1.json
-/seed99_v2.json
+/seed*.json
