@@ -38,7 +38,7 @@ class Interface:
             track_v = self.engine.current_track_vehicle
             self.vehicle_panel.update_vehicle_state(track_v)
             self._render_contact_result(track_v.contact_results)
-            if hasattr(track_v, "routing_localization"):
+            if hasattr(track_v, "navigation"):
                 self._update_navi_arrow(track_v.navigation.navi_arrow_dir)
 
     def init_interface(self):
