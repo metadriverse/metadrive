@@ -48,7 +48,10 @@ class Road:
         return block_id
 
     def __eq__(self, other):
-        return True if self.start_node == other.start_node and self.end_node == other.end_node else False
+        if isinstance(other, Road):
+            return True if self.start_node == other.start_node and self.end_node == other.end_node else False
+        else:
+            return super(Road, self).__eq__(other)
 
     def __repr__(self):
         return "Road from {} to {}".format(self.start_node, self.end_node)

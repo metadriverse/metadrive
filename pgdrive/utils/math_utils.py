@@ -52,6 +52,10 @@ def norm(x, y):
     return cutils.cutils_norm(x, y)
 
 
+def point_distance(x, y):
+    return norm(x[0] - y[0], x[1] - y[1])
+
+
 def distance_greater(vec1, vec2, length):
     """Return whether the distance between two vectors is greater than the given length."""
     return ((vec1[0] - vec2[0])**2 + (vec1[1] - vec2[1])**2) > length**2

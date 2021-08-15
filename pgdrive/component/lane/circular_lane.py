@@ -34,10 +34,15 @@ class CircularLane(AbstractLane):
         self.line_types = line_types
         self.forbidden = forbidden
         self.priority = priority
+
         self.length = self.radius * (self.end_phase - self.start_phase) * self.direction
+        self.start = self.position(0, 0)
+        self.end = self.position(self.length, 0)
 
     def update_properties(self):
         self.length = self.radius * (self.end_phase - self.start_phase) * self.direction
+        self.start = self.position(0, 0)
+        self.end = self.position(self.length, 0)
 
     # def position(self, longitudinal: float, lateral: float) -> np.ndarray:
     def position(self, longitudinal: float, lateral: float) -> Vector:

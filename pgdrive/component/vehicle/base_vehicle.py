@@ -299,6 +299,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self.body.setLinearVelocity(Vec3(0, 0, 0))
         self.body.setAngularVelocity(Vec3(0, 0, 0))
         self.system.resetSuspension()
+        self._apply_throttle_brake(0.0)
         # np.testing.assert_almost_equal(self.position, pos, decimal=4)
 
         # done info
