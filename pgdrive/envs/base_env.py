@@ -137,7 +137,6 @@ class BasePGDriveEnv(gym.Env):
 
         # lazy initialization, create the main vehicle in the lazy_init() func
         self.engine: Optional[BaseEngine] = None
-        self.controller = None
         self.episode_steps = 0
         # self.current_seed = None
 
@@ -293,10 +292,6 @@ class BasePGDriveEnv(gym.Env):
     def close(self):
         if self.engine is not None:
             close_engine()
-
-            del self.controller
-            self.controller = None
-        # self.agent_manager=None don't set to None ! since sometimes we need close() then reset()
 
     def force_close(self):
         print("Closing environment ... Please wait")

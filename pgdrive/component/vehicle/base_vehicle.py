@@ -185,7 +185,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         config = self.config
 
         # add routing module
-        self.add_routing_localization(config["show_navi_mark"])  # default added
+        self.add_navigation(config["show_navi_mark"])  # default added
 
         # add distance detector/lidar
         self.side_detector = SideDetector(
@@ -559,7 +559,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     def add_image_sensor(self, name: str, sensor: ImageBuffer):
         self.image_sensors[name] = sensor
 
-    def add_routing_localization(self, show_navi_mark: bool = False):
+    def add_navigation(self, show_navi_mark: bool = False):
         config = self.config
         self.navigation = Navigation(
             self.engine,
@@ -586,6 +586,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         dest = self.config["destination_node"]
         self.navigation.update(map, current_lane_index=new_l_index, final_road_node=dest if dest is not None else None)
         assert lane is not None, "spawn place is not on road!"
+        self.navigation.update_localization(self)
         self.lane_index = new_l_index
         self.lane = lane
 
@@ -744,3 +745,11 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     @property
     def last_current(self):
         return self.last_current_action[0]
+
+    def detach_from_world(self, physics_world):
+        super(BaseVehicle, self).detach_from_world(physics_world)
+        self.navigation.detach_from_world()
+
+    def attach_to_world(self, parent_node_path, physics_world):
+        super(BaseVehicle, self).attach_to_world(parent_node_path, physics_world)
+        self.navigation.attach_to_world(self.engine)

@@ -19,3 +19,4 @@ class BasePolicy(Randomizable, Configurable):
     def destroy(self):
         super(BasePolicy, self).destroy()
         self.control_object = None
+        self.engine = None

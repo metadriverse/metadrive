@@ -1,6 +1,7 @@
 import copy
 from pgdrive.policy.env_input_policy import EnvInputPolicy
 from pgdrive.policy.idm_policy import IDMPolicy
+from pgdrive.policy.manual_control_policy import ManualControlPolicy
 import logging
 from typing import Dict
 
@@ -71,7 +72,11 @@ class AgentManager(BaseManager):
             obj = self.engine.spawn_object(BaseVehicle, vehicle_config=v_config)
             ret[agent_id] = obj
             # note: agent.id = object id
-            self.engine.add_policy(obj.id, EnvInputPolicy())
+            if self.engine.global_config["manual_control"] and self.engine.global_config["use_render"]:
+                policy = ManualControlPolicy()
+            else:
+                policy = EnvInputPolicy()
+            self.engine.add_policy(obj.id, policy)
         return ret
 
     def init_space(self, init_observation_space, init_action_space):
