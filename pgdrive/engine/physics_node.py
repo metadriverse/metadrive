@@ -9,12 +9,12 @@ from panda3d.bullet import BulletRigidBodyNode
 
 
 class BaseRigidBodyNode(BulletRigidBodyNode):
-    def __init__(self, base_object, type_name=None):
-        node_name = base_object.name if type_name is None else type_name
+    def __init__(self, base_object_name, type_name=None):
+        node_name = base_object_name if type_name is None else type_name
         super(BaseRigidBodyNode, self).__init__(node_name)
         self.setPythonTag(node_name, self)
-        self.object = base_object
+        self.base_object_name = base_object_name
 
     def destroy(self):
-        self.object = None
+        self.base_object_name = None
         self.clearPythonTag(self.getName())
