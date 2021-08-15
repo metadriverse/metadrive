@@ -29,13 +29,14 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
 
     ID = "B"
 
-    def __init__(self, block_index: int, global_network: RoadNetwork, random_seed):
+    def __init__(self, block_index: int, global_network: RoadNetwork, random_seed, ignore_intersection_checking=False):
         super(BaseBlock, self).__init__(str(block_index) + self.ID, random_seed, escape_random_seed_assertion=True)
         # block information
         assert self.ID is not None, "Each Block must has its unique ID When define Block"
         assert len(self.ID) == 1, "Block ID must be a character "
 
         self.block_index = block_index
+        self.ignore_intersection_checking = ignore_intersection_checking
 
         # each block contains its own road network and a global network
         self._global_network = global_network

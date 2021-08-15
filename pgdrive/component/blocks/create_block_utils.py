@@ -3,7 +3,6 @@ import math
 from typing import Tuple, Union, List
 
 import numpy as np
-
 from pgdrive.component.lane.abs_lane import AbstractLane
 from pgdrive.component.lane.circular_lane import CircularLane
 from pgdrive.component.lane.straight_lane import StraightLane
@@ -73,7 +72,8 @@ def CreateRoadFrom(
     detect_one_side=True,
     side_lane_line_type=LineType.SIDE,
     inner_lane_line_type=LineType.BROKEN,
-    center_line_color=LineColor.YELLOW
+    center_line_color=LineColor.YELLOW,
+    ignore_intersection_checking=None
 ) -> bool:
     """
         | | | |
@@ -84,6 +84,10 @@ def CreateRoadFrom(
     Usage: give the far left lane, then create lane_num lanes including itself
     :return if the lanes created cross other lanes
     """
+
+    # TODO(pzh) remove None
+    assert ignore_intersection_checking is not None
+
     lane_num -= 1  # include lane itself
     origin_lane = lane
     lanes = []
@@ -129,11 +133,28 @@ def CreateRoadFrom(
     if not detect_one_side:
         # Because of side walk, the width of side walk should be consider
         no_cross = not (
-            check_lane_on_road(roadnet_to_check_cross, origin_lane, factor, ignore)
-            or check_lane_on_road(roadnet_to_check_cross, lanes[0], -0.95, ignore)
+            check_lane_on_road(
+                roadnet_to_check_cross,
+                origin_lane,
+                factor,
+                ignore,
+                ignore_intersection_checking=ignore_intersection_checking
+            ) or check_lane_on_road(
+                roadnet_to_check_cross,
+                lanes[0],
+                -0.95,
+                ignore,
+                ignore_intersection_checking=ignore_intersection_checking
+            )
         )
     else:
-        no_cross = not check_lane_on_road(roadnet_to_check_cross, origin_lane, factor, ignore)
+        no_cross = not check_lane_on_road(
+            roadnet_to_check_cross,
+            origin_lane,
+            factor,
+            ignore,
+            ignore_intersection_checking=ignore_intersection_checking
+        )
     for l in lanes:
         roadnet_to_add_lanes.add_lane(road.start_node, road.end_node, l)
     if lane_num == 0:
@@ -166,7 +187,8 @@ def CreateAdverseRoad(
     center_line_type=LineType.CONTINUOUS,  # Identical to Block.CENTER_LINE_TYPE
     side_lane_line_type=LineType.SIDE,
     inner_lane_line_type=LineType.BROKEN,
-    center_line_color=LineColor.YELLOW
+    center_line_color=LineColor.YELLOW,
+    ignore_intersection_checking=None
 ) -> bool:
     adverse_road = -positive_road
     lanes = get_lanes_on_road(positive_road, roadnet_to_get_road)
@@ -205,7 +227,8 @@ def CreateAdverseRoad(
         side_lane_line_type=side_lane_line_type,
         inner_lane_line_type=inner_lane_line_type,
         center_line_type=center_line_type,
-        center_line_color=center_line_color
+        center_line_color=center_line_color,
+        ignore_intersection_checking=ignore_intersection_checking
     )
     positive_road.get_lanes(roadnet_to_get_road)[0].line_color = [center_line_color, LineColor.GREY]
     return success
