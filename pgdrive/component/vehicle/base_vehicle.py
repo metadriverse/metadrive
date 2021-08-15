@@ -475,7 +475,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self.WIDTH = type(self).WIDTH  # or self.config["vehicle_width"]
         self.HEIGHT = type(self).HEIGHT  # or self.config[Parameter.vehicle_height]
 
-        chassis = BaseRigidBodyNode(self, BodyName.Vehicle)
+        chassis = BaseRigidBodyNode(self.name, BodyName.Vehicle)
         chassis.setIntoCollideMask(CollisionGroup.Vehicle)
         chassis_shape = BulletBoxShape(Vec3(self.WIDTH / 2, self.LENGTH / 2, self.HEIGHT / 2))
         ts = TransformState.makePos(Vec3(0, 0, self.HEIGHT / 2))
@@ -574,9 +574,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         :param map: new map
         :return: None
         """
-        possible_lanes = ray_localization(
-            np.array(self.heading.tolist()), np.array(self.spawn_place), self.engine, return_all_result=True
-        )
+        possible_lanes = ray_localization(self.heading, self.spawn_place, self.engine, return_all_result=True)
         possible_lane_indexes = [lane_index for lane, lane_index, dist in possible_lanes]
         try:
             idx = possible_lane_indexes.index(self.config["spawn_lane_index"])

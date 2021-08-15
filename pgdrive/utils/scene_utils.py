@@ -12,7 +12,7 @@ from pgdrive.constants import Decoration, BodyName
 from pgdrive.engine.core.engine_core import EngineCore
 from pgdrive.utils.coordinates_shift import panda_heading
 from pgdrive.utils.coordinates_shift import panda_position
-from pgdrive.utils.math_utils import get_points_bounding_box
+from pgdrive.utils.math_utils import get_points_bounding_box, norm
 from pgdrive.utils.utils import get_object_from_node
 
 if TYPE_CHECKING:
@@ -128,8 +128,8 @@ def get_all_lanes(roadnet: "RoadNetwork"):
     return res
 
 
-def ray_localization(heading: np.ndarray,
-                     position: np.ndarray,
+def ray_localization(heading: tuple,
+                     position: tuple,
                      engine: EngineCore,
                      return_all_result=False) -> Union[List[Tuple], Tuple]:
     """
@@ -151,8 +151,15 @@ def ray_localization(heading: np.ndarray,
                 lane = get_object_from_node(res.getNode())
                 long, _ = lane.local_coordinates(position)
                 lane_heading = lane.heading_at(long)
-                dir = np.array([math.cos(lane_heading), math.sin(lane_heading)])
-                cosangle = dir.dot(heading) / (np.linalg.norm(dir) * np.linalg.norm(heading))
+
+                # dir = np.array([math.cos(lane_heading), math.sin(lane_heading)])
+                # dot_result = dir.dot(heading)
+
+                dot_result = math.cos(lane_heading) * heading[0] + math.sin(lane_heading) * heading[1]
+                cosangle = dot_result / (
+                    norm(math.cos(lane_heading), math.sin(lane_heading)) * norm(heading[0], heading[1])
+                )
+
                 if cosangle > 0:
                     lane_index_dist.append((lane, lane.index, lane.distance(position)))
     if return_all_result:

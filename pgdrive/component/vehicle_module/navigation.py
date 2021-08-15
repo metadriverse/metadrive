@@ -308,7 +308,7 @@ class Navigation:
 
     def get_current_lane(self, ego_vehicle):
         possible_lanes = ray_localization(
-            np.array(ego_vehicle.heading.tolist()), ego_vehicle.position, ego_vehicle.engine, return_all_result=True
+            ego_vehicle.heading, ego_vehicle.position, ego_vehicle.engine, return_all_result=True
         )
         for lane, index, l_1_dist in possible_lanes:
             if lane in self.current_ref_lanes:

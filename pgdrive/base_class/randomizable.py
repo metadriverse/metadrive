@@ -1,4 +1,4 @@
-from pgdrive.utils import get_np_random
+from pgdrive.utils.random_utils import get_np_random
 
 
 class Randomizable:
