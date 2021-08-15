@@ -23,7 +23,7 @@ from pgdrive.utils.math_utils import norm, Vector
 class BaseBlock(BaseObject, DrivableAreaProperty):
     """
     Block is a driving area consisting of several roads
-    Note: overriding the _sample() function to fill block_network/respawn_roads/_block_objects in subclass
+    Note: overriding the _sample() function to fill block_network/respawn_roads in subclass
     Call Block.construct_block() to add it to world
     """
 
@@ -101,7 +101,7 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
         self.dynamic_nodes.clear()
         self.static_nodes.clear()
         for obj in self._block_objects:
-            obj.destroy(physics_world)
+            obj.destroy()
         self._block_objects = None
 
     def construct_from_config(self, config: Dict, root_render_np: NodePath, physics_world: PhysicsWorld):
@@ -473,56 +473,6 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
             )
             card.setTransparency(TransparencyAttrib.MMultisample)
             card.setTexture(self.ts_color, self.road_texture)
-
-    def _generate_invisible_static_wall(
-        self,
-        position: Tuple,
-        heading: float,
-        heading_length: float,
-        side_width: float,
-        height=10,
-        name=BodyName.InvisibleWall,
-        collision_group=CollisionGroup.InvisibleWall
-    ):
-        """
-        Add an invisible physics wall to physics world
-        You can add some building models to the same location, add make it be detected by lidar
-        ----------------------------------
-        |               *                |  --->>>
-        ----------------------------------
-        * position
-        --->>> heading direction
-        ------ longitude length
-        | lateral width
-
-        **CAUTION**: position is the middle point of longitude edge
-        :param position: position in PGDrive
-        :param heading: heading in PGDrive [degree]
-        :param heading_length: rect length in heading direction
-        :param side_width: rect width in side direction
-        :param height: the detect will be executed from this height to 0
-        :param name: name of this invisible wall
-        :param collision_group: control the collision of this static wall and other elements
-        :return node_path
-        """
-        shape = BulletBoxShape(Vec3(heading_length / 2, side_width / 2, height))
-        body_node = BaseRigidBodyNode(name, name)
-        body_node.setActive(False)
-        body_node.setKinematic(False)
-        body_node.setStatic(True)
-        wall_np = NodePath(body_node)
-        body_node.addShape(shape)
-        body_node.setIntoCollideMask(collision_group)
-        self.dynamic_nodes.append(body_node)
-        wall_np.setPos(panda_position(position))
-        wall_np.setH(panda_heading(heading))
-        return wall_np
-
-    def construct_block_buildings(self, object_manager):
-        """
-        Buildings will be added to object_manager as static object automatically
-        """
-        pass
 
     def add_body(self, physics_body):
         raise DeprecationWarning(

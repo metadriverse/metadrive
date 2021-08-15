@@ -31,7 +31,6 @@ class TrafficSignManager(BaseManager):
 
     def __init__(self):
         super(TrafficSignManager, self).__init__()
-        self._block_objects = {}
         self.accident_prob = 0.
         self.object = []
 
@@ -41,19 +40,9 @@ class TrafficSignManager(BaseManager):
         """
         self.clear_objects()
         self.accident_prob = self.engine.global_config["accident_prob"]
-        map = self.engine.map_manager.current_map
-        for block in map.blocks:
-            block.construct_block_buildings(self)
 
     def clear_objects(self):
         self.engine.clear_objects(lambda o: isinstance(o, TrafficSign))
-        for block_object in self._block_objects.values():
-            block_object.origin.detachNode()
-        self._block_objects = {}
-
-    def add_block_buildings(self, building, render_node):
-        self._block_objects[building.id] = building
-        building.origin.reparentTo(render_node)
 
     def reset(self):
         """
@@ -134,7 +123,6 @@ class TrafficSignManager(BaseManager):
             cone = self.engine.spawn_object(TrafficCone, lane=lane, longitude=p_[0], lateral=p_[1])
 
     def destroy(self):
-        self._block_objects = {}
         super(TrafficSignManager, self).destroy()
 
     @property
