@@ -32,6 +32,8 @@ class Configurable:
         Fully delete this element and release the memory
         """
         self._config.clear()
+        if hasattr(self, "engine"):
+            self.engine = None
 
     @property
     def config(self):

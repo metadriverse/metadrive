@@ -19,6 +19,10 @@ def get_engine():
     return BaseEngine.singleton
 
 
+def get_object(object_name):
+    return get_engine().get_objects([object_name])
+
+
 def engine_initialized():
     return False if BaseEngine.singleton is None else True
 
