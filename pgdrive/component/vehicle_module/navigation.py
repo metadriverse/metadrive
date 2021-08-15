@@ -359,4 +359,5 @@ class Navigation:
             self.origin.detachNode()
 
     def attach_to_world(self, engine):
-        self.origin.reparentTo(engine.render)
+        if isinstance(self.origin, NodePath):
+            self.origin.reparentTo(engine.render)
