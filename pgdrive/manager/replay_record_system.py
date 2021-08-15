@@ -70,7 +70,6 @@ class Replayer:
 class Recorder:
     def __init__(self, map: PGMap, init_traffic_vehicle_states: dict):
         map_data = dict()
-        map_data[map.random_seed] = map.save_map()
         self.episode_info = dict(
             map_config=map.config.get_dict(),
             init_traffic=init_traffic_vehicle_states,

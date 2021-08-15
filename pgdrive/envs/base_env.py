@@ -7,7 +7,6 @@ from typing import Union, Dict, AnyStr, Optional, Tuple
 import gym
 import numpy as np
 from panda3d.core import PNMImage
-
 from pgdrive.component.vehicle.base_vehicle import BaseVehicle
 from pgdrive.constants import RENDER_MODE_NONE, DEFAULT_AGENT
 from pgdrive.engine.base_engine import BaseEngine
@@ -15,10 +14,7 @@ from pgdrive.engine.engine_utils import initialize_engine, close_engine, \
     engine_initialized, set_global_random_seed
 from pgdrive.manager.agent_manager import AgentManager
 from pgdrive.obs.observation_base import ObservationBase
-from pgdrive.utils import Config, merge_dicts
-from pgdrive.utils import get_np_random
-
-pregenerated_map_file = osp.join(osp.dirname(osp.dirname(osp.abspath(__file__))), "assets", "maps", "PGDrive-maps.json")
+from pgdrive.utils import Config, merge_dicts, get_np_random
 
 BASE_DEFAULT_CONFIG = dict(
     # ===== Generalization =====
@@ -46,6 +42,7 @@ BASE_DEFAULT_CONFIG = dict(
     camera_height=1.8,
     camera_dist=7,
     prefer_track_agent=None,
+    draw_map_resolution=1024,  # Drawing the map in a canvas of (x, x) pixels.
 
     # ===== Vehicle =====
     vehicle_config=dict(
@@ -142,7 +139,7 @@ class BasePGDriveEnv(gym.Env):
         self.engine: Optional[BaseEngine] = None
         self.controller = None
         self.episode_steps = 0
-        self.current_seed = None
+        # self.current_seed = None
 
         # In MARL envs with respawn mechanism, varying episode lengths might happen.
         self.dones = None
@@ -272,7 +269,7 @@ class BasePGDriveEnv(gym.Env):
         """
         self.lazy_init()  # it only works the first time when reset() is called to avoid the error when render
         self._reset_global_seed(force_seed)
-        self._update_map(episode_data)
+        self._update_map(episode_data=episode_data)
 
         self._reset_config()
         self.engine.reset()
@@ -284,8 +281,11 @@ class BasePGDriveEnv(gym.Env):
 
         return self._get_reset_return()
 
-    def _update_map(self, episode_data: Union[None, dict] = None):
-        raise NotImplementedError()
+    def _update_map(self, episode_data: dict = None):
+        self.engine.map_manager.update_map(self.config, self.current_seed, episode_data)
+
+    # def _update_map(self, episode_data: Union[None, dict] = None):
+    #     raise NotImplementedError()
 
     def _get_reset_return(self):
         raise NotImplementedError()
@@ -336,7 +336,10 @@ class BasePGDriveEnv(gym.Env):
     def seed(self, seed=None):
         if seed is not None:
             set_global_random_seed(seed)
-            self.current_seed = seed
+
+    @property
+    def current_seed(self):
+        return self.engine.global_random_seed
 
     @property
     def observations(self):
@@ -402,6 +405,7 @@ class BasePGDriveEnv(gym.Env):
 
     @property
     def current_map(self):
+        # TODO(pzh): Can we remove this?
         return self.engine.map_manager.current_map
 
     def _reset_global_seed(self, force_seed):

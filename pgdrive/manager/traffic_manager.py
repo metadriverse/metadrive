@@ -50,7 +50,7 @@ class TrafficManager(BaseManager):
         :return: List of Traffic vehicles
         """
         map = self.current_map
-        logging.debug("load scene {}, {}".format(map.random_seed, "Use random traffic" if self.random_traffic else ""))
+        logging.debug("load scene {}".format("Use random traffic" if self.random_traffic else ""))
 
         # update vehicle list
         self.block_triggered_vehicles = []

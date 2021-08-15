@@ -96,6 +96,7 @@ class Navigation:
         logging.debug("Load Vehicle Module: {}".format(self.__class__.__name__))
 
     def update(self, map: BaseMap, current_lane_index, final_road_node=None, random_seed=False):
+        # TODO(pzh): We should not determine the destination of a vehicle in the navigation module.
         start_road_node = current_lane_index[0]
         self.map = map
         if start_road_node is None:
@@ -103,7 +104,7 @@ class Navigation:
         if final_road_node is None:
             # auto find if PGMap
             current_road_negative = Road(*current_lane_index[:-1]).is_negative_road()
-            random_seed = random_seed if random_seed is not False else map.random_seed
+            random_seed = random_seed if random_seed is not False else None
             # choose first block when born on negative road
             block = map.blocks[0] if current_road_negative else map.blocks[-1]
             sockets = block.get_socket_list()

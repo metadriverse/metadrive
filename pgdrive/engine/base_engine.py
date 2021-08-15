@@ -1,14 +1,12 @@
 import logging
 import time
-from typing import Callable, Optional, Union, List
 from collections import OrderedDict
-from typing import Dict, AnyStr
-from pgdrive.base_class.randomizable import Randomizable
-import numpy as np
+from typing import Callable, Optional, Union, List, Dict, AnyStr
 
+import numpy as np
+from pgdrive.base_class.randomizable import Randomizable
 from pgdrive.engine.core.engine_core import EngineCore
 from pgdrive.engine.interface import Interface
-from pgdrive.engine.scene_cull import SceneCull
 from pgdrive.manager.base_manager import BaseManager
 
 logger = logging.getLogger(__name__)
@@ -89,16 +87,17 @@ class BaseEngine(EngineCore, Randomizable):
     def has_task(self, object_id):
         return True if object_id in self._object_tasks else False
 
-    def spawn_object(self, object_class, pbr_model=True, force_spawn=False, **kwargs):
+    def spawn_object(self, object_class, pbr_model=True, force_spawn=False, auto_fill_random_seed=True, **kwargs):
         """
         Call this func to spawn one object
         :param object_class: object class
         :param pbr_model: if the visualization model is pbr model
         :param force_spawn: spawn a new object instead of fetching from _dying_objects list
+        :param auto_fill_random_seed: whether to set random seed using purely random integer
         :param kwargs: class init parameters
         :return: object spawned
         """
-        if "random_seed" not in kwargs:
+        if ("random_seed" not in kwargs) and auto_fill_random_seed:
             kwargs["random_seed"] = self.generate_seed()
         if force_spawn or object_class.__name__ not in self._dying_objects or len(
                 self._dying_objects[object_class.__name__]) == 0:
@@ -319,3 +318,11 @@ class BaseEngine(EngineCore, Randomizable):
             return MainCamera(self, self.global_config["camera_height"], self.global_config["camera_dist"])
         else:
             return None
+
+    @property
+    def current_seed(self):
+        return self.global_random_seed
+
+    @property
+    def global_seed(self):
+        return self.global_random_seed

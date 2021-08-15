@@ -45,15 +45,14 @@ class BaseObject(BaseRunnable):
     sample some special configs for it ,Properties and parameters in PARAMETER_SPACE of the object are fixed after
     calling __init__().
     """
-    def __init__(self, name=None, random_seed=None, config=None):
+    def __init__(self, name=None, random_seed=None, config=None, escape_random_seed_assertion=False):
         """
         Config is a static conception, which specified the parameters of one element.
         There parameters doesn't change, such as length of straight road, max speed of one vehicle, etc.
         """
         super(BaseObject, self).__init__(name, random_seed, config)
-        assert random_seed is not None, "Please assign a random seed for {} class in super().__init__()".format(
-            self.class_name
-        )
+        if not escape_random_seed_assertion:
+            assert random_seed is not None, "Please assign a random seed for {} class.".format(self.class_name)
 
         # Following properties are available when this object needs visualization and physics property
         self._body = None

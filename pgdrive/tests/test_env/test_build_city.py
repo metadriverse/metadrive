@@ -12,7 +12,7 @@ def _t(num_blocks):
     try:
         map_config = default_config["map_config"]
         map_config.update(dict(type="block_num", config=num_blocks))
-        map = CityMap(map_config, random_seed=map_config["seed"])
+        map = CityMap(map_config)
         m = draw_top_down_map(map, return_surface=True)
         pygame.image.save(m, "{}.jpg".format(num_blocks))
     finally:
