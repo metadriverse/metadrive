@@ -1,7 +1,7 @@
-import gym
 import copy
-import numpy as np
 
+import gym
+import numpy as np
 from pgdrive.component.blocks.first_block import FirstPGBlock
 from pgdrive.component.blocks.roundabout import Roundabout
 from pgdrive.component.map.pg_map import PGMap
@@ -126,14 +126,14 @@ class MultiAgentRoundaboutEnv(MultiAgentPGDrive):
     def default_config() -> Config:
         return MultiAgentPGDrive.default_config().update(MARoundaboutConfig, allow_add_new_key=True)
 
-    def _update_map(self, episode_data: dict = None, force_seed=None):
-        map_config = self.config["map_config"]
-
-        if self.current_map is None:
-            self.seed(map_config["seed"])
-            new_map = self.engine.spawn_object(MARoundaboutMap, map_config=map_config, random_seed=self.current_seed)
-            self.engine.map_manager.load_map(new_map)
-            self.current_map.spawn_roads = self.spawn_roads
+    def _update_map(self, episode_data: dict = None):
+        self.engine.map_manager.update_map(
+            self.config,
+            self.current_seed,
+            episode_data,
+            single_block_class=MARoundaboutMap,
+            spawn_roads=self.spawn_roads
+        )
 
     def _update_destination_for(self, vehicle_id, vehicle_config):
         end_roads = copy.deepcopy(self.spawn_roads)
@@ -383,8 +383,8 @@ def _long_run():
 
 if __name__ == "__main__":
     # _draw()
-    _vis()
+    # _vis()
     # _vis_debug_respawn()
-    # _profile()
+    _profile()
     # _long_run()
     # pygame_replay("round", MultiAgentRoundaboutEnv)

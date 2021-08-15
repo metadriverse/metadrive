@@ -163,7 +163,7 @@ if __name__ == "__main__":
     map = ArgoverseMap(
         {
             "city": "PIT",
-            "draw_map_resolution": 1024,
+            # "draw_map_resolution": 1024,
             "center": ArgoverseMap.pgdrive_position([xcenter, ycenter]),
             "radius": 100
         }

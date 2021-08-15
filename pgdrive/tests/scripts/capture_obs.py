@@ -74,7 +74,6 @@ if __name__ == "__main__":
             #     "vehicle_num": len(env.engine.traffic_manager.traffic_vehicles),
             #     "dist_to_left:": env.vehicle.dist_to_left,
             #     "dist_to_right:": env.vehicle.dist_to_right,
-            #     "env_seed": env.current_map.random_seed
             # }
         )
         if d:

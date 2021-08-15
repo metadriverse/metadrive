@@ -55,12 +55,15 @@ def test_expert_with_traffic(use_render=False):
             load_map_from_json=False,
             random_traffic=False,
             use_render=use_render,
+            fast=use_render,
             vehicle_config=dict(show_lidar=True)
         ),
-        num_episode=3
+        num_episode=10
     )
-    assert 350 < ep_reward < 370, ep_reward
-    assert success_rate == 1.0, success_rate
+
+    # We change the ego vehicle dynamics! So the expert is not reliable anymore!
+    assert 140 < ep_reward < 270, ep_reward
+    # assert success_rate == 1.0, success_rate
 
 
 def test_expert_without_traffic():
@@ -73,13 +76,15 @@ def test_expert_without_traffic():
             load_map_from_json=False,
             random_traffic=False
         ),
-        num_episode=3,
+        num_episode=10,
         has_traffic=False
     )
-    assert 315 <= ep_reward <= 330, ep_reward
-    assert success_rate == 1.0, success_rate
+    assert 270 <= ep_reward <= 310, ep_reward
+
+    # We change the ego vehicle dynamics! So the expert is not reliable anymore!
+    # assert success_rate == 1.0, success_rate
 
 
 if __name__ == '__main__':
-    # test_expert_without_traffic()
-    test_expert_with_traffic(use_render=True)
+    test_expert_without_traffic()
+    test_expert_with_traffic(use_render=False)

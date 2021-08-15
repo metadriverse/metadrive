@@ -1,15 +1,13 @@
 import copy
-import logging
 
 import numpy as np
-
-from pgdrive.component.algorithm.BIG import BigGenerateMethod
 from pgdrive.base_class.base_runnable import BaseRunnable
+from pgdrive.component.algorithm.BIG import BigGenerateMethod
 from pgdrive.component.blocks.first_block import FirstPGBlock
 from pgdrive.component.blocks.pg_block import PGBlock
 from pgdrive.component.road.road import Road
 from pgdrive.component.road.road_network import RoadNetwork
-from pgdrive.engine.engine_utils import get_engine
+from pgdrive.engine.engine_utils import get_engine, get_global_config
 from pgdrive.utils import Config, import_pygame
 
 pygame = import_pygame()
@@ -68,11 +66,12 @@ class BaseMap(BaseRunnable):
         """
         Map can be stored and recover to save time when we access the map encountered before
         """
-        assert random_seed == map_config[
-            self.SEED
-        ], "Global seed {} should equal to seed in map config {}".format(random_seed, map_config[self.SEED])
-        super(BaseMap, self).__init__(random_seed=map_config[self.SEED], config=map_config)
-        self.film_size = (self._config["draw_map_resolution"], self._config["draw_map_resolution"])
+        assert random_seed is None
+        # assert random_seed == map_config[
+        #     self.SEED
+        # ], "Global seed {} should equal to seed in map config {}".format(random_seed, map_config[self.SEED])
+        super(BaseMap, self).__init__(config=map_config)
+        self.film_size = (get_global_config()["draw_map_resolution"], get_global_config()["draw_map_resolution"])
         self.road_network = RoadNetwork()
 
         # A flatten representation of blocks, might cause chaos in city-level generation.
@@ -115,7 +114,7 @@ class BaseMap(BaseRunnable):
             json_config[self.PRE_BLOCK_SOCKET_INDEX] = b.pre_block_socket_index
             map_config.append(json_config)
 
-        saved_data = copy.deepcopy({self.SEED: self.random_seed, self.BLOCK_SEQUENCE: map_config})
+        saved_data = copy.deepcopy({self.BLOCK_SEQUENCE: map_config})
         return saved_data
 
     def read_map(self, map_config: dict):
@@ -138,7 +137,3 @@ class BaseMap(BaseRunnable):
         for block in self.blocks:
             block.destroy()
         super(BaseMap, self).destroy()
-
-    def __del__(self):
-        describe = self.random_seed if self.random_seed is not None else "custom"
-        logging.debug("Scene {} is destroyed".format(describe))

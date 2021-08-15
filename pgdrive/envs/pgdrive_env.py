@@ -4,24 +4,23 @@ import os.path as osp
 from typing import Union, Dict, AnyStr, Tuple
 
 import numpy as np
-
 from pgdrive.component.blocks.first_block import FirstPGBlock
 from pgdrive.component.map.base_map import BaseMap, MapGenerateMethod, parse_map_config
 from pgdrive.component.map.pg_map import PGMap
 from pgdrive.component.vehicle.base_vehicle import BaseVehicle
 from pgdrive.constants import DEFAULT_AGENT, TerminationState
 from pgdrive.engine.core.manual_controller import KeyboardController, JoystickController
-from pgdrive.engine.engine_utils import engine_initialized
-from pgdrive.engine.engine_utils import set_global_random_seed
+from pgdrive.engine.engine_utils import engine_initialized, set_global_random_seed
 from pgdrive.envs.base_env import BasePGDriveEnv
 from pgdrive.manager.traffic_manager import TrafficMode
 from pgdrive.obs.image_obs import ImageStateObservation
 from pgdrive.obs.state_obs import LidarStateObservation
-from pgdrive.utils import clip, Config, concat_step_infos
-from pgdrive.utils import get_np_random
+from pgdrive.utils import clip, Config, concat_step_infos, get_np_random
 
-pregenerated_map_file = osp.join(osp.dirname(osp.dirname(osp.abspath(__file__))), "assets", "maps", "PGDrive-maps.json")
-
+pregenerated_map_file = osp.join(
+    osp.dirname(osp.dirname(osp.abspath(__file__))), "assets", "maps",
+    "20210814_generated_maps_start_seed_0_environment_num_30000.json"
+)
 PGDriveEnvV1_DEFAULT_CONFIG = dict(
     # ===== Generalization =====
     start_seed=0,
@@ -34,9 +33,6 @@ PGDriveEnvV1_DEFAULT_CONFIG = dict(
         BaseMap.GENERATE_CONFIG: None,  # it can be a file path / block num / block ID sequence
         BaseMap.LANE_WIDTH: 3.5,
         BaseMap.LANE_NUM: 3,
-        BaseMap.SEED: 10,
-        "draw_map_resolution": 1024,  # Drawing the map in a canvas of (x, x) pixels.
-        "block_type_version": "v1",
         "exit_length": 50,
     },
     load_map_from_json=True,  # Whether to load maps from pre-generated file
@@ -338,41 +334,6 @@ class PGDriveEnv(BasePGDriveEnv):
             ret[v_id] = self.observations[v_id].observe(v)
         return ret if self.is_multi_agent else ret[DEFAULT_AGENT]
 
-    def _update_map(self, episode_data: dict = None):
-        map_manager = self.engine.map_manager
-        if episode_data is not None:
-            # TODO restore/replay here
-            # Since in episode data map data only contains one map, values()[0] is the map_parameters
-            map_data = episode_data["map_data"].values()
-            assert len(map_data) > 0, "Can not find map info in episode data"
-            blocks_info = map_data[0]
-
-            map_config = self.config["map_config"].copy()
-            map_config[BaseMap.GENERATE_TYPE] = MapGenerateMethod.PG_MAP_FILE
-            map_config[BaseMap.GENERATE_CONFIG] = blocks_info
-            map_manager.spawn_object(PGMap, map_config=map_config)
-            return
-
-        if self.config["load_map_from_json"] and self.current_map is None:
-            assert self.config["_load_map_from_json"]
-            map_manager.read_all_maps_from_json(self.config["_load_map_from_json"])
-
-        # remove map from world before adding
-        if self.current_map is not None:
-            map_manager.unload_map(self.current_map)
-
-        if map_manager.pg_maps[self.current_seed] is None:
-            if self.config["load_map_from_json"]:
-                map_config = map_manager.restored_pg_map_configs.get(self.current_seed, None)
-                assert map_config is not None
-            else:
-                map_config = self.config["map_config"]
-                map_config.update({"seed": self.current_seed})
-            map = map_manager.spawn_object(PGMap, map_config=map_config)
-        else:
-            map = map_manager.pg_maps[self.current_seed]
-        map_manager.load_map(map)
-
     def dump_all_maps(self):
         assert not engine_initialized(), \
             "We assume you generate map files in independent tasks (not in training). " \
@@ -383,12 +344,18 @@ class PGDriveEnv(BasePGDriveEnv):
         assert engine_initialized()
 
         for seed in range(self.start_seed, self.start_seed + self.env_num):
-            map_config = copy.deepcopy(self.config["map_config"])
-            map_config.update({"seed": seed})
-            set_global_random_seed(seed)
-            new_map = self.engine.map_manager.spawn_object(PGMap, map_config=map_config)
-            self.engine.map_manager.unload_map(new_map)
-            logging.info("Finish generating map with seed: {}".format(seed))
+
+            all_config = self.config.copy()
+            all_config["map_config"]["seed"] = seed
+            # map_config = copy.deepcopy(self.config["map_config"])
+            # map_config.update({"seed": seed})
+            # set_global_random_seed(seed)
+
+            self.engine.map_manager.update_map(all_config, current_seed=seed)
+            # new_map = self.engine.map_manager.spawn_object(PGMap, map_config=map_config, random_seed=None)
+            # self.pg_maps[current_seed] = new_map
+            # self.engine.map_manager.unload_map(new_map)
+            print("Finish generating map with seed: {}".format(seed))
 
         map_data = dict()
         for seed, map in self.maps.items():

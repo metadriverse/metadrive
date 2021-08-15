@@ -15,7 +15,7 @@ class ArgoverseEnv(PGDriveEnv):
             self.config["map_config"].update(
                 {
                     "city": "PIT",
-                    "draw_map_resolution": 1024,
+                    # "draw_map_resolution": 1024,
                     "center": [xcenter, ycenter],
                     "radius": 100
                 }

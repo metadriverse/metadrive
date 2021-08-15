@@ -6,12 +6,13 @@ from pgdrive.utils import recursive_equal, norm
 def test_seeding():
     env = PGDriveEnv({"environment_num": 1000})
     try:
+        env.reset()
         env.seed(999)
-        assert env.engine is None
+        # assert env.engine is None
         assert env.current_seed == 999
-        env.reset(force_seed=999)
-        assert env.current_seed == 999
-        assert env.engine is not None
+        env.reset(force_seed=992)
+        assert env.current_seed == 992
+        # assert env.engine is not None
     finally:
         env.close()
 
@@ -102,4 +103,5 @@ def test_random_traffic():
 
 
 if __name__ == '__main__':
-    test_map_random_seeding()
+    # test_map_random_seeding()
+    test_seeding()

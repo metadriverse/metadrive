@@ -2,46 +2,31 @@ import json
 import os.path as osp
 
 from pgdrive import PGDriveEnv
-from pgdrive.utils import recursive_equal
 
 root = osp.dirname(osp.dirname(osp.abspath(__file__)))
-assert_path = osp.join(root, "assets", "maps")
+asset_path = osp.join(root, "assets", "maps")
 
-predefined_maps = {
-    "PGDrive-maps": {
-        "start_seed": 0,
-        "environment_num": 10000
-    },
-}
+# The test script of this file is in pgdrive/tests/test_functionality/test_loading_map_from_json.py
+
+
+def generate_maps(env_class, env_config, json_file_path):
+    assert env_config.get("load_map_from_json", False) is False
+    env_config["load_map_from_json"] = False
+
+    env = env_class(env_config)
+    data = env.dump_all_maps()
+    with open(json_file_path, "w") as f:
+        json.dump(data, f)
+    env.close()
+    print('Finished! Saved at: ', json_file_path)
+
 
 if __name__ == '__main__':
-    # print("Root path is {}. Asset path is {}.".format(root, assert_path))
-    # for env_name, env_config in predefined_maps.items():
-    #     env = PGDriveEnv(env_config)
-    #     data = env.dump_all_maps()
-    #     file_path = osp.join(assert_path, "{}.json".format(env_name))
-    #     with open(file_path, "w") as f:
-    #         json.dump(data, f)
-    #     env.close()
-    #     print("Finish environment: ", env_name)
-
-    # For test purpose only. Generate another group of maps with "-quanyi" suffix, and compare them
-    #  with the original one.
-
-    # Generate the second round
-
-    for env_name, env_config in predefined_maps.items():
-        env = PGDriveEnv(env_config)
-        data = env.dump_all_maps()
-        file_path = osp.join(assert_path, "{}-quanyi.json".format(env_name))
-        with open(file_path, "w") as f:
-            json.dump(data, f)
-        env.close()
-        print("Finish environment: ", env_name)
-
-    for env_name, env_config in predefined_maps.items():
-        with open(osp.join(assert_path, "{}.json".format(env_name)), "r") as f:
-            data_zhenghao = json.load(f)
-        with open(osp.join(assert_path, "{}-quanyi2.json".format(env_name)), "r") as f:
-            data_quanyi = json.load(f)
-        recursive_equal(data_zhenghao, data_quanyi, True)
+    to_generate_map_config = {
+        "start_seed": 0,
+        "environment_num": 30000,
+    }
+    generate_maps(
+        PGDriveEnv, to_generate_map_config,
+        osp.join(asset_path, "20210814_generated_maps_start_seed_0_environment_num_30000.json")
+    )

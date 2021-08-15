@@ -34,7 +34,7 @@ class BIG:
         global_network: RoadNetwork,
         render_node_path: NodePath,
         physics_world: PhysicsWorld,
-        block_type_version: str,
+        # block_type_version: str,
         exit_length=50,
         random_seed=None
     ):
@@ -61,8 +61,8 @@ class BIG:
         )
         self.blocks.append(first_block)
         self.next_step = NextStep.forward
-        assert block_type_version in ["v1", "v2"]
-        self.block_type_version = block_type_version
+        # assert block_type_version in ["v1", "v2"]
+        # self.block_type_version = block_type_version
 
     def generate(self, generate_method: str, parameter: Union[str, int]):
         """
@@ -98,12 +98,12 @@ class BIG:
         Sample a random block type
         """
         if self._block_sequence is None:
-            block_types = PGBlockConfig.all_blocks(self.block_type_version)
-            block_probabilities = PGBlockConfig.block_probability(self.block_type_version)
+            block_types = PGBlockConfig.all_blocks()
+            block_probabilities = PGBlockConfig.block_probability()
             block_type = self.np_random.choice(block_types, p=block_probabilities)
         else:
             type_id = self._block_sequence[len(self.blocks)]
-            block_type = PGBlockConfig.get_block(type_id, self.block_type_version)
+            block_type = PGBlockConfig.get_block(type_id)
 
         socket = self.np_random.choice(self.blocks[-1].get_socket_indices())
         block = block_type(

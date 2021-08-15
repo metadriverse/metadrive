@@ -33,9 +33,9 @@ class PGMap(BaseMap):
             self.road_network,
             parent_node_path,
             physics_world,
-            self._config["block_type_version"],
+            # self._config["block_type_version"],
             exit_length=self._config["exit_length"],
-            random_seed=self.random_seed,
+            random_seed=self.engine.global_random_seed,
         )
         big_map.generate(self._config[self.GENERATE_TYPE], self._config[self.GENERATE_CONFIG])
         self.blocks = big_map.blocks
@@ -43,13 +43,22 @@ class PGMap(BaseMap):
     def _config_generate(self, blocks_config: List, parent_node_path: NodePath, physics_world: PhysicsWorld):
         assert len(self.road_network.graph) == 0, "These Map is not empty, please create a new map to read config"
         last_block = FirstPGBlock(
-            self.road_network, self._config[self.LANE_WIDTH], self._config[self.LANE_NUM], parent_node_path,
-            physics_world, 1
+            global_network=self.road_network,
+            lane_width=self._config[self.LANE_WIDTH],
+            lane_num=self._config[self.LANE_NUM],
+            render_root_np=parent_node_path,
+            physics_world=physics_world,
+            length=self._config["exit_length"]
         )
         self.blocks.append(last_block)
         for block_index, b in enumerate(blocks_config[1:], 1):
-            block_type = PGBlockConfig.get_block(b.pop(self.BLOCK_ID), self._config["block_type_version"])
+            block_type = PGBlockConfig.get_block(b.pop(self.BLOCK_ID))
             pre_block_socket_index = b.pop(self.PRE_BLOCK_SOCKET_INDEX)
-            last_block = block_type(block_index, last_block.get_socket(pre_block_socket_index), self.road_network)
+            last_block = block_type(
+                block_index,
+                last_block.get_socket(pre_block_socket_index),
+                self.road_network,
+                random_seed=self.engine.global_random_seed
+            )
             last_block.construct_from_config(b, parent_node_path, physics_world)
             self.blocks.append(last_block)

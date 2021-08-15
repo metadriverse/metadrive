@@ -171,14 +171,14 @@ class MultiAgentTollgateEnv(MultiAgentPGDrive):
         assert MATollConfig["vehicle_config"]["lane_line_detector"]["num_lasers"] > 2
         return MultiAgentPGDrive.default_config().update(MATollConfig, allow_add_new_key=True)
 
-    def _update_map(self, episode_data: dict = None, force_seed=None):
-        map_config = self.config["map_config"]
-
-        if self.current_map is None:
-            self.seed(map_config["seed"])
-            new_map = self.engine.spawn_object(MATollGateMap, map_config=map_config, random_seed=self.current_seed)
-            self.engine.map_manager.load_map(new_map)
-            self.current_map.spawn_roads = self.spawn_roads
+    def _update_map(self, episode_data: dict = None):
+        self.engine.map_manager.update_map(
+            self.config,
+            self.current_seed,
+            episode_data,
+            single_block_class=MATollGateMap,
+            spawn_roads=self.spawn_roads
+        )
 
     def reward_function(self, vehicle_id: str):
         """
