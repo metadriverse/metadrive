@@ -13,6 +13,9 @@ class BasePolicy(Randomizable, Configurable):
     def act(self, *args, **kwargs):
         pass
 
+    def reset(self):
+        pass
+
     def destroy(self):
         super(BasePolicy, self).destroy()
         self.control_object = None

@@ -38,6 +38,7 @@ class Ramp(PGBlock):
 class InRampOnStraight(Ramp):
     ID = "r"
     EXTRA_PART = 10
+    SOCKET_LEN = 20
 
     def _try_plug_into_previous_block(self) -> bool:
         acc_lane_len = self.get_config()[Parameter.length]
@@ -85,7 +86,20 @@ class InRampOnStraight(Ramp):
         no_cross = CreateAdverseRoad(acc_road, self.block_network, self._global_network) and no_cross
         left_line_type = LineType.CONTINUOUS if self.positive_lane_num == 1 else LineType.BROKEN
         acc_road.get_lanes(self.block_network)[-1].line_types = [left_line_type, LineType.BROKEN]
-        self.add_sockets(PGBlock.create_socket_from_positive_road(acc_road))
+
+        # socket part
+        socket_side_lane = ExtendStraightLane(acc_side_lane, self.SOCKET_LEN, acc_side_lane.line_types)
+        socket_road = Road(acc_road.end_node, self.add_road_node())
+        no_cross = CreateRoadFrom(
+            socket_side_lane,
+            self.positive_lane_num,
+            socket_road,
+            self.block_network,
+            self._global_network,
+            side_lane_line_type=LineType.CONTINUOUS
+        ) and no_cross
+        no_cross = CreateAdverseRoad(socket_road, self.block_network, self._global_network) and no_cross
+        self.add_sockets(PGBlock.create_socket_from_positive_road(socket_road))
 
         # ramp part, part 1
         self.set_part_idx(1)
@@ -131,7 +145,6 @@ class InRampOnStraight(Ramp):
         )
         acc_lane.line_types = [LineType.BROKEN, LineType.CONTINUOUS]
         bend_2_road = Road(connect_road.end_node, self.road_node(0, 0))  # end at part1 road 0, extend road
-        acc_road = Road(Decoration.start, Decoration.end)
         self.block_network.add_lane(bend_2_road.start_node, bend_2_road.end_node, bend_2)
         self.block_network.add_lane(acc_road.start_node, acc_road.end_node, acc_lane)
         no_cross = (not check_lane_on_road(self._global_network, bend_2, 0.95)) and no_cross
@@ -219,7 +232,7 @@ class OutRampOnStraight(Ramp):
         # part 1 road 0
         self.set_part_idx(1)
         dec_side_right_lane = self._get_deacc_lane(dec_right_lane)
-        self.block_network.add_lane(dec_road.start_node, self.add_road_node(), dec_side_right_lane)
+        self.block_network.add_lane(dec_road.start_node, dec_road.end_node, dec_side_right_lane)
         no_cross = (not check_lane_on_road(self._global_network, dec_side_right_lane, 0.95)) and no_cross
 
         bend_1, connect_part = create_bend_straight(
@@ -232,7 +245,7 @@ class OutRampOnStraight(Ramp):
             self.LANE_TYPE,
             speed_limit=self.SPEED_LIMIT
         )
-        bend_1_road = Road(self.road_node(1, 0), self.add_road_node())
+        bend_1_road = Road(dec_road.end_node, self.add_road_node())
         connect_road = Road(bend_1_road.end_node, self.add_road_node())
         self.block_network.add_lane(bend_1_road.start_node, bend_1_road.end_node, bend_1)
         self.block_network.add_lane(connect_road.start_node, connect_road.end_node, connect_part)

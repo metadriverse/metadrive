@@ -1,7 +1,7 @@
 import math
 from abc import ABCMeta, abstractmethod
 from typing import Tuple
-
+from pgdrive.utils import norm
 import numpy as np
 
 from pgdrive.constants import LineType, LineColor
@@ -110,3 +110,10 @@ class AbstractLane:
         b = 0 - s
         # return abs(r) + max(s - self.length, 0) + max(0 - s, 0)
         return abs(r) + (a if a > 0 else 0) + (b if b > 0 else 0)
+
+    def is_previous_lane_of(self, target_lane):
+        x_1, y_1 = self.end
+        x_2, y_2 = target_lane.start
+        if norm(x_1 - x_2, y_1 - y_2) < 1e-1:
+            return True
+        return False
