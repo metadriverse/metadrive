@@ -1,3 +1,5 @@
+import logging
+
 import numpy as np
 
 from pgdrive.component.vehicle_module.PID_controller import PIDController
@@ -189,17 +191,28 @@ class IDMPolicy(BasePolicy):
         # concat lane
         sucess = self.move_to_next_road()
         all_objects = self.control_object.lidar.get_surrounding_objects(self.control_object)
-        if sucess:
-            # perform lane change due to routing
-            acc_front_obj, acc_front_dist, steering_target_lane = self.lane_change_policy(all_objects)
-        else:
-            # can not find routing target lane
-            surrounding_objects = FrontBackObjects.get_find_front_back_objs(
-                all_objects, self.routing_target_lane, self.control_object.position, max_distance=self.MAX_LONG_DIST
-            )
-            acc_front_obj = surrounding_objects.front_object()
-            acc_front_dist = surrounding_objects.front_min_distance()
+        try:
+            if sucess:
+                # perform lane change due to routing
+                acc_front_obj, acc_front_dist, steering_target_lane = self.lane_change_policy(all_objects)
+            else:
+                # can not find routing target lane
+                surrounding_objects = FrontBackObjects.get_find_front_back_objs(
+                    all_objects,
+                    self.routing_target_lane,
+                    self.control_object.position,
+                    max_distance=self.MAX_LONG_DIST
+                )
+                acc_front_obj = surrounding_objects.front_object()
+                acc_front_dist = surrounding_objects.front_min_distance()
+                steering_target_lane = self.routing_target_lane
+        except:
+            # error fallback
+            acc_front_obj = None
+            acc_front_dist = 5
             steering_target_lane = self.routing_target_lane
+            logging.warning("IDM bug! fall back")
+            print("IDM bug! fall back")
 
         # control by PID and IDM
         steering = self.steering_control(steering_target_lane)
