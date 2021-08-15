@@ -60,9 +60,22 @@ class PGBlock(BaseBlock):
     When single-direction block created, road_2 in block socket is useless.
     But it's helpful when a town is created.
     """
-    def __init__(self, block_index: int, pre_block_socket: PGBlockSocket, global_network: RoadNetwork, random_seed):
+    def __init__(
+        self,
+        block_index: int,
+        pre_block_socket: PGBlockSocket,
+        global_network: RoadNetwork,
+        random_seed,
+        ignore_intersection_checking=None
+    ):
+
+        # TODO(pzh) remove None
+        assert ignore_intersection_checking is not None
+
         self.name = str(block_index) + self.ID
-        super(PGBlock, self).__init__(block_index, global_network, random_seed)
+        super(PGBlock, self).__init__(
+            block_index, global_network, random_seed, ignore_intersection_checking=ignore_intersection_checking
+        )
         # block information
         assert self.SOCKET_NUM is not None, "The number of Socket should be specified when define a new block"
         if block_index == 0:

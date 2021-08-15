@@ -29,10 +29,13 @@ class FirstPGBlock(PGBlock):
         lane_num: int,
         render_root_np: NodePath,
         physics_world: PhysicsWorld,
-        length: float = 50
+        length: float = 50,
+        ignore_intersection_checking=False
     ):
         place_holder = PGBlockSocket(Road(Decoration.start, Decoration.end), Road(Decoration.start, Decoration.end))
-        super(FirstPGBlock, self).__init__(0, place_holder, global_network, random_seed=0)
+        super(FirstPGBlock, self).__init__(
+            0, place_holder, global_network, random_seed=0, ignore_intersection_checking=ignore_intersection_checking
+        )
         assert length > self.ENTRANCE_LENGTH, (length, self.ENTRANCE_LENGTH)
         self._block_objects = []
         basic_lane = StraightLane(
@@ -41,13 +44,37 @@ class FirstPGBlock(PGBlock):
             width=lane_width
         )
         ego_v_spawn_road = Road(self.NODE_1, self.NODE_2)
-        CreateRoadFrom(basic_lane, lane_num, ego_v_spawn_road, self.block_network, self._global_network)
-        CreateAdverseRoad(ego_v_spawn_road, self.block_network, self._global_network)
+        CreateRoadFrom(
+            basic_lane,
+            lane_num,
+            ego_v_spawn_road,
+            self.block_network,
+            self._global_network,
+            ignore_intersection_checking=self.ignore_intersection_checking
+        )
+        CreateAdverseRoad(
+            ego_v_spawn_road,
+            self.block_network,
+            self._global_network,
+            ignore_intersection_checking=self.ignore_intersection_checking
+        )
 
         next_lane = ExtendStraightLane(basic_lane, length - self.ENTRANCE_LENGTH, [LineType.BROKEN, LineType.SIDE])
         other_v_spawn_road = Road(self.NODE_2, self.NODE_3)
-        CreateRoadFrom(next_lane, lane_num, other_v_spawn_road, self.block_network, self._global_network)
-        CreateAdverseRoad(other_v_spawn_road, self.block_network, self._global_network)
+        CreateRoadFrom(
+            next_lane,
+            lane_num,
+            other_v_spawn_road,
+            self.block_network,
+            self._global_network,
+            ignore_intersection_checking=self.ignore_intersection_checking
+        )
+        CreateAdverseRoad(
+            other_v_spawn_road,
+            self.block_network,
+            self._global_network,
+            ignore_intersection_checking=self.ignore_intersection_checking
+        )
 
         self._create_in_world()
 

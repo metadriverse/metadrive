@@ -36,17 +36,39 @@ class Curve(PGBlock):
             basic_lane, length, radius, np.deg2rad(angle), direction, basic_lane.width,
             (LineType.BROKEN, LineType.SIDE)
         )
-        no_cross = CreateRoadFrom(curve, lane_num, positive_road, self.block_network, self._global_network)
-        no_cross = CreateAdverseRoad(positive_road, self.block_network, self._global_network) and no_cross
+        no_cross = CreateRoadFrom(
+            curve,
+            lane_num,
+            positive_road,
+            self.block_network,
+            self._global_network,
+            ignore_intersection_checking=self.ignore_intersection_checking
+        )
+        no_cross = CreateAdverseRoad(
+            positive_road,
+            self.block_network,
+            self._global_network,
+            ignore_intersection_checking=self.ignore_intersection_checking
+        ) and no_cross
 
         # part 2
         start_node = end_node
         end_node = self.add_road_node()
         positive_road = Road(start_node, end_node)
         no_cross = CreateRoadFrom(
-            straight, lane_num, positive_road, self.block_network, self._global_network
+            straight,
+            lane_num,
+            positive_road,
+            self.block_network,
+            self._global_network,
+            ignore_intersection_checking=self.ignore_intersection_checking
         ) and no_cross
-        no_cross = CreateAdverseRoad(positive_road, self.block_network, self._global_network) and no_cross
+        no_cross = CreateAdverseRoad(
+            positive_road,
+            self.block_network,
+            self._global_network,
+            ignore_intersection_checking=self.ignore_intersection_checking
+        ) and no_cross
 
         # common properties
         self.add_sockets(self.create_socket_from_positive_road(positive_road))

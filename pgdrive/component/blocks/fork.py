@@ -1,5 +1,6 @@
-import numpy as np
+import math
 
+import numpy as np
 from pgdrive.component.blocks.create_block_utils import CreateRoadFrom, CreateAdverseRoad, ExtendStraightLane, \
     create_bend_straight
 from pgdrive.component.blocks.pg_block import PGBlock
@@ -180,7 +181,14 @@ class OutFork(Fork):
         self.set_part_idx(1)
         dec_side_right_lane = self._get_deacc_lane(dec_right_lane)
         self.block_network.add_lane(dec_road.start_node, self.add_road_node(), dec_side_right_lane)
-        no_cross = (not check_lane_on_road(self._global_network, dec_side_right_lane, 0.95)) and no_cross
+        no_cross = (
+            not check_lane_on_road(
+                self._global_network,
+                dec_side_right_lane,
+                0.95,
+                ignore_intersection_checking=ignore_intersection_checking
+            )
+        ) and no_cross
 
         bend_1, connect_part = create_bend_straight(
             dec_side_right_lane,
@@ -196,8 +204,16 @@ class OutFork(Fork):
         connect_road = Road(bend_1_road.end_node, self.add_road_node())
         self.block_network.add_lane(bend_1_road.start_node, bend_1_road.end_node, bend_1)
         self.block_network.add_lane(connect_road.start_node, connect_road.end_node, connect_part)
-        no_cross = (not check_lane_on_road(self._global_network, bend_1, 0.95)) and no_cross
-        no_cross = (not check_lane_on_road(self._global_network, connect_part, 0.95)) and no_cross
+        no_cross = (
+            not check_lane_on_road(
+                self._global_network, bend_1, 0.95, ignore_intersection_checking=ignore_intersection_checking
+            )
+        ) and no_cross
+        no_cross = (
+            not check_lane_on_road(
+                self._global_network, connect_part, 0.95, ignore_intersection_checking=ignore_intersection_checking
+            )
+        ) and no_cross
 
         bend_2, straight_part = create_bend_straight(
             connect_part,
@@ -213,8 +229,16 @@ class OutFork(Fork):
         straight_road = Road(bend_2_road.end_node, self.add_road_node())
         self.block_network.add_lane(bend_2_road.start_node, bend_2_road.end_node, bend_2)
         self.block_network.add_lane(straight_road.start_node, straight_road.end_node, straight_part)
-        no_cross = (not check_lane_on_road(self._global_network, bend_2, 0.95)) and no_cross
-        no_cross = (not check_lane_on_road(self._global_network, straight_part, 0.95)) and no_cross
+        no_cross = (
+            not check_lane_on_road(
+                self._global_network, bend_2, 0.95, ignore_intersection_checking=ignore_intersection_checking
+            )
+        ) and no_cross
+        no_cross = (
+            not check_lane_on_road(
+                self._global_network, straight_part, 0.95, ignore_intersection_checking=ignore_intersection_checking
+            )
+        ) and no_cross
 
         decoration_part = self._get_merge_part(dec_side_right_lane)
         self.block_network.add_lane(Decoration.start, Decoration.end, decoration_part)

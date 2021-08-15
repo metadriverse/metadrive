@@ -60,12 +60,18 @@ class InRampOnStraight(Ramp):
             extend_road,
             self.block_network,
             self._global_network,
-            side_lane_line_type=LineType.CONTINUOUS
+            side_lane_line_type=LineType.CONTINUOUS,
+            ignore_intersection_checking=self.ignore_intersection_checking
         ) and no_cross
         extend_road.get_lanes(self.block_network)[-1].line_types = [
             LineType.BROKEN if self.positive_lane_num != 1 else LineType.CONTINUOUS, LineType.CONTINUOUS
         ]
-        no_cross = CreateAdverseRoad(extend_road, self.block_network, self._global_network) and no_cross
+        no_cross = CreateAdverseRoad(
+            extend_road,
+            self.block_network,
+            self._global_network,
+            ignore_intersection_checking=self.ignore_intersection_checking
+        ) and no_cross
         _extend_road = -extend_road
         left_lane_line = LineType.NONE if self.positive_lane_num == 1 else LineType.BROKEN
         _extend_road.get_lanes(self.block_network)[-1].line_types = [left_lane_line, LineType.SIDE]
@@ -81,9 +87,15 @@ class InRampOnStraight(Ramp):
             acc_road,
             self.block_network,
             self._global_network,
-            side_lane_line_type=LineType.CONTINUOUS
+            side_lane_line_type=LineType.CONTINUOUS,
+            ignore_intersection_checking=self.ignore_intersection_checking
         ) and no_cross
-        no_cross = CreateAdverseRoad(acc_road, self.block_network, self._global_network) and no_cross
+        no_cross = CreateAdverseRoad(
+            acc_road,
+            self.block_network,
+            self._global_network,
+            ignore_intersection_checking=self.ignore_intersection_checking
+        ) and no_cross
         left_line_type = LineType.CONTINUOUS if self.positive_lane_num == 1 else LineType.BROKEN
         acc_road.get_lanes(self.block_network)[-1].line_types = [left_line_type, LineType.BROKEN]
 
@@ -96,9 +108,15 @@ class InRampOnStraight(Ramp):
             socket_road,
             self.block_network,
             self._global_network,
-            side_lane_line_type=LineType.CONTINUOUS
+            side_lane_line_type=LineType.CONTINUOUS,
+            ignore_intersection_checking=self.ignore_intersection_checking
         ) and no_cross
-        no_cross = CreateAdverseRoad(socket_road, self.block_network, self._global_network) and no_cross
+        no_cross = CreateAdverseRoad(
+            socket_road,
+            self.block_network,
+            self._global_network,
+            ignore_intersection_checking=self.ignore_intersection_checking
+        ) and no_cross
         self.add_sockets(PGBlock.create_socket_from_positive_road(socket_road))
 
         # ramp part, part 1
@@ -111,7 +129,14 @@ class InRampOnStraight(Ramp):
         )
         straight_road = Road(self.add_road_node(), self.add_road_node())
         self.block_network.add_lane(straight_road.start_node, straight_road.end_node, straight_part)
-        no_cross = (not check_lane_on_road(self._global_network, straight_part, 0.95)) and no_cross
+        no_cross = (
+            not check_lane_on_road(
+                self._global_network,
+                straight_part,
+                0.95,
+                ignore_intersection_checking=self.ignore_intersection_checking
+            )
+        ) and no_cross
         self.add_respawn_roads(straight_road)
 
         # p1 road 0, 1
@@ -129,8 +154,19 @@ class InRampOnStraight(Ramp):
         connect_road = Road(bend_1_road.end_node, self.add_road_node())
         self.block_network.add_lane(bend_1_road.start_node, bend_1_road.end_node, bend_1)
         self.block_network.add_lane(connect_road.start_node, connect_road.end_node, connect_part)
-        no_cross = (not check_lane_on_road(self._global_network, bend_1, 0.95)) and no_cross
-        no_cross = (not check_lane_on_road(self._global_network, connect_part, 0.95)) and no_cross
+        no_cross = (
+            not check_lane_on_road(
+                self._global_network, bend_1, 0.95, ignore_intersection_checking=self.ignore_intersection_checking
+            )
+        ) and no_cross
+        no_cross = (
+            not check_lane_on_road(
+                self._global_network,
+                connect_part,
+                0.95,
+                ignore_intersection_checking=self.ignore_intersection_checking
+            )
+        ) and no_cross
 
         # p1, road 2, 3
         bend_2, acc_lane = create_bend_straight(
@@ -147,8 +183,16 @@ class InRampOnStraight(Ramp):
         bend_2_road = Road(connect_road.end_node, self.road_node(0, 0))  # end at part1 road 0, extend road
         self.block_network.add_lane(bend_2_road.start_node, bend_2_road.end_node, bend_2)
         self.block_network.add_lane(acc_road.start_node, acc_road.end_node, acc_lane)
-        no_cross = (not check_lane_on_road(self._global_network, bend_2, 0.95)) and no_cross
-        no_cross = (not check_lane_on_road(self._global_network, acc_lane, 0.95)) and no_cross
+        no_cross = (
+            not check_lane_on_road(
+                self._global_network, bend_2, 0.95, ignore_intersection_checking=self.ignore_intersection_checking
+            )
+        ) and no_cross
+        no_cross = (
+            not check_lane_on_road(
+                self._global_network, acc_lane, 0.95, ignore_intersection_checking=self.ignore_intersection_checking
+            )
+        ) and no_cross
 
         # p1, road 4, small circular to decorate
         merge_lane, _ = create_bend_straight(
@@ -202,9 +246,15 @@ class OutRampOnStraight(Ramp):
             dec_road,
             self.block_network,
             self._global_network,
-            side_lane_line_type=LineType.CONTINUOUS
+            side_lane_line_type=LineType.CONTINUOUS,
+            ignore_intersection_checking=self.ignore_intersection_checking
         ) and no_cross
-        no_cross = CreateAdverseRoad(dec_road, self.block_network, self._global_network) and no_cross
+        no_cross = CreateAdverseRoad(
+            dec_road,
+            self.block_network,
+            self._global_network,
+            ignore_intersection_checking=self.ignore_intersection_checking
+        ) and no_cross
         dec_right_lane = dec_road.get_lanes(self.block_network)[-1]
         left_line_type = LineType.CONTINUOUS if self.positive_lane_num == 1 else LineType.BROKEN
         dec_right_lane.line_types = [left_line_type, LineType.NONE]
@@ -220,9 +270,15 @@ class OutRampOnStraight(Ramp):
             extend_road,
             self.block_network,
             self._global_network,
-            side_lane_line_type=LineType.CONTINUOUS
+            side_lane_line_type=LineType.CONTINUOUS,
+            ignore_intersection_checking=self.ignore_intersection_checking
         ) and no_cross
-        no_cross = CreateAdverseRoad(extend_road, self.block_network, self._global_network) and no_cross
+        no_cross = CreateAdverseRoad(
+            extend_road,
+            self.block_network,
+            self._global_network,
+            ignore_intersection_checking=self.ignore_intersection_checking
+        ) and no_cross
         _extend_road = -extend_road
         _extend_road.get_lanes(self.block_network)[-1].line_types = [
             LineType.NONE if self.positive_lane_num == 1 else LineType.BROKEN, LineType.SIDE
@@ -233,7 +289,14 @@ class OutRampOnStraight(Ramp):
         self.set_part_idx(1)
         dec_side_right_lane = self._get_deacc_lane(dec_right_lane)
         self.block_network.add_lane(dec_road.start_node, dec_road.end_node, dec_side_right_lane)
-        no_cross = (not check_lane_on_road(self._global_network, dec_side_right_lane, 0.95)) and no_cross
+        no_cross = (
+            not check_lane_on_road(
+                self._global_network,
+                dec_side_right_lane,
+                0.95,
+                ignore_intersection_checking=self.ignore_intersection_checking
+            )
+        ) and no_cross
 
         bend_1, connect_part = create_bend_straight(
             dec_side_right_lane,
@@ -249,8 +312,19 @@ class OutRampOnStraight(Ramp):
         connect_road = Road(bend_1_road.end_node, self.add_road_node())
         self.block_network.add_lane(bend_1_road.start_node, bend_1_road.end_node, bend_1)
         self.block_network.add_lane(connect_road.start_node, connect_road.end_node, connect_part)
-        no_cross = (not check_lane_on_road(self._global_network, bend_1, 0.95)) and no_cross
-        no_cross = (not check_lane_on_road(self._global_network, connect_part, 0.95)) and no_cross
+        no_cross = (
+            not check_lane_on_road(
+                self._global_network, bend_1, 0.95, ignore_intersection_checking=self.ignore_intersection_checking
+            )
+        ) and no_cross
+        no_cross = (
+            not check_lane_on_road(
+                self._global_network,
+                connect_part,
+                0.95,
+                ignore_intersection_checking=self.ignore_intersection_checking
+            )
+        ) and no_cross
 
         bend_2, straight_part = create_bend_straight(
             connect_part,
@@ -266,8 +340,19 @@ class OutRampOnStraight(Ramp):
         straight_road = Road(bend_2_road.end_node, self.add_road_node())
         self.block_network.add_lane(bend_2_road.start_node, bend_2_road.end_node, bend_2)
         self.block_network.add_lane(straight_road.start_node, straight_road.end_node, straight_part)
-        no_cross = (not check_lane_on_road(self._global_network, bend_2, 0.95)) and no_cross
-        no_cross = (not check_lane_on_road(self._global_network, straight_part, 0.95)) and no_cross
+        no_cross = (
+            not check_lane_on_road(
+                self._global_network, bend_2, 0.95, ignore_intersection_checking=self.ignore_intersection_checking
+            )
+        ) and no_cross
+        no_cross = (
+            not check_lane_on_road(
+                self._global_network,
+                straight_part,
+                0.95,
+                ignore_intersection_checking=self.ignore_intersection_checking
+            )
+        ) and no_cross
 
         decoration_part = self._get_merge_part(dec_side_right_lane)
         self.block_network.add_lane(Decoration.start, Decoration.end, decoration_part)
