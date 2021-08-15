@@ -52,9 +52,10 @@ class Navigation:
         self._navi_info = np.zeros((self.navigation_info_dim, ))  # navi information res
 
         # Vis
+        self._show_navi_info = (engine.mode == RENDER_MODE_ONSCREEN and not engine.global_config["debug_physics_world"])
+        self.origin = engine.render.attachNewNode("navigation_sign") if self._show_navi_info else None
         self.navi_mark_color = (0.6, 0.8, 0.5) if not random_navi_mark_color else get_np_random().rand(3)
         self.navi_arrow_dir = None
-        self._show_navi_info = (engine.mode == RENDER_MODE_ONSCREEN and not engine.global_config["debug_physics_world"])
         self._dest_node_path = None
         self._goal_node_path = None
 
@@ -62,9 +63,9 @@ class Navigation:
         self._show_line_to_dest = show_line_to_dest
         if self._show_navi_info:
             # nodepath
-            self._line_to_dest = engine.render.attachNewNode("line")
-            self._goal_node_path = engine.render.attachNewNode("target")
-            self._dest_node_path = engine.render.attachNewNode("dest")
+            self._line_to_dest = self.origin.attachNewNode("line")
+            self._goal_node_path = self.origin.attachNewNode("target")
+            self._dest_node_path = self.origin.attachNewNode("dest")
 
             if show_navi_mark:
                 navi_point_model = AssetLoader.loader.loadModel(AssetLoader.file_path("models", "box.bam"))
@@ -77,7 +78,7 @@ class Navigation:
                 line_seg.setColor(self.navi_mark_color[0], self.navi_mark_color[1], self.navi_mark_color[2], 0.7)
                 line_seg.setThickness(2)
                 self._dynamic_line_np = NodePath(line_seg.create(True))
-                self._dynamic_line_np.reparentTo(engine.render)
+                self._dynamic_line_np.reparentTo(self.origin)
                 self._line_to_dest = line_seg
 
             self._goal_node_path.setTransparency(TransparencyAttrib.M_alpha)
@@ -351,4 +352,11 @@ class Navigation:
         self._dynamic_line_np.removeNode()
         self._dynamic_line_np = NodePath(line_seg.create(False))
         self._dynamic_line_np.hide(CamMask.Shadow | CamMask.RgbCam)
-        self._dynamic_line_np.reparentTo(engine.render)
+        self._dynamic_line_np.reparentTo(self.origin)
+
+    def detach_from_world(self):
+        if isinstance(self.origin, NodePath):
+            self.origin.detachNode()
+
+    def attach_to_world(self, engine):
+        self.origin.reparentTo(engine.render)

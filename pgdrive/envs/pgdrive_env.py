@@ -139,14 +139,6 @@ class PGDriveEnv(BasePGDriveEnv):
         return config
 
     def _after_lazy_init(self):
-        if self.config["manual_control"]:
-            if self.config["controller"] == "keyboard":
-                self.controller = KeyboardController()
-            elif self.config["controller"] == "joystick":
-                self.controller = JoystickController()
-            else:
-                raise ValueError("No such a controller type: {}".format(self.config["controller"]))
-
         # initialize track vehicles
         vehicles = self.agent_manager.get_vehicle_list()
         current_track_vehicle = vehicles[0]
@@ -163,14 +155,6 @@ class PGDriveEnv(BasePGDriveEnv):
 
     def _preprocess_actions(self, actions: Union[np.ndarray, Dict[AnyStr, np.ndarray]]) \
             -> Tuple[Union[np.ndarray, Dict[AnyStr, np.ndarray]], Dict]:
-        if self.config["manual_control"] and self.config["use_render"] \
-                and self.current_track_vehicle in self.agent_manager.get_vehicle_list() and not self.main_camera.is_bird_view_camera():
-            action = self.controller.process_input(self.current_track_vehicle)
-            if self.is_multi_agent:
-                actions[self.agent_manager.object_to_agent(self.current_track_vehicle.name)] = action
-            else:
-                actions = action
-
         if not self.is_multi_agent:
             actions = {v_id: actions for v_id in self.vehicles.keys()}
         else:
