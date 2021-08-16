@@ -23,3 +23,7 @@ def test_build_city():
     _t(num_blocks=1)
     _t(num_blocks=3)
     _t(num_blocks=20)
+
+
+if __name__ == '__main__':
+    test_build_city()

@@ -82,7 +82,13 @@ class CityBIG(BIG):
         socket_available = set(socket_available).difference(socket_used)
         socket = self.np_random.choice(sorted(list(socket_available), key=lambda x: x.index))
 
-        block = block_type(len(self.blocks), socket, self._global_network, self.np_random.randint(0, 10000))
+        block = block_type(
+            len(self.blocks),
+            socket,
+            self._global_network,
+            self.np_random.randint(0, 10000),
+            ignore_intersection_checking=False
+        )
         return block
 
 

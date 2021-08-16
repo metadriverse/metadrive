@@ -45,7 +45,9 @@ class MABottleneckMap(PGMap):
         self.blocks.append(last_block)
 
         # Build Bottleneck
-        merge = Merge(1, last_block.get_socket(index=0), self.road_network, random_seed=1)
+        merge = Merge(
+            1, last_block.get_socket(index=0), self.road_network, random_seed=1, ignore_intersection_checking=False
+        )
         merge.construct_from_config(
             dict(
                 lane_num=self.config["bottle_lane_num"] - self.config["neck_lane_num"],
@@ -53,7 +55,9 @@ class MABottleneckMap(PGMap):
             ), parent_node_path, physics_world
         )
         self.blocks.append(merge)
-        split = Split(2, merge.get_socket(index=0), self.road_network, random_seed=1)
+        split = Split(
+            2, merge.get_socket(index=0), self.road_network, random_seed=1, ignore_intersection_checking=False
+        )
         split.construct_from_config(
             {
                 "length": self.config["exit_length"],

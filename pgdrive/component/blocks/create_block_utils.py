@@ -84,10 +84,6 @@ def CreateRoadFrom(
     Usage: give the far left lane, then create lane_num lanes including itself
     :return if the lanes created cross other lanes
     """
-
-    # TODO(pzh) remove None
-    assert ignore_intersection_checking is not None
-
     lane_num -= 1  # include lane itself
     origin_lane = lane
     lanes = []
@@ -243,7 +239,8 @@ def CreateTwoWayRoad(
     ignore_end: str = None,
     center_line_type=LineType.CONTINUOUS,  # Identical to Block.CENTER_LINE_TYPE
     side_lane_line_type=LineType.SIDE,
-    inner_lane_line_type=LineType.BROKEN
+    inner_lane_line_type=LineType.BROKEN,
+    ignore_intersection_checking=None
 ) -> bool:
     """
     This function will add a new road in reverse direction to the road network
@@ -292,7 +289,8 @@ def CreateTwoWayRoad(
         ignore_end=ignore_end,
         side_lane_line_type=side_lane_line_type,
         inner_lane_line_type=inner_lane_line_type,
-        center_line_type=center_line_type
+        center_line_type=center_line_type,
+        ignore_intersection_checking=ignore_intersection_checking
     )
     return success
 

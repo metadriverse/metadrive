@@ -51,7 +51,8 @@ class ParkingLot(PGBlock):
             center_line_type=LineType.BROKEN,
             inner_lane_line_type=LineType.BROKEN,
             side_lane_line_type=LineType.NONE,
-            center_line_color=LineColor.GREY
+            center_line_color=LineColor.GREY,
+            ignore_intersection_checking=self.ignore_intersection_checking
         ) and no_cross
         no_cross = CreateAdverseRoad(
             road,
@@ -60,7 +61,8 @@ class ParkingLot(PGBlock):
             center_line_type=LineType.BROKEN,
             inner_lane_line_type=LineType.BROKEN,
             side_lane_line_type=LineType.NONE,
-            center_line_color=LineColor.GREY
+            center_line_color=LineColor.GREY,
+            ignore_intersection_checking=self.ignore_intersection_checking
         ) and no_cross
 
         # socket part
@@ -76,7 +78,8 @@ class ParkingLot(PGBlock):
             self._global_network,
             center_line_type=LineType.BROKEN,
             inner_lane_line_type=LineType.BROKEN,
-            side_lane_line_type=LineType.SIDE
+            side_lane_line_type=LineType.SIDE,
+            ignore_intersection_checking=self.ignore_intersection_checking
         ) and no_cross
 
         no_cross = CreateAdverseRoad(
@@ -85,7 +88,8 @@ class ParkingLot(PGBlock):
             self._global_network,
             center_line_type=LineType.BROKEN,
             inner_lane_line_type=LineType.BROKEN,
-            side_lane_line_type=LineType.SIDE
+            side_lane_line_type=LineType.SIDE,
+            ignore_intersection_checking=self.ignore_intersection_checking
         ) and no_cross
 
         socket = self.create_socket_from_positive_road(parking_lot_out_road)
@@ -134,7 +138,8 @@ class ParkingLot(PGBlock):
                 self._global_network,
                 center_line_type=LineType.NONE,
                 inner_lane_line_type=LineType.NONE,
-                side_lane_line_type=LineType.NONE
+                side_lane_line_type=LineType.NONE,
+                ignore_intersection_checking=self.ignore_intersection_checking
             )
             start_node = self.road_node(part_idx, 0)
 
@@ -150,7 +155,8 @@ class ParkingLot(PGBlock):
             self._global_network,
             center_line_type=LineType.NONE,
             inner_lane_line_type=LineType.NONE,
-            side_lane_line_type=LineType.SIDE if dist_to_in < 1e-3 else LineType.NONE
+            side_lane_line_type=LineType.SIDE if dist_to_in < 1e-3 else LineType.NONE,
+            ignore_intersection_checking=self.ignore_intersection_checking
         )
         if dist_to_in < 1e-3:
             no_cross = no_cross and bend_no_cross
@@ -166,7 +172,8 @@ class ParkingLot(PGBlock):
             center_line_type=LineType.CONTINUOUS,
             inner_lane_line_type=LineType.NONE,
             side_lane_line_type=LineType.SIDE if dist_to_in < 1e-3 else LineType.NONE,
-            center_line_color=LineColor.GREY
+            center_line_color=LineColor.GREY,
+            ignore_intersection_checking=self.ignore_intersection_checking
         )
 
         # lane into parking space and parking space, 2
@@ -191,7 +198,8 @@ class ParkingLot(PGBlock):
                 self._global_network,
                 center_line_type=LineType.NONE,
                 inner_lane_line_type=LineType.NONE,
-                side_lane_line_type=LineType.NONE
+                side_lane_line_type=LineType.NONE,
+                ignore_intersection_checking=self.ignore_intersection_checking
             )
             start_node = self.road_node(part_idx, 3)
 
@@ -207,7 +215,8 @@ class ParkingLot(PGBlock):
             self._global_network,
             center_line_type=LineType.NONE,
             inner_lane_line_type=LineType.NONE,
-            side_lane_line_type=LineType.NONE
+            side_lane_line_type=LineType.NONE,
+            ignore_intersection_checking=self.ignore_intersection_checking
         )
 
         straight_road = Road(self.road_node(part_idx, 4), self.road_node(part_idx, 1))
@@ -219,7 +228,8 @@ class ParkingLot(PGBlock):
             self._global_network,
             center_line_type=LineType.NONE,
             inner_lane_line_type=LineType.NONE,
-            side_lane_line_type=LineType.NONE
+            side_lane_line_type=LineType.NONE,
+            ignore_intersection_checking=self.ignore_intersection_checking
         )
 
         # give it a new road name to make it be a two way road (1,2) = (5,6) = parking space !
@@ -232,7 +242,8 @@ class ParkingLot(PGBlock):
             parking_road,
             center_line_type=LineType.NONE,
             inner_lane_line_type=LineType.NONE,
-            side_lane_line_type=LineType.SIDE if dist_to_out < 1e-3 else LineType.NONE
+            side_lane_line_type=LineType.SIDE if dist_to_out < 1e-3 else LineType.NONE,
+            ignore_intersection_checking=self.ignore_intersection_checking
         )
 
         # out part
@@ -254,7 +265,8 @@ class ParkingLot(PGBlock):
             self._global_network,
             center_line_type=LineType.NONE,
             inner_lane_line_type=LineType.NONE,
-            side_lane_line_type=LineType.SIDE if dist_to_out < 1e-3 else LineType.NONE
+            side_lane_line_type=LineType.SIDE if dist_to_out < 1e-3 else LineType.NONE,
+            ignore_intersection_checking=self.ignore_intersection_checking
         )
         if dist_to_out < 1e-3:
             no_cross = no_cross and bend_success
@@ -269,7 +281,8 @@ class ParkingLot(PGBlock):
                 self._global_network,
                 center_line_type=LineType.NONE,
                 inner_lane_line_type=LineType.NONE,
-                side_lane_line_type=LineType.NONE
+                side_lane_line_type=LineType.NONE,
+                ignore_intersection_checking=self.ignore_intersection_checking
             )
         # out part 2
         extend_lane = ExtendStraightLane(parking_lane, self.lane_width, [LineType.NONE, LineType.NONE])
@@ -281,7 +294,8 @@ class ParkingLot(PGBlock):
             self._global_network,
             center_line_type=LineType.NONE,
             inner_lane_line_type=LineType.NONE,
-            side_lane_line_type=LineType.NONE
+            side_lane_line_type=LineType.NONE,
+            ignore_intersection_checking=self.ignore_intersection_checking
         )
 
         bend, straight = create_bend_straight(
@@ -299,7 +313,8 @@ class ParkingLot(PGBlock):
             self._global_network,
             center_line_type=LineType.NONE,
             inner_lane_line_type=LineType.NONE,
-            side_lane_line_type=LineType.NONE
+            side_lane_line_type=LineType.NONE,
+            ignore_intersection_checking=self.ignore_intersection_checking
         )
         if dist_to_in > 1e-3:
             out_straight_road = Road(self.road_node(part_idx, 9), in_socket.negative_road.start_node)
@@ -311,7 +326,8 @@ class ParkingLot(PGBlock):
                 self._global_network,
                 center_line_type=LineType.NONE,
                 inner_lane_line_type=LineType.NONE,
-                side_lane_line_type=LineType.NONE
+                side_lane_line_type=LineType.NONE,
+                ignore_intersection_checking=self.ignore_intersection_checking
             )
 
         return no_cross
