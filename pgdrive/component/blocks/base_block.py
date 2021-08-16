@@ -1,11 +1,10 @@
-from typing import Dict, Union, List, Tuple
-
 import math
+from typing import Dict, Union, List
+
 import numpy as np
 from panda3d.bullet import BulletBoxShape, BulletRigidBodyNode, BulletGhostNode
 from panda3d.core import Vec3, LQuaternionf, Vec4, CardMaker, TextureStage, RigidBodyCombiner, \
     TransparencyAttrib, SamplerState, NodePath
-
 from pgdrive.base_class.base_object import BaseObject
 from pgdrive.component.lane.abs_lane import AbstractLane
 from pgdrive.component.lane.circular_lane import CircularLane
@@ -13,11 +12,11 @@ from pgdrive.component.lane.straight_lane import StraightLane
 from pgdrive.component.lane.waypoint_lane import WayPointLane
 from pgdrive.component.road.road import Road
 from pgdrive.component.road.road_network import RoadNetwork
-from pgdrive.constants import BodyName, CamMask, CollisionGroup, LineType, LineColor, DrivableAreaProperty
+from pgdrive.constants import BodyName, CamMask, LineType, LineColor, DrivableAreaProperty
 from pgdrive.engine.asset_loader import AssetLoader
 from pgdrive.engine.core.physics_world import PhysicsWorld
 from pgdrive.engine.physics_node import BaseRigidBodyNode
-from pgdrive.utils.coordinates_shift import panda_position, panda_heading
+from pgdrive.utils.coordinates_shift import panda_position
 from pgdrive.utils.math_utils import norm, Vector
 
 
@@ -122,6 +121,10 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
             lanes = road.get_lanes(self.block_network)
             ret.append(lanes)
         return ret
+
+    def get_intermediate_spawn_lanes(self):
+        """Return all lanes that can be used to generate spawn intermediate vehicles."""
+        raise NotImplementedError()
 
     def _add_one_respawn_road(self, respawn_road: Road):
         assert isinstance(respawn_road, Road), "Spawn roads list only accept Road Type"

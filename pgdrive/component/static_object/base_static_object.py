@@ -19,6 +19,7 @@ class BaseStaticObject(BaseObject):
         super(BaseStaticObject, self).__init__(random_seed=random_seed)
         self.position = position
         self.speed = 0
+        self.velocity = np.array([0.0, 0.0])
         self.heading = heading / np.pi * 180
         self.lane_index = lane.index
         self.lane = lane
