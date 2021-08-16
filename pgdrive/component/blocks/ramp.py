@@ -203,6 +203,12 @@ class InRampOnStraight(Ramp):
 
         return no_cross
 
+    def get_intermediate_spawn_lanes(self):
+        """Override this function for intersection so that we won't spawn vehicles in the center of intersection."""
+        respawn_lanes = super(InRampOnStraight, self).get_intermediate_spawn_lanes()
+        assert sum([abs(l.length - InRampOnStraight.RAMP_LEN) <= 0.1 for ls in respawn_lanes for l in ls]) == 1
+        return respawn_lanes
+
 
 class OutRampOnStraight(Ramp):
     ID = "R"

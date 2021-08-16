@@ -203,3 +203,11 @@ class PGBlock(BaseBlock):
     @classmethod
     def node(cls, block_idx: int, part_idx: int, road_idx: int) -> str:
         return str(block_idx) + cls.ID + str(part_idx) + cls.DASH + str(road_idx) + cls.DASH
+
+    def get_intermediate_spawn_lanes(self):
+        trigger_lanes = self.block_network.get_positive_lanes()
+        respawn_lanes = self.get_respawn_lanes()
+        for lanes in respawn_lanes:
+            if lanes not in trigger_lanes:
+                trigger_lanes.append(lanes)
+        return trigger_lanes

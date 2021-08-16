@@ -2,7 +2,6 @@ import copy
 from collections import deque
 
 import numpy as np
-
 from pgdrive.component.blocks.create_block_utils import CreateAdverseRoad, CreateRoadFrom, ExtendStraightLane, \
     create_bend_straight
 from pgdrive.component.blocks.pg_block import PGBlock, PGBlockSocket
@@ -232,3 +231,8 @@ class InterSection(PGBlock):
 
     def add_u_turn(self, enable_u_turn: bool):
         self.enable_u_turn = enable_u_turn
+
+    def get_intermediate_spawn_lanes(self):
+        """Override this function for intersection so that we won't spawn vehicles in the center of intersection."""
+        respawn_lanes = self.get_respawn_lanes()
+        return respawn_lanes
