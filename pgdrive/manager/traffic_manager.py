@@ -206,7 +206,7 @@ class TrafficManager(BaseManager):
                 # Do special handling for ramp, and there must be vehicles created there
                 continue
             vehicle_type = self.random_vehicle_type()
-            random_v = self.engine.spawn_object(
+            random_v = self.engine.spawn_object_for_debug(
                 vehicle_type,
                 vehicle_config={
                     "spawn_lane_index": lane.index,
