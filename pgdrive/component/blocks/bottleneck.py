@@ -54,7 +54,8 @@ class Merge(Bottleneck):
             self._global_network,
             center_line_type=LineType.CONTINUOUS,
             side_lane_line_type=LineType.NONE,
-            inner_lane_line_type=LineType.NONE
+            inner_lane_line_type=LineType.NONE,
+            ignore_intersection_checking=self.ignore_intersection_checking
         ) and no_cross
         no_cross = CreateAdverseRoad(
             straight_road,
@@ -62,7 +63,8 @@ class Merge(Bottleneck):
             self._global_network,
             inner_lane_line_type=LineType.NONE,
             side_lane_line_type=LineType.NONE,
-            center_line_type=LineType.CONTINUOUS
+            center_line_type=LineType.CONTINUOUS,
+            ignore_intersection_checking=self.ignore_intersection_checking
         ) and no_cross
 
         # extend for socket ,part 1 road 1
@@ -76,7 +78,8 @@ class Merge(Bottleneck):
             self._global_network,
             center_line_type=LineType.CONTINUOUS,
             side_lane_line_type=LineType.SIDE,
-            inner_lane_line_type=LineType.BROKEN
+            inner_lane_line_type=LineType.BROKEN,
+            ignore_intersection_checking=self.ignore_intersection_checking
         ) and no_cross
         no_cross = CreateAdverseRoad(
             socket_road,
@@ -84,7 +87,8 @@ class Merge(Bottleneck):
             self._global_network,
             inner_lane_line_type=LineType.BROKEN,
             side_lane_line_type=LineType.SIDE,
-            center_line_type=LineType.CONTINUOUS
+            center_line_type=LineType.CONTINUOUS,
+            ignore_intersection_checking=self.ignore_intersection_checking
         ) and no_cross
 
         negative_sockect_road = -socket_road
@@ -107,7 +111,8 @@ class Merge(Bottleneck):
                 self._global_network,
                 center_line_type=LineType.NONE,
                 side_lane_line_type=side_line_type,
-                inner_lane_line_type=LineType.NONE
+                inner_lane_line_type=LineType.NONE,
+                ignore_intersection_checking=self.ignore_intersection_checking
             ) and no_cross
             road_2 = Road(inner_node, self.road_node(0, 0))
             no_cross = CreateRoadFrom(
@@ -118,7 +123,8 @@ class Merge(Bottleneck):
                 self._global_network,
                 center_line_type=LineType.NONE,
                 side_lane_line_type=side_line_type,
-                inner_lane_line_type=LineType.NONE
+                inner_lane_line_type=LineType.NONE,
+                ignore_intersection_checking=self.ignore_intersection_checking
             ) and no_cross
 
             # adverse part
@@ -135,7 +141,8 @@ class Merge(Bottleneck):
                 self._global_network,
                 center_line_type=LineType.NONE,
                 side_lane_line_type=side_line_type,
-                inner_lane_line_type=LineType.NONE
+                inner_lane_line_type=LineType.NONE,
+                ignore_intersection_checking=self.ignore_intersection_checking
             ) and no_cross
 
             road_1 = -road_1
@@ -147,7 +154,8 @@ class Merge(Bottleneck):
                 self._global_network,
                 center_line_type=LineType.NONE,
                 side_lane_line_type=side_line_type,
-                inner_lane_line_type=LineType.NONE
+                inner_lane_line_type=LineType.NONE,
+                ignore_intersection_checking=self.ignore_intersection_checking
             ) and no_cross
 
         return no_cross
@@ -188,7 +196,8 @@ class Split(Bottleneck):
             self._global_network,
             center_line_type=LineType.CONTINUOUS,
             side_lane_line_type=LineType.NONE,
-            inner_lane_line_type=LineType.NONE
+            inner_lane_line_type=LineType.NONE,
+            ignore_intersection_checking=self.ignore_intersection_checking
         ) and no_cross
         no_cross = CreateAdverseRoad(
             straight_road,
@@ -196,7 +205,8 @@ class Split(Bottleneck):
             self._global_network,
             inner_lane_line_type=LineType.NONE,
             side_lane_line_type=LineType.NONE,
-            center_line_type=LineType.CONTINUOUS
+            center_line_type=LineType.CONTINUOUS,
+            ignore_intersection_checking=self.ignore_intersection_checking
         ) and no_cross
 
         # part 2, circular part
@@ -222,7 +232,8 @@ class Split(Bottleneck):
                 self._global_network,
                 center_line_type=LineType.NONE,
                 side_lane_line_type=side_line_type,
-                inner_lane_line_type=LineType.NONE
+                inner_lane_line_type=LineType.NONE,
+                ignore_intersection_checking=self.ignore_intersection_checking
             ) and no_cross
             road_2 = Road(inner_node, self.road_node(0, 0))
             no_cross = CreateRoadFrom(
@@ -233,7 +244,8 @@ class Split(Bottleneck):
                 self._global_network,
                 center_line_type=LineType.NONE,
                 side_lane_line_type=side_line_type,
-                inner_lane_line_type=LineType.NONE
+                inner_lane_line_type=LineType.NONE,
+                ignore_intersection_checking=self.ignore_intersection_checking
             ) and no_cross
 
         # extend for socket ,part 1 road 1
@@ -246,7 +258,8 @@ class Split(Bottleneck):
             self._global_network,
             center_line_type=LineType.CONTINUOUS,
             side_lane_line_type=LineType.SIDE,
-            inner_lane_line_type=LineType.BROKEN
+            inner_lane_line_type=LineType.BROKEN,
+            ignore_intersection_checking=self.ignore_intersection_checking
         ) and no_cross
         no_cross = CreateAdverseRoad(
             socket_road,
@@ -254,7 +267,8 @@ class Split(Bottleneck):
             self._global_network,
             inner_lane_line_type=LineType.BROKEN,
             side_lane_line_type=LineType.SIDE,
-            center_line_type=LineType.CONTINUOUS
+            center_line_type=LineType.CONTINUOUS,
+            ignore_intersection_checking=self.ignore_intersection_checking
         ) and no_cross
 
         negative_sockect_road = -socket_road
@@ -279,7 +293,8 @@ class Split(Bottleneck):
                 self._global_network,
                 center_line_type=LineType.NONE,
                 side_lane_line_type=side_line_type,
-                inner_lane_line_type=LineType.NONE
+                inner_lane_line_type=LineType.NONE,
+                ignore_intersection_checking=self.ignore_intersection_checking
             ) and no_cross
             road_2 = -Road(start_ndoe, inner_node)
             no_cross = CreateRoadFrom(
@@ -290,6 +305,7 @@ class Split(Bottleneck):
                 self._global_network,
                 center_line_type=LineType.NONE,
                 side_lane_line_type=side_line_type,
-                inner_lane_line_type=LineType.NONE
+                inner_lane_line_type=LineType.NONE,
+                ignore_intersection_checking=self.ignore_intersection_checking
             ) and no_cross
         return no_cross

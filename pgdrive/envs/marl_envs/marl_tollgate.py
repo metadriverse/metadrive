@@ -126,7 +126,9 @@ class MATollGateMap(PGMap):
         )
         self.blocks.append(last_block)
 
-        split = Split(1, last_block.get_socket(index=0), self.road_network, random_seed=1)
+        split = Split(
+            1, last_block.get_socket(index=0), self.road_network, random_seed=1, ignore_intersection_checking=False
+        )
         split.construct_block(
             parent_node_path, physics_world, {
                 "length": 2,
@@ -135,7 +137,9 @@ class MATollGateMap(PGMap):
             }
         )
         self.blocks.append(split)
-        toll = TollGate(2, split.get_socket(index=0), self.road_network, random_seed=1)
+        toll = TollGate(
+            2, split.get_socket(index=0), self.road_network, random_seed=1, ignore_intersection_checking=False
+        )
         toll.construct_block(parent_node_path, physics_world, {
             "length": self.config["toll_length"],
         })
@@ -143,7 +147,7 @@ class MATollGateMap(PGMap):
         self.blocks.append(toll)
 
         # Build Toll
-        merge = Merge(3, toll.get_socket(index=0), self.road_network, random_seed=1)
+        merge = Merge(3, toll.get_socket(index=0), self.road_network, random_seed=1, ignore_intersection_checking=False)
         merge.construct_from_config(
             dict(
                 lane_num=self.config["toll_lane_num"] - self.config["lane_num"],

@@ -41,7 +41,9 @@ class MARoundaboutMap(PGMap):
 
         # Build roundabout
         Roundabout.EXIT_PART_LENGTH = length
-        last_block = Roundabout(1, last_block.get_socket(index=0), self.road_network, random_seed=1)
+        last_block = Roundabout(
+            1, last_block.get_socket(index=0), self.road_network, random_seed=1, ignore_intersection_checking=False
+        )
         last_block.construct_block(
             parent_node_path,
             physics_world,
