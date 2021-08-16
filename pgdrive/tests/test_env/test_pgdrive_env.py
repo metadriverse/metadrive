@@ -112,7 +112,7 @@ def test_zombie():
                 assert abs(middle_lane.local_coordinates(env.vehicle.position)[0] - middle_lane.length) < 10
 
                 # The speed should also be perfectly controlled.
-                assert abs(env.vehicle.speed - target.speed) < 1
+                assert abs(env.vehicle.speed - target.speed) < 1.2
 
                 break
     finally:

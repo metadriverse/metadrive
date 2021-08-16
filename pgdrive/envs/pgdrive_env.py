@@ -229,15 +229,15 @@ class PGDriveEnv(BasePGDriveEnv):
             done = True
             logging.info("Episode ended! Reason: arrive_dest.")
             done_info[TerminationState.SUCCESS] = True
-        elif vehicle.crash_vehicle:
+        if vehicle.crash_vehicle:
             done = True
             logging.info("Episode ended! Reason: crash. ")
             done_info[TerminationState.CRASH_VEHICLE] = True
-        elif vehicle.out_of_route or not vehicle.on_lane or vehicle.crash_sidewalk:
+        if vehicle.out_of_route or not vehicle.on_lane or vehicle.crash_sidewalk:
             done = True
             logging.info("Episode ended! Reason: out_of_road.")
             done_info[TerminationState.OUT_OF_ROAD] = True
-        elif vehicle.crash_object:
+        if vehicle.crash_object:
             done = True
             done_info[TerminationState.CRASH_OBJECT] = True
 

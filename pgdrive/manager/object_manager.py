@@ -27,7 +27,7 @@ class TrafficSignManager(BaseManager):
     # distance between two cones
     CONE_LONGITUDE = 2
     CONE_LATERAL = 1
-    PROHIBIT_SCENE_PROB = 0.  # the reset is the probability of break_down_scene
+    PROHIBIT_SCENE_PROB = 5.  # the reset is the probability of break_down_scene
 
     def __init__(self):
         super(TrafficSignManager, self).__init__()
@@ -92,7 +92,8 @@ class TrafficSignManager(BaseManager):
 
     def break_down_scene(self, lane: AbstractLane, longitude: float):
         engine = get_engine()
-        breakdown_vehicle = engine.spawn_object(engine.traffic_manager.random_vehicle_type(), lane, longitude, False)
+        v_config = {"spawn_lane_index": lane.index, "spawn_longitude": longitude}
+        breakdown_vehicle = engine.spawn_object(engine.traffic_manager.random_vehicle_type(), vehicle_config=v_config)
         breakdown_vehicle.set_break_down()
         self.engine.spawn_object(TrafficTriangle, lane=lane, longitude=longitude - self.ALERT_DIST, lateral=0)
 
@@ -105,7 +106,6 @@ class TrafficSignManager(BaseManager):
         :param on_left: on left or right side
         :return: None
         """
-        engine = get_engine()
         lat_num = int(lateral_len / self.CONE_LATERAL)
         longitude_num = int(self.ACCIDENT_AREA_LEN / self.CONE_LONGITUDE)
         lat_1 = [lat * self.CONE_LATERAL for lat in range(lat_num)]

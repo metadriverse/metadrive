@@ -1,8 +1,7 @@
 import numpy as np
 
 from pgdrive import PGDriveEnv
-from pgdrive.component.vehicle.base_vehicle import BaseVehicle
-from pgdrive.component.vehicle_module.lidar import Lidar
+from pgdrive.component.vehicle.vehicle_type import DefaultVehicle
 from pgdrive.envs.base_env import BASE_DEFAULT_CONFIG
 from pgdrive.envs.pgdrive_env import PGDriveEnvV1_DEFAULT_CONFIG
 from pgdrive.utils import Config
@@ -33,7 +32,7 @@ def test_base_vehicle():
 
         # v_config = BaseVehicle.get_vehicle_config(dict())
         v_config = Config(BASE_DEFAULT_CONFIG["vehicle_config"]).update(PGDriveEnvV1_DEFAULT_CONFIG["vehicle_config"])
-        v = engine.spawn_object(BaseVehicle, vehicle_config=v_config, random_seed=0)
+        v = engine.spawn_object(DefaultVehicle, vehicle_config=v_config, random_seed=0)
 
         v.add_navigation(True)
         v.add_navigation(False)

@@ -9,34 +9,36 @@ class TestEnv(PGDriveEnv):
         """
         super(TestEnv, self).__init__(
             {
-                "environment_num": 10,
+                "environment_num": 20,
                 "traffic_density": .2,
                 "traffic_mode": "trigger",
                 "start_seed": 12,
                 # "_disable_detector_mask":True,
                 "onscreen_message": True,
                 # "debug_physics_world": True,
-                "pstats": True,
                 "global_light": True,
                 # "debug_static_world":True,
                 "cull_scene": False,
-                "controller": "joystick",
-                # "manual_control": True,
+                # "controller": "joystick",
+                "manual_control": True,
                 "use_render": True,
                 "decision_repeat": 5,
                 "rgb_clip": True,
                 "debug": True,
                 "fast": True,
+
                 # "map_config": {
                 #     Map.GENERATE_TYPE: MapGenerateMethod.BIG_BLOCK_SEQUENCE,
-                #     Map.GENERATE_CONFIG: "SXO",
+                #     Map.GENERATE_CONFIG: "OXO",
                 #     Map.LANE_WIDTH: 3.5,
                 #     Map.LANE_NUM: 3,
                 # },
-                "map": 8,
+                "map": "O",
+                "pstats": True,
                 "driving_reward": 1.0,
                 "vehicle_config": {
                     "enable_reverse": True,
+                    # "random_color": True
                     # "show_lidar": True,
                     # "spawn_lane_index":("1r1_0_", "1r1_1_", 0),
                     # "destination_node":"2R1_3_",
@@ -59,7 +61,7 @@ if __name__ == "__main__":
     o = env.reset()
     print(len(env.engine.traffic_manager._traffic_vehicles))
     for s in range(1, 100000):
-        o, r, d, info = env.step([.0, 1.])
+        o, r, d, info = env.step([.0, 0.])
         # info["fuel"] = env.vehicle.energy_consumption
         env.render(text={"heading_diff": env.vehicle.heading_diff(env.vehicle.lane)})
         # assert env.observation_space.contains(o)
@@ -70,6 +72,6 @@ if __name__ == "__main__":
         #             time.time() - start, (s + 1) / (time.time() - start)
         #         )
         #     )
-        # if s % 100 == 0:
-        #     env.close()
-        #     env.reset()
+        if d:
+            # env.close()
+            env.reset()
