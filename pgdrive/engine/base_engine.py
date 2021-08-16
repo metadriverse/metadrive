@@ -4,6 +4,7 @@ from collections import OrderedDict
 from typing import Callable, Optional, Union, List, Dict, AnyStr
 
 import numpy as np
+
 from pgdrive.base_class.randomizable import Randomizable
 from pgdrive.engine.core.engine_core import EngineCore
 from pgdrive.engine.interface import Interface
@@ -326,3 +327,6 @@ class BaseEngine(EngineCore, Randomizable):
     @property
     def global_seed(self):
         return self.global_random_seed
+
+    def spawn_object_for_debug(self, *args, **kwargs):
+        return self.spawn_object(*args, **kwargs)

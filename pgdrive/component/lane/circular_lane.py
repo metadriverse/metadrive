@@ -1,8 +1,6 @@
 import math
 from typing import Tuple
 
-import numpy as np
-
 from pgdrive.component.lane.abs_lane import AbstractLane
 from pgdrive.constants import LineType
 from pgdrive.utils.math_utils import wrap_to_pi, norm, Vector
@@ -52,7 +50,7 @@ class CircularLane(AbstractLane):
 
     def heading_at(self, longitudinal: float) -> float:
         phi = self.direction * longitudinal / self.radius + self.start_phase
-        psi = phi + np.pi / 2 * self.direction
+        psi = phi + math.pi / 2 * self.direction
         return psi
 
     def width_at(self, longitudinal: float) -> float:
