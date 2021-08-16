@@ -12,6 +12,7 @@ from pgdrive.engine.engine_utils import get_engine
 from pgdrive.manager.base_manager import BaseManager
 from pgdrive.utils import norm, merge_dicts
 import math
+
 BlockVehicles = namedtuple("block_vehicles", "trigger_road vehicles")
 
 
@@ -298,8 +299,9 @@ class TrafficManager(BaseManager):
         return respawn_lanes
 
     def random_vehicle_type(self):
-        from pgdrive.component.vehicle.vehicle_type import vehicle_type
-        vehicle_type = vehicle_type[self.np_random.choice(list(vehicle_type.keys()), p=[0.2, 0.3, 0.3, 0.2])]
+        from pgdrive.component.vehicle.vehicle_type import vehicle_type, DefaultVehicle
+        vehicle_type = vehicle_type[self.np_random.choice(list(vehicle_type.keys()), p=[0.2, 0.3, 0.3, 0.2])] if \
+        self.engine.global_config["random_traffic_model"] else DefaultVehicle
         return vehicle_type
 
     def destroy(self) -> None:
