@@ -1,5 +1,4 @@
 import math
-from pgdrive.utils.math_utils import time_me
 from collections import deque
 from typing import Union, Optional
 
@@ -14,7 +13,6 @@ from pgdrive.component.lane.abs_lane import AbstractLane
 from pgdrive.component.lane.circular_lane import CircularLane
 from pgdrive.component.lane.straight_lane import StraightLane
 from pgdrive.component.lane.waypoint_lane import WayPointLane
-from pgdrive.component.map.base_map import BaseMap
 from pgdrive.component.road.road import Road
 from pgdrive.component.vehicle_module.depth_camera import DepthCamera
 from pgdrive.component.vehicle_module.distance_detector import SideDetector, LaneLineDetector
@@ -33,7 +31,6 @@ from pgdrive.utils.coordinates_shift import panda_position, pgdrive_position, pa
 from pgdrive.utils.math_utils import get_vertical_vector, norm, clip
 from pgdrive.utils.scene_utils import ray_localization
 from pgdrive.utils.scene_utils import rect_region_detection
-from pgdrive.utils.space import ParameterSpace, Parameter, VehicleParameterSpace
 
 
 class BaseVehicleState:
@@ -74,21 +71,24 @@ class BaseVehicle(BaseObject, BaseVehicleState):
                     0       1
                     II-----II
                         |
-                        |  <---chassis
+                        |  <---chassis/wheelbase
                         |
                     II-----II
                     2       3
     """
-    MODEL = None
-    PARAMETER_SPACE = ParameterSpace(
-        VehicleParameterSpace.BASE_VEHICLE
-    )  # it will not sample config from parameter space
     COLLISION_MASK = CollisionGroup.Vehicle
-    STEERING_INCREMENT = 0.05
 
-    LENGTH = 4.51
-    WIDTH = 1.852
-    HEIGHT = 1.19
+    LENGTH = None
+    WIDTH = None
+    HEIGHT = None
+    TIRE_RADIUS = None
+    LATERAL_TIRE_TO_CENTER = None
+    FRONT_WHEELBASE = None
+    REAR_WHEELBASE = None
+    MASS = None
+    CHASSIS_TO_WHEEL_AXIS = 0.2
+    SUSPENSION_LENGTH = 40
+    SUSPENSION_STIFFNESS = 30
 
     # for random color choosing
     MATERIAL_COLOR_COEFF = 10  # to resist other factors, since other setting may make color dark
@@ -96,6 +96,13 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     MATERIAL_ROUGHNESS = 0.8  # smaller to make it more smooth, and reflect more light
     MATERIAL_SHININESS = 1  # 0-128 smaller to make it more smooth, and reflect more light
     MATERIAL_SPECULAR_COLOR = (3, 3, 3, 3)
+
+    # control
+    STEERING_INCREMENT = 0.05
+
+    # save memory, load model once
+    model_collection = {}
+    path = None
 
     def __init__(
         self,
@@ -173,6 +180,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self._expert_takeover = False
         self.energy_consumption = 0
         self.action_space = self.get_action_space_before_init(extra_action_dim=self.config["extra_action_dim"])
+        self.break_down = False
 
         # overtake_stat
         self.front_vehicles = set()
@@ -472,16 +480,16 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     def _create_vehicle_chassis(self):
         para = self.get_config()
 
-        self.LENGTH = type(self).LENGTH  # or self.config["vehicle_length"]
-        self.WIDTH = type(self).WIDTH  # or self.config["vehicle_width"]
-        self.HEIGHT = type(self).HEIGHT  # or self.config[Parameter.vehicle_height]
+        self.LENGTH = type(self).LENGTH
+        self.WIDTH = type(self).WIDTH
+        self.HEIGHT = type(self).HEIGHT
 
         chassis = BaseRigidBodyNode(self.name, BodyName.Vehicle)
         chassis.setIntoCollideMask(CollisionGroup.Vehicle)
         chassis_shape = BulletBoxShape(Vec3(self.WIDTH / 2, self.LENGTH / 2, self.HEIGHT / 2))
         ts = TransformState.makePos(Vec3(0, 0, self.HEIGHT / 2))
         chassis.addShape(chassis_shape, ts)
-        chassis.setMass(para[Parameter.mass])
+        chassis.setMass(self.MASS)
         chassis.setDeactivationEnabled(False)
         chassis.notifyCollisions(True)  # advance collision check, do callback in pg_collision_callback
 
@@ -493,14 +501,17 @@ class BaseVehicle(BaseObject, BaseVehicleState):
 
     def _add_visualization(self):
         if self.render:
-
-            if self.MODEL is None:
-                model_path = 'models/ferra/scene.gltf'
-                self.MODEL = self.loader.loadModel(AssetLoader.file_path(model_path))
-                self.MODEL.setZ(-self.config[Parameter.tire_radius] - 0.2)
-                self.MODEL.set_scale(1)
-
-            self.MODEL.instanceTo(self.origin)
+            [path, scale, x_y_z_offset, H] = self.path[self.np_random.randint(0, len(self.path))]
+            if path not in BaseVehicle.model_collection:
+                car_model = self.loader.loadModel(AssetLoader.file_path("models", path))
+                BaseVehicle.model_collection[path] = car_model
+            else:
+                car_model = BaseVehicle.model_collection[path]
+            car_model.setScale(scale)
+            car_model.setH(H)
+            car_model.setPos(x_y_z_offset)
+            car_model.setZ(-self.TIRE_RADIUS - self.CHASSIS_TO_WHEEL_AXIS + x_y_z_offset[-1])
+            car_model.instanceTo(self.origin)
             if self.config["random_color"]:
                 material = Material()
                 material.setBaseColor(
@@ -519,12 +530,11 @@ class BaseVehicle(BaseObject, BaseVehicleState):
                 self.origin.setMaterial(material, True)
 
     def _create_wheel(self):
-        para = self.get_config()
-        f_l = para[Parameter.front_tire_longitude]
-        r_l = -para[Parameter.rear_tire_longitude]
-        lateral = para[Parameter.tire_lateral]
-        axis_height = para[Parameter.tire_radius] - 0.2  # 0.2 suspension length
-        radius = para[Parameter.tire_radius]
+        f_l = self.FRONT_WHEELBASE
+        r_l = -self.REAR_WHEELBASE
+        lateral = self.LATERAL_TIRE_TO_CENTER
+        axis_height = self.TIRE_RADIUS - self.CHASSIS_TO_WHEEL_AXIS
+        radius = self.TIRE_RADIUS
         wheels = []
         for k, pos in enumerate([Vec3(lateral, f_l, axis_height), Vec3(-lateral, f_l, axis_height),
                                  Vec3(lateral, r_l, axis_height), Vec3(-lateral, r_l, axis_height)]):
@@ -548,8 +558,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         wheel.setWheelAxleCs(Vec3(1, 0, 0))
 
         wheel.setWheelRadius(radius)
-        wheel.setMaxSuspensionTravelCm(40)
-        wheel.setSuspensionStiffness(30)
+        wheel.setMaxSuspensionTravelCm(self.SUSPENSION_LENGTH)
+        wheel.setSuspensionStiffness(self.SUSPENSION_STIFFNESS)
         wheel.setWheelsDampingRelaxation(4.8)
         wheel.setWheelsDampingCompression(1.2)
         wheel.setFrictionSlip(self.config["wheel_friction"])
@@ -753,3 +763,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     def attach_to_world(self, parent_node_path, physics_world):
         super(BaseVehicle, self).attach_to_world(parent_node_path, physics_world)
         self.navigation.attach_to_world(self.engine)
+
+    def set_break_down(self, break_down=True):
+        self.break_down = break_down
+        # self.set_static(True)

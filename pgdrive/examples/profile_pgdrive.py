@@ -6,9 +6,10 @@ from pgdrive.utils import setup_logger
 if __name__ == '__main__':
     setup_logger(debug=False)
     env = PGDriveEnvV2(dict(
-        environment_num=300,
+        environment_num=1000,
         # use_render=True, fast=True,
-        start_seed=1010
+        start_seed=1010,
+        pstats=True
     ))
     obs = env.reset()
     start = time.time()

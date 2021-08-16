@@ -66,10 +66,10 @@ class AgentManager(BaseManager):
         self._object_to_agent = {k: k for k in self.observations.keys()}  # no target vehicles created, fake init
 
     def _get_vehicles(self, config_dict: dict):
-        from pgdrive.component.vehicle.base_vehicle import BaseVehicle
+        from pgdrive.component.vehicle.vehicle_type import DefaultVehicle
         ret = {}
         for agent_id, v_config in config_dict.items():
-            obj = self.engine.spawn_object(BaseVehicle, vehicle_config=v_config)
+            obj = self.engine.spawn_object(DefaultVehicle, vehicle_config=v_config)
             ret[agent_id] = obj
             # note: agent.id = object id
             if self.engine.global_config["manual_control"] and self.engine.global_config["use_render"]:

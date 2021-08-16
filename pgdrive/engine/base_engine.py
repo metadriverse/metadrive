@@ -1,4 +1,5 @@
 import logging
+from pgdrive.engine.scene_cull import SceneCull
 import time
 from collections import OrderedDict
 from typing import Callable, Optional, Union, List, Dict, AnyStr
@@ -229,17 +230,12 @@ class BaseEngine(EngineCore, Randomizable):
         step_infos = {}
         for manager in self._managers.values():
             step_infos.update(manager.after_step())
+        self.interface.after_step()
+
         # cull distant blocks
         # poses = [v.position for v in self.agent_manager.active_agents.values()]
         # if self.cull_scene and False:
-        #     # TODO use a for loop
         #     SceneCull.cull_distant_blocks(self, self.current_map.blocks, poses, self.global_config["max_distance"])
-        #
-        #     SceneCull.cull_distant_traffic_vehicles(
-        #         self, self.traffic_manager.traffic_vehicles, poses, self.global_config["max_distance"]
-        #     )
-        #     SceneCull.cull_distant_objects(self, self.object_manager.objects, poses, self.global_config["max_distance"])
-        self.interface.after_step()
         return step_infos
 
     def dump_episode(self) -> None:

@@ -1,4 +1,4 @@
-from pgdrive.component.vehicle.base_vehicle import BaseVehicle
+from pgdrive.component.vehicle.vehicle_type import DefaultVehicle
 from pgdrive.envs.pgdrive_env import PGDriveEnv
 from pgdrive.utils import setup_logger
 
@@ -15,7 +15,7 @@ class TestEnv(PGDriveEnv):
     def reset(self):
         if self.vehicles is not None:
             self.vehicle.destroy()
-            self.vehicles["default_agent"] = BaseVehicle(env.engine)
+            self.vehicles["default_agent"] = DefaultVehicle(env.engine)
             if self.main_camera is not None:
                 self.main_camera.track(self.vehicle, env.engine)
         super(TestEnv, self).reset()

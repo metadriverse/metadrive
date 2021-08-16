@@ -25,11 +25,5 @@ if __name__ == "__main__":
     print("vehicle num", len(env.engine.traffic_manager.vehicles))
     for i in range(1, 100000):
         o, r, d, info = env.step([0, 1])
-        env.render(
-            text={
-                "vehicle_num": len(env.engine.traffic_manager.traffic_vehicles),
-                "dist_to_left:": env.vehicle.dist_to_left_side,
-                "dist_to_right:": env.vehicle.dist_to_right_side
-            }
-        )
+        env.render(text={})
     env.close()

@@ -1,6 +1,6 @@
 import numpy as np
 
-from pgdrive.component.vehicle.base_vehicle import BaseVehicle
+from pgdrive.component.vehicle.vehicle_type import DefaultVehicle
 from pgdrive.engine.engine_utils import initialize_engine
 from pgdrive.envs import PGDriveEnvV2
 from pgdrive.envs.base_env import BASE_DEFAULT_CONFIG
@@ -23,7 +23,7 @@ def _create_vehicle():
         }
     )
     initialize_engine(config)
-    v = BaseVehicle(vehicle_config=v_config, random_seed=0)
+    v = DefaultVehicle(vehicle_config=v_config, random_seed=0)
     return v
 
 
