@@ -1,6 +1,7 @@
 from typing import Dict, Union, List, Tuple
 
-import numpy
+import math
+import numpy as np
 from panda3d.bullet import BulletBoxShape, BulletRigidBodyNode, BulletGhostNode
 from panda3d.core import Vec3, LQuaternionf, Vec4, CardMaker, TextureStage, RigidBodyCombiner, \
     TransparencyAttrib, SamplerState, NodePath
@@ -300,8 +301,10 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
 
         body_np.setPos(panda_position(middle, DrivableAreaProperty.LANE_LINE_GHOST_HEIGHT / 2))
         direction_v = lane_end - lane_start
-        theta = -numpy.arctan2(direction_v[1], direction_v[0])
-        body_np.setQuat(LQuaternionf(numpy.cos(theta / 2), 0, 0, numpy.sin(theta / 2)))
+        # theta = -numpy.arctan2(direction_v[1], direction_v[0])
+        theta = -math.atan2(direction_v[1], direction_v[0])
+
+        body_np.setQuat(LQuaternionf(math.cos(theta / 2), 0, 0, math.sin(theta / 2)))
 
     def _add_lane_line2bullet(
         self,
@@ -346,8 +349,9 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
         # position and heading
         body_np.setPos(panda_position(middle, DrivableAreaProperty.LANE_LINE_GHOST_HEIGHT / 2))
         direction_v = lane_end - lane_start
-        theta = -numpy.arctan2(direction_v[1], direction_v[0])
-        body_np.setQuat(LQuaternionf(numpy.cos(theta / 2), 0, 0, numpy.sin(theta / 2)))
+        # theta = -numpy.arctan2(direction_v[1], direction_v[0])
+        theta = -math.atan2(direction_v[1], direction_v[0])
+        body_np.setQuat(LQuaternionf(math.cos(theta / 2), 0, 0, math.sin(theta / 2)))
 
         if self.render:
             # For visualization
@@ -379,11 +383,9 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
         vertical_v = Vector((-direction_v[1], direction_v[0])) / norm(*direction_v)
         middle += vertical_v * (self.SIDEWALK_WIDTH / 2 + self.SIDEWALK_LINE_DIST)
         side_np.setPos(panda_position(middle, 0))
-        theta = -numpy.arctan2(direction_v[1], direction_v[0])
-        side_np.setQuat(LQuaternionf(numpy.cos(theta / 2), 0, 0, numpy.sin(theta / 2)))
-        side_np.setScale(
-            length * factor, self.SIDEWALK_WIDTH, self.SIDEWALK_THICKNESS * (1 + 0.1 * numpy.random.rand())
-        )
+        theta = -math.atan2(direction_v[1], direction_v[0])
+        side_np.setQuat(LQuaternionf(math.cos(theta / 2), 0, 0, math.sin(theta / 2)))
+        side_np.setScale(length * factor, self.SIDEWALK_WIDTH, self.SIDEWALK_THICKNESS * (1 + 0.1 * np.random.rand()))
         if self.render:
             side_np.setTexture(self.ts_color, self.side_texture)
             self.sidewalk.instanceTo(side_np)
@@ -401,7 +403,7 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
                 middle = lane.position(lane.length / 2, 0)
                 end = lane.position(lane.length, 0)
                 direction_v = end - middle
-                theta = -numpy.arctan2(direction_v[1], direction_v[0])
+                theta = -math.atan2(direction_v[1], direction_v[0])
                 width = lane.width_at(0) + self.SIDEWALK_LINE_DIST * 2
                 length = lane.length
                 self._add_lane2bullet(middle, width, length, theta, lane, (from_, to_, index))
@@ -412,7 +414,7 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
                     middle = lane.position(lane.length * (i + .5) / segment_num, 0)
                     end = lane.position(lane.length * (i + 1) / segment_num, 0)
                     direction_v = end - middle
-                    theta = -numpy.arctan2(direction_v[1], direction_v[0])
+                    theta = -math.atan2(direction_v[1], direction_v[0])
                     width = lane.width_at(0) + self.SIDEWALK_LINE_DIST * 2
                     length = lane.length
                     self._add_lane2bullet(middle, width, length * 1.3 / segment_num, theta, lane, (from_, to_, index))
@@ -423,7 +425,7 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
                     lane_end = segment["end_point"]
                     middle = (lane_start + lane_end) / 2
                     direction_v = lane_end - middle
-                    theta = -numpy.arctan2(direction_v[1], direction_v[0])
+                    theta = -math.atan2(direction_v[1], direction_v[0])
                     width = lane.width_at(0)
                     length = segment["length"]
                     self._add_lane2bullet(middle, width, length, theta, lane, (from_, to_, index))
@@ -451,9 +453,9 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
         segment_np.setPos(panda_position(middle, -0.1))
         segment_np.setQuat(
             LQuaternionf(
-                numpy.cos(theta / 2) * numpy.cos(-numpy.pi / 4),
-                numpy.cos(theta / 2) * numpy.sin(-numpy.pi / 4), -numpy.sin(theta / 2) * numpy.cos(-numpy.pi / 4),
-                numpy.sin(theta / 2) * numpy.cos(-numpy.pi / 4)
+                math.cos(theta / 2) * math.cos(-math.pi / 4),
+                math.cos(theta / 2) * math.sin(-math.pi / 4), -math.sin(theta / 2) * math.cos(-math.pi / 4),
+                math.sin(theta / 2) * math.cos(-math.pi / 4)
             )
         )
         segment_np.reparentTo(self.lane_node_path)
@@ -463,13 +465,13 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
             cm.setHasNormals(True)
             cm.setUvRange((0, 0), (length / 20, width / 10))
             card = self.lane_vis_node_path.attachNewNode(cm.generate())
-            card.setPos(panda_position(middle, numpy.random.rand() * 0.01 - 0.01))
+            card.setPos(panda_position(middle, np.random.rand() * 0.01 - 0.01))
 
             card.setQuat(
                 LQuaternionf(
-                    numpy.cos(theta / 2) * numpy.cos(-numpy.pi / 4),
-                    numpy.cos(theta / 2) * numpy.sin(-numpy.pi / 4), -numpy.sin(theta / 2) * numpy.cos(-numpy.pi / 4),
-                    numpy.sin(theta / 2) * numpy.cos(-numpy.pi / 4)
+                    math.cos(theta / 2) * math.cos(-math.pi / 4),
+                    math.cos(theta / 2) * math.sin(-math.pi / 4), -math.sin(theta / 2) * math.cos(-math.pi / 4),
+                    math.sin(theta / 2) * math.cos(-math.pi / 4)
                 )
             )
             card.setTransparency(TransparencyAttrib.MMultisample)

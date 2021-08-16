@@ -1,4 +1,5 @@
-import numpy
+# import numpy
+import math
 from panda3d.bullet import BulletRigidBodyNode, BulletPlaneShape
 from panda3d.core import Vec3, CardMaker, LQuaternionf, TextureStage, Texture, SamplerState
 
@@ -46,4 +47,4 @@ class Terrain(BaseObject):
             # card.setTexture(self.ts_normal, self.terrain_normal)
             self.terrain_texture.setMinfilter(SamplerState.FT_linear_mipmap_linear)
             self.terrain_texture.setAnisotropicDegree(8)
-            card.setQuat(LQuaternionf(numpy.cos(-numpy.pi / 4), numpy.sin(-numpy.pi / 4), 0, 0))
+            card.setQuat(LQuaternionf(math.cos(-math.pi / 4), math.sin(-math.pi / 4), 0, 0))

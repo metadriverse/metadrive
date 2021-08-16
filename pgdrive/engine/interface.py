@@ -68,7 +68,7 @@ class Interface:
             self.arrow.setPos(0, 0, 0.08)
             self.arrow.hide(CamMask.AllOn)
             self.arrow.show(CamMask.MainCam)
-            self.arrow.setQuat(LQuaternionf(np.cos(-np.pi / 4), 0, 0, np.sin(-np.pi / 4)))
+            self.arrow.setQuat(LQuaternionf(math.cos(-math.pi / 4), 0, 0, math.sin(-math.pi / 4)))
             # the transparency attribute of gltf model is invalid on windows
             # self.arrow.setTransparency(TransparencyAttrib.M_alpha)
 
