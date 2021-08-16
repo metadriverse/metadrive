@@ -21,7 +21,12 @@ class Roundabout(PGBlock):
     ANGLE = 60
     EXIT_PART_LENGTH = 30
 
+    def __init__(self, *args, **kwargs):
+        super(Roundabout, self).__init__(*args, **kwargs)
+        self.intermediate_spawn_places = []
+
     def _try_plug_into_previous_block(self) -> bool:
+        self.intermediate_spawn_places = []
         para = self.get_config(copy=False)
         no_cross = True
         attach_road = self.pre_block_socket.positive_road
@@ -101,6 +106,8 @@ class Roundabout(PGBlock):
             self._global_network,
             ignore_intersection_checking=self.ignore_intersection_checking
         ) and none_cross
+
+        self.intermediate_spawn_places.append(segment_road.get_lanes(self.block_network))
 
         # circular part 2 and exit straight part
         length = self.EXIT_PART_LENGTH
@@ -191,8 +198,4 @@ class Roundabout(PGBlock):
 
     def get_intermediate_spawn_lanes(self):
         """Filter out half of the vehicles."""
-        lanes = super(Roundabout, self).get_intermediate_spawn_lanes()
-        lanes = [l for ls in lanes for l in ls]
-        self.np_random.shuffle(lanes)
-        ret = lanes[:int(max(1, len(lanes) / 2))]
-        return [ret]
+        return self.get_respawn_lanes() + self.intermediate_spawn_places

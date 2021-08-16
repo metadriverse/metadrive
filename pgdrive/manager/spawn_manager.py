@@ -24,6 +24,8 @@ class SpawnManager:
     REGION_DETECT_HEIGHT = 10
     RESPAWN_REGION_LONGITUDE = 8.
     RESPAWN_REGION_LATERAL = 3.
+    MAX_LENGTH = 6
+    MAX_WIDTH = 2.0
 
     def __init__(self, exit_length, lane_num, num_agents, vehicle_config, target_vehicle_configs=None, seed=None):
         self.num_agents = num_agents
@@ -43,11 +45,8 @@ class SpawnManager:
         self.target_vehicle_configs = target_vehicle_configs
         self.spawn_places_used = []
 
-        # self.vehicle_length = vehicle_config["vehicle_length"]
-        # self.vehicle_width = vehicle_config["vehicle_width"]
-
-        self.vehicle_length = BaseVehicle.LENGTH
-        self.vehicle_width = BaseVehicle.WIDTH
+        self.vehicle_length = self.MAX_LENGTH
+        self.vehicle_width = self.MAX_WIDTH
 
         self.custom_target_vehicle_config = True if target_vehicle_configs is not None and len(
             target_vehicle_configs

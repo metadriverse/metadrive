@@ -23,7 +23,7 @@ class Replayer:
 
     def _recover_vehicles_from_data(self, traffic_mgr: TrafficManager, episode_data: dict):
         assert isinstance(self.restore_vehicles, dict), "No place to restore vehicles"
-        import pgdrive.component.vehicle.traffic_vehicle_type as v_types
+        import pgdrive.component.vehicle.vehicle_type as v_types
         traffics = episode_data["init_traffic"]
         engine = get_engine()
         for name, config in traffics.items():

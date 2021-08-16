@@ -26,6 +26,7 @@ def _suppress_warning():
     loadPrcFileData("", "notify-level-pgraph fatal")
     loadPrcFileData("", "notify-level-pnmimage fatal")
     loadPrcFileData("", "notify-level-thread fatal")
+    loadPrcFileData("", "notify-level-bullet fatal")
 
 
 def _free_warning():
@@ -44,8 +45,9 @@ class EngineCore(ShowBase.ShowBase):
     loadPrcFileData("", "audio-library-name null")
     loadPrcFileData("", "model-cache-compressed-textures 1")
 
-    loadPrcFileData("", "transform-cache 0")
-    loadPrcFileData("", "state-cache 0")
+    # loadPrcFileData("", "transform-cache 0")
+    # loadPrcFileData("", "state-cache 0")
+    loadPrcFileData("", "garbage-collect-states 0")
 
     # loadPrcFileData("", " framebuffer-srgb truein")
     # loadPrcFileData("", "geom-cache-size 50000")
