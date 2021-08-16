@@ -188,3 +188,11 @@ class Roundabout(PGBlock):
         if socket.negative_road in self.get_respawn_roads():
             self._respawn_roads.remove(socket.negative_road)
         return socket
+
+    def get_intermediate_spawn_lanes(self):
+        """Filter out half of the vehicles."""
+        lanes = super(Roundabout, self).get_intermediate_spawn_lanes()
+        lanes = [l for ls in lanes for l in ls]
+        self.np_random.shuffle(lanes)
+        ret = lanes[:int(max(1, len(lanes) / 2))]
+        return [ret]
