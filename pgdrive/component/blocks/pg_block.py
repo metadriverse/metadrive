@@ -69,9 +69,6 @@ class PGBlock(BaseBlock):
         ignore_intersection_checking=None
     ):
 
-        # TODO(pzh) remove None
-        assert ignore_intersection_checking is not None
-
         self.name = str(block_index) + self.ID
         super(PGBlock, self).__init__(
             block_index, global_network, random_seed, ignore_intersection_checking=ignore_intersection_checking

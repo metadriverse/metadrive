@@ -85,7 +85,7 @@ class MAParkingLotMap(PGMap):
         )
         self.blocks.append(last_block)
 
-        last_block = ParkingLot(1, last_block.get_socket(0), self.road_network, 1)
+        last_block = ParkingLot(1, last_block.get_socket(0), self.road_network, 1, ignore_intersection_checking=False)
         last_block.construct_block(
             parent_node_path, physics_world, {"one_side_vehicle_number": int(self.config["parking_space_num"] / 2)}
         )
@@ -95,7 +95,9 @@ class MAParkingLotMap(PGMap):
 
         # Build ParkingLot
         TInterSection.EXIT_PART_LENGTH = 10
-        last_block = TInterSection(2, last_block.get_socket(index=0), self.road_network, random_seed=1)
+        last_block = TInterSection(
+            2, last_block.get_socket(index=0), self.road_network, random_seed=1, ignore_intersection_checking=False
+        )
         last_block.construct_block(
             parent_node_path,
             physics_world,

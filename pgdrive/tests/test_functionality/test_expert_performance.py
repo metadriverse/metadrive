@@ -62,7 +62,7 @@ def test_expert_with_traffic(use_render=False):
     )
 
     # We change the ego vehicle dynamics! So the expert is not reliable anymore!
-    assert 140 < ep_reward < 270, ep_reward
+    assert 290 < ep_reward < 330, ep_reward
     # assert success_rate == 1.0, success_rate
 
 

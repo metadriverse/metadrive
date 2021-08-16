@@ -45,7 +45,8 @@ class TollGate(PGBlock):
             center_line_color=LineColor.YELLOW,
             center_line_type=LineType.CONTINUOUS,
             inner_lane_line_type=LineType.CONTINUOUS,
-            side_lane_line_type=LineType.SIDE
+            side_lane_line_type=LineType.SIDE,
+            ignore_intersection_checking=self.ignore_intersection_checking
         )
 
         # create negative road
@@ -56,7 +57,8 @@ class TollGate(PGBlock):
             center_line_color=LineColor.YELLOW,
             center_line_type=LineType.CONTINUOUS,
             inner_lane_line_type=LineType.CONTINUOUS,
-            side_lane_line_type=LineType.SIDE
+            side_lane_line_type=LineType.SIDE,
+            ignore_intersection_checking=self.ignore_intersection_checking
         ) and no_cross
 
         self.add_sockets(PGBlockSocket(socket, _socket))
