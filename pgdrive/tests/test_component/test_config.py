@@ -16,25 +16,15 @@ def test_config_sync():
     The config in BaseEngine should be the same as env.config, if BaseEngine exists in process
     """
     try:
-        env = PGDriveEnv({"vehicle_config": dict(
-            max_engine_force=500,
-            max_brake_force=40,
-            max_steering=40,
-        )})
+        env = PGDriveEnv({"vehicle_config": dict(show_lidar=False, show_navi_mark=False)})
         env.reset()
         recursive_equal(env.config, env.engine.global_config)
-        env.config.update({"vehicle_config": dict(max_engine_force=0.1, max_brake_force=0.1, max_steering=0.1)})
+        env.config.update({"vehicle_config": dict(show_lidar=True, show_navi_mark=True)})
         recursive_equal(env.config, env.engine.global_config)
         env.close()
         env.reset()
         recursive_equal(env.config, env.engine.global_config)
-        env.engine.global_config.update(
-            {"vehicle_config": dict(
-                max_engine_force=50,
-                max_brake_force=4,
-                max_steering=4,
-            )}
-        )
+        env.engine.global_config.update({"vehicle_config": dict(show_lidar=False, show_navi_mark=False)})
         recursive_equal(env.config, env.engine.global_config)
     finally:
         env.close()

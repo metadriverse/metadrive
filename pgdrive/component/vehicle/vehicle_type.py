@@ -1,14 +1,16 @@
 from pgdrive.component.vehicle.base_vehicle import BaseVehicle
+from pgdrive.utils.space import ParameterSpace, VehicleParameterSpace
 
 factor = 1
 
 
 class DefaultVehicle(BaseVehicle):
+    PARAMETER_SPACE = ParameterSpace(VehicleParameterSpace.DEFAULT_VEHICLE)
     LENGTH = 4.51
     WIDTH = 1.852
     HEIGHT = 1.19
     TIRE_RADIUS = 0.313
-    MASS = 1300
+    MASS = 1100
     LATERAL_TIRE_TO_CENTER = 0.815
     FRONT_WHEELBASE = 1.05234
     REAR_WHEELBASE = 1.4166
@@ -16,6 +18,7 @@ class DefaultVehicle(BaseVehicle):
 
 
 class XLVehicle(BaseVehicle):
+    PARAMETER_SPACE = ParameterSpace(VehicleParameterSpace.XL_VEHICLE)
     LENGTH = 5.8
     WIDTH = 2.3
     HEIGHT = 2.8
@@ -29,6 +32,7 @@ class XLVehicle(BaseVehicle):
 
 
 class LVehicle(BaseVehicle):
+    PARAMETER_SPACE = ParameterSpace(VehicleParameterSpace.L_VEHICLE)
     LENGTH = 4.5
     WIDTH = 1.86
     HEIGHT = 1.85
@@ -43,6 +47,7 @@ class LVehicle(BaseVehicle):
 
 
 class MVehicle(BaseVehicle):
+    PARAMETER_SPACE = ParameterSpace(VehicleParameterSpace.M_VEHICLE)
     LENGTH = 4.4
     WIDTH = 1.85
     HEIGHT = 1.37
@@ -58,6 +63,7 @@ class MVehicle(BaseVehicle):
 
 
 class SVehicle(BaseVehicle):
+    PARAMETER_SPACE = ParameterSpace(VehicleParameterSpace.S_VEHICLE)
     LENGTH = 4.25
     WIDTH = 1.7
     HEIGHT = 1.7
@@ -73,7 +79,6 @@ class SVehicle(BaseVehicle):
 
 
 vehicle_type = {"s": SVehicle, "m": MVehicle, "l": LVehicle, "xl": XLVehicle, "default": DefaultVehicle}
-only_default_agent = [0, 0, 0, 0, 1]
 
 
 def random_vehicle_type(np_random, p=None):

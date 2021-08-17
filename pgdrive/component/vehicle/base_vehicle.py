@@ -1,7 +1,7 @@
 import math
+from pgdrive.utils.space import VehicleParameterSpace, ParameterSpace
 from collections import deque
 from typing import Union, Optional
-
 import gym
 import numpy as np
 import seaborn as sns
@@ -70,6 +70,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     Vehicle chassis and its wheels index
                     0       1
                     II-----II
+                    II-----II
                         |
                         |  <---chassis/wheelbase
                         |
@@ -77,6 +78,10 @@ class BaseVehicle(BaseObject, BaseVehicleState):
                     2       3
     """
     COLLISION_MASK = CollisionGroup.Vehicle
+    PARAMETER_SPACE = ParameterSpace(VehicleParameterSpace.BASE_VEHICLE)
+    MAX_LENGTH = 10
+    MAX_WIDTH = 2.5
+    MAX_STEERING = 60
 
     LENGTH = None
     WIDTH = None
@@ -478,11 +483,11 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     """-------------------------------------- for vehicle making ------------------------------------------"""
 
     def _create_vehicle_chassis(self):
-        para = self.get_config()
-
         self.LENGTH = type(self).LENGTH
         self.WIDTH = type(self).WIDTH
         self.HEIGHT = type(self).HEIGHT
+        assert self.LENGTH < BaseVehicle.MAX_LENGTH, "Vehicle is too large!"
+        assert self.WIDTH < BaseVehicle.MAX_WIDTH, "Vehicle is too large!"
 
         chassis = BaseRigidBodyNode(self.name, BodyName.Vehicle)
         chassis.setIntoCollideMask(CollisionGroup.Vehicle)
@@ -563,7 +568,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         wheel.setWheelsDampingRelaxation(4.8)
         wheel.setWheelsDampingCompression(1.2)
         wheel.setFrictionSlip(self.config["wheel_friction"])
-        wheel.setRollInfluence(1.5)
+        wheel.setRollInfluence(0.5)
         return wheel
 
     def add_image_sensor(self, name: str, sensor: ImageBuffer):

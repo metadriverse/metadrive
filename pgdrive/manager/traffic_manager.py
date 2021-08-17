@@ -104,7 +104,7 @@ class TrafficManager(BaseManager):
                 # v.reset(self.current_map)
                 # self.engine.get_policy(v.id).reset()
         for v in v_to_remove:
-            self.engine.clear_objects([v.id])
+            self.clear_objects([v.id])
             self._traffic_vehicles.remove(v)
         return dict()
 
@@ -113,11 +113,8 @@ class TrafficManager(BaseManager):
         Clear the scene and then reset the scene to empty
         :return: None
         """
+        super(TrafficManager, self).before_reset()
         self.density = self.engine.global_config["traffic_density"]
-        bv = []
-        for vs in self.block_triggered_vehicles:
-            bv += vs.vehicles
-        self.engine.clear_objects(filter=[v.id for v in self._traffic_vehicles + bv])
         self.block_triggered_vehicles = []
         self._traffic_vehicles = []
 
@@ -207,7 +204,7 @@ class TrafficManager(BaseManager):
             #     # Do special handling for ramp, and there must be vehicles created there
             #     continue
             vehicle_type = self.random_vehicle_type()
-            random_v = self.engine.spawn_object_for_debug(
+            random_v = self.spawn_object(
                 vehicle_type,
                 vehicle_config={
                     "spawn_lane_index": lane.index,
@@ -268,7 +265,7 @@ class TrafficManager(BaseManager):
             from pgdrive.policy.idm_policy import IDMPolicy
             for v_config in selected:
                 vehicle_type = self.random_vehicle_type()
-                random_v = self.engine.spawn_object(vehicle_type, vehicle_config=v_config)
+                random_v = self.spawn_object(vehicle_type, vehicle_config=v_config)
                 self.engine.add_policy(random_v.id, IDMPolicy(random_v, self.generate_seed()))
                 vehicles_on_block.append(random_v)
 
@@ -308,7 +305,7 @@ class TrafficManager(BaseManager):
         Destory func, release resource
         :return: None
         """
-        self.engine.clear_objects([v.id for v in self._traffic_vehicles])
+        self.clear_objects([v.id for v in self._traffic_vehicles])
         self._traffic_vehicles = []
         # current map
 

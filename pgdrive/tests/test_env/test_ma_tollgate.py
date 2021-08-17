@@ -398,8 +398,6 @@ def test_ma_toll_reward_done_alignment():
             act = {k: [0, 1] for k in env.vehicles.keys()}
             o, r, d, i = _act(env, act)
             for kkk, iii in i.items():
-                if iii["crash"]:
-                    assert iii["crash_vehicle"]
                 if iii["crash_vehicle"]:
                     assert iii["crash"]
                     assert r[kkk] == -1.7777
