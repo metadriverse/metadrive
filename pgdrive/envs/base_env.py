@@ -26,6 +26,7 @@ BASE_DEFAULT_CONFIG = dict(
     is_multi_agent=False,
     allow_respawn=False,
     delay_done=0,  # How many steps for the agent to stay static at the death place after done.
+    random_agent_model=True,
 
     # ===== Action =====
     decision_repeat=5,
@@ -121,14 +122,7 @@ class BasePGDriveEnv(gym.Env):
 
         # observation and action space
         self.agent_manager = AgentManager(
-            init_observations=self._get_observations(),
-            never_allow_respawn=not self.config["allow_respawn"],
-            debug=self.config["debug"],
-            delay_done=self.config["delay_done"],
-            infinite_agents=self.num_agents == -1
-        )
-        self.agent_manager.init_space(
-            init_observation_space=self._get_observation_space(), init_action_space=self._get_action_space()
+            init_observations=self._get_observations(), init_action_space=self._get_action_space()
         )
 
         # map setting
@@ -160,10 +154,17 @@ class BasePGDriveEnv(gym.Env):
         return {v_id: obs.observation_space for v_id, obs in self.observations.items()}
 
     def _get_action_space(self):
-        return {
-            v_id: BaseVehicle.get_action_space_before_init(self.config["vehicle_config"]["extra_action_dim"])
-            for v_id in self.observations.keys()
-        }
+        if self.is_multi_agent:
+            return {
+                v_id: BaseVehicle.get_action_space_before_init(self.config["vehicle_config"]["extra_action_dim"])
+                for v_id in self.config["target_vehicle_configs"].keys()
+            }
+        else:
+            return {
+                DEFAULT_AGENT: BaseVehicle.get_action_space_before_init(
+                    self.config["vehicle_config"]["extra_action_dim"]
+                )
+            }
 
     def lazy_init(self):
         """
@@ -176,13 +177,8 @@ class BasePGDriveEnv(gym.Env):
         self.engine = initialize_engine(self.config)
         # engine setup
         self.setup_engine()
-        # init agent
-        self.agent_manager.init(config_dict=self._get_target_vehicle_config())
         # other optional initialization
         self._after_lazy_init()
-
-    def _get_target_vehicle_config(self):
-        return {self.DEFAULT_AGENT: self.config["vehicle_config"]}
 
     def _after_lazy_init(self):
         pass
@@ -375,16 +371,6 @@ class BasePGDriveEnv(gym.Env):
         :return: Dict[agent_id:vehicle]
         """
         return self.agent_manager.active_agents
-
-    @property
-    def pending_vehicles(self):
-        """
-        Return pending BaseVehicles, it takes effect in MARL-env
-        :return: Dict[agent_id: pending_vehicles]
-        """
-        if not self.is_multi_agent:
-            raise ValueError("Pending agents is not available in single-agent env")
-        return self.agent_manager.pending_objects
 
     def setup_engine(self):
         """

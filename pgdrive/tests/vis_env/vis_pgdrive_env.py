@@ -9,7 +9,7 @@ class TestEnv(PGDriveEnv):
         """
         super(TestEnv, self).__init__(
             {
-                "environment_num": 20,
+                "environment_num": 5,
                 "traffic_density": .2,
                 "traffic_mode": "trigger",
                 "start_seed": 12,
@@ -20,11 +20,11 @@ class TestEnv(PGDriveEnv):
                 # "debug_static_world":True,
                 "cull_scene": False,
                 # "controller": "joystick",
-                "manual_control": True,
+                # "manual_control": True,
                 "use_render": True,
                 "decision_repeat": 5,
                 "rgb_clip": True,
-                "debug": True,
+                # "debug": True,
                 "fast": True,
 
                 # "map_config": {
@@ -59,9 +59,9 @@ if __name__ == "__main__":
     import time
     start = time.time()
     o = env.reset()
-    print(len(env.engine.traffic_manager._traffic_vehicles))
+
     for s in range(1, 100000):
-        o, r, d, info = env.step([.0, 0.])
+        o, r, d, info = env.step([.0, 1.])
         # info["fuel"] = env.vehicle.energy_consumption
         env.render(text={"heading_diff": env.vehicle.heading_diff(env.vehicle.lane)})
         # assert env.observation_space.contains(o)
@@ -74,4 +74,5 @@ if __name__ == "__main__":
         #     )
         if d:
             # env.close()
+            print(len(env.engine._spawned_objects))
             env.reset()

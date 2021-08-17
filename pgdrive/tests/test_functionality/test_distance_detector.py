@@ -87,7 +87,6 @@ def test_lidar_with_mask(render=False):
         another_v = DefaultVehicle(v_config, random_seed=0)
         another_v.reset()
         # for test
-        env.agent_manager._pending_objects[another_v.name] = another_v
         objs = env.vehicle.side_detector.perceive(env.vehicle, env.vehicle.engine.physics_world.static_world
                                                   ).detected_objects + env.vehicle.lane_line_detector.perceive(
                                                       env.vehicle, env.vehicle.engine.physics_world.static_world

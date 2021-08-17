@@ -337,6 +337,7 @@ def test_cutils_lidar():
         pg_start_position = panda_position(vehicle_position, self.height)
 
         # init
+        self.cloud_points = np.array([1.0 for _ in range(self.num_lasers)])
         self.cloud_points.fill(1.0)
         self.detected_objects = []
 
