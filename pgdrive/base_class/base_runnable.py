@@ -13,7 +13,6 @@ class BaseRunnable(Configurable, Nameable, Randomizable):
     If you need an element have visualization property or physics property, using BaseObject() instead
     """
 
-    # TODO in the future, the parameter space will be a __init__ parameter, so we don't have to specify it when coding
     PARAMETER_SPACE = ParameterSpace({})
 
     def __init__(self, name=None, random_seed=None, config=None):
@@ -25,8 +24,8 @@ class BaseRunnable(Configurable, Nameable, Randomizable):
             self.PARAMETER_SPACE, ParameterSpace
         ), "Using PGSpace to define parameter spaces of " + self.class_name
         self.sample_parameters()
-        if config is not None:
-            self.update_config(config, allow_add_new_key=True)
+        # use external config update to overwrite sampled parameters, except None
+        self.update_config(config, allow_add_new_key=True)
 
     def get_state(self) -> Dict:
         """

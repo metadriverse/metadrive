@@ -305,3 +305,13 @@ def _is_identical(k1, v1, k2, v2):
         if v1 != v2:
             return False
     return True
+
+
+def filter_none(config):
+    to_remove = []
+    for k, v in config.items():
+        if v is None:
+            to_remove.append(k)
+    for k in to_remove:
+        config.pop(k)
+    return config

@@ -28,6 +28,7 @@ PGDriveEnvV1_DEFAULT_CONFIG = dict(
 
     # ===== Map Config =====
     map=3,  # int or string: an easy way to fill map_config
+    random_lane_width=False,
     map_config={
         BaseMap.GENERATE_TYPE: MapGenerateMethod.BIG_BLOCK_NUM,
         BaseMap.GENERATE_CONFIG: None,  # it can be a file path / block num / block ID sequence
@@ -47,7 +48,6 @@ PGDriveEnvV1_DEFAULT_CONFIG = dict(
     traffic_density=0.1,
     traffic_mode=TrafficMode.Trigger,  # "Respawn", "Trigger", "Hybrid"
     random_traffic=False,  # Traffic is randomized at default.
-    random_traffic_model=True,
 
     # ===== Object =====
     accident_prob=0.,  # accident may happen on each block with this probability, except multi-exits block
@@ -137,6 +137,7 @@ class PGDriveEnv(BasePGDriveEnv):
             easy_map_config=config["map"], new_map_config=config["map_config"], default_config=self.default_config_copy
         )
         config["vehicle_config"]["rgb_clip"] = config["rgb_clip"]
+        config["vehicle_config"]["random_agent_model"] = config["random_agent_model"]
         return config
 
     def _get_observations(self):
