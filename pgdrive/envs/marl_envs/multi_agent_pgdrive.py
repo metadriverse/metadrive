@@ -14,6 +14,7 @@ MULTI_AGENT_PGDRIVE_DEFAULT_CONFIG = dict(
     # ===== Multi-agent =====
     is_multi_agent=True,
     num_agents=2,  # If num_agents is set to None, then endless vehicles will be added only the empty spawn points exist
+    random_agent_model=False,
 
     # Whether to terminate a vehicle if it crash with others. Since in MA env the crash is extremely dense, so
     # frequently done might not be a good idea.
@@ -105,8 +106,10 @@ class MultiAgentPGDrive(PGDriveEnvV2):
         )
 
         self._spawn_manager.set_spawn_roads(self.spawn_roads)
-
         ret_config = self._update_agent_pos_configs(ret_config)
+
+        if "prefer_track_agent" in config and config["prefer_track_agent"]:
+            ret_config["target_vehicle_configs"][config["prefer_track_agent"]]["am_i_the_special_one"] = True
         return ret_config
 
     def _update_agent_pos_configs(self, config):
@@ -188,19 +191,9 @@ class MultiAgentPGDrive(PGDriveEnvV2):
         return obs, reward, dones, info
 
     def _update_camera_after_finish(self, dead_vehicle_id):
-        if self.main_camera is not None and dead_vehicle_id == self.agent_manager.object_to_agent(
-                self.current_track_vehicle.name) \
+        if self.main_camera is not None and self.current_track_vehicle is None \
                 and self.engine.task_manager.hasTaskNamed(self.main_camera.CHASE_TASK_NAME):
             self.chase_camera()
-
-    def _get_target_vehicle_config(self):
-        ret = {
-            name: self._get_single_vehicle_config(new_config)
-            for name, new_config in self.config["target_vehicle_configs"].items()
-        }
-        if "prefer_track_agent" in self.config and self.config["prefer_track_agent"]:
-            ret[self.config["prefer_track_agent"]]["am_i_the_special_one"] = True
-        return ret
 
     def _get_observations(self):
         return {
@@ -215,21 +208,9 @@ class MultiAgentPGDrive(PGDriveEnvV2):
         vehicle_config = merge_dicts(self.config["vehicle_config"], extra_config, allow_new_keys=False)
         return Config(vehicle_config)
 
-    def _after_lazy_init(self):
-        super(MultiAgentPGDrive, self)._after_lazy_init()
-
-        # Use top-down view by default
-        if hasattr(self, "main_camera") and self.main_camera is not None:
-            top_down_camera_height = self.config["top_down_camera_initial_z"]
-            self.main_camera.camera.setPos(0, 0, top_down_camera_height)
-            self.main_camera.top_down_camera_height = top_down_camera_height
-            self.main_camera.stop_track()
-            self.main_camera.camera_x += self.config["top_down_camera_initial_x"]
-            self.main_camera.camera_y += self.config["top_down_camera_initial_y"]
-
     def _respawn_vehicles(self, randomize_position=False):
         new_obs_dict = {}
-        if not self.agent_manager.has_pending_objects():
+        if not self.agent_manager.allow_respawn:
             return new_obs_dict
         while True:
             new_id, new_obs = self._respawn_single_vehicle(randomize_position=randomize_position)

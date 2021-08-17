@@ -72,4 +72,10 @@ class SVehicle(BaseVehicle):
     ]
 
 
-vehicle_type = {"s": SVehicle, "m": MVehicle, "l": LVehicle, "xl": XLVehicle}
+vehicle_type = {"s": SVehicle, "m": MVehicle, "l": LVehicle, "xl": XLVehicle, "default": DefaultVehicle}
+only_default_agent = [0, 0, 0, 0, 1]
+
+
+def random_vehicle_type(np_random, p=None):
+    prob = [1 / len(vehicle_type) for _ in range(len(vehicle_type))] if p is None else p
+    return vehicle_type[np_random.choice(list(vehicle_type.keys()), p=prob)]
