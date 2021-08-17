@@ -139,18 +139,6 @@ class PGDriveEnv(BasePGDriveEnv):
         config["vehicle_config"]["rgb_clip"] = config["rgb_clip"]
         return config
 
-    def _after_lazy_init(self):
-        # initialize track vehicles
-        vehicles = self.agent_manager.get_vehicle_list()
-        current_track_vehicle = vehicles[0]
-
-        # for manual_control and main camera type
-        if self.config["use_render"] or self.config["offscreen_render"]:
-            self.main_camera.set_follow_lane(self.config["use_chase_camera_follow_lane"])
-            self.main_camera.track(current_track_vehicle)
-            self.engine.accept("b", self.bird_view_camera)
-        self.engine.accept("q", self.chase_camera)
-
     def _get_observations(self):
         return {self.DEFAULT_AGENT: self.get_single_observation(self.config["vehicle_config"])}
 
@@ -455,6 +443,8 @@ class PGDriveEnv(BasePGDriveEnv):
         super(PGDriveEnv, self).setup_engine()
         # Press t can let expert take over. But this function is still experimental.
         self.engine.accept("t", self.toggle_expert_takeover)
+        self.engine.accept("b", self.bird_view_camera)
+        self.engine.accept("q", self.chase_camera)
 
         from pgdrive.manager.object_manager import TrafficSignManager
         from pgdrive.manager.traffic_manager import TrafficManager

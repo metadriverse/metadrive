@@ -299,9 +299,8 @@ class TrafficManager(BaseManager):
         return respawn_lanes
 
     def random_vehicle_type(self):
-        from pgdrive.component.vehicle.vehicle_type import vehicle_type, DefaultVehicle
-        vehicle_type = vehicle_type[self.np_random.choice(list(vehicle_type.keys()), p=[0.2, 0.3, 0.3, 0.2])] if \
-        self.engine.global_config["random_traffic_model"] else DefaultVehicle
+        from pgdrive.component.vehicle.vehicle_type import random_vehicle_type
+        vehicle_type = random_vehicle_type(self.np_random, [0.2, 0.3, 0.3, 0.2, 0])
         return vehicle_type
 
     def destroy(self) -> None:

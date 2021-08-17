@@ -70,6 +70,7 @@ def test_expert_without_traffic():
     ep_reward, success_rate = _evaluate(
         dict(
             environment_num=1,
+            random_agent_model=False,
             map="CCC",
             start_seed=0,
             traffic_density=0,
