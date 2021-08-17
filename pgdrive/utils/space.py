@@ -217,22 +217,42 @@ class Parameter:
 
 
 class VehicleParameterSpace:
-    BASE_VEHICLE = {
-        # Now the parameter sample is not available and thus the value space is incorrect
-        Parameter.vehicle_height: ConstantSpace(1),
-        Parameter.front_tire_longitude: ConstantSpace(1.05),
-        Parameter.rear_tire_longitude: ConstantSpace(1.17),
-        Parameter.tire_lateral: ConstantSpace(0.8),
-        Parameter.tire_radius: ConstantSpace(0.25),
-        Parameter.mass: ConstantSpace(800.0),
-        Parameter.heading: ConstantSpace(0.0),
-
-        # visualization
-        Parameter.vehicle_vis_h: ConstantSpace(0),
-        Parameter.vehicle_vis_y: ConstantSpace(0),
-        Parameter.vehicle_vis_z: ConstantSpace(0),
-        Parameter.vehicle_vis_scale: ConstantSpace(1),
-    }
+    BASE_VEHICLE = dict(
+        wheel_friction=ConstantSpace(0.9),
+        max_engine_force=ConstantSpace(800),
+        max_brake_force=ConstantSpace(150),
+        max_steering=ConstantSpace(40),
+        max_speed=ConstantSpace(120),
+    )
+    DEFAULT_VEHICLE = BASE_VEHICLE
+    S_VEHICLE = dict(
+        wheel_friction=ConstantSpace(0.9),
+        max_engine_force=ConstantSpace(450),
+        max_brake_force=ConstantSpace(55),
+        max_steering=ConstantSpace(50),
+        max_speed=ConstantSpace(120),
+    )
+    M_VEHICLE = dict(
+        wheel_friction=ConstantSpace(0.75),
+        max_engine_force=ConstantSpace(750),
+        max_brake_force=ConstantSpace(90),
+        max_steering=ConstantSpace(45),
+        max_speed=ConstantSpace(120),
+    )
+    L_VEHICLE = dict(
+        wheel_friction=ConstantSpace(0.8),
+        max_engine_force=ConstantSpace(550),
+        max_brake_force=ConstantSpace(70),
+        max_steering=ConstantSpace(40),
+        max_speed=ConstantSpace(120),
+    )
+    XL_VEHICLE = dict(
+        wheel_friction=ConstantSpace(0.7),
+        max_engine_force=ConstantSpace(600),
+        max_brake_force=ConstantSpace(70),
+        max_steering=ConstantSpace(35),
+        max_speed=ConstantSpace(120),
+    )
 
 
 class BlockParameterSpace:

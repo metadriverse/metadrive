@@ -123,7 +123,7 @@ class BaseObject(BaseRunnable):
         engine = get_engine()
         self.detach_from_world(engine.physics_world)
         if self._body is not None and hasattr(self.body, "object"):
-            self.body.object = None
+            self.body.generated_object = None
         if self.origin is not None:
             self.origin.removeNode()
         self.dynamic_nodes.clear()

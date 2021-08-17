@@ -1,4 +1,5 @@
 import logging
+
 from pgdrive.engine.scene_cull import SceneCull
 import time
 from collections import OrderedDict
@@ -138,8 +139,9 @@ class BaseEngine(EngineCore, Randomizable):
         Since we don't expect a iterator, and the number of objects is not so large, we don't use built-in filter()
         If force_destroy=True, we will destroy this element instead of storing them for next time using
         """
+        clean_id = []
         if isinstance(filter, list):
-            exclude_objects = {id: self._spawned_objects[id] for id in filter}
+            exclude_objects = {obj_id: self._spawned_objects[obj_id] for obj_id in filter}
         elif callable(filter):
             exclude_objects = dict()
             for id, obj in self._spawned_objects.items():
@@ -161,6 +163,7 @@ class BaseEngine(EngineCore, Randomizable):
                 if obj.class_name not in self._dying_objects:
                     self._dying_objects[obj.class_name] = []
                 self._dying_objects[obj.class_name].append(obj)
+        return exclude_objects.keys()
 
     def reset(self):
         """
@@ -173,6 +176,7 @@ class BaseEngine(EngineCore, Randomizable):
 
         for manager in self._managers.values():
             manager.before_reset()
+        self._object_clean_check()
         for manager in self._managers.values():
             manager.reset()
         for manager in self._managers.values():
@@ -337,5 +341,16 @@ class BaseEngine(EngineCore, Randomizable):
     def global_seed(self):
         return self.global_random_seed
 
-    def spawn_object_for_debug(self, *args, **kwargs):
-        return self.spawn_object(*args, **kwargs)
+    def _object_clean_check(self):
+        if self.global_config["debug"]:
+            from pgdrive.component.vehicle.base_vehicle import BaseVehicle
+            from pgdrive.component.static_object.base_static_object import BaseStaticObject
+            for manager in self._managers.values():
+                assert len(manager.spawned_objects) == 0
+
+            objs_need_to_release = self.get_objects(
+                filter=lambda obj: isinstance(obj, BaseVehicle) or isinstance(obj, BaseStaticObject)
+            )
+            assert len(
+                objs_need_to_release) == 0, "You should clear all generated objects by using engine.clear_objects " \
+                                            "in each manager.before_step()"

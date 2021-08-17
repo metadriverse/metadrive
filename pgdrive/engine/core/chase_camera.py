@@ -85,7 +85,7 @@ class MainCamera:
         forward_dir = np.mean(self.direction_running_mean, axis=0)
 
         camera_pos = list(self.camera_queue.get())
-        camera_pos[2] += self.chase_camera_height
+        camera_pos[2] += self.chase_camera_height + vehicle.HEIGHT / 2
         camera_pos[0] += -forward_dir[0] * self.camera_dist
         camera_pos[1] += -forward_dir[1] * self.camera_dist
 

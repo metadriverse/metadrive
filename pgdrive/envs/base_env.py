@@ -26,7 +26,7 @@ BASE_DEFAULT_CONFIG = dict(
     is_multi_agent=False,
     allow_respawn=False,
     delay_done=0,  # How many steps for the agent to stay static at the death place after done.
-    random_agent_model=True,
+    random_agent_model=False,
 
     # ===== Action =====
     decision_repeat=5,
@@ -48,12 +48,8 @@ BASE_DEFAULT_CONFIG = dict(
     # ===== Vehicle =====
     vehicle_config=dict(
         increment_steering=False,
+        vehicle_model="default",
         show_navi_mark=True,
-        wheel_friction=0.6,
-        max_engine_force=500,
-        max_brake_force=40,
-        max_steering=40,
-        max_speed=120,
         extra_action_dim=0,
         enable_reverse=False,
         random_navi_mark_color=False,

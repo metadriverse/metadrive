@@ -27,22 +27,18 @@ class TrafficSignManager(BaseManager):
     # distance between two cones
     CONE_LONGITUDE = 2
     CONE_LATERAL = 1
-    PROHIBIT_SCENE_PROB = 5.  # the reset is the probability of break_down_scene
+    PROHIBIT_SCENE_PROB = 0.5  # the reset is the probability of break_down_scene
 
     def __init__(self):
         super(TrafficSignManager, self).__init__()
         self.accident_prob = 0.
-        self.object = []
 
     def before_reset(self):
         """
         Clear all objects in th scene
         """
-        self.clear_objects()
+        super(TrafficSignManager, self).before_reset()
         self.accident_prob = self.engine.global_config["accident_prob"]
-
-    def clear_objects(self):
-        self.engine.clear_objects(lambda o: isinstance(o, TrafficSign))
 
     def reset(self):
         """
@@ -91,11 +87,12 @@ class TrafficSignManager(BaseManager):
                 self.break_down_scene(lane, longitude)
 
     def break_down_scene(self, lane: AbstractLane, longitude: float):
-        engine = get_engine()
         v_config = {"spawn_lane_index": lane.index, "spawn_longitude": longitude}
-        breakdown_vehicle = engine.spawn_object(engine.traffic_manager.random_vehicle_type(), vehicle_config=v_config)
+        breakdown_vehicle = self.spawn_object(
+            self.engine.traffic_manager.random_vehicle_type(), vehicle_config=v_config
+        )
         breakdown_vehicle.set_break_down()
-        self.engine.spawn_object(TrafficTriangle, lane=lane, longitude=longitude - self.ALERT_DIST, lateral=0)
+        self.spawn_object(TrafficTriangle, lane=lane, longitude=longitude - self.ALERT_DIST, lateral=0)
 
     def prohibit_scene(self, lane: AbstractLane, longitude_position: float, lateral_len: float, on_left=False):
         """
@@ -120,11 +117,5 @@ class TrafficSignManager(BaseManager):
         left = 1 if on_left else -1
         for p in pos:
             p_ = (p[0] + longitude_position, left * p[1])
-            cone = self.engine.spawn_object(TrafficCone, lane=lane, longitude=p_[0], lateral=p_[1])
-
-    def destroy(self):
-        super(TrafficSignManager, self).destroy()
-
-    @property
-    def objects(self):
-        return list(self.engine.get_objects(filter=lambda o: isinstance(o, TrafficSign)).values())
+            cone = self.spawn_object(TrafficCone, lane=lane, longitude=p_[0], lateral=p_[1])
+            cone

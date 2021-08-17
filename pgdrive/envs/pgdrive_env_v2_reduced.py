@@ -90,7 +90,7 @@ class LidarStateObservationV2(LidarStateObservation):
             # Note: speed can be negative denoting free fall. This happen when emergency brake.
             clip((vehicle.speed + 1) / (vehicle.max_speed + 1), 0.0, 1.0),
             clip((vehicle.throttle_brake + 1) / 2, 0.0, 1.0),
-            clip((vehicle.steering / vehicle.max_steering + 1) / 2, 0.0, 1.0),
+            clip((vehicle.steering / vehicle.MAX_STEERING + 1) / 2, 0.0, 1.0),
             clip((vehicle.last_current_action[0][0] + 1) / 2, 0.0, 1.0),
             clip((vehicle.last_current_action[0][1] + 1) / 2, 0.0, 1.0)
         ]
