@@ -140,9 +140,11 @@ class MapManager(BaseManager):
             else:
                 map_config = config["map_config"]
                 map_config.update({"seed": current_seed})
+
                 logging.debug(
                     "We are spawning new map (seed {}). This is the config: {}".format(current_seed, map_config)
                 )
+            map_config = self.add_random_to_map(map_config)
             map = self.spawn_object(PGMap, map_config=map_config, random_seed=None)
             self.pg_maps[current_seed] = map
         else:
@@ -150,3 +152,17 @@ class MapManager(BaseManager):
             map = self.pg_maps[current_seed]
         # print("WE ARE LOADING MAP SEED {}.".format(current_seed))
         self.load_map(map)
+
+    def add_random_to_map(self, map_config):
+        if self.engine.global_config["random_lane_width"]:
+            assert not self.engine.global_config["load_map_from_json"
+                                                 ], "You are supposed to turn off the load_map_from_json"
+            map_config[PGMap.LANE_WIDTH
+                       ] = self.np_random.rand() * (PGMap.MAX_LANE_WIDTH - PGMap.MIN_LANE_WIDTH) + PGMap.MIN_LANE_WIDTH
+
+        if self.engine.global_config["random_lane_num"]:
+            assert not self.engine.global_config["load_map_from_json"
+                                                 ], "You are supposed to turn off the load_map_from_json"
+            map_config[PGMap.LANE_NUM] = self.np_random.randint(PGMap.MIN_LANE_NUM, PGMap.MAX_LANE_NUM)
+
+        return map_config

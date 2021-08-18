@@ -27,6 +27,7 @@ PGDriveEnvV1_DEFAULT_CONFIG = dict(
     # ===== Map Config =====
     map=3,  # int or string: an easy way to fill map_config
     random_lane_width=False,
+    random_lane_num=False,
     map_config={
         BaseMap.GENERATE_TYPE: MapGenerateMethod.BIG_BLOCK_NUM,
         BaseMap.GENERATE_CONFIG: None,  # it can be a file path / block num / block ID sequence
