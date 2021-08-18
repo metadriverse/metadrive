@@ -3,7 +3,6 @@ from math import cos, sin
 
 import numpy as np
 from gym.spaces import Box
-
 from pgdrive.envs.marl_envs.marl_inout_roundabout import MultiAgentRoundaboutEnv as MARound, \
     LidarStateObservationMARound
 from pgdrive.utils import get_np_random, norm

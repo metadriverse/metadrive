@@ -2,7 +2,6 @@ import time
 
 import numpy as np
 from gym.spaces import Box
-
 from pgdrive.envs.marl_envs.marl_inout_roundabout import MultiAgentRoundaboutEnv as MARound, \
     LidarStateObservationMARound
 from pgdrive.envs.marl_envs.pheromone_map import PheromoneMap
