@@ -525,8 +525,8 @@ def _long_run():
 
 if __name__ == "__main__":
     # _draw()
-    # _vis()
+    _vis()
     # _vis_debug_respawn()
     # _profile()
     # _long_run()
-    pygame_replay("tollgate", MultiAgentTollgateEnv)
+    # pygame_replay("tollgate", MultiAgentTollgateEnv)

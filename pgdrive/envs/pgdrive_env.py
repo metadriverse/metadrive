@@ -6,11 +6,9 @@ from typing import Union, Dict, AnyStr, Tuple
 import numpy as np
 from pgdrive.component.blocks.first_block import FirstPGBlock
 from pgdrive.component.map.base_map import BaseMap, MapGenerateMethod, parse_map_config
-from pgdrive.component.map.pg_map import PGMap
 from pgdrive.component.vehicle.base_vehicle import BaseVehicle
 from pgdrive.constants import DEFAULT_AGENT, TerminationState
-from pgdrive.engine.core.manual_controller import KeyboardController, JoystickController
-from pgdrive.engine.engine_utils import engine_initialized, set_global_random_seed
+from pgdrive.engine.engine_utils import engine_initialized
 from pgdrive.envs.base_env import BasePGDriveEnv
 from pgdrive.manager.traffic_manager import TrafficMode
 from pgdrive.obs.image_obs import ImageStateObservation
@@ -47,26 +45,26 @@ PGDriveEnvV1_DEFAULT_CONFIG = dict(
     # ===== Traffic =====
     traffic_density=0.1,
     traffic_mode=TrafficMode.Trigger,  # "Respawn", "Trigger", "Hybrid"
-    random_traffic=False,  # Traffic is randomized at default.
+    random_traffic=True,  # Traffic is randomized at default.
 
     # ===== Object =====
     accident_prob=0.,  # accident may happen on each block with this probability, except multi-exits block
 
     # ===== Others =====
-    auto_termination=True,  # Whether to done the environment after 250*(num_blocks+1) steps.
+    auto_termination=False,  # Whether to done the environment after 250*(num_blocks+1) steps.
 
     # ===== Single-agent vehicle config =====
     vehicle_config=dict(
         # ===== vehicle module config =====
         # laser num, distance, other vehicle info num
         lidar=dict(num_lasers=240, distance=50, num_others=4, gaussian_noise=0.0, dropout_prob=0.0),
+        side_detector=dict(num_lasers=0, distance=50, gaussian_noise=0.0, dropout_prob=0.0),
+        lane_line_detector=dict(num_lasers=0, distance=20, gaussian_noise=0.0, dropout_prob=0.0),
         show_lidar=False,
         mini_map=(84, 84, 250),  # buffer length, width
         rgb_camera=(84, 84),  # buffer length, width
         depth_camera=(84, 84, True),  # buffer length, width, view_ground
-        side_detector=dict(num_lasers=0, distance=50),  # laser num, distance
         show_side_detector=False,
-        lane_line_detector=dict(num_lasers=0, distance=20),  # laser num, distance
         show_lane_line_detector=False,
 
         # ===== use image =====
@@ -88,18 +86,21 @@ PGDriveEnvV1_DEFAULT_CONFIG = dict(
         random_color=False,
     ),
     rgb_clip=True,
+    gaussian_noise=0.0,
+    dropout_prob=0.0,
 
     # ===== Reward Scheme =====
-    success_reward=20,
-    out_of_road_penalty=5,
-    crash_vehicle_penalty=10,
-    crash_object_penalty=2,
+    # See: https://github.com/decisionforce/pgdrive/issues/283
+    success_reward=10.0,
+    out_of_road_penalty=5.0,
+    crash_vehicle_penalty=5.0,
+    crash_object_penalty=5.0,
     acceleration_penalty=0.0,
-    steering_penalty=0.1,
     low_speed_penalty=0.0,
     driving_reward=1.0,
     general_penalty=0.0,
     speed_reward=0.1,
+    use_lateral=False,
 
     # ===== Cost Scheme =====
     crash_vehicle_cost=1,
@@ -138,6 +139,20 @@ class PGDriveEnv(BasePGDriveEnv):
         )
         config["vehicle_config"]["rgb_clip"] = config["rgb_clip"]
         config["vehicle_config"]["random_agent_model"] = config["random_agent_model"]
+        if config.get("gaussian_noise", 0) > 0:
+            assert config["vehicle_config"]["lidar"]["gaussian_noise"] == 0, "You already provide config!"
+            assert config["vehicle_config"]["side_detector"]["gaussian_noise"] == 0, "You already provide config!"
+            assert config["vehicle_config"]["lane_line_detector"]["gaussian_noise"] == 0, "You already provide config!"
+            config["vehicle_config"]["lidar"]["gaussian_noise"] = config["gaussian_noise"]
+            config["vehicle_config"]["side_detector"]["gaussian_noise"] = config["gaussian_noise"]
+            config["vehicle_config"]["lane_line_detector"]["gaussian_noise"] = config["gaussian_noise"]
+        if config.get("dropout_prob", 0) > 0:
+            assert config["vehicle_config"]["lidar"]["dropout_prob"] == 0, "You already provide config!"
+            assert config["vehicle_config"]["side_detector"]["dropout_prob"] == 0, "You already provide config!"
+            assert config["vehicle_config"]["lane_line_detector"]["dropout_prob"] == 0, "You already provide config!"
+            config["vehicle_config"]["lidar"]["dropout_prob"] = config["dropout_prob"]
+            config["vehicle_config"]["side_detector"]["dropout_prob"] = config["dropout_prob"]
+            config["vehicle_config"]["lane_line_detector"]["dropout_prob"] = config["dropout_prob"]
         return config
 
     def _get_observations(self):
@@ -214,42 +229,58 @@ class PGDriveEnv(BasePGDriveEnv):
     def done_function(self, vehicle_id: str):
         vehicle = self.vehicles[vehicle_id]
         done = False
-        done_info = dict(crash=False, crash_vehicle=False, crash_object=False, out_of_road=False, arrive_dest=False)
+        done_info = dict(
+            crash_vehicle=False, crash_object=False, crash_building=False, out_of_road=False, arrive_dest=False
+        )
         if vehicle.arrive_destination:
             done = True
             logging.info("Episode ended! Reason: arrive_dest.")
             done_info[TerminationState.SUCCESS] = True
-        if vehicle.crash_vehicle:
-            done = True
-            logging.info("Episode ended! Reason: crash. ")
-            done_info[TerminationState.CRASH_VEHICLE] = True
-        if vehicle.out_of_route or not vehicle.on_lane or vehicle.crash_sidewalk:
+        if self._is_out_of_road(vehicle):
             done = True
             logging.info("Episode ended! Reason: out_of_road.")
             done_info[TerminationState.OUT_OF_ROAD] = True
+        if vehicle.crash_vehicle:
+            done = True
+            logging.info("Episode ended! Reason: crash vehicle ")
+            done_info[TerminationState.CRASH_VEHICLE] = True
         if vehicle.crash_object:
             done = True
             done_info[TerminationState.CRASH_OBJECT] = True
+            logging.info("Episode ended! Reason: crash object ")
+        if vehicle.crash_building:
+            done = True
+            done_info[TerminationState.CRASH_BUILDING] = True
+            logging.info("Episode ended! Reason: crash building ")
 
         # for compatibility
         # crash almost equals to crashing with vehicles
-        done_info[TerminationState.CRASH
-                  ] = done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
+        done_info[TerminationState.CRASH] = (
+            done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
+            or done_info[TerminationState.CRASH_BUILDING]
+        )
         return done, done_info
 
     def cost_function(self, vehicle_id: str):
         vehicle = self.vehicles[vehicle_id]
         step_info = dict()
         step_info["cost"] = 0
-        if vehicle.crash_vehicle:
+        if self._is_out_of_road(vehicle):
+            step_info["cost"] = self.config["out_of_road_cost"]
+        elif vehicle.crash_vehicle:
             step_info["cost"] = self.config["crash_vehicle_cost"]
         elif vehicle.crash_object:
             step_info["cost"] = self.config["crash_object_cost"]
-        elif vehicle.out_of_route:
-            step_info["cost"] = self.config["out_of_road_cost"]
         return step_info['cost'], step_info
 
-    def reward_function(self, vehicle_id):
+    def _is_out_of_road(self, vehicle):
+        # A specified function to determine whether this vehicle should be done.
+        # return vehicle.on_yellow_continuous_line or (not vehicle.on_lane) or vehicle.crash_sidewalk
+        ret = vehicle.on_yellow_continuous_line or vehicle.on_white_continuous_line or \
+              (not vehicle.on_lane) or vehicle.crash_sidewalk
+        return ret
+
+    def reward_function(self, vehicle_id: str):
         """
         Override this func to get a new reward function
         :param vehicle_id: id of BaseVehicle
@@ -257,47 +288,38 @@ class PGDriveEnv(BasePGDriveEnv):
         """
         vehicle = self.vehicles[vehicle_id]
         step_info = dict()
-        action = vehicle.last_current_action[1]
+
         # Reward for moving forward in current lane
-        current_lane = vehicle.lane if vehicle.lane in vehicle.navigation.current_ref_lanes else \
-            vehicle.navigation.current_ref_lanes[0]
+        if vehicle.lane in vehicle.navigation.current_ref_lanes:
+            current_lane = vehicle.lane
+            positive_road = 1
+        else:
+            current_lane = vehicle.navigation.current_ref_lanes[0]
+            current_road = vehicle.current_road
+            positive_road = 1 if not current_road.is_negative_road() else -1
         long_last, _ = current_lane.local_coordinates(vehicle.last_position)
         long_now, lateral_now = current_lane.local_coordinates(vehicle.position)
 
         # reward for lane keeping, without it vehicle can learn to overtake but fail to keep in lane
+        if self.config["use_lateral"]:
+            lateral_factor = clip(1 - 2 * abs(lateral_now) / vehicle.navigation.get_current_lane_width(), 0.0, 1.0)
+        else:
+            lateral_factor = 1.0
+
         reward = 0.0
-        lateral_factor = clip(1 - 2 * abs(lateral_now) / vehicle.navigation.get_current_lane_width(), 0.0, 1.0)
-        reward += self.config["driving_reward"] * (long_now - long_last) * lateral_factor
+        reward += self.config["driving_reward"] * (long_now - long_last) * lateral_factor * positive_road
+        reward += self.config["speed_reward"] * (vehicle.speed / vehicle.max_speed) * positive_road
 
-        # Penalty for frequent steering
-        steering_change = abs(vehicle.last_current_action[0][0] - vehicle.last_current_action[1][0])
-        steering_penalty = self.config["steering_penalty"] * steering_change * vehicle.speed / 20
-        reward -= steering_penalty
-
-        # Penalty for frequent acceleration / brake
-        acceleration_penalty = self.config["acceleration_penalty"] * ((action[1])**2)
-        reward -= acceleration_penalty
-
-        # Penalty for waiting
-        low_speed_penalty = 0
-        if vehicle.speed < 1:
-            low_speed_penalty = self.config["low_speed_penalty"]  # encourage car
-        reward -= low_speed_penalty
-        reward -= self.config["general_penalty"]
-
-        reward += self.config["speed_reward"] * (vehicle.speed / vehicle.max_speed)
         step_info["step_reward"] = reward
 
-        # for done
         if vehicle.arrive_destination:
-            reward += self.config["success_reward"]
-        elif vehicle.out_of_route:
-            reward -= self.config["out_of_road_penalty"]
+            reward = +self.config["success_reward"]
+        elif self._is_out_of_road(vehicle):
+            reward = -self.config["out_of_road_penalty"]
         elif vehicle.crash_vehicle:
-            reward -= self.config["crash_vehicle_penalty"]
+            reward = -self.config["crash_vehicle_penalty"]
         elif vehicle.crash_object:
-            reward -= self.config["crash_object_penalty"]
-
+            reward = -self.config["crash_object_penalty"]
         return reward, step_info
 
     def _get_reset_return(self):
@@ -306,7 +328,7 @@ class PGDriveEnv(BasePGDriveEnv):
         for v_id, v in self.vehicles.items():
             self.observations[v_id].reset(self, v)
             ret[v_id] = self.observations[v_id].observe(v)
-        return ret if self.is_multi_agent else ret[DEFAULT_AGENT]
+        return ret if self.is_multi_agent else self._wrap_as_single_agent(ret)
 
     def dump_all_maps(self):
         assert not engine_initialized(), \
@@ -318,7 +340,6 @@ class PGDriveEnv(BasePGDriveEnv):
         assert engine_initialized()
 
         for seed in range(self.start_seed, self.start_seed + self.env_num):
-
             all_config = self.config.copy()
             all_config["map_config"]["seed"] = seed
             # map_config = copy.deepcopy(self.config["map_config"])

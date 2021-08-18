@@ -1,7 +1,6 @@
 import time
 
 import numpy as np
-
 from pgdrive import PGDriveEnv
 from pgdrive.constants import DEFAULT_AGENT
 from pgdrive.examples import expert, get_terminal_state
@@ -56,13 +55,13 @@ def test_expert_with_traffic(use_render=False):
             random_traffic=False,
             use_render=use_render,
             fast=use_render,
-            vehicle_config=dict(show_lidar=True)
+            vehicle_config=dict(show_lidar=True),
         ),
         num_episode=10
     )
 
     # We change the ego vehicle dynamics! So the expert is not reliable anymore!
-    assert 290 < ep_reward < 330, ep_reward
+    assert 350 < ep_reward < 450, ep_reward
     # assert success_rate == 1.0, success_rate
 
 
@@ -75,15 +74,15 @@ def test_expert_without_traffic():
             start_seed=0,
             traffic_density=0,
             load_map_from_json=False,
-            random_traffic=False
+            random_traffic=False,
         ),
         num_episode=10,
         has_traffic=False
     )
-    assert 310 <= ep_reward <= 350, ep_reward
+    assert 350 <= ep_reward <= 450, ep_reward
 
     # We change the ego vehicle dynamics! So the expert is not reliable anymore!
-    # assert success_rate == 1.0, success_rate
+    assert success_rate == 1.0, success_rate
 
 
 if __name__ == '__main__':

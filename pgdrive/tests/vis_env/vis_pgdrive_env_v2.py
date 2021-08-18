@@ -6,16 +6,19 @@ if __name__ == "__main__":
     env = PGDriveEnvV2(
         {
             "start_seed": 0,
-            "environment_num": 5,
+            "environment_num": 10,
             "fast": True,
             "use_render": True,
             "manual_control": True,
-            "vehicle_config": {
-                "show_side_detector": True,
-                "show_lane_line_detector": True,
-                "show_navi_mark": True,
-                "show_lidar": True,
-            }
+            # "vehicle_config": {
+            #     "show_side_detector": True,
+            #     "show_lane_line_detector": True,
+            #     "show_navi_mark": True,
+            #     "show_lidar": True,
+            # }
+            "random_agent_model": True,
+            "random_lane_width": True,
+            "load_map_from_json": False
         }
     )
 
@@ -28,6 +31,7 @@ if __name__ == "__main__":
             text={
                 "left": env.vehicle.dist_to_left_side,
                 "right": env.vehicle.dist_to_right_side,
+                "width": env.vehicle.lane.width,
                 "white_lane_line": env.vehicle.on_white_continuous_line,
                 "reward": r,
             }
