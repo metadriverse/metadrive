@@ -136,7 +136,7 @@ class TopDownRenderer:
         self._env = env
         self._zoomin = zoomin or 1.0
         self._screen_size = screen_size
-        self._map = map
+        self.map = map
         self.stack_frames = deque(maxlen=num_stack)
         self.history_vehicles = deque(maxlen=num_stack)
         self.history_smooth = history_smooth
@@ -145,6 +145,7 @@ class TopDownRenderer:
             map, simple_draw=False, return_surface=True, film_size=film_size, road_color=road_color
         )
         self._film_size = self._background.get_size()
+        self.road_color = road_color
 
         self._light_background = light_background
         if self._light_background:
@@ -354,6 +355,24 @@ class TopDownRenderer:
     def close(self):
         pygame.quit()
 
+    def reset(self, map):
+        self._background = draw_top_down_map(
+            map, simple_draw=False, return_surface=True, film_size=self._film_size, road_color=self.road_color
+        )
+        self._film_size = self._background.get_size()
+
+        self._light_background = self._light_background
+        if self._light_background:
+            pixels = pygame.surfarray.pixels2d(self._background)
+            pixels ^= 2**32 - 1
+            del pixels
+
+        self._runtime = self._background.copy()
+        self._runtime_output = self._background.copy()
+
+        # self._runtime.blit(self._background, (0, 0))
+        self._size = tuple(self._background.get_size())
+
 
 class PheromoneRenderer(TopDownRenderer):
     def __init__(self, map, film_size=(2000, 2000), screen_size=(1000, 1000), zoomin=1.3, draw_vehicle_first=False):
@@ -361,7 +380,7 @@ class PheromoneRenderer(TopDownRenderer):
             map, film_size=film_size, screen_size=screen_size, light_background=True, zoomin=zoomin
         )
         self._pheromone_surface = None
-        self._bounding_box = self._map.road_network.get_bounding_box()
+        self._bounding_box = self.map.road_network.get_bounding_box()
         self._draw_vehicle_first = draw_vehicle_first
         self._color_map = None
 

@@ -165,6 +165,8 @@ class MultiAgentPGDrive(PGDriveEnvV2):
     def reset(self, *args, **kwargs):
         self.config.update(self._update_agent_pos_configs(self.config))
         ret = super(MultiAgentPGDrive, self).reset(*args, **kwargs)
+        if self._top_down_renderer is not None:
+            self._top_down_renderer.reset(self.current_map)
         assert (len(self.vehicles) == self.num_agents) or (self.num_agents == -1)
         return ret
 
