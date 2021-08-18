@@ -295,6 +295,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         """
         if random_seed is not None:
             self.seed(random_seed)
+            self.sample_parameters()
         if vehicle_config is not None:
             self.update_config(vehicle_config)
         map = self.engine.current_map
