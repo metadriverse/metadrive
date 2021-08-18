@@ -79,10 +79,12 @@ class Interface:
             self.contact_result_render.detachNode()
             self.mid_panel.remove_display_region()
             self.left_panel.remove_display_region()
+            self.arrow.detachNode()
 
     def track(self, vehicle):
         if self.need_interface:
             self.vehicle_panel.buffer.set_active(True)
+            self.arrow.reparentTo(self.engine.aspect2d)
             self.contact_result_render.reparentTo(self.engine.aspect2d)
             self.vehicle_panel.add_display_region(self.vehicle_panel.display_region_size)
             for p in [self.left_panel, self.mid_panel]:

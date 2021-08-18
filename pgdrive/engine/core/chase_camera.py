@@ -57,11 +57,12 @@ class MainCamera:
         self.engine.accept("wheel_down", self._wheel_down_height)
         self.engine.accept("mouse1", self._move_to_pointer)
 
-        if not self.engine.task_manager.hasTaskNamed(self.TOP_DOWN_TASK_NAME):
-            # adjust hpr
-            current_pos = self.camera.getPos()
-            self.camera.lookAt(current_pos[0], current_pos[1], 0)
-            self.engine.task_manager.add(self._top_down_task, self.TOP_DOWN_TASK_NAME, extraArgs=[], appendTask=True)
+        # default top-down
+        self.top_down_camera_height = self.engine.global_config["top_down_camera_initial_z"]
+        self.camera_x = self.engine.global_config["top_down_camera_initial_x"]
+        self.camera_y = self.engine.global_config["top_down_camera_initial_y"]
+        self.engine.interface.stop_track()
+        self.engine.task_manager.add(self._top_down_task, self.TOP_DOWN_TASK_NAME, extraArgs=[], appendTask=True)
 
     def set_bird_view_pos(self, position):
         if self.engine.task_manager.hasTaskNamed(self.TOP_DOWN_TASK_NAME):
@@ -179,14 +180,15 @@ class MainCamera:
             engine.task_manager.remove(self.TOP_DOWN_TASK_NAME)
         self.current_track_vehicle = None
 
-    def stop_track(self):
+    def stop_track(self, bird_view_on_current_position=True):
         self.engine.interface.stop_track()
         if self.engine.task_manager.hasTaskNamed(self.CHASE_TASK_NAME):
             self.engine.task_manager.remove(self.CHASE_TASK_NAME)
         if not self.engine.task_manager.hasTaskNamed(self.TOP_DOWN_TASK_NAME):
             # adjust hpr
-            current_pos = self.camera.getPos()
-            self.camera_x, self.camera_y = current_pos[0], current_pos[1]
+            if bird_view_on_current_position:
+                current_pos = self.camera.getPos()
+                self.camera_x, self.camera_y = current_pos[0], current_pos[1]
             self.engine.task_manager.add(self._top_down_task, self.TOP_DOWN_TASK_NAME, extraArgs=[], appendTask=True)
 
     def _top_down_task(self, task):

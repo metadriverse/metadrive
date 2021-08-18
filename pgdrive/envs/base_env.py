@@ -44,6 +44,9 @@ BASE_DEFAULT_CONFIG = dict(
     camera_dist=7,
     prefer_track_agent=None,
     draw_map_resolution=1024,  # Drawing the map in a canvas of (x, x) pixels.
+    top_down_camera_initial_x=0,
+    top_down_camera_initial_y=0,
+    top_down_camera_initial_z=120,  # height
 
     # ===== Vehicle =====
     vehicle_config=dict(
