@@ -337,12 +337,12 @@ class BaseEngine(EngineCore, Randomizable):
     def _object_clean_check(self):
         if self.global_config["debug"]:
             from pgdrive.component.vehicle.base_vehicle import BaseVehicle
-            from pgdrive.component.static_object.base_static_object import BaseStaticObject
+            from pgdrive.component.static_object.traffic_object import TrafficSign
             for manager in self._managers.values():
                 assert len(manager.spawned_objects) == 0
 
             objs_need_to_release = self.get_objects(
-                filter=lambda obj: isinstance(obj, BaseVehicle) or isinstance(obj, BaseStaticObject)
+                filter=lambda obj: isinstance(obj, BaseVehicle) or isinstance(obj, TrafficSign)
             )
             assert len(
                 objs_need_to_release) == 0, "You should clear all generated objects by using engine.clear_objects " \
