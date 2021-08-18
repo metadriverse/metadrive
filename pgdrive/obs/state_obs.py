@@ -65,7 +65,7 @@ class StateObservation(ObservationBase):
             info += vehicle.side_detector.perceive(vehicle, vehicle.engine.physics_world.static_world).cloud_points
         else:
             lateral_to_left, lateral_to_right, = vehicle.dist_to_left_side, vehicle.dist_to_right_side
-            total_width = float((vehicle.navigation.get_current_lane_num() + 1) * vehicle.navigation.map.MAX_LANE_WIDTH)
+            total_width = float((vehicle.navigation.map.MAX_LANE_NUM + 1) * vehicle.navigation.map.MAX_LANE_WIDTH)
             lateral_to_left /= total_width
             lateral_to_right /= total_width
             info += [clip(lateral_to_left, 0.0, 1.0), clip(lateral_to_right, 0.0, 1.0)]
