@@ -4,7 +4,6 @@ import logging
 from pgdrive.component.blocks.first_block import FirstPGBlock
 from pgdrive.component.road.road import Road
 from pgdrive.constants import TerminationState
-from pgdrive.envs.base_env import BasePGDriveEnv
 from pgdrive.envs.pgdrive_env_v2 import PGDriveEnvV2
 from pgdrive.manager.spawn_manager import SpawnManager
 from pgdrive.utils import setup_logger, get_np_random, Config
@@ -13,12 +12,12 @@ from pgdrive.utils.config import merge_dicts
 MULTI_AGENT_PGDRIVE_DEFAULT_CONFIG = dict(
     # ===== Multi-agent =====
     is_multi_agent=True,
-    num_agents=2,  # If num_agents is set to None, then endless vehicles will be added only the empty spawn points exist
+    num_agents=15,  # If num_agents is set to None, then endless vehicles will be added only the empty spawn points exist
     random_agent_model=False,
 
     # Whether to terminate a vehicle if it crash with others. Since in MA env the crash is extremely dense, so
     # frequently done might not be a good idea.
-    crash_done=False,
+    crash_done=True,
     out_of_road_done=True,
     delay_done=25,  # Wait for 5 seconds in real world.
 
@@ -29,6 +28,9 @@ MULTI_AGENT_PGDRIVE_DEFAULT_CONFIG = dict(
     # that, the episode won't terminate until all existing vehicles reach their horizon or done. The vehicle specified
     # horizon is also this value.
     horizon=1000,
+
+    # Use to determine what neighborhood means
+    neighbours_distance=10,
 
     # ===== Vehicle Setting =====
     vehicle_config=dict(lidar=dict(num_lasers=72, distance=40, num_others=0), random_color=True),
@@ -45,7 +47,7 @@ MULTI_AGENT_PGDRIVE_DEFAULT_CONFIG = dict(
     # ===== Environmental Setting =====
     top_down_camera_initial_x=0,
     top_down_camera_initial_y=0,
-    top_down_camera_initial_z=120,  # height
+    top_down_camera_initial_z=200,  # height
     traffic_density=0.,
     auto_termination=False,
     camera_height=4,
@@ -324,11 +326,14 @@ def _vis():
     setup_logger(True)
     env = MultiAgentPGDrive(
         {
-            # "use_render": True,
-            # "fast": True,
-            "num_agents": 12,
-            "allow_respawn": False,
-            "manual_control": True,
+            "use_render": True,
+            "fast": True,
+            "num_agents": 5,
+            "start_seed": 8000,
+            "environment_num": 100
+
+            # "allow_respawn": False,
+            # "manual_control": True,
         }
     )
     o = env.reset()
@@ -341,6 +346,7 @@ def _vis():
         # o, r, d, info = env.step([0,1])
         # d.update({"total_r": total_r})
         env.render(mode="top_down")
+        env.reset()
         if len(env.vehicles) == 0:
             total_r = 0
             print("Reset")
@@ -394,5 +400,5 @@ def panda_replay(name, env_class, save=False, other_traj=None, extra_config={}):
 
 
 if __name__ == '__main__':
-    _test()
-    # _vis()
+    # _test()
+    _vis()

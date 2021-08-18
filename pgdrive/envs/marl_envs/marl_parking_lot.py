@@ -14,7 +14,6 @@ from pgdrive.utils import get_np_random, Config
 
 MAParkingLotConfig = dict(
     num_agents=10,
-    crash_done=True,
     parking_space_num=8,
     map_config=dict(exit_length=20, lane_num=1),
     top_down_camera_initial_x=80,

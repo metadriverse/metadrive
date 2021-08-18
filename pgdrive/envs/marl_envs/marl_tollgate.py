@@ -13,7 +13,6 @@ from pgdrive.utils import Config, clip
 
 MATollConfig = dict(
     num_agents=40,
-    crash_done=True,
     map_config=dict(exit_length=70, lane_num=3, toll_lane_num=8, toll_length=10),
     top_down_camera_initial_x=125,
     top_down_camera_initial_y=0,
