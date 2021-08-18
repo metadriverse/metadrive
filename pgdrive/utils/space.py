@@ -222,7 +222,7 @@ class VehicleParameterSpace:
         max_engine_force=ConstantSpace(800),
         max_brake_force=ConstantSpace(150),
         max_steering=ConstantSpace(40),
-        max_speed=ConstantSpace(120),
+        max_speed=ConstantSpace(80),
     )
     DEFAULT_VEHICLE = BASE_VEHICLE
     S_VEHICLE = dict(
@@ -230,28 +230,28 @@ class VehicleParameterSpace:
         max_engine_force=ConstantSpace(450),
         max_brake_force=ConstantSpace(55),
         max_steering=ConstantSpace(50),
-        max_speed=ConstantSpace(120),
+        max_speed=ConstantSpace(80),
     )
     M_VEHICLE = dict(
         wheel_friction=ConstantSpace(0.75),
         max_engine_force=ConstantSpace(750),
         max_brake_force=ConstantSpace(90),
         max_steering=ConstantSpace(45),
-        max_speed=ConstantSpace(120),
+        max_speed=ConstantSpace(80),
     )
     L_VEHICLE = dict(
         wheel_friction=ConstantSpace(0.8),
         max_engine_force=ConstantSpace(550),
         max_brake_force=ConstantSpace(70),
         max_steering=ConstantSpace(40),
-        max_speed=ConstantSpace(120),
+        max_speed=ConstantSpace(80),
     )
     XL_VEHICLE = dict(
         wheel_friction=ConstantSpace(0.7),
         max_engine_force=ConstantSpace(600),
         max_brake_force=ConstantSpace(70),
         max_steering=ConstantSpace(35),
-        max_speed=ConstantSpace(120),
+        max_speed=ConstantSpace(80),
     )
 
 

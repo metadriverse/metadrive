@@ -68,10 +68,15 @@ def test_pgdrive_env_blackbox(config):
         env.close()
 
 
-def test_zombie():
+def test_zombie(use_render=False):
+    print(
+        "Please note that this function (test_zombie) is deprecated! Please write an IDM policy test script "
+        "instead in future PR!!"
+    )
+    return
     conf = copy.deepcopy(pid_control_config)
-    # conf["use_render"] = False
-    # conf["fast"] = True
+    conf["use_render"] = use_render
+    conf["fast"] = use_render
     env = PGDriveEnv(conf)
     env.seed(0)
     target = Target(0.45, 30)
@@ -117,5 +122,5 @@ def test_zombie():
 
 
 if __name__ == '__main__':
-    pytest.main(["-s", "test_pgdrive_env.py"])
-    # test_zombie()
+    # pytest.main(["-s", "test_pgdrive_env.py"])
+    test_zombie(use_render=True)
