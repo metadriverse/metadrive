@@ -10,7 +10,6 @@ from pgdrive.utils.math_utils import clip
 
 MABottleneckConfig = dict(
     num_agents=20,
-    crash_done=True,
     map_config=dict(exit_length=60, bottle_lane_num=4, neck_lane_num=1, neck_length=20),
     top_down_camera_initial_x=95,
     top_down_camera_initial_y=15,
