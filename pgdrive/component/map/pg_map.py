@@ -13,7 +13,7 @@ class PGMap(BaseMap):
     MAX_LANE_WIDTH = 4.5
     MIN_LANE_WIDTH = 3.0
     MAX_LANE_NUM = 3
-    MIN_LANE_NUM = 1
+    MIN_LANE_NUM = 2
 
     def _generate(self):
         """
