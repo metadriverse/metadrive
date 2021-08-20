@@ -1,4 +1,5 @@
 from typing import Tuple
+from pgdrive.constants import CollisionGroup
 
 import numpy as np
 from panda3d.bullet import BulletCylinderShape
@@ -13,7 +14,7 @@ from pgdrive.utils.coordinates_shift import panda_position, panda_heading
 LaneIndex = Tuple[str, str, int]
 
 
-class TrafficSign(BaseStaticObject):
+class TrafficObject(BaseStaticObject):
     """
     Common interface for objects that appear on the road, beside vehicles.
     """
@@ -21,6 +22,7 @@ class TrafficSign(BaseStaticObject):
     RADIUS = 0.25
     HEIGHT = 1.2
     MASS = 1
+    COLLISION_GROUP = CollisionGroup.TrafficObject
 
     COST_ONCE = True  # cost will give at the first time
 
@@ -33,11 +35,11 @@ class TrafficSign(BaseStaticObject):
         position = lane.position(longitude, lateral)
         heading = lane.heading_at(longitude)
         assert self.NAME is not None, "Assign a name for this class for finding it easily"
-        super(TrafficSign, self).__init__(lane, position, heading, random_seed)
+        super(TrafficObject, self).__init__(lane, position, heading, random_seed)
         self.crashed = False
 
 
-class TrafficCone(TrafficSign):
+class TrafficCone(TrafficObject):
     """Placed near the construction section to indicate that traffic is prohibited"""
 
     NAME = BodyName.Traffic_cone
@@ -46,6 +48,7 @@ class TrafficCone(TrafficSign):
         super(TrafficCone, self).__init__(lane, longitude, lateral, random_seed)
         self.add_body(BaseRigidBodyNode(self.name, self.NAME))
         self.body.addShape(BulletCylinderShape(self.RADIUS, self.HEIGHT))
+        self.body.setIntoCollideMask(self.COLLISION_GROUP)
         self.origin.setPos(panda_position(self.position, self.HEIGHT / 2))
         self.origin.setH(panda_heading(self.heading))
         if self.render:
@@ -56,7 +59,7 @@ class TrafficCone(TrafficSign):
         self.set_static(static)
 
 
-class TrafficTriangle(TrafficSign):
+class TrafficTriangle(TrafficObject):
     """Placed behind the vehicle when it breaks down"""
 
     NAME = BodyName.Traffic_triangle
@@ -66,6 +69,7 @@ class TrafficTriangle(TrafficSign):
         super(TrafficTriangle, self).__init__(lane, longitude, lateral, random_seed)
         self.add_body(BaseRigidBodyNode(self.name, self.NAME))
         self.body.addShape(BulletCylinderShape(self.RADIUS, self.HEIGHT))
+        self.body.setIntoCollideMask(self.COLLISION_GROUP)
         self.origin.setPos(panda_position(self.position, self.HEIGHT / 2))
         self.origin.setH(panda_heading(self.heading))
         if self.render:
