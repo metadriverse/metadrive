@@ -16,6 +16,7 @@ class TrafficSignManager(BaseManager):
     """
     This class is used to manager all static object, such as traffic cones, warning tripod.
     """
+    PRIORITY = 9
 
     # the distance between break-down vehicle and alert
     ALERT_DIST = 10
@@ -32,6 +33,7 @@ class TrafficSignManager(BaseManager):
     def __init__(self):
         super(TrafficSignManager, self).__init__()
         self.accident_prob = 0.
+        self.accident_lanes = []
 
     def before_reset(self):
         """
@@ -45,6 +47,7 @@ class TrafficSignManager(BaseManager):
         Generate an accident scene or construction scene on block
         :return: None
         """
+        self.accident_lanes = []
         engine = get_engine()
         accident_prob = self.accident_prob
         if abs(accident_prob - 0.0) < 1e-2:
@@ -75,12 +78,10 @@ class TrafficSignManager(BaseManager):
             if lane.length < self.ACCIDENT_LANE_MIN_LEN:
                 continue
 
-            # generate scene
-            block.PROHIBIT_TRAFFIC_GENERATION = True
-
             lateral_len = engine.current_map.config[engine.current_map.LANE_WIDTH]
 
             lane = engine.current_map.road_network.get_lane(accident_road.lane_index(accident_lane_idx))
+            self.accident_lanes.append(lane)
             if self.np_random.rand() > self.PROHIBIT_SCENE_PROB or _debug:
                 self.prohibit_scene(lane, longitude, lateral_len, on_left)
             else:
