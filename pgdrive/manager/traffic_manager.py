@@ -241,14 +241,14 @@ class TrafficManager(BaseManager):
         """
         vehicle_num = 0
         for block in map.blocks[1:]:
-            if block.PROHIBIT_TRAFFIC_GENERATION:  # For debug purpose.
-                continue
 
             # Propose candidate locations for spawning new vehicles
             trigger_lanes = block.get_intermediate_spawn_lanes()
             potential_vehicle_configs = []
             for lanes in trigger_lanes:
                 for l in lanes:
+                    if l in self.engine.object_manager.accident_lanes:
+                        continue
                     potential_vehicle_configs += self._propose_vehicle_configs(l)
 
             # How many vehicles should we spawn in this block?
