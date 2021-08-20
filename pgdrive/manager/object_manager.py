@@ -7,12 +7,12 @@ from pgdrive.component.blocks.straight import Straight
 from pgdrive.component.lane.abs_lane import AbstractLane
 from pgdrive.component.road.road import Road
 from pgdrive.component.road.road_network import LaneIndex
-from pgdrive.component.static_object.traffic_object import TrafficSign
+from pgdrive.component.static_object.traffic_object import TrafficObject
 from pgdrive.engine.engine_utils import get_engine
 from pgdrive.manager.base_manager import BaseManager
 
 
-class TrafficSignManager(BaseManager):
+class TrafficObjectManager(BaseManager):
     """
     This class is used to manager all static object, such as traffic cones, warning tripod.
     """
@@ -31,7 +31,7 @@ class TrafficSignManager(BaseManager):
     PROHIBIT_SCENE_PROB = 0.5  # the reset is the probability of break_down_scene
 
     def __init__(self):
-        super(TrafficSignManager, self).__init__()
+        super(TrafficObjectManager, self).__init__()
         self.accident_prob = 0.
         self.accident_lanes = []
 
@@ -39,7 +39,7 @@ class TrafficSignManager(BaseManager):
         """
         Clear all objects in th scene
         """
-        super(TrafficSignManager, self).before_reset()
+        super(TrafficObjectManager, self).before_reset()
         self.accident_prob = self.engine.global_config["accident_prob"]
 
     def reset(self):
