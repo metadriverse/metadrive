@@ -10,12 +10,18 @@ if __name__ == "__main__":
             "fast": True,
             "use_render": True,
             "manual_control": True,
-            # "vehicle_config": {
-            #     "show_side_detector": True,
-            #     "show_lane_line_detector": True,
-            #     "show_navi_mark": True,
-            #     "show_lidar": True,
-            # }
+            "vehicle_config": {
+                "side_detector": {
+                    "num_lasers": 120
+                },
+                "lane_line_detector": {
+                    "num_lasers": 120
+                },
+                "show_side_detector": True,
+                "show_lane_line_detector": True,
+                "show_navi_mark": True,
+                "show_lidar": True,
+            },
             "random_agent_model": True,
             "random_lane_width": True,
             "load_map_from_json": False

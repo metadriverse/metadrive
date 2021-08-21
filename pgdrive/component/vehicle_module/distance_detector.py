@@ -125,6 +125,14 @@ class DistanceDetector:
     def __del__(self):
         logging.debug("Lidar is destroyed.")
 
+    def detach_from_world(self):
+        if isinstance(self.origin, NodePath):
+            self.origin.detachNode()
+
+    def attach_to_world(self, engine):
+        if isinstance(self.origin, NodePath):
+            self.origin.reparentTo(engine.render)
+
 
 class SideDetector(DistanceDetector):
     def __init__(self, num_lasers: int = 2, distance: float = 50, enable_show=False):
