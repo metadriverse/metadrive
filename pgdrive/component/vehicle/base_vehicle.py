@@ -643,12 +643,15 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self.navigation.destroy()
         self.navigation = None
 
-        self.side_detector.destroy()
-        self.lane_line_detector.destroy()
-        self.lidar.destroy()
-        self.side_detector = None
-        self.lane_line_detector = None
-        self.lidar = None
+        if self.side_detector is not None:
+            self.side_detector.destroy()
+            self.side_detector = None
+        if self.lane_line_detector is not None:
+            self.lane_line_detector.destroy()
+            self.lane_line_detector = None
+        if self.lidar is not None:
+            self.lidar.destroy()
+            self.lidar = None
         if len(self.image_sensors) != 0:
             for sensor in self.image_sensors.values():
                 sensor.destroy()
@@ -765,10 +768,22 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     def detach_from_world(self, physics_world):
         super(BaseVehicle, self).detach_from_world(physics_world)
         self.navigation.detach_from_world()
+        if self.lidar is not None:
+            self.lidar.detach_from_world()
+        if self.side_detector is not None:
+            self.side_detector.detach_from_world()
+        if self.lane_line_detector is not None:
+            self.lane_line_detector.detach_from_world()
 
     def attach_to_world(self, parent_node_path, physics_world):
         super(BaseVehicle, self).attach_to_world(parent_node_path, physics_world)
         self.navigation.attach_to_world(self.engine)
+        if self.lidar is not None:
+            self.lidar.attach_to_world(self.engine)
+        if self.side_detector is not None:
+            self.side_detector.attach_to_world(self.engine)
+        if self.lane_line_detector is not None:
+            self.lane_line_detector.attach_to_world(self.engine)
 
     def set_break_down(self, break_down=True):
         self.break_down = break_down
