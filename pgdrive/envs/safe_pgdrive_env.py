@@ -29,6 +29,19 @@ class SafePGDriveEnv(PGDriveEnv):
             allow_add_new_key=True
         )
         return config
+    def __init__(self,config):
+        super(SafePGDriveEnv, self).__init__(config)
+        self.episode_cost = 0
+
+    def reset(self, *args, **kwargs):
+        self.episode_cost = 0
+        return super(SafePGDriveEnv, self).reset(*args, **kwargs)
+
+    def cost_function(self, vehicle_id: str):
+        cost, step_info = super(SafePGDriveEnv, self).cost_function(vehicle_id)
+        self.episode_cost += cost
+        step_info["total_cost"] = self.episode_cost
+        return cost, step_info
 
     def _post_process_config(self, config):
         config = super(SafePGDriveEnv, self)._post_process_config(config)
