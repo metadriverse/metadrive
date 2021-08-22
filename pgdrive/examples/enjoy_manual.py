@@ -7,10 +7,10 @@ environment that allows popping up an window.
 """
 import random
 
-from pgdrive import PGDriveEnvV2
+from pgdrive import PGDriveEnv
 
 if __name__ == "__main__":
-    env = PGDriveEnvV2(
+    env = PGDriveEnv(
         dict(
             use_render=True,
             #use_saver=True,

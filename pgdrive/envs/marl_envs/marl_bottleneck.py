@@ -9,6 +9,7 @@ from pgdrive.utils import Config
 from pgdrive.utils.math_utils import clip
 
 MABottleneckConfig = dict(
+    spawn_roads=[Road(FirstPGBlock.NODE_2, FirstPGBlock.NODE_3), -Road(Split.node(2, 0, 0), Split.node(2, 0, 1))],
     num_agents=20,
     map_config=dict(exit_length=60, bottle_lane_num=4, neck_lane_num=1, neck_length=20),
     top_down_camera_initial_x=95,
@@ -67,8 +68,6 @@ class MABottleneckMap(PGMap):
 
 
 class MultiAgentBottleneckEnv(MultiAgentPGDrive):
-    spawn_roads = [Road(FirstPGBlock.NODE_2, FirstPGBlock.NODE_3), -Road(Split.node(2, 0, 0), Split.node(2, 0, 1))]
-
     @staticmethod
     def default_config() -> Config:
         assert MABottleneckConfig["vehicle_config"]["side_detector"]["num_lasers"] > 2
@@ -82,7 +81,7 @@ class MultiAgentBottleneckEnv(MultiAgentPGDrive):
             self.current_seed,
             episode_data,
             single_block_class=MABottleneckMap,
-            spawn_roads=self.spawn_roads
+            spawn_roads=self.config["spawn_roads"]
         )
 
     def get_single_observation(self, vehicle_config: "Config") -> "ObservationBase":
@@ -157,9 +156,9 @@ def _expert():
                     "num_others": 4,
                     "distance": 50
                 },
-                "use_saver": True,
-                "save_level": 1.
             },
+            "use_saver": True,
+            "save_level": 1.,
             "debug_physics_world": True,
             "fast": True,
             # "use_render": True,
@@ -277,7 +276,8 @@ def _vis():
             "episode length": ep_s,
             "cam_x": env.main_camera.camera_x,
             "cam_y": env.main_camera.camera_y,
-            "cam_z": env.main_camera.top_down_camera_height
+            "cam_z": env.main_camera.top_down_camera_height,
+            "current_track_v": env.agent_manager.object_to_agent(env.current_track_vehicle.name)
         }
         track_v = env.agent_manager.object_to_agent(env.current_track_vehicle.name)
         render_text["tack_v_reward"] = r[track_v]
@@ -318,7 +318,7 @@ def _profile():
                     time.time() - start, (s + 1) / (time.time() - start)
                 )
             )
-    print(f"(PGDriveEnvV2) Total Time Elapse: {time.time() - start}")
+    print(f"(PGDriveEnv) Total Time Elapse: {time.time() - start}")
 
 
 def _long_run():

@@ -1,18 +1,14 @@
 from pgdrive.component.vehicle.vehicle_type import DefaultVehicle
+from pgdrive.component.vehicle.base_vehicle import BaseVehicle
 from pgdrive.constants import BodyName
 from pgdrive.constants import DEFAULT_AGENT
 from pgdrive.envs.pgdrive_env import PGDriveEnv
 from pgdrive.utils import setup_logger
 
 
-class TestEnv(PGDriveEnv):
-    def __init__(self, config):
-        super(TestEnv, self).__init__(config)
-
-
 def test_original_lidar(render=False):
     setup_logger(debug=True)
-    env = TestEnv(
+    env = PGDriveEnv(
         {
             "use_render": render,
             "manual_control": render,
@@ -50,8 +46,7 @@ def test_original_lidar(render=False):
             if len(env.vehicle.lidar.get_surrounding_vehicles(env.observations[DEFAULT_AGENT].detected_objects)) > 2:
                 detect_traffic_vehicle = True
             for hit in env.observations[DEFAULT_AGENT].detected_objects:
-                v = hit.getNode()
-                if v.hasPythonTag(BodyName.Vehicle):
+                if isinstance(hit, BaseVehicle):
                     detect_base_vehicle = True
             if d:
                 break
@@ -64,7 +59,7 @@ def test_original_lidar(render=False):
 
 def test_lidar_with_mask(render=False):
     setup_logger(debug=True)
-    env = TestEnv(
+    env = PGDriveEnv(
         {
             "use_render": render,
             "manual_control": render,
@@ -103,8 +98,7 @@ def test_lidar_with_mask(render=False):
             if len(env.vehicle.lidar.get_surrounding_vehicles(env.observations[DEFAULT_AGENT].detected_objects)) > 2:
                 detect_traffic_vehicle = True
             for hit in env.observations[DEFAULT_AGENT].detected_objects:
-                v = hit.getNode()
-                if v.hasPythonTag(BodyName.Vehicle):
+                if isinstance(hit, BaseVehicle):
                     detect_base_vehicle = True
             if d:
                 break

@@ -3,24 +3,6 @@ from pgdrive.component.vehicle_module.PID_controller import PIDController
 from pgdrive.envs.pgdrive_env import PGDriveEnv
 
 
-class TestEnv(PGDriveEnv):
-    def __init__(self, vis):
-        super(TestEnv, self).__init__(
-            {
-                "environment_num": 10,
-                "traffic_density": 0.0,
-                "use_render": vis,
-                "start_seed": 5,
-                "map_config": {
-                    BaseMap.GENERATE_TYPE: MapGenerateMethod.BIG_BLOCK_NUM,
-                    BaseMap.GENERATE_CONFIG: 7,
-                    BaseMap.LANE_WIDTH: 3.5,
-                    BaseMap.LANE_NUM: 3,
-                }
-            }
-        )
-
-
 class Target:
     def __init__(self, target_lateral, target_speed):
         self.lateral = target_lateral
@@ -40,7 +22,20 @@ class Target:
 
 
 def test_navigation(vis=False):
-    env = TestEnv(vis)
+    env = PGDriveEnv(
+        {
+            "environment_num": 10,
+            "traffic_density": 0.0,
+            "use_render": vis,
+            "start_seed": 5,
+            "map_config": {
+                BaseMap.GENERATE_TYPE: MapGenerateMethod.BIG_BLOCK_NUM,
+                BaseMap.GENERATE_CONFIG: 7,
+                BaseMap.LANE_WIDTH: 3.5,
+                BaseMap.LANE_NUM: 3,
+            }
+        }
+    )
     target = Target(0.375, 30)
     o = env.reset()
     if vis:

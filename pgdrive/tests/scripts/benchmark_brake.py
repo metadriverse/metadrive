@@ -3,7 +3,7 @@ import time
 import numpy as np
 
 from pgdrive.component.map.base_map import BaseMap, MapGenerateMethod
-from pgdrive.envs import PGDriveEnvV2
+from pgdrive.envs import PGDriveEnv
 
 
 def get_result(env):
@@ -74,7 +74,7 @@ def get_result(env):
 if __name__ == '__main__':
 
     for friction in [0.8]:
-        env = PGDriveEnvV2(
+        env = PGDriveEnv(
             {
                 "environment_num": 1,
                 "traffic_density": 0.0,

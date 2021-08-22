@@ -4,16 +4,9 @@ from pgdrive.utils import setup_logger
 setup_logger(debug=True)
 
 
-class TestEnv(PGDriveEnv):
-    def __init__(self):
-        super(TestEnv, self).__init__({"environment_num": 1, "start_seed": 3, "manual_control": False})
-        # self.engine.cam.setPos(0, 0, 1500)
-        # self.engine.cam.lookAt(0, 0, 0)
-
-
 def test_destroy():
     # Close and reset
-    env = TestEnv()
+    env = PGDriveEnv({"environment_num": 1, "start_seed": 3, "manual_control": False})
     try:
         env.reset()
         for i in range(1, 20):
@@ -24,7 +17,7 @@ def test_destroy():
         env.close()
 
         # Again!
-        env = TestEnv()
+        env = PGDriveEnv({"environment_num": 1, "start_seed": 3, "manual_control": False})
         env.reset()
         for i in range(1, 20):
             env.step([1, 1])

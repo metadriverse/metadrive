@@ -6,33 +6,29 @@ from pgdrive.manager.traffic_manager import TrafficMode
 from pgdrive.utils import setup_logger
 
 
-class TestEnv(PGDriveEnv):
-    def __init__(self, save_episode=True, vis=True):
-        super(TestEnv, self).__init__(
-            {
-                "environment_num": 1,
-                "traffic_density": 0.1,
-                "start_seed": 5,
-                # "manual_control": vis,
-                "use_render": vis,
-                "traffic_mode": TrafficMode.Trigger,
-                "record_episode": save_episode,
-                "map_config": {
-                    BaseMap.GENERATE_TYPE: MapGenerateMethod.BIG_BLOCK_SEQUENCE,
-                    BaseMap.GENERATE_CONFIG: "XTXTXTXTXT",
-                    BaseMap.LANE_WIDTH: 3.5,
-                    BaseMap.LANE_NUM: 3,
-                }
-            }
-        )
-
-
 def test_save_episode(vis=False):
     setup_logger(True)
 
     test_dump = True
-
-    env = TestEnv(vis=vis)
+    save_episode = True,
+    vis = True
+    env = PGDriveEnv(
+        {
+            "environment_num": 1,
+            "traffic_density": 0.1,
+            "start_seed": 5,
+            # "manual_control": vis,
+            "use_render": vis,
+            "traffic_mode": TrafficMode.Trigger,
+            "record_episode": save_episode,
+            "map_config": {
+                BaseMap.GENERATE_TYPE: MapGenerateMethod.BIG_BLOCK_SEQUENCE,
+                BaseMap.GENERATE_CONFIG: "XTXTXTXTXT",
+                BaseMap.LANE_WIDTH: 3.5,
+                BaseMap.LANE_NUM: 3,
+            }
+        }
+    )
     try:
         o = env.reset()
         epi_info = None

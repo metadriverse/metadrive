@@ -3,7 +3,7 @@ from collections import deque
 import gym
 import numpy as np
 
-from pgdrive.envs.pgdrive_env_v2 import PGDriveEnvV2
+from pgdrive.envs.pgdrive_env import PGDriveEnv
 from pgdrive.obs.observation_base import ObservationBase
 from pgdrive.obs.state_obs import LidarStateObservation
 from pgdrive.utils import Config, clip, norm
@@ -119,10 +119,10 @@ class LidarStateObservationV2(LidarStateObservation):
         return ret
 
 
-class PGDriveEnvV2Reduced(PGDriveEnvV2):
+class PGDriveEnvReduced(PGDriveEnv):
     @classmethod
     def default_config(cls) -> Config:
-        config = PGDriveEnvV2.default_config()
+        config = PGDriveEnv.default_config()
         config["vehicle_config"]["lidar"]["num_others"] = 0
         config["vehicle_config"]["lidar"]["num_lasers"] = 240
         config["vehicle_config"]["side_detector"]["num_lasers"] = 120
@@ -136,7 +136,7 @@ class PGDriveEnvV2Reduced(PGDriveEnvV2):
         return LidarStateObservationV2(vehicle_config)
 
     def reward_function(self, vehicle_id: str):
-        r, r_info = super(PGDriveEnvV2Reduced, self).reward_function(vehicle_id)
+        r, r_info = super(PGDriveEnvReduced, self).reward_function(vehicle_id)
         r_info["out_of_route"] = False
         if self.vehicles[vehicle_id].out_of_route:
             r = -abs(r)
@@ -153,10 +153,10 @@ if __name__ == '__main__':
         assert np.isscalar(reward)
         assert isinstance(info, dict)
 
-    # env = PGDriveEnvV2Reduced({"vehicle_config": {"num_stacks": 2}})
+    # env = PGDriveEnvReduced({"vehicle_config": {"num_stacks": 2}})
 
     for om in ["w_ego", "w_navi", "w_both"]:
-        env = PGDriveEnvV2Reduced({"obs_mode": om})
+        env = PGDriveEnvReduced({"obs_mode": om})
         try:
             obs = env.reset()
             assert env.observation_space.contains(obs)

@@ -5,30 +5,15 @@ from pgdrive.utils import setup_logger
 class TestEnv(MultiAgentRoundaboutEnv):
     def __init__(self):
         super(TestEnv, self).__init__(
-            {
-                "environment_num": 1,
-                "traffic_density": 0.,
-                "traffic_mode": "hybrid",
-                "start_seed": 5,
-                "onscreen_message": True,
-                # "debug_physics_world": True,
-                "pstats": True,
-                # "controller":"joystick",
-                "manual_control": True,
+            config={
                 "use_render": True,
-                # "debug":True,
-                "map": "XTX",
-                # "target_vehicle_configs": {sss
-                #     "agent0": {
-                #         "spawn_longitude": 40,
-                #         "show_lidar": True,
-                #     },
-                #     "agent1": {
-                #         "spawn_longitude": 10,
-                #         "show_lidar": True,
-                #     }
-                # },
-                "num_agents": 8
+                "map": "SSS",
+                "num_agents": 4,
+                "manual_control": True,
+                "target_vehicle_configs": {"agent{}".format(i): {
+                    "spawn_longitude": i * 5
+                }
+                                           for i in range(4)}
             }
         )
 
