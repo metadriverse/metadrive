@@ -1,21 +1,15 @@
 from pgdrive.envs.pgdrive_env import PGDriveEnv
 
-
-class TestEnv(PGDriveEnv):
-    def __init__(self):
-        super(TestEnv, self).__init__(
-            {
-                "map": 30,
-                "environment_num": 1,
-                "traffic_density": 0.1,
-                "pstats": True,
-                "traffic_mode": "respawn"
-            }
-        )
-
-
 if __name__ == "__main__":
-    env = TestEnv()
+    env = PGDriveEnv(
+        {
+            "map": 30,
+            "environment_num": 1,
+            "traffic_density": 0.1,
+            "pstats": True,
+            "traffic_mode": "respawn"
+        }
+    )
 
     o = env.reset()
     for i in range(1, 10000):

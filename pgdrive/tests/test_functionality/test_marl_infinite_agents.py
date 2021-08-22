@@ -54,7 +54,7 @@ def test_infinite_agents():
                 print("Finish {} steps.".format(i))
     finally:
         env.close()
-    assert max_num > old_num_of_vehicles
+    assert max_num >= old_num_of_vehicles
 
 
 if __name__ == '__main__':

@@ -3,7 +3,7 @@ import numpy as np
 from pgdrive import PGDriveEnv
 from pgdrive.component.vehicle.vehicle_type import DefaultVehicle
 from pgdrive.envs.base_env import BASE_DEFAULT_CONFIG
-from pgdrive.envs.pgdrive_env import PGDriveEnvV1_DEFAULT_CONFIG
+from pgdrive.envs.pgdrive_env import PGDriveEnv_DEFAULT_CONFIG
 from pgdrive.utils import Config
 
 
@@ -31,7 +31,7 @@ def test_base_vehicle():
         map = env.current_map
 
         # v_config = BaseVehicle.get_vehicle_config(dict())
-        v_config = Config(BASE_DEFAULT_CONFIG["vehicle_config"]).update(PGDriveEnvV1_DEFAULT_CONFIG["vehicle_config"])
+        v_config = Config(BASE_DEFAULT_CONFIG["vehicle_config"]).update(PGDriveEnv_DEFAULT_CONFIG["vehicle_config"])
         v = engine.spawn_object(DefaultVehicle, vehicle_config=v_config, random_seed=0)
 
         v.add_navigation(True)

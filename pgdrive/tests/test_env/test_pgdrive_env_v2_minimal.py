@@ -1,6 +1,6 @@
 import numpy as np
 
-from pgdrive.envs.pgdrive_env_v2_minimal import PGDriveEnvV2Minimal
+from pgdrive.envs.pgdrive_env_minimal import PGDriveEnvMinimal
 
 
 def test_pgdrive_env_v2_minimal():
@@ -22,16 +22,16 @@ def test_pgdrive_env_v2_minimal():
         finally:
             env.close()
 
-    _test(PGDriveEnvV2Minimal({"num_others": 4, "use_extra_state": True, "traffic_density": 0.5}))
-    _test(PGDriveEnvV2Minimal({"num_others": 0, "use_extra_state": True, "traffic_density": 0.5}))
-    _test(PGDriveEnvV2Minimal({"num_others": 4, "use_extra_state": False, "traffic_density": 0.5}))
-    _test(PGDriveEnvV2Minimal({"num_others": 0, "use_extra_state": False, "traffic_density": 0.5}))
+    _test(PGDriveEnvMinimal({"num_others": 4, "use_extra_state": True, "traffic_density": 0.5}))
+    _test(PGDriveEnvMinimal({"num_others": 0, "use_extra_state": True, "traffic_density": 0.5}))
+    _test(PGDriveEnvMinimal({"num_others": 4, "use_extra_state": False, "traffic_density": 0.5}))
+    _test(PGDriveEnvMinimal({"num_others": 0, "use_extra_state": False, "traffic_density": 0.5}))
 
 
 def test_pgdrive_env_v2_minimal_long_run():
     try:
         for m in ["X", "O", "C", "S", "R", "r", "T"]:
-            env = PGDriveEnvV2Minimal(
+            env = PGDriveEnvMinimal(
                 {
                     "map": m,
                     "fast": True,

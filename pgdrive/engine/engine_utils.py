@@ -35,7 +35,7 @@ def close_engine():
 
 def get_global_config():
     engine = get_engine()
-    return copy.copy(engine.global_config)
+    return engine.global_config.copy()
 
 
 def set_global_random_seed(random_seed: Optional[int]):

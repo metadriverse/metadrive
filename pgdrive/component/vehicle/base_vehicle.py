@@ -1,4 +1,5 @@
 import math
+import copy
 from pgdrive.utils.space import VehicleParameterSpace, ParameterSpace
 from collections import deque
 from typing import Union, Optional
@@ -182,7 +183,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         # others
         self._add_modules_for_vehicle()
         self.takeover = False
-        self._expert_takeover = False
+        self.expert_takeover = False
         self.energy_consumption = 0
         self.action_space = self.get_action_space_before_init(extra_action_dim=self.config["extra_action_dim"])
         self.break_down = False
@@ -228,9 +229,6 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             assert self.action_space.contains(action), "Input {} is not compatible with action space {}!".format(
                 action, self.action_space
             )
-
-        # protect agent from nan error
-        action = safe_clip_for_small_array(action, min_val=self.action_space.low[0], max_val=self.action_space.high[0])
         return action, {'raw_action': (action[0], action[1])}
 
     def before_step(self, action):
@@ -632,7 +630,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         res = rect_region_detection(
             self.engine, self.position, np.rad2deg(self.heading_theta), self.LENGTH, self.WIDTH, CollisionGroup.Sidewalk
         )
-        if res.hasHit():
+        if res.hasHit() and res.getNode().getName() == BodyName.Sidewalk:
             self.crash_sidewalk = True
             contacts.add(BodyName.Sidewalk)
         self.contact_results = contacts
@@ -712,8 +710,13 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         return len(self.front_vehicles.intersection(self.back_vehicles))
 
     @classmethod
-    def get_action_space_before_init(cls, extra_action_dim: int = 0):
-        return gym.spaces.Box(-1.0, 1.0, shape=(2 + extra_action_dim, ), dtype=np.float32)
+    def get_action_space_before_init(
+        cls, extra_action_dim: int = 0, discrete_action=False, steering_dim=5, throttle_dim=5
+    ):
+        if not discrete_action:
+            return gym.spaces.Box(-1.0, 1.0, shape=(2 + extra_action_dim, ), dtype=np.float32)
+        else:
+            return gym.spaces.MultiDiscrete([steering_dim, throttle_dim])
 
     def __del__(self):
         super(BaseVehicle, self).__del__()

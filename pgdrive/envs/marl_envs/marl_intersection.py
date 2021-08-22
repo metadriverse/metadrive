@@ -1,4 +1,5 @@
 import copy
+from pgdrive.manager.spawn_manager import SpawnManager
 
 from pgdrive.component.blocks.first_block import FirstPGBlock
 from pgdrive.component.blocks.intersection import InterSection
@@ -10,6 +11,12 @@ from pgdrive.obs.observation_base import ObservationBase
 from pgdrive.utils import get_np_random, Config
 
 MAIntersectionConfig = dict(
+    spawn_roads=[
+        Road(FirstPGBlock.NODE_2, FirstPGBlock.NODE_3),
+        -Road(InterSection.node(1, 0, 0), InterSection.node(1, 0, 1)),
+        -Road(InterSection.node(1, 1, 0), InterSection.node(1, 1, 1)),
+        -Road(InterSection.node(1, 2, 0), InterSection.node(1, 2, 1)),
+    ],
     num_agents=30,
     map_config=dict(exit_length=60, lane_num=2),
     top_down_camera_initial_x=80,
@@ -46,14 +53,15 @@ class MAIntersectionMap(PGMap):
         self.blocks.append(last_block)
 
 
-class MultiAgentIntersectionEnv(MultiAgentPGDrive):
-    spawn_roads = [
-        Road(FirstPGBlock.NODE_2, FirstPGBlock.NODE_3),
-        -Road(InterSection.node(1, 0, 0), InterSection.node(1, 0, 1)),
-        -Road(InterSection.node(1, 1, 0), InterSection.node(1, 1, 1)),
-        -Road(InterSection.node(1, 2, 0), InterSection.node(1, 2, 1)),
-    ]
+class InterectionSpawnManager(SpawnManager):
+    def update_destination_for(self, agent_id, vehicle_config):
+        end_roads = copy.deepcopy(self.engine.global_config["spawn_roads"])
+        end_road = -self.np_random.choice(end_roads)  # Use negative road!
+        vehicle_config["destination_node"] = end_road.end_node
+        return vehicle_config
 
+
+class MultiAgentIntersectionEnv(MultiAgentPGDrive):
     @staticmethod
     def default_config() -> Config:
         return MultiAgentPGDrive.default_config().update(MAIntersectionConfig, allow_add_new_key=True)
@@ -64,17 +72,16 @@ class MultiAgentIntersectionEnv(MultiAgentPGDrive):
             self.current_seed,
             episode_data,
             single_block_class=MAIntersectionMap,
-            spawn_roads=self.spawn_roads
+            spawn_roads=self.config["spawn_roads"]
         )
-
-    def _update_destination_for(self, vehicle_id, vehicle_config):
-        end_roads = copy.deepcopy(self.spawn_roads)
-        end_road = -get_np_random(self._DEBUG_RANDOM_SEED).choice(end_roads)  # Use negative road!
-        vehicle_config["destination_node"] = end_road.end_node
-        return vehicle_config
 
     def get_single_observation(self, vehicle_config: "Config") -> "ObservationBase":
         return LidarStateObservationMARound(vehicle_config)
+
+    def setup_engine(self):
+        from pgdrive.envs.pgdrive_env import PGDriveEnv
+        PGDriveEnv.setup_engine(self)
+        self.engine.register_manager("spawn_manager", InterectionSpawnManager())
 
 
 def _draw():
@@ -97,9 +104,9 @@ def _expert():
                     "num_others": 4,
                     "distance": 50
                 },
-                "use_saver": True,
-                "save_level": 1.
             },
+            "use_saver": True,
+            "save_level": 1.,
             "debug_physics_world": True,
             "fast": True,
             # "use_render": True,

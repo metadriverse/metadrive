@@ -19,7 +19,7 @@ pregenerated_map_file = osp.join(
     osp.dirname(osp.dirname(osp.abspath(__file__))), "assets", "maps",
     "20210814_generated_maps_start_seed_0_environment_num_30000.json"
 )
-PGDriveEnvV1_DEFAULT_CONFIG = dict(
+PGDriveEnv_DEFAULT_CONFIG = dict(
     # ===== Generalization =====
     start_seed=0,
     environment_num=1,
@@ -53,6 +53,8 @@ PGDriveEnvV1_DEFAULT_CONFIG = dict(
 
     # ===== Others =====
     auto_termination=False,  # Whether to done the environment after 250*(num_blocks+1) steps.
+    use_saver=False,
+    save_level=0.5,
 
     # ===== Single-agent vehicle config =====
     vehicle_config=dict(
@@ -80,10 +82,6 @@ PGDriveEnvV1_DEFAULT_CONFIG = dict(
         # ==== others ====
         overtake_stat=False,  # we usually set to True when evaluation
         action_check=False,
-        use_saver=False,
-        save_level=0.5,
-        # vehicle_length=4,
-        # vehicle_width=1.5,
         random_color=False,
     ),
     rgb_clip=True,
@@ -114,22 +112,23 @@ class PGDriveEnv(BasePGDriveEnv):
     @classmethod
     def default_config(cls) -> "Config":
         config = super(PGDriveEnv, cls).default_config()
-        config.update(PGDriveEnvV1_DEFAULT_CONFIG)
+        config.update(PGDriveEnv_DEFAULT_CONFIG)
         config.register_type("map", str, int)
         config["map_config"].register_type("config", None)
         return config
 
     def __init__(self, config: dict = None):
+        self.default_config_copy = Config(self.default_config(), unchangeable=True)
         super(PGDriveEnv, self).__init__(config)
 
     def _merge_extra_config(self, config: Union[dict, "Config"]) -> "Config":
-        """Check, update, sync and overwrite some config."""
         config = self.default_config().update(config, allow_add_new_key=False)
         if config["vehicle_config"]["lidar"]["distance"] > 50:
             config["max_distance"] = config["vehicle_config"]["lidar"]["distance"]
         return config
 
     def _post_process_config(self, config):
+        config = super(PGDriveEnv, self)._post_process_config(config)
         if not config["rgb_clip"]:
             logging.warning(
                 "You have set rgb_clip = False, which means the observation will be uint8 values in [0, 255]. "
@@ -157,75 +156,7 @@ class PGDriveEnv(BasePGDriveEnv):
         return config
 
     def _get_observations(self):
-        return {self.DEFAULT_AGENT: self.get_single_observation(self.config["vehicle_config"])}
-
-    def _preprocess_actions(self, actions: Union[np.ndarray, Dict[AnyStr, np.ndarray]]) \
-            -> Tuple[Union[np.ndarray, Dict[AnyStr, np.ndarray]], Dict]:
-        if not self.is_multi_agent:
-            actions = {v_id: actions for v_id in self.vehicles.keys()}
-        else:
-            if self.config["vehicle_config"]["action_check"]:
-                # Check whether some actions are not provided.
-                given_keys = set(actions.keys())
-                have_keys = set(self.vehicles.keys())
-                assert given_keys == have_keys, "The input actions: {} have incompatible keys with existing {}!".format(
-                    given_keys, have_keys
-                )
-            else:
-                # That would be OK if extra actions is given. This is because, when evaluate a policy with naive
-                # implementation, the "termination observation" will still be given in T=t-1. And at T=t, when you
-                # collect action from policy(last_obs) without masking, then the action for "termination observation"
-                # will still be computed. We just filter it out here.
-                actions = {v_id: actions[v_id] for v_id in self.vehicles.keys()}
-
-        saver_info = dict()
-        for v_id, v in self.vehicles.items():
-            actions[v_id], saver_info[v_id] = self.saver(v_id, actions)
-        return actions, saver_info
-
-    def _get_step_return(self, actions, step_infos):
-        """Don't need to copy anything here!"""
-        # update obs, dones, rewards, costs, calculate done at first !
-        obses = {}
-        done_infos = {}
-        cost_infos = {}
-        reward_infos = {}
-        rewards = {}
-        for v_id, v in self.vehicles.items():
-            obses[v_id] = self.observations[v_id].observe(v)
-            done_function_result, done_infos[v_id] = self.done_function(v_id)
-            rewards[v_id], reward_infos[v_id] = self.reward_function(v_id)
-            _, cost_infos[v_id] = self.cost_function(v_id)
-            done = done_function_result or self.dones[v_id]
-            self.dones[v_id] = done
-
-        should_done = self.config["auto_termination"] and (self.episode_steps >= (self.current_map.num_blocks * 250))
-
-        termination_infos = self.for_each_vehicle(_auto_termination, should_done)
-
-        step_infos = concat_step_infos([
-            step_infos,
-            done_infos,
-            reward_infos,
-            cost_infos,
-            termination_infos,
-        ])
-
-        if should_done:
-            for k in self.dones:
-                self.dones[k] = True
-
-        dones = {k: self.dones[k] for k in self.vehicles.keys()}
-        for v_id, r in rewards.items():
-            self.episode_rewards[v_id] += r
-            step_infos[v_id]["episode_reward"] = self.episode_rewards[v_id]
-            self.episode_lengths[v_id] += 1
-            step_infos[v_id]["episode_length"] = self.episode_lengths[v_id]
-        if not self.is_multi_agent:
-            return self._wrap_as_single_agent(obses), self._wrap_as_single_agent(rewards), \
-                   self._wrap_as_single_agent(dones), self._wrap_as_single_agent(step_infos)
-        else:
-            return obses, rewards, dones, step_infos
+        return {DEFAULT_AGENT: self.get_single_observation(self.config["vehicle_config"])}
 
     def done_function(self, vehicle_id: str):
         vehicle = self.vehicles[vehicle_id]
@@ -323,14 +254,6 @@ class PGDriveEnv(BasePGDriveEnv):
             reward = -self.config["crash_object_penalty"]
         return reward, step_info
 
-    def _get_reset_return(self):
-        ret = {}
-        self.engine.after_step()
-        for v_id, v in self.vehicles.items():
-            self.observations[v_id].reset(self, v)
-            ret[v_id] = self.observations[v_id].observe(v)
-        return ret if self.is_multi_agent else self._wrap_as_single_agent(ret)
-
     def dump_all_maps(self):
         assert not engine_initialized(), \
             "We assume you generate map files in independent tasks (not in training). " \
@@ -366,7 +289,7 @@ class PGDriveEnv(BasePGDriveEnv):
         Only take effect whene vehicle num==1
         :return: None
         """
-        self.current_track_vehicle._expert_takeover = not self.current_track_vehicle._expert_takeover
+        self.current_track_vehicle.expert_takeover = not self.current_track_vehicle.expert_takeover
 
     def chase_camera(self) -> (str, BaseVehicle):
         if self.main_camera is None:
@@ -392,69 +315,6 @@ class PGDriveEnv(BasePGDriveEnv):
     def bird_view_camera(self):
         self.main_camera.stop_track()
 
-    def saver(self, v_id: str, actions):
-        """
-        Rule to enable saver
-        :param v_id: id of a vehicle
-        :param vehicle:BaseVehicle that need protection of saver
-        :param actions: original actions of all vehicles
-        :return: a new action to override original action
-        """
-        vehicle = self.vehicles[v_id]
-        action = actions[v_id]
-        steering = action[0]
-        throttle = action[1]
-        if vehicle.config["use_saver"] or vehicle._expert_takeover:
-            # saver can be used for human or another AI
-            save_level = vehicle.config["save_level"] if not vehicle._expert_takeover else 1.0
-            obs = self.observations[v_id].observe(vehicle)
-            from pgdrive.examples.ppo_expert import expert
-            try:
-                saver_a = expert(obs, deterministic=False)
-            except ValueError:
-                print("Expert can not takeover, due to observation space mismathing!")
-                saver_a = action
-            else:
-                if save_level > 0.9:
-                    steering = saver_a[0]
-                    throttle = saver_a[1]
-                elif save_level > 1e-3:
-                    heading_diff = vehicle.heading_diff(vehicle.lane) - 0.5
-                    f = min(1 + abs(heading_diff) * vehicle.speed * vehicle.max_speed, save_level * 10)
-                    # for out of road
-                    if (obs[0] < 0.04 * f and heading_diff < 0) or (obs[1] < 0.04 * f and heading_diff > 0) or obs[
-                        0] <= 1e-3 or \
-                            obs[
-                                1] <= 1e-3:
-                        steering = saver_a[0]
-                        throttle = saver_a[1]
-                        if vehicle.speed < 5:
-                            throttle = 0.5
-                    # if saver_a[1] * vehicle.speed < -40 and action[1] > 0:
-                    #     throttle = saver_a[1]
-
-                    # for collision
-                    lidar_p = env.observations[DEFAULT_AGENT].cloud_points
-                    left = int(vehicle.lidar.num_lasers / 4)
-                    right = int(vehicle.lidar.num_lasers / 4 * 3)
-                    if min(lidar_p[left - 4:left + 6]) < (save_level + 0.1) / 10 or min(lidar_p[right - 4:right + 6]
-                                                                                        ) < (save_level + 0.1) / 10:
-                        # lateral safe distance 2.0m
-                        steering = saver_a[0]
-                    if action[1] >= 0 and saver_a[1] <= 0 and min(min(lidar_p[0:10]), min(lidar_p[-10:])) < save_level:
-                        # longitude safe distance 15 m
-                        throttle = saver_a[1]
-
-        # indicate if current frame is takeover step
-        pre_save = vehicle.takeover
-        vehicle.takeover = True if action[0] != steering or action[1] != throttle else False
-        saver_info = {
-            "takeover_start": True if not pre_save and vehicle.takeover else False,
-            "takeover_end": True if pre_save and not vehicle.takeover else False,
-            "takeover": vehicle.takeover if pre_save else False
-        }
-        return (steering, throttle) if saver_info["takeover"] else action, saver_info
-
     def get_single_observation(self, vehicle_config: "Config") -> "ObservationType":
         if self.config["offscreen_render"]:
             o = ImageStateObservation(vehicle_config)
@@ -473,18 +333,6 @@ class PGDriveEnv(BasePGDriveEnv):
         from pgdrive.manager.traffic_manager import TrafficManager
         self.engine.register_manager("traffic_manager", TrafficManager())
         self.engine.register_manager("object_manager", TrafficObjectManager())
-
-    @property
-    def main_camera(self):
-        return self.engine.main_camera
-
-    @property
-    def current_track_vehicle(self):
-        return self.engine.current_track_vehicle
-
-
-def _auto_termination(vehicle, should_done):
-    return {TerminationState.MAX_STEP: True if should_done else False}
 
 
 if __name__ == '__main__':

@@ -1,10 +1,10 @@
-from pgdrive.envs.pgdrive_env_v2 import PGDriveEnvV2
+from pgdrive.envs.pgdrive_env import PGDriveEnv
 
 
 def local_test_close_and_restart():
     try:
         for m in ["X", "O", "C", "S", "R", "r", "T"]:
-            env = PGDriveEnvV2({"map": m, "use_render": True, "fast": True})
+            env = PGDriveEnv({"map": m, "use_render": True, "fast": True})
             o = env.reset()
             for _ in range(300):
                 assert env.observation_space.contains(o)

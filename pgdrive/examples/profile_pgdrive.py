@@ -1,11 +1,11 @@
 import time
 
-from pgdrive import PGDriveEnvV2
+from pgdrive import PGDriveEnv
 from pgdrive.utils import setup_logger
 
 if __name__ == '__main__':
     setup_logger(debug=False)
-    env = PGDriveEnvV2(dict(
+    env = PGDriveEnv(dict(
         environment_num=1000,
         # use_render=True, fast=True,
         start_seed=1010,

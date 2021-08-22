@@ -4,7 +4,7 @@ import gym
 import numpy as np
 
 from pgdrive.engine.engine_utils import get_engine
-from pgdrive.envs.pgdrive_env_v2 import PGDriveEnvV2
+from pgdrive.envs.pgdrive_env import PGDriveEnv
 from pgdrive.obs.observation_base import ObservationBase
 from pgdrive.obs.state_obs import LidarStateObservation
 from pgdrive.utils import Config
@@ -194,10 +194,10 @@ class MinimalObservation(LidarStateObservation):
         return (clip(v, -1, +1) + 1) / 2
 
 
-class PGDriveEnvV2Minimal(PGDriveEnvV2):
+class PGDriveEnvMinimal(PGDriveEnv):
     @classmethod
     def default_config(cls) -> Config:
-        config = super(PGDriveEnvV2Minimal, cls).default_config()
+        config = super(PGDriveEnvMinimal, cls).default_config()
         config.update({"num_others": 4, "use_extra_state": True})
         config["vehicle_config"]["lidar"]["distance"] = 0
         config["vehicle_config"]["lidar"]["num_lasers"] = 0
@@ -212,7 +212,7 @@ class PGDriveEnvV2Minimal(PGDriveEnvV2):
         return MinimalObservation(vehicle_config, self)
 
     def _post_process_config(self, config):
-        config = super(PGDriveEnvV2Minimal, self)._post_process_config(config)
+        config = super(PGDriveEnvMinimal, self)._post_process_config(config)
         assert config["vehicle_config"]["lidar"]["num_others"] == 0
         assert config["vehicle_config"]["lidar"]["num_lasers"] == 0
         assert config["num_others"] >= 0
@@ -230,7 +230,7 @@ if __name__ == '__main__':
         assert np.isscalar(reward)
         assert isinstance(info, dict)
 
-    env = PGDriveEnvV2Minimal(
+    env = PGDriveEnvMinimal(
         {
             "use_render": False,
             "fast": True,

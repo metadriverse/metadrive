@@ -1,25 +1,19 @@
 from pgdrive.envs.pgdrive_env import PGDriveEnv
 
-
-class TestEnv(PGDriveEnv):
-    def __init__(self):
-        super(TestEnv, self).__init__(
-            {
-                "environment_num": 1,
-                "traffic_density": 0.1,
-                "start_seed": 4,
-                "image_source": "mini_map",
-                "manual_control": True,
-                "use_render": True,
-                "offscreen_render": True,
-                "rgb_clip": True,
-                "headless_machine_render": False
-            }
-        )
-
-
 if __name__ == "__main__":
-    env = TestEnv()
+    env = PGDriveEnv(
+        {
+            "environment_num": 1,
+            "traffic_density": 0.1,
+            "start_seed": 4,
+            "image_source": "mini_map",
+            "manual_control": True,
+            "use_render": True,
+            "offscreen_render": True,
+            "rgb_clip": True,
+            "headless_machine_render": False
+        }
+    )
     env.reset()
     env.engine.accept("m", env.vehicle.image_sensors[env.config["image_source"]].save_image)
 

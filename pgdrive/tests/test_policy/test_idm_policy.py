@@ -2,15 +2,15 @@ import numpy as np
 
 from pgdrive.component.vehicle.vehicle_type import DefaultVehicle
 from pgdrive.engine.engine_utils import initialize_engine
-from pgdrive.envs import PGDriveEnvV2
+from pgdrive.envs import PGDriveEnv
 from pgdrive.envs.base_env import BASE_DEFAULT_CONFIG
-from pgdrive.envs.pgdrive_env import PGDriveEnvV1_DEFAULT_CONFIG
+from pgdrive.envs.pgdrive_env import PGDriveEnv_DEFAULT_CONFIG
 from pgdrive.policy.idm_policy import IDMPolicy
 from pgdrive.utils import Config
 
 
 def _create_vehicle():
-    v_config = Config(BASE_DEFAULT_CONFIG["vehicle_config"]).update(PGDriveEnvV1_DEFAULT_CONFIG["vehicle_config"])
+    v_config = Config(BASE_DEFAULT_CONFIG["vehicle_config"]).update(PGDriveEnv_DEFAULT_CONFIG["vehicle_config"])
     v_config.update({"use_render": False, "offscreen_render": False})
     config = Config(BASE_DEFAULT_CONFIG)
     config.update(
@@ -28,7 +28,7 @@ def _create_vehicle():
 
 
 def _test_idm_policy_briefly():
-    env = PGDriveEnvV2()
+    env = PGDriveEnv()
     env.reset()
     try:
         vehicles = env.engine.traffic_manager.traffic_vehicles
@@ -57,7 +57,7 @@ def _test_idm_policy_is_moving(render=False, in_test=True):
     config = {"traffic_mode": "hybrid", "map": "SS", "traffic_density": 0.2}
     if render:
         config.update({"use_render": True, "fast": True, "manual_control": True})
-    env = PGDriveEnvV2(config)
+    env = PGDriveEnv(config)
     env.reset(force_seed=0)
     last_pos = None
     try:

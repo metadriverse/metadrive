@@ -1,4 +1,5 @@
 import copy
+from pgdrive.manager.spawn_manager import SpawnManager
 
 import gym
 import numpy as np
@@ -12,6 +13,12 @@ from pgdrive.obs.state_obs import StateObservation
 from pgdrive.utils import get_np_random, norm, Config
 
 MARoundaboutConfig = dict(
+    spawn_roads=[
+        Road(FirstPGBlock.NODE_2, FirstPGBlock.NODE_3),
+        -Road(Roundabout.node(1, 0, 2), Roundabout.node(1, 0, 3)),
+        -Road(Roundabout.node(1, 1, 2), Roundabout.node(1, 1, 3)),
+        -Road(Roundabout.node(1, 2, 2), Roundabout.node(1, 2, 3)),
+    ],
     map_config=dict(exit_length=60, lane_num=2),
     top_down_camera_initial_x=95,
     top_down_camera_initial_y=15,
@@ -115,14 +122,15 @@ class LidarStateObservationMARound(ObservationBase):
         return list(points)
 
 
-class MultiAgentRoundaboutEnv(MultiAgentPGDrive):
-    spawn_roads = [
-        Road(FirstPGBlock.NODE_2, FirstPGBlock.NODE_3),
-        -Road(Roundabout.node(1, 0, 2), Roundabout.node(1, 0, 3)),
-        -Road(Roundabout.node(1, 1, 2), Roundabout.node(1, 1, 3)),
-        -Road(Roundabout.node(1, 2, 2), Roundabout.node(1, 2, 3)),
-    ]
+class RoundaboutSpawnManager(SpawnManager):
+    def update_destination_for(self, vehicle_id, vehicle_config):
+        end_roads = copy.deepcopy(self.engine.global_config["spawn_roads"])
+        end_road = -self.np_random.choice(end_roads)  # Use negative road!
+        vehicle_config["destination_node"] = end_road.end_node
+        return vehicle_config
 
+
+class MultiAgentRoundaboutEnv(MultiAgentPGDrive):
     @staticmethod
     def default_config() -> Config:
         return MultiAgentPGDrive.default_config().update(MARoundaboutConfig, allow_add_new_key=True)
@@ -133,17 +141,16 @@ class MultiAgentRoundaboutEnv(MultiAgentPGDrive):
             self.current_seed,
             episode_data,
             single_block_class=MARoundaboutMap,
-            spawn_roads=self.spawn_roads
+            spawn_roads=self.config["spawn_roads"]
         )
-
-    def _update_destination_for(self, vehicle_id, vehicle_config):
-        end_roads = copy.deepcopy(self.spawn_roads)
-        end_road = -get_np_random(self._DEBUG_RANDOM_SEED).choice(end_roads)  # Use negative road!
-        vehicle_config["destination_node"] = end_road.end_node
-        return vehicle_config
 
     def get_single_observation(self, vehicle_config: "Config") -> "ObservationBase":
         return LidarStateObservationMARound(vehicle_config)
+
+    def setup_engine(self):
+        from pgdrive.envs.pgdrive_env import PGDriveEnv
+        PGDriveEnv.setup_engine(self)
+        self.engine.register_manager("spawn_manager", RoundaboutSpawnManager())
 
 
 def _draw():
@@ -166,9 +173,9 @@ def _expert():
                     "num_others": 4,
                     "distance": 50
                 },
-                "use_saver": True,
-                "save_level": 1.
             },
+            "use_saver": True,
+            "save_level": 1.,
             "debug_physics_world": True,
             "fast": True,
             # "use_render": True,
@@ -269,7 +276,7 @@ def _vis():
             "use_render": True,
             "debug": False,
             "manual_control": True,
-            "num_agents": 10,
+            "num_agents": -1,
         }
     )
     o = env.reset()
@@ -323,7 +330,7 @@ def _profile():
                     time.time() - start, (s + 1) / (time.time() - start)
                 )
             )
-    print(f"(PGDriveEnvV2) Total Time Elapse: {time.time() - start}")
+    print(f"(PGDriveEnv) Total Time Elapse: {time.time() - start}")
 
 
 def _long_run():

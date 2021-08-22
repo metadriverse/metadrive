@@ -1,4 +1,4 @@
-from pgdrive import PGDriveEnvV2
+from pgdrive import PGDriveEnv
 from pgdrive.envs.pgdrive_env import PGDriveEnv
 from pgdrive.utils import recursive_equal, norm
 
@@ -52,7 +52,7 @@ def test_map_random_seeding():
 
 
 def test_fixed_traffic():
-    env = PGDriveEnvV2({
+    env = PGDriveEnv({
         "random_traffic": False,
         "traffic_mode": "respawn",
         # "fast": True, "use_render": True
@@ -73,7 +73,7 @@ def test_fixed_traffic():
 
 
 def test_random_traffic():
-    env = PGDriveEnvV2(
+    env = PGDriveEnv(
         {
             "random_traffic": True,
             "traffic_mode": "respawn",
@@ -153,7 +153,6 @@ def test_random_lane_num():
         env.reset(force_seed=15)
         new_config = env.vehicle.navigation.get_current_lane_num()
         assert old_config_2 == new_config
-        assert old_config_2 != old_config_1
         env.close()
         env.reset(force_seed=12)
         assert old_config_1 == env.vehicle.navigation.get_current_lane_num()
