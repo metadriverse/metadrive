@@ -81,7 +81,7 @@ class TrafficObjectManager(BaseManager):
             lateral_len = engine.current_map.config[engine.current_map.LANE_WIDTH]
 
             lane = engine.current_map.road_network.get_lane(accident_road.lane_index(accident_lane_idx))
-            self.accident_lanes.append(lane)
+            self.accident_lanes += accident_road.get_lanes(engine.current_map.road_network)
             if self.np_random.rand() > self.PROHIBIT_SCENE_PROB or _debug:
                 self.prohibit_scene(lane, longitude, lateral_len, on_left)
             else:

@@ -598,7 +598,12 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         else:
             lane, new_l_index = possible_lanes[idx][:-1]
         dest = self.config["destination_node"]
-        self.navigation.update(map, current_lane_index=new_l_index, final_road_node=dest if dest is not None else None)
+        self.navigation.update(
+            map,
+            current_lane_index=new_l_index,
+            final_road_node=dest if dest is not None else None,
+            random_seed=self.engine.global_random_seed
+        )
         assert lane is not None, "spawn place is not on road!"
         self.navigation.update_localization(self)
         self.lane_index = new_l_index

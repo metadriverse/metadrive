@@ -247,7 +247,7 @@ class TrafficManager(BaseManager):
             potential_vehicle_configs = []
             for lanes in trigger_lanes:
                 for l in lanes:
-                    if l in self.engine.object_manager.accident_lanes:
+                    if hasattr(self.engine, "object_manager") and l in self.engine.object_manager.accident_lanes:
                         continue
                     potential_vehicle_configs += self._propose_vehicle_configs(l)
 

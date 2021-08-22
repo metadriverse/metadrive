@@ -40,6 +40,7 @@ def test_naive_multi_agent_pgdrive():
         assert isinstance(env.action_space, gym.spaces.Dict)
         obs = env.reset()
         assert isinstance(obs, dict)
+        env.action_space.seed(0)
         for step in range(100):
             a = env.action_space.sample()
             assert isinstance(a, dict)
