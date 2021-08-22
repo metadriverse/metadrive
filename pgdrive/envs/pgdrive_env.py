@@ -46,7 +46,7 @@ PGDriveEnv_DEFAULT_CONFIG = dict(
     # ===== Traffic =====
     traffic_density=0.1,
     traffic_mode=TrafficMode.Trigger,  # "Respawn", "Trigger", "Hybrid"
-    random_traffic=True,  # Traffic is randomized at default.
+    random_traffic=False,  # Traffic is randomized at default.
 
     # ===== Object =====
     accident_prob=0.,  # accident may happen on each block with this probability, except multi-exits block
@@ -328,11 +328,8 @@ class PGDriveEnv(BasePGDriveEnv):
         self.engine.accept("t", self.toggle_expert_takeover)
         self.engine.accept("b", self.bird_view_camera)
         self.engine.accept("q", self.chase_camera)
-
-        from pgdrive.manager.object_manager import TrafficObjectManager
         from pgdrive.manager.traffic_manager import TrafficManager
         self.engine.register_manager("traffic_manager", TrafficManager())
-        self.engine.register_manager("object_manager", TrafficObjectManager())
 
 
 if __name__ == '__main__':
