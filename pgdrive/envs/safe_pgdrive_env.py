@@ -22,7 +22,7 @@ class SafePGDriveEnv(PGDriveEnv):
 
                 # ===== cost scheme =====
                 "crash_vehicle_cost": 1,
-                "crash_object_cost": 1,
+                "crash_object_cost": 0.5,
                 "out_of_road_cost": 1.,  # only give penalty for out_of_road
                 "use_lateral": False
             },
@@ -52,6 +52,9 @@ class SafePGDriveEnv(PGDriveEnv):
         super(SafePGDriveEnv, self).setup_engine()
         self.engine.register_manager("object_manager", TrafficObjectManager())
 
+    def _is_out_of_road(self, vehicle):
+        return vehicle.out_of_route
+
 
 if __name__ == "__main__":
     env = SafePGDriveEnv(
@@ -67,7 +70,7 @@ if __name__ == "__main__":
             # # "start_seed": 187,
             # "out_of_road_cost": 1,
             # "debug": True,
-            # "map": "CCC",
+            "map": "X",
             # # "cull_scene": True,
             "vehicle_config": {
                 "spawn_lane_index": (FirstPGBlock.NODE_2, FirstPGBlock.NODE_3, 2)
