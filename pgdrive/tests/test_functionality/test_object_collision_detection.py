@@ -4,13 +4,13 @@ from pgdrive.constants import BodyName, TerminationState, DEFAULT_AGENT
 from pgdrive.envs import PGDriveEnv
 
 
-class TestEnv(PGDriveEnv):
+class TestCollisionEnv(PGDriveEnv):
     """
     now for test use and demo use only
     """
     @classmethod
     def default_config(cls):
-        config = super(TestEnv, cls).default_config()
+        config = super(TestCollisionEnv, cls).default_config()
         config.update(
             {
                 "environment_num": 1,
@@ -25,12 +25,12 @@ class TestEnv(PGDriveEnv):
         return config
 
     def __init__(self, config=None):
-        super(TestEnv, self).__init__(config)
+        super(TestCollisionEnv, self).__init__(config)
         self.breakdown_vehicle = None
         self.alert = None
 
     def reset(self, episode_data: dict = None, force_seed=None):
-        ret = super(TestEnv, self).reset(episode_data)
+        ret = super(TestCollisionEnv, self).reset(episode_data)
         self.vehicle.max_speed = 60
         lane = self.current_map.road_network.graph[">>>"]["1C0_0_"][0]
         self.breakdown_vehicle = self.engine.spawn_object(
@@ -134,7 +134,7 @@ class TestEnv(PGDriveEnv):
 
 
 def test_object_collision_detection(render=False):
-    env = TestEnv(
+    env = TestCollisionEnv(
         {
             "manual_control": True,
             "traffic_density": 0.0,
@@ -160,7 +160,7 @@ def test_object_collision_detection(render=False):
         for i in range(1, 100000 if render else 2000):
             o, r, d, info = env.step([0, 1])
             for obj in env.observations[DEFAULT_AGENT].detected_objects:
-                if obj.getNode().hasPythonTag(BodyName.Traffic_cone):
+                if isinstance(obj, TrafficCone):
                     detect_obj = True
             if render:
                 env.render()

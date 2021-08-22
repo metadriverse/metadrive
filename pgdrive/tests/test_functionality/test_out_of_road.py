@@ -1,14 +1,14 @@
 import math
 
-from pgdrive.envs.pgdrive_env_v2 import PGDriveEnvV2
+from pgdrive.envs.pgdrive_env import PGDriveEnv
 from pgdrive.utils import clip
 
 
 def test_out_of_road():
-    # env = PGDriveEnvV2(dict(vehicle_config=dict(side_detector=dict(num_lasers=8))))
+    # env = PGDriveEnv(dict(vehicle_config=dict(side_detector=dict(num_lasers=8))))
     for steering in [-0.01, 0.01]:
         for distance in [10, 50, 100]:
-            env = PGDriveEnvV2(
+            env = PGDriveEnv(
                 dict(
                     map="SSSSSSSSSSS",
                     vehicle_config=dict(side_detector=dict(num_lasers=120, distance=distance)),
@@ -37,10 +37,10 @@ def test_out_of_road():
 
 
 def useless_left_right_distance_printing():
-    # env = PGDriveEnvV2(dict(vehicle_config=dict(side_detector=dict(num_lasers=8))))
+    # env = PGDriveEnv(dict(vehicle_config=dict(side_detector=dict(num_lasers=8))))
     for steering in [-0.01, 0.01, -1, 1]:
         # for distance in [10, 50, 100]:
-        env = PGDriveEnvV2(
+        env = PGDriveEnv(
             dict(
                 map="SSSSSSSSSSS",
                 vehicle_config=dict(side_detector=dict(num_lasers=0, distance=50)),

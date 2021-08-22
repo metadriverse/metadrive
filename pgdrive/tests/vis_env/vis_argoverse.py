@@ -24,35 +24,30 @@ class ArgoverseEnv(PGDriveEnv):
             self.engine.map_manager.load_map(map)
 
 
-class TestEnv(ArgoverseEnv):
-    def __init__(self):
-        super(TestEnv, self).__init__(
-            {
-                "traffic_density": 0.,
-                "onscreen_message": True,
-                # "debug_physics_world": True,
-                "pstats": True,
-                "global_light": True,
-                # "debug_static_world":True,
-                "cull_scene": False,
-                # "controller":"joystick",
-                "manual_control": True,
-                "use_render": True,
-                "decision_repeat": 5,
-                "rgb_clip": True,
-                # "debug": False,
-                "fast": False,
-                "vehicle_config": {
-                    "enable_reverse": True,
-                    "side_detector": dict(num_lasers=2, distance=50),
-                    "lane_line_detector": dict(num_lasers=2, distance=50),
-                }
-            }
-        )
-
-
 if __name__ == "__main__":
-    env = TestEnv()
+    env = ArgoverseEnv(
+        {
+            "traffic_density": 0.,
+            "onscreen_message": True,
+            # "debug_physics_world": True,
+            "pstats": True,
+            "global_light": True,
+            # "debug_static_world":True,
+            "cull_scene": False,
+            # "controller":"joystick",
+            "manual_control": True,
+            "use_render": True,
+            "decision_repeat": 5,
+            "rgb_clip": True,
+            # "debug": False,
+            "fast": False,
+            "vehicle_config": {
+                "enable_reverse": True,
+                "side_detector": dict(num_lasers=2, distance=50),
+                "lane_line_detector": dict(num_lasers=2, distance=50),
+            }
+        }
+    )
 
     o = env.reset()
     for i in range(1, 100000):

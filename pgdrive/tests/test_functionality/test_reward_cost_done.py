@@ -1,5 +1,5 @@
 from pgdrive.constants import TerminationState
-from pgdrive.envs import PGDriveEnvV2
+from pgdrive.envs import PGDriveEnv
 from pgdrive.utils import setup_logger
 
 
@@ -19,7 +19,7 @@ def test_reward_cost_done():
     # config["map"] = "S"
     # config["traffic_density"] = 0
     # try:
-    #     env = PGDriveEnvV2(config=config)
+    #     env = PGDriveEnv(config=config)
     #     env.reset()
     #     for _ in range(1000):
     #         o, r, d, i = env.step([0, 1])
@@ -37,7 +37,7 @@ def test_reward_cost_done():
     # config["map"] = "S"
     # config["traffic_density"] = 0
     # try:
-    #     env = PGDriveEnvV2(config=config)
+    #     env = PGDriveEnv(config=config)
     #     env.reset()
     #     for _ in range(1000):
     #         o, r, d, i = env.step([1, 1])
@@ -55,7 +55,7 @@ def test_reward_cost_done():
     config["map"] = "SSS"
     config["traffic_density"] = 20
     try:
-        env = PGDriveEnvV2(config=config)
+        env = PGDriveEnv(config=config)
         env.reset()
         epr = 0
         for _ in range(1000):
@@ -82,7 +82,7 @@ def test_reward_cost_done():
     # # config["fast"] = True
     # config.update({"_debug_crash_object": True})
     # try:
-    #     env = PGDriveEnvV2(config=config)
+    #     env = PGDriveEnv(config=config)
     #     env.reset()
     #     for _ in range(1000):
     #         o, r, d, i = env.step([0, 1])

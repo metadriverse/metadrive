@@ -1,12 +1,12 @@
 import numpy as np
 
-from pgdrive.envs.pgdrive_env_v2 import PGDriveEnvV2
+from pgdrive.envs.pgdrive_env import PGDriveEnv
 from pgdrive.obs.state_obs import LidarStateObservation
 from pgdrive.tests.test_env.test_pgdrive_env import _act
 
 
 def test_obs_noise():
-    env = PGDriveEnvV2({"vehicle_config": {"lidar": {"gaussian_noise": 1.0, "dropout_prob": 1.0}}})
+    env = PGDriveEnv({"vehicle_config": {"lidar": {"gaussian_noise": 1.0, "dropout_prob": 1.0}}})
     try:
         obs = env.reset()
         obs_cls = env.observations[env.DEFAULT_AGENT]
@@ -21,7 +21,7 @@ def test_obs_noise():
                 _act(env, [x, y])
     finally:
         env.close()
-    env = PGDriveEnvV2({"vehicle_config": {"lidar": {"gaussian_noise": 0.0, "dropout_prob": 0.0}}})
+    env = PGDriveEnv({"vehicle_config": {"lidar": {"gaussian_noise": 0.0, "dropout_prob": 0.0}}})
     try:
         obs = env.reset()
         obs_cls = env.observations[env.DEFAULT_AGENT]

@@ -9,9 +9,20 @@ class BasePolicy(Randomizable, Configurable):
         Configurable.__init__(self, config)
         self.engine = get_engine()
         self.control_object = control_object
+        self.action_info = dict()
 
     def act(self, *args, **kwargs):
+        """
+        Return action [], policy implement information (dict) can be written in self.action_info, which will be
+        retrieved automatically
+        """
         pass
+
+    def get_action_info(self):
+        """
+        Get current action info for env.step() retrieve
+        """
+        return self.action_info
 
     def reset(self):
         pass

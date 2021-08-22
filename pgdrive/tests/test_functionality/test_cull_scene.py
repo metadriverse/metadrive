@@ -3,7 +3,8 @@ from pgdrive.envs.marl_envs.multi_agent_pgdrive import MultiAgentPGDrive
 from pgdrive.utils import Config
 
 
-def test_cull_scene(use_render=False):
+def _test_cull_scene(use_render=True):
+    # we do not do scene cull now
     class TestCull(MultiAgentPGDrive):
         def default_config(self) -> Config:
             config = MultiAgentPGDrive.default_config()

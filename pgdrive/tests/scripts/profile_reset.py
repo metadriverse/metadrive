@@ -1,9 +1,9 @@
 import time
 
-from pgdrive import PGDriveEnvV2
+from pgdrive import PGDriveEnv
 
 if __name__ == '__main__':
-    env = PGDriveEnvV2(dict(environment_num=1000, traffic_density=0.1, load_map_from_json=True, start_seed=5000))
+    env = PGDriveEnv(dict(environment_num=1000, traffic_density=0.1, load_map_from_json=True, start_seed=5000))
     obs = env.reset()
     start = time.time()
     vc = []

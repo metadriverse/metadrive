@@ -1,9 +1,9 @@
-from pgdrive import PGDriveEnvV2
+from pgdrive import PGDriveEnv
 from pgdrive.utils import setup_logger
 
 if __name__ == "__main__":
     setup_logger(True)
-    env = PGDriveEnvV2(
+    env = PGDriveEnv(
         {
             "start_seed": 0,
             "environment_num": 10,

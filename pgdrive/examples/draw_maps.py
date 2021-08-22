@@ -2,11 +2,11 @@ import random
 
 import matplotlib.pyplot as plt
 
-from pgdrive import PGDriveEnvV2
+from pgdrive import PGDriveEnv
 from pgdrive.utils.draw_top_down_map import draw_top_down_map
 
 if __name__ == '__main__':
-    env = PGDriveEnvV2(config=dict(environment_num=100, map=7, start_seed=random.randint(0, 1000)))
+    env = PGDriveEnv(config=dict(environment_num=100, map=7, start_seed=random.randint(0, 1000)))
     fig, axs = plt.subplots(4, 4, figsize=(10, 10), dpi=100)
     count = 0
     for i in range(4):

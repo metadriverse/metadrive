@@ -12,6 +12,7 @@ from pgdrive.obs.state_obs import LidarStateObservation, StateObservation
 from pgdrive.utils import Config, clip
 
 MATollConfig = dict(
+    spawn_roads=[Road(FirstPGBlock.NODE_2, FirstPGBlock.NODE_3), -Road(Merge.node(3, 0, 0), Merge.node(3, 0, 1))],
     num_agents=40,
     map_config=dict(exit_length=70, lane_num=3, toll_lane_num=8, toll_length=10),
     top_down_camera_initial_x=125,
@@ -158,8 +159,6 @@ class MATollGateMap(PGMap):
 
 
 class MultiAgentTollgateEnv(MultiAgentPGDrive):
-    spawn_roads = [Road(FirstPGBlock.NODE_2, FirstPGBlock.NODE_3), -Road(Merge.node(3, 0, 0), Merge.node(3, 0, 1))]
-
     def __init__(self, config):
         super(MultiAgentTollgateEnv, self).__init__(config)
         self.stay_time_manager = StayTimeManager()
@@ -180,7 +179,7 @@ class MultiAgentTollgateEnv(MultiAgentPGDrive):
             self.current_seed,
             episode_data,
             single_block_class=MATollGateMap,
-            spawn_roads=self.spawn_roads
+            spawn_roads=self.config["spawn_roads"]
         )
 
     def reward_function(self, vehicle_id: str):
@@ -293,9 +292,9 @@ def _expert():
                     "num_others": 4,
                     "distance": 50
                 },
-                "use_saver": True,
-                "save_level": 1.
             },
+            "save_level": 1.,
+            "use_saver": True,
             "debug_physics_world": True,
             "fast": True,
             # "use_render": True,
@@ -464,7 +463,7 @@ def _profile():
                     time.time() - start, (s + 1) / (time.time() - start)
                 )
             )
-    print(f"(PGDriveEnvV2) Total Time Elapse: {time.time() - start}")
+    print(f"(PGDriveEnv) Total Time Elapse: {time.time() - start}")
 
 
 def _long_run():

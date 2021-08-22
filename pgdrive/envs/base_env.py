@@ -1,4 +1,3 @@
-import os.path as osp
 import sys
 import time
 from collections import defaultdict
@@ -7,6 +6,7 @@ from typing import Union, Dict, AnyStr, Optional, Tuple
 import gym
 import numpy as np
 from panda3d.core import PNMImage
+
 from pgdrive.component.vehicle.base_vehicle import BaseVehicle
 from pgdrive.constants import RENDER_MODE_NONE, DEFAULT_AGENT
 from pgdrive.engine.base_engine import BaseEngine
@@ -15,6 +15,8 @@ from pgdrive.engine.engine_utils import initialize_engine, close_engine, \
 from pgdrive.manager.agent_manager import AgentManager
 from pgdrive.obs.observation_base import ObservationBase
 from pgdrive.utils import Config, merge_dicts, get_np_random
+from pgdrive.utils import concat_step_infos
+from pgdrive.utils.utils import auto_termination
 
 BASE_DEFAULT_CONFIG = dict(
     # ===== Generalization =====
@@ -27,9 +29,13 @@ BASE_DEFAULT_CONFIG = dict(
     allow_respawn=False,
     delay_done=0,  # How many steps for the agent to stay static at the death place after done.
     random_agent_model=False,
+    IDM_agent=False,
 
     # ===== Action =====
     decision_repeat=5,
+    discrete_action=False,
+    discrete_steering_dim=5,
+    discrete_throttle_dim=5,
 
     # ===== Rendering =====
     use_render=False,  # pop a window to render or not
@@ -46,7 +52,7 @@ BASE_DEFAULT_CONFIG = dict(
     draw_map_resolution=1024,  # Drawing the map in a canvas of (x, x) pixels.
     top_down_camera_initial_x=0,
     top_down_camera_initial_y=0,
-    top_down_camera_initial_z=120,  # height
+    top_down_camera_initial_z=200,  # height
 
     # ===== Vehicle =====
     vehicle_config=dict(
@@ -61,34 +67,24 @@ BASE_DEFAULT_CONFIG = dict(
         am_i_the_special_one=False
     ),
 
-    # ===== Others =====
+    # ===== Engine Core config =====
     window_size=(1200, 900),  # width, height
     physics_world_step_size=2e-2,
     show_fps=True,
     global_light=False,
-
-    # show message when render is called
     onscreen_message=True,
-
-    # limit the render fps
-    # Press "f" to switch FPS, this config is deprecated!
-    # force_fps=None,
-
     # only render physics world without model, a special debug option
     debug_physics_world=False,
-
     # debug static world
     debug_static_world=False,
-
     # set to true only when on headless machine and use rgb image!!!!!!
     headless_machine_render=False,
-
     # turn on to profile the efficiency
     pstats=False,
 
+    # ===== Others =====
     # The maximum distance used in PGLOD. Set to None will use the default values.
     max_distance=None,
-
     # Force to generate objects in the left lane.
     _debug_crash_object=False,
     record_episode=False,
@@ -96,10 +92,9 @@ BASE_DEFAULT_CONFIG = dict(
 
 
 class BasePGDriveEnv(gym.Env):
-    DEFAULT_AGENT = DEFAULT_AGENT
-
     # Force to use this seed if necessary. Note that the recipient of the forced seed should be explicitly implemented.
     _DEBUG_RANDOM_SEED = None
+    DEFAULT_AGENT = DEFAULT_AGENT
 
     @classmethod
     def default_config(cls) -> "Config":
@@ -107,7 +102,6 @@ class BasePGDriveEnv(gym.Env):
 
     # ===== Intialization =====
     def __init__(self, config: dict = None):
-        self.default_config_copy = Config(self.default_config(), unchangeable=True)
         merged_config = self._merge_extra_config(config)
         global_config = self._post_process_config(merged_config)
         self.config = global_config
@@ -130,6 +124,7 @@ class BasePGDriveEnv(gym.Env):
 
         # lazy initialization, create the main vehicle in the lazy_init() func
         self.engine: Optional[BaseEngine] = None
+        self._top_down_renderer = None
         self.episode_steps = 0
         # self.current_seed = None
 
@@ -155,13 +150,17 @@ class BasePGDriveEnv(gym.Env):
     def _get_action_space(self):
         if self.is_multi_agent:
             return {
-                v_id: BaseVehicle.get_action_space_before_init(self.config["vehicle_config"]["extra_action_dim"])
+                v_id: BaseVehicle.get_action_space_before_init(
+                    self.config["vehicle_config"]["extra_action_dim"], self.config["discrete_action"],
+                    self.config["discrete_steering_dim"], self.config["discrete_throttle_dim"]
+                )
                 for v_id in self.config["target_vehicle_configs"].keys()
             }
         else:
             return {
                 DEFAULT_AGENT: BaseVehicle.get_action_space_before_init(
-                    self.config["vehicle_config"]["extra_action_dim"]
+                    self.config["vehicle_config"]["extra_action_dim"], self.config["discrete_action"],
+                    self.config["discrete_steering_dim"], self.config["discrete_throttle_dim"]
                 )
             }
 
@@ -185,32 +184,42 @@ class BasePGDriveEnv(gym.Env):
     # ===== Run-time =====
     def step(self, actions: Union[np.ndarray, Dict[AnyStr, np.ndarray]]):
         self.episode_steps += 1
-        actions, action_infos = self._preprocess_actions(actions)
-        step_infos = self._step_simulator(actions, action_infos)
+        actions = self._preprocess_actions(actions)
+        step_infos = self._step_simulator(actions)
         o, r, d, i = self._get_step_return(actions, step_infos)
         # return o, copy.deepcopy(r), copy.deepcopy(d), copy.deepcopy(i)
         return o, r, d, i
 
     def _preprocess_actions(self, actions: Union[np.ndarray, Dict[AnyStr, np.ndarray]]) \
-            -> Tuple[Union[np.ndarray, Dict[AnyStr, np.ndarray]], Dict]:
-        raise NotImplementedError()
+            -> Union[np.ndarray, Dict[AnyStr, np.ndarray]]:
+        if not self.is_multi_agent:
+            actions = {v_id: actions for v_id in self.vehicles.keys()}
+        else:
+            if self.config["vehicle_config"]["action_check"]:
+                # Check whether some actions are not provided.
+                given_keys = set(actions.keys())
+                have_keys = set(self.vehicles.keys())
+                assert given_keys == have_keys, "The input actions: {} have incompatible keys with existing {}!".format(
+                    given_keys, have_keys
+                )
+            else:
+                # That would be OK if extra actions is given. This is because, when evaluate a policy with naive
+                # implementation, the "termination observation" will still be given in T=t-1. And at T=t, when you
+                # collect action from policy(last_obs) without masking, then the action for "termination observation"
+                # will still be computed. We just filter it out here.
+                actions = {v_id: actions[v_id] for v_id in self.vehicles.keys()}
+        return actions
 
-    def _step_simulator(self, actions, action_infos):
+    def _step_simulator(self, actions):
         # Note that we use shallow update for info dict in this function! This will accelerate system.
-        scene_manager_infos = self.engine.before_step(actions)
-        action_infos = merge_dicts(action_infos, scene_manager_infos, allow_new_keys=True, without_copy=True)
-
+        scene_manager_before_step_infos = self.engine.before_step(actions)
         # step all entities
         self.engine.step(self.config["decision_repeat"])
-
         # update states, if restore from episode data, position and heading will be force set in update_state() function
-        scene_manager_step_infos = self.engine.after_step()
-        action_infos = merge_dicts(action_infos, scene_manager_step_infos, allow_new_keys=True, without_copy=True)
-        return action_infos
-
-    def _get_step_return(self, actions, step_infos):
-        """Return a tuple of obs, reward, dones, infos"""
-        raise NotImplementedError()
+        scene_manager_after_step_infos = self.engine.after_step()
+        return merge_dicts(
+            scene_manager_after_step_infos, scene_manager_before_step_infos, allow_new_keys=True, without_copy=True
+        )
 
     def reward_function(self, vehicle_id: str) -> Tuple[float, Dict]:
         """
@@ -226,13 +235,15 @@ class BasePGDriveEnv(gym.Env):
     def done_function(self, vehicle_id: str) -> Tuple[bool, Dict]:
         raise NotImplementedError()
 
-    def render(self, mode='human', text: Optional[Union[dict, str]] = None) -> Optional[np.ndarray]:
+    def render(self, mode='human', text: Optional[Union[dict, str]] = None, *args, **kwargs) -> Optional[np.ndarray]:
         """
         This is a pseudo-render function, only used to update onscreen message when using panda3d backend
         :param mode: 'rgb'/'human'
         :param text:text to show
         :return: when mode is 'rgb', image array is returned
         """
+        if mode == "top_down":
+            return self._render_topdown(*args, **kwargs)
         assert self.config["use_render"] or self.engine.mode != RENDER_MODE_NONE, ("render is off now, can not render")
         self.engine.render_frame(text)
         if mode != "human" and self.config["offscreen_render"]:
@@ -264,29 +275,77 @@ class BasePGDriveEnv(gym.Env):
         self.lazy_init()  # it only works the first time when reset() is called to avoid the error when render
         self._reset_global_seed(force_seed)
         self._update_map(episode_data=episode_data)
-
-        self._reset_config()
         self.engine.reset()
+        if self._top_down_renderer is not None:
+            self._top_down_renderer.reset(self.current_map)
 
         self.dones = {agent_id: False for agent_id in self.vehicles.keys()}
         self.episode_steps = 0
         self.episode_rewards = defaultdict(float)
         self.episode_lengths = defaultdict(int)
+        assert (len(self.vehicles) == self.num_agents) or (self.num_agents == -1)
 
         return self._get_reset_return()
 
     def _update_map(self, episode_data: dict = None):
         self.engine.map_manager.update_map(self.config, self.current_seed, episode_data)
 
-    # def _update_map(self, episode_data: Union[None, dict] = None):
-    #     raise NotImplementedError()
-
     def _get_reset_return(self):
-        raise NotImplementedError()
+        ret = {}
+        self.engine.after_step()
+        for v_id, v in self.vehicles.items():
+            self.observations[v_id].reset(self, v)
+            ret[v_id] = self.observations[v_id].observe(v)
+        return ret if self.is_multi_agent else self._wrap_as_single_agent(ret)
+
+    def _get_step_return(self, actions, step_infos):
+        # update obs, dones, rewards, costs, calculate done at first !
+        obses = {}
+        done_infos = {}
+        cost_infos = {}
+        reward_infos = {}
+        rewards = {}
+        for v_id, v in self.vehicles.items():
+            obses[v_id] = self.observations[v_id].observe(v)
+            done_function_result, done_infos[v_id] = self.done_function(v_id)
+            rewards[v_id], reward_infos[v_id] = self.reward_function(v_id)
+            _, cost_infos[v_id] = self.cost_function(v_id)
+            done = done_function_result or self.dones[v_id]
+            self.dones[v_id] = done
+
+        should_done = self.config["auto_termination"] and (self.episode_steps >= (self.current_map.num_blocks * 250))
+
+        termination_infos = self.for_each_vehicle(auto_termination, should_done)
+
+        step_infos = concat_step_infos([
+            step_infos,
+            done_infos,
+            reward_infos,
+            cost_infos,
+            termination_infos,
+        ])
+
+        if should_done:
+            for k in self.dones:
+                self.dones[k] = True
+
+        dones = {k: self.dones[k] for k in self.vehicles.keys()}
+        for v_id, r in rewards.items():
+            self.episode_rewards[v_id] += r
+            step_infos[v_id]["episode_reward"] = self.episode_rewards[v_id]
+            self.episode_lengths[v_id] += 1
+            step_infos[v_id]["episode_length"] = self.episode_lengths[v_id]
+        if not self.is_multi_agent:
+            return self._wrap_as_single_agent(obses), self._wrap_as_single_agent(rewards), \
+                   self._wrap_as_single_agent(dones), self._wrap_as_single_agent(step_infos)
+        else:
+            return obses, rewards, dones, step_infos
 
     def close(self):
         if self.engine is not None:
             close_engine()
+        if self._top_down_renderer is not None:
+            self._top_down_renderer.close()
 
     def force_close(self):
         print("Closing environment ... Please wait")
@@ -385,7 +444,6 @@ class BasePGDriveEnv(gym.Env):
 
     @property
     def current_map(self):
-        # TODO(pzh): Can we remove this?
         return self.engine.map_manager.current_map
 
     def _reset_global_seed(self, force_seed):
@@ -401,8 +459,16 @@ class BasePGDriveEnv(gym.Env):
     def maps(self):
         return self.engine.map_manager.pg_maps
 
-    def _reset_config(self):
-        """
-        You may need to modify the global config in the new episode, do it here
-        """
-        pass
+    def _render_topdown(self, *args, **kwargs):
+        if self._top_down_renderer is None:
+            from pgdrive.obs.top_down_renderer import TopDownRenderer
+            self._top_down_renderer = TopDownRenderer(self, self.current_map, *args, **kwargs)
+        return self._top_down_renderer.render(list(self.vehicles.values()), self.agent_manager)
+
+    @property
+    def main_camera(self):
+        return self.engine.main_camera
+
+    @property
+    def current_track_vehicle(self):
+        return self.engine.current_track_vehicle

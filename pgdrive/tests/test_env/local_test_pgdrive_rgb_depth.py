@@ -1,9 +1,9 @@
-from pgdrive.envs.pgdrive_env_v2 import PGDriveEnvV2
+from pgdrive.envs.pgdrive_env import PGDriveEnv
 from pgdrive.tests.test_env.test_pgdrive_env import _act
 
 
 def test_pgdrive_env_rgb():
-    env = PGDriveEnvV2(dict(offscreen_render=True))
+    env = PGDriveEnv(dict(offscreen_render=True))
     try:
         obs = env.reset()
         assert env.observation_space.contains(obs)

@@ -7,11 +7,6 @@ from panda3d.core import PNMImage, loadPrcFileData
 from pgdrive.envs.pgdrive_env import PGDriveEnv
 
 
-class TestEnv(PGDriveEnv):
-    def __init__(self):
-        super(TestEnv, self).__init__({"use_render": False, "offscreen_render": False})
-
-
 def capture_image(headless):
     env = PGDriveEnv(
         dict(
@@ -44,7 +39,7 @@ def capture_image(headless):
 def vis_installation(headless=True):
     loadPrcFileData("", "notify-level-task fatal")
     try:
-        env = TestEnv()
+        env = PGDriveEnv({"use_render": False, "offscreen_render": False})
         env.reset()
         for i in range(1, 100):
             o, r, d, info = env.step([0, 1])

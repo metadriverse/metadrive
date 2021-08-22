@@ -1,9 +1,9 @@
-from pgdrive.envs.pgdrive_env_v2 import PGDriveEnvV2
+from pgdrive.envs.pgdrive_env import PGDriveEnv
 
 
 def local_test_apply_action():
     try:
-        env = PGDriveEnvV2({"map": "SSS", "use_render": True, "fast": True})
+        env = PGDriveEnv({"map": "SSS", "use_render": True, "fast": True})
         o = env.reset()
         for act in [-1, 1]:
             for _ in range(300):

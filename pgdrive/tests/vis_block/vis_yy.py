@@ -2,49 +2,40 @@ from pgdrive.component.map.base_map import BaseMap, MapGenerateMethod
 from pgdrive.envs.pgdrive_env import PGDriveEnv
 from pgdrive.utils import setup_logger
 
-
-class TestEnv(PGDriveEnv):
-    def __init__(self):
-        """
-        TODO a small bug exists in scene 9 (30 blocks), traffic density > 0, respawn mode
-        """
-        super(TestEnv, self).__init__(
-            {
-                "environment_num": 1,
-                "traffic_density": 0.1,
-                "traffic_mode": "hybrid",
-                "start_seed": 5,
-                "onscreen_message": True,
-                # "debug_physics_world": True,
-                "pstats": True,
-                # "controller":"joystick",
-                "manual_control": True,
-                "use_render": True,
-                "decision_repeat": 5,
-                "rgb_clip": True,
-                "debug": True,
-                "map_config": {
-                    BaseMap.GENERATE_TYPE: MapGenerateMethod.BIG_BLOCK_SEQUENCE,
-                    BaseMap.GENERATE_CONFIG: "yY",
-                    BaseMap.LANE_WIDTH: 3.5,
-                    BaseMap.LANE_NUM: 3,
-                },
-                "driving_reward": 1.0,
-                "vehicle_config": {
-                    "show_lidar": False,
-                    "show_side_detector": True,
-                    "show_lane_line_detector": True,
-                    "lane_line_detector": {
-                        "num_lasers": 100
-                    }
-                }
-            }
-        )
-
-
 if __name__ == "__main__":
     setup_logger(True)
-    env = TestEnv()
+    env = PGDriveEnv(
+        {
+            "environment_num": 1,
+            "traffic_density": 0.1,
+            "traffic_mode": "hybrid",
+            "start_seed": 5,
+            "onscreen_message": True,
+            # "debug_physics_world": True,
+            "pstats": True,
+            # "controller":"joystick",
+            "manual_control": True,
+            "use_render": True,
+            "decision_repeat": 5,
+            "rgb_clip": True,
+            "debug": True,
+            "map_config": {
+                BaseMap.GENERATE_TYPE: MapGenerateMethod.BIG_BLOCK_SEQUENCE,
+                BaseMap.GENERATE_CONFIG: "yY",
+                BaseMap.LANE_WIDTH: 3.5,
+                BaseMap.LANE_NUM: 3,
+            },
+            "driving_reward": 1.0,
+            "vehicle_config": {
+                "show_lidar": False,
+                "show_side_detector": True,
+                "show_lane_line_detector": True,
+                "lane_line_detector": {
+                    "num_lasers": 100
+                }
+            }
+        }
+    )
 
     o = env.reset()
     print("vehicle num", len(env.engine.traffic_manager.vehicles))

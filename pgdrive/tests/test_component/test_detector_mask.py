@@ -13,7 +13,7 @@ detect_result = namedtuple("detect_result", "cloud_points detected_objects")
 import numpy as np
 
 from pgdrive.component.vehicle.base_vehicle import BaseVehicle
-from pgdrive.envs import PGDriveEnvV2
+from pgdrive.envs import PGDriveEnv
 
 from pgdrive.utils import panda_position
 
@@ -252,7 +252,7 @@ def test_detector_mask():
 
 
 def test_detector_mask_in_lidar():
-    env = PGDriveEnvV2(
+    env = PGDriveEnv(
         {
             "traffic_density": 1.0,
             "map": "SSSSS",
@@ -415,7 +415,7 @@ def test_cutils_lidar():
         )
         return cloud_points.tolist(), _
 
-    env = PGDriveEnvV2({"map": "C", "traffic_density": 1.0, "environment_num": 10, "use_render": False})
+    env = PGDriveEnv({"map": "C", "traffic_density": 1.0, "environment_num": 10, "use_render": False})
     env.reset()
     env.vehicle.lidar.cloud_points = np.ones((env.vehicle.lidar.num_lasers, ), dtype=float)
     env.vehicle.lidar.detected_objects = []

@@ -1,9 +1,9 @@
 import time
 
-from pgdrive import PGDriveEnvV2
+from pgdrive import PGDriveEnv
 
 if __name__ == '__main__':
-    env = PGDriveEnvV2(dict(environment_num=30000))
+    env = PGDriveEnv(dict(environment_num=30000))
     obs = env.reset()
     start = time.time()
     action = [0.0, 1]
@@ -21,4 +21,4 @@ if __name__ == '__main__':
                     time.time() - start, (s + 1) / (time.time() - start)
                 )
             )
-    print(f"(PGDriveEnvV2) Total Time Elapse: {time.time() - start}")
+    print(f"(PGDriveEnv) Total Time Elapse: {time.time() - start}")

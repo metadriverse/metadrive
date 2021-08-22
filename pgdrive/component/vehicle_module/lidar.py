@@ -36,17 +36,20 @@ class Lidar(DistanceDetector):
         self.enable_mask = True if not engine.global_config["_disable_detector_mask"] else False
 
     def perceive(self, base_vehicle, detector_mask=True):
-        lidar_mask = self._get_lidar_mask(base_vehicle)[0] if detector_mask and self.enable_mask else None
-        return super(Lidar, self).perceive(base_vehicle, base_vehicle.engine.physics_world.dynamic_world, lidar_mask)
+        res = self._get_lidar_mask(base_vehicle)
+        lidar_mask = res[0] if detector_mask and self.enable_mask else None
+        detected_objects = res[1]
+        return super(Lidar, self).perceive(base_vehicle, base_vehicle.engine.physics_world.dynamic_world,
+                                           lidar_mask)[0], detected_objects
 
     @staticmethod
     def get_surrounding_vehicles(detected_objects) -> Set:
-        # TODO this will be removed in the future and use the broad phase detection results
+        from pgdrive.component.vehicle.base_vehicle import BaseVehicle
         vehicles = set()
         objs = detected_objects
         for ret in objs:
-            if ret.getNode().hasPythonTag(BodyName.Vehicle):
-                vehicles.add(get_object_from_node(ret.getNode()))
+            if isinstance(ret, BaseVehicle):
+                vehicles.add(ret)
         return vehicles
 
     def get_surrounding_vehicles_info(self, ego_vehicle, detected_objects, num_others: int = 4):
