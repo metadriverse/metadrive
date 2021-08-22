@@ -1,4 +1,5 @@
 from pgdrive.policy.base_policy import BasePolicy
+from pgdrive.utils.math_utils import clip
 
 
 class EnvInputPolicy(BasePolicy):
@@ -14,10 +15,15 @@ class EnvInputPolicy(BasePolicy):
         )  # for discrete actions space
 
     def act(self, agent_id):
+        # clip to -1, 1
+        action = [
+            clip(self.engine.external_actions[agent_id][i], -1.0, 1.0)
+            for i in range(len(self.engine.external_actions[agent_id]))
+        ]
         if not self.discrete_action:
-            return self.engine.external_actions[agent_id]
+            return action
         else:
-            return self.convert_to_continuous_action(self.engine.external_actions[agent_id])
+            return self.convert_to_continuous_action(action)
 
     def convert_to_continuous_action(self, action):
         steering = action[0] * self.steering_unit - 1.0
