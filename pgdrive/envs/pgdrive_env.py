@@ -104,7 +104,8 @@ PGDriveEnv_DEFAULT_CONFIG = dict(
     # ===== Cost Scheme =====
     crash_vehicle_cost=1,
     crash_object_cost=1,
-    out_of_road_cost=1.
+    out_of_road_cost=1.,
+    out_of_route_done=False,
 )
 
 
@@ -210,6 +211,8 @@ class PGDriveEnv(BasePGDriveEnv):
         # return vehicle.on_yellow_continuous_line or (not vehicle.on_lane) or vehicle.crash_sidewalk
         ret = vehicle.on_yellow_continuous_line or vehicle.on_white_continuous_line or \
               (not vehicle.on_lane) or vehicle.crash_sidewalk
+        if self.config["out_of_route_done"]:
+            ret = ret or vehicle.out_of_route
         return ret
 
     def reward_function(self, vehicle_id: str):
