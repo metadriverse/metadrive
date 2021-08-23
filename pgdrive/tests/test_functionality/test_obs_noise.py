@@ -1,8 +1,23 @@
 import numpy as np
 
+from pgdrive.constants import TerminationState
 from pgdrive.envs.pgdrive_env import PGDriveEnv
 from pgdrive.obs.state_obs import LidarStateObservation
-from pgdrive.tests.test_env.test_pgdrive_env import _act
+
+info_keys = [
+    "cost", "velocity", "steering", "acceleration", "step_reward", TerminationState.CRASH_VEHICLE,
+    TerminationState.OUT_OF_ROAD, TerminationState.SUCCESS
+]
+
+
+def _act(env, action):
+    assert env.action_space.contains(action)
+    obs, reward, done, info = env.step(action)
+    assert env.observation_space.contains(obs)
+    assert np.isscalar(reward)
+    assert isinstance(info, dict)
+    for k in info_keys:
+        assert k in info
 
 
 def test_obs_noise():
