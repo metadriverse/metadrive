@@ -1,5 +1,5 @@
 from pgdrive.component.vehicle.vehicle_type import LVehicle
-from pgdrive.component.static_object.traffic_object import TrafficCone, TrafficTriangle
+from pgdrive.component.static_object.traffic_object import TrafficCone, TrafficWarning
 from pgdrive.constants import BodyName, TerminationState, DEFAULT_AGENT
 from pgdrive.envs import PGDriveEnv
 
@@ -49,7 +49,7 @@ class TestCollisionEnv(PGDriveEnv):
             }
         )
 
-        self.alert = self.engine.spawn_object(TrafficTriangle, lane=lane, longitude=22, lateral=0)
+        self.alert = self.engine.spawn_object(TrafficWarning, lane=lane, longitude=22, lateral=0, pbr_model=False)
 
         # part 1
         lane = self.current_map.road_network.graph["1C0_1_"]["2S0_0_"][2]
@@ -96,9 +96,9 @@ class TestCollisionEnv(PGDriveEnv):
                 }
             )
 
-        alert = self.engine.spawn_object(TrafficTriangle, lane=lane, longitude=-35, lateral=0)
+        alert = self.engine.spawn_object(TrafficWarning, lane=lane, longitude=-35, lateral=0)
 
-        alert = self.engine.spawn_object(TrafficTriangle, lane=lane, longitude=-60, lateral=0)
+        alert = self.engine.spawn_object(TrafficWarning, lane=lane, longitude=-60, lateral=0)
 
         # part 3
         lane = self.current_map.road_network.graph["4C0_0_"]["4C0_1_"][2]
@@ -149,7 +149,7 @@ def test_object_collision_detection(render=False):
         o = env.reset()
         lane_index = (">>", ">>>", 0)
         alert = env.engine.spawn_object(
-            TrafficTriangle, lane=env.current_map.road_network.get_lane(lane_index), longitude=22, lateral=0
+            TrafficWarning, lane=env.current_map.road_network.get_lane(lane_index), longitude=22, lateral=0
         )
         lane_index = (">>", ">>>", 2)
         alert = env.engine.spawn_object(

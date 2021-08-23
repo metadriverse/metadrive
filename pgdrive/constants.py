@@ -59,8 +59,7 @@ class BodyName:
     InvisibleWall = "InvisibleWall"
     Vehicle = "Vehicle"
     Lane = "Lane"
-    Traffic_cone = "Traffic Cone"
-    Traffic_triangle = "Traffic Triangle"
+    Traffic_object = "Traffic Object"
     TollGate = "Toll Gate"
 
 
@@ -70,8 +69,7 @@ COLOR = {
     BodyName.Yellow_continuous_line: "red",
     BodyName.Broken_line: "yellow",
     BodyName.Vehicle: "red",
-    BodyName.Traffic_cone: "orange",
-    BodyName.Traffic_triangle: "orange",
+    BodyName.Traffic_object: "orange",
     BodyName.InvisibleWall: "red",
     BodyName.TollGate: "red",
 }
