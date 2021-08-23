@@ -1,13 +1,9 @@
-from typing import Union, Callable, Optional
-from pgdrive.component.static_object.traffic_object import TrafficCone, TrafficTriangle
-
 from pgdrive.component.blocks.curve import Curve
 from pgdrive.component.blocks.ramp import InRampOnStraight, OutRampOnStraight
 from pgdrive.component.blocks.straight import Straight
 from pgdrive.component.lane.abs_lane import AbstractLane
 from pgdrive.component.road.road import Road
-from pgdrive.component.road.road_network import LaneIndex
-from pgdrive.component.static_object.traffic_object import TrafficObject
+from pgdrive.component.static_object.traffic_object import TrafficCone, TrafficWarning, TrafficBarrier
 from pgdrive.engine.engine_utils import get_engine
 from pgdrive.manager.base_manager import BaseManager
 
@@ -23,12 +19,11 @@ class TrafficObjectManager(BaseManager):
 
     # accident scene setting
     ACCIDENT_AREA_LEN = 10
-    ACCIDENT_LANE_MIN_LEN = 50
 
     # distance between two cones
     CONE_LONGITUDE = 2
     CONE_LATERAL = 1
-    PROHIBIT_SCENE_PROB = 0.5  # the reset is the probability of break_down_scene
+    PROHIBIT_SCENE_PROB = 0.67  # the reset is the probability of break_down_scene
 
     def __init__(self):
         super(TrafficObjectManager, self).__init__()
@@ -62,30 +57,34 @@ class TrafficObjectManager(BaseManager):
 
             road_1 = Road(block.pre_block_socket.positive_road.end_node, block.road_node(0, 0))
             road_2 = Road(block.road_node(0, 0), block.road_node(0, 1)) if not isinstance(block, Straight) else None
-            accident_road = self.np_random.choice([road_1, road_2]) if not isinstance(block, Curve) else road_2
-            accident_road = road_1 if accident_road is None else accident_road
-            is_ramp = isinstance(block, InRampOnStraight) or isinstance(block, OutRampOnStraight)
-            on_left = True if self.np_random.rand() > 0.5 or (accident_road is road_2 and is_ramp) else False
-            accident_lane_idx = 0 if on_left else -1
 
-            _debug = engine.global_config["_debug_crash_object"]
-            if _debug:
-                on_left = True
+            if self.np_random.rand() > self.PROHIBIT_SCENE_PROB:
+                accident_road = self.np_random.choice([road_1, road_2]) if not isinstance(block, Curve) else road_2
+                accident_road = road_1 if accident_road is None else accident_road
+                is_ramp = isinstance(block, InRampOnStraight) or isinstance(block, OutRampOnStraight)
+                on_left = True if self.np_random.rand() > 0.5 or (accident_road is road_2 and is_ramp) else False
+                accident_lane_idx = 0 if on_left else -1
+                lane = accident_road.get_lanes(engine.current_map.road_network)[accident_lane_idx]
+                longitude = lane.length - self.ACCIDENT_AREA_LEN
 
-            lane = accident_road.get_lanes(engine.current_map.road_network)[accident_lane_idx]
-            longitude = lane.length - self.ACCIDENT_AREA_LEN
+                lateral_len = engine.current_map.config[engine.current_map.LANE_WIDTH]
 
-            if lane.length < self.ACCIDENT_LANE_MIN_LEN:
-                continue
-
-            lateral_len = engine.current_map.config[engine.current_map.LANE_WIDTH]
-
-            lane = engine.current_map.road_network.get_lane(accident_road.lane_index(accident_lane_idx))
-            self.accident_lanes += accident_road.get_lanes(engine.current_map.road_network)
-            if self.np_random.rand() > self.PROHIBIT_SCENE_PROB or _debug:
+                lane = engine.current_map.road_network.get_lane(accident_road.lane_index(accident_lane_idx))
+                self.accident_lanes += accident_road.get_lanes(engine.current_map.road_network)
                 self.prohibit_scene(lane, longitude, lateral_len, on_left)
             else:
-                self.break_down_scene(lane, longitude)
+                accident_road = self.np_random.choice([road_1, road_2])
+                accident_road = road_1 if accident_road is None else accident_road
+                is_ramp = isinstance(block, InRampOnStraight) or isinstance(block, OutRampOnStraight)
+                on_left = True if self.np_random.rand() > 0.5 or (accident_road is road_2 and is_ramp) else False
+                lanes = accident_road.get_lanes(engine.current_map.road_network)
+                accident_lane_idx = self.np_random.randint(0, len(lanes) - 1) if on_left else -1
+                lane = lanes[accident_lane_idx]
+                longitude = self.np_random.rand() * lane.length / 2 + lane.length / 2
+                if self.np_random.rand() > 0.5:
+                    self.break_down_scene(lane, longitude)
+                else:
+                    self.barrier_scene(lane, longitude)
 
     def break_down_scene(self, lane: AbstractLane, longitude: float):
         v_config = {"spawn_lane_index": lane.index, "spawn_longitude": longitude}
@@ -93,7 +92,10 @@ class TrafficObjectManager(BaseManager):
             self.engine.traffic_manager.random_vehicle_type(), vehicle_config=v_config
         )
         breakdown_vehicle.set_break_down()
-        self.spawn_object(TrafficTriangle, lane=lane, longitude=longitude - self.ALERT_DIST, lateral=0)
+        self.spawn_object(TrafficWarning, lane=lane, longitude=longitude - self.ALERT_DIST, lateral=0)
+
+    def barrier_scene(self, lane, longitude):
+        self.spawn_object(TrafficBarrier, lane=lane, longitude=longitude, lateral=0)
 
     def prohibit_scene(self, lane: AbstractLane, longitude_position: float, lateral_len: float, on_left=False):
         """

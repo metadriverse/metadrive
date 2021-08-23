@@ -25,7 +25,7 @@ def collision_callback(contact):
             if another_node_name == BodyName.Vehicle:
                 obj_1.crash_vehicle = True
             # crash objects
-            elif another_node_name in [BodyName.Traffic_cone, BodyName.Traffic_triangle]:
+            elif another_node_name == BodyName.Traffic_object:
                 if not obj_2.crashed:
                     obj_1.crash_object = True
                     if obj_2.COST_ONCE:
