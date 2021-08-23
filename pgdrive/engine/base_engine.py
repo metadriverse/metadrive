@@ -138,7 +138,6 @@ class BaseEngine(EngineCore, Randomizable):
         Since we don't expect a iterator, and the number of objects is not so large, we don't use built-in filter()
         If force_destroy=True, we will destroy this element instead of storing them for next time using
         """
-        clean_id = []
         if isinstance(filter, list):
             exclude_objects = {obj_id: self._spawned_objects[obj_id] for obj_id in filter}
         elif callable(filter):

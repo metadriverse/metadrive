@@ -8,6 +8,8 @@ if __name__ == "__main__":
             "start_seed": 0,
             "environment_num": 10,
             "fast": True,
+            "map": 1,
+            "traffic_density": 0.2,
             "use_render": True,
             "manual_control": True,
             "vehicle_config": {
@@ -17,9 +19,9 @@ if __name__ == "__main__":
                 "lane_line_detector": {
                     "num_lasers": 120
                 },
-                "show_side_detector": True,
-                "show_lane_line_detector": True,
-                "show_navi_mark": True,
+                # "show_side_detector": True,
+                # "show_lane_line_detector": True,
+                # "show_navi_mark": True,
                 "show_lidar": True,
             },
             "random_agent_model": True,
