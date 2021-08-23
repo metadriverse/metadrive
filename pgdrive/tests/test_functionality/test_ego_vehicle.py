@@ -34,8 +34,8 @@ def test_base_vehicle():
         v_config = Config(BASE_DEFAULT_CONFIG["vehicle_config"]).update(PGDriveEnv_DEFAULT_CONFIG["vehicle_config"])
         v = engine.spawn_object(DefaultVehicle, vehicle_config=v_config, random_seed=0)
 
-        v.add_navigation(True)
-        v.add_navigation(False)
+        v.add_navigation()
+        v.add_navigation()
         v.navigation.set_force_calculate_lane_index(True)
         v.update_map_info(map)
 

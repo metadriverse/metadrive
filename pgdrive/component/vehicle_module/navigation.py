@@ -185,11 +185,15 @@ class Navigation:
         self._navi_info.fill(0.0)
         half = self.navigation_info_dim // 2
         self._navi_info[:half], lanes_heading1, checkpoint = self._get_info_for_checkpoint(
-            lanes_id=0, lanes=target_lanes_1, ego_vehicle=ego_vehicle
+            lanes_id=0,
+            lanes=target_lanes_1,
+            ego_vehicle=ego_vehicle  #, print_info=False
         )
 
         self._navi_info[half:], lanes_heading2, _ = self._get_info_for_checkpoint(
-            lanes_id=1, lanes=target_lanes_2, ego_vehicle=ego_vehicle
+            lanes_id=1,
+            lanes=target_lanes_2,
+            ego_vehicle=ego_vehicle  #, print_info=True
         )
 
         if self._show_navi_info:
@@ -206,7 +210,7 @@ class Navigation:
 
         return lane, lane_index
 
-    def _get_info_for_checkpoint(self, lanes_id, lanes, ego_vehicle):
+    def _get_info_for_checkpoint(self, lanes_id, lanes, ego_vehicle, print_info=False):
         ref_lane = lanes[0]
         later_middle = (float(self.get_current_lane_num()) / 2 - 0.5) * self.get_current_lane_width()
         check_point = ref_lane.position(ref_lane.length, later_middle)
@@ -239,6 +243,20 @@ class Navigation:
         ret.append(clip(bendradius, 0.0, 1.0))
         ret.append(clip((dir + 1) / 2, 0.0, 1.0))
         ret.append(clip((np.rad2deg(angle) / BlockParameterSpace.CURVE[Parameter.angle].max + 1) / 2, 0.0, 1.0))
+
+        # if print_info:
+        #     print("[2ND] Distance to this navigation: {:.3f}, Angle: {:.3f}. Return value: {}".format(
+        #         norm(proj_heading, proj_side),
+        #         np.rad2deg(np.arctan2(proj_side, proj_heading)),
+        #         ret
+        #     ))
+        # else:
+        #     print("[1ND] Distance to this navigation: {:.3f}, Angle: {:.3f}. Return value: {}".format(
+        #         norm(proj_heading, proj_side),
+        #         np.rad2deg(np.arctan2(proj_side, proj_heading)),
+        #         ret
+        #     ))
+
         return ret, lanes_heading, check_point
 
     def _update_target_checkpoints(self, ego_lane_index, ego_lane_longitude):

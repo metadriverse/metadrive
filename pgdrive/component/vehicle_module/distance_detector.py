@@ -29,7 +29,7 @@ class DistanceDetector:
     MARK_COLOR = (51 / 255, 221 / 255, 1)
     ANGLE_FACTOR = False
 
-    def __init__(self, num_lasers: int = 16, distance: float = 50, enable_show=False):
+    def __init__(self, num_lasers: int = 16, distance: float = 50, enable_show=True):
         # properties
         self.available = True if num_lasers > 0 and distance > 0 else False
         parent_node_np: NodePath = get_engine().render
@@ -135,7 +135,7 @@ class DistanceDetector:
 
 
 class SideDetector(DistanceDetector):
-    def __init__(self, num_lasers: int = 2, distance: float = 50, enable_show=False):
+    def __init__(self, num_lasers: int = 2, distance: float = 50, enable_show=True):
         super(SideDetector, self).__init__(num_lasers, distance, enable_show)
         self.set_start_phase_offset(90)
         self.origin.hide(CamMask.RgbCam | CamMask.Shadow | CamMask.Shadow | CamMask.DepthCam)
@@ -145,7 +145,7 @@ class SideDetector(DistanceDetector):
 class LaneLineDetector(SideDetector):
     MARK_COLOR = (1, 77 / 255, 77 / 255)
 
-    def __init__(self, num_lasers: int = 2, distance: float = 50, enable_show=False):
+    def __init__(self, num_lasers: int = 2, distance: float = 50, enable_show=True):
         super(SideDetector, self).__init__(num_lasers, distance, enable_show)
         self.set_start_phase_offset(90)
         self.origin.hide(CamMask.RgbCam | CamMask.Shadow | CamMask.Shadow | CamMask.DepthCam)

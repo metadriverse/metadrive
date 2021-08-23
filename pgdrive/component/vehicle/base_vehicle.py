@@ -199,19 +199,23 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         config = self.config
 
         # add routing module
-        self.add_navigation(config["show_navi_mark"])  # default added
+        self.add_navigation()  # default added
 
         # add distance detector/lidar
         self.side_detector = SideDetector(
-            config["side_detector"]["num_lasers"], config["side_detector"]["distance"], config["show_side_detector"]
+            config["side_detector"]["num_lasers"], config["side_detector"]["distance"],
+            self.engine.global_config["vehicle_config"]["show_side_detector"]
         )
 
         self.lane_line_detector = LaneLineDetector(
             config["lane_line_detector"]["num_lasers"], config["lane_line_detector"]["distance"],
-            config["show_lane_line_detector"]
+            self.engine.global_config["vehicle_config"]["show_lane_line_detector"]
         )
 
-        self.lidar = Lidar(config["lidar"]["num_lasers"], config["lidar"]["distance"], config["show_lidar"])
+        self.lidar = Lidar(
+            config["lidar"]["num_lasers"], config["lidar"]["distance"],
+            self.engine.global_config["vehicle_config"]["show_lidar"]
+        )
 
         # vision modules
         self.add_image_sensor("rgb_camera", RGBCamera())
@@ -573,14 +577,13 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     def add_image_sensor(self, name: str, sensor: ImageBuffer):
         self.image_sensors[name] = sensor
 
-    def add_navigation(self, show_navi_mark: bool = False):
-        config = self.config
+    def add_navigation(self):
         self.navigation = Navigation(
             self.engine,
-            show_navi_mark=show_navi_mark,
-            random_navi_mark_color=config["random_navi_mark_color"],
-            show_dest_mark=config["show_dest_mark"],
-            show_line_to_dest=config["show_line_to_dest"]
+            show_navi_mark=self.engine.global_config["vehicle_config"]["show_navi_mark"],
+            random_navi_mark_color=self.engine.global_config["vehicle_config"]["random_navi_mark_color"],
+            show_dest_mark=self.engine.global_config["vehicle_config"]["show_dest_mark"],
+            show_line_to_dest=self.engine.global_config["vehicle_config"]["show_line_to_dest"]
         )
 
     def update_map_info(self, map):
@@ -774,7 +777,6 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         return self.last_current_action[0]
 
     def detach_from_world(self, physics_world):
-        super(BaseVehicle, self).detach_from_world(physics_world)
         self.navigation.detach_from_world()
         if self.lidar is not None:
             self.lidar.detach_from_world()
@@ -782,16 +784,18 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             self.side_detector.detach_from_world()
         if self.lane_line_detector is not None:
             self.lane_line_detector.detach_from_world()
+        super(BaseVehicle, self).detach_from_world(physics_world)
 
     def attach_to_world(self, parent_node_path, physics_world):
-        super(BaseVehicle, self).attach_to_world(parent_node_path, physics_world)
-        self.navigation.attach_to_world(self.engine)
-        if self.lidar is not None:
+        if self.config["show_navi_mark"]:
+            self.navigation.attach_to_world(self.engine)
+        if self.lidar is not None and self.config["show_lidar"]:
             self.lidar.attach_to_world(self.engine)
-        if self.side_detector is not None:
+        if self.side_detector is not None and self.config["show_side_detector"]:
             self.side_detector.attach_to_world(self.engine)
-        if self.lane_line_detector is not None:
+        if self.lane_line_detector is not None and self.config["show_lane_line_detector"]:
             self.lane_line_detector.attach_to_world(self.engine)
+        super(BaseVehicle, self).attach_to_world(parent_node_path, physics_world)
 
     def set_break_down(self, break_down=True):
         self.break_down = break_down

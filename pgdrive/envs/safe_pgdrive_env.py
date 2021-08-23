@@ -22,26 +22,13 @@ class SafePGDriveEnv(PGDriveEnv):
 
                 # ===== cost scheme =====
                 "crash_vehicle_cost": 1,
-                "crash_object_cost": 0.5,
+                "crash_object_cost": 1,
                 "out_of_road_cost": 1.,  # only give penalty for out_of_road
                 "use_lateral": False
             },
             allow_add_new_key=True
         )
         return config
-    def __init__(self,config):
-        super(SafePGDriveEnv, self).__init__(config)
-        self.episode_cost = 0
-
-    def reset(self, *args, **kwargs):
-        self.episode_cost = 0
-        return super(SafePGDriveEnv, self).reset(*args, **kwargs)
-
-    def cost_function(self, vehicle_id: str):
-        cost, step_info = super(SafePGDriveEnv, self).cost_function(vehicle_id)
-        self.episode_cost += cost
-        step_info["total_cost"] = self.episode_cost
-        return cost, step_info
 
     def _post_process_config(self, config):
         config = super(SafePGDriveEnv, self)._post_process_config(config)
@@ -65,9 +52,6 @@ class SafePGDriveEnv(PGDriveEnv):
         super(SafePGDriveEnv, self).setup_engine()
         self.engine.register_manager("object_manager", TrafficObjectManager())
 
-    def _is_out_of_road(self, vehicle):
-        return vehicle.out_of_route
-
 
 if __name__ == "__main__":
     env = SafePGDriveEnv(
@@ -83,7 +67,7 @@ if __name__ == "__main__":
             # # "start_seed": 187,
             # "out_of_road_cost": 1,
             # "debug": True,
-            "map": "X",
+            # "map": "CCC",
             # # "cull_scene": True,
             "vehicle_config": {
                 "spawn_lane_index": (FirstPGBlock.NODE_2, FirstPGBlock.NODE_3, 2)
