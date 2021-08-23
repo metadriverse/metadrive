@@ -87,7 +87,7 @@ class TrafficObjectManager(BaseManager):
                     self.barrier_scene(lane, longitude)
 
     def break_down_scene(self, lane: AbstractLane, longitude: float):
-        v_config = {"spawn_lane_index": lane.index, "spawn_longitude": longitude}
+        v_config = {"spawn_lane_index": lane.index, "spawn_longitude": float(longitude)}
         breakdown_vehicle = self.spawn_object(
             self.engine.traffic_manager.random_vehicle_type(), vehicle_config=v_config
         )
