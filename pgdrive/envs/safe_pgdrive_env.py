@@ -15,11 +15,6 @@ class SafePGDriveEnv(PGDriveEnv):
                 "safe_rl_env": True,  # Should always be True. But we just leave it here for historical reason.
                 "cost_to_reward": False,
 
-                # ===== reward scheme =====
-                "crash_vehicle_penalty": 0.,
-                "crash_object_penalty": 0.,
-                "out_of_road_penalty": 0.,
-
                 # ===== cost scheme =====
                 "crash_vehicle_cost": 1,
                 "crash_object_cost": 1,
@@ -47,9 +42,9 @@ class SafePGDriveEnv(PGDriveEnv):
     def _post_process_config(self, config):
         config = super(SafePGDriveEnv, self)._post_process_config(config)
         if config["cost_to_reward"]:
-            config["crash_vehicle_penalty"] = config["crash_vehicle_cost"]
-            config["crash_object_penalty"] = config["crash_object_cost"]
-            config["out_of_road_penalty"] = config["out_of_road_cost"]
+            config["crash_vehicle_penalty"] += config["crash_vehicle_cost"]
+            config["crash_object_penalty"] += config["crash_object_cost"]
+            config["out_of_road_penalty"] += config["out_of_road_cost"]
         return config
 
     def done_function(self, vehicle_id: str):
@@ -83,6 +78,7 @@ if __name__ == "__main__":
             # "debug": True,
             # "map": "X",
             # # "cull_scene": True,
+            # "cost_to_reward":True,
             "vehicle_config": {
                 "spawn_lane_index": (FirstPGBlock.NODE_2, FirstPGBlock.NODE_3, 2),
                 "show_lidar": True,
