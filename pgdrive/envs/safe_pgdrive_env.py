@@ -10,8 +10,8 @@ class SafePGDriveEnv(PGDriveEnv):
         config.update(
             {
                 "environment_num": 100,
-                "accident_prob": 0.5,
-                "traffic_density": 0.1,
+                "accident_prob": 0.8,
+                "traffic_density": 0.05,
                 "safe_rl_env": True,  # Should always be True. But we just leave it here for historical reason.
                 "cost_to_reward": False,
 
@@ -29,6 +29,20 @@ class SafePGDriveEnv(PGDriveEnv):
             allow_add_new_key=True
         )
         return config
+
+    def __init__(self, config):
+        super(SafePGDriveEnv, self).__init__(config)
+        self.episode_cost = 0
+
+    def reset(self, *args, **kwargs):
+        self.episode_cost = 0
+        return super(SafePGDriveEnv, self).reset(*args, **kwargs)
+
+    def cost_function(self, vehicle_id: str):
+        cost, step_info = super(SafePGDriveEnv, self).cost_function(vehicle_id)
+        self.episode_cost += cost
+        step_info["total_cost"] = self.episode_cost
+        return cost, step_info
 
     def _post_process_config(self, config):
         config = super(SafePGDriveEnv, self)._post_process_config(config)
@@ -60,18 +74,18 @@ if __name__ == "__main__":
             "manual_control": True,
             "use_render": True,
             # "debug": True,
-            'environment_num': 1,
-            "start_seed": 22,
+            'environment_num': 10,
+            "start_seed": 123,
             # "traffic_density": 0.2,
             # "environment_num": 1,
             # # "start_seed": 187,
             # "out_of_road_cost": 1,
             # "debug": True,
-            # "map": "CCC",
+            # "map": "X",
             # # "cull_scene": True,
             "vehicle_config": {
-                "spawn_lane_index": (FirstPGBlock.NODE_2, FirstPGBlock.NODE_3, 2)
-                # "show_lidar": True,
+                "spawn_lane_index": (FirstPGBlock.NODE_2, FirstPGBlock.NODE_3, 2),
+                "show_lidar": True,
                 # "show_side_detector": True,
                 # "show_lane_line_detector": True,
                 # "side_detector": dict(num_lasers=2, distance=50),  # laser num, distance
@@ -85,10 +99,22 @@ if __name__ == "__main__":
     for i in range(1, 100000):
         o, r, d, info = env.step([0, 0])
         total_cost += info["cost"]
-        env.render(text={"cost": total_cost, "seed": env.current_seed, "reward": r})
-        if d:
-            total_cost = 0
-            print("done_cost:{}".format(info["cost"]), "done_reward;{}".format(r))
-            print("Reset")
-            env.reset()
+        env.render(
+            text={
+                "cost": total_cost,
+                "seed": env.current_seed,
+                "reward": r,
+                "total_cost": info["total_cost"],
+            }
+        )
+        if info["crash_vehicle"]:
+            print("crash_vehicle:cost {}, reward {}".format(info["cost"], r))
+        if info["crash_object"]:
+            print("crash_object:cost {}, reward {}".format(info["cost"], r))
+
+        # if d:
+        #     total_cost = 0
+        #     print("done_cost:{}".format(info["cost"]), "done_reward;{}".format(r))
+        #     print("Reset")
+        #     env.reset()
     env.close()

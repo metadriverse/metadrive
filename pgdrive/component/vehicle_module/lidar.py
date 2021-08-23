@@ -23,7 +23,7 @@ class Lidar(DistanceDetector):
     def __init__(self, num_lasers: int = 240, distance: float = 50, enable_show=False):
         super(Lidar, self).__init__(num_lasers, distance, enable_show)
         self.origin.hide(CamMask.RgbCam | CamMask.Shadow | CamMask.Shadow | CamMask.DepthCam)
-        self.mask = CollisionGroup.Vehicle | CollisionGroup.InvisibleWall
+        self.mask = CollisionGroup.Vehicle | CollisionGroup.InvisibleWall | CollisionGroup.TrafficObject
 
         # lidar can calculate the detector mask by itself
         self.angle_delta = 360 / num_lasers if num_lasers > 0 else None
