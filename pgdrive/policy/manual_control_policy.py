@@ -1,4 +1,4 @@
-from pgdrive.engine.core.manual_controller import KeyboardController, JoystickController
+from pgdrive.engine.core.manual_controller import KeyboardController, SteeringWheelController
 from pgdrive.policy.env_input_policy import EnvInputPolicy
 from pgdrive.engine.engine_utils import get_global_config
 
@@ -11,7 +11,7 @@ class ManualControlPolicy(EnvInputPolicy):
             if config["controller"] == "keyboard":
                 self.controller = KeyboardController()
             elif config["controller"] == "joystick":
-                self.controller = JoystickController()
+                self.controller = SteeringWheelController()
             else:
                 raise ValueError("No such a controller type: {}".format(self.config["controller"]))
 

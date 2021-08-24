@@ -58,7 +58,10 @@ class KeyboardController(Controller):
         return [steering, throttle_brake]
 
 
-class JoystickController(Controller):
+class SteeringWheelController(Controller):
+    RIGHT_SHIFT_PADDLE = 4
+    LEFT_SHIFT_PADDLE = 5
+
     def __init__(self):
         pygame.display.init()
         pygame.joystick.init()
@@ -72,6 +75,9 @@ class JoystickController(Controller):
         self.joystick = pygame.joystick.Joystick(0)
         self.joystick.init()
 
+        self.right_shift_paddle = False
+        self.left_shift_paddle = False
+
     def process_input(self, vehicle):
         pygame.event.pump()
         steering = -self.joystick.get_axis(0)
@@ -79,7 +85,7 @@ class JoystickController(Controller):
         offset = 30
         val = int(65535 * (vehicle.speed + offset) / (120 + offset)) if vehicle is not None else 0
         self.ffb_dev.write(ecodes.EV_FF, ecodes.FF_AUTOCENTER, val)
-
-        # throttle_brake=0.2
+        self.right_shift_paddle = True if self.joystick.get_button(self.RIGHT_SHIFT_PADDLE) else False
+        self.left_shift_paddle = True if self.joystick.get_button(self.LEFT_SHIFT_PADDLE) else False
 
         return [steering, throttle_brake / 2]

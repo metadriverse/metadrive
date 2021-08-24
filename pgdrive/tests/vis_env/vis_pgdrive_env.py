@@ -15,7 +15,7 @@ if __name__ == "__main__":
             "global_light": True,
             # "debug_static_world":True,
             "cull_scene": False,
-            # "controller": "joystick",
+            "controller": "joystick",
             "manual_control": True,
             "use_render": True,
             "decision_repeat": 5,
@@ -69,6 +69,7 @@ if __name__ == "__main__":
                 "lane_width": env.vehicle.lane.width
             }
         )
+        print({env.engine.get_policy(env.vehicle.id).controller.joystick.get_button(4) })
         # assert env.observation_space.contains(o)
         # if (s + 1) % 100 == 0:
         #     print(
