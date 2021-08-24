@@ -6,16 +6,14 @@ from typing import Union, Dict, AnyStr, Optional, Tuple
 import gym
 import numpy as np
 from panda3d.core import PNMImage
-
 from pgdrive.component.vehicle.base_vehicle import BaseVehicle
-from pgdrive.constants import RENDER_MODE_NONE, DEFAULT_AGENT
+from pgdrive.constants import RENDER_MODE_NONE, DEFAULT_AGENT, TerminationState
 from pgdrive.engine.base_engine import BaseEngine
 from pgdrive.engine.engine_utils import initialize_engine, close_engine, \
     engine_initialized, set_global_random_seed
 from pgdrive.manager.agent_manager import AgentManager
 from pgdrive.obs.observation_base import ObservationBase
-from pgdrive.utils import Config, merge_dicts, get_np_random
-from pgdrive.utils import concat_step_infos
+from pgdrive.utils import Config, merge_dicts, get_np_random, concat_step_infos
 from pgdrive.utils.utils import auto_termination
 
 BASE_DEFAULT_CONFIG = dict(
@@ -88,6 +86,7 @@ BASE_DEFAULT_CONFIG = dict(
     # Force to generate objects in the left lane.
     _debug_crash_object=False,
     record_episode=False,
+    horizon=None,  # The maximum length of each episode. Set to None to remove system.
 )
 
 
@@ -188,6 +187,9 @@ class BasePGDriveEnv(gym.Env):
         step_infos = self._step_simulator(actions)
         o, r, d, i = self._get_step_return(actions, step_infos)
         # return o, copy.deepcopy(r), copy.deepcopy(d), copy.deepcopy(i)
+        if self.config["horizon"] and self.episode_steps >= self.config["horizon"]:
+            d = True
+            i[TerminationState.MAX_STEP] = True
         return o, r, d, i
 
     def _preprocess_actions(self, actions: Union[np.ndarray, Dict[AnyStr, np.ndarray]]) \
