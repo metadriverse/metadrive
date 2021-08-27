@@ -61,6 +61,7 @@ class KeyboardController(Controller):
 class SteeringWheelController(Controller):
     RIGHT_SHIFT_PADDLE = 4
     LEFT_SHIFT_PADDLE = 5
+    STEERING_MAKEUP = 1.5
 
     def __init__(self):
         pygame.display.init()
@@ -88,4 +89,4 @@ class SteeringWheelController(Controller):
         self.right_shift_paddle = True if self.joystick.get_button(self.RIGHT_SHIFT_PADDLE) else False
         self.left_shift_paddle = True if self.joystick.get_button(self.LEFT_SHIFT_PADDLE) else False
 
-        return [steering, throttle_brake / 2]
+        return [steering * self.STEERING_MAKEUP, throttle_brake / 2]

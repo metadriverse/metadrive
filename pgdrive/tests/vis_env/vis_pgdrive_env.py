@@ -31,7 +31,7 @@ if __name__ == "__main__":
             #     Map.LANE_NUM: 3,
             # },
             "pstats": True,
-            "discrete_action": True,
+            # "discrete_action": True,
             # "map": "SSS",
             "random_traffic": False,
             "random_lane_width": True,
@@ -59,7 +59,7 @@ if __name__ == "__main__":
     o = env.reset()
 
     for s in range(1, 100000):
-        o, r, d, info = env.step([2, 4])
+        o, r, d, info = env.step(env.action_space.sample())
         # info["fuel"] = env.vehicle.energy_consumption
         env.render(
             text={
