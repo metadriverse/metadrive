@@ -14,7 +14,7 @@ def _t(num_blocks):
         map_config.update(dict(type="block_num", config=num_blocks))
         map = CityMap(map_config)
         m = draw_top_down_map(map, return_surface=True)
-        pygame.image.save(m, "{}.png".format(num_blocks))
+        pygame.image.save(m, "test.png".format(num_blocks))
     finally:
         close_engine()
 
