@@ -23,6 +23,9 @@ if __name__ == '__main__':
         if (s + 1) % 100 == 0:
             print(
                 "Finish {}/10000 simulation steps. Time elapse: {:.4f}. Average FPS: {:.4f}, Average number of "
-                "vehicles: {:.4f}".format(s + 1, time.time() - start, (s + 1) / (time.time() - start),
-                                          np.mean(vehicle_num)))
+                "vehicles: {:.4f}".format(
+                    s + 1,
+                    time.time() - start, (s + 1) / (time.time() - start), np.mean(vehicle_num)
+                )
+            )
     print(f"Total Time Elapse: {time.time() - start}")

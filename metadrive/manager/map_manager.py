@@ -164,6 +164,6 @@ class MapManager(BaseManager):
         if self.engine.global_config["random_lane_num"]:
             assert not self.engine.global_config["load_map_from_json"
                                                  ], "You are supposed to turn off the load_map_from_json"
-            map_config[PGMap.LANE_NUM] = self.np_random.randint(PGMap.MIN_LANE_NUM, PGMap.MAX_LANE_NUM+1)
+            map_config[PGMap.LANE_NUM] = self.np_random.randint(PGMap.MIN_LANE_NUM, PGMap.MAX_LANE_NUM + 1)
 
         return map_config

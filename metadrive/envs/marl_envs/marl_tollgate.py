@@ -66,7 +66,7 @@ class TollGateStateObservation(StateObservation):
     @property
     def observation_space(self):
         # Navi info + Other states
-        shape = self.ego_state_obs_dim + self.get_side_detector_dim()
+        shape = self.ego_state_obs_dim + self.get_line_detector_dim()
         return gym.spaces.Box(-0.0, 1.0, shape=(shape, ), dtype=np.float32)
 
     def observe(self, vehicle):

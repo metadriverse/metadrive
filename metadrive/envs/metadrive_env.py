@@ -48,13 +48,14 @@ METADRIVE_DEFAULT_CONFIG = dict(
     traffic_mode=TrafficMode.Trigger,  # "Respawn", "Trigger", "Hybrid"
     random_traffic=False,  # Traffic is randomized at default.
     # this will update the vehicle_config and set to traffic
-    traffic_vehicle_config=dict(show_navi_mark=False,
-                                show_dest_mark=False,
-                                enable_reverse=False,
-                                show_lidar=False,
-                                show_lane_line_detector=False,
-                                show_side_detector=False,
-                                ),
+    traffic_vehicle_config=dict(
+        show_navi_mark=False,
+        show_dest_mark=False,
+        enable_reverse=False,
+        show_lidar=False,
+        show_lane_line_detector=False,
+        show_side_detector=False,
+    ),
 
     # ===== Object =====
     accident_prob=0.,  # accident may happen on each block with this probability, except multi-exits block
@@ -91,7 +92,6 @@ METADRIVE_DEFAULT_CONFIG = dict(
         action_check=False,
         random_color=False,
     ),
-
     rgb_clip=True,
     gaussian_noise=0.0,
     dropout_prob=0.0,
@@ -197,8 +197,8 @@ class MetaDriveEnv(BaseEnv):
         # for compatibility
         # crash almost equals to crashing with vehicles
         done_info[TerminationState.CRASH] = (
-                done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
-                or done_info[TerminationState.CRASH_BUILDING]
+            done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
+            or done_info[TerminationState.CRASH_BUILDING]
         )
         return done, done_info
 
@@ -343,7 +343,6 @@ if __name__ == '__main__':
         assert env.observation_space.contains(obs)
         assert np.isscalar(reward)
         assert isinstance(info, dict)
-
 
     env = MetaDriveEnv()
     try:
