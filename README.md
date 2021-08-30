@@ -124,24 +124,17 @@ The following table presents some predefined environment names.
 | `MetaDrive-training2-v0`  | [7000, 8000)      | 1000           | Thirds set of 1000 environments.                        |
 | ...                     |                   |                | *More map set can be added in response to the requests* |
 
+
+
 ## 🏫 Documentations
 
-More information about MetaDrive can be found in [MetaDrive Documentation](https://metadrive.readthedocs.io). 
-Besides, the training code of our [paper](https://arxiv.org/pdf/2012.13681) can be found in [this repo](https://github.com/decisionforce/metadrive-generalization-paper).
+Working in Progress!
+
 
 ## 📎 Citation
 
+Working in Progress!
 
-If you find this work useful in your project, please consider to cite it through:
-
-```
-@article{li2020improving,
-  title={Improving the Generalization of End-to-End Driving through Procedural Generation},
-  author={Li, Quanyi and Peng, Zhenghao and Zhang, Qihang and Qiu, Cong and Liu, Chunxiao and Zhou, Bolei},
-  journal={arXiv preprint arXiv:2012.13681},
-  year={2020}
-}
-```
 
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/2d6fabe328a644b49e1269497b741057)](https://www.codacy.com/gh/decisionforce/metadrive/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=decisionforce/metadrive&amp;utm_campaign=Badge_Grade)
 [![GitHub contributors](https://img.shields.io/github/contributors/decisionforce/metadrive)](https://github.com/decisionforce/metadrive/graphs/contributors)
