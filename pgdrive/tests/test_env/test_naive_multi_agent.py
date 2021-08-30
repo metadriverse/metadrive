@@ -38,7 +38,7 @@ def test_naive_multi_agent_pgdrive():
     )
     try:
         assert isinstance(env.action_space, gym.spaces.Dict)
-        obs = env.reset()
+        obs = env.reset(force_seed=0)
         assert isinstance(obs, dict)
         env.action_space.seed(0)
         for step in range(100):
