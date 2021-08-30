@@ -1,8 +1,16 @@
+<br>
+
+<br>
+
+![](metadrive/assets/logo-horizon.png)
+
+<br>
+
 
 
 # MetaDrive: Composing Diverse Driving Scenarios for Generalizable RL
 
-<img align=right width=250px  src="metadrive/assets/logo-cropped.png" />
+
 
 [![build](https://github.com/decisionforce/metadrive/workflows/test/badge.svg)](http://github.com/decisionforce/metadrive/actions)
 [![codecov](https://codecov.io/gh/decisionforce/metadrive/branch/main/graph/badge.svg?token=1ZYN8L5397)](https://codecov.io/gh/decisionforce/metadrive)
@@ -37,6 +45,7 @@ pip install -e .
 You can verify the installation and efficiency of MetaDrive via running:
 
 ```bash
+cd ~/
 python -m metadrive.examples.profile_metadrive
 ```
 
@@ -45,7 +54,7 @@ Note that please do not run the above command in the folder that has a sub-folde
 
 ## 🚕 Examples
 
-Please run the following line to drive the car in the environment manually with keyboard!
+Please run the following command to drive the car in the environment manually with keyboard! Pressing W, A, S, D to move and turn.
 
 ```bash
 python -m metadrive.examples.enjoy_manual
@@ -57,14 +66,6 @@ You can also enjoy a journey carrying out by our professional driver pretrained 
 python -m metadrive.examples.enjoy_expert
 ```
 
-A fusion of expert and manual controller, 
-where the expect will try to rescue the manually controlled vehicle from danger, 
-can be experienced via:
-
-```bash
-python -m metadrive.examples.enjoy_saver
-```
-
 To show the main feature, procedural generation, we provide a script to show BIG:
 
 ```bash
@@ -74,7 +75,7 @@ python -m metadrive.examples.render_big
 *Note that the above three scripts can not be run in headless machine.* 
 Please refer to the installation guideline in documentation for more information.
 
-Running the following line allows you to draw the generated maps:
+Running the following command to draw the generated maps from procedural generation:
 
 ```bash
 python -m metadrive.examples.draw_maps
