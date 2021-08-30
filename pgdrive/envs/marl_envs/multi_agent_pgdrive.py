@@ -48,7 +48,6 @@ MULTI_AGENT_PGDRIVE_DEFAULT_CONFIG = dict(
 
     # ===== Environmental Setting =====
     traffic_density=0.,
-    auto_termination=False,
     camera_height=4,
     load_map_from_json=False,
     _load_map_from_json=""
