@@ -1,6 +1,8 @@
-<img align=right width=250px  src="metadrive/assets/logo-cropped.png" />
+
 
 # MetaDrive: an open-ended driving simulator with infinite scenes
+
+<img align=right width=250px  src="metadrive/assets/logo-cropped.png" />
 
 [![build](https://github.com/decisionforce/metadrive/workflows/test/badge.svg)](http://github.com/decisionforce/metadrive/actions)
 [![codecov](https://codecov.io/gh/decisionforce/metadrive/branch/main/graph/badge.svg?token=1ZYN8L5397)](https://codecov.io/gh/decisionforce/metadrive)
