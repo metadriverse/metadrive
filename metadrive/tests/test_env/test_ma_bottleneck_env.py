@@ -707,15 +707,15 @@ def test_randomize_spawn_place():
 
 
 if __name__ == '__main__':
-    # test_ma_bottleneck_env()
+    test_ma_bottleneck_env()
     # test_ma_bottleneck_horizon()
     # test_ma_bottleneck_reset()
     # test_ma_bottleneck_reward_done_alignment()
-    test_ma_bottleneck_close_spawn()
+    # test_ma_bottleneck_close_spawn()
     # test_ma_bottleneck_reward_sign()
     # test_ma_bottleneck_init_space()
     # test_ma_bottleneck_no_short_episode()
     # test_ma_bottleneck_horizon_termination()
-    test_ma_bottleneck_40_agent_reset_after_respawn()
+    # test_ma_bottleneck_40_agent_reset_after_respawn()
     # test_ma_no_reset_error()
     # test_randomize_spawn_place()
