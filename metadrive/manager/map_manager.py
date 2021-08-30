@@ -123,9 +123,9 @@ class MapManager(BaseManager):
 
         # If we choose to load maps from json file.
         if config["load_map_from_json"] and self.current_map is None:
-            assert config["_load_map_from_json"]
-            logging.info("Loading maps from: {}".format(config["_load_map_from_json"]))
-            self.read_all_maps_from_json(config["_load_map_from_json"])
+            assert config["map_file_path"]
+            logging.info("Loading maps from: {}".format(config["map_file_path"]))
+            self.read_all_maps_from_json(config["map_file_path"])
 
         # remove map from world before adding
         if self.current_map is not None:
@@ -164,6 +164,6 @@ class MapManager(BaseManager):
         if self.engine.global_config["random_lane_num"]:
             assert not self.engine.global_config["load_map_from_json"
                                                  ], "You are supposed to turn off the load_map_from_json"
-            map_config[PGMap.LANE_NUM] = self.np_random.randint(PGMap.MIN_LANE_NUM, PGMap.MAX_LANE_NUM)
+            map_config[PGMap.LANE_NUM] = self.np_random.randint(PGMap.MIN_LANE_NUM, PGMap.MAX_LANE_NUM + 1)
 
         return map_config

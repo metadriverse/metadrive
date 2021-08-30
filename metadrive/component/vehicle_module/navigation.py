@@ -53,7 +53,7 @@ class Navigation:
 
         # Vis
         self._show_navi_info = (engine.mode == RENDER_MODE_ONSCREEN and not engine.global_config["debug_physics_world"])
-        self.origin = engine.render.attachNewNode("navigation_sign") if self._show_navi_info else None
+        self.origin = NodePath("navigation_sign") if self._show_navi_info else None
         self.navi_mark_color = (0.6, 0.8, 0.5) if not random_navi_mark_color else get_np_random().rand(3)
         self.navi_arrow_dir = None
         self._dest_node_path = None

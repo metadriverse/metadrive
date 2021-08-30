@@ -12,7 +12,7 @@ if __name__ == "__main__":
             # "controller": "joystick",
             "manual_control": True,
             "use_render": True,
-            "use_saver": True,
+            "use_AI_protector": True,
             "map": 30
         }
     )
