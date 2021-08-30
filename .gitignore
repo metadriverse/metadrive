@@ -8,14 +8,14 @@
 /build/
 /dist/
 /documentation/build/
-/pgdrive.egg-info/
+/metadrive.egg-info/
 .DS_Store
 **/.DS_Store
 **/test_10maps.json
 **/tmp_images/
 **/*.jpg
-/pgdrive/cutils.cpython-37m-x86_64-linux-gnu.so
+/metadrive/cutils.cpython-37m-x86_64-linux-gnu.so
 **/*.ipynb_checkpoints/
-/pgdrive/cutils.cpython-38-x86_64-linux-gnu.so
+/metadrive/cutils.cpython-38-x86_64-linux-gnu.so
 **/*.c
 /seed*.json

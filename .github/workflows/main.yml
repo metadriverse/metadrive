@@ -38,10 +38,10 @@ jobs:
           pip install pytest
           pip install pytest-cov
           pip install ray
-          cd pgdrive/
+          cd metadrive/
           pytest --cov=./ --cov-config=.coveragerc --cov-report=xml -sv tests/
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v1
         with:
-          file: ./pgdrive/coverage.xml
+          file: ./metadrive/coverage.xml
           fail_ci_if_error: true

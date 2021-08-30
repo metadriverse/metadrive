@@ -1,1 +1,1 @@
-This folder contains files for the website: [https://decisionforce.github.io/pgdrive/](https://decisionforce.github.io/pgdrive/) and the documentation: [https://pgdrive.readthedocs.io/](https://pgdrive.readthedocs.io/).
+This folder contains files for the website: [https://decisionforce.github.io/metadrive/](https://decisionforce.github.io/metadrive/) and the documentation: [https://metadrive.readthedocs.io/](https://metadrive.readthedocs.io/).
