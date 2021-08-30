@@ -100,7 +100,7 @@ class TopDownObservation(ObservationBase):
                 pygame.transform.scale2x(self.obs_window.get_screen_window(), self.screen)
             pygame.display.flip()
 
-    def get_screenshot(self, name="screenshot.jpg"):
+    def get_screenshot(self, name="screenshot.png"):
         pygame.image.save(self.screen, name)
 
     def draw_map(self) -> pygame.Surface:

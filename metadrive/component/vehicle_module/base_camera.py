@@ -40,7 +40,7 @@ class BaseCamera(ImageBuffer):
         self.track(self.attached_object)
         return ret
 
-    def save_image(self, base_object, name="debug.jpg"):
+    def save_image(self, base_object, name="debug.png"):
         img = self.get_image(base_object)
         img.write(name)
 

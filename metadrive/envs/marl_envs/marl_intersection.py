@@ -346,7 +346,7 @@ def show_map_and_traj():
     #
     plt.imshow(ret)
     plt.show()
-    pygame.image.save(m, "image.jpg")
+    pygame.image.save(m, "image.png")
     env.close()
 
 

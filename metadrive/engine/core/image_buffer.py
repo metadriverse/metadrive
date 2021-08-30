@@ -74,7 +74,7 @@ class ImageBuffer:
         self.buffer.getScreenshot(img)
         return img
 
-    def save_image(self, name="debug.jpg"):
+    def save_image(self, name="debug.png"):
         """
         for debug use
         """
