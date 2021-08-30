@@ -186,10 +186,6 @@ class BasePGDriveEnv(gym.Env):
         actions = self._preprocess_actions(actions)
         step_infos = self._step_simulator(actions)
         o, r, d, i = self._get_step_return(actions, step_infos)
-        # return o, copy.deepcopy(r), copy.deepcopy(d), copy.deepcopy(i)
-        if self.config["horizon"] and self.episode_steps >= self.config["horizon"]:
-            d = True
-            i[TerminationState.MAX_STEP] = True
         return o, r, d, i
 
     def _preprocess_actions(self, actions: Union[np.ndarray, Dict[AnyStr, np.ndarray]]) \
@@ -315,8 +311,7 @@ class BasePGDriveEnv(gym.Env):
             done = done_function_result or self.dones[v_id]
             self.dones[v_id] = done
 
-        should_done = self.config["auto_termination"] and (self.episode_steps >= (self.current_map.num_blocks * 250))
-
+        should_done = self.config["horizon"] and self.episode_steps >= self.config["horizon"]
         termination_infos = self.for_each_vehicle(auto_termination, should_done)
 
         step_infos = concat_step_infos([

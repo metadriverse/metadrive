@@ -52,7 +52,6 @@ PGDriveEnv_DEFAULT_CONFIG = dict(
     accident_prob=0.,  # accident may happen on each block with this probability, except multi-exits block
 
     # ===== Others =====
-    auto_termination=False,  # Whether to done the environment after 250*(num_blocks+1) steps.
     use_saver=False,
     save_level=0.5,
 
