@@ -99,8 +99,6 @@ for i in range(1000):
 env.close()
 ```
 
-We also prepare a Colab which demonstrates some basic usage of MetaDrive as follows:
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/decisionforce/MetaDrive/blob/main/metadrive/examples/Basic%20MetaDrive%20Usages.ipynb)
 
 ## 📦 Predefined environment sets
 
