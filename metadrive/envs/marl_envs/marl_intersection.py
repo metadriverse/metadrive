@@ -105,7 +105,7 @@ def _expert():
                     "distance": 50
                 },
             },
-            "use_saver": True,
+            "use_AI_protector": True,
             "save_level": 1.,
             "debug_physics_world": True,
             "fast": True,

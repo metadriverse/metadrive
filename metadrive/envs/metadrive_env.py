@@ -60,7 +60,7 @@ METADRIVE_DEFAULT_CONFIG = dict(
     accident_prob=0.,  # accident may happen on each block with this probability, except multi-exits block
 
     # ===== Others =====
-    use_saver=False,
+    use_AI_protector=False,
     save_level=0.5,
 
     # ===== Single-agent vehicle config =====
@@ -295,13 +295,6 @@ class MetaDriveEnv(BaseEnv):
         return_data = dict(map_config=self.config["map_config"].copy().get_dict(), map_data=copy.deepcopy(map_data))
         return return_data
 
-    def toggle_expert_takeover(self):
-        """
-        Only take effect whene vehicle num==1
-        :return: None
-        """
-        self.current_track_vehicle.expert_takeover = not self.current_track_vehicle.expert_takeover
-
     def chase_camera(self) -> (str, BaseVehicle):
         if self.main_camera is None:
             return
@@ -336,7 +329,6 @@ class MetaDriveEnv(BaseEnv):
     def setup_engine(self):
         super(MetaDriveEnv, self).setup_engine()
         # Press t can let expert take over. But this function is still experimental.
-        self.engine.accept("t", self.toggle_expert_takeover)
         self.engine.accept("b", self.bird_view_camera)
         self.engine.accept("q", self.chase_camera)
         from metadrive.manager.traffic_manager import TrafficManager

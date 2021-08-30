@@ -294,7 +294,7 @@ def _expert():
                 },
             },
             "save_level": 1.,
-            "use_saver": True,
+            "use_AI_protector": True,
             "debug_physics_world": True,
             "fast": True,
             # "use_render": True,

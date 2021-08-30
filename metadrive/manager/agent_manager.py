@@ -75,7 +75,8 @@ class AgentManager(BaseManager):
     def _get_policy(self, obj):
         # note: agent.id = object id
         if self.engine.global_config["manual_control"] and self.engine.global_config["use_render"]:
-            policy = AIProtectPolicy() if self.engine.global_config.get("use_saver", False) else ManualControlPolicy()
+            policy = AIProtectPolicy() if self.engine.global_config.get("use_AI_protector",
+                                                                        False) else ManualControlPolicy()
         elif self.engine.global_config["IDM_agent"]:
             policy = IDMPolicy(obj, self.generate_seed())
         else:
@@ -99,7 +100,7 @@ class AgentManager(BaseManager):
         self._allow_respawn = config["allow_respawn"]
         init_vehicles = self._get_vehicles(
             config_dict=self.engine.global_config["target_vehicle_configs"] if self.engine.
-            global_config["is_multi_agent"] else {DEFAULT_AGENT: self.engine.global_config["vehicle_config"]}
+                global_config["is_multi_agent"] else {DEFAULT_AGENT: self.engine.global_config["vehicle_config"]}
         )
         vehicles_created = set(init_vehicles.keys())
         vehicles_in_config = set(self._init_observations.keys())
