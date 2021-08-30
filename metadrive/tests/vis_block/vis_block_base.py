@@ -8,13 +8,14 @@ from metadrive.component.algorithm.BIG import NextStep
 from metadrive.component.map.base_map import BaseMap
 from metadrive.constants import CollisionGroup
 from metadrive.engine.core.physics_world import PhysicsWorld
+from metadrive.constants import BKG_COLOR
 
 
 class TestBlock(ShowBase.ShowBase):
     def __init__(self, debug=False):
         self.debug = debug
         super(TestBlock, self).__init__(windowType="onscreen")
-        self.setBackgroundColor(38 / 255, 58 / 255, 102 / 255, 1)
+        self.setBackgroundColor(BKG_COLOR)
         self.setFrameRateMeter(True)
         self.cam.setPos(0, 0, 300)
         self.cam.lookAt(0, 0, 0)

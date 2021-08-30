@@ -204,18 +204,13 @@ class TrafficManager(BaseManager):
             #     # Do special handling for ramp, and there must be vehicles created there
             #     continue
             vehicle_type = self.random_vehicle_type()
+            traffic_v_config = {
+                "spawn_lane_index": lane.index,
+                "spawn_longitude": long}
+            traffic_v_config.update(self.engine.global_config["traffic_vehicle_config"])
             random_v = self.spawn_object(
                 vehicle_type,
-                vehicle_config={
-                    "spawn_lane_index": lane.index,
-                    "spawn_longitude": long,
-                    "enable_reverse": False,
-                    "show_lidar": False,
-                    "show_lane_line_detector": False,
-                    "show_side_detector": False,
-                    "show_navi_mark": False
-                }
-            )
+                vehicle_config=traffic_v_config)
             from metadrive.policy.idm_policy import IDMPolicy
             self.engine.add_policy(random_v.id, IDMPolicy(random_v, self.generate_seed()))
             _traffic_vehicles.append(random_v)
@@ -269,15 +264,7 @@ class TrafficManager(BaseManager):
             from metadrive.policy.idm_policy import IDMPolicy
             for v_config in selected:
                 vehicle_type = self.random_vehicle_type()
-                v_config.update(
-                    {
-                        "enable_reverse": False,
-                        "show_lidar": False,
-                        "show_lane_line_detector": False,
-                        "show_side_detector": False,
-                        "show_navi_mark": False
-                    }
-                )
+                v_config.update(self.engine.global_config["traffic_vehicle_config"])
                 random_v = self.spawn_object(vehicle_type, vehicle_config=v_config)
                 self.engine.add_policy(random_v.id, IDMPolicy(random_v, self.generate_seed()))
                 vehicles_on_block.append(random_v)

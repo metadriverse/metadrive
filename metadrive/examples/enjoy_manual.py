@@ -12,20 +12,25 @@ from metadrive import MetaDriveEnv
 if __name__ == "__main__":
     env = MetaDriveEnv(
         dict(
+            # controller="joystick",
             use_render=True,
-            #use_saver=True,
-            controller="joystick",
             manual_control=True,
-            traffic_density=0.2,
-            environment_num=100,
-            map=7,
-            start_seed=random.randint(0, 1000)
-        )
+            traffic_density=0.1,
+            environment_num=10,
+
+            random_agent_model=True,
+            random_lane_width=True,
+            random_lane_num=True,
+            load_map_from_json=False,
+
+            map=7,  # seven block
+            start_seed=random.randint(0, 1000))
     )
     env.reset()
     for i in range(1, 100000):
         o, r, d, info = env.step([0, 0])
-        env.render()
+        env.render(text={"Engine Force": env.vehicle.config["max_engine_force"],
+                         "Brake Force": env.vehicle.config["max_brake_force"]})
         if d and info["arrive_dest"]:
             env.reset()
     env.close()

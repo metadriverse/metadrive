@@ -11,7 +11,11 @@ class ManualControlPolicy(EnvInputPolicy):
             if config["controller"] == "keyboard":
                 self.controller = KeyboardController()
             elif config["controller"] == "joystick":
-                self.controller = SteeringWheelController()
+                try:
+                    self.controller = SteeringWheelController()
+                except:
+                    print("Load Joystick Error! Fall back to keyboard control")
+                    self.controller = KeyboardController()
             else:
                 raise ValueError("No such a controller type: {}".format(self.config["controller"]))
 
