@@ -1,6 +1,6 @@
 
 
-# MetaDrive: an open-ended driving simulator with infinite scenes
+# MetaDrive: Composing Diverse Driving Scenarios for Generalizable RL
 
 <img align=right width=250px  src="metadrive/assets/logo-cropped.png" />
 
