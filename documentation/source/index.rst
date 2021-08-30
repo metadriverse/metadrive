@@ -2,7 +2,7 @@
 MetaDrive Documentation
 ######################
 
-.. image:: ../../metadrive/assets/MetaDrive.png
+.. image:: ../../metadrive/assets/logo.png
    :width: 300
    :align: center 
 
