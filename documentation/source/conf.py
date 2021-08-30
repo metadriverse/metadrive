@@ -17,7 +17,7 @@
 
 # -- Project information -----------------------------------------------------
 
-project = 'PGDrive'
+project = 'MetaDrive'
 copyright = 'DrivingForce'
 author = 'DrivingForce'
 

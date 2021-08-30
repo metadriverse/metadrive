@@ -4,26 +4,26 @@
 Environment Configuration
 ##########################
 
-An PGDrive instance accepts a dict as the environmental config. For example, you can build a PGDrive instance with 200 generated maps via::
+An MetaDrive instance accepts a dict as the environmental config. For example, you can build a MetaDrive instance with 200 generated maps via::
 
-    from pgdrive import PGDriveEnv
+    from metadrive import MetaDriveEnv
     config = dict(
         environment_num=200,
         start_seed=0
     )
-    env = PGDriveEnv(config)
+    env = MetaDriveEnv(config)
 
 
 In this page, we describe the meaning of each configuration options.
 
-PGDriveEnv Config
+MetaDriveEnv Config
 ###########################
 
-We do generalization experiments under the default setting of PGDriveEnv. To reproduce our experiment results,
+We do generalization experiments under the default setting of MetaDriveEnv. To reproduce our experiment results,
 no special configuration is needed.
 
-However, PGDrive can also support other research topics, and we will simply introduce the meaning of some configuration
-options of PGDriveEnv.
+However, MetaDrive can also support other research topics, and we will simply introduce the meaning of some configuration
+options of MetaDriveEnv.
 
 Draw Scene & Visualization
 ###########################
@@ -51,7 +51,7 @@ TrafficManager Config
 Map Config
 #############
     -   :code:`map` (int or string): You can set a *string* or *int* as the key to generate map in an easy way. An *int=N* means generating a map containing N blocks,
-        and the block type is randomly selected. Since in PGDrive each block has a unique ID in *char* type, *string* can determine the block type sequence.
+        and the block type is randomly selected. Since in MetaDrive each block has a unique ID in *char* type, *string* can determine the block type sequence.
         For example, "SCrRX" means the first block is Straight, and the next blocks are Circular, InRamp, OutRamp and Intersection.
         We provide the following block types:
 
@@ -112,7 +112,7 @@ Action Config
 Reward Scheme
 ####################
 Coefficient of different kinds of reward to describe the driving goal
-Find more information by accessing our source code in PGDriveEnv
+Find more information by accessing our source code in MetaDriveEnv
 You can adjust our primitive reward function or design your own reward function
 
 Misc.
@@ -124,15 +124,15 @@ Misc.
 
 PGWorld Config
 ################
-    This is the core of PGDrive, including physics engine, task manager and so on.
+    This is the core of MetaDrive, including physics engine, task manager and so on.
      - :code:`window_size` (tuple): Width, height of rendering window.
-     - :code:`debug` (bool): The debug value in PGDriveEnv will be passed to PGWorld.
+     - :code:`debug` (bool): The debug value in MetaDriveEnv will be passed to PGWorld.
      - :code:`physics_world_step_size` (float): The minimum step size of bullet physics engine.
      - :code:`show_fps` (bool): Turn on/ turn off the frame rater.
      - :code:`onscreen_message` (bool): Turn on to show help message or your self defined messages by organizing them in a *dict* and pass it in *render(text=your_messgaes_dict)* function.
      - :code:`force_fps` (None or float): *None* means no render fps limit, while *float* indicates the maximum render FPS.
-     - :code:`decision_repeat` (int): This will be written by PGDriveEnv to do ForceFPS.
+     - :code:`decision_repeat` (int): This will be written by MetaDriveEnv to do ForceFPS.
      - :code:`debug_physics_world` (bool): Only render physics world without model, a special debug option.
      - :code:`headless_machine_render` (bool): Set this to true only when training on headless machine and use rgb image!!!!!!
-     - :code:`use_render` (bool): The value is same as *use_render* in PGDriveEnv
-     - :code:`offscreen_render` (bool): The value is same as *offscreen_render* in PGDriveEnv.
+     - :code:`use_render` (bool): The value is same as *use_render* in MetaDriveEnv
+     - :code:`offscreen_render` (bool): The value is same as *offscreen_render* in MetaDriveEnv.
