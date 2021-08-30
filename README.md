@@ -1,4 +1,4 @@
-<img align=left width=250px  src="metadrive/assets/logo.png" />
+<img align=right width=250px  src="metadrive/assets/logo-cropped.png" />
 
 # MetaDrive: an open-ended driving simulator with infinite scenes
 
