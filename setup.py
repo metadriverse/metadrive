@@ -23,14 +23,14 @@ this_directory = path.abspath(path.dirname(__file__))
 with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 packages = find_namespace_packages(
-    exclude=("docs", "docs.*", "documentation", "documentation.*", "pgdrive.assets.*", "build.*"))
+    exclude=("docs", "docs.*", "documentation", "documentation.*", "metadrive.assets.*", "build.*"))
 print("We will install the following packages: ", packages)
 
 """ ===== Remember to modify the PG_EDITION at first ====="""
 version = "0.1.4"
 
 ext_modules = cythonize([Extension(
-    "pgdrive.cutils", ["pgdrive/cutils.pyx"], include_dirs=[numpy.get_include()]
+    "metadrive.cutils", ["metadrive/cutils.pyx"], include_dirs=[numpy.get_include()]
 )])
 for ele in ext_modules:
     assert isinstance(ele, Extension)
@@ -56,11 +56,11 @@ if (not is_mac()) and (not is_win()):
     install_requires.append("evdev")
 
 setup(
-    name="pgdrive",
+    name="metadrive",
     version=version,
     description="An open-ended driving simulator with infinite scenes",
-    url="https://github.com/decisionforce/pgdrive",
-    author="PGDrive Team",
+    url="https://github.com/decisionforce/metadrive",
+    author="MetaDrive Team",
     author_email="liquanyi@bupt.edu.cn, pengzh@ie.cuhk.edu.hk",
     packages=packages,
     install_requires=install_requires,
@@ -86,7 +86,7 @@ print(msg)
 How to publish to pypi?  Noted by Zhenghao in Dec 27, 2020.
 
 1. Remove old files
-    rm -rf dist/ build/ documentation/build/ pgdrive.egg-info/ docs/build/
+    rm -rf dist/ build/ documentation/build/ metadrive.egg-info/ docs/build/
     
 2. Rename current version to X.Y.Z.rcA, where A is arbitrary value represent "release candidate A". 
    This is really important since pypi do not support renaming and re-uploading.
@@ -100,7 +100,7 @@ How to publish to pypi?  Noted by Zhenghao in Dec 27, 2020.
     twine upload --repository testpypi dist/*
     
 5. Test as next line. If failed, change the version name and repeat 1, 2, 3, 4, 5.
-    pip install --index-url https://test.pypi.org/simple/ pgdrive
+    pip install --index-url https://test.pypi.org/simple/ metadrive
 
 6. Rename current version to X.Y.Z in setup.py, rerun 1, 3 steps.
 
