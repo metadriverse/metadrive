@@ -45,7 +45,7 @@ def _evaluate(env_config, num_episode, has_traffic=True):
     return ep_reward_mean, success_rate
 
 
-def test_expert_with_traffic(use_render=False):
+def _test_expert_with_traffic(use_render=False):
     ep_reward, success_rate = _evaluate(
         dict(
             environment_num=1,
@@ -65,7 +65,7 @@ def test_expert_with_traffic(use_render=False):
     # assert success_rate == 1.0, success_rate
 
 
-def test_expert_without_traffic():
+def _test_expert_without_traffic():
     ep_reward, success_rate = _evaluate(
         dict(
             environment_num=1,
@@ -86,5 +86,5 @@ def test_expert_without_traffic():
 
 
 if __name__ == '__main__':
-    test_expert_without_traffic()
-    test_expert_with_traffic(use_render=False)
+    _test_expert_without_traffic()
+    _test_expert_with_traffic(use_render=False)
