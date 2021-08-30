@@ -156,9 +156,7 @@ class EngineCore(ShowBase.ShowBase):
             if self.mode == RENDER_MODE_ONSCREEN and (not self.global_config["debug"]) \
                     and (not self.global_config["fast"]):
                 self._loading_logo = OnscreenImage(
-                    image=AssetLoader.file_path("logo-large.png"),
-                    pos=(0, 0, 0),
-                    scale=(self.w_scale, 1, self.h_scale)
+                    image=AssetLoader.file_path("logo-large.png"), pos=(0, 0, 0), scale=(self.w_scale, 1, self.h_scale)
                 )
                 self._loading_logo.setTransparency(True)
                 for i in range(20):
