@@ -6,7 +6,6 @@ if __name__ == '__main__':
             # environment_num=100,
             use_render=True,
             # manual_control=True,
-            auto_termination=False,
 
             # Extremely easy environment
             environment_num=100,
