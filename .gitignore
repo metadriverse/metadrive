@@ -13,7 +13,7 @@
 **/.DS_Store
 **/test_10maps.json
 **/tmp_images/
-**/*.jpg
+#**/*.jpg
 /metadrive/cutils.cpython-37m-x86_64-linux-gnu.so
 **/*.ipynb_checkpoints/
 /metadrive/cutils.cpython-38-x86_64-linux-gnu.so
