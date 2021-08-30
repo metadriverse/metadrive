@@ -38,7 +38,7 @@ def test_naive_multi_agent_metadrive():
     )
     try:
         assert isinstance(env.action_space, gym.spaces.Dict)
-        obs = env.reset(force_seed=0)
+        obs = env.reset()
         assert isinstance(obs, dict)
         env.action_space.seed(0)
         for step in range(100):
@@ -48,7 +48,7 @@ def test_naive_multi_agent_metadrive():
 
             pos_z_list = [v.chassis.getNode(0).transform.pos[2] for v in env.vehicles.values()]
             for p in pos_z_list:
-                assert p < 1.0 or step <= 10
+                assert p < 5.0 or step <= 10
 
             assert isinstance(o, dict)
             assert isinstance(r, dict)
