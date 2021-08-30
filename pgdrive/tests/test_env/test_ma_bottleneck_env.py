@@ -189,9 +189,9 @@ def test_ma_bottleneck_reset():
         for num_reset in range(5):
             for step in range(1000):
 
-                for _ in range(2):
-                    act = {k: [1, 1] for k in env.vehicles.keys()}
-                    o, r, d, i = _act(env, act)
+                # for _ in range(2):
+                #     act = {k: [1, 1] for k in env.vehicles.keys()}
+                #     o, r, d, i = _act(env, act)
 
                 # Force vehicle to success!
                 for v_id, v in env.vehicles.items():
