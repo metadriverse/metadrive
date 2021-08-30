@@ -50,7 +50,7 @@ MULTI_AGENT_METADRIVE_DEFAULT_CONFIG = dict(
     traffic_density=0.,
     camera_height=4,
     load_map_from_json=False,
-    _load_map_from_json=""
+    map_file_path=""
 )
 
 

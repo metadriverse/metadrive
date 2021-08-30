@@ -276,7 +276,7 @@ def test_ma_parking_lot_reward_done_alignment():
     env = MultiAgentParkingLotEnv({"horizon": 200, "num_agents": 11, "out_of_road_penalty": 777, "crash_done": False})
     try:
         _check_spaces_before_reset(env)
-        obs = env.reset()
+        obs = env.reset(force_seed=0)
         _check_spaces_after_reset(env, obs)
         assert env.observation_space.contains(obs)
         for action in [-1, 1]:
@@ -294,7 +294,7 @@ def test_ma_parking_lot_reward_done_alignment():
                         assert i[kkk]["out_of_road"]
                         # print('{} reward passed!'.format(kkk))
                 if d["__all__"]:
-                    env.reset()
+                    env.reset(force_seed=0)
                     break
     finally:
         env.close()
@@ -656,9 +656,9 @@ if __name__ == '__main__':
     # test_ma_parking_lot_env()
     # test_ma_parking_lot_horizon()
     # test_ma_parking_lot_reset()
-    # test_ma_parking_lot_reward_done_alignment()
+    test_ma_parking_lot_reward_done_alignment()
     # test_ma_parking_lot_close_spawn()
-    test_ma_parking_lot_reward_sign()
+    # test_ma_parking_lot_reward_sign()
     # test_ma_parking_lot_init_space()
     # test_ma_parking_lot_no_short_episode()
     # test_ma_parking_lot_horizon_termination()
