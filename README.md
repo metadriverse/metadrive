@@ -1,4 +1,4 @@
-<img align=right width=250px  src="metadrive/assets/logo.png" />
+<img align=left width=250px  src="metadrive/assets/logo.png" />
 
 # MetaDrive: an open-ended driving simulator with infinite scenes
 
@@ -16,8 +16,7 @@ Welcome to MetaDrive! MetaDrive is an driving simulator with many key features, 
 - 🎏 **Lightweight**: Extremely easy to download, install and run in almost all platforms.
 - 📷 **Realistic**: Accurate physics simulation and multiple sensory inputs.
 - 🚀 **Efficient**: Up to 500 simulation step per second and easy to parallel.
-- 🗺 **Open-ended**: Support generating infinite scenes and configuring various traffic, vehicle, and environmental settings.
-
+- 🗺 **Compositionality**: Support generating infinite scenes and configuring various traffic, vehicle, and environmental settings.
 
 <img src="docs/images/panel.jpg">
 
