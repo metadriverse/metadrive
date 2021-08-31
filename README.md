@@ -47,24 +47,11 @@ Note that please do not run the above command in the folder that has a sub-folde
 
 ## 🚕 Examples
 
-Please run the following line to drive the car in the environment manually with keyboard!
+Please run the following line to drive the car in the environment manually with keyboard, and
+Press T to trigger the auto-drive mode
 
 ```bash
 python -m metadrive.examples.enjoy_manual
-```
-
-You can also enjoy a journey carrying out by our professional driver pretrained from reinforcement learning! 
-
-```bash
-python -m metadrive.examples.enjoy_expert
-```
-
-A fusion of expert and manual controller, 
-where the expect will try to rescue the manually controlled vehicle from danger, 
-can be experienced via:
-
-```bash
-python -m metadrive.examples.enjoy_saver
 ```
 
 To show the main feature, procedural generation, we provide a script to show BIG:
@@ -129,7 +116,7 @@ The following table presents some predefined environment names.
 
 ## 🏫 Documentations
 
-Working in Progress!
+Find more detail in: [MetaDrive](https://metadrive-simulator.readthedocs.io)
 
 
 ## 📎 Citation
