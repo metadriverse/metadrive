@@ -1,10 +1,10 @@
 <br>
 
-# MetaDrive: Composing Diverse Driving Scenarios for Generalizable Reinforcement Learning
+# MetaDrive: Composing Diverse Driving Scenarios for Generalizable RL
 
 <br>
 
-![](metadrive/assets/logo.png)
+![](metadrive/assets/logo-horizon-compressed.png)
 
 <br>
 
@@ -18,9 +18,6 @@ Welcome to MetaDrive! MetaDrive is an driving simulator with many key features, 
 - **Realistic**: Accurate physics simulation and multiple sensory inputs.
 - **Efficient**: Up to 300 simulation step per second and easy to parallel.
 - **Compositionality**: Support generating infinite scenes and configuring various traffic, vehicle, and environmental settings.
-
-<img src="docs/images/panel.jpg">
-
 
 
 ## 🛠 Quick Start
@@ -134,4 +131,4 @@ Working in Progress!
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/2d6fabe328a644b49e1269497b741057)](https://www.codacy.com/gh/decisionforce/metadrive/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=decisionforce/metadrive&amp;utm_campaign=Badge_Grade)
 [![GitHub contributors](https://img.shields.io/github/contributors/decisionforce/metadrive)](https://github.com/decisionforce/metadrive/graphs/contributors)
 
-![](metadrive/assets/logo-horizon-compressed.png)
+![](metadrive/assets/logo.png)
