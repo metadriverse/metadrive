@@ -16,7 +16,7 @@ class ArgoverseEnv(MetaDriveEnv):
                 {
                     "city": "PIT",
                     # "draw_map_resolution": 1024,
-                    "center": [xcenter, ycenter],
+                    "center": ArgoverseMap.metadrive_position([xcenter, ycenter]),
                     "radius": 100
                 }
             )
