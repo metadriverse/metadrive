@@ -78,7 +78,7 @@ class MultiAgentMetaDrive(MetaDriveEnv):
                     ret_config["crash_vehicle_penalty"]
                 )
             )
-        if ret_config["use_render"] and ret_config["fast"]:
+        if ret_config["use_render"] and ret_config["disable_model_compression"]:
             logging.warning("Turn fast=False can accelerate Multi-agent rendering performance!")
 
         if "prefer_track_agent" in config and config["prefer_track_agent"]:
@@ -224,7 +224,7 @@ def _test():
             "allow_respawn": False,
             "use_render": True,
             "debug": False,
-            "fast": True,
+
             "manual_control": True,
         }
     )
@@ -251,7 +251,7 @@ def _vis():
     env = MultiAgentMetaDrive(
         {
             "use_render": True,
-            "fast": True,
+
             "num_agents": 5,
             "start_seed": 8000,
             "environment_num": 1,

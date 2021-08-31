@@ -251,7 +251,7 @@ def test_ma_parking_lot_close_spawn():
 
     MultiAgentParkingLotEnv._DEBUG_RANDOM_SEED = 1
     env = MultiAgentParkingLotEnv({
-        # "use_render": True, "fast": True,
+        # "use_render": True,
         "horizon": 50,
         "num_agents": 11,
     })
@@ -309,7 +309,7 @@ def test_ma_parking_lot_reward_done_alignment():
             "delay_done": 0,
 
             # "use_render": True,
-            # "fast": True,
+            #
             "top_down_camera_initial_z": 160
         }
     )
@@ -368,7 +368,7 @@ def test_ma_parking_lot_reward_done_alignment():
                 "lane_num": 1
             },
             # "use_render": True,
-            # "fast": True,
+            #
             "horizon": 200,
             "num_agents": 11,
             "crash_vehicle_penalty": 1.7777,
@@ -637,7 +637,7 @@ def test_ma_no_reset_error():
 
 def test_randomize_spawn_place():
     last_pos = {}
-    env = MultiAgentParkingLotEnv({"num_agents": 4, "use_render": False, "fast": True})
+    env = MultiAgentParkingLotEnv({"num_agents": 4, "use_render": False})
     try:
         obs = env.reset()
         for step in range(100):

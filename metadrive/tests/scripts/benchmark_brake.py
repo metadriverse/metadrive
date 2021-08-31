@@ -81,7 +81,7 @@ if __name__ == '__main__':
                 "start_seed": 4,
                 "manual_control": True,
                 "use_render": True,
-                "fast": True,
+
                 "offscreen_render": True,
                 "vehicle_config": {
                     "max_engine_force": 1000,

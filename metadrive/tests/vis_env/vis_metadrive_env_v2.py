@@ -7,7 +7,7 @@ if __name__ == "__main__":
         {
             "start_seed": 0,
             "environment_num": 10,
-            "fast": True,
+
             "map": 1,
             "traffic_density": 0.2,
             "use_render": True,

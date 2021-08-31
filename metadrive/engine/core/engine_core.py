@@ -124,7 +124,7 @@ class EngineCore(ShowBase.ShowBase):
 
         # main_window_position = (0, 0)
         if self.mode == RENDER_MODE_ONSCREEN:
-            if self.global_config["fast"]:
+            if self.global_config["disable_model_compression"]:
                 pass
             else:
                 loadPrcFileData("", "compressed-textures 1")  # Default to compress
@@ -168,7 +168,7 @@ class EngineCore(ShowBase.ShowBase):
             if self.mode == RENDER_MODE_ONSCREEN and (not self.global_config["debug"]):
                 self._loading_logo = attach_cover_image(window_width=self.get_size()[0],
                                                         window_height=self.get_size()[1])
-                for i in range(5 if self.global_config["fast"] else 20):
+                for i in range(5):
                     self.graphicsEngine.renderFrame()
                 self.taskMgr.add(self.remove_logo, "remove _loading_logo in first frame")
 
