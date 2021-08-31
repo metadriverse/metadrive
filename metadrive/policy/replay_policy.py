@@ -27,16 +27,10 @@ class ReplayPolicy(BasePolicy):
             self.control_object.set_position(self.init_pos)
         elif str(self.timestep) in self.traj_info.keys():
             self.control_object.set_position(self.traj_info[str(self.timestep)])
-        # else:
-        #     self.control_object.set_position((0, 0))
             
 
-        # TODO: set precise heading
         if self.heading is None or str(self.timestep - 1) not in self.heading.keys():
             pass
-            # lane = self.control_object.lane
-            # heading = lane.heading_at(lane.local_coordinates(self.control_object.position)[0])
-            # self.control_object.set_heading(heading)
         else:
             this_heading = self.heading[str(self.timestep - 1)]
             self.control_object.set_heading(np.arctan2(this_heading[0], this_heading[1]) - np.pi/2)
