@@ -5,7 +5,7 @@ if __name__ == "__main__":
     setup_logger(True)
     env = MetaDriveEnv(
         {
-            "environment_num": 10,
+            "environment_num": 100,
             "traffic_density": .5,
             "traffic_mode": "trigger",
             "start_seed": 22,
@@ -32,7 +32,7 @@ if __name__ == "__main__":
             # },
             "pstats": True,
             # "discrete_action": True,
-            "map": "OCSSS",
+            "map": "XCSSS",
             "random_traffic": False,
             "random_lane_width": True,
             "random_agent_model": True,
