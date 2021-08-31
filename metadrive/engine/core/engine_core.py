@@ -10,7 +10,7 @@ from panda3d.core import AntialiasAttrib, loadPrcFileData, LineSegs, PythonCallb
 
 from metadrive.constants import RENDER_MODE_OFFSCREEN, RENDER_MODE_NONE, RENDER_MODE_ONSCREEN, EDITION, CamMask, \
     BKG_COLOR
-from metadrive.engine.asset_loader import AssetLoader, initialize_asset_loader, close_asset_loader, randomize_cover
+from metadrive.engine.asset_loader import initialize_asset_loader, close_asset_loader, randomize_cover
 from metadrive.engine.core.collision_callback import collision_callback
 from metadrive.engine.core.force_fps import ForceFPS
 from metadrive.engine.core.light import Light
@@ -34,6 +34,18 @@ def _free_warning():
     # loadPrcFileData("", "notify-level-pgraph debug")  # press 4 to use toggle analyze to do this
     loadPrcFileData("", "notify-level-pnmimage debug")
     loadPrcFileData("", "notify-level-thread debug")
+
+
+def attach_cover_image(window_width, window_height):
+    cover_file_path = randomize_cover()
+    image = OnscreenImage(image=cover_file_path, pos=(0, 0, 0), scale=(1, 1, 1))
+    if window_width > window_height:
+        scale = window_width / window_height
+    else:
+        scale = window_height / window_width
+    image.set_scale((scale, 1, scale))
+    image.setTransparency(True)
+    return image
 
 
 class EngineCore(ShowBase.ShowBase):
@@ -154,11 +166,8 @@ class EngineCore(ShowBase.ShowBase):
 
             # Display logo
             if self.mode == RENDER_MODE_ONSCREEN and (not self.global_config["debug"]):
-                cover_file_path = randomize_cover()
-                self._loading_logo = OnscreenImage(
-                    image=cover_file_path, pos=(0, 0, 0), scale=(self.w_scale, 1, self.h_scale)
-                )
-                self._loading_logo.setTransparency(True)
+                self._loading_logo = attach_cover_image(window_width=self.get_size()[0],
+                                                        window_height=self.get_size()[1])
                 for i in range(5 if self.global_config["fast"] else 20):
                     self.graphicsEngine.renderFrame()
                 self.taskMgr.add(self.remove_logo, "remove _loading_logo in first frame")
