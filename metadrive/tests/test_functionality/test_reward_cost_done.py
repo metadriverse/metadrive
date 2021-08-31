@@ -79,7 +79,6 @@ def test_reward_cost_done():
     # config["traffic_density"] = 0
     # config['accident_prob'] = 1.0
     # # config["use_render"] = True
-    # # config["fast"] = True
     # config.update({"_debug_crash_object": True})
     # try:
     #     env = MetaDriveEnv(config=config)
