@@ -12,8 +12,7 @@ def test_out_of_road():
                 dict(
                     map="SSSSSSSSSSS",
                     vehicle_config=dict(side_detector=dict(num_lasers=120, distance=distance)),
-                    use_render=False,
-                    fast=True
+                    use_render=False
                 )
             )
             try:
@@ -42,10 +41,7 @@ def useless_left_right_distance_printing():
         # for distance in [10, 50, 100]:
         env = MetaDriveEnv(
             dict(
-                map="SSSSSSSSSSS",
-                vehicle_config=dict(side_detector=dict(num_lasers=0, distance=50)),
-                use_render=False,
-                fast=True
+                map="SSSSSSSSSSS", vehicle_config=dict(side_detector=dict(num_lasers=0, distance=50)), use_render=False
             )
         )
         try:

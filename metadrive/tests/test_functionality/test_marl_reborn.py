@@ -12,7 +12,7 @@ def test_respawn():
             "out_of_road_cost": out_of_road_cost,
             "out_of_road_penalty": out_of_road_penalty,
             "delay_done": 0,  # Since we are testing respawn!
-            # "use_render": True, "fast": True
+            # "use_render": True
             "crash_done": False,
         }
     )
@@ -78,7 +78,7 @@ def test_delay_done():
     env = MultiAgentRoundaboutEnv(
         {
             # "use_render": True,
-            # "fast": True,
+            #
             "target_vehicle_configs": {
                 "agent0": {
                     "spawn_longitude": 12,
