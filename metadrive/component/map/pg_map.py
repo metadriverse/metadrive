@@ -10,11 +10,6 @@ from metadrive.engine.core.physics_world import PhysicsWorld
 
 
 class PGMap(BaseMap):
-    MAX_LANE_WIDTH = 4.5
-    MIN_LANE_WIDTH = 3.0
-    MAX_LANE_NUM = 3
-    MIN_LANE_NUM = 2
-
     def _generate(self):
         """
         We can override this function to introduce other methods!

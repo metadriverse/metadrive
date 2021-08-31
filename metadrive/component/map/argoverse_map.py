@@ -41,7 +41,7 @@ class ArgoverseMap(BaseMap):
         assert map_config["city"] in self.SUPPORTED_MAPS, "City generation of {} is not supported (We support {} now)". \
             format(map_config["city"], self.SUPPORTED_MAPS)
         self.city = map_config["city"]
-        super(ArgoverseMap, self).__init__(map_config=map_config, random_seed=random_seed)
+        super(ArgoverseMap, self).__init__(map_config=map_config, random_seed=None)
         self.lane_id_lane = None
 
     def _generate(self):
