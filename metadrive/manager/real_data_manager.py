@@ -48,7 +48,6 @@ class RealDataManager(BaseManager):
         self.respawn_lanes = self.respawn_lanes = self._get_available_respawn_lanes(map)
 
         self._create_argoverse_vehicles_once(map)
-        print("="*10)
 
     def before_step(self):
         """
@@ -173,7 +172,7 @@ class RealDataManager(BaseManager):
         :return: List of vehicles
         """
 
-        from pgdrive.component.blocks.ramp import InRampOnStraight
+        from metadrive.component.blocks.ramp import InRampOnStraight
         _traffic_vehicles = []
         total_num = int(lane.length / self.VEHICLE_GAP)
         vehicle_longs = [i * self.VEHICLE_GAP for i in range(total_num)]
@@ -191,7 +190,7 @@ class RealDataManager(BaseManager):
                     "enable_reverse": False
                 }
             )
-            from pgdrive.policy.idm_policy import IDMPolicy
+            from metadrive.policy.idm_policy import IDMPolicy
             self.engine.add_policy(random_v.id, IDMPolicy(random_v, self.generate_seed()))
             _traffic_vehicles.append(random_v)
         return _traffic_vehicles
@@ -220,27 +219,16 @@ class RealDataManager(BaseManager):
         """
         real_data_config = self.engine.global_config["real_data_config"]
         locate_info = real_data_config["locate_info"]
-        pos_dict = {i:(j["init_pos"], j["diag_len"]) for i,j in zip(locate_info.keys(), locate_info.values())}
+        pos_dict = {i:j["init_pos"] for i,j in zip(locate_info.keys(), locate_info.values())}
         
         block = map.blocks[0]
         lanes = block.argo_lanes
         roads = block.block_network.get_roads(direction='positive', lane_num = 1)
         potential_vehicle_configs = []
         for l in lanes:
-            if l in self.engine.object_manager.accident_lanes:
-                continue
             start = np.max(l.centerline, axis=0)
             end = np.min(l.centerline, axis=0)
-            for idx, info in zip(pos_dict.keys(), pos_dict.values()):
-                pos, diag_len = info
-                # if diag_len < 4.5:
-                #     v_type = SVehicle
-                # elif 4.5 <= diag_len < 5:
-                #     v_type = MVehicle
-                # elif 6 <= diag_len <= 8:
-                #     v_type = LVehicle
-                # else:
-                #     v_type = XLVehicle
+            for idx, pos in zip(pos_dict.keys(), pos_dict.values()):
                 v_type = self.random_vehicle_type(prob=[0.4, 0.3, 0.3, 0, 0])
                 if start[0] > pos[0] > end[0] and start[1] > pos[1] > end[1]:
                     long, lat = l.local_coordinates(pos)
@@ -258,7 +246,7 @@ class RealDataManager(BaseManager):
                     potential_vehicle_configs.append(config)
                     pos_dict.pop(idx, None)
                     break
-        from pgdrive.policy.replay_policy import ReplayPolicy
+        from metadrive.policy.replay_policy import ReplayPolicy
         # vehicle_type = SVehicle
         for road in roads:
             for config in potential_vehicle_configs:
@@ -267,6 +255,7 @@ class RealDataManager(BaseManager):
                 v_end   = v_config["spawn_lane_index"][1]
                 if road.start_node == v_start and road.end_node == v_end:
                     generated_v = self.spawn_object(config["type"], vehicle_config=v_config)
+                    generated_v.set_static(True)
                     self.engine.add_policy(generated_v.id, ReplayPolicy(generated_v, locate_info[config["id"]]))
                     block_vehicles = BlockVehicles(trigger_road=road, vehicles=[generated_v])
                     self.block_triggered_vehicles.append(block_vehicles)
@@ -305,7 +294,7 @@ class RealDataManager(BaseManager):
             selected = potential_vehicle_configs[:min(total_vehicles, len(potential_vehicle_configs))]
             # print("We have {} candidates! We are spawning {} vehicles!".format(total_vehicles, len(selected)))
 
-            from pgdrive.policy.idm_policy import IDMPolicy
+            from metadrive.policy.idm_policy import IDMPolicy
             for v_config in selected:
                 vehicle_type = self.random_vehicle_type(prob=[0.4, 0.3, 0.3, 0, 0])
                 random_v = self.spawn_object(vehicle_type, vehicle_config=v_config)
@@ -339,7 +328,7 @@ class RealDataManager(BaseManager):
         return respawn_lanes
 
     def random_vehicle_type(self, prob=[0.2, 0.3, 0.3, 0.2, 0]):
-        from pgdrive.component.vehicle.vehicle_type import random_vehicle_type
+        from metadrive.component.vehicle.vehicle_type import random_vehicle_type
         vehicle_type = random_vehicle_type(self.np_random, prob)
         return vehicle_type
 

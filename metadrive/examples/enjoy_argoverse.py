@@ -8,7 +8,7 @@ import pickle
 class ArgoverseEnv(MetaDriveEnv):
     def _post_process_config(self, config):
         config = super(ArgoverseEnv, self)._post_process_config(config)
-        config["vehicle_config"]["spawn_lane_index"] = ("11713", "4250", 0)
+        config["vehicle_config"]["spawn_lane_index"] = ('7903', '9713', 0)
         config["vehicle_config"]["destination_node"] = "968"
 
         log_id = "c6911883-1843-3727-8eaa-41dc8cda8993"
@@ -37,9 +37,7 @@ class ArgoverseEnv(MetaDriveEnv):
                 {
                     "city": "PIT",
                     "center": ArgoverseMap.metadrive_position([xcenter, ycenter]),
-                    # "draw_map_resolution": 1024,
-                    # "center": [xcenter, ycenter],
-                    "radius": 100
+                    "radius": 150
                 }
             )
             map = ArgoverseMap(self.config["map_config"])
@@ -74,10 +72,4 @@ if __name__ == "__main__":
     o = env.reset()
     for i in range(1, 100000):
         o, r, d, info = env.step([1.0, 0.])
-        info = {}
-        info["lane_index"] = env.vehicle.lane_index
-        info["heading_diff"] = env.vehicle.heading_diff(env.vehicle.lane)
-        # info["left_lane_index"] =
-        # info["right_lane_index"]
-        # env.render(text=info)
     env.close()
