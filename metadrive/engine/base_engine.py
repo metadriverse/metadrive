@@ -208,28 +208,17 @@ class BaseEngine(EngineCore, Randomizable):
         Step the dynamics of each entity on the road.
         :param step_num: Decision of all entities will repeat *step_num* times
         """
-        engine = self
         for i in range(step_num):
             # simulate or replay
-            if self.replay_system is None:
-                # not in replay mode
-                for manager in self._managers.values():
-                    manager.step()
-                engine.step_physics_world()
-            else:
-                if not self.STOP_REPLAY:
-                    self.replay_system.replay_frame(self.agents, i == step_num - 1)
-            # # record every step
-            # if self.record_system is not None:
-            #     # didn't record while replay
-            #     frame_state = self.traffic_manager.get_global_states()
-            #     self.record_system.record_frame(frame_state)
-
-            if engine.force_fps.real_time_simulation and i < step_num - 1:
-                # insert frame to render in min step_size
-                engine.task_manager.step()
+            for manager in self._managers.values():
+                manager.step()
+            self.step_physics_world()
+            if self.force_fps.real_time_simulation and i < step_num - 1:
+                self.task_manager.step()
         #  panda3d render and garbage collecting loop
-        engine.task_manager.step()
+        self.task_manager.step()
+        if self.on_screen_message is not None:
+            self.on_screen_message.render()
 
     def after_step(self) -> Dict:
         """
