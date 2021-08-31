@@ -166,8 +166,9 @@ class EngineCore(ShowBase.ShowBase):
 
             # Display logo
             if self.mode == RENDER_MODE_ONSCREEN and (not self.global_config["debug"]):
-                self._loading_logo = attach_cover_image(window_width=self.get_size()[0],
-                                                        window_height=self.get_size()[1])
+                self._loading_logo = attach_cover_image(
+                    window_width=self.get_size()[0], window_height=self.get_size()[1]
+                )
                 for i in range(5):
                     self.graphicsEngine.renderFrame()
                 self.taskMgr.add(self.remove_logo, "remove _loading_logo in first frame")

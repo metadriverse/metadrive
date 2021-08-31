@@ -204,7 +204,6 @@ def _vis_debug_respawn():
                 "show_lidar": False,
             },
             "debug_physics_world": True,
-
             "use_render": True,
             "debug": False,
             "manual_control": True,
@@ -255,7 +254,6 @@ def _vis():
                 },
                 "show_lidar": False,
             },
-
             "use_render": True,
             # "debug": True,
             "manual_control": True,

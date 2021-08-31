@@ -41,9 +41,7 @@ def useless_left_right_distance_printing():
         # for distance in [10, 50, 100]:
         env = MetaDriveEnv(
             dict(
-                map="SSSSSSSSSSS",
-                vehicle_config=dict(side_detector=dict(num_lasers=0, distance=50)),
-                use_render=False
+                map="SSSSSSSSSSS", vehicle_config=dict(side_detector=dict(num_lasers=0, distance=50)), use_render=False
             )
         )
         try:

@@ -23,7 +23,6 @@ if __name__ == "__main__":
             # "debug": True,
             # "random_lane_num": True,
 
-
             # "map_config": {
             #     Map.GENERATE_TYPE: MapGenerateMethod.BIG_BLOCK_SEQUENCE,
             #     Map.GENERATE_CONFIG: "OXO",

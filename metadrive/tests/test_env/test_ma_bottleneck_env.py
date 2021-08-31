@@ -691,7 +691,7 @@ def test_ma_no_reset_error():
 
 def test_randomize_spawn_place():
     last_pos = {}
-    env = MultiAgentBottleneckEnv({"num_agents": 4, "use_render": False,  "crash_done": False})
+    env = MultiAgentBottleneckEnv({"num_agents": 4, "use_render": False, "crash_done": False})
     try:
         obs = env.reset()
         for step in range(100):

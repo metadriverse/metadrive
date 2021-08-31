@@ -340,7 +340,6 @@ def _vis_debug_respawn():
                 "show_lidar": False,
             },
             "debug_physics_world": True,
-
             "use_render": True,
             "debug": False,
             "manual_control": True,
@@ -396,7 +395,6 @@ def _vis():
             "traffic_density": 0.,
             "traffic_mode": "hybrid",
             "debug": True,
-
             "use_render": True,
             # "debug": True,
             "manual_control": True,

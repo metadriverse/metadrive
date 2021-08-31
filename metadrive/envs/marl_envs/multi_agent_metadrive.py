@@ -224,7 +224,6 @@ def _test():
             "allow_respawn": False,
             "use_render": True,
             "debug": False,
-
             "manual_control": True,
         }
     )
@@ -251,7 +250,6 @@ def _vis():
     env = MultiAgentMetaDrive(
         {
             "use_render": True,
-
             "num_agents": 5,
             "start_seed": 8000,
             "environment_num": 1,
