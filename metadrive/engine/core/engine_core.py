@@ -10,7 +10,7 @@ from panda3d.core import AntialiasAttrib, loadPrcFileData, LineSegs, PythonCallb
 
 from metadrive.constants import RENDER_MODE_OFFSCREEN, RENDER_MODE_NONE, RENDER_MODE_ONSCREEN, EDITION, CamMask, \
     BKG_COLOR
-from metadrive.engine.asset_loader import AssetLoader, initialize_asset_loader, close_asset_loader
+from metadrive.engine.asset_loader import AssetLoader, initialize_asset_loader, close_asset_loader, randomize_cover
 from metadrive.engine.core.collision_callback import collision_callback
 from metadrive.engine.core.force_fps import ForceFPS
 from metadrive.engine.core.light import Light
@@ -153,13 +153,13 @@ class EngineCore(ShowBase.ShowBase):
             gltf.patch_loader(self.loader)
 
             # Display logo
-            if self.mode == RENDER_MODE_ONSCREEN and (not self.global_config["debug"]) \
-                    and (not self.global_config["fast"]):
+            if self.mode == RENDER_MODE_ONSCREEN and (not self.global_config["debug"]):
+                cover_file_path = randomize_cover()
                 self._loading_logo = OnscreenImage(
-                    image=AssetLoader.file_path("logo-large.png"), pos=(0, 0, 0), scale=(self.w_scale, 1, self.h_scale)
+                    image=cover_file_path, pos=(0, 0, 0), scale=(self.w_scale, 1, self.h_scale)
                 )
                 self._loading_logo.setTransparency(True)
-                for i in range(20):
+                for i in range(5 if self.global_config["fast"] else 20):
                     self.graphicsEngine.renderFrame()
                 self.taskMgr.add(self.remove_logo, "remove _loading_logo in first frame")
 

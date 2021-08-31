@@ -69,7 +69,7 @@ if __name__ == "__main__":
                 "lane_width": env.vehicle.lane.width
             }
         )
-        print({env.engine.get_policy(env.vehicle.id).controller.joystick.get_button(4)})
+        # print({env.engine.get_policy(env.vehicle.id).controller.joystick.get_button(4)})
         # assert env.observation_space.contains(o)
         # if (s + 1) % 100 == 0:
         #     print(
