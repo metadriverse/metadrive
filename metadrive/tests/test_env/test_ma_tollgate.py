@@ -251,7 +251,7 @@ def test_ma_toll_close_spawn():
     MultiAgentTollgateEnv._DEBUG_RANDOM_SEED = 1
     env = MultiAgentTollgateEnv(
         {
-            # "use_render": True, "fast": True,
+            # "use_render": True,
             "horizon": 50,
             "num_agents": 12,
             "map_config": {
@@ -315,7 +315,7 @@ def test_ma_toll_reward_done_alignment_1():
             "delay_done": 0,
 
             # "use_render": True,
-            # "fast": True,
+            #
             "top_down_camera_initial_z": 160
         }
     )
@@ -377,7 +377,7 @@ def test_ma_toll_reward_done_alignment_2():
                 "lane_num": 1
             },
             # "use_render": True,
-            # "fast": True,
+            #
             "horizon": 200,
             "num_agents": 24,
             "crash_vehicle_penalty": 1.7777,
@@ -685,7 +685,7 @@ def test_ma_no_reset_error():
 
 def test_randomize_spawn_place():
     last_pos = {}
-    env = MultiAgentTollgateEnv({"num_agents": 4, "use_render": False, "fast": True})
+    env = MultiAgentTollgateEnv({"num_agents": 4, "use_render": False})
     try:
         obs = env.reset()
         for step in range(100):

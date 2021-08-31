@@ -55,7 +55,7 @@ def test_fixed_traffic():
     env = MetaDriveEnv({
         "random_traffic": False,
         "traffic_mode": "respawn",
-        # "fast": True, "use_render": True
+        #  "use_render": True
     })
     try:
         last_pos = None
@@ -80,7 +80,7 @@ def test_random_traffic():
             "traffic_density": 0.3,
             "start_seed": 5,
 
-            # "fast": True, "use_render": True
+            #  "use_render": True
         }
     )
     has_traffic = False

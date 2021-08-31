@@ -22,7 +22,6 @@ def _test_cull_scene(use_render=True):
             {
                 "use_render": use_render,
                 "manual_control": False,
-                "fast": use_render,
                 "map": "SSSSCS",
                 "debug": True,
                 "target_vehicle_configs": {

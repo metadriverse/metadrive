@@ -56,7 +56,7 @@ def _test_idm_policy_is_moving(render=False, in_test=True):
     # config = {"traffic_mode": "hybrid", "map": "SS", "traffic_density": 1.0}
     config = {"traffic_mode": "hybrid", "map": "SS", "traffic_density": 0.2}
     if render:
-        config.update({"use_render": True, "fast": True, "manual_control": True})
+        config.update({"use_render": True, "manual_control": True})
     env = MetaDriveEnv(config)
     env.reset(force_seed=0)
     last_pos = None

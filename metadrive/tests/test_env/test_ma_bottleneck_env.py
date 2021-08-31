@@ -252,7 +252,7 @@ def test_ma_bottleneck_close_spawn():
     MultiAgentBottleneckEnv._DEBUG_RANDOM_SEED = 1
     env = MultiAgentBottleneckEnv(
         {
-            # "use_render": True, "fast": True,
+            # "use_render": True,
             "horizon": 50,
             "num_agents": 16,
             "map_config": {
@@ -317,7 +317,7 @@ def test_ma_bottleneck_reward_done_alignment():
             "delay_done": 0,
 
             # "use_render": True,
-            # "fast": True,
+            #
             "top_down_camera_initial_z": 160
         }
     )
@@ -377,7 +377,7 @@ def test_ma_bottleneck_reward_done_alignment():
                 "lane_num": 1
             },
             # "use_render": True,
-            # "fast": True,
+            #
             "horizon": 200,
             "num_agents": 24,
             "crash_vehicle_penalty": 1.7777,
@@ -691,7 +691,7 @@ def test_ma_no_reset_error():
 
 def test_randomize_spawn_place():
     last_pos = {}
-    env = MultiAgentBottleneckEnv({"num_agents": 4, "use_render": False, "fast": True, "crash_done": False})
+    env = MultiAgentBottleneckEnv({"num_agents": 4, "use_render": False, "crash_done": False})
     try:
         obs = env.reset()
         for step in range(100):
