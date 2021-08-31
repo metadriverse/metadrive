@@ -5,6 +5,9 @@ Installing MetaDrive
 ######################
 
 
+Install MetaDrive by few lines!
+############################################
+
 The installation of MetaDrive on different platforms is straightforward and easy!
 
 We recommend to use the command following to install::

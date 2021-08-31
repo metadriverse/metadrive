@@ -16,7 +16,7 @@ Welcome to MetaDrive! MetaDrive is an driving simulator with many key features, 
 
 - **Lightweight**: Extremely easy to download, install and run in almost all platforms.
 - **Realistic**: Accurate physics simulation and multiple sensory inputs.
-- **Efficient**: Up to 500 simulation step per second and easy to parallel.
+- **Efficient**: Up to 300 simulation step per second and easy to parallel.
 - **Compositionality**: Support generating infinite scenes and configuring various traffic, vehicle, and environmental settings.
 
 <img src="docs/images/panel.jpg">
