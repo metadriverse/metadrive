@@ -24,7 +24,8 @@ def draw_multi_channels_top_down_observation(obs):
     num_channels = obs.shape[-1]
     assert num_channels == 5
     channel_names = [
-        "Road and navigation", "Ego previous pos", "Neighbor at step t", "Neighbor at step t-1", "Neighbor at step t-2"
+        "Road and navigation", "Ego now and previous pos", "Neighbor at step t", "Neighbor at step t-1",
+        "Neighbor at step t-2"
     ]
     fig, axs = plt.subplots(1, num_channels, figsize=(15, 4), dpi=150)
     count = 0
