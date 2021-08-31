@@ -1,57 +1,50 @@
-######################
+
+
+.. image:: ../../metadrive/assets/logo-horizon.png
+   :width: 1800
+   :align: center
+
+
+|
+|
+
+########################
 MetaDrive Documentation
-######################
+########################
 
-.. image:: ../../metadrive/assets/logo.png
-   :width: 300
-   :align: center 
-
-Welcome to the MetaDrive documentation. MetaDrive is an open-ended driving simulator with infinite scenes.
+Welcome to the MetaDrive documentation!
+MetaDrive is an efficient and compositional driving simulator for reinforcement learning community!
 The key features of MetaDrive includes:
 
-- **Lightweight**: Extremely easy to download, install and run in almost all platform.
+- **Lightweight**: Extremely easy to download, install and run in almost all platforms.
 - **Realistic**: Accurate physics simulation and multiple sensory input including RGB camera, Lidar and sensory data.
-- **Efficient**: Up to 500 simulation step per second.
-- **Open-ended**: Support generating infinite scenes and configuring various traffic, vehicle, and environmental settings.
+- **Efficient**: Up to 300 simulation step per second.
+- **Open-ended**: Support generating infinite scenes and configuring various traffics, vehicles, and environmental settings.
 
-This documentation let you get familiar with the installation and basic utilization of MetaDrive.
-Please go through :doc:`install` to install MetaDrive and try the examples in :doc:`get_start` to enjoy MetaDrive!
+This documentation brings you the information on installation, philosophy, usages and development tips of MetaDrive!
 
-Interesting experiment results can be found in `our paper <https://arxiv.org/pdf/2012.13681>`_.
-You can also visit `our webpage <https://decisionforce.github.io/metadrive/>`_ and `GitHub repo <https://github.com/decisionforce/metadrive>`_! Please feel free to contact us if you have any suggestions or ideas!
+
+You can also visit `our webpage <https://decisionforce.github.io/metadrive/>`_ and `GitHub repo <https://github.com/decisionforce/metadrive>`_.
+Please feel free to contact us if you have any suggestions or ideas!
 
 
 Table of Content
 ################
-.. toctree::
-    :caption: Home
 
-    self
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Quick Start
+    :maxdepth: 2
 
-   install.rst
-   get_start.rst
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Configuration
-
-   vehicle_config.rst
-   env_config.rst
+    install.rst
+    get_start.rst
+    use_rendering.rst
+    rl_environments.rst
+    config_system.rst
+    read_data_from_dataset.rst
+    development_tips.rst
 
 Citation
 ########
 
-If you find this work useful in your project, please consider to cite it through:
-
-.. code-block:: latex
-
-    @article{li2020improving,
-      title={Improving the Generalization of End-to-End Driving through Procedural Generation},
-      author={Li, Quanyi and Peng, Zhenghao and Zhang, Qihang and Qiu, Cong and Liu, Chunxiao and Zhou, Bolei},
-      journal={arXiv preprint arXiv:2012.13681},
-      year={2020}
-    }
+We wrote a white paper on this project, but the citation information is not yet well prepared!
+Please contact us if you find this work useful in your project.
