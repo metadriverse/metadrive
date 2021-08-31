@@ -176,7 +176,6 @@ class BaseEngine(EngineCore, Randomizable):
             manager.before_reset()
         self._object_clean_check()
         for manager in self._managers.values():
-            print(manager)
             manager.reset()
         for manager in self._managers.values():
             manager.after_reset()

@@ -48,7 +48,6 @@ class RealDataManager(BaseManager):
         self.respawn_lanes = self.respawn_lanes = self._get_available_respawn_lanes(map)
 
         self._create_argoverse_vehicles_once(map)
-        print("="*10)
 
     def before_step(self):
         """
