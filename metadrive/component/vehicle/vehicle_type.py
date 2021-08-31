@@ -10,6 +10,7 @@ class DefaultVehicle(BaseVehicle):
     WIDTH = 1.852
     HEIGHT = 1.19
     TIRE_RADIUS = 0.313
+    TIRE_WIDTH = 0.25
     MASS = 1100
     LATERAL_TIRE_TO_CENTER = 0.815
     FRONT_WHEELBASE = 1.05234
@@ -25,8 +26,9 @@ class XLVehicle(BaseVehicle):
     TIRE_RADIUS = 0.37
     REAR_WHEELBASE = 1.075
     FRONT_WHEELBASE = 1.726
-    LATERAL_TIRE_TO_CENTER = 0.831
+    LATERAL_TIRE_TO_CENTER = 0.931
     CHASSIS_TO_WHEEL_AXIS = 0.3
+    TIRE_WIDTH = 0.5
     MASS = 1600
     path = [['new/truck/scene.gltf', (factor, factor, factor), (0, 0.3, 0.04), 0]]
 
@@ -40,6 +42,7 @@ class LVehicle(BaseVehicle):
     REAR_WHEELBASE = 1.10751
     FRONT_WHEELBASE = 1.391
     LATERAL_TIRE_TO_CENTER = 0.75
+    TIRE_WIDTH = 0.35
     MASS = 1300
     path = [
         ['new/lada/scene.gltf', (factor, factor, factor), (0, -0.25, 0.07), 0],
@@ -55,6 +58,7 @@ class MVehicle(BaseVehicle):
     REAR_WHEELBASE = 1.203
     FRONT_WHEELBASE = 1.285
     LATERAL_TIRE_TO_CENTER = 0.803
+    TIRE_WIDTH = 0.3
     MASS = 1200
 
     path = [
@@ -71,8 +75,8 @@ class SVehicle(BaseVehicle):
     FRONT_WHEELBASE = 1.4126
     REAR_WHEELBASE = 1.07
     TIRE_RADIUS = 0.376
+    TIRE_WIDTH = 0.25
     MASS = 800
-
     path = [
         ['new/beetle/scene.gltf', (factor, factor, factor), (0, -0.2, 0.03), 0],
     ]

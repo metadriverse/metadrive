@@ -45,7 +45,8 @@ Note that please do not run the above command in the folder that has a sub-folde
 
 ## 🚕 Examples
 
-Please run the following command to drive the car in the environment manually with keyboard! Pressing W, A, S, D to move and turn.
+Please run the following command to drive the car in the environment manually with keyboard! 
+Pressing W, A, S, D to move and turn and T to trigger the auto-drive mode!
 
 ```bash
 python -m metadrive.examples.enjoy_manual
@@ -119,7 +120,7 @@ The following table presents some predefined environment names.
 
 ## 🏫 Documentations
 
-Working in Progress!
+Find more detail in: [MetaDrive](https://metadrive-simulator.readthedocs.io)
 
 
 ## 📎 Citation

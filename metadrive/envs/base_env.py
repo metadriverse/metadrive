@@ -1,4 +1,5 @@
 import sys
+import datetime
 import time
 from collections import defaultdict
 from typing import Union, Dict, AnyStr, Optional, Tuple
@@ -45,7 +46,7 @@ BASE_DEFAULT_CONFIG = dict(
     controller="keyboard",  # "joystick" or "keyboard"
     use_chase_camera_follow_lane=False,  # If true, then vision would be more stable.
     camera_height=1.8,
-    camera_dist=7,
+    camera_dist=6,
     prefer_track_agent=None,
     draw_map_resolution=1024,  # Drawing the map in a canvas of (x, x) pixels.
     top_down_camera_initial_x=0,
@@ -70,7 +71,6 @@ BASE_DEFAULT_CONFIG = dict(
     physics_world_step_size=2e-2,
     show_fps=True,
     global_light=False,
-    onscreen_message=True,
     # only render physics world without model, a special debug option
     debug_physics_world=False,
     # debug static world
@@ -353,12 +353,7 @@ class BaseEnv(gym.Env):
     def capture(self):
         img = PNMImage()
         self.engine.win.getScreenshot(img)
-        img.write("main.png")
-
-        for name, sensor in self.vehicle.image_sensors.items():
-            if name == "mini_map":
-                name = "lidar"
-            sensor.save_image("{}.png".format(name))
+        img.write("main_{}.png".format(time.time()))
 
     def for_each_vehicle(self, func, *args, **kwargs):
         return self.agent_manager.for_each_active_agents(func, *args, **kwargs)

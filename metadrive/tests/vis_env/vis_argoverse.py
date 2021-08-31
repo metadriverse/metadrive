@@ -28,7 +28,6 @@ if __name__ == "__main__":
     env = ArgoverseEnv(
         {
             "traffic_density": 0.,
-            "onscreen_message": True,
             # "debug_physics_world": True,
             "pstats": True,
             "global_light": True,
