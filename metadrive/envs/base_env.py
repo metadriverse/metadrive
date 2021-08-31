@@ -31,6 +31,8 @@ BASE_DEFAULT_CONFIG = dict(
     IDM_agent=False,
 
     # ===== Action =====
+    manual_control=False,
+    controller="keyboard",  # "joystick" or "keyboard"
     decision_repeat=5,
     discrete_action=False,
     discrete_steering_dim=5,
@@ -38,15 +40,12 @@ BASE_DEFAULT_CONFIG = dict(
 
     # ===== Rendering =====
     use_render=False,  # pop a window to render or not
-    # force_fps=None,
     debug=False,
     disable_model_compression=True,  # disable compression if you wish to launch the window quicker.
     cull_scene=True,  # only for debug use
-    manual_control=False,
-    controller="keyboard",  # "joystick" or "keyboard"
     use_chase_camera_follow_lane=False,  # If true, then vision would be more stable.
     camera_height=1.8,
-    camera_dist=6,
+    camera_dist=6.0,
     prefer_track_agent=None,
     draw_map_resolution=1024,  # Drawing the map in a canvas of (x, x) pixels.
     top_down_camera_initial_x=0,
