@@ -19,7 +19,7 @@ if __name__ == "__main__":
             "use_render": True,
             "decision_repeat": 5,
             "rgb_clip": True,
-            # "debug": True,
+            "debug": True,
             # "random_lane_num": True,
             "fast": True,
 

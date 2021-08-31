@@ -89,12 +89,13 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     HEIGHT = None
     TIRE_RADIUS = None
     LATERAL_TIRE_TO_CENTER = None
+    TIRE_WIDTH = 0.4
     FRONT_WHEELBASE = None
     REAR_WHEELBASE = None
     MASS = None
     CHASSIS_TO_WHEEL_AXIS = 0.2
-    SUSPENSION_LENGTH = 40
-    SUSPENSION_STIFFNESS = 30
+    SUSPENSION_LENGTH = 15
+    SUSPENSION_STIFFNESS = 40
 
     # for random color choosing
     MATERIAL_COLOR_COEFF = 10  # to resist other factors, since other setting may make color dark
@@ -553,11 +554,10 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     def _add_wheel(self, pos: Vec3, radius: float, front: bool, left):
         wheel_np = self.origin.attachNewNode("wheel")
         if self.render:
-            # TODO something wrong with the wheel render
             model_path = 'models/yugo/yugotireR.egg' if left else 'models/yugo/yugotireL.egg'
             wheel_model = self.loader.loadModel(AssetLoader.file_path(model_path))
             wheel_model.reparentTo(wheel_np)
-            wheel_model.set_scale(1.4, radius / 0.25, radius / 0.25)
+            wheel_model.set_scale(self.TIRE_WIDTH/0.15, radius / 0.25, radius / 0.25)
         wheel = self.system.create_wheel()
         wheel.setNode(wheel_np.node())
         wheel.setChassisConnectionPointCs(pos)
