@@ -45,8 +45,6 @@ class RealDataManager(BaseManager):
         self.block_triggered_vehicles = []
 
         traffic_density = self.density
-        if abs(traffic_density) < 1e-2:
-            return
         self.respawn_lanes = self.respawn_lanes = self._get_available_respawn_lanes(map)
 
         self._create_argoverse_vehicles_once(map)

@@ -58,7 +58,7 @@ if __name__ == "__main__":
             "cull_scene": False,
             # "controller":"joystick",
             "manual_control": True,
-            "use_render": False,
+            "use_render": True,
             "decision_repeat": 5,
             "rgb_clip": True,
             # "debug": False,
