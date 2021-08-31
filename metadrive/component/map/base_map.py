@@ -62,6 +62,12 @@ class BaseMap(BaseRunnable):
     GENERATE_CONFIG = "config"
     GENERATE_TYPE = "type"
 
+    # default lane parameter
+    MAX_LANE_WIDTH = 4.5
+    MIN_LANE_WIDTH = 3.0
+    MAX_LANE_NUM = 3
+    MIN_LANE_NUM = 2
+
     def __init__(self, map_config: dict = None, random_seed=None):
         """
         Map can be stored and recover to save time when we access the map encountered before

@@ -20,3 +20,4 @@
 **/*.c
 /seed*.json
 **/.vscode
+**/.idea
