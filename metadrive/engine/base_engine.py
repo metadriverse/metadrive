@@ -176,6 +176,7 @@ class BaseEngine(EngineCore, Randomizable):
             manager.before_reset()
         self._object_clean_check()
         for manager in self._managers.values():
+            print(manager)
             manager.reset()
         for manager in self._managers.values():
             manager.after_reset()
@@ -296,6 +297,7 @@ class BaseEngine(EngineCore, Randomizable):
         self._managers[manger_name] = manager
         setattr(self, manger_name, manager)
         self._managers = OrderedDict(sorted(self._managers.items(), key=lambda k_v: k_v[-1].PRIORITY))
+        print(self._managers)
 
     def seed(self, random_seed):
         self.global_random_seed = random_seed
