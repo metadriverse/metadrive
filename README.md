@@ -1,16 +1,12 @@
 <br>
 
-<br>
-
-![](metadrive/assets/logo.png)
-
-<br>
-
-
-
 # MetaDrive: Composing Diverse Driving Scenarios for Generalizable RL
 
+<br>
 
+![](metadrive/assets/logo.png)s
+
+<br>
 
 [![build](https://github.com/decisionforce/metadrive/workflows/test/badge.svg)](http://github.com/decisionforce/metadrive/actions)
 [![codecov](https://codecov.io/gh/decisionforce/metadrive/branch/main/graph/badge.svg?token=1ZYN8L5397)](https://codecov.io/gh/decisionforce/metadrive)
