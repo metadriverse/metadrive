@@ -30,6 +30,8 @@ if __name__ == '__main__':
                     time.time() - start, (s + 1) / (time.time() - start), np.mean(vehicle_num)
                 )
             )
-    print("Total Time Elapse: {:.3f}, average FPS: {:.3f}, average number of vehicles: {:.3f}.".format(
-        time.time() - start, total_steps / (time.time() - start), np.mean(vehicle_num)
-    ))
+    print(
+        "Total Time Elapse: {:.3f}, average FPS: {:.3f}, average number of vehicles: {:.3f}.".format(
+            time.time() - start, total_steps / (time.time() - start), np.mean(vehicle_num)
+        )
+    )
