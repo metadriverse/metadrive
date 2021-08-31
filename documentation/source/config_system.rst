@@ -4,52 +4,91 @@
 Environment Configuration
 ##########################
 
-An MetaDrive instance accepts a dict as the environmental config. For example, you can build a MetaDrive instance with 200 generated maps via::
+.. warning:: This page is under construction!
+
+A MetaDrive instance accepts a dict as the environmental config. For example, you can build a MetaDrive instance with 200 generated maps via
+
+.. code-block:: python
 
     from metadrive import MetaDriveEnv
-    config = dict(
-        environment_num=200,
-        start_seed=0
-    )
+    config = dict(environment_num=200, start_seed=0)
     env = MetaDriveEnv(config)
 
+    # or using gym interface:
+    import gym
+    env = gym.make("MetaDrive-v0", {"environment_num": 200, "start_seed": 0})
 
-In this page, we describe the meaning of each configuration options.
+In this page, we describe the details of each configurable options.
 
-MetaDriveEnv Config
+
+Generalization Config
+########################
+
+MetaDrive can generate unlimited driving scenarios if using procedural generation.
+We can specify the range of the scenarios used in different tasks.
+For example, you can use different set of generated scenarios to train and test the trained agents.
+To achieve that, you only need to specify the range of random seeds used to generated those scenarios.
+Concretely, MetaDrive will use the seeds in range :code:`[start_seed, start_seed + environment_num)`.
+Therefore, you only need to specify these two values in the config:
+
+    - :code:`start_seed` (int = 0): Random seed of the first map.
+    - :code:`environment_num` (int = 1): Number of the driving scenarios.
+
+
+Agent Config
+#############
+
+
+    - :code:`num_agents` (int = 1):
+    - :code:`is_multi_agent` (bool = False):
+    - :code:`allow_respawn` (bool = False):
+    - :code:`delay_done` (int = 0):
+    - :code:`random_agent_model` (bool = False):
+    - :code:`IDM_agent` (bool = False):
+
+
+Action Config
+##############
+
+    - :code:`manual_control` (bool = False):
+    - :code:`controller` (str = "keyboard"):
+    - :code:`decision_repeat` (int = 5):
+    - :code:`discrete_action` (bool = False):
+    - :code:`discrete_steering/throttle_dim` (int = 5, 5):
+
+
+
+
+Visualization & Rendering
 ###########################
 
-We do generalization experiments under the default setting of MetaDriveEnv. To reproduce our experiment results,
-no special configuration is needed.
+    - :code:`use_render` (bool = False): Pop a window on your screen or not
+    - :code:`debug` (bool = False): For developing use, draw the scene with bounding box
+    - :code:`disable_model_compression` (bool = True): Model compression reduces the memory consumption when using Panda3D window to visualize. Disabling model compression greatly improves the launch speed but might cause breakdown in low-memory machine.
+    - :code:`cull_scene` (bool = True): When you want to access the image of camera, it should be set to True.
+    - :code:`use_chase_camera_follow_lane` (bool = False):
+    - :code:`camera_height` (float = 1.8):
+    - :code:`camera_dist` (float = 6.0):
+    - :code:`prefer_track_agent` (str = None):
+    - :code:`draw_map_resolution` (int = 1024):
+    - :code:`top_down_camera_initial_x/y/z` (int = 0, 0, 200):
 
-However, MetaDrive can also support other research topics, and we will simply introduce the meaning of some configuration
-options of MetaDriveEnv.
 
-Draw Scene & Visualization
-###########################
+Vehicle Control
+#################################
 
-    - :code:`use_render` (bool): Pop a window on your screen or not
-    - :code:`offscreen_render` (bool): When you want to access the image of camera, it should be set to True.
-    - :code:`force_fps` (Union[int, None]): Decide the render fps. "None" means that no fps limitation.
-    - :code:`debug` (bool): For developing use, draw the scene with bounding box
+The following content is working in progress.
 
-Manual Control
-################
-
-    - :code:`controller` (str): "joystick" or "keyboard". Controlling vehicle by joystick is more recommended.
-    - :code:`manual_control` (bool): Controllers above are available only when this flag is True
-    - :code:`use_chase_camera` (bool): A perspective like racing game. usually True, when manual control
-    - :code:`camera_height` (float): Chase camera height
 
 TrafficManager Config
-#################
+##################################
 
     - :code:`traffic_density` (float): Vehicle number per 10 meter, aiming to adjust the number of vehicle on road
     - :code:`traffic_mode`: Trigger mode (Triger) / reborn mode (Reborn). In Reborn mode vehicles will enter the map again after arriving its destination.
     - :code:`random_traffic` (bool): the traffic generation will not be controlled by current map seed. If set to *False*, each map will have same traffic flow.
 
 Map Config
-#############
+##############################
     -   :code:`map` (int or string): You can set a *string* or *int* as the key to generate map in an easy way. An *int=N* means generating a map containing N blocks,
         and the block type is randomly selected. Since in MetaDrive each block has a unique ID in *char* type, *string* can determine the block type sequence.
         For example, "SCrRX" means the first block is Straight, and the next blocks are Circular, InRamp, OutRamp and Intersection.
@@ -85,13 +124,7 @@ Map Config
         - :code:`lane_width` (float): Width of lanes.
         - :code:`lane_num` (int): Number of lanes in each road.
 
-Generalization Environment Config
-##################################
 
-    - :code:`start_seed` (int): Random seed of first map.
-    - :code:`environment_num` (int): Number of environments. BIG generates map by a random generator initialized by a specific seed.
-      Therefore, "environment_num" maps are generated by seeds \[seed for seed in range(start_seed,
-      start_seed+environment_num)\]
 
 Observation Config
 ######################

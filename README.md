@@ -33,7 +33,7 @@ pip install -e .
 You can verify the installation and efficiency of MetaDrive via running:
 
 ```bash
-cd ~/
+# Go to a folder where no sub-folder calls metadrive
 python -m metadrive.examples.profile_metadrive
 ```
 

@@ -20,7 +20,7 @@ We recommend to use the command following to install::
 
 To check whether MetaDrive is successfully installed, please run::
 
-    cd ~/
+    # Go to a folder where no sub-folder calls metadrive
     python -m metadrive.examples.profile_metadrive
 
 
@@ -44,7 +44,7 @@ If the above observation is not enough for your RL algorithms and you wish to us
 
 If your machine already has a screen and you already verified that the Panda3D window can successfully pops up, then please use the following code to verify the on-screen rendering is working::
 
-    cd ~/
+    # Go to a folder where no sub-folder calls metadrive
     python -m metadrive.examples.manual_control
 
 If the screen successfully shows up, then you can move on to :ref:`use_rendering` and skip this section.

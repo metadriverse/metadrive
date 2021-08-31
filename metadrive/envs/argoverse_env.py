@@ -1,9 +1,9 @@
 import pathlib
 import pickle
 
-from component.map.argoverse_map import ArgoverseMap
 from metadrive import MetaDriveEnv
-from utils import is_win
+from metadrive.component.map.argoverse_map import ArgoverseMap
+from metadrive.utils import is_win
 
 
 class ArgoverseEnv(MetaDriveEnv):
