@@ -15,7 +15,7 @@ if __name__ == "__main__":
             # controller="joystick",
             use_render=True,
             manual_control=True,
-            traffic_density=0.15,
+            traffic_density=0.1,
             environment_num=100,
             random_agent_model=True,
             random_lane_width=True,
@@ -31,7 +31,8 @@ if __name__ == "__main__":
         env.render(
             text={
                 "Engine Force": env.vehicle.config["max_engine_force"],
-                "Brake Force": env.vehicle.config["max_brake_force"]
+                "Brake Force": env.vehicle.config["max_brake_force"],
+                "Auto-Drive (Press T)": env.current_track_vehicle.expert_takeover
             }
         )
         if d and info["arrive_dest"]:

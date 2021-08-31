@@ -1,1 +1,1 @@
-This folder contains files for the website: [https://decisionforce.github.io/metadrive/](https://decisionforce.github.io/metadrive/) and the documentation: [https://metadrive.readthedocs.io/](https://metadrive.readthedocs.io/).
+This folder contains files for the website: [https://decisionforce.github.io/metadrive/](https://decisionforce.github.io/metadrive/) and the documentation: [https://metadrive-simulator.readthedocs.io/](https://metadrive-simulator.readthedocs.io/).
