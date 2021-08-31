@@ -4,78 +4,74 @@
 Installing MetaDrive
 ######################
 
-By leveraging the power of panda3d, MetaDrive can be run on personal laptop, cluster, headless server with different OS.
 
-Install MetaDrive on macOS, Windows and Linux in the easiest way
-###############################################################
+The installation of MetaDrive on different platforms is straightforward and easy!
 
-The installation procedure on these different platforms is same and easy, we recommend to use the command following to install::
-
-    pip install git+https://github.com/decisionforce/metadrive.git
-
-or you can install via::
+We recommend to use the command following to install::
 
     git clone https://github.com/decisionforce/metadrive.git
     cd metadrive
+    pip install numpy cython
     pip install -e .
 
-The basic functionality, namely the render-less simulation can be conducted extremely easily. However, if you wish to
-use rendering features such as the RGB, the installation need more efforts, especially in headless machine or cluster.
 
-Verify the installation of MetaDrive
-#############################################
+To check whether MetaDrive is successfully installed, please run::
 
-To check whether MetaDrive v0.1.1 is successfully installed, please run::
-
+    cd ~/
     python -m metadrive.examples.profile_metadrive
 
 
+You can also verify the efficiency of MetaDrive through the printed messages. This script is supposed to be runnable in all places.
 
-You can also verify the efficiency of MetaDrive through the printed messages.
-Note that the above script is supposed to be runnable in all places.
-Please do not run the above command in the folder that has a sub-folder called :code:`./metadrive`.
+.. note:: Please do not run the above command in the folder that has a sub-folder called :code:`./metadrive`.
 
-Install the MetaDrive with offscreen rendering functionality
+
+Install MetaDrive with offscreen rendering functionality
 ##############################################################
 
-This section introduce the procedure to enable MetaDrive with RGB rendering in headless machine.
-If the lidar information is enough for your task, you can simply install MetaDrive on your headless machine using the way we mentioned above.
 
-.. note:: You have to set the :code:`config["engine_config"]["headless_machine_render"] = True` when training the agent using image as input.
+
+The default observation contains information on ego vehicle's states, Lidar-like cloud points showing neighboring vehicles, and information about navigation and tasks. Besides, you can also try the Pygame-based Top-down rendering (See :ref:`use_pygame_rendering`), which is also runnable in most headless machine without any special treatment.
+
+
+If the above observation is not enough for your RL algorithms and you wish to use the Panda3D camera to provide realistic RGB images as the observation, please continue reading this section.
+
+
+If your machine already has a screen and you already verified that the Panda3D window can successfully pops up, then please use the following code to verify the on-screen rendering is working::
+
+    cd ~/
+    python -m metadrive.examples.manual_control
+
+If the screen successfully shows up, then you can move on to :ref:`use_rendering` and skip this section.
+
 
 However, if you want to use image to train your agent on headless machine, you have to compile a customized Panda3D.
-The customized Panda3D is built from the source code of panda3d, following the instructions in `Panda3D: Building Panda3D <https://github.com/panda3d/panda3d#building-panda3d>`_.
-After setting up the Panda3D dependencies, we will build our own wheel through the following command::
+The customized Panda3D is built from the source code of panda3d following the instructions in `Panda3D: Building Panda3D <https://github.com/panda3d/panda3d#building-panda3d>`_. Please refer to the link to setup Panda3D dependencies. After setting up dependencies, we build our own wheel through the following command::
 
     python ./makepanda/makepanda.py --everything --no-x11 --no-opencv --no-fmodex \
       --python-incdir /path/to/your/conda_env/include/ \
       --python-libdir /path/to/your/conda_env/lib/ \
       --thread 8 --wheel
 
+
 It will give you a Panda3D wheel which can run in EGL environment without the X11 support. Now please install the wheel file by::
 
     pip install panda3d-1.10.xxx.whl
 
-Now, MetaDrive will utilize the power of cluster to train your agent!
+
+In principle, the installation of MetaDrive in headless machine is finished.
+To verify the installation on cluster, run following command instead::
+
+    python -m metadrive.tests.test_headless
+
+
+The script will generate images to current directory. Please fetch anc check those images from cluster to ensure MetaDrive can draw scene and capture images.
+
+If the captured images is complete as following, then the installation in headless machine is successful and please move on to :ref:`use_rendering`.
+
+.. note:: You have to set the :code:`config["headless_machine_render"] = True` when training the agent using images as observation.
 
 .. warning:: Compiling Panda3D from source might require the **administrator permission** to install some libraries.
     We are working to provide a pre-built Panda3D for cluster users of MetaDrive to make it easy to use on headless machines.
 
-Verify the offscreen rendering functionality of MetaDrive
-############################################################
 
-.. note:: An easy installation of MetaDrive in macOS will fail the following verification.
-
-Please run commands below to verify the installation::
-
-    python -m metadrive.tests.install_test.test_install
-
-Successfully running this script means the MetaDrive works well, and an image will be shown to help you check if MetaDrive
-can launch and capture image in offscreen mode
-
-To verify the installation on cluster, run following command instead::
-
-    python -m metadrive.tests.install_test.test_headless_install
-
-The script will generate images to local directory. Please fetch anc check those images from cluster to ensure MetaDrive can draw scene
-and capture images without X11.
