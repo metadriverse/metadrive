@@ -1,6 +1,6 @@
 <br>
 
-# MetaDrive: Composing Diverse Driving Scenarios for Generalizable RL
+# MetaDrive: Composing Diverse Driving Scenarios for Generalizable Reinforcement Learning
 
 <br>
 
