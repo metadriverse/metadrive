@@ -1,10 +1,12 @@
-######################
-MetaDrive Documentation
-######################
 
-.. image:: ../../metadrive/assets/logo.png
-   :width: 300
+
+.. image:: ../../metadrive/assets/logo-horizon-compressed.png
+   :width: 1800
    :align: center 
+
+########################
+MetaDrive Documentation
+########################
 
 Welcome to the MetaDrive documentation. MetaDrive is an open-ended driving simulator with infinite scenes.
 The key features of MetaDrive includes:
