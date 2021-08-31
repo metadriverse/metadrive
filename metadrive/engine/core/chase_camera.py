@@ -1,4 +1,5 @@
 import math
+from panda3d.core import WindowProperties
 import queue
 from collections import deque
 from typing import Tuple
@@ -23,6 +24,7 @@ class MainCamera:
     FOLLOW_LANE = False
     TOP_DOWN_VIEW_HEIGHT = 120
     WHEEL_SCROLL_SPEED = 10
+    MOUSE_RECOVER_TIME = 20
 
     def __init__(self, engine, camera_height: float, camera_dist: float):
         self._origin_height = camera_height
@@ -64,6 +66,15 @@ class MainCamera:
         self.engine.interface.stop_track()
         self.engine.task_manager.add(self._top_down_task, self.TOP_DOWN_TASK_NAME, extraArgs=[], appendTask=True)
 
+        # TPP rotate
+        props = WindowProperties()
+        props.setCursorHidden(True)
+        # props.setMouseMode(WindowProperties.MConfined)
+        self.engine.win.requestProperties(props)
+        self.mouse_rotate = 0
+        self.last_mouse_pos = self.engine.mouseWatcherNode.getMouseX() if self.has_mouse else 0
+        self.static_timer = 0
+
     def set_bird_view_pos(self, position):
         if self.engine.task_manager.hasTaskNamed(self.TOP_DOWN_TASK_NAME):
             # adjust hpr
@@ -75,15 +86,29 @@ class MainCamera:
         self.direction_running_mean.clear()
 
     def _chase_task(self, vehicle, task):
+        new_mouse_pos = self.engine.mouseWatcherNode.getMouseX() if self.has_mouse else self.last_mouse_pos
+        diff = new_mouse_pos - self.last_mouse_pos
+        if abs(diff) > 0:
+            self.mouse_rotate -= diff
+            self.static_timer = 0
+        else:
+            if self.static_timer > self.MOUSE_RECOVER_TIME:
+                self.mouse_rotate += -self.mouse_rotate / self.MOUSE_RECOVER_TIME
+            else:
+                self.static_timer += 1
+        self.last_mouse_pos = new_mouse_pos
         self.chase_camera_height = self._update_height(self.chase_camera_height)
         self.camera_queue.put(vehicle.chassis.get_pos())
         if not self.FOLLOW_LANE:
-            forward_dir = vehicle.system.get_forward_vector()
+            current_forward_dir = vehicle.system.get_forward_vector()
         else:
-            forward_dir = self._dir_of_lane(vehicle.navigation.current_ref_lanes[0], vehicle.position)
-
-        self.direction_running_mean.append(forward_dir)
+            current_forward_dir = self._dir_of_lane(vehicle.navigation.current_ref_lanes[0], vehicle.position)
+        self.direction_running_mean.append(current_forward_dir)
         forward_dir = np.mean(self.direction_running_mean, axis=0)
+        forward_dir[0] = np.cos(self.mouse_rotate) * current_forward_dir[0] - np.sin(self.mouse_rotate) * \
+                         current_forward_dir[1]
+        forward_dir[1] = np.sin(self.mouse_rotate) * current_forward_dir[0] + np.cos(self.mouse_rotate) * \
+                         current_forward_dir[1]
 
         camera_pos = list(self.camera_queue.get())
         camera_pos[2] += self.chase_camera_height + vehicle.HEIGHT / 2
@@ -143,6 +168,10 @@ class MainCamera:
             self.engine.task_manager.remove(self.CHASE_TASK_NAME)
         if self.engine.task_manager.hasTaskNamed(self.TOP_DOWN_TASK_NAME):
             self.engine.task_manager.remove(self.TOP_DOWN_TASK_NAME)
+        self.mouse_rotate = 0
+        self.last_mouse_pos = self.engine.mouseWatcherNode.getMouseX() if self.has_mouse else 0
+        self.static_timer = 0
+        self.set_mouse_to_center()
         self.engine.task_manager.add(self._chase_task, self.CHASE_TASK_NAME, extraArgs=[vehicle], appendTask=True)
         self.camera_queue = queue.Queue(self.queue_length)
         for i in range(self.queue_length - 1):
@@ -242,3 +271,14 @@ class MainCamera:
 
     def is_bird_view_camera(self):
         return True if self.engine.task_manager.hasTaskNamed(self.TOP_DOWN_TASK_NAME) else False
+
+    @property
+    def has_mouse(self):
+        return True if self.engine.mouseWatcherNode.hasMouse() else False
+
+    def set_mouse_to_center(self):
+        mouse_id = 0
+        if self.has_mouse:
+            win_middle_x = self.engine.win.getXSize() / 2
+            win_middle_y = self.engine.win.getYSize() / 2
+            self.engine.win.movePointer(mouse_id, int(win_middle_x), int(win_middle_y))

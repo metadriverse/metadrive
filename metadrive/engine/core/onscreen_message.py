@@ -22,7 +22,7 @@ class ScreenMessage(OnScreenDebug.OnScreenDebug):
         self._refresh_plain_text = refresh_plain_text
         self._show_help_message = False
 
-    def update_data(self, data: Optional[Union[dict, str]]):
+    def _update_data(self, data: Optional[Union[dict, str]]):
         # Several Node will be destructing or constructing again and again when debug pgraph
         self.onScreenText.cleanup()
         if isinstance(data, str):
@@ -43,7 +43,8 @@ class ScreenMessage(OnScreenDebug.OnScreenDebug):
     def set_scale(self, scale=None):
         self.SCALE = scale
 
-    def render(self):
+    def render(self, data: Optional[Union[dict, str]] = None):
+        self._update_data(data)
         if not self.enabled:
             return
         if not self.onScreenText:

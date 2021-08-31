@@ -3,7 +3,7 @@ from metadrive.envs.metadrive_env import MetaDriveEnv
 
 def local_test_apply_action():
     try:
-        env = MetaDriveEnv({"map": "SSS", "use_render": True, "fast": True})
+        env = MetaDriveEnv({"map": "SSS", "use_render": True})
         o = env.reset()
         for act in [-1, 1]:
             for _ in range(300):

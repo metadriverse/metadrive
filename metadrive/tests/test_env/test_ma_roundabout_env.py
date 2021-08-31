@@ -308,7 +308,7 @@ def test_ma_roundabout_reward_done_alignment_1():
             "delay_done": 0,
 
             # "use_render": True,
-            # "fast": True,
+            #
             "top_down_camera_initial_z": 160
         }
     )
@@ -368,7 +368,7 @@ def test_ma_roundabout_reward_done_alignment_1():
                 "lane_num": 1
             },
             # "use_render": True,
-            # "fast": True,
+            #
             "horizon": 200,
             "num_agents": 40,
             "crash_vehicle_penalty": 1.7777,
@@ -671,7 +671,7 @@ def test_ma_no_reset_error():
 
 def test_randomize_spawn_place():
     last_pos = {}
-    env = MultiAgentRoundaboutEnv({"num_agents": 4, "use_render": False, "fast": True})
+    env = MultiAgentRoundaboutEnv({"num_agents": 4, "use_render": False})
     try:
         obs = env.reset()
         for step in range(100):

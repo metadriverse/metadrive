@@ -28,7 +28,6 @@ if __name__ == "__main__":
     env = ArgoverseEnv(
         {
             "traffic_density": 0.,
-            "onscreen_message": True,
             # "debug_physics_world": True,
             "pstats": True,
             "global_light": True,
@@ -40,7 +39,6 @@ if __name__ == "__main__":
             "decision_repeat": 5,
             "rgb_clip": True,
             # "debug": False,
-            "fast": False,
             "vehicle_config": {
                 "enable_reverse": True,
                 "side_detector": dict(num_lasers=2, distance=50),

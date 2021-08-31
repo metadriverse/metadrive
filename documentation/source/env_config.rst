@@ -129,7 +129,6 @@ PGWorld Config
      - :code:`debug` (bool): The debug value in MetaDriveEnv will be passed to PGWorld.
      - :code:`physics_world_step_size` (float): The minimum step size of bullet physics engine.
      - :code:`show_fps` (bool): Turn on/ turn off the frame rater.
-     - :code:`onscreen_message` (bool): Turn on to show help message or your self defined messages by organizing them in a *dict* and pass it in *render(text=your_messgaes_dict)* function.
      - :code:`force_fps` (None or float): *None* means no render fps limit, while *float* indicates the maximum render FPS.
      - :code:`decision_repeat` (int): This will be written by MetaDriveEnv to do ForceFPS.
      - :code:`debug_physics_world` (bool): Only render physics world without model, a special debug option.

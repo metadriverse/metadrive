@@ -1,26 +1,23 @@
-<img align=right width=250px  src="metadrive/assets/logo.png" />
+<br>
 
-# MetaDrive: an open-ended driving simulator with infinite scenes
+# MetaDrive: Composing Diverse Driving Scenarios for Generalizable Reinforcement Learning
 
-[![build](https://github.com/decisionforce/metadrive/workflows/test/badge.svg)](http://github.com/decisionforce/metadrive/actions)
-[![codecov](https://codecov.io/gh/decisionforce/metadrive/branch/main/graph/badge.svg?token=1ZYN8L5397)](https://codecov.io/gh/decisionforce/metadrive)
-[![Documentation](https://readthedocs.org/projects/metadrive/badge/?version=latest)](https://metadrive.readthedocs.io)
-[![GitHub license](https://img.shields.io/github/license/decisionforce/metadrive)](https://github.com/decisionforce/metadrive/blob/main/LICENSE.txt)
-[![GitHub stars](https://img.shields.io/github/stars/decisionforce/metadrive)](https://github.com/decisionforce/metadrive/stargazers)
+<br>
 
+![](metadrive/assets/logo.png)
 
-**Though the development of MetaDrive is alrady settled for current stage, we are still working on managing the documentation and other stuff. We expect to finish all cleanup by 1st, September.**
+<br>
 
 
+**Though the development of MetaDrive is already settled for current stage, we are still working on managing the documentation and other stuff. We expect to finish all cleanup by 1st, September.**
 
 
 Welcome to MetaDrive! MetaDrive is an driving simulator with many key features, including:
 
-- 🎏 **Lightweight**: Extremely easy to download, install and run in almost all platforms.
-- 📷 **Realistic**: Accurate physics simulation and multiple sensory inputs.
-- 🚀 **Efficient**: Up to 500 simulation step per second and easy to parallel.
-- 🗺 **Open-ended**: Support generating infinite scenes and configuring various traffic, vehicle, and environmental settings.
-
+- **Lightweight**: Extremely easy to download, install and run in almost all platforms.
+- **Realistic**: Accurate physics simulation and multiple sensory inputs.
+- **Efficient**: Up to 500 simulation step per second and easy to parallel.
+- **Compositionality**: Support generating infinite scenes and configuring various traffic, vehicle, and environmental settings.
 
 <img src="docs/images/panel.jpg">
 
@@ -39,6 +36,7 @@ pip install -e .
 You can verify the installation and efficiency of MetaDrive via running:
 
 ```bash
+cd ~/
 python -m metadrive.examples.profile_metadrive
 ```
 
@@ -47,7 +45,8 @@ Note that please do not run the above command in the folder that has a sub-folde
 
 ## 🚕 Examples
 
-Please run the following line to drive the car in the environment manually with keyboard!
+Please run the following command to drive the car in the environment manually with keyboard! 
+Pressing W, A, S, D to move and turn and T to trigger the auto-drive mode!
 
 ```bash
 python -m metadrive.examples.enjoy_manual
@@ -59,14 +58,6 @@ You can also enjoy a journey carrying out by our professional driver pretrained 
 python -m metadrive.examples.enjoy_expert
 ```
 
-A fusion of expert and manual controller, 
-where the expect will try to rescue the manually controlled vehicle from danger, 
-can be experienced via:
-
-```bash
-python -m metadrive.examples.enjoy_saver
-```
-
 To show the main feature, procedural generation, we provide a script to show BIG:
 
 ```bash
@@ -76,7 +67,7 @@ python -m metadrive.examples.render_big
 *Note that the above three scripts can not be run in headless machine.* 
 Please refer to the installation guideline in documentation for more information.
 
-Running the following line allows you to draw the generated maps:
+Running the following command to draw the generated maps from procedural generation:
 
 ```bash
 python -m metadrive.examples.draw_maps
@@ -129,7 +120,7 @@ The following table presents some predefined environment names.
 
 ## 🏫 Documentations
 
-Working in Progress!
+Find more detail in: [MetaDrive](https://metadrive-simulator.readthedocs.io)
 
 
 ## 📎 Citation
@@ -137,7 +128,10 @@ Working in Progress!
 Working in Progress!
 
 
+[![build](https://github.com/decisionforce/metadrive/workflows/test/badge.svg)](http://github.com/decisionforce/metadrive/actions)
+[![codecov](https://codecov.io/gh/decisionforce/metadrive/branch/main/graph/badge.svg?token=1ZYN8L5397)](https://codecov.io/gh/decisionforce/metadrive)
+[![Documentation](https://readthedocs.org/projects/metadrive/badge/?version=latest)](https://metadrive.readthedocs.io)
+[![GitHub license](https://img.shields.io/github/license/decisionforce/metadrive)](https://github.com/decisionforce/metadrive/blob/main/LICENSE.txt)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/2d6fabe328a644b49e1269497b741057)](https://www.codacy.com/gh/decisionforce/metadrive/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=decisionforce/metadrive&amp;utm_campaign=Badge_Grade)
 [![GitHub contributors](https://img.shields.io/github/contributors/decisionforce/metadrive)](https://github.com/decisionforce/metadrive/graphs/contributors)
-[![GitHub forks](https://img.shields.io/github/forks/decisionforce/metadrive)](https://github.com/decisionforce/metadrive/network)
-[![GitHub issues](https://img.shields.io/github/issues/decisionforce/metadrive)](https://github.com/decisionforce/metadrive/issues)
+

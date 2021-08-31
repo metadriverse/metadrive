@@ -104,7 +104,8 @@ class LidarStateObservationMARound(ObservationBase):
             )
             self.cloud_points = cloud_points
             self.detected_objects = detected_objects
-        return np.concatenate((state, np.asarray(other_v_info)))
+        self.current_observation = np.concatenate((state, np.asarray(other_v_info)))
+        return self.current_observation
 
     def state_observe(self, vehicle):
         return self.state_obs.observe(vehicle)
@@ -177,7 +178,7 @@ def _expert():
             "use_AI_protector": True,
             "save_level": 1.,
             "debug_physics_world": True,
-            "fast": True,
+
             # "use_render": True,
             "debug": True,
             "manual_control": True,
@@ -221,7 +222,6 @@ def _vis_debug_respawn():
                 "show_lidar": False,
             },
             "debug_physics_world": True,
-            "fast": True,
             "use_render": True,
             "debug": False,
             "manual_control": True,
@@ -272,7 +272,6 @@ def _vis():
                 },
                 "show_lidar": False,
             },
-            "fast": True,
             "use_render": True,
             "debug": False,
             "manual_control": True,
