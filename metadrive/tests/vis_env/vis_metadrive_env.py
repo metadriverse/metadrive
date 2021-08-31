@@ -31,7 +31,7 @@ if __name__ == "__main__":
             # },
             "pstats": True,
             # "discrete_action": True,
-            "map": "XCSSS",
+            "map": "SSS",
             "random_traffic": False,
             "random_lane_width": True,
             "random_agent_model": True,

@@ -216,8 +216,7 @@ class EngineCore(ShowBase.ShowBase):
             self.cam.node().getDisplayRegion(0).setClearColorActive(True)
             self.cam.node().getDisplayRegion(0).setClearColor(BKG_COLOR)
             lens = self.cam.node().getLens()
-            lens.setFov(70)
-            lens.setAspectRatio(1.2)
+            lens.setFov(80)
 
             self.sky_box = SkyBox()
             self.sky_box.attach_to_world(self.render, self.physics_world)
