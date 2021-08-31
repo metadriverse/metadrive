@@ -37,7 +37,7 @@ class Vehicle:
         np_random: np.random.RandomState = None,
         name: str = None
     ):
-
+        raise DeprecationWarning("We don't use kinematics from highway now")
         deprecation_warning("Vehicle", "Policy Class", error=False)
 
         self.name = random_string() if name is None else name
