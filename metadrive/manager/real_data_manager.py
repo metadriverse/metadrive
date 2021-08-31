@@ -26,13 +26,7 @@ class RealDataManager(BaseManager):
         Replay Argoverse data.
         """
         super(RealDataManager, self).__init__()
-
         self._traffic_vehicles = []
-        self.block_triggered_vehicles = []
-
-        # traffic property
-        self.respawn_lanes = None
-        self._traffic_vehicles_inited = False
 
     def reset(self):
         """
@@ -40,13 +34,6 @@ class RealDataManager(BaseManager):
         :return: List of Traffic vehicles
         """
         map = self.current_map
-
-        # update vehicle list
-        self.block_triggered_vehicles = []
-
-        traffic_density = self.density
-        self.respawn_lanes = self.respawn_lanes = self._get_available_respawn_lanes(map)
-
         self._create_argoverse_vehicles_once(map)
 
     def before_step(self):
@@ -57,33 +44,9 @@ class RealDataManager(BaseManager):
         # trigger vehicles
         engine = self.engine
 
-        if not self._traffic_vehicles_inited:
-            self._traffic_vehicles = [i.vehicles[0] for i in self.block_triggered_vehicles]
-            self._traffic_vehicles_inited = True
-
         for v in self._traffic_vehicles:
             p = self.engine.get_policy(v.name)
             v.before_step(p.act())
-        return dict()
-
-    def after_step(self):
-        """
-        Update all traffic vehicles' states,
-        """
-        # v_to_remove = []
-        # for v in self._traffic_vehicles:
-        #     v.after_step()
-        #     if not v.on_lane:
-        #         v_to_remove.append(v)
-                # lane = self.respawn_lanes[self.np_random.randint(0, len(self.respawn_lanes))]
-                # lane_idx = lane.index
-                # long = self.np_random.rand() * lane.length / 2
-                # v.update_config({"spawn_lane_index": lane_idx, "spawn_longitude": long})
-                # v.reset(self.current_map)
-                # self.engine.get_policy(v.id).reset()
-        # for v in v_to_remove:
-        #     self.clear_objects([v.id])
-        #     self._traffic_vehicles.remove(v)
         return dict()
 
     def before_reset(self) -> None:
@@ -93,7 +56,6 @@ class RealDataManager(BaseManager):
         """
         super(RealDataManager, self).before_reset()
         self.density = self.engine.global_config["traffic_density"]
-        self.block_triggered_vehicles = []
         self._traffic_vehicles = []
 
     def get_vehicle_num(self):
@@ -101,114 +63,7 @@ class RealDataManager(BaseManager):
         Get the vehicles on road
         :return:
         """
-        if self.mode == TrafficMode.Respawn:
-            return len(self._traffic_vehicles)
-        return sum(len(block_vehicle_set.vehicles) for block_vehicle_set in self.block_triggered_vehicles)
-
-    def get_global_states(self) -> Dict:
-        """
-        Return all traffic vehicles' states
-        :return: States of all vehicles
-        """
-        states = dict()
-        traffic_states = dict()
-        for vehicle in self._traffic_vehicles:
-            traffic_states[vehicle.index] = vehicle.get_state()
-
-        # collect other vehicles
-        if self.mode != TrafficMode.Respawn:
-            for v_b in self.block_triggered_vehicles:
-                for vehicle in v_b.vehicles:
-                    traffic_states[vehicle.index] = vehicle.get_state()
-        states[TRAFFIC_VEHICLES] = traffic_states
-        active_obj = copy.copy(self.engine.agent_manager._active_objects)
-        pending_obj = copy.copy(self.engine.agent_manager._pending_objects)
-        dying_obj = copy.copy(self.engine.agent_manager._dying_objects)
-        states[TARGET_VEHICLES] = {k: v.get_state() for k, v in active_obj.items()}
-        states[TARGET_VEHICLES] = merge_dicts(
-            states[TARGET_VEHICLES], {k: v.get_state()
-                                      for k, v in pending_obj.items()}, allow_new_keys=True
-        )
-        states[TARGET_VEHICLES] = merge_dicts(
-            states[TARGET_VEHICLES], {k: v_count[0].get_state()
-                                      for k, v_count in dying_obj.items()},
-            allow_new_keys=True
-        )
-
-        states[OBJECT_TO_AGENT] = copy.deepcopy(self.engine.agent_manager._object_to_agent)
-        states[AGENT_TO_OBJECT] = copy.deepcopy(self.engine.agent_manager._agent_to_object)
-        return states
-
-    def get_global_init_states(self) -> Dict:
-        """
-        Special handling for first states of traffic vehicles
-        :return: States of all vehicles
-        """
-        vehicles = dict()
-        for vehicle in self._traffic_vehicles:
-            init_state = vehicle.get_state()
-            init_state["index"] = vehicle.index
-            init_state["type"] = vehicle.class_name
-            init_state["enable_respawn"] = vehicle.enable_respawn
-            vehicles[vehicle.index] = init_state
-
-        # collect other vehicles
-        if self.mode != TrafficMode.Respawn:
-            for v_b in self.block_triggered_vehicles:
-                for vehicle in v_b.vehicles:
-                    init_state = vehicle.get_state()
-                    init_state["type"] = vehicle.class_name
-                    init_state["index"] = vehicle.index
-                    init_state["enable_respawn"] = vehicle.enable_respawn
-                    vehicles[vehicle.index] = init_state
-        return vehicles
-
-    def _create_vehicles_on_lane(self, traffic_density: float, lane: AbstractLane, is_respawn_lane):
-        """
-        Create vehicles on a lane
-        :param traffic_density: traffic density according to num of vehicles per meter
-        :param lane: Circular lane or Straight lane
-        :param is_respawn_lane: Whether vehicles should be respawn on this lane or not
-        :return: List of vehicles
-        """
-
-        from metadrive.component.blocks.ramp import InRampOnStraight
-        _traffic_vehicles = []
-        total_num = int(lane.length / self.VEHICLE_GAP)
-        vehicle_longs = [i * self.VEHICLE_GAP for i in range(total_num)]
-        self.np_random.shuffle(vehicle_longs)
-        for long in vehicle_longs:
-            # if self.np_random.rand() > traffic_density and abs(lane.length - InRampOnStraight.RAMP_LEN) > 0.1:
-            #     # Do special handling for ramp, and there must be vehicles created there
-            #     continue
-            vehicle_type = self.random_vehicle_type()
-            random_v = self.spawn_object(
-                vehicle_type,
-                vehicle_config={
-                    "spawn_lane_index": lane.index,
-                    "spawn_longitude": long,
-                    "enable_reverse": False
-                }
-            )
-            from metadrive.policy.idm_policy import IDMPolicy
-            self.engine.add_policy(random_v.id, IDMPolicy(random_v, self.generate_seed()))
-            _traffic_vehicles.append(random_v)
-        return _traffic_vehicles
-
-    def _propose_vehicle_configs(self, lane: AbstractLane):
-        potential_vehicle_configs = []
-        total_num = int(lane.length / self.VEHICLE_GAP)
-        vehicle_longs = [i * self.VEHICLE_GAP for i in range(total_num)]
-        # Only choose given number of vehicles
-        for long in vehicle_longs:
-            random_vehicle_config = {"spawn_lane_index": lane.index, "spawn_longitude": long, "enable_reverse": False}
-            potential_vehicle_configs.append(random_vehicle_config)
-        return potential_vehicle_configs
-
-    def _create_respawn_vehicles(self, map: BaseMap, traffic_density: float):
-        respawn_lanes = self._get_available_respawn_lanes(map)
-        for lane in respawn_lanes:
-            self._traffic_vehicles += self._create_vehicles_on_lane(traffic_density, lane, True)
+        return len(self._traffic_vehicles)
 
     def _create_argoverse_vehicles_once(self, map: BaseMap) -> None:
         """
@@ -233,13 +88,11 @@ class RealDataManager(BaseManager):
                 if start[0] > pos[0] > end[0] and start[1] > pos[1] > end[1]:
                     long, lat = l.local_coordinates(pos)
                     config = {
-                        #* 如何控制出生车道?
                         "id": idx,
                         "type": v_type,
                         "v_config": {
                             "spawn_lane_index": l.index,
                             "spawn_longitude": long,
-                            # "spawn_lateral": lat,
                             "enable_reverse": False,
                         }
                     }
@@ -247,7 +100,6 @@ class RealDataManager(BaseManager):
                     pos_dict.pop(idx, None)
                     break
         from metadrive.policy.replay_policy import ReplayPolicy
-        # vehicle_type = SVehicle
         for road in roads:
             for config in potential_vehicle_configs:
                 v_config = config["v_config"]
@@ -257,75 +109,10 @@ class RealDataManager(BaseManager):
                     generated_v = self.spawn_object(config["type"], vehicle_config=v_config)
                     generated_v.set_static(True)
                     self.engine.add_policy(generated_v.id, ReplayPolicy(generated_v, locate_info[config["id"]]))
-                    block_vehicles = BlockVehicles(trigger_road=road, vehicles=[generated_v])
-                    self.block_triggered_vehicles.append(block_vehicles)
+                    self._traffic_vehicles.append(generated_v)
                     potential_vehicle_configs.remove(config)
                     break
-        self.block_triggered_vehicles.reverse()
 
-
-    def _create_vehicles_once(self, map: BaseMap, traffic_density: float) -> None:
-        """
-        Trigger mode, vehicles will be triggered only once, and disappear when arriving destination
-        :param map: Map
-        :param traffic_density: it can be adjusted each episode
-        :return: None
-        """
-        vehicle_num = 0
-        for block in map.blocks[1:]:
-
-            # Propose candidate locations for spawning new vehicles
-            trigger_lanes = block.get_intermediate_spawn_lanes()
-            potential_vehicle_configs = []
-            for lanes in trigger_lanes:
-                for l in lanes:
-                    if l in self.engine.object_manager.accident_lanes:
-                        continue
-                    potential_vehicle_configs += self._propose_vehicle_configs(l)
-
-            # How many vehicles should we spawn in this block?
-            total_length = sum([lane.length for lanes in trigger_lanes for lane in lanes])
-            total_spawn_points = int(math.floor(total_length / self.VEHICLE_GAP))
-            total_vehicles = int(math.floor(total_spawn_points * traffic_density))
-
-            # Generate vehicles!
-            vehicles_on_block = []
-            self.np_random.shuffle(potential_vehicle_configs)
-            selected = potential_vehicle_configs[:min(total_vehicles, len(potential_vehicle_configs))]
-            # print("We have {} candidates! We are spawning {} vehicles!".format(total_vehicles, len(selected)))
-
-            from metadrive.policy.idm_policy import IDMPolicy
-            for v_config in selected:
-                vehicle_type = self.random_vehicle_type(prob=[0.4, 0.3, 0.3, 0, 0])
-                random_v = self.spawn_object(vehicle_type, vehicle_config=v_config)
-                self.engine.add_policy(random_v.id, IDMPolicy(random_v, self.generate_seed()))
-                vehicles_on_block.append(random_v)
-
-            trigger_road = block.pre_block_socket.positive_road
-            block_vehicles = BlockVehicles(trigger_road=trigger_road, vehicles=vehicles_on_block)
-
-            self.block_triggered_vehicles.append(block_vehicles)
-            vehicle_num += len(vehicles_on_block)
-        self.block_triggered_vehicles.reverse()
-
-    def _get_available_respawn_lanes(self, map: BaseMap) -> list:
-        """
-        Used to find some respawn lanes
-        :param map: select spawn lanes from this map
-        :return: respawn_lanes
-        """
-        respawn_lanes = []
-        respawn_roads = []
-        for block in map.blocks:
-            roads = block.get_respawn_roads()
-            for road in roads:
-                if road in respawn_roads:
-                    respawn_roads.remove(road)
-                else:
-                    respawn_roads.append(road)
-        for road in respawn_roads:
-            respawn_lanes += road.get_lanes(map.road_network)
-        return respawn_lanes
 
     def random_vehicle_type(self, prob=[0.2, 0.3, 0.3, 0.2, 0]):
         from metadrive.component.vehicle.vehicle_type import random_vehicle_type
@@ -343,12 +130,6 @@ class RealDataManager(BaseManager):
 
         # traffic vehicle list
         self._traffic_vehicles = None
-        self.block_triggered_vehicles = None
-
-        # traffic property
-        self.mode = None
-        self.random_traffic = None
-        self.density = None
 
     def __del__(self):
         logging.debug("{} is destroyed".format(self.__class__.__name__))
