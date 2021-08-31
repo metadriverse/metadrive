@@ -11,6 +11,7 @@ class StateObservation(ObservationBase):
     """
     Use vehicle state info, navigation info and lidar point clouds info as input
     """
+
     def __init__(self, config):
         super(StateObservation, self).__init__(config)
 
@@ -20,7 +21,7 @@ class StateObservation(ObservationBase):
         shape = self.ego_state_obs_dim + Navigation.navigation_info_dim + self.get_line_detector_dim()
         if self.config["random_agent_model"]:
             shape += 2
-        return gym.spaces.Box(-0.0, 1.0, shape=(shape, ), dtype=np.float32)
+        return gym.spaces.Box(-0.0, 1.0, shape=(shape,), dtype=np.float32)
 
     def observe(self, vehicle):
         """
@@ -61,6 +62,9 @@ class StateObservation(ObservationBase):
         """
         # update out of road
         info = []
+        if self.config["random_agent_model"]:
+            info.append(clip(vehicle.LENGTH / vehicle.MAX_LENGTH, 0.0, 1.0))
+            info.append(clip(vehicle.WIDTH / vehicle.MAX_WIDTH, 0.0, 1.0))
         if hasattr(vehicle, "side_detector") and vehicle.side_detector.available:
             info += vehicle.side_detector.perceive(vehicle, vehicle.engine.physics_world.static_world).cloud_points
         else:
@@ -98,11 +102,6 @@ class StateObservation(ObservationBase):
         else:
             _, lateral = vehicle.lane.local_coordinates(vehicle.position)
             info.append(clip((lateral * 2 / vehicle.navigation.map.MAX_LANE_WIDTH + 1.0) / 2.0, 0.0, 1.0))
-
-        # add vehicle length/width
-        if self.config["random_agent_model"]:
-            info.append(clip(vehicle.LENGTH / vehicle.MAX_LENGTH, 0.0, 1.0))
-            info.append(clip(vehicle.WIDTH / vehicle.MAX_WIDTH, 0.0, 1.0))
         return info
 
     def get_line_detector_dim(self):
@@ -147,7 +146,8 @@ class LidarStateObservation(ObservationBase):
         """
         state = self.state_observe(vehicle)
         other_v_info = self.lidar_observe(vehicle)
-        return np.concatenate((state, np.asarray(other_v_info)))
+        self.current_observation = np.concatenate((state, np.asarray(other_v_info)))
+        return self.current_observation
 
     def state_observe(self, vehicle):
         return self.state_obs.observe(vehicle)

@@ -112,10 +112,10 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     path = None
 
     def __init__(
-        self,
-        vehicle_config: Union[dict, Config] = None,
-        name: str = None,
-        random_seed=None,
+            self,
+            vehicle_config: Union[dict, Config] = None,
+            name: str = None,
+            random_seed=None,
     ):
         """
         This Vehicle Config is different from self.get_config(), and it is used to define which modules to use, and
@@ -336,6 +336,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         # overtake_stat
         self.front_vehicles = set()
         self.back_vehicles = set()
+        self.expert_takeover = False
 
         assert self.navigation
 
@@ -451,8 +452,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         if not lateral_norm * forward_direction_norm:
             return 0
         cos = (
-            (forward_direction[0] * lateral[0] + forward_direction[1] * lateral[1]) /
-            (lateral_norm * forward_direction_norm)
+                (forward_direction[0] * lateral[0] + forward_direction[1] * lateral[1]) /
+                (lateral_norm * forward_direction_norm)
         )
         # return cos
         # Normalize to 0, 1
@@ -557,7 +558,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             model_path = 'models/yugo/yugotireR.egg' if left else 'models/yugo/yugotireL.egg'
             wheel_model = self.loader.loadModel(AssetLoader.file_path(model_path))
             wheel_model.reparentTo(wheel_np)
-            wheel_model.set_scale(self.TIRE_WIDTH/0.15, radius / 0.25, radius / 0.25)
+            wheel_model.set_scale(self.TIRE_WIDTH / 0.15, radius / 0.25, radius / 0.25)
         wheel = self.system.create_wheel()
         wheel.setNode(wheel_np.node())
         wheel.setChassisConnectionPointCs(pos)
@@ -704,7 +705,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             ckpt_idx = routing._target_checkpoints_index
             for surrounding_v in surrounding_vs:
                 if surrounding_v.lane_index[:-1] == (routing.checkpoints[ckpt_idx[0]], routing.checkpoints[ckpt_idx[1]
-                                                                                                           ]):
+                ]):
                     if self.lane.local_coordinates(self.position)[0] - \
                             self.lane.local_coordinates(surrounding_v.position)[0] < 0:
                         self.front_vehicles.add(surrounding_v)
@@ -719,10 +720,10 @@ class BaseVehicle(BaseObject, BaseVehicleState):
 
     @classmethod
     def get_action_space_before_init(
-        cls, extra_action_dim: int = 0, discrete_action=False, steering_dim=5, throttle_dim=5
+            cls, extra_action_dim: int = 0, discrete_action=False, steering_dim=5, throttle_dim=5
     ):
         if not discrete_action:
-            return gym.spaces.Box(-1.0, 1.0, shape=(2 + extra_action_dim, ), dtype=np.float32)
+            return gym.spaces.Box(-1.0, 1.0, shape=(2 + extra_action_dim,), dtype=np.float32)
         else:
             return gym.spaces.MultiDiscrete([steering_dim, throttle_dim])
 
@@ -739,8 +740,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     def arrive_destination(self):
         long, lat = self.navigation.final_lane.local_coordinates(self.position)
         flag = (self.navigation.final_lane.length - 5 < long < self.navigation.final_lane.length + 5) and (
-            self.navigation.get_current_lane_width() / 2 >= lat >=
-            (0.5 - self.navigation.get_current_lane_num()) * self.navigation.get_current_lane_width()
+                self.navigation.get_current_lane_width() / 2 >= lat >=
+                (0.5 - self.navigation.get_current_lane_num()) * self.navigation.get_current_lane_width()
         )
         return flag
 
@@ -763,9 +764,9 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     @property
     def replay_done(self):
         return self._replay_done if hasattr(self, "_replay_done") else (
-            self.crash_building or self.crash_vehicle or
-            # self.on_white_continuous_line or
-            self.on_yellow_continuous_line
+                self.crash_building or self.crash_vehicle or
+                # self.on_white_continuous_line or
+                self.on_yellow_continuous_line
         )
 
     @property

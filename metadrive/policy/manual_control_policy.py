@@ -1,12 +1,19 @@
 from metadrive.engine.core.manual_controller import KeyboardController, SteeringWheelController
+from metadrive.utils import clip
+from metadrive.examples import expert
 from metadrive.policy.env_input_policy import EnvInputPolicy
 from metadrive.engine.engine_utils import get_global_config
 
 
 class ManualControlPolicy(EnvInputPolicy):
+    """
+    Control the current track vehicle
+    """
+
     def __init__(self):
         super(ManualControlPolicy, self).__init__()
         config = get_global_config()
+        self.engine.accept("t", self.toggle_takeover)
         if config["manual_control"] and config["use_render"]:
             if config["controller"] == "keyboard":
                 self.controller = KeyboardController()
@@ -20,11 +27,21 @@ class ManualControlPolicy(EnvInputPolicy):
                 raise ValueError("No such a controller type: {}".format(self.config["controller"]))
 
     def act(self, agent_id):
+        if self.engine.current_track_vehicle.expert_takeover:
+            obs = self.engine.agent_manager.observations[self.engine.current_track_vehicle.id].current_observation
+            if self.engine.global_config["random_agent_model"]:
+                obs = obs[2:]
+            expert_action = expert(obs)
+            return clip(expert_action[0], -1, 1), clip(expert_action[1], -1, 1)
         if self.engine.global_config["manual_control"] and self.engine.agent_manager.get_agent(
                 agent_id) is self.engine.current_track_vehicle and not self.engine.main_camera.is_bird_view_camera():
             return self.controller.process_input(self.engine.current_track_vehicle)
         else:
             return super(ManualControlPolicy, self).act(agent_id)
+
+    def toggle_takeover(self):
+        if self.engine.current_track_vehicle is not None:
+            self.engine.current_track_vehicle.expert_takeover = not self.engine.current_track_vehicle.expert_takeover
 
 
 class TakeoverPolicy(EnvInputPolicy):
