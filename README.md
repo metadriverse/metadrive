@@ -4,28 +4,20 @@
 
 <br>
 
-![](metadrive/assets/logo.png)s
+![](metadrive/assets/logo.png)
 
 <br>
 
-[![build](https://github.com/decisionforce/metadrive/workflows/test/badge.svg)](http://github.com/decisionforce/metadrive/actions)
-[![codecov](https://codecov.io/gh/decisionforce/metadrive/branch/main/graph/badge.svg?token=1ZYN8L5397)](https://codecov.io/gh/decisionforce/metadrive)
-[![Documentation](https://readthedocs.org/projects/metadrive/badge/?version=latest)](https://metadrive.readthedocs.io)
-[![GitHub license](https://img.shields.io/github/license/decisionforce/metadrive)](https://github.com/decisionforce/metadrive/blob/main/LICENSE.txt)
-[![GitHub stars](https://img.shields.io/github/stars/decisionforce/metadrive)](https://github.com/decisionforce/metadrive/stargazers)
 
-
-**Though the development of MetaDrive is alrady settled for current stage, we are still working on managing the documentation and other stuff. We expect to finish all cleanup by 1st, September.**
-
-
+**Though the development of MetaDrive is already settled for current stage, we are still working on managing the documentation and other stuff. We expect to finish all cleanup by 1st, September.**
 
 
 Welcome to MetaDrive! MetaDrive is an driving simulator with many key features, including:
 
-- 🎏 **Lightweight**: Extremely easy to download, install and run in almost all platforms.
-- 📷 **Realistic**: Accurate physics simulation and multiple sensory inputs.
-- 🚀 **Efficient**: Up to 500 simulation step per second and easy to parallel.
-- 🗺 **Compositionality**: Support generating infinite scenes and configuring various traffic, vehicle, and environmental settings.
+- **Lightweight**: Extremely easy to download, install and run in almost all platforms.
+- **Realistic**: Accurate physics simulation and multiple sensory inputs.
+- **Efficient**: Up to 500 simulation step per second and easy to parallel.
+- **Compositionality**: Support generating infinite scenes and configuring various traffic, vehicle, and environmental settings.
 
 <img src="docs/images/panel.jpg">
 
@@ -135,7 +127,10 @@ Working in Progress!
 Working in Progress!
 
 
+[![build](https://github.com/decisionforce/metadrive/workflows/test/badge.svg)](http://github.com/decisionforce/metadrive/actions)
+[![codecov](https://codecov.io/gh/decisionforce/metadrive/branch/main/graph/badge.svg?token=1ZYN8L5397)](https://codecov.io/gh/decisionforce/metadrive)
+[![Documentation](https://readthedocs.org/projects/metadrive/badge/?version=latest)](https://metadrive.readthedocs.io)
+[![GitHub license](https://img.shields.io/github/license/decisionforce/metadrive)](https://github.com/decisionforce/metadrive/blob/main/LICENSE.txt)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/2d6fabe328a644b49e1269497b741057)](https://www.codacy.com/gh/decisionforce/metadrive/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=decisionforce/metadrive&amp;utm_campaign=Badge_Grade)
 [![GitHub contributors](https://img.shields.io/github/contributors/decisionforce/metadrive)](https://github.com/decisionforce/metadrive/graphs/contributors)
-[![GitHub forks](https://img.shields.io/github/forks/decisionforce/metadrive)](https://github.com/decisionforce/metadrive/network)
-[![GitHub issues](https://img.shields.io/github/issues/decisionforce/metadrive)](https://github.com/decisionforce/metadrive/issues)
+
