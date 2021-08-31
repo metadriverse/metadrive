@@ -24,11 +24,7 @@ def draw_multi_channels_top_down_observation(obs):
     num_channels = obs.shape[-1]
     assert num_channels == 5
     channel_names = [
-        "Road and navigation",
-        "Ego previous pos",
-        "Neighbor at step t",
-        "Neighbor at step t-1",
-        "Neighbor at step t-2"
+        "Road and navigation", "Ego previous pos", "Neighbor at step t", "Neighbor at step t-1", "Neighbor at step t-2"
     ]
     fig, axs = plt.subplots(1, num_channels, figsize=(15, 4), dpi=150)
     count = 0
@@ -54,7 +50,6 @@ if __name__ == "__main__":
             # You can also try to uncomment next line with "use_render=True", so that you can control the ego vehicle
             # with keyboard in the main window.
             # manual_control=True,
-
             map="O",
             traffic_density=0.1,
             environment_num=100,
