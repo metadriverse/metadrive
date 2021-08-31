@@ -3,6 +3,7 @@ import numpy as np
 from copy import deepcopy
 has_rendered = False
 
+
 class ReplayPolicy(BasePolicy):
     def __init__(self, control_object, locate_info):
         super(ReplayPolicy, self).__init__(control_object=control_object)
@@ -21,18 +22,17 @@ class ReplayPolicy(BasePolicy):
             self.timestep += 1
             self.damp = 0
         else:
-            return [0,0]
+            return [0, 0]
 
         if str(self.timestep) == self.start_index:
             self.control_object.set_position(self.init_pos)
         elif str(self.timestep) in self.traj_info.keys():
             self.control_object.set_position(self.traj_info[str(self.timestep)])
-            
 
         if self.heading is None or str(self.timestep - 1) not in self.heading.keys():
             pass
         else:
             this_heading = self.heading[str(self.timestep - 1)]
-            self.control_object.set_heading(np.arctan2(this_heading[0], this_heading[1]) - np.pi/2)
+            self.control_object.set_heading(np.arctan2(this_heading[0], this_heading[1]) - np.pi / 2)
 
         return [0, 0]

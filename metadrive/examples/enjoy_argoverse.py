@@ -17,11 +17,7 @@ class ArgoverseEnv(MetaDriveEnv):
         data_path = root_path.joinpath("assets").joinpath("real_data").joinpath("{}.pkl".format(log_id))
         with open(data_path, 'rb') as f:
             locate_info, _ = pickle.load(f)
-        config.update({
-            "real_data_config": {
-                "locate_info": locate_info
-            }
-        })
+        config.update({"real_data_config": {"locate_info": locate_info}})
 
         return config
 

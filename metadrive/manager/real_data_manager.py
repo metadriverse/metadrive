@@ -74,11 +74,11 @@ class RealDataManager(BaseManager):
         """
         real_data_config = self.engine.global_config["real_data_config"]
         locate_info = real_data_config["locate_info"]
-        pos_dict = {i:j["init_pos"] for i,j in zip(locate_info.keys(), locate_info.values())}
-        
+        pos_dict = {i: j["init_pos"] for i, j in zip(locate_info.keys(), locate_info.values())}
+
         block = map.blocks[0]
         lanes = block.argo_lanes
-        roads = block.block_network.get_roads(direction='positive', lane_num = 1)
+        roads = block.block_network.get_roads(direction='positive', lane_num=1)
         potential_vehicle_configs = []
         for l in lanes:
             start = np.max(l.centerline, axis=0)
@@ -104,7 +104,7 @@ class RealDataManager(BaseManager):
             for config in potential_vehicle_configs:
                 v_config = config["v_config"]
                 v_start = v_config["spawn_lane_index"][0]
-                v_end   = v_config["spawn_lane_index"][1]
+                v_end = v_config["spawn_lane_index"][1]
                 if road.start_node == v_start and road.end_node == v_end:
                     generated_v = self.spawn_object(config["type"], vehicle_config=v_config)
                     generated_v.set_static(True)
@@ -112,7 +112,6 @@ class RealDataManager(BaseManager):
                     self._traffic_vehicles.append(generated_v)
                     potential_vehicle_configs.remove(config)
                     break
-
 
     def random_vehicle_type(self, prob=[0.2, 0.3, 0.3, 0.2, 0]):
         from metadrive.component.vehicle.vehicle_type import random_vehicle_type
