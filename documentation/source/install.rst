@@ -26,8 +26,10 @@ You can also verify the efficiency of MetaDrive through the printed messages. Th
 .. note:: Please do not run the above command in the folder that has a sub-folder called :code:`./metadrive`.
 
 
-Install MetaDrive with offscreen rendering functionality
-##############################################################
+.. _install_headless:
+
+Install MetaDrive with offscreen rendering
+############################################
 
 
 
