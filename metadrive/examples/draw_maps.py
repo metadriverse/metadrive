@@ -9,6 +9,7 @@ if __name__ == '__main__':
     env = MetaDriveEnv(config=dict(environment_num=100, map=7, start_seed=random.randint(0, 1000)))
     fig, axs = plt.subplots(4, 4, figsize=(10, 10), dpi=100)
     count = 0
+    print("We are going to draw 16 maps!")
     for i in range(4):
         for j in range(4):
             count += 1
