@@ -2,7 +2,7 @@
 
 <br>
 
-![](metadrive/assets/logo-horizon.png)
+![](metadrive/assets/logo.png)
 
 <br>
 
