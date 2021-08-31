@@ -136,10 +136,6 @@ class EngineCore(ShowBase.ShowBase):
             #     (w - self.global_config["window_size"][0]) / 2, (h - self.global_config["window_size"][1]) / 2
             # )
 
-        # self.highway_render = None
-        # if self.global_config["use_topdown"]:
-        #     self.highway_render = HighwayRender(self.global_config["use_render"], main_window_position)
-
         # screen scale factor
         self.w_scale = max(self.global_config["window_size"][0] / self.global_config["window_size"][1], 1)
         self.h_scale = max(self.global_config["window_size"][1] / self.global_config["window_size"][0], 1)
@@ -241,7 +237,7 @@ class EngineCore(ShowBase.ShowBase):
             # onscreen message
             self.on_screen_message = ScreenMessage(
                 debug=self.DEBUG
-            ) if self.mode == RENDER_MODE_ONSCREEN and self.global_config["onscreen_message"] else None
+            ) if self.mode == RENDER_MODE_ONSCREEN else None
             self._show_help_message = False
             self._episode_start_time = time.time()
 
@@ -264,12 +260,9 @@ class EngineCore(ShowBase.ShowBase):
         """
 
         if self.on_screen_message is not None:
-            self.on_screen_message.update_data(text)
-            self.on_screen_message.render()
+            self.on_screen_message.render(text)
         if self.mode == RENDER_MODE_ONSCREEN:
             self.sky_box.step()
-        # if self.highway_render is not None:
-        #     self.highway_render.render()
 
     def step_physics_world(self):
         dt = self.global_config["physics_world_step_size"]

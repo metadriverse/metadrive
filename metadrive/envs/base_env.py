@@ -71,7 +71,6 @@ BASE_DEFAULT_CONFIG = dict(
     physics_world_step_size=2e-2,
     show_fps=True,
     global_light=False,
-    onscreen_message=True,
     # only render physics world without model, a special debug option
     debug_physics_world=False,
     # debug static world

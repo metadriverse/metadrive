@@ -6,16 +6,15 @@ if __name__ == "__main__":
     env = MetaDriveEnv(
         {
             "environment_num": 100,
-            "traffic_density": .5,
+            "traffic_density": .0,
             "traffic_mode": "trigger",
             "start_seed": 22,
             # "_disable_detector_mask":True,
-            "onscreen_message": True,
             # "debug_physics_world": True,
             "global_light": True,
             # "debug_static_world":True,
             "cull_scene": False,
-            "controller": "joystick",
+            # "controller": "joystick",
             "manual_control": True,
             "use_render": True,
             "decision_repeat": 5,
