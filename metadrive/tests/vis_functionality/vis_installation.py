@@ -37,7 +37,6 @@ def capture_image(headless):
 
 
 def vis_installation(headless=True):
-    loadPrcFileData("", "notify-level-task fatal")
     try:
         env = MetaDriveEnv({"use_render": False, "offscreen_render": False})
         env.reset()
