@@ -1,6 +1,7 @@
-from envs.argoverse_env import ArgoverseEnv
+from metadrive.envs.argoverse_env import ArgoverseEnv
 
 if __name__ == "__main__":
+    print("We are preparing argoverse environment!")
     env = ArgoverseEnv({"manual_control": True, "use_render": True})
 
     o = env.reset()

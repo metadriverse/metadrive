@@ -4,6 +4,11 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Any, Dict, List, Mapping, Tuple, Union, cast
 
+try:
+    import argoverse
+except ImportError:
+    raise ImportError("Please import argoverse")
+
 from argoverse.data_loading.vector_map_loader import Node, append_additional_key_value_pair, \
     append_unique_key_value_pair, convert_node_id_list_to_xy, extract_node_waypt, get_lane_identifier, str_to_bool, \
     extract_node_from_ET_element
