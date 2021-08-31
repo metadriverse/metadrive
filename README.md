@@ -19,7 +19,10 @@
 [![GitHub stars](https://img.shields.io/github/stars/decisionforce/metadrive)](https://github.com/decisionforce/metadrive/stargazers)
 
 
-**[  📺 [Website](https://decisionforce.github.io/metadrive/) | 🏗 [Github Repo](https://github.com/decisionforce/metadrive) | 📜 [Documentation](https://metadrive.readthedocs.io/) | 🎓 [Paper](https://arxiv.org/pdf/2012.13681) ]**
+**Though the development of MetaDrive is alrady settled for current stage, we are still working on managing the documentation and other stuff. We expect to finish all cleanup by 1st, September.**
+
+
+
 
 Welcome to MetaDrive! MetaDrive is an driving simulator with many key features, including:
 
@@ -98,8 +101,6 @@ for i in range(1000):
 env.close()
 ```
 
-We also prepare a Colab which demonstrates some basic usage of MetaDrive as follows:
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/decisionforce/MetaDrive/blob/main/metadrive/examples/Basic%20MetaDrive%20Usages.ipynb)
 
 ## 📦 Predefined environment sets
 

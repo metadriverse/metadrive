@@ -17,7 +17,7 @@ class StateObservation(ObservationBase):
     @property
     def observation_space(self):
         # Navi info + Other states
-        shape = self.ego_state_obs_dim + Navigation.navigation_info_dim + self.get_side_detector_dim()
+        shape = self.ego_state_obs_dim + Navigation.navigation_info_dim + self.get_line_detector_dim()
         if self.config["random_agent_model"]:
             shape += 2
         return gym.spaces.Box(-0.0, 1.0, shape=(shape, ), dtype=np.float32)
@@ -95,9 +95,9 @@ class StateObservation(ObservationBase):
 
         if vehicle.lane_line_detector.available:
             info += vehicle.lane_line_detector.perceive(vehicle, vehicle.engine.physics_world.static_world).cloud_points
-        # else:
-        #     _, lateral = vehicle.lane.local_coordinates(vehicle.position)
-        #     info.append(clip((lateral * 2 / vehicle.navigation.map.MAX_LANE_WIDTH + 1.0) / 2.0, 0.0, 1.0))
+        else:
+            _, lateral = vehicle.lane.local_coordinates(vehicle.position)
+            info.append(clip((lateral * 2 / vehicle.navigation.map.MAX_LANE_WIDTH + 1.0) / 2.0, 0.0, 1.0))
 
         # add vehicle length/width
         if self.config["random_agent_model"]:
@@ -105,11 +105,11 @@ class StateObservation(ObservationBase):
             info.append(clip(vehicle.WIDTH / vehicle.MAX_WIDTH, 0.0, 1.0))
         return info
 
-    def get_side_detector_dim(self):
+    def get_line_detector_dim(self):
         dim = 0
         dim += 2 if self.config["side_detector"]["num_lasers"] == 0 else \
             self.config["side_detector"]["num_lasers"]
-        dim += 0 if self.config["lane_line_detector"]["num_lasers"] == 0 else \
+        dim += 1 if self.config["lane_line_detector"]["num_lasers"] == 0 else \
             self.config["lane_line_detector"]["num_lasers"]
         return dim
 
