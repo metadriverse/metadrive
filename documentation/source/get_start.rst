@@ -32,7 +32,9 @@ Using MetaDrive in Your Code
 
 The usage of MetaDrive is as same as other **gym** environments.
 Almost all decision making algorithms are compatible with MetaDrive, as long as they are compatible with OpenAI gym.
-The following scripts is a minimal example for instantiating a MetaDrive environment instance::
+The following scripts is a minimal example for instantiating a MetaDrive environment instance
+
+.. code-block:: python
 
     import metadrive  # Import this package to register the environment!
     import gym
@@ -52,6 +54,9 @@ The following scripts is a minimal example for instantiating a MetaDrive environ
 
 Out-of-the-box Environments
 #############################
+
+
+.. warning:: This section is under construction!
 
 Besides, we provide several predefined environments for different purposes shown in the following table.
 Please feel free to open an issue if you want to request new environments.
