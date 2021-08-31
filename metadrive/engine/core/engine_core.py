@@ -234,9 +234,7 @@ class EngineCore(ShowBase.ShowBase):
                 self.setFrameRateMeter(True)
 
             # onscreen message
-            self.on_screen_message = ScreenMessage(
-                debug=self.DEBUG
-            ) if self.mode == RENDER_MODE_ONSCREEN else None
+            self.on_screen_message = ScreenMessage(debug=self.DEBUG) if self.mode == RENDER_MODE_ONSCREEN else None
             self._show_help_message = False
             self._episode_start_time = time.time()
 

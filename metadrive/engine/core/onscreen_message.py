@@ -43,7 +43,7 @@ class ScreenMessage(OnScreenDebug.OnScreenDebug):
     def set_scale(self, scale=None):
         self.SCALE = scale
 
-    def render(self, data: Optional[Union[dict, str]]=None):
+    def render(self, data: Optional[Union[dict, str]] = None):
         self._update_data(data)
         if not self.enabled:
             return

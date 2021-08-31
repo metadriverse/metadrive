@@ -11,7 +11,6 @@ class StateObservation(ObservationBase):
     """
     Use vehicle state info, navigation info and lidar point clouds info as input
     """
-
     def __init__(self, config):
         super(StateObservation, self).__init__(config)
 
@@ -21,7 +20,7 @@ class StateObservation(ObservationBase):
         shape = self.ego_state_obs_dim + Navigation.navigation_info_dim + self.get_line_detector_dim()
         if self.config["random_agent_model"]:
             shape += 2
-        return gym.spaces.Box(-0.0, 1.0, shape=(shape,), dtype=np.float32)
+        return gym.spaces.Box(-0.0, 1.0, shape=(shape, ), dtype=np.float32)
 
     def observe(self, vehicle):
         """

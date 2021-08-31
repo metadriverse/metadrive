@@ -9,7 +9,6 @@ class ManualControlPolicy(EnvInputPolicy):
     """
     Control the current track vehicle
     """
-
     def __init__(self):
         super(ManualControlPolicy, self).__init__()
         config = get_global_config()
@@ -48,7 +47,6 @@ class TakeoverPolicy(EnvInputPolicy):
     """
     Record the takeover signal
     """
-
     def __init__(self):
         super(TakeoverPolicy, self).__init__()
         config = get_global_config()
