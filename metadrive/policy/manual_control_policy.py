@@ -28,16 +28,18 @@ class ManualControlPolicy(EnvInputPolicy):
 
 
 class TakeoverPolicy(EnvInputPolicy):
+    """
+    Record the takeover signal
+    """
+
     def __init__(self):
         super(TakeoverPolicy, self).__init__()
         config = get_global_config()
         if config["manual_control"] and config["use_render"]:
-            if config["controller"] == "keyboard":
-                self.controller = KeyboardController()
-            elif config["controller"] == "joystick":
+            if config["controller"] == "joystick":
                 self.controller = SteeringWheelController()
             else:
-                raise ValueError("No such a controller type: {}".format(self.config["controller"]))
+                raise ValueError("Takeover policy can only be activated with SteeringWheel")
         self.takeover = False
 
     def act(self, agent_id):
