@@ -5,6 +5,7 @@ class ObservationBase(ABC):
     def __init__(self, config, env=None):
         self.config = config
         self.env = env
+        self.current_observation = None
 
     @property
     def observation_space(self):

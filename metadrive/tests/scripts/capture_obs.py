@@ -14,7 +14,6 @@ if __name__ == "__main__":
             # "traffic_density": 1.0,
             "traffic_mode": "hybrid",
             "start_seed": 82,
-            "onscreen_message": True,
             # "debug_physics_world": True,
             # "pstats": True,
             # "show_fps":False,

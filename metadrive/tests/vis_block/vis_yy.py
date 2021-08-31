@@ -10,7 +10,6 @@ if __name__ == "__main__":
             "traffic_density": 0.1,
             "traffic_mode": "hybrid",
             "start_seed": 5,
-            "onscreen_message": True,
             # "debug_physics_world": True,
             "pstats": True,
             # "controller":"joystick",

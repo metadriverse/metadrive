@@ -4,7 +4,7 @@
 
 [![build](https://github.com/decisionforce/metadrive/workflows/test/badge.svg)](http://github.com/decisionforce/metadrive/actions)
 [![codecov](https://codecov.io/gh/decisionforce/metadrive/branch/main/graph/badge.svg?token=1ZYN8L5397)](https://codecov.io/gh/decisionforce/metadrive)
-[![Documentation](https://readthedocs.org/projects/metadrive/badge/?version=latest)](https://metadrive.readthedocs.io)
+[![Documentation](https://readthedocs.org/projects/metadrive/badge/?version=latest)](https://metadrive-simulator.readthedocs.io)
 [![GitHub license](https://img.shields.io/github/license/decisionforce/metadrive)](https://github.com/decisionforce/metadrive/blob/main/LICENSE.txt)
 [![GitHub stars](https://img.shields.io/github/stars/decisionforce/metadrive)](https://github.com/decisionforce/metadrive/stargazers)
 
