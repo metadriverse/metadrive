@@ -1,4 +1,5 @@
 import sys
+import datetime
 import time
 from collections import defaultdict
 from typing import Union, Dict, AnyStr, Optional, Tuple
@@ -353,12 +354,7 @@ class BaseEnv(gym.Env):
     def capture(self):
         img = PNMImage()
         self.engine.win.getScreenshot(img)
-        img.write("main.png")
-
-        for name, sensor in self.vehicle.image_sensors.items():
-            if name == "mini_map":
-                name = "lidar"
-            sensor.save_image("{}.png".format(name))
+        img.write("main_{}.png".format(time.time()))
 
     def for_each_vehicle(self, func, *args, **kwargs):
         return self.agent_manager.for_each_active_agents(func, *args, **kwargs)

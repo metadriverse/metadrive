@@ -5,8 +5,8 @@ if __name__ == "__main__":
     setup_logger(True)
     env = MetaDriveEnv(
         {
-            "environment_num": 1,
-            "traffic_density": .2,
+            "environment_num": 10,
+            "traffic_density": .5,
             "traffic_mode": "trigger",
             "start_seed": 22,
             # "_disable_detector_mask":True,
@@ -32,7 +32,7 @@ if __name__ == "__main__":
             # },
             "pstats": True,
             # "discrete_action": True,
-            # "map": "SSS",
+            "map": "OCSSS",
             "random_traffic": False,
             "random_lane_width": True,
             "random_agent_model": True,
@@ -61,16 +61,15 @@ if __name__ == "__main__":
     for s in range(1, 100000):
         o, r, d, info = env.step(env.action_space.sample())
         # info["fuel"] = env.vehicle.energy_consumption
-        env.render(
-            text={
-                "heading_diff": env.vehicle.heading_diff(env.vehicle.lane),
-                "engine_force": env.vehicle.config["max_engine_force"],
-                "current_seed": env.current_seed,
-                "lane_width": env.vehicle.lane.width
-            }
-        )
-        print({env.engine.get_policy(env.vehicle.id).controller.joystick.get_button(4)})
-        # assert env.observation_space.contains(o)
+        # env.render(
+        #     text={
+        #         "heading_diff": env.vehicle.heading_diff(env.vehicle.lane),
+        #         "engine_force": env.vehicle.config["max_engine_force"],
+        #         "current_seed": env.current_seed,
+        #         "lane_width": env.vehicle.lane.width
+        #     }
+        # )
+        # # assert env.observation_space.contains(o)
         # if (s + 1) % 100 == 0:
         #     print(
         #         "Finish {}/10000 simulation steps. Time elapse: {:.4f}. Average FPS: {:.4f}".format(
