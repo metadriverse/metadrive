@@ -29,8 +29,8 @@ HELP_MESSAGE = "Keyboard Shortcuts:\n" \
                "  D: Moving Right\n" \
                "  R: Reset the Environment\n" \
                "  H: Help Message\n" \
-               "  F: Switch FPS between unlimited and realtime\n" \
-               "  Q: Track Another Vehicle\n" \
+               "  F: Switch FPS to unlimited / realtime\n" \
+               "  Q: Third-person View Camera\n" \
                "  B: Top-down View Camera (control: WASD-=)\n" \
                "  +: Lift Camera\n" \
                "  -: Lower Camera\n" \

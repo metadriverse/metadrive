@@ -28,13 +28,9 @@ if __name__ == "__main__":
     env.reset()
     for i in range(1, 100000):
         o, r, d, info = env.step([0, 0])
-        env.render(
-            text={
-                "Engine Force": env.vehicle.config["max_engine_force"],
-                "Brake Force": env.vehicle.config["max_brake_force"],
-                "Auto-Drive (Press T)": env.current_track_vehicle.expert_takeover
-            }
-        )
+        env.render(text={
+            "Auto-Drive (Press T)": env.current_track_vehicle.expert_takeover,
+        })
         if d and info["arrive_dest"]:
             env.reset()
     env.close()
