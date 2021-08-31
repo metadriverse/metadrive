@@ -4,7 +4,7 @@
 
 <br>
 
-![](metadrive/assets/logo-horizon-compressed.png)
+![](metadrive/assets/logo-horizon.png)
 
 <br>
 

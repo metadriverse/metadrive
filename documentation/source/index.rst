@@ -1,6 +1,6 @@
 
 
-.. image:: ../../metadrive/assets/logo-horizon-compressed.png
+.. image:: ../../metadrive/assets/logo-horizon.png
    :width: 1800
    :align: center
 
