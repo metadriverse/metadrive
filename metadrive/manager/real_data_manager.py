@@ -105,6 +105,7 @@ class RealDataManager(BaseManager):
                 v_config = config["v_config"]
                 v_start = v_config["spawn_lane_index"][0]
                 v_end = v_config["spawn_lane_index"][1]
+                v_config.update(self.engine.global_config["traffic_vehicle_config"])
                 if road.start_node == v_start and road.end_node == v_end:
                     generated_v = self.spawn_object(config["type"], vehicle_config=v_config)
                     generated_v.set_static(True)
