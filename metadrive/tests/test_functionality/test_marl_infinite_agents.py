@@ -5,7 +5,7 @@ def test_infinite_agents():
     env = MultiAgentRoundaboutEnv(
         {
             "map_config": dict(exit_length=20, lane_num=2),
-            # "use_render": True, "fast": True,
+            # "use_render": True,
             "num_agents": -1,
             "delay_done": 50,
             "horizon": 50,
