@@ -280,8 +280,9 @@ class MetaDriveEnv(BaseEnv):
             # map_config = copy.deepcopy(self.config["map_config"])
             # map_config.update({"seed": seed})
             # set_global_random_seed(seed)
-
-            self.engine.map_manager.update_map(all_config, current_seed=seed)
+            self.seed(seed)
+            self.engine.map_manger.before_reset()
+            self.engine.map_manager.reset()
             # new_map = self.engine.map_manager.spawn_object(PGMap, map_config=map_config, random_seed=None)
             # self.pg_maps[current_seed] = new_map
             # self.engine.map_manager.unload_map(new_map)
