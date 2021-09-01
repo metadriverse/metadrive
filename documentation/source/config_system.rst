@@ -1,7 +1,7 @@
 .. _config_system:
 
 ##########################
-Environment Configuration
+Config System
 ##########################
 
 A MetaDrive instance accepts a dict as the environmental config. For example, you can build a MetaDrive instance with 200 generated maps via
@@ -31,18 +31,6 @@ Therefore, you only need to specify these two values in the config:
 
     - :code:`start_seed` (int = 0): random seed of the first map
     - :code:`environment_num` (int = 1): number of the driving scenarios
-
-
-Agent Config
-#############
-
-
-    - :code:`num_agents` (int = 1):
-    - :code:`is_multi_agent` (bool = False):
-    - :code:`allow_respawn` (bool = False):
-    - :code:`delay_done` (int = 0):
-    - :code:`random_agent_model` (bool = False):
-    - :code:`IDM_agent` (bool = False):
 
 
 
@@ -98,113 +86,148 @@ We also provide a shortcut to specify the map:
 Action Config
 ##############
 
-    - :code:`manual_control` (bool = False):
-    - :code:`controller` (str = "keyboard"):
-    - :code:`decision_repeat` (int = 5):
-    - :code:`discrete_action` (bool = False):
-    - :code:`discrete_steering/throttle_dim` (int = 5, 5):
-    - :code:`decision_repeat` (int): The minimal step size of the world is 2e-2 second, and thus for agent the world will step
-      decision_repeat * 2e-2 second after applying one action or step.
+    - :code:`manual_control` (bool = False): whether to control ego vehicle by user in the interface (require :code:`use_render = True`)
+    - :code:`controller` (str = "keyboard"): select in ["keyboard", "joystick"], the controller for user to control the ego vehicle
+    - :code:`discrete_action` (bool = False): whether to discretize the action space
+    - :code:`discrete_steering/throttle_dim` (int = 5, 5): how many dimensions used to discrtize the action space
+    - :code:`decision_repeat` (int): how many times for the simulation engine to repeat the applied action to the vehicles. The minimal simulation interval :code:`physics_world_step_size` is 0.02 s. Therefore each RL step will last :code:`decision_repeat * 0.02 s` in the simulation world.
 
 
-Visualization & Rendering
-###########################
 
-    - :code:`use_render` (bool = False): Pop a window on your screen or not
-    - :code:`debug` (bool = False): For developing use, draw the scene with bounding box
-    - :code:`disable_model_compression` (bool = True): Model compression reduces the memory consumption when using Panda3D window to visualize. Disabling model compression greatly improves the launch speed but might cause breakdown in low-memory machine.
-    - :code:`cull_scene` (bool = True): When you want to access the image of camera, it should be set to True.
-    - :code:`use_chase_camera_follow_lane` (bool = False):
-    - :code:`camera_height` (float = 1.8):
-    - :code:`camera_dist` (float = 6.0):
-    - :code:`prefer_track_agent` (str = None):
-    - :code:`draw_map_resolution` (int = 1024):
-    - :code:`top_down_camera_initial_x/y/z` (int = 0, 0, 200):
+Agent Config
+#############
+
+    - :code:`random_agent_model` (bool = False): whether to randomize the dynamic model of ego vehicle
+    - :code:`IDM_agent` (bool = False): whether to control ego vehicle by IDM policy
 
 
-Vehicle Control
-#################################
-
-The following content is working in progress.
 
 
-TrafficManager Config
+
+Visualization & Rendering Config
 ##################################
 
-    - :code:`traffic_density` (float): Vehicle number per 10 meter, aiming to adjust the number of vehicle on road
-    - :code:`traffic_mode`: Trigger mode (Triger) / reborn mode (Reborn). In Reborn mode vehicles will enter the map again after arriving its destination.
-    - :code:`random_traffic` (bool): the traffic generation will not be controlled by current map seed. If set to *False*, each map will have same traffic flow.
+The config in this part specifies the setting related to visualization. The :code:`use_render` is the most useful one.
 
-
-
-
-Observation Config
-######################
-
-    - :code:`offscreen_render` (bool): If you want to use camera data, please set this to True.
-    - :code:`rgb_clip` (bool): Squeeze the value between \[0, 255\] to \[0.0, 1.0\]
-    - :code:`vehicle_config` (dict): Sensor parameters for vehicle
-    - :code:`image_source` (str): decided which camera image to use (mini_map or front camera). Now we only support capture one image as a part of
-      observation.
-
-
-
-Reward Scheme
-####################
-Coefficient of different kinds of reward to describe the driving goal
-Find more information by accessing our source code in MetaDriveEnv
-You can adjust our primitive reward function or design your own reward function
-
-Misc.
-##########
-
-    - :code:`use_increment_steering` (bool): Keyboard control use discretized action such as -1, 0, +1. You can set this value to True to make the keyboard strokes serve as increments to existing action.
-    - :code:`action_check` (bool): Check whether the value of action is between \[0.0, 1.0\] or not.
-    - :code:`engine_config` (dict): Some basic settings for low-level physics world. More information can be found in source code.
-
-Engine Config
-################
-    This is the engine core config of MetaDrive, including physics engine, window size and so on.
-     - :code:`window_size` (tuple): Width, height of rendering window default (1200, 900).
-     - :code:`physics_world_step_size` (float): The minimum step size of bullet physics engine.
-     - :code:`show_fps` (bool): Turn on/ turn off the frame rater.
-     - :code:`force_fps` (None or float): *None* means no render fps limit, while *float* indicates the maximum render FPS.
-     - :code:`debug_physics_world` (bool): Only render physics world without model, a special debug option.
-     - :code:`debug_static_world` (bool): Merge the static world and dynamic world to one world, a special debug option.
-     - :code:`pstats` (bool): Use Panda3D built-in debug tool to analyze the program.
-     - :code:`headless_machine_render` (bool): Set this to true only when training on headless machine and use rgb image!!!!!!
-     - :code:`global_light` (bool): True to enable global light. It will consume more computation resource to render.
-     - :code:`debug` (bool): The debug value in MetaDriveEnv will be passed to game engine core.
-     - :code:`use_render` (bool): The value is same as *use_render* in MetaDriveEnv
-     - :code:`offscreen_render` (bool): The value is same as *offscreen_render* in MetaDriveEnv.
-
+    - :code:`use_render` (bool = False): whether to pop a window on your screen or not
+    - :code:`disable_model_compression` (bool = True): Model compression reduces the memory consumption when using Panda3D window to visualize. Disabling model compression greatly improves the launch speed but might cause breakdown in low-memory machine.
+    - :code:`cull_scene` (bool = True): When you want to access the image of camera, it should be set to True.
+    - :code:`use_chase_camera_follow_lane` (bool = False): whether to force the third-person view camera following the heading of current lane
+    - :code:`camera_dist/height` (float = 6.0, 1.8): the initial distance and height of the third-person view camera
+    - :code:`prefer_track_agent` (str = None): specify the name of the agent that you wish to track in the third-person view. This is useful in the visualization in multi-agent environments.
+    - :code:`draw_map_resolution` (int = 1024): the size of the image capturing the top-down view of the road network
+    - :code:`top_down_camera_initial_x/y/z` (int = 0, 0, 200): the initial position of the top-down view camera
 
 
 Vehicle Config
 ################
 
-We list the vehicle config here. Observation Space will be adjusted by these config automatically.
-Other vehicle config like *traffic_vehicle_config* should merge this base config before passing to traffic vehicle
-Find more information and in our source code and test scripts!
+We list the vehicle config here. Observation Space will be adjusted by these config automatically. For example, if you set :code:`config["vehicle_config"]["lidar"]["num_lasers"] = 720`, then the dimension of the Lidar observation will automatically set to 720.
 
-- :code:`lidar` (tuple): (laser num, distance, other vehicle info num)
-- :code:`rgb_camera` (tuple): (camera resolution width(int), camera resolution height(int), we use (84, 84) as the default value like what Nature DQN did in Atari.
-- :code:`mini_map` (tuple): (camera resolution width(int), camera resolution height(int), camera height). The bird-view image can be captured by this camera.
-- :code:`show_navi_mark` (bool): A spinning navigation mark will be shown in the scene
-- :code:`increment_steering` (bool): For keyboard control using. When set to True, the steering angle is determined by the key pressing time.
-- :code:`wheel_friction` (float): Friction coefficient
-- :code:`vehicle_model` (str): Decided which vehicle to use (s, m, l, xl, default)
-- :code:`enable_reverse` (bool): When set to True and vehicle speed < 0, a brake action will be parsed to reverse
-- :code:`extra_action_dim` (int): If you want more control signal from env.step() besides [steering, throttle/brake], change the default value 0 to whatever you want
-- :code:`random_navi_mark_color` (bool): When there are several agents, turn it to True so that one can distinguish navigation information
-- :code:`show_dest_mark` (bool): Whether to show the destination or not.
-- :code:`show_line_to_dest` (bool): Whether to show a line from current position to destination.
-- :code:`random_color` (bool): Vehicle model will have random color picked from seaborn palette
-- :code:`am_i_the_special_one` (bool): This car will have a special color in green
-- :code:`image_source` (str): When using image observation, it decides where the image will be retrieved ("rgb_camera", "depth_camera")
-- :code:`spawn_lane_index` (tuple): Which lane to spawn this vehicle.
-- :code:`spawn_longitude` (float): The spawn point will be calculated by *spawn_longitude* and *spawn_lateral*
-- :code:`spawn_lateral` (float): The spawn point will be calculated by *spawn_longitude* and *spawn_lateral*
-- :code:`destination_node` (str): Destination road node name
-- :code:`overtake_stat` (bool): Vehicle will record how many vehicles it overtakes, and write it into info
+    - :code:`vehicle_config` (dict):
+        - :code:`lidar` (dict): the config is related to the :ref:`Lidar-like observation <State Vector>`. This Lidar only scans nearby vehicles.
+            - :code:`num_lasers` (int = 240): the number of lasers used in Lidar
+            - :code:`distance` (float = 50.0): the perception field radius
+            - :code:`num_others` (int = 0): if this is greater than 0, MetaDrive will retrieve the states of :code:`num_others`-nearest vehicles as additional information
+            - :code:`gaussian_noise` (float = 0.0): if this is greater than 0, MetaDrive will add Gaussian noise with :code:`gaussian_noise` standard deviation to each entry of the Lidar cloud points
+            - :code:`dropout_prob` (float = 0.0): in [0, 1]. If this is greater than 0, MetaDrive will randomly set :code:`dropout_prob` % of entries in the cloud points to zero
+        - :code:`side_detector` (dict): This Lidar only scans the side of the road but not vehicles. The config dict has identical keys as :code:`lidar` except :code:`num_others`.
+        - :code:`lane_line_detector` (dict): This Lidar only scans the side of current lane but neither vehicles or road boundary. The config dict has identical keys as :code:`lidar` except :code:`num_others`.
+        - :code:`show_lidar` (bool = False): whether to show the end of each Lidar laser in the scene
+        - :code:`rgb_camera` (tuple): (camera resolution width(int), camera resolution height(int). We use (84, 84) as the default size so that the RGB observation is compatible to those CNN used in Atari. Please refer to :ref:`use_native_rendering` for more information about using image as observation.
+        - :code:`increment_steering` (bool = False): for keyboard control. When set to True, the steering angle and acceleration is determined by the key pressing time
+        - :code:`vehicle_model` (str = "default"): which type of vehicle to use in ego vehicle (s, m, l, xl, default)
+        - :code:`enable_reverse` (bool = False): If True and vehicle speed < 0, a brake action (e.g. acceleration = -1) will be parsed as reverse. This is used in the Multi-agent Parking Lot environment.
+        - :code:`extra_action_dim` (int = 0): If you want to input more control signal than the default [steering, throttle/brake] in your customized environment, change the default value 0 to the extra number of dimensions.
+        - :code:`random_color` (bool = False): whether to randomize the color of ego vehicles. This is useful in multi-agent environments.
+        - :code:`image_source` (str = "rgb_camera"): select in ["rgb_camera", "depth_camera"]. When using image observation, it decides where the image collected.
+        - :code:`spawn_lane_index` (tuple): which lane to spawn this vehicle. Default to one lane in the first block of the map
+        - :code:`spawn_longitude/lateral` (float = 5.0, 0.0): The spawn point will be calculated by *spawn_longitude* and *spawn_lateral*
+        - :code:`destination_node` (str = None): the destination road node name. This is used in real dataset replay map.
+        - :code:`mini_map` (tuple): (camera resolution width(int), camera resolution height(int), camera height). The size of the bird-view image in the left upper corner of the interface.
+
+
+
+
+
+Other Observation Config
+##########################
+
+The vehicle config decides many of the observational config.
+
+    - :code:`offscreen_render` (bool = False): If you want to use camera data, please set this to True.
+    - :code:`rgb_clip` (bool = True): if True than squeeze the value between \[0, 255\] to \[0.0, 1.0\]
+    - :code:`headless_machine_render` (bool = False): Set this to True only when training on headless machine and using rgb image
+
+
+Traffic Config
+##################################
+
+
+Currently, MetaDrive provides two built-in traffic modes: Respawn mode and Trigger mode.
+
+
+In Respawn mode, Traffic Manager assigns traffic vehicles to random spawn points on the map.
+The vehicles immediately start driving toward their destinations after spawning.
+When a traffic vehicle terminates, it will be re-positioned to an available spawn point.
+Respawn traffic mode is designed to maintain traffic flow density.
+
+On the contrary, the Trigger mode traffic flow is designed to maximize the interaction between target vehicles and traffic vehicles.
+The vehicles stay still in the spawn points until the target agent enters the trigger zone in each block.
+Take an Intersection block as an case, the traffic vehicles inside the intersection will be triggered and start moving only when the target vehicle trespasses into the intersection.
+
+Here we provide many config to adjust the traffic flow. Note that you can even setup rule-based traffic flow by setting :code:`traffic_mode` > 0.
+
+
+    - :code:`traffic_density` (float = 0.1): number of traffic vehicles per 10 meter per lane
+    - :code:`traffic_mode` (str = "Trigger"): select in ["Trigger", "Respawn"]
+    - :code:`random_traffic` (bool = False): If set to False, each driving scenario will have deterministic traffic flow. Otherwise the traffic generation will not be controlled by current seed and provide various traffic flow even in the same road network.
+
+
+Multi-agent Config
+##################
+
+
+    - :code:`num_agents` (int = 1): the number of agent that are controllable by RL policies
+    - :code:`is_multi_agent` (bool = False): set this to True if in multi-agent training (default to True in MA)
+    - :code:`allow_respawn` (bool = False): whether allow (default to True in MA)
+    - :code:`delay_done` (int = 0): how many environmental steps for the agent to stay static as an obstacle after it is terminated (default to 25 in MA)
+    - :code:`horizon` (int = None): The maximum length of each episode. Set to None to remove constraint. (default to 1000 in MA, see :ref:`Multi-agent Environments`)
+
+
+
+Reward, Cost and Termination Function Config
+##############################################
+
+There are a lot of coefficients to describe the reward function and cost function.
+You can adjust the default reward function or design your own functions.
+Please refer to :ref:`Reward Function`, :ref:`Cost Function` and :ref:`Termination Function` for more information.
+
+
+Engine Config
+################
+
+This is the engine core config of MetaDrive, including physics engine, window size and so on.
+We don't suggest to modify this part if you are not confident on what you are doing.
+
+    - :code:`window_size` (tuple): width and height of interface window. Default is (1200, 900).
+    - :code:`physics_world_step_size` (float = 0.02): the minimum time interval between two time steps of bullet physics engine.
+    - :code:`show_fps` (bool = True): Turn on/ turn off the frame rater.
+    - :code:`debug_physics_world` (bool = False): if True then only render physics world without model
+    - :code:`debug_static_world` (bool = True): if True then merge the static world and dynamic world to one world and render this world
+    - :code:`pstats` (bool = False): if True then use Panda3D built-in debug tool to profile the program
+    - :code:`global_light` (bool = False): True to enable global light. It will consume more computation resource to render.
+    - :code:`debug` (bool = False): for developing use, draw the scene with bounding box
+
+
+Default Config
+################
+
+The default config dicts are widely spread in many files. The basic config about some general setting is provided in the `BaseEnv Class <https://github.com/decisionforce/metadrive/blob/main/metadrive/envs/base_env.py>`_.
+More detailed config is provided in the `MetaDriveEnv Class <https://github.com/decisionforce/metadrive/blob/main/metadrive/envs/metadrive_env.py>`_.
+Besides, for `SafeMetaDriveEnv Class <https://github.com/decisionforce/metadrive/blob/main/metadrive/envs/safe_metadrive_env.py>`_
+and `MultiAgentMetaDrive Class <https://github.com/decisionforce/metadrive/blob/main/metadrive/envs/marl_envs/multi_agent_metadrive.py>`_
+there also have many task-specified config. Please feel free to open issues if you have any question about the environmental settings!
+
+
 

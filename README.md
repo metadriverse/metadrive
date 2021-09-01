@@ -1,13 +1,12 @@
 <br>
 
-# MetaDrive: Composing Diverse Driving Scenarios for Generalizable RL
-
-<br>
-
 ![](metadrive/assets/logo-horizon.png)
 
 <br>
 
+# MetaDrive: Composing Diverse Driving Scenarios for Generalizable RL
+
+<br>
 
 **Though the development of MetaDrive is already settled for current stage, we are still working on managing the documentation and other stuff. We expect to finish all cleanup by 1st, September.**
 

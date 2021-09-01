@@ -1,6 +1,4 @@
 import sys
-from metadrive.component.blocks.first_block import FirstPGBlock
-import datetime
 import time
 from collections import defaultdict
 from typing import Union, Dict, AnyStr, Optional, Tuple
@@ -8,8 +6,10 @@ from typing import Union, Dict, AnyStr, Optional, Tuple
 import gym
 import numpy as np
 from panda3d.core import PNMImage
+
+from metadrive.component.blocks.first_block import FirstPGBlock
 from metadrive.component.vehicle.base_vehicle import BaseVehicle
-from metadrive.constants import RENDER_MODE_NONE, DEFAULT_AGENT, TerminationState
+from metadrive.constants import RENDER_MODE_NONE, DEFAULT_AGENT
 from metadrive.engine.base_engine import BaseEngine
 from metadrive.engine.engine_utils import initialize_engine, close_engine, \
     engine_initialized, set_global_random_seed
@@ -23,13 +23,15 @@ BASE_DEFAULT_CONFIG = dict(
     start_seed=0,
     environment_num=1,
 
-    # ==== agents config =====
+    # ===== agent =====
+    random_agent_model=False,
+    IDM_agent=False,
+
+    # ===== multi-agent =====
     num_agents=1,  # Note that this can be set to >1 in MARL envs, or set to -1 for as many vehicles as possible.
     is_multi_agent=False,
     allow_respawn=False,
     delay_done=0,  # How many steps for the agent to stay static at the death place after done.
-    random_agent_model=False,
-    IDM_agent=False,
 
     # ===== Action =====
     manual_control=False,
@@ -63,7 +65,7 @@ BASE_DEFAULT_CONFIG = dict(
         random_navi_mark_color=False,
         show_dest_mark=False,
         show_line_to_dest=False,
-        am_i_the_special_one=False,
+        use_special_color=False,
 
         # ===== use image =====
         image_source="rgb_camera",  # take effect when only when offscreen_render == True
@@ -100,7 +102,7 @@ BASE_DEFAULT_CONFIG = dict(
     # Force to generate objects in the left lane.
     _debug_crash_object=False,
     record_episode=False,
-    horizon=None,  # The maximum length of each episode. Set to None to remove system.
+    horizon=None,  # The maximum length of each episode. Set to None to remove this constraint
 )
 
 

@@ -43,7 +43,7 @@ METADRIVE_DEFAULT_CONFIG = dict(
 
     # ===== Traffic =====
     traffic_density=0.1,
-    traffic_mode=TrafficMode.Trigger,  # "Respawn", "Trigger", "Hybrid"
+    traffic_mode=TrafficMode.Trigger,  # "Respawn", "Trigger"
     random_traffic=False,  # Traffic is randomized at default.
     # this will update the vehicle_config and set to traffic
     traffic_vehicle_config=dict(
@@ -74,7 +74,7 @@ METADRIVE_DEFAULT_CONFIG = dict(
         rgb_camera=(84, 84),  # buffer length, width
         depth_camera=(84, 84, True),  # buffer length, width, view_ground
         show_side_detector=False,
-        show_lane_line_detector=False,
+        show_lane_line_detector=False
     ),
     rgb_clip=True,
     gaussian_noise=0.0,
