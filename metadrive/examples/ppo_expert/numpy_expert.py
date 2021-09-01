@@ -18,15 +18,25 @@ default_policy/value_out/bias (1,)
 import os.path as osp
 
 import numpy as np
+from metadrive.obs.state_obs import LidarStateObservation
+from metadrive.engine.engine_utils import get_global_config
 
 ckpt_path = osp.join(osp.dirname(__file__), "expert_weights.npz")
 _expert_weights = None
+_expert_observation = None
 
 
-def expert(obs, deterministic=False):
+def expert(vehicle, deterministic=False, need_obs=False):
     global _expert_weights
+    global _expert_observation
     if _expert_weights is None:
         _expert_weights = np.load(ckpt_path)
+        v_config = get_global_config()["vehicle_config"]
+        v_config["lidar"] = dict(num_lasers=240, distance=50, num_others=4, gaussian_noise=0.0, dropout_prob=0.0)
+        v_config["random_agent_model"] = False
+        _expert_observation = LidarStateObservation(v_config)
+        assert _expert_observation.observation_space.shape[0] == 275, "Observation not match"
+    obs = _expert_observation.observe(vehicle)
     weights = _expert_weights
     obs = obs.reshape(1, -1)
     x = np.matmul(obs, weights["default_policy/fc_1/kernel"]) + weights["default_policy/fc_1/bias"]
@@ -37,12 +47,12 @@ def expert(obs, deterministic=False):
     x = x.reshape(-1)
     mean, log_std = np.split(x, 2)
     if deterministic:
-        return mean
+        return (mean, obs) if need_obs else mean
     std = np.exp(log_std)
     action = np.random.normal(mean, std)
     ret = action
     # ret = np.clip(ret, -1.0, 1.0) all clip should be implemented in env!
-    return ret
+    return (ret, obs) if need_obs else ret
 
 
 def load_weights(path: str):
@@ -78,8 +88,8 @@ def value(obs, weights):
     return ret
 
 
-if __name__ == '__main__':
-    for i in range(100):
-        print("Weights? ", type(_expert_weights))
-        ret = expert(np.clip(np.random.normal(0.5, 1, size=(275, )), 0.0, 1.0))
-        print("Return: ", ret)
+# if __name__ == '__main__':
+#     for i in range(100):
+#         print("Weights? ", type(_expert_weights))
+#         ret = expert(np.clip(np.random.normal(0.5, 1, size=(275,)), 0.0, 1.0))
+#         print("Return: ", ret)
