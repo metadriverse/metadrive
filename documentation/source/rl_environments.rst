@@ -56,6 +56,7 @@ Different from the generalization task, we do not terminate the agent if a colli
 Instead, we allow agent to continue driving but flag the crash with a cost +1.
 Thus as safe exploration task, the learning agent is required to balance the reward and the cost to solve the constrained optimization problem.
 
+
 The following script can setup such environment. Same as in generalization environment, you can also specify the number of environment and the start seed to initialize two sets of environments to train and test the RL agents and benchmark their safety generalization.
 
 .. code-block:: python
@@ -88,6 +89,16 @@ The descriptions and typical settings of the six traffic environments are as fol
 4. **Bottleneck**: Complementary to Tollgate, Bottleneck contains a narrow bottleneck lane in the middle that forces the vehicles to yield to others. We initialize 20 vehicles.
 5. **Parking Lot**: A compact environment with 8 parking slots. Spawn points are scattered in both parking lots or in external roads. 10 vehicles spawn initially and need to navigate toward external roads or enter parking lots. In this environment, we allow agents to back their cars to spare space for others.  Maneuvering and yielding are the key to solve this task.
 6. **PGMA** (Procedural Generation Multi-Agent environment): We reuse the procedurally generated scenarios in the generalization environment and replaces the traffic vehicles by controllable target vehicles. These environments contain rich interactions between agents and complex road structures. This multi-agent environment introduces new challenge under the setting of mixed motive RL. Each constituent agent in this traffic system is self-interested and the relationship between agents is constantly changing.
+
+In Multi-agent environment, the termination criterion for each vehicle is identical to that in single-agent environment.
+We explicitly add two config to adjust the termination processing in MARL: :code:`crash_done = True` and :code:`out_of_road_done = True`.
+They denotes whether to terminate the agent episode if crash / out of road happens.
+
+Besides, in Multi-agent environment, the controllable target vehicles consistently respawn in the scene if old target vehicles are terminated.
+To limit the length of *environmental episode*, we also introduce a config :code:`horizon = 1000` in MARL environments.
+The environmental episode has a **minimal length** of :code:`horizon` steps and the environment will stop spawning new target vehicles if this horizon is exceeded.
+If you wish to disable the respawning mechanism in MARL, set the config :code:`allow_respawn = False`. In this case, the environmental episode will terminate if no active vehicles are in the scene.
+
 
 You can try to drive a vehicle in Multi-agent environment through this example:
 

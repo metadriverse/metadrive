@@ -132,7 +132,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         BaseObject.__init__(self, name, random_seed, self.engine.global_config["vehicle_config"])
         BaseVehicleState.__init__(self)
         self.update_config(vehicle_config)
-        am_i_the_special_one = self.config["am_i_the_special_one"]
+        use_special_color = self.config["use_special_color"]
 
         # build vehicle physics model
         vehicle_chassis = self._create_vehicle_chassis()
@@ -151,7 +151,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         color = sns.color_palette("colorblind")
         idx = get_np_random().randint(len(color))
         rand_c = color[idx]
-        if am_i_the_special_one:
+        if use_special_color:
             rand_c = color[2]  # A pretty green
         self.top_down_color = (rand_c[0] * 255, rand_c[1] * 255, rand_c[2] * 255)
         self.panda_color = rand_c
