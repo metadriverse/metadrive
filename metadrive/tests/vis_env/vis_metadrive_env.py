@@ -21,7 +21,6 @@ if __name__ == "__main__":
             "rgb_clip": True,
             # "debug": True,
             # "random_lane_num": True,
-            "fast": True,
 
             # "map_config": {
             #     Map.GENERATE_TYPE: MapGenerateMethod.BIG_BLOCK_SEQUENCE,

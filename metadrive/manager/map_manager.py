@@ -15,7 +15,7 @@ class MapManager(BaseManager):
     """
     PRIORITY = 0  # Map update has the most high priority
 
-    def __init__(self, single_block=None):
+    def __init__(self):
         super(MapManager, self).__init__()
         self.current_map = None
 
@@ -24,9 +24,6 @@ class MapManager(BaseManager):
         env_num = self.engine.global_config["environment_num"]
         self.restored_pg_map_configs = None
         self.pg_maps = {_seed: None for _seed in range(start_seed, start_seed + env_num)}
-
-        # TODO(pzh): clean this!
-        self.single_block_class = single_block
 
     def spawn_object(self, object_class, *args, **kwargs):
         map = self.engine.spawn_object(object_class, auto_fill_random_seed=False, *args, **kwargs)
@@ -95,41 +92,33 @@ class MapManager(BaseManager):
         self.restored_pg_map_configs = None
         super(MapManager, self).destroy()
 
-    def update_map(self, config, current_seed, episode_data: dict = None, single_block_class=None, spawn_roads=None):
-        # TODO(pzh): Remove the config as the input args.
-        if episode_data is not None:
-            # TODO restore/replay here
-            # Since in episode data map data only contains one map, values()[0] is the map_parameters
-            map_data = episode_data["map_data"].values()
-            assert len(map_data) > 0, "Can not find map info in episode data"
-            blocks_info = map_data[0]
+    def before_reset(self):
+        # remove map from world before adding
+        if self.current_map is not None:
+            self.unload_map(self.current_map)
 
-            map_config = copy.deepcopy(config["map_config"])
-            # map_config[BaseMap.GENERATE_TYPE] = MapGenerateMethod.PG_MAP_FILE
-            # map_config[BaseMap.GENERATE_CONFIG] = blocks_info
-            map_config.update(map_data)
-            self.spawn_object(PGMap, map_config=map_config)
-            return
-
-        # Build single block for multi-agent system!
-        if config["is_multi_agent"] and single_block_class is not None:
-            assert single_block_class is not None
-            assert spawn_roads is not None
-            if self.current_map is None:
-                new_map = self.spawn_object(single_block_class, map_config=config["map_config"], random_seed=None)
-                self.load_map(new_map)
-                self.current_map.spawn_roads = spawn_roads
-            return
+    def reset(self):
+        # if episode_data is not None:
+        #     # TODO restore/replay here
+        #     # Since in episode data map data only contains one map, values()[0] is the map_parameters
+        #     map_data = episode_data["map_data"].values()
+        #     assert len(map_data) > 0, "Can not find map info in episode data"
+        #     blocks_info = map_data[0]
+        #
+        #     map_config = copy.deepcopy(config["map_config"])
+        #     # map_config[BaseMap.GENERATE_TYPE] = MapGenerateMethod.PG_MAP_FILE
+        #     # map_config[BaseMap.GENERATE_CONFIG] = blocks_info
+        #     map_config.update(map_data)
+        #     self.spawn_object(PGMap, map_config=map_config)
+        #     return
+        config=self.engine.global_config
+        current_seed = self.engine.global_seed
 
         # If we choose to load maps from json file.
         if config["load_map_from_json"] and self.current_map is None:
             assert config["map_file_path"]
             logging.info("Loading maps from: {}".format(config["map_file_path"]))
             self.read_all_maps_from_json(config["map_file_path"])
-
-        # remove map from world before adding
-        if self.current_map is not None:
-            self.unload_map(self.current_map)
 
         if self.pg_maps[current_seed] is None:
             if config["load_map_from_json"]:
