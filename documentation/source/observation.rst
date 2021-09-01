@@ -1,10 +1,8 @@
-.. _observation:
-
 ########################
 Observation
 ########################
 
-.. image:: figs/observation.png
+.. image:: figs/observation_demo.png
    :width: 260
    :align: right
 

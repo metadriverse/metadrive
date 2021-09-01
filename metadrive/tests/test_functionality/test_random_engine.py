@@ -1,4 +1,5 @@
 from metadrive import MetaDriveEnv
+import numpy as np
 from metadrive.envs.metadrive_env import MetaDriveEnv
 from metadrive.utils import recursive_equal, norm
 
@@ -21,34 +22,54 @@ def test_map_random_seeding():
     cfg_1 = {
         "environment_num": 1,
         "start_seed": 5,
+        "random_lane_width": True,
+        "random_lane_num": True,
     }
     cfg_2 = {
         "environment_num": 10,
         "start_seed": 5,
+        "random_lane_width": True,
+        "random_lane_num": True,
     }
     cfg_3 = {
         "environment_num": 100,
         "start_seed": 5,
+        "random_lane_width": True,
+        "random_lane_num": True,
     }
     cfg_4 = {
         "environment_num": 10,
         "start_seed": 0,
+        "random_lane_width": True,
+        "random_lane_num": True,
     }
     cfg_5 = {
         "environment_num": 3,
         "start_seed": 3,
+        "random_lane_width": True,
+        "random_lane_num": True,
     }
+    from metadrive.component.blocks.first_block import FirstPGBlock
     map_configs = []
+    lane_width = []
+    lane_num = []
     for cfg in [cfg_1, cfg_2, cfg_3, cfg_4, cfg_5]:
         env = MetaDriveEnv(cfg)
         try:
+            env.reset()
+            env.reset()
             env.reset(force_seed=5)
             map_configs.append(env.current_map.save_map)
+            lane_num.append(len(env.current_map.road_network.graph[FirstPGBlock.NODE_1][FirstPGBlock.NODE_2]))
+            lane_width.append(
+                env.current_map.road_network.graph[FirstPGBlock.NODE_1][FirstPGBlock.NODE_2][0].width_at(0)
+            )
         finally:
             env.close()
     for idx, map_cfg in enumerate(map_configs[:-1]):
         nxt_map_cfg = map_configs[idx + 1]
         recursive_equal(map_cfg, nxt_map_cfg)
+    assert np.std(lane_width) < 0.01 and np.std(lane_num) < 0.01, "random engine error"
 
 
 def test_fixed_traffic():
@@ -110,7 +131,6 @@ def test_random_lane_width():
             "traffic_mode": "trigger",
             "start_seed": 12,
             "random_lane_width": True,
-            "load_map_from_json": False
         }
     )
     try:
@@ -137,7 +157,6 @@ def test_random_lane_num():
             "traffic_density": .2,
             "traffic_mode": "trigger",
             "start_seed": 12,
-            "load_map_from_json": False,
             "random_lane_num": True,
         }
     )
@@ -189,5 +208,5 @@ def test_random_vehicle_parameter():
 
 
 if __name__ == '__main__':
-    # test_map_random_seeding()
-    test_seeding()
+    test_map_random_seeding()
+    # test_seeding()

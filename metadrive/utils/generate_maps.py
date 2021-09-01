@@ -10,8 +10,7 @@ asset_path = osp.join(root, "assets", "maps")
 
 
 def generate_maps(env_class, env_config, json_file_path):
-    assert env_config.get("load_map_from_json", False) is False
-    env_config["load_map_from_json"] = False
+    raise DeprecationWarning("All procedural generated maps are load online now")
 
     env = env_class(env_config)
     data = env.dump_all_maps()

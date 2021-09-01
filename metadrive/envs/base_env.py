@@ -271,7 +271,6 @@ class BaseEnv(gym.Env):
         """
         self.lazy_init()  # it only works the first time when reset() is called to avoid the error when render
         self._reset_global_seed(force_seed)
-        self._update_map(episode_data=episode_data)
         self.engine.reset()
         if self._top_down_renderer is not None:
             self._top_down_renderer.reset(self.current_map)
@@ -283,9 +282,6 @@ class BaseEnv(gym.Env):
         assert (len(self.vehicles) == self.num_agents) or (self.num_agents == -1)
 
         return self._get_reset_return()
-
-    def _update_map(self, episode_data: dict = None):
-        self.engine.map_manager.update_map(self.config, self.current_seed, episode_data)
 
     def _get_reset_return(self):
         ret = {}
@@ -428,10 +424,7 @@ class BaseEnv(gym.Env):
         self.engine.accept("r", self.reset)
         self.engine.accept("escape", sys.exit)
         self.engine.accept("p", self.capture)
-        from metadrive.manager.map_manager import MapManager
-
         self.engine.register_manager("agent_manager", self.agent_manager)
-        self.engine.register_manager("map_manager", MapManager())
 
     @property
     def current_map(self):
