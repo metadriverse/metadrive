@@ -13,10 +13,10 @@ class AIProtectPolicy(ManualControlPolicy):
         if not vehicle.expert_takeover:
             # saver can be used for human or another AI
             save_level = self.engine.global_config["save_level"] if not vehicle.expert_takeover else 1.0
-            obs = self.engine.agent_manager.observations[vehicle.id].observe(vehicle)
             from metadrive.examples.ppo_expert import expert
             try:
-                saver_a = expert(obs, deterministic=False)
+                saver_a, obs = expert(vehicle, deterministic=False, need_obs=True)
+                obs = obs[0]
             except ValueError:
                 print("Expert can not takeover, due to observation space mismathing!")
                 saver_a = action
