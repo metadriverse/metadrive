@@ -35,7 +35,6 @@ METADRIVE_DEFAULT_CONFIG = dict(
         BaseMap.LANE_NUM: 3,
         "exit_length": 50,
     },
-    map_file_path=pregenerated_map_file,  # The path to the pre-generated file
 
     # ===== Observation =====
     use_topdown=False,  # Use top-down view
@@ -44,7 +43,7 @@ METADRIVE_DEFAULT_CONFIG = dict(
 
     # ===== Traffic =====
     traffic_density=0.1,
-    traffic_mode=TrafficMode.Trigger,  # "Respawn", "Trigger", "Hybrid"
+    traffic_mode=TrafficMode.Trigger,  # "Respawn", "Trigger"
     random_traffic=False,  # Traffic is randomized at default.
     # this will update the vehicle_config and set to traffic
     traffic_vehicle_config=dict(
@@ -75,21 +74,7 @@ METADRIVE_DEFAULT_CONFIG = dict(
         rgb_camera=(84, 84),  # buffer length, width
         depth_camera=(84, 84, True),  # buffer length, width, view_ground
         show_side_detector=False,
-        show_lane_line_detector=False,
-
-        # ===== use image =====
-        image_source="rgb_camera",  # take effect when only when offscreen_render == True
-
-        # ===== vehicle spawn and destination =====
-        spawn_lane_index=(FirstPGBlock.NODE_1, FirstPGBlock.NODE_2, 0),
-        spawn_longitude=5.0,
-        spawn_lateral=0.0,
-        destination_node=None,
-
-        # ==== others ====
-        overtake_stat=False,  # we usually set to True when evaluation
-        action_check=False,
-        random_color=False,
+        show_lane_line_detector=False
     ),
     rgb_clip=True,
     gaussian_noise=0.0,

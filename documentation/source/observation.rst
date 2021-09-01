@@ -81,8 +81,8 @@ The above figure shows the semantic meaning of each channel.
 
 .. _use_native_rendering:
 
-Use Rendering in Training
-##########################
+Use First-view Images in Training
+##################################
 
 MetaDrive supports visuomotor tasks by turning on the rendering during the training.
 

@@ -144,7 +144,7 @@ def ray_localization(heading: tuple,
     Only used when smoething is on lane ! Otherwise fall back to use get_closest_lane()
     :param heading: heading to help filter lanes
     :param position: a physx_world position [m].
-    :param engine: PGWorld class
+    :param engine: BaseEngine class
     :param return_all_result: return a list instead of the lane with min L1 distance
     :return: list(closest lane) or closest lane.
     """
