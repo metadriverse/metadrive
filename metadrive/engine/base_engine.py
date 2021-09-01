@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 class BaseEngine(EngineCore, Randomizable):
     """
     Due to the feature of Panda3D, BaseEngine should only be created once(Singleton Pattern)
-    PGWorld is a pure game engine, which is not task-specific, while BaseEngine connects the
+    It is a pure game engine, which is not task-specific, while BaseEngine connects the
     driving task and the game engine modified from Panda3D Engine.
     """
     singleton = None

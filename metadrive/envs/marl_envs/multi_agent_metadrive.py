@@ -81,7 +81,7 @@ class MultiAgentMetaDrive(MetaDriveEnv):
             logging.warning("Turn disable_model_compression=True can accelerate Multi-agent rendering performance!")
 
         if "prefer_track_agent" in config and config["prefer_track_agent"]:
-            ret_config["target_vehicle_configs"][config["prefer_track_agent"]]["am_i_the_special_one"] = True
+            ret_config["target_vehicle_configs"][config["prefer_track_agent"]]["use_special_color"] = True
         ret_config["vehicle_config"]["random_agent_model"] = ret_config["random_agent_model"]
         return ret_config
 
