@@ -1,6 +1,10 @@
 """
-Manually drive in marl-env
-Args:
+This script demonstrates how to setup the Multi-agent RL environments.
+
+
+Usage: python -m metadrive.examples.drive_in_multi_agent_env --env pgma
+
+Options for --env argument:
     (1) roundabout
     (2) intersection
     (3) tollgate
@@ -44,6 +48,7 @@ if __name__ == "__main__":
         .format(env_cls_name)
     env = envs[env_cls_name]({"use_render": True, "manual_control": True, "crash_done": False})
     env.reset()
+    env.switch_to_third_person_view()  # Default is in Top-down view, we switch to Third-person view.
     for i in range(1, 10000000000):
         o, r, d, info = env.step({agent_id: [0, 0] for agent_id in env.vehicles.keys()})
         env.render(

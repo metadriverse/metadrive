@@ -263,7 +263,7 @@ class MetaDriveEnv(BaseEnv):
             reward = -self.config["crash_object_penalty"]
         return reward, step_info
 
-    def chase_camera(self) -> (str, BaseVehicle):
+    def switch_to_third_person_view(self) -> (str, BaseVehicle):
         if self.main_camera is None:
             return
         self.main_camera.reset()
@@ -284,7 +284,7 @@ class MetaDriveEnv(BaseEnv):
         self.main_camera.track(current_track_vehicle)
         return
 
-    def bird_view_camera(self):
+    def switch_to_top_down_view(self):
         self.main_camera.stop_track()
 
     def get_single_observation(self, vehicle_config: "Config") -> "ObservationType":
@@ -296,8 +296,8 @@ class MetaDriveEnv(BaseEnv):
 
     def setup_engine(self):
         super(MetaDriveEnv, self).setup_engine()
-        self.engine.accept("b", self.bird_view_camera)
-        self.engine.accept("q", self.chase_camera)
+        self.engine.accept("b", self.switch_to_top_down_view)
+        self.engine.accept("q", self.switch_to_third_person_view)
         from metadrive.manager.traffic_manager import TrafficManager
         from metadrive.manager.map_manager import MapManager
         self.engine.register_manager("map_manager", MapManager())
