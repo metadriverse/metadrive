@@ -201,7 +201,6 @@ Find more information and in our source code and test scripts!
 - :code:`mini_map` (tuple): (camera resolution width(int), camera resolution height(int), camera height). The bird-view image can be captured by this camera.
 - :code:`show_navi_mark` (bool): A spinning navigation mark will be shown in the scene
 - :code:`increment_steering` (bool): For keyboard control using. When set to True, the steering angle is determined by the key pressing time.
-- :code:`wheel_friction` (float): Friction coefficient
 - :code:`vehicle_model` (str): Decided which vehicle to use (s, m, l, xl, default)
 - :code:`enable_reverse` (bool): When set to True and vehicle speed < 0, a brake action will be parsed to reverse
 - :code:`extra_action_dim` (int): If you want more control signal from env.step() besides [steering, throttle/brake], change the default value 0 to whatever you want
