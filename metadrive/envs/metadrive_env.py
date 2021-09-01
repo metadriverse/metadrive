@@ -275,17 +275,9 @@ class MetaDriveEnv(BaseEnv):
         assert engine_initialized()
 
         for seed in range(self.start_seed, self.start_seed + self.env_num):
-            all_config = self.config.copy()
-            all_config["map_config"]["seed"] = seed
-            # map_config = copy.deepcopy(self.config["map_config"])
-            # map_config.update({"seed": seed})
-            # set_global_random_seed(seed)
             self.seed(seed)
-            self.engine.map_manger.before_reset()
+            self.engine.map_manager.before_reset()
             self.engine.map_manager.reset()
-            # new_map = self.engine.map_manager.spawn_object(PGMap, map_config=map_config, random_seed=None)
-            # self.pg_maps[current_seed] = new_map
-            # self.engine.map_manager.unload_map(new_map)
             print("Finish generating map with seed: {}".format(seed))
 
         map_data = dict()
