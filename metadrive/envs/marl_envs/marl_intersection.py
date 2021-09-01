@@ -1,6 +1,6 @@
 import copy
 from metadrive.manager.spawn_manager import SpawnManager
-
+from metadrive.manager.map_manager import MapManager
 from metadrive.component.blocks.first_block import FirstPGBlock
 from metadrive.component.blocks.intersection import InterSection
 from metadrive.component.map.pg_map import PGMap
@@ -53,7 +53,7 @@ class MAIntersectionMap(PGMap):
         self.blocks.append(last_block)
 
 
-class InterectionSpawnManager(SpawnManager):
+class MAIntersectionSpawnManager(SpawnManager):
     def update_destination_for(self, agent_id, vehicle_config):
         end_roads = copy.deepcopy(self.engine.global_config["spawn_roads"])
         end_road = -self.np_random.choice(end_roads)  # Use negative road!
@@ -61,27 +61,31 @@ class InterectionSpawnManager(SpawnManager):
         return vehicle_config
 
 
+class MAIntersectionMapManager(MapManager):
+
+    def reset(self):
+        config = self.engine.global_config
+        if len(self.spawned_objects) == 0:
+            _map = self.spawn_object(MAIntersectionMap, map_config=config["map_config"], random_seed=None)
+        else:
+            assert len(self.spawned_objects)==1, "It is supposed to contain one map in this manager"
+            _map = self.spawned_objects.values()[0]
+        self.load_map(_map)
+        self.current_map.spawn_roads = config["spawn_roads"]
+
+
 class MultiAgentIntersectionEnv(MultiAgentMetaDrive):
     @staticmethod
     def default_config() -> Config:
         return MultiAgentMetaDrive.default_config().update(MAIntersectionConfig, allow_add_new_key=True)
 
-    def _update_map(self, episode_data: dict = None):
-        self.engine.map_manager.update_map(
-            self.config,
-            self.current_seed,
-            episode_data,
-            single_block_class=MAIntersectionMap,
-            spawn_roads=self.config["spawn_roads"]
-        )
-
     def get_single_observation(self, vehicle_config: "Config") -> "ObservationBase":
         return LidarStateObservationMARound(vehicle_config)
 
     def setup_engine(self):
-        from metadrive.envs.metadrive_env import MetaDriveEnv
-        MetaDriveEnv.setup_engine(self)
-        self.engine.register_manager("spawn_manager", InterectionSpawnManager())
+        super(MultiAgentIntersectionEnv, self).setup_engine()
+        self.engine.update_manager("map_manager", MAIntersectionMapManager())
+        self.engine.update_manager("spawn_manager", MAIntersectionSpawnManager())
 
 
 def _draw():

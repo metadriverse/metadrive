@@ -10,6 +10,7 @@ from metadrive.constants import TerminationState
 from metadrive.envs.marl_envs.multi_agent_metadrive import MultiAgentMetaDrive, pygame_replay
 from metadrive.obs.state_obs import LidarStateObservation, StateObservation
 from metadrive.utils import Config, clip
+from metadrive.manager.map_manager import MapManager
 
 MATollConfig = dict(
     spawn_roads=[Road(FirstPGBlock.NODE_2, FirstPGBlock.NODE_3), -Road(Merge.node(3, 0, 0), Merge.node(3, 0, 1))],
@@ -67,7 +68,7 @@ class TollGateStateObservation(StateObservation):
     def observation_space(self):
         # Navi info + Other states
         shape = self.ego_state_obs_dim + self.get_line_detector_dim()
-        return gym.spaces.Box(-0.0, 1.0, shape=(shape, ), dtype=np.float32)
+        return gym.spaces.Box(-0.0, 1.0, shape=(shape,), dtype=np.float32)
 
     def observe(self, vehicle):
         ego_state = self.vehicle_state(vehicle)
@@ -156,6 +157,19 @@ class MATollGateMap(PGMap):
             ), parent_node_path, physics_world
         )
         self.blocks.append(merge)
+
+
+class MATollGateMapManager(MapManager):
+
+    def reset(self):
+        config = self.engine.global_config
+        if len(self.spawned_objects) == 0:
+            _map = self.spawn_object(MATollGateMap, map_config=config["map_config"], random_seed=None)
+        else:
+            assert len(self.spawned_objects) == 1, "It is supposed to contain one map in this manager"
+            _map = self.spawned_objects.values()[0]
+        self.load_map(_map)
+        self.current_map.spawn_roads = config["spawn_roads"]
 
 
 class MultiAgentTollgateEnv(MultiAgentMetaDrive):
@@ -270,6 +284,10 @@ class MultiAgentTollgateEnv(MultiAgentMetaDrive):
         o, r, d, i = super(MultiAgentTollgateEnv, self).step(actions)
         self.stay_time_manager.record(self.agent_manager.active_agents, self.episode_steps)
         return o, r, d, i
+
+    def setup_engine(self):
+        super(MultiAgentTollgateEnv, self).setup_engine()
+        self.engine.update_manager("map_manager", MATollGateMapManager())
 
 
 def _draw():

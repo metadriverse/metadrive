@@ -328,10 +328,11 @@ class MetaDriveEnv(BaseEnv):
 
     def setup_engine(self):
         super(MetaDriveEnv, self).setup_engine()
-        # Press t can let expert take over. But this function is still experimental.
         self.engine.accept("b", self.bird_view_camera)
         self.engine.accept("q", self.chase_camera)
         from metadrive.manager.traffic_manager import TrafficManager
+        from metadrive.manager.map_manager import MapManager
+        self.engine.register_manager("map_manager", MapManager())
         self.engine.register_manager("traffic_manager", TrafficManager())
 
 

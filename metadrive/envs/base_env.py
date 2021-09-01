@@ -424,10 +424,7 @@ class BaseEnv(gym.Env):
         self.engine.accept("r", self.reset)
         self.engine.accept("escape", sys.exit)
         self.engine.accept("p", self.capture)
-        from metadrive.manager.map_manager import MapManager
-
         self.engine.register_manager("agent_manager", self.agent_manager)
-        self.engine.register_manager("map_manager", MapManager())
 
     @property
     def current_map(self):

@@ -274,16 +274,17 @@ class BaseEngine(EngineCore, Randomizable):
             return
         self.STOP_REPLAY = not self.STOP_REPLAY
 
-    def register_manager(self, manger_name: str, manager: BaseManager):
+    def register_manager(self, manager_name: str, manager: BaseManager):
         """
         Add a manager to BaseEngine, then all objects can communicate with this class
-        :param manger_name: name shouldn't exist in self._managers and not be same as any class attribute
+        :param manager_name: name shouldn't exist in self._managers and not be same as any class attribute
         :param manager: subclass of BaseManager
         """
-        assert manger_name not in self._managers, "Manager already exists in BaseEngine"
-        assert not hasattr(self, manger_name), "Manager name can not be same as the attribute in BaseEngine"
-        self._managers[manger_name] = manager
-        setattr(self, manger_name, manager)
+        assert manager_name not in self._managers, "Manager already exists in BaseEngine, Use update_manager() to " \
+                                                   "overwrite"
+        assert not hasattr(self, manager_name), "Manager name can not be same as the attribute in BaseEngine"
+        self._managers[manager_name] = manager
+        setattr(self, manager_name, manager)
         self._managers = OrderedDict(sorted(self._managers.items(), key=lambda k_v: k_v[-1].PRIORITY))
 
     def seed(self, random_seed):
@@ -335,3 +336,17 @@ class BaseEngine(EngineCore, Randomizable):
             assert len(
                 objs_need_to_release) == 0, "You should clear all generated objects by using engine.clear_objects " \
                                             "in each manager.before_step()"
+
+    def update_manager(self, manager_name: str, manager: BaseManager):
+        """
+        Update an existing manager with a new one
+        :param manager_name: existing manager name
+        :param manager: new manager
+        """
+        assert manager_name in self._managers, "You may want to call register manager, since {} is not in engine".format(
+            manager_name)
+        existing_manager = self._managers.pop(manager_name)
+        existing_manager.destroy()
+        self._managers[manager_name] = manager
+        setattr(self, manager_name, manager)
+        self._managers = OrderedDict(sorted(self._managers.items(), key=lambda k_v: k_v[-1].PRIORITY))

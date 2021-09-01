@@ -57,8 +57,8 @@ class SafeMetaDriveEnv(MetaDriveEnv):
         return done, done_info
 
     def setup_engine(self):
-        from metadrive.manager.object_manager import TrafficObjectManager
         super(SafeMetaDriveEnv, self).setup_engine()
+        from metadrive.manager.object_manager import TrafficObjectManager
         self.engine.register_manager("object_manager", TrafficObjectManager())
 
 
