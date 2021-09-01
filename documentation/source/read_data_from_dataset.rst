@@ -67,6 +67,10 @@ Specify the Data to Replay
 ###############################
 
 MetaDrive currently supports replay the map and traffic flow in Argoverse dataset.
-As shown in `ArgoverseEnv <>`_
+As shown in `ArgoverseEnv <https://github.com/decisionforce/metadrive/blob/main/metadrive/envs/argoverse_env.py>`_,
+we specify few parameters to limit the map in a region of the city. Here is the detailed explaination of those parameters:
 
+
+- :code:`argoverse_city` (str = "PIT"): Optional in ["PIT", XXX]. The shortcut of the specified city.
+- :code:`argoverse_map_xcenter` (float): The XXXX
 
