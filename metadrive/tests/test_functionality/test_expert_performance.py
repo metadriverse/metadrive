@@ -15,7 +15,7 @@ def _evaluate(env_config, num_episode, has_traffic=True):
         lidar_success = False
         success_list, reward_list, ep_reward, ep_len, ep_count = [], [], 0, 0, 0
         while ep_count < num_episode:
-            action = expert(obs, deterministic=True)
+            action = expert(env.vehicle, deterministic=True)
             obs, reward, done, info = env.step(action)
             # double check lidar
             lidar = [True if p == 1.0 else False for p in env.observations[DEFAULT_AGENT].cloud_points]
