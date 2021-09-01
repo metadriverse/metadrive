@@ -75,7 +75,6 @@ METADRIVE_DEFAULT_CONFIG = dict(
         depth_camera=(84, 84, True),  # buffer length, width, view_ground
         show_side_detector=False,
         show_lane_line_detector=False,
-
     ),
     rgb_clip=True,
     gaussian_noise=0.0,
