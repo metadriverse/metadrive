@@ -4,14 +4,20 @@
 Observation
 ########################
 
-
-
-.. warning:: This page is under construction!
-
-
 .. image:: figs/observation.png
-   :width: 600
-   :align: center
+   :width: 260
+   :align: right
+
+MetaDrive provides various kinds of sensory input, as illustrated in the next figure.
+For low-level sensors, RGB cameras, depth cameras and Lidar can be placed anywhere in the scene with adjustable
+parameters such as view field and the laser number.
+Meanwhile, the high-level scene information including the road information and nearby vehicles' information
+like velocity and heading can also be provided as the observation.
+
+Note that MetaDrive aims at providing an efficient platform to benchmark RL research,
+therefore we improve the simulation efficiency at the cost of photorealistic rendering effect.
+
+In this page, we describe the existing observation forms
 
 
 

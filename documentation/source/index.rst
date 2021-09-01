@@ -54,12 +54,14 @@ Please contact us if you find this work useful in your project.
    observation.rst
    reward_and_cost.rst
    action_and_dynamics.rst
+   config_system.rst
+   read_data_from_dataset.rst
+
 
 .. toctree::
    :hidden:
    :maxdepth: 2
-   :caption: Customize MetaDrive
+   :caption: Concept and Customization
 
-   config_system.rst
-   read_data_from_dataset.rst
-   development_tips.rst
+   concept.rst
+   development.rst
