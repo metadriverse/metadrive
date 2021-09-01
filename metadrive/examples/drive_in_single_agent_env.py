@@ -25,7 +25,7 @@ if __name__ == "__main__":
         )
     )
     env.reset()
-    for i in range(1, 100000):
+    for i in range(1, 1000000000):
         o, r, d, info = env.step([0, 0])
         env.render(text={
             "Auto-Drive (Press T)": env.current_track_vehicle.expert_takeover,

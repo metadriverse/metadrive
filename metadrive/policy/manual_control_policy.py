@@ -26,11 +26,15 @@ class ManualControlPolicy(EnvInputPolicy):
                 raise ValueError("No such a controller type: {}".format(self.config["controller"]))
 
     def act(self, agent_id):
-        if self.engine.current_track_vehicle.expert_takeover:
-            obs = self.engine.agent_manager.observations[self.engine.current_track_vehicle.id].current_observation
-            if self.engine.global_config["random_agent_model"]:
-                obs = obs[2:]
-            return expert(obs)
+        try:
+            if self.engine.current_track_vehicle.expert_takeover:
+                obs = self.engine.agent_manager.observations[self.engine.current_track_vehicle.id].current_observation
+                if self.engine.global_config["random_agent_model"]:
+                    obs = obs[2:]
+                return expert(obs)
+        except ValueError:
+            # if observation doesn't match, fall back to manual control
+            pass
         if self.engine.global_config["manual_control"] and self.engine.agent_manager.get_agent(
                 agent_id) is self.engine.current_track_vehicle and not self.engine.main_camera.is_bird_view_camera():
             return self.controller.process_input(self.engine.current_track_vehicle)
