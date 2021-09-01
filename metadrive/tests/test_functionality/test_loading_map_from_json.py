@@ -5,7 +5,8 @@ from metadrive.utils import recursive_equal
 from metadrive.utils.generate_maps import generate_maps
 
 
-def test_loaded_map_alignment():
+def _test_loaded_map_alignment():
+    raise DeprecationWarning("We do not generate maps from file now!")
     # Generate the second round
     # for seed in [0, 1, 2, 100, 200, 300, 9999]:
     for seed in [0, 1, 2, 99]:
@@ -19,20 +20,16 @@ def test_loaded_map_alignment():
 
         e = MetaDriveEnv(env_config.copy())
         e.reset()
-        assert e.engine.global_config["load_map_from_json"] is True, (
-            "If this assertion fail, it means you are not using the predefined maps. Please check the read_all_"
-            "maps_from_json function in map_manager.py"
-        )
         map_data_realtime_load = e.current_map.save_map()
         map_data_in_json = saved_v1["map_data"][str(seed)]
         e.close()
 
-        e = MetaDriveEnv({"start_seed": seed, "environment_num": 1, "load_map_from_json": False})
+        e = MetaDriveEnv({"start_seed": seed, "environment_num": 1})
         e.reset()
         map_data_realtime_generate = e.current_map.save_map()
         e.close()
 
-        e = MetaDriveEnv({"start_seed": seed, "environment_num": 10, "load_map_from_json": False})
+        e = MetaDriveEnv({"start_seed": seed, "environment_num": 10})
         e.reset(force_seed=seed)
         map_data_realtime_generate_in_multiple_maps = e.current_map.save_map()
         e.close()
