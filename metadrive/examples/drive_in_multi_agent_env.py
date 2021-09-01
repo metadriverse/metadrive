@@ -6,28 +6,32 @@ Args:
     (3) tollgate
     (4) bottleneck
     (5) parkinglot
-    (6) pgmap
+    (6) pgma
 
 """
-from metadrive.envs.marl_envs.multi_agent_metadrive import MultiAgentMetaDrive
-from metadrive.envs.marl_envs.marl_tollgate import MultiAgentTollgateEnv
-from metadrive.envs.marl_envs.marl_bottleneck import MultiAgentBottleneckEnv
-from metadrive.envs.marl_envs.marl_intersection import MultiAgentIntersectionEnv
-from metadrive.envs.marl_envs.marl_inout_roundabout import MultiAgentRoundaboutEnv
-from metadrive.envs.marl_envs.marl_parking_lot import MultiAgentParkingLotEnv
 import argparse
 
+from metadrive import (
+    MultiAgentMetaDrive,
+    MultiAgentTollgateEnv,
+    MultiAgentBottleneckEnv,
+    MultiAgentIntersectionEnv,
+    MultiAgentRoundaboutEnv,
+    MultiAgentParkingLotEnv
+)
+
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--env", type=str, default="roundabout")
     envs = dict(
         roundabout=MultiAgentRoundaboutEnv,
         intersection=MultiAgentIntersectionEnv,
         tollgate=MultiAgentTollgateEnv,
         bottleneck=MultiAgentBottleneckEnv,
         parkinglot=MultiAgentParkingLotEnv,
-        pgmap=MultiAgentMetaDrive
+        pgma=MultiAgentMetaDrive
     )
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--env", type=str, default="roundabout", choices=list(envs.keys()))
     args = parser.parse_args()
     env_cls_name = args.env
     assert env_cls_name in envs.keys(), "No environment named {}, argument accepted: \n" \
@@ -36,7 +40,7 @@ if __name__ == "__main__":
                                         "(3) tollgate\n" \
                                         "(4) bottleneck\n" \
                                         "(5) parkinglot\n" \
-                                        "(6) pgmap" \
+                                        "(6) pgma" \
         .format(env_cls_name)
     env = envs[env_cls_name]({"use_render": True, "manual_control": True, "crash_done": False})
     env.reset()
