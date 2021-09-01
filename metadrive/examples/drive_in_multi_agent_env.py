@@ -16,12 +16,8 @@ Options for --env argument:
 import argparse
 
 from metadrive import (
-    MultiAgentMetaDrive,
-    MultiAgentTollgateEnv,
-    MultiAgentBottleneckEnv,
-    MultiAgentIntersectionEnv,
-    MultiAgentRoundaboutEnv,
-    MultiAgentParkingLotEnv
+    MultiAgentMetaDrive, MultiAgentTollgateEnv, MultiAgentBottleneckEnv, MultiAgentIntersectionEnv,
+    MultiAgentRoundaboutEnv, MultiAgentParkingLotEnv
 )
 
 if __name__ == "__main__":
