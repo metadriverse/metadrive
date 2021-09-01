@@ -6,6 +6,7 @@ from metadrive.envs.marl_envs.marl_inout_roundabout import LidarStateObservation
 from metadrive.envs.marl_envs.multi_agent_metadrive import MultiAgentMetaDrive
 from metadrive.obs.observation_base import ObservationBase
 from metadrive.utils import Config
+from metadrive.manager.map_manager import MapManager
 from metadrive.utils.math_utils import clip
 
 MABottleneckConfig = dict(
@@ -67,6 +68,18 @@ class MABottleneckMap(PGMap):
         self.blocks.append(split)
 
 
+class MABottleneckMapManager(MapManager):
+    def reset(self):
+        config = self.engine.global_config
+        if len(self.spawned_objects) == 0:
+            _map = self.spawn_object(MABottleneckMap, map_config=config["map_config"], random_seed=None)
+        else:
+            assert len(self.spawned_objects) == 1, "It is supposed to contain one map in this manager"
+            _map = self.spawned_objects.values()[0]
+        self.load_map(_map)
+        self.current_map.spawn_roads = config["spawn_roads"]
+
+
 class MultiAgentBottleneckEnv(MultiAgentMetaDrive):
     @staticmethod
     def default_config() -> Config:
@@ -74,15 +87,6 @@ class MultiAgentBottleneckEnv(MultiAgentMetaDrive):
         assert MABottleneckConfig["vehicle_config"]["lane_line_detector"]["num_lasers"] > 2
         MABottleneckConfig["map_config"]["lane_num"] = MABottleneckConfig["map_config"]["bottle_lane_num"]
         return MultiAgentMetaDrive.default_config().update(MABottleneckConfig, allow_add_new_key=True)
-
-    def _update_map(self, episode_data: dict = None):
-        self.engine.map_manager.update_map(
-            self.config,
-            self.current_seed,
-            episode_data,
-            single_block_class=MABottleneckMap,
-            spawn_roads=self.config["spawn_roads"]
-        )
 
     def get_single_observation(self, vehicle_config: "Config") -> "ObservationBase":
         return LidarStateObservationMARound(vehicle_config)
@@ -134,6 +138,10 @@ class MultiAgentBottleneckEnv(MultiAgentMetaDrive):
         if self.config["cross_yellow_line_done"]:
             ret = ret or vehicle.on_yellow_continuous_line
         return ret
+
+    def setup_engine(self):
+        super(MultiAgentBottleneckEnv, self).setup_engine()
+        self.engine.update_manager("map_manager", MABottleneckMapManager())
 
 
 def _draw():

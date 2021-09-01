@@ -21,7 +21,7 @@ class SpawnManager(BaseManager):
     This class maintain a list of possible spawn places/destination for MARL respawn
     """
     # it needs to fill the config at first
-    PRIORITY = 0
+    PRIORITY = 1
 
     REGION_DETECT_HEIGHT = 10
     RESPAWN_REGION_LONGITUDE = 8.

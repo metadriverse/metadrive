@@ -4,10 +4,10 @@ from metadrive.envs.metadrive_env import MetaDriveEnv
 from metadrive.utils import recursive_equal, setup_logger
 
 
-def test_gen_map_read():
+def _test_gen_map_read():
     setup_logger(debug=True)
-
-    env = MetaDriveEnv({"environment_num": 10, "load_map_from_json": False})
+    raise DeprecationWarning("Map can not be generated via dump function now")
+    env = MetaDriveEnv({"environment_num": 10})
     try:
         data = env.dump_all_maps()
         with open("test_10maps.json", "w") as f:
@@ -36,4 +36,4 @@ def test_gen_map_read():
 
 
 if __name__ == "__main__":
-    test_gen_map_read()
+    _test_gen_map_read()
