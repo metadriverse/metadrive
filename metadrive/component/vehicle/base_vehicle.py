@@ -1,6 +1,6 @@
 import math
-import copy
 from metadrive.utils.space import VehicleParameterSpace, ParameterSpace
+from metadrive.utils.math_utils import safe_clip_for_small_array
 from collections import deque
 from typing import Union, Optional
 import gym
@@ -230,6 +230,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self.on_lane = True  # on lane surface or not
 
     def _preprocess_action(self, action):
+        action = safe_clip_for_small_array(action, -1, 1)
         if self.config["action_check"]:
             assert self.action_space.contains(action), "Input {} is not compatible with action space {}!".format(
                 action, self.action_space

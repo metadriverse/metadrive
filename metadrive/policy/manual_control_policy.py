@@ -30,8 +30,7 @@ class ManualControlPolicy(EnvInputPolicy):
             obs = self.engine.agent_manager.observations[self.engine.current_track_vehicle.id].current_observation
             if self.engine.global_config["random_agent_model"]:
                 obs = obs[2:]
-            expert_action = expert(obs)
-            return clip(expert_action[0], -1, 1), clip(expert_action[1], -1, 1)
+            return expert(obs)
         if self.engine.global_config["manual_control"] and self.engine.agent_manager.get_agent(
                 agent_id) is self.engine.current_track_vehicle and not self.engine.main_camera.is_bird_view_camera():
             return self.controller.process_input(self.engine.current_track_vehicle)

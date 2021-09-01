@@ -10,6 +10,7 @@ from metadrive.constants import TerminationState
 from metadrive.envs.marl_envs.multi_agent_metadrive import MultiAgentMetaDrive, pygame_replay
 from metadrive.obs.state_obs import LidarStateObservation, StateObservation
 from metadrive.utils import Config, clip
+from metadrive.manager.map_manager import MapManager
 
 MATollConfig = dict(
     spawn_roads=[Road(FirstPGBlock.NODE_2, FirstPGBlock.NODE_3), -Road(Merge.node(3, 0, 0), Merge.node(3, 0, 1))],
@@ -158,6 +159,18 @@ class MATollGateMap(PGMap):
         self.blocks.append(merge)
 
 
+class MATollGateMapManager(MapManager):
+    def reset(self):
+        config = self.engine.global_config
+        if len(self.spawned_objects) == 0:
+            _map = self.spawn_object(MATollGateMap, map_config=config["map_config"], random_seed=None)
+        else:
+            assert len(self.spawned_objects) == 1, "It is supposed to contain one map in this manager"
+            _map = self.spawned_objects.values()[0]
+        self.load_map(_map)
+        self.current_map.spawn_roads = config["spawn_roads"]
+
+
 class MultiAgentTollgateEnv(MultiAgentMetaDrive):
     def __init__(self, config):
         super(MultiAgentTollgateEnv, self).__init__(config)
@@ -172,15 +185,6 @@ class MultiAgentTollgateEnv(MultiAgentMetaDrive):
         assert MATollConfig["vehicle_config"]["side_detector"]["num_lasers"] > 2
         assert MATollConfig["vehicle_config"]["lane_line_detector"]["num_lasers"] > 2
         return MultiAgentMetaDrive.default_config().update(MATollConfig, allow_add_new_key=True)
-
-    def _update_map(self, episode_data: dict = None):
-        self.engine.map_manager.update_map(
-            self.config,
-            self.current_seed,
-            episode_data,
-            single_block_class=MATollGateMap,
-            spawn_roads=self.config["spawn_roads"]
-        )
 
     def reward_function(self, vehicle_id: str):
         """
@@ -270,6 +274,10 @@ class MultiAgentTollgateEnv(MultiAgentMetaDrive):
         o, r, d, i = super(MultiAgentTollgateEnv, self).step(actions)
         self.stay_time_manager.record(self.agent_manager.active_agents, self.episode_steps)
         return o, r, d, i
+
+    def setup_engine(self):
+        super(MultiAgentTollgateEnv, self).setup_engine()
+        self.engine.update_manager("map_manager", MATollGateMapManager())
 
 
 def _draw():
