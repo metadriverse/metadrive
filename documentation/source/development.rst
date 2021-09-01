@@ -5,8 +5,5 @@
 Development Tips
 ######################
 
-.. warning:: This page is under construction!
-
-
-This page is working in progress!
+.. warning:: This page is working in progress!
 

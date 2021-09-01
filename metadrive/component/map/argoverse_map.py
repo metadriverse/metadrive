@@ -37,10 +37,9 @@ class ArgoverseMap(BaseMap):
     # block size
     BLOCK_LANE_NUM = 40
 
-    # origin ag map
-    AGMap = AGMap()
-
     def __init__(self, map_config, random_seed=0):
+        # origin ag map
+        self.AGMap = AGMap()
         map_config[self.SEED] = random_seed
         assert "city" in map_config, "City name is required when generating argoverse map"
         assert map_config["city"] in self.SUPPORTED_MAPS, "City generation of {} is not supported (We support {} now)". \
