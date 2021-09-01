@@ -67,6 +67,6 @@ Specify the Data to Replay
 ###############################
 
 MetaDrive currently supports replay the map and traffic flow in Argoverse dataset.
+As shown in `ArgoverseEnv <>`_
 
-.. note:: This section is working in progress.
 
