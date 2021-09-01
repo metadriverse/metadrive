@@ -1,11 +1,9 @@
 """
-Please feel free to run this script to enjoy a journey by keyboard!
-Remember to press H to see help message!
+This script demonstrates how to setup the Safe RL environments.
 
-Note: This script require rendering, please following the installation instruction to setup a proper
-environment that allows popping up an window.
+Please feel free to run this script to enjoy a journey by keyboard! Remember to press H to see help message!
 
-Auto-Drive mode may fail to solve some scenarios due to distribution mismatch
+Auto-Drive mode may fail to solve some scenarios due to distribution mismatch.
 """
 import logging
 
