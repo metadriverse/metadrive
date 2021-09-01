@@ -167,7 +167,7 @@ class MultiAgentMetaDrive(MetaDriveEnv):
     def _update_camera_after_finish(self):
         if self.main_camera is not None and self.current_track_vehicle.id not in self.engine.agent_manager._active_objects \
                 and self.engine.task_manager.hasTaskNamed(self.main_camera.CHASE_TASK_NAME):
-            self.chase_camera()
+            self.switch_to_third_person_view()
 
     def _get_observations(self):
         return {

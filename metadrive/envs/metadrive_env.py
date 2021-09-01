@@ -66,7 +66,7 @@ METADRIVE_DEFAULT_CONFIG = dict(
     vehicle_config=dict(
         # ===== vehicle module config =====
         # laser num, distance, other vehicle info num
-        lidar=dict(num_lasers=240, distance=50, num_others=4, gaussian_noise=0.0, dropout_prob=0.0),
+        lidar=dict(num_lasers=240, distance=50, num_others=0, gaussian_noise=0.0, dropout_prob=0.0),
         side_detector=dict(num_lasers=0, distance=50, gaussian_noise=0.0, dropout_prob=0.0),
         lane_line_detector=dict(num_lasers=0, distance=20, gaussian_noise=0.0, dropout_prob=0.0),
         show_lidar=False,
@@ -248,7 +248,7 @@ class MetaDriveEnv(BaseEnv):
             reward = -self.config["crash_object_penalty"]
         return reward, step_info
 
-    def chase_camera(self) -> (str, BaseVehicle):
+    def switch_to_third_person_view(self) -> (str, BaseVehicle):
         if self.main_camera is None:
             return
         self.main_camera.reset()
@@ -269,7 +269,7 @@ class MetaDriveEnv(BaseEnv):
         self.main_camera.track(current_track_vehicle)
         return
 
-    def bird_view_camera(self):
+    def switch_to_top_down_view(self):
         self.main_camera.stop_track()
 
     def get_single_observation(self, vehicle_config: "Config") -> "ObservationType":
@@ -281,8 +281,8 @@ class MetaDriveEnv(BaseEnv):
 
     def setup_engine(self):
         super(MetaDriveEnv, self).setup_engine()
-        self.engine.accept("b", self.bird_view_camera)
-        self.engine.accept("q", self.chase_camera)
+        self.engine.accept("b", self.switch_to_top_down_view)
+        self.engine.accept("q", self.switch_to_third_person_view)
         from metadrive.manager.traffic_manager import TrafficManager
         from metadrive.manager.map_manager import MapManager
         self.engine.register_manager("map_manager", MapManager())
