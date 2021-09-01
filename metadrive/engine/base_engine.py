@@ -344,7 +344,8 @@ class BaseEngine(EngineCore, Randomizable):
         :param manager: new manager
         """
         assert manager_name in self._managers, "You may want to call register manager, since {} is not in engine".format(
-            manager_name)
+            manager_name
+        )
         existing_manager = self._managers.pop(manager_name)
         existing_manager.destroy()
         self._managers[manager_name] = manager

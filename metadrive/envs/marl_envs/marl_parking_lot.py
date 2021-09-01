@@ -131,7 +131,6 @@ class MAParkingLotMap(PGMap):
 
 
 class MAParkinglotMapManager(MapManager):
-
     def reset(self):
         config = self.engine.global_config
         if len(self.spawned_objects) == 0:
@@ -147,7 +146,6 @@ class MultiAgentParkingLotEnv(MultiAgentMetaDrive):
     """
     Env will be done when vehicle is on yellow or white continuous lane line!
     """
-
     @staticmethod
     def default_config() -> Config:
         return MultiAgentMetaDrive.default_config().update(MAParkingLotConfig, allow_add_new_key=True)
@@ -169,15 +167,6 @@ class MultiAgentParkingLotEnv(MultiAgentMetaDrive):
         ret_config["spawn_roads"] = ret_config["in_spawn_roads"] + ret_config["out_spawn_roads"]
         ret_config["map_config"]["parking_space_num"] = ret_config["parking_space_num"]
         return ret_config
-
-    def _update_map(self, episode_data: dict = None):
-        self.engine.map_manager.update_map(
-            self.config,
-            self.current_seed,
-            episode_data,
-            single_block_class=MAParkingLotMap,
-            spawn_roads=self.config["spawn_roads"]
-        )
 
     def _respawn_single_vehicle(self, randomize_position=False):
         """

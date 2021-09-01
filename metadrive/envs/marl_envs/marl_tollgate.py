@@ -68,7 +68,7 @@ class TollGateStateObservation(StateObservation):
     def observation_space(self):
         # Navi info + Other states
         shape = self.ego_state_obs_dim + self.get_line_detector_dim()
-        return gym.spaces.Box(-0.0, 1.0, shape=(shape,), dtype=np.float32)
+        return gym.spaces.Box(-0.0, 1.0, shape=(shape, ), dtype=np.float32)
 
     def observe(self, vehicle):
         ego_state = self.vehicle_state(vehicle)
@@ -160,7 +160,6 @@ class MATollGateMap(PGMap):
 
 
 class MATollGateMapManager(MapManager):
-
     def reset(self):
         config = self.engine.global_config
         if len(self.spawned_objects) == 0:
@@ -186,15 +185,6 @@ class MultiAgentTollgateEnv(MultiAgentMetaDrive):
         assert MATollConfig["vehicle_config"]["side_detector"]["num_lasers"] > 2
         assert MATollConfig["vehicle_config"]["lane_line_detector"]["num_lasers"] > 2
         return MultiAgentMetaDrive.default_config().update(MATollConfig, allow_add_new_key=True)
-
-    def _update_map(self, episode_data: dict = None):
-        self.engine.map_manager.update_map(
-            self.config,
-            self.current_seed,
-            episode_data,
-            single_block_class=MATollGateMap,
-            spawn_roads=self.config["spawn_roads"]
-        )
 
     def reward_function(self, vehicle_id: str):
         """

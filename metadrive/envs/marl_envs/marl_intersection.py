@@ -62,13 +62,12 @@ class MAIntersectionSpawnManager(SpawnManager):
 
 
 class MAIntersectionMapManager(MapManager):
-
     def reset(self):
         config = self.engine.global_config
         if len(self.spawned_objects) == 0:
             _map = self.spawn_object(MAIntersectionMap, map_config=config["map_config"], random_seed=None)
         else:
-            assert len(self.spawned_objects)==1, "It is supposed to contain one map in this manager"
+            assert len(self.spawned_objects) == 1, "It is supposed to contain one map in this manager"
             _map = self.spawned_objects.values()[0]
         self.load_map(_map)
         self.current_map.spawn_roads = config["spawn_roads"]

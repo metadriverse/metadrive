@@ -148,15 +148,6 @@ class MultiAgentRoundaboutEnv(MultiAgentMetaDrive):
     def default_config() -> Config:
         return MultiAgentMetaDrive.default_config().update(MARoundaboutConfig, allow_add_new_key=True)
 
-    def _update_map(self, episode_data: dict = None):
-        self.engine.map_manager.update_map(
-            self.config,
-            self.current_seed,
-            episode_data,
-            single_block_class=MARoundaboutMap,
-            spawn_roads=self.config["spawn_roads"]
-        )
-
     def get_single_observation(self, vehicle_config: "Config") -> "ObservationBase":
         return LidarStateObservationMARound(vehicle_config)
 

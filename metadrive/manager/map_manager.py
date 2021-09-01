@@ -111,7 +111,7 @@ class MapManager(BaseManager):
         #     map_config.update(map_data)
         #     self.spawn_object(PGMap, map_config=map_config)
         #     return
-        config=self.engine.global_config
+        config = self.engine.global_config
         current_seed = self.engine.global_seed
 
         # If we choose to load maps from json file.

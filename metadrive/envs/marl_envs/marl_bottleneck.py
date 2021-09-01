@@ -69,7 +69,6 @@ class MABottleneckMap(PGMap):
 
 
 class MABottleneckMapManager(MapManager):
-
     def reset(self):
         config = self.engine.global_config
         if len(self.spawned_objects) == 0:
@@ -88,15 +87,6 @@ class MultiAgentBottleneckEnv(MultiAgentMetaDrive):
         assert MABottleneckConfig["vehicle_config"]["lane_line_detector"]["num_lasers"] > 2
         MABottleneckConfig["map_config"]["lane_num"] = MABottleneckConfig["map_config"]["bottle_lane_num"]
         return MultiAgentMetaDrive.default_config().update(MABottleneckConfig, allow_add_new_key=True)
-
-    def _update_map(self, episode_data: dict = None):
-        self.engine.map_manager.update_map(
-            self.config,
-            self.current_seed,
-            episode_data,
-            single_block_class=MABottleneckMap,
-            spawn_roads=self.config["spawn_roads"]
-        )
 
     def get_single_observation(self, vehicle_config: "Config") -> "ObservationBase":
         return LidarStateObservationMARound(vehicle_config)
