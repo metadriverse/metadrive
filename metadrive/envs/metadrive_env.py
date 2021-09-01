@@ -76,19 +76,6 @@ METADRIVE_DEFAULT_CONFIG = dict(
         show_side_detector=False,
         show_lane_line_detector=False,
 
-        # ===== use image =====
-        image_source="rgb_camera",  # take effect when only when offscreen_render == True
-
-        # ===== vehicle spawn and destination =====
-        spawn_lane_index=(FirstPGBlock.NODE_1, FirstPGBlock.NODE_2, 0),
-        spawn_longitude=5.0,
-        spawn_lateral=0.0,
-        destination_node=None,
-
-        # ==== others ====
-        overtake_stat=False,  # we usually set to True when evaluation
-        action_check=False,
-        random_color=False,
     ),
     rgb_clip=True,
     gaussian_noise=0.0,

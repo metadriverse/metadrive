@@ -1,4 +1,5 @@
 import sys
+from metadrive.component.blocks.first_block import FirstPGBlock
 import datetime
 import time
 from collections import defaultdict
@@ -62,7 +63,21 @@ BASE_DEFAULT_CONFIG = dict(
         random_navi_mark_color=False,
         show_dest_mark=False,
         show_line_to_dest=False,
-        am_i_the_special_one=False
+        am_i_the_special_one=False,
+
+        # ===== use image =====
+        image_source="rgb_camera",  # take effect when only when offscreen_render == True
+
+        # ===== vehicle spawn and destination =====
+        spawn_lane_index=(FirstPGBlock.NODE_1, FirstPGBlock.NODE_2, 0),
+        spawn_longitude=5.0,
+        spawn_lateral=0.0,
+        destination_node=None,
+
+        # ==== others ====
+        overtake_stat=False,  # we usually set to True when evaluation
+        action_check=False,
+        random_color=False,
     ),
 
     # ===== Engine Core config =====

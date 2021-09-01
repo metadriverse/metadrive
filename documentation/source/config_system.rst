@@ -180,12 +180,11 @@ Engine Config
 
 
 
-
-
 Vehicle Config
 ################
 
 We list the vehicle config here. Observation Space will be adjusted by these config automatically.
+Other vehicle config like *traffic_vehicle_config* should merge this base config before passing to traffic vehicle
 Find more information and in our source code and test scripts!
 
 - :code:`lidar` (tuple): (laser num, distance, other vehicle info num)
@@ -194,3 +193,18 @@ Find more information and in our source code and test scripts!
 - :code:`show_navi_mark` (bool): A spinning navigation mark will be shown in the scene
 - :code:`increment_steering` (bool): For keyboard control using. When set to True, the steering angle is determined by the key pressing time.
 - :code:`wheel_friction` (float): Friction coefficient
+- :code:`vehicle_model` (str): Decided which vehicle to use (s, m, l, xl, default)
+- :code:`enable_reverse` (bool): When set to True and vehicle speed < 0, a brake action will be parsed to reverse
+- :code:`extra_action_dim` (int): If you want more control signal from env.step() besides [steering, throttle/brake], change the default value 0 to whatever you want
+- :code:`random_navi_mark_color` (bool): When there are several agents, turn it to True so that one can distinguish navigation information
+- :code:`show_dest_mark` (bool): Whether to show the destination or not.
+- :code:`show_line_to_dest` (bool): Whether to show a line from current position to destination.
+- :code:`random_color` (bool): Vehicle model will have random color picked from seaborn palette
+- :code:`am_i_the_special_one` (bool): This car will have a special color in green
+- :code:`image_source` (str): When using image observation, it decides where the image will be retrieved ("rgb_camera", "depth_camera")
+- :code:`spawn_lane_index` (tuple): Which lane to spawn this vehicle.
+- :code:`spawn_longitude` (float): The spawn point will be calculated by *spawn_longitude* and *spawn_lateral*
+- :code:`spawn_lateral` (float): The spawn point will be calculated by *spawn_longitude* and *spawn_lateral*
+- :code:`destination_node` (str): Destination road node name
+- :code:`overtake_stat` (bool): Vehicle will record how many vehicles it overtakes, and write it into info
+
