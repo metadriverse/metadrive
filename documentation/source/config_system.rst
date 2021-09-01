@@ -4,8 +4,6 @@
 Environment Configuration
 ##########################
 
-.. warning:: This page is under construction!
-
 A MetaDrive instance accepts a dict as the environmental config. For example, you can build a MetaDrive instance with 200 generated maps via
 
 .. code-block:: python
@@ -16,7 +14,7 @@ A MetaDrive instance accepts a dict as the environmental config. For example, yo
 
     # or using gym interface:
     import gym
-    env = gym.make("MetaDrive-v0", {"environment_num": 200, "start_seed": 0})
+    env = gym.make("MetaDrive-v0", config=config)
 
 In this page, we describe the details of each configurable options.
 
@@ -31,8 +29,8 @@ To achieve that, you only need to specify the range of random seeds used to gene
 Concretely, MetaDrive will use the seeds in range :code:`[start_seed, start_seed + environment_num)`.
 Therefore, you only need to specify these two values in the config:
 
-    - :code:`start_seed` (int = 0): Random seed of the first map.
-    - :code:`environment_num` (int = 1): Number of the driving scenarios.
+    - :code:`start_seed` (int = 0): random seed of the first map
+    - :code:`environment_num` (int = 1): number of the driving scenarios
 
 
 Agent Config
@@ -47,6 +45,56 @@ Agent Config
     - :code:`IDM_agent` (bool = False):
 
 
+
+Map Config
+#############
+
+MetaDrive provides detailed configuration on the generated maps. Generally speaking, we allow two forms of map generation if using Procedural Generation (PG) algorithm while not loading map from dataset:
+
+1. :code:`config["map_config"]["type"] = "block_num"`: the user specifies the number of blocks in each map so that the PG algorithm will automatically build maps containing that number of blocks while randomizing all parameters including the type of blocks.
+2. :code:`config["map_config"]["type"] = "block_sequence"`: the user specify the sequence of block types and PG algorithm will build maps strictly following that order while randomizing the parameters in each block.
+
+We describe all optional map config as follows:
+
+    - :code:`random_lane_width` (bool = False): whether to randomize the width of lane in each map (all lanes in the same map share the same lane width)
+    - :code:`random_lane_num` (bool = False): whether to randomize the number of lane in a road in each map (all road in the same map share the same number of lanes)
+    - :code:`map_config` (dict): A nested dict describing the generation of map.
+        - :code:`type` (str = "block_num"): A string in ["block_num", "block_sequence"] denoting which form of map generation should the PG algorithm use.
+        - :code:`config`: XXX
+        - :code:`lane_width` (float = 3.5): the width of each lane. This will be overwritten if :code:`random_lane_width = True`.
+        - :code:`lane_num` (int = 3): number of lanes in each road. This will be overwritten if :code:`random_lane_num = True`.
+        - :code:`exit_length` (float = 50): TODO(LQY)
+
+
+We also provide a shortcut to specify the map:
+
+    -   :code:`map` (int or string): User can set a *string* or *int* as the key to generate map in an easy way. For example, :code:`config["map"] = 3` means generating a map containing 3 blocks, while :code:`config["map"] = "SCrRX"` means the first block is Straight, and the following blocks are Circular, InRamp, OutRamp and Intersection. The character here are the unique ID of different types of blocks as shown in the next table. Therefore using a *string* can determine the block type sequence.
+        We provide the following block types:
+
+            +---------------+-----------+
+            | Block Type    |    ID     |
+            +===============+===========+
+            | Straight      |     S     |
+            +---------------+-----------+
+            | Circular      |     C     |
+            +---------------+-----------+
+            | InRamp        |     r     |
+            +---------------+-----------+
+            | OutRamp       |     R     |
+            +---------------+-----------+
+            | Roundabout    |     O     |
+            +---------------+-----------+
+            | Intersection  |     X     |
+            +---------------+-----------+
+            | TIntersection |     T     |
+            +---------------+-----------+
+            | Fork          |TODO(LQY)  |
+            +---------------+-----------+
+
+
+
+
+
 Action Config
 ##############
 
@@ -55,8 +103,8 @@ Action Config
     - :code:`decision_repeat` (int = 5):
     - :code:`discrete_action` (bool = False):
     - :code:`discrete_steering/throttle_dim` (int = 5, 5):
-
-
+    - :code:`decision_repeat` (int): The minimal step size of the world is 2e-2 second, and thus for agent the world will step
+      decision_repeat * 2e-2 second after applying one action or step.
 
 
 Visualization & Rendering
@@ -87,42 +135,6 @@ TrafficManager Config
     - :code:`traffic_mode`: Trigger mode (Triger) / reborn mode (Reborn). In Reborn mode vehicles will enter the map again after arriving its destination.
     - :code:`random_traffic` (bool): the traffic generation will not be controlled by current map seed. If set to *False*, each map will have same traffic flow.
 
-Map Config
-##############################
-    -   :code:`map` (int or string): You can set a *string* or *int* as the key to generate map in an easy way. An *int=N* means generating a map containing N blocks,
-        and the block type is randomly selected. Since in MetaDrive each block has a unique ID in *char* type, *string* can determine the block type sequence.
-        For example, "SCrRX" means the first block is Straight, and the next blocks are Circular, InRamp, OutRamp and Intersection.
-        We provide the following block types:
-
-            +---------------+-----------+
-            | Block Type    |    ID     |
-            +===============+===========+
-            | Straight      |     S     |
-            +---------------+-----------+
-            | Circular      |     C     |
-            +---------------+-----------+
-            | InRamp        |     r     |
-            +---------------+-----------+
-            | OutRamp       |     R     |
-            +---------------+-----------+
-            | Roundabout    |     O     |
-            +---------------+-----------+
-            | Intersection  |     X     |
-            +---------------+-----------+
-            | TIntersection |     T     |
-            +---------------+-----------+
-            | Fork          |   (WIP)   |
-            +---------------+-----------+
-
-
-    - :code:`map_config` (dict): The original map config. Find more information in Map source code, or find usage in our test scripts.
-
-        - :code:`type` (str): The map can be generated by BIG according to BLOCK_NUM, BLOCK_SEQUENCE, or MAP_FILE
-        - :code:`config` (srt): A int telling BIG the total block number under BLOCK_NUM mode, or a str describing BLOCK_SEQUENCE
-          (each block has a unique character severing as its ID, so combining them to get a map, the parameters of these block
-          is sampled by BIG), and under MAP_FILE mode the config should be a dict describing the whole map.
-        - :code:`lane_width` (float): Width of lanes.
-        - :code:`lane_num` (int): Number of lanes in each road.
 
 
 
@@ -135,11 +147,6 @@ Observation Config
     - :code:`image_source` (str): decided which camera image to use (mini_map or front camera). Now we only support capture one image as a part of
       observation.
 
-Action Config
-#######################
-
-    - :code:`decision_repeat` (int): The minimal step size of the world is 2e-2 second, and thus for agent the world will step
-      decision_repeat * 2e-2 second after applying one action or step.
 
 
 Reward Scheme

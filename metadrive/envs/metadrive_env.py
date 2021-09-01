@@ -35,7 +35,6 @@ METADRIVE_DEFAULT_CONFIG = dict(
         BaseMap.LANE_NUM: 3,
         "exit_length": 50,
     },
-    map_file_path=pregenerated_map_file,  # The path to the pre-generated file
 
     # ===== Observation =====
     use_topdown=False,  # Use top-down view
