@@ -20,7 +20,7 @@ MULTI_AGENT_METADRIVE_DEFAULT_CONFIG = dict(
     # frequently done might not be a good idea.
     crash_done=True,
     out_of_road_done=True,
-    delay_done=25,  # Wait for 5 seconds in real world.
+    delay_done=25,  # Put the dead vehicles in place for 5 seconds before removing them.
 
     # Whether the vehicle can rejoin the episode
     allow_respawn=True,

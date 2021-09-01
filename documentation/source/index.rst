@@ -52,7 +52,7 @@ Please contact us if you find this work useful in your project.
 
    rl_environments.rst
    observation.rst
-   reward_and_cost.rst
+   reward_cost_and_termination_function.rst
    action_and_dynamics.rst
    config_system.rst
    read_data_from_dataset.rst
