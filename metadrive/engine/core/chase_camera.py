@@ -26,7 +26,7 @@ class MainCamera:
     TOP_DOWN_VIEW_HEIGHT = 120
     WHEEL_SCROLL_SPEED = 10
     MOUSE_RECOVER_TIME = 8
-    STATIC_MOUSE_HOLD_TIME = 40
+    STATIC_MOUSE_HOLD_TIME = 100  # in steps
     MOUSE_MOVE_INTO_LATENCY = 2
     MOUSE_SPEED_MULTIPLIER = 1
 
@@ -73,7 +73,7 @@ class MainCamera:
         # TPP rotate
         props = WindowProperties()
         props.setCursorHidden(True)
-        props.setMouseMode(WindowProperties.MConfined)
+        # props.setMouseMode(WindowProperties.MConfined)
         self.engine.win.requestProperties(props)
         self.mouse_rotate = 0
         self.last_mouse_pos = self.engine.mouseWatcherNode.getMouseX() if self.has_mouse else 0
