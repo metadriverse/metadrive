@@ -20,12 +20,14 @@ import argparse
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--env", type=str, default="roundabout")
-    envs = dict(roundabout=MultiAgentRoundaboutEnv,
-                intersection=MultiAgentIntersectionEnv,
-                tollgate=MultiAgentTollgateEnv,
-                bottleneck=MultiAgentBottleneckEnv,
-                parkinglot=MultiAgentParkingLotEnv,
-                pgmap=MultiAgentMetaDrive)
+    envs = dict(
+        roundabout=MultiAgentRoundaboutEnv,
+        intersection=MultiAgentIntersectionEnv,
+        tollgate=MultiAgentTollgateEnv,
+        bottleneck=MultiAgentBottleneckEnv,
+        parkinglot=MultiAgentParkingLotEnv,
+        pgmap=MultiAgentMetaDrive
+    )
     args = parser.parse_args()
     env_cls_name = args.env
     assert env_cls_name in envs.keys(), "No environment named {}, argument accepted: \n" \
@@ -40,9 +42,12 @@ if __name__ == "__main__":
     env.reset()
     for i in range(1, 10000000000):
         o, r, d, info = env.step({agent_id: [0, 0] for agent_id in env.vehicles.keys()})
-        env.render(text={"Number of existing vehicles": len(env.vehicles),
-                         "Tracked agent (Press Q)": env.engine.agent_manager.object_to_agent(
-                             env.current_track_vehicle.id)})
+        env.render(
+            text={
+                "Number of existing vehicles": len(env.vehicles),
+                "Tracked agent (Press Q)": env.engine.agent_manager.object_to_agent(env.current_track_vehicle.id)
+            }
+        )
         if d["__all__"]:
             env.reset()
     env.close()

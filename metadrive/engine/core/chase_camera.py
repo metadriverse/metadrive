@@ -102,7 +102,7 @@ class MainCamera:
         if not self._in_recover and self.has_mouse and not self.mouse_into_window and self.move_into_window_timer == 0:
             new_mouse_pos = self.engine.mouseWatcherNode.getMouseX()
             last_rotate = self.mouse_rotate
-            self.mouse_rotate = -new_mouse_pos*self.MOUSE_SPEED_MULTIPLIER
+            self.mouse_rotate = -new_mouse_pos * self.MOUSE_SPEED_MULTIPLIER
             diff = abs(last_rotate - self.mouse_rotate)
             if diff == 0.:
                 self.static_timer += 1
