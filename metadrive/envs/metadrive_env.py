@@ -35,7 +35,6 @@ METADRIVE_DEFAULT_CONFIG = dict(
         BaseMap.LANE_NUM: 3,
         "exit_length": 50,
     },
-    load_map_from_json=True,  # Whether to load maps from pre-generated file
     map_file_path=pregenerated_map_file,  # The path to the pre-generated file
 
     # ===== Observation =====
@@ -265,36 +264,6 @@ class MetaDriveEnv(BaseEnv):
             reward = -self.config["crash_object_penalty"]
         return reward, step_info
 
-    def dump_all_maps(self):
-        assert not engine_initialized(), \
-            "We assume you generate map files in independent tasks (not in training). " \
-            "So you should run the generating script without calling reset of the " \
-            "environment."
-
-        self.lazy_init()  # it only works the first time when reset() is called to avoid the error when render
-        assert engine_initialized()
-
-        for seed in range(self.start_seed, self.start_seed + self.env_num):
-            all_config = self.config.copy()
-            all_config["map_config"]["seed"] = seed
-            # map_config = copy.deepcopy(self.config["map_config"])
-            # map_config.update({"seed": seed})
-            # set_global_random_seed(seed)
-
-            self.engine.map_manager.update_map(all_config, current_seed=seed)
-            # new_map = self.engine.map_manager.spawn_object(PGMap, map_config=map_config, random_seed=None)
-            # self.pg_maps[current_seed] = new_map
-            # self.engine.map_manager.unload_map(new_map)
-            print("Finish generating map with seed: {}".format(seed))
-
-        map_data = dict()
-        for seed, map in self.maps.items():
-            assert map is not None
-            map_data[seed] = map.save_map()
-
-        return_data = dict(map_config=self.config["map_config"].copy().get_dict(), map_data=copy.deepcopy(map_data))
-        return return_data
-
     def chase_camera(self) -> (str, BaseVehicle):
         if self.main_camera is None:
             return
@@ -328,10 +297,11 @@ class MetaDriveEnv(BaseEnv):
 
     def setup_engine(self):
         super(MetaDriveEnv, self).setup_engine()
-        # Press t can let expert take over. But this function is still experimental.
         self.engine.accept("b", self.bird_view_camera)
         self.engine.accept("q", self.chase_camera)
         from metadrive.manager.traffic_manager import TrafficManager
+        from metadrive.manager.map_manager import MapManager
+        self.engine.register_manager("map_manager", MapManager())
         self.engine.register_manager("traffic_manager", TrafficManager())
 
 

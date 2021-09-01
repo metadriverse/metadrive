@@ -8,7 +8,7 @@ from metadrive.component.map.pg_map import PGMap
 from metadrive.component.road.road import Road
 from metadrive.envs.marl_envs.marl_inout_roundabout import LidarStateObservationMARound
 from metadrive.envs.marl_envs.multi_agent_metadrive import MultiAgentMetaDrive, panda_replay
-from metadrive.manager.spawn_manager import SpawnManager
+from metadrive.manager.map_manager import MapManager
 from metadrive.obs.observation_base import ObservationBase
 from metadrive.utils import get_np_random, Config
 
@@ -129,6 +129,18 @@ class MAParkingLotMap(PGMap):
         self.blocks.append(last_block)
 
 
+class MAParkinglotMapManager(MapManager):
+    def reset(self):
+        config = self.engine.global_config
+        if len(self.spawned_objects) == 0:
+            _map = self.spawn_object(MAParkingLotMap, map_config=config["map_config"], random_seed=None)
+        else:
+            assert len(self.spawned_objects) == 1, "It is supposed to contain one map in this manager"
+            _map = self.spawned_objects.values()[0]
+        self.load_map(_map)
+        self.current_map.spawn_roads = config["spawn_roads"]
+
+
 class MultiAgentParkingLotEnv(MultiAgentMetaDrive):
     """
     Env will be done when vehicle is on yellow or white continuous lane line!
@@ -154,15 +166,6 @@ class MultiAgentParkingLotEnv(MultiAgentMetaDrive):
         ret_config["spawn_roads"] = ret_config["in_spawn_roads"] + ret_config["out_spawn_roads"]
         ret_config["map_config"]["parking_space_num"] = ret_config["parking_space_num"]
         return ret_config
-
-    def _update_map(self, episode_data: dict = None):
-        self.engine.map_manager.update_map(
-            self.config,
-            self.current_seed,
-            episode_data,
-            single_block_class=MAParkingLotMap,
-            spawn_roads=self.config["spawn_roads"]
-        )
 
     def _respawn_single_vehicle(self, randomize_position=False):
         """
@@ -225,9 +228,9 @@ class MultiAgentParkingLotEnv(MultiAgentMetaDrive):
         # return ret
 
     def setup_engine(self):
-        from metadrive.envs.metadrive_env import MetaDriveEnv
-        MetaDriveEnv.setup_engine(self)
-        self.engine.register_manager("spawn_manager", ParkingLotSpawnManager())
+        super(MultiAgentParkingLotEnv, self).setup_engine()
+        self.engine.update_manager("spawn_manager", ParkingLotSpawnManager())
+        self.engine.update_manager("map_manager", MAParkinglotMapManager())
 
 
 def _draw():

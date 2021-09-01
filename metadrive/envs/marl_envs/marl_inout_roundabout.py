@@ -1,6 +1,6 @@
 import copy
 from metadrive.manager.spawn_manager import SpawnManager
-
+from metadrive.manager.map_manager import MapManager
 import gym
 import numpy as np
 from metadrive.component.blocks.first_block import FirstPGBlock
@@ -61,6 +61,18 @@ class MARoundaboutMap(PGMap):
             }
         )
         self.blocks.append(last_block)
+
+
+class MARoundaboutMapManager(MapManager):
+    def reset(self):
+        config = self.engine.global_config
+        if len(self.spawned_objects) == 0:
+            _map = self.spawn_object(MARoundaboutMap, map_config=config["map_config"], random_seed=None)
+        else:
+            assert len(self.spawned_objects) == 1, "It is supposed to contain one map in this manager"
+            _map = self.spawned_objects.values()[0]
+        self.load_map(_map)
+        self.current_map.spawn_roads = config["spawn_roads"]
 
 
 class LidarStateObservationMARound(ObservationBase):
@@ -136,22 +148,13 @@ class MultiAgentRoundaboutEnv(MultiAgentMetaDrive):
     def default_config() -> Config:
         return MultiAgentMetaDrive.default_config().update(MARoundaboutConfig, allow_add_new_key=True)
 
-    def _update_map(self, episode_data: dict = None):
-        self.engine.map_manager.update_map(
-            self.config,
-            self.current_seed,
-            episode_data,
-            single_block_class=MARoundaboutMap,
-            spawn_roads=self.config["spawn_roads"]
-        )
-
     def get_single_observation(self, vehicle_config: "Config") -> "ObservationBase":
         return LidarStateObservationMARound(vehicle_config)
 
     def setup_engine(self):
-        from metadrive.envs.metadrive_env import MetaDriveEnv
-        MetaDriveEnv.setup_engine(self)
-        self.engine.register_manager("spawn_manager", RoundaboutSpawnManager())
+        super(MultiAgentRoundaboutEnv, self).setup_engine()
+        self.engine.update_manager("spawn_manager", RoundaboutSpawnManager())
+        self.engine.update_manager("map_manager", MARoundaboutMapManager())
 
 
 def _draw():

@@ -4,6 +4,26 @@ import pickle
 from metadrive import MetaDriveEnv
 from metadrive.component.map.argoverse_map import ArgoverseMap
 from metadrive.utils import is_win
+from metadrive.manager.map_manager import MapManager
+
+
+class ArgoverseMapManager(MapManager):
+    def before_reset(self):
+        # do not unload map
+        pass
+
+    def reset(self):
+        xcenter, ycenter = 2599.5505965123866, 1200.0214763629717
+        if self.current_map is None:
+            self.engine.global_config["map_config"].update(
+                {
+                    "city": "PIT",
+                    "center": ArgoverseMap.metadrive_position([xcenter, ycenter]),
+                    "radius": 150
+                }
+            )
+            map = ArgoverseMap(self.engine.global_config["map_config"])
+            self.engine.map_manager.load_map(map)
 
 
 class ArgoverseEnv(MetaDriveEnv):
@@ -26,16 +46,4 @@ class ArgoverseEnv(MetaDriveEnv):
         super(ArgoverseEnv, self).setup_engine()
         from metadrive.manager.real_data_manager import RealDataManager
         self.engine.register_manager("real_data_manager", RealDataManager())
-
-    def _update_map(self, episode_data: dict = None):
-        xcenter, ycenter = 2599.5505965123866, 1200.0214763629717
-        if self.current_map is None:
-            self.config["map_config"].update(
-                {
-                    "city": "PIT",
-                    "center": ArgoverseMap.metadrive_position([xcenter, ycenter]),
-                    "radius": 150
-                }
-            )
-            map = ArgoverseMap(self.config["map_config"])
-            self.engine.map_manager.load_map(map)
+        self.engine.update_manager("map_manager", ArgoverseMapManager())
