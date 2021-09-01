@@ -63,11 +63,11 @@ class MapManager(BaseManager):
         current_seed = self.engine.global_seed
 
         if self.pg_maps[current_seed] is None:
-                map_config = config["map_config"]
-                map_config.update({"seed": current_seed})
-                map_config = self.add_random_to_map(map_config)
-                map = self.spawn_object(PGMap, map_config=map_config, random_seed=None)
-                self.pg_maps[current_seed] = map
+            map_config = config["map_config"]
+            map_config.update({"seed": current_seed})
+            map_config = self.add_random_to_map(map_config)
+            map = self.spawn_object(PGMap, map_config=map_config, random_seed=None)
+            self.pg_maps[current_seed] = map
         map = self.pg_maps[current_seed]
         self.load_map(map)
 
