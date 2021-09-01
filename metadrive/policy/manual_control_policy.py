@@ -28,10 +28,7 @@ class ManualControlPolicy(EnvInputPolicy):
     def act(self, agent_id):
         try:
             if self.engine.current_track_vehicle.expert_takeover:
-                obs = self.engine.agent_manager.observations[self.engine.current_track_vehicle.id].current_observation
-                if self.engine.global_config["random_agent_model"]:
-                    obs = obs[2:]
-                return expert(obs)
+                return expert(self.engine.current_track_vehicle)
         except ValueError:
             # if observation doesn't match, fall back to manual control
             pass
