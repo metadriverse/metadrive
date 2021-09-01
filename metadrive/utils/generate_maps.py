@@ -6,12 +6,12 @@ from metadrive import MetaDriveEnv
 root = osp.dirname(osp.dirname(osp.abspath(__file__)))
 asset_path = osp.join(root, "assets", "maps")
 
+
 # The test script of this file is in metadrive/tests/test_functionality/test_loading_map_from_json.py
 
 
 def generate_maps(env_class, env_config, json_file_path):
-    assert env_config.get("load_map_from_json", False) is False
-    env_config["load_map_from_json"] = False
+    raise DeprecationWarning("All procedural generated maps are load online now")
 
     env = env_class(env_config)
     data = env.dump_all_maps()

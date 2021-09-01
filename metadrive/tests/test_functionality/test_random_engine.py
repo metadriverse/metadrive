@@ -110,7 +110,6 @@ def test_random_lane_width():
             "traffic_mode": "trigger",
             "start_seed": 12,
             "random_lane_width": True,
-            "load_map_from_json": False
         }
     )
     try:
@@ -137,7 +136,6 @@ def test_random_lane_num():
             "traffic_density": .2,
             "traffic_mode": "trigger",
             "start_seed": 12,
-            "load_map_from_json": False,
             "random_lane_num": True,
         }
     )

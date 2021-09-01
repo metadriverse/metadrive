@@ -34,7 +34,6 @@ if __name__ == "__main__":
             "random_traffic": False,
             "random_lane_width": True,
             "random_agent_model": True,
-            "load_map_from_json": False,
             "driving_reward": 1.0,
             "vehicle_config": {
                 "enable_reverse": True,

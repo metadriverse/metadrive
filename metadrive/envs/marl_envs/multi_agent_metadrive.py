@@ -49,7 +49,6 @@ MULTI_AGENT_METADRIVE_DEFAULT_CONFIG = dict(
     # ===== Environmental Setting =====
     traffic_density=0.,
     camera_height=4,
-    load_map_from_json=False,
     map_file_path=""
 )
 
