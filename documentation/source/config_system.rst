@@ -162,19 +162,22 @@ Misc.
     - :code:`action_check` (bool): Check whether the value of action is between \[0.0, 1.0\] or not.
     - :code:`engine_config` (dict): Some basic settings for low-level physics world. More information can be found in source code.
 
-PGWorld Config
+Engine Config
 ################
-    This is the core of MetaDrive, including physics engine, task manager and so on.
-     - :code:`window_size` (tuple): Width, height of rendering window.
-     - :code:`debug` (bool): The debug value in MetaDriveEnv will be passed to PGWorld.
+    This is the engine core config of MetaDrive, including physics engine, window size and so on.
+     - :code:`window_size` (tuple): Width, height of rendering window default (1200, 900).
      - :code:`physics_world_step_size` (float): The minimum step size of bullet physics engine.
      - :code:`show_fps` (bool): Turn on/ turn off the frame rater.
      - :code:`force_fps` (None or float): *None* means no render fps limit, while *float* indicates the maximum render FPS.
-     - :code:`decision_repeat` (int): This will be written by MetaDriveEnv to do ForceFPS.
      - :code:`debug_physics_world` (bool): Only render physics world without model, a special debug option.
+     - :code:`debug_static_world` (bool): Merge the static world and dynamic world to one world, a special debug option.
+     - :code:`pstats` (bool): Use Panda3D built-in debug tool to analyze the program.
      - :code:`headless_machine_render` (bool): Set this to true only when training on headless machine and use rgb image!!!!!!
+     - :code:`global_light` (bool): True to enable global light. It will consume more computation resource to render.
+     - :code:`debug` (bool): The debug value in MetaDriveEnv will be passed to game engine core.
      - :code:`use_render` (bool): The value is same as *use_render* in MetaDriveEnv
      - :code:`offscreen_render` (bool): The value is same as *offscreen_render* in MetaDriveEnv.
+
 
 
 
