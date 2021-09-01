@@ -1,4 +1,3 @@
-from metadrive.envs.argoverse_env import ArgoverseEnv
 from metadrive.envs.marl_envs import MultiAgentMetaDrive, MultiAgentBottleneckEnv, MultiAgentTollgateEnv, \
     MultiAgentParkingLotEnv, MultiAgentIntersectionEnv, MultiAgentRoundaboutEnv
 from metadrive.envs.metadrive_env import MetaDriveEnv
