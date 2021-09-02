@@ -6,7 +6,7 @@ if __name__ == "__main__":
     env = MetaDriveEnv(
         {
             "environment_num": 100,
-            "traffic_density": .0,
+            "traffic_density": .1,
             "traffic_mode": "trigger",
             "start_seed": 22,
             # "_disable_detector_mask":True,
@@ -14,6 +14,7 @@ if __name__ == "__main__":
             "global_light": True,
             # "debug_static_world":True,
             "cull_scene": False,
+            "offscreen_render": True,
             # "controller": "joystick",
             "manual_control": True,
             "use_render": True,
@@ -30,13 +31,14 @@ if __name__ == "__main__":
             # },
             "pstats": True,
             # "discrete_action": True,
-            "map": "SSS",
+            "map": "SSSSSS",
             "random_traffic": False,
             "random_lane_width": True,
             "random_agent_model": True,
             "driving_reward": 1.0,
             "vehicle_config": {
                 "enable_reverse": True,
+                "image_source": "depth_camera",
                 # "random_color": True
                 # "show_lidar": True,
                 # "spawn_lane_index":("1r1_0_", "1r1_1_", 0),
@@ -57,6 +59,10 @@ if __name__ == "__main__":
 
     for s in range(1, 100000):
         o, r, d, info = env.step(env.action_space.sample())
+        if s == 50:
+            env.vehicle.image_sensors["rgb_camera"].save_image(env.vehicle, name="rgb.png")
+            env.vehicle.image_sensors["depth_camera"].save_image(env.vehicle, name="depth.png")
+        print(o)
         # info["fuel"] = env.vehicle.energy_consumption
         # env.render(
         #     text={

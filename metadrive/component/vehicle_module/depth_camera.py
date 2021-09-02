@@ -28,7 +28,7 @@ class DepthCamera(BaseCamera):
         cam.lookAt(0, 2.4, 1.3)
         lens.setFov(60)
         lens.setAspectRatio(2.0)
-        if get_engine().mode == RENDER_MODE_NONE or not AssetLoader.initialized():
+        if get_engine().mode == RENDER_MODE_NONE or not AssetLoader.initialized() or type(self)._singleton.init_num > 0:
             return
         # add shader for it
         if get_global_config()["headless_machine_render"]:
@@ -47,18 +47,13 @@ class DepthCamera(BaseCamera):
 
         if self.VIEW_GROUND:
             self.GROUND = GeoMipTerrain("mySimpleTerrain")
-
             self.GROUND.setHeightfield(AssetLoader.file_path("textures", "height_map.png"))
             # terrain.setBruteforce(True)
             # # Since the terrain is a texture, shader will not calculate the depth information, we add a moving terrain
             # # model to enable the depth information of terrain
             self.GROUND_MODEL = self.GROUND.getRoot()
             self.GROUND_MODEL.setPos(-128, 0, self.GROUND_HEIGHT)
+            self.GROUND_MODEL.reparentTo(type(self)._singleton.origin)
             self.GROUND_MODEL.hide(CamMask.AllOn)
             self.GROUND_MODEL.show(CamMask.DepthCam)
             self.GROUND.generate()
-
-    def set_virtual_ground(self, chassis_np: Vec3):
-        self.GROUND_MODEL.setPos(-128, 0, self.GROUND)
-        self.GROUND_MODEL.setP(-chassis_np.getP())
-        self.GROUND_MODEL.setH(chassis_np.getH())

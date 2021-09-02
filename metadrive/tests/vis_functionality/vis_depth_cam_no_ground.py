@@ -22,7 +22,7 @@ if __name__ == "__main__":
         }
     )
     env.reset()
-    env.engine.accept("m", env.vehicle.image_sensors["depth_camera"].save_image, extraArgs=[env.vehicle])
+    env.engine.accept("m", env.vehicle.image_sensors["depth_camera"].save_image, extraArgs=[env.vehicle, "debug.jpg"])
 
     for i in range(1, 100000):
         o, r, d, info = env.step([0, 1])
