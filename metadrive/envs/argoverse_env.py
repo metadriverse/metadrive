@@ -7,8 +7,7 @@ from metadrive.manager.map_manager import MapManager
 from metadrive.utils import is_win
 
 argoverse_city = "PIT"
-argoverse_map_xcenter = 2599.5505965123866
-argoverse_map_ycenter = 1200.0214763629717
+argoverse_map_center = [2599.5505965123866, 1200.0214763629717]
 argoverse_map_radius = 150
 argoverse_spawn_lane_index = ('7903', '9713', 0)
 argoverse_destination_node = "968"
@@ -25,7 +24,7 @@ class ArgoverseMapManager(MapManager):
             self.engine.global_config["map_config"].update(
                 {
                     "city": argoverse_city,
-                    "center": ArgoverseMap.metadrive_position([argoverse_map_xcenter, argoverse_map_ycenter]),
+                    "center": ArgoverseMap.metadrive_position(argoverse_map_center),
                     "radius": argoverse_map_radius
                 }
             )

@@ -6,12 +6,10 @@ Read Data from Dataset
 ########################
 
 
-We provide a script to enable users to drive in a real scenario. Please follow the instructions 
-in :code:`metadrive/component/map/README.md` and run::
 Setting up Argoverse dataset
 #############################
 
-To run the `drive_in_argoverse.py` example, you need to install the argoverse-api and download the map files.
+To run the :code:`drive_in_argoverse.py` example, you need to install the argoverse-api and download the map files.
 
 Install argoverse-api repo
 *********************************************
@@ -68,18 +66,14 @@ Note: Press T to launch auto-driving! Enjoy!
 Specify the Data to Replay
 ###############################
 
-MetaDrive currently supports replay the map and traffic flow in Argoverse dataset.
+MetaDrive currently supports replay the map and traffic flow in the sample dataset of argoverse-tracking.
+We will add more scenarios for customized selection in the near future.
 As shown in `ArgoverseEnv <https://github.com/decisionforce/metadrive/blob/main/metadrive/envs/argoverse_env.py>`_,
-we specify few parameters to limit the map in a region of the city. Here is the detailed explaination of those parameters:
+we use a few parameters to specify the data to be loaded. Here is the detailed explaination of those parameters:
 
 
-- :code:`argoverse_city` (str = "PIT"): Optional in ["PIT", XXX]. The shortcut of the specified city.
-- :code:`argoverse_map_xcenter` (float): The XXXX
-
-	python metadrive/examples/drive_in_argoverse.py
-
-We will add more scenarios for customized selection in the near future. For users' reference, we explain the role
-of several values in :code:`metadrive/envs/argoverse_env.py`:
-
-	- :code:`xcenter`, :code:`ycenter`, :code:`radius`: Only roads within the circle with corresponding center and radius will be loaded.
-	- 
+- :code:`argoverse_city`: The shortcut of the specified city.
+- :code:`argoverse_map_center`, :code:`radius`: Only roads within the circle with corresponding center and radius will be loaded.
+- :code:`argoverse_spawn_lane_index`: Node indexes indicating where the agent is initialized.
+- :code:`argoverse_destination_node`: Node index indicating the destination of the agent.
+- :code:`argoverse_log_id`: We select one sample of argoverse-tracking data with this id as folder name.
