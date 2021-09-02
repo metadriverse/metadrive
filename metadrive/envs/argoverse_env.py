@@ -6,6 +6,13 @@ from metadrive.envs.metadrive_env import MetaDriveEnv
 from metadrive.manager.map_manager import MapManager
 from metadrive.utils import is_win
 
+argoverse_city = "PIT"
+argoverse_map_center = [2599.5505965123866, 1200.0214763629717]
+argoverse_map_radius = 150
+argoverse_spawn_lane_index = ('7903', '9713', 0)
+argoverse_destination_node = "968"
+argoverse_log_id = "c6911883-1843-3727-8eaa-41dc8cda8993"
+
 
 class ArgoverseMapManager(MapManager):
     def before_reset(self):
@@ -13,13 +20,12 @@ class ArgoverseMapManager(MapManager):
         pass
 
     def reset(self):
-        xcenter, ycenter = 2599.5505965123866, 1200.0214763629717
         if self.current_map is None:
             self.engine.global_config["map_config"].update(
                 {
-                    "city": "PIT",
-                    "center": ArgoverseMap.metadrive_position([xcenter, ycenter]),
-                    "radius": 150
+                    "city": argoverse_city,
+                    "center": ArgoverseMap.metadrive_position(argoverse_map_center),
+                    "radius": argoverse_map_radius
                 }
             )
             map = ArgoverseMap(self.engine.global_config["map_config"])
@@ -29,17 +35,17 @@ class ArgoverseMapManager(MapManager):
 class ArgoverseEnv(MetaDriveEnv):
     def _post_process_config(self, config):
         config = super(ArgoverseEnv, self)._post_process_config(config)
-        config["vehicle_config"]["spawn_lane_index"] = ('7903', '9713', 0)
-        config["vehicle_config"]["destination_node"] = "968"
+        config["vehicle_config"]["spawn_lane_index"] = argoverse_spawn_lane_index
+        config["vehicle_config"]["destination_node"] = argoverse_destination_node
 
-        log_id = "c6911883-1843-3727-8eaa-41dc8cda8993"
+        log_id = argoverse_log_id
         root_path = pathlib.PurePosixPath(__file__).parent.parent if not is_win() else pathlib.Path(__file__).resolve(
         ).parent.parent
         data_path = root_path.joinpath("assets").joinpath("real_data").joinpath("{}.pkl".format(log_id))
         with open(data_path, 'rb') as f:
             locate_info, _ = pickle.load(f)
         config.update({"real_data_config": {"locate_info": locate_info}})
-        config["traffic_density"] = 0.0
+        config["traffic_density"] = 0.0  # Remove rule-based traffic flow
         return config
 
     def setup_engine(self):
