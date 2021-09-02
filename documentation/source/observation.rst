@@ -90,6 +90,10 @@ MetaDrive supports visuomotor tasks by turning on the rendering during the train
    :width: 600
    :align: center
 
+.. image:: figs/depth_obs.png
+   :width: 600
+   :align: center
+
 Special config needs to activate camera observation.
 
 1. In env config **offline_render** needs to be **True** to tell MetaDrive retrieving images from camera
