@@ -9,7 +9,7 @@ Read Data from Dataset
 Setting up Argoverse dataset
 #############################
 
-To run the `drive_in_argoverse.py` example, you need to install the argoverse-api and download the map files.
+To run the :code:`drive_in_argoverse.py` example, you need to install the argoverse-api and download the map files.
 
 Install argoverse-api repo
 *********************************************
@@ -66,7 +66,14 @@ Note: Press T to launch auto-driving! Enjoy!
 Specify the Data to Replay
 ###############################
 
-MetaDrive currently supports replay the map and traffic flow in Argoverse dataset.
+MetaDrive currently supports replaying the map and traffic flow in the sample dataset of argoverse-tracking.
+We will add more scenarios for customized selection in the near future.
+As shown in `ArgoverseEnv Class <https://github.com/decisionforce/metadrive/blob/main/metadrive/envs/argoverse_env.py>`_,
+we use a few parameters to specify the data to be loaded. Here is the detailed explanation of those parameters:
 
-.. note:: This section is working in progress.
 
+- :code:`argoverse_city`: The shortcut of the specified city.
+- :code:`argoverse_map_center/radius`, :code:`radius`: Only the roads and traffic within the circle centering in :code:`argoverse_map_center` with radius :code:`argoverse_map_radius` will be loaded.
+- :code:`argoverse_spawn_lane_index`: Node index indicating where the ego agent is initialized.
+- :code:`argoverse_destination_node`: Node index indicating the destination of the ego agent.
+- :code:`argoverse_log_id`: We select one sample of argoverse-tracking data with this ID as the folder name.
