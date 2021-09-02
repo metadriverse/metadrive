@@ -28,7 +28,7 @@ class DepthCamera(BaseCamera):
         cam.lookAt(0, 2.4, 1.3)
         lens.setFov(60)
         lens.setAspectRatio(2.0)
-        if get_engine().mode == RENDER_MODE_NONE or not AssetLoader.initialized():
+        if get_engine().mode == RENDER_MODE_NONE or not AssetLoader.initialized() or type(self)._singleton.init_num > 0:
             return
         # add shader for it
         if get_global_config()["headless_machine_render"]:
