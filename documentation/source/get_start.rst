@@ -10,7 +10,7 @@ Tryout MetaDrive with one line
 We provide a script to let you try out MetaDrive by keyboard immediately after installation! Please run::
 
     # Make sure current folder does not have a sub-folder named metadrive
-    python -m metadrive.examples.manual_control
+    python -m metadrive.examples.drive_in_single_agent_env
 
 In the same script, you can even experience an "auto-drive" journey carried out by our pre-trained RL agent. Press T in the main window will kick-off this. You can also press H to visit the helper information on other shortcuts.
 
