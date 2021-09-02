@@ -27,7 +27,7 @@ if __name__ == "__main__":
     parser.add_argument("--observation", type=str, default="lidar", choices=["lidar", "rgb_camera"])
     args = parser.parse_args()
     if args.observation == "rgb_camera":
-        config.update(dict(offline_render=True))
+        config.update(dict(offscreen_render=True))
     env = MetaDriveEnv(config)
     env.reset()
     for i in range(1, 1000000000):

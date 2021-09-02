@@ -101,7 +101,11 @@ Special config needs to activate camera observation.
 3. The image size will be determined by the camera parameters. For example, **rgb_camera=(200, 88)** means that
 the image size is in 200 x 88.
 
-note:: This part is working in progress. An example will be provided soon
+There is a script to use camera output via::
+
+    python -m metadrive.examples.drive_in_single_agent_env --observation rgb_camera
+
+
 
 
 

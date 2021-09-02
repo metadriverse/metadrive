@@ -14,7 +14,7 @@ if __name__ == "__main__":
             "global_light": True,
             # "debug_static_world":True,
             "cull_scene": False,
-            "offscreen_render":True,
+            "offscreen_render": True,
             # "controller": "joystick",
             "manual_control": True,
             "use_render": True,
@@ -31,7 +31,6 @@ if __name__ == "__main__":
             # },
             "pstats": True,
             # "discrete_action": True,
-
             "map": "SSSSSS",
             "random_traffic": False,
             "random_lane_width": True,
@@ -60,7 +59,7 @@ if __name__ == "__main__":
 
     for s in range(1, 100000):
         o, r, d, info = env.step(env.action_space.sample())
-        if s==50:
+        if s == 50:
             env.vehicle.image_sensors["rgb_camera"].save_image(env.vehicle, name="rgb.png")
             env.vehicle.image_sensors["depth_camera"].save_image(env.vehicle, name="depth.png")
         print(o)
