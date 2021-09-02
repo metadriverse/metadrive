@@ -512,9 +512,9 @@ class BaseVehicle(BaseObject, BaseVehicleState):
 
     def _add_visualization(self):
         if self.render:
-            [path, scale, x_y_z_offset, H] = self.path[self.np_random.randint(0, len(self.path))]
+            [path, scale, x_y_z_offset, H] = self.path
             if path not in BaseVehicle.model_collection:
-                car_model = self.loader.loadModel(AssetLoader.file_path("models", path))
+                car_model = self.loader.loadModel(AssetLoader.file_path("models", path, "vehicle.gltf"))
                 BaseVehicle.model_collection[path] = car_model
             else:
                 car_model = BaseVehicle.model_collection[path]
@@ -556,10 +556,11 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     def _add_wheel(self, pos: Vec3, radius: float, front: bool, left):
         wheel_np = self.origin.attachNewNode("wheel")
         if self.render:
-            model_path = 'models/yugo/yugotireR.egg' if left else 'models/yugo/yugotireL.egg'
+            model = 'right_tire_front.gltf' if front else 'right_tire_back.gltf'
+            model_path = AssetLoader.file_path("models", self.path[0], model)
             wheel_model = self.loader.loadModel(AssetLoader.file_path(model_path))
             wheel_model.reparentTo(wheel_np)
-            wheel_model.set_scale(self.TIRE_WIDTH / 0.15, radius / 0.25, radius / 0.25)
+            wheel_model.set_scale(1 if left else -1)
         wheel = self.system.create_wheel()
         wheel.setNode(wheel_np.node())
         wheel.setChassisConnectionPointCs(pos)

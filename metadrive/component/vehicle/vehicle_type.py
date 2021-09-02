@@ -15,7 +15,7 @@ class DefaultVehicle(BaseVehicle):
     LATERAL_TIRE_TO_CENTER = 0.815
     FRONT_WHEELBASE = 1.05234
     REAR_WHEELBASE = 1.4166
-    path = [['ferra/scene.gltf', (factor, factor, factor), (0, 0.0, 0.), 0]]
+    path = ['vehicle/ferra/', (factor, factor, factor), (0, 0.0, 0.), 0]
 
 
 class XLVehicle(BaseVehicle):
@@ -30,7 +30,7 @@ class XLVehicle(BaseVehicle):
     CHASSIS_TO_WHEEL_AXIS = 0.3
     TIRE_WIDTH = 0.5
     MASS = 1600
-    path = [['new/truck/scene.gltf', (factor, factor, factor), (0, 0.3, 0.04), 0]]
+    path = ['vehicle/truck/', (factor, factor, factor), (0, 0.3, 0.04), 0]
 
 
 class LVehicle(BaseVehicle):
@@ -44,9 +44,7 @@ class LVehicle(BaseVehicle):
     LATERAL_TIRE_TO_CENTER = 0.75
     TIRE_WIDTH = 0.35
     MASS = 1300
-    path = [
-        ['new/lada/scene.gltf', (factor, factor, factor), (0, -0.25, 0.07), 0],
-    ]
+    path = ['vehicle/lada/', (factor, factor, factor), (0, -0.25, 0.07), 0]
 
 
 class MVehicle(BaseVehicle):
@@ -61,9 +59,7 @@ class MVehicle(BaseVehicle):
     TIRE_WIDTH = 0.3
     MASS = 1200
 
-    path = [
-        ['new/130/scene.gltf', (factor, factor, factor), (0, -0.05, 0.07), 0],
-    ]
+    path = ['vehicle/130/', (factor, factor, factor), (0, -0.05, 0.07), 0]
 
 
 class SVehicle(BaseVehicle):
@@ -77,9 +73,7 @@ class SVehicle(BaseVehicle):
     TIRE_RADIUS = 0.376
     TIRE_WIDTH = 0.25
     MASS = 800
-    path = [
-        ['new/beetle/scene.gltf', (factor, factor, factor), (0, -0.2, 0.03), 0],
-    ]
+    path = ['vehicle/beetle/', (factor, factor, factor), (0, -0.2, 0.03), 0]
 
 
 vehicle_type = {"s": SVehicle, "m": MVehicle, "l": LVehicle, "xl": XLVehicle, "default": DefaultVehicle}
