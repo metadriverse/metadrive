@@ -11,7 +11,7 @@ if __name__ == "__main__":
             "use_render": True,
             "offscreen_render": True,
             "rgb_clip": True,
-            "vehicle_config": dict(rgb_camera=(200, 88, False), image_source="rgb_camera"),
+            "vehicle_config": dict(depth_camera=(200, 88, False), image_source="depth_camera"),
             "headless_machine_render": False,
             "map_config": {
                 BaseMap.GENERATE_TYPE: MapGenerateMethod.BIG_BLOCK_NUM,
@@ -22,7 +22,7 @@ if __name__ == "__main__":
         }
     )
     env.reset()
-    env.engine.accept("m", env.vehicle.image_sensors["rgb_camera"].save_image, extraArgs=[env.vehicle])
+    env.engine.accept("m", env.vehicle.image_sensors["depth_camera"].save_image, extraArgs=[env.vehicle])
 
     for i in range(1, 100000):
         o, r, d, info = env.step([0, 1])
