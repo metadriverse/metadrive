@@ -558,7 +558,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         if self.render:
             model = 'right_tire_front.gltf' if front else 'right_tire_back.gltf'
             model_path = AssetLoader.file_path("models", self.path[0], model)
-            wheel_model = self.loader.loadModel(AssetLoader.file_path(model_path))
+            wheel_model = self.loader.loadModel(model_path)
             wheel_model.reparentTo(wheel_np)
             wheel_model.set_scale(1 if left else -1)
         wheel = self.system.create_wheel()
