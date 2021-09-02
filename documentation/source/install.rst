@@ -42,10 +42,10 @@ The default observation contains information on ego vehicle's states, Lidar-like
 If the above observation is not enough for your RL algorithms and you wish to use the Panda3D camera to provide realistic RGB images as the observation, please continue reading this section.
 
 
-If your machine already has a screen and you already verified that the Panda3D window can successfully pops up, then please use the following code to verify the on-screen rendering is working::
+If your machine already has a screen, please try the following script to verify whether the Panda3D window can successfully pop up.
 
     # Go to a folder where no sub-folder calls metadrive
-    python -m metadrive.examples.manual_control
+    python -m metadrive.examples.drive_in_single_agent_env
 
 If the screen successfully shows up, then you can move on to :ref:`use_native_rendering` and skip this section.
 
