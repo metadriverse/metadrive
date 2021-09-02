@@ -1,29 +1,26 @@
-import logging
-import os
-import xml.etree.ElementTree as ET
-from pathlib import Path
-from typing import Any, Dict, List, Mapping, Tuple, Union, cast
-
 try:
+    import logging
+    import os
+    import xml.etree.ElementTree as ET
+    from pathlib import Path
+    from typing import Any, Dict, List, Mapping, Tuple, Union, cast
     import argoverse
+    from argoverse.data_loading.vector_map_loader import Node, append_additional_key_value_pair, \
+        append_unique_key_value_pair, convert_node_id_list_to_xy, extract_node_waypt, get_lane_identifier, str_to_bool, \
+        extract_node_from_ET_element
+    from argoverse.map_representation.map_api import ArgoverseMap as AGMap
+    from argoverse.map_representation.map_api import PITTSBURGH_ID, MIAMI_ID, ROOT
 except ImportError:
-    raise ImportError("Please import argoverse")
+    pass
 
-from argoverse.data_loading.vector_map_loader import Node, append_additional_key_value_pair, \
-    append_unique_key_value_pair, convert_node_id_list_to_xy, extract_node_waypt, get_lane_identifier, str_to_bool, \
-    extract_node_from_ET_element
-from argoverse.map_representation.map_api import ArgoverseMap as AGMap
-from argoverse.map_representation.map_api import PITTSBURGH_ID, MIAMI_ID, ROOT
-
+from metadrive.component.map.base_map import BaseMap
+from metadrive.constants import LineColor
 from metadrive.component.blocks.argoverse_block import ArgoverseBlock
 from metadrive.component.lane.argoverse_lane import ArgoverseLane
 
 logger = logging.getLogger(__name__)
 
 _PathLike = Union[str, "os.PathLike[str]"]
-
-from metadrive.component.map.base_map import BaseMap
-from metadrive.constants import LineColor
 
 
 class ArgoverseMap(BaseMap):
@@ -37,10 +34,9 @@ class ArgoverseMap(BaseMap):
     # block size
     BLOCK_LANE_NUM = 40
 
-    # origin ag map
-    AGMap = AGMap()
-
     def __init__(self, map_config, random_seed=0):
+        # origin ag map
+        self.AGMap = AGMap()
         map_config[self.SEED] = random_seed
         assert "city" in map_config, "City name is required when generating argoverse map"
         assert map_config["city"] in self.SUPPORTED_MAPS, "City generation of {} is not supported (We support {} now)". \

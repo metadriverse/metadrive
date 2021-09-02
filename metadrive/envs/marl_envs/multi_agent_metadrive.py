@@ -81,7 +81,7 @@ class MultiAgentMetaDrive(MetaDriveEnv):
             logging.warning("Turn disable_model_compression=True can accelerate Multi-agent rendering performance!")
 
         if "prefer_track_agent" in config and config["prefer_track_agent"]:
-            ret_config["target_vehicle_configs"][config["prefer_track_agent"]]["am_i_the_special_one"] = True
+            ret_config["target_vehicle_configs"][config["prefer_track_agent"]]["use_special_color"] = True
         ret_config["vehicle_config"]["random_agent_model"] = ret_config["random_agent_model"]
         return ret_config
 
@@ -167,7 +167,7 @@ class MultiAgentMetaDrive(MetaDriveEnv):
     def _update_camera_after_finish(self):
         if self.main_camera is not None and self.current_track_vehicle.id not in self.engine.agent_manager._active_objects \
                 and self.engine.task_manager.hasTaskNamed(self.main_camera.CHASE_TASK_NAME):
-            self.chase_camera()
+            self.switch_to_third_person_view()
 
     def _get_observations(self):
         return {

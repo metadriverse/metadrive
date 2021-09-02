@@ -1,13 +1,12 @@
 <br>
 
-# MetaDrive: Composing Diverse Driving Scenarios for Generalizable RL
-
-<br>
-
 ![](metadrive/assets/logo-horizon.png)
 
 <br>
 
+# MetaDrive: Composing Diverse Driving Scenarios for Generalizable RL
+
+<br>
 
 **Though the development of MetaDrive is already settled for current stage, we are still working on managing the documentation and other stuff. We expect to finish all cleanup by 1st, September.**
 
@@ -46,19 +45,26 @@ Please run the following command to drive the car in the environment manually wi
 Pressing W, A, S, D to move and turn and T to trigger the auto-drive mode!
 
 ```bash
-python -m metadrive.examples.enjoy_manual
+python -m metadrive.examples.drive_in_single_agent_env
 ```
 
-You can also enjoy a journey carrying out by our professional driver pretrained from reinforcement learning! 
+You can also drive in our Multi-agent RL environment. 
 
 ```bash
-python -m metadrive.examples.enjoy_expert
+python -m metadrive.examples.drive_in_multiagent_env --env [env_name]
 ```
+Accepted arguments:
+- roundabout (default)
+- intersection
+- tollgate
+- bottleneck
+- parkinglot
+- pgmap
 
 To show the main feature, procedural generation, we provide a script to show BIG:
 
 ```bash
-python -m metadrive.examples.render_big
+python -m metadrive.examples.procedural_generation
 ```
 
 *Note that the above three scripts can not be run in headless machine.* 

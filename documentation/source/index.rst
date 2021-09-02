@@ -21,20 +21,17 @@ The key features of MetaDrive includes:
 - **Efficient**: Up to 300 simulation step per second.
 - **Open-ended**: Support generating infinite scenes and configuring various traffics, vehicles, and environmental settings.
 
-This documentation brings you the information on installation, philosophy, usages and development tips of MetaDrive!
-
+This documentation brings you the information on installation, usages and more of MetaDrive!
 
 You can also visit `our webpage <https://decisionforce.github.io/metadrive/>`_ and `GitHub repo <https://github.com/decisionforce/metadrive>`_.
 Please feel free to contact us if you have any suggestions or ideas!
 
 
-Citation
-########
+.. Citation
+.. ########
 
-We wrote a white paper on this project, but the citation information is not yet well prepared!
-Please contact us if you find this work useful in your project.
-
-
+.. We wrote a white paper on this project, but the citation information is not yet well prepared!
+.. Please contact us if you find this work useful in your project.
 
 
 .. toctree::
@@ -56,7 +53,6 @@ Please contact us if you find this work useful in your project.
    action_and_dynamics.rst
    config_system.rst
    read_data_from_dataset.rst
-
 
 .. toctree::
    :hidden:
