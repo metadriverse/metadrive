@@ -101,17 +101,16 @@ METADRIVE_DEFAULT_CONFIG = dict(
     out_of_road_penalty=5.0,
     crash_vehicle_penalty=5.0,
     crash_object_penalty=5.0,
-    acceleration_penalty=0.0,
-    low_speed_penalty=0.0,
     driving_reward=1.0,
-    general_penalty=0.0,
     speed_reward=0.1,
     use_lateral=False,
 
     # ===== Cost Scheme =====
-    crash_vehicle_cost=1,
-    crash_object_cost=1,
-    out_of_road_cost=1.,
+    crash_vehicle_cost=1.0,
+    crash_object_cost=1.0,
+    out_of_road_cost=1.0,
+
+    # ===== Termination Scheme =====
     out_of_route_done=False,
 )
 

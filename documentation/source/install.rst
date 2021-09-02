@@ -47,7 +47,7 @@ If your machine already has a screen and you already verified that the Panda3D w
     # Go to a folder where no sub-folder calls metadrive
     python -m metadrive.examples.manual_control
 
-If the screen successfully shows up, then you can move on to :ref:`use_rendering` and skip this section.
+If the screen successfully shows up, then you can move on to :ref:`use_native_rendering` and skip this section.
 
 
 However, if you want to use image to train your agent on headless machine, you have to compile a customized Panda3D.
@@ -72,7 +72,7 @@ To verify the installation on cluster, run following command instead::
 
 The script will generate images to current directory. Please fetch anc check those images from cluster to ensure MetaDrive can draw scene and capture images.
 
-If the captured images is complete as following, then the installation in headless machine is successful and please move on to :ref:`use_rendering`.
+If the captured images is complete as following, then the installation in headless machine is successful and please move on to :ref:`use_native_rendering`.
 
 .. note:: You have to set the :code:`config["headless_machine_render"] = True` when training the agent using images as observation.
 
