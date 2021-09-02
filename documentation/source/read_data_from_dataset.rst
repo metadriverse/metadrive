@@ -66,14 +66,14 @@ Note: Press T to launch auto-driving! Enjoy!
 Specify the Data to Replay
 ###############################
 
-MetaDrive currently supports replay the map and traffic flow in the sample dataset of argoverse-tracking.
+MetaDrive currently supports replaying the map and traffic flow in the sample dataset of argoverse-tracking.
 We will add more scenarios for customized selection in the near future.
-As shown in `ArgoverseEnv <https://github.com/decisionforce/metadrive/blob/main/metadrive/envs/argoverse_env.py>`_,
-we use a few parameters to specify the data to be loaded. Here is the detailed explaination of those parameters:
+As shown in `ArgoverseEnv Class <https://github.com/decisionforce/metadrive/blob/main/metadrive/envs/argoverse_env.py>`_,
+we use a few parameters to specify the data to be loaded. Here is the detailed explanation of those parameters:
 
 
 - :code:`argoverse_city`: The shortcut of the specified city.
-- :code:`argoverse_map_center`, :code:`radius`: Only roads within the circle with corresponding center and radius will be loaded.
-- :code:`argoverse_spawn_lane_index`: Node indexes indicating where the agent is initialized.
-- :code:`argoverse_destination_node`: Node index indicating the destination of the agent.
-- :code:`argoverse_log_id`: We select one sample of argoverse-tracking data with this id as folder name.
+- :code:`argoverse_map_center/radius`, :code:`radius`: Only the roads and traffic within the circle centering in :code:`argoverse_map_center` with radius :code:`argoverse_map_radius` will be loaded.
+- :code:`argoverse_spawn_lane_index`: Node index indicating where the ego agent is initialized.
+- :code:`argoverse_destination_node`: Node index indicating the destination of the ego agent.
+- :code:`argoverse_log_id`: We select one sample of argoverse-tracking data with this ID as the folder name.
