@@ -66,12 +66,12 @@ class ScreenMessage(OnScreenDebug.OnScreenDebug):
             if v[0] == self.frame:
                 # It was updated this frame (key equals value):
                 # isNew = " is"
-                isNew = "="
+                isNew = ":"
             else:
                 # This data is not for the current
                 # frame (key roughly equals value):
                 # isNew = "was"
-                isNew = "~"
+                isNew = ":"
             value = v[1]
             if type(value) == float:
                 value = "% 10.4f" % (value, )
