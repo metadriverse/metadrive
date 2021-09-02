@@ -86,6 +86,18 @@ Use First-view Images in Training
 
 MetaDrive supports visuomotor tasks by turning on the rendering during the training.
 
-.. note:: This part is working in progress.
+.. image:: figs/rgb_obs.png
+   :width: 600
+   :align: center
+
+Special config needs to activate camera observation.
+
+1. In env config **offline_render** needs to be **True** to tell MetaDrive retrieving images from camera
+2. In vehicle_config (under env config), set **image_source** to **rgb_camera**, **depth_camera** to get different sensory data
+3. The image size will be determined by the camera parameters. For example, **rgb_camera=(200, 88)** means that
+the image size is in 200 x 88.
+
+note:: This part is working in progress. An example will be provided soon
+
 
 

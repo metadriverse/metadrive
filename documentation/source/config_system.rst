@@ -51,7 +51,7 @@ We describe all optional map config as follows:
         - :code:`config`: XXX
         - :code:`lane_width` (float = 3.5): the width of each lane. This will be overwritten if :code:`random_lane_width = True`.
         - :code:`lane_num` (int = 3): number of lanes in each road. This will be overwritten if :code:`random_lane_num = True`.
-        - :code:`exit_length` (float = 50): TODO(LQY)
+        - :code:`exit_length` (float = 50): more than one exit whose length is *exit_length* are contained in some blocks like roundabout
 
 
 We also provide a shortcut to specify the map:
