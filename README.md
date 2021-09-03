@@ -7,7 +7,7 @@
 # MetaDrive: Composing Diverse Driving Scenarios for Generalizable RL
 
 
-<div style="text-align: center; width:100%; margin: 0 auto;">
+<div style="text-align: center; width:100%; margin: 0 auto; display: inline-block">
 <strong>
 [
 <a href="https://decisionforce.github.io/metadrive/">Website</a>
