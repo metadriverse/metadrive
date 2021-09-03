@@ -8,9 +8,6 @@
 
 <br>
 
-**Though the development of MetaDrive is already settled for current stage, we are still working on managing the documentation and other stuff. We expect to finish all cleanup by 1st, September.**
-
-
 Welcome to MetaDrive! MetaDrive is an driving simulator with many key features, including:
 
 - **Lightweight**: Extremely easy to download, install and run in almost all platforms.

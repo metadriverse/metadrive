@@ -43,7 +43,7 @@ The above information is concatenated into a state vector by the `LidarStateObse
 
 .. _use_pygame_rendering:
 
-Pygame Top-down Semantic Maps
+Top-down Semantic Maps
 ********************************
 
 
@@ -84,27 +84,36 @@ The above figure shows the semantic meaning of each channel.
 Use First-view Images in Training
 ##################################
 
-MetaDrive supports visuomotor tasks by turning on the rendering during the training.
-
 .. image:: figs/rgb_obs.png
-   :width: 600
-   :align: center
+   :width: 300
+   :align: left
 
-.. image:: figs/depth_obs.png
-   :width: 600
-   :align: center
+.. image:: figs/depth_obs.jpg
+   :width: 300
+   :align: right
 
-Special config needs to activate camera observation.
+MetaDrive supports visuomotor tasks by turning on the rendering during the training.
+The above figure shows the images captured by RGB camera (left) and depth camera (right).
+In this section, we discuss how to utilize such observation in a **headless** machine, such as computing node in cluster
+or other remote server.
+Before using such function in your project, please make sure the offscreen rendering is working in your
+machine. The setup tutorial is at :ref:`install_headless`.
 
-1. In env config **offline_render** needs to be **True** to tell MetaDrive retrieving images from camera
-2. In vehicle_config (under env config), set **image_source** to **rgb_camera** or **depth_camera** to get sensory data
-3. The image size will be determined by the camera parameters. For example, **rgb_camera=(200, 88)** means that the image is in 200 x 88
+Now we can setup the vision-based observation in MetaDrive:
 
-There is a demo script using camera output via::
+* Step 1. Set the :code:`config["offscreen_render"] = True` to tell MetaDrive maintaining a image buffer in memory even no popup window exists.
+* Step 2. Set the :code:`config["vehicle_config"]["image_source"]` to :code:`"rgb_camera"` or :code:`"depth_camera"` according to your demand.
+* Step 3. The image size (width and height) will be determined by the camera parameters. The default setting is (84, 84) following the image size in Atari. You can customize the size by configuring :code:`config["vehicle_config"]["rgb_camera"]`. For example, :code:`config["vehicle_config"]["rgb_camera"] = (200, 88)` means that the image has 200 pixels in width and 88 pixels in height.
+
+There is a demo script using RGB camera as observation::
 
     python -m metadrive.examples.drive_in_single_agent_env --observation rgb_camera
 
+The script should print a message:
 
+.. code-block:: text
 
+    The observation is a dict with numpy arrays as values:  {'image': (84, 84, 3), 'state': (21,)}
 
+The image rendering consumes memory in the first GPU of your machine (if any). Please be careful when using this.
 
