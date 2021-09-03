@@ -287,7 +287,7 @@ class IDMPolicy(BasePolicy):
         next_lanes = self.control_object.navigation.next_ref_lanes
         lane_num_diff = len(current_lanes) - len(next_lanes) if next_lanes is not None else 0
 
-        # must perform lane change due to routing lane num change
+        # We have to perform lane changing because the number of lanes in next road is less than current road
         if lane_num_diff > 0:
             # lane num decreasing happened in left road or right road
             if current_lanes[0].is_previous_lane_of(next_lanes[0]):
