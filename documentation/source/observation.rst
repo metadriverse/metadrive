@@ -84,13 +84,15 @@ The above figure shows the semantic meaning of each channel.
 Use First-view Images in Training
 ##################################
 
+
 .. image:: figs/rgb_obs.png
-   :width: 300
-   :align: left
+   :width: 350
+   :align: center
 
 .. image:: figs/depth_obs.jpg
-   :width: 300
-   :align: right
+   :width: 350
+   :align: center
+
 
 MetaDrive supports visuomotor tasks by turning on the rendering during the training.
 The above figure shows the images captured by RGB camera (left) and depth camera (right).
