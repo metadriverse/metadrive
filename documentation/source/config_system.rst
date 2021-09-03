@@ -118,7 +118,7 @@ Visualization & Rendering Config
 
 The config in this part specifies the setting related to visualization. The :code:`use_render` is the most useful one.
 
-    - :code:`use_render` (bool = False): whether to pop a window on your screen or not
+    - :code:`use_render` (bool = False): whether to pop a window on your screen or not. This is irrelevant to the vision-based observation.
     - :code:`disable_model_compression` (bool = True): Model compression reduces the memory consumption when using Panda3D window to visualize. Disabling model compression greatly improves the launch speed but might cause breakdown in low-memory machine.
     - :code:`cull_scene` (bool = True): When you want to access the image of camera, it should be set to True.
     - :code:`use_chase_camera_follow_lane` (bool = False): whether to force the third-person view camera following the heading of current lane
@@ -143,13 +143,13 @@ We list the vehicle config here. Observation Space will be adjusted by these con
         - :code:`side_detector` (dict): This Lidar only scans the side of the road but not vehicles. The config dict has identical keys as :code:`lidar` except :code:`num_others`.
         - :code:`lane_line_detector` (dict): This Lidar only scans the side of current lane but neither vehicles or road boundary. The config dict has identical keys as :code:`lidar` except :code:`num_others`.
         - :code:`show_lidar` (bool = False): whether to show the end of each Lidar laser in the scene
-        - :code:`rgb_camera` (tuple): (camera resolution width(int), camera resolution height(int). We use (84, 84) as the default size so that the RGB observation is compatible to those CNN used in Atari. Please refer to :ref:`use_native_rendering` for more information about using image as observation.
         - :code:`increment_steering` (bool = False): for keyboard control. When set to True, the steering angle and acceleration is determined by the key pressing time
         - :code:`vehicle_model` (str = "default"): which type of vehicle to use in ego vehicle (s, m, l, xl, default)
         - :code:`enable_reverse` (bool = False): If True and vehicle speed < 0, a brake action (e.g. acceleration = -1) will be parsed as reverse. This is used in the Multi-agent Parking Lot environment.
         - :code:`extra_action_dim` (int = 0): If you want to input more control signal than the default [steering, throttle/brake] in your customized environment, change the default value 0 to the extra number of dimensions.
         - :code:`random_color` (bool = False): whether to randomize the color of ego vehicles. This is useful in multi-agent environments.
-        - :code:`image_source` (str = "rgb_camera"): select in ["rgb_camera", "depth_camera"]. When using image observation, it decides where the image collected.
+        - :code:`image_source` (str = "rgb_camera"): select in ["rgb_camera", "depth_camera"]. When using image observation, it decides where the image collected. See :ref:`use_native_rendering` for more information.
+        - :code:`rgb_camera` (tuple = (84, 84): (camera resolution width (int), camera resolution height (int). We use (84, 84) as the default size so that the RGB observation is compatible to those CNN used in Atari. Please refer to :ref:`use_native_rendering` for more information about using image as observation. See :ref:`use_native_rendering` for more information.
         - :code:`spawn_lane_index` (tuple): which lane to spawn this vehicle. Default to one lane in the first block of the map
         - :code:`spawn_longitude/lateral` (float = 5.0, 0.0): The spawn point will be calculated by *spawn_longitude* and *spawn_lateral*
         - :code:`destination_node` (str = None): the destination road node name. This is used in real dataset replay map.
@@ -164,7 +164,7 @@ Other Observation Config
 
 The vehicle config decides many of the observational config.
 
-    - :code:`offscreen_render` (bool = False): If you want to use camera data, please set this to True.
+    - :code:`offscreen_render` (bool = False): If you want to use vision-based observation, please set this to True. See :ref:`use_native_rendering` for more information.
     - :code:`rgb_clip` (bool = True): if True than squeeze the value between \[0, 255\] to \[0.0, 1.0\]
     - :code:`headless_machine_render` (bool = False): Set this to True only when training on headless machine and using rgb image
 
