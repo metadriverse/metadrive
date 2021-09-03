@@ -8,13 +8,15 @@
 
 
 <div style="text-align: center;">
+<strong>
 [
-**[Website](https://decisionforce.github.io/metadrive/)**
+<a href="https://decisionforce.github.io/metadrive/">Website</a>
 |
-**[Documentation](https://metadrive-simulator.readthedocs.io)**
+<a href="https://metadrive-simulator.readthedocs.io">Documentation</a>
 |
-**[Github Repo](https://github.com/decisionforce/metadrive)**
+<a href="https://github.com/decisionforce/metadrive">Github Repo</a>
 ]
+</strong>
 </div>
 
 <br>
