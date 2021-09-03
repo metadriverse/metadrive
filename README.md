@@ -6,17 +6,26 @@
 
 # MetaDrive: Composing Diverse Driving Scenarios for Generalizable RL
 
+
+<div style="text-align: center; width:100%; margin: 0 auto; display: inline-block">
+<strong>
+[
+<a href="https://decisionforce.github.io/metadrive/">Website</a>
+|
+<a href="https://metadrive-simulator.readthedocs.io">Documentation</a>
+|
+<a href="https://github.com/decisionforce/metadrive">Github Repo</a>
+]
+</strong>
+</div>
+
 <br>
 
-**Though the development of MetaDrive is already settled for current stage, we are still working on managing the documentation and other stuff. We expect to finish all cleanup by 1st, September.**
+Welcome to MetaDrive! MetaDrive is an driving simulator with many key features:
 
-
-Welcome to MetaDrive! MetaDrive is an driving simulator with many key features, including:
-
-- **Lightweight**: Extremely easy to download, install and run in almost all platforms.
-- **Realistic**: Accurate physics simulation and multiple sensory inputs.
-- **Efficient**: Up to 300 simulation step per second and easy to parallel.
-- **Compositionality**: Support generating infinite scenes and configuring various traffic, vehicle, and environmental settings.
+- **Lightweight**: Extremely easy to download, install and run in almost all platforms. Up to 300 simulation step per second and easy to parallel.
+- **Realistic**: Accurate physics simulation and multiple sensory input including Lidar, sensory data, top-down semantic map and first-person view images. 
+- **Compositional**: Support generating infinite scenes and configuring various traffics, vehicles, and environmental settings.
 
 
 ## 🛠 Quick Start
