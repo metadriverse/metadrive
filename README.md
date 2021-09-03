@@ -6,6 +6,8 @@
 
 # MetaDrive: Composing Diverse Driving Scenarios for Generalizable RL
 
+
+<div style="text-align: center;">
 [
 **[Website](https://decisionforce.github.io/metadrive/)**
 |
@@ -13,6 +15,7 @@
 |
 **[Github Repo](https://github.com/decisionforce/metadrive)**
 ]
+</div>
 
 <br>
 
