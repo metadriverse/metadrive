@@ -5,10 +5,12 @@ Remember to press H to see help message!
 Note: This script require rendering, please following the installation instruction to setup a proper
 environment that allows popping up an window.
 """
+import argparse
 import random
 
+import numpy as np
+
 from metadrive import MetaDriveEnv
-import argparse
 
 if __name__ == "__main__":
     config = dict(
@@ -29,7 +31,13 @@ if __name__ == "__main__":
     if args.observation == "rgb_camera":
         config.update(dict(offscreen_render=True))
     env = MetaDriveEnv(config)
-    env.reset()
+    o = env.reset()
+    if args.observation == "rgb_camera":
+        assert isinstance(o, dict)
+        print("The observation is a dict with numpy arrays as values: ", {k: v.shape for k, v in o.items()})
+    else:
+        assert isinstance(o, np.ndarray)
+        print("The observation is an numpy array with shape: ", o.shape)
     for i in range(1, 1000000000):
         o, r, d, info = env.step([0, 0])
         env.render(text={
