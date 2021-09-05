@@ -27,7 +27,7 @@ packages = find_namespace_packages(
 print("We will install the following packages: ", packages)
 
 """ ===== Remember to modify the PG_EDITION at first ====="""
-version = "0.1.4"
+version = "0.2.0"
 
 ext_modules = cythonize([Extension(
     "metadrive.cutils", ["metadrive/cutils.pyx"], include_dirs=[numpy.get_include()]
