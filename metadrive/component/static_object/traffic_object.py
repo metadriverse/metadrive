@@ -28,9 +28,9 @@ class TrafficObject(BaseStaticObject):
         :param lateral: use to calculate the angle from positive direction of horizontal axis
         """
         position = lane.position(longitude, lateral)
-        heading = lane.heading_at(longitude)
+        heading_theta = lane.heading_theta_at(longitude)
         assert self.NAME is not None, "Assign a name for this class for finding it easily"
-        super(TrafficObject, self).__init__(lane, position, heading, random_seed)
+        super(TrafficObject, self).__init__(lane, position, heading_theta, random_seed)
         self.crashed = False
 
 
@@ -46,8 +46,6 @@ class TrafficCone(TrafficObject):
         self.add_body(BaseRigidBodyNode(self.name, self.NAME))
         self.body.addShape(BulletCylinderShape(self.RADIUS, self.HEIGHT))
         self.body.setIntoCollideMask(self.COLLISION_GROUP)
-        self.origin.setPos(panda_position(self.position, self.HEIGHT / 2))
-        self.origin.setH(panda_heading(self.heading))
         if self.render:
             model = self.loader.loadModel(AssetLoader.file_path("models", "traffic_cone", "scene.gltf"))
             model.setScale(0.02)
@@ -68,8 +66,6 @@ class TrafficWarning(TrafficObject):
         self.add_body(BaseRigidBodyNode(self.name, self.NAME))
         self.body.addShape(BulletCylinderShape(self.RADIUS, self.HEIGHT))
         self.body.setIntoCollideMask(self.COLLISION_GROUP)
-        self.origin.setPos(panda_position(self.position, self.HEIGHT / 2))
-        self.origin.setH(panda_heading(self.heading))
         if self.render:
             model = self.loader.loadModel(AssetLoader.file_path("models", "warning", "warning.gltf"))
             model.setScale(0.02)
@@ -92,8 +88,6 @@ class TrafficBarrier(TrafficObject):
         self.add_body(BaseRigidBodyNode(self.name, self.NAME))
         self.body.addShape(BulletBoxShape((self.WIDTH / 2, self.LENGTH / 2, self.HEIGHT / 2)))
         self.body.setIntoCollideMask(self.COLLISION_GROUP)
-        self.origin.setPos(panda_position(self.position, self.HEIGHT / 2))
-        self.origin.setH(panda_heading(self.heading))
         if self.render:
             model = self.loader.loadModel(AssetLoader.file_path("models", "barrier", "scene.gltf"))
             model.setH(-90)

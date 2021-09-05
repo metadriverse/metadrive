@@ -69,7 +69,7 @@ class ArgoverseMap(BaseMap):
             else:
                 logger.error("Unknown XML item encountered.")
                 raise ValueError("Unknown XML item encountered.")
-        lane_ids = ArgoverseMap.AGMap.get_lane_ids_in_xy_bbox(
+        lane_ids = self.AGMap.get_lane_ids_in_xy_bbox(
             *self.argoverse_position(self.config["center"]), self.config["city"], self.config["radius"]
         )
         self.lane_id_lane = lane_objs

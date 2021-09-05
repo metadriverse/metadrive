@@ -354,7 +354,8 @@ class RoadNetwork:
         while len(route) > 1 and longitudinal > self.get_lane(route[0]).length:
             longitudinal -= self.get_lane(route[0]).length
             route = route[1:]
-        return self.get_lane(route[0]).position(longitudinal, lateral), self.get_lane(route[0]).heading_at(longitudinal)
+        return self.get_lane(route[0]).position(longitudinal,
+                                                lateral), self.get_lane(route[0]).heading_theta_at(longitudinal)
 
     def get_roads(self, *, direction="all", lane_num=None) -> List:
         """

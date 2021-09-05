@@ -48,7 +48,7 @@ class CircularLane(AbstractLane):
         # return self.center + (self.radius - lateral * self.direction) * np.array([math.cos(phi), math.sin(phi)])
         return self.center + (self.radius - lateral * self.direction) * Vector((math.cos(phi), math.sin(phi)))
 
-    def heading_at(self, longitudinal: float) -> float:
+    def heading_theta_at(self, longitudinal: float) -> float:
         phi = self.direction * longitudinal / self.radius + self.start_phase
         psi = phi + math.pi / 2 * self.direction
         return psi
