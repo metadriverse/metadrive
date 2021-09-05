@@ -22,7 +22,7 @@ The key features of MetaDrive includes:
 
 This documentation brings you the information on installation, usages and more of MetaDrive!
 
-You can also visit `our webpage <https://decisionforce.github.io/metadrive/>`_ and `GitHub repo <https://github.com/decisionforce/metadrive>`_.
+You can also visit the `GitHub repo <https://github.com/decisionforce/metadrive>`_ of MetaDrive.
 Please feel free to contact us if you have any suggestions or ideas!
 
 
