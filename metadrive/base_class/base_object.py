@@ -52,6 +52,8 @@ class BaseObject(BaseRunnable):
     sample some special configs for it ,Properties and parameters in PARAMETER_SPACE of the object are fixed after
     calling __init__().
     """
+    MASS = None  # if object has a body, the mass will be set automatically
+
     def __init__(self, name=None, random_seed=None, config=None, escape_random_seed_assertion=False):
         """
         Config is a static conception, which specified the parameters of one element.
@@ -89,9 +91,15 @@ class BaseObject(BaseRunnable):
                 raise ValueError("The physics body is not BulletBodyNode type")
             self._body = physics_body
             new_origin = NodePath(self._body)
+            new_origin.setH(self.origin.getH())
+            new_origin.setPos(self.origin.getPos())
             self.origin.getChildren().reparentTo(new_origin)
             self.origin = new_origin
             self.dynamic_nodes.append(physics_body)
+            if self.MASS is not None:
+                assert isinstance(self.MASS,
+                                  int) or isinstance(self.MASS, float), "MASS should be a float or an integer"
+                self._body.setMass(self.MASS)
         else:
             raise AttributeError("You can not set the object body for twice")
 

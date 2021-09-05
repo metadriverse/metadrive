@@ -70,7 +70,7 @@ if __name__ == "__main__":
             "use_render": True,
             # "debug": True,
             'environment_num': 10,
-            "start_seed": 123,
+            "start_seed": 129,
             # "traffic_density": 0.2,
             # "environment_num": 1,
             # # "start_seed": 187,
@@ -81,7 +81,7 @@ if __name__ == "__main__":
             # "cost_to_reward":True,
             "vehicle_config": {
                 "spawn_lane_index": (FirstPGBlock.NODE_2, FirstPGBlock.NODE_3, 2),
-                "show_lidar": True,
+                # "show_lidar": True,
                 # "show_side_detector": True,
                 # "show_lane_line_detector": True,
                 # "side_detector": dict(num_lasers=2, distance=50),  # laser num, distance

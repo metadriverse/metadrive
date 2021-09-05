@@ -1,21 +1,21 @@
 from metadrive.component.vehicle.vehicle_type import LVehicle
 from metadrive.component.static_object.traffic_object import TrafficCone, TrafficWarning
 from metadrive.constants import BodyName, TerminationState, DEFAULT_AGENT
-from metadrive.envs import MetaDriveEnv
+from metadrive.envs.safe_metadrive_env import SafeMetaDriveEnv
 
 
-class TestCollisionEnv(MetaDriveEnv):
+class ComplexEnv(SafeMetaDriveEnv):
     """
     now for test use and demo use only
     """
-    @classmethod
-    def default_config(cls):
-        config = super(TestCollisionEnv, cls).default_config()
+    def default_config(self):
+        config = super(ComplexEnv, self).default_config()
         config.update(
             {
                 "environment_num": 1,
-                "traffic_density": 0.1,
+                "traffic_density": 0.02,
                 "start_seed": 5,
+                "accident_prob": 0.0,
                 # "traffic_mode":"respawn",
                 "debug_physics_world": False,
                 "debug": False,
@@ -25,31 +25,34 @@ class TestCollisionEnv(MetaDriveEnv):
         return config
 
     def __init__(self, config=None):
-        super(TestCollisionEnv, self).__init__(config)
+        super(ComplexEnv, self).__init__(config)
         self.breakdown_vehicle = None
         self.alert = None
 
     def reset(self, episode_data: dict = None, force_seed=None):
-        ret = super(TestCollisionEnv, self).reset(episode_data)
+        ret = super(ComplexEnv, self).reset(episode_data)
         self.vehicle.max_speed = 60
         lane = self.current_map.road_network.graph[">>>"]["1C0_0_"][0]
-        self.breakdown_vehicle = self.engine.spawn_object(
+        self.breakdown_vehicle = self.engine.object_manager.spawn_object(
             self.engine.traffic_manager.random_vehicle_type(),
             vehicle_config={
                 "spawn_lane_index": lane.index,
                 "spawn_longitude": 30
             }
         )
-
+        self.engine.object_manager.accident_lanes.append(lane)
         lane_ = self.current_map.road_network.graph[">>>"]["1C0_0_"][1]
-        breakdown_vehicle = self.engine.spawn_object(
+        breakdown_vehicle = self.engine.object_manager.spawn_object(
             LVehicle, vehicle_config={
                 "spawn_lane_index": lane_.index,
                 "spawn_longitude": 30
             }
         )
+        self.engine.object_manager.accident_lanes.append(lane_)
 
-        self.alert = self.engine.spawn_object(TrafficWarning, lane=lane, longitude=22, lateral=0, pbr_model=False)
+        self.alert = self.engine.object_manager.spawn_object(
+            TrafficWarning, lane=lane, longitude=22, lateral=0, pbr_model=False
+        )
 
         # part 1
         lane = self.current_map.road_network.graph["1C0_1_"]["2S0_0_"][2]
@@ -61,12 +64,13 @@ class TestCollisionEnv(MetaDriveEnv):
         ]
 
         for p in pos:
-            cone = self.engine.spawn_object(TrafficCone, lane=lane, longitude=p[0], lateral=p[1])
+            cone = self.engine.object_manager.spawn_object(TrafficCone, lane=lane, longitude=p[0], lateral=p[1])
+        self.engine.object_manager.accident_lanes.append(lane)
         from metadrive.component.vehicle.vehicle_type import SVehicle, XLVehicle
         v_pos = [8, 14]
         v_type = [SVehicle, XLVehicle]
         for v_long, v_t in zip(v_pos, v_type):
-            v = self.engine.spawn_object(
+            v = self.engine.object_manager.spawn_object(
                 v_t, vehicle_config={
                     "spawn_lane_index": lane.index,
                     "spawn_longitude": v_long
@@ -75,6 +79,7 @@ class TestCollisionEnv(MetaDriveEnv):
 
         # part 2
         lane = self.current_map.road_network.graph["3R0_0_"]["3R0_1_"][0]
+        self.engine.object_manager.accident_lanes.append(lane)
         pos = [
             (-20, lane.width / 3), (-15.6, lane.width / 4), (-12.1, 0), (-8.7, -lane.width / 4),
             (-4.2, -lane.width / 2), (-0.7, -lane.width * 3 / 4), (4.1, -lane.width), (7.3, -lane.width),
@@ -84,11 +89,11 @@ class TestCollisionEnv(MetaDriveEnv):
 
         for p in pos:
             p_ = (p[0] + 5, -p[1])
-            cone = self.engine.spawn_object(TrafficCone, lane=lane, longitude=p_[0], lateral=p_[1])
+            cone = self.engine.object_manager.spawn_object(TrafficCone, lane=lane, longitude=p_[0], lateral=p_[1])
 
         v_pos = [14, 19]
         for v_long in v_pos:
-            v = self.engine.spawn_object(
+            v = self.engine.object_manager.spawn_object(
                 self.engine.traffic_manager.random_vehicle_type(),
                 vehicle_config={
                     "spawn_lane_index": lane.index,
@@ -96,12 +101,13 @@ class TestCollisionEnv(MetaDriveEnv):
                 }
             )
 
-        alert = self.engine.spawn_object(TrafficWarning, lane=lane, longitude=-35, lateral=0)
+        alert = self.engine.object_manager.spawn_object(TrafficWarning, lane=lane, longitude=-35, lateral=0)
 
-        alert = self.engine.spawn_object(TrafficWarning, lane=lane, longitude=-60, lateral=0)
+        alert = self.engine.object_manager.spawn_object(TrafficWarning, lane=lane, longitude=-60, lateral=0)
 
         # part 3
         lane = self.current_map.road_network.graph["4C0_0_"]["4C0_1_"][2]
+        self.engine.object_manager.accident_lanes.append(lane)
         pos = [
             (-12.1, 0), (-8.7, -lane.width / 4), (-4.2, -lane.width / 2), (-0.7, -lane.width * 3 / 4),
             (4.1, -lane.width), (7.3, -lane.width), (11.5, -lane.width), (15.5, -lane.width), (20.0, -lane.width),
@@ -110,11 +116,11 @@ class TestCollisionEnv(MetaDriveEnv):
 
         for p in pos:
             p_ = (p[0] + 5, p[1] * 3.5 / 3)
-            cone = self.engine.spawn_object(TrafficCone, lane=lane, longitude=p_[0], lateral=p_[1])
+            cone = self.engine.object_manager.spawn_object(TrafficCone, lane=lane, longitude=p_[0], lateral=p_[1])
 
         v_pos = [14, 19]
         for v_long in v_pos:
-            v = self.engine.spawn_object(
+            v = self.engine.object_manager.spawn_object(
                 self.engine.traffic_manager.random_vehicle_type(),
                 vehicle_config={
                     "spawn_lane_index": lane.index,
@@ -124,17 +130,18 @@ class TestCollisionEnv(MetaDriveEnv):
 
         # part 4
         lane = self.current_map.road_network.graph["4C0_1_"]["5R0_0_"][0]
+        self.engine.object_manager.accident_lanes.append(lane)
         pos = [(-12, lane.width / 4), (-8.1, 0), (-4, -lane.width / 4), (-0.1, -lane.width / 2), (4, -lane.width)]
 
         for p in pos:
             p_ = (p[0] + 60, -p[1] * 3.5 / 3)
-            cone = self.engine.spawn_object(TrafficCone, lane=lane, longitude=p_[0], lateral=p_[1])
+            cone = self.engine.object_manager.spawn_object(TrafficCone, lane=lane, longitude=p_[0], lateral=p_[1])
 
         return ret
 
 
 def test_object_collision_detection(render=False):
-    env = TestCollisionEnv(
+    env = ComplexEnv(
         {
             "manual_control": True,
             "traffic_density": 0.0,
@@ -148,11 +155,11 @@ def test_object_collision_detection(render=False):
     try:
         o = env.reset()
         lane_index = (">>", ">>>", 0)
-        alert = env.engine.spawn_object(
+        alert = env.engine.object_manager.spawn_object(
             TrafficWarning, lane=env.current_map.road_network.get_lane(lane_index), longitude=22, lateral=0
         )
         lane_index = (">>", ">>>", 2)
-        alert = env.engine.spawn_object(
+        alert = env.engine.object_manager.spawn_object(
             TrafficCone, lane=env.current_map.road_network.get_lane(lane_index), longitude=22, lateral=0
         )
         crash_obj = False
