@@ -21,3 +21,7 @@ class BaseStaticObject(BaseObject):
         self.set_heading_theta(heading_theta)
         self.lane_index = lane.index
         self.lane = lane
+
+    def set_static(self, static: bool = False):
+        mass = 0 if static else self.MASS
+        self._body.setMass(mass)
