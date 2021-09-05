@@ -34,7 +34,7 @@ class Terrain(BaseObject):
             self.ts_color = TextureStage("color")
             self.ts_normal = TextureStage("normal")
             self.ts_normal.set_mode(TextureStage.M_normal)
-            self.origin.setPos(0, 0, self.HEIGHT)
+            self.set_position(0, 0, self.HEIGHT)
             cm = CardMaker('card')
             scale = 20000
             cm.setUvRange((0, 0), (scale / 10, scale / 10))

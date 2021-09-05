@@ -1,4 +1,7 @@
 from panda3d.bullet import BulletWorld, BulletBodyNode
+import numpy as np
+from panda3d.core import LVector3
+from metadrive.utils.math_utils import norm
 from panda3d.core import NodePath
 
 from metadrive.base_class.base_runnable import BaseRunnable
@@ -45,6 +48,7 @@ class BaseObject(BaseRunnable):
     sample some special configs for it ,Properties and parameters in PARAMETER_SPACE of the object are fixed after
     calling __init__().
     """
+
     def __init__(self, name=None, random_seed=None, config=None, escape_random_seed_assertion=False):
         """
         Config is a static conception, which specified the parameters of one element.
@@ -129,3 +133,71 @@ class BaseObject(BaseRunnable):
         self.dynamic_nodes.clear()
         self.static_nodes.clear()
         self._config.clear()
+
+    def set_position(self, position, height=0.4):
+        """
+        Set this object to a place
+        :param position: 2d array or list
+        """
+        self.origin.setPos(panda_position(position, height))
+
+    @property
+    def position(self):
+        return metadrive_position(self.origin.getPos())
+
+    def set_velocity(self, direction: list, value: float):
+        """
+        Set velocity for object including the direction of velocity and the value (speed)
+        The direction of velocity will be normalized automatically, value decided its scale
+        :param position: 2d array or list
+        :param value: speed [m/s]
+        """
+        norm_ratio = value / norm(direction[0], direction[1])
+        self._body.setLinearVelocity(
+            LVector3(direction[0] * norm_ratio, direction[1] * norm_ratio, self.origin.getPos()[-1]))
+
+    @property
+    def velocity(self):
+        """
+        Velocity, unit: m/s
+        """
+        velocity = self.body.get_linear_velocity()
+        return np.asarray([velocity[0], -velocity[1]])
+
+    @property
+    def speed(self):
+        """
+        return the speed in m/s
+        """
+        velocity = self.body.get_linear_velocity()
+        speed = norm(velocity[0], velocity[1])
+        return clip(speed, 0.0, 100000.0)
+
+    def set_heading_theta(self, heading_theta, rad_to_degree=True) -> None:
+        """
+        Set heading theta for this object
+        :param heading_theta: float
+        :param in_rad: when set to True transfer to degree automatically
+        """
+        h = panda_heading(heading_theta)
+        if rad_to_degree:
+            h = h * 180 / np.pi
+        self.origin.setH(h)
+
+    @property
+    def heading_theta(self):
+        """
+        Get the heading theta of this object, unit [rad]
+        :return:  heading in rad
+        """
+        return metadrive_heading(self.origin.getH()) / 180 * math.pi
+
+    @property
+    def heading(self):
+        """
+        Heading is a vector = [cos(heading_theta), sin(heading_theta)]
+        """
+        real_heading = self.heading_theta
+        # heading = np.array([math.cos(real_heading), math.sin(real_heading)])
+        heading = Vector((math.cos(real_heading), math.sin(real_heading)))
+        return heading
