@@ -9,11 +9,9 @@ from metadrive.component.lane.circular_lane import CircularLane
 from metadrive.component.lane.straight_lane import StraightLane
 from metadrive.component.map.base_map import BaseMap
 from metadrive.component.road.road import Road
-from metadrive.constants import Mask
 from metadrive.constants import RENDER_MODE_ONSCREEN, CamMask
 from metadrive.engine.asset_loader import AssetLoader
-from metadrive.utils import clip, norm
-from metadrive.utils import get_np_random
+from metadrive.utils import clip, norm, get_np_random
 from metadrive.utils.coordinates_shift import panda_position
 from metadrive.utils.scene_utils import ray_localization
 from metadrive.utils.space import Parameter, BlockParameterSpace
@@ -103,7 +101,6 @@ class Navigation:
         if start_road_node is None:
             start_road_node = FirstPGBlock.NODE_1
         if final_road_node is None:
-            # auto find if PGMap
             current_road_negative = Road(*current_lane_index[:-1]).is_negative_road()
             # choose first block when born on negative road
             block = map.blocks[0] if current_road_negative else map.blocks[-1]
@@ -166,16 +163,20 @@ class Navigation:
 
         assert len(self.checkpoints) >= 2
 
+        # target_road_1 is the road segment the vehicle is driving on.
         target_road_1_start = self.checkpoints[self._target_checkpoints_index[0]]
         target_road_1_end = self.checkpoints[self._target_checkpoints_index[0] + 1]
+        target_lanes_1 = self.map.road_network.graph[target_road_1_start][target_road_1_end]
+        self.current_ref_lanes = target_lanes_1
+        self.current_road = Road(target_road_1_start, target_road_1_end)
+
+        # target_road_2 is next road segment the vehicle should drive on.
         target_road_2_start = self.checkpoints[self._target_checkpoints_index[1]]
         target_road_2_end = self.checkpoints[self._target_checkpoints_index[1] + 1]
-        target_lanes_1 = self.map.road_network.graph[target_road_1_start][target_road_1_end]
         target_lanes_2 = self.map.road_network.graph[target_road_2_start][target_road_2_end]
-        self.current_ref_lanes = target_lanes_1
 
-        self.current_road = Road(target_road_1_start, target_road_1_end)
         if target_road_1_start == target_road_2_start:
+            # When we are in the final road segment that there is no further road to drive on
             self.next_road = None
             self.next_ref_lanes = None
         else:
@@ -185,18 +186,14 @@ class Navigation:
         self._navi_info.fill(0.0)
         half = self.navigation_info_dim // 2
         self._navi_info[:half], lanes_heading1, checkpoint = self._get_info_for_checkpoint(
-            lanes_id=0,
-            lanes=target_lanes_1,
-            ego_vehicle=ego_vehicle  #, print_info=False
+            lanes_id=0, lanes=target_lanes_1, ego_vehicle=ego_vehicle
         )
 
         self._navi_info[half:], lanes_heading2, _ = self._get_info_for_checkpoint(
-            lanes_id=1,
-            lanes=target_lanes_2,
-            ego_vehicle=ego_vehicle  #, print_info=True
+            lanes_id=1, lanes=target_lanes_2, ego_vehicle=ego_vehicle
         )
 
-        if self._show_navi_info:
+        if self._show_navi_info:  # Whether to visualize little boxes in the scene denoting the checkpoints
             pos_of_goal = checkpoint
             self._goal_node_path.setPos(pos_of_goal[0], -pos_of_goal[1], 1.8)
             self._goal_node_path.setH(self._goal_node_path.getH() + 3)
@@ -210,20 +207,33 @@ class Navigation:
 
         return lane, lane_index
 
-    def _get_info_for_checkpoint(self, lanes_id, lanes, ego_vehicle, print_info=False):
+    def _get_info_for_checkpoint(self, lanes_id, lanes, ego_vehicle):
+
+        navi_information = []
+
+        # Project the checkpoint position into the target vehicle's coordination, where
+        # +x is the heading and +y is the right hand side.
         ref_lane = lanes[0]
         later_middle = (float(self.get_current_lane_num()) / 2 - 0.5) * self.get_current_lane_width()
         check_point = ref_lane.position(ref_lane.length, later_middle)
+        dir_vec = check_point - ego_vehicle.position  # get the vector from center of vehicle to checkpoint
+        dir_norm = norm(dir_vec[0], dir_vec[1])
+        if dir_norm > self.NAVI_POINT_DIST:  # if the checkpoint is too far then crop the direction vector
+            dir_vec = dir_vec / dir_norm * self.NAVI_POINT_DIST
+        ckpt_in_heading, ckpt_in_rhs = ego_vehicle.projection(dir_vec)  # project to ego vehicle's coordination
+
+        # Dim 1: the relative position of the checkpoint in the target vehicle's heading direction.
+        navi_information.append(clip((ckpt_in_heading / self.NAVI_POINT_DIST + 1) / 2, 0.0, 1.0))
+
+        # Dim 2: the relative position of the checkpoint in the target vehicle's right hand side direction.
+        navi_information.append(clip((ckpt_in_rhs / self.NAVI_POINT_DIST + 1) / 2, 0.0, 1.0))
+
         if lanes_id == 0:
-            # calculate ego v lane heading
             lanes_heading = ref_lane.heading_at(ref_lane.local_coordinates(ego_vehicle.position)[0])
         else:
             lanes_heading = ref_lane.heading_at(min(self.PRE_NOTIFY_DIST, ref_lane.length))
-        dir_vec = check_point - ego_vehicle.position
-        dir_norm = norm(dir_vec[0], dir_vec[1])
-        if dir_norm > self.NAVI_POINT_DIST:
-            dir_vec = dir_vec / dir_norm * self.NAVI_POINT_DIST
-        proj_heading, proj_side = ego_vehicle.projection(dir_vec)
+
+        # Try to include the current lane's information into the navigation information
         bendradius = 0.0
         dir = 0.0
         angle = 0.0
@@ -237,27 +247,19 @@ class Navigation:
                 angle = ref_lane.end_phase - ref_lane.start_phase
             elif dir == -1:
                 angle = ref_lane.start_phase - ref_lane.end_phase
-        ret = []
-        ret.append(clip((proj_heading / self.NAVI_POINT_DIST + 1) / 2, 0.0, 1.0))
-        ret.append(clip((proj_side / self.NAVI_POINT_DIST + 1) / 2, 0.0, 1.0))
-        ret.append(clip(bendradius, 0.0, 1.0))
-        ret.append(clip((dir + 1) / 2, 0.0, 1.0))
-        ret.append(clip((np.rad2deg(angle) / BlockParameterSpace.CURVE[Parameter.angle].max + 1) / 2, 0.0, 1.0))
 
-        # if print_info:
-        #     print("[2ND] Distance to this navigation: {:.3f}, Angle: {:.3f}. Return value: {}".format(
-        #         norm(proj_heading, proj_side),
-        #         np.rad2deg(np.arctan2(proj_side, proj_heading)),
-        #         ret
-        #     ))
-        # else:
-        #     print("[1ND] Distance to this navigation: {:.3f}, Angle: {:.3f}. Return value: {}".format(
-        #         norm(proj_heading, proj_side),
-        #         np.rad2deg(np.arctan2(proj_side, proj_heading)),
-        #         ret
-        #     ))
+        # Dim 3: The bending radius of current lane
+        navi_information.append(clip(bendradius, 0.0, 1.0))
 
-        return ret, lanes_heading, check_point
+        # Dim 4: The bending direction of current lane (+1 for clockwise, -1 for counterclockwise)
+        navi_information.append(clip((dir + 1) / 2, 0.0, 1.0))
+
+        # Dim 5: The angular difference between the heading in lane ending position and
+        # the heading in lane starting position
+        navi_information.append(
+            clip((np.rad2deg(angle) / BlockParameterSpace.CURVE[Parameter.angle].max + 1) / 2, 0.0, 1.0)
+        )
+        return navi_information, lanes_heading, check_point
 
     def _update_target_checkpoints(self, ego_lane_index, ego_lane_longitude):
         """
