@@ -68,7 +68,7 @@ class WayPointLane(AbstractLane):
     def width_at(self, longitudinal: float) -> float:
         return self.width
 
-    def heading_at(self, longitudinal: float) -> float:
+    def heading_theta_at(self, longitudinal: float) -> float:
         accumulate_len = 0
         for seg in self.segment_property:
             accumulate_len += seg["length"]

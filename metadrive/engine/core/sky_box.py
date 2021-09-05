@@ -61,4 +61,4 @@ class SkyBox(BaseObject):
             self._accumulate = 0
         self._accumulate += 1
         factor = self.f * (1 - abs(self._accumulate - self.ROTATION_MAX / 2) * 2 / self.ROTATION_MAX)
-        self.origin.setH(self.origin.getH() + factor * 0.0035)
+        self.set_heading_theta(self.origin.getH() + factor * 0.0035, rad_to_degree=False)

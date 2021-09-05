@@ -162,7 +162,7 @@ class MainCamera:
         :param pos: Tuple, MetaDrive coordinates
         :return: heading theta
         """
-        heading_theta = panda_heading(lane.heading_at(lane.local_coordinates(pos)[0]))
+        heading_theta = panda_heading(lane.heading_theta_at(lane.local_coordinates(pos)[0]))
         return heading_theta
 
     @staticmethod
