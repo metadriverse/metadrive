@@ -1,12 +1,12 @@
 # Please don't change the order of following packages!
 import sys
 from distutils.core import setup
-from distutils.extension import Extension
 from os import path
 
 import numpy
-from Cython.Build import cythonize
 from setuptools import find_namespace_packages  # This should be place at top!
+from Cython.Build import cythonize
+from distutils.extension import Extension
 
 
 def is_mac():
@@ -27,7 +27,7 @@ packages = find_namespace_packages(
 print("We will install the following packages: ", packages)
 
 """ ===== Remember to modify the PG_EDITION at first ====="""
-version = "0.1.4"
+version = "0.2.0"
 
 ext_modules = cythonize([Extension(
     "metadrive.cutils", ["metadrive/cutils.pyx"], include_dirs=[numpy.get_include()]
@@ -56,7 +56,7 @@ if (not is_mac()) and (not is_win()):
     install_requires.append("evdev")
 
 setup(
-    name="metadrive",
+    name="metadrive-simulator",
     version=version,
     description="An open-ended driving simulator with infinite scenes",
     url="https://github.com/decisionforce/metadrive",
