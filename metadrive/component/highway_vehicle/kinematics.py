@@ -107,7 +107,7 @@ class Vehicle:
         v = cls(
             traffic_mgr,
             list(lane.position(longitude, 0)),
-            lane.heading_at(longitude),
+            lane.heading_theta_at(longitude),
             speed,
             # random_seed=get_np_random(random_seed)
             # np_random=get_np_random(random_seed)

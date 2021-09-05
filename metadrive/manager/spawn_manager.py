@@ -176,7 +176,7 @@ class SpawnManager(BaseManager):
                 spawn_point_position = lane.position(longitudinal=long, lateral=0)
                 bp.force_update(
                     {
-                        "spawn_point_heading": np.rad2deg(lane.heading_at(long)),
+                        "spawn_point_heading": np.rad2deg(lane.heading_theta_at(long)),
                         "spawn_point_position": (spawn_point_position[0], spawn_point_position[1])
                     }
                 )

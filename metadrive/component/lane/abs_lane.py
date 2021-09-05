@@ -47,7 +47,7 @@ class AbstractLane:
         raise NotImplementedError()
 
     @abstractmethod
-    def heading_at(self, longitudinal: float) -> float:
+    def heading_theta_at(self, longitudinal: float) -> float:
         """
         Get the lane heading at a given longitudinal lane coordinate.
 
@@ -55,6 +55,10 @@ class AbstractLane:
         :return: the lane heading [rad]
         """
         raise NotImplementedError()
+
+    def heading_at(self, longitudinal) -> list:
+        heaidng_theta = self.heading_theta_at(longitudinal)
+        return [math.cos(heaidng_theta), math.sin(heaidng_theta)]
 
     @abstractmethod
     def width_at(self, longitudinal: float) -> float:
