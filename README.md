@@ -38,6 +38,12 @@ pip install numpy cython
 pip install -e .
 ```
 
+or
+
+```bash
+pip install metadrive-simulator
+```
+
 You can verify the installation and efficiency of MetaDrive via running:
 
 ```bash
