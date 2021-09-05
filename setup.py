@@ -1,12 +1,12 @@
 # Please don't change the order of following packages!
 import sys
 from distutils.core import setup
-from distutils.extension import Extension
 from os import path
 
 import numpy
-from Cython.Build import cythonize
 from setuptools import find_namespace_packages  # This should be place at top!
+from Cython.Build import cythonize
+from distutils.extension import Extension
 
 
 def is_mac():
