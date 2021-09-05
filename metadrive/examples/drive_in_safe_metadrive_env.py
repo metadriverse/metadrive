@@ -7,20 +7,18 @@ Auto-Drive mode may fail to solve some scenarios due to distribution mismatch.
 """
 import logging
 
-from metadrive.envs.safe_metadrive_env import SafeMetaDriveEnv
+from metadrive.tests.test_functionality.test_object_collision_detection import ComplexEnv
 
 if __name__ == "__main__":
-    env = SafeMetaDriveEnv(dict(
-        use_render=True,
-        manual_control=True,
-    ))
+    env = ComplexEnv(dict(use_render=True, manual_control=True, vehicle_config={"show_navi_mark": False}))
     env.reset()
+    env.vehicle.expert_takeover = True
     for i in range(1, 1000000000):
         previous_takeover = env.current_track_vehicle.expert_takeover
         o, r, d, info = env.step([0, 0])
         env.render(
             text={
-                "Auto-Drive (Press T)": env.current_track_vehicle.expert_takeover,
+                "Auto-Drive (Switch mode: T)": "on" if env.current_track_vehicle.expert_takeover else "off",
                 "Total episode cost": env.episode_cost
             }
         )

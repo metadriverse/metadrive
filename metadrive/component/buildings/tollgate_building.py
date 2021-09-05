@@ -7,6 +7,7 @@ from metadrive.utils.coordinates_shift import panda_position, panda_heading
 class TollGateBuilding(BaseBuilding):
     BUILDING_LENGTH = 10
     BUILDING_HEIGHT = 5
+    MASS = 0
 
     def __init__(self, lane, position, heading_theta, random_seed):
         super(TollGateBuilding, self).__init__(lane, position, heading_theta, random_seed)
