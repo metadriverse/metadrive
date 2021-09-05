@@ -205,3 +205,6 @@ class BaseObject(BaseRunnable):
         # heading = np.array([math.cos(real_heading), math.sin(real_heading)])
         heading = Vector((math.cos(real_heading), math.sin(real_heading)))
         return heading
+
+    def set_static(self, flag):
+        self.body.setStatic(flag)

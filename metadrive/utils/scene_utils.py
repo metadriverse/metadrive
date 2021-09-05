@@ -157,7 +157,7 @@ def ray_localization(heading: tuple,
             if res.getNode().getName() == BodyName.Lane:
                 lane = get_object_from_node(res.getNode())
                 long, _ = lane.local_coordinates(position)
-                lane_heading = lane.heading_at(long)
+                lane_heading = lane.heading_theta_at(long)
 
                 # dir = np.array([math.cos(lane_heading), math.sin(lane_heading)])
                 # dot_result = dir.dot(heading)

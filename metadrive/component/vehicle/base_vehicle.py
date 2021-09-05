@@ -306,7 +306,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         if pos is None:
             lane = map.road_network.get_lane(self.config["spawn_lane_index"])
             pos = lane.position(self.config["spawn_longitude"], self.config["spawn_lateral"])
-            heading = np.rad2deg(lane.heading_at(self.config["spawn_longitude"]))
+            heading = np.rad2deg(lane.heading_theta_at(self.config["spawn_longitude"]))
             self.spawn_place = pos
         heading = -np.deg2rad(heading) - np.pi / 2
         self.set_static(False)
@@ -729,9 +729,6 @@ class BaseVehicle(BaseObject, BaseVehicleState):
                 (0.5 - self.navigation.get_current_lane_num()) * self.navigation.get_current_lane_width()
         )
         return flag
-
-    def set_static(self, flag):
-        self.body.setStatic(flag)
 
     @property
     def reference_lanes(self):

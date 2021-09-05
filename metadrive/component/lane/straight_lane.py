@@ -53,7 +53,7 @@ class StraightLane(AbstractLane):
     def position(self, longitudinal: float, lateral: float) -> np.ndarray:
         return self.start + longitudinal * self.direction + lateral * self.direction_lateral
 
-    def heading_at(self, longitudinal: float) -> float:
+    def heading_theta_at(self, longitudinal: float) -> float:
         return self.heading
 
     def width_at(self, longitudinal: float) -> float:

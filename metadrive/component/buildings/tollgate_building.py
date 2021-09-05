@@ -8,8 +8,8 @@ class TollGateBuilding(BaseBuilding):
     BUILDING_LENGTH = 10
     BUILDING_HEIGHT = 5
 
-    def __init__(self, lane, position, heading, random_seed):
-        super(TollGateBuilding, self).__init__(lane, position, heading, random_seed)
+    def __init__(self, lane, position, heading_theta, random_seed):
+        super(TollGateBuilding, self).__init__(lane, position, heading_theta, random_seed)
         air_wall = generate_invisible_static_wall(
             self.BUILDING_LENGTH, lane.width, self.BUILDING_HEIGHT / 2, object_id=self.id
         )
