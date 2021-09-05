@@ -56,7 +56,7 @@ if (not is_mac()) and (not is_win()):
     install_requires.append("evdev")
 
 setup(
-    name="metadrive",
+    name="metadrive-simulator",
     version=version,
     description="An open-ended driving simulator with infinite scenes",
     url="https://github.com/decisionforce/metadrive",
