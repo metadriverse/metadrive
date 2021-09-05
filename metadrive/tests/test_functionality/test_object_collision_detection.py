@@ -6,7 +6,6 @@ from metadrive.manager.object_manager import TrafficObjectManager
 
 
 class ComplexObjectManager(TrafficObjectManager):
-
     def reset(self):
         ret = super(ComplexObjectManager, self).reset()
         lane = self.engine.current_map.road_network.graph[">>>"]["1C0_0_"][0]
@@ -41,8 +40,9 @@ class ComplexObjectManager(TrafficObjectManager):
         ]
 
         for p in pos:
-            cone = self.engine.object_manager.spawn_object(TrafficCone, lane=lane, longitude=p[0],
-                                                           lateral=p[1] + lane.width / 2)
+            cone = self.engine.object_manager.spawn_object(
+                TrafficCone, lane=lane, longitude=p[0], lateral=p[1] + lane.width / 2
+            )
         self.engine.object_manager.accident_lanes.append(lane)
         from metadrive.component.vehicle.vehicle_type import SVehicle, XLVehicle
         v_pos = [8, 14]
@@ -67,8 +67,9 @@ class ComplexObjectManager(TrafficObjectManager):
 
         for p in pos:
             p_ = (p[0] + 5, -p[1])
-            cone = self.engine.object_manager.spawn_object(TrafficCone, lane=lane, longitude=p_[0],
-                                                           lateral=p[1] + lane.width / 2)
+            cone = self.engine.object_manager.spawn_object(
+                TrafficCone, lane=lane, longitude=p_[0], lateral=p[1] + lane.width / 2
+            )
 
         v_pos = [14, 19]
         for v_long in v_pos:
@@ -95,8 +96,9 @@ class ComplexObjectManager(TrafficObjectManager):
 
         for p in pos:
             p_ = (p[0] + 5, p[1] * 3.5 / 3)
-            cone = self.engine.object_manager.spawn_object(TrafficCone, lane=lane, longitude=p_[0],
-                                                           lateral=p[1] + lane.width / 2)
+            cone = self.engine.object_manager.spawn_object(
+                TrafficCone, lane=lane, longitude=p_[0], lateral=p[1] + lane.width / 2
+            )
 
         v_pos = [14, 19]
         for v_long in v_pos:
@@ -124,7 +126,6 @@ class ComplexEnv(SafeMetaDriveEnv):
     """
     now for test use and demo use only
     """
-
     def default_config(self):
         config = super(ComplexEnv, self).default_config()
         config.update(
