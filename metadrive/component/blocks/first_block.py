@@ -29,7 +29,7 @@ class FirstPGBlock(PGBlock):
         lane_num: int,
         render_root_np: NodePath,
         physics_world: PhysicsWorld,
-        length: float = 50,
+        length: float = 30,
         ignore_intersection_checking=False
     ):
         place_holder = PGBlockSocket(Road(Decoration.start, Decoration.end), Road(Decoration.start, Decoration.end))
