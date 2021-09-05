@@ -56,13 +56,11 @@ if __name__ == "__main__":
 
     start = time.time()
     o = env.reset()
+    env.vehicle.set_velocity([1, 0], 10)
+    print(env.vehicle.speed)
 
     for s in range(1, 100000):
         o, r, d, info = env.step(env.action_space.sample())
-        if s == 50:
-            env.vehicle.image_sensors["rgb_camera"].save_image(env.vehicle, name="rgb.png")
-            env.vehicle.image_sensors["depth_camera"].save_image(env.vehicle, name="depth.png")
-        print(o)
         # info["fuel"] = env.vehicle.energy_consumption
         # env.render(
         #     text={

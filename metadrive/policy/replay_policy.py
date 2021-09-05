@@ -33,6 +33,6 @@ class ReplayPolicy(BasePolicy):
             pass
         else:
             this_heading = self.heading[str(self.timestep - 1)]
-            self.control_object.set_heading(np.arctan2(this_heading[0], this_heading[1]) - np.pi / 2)
+            self.control_object.set_heading_theta(np.arctan2(this_heading[0], this_heading[1]) - np.pi / 2)
 
         return [0, 0]

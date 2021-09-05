@@ -306,11 +306,11 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         if pos is None:
             lane = map.road_network.get_lane(self.config["spawn_lane_index"])
             pos = lane.position(self.config["spawn_longitude"], self.config["spawn_lateral"])
-            heading = np.rad2deg(lane.heading_at(self.config["spawn_longitude"]))
+            heading = np.rad2deg(lane.heading_theta_at(self.config["spawn_longitude"]))
             self.spawn_place = pos
         heading = -np.deg2rad(heading) - np.pi / 2
         self.set_static(False)
-        self.origin.setPos(panda_position(Vec3(*pos, self.HEIGHT / 2 + 1)))
+        self.set_position(pos, self.HEIGHT / 2 + 1)
         self.origin.setQuat(LQuaternionf(math.cos(heading / 2), 0, 0, math.sin(heading / 2)))
         self.update_map_info(map)
         self.body.clearForces()
@@ -391,8 +391,12 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         return lateral_to_left, lateral_to_right
 
     @property
-    def position(self):
-        return metadrive_position(self.origin.getPos())
+    def heading_theta(self):
+        """
+        Get the heading theta of vehicle, unit [rad]
+        :return:  heading in rad
+        """
+        return (metadrive_heading(self.origin.getH()) - 90) / 180 * math.pi
 
     @property
     def speed(self):
@@ -402,21 +406,6 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         velocity = self.body.get_linear_velocity()
         speed = norm(velocity[0], velocity[1]) * 3.6
         return clip(speed, 0.0, 100000.0)
-
-    @property
-    def heading(self):
-        real_heading = self.heading_theta
-        # heading = np.array([math.cos(real_heading), math.sin(real_heading)])
-        heading = Vector((math.cos(real_heading), math.sin(real_heading)))
-        return heading
-
-    @property
-    def heading_theta(self):
-        """
-        Get the heading theta of vehicle, unit [rad]
-        :return:  heading in rad
-        """
-        return (metadrive_heading(self.origin.getH()) - 90) / 180 * math.pi
 
     @property
     def velocity(self) -> np.ndarray:
@@ -667,21 +656,15 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self.image_sensors = None
         self.engine = None
 
-    def set_position(self, position, height=0.4):
+    def set_heading_theta(self, heading_theta, rad_to_degree=True) -> None:
         """
-        Should only be called when restore traffic from episode data
-        :param position: 2d array or list
-        :return: None
-        """
-        self.origin.setPos(panda_position(position, height))
-
-    def set_heading(self, heading_theta) -> None:
-        """
-        Should only be called when restore traffic from episode data
+        Set heading theta for this object
         :param heading_theta: float in rad
-        :return: None
         """
-        self.origin.setH((panda_heading(heading_theta) * 180 / np.pi) - 90)
+        h = panda_heading(heading_theta)
+        if rad_to_degree:
+            h *= 180 / np.pi
+        self.origin.setH(h - 90)
 
     def get_state(self):
         final_road = self.navigation.final_road
@@ -695,7 +678,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         }
 
     def set_state(self, state: dict):
-        self.set_heading(state["heading"])
+        self.set_heading_theta(state["heading"])
         self.set_position(state["position"])
         self._replay_done = state["done"]
         self.set_position(state["position"], height=0.28)
@@ -746,9 +729,6 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             (0.5 - self.navigation.get_current_lane_num()) * self.navigation.get_current_lane_width()
         )
         return flag
-
-    def set_static(self, flag):
-        self.body.setStatic(flag)
 
     @property
     def reference_lanes(self):

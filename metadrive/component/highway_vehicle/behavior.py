@@ -421,7 +421,7 @@ class LinearVehicle(IDMVehicle):
         lane = self.traffic_mgr.current_map.road_network.get_lane(target_lane_index)
         lane_coords = lane.local_coordinates(self.position)
         lane_next_coords = lane_coords[0] + self.speed * self.PURSUIT_TAU
-        lane_future_heading = lane.heading_at(lane_next_coords)
+        lane_future_heading = lane.heading_theta_at(lane_next_coords)
         features = np.array(
             [
                 utils.wrap_to_pi(lane_future_heading - self.heading) * self.LENGTH / utils.not_zero(self.speed),
