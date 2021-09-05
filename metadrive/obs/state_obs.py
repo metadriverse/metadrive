@@ -62,45 +62,66 @@ class StateObservation(ObservationBase):
         # update out of road
         info = []
         if self.config["random_agent_model"]:
+
+            # The length of the target vehicle
             info.append(clip(vehicle.LENGTH / vehicle.MAX_LENGTH, 0.0, 1.0))
+
+            # The width of the target vehicle
             info.append(clip(vehicle.WIDTH / vehicle.MAX_WIDTH, 0.0, 1.0))
+
         if hasattr(vehicle, "side_detector") and vehicle.side_detector.available:
+
+            # If side detector (a Lidar scanning road borders) is turn on, then add the cloud points of side detector
             info += vehicle.side_detector.perceive(vehicle, vehicle.engine.physics_world.static_world).cloud_points
+
         else:
+
+            # If the side detector is turn off, then add the distance to left and right road borders as state.
             lateral_to_left, lateral_to_right, = vehicle.dist_to_left_side, vehicle.dist_to_right_side
             total_width = float((vehicle.navigation.map.MAX_LANE_NUM + 1) * vehicle.navigation.map.MAX_LANE_WIDTH)
             lateral_to_left /= total_width
             lateral_to_right /= total_width
             info += [clip(lateral_to_left, 0.0, 1.0), clip(lateral_to_right, 0.0, 1.0)]
 
-        # print("Heading Diff: ", [
-        #     vehicle.heading_diff(current_reference_lane)
-        #     for current_reference_lane in vehicle.navigation.current_ref_lanes
-        # ])
-
         current_reference_lane = vehicle.navigation.current_ref_lanes[-1]
         info += [
+
+            # The angular difference between vehicle's heading and the lane heading at this location.
             vehicle.heading_diff(current_reference_lane),
-            # Note: speed can be negative denoting free fall. This happen when emergency brake.
+
+            # The velocity of target vehicle
             clip((vehicle.speed + 1) / (vehicle.max_speed + 1), 0.0, 1.0),
+
+            # Current steering
             clip((vehicle.steering / vehicle.MAX_STEERING + 1) / 2, 0.0, 1.0),
+
+            # The normalized actions at last steps
             clip((vehicle.last_current_action[0][0] + 1) / 2, 0.0, 1.0),
             clip((vehicle.last_current_action[0][1] + 1) / 2, 0.0, 1.0)
         ]
+
+        # Current angular acceleration (yaw rate)
         heading_dir_last = vehicle.last_heading_dir
         heading_dir_now = vehicle.heading
         cos_beta = heading_dir_now.dot(heading_dir_last) / (norm(*heading_dir_now) * norm(*heading_dir_last))
         beta_diff = np.arccos(clip(cos_beta, 0.0, 1.0))
-        # print(beta)
         yaw_rate = beta_diff / 0.1
-        # print(yaw_rate)
         info.append(clip(yaw_rate, 0.0, 1.0))
 
         if vehicle.lane_line_detector.available:
+
+            # If lane line detector (a Lidar scanning current lane borders) is turn on,
+            # then add the cloud points of lane line detector
             info += vehicle.lane_line_detector.perceive(vehicle, vehicle.engine.physics_world.static_world).cloud_points
+
         else:
+
+            # If the lane line detector is turn off, then add the offset of current position
+            # against the central of current lane to the state. If vehicle is centered in the lane, then the offset
+            # is 0 and vice versa.
             _, lateral = vehicle.lane.local_coordinates(vehicle.position)
             info.append(clip((lateral * 2 / vehicle.navigation.map.MAX_LANE_WIDTH + 1.0) / 2.0, 0.0, 1.0))
+
         return info
 
     def get_line_detector_dim(self):
