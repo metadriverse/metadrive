@@ -46,12 +46,12 @@ class TrafficCone(TrafficObject):
         self.add_body(BaseRigidBodyNode(self.name, self.NAME))
         self.body.addShape(BulletCylinderShape(self.RADIUS, self.HEIGHT))
         self.body.setIntoCollideMask(self.COLLISION_GROUP)
+        self.set_static(static)
         if self.render:
             model = self.loader.loadModel(AssetLoader.file_path("models", "traffic_cone", "scene.gltf"))
             model.setScale(0.02)
             model.setPos(0, 0, -self.HEIGHT / 2)
             model.reparentTo(self.origin)
-        self.set_static(static)
 
 
 class TrafficWarning(TrafficObject):
@@ -66,13 +66,13 @@ class TrafficWarning(TrafficObject):
         self.add_body(BaseRigidBodyNode(self.name, self.NAME))
         self.body.addShape(BulletCylinderShape(self.RADIUS, self.HEIGHT))
         self.body.setIntoCollideMask(self.COLLISION_GROUP)
+        self.set_static(static)
         if self.render:
             model = self.loader.loadModel(AssetLoader.file_path("models", "warning", "warning.gltf"))
             model.setScale(0.02)
             model.setH(-90)
             model.setPos(0, 0, -self.HEIGHT / 2)
             model.reparentTo(self.origin)
-        self.set_static(static)
 
 
 class TrafficBarrier(TrafficObject):
@@ -88,8 +88,8 @@ class TrafficBarrier(TrafficObject):
         self.add_body(BaseRigidBodyNode(self.name, self.NAME))
         self.body.addShape(BulletBoxShape((self.WIDTH / 2, self.LENGTH / 2, self.HEIGHT / 2)))
         self.body.setIntoCollideMask(self.COLLISION_GROUP)
+        self.set_static(static)
         if self.render:
             model = self.loader.loadModel(AssetLoader.file_path("models", "barrier", "scene.gltf"))
             model.setH(-90)
             model.reparentTo(self.origin)
-        self.set_static(static)
