@@ -68,7 +68,7 @@ class ComplexObjectManager(TrafficObjectManager):
         for p in pos:
             p_ = (p[0] + 5, -p[1])
             cone = self.engine.object_manager.spawn_object(
-                TrafficCone, lane=lane, longitude=p_[0], lateral=p[1] + lane.width / 2
+                TrafficCone, lane=lane, longitude=p_[0], lateral=-p[1] - lane.width / 2
             )
 
         v_pos = [14, 19]
@@ -113,11 +113,11 @@ class ComplexObjectManager(TrafficObjectManager):
         # part 4
         lane = self.engine.current_map.road_network.graph["4C0_1_"]["5R0_0_"][0]
         self.engine.object_manager.accident_lanes.append(lane)
-        pos = [(-12, lane.width / 4), (-8.1, 0), (-4, -lane.width / 4), (-0.1, -lane.width / 2), (4, -lane.width)]
-
-        for p in pos:
-            p_ = (p[0] + 60, -p[1] * 3.5 / 3)
-            cone = self.engine.object_manager.spawn_object(TrafficCone, lane=lane, longitude=p_[0], lateral=p_[1])
+        # pos = [(-12, lane.width / 4), (-8.1, 0), (-4, -lane.width / 4), (-0.1, -lane.width / 2), (4, -lane.width)]
+        #
+        # for p in pos:
+        #     p_ = (p[0] + 60, -p[1] * 3.5 / 3)
+        #     cone = self.engine.object_manager.spawn_object(TrafficCone, lane=lane, longitude=p_[0], lateral=p_[1])
 
         return ret
 
