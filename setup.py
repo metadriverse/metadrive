@@ -52,8 +52,8 @@ install_requires = [
     "Cython==0.29.6",
 ]
 
-if (not is_mac()) and (not is_win()):
-    install_requires.append("evdev")
+# if (not is_mac()) and (not is_win()):
+#     install_requires.append("evdev")
 
 setup(
     name="metadrive-simulator",
