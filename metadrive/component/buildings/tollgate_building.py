@@ -15,7 +15,7 @@ class TollGateBuilding(BaseBuilding):
         )
         self.add_body(air_wall)
         self.set_position(position, 0)
-        self.set_heading_theta(heading)
+        self.set_heading_theta(heading_theta)
 
         if self.render:
             building_model = self.loader.loadModel(AssetLoader.file_path("models", "tollgate", "booth.gltf"))
