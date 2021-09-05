@@ -21,3 +21,4 @@
 /seed*.json
 **/.vscode
 **/.idea
+/metadrive/cutils.cp37-win_amd64.pyd
