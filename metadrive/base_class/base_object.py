@@ -52,7 +52,6 @@ class BaseObject(BaseRunnable):
     sample some special configs for it ,Properties and parameters in PARAMETER_SPACE of the object are fixed after
     calling __init__().
     """
-
     def __init__(self, name=None, random_seed=None, config=None, escape_random_seed_assertion=False):
         """
         Config is a static conception, which specified the parameters of one element.
@@ -158,7 +157,9 @@ class BaseObject(BaseRunnable):
         """
         norm_ratio = value / norm(direction[0], direction[1])
         self._body.setLinearVelocity(
-            LVector3(direction[0] * norm_ratio, direction[1] * norm_ratio, self.origin.getPos()[-1]))
+            LVector3(direction[0] * norm_ratio, direction[1] * norm_ratio,
+                     self.origin.getPos()[-1])
+        )
 
     @property
     def velocity(self):

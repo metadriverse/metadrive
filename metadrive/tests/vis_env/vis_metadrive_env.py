@@ -56,7 +56,7 @@ if __name__ == "__main__":
 
     start = time.time()
     o = env.reset()
-    env.vehicle.set_velocity([1,0], 10)
+    env.vehicle.set_velocity([1, 0], 10)
     print(env.vehicle.speed)
 
     for s in range(1, 100000):

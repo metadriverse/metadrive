@@ -14,7 +14,7 @@ class TollGateBuilding(BaseBuilding):
             self.BUILDING_LENGTH, lane.width, self.BUILDING_HEIGHT / 2, object_id=self.id
         )
         self.add_body(air_wall)
-        self.set_position(position,0)
+        self.set_position(position, 0)
         self.set_heading_theta(heading)
 
         if self.render:
