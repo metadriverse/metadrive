@@ -3,8 +3,11 @@ from direct.controls.InputState import InputState
 from metadrive.utils import is_win, is_mac
 
 if (not is_win()) and (not is_mac()):
-    import evdev
-    from evdev import ecodes, InputDevice
+    try:
+        import evdev
+        from evdev import ecodes, InputDevice
+    except ImportError:
+        print("Install evdev to enable steering wheel control")
 
 from metadrive.utils import import_pygame
 
