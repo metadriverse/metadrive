@@ -149,7 +149,7 @@ We list the vehicle config here. Observation Space will be adjusted by these con
         - :code:`extra_action_dim` (int = 0): If you want to input more control signal than the default [steering, throttle/brake] in your customized environment, change the default value 0 to the extra number of dimensions.
         - :code:`random_color` (bool = False): whether to randomize the color of ego vehicles. This is useful in multi-agent environments.
         - :code:`image_source` (str = "rgb_camera"): select in ["rgb_camera", "depth_camera"]. When using image observation, it decides where the image collected. See :ref:`use_native_rendering` for more information.
-        - :code:`rgb_camera` (tuple = (84, 84): (camera resolution width (int), camera resolution height (int). We use (84, 84) as the default size so that the RGB observation is compatible to those CNN used in Atari. Please refer to :ref:`use_native_rendering` for more information about using image as observation. See :ref:`use_native_rendering` for more information.
+        - :code:`rgb_camera` (tuple = (84, 84): (camera resolution width (int), camera resolution height (int). We use (84, 84) as the default size so that the RGB observation is compatible to those CNN used in Atari. Please refer to :ref:`use_native_rendering` for more information about using image as observation.
         - :code:`spawn_lane_index` (tuple): which lane to spawn this vehicle. Default to one lane in the first block of the map
         - :code:`spawn_longitude/lateral` (float = 5.0, 0.0): The spawn point will be calculated by *spawn_longitude* and *spawn_lateral*
         - :code:`destination_node` (str = None): the destination road node name. This is used in real dataset replay map.
