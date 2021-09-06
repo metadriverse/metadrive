@@ -12,7 +12,7 @@ from metadrive.utils.config import merge_dicts
 MULTI_AGENT_METADRIVE_DEFAULT_CONFIG = dict(
     # ===== Multi-agent =====
     is_multi_agent=True,
-    num_agents=15,
+    num_agents=12,
     # If num_agents is set to None, then endless vehicles will be added only the empty spawn points exist
     random_agent_model=False,
 
