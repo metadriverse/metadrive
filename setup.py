@@ -27,7 +27,7 @@ packages = find_namespace_packages(
 print("We will install the following packages: ", packages)
 
 """ ===== Remember to modify the PG_EDITION at first ====="""
-version = "0.2.0"
+version = "0.2.2"
 
 ext_modules = cythonize([Extension(
     "metadrive.cutils", ["metadrive/cutils.pyx"], include_dirs=[numpy.get_include()]
@@ -74,31 +74,31 @@ setup(
 
 msg = """
       If you encounter the following error:
-      
+
           error: Microsoft Visual C++ 14.0 or greater is required. Get it with "Microsoft C++ Build Tools": https://visualstudio.microsoft.com/visual-cpp-build-tools/
 
       Please feel free to continue! We will disable cython utility and fall back to all python code. Please enjoy!
-      
+
       """
 print(msg)
 
 """
 How to publish to pypi?  Noted by Zhenghao in Dec 27, 2020.
 
-1. Remove old files
+1. Remove old files ext_modules from setup() to get a clean wheel for all platforms in py3-none-any.wheel
     rm -rf dist/ build/ documentation/build/ metadrive.egg-info/ docs/build/
-    
+
 2. Rename current version to X.Y.Z.rcA, where A is arbitrary value represent "release candidate A". 
    This is really important since pypi do not support renaming and re-uploading.
-    
+
 3. Get wheel
     python setup.py sdist bdist_wheel
-    
+
     WARNING: wheel should not be created on windows, since assets will not be included in the .whl file !!!
 
 4. Upload to test channel
     twine upload --repository testpypi dist/*
-    
+
 5. Test as next line. If failed, change the version name and repeat 1, 2, 3, 4, 5.
     pip install --index-url https://test.pypi.org/simple/ metadrive
 
@@ -106,5 +106,5 @@ How to publish to pypi?  Noted by Zhenghao in Dec 27, 2020.
 
 7. Upload to production channel 
     twine upload dist/*
-    
+
 """

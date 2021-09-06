@@ -63,10 +63,17 @@ Pressing W, A, S, D to move and turn and T to trigger the auto-drive mode!
 python -m metadrive.examples.drive_in_single_agent_env
 ```
 
+Besides, a scenario where safety must be concerned is included in examples, and this environment also shows how 
+to compose a sophisticate scenario.
+
+```bash
+python -m metadrive.examples.drive_in_safe_metadrive_env
+```
+
 You can also drive in our Multi-agent RL environment. 
 
 ```bash
-python -m metadrive.examples.drive_in_multiagent_env --env [env_name]
+python -m metadrive.examples.drive_in_multi_agent_env --env roundabout
 ```
 Accepted arguments:
 - roundabout (default)
