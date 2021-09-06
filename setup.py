@@ -27,7 +27,7 @@ packages = find_namespace_packages(
 print("We will install the following packages: ", packages)
 
 """ ===== Remember to modify the PG_EDITION at first ====="""
-version = "0.2.2"
+version = "0.2.3"
 
 ext_modules = cythonize([Extension(
     "metadrive.cutils", ["metadrive/cutils.pyx"], include_dirs=[numpy.get_include()]
@@ -85,7 +85,7 @@ print(msg)
 """
 How to publish to pypi?  Noted by Zhenghao in Dec 27, 2020.
 
-1. Remove old files ext_modules from setup() to get a clean wheel for all platforms in py3-none-any.wheel
+1. Remove old files and ext_modules from setup() to get a clean wheel for all platforms in py3-none-any.wheel
     rm -rf dist/ build/ documentation/build/ metadrive.egg-info/ docs/build/
 
 2. Rename current version to X.Y.Z.rcA, where A is arbitrary value represent "release candidate A". 
@@ -94,7 +94,9 @@ How to publish to pypi?  Noted by Zhenghao in Dec 27, 2020.
 3. Get wheel
     python setup.py sdist bdist_wheel
 
-    WARNING: wheel should not be created on windows, since assets will not be included in the .whl file !!!
+    WARNING: when create wheels on windows, modifying MANIFEST.in to include assets by using
+    recursive-include metadrive\\assets\\ *
+    recursive-include metadrive\\examples\\ *
 
 4. Upload to test channel
     twine upload --repository testpypi dist/*
