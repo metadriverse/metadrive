@@ -4,6 +4,7 @@ import numpy as np
 
 from metadrive.component.vehicle_module.PID_controller import PIDController
 from metadrive.policy.base_policy import BasePolicy
+from metadrive.policy.manual_control_policy import ManualControlPolicy
 from metadrive.utils.math_utils import not_zero, wrap_to_pi, point_distance
 from metadrive.utils.scene_utils import is_same_lane_index, is_following_lane_index
 
@@ -351,3 +352,16 @@ class IDMPolicy(BasePolicy):
         self.target_speed = self.NORMAL_SPEED
         self.overtake_timer += 1
         return surrounding_objects.front_object(), surrounding_objects.front_min_distance(), self.routing_target_lane
+
+
+class ManualControllableIDMPolicy(IDMPolicy):
+    def __init__(self, *args, **kwargs):
+        super(ManualControllableIDMPolicy, self).__init__(*args, **kwargs)
+        self.manual_control_policy = ManualControlPolicy()
+
+    def act(self, agent_id):
+        if self.control_object is self.engine.current_track_vehicle and self.engine.global_config["manual_control"]\
+                and not self.engine.current_track_vehicle.expert_takeover:
+            return self.manual_control_policy.act(agent_id)
+        else:
+            return super(ManualControllableIDMPolicy, self).act(agent_id)

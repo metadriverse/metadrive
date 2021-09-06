@@ -178,15 +178,39 @@ class TopDownRenderer:
         self._runtime.blit(self._background, (0, 0))
         self.canvas.fill((255, 255, 255))
 
-    def render(self, vehicles, agent_manager, *args, **kwargs):
+    def render(self, agent_manager, *args, **kwargs):
+        self.handle_event()
         self.refresh()
-        this_frame_vehicles = self._append_frame_vehicles(vehicles, agent_manager)
+        traffic_vehicles = {}
+        if hasattr(self._env.engine, "traffic_manager") and self._env.engine.traffic_manager is not None:
+            traffic_vehicles = self._env.engine.traffic_manager.spawned_objects
+        this_frame_vehicles = self._append_frame_vehicles(traffic_vehicles, agent_manager)
+
         self.history_vehicles.append(this_frame_vehicles)
         self._draw_history_vehicles()
         self.blit()
         ret = self.canvas.copy()
         ret = ret.convert(24)
         return ret
+
+    def handle_event(self) -> None:
+        """
+        Handle pygame events for moving and zooming in the displayed area.
+        """
+        events = pygame.event.get()
+        for event in events:
+            if event.type == pygame.KEYDOWN:
+                #     if event.key == pygame.K_l:
+                #         self.scaling *= 1 / self.SCALING_FACTOR
+                #     if event.key == pygame.K_o:
+                #         self.scaling *= self.SCALING_FACTOR
+                #     if event.key == pygame.K_m:
+                #         self.centering_position[0] -= self.MOVING_FACTOR
+                #     if event.key == pygame.K_k:
+                #         self.centering_position[0] += self.MOVING_FACTOR
+                if event.key == pygame.K_ESCAPE:
+                    import sys
+                    sys.exit()
 
     def blit(self):
         # if self._screen_size is None and self._zoomin is None:
@@ -200,7 +224,7 @@ class TopDownRenderer:
 
         pygame.display.update()
 
-    def _append_frame_vehicles(self, vehicles, agent_manager):
+    def _append_frame_vehicles(self, traffic_vehicles, agent_manager):
         frame_vehicles = []
         # for i, v in enumerate(vehicles, 1):
         #     name = self._env.agent_manager.object_to_agent(v.name)
@@ -210,6 +234,19 @@ class TopDownRenderer:
             frame_vehicles.append(
                 history_vehicle(
                     name=name,
+                    heading_theta=v.heading_theta,
+                    WIDTH=v.WIDTH,
+                    LENGTH=v.LENGTH,
+                    position=v.position,
+                    color=v.top_down_color,
+                    done=False
+                )
+            )
+
+        for v in traffic_vehicles.values():
+            frame_vehicles.append(
+                history_vehicle(
+                    name=v.name,
                     heading_theta=v.heading_theta,
                     WIDTH=v.WIDTH,
                     LENGTH=v.LENGTH,

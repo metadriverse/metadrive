@@ -44,7 +44,7 @@ BASE_DEFAULT_CONFIG = dict(
     # ===== Rendering =====
     use_render=False,  # pop a window to render or not
     debug=False,
-    disable_model_compression=True,  # disable compression if you wish to launch the window quicker.
+    disable_model_compression=False,  # disable compression if you wish to launch the window quicker.
     cull_scene=True,  # only for debug use
     use_chase_camera_follow_lane=False,  # If true, then vision would be more stable.
     camera_height=1.8,
@@ -464,7 +464,7 @@ class BaseEnv(gym.Env):
         if self._top_down_renderer is None:
             from metadrive.obs.top_down_renderer import TopDownRenderer
             self._top_down_renderer = TopDownRenderer(self, self.current_map, *args, **kwargs)
-        return self._top_down_renderer.render(list(self.vehicles.values()), self.agent_manager)
+        return self._top_down_renderer.render(self.agent_manager)
 
     @property
     def main_camera(self):
