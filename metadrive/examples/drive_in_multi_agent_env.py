@@ -53,23 +53,27 @@ if __name__ == "__main__":
             "IDM_agent": True
         }
     )
-    env.reset()
-    if env.current_track_vehicle:
-        env.current_track_vehicle.expert_takeover = True
-    print(HELP_MESSAGE)
-    env.switch_to_third_person_view()  # Default is in Top-down view, we switch to Third-person view.
-    for i in range(1, 10000000000):
-        o, r, d, info = env.step({agent_id: [0, 0] for agent_id in env.vehicles.keys()})
-        env.render(
-            **extra_args,
-            text={
-                "Number of existing vehicles": len(env.vehicles),
-                "Tracked agent (Press Q)": env.engine.agent_manager.object_to_agent(env.current_track_vehicle.id),
-                "Auto-Drive (Switch mode: T)": "on" if env.current_track_vehicle.expert_takeover else "off",
-            } if not args.pygame_render else {}
-        )
-        if d["__all__"]:
-            env.reset()
-            if env.current_track_vehicle:
-                env.current_track_vehicle.expert_takeover = True
-    env.close()
+    try:
+        env.reset()
+        if env.current_track_vehicle:
+            env.current_track_vehicle.expert_takeover = True
+        print(HELP_MESSAGE)
+        env.switch_to_third_person_view()  # Default is in Top-down view, we switch to Third-person view.
+        for i in range(1, 10000000000):
+            o, r, d, info = env.step({agent_id: [0, 0] for agent_id in env.vehicles.keys()})
+            env.render(
+                **extra_args,
+                text={
+                    "Number of existing vehicles": len(env.vehicles),
+                    "Tracked agent (Press Q)": env.engine.agent_manager.object_to_agent(env.current_track_vehicle.id),
+                    "Auto-Drive (Switch mode: T)": "on" if env.current_track_vehicle.expert_takeover else "off",
+                } if not args.pygame_render else {}
+            )
+            if d["__all__"]:
+                env.reset()
+                if env.current_track_vehicle:
+                    env.current_track_vehicle.expert_takeover = True
+    except:
+        pass
+    finally:
+        env.close()
