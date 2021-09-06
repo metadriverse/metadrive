@@ -165,7 +165,7 @@ class BaseObject(BaseRunnable):
         """
         norm_ratio = value / norm(direction[0], direction[1])
         self._body.setLinearVelocity(
-            LVector3(direction[0] * norm_ratio, direction[1] * norm_ratio,
+            LVector3(direction[0] * norm_ratio, -direction[1] * norm_ratio,
                      self.origin.getPos()[-1])
         )
 
