@@ -71,12 +71,12 @@ class MultiAgentMetaDrive(MetaDriveEnv):
         ret_config = self.default_config().update(
             config, allow_add_new_key=False, stop_recursive_update=["target_vehicle_configs"]
         )
-        if not ret_config["crash_done"] and ret_config["crash_vehicle_penalty"] > 2:
-            logging.warning(
-                "Are you sure you wish to set crash_vehicle_penalty={} when crash_done=False?".format(
-                    ret_config["crash_vehicle_penalty"]
-                )
-            )
+        # if not ret_config["crash_done"] and ret_config["crash_vehicle_penalty"] > 2:
+        #     logging.warning(
+        #         "Are you sure you wish to set crash_vehicle_penalty={} when crash_done=False?".format(
+        #             ret_config["crash_vehicle_penalty"]
+        #         )
+        #     )
         if ret_config["use_render"] and ret_config["disable_model_compression"]:
             logging.warning("Turn disable_model_compression=True can decrease the loading time!")
 
