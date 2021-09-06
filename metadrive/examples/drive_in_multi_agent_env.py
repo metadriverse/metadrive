@@ -45,6 +45,7 @@ if __name__ == "__main__":
         .format(env_cls_name)
     env = envs[env_cls_name]({"use_render": True, "manual_control": True, "crash_done": False, "IDM_agent": True})
     env.reset()
+    env.current_track_vehicle.expert_takeover=True
     print(HELP_MESSAGE)
     env.switch_to_third_person_view()  # Default is in Top-down view, we switch to Third-person view.
     for i in range(1, 10000000000):
@@ -52,9 +53,11 @@ if __name__ == "__main__":
         env.render(
             text={
                 "Number of existing vehicles": len(env.vehicles),
-                "Tracked agent (Press Q)": env.engine.agent_manager.object_to_agent(env.current_track_vehicle.id)
+                "Tracked agent (Press Q)": env.engine.agent_manager.object_to_agent(env.current_track_vehicle.id),
+                "Auto-Drive (Switch mode: T)": "on" if env.current_track_vehicle.expert_takeover else "off",
             }
         )
         if d["__all__"]:
             env.reset()
+            env.current_track_vehicle.expert_takeover = True
     env.close()

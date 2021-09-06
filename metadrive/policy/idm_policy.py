@@ -360,7 +360,8 @@ class ManualControllableIDMPolicy(IDMPolicy):
         self.manual_control_policy = ManualControlPolicy()
 
     def act(self, agent_id):
-        if self.control_object is self.engine.current_track_vehicle and self.engine.global_config["manual_control"]:
+        if self.control_object is self.engine.current_track_vehicle and self.engine.global_config["manual_control"]\
+                and not self.engine.current_track_vehicle.expert_takeover:
             return self.manual_control_policy.act(agent_id)
         else:
             return super(ManualControllableIDMPolicy, self).act(agent_id)

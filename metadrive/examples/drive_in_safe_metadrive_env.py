@@ -28,4 +28,5 @@ if __name__ == "__main__":
             logging.warning("Auto-Drive mode may fail to solve some scenarios due to distribution mismatch")
         if d and info["arrive_dest"]:
             env.reset()
+            env.current_track_vehicle.expert_takeover = True
     env.close()
