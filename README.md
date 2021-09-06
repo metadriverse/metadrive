@@ -14,22 +14,22 @@
 |
 <a href="https://metadrive-simulator.readthedocs.io">Documentation</a>
 |
-<a href="https://github.com/decisionforce/metadrive">Github Repo</a>
+<a href="">Demo Video (TBD)</a>
 ]
 </strong>
 </div>
 
 <br>
 
-Welcome to MetaDrive! MetaDrive is an driving simulator with many key features:
+MetaDrive is a driving simulator with the following key features:
 
-- **Lightweight**: Extremely easy to download, install and run in almost all platforms. Up to 300 simulation step per second and easy to parallel.
-- **Realistic**: Accurate physics simulation and multiple sensory input including Lidar, sensory data, top-down semantic map and first-person view images. 
-- **Compositional**: Support generating infinite scenes and configuring various traffics, vehicles, and environmental settings.
+- **Compositional**: It supports generating infinite scenes with various road maps and traffic settings for the research of generalizable RL. 
+- **Lightweight**: It is easy to install and run. It can run up to 300 FPS on a standard PC.
+- **Realistic**: Accurate physics simulation and multiple sensory input including Lidar, RGB images, top-down semantic map and first-person view images. 
 
 
 ## 🛠 Quick Start
-Please install MetaDrive via:
+Install MetaDrive via:
 
 ```bash
 git clone https://github.com/decisionforce/metadrive.git
@@ -44,38 +44,34 @@ or
 pip install metadrive-simulator
 ```
 
-You can verify the installation and efficiency of MetaDrive via running:
+You can verify the installation of MetaDrive via running the testing script:
 
 ```bash
 # Go to a folder where no sub-folder calls metadrive
 python -m metadrive.examples.profile_metadrive
 ```
 
-The above script is supposed to be runnable in all places.
-Note that please do not run the above command in the folder that has a sub-folder called `./metadrive`.
+Note that please do not run the above command in a folder that has a sub-folder called `./metadrive`.
 
 ## 🚕 Examples
 
-Please run the following command to drive the car in the environment manually with keyboard! 
-Pressing W, A, S, D to move and turn and T to trigger the auto-drive mode!
+Run the following command to launch a simple driving scenario with auto-drive mode on. Press W, A, S, D to drive the vehicle manually.
 
 ```bash
 python -m metadrive.examples.drive_in_single_agent_env
 ```
-
-Besides, a scenario where safety must be concerned is included in examples, and this environment also shows how 
-to compose a sophisticate scenario.
+Run the following command to launch a safe driving scenario, which includes more complex obstacles and cost to be yielded. 
 
 ```bash
 python -m metadrive.examples.drive_in_safe_metadrive_env
 ```
 
-You can also drive in our Multi-agent RL environment. 
+You can also launch an instance of Multi-Agent scenario as follows
 
 ```bash
 python -m metadrive.examples.drive_in_multi_agent_env --env roundabout
 ```
-Accepted arguments:
+env argument could be:
 - roundabout (default)
 - intersection
 - tollgate
@@ -83,22 +79,22 @@ Accepted arguments:
 - parkinglot
 - pgmap
 
-To show the main feature, procedural generation, we provide a script to show BIG:
+Run the example of procedural generation of a new map as:
 
 ```bash
 python -m metadrive.examples.procedural_generation
 ```
 
-*Note that the above three scripts can not be run in headless machine.* 
-Please refer to the installation guideline in documentation for more information.
+*Note that the above four scripts can not be ran in a headless machine.* 
+Please refer to the installation guideline in documentation for more information about how to launch runing in a headless machine.
 
-Running the following command to draw the generated maps from procedural generation:
+Run the following command to draw the generated maps from procedural generation:
 
 ```bash
 python -m metadrive.examples.draw_maps
 ```
 
-To build the environment in python script, you can simply run:
+To build the RL environment in python script, you can simply code in the OpenAI gym format as:
 
 ```python
 import metadrive  # Import this package to register the environment!
@@ -118,7 +114,7 @@ env.close()
 
 ## 📦 Predefined environment sets
 
-We also define several Gym environment names, so user can start training in the minimalist manner:
+We define several standard MetaDrive Gym environments, where the user can start training off the shelf:
 
 ```python
 import gym
@@ -127,7 +123,7 @@ import metadrive  # Register the environment
 env = gym.make("MetaDrive-v0")
 ```
 
-The following table presents some predefined environment names. 
+The following table presents the names for the predefined environments. 
 
 |&nbsp;  Gym Environment Name   | Random Seed Range | Number of Maps | Comments                                          |
 | ----------------------- | ----------------- | -------------- | ------------------------------------------------------- |
@@ -139,16 +135,16 @@ The following table presents some predefined environment names.
 | `MetaDrive-training0-v0`  | [3000, 4000)      | 1000           | First set of 1000 environments.                         |
 | `MetaDrive-training1-v0`  | [5000, 6000)      | 1000           | Second set of 1000 environments.                        |
 | `MetaDrive-training2-v0`  | [7000, 8000)      | 1000           | Thirds set of 1000 environments.                        |
-| ...                     |                   |                | *More map set can be added in response to the requests* |
+| ...                     |                   |                | *More map set and environments will be added* |
 
 
 
 ## 🏫 Documentations
 
-Find more detail in: [MetaDrive](https://metadrive-simulator.readthedocs.io)
+Find more details in: [MetaDrive](https://metadrive-simulator.readthedocs.io)
 
 
-## 📎 Citation
+## 📎 References
 
 Working in Progress!
 
@@ -158,5 +154,3 @@ Working in Progress!
 [![GitHub license](https://img.shields.io/github/license/decisionforce/metadrive)](https://github.com/decisionforce/metadrive/blob/main/LICENSE.txt)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/2d6fabe328a644b49e1269497b741057)](https://www.codacy.com/gh/decisionforce/metadrive/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=decisionforce/metadrive&amp;utm_campaign=Badge_Grade)
 [![GitHub contributors](https://img.shields.io/github/contributors/decisionforce/metadrive)](https://github.com/decisionforce/metadrive/graphs/contributors)
-
-![](metadrive/assets/logo.png)
