@@ -19,6 +19,7 @@ from metadrive import (
     MultiAgentMetaDrive, MultiAgentTollgateEnv, MultiAgentBottleneckEnv, MultiAgentIntersectionEnv,
     MultiAgentRoundaboutEnv, MultiAgentParkingLotEnv
 )
+from metadrive.constants import HELP_MESSAGE
 
 if __name__ == "__main__":
     envs = dict(
@@ -42,8 +43,9 @@ if __name__ == "__main__":
                                         "(5) parkinglot\n" \
                                         "(6) pgma" \
         .format(env_cls_name)
-    env = envs[env_cls_name]({"use_render": True, "manual_control": True, "crash_done": False})
+    env = envs[env_cls_name]({"use_render": True, "manual_control": True, "crash_done": False, "IDM_agent": True})
     env.reset()
+    print(HELP_MESSAGE)
     env.switch_to_third_person_view()  # Default is in Top-down view, we switch to Third-person view.
     for i in range(1, 10000000000):
         o, r, d, info = env.step({agent_id: [0, 0] for agent_id in env.vehicles.keys()})

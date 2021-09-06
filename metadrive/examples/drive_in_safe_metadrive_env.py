@@ -8,10 +8,12 @@ Auto-Drive mode may fail to solve some scenarios due to distribution mismatch.
 import logging
 
 from metadrive.tests.test_functionality.test_object_collision_detection import ComplexEnv
+from metadrive.constants import HELP_MESSAGE
 
 if __name__ == "__main__":
     env = ComplexEnv(dict(use_render=True, manual_control=True, vehicle_config={"show_navi_mark": False}))
     env.reset()
+    print(HELP_MESSAGE)
     env.vehicle.expert_takeover = True
     for i in range(1, 1000000000):
         previous_takeover = env.current_track_vehicle.expert_takeover

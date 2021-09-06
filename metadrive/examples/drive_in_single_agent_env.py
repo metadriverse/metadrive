@@ -11,6 +11,7 @@ import random
 import numpy as np
 
 from metadrive import MetaDriveEnv
+from metadrive.constants import HELP_MESSAGE
 
 if __name__ == "__main__":
     config = dict(
@@ -32,6 +33,7 @@ if __name__ == "__main__":
         config.update(dict(offscreen_render=True))
     env = MetaDriveEnv(config)
     o = env.reset()
+    print(HELP_MESSAGE)
     env.vehicle.expert_takeover = True
     if args.observation == "rgb_camera":
         assert isinstance(o, dict)
