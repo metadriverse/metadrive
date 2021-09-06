@@ -1,3 +1,5 @@
+import logging
+
 from direct.controls.InputState import InputState
 
 from metadrive.utils import is_win, is_mac
@@ -7,7 +9,7 @@ if (not is_win()) and (not is_mac()):
         import evdev
         from evdev import ecodes, InputDevice
     except ImportError:
-        print("Install evdev to enable steering wheel control")
+        pass
 
 from metadrive.utils import import_pygame
 
@@ -67,6 +69,14 @@ class SteeringWheelController(Controller):
     STEERING_MAKEUP = 1.5
 
     def __init__(self):
+        try:
+            import evdev
+            from evdev import ecodes, InputDevice
+        except ImportError:
+            print(
+                "Fail to load evdev, which is required for steering wheel control. "
+                "Install evdev via pip install evdev"
+            )
         pygame.display.init()
         pygame.joystick.init()
         assert not is_win(), "Joystick is supported in linux and mac only"
