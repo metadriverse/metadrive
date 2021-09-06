@@ -178,9 +178,9 @@ class TopDownRenderer:
         self._runtime.blit(self._background, (0, 0))
         self.canvas.fill((255, 255, 255))
 
-    def render(self, vehicles, agent_manager, *args, **kwargs):
+    def render(self, agent_manager, *args, **kwargs):
         self.refresh()
-        this_frame_vehicles = self._append_frame_vehicles(vehicles, agent_manager)
+        this_frame_vehicles = self._append_frame_vehicles(agent_manager.active_objects, agent_manager)
         self.history_vehicles.append(this_frame_vehicles)
         self._draw_history_vehicles()
         self.blit()

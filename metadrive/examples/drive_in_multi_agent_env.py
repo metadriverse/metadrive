@@ -51,6 +51,7 @@ if __name__ == "__main__":
     for i in range(1, 10000000000):
         o, r, d, info = env.step({agent_id: [0, 0] for agent_id in env.vehicles.keys()})
         env.render(
+            mode="top_down",
             text={
                 "Number of existing vehicles": len(env.vehicles),
                 "Tracked agent (Press Q)": env.engine.agent_manager.object_to_agent(env.current_track_vehicle.id),
