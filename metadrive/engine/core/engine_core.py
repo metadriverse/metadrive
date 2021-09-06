@@ -115,6 +115,11 @@ class EngineCore(ShowBase.ShowBase):
                 self.accept('1', self.toggleDebug)
                 self.accept('4', self.toggleAnalyze)
 
+        if self.global_config["disable_model_compression"]:
+            pass
+        else:
+            loadPrcFileData("", "compressed-textures 1")  # Default to compress
+
         super(EngineCore, self).__init__(windowType=self.mode)
 
         # Change window size at runtime if screen too small
@@ -124,10 +129,6 @@ class EngineCore(ShowBase.ShowBase):
 
         # main_window_position = (0, 0)
         if self.mode == RENDER_MODE_ONSCREEN:
-            if self.global_config["disable_model_compression"]:
-                pass
-            else:
-                loadPrcFileData("", "compressed-textures 1")  # Default to compress
             h = self.pipe.getDisplayHeight()
             w = self.pipe.getDisplayWidth()
             if self.global_config["window_size"][0] > 0.9 * w or self.global_config["window_size"][1] > 0.9 * h:

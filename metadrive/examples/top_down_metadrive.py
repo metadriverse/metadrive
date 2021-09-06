@@ -14,6 +14,7 @@ We welcome contributions to propose a better representation of the top-down sema
 """
 
 import random
+from metadrive.constants import HELP_MESSAGE
 
 import matplotlib.pyplot as plt
 
@@ -27,8 +28,15 @@ def draw_multi_channels_top_down_observation(obs):
         "Road and navigation", "Ego now and previous pos", "Neighbor at step t", "Neighbor at step t-1",
         "Neighbor at step t-2"
     ]
-    fig, axs = plt.subplots(1, num_channels, figsize=(15, 4), dpi=150)
+    fig, axs = plt.subplots(1, num_channels, figsize=(15, 4), dpi=80)
     count = 0
+
+    def close_event():
+        plt.close()  # timer calls this function after 3 seconds and closes the window
+
+    timer = fig.canvas.new_timer(interval=4500)  # creating a timer object and setting an interval of 3000 milliseconds
+    timer.add_callback(close_event)
+
     for i, name in enumerate(channel_names):
         count += 1
         ax = axs[i]
@@ -36,12 +44,14 @@ def draw_multi_channels_top_down_observation(obs):
         ax.set_xticks([])
         ax.set_yticks([])
         ax.set_title(name)
-        print("Drawing {}-th semantic map!".format(count))
+        # print("Drawing {}-th semantic map!".format(count))
     fig.suptitle("Multi-channels Top-down Observation")
+    timer.start()
     plt.show()
 
 
 if __name__ == "__main__":
+    print(HELP_MESSAGE)
     env = TopDownMetaDrive(
         dict(
             # We also support using two renderer (Panda3D renderer and Pygame renderer) simultaneously. You can
@@ -57,11 +67,21 @@ if __name__ == "__main__":
             start_seed=random.randint(0, 1000),
         )
     )
-    o = env.reset()
-    for i in range(1, 100000):
-        o, r, d, info = env.step([0, 1])
-        env.render(mode="top_down")
-        if d:
-            draw_multi_channels_top_down_observation(o)
-            env.reset()
-    env.close()
+    try:
+        o = env.reset()
+        for i in range(1, 100000):
+            o, r, d, info = env.step([0, 1])
+            env.render(mode="top_down", film_size=(800, 800))
+            if d:
+                # print("Close the popup window to continue.")
+                draw_multi_channels_top_down_observation(o)
+                env.reset()
+                # ret = input("Do you wish to quit? Type any ESC to quite, or press enter to continue")
+                # if len(ret) == 0:
+                #     continue
+                # else:
+                #     break
+    except:
+        pass
+    finally:
+        env.close()

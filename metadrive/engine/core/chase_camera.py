@@ -72,7 +72,7 @@ class MainCamera:
 
         # TPP rotate
         props = WindowProperties()
-        props.setCursorHidden(True)
+        # props.setCursorHidden(True)
         # props.setMouseMode(WindowProperties.MConfined)
         self.engine.win.requestProperties(props)
         self.mouse_rotate = 0

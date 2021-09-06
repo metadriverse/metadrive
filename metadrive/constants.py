@@ -34,6 +34,7 @@ HELP_MESSAGE = "Keyboard Shortcuts:\n" \
                "  B: Top-down View Camera (control: WASD-=)\n" \
                "  +: Lift Camera\n" \
                "  -: Lower Camera\n" \
+               "  Mouse click: move camera (top-down view)\n" \
                "  Esc: Quit\n"
 
 DEBUG_MESSAGE = "  1: Box Debug Mode\n" \

@@ -71,6 +71,13 @@ You can also launch an instance of Multi-Agent scenario as follows
 ```bash
 python -m metadrive.examples.drive_in_multi_agent_env --env roundabout
 ```
+
+or launch and render in pygame front end 
+
+```bash
+python -m metadrive.examples.drive_in_multi_agent_env --pygame_render --env roundabout
+```
+
 env argument could be:
 - roundabout (default)
 - intersection

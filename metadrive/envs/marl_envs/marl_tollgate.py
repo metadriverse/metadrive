@@ -14,7 +14,7 @@ from metadrive.manager.map_manager import MapManager
 
 MATollConfig = dict(
     spawn_roads=[Road(FirstPGBlock.NODE_2, FirstPGBlock.NODE_3), -Road(Merge.node(3, 0, 0), Merge.node(3, 0, 1))],
-    num_agents=40,
+    num_agents=12,
     map_config=dict(exit_length=70, lane_num=3, toll_lane_num=8, toll_length=10),
     top_down_camera_initial_x=125,
     top_down_camera_initial_y=0,

@@ -171,22 +171,6 @@ class WorldSurface(pygame.Surface):
             ]
         )
 
-    def handle_event(self, event: pygame.event.EventType) -> None:
-        """
-        Handle pygame events for moving and zooming in the displayed area.
-
-        :param event: a pygame event
-        """
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_l:
-                self.scaling *= 1 / self.SCALING_FACTOR
-            if event.key == pygame.K_o:
-                self.scaling *= self.SCALING_FACTOR
-            if event.key == pygame.K_m:
-                self.centering_position[0] -= self.MOVING_FACTOR
-            if event.key == pygame.K_k:
-                self.centering_position[0] += self.MOVING_FACTOR
-
     def copy(self):
         ret = WorldSurface(size=self.raw_size, flags=self.raw_flags, surf=self.raw_surface)
         ret.origin = self.origin
