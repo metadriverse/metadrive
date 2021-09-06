@@ -44,7 +44,7 @@ BASE_DEFAULT_CONFIG = dict(
     # ===== Rendering =====
     use_render=False,  # pop a window to render or not
     debug=False,
-    disable_model_compression=True,  # disable compression if you wish to launch the window quicker.
+    disable_model_compression=False,  # disable compression if you wish to launch the window quicker.
     cull_scene=True,  # only for debug use
     use_chase_camera_follow_lane=False,  # If true, then vision would be more stable.
     camera_height=1.8,
