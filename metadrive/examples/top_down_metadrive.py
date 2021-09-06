@@ -36,7 +36,7 @@ def draw_multi_channels_top_down_observation(obs):
         ax.set_xticks([])
         ax.set_yticks([])
         ax.set_title(name)
-        print("Drawing {}-th semantic map!".format(count))
+        # print("Drawing {}-th semantic map!".format(count))
     fig.suptitle("Multi-channels Top-down Observation")
     plt.show()
 
@@ -57,11 +57,21 @@ if __name__ == "__main__":
             start_seed=random.randint(0, 1000),
         )
     )
-    o = env.reset()
-    for i in range(1, 100000):
-        o, r, d, info = env.step([0, 1])
-        env.render(mode="top_down")
-        if d:
-            draw_multi_channels_top_down_observation(o)
-            env.reset()
-    env.close()
+    try:
+        o = env.reset()
+        for i in range(1, 100000):
+            o, r, d, info = env.step([0, 1])
+            env.render(mode="top_down")
+            if d:
+                print("Close the popup window to continue.")
+                draw_multi_channels_top_down_observation(o)
+                env.reset()
+                ret = input("Do you wish to quit? Type any key + enter to quite, or press enter to continue")
+                if len(ret) == 0:
+                    continue
+                else:
+                    break
+    except:
+        pass
+    finally:
+        env.close()
