@@ -15,13 +15,13 @@ history_vehicle = namedtuple("history_vehicle", "name position heading_theta WID
 
 
 def draw_top_down_map(
-    map,
-    resolution: Iterable = (512, 512),
-    simple_draw=True,
-    return_surface=False,
-    film_size=None,
-    reverse_color=False,
-    road_color=color_white
+        map,
+        resolution: Iterable = (512, 512),
+        simple_draw=True,
+        return_surface=False,
+        film_size=None,
+        reverse_color=False,
+        road_color=color_white
 ) -> Optional[Union[np.ndarray, pygame.Surface]]:
     film_size = film_size or map.film_size
     surface = WorldSurface(film_size, 0, pygame.Surface(film_size))
@@ -54,7 +54,7 @@ def draw_top_down_map(
 
 
 def draw_top_down_trajectory(
-    surface: WorldSurface, episode_data: dict, entry_differ_color=False, exit_differ_color=False, color_list=None
+        surface: WorldSurface, episode_data: dict, entry_differ_color=False, exit_differ_color=False, color_list=None
 ):
     if entry_differ_color or exit_differ_color:
         assert color_list is not None
@@ -113,18 +113,18 @@ def draw_top_down_trajectory(
 
 class TopDownRenderer:
     def __init__(
-        self,
-        env,
-        map,
-        film_size=None,
-        screen_size=None,
-        light_background=True,
-        zoomin=None,
-        num_stack=15,
-        history_smooth=0,
-        road_color=(255, 255, 255),
-        show_agent_name=False,
-        track=False
+            self,
+            env,
+            map,
+            film_size=None,
+            screen_size=None,
+            light_background=True,
+            zoomin=None,
+            num_stack=15,
+            history_smooth=0,
+            road_color=(255, 255, 255),
+            show_agent_name=False,
+            track=False
     ):
         self.follow_agent = track
         self.show_agent_name = show_agent_name
@@ -150,7 +150,7 @@ class TopDownRenderer:
         self._light_background = light_background
         if self._light_background:
             pixels = pygame.surfarray.pixels2d(self._background)
-            pixels ^= 2**32 - 1
+            pixels ^= 2 ** 32 - 1
             del pixels
 
         self._runtime = self._background.copy()
@@ -181,7 +181,11 @@ class TopDownRenderer:
     def render(self, agent_manager, *args, **kwargs):
         self.handle_event()
         self.refresh()
-        this_frame_vehicles = self._append_frame_vehicles(agent_manager.active_objects, agent_manager)
+        traffic_vehicles = {}
+        if hasattr(self._env.engine, "traffic_manager") and self._env.engine.traffic_manager is not None:
+            traffic_vehicles = self._env.engine.traffic_manager.spawned_objects
+        this_frame_vehicles = self._append_frame_vehicles(traffic_vehicles, agent_manager)
+
         self.history_vehicles.append(this_frame_vehicles)
         self._draw_history_vehicles()
         self.blit()
@@ -220,7 +224,7 @@ class TopDownRenderer:
 
         pygame.display.update()
 
-    def _append_frame_vehicles(self, vehicles, agent_manager):
+    def _append_frame_vehicles(self, traffic_vehicles, agent_manager):
         frame_vehicles = []
         # for i, v in enumerate(vehicles, 1):
         #     name = self._env.agent_manager.object_to_agent(v.name)
@@ -230,6 +234,19 @@ class TopDownRenderer:
             frame_vehicles.append(
                 history_vehicle(
                     name=name,
+                    heading_theta=v.heading_theta,
+                    WIDTH=v.WIDTH,
+                    LENGTH=v.LENGTH,
+                    position=v.position,
+                    color=v.top_down_color,
+                    done=False
+                )
+            )
+
+        for v in traffic_vehicles.values():
+            frame_vehicles.append(
+                history_vehicle(
+                    name=v.name,
                     heading_theta=v.heading_theta,
                     WIDTH=v.WIDTH,
                     LENGTH=v.LENGTH,
@@ -384,7 +401,7 @@ class TopDownRenderer:
         self._light_background = self._light_background
         if self._light_background:
             pixels = pygame.surfarray.pixels2d(self._background)
-            pixels ^= 2**32 - 1
+            pixels ^= 2 ** 32 - 1
             del pixels
 
         self._runtime = self._background.copy()
