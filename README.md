@@ -10,11 +10,9 @@
 <div style="text-align: center; width:100%; margin: 0 auto; display: inline-block">
 <strong>
 [
-<a href="https://decisionforce.github.io/metadrive/">Website</a>
-|
 <a href="https://metadrive-simulator.readthedocs.io">Documentation</a>
 |
-<a href="">Demo Video (TBD)</a>
+<a href="https://www.youtube.com/embed/3ziJPqC_-T4">Demo Video</a>
 ]
 </strong>
 </div>
@@ -79,12 +77,12 @@ python -m metadrive.examples.drive_in_multi_agent_env --pygame_render --env roun
 ```
 
 env argument could be:
-- roundabout (default)
-- intersection
-- tollgate
-- bottleneck
-- parkinglot
-- pgmap
+- `roundabout` (default)
+- `intersection`
+- `tollgate`
+- `bottleneck`
+- `parkinglot`
+- `pgmap`
 
 Run the example of procedural generation of a new map as:
 
@@ -117,33 +115,6 @@ for i in range(1000):
         env.reset()
 env.close()
 ```
-
-
-## 📦 Predefined environment sets
-
-We define several standard MetaDrive Gym environments, where the user can start training off the shelf:
-
-```python
-import gym
-import metadrive  # Register the environment
-
-env = gym.make("MetaDrive-v0")
-```
-
-The following table presents the names for the predefined environments. 
-
-|&nbsp;  Gym Environment Name   | Random Seed Range | Number of Maps | Comments                                          |
-| ----------------------- | ----------------- | -------------- | ------------------------------------------------------- |
-| `MetaDrive-test-v0`       | [0, 200)          | 200            | Test set, not change for all experiments.               |
-| `MetaDrive-validation-v0` &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;|[200, 1000)|800| Validation set.|
-| `MetaDrive-v0`            | [1000, 1100)      | 100            | Default training setting, for quick start.              |
-| `MetaDrive-10envs-v0`     | [1000, 1100)      | 10             | Training environment with 10 maps.                      |
-| `MetaDrive-1000envs-v0`   | [1000, 1100)      | 1000           | Training environment with 1000 maps.                    |
-| `MetaDrive-training0-v0`  | [3000, 4000)      | 1000           | First set of 1000 environments.                         |
-| `MetaDrive-training1-v0`  | [5000, 6000)      | 1000           | Second set of 1000 environments.                        |
-| `MetaDrive-training2-v0`  | [7000, 8000)      | 1000           | Thirds set of 1000 environments.                        |
-| ...                     |                   |                | *More map set and environments will be added* |
-
 
 
 ## 🏫 Documentations
