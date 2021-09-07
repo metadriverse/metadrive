@@ -14,12 +14,12 @@ MetaDrive Documentation
 
 
 Welcome to the MetaDrive documentation!
-MetaDrive is an efficient and compositional driving simulator for reinforcement learning community!
-The key features of MetaDrive includes:
+MetaDrive is an efficient and compositional driving simulator with the following key features:
 
-- **Lightweight**: Extremely easy to download, install and run in almost all platforms. Up to 300 simulation step per second and easy to parallel.
-- **Realistic**: Accurate physics simulation and multiple sensory input including Lidar, sensory data, top-down semantic map and first-person view images.
-- **Compositional**: Support generating infinite scenes and configuring various traffics, vehicles, and environmental settings.
+* Compositional: It supports generating infinite scenes with various road maps and traffic settings for the research of generalizable RL.
+* Lightweight: It is easy to install and run. It can run up to 300 FPS on a standard PC.
+* Realistic: Accurate physics simulation and multiple sensory input including Lidar, RGB images, top-down semantic map and first-person view images.
+
 
 This documentation brings you the information on installation, usages and more of MetaDrive!
 
