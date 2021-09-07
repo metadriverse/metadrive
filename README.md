@@ -10,11 +10,9 @@
 <div style="text-align: center; width:100%; margin: 0 auto; display: inline-block">
 <strong>
 [
-<a href="https://decisionforce.github.io/metadrive/">Website</a>
-|
 <a href="https://metadrive-simulator.readthedocs.io">Documentation</a>
 |
-<a href="">Demo Video (TBD)</a>
+<a href="https://www.youtube.com/embed/3ziJPqC_-T4">Demo Video</a>
 ]
 </strong>
 </div>
@@ -161,3 +159,8 @@ Working in Progress!
 [![GitHub license](https://img.shields.io/github/license/decisionforce/metadrive)](https://github.com/decisionforce/metadrive/blob/main/LICENSE.txt)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/2d6fabe328a644b49e1269497b741057)](https://www.codacy.com/gh/decisionforce/metadrive/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=decisionforce/metadrive&amp;utm_campaign=Badge_Grade)
 [![GitHub contributors](https://img.shields.io/github/contributors/decisionforce/metadrive)](https://github.com/decisionforce/metadrive/graphs/contributors)
+
+
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/3ziJPqC_-T4" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+ 
