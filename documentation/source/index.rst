@@ -12,6 +12,7 @@
 MetaDrive Documentation
 ########################
 
+
 Welcome to the MetaDrive documentation!
 MetaDrive is an efficient and compositional driving simulator for reinforcement learning community!
 The key features of MetaDrive includes:
@@ -60,3 +61,17 @@ Please feel free to contact us if you have any suggestions or ideas!
 
    concept.rst
    development.rst
+
+
+.. raw:: html
+
+    <br>
+    <table width="100%" style="margin: 0 0; text-align: center;">
+        <tr>
+            <td>
+            <iframe width="560" height="315" src="https://www.youtube.com/embed/3ziJPqC_-T4" title="MetaDrive Introduction" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            </td>
+        </tr>
+    </table>
+
+
