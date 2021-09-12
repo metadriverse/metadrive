@@ -34,6 +34,8 @@ class WayPointLane(AbstractLane):
         # Segment is the part between two adjacent way points
         self.segment_property = self._get_properties()
         self.length = sum([seg["length"] for seg in self.segment_property])
+        self.is_straight = True if abs(
+            self.heading_theta_at(0.1) - self.heading_theta_at(self.length - 0.1)) < np.deg2rad(10) else False
 
     def _get_properties(self):
         ret = []

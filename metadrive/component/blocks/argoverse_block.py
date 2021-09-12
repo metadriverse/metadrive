@@ -19,6 +19,7 @@ class ArgoverseBlock(BaseBlock):
 
     def _sample_topology(self) -> bool:
         self.add_lanes()
+        self.set_width_in_intersect()
         return True
 
     def _create_in_world(self):
@@ -32,6 +33,14 @@ class ArgoverseBlock(BaseBlock):
         # for road in redundant_road_to_remove:
         #     self.block_network.remove_road(road)
         return super(ArgoverseBlock, self)._create_in_world()
+
+    def set_width_in_intersect(self):
+        for lane in self.argo_lanes.values():
+            if lane.is_intersection:
+                if lane.successors is not None and lane.successors[0] in self.argo_lanes:
+                    lane.width = self.argo_lanes[lane.successors[0]].width
+                elif lane.predecessors is not None and lane.predecessors[0] in self.argo_lanes:
+                    lane.width = self.argo_lanes[lane.predecessors[0]].width
 
     def add_lanes(self):
         for lane in self.argo_lanes.values():
@@ -58,18 +67,32 @@ class ArgoverseBlock(BaseBlock):
             lanes = [self.argo_lanes[id] for id in ret]
             for idx, l in enumerate(lanes):
                 if l.is_intersection:
-                    right_type = LineType.CONTINUOUS if l.turn_direction == "RIGHT" \
-                        else LineType.NONE
-                    l.line_types = (LineType.NONE, right_type)
+                    # if l.turn_direction == "RIGHT" and l.r_neighbor_id is None:
+                    #     l.line_types = [LineType.NONE, LineType.CONTINUOUS]
+                    # else:
+                    #     l.line_types = [LineType.NONE, LineType.NONE]
+                    #
+                    # if l.turn_direction == "LEFT" and l.l_neighbor_id is None:
+                    #     l.line_types = [LineType.CONTINUOUS, LineType.NONE]
+                    # else:
+                    l.line_types = [LineType.NONE, LineType.NONE]
                 else:
                     if l.r_neighbor_id is not None:
                         right_type = LineType.BROKEN
                     else:
                         right_type = LineType.CONTINUOUS
-                    if idx == 0 and l.l_neighbor_id is not None:
+                    if idx == 0:
                         left_type = LineType.CONTINUOUS
-                        l.line_color = [LineColor.YELLOW, LineColor.GREY]
+                        if l.l_neighbor_id is not None:
+                            l.line_color = [LineColor.YELLOW, LineColor.GREY]
                     else:
                         left_type = LineType.BROKEN
                     l.line_types = [left_type, right_type]
+            if not lane.is_intersection:
+                _, right_lat = self.argo_lanes[lane.r_neighbor_id].local_coordinates(
+                    lane.center_line_points[0]) if lane.r_neighbor_id in self.argo_lanes else (0, 0)
+                _, left_lat = self.argo_lanes[lane.l_neighbor_id].local_coordinates(
+                    lane.center_line_points[0]) if lane.l_neighbor_id in self.argo_lanes else (0, 0)
+                width = max(abs(right_lat), abs(left_lat))+0.1
+                lane.width = width if abs(width) > 1.0 else lane.LANE_WIDTH  # else default
             self.block_network.add_road(Road(lane.start_node, lane.end_node), lanes)
