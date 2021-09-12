@@ -1,4 +1,5 @@
 import copy
+from metadrive.component.lane.abs_lane import LineColor, LineType
 from typing import Dict
 
 from metadrive.component.blocks.base_block import BaseBlock
@@ -40,7 +41,7 @@ class ArgoverseBlock(BaseBlock):
             in_same_dir = True if left_id is not None and lane.is_in_same_direction(
                 self.argo_lanes[left_id]) else False
             while left_id is not None and in_same_dir:
-                ret.append(left_id)
+                ret.insert(0, left_id)
                 left_id = self.argo_lanes[left_id].l_neighbor_id
                 in_same_dir = True if left_id is not None and lane.is_in_same_direction(
                     self.argo_lanes[left_id]) else False
@@ -54,4 +55,21 @@ class ArgoverseBlock(BaseBlock):
                 right_id = self.argo_lanes[right_id].r_neighbor_id
                 in_same_dir = True if right_id is not None and lane.is_in_same_direction(
                     self.argo_lanes[right_id]) else False
-            self.block_network.add_road(Road(lane.start_node, lane.end_node), [self.argo_lanes[id] for id in ret])
+            lanes = [self.argo_lanes[id] for id in ret]
+            for idx, l in enumerate(lanes):
+                if l.is_intersection:
+                    right_type = LineType.CONTINUOUS if l.turn_direction == "RIGHT" \
+                        else LineType.NONE
+                    l.line_types = (LineType.NONE, right_type)
+                else:
+                    if l.r_neighbor_id is not None:
+                        right_type = LineType.BROKEN
+                    else:
+                        right_type = LineType.CONTINUOUS
+                    if idx == 0 and l.l_neighbor_id is not None:
+                        left_type = LineType.CONTINUOUS
+                        l.line_color = [LineColor.YELLOW, LineColor.GREY]
+                    else:
+                        left_type = LineType.BROKEN
+                    l.line_types = [left_type, right_type]
+            self.block_network.add_road(Road(lane.start_node, lane.end_node), lanes)
