@@ -12,18 +12,18 @@ class ArgoverseLane(WayPointLane, LaneSegment):
     LANE_WIDTH = 3.0
 
     def __init__(
-        self,
-        start_node: str,
-        end_node: str,
-        id: int,
-        has_traffic_control: bool,
-        turn_direction: str,
-        is_intersection: bool,
-        l_neighbor_id: Optional[int],
-        r_neighbor_id: Optional[int],
-        predecessors: List[int],
-        successors: Optional[List[int]],
-        centerline: np.ndarray,
+            self,
+            start_node: str,
+            end_node: str,
+            id: int,
+            has_traffic_control: bool,
+            turn_direction: str,
+            is_intersection: bool,
+            l_neighbor_id: Optional[int],
+            r_neighbor_id: Optional[int],
+            predecessors: List[int],
+            successors: Optional[List[int]],
+            centerline: np.ndarray,
     ):
         # convert_to_MetaDrive_coordinates
         centerline[:, 1] *= -1
@@ -45,3 +45,8 @@ class ArgoverseLane(WayPointLane, LaneSegment):
         else:
             self.line_types = (LineType.CONTINUOUS, LineType.CONTINUOUS)
         self.line_color = (LineColor.GREY, LineColor.GREY)
+
+    def is_in_same_direction(self, another_lane):
+        if self.id == another_lane.l_neighbor_id and self.l_neighbor_id == another_lane.id:
+            return False
+        return super(ArgoverseLane, self).is_in_same_direction(another_lane)

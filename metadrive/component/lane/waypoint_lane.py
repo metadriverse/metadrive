@@ -1,4 +1,5 @@
 import math
+from metadrive.utils.math_utils import wrap_to_pi
 from typing import Tuple, Union
 
 import numpy as np
@@ -13,13 +14,14 @@ class WayPointLane(AbstractLane):
     CenterLineLane is created by giving the center line points array or way points array.
     By using this lane type, map can be constructed from Waymo/Argoverse/OpenstreetMap dataset
     """
+
     def __init__(
-        self,
-        center_line_points: Union[list, np.ndarray],
-        width: float,
-        forbidden: bool = False,
-        speed_limit: float = 1000,
-        priority: int = 0
+            self,
+            center_line_points: Union[list, np.ndarray],
+            width: float,
+            forbidden: bool = False,
+            speed_limit: float = 1000,
+            priority: int = 0
     ):
         super(WayPointLane, self).__init__()
         self.set_speed_limit(speed_limit)
@@ -69,6 +71,9 @@ class WayPointLane(AbstractLane):
         return self.width
 
     def heading_theta_at(self, longitudinal: float) -> float:
+        """
+        In rad
+        """
         accumulate_len = 0
         for seg in self.segment_property:
             accumulate_len += seg["length"]
@@ -110,3 +115,16 @@ class WayPointLane(AbstractLane):
             if accumulate_len + 0.1 >= longitudinal:
                 return self.segment_property[index]
         return self.segment_property[index]
+
+    def is_in_same_direction(self, another_lane):
+        """
+        Return True if two lane is in same direction
+        """
+        my_start_heading = self.heading_theta_at(0.1)
+        another_start_heading = another_lane.heading_theta_at(0.1)
+
+        my_end_heading = self.heading_theta_at(self.length - 0.1)
+        another_end_heading = another_lane.heading_theta_at(self.length - 0.1)
+
+        return True if abs(wrap_to_pi(my_end_heading) - wrap_to_pi(another_end_heading)) < 0.2 and abs(wrap_to_pi(
+            my_start_heading) - wrap_to_pi(another_start_heading)) < 0.2 else False
