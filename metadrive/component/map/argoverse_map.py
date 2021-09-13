@@ -81,7 +81,7 @@ class ArgoverseMap(BaseMap):
         for lane in lanes:
             self._post_process_lane(lane)
 
-        block = ArgoverseBlock(0, self.road_network, {lane.id:lane for lane in chosen_lanes})
+        block = ArgoverseBlock(0, self.road_network, {lane.id: lane for lane in chosen_lanes})
         block.construct_block(self.engine.worldNP, self.engine.physics_world)
         self.blocks.append(block)
 

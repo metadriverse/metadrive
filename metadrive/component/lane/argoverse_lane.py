@@ -9,22 +9,22 @@ from metadrive.constants import LineType, LineColor
 
 class ArgoverseLane(WayPointLane, LaneSegment):
     # according to api of get_vector_map_lane_polygons(), the lane width in argoverse dataset is 3.8m
-    LANE_WIDTH = 3.0
+    LANE_WIDTH = 3.8
 
     def __init__(
-            self,
-            start_node: str,
-            end_node: str,
-            id: int,
-            has_traffic_control: bool,
-            turn_direction: str,
-            is_intersection: bool,
-            l_neighbor_id: Optional[int],
-            r_neighbor_id: Optional[int],
-            predecessors: List[int],
-            successors: Optional[List[int]],
-            centerline: np.ndarray,
-            lane_width=None
+        self,
+        start_node: str,
+        end_node: str,
+        id: int,
+        has_traffic_control: bool,
+        turn_direction: str,
+        is_intersection: bool,
+        l_neighbor_id: Optional[int],
+        r_neighbor_id: Optional[int],
+        predecessors: List[int],
+        successors: Optional[List[int]],
+        centerline: np.ndarray,
+        lane_width=None
     ):
         # convert_to_MetaDrive_coordinates
         centerline[:, 1] *= -1

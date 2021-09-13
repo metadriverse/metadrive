@@ -70,11 +70,11 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
         raise NotImplementedError
 
     def construct_block(
-            self,
-            root_render_np: NodePath,
-            physics_world: PhysicsWorld,
-            extra_config: Dict = None,
-            no_same_node=True
+        self,
+        root_render_np: NodePath,
+        physics_world: PhysicsWorld,
+        extra_config: Dict = None,
+        no_same_node=True
     ) -> bool:
         """
         Randomly Construct a block, if overlap return False
@@ -310,14 +310,14 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
         body_np.setQuat(LQuaternionf(math.cos(theta / 2), 0, 0, math.sin(theta / 2)))
 
     def _add_lane_line2bullet(
-            self,
-            lane_start,
-            lane_end,
-            middle,
-            parent_np: NodePath,
-            color: Vec4,
-            line_type: LineType,
-            straight_stripe=False
+        self,
+        lane_start,
+        lane_end,
+        middle,
+        parent_np: NodePath,
+        color: Vec4,
+        line_type: LineType,
+        straight_stripe=False
     ):
         length = norm(lane_end[0] - lane_start[0], lane_end[1] - lane_start[1])
         if length <= 0:
