@@ -273,7 +273,7 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
             for c, i in enumerate([-1, 1]):
                 line_color = colors[c]
                 acc_length = 0
-                if lane.line_types[c] != LineType.NONE:
+                if lane.line_types[c] == LineType.CONTINUOUS:
                     for segment in lane.segment_property:
                         lane_start = lane.position(acc_length, i * lane_width / 2)
                         acc_length += segment["length"]

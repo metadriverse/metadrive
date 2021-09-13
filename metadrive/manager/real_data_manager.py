@@ -77,7 +77,7 @@ class RealDataManager(BaseManager):
         pos_dict = {i: j["init_pos"] for i, j in zip(locate_info.keys(), locate_info.values())}
 
         block = map.blocks[0]
-        lanes = block.argo_lanes
+        lanes = block.argo_lanes.values()
         roads = block.block_network.get_roads(direction='positive', lane_num=1)
         potential_vehicle_configs = []
         for l in lanes:

@@ -1,4 +1,5 @@
 import math
+from metadrive.utils.math_utils import wrap_to_pi
 from typing import Tuple, Union
 
 import numpy as np
@@ -32,6 +33,8 @@ class WayPointLane(AbstractLane):
         # Segment is the part between two adjacent way points
         self.segment_property = self._get_properties()
         self.length = sum([seg["length"] for seg in self.segment_property])
+        self.is_straight = True if abs(self.heading_theta_at(0.1) -
+                                       self.heading_theta_at(self.length - 0.1)) < np.deg2rad(10) else False
 
     def _get_properties(self):
         ret = []
@@ -69,6 +72,9 @@ class WayPointLane(AbstractLane):
         return self.width
 
     def heading_theta_at(self, longitudinal: float) -> float:
+        """
+        In rad
+        """
         accumulate_len = 0
         for seg in self.segment_property:
             accumulate_len += seg["length"]
@@ -110,3 +116,17 @@ class WayPointLane(AbstractLane):
             if accumulate_len + 0.1 >= longitudinal:
                 return self.segment_property[index]
         return self.segment_property[index]
+
+    def is_in_same_direction(self, another_lane):
+        """
+        Return True if two lane is in same direction
+        """
+        my_start_heading = self.heading_theta_at(0.1)
+        another_start_heading = another_lane.heading_theta_at(0.1)
+
+        my_end_heading = self.heading_theta_at(self.length - 0.1)
+        another_end_heading = another_lane.heading_theta_at(self.length - 0.1)
+
+        return True if abs(wrap_to_pi(my_end_heading) - wrap_to_pi(another_end_heading)) < 0.2 and abs(
+            wrap_to_pi(my_start_heading) - wrap_to_pi(another_start_heading)
+        ) < 0.2 else False
