@@ -153,7 +153,6 @@ def get_train_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument("--exp-name", type=str, default="generalization_experiment")
     parser.add_argument("--num-gpus", type=int, default=0)
-    parser.add_argument("--test", action="store_true")
     return parser
 
 

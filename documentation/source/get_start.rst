@@ -73,35 +73,4 @@ The following scripts is a minimal example for instantiating a MetaDrive environ
 
 .. Note:: Please note that each process should only have one single MetaDrive instance due to the limit of the underlying simulation engine. As a workaround, we provide an asynchronous version of MetaDrive through `Ray framework <https://github.com/ray-project/ray>`_, please find the environment in `remove_env.py <https://github.com/decisionforce/metadrive/blob/main/metadrive/envs/remote_env.py>`_.
 
-
-Out-of-the-box Environments
-#############################
-
-
-.. warning:: This section is under construction!
-
-Besides, we provide several predefined environments for different purposes shown in the following table.
-Please feel free to open an issue if you want to request new environments.
-
-+-------------------------+-------------------+----------------+---------------------------------------------------------+
-| Gym Environment Name    | Random Seed Range | Number of Maps | Comments                                                |
-+=========================+===================+================+=========================================================+
-| `MetaDrive-test-v0`       | [0, 200)          | 200            | Test set, not change for all experiments.               |
-+-------------------------+-------------------+----------------+---------------------------------------------------------+
-| `MetaDrive-validation-v0` | [200, 1000)       | 800            | Validation set.                                         |
-+-------------------------+-------------------+----------------+---------------------------------------------------------+
-| `MetaDrive-v0`            | [1000, 1100)      | 100            | Default training setting, for quick start.              |
-+-------------------------+-------------------+----------------+---------------------------------------------------------+
-| `MetaDrive-10envs-v0`     | [1000, 1100)      | 10             | Training environment with 10 maps.                      |
-+-------------------------+-------------------+----------------+---------------------------------------------------------+
-| `MetaDrive-1000envs-v0`   | [1000, 1100)      | 1000           | Training environment with 1000 maps.                    |
-+-------------------------+-------------------+----------------+---------------------------------------------------------+
-| `MetaDrive-training0-v0`  | [3000, 4000)      | 1000           | First set of 1000 environments.                         |
-+-------------------------+-------------------+----------------+---------------------------------------------------------+
-| `MetaDrive-training1-v0`  | [5000, 6000)      | 1000           | Second set of 1000 environments.                        |
-+-------------------------+-------------------+----------------+---------------------------------------------------------+
-| `MetaDrive-training2-v0`  | [7000, 8000)      | 1000           | Thirds set of 1000 environments.                        |
-+-------------------------+-------------------+----------------+---------------------------------------------------------+
-| ...                     |                   |                | *More map set can be added in response to the requests* |
-+-------------------------+-------------------+----------------+---------------------------------------------------------+
-
+You can also try out our example of using RLLib to train RL policies in :ref:`Training with RLLib`.
