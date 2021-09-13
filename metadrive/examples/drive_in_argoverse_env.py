@@ -1,3 +1,6 @@
+"""
+This script demonstrates how to use the environment where traffic and road map are loaded from argoverse dataset.
+"""
 from metadrive.envs.argoverse_env import ArgoverseEnv
 
 if __name__ == "__main__":
