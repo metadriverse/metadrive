@@ -24,10 +24,6 @@ class ArgoverseMapManager(MapManager):
         super(ArgoverseMapManager, self).__init__()
         self.ag_map = AGMap
 
-    def before_reset(self):
-        # do not unload map
-        pass
-
     def reset(self):
         if self.current_map is None:
             self.engine.global_config["map_config"].update(
