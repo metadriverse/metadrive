@@ -6,6 +6,11 @@ from metadrive.envs.metadrive_env import MetaDriveEnv
 from metadrive.manager.map_manager import MapManager
 from metadrive.utils import is_win
 
+try:
+    from argoverse.map_representation.map_api import ArgoverseMap as AGMap
+except ImportError:
+    pass
+
 argoverse_city = "PIT"
 argoverse_map_center = [2599.5505965123866, 1200.0214763629717]
 argoverse_map_radius = 150
@@ -15,6 +20,10 @@ argoverse_log_id = "c6911883-1843-3727-8eaa-41dc8cda8993"
 
 
 class ArgoverseMapManager(MapManager):
+    def __init__(self):
+        super(ArgoverseMapManager, self).__init__()
+        self.ag_map = AGMap
+
     def before_reset(self):
         # do not unload map
         pass
@@ -28,7 +37,9 @@ class ArgoverseMapManager(MapManager):
                     "radius": argoverse_map_radius
                 }
             )
-            map = ArgoverseMap(self.engine.global_config["map_config"])
+            map = self.spawn_object(ArgoverseMap, ag_map=self.ag_map,
+                                    map_config=self.engine.global_config["map_config"],
+                                    )
             self.engine.map_manager.load_map(map)
 
 

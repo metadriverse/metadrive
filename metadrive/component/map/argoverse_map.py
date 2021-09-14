@@ -34,9 +34,9 @@ class ArgoverseMap(BaseMap):
     # block size
     BLOCK_LANE_NUM = 40
 
-    def __init__(self, map_config, random_seed=0):
+    def __init__(self, ag_map, map_config, random_seed=0):
         # origin ag map
-        self.AGMap = AGMap()
+        self.ag_map = ag_map
         map_config[self.SEED] = random_seed
         assert "city" in map_config, "City name is required when generating argoverse map"
         assert map_config["city"] in self.SUPPORTED_MAPS, "City generation of {} is not supported (We support {} now)". \
@@ -69,7 +69,7 @@ class ArgoverseMap(BaseMap):
             else:
                 logger.error("Unknown XML item encountered.")
                 raise ValueError("Unknown XML item encountered.")
-        lane_ids = self.AGMap.get_lane_ids_in_xy_bbox(
+        lane_ids = self.ag_map.get_lane_ids_in_xy_bbox(
             *self.argoverse_position(self.config["center"]), self.config["city"], self.config["radius"]
         )
         self.lane_id_lane = lane_objs
