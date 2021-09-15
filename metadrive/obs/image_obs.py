@@ -44,7 +44,7 @@ class ImageObservation(ObservationBase):
         self.image_source = image_source
         super(ImageObservation, self).__init__(config)
         self.rgb_clip = clip_rgb
-        self.state = np.zeros(self.observation_space.shape)
+        self.state = np.zeros(self.observation_space.shape, dtype=np.float32)
 
     @property
     def observation_space(self):
@@ -70,4 +70,4 @@ class ImageObservation(ObservationBase):
         :param vehicle: BaseVehicle
         :return: None
         """
-        self.state = np.zeros(self.observation_space.shape)
+        self.state = np.zeros(self.observation_space.shape, dtype=np.float32)
