@@ -25,7 +25,7 @@ BASE_DEFAULT_CONFIG = dict(
 
     # ===== agent =====
     random_agent_model=False,
-    IDM_agent=False,
+    agent_policy=None,
 
     # ===== multi-agent =====
     num_agents=1,  # Note that this can be set to >1 in MARL envs, or set to -1 for as many vehicles as possible.
