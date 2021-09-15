@@ -3,7 +3,7 @@ from metadrive.utils.math_utils import clip
 
 
 class EnvInputPolicy(BasePolicy):
-    def __init__(self):
+    def __init__(self, obj, seed):
         # Since control object may change
         super(EnvInputPolicy, self).__init__(control_object=None)
         self.discrete_action = self.engine.global_config["discrete_action"]
