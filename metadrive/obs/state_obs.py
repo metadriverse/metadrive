@@ -53,7 +53,8 @@ class StateObservation(ObservationBase):
         """
         navi_info = vehicle.navigation.get_navi_info()
         ego_state = self.vehicle_state(vehicle)
-        return np.concatenate([ego_state, navi_info])
+        ret = np.concatenate([ego_state, navi_info])
+        return ret.astype(np.float32)
 
     def vehicle_state(self, vehicle):
         """

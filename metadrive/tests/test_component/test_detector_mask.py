@@ -417,7 +417,7 @@ def test_cutils_lidar():
 
     env = MetaDriveEnv({"map": "C", "traffic_density": 1.0, "environment_num": 10, "use_render": False})
     env.reset()
-    env.vehicle.lidar.cloud_points = np.ones((env.vehicle.lidar.num_lasers, ), dtype=float)
+    env.vehicle.lidar.cloud_points = np.ones((env.vehicle.lidar.num_lasers, ), dtype=np.float32)
     env.vehicle.lidar.detected_objects = []
     try:
         for _ in range(3):
