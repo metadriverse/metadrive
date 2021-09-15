@@ -9,6 +9,7 @@ def test_safe_env():
         for i in range(1, 100):
             o, r, d, info = env.step([0, 1])
             total_cost += info["cost"]
+            assert env.observation_space.contains(o)
             if d:
                 total_cost = 0
                 print("Reset")

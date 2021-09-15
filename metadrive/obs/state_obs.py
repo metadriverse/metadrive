@@ -167,7 +167,8 @@ class LidarStateObservation(ObservationBase):
         state = self.state_observe(vehicle)
         other_v_info = self.lidar_observe(vehicle)
         self.current_observation = np.concatenate((state, np.asarray(other_v_info)))
-        return self.current_observation
+        ret = self.current_observation
+        return ret.astype(np.float32)
 
     def state_observe(self, vehicle):
         return self.state_obs.observe(vehicle)
