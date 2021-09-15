@@ -14,6 +14,7 @@ Options for --env argument:
 
 """
 import argparse
+from metadrive.policy.idm_policy import ManualControllableIDMPolicy
 
 from metadrive import (
     MultiAgentMetaDrive, MultiAgentTollgateEnv, MultiAgentBottleneckEnv, MultiAgentIntersectionEnv,
@@ -50,7 +51,7 @@ if __name__ == "__main__":
             "use_render": True if not args.pygame_render else False,
             "manual_control": True,
             "crash_done": False,
-            "IDM_agent": True
+            "agent_policy": ManualControllableIDMPolicy
         }
     )
     try:

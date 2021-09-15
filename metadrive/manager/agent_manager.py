@@ -79,12 +79,8 @@ class AgentManager(BaseManager):
         if self.engine.global_config["manual_control"] and self.engine.global_config["use_render"]:
             if self.engine.global_config.get("use_AI_protector", False):
                 policy = AIProtectPolicy(obj, self.generate_seed())
-            elif self.engine.global_config["IDM_agent"]:
-                policy = ManualControllableIDMPolicy(obj, self.generate_seed())
             else:
                 policy = ManualControlPolicy(obj, self.generate_seed())
-        elif self.engine.global_config["IDM_agent"]:
-            policy = IDMPolicy(obj, self.generate_seed())
         else:
             policy = EnvInputPolicy(obj, self.generate_seed())
         return policy
