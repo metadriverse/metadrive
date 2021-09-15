@@ -9,7 +9,7 @@ class ManualControlPolicy(EnvInputPolicy):
     """
     Control the current track vehicle
     """
-    def __init__(self,obj, seed):
+    def __init__(self, obj, seed):
         super(ManualControlPolicy, self).__init__(obj, seed)
         config = get_global_config()
         self.engine.accept("t", self.toggle_takeover)
