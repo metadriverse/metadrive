@@ -398,7 +398,7 @@ def test_ma_roundabout_reward_done_alignment_1():
                     # #assert r[kkk] == -1.7777
             for kkk, ddd in d.items():
                 if ddd and kkk != "__all__":
-                    assert i[kkk][TerminationState.OUT_OF_ROAD]
+                    assert i[kkk][TerminationState.OUT_OF_ROAD], i[kkk]
                     # print('{} done passed!'.format(kkk))
             for kkk, rrr in r.items():
                 if rrr == -1.7777:
