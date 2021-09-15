@@ -43,7 +43,7 @@ class ModelPredictiveControl:
         self.mass = 800
         self.len = 1
         self.bounds = []
-        self.u = np.zeros(self.dim * self.horizon)
+        self.u = np.zeros(self.dim * self.horizon, dtype=np.float32)
         self.config = {"replan": False}
 
     def cost(self, u, *args):
@@ -54,7 +54,7 @@ class ModelPredictiveControl:
 
     def solve(self):
         if self.config['replan']:
-            self.u = np.zeros(self.dim * self.horizon)
+            self.u = np.zeros(self.dim * self.horizon, dtype=np.float32)
         else:
             for _ in range(self.dim):
                 self.u = np.delete(self.u, 0)

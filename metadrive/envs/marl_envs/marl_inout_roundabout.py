@@ -117,7 +117,7 @@ class LidarStateObservationMARound(ObservationBase):
             self.cloud_points = cloud_points
             self.detected_objects = detected_objects
         self.current_observation = np.concatenate((state, np.asarray(other_v_info)))
-        return self.current_observation
+        return self.current_observation.astype(np.float32)
 
     def state_observe(self, vehicle):
         return self.state_obs.observe(vehicle)

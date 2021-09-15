@@ -104,7 +104,8 @@ class TollGateObservation(LidarStateObservation):
         # print(toll_obs)
         state = self.state_observe(vehicle)
         other_v_info = self.lidar_observe(vehicle)
-        return np.concatenate((state, np.asarray(other_v_info), np.asarray(toll_obs)))
+        ret = np.concatenate((state, np.asarray(other_v_info), np.asarray(toll_obs)))
+        return ret.astype(np.float32)
 
 
 class MATollGateMap(PGMap):
