@@ -357,7 +357,7 @@ class IDMPolicy(BasePolicy):
 class ManualControllableIDMPolicy(IDMPolicy):
     def __init__(self, *args, **kwargs):
         super(ManualControllableIDMPolicy, self).__init__(*args, **kwargs)
-        self.manual_control_policy = ManualControlPolicy()
+        self.manual_control_policy = ManualControlPolicy(*args, **kwargs)
 
     def act(self, agent_id):
         if self.control_object is self.engine.current_track_vehicle and self.engine.global_config["manual_control"]\

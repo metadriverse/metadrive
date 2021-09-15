@@ -9,8 +9,8 @@ class ManualControlPolicy(EnvInputPolicy):
     """
     Control the current track vehicle
     """
-    def __init__(self):
-        super(ManualControlPolicy, self).__init__()
+    def __init__(self,obj, seed):
+        super(ManualControlPolicy, self).__init__(obj, seed)
         config = get_global_config()
         self.engine.accept("t", self.toggle_takeover)
         if config["manual_control"] and config["use_render"]:
@@ -47,8 +47,8 @@ class TakeoverPolicy(EnvInputPolicy):
     """
     Record the takeover signal
     """
-    def __init__(self):
-        super(TakeoverPolicy, self).__init__()
+    def __init__(self, obj, seed):
+        super(TakeoverPolicy, self).__init__(obj, seed)
         config = get_global_config()
         if config["manual_control"] and config["use_render"]:
             if config["controller"] == "joystick":

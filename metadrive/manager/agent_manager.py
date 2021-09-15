@@ -74,17 +74,19 @@ class AgentManager(BaseManager):
 
     def _get_policy(self, obj):
         # note: agent.id = object id
+        if self.engine.global_config["agent_policy"] is not None:
+            return self.engine.global_config["agent_policy"](obj, self.generate_seed())
         if self.engine.global_config["manual_control"] and self.engine.global_config["use_render"]:
             if self.engine.global_config.get("use_AI_protector", False):
-                policy = AIProtectPolicy()
+                policy = AIProtectPolicy(obj, self.generate_seed())
             elif self.engine.global_config["IDM_agent"]:
                 policy = ManualControllableIDMPolicy(obj, self.generate_seed())
             else:
-                policy = ManualControlPolicy()
+                policy = ManualControlPolicy(obj, self.generate_seed())
         elif self.engine.global_config["IDM_agent"]:
             policy = IDMPolicy(obj, self.generate_seed())
         else:
-            policy = EnvInputPolicy()
+            policy = EnvInputPolicy(obj, self.generate_seed())
         return policy
 
     def before_reset(self):
