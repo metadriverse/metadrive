@@ -41,6 +41,7 @@ or
 ```bash
 pip install metadrive-simulator
 ```
+*Note that the program is tested on both Linux and Windows. Some control and display issues in MacOS wait to be solved*
 
 You can verify the installation of MetaDrive via running the testing script:
 
@@ -49,7 +50,7 @@ You can verify the installation of MetaDrive via running the testing script:
 python -m metadrive.examples.profile_metadrive
 ```
 
-Note that please do not run the above command in a folder that has a sub-folder called `./metadrive`.
+*Note that please do not run the above command in a folder that has a sub-folder called `./metadrive`.*
 
 ## 🚕 Examples
 
@@ -90,8 +91,8 @@ Run the example of procedural generation of a new map as:
 python -m metadrive.examples.procedural_generation
 ```
 
-*Note that the above four scripts can not be ran in a headless machine.* 
-Please refer to the installation guideline in documentation for more information about how to launch runing in a headless machine.
+*Note that the above four scripts can not be ran in a headless machine.*
+*Please refer to the installation guideline in documentation for more information about how to launch runing in a headless machine.*
 
 Run the following command to draw the generated maps from procedural generation:
 
