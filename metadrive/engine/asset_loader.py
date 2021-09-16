@@ -90,3 +90,9 @@ def randomize_cover():
     selected = get_np_random().choice(files)
     selected_file = AssetLoader.file_path("{}/{}".format(background_folder_name, selected))
     return selected_file
+
+
+def get_logo_file():
+    file = AssetLoader.file_path("logo-tiny.png")
+    assert os.path.exists(file)
+    return file

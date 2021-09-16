@@ -10,7 +10,7 @@ from panda3d.core import AntialiasAttrib, loadPrcFileData, LineSegs, PythonCallb
 
 from metadrive.constants import RENDER_MODE_OFFSCREEN, RENDER_MODE_NONE, RENDER_MODE_ONSCREEN, EDITION, CamMask, \
     BKG_COLOR
-from metadrive.engine.asset_loader import initialize_asset_loader, close_asset_loader, randomize_cover
+from metadrive.engine.asset_loader import initialize_asset_loader, close_asset_loader, randomize_cover, get_logo_file
 from metadrive.engine.core.collision_callback import collision_callback
 from metadrive.engine.core.force_fps import ForceFPS
 from metadrive.engine.core.light import Light
@@ -44,6 +44,17 @@ def attach_cover_image(window_width, window_height):
     else:
         scale = window_height / window_width
     image.set_scale((scale, 1, scale))
+    image.setTransparency(True)
+    return image
+
+
+def attach_logo(engine):
+    cover_file_path = get_logo_file()
+    image = OnscreenImage(image=cover_file_path)
+    scale = 0.075
+    image.set_scale((scale * 3, 1, scale))
+    image.set_pos((0.8325 * engine.w_scale, 0, -0.94 * engine.h_scale))
+    image.set_antialias(AntialiasAttrib.MMultisample)
     image.setTransparency(True)
     return image
 
@@ -163,6 +174,7 @@ class EngineCore(ShowBase.ShowBase):
 
             # Display logo
             if self.mode == RENDER_MODE_ONSCREEN and (not self.global_config["debug"]):
+                self._window_logo = attach_logo(self)
                 self._loading_logo = attach_cover_image(
                     window_width=self.get_size()[0], window_height=self.get_size()[1]
                 )
