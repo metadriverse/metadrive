@@ -32,7 +32,6 @@ Install MetaDrive via:
 ```bash
 git clone https://github.com/decisionforce/metadrive.git
 cd metadrive
-pip install numpy cython
 pip install -e .
 ```
 
