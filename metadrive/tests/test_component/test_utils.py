@@ -1,32 +1,5 @@
 import numpy as np
 
-from metadrive.utils.cutils import import_cutils
-
-
-def _test_cutils(cutils):
-    for _ in range(20):
-        pos = np.random.normal(1000, 1000, size=(2, ))
-        n = cutils.cutils_norm(*pos.tolist())
-        assert abs(n - abs(np.linalg.norm(pos, ord=2))) < 1e-4
-
-        clip0 = cutils.cutils_clip(pos[0], 999, 1001)
-        clip1 = cutils.cutils_clip(pos[1], 999, 1001)
-        assert np.array_equal(np.clip(pos, 999, 1001), np.array([clip0, clip1]))
-
-        ppos = cutils.cutils_panda_position(*pos.tolist())
-        assert ppos[0] == pos[0]
-        assert ppos[1] == -pos[1]
-
-
-def test_cutils():
-    cutils = import_cutils(use_fake_cutils=False)
-    _test_cutils(cutils)
-
-
-def test_fake_cutils():
-    cutils = import_cutils(use_fake_cutils=True)
-    _test_cutils(cutils)
-
 
 def test_utils():
     from metadrive.utils.math_utils import safe_clip, safe_clip_for_small_array, get_vertical_vector, distance_greater
@@ -45,6 +18,4 @@ def test_utils():
 
 
 if __name__ == '__main__':
-    test_cutils()
-    test_fake_cutils()
     test_utils()

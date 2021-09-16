@@ -14,7 +14,6 @@ We recommend to use the command following to install::
 
     git clone https://github.com/decisionforce/metadrive.git
     cd metadrive
-    pip install numpy cython
     pip install -e .
 
 
