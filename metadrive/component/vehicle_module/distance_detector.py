@@ -6,16 +6,81 @@ import numpy as np
 from panda3d.bullet import BulletGhostNode, BulletSphereShape
 from panda3d.core import NodePath
 
-from metadrive.constants import Mask
 from metadrive.constants import CamMask, CollisionGroup
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.engine.engine_utils import get_engine
-from metadrive.utils import import_cutils
 from metadrive.utils.coordinates_shift import panda_position
-
-cutils = import_cutils()
+from metadrive.utils.math_utils import panda_position, get_laser_end
 
 detect_result = namedtuple("detect_result", "cloud_points detected_objects")
+
+
+def add_cloud_point_vis(
+    point_x, point_y, height, num_lasers, laser_index, ANGLE_FACTOR, MARK_COLOR0, MARK_COLOR1, MARK_COLOR2
+):
+    f = laser_index / num_lasers if ANGLE_FACTOR else 1
+    return laser_index, (point_x, point_y, height), (f * MARK_COLOR0, f * MARK_COLOR1, f * MARK_COLOR2)
+
+
+def perceive(
+    cloud_points, detector_mask, mask, lidar_range, perceive_distance, heading_theta, vehicle_position_x,
+    vehicle_position_y, num_lasers, height, physics_world, extra_filter_node, require_colors, ANGLE_FACTOR, MARK_COLOR0,
+    MARK_COLOR1, MARK_COLOR2
+):
+    cloud_points.fill(1.0)
+    detected_objects = []
+    colors = []
+    pg_start_position = panda_position(vehicle_position_x, vehicle_position_y, height)
+
+    for laser_index in range(num_lasers):
+        if (detector_mask is not None) and (not detector_mask[laser_index]):
+            # update vis
+            if require_colors:
+                point_x, point_y = get_laser_end(
+                    lidar_range, perceive_distance, laser_index, heading_theta, vehicle_position_x, vehicle_position_y
+                )
+                point_x, point_y, point_z = panda_position(point_x, point_y, height)
+                colors.append(
+                    add_cloud_point_vis(
+                        point_x, point_y, height, num_lasers, laser_index, ANGLE_FACTOR, MARK_COLOR0, MARK_COLOR1,
+                        MARK_COLOR2
+                    )
+                )
+            continue
+
+        # # coordinates problem here! take care
+        point_x, point_y = get_laser_end(
+            lidar_range, perceive_distance, laser_index, heading_theta, vehicle_position_x, vehicle_position_y
+        )
+        laser_end = panda_position(point_x, point_y, height)
+        result = physics_world.rayTestClosest(pg_start_position, laser_end, mask)
+        node = result.getNode()
+        if node in extra_filter_node:
+            # Fall back to all tests.
+            results = physics_world.rayTestAll(pg_start_position, laser_end, mask)
+            hits = results.getHits()
+            hits = sorted(hits, key=lambda ret: ret.getHitFraction())
+            for result in hits:
+                if result.getNode() in extra_filter_node:
+                    continue
+                detected_objects.append(result)
+                cloud_points[laser_index] = result.getHitFraction()
+                laser_end = result.getHitPos()
+                break
+        else:
+            cloud_points[laser_index] = result.getHitFraction()
+            if result.hasHit():
+                laser_end = result.getHitPos()
+            if node:
+                detected_objects.append(result)
+        if require_colors:
+            colors.append(
+                add_cloud_point_vis(
+                    laser_end[0], laser_end[1], height, num_lasers, laser_index, ANGLE_FACTOR, MARK_COLOR0, MARK_COLOR1,
+                    MARK_COLOR2
+                )
+            )
+    return cloud_points, detected_objects, colors
 
 
 class DistanceDetector:
@@ -68,7 +133,7 @@ class DistanceDetector:
         vehicle_position = base_vehicle.position
         heading_theta = base_vehicle.heading_theta
         assert not isinstance(detector_mask, str), "Please specify detector_mask either with None or a numpy array."
-        cloud_points, detected_objects, colors = cutils.cutils_perceive(
+        cloud_points, detected_objects, colors = perceive(
             cloud_points=np.ones((self.num_lasers, ), dtype=float),
             detector_mask=detector_mask.astype(dtype=np.uint8) if detector_mask is not None else None,
             mask=self.mask,

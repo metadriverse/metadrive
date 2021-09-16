@@ -48,8 +48,8 @@ def test_original_lidar(render=False):
             for hit in env.observations[DEFAULT_AGENT].detected_objects:
                 if isinstance(hit, BaseVehicle):
                     detect_base_vehicle = True
-            if d:
-                break
+            # if d:
+            #     break
         if not (detect_traffic_vehicle and detect_base_vehicle):
             print("Lidar detection failed")
         assert detect_traffic_vehicle and detect_base_vehicle, "Lidar detection failed"
@@ -110,5 +110,5 @@ def test_lidar_with_mask(render=False):
 
 
 if __name__ == "__main__":
-    test_lidar_with_mask(render=False)
-    test_original_lidar(render=False)
+    # test_lidar_with_mask(render=False)
+    test_original_lidar(render=True)

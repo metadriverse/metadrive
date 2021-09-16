@@ -3,9 +3,6 @@ import time
 from typing import Tuple
 
 import numpy as np
-from metadrive.utils.cutils import import_cutils
-
-cutils = import_cutils()
 
 number_pos_inf = float("inf")
 number_neg_inf = float("-inf")
@@ -48,12 +45,19 @@ def time_me(fn):
 
 
 def norm(x, y):
-    # return math.sqrt(x**2 + y**2)
-    return cutils.cutils_norm(x, y)
+    return math.sqrt(x**2 + y**2)
+
+
+def clip(a, low, high):
+    return min(max(a, low), high)
 
 
 def point_distance(x, y):
     return norm(x[0] - y[0], x[1] - y[1])
+
+
+def panda_position(position_x, position_y, z=0.0):
+    return position_x, -position_y, z
 
 
 def distance_greater(vec1, vec2, length):
@@ -61,15 +65,11 @@ def distance_greater(vec1, vec2, length):
     return ((vec1[0] - vec2[0])**2 + (vec1[1] - vec2[1])**2) > length**2
 
 
-def clip(a, low, high):
-    # Since we clip all observation all the times. So adding a breakpoint in this function is really helpful!
-    # if a < low:
-    #     print('Small Value')
-    # if a > high:
-    #     print('Large Value')
-
-    # return min(max(a, low), high)
-    return cutils.cutils_clip(a, low, high)
+def get_laser_end(lidar_range, perceive_distance, laser_index, heading_theta, vehicle_position_x, vehicle_position_y):
+    return (
+        perceive_distance * math.cos(lidar_range[laser_index] + heading_theta) + vehicle_position_x,
+        perceive_distance * math.sin(lidar_range[laser_index] + heading_theta) + vehicle_position_y
+    )
 
 
 def dot(a, b):
