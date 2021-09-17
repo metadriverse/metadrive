@@ -31,8 +31,7 @@ def _test_bicycle_model():
     o = env.reset()
     vehicle = env.current_track_vehicle
     v_dir = vehicle.velocity_direction
-    bicycle_model.reset(*vehicle.position, vehicle.speed, vehicle.heading_theta,
-                        np.arctan2(v_dir[1], v_dir[0]))
+    bicycle_model.reset(*vehicle.position, vehicle.speed, vehicle.heading_theta, np.arctan2(v_dir[1], v_dir[0]))
     actions = []
     for steering in [1.0, 0.8, 0.6, 0.4, 0.2, 0]:
         for dir in [-1, 1]:
@@ -44,12 +43,15 @@ def _test_bicycle_model():
         vehicle = env.current_track_vehicle
         v_dir = vehicle.velocity_direction
         predict_states.append(
-            predict(current_state=(*env.current_track_vehicle.position,
-                                   env.current_track_vehicle.speed,
-                                   env.current_track_vehicle.heading_theta,
-                                   np.arctan2(v_dir[1], v_dir[0])),
-                    actions=[actions[i] for i in range(s, s + horizon)],
-                    model=bicycle_model))
+            predict(
+                current_state=(
+                    *env.current_track_vehicle.position, env.current_track_vehicle.speed,
+                    env.current_track_vehicle.heading_theta, np.arctan2(v_dir[1], v_dir[0])
+                ),
+                actions=[actions[i] for i in range(s, s + horizon)],
+                model=bicycle_model
+            )
+        )
         o, r, d, info = env.step(actions[s])
         index = s - horizon
         if index >= 0:

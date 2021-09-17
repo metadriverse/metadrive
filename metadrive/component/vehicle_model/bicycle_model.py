@@ -5,7 +5,6 @@ class BicycleModel:
     """
     This model can be used to predict next state
     """
-
     def __init__(self):
         self.state = dict(x=0, y=0, speed=0, heading_theta=0, velocity_dir=0)
 
