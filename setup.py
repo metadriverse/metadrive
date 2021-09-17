@@ -3,10 +3,7 @@ import sys
 from distutils.core import setup
 from os import path
 
-import numpy
 from setuptools import find_namespace_packages  # This should be place at top!
-from Cython.Build import cythonize
-from distutils.extension import Extension
 
 
 def is_mac():
@@ -29,12 +26,6 @@ print("We will install the following packages: ", packages)
 """ ===== Remember to modify the PG_EDITION at first ====="""
 version = "0.2.3"
 
-ext_modules = cythonize([Extension(
-    "metadrive.cutils", ["metadrive/cutils.pyx"], include_dirs=[numpy.get_include()]
-)])
-for ele in ext_modules:
-    assert isinstance(ele, Extension)
-
 install_requires = [
     "gym",
     "numpy<=1.19.3",
@@ -49,7 +40,6 @@ install_requires = [
     "pillow",
     "pytest",
     "opencv-python-headless",
-    "Cython==0.29.6",
 ]
 
 # if (not is_mac()) and (not is_win()):
@@ -68,19 +58,7 @@ setup(
     license="Apache 2.0",
     long_description=long_description,
     long_description_content_type='text/markdown',
-
-    ext_modules=ext_modules
 )
-
-msg = """
-      If you encounter the following error:
-
-          error: Microsoft Visual C++ 14.0 or greater is required. Get it with "Microsoft C++ Build Tools": https://visualstudio.microsoft.com/visual-cpp-build-tools/
-
-      Please feel free to continue! We will disable cython utility and fall back to all python code. Please enjoy!
-
-      """
-print(msg)
 
 """
 How to publish to pypi?  Noted by Zhenghao in Dec 27, 2020.
