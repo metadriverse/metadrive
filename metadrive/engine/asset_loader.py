@@ -94,5 +94,5 @@ def randomize_cover():
 
 def get_logo_file():
     file = AssetLoader.file_path("logo-tiny.png")
-    assert os.path.exists(file)
+    # assert os.path.exists(file)
     return file
