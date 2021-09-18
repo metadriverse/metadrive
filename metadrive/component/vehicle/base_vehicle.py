@@ -1,6 +1,7 @@
 import math
+
 from metadrive.utils.space import VehicleParameterSpace, ParameterSpace
-from metadrive.utils.math_utils import safe_clip_for_small_array
+from metadrive.utils.math_utils import norm
 from collections import deque
 from typing import Union, Optional
 import gym
@@ -112,10 +113,10 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     path = None
 
     def __init__(
-        self,
-        vehicle_config: Union[dict, Config] = None,
-        name: str = None,
-        random_seed=None,
+            self,
+            vehicle_config: Union[dict, Config] = None,
+            name: str = None,
+            random_seed=None,
     ):
         """
         This Vehicle Config is different from self.get_config(), and it is used to define which modules to use, and
@@ -442,8 +443,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         if not lateral_norm * forward_direction_norm:
             return 0
         cos = (
-            (forward_direction[0] * lateral[0] + forward_direction[1] * lateral[1]) /
-            (lateral_norm * forward_direction_norm)
+                (forward_direction[0] * lateral[0] + forward_direction[1] * lateral[1]) /
+                (lateral_norm * forward_direction_norm)
         )
         # return cos
         # Normalize to 0, 1
@@ -689,7 +690,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             ckpt_idx = routing._target_checkpoints_index
             for surrounding_v in surrounding_vs:
                 if surrounding_v.lane_index[:-1] == (routing.checkpoints[ckpt_idx[0]], routing.checkpoints[ckpt_idx[1]
-                                                                                                           ]):
+                ]):
                     if self.lane.local_coordinates(self.position)[0] - \
                             self.lane.local_coordinates(surrounding_v.position)[0] < 0:
                         self.front_vehicles.add(surrounding_v)
@@ -704,10 +705,10 @@ class BaseVehicle(BaseObject, BaseVehicleState):
 
     @classmethod
     def get_action_space_before_init(
-        cls, extra_action_dim: int = 0, discrete_action=False, steering_dim=5, throttle_dim=5
+            cls, extra_action_dim: int = 0, discrete_action=False, steering_dim=5, throttle_dim=5
     ):
         if not discrete_action:
-            return gym.spaces.Box(-1.0, 1.0, shape=(2 + extra_action_dim, ), dtype=np.float32)
+            return gym.spaces.Box(-1.0, 1.0, shape=(2 + extra_action_dim,), dtype=np.float32)
         else:
             return gym.spaces.MultiDiscrete([steering_dim, throttle_dim])
 
@@ -724,8 +725,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     def arrive_destination(self):
         long, lat = self.navigation.final_lane.local_coordinates(self.position)
         flag = (self.navigation.final_lane.length - 5 < long < self.navigation.final_lane.length + 5) and (
-            self.navigation.get_current_lane_width() / 2 >= lat >=
-            (0.5 - self.navigation.get_current_lane_num()) * self.navigation.get_current_lane_width()
+                self.navigation.get_current_lane_width() / 2 >= lat >=
+                (0.5 - self.navigation.get_current_lane_num()) * self.navigation.get_current_lane_width()
         )
         return flag
 
@@ -745,9 +746,9 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     @property
     def replay_done(self):
         return self._replay_done if hasattr(self, "_replay_done") else (
-            self.crash_building or self.crash_vehicle or
-            # self.on_white_continuous_line or
-            self.on_yellow_continuous_line
+                self.crash_building or self.crash_vehicle or
+                # self.on_white_continuous_line or
+                self.on_yellow_continuous_line
         )
 
     @property
@@ -782,3 +783,35 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     def set_break_down(self, break_down=True):
         self.break_down = break_down
         # self.set_static(True)
+
+    def convert_to_vehicle_coordinates(self, position):
+        """
+        Give a world position, and convert it to vehicle coordinates
+        """
+        # Projected to the heading of vehicle
+        # forward_vector = self.vehicle.get_forward_vector()
+        # forward_old = (forward_vector[0], -forward_vector[1])
+        vector = position - self.position
+        forward = self.heading
+
+        # print(f"[projection] Old forward {forward_old}, new heading {forward}")
+
+        norm_velocity = norm(forward[0], forward[1]) + 1e-6
+        project_on_heading = (vector[0] * forward[0] + vector[1] * forward[1]) / norm_velocity
+
+        side_direction = get_vertical_vector(forward)[1]
+        side_norm = norm(side_direction[0], side_direction[1]) + 1e-6
+        project_on_side = (vector[0] * side_direction[0] + vector[1] * side_direction[1]) / side_norm
+        return project_on_heading, project_on_side
+
+    def convert_to_world_coordinates(self, project_on_heading, project_on_side):
+        """
+        Give a position in vehicle coordinates, and convert it to world coordinates
+        """
+        theta = np.arctan2(project_on_heading, project_on_side)
+        theta += self.heading_theta
+        norm_len = norm(project_on_heading, project_on_side)
+        x = np.cos(theta) * norm_len
+        y = np.sin(theta) * norm_len
+        position = self.position
+        return position[0] + x, position[1] + y
