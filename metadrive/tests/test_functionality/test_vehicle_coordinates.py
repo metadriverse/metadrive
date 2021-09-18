@@ -13,7 +13,6 @@ def test_coordinates_shift():
                 # "use_render": True,
                 "decision_repeat": 5,
                 "rgb_clip": True,
-
                 "pstats": True,
                 # "discrete_action": True,
                 "map": "SSSSSS",
