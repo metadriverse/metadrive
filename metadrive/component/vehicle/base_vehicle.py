@@ -1,6 +1,7 @@
 import math
+
 from metadrive.utils.space import VehicleParameterSpace, ParameterSpace
-from metadrive.utils.math_utils import safe_clip_for_small_array
+from metadrive.utils.math_utils import norm, wrap_to_pi
 from collections import deque
 from typing import Union, Optional
 import gym
@@ -782,3 +783,34 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     def set_break_down(self, break_down=True):
         self.break_down = break_down
         # self.set_static(True)
+
+    def convert_to_vehicle_coordinates(self, position, ego_heading=None, ego_position=None):
+        """
+        Give a world position, and convert it to vehicle coordinates
+        The vehicle heading is X direction and right side is Y direction
+        """
+        # Projected to the heading of vehicle
+        pos = ego_heading if ego_position is not None else self.position
+        vector = position - pos
+        forward = self.heading if ego_heading is None else ego_position
+
+        norm_velocity = norm(forward[0], forward[1]) + 1e-6
+        project_on_heading = (vector[0] * forward[0] + vector[1] * forward[1]) / norm_velocity
+
+        side_direction = get_vertical_vector(forward)[1]
+        side_norm = norm(side_direction[0], side_direction[1]) + 1e-6
+        project_on_side = (vector[0] * side_direction[0] + vector[1] * side_direction[1]) / side_norm
+        return project_on_heading, project_on_side
+
+    def convert_to_world_coordinates(self, project_on_heading, project_on_side):
+        """
+        Give a position in vehicle coordinates, and convert it to world coordinates
+        The vehicle heading is X direction and right side is Y direction
+        """
+        theta = np.arctan2(project_on_side, project_on_heading)
+        theta = wrap_to_pi(self.heading_theta) + wrap_to_pi(theta)
+        norm_len = norm(project_on_heading, project_on_side)
+        position = self.position
+        heading = np.sin(theta) * norm_len
+        side = np.cos(theta) * norm_len
+        return position[0] + side, position[1] + heading

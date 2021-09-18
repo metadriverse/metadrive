@@ -14,7 +14,7 @@ if __name__ == "__main__":
             "global_light": True,
             # "debug_static_world":True,
             "cull_scene": False,
-            "offscreen_render": True,
+            # "offscreen_render": True,
             # "controller": "joystick",
             "manual_control": True,
             "use_render": True,
@@ -38,7 +38,7 @@ if __name__ == "__main__":
             "driving_reward": 1.0,
             "vehicle_config": {
                 "enable_reverse": True,
-                "image_source": "depth_camera",
+                # "image_source": "depth_camera",
                 # "random_color": True
                 # "show_lidar": True,
                 # "spawn_lane_index":("1r1_0_", "1r1_1_", 0),
