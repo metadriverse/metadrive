@@ -1,6 +1,6 @@
 from metadrive.component.vehicle_module.base_camera import BaseCamera
 from metadrive.constants import CamMask
-from metadrive.engine.engine_utils import engine_initialized
+from metadrive.engine.engine_utils import engine_initialized, get_global_config
 
 
 class RGBCamera(BaseCamera):
@@ -11,7 +11,7 @@ class RGBCamera(BaseCamera):
 
     def __init__(self):
         assert engine_initialized(), "You should initialize engine before adding camera to vehicle"
-        config = self.engine.global_config["vehicle_config"]["rgb_camera"]
+        config = get_global_config()["vehicle_config"]["rgb_camera"]
         self.BUFFER_W, self.BUFFER_H = config[0], config[1]
         super(RGBCamera, self).__init__()
         cam = self.get_cam()

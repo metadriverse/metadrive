@@ -1,10 +1,6 @@
 import math
 
 import numpy as np
-from panda3d.bullet import BulletWorld, BulletBodyNode
-from panda3d.core import LVector3
-from panda3d.core import NodePath
-
 from metadrive.base_class.base_runnable import BaseRunnable
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.engine.core.physics_world import PhysicsWorld
@@ -12,6 +8,9 @@ from metadrive.utils import Vector
 from metadrive.utils.coordinates_shift import panda_position, metadrive_position, panda_heading, metadrive_heading
 from metadrive.utils.math_utils import clip
 from metadrive.utils.math_utils import norm
+from panda3d.bullet import BulletWorld, BulletBodyNode
+from panda3d.core import LVector3
+from panda3d.core import NodePath
 
 
 class PhysicsNodeList(list):

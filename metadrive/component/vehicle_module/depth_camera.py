@@ -1,4 +1,4 @@
-from panda3d.core import Shader, RenderState, ShaderAttrib, GeoMipTerrain
+from panda3d.core import Vec3, Shader, RenderState, ShaderAttrib, GeoMipTerrain
 
 from metadrive.component.vehicle_module.base_camera import BaseCamera
 from metadrive.constants import CamMask
@@ -18,7 +18,7 @@ class DepthCamera(BaseCamera):
 
     def __init__(self):
         assert engine_initialized(), "You should initialize engine before adding camera to vehicle"
-        config = self.engine.global_config["vehicle_config"]["depth_camera"]
+        config = get_global_config()["vehicle_config"]["depth_camera"]
         self.BUFFER_W, self.BUFFER_H = config[0], config[1]
         self.VIEW_GROUND = config[2]
         super(DepthCamera, self).__init__()
