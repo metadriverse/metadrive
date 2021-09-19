@@ -1,13 +1,13 @@
 import math
-from metadrive.component.lane.abs_lane import AbstractLane
 from typing import Set
 
 import numpy as np
-from panda3d.bullet import BulletGhostNode, ZUp, BulletCylinderShape
+from panda3d.bullet import BulletGhostNode, BulletCylinderShape
 from panda3d.core import NodePath
 
+from metadrive.component.lane.abs_lane import AbstractLane
 from metadrive.component.vehicle_module.distance_detector import DistanceDetector
-from metadrive.constants import BodyName, CamMask, CollisionGroup
+from metadrive.constants import CamMask, CollisionGroup
 from metadrive.engine import get_engine
 from metadrive.utils.coordinates_shift import panda_position
 from metadrive.utils.utils import get_object_from_node

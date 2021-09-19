@@ -1,5 +1,4 @@
 from metadrive.envs.metadrive_env import MetaDriveEnv
-from metadrive.envs.metadrive_env import MetaDriveEnv
 from metadrive.obs.top_down_obs import TopDownObservation
 from metadrive.obs.top_down_obs_multi_channel import TopDownMultiChannel
 from metadrive.utils import Config

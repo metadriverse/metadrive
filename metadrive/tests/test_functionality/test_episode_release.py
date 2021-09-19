@@ -1,5 +1,4 @@
 from metadrive.envs.safe_metadrive_env import SafeMetaDriveEnv
-from metadrive.utils import setup_logger
 
 
 def test_episode_release():

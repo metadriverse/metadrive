@@ -1,5 +1,5 @@
-from metadrive import MetaDriveEnv
 import numpy as np
+
 from metadrive.envs.metadrive_env import MetaDriveEnv
 from metadrive.utils import recursive_equal, norm
 

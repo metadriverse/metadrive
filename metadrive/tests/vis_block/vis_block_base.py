@@ -6,9 +6,9 @@ from panda3d.core import Vec3, NodePath, LineSegs
 
 from metadrive.component.algorithm.BIG import NextStep
 from metadrive.component.map.base_map import BaseMap
+from metadrive.constants import BKG_COLOR
 from metadrive.constants import CollisionGroup
 from metadrive.engine.core.physics_world import PhysicsWorld
-from metadrive.constants import BKG_COLOR
 
 
 class TestBlock(ShowBase.ShowBase):

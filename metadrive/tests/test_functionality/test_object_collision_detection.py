@@ -1,6 +1,6 @@
-from metadrive.component.vehicle.vehicle_type import LVehicle
 from metadrive.component.static_object.traffic_object import TrafficCone, TrafficWarning
-from metadrive.constants import BodyName, TerminationState, DEFAULT_AGENT
+from metadrive.component.vehicle.vehicle_type import LVehicle
+from metadrive.constants import TerminationState, DEFAULT_AGENT
 from metadrive.envs.safe_metadrive_env import SafeMetaDriveEnv
 from metadrive.manager.object_manager import TrafficObjectManager
 

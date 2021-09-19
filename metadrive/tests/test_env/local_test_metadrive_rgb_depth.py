@@ -1,6 +1,7 @@
-from metadrive.envs.metadrive_env import MetaDriveEnv
-from metadrive.constants import TerminationState
 import numpy as np
+
+from metadrive.constants import TerminationState
+from metadrive.envs.metadrive_env import MetaDriveEnv
 
 info_keys = [
     "cost", "velocity", "steering", "acceleration", "step_reward", TerminationState.CRASH_VEHICLE,

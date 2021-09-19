@@ -1,16 +1,18 @@
 import copy
-from metadrive.manager.spawn_manager import SpawnManager
-from metadrive.manager.map_manager import MapManager
+
 import gym
 import numpy as np
+
 from metadrive.component.blocks.first_block import FirstPGBlock
 from metadrive.component.blocks.roundabout import Roundabout
 from metadrive.component.map.pg_map import PGMap
 from metadrive.component.road.road import Road
 from metadrive.envs.marl_envs.multi_agent_metadrive import MultiAgentMetaDrive
+from metadrive.manager.map_manager import MapManager
+from metadrive.manager.spawn_manager import SpawnManager
 from metadrive.obs.observation_base import ObservationBase
 from metadrive.obs.state_obs import StateObservation
-from metadrive.utils import get_np_random, norm, Config
+from metadrive.utils import norm, Config
 
 MARoundaboutConfig = dict(
     spawn_roads=[

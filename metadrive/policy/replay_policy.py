@@ -1,6 +1,7 @@
-from metadrive.policy.base_policy import BasePolicy
 import numpy as np
-from copy import deepcopy
+
+from metadrive.policy.base_policy import BasePolicy
+
 has_rendered = False
 
 

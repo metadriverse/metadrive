@@ -1,4 +1,3 @@
-import copy
 import logging
 from typing import Optional
 
@@ -35,7 +34,7 @@ def close_engine():
 
 def get_global_config():
     engine = get_engine()
-    return engine.global_config.copy()
+    return engine.global_config
 
 
 def set_global_random_seed(random_seed: Optional[int]):

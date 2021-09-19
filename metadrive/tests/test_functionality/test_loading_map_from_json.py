@@ -1,6 +1,6 @@
 import json
 
-from metadrive import MetaDriveEnv, MetaDriveEnv
+from metadrive import MetaDriveEnv
 from metadrive.utils import recursive_equal
 from metadrive.utils.generate_maps import generate_maps
 

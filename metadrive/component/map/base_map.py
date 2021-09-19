@@ -1,6 +1,7 @@
 import copy
 
 import numpy as np
+
 from metadrive.base_class.base_runnable import BaseRunnable
 from metadrive.component.algorithm.BIG import BigGenerateMethod
 from metadrive.component.blocks.first_block import FirstPGBlock

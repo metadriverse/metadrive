@@ -1,10 +1,10 @@
 from typing import Tuple, Union, List
 
 import numpy as np
-
-import metadrive.utils.math_utils as utils
 from metadrive.component.highway_vehicle.controller import ControlledVehicle
 from metadrive.component.highway_vehicle.kinematics import Vehicle
+
+import metadrive.utils.math_utils as utils
 from metadrive.component.static_object.base_static_object import BaseStaticObject
 from metadrive.constants import Route, LaneIndex
 from metadrive.manager.traffic_manager import TrafficManager

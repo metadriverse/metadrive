@@ -1,5 +1,3 @@
-import logging
-
 from metadrive.constants import BodyName
 from metadrive.utils.utils import get_object_from_node
 

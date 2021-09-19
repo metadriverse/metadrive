@@ -14,11 +14,11 @@ We welcome contributions to propose a better representation of the top-down sema
 """
 
 import random
-from metadrive.constants import HELP_MESSAGE
 
 import matplotlib.pyplot as plt
 
 from metadrive import TopDownMetaDrive
+from metadrive.constants import HELP_MESSAGE
 
 
 def draw_multi_channels_top_down_observation(obs):

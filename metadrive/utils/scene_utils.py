@@ -1,17 +1,17 @@
 import math
-from metadrive.constants import CollisionGroup
-from metadrive.engine.physics_node import BaseRigidBodyNode
 from typing import List, TYPE_CHECKING, Tuple, Union
 
 import numpy as np
 from panda3d.bullet import BulletBoxShape, BulletCylinderShape, ZUp
-from panda3d.core import TransformState, NodePath
+from panda3d.core import TransformState
 from panda3d.core import Vec3
 
 from metadrive.component.lane.abs_lane import AbstractLane
 from metadrive.component.lane.circular_lane import CircularLane
+from metadrive.constants import CollisionGroup
 from metadrive.constants import Decoration, BodyName
 from metadrive.engine.core.engine_core import EngineCore
+from metadrive.engine.physics_node import BaseRigidBodyNode
 from metadrive.utils.coordinates_shift import panda_heading
 from metadrive.utils.coordinates_shift import panda_position
 from metadrive.utils.math_utils import get_points_bounding_box, norm

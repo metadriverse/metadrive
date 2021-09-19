@@ -1,5 +1,5 @@
-from metadrive.component.vehicle.vehicle_type import DefaultVehicle
 from metadrive.component.vehicle.base_vehicle import BaseVehicle
+from metadrive.component.vehicle.vehicle_type import DefaultVehicle
 from metadrive.constants import BodyName
 from metadrive.constants import DEFAULT_AGENT
 from metadrive.envs.metadrive_env import MetaDriveEnv
