@@ -1,14 +1,9 @@
-import numpy as np
-from metadrive.utils.scene_utils import generate_invisible_static_wall
-
 from metadrive.component.blocks.bottleneck import PGBlock
 from metadrive.component.blocks.create_block_utils import CreateAdverseRoad, CreateRoadFrom, ExtendStraightLane
 from metadrive.component.blocks.pg_block import PGBlockSocket
 from metadrive.component.buildings.tollgate_building import TollGateBuilding
 from metadrive.component.road.road import Road
-from metadrive.constants import BodyName
-from metadrive.constants import CamMask, LineType, LineColor
-from metadrive.engine.asset_loader import AssetLoader
+from metadrive.constants import LineType, LineColor
 from metadrive.engine.engine_utils import get_engine
 from metadrive.utils.space import ParameterSpace, Parameter, BlockParameterSpace
 

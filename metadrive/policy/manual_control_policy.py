@@ -1,8 +1,6 @@
 from metadrive.engine.core.manual_controller import KeyboardController, SteeringWheelController
-from metadrive.utils import clip
 from metadrive.examples import expert
 from metadrive.policy.env_input_policy import EnvInputPolicy
-from metadrive.engine.engine_utils import get_global_config
 
 
 class ManualControlPolicy(EnvInputPolicy):
@@ -11,7 +9,7 @@ class ManualControlPolicy(EnvInputPolicy):
     """
     def __init__(self, obj, seed):
         super(ManualControlPolicy, self).__init__(obj, seed)
-        config = get_global_config()
+        config = self.engine.global_config
         self.engine.accept("t", self.toggle_takeover)
         if config["manual_control"] and config["use_render"]:
             if config["controller"] == "keyboard":

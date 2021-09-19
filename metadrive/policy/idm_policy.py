@@ -5,8 +5,7 @@ import numpy as np
 from metadrive.component.vehicle_module.PID_controller import PIDController
 from metadrive.policy.base_policy import BasePolicy
 from metadrive.policy.manual_control_policy import ManualControlPolicy
-from metadrive.utils.math_utils import not_zero, wrap_to_pi, point_distance
-from metadrive.utils.scene_utils import is_same_lane_index, is_following_lane_index
+from metadrive.utils.math_utils import not_zero, wrap_to_pi
 
 
 class FrontBackObjects:

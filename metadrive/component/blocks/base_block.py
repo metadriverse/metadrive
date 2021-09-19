@@ -5,6 +5,7 @@ import numpy as np
 from panda3d.bullet import BulletBoxShape, BulletRigidBodyNode, BulletGhostNode
 from panda3d.core import Vec3, LQuaternionf, Vec4, CardMaker, TextureStage, RigidBodyCombiner, \
     TransparencyAttrib, SamplerState, NodePath
+
 from metadrive.base_class.base_object import BaseObject
 from metadrive.component.lane.abs_lane import AbstractLane
 from metadrive.component.lane.circular_lane import CircularLane

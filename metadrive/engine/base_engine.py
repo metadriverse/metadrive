@@ -1,5 +1,4 @@
 import logging
-
 import time
 from collections import OrderedDict
 from typing import Callable, Optional, Union, List, Dict, AnyStr

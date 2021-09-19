@@ -1,5 +1,3 @@
-import logging
-
 from direct.controls.InputState import InputState
 
 from metadrive.utils import is_win, is_mac

@@ -14,13 +14,13 @@ Options for --env argument:
 
 """
 import argparse
-from metadrive.policy.idm_policy import ManualControllableIDMPolicy
 
 from metadrive import (
     MultiAgentMetaDrive, MultiAgentTollgateEnv, MultiAgentBottleneckEnv, MultiAgentIntersectionEnv,
     MultiAgentRoundaboutEnv, MultiAgentParkingLotEnv
 )
 from metadrive.constants import HELP_MESSAGE
+from metadrive.policy.idm_policy import ManualControllableIDMPolicy
 
 if __name__ == "__main__":
     envs = dict(

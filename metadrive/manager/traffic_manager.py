@@ -1,17 +1,16 @@
-from metadrive.component.vehicle.base_vehicle import BaseVehicle
 import copy
 import logging
-from collections import namedtuple, deque
-from typing import Tuple, Dict
+import math
+from collections import namedtuple
+from typing import Dict
 
 from metadrive.component.lane.abs_lane import AbstractLane
 from metadrive.component.map.base_map import BaseMap
 from metadrive.component.road.road import Road
+from metadrive.component.vehicle.base_vehicle import BaseVehicle
 from metadrive.constants import TARGET_VEHICLES, TRAFFIC_VEHICLES, OBJECT_TO_AGENT, AGENT_TO_OBJECT
-from metadrive.engine.engine_utils import get_engine
 from metadrive.manager.base_manager import BaseManager
-from metadrive.utils import norm, merge_dicts
-import math
+from metadrive.utils import merge_dicts
 
 BlockVehicles = namedtuple("block_vehicles", "trigger_road vehicles")
 
@@ -194,7 +193,6 @@ class TrafficManager(BaseManager):
         :return: List of vehicles
         """
 
-        from metadrive.component.blocks.ramp import InRampOnStraight
         _traffic_vehicles = []
         total_num = int(lane.length / self.VEHICLE_GAP)
         vehicle_longs = [i * self.VEHICLE_GAP for i in range(total_num)]

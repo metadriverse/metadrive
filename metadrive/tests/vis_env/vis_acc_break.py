@@ -1,5 +1,4 @@
 from metadrive.envs.metadrive_env import MetaDriveEnv
-from metadrive.utils import setup_logger
 
 if __name__ == "__main__":
     config = {

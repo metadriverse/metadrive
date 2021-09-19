@@ -7,7 +7,6 @@ from metadrive.constants import TerminationState
 from metadrive.envs.metadrive_env import MetaDriveEnv
 from metadrive.manager.spawn_manager import SpawnManager
 from metadrive.utils import setup_logger, get_np_random, Config
-from metadrive.utils.config import merge_dicts
 
 MULTI_AGENT_METADRIVE_DEFAULT_CONFIG = dict(
     # ===== Multi-agent =====

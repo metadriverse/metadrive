@@ -1,9 +1,7 @@
 import math
-
-from metadrive.utils.space import VehicleParameterSpace, ParameterSpace
-from metadrive.utils.math_utils import norm, wrap_to_pi
 from collections import deque
 from typing import Union, Optional
+
 import gym
 import numpy as np
 import seaborn as sns
@@ -20,19 +18,21 @@ from metadrive.component.vehicle_module.depth_camera import DepthCamera
 from metadrive.component.vehicle_module.distance_detector import SideDetector, LaneLineDetector
 from metadrive.component.vehicle_module.lidar import Lidar
 from metadrive.component.vehicle_module.mini_map import MiniMap
-from metadrive.component.vehicle_module.rgb_camera import RGBCamera
 from metadrive.component.vehicle_module.navigation import Navigation
+from metadrive.component.vehicle_module.rgb_camera import RGBCamera
 from metadrive.constants import BodyName, CollisionGroup
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.engine.core.image_buffer import ImageBuffer
 from metadrive.engine.engine_utils import get_engine, engine_initialized
 from metadrive.engine.physics_node import BaseRigidBodyNode
-from metadrive.utils import Config, safe_clip_for_small_array, Vector
+from metadrive.utils import Config, safe_clip_for_small_array
 from metadrive.utils import get_np_random
-from metadrive.utils.coordinates_shift import panda_position, metadrive_position, panda_heading, metadrive_heading
+from metadrive.utils.coordinates_shift import panda_heading, metadrive_heading
 from metadrive.utils.math_utils import get_vertical_vector, norm, clip
+from metadrive.utils.math_utils import wrap_to_pi
 from metadrive.utils.scene_utils import ray_localization
 from metadrive.utils.scene_utils import rect_region_detection
+from metadrive.utils.space import VehicleParameterSpace, ParameterSpace
 
 
 class BaseVehicleState:

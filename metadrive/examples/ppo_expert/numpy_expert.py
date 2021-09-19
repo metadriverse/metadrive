@@ -18,8 +18,9 @@ default_policy/value_out/bias (1,)
 import os.path as osp
 
 import numpy as np
-from metadrive.obs.state_obs import LidarStateObservation
+
 from metadrive.engine.engine_utils import get_global_config
+from metadrive.obs.state_obs import LidarStateObservation
 
 ckpt_path = osp.join(osp.dirname(__file__), "expert_weights.npz")
 _expert_weights = None

@@ -13,10 +13,10 @@ try:
 except ImportError:
     pass
 
-from metadrive.component.map.base_map import BaseMap
-from metadrive.constants import LineColor
 from metadrive.component.blocks.argoverse_block import ArgoverseBlock
 from metadrive.component.lane.argoverse_lane import ArgoverseLane
+from metadrive.component.map.base_map import BaseMap
+from metadrive.constants import LineColor
 
 logger = logging.getLogger(__name__)
 

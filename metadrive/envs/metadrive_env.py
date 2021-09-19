@@ -1,19 +1,18 @@
-import copy
+import logging
 import logging
 import os.path as osp
-from typing import Union, Dict, AnyStr, Tuple
+from typing import Union
 
 import numpy as np
-from metadrive.component.blocks.first_block import FirstPGBlock
+
 from metadrive.component.map.base_map import BaseMap, MapGenerateMethod, parse_map_config
 from metadrive.component.vehicle.base_vehicle import BaseVehicle
 from metadrive.constants import DEFAULT_AGENT, TerminationState
-from metadrive.engine.engine_utils import engine_initialized
 from metadrive.envs.base_env import BaseEnv
 from metadrive.manager.traffic_manager import TrafficMode
 from metadrive.obs.image_obs import ImageStateObservation
 from metadrive.obs.state_obs import LidarStateObservation
-from metadrive.utils import clip, Config, concat_step_infos, get_np_random
+from metadrive.utils import clip, Config, get_np_random
 
 pregenerated_map_file = osp.join(
     osp.dirname(osp.dirname(osp.abspath(__file__))), "assets", "maps",

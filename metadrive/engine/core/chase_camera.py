@@ -1,6 +1,4 @@
 import math
-from metadrive.utils.math_utils import clip
-from panda3d.core import WindowProperties
 import queue
 from collections import deque
 from typing import Tuple
@@ -8,6 +6,7 @@ from typing import Tuple
 import numpy as np
 from direct.controls.InputState import InputState
 from panda3d.core import Vec3, Point3
+from panda3d.core import WindowProperties
 
 from metadrive.constants import CollisionGroup
 from metadrive.engine.engine_utils import get_engine

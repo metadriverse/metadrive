@@ -1,12 +1,5 @@
-import copy
-import json
-import logging
-import os.path as osp
-
-from metadrive.component.map.base_map import BaseMap, MapGenerateMethod
 from metadrive.component.map.pg_map import PGMap
 from metadrive.manager.base_manager import BaseManager
-from metadrive.utils import recursive_equal
 
 
 class MapManager(BaseManager):

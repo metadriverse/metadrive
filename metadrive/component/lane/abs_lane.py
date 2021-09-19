@@ -1,10 +1,11 @@
 import math
 from abc import ABCMeta, abstractmethod
 from typing import Tuple
-from metadrive.utils import norm
+
 import numpy as np
 
 from metadrive.constants import LineType, LineColor
+from metadrive.utils import norm
 
 
 class AbstractLane:
