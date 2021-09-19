@@ -1,6 +1,6 @@
 from metadrive.component.vehicle_module.base_camera import BaseCamera
 from metadrive.constants import CamMask
-from metadrive.engine.engine_utils import  engine_initialized
+from metadrive.engine.engine_utils import engine_initialized
 
 
 class RGBCamera(BaseCamera):
