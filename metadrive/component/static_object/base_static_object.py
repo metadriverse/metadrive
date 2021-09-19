@@ -1,7 +1,5 @@
 from typing import Sequence, Tuple
 
-import numpy as np
-
 from metadrive.base_class.base_object import BaseObject
 
 LaneIndex = Tuple[str, str, int]

@@ -1,5 +1,4 @@
 import math
-from metadrive.utils.math_utils import wrap_to_pi
 from typing import Tuple, Union
 
 import numpy as np
@@ -7,6 +6,7 @@ import numpy as np
 from metadrive.component.lane.abs_lane import AbstractLane
 from metadrive.constants import LineType
 from metadrive.utils import norm
+from metadrive.utils.math_utils import wrap_to_pi
 
 
 class WayPointLane(AbstractLane):

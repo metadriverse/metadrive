@@ -4,9 +4,9 @@ from metadrive.component.map.pg_map import PGMap
 from metadrive.component.road.road import Road
 from metadrive.envs.marl_envs.marl_inout_roundabout import LidarStateObservationMARound
 from metadrive.envs.marl_envs.multi_agent_metadrive import MultiAgentMetaDrive
+from metadrive.manager.map_manager import MapManager
 from metadrive.obs.observation_base import ObservationBase
 from metadrive.utils import Config
-from metadrive.manager.map_manager import MapManager
 from metadrive.utils.math_utils import clip
 
 MABottleneckConfig = dict(

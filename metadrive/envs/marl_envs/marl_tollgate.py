@@ -7,10 +7,10 @@ from metadrive.component.blocks.tollgate import TollGate
 from metadrive.component.map.pg_map import PGMap
 from metadrive.component.road.road import Road
 from metadrive.constants import TerminationState
-from metadrive.envs.marl_envs.multi_agent_metadrive import MultiAgentMetaDrive, pygame_replay
+from metadrive.envs.marl_envs.multi_agent_metadrive import MultiAgentMetaDrive
+from metadrive.manager.map_manager import MapManager
 from metadrive.obs.state_obs import LidarStateObservation, StateObservation
 from metadrive.utils import Config, clip
-from metadrive.manager.map_manager import MapManager
 
 MATollConfig = dict(
     spawn_roads=[Road(FirstPGBlock.NODE_2, FirstPGBlock.NODE_3), -Road(Merge.node(3, 0, 0), Merge.node(3, 0, 1))],

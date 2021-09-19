@@ -1,4 +1,5 @@
 from typing import Tuple
+
 from panda3d.bullet import BulletBoxShape
 from panda3d.bullet import BulletCylinderShape
 
@@ -7,7 +8,6 @@ from metadrive.constants import BodyName
 from metadrive.constants import CollisionGroup
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.engine.physics_node import BaseRigidBodyNode
-from metadrive.utils.coordinates_shift import panda_position, panda_heading
 
 LaneIndex = Tuple[str, str, int]
 

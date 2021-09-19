@@ -1,7 +1,6 @@
 from metadrive.component.algorithm.BIG import BIG
 from metadrive.component.road.road_network import RoadNetwork
 from metadrive.engine.asset_loader import initialize_asset_loader
-from metadrive.engine.engine_utils import set_global_random_seed
 from metadrive.tests.vis_block.vis_block_base import TestBlock
 
 

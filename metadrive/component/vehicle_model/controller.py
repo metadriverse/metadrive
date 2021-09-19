@@ -1,8 +1,8 @@
 from typing import List
 
 import numpy as np
-
 from metadrive.component.highway_vehicle.kinematics import Vehicle
+
 from metadrive.manager.traffic_manager import TrafficManager
 
 

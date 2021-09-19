@@ -2,7 +2,7 @@ import os
 import sys
 
 from PIL import Image
-from panda3d.core import PNMImage, loadPrcFileData
+from panda3d.core import PNMImage
 
 from metadrive.envs.metadrive_env import MetaDriveEnv
 

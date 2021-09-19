@@ -1,10 +1,11 @@
 import copy
-from metadrive.constants import TerminationState
 import logging
 import os
 import sys
 
 from panda3d.bullet import BulletBodyNode
+
+from metadrive.constants import TerminationState
 
 
 def import_pygame():

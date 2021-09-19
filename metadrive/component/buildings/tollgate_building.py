@@ -1,7 +1,6 @@
 from metadrive.component.buildings.base_building import BaseBuilding
-from metadrive.utils.scene_utils import generate_invisible_static_wall
 from metadrive.engine.asset_loader import AssetLoader
-from metadrive.utils.coordinates_shift import panda_position, panda_heading
+from metadrive.utils.scene_utils import generate_invisible_static_wall
 
 
 class TollGateBuilding(BaseBuilding):

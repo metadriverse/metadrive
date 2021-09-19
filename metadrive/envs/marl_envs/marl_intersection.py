@@ -1,14 +1,15 @@
 import copy
-from metadrive.manager.spawn_manager import SpawnManager
-from metadrive.manager.map_manager import MapManager
+
 from metadrive.component.blocks.first_block import FirstPGBlock
 from metadrive.component.blocks.intersection import InterSection
 from metadrive.component.map.pg_map import PGMap
 from metadrive.component.road.road import Road
 from metadrive.envs.marl_envs.marl_inout_roundabout import LidarStateObservationMARound
 from metadrive.envs.marl_envs.multi_agent_metadrive import MultiAgentMetaDrive
+from metadrive.manager.map_manager import MapManager
+from metadrive.manager.spawn_manager import SpawnManager
 from metadrive.obs.observation_base import ObservationBase
-from metadrive.utils import get_np_random, Config
+from metadrive.utils import Config
 
 MAIntersectionConfig = dict(
     spawn_roads=[

@@ -1,5 +1,6 @@
-from metadrive.envs.marl_envs.marl_inout_roundabout import MultiAgentRoundaboutEnv
 import copy
+
+from metadrive.envs.marl_envs.marl_inout_roundabout import MultiAgentRoundaboutEnv
 
 
 def test_ma_env_force_reset():

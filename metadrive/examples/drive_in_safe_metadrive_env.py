@@ -7,8 +7,8 @@ Auto-Drive mode may fail to solve some scenarios due to distribution mismatch.
 """
 import logging
 
-from metadrive.tests.test_functionality.test_object_collision_detection import ComplexEnv
 from metadrive.constants import HELP_MESSAGE
+from metadrive.tests.test_functionality.test_object_collision_detection import ComplexEnv
 
 if __name__ == "__main__":
     env = ComplexEnv(dict(use_render=True, manual_control=True, vehicle_config={"show_navi_mark": False}))
