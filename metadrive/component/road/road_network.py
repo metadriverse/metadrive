@@ -95,8 +95,8 @@ class RoadNetwork:
         In order to remain the lane index, ret is a 2-dim array structure like like [Road_lanes[lane_1, lane_2]]
         """
         ret = []
-        for _from, _to_dict in self.graph:
-            for _to, lanes in _to_dict:
+        for _from, _to_dict in self.graph.items():
+            for _to, lanes in _to_dict.items():
                 road = Road(_from, _to)
                 if road.is_negative_road() and road.is_valid_road():
                     ret.append(lanes)

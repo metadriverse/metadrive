@@ -19,6 +19,7 @@ if __name__ == "__main__":
             "manual_control": True,
             "use_render": True,
             "decision_repeat": 5,
+            # "need_inverse_traffic":True,
             "rgb_clip": True,
             # "debug": True,
             # "random_lane_num": True,
