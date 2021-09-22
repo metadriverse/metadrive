@@ -145,7 +145,6 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         # powertrain config
         self.increment_steering = self.config["increment_steering"]
         self.enable_reverse = self.config["enable_reverse"]
-        self.max_speed = self.config["max_speed"]
         self.max_steering = self.config["max_steering"]
 
         # visualization
@@ -814,3 +813,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         heading = np.sin(theta) * norm_len
         side = np.cos(theta) * norm_len
         return position[0] + side, position[1] + heading
+
+    @property
+    def max_speed(self):
+        return self.config["max_speed"]
