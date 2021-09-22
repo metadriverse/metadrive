@@ -42,6 +42,7 @@ METADRIVE_DEFAULT_CONFIG = dict(
 
     # ===== Traffic =====
     traffic_density=0.1,
+    need_inverse_traffic=False,
     traffic_mode=TrafficMode.Trigger,  # "Respawn", "Trigger"
     random_traffic=False,  # Traffic is randomized at default.
     # this will update the vehicle_config and set to traffic
