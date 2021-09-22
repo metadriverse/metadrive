@@ -6,7 +6,7 @@ if __name__ == "__main__":
     env = MetaDriveEnv(
         {
             "environment_num": 100,
-            "traffic_density": .1,
+            "traffic_density": .2,
             "traffic_mode": "trigger",
             "start_seed": 22,
             # "_disable_detector_mask":True,
@@ -19,7 +19,7 @@ if __name__ == "__main__":
             "manual_control": True,
             "use_render": True,
             "decision_repeat": 5,
-            "need_inverse_traffic":True,
+            "need_inverse_traffic": True,
             "rgb_clip": True,
             # "debug": True,
             # "random_lane_num": True,
@@ -32,7 +32,7 @@ if __name__ == "__main__":
             # },
             "pstats": True,
             # "discrete_action": True,
-            "map": "SXS",
+            "map": "SCrR",
             "random_traffic": False,
             "random_lane_width": True,
             "random_agent_model": True,

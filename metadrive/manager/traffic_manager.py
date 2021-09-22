@@ -238,7 +238,9 @@ class TrafficManager(BaseManager):
             # Propose candidate locations for spawning new vehicles
             trigger_lanes = block.get_intermediate_spawn_lanes()
             if self.engine.global_config["need_inverse_traffic"] and block.ID in ["S", "C", "r", "R"]:
-                trigger_lanes += block.block_network.get_negative_lanes()
+                neg_lanes = block.block_network.get_negative_lanes()
+                self.np_random.shuffle(neg_lanes)
+                trigger_lanes += neg_lanes
             potential_vehicle_configs = []
             for lanes in trigger_lanes:
                 for l in lanes:
