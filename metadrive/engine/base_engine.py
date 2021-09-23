@@ -309,7 +309,7 @@ class BaseEngine(EngineCore, Randomizable):
 
     def setup_main_camera(self):
         from metadrive.engine.core.chase_camera import MainCamera
-        if self.global_config["use_render"] or self.global_config["offscreen_render"]:
+        if self.global_config["use_render"]:
             return MainCamera(self, self.global_config["camera_height"], self.global_config["camera_dist"])
         else:
             return None
