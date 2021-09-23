@@ -2,7 +2,6 @@ from metadrive.envs.metadrive_env import MetaDriveEnv
 
 
 class MixedTrafficEnv(MetaDriveEnv):
-
     @classmethod
     def default_config(cls) -> "Config":
         config = super(MixedTrafficEnv, cls).default_config()
@@ -20,14 +19,16 @@ class MixedTrafficEnv(MetaDriveEnv):
 
 
 if __name__ == '__main__':
-    env = MixedTrafficEnv({
-        "rl_agent_ratio": 0.5,
-        "manual_control": True,
-        "use_render": True,
-        "disable_model_compression": True,
-        # "map": "SS",
-        "environment_num": 100,
-    })
+    env = MixedTrafficEnv(
+        {
+            "rl_agent_ratio": 0.5,
+            "manual_control": True,
+            "use_render": True,
+            "disable_model_compression": True,
+            # "map": "SS",
+            "environment_num": 100,
+        }
+    )
     try:
         obs = env.reset()
         for _ in range(100000):
