@@ -372,17 +372,17 @@ class MixedTrafficManager(TrafficManager):
 
             from metadrive.policy.idm_policy import IDMPolicy
             from metadrive.policy.expert_policy import ExpertPolicy
-            print("===== We are initializing {} vehicles =====".format(len(selected)))
-            print("Current seed: ", self.engine.global_random_seed)
+            # print("===== We are initializing {} vehicles =====".format(len(selected)))
+            # print("Current seed: ", self.engine.global_random_seed)
             for v_config in selected:
                 vehicle_type = self.random_vehicle_type()
                 v_config.update(self.engine.global_config["traffic_vehicle_config"])
                 random_v = self.spawn_object(vehicle_type, vehicle_config=v_config)
                 if self.np_random.random() < self.engine.global_config["rl_agent_ratio"]:
-                    print("Vehicle {} is assigned with RL policy!".format(random_v.id))
-                    self.engine.add_policy(random_v.id, IDMPolicy(random_v, self.generate_seed()))
-                else:
+                    # print("Vehicle {} is assigned with RL policy!".format(random_v.id))
                     self.engine.add_policy(random_v.id, ExpertPolicy(random_v, self.generate_seed()))
+                else:
+                    self.engine.add_policy(random_v.id, IDMPolicy(random_v, self.generate_seed()))
                 vehicles_on_block.append(random_v)
 
             trigger_road = block.pre_block_socket.positive_road

@@ -316,7 +316,8 @@ class BaseEnv(gym.Env):
         reward_infos = {}
         rewards = {}
         for v_id, v in self.vehicles.items():
-            obses[v_id] = self.observations[v_id].observe(v)
+            o = self.observations[v_id].observe(v)
+            obses[v_id] = o
             done_function_result, done_infos[v_id] = self.done_function(v_id)
             rewards[v_id], reward_infos[v_id] = self.reward_function(v_id)
             _, cost_infos[v_id] = self.cost_function(v_id)
