@@ -188,6 +188,7 @@ class BaseEngine(EngineCore, Randomizable):
                 self.main_camera.track(current_track_vehicle)
                 if self.global_config["is_multi_agent"]:
                     self.main_camera.stop_track(bird_view_on_current_position=False)
+        self.taskMgr.step()
 
     def before_step(self, external_actions: Dict[AnyStr, np.array]):
         """
@@ -309,7 +310,7 @@ class BaseEngine(EngineCore, Randomizable):
 
     def setup_main_camera(self):
         from metadrive.engine.core.chase_camera import MainCamera
-        if self.global_config["use_render"] or self.global_config["offscreen_render"]:
+        if self.global_config["use_render"]:
             return MainCamera(self, self.global_config["camera_height"], self.global_config["camera_dist"])
         else:
             return None

@@ -15,7 +15,7 @@ if __name__ == "__main__":
             # "debug_static_world":True,
             "cull_scene": False,
             # "offscreen_render": True,
-            # "controller": "joystick",
+            "controller": "joystick",
             "manual_control": True,
             "use_render": True,
             "decision_repeat": 5,
