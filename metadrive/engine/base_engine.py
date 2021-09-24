@@ -188,6 +188,7 @@ class BaseEngine(EngineCore, Randomizable):
                 self.main_camera.track(current_track_vehicle)
                 if self.global_config["is_multi_agent"]:
                     self.main_camera.stop_track(bird_view_on_current_position=False)
+        self.taskMgr.step()
 
     def before_step(self, external_actions: Dict[AnyStr, np.array]):
         """
