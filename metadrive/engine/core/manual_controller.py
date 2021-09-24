@@ -108,9 +108,9 @@ class SteeringWheelController(Controller):
         self.left_shift_paddle = True if self.joystick.get_button(self.LEFT_SHIFT_PADDLE) else False
         self.left_shift_paddle = True if self.joystick.get_button(self.LEFT_SHIFT_PADDLE) else False
 
-        self.button_circle = False if self.joystick.get_button(2) else False
-        self.button_rectangle = False if self.joystick.get_button(1) else False
-        self.button_triangle = False if self.joystick.get_button(3) else False
-        self.button_x = False if self.joystick.get_button(0) else False
+        self.button_circle = True if self.joystick.get_button(2) else False
+        self.button_rectangle = True if self.joystick.get_button(1) else False
+        self.button_triangle = True if self.joystick.get_button(3) else False
+        self.button_x = True if self.joystick.get_button(0) else False
 
         return [steering * self.STEERING_MAKEUP, throttle_brake / 2]
