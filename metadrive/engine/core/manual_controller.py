@@ -119,9 +119,9 @@ class SteeringWheelController(Controller):
         self.button_x = True if self.joystick.get_button(0) else False
 
         hat = self.joystick.get_hat(i)
-        self.button_up = True if hat[-1]==1 else False
-        self.button_down = True if hat[-1]==-1 else False
-        self.button_left = True if hat[0]==-1 else False
-        self.button_right = True if hat[0]==1 else False
-        
+        self.button_up = True if hat[-1] == 1 else False
+        self.button_down = True if hat[-1] == -1 else False
+        self.button_left = True if hat[0] == -1 else False
+        self.button_right = True if hat[0] == 1 else False
+
         return [steering * self.STEERING_MAKEUP, throttle_brake / 2]
