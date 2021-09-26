@@ -1,7 +1,6 @@
 import logging
 
 import numpy as np
-
 from metadrive.component.vehicle_module.PID_controller import PIDController
 from metadrive.policy.base_policy import BasePolicy
 from metadrive.policy.manual_control_policy import ManualControlPolicy
@@ -359,7 +358,7 @@ class ManualControllableIDMPolicy(IDMPolicy):
         self.manual_control_policy = ManualControlPolicy(*args, **kwargs)
 
     def act(self, agent_id):
-        if self.control_object is self.engine.current_track_vehicle and self.engine.global_config["manual_control"]\
+        if self.control_object is self.engine.current_track_vehicle and self.engine.global_config["manual_control"] \
                 and not self.engine.current_track_vehicle.expert_takeover:
             return self.manual_control_policy.act(agent_id)
         else:

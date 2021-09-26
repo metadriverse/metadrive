@@ -337,3 +337,57 @@ class TrafficManager(BaseManager):
     @property
     def current_map(self):
         return self.engine.map_manager.current_map
+
+
+class MixedTrafficManager(TrafficManager):
+    def _create_respawn_vehicles(self, *args, **kwargs):
+        raise NotImplementedError()
+
+    def _create_vehicles_once(self, map: BaseMap, traffic_density: float) -> None:
+        vehicle_num = 0
+        for block in map.blocks[1:]:
+
+            # Propose candidate locations for spawning new vehicles
+            trigger_lanes = block.get_intermediate_spawn_lanes()
+            if self.engine.global_config["need_inverse_traffic"] and block.ID in ["S", "C", "r", "R"]:
+                neg_lanes = block.block_network.get_negative_lanes()
+                self.np_random.shuffle(neg_lanes)
+                trigger_lanes += neg_lanes
+            potential_vehicle_configs = []
+            for lanes in trigger_lanes:
+                for l in lanes:
+                    if hasattr(self.engine, "object_manager") and l in self.engine.object_manager.accident_lanes:
+                        continue
+                    potential_vehicle_configs += self._propose_vehicle_configs(l)
+
+            # How many vehicles should we spawn in this block?
+            total_length = sum([lane.length for lanes in trigger_lanes for lane in lanes])
+            total_spawn_points = int(math.floor(total_length / self.VEHICLE_GAP))
+            total_vehicles = int(math.floor(total_spawn_points * traffic_density))
+
+            # Generate vehicles!
+            vehicles_on_block = []
+            self.np_random.shuffle(potential_vehicle_configs)
+            selected = potential_vehicle_configs[:min(total_vehicles, len(potential_vehicle_configs))]
+
+            from metadrive.policy.idm_policy import IDMPolicy
+            from metadrive.policy.expert_policy import ExpertPolicy
+            # print("===== We are initializing {} vehicles =====".format(len(selected)))
+            # print("Current seed: ", self.engine.global_random_seed)
+            for v_config in selected:
+                vehicle_type = self.random_vehicle_type()
+                v_config.update(self.engine.global_config["traffic_vehicle_config"])
+                random_v = self.spawn_object(vehicle_type, vehicle_config=v_config)
+                if self.np_random.random() < self.engine.global_config["rl_agent_ratio"]:
+                    # print("Vehicle {} is assigned with RL policy!".format(random_v.id))
+                    self.engine.add_policy(random_v.id, ExpertPolicy(random_v, self.generate_seed()))
+                else:
+                    self.engine.add_policy(random_v.id, IDMPolicy(random_v, self.generate_seed()))
+                vehicles_on_block.append(random_v)
+
+            trigger_road = block.pre_block_socket.positive_road
+            block_vehicles = BlockVehicles(trigger_road=trigger_road, vehicles=vehicles_on_block)
+
+            self.block_triggered_vehicles.append(block_vehicles)
+            vehicle_num += len(vehicles_on_block)
+        self.block_triggered_vehicles.reverse()
