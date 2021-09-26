@@ -1,0 +1,44 @@
+from metadrive.envs.metadrive_env import MetaDriveEnv
+
+
+class MixedTrafficEnv(MetaDriveEnv):
+    @classmethod
+    def default_config(cls) -> "Config":
+        config = super(MixedTrafficEnv, cls).default_config()
+        config["rl_agent_ratio"] = 0.0
+        return config
+
+    def setup_engine(self):
+        super(MetaDriveEnv, self).setup_engine()
+        self.engine.accept("b", self.switch_to_top_down_view)
+        self.engine.accept("q", self.switch_to_third_person_view)
+        from metadrive.manager.traffic_manager import MixedTrafficManager
+        from metadrive.manager.map_manager import MapManager
+        self.engine.register_manager("map_manager", MapManager())
+        self.engine.register_manager("traffic_manager", MixedTrafficManager())
+
+
+if __name__ == '__main__':
+    env = MixedTrafficEnv(
+        {
+            "rl_agent_ratio": 0.5,
+            "manual_control": True,
+            # "use_render": True,
+            "disable_model_compression": True,
+            # "map": "SS",
+            "environment_num": 100,
+        }
+    )
+    try:
+        obs = env.reset()
+        obs_space = env.observation_space
+        assert obs_space.contains(obs)
+        for _ in range(100000):
+            assert env.observation_space.contains(obs)
+            o, r, d, i = env.step(env.action_space.sample())
+            assert obs_space.contains(o)
+            if d:
+                o = env.reset()
+                assert obs_space.contains(o)
+    finally:
+        env.close()

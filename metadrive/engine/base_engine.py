@@ -4,7 +4,6 @@ from collections import OrderedDict
 from typing import Callable, Optional, Union, List, Dict, AnyStr
 
 import numpy as np
-
 from metadrive.base_class.randomizable import Randomizable
 from metadrive.engine.core.engine_core import EngineCore
 from metadrive.engine.interface import Interface
@@ -130,6 +129,9 @@ class BaseEngine(EngineCore, Randomizable):
             return res
         else:
             raise ValueError("filter should be a list or a function")
+
+    def get_object(self, object_id):
+        return self.get_objects([object_id])
 
     def clear_objects(self, filter: Optional[Union[Callable, List]], force_destroy=False):
         """

@@ -1,10 +1,7 @@
 import logging
-import logging
-import os.path as osp
 from typing import Union
 
 import numpy as np
-
 from metadrive.component.map.base_map import BaseMap, MapGenerateMethod, parse_map_config
 from metadrive.component.vehicle.base_vehicle import BaseVehicle
 from metadrive.constants import DEFAULT_AGENT, TerminationState
@@ -14,10 +11,6 @@ from metadrive.obs.image_obs import ImageStateObservation
 from metadrive.obs.state_obs import LidarStateObservation
 from metadrive.utils import clip, Config, get_np_random
 
-pregenerated_map_file = osp.join(
-    osp.dirname(osp.dirname(osp.abspath(__file__))), "assets", "maps",
-    "20210814_generated_maps_start_seed_0_environment_num_30000.json"
-)
 METADRIVE_DEFAULT_CONFIG = dict(
     # ===== Generalization =====
     start_seed=0,
