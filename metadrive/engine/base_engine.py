@@ -4,6 +4,7 @@ from collections import OrderedDict
 from typing import Callable, Optional, Union, List, Dict, AnyStr
 
 import numpy as np
+
 from metadrive.base_class.randomizable import Randomizable
 from metadrive.engine.core.engine_core import EngineCore
 from metadrive.engine.interface import Interface
@@ -21,9 +22,6 @@ class BaseEngine(EngineCore, Randomizable):
     singleton = None
     global_random_seed = None
 
-    IN_REPLAY = False
-    STOP_REPLAY = False
-
     def __init__(self, global_config):
         EngineCore.__init__(self, global_config)
         Randomizable.__init__(self, self.global_random_seed)
@@ -35,11 +33,11 @@ class BaseEngine(EngineCore, Randomizable):
         self._managers = OrderedDict()
 
         # for recovering, they can not exist together
-        # TODO new record/replay
         self.record_episode = False
+        self.replay_episode = False
         self.replay_system = None
         self.record_system = None
-        self.accept("s", self._stop_replay)
+        # self.accept("s", self._stop_replay)
 
         # cull scene
         self.cull_scene = self.global_config["cull_scene"]
@@ -166,13 +164,18 @@ class BaseEngine(EngineCore, Randomizable):
 
     def reset(self):
         """
-        For garbage collecting using, ensure to release the memory of all traffic vehicles
+        Clear and generate the whole scene
         """
+        # initialize
+        self._episode_start_time = time.time()
         if self.global_config["debug_physics_world"]:
             self.addTask(self.report_body_nums, "report_num")
 
-        self._episode_start_time = time.time()
+        # record replay
+        self.replay_episode = True if self.global_config["replay_episode"] is not None else False
+        self.record_episode = self.global_config["record_episode"]
 
+        # reset manager
         for manager in self._managers.values():
             manager.before_reset()
         self._object_clean_check()
@@ -181,6 +184,7 @@ class BaseEngine(EngineCore, Randomizable):
         for manager in self._managers.values():
             manager.after_reset()
 
+        # reset cam
         if self.main_camera is not None:
             self.main_camera.reset()
             if hasattr(self, "agent_manager"):
@@ -272,6 +276,7 @@ class BaseEngine(EngineCore, Randomizable):
         logging.debug("{} is destroyed".format(self.__class__.__name__))
 
     def _stop_replay(self):
+        raise DeprecationWarning
         if not self.IN_REPLAY:
             return
         self.STOP_REPLAY = not self.STOP_REPLAY

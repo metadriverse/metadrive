@@ -1,4 +1,5 @@
 import copy
+from metadrive.manager.base_manager import BaseManager
 import logging
 
 from metadrive.component.map.pg_map import PGMap
@@ -9,6 +10,8 @@ from metadrive.manager.traffic_manager import TrafficManager
 
 
 class Replayer:
+    raise DeprecationWarning("It is deprecated now")
+
     def __init__(self, traffic_mgr: TrafficManager, current_map: PGMap, episode_data: dict):
         self.restore_episode_info = episode_data["frame"]
         self.restore_episode_info.reverse()
@@ -67,12 +70,14 @@ class Replayer:
         logging.debug("Replay system is destroyed")
 
 
-class Recorder:
-    def __init__(self, map: PGMap, init_traffic_vehicle_states: dict):
+class RecordManager(BaseManager):
+    def __init__(self):
+        super(RecordManager, self).__init__()
+        map = 0
         map_data = dict()
         self.episode_info = dict(
             map_config=map.config.get_dict(),
-            init_traffic=init_traffic_vehicle_states,
+            init_traffic=0,
             map_data=copy.deepcopy(map_data),
             spawn_roads=[road.to_json() for road in map.spawn_roads],
             frame=[]
