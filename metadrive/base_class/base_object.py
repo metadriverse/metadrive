@@ -226,20 +226,20 @@ class BaseObject(BaseRunnable):
         """
         Return the roll of this object
         """
-        return self.body.getR()
+        return self.origin.getR()
 
     def set_roll(self, roll):
-        self.body.setR(roll)
+        self.origin.setR(roll)
 
     @property
     def pitch(self):
         """
         Return the pitch of this object
         """
-        return self.body.getP()
+        return self.origin.getP()
 
     def set_pitch(self, pitch):
-        self.body.setP(pitch)
+        self.origin.setP(pitch)
 
     def set_static(self, flag):
         self.body.setStatic(flag)
@@ -251,7 +251,6 @@ class BaseObject(BaseRunnable):
             ObjectState.ROLL: self.roll,
             ObjectState.PITCH: self.pitch,
             ObjectState.VELOCITY: self.velocity,
-            ObjectState.STATIC: self.body.isStatic()
         }
         return state
 
@@ -260,6 +259,4 @@ class BaseObject(BaseRunnable):
         self.set_heading_theta(state[ObjectState.HEADING_THETA])
         self.set_pitch(state[ObjectState.PITCH])
         self.set_roll(state[ObjectState.ROLL])
-        velocity = state[ObjectState.VELOCITY]
-        self.set_velocity(velocity)
-        self.set_static(state[ObjectState.STATIC])
+        self.set_velocity(state[ObjectState.VELOCITY])

@@ -267,8 +267,11 @@ class DrivableAreaProperty:
 
 class ObjectState:
     POSITION = "position"
-    HEADING_THETA="heading_theta"
+    HEADING_THETA = "heading_theta"
     VELOCITY = "velocity"
     PITCH = "pitch"
     ROLL = "roll"
-    STATIC="static"
+    STATIC = "static"
+    CLASS = "type"
+    INIT_KWARGS= "config"
+    NAME = "name"

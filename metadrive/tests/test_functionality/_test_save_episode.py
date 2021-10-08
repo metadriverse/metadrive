@@ -10,8 +10,8 @@ def test_save_episode(vis=False):
     setup_logger(True)
 
     test_dump = True
-    save_episode = True,
-    vis = True
+    save_episode = True
+    vis = False
     env = MetaDriveEnv(
         {
             "environment_num": 1,
@@ -37,13 +37,7 @@ def test_save_episode(vis=False):
             if vis:
                 env.render()
             if d:
-                epi_info = env.engine.dump_episode()
-
-                # test dump json
-                if test_dump:
-                    with open("test.json", "w") as f:
-                        json.dump(epi_info, f)
-                break
+                epi_info = env.engine.dump_episode("test_dump.pkl" if test_dump else None)
 
         o = env.reset(epi_info)
         for i in range(1, 100000 if vis else 2000):

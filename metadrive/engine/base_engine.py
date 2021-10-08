@@ -1,4 +1,5 @@
 import logging
+import pickle
 import time
 from collections import OrderedDict
 from typing import Callable, Optional, Union, List, Dict, AnyStr
@@ -25,6 +26,7 @@ class BaseEngine(EngineCore, Randomizable):
     def __init__(self, global_config):
         EngineCore.__init__(self, global_config)
         Randomizable.__init__(self, self.global_random_seed)
+        self.episode_step = 0
         BaseEngine.singleton = self
         self.interface = Interface(self)
 
@@ -36,7 +38,6 @@ class BaseEngine(EngineCore, Randomizable):
         self.record_episode = False
         self.replay_episode = False
         self.replay_system = None
-        self.record_system = None
         # self.accept("s", self._stop_replay)
 
         # cull scene
@@ -103,6 +104,8 @@ class BaseEngine(EngineCore, Randomizable):
         else:
             obj = self._dying_objects[object_class.__name__].pop()
             obj.reset(**kwargs)
+        if self.global_config["record_episode"]:
+            self.record_manager.add_spawn_info(object_class, kwargs, obj.name)
         self._spawned_objects[obj.id] = obj
         obj.attach_to_world(self.pbr_worldNP if pbr_model else self.worldNP, self.physics_world)
         return obj
@@ -160,6 +163,8 @@ class BaseEngine(EngineCore, Randomizable):
                 if obj.class_name not in self._dying_objects:
                     self._dying_objects[obj.class_name] = []
                 self._dying_objects[obj.class_name].append(obj)
+            if self.global_config["record_episode"]:
+                self.record_manager.add_clear_info(obj)
         return exclude_objects.keys()
 
     def reset(self):
@@ -168,6 +173,7 @@ class BaseEngine(EngineCore, Randomizable):
         """
         # initialize
         self._episode_start_time = time.time()
+        self.episode_step = 0
         if self.global_config["debug_physics_world"]:
             self.addTask(self.report_body_nums, "report_num")
 
@@ -231,6 +237,7 @@ class BaseEngine(EngineCore, Randomizable):
         Update states after finishing movement
         :return: if this episode is done
         """
+        self.episode_step += 1
         step_infos = {}
         for manager in self._managers.values():
             step_infos.update(manager.after_step())
@@ -242,10 +249,14 @@ class BaseEngine(EngineCore, Randomizable):
         #     SceneCull.cull_distant_blocks(self, self.current_map.blocks, poses, self.global_config["max_distance"])
         return step_infos
 
-    def dump_episode(self) -> None:
+    def dump_episode(self, pkl_file_name=None) -> None:
         """Dump the data of an episode."""
-        assert self.record_system is not None
-        return self.record_system.dump_episode()
+        assert self.record_manager is not None
+        episode_state = self.record_manager.dump_episode()
+        if pkl_file_name is not None:
+            with open(pkl_file_name, "wb+") as file:
+                pickle.dump(episode_state, file)
+        return episode_state
 
     def close(self):
         """
