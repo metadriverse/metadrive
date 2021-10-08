@@ -64,7 +64,7 @@ class BaseVehicleState:
         self.on_broken_line = False
 
         # contact results
-        self.contact_results = None
+        self.contact_results = set()
 
 
 class BaseVehicle(BaseObject, BaseVehicleState):
@@ -237,11 +237,12 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             )
         return action, {'raw_action': (action[0], action[1])}
 
-    def before_step(self, action):
+    def before_step(self, action=None):
         """
         Save info and make decision before action
         """
         # init step info to store info before each step
+        action = action or [0, 0]
         self._init_step_info()
         action, step_info = self._preprocess_action(action)
 

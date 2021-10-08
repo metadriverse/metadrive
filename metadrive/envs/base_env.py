@@ -9,7 +9,7 @@ from panda3d.core import PNMImage
 
 from metadrive.component.blocks.first_block import FirstPGBlock
 from metadrive.component.vehicle.base_vehicle import BaseVehicle
-from metadrive.constants import RENDER_MODE_NONE, DEFAULT_AGENT
+from metadrive.constants import RENDER_MODE_NONE, DEFAULT_AGENT, REPLAY_DONE
 from metadrive.engine.base_engine import BaseEngine
 from metadrive.engine.engine_utils import initialize_engine, close_engine, \
     engine_initialized, set_global_random_seed
@@ -202,8 +202,9 @@ class BaseEnv(gym.Env):
     def step(self, actions: Union[np.ndarray, Dict[AnyStr, np.ndarray]]):
         self.episode_steps += 1
         actions = self._preprocess_actions(actions)
-        step_infos = self._step_simulator(actions)
-        o, r, d, i = self._get_step_return(actions, step_infos)
+        engine_info = self._step_simulator(actions)
+        o, r, d, i = self._get_step_return(actions, engine_info=engine_info)
+        d = d or engine_info.get(REPLAY_DONE, False)
         return o, r, d, i
 
     def _preprocess_actions(self, actions: Union[np.ndarray, Dict[AnyStr, np.ndarray]]) \
@@ -309,7 +310,7 @@ class BaseEnv(gym.Env):
             ret[v_id] = self.observations[v_id].observe(v)
         return ret if self.is_multi_agent else self._wrap_as_single_agent(ret)
 
-    def _get_step_return(self, actions, step_infos):
+    def _get_step_return(self, actions, engine_info):
         # update obs, dones, rewards, costs, calculate done at first !
         obses = {}
         done_infos = {}
@@ -325,16 +326,19 @@ class BaseEnv(gym.Env):
             done = done_function_result or self.dones[v_id]
             self.dones[v_id] = done
 
-        should_done = self.config["horizon"] and self.episode_steps >= self.config["horizon"]
+        should_done = engine_info.get(REPLAY_DONE, False) or (
+                self.config["horizon"] and self.episode_steps >= self.config["horizon"])
         termination_infos = self.for_each_vehicle(auto_termination, should_done)
 
         step_infos = concat_step_infos([
-            step_infos,
             done_infos,
             reward_infos,
             cost_infos,
             termination_infos,
         ])
+
+        for agent, info in step_infos.items():
+            info.update(engine_info)
 
         if should_done:
             for k in self.dones:

@@ -78,3 +78,12 @@ class BaseManager(Randomizable):
 
     def get_objects(self, *args, **kwargs):
         return self.engine.get_objects(*args, *kwargs)
+
+    def change_object_name(self, obj, new_name):
+        """
+        Change the name of one object, Note: it may bring some bugs if abusing!
+        """
+        self.engine.change_object_name(obj, new_name)
+        obj = self.spawned_objects.pop(obj.name)
+        self.spawned_objects[new_name] = obj
+        obj.name = new_name

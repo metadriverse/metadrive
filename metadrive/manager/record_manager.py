@@ -4,7 +4,7 @@ import logging
 from metadrive.component.blocks.base_block import BaseBlock
 from metadrive.component.map.base_map import BaseMap, MapGenerateMethod
 from metadrive.component.map.pg_map import PGMap
-from metadrive.constants import ObjectState
+from metadrive.constants import ObjectState, REPLAY_DONE
 from metadrive.manager.base_manager import BaseManager
 
 
@@ -16,7 +16,16 @@ class FrameInfo:
         # used to track update objects state in the scene
         self.step_info = {}
         # used to track the objects cleared
-        self.clear_info = {}
+        self.clear_info = []
+        self.agents = []
+        self._object_to_agent = None
+        self._agent_to_object = None
+
+    def object_to_agent(self, object):
+        return self._object_to_agent[object]
+
+    def agent_to_object(self, agent):
+        return self._agent_to_object[agent]
 
 
 class RecordManager(BaseManager):
@@ -38,24 +47,30 @@ class RecordManager(BaseManager):
         """
         create a new log to record, note: after_step will be called after calling after_reset()
         """
-        self.episode_info = dict(
-            map_data=self.engine.current_map.save_map(),
-            frame=[],
-        )
+        if self.engine.record_episode:
+            self.episode_info = dict(
+                map_data=self.engine.current_map.save_map(),
+                frame=[],
+            )
 
     def before_step(self, *args, **kwargs):
-        self.current_frame = FrameInfo(self.engine.episode_step)
+        if self.engine.record_episode:
+            self.current_frame = FrameInfo(self.engine.episode_step)
         return {}
 
     def after_step(self, *args, **kwargs):
-        self._update_objects_states()
-        self.episode_info["frame"].append(self.current_frame)
-        return {}
+        if self.engine.record_episode:
+            self._update_objects_states()
+            self.episode_info["frame"].append(self.current_frame)
+            return {}
 
     def _update_objects_states(self):
         for name, obj in self.engine.get_objects().items():
             if not isinstance(obj, BaseBlock) and not isinstance(obj, BaseMap):
                 self.current_frame.step_info[name] = obj.get_state()
+        self.current_frame.agents = list(self.engine.agents.keys())
+        self.current_frame._agent_to_object = self.engine.agent_manager._agent_to_object
+        self.current_frame._object_to_agent = self.engine.agent_manager._object_to_agent
 
     def dump_episode(self):
         return copy.deepcopy(self.episode_info)
@@ -77,7 +92,7 @@ class RecordManager(BaseManager):
         Call when clear objects, ignore map related things
         """
         if not isinstance(obj, BaseBlock) and not isinstance(obj, BaseMap):
-            self.current_frame.clear_info = {ObjectState.NAME: obj.name}
+            self.current_frame.clear_info.append(obj.name)
 
     def __del__(self):
         logging.debug("Record system is destroyed")
@@ -89,6 +104,7 @@ class ReplayManager(BaseManager):
         super(ReplayManager, self).__init__()
         self.restore_episode_info = None
         self.current_map = None
+        self.current_frame = None
 
     def before_reset(self, *args, **kwargs):
         """
@@ -109,10 +125,33 @@ class ReplayManager(BaseManager):
         map_config[BaseMap.GENERATE_TYPE] = MapGenerateMethod.PG_MAP_FILE
         map_config[BaseMap.GENERATE_CONFIG] = map_data["block_sequence"]
         self.current_map = self.spawn_object(PGMap, map_config=map_config, auto_fill_random_seed=False)
+        self.replay_frame()
+
+    def after_step(self, *args, **kwargs):
+        if self.engine.replay_episode:
+            return self.replay_frame()
+        return dict(REPLAY_DONE=False)
 
     def destroy(self):
         self.restore_episode_info = None
         self.current_map = None
 
+    def replay_frame(self):
+        if len(self.restore_episode_info["frame"]) == 0:
+            return {REPLAY_DONE: True}
+        self.current_frame = self.restore_episode_info["frame"].pop()
+        # create
+        for name, config in self.current_frame.spawn_info.items():
+            obj = self.spawn_object(config[ObjectState.CLASS], config[ObjectState.INIT_KWARGS])
+            # self.change_object_name(obj, name)
+        for name, state in self.current_frame.step_info.items():
+            self.spawned_objects[name].before_step()
+            self.spawned_objects[name].set_state(state)
+        self.clear_objects(self.current_frame.clear_info)
+        return {REPLAY_DONE: False}
+
     def __del__(self):
         logging.debug("Replay system is destroyed")
+
+    def get_object_from_agent(self, agent_id):
+        return self.spawned_objects[self.current_frame.agent_to_object(agent_id)]

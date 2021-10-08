@@ -45,8 +45,8 @@ def test_save_episode(vis=False):
             o, r, d, info = env.step([0, 1])
             if vis:
                 env.render()
-            # if d:
-            #     break
+            if info.get("replay_done", False):
+                break
     finally:
         env.close()
 

@@ -194,7 +194,7 @@ class BaseEngine(EngineCore, Randomizable):
         if self.main_camera is not None:
             self.main_camera.reset()
             if hasattr(self, "agent_manager"):
-                vehicles = self.agent_manager.get_vehicle_list()
+                vehicles = list(self.agents.values())
                 current_track_vehicle = vehicles[0]
                 self.main_camera.set_follow_lane(self.global_config["use_chase_camera_follow_lane"])
                 self.main_camera.track(current_track_vehicle)
@@ -327,7 +327,10 @@ class BaseEngine(EngineCore, Randomizable):
 
     @property
     def agents(self):
-        return {k: v for k, v in self.agent_manager.active_agents.items()}
+        if not self.replay_episode:
+            return {k: v for k, v in self.agent_manager.active_agents.items()}
+        else:
+            return {k: self.replay_manager.get_object_from_agent(k) for k in self.replay_manager.current_frame.agents}
 
     def setup_main_camera(self):
         from metadrive.engine.core.chase_camera import MainCamera
@@ -377,3 +380,10 @@ class BaseEngine(EngineCore, Randomizable):
     def managers(self):
         # whether to froze other managers
         return self._managers if not self.replay_episode else {"replay_manager": self.replay_manager}
+
+    def change_object_name(self, obj, new_name):
+        """
+        Change the name of one object, Note: it may bring some bugs if abusing
+        """
+        obj = self._spawned_objects.pop(obj.name)
+        self._spawned_objects[new_name] = obj

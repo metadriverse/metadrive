@@ -273,5 +273,8 @@ class ObjectState:
     ROLL = "roll"
     STATIC = "static"
     CLASS = "type"
-    INIT_KWARGS= "config"
+    INIT_KWARGS = "config"
     NAME = "name"
+
+
+REPLAY_DONE = "replay_done"
