@@ -39,19 +39,6 @@ class MapManager(BaseManager):
             self.unload_map(self.current_map)
 
     def reset(self):
-        # if episode_data is not None:
-        #     # TODO restore/replay here
-        #     # Since in episode data map data only contains one map, values()[0] is the map_parameters
-        #     map_data = episode_data["map_data"].values()
-        #     assert len(map_data) > 0, "Can not find map info in episode data"
-        #     blocks_info = map_data[0]
-        #
-        #     map_config = copy.deepcopy(config["map_config"])
-        #     # map_config[BaseMap.GENERATE_TYPE] = MapGenerateMethod.PG_MAP_FILE
-        #     # map_config[BaseMap.GENERATE_CONFIG] = blocks_info
-        #     map_config.update(map_data)
-        #     self.spawn_object(PGMap, map_config=map_config)
-        #     return
         config = self.engine.global_config.copy()
         current_seed = self.engine.global_seed
 

@@ -2,14 +2,10 @@ import copy
 import logging
 
 from metadrive.component.blocks.base_block import BaseBlock
-from metadrive.component.map.base_map import BaseMap
+from metadrive.component.map.base_map import BaseMap, MapGenerateMethod
 from metadrive.component.map.pg_map import PGMap
-from metadrive.component.road.road import Road
 from metadrive.constants import ObjectState
-from metadrive.constants import TARGET_VEHICLES, TRAFFIC_VEHICLES, OBJECT_TO_AGENT
-from metadrive.engine.engine_utils import get_engine
 from metadrive.manager.base_manager import BaseManager
-from metadrive.manager.traffic_manager import TrafficManager
 
 
 class FrameInfo:
@@ -92,8 +88,31 @@ class ReplayManager(BaseManager):
     def __init__(self):
         super(ReplayManager, self).__init__()
         self.restore_episode_info = None
+        self.current_map = None
 
-    
+    def before_reset(self, *args, **kwargs):
+        """
+        Clean generated objects
+        """
+        self.clear_objects([name for name in self.spawned_objects])
+
+    def reset(self):
+        if not self.engine.replay_episode:
+            return
+        self.restore_episode_info = self.engine.global_config["replay_episode"]
+        self.restore_episode_info["frame"].reverse()
+        # Since in episode data map data only contains one map, values()[0] is the map_parameters
+        map_data = self.restore_episode_info["map_data"]
+        assert len(map_data) > 0, "Can not find map info in episode data"
+
+        map_config = copy.deepcopy(map_data["map_config"])
+        map_config[BaseMap.GENERATE_TYPE] = MapGenerateMethod.PG_MAP_FILE
+        map_config[BaseMap.GENERATE_CONFIG] = map_data["block_sequence"]
+        self.current_map = self.spawn_object(PGMap, map_config=map_config, auto_fill_random_seed=False)
+
+    def destroy(self):
+        self.restore_episode_info = None
+        self.current_map = None
 
     def __del__(self):
         logging.debug("Replay system is destroyed")

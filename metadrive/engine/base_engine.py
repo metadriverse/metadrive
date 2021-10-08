@@ -37,7 +37,6 @@ class BaseEngine(EngineCore, Randomizable):
         # for recovering, they can not exist together
         self.record_episode = False
         self.replay_episode = False
-        self.replay_system = None
         # self.accept("s", self._stop_replay)
 
         # cull scene
@@ -183,11 +182,12 @@ class BaseEngine(EngineCore, Randomizable):
 
         # reset manager
         for manager in self._managers.values():
+            # clean all manager
             manager.before_reset()
         self._object_clean_check()
-        for manager in self._managers.values():
+        for manager in self.managers.values():
             manager.reset()
-        for manager in self._managers.values():
+        for manager in self.managers.values():
             manager.after_reset()
 
         # reset cam
@@ -211,7 +211,7 @@ class BaseEngine(EngineCore, Randomizable):
         """
         step_infos = {}
         self.external_actions = external_actions
-        for manager in self._managers.values():
+        for manager in self.managers.values():
             step_infos.update(manager.before_step())
         return step_infos
 
@@ -222,7 +222,7 @@ class BaseEngine(EngineCore, Randomizable):
         """
         for i in range(step_num):
             # simulate or replay
-            for manager in self._managers.values():
+            for manager in self.managers.values():
                 manager.step()
             self.step_physics_world()
             if self.force_fps.real_time_simulation and i < step_num - 1:
@@ -239,7 +239,7 @@ class BaseEngine(EngineCore, Randomizable):
         """
         self.episode_step += 1
         step_infos = {}
-        for manager in self._managers.values():
+        for manager in self.managers.values():
             step_infos.update(manager.after_step())
         self.interface.after_step()
 
@@ -313,7 +313,10 @@ class BaseEngine(EngineCore, Randomizable):
 
     @property
     def current_map(self):
-        return self.map_manager.current_map
+        if self.replay_episode:
+            return self.replay_manager.current_map
+        else:
+            return self.map_manager.current_map
 
     @property
     def current_track_vehicle(self):
@@ -369,3 +372,8 @@ class BaseEngine(EngineCore, Randomizable):
         self._managers[manager_name] = manager
         setattr(self, manager_name, manager)
         self._managers = OrderedDict(sorted(self._managers.items(), key=lambda k_v: k_v[-1].PRIORITY))
+
+    @property
+    def managers(self):
+        # whether to froze other managers
+        return self._managers if not self.replay_episode else {"replay_manager": self.replay_manager}

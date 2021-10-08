@@ -22,3 +22,4 @@
 **/.vscode
 **/.idea
 /metadrive/cutils.cp37-win_amd64.pyd
+/metadrive/tests/test_functionality/test_dump.pkl

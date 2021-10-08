@@ -14,7 +14,7 @@ from metadrive.engine.base_engine import BaseEngine
 from metadrive.engine.engine_utils import initialize_engine, close_engine, \
     engine_initialized, set_global_random_seed
 from metadrive.manager.agent_manager import AgentManager
-from metadrive.manager.record_manager import RecordManager
+from metadrive.manager.record_manager import RecordManager, ReplayManager
 from metadrive.obs.observation_base import ObservationBase
 from metadrive.utils import Config, merge_dicts, get_np_random, concat_step_infos
 from metadrive.utils.utils import auto_termination
@@ -445,6 +445,7 @@ class BaseEnv(gym.Env):
         self.engine.accept("p", self.capture)
         self.engine.register_manager("agent_manager", self.agent_manager)
         self.engine.register_manager("record_manager", RecordManager())
+        self.engine.register_manager("replay_manager", ReplayManager())
 
     @property
     def current_map(self):
