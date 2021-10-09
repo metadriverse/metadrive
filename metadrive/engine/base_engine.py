@@ -331,9 +331,9 @@ class BaseEngine(EngineCore, Randomizable):
     @property
     def agents(self):
         if not self.replay_episode:
-            return {k: v for k, v in self.agent_manager.active_agents.items()}
+           return self.agent_manager.active_agents
         else:
-            return {k: self.replay_manager.get_object_from_agent(k) for k in self.replay_manager.current_frame.agents}
+            return self.replay_manager.replay_agents
 
     def setup_main_camera(self):
         from metadrive.engine.core.chase_camera import MainCamera

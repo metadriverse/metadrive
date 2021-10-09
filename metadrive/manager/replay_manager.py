@@ -1,4 +1,5 @@
 import copy
+from metadrive.obs.state_obs import LidarStateObservation
 from metadrive.constants import REPLAY_DONE
 import logging
 
@@ -17,6 +18,7 @@ class ReplayManager(BaseManager):
         self.replay_done = False
         self.record_name_to_current_name = dict()
         self.current_name_to_record_name = dict()
+        self.observation = self.get_observation()
 
     def before_reset(self, *args, **kwargs):
         """
@@ -24,6 +26,7 @@ class ReplayManager(BaseManager):
         """
         self.clear_objects([name for name in self.spawned_objects])
         self.replay_done = False
+        return super(ReplayManager, self).before_reset()
 
     def reset(self):
         if not self.engine.replay_episode:
@@ -71,8 +74,21 @@ class ReplayManager(BaseManager):
         self.clear_objects([self.record_name_to_current_name[name] for name in self.current_frame.clear_info])
         self.replay_done = False
 
+    @property
+    def replay_agents(self):
+        return {k: self.get_object_from_agent(k) for k in self.current_frame.agents}
+
     def __del__(self):
         logging.debug("Replay system is destroyed")
 
     def get_object_from_agent(self, agent_id):
         return self.spawned_objects[self.record_name_to_current_name[self.current_frame.agent_to_object(agent_id)]]
+
+    def get_observation(self):
+        """
+        Override me in the future for collecting other modality
+        """
+        return LidarStateObservation(self.engine.global_config["vehicle_config"])
+
+    def get_replay_agent_observations(self):
+        return {k: self.observation for k in self.current_frame.agents}
