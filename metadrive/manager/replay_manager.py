@@ -9,7 +9,6 @@ from metadrive.manager.base_manager import BaseManager
 
 
 class ReplayManager(BaseManager):
-
     def __init__(self):
         super(ReplayManager, self).__init__()
         self.restore_episode_info = None

@@ -326,8 +326,8 @@ class BaseEnv(gym.Env):
             done = done_function_result or self.dones[v_id]
             self.dones[v_id] = done
 
-        should_done = engine_info.get(REPLAY_DONE, False) or (
-                self.config["horizon"] and self.episode_steps >= self.config["horizon"])
+        should_done = engine_info.get(REPLAY_DONE, False
+                                      ) or (self.config["horizon"] and self.episode_steps >= self.config["horizon"])
         termination_infos = self.for_each_vehicle(auto_termination, should_done)
 
         step_infos = concat_step_infos([

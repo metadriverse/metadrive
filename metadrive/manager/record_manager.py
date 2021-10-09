@@ -61,8 +61,9 @@ class RecordManager(BaseManager):
 
     def before_step(self, *args, **kwargs) -> dict:
         if self.engine.record_episode:
-            self.current_frames = [FrameInfo(self.engine.episode_step) for _ in
-                                   range(self.engine.global_config["decision_repeat"])]
+            self.current_frames = [
+                FrameInfo(self.engine.episode_step) for _ in range(self.engine.global_config["decision_repeat"])
+            ]
             self.current_step = 0
         return {}
 
@@ -98,8 +99,11 @@ class RecordManager(BaseManager):
         """
         if not issubclass(object_class, BaseBlock) and not issubclass(object_class, BaseMap):
             assert name not in self.current_frame.spawn_info, "Duplicated record!"
-            self.current_frame.spawn_info[name] = {ObjectState.CLASS: object_class, ObjectState.INIT_KWARGS: kwargs,
-                                                   ObjectState.NAME: name}
+            self.current_frame.spawn_info[name] = {
+                ObjectState.CLASS: object_class,
+                ObjectState.INIT_KWARGS: kwargs,
+                ObjectState.NAME: name
+            }
 
     def add_clear_info(self, obj):
         """

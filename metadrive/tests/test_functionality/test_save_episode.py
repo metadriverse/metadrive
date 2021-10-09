@@ -23,7 +23,7 @@ def test_save_episode(vis=False):
             "start_seed": 5,
             # "manual_control": vis,
             "use_render": vis,
-            "agent_policy":IDMPolicy,
+            "agent_policy": IDMPolicy,
             "traffic_mode": TrafficMode.Trigger,
             "record_episode": save_episode,
             "map_config": {
@@ -43,7 +43,7 @@ def test_save_episode(vis=False):
             if d:
                 epi_info = env.engine.dump_episode("test_dump.pkl" if test_dump else None)
                 break
-        f = open("test_dump.pkl","rb+")
+        f = open("test_dump.pkl", "rb+")
         env.config["replay_episode"] = pickle.load(f)
         o = env.reset()
         for i in range(1, 100000 if vis else 2000):
