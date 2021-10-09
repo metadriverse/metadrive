@@ -17,13 +17,13 @@ def test_save_episode(vis=False):
     vis = True
     env = SafeMetaDriveEnv(
         {
-            "accident_prob": 0.8,
+            "accident_prob": 0.7,
             "environment_num": 1,
             "traffic_density": 0.1,
             "start_seed": 5,
-            "manual_control": vis,
+            # "manual_control": vis,
             "use_render": vis,
-            # "agent_policy":IDMPolicy,
+            "agent_policy":IDMPolicy,
             "traffic_mode": TrafficMode.Trigger,
             "record_episode": save_episode,
             "map_config": {

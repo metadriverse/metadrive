@@ -259,4 +259,4 @@ class BaseObject(BaseRunnable):
         self.set_heading_theta(state[ObjectState.HEADING_THETA])
         self.set_pitch(state[ObjectState.PITCH])
         self.set_roll(state[ObjectState.ROLL])
-        self.set_velocity(state[ObjectState.VELOCITY])
+        # self.set_velocity(state[ObjectState.VELOCITY]/3.6)
