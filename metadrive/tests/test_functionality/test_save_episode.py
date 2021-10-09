@@ -1,4 +1,5 @@
 import json
+import pickle
 
 from metadrive.component.map.base_map import BaseMap, MapGenerateMethod
 from metadrive.envs.metadrive_env import MetaDriveEnv
@@ -23,7 +24,7 @@ def test_save_episode(vis=False):
             "record_episode": save_episode,
             "map_config": {
                 BaseMap.GENERATE_TYPE: MapGenerateMethod.BIG_BLOCK_SEQUENCE,
-                BaseMap.GENERATE_CONFIG: "XTXTXTXTXT",
+                BaseMap.GENERATE_CONFIG: "XTCTXT",
                 BaseMap.LANE_WIDTH: 3.5,
                 BaseMap.LANE_NUM: 3,
             }
@@ -39,6 +40,7 @@ def test_save_episode(vis=False):
             if d:
                 epi_info = env.engine.dump_episode("test_dump.pkl" if test_dump else None)
                 break
+        f = open("test_dump.pkl","rb+")
         env.config["replay_episode"] = epi_info
         o = env.reset()
         for i in range(1, 100000 if vis else 2000):
