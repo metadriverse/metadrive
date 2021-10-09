@@ -21,7 +21,7 @@ class PGMap(BaseMap):
 
         elif generate_type == MapGenerateMethod.PG_MAP_FILE:
             # other config such as lane width, num and seed will be valid, since they will be read from file
-            blocks_config = self.read_map(self._config[self.GENERATE_CONFIG])
+            blocks_config = self._config[self.GENERATE_CONFIG]
             self._config_generate(blocks_config, parent_node_path, physics_world)
         else:
             raise ValueError("Map can not be created by {}".format(generate_type))

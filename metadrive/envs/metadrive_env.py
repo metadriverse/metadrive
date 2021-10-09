@@ -252,7 +252,7 @@ class MetaDriveEnv(BaseEnv):
             if self.main_camera.is_bird_view_camera():
                 current_track_vehicle = self.current_track_vehicle
             else:
-                vehicles = list(self.agent_manager.active_agents.values())
+                vehicles = list(self.engine.agents.values())
                 if len(vehicles) <= 1:
                     return
                 if self.current_track_vehicle in vehicles:

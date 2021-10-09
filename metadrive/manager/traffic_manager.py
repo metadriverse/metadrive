@@ -75,7 +75,7 @@ class TrafficManager(BaseManager):
         # trigger vehicles
         engine = self.engine
         if self.mode != TrafficMode.Respawn:
-            for v in engine.agent_manager.active_objects.values():
+            for v in engine.agent_manager.active_agents.values():
                 ego_lane_idx = v.lane_index[:-1]
                 ego_road = Road(ego_lane_idx[0], ego_lane_idx[1])
                 if len(self.block_triggered_vehicles) > 0 and \

@@ -263,3 +263,18 @@ class DrivableAreaProperty:
 
     #  when set to True, Vehicles will not generate on this block
     PROHIBIT_TRAFFIC_GENERATION = False
+
+
+class ObjectState:
+    POSITION = "position"
+    HEADING_THETA = "heading_theta"
+    VELOCITY = "velocity"
+    PITCH = "pitch"
+    ROLL = "roll"
+    STATIC = "static"
+    CLASS = "type"
+    INIT_KWARGS = "config"
+    NAME = "name"
+
+
+REPLAY_DONE = "replay_done"

@@ -23,7 +23,10 @@ class TopDownSingleFrameMetaDriveEnv(MetaDriveEnv):
 
     def get_single_observation(self, _=None):
         return TopDownObservation(
-            self.config["vehicle_config"], self, self.config["rgb_clip"], max_distance=self.config["distance"]
+            self.config["vehicle_config"],
+            self.config["rgb_clip"],
+            self.config["use_render"],
+            max_distance=self.config["distance"]
         )
 
 
@@ -31,7 +34,7 @@ class TopDownMetaDrive(TopDownSingleFrameMetaDriveEnv):
     def get_single_observation(self, _=None):
         return TopDownMultiChannel(
             self.config["vehicle_config"],
-            self,
+            self.config["use_render"],
             self.config["rgb_clip"],
             frame_stack=self.config["frame_stack"],
             post_stack=self.config["post_stack"],
@@ -61,7 +64,7 @@ class TopDownMetaDriveEnvV2(MetaDriveEnv):
     def get_single_observation(self, _=None):
         return TopDownMultiChannel(
             self.config["vehicle_config"],
-            self,
+            self.config["use_render"],
             self.config["rgb_clip"],
             frame_stack=self.config["frame_stack"],
             post_stack=self.config["post_stack"],

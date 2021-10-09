@@ -26,7 +26,7 @@ class BaseManager(Randomizable):
         """
         pass
 
-    def after_step(self, *args, **kwargs) -> dict():
+    def after_step(self, *args, **kwargs) -> dict:
         """
         Update state for this manager after system advancing dt
         """
@@ -59,11 +59,11 @@ class BaseManager(Randomizable):
         self.engine = None
         self.spawned_objects = None
 
-    def spawn_object(self, *args, **kwargs):
+    def spawn_object(self, object_class, **kwargs):
         """
         Spawn one objects
         """
-        object = self.engine.spawn_object(*args, **kwargs)
+        object = self.engine.spawn_object(object_class, **kwargs)
         self.spawned_objects[object.id] = object
         return object
 
@@ -78,3 +78,12 @@ class BaseManager(Randomizable):
 
     def get_objects(self, *args, **kwargs):
         return self.engine.get_objects(*args, *kwargs)
+
+    def change_object_name(self, obj, new_name):
+        """
+        Change the name of one object, Note: it may bring some bugs if abusing!
+        """
+        self.engine.change_object_name(obj, new_name)
+        obj = self.spawned_objects.pop(obj.name)
+        self.spawned_objects[new_name] = obj
+        obj.name = new_name

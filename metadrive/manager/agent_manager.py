@@ -136,15 +136,16 @@ class AgentManager(BaseManager):
         """
         ignore_delay_done: Whether to ignore the delay done. This is not required when the agent success the episode!
         """
-        vehicle_name = self._agent_to_object[agent_name]
-        v = self._active_objects.pop(vehicle_name)
-        if (not ignore_delay_done) and (self._delay_done > 0):
-            self._put_to_dying_queue(v)
-        else:
-            # move to invisible place
-            self._remove_vehicle(v)
-        self._agents_finished_this_frame[agent_name] = v.name
-        self._check()
+        if not self.engine.replay_episode:
+            vehicle_name = self._agent_to_object[agent_name]
+            v = self._active_objects.pop(vehicle_name)
+            if (not ignore_delay_done) and (self._delay_done > 0):
+                self._put_to_dying_queue(v)
+            else:
+                # move to invisible place
+                self._remove_vehicle(v)
+            self._agents_finished_this_frame[agent_name] = v.name
+            self._check()
 
     def _check(self):
         if self._debug:
@@ -210,14 +211,17 @@ class AgentManager(BaseManager):
         return list(self._active_objects.values()) + [v for (v, _) in self._dying_objects.values()]
 
     def get_observations(self):
-        ret = {
-            old_agent_id: self.observations[v_name]
-            for old_agent_id, v_name in self._agents_finished_this_frame.items()
-        }
-        for obj_id, observation in self.observations.items():
-            if self.is_active_object(obj_id):
-                ret[self.object_to_agent(obj_id)] = observation
-        return ret
+        if hasattr(self, "engine") and self.engine.replay_episode:
+            return self.engine.replay_manager.get_replay_agent_observations()
+        else:
+            ret = {
+                old_agent_id: self.observations[v_name]
+                for old_agent_id, v_name in self._agents_finished_this_frame.items()
+            }
+            for obj_id, observation in self.observations.items():
+                if self.is_active_object(obj_id):
+                    ret[self.object_to_agent(obj_id)] = observation
+            return ret
 
     def get_observation_spaces(self):
         ret = {
@@ -246,7 +250,10 @@ class AgentManager(BaseManager):
         """
         Return Map<agent_id, BaseVehicle>
         """
-        return {self._object_to_agent[k]: v for k, v in self._active_objects.items()}
+        return self.engine.replay_manager.replay_agents if hasattr(self, "engine") and self.engine.replay_episode else {
+            self._object_to_agent[k]: v
+            for k, v in self._active_objects.items()
+        }
 
     @property
     def active_objects(self):
@@ -254,6 +261,7 @@ class AgentManager(BaseManager):
         Return meta-data, a pointer, Caution !
         :return: Map<obj_name, obj>
         """
+        raise DeprecationWarning("prohibit! Use active agent instead")
         return self._active_objects
 
     def get_agent(self, agent_name):

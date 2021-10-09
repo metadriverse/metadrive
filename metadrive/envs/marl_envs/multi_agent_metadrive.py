@@ -125,7 +125,7 @@ class MultiAgentMetaDrive(MetaDriveEnv):
         o, r, d, i = self._after_vehicle_done(o, r, d, i)
 
         # Update respawn manager
-        if self.episode_steps >= self.config["horizon"] or self.engine.replay_system is not None:
+        if self.episode_steps >= self.config["horizon"]:
             self.agent_manager.set_allow_respawn(False)
         new_obs_dict = self._respawn_vehicles(randomize_position=self.config["random_traffic"])
         if new_obs_dict:
@@ -147,8 +147,6 @@ class MultiAgentMetaDrive(MetaDriveEnv):
         return o, r, d, i
 
     def _after_vehicle_done(self, obs=None, reward=None, dones: dict = None, info=None):
-        if self.engine.replay_system is not None:
-            return obs, reward, dones, info
         for v_id, v_info in info.items():
             if v_info.get("episode_length", 0) >= self.config["horizon"]:
                 if dones[v_id] is not None:
@@ -294,7 +292,7 @@ def pygame_replay(name, env_class, save=False, other_traj=None, film_size=(1000,
         if save:
             pygame.image.save(env._top_down_renderer._runtime, "{}_{}.png".format(name, frame_count))
         frame_count += 1
-        if len(env.engine.replay_system.restore_episode_info) == 0:
+        if len(env.engine.replay_manager.restore_episode_info) == 0:
             env.close()
 
 
@@ -316,7 +314,7 @@ def panda_replay(name, env_class, save=False, other_traj=None, extra_config={}):
         if save:
             pygame.image.save(env._top_down_renderer._runtime, "{}_{}.png".format(name, frame_count))
         frame_count += 1
-        if len(env.engine.replay_system.restore_episode_info) == 0:
+        if len(env.engine.replay_manager.restore_episode_info) == 0:
             env.close()
 
 

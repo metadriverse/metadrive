@@ -64,7 +64,7 @@ class BaseVehicleState:
         self.on_broken_line = False
 
         # contact results
-        self.contact_results = None
+        self.contact_results = set()
 
 
 class BaseVehicle(BaseObject, BaseVehicleState):
@@ -237,11 +237,12 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             )
         return action, {'raw_action': (action[0], action[1])}
 
-    def before_step(self, action):
+    def before_step(self, action=None):
         """
         Save info and make decision before action
         """
         # init step info to store info before each step
+        action = action or [0, 0]
         self._init_step_info()
         action, step_info = self._preprocess_action(action)
 
@@ -666,21 +667,25 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self.origin.setH(h - 90)
 
     def get_state(self):
+        """
+        Fetch more information
+        """
+        state = super(BaseVehicle, self).get_state()
         final_road = self.navigation.final_road
-        return {
-            "heading": self.heading_theta,
-            "position": self.position.tolist(),
-            "done": self.crash_vehicle or self.out_of_route or self.crash_sidewalk or not self.on_lane,
-            "speed": self.speed,
-            "spawn_road": self.config["spawn_lane_index"][:-1],
-            "destination": (final_road.start_node, final_road.end_node)
-        }
+        state.update(
+            {
+                "spawn_road": self.config["spawn_lane_index"][:-1],
+                "destination": (final_road.start_node, final_road.end_node),
+                "steering": self.steering,
+                "throttle_brake": self.throttle_brake
+            }
+        )
+        return state
 
-    def set_state(self, state: dict):
-        self.set_heading_theta(state["heading"])
-        self.set_position(state["position"])
-        self._replay_done = state["done"]
-        self.set_position(state["position"], height=0.28)
+    def set_state(self, state):
+        super(BaseVehicle, self).set_state(state)
+        self.throttle_brake = state["throttle_brake"]
+        self.steering = state["steering"]
 
     def _update_overtake_stat(self):
         if self.config["overtake_stat"] and self.lidar.available:

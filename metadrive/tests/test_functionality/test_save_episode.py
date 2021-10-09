@@ -1,8 +1,11 @@
 import json
+from metadrive.policy.idm_policy import IDMPolicy
+import pickle
 
 from metadrive.component.map.base_map import BaseMap, MapGenerateMethod
 from metadrive.envs.metadrive_env import MetaDriveEnv
 from metadrive.manager.traffic_manager import TrafficMode
+from metadrive.envs.safe_metadrive_env import SafeMetaDriveEnv
 from metadrive.utils import setup_logger
 
 
@@ -10,20 +13,22 @@ def test_save_episode(vis=False):
     setup_logger(True)
 
     test_dump = True
-    save_episode = True,
-    vis = True
-    env = MetaDriveEnv(
+    save_episode = True
+    vis = vis
+    env = SafeMetaDriveEnv(
         {
+            "accident_prob": 0.7,
             "environment_num": 1,
             "traffic_density": 0.1,
             "start_seed": 5,
             # "manual_control": vis,
             "use_render": vis,
+            "agent_policy": IDMPolicy,
             "traffic_mode": TrafficMode.Trigger,
             "record_episode": save_episode,
             "map_config": {
                 BaseMap.GENERATE_TYPE: MapGenerateMethod.BIG_BLOCK_SEQUENCE,
-                BaseMap.GENERATE_CONFIG: "XTXTXTXTXT",
+                BaseMap.GENERATE_CONFIG: "CXOC",
                 BaseMap.LANE_WIDTH: 3.5,
                 BaseMap.LANE_NUM: 3,
             }
@@ -31,30 +36,25 @@ def test_save_episode(vis=False):
     )
     try:
         o = env.reset()
-        epi_info = None
         for i in range(1, 100000 if vis else 2000):
             o, r, d, info = env.step([0, 1])
             if vis:
                 env.render()
             if d:
-                epi_info = env.engine.dump_episode()
-
-                # test dump json
-                if test_dump:
-                    with open("test.json", "w") as f:
-                        json.dump(epi_info, f)
+                epi_info = env.engine.dump_episode("test_dump.pkl" if test_dump else None)
                 break
-
-        o = env.reset(epi_info)
+        f = open("test_dump.pkl", "rb+")
+        env.config["replay_episode"] = pickle.load(f)
+        o = env.reset()
         for i in range(1, 100000 if vis else 2000):
             o, r, d, info = env.step([0, 1])
             if vis:
                 env.render()
-            if d:
+            if info.get("replay_done", False):
                 break
     finally:
         env.close()
 
 
 if __name__ == "__main__":
-    test_save_episode(vis=True)
+    test_save_episode(vis=False)

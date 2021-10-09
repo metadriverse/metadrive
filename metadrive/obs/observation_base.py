@@ -2,9 +2,8 @@ from abc import ABC
 
 
 class ObservationBase(ABC):
-    def __init__(self, config, env=None):
+    def __init__(self, config):
         self.config = config
-        self.env = env
         self.current_observation = None
 
     @property

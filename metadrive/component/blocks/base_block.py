@@ -487,3 +487,15 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
             "Therefore, you should create BulletBody and then add them to self.dynamics_nodes "
             "manually. See in construct() method"
         )
+
+    def get_state(self) -> Dict:
+        """
+        The record of Block type is not same as other objects
+        """
+        return {}
+
+    def set_state(self, state: Dict):
+        """
+        Block type can not set state currently
+        """
+        pass
