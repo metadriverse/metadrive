@@ -48,7 +48,7 @@ class ReplayManager(BaseManager):
             self.replay_frame()
 
     def after_step(self, *args, **kwargs):
-        return {REPLAY_DONE: self.replay_done}
+        return self.engine.agent_manager.for_each_active_agents(lambda v: {REPLAY_DONE: self.replay_done})
 
     def destroy(self):
         self.record_name_to_current_name = dict()

@@ -205,7 +205,6 @@ class BaseEnv(gym.Env):
         actions = self._preprocess_actions(actions)
         engine_info = self._step_simulator(actions)
         o, r, d, i = self._get_step_return(actions, engine_info=engine_info)
-        d = d or engine_info.get(REPLAY_DONE, False)
         return o, r, d, i
 
     def _preprocess_actions(self, actions: Union[np.ndarray, Dict[AnyStr, np.ndarray]]) \
@@ -332,14 +331,12 @@ class BaseEnv(gym.Env):
         termination_infos = self.for_each_vehicle(auto_termination, should_done)
 
         step_infos = concat_step_infos([
+            engine_info,
             done_infos,
             reward_infos,
             cost_infos,
             termination_infos,
         ])
-
-        for agent, info in step_infos.items():
-            info.update(engine_info)
 
         if should_done:
             for k in self.dones:

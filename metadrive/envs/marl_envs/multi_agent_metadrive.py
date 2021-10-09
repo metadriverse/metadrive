@@ -125,7 +125,7 @@ class MultiAgentMetaDrive(MetaDriveEnv):
         o, r, d, i = self._after_vehicle_done(o, r, d, i)
 
         # Update respawn manager
-        if self.episode_steps >= self.config["horizon"] or self.engine.replay_manager is not None:
+        if self.episode_steps >= self.config["horizon"]:
             self.agent_manager.set_allow_respawn(False)
         new_obs_dict = self._respawn_vehicles(randomize_position=self.config["random_traffic"])
         if new_obs_dict:
@@ -147,8 +147,6 @@ class MultiAgentMetaDrive(MetaDriveEnv):
         return o, r, d, i
 
     def _after_vehicle_done(self, obs=None, reward=None, dones: dict = None, info=None):
-        if self.engine.replay_manager is not None:
-            return obs, reward, dones, info
         for v_id, v_info in info.items():
             if v_info.get("episode_length", 0) >= self.config["horizon"]:
                 if dones[v_id] is not None:

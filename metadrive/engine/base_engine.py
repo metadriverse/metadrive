@@ -1,4 +1,5 @@
 import logging
+from metadrive.utils import concat_step_infos
 import pickle
 import time
 from collections import OrderedDict
@@ -212,7 +213,8 @@ class BaseEngine(EngineCore, Randomizable):
         step_infos = {}
         self.external_actions = external_actions
         for manager in self.managers.values():
-            step_infos.update(manager.before_step())
+            new_step_infos = manager.before_step()
+            step_infos = concat_step_infos([step_infos, new_step_infos])
         return step_infos
 
     def step(self, step_num: int = 1) -> None:
@@ -240,7 +242,8 @@ class BaseEngine(EngineCore, Randomizable):
         self.episode_step += 1
         step_infos = {}
         for manager in self.managers.values():
-            step_infos.update(manager.after_step())
+            new_step_info = manager.after_step()
+            step_infos = concat_step_infos([step_infos, new_step_info])
         self.interface.after_step()
 
         # cull distant blocks
