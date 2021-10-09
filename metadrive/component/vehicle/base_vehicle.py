@@ -673,8 +673,15 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         state = super(BaseVehicle, self).get_state()
         final_road = self.navigation.final_road
         state.update({"spawn_road": self.config["spawn_lane_index"][:-1],
-                      "destination": (final_road.start_node, final_road.end_node)})
+                      "destination": (final_road.start_node, final_road.end_node),
+                      "steering": self.steering,
+                      "throttle_brake": self.throttle_brake})
         return state
+
+    def set_state(self, state):
+        super(BaseVehicle, self).set_state(state)
+        self.throttle_brake = state["throttle_brake"]
+        self.steering = state["steering"]
 
     def _update_overtake_stat(self):
         if self.config["overtake_stat"] and self.lidar.available:

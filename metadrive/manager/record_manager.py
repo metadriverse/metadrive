@@ -62,7 +62,7 @@ class RecordManager(BaseManager):
         if self.engine.record_episode:
             self._update_objects_states()
             self.episode_info["frame"].append(self.current_frame)
-            return {}
+        return {}
 
     def _update_objects_states(self):
         for name, obj in self.engine.get_objects().items():

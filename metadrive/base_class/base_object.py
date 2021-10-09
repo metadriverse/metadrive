@@ -167,7 +167,7 @@ class BaseObject(BaseRunnable):
         :param value: speed [m/s]
         """
         if value is not None:
-            norm_ratio = value / norm(direction[0], direction[1])
+            norm_ratio = value / (norm(direction[0], direction[1]) + 1e-3)
         else:
             norm_ratio = 1
         self._body.setLinearVelocity(
@@ -259,4 +259,4 @@ class BaseObject(BaseRunnable):
         self.set_heading_theta(state[ObjectState.HEADING_THETA])
         self.set_pitch(state[ObjectState.PITCH])
         self.set_roll(state[ObjectState.ROLL])
-        # self.set_velocity(state[ObjectState.VELOCITY]/3.6)
+        self.set_velocity(state[ObjectState.VELOCITY]/3.6)
