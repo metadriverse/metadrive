@@ -100,7 +100,7 @@ class AgentManager(BaseManager):
         self._allow_respawn = config["allow_respawn"]
         init_vehicles = self._get_vehicles(
             config_dict=self.engine.global_config["target_vehicle_configs"] if self.engine.
-                global_config["is_multi_agent"] else {DEFAULT_AGENT: self.engine.global_config["vehicle_config"]}
+            global_config["is_multi_agent"] else {DEFAULT_AGENT: self.engine.global_config["vehicle_config"]}
         )
         vehicles_created = set(init_vehicles.keys())
         vehicles_in_config = set(self._init_observations.keys())
@@ -250,8 +250,10 @@ class AgentManager(BaseManager):
         """
         Return Map<agent_id, BaseVehicle>
         """
-        return {self._object_to_agent[k]: v for k, v in
-                self._active_objects.items()} if not self.engine.replay_episode else self.engine.replay_manager.replay_agents
+        return {
+            self._object_to_agent[k]: v
+            for k, v in self._active_objects.items()
+        } if not self.engine.replay_episode else self.engine.replay_manager.replay_agents
 
     @property
     def active_objects(self):
