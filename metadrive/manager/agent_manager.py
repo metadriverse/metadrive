@@ -211,7 +211,7 @@ class AgentManager(BaseManager):
         return list(self._active_objects.values()) + [v for (v, _) in self._dying_objects.values()]
 
     def get_observations(self):
-        if self.engine.replay_episode:
+        if hasattr(self, "engine") and self.engine.replay_episode:
             return self.engine.replay_manager.get_replay_agent_observations()
         else:
             ret = {
@@ -250,10 +250,10 @@ class AgentManager(BaseManager):
         """
         Return Map<agent_id, BaseVehicle>
         """
-        return {
+        return self.engine.replay_manager.replay_agents if hasattr(self, "engine") and self.engine.replay_episode else {
             self._object_to_agent[k]: v
             for k, v in self._active_objects.items()
-        } if not self.engine.replay_episode else self.engine.replay_manager.replay_agents
+        }
 
     @property
     def active_objects(self):
