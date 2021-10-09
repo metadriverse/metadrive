@@ -29,9 +29,9 @@ class TopDownObservation(ObservationBase):
 
     # MAX_RANGE = (50, 50)  # maximum detection distance = 50 M
 
-    def __init__(self, vehicle_config, env, clip_rgb: bool, resolution=None, max_distance=50):
+    def __init__(self, vehicle_config, clip_rgb: bool, onscreen, resolution=None, max_distance=50):
         self.resolution = resolution or self.RESOLUTION
-        super(TopDownObservation, self).__init__(vehicle_config, env)
+        super(TopDownObservation, self).__init__(vehicle_config)
         self.rgb_clip = clip_rgb
         self.num_stacks = 3
 
@@ -40,7 +40,7 @@ class TopDownObservation(ObservationBase):
 
         self.pygame = import_pygame()
 
-        self.onscreen = env.config["use_render"]
+        self.onscreen = onscreen
         main_window_position = (0, 0)
 
         self._center_pos = None  # automatically change, don't set the value

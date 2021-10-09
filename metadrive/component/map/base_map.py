@@ -121,20 +121,8 @@ class BaseMap(BaseRunnable):
             json_config[self.PRE_BLOCK_SOCKET_INDEX] = b.pre_block_socket_index
             map_config.append(json_config)
 
-        saved_data = copy.deepcopy({self.BLOCK_SEQUENCE: map_config})
+        saved_data = copy.deepcopy({self.BLOCK_SEQUENCE: map_config, "map_config": self.config.copy()})
         return saved_data
-
-    def read_map(self, map_config: dict):
-        """
-        Load the map from a dict. Note that we don't provide a restore function in the base class.
-        """
-        self._config[self.SEED] = map_config[self.SEED]
-        blocks_config = map_config[self.BLOCK_SEQUENCE]
-        for b_id, b in enumerate(blocks_config):
-            blocks_config[b_id] = {k: np.array(v) if isinstance(v, list) else v for k, v in b.items()}
-
-        # update the property
-        return blocks_config
 
     @property
     def num_blocks(self):

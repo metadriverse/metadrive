@@ -9,11 +9,13 @@ from panda3d.core import PNMImage
 
 from metadrive.component.blocks.first_block import FirstPGBlock
 from metadrive.component.vehicle.base_vehicle import BaseVehicle
-from metadrive.constants import RENDER_MODE_NONE, DEFAULT_AGENT
+from metadrive.constants import RENDER_MODE_NONE, DEFAULT_AGENT, REPLAY_DONE
 from metadrive.engine.base_engine import BaseEngine
 from metadrive.engine.engine_utils import initialize_engine, close_engine, \
     engine_initialized, set_global_random_seed
 from metadrive.manager.agent_manager import AgentManager
+from metadrive.manager.record_manager import RecordManager
+from metadrive.manager.replay_manager import ReplayManager
 from metadrive.obs.observation_base import ObservationBase
 from metadrive.utils import Config, merge_dicts, get_np_random, concat_step_infos
 from metadrive.utils.utils import auto_termination
@@ -101,7 +103,8 @@ BASE_DEFAULT_CONFIG = dict(
     max_distance=None,
     # Force to generate objects in the left lane.
     _debug_crash_object=False,
-    record_episode=False,
+    record_episode=False,  # when replay_episode is not None ,this option will be useless
+    replay_episode=None,  # set the replay file to enable replay
     horizon=None,  # The maximum length of each episode. Set to None to remove this constraint
 )
 
@@ -200,8 +203,8 @@ class BaseEnv(gym.Env):
     def step(self, actions: Union[np.ndarray, Dict[AnyStr, np.ndarray]]):
         self.episode_steps += 1
         actions = self._preprocess_actions(actions)
-        step_infos = self._step_simulator(actions)
-        o, r, d, i = self._get_step_return(actions, step_infos)
+        engine_info = self._step_simulator(actions)
+        o, r, d, i = self._get_step_return(actions, engine_info=engine_info)
         return o, r, d, i
 
     def _preprocess_actions(self, actions: Union[np.ndarray, Dict[AnyStr, np.ndarray]]) \
@@ -278,11 +281,10 @@ class BaseEnv(gym.Env):
         # logging.warning("You do not set 'offscreen_render' or 'offscreen_render' to True, so no image will be returned!")
         return None
 
-    def reset(self, episode_data: dict = None, force_seed: Union[None, int] = None):
+    def reset(self, force_seed: Union[None, int] = None):
         """
         Reset the env, scene can be restored and replayed by giving episode_data
         Reset the environment or load an episode from episode data to recover is
-        :param episode_data: Feed the episode data to replay an episode
         :param force_seed: The seed to set the env.
         :return: None
         """
@@ -308,7 +310,7 @@ class BaseEnv(gym.Env):
             ret[v_id] = self.observations[v_id].observe(v)
         return ret if self.is_multi_agent else self._wrap_as_single_agent(ret)
 
-    def _get_step_return(self, actions, step_infos):
+    def _get_step_return(self, actions, engine_info):
         # update obs, dones, rewards, costs, calculate done at first !
         obses = {}
         done_infos = {}
@@ -324,11 +326,12 @@ class BaseEnv(gym.Env):
             done = done_function_result or self.dones[v_id]
             self.dones[v_id] = done
 
-        should_done = self.config["horizon"] and self.episode_steps >= self.config["horizon"]
+        should_done = engine_info.get(REPLAY_DONE, False
+                                      ) or (self.config["horizon"] and self.episode_steps >= self.config["horizon"])
         termination_infos = self.for_each_vehicle(auto_termination, should_done)
 
         step_infos = concat_step_infos([
-            step_infos,
+            engine_info,
             done_infos,
             reward_infos,
             cost_infos,
@@ -443,6 +446,8 @@ class BaseEnv(gym.Env):
         self.engine.accept("escape", sys.exit)
         self.engine.accept("p", self.capture)
         self.engine.register_manager("agent_manager", self.agent_manager)
+        self.engine.register_manager("record_manager", RecordManager())
+        self.engine.register_manager("replay_manager", ReplayManager())
 
     @property
     def current_map(self):

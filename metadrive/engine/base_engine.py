@@ -1,9 +1,12 @@
 import logging
+from metadrive.utils import concat_step_infos
+import pickle
 import time
 from collections import OrderedDict
 from typing import Callable, Optional, Union, List, Dict, AnyStr
 
 import numpy as np
+
 from metadrive.base_class.randomizable import Randomizable
 from metadrive.engine.core.engine_core import EngineCore
 from metadrive.engine.interface import Interface
@@ -21,12 +24,10 @@ class BaseEngine(EngineCore, Randomizable):
     singleton = None
     global_random_seed = None
 
-    IN_REPLAY = False
-    STOP_REPLAY = False
-
     def __init__(self, global_config):
         EngineCore.__init__(self, global_config)
         Randomizable.__init__(self, self.global_random_seed)
+        self.episode_step = 0
         BaseEngine.singleton = self
         self.interface = Interface(self)
 
@@ -35,11 +36,9 @@ class BaseEngine(EngineCore, Randomizable):
         self._managers = OrderedDict()
 
         # for recovering, they can not exist together
-        # TODO new record/replay
         self.record_episode = False
-        self.replay_system = None
-        self.record_system = None
-        self.accept("s", self._stop_replay)
+        self.replay_episode = False
+        # self.accept("s", self._stop_replay)
 
         # cull scene
         self.cull_scene = self.global_config["cull_scene"]
@@ -105,6 +104,8 @@ class BaseEngine(EngineCore, Randomizable):
         else:
             obj = self._dying_objects[object_class.__name__].pop()
             obj.reset(**kwargs)
+        if self.global_config["record_episode"] and not self.replay_episode:
+            self.record_manager.add_spawn_info(object_class, kwargs, obj.name)
         self._spawned_objects[obj.id] = obj
         obj.attach_to_world(self.pbr_worldNP if pbr_model else self.worldNP, self.physics_world)
         return obj
@@ -162,29 +163,39 @@ class BaseEngine(EngineCore, Randomizable):
                 if obj.class_name not in self._dying_objects:
                     self._dying_objects[obj.class_name] = []
                 self._dying_objects[obj.class_name].append(obj)
+            if self.global_config["record_episode"] and not self.replay_episode:
+                self.record_manager.add_clear_info(obj)
         return exclude_objects.keys()
 
     def reset(self):
         """
-        For garbage collecting using, ensure to release the memory of all traffic vehicles
+        Clear and generate the whole scene
         """
+        # initialize
+        self._episode_start_time = time.time()
+        self.episode_step = 0
         if self.global_config["debug_physics_world"]:
             self.addTask(self.report_body_nums, "report_num")
 
-        self._episode_start_time = time.time()
+        # record replay
+        self.replay_episode = True if self.global_config["replay_episode"] is not None else False
+        self.record_episode = self.global_config["record_episode"]
 
+        # reset manager
         for manager in self._managers.values():
+            # clean all manager
             manager.before_reset()
         self._object_clean_check()
-        for manager in self._managers.values():
+        for manager in self.managers.values():
             manager.reset()
-        for manager in self._managers.values():
+        for manager in self.managers.values():
             manager.after_reset()
 
+        # reset cam
         if self.main_camera is not None:
             self.main_camera.reset()
             if hasattr(self, "agent_manager"):
-                vehicles = self.agent_manager.get_vehicle_list()
+                vehicles = list(self.agents.values())
                 current_track_vehicle = vehicles[0]
                 self.main_camera.set_follow_lane(self.global_config["use_chase_camera_follow_lane"])
                 self.main_camera.track(current_track_vehicle)
@@ -201,8 +212,9 @@ class BaseEngine(EngineCore, Randomizable):
         """
         step_infos = {}
         self.external_actions = external_actions
-        for manager in self._managers.values():
-            step_infos.update(manager.before_step())
+        for manager in self.managers.values():
+            new_step_infos = manager.before_step()
+            step_infos = concat_step_infos([step_infos, new_step_infos])
         return step_infos
 
     def step(self, step_num: int = 1) -> None:
@@ -212,7 +224,7 @@ class BaseEngine(EngineCore, Randomizable):
         """
         for i in range(step_num):
             # simulate or replay
-            for manager in self._managers.values():
+            for manager in self.managers.values():
                 manager.step()
             self.step_physics_world()
             if self.force_fps.real_time_simulation and i < step_num - 1:
@@ -227,9 +239,11 @@ class BaseEngine(EngineCore, Randomizable):
         Update states after finishing movement
         :return: if this episode is done
         """
+        self.episode_step += 1
         step_infos = {}
-        for manager in self._managers.values():
-            step_infos.update(manager.after_step())
+        for manager in self.managers.values():
+            new_step_info = manager.after_step()
+            step_infos = concat_step_infos([step_infos, new_step_info])
         self.interface.after_step()
 
         # cull distant blocks
@@ -238,10 +252,14 @@ class BaseEngine(EngineCore, Randomizable):
         #     SceneCull.cull_distant_blocks(self, self.current_map.blocks, poses, self.global_config["max_distance"])
         return step_infos
 
-    def dump_episode(self) -> None:
+    def dump_episode(self, pkl_file_name=None) -> None:
         """Dump the data of an episode."""
-        assert self.record_system is not None
-        return self.record_system.dump_episode()
+        assert self.record_manager is not None
+        episode_state = self.record_manager.dump_episode()
+        if pkl_file_name is not None:
+            with open(pkl_file_name, "wb+") as file:
+                pickle.dump(episode_state, file)
+        return episode_state
 
     def close(self):
         """
@@ -272,6 +290,7 @@ class BaseEngine(EngineCore, Randomizable):
         logging.debug("{} is destroyed".format(self.__class__.__name__))
 
     def _stop_replay(self):
+        raise DeprecationWarning
         if not self.IN_REPLAY:
             return
         self.STOP_REPLAY = not self.STOP_REPLAY
@@ -297,7 +316,10 @@ class BaseEngine(EngineCore, Randomizable):
 
     @property
     def current_map(self):
-        return self.map_manager.current_map
+        if self.replay_episode:
+            return self.replay_manager.current_map
+        else:
+            return self.map_manager.current_map
 
     @property
     def current_track_vehicle(self):
@@ -308,7 +330,10 @@ class BaseEngine(EngineCore, Randomizable):
 
     @property
     def agents(self):
-        return {k: v for k, v in self.agent_manager.active_agents.items()}
+        if not self.replay_episode:
+            return self.agent_manager.active_agents
+        else:
+            return self.replay_manager.replay_agents
 
     def setup_main_camera(self):
         from metadrive.engine.core.chase_camera import MainCamera
@@ -353,3 +378,16 @@ class BaseEngine(EngineCore, Randomizable):
         self._managers[manager_name] = manager
         setattr(self, manager_name, manager)
         self._managers = OrderedDict(sorted(self._managers.items(), key=lambda k_v: k_v[-1].PRIORITY))
+
+    @property
+    def managers(self):
+        # whether to froze other managers
+        return self._managers if not self.replay_episode else {"replay_manager": self.replay_manager}
+
+    def change_object_name(self, obj, new_name):
+        raise DeprecationWarning("This function is too dangerous to use")
+        """
+        Change the name of one object, Note: it may bring some bugs if abusing
+        """
+        obj = self._spawned_objects.pop(obj.name)
+        self._spawned_objects[new_name] = obj
