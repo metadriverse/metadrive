@@ -1,9 +1,11 @@
 import json
+from metadrive.policy.idm_policy import IDMPolicy
 import pickle
 
 from metadrive.component.map.base_map import BaseMap, MapGenerateMethod
 from metadrive.envs.metadrive_env import MetaDriveEnv
 from metadrive.manager.traffic_manager import TrafficMode
+from metadrive.envs.safe_metadrive_env import SafeMetaDriveEnv
 from metadrive.utils import setup_logger
 
 
@@ -13,18 +15,20 @@ def test_save_episode(vis=False):
     test_dump = True
     save_episode = True
     vis = True
-    env = MetaDriveEnv(
+    env = SafeMetaDriveEnv(
         {
+            "accident_prob": 0.8,
             "environment_num": 1,
             "traffic_density": 0.1,
             "start_seed": 5,
-            # "manual_control": vis,
+            "manual_control": vis,
             "use_render": vis,
+            # "agent_policy":IDMPolicy,
             "traffic_mode": TrafficMode.Trigger,
             "record_episode": save_episode,
             "map_config": {
                 BaseMap.GENERATE_TYPE: MapGenerateMethod.BIG_BLOCK_SEQUENCE,
-                BaseMap.GENERATE_CONFIG: "XTCTXT",
+                BaseMap.GENERATE_CONFIG: "CXOC",
                 BaseMap.LANE_WIDTH: 3.5,
                 BaseMap.LANE_NUM: 3,
             }

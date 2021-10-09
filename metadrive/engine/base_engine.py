@@ -103,7 +103,7 @@ class BaseEngine(EngineCore, Randomizable):
         else:
             obj = self._dying_objects[object_class.__name__].pop()
             obj.reset(**kwargs)
-        if self.global_config["record_episode"]:
+        if self.global_config["record_episode"] and not self.replay_episode:
             self.record_manager.add_spawn_info(object_class, kwargs, obj.name)
         self._spawned_objects[obj.id] = obj
         obj.attach_to_world(self.pbr_worldNP if pbr_model else self.worldNP, self.physics_world)
@@ -162,7 +162,7 @@ class BaseEngine(EngineCore, Randomizable):
                 if obj.class_name not in self._dying_objects:
                     self._dying_objects[obj.class_name] = []
                 self._dying_objects[obj.class_name].append(obj)
-            if self.global_config["record_episode"]:
+            if self.global_config["record_episode"] and not self.replay_episode:
                 self.record_manager.add_clear_info(obj)
         return exclude_objects.keys()
 
@@ -382,6 +382,7 @@ class BaseEngine(EngineCore, Randomizable):
         return self._managers if not self.replay_episode else {"replay_manager": self.replay_manager}
 
     def change_object_name(self, obj, new_name):
+        raise DeprecationWarning("This function is too dangerous to use")
         """
         Change the name of one object, Note: it may bring some bugs if abusing
         """

@@ -105,6 +105,8 @@ class ReplayManager(BaseManager):
         self.restore_episode_info = None
         self.current_map = None
         self.current_frame = None
+        self.record_name_to_current_name = dict()
+        self.current_name_to_record_name = dict()
 
     def before_reset(self, *args, **kwargs):
         """
@@ -115,6 +117,8 @@ class ReplayManager(BaseManager):
     def reset(self):
         if not self.engine.replay_episode:
             return
+        self.record_name_to_current_name = dict()
+        self.current_name_to_record_name = dict()
         self.restore_episode_info = self.engine.global_config["replay_episode"]
         self.restore_episode_info["frame"].reverse()
         # Since in episode data map data only contains one map, values()[0] is the map_parameters
@@ -133,6 +137,8 @@ class ReplayManager(BaseManager):
         return dict(REPLAY_DONE=False)
 
     def destroy(self):
+        self.record_name_to_current_name = dict()
+        self.current_name_to_record_name = dict()
         self.restore_episode_info = None
         self.current_map = None
 
@@ -142,16 +148,17 @@ class ReplayManager(BaseManager):
         self.current_frame = self.restore_episode_info["frame"].pop()
         # create
         for name, config in self.current_frame.spawn_info.items():
-            obj = self.spawn_object(config[ObjectState.CLASS], config[ObjectState.INIT_KWARGS])
-            # self.change_object_name(obj, name)
+            obj = self.spawn_object(object_class=config[ObjectState.CLASS], **config[ObjectState.INIT_KWARGS])
+            self.current_name_to_record_name[obj.name] = name
+            self.record_name_to_current_name[name] = obj.name
         for name, state in self.current_frame.step_info.items():
-            self.spawned_objects[name].before_step()
-            self.spawned_objects[name].set_state(state)
-        self.clear_objects(self.current_frame.clear_info)
+            self.spawned_objects[self.record_name_to_current_name[name]].before_step()
+            self.spawned_objects[self.record_name_to_current_name[name]].set_state(state)
+        self.clear_objects([self.record_name_to_current_name[name] for name in self.current_frame.clear_info])
         return {REPLAY_DONE: False}
 
     def __del__(self):
         logging.debug("Replay system is destroyed")
 
     def get_object_from_agent(self, agent_id):
-        return self.spawned_objects[self.current_frame.agent_to_object(agent_id)]
+        return self.spawned_objects[self.record_name_to_current_name[self.current_frame.agent_to_object(agent_id)]]
