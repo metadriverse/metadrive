@@ -2,9 +2,8 @@ import copy
 import logging
 
 from metadrive.component.blocks.base_block import BaseBlock
-from metadrive.component.map.base_map import BaseMap, MapGenerateMethod
-from metadrive.component.map.pg_map import PGMap
-from metadrive.constants import ObjectState, REPLAY_DONE
+from metadrive.component.map.base_map import BaseMap
+from metadrive.constants import ObjectState
 from metadrive.manager.base_manager import BaseManager
 
 
@@ -37,11 +36,14 @@ class RecordManager(BaseManager):
     def __init__(self):
         super(RecordManager, self).__init__()
         self.episode_info = None
-        self.current_frame = None
+        self.current_frames = None
+        self.current_step = 0
+        self.reset_frame = None
 
     def before_reset(self):
-        self.episode_info = {}
-        self.current_frame = FrameInfo(self.engine.episode_step)
+        if self.engine.record_episode:
+            self.episode_info = {}
+            self.reset_frame = FrameInfo(self.engine.episode_step)
 
     def after_reset(self):
         """
@@ -50,18 +52,27 @@ class RecordManager(BaseManager):
         if self.engine.record_episode:
             self.episode_info = dict(
                 map_data=self.engine.current_map.save_map(),
-                frame=[],
+                frame=[self.reset_frame],
             )
+            self.current_frames = None
+            self.current_step = 0
 
-    def before_step(self, *args, **kwargs):
+    def before_step(self, *args, **kwargs) -> dict:
         if self.engine.record_episode:
-            self.current_frame = FrameInfo(self.engine.episode_step)
+            self.current_frames = [FrameInfo(self.engine.episode_step) for _ in
+                                   range(self.engine.global_config["decision_repeat"])]
+            self.current_step = 0
         return {}
 
-    def after_step(self, *args, **kwargs):
+    def step(self, *args, **kwargs):
         if self.engine.record_episode:
             self._update_objects_states()
-            self.episode_info["frame"].append(self.current_frame)
+            self.current_step += 1 if self.current_step < len(self.current_frames)-1 else 0
+            # self.episode_info["frame"].append(self.current_frames.pop())
+
+    def after_step(self, *args, **kwargs) -> dict:
+        if self.engine.record_episode and self.current_step:
+            self.episode_info["frame"] += self.current_frames
         return {}
 
     def _update_objects_states(self):
@@ -73,6 +84,7 @@ class RecordManager(BaseManager):
         self.current_frame._object_to_agent = self.engine.agent_manager._object_to_agent
 
     def dump_episode(self):
+        assert self.engine.record_episode, "Turn on recording episode and then dump it"
         return copy.deepcopy(self.episode_info)
 
     def destroy(self):
@@ -97,68 +109,6 @@ class RecordManager(BaseManager):
     def __del__(self):
         logging.debug("Record system is destroyed")
 
-
-class ReplayManager(BaseManager):
-
-    def __init__(self):
-        super(ReplayManager, self).__init__()
-        self.restore_episode_info = None
-        self.current_map = None
-        self.current_frame = None
-        self.record_name_to_current_name = dict()
-        self.current_name_to_record_name = dict()
-
-    def before_reset(self, *args, **kwargs):
-        """
-        Clean generated objects
-        """
-        self.clear_objects([name for name in self.spawned_objects])
-
-    def reset(self):
-        if not self.engine.replay_episode:
-            return
-        self.record_name_to_current_name = dict()
-        self.current_name_to_record_name = dict()
-        self.restore_episode_info = self.engine.global_config["replay_episode"]
-        self.restore_episode_info["frame"].reverse()
-        # Since in episode data map data only contains one map, values()[0] is the map_parameters
-        map_data = self.restore_episode_info["map_data"]
-        assert len(map_data) > 0, "Can not find map info in episode data"
-
-        map_config = copy.deepcopy(map_data["map_config"])
-        map_config[BaseMap.GENERATE_TYPE] = MapGenerateMethod.PG_MAP_FILE
-        map_config[BaseMap.GENERATE_CONFIG] = map_data["block_sequence"]
-        self.current_map = self.spawn_object(PGMap, map_config=map_config, auto_fill_random_seed=False)
-        self.replay_frame()
-
-    def after_step(self, *args, **kwargs):
-        if self.engine.replay_episode:
-            return self.replay_frame()
-        return dict(REPLAY_DONE=False)
-
-    def destroy(self):
-        self.record_name_to_current_name = dict()
-        self.current_name_to_record_name = dict()
-        self.restore_episode_info = None
-        self.current_map = None
-
-    def replay_frame(self):
-        if len(self.restore_episode_info["frame"]) == 0:
-            return {REPLAY_DONE: True}
-        self.current_frame = self.restore_episode_info["frame"].pop()
-        # create
-        for name, config in self.current_frame.spawn_info.items():
-            obj = self.spawn_object(object_class=config[ObjectState.CLASS], **config[ObjectState.INIT_KWARGS])
-            self.current_name_to_record_name[obj.name] = name
-            self.record_name_to_current_name[name] = obj.name
-        for name, state in self.current_frame.step_info.items():
-            self.spawned_objects[self.record_name_to_current_name[name]].before_step()
-            self.spawned_objects[self.record_name_to_current_name[name]].set_state(state)
-        self.clear_objects([self.record_name_to_current_name[name] for name in self.current_frame.clear_info])
-        return {REPLAY_DONE: False}
-
-    def __del__(self):
-        logging.debug("Replay system is destroyed")
-
-    def get_object_from_agent(self, agent_id):
-        return self.spawned_objects[self.record_name_to_current_name[self.current_frame.agent_to_object(agent_id)]]
+    @property
+    def current_frame(self):
+        return self.current_frames[self.current_step] if self.current_step else self.reset_frame

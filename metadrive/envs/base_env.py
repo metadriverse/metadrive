@@ -14,7 +14,8 @@ from metadrive.engine.base_engine import BaseEngine
 from metadrive.engine.engine_utils import initialize_engine, close_engine, \
     engine_initialized, set_global_random_seed
 from metadrive.manager.agent_manager import AgentManager
-from metadrive.manager.record_manager import RecordManager, ReplayManager
+from metadrive.manager.record_manager import RecordManager
+from metadrive.manager.replay_manager import ReplayManager
 from metadrive.obs.observation_base import ObservationBase
 from metadrive.utils import Config, merge_dicts, get_np_random, concat_step_infos
 from metadrive.utils.utils import auto_termination

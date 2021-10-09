@@ -14,7 +14,7 @@ def test_save_episode(vis=False):
 
     test_dump = True
     save_episode = True
-    vis = True
+    vis = False
     env = SafeMetaDriveEnv(
         {
             "accident_prob": 0.7,
@@ -36,7 +36,6 @@ def test_save_episode(vis=False):
     )
     try:
         o = env.reset()
-        epi_info = None
         for i in range(1, 100000 if vis else 2000):
             o, r, d, info = env.step([0, 1])
             if vis:
@@ -45,7 +44,7 @@ def test_save_episode(vis=False):
                 epi_info = env.engine.dump_episode("test_dump.pkl" if test_dump else None)
                 break
         f = open("test_dump.pkl","rb+")
-        env.config["replay_episode"] = epi_info
+        env.config["replay_episode"] = pickle.load(f)
         o = env.reset()
         for i in range(1, 100000 if vis else 2000):
             o, r, d, info = env.step([0, 1])
