@@ -50,11 +50,13 @@ class RecordManager(BaseManager):
         create a new log to record, note: after_step will be called after calling after_reset()
         """
         if self.engine.record_episode:
+            self._update_objects_states()
             self.episode_info = dict(
                 map_data=self.engine.current_map.save_map(),
                 frame=[self.reset_frame],
             )
             self.current_frames = None
+            self.reset_frame = None
             self.current_step = 0
 
     def before_step(self, *args, **kwargs) -> dict:
@@ -67,7 +69,7 @@ class RecordManager(BaseManager):
     def step(self, *args, **kwargs):
         if self.engine.record_episode:
             self._update_objects_states()
-            self.current_step += 1 if self.current_step < len(self.current_frames)-1 else 0
+            self.current_step += 1 if self.current_step < len(self.current_frames) - 1 else 0
             # self.episode_info["frame"].append(self.current_frames.pop())
 
     def after_step(self, *args, **kwargs) -> dict:
@@ -111,4 +113,4 @@ class RecordManager(BaseManager):
 
     @property
     def current_frame(self):
-        return self.current_frames[self.current_step] if self.current_step else self.reset_frame
+        return self.current_frames[self.current_step] if self.reset_frame is None else self.reset_frame

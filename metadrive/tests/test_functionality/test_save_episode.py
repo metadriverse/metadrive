@@ -14,7 +14,7 @@ def test_save_episode(vis=False):
 
     test_dump = True
     save_episode = True
-    vis = False
+    vis = vis
     env = SafeMetaDriveEnv(
         {
             "accident_prob": 0.7,
