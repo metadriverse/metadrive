@@ -282,9 +282,11 @@ class BaseObject(BaseRunnable):
     @property
     def top_down_width(self):
         raise NotImplementedError(
-            "Implement this func for rendering class {} in top down renderer".format(self.class_name))
+            "Implement this func for rendering class {} in top down renderer".format(self.class_name)
+        )
 
     @property
     def top_down_length(self):
         raise NotImplementedError(
-            "Implement this func for rendering class {} in top down renderer".format(self.class_name))
+            "Implement this func for rendering class {} in top down renderer".format(self.class_name)
+        )
