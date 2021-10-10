@@ -674,7 +674,12 @@ class BaseVehicle(BaseObject, BaseVehicleState):
                 "spawn_road": self.config["spawn_lane_index"][:-1],
                 "destination": (final_road.start_node, final_road.end_node),
                 "steering": self.steering,
-                "throttle_brake": self.throttle_brake
+                "throttle_brake": self.throttle_brake,
+                "velocity": float(self.speed),
+                "crash_vehicle": self.crash_vehicle,
+                "crash_object": self.crash_object,
+                "crash_building":self.crash_building,
+                "crash_sidewalk":self.crash_sidewalk
             }
         )
         return state
