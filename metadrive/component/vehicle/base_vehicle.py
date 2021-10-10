@@ -675,7 +675,6 @@ class BaseVehicle(BaseObject, BaseVehicleState):
                 "destination": (final_road.start_node, final_road.end_node),
                 "steering": self.steering,
                 "throttle_brake": self.throttle_brake,
-                "velocity": float(self.speed),
                 "crash_vehicle": self.crash_vehicle,
                 "crash_object": self.crash_object,
                 "crash_building": self.crash_building,
