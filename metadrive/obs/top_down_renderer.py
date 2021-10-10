@@ -184,6 +184,8 @@ class TopDownRenderer:
     def render(self, *args, **kwargs):
         if "current_track_vehicle" in kwargs:
             self.current_track_vehicle = kwargs["current_track_vehicle"]
+        if "zoomin" in kwargs:
+            self._zoomin=kwargs["zoomin"]
         self.handle_event()
         self.refresh()
         objects = self.engine.get_objects(lambda obj: not is_map_related_instance(obj))
