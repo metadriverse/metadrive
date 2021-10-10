@@ -451,7 +451,7 @@ class BaseEnv(gym.Env):
 
     @property
     def current_map(self):
-        return self.engine.map_manager.current_map
+        return self.engine.current_map
 
     def _reset_global_seed(self, force_seed):
         # create map

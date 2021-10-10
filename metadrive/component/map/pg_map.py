@@ -4,7 +4,7 @@ from panda3d.core import NodePath
 
 from metadrive.component.algorithm.BIG import BigGenerateMethod, BIG
 from metadrive.component.algorithm.blocks_prob_dist import PGBlockConfig
-from metadrive.component.blocks import FirstPGBlock
+from metadrive.component.blocks.first_block import FirstPGBlock
 from metadrive.component.map.base_map import BaseMap, MapGenerateMethod
 from metadrive.engine.core.physics_world import PhysicsWorld
 

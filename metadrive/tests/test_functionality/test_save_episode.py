@@ -22,7 +22,7 @@ def test_save_episode(vis=False):
             "traffic_density": 0.1,
             "start_seed": 5,
             # "manual_control": vis,
-            "use_render": vis,
+            "use_render": False,
             "agent_policy": IDMPolicy,
             "traffic_mode": TrafficMode.Trigger,
             "record_episode": save_episode,
@@ -39,17 +39,18 @@ def test_save_episode(vis=False):
         for i in range(1, 100000 if vis else 2000):
             o, r, d, info = env.step([0, 1])
             if vis:
-                env.render()
+                env.render(mode="top_down")
             if d:
                 epi_info = env.engine.dump_episode("test_dump.pkl" if test_dump else None)
                 break
         f = open("test_dump.pkl", "rb+")
         env.config["replay_episode"] = pickle.load(f)
+        env.config["use_render"] = True
         o = env.reset()
         for i in range(1, 100000 if vis else 2000):
             o, r, d, info = env.step([0, 1])
             if vis:
-                env.render()
+                env.render(mode="top_down")
             if info.get("replay_done", False):
                 break
     finally:
@@ -57,4 +58,4 @@ def test_save_episode(vis=False):
 
 
 if __name__ == "__main__":
-    test_save_episode(vis=False)
+    test_save_episode(vis=True)
