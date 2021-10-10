@@ -16,13 +16,13 @@ history_object = namedtuple("history_object", "name position heading_theta WIDTH
 
 
 def draw_top_down_map(
-    map,
-    resolution: Iterable = (512, 512),
-    simple_draw=True,
-    return_surface=False,
-    film_size=None,
-    reverse_color=False,
-    road_color=color_white
+        map,
+        resolution: Iterable = (512, 512),
+        simple_draw=True,
+        return_surface=False,
+        film_size=None,
+        reverse_color=False,
+        road_color=color_white
 ) -> Optional[Union[np.ndarray, pygame.Surface]]:
     film_size = film_size or map.film_size
     surface = WorldSurface(film_size, 0, pygame.Surface(film_size))
@@ -55,7 +55,7 @@ def draw_top_down_map(
 
 
 def draw_top_down_trajectory(
-    surface: WorldSurface, episode_data: dict, entry_differ_color=False, exit_differ_color=False, color_list=None
+        surface: WorldSurface, episode_data: dict, entry_differ_color=False, exit_differ_color=False, color_list=None
 ):
     if entry_differ_color or exit_differ_color:
         assert color_list is not None
@@ -114,16 +114,17 @@ def draw_top_down_trajectory(
 
 class TopDownRenderer:
     def __init__(
-        self,
-        film_size=None,
-        screen_size=None,
-        light_background=True,
-        zoomin=None,
-        num_stack=15,
-        history_smooth=0,
-        road_color=(255, 255, 255),
-        show_agent_name=False,
-        track=False
+            self,
+            film_size=None,
+            screen_size=None,
+            light_background=True,
+            zoomin=None,
+            num_stack=15,
+            history_smooth=0,
+            road_color=(255, 255, 255),
+            show_agent_name=False,
+            track=False,
+            current_track_vehicle=None
     ):
         self.follow_agent = track
         self.show_agent_name = show_agent_name
@@ -140,7 +141,9 @@ class TopDownRenderer:
         self.stack_frames = deque(maxlen=num_stack)
         self.history_objects = deque(maxlen=num_stack)
         self.history_smooth = history_smooth
-
+        self.current_track_vehicle = current_track_vehicle
+        if track:
+            assert self.current_track_vehicle is not None, "Specify which vehicle to track"
         self._background = draw_top_down_map(
             map, simple_draw=False, return_surface=True, film_size=film_size, road_color=road_color
         )
@@ -150,7 +153,7 @@ class TopDownRenderer:
         self._light_background = light_background
         if self._light_background:
             pixels = pygame.surfarray.pixels2d(self._background)
-            pixels ^= 2**32 - 1
+            pixels ^= 2 ** 32 - 1
             del pixels
 
         self._runtime = self._background.copy()
@@ -179,6 +182,8 @@ class TopDownRenderer:
         self.canvas.fill((255, 255, 255))
 
     def render(self, *args, **kwargs):
+        if "current_track_vehicle" in kwargs:
+            self.current_track_vehicle = kwargs["current_track_vehicle"]
         self.handle_event()
         self.refresh()
         objects = self.engine.get_objects(lambda obj: not is_map_related_instance(obj))
@@ -311,7 +316,7 @@ class TopDownRenderer:
         # rotation = np.rad2deg(heading) + 90
 
         if self.follow_agent:
-            v = self.engine.current_track_vehicle
+            v = self.current_track_vehicle
             canvas = self._runtime
             field = self.canvas.get_width()
             position = self._runtime.pos2pix(*v.position)
@@ -371,7 +376,7 @@ class TopDownRenderer:
         self._light_background = self._light_background
         if self._light_background:
             pixels = pygame.surfarray.pixels2d(self._background)
-            pixels ^= 2**32 - 1
+            pixels ^= 2 ** 32 - 1
             del pixels
 
         self._runtime = self._background.copy()
