@@ -53,6 +53,14 @@ class TrafficCone(TrafficObject):
             model.setPos(0, 0, -self.HEIGHT / 2)
             model.reparentTo(self.origin)
 
+    @property
+    def top_down_length(self):
+        return self.RADIUS
+
+    @property
+    def top_down_width(self):
+        return self.RADIUS
+
 
 class TrafficWarning(TrafficObject):
     """Placed behind the vehicle when it breaks down"""
@@ -74,6 +82,14 @@ class TrafficWarning(TrafficObject):
             model.setPos(0, 0, -self.HEIGHT / 2)
             model.reparentTo(self.origin)
 
+    @property
+    def top_down_length(self):
+        return self.RADIUS
+
+    @property
+    def top_down_width(self):
+        return self.RADIUS
+
 
 class TrafficBarrier(TrafficObject):
     """A barrier"""
@@ -93,3 +109,11 @@ class TrafficBarrier(TrafficObject):
             model = self.loader.loadModel(AssetLoader.file_path("models", "barrier", "scene.gltf"))
             model.setH(-90)
             model.reparentTo(self.origin)
+
+    @property
+    def top_down_length(self):
+        return self.LENGTH
+
+    @property
+    def top_down_width(self):
+        return self.WIDTH

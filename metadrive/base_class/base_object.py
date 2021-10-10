@@ -1,6 +1,7 @@
 import math
+import seaborn as sns
 from typing import Dict
-
+from metadrive.utils import get_np_random
 import numpy as np
 from panda3d.bullet import BulletWorld, BulletBodyNode
 from panda3d.core import LVector3
@@ -86,6 +87,12 @@ class BaseObject(BaseRunnable):
             if not hasattr(self.loader, "loader"):
                 # It is closed before!
                 self.loader.__init__()
+
+        # add color setting for visualization
+        color = sns.color_palette("colorblind")
+        idx = get_np_random().randint(len(color))
+        rand_c = color[idx]
+        self.panda_color = rand_c
 
     def add_body(self, physics_body):
         if self._body is None:
@@ -266,3 +273,18 @@ class BaseObject(BaseRunnable):
         self.set_pitch(state[ObjectState.PITCH])
         self.set_roll(state[ObjectState.ROLL])
         self.set_velocity(state[ObjectState.VELOCITY] / 3.6)
+
+    @property
+    def top_down_color(self):
+        rand_c = self.panda_color
+        return rand_c[0] * 255, rand_c[1] * 255, rand_c[2] * 255
+
+    @property
+    def top_down_width(self):
+        raise NotImplementedError(
+            "Implement this func for rendering class {} in top down renderer".format(self.class_name))
+
+    @property
+    def top_down_length(self):
+        raise NotImplementedError(
+            "Implement this func for rendering class {} in top down renderer".format(self.class_name))
