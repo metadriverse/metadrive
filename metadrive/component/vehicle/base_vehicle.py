@@ -678,8 +678,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
                 "velocity": float(self.speed),
                 "crash_vehicle": self.crash_vehicle,
                 "crash_object": self.crash_object,
-                "crash_building":self.crash_building,
-                "crash_sidewalk":self.crash_sidewalk
+                "crash_building": self.crash_building,
+                "crash_sidewalk": self.crash_sidewalk
             }
         )
         return state
