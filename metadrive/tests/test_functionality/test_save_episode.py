@@ -39,8 +39,9 @@ def test_save_episode(vis=False):
         for i in range(1, 100000 if vis else 2000):
             o, r, d, info = env.step([0, 1])
             if vis:
-                env.render(mode="top_down", track=True, current_track_vehicle=env.vehicle, zoomin=5,
-                           show_agent_name=True)
+                env.render(
+                    mode="top_down", track=True, current_track_vehicle=env.vehicle, zoomin=5, show_agent_name=True
+                )
             if d:
                 epi_info = env.engine.dump_episode("test_dump.pkl" if test_dump else None)
                 break
@@ -51,8 +52,9 @@ def test_save_episode(vis=False):
         for i in range(1, 100000 if vis else 2000):
             o, r, d, info = env.step([0, 1])
             if vis:
-                env.render(mode="top_down", track=True, current_track_vehicle=env.vehicle, zoomin=5,
-                           show_agent_name=True)
+                env.render(
+                    mode="top_down", track=True, current_track_vehicle=env.vehicle, zoomin=5, show_agent_name=True
+                )
             if info.get("replay_done", False):
                 break
     finally:
