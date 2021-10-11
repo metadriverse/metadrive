@@ -391,3 +391,15 @@ class BaseEngine(EngineCore, Randomizable):
         """
         obj = self._spawned_objects.pop(obj.name)
         self._spawned_objects[new_name] = obj
+
+    def object_to_agent(self, obj_name):
+        if self.replay_episode:
+            return self.replay_manager.current_frame.object_to_agent(obj_name)
+        else:
+            return self.agent_manager.object_to_agent(obj_name)
+
+    def agent_to_object(self, agent_name):
+        if self.replay_episode:
+            return self.replay_manager.current_frame.agent_to_object(agent_name)
+        else:
+            return self.agent_manager.agent_to_object(agent_name)

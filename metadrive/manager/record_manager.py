@@ -1,10 +1,9 @@
 import copy
 import logging
 
-from metadrive.component.blocks.base_block import BaseBlock
-from metadrive.component.map.base_map import BaseMap
 from metadrive.constants import ObjectState
 from metadrive.manager.base_manager import BaseManager
+from metadrive.utils.map_utils import is_map_related_instance, is_map_related_class
 
 
 class FrameInfo:
@@ -80,7 +79,7 @@ class RecordManager(BaseManager):
 
     def _update_objects_states(self):
         for name, obj in self.engine.get_objects().items():
-            if not isinstance(obj, BaseBlock) and not isinstance(obj, BaseMap):
+            if not is_map_related_instance(obj):
                 self.current_frame.step_info[name] = obj.get_state()
         self.current_frame.agents = list(self.engine.agents.keys())
         self.current_frame._agent_to_object = self.engine.agent_manager._agent_to_object
@@ -97,7 +96,7 @@ class RecordManager(BaseManager):
         """
         Call when spawn new objects, ignore map related things
         """
-        if not issubclass(object_class, BaseBlock) and not issubclass(object_class, BaseMap):
+        if not is_map_related_class(object_class) and self.engine.record_episode:
             assert name not in self.current_frame.spawn_info, "Duplicated record!"
             self.current_frame.spawn_info[name] = {
                 ObjectState.CLASS: object_class,
@@ -109,7 +108,7 @@ class RecordManager(BaseManager):
         """
         Call when clear objects, ignore map related things
         """
-        if not isinstance(obj, BaseBlock) and not isinstance(obj, BaseMap):
+        if not is_map_related_instance(obj) and self.engine.record_episode:
             self.current_frame.clear_info.append(obj.name)
 
     def __del__(self):

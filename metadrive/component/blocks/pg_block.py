@@ -76,7 +76,7 @@ class PGBlock(BaseBlock):
         # block information
         assert self.SOCKET_NUM is not None, "The number of Socket should be specified when define a new block"
         if block_index == 0:
-            from metadrive.component.blocks import FirstPGBlock
+            from metadrive.component.blocks.first_block import FirstPGBlock
             assert isinstance(self, FirstPGBlock), "only first block can use block index 0"
         elif block_index < 0:
             logging.debug("It is recommended that block index should > 1")

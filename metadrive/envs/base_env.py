@@ -451,7 +451,7 @@ class BaseEnv(gym.Env):
 
     @property
     def current_map(self):
-        return self.engine.map_manager.current_map
+        return self.engine.current_map
 
     def _reset_global_seed(self, force_seed):
         # create map
@@ -469,8 +469,8 @@ class BaseEnv(gym.Env):
     def _render_topdown(self, *args, **kwargs):
         if self._top_down_renderer is None:
             from metadrive.obs.top_down_renderer import TopDownRenderer
-            self._top_down_renderer = TopDownRenderer(self, self.current_map, *args, **kwargs)
-        return self._top_down_renderer.render(self.agent_manager)
+            self._top_down_renderer = TopDownRenderer(*args, **kwargs)
+        return self._top_down_renderer.render()
 
     @property
     def main_camera(self):
