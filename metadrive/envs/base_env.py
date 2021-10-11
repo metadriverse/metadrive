@@ -56,6 +56,7 @@ BASE_DEFAULT_CONFIG = dict(
     top_down_camera_initial_x=0,
     top_down_camera_initial_y=0,
     top_down_camera_initial_z=200,  # height
+    show_logo=True,
 
     # ===== Vehicle =====
     vehicle_config=dict(

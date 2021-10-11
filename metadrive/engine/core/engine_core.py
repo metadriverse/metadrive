@@ -174,7 +174,8 @@ class EngineCore(ShowBase.ShowBase):
 
             # Display logo
             if self.mode == RENDER_MODE_ONSCREEN and (not self.global_config["debug"]):
-                self._window_logo = attach_logo(self)
+                if self.global_config["show_logo"]:
+                    self._window_logo = attach_logo(self)
                 self._loading_logo = attach_cover_image(
                     window_width=self.get_size()[0], window_height=self.get_size()[1]
                 )
