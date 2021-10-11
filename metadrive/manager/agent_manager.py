@@ -100,7 +100,7 @@ class AgentManager(BaseManager):
         self._allow_respawn = config["allow_respawn"]
         init_vehicles = self._get_vehicles(
             config_dict=self.engine.global_config["target_vehicle_configs"] if self.engine.
-            global_config["is_multi_agent"] else {DEFAULT_AGENT: self.engine.global_config["vehicle_config"]}
+                global_config["is_multi_agent"] else {DEFAULT_AGENT: self.engine.global_config["vehicle_config"]}
         )
         vehicles_created = set(init_vehicles.keys())
         vehicles_in_config = set(self._init_observations.keys())
@@ -278,6 +278,8 @@ class AgentManager(BaseManager):
 
     def object_to_agent(self, obj_name):
         """
+        We recommend to use engine.agent_to_object() or engine.object_to_agent() instead of the ones in agent_manager,
+        since this two functions DO NOT work when replaying episode.
         :param obj_name: BaseVehicle name
         :return: agent id
         """
@@ -286,6 +288,10 @@ class AgentManager(BaseManager):
         return self._object_to_agent[obj_name]
 
     def agent_to_object(self, agent_id):
+        """
+        We recommend to use engine.agent_to_object() or engine.object_to_agent() instead of the ones in agent_manager,
+        since this two functions DO NOT work when replaying episode.
+        """
         return self._agent_to_object[agent_id]
 
     def destroy(self):
