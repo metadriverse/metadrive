@@ -148,13 +148,10 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self.max_steering = self.config["max_steering"]
 
         # visualization
-        color = sns.color_palette("colorblind")
-        idx = get_np_random().randint(len(color))
-        rand_c = color[idx]
         if use_special_color:
+            color = sns.color_palette("colorblind")
             rand_c = color[2]  # A pretty green
-        self.top_down_color = (rand_c[0] * 255, rand_c[1] * 255, rand_c[2] * 255)
-        self.panda_color = rand_c
+            self.panda_color = rand_c
         self._add_visualization()
 
         # modules, get observation by using these modules
@@ -677,7 +674,11 @@ class BaseVehicle(BaseObject, BaseVehicleState):
                 "spawn_road": self.config["spawn_lane_index"][:-1],
                 "destination": (final_road.start_node, final_road.end_node),
                 "steering": self.steering,
-                "throttle_brake": self.throttle_brake
+                "throttle_brake": self.throttle_brake,
+                "crash_vehicle": self.crash_vehicle,
+                "crash_object": self.crash_object,
+                "crash_building": self.crash_building,
+                "crash_sidewalk": self.crash_sidewalk
             }
         )
         return state
@@ -822,3 +823,11 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     @property
     def max_speed(self):
         return self.config["max_speed"]
+
+    @property
+    def top_down_length(self):
+        return self.LENGTH
+
+    @property
+    def top_down_width(self):
+        return self.WIDTH

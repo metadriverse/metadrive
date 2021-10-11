@@ -278,6 +278,8 @@ class AgentManager(BaseManager):
 
     def object_to_agent(self, obj_name):
         """
+        We recommend to use engine.agent_to_object() or engine.object_to_agent() instead of the ones in agent_manager,
+        since this two functions DO NOT work when replaying episode.
         :param obj_name: BaseVehicle name
         :return: agent id
         """
@@ -286,6 +288,10 @@ class AgentManager(BaseManager):
         return self._object_to_agent[obj_name]
 
     def agent_to_object(self, agent_id):
+        """
+        We recommend to use engine.agent_to_object() or engine.object_to_agent() instead of the ones in agent_manager,
+        since this two functions DO NOT work when replaying episode.
+        """
         return self._agent_to_object[agent_id]
 
     def destroy(self):
