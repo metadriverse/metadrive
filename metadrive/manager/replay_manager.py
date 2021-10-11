@@ -42,7 +42,7 @@ class ReplayManager(BaseManager):
         map_config = copy.deepcopy(map_data["map_config"])
         map_config[BaseMap.GENERATE_TYPE] = MapGenerateMethod.PG_MAP_FILE
         map_config[BaseMap.GENERATE_CONFIG] = map_data["block_sequence"]
-        self.current_map = self.spawn_object(PGMap, map_config=map_config, auto_fill_random_seed=False)
+        self.current_map = self.spawn_object(PGMap, map_config=map_config, auto_fill_random_seed=False, force_spawn=True)
         self.replay_frame()
 
     def step(self, *args, **kwargs):
