@@ -63,8 +63,9 @@ class Interface:
             self._right_arrow = self.arrow.attachNewNode("right arrow")
             self._left_arrow.setColor(self.ARROW_COLOR)
             self._right_arrow.setColor(self.ARROW_COLOR)
-            navi_arrow_model.instanceTo(self._left_arrow)
-            navi_arrow_model.instanceTo(self._right_arrow)
+            if self.engine.global_config["show_interface_navi_mark"]:
+                navi_arrow_model.instanceTo(self._left_arrow)
+                navi_arrow_model.instanceTo(self._right_arrow)
             self.arrow.setPos(0, 0, 0.08)
             self.arrow.hide(CamMask.AllOn)
             self.arrow.show(CamMask.MainCam)
