@@ -43,8 +43,9 @@ class ReplayManager(BaseManager):
         map_config = copy.deepcopy(map_data["map_config"])
         map_config[BaseMap.GENERATE_TYPE] = MapGenerateMethod.PG_MAP_FILE
         map_config[BaseMap.GENERATE_CONFIG] = map_data["block_sequence"]
-        self.current_map = self.spawn_object(PGMap, map_config=map_config, auto_fill_random_seed=False,
-                                             force_spawn=True)
+        self.current_map = self.spawn_object(
+            PGMap, map_config=map_config, auto_fill_random_seed=False, force_spawn=True
+        )
         self.replay_frame()
 
     def step(self, *args, **kwargs):
@@ -74,8 +75,10 @@ class ReplayManager(BaseManager):
             self.current_name_to_record_name[obj.name] = name
             self.record_name_to_current_name[name] = obj.name
             if issubclass(config[ObjectState.CLASS], BaseVehicle):
-                obj.navigation.set_route(self.restore_episode_info["frame"][-1].step_info[name]["spawn_road"],
-                                         self.restore_episode_info["frame"][-1].step_info[name]["destination"][-1])
+                obj.navigation.set_route(
+                    self.restore_episode_info["frame"][-1].step_info[name]["spawn_road"],
+                    self.restore_episode_info["frame"][-1].step_info[name]["destination"][-1]
+                )
         for name, state in self.current_frame.step_info.items():
             self.spawned_objects[self.record_name_to_current_name[name]].before_step()
             self.spawned_objects[self.record_name_to_current_name[name]].set_state(state)
