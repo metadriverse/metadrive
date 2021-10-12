@@ -145,7 +145,7 @@ class TopDownRenderer:
         self._light_background = light_background
 
         # Setup the canvas
-        film_size = film_size or (6000, 6000)
+        film_size = film_size or (3000, 3000)
         # (1) background is the underlying layer. It is fixed and will never change unless the map changes.
         self._background_canvas = draw_top_down_map(
             self.map, simple_draw=False, return_surface=True, film_size=film_size, road_color=road_color
