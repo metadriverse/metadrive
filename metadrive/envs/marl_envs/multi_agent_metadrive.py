@@ -290,7 +290,7 @@ def pygame_replay(name, env_class, save=False, other_traj=None, film_size=(1000,
         env.engine.force_fps.toggle()
         env.render(mode="top_down", num_stack=50, film_size=film_size, history_smooth=0)
         if save:
-            pygame.image.save(env._top_down_renderer._runtime, "{}_{}.png".format(name, frame_count))
+            pygame.image.save(env._top_down_renderer._runtime_canvas, "{}_{}.png".format(name, frame_count))
         frame_count += 1
         if len(env.engine.replay_manager.restore_episode_info) == 0:
             env.close()
@@ -312,7 +312,7 @@ def panda_replay(name, env_class, save=False, other_traj=None, extra_config={}):
         o, r, d, i = env.step(env.action_space.sample())
         env.engine.force_fps.toggle()
         if save:
-            pygame.image.save(env._top_down_renderer._runtime, "{}_{}.png".format(name, frame_count))
+            pygame.image.save(env._top_down_renderer._runtime_canvas, "{}_{}.png".format(name, frame_count))
         frame_count += 1
         if len(env.engine.replay_manager.restore_episode_info) == 0:
             env.close()
