@@ -239,7 +239,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         Save info and make decision before action
         """
         # init step info to store info before each step
-        action = action or [0, 0]
+        if action is None:
+            action = [0, 0]
         self._init_step_info()
         action, step_info = self._preprocess_action(action)
 
