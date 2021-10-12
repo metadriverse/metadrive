@@ -99,9 +99,7 @@ class AgentManager(BaseManager):
         self._infinite_agents = config["num_agents"] == -1
         self._allow_respawn = config["allow_respawn"]
         init_vehicles = self._get_vehicles(
-            config_dict=self.engine.global_config["target_vehicle_configs"] if self.engine.
-            global_config["is_multi_agent"] else {DEFAULT_AGENT: self.engine.global_config["vehicle_config"]}
-        )
+            config_dict=self.engine.global_config["target_vehicle_configs"])
         vehicles_created = set(init_vehicles.keys())
         vehicles_in_config = set(self._init_observations.keys())
         assert vehicles_created == vehicles_in_config, "{} not defined in target vehicles config".format(

@@ -1,11 +1,9 @@
-import json
-from metadrive.policy.idm_policy import IDMPolicy
 import pickle
 
 from metadrive.component.map.base_map import BaseMap, MapGenerateMethod
-from metadrive.envs.metadrive_env import MetaDriveEnv
-from metadrive.manager.traffic_manager import TrafficMode
 from metadrive.envs.safe_metadrive_env import SafeMetaDriveEnv
+from metadrive.manager.traffic_manager import TrafficMode
+from metadrive.policy.idm_policy import IDMPolicy
 from metadrive.utils import setup_logger
 
 
@@ -40,7 +38,7 @@ def test_save_episode(vis=False):
             o, r, d, info = env.step([0, 1])
             if vis:
                 env.render(
-                    mode="top_down", track=True, current_track_vehicle=env.vehicle, zoomin=5, show_agent_name=True
+                    mode="top_down", track_target_vehicle=True, road_color=(35, 35, 35)
                 )
             if d:
                 epi_info = env.engine.dump_episode("test_dump.pkl" if test_dump else None)
@@ -53,7 +51,7 @@ def test_save_episode(vis=False):
             o, r, d, info = env.step([0, 1])
             if vis:
                 env.render(
-                    mode="top_down", track=True, current_track_vehicle=env.vehicle, zoomin=5, show_agent_name=True
+                    mode="top_down", track_target_vehicle=True,
                 )
             if info.get("replay_done", False):
                 break
