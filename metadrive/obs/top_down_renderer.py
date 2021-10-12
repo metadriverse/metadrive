@@ -17,13 +17,13 @@ history_object = namedtuple("history_object", "name position heading_theta WIDTH
 
 
 def draw_top_down_map(
-        map,
-        resolution: Iterable = (512, 512),
-        simple_draw=True,
-        return_surface=False,
-        film_size=None,
-        reverse_color=False,
-        road_color=color_white
+    map,
+    resolution: Iterable = (512, 512),
+    simple_draw=True,
+    return_surface=False,
+    film_size=None,
+    reverse_color=False,
+    road_color=color_white
 ) -> Optional[Union[np.ndarray, pygame.Surface]]:
     film_size = film_size or map.film_size
     surface = WorldSurface(film_size, 0, pygame.Surface(film_size))
@@ -56,7 +56,7 @@ def draw_top_down_map(
 
 
 def draw_top_down_trajectory(
-        surface: WorldSurface, episode_data: dict, entry_differ_color=False, exit_differ_color=False, color_list=None
+    surface: WorldSurface, episode_data: dict, entry_differ_color=False, exit_differ_color=False, color_list=None
 ):
     if entry_differ_color or exit_differ_color:
         assert color_list is not None
@@ -115,16 +115,16 @@ def draw_top_down_trajectory(
 
 class TopDownRenderer:
     def __init__(
-            self,
-            film_size=None,
-            screen_size=None,
-            light_background=True,
-            num_stack=15,
-            history_smooth=0,
-            road_color=(255, 255, 255),
-            show_agent_name=False,
-            track_target_vehicle=False,
-            # current_track_vehicle=None
+        self,
+        film_size=None,
+        screen_size=None,
+        light_background=True,
+        num_stack=15,
+        history_smooth=0,
+        road_color=(255, 255, 255),
+        show_agent_name=False,
+        track_target_vehicle=False,
+        # current_track_vehicle=None
     ):
         # Setup some useful flags
         self.track_target_vehicle = track_target_vehicle
@@ -152,7 +152,7 @@ class TopDownRenderer:
         )
         if self._light_background:
             pixels = pygame.surfarray.pixels2d(self._background_canvas)
-            pixels ^= 2 ** 32 - 1
+            pixels ^= 2**32 - 1
             del pixels
         # (2) runtime is a copy of the background so you can draw movable things on it. It is super large
         # and our vehicles can draw on this large canvas.
@@ -203,7 +203,6 @@ class TopDownRenderer:
         ret = ret.convert(24)
         return ret
 
-
     def blit(self):
         # self._render_canvas.blit(self._runtime_canvas, (0, 0))
         pygame.display.update()
@@ -219,13 +218,12 @@ class TopDownRenderer:
         self._light_background = self._light_background
         if self._light_background:
             pixels = pygame.surfarray.pixels2d(self._background_canvas)
-            pixels ^= 2 ** 32 - 1
+            pixels ^= 2**32 - 1
             del pixels
 
         # Reset several useful variables.
         # self._render_size = self._background_canvas.get_size()
         # Maybe we can optimize here! We don't need to copy but just blit new background on it.
-
 
         self._runtime_canvas = self._background_canvas.copy()
         # self._runtime_output = self._background_canvas.copy()
@@ -321,9 +319,7 @@ class TopDownRenderer:
             field = self.canvas.get_width()
             position = self._runtime_canvas.pos2pix(*v.position)
             off = (position[0] - field / 2, position[1] - field / 2)
-            self.canvas.blit(
-                source=canvas, dest=(0, 0), area=(off[0], off[1], field, field)
-            )
+            self.canvas.blit(source=canvas, dest=(0, 0), area=(off[0], off[1], field, field))
         else:
             raise ValueError()
             # FIXME check this later

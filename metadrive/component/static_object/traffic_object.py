@@ -63,7 +63,7 @@ class TrafficCone(TrafficObject):
 
     @property
     def top_down_color(self):
-        return 100, 100 ,100
+        return 100, 100, 100
 
 
 class TrafficWarning(TrafficObject):

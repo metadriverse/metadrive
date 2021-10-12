@@ -73,8 +73,7 @@ METADRIVE_DEFAULT_CONFIG = dict(
     rgb_clip=True,
     gaussian_noise=0.0,
     dropout_prob=0.0,
-
-    target_vehicle_configs={DEFAULT_AGENT:dict(use_special_color=True)},
+    target_vehicle_configs={DEFAULT_AGENT: dict(use_special_color=True)},
     # ===== Reward Scheme =====
     # See: https://github.com/decisionforce/metadrive/issues/283
     success_reward=10.0,
