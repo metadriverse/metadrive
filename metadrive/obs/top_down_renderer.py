@@ -1,12 +1,13 @@
 from collections import deque, namedtuple
-from metadrive.utils.map_utils import is_map_related_instance
 from typing import Optional, Union, Iterable
-from metadrive.engine.engine_utils import get_engine
+
 import cv2
 import numpy as np
 
 from metadrive.constants import Decoration, TARGET_VEHICLES
+from metadrive.engine.engine_utils import get_engine
 from metadrive.obs.top_down_obs_impl import WorldSurface, VehicleGraphics, LaneGraphics
+from metadrive.utils.map_utils import is_map_related_instance
 from metadrive.utils.utils import import_pygame
 
 pygame = import_pygame()
@@ -16,13 +17,13 @@ history_object = namedtuple("history_object", "name position heading_theta WIDTH
 
 
 def draw_top_down_map(
-    map,
-    resolution: Iterable = (512, 512),
-    simple_draw=True,
-    return_surface=False,
-    film_size=None,
-    reverse_color=False,
-    road_color=color_white
+        map,
+        resolution: Iterable = (512, 512),
+        simple_draw=True,
+        return_surface=False,
+        film_size=None,
+        reverse_color=False,
+        road_color=color_white
 ) -> Optional[Union[np.ndarray, pygame.Surface]]:
     film_size = film_size or map.film_size
     surface = WorldSurface(film_size, 0, pygame.Surface(film_size))
@@ -55,7 +56,7 @@ def draw_top_down_map(
 
 
 def draw_top_down_trajectory(
-    surface: WorldSurface, episode_data: dict, entry_differ_color=False, exit_differ_color=False, color_list=None
+        surface: WorldSurface, episode_data: dict, entry_differ_color=False, exit_differ_color=False, color_list=None
 ):
     if entry_differ_color or exit_differ_color:
         assert color_list is not None
@@ -114,78 +115,78 @@ def draw_top_down_trajectory(
 
 class TopDownRenderer:
     def __init__(
-        self,
-        film_size=None,
-        screen_size=None,
-        light_background=True,
-        zoomin=None,
-        num_stack=15,
-        history_smooth=0,
-        road_color=(255, 255, 255),
-        show_agent_name=False,
-        track=False,
-        current_track_vehicle=None
+            self,
+            film_size=None,
+            screen_size=None,
+            light_background=True,
+            num_stack=15,
+            history_smooth=0,
+            road_color=(255, 255, 255),
+            show_agent_name=False,
+            track=False,
+            current_track_vehicle=None
     ):
+        # Setup some useful flags
         self.follow_agent = track
         self.show_agent_name = show_agent_name
-        if show_agent_name:
+        if self.show_agent_name:
             pygame.init()
-        self.pygame_font = None
-
-        film_size = film_size or (1000, 1000)
         self.engine = get_engine()
-        map = self.engine.current_map
-        self._zoomin = zoomin or 1.0
         self._screen_size = screen_size
-        self.map = map
+        self.pygame_font = None
+        self.map = self.engine.current_map
         self.stack_frames = deque(maxlen=num_stack)
         self.history_objects = deque(maxlen=num_stack)
         self.history_smooth = history_smooth
         self.current_track_vehicle = current_track_vehicle
         if track:
             assert self.current_track_vehicle is not None, "Specify which vehicle to track"
-        self._background = draw_top_down_map(
-            map, simple_draw=False, return_surface=True, film_size=film_size, road_color=road_color
-        )
-        self._film_size = self._background.get_size()
         self.road_color = road_color
-
         self._light_background = light_background
+
+        # Setup the canvas
+        film_size = film_size or (1000, 1000)
+        # (1) background is the underlying layer. It is fixed and will never change unless the map changes.
+        self._background = draw_top_down_map(
+            self.map, simple_draw=False, return_surface=True, film_size=film_size, road_color=road_color
+        )
         if self._light_background:
             pixels = pygame.surfarray.pixels2d(self._background)
-            pixels ^= 2**32 - 1
+            pixels ^= 2 ** 32 - 1
             del pixels
-
+        # (2) runtime is a copy of the background so you can draw movable things on it. It is super large
+        # and our vehicles can draw on this large canvas.
         self._runtime = self._background.copy()
-        self._runtime_output = self._background.copy()
+        self._runtime_output = self._background.copy()  # TODO(pzh) what is this?
 
-        # self._runtime.blit(self._background, (0, 0))
+        # Setup some runtime variables
+        self._film_size = self._background.get_size()
         self._size = tuple(self._background.get_size())
+        # screen_size = self._screen_size or self._film_size
+        # self._blit_size = (int(screen_size[0] * self._zoomin), int(screen_size[1] * self._zoomin))
+        # self._blit_rect = (
+        #     -(self._blit_size[0] - screen_size[0]) / 2, -(self._blit_size[1] - screen_size[1]) / 2, screen_size[0],
+        #     screen_size[1]
+        # )
 
+        # screen and canvas are a regional surface where only part of the super large background will draw.
+        # (3) screen is the popup window and canvas is a wrapper to screen but with more features
         self._screen = pygame.display.set_mode(self._screen_size if self._screen_size is not None else self._film_size)
-        self.canvas = pygame.Surface(self._screen.get_size())
-
         self._screen.set_alpha(None)
         self._screen.fill(color_white)
+        self.canvas = pygame.Surface(self._screen.get_size())
 
-        screen_size = self._screen_size or self._film_size
-        self._blit_size = (int(screen_size[0] * self._zoomin), int(screen_size[1] * self._zoomin))
-        self._blit_rect = (
-            -(self._blit_size[0] - screen_size[0]) / 2, -(self._blit_size[1] - screen_size[1]) / 2, screen_size[0],
-            screen_size[1]
-        )
+
+        # Draw
         self.blit()
 
     def refresh(self):
-        # self._runtime.blit(self._background, self._blit_rect)
         self._runtime.blit(self._background, (0, 0))
         self.canvas.fill((255, 255, 255))
 
     def render(self, *args, **kwargs):
         if "current_track_vehicle" in kwargs:
             self.current_track_vehicle = kwargs["current_track_vehicle"]
-        if "zoomin" in kwargs:
-            self._zoomin = kwargs["zoomin"]
         self.handle_event()
         self.refresh()
         objects = self.engine.get_objects(lambda obj: not is_map_related_instance(obj))
@@ -205,35 +206,43 @@ class TopDownRenderer:
         events = pygame.event.get()
         for event in events:
             if event.type == pygame.KEYDOWN:
-                #     if event.key == pygame.K_l:
-                #         self.scaling *= 1 / self.SCALING_FACTOR
-                #     if event.key == pygame.K_o:
-                #         self.scaling *= self.SCALING_FACTOR
-                #     if event.key == pygame.K_m:
-                #         self.centering_position[0] -= self.MOVING_FACTOR
-                #     if event.key == pygame.K_k:
-                #         self.centering_position[0] += self.MOVING_FACTOR
                 if event.key == pygame.K_ESCAPE:
                     import sys
                     sys.exit()
 
     def blit(self):
-        # if self._screen_size is None and self._zoomin is None:
-        #     self._screen.blit(self._runtime, (0, 0))
-        # else:
-        #     self._screen.blit(
-        #         pygame.transform.smoothscale(self._runtime, self._blit_size), (self._blit_rect[0], self._blit_rect[1])
-        #     )
-
-        self._screen.blit(self.canvas, (0, 0))
-
+        if self._screen_size is None:
+            self._screen.blit(self._runtime, (0, 0))
+        else:
+            self._screen.blit(
+                pygame.transform.smoothscale(self._runtime, self._blit_size), (self._blit_rect[0], self._blit_rect[1])
+            )
         pygame.display.update()
+
+    def close(self):
+        pygame.quit()
+
+    def reset(self, map):
+        # Reset the super large background
+        self._background = draw_top_down_map(
+            map, simple_draw=False, return_surface=True, film_size=self._film_size, road_color=self.road_color
+        )
+        self._light_background = self._light_background
+        if self._light_background:
+            pixels = pygame.surfarray.pixels2d(self._background)
+            pixels ^= 2 ** 32 - 1
+            del pixels
+
+        # Reset several useful variables.
+        self._film_size = self._background.get_size()
+        # Maybe we can optimize here! We don't need to copy but just blit new background on it.
+        self._runtime = self._background.copy()
+        self._runtime_output = self._background.copy()
+        self._size = tuple(self._background.get_size())
+
 
     def _append_frame_objects(self, objects):
         frame_objects = []
-        # for i, v in enumerate(vehicles, 1):
-        #     name = self._env.agent_manager.object_to_agent(v.name)
-
         for name, obj in objects.items():
             frame_objects.append(
                 history_object(
@@ -269,15 +278,14 @@ class TopDownRenderer:
                     draw_countour=False
                 )
 
+        # Use this line if you wish to draw "future" trajectory.
+        # i is the index of vehicle that we will render a black box for it.
         # i = int(len(self.history_vehicles) / 2)
-        # i = int(len(self.history_vehicles)) - 1
         i = -1
         for v in self.history_objects[i]:
             h = v.heading_theta
             c = v.color
             h = h if abs(h) > 2 * np.pi / 180 else 0
-            # x = abs(int(i))
-            # alpha_f = x / len(self.history_vehicles)
             alpha_f = 0
             VehicleGraphics.display(
                 vehicle=v,
@@ -293,29 +301,21 @@ class TopDownRenderer:
 
         for v in self._deads:
             pygame.draw.circle(
-                self._runtime,
-                (255, 0, 0),
-                self._runtime.pos2pix(v.position[0], v.position[1]),
-                # self._runtime.pix(v.WIDTH)
-                5
+                surface=self._runtime,
+                color=(255, 0, 0),
+                center=self._runtime.pos2pix(v.position[0], v.position[1]),
+                radius=5
             )
 
         for v in self.history_objects[i]:
             if v.done:
                 pygame.draw.circle(
-                    self._runtime,
-                    (255, 0, 0),
-                    self._runtime.pos2pix(v.position[0], v.position[1]),
-                    # self._runtime.pix(v.WIDTH)
-                    5
+                    surface=self._runtime,
+                    color=(255, 0, 0),
+                    center=self._runtime.pos2pix(v.position[0], v.position[1]),
+                    radius=5
                 )
                 self._deads.append(v)
-
-        # Tracking Vehicle
-        # heading = 30
-        # rotation = np.rad2deg(heading) + 90
-        # heading = self._env.current_track_vehicle.heading_theta
-        # rotation = np.rad2deg(heading) + 90
 
         if self.follow_agent:
             v = self.current_track_vehicle
@@ -328,22 +328,6 @@ class TopDownRenderer:
             self.canvas.blit(self._runtime, (0, 0))
             off = (0, 0)
 
-        # heading = self._env.current_track_vehicle.heading_theta
-        # rotation = np.rad2deg(heading) + 90
-        # rotated = pygame.transform.rotate(self.canvas, rotation)
-        # size = self.canvas.get_size()
-        # new_canvas = rotated
-        # self.canvas.blit(
-        #     rotated,
-        #     (0, 0),
-        #     (
-        #         new_canvas.get_size()[0] / 2 - size[0] / 2,  # Left
-        #         new_canvas.get_size()[1] / 2 - size[1] / 2,  # Top
-        #         size[0],  # Width
-        #         size[1]  # Height
-        #     )
-        # )
-
         if self.show_agent_name:
             if self.pygame_font is None:
                 self.pygame_font = pygame.font.SysFont("Arial.ttf", 30)
@@ -353,38 +337,13 @@ class TopDownRenderer:
                     position = self._runtime.pos2pix(*v.position)
                     new_position = (position[0] - off[0], position[1] - off[1])
                     img = self.pygame_font.render(
-                        self.engine.object_to_agent(v.name),
-                        True,
-                        (0, 0, 0, 128),
-                        # (0, 255, 0, 230)
-                        # None
-                        # pygame.color.Color("black"),
-                        # (255, 255, 255)
+                        text=self.engine.object_to_agent(v.name),
+                        antialias=True,
+                        color=(0, 0, 0, 128),
                     )
                     # img.set_alpha(None)
                     self.canvas.blit(
-                        img,
-                        (new_position[0] - img.get_width() / 2, new_position[1] - img.get_height() / 2),
+                        source=img,
+                        dest=(new_position[0] - img.get_width() / 2, new_position[1] - img.get_height() / 2),
                         # special_flags=pygame.BLEND_RGBA_MULT
                     )
-
-    def close(self):
-        pygame.quit()
-
-    def reset(self, map):
-        self._background = draw_top_down_map(
-            map, simple_draw=False, return_surface=True, film_size=self._film_size, road_color=self.road_color
-        )
-        self._film_size = self._background.get_size()
-
-        self._light_background = self._light_background
-        if self._light_background:
-            pixels = pygame.surfarray.pixels2d(self._background)
-            pixels ^= 2**32 - 1
-            del pixels
-
-        self._runtime = self._background.copy()
-        self._runtime_output = self._background.copy()
-
-        # self._runtime.blit(self._background, (0, 0))
-        self._size = tuple(self._background.get_size())
