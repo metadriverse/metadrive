@@ -72,8 +72,8 @@ class ReplayManager(BaseManager):
         self.current_frame = self.restore_episode_info["frame"].pop()
         # create
         for name, config in self.current_frame.spawn_info.items():
-            if config[ObjectState.CLASS]==DefaultVehicle:
-                config[ObjectState.INIT_KWARGS]["vehicle_config"]["use_special_color"]=True
+            if config[ObjectState.CLASS] == DefaultVehicle:
+                config[ObjectState.INIT_KWARGS]["vehicle_config"]["use_special_color"] = True
             obj = self.spawn_object(object_class=config[ObjectState.CLASS], **config[ObjectState.INIT_KWARGS])
             self.current_name_to_record_name[obj.name] = name
             self.record_name_to_current_name[name] = obj.name
