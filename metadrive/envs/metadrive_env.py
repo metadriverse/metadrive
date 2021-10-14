@@ -55,6 +55,7 @@ METADRIVE_DEFAULT_CONFIG = dict(
     # ===== Others =====
     use_AI_protector=False,
     save_level=0.5,
+    is_multi_agent=False,
 
     # ===== Single-agent vehicle config =====
     vehicle_config=dict(
@@ -140,7 +141,9 @@ class MetaDriveEnv(BaseEnv):
             config["vehicle_config"]["side_detector"]["dropout_prob"] = config["dropout_prob"]
             config["vehicle_config"]["lane_line_detector"]["dropout_prob"] = config["dropout_prob"]
         target_v_config = copy.deepcopy(config["vehicle_config"])
-        target_v_config.update(config["target_vehicle_configs"][DEFAULT_AGENT])
+        if not config["is_multi_agent"]:
+            target_v_config.update(config["target_vehicle_configs"][DEFAULT_AGENT])
+            config["target_vehicle_configs"][DEFAULT_AGENT] = target_v_config
         return config
 
     def _get_observations(self):
