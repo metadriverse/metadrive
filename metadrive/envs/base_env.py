@@ -107,6 +107,8 @@ BASE_DEFAULT_CONFIG = dict(
     record_episode=False,  # when replay_episode is not None ,this option will be useless
     replay_episode=None,  # set the replay file to enable replay
     horizon=None,  # The maximum length of each episode. Set to None to remove this constraint
+    show_interface_navi_mark=True,
+    show_mouse=True,
 )
 
 
