@@ -1,3 +1,4 @@
+import copy
 import logging
 from typing import Union
 
@@ -72,7 +73,7 @@ METADRIVE_DEFAULT_CONFIG = dict(
     rgb_clip=True,
     gaussian_noise=0.0,
     dropout_prob=0.0,
-
+    target_vehicle_configs={DEFAULT_AGENT: dict(use_special_color=True)},
     # ===== Reward Scheme =====
     # See: https://github.com/decisionforce/metadrive/issues/283
     success_reward=10.0,
@@ -138,6 +139,8 @@ class MetaDriveEnv(BaseEnv):
             config["vehicle_config"]["lidar"]["dropout_prob"] = config["dropout_prob"]
             config["vehicle_config"]["side_detector"]["dropout_prob"] = config["dropout_prob"]
             config["vehicle_config"]["lane_line_detector"]["dropout_prob"] = config["dropout_prob"]
+        target_v_config = copy.deepcopy(config["vehicle_config"])
+        target_v_config.update(config["target_vehicle_configs"][DEFAULT_AGENT])
         return config
 
     def _get_observations(self):
