@@ -11,16 +11,14 @@ class AssetLoader:
     Load model for each element when render is needed.
     """
     loader = None
-    asset_path = None
+    asset_path = pathlib.PurePosixPath(__file__).parent.parent if not is_win() else pathlib.Path(__file__).resolve(
+    ).parent.parent.joinpath("assets")
 
     @staticmethod
     def init_loader(engine):
         """
         Due to the feature of Panda3d, keep reference of loader in static variable
         """
-        root_path = pathlib.PurePosixPath(__file__).parent.parent if not is_win() else pathlib.Path(__file__).resolve(
-        ).parent.parent
-        AssetLoader.asset_path = root_path.joinpath("assets")
         if engine.win is None:
             logging.debug("Physics world mode")
             return
@@ -39,14 +37,15 @@ class AssetLoader:
         return panda_path
 
     @staticmethod
-    def file_path(*path_string):
+    def file_path(*path_string, linux_style=True):
         """
         Usage is the same as path.join(dir_1,dir_2,file_name)
         :param path_string: a tuple
         :return: file path used to load asset
         """
         path = AssetLoader.asset_path.joinpath(*path_string)
-        return AssetLoader.windows_style2unix_style(path) if sys.platform.startswith("win") else str(path)
+        return AssetLoader.windows_style2unix_style(path) if sys.platform.startswith("win") and linux_style else str(
+            path)
 
     @classmethod
     def load_model(cls, file_path):
