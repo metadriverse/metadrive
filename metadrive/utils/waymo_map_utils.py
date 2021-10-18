@@ -168,6 +168,10 @@ def draw_waymo_map(data):
     for key, value in data["map"].items():
         if value.get("type", None) =="center_lane":
             plt.scatter([x[0] for x in value["polyline"]], [y[1] for y in value["polyline"]],s=0.5)
+        elif value.get("type", None) == "road_edge":
+            plt.scatter([x[0] for x in value["polyline"]], [y[1] for y in value["polyline"]], s=0.5, c=(0,0,0))
+        # elif value.get("type", None) == "road_line":
+        #     plt.scatter([x[0] for x in value["polyline"]], [y[1] for y in value["polyline"]], s=0.5, c=(0.8,0.8,0.8))
     plt.show()
 
 # parse raw data from input path to output path
@@ -198,12 +202,12 @@ def parse_data(inut_path,output_path):
 
 if __name__=="__main__":
 
-    raw_data_path = AssetLoader.file_path("utils/waymo_utils/raw",  linux_style=False)
-    processed_data_path = AssetLoader.file_path("utils/waymo_utils/processed", linux_style=False)
-    # parse raw data from input path to output path,
-    # there is 1000 raw data in google cloud, each of them produce about 500 pkl file
-    parse_data(raw_data_path,processed_data_path)
+    # raw_data_path = AssetLoader.file_path("utils/waymo_utils/raw",  linux_style=False)
+    # processed_data_path = AssetLoader.file_path("utils/waymo_utils/processed", linux_style=False)
+    # # parse raw data from input path to output path,
+    # # there is 1000 raw data in google cloud, each of them produce about 500 pkl file
+    # parse_data(raw_data_path,processed_data_path)
 
-    file_path = AssetLoader.file_path("utils/waymo_utils/processed", "48.pkl", linux_style=False)
+    file_path = AssetLoader.file_path("waymo", "test.pkl", linux_style=False)
     data = read_waymo_data(file_path)
     draw_waymo_map(data)
