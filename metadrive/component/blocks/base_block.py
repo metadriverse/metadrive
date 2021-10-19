@@ -71,11 +71,11 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
         raise NotImplementedError
 
     def construct_block(
-        self,
-        root_render_np: NodePath,
-        physics_world: PhysicsWorld,
-        extra_config: Dict = None,
-        no_same_node=True
+            self,
+            root_render_np: NodePath,
+            physics_world: PhysicsWorld,
+            extra_config: Dict = None,
+            no_same_node=True
     ) -> bool:
         """
         Randomly Construct a block, if overlap return False
@@ -151,10 +151,9 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
         graph = self.block_network.graph
         for _from, to_dict in graph.items():
             for _to, lanes in to_dict.items():
-                self._add_lane_surface(_from, _to, lanes)
-                for _id, l in enumerate(lanes):
-                    line_color = l.line_colors
-                    self._add_lane(l, _id, line_color)
+                for _id, lane in enumerate(lanes):
+                    lane.construct_lane_in_block(self, (_from, _to, _id))
+                    lane.construct_lane_line_in_block(self, [True, True] if _id == 0 else [False, True])
         self.lane_line_node_path.flattenStrong()
         self.lane_line_node_path.node().collect()
 
@@ -179,64 +178,11 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
 
         self.bounding_box = self.block_network.get_bounding_box()
 
-    def _add_metadrive_lanes(self, lane, lane_id, lane_width, colors, parent_np):
-        lane.construct_lane_line_in_block(self)
-        # for metadrive structure
-        # for k, i in enumerate([-1, 1]):
-        #     line_color = colors[k]
-            # if lane.line_types[k] == LineType.NONE or (lane_id != 0 and k == 0):
-            #     if isinstance(lane, StraightLane):
-            #         continue
-            #     elif isinstance(lane, CircularLane) and lane.radius != lane_width / 2:
-            #         # for ramp render
-            #         continue
-            # if lane.line_types[k] == LineType.CONTINUOUS or lane.line_types[k] == LineType.SIDE:
-            #
-            #     elif isinstance(lane, CircularLane):
-            #         segment_num = int(lane.length / DrivableAreaProperty.CIRCULAR_SEGMENT_LENGTH)
-            #         for segment in range(segment_num):
-            #             lane_start = lane.position(
-            #                 segment * DrivableAreaProperty.CIRCULAR_SEGMENT_LENGTH, i * lane_width / 2
-            #             )
-            #             lane_end = lane.position(
-            #                 (segment + 1) * DrivableAreaProperty.CIRCULAR_SEGMENT_LENGTH, i * lane_width / 2
-            #             )
-            #             middle = (lane_start + lane_end) / 2
-            #
-            #             self._add_lane_line2bullet(
-            #                 lane_start, lane_end, middle, parent_np, line_color, lane.line_types[k]
-            #             )
-            #         # for last part
-            #         lane_start = lane.position(
-            #             segment_num * DrivableAreaProperty.CIRCULAR_SEGMENT_LENGTH, i * lane_width / 2
-            #         )
-            #         lane_end = lane.position(lane.length, i * lane_width / 2)
-            #         middle = (lane_start + lane_end) / 2
-            #         self._add_lane_line2bullet(lane_start, lane_end, middle, parent_np, line_color, lane.line_types[k])
-
-                # if lane.line_types[k] == LineType.SIDE:
-                #     radius = lane.radius if isinstance(lane, CircularLane) else 0.0
-                #     segment_num = int(lane.length / DrivableAreaProperty.SIDEWALK_LENGTH)
-                #     for segment in range(segment_num):
-                #         lane_start = lane.position(segment * DrivableAreaProperty.SIDEWALK_LENGTH, i * lane_width / 2)
-                #         lane_end = lane.position(
-                #             (segment + 1) * DrivableAreaProperty.SIDEWALK_LENGTH, i * lane_width / 2
-                #         )
-                #         middle = (lane_start + lane_end) / 2
-                #         self._add_sidewalk2bullet(lane_start, lane_end, middle, radius, lane.direction)
-                #     # for last part
-                #     lane_start = lane.position(segment_num * DrivableAreaProperty.SIDEWALK_LENGTH, i * lane_width / 2)
-                #     lane_end = lane.position(lane.length, i * lane_width / 2)
-                #     middle = (lane_start + lane_end) / 2
-                #     if norm(lane_start[0] - lane_end[0], lane_start[1] - lane_end[1]) > 1e-1:
-                #         self._add_sidewalk2bullet(lane_start, lane_end, middle, radius, lane.direction)
-
-    def _add_lane(self, lane: AbstractLane, lane_id: int, colors: List[Vec4]):
-        parent_np = self.lane_line_node_path
-        lane_width = lane.width_at(0)
-        if isinstance(lane, CircularLane) or isinstance(lane, StraightLane):
-            self._add_metadrive_lanes(lane, lane_id, lane_width, colors, parent_np)
-        elif isinstance(lane, WayPointLane):
+    def _add_lane_line(self, lane: AbstractLane, colors: List[Vec4], contruct_two_side=True):
+        raise DeprecationWarning("Leave for argoverse using")
+        if isinstance(lane, WayPointLane):
+            parent_np = self.lane_line_node_path
+            lane_width = lane.width_at(0)
             for c, i in enumerate([-1, 1]):
                 line_color = colors[c]
                 acc_length = 0
@@ -251,6 +197,7 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
                         )
 
     def _add_box_body(self, lane_start, lane_end, middle, parent_np: NodePath, line_type, line_color):
+        raise DeprecationWarning("Useless, currently")
         length = norm(lane_end[0] - lane_start[0], lane_end[1] - lane_start[1])
         if LineType.prohibit(line_type):
             node_name = BodyName.White_continuous_line if line_color == LineColor.GREY else BodyName.Yellow_continuous_line
@@ -275,46 +222,6 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
         theta = -math.atan2(direction_v[1], direction_v[0])
 
         body_np.setQuat(LQuaternionf(math.cos(theta / 2), 0, 0, math.sin(theta / 2)))
-
-    def _add_sidewalk2bullet(self, lane_start, lane_end, middle, radius=0.0, direction=0):
-        length = norm(lane_end[0] - lane_start[0], lane_end[1] - lane_start[1])
-        body_node = BulletRigidBodyNode(BodyName.Sidewalk)
-        body_node.setKinematic(False)
-        body_node.setStatic(True)
-        side_np = self.sidewalk_node_path.attachNewNode(body_node)
-        shape = BulletBoxShape(Vec3(1 / 2, 1 / 2, 1 / 2))
-        body_node.addShape(shape)
-        body_node.setIntoCollideMask(self.SIDEWALK_COLLISION_MASK)
-        self.dynamic_nodes.append(body_node)
-
-        if radius == 0:
-            factor = 1
-        else:
-            if direction == 1:
-                factor = (1 - self.SIDEWALK_LINE_DIST / radius)
-            else:
-                factor = (1 + self.SIDEWALK_WIDTH / radius) * (1 + self.SIDEWALK_LINE_DIST / radius)
-        direction_v = lane_end - lane_start
-        vertical_v = Vector((-direction_v[1], direction_v[0])) / norm(*direction_v)
-        middle += vertical_v * (self.SIDEWALK_WIDTH / 2 + self.SIDEWALK_LINE_DIST)
-        side_np.setPos(panda_position(middle, 0))
-        theta = -math.atan2(direction_v[1], direction_v[0])
-        side_np.setQuat(LQuaternionf(math.cos(theta / 2), 0, 0, math.sin(theta / 2)))
-        side_np.setScale(length * factor, self.SIDEWALK_WIDTH, self.SIDEWALK_THICKNESS * (1 + 0.1 * np.random.rand()))
-        if self.render:
-            side_np.setTexture(self.ts_color, self.side_texture)
-            self.sidewalk.instanceTo(side_np)
-
-    def _add_lane_surface(self, from_: str, to_: str, lanes: List):
-        """
-        Add the land surface to world, this surface will record the lane information, like index
-        :param from_: From node
-        :param to_: To Node
-        :param lanes: All lanes of this road
-        """
-
-        for index, lane in enumerate(lanes):
-            lane.construct_lane_in_block(self, (from_, to_, index))
 
     def add_body(self, physics_body):
         raise DeprecationWarning(

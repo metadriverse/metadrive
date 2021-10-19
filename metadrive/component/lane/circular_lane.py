@@ -2,28 +2,28 @@ import math
 from metadrive.constants import DrivableAreaProperty
 from typing import Tuple
 
-from metadrive.component.lane.abs_lane import AbstractLane
+from metadrive.component.lane.metadrive_lane import MetaDriveLane
 from metadrive.constants import LineType
 from metadrive.utils.math_utils import wrap_to_pi, norm, Vector
 
 
-class CircularLane(AbstractLane):
+class CircularLane(MetaDriveLane):
     """A lane going in circle arc."""
 
     CIRCULAR_SEGMENT_LENGTH = 4
 
     def __init__(
-        self,
-        center: Vector,
-        radius: float,
-        start_phase: float,
-        end_phase: float,
-        clockwise: bool = True,
-        width: float = AbstractLane.DEFAULT_WIDTH,
-        line_types: Tuple[LineType, LineType] = (LineType.BROKEN, LineType.BROKEN),
-        forbidden: bool = False,
-        speed_limit: float = 1000,
-        priority: int = 0
+            self,
+            center: Vector,
+            radius: float,
+            start_phase: float,
+            end_phase: float,
+            clockwise: bool = True,
+            width: float = MetaDriveLane.DEFAULT_WIDTH,
+            line_types: Tuple[LineType, LineType] = (LineType.BROKEN, LineType.BROKEN),
+            forbidden: bool = False,
+            speed_limit: float = 1000,
+            priority: int = 0
     ) -> None:
         super().__init__()
         self.set_speed_limit(speed_limit)

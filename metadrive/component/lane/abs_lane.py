@@ -114,19 +114,21 @@ class AbstractLane:
         """
         raise NotImplementedError
 
-    def construct_lane_line_in_block(self, block):
+    def construct_lane_line_in_block(self, block, construct_left_right=[True, True]):
         """
         Construct lane line in the Panda3d world for getting contact information
         """
-        for idx, line_type, line_color in zip([-1, 1], self.line_types, self.line_colors):
+        for idx, line_type, line_color, need, in zip([-1, 1], self.line_types, self.line_colors, construct_left_right):
+            if not need:
+                continue
             lateral = idx * self.width_at(0) / 2
             if line_type == LineType.CONTINUOUS:
-                self.construct_continuous_line(block,lateral, line_color, line_type)
+                self.construct_continuous_line(block, lateral, line_color, line_type)
             elif line_type == LineType.BROKEN:
                 self.construct_broken_line(block, lateral, line_color, line_type)
             elif line_type == LineType.SIDE:
-                # self.construct_sidewalk(block, lateral, line_color, line_type)
                 self.construct_continuous_line(block, lateral, line_color, line_type)
+                self.construct_sidewalk(block, lateral)
             elif line_type == LineType.NONE:
                 continue
             else:
@@ -145,46 +147,30 @@ class AbstractLane:
                 segment * DrivableAreaProperty.STRIPE_LENGTH * 2 + DrivableAreaProperty.STRIPE_LENGTH,
                 lateral
             )
+            if segment == segment_num - 1:
+                end = self.position(self.length, lateral)
             self.construct_lane_line_segment(block, start, end, line_color, line_type)
-
-        start = self.position(segment_num * DrivableAreaProperty.STRIPE_LENGTH * 2, lateral)
-        end = self.position(self.length + DrivableAreaProperty.STRIPE_LENGTH, lateral)
-        self.construct_lane_line_segment(block, start, end, line_color, line_type)
-
 
     def construct_continuous_line(self, block, lateral, line_color, line_type):
         """
+        We process straight line to several pieces by default, which can be optimized through overriding this function
         Lateral: left[-1/2 * width] or right[1/2 * width]
         """
-        segment_num = int(self.length / (2 * DrivableAreaProperty.STRIPE_LENGTH))
+        segment_num = int(self.length / DrivableAreaProperty.CIRCULAR_SEGMENT_LENGTH)
         for segment in range(segment_num):
-            start = self.position(segment * DrivableAreaProperty.STRIPE_LENGTH * 2, lateral)
-            end = self.position(
-                segment * DrivableAreaProperty.STRIPE_LENGTH * 2 + DrivableAreaProperty.STRIPE_LENGTH,
-                lateral
-            )
+            start = self.position(DrivableAreaProperty.CIRCULAR_SEGMENT_LENGTH * segment, lateral)
+            if segment == segment_num - 1:
+                end = self.position(self.length, lateral)
+            else:
+                end = self.position(
+                    (segment + 1) * DrivableAreaProperty.CIRCULAR_SEGMENT_LENGTH, lateral)
             self.construct_lane_line_segment(block, start, end, line_color, line_type)
 
-        start = self.position(segment_num * DrivableAreaProperty.STRIPE_LENGTH * 2, lateral)
-        end = self.position(self.length + DrivableAreaProperty.STRIPE_LENGTH, lateral)
-        self.construct_lane_line_segment(block, start, end, line_color, line_type)
-
-    def construct_sidewalk(self, block, lateral, line_color, line_type):
+    def construct_sidewalk(self, block, lateral):
         """
         Lateral: left[-1/2 * width] or right[1/2 * width]
         """
-        segment_num = int(self.length / (2 * DrivableAreaProperty.STRIPE_LENGTH))
-        for segment in range(segment_num):
-            start = self.position(segment * DrivableAreaProperty.STRIPE_LENGTH * 2, lateral)
-            end = self.position(
-                segment * DrivableAreaProperty.STRIPE_LENGTH * 2 + DrivableAreaProperty.STRIPE_LENGTH,
-                lateral
-            )
-            self.construct_lane_line_segment(block, start, end, line_color, line_type)
-
-        start = self.position(segment_num * DrivableAreaProperty.STRIPE_LENGTH * 2, lateral)
-        end = self.position(self.length + DrivableAreaProperty.STRIPE_LENGTH, lateral)
-        self.construct_lane_line_segment(block, start, end, line_color, line_type)
+        pass
 
     def construct_lane_segment(self, block, position, width, length, theta, lane_index=None):
         """
@@ -244,6 +230,7 @@ class AbstractLane:
             end_point,
             color: Vec4,
             line_type: LineType,
+            last_segment=False
     ):
         length = norm(end_point[0] - start_point[0], end_point[1] - start_point[1])
         middle = (start_point + end_point) / 2
@@ -284,7 +271,8 @@ class AbstractLane:
         if block.render:
             # For visualization
             lane_line = block.loader.loadModel(AssetLoader.file_path("models", "box.bam"))
-            lane_line.setScale(length*2 if line_type != LineType.BROKEN else length, DrivableAreaProperty.LANE_LINE_WIDTH, DrivableAreaProperty.LANE_LINE_THICKNESS)
+            lane_line.setScale(length,
+                               DrivableAreaProperty.LANE_LINE_WIDTH, DrivableAreaProperty.LANE_LINE_THICKNESS)
             lane_line.setPos(Vec3(0, 0 - DrivableAreaProperty.LANE_LINE_GHOST_HEIGHT / 2))
             lane_line.reparentTo(body_np)
             body_np.set_color(color)
