@@ -127,12 +127,14 @@ class AbstractLane:
             elif line_type == LineType.SIDE:
                 # self.construct_sidewalk(block, lateral, line_color, line_type)
                 self.construct_continuous_line(block, lateral, line_color, line_type)
+            elif line_type == LineType.NONE:
+                continue
             else:
                 raise ValueError(
                     "You have to modify this cuntion and implement a constructing method for line type: {}".format(
                         line_type))
 
-    def construct_continuous_line(self, block, lateral, line_color, line_type):
+    def construct_broken_line(self, block, lateral, line_color, line_type):
         """
         Lateral: left[-1/2 * width] or right[1/2 * width]
         """
@@ -150,7 +152,7 @@ class AbstractLane:
         self.construct_lane_line_segment(block, start, end, line_color, line_type)
 
 
-    def construct_broken_line(self, block, lateral, line_color, line_type):
+    def construct_continuous_line(self, block, lateral, line_color, line_type):
         """
         Lateral: left[-1/2 * width] or right[1/2 * width]
         """
@@ -263,7 +265,7 @@ class AbstractLane:
         body_height = DrivableAreaProperty.LANE_LINE_GHOST_HEIGHT
         shape = BulletBoxShape(
             Vec3(
-                length / 2 if line_type != LineType.BROKEN else length, DrivableAreaProperty.LANE_LINE_WIDTH / 2,
+                length, DrivableAreaProperty.LANE_LINE_WIDTH / 2,
                 body_height
             )
         )
@@ -282,7 +284,7 @@ class AbstractLane:
         if block.render:
             # For visualization
             lane_line = block.loader.loadModel(AssetLoader.file_path("models", "box.bam"))
-            lane_line.setScale(length, DrivableAreaProperty.LANE_LINE_WIDTH, DrivableAreaProperty.LANE_LINE_THICKNESS)
+            lane_line.setScale(length*2 if line_type != LineType.BROKEN else length, DrivableAreaProperty.LANE_LINE_WIDTH, DrivableAreaProperty.LANE_LINE_THICKNESS)
             lane_line.setPos(Vec3(0, 0 - DrivableAreaProperty.LANE_LINE_GHOST_HEIGHT / 2))
             lane_line.reparentTo(body_np)
             body_np.set_color(color)

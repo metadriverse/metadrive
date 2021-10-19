@@ -22,7 +22,8 @@ if __name__ == "__main__":
             "need_inverse_traffic": True,
             "rgb_clip": True,
             # "debug": True,
-            # "random_lane_num": True,
+            # "debug_static_world":True,
+            "random_lane_num": True,
 
             # "map_config": {
             #     Map.GENERATE_TYPE: MapGenerateMethod.BIG_BLOCK_SEQUENCE,
@@ -32,7 +33,7 @@ if __name__ == "__main__":
             # },
             "pstats": True,
             # "discrete_action": True,
-            "map": "S",
+            "map": "COX",
             "random_traffic": False,
             "random_lane_width": True,
             "random_agent_model": True,

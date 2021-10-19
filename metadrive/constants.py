@@ -249,7 +249,7 @@ class DrivableAreaProperty:
     NAVI_COLOR = (0.709, 0.09, 0, 1)
 
     # for detection
-    LANE_LINE_GHOST_HEIGHT = 0.4
+    LANE_LINE_GHOST_HEIGHT = 1.0
 
     # lane line collision group
     CONTINUOUS_COLLISION_MASK = CollisionGroup.ContinuousLaneLine
