@@ -71,11 +71,11 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
         raise NotImplementedError
 
     def construct_block(
-            self,
-            root_render_np: NodePath,
-            physics_world: PhysicsWorld,
-            extra_config: Dict = None,
-            no_same_node=True
+        self,
+        root_render_np: NodePath,
+        physics_world: PhysicsWorld,
+        extra_config: Dict = None,
+        no_same_node=True
     ) -> bool:
         """
         Randomly Construct a block, if overlap return False

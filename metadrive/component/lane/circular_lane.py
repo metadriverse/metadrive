@@ -13,17 +13,17 @@ class CircularLane(MetaDriveLane):
     CIRCULAR_SEGMENT_LENGTH = 4
 
     def __init__(
-            self,
-            center: Vector,
-            radius: float,
-            start_phase: float,
-            end_phase: float,
-            clockwise: bool = True,
-            width: float = MetaDriveLane.DEFAULT_WIDTH,
-            line_types: Tuple[LineType, LineType] = (LineType.BROKEN, LineType.BROKEN),
-            forbidden: bool = False,
-            speed_limit: float = 1000,
-            priority: int = 0
+        self,
+        center: Vector,
+        radius: float,
+        start_phase: float,
+        end_phase: float,
+        clockwise: bool = True,
+        width: float = MetaDriveLane.DEFAULT_WIDTH,
+        line_types: Tuple[LineType, LineType] = (LineType.BROKEN, LineType.BROKEN),
+        forbidden: bool = False,
+        speed_limit: float = 1000,
+        priority: int = 0
     ) -> None:
         super().__init__()
         self.set_speed_limit(speed_limit)

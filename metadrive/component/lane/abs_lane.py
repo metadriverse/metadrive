@@ -133,8 +133,9 @@ class AbstractLane:
                 continue
             else:
                 raise ValueError(
-                    "You have to modify this cuntion and implement a constructing method for line type: {}".format(
-                        line_type))
+                    "You have to modify this cuntion and implement a constructing method for line type: {}".
+                    format(line_type)
+                )
 
     def construct_broken_line(self, block, lateral, line_color, line_type):
         """
@@ -144,11 +145,10 @@ class AbstractLane:
         for segment in range(segment_num):
             start = self.position(segment * DrivableAreaProperty.STRIPE_LENGTH * 2, lateral)
             end = self.position(
-                segment * DrivableAreaProperty.STRIPE_LENGTH * 2 + DrivableAreaProperty.STRIPE_LENGTH,
-                lateral
+                segment * DrivableAreaProperty.STRIPE_LENGTH * 2 + DrivableAreaProperty.STRIPE_LENGTH, lateral
             )
             if segment == segment_num - 1:
-                end = self.position(self.length, lateral)
+                end = self.position(self.length - DrivableAreaProperty.STRIPE_LENGTH, lateral)
             self.construct_lane_line_segment(block, start, end, line_color, line_type)
 
     def construct_continuous_line(self, block, lateral, line_color, line_type):
@@ -162,8 +162,7 @@ class AbstractLane:
             if segment == segment_num - 1:
                 end = self.position(self.length, lateral)
             else:
-                end = self.position(
-                    (segment + 1) * DrivableAreaProperty.CIRCULAR_SEGMENT_LENGTH, lateral)
+                end = self.position((segment + 1) * DrivableAreaProperty.CIRCULAR_SEGMENT_LENGTH, lateral)
             self.construct_lane_line_segment(block, start, end, line_color, line_type)
 
     def construct_sidewalk(self, block, lateral):
@@ -225,12 +224,7 @@ class AbstractLane:
 
     @staticmethod
     def construct_lane_line_segment(
-            block,
-            start_point,
-            end_point,
-            color: Vec4,
-            line_type: LineType,
-            last_segment=False
+        block, start_point, end_point, color: Vec4, line_type: LineType, last_segment=False
     ):
         length = norm(end_point[0] - start_point[0], end_point[1] - start_point[1])
         middle = (start_point + end_point) / 2
@@ -250,12 +244,7 @@ class AbstractLane:
         body_np = parent_np.attachNewNode(body_node)
         # its scale will change by setScale
         body_height = DrivableAreaProperty.LANE_LINE_GHOST_HEIGHT
-        shape = BulletBoxShape(
-            Vec3(
-                length, DrivableAreaProperty.LANE_LINE_WIDTH / 2,
-                body_height
-            )
-        )
+        shape = BulletBoxShape(Vec3(length, DrivableAreaProperty.LANE_LINE_WIDTH / 2, body_height))
         body_np.node().addShape(shape)
         mask = DrivableAreaProperty.CONTINUOUS_COLLISION_MASK if line_type != LineType.BROKEN else DrivableAreaProperty.BROKEN_COLLISION_MASK
         body_np.node().setIntoCollideMask(mask)
@@ -271,8 +260,7 @@ class AbstractLane:
         if block.render:
             # For visualization
             lane_line = block.loader.loadModel(AssetLoader.file_path("models", "box.bam"))
-            lane_line.setScale(length,
-                               DrivableAreaProperty.LANE_LINE_WIDTH, DrivableAreaProperty.LANE_LINE_THICKNESS)
+            lane_line.setScale(length, DrivableAreaProperty.LANE_LINE_WIDTH, DrivableAreaProperty.LANE_LINE_THICKNESS)
             lane_line.setPos(Vec3(0, 0 - DrivableAreaProperty.LANE_LINE_GHOST_HEIGHT / 2))
             lane_line.reparentTo(body_np)
             body_np.set_color(color)

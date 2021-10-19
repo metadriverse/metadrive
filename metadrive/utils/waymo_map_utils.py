@@ -7,12 +7,14 @@ import os
 import pickle
 import numpy as np
 
+
 def extract_poly(message):
     x = [i.x for i in message]
     y = [i.y for i in message]
     z = [i.z for i in message]
-    coord = np.stack((x,y,z),axis=1)
+    coord = np.stack((x, y, z), axis=1)
     return coord
+
 
 def extract_boundaries(fb):
 
@@ -24,15 +26,19 @@ def extract_boundaries(fb):
         b[k, 3] = fb[k].boundary_type
     return b
 
+
 def extract_neighbors(fb):
     nb_list = []
     for k in range(len(fb)):
         nb = dict()
         nb['id'] = fb[k].feature_id
-        nb['indexes'] = [fb[k].self_start_index,fb[k].self_end_index,fb[k].neighbor_start_index,fb[k].neighbor_end_index]
+        nb['indexes'] = [
+            fb[k].self_start_index, fb[k].self_end_index, fb[k].neighbor_start_index, fb[k].neighbor_end_index
+        ]
         nb['boundaries'] = extract_boundaries(fb[k].boundaries)
         nb_list.append(nb)
     return nb_list
+
 
 def extract_center(f):
     center = dict()
@@ -58,6 +64,7 @@ def extract_center(f):
 
     return center
 
+
 def extract_line(f):
     line = dict()
     f = f.road_line
@@ -65,6 +72,7 @@ def extract_line(f):
     line['polyline'] = extract_poly(f.polyline)
 
     return line
+
 
 def extract_edge(f):
     edge = dict()
@@ -75,6 +83,7 @@ def extract_edge(f):
 
     return edge
 
+
 def extract_stop(f):
     stop = dict()
     f = f.stop_sign
@@ -83,12 +92,14 @@ def extract_stop(f):
     stop['pos'] = [f.position.x, f.position.y, f.position.z]
     return stop
 
+
 def extract_crosswalk(f):
     cross_walk = dict()
     f = f.crosswalk
     cross_walk['sign'] = 'cross_walk'
     cross_walk['polygon'] = extract_poly(f.polygon)
     return cross_walk
+
 
 def extract_bump(f):
     speed_bump = dict()
@@ -97,6 +108,7 @@ def extract_bump(f):
     speed_bump['polygon'] = extract_poly(f.polygon)
 
     return speed_bump
+
 
 def extract_tracks(f):
     track = dict()
@@ -115,10 +127,11 @@ def extract_tracks(f):
         vx = [state.velocity_x for state in f[i].states]
         vy = [state.velocity_y for state in f[i].states]
         valid = [state.valid for state in f[i].states]
-        agent['state'] = np.stack((x,y,z,l,w,h,head,vx,vy,valid),1)
+        agent['state'] = np.stack((x, y, z, l, w, h, head, vx, vy, valid), 1)
         track[f[i].id] = agent
 
     return track
+
 
 def extract_map(f):
     data_dict = dict()
@@ -144,6 +157,7 @@ def extract_map(f):
 
     return data_dict
 
+
 def extract_dynamic(f):
     dynamics = []
     for i in range(len(f)):
@@ -158,30 +172,34 @@ def extract_dynamic(f):
 
     return dynamics
 
+
 def read_waymo_data(file_path):
     with open(file_path, "rb+") as waymo_file:
         data = pickle.load(waymo_file)
     return data
 
+
 def draw_waymo_map(data):
     figure(figsize=(8, 6), dpi=500)
     for key, value in data["map"].items():
-        if value.get("type", None) =="center_lane":
-            plt.scatter([x[0] for x in value["polyline"]], [y[1] for y in value["polyline"]],s=0.5)
+        if value.get("type", None) == "center_lane":
+            plt.scatter([x[0] for x in value["polyline"]], [y[1] for y in value["polyline"]], s=0.5)
         elif value.get("type", None) == "road_edge":
-            plt.scatter([x[0] for x in value["polyline"]], [y[1] for y in value["polyline"]], s=0.5, c=(0,0,0))
+            plt.scatter([x[0] for x in value["polyline"]], [y[1] for y in value["polyline"]], s=0.5, c=(0, 0, 0))
         # elif value.get("type", None) == "road_line":
         #     plt.scatter([x[0] for x in value["polyline"]], [y[1] for y in value["polyline"]], s=0.5, c=(0.8,0.8,0.8))
     plt.show()
 
+
 # parse raw data from input path to output path
-def parse_data(inut_path,output_path):
+def parse_data(inut_path, output_path):
     cnt = 0
     scenario = scenario_pb2.Scenario()
     file_list = os.listdir(inut_path)
     for file in file_list:
-        file_path = os.path.join(inut_path,file)
-        if not 'scenario' in file_path: continue
+        file_path = os.path.join(inut_path, file)
+        if not 'scenario' in file_path:
+            continue
         dataset = tf.data.TFRecordDataset(file_path, compression_type='')
         for j, data in enumerate(dataset.as_numpy_iterator()):
             scenario.ParseFromString(data)
@@ -200,7 +218,8 @@ def parse_data(inut_path,output_path):
             cnt += 1
     return
 
-if __name__=="__main__":
+
+if __name__ == "__main__":
 
     # raw_data_path = AssetLoader.file_path("utils/waymo_utils/raw",  linux_style=False)
     # processed_data_path = AssetLoader.file_path("utils/waymo_utils/processed", linux_style=False)

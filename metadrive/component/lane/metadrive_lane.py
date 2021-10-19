@@ -21,8 +21,7 @@ class MetaDriveLane(AbstractLane):
         for segment in range(segment_num):
             lane_start = self.position(segment * DrivableAreaProperty.SIDEWALK_LENGTH, lateral)
             if segment != segment_num - 1:
-                lane_end = self.position(
-                    (segment + 1) * DrivableAreaProperty.SIDEWALK_LENGTH, lateral)
+                lane_end = self.position((segment + 1) * DrivableAreaProperty.SIDEWALK_LENGTH, lateral)
             else:
                 lane_end = self.position(self.length, lateral)
             self._add_sidewalk2bullet(block, lane_start, lane_end, radius, self.direction)
