@@ -402,84 +402,9 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
         :param lanes: All lanes of this road
         """
 
-        if isinstance(lanes[0], StraightLane):
-            for index, lane in enumerate(lanes):
-                middle = lane.position(lane.length / 2, 0)
-                end = lane.position(lane.length, 0)
-                direction_v = end - middle
-                theta = -math.atan2(direction_v[1], direction_v[0])
-                width = lane.width_at(0) + self.SIDEWALK_LINE_DIST * 2
-                length = lane.length
-                self._add_lane2bullet(middle, width, length, theta, lane, (from_, to_, index))
-        elif isinstance(lanes[0], CircularLane):
-            for index, lane in enumerate(lanes):
-                segment_num = int(lane.length / self.CIRCULAR_SEGMENT_LENGTH)
-                for i in range(segment_num):
-                    middle = lane.position(lane.length * (i + .5) / segment_num, 0)
-                    end = lane.position(lane.length * (i + 1) / segment_num, 0)
-                    direction_v = end - middle
-                    theta = -math.atan2(direction_v[1], direction_v[0])
-                    width = lane.width_at(0) + self.SIDEWALK_LINE_DIST * 2
-                    length = lane.length
-                    self._add_lane2bullet(middle, width, length * 1.3 / segment_num, theta, lane, (from_, to_, index))
-        elif isinstance(lanes[0], WayPointLane):
-            for index, lane in enumerate(lanes):
-                for segment in lane.segment_property:
-                    lane_start = segment["start_point"]
-                    lane_end = segment["end_point"]
-                    middle = (lane_start + lane_end) / 2
-                    direction_v = lane_end - middle
-                    theta = -math.atan2(direction_v[1], direction_v[0])
-                    width = lane.width_at(0)
-                    length = segment["length"]
-                    self._add_lane2bullet(middle, width, length, theta, lane, (from_, to_, index))
+        for index, lane in enumerate(lanes):
+            lane.construct_in_block(self, (from_, to_, index))
 
-    def _add_lane2bullet(self, middle, width, length, theta, lane: Union[StraightLane, CircularLane], lane_index):
-        """
-        Add lane visualization and body for it
-        :param middle: Middle point
-        :param width: Lane width
-        :param length: Segment length
-        :param theta: Rotate theta
-        :param lane: Lane info
-        :return: None
-        """
-        length += 0.1
-        lane.index = lane_index
-        segment_np = NodePath(BaseRigidBodyNode(lane, BodyName.Lane))
-        segment_node = segment_np.node()
-        segment_node.set_active(False)
-        segment_node.setKinematic(False)
-        segment_node.setStatic(True)
-        shape = BulletBoxShape(Vec3(length / 2, 0.1, width / 2))
-        segment_node.addShape(shape)
-        self.static_nodes.append(segment_node)
-        segment_np.setPos(panda_position(middle, -0.1))
-        segment_np.setQuat(
-            LQuaternionf(
-                math.cos(theta / 2) * math.cos(-math.pi / 4),
-                math.cos(theta / 2) * math.sin(-math.pi / 4), -math.sin(theta / 2) * math.cos(-math.pi / 4),
-                math.sin(theta / 2) * math.cos(-math.pi / 4)
-            )
-        )
-        segment_np.reparentTo(self.lane_node_path)
-        if self.render:
-            cm = CardMaker('card')
-            cm.setFrame(-length / 2, length / 2, -width / 2, width / 2)
-            cm.setHasNormals(True)
-            cm.setUvRange((0, 0), (length / 20, width / 10))
-            card = self.lane_vis_node_path.attachNewNode(cm.generate())
-            card.setPos(panda_position(middle, np.random.rand() * 0.01 - 0.01))
-
-            card.setQuat(
-                LQuaternionf(
-                    math.cos(theta / 2) * math.cos(-math.pi / 4),
-                    math.cos(theta / 2) * math.sin(-math.pi / 4), -math.sin(theta / 2) * math.cos(-math.pi / 4),
-                    math.sin(theta / 2) * math.cos(-math.pi / 4)
-                )
-            )
-            card.setTransparency(TransparencyAttrib.MMultisample)
-            card.setTexture(self.ts_color, self.road_texture)
 
     def add_body(self, physics_body):
         raise DeprecationWarning(

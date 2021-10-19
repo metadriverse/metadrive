@@ -1,4 +1,5 @@
 import math
+from metadrive.constants import DrivableAreaProperty
 from typing import Tuple
 
 from metadrive.component.lane.abs_lane import AbstractLane
@@ -8,6 +9,9 @@ from metadrive.utils.math_utils import wrap_to_pi, norm, Vector
 
 class CircularLane(AbstractLane):
     """A lane going in circle arc."""
+
+    CIRCULAR_SEGMENT_LENGTH = 4
+
     def __init__(
         self,
         center: Vector,
@@ -65,3 +69,14 @@ class CircularLane(AbstractLane):
         longitudinal = self.direction * (phi - self.start_phase) * self.radius
         lateral = self.direction * (self.radius - r)
         return longitudinal, lateral
+
+    def construct_in_block(self, block, lane_index=None):
+        segment_num = int(self.length / DrivableAreaProperty.CIRCULAR_SEGMENT_LENGTH)
+        for i in range(segment_num):
+            middle = self.position(self.length * (i + .5) / segment_num, 0)
+            end = self.position(self.length * (i + 1) / segment_num, 0)
+            direction_v = end - middle
+            theta = -math.atan2(direction_v[1], direction_v[0])
+            width = self.width_at(0) + DrivableAreaProperty.SIDEWALK_LINE_DIST * 2
+            length = self.length
+            self.construct_one_segment(block, middle, width, length * 1.3 / segment_num, theta, lane_index)

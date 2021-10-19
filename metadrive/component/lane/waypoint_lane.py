@@ -130,3 +130,15 @@ class WayPointLane(AbstractLane):
         return True if abs(wrap_to_pi(my_end_heading) - wrap_to_pi(another_end_heading)) < 0.2 and abs(
             wrap_to_pi(my_start_heading) - wrap_to_pi(another_start_heading)
         ) < 0.2 else False
+
+    def construct_in_block(self, block, lane_index=None):
+        for index, self in enumerate(lanes):
+            for segment in self.segment_property:
+                lane_start = segment["start_point"]
+                lane_end = segment["end_point"]
+                middle = (lane_start + lane_end) / 2
+                direction_v = lane_end - middle
+                theta = -math.atan2(direction_v[1], direction_v[0])
+                width = self.width_at(0)
+                length = segment["length"]
+                self.construct_one_segment(block, middle, width, length, theta, lane_index)
