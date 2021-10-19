@@ -1,7 +1,10 @@
 from matplotlib.pyplot import figure
 import matplotlib.pyplot as plt
 from metadrive.engine.asset_loader import AssetLoader
-import tensorflow as tf
+try:
+    import tensorflow as tf
+except ImportError:
+    pass
 from metadrive.utils.waymo_utils.protos import scenario_pb2
 import os
 import pickle
