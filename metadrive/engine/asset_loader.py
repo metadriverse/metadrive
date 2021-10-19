@@ -59,7 +59,7 @@ class AssetLoader:
 
     @classmethod
     def initialized(cls):
-        return cls.asset_path is not None
+        return cls.loader is not None
 
 
 def initialize_asset_loader(engine):

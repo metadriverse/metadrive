@@ -156,7 +156,7 @@ def CreateRoadFrom(
         roadnet_to_add_lanes.add_lane(road.start_node, road.end_node, l)
     if lane_num == 0:
         lanes[-1].line_types = [center_line_type, side_lane_line_type]
-    lanes[0].line_color = [center_line_color, LineColor.GREY]
+    lanes[0].line_colors = [center_line_color, LineColor.GREY]
     return no_cross
 
 
@@ -227,7 +227,7 @@ def CreateAdverseRoad(
         center_line_color=center_line_color,
         ignore_intersection_checking=ignore_intersection_checking
     )
-    positive_road.get_lanes(roadnet_to_get_road)[0].line_color = [center_line_color, LineColor.GREY]
+    positive_road.get_lanes(roadnet_to_get_road)[0].line_colors = [center_line_color, LineColor.GREY]
     return success
 
 

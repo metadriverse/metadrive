@@ -153,7 +153,7 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
             for _to, lanes in to_dict.items():
                 self._add_lane_surface(_from, _to, lanes)
                 for _id, l in enumerate(lanes):
-                    line_color = l.line_color
+                    line_color = l.line_colors
                     self._add_lane(l, _id, line_color)
         self.lane_line_node_path.flattenStrong()
         self.lane_line_node_path.node().collect()
@@ -180,90 +180,56 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
         self.bounding_box = self.block_network.get_bounding_box()
 
     def _add_metadrive_lanes(self, lane, lane_id, lane_width, colors, parent_np):
+        lane.construct_lane_line_in_block(self)
         # for metadrive structure
-        for k, i in enumerate([-1, 1]):
-            line_color = colors[k]
-            if lane.line_types[k] == LineType.NONE or (lane_id != 0 and k == 0):
-                if isinstance(lane, StraightLane):
-                    continue
-                elif isinstance(lane, CircularLane) and lane.radius != lane_width / 2:
-                    # for ramp render
-                    continue
-            if lane.line_types[k] == LineType.CONTINUOUS or lane.line_types[k] == LineType.SIDE:
-                if isinstance(lane, StraightLane):
-                    lane_start = lane.position(0, i * lane_width / 2)
-                    lane_end = lane.position(lane.length, i * lane_width / 2)
-                    middle = lane.position(lane.length / 2, i * lane_width / 2)
-                    self._add_lane_line2bullet(lane_start, lane_end, middle, parent_np, line_color, lane.line_types[k])
-                elif isinstance(lane, CircularLane):
-                    segment_num = int(lane.length / DrivableAreaProperty.CIRCULAR_SEGMENT_LENGTH)
-                    for segment in range(segment_num):
-                        lane_start = lane.position(
-                            segment * DrivableAreaProperty.CIRCULAR_SEGMENT_LENGTH, i * lane_width / 2
-                        )
-                        lane_end = lane.position(
-                            (segment + 1) * DrivableAreaProperty.CIRCULAR_SEGMENT_LENGTH, i * lane_width / 2
-                        )
-                        middle = (lane_start + lane_end) / 2
+        # for k, i in enumerate([-1, 1]):
+        #     line_color = colors[k]
+            # if lane.line_types[k] == LineType.NONE or (lane_id != 0 and k == 0):
+            #     if isinstance(lane, StraightLane):
+            #         continue
+            #     elif isinstance(lane, CircularLane) and lane.radius != lane_width / 2:
+            #         # for ramp render
+            #         continue
+            # if lane.line_types[k] == LineType.CONTINUOUS or lane.line_types[k] == LineType.SIDE:
+            #
+            #     elif isinstance(lane, CircularLane):
+            #         segment_num = int(lane.length / DrivableAreaProperty.CIRCULAR_SEGMENT_LENGTH)
+            #         for segment in range(segment_num):
+            #             lane_start = lane.position(
+            #                 segment * DrivableAreaProperty.CIRCULAR_SEGMENT_LENGTH, i * lane_width / 2
+            #             )
+            #             lane_end = lane.position(
+            #                 (segment + 1) * DrivableAreaProperty.CIRCULAR_SEGMENT_LENGTH, i * lane_width / 2
+            #             )
+            #             middle = (lane_start + lane_end) / 2
+            #
+            #             self._add_lane_line2bullet(
+            #                 lane_start, lane_end, middle, parent_np, line_color, lane.line_types[k]
+            #             )
+            #         # for last part
+            #         lane_start = lane.position(
+            #             segment_num * DrivableAreaProperty.CIRCULAR_SEGMENT_LENGTH, i * lane_width / 2
+            #         )
+            #         lane_end = lane.position(lane.length, i * lane_width / 2)
+            #         middle = (lane_start + lane_end) / 2
+            #         self._add_lane_line2bullet(lane_start, lane_end, middle, parent_np, line_color, lane.line_types[k])
 
-                        self._add_lane_line2bullet(
-                            lane_start, lane_end, middle, parent_np, line_color, lane.line_types[k]
-                        )
-                    # for last part
-                    lane_start = lane.position(
-                        segment_num * DrivableAreaProperty.CIRCULAR_SEGMENT_LENGTH, i * lane_width / 2
-                    )
-                    lane_end = lane.position(lane.length, i * lane_width / 2)
-                    middle = (lane_start + lane_end) / 2
-                    self._add_lane_line2bullet(lane_start, lane_end, middle, parent_np, line_color, lane.line_types[k])
-
-                if lane.line_types[k] == LineType.SIDE:
-                    radius = lane.radius if isinstance(lane, CircularLane) else 0.0
-                    segment_num = int(lane.length / DrivableAreaProperty.SIDEWALK_LENGTH)
-                    for segment in range(segment_num):
-                        lane_start = lane.position(segment * DrivableAreaProperty.SIDEWALK_LENGTH, i * lane_width / 2)
-                        lane_end = lane.position(
-                            (segment + 1) * DrivableAreaProperty.SIDEWALK_LENGTH, i * lane_width / 2
-                        )
-                        middle = (lane_start + lane_end) / 2
-                        self._add_sidewalk2bullet(lane_start, lane_end, middle, radius, lane.direction)
-                    # for last part
-                    lane_start = lane.position(segment_num * DrivableAreaProperty.SIDEWALK_LENGTH, i * lane_width / 2)
-                    lane_end = lane.position(lane.length, i * lane_width / 2)
-                    middle = (lane_start + lane_end) / 2
-                    if norm(lane_start[0] - lane_end[0], lane_start[1] - lane_end[1]) > 1e-1:
-                        self._add_sidewalk2bullet(lane_start, lane_end, middle, radius, lane.direction)
-
-            elif lane.line_types[k] == LineType.BROKEN:
-                straight = True if isinstance(lane, StraightLane) else False
-                segment_num = int(lane.length / (2 * DrivableAreaProperty.STRIPE_LENGTH))
-                for segment in range(segment_num):
-                    lane_start = lane.position(segment * DrivableAreaProperty.STRIPE_LENGTH * 2, i * lane_width / 2)
-                    lane_end = lane.position(
-                        segment * DrivableAreaProperty.STRIPE_LENGTH * 2 + DrivableAreaProperty.STRIPE_LENGTH,
-                        i * lane_width / 2
-                    )
-                    middle = lane.position(
-                        segment * DrivableAreaProperty.STRIPE_LENGTH * 2 + DrivableAreaProperty.STRIPE_LENGTH / 2,
-                        i * lane_width / 2
-                    )
-
-                    self._add_lane_line2bullet(
-                        lane_start, lane_end, middle, parent_np, line_color, lane.line_types[k], straight
-                    )
-
-                lane_start = lane.position(segment_num * DrivableAreaProperty.STRIPE_LENGTH * 2, i * lane_width / 2)
-                lane_end = lane.position(lane.length + DrivableAreaProperty.STRIPE_LENGTH, i * lane_width / 2)
-                middle = (lane_end[0] + lane_start[0]) / 2, (lane_end[1] + lane_start[1]) / 2
-                if not straight:
-                    self._add_lane_line2bullet(
-                        lane_start, lane_end, middle, parent_np, line_color, lane.line_types[k], straight
-                    )
-                if straight:
-                    lane_start = lane.position(0, i * lane_width / 2)
-                    lane_end = lane.position(lane.length, i * lane_width / 2)
-                    middle = lane.position(lane.length / 2, i * lane_width / 2)
-                    self._add_box_body(lane_start, lane_end, middle, parent_np, lane.line_types[k], line_color)
+                # if lane.line_types[k] == LineType.SIDE:
+                #     radius = lane.radius if isinstance(lane, CircularLane) else 0.0
+                #     segment_num = int(lane.length / DrivableAreaProperty.SIDEWALK_LENGTH)
+                #     for segment in range(segment_num):
+                #         lane_start = lane.position(segment * DrivableAreaProperty.SIDEWALK_LENGTH, i * lane_width / 2)
+                #         lane_end = lane.position(
+                #             (segment + 1) * DrivableAreaProperty.SIDEWALK_LENGTH, i * lane_width / 2
+                #         )
+                #         middle = (lane_start + lane_end) / 2
+                #         self._add_sidewalk2bullet(lane_start, lane_end, middle, radius, lane.direction)
+                #     # for last part
+                #     lane_start = lane.position(segment_num * DrivableAreaProperty.SIDEWALK_LENGTH, i * lane_width / 2)
+                #     lane_end = lane.position(lane.length, i * lane_width / 2)
+                #     middle = (lane_start + lane_end) / 2
+                #     if norm(lane_start[0] - lane_end[0], lane_start[1] - lane_end[1]) > 1e-1:
+                #         self._add_sidewalk2bullet(lane_start, lane_end, middle, radius, lane.direction)
 
     def _add_lane(self, lane: AbstractLane, lane_id: int, colors: List[Vec4]):
         parent_np = self.lane_line_node_path
@@ -310,61 +276,6 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
 
         body_np.setQuat(LQuaternionf(math.cos(theta / 2), 0, 0, math.sin(theta / 2)))
 
-    def _add_lane_line2bullet(
-        self,
-        lane_start,
-        lane_end,
-        middle,
-        parent_np: NodePath,
-        color: Vec4,
-        line_type: LineType,
-        straight_stripe=False
-    ):
-        length = norm(lane_end[0] - lane_start[0], lane_end[1] - lane_start[1])
-        if length <= 0:
-            return
-        if LineType.prohibit(line_type):
-            node_name = BodyName.White_continuous_line if color == LineColor.GREY else BodyName.Yellow_continuous_line
-        else:
-            node_name = BodyName.Broken_line
-
-        # add bullet body for it
-        if straight_stripe:
-            body_np = parent_np.attachNewNode(node_name)
-        else:
-            body_node = BulletGhostNode(node_name)
-            body_node.set_active(False)
-            body_node.setKinematic(False)
-            body_node.setStatic(True)
-            body_np = parent_np.attachNewNode(body_node)
-            # its scale will change by setScale
-            body_height = DrivableAreaProperty.LANE_LINE_GHOST_HEIGHT
-            shape = BulletBoxShape(
-                Vec3(
-                    length / 2 if line_type != LineType.BROKEN else length, DrivableAreaProperty.LANE_LINE_WIDTH / 2,
-                    body_height
-                )
-            )
-            body_np.node().addShape(shape)
-            mask = DrivableAreaProperty.CONTINUOUS_COLLISION_MASK if line_type != LineType.BROKEN else DrivableAreaProperty.BROKEN_COLLISION_MASK
-            body_np.node().setIntoCollideMask(mask)
-            self.static_nodes.append(body_np.node())
-
-        # position and heading
-        body_np.setPos(panda_position(middle, DrivableAreaProperty.LANE_LINE_GHOST_HEIGHT / 2))
-        direction_v = lane_end - lane_start
-        # theta = -numpy.arctan2(direction_v[1], direction_v[0])
-        theta = -math.atan2(direction_v[1], direction_v[0])
-        body_np.setQuat(LQuaternionf(math.cos(theta / 2), 0, 0, math.sin(theta / 2)))
-
-        if self.render:
-            # For visualization
-            lane_line = self.loader.loadModel(AssetLoader.file_path("models", "box.bam"))
-            lane_line.setScale(length, DrivableAreaProperty.LANE_LINE_WIDTH, DrivableAreaProperty.LANE_LINE_THICKNESS)
-            lane_line.setPos(Vec3(0, 0 - DrivableAreaProperty.LANE_LINE_GHOST_HEIGHT / 2))
-            lane_line.reparentTo(body_np)
-            body_np.set_color(color)
-
     def _add_sidewalk2bullet(self, lane_start, lane_end, middle, radius=0.0, direction=0):
         length = norm(lane_end[0] - lane_start[0], lane_end[1] - lane_start[1])
         body_node = BulletRigidBodyNode(BodyName.Sidewalk)
@@ -403,8 +314,7 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
         """
 
         for index, lane in enumerate(lanes):
-            lane.construct_in_block(self, (from_, to_, index))
-
+            lane.construct_lane_in_block(self, (from_, to_, index))
 
     def add_body(self, physics_body):
         raise DeprecationWarning(

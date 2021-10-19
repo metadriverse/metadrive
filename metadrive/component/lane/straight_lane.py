@@ -72,7 +72,7 @@ class StraightLane(AbstractLane):
         self.end = end
         self.update_properties()
 
-    def construct_in_block(self, block, lane_index=None):
+    def construct_lane_in_block(self, block, lane_index=None):
         """
         Straight lane can be represented by one segment
         """
@@ -81,5 +81,4 @@ class StraightLane(AbstractLane):
         direction_v = end - middle
         theta = -math.atan2(direction_v[1], direction_v[0])
         width = self.width_at(0) + block.SIDEWALK_LINE_DIST * 2
-        self.construct_one_segment(block, middle, width, self.length, theta,lane_index)
-
+        self.construct_lane_segment(block, middle, width, self.length, theta, lane_index)
