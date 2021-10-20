@@ -1,6 +1,5 @@
-from metadrive.utils.waymo_map_utils import read_waymo_data
 from metadrive.engine.asset_loader import AssetLoader
-from metadrive.engine.engine_utils import initialize_engine
+from metadrive.utils.waymo_map_utils import read_waymo_data
 
 
 def test_read_waymo_data():

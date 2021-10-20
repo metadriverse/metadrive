@@ -1,24 +1,20 @@
 import math
-from typing import Dict, Union, List
+from typing import Dict, List
 
-import numpy as np
-from panda3d.bullet import BulletBoxShape, BulletRigidBodyNode, BulletGhostNode
-from panda3d.core import Vec3, LQuaternionf, Vec4, CardMaker, TextureStage, RigidBodyCombiner, \
-    TransparencyAttrib, SamplerState, NodePath
+from panda3d.bullet import BulletBoxShape, BulletGhostNode
+from panda3d.core import Vec3, LQuaternionf, Vec4, TextureStage, RigidBodyCombiner, \
+    SamplerState, NodePath
 
 from metadrive.base_class.base_object import BaseObject
 from metadrive.component.lane.abs_lane import AbstractLane
-from metadrive.component.lane.circular_lane import CircularLane
-from metadrive.component.lane.straight_lane import StraightLane
 from metadrive.component.lane.waypoint_lane import WayPointLane
 from metadrive.component.road.road import Road
 from metadrive.component.road.road_network import RoadNetwork
 from metadrive.constants import BodyName, CamMask, LineType, LineColor, DrivableAreaProperty
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.engine.core.physics_world import PhysicsWorld
-from metadrive.engine.physics_node import BaseRigidBodyNode
 from metadrive.utils.coordinates_shift import panda_position
-from metadrive.utils.math_utils import norm, Vector
+from metadrive.utils.math_utils import norm
 
 
 class BaseBlock(BaseObject, DrivableAreaProperty):
@@ -179,6 +175,25 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
 
         self.bounding_box = self.block_network.get_bounding_box()
 
+    def add_body(self, physics_body):
+        raise DeprecationWarning(
+            "Different from common objects like vehicle/traffic sign, Block has several bodies!"
+            "Therefore, you should create BulletBody and then add them to self.dynamics_nodes "
+            "manually. See in construct() method"
+        )
+
+    def get_state(self) -> Dict:
+        """
+        The record of Block type is not same as other objects
+        """
+        return {}
+
+    def set_state(self, state: Dict):
+        """
+        Block type can not set state currently
+        """
+        pass
+
     def _add_lane_line(self, lane: AbstractLane, colors: List[Vec4], contruct_two_side=True):
         raise DeprecationWarning("Leave for argoverse using")
         if isinstance(lane, WayPointLane):
@@ -223,22 +238,3 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
         theta = -math.atan2(direction_v[1], direction_v[0])
 
         body_np.setQuat(LQuaternionf(math.cos(theta / 2), 0, 0, math.sin(theta / 2)))
-
-    def add_body(self, physics_body):
-        raise DeprecationWarning(
-            "Different from common objects like vehicle/traffic sign, Block has several bodies!"
-            "Therefore, you should create BulletBody and then add them to self.dynamics_nodes "
-            "manually. See in construct() method"
-        )
-
-    def get_state(self) -> Dict:
-        """
-        The record of Block type is not same as other objects
-        """
-        return {}
-
-    def set_state(self, state: Dict):
-        """
-        Block type can not set state currently
-        """
-        pass

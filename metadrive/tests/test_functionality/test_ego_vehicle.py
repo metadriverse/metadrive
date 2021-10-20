@@ -1,11 +1,11 @@
 import numpy as np
-from metadrive.utils.coordinates_shift import metadrive_position
 
 from metadrive import MetaDriveEnv
 from metadrive.component.vehicle.vehicle_type import DefaultVehicle
 from metadrive.envs.base_env import BASE_DEFAULT_CONFIG
 from metadrive.envs.metadrive_env import METADRIVE_DEFAULT_CONFIG
 from metadrive.utils import Config
+from metadrive.utils.coordinates_shift import metadrive_position
 
 
 def _assert_vehicle(vehicle):
