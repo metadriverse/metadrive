@@ -234,7 +234,7 @@ class DrivableAreaProperty:
     SOCKET_NUM = None
 
     # visualization size property
-    CIRCULAR_SEGMENT_LENGTH = 4
+    LANE_LINE_SEGMENT_LENGTH = 4
     STRIPE_LENGTH = 1.5
     LANE_LINE_WIDTH = 0.15
     LANE_LINE_THICKNESS = 0.01

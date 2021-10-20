@@ -156,13 +156,13 @@ class AbstractLane:
         We process straight line to several pieces by default, which can be optimized through overriding this function
         Lateral: left[-1/2 * width] or right[1/2 * width]
         """
-        segment_num = int(self.length / DrivableAreaProperty.CIRCULAR_SEGMENT_LENGTH)
+        segment_num = int(self.length / DrivableAreaProperty.LANE_LINE_SEGMENT_LENGTH)
         for segment in range(segment_num):
-            start = self.position(DrivableAreaProperty.CIRCULAR_SEGMENT_LENGTH * segment, lateral)
+            start = self.position(DrivableAreaProperty.LANE_LINE_SEGMENT_LENGTH * segment, lateral)
             if segment == segment_num - 1:
                 end = self.position(self.length, lateral)
             else:
-                end = self.position((segment + 1) * DrivableAreaProperty.CIRCULAR_SEGMENT_LENGTH, lateral)
+                end = self.position((segment + 1) * DrivableAreaProperty.LANE_LINE_SEGMENT_LENGTH, lateral)
             self.construct_lane_line_segment(block, start, end, line_color, line_type)
 
     def construct_sidewalk(self, block, lateral):
@@ -244,7 +244,7 @@ class AbstractLane:
         body_np = parent_np.attachNewNode(body_node)
         # its scale will change by setScale
         body_height = DrivableAreaProperty.LANE_LINE_GHOST_HEIGHT
-        shape = BulletBoxShape(Vec3(length, DrivableAreaProperty.LANE_LINE_WIDTH / 2, body_height))
+        shape = BulletBoxShape(Vec3(length / 2, DrivableAreaProperty.LANE_LINE_WIDTH / 4, body_height))
         body_np.node().addShape(shape)
         mask = DrivableAreaProperty.CONTINUOUS_COLLISION_MASK if line_type != LineType.BROKEN else DrivableAreaProperty.BROKEN_COLLISION_MASK
         body_np.node().setIntoCollideMask(mask)

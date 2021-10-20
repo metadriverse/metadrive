@@ -71,7 +71,7 @@ class CircularLane(MetaDriveLane):
         return longitudinal, lateral
 
     def construct_lane_in_block(self, block, lane_index=None):
-        segment_num = int(self.length / DrivableAreaProperty.CIRCULAR_SEGMENT_LENGTH)
+        segment_num = int(self.length / DrivableAreaProperty.LANE_LINE_SEGMENT_LENGTH)
         for i in range(segment_num):
             middle = self.position(self.length * (i + .5) / segment_num, 0)
             end = self.position(self.length * (i + 1) / segment_num, 0)

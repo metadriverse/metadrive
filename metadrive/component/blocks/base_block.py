@@ -153,7 +153,8 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
             for _to, lanes in to_dict.items():
                 for _id, lane in enumerate(lanes):
                     lane.construct_lane_in_block(self, (_from, _to, _id))
-                    lane.construct_lane_line_in_block(self, [True, True] if _id == 0 else [False, True])
+                    pos_road = not Road(_from, _to).is_negative_road()
+                    lane.construct_lane_line_in_block(self, [True, True] if _id == 0 and pos_road else [False, True])
         self.lane_line_node_path.flattenStrong()
         self.lane_line_node_path.node().collect()
 
