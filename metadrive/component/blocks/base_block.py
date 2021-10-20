@@ -67,11 +67,11 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
         raise NotImplementedError
 
     def construct_block(
-        self,
-        root_render_np: NodePath,
-        physics_world: PhysicsWorld,
-        extra_config: Dict = None,
-        no_same_node=True
+            self,
+            root_render_np: NodePath,
+            physics_world: PhysicsWorld,
+            extra_config: Dict = None,
+            no_same_node=True
     ) -> bool:
         """
         Randomly Construct a block, if overlap return False
@@ -139,18 +139,15 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
     def _create_in_world(self):
         """
         Create NodePath and Geom node to perform both collision detection and render
+
+        Note: Override the create_in_world() function instead of this one, since this method severing as a wrapper to
+        help improve efficiency
         """
         self.lane_line_node_path = NodePath(RigidBodyCombiner(self.name + "_lane_line"))
         self.sidewalk_node_path = NodePath(RigidBodyCombiner(self.name + "_sidewalk"))
         self.lane_node_path = NodePath(RigidBodyCombiner(self.name + "_lane"))
         self.lane_vis_node_path = NodePath(RigidBodyCombiner(self.name + "_lane_vis"))
-        graph = self.block_network.graph
-        for _from, to_dict in graph.items():
-            for _to, lanes in to_dict.items():
-                for _id, lane in enumerate(lanes):
-                    lane.construct_lane_in_block(self, (_from, _to, _id))
-                    pos_road = not Road(_from, _to).is_negative_road()
-                    lane.construct_lane_line_in_block(self, [True, True] if _id == 0 and pos_road else [False, True])
+        self.create_in_world()
         self.lane_line_node_path.flattenStrong()
         self.lane_line_node_path.node().collect()
 
@@ -174,6 +171,18 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
         self.lane_vis_node_path.reparentTo(self.origin)
 
         self.bounding_box = self.block_network.get_bounding_box()
+
+    def create_in_world(self):
+        """
+        Create lane in the panda3D world
+        """
+        graph = self.block_network.graph
+        for _from, to_dict in graph.items():
+            for _to, lanes in to_dict.items():
+                for _id, lane in enumerate(lanes):
+                    lane.construct_lane_in_block(self, (_from, _to, _id))
+                    pos_road = not Road(_from, _to).is_negative_road()
+                    lane.construct_lane_line_in_block(self, [True, True] if _id == 0 and pos_road else [False, True])
 
     def add_body(self, physics_body):
         raise DeprecationWarning(

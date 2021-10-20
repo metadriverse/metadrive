@@ -20,12 +20,10 @@ class WaymoMap(BaseMap):
 
     @staticmethod
     def waymo_position(pos):
-        pos[1] *= -1
         return pos
 
     @staticmethod
     def metadrive_position(pos):
-        pos[1] *= -1
         return pos
 
 
@@ -39,6 +37,7 @@ if __name__ == "__main__":
     default_config = MetaDriveEnv.default_config()
     default_config["use_render"] = True
     default_config["debug"] = True
+    default_config["debug_static_world"] = True
     engine = initialize_engine(default_config)
     map = WaymoMap(data)
 
@@ -46,6 +45,7 @@ if __name__ == "__main__":
     engine.enableMouse()
 
     # argoverse data set is as the same coordinates as panda3d
-    # engine.main_camera.set_bird_view_pos(ArgoverseMap.metadrive_position([xcenter, ycenter]))
+    pos = WaymoMap.metadrive_position(data["map"][1]["polyline"][0])
+    engine.main_camera.set_bird_view_pos(pos)
     while True:
         map.engine.step()

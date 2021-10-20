@@ -353,13 +353,13 @@ class LaneGraphics:
     @classmethod
     def simple_draw(cls, lane, surface, color=(255, 255, 255)):
         from metadrive.component.blocks.pg_block import PGBlock
-        segment_num = int(lane.length / PGBlock.LANE_LINE_SEGMENT_LENGTH)
+        segment_num = int(lane.length / PGBlock.LANE_SEGMENT_LENGTH)
         width = lane.width
         for segment in range(segment_num):
-            p_1 = lane.position(segment * PGBlock.LANE_LINE_SEGMENT_LENGTH, -width / 2)
-            p_2 = lane.position(segment * PGBlock.LANE_LINE_SEGMENT_LENGTH, width / 2)
-            p_3 = lane.position((segment + 1) * PGBlock.LANE_LINE_SEGMENT_LENGTH, width / 2)
-            p_4 = lane.position((segment + 1) * PGBlock.LANE_LINE_SEGMENT_LENGTH, -width / 2)
+            p_1 = lane.position(segment * PGBlock.LANE_SEGMENT_LENGTH, -width / 2)
+            p_2 = lane.position(segment * PGBlock.LANE_SEGMENT_LENGTH, width / 2)
+            p_3 = lane.position((segment + 1) * PGBlock.LANE_SEGMENT_LENGTH, width / 2)
+            p_4 = lane.position((segment + 1) * PGBlock.LANE_SEGMENT_LENGTH, -width / 2)
             pygame.draw.polygon(
                 surface, color,
                 [surface.pos2pix(*p_1),
@@ -369,8 +369,8 @@ class LaneGraphics:
             )
 
         # # for last part
-        p_1 = lane.position(segment_num * PGBlock.LANE_LINE_SEGMENT_LENGTH, -width / 2)
-        p_2 = lane.position(segment_num * PGBlock.LANE_LINE_SEGMENT_LENGTH, width / 2)
+        p_1 = lane.position(segment_num * PGBlock.LANE_SEGMENT_LENGTH, -width / 2)
+        p_2 = lane.position(segment_num * PGBlock.LANE_SEGMENT_LENGTH, width / 2)
         p_3 = lane.position(lane.length, width / 2)
         p_4 = lane.position(lane.length, -width / 2)
         pygame.draw.polygon(

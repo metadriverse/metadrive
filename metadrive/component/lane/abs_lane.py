@@ -113,7 +113,7 @@ class AbstractLane:
         return False
 
     def construct_lane_in_block(self, block, lane_index=None):
-        segment_num = int(self.length / DrivableAreaProperty.LANE_LINE_SEGMENT_LENGTH)
+        segment_num = int(self.length / DrivableAreaProperty.LANE_SEGMENT_LENGTH)
         for i in range(segment_num):
             middle = self.position(self.length * (i + .5) / segment_num, 0)
             end = self.position(self.length * (i + 1) / segment_num, 0)
@@ -165,13 +165,13 @@ class AbstractLane:
         We process straight line to several pieces by default, which can be optimized through overriding this function
         Lateral: left[-1/2 * width] or right[1/2 * width]
         """
-        segment_num = int(self.length / DrivableAreaProperty.LANE_LINE_SEGMENT_LENGTH)
+        segment_num = int(self.length / DrivableAreaProperty.LANE_SEGMENT_LENGTH)
         for segment in range(segment_num):
-            start = self.position(DrivableAreaProperty.LANE_LINE_SEGMENT_LENGTH * segment, lateral)
+            start = self.position(DrivableAreaProperty.LANE_SEGMENT_LENGTH * segment, lateral)
             if segment == segment_num - 1:
                 end = self.position(self.length, lateral)
             else:
-                end = self.position((segment + 1) * DrivableAreaProperty.LANE_LINE_SEGMENT_LENGTH, lateral)
+                end = self.position((segment + 1) * DrivableAreaProperty.LANE_SEGMENT_LENGTH, lateral)
             self.construct_lane_line_segment(block, start, end, line_color, line_type)
 
     def construct_sidewalk(self, block, lateral):
@@ -233,8 +233,7 @@ class AbstractLane:
 
     @staticmethod
     def construct_lane_line_segment(
-            block, start_point, end_point, color: Vec4, line_type: LineType, last_segment=False
-    ):
+            block, start_point, end_point, color: Vec4, line_type: LineType):
         length = norm(end_point[0] - start_point[0], end_point[1] - start_point[1])
         middle = (start_point + end_point) / 2
         parent_np = block.lane_line_node_path

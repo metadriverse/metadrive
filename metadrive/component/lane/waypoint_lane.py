@@ -7,9 +7,10 @@ from metadrive.component.lane.abs_lane import AbstractLane
 from metadrive.constants import LineType
 from metadrive.utils import norm
 from metadrive.utils.math_utils import wrap_to_pi
+from metadrive.utils.interpolating_line import InterpolatingLine
 
 
-class WayPointLane(AbstractLane):
+class WayPointLane(AbstractLane, InterpolatingLine):
     """
     CenterLineLane is created by giving the center line points array or way points array.
     By using this lane type, map can be constructed from Waymo/Argoverse/OpenstreetMap dataset
@@ -23,51 +24,16 @@ class WayPointLane(AbstractLane):
             speed_limit: float = 1000,
             priority: int = 0
     ):
-        super(WayPointLane, self).__init__()
+        AbstractLane.__init__(self)
+        InterpolatingLine.__init__(self, center_line_points)
         self.set_speed_limit(speed_limit)
         self.width = width
         self.forbidden = forbidden
         self.priority = priority
-        self.line_types = (LineType.BROKEN, LineType.BROKEN)
-        self.center_line_points = center_line_points
-
-        # Segment is the part between two adjacent way points
-        self.segment_property = self._get_properties()
-        self.length = sum([seg["length"] for seg in self.segment_property])
+        # waymo lane line will be processed separately
+        self.line_types = (LineType.NONE, LineType.NONE)
         self.is_straight = True if abs(self.heading_theta_at(0.1) -
                                        self.heading_theta_at(self.length - 0.1)) < np.deg2rad(10) else False
-
-    def _get_properties(self):
-        ret = []
-        for idx, p_start in enumerate(self.center_line_points[:-1]):
-            p_end = self.center_line_points[idx + 1]
-            seg_property = {
-                "length": self.points_distance(p_start, p_end),
-                "direction": self.points_direction(p_start, p_end),
-                "lateral_direction": self.points_lateral_direction(p_start, p_end),
-                "heading": self.points_heading(p_start, p_end),
-                "start_point": p_start,
-                "end_point": p_end
-            }
-            ret.append(seg_property)
-        return ret
-
-    @staticmethod
-    def points_distance(start_p, end_p):
-        return norm((end_p - start_p)[0], (end_p - start_p)[1])
-
-    @staticmethod
-    def points_direction(start_p, end_p):
-        return (end_p - start_p) / norm((end_p - start_p)[0], (end_p - start_p)[1])
-
-    @staticmethod
-    def points_lateral_direction(start_p, end_p):
-        direction = (end_p - start_p) / norm((end_p - start_p)[0], (end_p - start_p)[1])
-        return np.array([-direction[1], direction[0]])
-
-    @staticmethod
-    def points_heading(start_p, end_p):
-        return math.atan2(end_p[1] - start_p[1], end_p[0] - start_p[0])
 
     def width_at(self, longitudinal: float) -> float:
         return self.width
@@ -76,24 +42,11 @@ class WayPointLane(AbstractLane):
         """
         In rad
         """
-        accumulate_len = 0
-        for seg in self.segment_property:
-            accumulate_len += seg["length"]
-            if accumulate_len > longitudinal:
-                return seg["heading"]
-
-        return seg["heading"]
+        return self.get_heading_theta(longitudinal)
 
     def position(self, longitudinal: float, lateral: float) -> np.ndarray:
-        accumulate_len = 0
-        for seg in self.segment_property:
-            if accumulate_len + 0.1 >= longitudinal:
-                return seg["start_point"] + (accumulate_len -
-                                             longitudinal) * seg["direction"] + lateral * seg["lateral_direction"]
-            accumulate_len += seg["length"]
-
-        return seg["start_point"] + (longitudinal - accumulate_len +
-                                     seg["length"]) * seg["direction"] + lateral * seg["lateral_direction"]
+        point, seg = self.get_point(longitudinal, return_segment=True)
+        return point + lateral * seg["lateral_direction"]
 
     def local_coordinates(self, position: Tuple[float, float]):
         ret = []  # ret_longitude, ret_lateral, sort_key
@@ -107,21 +60,6 @@ class WayPointLane(AbstractLane):
             accumulate_len += seg["length"]
         ret.sort(key=lambda seg: seg[-1])
         return ret[0][0], ret[0][1]
-
-    def segment(self, longitudinal: float):
-        """
-        Return the segment piece on this lane of current position
-        """
-        accumulate_len = 0
-        for index, seg in enumerate(self.segment_property):
-            if accumulate_len + 0.1 >= longitudinal:
-                return self.segment_property[index]
-        return self.segment_property[index]
-
-    def lateral_direction(self, longitude):
-        lane_segment = self.segment(longitude)
-        lateral = lane_segment["lateral_direction"]
-        return lateral
 
     def is_in_same_direction(self, another_lane):
         """
