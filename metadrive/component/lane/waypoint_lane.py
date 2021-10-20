@@ -14,13 +14,14 @@ class WayPointLane(AbstractLane):
     CenterLineLane is created by giving the center line points array or way points array.
     By using this lane type, map can be constructed from Waymo/Argoverse/OpenstreetMap dataset
     """
+
     def __init__(
-        self,
-        center_line_points: Union[list, np.ndarray],
-        width: float,
-        forbidden: bool = False,
-        speed_limit: float = 1000,
-        priority: int = 0
+            self,
+            center_line_points: Union[list, np.ndarray],
+            width: float,
+            forbidden: bool = False,
+            speed_limit: float = 1000,
+            priority: int = 0
     ):
         super(WayPointLane, self).__init__()
         self.set_speed_limit(speed_limit)
@@ -117,6 +118,11 @@ class WayPointLane(AbstractLane):
                 return self.segment_property[index]
         return self.segment_property[index]
 
+    def lateral_direction(self, longitude):
+        lane_segment = self.segment(longitude)
+        lateral = lane_segment["lateral_direction"]
+        return lateral
+
     def is_in_same_direction(self, another_lane):
         """
         Return True if two lane is in same direction
@@ -130,15 +136,3 @@ class WayPointLane(AbstractLane):
         return True if abs(wrap_to_pi(my_end_heading) - wrap_to_pi(another_end_heading)) < 0.2 and abs(
             wrap_to_pi(my_start_heading) - wrap_to_pi(another_start_heading)
         ) < 0.2 else False
-
-    def construct_lane_in_block(self, block, lane_index=None):
-        for index, self in enumerate(lanes):
-            for segment in self.segment_property:
-                lane_start = segment["start_point"]
-                lane_end = segment["end_point"]
-                middle = (lane_start + lane_end) / 2
-                direction_v = lane_end - middle
-                theta = -math.atan2(direction_v[1], direction_v[0])
-                width = self.width_at(0)
-                length = segment["length"]
-                self.construct_lane_segment(block, middle, width, length, theta, lane_index)

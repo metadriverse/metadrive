@@ -278,3 +278,18 @@ class ObjectState:
 
 
 REPLAY_DONE = "replay_done"
+
+
+class WaymoLaneProperty:
+    TYPE = "center_lane"
+    CENTER_POINTS = "polyline"
+    LEFT_BOUNDARIES = "left_boundaries"
+    RIGHT_BOUNDARIES = "right_boundaries"
+    LEFT_NEIGHBORS = "left_neighbors"
+    RIGHT_NEIGHBORS = "right_neighbors"
+    ENTRY = "entry"
+    EXIT = "exit"
+
+    @staticmethod
+    def get_line_type_and_line_color(waymo_type):
+        pass

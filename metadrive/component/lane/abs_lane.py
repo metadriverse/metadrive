@@ -23,6 +23,10 @@ class AbstractLane:
     DEFAULT_WIDTH: float = 4
     line_types: Tuple[LineType, LineType]
     line_colors = [LineColor.GREY, LineColor.GREY]
+    length = 0
+    start = None
+    end = None
+    VEHICLE_LENGTH = 4
 
     def __init__(self):
         self.speed_limit = 1000  # should be set manually
@@ -109,12 +113,17 @@ class AbstractLane:
         return False
 
     def construct_lane_in_block(self, block, lane_index=None):
-        """
-        Every lane should implement this method for constructing it in the panda3D world
-        """
-        raise NotImplementedError
+        segment_num = int(self.length / DrivableAreaProperty.LANE_LINE_SEGMENT_LENGTH)
+        for i in range(segment_num):
+            middle = self.position(self.length * (i + .5) / segment_num, 0)
+            end = self.position(self.length * (i + 1) / segment_num, 0)
+            direction_v = end - middle
+            theta = -math.atan2(direction_v[1], direction_v[0])
+            width = self.width_at(0) + DrivableAreaProperty.SIDEWALK_LINE_DIST * 2
+            length = self.length
+            self.construct_lane_segment(block, middle, width, length * 1.3 / segment_num, theta, lane_index)
 
-    def construct_lane_line_in_block(self, block, construct_left_right=[True, True]):
+    def construct_lane_line_in_block(self, block, construct_left_right=(True, True)):
         """
         Construct lane line in the Panda3d world for getting contact information
         """
@@ -134,7 +143,7 @@ class AbstractLane:
             else:
                 raise ValueError(
                     "You have to modify this cuntion and implement a constructing method for line type: {}".
-                    format(line_type)
+                        format(line_type)
                 )
 
     def construct_broken_line(self, block, lateral, line_color, line_type):
@@ -224,7 +233,7 @@ class AbstractLane:
 
     @staticmethod
     def construct_lane_line_segment(
-        block, start_point, end_point, color: Vec4, line_type: LineType, last_segment=False
+            block, start_point, end_point, color: Vec4, line_type: LineType, last_segment=False
     ):
         length = norm(end_point[0] - start_point[0], end_point[1] - start_point[1])
         middle = (start_point + end_point) / 2
