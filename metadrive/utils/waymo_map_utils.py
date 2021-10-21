@@ -1,6 +1,8 @@
 from matplotlib.pyplot import figure
 import matplotlib.pyplot as plt
+from enum import Enum
 from metadrive.engine.asset_loader import AssetLoader
+
 try:
     import tensorflow as tf
 except ImportError:
@@ -9,6 +11,34 @@ from metadrive.utils.waymo_utils.protos import scenario_pb2
 import os
 import pickle
 import numpy as np
+
+
+class RoadLineType(Enum):
+    UNKNOWN = 0
+    BROKEN_SINGLE_WHITE = 1
+    SOLID_SINGLE_WHITE = 2
+    SOLID_DOUBLE_WHITE = 3
+    BROKEN_SINGLE_YELLOW = 4
+    BROKEN_DOUBLE_YELLOW = 5
+    SOLID_SINGLE_YELLOW = 6
+    SOLID_DOUBLE_YELLOW = 7
+    PASSING_DOUBLE_YELLOW = 8
+
+
+class RoadEdgeType(Enum):
+    UNKNOWN = 0
+    # Physical road boundary that doesn't have traffic on the other side (e.g., a curb or the k-rail on the right side of a freeway).
+    BOUNDARY = 1
+    # Physical road boundary that separates the car from other traffic (e.g. a k-rail or an island).
+    MEDIAN = 2
+
+
+class AgentType(Enum):
+    UNSET = 0
+    VEHICLE = 1
+    PEDESTRIAN = 2
+    CYCLIST = 3
+    OTHER = 4
 
 
 def extract_poly(message):
@@ -20,27 +50,32 @@ def extract_poly(message):
 
 
 def extract_boundaries(fb):
-
-    b = np.zeros([len(fb), 4], dtype='int64')
+    b = []
+    # b = np.zeros([len(fb), 4], dtype='int64')
     for k in range(len(fb)):
-        b[k, 0] = fb[k].lane_start_index
-        b[k, 1] = fb[k].lane_end_index
-        b[k, 2] = fb[k].boundary_feature_id
-        b[k, 3] = fb[k].boundary_type
+        c = dict()
+        c['index'] = [fb[k].lane_start_index, fb[k].lane_end_index]
+        c['type'] = RoadLineType(fb[k].boundary_type)
+        c['id'] = fb[k].boundary_feature_id
+        b.append(c)
+
     return b
 
 
 def extract_neighbors(fb):
-    nb_list = []
+    nbs = []
     for k in range(len(fb)):
         nb = dict()
         nb['id'] = fb[k].feature_id
         nb['indexes'] = [
             fb[k].self_start_index, fb[k].self_end_index, fb[k].neighbor_start_index, fb[k].neighbor_end_index
         ]
+        nb['indexes'] = [fb[k].self_start_index, fb[k].self_end_index, fb[k].neighbor_start_index,
+                         fb[k].neighbor_end_index]
         nb['boundaries'] = extract_boundaries(fb[k].boundaries)
-        nb_list.append(nb)
-    return nb_list
+        nb['id'] = fb[k].feature_id
+        nbs.append(nb)
+    return nbs
 
 
 def extract_center(f):
@@ -71,17 +106,15 @@ def extract_center(f):
 def extract_line(f):
     line = dict()
     f = f.road_line
-    line['type'] = 'road_line'
+    line['type'] = RoadLineType(f.type)
     line['polyline'] = extract_poly(f.polyline)
-
     return line
 
 
 def extract_edge(f):
     edge = dict()
-
     f = f.road_edge
-    edge['type'] = 'road_edge'
+    edge['type'] = RoadEdgeType(f.type)
     edge['polyline'] = extract_poly(f.polyline)
 
     return edge
@@ -118,8 +151,7 @@ def extract_tracks(f):
 
     for i in range(len(f)):
         agent = dict()
-        agent['type'] = f[i].object_type
-
+        agent['type'] = AgentType(f[i].object_type)
         x = [state.center_x for state in f[i].states]
         y = [state.center_y for state in f[i].states]
         z = [state.center_z for state in f[i].states]
@@ -194,6 +226,52 @@ def draw_waymo_map(data):
     plt.show()
 
 
+# return the nearest point's index of the line
+def nearest_point(point, line):
+    dist = np.square(line - point)
+    dist = np.sqrt(dist[:, 0] + dist[:, 1])
+    return np.argmin(dist)
+
+
+def extract_width(map, polyline, boundary):
+    l_width = np.zeros(polyline.shape[0])
+    for b in boundary:
+        lb = map[b['id']]
+        b_polyline = lb['polyline'][:, :2]
+
+        start_p = polyline[b['index'][0]]
+        start_index = nearest_point(start_p, b_polyline)
+        seg_len = b['index'][1] - b['index'][0]
+        end_index = min(start_index + seg_len, lb['polyline'].shape[0] - 1)
+        leng = min(end_index - start_index, b['index'][1] - b['index'][0]) + 1
+        self_range = range(b['index'][0], b['index'][0] + leng)
+        bound_range = range(start_index, start_index + leng)
+        centerLane = polyline[self_range]
+        bound = b_polyline[bound_range]
+        dist = np.square(centerLane - bound)
+        dist = np.sqrt(dist[:, 0] + dist[:, 1])
+        l_width[self_range] = dist
+    return l_width
+
+
+def compute_width(map):
+    for key in map.keys():
+        if not 'type' in map[key] or map[key]['type'] != 'center_lane':
+            continue
+        lane = map[key]
+
+        width = np.zeros((lane['polyline'].shape[0], 2))
+
+        width[:, 0] = extract_width(map, lane['polyline'][:, :2], lane['left_boundaries'])
+        width[:, 1] = extract_width(map, lane['polyline'][:, :2], lane['right_boundaries'])
+
+        width[width[:, 0] == 0, 0] = width[width[:, 0] == 0, 1]
+        width[width[:, 1] == 0, 1] = width[width[:, 1] == 0, 0]
+
+        lane['width'] = width
+    return
+
+
 # parse raw data from input path to output path
 def parse_data(inut_path, output_path):
     cnt = 0
@@ -215,6 +293,7 @@ def parse_data(inut_path, output_path):
             # scene['interact_tracks'] = [x for x in scenario.objects_of_interest]
             # scene['motion_tracks'] = [x for x in scenario.tracks_to_predict]
             scene['map'] = extract_map(scenario.map_features)
+            compute_width(scene['map'])
             p = os.path.join(output_path, f'{cnt}.pkl')
             with open(p, 'wb') as f:
                 pickle.dump(scene, f)
@@ -233,3 +312,4 @@ if __name__ == "__main__":
     # file_path = AssetLoader.file_path("waymo", "test.pkl", linux_style=False)
     # data = read_waymo_data(file_path)
     # draw_waymo_map(data)
+
