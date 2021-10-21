@@ -43,7 +43,12 @@ if __name__ == "__main__":
     from metadrive.utils.waymo_map_utils import RoadEdgeType
     from metadrive.utils.waymo_map_utils import RoadLineType
 
-    file_path = AssetLoader.file_path("waymo", "processed", "499.pkl", linux_style=False)
+    # touch these items so that pickle can work
+    _ = AgentType
+    _ = RoadLineType
+    _ = RoadEdgeType
+
+    file_path = AssetLoader.file_path("waymo", "test.pkl", return_raw_style=False)
     data = read_waymo_data(file_path)
 
     default_config = MetaDriveEnv.default_config()

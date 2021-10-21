@@ -11,7 +11,8 @@ class AssetLoader:
     Load model for each element when render is needed.
     """
     loader = None
-    asset_path = pathlib.PurePosixPath(__file__).parent.parent.joinpath("assets") if not is_win() else pathlib.Path(__file__).resolve(
+    asset_path = pathlib.PurePosixPath(__file__).parent.parent.joinpath("assets") if not is_win() else pathlib.Path(
+        __file__).resolve(
     ).parent.parent.joinpath("assets")
 
     @staticmethod
@@ -37,15 +38,17 @@ class AssetLoader:
         return panda_path
 
     @staticmethod
-    def file_path(*path_string, linux_style=True):
+    def file_path(*path_string, return_raw_style=True):
         """
         Usage is the same as path.join(dir_1,dir_2,file_name)
         :param path_string: a tuple
+        :param return_raw_style: it will not return raw style and not do any style converting
         :return: file path used to load asset
         """
         path = AssetLoader.asset_path.joinpath(*path_string)
         return AssetLoader.windows_style2unix_style(path
-                                                    ) if sys.platform.startswith("win") and linux_style else str(path)
+                                                    ) if sys.platform.startswith("win") and return_raw_style else str(
+            path)
 
     @classmethod
     def load_model(cls, file_path):
