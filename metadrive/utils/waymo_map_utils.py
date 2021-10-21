@@ -24,6 +24,10 @@ class RoadLineType(Enum):
     SOLID_DOUBLE_YELLOW = 7
     PASSING_DOUBLE_YELLOW = 8
 
+    @staticmethod
+    def is_road_line(line):
+        return True if line.__class__ == RoadLineType else False
+
 
 class RoadEdgeType(Enum):
     UNKNOWN = 0
@@ -31,6 +35,10 @@ class RoadEdgeType(Enum):
     BOUNDARY = 1
     # Physical road boundary that separates the car from other traffic (e.g. a k-rail or an island).
     MEDIAN = 2
+
+    @staticmethod
+    def is_road_edge(edge):
+        return True if edge.__class__ == RoadEdgeType else False
 
 
 class AgentType(Enum):
@@ -302,14 +310,12 @@ def parse_data(inut_path, output_path):
 
 
 if __name__ == "__main__":
-
-    raw_data_path = AssetLoader.file_path("waymo","raw",  linux_style=False)
-    processed_data_path = AssetLoader.file_path("waymo","processed", linux_style=False)
+    raw_data_path = AssetLoader.file_path("waymo", "raw", linux_style=False)
+    processed_data_path = AssetLoader.file_path("waymo", "processed", linux_style=False)
     # parse raw data from input path to output path,
     # there is 1000 raw data in google cloud, each of them produce about 500 pkl file
-    parse_data(raw_data_path,processed_data_path)
+    parse_data(raw_data_path, processed_data_path)
 
     # file_path = AssetLoader.file_path("waymo", "test.pkl", linux_style=False)
     # data = read_waymo_data(file_path)
     # draw_waymo_map(data)
-

@@ -31,20 +31,21 @@ class WaymoBlock(BaseBlock):
         """
         super(WaymoBlock, self).create_in_world()
         for lane_id, data in self.waymo_map_data.items():
-            if data.get("type", False).__class__ in [RoadLineType, RoadEdgeType]:
+            type = data.get("type", None)
+            if RoadLineType.is_road_line(type) and type == RoadLineType.SOLID_DOUBLE_WHITE:
                 if len(data[WaymoLaneProperty.POLYLINE]) <= 1:
                     continue
                 self.construct_continuous_waymo_line([p[:-1] for p in data[WaymoLaneProperty.POLYLINE]])
 
     def construct_continuous_waymo_line(self, polyline):
         line = InterpolatingLine(polyline)
-        segment_num = int(line.length / DrivableAreaProperty.LANE_SEGMENT_LENGTH)
+        segment_num = int(line.length / DrivableAreaProperty.STRIPE_LENGTH)
         for segment in range(segment_num):
-            start = line.get_point(DrivableAreaProperty.LANE_SEGMENT_LENGTH * segment)
+            start = line.get_point(DrivableAreaProperty.STRIPE_LENGTH * segment)
             if segment == segment_num - 1:
                 end = line.get_point(line.length)
             else:
-                end = line.get_point((segment + 1) * DrivableAreaProperty.LANE_SEGMENT_LENGTH)
+                end = line.get_point((segment + 1) * DrivableAreaProperty.STRIPE_LENGTH)
             WaymoLane.construct_lane_line_segment(self, start, end, LineColor.GREY, LineType.CONTINUOUS)
 
     def construct_broken_waymo_line(self, polyline):
