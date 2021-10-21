@@ -9,7 +9,6 @@ from metadrive.utils.waymo_map_utils import RoadLineType, RoadEdgeType
 
 
 class WaymoBlock(BaseBlock):
-
     def __init__(self, block_index: int, global_network, random_seed, waymo_map_data: dict):
         self.waymo_map_data = waymo_map_data
         super(WaymoBlock, self).__init__(block_index, global_network, random_seed)
@@ -36,13 +35,15 @@ class WaymoBlock(BaseBlock):
                 if len(data[WaymoLaneProperty.POLYLINE]) <= 1:
                     continue
                 if RoadLineType.is_broken(type):
-                    self.construct_broken_waymo_line([p[:-1] for p in data[WaymoLaneProperty.POLYLINE]],
-                                                     LineColor.YELLOW if RoadLineType.is_yellow(
-                                                         type) else LineColor.GREY)
+                    self.construct_broken_waymo_line(
+                        [p[:-1] for p in data[WaymoLaneProperty.POLYLINE]],
+                        LineColor.YELLOW if RoadLineType.is_yellow(type) else LineColor.GREY
+                    )
                 else:
-                    self.construct_continuous_waymo_line([p[:-1] for p in data[WaymoLaneProperty.POLYLINE]],
-                                                         LineColor.YELLOW if RoadLineType.is_yellow(
-                                                             type) else LineColor.GREY)
+                    self.construct_continuous_waymo_line(
+                        [p[:-1] for p in data[WaymoLaneProperty.POLYLINE]],
+                        LineColor.YELLOW if RoadLineType.is_yellow(type) else LineColor.GREY
+                    )
             elif RoadEdgeType.is_road_edge(type) and RoadEdgeType.is_sidewalk(type):
                 self.construct_waymo_sidewalk([p[:-1] for p in data[WaymoLaneProperty.POLYLINE]])
 
@@ -62,8 +63,7 @@ class WaymoBlock(BaseBlock):
         segment_num = int(line.length / (2 * DrivableAreaProperty.STRIPE_LENGTH))
         for segment in range(segment_num):
             start = line.get_point(segment * DrivableAreaProperty.STRIPE_LENGTH * 2)
-            end = line.get_point(
-                segment * DrivableAreaProperty.STRIPE_LENGTH * 2 + DrivableAreaProperty.STRIPE_LENGTH)
+            end = line.get_point(segment * DrivableAreaProperty.STRIPE_LENGTH * 2 + DrivableAreaProperty.STRIPE_LENGTH)
             if segment == segment_num - 1:
                 end = line.get_point(line.length - DrivableAreaProperty.STRIPE_LENGTH)
             WaymoLane.construct_lane_line_segment(self, start, end, color, LineType.BROKEN)
@@ -73,11 +73,9 @@ class WaymoBlock(BaseBlock):
         seg_len = 0.5
         segment_num = int(line.length / seg_len)
         for segment in range(segment_num):
-            lane_start = line.get_point(segment * seg_len,
-                                        -DrivableAreaProperty.SIDEWALK_WIDTH)
+            lane_start = line.get_point(segment * seg_len, -DrivableAreaProperty.SIDEWALK_WIDTH)
             if segment != segment_num - 1:
-                lane_end = line.get_point((segment + 1) * seg_len,
-                                          -DrivableAreaProperty.SIDEWALK_WIDTH)
+                lane_end = line.get_point((segment + 1) * seg_len, -DrivableAreaProperty.SIDEWALK_WIDTH)
             else:
                 lane_end = line.get_point(line.length, -DrivableAreaProperty.SIDEWALK_WIDTH)
             WaymoLane.construct_sidewalk_segment(self, lane_start, lane_end, length=seg_len * 2)

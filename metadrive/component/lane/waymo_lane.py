@@ -5,13 +5,14 @@ from metadrive.constants import WaymoLaneProperty
 
 
 class WaymoLane(WayPointLane):
-
     def __init__(self, waymo_lane_id: int, waymo_map_data: dict):
         """
         Extract the lane information of one waymo lane
         """
         super(WaymoLane, self).__init__(
-            [p[:-1] for p in waymo_map_data[waymo_lane_id][WaymoLaneProperty.POLYLINE]], max(sum(waymo_map_data[waymo_lane_id]["width"][0]), 4))
+            [p[:-1] for p in waymo_map_data[waymo_lane_id][WaymoLaneProperty.POLYLINE]],
+            max(sum(waymo_map_data[waymo_lane_id]["width"][0]), 4)
+        )
         self.index = waymo_lane_id
 
     def get_lane_width(self, waymo_lane_id, waymo_map_data):
@@ -26,6 +27,7 @@ class WaymoLane(WayPointLane):
         #
         # elif left_n is not None
         return 4
+
 
 if __name__ == "__main__":
     file_path = AssetLoader.file_path("waymo", "test.pkl", return_raw_style=False)

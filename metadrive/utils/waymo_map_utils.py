@@ -32,17 +32,16 @@ class RoadLineType(Enum):
 
     @staticmethod
     def is_yellow(line):
-        return True if line in [RoadLineType.SOLID_DOUBLE_YELLOW,
-                                RoadLineType.PASSING_DOUBLE_YELLOW,
-                                RoadLineType.SOLID_SINGLE_YELLOW,
-                                RoadLineType.BROKEN_DOUBLE_YELLOW,
-                                RoadLineType.BROKEN_SINGLE_YELLOW] else False
+        return True if line in [
+            RoadLineType.SOLID_DOUBLE_YELLOW, RoadLineType.PASSING_DOUBLE_YELLOW, RoadLineType.SOLID_SINGLE_YELLOW,
+            RoadLineType.BROKEN_DOUBLE_YELLOW, RoadLineType.BROKEN_SINGLE_YELLOW
+        ] else False
 
     @staticmethod
     def is_broken(line):
-        return True if line in [RoadLineType.BROKEN_DOUBLE_YELLOW,
-                                RoadLineType.BROKEN_SINGLE_YELLOW,
-                                RoadLineType.BROKEN_SINGLE_WHITE] else False
+        return True if line in [
+            RoadLineType.BROKEN_DOUBLE_YELLOW, RoadLineType.BROKEN_SINGLE_YELLOW, RoadLineType.BROKEN_SINGLE_WHITE
+        ] else False
 
 
 class RoadEdgeType(Enum):
@@ -98,8 +97,9 @@ def extract_neighbors(fb):
         nb['indexes'] = [
             fb[k].self_start_index, fb[k].self_end_index, fb[k].neighbor_start_index, fb[k].neighbor_end_index
         ]
-        nb['indexes'] = [fb[k].self_start_index, fb[k].self_end_index, fb[k].neighbor_start_index,
-                         fb[k].neighbor_end_index]
+        nb['indexes'] = [
+            fb[k].self_start_index, fb[k].self_end_index, fb[k].neighbor_start_index, fb[k].neighbor_end_index
+        ]
         nb['boundaries'] = extract_boundaries(fb[k].boundaries)
         nb['id'] = fb[k].feature_id
         nbs.append(nb)

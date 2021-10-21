@@ -7,7 +7,6 @@ class InterpolatingLine:
     """
     This class provides point set with interpolating function
     """
-
     def __init__(self, points):
         self.points = points
         self.segment_property = self._get_properties()
@@ -55,7 +54,8 @@ class InterpolatingLine:
                 break
             accumulate_len += seg["length"]
         if lateral is not None:
-            return (seg["start_point"] + (longitudinal - accumulate_len + seg["length"]) * seg["direction"]) + lateral * seg["lateral_direction"]
+            return (seg["start_point"] + (longitudinal - accumulate_len + seg["length"]) *
+                    seg["direction"]) + lateral * seg["lateral_direction"]
         else:
             return seg["start_point"] + (longitudinal - accumulate_len + seg["length"]) * seg["direction"]
 

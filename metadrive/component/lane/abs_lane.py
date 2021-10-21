@@ -146,7 +146,7 @@ class AbstractLane:
             else:
                 raise ValueError(
                     "You have to modify this cuntion and implement a constructing method for line type: {}".
-                        format(line_type)
+                    format(line_type)
                 )
 
     def construct_broken_line(self, block, lateral, line_color, line_type):
@@ -235,8 +235,7 @@ class AbstractLane:
             card.setTexture(block.ts_color, block.road_texture)
 
     @staticmethod
-    def construct_lane_line_segment(
-            block, start_point, end_point, color: Vec4, line_type: LineType):
+    def construct_lane_line_segment(block, start_point, end_point, color: Vec4, line_type: LineType):
         length = norm(end_point[0] - start_point[0], end_point[1] - start_point[1])
         middle = (start_point + end_point) / 2
         parent_np = block.lane_line_node_path

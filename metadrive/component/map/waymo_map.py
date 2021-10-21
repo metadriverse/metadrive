@@ -6,7 +6,6 @@ from metadrive.utils.waymo_map_utils import read_waymo_data
 
 
 class WaymoMap(BaseMap):
-
     def __init__(self, waymo_data):
         self.map_id = waymo_data["id"]
         self.waymo_data = waymo_data

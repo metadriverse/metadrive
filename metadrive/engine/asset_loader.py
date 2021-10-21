@@ -11,9 +11,8 @@ class AssetLoader:
     Load model for each element when render is needed.
     """
     loader = None
-    asset_path = pathlib.PurePosixPath(__file__).parent.parent.joinpath("assets") if not is_win() else pathlib.Path(
-        __file__).resolve(
-    ).parent.parent.joinpath("assets")
+    asset_path = pathlib.PurePosixPath(__file__).parent.parent.joinpath("assets") if not is_win(
+    ) else pathlib.Path(__file__).resolve().parent.parent.joinpath("assets")
 
     @staticmethod
     def init_loader(engine):
@@ -46,9 +45,9 @@ class AssetLoader:
         :return: file path used to load asset
         """
         path = AssetLoader.asset_path.joinpath(*path_string)
-        return AssetLoader.windows_style2unix_style(path
-                                                    ) if sys.platform.startswith("win") and return_raw_style else str(
-            path)
+        return AssetLoader.windows_style2unix_style(
+            path
+        ) if sys.platform.startswith("win") and return_raw_style else str(path)
 
     @classmethod
     def load_model(cls, file_path):
