@@ -234,7 +234,7 @@ class DrivableAreaProperty:
     SOCKET_NUM = None
 
     # visualization size property
-    CIRCULAR_SEGMENT_LENGTH = 4
+    LANE_SEGMENT_LENGTH = 4
     STRIPE_LENGTH = 1.5
     LANE_LINE_WIDTH = 0.15
     LANE_LINE_THICKNESS = 0.01
@@ -249,7 +249,7 @@ class DrivableAreaProperty:
     NAVI_COLOR = (0.709, 0.09, 0, 1)
 
     # for detection
-    LANE_LINE_GHOST_HEIGHT = 0.4
+    LANE_LINE_GHOST_HEIGHT = 1.0
 
     # lane line collision group
     CONTINUOUS_COLLISION_MASK = CollisionGroup.ContinuousLaneLine
@@ -278,3 +278,20 @@ class ObjectState:
 
 
 REPLAY_DONE = "replay_done"
+
+
+class WaymoLaneProperty:
+    LANE_TYPE = "center_lane"
+    LANE_LINE_TYPE = "road_line"
+    LANE_EDGE_TYPE = "road_edge"
+    POLYLINE = "polyline"
+    LEFT_BOUNDARIES = "left_boundaries"
+    RIGHT_BOUNDARIES = "right_boundaries"
+    LEFT_NEIGHBORS = "left_neighbors"
+    RIGHT_NEIGHBORS = "right_neighbors"
+    ENTRY = "entry"
+    EXIT = "exit"
+
+    @staticmethod
+    def get_line_type_and_line_color(waymo_type):
+        pass

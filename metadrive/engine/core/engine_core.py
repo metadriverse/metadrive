@@ -1,4 +1,5 @@
 import logging
+import sys
 import time
 from typing import Optional, Union
 
@@ -264,7 +265,7 @@ class EngineCore(ShowBase.ShowBase):
 
             self.accept("h", self.toggle_help_message)
             self.accept("f", self.force_fps.toggle)
-
+            self.accept("escape", sys.exit)
         else:
             self.on_screen_message = None
 

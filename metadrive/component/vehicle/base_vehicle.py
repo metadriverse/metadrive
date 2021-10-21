@@ -431,8 +431,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             else:
                 lateral = target_lane.center - self.position
         elif isinstance(target_lane, WayPointLane):
-            lane_segment = target_lane.segment(target_lane.local_coordinates(self.position)[0])
-            lateral = lane_segment["lateral_direction"]
+            lateral = target_lane.lateral_direction(target_lane.local_coordinates(self.position)[0])
 
         lateral_norm = norm(lateral[0], lateral[1])
         forward_direction = self.heading
