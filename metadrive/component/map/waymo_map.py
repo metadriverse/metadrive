@@ -30,6 +30,9 @@ class WaymoMap(BaseMap):
 if __name__ == "__main__":
     from metadrive.engine.engine_utils import initialize_engine
     from metadrive.envs.metadrive_env import MetaDriveEnv
+    from metadrive.utils.waymo_map_utils import AgentType
+    from metadrive.utils.waymo_map_utils import RoadEdgeType
+    from metadrive.utils.waymo_map_utils import RoadLineType
 
     file_path = AssetLoader.file_path("waymo", "test.pkl", linux_style=False)
     data = read_waymo_data(file_path)

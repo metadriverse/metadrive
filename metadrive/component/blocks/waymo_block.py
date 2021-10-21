@@ -1,4 +1,5 @@
 from metadrive.component.blocks.base_block import BaseBlock
+from metadrive.utils.waymo_map_utils import RoadLineType, RoadEdgeType
 from metadrive.constants import LineType, LineColor
 from metadrive.constants import DrivableAreaProperty
 from metadrive.utils.interpolating_line import InterpolatingLine
@@ -30,7 +31,7 @@ class WaymoBlock(BaseBlock):
         """
         super(WaymoBlock, self).create_in_world()
         for lane_id, data in self.waymo_map_data.items():
-            if data.get("type", False) in [WaymoLaneProperty.LANE_LINE_TYPE, WaymoLaneProperty.LANE_EDGE_TYPE]:
+            if data.get("type", False).__class__ in [RoadLineType, RoadEdgeType]:
                 if len(data[WaymoLaneProperty.POLYLINE]) <= 1:
                     continue
                 self.construct_continuous_waymo_line([p[:-1] for p in data[WaymoLaneProperty.POLYLINE]])

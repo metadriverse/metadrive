@@ -11,7 +11,7 @@ class WaymoLane(WayPointLane):
         Extract the lane information of one waymo lane
         """
         super(WaymoLane, self).__init__(
-            [p[:-1] for p in waymo_map_data[waymo_lane_id][WaymoLaneProperty.POLYLINE]], 4)
+            [p[:-1] for p in waymo_map_data[waymo_lane_id][WaymoLaneProperty.POLYLINE]], max(sum(waymo_map_data[waymo_lane_id]["width"][0]), 4))
         self.index = waymo_lane_id
 
     def get_lane_width(self, waymo_lane_id, waymo_map_data):
