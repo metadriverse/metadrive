@@ -1,13 +1,12 @@
-import math
 from typing import Tuple, Union
+from metadrive.utils.math_utils import get_points_bounding_box
 
 import numpy as np
 
 from metadrive.component.lane.abs_lane import AbstractLane
 from metadrive.constants import LineType
-from metadrive.utils import norm
-from metadrive.utils.math_utils import wrap_to_pi
 from metadrive.utils.interpolating_line import InterpolatingLine
+from metadrive.utils.math_utils import wrap_to_pi
 
 
 class WayPointLane(AbstractLane, InterpolatingLine):
@@ -26,6 +25,7 @@ class WayPointLane(AbstractLane, InterpolatingLine):
     ):
         AbstractLane.__init__(self)
         InterpolatingLine.__init__(self, center_line_points)
+        self._bounding_box = get_points_bounding_box(center_line_points)
         self.set_speed_limit(speed_limit)
         self.width = width
         self.forbidden = forbidden
@@ -45,8 +45,7 @@ class WayPointLane(AbstractLane, InterpolatingLine):
         return self.get_heading_theta(longitudinal)
 
     def position(self, longitudinal: float, lateral: float) -> np.ndarray:
-        point, seg = self.get_point(longitudinal, return_segment=True)
-        return point + lateral * seg["lateral_direction"]
+        return self.get_point(longitudinal, lateral)
 
     def local_coordinates(self, position: Tuple[float, float]):
         ret = []  # ret_longitude, ret_lateral, sort_key
@@ -74,3 +73,6 @@ class WayPointLane(AbstractLane, InterpolatingLine):
         return True if abs(wrap_to_pi(my_end_heading) - wrap_to_pi(another_end_heading)) < 0.2 and abs(
             wrap_to_pi(my_start_heading) - wrap_to_pi(another_start_heading)
         ) < 0.2 else False
+
+    def get_bounding_box(self):
+        return self._bounding_box

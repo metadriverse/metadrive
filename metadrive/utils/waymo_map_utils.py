@@ -1,6 +1,8 @@
-from matplotlib.pyplot import figure
-import matplotlib.pyplot as plt
 from enum import Enum
+
+import matplotlib.pyplot as plt
+from matplotlib.pyplot import figure
+
 from metadrive.engine.asset_loader import AssetLoader
 
 try:
@@ -28,6 +30,20 @@ class RoadLineType(Enum):
     def is_road_line(line):
         return True if line.__class__ == RoadLineType else False
 
+    @staticmethod
+    def is_yellow(line):
+        return True if line in [RoadLineType.SOLID_DOUBLE_YELLOW,
+                                RoadLineType.PASSING_DOUBLE_YELLOW,
+                                RoadLineType.SOLID_SINGLE_YELLOW,
+                                RoadLineType.BROKEN_DOUBLE_YELLOW,
+                                RoadLineType.BROKEN_SINGLE_YELLOW] else False
+
+    @staticmethod
+    def is_broken(line):
+        return True if line in [RoadLineType.BROKEN_DOUBLE_YELLOW,
+                                RoadLineType.BROKEN_SINGLE_YELLOW,
+                                RoadLineType.BROKEN_SINGLE_WHITE] else False
+
 
 class RoadEdgeType(Enum):
     UNKNOWN = 0
@@ -39,6 +55,10 @@ class RoadEdgeType(Enum):
     @staticmethod
     def is_road_edge(edge):
         return True if edge.__class__ == RoadEdgeType else False
+
+    @staticmethod
+    def is_sidewalk(edge):
+        return True if edge == RoadEdgeType.BOUNDARY else False
 
 
 class AgentType(Enum):

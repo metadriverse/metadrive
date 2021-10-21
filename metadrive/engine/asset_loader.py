@@ -11,7 +11,7 @@ class AssetLoader:
     Load model for each element when render is needed.
     """
     loader = None
-    asset_path = pathlib.PurePosixPath(__file__).parent.parent if not is_win() else pathlib.Path(__file__).resolve(
+    asset_path = pathlib.PurePosixPath(__file__).parent.parent.joinpath("assets") if not is_win() else pathlib.Path(__file__).resolve(
     ).parent.parent.joinpath("assets")
 
     @staticmethod

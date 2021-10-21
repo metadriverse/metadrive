@@ -118,7 +118,7 @@ class SteeringWheelController(Controller):
         self.button_triangle = True if self.joystick.get_button(3) else False
         self.button_x = True if self.joystick.get_button(0) else False
 
-        hat = self.joystick.get_hat(i)
+        hat = self.joystick.get_hat(0)
         self.button_up = True if hat[-1] == 1 else False
         self.button_down = True if hat[-1] == -1 else False
         self.button_left = True if hat[0] == -1 else False

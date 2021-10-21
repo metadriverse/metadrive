@@ -3,17 +3,20 @@ from abc import ABCMeta, abstractmethod
 from typing import Tuple
 
 import numpy as np
+from panda3d.bullet import BulletBoxShape
+from panda3d.bullet import BulletGhostNode
+from panda3d.core import Vec3, LQuaternionf, CardMaker, TransparencyAttrib, NodePath
+from panda3d.core import Vec4
+
 from metadrive.constants import BodyName
 from metadrive.constants import DrivableAreaProperty
 from metadrive.constants import LineType, LineColor
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.engine.physics_node import BaseRigidBodyNode
+from metadrive.engine.physics_node import BulletRigidBodyNode
 from metadrive.utils import norm
 from metadrive.utils.coordinates_shift import panda_position
-from panda3d.bullet import BulletBoxShape
-from panda3d.bullet import BulletGhostNode
-from panda3d.core import Vec3, LQuaternionf, CardMaker, TransparencyAttrib, NodePath
-from panda3d.core import Vec4
+from metadrive.utils.math_utils import Vector
 
 
 class AbstractLane:
@@ -272,3 +275,34 @@ class AbstractLane:
             lane_line.setPos(Vec3(0, 0 - DrivableAreaProperty.LANE_LINE_GHOST_HEIGHT / 2))
             lane_line.reparentTo(body_np)
             body_np.set_color(color)
+
+    @staticmethod
+    def construct_sidewalk_segment(block, lane_start, lane_end, radius=0.0, direction=0, length=0.00):
+        middle = (lane_start + lane_end) / 2
+        length = norm(lane_end[0] - lane_start[0], lane_end[1] - lane_start[1]) if abs(length - 0.0) < 1e-1 else length
+        body_node = BulletRigidBodyNode(BodyName.Sidewalk)
+        body_node.setKinematic(False)
+        body_node.setStatic(True)
+        side_np = block.sidewalk_node_path.attachNewNode(body_node)
+        shape = BulletBoxShape(Vec3(1 / 2, 1 / 2, 1 / 2))
+        body_node.addShape(shape)
+        body_node.setIntoCollideMask(block.SIDEWALK_COLLISION_MASK)
+        block.dynamic_nodes.append(body_node)
+
+        if radius == 0:
+            factor = 1
+        else:
+            if direction == 1:
+                factor = (1 - block.SIDEWALK_LINE_DIST / radius)
+            else:
+                factor = (1 + block.SIDEWALK_WIDTH / radius) * (1 + block.SIDEWALK_LINE_DIST / radius)
+        direction_v = lane_end - lane_start
+        vertical_v = Vector((-direction_v[1], direction_v[0])) / norm(*direction_v)
+        middle += vertical_v * (block.SIDEWALK_WIDTH / 2 + block.SIDEWALK_LINE_DIST)
+        side_np.setPos(panda_position(middle, 0))
+        theta = -math.atan2(direction_v[1], direction_v[0])
+        side_np.setQuat(LQuaternionf(math.cos(theta / 2), 0, 0, math.sin(theta / 2)))
+        side_np.setScale(length * factor, block.SIDEWALK_WIDTH, block.SIDEWALK_THICKNESS * (1 + 0.1 * np.random.rand()))
+        if block.render:
+            side_np.setTexture(block.ts_color, block.side_texture)
+            block.sidewalk.instanceTo(side_np)

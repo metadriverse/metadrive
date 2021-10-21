@@ -1,9 +1,8 @@
-from metadrive.component.map.base_map import BaseMap
-from metadrive.component.lane.waypoint_lane import WayPointLane
-from metadrive.utils.waymo_map_utils import read_waymo_data
-from metadrive.engine.asset_loader import AssetLoader
-from metadrive.constants import WaymoLaneProperty
 from metadrive.component.blocks.waymo_block import WaymoBlock
+from metadrive.component.map.base_map import BaseMap
+from metadrive.engine.asset_loader import AssetLoader
+from metadrive.utils.math_utils import get_boxes_bounding_box
+from metadrive.utils.waymo_map_utils import read_waymo_data
 
 
 class WaymoMap(BaseMap):
@@ -26,6 +25,16 @@ class WaymoMap(BaseMap):
     def metadrive_position(pos):
         return pos
 
+    def get_center_point(self):
+        raise DeprecationWarning("This func is broken")
+        boxes = []
+        for _from, to_dict in self.road_network.graph.items():
+            for _to, lanes in to_dict.items():
+                for lane in lanes:
+                    boxes.append(lane.get_bounding_box())
+        x_min, x_max, y_min, y_max = get_boxes_bounding_box(boxes)
+        return x_max - x_min, y_max - y_min
+
 
 if __name__ == "__main__":
     from metadrive.engine.engine_utils import initialize_engine
@@ -34,7 +43,7 @@ if __name__ == "__main__":
     from metadrive.utils.waymo_map_utils import RoadEdgeType
     from metadrive.utils.waymo_map_utils import RoadLineType
 
-    file_path = AssetLoader.file_path("waymo", "test.pkl", linux_style=False)
+    file_path = AssetLoader.file_path("waymo", "processed", "499.pkl", linux_style=False)
     data = read_waymo_data(file_path)
 
     default_config = MetaDriveEnv.default_config()
@@ -48,7 +57,7 @@ if __name__ == "__main__":
     engine.enableMouse()
 
     # argoverse data set is as the same coordinates as panda3d
-    pos = WaymoMap.metadrive_position(data["map"][1]["polyline"][0])
+    pos = WaymoMap.metadrive_position(list(data["map"].values())[0]["polyline"][0])
     engine.main_camera.set_bird_view_pos(pos)
     while True:
         map.engine.step()

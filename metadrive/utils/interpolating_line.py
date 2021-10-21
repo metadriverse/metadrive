@@ -45,7 +45,7 @@ class InterpolatingLine:
     def points_heading(start_p, end_p):
         return math.atan2(end_p[1] - start_p[1], end_p[0] - start_p[0])
 
-    def get_point(self, longitudinal, return_segment=False):
+    def get_point(self, longitudinal, lateral=None):
         """
         Get point on this line by interpolating
         """
@@ -54,8 +54,8 @@ class InterpolatingLine:
             if accumulate_len + 0.1 >= longitudinal:
                 break
             accumulate_len += seg["length"]
-        if return_segment:
-            return (seg["start_point"] + (longitudinal - accumulate_len + seg["length"]) * seg["direction"]), seg
+        if lateral is not None:
+            return (seg["start_point"] + (longitudinal - accumulate_len + seg["length"]) * seg["direction"]) + lateral * seg["lateral_direction"]
         else:
             return seg["start_point"] + (longitudinal - accumulate_len + seg["length"]) * seg["direction"]
 
