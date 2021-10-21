@@ -5,8 +5,8 @@ if __name__ == "__main__":
     setup_logger(True)
     env = MetaDriveEnv(
         {
-            "environment_num": 100,
-            "traffic_density": .2,
+            "environment_num": 1,
+            "traffic_density": .0,
             "traffic_mode": "trigger",
             "start_seed": 22,
             # "_disable_detector_mask":True,
@@ -21,8 +21,9 @@ if __name__ == "__main__":
             "decision_repeat": 5,
             "need_inverse_traffic": True,
             "rgb_clip": True,
-            # "debug": True,
-            # "random_lane_num": True,
+            "debug": True,
+            "debug_static_world": True,
+            "random_lane_num": True,
 
             # "map_config": {
             #     Map.GENERATE_TYPE: MapGenerateMethod.BIG_BLOCK_SEQUENCE,
@@ -32,7 +33,7 @@ if __name__ == "__main__":
             # },
             "pstats": True,
             # "discrete_action": True,
-            "map": "SCrR",
+            "map": "CCOX",
             "random_traffic": False,
             "random_lane_width": True,
             "random_agent_model": True,

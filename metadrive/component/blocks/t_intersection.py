@@ -46,7 +46,7 @@ class TInterSection(InterSection):
                               ] if k != len(lanes) - 1 else [LineType.BROKEN, outside_type]
                 lane.line_types = line_types
                 if k == 0:
-                    lane.line_color = [LineColor.YELLOW, LineColor.GREY]
+                    lane.line_colors = [LineColor.YELLOW, LineColor.GREY]
                     if i == 1:
                         lane.line_types[0] = LineType.NONE
 
