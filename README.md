@@ -13,6 +13,8 @@
 <a href="https://metadrive-simulator.readthedocs.io">Documentation</a>
 |
 <a href="https://www.youtube.com/embed/3ziJPqC_-T4">Demo Video</a>
+|
+<a href="https://decisionforce.github.io/metadrive/">Website</a>
 ]
 </strong>
 </div>
