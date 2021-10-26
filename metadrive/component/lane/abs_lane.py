@@ -118,9 +118,9 @@ class AbstractLane:
     def construct_lane_in_block(self, block, lane_index=None):
         segment_num = int(self.length / DrivableAreaProperty.LANE_SEGMENT_LENGTH)
         if segment_num == 0:
-            middle = self.position(self.length/2, 0)
+            middle = self.position(self.length / 2, 0)
             end = self.position(self.length, 0)
-            theta=self.heading_theta_at(self.length/2)
+            theta = self.heading_theta_at(self.length / 2)
             width = self.width_at(0) + DrivableAreaProperty.SIDEWALK_LINE_DIST * 2
             self.construct_lane_segment(block, middle, width, self.length, theta, lane_index)
         for i in range(segment_num):
