@@ -22,7 +22,7 @@ if __name__ == "__main__":
             "need_inverse_traffic": True,
             "rgb_clip": True,
             "debug": True,
-            "debug_static_world": True,
+            # "debug_static_world": True,
             "random_lane_num": True,
 
             # "map_config": {
