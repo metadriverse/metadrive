@@ -50,9 +50,9 @@ class InterpolatingLine:
         """
         accumulate_len = 0
         for seg in self.segment_property:
+            accumulate_len += seg["length"]
             if accumulate_len + 0.1 >= longitudinal:
                 break
-            accumulate_len += seg["length"]
         if lateral is not None:
             return (seg["start_point"] + (longitudinal - accumulate_len + seg["length"]) *
                     seg["direction"]) + lateral * seg["lateral_direction"]

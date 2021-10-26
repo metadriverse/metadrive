@@ -328,6 +328,12 @@ def parse_data(inut_path, output_path):
             cnt += 1
     return
 
+def convert_polyline_to_metadrive(waymo_polyline):
+    """
+    Waymo lane is in a different coordinate system, using them after converting
+    """
+    return [np.array([p[0], -p[1]]) for p in waymo_polyline]
+
 
 if __name__ == "__main__":
     raw_data_path = AssetLoader.file_path("waymo", "raw", return_raw_style=False)

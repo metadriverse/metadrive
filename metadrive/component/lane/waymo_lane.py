@@ -1,16 +1,17 @@
 from metadrive.component.lane.waypoint_lane import WayPointLane
-from metadrive.utils.waymo_map_utils import read_waymo_data
+from metadrive.utils.waymo_map_utils import read_waymo_data, convert_polyline_to_metadrive
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.constants import WaymoLaneProperty
+import numpy as np
 
 
 class WaymoLane(WayPointLane):
     def __init__(self, waymo_lane_id: int, waymo_map_data: dict):
         """
-        Extract the lane information of one waymo lane
+        Extract the lane information of one waymo lane, and do coordinate shift
         """
         super(WaymoLane, self).__init__(
-            [p[:-1] for p in waymo_map_data[waymo_lane_id][WaymoLaneProperty.POLYLINE]],
+            convert_polyline_to_metadrive(waymo_map_data[waymo_lane_id][WaymoLaneProperty.POLYLINE]),
             max(sum(waymo_map_data[waymo_lane_id]["width"][0]), 4)
         )
         self.index = waymo_lane_id

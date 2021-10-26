@@ -18,11 +18,11 @@ class WaymoMap(BaseMap):
 
     @staticmethod
     def waymo_position(pos):
-        return pos
+        return pos[0], -pos[1]
 
     @staticmethod
     def metadrive_position(pos):
-        return pos
+        return pos[0], -pos[1]
 
     def get_center_point(self):
         raise DeprecationWarning("This func is broken")
