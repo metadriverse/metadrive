@@ -56,7 +56,6 @@ if __name__ == "__main__":
     default_config["debug_static_world"] = True
     engine = initialize_engine(default_config)
     map = WaymoMap(data)
-
     map.attach_to_world()
     engine.enableMouse()
 

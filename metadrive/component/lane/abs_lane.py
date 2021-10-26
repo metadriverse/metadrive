@@ -286,7 +286,8 @@ class AbstractLane:
             body_np.set_color(line_color)
 
     @staticmethod
-    def construct_sidewalk_segment(block, lane_start, lane_end, length_multiply=1, extra_thrust=0):
+    def construct_sidewalk_segment(block, lane_start, lane_end, length_multiply=1, extra_thrust=0, width=0):
+        width = width or block.SIDEWALK_WIDTH
         middle = (lane_start + lane_end) / 2
         length = norm(lane_end[0] - lane_start[0], lane_end[1] - lane_start[1])
         body_node = BulletRigidBodyNode(BodyName.Sidewalk)
@@ -296,7 +297,11 @@ class AbstractLane:
         shape = BulletBoxShape(Vec3(1 / 2, 1 / 2, 1 / 2))
         body_node.addShape(shape)
         body_node.setIntoCollideMask(block.SIDEWALK_COLLISION_MASK)
-        block.dynamic_nodes.append(body_node)
+        if block.render:
+            # a trick to acc off-rendering training
+            block.dynamic_nodes.append(body_node)
+        else:
+            block.static_nodes.append(body_node)
 
         direction_v = lane_end - lane_start
         if extra_thrust != 0:
@@ -305,7 +310,7 @@ class AbstractLane:
         side_np.setPos(panda_position(middle, 0))
         theta = -math.atan2(direction_v[1], direction_v[0])
         side_np.setQuat(LQuaternionf(math.cos(theta / 2), 0, 0, math.sin(theta / 2)))
-        side_np.setScale(length * length_multiply, block.SIDEWALK_WIDTH, block.SIDEWALK_THICKNESS * (1 + 0.1 * np.random.rand()))
+        side_np.setScale(length * length_multiply, width, block.SIDEWALK_THICKNESS * (1 + 0.1 * np.random.rand()))
         if block.render:
             side_np.setTexture(block.ts_color, block.side_texture)
             block.sidewalk.instanceTo(side_np)

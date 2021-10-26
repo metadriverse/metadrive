@@ -1,4 +1,8 @@
 from metadrive.component.blocks.base_block import BaseBlock
+import math
+
+import numpy as np
+from metadrive.utils.math_utils import wrap_to_pi, norm
 from metadrive.component.lane.waymo_lane import WaymoLane
 from metadrive.component.road.road import Road
 from metadrive.constants import DrivableAreaProperty
@@ -70,11 +74,22 @@ class WaymoBlock(BaseBlock):
 
     def construct_waymo_sidewalk(self, polyline):
         line = InterpolatingLine(polyline)
-        seg_len = 0.5
+        seg_len = DrivableAreaProperty.LANE_SEGMENT_LENGTH
         segment_num = int(line.length / seg_len)
+        last_theta = None
         for segment in range(segment_num):
             lane_start = line.get_point(segment * seg_len)
             lane_end = line.get_point((segment + 1) * seg_len)
             if segment == segment_num - 1:
                 lane_end = line.get_point(line.length)
-            WaymoLane.construct_sidewalk_segment(self, lane_start, lane_end)
+            direction_v = lane_end - lane_start
+            theta = -math.atan2(direction_v[1], direction_v[0])
+            factor = 1.25
+            if last_theta is not None:
+                diff=wrap_to_pi(theta)-wrap_to_pi(last_theta)
+                if diff>0:
+                    factor += np.sin(abs(diff)/2)*DrivableAreaProperty.SIDEWALK_WIDTH/norm(lane_start[0]-lane_end[0], lane_start[1]-lane_end[1])+0.15
+                else:
+                    factor -= np.sin(abs(diff)/2)*DrivableAreaProperty.SIDEWALK_WIDTH/norm(lane_start[0]-lane_end[0], lane_start[1]-lane_end[1])
+            last_theta = theta
+            WaymoLane.construct_sidewalk_segment(self, lane_start, lane_end, length_multiply=factor, extra_thrust=1)

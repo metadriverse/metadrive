@@ -77,6 +77,7 @@ class InterpolatingLine:
         """
         accumulate_len = 0
         for index, seg in enumerate(self.segment_property):
+            accumulate_len += seg["length"]
             if accumulate_len + 0.1 >= longitudinal:
                 return self.segment_property[index]
         return self.segment_property[index]
