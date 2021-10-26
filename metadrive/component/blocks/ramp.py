@@ -263,7 +263,7 @@ class OutRampOnStraight(Ramp):
         ) and no_cross
         dec_right_lane = dec_road.get_lanes(self.block_network)[-1]
         left_line_type = LineType.CONTINUOUS if self.positive_lane_num == 1 else LineType.BROKEN
-        dec_right_lane.line_types = [left_line_type, LineType.NONE]
+        dec_right_lane.line_types = [left_line_type, LineType.BROKEN]
 
         # part 0 road 1
         extend_lane = ExtendStraightLane(
