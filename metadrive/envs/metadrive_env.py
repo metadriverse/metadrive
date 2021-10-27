@@ -1,4 +1,5 @@
 import copy
+from metadrive.component.pgblock.first_block import FirstPGBlock
 import logging
 from typing import Union
 
@@ -30,11 +31,6 @@ METADRIVE_DEFAULT_CONFIG = dict(
         "exit_length": 50,
     },
 
-    # ===== Observation =====
-    use_topdown=False,  # Use top-down view
-    offscreen_render=False,
-    _disable_detector_mask=False,
-
     # ===== Traffic =====
     traffic_density=0.1,
     need_inverse_traffic=False,
@@ -58,24 +54,11 @@ METADRIVE_DEFAULT_CONFIG = dict(
     save_level=0.5,
     is_multi_agent=False,
 
-    # ===== Single-agent vehicle config =====
-    vehicle_config=dict(
-        # ===== vehicle module config =====
-        # laser num, distance, other vehicle info num
-        lidar=dict(num_lasers=240, distance=50, num_others=0, gaussian_noise=0.0, dropout_prob=0.0),
-        side_detector=dict(num_lasers=0, distance=50, gaussian_noise=0.0, dropout_prob=0.0),
-        lane_line_detector=dict(num_lasers=0, distance=20, gaussian_noise=0.0, dropout_prob=0.0),
-        show_lidar=False,
-        mini_map=(84, 84, 250),  # buffer length, width
-        rgb_camera=(84, 84),  # buffer length, width
-        depth_camera=(84, 84, True),  # buffer length, width, view_ground
-        show_side_detector=False,
-        show_lane_line_detector=False
-    ),
-    rgb_clip=True,
-    gaussian_noise=0.0,
-    dropout_prob=0.0,
-    target_vehicle_configs={DEFAULT_AGENT: dict(use_special_color=True)},
+    # ===== Agent =====
+    target_vehicle_configs={
+        DEFAULT_AGENT: dict(use_special_color=True,
+                            spawn_lane_index=(FirstPGBlock.NODE_1, FirstPGBlock.NODE_2, 0))},
+
     # ===== Reward Scheme =====
     # See: https://github.com/decisionforce/metadrive/issues/283
     success_reward=10.0,
@@ -180,8 +163,8 @@ class MetaDriveEnv(BaseEnv):
         # for compatibility
         # crash almost equals to crashing with vehicles
         done_info[TerminationState.CRASH] = (
-            done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
-            or done_info[TerminationState.CRASH_BUILDING]
+                done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
+                or done_info[TerminationState.CRASH_BUILDING]
         )
         return done, done_info
 
@@ -297,6 +280,7 @@ if __name__ == '__main__':
         assert env.observation_space.contains(obs)
         assert np.isscalar(reward)
         assert isinstance(info, dict)
+
 
     env = MetaDriveEnv()
     try:

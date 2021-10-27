@@ -4,7 +4,6 @@ from typing import Union, Dict, AnyStr, Optional, Tuple
 
 import gym
 import numpy as np
-from metadrive.component.pgblock.first_block import FirstPGBlock
 from metadrive.component.vehicle.base_vehicle import BaseVehicle
 from metadrive.constants import RENDER_MODE_NONE, DEFAULT_AGENT, REPLAY_DONE
 from metadrive.engine.base_engine import BaseEngine
@@ -72,7 +71,7 @@ BASE_DEFAULT_CONFIG = dict(
         image_source="rgb_camera",  # take effect when only when offscreen_render == True
 
         # ===== vehicle spawn and destination =====
-        spawn_lane_index=(FirstPGBlock.NODE_1, FirstPGBlock.NODE_2, 0),
+        spawn_lane_index=None,
         spawn_longitude=5.0,
         spawn_lateral=0.0,
         destination_node=None,
@@ -81,6 +80,22 @@ BASE_DEFAULT_CONFIG = dict(
         overtake_stat=False,  # we usually set to True when evaluation
         action_check=False,
         random_color=False,
+
+        # ===== vehicle module config =====
+        lidar=dict(num_lasers=240, distance=50, num_others=0, gaussian_noise=0.0, dropout_prob=0.0),
+        side_detector=dict(num_lasers=0, distance=50, gaussian_noise=0.0, dropout_prob=0.0),
+        lane_line_detector=dict(num_lasers=0, distance=20, gaussian_noise=0.0, dropout_prob=0.0),
+        show_lidar=False,
+        mini_map=(84, 84, 250),  # buffer length, width
+        rgb_camera=(84, 84),  # buffer length, width
+        depth_camera=(84, 84, True),  # buffer length, width, view_ground
+        show_side_detector=False,
+        show_lane_line_detector=False,
+
+        # NOTE: rgb_clip will be modified by env level config when initialization
+        rgb_clip=True,
+        gaussian_noise=0.0,
+        dropout_prob=0.0,
     ),
 
     # ===== Engine Core config =====
@@ -96,6 +111,12 @@ BASE_DEFAULT_CONFIG = dict(
     headless_machine_render=False,
     # turn on to profile the efficiency
     pstats=False,
+    # if need running in offscreen
+    offscreen_render=False,
+    # accelerate the lidar perception
+    _disable_detector_mask=False,
+    # clip rgb to (0, 1)
+    rgb_clip=True,
 
     # ===== Others =====
     # The maximum distance used in PGLOD. Set to None will use the default values.

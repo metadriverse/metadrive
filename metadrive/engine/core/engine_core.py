@@ -134,11 +134,6 @@ class EngineCore(ShowBase.ShowBase):
 
         super(EngineCore, self).__init__(windowType=self.mode)
 
-        # Change window size at runtime if screen too small
-        # assert int(self.global_config["use_topdown"]) + int(self.global_config["offscreen_render"]) <= 1, (
-        #     "Only one of use_topdown and offscreen_render options can be selected."
-        # )
-
         # main_window_position = (0, 0)
         if self.mode == RENDER_MODE_ONSCREEN:
             h = self.pipe.getDisplayHeight()

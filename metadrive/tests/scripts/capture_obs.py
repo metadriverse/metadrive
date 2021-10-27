@@ -34,7 +34,6 @@ if __name__ == "__main__":
             "image_source": "mini_map",
             "manual_control": True,
             "use_render": True,
-            "use_topdown": True,
             "decision_repeat": 5,
             "rgb_clip": True,
             # "debug":True,
