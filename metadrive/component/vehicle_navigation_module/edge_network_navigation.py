@@ -53,33 +53,23 @@ class EdgeNetworkNavigation(BaseNavigation):
         self._update_target_checkpoints(lane_index, long)
 
         # target_road_1 is the road segment the vehicle is driving on.
-        target_road_1_start = self.checkpoints[self._target_checkpoints_index[0]]
-        target_road_1_end = self.checkpoints[self._target_checkpoints_index[0] + 1]
-        target_lanes_1 = self.map.road_network.graph[target_road_1_start][target_road_1_end]
-        self.current_ref_lanes = target_lanes_1
-        self.current_road = Road(target_road_1_start, target_road_1_end)
+        self.current_ref_lanes = self.map.road_network.get_peer_lanes_from_index(self.current_checkpoint_lane_index)
 
         # target_road_2 is next road segment the vehicle should drive on.
-        target_road_2_start = self.checkpoints[self._target_checkpoints_index[1]]
-        target_road_2_end = self.checkpoints[self._target_checkpoints_index[1] + 1]
-        target_lanes_2 = self.map.road_network.graph[target_road_2_start][target_road_2_end]
+        self.next_ref_lanes = self.map.road_network.get_peer_lanes_from_index(self.next_checkpoint_lane_index)
 
-        if target_road_1_start == target_road_2_start:
+        if self.current_checkpoint_lane_index == self.next_checkpoint_lane_index:
             # When we are in the final road segment that there is no further road to drive on
-            self.next_road = None
             self.next_ref_lanes = None
-        else:
-            self.next_road = Road(target_road_2_start, target_road_2_end)
-            self.next_ref_lanes = target_lanes_2
 
         self._navi_info.fill(0.0)
         half = self.navigation_info_dim // 2
         self._navi_info[:half], lanes_heading1, checkpoint = self._get_info_for_checkpoint(
-            lanes_id=0, lanes=target_lanes_1, ego_vehicle=ego_vehicle
+            lanes_id=0, lanes=self.current_lane, ego_vehicle=ego_vehicle
         )
 
         self._navi_info[half:], lanes_heading2, _ = self._get_info_for_checkpoint(
-            lanes_id=1, lanes=target_lanes_2, ego_vehicle=ego_vehicle
+            lanes_id=1, lanes=self.map.road_network.get_lane(self.next_checkpoint_lane_index), ego_vehicle=ego_vehicle
         )
 
         if self._show_navi_info:  # Whether to visualize little boxes in the scene denoting the checkpoints
@@ -90,12 +80,7 @@ class EdgeNetworkNavigation(BaseNavigation):
             dest_pos = self._dest_node_path.getPos()
             self._draw_line_to_dest(start_position=ego_vehicle.position, end_position=(dest_pos[0], -dest_pos[1]))
 
-        return lane, lane_index
-
     def _update_target_checkpoints(self, ego_lane_index, ego_lane_longitude):
-        pass
-
-    def _get_info_for_checkpoint(self, lanes_id, lanes, ego_vehicle):
         pass
 
     def get_current_lateral_range(self, current_position, engine) -> float:
