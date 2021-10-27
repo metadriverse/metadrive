@@ -2,7 +2,6 @@ import re
 from typing import List, Tuple
 
 from metadrive.constants import Decoration
-from metadrive.utils.scene_utils import get_lanes_on_road
 
 LaneIndex = Tuple[str, str, int]
 Route = List[LaneIndex]
@@ -19,7 +18,7 @@ class Road:
         self.end_node = end_node
 
     def get_lanes(self, road_network):
-        return get_lanes_on_road(self, road_network)
+        return road_network.graph[self.start_node][self.end_node]
 
     def __neg__(self):
         sub_index = self.end_node.find(Road.NEGATIVE_DIR)

@@ -1,4 +1,4 @@
-from metadrive.component.blocks.base_block import BaseBlock
+from metadrive.component.block.base_block import BaseBlock
 from metadrive.component.map.base_map import BaseMap
 
 

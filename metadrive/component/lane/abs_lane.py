@@ -3,11 +3,6 @@ from abc import ABCMeta, abstractmethod
 from typing import Tuple
 
 import numpy as np
-from panda3d.bullet import BulletBoxShape
-from panda3d.bullet import BulletGhostNode
-from panda3d.core import Vec3, LQuaternionf, CardMaker, TransparencyAttrib, NodePath
-from panda3d.core import Vec4
-
 from metadrive.constants import BodyName
 from metadrive.constants import DrivableAreaProperty
 from metadrive.constants import LineType, LineColor
@@ -17,6 +12,10 @@ from metadrive.engine.physics_node import BulletRigidBodyNode
 from metadrive.utils import norm
 from metadrive.utils.coordinates_shift import panda_position
 from metadrive.utils.math_utils import Vector
+from panda3d.bullet import BulletBoxShape
+from panda3d.bullet import BulletGhostNode
+from panda3d.core import Vec3, LQuaternionf, CardMaker, TransparencyAttrib, NodePath
+from panda3d.core import Vec4
 
 
 class AbstractLane:

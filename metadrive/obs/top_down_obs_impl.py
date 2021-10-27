@@ -1,7 +1,6 @@
 from typing import List, Tuple, Union
 
 import numpy as np
-
 from metadrive.component.lane.circular_lane import CircularLane
 from metadrive.component.lane.straight_lane import StraightLane
 from metadrive.constants import LineType
@@ -352,7 +351,7 @@ class LaneGraphics:
 
     @classmethod
     def simple_draw(cls, lane, surface, color=(255, 255, 255)):
-        from metadrive.component.blocks.pg_block import PGBlock
+        from metadrive.component.pgblock.pg_block import PGBlock
         segment_num = int(lane.length / PGBlock.LANE_SEGMENT_LENGTH)
         width = lane.width
         for segment in range(segment_num):

@@ -1,5 +1,4 @@
 import math
-from metadrive.constants import DrivableAreaProperty
 from typing import Tuple
 
 from metadrive.component.lane.metadrive_lane import MetaDriveLane

@@ -1,14 +1,13 @@
-from metadrive.component.blocks.base_block import BaseBlock
 import math
 
 import numpy as np
-from metadrive.utils.math_utils import wrap_to_pi, norm
+from metadrive.component.block.base_block import BaseBlock
 from metadrive.component.lane.waymo_lane import WaymoLane
-from metadrive.component.road.road import Road
 from metadrive.constants import DrivableAreaProperty
 from metadrive.constants import LineType, LineColor
 from metadrive.constants import WaymoLaneProperty
 from metadrive.utils.interpolating_line import InterpolatingLine
+from metadrive.utils.math_utils import wrap_to_pi, norm
 from metadrive.utils.waymo_map_utils import RoadLineType, RoadEdgeType, convert_polyline_to_metadrive
 
 
@@ -25,7 +24,7 @@ class WaymoBlock(BaseBlock):
                     continue
                 waymo_lane = WaymoLane(lane_id, self.waymo_map_data)
                 waymo_lanes.append(waymo_lane)
-        self.block_network.add_road(Road("test", "test"), waymo_lanes)
+        # self.block_network.add_road(Road("test", "test"), waymo_lanes)
         return True
 
     def create_in_world(self):
@@ -97,3 +96,4 @@ class WaymoBlock(BaseBlock):
                     )
             last_theta = theta
             WaymoLane.construct_sidewalk_segment(self, lane_start, lane_end, length_multiply=factor, extra_thrust=1)
+

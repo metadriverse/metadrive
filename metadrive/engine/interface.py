@@ -2,12 +2,11 @@ import math
 import time
 
 import numpy as np
-from panda3d.core import NodePath, TextNode, PGTop, CardMaker, Vec3, LQuaternionf
-
 from metadrive.constants import RENDER_MODE_ONSCREEN, COLLISION_INFO_COLOR, COLOR, BodyName, CamMask
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.engine.core.engine_core import EngineCore
 from metadrive.engine.core.image_buffer import ImageBuffer
+from panda3d.core import NodePath, TextNode, PGTop, CardMaker, Vec3, LQuaternionf
 
 
 class Interface:

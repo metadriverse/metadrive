@@ -2,7 +2,6 @@ import copy
 from typing import Union, Any
 
 import numpy as np
-
 from metadrive.utils.utils import merge_dicts
 
 

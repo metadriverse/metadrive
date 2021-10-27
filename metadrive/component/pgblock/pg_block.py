@@ -3,9 +3,9 @@ import logging
 from collections import OrderedDict
 from typing import Union, List
 
-from metadrive.component.blocks.base_block import BaseBlock
-from metadrive.component.road.road import Road
-from metadrive.component.road.road_network import RoadNetwork
+from metadrive.component.block.base_block import BaseBlock
+from metadrive.component.road import Road
+from metadrive.component.road.road_network import NodeRoadNetwork
 
 
 class PGBlockSocket:
@@ -64,7 +64,7 @@ class PGBlock(BaseBlock):
         self,
         block_index: int,
         pre_block_socket: PGBlockSocket,
-        global_network: RoadNetwork,
+        global_network: NodeRoadNetwork,
         random_seed,
         ignore_intersection_checking=None
     ):
@@ -76,7 +76,7 @@ class PGBlock(BaseBlock):
         # block information
         assert self.SOCKET_NUM is not None, "The number of Socket should be specified when define a new block"
         if block_index == 0:
-            from metadrive.component.blocks.first_block import FirstPGBlock
+            from metadrive.component.pgblock.first_block import FirstPGBlock
             assert isinstance(self, FirstPGBlock), "only first block can use block index 0"
         elif block_index < 0:
             logging.debug("It is recommended that block index should > 1")
@@ -211,3 +211,6 @@ class PGBlock(BaseBlock):
             if lanes not in trigger_lanes:
                 trigger_lanes.append(lanes)
         return trigger_lanes
+
+    def init_block_network(self):
+        return NodeRoadNetwork()

@@ -1,10 +1,10 @@
 from panda3d.core import NodePath
 
-from metadrive.component.blocks.create_block_utils import CreateRoadFrom, CreateAdverseRoad, ExtendStraightLane
-from metadrive.component.blocks.pg_block import PGBlock, PGBlockSocket
+from metadrive.component.pgblock.create_pg_block_utils import CreateRoadFrom, CreateAdverseRoad, ExtendStraightLane
+from metadrive.component.pgblock.pg_block import PGBlock, PGBlockSocket
 from metadrive.component.lane.straight_lane import StraightLane
-from metadrive.component.road.road import Road
-from metadrive.component.road.road_network import RoadNetwork
+from metadrive.component.road import Road
+from metadrive.component.road.road_network import NodeRoadNetwork
 from metadrive.constants import Decoration, LineType
 from metadrive.engine.core.physics_world import PhysicsWorld
 from metadrive.utils.space import ParameterSpace
@@ -24,7 +24,7 @@ class FirstPGBlock(PGBlock):
 
     def __init__(
         self,
-        global_network: RoadNetwork,
+        global_network: NodeRoadNetwork,
         lane_width: float,
         lane_num: int,
         render_root_np: NodePath,

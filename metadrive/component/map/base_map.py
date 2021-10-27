@@ -1,47 +1,8 @@
-import copy
-
-import numpy as np
-
 from metadrive.base_class.base_runnable import BaseRunnable
-from metadrive.component.algorithm.BIG import BigGenerateMethod
-from metadrive.component.blocks.first_block import FirstPGBlock
-from metadrive.component.blocks.pg_block import PGBlock
-from metadrive.component.road.road import Road
-from metadrive.component.road.road_network import RoadNetwork
 from metadrive.engine.engine_utils import get_engine, get_global_config
-from metadrive.utils import Config, import_pygame
+from metadrive.utils import import_pygame
 
 pygame = import_pygame()
-
-
-def parse_map_config(easy_map_config, new_map_config, default_config):
-    assert isinstance(new_map_config, Config)
-    assert isinstance(default_config, Config)
-
-    # Return the user specified config if overwritten
-    if not default_config["map_config"].is_identical(new_map_config):
-        new_map_config = default_config["map_config"].copy(unchangeable=False).update(new_map_config)
-        assert default_config["map"] == easy_map_config
-        return new_map_config
-
-    if isinstance(easy_map_config, int):
-        new_map_config[BaseMap.GENERATE_TYPE] = BigGenerateMethod.BLOCK_NUM
-    elif isinstance(easy_map_config, str):
-        new_map_config[BaseMap.GENERATE_TYPE] = BigGenerateMethod.BLOCK_SEQUENCE
-    else:
-        raise ValueError(
-            "Unkown easy map config: {} and original map config: {}".format(easy_map_config, new_map_config)
-        )
-    new_map_config[BaseMap.GENERATE_CONFIG] = easy_map_config
-    return new_map_config
-
-
-class MapGenerateMethod:
-    BIG_BLOCK_NUM = BigGenerateMethod.BLOCK_NUM
-    BIG_BLOCK_SEQUENCE = BigGenerateMethod.BLOCK_SEQUENCE
-    BIG_SINGLE_BLOCK = BigGenerateMethod.SINGLE_BLOCK
-    PG_MAP_FILE = "pg_map_file"
-
 
 class BaseMap(BaseRunnable):
     """
@@ -79,7 +40,7 @@ class BaseMap(BaseRunnable):
         # ], "Global seed {} should equal to seed in map config {}".format(random_seed, map_config[self.SEED])
         super(BaseMap, self).__init__(config=map_config)
         self.film_size = (get_global_config()["draw_map_resolution"], get_global_config()["draw_map_resolution"])
-        self.road_network = RoadNetwork()
+        self.road_network = self.init_road_network()
 
         # A flatten representation of blocks, might cause chaos in city-level generation.
         self.blocks = []
@@ -90,8 +51,7 @@ class BaseMap(BaseRunnable):
         assert self.blocks, "The generate methods does not fill blocks!"
 
         #  a trick to optimize performance
-        self.road_network.after_init()
-        self.spawn_roads = [Road(FirstPGBlock.NODE_2, FirstPGBlock.NODE_3)]
+        self.spawn_roads = None
         self.detach_from_world()
 
     def _generate(self):
@@ -111,18 +71,7 @@ class BaseMap(BaseRunnable):
         """
         Save the generated map to map file
         """
-        assert self.blocks is not None and len(self.blocks) > 0, "Please generate Map before saving it"
-        map_config = []
-        for b in self.blocks:
-            assert isinstance(b, PGBlock), "None Set can not be saved to json file"
-            b_config = b.get_config()
-            json_config = b_config.get_serializable_dict()
-            json_config[self.BLOCK_ID] = b.ID
-            json_config[self.PRE_BLOCK_SOCKET_INDEX] = b.pre_block_socket_index
-            map_config.append(json_config)
-
-        saved_data = copy.deepcopy({self.BLOCK_SEQUENCE: map_config, "map_config": self.config.copy()})
-        return saved_data
+        raise NotImplementedError
 
     @property
     def num_blocks(self):
@@ -132,3 +81,6 @@ class BaseMap(BaseRunnable):
         for block in self.blocks:
             block.destroy()
         super(BaseMap, self).destroy()
+
+    def init_road_network(self):
+        raise NotImplementedError

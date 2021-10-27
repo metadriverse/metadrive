@@ -8,7 +8,6 @@ from typing import Tuple
 
 import gym
 import numpy as np
-
 from metadrive.component.vehicle.base_vehicle import BaseVehicle
 from metadrive.constants import Decoration, DEFAULT_AGENT, EDITION
 from metadrive.obs.observation_base import ObservationBase

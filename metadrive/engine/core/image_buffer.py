@@ -2,9 +2,8 @@ import logging
 from typing import Union, List
 
 import numpy as np
-from panda3d.core import NodePath, Vec3, Vec4, Camera, PNMImage
-
 from metadrive.constants import RENDER_MODE_ONSCREEN, BKG_COLOR
+from panda3d.core import NodePath, Vec3, Vec4, Camera, PNMImage
 
 
 class ImageBuffer:

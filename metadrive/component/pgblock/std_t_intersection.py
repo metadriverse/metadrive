@@ -1,4 +1,4 @@
-from metadrive.component.blocks.t_intersection import TInterSection
+from metadrive.component.pgblock.t_intersection import TInterSection
 from metadrive.utils.space import Parameter
 
 

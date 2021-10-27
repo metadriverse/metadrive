@@ -13,7 +13,7 @@ from metadrive.component.lane.abs_lane import AbstractLane
 from metadrive.component.lane.circular_lane import CircularLane
 from metadrive.component.lane.straight_lane import StraightLane
 from metadrive.component.lane.waypoint_lane import WayPointLane
-from metadrive.component.road.road import Road
+from metadrive.component.road import Road
 from metadrive.component.vehicle_module.depth_camera import DepthCamera
 from metadrive.component.vehicle_module.distance_detector import SideDetector, LaneLineDetector
 from metadrive.component.vehicle_module.lidar import Lidar

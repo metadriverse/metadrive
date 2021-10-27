@@ -1,5 +1,5 @@
-from metadrive.component.blocks.waymo_block import WaymoBlock
 from metadrive.component.map.base_map import BaseMap
+from metadrive.component.waymo_block.waymo_block import WaymoBlock
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.utils.math_utils import get_boxes_bounding_box
 from metadrive.utils.waymo_map_utils import read_waymo_data

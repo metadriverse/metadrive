@@ -1,7 +1,6 @@
-from panda3d.core import LVector4, NodePath, DirectionalLight, AmbientLight
-
 from metadrive.base_class.base_object import BaseObject
 from metadrive.constants import CamMask
+from panda3d.core import LVector4, NodePath, DirectionalLight, AmbientLight
 
 
 class Light(BaseObject):

@@ -1,20 +1,19 @@
 import math
 from typing import Dict, List
 
-from panda3d.bullet import BulletBoxShape, BulletGhostNode
-from panda3d.core import Vec3, LQuaternionf, Vec4, TextureStage, RigidBodyCombiner, \
-    SamplerState, NodePath
-
 from metadrive.base_class.base_object import BaseObject
 from metadrive.component.lane.abs_lane import AbstractLane
 from metadrive.component.lane.waypoint_lane import WayPointLane
-from metadrive.component.road.road import Road
-from metadrive.component.road.road_network import RoadNetwork
+from metadrive.component.road import Road
+from metadrive.component.road.road_network import NodeRoadNetwork
 from metadrive.constants import BodyName, CamMask, LineType, LineColor, DrivableAreaProperty
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.engine.core.physics_world import PhysicsWorld
 from metadrive.utils.coordinates_shift import panda_position
 from metadrive.utils.math_utils import norm
+from panda3d.bullet import BulletBoxShape, BulletGhostNode
+from panda3d.core import Vec3, LQuaternionf, Vec4, TextureStage, RigidBodyCombiner, \
+    SamplerState, NodePath
 
 
 class BaseBlock(BaseObject, DrivableAreaProperty):
@@ -26,7 +25,7 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
 
     ID = "B"
 
-    def __init__(self, block_index: int, global_network: RoadNetwork, random_seed, ignore_intersection_checking=False):
+    def __init__(self, block_index: int, global_network: NodeRoadNetwork, random_seed, ignore_intersection_checking=False):
         super(BaseBlock, self).__init__(str(block_index) + self.ID, random_seed, escape_random_seed_assertion=True)
         # block information
         assert self.ID is not None, "Each Block must has its unique ID When define Block"
@@ -37,7 +36,7 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
 
         # each block contains its own road network and a global network
         self._global_network = global_network
-        self.block_network = RoadNetwork()
+        self.block_network = self.init_block_network()
 
         # a bounding box used to improve efficiency x_min, x_max, y_min, y_max
         self.bounding_box = None
@@ -67,11 +66,11 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
         raise NotImplementedError
 
     def construct_block(
-        self,
-        root_render_np: NodePath,
-        physics_world: PhysicsWorld,
-        extra_config: Dict = None,
-        no_same_node=True
+            self,
+            root_render_np: NodePath,
+            physics_world: PhysicsWorld,
+            extra_config: Dict = None,
+            no_same_node=True
     ) -> bool:
         """
         Randomly Construct a block, if overlap return False
@@ -247,3 +246,11 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
         theta = -math.atan2(direction_v[1], direction_v[0])
 
         body_np.setQuat(LQuaternionf(math.cos(theta / 2), 0, 0, math.sin(theta / 2)))
+
+    def init_block_network(self):
+        """
+        There are two type of road network to describe the relation of all lanes, override this func to assign one when
+        you are building your own block.
+        return: roadnetwork
+        """
+        raise NotImplementedError

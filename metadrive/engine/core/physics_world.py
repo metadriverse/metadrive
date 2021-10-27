@@ -1,9 +1,8 @@
 import logging
 
+from metadrive.constants import CollisionGroup
 from panda3d.bullet import BulletWorld
 from panda3d.core import Vec3
-
-from metadrive.constants import CollisionGroup
 
 
 class PhysicsWorld:

@@ -1,10 +1,10 @@
 import copy
 
-from metadrive.component.blocks.first_block import FirstPGBlock
-from metadrive.component.blocks.parking_lot import ParkingLot
-from metadrive.component.blocks.t_intersection import TInterSection
 from metadrive.component.map.pg_map import PGMap
-from metadrive.component.road.road import Road
+from metadrive.component.pgblock.first_block import FirstPGBlock
+from metadrive.component.pgblock.parking_lot import ParkingLot
+from metadrive.component.pgblock.t_intersection import TInterSection
+from metadrive.component.road import Road
 from metadrive.envs.marl_envs.marl_inout_roundabout import LidarStateObservationMARound
 from metadrive.envs.marl_envs.multi_agent_metadrive import MultiAgentMetaDrive
 from metadrive.manager.map_manager import MapManager

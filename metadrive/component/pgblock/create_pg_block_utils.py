@@ -7,8 +7,8 @@ import numpy as np
 from metadrive.component.lane.abs_lane import AbstractLane
 from metadrive.component.lane.circular_lane import CircularLane
 from metadrive.component.lane.straight_lane import StraightLane
-from metadrive.component.road.road import Road
-from metadrive.component.road.road_network import RoadNetwork
+from metadrive.component.road import Road
+from metadrive.component.road.road_network import NodeRoadNetwork
 from metadrive.constants import LineType, LineColor, DrivableAreaProperty
 from metadrive.utils.math_utils import get_vertical_vector
 from metadrive.utils.scene_utils import check_lane_on_road
@@ -64,8 +64,8 @@ def CreateRoadFrom(
     lane: Union["AbstractLane", "StraightLane", "CircularLane"],
     lane_num: int,
     road: "Road",
-    roadnet_to_add_lanes: "RoadNetwork",  # mostly, block network
-    roadnet_to_check_cross: "RoadNetwork",  # mostly, previous global_network
+    roadnet_to_add_lanes: "NodeRoadNetwork",  # mostly, block network
+    roadnet_to_check_cross: "NodeRoadNetwork",  # mostly, previous global_network
     toward_smaller_lane_index: bool = True,
     ignore_start: str = None,
     ignore_end: str = None,
@@ -171,14 +171,14 @@ def ExtendStraightLane(lane: "StraightLane", extend_length: float, line_types: (
     return new_lane
 
 
-def get_lanes_on_road(road: "Road", roadnet: "RoadNetwork") -> List[AbstractLane]:
+def get_lanes_on_road(road: "Road", roadnet: "NodeRoadNetwork") -> List[AbstractLane]:
     return roadnet.graph[road.start_node][road.end_node]
 
 
 def CreateAdverseRoad(
     positive_road: "Road",
-    roadnet_to_get_road: "RoadNetwork",  # mostly, block network
-    roadnet_to_check_cross: "RoadNetwork",  # mostly, previous global network
+    roadnet_to_get_road: "NodeRoadNetwork",  # mostly, block network
+    roadnet_to_check_cross: "NodeRoadNetwork",  # mostly, previous global network
     ignore_start: str = None,
     ignore_end: str = None,
     center_line_type=LineType.CONTINUOUS,  # Identical to Block.CENTER_LINE_TYPE
@@ -233,8 +233,8 @@ def CreateAdverseRoad(
 
 def CreateTwoWayRoad(
     road_to_change: "Road",
-    roadnet_to_get_road: "RoadNetwork",  # mostly, block network
-    roadnet_to_check_cross: "RoadNetwork",  # mostly, previous global network
+    roadnet_to_get_road: "NodeRoadNetwork",  # mostly, block network
+    roadnet_to_check_cross: "NodeRoadNetwork",  # mostly, previous global network
     new_road_name: Road = None,
     ignore_start: str = None,
     ignore_end: str = None,
@@ -297,7 +297,7 @@ def CreateTwoWayRoad(
 
 
 def block_socket_merge(
-    socket_1: "BlockSocket", socket_2: "BlockSocket", global_network: "RoadNetwork", positive_merge: False
+    socket_1: "BlockSocket", socket_2: "BlockSocket", global_network: "NodeRoadNetwork", positive_merge: False
 ):
     global_network.graph[socket_1.positive_road.start_node][socket_2.negative_road.start_node] = \
         global_network.graph[socket_1.positive_road.start_node].pop(socket_1.positive_road.end_node)

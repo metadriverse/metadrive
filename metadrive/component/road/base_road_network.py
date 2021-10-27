@@ -4,7 +4,7 @@ from typing import List, Tuple, Dict
 
 import numpy as np
 from metadrive.component.lane.abs_lane import AbstractLane
-from metadrive.component.road.road import Road
+from metadrive.component.road import Road
 from metadrive.constants import Decoration
 from metadrive.utils.math_utils import get_boxes_bounding_box
 from metadrive.utils.scene_utils import get_road_bounding_box
@@ -15,25 +15,11 @@ LaneIndex = Tuple[str, str, int]
 Route = List[LaneIndex]
 
 
-class NodeRoadNetwork:
-    """
-    This network uses two node to describe the road network graph, and the edges between two nodes represent road, which
-    is a list of lanes connecting two lanes
-    """
+class BaseRoadNetwork:
     graph: Dict[str, Dict[str, List[AbstractLane]]]
 
     def __init__(self, debug=False):
-        self.graph = {}
-        self.indices = []
-        self._graph_helper = None
-        self.debug = debug
-        self.is_initialized = False
-
-    def after_init(self):
-        assert not self.is_initialized
-        self._update_indices()
-        self._init_graph_helper()
-        self.is_initialized = True
+        self.graph = None
 
     def add(self, other, no_intersect=True):
         assert not self.is_initialized, "Adding new blocks should be done before road network initialization!"
@@ -60,7 +46,7 @@ class NodeRoadNetwork:
         return self
 
     def __sub__(self, other):
-        ret = NodeRoadNetwork()
+        ret = RoadNetwork()
         ret.graph = self.graph
         ret -= other
         return ret
@@ -320,8 +306,8 @@ class NodeRoadNetwork:
         :param depth: search depth from lane 1 along its route
         :return: whether the roads are connected
         """
-        if NodeRoadNetwork.is_same_road(lane_index_2, lane_index_1, same_lane) \
-                or NodeRoadNetwork.is_leading_to_road(lane_index_2, lane_index_1, same_lane):
+        if RoadNetwork.is_same_road(lane_index_2, lane_index_1, same_lane) \
+                or RoadNetwork.is_leading_to_road(lane_index_2, lane_index_1, same_lane):
             return True
         if depth > 0:
             if route and route[0][:2] == lane_index_1[:2]:
@@ -376,52 +362,3 @@ class NodeRoadNetwork:
                     if lane_num is None or len(lanes) == lane_num:
                         ret.append(Road(_from, _to))
         return ret
-
-
-class GraphLookupTable:
-    def __init__(self, graph, debug):
-        self.graph = graph
-        self.debug = debug
-
-    def get(self, position, return_all):
-        log = dict()
-        count = 0
-        for _, (_from, to_dict) in enumerate(self.graph.items()):
-            if _from == "decoration":
-                continue
-            for lanes_id, lanes in to_dict.items():
-                lane = next(iter(lanes))
-                log[count] = (lane.distance(position), (_from, lanes_id))
-                count += 1
-
-        distance_index_mapping = []
-        for rank, candidate_count in enumerate(sorted(log, key=lambda key: log[key][0])):
-            first_lane_distance, (section_id, lanes_id) = log[candidate_count]
-            lanes = self.graph[section_id][lanes_id]
-            for lane_id, lane in enumerate(lanes):
-                if lanes_id == Decoration.start:
-                    continue
-                if lane_id == 0:
-                    dist = first_lane_distance
-                else:
-                    dist = lane.distance(position)
-                distance_index_mapping.append((dist, (section_id, lanes_id, lane_id)))
-            # if rank > 10:
-            #     # Take first rank 5 lanes into consideration. The number may related to the number of
-            #     # lanes in intersection. We have 3 lanes in intersection, so computing the first 4 ranks can make
-            #     # thing work. We choose take first 5 lanes into consideration.
-            #     # In futurem we shall refactor the whole system, so this vulnerable code would be removed.
-            #     break
-        if self.graph.get(Decoration.start, False):
-            for id, lane in enumerate(self.graph[Decoration.start][Decoration.end]):
-                dist = lane.distance(position)
-                distance_index_mapping.append((dist, (Decoration.start, Decoration.end, id)))
-
-        distance_index_mapping = sorted(distance_index_mapping, key=lambda d: d[0])
-        if return_all:
-            return distance_index_mapping
-        else:
-            ret_ind = 0
-            index = distance_index_mapping[ret_ind][1]
-            distance = distance_index_mapping[ret_ind][0]
-            return index, distance

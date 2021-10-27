@@ -1,6 +1,6 @@
-from metadrive.component.blocks.intersection import InterSection
-from metadrive.component.blocks.pg_block import PGBlockSocket
-from metadrive.component.road.road import Road
+from metadrive.component.pgblock.intersection import InterSection
+from metadrive.component.pgblock.pg_block import PGBlockSocket
+from metadrive.component.road import Road
 from metadrive.constants import Goal, LineType, LineColor
 from metadrive.utils.space import ParameterSpace, Parameter, BlockParameterSpace
 

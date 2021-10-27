@@ -1,5 +1,5 @@
 from metadrive.component.algorithm.BIG import BIG
-from metadrive.component.road.road_network import RoadNetwork
+from metadrive.component.road.road_network import NodeRoadNetwork
 from metadrive.engine.asset_loader import initialize_asset_loader
 from metadrive.tests.vis_block.vis_block_base import TestBlock
 
@@ -10,7 +10,7 @@ def vis_big(debug: bool = False):
     test.cam.setPos(250, 100, 2000)
 
     initialize_asset_loader(test)
-    global_network = RoadNetwork()
+    global_network = NodeRoadNetwork()
 
     big = BIG(2, 3.5, global_network, test.render, test.world, random_seed=5)
     test.vis_big(big)

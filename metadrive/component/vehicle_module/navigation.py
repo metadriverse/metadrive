@@ -3,12 +3,12 @@ import logging
 import numpy as np
 from panda3d.core import TransparencyAttrib, LineSegs, NodePath
 
-from metadrive.component.blocks.bottleneck import Merge, Split
-from metadrive.component.blocks.first_block import FirstPGBlock
+from metadrive.component.pgblock.bottleneck import Merge, Split
+from metadrive.component.pgblock.first_block import FirstPGBlock
 from metadrive.component.lane.circular_lane import CircularLane
 from metadrive.component.lane.straight_lane import StraightLane
 from metadrive.component.map.base_map import BaseMap
-from metadrive.component.road.road import Road
+from metadrive.component.road import Road
 from metadrive.constants import RENDER_MODE_ONSCREEN, CamMask
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.utils import clip, norm, get_np_random

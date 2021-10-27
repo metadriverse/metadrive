@@ -1,8 +1,7 @@
 from metadrive.component.lane.waypoint_lane import WayPointLane
-from metadrive.utils.waymo_map_utils import read_waymo_data, convert_polyline_to_metadrive
-from metadrive.engine.asset_loader import AssetLoader
 from metadrive.constants import WaymoLaneProperty
-import numpy as np
+from metadrive.engine.asset_loader import AssetLoader
+from metadrive.utils.waymo_map_utils import read_waymo_data, convert_polyline_to_metadrive
 
 
 class WaymoLane(WayPointLane):

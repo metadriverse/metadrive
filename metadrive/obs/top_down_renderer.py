@@ -3,7 +3,6 @@ from typing import Optional, Union, Iterable
 
 import cv2
 import numpy as np
-
 from metadrive.constants import Decoration, TARGET_VEHICLES
 from metadrive.engine.engine_utils import get_engine
 from metadrive.obs.top_down_obs_impl import WorldSurface, VehicleGraphics, LaneGraphics

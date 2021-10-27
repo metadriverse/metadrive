@@ -2,7 +2,6 @@ from enum import Enum
 
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import figure
-
 from metadrive.engine.asset_loader import AssetLoader
 
 try:

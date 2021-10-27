@@ -1,4 +1,5 @@
-from metadrive.component.map.base_map import BaseMap, MapGenerateMethod
+from metadrive.component.map.base_map import BaseMap
+from metadrive.component.map.pg_map import MapGenerateMethod
 from metadrive.component.vehicle_module.PID_controller import PIDController
 from metadrive.envs.metadrive_env import MetaDriveEnv
 

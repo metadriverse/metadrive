@@ -1,4 +1,4 @@
-from metadrive.component.blocks.intersection import InterSection
+from metadrive.component.pgblock.intersection import InterSection
 from metadrive.utils.space import Parameter
 
 

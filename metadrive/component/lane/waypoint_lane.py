@@ -1,11 +1,10 @@
 from typing import Tuple, Union
-from metadrive.utils.math_utils import get_points_bounding_box
 
 import numpy as np
-
 from metadrive.component.lane.abs_lane import AbstractLane
 from metadrive.constants import LineType
 from metadrive.utils.interpolating_line import InterpolatingLine
+from metadrive.utils.math_utils import get_points_bounding_box
 from metadrive.utils.math_utils import wrap_to_pi
 
 

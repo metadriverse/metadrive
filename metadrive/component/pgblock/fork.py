@@ -2,12 +2,12 @@ import math
 
 import numpy as np
 
-from metadrive.component.blocks.create_block_utils import CreateRoadFrom, CreateAdverseRoad, ExtendStraightLane, \
+from metadrive.component.pgblock.create_pg_block_utils import CreateRoadFrom, CreateAdverseRoad, ExtendStraightLane, \
     create_bend_straight
-from metadrive.component.blocks.pg_block import PGBlock
-from metadrive.component.blocks.ramp import Ramp
+from metadrive.component.pgblock.pg_block import PGBlock
+from metadrive.component.pgblock.ramp import Ramp
 from metadrive.component.lane.straight_lane import StraightLane
-from metadrive.component.road.road import Road
+from metadrive.component.road import Road
 from metadrive.constants import Decoration, LineType
 from metadrive.utils.scene_utils import check_lane_on_road
 from metadrive.utils.space import ParameterSpace, Parameter, BlockParameterSpace

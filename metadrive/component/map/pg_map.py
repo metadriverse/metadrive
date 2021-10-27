@@ -1,12 +1,42 @@
 from typing import List
 
-from panda3d.core import NodePath
-
 from metadrive.component.algorithm.BIG import BigGenerateMethod, BIG
 from metadrive.component.algorithm.blocks_prob_dist import PGBlockConfig
-from metadrive.component.blocks.first_block import FirstPGBlock
-from metadrive.component.map.base_map import BaseMap, MapGenerateMethod
+from metadrive.component.map.base_map import BaseMap
+from metadrive.component.pgblock.first_block import FirstPGBlock
+from metadrive.component.road.road_network import NodeRoadNetwork
 from metadrive.engine.core.physics_world import PhysicsWorld
+from metadrive.utils import Config
+from panda3d.core import NodePath
+
+
+def parse_map_config(easy_map_config, new_map_config, default_config):
+    assert isinstance(new_map_config, Config)
+    assert isinstance(default_config, Config)
+
+    # Return the user specified config if overwritten
+    if not default_config["map_config"].is_identical(new_map_config):
+        new_map_config = default_config["map_config"].copy(unchangeable=False).update(new_map_config)
+        assert default_config["map"] == easy_map_config
+        return new_map_config
+
+    if isinstance(easy_map_config, int):
+        new_map_config[BaseMap.GENERATE_TYPE] = BigGenerateMethod.BLOCK_NUM
+    elif isinstance(easy_map_config, str):
+        new_map_config[BaseMap.GENERATE_TYPE] = BigGenerateMethod.BLOCK_SEQUENCE
+    else:
+        raise ValueError(
+            "Unkown easy map config: {} and original map config: {}".format(easy_map_config, new_map_config)
+        )
+    new_map_config[BaseMap.GENERATE_CONFIG] = easy_map_config
+    return new_map_config
+
+
+class MapGenerateMethod:
+    BIG_BLOCK_NUM = BigGenerateMethod.BLOCK_NUM
+    BIG_BLOCK_SEQUENCE = BigGenerateMethod.BLOCK_SEQUENCE
+    BIG_SINGLE_BLOCK = BigGenerateMethod.SINGLE_BLOCK
+    PG_MAP_FILE = "pg_map_file"
 
 
 class PGMap(BaseMap):
@@ -25,6 +55,7 @@ class PGMap(BaseMap):
             self._config_generate(blocks_config, parent_node_path, physics_world)
         else:
             raise ValueError("Map can not be created by {}".format(generate_type))
+        self.road_network.after_init()
 
     def _big_generate(self, parent_node_path: NodePath, physics_world: PhysicsWorld):
         big_map = BIG(
@@ -64,3 +95,20 @@ class PGMap(BaseMap):
             )
             last_block.construct_from_config(b, parent_node_path, physics_world)
             self.blocks.append(last_block)
+
+    def init_road_network(self):
+        return NodeRoadNetwork()
+
+    def save_map(self):
+        assert self.blocks is not None and len(self.blocks) > 0, "Please generate Map before saving it"
+        map_config = []
+        for b in self.blocks:
+            assert isinstance(b, PGBlock), "None Set can not be saved to json file"
+            b_config = b.get_config()
+            json_config = b_config.get_serializable_dict()
+            json_config[self.BLOCK_ID] = b.ID
+            json_config[self.PRE_BLOCK_SOCKET_INDEX] = b.pre_block_socket_index
+            map_config.append(json_config)
+
+        saved_data = copy.deepcopy({self.BLOCK_SEQUENCE: map_config, "map_config": self.config.copy()})
+        return saved_data

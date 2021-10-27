@@ -2,11 +2,6 @@ import math
 from typing import List, TYPE_CHECKING, Tuple, Union
 
 import numpy as np
-from panda3d.bullet import BulletBoxShape, BulletCylinderShape, ZUp
-from panda3d.core import TransformState
-from panda3d.core import Vec3
-
-from metadrive.component.lane.abs_lane import AbstractLane
 from metadrive.component.lane.circular_lane import CircularLane
 from metadrive.constants import CollisionGroup
 from metadrive.constants import Decoration, BodyName
@@ -16,19 +11,16 @@ from metadrive.utils.coordinates_shift import panda_heading
 from metadrive.utils.coordinates_shift import panda_position
 from metadrive.utils.math_utils import get_points_bounding_box, norm
 from metadrive.utils.utils import get_object_from_node
+from panda3d.bullet import BulletBoxShape, BulletCylinderShape, ZUp
+from panda3d.core import TransformState
+from panda3d.core import Vec3
 
 if TYPE_CHECKING:
-    from metadrive.component.blocks.pg_block import PGBlockSocket
-    from metadrive.component.road.road import Road
-    from metadrive.component.road.road_network import RoadNetwork
-
-
-def get_lanes_on_road(road: "Road", roadnet: "RoadNetwork") -> List["AbstractLane"]:
-    return roadnet.graph[road.start_node][road.end_node]
-
+    from metadrive.component.pgblock.pg_block import PGBlockSocket
+    from metadrive.component.road.road_network import NodeRoadNetwork
 
 def block_socket_merge(
-    socket_1: "PGBlockSocket", socket_2: "PGBlockSocket", global_network: "RoadNetwork", positive_merge: False
+    socket_1: "PGBlockSocket", socket_2: "PGBlockSocket", global_network: "NodeRoadNetwork", positive_merge: False
 ):
     global_network.graph[socket_1.positive_road.start_node][socket_2.negative_road.start_node] = \
         global_network.graph[socket_1.positive_road.start_node].pop(socket_1.positive_road.end_node)
@@ -38,7 +30,7 @@ def block_socket_merge(
 
 
 def check_lane_on_road(
-    road_network: "RoadNetwork", lane, positive: float = 0, ignored=None, ignore_intersection_checking=None
+    road_network: "NodeRoadNetwork", lane, positive: float = 0, ignored=None, ignore_intersection_checking=None
 ) -> bool:
     """
     Calculate if the new lane intersects with other lanes in current road network
@@ -125,7 +117,7 @@ def get_curve_contour(lanes, extra_lateral) -> List:
     return points
 
 
-def get_all_lanes(roadnet: "RoadNetwork"):
+def get_all_lanes(roadnet: "NodeRoadNetwork"):
     graph = roadnet.graph
     res = []
     for from_, to_dict in graph.items():

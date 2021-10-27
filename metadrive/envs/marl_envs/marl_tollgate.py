@@ -1,11 +1,10 @@
 import gym
 import numpy as np
-
-from metadrive.component.blocks.bottleneck import Merge, Split
-from metadrive.component.blocks.first_block import FirstPGBlock
-from metadrive.component.blocks.tollgate import TollGate
 from metadrive.component.map.pg_map import PGMap
-from metadrive.component.road.road import Road
+from metadrive.component.pgblock.bottleneck import Merge, Split
+from metadrive.component.pgblock.first_block import FirstPGBlock
+from metadrive.component.pgblock.tollgate import TollGate
+from metadrive.component.road import Road
 from metadrive.constants import TerminationState
 from metadrive.envs.marl_envs.multi_agent_metadrive import MultiAgentMetaDrive
 from metadrive.manager.map_manager import MapManager

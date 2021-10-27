@@ -1,9 +1,8 @@
-from panda3d.core import SamplerState, Shader, ConfigVariableString
-
 from metadrive.base_class.base_object import BaseObject
 from metadrive.constants import CamMask
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.utils.utils import is_mac
+from panda3d.core import SamplerState, Shader, ConfigVariableString
 
 
 class SkyBox(BaseObject):

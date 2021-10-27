@@ -1,7 +1,6 @@
 import time
 
 import numpy as np
-
 from metadrive import MetaDriveEnv
 from metadrive.utils import setup_logger
 

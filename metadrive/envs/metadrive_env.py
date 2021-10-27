@@ -3,8 +3,8 @@ import logging
 from typing import Union
 
 import numpy as np
-
-from metadrive.component.map.base_map import BaseMap, MapGenerateMethod, parse_map_config
+from metadrive.component.map.base_map import BaseMap
+from metadrive.component.map.pg_map import parse_map_config, MapGenerateMethod
 from metadrive.component.vehicle.base_vehicle import BaseVehicle
 from metadrive.constants import DEFAULT_AGENT, TerminationState
 from metadrive.envs.base_env import BaseEnv

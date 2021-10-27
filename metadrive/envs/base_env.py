@@ -1,13 +1,10 @@
-import sys
 import time
 from collections import defaultdict
 from typing import Union, Dict, AnyStr, Optional, Tuple
 
 import gym
 import numpy as np
-from panda3d.core import PNMImage
-
-from metadrive.component.blocks.first_block import FirstPGBlock
+from metadrive.component.pgblock.first_block import FirstPGBlock
 from metadrive.component.vehicle.base_vehicle import BaseVehicle
 from metadrive.constants import RENDER_MODE_NONE, DEFAULT_AGENT, REPLAY_DONE
 from metadrive.engine.base_engine import BaseEngine
@@ -19,6 +16,7 @@ from metadrive.manager.replay_manager import ReplayManager
 from metadrive.obs.observation_base import ObservationBase
 from metadrive.utils import Config, merge_dicts, get_np_random, concat_step_infos
 from metadrive.utils.utils import auto_termination
+from panda3d.core import PNMImage
 
 BASE_DEFAULT_CONFIG = dict(
     # ===== Generalization =====

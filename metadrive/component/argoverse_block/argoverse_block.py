@@ -1,14 +1,14 @@
 from typing import Dict
 
-from metadrive.component.blocks.base_block import BaseBlock
+from metadrive.component.block.base_block import BaseBlock
 from metadrive.component.lane.abs_lane import LineColor, LineType
 from metadrive.component.lane.argoverse_lane import ArgoverseLane
-from metadrive.component.road.road import Road
-from metadrive.component.road.road_network import RoadNetwork
+from metadrive.component.road import Road
+from metadrive.component.road.road_network import NodeRoadNetwork
 
 
 class ArgoverseBlock(BaseBlock):
-    def __init__(self, block_index: int, global_network: RoadNetwork, argoverse_lanes: Dict[int, ArgoverseLane]):
+    def __init__(self, block_index: int, global_network: NodeRoadNetwork, argoverse_lanes: Dict[int, ArgoverseLane]):
         """
         No randomization when create argoverse block, Split Argoverse Map to several blocks to boost efficiency
         """

@@ -2,8 +2,6 @@ import copy
 from typing import Dict
 
 from gym.spaces import Box, Dict, MultiDiscrete
-
-from metadrive.constants import DEFAULT_AGENT
 from metadrive.manager.base_manager import BaseManager
 from metadrive.policy.AI_protect_policy import AIProtectPolicy
 from metadrive.policy.env_input_policy import EnvInputPolicy
