@@ -84,6 +84,7 @@ def get_lanes_bounding_box(lanes, extra_lateral=3) -> Tuple:
         line_points = get_waypoint_countour(lanes)
     return get_points_bounding_box(line_points)
 
+
 def get_waypoint_countour(lanes):
     assert isinstance(lanes[0], WayPointLane)
     ret = []
@@ -92,6 +93,7 @@ def get_waypoint_countour(lanes):
             ret.append(seg["start_point"])
         ret.append(seg["end_point"])
     return ret
+
 
 def get_straight_contour(lanes, extra_lateral) -> List:
     """

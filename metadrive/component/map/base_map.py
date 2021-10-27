@@ -89,4 +89,4 @@ class BaseMap(BaseRunnable):
 
     def get_center_point(self):
         x_min, x_max, y_min, y_max = self.road_network.get_bounding_box()
-        return (x_max + x_min)/2, (y_max + y_min)/2
+        return (x_max + x_min) / 2, (y_max + y_min) / 2

@@ -37,7 +37,7 @@ class FirstPGBlock(PGBlock):
             0, place_holder, global_network, random_seed=0, ignore_intersection_checking=ignore_intersection_checking
         )
         if length < self.ENTRANCE_LENGTH:
-            print("Warning: first block length is two small",length, "<", self.ENTRANCE_LENGTH)
+            print("Warning: first block length is two small", length, "<", self.ENTRANCE_LENGTH)
         self._block_objects = []
         basic_lane = StraightLane(
             [0, lane_width * (lane_num - 1)], [self.ENTRANCE_LENGTH, lane_width * (lane_num - 1)],

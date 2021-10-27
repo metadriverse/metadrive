@@ -388,6 +388,7 @@ class EngineCore(ShowBase.ShowBase):
         line_seg.setThickness(thickness)
         NodePath(line_seg.create(False)).reparentTo(self.render)
 
+
 if __name__ == "__main__":
     world = EngineCore({"debug": True})
     world.run()
