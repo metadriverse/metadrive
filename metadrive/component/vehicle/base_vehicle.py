@@ -14,7 +14,7 @@ from metadrive.component.vehicle_module.depth_camera import DepthCamera
 from metadrive.component.vehicle_module.distance_detector import SideDetector, LaneLineDetector
 from metadrive.component.vehicle_module.lidar import Lidar
 from metadrive.component.vehicle_module.mini_map import MiniMap
-from metadrive.component.vehicle_module.navigation import Navigation
+from metadrive.component.vehicle_navigation_module.node_network_navigation import NodeNetworkNavigation
 from metadrive.component.vehicle_module.rgb_camera import RGBCamera
 from metadrive.constants import BodyName, CollisionGroup
 from metadrive.engine.asset_loader import AssetLoader
@@ -152,9 +152,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self._add_visualization()
 
         # modules, get observation by using these modules
-        self.lane: Optional[AbstractLane] = None
-        self.lane_index = None
-        self.navigation: Optional[Navigation] = None
+        self.navigation: Optional[NodeNetworkNavigation] = None
         self.lidar: Optional[Lidar] = None  # detect surrounding vehicles
         self.side_detector: Optional[SideDetector] = None  # detect road side
         self.lane_line_detector: Optional[LaneLineDetector] = None  # detect nearest lane lines
@@ -252,7 +250,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
 
     def after_step(self):
         if self.navigation is not None:
-            self.lane, self.lane_index, = self.navigation.update_localization(self)
+            self.navigation.update_localization(self)
         self._state_check()
         self.update_dist_to_left_right()
         step_energy, episode_energy = self._update_energy_consumption()
@@ -560,7 +558,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self.image_sensors[name] = sensor
 
     def add_navigation(self):
-        self.navigation = Navigation(
+        self.navigation = NodeNetworkNavigation(
             self.engine,
             show_navi_mark=self.engine.global_config["vehicle_config"]["show_navi_mark"],
             random_navi_mark_color=self.engine.global_config["vehicle_config"]["random_navi_mark_color"],
@@ -583,16 +581,14 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         else:
             lane, new_l_index = possible_lanes[idx][:-1]
         dest = self.config["destination"]
-        self.navigation.update(
+        self.navigation.reset(
             map,
-            current_lane_index=new_l_index,
+            current_lane=lane,
             destination=dest if dest is not None else None,
             random_seed=self.engine.global_random_seed
         )
         assert lane is not None, "spawn place is not on road!"
         self.navigation.update_localization(self)
-        self.lane_index = new_l_index
-        self.lane = lane
 
     def _state_check(self):
         """
@@ -830,3 +826,11 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     @property
     def top_down_width(self):
         return self.WIDTH
+
+    @property
+    def lane(self):
+        return self.navigation.current_lane
+
+    @property
+    def lane_index(self):
+        return self.navigation.current_lane.index
