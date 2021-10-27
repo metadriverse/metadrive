@@ -35,7 +35,7 @@ class EdgeRoadNetwork(BaseRoadNetwork):
         )
 
     def get_lane(self, index: LaneIndex):
-        return self.graph[index]
+        return self.graph[index].lane
 
     def __isub__(self, other):
         for id, lane_info in other.graph.items():

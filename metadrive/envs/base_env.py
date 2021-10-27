@@ -1,4 +1,6 @@
 import time
+from metadrive.obs.image_obs import ImageStateObservation
+from metadrive.obs.state_obs import LidarStateObservation
 from collections import defaultdict
 from typing import Union, Dict, AnyStr, Optional, Tuple
 
@@ -95,6 +97,9 @@ BASE_DEFAULT_CONFIG = dict(
         dropout_prob=0.0,
     ),
 
+    # ===== Agent config =====
+    target_vehicle_configs={DEFAULT_AGENT: dict(use_special_color=False, spawn_lane_index=None)},
+
     # ===== Engine Core config =====
     window_size=(1200, 900),  # width, height
     physics_world_step_size=2e-2,
@@ -172,6 +177,8 @@ class BaseEnv(gym.Env):
 
     def _post_process_config(self, config):
         """Add more special process to merged config"""
+        config["vehicle_config"]["random_agent_model"] = config["random_agent_model"]
+        config["vehicle_config"]["rgb_clip"] = config["rgb_clip"]
         return config
 
     def _get_observations(self) -> Dict[str, "ObservationBase"]:
@@ -399,8 +406,12 @@ class BaseEnv(gym.Env):
         ego_v = self.vehicles[DEFAULT_AGENT]
         return ego_v
 
-    def get_single_observation(self, vehicle_config: "Config") -> "ObservationBase":
-        raise NotImplementedError()
+    def get_single_observation(self, vehicle_config: "Config"):
+        if self.config["offscreen_render"]:
+            o = ImageStateObservation(vehicle_config)
+        else:
+            o = LidarStateObservation(vehicle_config)
+        return o
 
     def _wrap_as_single_agent(self, data):
         return data[next(iter(self.vehicles.keys()))]

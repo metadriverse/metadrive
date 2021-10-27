@@ -10,8 +10,7 @@ from metadrive.component.vehicle.base_vehicle import BaseVehicle
 from metadrive.constants import DEFAULT_AGENT, TerminationState
 from metadrive.envs.base_env import BaseEnv
 from metadrive.manager.traffic_manager import TrafficMode
-from metadrive.obs.image_obs import ImageStateObservation
-from metadrive.obs.state_obs import LidarStateObservation
+
 from metadrive.utils import clip, Config, get_np_random
 
 METADRIVE_DEFAULT_CONFIG = dict(
@@ -259,13 +258,6 @@ class MetaDriveEnv(BaseEnv):
 
     def switch_to_top_down_view(self):
         self.main_camera.stop_track()
-
-    def get_single_observation(self, vehicle_config: "Config") -> "ObservationType":
-        if self.config["offscreen_render"]:
-            o = ImageStateObservation(vehicle_config)
-        else:
-            o = LidarStateObservation(vehicle_config)
-        return o
 
     def setup_engine(self):
         super(MetaDriveEnv, self).setup_engine()
