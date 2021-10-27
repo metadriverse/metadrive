@@ -1,4 +1,5 @@
 import math
+from metadrive.component.road_network.edge_road_network import EdgeRoadNetwork
 
 import numpy as np
 from metadrive.component.block.base_block import BaseBlock
@@ -17,21 +18,22 @@ class WaymoBlock(BaseBlock):
         super(WaymoBlock, self).__init__(block_index, global_network, random_seed)
 
     def _sample_topology(self) -> bool:
-        waymo_lanes = []
         for lane_id, data in self.waymo_map_data.items():
             if data.get("type", False) == WaymoLaneProperty.LANE_TYPE:
                 if len(data[WaymoLaneProperty.POLYLINE]) <= 1:
                     continue
                 waymo_lane = WaymoLane(lane_id, self.waymo_map_data)
-                waymo_lanes.append(waymo_lane)
-        # self.block_network.add_road(Road("test", "test"), waymo_lanes)
+                self.block_network.add_lane(waymo_lane)
         return True
 
     def create_in_world(self):
         """
         The lane line should be created separately
         """
-        super(WaymoBlock, self).create_in_world()
+        graph = self.block_network.graph
+        for id, lane_info in graph.items():
+            lane = lane_info.lane
+            lane.construct_lane_in_block(self, lane)
         for lane_id, data in self.waymo_map_data.items():
             type = data.get("type", None)
             if RoadLineType.is_road_line(type):
@@ -96,3 +98,7 @@ class WaymoBlock(BaseBlock):
                     )
             last_theta = theta
             WaymoLane.construct_sidewalk_segment(self, lane_start, lane_end, length_multiply=factor, extra_thrust=1)
+
+    @property
+    def block_network_type(self):
+        return EdgeRoadNetwork

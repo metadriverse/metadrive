@@ -8,7 +8,7 @@ from metadrive.component.road_network.road import Road
 from metadrive.component.road_network.base_road_network import BaseRoadNetwork
 from metadrive.constants import Decoration
 from metadrive.utils.math_utils import get_boxes_bounding_box
-from metadrive.utils.scene_utils import get_road_bounding_box
+from metadrive.utils.scene_utils import get_lanes_bounding_box
 
 logger = logging.getLogger(__name__)
 
@@ -24,6 +24,7 @@ class NodeRoadNetwork(BaseRoadNetwork):
     graph: Dict[str, Dict[str, List[AbstractLane]]]
 
     def __init__(self, debug=False):
+        super(NodeRoadNetwork, self).__init__()
         self.graph = {}
         self.indices = []
         self._graph_helper = None
@@ -59,12 +60,6 @@ class NodeRoadNetwork(BaseRoadNetwork):
                 if lane in self.graph[Decoration.start][Decoration.end]:
                     self.graph[Decoration.start][Decoration.end].remove(lane)
         return self
-
-    def __sub__(self, other):
-        ret = NodeRoadNetwork()
-        ret.graph = self.graph
-        ret -= other
-        return ret
 
     def get_all_decoration_lanes(self) -> List:
         if Decoration.start in self.graph:
@@ -106,7 +101,7 @@ class NodeRoadNetwork(BaseRoadNetwork):
                     ret.append(lanes)
         return ret
 
-    def get_bounding_box(self):
+    def _get_bounding_box(self):
         """
         By using this bounding box, the edge length of x, y direction and the center of this road network can be
         easily calculated.
@@ -117,7 +112,7 @@ class NodeRoadNetwork(BaseRoadNetwork):
             for _to, lanes in to_dict.items():
                 if len(lanes) == 0:
                     continue
-                boxes.append(get_road_bounding_box(lanes))
+                boxes.append(get_lanes_bounding_box(lanes))
         res_x_max, res_x_min, res_y_max, res_y_min = get_boxes_bounding_box(boxes)
         return res_x_min, res_x_max, res_y_min, res_y_max
 

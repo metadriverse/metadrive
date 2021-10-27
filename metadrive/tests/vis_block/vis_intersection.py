@@ -11,7 +11,7 @@ if __name__ == "__main__":
     initialize_asset_loader(test)
 
     global_network = NodeRoadNetwork()
-    first = FirstPGBlock(global_network, 3.0, 2, test.render, test.world, 1)
+    first = FirstPGBlock(global_network, 3.0, 2, test.render, test.world, 20)
 
     intersection = InterSection(3, first.get_socket(0), global_network, 1)
     print(intersection.construct_block(test.render, test.world))

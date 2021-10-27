@@ -104,7 +104,6 @@ class PGMap(BaseMap):
         assert self.blocks is not None and len(self.blocks) > 0, "Please generate Map before saving it"
         map_config = []
         for b in self.blocks:
-            assert isinstance(b, PGBlock), "None Set can not be saved to json file"
             b_config = b.get_config()
             json_config = b_config.get_serializable_dict()
             json_config[self.BLOCK_ID] = b.ID

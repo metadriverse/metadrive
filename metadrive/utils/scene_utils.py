@@ -1,4 +1,6 @@
 import math
+from metadrive.component.lane.metadrive_lane import MetaDriveLane
+from metadrive.component.lane.waypoint_lane import WayPointLane
 from typing import List, TYPE_CHECKING, Tuple, Union
 
 import numpy as np
@@ -54,8 +56,8 @@ def check_lane_on_road(
                 continue
             if len(lanes) == 0:
                 continue
-            x_max_1, x_min_1, y_max_1, y_min_1 = get_road_bounding_box(lanes)
-            x_max_2, x_min_2, y_max_2, y_min_2 = get_road_bounding_box([lane])
+            x_max_1, x_min_1, y_max_1, y_min_1 = get_lanes_bounding_box(lanes)
+            x_max_2, x_min_2, y_max_2, y_min_2 = get_lanes_bounding_box([lane])
             if x_min_1 > x_max_2 or x_min_2 > x_max_1 or y_min_1 > y_max_2 or y_min_2 > y_max_1:
                 continue
             for _id, l in enumerate(lanes):
@@ -68,17 +70,28 @@ def check_lane_on_road(
     return False
 
 
-def get_road_bounding_box(lanes, extra_lateral=3) -> Tuple:
+def get_lanes_bounding_box(lanes, extra_lateral=3) -> Tuple:
     """
     Return (x_max, x_min, y_max, y_min) as bounding box of this road
     :param lanes: Lanes in this road
     :param extra_lateral: extra width in lateral direction, usually sidewalk width
     :return: x_max, x_min, y_max, y_min
     """
-    line_points = get_curve_contour(lanes, extra_lateral) if isinstance(lanes[0], CircularLane) \
-        else get_straight_contour(lanes, extra_lateral)
+    if isinstance(lanes[0], MetaDriveLane):
+        line_points = get_curve_contour(lanes, extra_lateral) if isinstance(lanes[0], CircularLane) \
+            else get_straight_contour(lanes, extra_lateral)
+    else:
+        line_points = get_waypoint_countour(lanes)
     return get_points_bounding_box(line_points)
 
+def get_waypoint_countour(lanes):
+    assert isinstance(lanes[0], WayPointLane)
+    ret = []
+    for lane in lanes:
+        for seg in lane.segment_property:
+            ret.append(seg["start_point"])
+        ret.append(seg["end_point"])
+    return ret
 
 def get_straight_contour(lanes, extra_lateral) -> List:
     """

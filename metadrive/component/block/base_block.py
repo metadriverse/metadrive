@@ -38,7 +38,7 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
 
         # each block contains its own road network and a global network
         self._global_network = global_network
-        self.block_network = self.init_block_network()
+        self.block_network = self.block_network_type()
 
         # a bounding box used to improve efficiency x_min, x_max, y_min, y_max
         self.bounding_box = None
@@ -177,13 +177,7 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
         """
         Create lane in the panda3D world
         """
-        graph = self.block_network.graph
-        for _from, to_dict in graph.items():
-            for _to, lanes in to_dict.items():
-                for _id, lane in enumerate(lanes):
-                    lane.construct_lane_in_block(self, (_from, _to, _id))
-                    pos_road = not Road(_from, _to).is_negative_road()
-                    lane.construct_lane_line_in_block(self, [True, True] if _id == 0 and pos_road else [False, True])
+        raise NotImplementedError
 
     def add_body(self, physics_body):
         raise DeprecationWarning(
@@ -249,7 +243,8 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
 
         body_np.setQuat(LQuaternionf(math.cos(theta / 2), 0, 0, math.sin(theta / 2)))
 
-    def init_block_network(self):
+    @property
+    def block_network_type(self):
         """
         There are two type of road network to describe the relation of all lanes, override this func to assign one when
         you are building your own block.

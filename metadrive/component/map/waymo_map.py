@@ -3,6 +3,7 @@ from metadrive.component.waymo_block.waymo_block import WaymoBlock
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.utils.math_utils import get_boxes_bounding_box
 from metadrive.utils.waymo_map_utils import read_waymo_data
+from metadrive.component.road_network.edge_road_network import EdgeRoadNetwork
 
 
 class WaymoMap(BaseMap):
@@ -24,15 +25,9 @@ class WaymoMap(BaseMap):
     def metadrive_position(pos):
         return pos[0], -pos[1]
 
-    def get_center_point(self):
-        raise DeprecationWarning("This func is broken")
-        boxes = []
-        for _from, to_dict in self.road_network.graph.items():
-            for _to, lanes in to_dict.items():
-                for lane in lanes:
-                    boxes.append(lane.get_bounding_box())
-        x_min, x_max, y_min, y_max = get_boxes_bounding_box(boxes)
-        return x_max - x_min, y_max - y_min
+    @property
+    def road_network_type(self):
+        return EdgeRoadNetwork
 
 
 if __name__ == "__main__":
@@ -58,9 +53,10 @@ if __name__ == "__main__":
     map = WaymoMap(data)
     map.attach_to_world()
     engine.enableMouse()
+    map.road_network.show_bounding_box(engine)
 
     # argoverse data set is as the same coordinates as panda3d
-    pos = WaymoMap.metadrive_position(list(data["map"].values())[0]["polyline"][0])
+    pos = map.get_center_point()
     engine.main_camera.set_bird_view_pos(pos)
     while True:
         map.engine.step()

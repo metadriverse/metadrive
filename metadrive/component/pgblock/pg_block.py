@@ -66,7 +66,7 @@ class PGBlock(BaseBlock):
         pre_block_socket: PGBlockSocket,
         global_network: NodeRoadNetwork,
         random_seed,
-        ignore_intersection_checking=None
+        ignore_intersection_checking=False
     ):
 
         self.name = str(block_index) + self.ID
@@ -212,5 +212,15 @@ class PGBlock(BaseBlock):
                 trigger_lanes.append(lanes)
         return trigger_lanes
 
-    def init_block_network(self):
-        return NodeRoadNetwork()
+    @property
+    def block_network_type(self):
+        return NodeRoadNetwork
+
+    def create_in_world(self):
+        graph = self.block_network.graph
+        for _from, to_dict in graph.items():
+            for _to, lanes in to_dict.items():
+                for _id, lane in enumerate(lanes):
+                    lane.construct_lane_in_block(self, (_from, _to, _id))
+                    pos_road = not Road(_from, _to).is_negative_road()
+                    lane.construct_lane_line_in_block(self, [True, True] if _id == 0 and pos_road else [False, True])

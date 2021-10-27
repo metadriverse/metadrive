@@ -14,6 +14,10 @@ class WaymoLane(WayPointLane):
             max(sum(waymo_map_data[waymo_lane_id]["width"][0]), 4)
         )
         self.index = waymo_lane_id
+        self.entry_lanes = waymo_map_data[waymo_lane_id][WaymoLaneProperty.ENTRY]
+        self.exit_lanes = waymo_map_data[waymo_lane_id][WaymoLaneProperty.EXIT]
+        self.left_lanes = waymo_map_data[waymo_lane_id][WaymoLaneProperty.LEFT_NEIGHBORS]
+        self.right_lanes = waymo_map_data[waymo_lane_id][WaymoLaneProperty.RIGHT_NEIGHBORS]
 
     def get_lane_width(self, waymo_lane_id, waymo_map_data):
         """

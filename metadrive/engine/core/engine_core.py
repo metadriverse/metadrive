@@ -1,7 +1,8 @@
 import logging
+
 import sys
 import time
-from typing import Optional, Union
+from typing import Optional, Union, Tuple
 
 import gltf
 from direct.gui.OnscreenImage import OnscreenImage
@@ -18,7 +19,7 @@ from metadrive.engine.core.sky_box import SkyBox
 from metadrive.engine.core.terrain import Terrain
 from metadrive.utils.utils import is_mac, setup_logger
 from panda3d.bullet import BulletDebugNode
-from panda3d.core import AntialiasAttrib, loadPrcFileData, LineSegs, PythonCallbackObject
+from panda3d.core import AntialiasAttrib, loadPrcFileData, LineSegs, PythonCallbackObject, Vec3, NodePath
 
 
 def _suppress_warning():
@@ -379,6 +380,13 @@ class EngineCore(ShowBase.ShowBase):
             self._loading_logo.setColor((1, 1, 1, new_alpha))
             return task.cont
 
+    def add_line(self, start_p: Union[Vec3, Tuple], end_p: Union[Vec3, Tuple], color, thickness: float):
+        line_seg = LineSegs("interface")
+        line_seg.setColor(*color)
+        line_seg.moveTo(start_p)
+        line_seg.drawTo(end_p)
+        line_seg.setThickness(thickness)
+        NodePath(line_seg.create(False)).reparentTo(self.render)
 
 if __name__ == "__main__":
     world = EngineCore({"debug": True})
