@@ -1,4 +1,5 @@
 import logging
+from metadrive.component.road_network.node_road_network import NodeRoadNetwork
 
 import numpy as np
 from panda3d.core import TransparencyAttrib, LineSegs, NodePath
@@ -101,30 +102,7 @@ class BaseNavigation:
         :param destination: end road node or end lane index
         :return: None
         """
-        self.checkpoints = self.map.road_network.shortest_path(current_lane_index, destination)
-        self._target_checkpoints_index = [0, 1]
-        # update routing info
-        if len(self.checkpoints) <= 2:
-            self.checkpoints = [current_lane_index[0], current_lane_index[1]]
-            self._target_checkpoints_index = [0, 0]
-        assert len(self.checkpoints
-                   ) >= 2, "Can not find a route from {} to {}".format(current_lane_index[0], destination)
-        self.final_road = Road(self.checkpoints[-2], self.checkpoints[-1])
-        final_lanes = self.final_road.get_lanes(self.map.road_network)
-        self.final_lane = final_lanes[-1]
-        self._navi_info.fill(0.0)
-        target_road_1_start = self.checkpoints[0]
-        target_road_1_end = self.checkpoints[1]
-        self.current_ref_lanes = self.map.road_network.graph[target_road_1_start][target_road_1_end]
-        self.next_ref_lanes = self.map.road_network.graph[self.checkpoints[1]][self.checkpoints[2]
-                                                                               ] if len(self.checkpoints) > 2 else None
-        self.current_road = Road(target_road_1_start, target_road_1_end)
-        self.next_road = Road(self.checkpoints[1], self.checkpoints[2]) if len(self.checkpoints) > 2 else None
-        if self._dest_node_path is not None:
-            ref_lane = final_lanes[0]
-            later_middle = (float(self.get_current_lane_num()) / 2 - 0.5) * self.get_current_lane_width()
-            check_point = ref_lane.position(ref_lane.length, later_middle)
-            self._dest_node_path.setPos(check_point[0], -check_point[1], 1.8)
+        raise NotImplementedError
 
     def update_localization(self, ego_vehicle):
         """
@@ -198,8 +176,6 @@ class BaseNavigation:
                 pass
             self._dest_node_path.removeNode()
             self._goal_node_path.removeNode()
-        self.next_road = None
-        self.current_road = None
         self.next_ref_lanes = None
         self.current_ref_lanes = None
 
@@ -229,11 +205,14 @@ class BaseNavigation:
             if lane in self.current_ref_lanes:
                 return lane, index
         nx_ckpt = self._target_checkpoints_index[-1]
-        if nx_ckpt == self.checkpoints[-1] or self.next_road is None:
+        if nx_ckpt == self.checkpoints[-1] or self.next_ref_lanes is None:
             return possible_lanes[0][:-1] if len(possible_lanes) > 0 else (None, None)
 
-        nx_nx_ckpt = nx_ckpt + 1
-        next_ref_lanes = self.map.road_network.graph[self.checkpoints[nx_ckpt]][self.checkpoints[nx_nx_ckpt]]
+        if self.map.road_network_type==NodeRoadNetwork:
+            nx_nx_ckpt = nx_ckpt + 1
+            next_ref_lanes = self.map.road_network.graph[self.checkpoints[nx_ckpt]][self.checkpoints[nx_nx_ckpt]]
+        else:
+            next_ref_lanes = self.next_ref_lanes
         for lane, index, l_1_dist in possible_lanes:
             if lane in next_ref_lanes:
                 return lane, index
