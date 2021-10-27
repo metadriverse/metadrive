@@ -87,9 +87,9 @@ class FrontBackObjects:
         """
         if ref_lanes is not None:
             assert lane in ref_lanes
-        idx = lane.index[-1]
-        left_lane = ref_lanes[idx - 1] if idx > 0 and ref_lanes is not None else None
-        right_lane = ref_lanes[idx + 1] if ref_lanes and idx + 1 < len(ref_lanes) is not None else None
+        idx = lane.index[-1] if ref_lanes is not None else None
+        left_lane = ref_lanes[idx - 1] if ref_lanes is not None and idx > 0 else None
+        right_lane = ref_lanes[idx + 1] if ref_lanes is not None and idx + 1 < len(ref_lanes) else None
         lanes = [left_lane, lane, right_lane]
 
         min_front_long = [max_distance if lane is not None else None for lane in lanes]
@@ -192,7 +192,7 @@ class IDMPolicy(BasePolicy):
         sucess = self.move_to_next_road()
         all_objects = self.control_object.lidar.get_surrounding_objects(self.control_object)
         try:
-            if sucess:
+            if sucess and self.engine.global_config.get("enable_idm_lane_change", True):
                 # perform lane change due to routing
                 acc_front_obj, acc_front_dist, steering_target_lane = self.lane_change_policy(all_objects)
             else:
@@ -248,7 +248,7 @@ class IDMPolicy(BasePolicy):
         lane_heading = target_lane.heading_theta_at(long + 1)
         v_heading = ego_vehicle.heading_theta
         steering = self.heading_pid.get_result(wrap_to_pi(lane_heading - v_heading))
-        steering += self.lateral_pid.get_result(-lat)
+        # steering += self.lateral_pid.get_result(-lat)
         return float(steering)
 
     def acceleration(self, front_obj, dist_to_front) -> float:
@@ -258,7 +258,7 @@ class IDMPolicy(BasePolicy):
         if front_obj:
             d = dist_to_front
             speed_diff = self.desired_gap(ego_vehicle, front_obj) / not_zero(d)
-            acceleration -= self.ACC_FACTOR * (speed_diff**2)
+            acceleration -= self.ACC_FACTOR * (speed_diff ** 2)
         return acceleration
 
     def desired_gap(self, ego_vehicle, front_obj, projected: bool = True) -> float:

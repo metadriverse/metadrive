@@ -34,6 +34,7 @@ WAYMO_ENV_CONFIG = dict(
 
     # ===== Agent config =====
     target_vehicle_configs={DEFAULT_AGENT: dict(spawn_lane_index=118, destination=191)},
+    enable_idm_lane_change=False,
 
     # ===== Reward Scheme =====
     # See: https://github.com/decisionforce/metadrive/issues/283
@@ -92,16 +93,24 @@ class WaymoEnv(BaseEnv):
 
 
 if __name__ == "__main__":
-    env = WaymoEnv({"use_render": True, "manual_control": True, "debug_static_world": True, "debug": True, "agent_policy":IDMPolicy})
+    env = WaymoEnv({"use_render": True, "manual_control": True, "debug_static_world": True, "debug": True,
+                    # "agent_policy": IDMPolicy,
+                    "enable_idm_lane_change": False})
     env.reset()
     while True:
         env.step([0, 0])
+        c_lane = env.vehicle.lane
+        long,lat = c_lane.local_coordinates(env.vehicle.position)
         env.render(
             text={
                 "lane_index": env.vehicle.lane_index,
                 "current_ckpt_index": env.vehicle.navigation.current_checkpoint_lane_index,
                 "next_ckpt_index": env.vehicle.navigation.next_checkpoint_lane_index,
                 "ckpts": env.vehicle.navigation.checkpoints,
-                "final_lane": env.vehicle.navigation.final_lane.index
+                "final_lane": env.vehicle.navigation.final_lane.index,
+                "lane_heading": c_lane.heading_theta_at(long),
+                "long":long,
+                "lat":lat,
+                "v_heading":env.vehicle.heading_theta
             }
         )

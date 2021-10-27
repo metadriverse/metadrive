@@ -337,12 +337,12 @@ def convert_polyline_to_metadrive(waymo_polyline):
 
 
 if __name__ == "__main__":
-    raw_data_path = AssetLoader.file_path("waymo", "raw", return_raw_style=False)
-    processed_data_path = AssetLoader.file_path("waymo", "processed", return_raw_style=False)
-    # parse raw data from input path to output path,
-    # there is 1000 raw data in google cloud, each of them produce about 500 pkl file
-    parse_data(raw_data_path, processed_data_path)
+    # raw_data_path = AssetLoader.file_path("waymo", "raw", return_raw_style=False)
+    # processed_data_path = AssetLoader.file_path("waymo", "processed", return_raw_style=False)
+    # # parse raw data from input path to output path,
+    # # there is 1000 raw data in google cloud, each of them produce about 500 pkl file
+    # parse_data(raw_data_path, processed_data_path)
 
-    # file_path = AssetLoader.file_path("waymo", "test.pkl", return_raw_style=False)
-    # data = read_waymo_data(file_path)
-    # draw_waymo_map(data)
+    file_path = AssetLoader.file_path("waymo", "processed", "0.pkl", return_raw_style=False)
+    data = read_waymo_data(file_path)
+    draw_waymo_map(data)
