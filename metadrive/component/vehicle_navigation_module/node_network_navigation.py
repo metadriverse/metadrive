@@ -15,12 +15,12 @@ from metadrive.component.vehicle_navigation_module.base_navigation import BaseNa
 
 class NodeNetworkNavigation(BaseNavigation):
     def __init__(
-            self,
-            engine,
-            show_navi_mark: bool = False,
-            random_navi_mark_color=False,
-            show_dest_mark=False,
-            show_line_to_dest=False
+        self,
+        engine,
+        show_navi_mark: bool = False,
+        random_navi_mark_color=False,
+        show_dest_mark=False,
+        show_line_to_dest=False
     ):
         """
         This class define a helper for localizing vehicles and retrieving navigation information.
@@ -84,7 +84,7 @@ class NodeNetworkNavigation(BaseNavigation):
         target_road_1_end = self.checkpoints[1]
         self.current_ref_lanes = self.map.road_network.graph[target_road_1_start][target_road_1_end]
         self.next_ref_lanes = self.map.road_network.graph[self.checkpoints[1]][self.checkpoints[2]
-        ] if len(self.checkpoints) > 2 else None
+                                                                               ] if len(self.checkpoints) > 2 else None
         self.current_road = Road(target_road_1_start, target_road_1_end)
         self.next_road = Road(self.checkpoints[1], self.checkpoints[2]) if len(self.checkpoints) > 2 else None
         if self._dest_node_path is not None:
@@ -128,8 +128,10 @@ class NodeNetworkNavigation(BaseNavigation):
         )
 
         self._navi_info[half:], lanes_heading2, _ = self._get_info_for_checkpoint(
-            lanes_id=1, ref_lane=self.next_ref_lanes[0] if self.next_ref_lanes is not None else self.current_ref_lanes[0],
-            ego_vehicle=ego_vehicle)
+            lanes_id=1,
+            ref_lane=self.next_ref_lanes[0] if self.next_ref_lanes is not None else self.current_ref_lanes[0],
+            ego_vehicle=ego_vehicle
+        )
 
         if self._show_navi_info:
             # Whether to visualize little boxes in the scene denoting the checkpoints

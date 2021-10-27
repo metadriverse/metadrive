@@ -7,14 +7,13 @@ class EdgeNetworkNavigation(BaseNavigation):
    This class define a helper for localizing vehicles and retrieving navigation information.
    It now only support EdgeRoadNetwork
    """
-
     def __init__(
-            self,
-            engine,
-            show_navi_mark: bool = False,
-            random_navi_mark_color=False,
-            show_dest_mark=False,
-            show_line_to_dest=False
+        self,
+        engine,
+        show_navi_mark: bool = False,
+        random_navi_mark_color=False,
+        show_dest_mark=False,
+        show_line_to_dest=False
     ):
         super(EdgeNetworkNavigation,
               self).__init__(engine, show_navi_mark, random_navi_mark_color, show_dest_mark, show_line_to_dest)
@@ -70,7 +69,9 @@ class EdgeNetworkNavigation(BaseNavigation):
         )
 
         self._navi_info[half:], lanes_heading2, _ = self._get_info_for_checkpoint(
-            lanes_id=1, ref_lane=self.map.road_network.get_lane(self.next_checkpoint_lane_index), ego_vehicle=ego_vehicle
+            lanes_id=1,
+            ref_lane=self.map.road_network.get_lane(self.next_checkpoint_lane_index),
+            ego_vehicle=ego_vehicle
         )
 
         if self._show_navi_info:  # Whether to visualize little boxes in the scene denoting the checkpoints
@@ -81,7 +82,7 @@ class EdgeNetworkNavigation(BaseNavigation):
             dest_pos = self._dest_node_path.getPos()
             self._draw_line_to_dest(start_position=ego_vehicle.position, end_position=(dest_pos[0], -dest_pos[1]))
 
-    def _update_target_checkpoints(self, ego_lane_index, ego_lane_longitude)->bool:
+    def _update_target_checkpoints(self, ego_lane_index, ego_lane_longitude) -> bool:
         """
         update the checkpoint, return True if updated else False
         """

@@ -21,7 +21,6 @@ class EdgeRoadNetwork(BaseRoadNetwork):
     Compared to NodeRoadNetwork representing the relation of lanes in a node-based graph, EdgeRoadNetwork stores the
     relationship in edge-based graph, which is more common in real map representation
     """
-
     def __init__(self):
         super(EdgeRoadNetwork, self).__init__()
         self.graph = {}
