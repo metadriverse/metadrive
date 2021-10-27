@@ -138,8 +138,6 @@ class NodeNetworkNavigation(BaseNavigation):
             dest_pos = self._dest_node_path.getPos()
             self._draw_line_to_dest(start_position=ego_vehicle.position, end_position=(dest_pos[0], -dest_pos[1]))
 
-        return lane, lane_index
-
     def _get_info_for_checkpoint(self, lanes_id, lanes, ego_vehicle):
         """
         It is for getting navigation information

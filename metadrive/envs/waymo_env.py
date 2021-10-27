@@ -32,7 +32,7 @@ WAYMO_ENV_CONFIG = dict(
     # ),
 
     # ===== Agent config =====
-    target_vehicle_configs={DEFAULT_AGENT: dict(spawn_lane_index=118)},
+    target_vehicle_configs={DEFAULT_AGENT: dict(spawn_lane_index=118, destination=191)},
 
     # ===== Reward Scheme =====
     # See: https://github.com/decisionforce/metadrive/issues/283
@@ -75,9 +75,23 @@ class WaymoEnv(BaseEnv):
         super(WaymoEnv, self).setup_engine()
         self.engine.register_manager("map_manager", WaymoMapManager())
 
+    def reward_function(self, vehicle_id: str):
+        """
+        Override this func to get a new reward function
+        :param vehicle_id: name of this base vehicle
+        :return: reward, reward info
+        """
+        return 0, {}
+
+    def cost_function(self, vehicle_id: str):
+        return 0, {}
+
+    def done_function(self, vehicle_id: str):
+        return False, {}
+
 
 if __name__ == "__main__":
-    env = WaymoEnv({"use_render": False, "manual_control": True})
+    env = WaymoEnv({"use_render": True, "manual_control": True})
     env.reset()
     while True:
         env.step([0, 0])

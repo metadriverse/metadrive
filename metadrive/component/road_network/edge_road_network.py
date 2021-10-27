@@ -21,6 +21,7 @@ class EdgeRoadNetwork(BaseRoadNetwork):
     Compared to NodeRoadNetwork representing the relation of lanes in a node-based graph, EdgeRoadNetwork stores the
     relationship in edge-based graph, which is more common in real map representation
     """
+
     def __init__(self):
         super(EdgeRoadNetwork, self).__init__()
         self.graph = {}
@@ -83,3 +84,12 @@ class EdgeRoadNetwork(BaseRoadNetwork):
                     yield path + [_next]
                 elif _next in self.graph:
                     queue.append((_next, path + [_next]))
+
+    def get_peer_lanes_from_index(self, lane_index):
+        info: lane_info = self.graph[lane_index]
+        ret = [self.graph[lane_index].lane]
+        for left_n in info.left_lanes:
+            ret.append(self.graph[left_n.index])
+        for right_n in info.right_lanes:
+            ret.append(self.graph[right_n.index])
+        return ret
