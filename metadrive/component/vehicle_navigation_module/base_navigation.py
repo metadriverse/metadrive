@@ -208,7 +208,7 @@ class BaseNavigation:
         if nx_ckpt == self.checkpoints[-1] or self.next_ref_lanes is None:
             return possible_lanes[0][:-1] if len(possible_lanes) > 0 else (None, None)
 
-        if self.map.road_network_type==NodeRoadNetwork:
+        if self.map.road_network_type == NodeRoadNetwork:
             nx_nx_ckpt = nx_ckpt + 1
             next_ref_lanes = self.map.road_network.graph[self.checkpoints[nx_ckpt]][self.checkpoints[nx_nx_ckpt]]
         else:

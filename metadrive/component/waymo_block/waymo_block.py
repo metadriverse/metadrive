@@ -85,7 +85,7 @@ class WaymoBlock(BaseBlock):
                 lane_end = line.get_point(line.length)
             direction_v = lane_end - lane_start
             theta = -math.atan2(direction_v[1], direction_v[0])
-            if segment == segment_num-1:
+            if segment == segment_num - 1:
                 factor = 1
             else:
                 factor = 1.25

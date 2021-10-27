@@ -102,7 +102,7 @@ class EdgeNetworkNavigation(BaseNavigation):
         return False
 
     def get_current_lateral_range(self, current_position, engine) -> float:
-        return self.current_lane.width*len(self.current_ref_lanes)
+        return self.current_lane.width * len(self.current_ref_lanes)
 
     @property
     def current_checkpoint_lane_index(self):
