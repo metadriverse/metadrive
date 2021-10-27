@@ -42,7 +42,7 @@ class WaymoMapManager(BaseManager):
 
     def destroy(self):
         self.maps = None
-        self.current_map=None
+        self.current_map = None
         self._map_configs = None
         super(WaymoMapManager, self).destroy()
 

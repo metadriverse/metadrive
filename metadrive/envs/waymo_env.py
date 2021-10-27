@@ -54,7 +54,6 @@ WAYMO_ENV_CONFIG = dict(
 
 
 class WaymoEnv(BaseEnv):
-
     @classmethod
     def default_config(cls):
         config = super(WaymoEnv, cls).default_config()
