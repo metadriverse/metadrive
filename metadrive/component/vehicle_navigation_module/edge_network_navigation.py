@@ -33,7 +33,6 @@ class EdgeNetworkNavigation(BaseNavigation):
         self.checkpoints = self.map.road_network.shortest_path(current_lane_index, destination)
         self._target_checkpoints_index = [0, 1]
         # update routing info
-        self._target_checkpoints_index = [0, 0]
         assert len(self.checkpoints) >= 0, "Can not find a route from {} to {}".format(current_lane_index, destination)
         self.final_lane = self.map.road_network.get_lane(self.checkpoints[-1])
         self._navi_info.fill(0.0)
@@ -93,11 +92,9 @@ class EdgeNetworkNavigation(BaseNavigation):
         new_index = ego_lane_index
         if new_index in self.checkpoints[self._target_checkpoints_index[1]:] \
                 and ego_lane_longitude < self.CKPT_UPDATE_RANGE:
-            if new_index not in self.checkpoints[self._target_checkpoints_index[1]:-1]:
-                return False
-            idx = self.checkpoints.index(new_index, self._target_checkpoints_index[1], -1)
+            idx = self.checkpoints.index(new_index, self._target_checkpoints_index[1])
             self._target_checkpoints_index = [idx]
-            if idx + 1 == len(self.checkpoints) - 1:
+            if idx + 1 == len(self.checkpoints):
                 self._target_checkpoints_index.append(idx)
             else:
                 self._target_checkpoints_index.append(idx + 1)
@@ -105,8 +102,7 @@ class EdgeNetworkNavigation(BaseNavigation):
         return False
 
     def get_current_lateral_range(self, current_position, engine) -> float:
-
-        return 10
+        return self.current_lane.width*len(self.current_ref_lanes)
 
     @property
     def current_checkpoint_lane_index(self):

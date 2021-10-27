@@ -98,5 +98,7 @@ if __name__ == "__main__":
         env.render(text={
             "lane_index": env.vehicle.lane_index,
             "current_ckpt_index":env.vehicle.navigation.current_checkpoint_lane_index,
-            "next_ckpt_index":env.vehicle.navigation.next_checkpoint_lane_index
+            "next_ckpt_index":env.vehicle.navigation.next_checkpoint_lane_index,
+            "ckpts":env.vehicle.navigation.checkpoints,
+            "final_lane":env.vehicle.navigation.final_lane.index
         })

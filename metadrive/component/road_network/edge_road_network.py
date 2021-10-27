@@ -88,7 +88,7 @@ class EdgeRoadNetwork(BaseRoadNetwork):
         info: lane_info = self.graph[lane_index]
         ret = [self.graph[lane_index].lane]
         for left_n in info.left_lanes:
-            ret.append(self.graph[left_n.index])
+            ret.append(self.graph[left_n["id"]].lane)
         for right_n in info.right_lanes:
-            ret.append(self.graph[right_n.index])
+            ret.append(self.graph[right_n["id"]].lane)
         return ret
