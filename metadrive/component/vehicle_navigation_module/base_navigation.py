@@ -132,12 +132,11 @@ class BaseNavigation:
         """
         raise NotImplementedError
 
-    def _get_info_for_checkpoint(self, lanes_id, lanes, ego_vehicle):
+    def _get_info_for_checkpoint(self, lanes_id, ref_lane, ego_vehicle):
 
         navi_information = []
         # Project the checkpoint position into the target vehicle's coordination, where
         # +x is the heading and +y is the right hand side.
-        ref_lane = lanes[0]
         later_middle = (float(self.get_current_lane_num()) / 2 - 0.5) * self.get_current_lane_width()
         check_point = ref_lane.position(ref_lane.length, later_middle)
         dir_vec = check_point - ego_vehicle.position  # get the vector from center of vehicle to checkpoint

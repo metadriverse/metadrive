@@ -124,13 +124,13 @@ class NodeNetworkNavigation(BaseNavigation):
         self._navi_info.fill(0.0)
         half = self.navigation_info_dim // 2
         self._navi_info[:half], lanes_heading1, checkpoint = self._get_info_for_checkpoint(
-            lanes_id=0, lanes=self.current_ref_lanes, ego_vehicle=ego_vehicle
+            lanes_id=0, ref_lane=self.current_ref_lanes[0], ego_vehicle=ego_vehicle
         )
 
         self._navi_info[half:], lanes_heading2, _ = self._get_info_for_checkpoint(
-            lanes_id=1, lanes=self.next_ref_lanes if self.next_ref_lanes is not None else self.current_ref_lanes,
+            lanes_id=1, ref_lane=self.next_ref_lanes[0] if self.next_ref_lanes is not None else self.current_ref_lanes[0],
             ego_vehicle=ego_vehicle)
-        
+
         if self._show_navi_info:
             # Whether to visualize little boxes in the scene denoting the checkpoints
             pos_of_goal = checkpoint
@@ -145,7 +145,7 @@ class NodeNetworkNavigation(BaseNavigation):
         Return should_update: True or False
         """
         if self._target_checkpoints_index[0] == self._target_checkpoints_index[1]:  # on last road
-            return True
+            return False
 
         # arrive to second checkpoint
         current_road_start_point = ego_lane_index[0]
