@@ -1,4 +1,5 @@
 from metadrive.constants import DEFAULT_AGENT
+from metadrive.policy.idm_policy import IDMPolicy
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.envs.base_env import BaseEnv
 from metadrive.manager.waymo_map_manager import WaymoMapManager
@@ -91,7 +92,7 @@ class WaymoEnv(BaseEnv):
 
 
 if __name__ == "__main__":
-    env = WaymoEnv({"use_render": True, "manual_control": True, "debug_static_world": True, "debug": True})
+    env = WaymoEnv({"use_render": True, "manual_control": True, "debug_static_world": True, "debug": True, "agent_policy":IDMPolicy})
     env.reset()
     while True:
         env.step([0, 0])
