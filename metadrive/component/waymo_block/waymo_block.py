@@ -33,7 +33,7 @@ class WaymoBlock(BaseBlock):
         graph = self.block_network.graph
         for id, lane_info in graph.items():
             lane = lane_info.lane
-            lane.construct_lane_in_block(self, lane)
+            lane.construct_lane_in_block(self, lane_index=id)
         for lane_id, data in self.waymo_map_data.items():
             type = data.get("type", None)
             if RoadLineType.is_road_line(type):

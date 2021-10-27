@@ -76,7 +76,7 @@ class WaymoEnv(BaseEnv):
 
 
 if __name__ == "__main__":
-    env = WaymoEnv({"use_render": True, "manual_control": True})
+    env = WaymoEnv({"use_render": False, "manual_control": True})
     env.reset()
     while True:
         env.step([0, 0])

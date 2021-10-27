@@ -114,7 +114,7 @@ class AbstractLane:
             return True
         return False
 
-    def construct_lane_in_block(self, block, lane_index=None):
+    def construct_lane_in_block(self, block, lane_index):
         segment_num = int(self.length / DrivableAreaProperty.LANE_SEGMENT_LENGTH)
         if segment_num == 0:
             middle = self.position(self.length / 2, 0)
