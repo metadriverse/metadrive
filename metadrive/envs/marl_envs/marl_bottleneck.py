@@ -105,7 +105,7 @@ class MultiAgentBottleneckEnv(MultiAgentMetaDrive):
             current_lane = vehicle.lane
         else:
             current_lane = vehicle.navigation.current_ref_lanes[0]
-            current_road = vehicle.current_road
+            current_road = vehicle.navigation.current_road
         long_last, _ = current_lane.local_coordinates(vehicle.last_position)
         long_now, lateral_now = current_lane.local_coordinates(vehicle.position)
 

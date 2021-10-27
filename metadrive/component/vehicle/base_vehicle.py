@@ -5,15 +5,11 @@ from typing import Union, Optional
 import gym
 import numpy as np
 import seaborn as sns
-from panda3d.bullet import BulletVehicle, BulletBoxShape, ZUp
-from panda3d.core import Material, Vec3, TransformState, LQuaternionf
-
 from metadrive.base_class.base_object import BaseObject
 from metadrive.component.lane.abs_lane import AbstractLane
 from metadrive.component.lane.circular_lane import CircularLane
 from metadrive.component.lane.straight_lane import StraightLane
 from metadrive.component.lane.waypoint_lane import WayPointLane
-from metadrive.component.road_network import Road
 from metadrive.component.vehicle_module.depth_camera import DepthCamera
 from metadrive.component.vehicle_module.distance_detector import SideDetector, LaneLineDetector
 from metadrive.component.vehicle_module.lidar import Lidar
@@ -26,13 +22,14 @@ from metadrive.engine.core.image_buffer import ImageBuffer
 from metadrive.engine.engine_utils import get_engine, engine_initialized
 from metadrive.engine.physics_node import BaseRigidBodyNode
 from metadrive.utils import Config, safe_clip_for_small_array
-from metadrive.utils import get_np_random
 from metadrive.utils.coordinates_shift import panda_heading, metadrive_heading
 from metadrive.utils.math_utils import get_vertical_vector, norm, clip
 from metadrive.utils.math_utils import wrap_to_pi
 from metadrive.utils.scene_utils import ray_localization
 from metadrive.utils.scene_utils import rect_region_detection
 from metadrive.utils.space import VehicleParameterSpace, ParameterSpace
+from panda3d.bullet import BulletVehicle, BulletBoxShape, ZUp
+from panda3d.core import Material, Vec3, TransformState, LQuaternionf
 
 
 class BaseVehicleState:
@@ -414,10 +411,6 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     def velocity_direction(self):
         direction = self.system.getForwardVector()
         return np.asarray([direction[0], -direction[1]])
-
-    @property
-    def current_road(self):
-        return Road(*self.lane_index[0:-1])
 
     """---------------------------------------- some math tool ----------------------------------------------"""
 

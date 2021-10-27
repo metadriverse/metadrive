@@ -395,7 +395,7 @@ def _vis():
         if len(env.vehicles) > 0:
             v = env.current_track_vehicle
             # print(v.navigation.checkpoints)
-            render_text["current_road"] = v.current_road
+            render_text["current_road"] = v.navigation.current_road
 
         env.render(text=render_text)
         for kkk, ddd in d.items():
