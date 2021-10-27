@@ -1,16 +1,16 @@
 import copy
-from metadrive.component.pgblock.first_block import FirstPGBlock
 import logging
 from typing import Union
 
 import numpy as np
+
 from metadrive.component.map.base_map import BaseMap
 from metadrive.component.map.pg_map import parse_map_config, MapGenerateMethod
+from metadrive.component.pgblock.first_block import FirstPGBlock
 from metadrive.component.vehicle.base_vehicle import BaseVehicle
 from metadrive.constants import DEFAULT_AGENT, TerminationState
 from metadrive.envs.base_env import BaseEnv
 from metadrive.manager.traffic_manager import TrafficMode
-
 from metadrive.utils import clip, Config, get_np_random
 
 METADRIVE_DEFAULT_CONFIG = dict(

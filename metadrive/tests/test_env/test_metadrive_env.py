@@ -3,6 +3,7 @@ import os
 
 import numpy as np
 import pytest
+
 from metadrive import MetaDriveEnv
 from metadrive.constants import TerminationState
 

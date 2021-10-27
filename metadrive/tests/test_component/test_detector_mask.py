@@ -4,6 +4,7 @@ import math
 from collections import defaultdict, namedtuple
 
 import numpy as np
+
 from metadrive.component.vehicle.base_vehicle import BaseVehicle
 from metadrive.envs import MetaDriveEnv
 

@@ -1,11 +1,11 @@
 import time
-from metadrive.obs.image_obs import ImageStateObservation
-from metadrive.obs.state_obs import LidarStateObservation
 from collections import defaultdict
 from typing import Union, Dict, AnyStr, Optional, Tuple
 
 import gym
 import numpy as np
+from panda3d.core import PNMImage
+
 from metadrive.component.vehicle.base_vehicle import BaseVehicle
 from metadrive.constants import RENDER_MODE_NONE, DEFAULT_AGENT, REPLAY_DONE
 from metadrive.engine.base_engine import BaseEngine
@@ -14,10 +14,11 @@ from metadrive.engine.engine_utils import initialize_engine, close_engine, \
 from metadrive.manager.agent_manager import AgentManager
 from metadrive.manager.record_manager import RecordManager
 from metadrive.manager.replay_manager import ReplayManager
+from metadrive.obs.image_obs import ImageStateObservation
 from metadrive.obs.observation_base import ObservationBase
+from metadrive.obs.state_obs import LidarStateObservation
 from metadrive.utils import Config, merge_dicts, get_np_random, concat_step_infos
 from metadrive.utils.utils import auto_termination
-from panda3d.core import PNMImage
 
 BASE_DEFAULT_CONFIG = dict(
 

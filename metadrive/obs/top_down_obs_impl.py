@@ -1,6 +1,7 @@
 from typing import List, Tuple, Union
 
 import numpy as np
+
 from metadrive.component.lane.circular_lane import CircularLane
 from metadrive.component.lane.straight_lane import StraightLane
 from metadrive.constants import LineType

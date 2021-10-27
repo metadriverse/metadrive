@@ -9,6 +9,7 @@ import argparse
 import random
 
 import numpy as np
+
 from metadrive import MetaDriveEnv
 from metadrive.constants import HELP_MESSAGE
 

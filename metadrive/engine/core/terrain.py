@@ -1,11 +1,12 @@
 # import numpy
 import math
 
+from panda3d.bullet import BulletRigidBodyNode, BulletPlaneShape
+from panda3d.core import Vec3, CardMaker, LQuaternionf, TextureStage, Texture, SamplerState
+
 from metadrive.base_class.base_object import BaseObject
 from metadrive.constants import BodyName, CamMask, CollisionGroup
 from metadrive.engine.asset_loader import AssetLoader
-from panda3d.bullet import BulletRigidBodyNode, BulletPlaneShape
-from panda3d.core import Vec3, CardMaker, LQuaternionf, TextureStage, Texture, SamplerState
 
 
 class Terrain(BaseObject):

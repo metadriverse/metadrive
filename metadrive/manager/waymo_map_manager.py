@@ -1,7 +1,8 @@
+import os
+
+from metadrive.component.map.waymo_map import WaymoMap
 from metadrive.manager.base_manager import BaseManager
 from metadrive.utils.waymo_map_utils import read_waymo_data
-from metadrive.component.map.waymo_map import WaymoMap
-import os
 
 
 class WaymoMapManager(BaseManager):

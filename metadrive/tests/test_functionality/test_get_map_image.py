@@ -1,6 +1,7 @@
 import os
 
 import matplotlib.pyplot as plt
+
 from metadrive.envs.metadrive_env import MetaDriveEnv
 from metadrive.utils import setup_logger
 from metadrive.utils.draw_top_down_map import draw_top_down_map

@@ -14,14 +14,15 @@ from typing import Dict
 import matplotlib
 import numpy as np
 import ray
-from metadrive import GeneralizationRacing
-from metadrive.constants import TerminationState
 from ray.rllib.agents.callbacks import DefaultCallbacks
 from ray.rllib.agents.ppo import PPOTrainer
 from ray.rllib.env import BaseEnv
 from ray.rllib.evaluation import MultiAgentEpisode, RolloutWorker
 from ray.rllib.execution.rollout_ops import ParallelRollouts
 from ray.rllib.policy import Policy
+
+from metadrive import GeneralizationRacing
+from metadrive.constants import TerminationState
 
 matplotlib.rcParams['pdf.fonttype'] = 42
 matplotlib.rcParams['ps.fonttype'] = 42

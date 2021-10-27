@@ -2,8 +2,9 @@ import os
 import sys
 
 from PIL import Image
-from metadrive.envs.metadrive_env import MetaDriveEnv
 from panda3d.core import PNMImage
+
+from metadrive.envs.metadrive_env import MetaDriveEnv
 
 
 def capture_image(headless):

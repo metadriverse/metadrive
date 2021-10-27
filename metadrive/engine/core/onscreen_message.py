@@ -1,8 +1,9 @@
 from typing import Optional, Union
 
 from direct.showbase import OnScreenDebug
-from metadrive.constants import HELP_MESSAGE, DEBUG_MESSAGE
 from panda3d.core import Vec4
+
+from metadrive.constants import HELP_MESSAGE, DEBUG_MESSAGE
 
 
 class ScreenMessage(OnScreenDebug.OnScreenDebug):

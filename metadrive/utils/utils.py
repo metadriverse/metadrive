@@ -3,8 +3,9 @@ import logging
 import os
 import sys
 
-from metadrive.constants import TerminationState
 from panda3d.bullet import BulletBodyNode
+
+from metadrive.constants import TerminationState
 
 
 def import_pygame():

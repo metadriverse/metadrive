@@ -2,6 +2,7 @@ import logging
 from collections import namedtuple
 
 import numpy as np
+
 from metadrive.component.map.base_map import BaseMap
 from metadrive.component.vehicle.vehicle_type import *
 from metadrive.manager.base_manager import BaseManager

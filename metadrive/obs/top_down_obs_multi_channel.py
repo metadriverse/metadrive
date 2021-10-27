@@ -3,6 +3,7 @@ from collections import deque
 
 import gym
 import numpy as np
+
 from metadrive.component.vehicle.base_vehicle import BaseVehicle
 from metadrive.constants import Decoration, DEFAULT_AGENT
 from metadrive.obs.top_down_obs import TopDownObservation

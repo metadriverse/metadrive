@@ -1,6 +1,7 @@
 import random
 
 import matplotlib.pyplot as plt
+
 from metadrive import MetaDriveEnv
 from metadrive.utils.draw_top_down_map import draw_top_down_map
 

@@ -1,7 +1,8 @@
-from metadrive.envs.base_env import BaseEnv
-from metadrive.engine.asset_loader import AssetLoader
-from metadrive.manager.waymo_map_manager import WaymoMapManager
 from metadrive.constants import DEFAULT_AGENT
+from metadrive.engine.asset_loader import AssetLoader
+from metadrive.envs.base_env import BaseEnv
+from metadrive.manager.waymo_map_manager import WaymoMapManager
+
 try:
     from metadrive.utils.waymo_map_utils import AgentType
     from metadrive.utils.waymo_map_utils import RoadEdgeType

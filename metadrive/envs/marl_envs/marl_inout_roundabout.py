@@ -2,6 +2,7 @@ import copy
 
 import gym
 import numpy as np
+
 from metadrive.component.map.pg_map import PGMap
 from metadrive.component.pgblock.first_block import FirstPGBlock
 from metadrive.component.pgblock.roundabout import Roundabout

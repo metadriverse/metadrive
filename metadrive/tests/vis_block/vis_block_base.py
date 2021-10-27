@@ -1,13 +1,14 @@
 from typing import Union, Tuple
 
 from direct.showbase import ShowBase
+from panda3d.bullet import BulletPlaneShape, BulletRigidBodyNode, BulletDebugNode
+from panda3d.core import Vec3, NodePath, LineSegs
+
 from metadrive.component.algorithm.BIG import NextStep
 from metadrive.component.map.base_map import BaseMap
 from metadrive.constants import BKG_COLOR
 from metadrive.constants import CollisionGroup
 from metadrive.engine.core.physics_world import PhysicsWorld
-from panda3d.bullet import BulletPlaneShape, BulletRigidBodyNode, BulletDebugNode
-from panda3d.core import Vec3, NodePath, LineSegs
 
 
 class TestBlock(ShowBase.ShowBase):

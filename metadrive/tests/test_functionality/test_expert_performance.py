@@ -1,6 +1,7 @@
 import time
 
 import numpy as np
+
 from metadrive import MetaDriveEnv
 from metadrive.constants import DEFAULT_AGENT
 from metadrive.examples import expert, get_terminal_state

@@ -1,10 +1,14 @@
 import math
-from metadrive.component.lane.metadrive_lane import MetaDriveLane
-from metadrive.component.lane.waypoint_lane import WayPointLane
 from typing import List, TYPE_CHECKING, Tuple, Union
 
 import numpy as np
+from panda3d.bullet import BulletBoxShape, BulletCylinderShape, ZUp
+from panda3d.core import TransformState
+from panda3d.core import Vec3
+
 from metadrive.component.lane.circular_lane import CircularLane
+from metadrive.component.lane.metadrive_lane import MetaDriveLane
+from metadrive.component.lane.waypoint_lane import WayPointLane
 from metadrive.constants import CollisionGroup
 from metadrive.constants import Decoration, BodyName
 from metadrive.engine.core.engine_core import EngineCore
@@ -13,9 +17,6 @@ from metadrive.utils.coordinates_shift import panda_heading
 from metadrive.utils.coordinates_shift import panda_position
 from metadrive.utils.math_utils import get_points_bounding_box, norm
 from metadrive.utils.utils import get_object_from_node
-from panda3d.bullet import BulletBoxShape, BulletCylinderShape, ZUp
-from panda3d.core import TransformState
-from panda3d.core import Vec3
 
 if TYPE_CHECKING:
     from metadrive.component.pgblock.pg_block import PGBlockSocket

@@ -6,10 +6,11 @@ import time
 
 import numpy as np
 from gym import logger, error
+from panda3d.core import PNMImage
+
 from metadrive.component.algorithm.BIG import BigGenerateMethod
 from metadrive.component.map.base_map import BaseMap
 from metadrive.envs.metadrive_env import MetaDriveEnv
-from panda3d.core import PNMImage
 
 
 class ImageEncoder(object):

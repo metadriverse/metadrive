@@ -5,11 +5,12 @@ from typing import Tuple
 
 import numpy as np
 from direct.controls.InputState import InputState
+from panda3d.core import Vec3, Point3
+from panda3d.core import WindowProperties
+
 from metadrive.constants import CollisionGroup
 from metadrive.engine.engine_utils import get_engine
 from metadrive.utils.coordinates_shift import panda_heading, panda_position
-from panda3d.core import Vec3, Point3
-from panda3d.core import WindowProperties
 
 
 class MainCamera:
