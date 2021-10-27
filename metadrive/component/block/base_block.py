@@ -25,7 +25,9 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
 
     ID = "B"
 
-    def __init__(self, block_index: int, global_network: NodeRoadNetwork, random_seed, ignore_intersection_checking=False):
+    def __init__(
+        self, block_index: int, global_network: NodeRoadNetwork, random_seed, ignore_intersection_checking=False
+    ):
         super(BaseBlock, self).__init__(str(block_index) + self.ID, random_seed, escape_random_seed_assertion=True)
         # block information
         assert self.ID is not None, "Each Block must has its unique ID When define Block"
@@ -66,11 +68,11 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
         raise NotImplementedError
 
     def construct_block(
-            self,
-            root_render_np: NodePath,
-            physics_world: PhysicsWorld,
-            extra_config: Dict = None,
-            no_same_node=True
+        self,
+        root_render_np: NodePath,
+        physics_world: PhysicsWorld,
+        extra_config: Dict = None,
+        no_same_node=True
     ) -> bool:
         """
         Randomly Construct a block, if overlap return False

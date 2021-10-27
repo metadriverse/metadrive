@@ -19,6 +19,7 @@ if TYPE_CHECKING:
     from metadrive.component.pgblock.pg_block import PGBlockSocket
     from metadrive.component.road_network.node_road_network import NodeRoadNetwork
 
+
 def block_socket_merge(
     socket_1: "PGBlockSocket", socket_2: "PGBlockSocket", global_network: "NodeRoadNetwork", positive_merge: False
 ):
@@ -30,7 +31,11 @@ def block_socket_merge(
 
 
 def check_lane_on_road(
-    road_network: "NodeRoadNetwork", lane, positive: float = 0, ignored=None, ignore_intersection_checking=None
+    road_network: "NodeRoadNetwork",
+    lane,
+    positive: float = 0,
+    ignored=None,
+    ignore_intersection_checking=None
 ) -> bool:
     """
     Calculate if the new lane intersects with other lanes in current road network

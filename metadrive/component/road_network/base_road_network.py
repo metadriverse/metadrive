@@ -7,8 +7,8 @@ logger = logging.getLogger(__name__)
 
 LaneIndex = Union[str, Tuple[str, str, int]]
 
-class BaseRoadNetwork:
 
+class BaseRoadNetwork:
     def __init__(self, debug=False):
         self.graph = None
 

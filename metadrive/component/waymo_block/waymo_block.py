@@ -96,4 +96,3 @@ class WaymoBlock(BaseBlock):
                     )
             last_theta = theta
             WaymoLane.construct_sidewalk_segment(self, lane_start, lane_end, length_multiply=factor, extra_thrust=1)
-

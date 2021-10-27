@@ -108,4 +108,3 @@ class CityMap(BaseMap):
     @property
     def road_network_type(self):
         return NodeRoadNetwork
-

@@ -4,6 +4,7 @@ from metadrive.utils import import_pygame
 
 pygame = import_pygame()
 
+
 class BaseMap(BaseRunnable):
     """
     Base class for Map generation!
