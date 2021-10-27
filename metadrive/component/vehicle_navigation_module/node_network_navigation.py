@@ -14,28 +14,26 @@ from metadrive.component.vehicle_navigation_module.base_navigation import BaseNa
 
 
 class NodeNetworkNavigation(BaseNavigation):
-
     def __init__(
-            self,
-            engine,
-            show_navi_mark: bool = False,
-            random_navi_mark_color=False,
-            show_dest_mark=False,
-            show_line_to_dest=False
+        self,
+        engine,
+        show_navi_mark: bool = False,
+        random_navi_mark_color=False,
+        show_dest_mark=False,
+        show_line_to_dest=False
     ):
         """
         This class define a helper for localizing vehicles and retrieving navigation information.
         It now only support from first block start to the end node, but can be extended easily.
         """
-        super(NodeNetworkNavigation, self).__init__(engine, show_navi_mark, random_navi_mark_color, show_dest_mark,
-                                                    show_line_to_dest)
+        super(NodeNetworkNavigation,
+              self).__init__(engine, show_navi_mark, random_navi_mark_color, show_dest_mark, show_line_to_dest)
         self.final_road = None
         self.current_road = None
         self.next_road = None
 
     def reset(self, map: BaseMap, current_lane, destination=None, random_seed=None):
-        self.map = map
-        self.current_lane = current_lane
+        super(NodeNetworkNavigation, self).reset(map, current_lane)
         assert self.map.road_network_type == NodeRoadNetwork, "This Navigation module only support NodeRoadNetwork type"
         destination = self.auto_assign_task(map, current_lane.index, destination, random_seed)
         self.set_route(current_lane.index, destination)
@@ -76,8 +74,8 @@ class NodeNetworkNavigation(BaseNavigation):
         if len(self.checkpoints) <= 2:
             self.checkpoints = [current_lane_index[0], current_lane_index[1]]
             self._target_checkpoints_index = [0, 0]
-        assert len(self.checkpoints) >= 2, "Can not find a route from {} to {}".format(current_lane_index[0],
-                                                                                       destination)
+        assert len(self.checkpoints
+                   ) >= 2, "Can not find a route from {} to {}".format(current_lane_index[0], destination)
         self.final_road = Road(self.checkpoints[-2], self.checkpoints[-1])
         final_lanes = self.final_road.get_lanes(self.map.road_network)
         self.final_lane = final_lanes[-1]
@@ -86,7 +84,7 @@ class NodeNetworkNavigation(BaseNavigation):
         target_road_1_end = self.checkpoints[1]
         self.current_ref_lanes = self.map.road_network.graph[target_road_1_start][target_road_1_end]
         self.next_ref_lanes = self.map.road_network.graph[self.checkpoints[1]][self.checkpoints[2]
-        ] if len(self.checkpoints) > 2 else None
+                                                                               ] if len(self.checkpoints) > 2 else None
         self.current_road = Road(target_road_1_start, target_road_1_end)
         self.next_road = Road(self.checkpoints[1], self.checkpoints[2]) if len(self.checkpoints) > 2 else None
         if self._dest_node_path is not None:
@@ -138,9 +136,7 @@ class NodeNetworkNavigation(BaseNavigation):
             self._goal_node_path.setH(self._goal_node_path.getH() + 3)
             self.navi_arrow_dir = [lanes_heading1, lanes_heading2]
             dest_pos = self._dest_node_path.getPos()
-            self._draw_line_to_dest(
-                start_position=ego_vehicle.position,
-                end_position=(dest_pos[0], -dest_pos[1]))
+            self._draw_line_to_dest(start_position=ego_vehicle.position, end_position=(dest_pos[0], -dest_pos[1]))
 
         return lane, lane_index
 
@@ -177,8 +173,8 @@ class NodeNetworkNavigation(BaseNavigation):
         angle = 0.0
         if isinstance(ref_lane, CircularLane):
             bendradius = ref_lane.radius / (
-                    BlockParameterSpace.CURVE[Parameter.radius].max +
-                    self.get_current_lane_num() * self.get_current_lane_width()
+                BlockParameterSpace.CURVE[Parameter.radius].max +
+                self.get_current_lane_num() * self.get_current_lane_width()
             )
             dir = ref_lane.direction
             if dir == 1:
@@ -236,4 +232,3 @@ class NodeNetworkNavigation(BaseNavigation):
             return self._ray_lateral_range(engine, current_position, self.current_ref_lanes[0].direction_lateral)
         else:
             return self.get_current_lane_width() * self.get_current_lane_num()
-

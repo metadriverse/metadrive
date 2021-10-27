@@ -25,12 +25,13 @@ class BaseNavigation:
     LINE_TO_DEST_HEIGHT = 0.6
 
     def __init__(
-            self,
-            engine,
-            show_navi_mark: bool = False,
-            random_navi_mark_color=False,
-            show_dest_mark=False,
-            show_line_to_dest=False):
+        self,
+        engine,
+        show_navi_mark: bool = False,
+        random_navi_mark_color=False,
+        show_dest_mark=False,
+        show_line_to_dest=False
+    ):
         """
         This class define a helper for localizing vehicles and retrieving navigation information.
         It now only support from first block start to the end node, but can be extended easily.
@@ -42,7 +43,7 @@ class BaseNavigation:
         self.next_ref_lanes = None
         self.final_lane = None
         self.current_lane = None
-        self._navi_info = np.zeros((self.navigation_info_dim,), dtype=np.float32)  # navi information res
+        self._navi_info = np.zeros((self.navigation_info_dim, ), dtype=np.float32)  # navi information res
 
         # Vis
         self._show_navi_info = (engine.mode == RENDER_MODE_ONSCREEN and not engine.global_config["debug_physics_world"])
@@ -89,8 +90,9 @@ class BaseNavigation:
             self._dest_node_path.show(CamMask.MainCam)
         logging.debug("Load Vehicle Module: {}".format(self.__class__.__name__))
 
-    def reset(self, map: BaseMap, current_lane_index, destination=None, random_seed=None):
-        raise NotImplementedError
+    def reset(self, map: BaseMap, current_lane):
+        self.map = map
+        self.current_lane = current_lane
 
     def set_route(self, current_lane_index: str, destination: str):
         """
@@ -105,8 +107,8 @@ class BaseNavigation:
         if len(self.checkpoints) <= 2:
             self.checkpoints = [current_lane_index[0], current_lane_index[1]]
             self._target_checkpoints_index = [0, 0]
-        assert len(self.checkpoints) >= 2, "Can not find a route from {} to {}".format(current_lane_index[0],
-                                                                                       destination)
+        assert len(self.checkpoints
+                   ) >= 2, "Can not find a route from {} to {}".format(current_lane_index[0], destination)
         self.final_road = Road(self.checkpoints[-2], self.checkpoints[-1])
         final_lanes = self.final_road.get_lanes(self.map.road_network)
         self.final_lane = final_lanes[-1]
@@ -115,7 +117,7 @@ class BaseNavigation:
         target_road_1_end = self.checkpoints[1]
         self.current_ref_lanes = self.map.road_network.graph[target_road_1_start][target_road_1_end]
         self.next_ref_lanes = self.map.road_network.graph[self.checkpoints[1]][self.checkpoints[2]
-        ] if len(self.checkpoints) > 2 else None
+                                                                               ] if len(self.checkpoints) > 2 else None
         self.current_road = Road(target_road_1_start, target_road_1_end)
         self.next_road = Road(self.checkpoints[1], self.checkpoints[2]) if len(self.checkpoints) > 2 else None
         if self._dest_node_path is not None:
@@ -161,8 +163,8 @@ class BaseNavigation:
         angle = 0.0
         if isinstance(ref_lane, CircularLane):
             bendradius = ref_lane.radius / (
-                    BlockParameterSpace.CURVE[Parameter.radius].max +
-                    self.get_current_lane_num() * self.get_current_lane_width()
+                BlockParameterSpace.CURVE[Parameter.radius].max +
+                self.get_current_lane_num() * self.get_current_lane_width()
             )
             dir = ref_lane.direction
             if dir == 1:
