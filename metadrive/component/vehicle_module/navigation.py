@@ -1,4 +1,5 @@
 import logging
+from metadrive.component.road_network.node_road_network import NodeRoadNetwork
 
 import numpy as np
 from panda3d.core import TransparencyAttrib, LineSegs, NodePath
@@ -27,12 +28,12 @@ class Navigation:
     LINE_TO_DEST_HEIGHT = 0.6
 
     def __init__(
-        self,
-        engine,
-        show_navi_mark: bool = False,
-        random_navi_mark_color=False,
-        show_dest_mark=False,
-        show_line_to_dest=False
+            self,
+            engine,
+            show_navi_mark: bool = False,
+            random_navi_mark_color=False,
+            show_dest_mark=False,
+            show_line_to_dest=False
     ):
         """
         This class define a helper for localizing vehicles and retrieving navigation information.
@@ -47,7 +48,7 @@ class Navigation:
         self.current_road = None
         self.next_road = None
         self._target_checkpoints_index = None
-        self._navi_info = np.zeros((self.navigation_info_dim, ), dtype=np.float32)  # navi information res
+        self._navi_info = np.zeros((self.navigation_info_dim,), dtype=np.float32)  # navi information res
 
         # Vis
         self._show_navi_info = (engine.mode == RENDER_MODE_ONSCREEN and not engine.global_config["debug_physics_world"])
@@ -94,10 +95,16 @@ class Navigation:
             self._dest_node_path.show(CamMask.MainCam)
         logging.debug("Load Vehicle Module: {}".format(self.__class__.__name__))
 
-    def update(self, map: BaseMap, current_lane_index, final_road_node=None, random_seed=None):
-        # TODO(pzh): We should not determine the destination of a vehicle in the navigation module.
-        start_road_node = current_lane_index[0]
+    def update(self, map: BaseMap, current_lane_index, destination=None, random_seed=None):
         self.map = map
+        assert self.map.road_network_type == NodeRoadNetwork, "This Navigation module only support NodeRoadNetwork type"
+        destination = self.auto_assign_task(map, current_lane_index, destination, random_seed)
+        self.set_route(current_lane_index, destination)
+
+    @staticmethod
+    def auto_assign_task(map, current_lane_index, final_road_node=None, random_seed=None):
+        # TODO we will assign the route in the task manager in the future
+        start_road_node = current_lane_index[0]
         if start_road_node is None:
             start_road_node = FirstPGBlock.NODE_1
         if final_road_node is None:
@@ -115,23 +122,22 @@ class Navigation:
                         raise ValueError("Can not set a destination!")
             # choose negative road end node when current road is negative road
             final_road_node = socket.negative_road.end_node if current_road_negative else socket.positive_road.end_node
-        self.set_route(current_lane_index, final_road_node)
+        return final_road_node
 
-    def set_route(self, current_lane_index: str, end_road_node: str):
+    def set_route(self, current_lane_index: str, destination: str):
         """
         Find a shortest path from start road to end road
         :param current_lane_index: start road node
-        :param end_road_node: end road node
+        :param destination: end road node or end lane index
         :return: None
         """
-        start_road_node = current_lane_index[0]
-        self.checkpoints = self.map.road_network.shortest_path(start_road_node, end_road_node)
+        self.checkpoints = self.map.road_network.shortest_path(current_lane_index, destination)
         self._target_checkpoints_index = [0, 1]
         # update routing info
         if len(self.checkpoints) <= 2:
             self.checkpoints = [current_lane_index[0], current_lane_index[1]]
             self._target_checkpoints_index = [0, 0]
-        assert len(self.checkpoints) >= 2, "Can not find a route from {} to {}".format(start_road_node, end_road_node)
+        assert len(self.checkpoints) >= 2, "Can not find a route from {} to {}".format(current_lane_index[0], destination)
         self.final_road = Road(self.checkpoints[-2], self.checkpoints[-1])
         final_lanes = self.final_road.get_lanes(self.map.road_network)
         self.final_lane = final_lanes[-1]
@@ -140,7 +146,7 @@ class Navigation:
         target_road_1_end = self.checkpoints[1]
         self.current_ref_lanes = self.map.road_network.graph[target_road_1_start][target_road_1_end]
         self.next_ref_lanes = self.map.road_network.graph[self.checkpoints[1]][self.checkpoints[2]
-                                                                               ] if len(self.checkpoints) > 2 else None
+        ] if len(self.checkpoints) > 2 else None
         self.current_road = Road(target_road_1_start, target_road_1_end)
         self.next_road = Road(self.checkpoints[1], self.checkpoints[2]) if len(self.checkpoints) > 2 else None
         if self._dest_node_path is not None:
@@ -200,10 +206,8 @@ class Navigation:
             self.navi_arrow_dir = [lanes_heading1, lanes_heading2]
             dest_pos = self._dest_node_path.getPos()
             self._draw_line_to_dest(
-                engine=ego_vehicle.engine,
                 start_position=ego_vehicle.position,
-                end_position=(dest_pos[0], -dest_pos[1])
-            )
+                end_position=(dest_pos[0], -dest_pos[1]))
 
         return lane, lane_index
 
@@ -239,8 +243,8 @@ class Navigation:
         angle = 0.0
         if isinstance(ref_lane, CircularLane):
             bendradius = ref_lane.radius / (
-                BlockParameterSpace.CURVE[Parameter.radius].max +
-                self.get_current_lane_num() * self.get_current_lane_width()
+                    BlockParameterSpace.CURVE[Parameter.radius].max +
+                    self.get_current_lane_num() * self.get_current_lane_width()
             )
             dir = ref_lane.direction
             if dir == 1:
@@ -363,7 +367,7 @@ class Navigation:
         else:
             return res.getHitFraction() * length
 
-    def _draw_line_to_dest(self, engine, start_position, end_position):
+    def _draw_line_to_dest(self, start_position, end_position):
         if not self._show_line_to_dest:
             return
         line_seg = self._line_to_dest

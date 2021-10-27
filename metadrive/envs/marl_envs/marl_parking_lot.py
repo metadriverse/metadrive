@@ -81,7 +81,7 @@ class ParkingLotSpawnManager(SpawnManager):
             end_road = self.engine.spawn_manager.get_parking_space(vehicle_id)
         else:
             end_road = -self.np_random.choice(end_roads)  # Use negative road!
-        vehicle_config["destination_node"] = end_road.end_node
+        vehicle_config["destination"] = end_road.end_node
         return vehicle_config
 
 

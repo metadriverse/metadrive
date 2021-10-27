@@ -60,3 +60,26 @@ class EdgeRoadNetwork(BaseRoadNetwork):
             lanes.append(lane_info.lane)
         res_x_max, res_x_min, res_y_max, res_y_min = get_boxes_bounding_box([get_lanes_bounding_box(lanes)])
         return res_x_min, res_x_max, res_y_min, res_y_max
+
+    def shortest_path(self, start: str, goal: str):
+        return next(self.bfs_paths(start, goal), [])
+
+    def bfs_paths(self, start: str, goal: str) -> List[List[str]]:
+        """
+        Breadth-first search of all routes from start to goal.
+
+        :param start: starting node
+        :param goal: goal node
+        :return: list of paths from start to goal.
+        """
+        goal=191
+        queue = [(start, [start])]
+        while queue:
+            (node, path) = queue.pop(0)
+            if node not in self.graph:
+                yield []
+            for _next in set(self.graph[node].exit_lanes) - set(path):
+                if _next == goal:
+                    yield path + [_next]
+                elif _next in self.graph:
+                    queue.append((_next, path + [_next]))

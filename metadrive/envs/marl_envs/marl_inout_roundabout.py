@@ -140,7 +140,7 @@ class RoundaboutSpawnManager(SpawnManager):
     def update_destination_for(self, vehicle_id, vehicle_config):
         end_roads = copy.deepcopy(self.engine.global_config["spawn_roads"])
         end_road = -self.np_random.choice(end_roads)  # Use negative road!
-        vehicle_config["destination_node"] = end_road.end_node
+        vehicle_config["destination"] = end_road.end_node
         return vehicle_config
 
 

@@ -213,8 +213,9 @@ class NodeRoadNetwork(BaseRoadNetwork):
         :param goal: goal node
         :return: shortest checkpoints from start to goal.
         """
+        start_road_node = start[0]
         assert start != goal
-        return next(self.bfs_paths(start, goal), [])
+        return next(self.bfs_paths(start_road_node, goal), [])
 
 
 class GraphLookupTable:

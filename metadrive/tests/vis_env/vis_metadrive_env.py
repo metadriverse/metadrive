@@ -44,7 +44,7 @@ if __name__ == "__main__":
                 # "random_color": True
                 # "show_lidar": True,
                 # "spawn_lane_index":("1r1_0_", "1r1_1_", 0),
-                # "destination_node":"2R1_3_",
+                # "destination":"2R1_3_",
                 # "show_side_detector": True,
                 # "show_lane_line_detector": True,
                 # "side_detector": dict(num_lasers=2, distance=50),
