@@ -18,9 +18,6 @@ from metadrive.utils.utils import auto_termination
 from panda3d.core import PNMImage
 
 BASE_DEFAULT_CONFIG = dict(
-    # ===== Generalization =====
-    start_seed=0,
-    environment_num=1,
 
     # ===== agent =====
     random_agent_model=False,
@@ -157,10 +154,6 @@ class BaseEnv(gym.Env):
         self.agent_manager = AgentManager(
             init_observations=self._get_observations(), init_action_space=self._get_action_space()
         )
-
-        # map setting
-        self.start_seed = self.config["start_seed"]
-        self.env_num = self.config["environment_num"]
 
         # lazy initialization, create the main vehicle in the lazy_init() func
         self.engine: Optional[BaseEngine] = None
@@ -474,18 +467,13 @@ class BaseEnv(gym.Env):
     def current_map(self):
         return self.engine.current_map
 
-    def _reset_global_seed(self, force_seed):
-        # create map
-        if force_seed is not None:
-            current_seed = force_seed
-        else:
-            current_seed = get_np_random(self._DEBUG_RANDOM_SEED
-                                         ).randint(self.start_seed, self.start_seed + self.env_num)
+    def _reset_global_seed(self, force_seed=None):
+        current_seed = force_seed if force_seed is not None else get_np_random(None).randint(0, int(1e4))
         self.seed(current_seed)
 
     @property
     def maps(self):
-        return self.engine.map_manager.pg_maps
+        return self.engine.map_manager.maps
 
     def _render_topdown(self, *args, **kwargs):
         if self._top_down_renderer is None:

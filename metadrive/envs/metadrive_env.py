@@ -53,6 +53,7 @@ METADRIVE_DEFAULT_CONFIG = dict(
     use_AI_protector=False,
     save_level=0.5,
     is_multi_agent=False,
+    vehicle_config=dict(spawn_lane_index=(FirstPGBlock.NODE_1, FirstPGBlock.NODE_2, 0)),
 
     # ===== Agent =====
     target_vehicle_configs={
@@ -91,6 +92,10 @@ class MetaDriveEnv(BaseEnv):
     def __init__(self, config: dict = None):
         self.default_config_copy = Config(self.default_config(), unchangeable=True)
         super(MetaDriveEnv, self).__init__(config)
+
+        # map setting
+        self.start_seed = self.config["start_seed"]
+        self.env_num = self.config["environment_num"]
 
     def _merge_extra_config(self, config: Union[dict, "Config"]) -> "Config":
         config = self.default_config().update(config, allow_add_new_key=False)
@@ -270,6 +275,11 @@ class MetaDriveEnv(BaseEnv):
         from metadrive.manager.map_manager import MapManager
         self.engine.register_manager("map_manager", MapManager())
         self.engine.register_manager("traffic_manager", TrafficManager())
+
+    def _reset_global_seed(self, force_seed=None):
+        current_seed = force_seed if force_seed is not None else \
+            get_np_random(self._DEBUG_RANDOM_SEED).randint(self.start_seed, self.start_seed + self.env_num)
+        self.seed(current_seed)
 
 
 if __name__ == '__main__':

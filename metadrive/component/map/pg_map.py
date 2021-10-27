@@ -1,4 +1,5 @@
 from typing import List
+import copy
 
 from metadrive.component.algorithm.BIG import BigGenerateMethod, BIG
 from metadrive.component.algorithm.blocks_prob_dist import PGBlockConfig

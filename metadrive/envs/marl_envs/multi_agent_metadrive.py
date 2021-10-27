@@ -34,7 +34,8 @@ MULTI_AGENT_METADRIVE_DEFAULT_CONFIG = dict(
     neighbours_distance=10,
 
     # ===== Vehicle Setting =====
-    vehicle_config=dict(lidar=dict(num_lasers=72, distance=40, num_others=0), random_color=True, not_randomize=False),
+    vehicle_config=dict(lidar=dict(num_lasers=72, distance=40, num_others=0), random_color=True, not_randomize=False,
+                        spawn_lane_index=(FirstPGBlock.NODE_1, FirstPGBlock.NODE_2, 0)),
     target_vehicle_configs=dict(),
 
     # ===== New Reward Setting =====
@@ -137,8 +138,8 @@ class MultiAgentMetaDrive(MetaDriveEnv):
 
         # Update __all__
         d["__all__"] = (
-            ((self.episode_steps >= self.config["horizon"]) and (all(d.values()))) or (len(self.vehicles) == 0)
-            or (self.episode_steps >= 5 * self.config["horizon"])
+                ((self.episode_steps >= self.config["horizon"]) and (all(d.values()))) or (len(self.vehicles) == 0)
+                or (self.episode_steps >= 5 * self.config["horizon"])
         )
         if d["__all__"]:
             for k in d.keys():
