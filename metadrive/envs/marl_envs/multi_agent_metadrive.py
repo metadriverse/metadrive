@@ -2,7 +2,7 @@ import copy
 import logging
 
 from metadrive.component.pgblock.first_block import FirstPGBlock
-from metadrive.component.road import Road
+from metadrive.component.road_network import Road
 from metadrive.constants import TerminationState
 from metadrive.envs.metadrive_env import MetaDriveEnv
 from metadrive.manager.spawn_manager import SpawnManager

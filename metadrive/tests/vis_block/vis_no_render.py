@@ -1,7 +1,7 @@
 import logging
 
 from metadrive.component.algorithm.BIG import BIG
-from metadrive.component.road.road_network import NodeRoadNetwork
+from metadrive.component.road_network.node_road_network import NodeRoadNetwork
 from metadrive.tests.vis_block.vis_block_base import TestBlock
 
 if __name__ == "__main__":

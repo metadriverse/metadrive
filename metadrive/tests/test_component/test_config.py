@@ -31,4 +31,4 @@ def test_config_sync():
 
 
 if __name__ == '__main__':
-    test_config_unchangeable()
+    test_config_sync()

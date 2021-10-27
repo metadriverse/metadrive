@@ -5,7 +5,7 @@ from metadrive.component.algorithm.blocks_prob_dist import PGBlockConfig
 from metadrive.component.map.base_map import BaseMap
 from metadrive.component.pgblock.first_block import FirstPGBlock
 from metadrive.component.pgblock.pg_block import PGBlock
-from metadrive.component.road.road_network import NodeRoadNetwork
+from metadrive.component.road_network.node_road_network import NodeRoadNetwork
 from metadrive.engine.core.physics_world import PhysicsWorld
 from panda3d.core import NodePath
 
@@ -104,3 +104,8 @@ class CityMap(BaseMap):
         )
         big_map.generate(self._config[self.GENERATE_TYPE], self._config[self.GENERATE_CONFIG])
         self.blocks = big_map.blocks
+
+    @property
+    def road_network_type(self):
+        return NodeRoadNetwork
+

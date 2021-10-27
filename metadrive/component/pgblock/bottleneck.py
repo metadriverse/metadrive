@@ -1,7 +1,7 @@
 from metadrive.component.pgblock.create_pg_block_utils import CreateAdverseRoad, CreateRoadFrom, ExtendStraightLane, \
     create_wave_lanes
 from metadrive.component.pgblock.pg_block import PGBlock, PGBlockSocket
-from metadrive.component.road import Road
+from metadrive.component.road_network import Road
 from metadrive.constants import LineType
 from metadrive.utils.space import ParameterSpace, Parameter, BlockParameterSpace
 

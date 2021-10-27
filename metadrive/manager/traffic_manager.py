@@ -6,7 +6,7 @@ from typing import Dict
 
 from metadrive.component.lane.abs_lane import AbstractLane
 from metadrive.component.map.base_map import BaseMap
-from metadrive.component.road import Road
+from metadrive.component.road_network import Road
 from metadrive.component.vehicle.base_vehicle import BaseVehicle
 from metadrive.constants import TARGET_VEHICLES, TRAFFIC_VEHICLES, OBJECT_TO_AGENT, AGENT_TO_OBJECT
 from metadrive.manager.base_manager import BaseManager

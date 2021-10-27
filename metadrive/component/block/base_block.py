@@ -4,8 +4,8 @@ from typing import Dict, List
 from metadrive.base_class.base_object import BaseObject
 from metadrive.component.lane.abs_lane import AbstractLane
 from metadrive.component.lane.waypoint_lane import WayPointLane
-from metadrive.component.road import Road
-from metadrive.component.road.road_network import NodeRoadNetwork
+from metadrive.component.road_network import Road
+from metadrive.component.road_network.node_road_network import NodeRoadNetwork
 from metadrive.constants import BodyName, CamMask, LineType, LineColor, DrivableAreaProperty
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.engine.core.physics_world import PhysicsWorld

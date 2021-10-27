@@ -1,7 +1,7 @@
 from metadrive.component.pgblock.first_block import FirstPGBlock
 from metadrive.component.pgblock.std_intersection import StdInterSection
 from metadrive.component.pgblock.std_t_intersection import StdTInterSection
-from metadrive.component.road.road_network import NodeRoadNetwork
+from metadrive.component.road_network.node_road_network import NodeRoadNetwork
 from metadrive.tests.vis_block.vis_block_base import TestBlock
 
 if __name__ == "__main__":

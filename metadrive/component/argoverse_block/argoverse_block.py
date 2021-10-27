@@ -3,8 +3,8 @@ from typing import Dict
 from metadrive.component.block.base_block import BaseBlock
 from metadrive.component.lane.abs_lane import LineColor, LineType
 from metadrive.component.lane.argoverse_lane import ArgoverseLane
-from metadrive.component.road import Road
-from metadrive.component.road.road_network import NodeRoadNetwork
+from metadrive.component.road_network import Road
+from metadrive.component.road_network.node_road_network import NodeRoadNetwork
 
 
 class ArgoverseBlock(BaseBlock):

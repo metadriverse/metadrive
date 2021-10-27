@@ -1,6 +1,6 @@
 from metadrive.component.pgblock.first_block import FirstPGBlock
 from metadrive.component.pgblock.straight import Straight
-from metadrive.component.road.road_network import NodeRoadNetwork
+from metadrive.component.road_network.node_road_network import NodeRoadNetwork
 from metadrive.engine.asset_loader import initialize_asset_loader
 from metadrive.tests.vis_block.vis_block_base import TestBlock
 

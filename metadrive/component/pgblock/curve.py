@@ -2,7 +2,7 @@ import numpy as np
 
 from metadrive.component.pgblock.create_pg_block_utils import CreateAdverseRoad, CreateRoadFrom, create_bend_straight
 from metadrive.component.pgblock.pg_block import PGBlock
-from metadrive.component.road import Road
+from metadrive.component.road_network import Road
 from metadrive.constants import LineType
 from metadrive.utils.space import ParameterSpace, Parameter, BlockParameterSpace
 

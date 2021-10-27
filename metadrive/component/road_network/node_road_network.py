@@ -4,7 +4,8 @@ from typing import List, Tuple, Dict
 
 import numpy as np
 from metadrive.component.lane.abs_lane import AbstractLane
-from metadrive.component.road.road import Road
+from metadrive.component.road_network.road import Road
+from metadrive.component.road_network.base_road_network import BaseRoadNetwork
 from metadrive.constants import Decoration
 from metadrive.utils.math_utils import get_boxes_bounding_box
 from metadrive.utils.scene_utils import get_road_bounding_box
@@ -15,7 +16,7 @@ LaneIndex = Tuple[str, str, int]
 Route = List[LaneIndex]
 
 
-class NodeRoadNetwork:
+class NodeRoadNetwork(BaseRoadNetwork):
     """
     This network uses two node to describe the road network graph, and the edges between two nodes represent road, which
     is a list of lanes connecting two lanes
@@ -190,57 +191,6 @@ class NodeRoadNetwork:
     def get_closest_lane_index(self, position, return_all=False):
         return self._graph_helper.get(position, return_all)
 
-    def next_lane(
-        self,
-        current_index: LaneIndex,
-        route: Route = None,
-        position: np.ndarray = None,
-        # Don't change this, since we need to make map identical to old version. get_np_random is used for traffic only.
-        np_random: np.random.RandomState = None
-    ) -> LaneIndex:
-        """
-        Get the index of the next lane that should be followed after finishing the current lane.
-
-        - If a plan is available and matches with current lane, follow it.
-        - Else, pick next road randomly.
-        - If it has the same number of lanes as current road, stay in the same lane.
-        - Else, pick next road's closest lane.
-        :param current_index: the index of the current lane.
-        :param route: the planned route, if any.
-        :param position: the vehicle position.
-        :param np_random: a source of randomness.
-        :return: the index of the next lane to be followed when current lane is finished.
-        """
-        assert np_random
-
-        _from, _to, _id = current_index
-        next_to = None
-        # Pick next road according to planned route
-        if route:
-            if route[0][:2] == current_index[:2]:  # We just finished the first step of the route, drop it.
-                route.pop(0)
-            if route and route[0][0] == _to:  # Next road in route is starting at the end of current road.
-                _, next_to, _ = route[0]
-            elif route:
-                logger.warning("Route {} does not start after current road {}.".format(route[0], current_index))
-        # Randomly pick next road
-        if not next_to:
-            try:
-                next_to = list(self.graph[_to].keys())[np_random.randint(len(self.graph[_to]))]
-            except KeyError:
-                # logger.warning("End of lane reached.")
-                return current_index
-
-        # If next road has same number of lane, stay on the same lane
-        if len(self.graph[_from][_to]) == len(self.graph[_to][next_to]):
-            next_id = _id
-        # Else, pick closest lane
-        else:
-            lanes = range(len(self.graph[_to][next_to]))
-            next_id = min(lanes, key=lambda l: self.get_lane((_to, next_to, l)).distance(position))
-
-        return _to, next_to, next_id
-
     def bfs_paths(self, start: str, goal: str) -> List[List[str]]:
         """
         Breadth-first search of all routes from start to goal.
@@ -270,112 +220,6 @@ class NodeRoadNetwork:
         """
         assert start != goal
         return next(self.bfs_paths(start, goal), [])
-
-    def all_side_lanes(self, lane_index: LaneIndex) -> List[LaneIndex]:
-        """
-        :param lane_index: the index of a lane.
-        :return: all lanes belonging to the same road.
-        """
-        return [(lane_index[0], lane_index[1], i) for i in range(len(self.graph[lane_index[0]][lane_index[1]]))]
-
-    def side_lanes(self, lane_index: LaneIndex) -> List[LaneIndex]:
-        """
-        :param lane_index: the index of a lane.
-        :return: indexes of lanes next to a an input lane, to its right or left.
-        """
-        _from, _to, _id = lane_index
-        lanes = []
-        if _id > 0:
-            lanes.append((_from, _to, _id - 1))
-        if _id < len(self.graph[_from][_to]) - 1:
-            lanes.append((_from, _to, _id + 1))
-        return lanes
-
-    @staticmethod
-    def is_same_road(lane_index_1: LaneIndex, lane_index_2: LaneIndex, same_lane: bool = False) -> bool:
-        """Is lane 1 in the same road as lane 2?"""
-        return lane_index_1[:2] == lane_index_2[:2] and (not same_lane or lane_index_1[2] == lane_index_2[2])
-
-    @staticmethod
-    def is_leading_to_road(lane_index_1: LaneIndex, lane_index_2: LaneIndex, same_lane: bool = False) -> bool:
-        """Is lane 1 leading to of lane 2?"""
-        return lane_index_1[1] == lane_index_2[0] and (not same_lane or lane_index_1[2] == lane_index_2[2])
-
-    def is_connected_road(
-        self,
-        lane_index_1: LaneIndex,
-        lane_index_2: LaneIndex,
-        route: Route = None,
-        same_lane: bool = False,
-        depth: int = 0
-    ) -> bool:
-        """
-        Is the lane 2 leading to a road within lane 1's route?
-
-        Vehicles on these lanes must be considered for collisions.
-        :param lane_index_1: origin lane
-        :param lane_index_2: target lane
-        :param route: route from origin lane, if any
-        :param same_lane: compare lane id
-        :param depth: search depth from lane 1 along its route
-        :return: whether the roads are connected
-        """
-        if NodeRoadNetwork.is_same_road(lane_index_2, lane_index_1, same_lane) \
-                or NodeRoadNetwork.is_leading_to_road(lane_index_2, lane_index_1, same_lane):
-            return True
-        if depth > 0:
-            if route and route[0][:2] == lane_index_1[:2]:
-                # Route is starting at current road, skip it
-                return self.is_connected_road(lane_index_1, lane_index_2, route[1:], same_lane, depth)
-            elif route and route[0][0] == lane_index_1[1]:
-                # Route is continuing from current road, follow it
-                return self.is_connected_road(route[0], lane_index_2, route[1:], same_lane, depth - 1)
-            else:
-                # Recursively search all roads at intersection
-                _from, _to, _id = lane_index_1
-                return any(
-                    [
-                        self.is_connected_road((_to, l1_to, _id), lane_index_2, route, same_lane, depth - 1)
-                        for l1_to in self.graph.get(_to, {}).keys()
-                    ]
-                )
-        return False
-
-    def lanes_list(self) -> List[AbstractLane]:
-        return [lane for to in self.graph.values() for ids in to.values() for lane in ids]
-
-    def position_heading_along_route(self, route: Route, longitudinal: float, lateral: float) \
-            -> Tuple[np.ndarray, float]:
-        """
-        Get the absolute position and heading along a route composed of several lanes at some local coordinates.
-
-        :param route: a planned route, list of lane indexes
-        :param longitudinal: longitudinal position
-        :param lateral: : lateral position
-        :return: position, heading
-        """
-        while len(route) > 1 and longitudinal > self.get_lane(route[0]).length:
-            longitudinal -= self.get_lane(route[0]).length
-            route = route[1:]
-        return self.get_lane(route[0]).position(longitudinal,
-                                                lateral), self.get_lane(route[0]).heading_theta_at(longitudinal)
-
-    def get_roads(self, *, direction="all", lane_num=None) -> List:
-        """
-        Return all roads in road_network
-        :param direction: "positive"/"negative"
-        :param lane_num: only roads with lane_num lanes will be returned
-        :return: List[Road]
-        """
-        assert direction in ["positive", "negative", "all"], "incorrect road direction"
-        ret = []
-        for _from, _to_dict in self.graph.items():
-            if direction == "all" or (direction == "positive" and _from[0] != "-") or (direction == "negative"
-                                                                                       and _from[0] == "-"):
-                for _to, lanes in _to_dict.items():
-                    if lane_num is None or len(lanes) == lane_num:
-                        ret.append(Road(_from, _to))
-        return ret
 
 
 class GraphLookupTable:

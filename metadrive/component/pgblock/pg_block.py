@@ -4,8 +4,8 @@ from collections import OrderedDict
 from typing import Union, List
 
 from metadrive.component.block.base_block import BaseBlock
-from metadrive.component.road import Road
-from metadrive.component.road.road_network import NodeRoadNetwork
+from metadrive.component.road_network import Road
+from metadrive.component.road_network.node_road_network import NodeRoadNetwork
 
 
 class PGBlockSocket:

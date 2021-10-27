@@ -4,7 +4,7 @@ from metadrive.component.algorithm.BIG import BigGenerateMethod, BIG
 from metadrive.component.algorithm.blocks_prob_dist import PGBlockConfig
 from metadrive.component.map.base_map import BaseMap
 from metadrive.component.pgblock.first_block import FirstPGBlock
-from metadrive.component.road.road_network import NodeRoadNetwork
+from metadrive.component.road_network.node_road_network import NodeRoadNetwork
 from metadrive.engine.core.physics_world import PhysicsWorld
 from metadrive.utils import Config
 from panda3d.core import NodePath
@@ -96,8 +96,9 @@ class PGMap(BaseMap):
             last_block.construct_from_config(b, parent_node_path, physics_world)
             self.blocks.append(last_block)
 
-    def init_road_network(self):
-        return NodeRoadNetwork()
+    @property
+    def road_network_type(self):
+        return NodeRoadNetwork
 
     def save_map(self):
         assert self.blocks is not None and len(self.blocks) > 0, "Please generate Map before saving it"

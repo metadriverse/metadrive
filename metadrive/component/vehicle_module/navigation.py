@@ -8,7 +8,7 @@ from metadrive.component.pgblock.first_block import FirstPGBlock
 from metadrive.component.lane.circular_lane import CircularLane
 from metadrive.component.lane.straight_lane import StraightLane
 from metadrive.component.map.base_map import BaseMap
-from metadrive.component.road import Road
+from metadrive.component.road_network import Road
 from metadrive.constants import RENDER_MODE_ONSCREEN, CamMask
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.utils import clip, norm, get_np_random

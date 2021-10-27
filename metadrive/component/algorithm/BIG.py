@@ -6,7 +6,7 @@ from panda3d.core import NodePath
 from metadrive.component.algorithm.blocks_prob_dist import PGBlockConfig
 from metadrive.component.pgblock.first_block import FirstPGBlock
 from metadrive.component.pgblock.pg_block import PGBlock
-from metadrive.component.road.road_network import NodeRoadNetwork
+from metadrive.component.road_network.node_road_network import NodeRoadNetwork
 from metadrive.engine.core.physics_world import PhysicsWorld
 from metadrive.utils import get_np_random
 

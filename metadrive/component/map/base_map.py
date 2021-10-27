@@ -40,7 +40,7 @@ class BaseMap(BaseRunnable):
         # ], "Global seed {} should equal to seed in map config {}".format(random_seed, map_config[self.SEED])
         super(BaseMap, self).__init__(config=map_config)
         self.film_size = (get_global_config()["draw_map_resolution"], get_global_config()["draw_map_resolution"])
-        self.road_network = self.init_road_network()
+        self.road_network = self.road_network_type()
 
         # A flatten representation of blocks, might cause chaos in city-level generation.
         self.blocks = []
@@ -82,5 +82,6 @@ class BaseMap(BaseRunnable):
             block.destroy()
         super(BaseMap, self).destroy()
 
-    def init_road_network(self):
+    @property
+    def road_network_type(self):
         raise NotImplementedError

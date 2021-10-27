@@ -17,7 +17,7 @@ from panda3d.core import Vec3
 
 if TYPE_CHECKING:
     from metadrive.component.pgblock.pg_block import PGBlockSocket
-    from metadrive.component.road.road_network import NodeRoadNetwork
+    from metadrive.component.road_network.node_road_network import NodeRoadNetwork
 
 def block_socket_merge(
     socket_1: "PGBlockSocket", socket_2: "PGBlockSocket", global_network: "NodeRoadNetwork", positive_merge: False

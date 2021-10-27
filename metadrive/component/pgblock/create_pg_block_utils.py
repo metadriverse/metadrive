@@ -7,8 +7,8 @@ import numpy as np
 from metadrive.component.lane.abs_lane import AbstractLane
 from metadrive.component.lane.circular_lane import CircularLane
 from metadrive.component.lane.straight_lane import StraightLane
-from metadrive.component.road import Road
-from metadrive.component.road.road_network import NodeRoadNetwork
+from metadrive.component.road_network import Road
+from metadrive.component.road_network.node_road_network import NodeRoadNetwork
 from metadrive.constants import LineType, LineColor, DrivableAreaProperty
 from metadrive.utils.math_utils import get_vertical_vector
 from metadrive.utils.scene_utils import check_lane_on_road
