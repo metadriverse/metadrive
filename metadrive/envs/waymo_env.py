@@ -99,7 +99,7 @@ if __name__ == "__main__":
             "manual_control": True,
             "debug_static_world": True,
             "debug": True,
-            # "agent_policy": IDMPolicy,
+            "agent_policy": IDMPolicy,
             "enable_idm_lane_change": False
         }
     )
