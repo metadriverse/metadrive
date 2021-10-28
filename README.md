@@ -15,6 +15,8 @@
 <a href="https://www.youtube.com/embed/3ziJPqC_-T4">Demo Video</a>
 |
 <a href="https://decisionforce.github.io/metadrive/">Website</a>
+|
+<a href="https://arxiv.org/pdf/2109.12674.pdf">Paper</a>
 ]
 </strong>
 </div>
@@ -126,7 +128,16 @@ Find more details in: [MetaDrive](https://metadrive-simulator.readthedocs.io)
 
 ## 📎 References
 
-Working in Progress!
+If you use MetaDrive in your own work, please cite:
+
+```latex
+@article{li2021metadrive,
+  title={MetaDrive: Composing Diverse Driving Scenarios for Generalizable Reinforcement Learning},
+  author={Li, Quanyi and Peng, Zhenghao and Xue, Zhenghai and Zhang, Qihang and Zhou, Bolei},
+  journal={arXiv preprint arXiv:2109.12674},
+  year={2021}
+}
+```
 
 [![build](https://github.com/decisionforce/metadrive/workflows/test/badge.svg)](http://github.com/decisionforce/metadrive/actions)
 [![codecov](https://codecov.io/gh/decisionforce/metadrive/branch/main/graph/badge.svg?token=1ZYN8L5397)](https://codecov.io/gh/decisionforce/metadrive)
