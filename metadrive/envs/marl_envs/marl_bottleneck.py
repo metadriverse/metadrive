@@ -11,7 +11,7 @@ from metadrive.utils.math_utils import clip
 
 MABottleneckConfig = dict(
     spawn_roads=[Road(FirstPGBlock.NODE_2, FirstPGBlock.NODE_3), -Road(Split.node(2, 0, 0), Split.node(2, 0, 1))],
-    num_agents=12,
+    num_agents=20,
     map_config=dict(exit_length=60, bottle_lane_num=4, neck_lane_num=1, neck_length=20),
     top_down_camera_initial_x=95,
     top_down_camera_initial_y=15,
