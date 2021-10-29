@@ -59,12 +59,14 @@ safe_metadrive_environment_dict = {
     },
 }
 
-marl_env = {"MARLTollgate-v0":MultiAgentTollgateEnv,
-            "MARLBottleneck-v0":MultiAgentBottleneckEnv,
-            "MARLRoundabout-v0":MultiAgentRoundaboutEnv,
-            "MARLIntersection-v0":MultiAgentIntersectionEnv,
-            "MARLParkingLot-v0": MultiAgentParkingLotEnv,
-            "MARLMetaDrive-v0": MultiAgentMetaDrive}
+marl_env = {
+    "MARLTollgate-v0": MultiAgentTollgateEnv,
+    "MARLBottleneck-v0": MultiAgentBottleneckEnv,
+    "MARLRoundabout-v0": MultiAgentRoundaboutEnv,
+    "MARLIntersection-v0": MultiAgentIntersectionEnv,
+    "MARLParkingLot-v0": MultiAgentParkingLotEnv,
+    "MARLMetaDrive-v0": MultiAgentMetaDrive
+}
 
 envs = []
 for env_name, env_config in metadrive_environment_dict.items():
@@ -93,11 +95,10 @@ if __name__ == '__main__':
     env.reset()
     env.close()
 
-    env= gym.make("SafeMetaDrive-validation-v0")
+    env = gym.make("SafeMetaDrive-validation-v0")
     env.reset()
     env.close()
 
     env = gym.make("MARLTollgate-v0")
     env.reset()
     env.close()
-
