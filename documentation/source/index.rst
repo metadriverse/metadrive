@@ -1,5 +1,3 @@
-
-
 .. image:: ../../metadrive/assets/logo-horizon.png
    :width: 1800
    :align: center
@@ -27,11 +25,6 @@ You can also visit the `GitHub repo <https://github.com/decisionforce/metadrive>
 Please feel free to contact us if you have any suggestions or ideas!
 
 
-.. Citation
-.. ########
-
-.. We wrote a white paper on this project, but the citation information is not yet well prepared!
-.. Please contact us if you find this work useful in your project.
 
 
 .. toctree::
@@ -74,5 +67,20 @@ Please feel free to contact us if you have any suggestions or ideas!
             </td>
         </tr>
     </table>
+    <br>
 
+
+Citation
+########
+
+You can read `our white paper <https://arxiv.org/pdf/2109.12674.pdf>`_ describing the details of MetaDrive! If you use MetaDrive in your own work, please cite:
+
+.. code-block:: latex
+
+    @article{li2021metadrive,
+      title={MetaDrive: Composing Diverse Driving Scenarios for Generalizable Reinforcement Learning},
+      author={Li, Quanyi and Peng, Zhenghao and Xue, Zhenghai and Zhang, Qihang and Zhou, Bolei},
+      journal={arXiv preprint arXiv:2109.12674},
+      year={2021}
+    }
 
