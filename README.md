@@ -139,6 +139,32 @@ If you use MetaDrive in your own work, please cite:
 }
 ```
 
+## 🎉 Relevant Projects
+
+**Learning to Simulate Self-driven Particles System with Coordinated Policy Optimization**
+\
+Zhenghao Peng, Quanyi Li, Ka Ming Hui, Chunxiao Liu, Bolei Zhou 
+\
+*NeurIPS 2021*
+\
+[<a href="https://arxiv.org/pdf/2110.13827.pdf" target="_blank">Paper</a>]
+[<a href="https://github.com/decisionforce/CoPO" target="_blank">Code</a>]
+[<a href="https://decisionforce.github.io/CoPO" target="_blank">Webpage</a>]
+[<a href="https://youtu.be/sOw43l8lwxE" target="_blank">Talk</a>]
+
+
+**Safe Driving via Expert Guided Policy Optimization**
+\
+Zhenghao Peng*, Quanyi Li*, Chunxiao Liu, Bolei Zhou
+\
+*Conference on Robot Learning (CoRL) 2021*
+\
+[<a href="https://arxiv.org/pdf/2110.06831.pdf" target="_blank">Paper</a>]
+[<a href="https://github.com/decisionforce/EGPO" target="_blank">Code</a>]
+[<a href="https://decisionforce.github.io/EGPO/" target="_blank">Webpage</a>]
+[<a href="https://decisionforce.github.io/EGPO/images/egpo_poster.png" target="_blank">Poster</a>]
+    
+
 [![build](https://github.com/decisionforce/metadrive/workflows/test/badge.svg)](http://github.com/decisionforce/metadrive/actions)
 [![codecov](https://codecov.io/gh/decisionforce/metadrive/branch/main/graph/badge.svg?token=1ZYN8L5397)](https://codecov.io/gh/decisionforce/metadrive)
 [![Documentation](https://readthedocs.org/projects/metadrive/badge/?version=latest)](https://metadrive.readthedocs.io)
