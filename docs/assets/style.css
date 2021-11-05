@@ -38,21 +38,21 @@ pre {
 /* Header (Title and Logo) */
 .section .header {
   min-height: 80pt;
-  margin-top: 30pt;
+  margin-top: 20pt;
 }
 .section .header .logo {
   width: 80pt;
-  margin-left: 10pt;
-  float: left;
+  /*margin-left: 0pt;*/
+  /*float: ;*/
 }
 .section .header .logo img {
   width: 80pt;
-  object-fit: cover;
+  /*object-fit: cover;*/
 }
 .section .header .title {
-  margin: 0 120pt;
+  /*margin: 0 60pt;*/
   text-align: center;
-  font-size: 22pt;
+  font-size: 20pt;
 }
 
 /* Author */
