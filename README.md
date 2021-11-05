@@ -139,14 +139,12 @@ If you use MetaDrive in your own work, please cite:
 }
 ```
 
-Relevant Projects
+### Relevant Projects
 
 **Learning to Simulate Self-driven Particles System with Coordinated Policy Optimization**
-
-Zhenghao Peng, Quanyi Li, Ka Ming Hui, Chunxiao Liu, Bolei Zhou
-
-*NeurIPS 2021*
-
+(*NeurIPS 2021*)
+\
+Zhenghao Peng, Quanyi Li, Ka Ming Hui, Chunxiao Liu, Bolei Zhou \
 [<a href="https://arxiv.org/pdf/2110.13827.pdf" target="_blank">Paper</a>]
 [<a href="https://github.com/decisionforce/CoPO" target="_blank">Code</a>]
 [<a href="https://decisionforce.github.io/CoPO" target="_blank">Webpage</a>]
@@ -154,11 +152,11 @@ Zhenghao Peng, Quanyi Li, Ka Ming Hui, Chunxiao Liu, Bolei Zhou
 
 
 **Safe Driving via Expert Guided Policy Optimization**
-
+\
 Zhenghao Peng*, Quanyi Li*, Chunxiao Liu, Bolei Zhou
-
+\
 *Conference on Robot Learning (CoRL) 2021*
-
+\
 [<a href="https://arxiv.org/pdf/2110.06831.pdf" target="_blank">Paper</a>]
 [<a href="https://github.com/decisionforce/EGPO" target="_blank">Code</a>]
 [<a href="https://decisionforce.github.io/EGPO/" target="_blank">Webpage</a>]
