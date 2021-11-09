@@ -59,15 +59,49 @@ Please feel free to contact us if you have any suggestions or ideas!
 
 .. raw:: html
 
-    <br>
-    <table width="100%" style="margin: 0 0; text-align: center;">
+    <table width="100%" style="margin: 0pt 0pt; text-align: center;">
         <tr>
             <td>
-            <iframe width="560" height="315" src="https://www.youtube.com/embed/3ziJPqC_-T4" title="MetaDrive Introduction" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                <video style="display:block; width:100%; height:auto; "
+                       autoplay="autoplay" muted loop="loop" controls playsinline>
+                    <source src="https://raw.githubusercontent.com/decisionforce/archive/master/MetaDrive/metadrive_teaser.mp4"
+                            type="video/mp4"/>
+                </video>
             </td>
         </tr>
     </table>
+    <br><br>
+
+
+
+
+Relevant Projects
+#################
+
+.. raw:: html
+
+    <b>
+        Learning to Simulate Self-driven Particles System with Coordinated Policy Optimization
+    </b> <br>
+    Zhenghao Peng, Quanyi Li, Ka Ming Hui, Chunxiao Liu, Bolei Zhou
     <br>
+    <i>NeurIPS 2021</i><br>
+    [<a href="https://arxiv.org/pdf/2110.13827.pdf" target="_blank">Paper</a>]
+    [<a href="https://github.com/decisionforce/CoPO" target="_blank">Code</a>]
+    [<a href="https://decisionforce.github.io/CoPO" target="_blank">Webpage</a>]
+    [<a href="https://youtu.be/sOw43l8lwxE" target="_blank">Talk</a>]
+
+    <br><br>
+    <b>Safe Driving via Expert Guided Policy Optimization</b> <br>
+    Zhenghao Peng*, Quanyi Li*, Chunxiao Liu, Bolei Zhou
+    <br>
+    <i>Conference on Robot Learning (CoRL) 2021</i><br>
+    [<a href="https://arxiv.org/pdf/2110.06831.pdf" target="_blank">Paper</a>]
+    [<a href="https://github.com/decisionforce/EGPO" target="_blank">Code</a>]
+    [<a href="https://decisionforce.github.io/EGPO/" target="_blank">Webpage</a>]
+    [<a href="https://decisionforce.github.io/EGPO/images/egpo_poster.png" target="_blank">Poster</a>]
+
+    <br><br>
 
 
 Citation

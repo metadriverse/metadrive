@@ -313,6 +313,13 @@ class BaseEnv(gym.Env):
         """
         self.lazy_init()  # it only works the first time when reset() is called to avoid the error when render
         self._reset_global_seed(force_seed)
+        if self.engine is None:
+            raise ValueError(
+                "Current MetaDrive instance is broken. Please make sure there is only one active MetaDrive "
+                "environment exists in one process. You can try to call env.close() and then call "
+                "env.reset() to rescue this environment. However, a better and safer solution is to check the "
+                "singleton of MetaDrive and restart your program."
+            )
         self.engine.reset()
         if self._top_down_renderer is not None:
             self._top_down_renderer.reset(self.current_map)
