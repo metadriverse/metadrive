@@ -35,7 +35,9 @@ def draw_multi_channels_top_down_observation(obs, show_time=4):
     def close_event():
         plt.close()  # timer calls this function after 3 seconds and closes the window
 
-    timer = fig.canvas.new_timer(interval=show_time*1000)  # creating a timer object and setting an interval of 3000 milliseconds
+    timer = fig.canvas.new_timer(
+        interval=show_time * 1000
+    )  # creating a timer object and setting an interval of 3000 milliseconds
     timer.add_callback(close_event)
 
     for i, name in enumerate(channel_names):
@@ -75,8 +77,8 @@ if __name__ == "__main__":
         env.render(mode="top_down", film_size=(800, 800))
         if d:
             env.reset()
-        if i % 50 ==0:
-            draw_multi_channels_top_down_observation(o, show_time=4) # show time 4s
+        if i % 50 == 0:
+            draw_multi_channels_top_down_observation(o, show_time=4)  # show time 4s
             # ret = input("Do you wish to quit? Type any ESC to quite, or press enter to continue")
             # if len(ret) == 0:
             #     continue
