@@ -8,7 +8,7 @@ class TopDownSingleFrameMetaDriveEnv(MetaDriveEnv):
     @classmethod
     def default_config(cls) -> Config:
         config = MetaDriveEnv.default_config()
-        config["vehicle_config"]["lidar"].update({"num_lasers": 0, "distance": 0})  # Remove lidar
+        # config["vehicle_config"]["lidar"].update({"num_lasers": 0, "distance": 0})  # Remove lidar
         config.update(
             {
                 "frame_skip": 5,
