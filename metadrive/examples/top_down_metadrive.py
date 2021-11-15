@@ -14,6 +14,7 @@ We welcome contributions to propose a better representation of the top-down sema
 """
 
 import random
+from metadrive.examples.ppo_expert.numpy_expert import expert
 
 import matplotlib.pyplot as plt
 
@@ -21,7 +22,7 @@ from metadrive import TopDownMetaDrive
 from metadrive.constants import HELP_MESSAGE
 
 
-def draw_multi_channels_top_down_observation(obs):
+def draw_multi_channels_top_down_observation(obs, show_time=4):
     num_channels = obs.shape[-1]
     assert num_channels == 5
     channel_names = [
@@ -34,7 +35,7 @@ def draw_multi_channels_top_down_observation(obs):
     def close_event():
         plt.close()  # timer calls this function after 3 seconds and closes the window
 
-    timer = fig.canvas.new_timer(interval=4500)  # creating a timer object and setting an interval of 3000 milliseconds
+    timer = fig.canvas.new_timer(interval=show_time*1000)  # creating a timer object and setting an interval of 3000 milliseconds
     timer.add_callback(close_event)
 
     for i, name in enumerate(channel_names):
@@ -61,27 +62,27 @@ if __name__ == "__main__":
             # You can also try to uncomment next line with "use_render=True", so that you can control the ego vehicle
             # with keyboard in the main window.
             # manual_control=True,
-            map="O",
+            map="SSSS",
             traffic_density=0.1,
             environment_num=100,
             start_seed=random.randint(0, 1000),
         )
     )
-    try:
-        o = env.reset()
-        for i in range(1, 100000):
-            o, r, d, info = env.step([0, 1])
-            env.render(mode="top_down", film_size=(800, 800))
-            if d:
-                # print("Close the popup window to continue.")
-                draw_multi_channels_top_down_observation(o)
-                env.reset()
-                # ret = input("Do you wish to quit? Type any ESC to quite, or press enter to continue")
-                # if len(ret) == 0:
-                #     continue
-                # else:
-                #     break
-    except:
-        pass
-    finally:
-        env.close()
+    # try:
+    o = env.reset()
+    for i in range(1, 100000):
+        o, r, d, info = env.step(expert(env.vehicle))
+        env.render(mode="top_down", film_size=(800, 800))
+        if d:
+            env.reset()
+        if i % 50 ==0:
+            draw_multi_channels_top_down_observation(o, show_time=4) # show time 4s
+            # ret = input("Do you wish to quit? Type any ESC to quite, or press enter to continue")
+            # if len(ret) == 0:
+            #     continue
+            # else:
+            #     break
+    # except:
+    #     pass
+    # finally:
+    #     env.close()
