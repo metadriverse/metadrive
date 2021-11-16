@@ -10,6 +10,7 @@ from metadrive.tests.vis_block.vis_block_base import TestBlock
 from metadrive.utils.space import Parameter
 
 if __name__ == "__main__":
+    FirstPGBlock.ENTRANCE_LENGTH = 0.5
     test = TestBlock(False)
     initialize_asset_loader(test)
     global_network = RoadNetwork()
