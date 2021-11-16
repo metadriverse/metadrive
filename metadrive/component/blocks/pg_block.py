@@ -66,7 +66,7 @@ class PGBlock(BaseBlock):
         pre_block_socket: PGBlockSocket,
         global_network: RoadNetwork,
         random_seed,
-        ignore_intersection_checking=None
+        ignore_intersection_checking=False
     ):
 
         self.name = str(block_index) + self.ID
