@@ -143,13 +143,14 @@ If you use MetaDrive in your own work, please cite:
 
 **Learning to Simulate Self-driven Particles System with Coordinated Policy Optimization**
 \
-Zhenghao Peng, Quanyi Li, Ka Ming Hui, Chunxiao Liu, Bolei Zhou 
+Zhenghao Peng, Quanyi Li, Chunxiao Liu, Bolei Zhou 
 \
 *NeurIPS 2021*
 \
 [<a href="https://arxiv.org/pdf/2110.13827.pdf" target="_blank">Paper</a>]
 [<a href="https://github.com/decisionforce/CoPO" target="_blank">Code</a>]
 [<a href="https://decisionforce.github.io/CoPO" target="_blank">Webpage</a>]
+[<a href="https://decisionforce.github.io/CoPO/copo_poster.pdf" target="_blank">Poster</a>]
 [<a href="https://youtu.be/sOw43l8lwxE" target="_blank">Talk</a>]
 
 
