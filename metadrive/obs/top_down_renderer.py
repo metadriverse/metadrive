@@ -123,7 +123,7 @@ class TopDownRenderer:
         history_smooth=0,
         road_color=(255, 255, 255),
         show_agent_name=False,
-        track_target_vehicle=False,
+        track_target_vehicle=True,
         # current_track_vehicle=None
     ):
         # Setup some useful flags
