@@ -71,6 +71,7 @@ BASE_DEFAULT_CONFIG = dict(
         image_source="rgb_camera",  # take effect when only when offscreen_render == True
 
         # ===== vehicle spawn and destination =====
+        need_navigation=True,
         spawn_lane_index=None,
         spawn_longitude=5.0,
         spawn_lateral=0.0,

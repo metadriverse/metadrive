@@ -15,7 +15,7 @@ if __name__ == "__main__":
             # "debug_static_world":True,
             "cull_scene": False,
             # "offscreen_render": True,
-            "controller": "joystick",
+            # "controller": "joystick",
             "manual_control": True,
             "use_render": True,
             "decision_repeat": 5,
@@ -58,7 +58,7 @@ if __name__ == "__main__":
 
     start = time.time()
     o = env.reset()
-    env.vehicle.set_velocity([1, 0], 10)
+    env.vehicle.set_velocity([1, 0.1], 10)
     print(env.vehicle.speed)
 
     for s in range(1, 100000):

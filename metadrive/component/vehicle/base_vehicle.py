@@ -306,7 +306,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             lane = map.road_network.get_lane(self.config["spawn_lane_index"])
             pos = lane.position(self.config["spawn_longitude"], self.config["spawn_lateral"])
             heading = np.rad2deg(lane.heading_theta_at(self.config["spawn_longitude"]))
-            self.spawn_place = pos
+        self.spawn_place = pos
         heading = -np.deg2rad(heading) - np.pi / 2
         self.set_static(False)
         self.set_position(pos, self.HEIGHT / 2 + 1)
@@ -337,8 +337,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self.front_vehicles = set()
         self.back_vehicles = set()
         self.expert_takeover = False
-
-        assert self.navigation
+        if self.config["need_navigation"]:
+            assert self.navigation
 
     """------------------------------------------- act -------------------------------------------------"""
 
@@ -383,6 +383,9 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self.dist_to_left_side, self.dist_to_right_side = self._dist_to_route_left_right()
 
     def _dist_to_route_left_right(self):
+        # TODO
+        if self.navigation is None:
+            return 0, 0
         current_reference_lane = self.navigation.current_ref_lanes[0]
         _, lateral_to_reference = current_reference_lane.local_coordinates(self.position)
         lateral_to_left = lateral_to_reference + self.navigation.get_current_lane_width() / 2
@@ -563,6 +566,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self.image_sensors[name] = sensor
 
     def add_navigation(self):
+        if not self.config["need_navigation"]:
+            return
         navi = NodeNetworkNavigation if self.engine.current_map.road_network_type == NodeRoadNetwork \
             else EdgeNetworkNavigation
         self.navigation = \
@@ -578,6 +583,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         :param map: new map
         :return: None
         """
+        if not self.config["need_navigation"]:
+            return
         possible_lanes = ray_localization(self.heading, self.spawn_place, self.engine, return_all_result=True)
         possible_lane_indexes = [lane_index for lane, lane_index, dist in possible_lanes]
         try:
@@ -776,7 +783,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         super(BaseVehicle, self).detach_from_world(physics_world)
 
     def attach_to_world(self, parent_node_path, physics_world):
-        if self.config["show_navi_mark"]:
+        if self.config["show_navi_mark"] and self.config["need_navigation"]:
             self.navigation.attach_to_world(self.engine)
         if self.lidar is not None and self.config["show_lidar"]:
             self.lidar.attach_to_world(self.engine)

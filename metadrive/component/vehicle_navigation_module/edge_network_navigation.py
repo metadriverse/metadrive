@@ -1,5 +1,5 @@
-from metadrive.component.vehicle_navigation_module.base_navigation import BaseNavigation
 from metadrive.component.road_network.edge_road_network import EdgeRoadNetwork
+from metadrive.component.vehicle_navigation_module.base_navigation import BaseNavigation
 
 
 class EdgeNetworkNavigation(BaseNavigation):
@@ -7,13 +7,14 @@ class EdgeNetworkNavigation(BaseNavigation):
    This class define a helper for localizing vehicles and retrieving navigation information.
    It now only support EdgeRoadNetwork
    """
+
     def __init__(
-        self,
-        engine,
-        show_navi_mark: bool = False,
-        random_navi_mark_color=False,
-        show_dest_mark=False,
-        show_line_to_dest=False
+            self,
+            engine,
+            show_navi_mark: bool = False,
+            random_navi_mark_color=False,
+            show_dest_mark=False,
+            show_line_to_dest=False
     ):
         super(EdgeNetworkNavigation,
               self).__init__(engine, show_navi_mark, random_navi_mark_color, show_dest_mark, show_line_to_dest)
@@ -31,6 +32,9 @@ class EdgeNetworkNavigation(BaseNavigation):
         :return: None
         """
         self.checkpoints = self.map.road_network.shortest_path(current_lane_index, destination)
+        # if len(self.checkpoints) == 0:
+        #     self.checkpoints.append(current_lane_index)
+        #     self.checkpoints.append(current_lane_index)
         self._target_checkpoints_index = [0, 1]
         # update routing info
         assert len(self.checkpoints) >= 0, "Can not find a route from {} to {}".format(current_lane_index, destination)

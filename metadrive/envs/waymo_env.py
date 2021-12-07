@@ -108,8 +108,9 @@ if __name__ == "__main__":
             "manual_control": True,
             "debug_static_world": True,
             "debug": True,
-            "agent_policy": WaymoIDMPolicy,
-            "enable_idm_lane_change": False
+            # "agent_policy": WaymoIDMPolicy,
+            "enable_idm_lane_change": False,
+            # "pstats":True
         }
     )
     env.reset()
