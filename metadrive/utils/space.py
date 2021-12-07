@@ -274,8 +274,8 @@ class BlockParameterSpace:
     }
     ROUNDABOUT = {
         # The radius of the
-        Parameter.radius_exit: BoxSpace(min=5, max=15),  # TODO Should we reduce this?
-        Parameter.radius_inner: BoxSpace(min=15, max=45),  # TODO Should we reduce this?
+        Parameter.radius_exit: BoxSpace(min=5, max=15),
+        Parameter.radius_inner: BoxSpace(min=15, max=45),
         Parameter.angle: ConstantSpace(60)
     }
     T_INTERSECTION = {
