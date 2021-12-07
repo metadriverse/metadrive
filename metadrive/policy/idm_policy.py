@@ -248,7 +248,7 @@ class IDMPolicy(BasePolicy):
         lane_heading = target_lane.heading_theta_at(long + 1)
         v_heading = ego_vehicle.heading_theta
         steering = self.heading_pid.get_result(wrap_to_pi(lane_heading - v_heading))
-        # steering += self.lateral_pid.get_result(-lat)
+        steering += self.lateral_pid.get_result(-lat)
         return float(steering)
 
     def acceleration(self, front_obj, dist_to_front) -> float:
@@ -258,7 +258,7 @@ class IDMPolicy(BasePolicy):
         if front_obj:
             d = dist_to_front
             speed_diff = self.desired_gap(ego_vehicle, front_obj) / not_zero(d)
-            acceleration -= self.ACC_FACTOR * (speed_diff**2)
+            acceleration -= self.ACC_FACTOR * (speed_diff ** 2)
         return acceleration
 
     def desired_gap(self, ego_vehicle, front_obj, projected: bool = True) -> float:
@@ -364,3 +364,15 @@ class ManualControllableIDMPolicy(IDMPolicy):
             return self.manual_control_policy.act(agent_id)
         else:
             return super(ManualControllableIDMPolicy, self).act(agent_id)
+
+
+class WaymoIDMPolicy(IDMPolicy):
+
+    def steering_control(self, target_lane) -> float:
+        # heading control following a lateral distance control
+        ego_vehicle = self.control_object
+        long, lat = target_lane.local_coordinates(ego_vehicle.position)
+        lane_heading = target_lane.heading_theta_at(long + 1)
+        v_heading = ego_vehicle.heading_theta
+        steering = self.heading_pid.get_result(wrap_to_pi(lane_heading - v_heading))
+        return float(steering)

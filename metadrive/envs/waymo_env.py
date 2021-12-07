@@ -1,5 +1,5 @@
 from metadrive.constants import DEFAULT_AGENT
-from metadrive.policy.idm_policy import IDMPolicy
+from metadrive.policy.idm_policy import WaymoIDMPolicy
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.envs.base_env import BaseEnv
 from metadrive.manager.waymo_map_manager import WaymoMapManager
@@ -99,7 +99,7 @@ if __name__ == "__main__":
             "manual_control": True,
             "debug_static_world": True,
             "debug": True,
-            "agent_policy": IDMPolicy,
+            "agent_policy": WaymoIDMPolicy,
             "enable_idm_lane_change": False
         }
     )
