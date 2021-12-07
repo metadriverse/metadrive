@@ -239,6 +239,10 @@ def extract_dynamic(f):
 def read_waymo_data(file_path):
     with open(file_path, "rb+") as waymo_file:
         data = pickle.load(waymo_file)
+    new_track= {}
+    for key, value in data["tracks"].items():
+        new_track[str(key)]=value
+    data["tracks"]=new_track
     return data
 
 

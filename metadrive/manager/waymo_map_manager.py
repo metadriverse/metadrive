@@ -12,9 +12,9 @@ class WaymoMapManager(BaseManager):
         self.maps = {_seed: None for _seed in range(0, self.map_num)}
 
     def reset(self):
-        seed = self.np_random.randint(0, self.map_num)
+        seed = self.engine.global_random_seed
         if self.maps[seed] is None:
-            map_config = self.engine.waymo_data_manager.cases[seed]
+            map_config = self.engine.data_manager.cases[seed]
             map = self.spawn_object(WaymoMap, waymo_data=map_config)
             self.maps[seed] = map
         map = self.maps[seed]

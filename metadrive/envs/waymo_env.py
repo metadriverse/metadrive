@@ -1,9 +1,11 @@
 from metadrive.constants import DEFAULT_AGENT
-from metadrive.policy.idm_policy import WaymoIDMPolicy
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.envs.base_env import BaseEnv
-from metadrive.manager.waymo_map_manager import WaymoMapManager
 from metadrive.manager.waymo_data_manager import WaymoDataManager
+from metadrive.manager.waymo_map_manager import WaymoMapManager
+from metadrive.manager.waymo_traffic_manager import WaymoTrafficManager
+from metadrive.policy.idm_policy import WaymoIDMPolicy
+from metadrive.utils import get_np_random
 
 try:
     from metadrive.utils.waymo_map_utils import AgentType
@@ -76,7 +78,8 @@ class WaymoEnv(BaseEnv):
     def setup_engine(self):
         super(WaymoEnv, self).setup_engine()
         self.engine.register_manager("map_manager", WaymoMapManager())
-        self.engine.register_manager("waymo_data_manager", WaymoDataManager())
+        self.engine.register_manager("traffic_manager", WaymoTrafficManager())
+        self.engine.register_manager("data_manager", WaymoDataManager())
 
     def reward_function(self, vehicle_id: str):
         """
@@ -91,6 +94,11 @@ class WaymoEnv(BaseEnv):
 
     def done_function(self, vehicle_id: str):
         return False, {}
+
+    def _reset_global_seed(self, force_seed=None):
+        current_seed = force_seed if force_seed is not None else get_np_random(None).randint(0, int(
+            self.config["case_num"]))
+        self.seed(current_seed)
 
 
 if __name__ == "__main__":
