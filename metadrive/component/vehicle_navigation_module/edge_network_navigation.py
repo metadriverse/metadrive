@@ -37,7 +37,7 @@ class EdgeNetworkNavigation(BaseNavigation):
         #     self.checkpoints.append(current_lane_index)
         self._target_checkpoints_index = [0, 1]
         # update routing info
-        assert len(self.checkpoints) >= 0, "Can not find a route from {} to {}".format(current_lane_index, destination)
+        assert len(self.checkpoints) > 0, "Can not find a route from {} to {}".format(current_lane_index, destination)
         self.final_lane = self.map.road_network.get_lane(self.checkpoints[-1])
         self._navi_info.fill(0.0)
         self.current_ref_lanes = self.map.road_network.get_peer_lanes_from_index(self.current_checkpoint_lane_index)

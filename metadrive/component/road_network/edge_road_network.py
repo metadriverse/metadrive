@@ -72,7 +72,6 @@ class EdgeRoadNetwork(BaseRoadNetwork):
         :param goal: goal node
         :return: list of paths from start to goal.
         """
-        goal = 191
         queue = [(start, [start])]
         while queue:
             (node, path) = queue.pop(0)

@@ -174,7 +174,7 @@ def extract_bump(f):
     return speed_bump
 
 
-def extract_tracks(f):
+def extract_tracks(f, sdc_idx):
     track = dict()
 
     for i in range(len(f)):
@@ -193,7 +193,7 @@ def extract_tracks(f):
         agent['state'] = np.stack((x, y, z, l, w, h, head, vx, vy, valid), 1)
         track[f[i].id] = agent
 
-    return track
+    return track, f[sdc_idx].id
 
 
 def extract_map(f):
@@ -319,9 +319,9 @@ def parse_data(inut_path, output_path):
             scene = dict()
             scene['id'] = scenario.scenario_id
             scene['ts'] = [ts for ts in scenario.timestamps_seconds]
-            scene['tracks'] = extract_tracks(scenario.tracks)
+            scene['tracks'], sdc_id = extract_tracks(scenario.tracks, scenario.sdc_track_index)
             scene['dynamic_map_states'] = extract_dynamic(scenario.dynamic_map_states)
-            scene['sdc_index'] = scenario.sdc_track_index
+            scene['sdc_index'] = sdc_id
             # scene['interact_tracks'] = [x for x in scenario.objects_of_interest]
             # scene['motion_tracks'] = [x for x in scenario.tracks_to_predict]
             scene['map'] = extract_map(scenario.map_features)
@@ -341,12 +341,12 @@ def convert_polyline_to_metadrive(waymo_polyline):
 
 
 if __name__ == "__main__":
-    # raw_data_path = AssetLoader.file_path("waymo", "raw", return_raw_style=False)
-    # processed_data_path = AssetLoader.file_path("waymo", "processed", return_raw_style=False)
-    # # parse raw data from input path to output path,
-    # # there is 1000 raw data in google cloud, each of them produce about 500 pkl file
-    # parse_data(raw_data_path, processed_data_path)
+    raw_data_path = AssetLoader.file_path("waymo", "raw", return_raw_style=False)
+    processed_data_path = AssetLoader.file_path("waymo", "processed", return_raw_style=False)
+    # parse raw data from input path to output path,
+    # there is 1000 raw data in google cloud, each of them produce about 500 pkl file
+    parse_data(raw_data_path, processed_data_path)
 
-    file_path = AssetLoader.file_path("waymo", "processed", "0.pkl", return_raw_style=False)
-    data = read_waymo_data(file_path)
-    draw_waymo_map(data)
+    # file_path = AssetLoader.file_path("waymo", "processed", "0.pkl", return_raw_style=False)
+    # data = read_waymo_data(file_path)
+    # draw_waymo_map(data)

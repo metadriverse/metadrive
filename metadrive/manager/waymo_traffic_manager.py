@@ -45,15 +45,16 @@ class WaymoTrafficManager(BaseManager):
         ret["valid"] = state[9]
         return ret
 
-    # def step(self, *args, **kwargs):
-    #     # generate vehicle
-    #     for v_id, type_traj in self.current_traffic_data.items():
-    #         if v_id in self.spawned_objects.keys():
-    #             info = self.parse_vehicle_state(type_traj["state"], self.count)
-    #             if not info["valid"]:
-    #                 continue
-    #             self.spawned_objects[v_id].set_position(info["position"])
-    #             self.spawned_objects[v_id].set_heading_theta(info["heading"])
+    def after_step(self, *args, **kwargs):
+        # generate vehicle
+        for v_id, type_traj in self.current_traffic_data.items():
+            if v_id in self.spawned_objects.keys():
+                info = self.parse_vehicle_state(type_traj["state"], self.count)
+                if not info["valid"]:
+                    continue
+                self.spawned_objects[v_id].set_position(info["position"])
+                self.spawned_objects[v_id].set_heading_theta(info["heading"], rad_to_degree=True)
+        self.count += 1
 
     def before_reset(self):
         # clean previous episode data

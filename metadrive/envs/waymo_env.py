@@ -35,7 +35,7 @@ WAYMO_ENV_CONFIG = dict(
     # ),
 
     # ===== Agent config =====
-    target_vehicle_configs={DEFAULT_AGENT: dict(spawn_lane_index=118, destination=191)},
+    target_vehicle_configs={DEFAULT_AGENT: dict(spawn_lane_index=313, destination=265)},
     enable_idm_lane_change=False,
 
     # ===== Reward Scheme =====
