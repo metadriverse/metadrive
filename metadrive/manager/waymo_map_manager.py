@@ -1,8 +1,5 @@
-import os
-
 from metadrive.component.map.waymo_map import WaymoMap
 from metadrive.manager.base_manager import BaseManager
-from metadrive.utils.waymo_map_utils import read_waymo_data
 
 
 class WaymoMapManager(BaseManager):
@@ -11,19 +8,13 @@ class WaymoMapManager(BaseManager):
     def __init__(self):
         super(WaymoMapManager, self).__init__()
         self.current_map = None
-        self.map_num = self.engine.global_config["map_num"]
-        directory = self.engine.global_config["map_directory"]
-        self._map_configs = {}
-        for i in range(self.map_num):
-            file_path = os.path.join(directory, "{}.pkl".format(i))
-            data = read_waymo_data(file_path)
-            self._map_configs[i] = data
+        self.map_num = self.engine.global_config["case_num"]
         self.maps = {_seed: None for _seed in range(0, self.map_num)}
 
     def reset(self):
         seed = self.np_random.randint(0, self.map_num)
         if self.maps[seed] is None:
-            map_config = self._map_configs[seed]
+            map_config = self.engine.waymo_data_manager.cases[seed]
             map = self.spawn_object(WaymoMap, waymo_data=map_config)
             self.maps[seed] = map
         map = self.maps[seed]
@@ -44,7 +35,6 @@ class WaymoMapManager(BaseManager):
     def destroy(self):
         self.maps = None
         self.current_map = None
-        self._map_configs = None
         super(WaymoMapManager, self).destroy()
 
     def before_reset(self):

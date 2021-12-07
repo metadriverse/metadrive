@@ -2,7 +2,8 @@ from metadrive.constants import DEFAULT_AGENT
 from metadrive.policy.idm_policy import WaymoIDMPolicy
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.envs.base_env import BaseEnv
-from metadrive.manager.waymo.waymo_map_manager import WaymoMapManager
+from metadrive.manager.waymo_map_manager import WaymoMapManager
+from metadrive.manager.waymo_data_manager import WaymoDataManager
 
 try:
     from metadrive.utils.waymo_map_utils import AgentType
@@ -13,7 +14,7 @@ finally:
 
 WAYMO_ENV_CONFIG = dict(
     # ===== Map Config =====
-    data_directory=AssetLoader.file_path("waymo", "processed", return_raw_style=False),
+    waymo_data_directory=AssetLoader.file_path("waymo", "processed", return_raw_style=False),
     case_num=1,
 
     # ===== Traffic =====
