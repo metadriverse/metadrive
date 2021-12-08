@@ -105,3 +105,8 @@ class WaymoBlock(BaseBlock):
     @property
     def block_network_type(self):
         return EdgeRoadNetwork
+
+    def destroy(self):
+        self.waymo_map_data = None
+        self.block_network = None
+        super(WaymoBlock, self).destroy()

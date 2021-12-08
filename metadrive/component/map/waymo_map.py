@@ -28,6 +28,10 @@ class WaymoMap(BaseMap):
     def road_network_type(self):
         return EdgeRoadNetwork
 
+    def destroy(self):
+        self.waymo_data=None
+        super(WaymoMap, self).destroy()
+
 
 if __name__ == "__main__":
     from metadrive.engine.engine_utils import initialize_engine
