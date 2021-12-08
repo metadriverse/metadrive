@@ -243,6 +243,7 @@ def read_waymo_data(file_path):
     for key, value in data["tracks"].items():
         new_track[str(key)]=value
     data["tracks"]=new_track
+    data["sdc_index"]=str(data["sdc_index"])
     return data
 
 

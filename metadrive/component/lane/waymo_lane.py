@@ -28,7 +28,7 @@ class WaymoLane(WayPointLane):
         right_lanes = waymo_map_data[waymo_lane_id][WaymoLaneProperty.RIGHT_NEIGHBORS]
         left_lanes = waymo_map_data[waymo_lane_id][WaymoLaneProperty.LEFT_NEIGHBORS]
         if len(right_lanes) + len(left_lanes) == 0:
-            return max(sum(waymo_map_data[waymo_lane_id]["width"][0]), 4)
+            return max(sum(waymo_map_data[waymo_lane_id]["width"][0]), 6)
         dist_to_left_lane = 0
         dist_to_right_lane = 0
         if len(right_lanes) > 0:

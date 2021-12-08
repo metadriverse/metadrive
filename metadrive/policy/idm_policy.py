@@ -367,6 +367,8 @@ class ManualControllableIDMPolicy(IDMPolicy):
 
 
 class WaymoIDMPolicy(IDMPolicy):
+    NORMAL_SPEED = 15
+
     def steering_control(self, target_lane) -> float:
         # heading control following a lateral distance control
         ego_vehicle = self.control_object
@@ -375,3 +377,20 @@ class WaymoIDMPolicy(IDMPolicy):
         v_heading = ego_vehicle.heading_theta
         steering = self.heading_pid.get_result(wrap_to_pi(lane_heading - v_heading))
         return float(steering)
+
+    def move_to_next_road(self):
+        # routing target lane is in current ref lanes
+        current_lanes = self.control_object.navigation.current_ref_lanes
+        if self.routing_target_lane is None:
+            self.routing_target_lane = self.control_object.lane
+            return True if self.routing_target_lane in current_lanes else False
+        if self.routing_target_lane not in current_lanes:
+            for lane in current_lanes:
+                if self.routing_target_lane.is_previous_lane_of(lane):
+                    # two lanes connect
+                    self.routing_target_lane = lane
+                    return True
+                    # lane change for lane num change
+            return False
+        else:
+            return True
