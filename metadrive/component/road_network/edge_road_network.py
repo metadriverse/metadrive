@@ -1,4 +1,5 @@
 from metadrive.component.road_network.base_road_network import BaseRoadNetwork, LaneIndex
+import gc
 import copy
 import logging
 from typing import List, Tuple, Dict
@@ -96,6 +97,7 @@ class EdgeRoadNetwork(BaseRoadNetwork):
         super(EdgeRoadNetwork, self).destroy()
         for k, v in self.graph.items():
             v.lane.destroy()
+            self.graph[k]:lane_info=None
         self.graph=None
 
     def __del__(self):

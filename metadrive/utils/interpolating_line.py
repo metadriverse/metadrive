@@ -10,14 +10,13 @@ class InterpolatingLine:
     This class provides point set with interpolating function
     """
     def __init__(self, points):
-        self.points = points
-        self.segment_property = self._get_properties()
+        self.segment_property = self._get_properties(points)
         self.length = sum([seg["length"] for seg in self.segment_property])
 
-    def _get_properties(self):
+    def _get_properties(self, points):
         ret = []
-        for idx, p_start in enumerate(self.points[:-1]):
-            p_end = self.points[idx + 1]
+        for idx, p_start in enumerate(points[:-1]):
+            p_end = points[idx + 1]
             seg_property = {
                 "length": self.points_distance(p_start, p_end),
                 "direction": self.points_direction(p_start, p_end),
@@ -90,6 +89,5 @@ class InterpolatingLine:
         return lateral
 
     def destroy(self):
-        self.points = None
         self.segment_property = None
         self.length = None

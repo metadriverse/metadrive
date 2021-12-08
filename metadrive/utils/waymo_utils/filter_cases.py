@@ -1,7 +1,7 @@
 import os
 import signal
 import sys
-
+import gc
 from metadrive.envs.waymo_env import WaymoEnv
 from metadrive.policy.idm_policy import WaymoIDMPolicy
 from tqdm import tqdm
@@ -28,29 +28,25 @@ if __name__ == "__main__":
     case_num = len(os.listdir(case_data_path))
     max_step = 1000
     min_step = 100
+    env=None
 
-    env = WaymoEnv(
-        {
-            "use_render": False,
-            "agent_policy": WaymoIDMPolicy,
-            "waymo_data_directory": case_data_path,
-            "case_num": case_num,
-            "store_map": False,
-            # "manual_control": True,
-            # "debug":True,
-            "horizon": 1000,
-        }
-    )
-    try:
-        env.reset()
-    except:
-        pass
-    finally:
-        pass
     for i in tqdm(range(case_num)):
         try:
             signal.signal(signal.SIGALRM, handler)
             signal.alarm(10)
+            env = WaymoEnv(
+                {
+                    "use_render": False,
+                    "agent_policy": WaymoIDMPolicy,
+                    "waymo_data_directory": case_data_path,
+                    "case_num": case_num,
+                    "store_map": False,
+                    # "manual_control": True,
+                    # "debug":True,
+                    # "pstats": True,
+                    "horizon": 1000,
+                }
+            )
             env.reset(force_seed=i)
             while True:
                 o, r, d, info = env.step([0, 0])
@@ -61,6 +57,11 @@ if __name__ == "__main__":
                             os.path.join(processed_data_path, "{}.pkl".format(i))
                         )
                     break
+            env.close()
+            env=None
         except:
             # print("\n No Route or Timeout, Fail, Seed: {}".format(i))
+            if env is not None:
+                env.close()
+                env=None
             pass
