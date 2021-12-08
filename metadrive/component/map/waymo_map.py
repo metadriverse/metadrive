@@ -1,7 +1,7 @@
 from metadrive.component.map.base_map import BaseMap
 from metadrive.component.waymo_block.waymo_block import WaymoBlock
 from metadrive.engine.asset_loader import AssetLoader
-from metadrive.utils.waymo_utils.process_scenario_20s import read_waymo_data
+from metadrive.utils.waymo_utils.waymo_utils import read_waymo_data
 from metadrive.component.road_network.edge_road_network import EdgeRoadNetwork
 
 
@@ -32,9 +32,9 @@ class WaymoMap(BaseMap):
 if __name__ == "__main__":
     from metadrive.engine.engine_utils import initialize_engine
     from metadrive.envs.metadrive_env import MetaDriveEnv
-    from metadrive.utils.waymo_utils.process_scenario_20s import AgentType
-    from metadrive.utils.waymo_utils.process_scenario_20s import RoadEdgeType
-    from metadrive.utils.waymo_utils.process_scenario_20s import RoadLineType
+    from metadrive.utils.waymo_utils.waymo_utils import AgentType
+    from metadrive.utils.waymo_utils.waymo_utils import RoadEdgeType
+    from metadrive.utils.waymo_utils.waymo_utils import RoadLineType
 
     # touch these items so that pickle can work
     _ = AgentType

@@ -1,7 +1,7 @@
 import os
 
 from metadrive.manager.base_manager import BaseManager
-from metadrive.utils.waymo_utils.process_scenario_20s import read_waymo_data
+from metadrive.utils.waymo_utils.waymo_utils import read_waymo_data
 
 
 class WaymoDataManager(BaseManager):

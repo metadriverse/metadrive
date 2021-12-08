@@ -10,9 +10,9 @@ from metadrive.policy.idm_policy import WaymoIDMPolicy
 from metadrive.utils import get_np_random
 
 try:
-    from metadrive.utils.waymo_utils.process_scenario_20s import AgentType
-    from metadrive.utils.waymo_utils.process_scenario_20s import RoadEdgeType
-    from metadrive.utils.waymo_utils.process_scenario_20s import RoadLineType
+    from metadrive.utils.waymo_utils.waymo_utils import AgentType
+    from metadrive.utils.waymo_utils.waymo_utils import RoadEdgeType
+    from metadrive.utils.waymo_utils.waymo_utils import RoadLineType
 finally:
     pass
 
