@@ -67,7 +67,6 @@ class WaymoMapManager(BaseManager):
         )
 
     def filter_path(self, start_lanes, end_lanes):
-        available_route = []
         for start in start_lanes:
             for end in end_lanes:
                 path = self.current_map.road_network.shortest_path(start[0].index, end[0].index)

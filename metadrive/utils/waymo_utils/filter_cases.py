@@ -54,23 +54,6 @@ if __name__ == "__main__":
             env.reset(force_seed=i)
             while True:
                 o, r, d, info = env.step([0, 0])
-                c_lane = env.vehicle.lane
-                long, lat, = c_lane.local_coordinates(env.vehicle.position)
-                if env.config["use_render"]:
-                    env.render(
-                        text={
-                            "routing_lane_idx": env.engine._object_policies[env.vehicle.id].routing_target_lane.index,
-                            "lane_index": env.vehicle.lane_index,
-                            "current_ckpt_index": env.vehicle.navigation.current_checkpoint_lane_index,
-                            "next_ckpt_index": env.vehicle.navigation.next_checkpoint_lane_index,
-                            "ckpts": env.vehicle.navigation.checkpoints,
-                            "lane_heading": c_lane.heading_theta_at(long),
-                            "long": long,
-                            "lat": lat,
-                            "v_heading": env.vehicle.heading_theta
-                        }
-                    )
-
                 if d or env.episode_steps > max_step:
                     if info["arrive_dest"] and env.episode_steps > min_step:
                         os.rename(
