@@ -147,46 +147,48 @@ class WaymoEnv(BaseEnv):
     def _is_out_of_road(self, vehicle):
         # A specified function to determine whether this vehicle should be done.
         # return vehicle.on_yellow_continuous_line or (not vehicle.on_lane) or vehicle.crash_sidewalk
-        ret = vehicle.on_yellow_continuous_line or vehicle.on_white_continuous_line or vehicle.crash_sidewalk
+        ret = vehicle.on_yellow_continuous_line or vehicle.on_white_continuous_line or vehicle.crash_sidewalk or not vehicle.on_lane
         return ret
 
     def stop(self):
         self.in_stop = not self.in_stop
 
+
 if __name__ == "__main__":
     env = WaymoEnv(
         {
-            "use_render": True,
-            # "manual_control": True,
+            "use_render": False,
             "agent_policy": WaymoIDMPolicy,
+            # "manual_control": True,
             # "debug":True,
-            "horizon":1000,
+            "horizon": 1000,
         }
     )
-    success=[]
+    success = []
     for i in range(60):
         try:
             env.reset(force_seed=i)
             while True:
-                o,r,d,info = env.step([0, 0])
+                o, r, d, info = env.step([0, 0])
                 c_lane = env.vehicle.lane
-                long, lat = c_lane.local_coordinates(env.vehicle.position)
-                env.render(
-                    text={
-                        "routing_lane_idx": env.engine._object_policies[env.vehicle.id].routing_target_lane.index,
-                        "lane_index": env.vehicle.lane_index,
-                        "current_ckpt_index": env.vehicle.navigation.current_checkpoint_lane_index,
-                        "next_ckpt_index": env.vehicle.navigation.next_checkpoint_lane_index,
-                        "ckpts": env.vehicle.navigation.checkpoints,
-                        "lane_heading": c_lane.heading_theta_at(long),
-                        "long": long,
-                        "lat": lat,
-                        "v_heading": env.vehicle.heading_theta
-                    }
-                )
+                long, lat, = c_lane.local_coordinates(env.vehicle.position)
+                if env.config["use_render"]:
+                    env.render(
+                        text={
+                            "routing_lane_idx": env.engine._object_policies[env.vehicle.id].routing_target_lane.index,
+                            "lane_index": env.vehicle.lane_index,
+                            "current_ckpt_index": env.vehicle.navigation.current_checkpoint_lane_index,
+                            "next_ckpt_index": env.vehicle.navigation.next_checkpoint_lane_index,
+                            "ckpts": env.vehicle.navigation.checkpoints,
+                            "lane_heading": c_lane.heading_theta_at(long),
+                            "long": long,
+                            "lat": lat,
+                            "v_heading": env.vehicle.heading_theta
+                        }
+                    )
 
-                if d or env.episode_steps>1000:
-                    if info["arrive_dest"] and env.episode_steps>50:
+                if d or env.episode_steps > 1000:
+                    if info["arrive_dest"] and env.episode_steps > 100:
                         success.append(i)
                         print("Success, Seed: {}".format(i))
                     else:
