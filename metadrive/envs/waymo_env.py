@@ -81,8 +81,8 @@ class WaymoEnv(BaseEnv):
     def setup_engine(self):
         self.in_stop = False
         super(WaymoEnv, self).setup_engine()
-        self.engine.register_manager("map_manager", WaymoMapManager())
         self.engine.register_manager("data_manager", WaymoDataManager())
+        self.engine.register_manager("map_manager", WaymoMapManager())
         if not self.config["no_traffic"]:
             self.engine.register_manager("traffic_manager", WaymoTrafficManager())
         self.engine.accept("s", self.stop)
