@@ -2,7 +2,7 @@ import os
 
 from metadrive.manager.base_manager import BaseManager
 from metadrive.utils.waymo_utils.waymo_utils import read_waymo_data
-from tqdm import  tqdm
+from tqdm import tqdm
 
 
 class WaymoDataManager(BaseManager):

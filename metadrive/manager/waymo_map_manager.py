@@ -87,7 +87,7 @@ class WaymoMapManager(BaseManager):
         map.detach_from_world()
         self.current_map = None
         if not self.engine.global_config["store_map"]:
-            self.clear_objects([map.id])
+            self.clear_objects([map.id], force_destroy=True)
 
     def destroy(self):
         self.maps = None
