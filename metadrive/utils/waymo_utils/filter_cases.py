@@ -20,11 +20,11 @@ def handler(signum, frame):
 
 if __name__ == "__main__":
     case_data_path = sys.argv[1]
-    processed_data_path = case_data_path + "_filtered"
+    processed_data_path = case_data_path+"_filtered"
     os.mkdir(processed_data_path)
     if not os.path.exists(case_data_path) or not os.path.exists(processed_data_path):
         raise ValueError("Path Not exist")
-    case_num = len([name for name in os.listdir(case_data_path) if os.path.isfile(name)])
+    case_num = len(os.listdir(case_data_path))
     max_step = 1000
     min_step = 100
 
@@ -32,7 +32,7 @@ if __name__ == "__main__":
         {
             "use_render": False,
             "agent_policy": WaymoIDMPolicy,
-            "waymo_data_directory": AssetLoader.file_path(case_data_path, return_raw_style=False),
+            "waymo_data_directory": case_data_path,
             "case_num": case_num,
             # "manual_control": True,
             # "debug":True,
