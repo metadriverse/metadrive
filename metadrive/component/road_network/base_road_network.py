@@ -71,3 +71,7 @@ class BaseRoadNetwork:
         for k, p in enumerate(points[:-1]):
             for p_ in points[k + 1:]:
                 engine.add_line((*p, 2), (*p_, 2), (1, 0., 0., 1), 2)
+
+    def destroy(self):
+        self.bounding_box=None
+

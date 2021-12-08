@@ -1,3 +1,6 @@
+import logging
+
+
 from metadrive.base_class.configurable import Configurable
 from metadrive.base_class.randomizable import Randomizable
 from metadrive.engine.engine_utils import get_engine
@@ -28,6 +31,7 @@ class BasePolicy(Randomizable, Configurable):
         pass
 
     def destroy(self):
+        logging.debug("{} is released".format(self.__class__.__name__))
         super(BasePolicy, self).destroy()
         self.control_object = None
         self.engine = None

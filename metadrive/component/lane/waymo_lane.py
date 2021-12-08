@@ -1,3 +1,5 @@
+import logging
+
 from metadrive.component.lane.waypoint_lane import WayPointLane
 from metadrive.utils.math_utils import norm
 from metadrive.constants import WaymoLaneProperty
@@ -46,6 +48,9 @@ class WaymoLane(WayPointLane):
             self_point = waymo_map_data[waymo_lane_id][WaymoLaneProperty.POLYLINE][self_start]
             dist_to_left_lane = norm(n_point[0] - self_point[0], n_point[1] - self_point[1])
         return max(dist_to_left_lane, dist_to_right_lane, 2)
+
+    def __del__(self):
+        logging.debug("WaymoLane is released")
 
 
 if __name__ == "__main__":

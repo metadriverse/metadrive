@@ -88,3 +88,8 @@ class InterpolatingLine:
         lane_segment = self.segment(longitude)
         lateral = lane_segment["lateral_direction"]
         return lateral
+
+    def destroy(self):
+        self.points = None
+        self.segment_property = None
+        self.length = None

@@ -91,3 +91,12 @@ class EdgeRoadNetwork(BaseRoadNetwork):
         for right_n in info.right_lanes:
             ret.append(self.graph[right_n["id"]].lane)
         return ret
+
+    def destroy(self):
+        super(EdgeRoadNetwork, self).destroy()
+        for k, v in self.graph.items():
+            v.lane.destroy()
+        self.graph=None
+
+    def __del__(self):
+        logging.debug("{} is released".format(self.__class__.__name__))

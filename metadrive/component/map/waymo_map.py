@@ -1,3 +1,5 @@
+import logging
+
 from metadrive.component.map.base_map import BaseMap
 from metadrive.component.waymo_block.waymo_block import WaymoBlock
 from metadrive.engine.asset_loader import AssetLoader
@@ -31,6 +33,9 @@ class WaymoMap(BaseMap):
     def destroy(self):
         self.waymo_data=None
         super(WaymoMap, self).destroy()
+
+    def __del__(self):
+        logging.debug("Map is Released")
 
 
 if __name__ == "__main__":

@@ -8,13 +8,14 @@ from tqdm import tqdm
 class WaymoDataManager(BaseManager):
     def __init__(self):
         super(WaymoDataManager, self).__init__()
-        directory = self.engine.global_config["waymo_data_directory"]
+        self.directory = self.engine.global_config["waymo_data_directory"]
         self.case_num = self.engine.global_config["case_num"]
-        self.cases = {}
-        for i in tqdm(range(self.case_num), desc="Load Data"):
-            file_path = os.path.join(directory, "{}.pkl".format(i))
-            data = read_waymo_data(file_path)
-            self.cases[i] = data
+        for i in tqdm(range(self.case_num), desc="Check Data"):
+            assert os.path.exists(os.path.join(self.directory, "{}.pkl".format(i))), "No Data"
+
+    def get_case(self, i):
+        file_path = os.path.join(self.directory, "{}.pkl".format(i))
+        return read_waymo_data(file_path)
 
     def destroy(self):
         super(WaymoDataManager, self).destroy()

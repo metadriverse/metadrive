@@ -58,5 +58,5 @@ class WaymoTrafficManager(BaseManager):
     def before_reset(self):
         # clean previous episode data
         super(WaymoTrafficManager, self).before_reset()
-        self.current_traffic_data = self.engine.data_manager.cases[self.engine.global_random_seed]["tracks"]
-        self.sdc_index = str(self.engine.data_manager.cases[self.engine.global_random_seed]["sdc_index"])
+        self.current_traffic_data = self.engine.data_manager.get_case(self.engine.global_random_seed)["tracks"]
+        self.sdc_index = str(self.engine.data_manager.get_case(self.engine.global_random_seed)["sdc_index"])

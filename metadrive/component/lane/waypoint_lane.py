@@ -76,3 +76,15 @@ class WayPointLane(AbstractLane, InterpolatingLine):
 
     def get_bounding_box(self):
         return self._bounding_box
+
+    def destroy(self):
+        self._bounding_box =None
+        self.width = None
+        self.forbidden = None
+        self.priority = None
+        # waymo lane line will be processed separately
+        self.line_types = None
+        self.is_straight = None
+        self.start = None
+        self.end = None
+        InterpolatingLine.destroy(self)

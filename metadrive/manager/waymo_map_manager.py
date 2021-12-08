@@ -21,7 +21,7 @@ class WaymoMapManager(BaseManager):
 
     def reset(self):
         seed = self.engine.global_random_seed
-        map_config = self.engine.data_manager.cases[seed]
+        map_config = self.engine.data_manager.get_case(seed)
         if self.maps[seed] is None:
             map = self.spawn_object(WaymoMap, waymo_data=map_config)
             if self.engine.global_config["store_map"]:
