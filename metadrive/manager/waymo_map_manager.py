@@ -77,6 +77,7 @@ class WaymoMapManager(BaseManager):
 
     def spawn_object(self, object_class, *args, **kwargs):
         map = self.engine.spawn_object(object_class, auto_fill_random_seed=False, *args, **kwargs)
+        self.spawned_objects[map.id] = map
         return map
 
     def load_map(self, map):
