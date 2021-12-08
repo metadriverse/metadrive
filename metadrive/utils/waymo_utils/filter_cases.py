@@ -21,7 +21,8 @@ def handler(signum, frame):
 if __name__ == "__main__":
     case_data_path = sys.argv[1]
     processed_data_path = case_data_path+"_filtered"
-    os.mkdir(processed_data_path)
+    if not os.path.exists(processed_data_path):
+        os.mkdir(processed_data_path)
     if not os.path.exists(case_data_path) or not os.path.exists(processed_data_path):
         raise ValueError("Path Not exist")
     case_num = len(os.listdir(case_data_path))
