@@ -1,7 +1,6 @@
 import logging
 
 import numpy as np
-
 from metadrive.component.vehicle_module.PID_controller import PIDController
 from metadrive.policy.base_policy import BasePolicy
 from metadrive.policy.manual_control_policy import ManualControlPolicy
@@ -258,7 +257,7 @@ class IDMPolicy(BasePolicy):
         if front_obj:
             d = dist_to_front
             speed_diff = self.desired_gap(ego_vehicle, front_obj) / not_zero(d)
-            acceleration -= self.ACC_FACTOR * (speed_diff**2)
+            acceleration -= self.ACC_FACTOR * (speed_diff ** 2)
         return acceleration
 
     def desired_gap(self, ego_vehicle, front_obj, projected: bool = True) -> float:
@@ -376,6 +375,7 @@ class WaymoIDMPolicy(IDMPolicy):
         lane_heading = target_lane.heading_theta_at(long + 1)
         v_heading = ego_vehicle.heading_theta
         steering = self.heading_pid.get_result(wrap_to_pi(lane_heading - v_heading))
+        steering += self.lateral_pid.get_result(wrap_to_pi(lane_heading - v_heading))
         return float(steering)
 
     def move_to_next_road(self):
@@ -386,11 +386,11 @@ class WaymoIDMPolicy(IDMPolicy):
             return True if self.routing_target_lane in current_lanes else False
         if self.routing_target_lane not in current_lanes:
             for lane in current_lanes:
-                if self.routing_target_lane.is_previous_lane_of(lane):
-                    # two lanes connect
+                if self.routing_target_y:
                     self.routing_target_lane = lane
                     return True
                     # lane change for lane num change
-            return False
-        else:
+            self.routing_target_lane = self.control_object.navigation.map.road_network.get_lane(
+                self.control_object.navigation.next_checkpoint_lane_index)
             return True
+        return False

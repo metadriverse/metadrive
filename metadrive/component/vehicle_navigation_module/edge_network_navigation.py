@@ -1,5 +1,8 @@
 from metadrive.component.road_network.edge_road_network import EdgeRoadNetwork
+from metadrive.component.road_network.node_road_network import NodeRoadNetwork
+
 from metadrive.component.vehicle_navigation_module.base_navigation import BaseNavigation
+from metadrive.utils.scene_utils import ray_localization
 
 
 class EdgeNetworkNavigation(BaseNavigation):
@@ -115,3 +118,23 @@ class EdgeNetworkNavigation(BaseNavigation):
     @property
     def next_checkpoint_lane_index(self):
         return self.checkpoints[self._target_checkpoints_index[1]]
+
+    def _get_current_lane(self, ego_vehicle):
+        """
+        Called in update_localization to find current lane information
+        """
+        possible_lanes = ray_localization(
+            ego_vehicle.heading, ego_vehicle.position, ego_vehicle.engine, return_all_result=True,
+            use_heading_filter=False)
+        for lane, index, l_1_dist in possible_lanes:
+            if lane in self.current_ref_lanes:
+                return lane, index
+        nx_ckpt = self._target_checkpoints_index[-1]
+        if nx_ckpt == self.checkpoints[-1] or self.next_ref_lanes is None:
+            return possible_lanes[0][:-1] if len(possible_lanes) > 0 else (None, None)
+
+        next_ref_lanes = self.next_ref_lanes
+        for lane, index, l_1_dist in possible_lanes:
+            if lane in next_ref_lanes:
+                return lane, index
+        return possible_lanes[0][:-1] if len(possible_lanes) > 0 else (None, None)
