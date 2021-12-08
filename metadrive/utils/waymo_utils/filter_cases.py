@@ -39,6 +39,7 @@ if __name__ == "__main__":
             "horizon": 1000,
         }
     )
+    env.reset()
     for i in tqdm(range(case_num)):
         try:
             signal.signal(signal.SIGALRM, handler)
