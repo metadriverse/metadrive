@@ -19,8 +19,7 @@ finally:
 WAYMO_ENV_CONFIG = dict(
     # ===== Map Config =====
     waymo_data_directory=AssetLoader.file_path("waymo", "processed", return_raw_style=False),
-    case_num=10,
-    start_case=2,
+    case_num=60,
 
     no_traffic=True,
     # ===== Traffic =====
@@ -158,10 +157,8 @@ if __name__ == "__main__":
     env = WaymoEnv(
         {
             "use_render": True,
-            "manual_control": True,
-            "debug_static_world": True,
+            # "manual_control": True,
             "agent_policy": WaymoIDMPolicy,
-            "enable_idm_lane_change": False,
             # "debug":True,
             "horizon":1000,
         }
@@ -172,13 +169,22 @@ if __name__ == "__main__":
             env.reset(force_seed=i)
             while True:
                 o,r,d,info = env.step([0, 0])
+                c_lane = env.vehicle.lane
+                long, lat = c_lane.local_coordinates(env.vehicle.position)
                 env.render(
                     text={
+                        "routing_lane_idx": env.engine._object_policies[env.vehicle.id].routing_target_lane.index,
                         "lane_index": env.vehicle.lane_index,
                         "current_ckpt_index": env.vehicle.navigation.current_checkpoint_lane_index,
                         "next_ckpt_index": env.vehicle.navigation.next_checkpoint_lane_index,
                         "ckpts": env.vehicle.navigation.checkpoints,
-                    })
+                        "lane_heading": c_lane.heading_theta_at(long),
+                        "long": long,
+                        "lat": lat,
+                        "v_heading": env.vehicle.heading_theta
+                    }
+                )
+
                 if d or env.episode_steps>1000:
                     if info["arrive_dest"] and env.episode_steps>50:
                         success.append(i)

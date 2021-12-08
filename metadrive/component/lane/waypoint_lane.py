@@ -55,9 +55,9 @@ class WayPointLane(AbstractLane, InterpolatingLine):
             delta_y = position[1] - seg["start_point"][1]
             longitudinal = delta_x * seg["direction"][0] + delta_y * seg["direction"][1]
             lateral = delta_x * seg["lateral_direction"][0] + delta_y * seg["lateral_direction"][1]
-            ret.append([accumulate_len + longitudinal, lateral, longitudinal + lateral])
+            ret.append([accumulate_len + longitudinal, lateral])
             accumulate_len += seg["length"]
-        ret.sort(key=lambda seg: seg[-1])
+        ret.sort(key=lambda seg: abs(seg[-1]))
         return ret[0][0], ret[0][1]
 
     def is_in_same_direction(self, another_lane):

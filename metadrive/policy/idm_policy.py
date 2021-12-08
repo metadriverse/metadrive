@@ -366,7 +366,17 @@ class ManualControllableIDMPolicy(IDMPolicy):
 
 
 class WaymoIDMPolicy(IDMPolicy):
-    NORMAL_SPEED = 15
+    NORMAL_SPEED = 20
+
+    def __init__(self, control_object, random_seed):
+        super(IDMPolicy, self).__init__(control_object=control_object, random_seed=random_seed)
+        self.target_speed = self.NORMAL_SPEED
+        self.routing_target_lane = None
+        self.available_routing_index_range = None
+        self.overtake_timer = self.np_random.randint(0, self.LANE_CHANGE_FREQ)
+
+        self.heading_pid = PIDController(1.7, 0.01, 3.5)
+        self.lateral_pid = PIDController(0.3, .0, 0.0)
 
     def steering_control(self, target_lane) -> float:
         # heading control following a lateral distance control
@@ -375,7 +385,7 @@ class WaymoIDMPolicy(IDMPolicy):
         lane_heading = target_lane.heading_theta_at(long + 1)
         v_heading = ego_vehicle.heading_theta
         steering = self.heading_pid.get_result(wrap_to_pi(lane_heading - v_heading))
-        steering += self.lateral_pid.get_result(wrap_to_pi(lane_heading - v_heading))
+        # steering += self.lateral_pid.get_result(-lat)
         return float(steering)
 
     def move_to_next_road(self):
@@ -386,9 +396,8 @@ class WaymoIDMPolicy(IDMPolicy):
             return True if self.routing_target_lane in current_lanes else False
         if self.routing_target_lane not in current_lanes:
             for lane in current_lanes:
-                if self.routing_target_y:
-                    self.routing_target_lane = lane
-                    return True
+                self.routing_target_lane = lane
+                return True
                     # lane change for lane num change
             self.routing_target_lane = self.control_object.navigation.map.road_network.get_lane(
                 self.control_object.navigation.next_checkpoint_lane_index)
