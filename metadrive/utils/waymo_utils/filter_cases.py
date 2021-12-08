@@ -42,6 +42,8 @@ if __name__ == "__main__":
     )
     try:
         env.reset()
+    except:
+        pass
     finally:
         pass
     for i in tqdm(range(case_num)):
