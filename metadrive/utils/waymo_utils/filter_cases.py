@@ -1,5 +1,5 @@
-import signal
 import os
+import signal
 import sys
 
 from metadrive.envs.waymo_env import WaymoEnv
@@ -20,11 +20,11 @@ def handler(signum, frame):
 
 if __name__ == "__main__":
     case_data_path = sys.argv[1]
-    processed_data_path = sys.argv[2]
-    pre_fix = sys.argv[3]
+    processed_data_path = case_data_path + "_filtered"
+    os.mkdir(processed_data_path)
     if not os.path.exists(case_data_path) or not os.path.exists(processed_data_path):
         raise ValueError("Path Not exist")
-    case_num=len([name for name in os.listdir(case_data_path) if os.path.isfile(name)])
+    case_num = len([name for name in os.listdir(case_data_path) if os.path.isfile(name)])
     max_step = 1000
     min_step = 100
 
@@ -39,7 +39,6 @@ if __name__ == "__main__":
             "horizon": 1000,
         }
     )
-    success = []
     for i in tqdm(range(case_num)):
         try:
             signal.signal(signal.SIGALRM, handler)
@@ -66,7 +65,8 @@ if __name__ == "__main__":
 
                 if d or env.episode_steps > max_step:
                     if info["arrive_dest"] and env.episode_steps > min_step:
-                        success.append(i)
+                        os.rename(os.path.join(case_data_path, "{}.pkl".format(i)),
+                                  os.path.join(processed_data_path, "{}.pkl".format(i)))
                     break
         except:
             # print("\n No Route or Timeout, Fail, Seed: {}".format(i))
