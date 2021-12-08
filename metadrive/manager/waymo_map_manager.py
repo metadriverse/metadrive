@@ -24,8 +24,10 @@ class WaymoMapManager(BaseManager):
         map_config = self.engine.data_manager.cases[seed]
         if self.maps[seed] is None:
             map = self.spawn_object(WaymoMap, waymo_data=map_config)
-            self.maps[seed] = map
-        map = self.maps[seed]
+            if self.engine.global_config["store_map"]:
+                self.maps[seed] = map
+        else:
+            map = self.maps[seed]
         self.load_map(map)
         self.update_route(map_config)
 
@@ -73,6 +75,8 @@ class WaymoMapManager(BaseManager):
     def unload_map(self, map):
         map.detach_from_world()
         self.current_map = None
+        if not self.engine.global_config["store_map"]:
+            self.clear_objects([map.id])
 
     def destroy(self):
         self.maps = None
@@ -83,3 +87,4 @@ class WaymoMapManager(BaseManager):
         # remove map from world before adding
         if self.current_map is not None:
             self.unload_map(self.current_map)
+

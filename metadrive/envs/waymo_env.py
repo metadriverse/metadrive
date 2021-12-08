@@ -20,6 +20,7 @@ WAYMO_ENV_CONFIG = dict(
     # ===== Map Config =====
     waymo_data_directory=AssetLoader.file_path("waymo", "processed", return_raw_style=False),
     case_num=60,
+    store_map=True,
 
     no_traffic=True,
     # ===== Traffic =====

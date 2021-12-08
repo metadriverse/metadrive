@@ -35,6 +35,7 @@ if __name__ == "__main__":
             "agent_policy": WaymoIDMPolicy,
             "waymo_data_directory": case_data_path,
             "case_num": case_num,
+            "store_map":False,
             # "manual_control": True,
             # "debug":True,
             "horizon": 1000,
