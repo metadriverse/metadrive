@@ -109,5 +109,4 @@ class WaymoBlock(BaseBlock):
 
     def destroy(self):
         self.waymo_map_data = None
-        self.block_network = None
         super(WaymoBlock, self).destroy()

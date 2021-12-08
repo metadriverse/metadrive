@@ -251,3 +251,9 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
         return: roadnetwork
         """
         raise NotImplementedError
+
+    def destroy(self):
+        if self.block_network is not None:
+            self.block_network.destroy()
+            self.block_network=None
+        super(BaseBlock, self).destroy()
