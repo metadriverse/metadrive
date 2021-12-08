@@ -1,5 +1,6 @@
 from enum import Enum
-
+import sys
+from tqdm import tqdm
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import figure
 
@@ -310,7 +311,7 @@ def parse_data(inut_path, output_path):
     cnt = 0
     scenario = scenario_pb2.Scenario()
     file_list = os.listdir(inut_path)
-    for file in file_list:
+    for file in tqdm(file_list):
         file_path = os.path.join(inut_path, file)
         if not 'scenario' in file_path:
             continue
