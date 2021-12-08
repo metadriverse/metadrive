@@ -7,9 +7,9 @@ from metadrive.policy.idm_policy import WaymoIDMPolicy
 from tqdm import tqdm
 
 try:
-    from metadrive.utils.waymo_map_utils import AgentType
-    from metadrive.utils.waymo_map_utils import RoadEdgeType
-    from metadrive.utils.waymo_map_utils import RoadLineType
+    from metadrive.utils.waymo_utils.process_scenario_20s import AgentType
+    from metadrive.utils.waymo_utils.process_scenario_20s import RoadEdgeType
+    from metadrive.utils.waymo_utils.process_scenario_20s import RoadLineType
 finally:
     pass
 
