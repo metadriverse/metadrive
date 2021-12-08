@@ -38,12 +38,20 @@ class WaymoMapManager(BaseManager):
         init_yaw = init_state["heading"]
         last_position = last_state["position"]
         last_yaw = last_state["heading"]
-        start_lanes = ray_localization([np.cos(init_yaw), np.sin(init_yaw)], init_position, self.engine,
-                                       return_all_result=True,
-                                       use_heading_filter=False)
-        end_lanes = ray_localization([np.cos(last_yaw), np.sin(last_yaw)], last_position, self.engine,
-                                     return_all_result=True,
-                                     use_heading_filter=False)
+        start_lanes = ray_localization(
+            [np.cos(init_yaw), np.sin(init_yaw)],
+            init_position,
+            self.engine,
+            return_all_result=True,
+            use_heading_filter=False
+        )
+        end_lanes = ray_localization(
+            [np.cos(last_yaw), np.sin(last_yaw)],
+            last_position,
+            self.engine,
+            return_all_result=True,
+            use_heading_filter=False
+        )
 
         self.sdc_start, self.sdc_end = self.filter_path(start_lanes, end_lanes)
         lane = self.current_map.road_network.get_lane(self.sdc_end)
@@ -52,8 +60,11 @@ class WaymoMapManager(BaseManager):
             self.sdc_destinations += [lane["id"] for lane in lane.left_lanes]
         if len(lane.right_lanes) > 0:
             self.sdc_destinations += [lane["id"] for lane in lane.right_lanes]
-        self.engine.global_config.update(dict(
-            target_vehicle_configs={DEFAULT_AGENT: dict(spawn_lane_index=self.sdc_start, destination=self.sdc_end)}))
+        self.engine.global_config.update(
+            dict(
+                target_vehicle_configs={DEFAULT_AGENT: dict(spawn_lane_index=self.sdc_start, destination=self.sdc_end)}
+            )
+        )
 
     def filter_path(self, start_lanes, end_lanes):
         available_route = []
@@ -87,4 +98,3 @@ class WaymoMapManager(BaseManager):
         # remove map from world before adding
         if self.current_map is not None:
             self.unload_map(self.current_map)
-

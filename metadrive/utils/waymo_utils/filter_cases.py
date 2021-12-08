@@ -20,7 +20,7 @@ def handler(signum, frame):
 
 if __name__ == "__main__":
     case_data_path = sys.argv[1]
-    processed_data_path = case_data_path+"_filtered"
+    processed_data_path = case_data_path + "_filtered"
     if not os.path.exists(processed_data_path):
         os.mkdir(processed_data_path)
     if not os.path.exists(case_data_path) or not os.path.exists(processed_data_path):
@@ -35,7 +35,7 @@ if __name__ == "__main__":
             "agent_policy": WaymoIDMPolicy,
             "waymo_data_directory": case_data_path,
             "case_num": case_num,
-            "store_map":False,
+            "store_map": False,
             # "manual_control": True,
             # "debug":True,
             "horizon": 1000,
@@ -73,8 +73,10 @@ if __name__ == "__main__":
 
                 if d or env.episode_steps > max_step:
                     if info["arrive_dest"] and env.episode_steps > min_step:
-                        os.rename(os.path.join(case_data_path, "{}.pkl".format(i)),
-                                  os.path.join(processed_data_path, "{}.pkl".format(i)))
+                        os.rename(
+                            os.path.join(case_data_path, "{}.pkl".format(i)),
+                            os.path.join(processed_data_path, "{}.pkl".format(i))
+                        )
                     break
         except:
             # print("\n No Route or Timeout, Fail, Seed: {}".format(i))

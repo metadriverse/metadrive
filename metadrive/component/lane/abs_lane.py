@@ -287,7 +287,7 @@ class AbstractLane:
     @staticmethod
     def construct_sidewalk_segment(block, lane_start, lane_end, length_multiply=1, extra_thrust=0, width=0):
         direction_v = lane_end - lane_start
-        if abs(norm(direction_v[0], direction_v[1]))<0.1:
+        if abs(norm(direction_v[0], direction_v[1])) < 0.1:
             return
         width = width or block.SIDEWALK_WIDTH
         middle = (lane_start + lane_end) / 2

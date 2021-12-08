@@ -10,14 +10,13 @@ class EdgeNetworkNavigation(BaseNavigation):
    This class define a helper for localizing vehicles and retrieving navigation information.
    It now only support EdgeRoadNetwork
    """
-
     def __init__(
-            self,
-            engine,
-            show_navi_mark: bool = False,
-            random_navi_mark_color=False,
-            show_dest_mark=False,
-            show_line_to_dest=False
+        self,
+        engine,
+        show_navi_mark: bool = False,
+        random_navi_mark_color=False,
+        show_dest_mark=False,
+        show_line_to_dest=False
     ):
         super(EdgeNetworkNavigation,
               self).__init__(engine, show_navi_mark, random_navi_mark_color, show_dest_mark, show_line_to_dest)
@@ -70,7 +69,9 @@ class EdgeNetworkNavigation(BaseNavigation):
         self._navi_info.fill(0.0)
         half = self.navigation_info_dim // 2
         self._navi_info[:half], lanes_heading1, checkpoint = self._get_info_for_checkpoint(
-            lanes_id=0, ref_lane=self.map.road_network.get_lane(self.current_checkpoint_lane_index), ego_vehicle=ego_vehicle
+            lanes_id=0,
+            ref_lane=self.map.road_network.get_lane(self.current_checkpoint_lane_index),
+            ego_vehicle=ego_vehicle
         )
 
         self._navi_info[half:], lanes_heading2, _ = self._get_info_for_checkpoint(
@@ -122,8 +123,12 @@ class EdgeNetworkNavigation(BaseNavigation):
         Called in update_localization to find current lane information
         """
         possible_lanes = ray_localization(
-            ego_vehicle.heading, ego_vehicle.position, ego_vehicle.engine, return_all_result=True,
-            use_heading_filter=False)
+            ego_vehicle.heading,
+            ego_vehicle.position,
+            ego_vehicle.engine,
+            return_all_result=True,
+            use_heading_filter=False
+        )
         for lane, index, l_1_dist in possible_lanes:
             if lane in self.current_ref_lanes:
                 return lane, index

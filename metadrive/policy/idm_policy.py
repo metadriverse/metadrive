@@ -257,7 +257,7 @@ class IDMPolicy(BasePolicy):
         if front_obj:
             d = dist_to_front
             speed_diff = self.desired_gap(ego_vehicle, front_obj) / not_zero(d)
-            acceleration -= self.ACC_FACTOR * (speed_diff ** 2)
+            acceleration -= self.ACC_FACTOR * (speed_diff**2)
         return acceleration
 
     def desired_gap(self, ego_vehicle, front_obj, projected: bool = True) -> float:
@@ -398,8 +398,9 @@ class WaymoIDMPolicy(IDMPolicy):
             for lane in current_lanes:
                 self.routing_target_lane = lane
                 return True
-                    # lane change for lane num change
+                # lane change for lane num change
             self.routing_target_lane = self.control_object.navigation.map.road_network.get_lane(
-                self.control_object.navigation.next_checkpoint_lane_index)
+                self.control_object.navigation.next_checkpoint_lane_index
+            )
             return True
         return False

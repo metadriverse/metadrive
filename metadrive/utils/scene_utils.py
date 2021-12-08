@@ -23,7 +23,7 @@ if TYPE_CHECKING:
 
 
 def block_socket_merge(
-        socket_1: "PGBlockSocket", socket_2: "PGBlockSocket", global_network: "NodeRoadNetwork", positive_merge: False
+    socket_1: "PGBlockSocket", socket_2: "PGBlockSocket", global_network: "NodeRoadNetwork", positive_merge: False
 ):
     global_network.graph[socket_1.positive_road.start_node][socket_2.negative_road.start_node] = \
         global_network.graph[socket_1.positive_road.start_node].pop(socket_1.positive_road.end_node)
@@ -33,11 +33,11 @@ def block_socket_merge(
 
 
 def check_lane_on_road(
-        road_network: "NodeRoadNetwork",
-        lane,
-        positive: float = 0,
-        ignored=None,
-        ignore_intersection_checking=None
+    road_network: "NodeRoadNetwork",
+    lane,
+    positive: float = 0,
+    ignored=None,
+    ignore_intersection_checking=None
 ) -> bool:
     """
     Calculate if the new lane intersects with other lanes in current road network
@@ -147,11 +147,13 @@ def get_all_lanes(roadnet: "NodeRoadNetwork"):
     return res
 
 
-def ray_localization(heading: tuple,
-                     position: tuple,
-                     engine: EngineCore,
-                     return_all_result=False,
-                     use_heading_filter=True) -> Union[List[Tuple], Tuple]:
+def ray_localization(
+    heading: tuple,
+    position: tuple,
+    engine: EngineCore,
+    return_all_result=False,
+    use_heading_filter=True
+) -> Union[List[Tuple], Tuple]:
     """
     Get the index of the lane closest to a physx_world position.
     Only used when smoething is on lane ! Otherwise fall back to use get_closest_lane()
@@ -177,7 +179,7 @@ def ray_localization(heading: tuple,
 
                 dot_result = math.cos(lane_heading) * heading[0] + math.sin(lane_heading) * heading[1]
                 cosangle = dot_result / (
-                        norm(math.cos(lane_heading), math.sin(lane_heading)) * norm(heading[0], heading[1])
+                    norm(math.cos(lane_heading), math.sin(lane_heading)) * norm(heading[0], heading[1])
                 )
 
                 if use_heading_filter:
@@ -202,14 +204,14 @@ def ray_localization(heading: tuple,
 
 
 def rect_region_detection(
-        engine: EngineCore,
-        position: Tuple,
-        heading: float,
-        heading_direction_length: float,
-        side_direction_width: float,
-        detection_group: int,
-        height=10,
-        in_static_world=False
+    engine: EngineCore,
+    position: Tuple,
+    heading: float,
+    heading_direction_length: float,
+    side_direction_width: float,
+    detection_group: int,
+    height=10,
+    in_static_world=False
 ):
     """
 
@@ -248,7 +250,7 @@ def rect_region_detection(
 
 
 def circle_region_detection(
-        engine: EngineCore, position: Tuple, radius: float, detection_group: int, height=10, in_static_world=False
+    engine: EngineCore, position: Tuple, radius: float, detection_group: int, height=10, in_static_world=False
 ):
     """
     :param engine: BaseEngine class
@@ -274,12 +276,12 @@ def circle_region_detection(
 
 
 def generate_invisible_static_wall(
-        heading_length: float,
-        side_width: float,
-        height=10,
-        object_id=None,
-        type_name=BodyName.InvisibleWall,
-        collision_group=CollisionGroup.InvisibleWall
+    heading_length: float,
+    side_width: float,
+    height=10,
+    object_id=None,
+    type_name=BodyName.InvisibleWall,
+    collision_group=CollisionGroup.InvisibleWall
 ):
     """
     Add an invisible physics wall to physics world

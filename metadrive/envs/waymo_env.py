@@ -21,7 +21,6 @@ WAYMO_ENV_CONFIG = dict(
     waymo_data_directory=AssetLoader.file_path("waymo", "processed", return_raw_style=False),
     case_num=60,
     store_map=True,
-
     no_traffic=True,
     # ===== Traffic =====
     # traffic_density=0.1,
@@ -135,14 +134,15 @@ class WaymoEnv(BaseEnv):
         # for compatibility
         # crash almost equals to crashing with vehicles
         done_info[TerminationState.CRASH] = (
-                done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
-                or done_info[TerminationState.CRASH_BUILDING]
+            done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
+            or done_info[TerminationState.CRASH_BUILDING]
         )
         return done, done_info
 
     def _reset_global_seed(self, force_seed=None):
-        current_seed = force_seed if force_seed is not None else get_np_random(None).randint(0, int(
-            self.config["case_num"]))
+        current_seed = force_seed if force_seed is not None else get_np_random(None).randint(
+            0, int(self.config["case_num"])
+        )
         self.seed(current_seed)
 
     def _is_out_of_road(self, vehicle):

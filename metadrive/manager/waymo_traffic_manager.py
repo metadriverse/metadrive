@@ -25,10 +25,9 @@ class WaymoTrafficManager(BaseManager):
                     continue
                 v_config = copy.deepcopy(self.engine.global_config["vehicle_config"])
                 v_config["need_navigation"] = False
-                v = self.spawn_object(SVehicle, name=v_id,
-                                      position=info["position"],
-                                      heading=info["heading"],
-                                      vehicle_config=v_config)
+                v = self.spawn_object(
+                    SVehicle, name=v_id, position=info["position"], heading=info["heading"], vehicle_config=v_config
+                )
                 v.set_static(True)
 
     @staticmethod
