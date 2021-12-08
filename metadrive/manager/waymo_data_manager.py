@@ -11,7 +11,7 @@ class WaymoDataManager(BaseManager):
         directory = self.engine.global_config["waymo_data_directory"]
         self.case_num = self.engine.global_config["case_num"]
         self.cases = {}
-        for i in tqdm(range(self.case_num), desc="Load Data"):
+        for i in range(self.case_num):
             file_path = os.path.join(directory, "{}.pkl".format(i))
             data = read_waymo_data(file_path)
             self.cases[i] = data
