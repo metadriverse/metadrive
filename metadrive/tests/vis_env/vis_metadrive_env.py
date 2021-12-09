@@ -63,7 +63,7 @@ if __name__ == "__main__":
 
     for s in range(1, 10000):
         o, r, d, info = env.step(env.action_space.sample())
-        if s%100==0:
+        if s % 100 == 0:
             env.close()
             env.reset()
         # info["fuel"] = env.vehicle.energy_consumption
