@@ -18,29 +18,21 @@ finally:
 
 WAYMO_ENV_CONFIG = dict(
     # ===== Map Config =====
-    waymo_data_directory=AssetLoader.file_path("waymo", "raw_processed", return_raw_style=False),
-    case_num=60,
+    waymo_data_directory=AssetLoader.file_path("waymo", "processed", return_raw_style=False),
+    start_case_index=0,
+    case_num=100,
     store_map=True,
 
     # ===== Traffic =====
     no_traffic=False,
-    # traffic_density=0.1,
-    # need_inverse_traffic=False,
-    # traffic_mode=TrafficMode.Trigger,  # "Respawn", "Trigger"
-    # random_traffic=False,  # Traffic is randomized at default.
-    # # this will update the vehicle_config and set to traffic
-    # traffic_vehicle_config=dict(
-    #     show_navi_mark=False,
-    #     show_dest_mark=False,
-    #     enable_reverse=False,
-    #     show_lidar=False,
-    #     show_lane_line_detector=False,
-    #     show_side_detector=False,
-    # ),
 
     # ===== Agent config =====
-    target_vehicle_configs={DEFAULT_AGENT: dict(spawn_lane_index=313, destination=265)},
-    enable_idm_lane_change=False,
+    vehicle_config=dict(show_lidar=True,
+                        show_lane_line_detector=True,
+                        show_side_detector=True,
+                        lidar=dict(num_lasers=120, distance=50),
+                        lane_line_detector=dict(num_lasers=12, distance=20),
+                        side_detector=dict(num_lasers=12, distance=50)),
 
     # ===== Reward Scheme =====
     # See: https://github.com/decisionforce/metadrive/issues/283
@@ -71,6 +63,8 @@ class WaymoEnv(BaseEnv):
 
     def __init__(self, config):
         super(WaymoEnv, self).__init__(config)
+        if not self.config["no_traffic"]:
+            assert self.config["agent_policy"] is not WaymoIDMPolicy, "WaymoIDM will fail when interacting with traffic"
 
     def _merge_extra_config(self, config):
         config = self.default_config().update(config, allow_add_new_key=False)
@@ -160,42 +154,34 @@ if __name__ == "__main__":
     env = WaymoEnv(
         {
             "use_render": True,
-            "agent_policy": WaymoIDMPolicy,
-            # "manual_control": True,
+            # "agent_policy": WaymoIDMPolicy,
+            "manual_control": True,
             # "debug":True,
             "horizon": 1000,
         }
     )
     success = []
-    for i in range(60):
-        try:
-            env.reset(force_seed=i)
-            while True:
-                o, r, d, info = env.step([0, 0])
-                c_lane = env.vehicle.lane
-                long, lat, = c_lane.local_coordinates(env.vehicle.position)
-                if env.config["use_render"]:
-                    env.render(
-                        text={
-                            "routing_lane_idx": env.engine._object_policies[env.vehicle.id].routing_target_lane.index,
-                            "lane_index": env.vehicle.lane_index,
-                            "current_ckpt_index": env.vehicle.navigation.current_checkpoint_lane_index,
-                            "next_ckpt_index": env.vehicle.navigation.next_checkpoint_lane_index,
-                            "ckpts": env.vehicle.navigation.checkpoints,
-                            "lane_heading": c_lane.heading_theta_at(long),
-                            "long": long,
-                            "lat": lat,
-                            "v_heading": env.vehicle.heading_theta
-                        }
-                    )
+    for i in range(env.config["case_num"]):
+        env.reset(force_seed=i)
+        while True:
+            o, r, d, info = env.step([0, 0])
+            c_lane = env.vehicle.lane
+            long, lat, = c_lane.local_coordinates(env.vehicle.position)
+            if env.config["use_render"]:
+                env.render(
+                    text={
+                        # "routing_lane_idx": env.engine._object_policies[env.vehicle.id].routing_target_lane.index,
+                        "lane_index": env.vehicle.lane_index,
+                        "current_ckpt_index": env.vehicle.navigation.current_checkpoint_lane_index,
+                        "next_ckpt_index": env.vehicle.navigation.next_checkpoint_lane_index,
+                        "ckpts": env.vehicle.navigation.checkpoints,
+                        "lane_heading": c_lane.heading_theta_at(long),
+                        "long": long,
+                        "lat": lat,
+                        "v_heading": env.vehicle.heading_theta
+                    }
+                )
 
-                if info["arrive_dest"] or env.episode_steps > 1000:
-                    if info["arrive_dest"] and env.episode_steps > 100:
-                        success.append(i)
-                        print("Success, Seed: {}".format(i))
-                    else:
-                        print("IDM Fail, Seed: {}".format(i))
-                        print(info)
-                    break
-        except:
-            print("No Route, Fail, Seed: {}".format(i))
+            if info["arrive_dest"] or env.episode_steps > 1000:
+                break
+    print("success")
