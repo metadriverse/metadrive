@@ -21,7 +21,7 @@ if __name__ == "__main__":
             "decision_repeat": 5,
             "need_inverse_traffic": True,
             "rgb_clip": True,
-            "debug": True,
+            # "debug": True,
             "debug_static_world": True,
             "random_lane_num": True,
 
@@ -31,7 +31,7 @@ if __name__ == "__main__":
             #     Map.LANE_WIDTH: 3.5,
             #     Map.LANE_NUM: 3,
             # },
-            "pstats": True,
+            # "pstats": True,
             # "discrete_action": True,
             "map": "CCOX",
             "random_traffic": False,
@@ -61,8 +61,11 @@ if __name__ == "__main__":
     env.vehicle.set_velocity([1, 0], 10)
     print(env.vehicle.speed)
 
-    for s in range(1, 100000):
+    for s in range(1, 10000):
         o, r, d, info = env.step(env.action_space.sample())
+        if s%100==0:
+            env.close()
+            env.reset()
         # info["fuel"] = env.vehicle.energy_consumption
         # env.render(
         #     text={
