@@ -1,6 +1,5 @@
 import logging
 
-
 from metadrive.base_class.configurable import Configurable
 from metadrive.base_class.randomizable import Randomizable
 from metadrive.engine.engine_utils import get_engine

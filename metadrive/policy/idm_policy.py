@@ -182,7 +182,7 @@ class IDMPolicy(BasePolicy):
         self.routing_target_lane = None
         self.available_routing_index_range = None
         self.overtake_timer = self.np_random.randint(0, self.LANE_CHANGE_FREQ)
-        self.enable_lane_change=self.engine.global_config.get("enable_idm_lane_change", True)
+        self.enable_lane_change = self.engine.global_config.get("enable_idm_lane_change", True)
         self.heading_pid = PIDController(1.7, 0.01, 3.5)
         self.lateral_pid = PIDController(0.3, .002, 0.05)
 
@@ -374,7 +374,7 @@ class WaymoIDMPolicy(IDMPolicy):
         self.routing_target_lane = None
         self.available_routing_index_range = None
         self.overtake_timer = self.np_random.randint(0, self.LANE_CHANGE_FREQ)
-        self.enable_lane_change=False
+        self.enable_lane_change = False
 
         self.heading_pid = PIDController(1.7, 0.01, 3.5)
         self.lateral_pid = PIDController(0.3, .0, 0.0)

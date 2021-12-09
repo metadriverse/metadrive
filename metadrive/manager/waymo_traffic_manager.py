@@ -28,14 +28,16 @@ class WaymoTrafficManager(BaseManager):
                         continue
                     v_config = copy.deepcopy(self.engine.global_config["vehicle_config"])
                     v_config["need_navigation"] = False
-                    v_config.update(dict(
-                        show_navi_mark=False,
-                        show_dest_mark=False,
-                        enable_reverse=False,
-                        show_lidar=False,
-                        show_lane_line_detector=False,
-                        show_side_detector=False,
-                    ))
+                    v_config.update(
+                        dict(
+                            show_navi_mark=False,
+                            show_dest_mark=False,
+                            enable_reverse=False,
+                            show_lidar=False,
+                            show_lane_line_detector=False,
+                            show_side_detector=False,
+                        )
+                    )
                     v = self.spawn_object(
                         SVehicle, position=info["position"], heading=info["heading"], vehicle_config=v_config
                     )

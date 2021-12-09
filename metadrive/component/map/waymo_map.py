@@ -31,7 +31,7 @@ class WaymoMap(BaseMap):
         return EdgeRoadNetwork
 
     def destroy(self):
-        self.waymo_data=None
+        self.waymo_data = None
         super(WaymoMap, self).destroy()
 
     def __del__(self):

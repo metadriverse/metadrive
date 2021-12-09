@@ -73,5 +73,4 @@ class BaseRoadNetwork:
                 engine.add_line((*p, 2), (*p_, 2), (1, 0., 0., 1), 2)
 
     def destroy(self):
-        self.bounding_box=None
-
+        self.bounding_box = None

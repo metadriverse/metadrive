@@ -78,7 +78,7 @@ class WayPointLane(AbstractLane, InterpolatingLine):
         return self._bounding_box
 
     def destroy(self):
-        self._bounding_box =None
+        self._bounding_box = None
         self.width = None
         self.forbidden = None
         self.priority = None

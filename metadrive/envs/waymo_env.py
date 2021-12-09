@@ -27,9 +27,11 @@ WAYMO_ENV_CONFIG = dict(
     no_traffic=False,
 
     # ===== Agent config =====
-    vehicle_config=dict(lidar=dict(num_lasers=120, distance=50),
-                        lane_line_detector=dict(num_lasers=12, distance=20),
-                        side_detector=dict(num_lasers=12, distance=50)),
+    vehicle_config=dict(
+        lidar=dict(num_lasers=120, distance=50),
+        lane_line_detector=dict(num_lasers=12, distance=20),
+        side_detector=dict(num_lasers=12, distance=50)
+    ),
 
     # ===== Reward Scheme =====
     # See: https://github.com/decisionforce/metadrive/issues/283
@@ -126,8 +128,8 @@ class WaymoEnv(BaseEnv):
         # for compatibility
         # crash almost equals to crashing with vehicles
         done_info[TerminationState.CRASH] = (
-                done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
-                or done_info[TerminationState.CRASH_BUILDING]
+            done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
+            or done_info[TerminationState.CRASH_BUILDING]
         )
         return done, done_info
 
