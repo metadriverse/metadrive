@@ -27,10 +27,7 @@ WAYMO_ENV_CONFIG = dict(
     no_traffic=False,
 
     # ===== Agent config =====
-    vehicle_config=dict(show_lidar=True,
-                        show_lane_line_detector=True,
-                        show_side_detector=True,
-                        lidar=dict(num_lasers=120, distance=50),
+    vehicle_config=dict(lidar=dict(num_lasers=120, distance=50),
                         lane_line_detector=dict(num_lasers=12, distance=20),
                         side_detector=dict(num_lasers=12, distance=50)),
 
@@ -158,6 +155,9 @@ if __name__ == "__main__":
             "manual_control": True,
             # "debug":True,
             "horizon": 1000,
+            # "vehicle_config": dict(show_lidar=True,
+            #                        show_lane_line_detector=True,
+            #                        show_side_detector=True)
         }
     )
     success = []
@@ -165,6 +165,7 @@ if __name__ == "__main__":
         env.reset(force_seed=i)
         while True:
             o, r, d, info = env.step([0, 0])
+            assert env.observation_space.contains(o)
             c_lane = env.vehicle.lane
             long, lat, = c_lane.local_coordinates(env.vehicle.position)
             if env.config["use_render"]:
