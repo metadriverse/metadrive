@@ -18,11 +18,12 @@ finally:
 
 WAYMO_ENV_CONFIG = dict(
     # ===== Map Config =====
-    waymo_data_directory=AssetLoader.file_path("waymo", "processed", return_raw_style=False),
+    waymo_data_directory=AssetLoader.file_path("waymo", "raw_processed", return_raw_style=False),
     case_num=60,
     store_map=True,
-    no_traffic=True,
+
     # ===== Traffic =====
+    no_traffic=False,
     # traffic_density=0.1,
     # need_inverse_traffic=False,
     # traffic_mode=TrafficMode.Trigger,  # "Respawn", "Trigger"
@@ -134,8 +135,8 @@ class WaymoEnv(BaseEnv):
         # for compatibility
         # crash almost equals to crashing with vehicles
         done_info[TerminationState.CRASH] = (
-            done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
-            or done_info[TerminationState.CRASH_BUILDING]
+                done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
+                or done_info[TerminationState.CRASH_BUILDING]
         )
         return done, done_info
 
@@ -158,7 +159,7 @@ class WaymoEnv(BaseEnv):
 if __name__ == "__main__":
     env = WaymoEnv(
         {
-            "use_render": False,
+            "use_render": True,
             "agent_policy": WaymoIDMPolicy,
             # "manual_control": True,
             # "debug":True,
@@ -188,7 +189,7 @@ if __name__ == "__main__":
                         }
                     )
 
-                if d or env.episode_steps > 1000:
+                if info["arrive_dest"] or env.episode_steps > 1000:
                     if info["arrive_dest"] and env.episode_steps > 100:
                         success.append(i)
                         print("Success, Seed: {}".format(i))
@@ -198,4 +199,3 @@ if __name__ == "__main__":
                     break
         except:
             print("No Route, Fail, Seed: {}".format(i))
-    print(success)

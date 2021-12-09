@@ -5,9 +5,6 @@ from typing import Union, Optional
 import gym
 import numpy as np
 import seaborn as sns
-from panda3d.bullet import BulletVehicle, BulletBoxShape, ZUp
-from panda3d.core import Material, Vec3, TransformState, LQuaternionf
-
 from metadrive.base_class.base_object import BaseObject
 from metadrive.component.lane.abs_lane import AbstractLane
 from metadrive.component.lane.circular_lane import CircularLane
@@ -33,6 +30,8 @@ from metadrive.utils.math_utils import wrap_to_pi
 from metadrive.utils.scene_utils import ray_localization
 from metadrive.utils.scene_utils import rect_region_detection
 from metadrive.utils.space import VehicleParameterSpace, ParameterSpace
+from panda3d.bullet import BulletVehicle, BulletBoxShape, ZUp
+from panda3d.core import Material, Vec3, TransformState, LQuaternionf
 
 
 class BaseVehicleState:
@@ -113,12 +112,12 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     path = None
 
     def __init__(
-        self,
-        vehicle_config: Union[dict, Config] = None,
-        name: str = None,
-        random_seed=None,
-        position=None,
-        heading=None
+            self,
+            vehicle_config: Union[dict, Config] = None,
+            name: str = None,
+            random_seed=None,
+            position=None,
+            heading=None
     ):
         """
         This Vehicle Config is different from self.get_config(), and it is used to define which modules to use, and
@@ -191,7 +190,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self.back_vehicles = set()
 
         if self.engine.current_map is not None:
-            self.reset(pos=position, heading=heading)
+            self.reset(position=position, heading=heading)
 
     def _add_modules_for_vehicle(self, ):
         config = self.config
@@ -290,7 +289,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self.energy_consumption += step_energy  # L/100 km
         return step_energy, self.energy_consumption
 
-    def reset(self, random_seed=None, vehicle_config=None, pos: np.ndarray = None, heading: float = 0.0):
+    def reset(self, random_seed=None, vehicle_config=None, position: np.ndarray = None, heading: float = 0.0, *args,
+              **kwargs):
         """
         pos is a 2-d array, and heading is a float (unit degree)
         if pos is not None, vehicle will be reset to the position
@@ -302,14 +302,14 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         if vehicle_config is not None:
             self.update_config(vehicle_config)
         map = self.engine.current_map
-        if pos is None:
+        if position is None:
             lane = map.road_network.get_lane(self.config["spawn_lane_index"])
-            pos = lane.position(self.config["spawn_longitude"], self.config["spawn_lateral"])
+            position = lane.position(self.config["spawn_longitude"], self.config["spawn_lateral"])
             heading = np.rad2deg(lane.heading_theta_at(self.config["spawn_longitude"]))
-        self.spawn_place = pos
+        self.spawn_place = position
         heading = -np.deg2rad(heading) - np.pi / 2
         self.set_static(False)
-        self.set_position(pos, self.HEIGHT / 2 + 1)
+        self.set_position(position, self.HEIGHT / 2 + 1)
         self.origin.setQuat(LQuaternionf(math.cos(heading / 2), 0, 0, math.sin(heading / 2)))
         self.update_map_info(map)
         self.body.clearForces()
@@ -439,8 +439,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         if not lateral_norm * forward_direction_norm:
             return 0
         cos = (
-            (forward_direction[0] * lateral[0] + forward_direction[1] * lateral[1]) /
-            (lateral_norm * forward_direction_norm)
+                (forward_direction[0] * lateral[0] + forward_direction[1] * lateral[1]) /
+                (lateral_norm * forward_direction_norm)
         )
         # return cos
         # Normalize to 0, 1
@@ -703,7 +703,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             ckpt_idx = routing._target_checkpoints_index
             for surrounding_v in surrounding_vs:
                 if surrounding_v.lane_index[:-1] == (routing.checkpoints[ckpt_idx[0]], routing.checkpoints[ckpt_idx[1]
-                                                                                                           ]):
+                ]):
                     if self.lane.local_coordinates(self.position)[0] - \
                             self.lane.local_coordinates(surrounding_v.position)[0] < 0:
                         self.front_vehicles.add(surrounding_v)
@@ -718,10 +718,10 @@ class BaseVehicle(BaseObject, BaseVehicleState):
 
     @classmethod
     def get_action_space_before_init(
-        cls, extra_action_dim: int = 0, discrete_action=False, steering_dim=5, throttle_dim=5
+            cls, extra_action_dim: int = 0, discrete_action=False, steering_dim=5, throttle_dim=5
     ):
         if not discrete_action:
-            return gym.spaces.Box(-1.0, 1.0, shape=(2 + extra_action_dim, ), dtype=np.float32)
+            return gym.spaces.Box(-1.0, 1.0, shape=(2 + extra_action_dim,), dtype=np.float32)
         else:
             return gym.spaces.MultiDiscrete([steering_dim, throttle_dim])
 
@@ -738,8 +738,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     def arrive_destination(self):
         long, lat = self.navigation.final_lane.local_coordinates(self.position)
         flag = (self.navigation.final_lane.length - 5 < long < self.navigation.final_lane.length + 5) and (
-            self.navigation.get_current_lane_width() / 2 >= lat >=
-            (0.5 - self.navigation.get_current_lane_num()) * self.navigation.get_current_lane_width()
+                self.navigation.get_current_lane_width() / 2 >= lat >=
+                (0.5 - self.navigation.get_current_lane_num()) * self.navigation.get_current_lane_width()
         )
         return flag
 
@@ -759,9 +759,9 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     @property
     def replay_done(self):
         return self._replay_done if hasattr(self, "_replay_done") else (
-            self.crash_building or self.crash_vehicle or
-            # self.on_white_continuous_line or
-            self.on_yellow_continuous_line
+                self.crash_building or self.crash_vehicle or
+                # self.on_white_continuous_line or
+                self.on_yellow_continuous_line
         )
 
     @property
@@ -773,7 +773,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         return self.last_current_action[0]
 
     def detach_from_world(self, physics_world):
-        self.navigation.detach_from_world()
+        if self.navigation is not None:
+            self.navigation.detach_from_world()
         if self.lidar is not None:
             self.lidar.detach_from_world()
         if self.side_detector is not None:

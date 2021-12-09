@@ -14,10 +14,12 @@ class WaymoTrafficManager(BaseManager):
         self.current_traffic_data = None
         self.count = 0
         self.sdc_index = None
+        self.vid_to_obj = None
 
     def reset(self):
         # generate vehicle
         self.count = 0
+        self.vid_to_obj = {}
         for v_id, type_traj in self.current_traffic_data.items():
             if type_traj["type"] == AgentType.VEHICLE and v_id != self.sdc_index:
                 info = self.parse_vehicle_state(type_traj["state"], 0)
@@ -26,8 +28,9 @@ class WaymoTrafficManager(BaseManager):
                 v_config = copy.deepcopy(self.engine.global_config["vehicle_config"])
                 v_config["need_navigation"] = False
                 v = self.spawn_object(
-                    SVehicle, name=v_id, position=info["position"], heading=info["heading"], vehicle_config=v_config
+                    SVehicle, position=info["position"], heading=info["heading"], vehicle_config=v_config
                 )
+                self.vid_to_obj[v_id]=v.name
                 v.set_static(True)
 
     @staticmethod
@@ -47,12 +50,12 @@ class WaymoTrafficManager(BaseManager):
     def after_step(self, *args, **kwargs):
         # generate vehicle
         for v_id, type_traj in self.current_traffic_data.items():
-            if v_id in self.spawned_objects.keys():
+            if v_id in self.vid_to_obj and self.vid_to_obj[v_id] in self.spawned_objects.keys():
                 info = self.parse_vehicle_state(type_traj["state"], self.count)
                 if not info["valid"]:
                     continue
-                self.spawned_objects[v_id].set_position(info["position"])
-                self.spawned_objects[v_id].set_heading_theta(info["heading"], rad_to_degree=True)
+                self.spawned_objects[self.vid_to_obj[v_id]].set_position(info["position"])
+                self.spawned_objects[self.vid_to_obj[v_id]].set_heading_theta(info["heading"], rad_to_degree=False)
         self.count += 1
 
     def before_reset(self):
