@@ -10,13 +10,6 @@ from metadrive.policy.idm_policy import WaymoIDMPolicy
 from metadrive.utils import clip
 from metadrive.utils import get_np_random
 
-try:
-    from metadrive.utils.waymo_utils.waymo_utils import AgentType
-    from metadrive.utils.waymo_utils.waymo_utils import RoadEdgeType
-    from metadrive.utils.waymo_utils.waymo_utils import RoadLineType
-finally:
-    pass
-
 WAYMO_ENV_CONFIG = dict(
     # ===== Map Config =====
     waymo_data_directory=AssetLoader.file_path("waymo", "processed", return_raw_style=False),

@@ -237,9 +237,20 @@ def extract_dynamic(f):
     return dynamics
 
 
+class CustomUnpickler(pickle.Unpickler):
+
+    def find_class(self, module, name):
+        if name == 'AgentType':
+            return AgentType
+        elif name == "RoadLineType":
+            return RoadLineType
+        elif name == "RoadEdgeType":
+            return RoadEdgeType
+        return super().find_class(module, name)
+
+
 def read_waymo_data(file_path):
-    with open(file_path, "rb+") as waymo_file:
-        data = pickle.load(waymo_file)
+    data = CustomUnpickler(open(file_path, "rb+")).load()
     new_track = {}
     for key, value in data["tracks"].items():
         new_track[str(key)] = value
