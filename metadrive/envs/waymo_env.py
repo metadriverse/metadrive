@@ -1,12 +1,13 @@
 import logging
 
-from metadrive.constants import DEFAULT_AGENT, TerminationState
+from metadrive.constants import TerminationState
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.envs.base_env import BaseEnv
 from metadrive.manager.waymo_data_manager import WaymoDataManager
 from metadrive.manager.waymo_map_manager import WaymoMapManager
 from metadrive.manager.waymo_traffic_manager import WaymoTrafficManager
 from metadrive.policy.idm_policy import WaymoIDMPolicy
+from metadrive.utils import clip
 from metadrive.utils import get_np_random
 
 try:
@@ -87,17 +88,6 @@ class WaymoEnv(BaseEnv):
             self.engine.taskMgr.step()
         return ret
 
-    def reward_function(self, vehicle_id: str):
-        """
-        Override this func to get a new reward function
-        :param vehicle_id: name of this base vehicle
-        :return: reward, reward info
-        """
-        return 0, {}
-
-    def cost_function(self, vehicle_id: str):
-        return 0, {}
-
     def done_function(self, vehicle_id: str):
         vehicle = self.vehicles[vehicle_id]
         done = False
@@ -132,6 +122,57 @@ class WaymoEnv(BaseEnv):
             or done_info[TerminationState.CRASH_BUILDING]
         )
         return done, done_info
+
+    def cost_function(self, vehicle_id: str):
+        vehicle = self.vehicles[vehicle_id]
+        step_info = dict()
+        step_info["cost"] = 0
+        if self._is_out_of_road(vehicle):
+            step_info["cost"] = self.config["out_of_road_cost"]
+        elif vehicle.crash_vehicle:
+            step_info["cost"] = self.config["crash_vehicle_cost"]
+        elif vehicle.crash_object:
+            step_info["cost"] = self.config["crash_object_cost"]
+        return step_info['cost'], step_info
+
+    def reward_function(self, vehicle_id: str):
+        """
+        Override this func to get a new reward function
+        :param vehicle_id: id of BaseVehicle
+        :return: reward
+        """
+        vehicle = self.vehicles[vehicle_id]
+        step_info = dict()
+
+        # Reward for moving forward in current lane
+        if vehicle.lane in vehicle.navigation.current_ref_lanes:
+            current_lane = vehicle.lane
+        else:
+            current_lane = vehicle.navigation.current_ref_lanes[0]
+        long_last, _ = current_lane.local_coordinates(vehicle.last_position)
+        long_now, lateral_now = current_lane.local_coordinates(vehicle.position)
+
+        # reward for lane keeping, without it vehicle can learn to overtake but fail to keep in lane
+        if self.config["use_lateral"]:
+            lateral_factor = clip(1 - 2 * abs(lateral_now) / vehicle.navigation.get_current_lane_width(), 0.0, 1.0)
+        else:
+            lateral_factor = 1.0
+
+        reward = 0.0
+        reward += self.config["driving_reward"] * (long_now - long_last) * lateral_factor
+        reward += self.config["speed_reward"] * (vehicle.speed / vehicle.max_speed)
+
+        step_info["step_reward"] = reward
+
+        if vehicle.arrive_destination:
+            reward = +self.config["success_reward"]
+        elif self._is_out_of_road(vehicle):
+            reward = -self.config["out_of_road_penalty"]
+        elif vehicle.crash_vehicle:
+            reward = -self.config["crash_vehicle_penalty"]
+        elif vehicle.crash_object:
+            reward = -self.config["crash_object_penalty"]
+        return reward, step_info
 
     def _reset_global_seed(self, force_seed=None):
         current_seed = force_seed if force_seed is not None else get_np_random(None).randint(
