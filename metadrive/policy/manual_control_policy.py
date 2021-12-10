@@ -1,7 +1,7 @@
 from metadrive.engine.core.manual_controller import KeyboardController, SteeringWheelController
+from metadrive.engine.engine_utils import get_global_config
 from metadrive.examples import expert
 from metadrive.policy.env_input_policy import EnvInputPolicy
-from metadrive.engine.engine_utils import get_global_config
 
 
 class ManualControlPolicy(EnvInputPolicy):

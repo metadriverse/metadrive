@@ -1,13 +1,13 @@
 import logging
 
 from metadrive.component.algorithm.BIG import BIG
-from metadrive.component.road.road_network import RoadNetwork
+from metadrive.component.road_network.node_road_network import NodeRoadNetwork
 from metadrive.tests.vis_block.vis_block_base import TestBlock
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
     test = TestBlock(True)
-    global_network = RoadNetwork()
+    global_network = NodeRoadNetwork()
 
     big = BIG(2, 5, global_network, test.render, test.world, 1010)
 

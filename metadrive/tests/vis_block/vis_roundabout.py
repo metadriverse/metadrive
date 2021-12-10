@@ -1,7 +1,7 @@
-from metadrive.component.blocks.curve import Curve
-from metadrive.component.blocks.first_block import FirstPGBlock
-from metadrive.component.blocks.roundabout import Roundabout
-from metadrive.component.road.road_network import RoadNetwork
+from metadrive.component.pgblock.curve import Curve
+from metadrive.component.pgblock.first_block import FirstPGBlock
+from metadrive.component.pgblock.roundabout import Roundabout
+from metadrive.component.road_network.node_road_network import NodeRoadNetwork
 from metadrive.tests.vis_block.vis_block_base import TestBlock
 
 if __name__ == "__main__":
@@ -10,7 +10,7 @@ if __name__ == "__main__":
 
     initialize_asset_loader(test)
 
-    global_network = RoadNetwork()
+    global_network = NodeRoadNetwork()
     straight = FirstPGBlock(global_network, 3.0, 1, test.render, test.world, 1)
 
     rd = Roundabout(1, straight.get_socket(0), global_network, 1)

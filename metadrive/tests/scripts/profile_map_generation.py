@@ -1,5 +1,6 @@
 from metadrive import MetaDriveEnv
-from metadrive.component.map.base_map import BaseMap, MapGenerateMethod
+from metadrive.component.map.base_map import BaseMap
+from metadrive.component.map.pg_map import MapGenerateMethod
 from metadrive.utils.draw_top_down_map import draw_top_down_map
 
 if __name__ == '__main__':

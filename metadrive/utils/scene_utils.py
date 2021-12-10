@@ -2,12 +2,9 @@ import math
 from typing import List, TYPE_CHECKING, Tuple, Union
 
 import numpy as np
-from panda3d.bullet import BulletBoxShape, BulletCylinderShape, ZUp
-from panda3d.core import TransformState
-from panda3d.core import Vec3
-
-from metadrive.component.lane.abs_lane import AbstractLane
 from metadrive.component.lane.circular_lane import CircularLane
+from metadrive.component.lane.metadrive_lane import MetaDriveLane
+from metadrive.component.lane.waypoint_lane import WayPointLane
 from metadrive.constants import CollisionGroup
 from metadrive.constants import Decoration, BodyName
 from metadrive.engine.core.engine_core import EngineCore
@@ -16,19 +13,17 @@ from metadrive.utils.coordinates_shift import panda_heading
 from metadrive.utils.coordinates_shift import panda_position
 from metadrive.utils.math_utils import get_points_bounding_box, norm
 from metadrive.utils.utils import get_object_from_node
+from panda3d.bullet import BulletBoxShape, BulletCylinderShape, ZUp
+from panda3d.core import TransformState
+from panda3d.core import Vec3
 
 if TYPE_CHECKING:
-    from metadrive.component.blocks.pg_block import PGBlockSocket
-    from metadrive.component.road.road import Road
-    from metadrive.component.road.road_network import RoadNetwork
-
-
-def get_lanes_on_road(road: "Road", roadnet: "RoadNetwork") -> List["AbstractLane"]:
-    return roadnet.graph[road.start_node][road.end_node]
+    from metadrive.component.pgblock.pg_block import PGBlockSocket
+    from metadrive.component.road_network.node_road_network import NodeRoadNetwork
 
 
 def block_socket_merge(
-    socket_1: "PGBlockSocket", socket_2: "PGBlockSocket", global_network: "RoadNetwork", positive_merge: False
+    socket_1: "PGBlockSocket", socket_2: "PGBlockSocket", global_network: "NodeRoadNetwork", positive_merge: False
 ):
     global_network.graph[socket_1.positive_road.start_node][socket_2.negative_road.start_node] = \
         global_network.graph[socket_1.positive_road.start_node].pop(socket_1.positive_road.end_node)
@@ -38,7 +33,11 @@ def block_socket_merge(
 
 
 def check_lane_on_road(
-    road_network: "RoadNetwork", lane, positive: float = 0, ignored=None, ignore_intersection_checking=None
+    road_network: "NodeRoadNetwork",
+    lane,
+    positive: float = 0,
+    ignored=None,
+    ignore_intersection_checking=None
 ) -> bool:
     """
     Calculate if the new lane intersects with other lanes in current road network
@@ -57,8 +56,8 @@ def check_lane_on_road(
                 continue
             if len(lanes) == 0:
                 continue
-            x_max_1, x_min_1, y_max_1, y_min_1 = get_road_bounding_box(lanes)
-            x_max_2, x_min_2, y_max_2, y_min_2 = get_road_bounding_box([lane])
+            x_max_1, x_min_1, y_max_1, y_min_1 = get_lanes_bounding_box(lanes)
+            x_max_2, x_min_2, y_max_2, y_min_2 = get_lanes_bounding_box([lane])
             if x_min_1 > x_max_2 or x_min_2 > x_max_1 or y_min_1 > y_max_2 or y_min_2 > y_max_1:
                 continue
             for _id, l in enumerate(lanes):
@@ -71,16 +70,29 @@ def check_lane_on_road(
     return False
 
 
-def get_road_bounding_box(lanes, extra_lateral=3) -> Tuple:
+def get_lanes_bounding_box(lanes, extra_lateral=3) -> Tuple:
     """
     Return (x_max, x_min, y_max, y_min) as bounding box of this road
     :param lanes: Lanes in this road
     :param extra_lateral: extra width in lateral direction, usually sidewalk width
     :return: x_max, x_min, y_max, y_min
     """
-    line_points = get_curve_contour(lanes, extra_lateral) if isinstance(lanes[0], CircularLane) \
-        else get_straight_contour(lanes, extra_lateral)
+    if isinstance(lanes[0], MetaDriveLane):
+        line_points = get_curve_contour(lanes, extra_lateral) if isinstance(lanes[0], CircularLane) \
+            else get_straight_contour(lanes, extra_lateral)
+    else:
+        line_points = get_waypoint_countour(lanes)
     return get_points_bounding_box(line_points)
+
+
+def get_waypoint_countour(lanes):
+    assert isinstance(lanes[0], WayPointLane)
+    ret = []
+    for lane in lanes:
+        for seg in lane.segment_property:
+            ret.append(seg["start_point"])
+        ret.append(seg["end_point"])
+    return ret
 
 
 def get_straight_contour(lanes, extra_lateral) -> List:
@@ -125,7 +137,7 @@ def get_curve_contour(lanes, extra_lateral) -> List:
     return points
 
 
-def get_all_lanes(roadnet: "RoadNetwork"):
+def get_all_lanes(roadnet: "NodeRoadNetwork"):
     graph = roadnet.graph
     res = []
     for from_, to_dict in graph.items():
@@ -135,10 +147,13 @@ def get_all_lanes(roadnet: "RoadNetwork"):
     return res
 
 
-def ray_localization(heading: tuple,
-                     position: tuple,
-                     engine: EngineCore,
-                     return_all_result=False) -> Union[List[Tuple], Tuple]:
+def ray_localization(
+    heading: tuple,
+    position: tuple,
+    engine: EngineCore,
+    return_all_result=False,
+    use_heading_filter=True
+) -> Union[List[Tuple], Tuple]:
     """
     Get the index of the lane closest to a physx_world position.
     Only used when smoething is on lane ! Otherwise fall back to use get_closest_lane()
@@ -167,7 +182,10 @@ def ray_localization(heading: tuple,
                     norm(math.cos(lane_heading), math.sin(lane_heading)) * norm(heading[0], heading[1])
                 )
 
-                if cosangle > 0:
+                if use_heading_filter:
+                    if cosangle > 0:
+                        lane_index_dist.append((lane, lane.index, lane.distance(position)))
+                else:
                     lane_index_dist.append((lane, lane.index, lane.distance(position)))
     if return_all_result:
         ret = []

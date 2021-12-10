@@ -10,7 +10,7 @@ argoverse_city = "PIT"
 argoverse_map_center = [2599.5505965123866, 1200.0214763629717]
 argoverse_map_radius = 150
 argoverse_spawn_lane_index = ('7903', '9713', 0)
-argoverse_destination_node = "968"
+argoverse_destination = "968"
 argoverse_log_id = "c6911883-1843-3727-8eaa-41dc8cda8993"
 
 
@@ -36,7 +36,7 @@ class ArgoverseEnv(MetaDriveEnv):
     def _post_process_config(self, config):
         config = super(ArgoverseEnv, self)._post_process_config(config)
         config["vehicle_config"]["spawn_lane_index"] = argoverse_spawn_lane_index
-        config["vehicle_config"]["destination_node"] = argoverse_destination_node
+        config["vehicle_config"]["destination"] = argoverse_destination
 
         log_id = argoverse_log_id
         root_path = pathlib.PurePosixPath(__file__).parent.parent if not is_win() else pathlib.Path(__file__).resolve(

@@ -287,8 +287,8 @@ class WaymoLaneProperty:
     POLYLINE = "polyline"
     LEFT_BOUNDARIES = "left_boundaries"
     RIGHT_BOUNDARIES = "right_boundaries"
-    LEFT_NEIGHBORS = "left_neighbors"
-    RIGHT_NEIGHBORS = "right_neighbors"
+    LEFT_NEIGHBORS = "left_neighbor"
+    RIGHT_NEIGHBORS = "right_neighbor"
     ENTRY = "entry"
     EXIT = "exit"
 

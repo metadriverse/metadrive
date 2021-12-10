@@ -1,8 +1,8 @@
 import copy
 import logging
 
-from metadrive.component.blocks.first_block import FirstPGBlock
-from metadrive.component.road.road import Road
+from metadrive.component.pgblock.first_block import FirstPGBlock
+from metadrive.component.road_network import Road
 from metadrive.constants import TerminationState
 from metadrive.envs.metadrive_env import MetaDriveEnv
 from metadrive.manager.spawn_manager import SpawnManager
@@ -34,7 +34,12 @@ MULTI_AGENT_METADRIVE_DEFAULT_CONFIG = dict(
     neighbours_distance=10,
 
     # ===== Vehicle Setting =====
-    vehicle_config=dict(lidar=dict(num_lasers=72, distance=40, num_others=0), random_color=True, not_randomize=False),
+    vehicle_config=dict(
+        lidar=dict(num_lasers=72, distance=40, num_others=0),
+        random_color=True,
+        not_randomize=False,
+        spawn_lane_index=(FirstPGBlock.NODE_1, FirstPGBlock.NODE_2, 0)
+    ),
     target_vehicle_configs=dict(),
 
     # ===== New Reward Setting =====

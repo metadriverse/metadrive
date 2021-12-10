@@ -6,7 +6,6 @@ import gym
 import numpy as np
 from panda3d.core import PNMImage
 
-from metadrive.component.blocks.first_block import FirstPGBlock
 from metadrive.component.vehicle.base_vehicle import BaseVehicle
 from metadrive.constants import RENDER_MODE_NONE, DEFAULT_AGENT, REPLAY_DONE
 from metadrive.engine.base_engine import BaseEngine
@@ -15,14 +14,13 @@ from metadrive.engine.engine_utils import initialize_engine, close_engine, \
 from metadrive.manager.agent_manager import AgentManager
 from metadrive.manager.record_manager import RecordManager
 from metadrive.manager.replay_manager import ReplayManager
+from metadrive.obs.image_obs import ImageStateObservation
 from metadrive.obs.observation_base import ObservationBase
+from metadrive.obs.state_obs import LidarStateObservation
 from metadrive.utils import Config, merge_dicts, get_np_random, concat_step_infos
 from metadrive.utils.utils import auto_termination
 
 BASE_DEFAULT_CONFIG = dict(
-    # ===== Generalization =====
-    start_seed=0,
-    environment_num=1,
 
     # ===== agent =====
     random_agent_model=False,
@@ -73,16 +71,36 @@ BASE_DEFAULT_CONFIG = dict(
         image_source="rgb_camera",  # take effect when only when offscreen_render == True
 
         # ===== vehicle spawn and destination =====
-        spawn_lane_index=(FirstPGBlock.NODE_1, FirstPGBlock.NODE_2, 0),
+        need_navigation=True,
+        spawn_lane_index=None,
         spawn_longitude=5.0,
         spawn_lateral=0.0,
-        destination_node=None,
+        destination=None,
 
         # ==== others ====
         overtake_stat=False,  # we usually set to True when evaluation
         action_check=False,
         random_color=False,
+
+        # ===== vehicle module config =====
+        lidar=dict(num_lasers=240, distance=50, num_others=0, gaussian_noise=0.0, dropout_prob=0.0),
+        side_detector=dict(num_lasers=0, distance=50, gaussian_noise=0.0, dropout_prob=0.0),
+        lane_line_detector=dict(num_lasers=0, distance=20, gaussian_noise=0.0, dropout_prob=0.0),
+        show_lidar=False,
+        mini_map=(84, 84, 250),  # buffer length, width
+        rgb_camera=(84, 84),  # buffer length, width
+        depth_camera=(84, 84, True),  # buffer length, width, view_ground
+        show_side_detector=False,
+        show_lane_line_detector=False,
+
+        # NOTE: rgb_clip will be modified by env level config when initialization
+        rgb_clip=True,
+        gaussian_noise=0.0,
+        dropout_prob=0.0,
     ),
+
+    # ===== Agent config =====
+    target_vehicle_configs={DEFAULT_AGENT: dict(use_special_color=False, spawn_lane_index=None)},
 
     # ===== Engine Core config =====
     window_size=(1200, 900),  # width, height
@@ -97,6 +115,12 @@ BASE_DEFAULT_CONFIG = dict(
     headless_machine_render=False,
     # turn on to profile the efficiency
     pstats=False,
+    # if need running in offscreen
+    offscreen_render=False,
+    # accelerate the lidar perception
+    _disable_detector_mask=False,
+    # clip rgb to (0, 1)
+    rgb_clip=True,
 
     # ===== Others =====
     # The maximum distance used in PGLOD. Set to None will use the default values.
@@ -138,10 +162,6 @@ class BaseEnv(gym.Env):
             init_observations=self._get_observations(), init_action_space=self._get_action_space()
         )
 
-        # map setting
-        self.start_seed = self.config["start_seed"]
-        self.env_num = self.config["environment_num"]
-
         # lazy initialization, create the main vehicle in the lazy_init() func
         self.engine: Optional[BaseEngine] = None
         self._top_down_renderer = None
@@ -159,6 +179,8 @@ class BaseEnv(gym.Env):
 
     def _post_process_config(self, config):
         """Add more special process to merged config"""
+        config["vehicle_config"]["random_agent_model"] = config["random_agent_model"]
+        config["vehicle_config"]["rgb_clip"] = config["rgb_clip"]
         return config
 
     def _get_observations(self) -> Dict[str, "ObservationBase"]:
@@ -393,8 +415,12 @@ class BaseEnv(gym.Env):
         ego_v = self.vehicles[DEFAULT_AGENT]
         return ego_v
 
-    def get_single_observation(self, vehicle_config: "Config") -> "ObservationBase":
-        raise NotImplementedError()
+    def get_single_observation(self, vehicle_config: "Config"):
+        if self.config["offscreen_render"]:
+            o = ImageStateObservation(vehicle_config)
+        else:
+            o = LidarStateObservation(vehicle_config)
+        return o
 
     def _wrap_as_single_agent(self, data):
         return data[next(iter(self.vehicles.keys()))]
@@ -461,18 +487,13 @@ class BaseEnv(gym.Env):
     def current_map(self):
         return self.engine.current_map
 
-    def _reset_global_seed(self, force_seed):
-        # create map
-        if force_seed is not None:
-            current_seed = force_seed
-        else:
-            current_seed = get_np_random(self._DEBUG_RANDOM_SEED
-                                         ).randint(self.start_seed, self.start_seed + self.env_num)
+    def _reset_global_seed(self, force_seed=None):
+        current_seed = force_seed if force_seed is not None else get_np_random(None).randint(0, int(1e4))
         self.seed(current_seed)
 
     @property
     def maps(self):
-        return self.engine.map_manager.pg_maps
+        return self.engine.map_manager.maps
 
     def _render_topdown(self, *args, **kwargs):
         if self._top_down_renderer is None:

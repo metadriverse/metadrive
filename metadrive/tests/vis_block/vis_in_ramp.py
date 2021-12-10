@@ -1,7 +1,7 @@
-from metadrive.component.blocks.first_block import FirstPGBlock
-from metadrive.component.blocks.ramp import InRampOnStraight
-from metadrive.component.blocks.straight import Straight
-from metadrive.component.road.road_network import RoadNetwork
+from metadrive.component.pgblock.first_block import FirstPGBlock
+from metadrive.component.pgblock.ramp import InRampOnStraight
+from metadrive.component.pgblock.straight import Straight
+from metadrive.component.road_network.node_road_network import NodeRoadNetwork
 from metadrive.engine.asset_loader import initialize_asset_loader
 from metadrive.tests.vis_block.vis_block_base import TestBlock
 
@@ -11,7 +11,7 @@ if __name__ == "__main__":
 
     initialize_asset_loader(test)
 
-    global_network = RoadNetwork()
+    global_network = NodeRoadNetwork()
     straight = FirstPGBlock(global_network, 3.0, 1, test.render, test.world, 1)
     straight = Straight(4, straight.get_socket(0), global_network, 1)
     print(straight.construct_block(test.render, test.world))

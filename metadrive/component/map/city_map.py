@@ -1,14 +1,13 @@
 from typing import Union
 
-from panda3d.core import NodePath
-
 from metadrive.component.algorithm.BIG import BIG
 from metadrive.component.algorithm.blocks_prob_dist import PGBlockConfig
-from metadrive.component.blocks.first_block import FirstPGBlock
-from metadrive.component.blocks.pg_block import PGBlock
 from metadrive.component.map.base_map import BaseMap
-from metadrive.component.road.road_network import RoadNetwork
+from metadrive.component.pgblock.first_block import FirstPGBlock
+from metadrive.component.pgblock.pg_block import PGBlock
+from metadrive.component.road_network.node_road_network import NodeRoadNetwork
 from metadrive.engine.core.physics_world import PhysicsWorld
+from panda3d.core import NodePath
 
 
 class NextStep:
@@ -30,7 +29,7 @@ class CityBIG(BIG):
         self,
         lane_num: int,
         lane_width: float,
-        global_network: RoadNetwork,
+        global_network: NodeRoadNetwork,
         render_node_path: NodePath,
         physics_world: PhysicsWorld,
         # block_type_version: str,
@@ -105,3 +104,7 @@ class CityMap(BaseMap):
         )
         big_map.generate(self._config[self.GENERATE_TYPE], self._config[self.GENERATE_CONFIG])
         self.blocks = big_map.blocks
+
+    @property
+    def road_network_type(self):
+        return NodeRoadNetwork

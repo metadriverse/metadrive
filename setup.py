@@ -32,6 +32,7 @@ install_requires = [
     "matplotlib",
     "pandas",
     "pygame",
+    "tqdm",
     "yapf==0.30.0",
     "seaborn",
     "panda3d~=1.10.8",

@@ -49,7 +49,7 @@ def test_map_random_seeding():
         "random_lane_width": True,
         "random_lane_num": True,
     }
-    from metadrive.component.blocks.first_block import FirstPGBlock
+    from metadrive.component.pgblock.first_block import FirstPGBlock
     map_configs = []
     lane_width = []
     lane_num = []

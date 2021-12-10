@@ -60,3 +60,11 @@ def metadrive_heading(heading: float) -> float:
     :return: heading (degree)
     """
     return -heading
+
+
+def waymo_2_metadrive_position(position):
+    return position[0], -position[1]
+
+
+def waymo_2_metadrive_heading(heading):
+    return -heading

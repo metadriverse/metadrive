@@ -4,13 +4,13 @@ from typing import Union
 
 import numpy as np
 
-from metadrive.component.map.base_map import BaseMap, MapGenerateMethod, parse_map_config
+from metadrive.component.map.base_map import BaseMap
+from metadrive.component.map.pg_map import parse_map_config, MapGenerateMethod
+from metadrive.component.pgblock.first_block import FirstPGBlock
 from metadrive.component.vehicle.base_vehicle import BaseVehicle
 from metadrive.constants import DEFAULT_AGENT, TerminationState
 from metadrive.envs.base_env import BaseEnv
 from metadrive.manager.traffic_manager import TrafficMode
-from metadrive.obs.image_obs import ImageStateObservation
-from metadrive.obs.state_obs import LidarStateObservation
 from metadrive.utils import clip, Config, get_np_random
 
 METADRIVE_DEFAULT_CONFIG = dict(
@@ -29,11 +29,6 @@ METADRIVE_DEFAULT_CONFIG = dict(
         BaseMap.LANE_NUM: 3,
         "exit_length": 50,
     },
-
-    # ===== Observation =====
-    use_topdown=False,  # Use top-down view
-    offscreen_render=False,
-    _disable_detector_mask=False,
 
     # ===== Traffic =====
     traffic_density=0.1,
@@ -57,25 +52,13 @@ METADRIVE_DEFAULT_CONFIG = dict(
     use_AI_protector=False,
     save_level=0.5,
     is_multi_agent=False,
+    vehicle_config=dict(spawn_lane_index=(FirstPGBlock.NODE_1, FirstPGBlock.NODE_2, 0)),
 
-    # ===== Single-agent vehicle config =====
-    vehicle_config=dict(
-        # ===== vehicle module config =====
-        # laser num, distance, other vehicle info num
-        lidar=dict(num_lasers=240, distance=50, num_others=0, gaussian_noise=0.0, dropout_prob=0.0),
-        side_detector=dict(num_lasers=0, distance=50, gaussian_noise=0.0, dropout_prob=0.0),
-        lane_line_detector=dict(num_lasers=0, distance=20, gaussian_noise=0.0, dropout_prob=0.0),
-        show_lidar=False,
-        mini_map=(84, 84, 250),  # buffer length, width
-        rgb_camera=(84, 84),  # buffer length, width
-        depth_camera=(84, 84, True),  # buffer length, width, view_ground
-        show_side_detector=False,
-        show_lane_line_detector=False
-    ),
-    rgb_clip=True,
-    gaussian_noise=0.0,
-    dropout_prob=0.0,
-    target_vehicle_configs={DEFAULT_AGENT: dict(use_special_color=True)},
+    # ===== Agent =====
+    target_vehicle_configs={
+        DEFAULT_AGENT: dict(use_special_color=True, spawn_lane_index=(FirstPGBlock.NODE_1, FirstPGBlock.NODE_2, 0))
+    },
+
     # ===== Reward Scheme =====
     # See: https://github.com/decisionforce/metadrive/issues/283
     success_reward=10.0,
@@ -108,6 +91,10 @@ class MetaDriveEnv(BaseEnv):
     def __init__(self, config: dict = None):
         self.default_config_copy = Config(self.default_config(), unchangeable=True)
         super(MetaDriveEnv, self).__init__(config)
+
+        # map setting
+        self.start_seed = self.config["start_seed"]
+        self.env_num = self.config["environment_num"]
 
     def _merge_extra_config(self, config: Union[dict, "Config"]) -> "Config":
         config = self.default_config().update(config, allow_add_new_key=False)
@@ -221,7 +208,7 @@ class MetaDriveEnv(BaseEnv):
             positive_road = 1
         else:
             current_lane = vehicle.navigation.current_ref_lanes[0]
-            current_road = vehicle.current_road
+            current_road = vehicle.navigation.current_road
             positive_road = 1 if not current_road.is_negative_road() else -1
         long_last, _ = current_lane.local_coordinates(vehicle.last_position)
         long_now, lateral_now = current_lane.local_coordinates(vehicle.position)
@@ -272,13 +259,6 @@ class MetaDriveEnv(BaseEnv):
     def switch_to_top_down_view(self):
         self.main_camera.stop_track()
 
-    def get_single_observation(self, vehicle_config: "Config") -> "ObservationType":
-        if self.config["offscreen_render"]:
-            o = ImageStateObservation(vehicle_config)
-        else:
-            o = LidarStateObservation(vehicle_config)
-        return o
-
     def setup_engine(self):
         super(MetaDriveEnv, self).setup_engine()
         self.engine.accept("b", self.switch_to_top_down_view)
@@ -287,6 +267,11 @@ class MetaDriveEnv(BaseEnv):
         from metadrive.manager.map_manager import MapManager
         self.engine.register_manager("map_manager", MapManager())
         self.engine.register_manager("traffic_manager", TrafficManager())
+
+    def _reset_global_seed(self, force_seed=None):
+        current_seed = force_seed if force_seed is not None else \
+            get_np_random(self._DEBUG_RANDOM_SEED).randint(self.start_seed, self.start_seed + self.env_num)
+        self.seed(current_seed)
 
 
 if __name__ == '__main__':

@@ -7,6 +7,7 @@ from metadrive.manager.traffic_manager import TrafficManager
 
 
 class ControlledVehicle(Vehicle):
+    raise DeprecationWarning()
     """
     A vehicle piloted by two low-level controller, allowing high-level actions such as cruise control and lane changes.
 
@@ -117,12 +118,12 @@ class ControlledVehicle(Vehicle):
     #     action['steering'] = clip(action['steering'], -self.MAX_STEERING_ANGLE, self.MAX_STEERING_ANGLE)
     #     super().act(action)
 
-    def follow_road(self) -> None:
-        """At the end of a lane, automatically switch to a next one."""
-        if self.traffic_mgr.current_map.road_network.get_lane(self.target_lane_index).after_end(self.position):
-            self.target_lane_index = self.traffic_mgr.current_map.road_network.next_lane(
-                self.target_lane_index, route=self.route, position=self.position, np_random=self.np_random
-            )
+    # def follow_road(self) -> None:
+    #     """At the end of a lane, automatically switch to a next one."""
+    #     if self.traffic_mgr.current_map.road_network.get_lane(self.target_lane_index).after_end(self.position):
+    #         self.target_lane_index = self.traffic_mgr.current_map.road_network.next_lane(
+    #             self.target_lane_index, route=self.route, position=self.position, np_random=self.np_random
+    #         )
 
     # NOTE(pzh): This part is replaced by the IDM model!
     # def steering_control(self, target_lane_index: LaneIndex) -> float:

@@ -1,4 +1,4 @@
-from metadrive.component.blocks.first_block import FirstPGBlock
+from metadrive.component.pgblock.first_block import FirstPGBlock
 from metadrive.constants import TerminationState
 from metadrive.envs.metadrive_env import MetaDriveEnv
 from metadrive.utils import Config
