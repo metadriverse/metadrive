@@ -238,7 +238,6 @@ def extract_dynamic(f):
 
 
 class CustomUnpickler(pickle.Unpickler):
-
     def find_class(self, module, name):
         if name == 'AgentType':
             return AgentType
