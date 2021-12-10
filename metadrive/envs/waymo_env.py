@@ -151,7 +151,7 @@ class WaymoEnv(BaseEnv):
         else:
             lateral_factor = 1.0
 
-        reward = -abs(lateral_now)/4
+        reward = -abs(lateral_now) / 4
         reward += self.config["driving_reward"] * (long_now - long_last) * lateral_factor
         reward += self.config["speed_reward"] * (vehicle.speed / vehicle.max_speed)
 
@@ -194,7 +194,7 @@ if __name__ == "__main__":
             # "debug":True,
             # "no_traffic":True,
             # "start_case_index": 192,
-            "case_num":160,
+            "case_num": 160,
             "waymo_data_directory": "E:\\hk\\idm_filtered\\validation",
             "horizon": 1000,
             # "vehicle_config": dict(show_lidar=True,
@@ -222,7 +222,7 @@ if __name__ == "__main__":
                         # "long": long,
                         # "lat": lat,
                         # "v_heading": env.vehicle.heading_theta,
-                        "seed": env.engine.global_seed+env.config["start_case_index"],
+                        "seed": env.engine.global_seed + env.config["start_case_index"],
                         "reward": r,
                     }
                 )
@@ -230,5 +230,3 @@ if __name__ == "__main__":
             if d:
                 break
     print("success")
-
-
