@@ -176,7 +176,7 @@ class WaymoEnv(BaseEnv):
     def _is_out_of_road(self, vehicle):
         # A specified function to determine whether this vehicle should be done.
         # return vehicle.on_yellow_continuous_line or (not vehicle.on_lane) or vehicle.crash_sidewalk
-        ret = vehicle.on_yellow_continuous_line or vehicle.on_white_continuous_line or vehicle.crash_sidewalk
+        ret = vehicle.on_yellow_continuous_line or vehicle.crash_sidewalk
         return ret
 
     def stop(self):
@@ -215,7 +215,9 @@ if __name__ == "__main__":
                         "lane_heading": c_lane.heading_theta_at(long),
                         "long": long,
                         "lat": lat,
-                        "v_heading": env.vehicle.heading_theta
+                        "v_heading": env.vehicle.heading_theta,
+                        "seed": env.engine.global_seed,
+                        "start_seed":env.config["start_case_index"]
                     }
                 )
 
