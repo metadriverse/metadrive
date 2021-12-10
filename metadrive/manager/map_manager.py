@@ -15,7 +15,7 @@ class MapManager(BaseManager):
         # for pgmaps
         start_seed = self.engine.global_config["start_seed"]
         env_num = self.engine.global_config["environment_num"]
-        self.pg_maps = {_seed: None for _seed in range(start_seed, start_seed + env_num)}
+        self.maps = {_seed: None for _seed in range(start_seed, start_seed + env_num)}
 
     def spawn_object(self, object_class, *args, **kwargs):
         map = self.engine.spawn_object(object_class, auto_fill_random_seed=False, *args, **kwargs)
@@ -30,7 +30,7 @@ class MapManager(BaseManager):
         self.current_map = None
 
     def destroy(self):
-        self.pg_maps = None
+        self.maps = None
         super(MapManager, self).destroy()
 
     def before_reset(self):
@@ -42,13 +42,13 @@ class MapManager(BaseManager):
         config = self.engine.global_config.copy()
         current_seed = self.engine.global_seed
 
-        if self.pg_maps[current_seed] is None:
+        if self.maps[current_seed] is None:
             map_config = config["map_config"]
             map_config.update({"seed": current_seed})
             map_config = self.add_random_to_map(map_config)
             map = self.spawn_object(PGMap, map_config=map_config, random_seed=None)
-            self.pg_maps[current_seed] = map
-        map = self.pg_maps[current_seed]
+            self.maps[current_seed] = map
+        map = self.maps[current_seed]
         self.load_map(map)
 
     def add_random_to_map(self, map_config):

@@ -148,18 +148,14 @@ class Vehicle:
         beta = np.arctan(1 / 2 * np.tan(delta_f))
         v = self.speed * np.array([math.cos(self.heading + beta), math.sin(self.heading + beta)])
 
-        # TODO(pzh): The real position of the traffic vehicle is changed here!!!!
-        #  we should merge this with BaseVehicle, TrafficVehicle and so on.
         self._position += v * dt
 
         self.heading += self.speed * math.sin(beta) / (self.LENGTH / 2) * dt
         self.speed += action['acceleration'] * dt
         # for performance reason,
-        # TODO(pzh): This part is done in the policy. Check!
         # self.on_state_update()
 
     def clip_actions(self, action) -> None:
-        # TODO(pzh): This part is done in policy. Check!
         if self.crashed:
             action['steering'] = 0
             action['acceleration'] = -1.0 * self.speed

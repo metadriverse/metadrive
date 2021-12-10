@@ -2,7 +2,8 @@ import time
 
 import numpy as np
 
-from metadrive.component.map.base_map import BaseMap, MapGenerateMethod
+from metadrive.component.map.base_map import BaseMap
+from metadrive.component.map.pg_map import MapGenerateMethod
 from metadrive.envs import MetaDriveEnv
 
 

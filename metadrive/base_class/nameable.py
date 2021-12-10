@@ -29,3 +29,7 @@ class Nameable:
 
     def __str__(self):
         return "{}, ID:{}".format(self.class_name, self.name)
+
+    def rename(self, new_name):
+        self.name = new_name
+        self.id = self.name

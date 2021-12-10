@@ -12,6 +12,7 @@ from metadrive.utils.math_utils import clip
 
 
 class IDMVehicle(ControlledVehicle):
+    raise DeprecationWarning
     """
     A vehicle using both a longitudinal and a lateral decision policies.
 

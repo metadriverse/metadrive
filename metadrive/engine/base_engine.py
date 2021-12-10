@@ -1,5 +1,4 @@
 import logging
-from metadrive.utils import concat_step_infos
 import pickle
 import time
 from collections import OrderedDict
@@ -11,6 +10,7 @@ from metadrive.base_class.randomizable import Randomizable
 from metadrive.engine.core.engine_core import EngineCore
 from metadrive.engine.interface import Interface
 from metadrive.manager.base_manager import BaseManager
+from metadrive.utils import concat_step_infos
 
 logger = logging.getLogger(__name__)
 

@@ -1,11 +1,10 @@
 from typing import Tuple, Union
-from metadrive.utils.math_utils import get_points_bounding_box
 
 import numpy as np
-
 from metadrive.component.lane.abs_lane import AbstractLane
 from metadrive.constants import LineType
 from metadrive.utils.interpolating_line import InterpolatingLine
+from metadrive.utils.math_utils import get_points_bounding_box
 from metadrive.utils.math_utils import wrap_to_pi
 
 
@@ -33,6 +32,8 @@ class WayPointLane(AbstractLane, InterpolatingLine):
         self.line_types = (LineType.NONE, LineType.NONE)
         self.is_straight = True if abs(self.heading_theta_at(0.1) -
                                        self.heading_theta_at(self.length - 0.1)) < np.deg2rad(10) else False
+        self.start = self.position(0, 0)
+        self.end = self.position(self.length, 0)
 
     def width_at(self, longitudinal: float) -> float:
         return self.width
@@ -54,9 +55,9 @@ class WayPointLane(AbstractLane, InterpolatingLine):
             delta_y = position[1] - seg["start_point"][1]
             longitudinal = delta_x * seg["direction"][0] + delta_y * seg["direction"][1]
             lateral = delta_x * seg["lateral_direction"][0] + delta_y * seg["lateral_direction"][1]
-            ret.append([accumulate_len + longitudinal, lateral, longitudinal + lateral])
+            ret.append([accumulate_len + longitudinal, lateral])
             accumulate_len += seg["length"]
-        ret.sort(key=lambda seg: seg[-1])
+        ret.sort(key=lambda seg: abs(seg[-1]))
         return ret[0][0], ret[0][1]
 
     def is_in_same_direction(self, another_lane):
@@ -75,3 +76,15 @@ class WayPointLane(AbstractLane, InterpolatingLine):
 
     def get_bounding_box(self):
         return self._bounding_box
+
+    def destroy(self):
+        self._bounding_box = None
+        self.width = None
+        self.forbidden = None
+        self.priority = None
+        # waymo lane line will be processed separately
+        self.line_types = None
+        self.is_straight = None
+        self.start = None
+        self.end = None
+        InterpolatingLine.destroy(self)

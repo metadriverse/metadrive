@@ -1,8 +1,10 @@
-from metadrive.component.blocks.waymo_block import WaymoBlock
+import logging
+
 from metadrive.component.map.base_map import BaseMap
+from metadrive.component.waymo_block.waymo_block import WaymoBlock
 from metadrive.engine.asset_loader import AssetLoader
-from metadrive.utils.math_utils import get_boxes_bounding_box
-from metadrive.utils.waymo_map_utils import read_waymo_data
+from metadrive.utils.waymo_utils.waymo_utils import read_waymo_data
+from metadrive.component.road_network.edge_road_network import EdgeRoadNetwork
 
 
 class WaymoMap(BaseMap):
@@ -18,29 +20,30 @@ class WaymoMap(BaseMap):
 
     @staticmethod
     def waymo_position(pos):
-        return pos
+        return pos[0], -pos[1]
 
     @staticmethod
     def metadrive_position(pos):
-        return pos
+        return pos[0], -pos[1]
 
-    def get_center_point(self):
-        raise DeprecationWarning("This func is broken")
-        boxes = []
-        for _from, to_dict in self.road_network.graph.items():
-            for _to, lanes in to_dict.items():
-                for lane in lanes:
-                    boxes.append(lane.get_bounding_box())
-        x_min, x_max, y_min, y_max = get_boxes_bounding_box(boxes)
-        return x_max - x_min, y_max - y_min
+    @property
+    def road_network_type(self):
+        return EdgeRoadNetwork
+
+    def destroy(self):
+        self.waymo_data = None
+        super(WaymoMap, self).destroy()
+
+    def __del__(self):
+        logging.debug("Map is Released")
 
 
 if __name__ == "__main__":
     from metadrive.engine.engine_utils import initialize_engine
     from metadrive.envs.metadrive_env import MetaDriveEnv
-    from metadrive.utils.waymo_map_utils import AgentType
-    from metadrive.utils.waymo_map_utils import RoadEdgeType
-    from metadrive.utils.waymo_map_utils import RoadLineType
+    from metadrive.utils.waymo_utils.waymo_utils import AgentType
+    from metadrive.utils.waymo_utils.waymo_utils import RoadEdgeType
+    from metadrive.utils.waymo_utils.waymo_utils import RoadLineType
 
     # touch these items so that pickle can work
     _ = AgentType
@@ -56,12 +59,12 @@ if __name__ == "__main__":
     default_config["debug_static_world"] = True
     engine = initialize_engine(default_config)
     map = WaymoMap(data)
-
     map.attach_to_world()
     engine.enableMouse()
+    map.road_network.show_bounding_box(engine)
 
     # argoverse data set is as the same coordinates as panda3d
-    pos = WaymoMap.metadrive_position(list(data["map"].values())[0]["polyline"][0])
+    pos = map.get_center_point()
     engine.main_camera.set_bird_view_pos(pos)
     while True:
         map.engine.step()

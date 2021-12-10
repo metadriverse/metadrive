@@ -70,7 +70,7 @@ class RealDataManager(BaseManager):
 
         block = map.blocks[0]
         lanes = block.argo_lanes.values()
-        roads = block.block_network.get_roads(direction='positive', lane_num=1)
+        roads = self.get_roads(block.block_network, direction='positive', lane_num=1)
         potential_vehicle_configs = []
         for l in lanes:
             start = np.max(l.centerline, axis=0)
@@ -140,3 +140,21 @@ class RealDataManager(BaseManager):
     @property
     def current_map(self):
         return self.engine.map_manager.current_map
+
+    @staticmethod
+    def get_roads(roadnetwork, *, direction="all", lane_num=None) -> List:
+        """
+        Return all roads in road_network
+        :param direction: "positive"/"negative"
+        :param lane_num: only roads with lane_num lanes will be returned
+        :return: List[Road]
+        """
+        assert direction in ["positive", "negative", "all"], "incorrect road direction"
+        ret = []
+        for _from, _to_dict in self.graph.items():
+            if direction == "all" or (direction == "positive" and _from[0] != "-") or (direction == "negative"
+                                                                                       and _from[0] == "-"):
+                for _to, lanes in _to_dict.items():
+                    if lane_num is None or len(lanes) == lane_num:
+                        ret.append(Road(_from, _to))
+        return ret

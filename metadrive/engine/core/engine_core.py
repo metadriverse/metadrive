@@ -1,13 +1,13 @@
 import logging
 import sys
 import time
-from typing import Optional, Union
+from typing import Optional, Union, Tuple
 
 import gltf
 from direct.gui.OnscreenImage import OnscreenImage
 from direct.showbase import ShowBase
 from panda3d.bullet import BulletDebugNode
-from panda3d.core import AntialiasAttrib, loadPrcFileData, LineSegs, PythonCallbackObject
+from panda3d.core import AntialiasAttrib, loadPrcFileData, LineSegs, PythonCallbackObject, Vec3, NodePath
 
 from metadrive.constants import RENDER_MODE_OFFSCREEN, RENDER_MODE_NONE, RENDER_MODE_ONSCREEN, EDITION, CamMask, \
     BKG_COLOR
@@ -133,11 +133,6 @@ class EngineCore(ShowBase.ShowBase):
             loadPrcFileData("", "compressed-textures 1")  # Default to compress
 
         super(EngineCore, self).__init__(windowType=self.mode)
-
-        # Change window size at runtime if screen too small
-        # assert int(self.global_config["use_topdown"]) + int(self.global_config["offscreen_render"]) <= 1, (
-        #     "Only one of use_topdown and offscreen_render options can be selected."
-        # )
 
         # main_window_position = (0, 0)
         if self.mode == RENDER_MODE_ONSCREEN:
@@ -379,6 +374,14 @@ class EngineCore(ShowBase.ShowBase):
             new_alpha = alpha - 0.08
             self._loading_logo.setColor((1, 1, 1, new_alpha))
             return task.cont
+
+    def add_line(self, start_p: Union[Vec3, Tuple], end_p: Union[Vec3, Tuple], color, thickness: float):
+        line_seg = LineSegs("interface")
+        line_seg.setColor(*color)
+        line_seg.moveTo(start_p)
+        line_seg.drawTo(end_p)
+        line_seg.setThickness(thickness)
+        NodePath(line_seg.create(False)).reparentTo(self.render)
 
 
 if __name__ == "__main__":

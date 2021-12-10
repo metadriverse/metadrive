@@ -1,14 +1,14 @@
 import copy
-from metadrive.component.vehicle.base_vehicle import BaseVehicle
-from metadrive.component.vehicle.vehicle_type import DefaultVehicle
-from metadrive.obs.state_obs import LidarStateObservation
-from metadrive.constants import REPLAY_DONE
 import logging
 
-from metadrive.component.map.base_map import BaseMap, MapGenerateMethod
-from metadrive.component.map.pg_map import PGMap
+from metadrive.component.map.base_map import BaseMap
+from metadrive.component.map.pg_map import PGMap, MapGenerateMethod
+from metadrive.component.vehicle.base_vehicle import BaseVehicle
+from metadrive.component.vehicle.vehicle_type import DefaultVehicle
 from metadrive.constants import ObjectState
+from metadrive.constants import REPLAY_DONE
 from metadrive.manager.base_manager import BaseManager
+from metadrive.obs.state_obs import LidarStateObservation
 
 
 class ReplayManager(BaseManager):

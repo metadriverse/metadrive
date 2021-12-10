@@ -1,13 +1,13 @@
-from metadrive.component.blocks.bottleneck import Merge, Split
-from metadrive.component.blocks.curve import Curve
-from metadrive.component.blocks.fork import InFork, OutFork
-from metadrive.component.blocks.parking_lot import ParkingLot
-from metadrive.component.blocks.ramp import InRampOnStraight, OutRampOnStraight
-from metadrive.component.blocks.roundabout import Roundabout
-from metadrive.component.blocks.std_intersection import StdInterSection
-from metadrive.component.blocks.std_t_intersection import StdTInterSection
-from metadrive.component.blocks.straight import Straight
-from metadrive.component.blocks.tollgate import TollGate
+from metadrive.component.pgblock.bottleneck import Merge, Split
+from metadrive.component.pgblock.curve import Curve
+from metadrive.component.pgblock.fork import InFork, OutFork
+from metadrive.component.pgblock.parking_lot import ParkingLot
+from metadrive.component.pgblock.ramp import InRampOnStraight, OutRampOnStraight
+from metadrive.component.pgblock.roundabout import Roundabout
+from metadrive.component.pgblock.std_intersection import StdInterSection
+from metadrive.component.pgblock.std_t_intersection import StdTInterSection
+from metadrive.component.pgblock.straight import Straight
+from metadrive.component.pgblock.tollgate import TollGate
 
 
 class PGBlockConfig:
