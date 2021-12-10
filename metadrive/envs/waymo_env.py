@@ -151,12 +151,14 @@ class WaymoEnv(BaseEnv):
         else:
             lateral_factor = 1.0
 
-        reward = 0.0
+        reward = -abs(lateral_now) / 4
         reward += self.config["driving_reward"] * (long_now - long_last) * lateral_factor
         reward += self.config["speed_reward"] * (vehicle.speed / vehicle.max_speed)
 
         step_info["step_reward"] = reward
 
+        if vehicle.on_yellow_continuous_line:
+            reward -= 5
         if vehicle.arrive_destination:
             reward = +self.config["success_reward"]
         elif self._is_out_of_road(vehicle):
@@ -176,7 +178,7 @@ class WaymoEnv(BaseEnv):
     def _is_out_of_road(self, vehicle):
         # A specified function to determine whether this vehicle should be done.
         # return vehicle.on_yellow_continuous_line or (not vehicle.on_lane) or vehicle.crash_sidewalk
-        ret = vehicle.on_yellow_continuous_line or vehicle.on_white_continuous_line or vehicle.crash_sidewalk
+        ret = vehicle.crash_sidewalk
         return ret
 
     def stop(self):
@@ -190,6 +192,10 @@ if __name__ == "__main__":
             # "agent_policy": WaymoIDMPolicy,
             "manual_control": True,
             # "debug":True,
+            # "no_traffic":True,
+            # "start_case_index": 192,
+            "case_num": 160,
+            "waymo_data_directory": "E:\\hk\\idm_filtered\\validation",
             "horizon": 1000,
             # "vehicle_config": dict(show_lidar=True,
             #                        show_lane_line_detector=True,
@@ -208,17 +214,19 @@ if __name__ == "__main__":
                 env.render(
                     text={
                         # "routing_lane_idx": env.engine._object_policies[env.vehicle.id].routing_target_lane.index,
-                        "lane_index": env.vehicle.lane_index,
-                        "current_ckpt_index": env.vehicle.navigation.current_checkpoint_lane_index,
-                        "next_ckpt_index": env.vehicle.navigation.next_checkpoint_lane_index,
-                        "ckpts": env.vehicle.navigation.checkpoints,
-                        "lane_heading": c_lane.heading_theta_at(long),
-                        "long": long,
-                        "lat": lat,
-                        "v_heading": env.vehicle.heading_theta
+                        # "lane_index": env.vehicle.lane_index,
+                        # "current_ckpt_index": env.vehicle.navigation.current_checkpoint_lane_index,
+                        # "next_ckpt_index": env.vehicle.navigation.next_checkpoint_lane_index,
+                        # "ckpts": env.vehicle.navigation.checkpoints,
+                        # "lane_heading": c_lane.heading_theta_at(long),
+                        # "long": long,
+                        # "lat": lat,
+                        # "v_heading": env.vehicle.heading_theta,
+                        "seed": env.engine.global_seed + env.config["start_case_index"],
+                        "reward": r,
                     }
                 )
 
-            if info["arrive_dest"] or env.episode_steps > 1000:
+            if d:
                 break
     print("success")
