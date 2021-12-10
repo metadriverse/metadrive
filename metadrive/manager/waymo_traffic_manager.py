@@ -72,7 +72,9 @@ class WaymoTrafficManager(BaseManager):
             for v_id, type_traj in self.current_traffic_data.items():
                 if v_id in self.vid_to_obj and self.vid_to_obj[v_id] in self.spawned_objects.keys():
                     info = self.parse_vehicle_state(type_traj["state"], self.count)
-                    if not info["valid"]:
+                    if not info["valid"] and v_id in self.vid_to_obj:
+                        self.clear_objects([self.vid_to_obj[v_id]])
+                        self.vid_to_obj.pop(v_id)
                         continue
                     self.spawned_objects[self.vid_to_obj[v_id]].set_position(info["position"])
                     self.spawned_objects[self.vid_to_obj[v_id]].set_heading_theta(info["heading"], rad_to_degree=False)
