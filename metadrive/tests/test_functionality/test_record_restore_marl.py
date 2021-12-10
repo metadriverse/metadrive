@@ -1,4 +1,3 @@
-import json
 import pickle
 
 from metadrive.envs.marl_envs.marl_inout_roundabout import MultiAgentRoundaboutEnv

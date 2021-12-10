@@ -1,8 +1,8 @@
-from metadrive.component.blocks.curve import Curve
-from metadrive.component.blocks.ramp import InRampOnStraight, OutRampOnStraight
-from metadrive.component.blocks.straight import Straight
 from metadrive.component.lane.abs_lane import AbstractLane
-from metadrive.component.road.road import Road
+from metadrive.component.pgblock.curve import Curve
+from metadrive.component.pgblock.ramp import InRampOnStraight, OutRampOnStraight
+from metadrive.component.pgblock.straight import Straight
+from metadrive.component.road_network import Road
 from metadrive.component.static_object.traffic_object import TrafficCone, TrafficWarning, TrafficBarrier
 from metadrive.engine.engine_utils import get_engine
 from metadrive.manager.base_manager import BaseManager

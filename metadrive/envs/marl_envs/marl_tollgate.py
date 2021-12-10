@@ -1,11 +1,11 @@
 import gym
 import numpy as np
 
-from metadrive.component.blocks.bottleneck import Merge, Split
-from metadrive.component.blocks.first_block import FirstPGBlock
-from metadrive.component.blocks.tollgate import TollGate
 from metadrive.component.map.pg_map import PGMap
-from metadrive.component.road.road import Road
+from metadrive.component.pgblock.bottleneck import Merge, Split
+from metadrive.component.pgblock.first_block import FirstPGBlock
+from metadrive.component.pgblock.tollgate import TollGate
+from metadrive.component.road_network import Road
 from metadrive.constants import TerminationState
 from metadrive.envs.marl_envs.multi_agent_metadrive import MultiAgentMetaDrive
 from metadrive.manager.map_manager import MapManager
@@ -48,7 +48,7 @@ class StayTimeManager:
 
     def record(self, agents, time_step):
         for v_id, v in agents.items():
-            cur_block_id = v.current_road.block_ID()
+            cur_block_id = v.navigation.current_road.block_ID()
             if v_id in self.last_block:
                 last_block_id = self.last_block[v_id]
                 self.last_block[v_id] = cur_block_id
@@ -93,7 +93,7 @@ class TollGateObservation(LidarStateObservation):
         self.in_toll_time = 0
 
     def observe(self, vehicle):
-        cur_block_is_toll = vehicle.current_road.block_ID() == TollGate.ID
+        cur_block_is_toll = vehicle.navigation.current_road.block_ID() == TollGate.ID
         self.in_toll_time += 1 if cur_block_is_toll else 0
         if not cur_block_is_toll:
             toll_obs = [0.0, 0.0]
@@ -201,7 +201,7 @@ class MultiAgentTollgateEnv(MultiAgentMetaDrive):
             current_lane = vehicle.lane
         else:
             current_lane = vehicle.navigation.current_ref_lanes[0]
-            current_road = vehicle.current_road
+            current_road = vehicle.navigation.current_road
         long_last, _ = current_lane.local_coordinates(vehicle.last_position)
         long_now, lateral_now = current_lane.local_coordinates(vehicle.position)
 
@@ -214,7 +214,7 @@ class MultiAgentTollgateEnv(MultiAgentMetaDrive):
         reward = 0.0
         reward += self.config["driving_reward"] * (long_now - long_last) * lateral_factor
 
-        if vehicle.current_road.block_ID() == TollGate.ID:
+        if vehicle.navigation.current_road.block_ID() == TollGate.ID:
             if vehicle.overspeed:  # Too fast!
                 reward = -self.config["overspeed_penalty"] * vehicle.speed / vehicle.max_speed
             else:
@@ -433,7 +433,7 @@ def _vis():
         render_text["dist_to_left"] = env.current_track_vehicle.dist_to_left_side
         render_text["overspeed"] = env.current_track_vehicle.overspeed
         render_text["lane"] = env.current_track_vehicle.lane_index
-        render_text["block"] = env.current_track_vehicle.current_road.block_ID()
+        render_text["block"] = env.current_track_vehicle.navigation.current_road.block_ID()
         env.render(text=render_text)
         if d["__all__"]:
             print(info)

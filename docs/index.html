@@ -26,30 +26,53 @@
 <div class="section">
     <!-- === Title Starts === -->
     <div class="header">
-        <div class="logo">
-            <a href="https://decisionforce.github.io/" target="_blank">
-                <img src="images/deciforce.png">
-            </a>
-        </div>
-        <div class="logo"
-             style="float: right; object-fit:none; overflow-x: hidden; width: 150pt; margin-top: 25pt;margin-left: 0">
-            <a href="https://github.com/decisionforce/metadrive" target="_blank">
-                <img style=" width: 150pt; overflow-x: hidden;"
-                     align=right
-                     src="https://raw.githubusercontent.com/decisionforce/metadrive/main/metadrive/assets/logo-horizon.png">
-            </a>
-        </div>
+
+        <table>
+            <tr>
+                <td>
+
+                    <div class="logo"
+                         style="
+                         width: 100pt;
+                         vertical-align: text-top;
+                         text-align: center;
+                         ">
+                        <a href="https://decisionforce.github.io/" target="_blank">
+                            <img src="images/deciforce.png">
+                        </a>
+                    </div>
+
+                </td>
+                <td>
+                    <div style="padding-top: 10pt;" class="title" id="lang">
+                        MetaDrive: Composing Diverse Driving Scenarios for Generalizable Reinforcement Learning
+                    </div>
+
+                </td>
+                <td>
+
+                    <div class="logo"
+                         style="
+                         width: 150pt;
+                         vertical-align: text-top;
+                         text-align: center;
+                         ">
+                        <a href="https://github.com/decisionforce/metadrive" target="_blank">
+                            <img style=" width: 150pt;" src="images/metadrive.png">
+                        </a>
+                    </div>
+
+                </td>
+            </tr>
+        </table>
 
 
-        <div style="padding-top: 10pt;" class="title" id="lang">
-            MetaDrive: Composing Diverse Driving Scenarios for Generalizable Reinforcement Learning
-        </div>
         <br>
     </div>
     <!-- === Title Ends === -->
 
-    <div class="author">
-        <a href="#">Quanyi Li</a><sup>1,2</sup>*,&nbsp;
+    <div class="author" style="margin-top: -10pt">
+        <a href="https://quanyili.github.io" target="_blank">Quanyi Li</a><sup>1,2</sup>*,&nbsp;
         <a href="https://pengzhenghao.github.io" target="_blank">Zhenghao Peng</a><sup>1</sup>*,&nbsp;
         <a href="#">Zhenghai Xue</a><sup>1</sup>,&nbsp;
         <a href="#">Qihang Zhang</a><sup>1</sup>,&nbsp;
@@ -61,155 +84,69 @@
             <sup>2</sup>Centre for Perceptual and Interactive Intelligence
         </div>
     </div>
-</div>
-<!-- === Home Section Ends === -->
 
-
-<!-- === Overview Section Starts === -->
-<div class="section">
-    <div class="title" id="lang">Overview of MetaDrive Simulator</div>
-    <div class="body">
-        <div class="teaser">
-            <img src="images/panel.png">
-        </div>
-
-        <div class="text">
-            To better evaluate and improve the generalization of learning-based driving systems, we introduce an
-            open-ended and highly configurable driving simulator called MetaDrive.
-            MetaDrive can generate a diverse set of driving scenes through both procedural content generation and
-            real data import. Currently the simulator is used to study the generalization of the driving agents trained
-            from reinforcement learning. See <a href="https://arxiv.org/pdf/2109.12674.pdf">paper</a> for more detail.
-        </div>
-    </div>
-</div>
-<div class="section">
-    <div class="title" id="lang">Procedural Generation of Driving Scenes</div>
-    <p>
-    <div class="text">We first define the elementary road blocks as follows,</div>
-    <div class="teaser"><img
-            src="images/blocks-1row.jpg">
-    </div>
-    <div class="text">we then follow the proposed algorithm of procedural generation to synthesize maps:</div>
-
+    <table border="0" align="center">
+        <tr>
+            <td align="center" style="padding: 0pt 0 15pt 0">
+                <a class="bar" href="https://decisionforce.github.io/metadrive"><b>Webpage</b></a> |
+                <a class="bar" href="https://github.com/decisionforce/metadrive"><b>Code</b></a> |
+                <a class="bar" href="https://arxiv.org/pdf/2109.12674.pdf"><b>Paper</b></a>
+            </td>
+        </tr>
+    </table>
+    
     <div align="center">
-        <table width="70%" style="margin: 0 0; text-align: center;">
+        <table width="100%" style="margin: 0pt 0pt; text-align: center;">
             <tr>
                 <td>
-                    <video style="display:block; width:98%; height:auto;"
-                           autoplay="autoplay" controls muted loop="loop">
-                        <source src="https://github.com/decisionforce/pgdrive/releases/download/pgdrive-0.1.1/BIG.mp4"
+                    <video style="display:block; width:100%; height:auto; "
+                           autoplay="autoplay" muted loop="loop" controls playsinline>
+                        <source src="https://raw.githubusercontent.com/decisionforce/archive/master/MetaDrive/metadrive_teaser.mp4"
                                 type="video/mp4"/>
                     </video>
                 </td>
             </tr>
         </table>
     </div>
-
-
-    <div class="text">We exhibit more generated maps as follows, which are further turned into interactive environments
-        for reinforcement learning of end-to-end driving.
-    </div>
-    <div class="teaser"><img
-            src="images/webpage2.001.png">
-    </div>
-    <div class="teaser"><img
-            src="images/webpage2.002.png">
-    </div>
-    </p>
-
+    
 </div>
+<!-- === Home Section Ends === -->
+
+
 
 
 <div class="section">
-    <div class="title" id="lang">Driving Scenes Imported from Real Data </div>
+    <div class="title" id="lang">MetaDrive Simulator</div>
     <p>
-    <div class="text">Currently, MetaDrive supports importing real traffic scenarios from Argoverse dataset,
-    which enriches the diversity and reality of interactive environments for training agents.
-    </div>
-    <div class="teaser"><img
-            src="images/real_2x4.png">
+        To facilitate the research of generalizable reinforcement learning, we develop an open-source, highly efficient
+        and flexible driving simulator MetaDrive, which holds the following key features:
     </p>
+    <ul>
+        <li>
+            <b>Compositional</b>: It supports generating infinite scenes with various road maps and traffic settings for the
+            research of generalizable RL.
+        </li>
+        <li>
+            <b>Lightweight</b>: It is easy to install and run. It can run up to 300 FPS on a standard PC.
+        </li>
+        <li>
+            <b>Realistic</b>: Accurate physics simulation and multiple sensory input including Lidar, RGB images, top-down
+            semantic map and first-person view images. The real traffic data replay is also supported.
+        </li>
+    </ul>
     <p>
-        <div class="text" align="left"> Compared to procedurally generated maps, Argoverse maps contain more unusual but realistic road structures,
-            making it feasible to benchmark the agent performance on unseen realistic maps after training on procedurally generated maps.
-        </div>
-    <div class="teaser"><img
-            src="images/argoverse_show_case.jpg">
-    </div>
+        We construct a variety of RL tasks and baselines in both single-agent and multi-agent settings, including
+        benchmarking generalizability across unseen scenes, safe exploration, and learning multi-agent traffic. 
     </p>
-
-
-
 </div>
-
-
-
-</div>
-<!-- === Overview Section Ends === -->
-
-
-<!-- === Result Section Starts === -->
-<div class="section">
-    <div class="title" id="lang">Result of Improved Generalization</div>
-    <div class="body">
-        <p>
-        <div class="text">
-            We first split the procedurally generated maps into training set and test set.
-            We show that when trained with more procedurally generated maps, the driving agents from reinforcement
-            learning have better generalization performance on unseen test maps, and can handle more complex scenarios.
-            The detailed experimental results are in the paper. You can reproduce the experiment through <a
-                href="https://github.com/decisionforce/pgdrive-generalization-paper">our generalization experiment
-            code</a>.
-        </div>
-        <div class="teaser"><img
-                src="images/sac-up.jpg">
-        </div>
-        <div class="teaser"><img
-                src="images/sac-down.jpg">
-        </div>
-        </p>
-
-        <p>
-            <div class="text">
-            Besides, we also benchmark the agent performance in Argoverse scenarios after training on procedurally generating maps.
-            The following results demonstrate that procedural generation can help improve the agent generalization ability
-            on realistic traffic scenarios.
-            </div>
-            <div class="teaser"><img src="images/generalization_ppo_with_real_test.png" style="width: 55%; height: 55%;"></div>
-        </p>
-
-        <p>
-        <div class="text">
-            The demo video of the generalizable agent is shown as follows. You can run the agent on your local machine
-            through the provided example in <a href="https://github.com/decisionforce/metadrive">the simulator
-            codebase</a>.
-        </div>
-        <div class="vedio" style="position: relative; padding-top: 50%; margin: 20pt auto; text-align: center;">
-            <iframe src="https://www.youtube.com/embed/3ziJPqC_-T4" frameborder=0
-                    style="position: absolute; top: 2.5%; left: 2.5%; width: 95%; height: 100%;"
-                    allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
-                    allowfullscreen></iframe>
-        </div>
-<!--        <p>-->
-<!--            <a class="text" href="https://github.com/decisionforce/metadrive/releases/download/metadrive-0.1.1/agents.mp4"-->
-<!--               target="_blank">-->
-<!--                Download the video.-->
-<!--            </a>-->
-<!--        </p>-->
-        </p>
-    </div>
-</div>
-<!-- === Result Section Ends === -->
 
 
 <!-- === Reference Section Starts === -->
 <div class="section">
     <div class="bibtex">
-        <div class="text">Citation</div>
+       <div class="title" id="lang">Reference</div>
     </div>
-
-    If you find this work useful in your project, please consider to cite it through:
-
+Please refer to the <a href="https://arxiv.org/pdf/2109.12674.pdf">technical report</a> or the <a href="https://github.com/decisionforce/metadrive">code repo</a> for more information.
     <pre>
 @misc{li2021metadrive,
       title={MetaDrive: Composing Diverse Driving Scenarios for Generalizable Reinforcement Learning},

@@ -1,6 +1,8 @@
-from metadrive.utils.math_utils import norm
 import math
+
 import numpy as np
+
+from metadrive.utils.math_utils import norm
 
 
 class InterpolatingLine:
@@ -8,14 +10,13 @@ class InterpolatingLine:
     This class provides point set with interpolating function
     """
     def __init__(self, points):
-        self.points = points
-        self.segment_property = self._get_properties()
+        self.segment_property = self._get_properties(points)
         self.length = sum([seg["length"] for seg in self.segment_property])
 
-    def _get_properties(self):
+    def _get_properties(self, points):
         ret = []
-        for idx, p_start in enumerate(self.points[:-1]):
-            p_end = self.points[idx + 1]
+        for idx, p_start in enumerate(points[:-1]):
+            p_end = points[idx + 1]
             seg_property = {
                 "length": self.points_distance(p_start, p_end),
                 "direction": self.points_direction(p_start, p_end),
@@ -50,9 +51,9 @@ class InterpolatingLine:
         """
         accumulate_len = 0
         for seg in self.segment_property:
+            accumulate_len += seg["length"]
             if accumulate_len + 0.1 >= longitudinal:
                 break
-            accumulate_len += seg["length"]
         if lateral is not None:
             return (seg["start_point"] + (longitudinal - accumulate_len + seg["length"]) *
                     seg["direction"]) + lateral * seg["lateral_direction"]
@@ -77,6 +78,7 @@ class InterpolatingLine:
         """
         accumulate_len = 0
         for index, seg in enumerate(self.segment_property):
+            accumulate_len += seg["length"]
             if accumulate_len + 0.1 >= longitudinal:
                 return self.segment_property[index]
         return self.segment_property[index]
@@ -85,3 +87,7 @@ class InterpolatingLine:
         lane_segment = self.segment(longitude)
         lateral = lane_segment["lateral_direction"]
         return lateral
+
+    def destroy(self):
+        self.segment_property = None
+        self.length = None

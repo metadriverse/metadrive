@@ -3,11 +3,6 @@ from abc import ABCMeta, abstractmethod
 from typing import Tuple
 
 import numpy as np
-from panda3d.bullet import BulletBoxShape
-from panda3d.bullet import BulletGhostNode
-from panda3d.core import Vec3, LQuaternionf, CardMaker, TransparencyAttrib, NodePath
-from panda3d.core import Vec4
-
 from metadrive.constants import BodyName
 from metadrive.constants import DrivableAreaProperty
 from metadrive.constants import LineType, LineColor
@@ -17,6 +12,10 @@ from metadrive.engine.physics_node import BulletRigidBodyNode
 from metadrive.utils import norm
 from metadrive.utils.coordinates_shift import panda_position
 from metadrive.utils.math_utils import Vector
+from panda3d.bullet import BulletBoxShape
+from panda3d.bullet import BulletGhostNode
+from panda3d.core import Vec3, LQuaternionf, CardMaker, TransparencyAttrib, NodePath
+from panda3d.core import Vec4
 
 
 class AbstractLane:
@@ -115,8 +114,14 @@ class AbstractLane:
             return True
         return False
 
-    def construct_lane_in_block(self, block, lane_index=None):
+    def construct_lane_in_block(self, block, lane_index):
         segment_num = int(self.length / DrivableAreaProperty.LANE_SEGMENT_LENGTH)
+        if segment_num == 0:
+            middle = self.position(self.length / 2, 0)
+            end = self.position(self.length, 0)
+            theta = self.heading_theta_at(self.length / 2)
+            width = self.width_at(0) + DrivableAreaProperty.SIDEWALK_LINE_DIST * 2
+            self.construct_lane_segment(block, middle, width, self.length, theta, lane_index)
         for i in range(segment_num):
             middle = self.position(self.length * (i + .5) / segment_num, 0)
             end = self.position(self.length * (i + 1) / segment_num, 0)
@@ -169,6 +174,10 @@ class AbstractLane:
         Lateral: left[-1/2 * width] or right[1/2 * width]
         """
         segment_num = int(self.length / DrivableAreaProperty.LANE_SEGMENT_LENGTH)
+        if segment_num == 0:
+            start = self.position(0, lateral)
+            end = self.position(self.length, lateral)
+            self.construct_lane_line_segment(block, start, end, line_color, line_type)
         for segment in range(segment_num):
             start = self.position(DrivableAreaProperty.LANE_SEGMENT_LENGTH * segment, lateral)
             if segment == segment_num - 1:
@@ -235,14 +244,14 @@ class AbstractLane:
             card.setTexture(block.ts_color, block.road_texture)
 
     @staticmethod
-    def construct_lane_line_segment(block, start_point, end_point, color: Vec4, line_type: LineType):
+    def construct_lane_line_segment(block, start_point, end_point, line_color: Vec4, line_type: LineType):
         length = norm(end_point[0] - start_point[0], end_point[1] - start_point[1])
         middle = (start_point + end_point) / 2
         parent_np = block.lane_line_node_path
         if length <= 0:
             return
         if LineType.prohibit(line_type):
-            node_name = BodyName.White_continuous_line if color == LineColor.GREY else BodyName.Yellow_continuous_line
+            node_name = BodyName.White_continuous_line if line_color == LineColor.GREY else BodyName.Yellow_continuous_line
         else:
             node_name = BodyName.Broken_line
 
@@ -273,12 +282,16 @@ class AbstractLane:
             lane_line.setScale(length, DrivableAreaProperty.LANE_LINE_WIDTH, DrivableAreaProperty.LANE_LINE_THICKNESS)
             lane_line.setPos(Vec3(0, 0 - DrivableAreaProperty.LANE_LINE_GHOST_HEIGHT / 2))
             lane_line.reparentTo(body_np)
-            body_np.set_color(color)
+            body_np.set_color(line_color)
 
     @staticmethod
-    def construct_sidewalk_segment(block, lane_start, lane_end, radius=0.0, direction=0, length=0.00):
+    def construct_sidewalk_segment(block, lane_start, lane_end, length_multiply=1, extra_thrust=0, width=0):
+        direction_v = lane_end - lane_start
+        if abs(norm(direction_v[0], direction_v[1])) < 0.1:
+            return
+        width = width or block.SIDEWALK_WIDTH
         middle = (lane_start + lane_end) / 2
-        length = norm(lane_end[0] - lane_start[0], lane_end[1] - lane_start[1]) if abs(length - 0.0) < 1e-1 else length
+        length = norm(lane_end[0] - lane_start[0], lane_end[1] - lane_start[1])
         body_node = BulletRigidBodyNode(BodyName.Sidewalk)
         body_node.setKinematic(False)
         body_node.setStatic(True)
@@ -286,22 +299,20 @@ class AbstractLane:
         shape = BulletBoxShape(Vec3(1 / 2, 1 / 2, 1 / 2))
         body_node.addShape(shape)
         body_node.setIntoCollideMask(block.SIDEWALK_COLLISION_MASK)
-        block.dynamic_nodes.append(body_node)
-
-        if radius == 0:
-            factor = 1
+        if block.render:
+            # a trick to acc off-rendering training
+            block.dynamic_nodes.append(body_node)
         else:
-            if direction == 1:
-                factor = (1 - block.SIDEWALK_LINE_DIST / radius)
-            else:
-                factor = (1 + block.SIDEWALK_WIDTH / radius) * (1 + block.SIDEWALK_LINE_DIST / radius)
+            block.static_nodes.append(body_node)
+
         direction_v = lane_end - lane_start
-        vertical_v = Vector((-direction_v[1], direction_v[0])) / norm(*direction_v)
-        middle += vertical_v * (block.SIDEWALK_WIDTH / 2 + block.SIDEWALK_LINE_DIST)
+        if extra_thrust != 0:
+            vertical_v = Vector((-direction_v[1], direction_v[0])) / norm(*direction_v)
+            middle += vertical_v * extra_thrust
         side_np.setPos(panda_position(middle, 0))
         theta = -math.atan2(direction_v[1], direction_v[0])
         side_np.setQuat(LQuaternionf(math.cos(theta / 2), 0, 0, math.sin(theta / 2)))
-        side_np.setScale(length * factor, block.SIDEWALK_WIDTH, block.SIDEWALK_THICKNESS * (1 + 0.1 * np.random.rand()))
+        side_np.setScale(length * length_multiply, width, block.SIDEWALK_THICKNESS * (1 + 0.1 * np.random.rand()))
         if block.render:
             side_np.setTexture(block.ts_color, block.side_texture)
             block.sidewalk.instanceTo(side_np)

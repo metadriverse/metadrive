@@ -15,6 +15,8 @@
 <a href="https://www.youtube.com/embed/3ziJPqC_-T4">Demo Video</a>
 |
 <a href="https://decisionforce.github.io/metadrive/">Website</a>
+|
+<a href="https://arxiv.org/pdf/2109.12674.pdf">Paper</a>
 ]
 </strong>
 </div>
@@ -126,7 +128,43 @@ Find more details in: [MetaDrive](https://metadrive-simulator.readthedocs.io)
 
 ## 📎 References
 
-Working in Progress!
+If you use MetaDrive in your own work, please cite:
+
+```latex
+@article{li2021metadrive,
+  title={MetaDrive: Composing Diverse Driving Scenarios for Generalizable Reinforcement Learning},
+  author={Li, Quanyi and Peng, Zhenghao and Xue, Zhenghai and Zhang, Qihang and Zhou, Bolei},
+  journal={arXiv preprint arXiv:2109.12674},
+  year={2021}
+}
+```
+
+## 🎉 Relevant Projects
+
+**Learning to Simulate Self-driven Particles System with Coordinated Policy Optimization**
+\
+Zhenghao Peng, Quanyi Li, Chunxiao Liu, Bolei Zhou 
+\
+*NeurIPS 2021*
+\
+[<a href="https://arxiv.org/pdf/2110.13827.pdf" target="_blank">Paper</a>]
+[<a href="https://github.com/decisionforce/CoPO" target="_blank">Code</a>]
+[<a href="https://decisionforce.github.io/CoPO" target="_blank">Webpage</a>]
+[<a href="https://decisionforce.github.io/CoPO/copo_poster.pdf" target="_blank">Poster</a>]
+[<a href="https://youtu.be/sOw43l8lwxE" target="_blank">Talk</a>]
+
+
+**Safe Driving via Expert Guided Policy Optimization**
+\
+Zhenghao Peng*, Quanyi Li*, Chunxiao Liu, Bolei Zhou
+\
+*Conference on Robot Learning (CoRL) 2021*
+\
+[<a href="https://arxiv.org/pdf/2110.06831.pdf" target="_blank">Paper</a>]
+[<a href="https://github.com/decisionforce/EGPO" target="_blank">Code</a>]
+[<a href="https://decisionforce.github.io/EGPO/" target="_blank">Webpage</a>]
+[<a href="https://decisionforce.github.io/EGPO/images/egpo_poster.png" target="_blank">Poster</a>]
+    
 
 [![build](https://github.com/decisionforce/metadrive/workflows/test/badge.svg)](http://github.com/decisionforce/metadrive/actions)
 [![codecov](https://codecov.io/gh/decisionforce/metadrive/branch/main/graph/badge.svg?token=1ZYN8L5397)](https://codecov.io/gh/decisionforce/metadrive)

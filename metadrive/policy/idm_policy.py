@@ -86,9 +86,9 @@ class FrontBackObjects:
         """
         if ref_lanes is not None:
             assert lane in ref_lanes
-        idx = lane.index[-1]
-        left_lane = ref_lanes[idx - 1] if idx > 0 and ref_lanes is not None else None
-        right_lane = ref_lanes[idx + 1] if ref_lanes and idx + 1 < len(ref_lanes) is not None else None
+        idx = lane.index[-1] if ref_lanes is not None else None
+        left_lane = ref_lanes[idx - 1] if ref_lanes is not None and idx > 0 else None
+        right_lane = ref_lanes[idx + 1] if ref_lanes is not None and idx + 1 < len(ref_lanes) else None
         lanes = [left_lane, lane, right_lane]
 
         min_front_long = [max_distance if lane is not None else None for lane in lanes]
@@ -182,7 +182,7 @@ class IDMPolicy(BasePolicy):
         self.routing_target_lane = None
         self.available_routing_index_range = None
         self.overtake_timer = self.np_random.randint(0, self.LANE_CHANGE_FREQ)
-
+        self.enable_lane_change = self.engine.global_config.get("enable_idm_lane_change", True)
         self.heading_pid = PIDController(1.7, 0.01, 3.5)
         self.lateral_pid = PIDController(0.3, .002, 0.05)
 
@@ -191,7 +191,7 @@ class IDMPolicy(BasePolicy):
         sucess = self.move_to_next_road()
         all_objects = self.control_object.lidar.get_surrounding_objects(self.control_object)
         try:
-            if sucess:
+            if sucess and self.enable_lane_change:
                 # perform lane change due to routing
                 acc_front_obj, acc_front_dist, steering_target_lane = self.lane_change_policy(all_objects)
             else:
@@ -363,3 +363,45 @@ class ManualControllableIDMPolicy(IDMPolicy):
             return self.manual_control_policy.act(agent_id)
         else:
             return super(ManualControllableIDMPolicy, self).act(agent_id)
+
+
+class WaymoIDMPolicy(IDMPolicy):
+    NORMAL_SPEED = 20
+
+    def __init__(self, control_object, random_seed):
+        super(IDMPolicy, self).__init__(control_object=control_object, random_seed=random_seed)
+        self.target_speed = self.NORMAL_SPEED
+        self.routing_target_lane = None
+        self.available_routing_index_range = None
+        self.overtake_timer = self.np_random.randint(0, self.LANE_CHANGE_FREQ)
+        self.enable_lane_change = False
+
+        self.heading_pid = PIDController(1.7, 0.01, 3.5)
+        self.lateral_pid = PIDController(0.3, .0, 0.0)
+
+    def steering_control(self, target_lane) -> float:
+        # heading control following a lateral distance control
+        ego_vehicle = self.control_object
+        long, lat = target_lane.local_coordinates(ego_vehicle.position)
+        lane_heading = target_lane.heading_theta_at(long + 1)
+        v_heading = ego_vehicle.heading_theta
+        steering = self.heading_pid.get_result(wrap_to_pi(lane_heading - v_heading))
+        # steering += self.lateral_pid.get_result(-lat)
+        return float(steering)
+
+    def move_to_next_road(self):
+        # routing target lane is in current ref lanes
+        current_lanes = self.control_object.navigation.current_ref_lanes
+        if self.routing_target_lane is None:
+            self.routing_target_lane = self.control_object.lane
+            return True if self.routing_target_lane in current_lanes else False
+        if self.routing_target_lane not in current_lanes:
+            for lane in current_lanes:
+                self.routing_target_lane = lane
+                return True
+                # lane change for lane num change
+            self.routing_target_lane = self.control_object.navigation.map.road_network.get_lane(
+                self.control_object.navigation.next_checkpoint_lane_index
+            )
+            return True
+        return False

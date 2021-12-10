@@ -1,4 +1,5 @@
-from metadrive.component.map.base_map import BaseMap, MapGenerateMethod
+from metadrive.component.map.base_map import BaseMap
+from metadrive.component.map.pg_map import MapGenerateMethod
 from metadrive.component.vehicle_module.depth_camera import DepthCamera
 from metadrive.envs.metadrive_env import MetaDriveEnv
 from metadrive.utils import setup_logger
@@ -33,7 +34,6 @@ if __name__ == "__main__":
             "image_source": "mini_map",
             "manual_control": True,
             "use_render": True,
-            "use_topdown": True,
             "decision_repeat": 5,
             "rgb_clip": True,
             # "debug":True,

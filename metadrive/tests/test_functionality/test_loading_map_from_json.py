@@ -55,7 +55,7 @@ def test_map_buffering():
     try:
         for i in range(10):
             e.reset()
-        assert any([v is not None for v in e.engine.map_manager.pg_maps.values()])
+        assert any([v is not None for v in e.engine.map_manager.maps.values()])
     finally:
         e.close()
 

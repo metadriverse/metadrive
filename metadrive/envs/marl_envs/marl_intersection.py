@@ -1,9 +1,9 @@
 import copy
 
-from metadrive.component.blocks.first_block import FirstPGBlock
-from metadrive.component.blocks.intersection import InterSection
 from metadrive.component.map.pg_map import PGMap
-from metadrive.component.road.road import Road
+from metadrive.component.pgblock.first_block import FirstPGBlock
+from metadrive.component.pgblock.intersection import InterSection
+from metadrive.component.road_network import Road
 from metadrive.envs.marl_envs.marl_inout_roundabout import LidarStateObservationMARound
 from metadrive.envs.marl_envs.multi_agent_metadrive import MultiAgentMetaDrive
 from metadrive.manager.map_manager import MapManager
@@ -58,7 +58,7 @@ class MAIntersectionSpawnManager(SpawnManager):
     def update_destination_for(self, agent_id, vehicle_config):
         end_roads = copy.deepcopy(self.engine.global_config["spawn_roads"])
         end_road = -self.np_random.choice(end_roads)  # Use negative road!
-        vehicle_config["destination_node"] = end_road.end_node
+        vehicle_config["destination"] = end_road.end_node
         return vehicle_config
 
 

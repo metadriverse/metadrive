@@ -152,7 +152,7 @@ We list the vehicle config here. Observation Space will be adjusted by these con
         - :code:`rgb_camera` (tuple = (84, 84): (camera resolution width (int), camera resolution height (int). We use (84, 84) as the default size so that the RGB observation is compatible to those CNN used in Atari. Please refer to :ref:`use_native_rendering` for more information about using image as observation.
         - :code:`spawn_lane_index` (tuple): which lane to spawn this vehicle. Default to one lane in the first block of the map
         - :code:`spawn_longitude/lateral` (float = 5.0, 0.0): The spawn point will be calculated by *spawn_longitude* and *spawn_lateral*
-        - :code:`destination_node` (str = None): the destination road node name. This is used in real dataset replay map.
+        - :code:`destination` (str = None): the destination road node name. This is used in real dataset replay map.
         - :code:`mini_map` (tuple): (camera resolution width(int), camera resolution height(int), camera height). The size of the bird-view image in the left upper corner of the interface.
 
 

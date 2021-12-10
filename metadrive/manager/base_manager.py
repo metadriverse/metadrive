@@ -21,9 +21,6 @@ class BaseManager(Randomizable):
         return dict()
 
     def step(self, *args, **kwargs):
-        """
-        TODO Remove in the future?
-        """
         pass
 
     def after_step(self, *args, **kwargs) -> dict:

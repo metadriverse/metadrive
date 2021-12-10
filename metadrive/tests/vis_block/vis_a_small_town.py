@@ -1,18 +1,19 @@
-from metadrive.component.blocks.curve import Curve
-from metadrive.component.blocks.first_block import FirstPGBlock
-from metadrive.component.blocks.roundabout import Roundabout
-from metadrive.component.blocks.std_intersection import StdInterSection
-from metadrive.component.blocks.straight import Straight
-from metadrive.component.blocks.t_intersection import TInterSection
-from metadrive.component.road.road_network import RoadNetwork
+from metadrive.component.pgblock.curve import Curve
+from metadrive.component.pgblock.first_block import FirstPGBlock
+from metadrive.component.pgblock.roundabout import Roundabout
+from metadrive.component.pgblock.std_intersection import StdInterSection
+from metadrive.component.pgblock.straight import Straight
+from metadrive.component.pgblock.t_intersection import TInterSection
+from metadrive.component.road_network.node_road_network import NodeRoadNetwork
 from metadrive.engine.asset_loader import initialize_asset_loader
 from metadrive.tests.vis_block.vis_block_base import TestBlock
 from metadrive.utils.space import Parameter
 
 if __name__ == "__main__":
+    FirstPGBlock.ENTRANCE_LENGTH = 0.5
     test = TestBlock(False)
     initialize_asset_loader(test)
-    global_network = RoadNetwork()
+    global_network = NodeRoadNetwork()
     blocks = []
     init_block = FirstPGBlock(global_network, 3.0, 3, test.render, test.world, 1)
 

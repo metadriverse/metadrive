@@ -80,7 +80,6 @@ def initialize_asset_loader(engine):
 def close_asset_loader():
     cls = AssetLoader
     cls.loader = None
-    cls.asset_path = None
 
 
 def randomize_cover():

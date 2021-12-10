@@ -1,6 +1,7 @@
 import pickle
 
-from metadrive.component.map.base_map import BaseMap, MapGenerateMethod
+from metadrive.component.map.base_map import BaseMap
+from metadrive.component.map.pg_map import MapGenerateMethod
 from metadrive.envs.safe_metadrive_env import SafeMetaDriveEnv
 from metadrive.manager.traffic_manager import TrafficMode
 from metadrive.policy.idm_policy import IDMPolicy

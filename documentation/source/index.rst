@@ -1,5 +1,3 @@
-
-
 .. image:: ../../metadrive/assets/logo-horizon.png
    :width: 1800
    :align: center
@@ -27,11 +25,6 @@ You can also visit the `GitHub repo <https://github.com/decisionforce/metadrive>
 Please feel free to contact us if you have any suggestions or ideas!
 
 
-.. Citation
-.. ########
-
-.. We wrote a white paper on this project, but the citation information is not yet well prepared!
-.. Please contact us if you find this work useful in your project.
 
 
 .. toctree::
@@ -66,13 +59,63 @@ Please feel free to contact us if you have any suggestions or ideas!
 
 .. raw:: html
 
-    <br>
-    <table width="100%" style="margin: 0 0; text-align: center;">
+    <table width="100%" style="margin: 0pt 0pt; text-align: center;">
         <tr>
             <td>
-            <iframe width="560" height="315" src="https://www.youtube.com/embed/3ziJPqC_-T4" title="MetaDrive Introduction" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                <video style="display:block; width:100%; height:auto; "
+                       autoplay="autoplay" muted loop="loop" controls playsinline>
+                    <source src="https://raw.githubusercontent.com/decisionforce/archive/master/MetaDrive/metadrive_teaser.mp4"
+                            type="video/mp4"/>
+                </video>
             </td>
         </tr>
     </table>
+    <br><br>
 
+
+
+
+Relevant Projects
+#################
+
+.. raw:: html
+
+    <b>
+        Learning to Simulate Self-driven Particles System with Coordinated Policy Optimization
+    </b> <br>
+    Zhenghao Peng, Quanyi Li, Chunxiao Liu, Bolei Zhou
+    <br>
+    <i>NeurIPS 2021</i><br>
+    [<a href="https://arxiv.org/pdf/2110.13827.pdf" target="_blank">Paper</a>]
+    [<a href="https://github.com/decisionforce/CoPO" target="_blank">Code</a>]
+    [<a href="https://decisionforce.github.io/CoPO" target="_blank">Webpage</a>]
+    [<a href="https://decisionforce.github.io/CoPO/copo_poster.pdf" target="_blank">Poster</a>]
+    [<a href="https://youtu.be/sOw43l8lwxE" target="_blank">Talk</a>]
+
+    <br><br>
+    <b>Safe Driving via Expert Guided Policy Optimization</b> <br>
+    Zhenghao Peng*, Quanyi Li*, Chunxiao Liu, Bolei Zhou
+    <br>
+    <i>Conference on Robot Learning (CoRL) 2021</i><br>
+    [<a href="https://arxiv.org/pdf/2110.06831.pdf" target="_blank">Paper</a>]
+    [<a href="https://github.com/decisionforce/EGPO" target="_blank">Code</a>]
+    [<a href="https://decisionforce.github.io/EGPO/" target="_blank">Webpage</a>]
+    [<a href="https://decisionforce.github.io/EGPO/images/egpo_poster.png" target="_blank">Poster</a>]
+
+    <br><br>
+
+
+Citation
+########
+
+You can read `our white paper <https://arxiv.org/pdf/2109.12674.pdf>`_ describing the details of MetaDrive! If you use MetaDrive in your own work, please cite:
+
+.. code-block:: latex
+
+    @article{li2021metadrive,
+      title={MetaDrive: Composing Diverse Driving Scenarios for Generalizable Reinforcement Learning},
+      author={Li, Quanyi and Peng, Zhenghao and Xue, Zhenghai and Zhang, Qihang and Zhou, Bolei},
+      journal={arXiv preprint arXiv:2109.12674},
+      year={2021}
+    }
 

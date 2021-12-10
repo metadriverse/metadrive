@@ -5,34 +5,33 @@ from typing import Union, Optional
 import gym
 import numpy as np
 import seaborn as sns
-from panda3d.bullet import BulletVehicle, BulletBoxShape, ZUp
-from panda3d.core import Material, Vec3, TransformState, LQuaternionf
-
 from metadrive.base_class.base_object import BaseObject
 from metadrive.component.lane.abs_lane import AbstractLane
 from metadrive.component.lane.circular_lane import CircularLane
 from metadrive.component.lane.straight_lane import StraightLane
 from metadrive.component.lane.waypoint_lane import WayPointLane
-from metadrive.component.road.road import Road
+from metadrive.component.road_network.node_road_network import NodeRoadNetwork
 from metadrive.component.vehicle_module.depth_camera import DepthCamera
 from metadrive.component.vehicle_module.distance_detector import SideDetector, LaneLineDetector
 from metadrive.component.vehicle_module.lidar import Lidar
 from metadrive.component.vehicle_module.mini_map import MiniMap
-from metadrive.component.vehicle_module.navigation import Navigation
 from metadrive.component.vehicle_module.rgb_camera import RGBCamera
+from metadrive.component.vehicle_navigation_module.edge_network_navigation import EdgeNetworkNavigation
+from metadrive.component.vehicle_navigation_module.node_network_navigation import NodeNetworkNavigation
 from metadrive.constants import BodyName, CollisionGroup
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.engine.core.image_buffer import ImageBuffer
 from metadrive.engine.engine_utils import get_engine, engine_initialized
 from metadrive.engine.physics_node import BaseRigidBodyNode
 from metadrive.utils import Config, safe_clip_for_small_array
-from metadrive.utils import get_np_random
 from metadrive.utils.coordinates_shift import panda_heading, metadrive_heading
 from metadrive.utils.math_utils import get_vertical_vector, norm, clip
 from metadrive.utils.math_utils import wrap_to_pi
 from metadrive.utils.scene_utils import ray_localization
 from metadrive.utils.scene_utils import rect_region_detection
 from metadrive.utils.space import VehicleParameterSpace, ParameterSpace
+from panda3d.bullet import BulletVehicle, BulletBoxShape, ZUp
+from panda3d.core import Material, Vec3, TransformState, LQuaternionf
 
 
 class BaseVehicleState:
@@ -117,6 +116,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         vehicle_config: Union[dict, Config] = None,
         name: str = None,
         random_seed=None,
+        position=None,
+        heading=None
     ):
         """
         This Vehicle Config is different from self.get_config(), and it is used to define which modules to use, and
@@ -155,9 +156,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self._add_visualization()
 
         # modules, get observation by using these modules
-        self.lane: Optional[AbstractLane] = None
-        self.lane_index = None
-        self.navigation: Optional[Navigation] = None
+        self.navigation: Optional[NodeNetworkNavigation] = None
         self.lidar: Optional[Lidar] = None  # detect surrounding vehicles
         self.side_detector: Optional[SideDetector] = None  # detect road side
         self.lane_line_detector: Optional[LaneLineDetector] = None  # detect nearest lane lines
@@ -191,7 +190,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self.back_vehicles = set()
 
         if self.engine.current_map is not None:
-            self.reset()
+            self.reset(position=position, heading=heading)
 
     def _add_modules_for_vehicle(self, ):
         config = self.config
@@ -255,7 +254,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
 
     def after_step(self):
         if self.navigation is not None:
-            self.lane, self.lane_index, = self.navigation.update_localization(self)
+            self.navigation.update_localization(self)
         self._state_check()
         self.update_dist_to_left_right()
         step_energy, episode_energy = self._update_energy_consumption()
@@ -290,7 +289,15 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self.energy_consumption += step_energy  # L/100 km
         return step_energy, self.energy_consumption
 
-    def reset(self, random_seed=None, vehicle_config=None, pos: np.ndarray = None, heading: float = 0.0):
+    def reset(
+        self,
+        random_seed=None,
+        vehicle_config=None,
+        position: np.ndarray = None,
+        heading: float = 0.0,
+        *args,
+        **kwargs
+    ):
         """
         pos is a 2-d array, and heading is a float (unit degree)
         if pos is not None, vehicle will be reset to the position
@@ -302,14 +309,14 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         if vehicle_config is not None:
             self.update_config(vehicle_config)
         map = self.engine.current_map
-        if pos is None:
+        if position is None:
             lane = map.road_network.get_lane(self.config["spawn_lane_index"])
-            pos = lane.position(self.config["spawn_longitude"], self.config["spawn_lateral"])
+            position = lane.position(self.config["spawn_longitude"], self.config["spawn_lateral"])
             heading = np.rad2deg(lane.heading_theta_at(self.config["spawn_longitude"]))
-            self.spawn_place = pos
+        self.spawn_place = position
         heading = -np.deg2rad(heading) - np.pi / 2
         self.set_static(False)
-        self.set_position(pos, self.HEIGHT / 2 + 1)
+        self.set_position(position, self.HEIGHT / 2 + 1)
         self.origin.setQuat(LQuaternionf(math.cos(heading / 2), 0, 0, math.sin(heading / 2)))
         self.update_map_info(map)
         self.body.clearForces()
@@ -337,8 +344,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self.front_vehicles = set()
         self.back_vehicles = set()
         self.expert_takeover = False
-
-        assert self.navigation
+        if self.config["need_navigation"]:
+            assert self.navigation
 
     """------------------------------------------- act -------------------------------------------------"""
 
@@ -383,6 +390,9 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self.dist_to_left_side, self.dist_to_right_side = self._dist_to_route_left_right()
 
     def _dist_to_route_left_right(self):
+        # TODO
+        if self.navigation is None:
+            return 0, 0
         current_reference_lane = self.navigation.current_ref_lanes[0]
         _, lateral_to_reference = current_reference_lane.local_coordinates(self.position)
         lateral_to_left = lateral_to_reference + self.navigation.get_current_lane_width() / 2
@@ -414,10 +424,6 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     def velocity_direction(self):
         direction = self.system.getForwardVector()
         return np.asarray([direction[0], -direction[1]])
-
-    @property
-    def current_road(self):
-        return Road(*self.lane_index[0:-1])
 
     """---------------------------------------- some math tool ----------------------------------------------"""
 
@@ -567,13 +573,16 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self.image_sensors[name] = sensor
 
     def add_navigation(self):
-        self.navigation = Navigation(
-            self.engine,
-            show_navi_mark=self.engine.global_config["vehicle_config"]["show_navi_mark"],
-            random_navi_mark_color=self.engine.global_config["vehicle_config"]["random_navi_mark_color"],
-            show_dest_mark=self.engine.global_config["vehicle_config"]["show_dest_mark"],
-            show_line_to_dest=self.engine.global_config["vehicle_config"]["show_line_to_dest"]
-        )
+        if not self.config["need_navigation"]:
+            return
+        navi = NodeNetworkNavigation if self.engine.current_map.road_network_type == NodeRoadNetwork \
+            else EdgeNetworkNavigation
+        self.navigation = \
+            navi(self.engine,
+                 show_navi_mark=self.engine.global_config["vehicle_config"]["show_navi_mark"],
+                 random_navi_mark_color=self.engine.global_config["vehicle_config"]["random_navi_mark_color"],
+                 show_dest_mark=self.engine.global_config["vehicle_config"]["show_dest_mark"],
+                 show_line_to_dest=self.engine.global_config["vehicle_config"]["show_line_to_dest"])
 
     def update_map_info(self, map):
         """
@@ -581,6 +590,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         :param map: new map
         :return: None
         """
+        if not self.config["need_navigation"]:
+            return
         possible_lanes = ray_localization(self.heading, self.spawn_place, self.engine, return_all_result=True)
         possible_lane_indexes = [lane_index for lane, lane_index, dist in possible_lanes]
         try:
@@ -589,17 +600,15 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             lane, new_l_index = possible_lanes[0][:-1]
         else:
             lane, new_l_index = possible_lanes[idx][:-1]
-        dest = self.config["destination_node"]
-        self.navigation.update(
+        dest = self.config["destination"]
+        self.navigation.reset(
             map,
-            current_lane_index=new_l_index,
-            final_road_node=dest if dest is not None else None,
+            current_lane=lane,
+            destination=dest if dest is not None else None,
             random_seed=self.engine.global_random_seed
         )
         assert lane is not None, "spawn place is not on road!"
         self.navigation.update_localization(self)
-        self.lane_index = new_l_index
-        self.lane = lane
 
     def _state_check(self):
         """
@@ -625,7 +634,13 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             contacts.add(name[0])
         # side walk detect
         res = rect_region_detection(
-            self.engine, self.position, np.rad2deg(self.heading_theta), self.LENGTH, self.WIDTH, CollisionGroup.Sidewalk
+            self.engine,
+            self.position,
+            np.rad2deg(self.heading_theta),
+            self.LENGTH,
+            self.WIDTH,
+            CollisionGroup.Sidewalk,
+            in_static_world=True if not self.render else False
         )
         if res.hasHit() and res.getNode().getName() == BodyName.Sidewalk:
             self.crash_sidewalk = True
@@ -765,7 +780,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         return self.last_current_action[0]
 
     def detach_from_world(self, physics_world):
-        self.navigation.detach_from_world()
+        if self.navigation is not None:
+            self.navigation.detach_from_world()
         if self.lidar is not None:
             self.lidar.detach_from_world()
         if self.side_detector is not None:
@@ -775,7 +791,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         super(BaseVehicle, self).detach_from_world(physics_world)
 
     def attach_to_world(self, parent_node_path, physics_world):
-        if self.config["show_navi_mark"]:
+        if self.config["show_navi_mark"] and self.config["need_navigation"]:
             self.navigation.attach_to_world(self.engine)
         if self.lidar is not None and self.config["show_lidar"]:
             self.lidar.attach_to_world(self.engine)
@@ -831,3 +847,11 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     @property
     def top_down_width(self):
         return self.WIDTH
+
+    @property
+    def lane(self):
+        return self.navigation.current_lane
+
+    @property
+    def lane_index(self):
+        return self.navigation.current_lane.index

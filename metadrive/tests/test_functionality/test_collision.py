@@ -50,4 +50,5 @@ def test_line_contact():
 
 
 if __name__ == '__main__':
-    test_collision_with_vehicle(True)
+    test_collision_with_sidewalk()
+    # test_collision_with_vehicle(True)
