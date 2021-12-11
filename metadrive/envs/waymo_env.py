@@ -147,18 +147,16 @@ class WaymoEnv(BaseEnv):
 
         # reward for lane keeping, without it vehicle can learn to overtake but fail to keep in lane
         if self.config["use_lateral"]:
-            lateral_factor = clip(1 - 2 * abs(lateral_now) / vehicle.navigation.get_current_lane_width(), 0.0, 1.0)
+            lateral_factor = clip(1 - 2 * abs(lateral_now) / 6, 0.0, 1.0)
         else:
             lateral_factor = 1.0
 
-        reward = -abs(lateral_now) / 4
+        reward = 0
         reward += self.config["driving_reward"] * (long_now - long_last) * lateral_factor
         reward += self.config["speed_reward"] * (vehicle.speed / vehicle.max_speed)
 
         step_info["step_reward"] = reward
 
-        if vehicle.on_yellow_continuous_line:
-            reward -= 5
         if vehicle.arrive_destination:
             reward = +self.config["success_reward"]
         elif self._is_out_of_road(vehicle):
@@ -177,9 +175,9 @@ class WaymoEnv(BaseEnv):
 
     def _is_out_of_road(self, vehicle):
         # A specified function to determine whether this vehicle should be done.
-        # return vehicle.on_yellow_continuous_line or (not vehicle.on_lane) or vehicle.crash_sidewalk
-        ret = vehicle.crash_sidewalk
-        return ret
+        return vehicle.on_yellow_continuous_line or vehicle.crash_sidewalk or vehicle.on_white_continuous_line
+        # ret = vehicle.crash_sidewalk
+        # return ret
 
     def stop(self):
         self.in_stop = not self.in_stop
@@ -194,7 +192,7 @@ if __name__ == "__main__":
             # "debug":True,
             # "no_traffic":True,
             # "start_case_index": 192,
-            "case_num": 160,
+            "case_num": 100,
             "waymo_data_directory": "E:\\hk\\idm_filtered\\validation",
             "horizon": 1000,
             # "vehicle_config": dict(show_lidar=True,
@@ -228,5 +226,7 @@ if __name__ == "__main__":
                 )
 
             if d:
+                if info["arrive_dest"]:
+                    print("seed:{}, success".format(env.engine.global_random_seed))
                 break
-    print("success")
+
