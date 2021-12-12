@@ -152,8 +152,9 @@ class WaymoEnv(BaseEnv):
             lateral_factor = 1.0
 
         reward = 0
-        reward += self.config["driving_reward"] * (long_now - long_last) * lateral_factor
-        reward += self.config["speed_reward"] * (vehicle.speed / vehicle.max_speed)
+        if not vehicle.on_white_continuous_line:
+            reward += self.config["driving_reward"] * (long_now - long_last) * lateral_factor
+            reward += self.config["speed_reward"] * (vehicle.speed / vehicle.max_speed)
 
         step_info["step_reward"] = reward
 
@@ -175,7 +176,7 @@ class WaymoEnv(BaseEnv):
 
     def _is_out_of_road(self, vehicle):
         # A specified function to determine whether this vehicle should be done.
-        return vehicle.on_yellow_continuous_line or vehicle.crash_sidewalk or vehicle.on_white_continuous_line
+        return vehicle.on_yellow_continuous_line or vehicle.crash_sidewalk
         # ret = vehicle.crash_sidewalk
         # return ret
 
