@@ -1,3 +1,4 @@
+import numpy as np
 from direct.controls.InputState import InputState
 
 from metadrive.utils import is_win, is_mac
@@ -20,7 +21,14 @@ class Controller:
 
 
 class KeyboardController(Controller):
-    INCREMENT = 2e-1
+    STEERING_INCREMENT = 0.15
+    STEERING_DECAY = 0.3
+
+    THROTTLE_INCREMENT = 0.1
+    THROTTLE_DECAY = 0.2
+
+    BRAKE_INCREMENT = 1.0
+    BRAKE_DECAY = 0.5
 
     def __init__(self):
         # Input
@@ -32,6 +40,9 @@ class KeyboardController(Controller):
             self.inputs.watchWithModifiers('reverse', 's')
             self.inputs.watchWithModifiers('turnLeft', 'a')
             self.inputs.watchWithModifiers('turnRight', 'd')
+        self.steering = 0.0
+        self.throttle_brake = 0.0
+        self.np_random = np.random.RandomState(None)
 
     def process_input(self, vehicle):
         if not self.pygame_control:
@@ -57,8 +68,44 @@ class KeyboardController(Controller):
             key_press = pygame.key.get_pressed()
             throttle_brake += key_press[pygame.K_w] - key_press[pygame.K_s]
             steering += key_press[pygame.K_a] - key_press[pygame.K_d]
+        self.further_process(steering, throttle_brake)
 
-        return [steering, throttle_brake]
+        return [self.steering, self.throttle_brake]
+
+    def further_process(self, steering, throttle_brake):
+        if steering == 0.0:
+            if self.steering > 0:
+                self.steering -= self.STEERING_DECAY
+                self.steering = max(0.0, self.steering)
+            elif self.steering < 0:
+                self.steering += self.STEERING_DECAY
+                self.steering = min(0.0, self.steering)
+        if throttle_brake == 0.0:
+            if self.throttle_brake > 0:
+                self.throttle_brake -= self.THROTTLE_DECAY
+                self.throttle_brake = max(self.throttle_brake, 0.0)
+            elif self.throttle_brake < 0:
+                self.throttle_brake += self.BRAKE_DECAY
+                self.throttle_brake = min(0, self.throttle_brake)
+
+        if steering > 0:
+            self.steering += self.STEERING_INCREMENT if self.steering > 0 else self.STEERING_DECAY
+        elif steering < 0:
+            self.steering -= self.STEERING_INCREMENT if self.steering < 0 else self.STEERING_DECAY
+
+        if throttle_brake > 0:
+            self.throttle_brake = max(self.throttle_brake, 0)
+            self.throttle_brake += self.THROTTLE_INCREMENT
+        elif throttle_brake < 0:
+            self.throttle_brake = min(self.throttle_brake, 0)
+            self.throttle_brake -= self.BRAKE_INCREMENT
+
+        rand = self.np_random.rand(2, 1) / 100
+        self.throttle_brake -= rand[0]
+        self.steering += rand[1]
+
+        self.throttle_brake = min(max(-1, self.throttle_brake), 1)
+        self.steering = min(max(-1, self.steering), 1)
 
 
 class SteeringWheelController(Controller):
