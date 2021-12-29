@@ -230,4 +230,3 @@ if __name__ == "__main__":
                 if info["arrive_dest"]:
                     print("seed:{}, success".format(env.engine.global_random_seed))
                 break
-
