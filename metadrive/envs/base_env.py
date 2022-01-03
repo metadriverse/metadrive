@@ -102,9 +102,8 @@ BASE_DEFAULT_CONFIG = dict(
 
     # ===== Agent config =====
     target_vehicle_configs={
-        DEFAULT_AGENT: dict(use_special_color=False,
-                            spawn_lane_index=None,
-                            random_spawn_lane_index=False)},
+        DEFAULT_AGENT: dict(use_special_color=False, spawn_lane_index=None, random_spawn_lane_index=False)
+    },
 
     # ===== Engine Core config =====
     window_size=(1200, 900),  # width, height

@@ -131,12 +131,13 @@ class AgentManager(BaseManager):
 
     def random_spawn_lane_in_single_agent(self):
         if not self.engine.global_config["is_multi_agent"] and self.engine.global_config["target_vehicle_configs"][
-            DEFAULT_AGENT].get("random_spawn_lane_index", False) and self.engine.current_map is not None:
+                DEFAULT_AGENT].get("random_spawn_lane_index", False) and self.engine.current_map is not None:
             spawn_road_start = self.engine.global_config["target_vehicle_configs"][DEFAULT_AGENT]["spawn_lane_index"][0]
             spawn_road_end = self.engine.global_config["target_vehicle_configs"][DEFAULT_AGENT]["spawn_lane_index"][1]
             index = self.np_random.randint(self.engine.current_map.config["lane_num"])
             self.engine.global_config["target_vehicle_configs"][DEFAULT_AGENT]["spawn_lane_index"] = (
-                spawn_road_start, spawn_road_end, index)
+                spawn_road_start, spawn_road_end, index
+            )
 
     def finish(self, agent_name, ignore_delay_done=False):
         """
