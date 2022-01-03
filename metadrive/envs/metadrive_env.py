@@ -55,8 +55,12 @@ METADRIVE_DEFAULT_CONFIG = dict(
     vehicle_config=dict(spawn_lane_index=(FirstPGBlock.NODE_1, FirstPGBlock.NODE_2, 0)),
 
     # ===== Agent =====
+    random_spawn_lane_index=True,
     target_vehicle_configs={
-        DEFAULT_AGENT: dict(use_special_color=True, spawn_lane_index=(FirstPGBlock.NODE_1, FirstPGBlock.NODE_2, 0))
+        DEFAULT_AGENT: dict(
+            use_special_color=True,
+            spawn_lane_index=(FirstPGBlock.NODE_1, FirstPGBlock.NODE_2, 0),
+        )
     },
 
     # ===== Reward Scheme =====
