@@ -32,27 +32,27 @@ if __name__ == "__main__":
     if args.observation == "rgb_camera":
         config.update(dict(offscreen_render=True))
     env = MetaDriveEnv(config)
-    try:
-        o = env.reset()
-        print(HELP_MESSAGE)
-        env.vehicle.expert_takeover = True
-        if args.observation == "rgb_camera":
-            assert isinstance(o, dict)
-            print("The observation is a dict with numpy arrays as values: ", {k: v.shape for k, v in o.items()})
-        else:
-            assert isinstance(o, np.ndarray)
-            print("The observation is an numpy array with shape: ", o.shape)
-        for i in range(1, 1000000000):
-            o, r, d, info = env.step([0, 0])
-            env.render(
-                text={
-                    "Auto-Drive (Switch mode: T)": "on" if env.current_track_vehicle.expert_takeover else "off",
-                }
-            )
-            if d and info["arrive_dest"]:
-                env.reset()
-                env.current_track_vehicle.expert_takeover = True
-    except:
-        pass
-    finally:
-        env.close()
+    # try:
+    o = env.reset()
+    print(HELP_MESSAGE)
+    env.vehicle.expert_takeover = True
+    if args.observation == "rgb_camera":
+        assert isinstance(o, dict)
+        print("The observation is a dict with numpy arrays as values: ", {k: v.shape for k, v in o.items()})
+    else:
+        assert isinstance(o, np.ndarray)
+        print("The observation is an numpy array with shape: ", o.shape)
+    for i in range(1, 1000000000):
+        o, r, d, info = env.step([0, 0])
+        env.render(
+            text={
+                "Auto-Drive (Switch mode: T)": "on" if env.current_track_vehicle.expert_takeover else "off",
+            }
+        )
+        if d and info["arrive_dest"]:
+            env.reset()
+            env.current_track_vehicle.expert_takeover = True
+    # except:
+    #     pass
+    # finally:
+    #     env.close()

@@ -76,6 +76,7 @@ BASE_DEFAULT_CONFIG = dict(
         spawn_longitude=5.0,
         spawn_lateral=0.0,
         destination=None,
+        random_spawn_lane_index=False,
 
         # ==== others ====
         overtake_stat=False,  # we usually set to True when evaluation
@@ -100,7 +101,10 @@ BASE_DEFAULT_CONFIG = dict(
     ),
 
     # ===== Agent config =====
-    target_vehicle_configs={DEFAULT_AGENT: dict(use_special_color=False, spawn_lane_index=None)},
+    target_vehicle_configs={
+        DEFAULT_AGENT: dict(use_special_color=False,
+                            spawn_lane_index=None,
+                            random_spawn_lane_index=False)},
 
     # ===== Engine Core config =====
     window_size=(1200, 900),  # width, height
