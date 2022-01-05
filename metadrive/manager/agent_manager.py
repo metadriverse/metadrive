@@ -73,7 +73,7 @@ class AgentManager(BaseManager):
         # note: agent.id = object id
         if self.engine.global_config["agent_policy"] is not None:
             return self.engine.global_config["agent_policy"](obj, self.generate_seed())
-        if self.engine.global_config["manual_control"] and self.engine.global_config["use_render"]:
+        if self.engine.global_config["manual_control"]:
             if self.engine.global_config.get("use_AI_protector", False):
                 policy = AIProtectPolicy(obj, self.generate_seed())
             else:

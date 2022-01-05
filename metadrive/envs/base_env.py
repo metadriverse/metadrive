@@ -283,7 +283,7 @@ class BaseEnv(gym.Env):
         :param text:text to show
         :return: when mode is 'rgb', image array is returned
         """
-        if mode == "top_down":
+        if mode in ["top_down", "topdown", "bev", "birdview"]:
             return self._render_topdown(*args, **kwargs)
         assert self.config["use_render"] or self.engine.mode != RENDER_MODE_NONE, ("render is off now, can not render")
         self.engine.render_frame(text)

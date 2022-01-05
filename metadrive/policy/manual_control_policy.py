@@ -8,11 +8,13 @@ class ManualControlPolicy(EnvInputPolicy):
     """
     Control the current track vehicle
     """
+
     def __init__(self, obj, seed):
         super(ManualControlPolicy, self).__init__(obj, seed)
         config = self.engine.global_config
         self.engine.accept("t", self.toggle_takeover)
-        if config["manual_control"] and config["use_render"]:
+        # if config["manual_control"] and config["use_render"]:
+        if config["manual_control"]:
             if config["controller"] == "keyboard":
                 self.controller = KeyboardController()
             elif config["controller"] == "joystick":
@@ -23,6 +25,8 @@ class ManualControlPolicy(EnvInputPolicy):
                     self.controller = KeyboardController()
             else:
                 raise ValueError("No such a controller type: {}".format(self.config["controller"]))
+        else:
+            self.controller = None
 
     def act(self, agent_id):
         try:
@@ -31,8 +35,10 @@ class ManualControlPolicy(EnvInputPolicy):
         except ValueError:
             # if observation doesn't match, fall back to manual control
             pass
-        if self.engine.global_config["manual_control"] and self.engine.agent_manager.get_agent(
-                agent_id) is self.engine.current_track_vehicle and not self.engine.main_camera.is_bird_view_camera():
+
+        is_track_vehicle = self.engine.agent_manager.get_agent(agent_id) is self.engine.current_track_vehicle
+        not_in_native_bev = (self.engine.main_camera is None) or (not self.engine.main_camera.is_bird_view_camera())
+        if self.engine.global_config["manual_control"] and is_track_vehicle and not_in_native_bev:
             return self.controller.process_input(self.engine.current_track_vehicle)
         else:
             return super(ManualControlPolicy, self).act(agent_id)
@@ -46,6 +52,7 @@ class TakeoverPolicy(EnvInputPolicy):
     """
     Record the takeover signal
     """
+
     def __init__(self, obj, seed):
         super(TakeoverPolicy, self).__init__(obj, seed)
         config = get_global_config()
