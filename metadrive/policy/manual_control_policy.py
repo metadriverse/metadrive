@@ -12,23 +12,35 @@ class ManualControlPolicy(EnvInputPolicy):
     def __init__(self, obj, seed):
         super(ManualControlPolicy, self).__init__(obj, seed)
         config = self.engine.global_config
-        self.engine.accept("t", self.toggle_takeover)
+
+        if config["manual_control"] and config["use_render"]:
+            self.engine.accept("t", self.toggle_takeover)
+            pygame_control = False
+        elif config["manual_control"]:
+            # Use pygame to accept key strike.
+            pygame_control = True
+        else:
+            pygame_control = False
+
         # if config["manual_control"] and config["use_render"]:
         if config["manual_control"]:
             if config["controller"] == "keyboard":
-                self.controller = KeyboardController()
+                self.controller = KeyboardController(pygame_control=pygame_control)
             elif config["controller"] == "joystick":
                 try:
                     self.controller = SteeringWheelController()
                 except:
                     print("Load Joystick Error! Fall back to keyboard control")
-                    self.controller = KeyboardController()
+                    self.controller = KeyboardController(pygame_control=pygame_control)
             else:
                 raise ValueError("No such a controller type: {}".format(self.config["controller"]))
         else:
             self.controller = None
 
     def act(self, agent_id):
+
+        self.controller.process_others(takeover_callback=self.toggle_takeover)
+
         try:
             if self.engine.current_track_vehicle.expert_takeover:
                 return expert(self.engine.current_track_vehicle)
@@ -46,6 +58,7 @@ class ManualControlPolicy(EnvInputPolicy):
     def toggle_takeover(self):
         if self.engine.current_track_vehicle is not None:
             self.engine.current_track_vehicle.expert_takeover = not self.engine.current_track_vehicle.expert_takeover
+            print("The expert takeover is set to: ", self.engine.current_track_vehicle.expert_takeover)
 
 
 class TakeoverPolicy(EnvInputPolicy):
