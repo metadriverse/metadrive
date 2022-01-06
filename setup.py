@@ -33,7 +33,7 @@ install_requires = [
     "pandas",
     "pygame",
     "tqdm",
-    "yapf==0.30.0",
+    "yapf",
     "seaborn",
     "panda3d~=1.10.8",
     "panda3d-gltf",
