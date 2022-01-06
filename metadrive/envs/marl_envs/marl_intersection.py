@@ -18,7 +18,7 @@ MAIntersectionConfig = dict(
         -Road(InterSection.node(1, 1, 0), InterSection.node(1, 1, 1)),
         -Road(InterSection.node(1, 2, 0), InterSection.node(1, 2, 1)),
     ],
-    num_agents=20,
+    num_agents=30,
     map_config=dict(exit_length=60, lane_num=2),
     top_down_camera_initial_x=80,
     top_down_camera_initial_y=0,

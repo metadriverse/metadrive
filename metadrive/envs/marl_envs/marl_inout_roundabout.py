@@ -25,7 +25,7 @@ MARoundaboutConfig = dict(
     top_down_camera_initial_x=95,
     top_down_camera_initial_y=15,
     top_down_camera_initial_z=120,
-    num_agents=20,
+    num_agents=40,
 )
 
 
