@@ -150,7 +150,7 @@ class ComplexEnv(SafeMetaDriveEnv):
 def test_object_collision_detection(render=False):
     env = ComplexEnv(
         {
-            "manual_control": True,
+            # "manual_control": True,
             "traffic_density": 0.0,
             "use_render": render,
             "debug": False,
@@ -187,4 +187,4 @@ def test_object_collision_detection(render=False):
 
 
 if __name__ == "__main__":
-    test_object_collision_detection(render=True)
+    test_object_collision_detection(render=False)
