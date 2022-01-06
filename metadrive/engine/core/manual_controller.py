@@ -19,6 +19,9 @@ class Controller:
     def process_input(self, vehicle):
         raise NotImplementedError
 
+    def process_others(self, *args, **kwargs):
+        pass
+
 
 class KeyboardController(Controller):
     STEERING_INCREMENT = 0.15
@@ -30,11 +33,11 @@ class KeyboardController(Controller):
     BRAKE_INCREMENT = 1.0
     BRAKE_DECAY = 0.5
 
-    def __init__(self):
-        # Input
-        # self.pygame_control = True if engine.highway_render is not None else False
-        self.pygame_control = False
-        if not self.pygame_control:
+    def __init__(self, pygame_control):
+        self.pygame_control = pygame_control
+        if self.pygame_control:
+            pygame.init()
+        else:
             self.inputs = InputState()
             self.inputs.watchWithModifiers('forward', 'w')
             self.inputs.watchWithModifiers('reverse', 's')
@@ -68,6 +71,7 @@ class KeyboardController(Controller):
             key_press = pygame.key.get_pressed()
             throttle_brake += key_press[pygame.K_w] - key_press[pygame.K_s]
             steering += key_press[pygame.K_a] - key_press[pygame.K_d]
+
         self.further_process(steering, throttle_brake)
 
         return [self.steering, self.throttle_brake]
@@ -106,6 +110,15 @@ class KeyboardController(Controller):
 
         self.throttle_brake = min(max(-1, self.throttle_brake), 1)
         self.steering = min(max(-1, self.steering), 1)
+
+    def process_others(self, takeover_callback=None):
+        """This function allows the outer loop to call callback if some signal is received by the controller."""
+        if (takeover_callback is None) or (not self.pygame_control) or (not pygame.get_init()):
+            return
+        for event in pygame.event.get():
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_t:
+                # Here we allow user to press T for takeover callback.
+                takeover_callback()
 
 
 class SteeringWheelController(Controller):

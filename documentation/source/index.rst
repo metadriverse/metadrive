@@ -57,6 +57,14 @@ Please feel free to contact us if you have any suggestions or ideas!
    development.rst
 
 
+.. toctree::
+   :hidden:
+   :maxdepth: 2
+   :caption: Issues
+
+   known_issues.rst
+
+
 .. raw:: html
 
     <table width="100%" style="margin: 0pt 0pt; text-align: center;">
