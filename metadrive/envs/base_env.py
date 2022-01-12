@@ -356,8 +356,9 @@ class BaseEnv(gym.Env):
             done = done_function_result or self.dones[v_id]
             self.dones[v_id] = done
 
-        should_done = engine_info.get(REPLAY_DONE, False
-                                      ) or (self.config["horizon"] and self.episode_steps >= self.config["horizon"])
+        should_done = engine_info.get(REPLAY_DONE, False) or (self.config["horizon"] and self.episode_steps >= self.config["horizon"])
+
+        # TODO(pzh): This "auto_termination" is stupid. We should remove it.
         termination_infos = self.for_each_vehicle(auto_termination, should_done)
 
         step_infos = concat_step_infos([
@@ -402,7 +403,8 @@ class BaseEnv(gym.Env):
         img.write("main_{}.png".format(time.time()))
 
     def for_each_vehicle(self, func, *args, **kwargs):
-        return self.agent_manager.for_each_active_agents(func, *args, **kwargs)
+        # return self.agent_manager.for_each_active_agents(func, *args, **kwargs)
+        return self.agent_manager.for_each_controllable_agents(func, *args, **kwargs)
 
     @property
     def vehicle(self):
@@ -467,10 +469,10 @@ class BaseEnv(gym.Env):
     @property
     def vehicles(self):
         """
-        Return all active vehicles
+        Return all controllable vehicles
         :return: Dict[agent_id:vehicle]
         """
-        return self.agent_manager.active_agents
+        return self.agent_manager.controllable_agents
 
     def setup_engine(self):
         """

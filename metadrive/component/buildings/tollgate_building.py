@@ -26,8 +26,14 @@ class TollGateBuilding(BaseBuilding):
 
     @property
     def top_down_length(self):
-        return 1
+        # In meters
+        return 9
 
     @property
     def top_down_width(self):
-        return 1
+        # In meters
+        return 2
+
+    @property
+    def top_down_color(self):
+        return (255 - 35, 255 - 35, 255 - 35)

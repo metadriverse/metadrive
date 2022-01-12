@@ -353,12 +353,14 @@ def _vis():
             },
             "debug_static_world": True,
             "global_light": True,
-            "use_render": True,
+            # "use_render": True,
             "debug": True,
-            "manual_control": True,
+            # "manual_control": True,
             "num_agents": 8,
             "delay_done": 10,
             # "parking_space_num": 4
+
+            "idm_ratio": 0.9
         }
     )
     o = env.reset()

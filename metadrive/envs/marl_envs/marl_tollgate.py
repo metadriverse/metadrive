@@ -273,6 +273,7 @@ class MultiAgentTollgateEnv(MultiAgentMetaDrive):
 
     def step(self, actions):
         o, r, d, i = super(MultiAgentTollgateEnv, self).step(actions)
+        # Note that here we use active agents, not controllable agents!
         self.stay_time_manager.record(self.agent_manager.active_agents, self.episode_steps)
         return o, r, d, i
 
@@ -404,10 +405,12 @@ def _vis():
             "traffic_density": 0.,
             "traffic_mode": "hybrid",
             "debug": True,
-            "use_render": True,
+            # "use_render": True,
             # "debug": True,
-            "manual_control": True,
+            # "manual_control": True,
             "num_agents": 18,
+
+            "idm_ratio": 0.9
         }
     )
     o = env.reset()
@@ -418,23 +421,36 @@ def _vis():
         for r_ in r.values():
             total_r += r_
         ep_s += 1
+
+        # === Panda3d rendering ===
         # d.update({"total_r": total_r, "episode length": ep_s})
-        render_text = {
-            "total_r": total_r,
-            "episode length": ep_s,
-            "cam_x": env.main_camera.camera_x,
-            "cam_y": env.main_camera.camera_y,
-            "cam_z": env.main_camera.top_down_camera_height
-        }
-        track_v = env.agent_manager.object_to_agent(env.current_track_vehicle.name)
-        if track_v in r:
-            render_text["tack_v_reward"] = r[track_v]
-        render_text["dist_to_right"] = env.current_track_vehicle.dist_to_right_side
-        render_text["dist_to_left"] = env.current_track_vehicle.dist_to_left_side
-        render_text["overspeed"] = env.current_track_vehicle.overspeed
-        render_text["lane"] = env.current_track_vehicle.lane_index
-        render_text["block"] = env.current_track_vehicle.navigation.current_road.block_ID()
-        env.render(text=render_text)
+        # render_text = {
+        #     "total_r": total_r,
+        #     "episode length": ep_s,
+        #     "cam_x": env.main_camera.camera_x,
+        #     "cam_y": env.main_camera.camera_y,
+        #     "cam_z": env.main_camera.top_down_camera_height
+        # }
+        # track_v = env.agent_manager.object_to_agent(env.current_track_vehicle.name)
+        # if track_v in r:
+        #     render_text["tack_v_reward"] = r[track_v]
+        # render_text["dist_to_right"] = env.current_track_vehicle.dist_to_right_side
+        # render_text["dist_to_left"] = env.current_track_vehicle.dist_to_left_side
+        # render_text["overspeed"] = env.current_track_vehicle.overspeed
+        # render_text["lane"] = env.current_track_vehicle.lane_index
+        # render_text["block"] = env.current_track_vehicle.navigation.current_road.block_ID()
+        # env.render(text=render_text)
+
+        # === Top-down rendering ===
+        env.render("topdown")
+        ps = env.engine.get_all_policies()
+        from metadrive.policy.idm_policy import IDMPolicy
+        print(
+            "Current IDM ratio: {}. Number of controllable agents: {}".format(
+                np.mean([isinstance(p, IDMPolicy) for p in ps]), len(env.action_space)
+            )
+        )
+
         if d["__all__"]:
             print(info)
             print(

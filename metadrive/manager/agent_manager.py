@@ -203,6 +203,7 @@ class AgentManager(BaseManager):
         # not in replay mode
         self._agents_finished_this_frame = dict()
         step_infos = {}
+        # Note that we are using active agents here, not controllable agents.
         for agent_id in self.active_agents.keys():
             policy = self.engine.get_policy(self._agent_to_object[agent_id])
             action = policy.act(agent_id)
@@ -265,18 +266,35 @@ class AgentManager(BaseManager):
             return True
 
         # If this agent is active, and it is control by external policy, then we count it into the action space.
-        if (object_name in self._active_objects.keys()
-                and (isinstance(self.engine.get_policy(object_name), EnvInputPolicy))):
+        if self.is_active_object(object_name) and (isinstance(self.engine.get_policy(object_name), EnvInputPolicy)):
             return True
+
         return False
 
     def is_active_object(self, object_name):
-        print("agent_manager.is_active_object function is deprecated! Please use is_controllable_object instead!")
-        return self.is_controllable_object(object_name)
+        if (not self.INITIALIZED) or (object_name in self._active_objects.keys()):
+            return True
+
+        return False
 
     @property
     def active_agents(self):
         """
+        Return the "alive" agents, they might be controlled by IDM or RL policies.
+        Return Map<agent_id, BaseVehicle>
+        """
+        if hasattr(self, "engine") and self.engine.replay_episode:
+            return self.engine.replay_manager.replay_agents
+        else:
+            return {
+                self._object_to_agent[k]: v
+                for k, v in self._active_objects.items() if self.is_active_object(k)
+            }
+
+    @property
+    def controllable_agents(self):
+        """
+        Return the "controllable" agents, they must be controlled by RL policies.
         Return Map<agent_id, BaseVehicle>
         """
         if hasattr(self, "engine") and self.engine.replay_episode:
@@ -373,8 +391,17 @@ class AgentManager(BaseManager):
         """
         This func is a function that take each vehicle as the first argument and *arg and **kwargs as others.
         """
+        # TODO(pzh): If we are running with many IDM policies, and the RL agent is dead,
+        #  what should we do now? At this time, the active agents is >0, but the controllable agent =0.
         assert len(self.active_agents) > 0, "Not enough vehicles exist!"
         ret = dict()
         for k, v in self.active_agents.items():
+            ret[k] = func(v, *args, **kwargs)
+        return ret
+
+    def for_each_controllable_agents(self, func, *args, **kwargs):
+        assert len(self.controllable_agents) > 0, "Not enough vehicles exist!"
+        ret = dict()
+        for k, v in self.controllable_agents.items():
             ret[k] = func(v, *args, **kwargs)
         return ret

@@ -13,6 +13,7 @@ from metadrive.utils.utils import import_pygame
 pygame = import_pygame()
 
 color_white = (255, 255, 255)
+color_light_gray = (35, 35, 35)
 history_object = namedtuple("history_object", "name position heading_theta WIDTH LENGTH color done")
 
 
@@ -121,7 +122,7 @@ class TopDownRenderer:
         light_background=True,
         num_stack=15,
         history_smooth=0,
-        road_color=(255, 255, 255),
+        road_color=color_light_gray,
         show_agent_name=False,
         track_target_vehicle=False,
         # current_track_vehicle=None

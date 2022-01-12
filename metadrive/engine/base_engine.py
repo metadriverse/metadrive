@@ -336,7 +336,7 @@ class BaseEngine(EngineCore, Randomizable):
     @property
     def agents(self):
         if not self.replay_episode:
-            return self.agent_manager.active_agents
+            return self.agent_manager.controllable_agents
         else:
             return self.replay_manager.replay_agents
 
