@@ -1,8 +1,8 @@
 import math
-import seaborn as sns
 from typing import Dict
-from metadrive.utils import get_np_random
+
 import numpy as np
+import seaborn as sns
 from panda3d.bullet import BulletWorld, BulletBodyNode
 from panda3d.core import LVector3
 from panda3d.core import NodePath
@@ -12,6 +12,7 @@ from metadrive.constants import ObjectState
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.engine.core.physics_world import PhysicsWorld
 from metadrive.utils import Vector
+from metadrive.utils import get_np_random
 from metadrive.utils.coordinates_shift import panda_position, metadrive_position, panda_heading, metadrive_heading
 from metadrive.utils.math_utils import clip
 from metadrive.utils.math_utils import norm
@@ -88,11 +89,7 @@ class BaseObject(BaseRunnable):
                 # It is closed before!
                 self.loader.__init__()
 
-        # add color setting for visualization
-        color = sns.color_palette("colorblind")
-        idx = get_np_random().randint(len(color))
-        rand_c = color[idx]
-        self.panda_color = rand_c
+        self.reset_color()
 
     def add_body(self, physics_body):
         if self._body is None:
@@ -130,6 +127,15 @@ class BaseObject(BaseRunnable):
             self.origin.reparentTo(parent_node_path)
         self.dynamic_nodes.attach_to_physics_world(physics_world.dynamic_world)
         self.static_nodes.attach_to_physics_world(physics_world.static_world)
+
+        self.reset_color()
+
+    def reset_color(self):
+        # add color setting for visualization
+        color = sns.color_palette("colorblind")
+        idx = get_np_random().randint(len(color))
+        rand_c = color[idx]
+        self.panda_color = rand_c
 
     def detach_from_world(self, physics_world: PhysicsWorld):
         """
