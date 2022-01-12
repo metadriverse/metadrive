@@ -21,8 +21,8 @@ if __name__ == "__main__":
             # "debug":True,
             "no_traffic":False,
             # "start_case_index": 192,
-            "case_num": 2,
-            "waymo_data_directory": "/home/liquanyi/tt_generation",
+            "case_num": 100,
+            "waymo_data_directory": "/home/liquanyi/validation",
             "horizon": 1000,
             # "vehicle_config": dict(show_lidar=True,
             #                        show_lane_line_detector=True,
@@ -31,7 +31,7 @@ if __name__ == "__main__":
     )
     success = []
     for i in range(env.config["case_num"]):
-        env.reset(force_seed=i)
+        env.reset(force_seed=3)
         while True:
             o, r, d, info = env.step([0, 0])
             assert env.observation_space.contains(o)
@@ -54,7 +54,7 @@ if __name__ == "__main__":
                     }
                 )
 
-            if d:
-                if info["arrive_dest"]:
-                    print("seed:{}, success".format(env.engine.global_random_seed))
-                break
+            # if d:
+            #     if info["arrive_dest"]:
+            #         print("seed:{}, success".format(env.engine.global_random_seed))
+            #     break

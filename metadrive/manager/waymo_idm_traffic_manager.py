@@ -5,7 +5,7 @@ import numpy as np
 
 from metadrive.component.vehicle.vehicle_type import SVehicle
 from metadrive.manager.waymo_traffic_manager import WaymoTrafficManager
-from metadrive.policy.idm_policy import IDMPolicy
+from metadrive.policy.idm_policy import WaymoIDMPolicy
 from metadrive.utils.scene_utils import ray_localization
 from metadrive.utils.waymo_utils.waymo_utils import AgentType
 
@@ -54,7 +54,8 @@ class WaymoIDMTrafficManager(WaymoTrafficManager):
                         SVehicle, position=init_info["position"], heading=init_info["heading"], vehicle_config=v_config
                     )
                     self.vehicle_destination_map[v.id] = destinations
-                    self.add_policy(v.id, IDMPolicy(v, self.generate_seed()))
+                    self.add_policy(v.id, WaymoIDMPolicy(v, self.generate_seed()))
+                    v.set_velocity(init_info["velocity"])
                 elif type_traj["type"] == AgentType.VEHICLE and v_id == self.sdc_index:
                     # set Ego V velocity
                     init_info = self.parse_vehicle_state(type_traj["state"], 0)
@@ -110,15 +111,12 @@ class WaymoIDMTrafficManager(WaymoTrafficManager):
     def filter_path(self, start_lanes, end_lanes):
         # add some functions to store the filter information to avoid repeat filter when encountering the same cases
         try:
-            signal.signal(signal.SIGALRM, handler)
-            signal.alarm(5)
             for start in start_lanes:
                 for end in end_lanes:
                     path = self.engine.current_map.road_network.shortest_path(start[0].index, end[0].index)
                     if len(path) > 0:
                         signal.alarm(0)
                         return (start[0].index, end[0].index)
-            signal.alarm(0)
             return None, None
         except:
             return None, None
