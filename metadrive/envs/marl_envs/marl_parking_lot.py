@@ -5,6 +5,7 @@ from metadrive.component.pgblock.first_block import FirstPGBlock
 from metadrive.component.pgblock.parking_lot import ParkingLot
 from metadrive.component.pgblock.t_intersection import TInterSection
 from metadrive.component.road_network import Road
+from metadrive.constants import ALL_ACTIVE_AGENTS_DONE
 from metadrive.envs.marl_envs.marl_inout_roundabout import LidarStateObservationMARound
 from metadrive.envs.marl_envs.multi_agent_metadrive import MultiAgentMetaDrive
 from metadrive.manager.map_manager import MapManager
@@ -43,6 +44,7 @@ class ParkingLotSpawnManager(SpawnManager):
     parking space and entrances of parking lot, vehicle can not respawn in parking space which has been assigned to a
     vehicle who drives into this parking lot.
     """
+
     def __init__(self):
         super(ParkingLotSpawnManager, self).__init__()
         self.parking_space_available = set()
@@ -144,6 +146,7 @@ class MultiAgentParkingLotEnv(MultiAgentMetaDrive):
     """
     Env will be done when vehicle is on yellow or white continuous lane line!
     """
+
     @staticmethod
     def default_config() -> Config:
         return MultiAgentMetaDrive.default_config().update(MAParkingLotConfig, allow_add_new_key=True)
@@ -195,21 +198,27 @@ class MultiAgentParkingLotEnv(MultiAgentMetaDrive):
         safe_places_dict = filter_ret
         if len(safe_places_dict) == 0 or not self.agent_manager.allow_respawn:
             # No more run, just wait!
-            return None, None
+            return None, None, True
+
         assert len(safe_places_dict) > 0
         bp_index = get_np_random(self._DEBUG_RANDOM_SEED).choice(list(safe_places_dict.keys()), 1)[0]
         new_spawn_place = safe_places_dict[bp_index]
 
-        new_agent_id, vehicle = self.agent_manager.propose_new_vehicle()
+        new_agent_id, vehicle, is_controllable_vehicle = self.agent_manager.propose_new_vehicle()
+
         new_spawn_place_config = new_spawn_place["config"]
         new_spawn_place_config = self.engine.spawn_manager.update_destination_for(new_agent_id, new_spawn_place_config)
         vehicle.config.update(new_spawn_place_config)
         vehicle.reset()
         vehicle.after_step()
-        self.dones[new_agent_id] = False  # Put it in the internal dead-tracking dict.
 
-        new_obs = self.observations[new_agent_id].observe(vehicle)
-        return new_agent_id, new_obs
+        if is_controllable_vehicle:
+            self.dones[new_agent_id] = False  # Put it in the internal dead-tracking dict.
+            new_obs = self.observations[new_agent_id].observe(vehicle)
+        else:
+            new_obs = None
+
+        return new_agent_id, new_obs, False
 
     def get_single_observation(self, vehicle_config: "Config") -> "ObservationBase":
         return LidarStateObservationMARound(vehicle_config)
@@ -310,7 +319,7 @@ def _vis_debug_respawn():
     total_r = 0
     ep_s = 0
     for i in range(1, 100000):
-        action = {k: [0.0, .0] for k in env.vehicles.keys()}
+        action = {k: [0.0, .0] for k in env.controllable_agents.keys()}
         o, r, d, info = env.step(action)
         for r_ in r.values():
             total_r += r_
@@ -357,7 +366,7 @@ def _vis():
             "debug": True,
             # "manual_control": True,
             "num_agents": 8,
-            "delay_done": 10,
+            "delay_done": 0,
             # "parking_space_num": 4
             "idm_ratio": 0.9
         }
@@ -366,39 +375,44 @@ def _vis():
     total_r = 0
     ep_s = 0
     for i in range(1, 100000):
-        actions = {k: [1.0, .0] for k in env.vehicles.keys()}
+        actions = {k: [1.0, 1.0] for k in env.controllable_agents.keys()}
         if len(env.vehicles) == 1:
-            actions = {k: [-1.0, .0] for k in env.vehicles.keys()}
+            actions = {k: [-1.0, 1.0] for k in env.controllable_agents.keys()}
         o, r, d, info = env.step(actions)
         for r_ in r.values():
             total_r += r_
         ep_s += 1
+
+        # === Using panda3d rendering ===-
         # d.update({"total_r": total_r, "episode length": ep_s})
-        if len(env.vehicles) != 0:
-            v = env.current_track_vehicle
-            dist = v.dist_to_left_side, v.dist_to_right_side
-            ckpt_idx = v.navigation._target_checkpoints_index
-        else:
-            dist = (0, 0)
-            ckpt_idx = (0, 0)
+        # if len(env.vehicles) != 0:
+        #     v = env.current_track_vehicle
+        #     dist = v.dist_to_left_side, v.dist_to_right_side
+        #     ckpt_idx = v.navigation._target_checkpoints_index
+        # else:
+        #     dist = (0, 0)
+        #     ckpt_idx = (0, 0)
+        # render_text = {
+        #     "total_r": total_r,
+        #     "episode length": ep_s,
+        #     "cam_x": env.main_camera.camera_x,
+        #     "cam_y": env.main_camera.camera_y,
+        #     "cam_z": env.main_camera.top_down_camera_height,
+        #     "alive": len(env.vehicles),
+        #     "dist_right_left": dist,
+        #     "ckpt_idx": ckpt_idx,
+        #     "parking_space_num": len(env.engine.spawn_manager.parking_space_available)
+        # }
+        # if len(env.vehicles) > 0:
+        #     v = env.current_track_vehicle
+        #     # print(v.navigation.checkpoints)
+        #     render_text["current_road"] = v.navigation.current_road
+        #
+        # env.render(text=render_text)
 
-        render_text = {
-            "total_r": total_r,
-            "episode length": ep_s,
-            "cam_x": env.main_camera.camera_x,
-            "cam_y": env.main_camera.camera_y,
-            "cam_z": env.main_camera.top_down_camera_height,
-            "alive": len(env.vehicles),
-            "dist_right_left": dist,
-            "ckpt_idx": ckpt_idx,
-            "parking_space_num": len(env.engine.spawn_manager.parking_space_available)
-        }
-        if len(env.vehicles) > 0:
-            v = env.current_track_vehicle
-            # print(v.navigation.checkpoints)
-            render_text["current_road"] = v.navigation.current_road
+        # === Using pygame rendering ===
+        env.render("topdown")
 
-        env.render(text=render_text)
         for kkk, ddd in d.items():
             if ddd and kkk not in ["__all__", ALL_ACTIVE_AGENTS_DONE]:
                 print(
@@ -411,7 +425,8 @@ def _vis():
                         }
                     )
                 )
-        if d["__all__"]:
+        # if d["__all__"]:
+        if info[ALL_ACTIVE_AGENTS_DONE]:
             print(
                 "Finish! Current step {}. Group Reward: {}. Average reward: {}".format(
                     i, total_r, total_r / env.agent_manager.next_agent_count
@@ -419,10 +434,10 @@ def _vis():
             )
             env.reset()
             # break
-        if len(env.vehicles) == 0:
-            total_r = 0
-            print("Reset")
-            env.reset()
+        # if len(env.vehicles) == 0:
+        #     total_r = 0
+        #     print("Reset")
+        #     env.reset()
     env.close()
 
 

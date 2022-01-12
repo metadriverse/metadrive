@@ -130,8 +130,6 @@ class MultiAgentMetaDrive(MetaDriveEnv):
         o, r, d, i = super(MultiAgentMetaDrive, self).step(actions)
         o, r, d, i = self._after_vehicle_done(o, r, d, i)
 
-        print("Current active agent list")
-
         # Update respawn manager
         if self.episode_steps >= self.config["horizon"]:
             self.agent_manager.set_allow_respawn(False)

@@ -131,7 +131,7 @@ def test_delay_done():
         env.reset()
         dead = set()
         for _ in range(300):
-            o, r, d, i = env.step({k: [1, 1] for k in env.vehicles.keys()})
+            o, r, d, i = env.step({k: [1, 1] for k in env.controllable_agents.keys()})
             for dead_name in dead:
                 assert dead_name not in o
             print("{} there!".format(env.vehicles.keys()))

@@ -88,7 +88,7 @@ def test_ma_bottleneck_env():
             _check_spaces_after_reset(env, obs)
             assert env.observation_space.contains(obs)
             for step in range(100):
-                act = {k: [1, 1] for k in env.vehicles.keys()}
+                act = {k: [1, 1] for k in env.controllable_agents.keys()}
                 o, r, d, i = _act(env, act)
                 if step == 0:
                     assert not any(d.values())
@@ -120,7 +120,7 @@ def test_ma_bottleneck_horizon():
             assert env.observation_space.contains(obs)
             last_keys = set(env.vehicles.keys())
             for step in range(1, 1000):
-                act = {k: [1, 1] for k in env.vehicles.keys()}
+                act = {k: [1, 1] for k in env.controllable_agents.keys()}
                 o, r, d, i = _act(env, act)
                 new_keys = set(env.vehicles.keys())
                 if step == 0:
@@ -161,7 +161,7 @@ def test_ma_bottleneck_reset():
         _check_spaces_after_reset(env, obs)
         assert env.observation_space.contains(obs)
         for step in range(1000):
-            act = {k: [1, 1] for k in env.vehicles.keys()}
+            act = {k: [1, 1] for k in env.controllable_agents.keys()}
             o, r, d, i = _act(env, act)
             if step == 0:
                 assert not any(d.values())
@@ -192,7 +192,7 @@ def test_ma_bottleneck_reset():
             for step in range(1000):
 
                 # for _ in range(2):
-                #     act = {k: [1, 1] for k in env.vehicles.keys()}
+                #     act = {k: [1, 1] for k in env.controllable_agents.keys()}
                 #     o, r, d, i = _act(env, act)
 
                 # Force vehicle to success!
@@ -212,7 +212,7 @@ def test_ma_bottleneck_reset():
                         print('sss')
                     assert v.arrive_destination
 
-                act = {k: [0, 0] for k in env.vehicles.keys()}
+                act = {k: [0, 0] for k in env.controllable_agents.keys()}
                 o, r, d, i = _act(env, act)
 
                 for v in env.vehicles.values():
@@ -269,7 +269,7 @@ def test_ma_bottleneck_close_spawn():
             obs = env.reset()
             _check_spaces_after_reset(env)
             for _ in range(10):
-                o, r, d, i = env.step({k: [0, 0] for k in env.vehicles.keys()})
+                o, r, d, i = env.step({k: [0, 0] for k in env.controllable_agents.keys()})
                 print(d)
                 assert not any(d.values())
             _no_close_spawn(env.vehicles)
@@ -289,7 +289,7 @@ def test_ma_bottleneck_reward_done_alignment():
         assert env.observation_space.contains(obs)
         for action in [-1, 1]:
             for step in range(5000):
-                act = {k: [action, 1] for k in env.vehicles.keys()}
+                act = {k: [action, 1] for k in env.controllable_agents.keys()}
                 o, r, d, i = _act(env, act)
                 for kkk, ddd in d.items():
                     if ddd and kkk not in ["__all__", ALL_ACTIVE_AGENTS_DONE
@@ -332,11 +332,11 @@ def test_ma_bottleneck_reward_done_alignment():
         obs = env.reset()
         _check_spaces_after_reset(env, obs)
         for step in range(5):
-            act = {k: [0, 0] for k in env.vehicles.keys()}
+            act = {k: [0, 0] for k in env.controllable_agents.keys()}
             o, r, d, i = _act(env, act)
         env.vehicles["agent0"].set_position(env.vehicles["agent1"].position, height=1.2)
         for step in range(5000):
-            act = {k: [0, 0] for k in env.vehicles.keys()}
+            act = {k: [0, 0] for k in env.controllable_agents.keys()}
             o, r, d, i = _act(env, act)
 
             if not any(d.values()):
@@ -392,7 +392,7 @@ def test_ma_bottleneck_reward_done_alignment():
         obs = env.reset()
         _check_spaces_after_reset(env, obs)
         for step in range(1):
-            act = {k: [0, 0] for k in env.vehicles.keys()}
+            act = {k: [0, 0] for k in env.controllable_agents.keys()}
             o, r, d, i = _act(env, act)
 
         for v_id, v in env.vehicles.items():
@@ -400,7 +400,7 @@ def test_ma_bottleneck_reward_done_alignment():
                 v.set_static(True)
 
         for step in range(5000):
-            act = {k: [0, 1] for k in env.vehicles.keys()}
+            act = {k: [0, 1] for k in env.controllable_agents.keys()}
             o, r, d, i = _act(env, act)
             for kkk, iii in i.items():
                 if iii["crash"]:
@@ -442,7 +442,7 @@ def test_ma_bottleneck_reward_done_alignment():
         env.vehicles["agent0"].set_position(env.vehicles["agent0"].navigation.final_lane.end)
         assert env.observation_space.contains(obs)
         for step in range(5000):
-            act = {k: [0, 0] for k in env.vehicles.keys()}
+            act = {k: [0, 0] for k in env.controllable_agents.keys()}
             o, r, d, i = _act(env, act)
             if d["__all__"]:
                 break
@@ -483,7 +483,7 @@ def test_ma_bottleneck_reward_sign():
         _check_spaces_after_reset(env)
         ep_reward = 0.0
         for step in range(1000):
-            act = {k: [0, 1] for k in env.vehicles.keys()}
+            act = {k: [0, 1] for k in env.controllable_agents.keys()}
             o, r, d, i = env.step(act)
             ep_reward += next(iter(r.values()))
             if any(d.values()):
@@ -546,7 +546,7 @@ def test_ma_bottleneck_no_short_episode():
         d = {"__all__": False}
         for step in range(2000):
             # act = {k: actions[np.random.choice(len(actions))] for k in o.keys()}
-            act = {k: actions[np.random.choice(len(actions))] for k in env.vehicles.keys()}
+            act = {k: actions[np.random.choice(len(actions))] for k in env.controllable_agents.keys()}
             o_keys = set(o.keys()).union({"__all__"})
             a_keys = set(env.action_space.spaces.keys()).union(set(d.keys()))
             assert o_keys == a_keys
@@ -583,7 +583,7 @@ def test_ma_bottleneck_horizon_termination():
             should_respawn = set()
             special_agents = set(["agent0", "agent7"])
             for step in range(1, 10000):
-                act = {k: [0, 0] for k in env.vehicles.keys()}
+                act = {k: [0, 0] for k in env.controllable_agents.keys()}
                 for v_id in act.keys():
                     if v_id in special_agents:
                         act[v_id] = [1, 1]  # Add some randomness
@@ -645,9 +645,9 @@ def test_ma_bottleneck_40_agent_reset_after_respawn():
             check_pos(list(env.vehicles.values()))
             for v_id in list(env.vehicles.keys())[:20]:
                 env.agent_manager.finish(v_id)
-            env.step({k: [1, 1] for k in env.vehicles.keys()})
-            env.step({k: [1, 1] for k in env.vehicles.keys()})
-            env.step({k: [1, 1] for k in env.vehicles.keys()})
+            env.step({k: [1, 1] for k in env.controllable_agents.keys()})
+            env.step({k: [1, 1] for k in env.controllable_agents.keys()})
+            env.step({k: [1, 1] for k in env.controllable_agents.keys()})
     finally:
         env.close()
 
@@ -684,7 +684,7 @@ def test_ma_no_reset_error():
         assert env.observation_space.contains(obs)
         for step in range(50):
             check_pos(list(env.vehicles.values()))
-            o, r, d, i = env.step({k: [0, 1] for k in env.vehicles.keys()})
+            o, r, d, i = env.step({k: [0, 1] for k in env.controllable_agents.keys()})
             env.reset()
             if d["__all__"]:
                 break
@@ -698,7 +698,7 @@ def test_randomize_spawn_place():
     try:
         obs = env.reset()
         for step in range(100):
-            act = {k: [1, 1] for k in env.vehicles.keys()}
+            act = {k: [1, 1] for k in env.controllable_agents.keys()}
             last_pos = {kkk: v.position for kkk, v in env.vehicles.items()}
             o, r, d, i = env.step(act)
             obs = env.reset()

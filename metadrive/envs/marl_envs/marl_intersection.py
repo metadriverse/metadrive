@@ -166,7 +166,7 @@ def _vis_debug_respawn():
     total_r = 0
     ep_s = 0
     for i in range(1, 100000):
-        action = {k: [0.0, .0] for k in env.vehicles.keys()}
+        action = {k: [0.0, .0] for k in env.controllable_agents.keys()}
         o, r, d, info = env.step(action)
         for r_ in r.values():
             total_r += r_
@@ -220,9 +220,9 @@ def _vis():
     total_r = 0
     ep_s = 0
     for i in range(1, 100000):
-        actions = {k: [0.0, 1.0] for k in env.vehicles.keys()}
+        actions = {k: [0.0, 1.0] for k in env.controllable_agents.keys()}
         if len(env.vehicles) == 1:
-            actions = {k: [-0, 1.0] for k in env.vehicles.keys()}
+            actions = {k: [-0, 1.0] for k in env.controllable_agents.keys()}
         o, r, d, info = env.step(actions)
         for r_ in r.values():
             total_r += r_

@@ -161,12 +161,15 @@ class AgentManager(BaseManager):
         if not self.engine.replay_episode:
             vehicle_name = self._agent_to_object[agent_name]
             v = self._active_objects.pop(vehicle_name)
+
+            if self.is_controllable(v.name):
+                self._agents_finished_this_frame[agent_name] = v.name
+
             if (not ignore_delay_done) and (self._delay_done > 0):
                 self._put_to_dying_queue(v)
             else:
                 # move to invisible place
-                self._remove_vehicle(v)
-            self._agents_finished_this_frame[agent_name] = v.name
+                self._remove_vehicle(v)  # This function also remove policy from engine registry.
             self._check()
 
     def _check(self):
