@@ -401,7 +401,7 @@ class AgentManager(BaseManager):
         return ret
 
     def for_each_controllable_agents(self, func, *args, **kwargs):
-        assert len(self.controllable_agents) > 0, "Not enough vehicles exist!"
+        # assert len(self.controllable_agents) > 0, "Not enough vehicles exist!"
         ret = dict()
         for k, v in self.controllable_agents.items():
             ret[k] = func(v, *args, **kwargs)

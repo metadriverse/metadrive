@@ -207,12 +207,14 @@ def _vis():
                 "show_lidar": False,
             },
             #
-            "use_render": True,
+            # "use_render": True,
             "debug": True,
-            "allow_respawn": False,
-            "manual_control": True,
+            # "allow_respawn": False,
+            # "manual_control": True,
             "num_agents": 20,
             "delay_done": 2,
+
+            "idm_ratio": 1.0
         }
     )
     o = env.reset()
@@ -236,8 +238,9 @@ def _vis():
         #     "alive": len(env.vehicles)
         # }
         # env.render(text=render_text)
-        # env.render(mode="top_down")
-        if d["__all__"]:
+        env.render(mode="top_down")
+        # if d["__all__"]:
+        if info["all_active_agents_done"]:
             print(
                 "Finish! Current step {}. Group Reward: {}. Average reward: {}".format(
                     i, total_r, total_r / env.agent_manager.next_agent_count
@@ -245,10 +248,8 @@ def _vis():
             )
             env.reset()
             # break
-        if len(env.vehicles) == 0:
             total_r = 0
             print("Reset")
-            env.reset()
     env.close()
 
 
