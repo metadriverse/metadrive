@@ -14,6 +14,7 @@ MULTI_AGENT_METADRIVE_DEFAULT_CONFIG = dict(
     num_agents=15,
     # If num_agents is set to None, then endless vehicles will be added only the empty spawn points exist
     random_agent_model=False,
+    idm_ratio=0.0,  # Ratio of the agents that should be controlled by IDM policy.
 
     # Whether to terminate a vehicle if it crash with others. Since in MA env the crash is extremely dense, so
     # frequently done might not be a good idea.
@@ -142,8 +143,8 @@ class MultiAgentMetaDrive(MetaDriveEnv):
 
         # Update __all__
         d["__all__"] = (
-            ((self.episode_steps >= self.config["horizon"]) and (all(d.values()))) or (len(self.vehicles) == 0)
-            or (self.episode_steps >= 5 * self.config["horizon"])
+                ((self.episode_steps >= self.config["horizon"]) and (all(d.values()))) or (len(self.vehicles) == 0)
+                or (self.episode_steps >= 5 * self.config["horizon"])
         )
         if d["__all__"]:
             for k in d.keys():

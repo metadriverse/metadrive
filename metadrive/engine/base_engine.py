@@ -71,6 +71,9 @@ class BaseEngine(EngineCore, Randomizable):
         assert object_id in self._object_policies, "Can not find the policy for object(id: {})".format(object_id)
         return self._object_policies[object_id]
 
+    def get_all_policies(self):
+        return list(self._object_policies.values())
+
     def get_task(self, object_id):
         """
         Return task of specific object with id

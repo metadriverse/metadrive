@@ -2,10 +2,12 @@ import copy
 from typing import Dict
 
 from gym.spaces import Box, Dict, MultiDiscrete
+import numpy as np
 from metadrive.constants import DEFAULT_AGENT
 from metadrive.manager.base_manager import BaseManager
 from metadrive.policy.AI_protect_policy import AIProtectPolicy
 from metadrive.policy.env_input_policy import EnvInputPolicy
+from metadrive.policy.idm_policy import IDMPolicy
 from metadrive.policy.manual_control_policy import ManualControlPolicy
 
 
@@ -71,17 +73,24 @@ class AgentManager(BaseManager):
 
     def _get_policy(self, obj):
         # note: agent.id = object id
+        policy = None
         if self.engine.global_config["agent_policy"] is not None:
             return self.engine.global_config["agent_policy"](obj, self.generate_seed())
+
         if self.engine.global_config["manual_control"]:
             if self.engine.global_config.get("use_AI_protector", False):
                 policy = AIProtectPolicy(obj, self.generate_seed())
             else:
                 policy = ManualControlPolicy(obj, self.generate_seed())
 
-        # if self.engine.global_config["idm_ratio"]
+        elif self.engine.global_config["idm_ratio"]:
+            assert self.engine.global_config["is_multi_agent"], "Mixed policies can only be triggered in MARL envs!"
+            assert 0 <= self.engine.global_config["idm_ratio"] <= 1, "idm_ratio should in [0, 1]."
+            ratio = np.mean([isinstance(p, IDMPolicy) for p in self.engine.get_all_policies()])
+            if ratio < self.engine.global_config["idm_ratio"]:
+                policy = IDMPolicy(obj, self.generate_seed())  # IDM
 
-        else:
+        if policy is None:
             policy = EnvInputPolicy(obj, self.generate_seed())
         return policy
 
