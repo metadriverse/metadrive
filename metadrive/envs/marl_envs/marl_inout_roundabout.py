@@ -280,10 +280,8 @@ def _vis():
             # "use_render": True,
             "debug": False,
             # "manual_control": True,
-
             "num_agents": -1,
             "idm_ratio": 1.0,
-
         }
     )
     o = env.reset()
@@ -309,8 +307,7 @@ def _vis():
         from metadrive.policy.idm_policy import IDMPolicy
         print(
             "Current IDM ratio: {}. Number of controllable agents: {}".format(
-                np.mean([isinstance(p, IDMPolicy) for p in ps]),
-                len(env.action_space)
+                np.mean([isinstance(p, IDMPolicy) for p in ps]), len(env.action_space)
             )
         )
 

@@ -143,8 +143,8 @@ class MultiAgentMetaDrive(MetaDriveEnv):
 
         # Update __all__
         d["__all__"] = (
-                ((self.episode_steps >= self.config["horizon"]) and (all(d.values()))) or (len(self.vehicles) == 0)
-                or (self.episode_steps >= 5 * self.config["horizon"])
+            ((self.episode_steps >= self.config["horizon"]) and (all(d.values()))) or (len(self.vehicles) == 0)
+            or (self.episode_steps >= 5 * self.config["horizon"])
         )
         if d["__all__"]:
             for k in d.keys():

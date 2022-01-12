@@ -75,20 +75,15 @@ def _act(env, action):
 
 def test_ma_roundabout_env():
     for env in [
-        MultiAgentRoundaboutEnv({"delay_done": 0, "num_agents": 1,
-                                 "vehicle_config": {"lidar": {"num_others": 8}}}),
-        MultiAgentRoundaboutEnv({"num_agents": 1, "delay_done": 0,
-                                 "vehicle_config": {"lidar": {"num_others": 0}}}),
-        MultiAgentRoundaboutEnv({"num_agents": 4, "delay_done": 0,
-                                 "vehicle_config": {"lidar": {"num_others": 8}}}),
-        MultiAgentRoundaboutEnv({"num_agents": 4, "delay_done": 0,
-                                 "vehicle_config": {"lidar": {"num_others": 0}}}),
-        MultiAgentRoundaboutEnv({"num_agents": 8, "delay_done": 0,
-                                 "vehicle_config": {"lidar": {"num_others": 0}}}),
-        MultiAgentRoundaboutEnv({"num_agents": 8, "delay_done": 0, "idm_ratio": 0.5,
-                                 "vehicle_config": {"lidar": {"num_others": 0}}}),
-        MultiAgentRoundaboutEnv({"num_agents": 8, "delay_done": 0, "idm_ratio": 1.0,
-                                 "vehicle_config": {"lidar": {"num_others": 0}}}),
+            MultiAgentRoundaboutEnv({"delay_done": 0, "num_agents": 1, "vehicle_config": {"lidar": {"num_others": 8}}}),
+            MultiAgentRoundaboutEnv({"num_agents": 1, "delay_done": 0, "vehicle_config": {"lidar": {"num_others": 0}}}),
+            MultiAgentRoundaboutEnv({"num_agents": 4, "delay_done": 0, "vehicle_config": {"lidar": {"num_others": 8}}}),
+            MultiAgentRoundaboutEnv({"num_agents": 4, "delay_done": 0, "vehicle_config": {"lidar": {"num_others": 0}}}),
+            MultiAgentRoundaboutEnv({"num_agents": 8, "delay_done": 0, "vehicle_config": {"lidar": {"num_others": 0}}}),
+            MultiAgentRoundaboutEnv({"num_agents": 8, "delay_done": 0, "idm_ratio": 0.5,
+                                     "vehicle_config": {"lidar": {"num_others": 0}}}),
+            MultiAgentRoundaboutEnv({"num_agents": 8, "delay_done": 0, "idm_ratio": 1.0,
+                                     "vehicle_config": {"lidar": {"num_others": 0}}}),
     ]:
         try:
             _check_spaces_before_reset(env)
@@ -213,8 +208,8 @@ def test_ma_roundabout_reset():
                     long, lat = v.navigation.final_lane.local_coordinates(v.position)
                     flag1 = (v.navigation.final_lane.length - 5 < long < v.navigation.final_lane.length + 5)
                     flag2 = (
-                            v.navigation.get_current_lane_width() / 2 >= lat >=
-                            (0.5 - v.navigation.get_current_lane_num()) * v.navigation.get_current_lane_width()
+                        v.navigation.get_current_lane_width() / 2 >= lat >=
+                        (0.5 - v.navigation.get_current_lane_num()) * v.navigation.get_current_lane_width()
                     )
                     if not v.arrive_destination:
                         print('sss')
@@ -458,7 +453,6 @@ def test_ma_roundabout_reward_sign():
     straight road before coming into roundabout.
     However, some bugs cause the vehicles receive negative reward by doing this behavior!
     """
-
     class TestEnv(MultiAgentRoundaboutEnv):
         _respawn_count = 0
 

@@ -265,10 +265,8 @@ class AgentManager(BaseManager):
             return True
 
         # If this agent is active, and it is control by external policy, then we count it into the action space.
-        if (
-                object_name in self._active_objects.keys() and
-                (isinstance(self.engine.get_policy(object_name), EnvInputPolicy))
-        ):
+        if (object_name in self._active_objects.keys()
+                and (isinstance(self.engine.get_policy(object_name), EnvInputPolicy))):
             return True
         return False
 
@@ -286,8 +284,7 @@ class AgentManager(BaseManager):
         else:
             return {
                 self._object_to_agent[k]: v
-                for k, v in self._active_objects.items()
-                if self.is_controllable_object(k)
+                for k, v in self._active_objects.items() if self.is_controllable_object(k)
             }
 
     @property
