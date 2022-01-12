@@ -142,7 +142,7 @@ class MetaDriveEnv(BaseEnv):
         return {DEFAULT_AGENT: self.get_single_observation(self.config["vehicle_config"])}
 
     def done_function(self, vehicle_id: str):
-        vehicle = self.vehicles[vehicle_id]
+        vehicle = self.active_agents[vehicle_id]
         done = False
         done_info = dict(
             crash_vehicle=False, crash_object=False, crash_building=False, out_of_road=False, arrive_dest=False
@@ -177,7 +177,7 @@ class MetaDriveEnv(BaseEnv):
         return done, done_info
 
     def cost_function(self, vehicle_id: str):
-        vehicle = self.vehicles[vehicle_id]
+        vehicle = self.active_agents[vehicle_id]
         step_info = dict()
         step_info["cost"] = 0
         if self._is_out_of_road(vehicle):
@@ -203,7 +203,7 @@ class MetaDriveEnv(BaseEnv):
         :param vehicle_id: id of BaseVehicle
         :return: reward
         """
-        vehicle = self.vehicles[vehicle_id]
+        vehicle = self.active_agents[vehicle_id]
         step_info = dict()
 
         # Reward for moving forward in current lane
@@ -243,8 +243,8 @@ class MetaDriveEnv(BaseEnv):
         if self.main_camera is None:
             return
         self.main_camera.reset()
-        if self.config["prefer_track_agent"] is not None and self.config["prefer_track_agent"] in self.vehicles.keys():
-            new_v = self.vehicles[self.config["prefer_track_agent"]]
+        if self.config["prefer_track_agent"] is not None and self.config["prefer_track_agent"] in self.active_agents.keys():
+            new_v = self.active_agents[self.config["prefer_track_agent"]]
             current_track_vehicle = new_v
         else:
             if self.main_camera.is_bird_view_camera():

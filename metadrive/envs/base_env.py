@@ -234,12 +234,12 @@ class BaseEnv(gym.Env):
     def _preprocess_actions(self, actions: Union[np.ndarray, Dict[AnyStr, np.ndarray]]) \
             -> Union[np.ndarray, Dict[AnyStr, np.ndarray]]:
         if not self.is_multi_agent:
-            actions = {v_id: actions for v_id in self.vehicles.keys()}
+            actions = {v_id: actions for v_id in self.controllable_agents.keys()}
         else:
             if self.config["vehicle_config"]["action_check"]:
                 # Check whether some actions are not provided.
                 given_keys = set(actions.keys())
-                have_keys = set(self.vehicles.keys())
+                have_keys = set(self.controllable_agents.keys())
                 assert given_keys == have_keys, "The input actions: {} have incompatible keys with existing {}!".format(
                     given_keys, have_keys
                 )
@@ -248,7 +248,7 @@ class BaseEnv(gym.Env):
                 # implementation, the "termination observation" will still be given in T=t-1. And at T=t, when you
                 # collect action from policy(last_obs) without masking, then the action for "termination observation"
                 # will still be computed. We just filter it out here.
-                actions = {v_id: actions[v_id] for v_id in self.vehicles.keys()}
+                actions = {v_id: actions[v_id] for v_id in self.controllable_agents.keys()}
         return actions
 
     def _step_simulator(self, actions):
@@ -296,10 +296,10 @@ class BaseEnv(gym.Env):
                 from metadrive.obs.observation_base import ImageObservation
                 image_source = "rgb_camera"
                 assert len(self.vehicles) == 1, "Multi-agent not supported yet!"
-                self.temporary_img_obs = ImageObservation(self.vehicles[DEFAULT_AGENT].config, image_source, False)
+                self.temporary_img_obs = ImageObservation(self.controllable_agents[DEFAULT_AGENT].config, image_source, False)
             else:
                 raise ValueError("Not implemented yet!")
-            self.temporary_img_obs.observe(self.vehicles[DEFAULT_AGENT].image_sensors[image_source])
+            self.temporary_img_obs.observe(self.controllable_agents[DEFAULT_AGENT].image_sensors[image_source])
             return self.temporary_img_obs.get_image()
 
         # logging.warning("You do not set 'offscreen_render' or 'offscreen_render' to True, so no image will be returned!")
@@ -325,7 +325,7 @@ class BaseEnv(gym.Env):
         if self._top_down_renderer is not None:
             self._top_down_renderer.reset(self.current_map)
 
-        self.dones = {agent_id: False for agent_id in self.vehicles.keys()}
+        self.dones = {agent_id: False for agent_id in self.controllable_agents.keys()}
         self.episode_steps = 0
         self.episode_rewards = defaultdict(float)
         self.episode_lengths = defaultdict(int)
@@ -335,7 +335,7 @@ class BaseEnv(gym.Env):
     def _get_reset_return(self):
         ret = {}
         self.engine.after_step()
-        for v_id, v in self.vehicles.items():
+        for v_id, v in self.controllable_agents.items():
             self.observations[v_id].reset(self, v)
             ret[v_id] = self.observations[v_id].observe(v)
         return ret if self.is_multi_agent else self._wrap_as_single_agent(ret)
@@ -347,7 +347,7 @@ class BaseEnv(gym.Env):
         cost_infos = {}
         reward_infos = {}
         rewards = {}
-        for v_id, v in self.vehicles.items():
+        for v_id, v in self.controllable_agents.items():
             o = self.observations[v_id].observe(v)
             obses[v_id] = o
             done_function_result, done_infos[v_id] = self.done_function(v_id)
@@ -373,7 +373,7 @@ class BaseEnv(gym.Env):
             for k in self.dones:
                 self.dones[k] = True
 
-        dones = {k: self.dones[k] for k in self.vehicles.keys()}
+        dones = {k: self.dones[k] for k in self.controllable_agents.keys()}
         for v_id, r in rewards.items():
             self.episode_rewards[v_id] += r
             step_infos[v_id]["episode_reward"] = self.episode_rewards[v_id]
@@ -472,7 +472,15 @@ class BaseEnv(gym.Env):
         Return all controllable vehicles
         :return: Dict[agent_id:vehicle]
         """
+        return self.active_agents
+
+    @property
+    def controllable_agents(self):
         return self.agent_manager.controllable_agents
+
+    @property
+    def active_agents(self):
+        return self.agent_manager.active_agents
 
     def setup_engine(self):
         """

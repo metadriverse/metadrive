@@ -5,6 +5,7 @@ import numpy as np
 from gym.spaces import Box, Dict, MultiDiscrete
 
 from metadrive.constants import DEFAULT_AGENT
+from metadrive.constants import TerminationState
 from metadrive.manager.base_manager import BaseManager
 from metadrive.policy.AI_protect_policy import AIProtectPolicy
 from metadrive.policy.env_input_policy import EnvInputPolicy
@@ -179,18 +180,25 @@ class AgentManager(BaseManager):
         agent_name = self.next_agent_id()
         next_config = self.engine.global_config["target_vehicle_configs"]["agent0"]
         vehicle = self._get_vehicles({agent_name: next_config})[agent_name]
-        new_v_name = vehicle.name
-        self._agent_to_object[agent_name] = new_v_name
-        self._object_to_agent[new_v_name] = agent_name
-        self.observations[new_v_name] = self._init_observations["agent0"]
-        self.observations[new_v_name].reset(vehicle)
-        self.observation_spaces[new_v_name] = self._init_observation_spaces["agent0"]
-        self.action_spaces[new_v_name] = self._init_action_spaces["agent0"]
+        new_obj_id = vehicle.name
+        self._agent_to_object[agent_name] = new_obj_id
+        self._object_to_agent[new_obj_id] = agent_name
         self._active_objects[vehicle.name] = vehicle
+
+        if self.is_controllable(new_obj_id):
+            self.observations[new_obj_id] = self._init_observations["agent0"]
+            self.observations[new_obj_id].reset(vehicle)
+            self.observation_spaces[new_obj_id] = self._init_observation_spaces["agent0"]
+            self.action_spaces[new_obj_id] = self._init_action_spaces["agent0"]
+            is_controllable_vehicle = True
+        else:
+            is_controllable_vehicle = False
+
         self._check()
         vehicle.before_step([0, 0])
         vehicle.set_static(False)
-        return agent_name, vehicle
+
+        return agent_name, vehicle, is_controllable_vehicle
 
     def next_agent_id(self):
         ret = "agent{}".format(self.next_agent_count)
@@ -224,6 +232,13 @@ class AgentManager(BaseManager):
 
     def after_step(self, *args, **kwargs):
         step_infos = self.for_each_active_agents(lambda v: v.after_step())
+
+        for agent_name, v in self.active_agents.items():
+            # Finish the IDM policy
+            if isinstance(self.engine.get_policy(v.name), IDMPolicy):
+                if not v.on_lane:
+                    self.finish(agent_name)
+
         return step_infos
 
     def _translate(self, d):
@@ -267,7 +282,7 @@ class AgentManager(BaseManager):
             return True
 
         # If this agent is active, and it is control by external policy, then we count it into the action space.
-        if self.is_active_object(object_name) and (isinstance(self.engine.get_policy(object_name), EnvInputPolicy)):
+        if self.is_active_object(object_name) and self.is_controllable(object_name):
             return True
 
         return False
@@ -306,6 +321,19 @@ class AgentManager(BaseManager):
                 for k, v in self._active_objects.items() if self.is_controllable_object(k)
             }
 
+    def is_controllable(self, object_name):
+        return isinstance(self.engine.get_policy(object_name), EnvInputPolicy)
+
+    @property
+    def not_controllable_agents(self):
+        if hasattr(self, "engine") and self.engine.replay_episode:
+            return self.engine.replay_manager.replay_agents
+        else:
+            return {
+                self._object_to_agent[k]: v
+                for k, v in self._active_objects.items() if not self.is_controllable_object(k)
+            }
+
     @property
     def active_objects(self):
         """
@@ -313,7 +341,6 @@ class AgentManager(BaseManager):
         :return: Map<obj_name, obj>
         """
         raise DeprecationWarning("prohibit! Use active agent instead")
-        return self._active_objects
 
     def get_agent(self, agent_name):
         object_name = self.agent_to_object(agent_name)
@@ -406,3 +433,16 @@ class AgentManager(BaseManager):
         for k, v in self.controllable_agents.items():
             ret[k] = func(v, *args, **kwargs)
         return ret
+
+    def finish_not_controllable_agents(self, done_function):
+        """
+        Definition:
+            done[bool], done_info[dict] = done_function(agent_name[str])
+        """
+        for agent_name in self.not_controllable_agents.keys():
+            done, done_info = done_function(agent_name)
+            if done:
+                self.finish(
+                    agent_name, ignore_delay_done=done_info.get(TerminationState.SUCCESS, False)
+                )
+                print("IDM agent {} is done! Done info: {}".format(agent_name, done_info))

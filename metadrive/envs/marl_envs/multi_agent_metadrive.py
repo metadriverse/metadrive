@@ -130,6 +130,8 @@ class MultiAgentMetaDrive(MetaDriveEnv):
         o, r, d, i = super(MultiAgentMetaDrive, self).step(actions)
         o, r, d, i = self._after_vehicle_done(o, r, d, i)
 
+        print("Current active agent list")
+
         # Update respawn manager
         if self.episode_steps >= self.config["horizon"]:
             self.agent_manager.set_allow_respawn(False)
@@ -171,6 +173,10 @@ class MultiAgentMetaDrive(MetaDriveEnv):
                     dead_vehicle_id, ignore_delay_done=info[dead_vehicle_id].get(TerminationState.SUCCESS, False)
                 )
                 self._update_camera_after_finish()
+
+        # Special treatment to the agents controlled by the IDM policies.
+        self.agent_manager.finish_not_controllable_agents(self.done_function)
+
         return obs, reward, dones, info
 
     def _update_camera_after_finish(self):
@@ -188,12 +194,15 @@ class MultiAgentMetaDrive(MetaDriveEnv):
         new_obs_dict = {}
         if not self.agent_manager.allow_respawn:
             return new_obs_dict
+
         while True:
-            new_id, new_obs = self._respawn_single_vehicle(randomize_position=randomize_position)
+            new_id, new_obs, should_terminated = self._respawn_single_vehicle(randomize_position=randomize_position)
             if new_obs is not None:
                 new_obs_dict[new_id] = new_obs
-            else:
+
+            if should_terminated:
                 break
+
         return new_obs_dict
 
     def _respawn_single_vehicle(self, randomize_position=False):
@@ -204,20 +213,27 @@ class MultiAgentMetaDrive(MetaDriveEnv):
             self.current_map, randomize=randomize_position
         )
         if len(safe_places_dict) == 0:
-            return None, None
+            should_terminated = True
+            return None, None, should_terminated
         born_place_index = get_np_random(self._DEBUG_RANDOM_SEED).choice(list(safe_places_dict.keys()), 1)[0]
         new_spawn_place = safe_places_dict[born_place_index]
 
-        new_agent_id, vehicle = self.agent_manager.propose_new_vehicle()
+        new_agent_id, vehicle, is_controllable_vehicle = self.agent_manager.propose_new_vehicle()
+
         new_spawn_place_config = new_spawn_place["config"]
         new_spawn_place_config = self.engine.spawn_manager.update_destination_for(new_agent_id, new_spawn_place_config)
         vehicle.config.update(new_spawn_place_config)
         vehicle.reset()
         vehicle.after_step()
-        self.dones[new_agent_id] = False  # Put it in the internal dead-tracking dict.
 
-        new_obs = self.observations[new_agent_id].observe(vehicle)
-        return new_agent_id, new_obs
+        if is_controllable_vehicle:
+            self.dones[new_agent_id] = False  # Put it in the internal dead-tracking dict.
+            new_obs = self.observations[new_agent_id].observe(vehicle)
+        else:
+            new_obs = None
+
+        should_terminated = False
+        return new_agent_id, new_obs, should_terminated
 
     def setup_engine(self):
         super(MultiAgentMetaDrive, self).setup_engine()
