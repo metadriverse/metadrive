@@ -101,7 +101,7 @@ class RealDataManager(BaseManager):
                 if road.start_node == v_start and road.end_node == v_end:
                     generated_v = self.spawn_object(config["type"], vehicle_config=v_config)
                     generated_v.set_static(True)
-                    self.engine.add_policy(generated_v.id, ReplayPolicy(generated_v, locate_info[config["id"]]))
+                    self.add_policy(generated_v.id, ReplayPolicy(generated_v, locate_info[config["id"]]))
                     self._traffic_vehicles.append(generated_v)
                     potential_vehicle_configs.remove(config)
                     break

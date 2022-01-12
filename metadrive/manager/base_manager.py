@@ -84,3 +84,6 @@ class BaseManager(Randomizable):
         obj = self.spawned_objects.pop(obj.name)
         self.spawned_objects[new_name] = obj
         obj.name = new_name
+
+    def add_policy(self, object_id, policy):
+        self.engine.add_policy(object_id, policy)

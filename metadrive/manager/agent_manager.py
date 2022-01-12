@@ -66,7 +66,7 @@ class AgentManager(BaseManager):
             obj = self.spawn_object(v_type, vehicle_config=v_config)
             ret[agent_id] = obj
             policy = self._get_policy(obj)
-            self.engine.add_policy(obj.id, policy)
+            self.add_policy(obj.id, policy)
         return ret
 
     def _get_policy(self, obj):
