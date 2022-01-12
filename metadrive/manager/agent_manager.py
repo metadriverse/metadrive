@@ -78,6 +78,9 @@ class AgentManager(BaseManager):
                 policy = AIProtectPolicy(obj, self.generate_seed())
             else:
                 policy = ManualControlPolicy(obj, self.generate_seed())
+
+        # if self.engine.global_config["idm_ratio"]
+
         else:
             policy = EnvInputPolicy(obj, self.generate_seed())
         return policy

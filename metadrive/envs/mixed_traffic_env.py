@@ -37,6 +37,7 @@ if __name__ == '__main__':
             assert env.observation_space.contains(obs)
             o, r, d, i = env.step(env.action_space.sample())
             assert obs_space.contains(o)
+            env.render(mode="topdown")
             if d:
                 o = env.reset()
                 assert obs_space.contains(o)

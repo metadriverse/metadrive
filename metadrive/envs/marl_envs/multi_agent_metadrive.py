@@ -98,8 +98,8 @@ class MultiAgentMetaDrive(MetaDriveEnv):
         num_agents = ret_config["num_agents"] if ret_config["num_agents"] != -1 else SpawnManager.max_capacity(
             config["spawn_roads"], config["map_config"]["exit_length"], config["map_config"]["lane_num"]
         )
-        for id in range(num_agents):
-            agent_id = "agent{}".format(id)
+        for agent_id in range(num_agents):
+            agent_id = "agent{}".format(agent_id)
             config = copy.deepcopy(ret_config["vehicle_config"])
             if agent_id in ret_config["target_vehicle_configs"]:
                 config.update(ret_config["target_vehicle_configs"][agent_id])

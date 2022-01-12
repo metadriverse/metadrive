@@ -123,7 +123,7 @@ class TopDownRenderer:
         history_smooth=0,
         road_color=(255, 255, 255),
         show_agent_name=False,
-        track_target_vehicle=True,
+        track_target_vehicle=False,
         # current_track_vehicle=None
     ):
         # Setup some useful flags
@@ -140,7 +140,7 @@ class TopDownRenderer:
         self.history_smooth = history_smooth
         # self.current_track_vehicle = current_track_vehicle
         if self.track_target_vehicle:
-            assert self.current_track_vehicle is not None, "Specify which vehicle to track"
+            assert self.current_track_vehicle is not None, "Please specify which vehicle to track"
         self.road_color = road_color
         self._light_background = light_background
 
@@ -320,10 +320,7 @@ class TopDownRenderer:
             off = (position[0] - field / 2, position[1] - field / 2)
             self.canvas.blit(source=canvas, dest=(0, 0), area=(off[0], off[1], field, field))
         else:
-            raise ValueError()
-            # FIXME check this later
-            self.canvas.blit(self._runtime_canvas, (0, 0))
-            off = (0, 0)
+            pygame.transform.smoothscale(self._runtime_canvas, self.canvas.get_size(), self.canvas)
 
         if self.show_agent_name:
             raise ValueError()

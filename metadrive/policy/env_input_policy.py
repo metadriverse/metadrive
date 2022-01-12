@@ -3,6 +3,9 @@ from metadrive.utils.math_utils import clip
 
 
 class EnvInputPolicy(BasePolicy):
+    """
+    An interface to accept actions from external policies (e.g. RL policies)
+    """
     def __init__(self, obj, seed):
         # Since control object may change
         super(EnvInputPolicy, self).__init__(control_object=None)

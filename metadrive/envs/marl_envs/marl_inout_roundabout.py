@@ -277,9 +277,9 @@ def _vis():
                 },
                 "show_lidar": False,
             },
-            "use_render": True,
+            # "use_render": True,
             "debug": False,
-            "manual_control": True,
+            # "manual_control": True,
             "num_agents": -1,
         }
     )
@@ -292,14 +292,18 @@ def _vis():
             total_r += r_
         ep_s += 1
         # d.update({"total_r": total_r, "episode length": ep_s})
-        render_text = {
-            "total_r": total_r,
-            "episode length": ep_s,
-            "cam_x": env.main_camera.camera_x,
-            "cam_y": env.main_camera.camera_y,
-            "cam_z": env.main_camera.top_down_camera_height
-        }
-        env.render(text=render_text)
+        # render_text = {
+        #     "total_r": total_r,
+        #     "episode length": ep_s,
+        #     "cam_x": env.main_camera.camera_x,
+        #     "cam_y": env.main_camera.camera_y,
+        #     "cam_z": env.main_camera.top_down_camera_height
+        # }
+        # env.render(text=render_text)
+        env.render(mode="topdown")
+
+        print(i)
+
         if d["__all__"]:
             print(
                 "Finish! Current step {}. Group Reward: {}. Average reward: {}".format(
