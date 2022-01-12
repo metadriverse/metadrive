@@ -31,6 +31,7 @@ BASE_DEFAULT_CONFIG = dict(
     is_multi_agent=False,
     allow_respawn=False,
     delay_done=0,  # How many steps for the agent to stay static at the death place after done.
+    idm_ratio=0.0,
 
     # ===== Action =====
     manual_control=False,

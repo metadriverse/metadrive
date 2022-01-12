@@ -217,12 +217,12 @@ def test_ma_parking_lot_reset():
                     assert len(v.navigation.checkpoints) > 2
 
                 for kkk, iii in i.items():
-                    if iii and iii["arrive_dest"]:
+                    if kkk.startswith("agent") and iii and iii["arrive_dest"]:
                         # print("{} success!".format(kkk))
                         success_count += 1
 
                 for kkk, ddd in d.items():
-                    if ddd and kkk != "__all__":
+                    if ddd and kkk not in ["__all__", "all_active_agents_done"]:
                         assert i[kkk]["arrive_dest"]
                         agent_count += 1
 
@@ -284,7 +284,7 @@ def test_ma_parking_lot_reward_done_alignment():
                 act = {k: [action, 1] for k in env.vehicles.keys()}
                 o, r, d, i = _act(env, act)
                 for kkk, ddd in d.items():
-                    if ddd and kkk != "__all__":
+                    if ddd and kkk not in ["__all__", "all_active_agents_done"]:
                         #assert r[kkk] == -777
                         assert i[kkk]["out_of_road"]
                         # print('{} done passed!'.format(kkk))
@@ -340,7 +340,7 @@ def test_ma_parking_lot_reward_done_alignment():
                 #assert r[kkk] == -1.7777
                 # for kkk, ddd in d.items():
                 ddd = d[kkk]
-                if ddd and kkk != "__all__":
+                if ddd and kkk not in ["__all__", "all_active_agents_done"]:
                     #assert r[kkk] == -1.7777
                     assert i[kkk]["crash_vehicle"]
                     assert i[kkk]["crash"]
@@ -398,7 +398,7 @@ def test_ma_parking_lot_reward_done_alignment():
                     assert iii["crash"]
                     # #assert r[kkk] == -1.7777
             for kkk, ddd in d.items():
-                if ddd and kkk != "__all__":
+                if ddd and kkk not in ["__all__", "all_active_agents_done"]:
                     assert i[kkk]["out_of_road"]
                     # print('{} done passed!'.format(kkk))
             for kkk, rrr in r.items():

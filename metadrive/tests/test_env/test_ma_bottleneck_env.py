@@ -217,12 +217,12 @@ def test_ma_bottleneck_reset():
                     assert len(v.navigation.checkpoints) > 2
 
                 for kkk, iii in i.items():
-                    if iii and iii["arrive_dest"]:
+                    if kkk.startswith("agent") and iii and iii["arrive_dest"]:
                         # print("{} success!".format(kkk))
                         success_count += 1
 
                 for kkk, ddd in d.items():
-                    if ddd and kkk != "__all__":
+                    if ddd and kkk not in ["__all__", "all_active_agents_done"]:
                         assert i[kkk]["arrive_dest"]
                         agent_count += 1
 
@@ -290,7 +290,7 @@ def test_ma_bottleneck_reward_done_alignment():
                 act = {k: [action, 1] for k in env.vehicles.keys()}
                 o, r, d, i = _act(env, act)
                 for kkk, ddd in d.items():
-                    if ddd and kkk != "__all__" and not d["__all__"] and not i[kkk]["max_step"]:
+                    if ddd and kkk not in ["__all__", "all_active_agents_done"] and not d["__all__"] and not i[kkk]["max_step"]:
                         if r[kkk] != -777:
                             raise ValueError
                         #assert r[kkk] == -777
@@ -348,7 +348,7 @@ def test_ma_bottleneck_reward_done_alignment():
                 #assert r[kkk] == -1.7777
                 # for kkk, ddd in d.items():
                 ddd = d[kkk]
-                if ddd and kkk != "__all__":
+                if ddd and kkk not in ["__all__", "all_active_agents_done"]:
                     #assert r[kkk] == -1.7777
                     assert i[kkk]["crash_vehicle"]
                     assert i[kkk]["crash"]
@@ -406,7 +406,7 @@ def test_ma_bottleneck_reward_done_alignment():
                     assert iii["crash"]
                     #assert r[kkk] == -1.7777
             for kkk, ddd in d.items():
-                if ddd and kkk != "__all__" and not d["__all__"]:
+                if ddd and kkk not in ["__all__", "all_active_agents_done"] and not d["__all__"]:
                     assert i[kkk]["out_of_road"] or i[kkk]["arrive_dest"]
                     # print('{} done passed!'.format(kkk))
             for kkk, rrr in r.items():
@@ -707,9 +707,9 @@ def test_randomize_spawn_place():
 
 
 if __name__ == '__main__':
-    test_ma_bottleneck_env()
+    # test_ma_bottleneck_env()
     # test_ma_bottleneck_horizon()
-    # test_ma_bottleneck_reset()
+    test_ma_bottleneck_reset()
     # test_ma_bottleneck_reward_done_alignment()
     # test_ma_bottleneck_close_spawn()
     # test_ma_bottleneck_reward_sign()

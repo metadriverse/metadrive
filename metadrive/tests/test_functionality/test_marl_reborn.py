@@ -137,7 +137,7 @@ def test_delay_done():
             print("{} there!".format(env.vehicles.keys()))
             print("{} dead!".format([kkk for kkk, ddd in d.items() if ddd]))
             for kkk, ddd in d.items():
-                if ddd and kkk != "__all__":
+                if ddd and kkk not in ["__all__", "all_active_agents_done"]:
                     dead.add(kkk)
             if d["__all__"]:
                 env.reset()

@@ -400,7 +400,7 @@ def _vis():
 
         env.render(text=render_text)
         for kkk, ddd in d.items():
-            if ddd and kkk != "__all__":
+            if ddd and kkk not in ["__all__", "all_active_agents_done"]:
                 print(
                     "{} done! State: {}".format(
                         kkk, {
@@ -482,7 +482,7 @@ def _long_run():
             if any(d.values()):
                 print("Current Done: {}\nReward: {}".format(d, r))
                 for kkk, ddd in d.items():
-                    if ddd and kkk != "__all__":
+                    if ddd and kkk not in ["__all__", "all_active_agents_done"]:
                         print("Info {}: {}\n".format(kkk, i[kkk]))
                 print("\n")
 

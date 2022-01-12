@@ -227,7 +227,7 @@ def test_ma_roundabout_reset():
                         success_count += 1
 
                 for kkk, ddd in d.items():
-                    if ddd and kkk != "__all__":
+                    if ddd and kkk not in ["__all__", "all_active_agents_done"]:
                         assert i[kkk][TerminationState.SUCCESS]
                         agent_count += 1
 
@@ -285,7 +285,7 @@ def test_ma_roundabout_reward_done_alignment():
                 act = {k: [action, 1] for k in env.vehicles.keys()}
                 o, r, d, i = _act(env, act)
                 for kkk, ddd in d.items():
-                    if ddd and kkk != "__all__":
+                    if ddd and kkk not in ["__all__", "all_active_agents_done"]:
                         # assert r[kkk] == -777
                         assert i[kkk][TerminationState.OUT_OF_ROAD]
                         # print('{} done passed!'.format(kkk))
@@ -343,7 +343,7 @@ def test_ma_roundabout_reward_done_alignment_1():
                 # assert r[kkk] == -1.7777
                 # for kkk, ddd in d.items():
                 ddd = d[kkk]
-                if ddd and kkk != "__all__":
+                if ddd and kkk not in ["__all__", "all_active_agents_done"]:
                     # assert r[kkk] == -1.7777
                     assert i[kkk][TerminationState.CRASH_VEHICLE]
                     assert i[kkk][TerminationState.CRASH]
