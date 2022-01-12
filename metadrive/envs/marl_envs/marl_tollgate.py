@@ -409,7 +409,6 @@ def _vis():
             # "debug": True,
             # "manual_control": True,
             "num_agents": 18,
-
             "idm_ratio": 1.0
         }
     )

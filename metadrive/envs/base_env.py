@@ -296,7 +296,9 @@ class BaseEnv(gym.Env):
                 from metadrive.obs.observation_base import ImageObservation
                 image_source = "rgb_camera"
                 assert len(self.vehicles) == 1, "Multi-agent not supported yet!"
-                self.temporary_img_obs = ImageObservation(self.controllable_agents[DEFAULT_AGENT].config, image_source, False)
+                self.temporary_img_obs = ImageObservation(
+                    self.controllable_agents[DEFAULT_AGENT].config, image_source, False
+                )
             else:
                 raise ValueError("Not implemented yet!")
             self.temporary_img_obs.observe(self.controllable_agents[DEFAULT_AGENT].image_sensors[image_source])
@@ -356,7 +358,8 @@ class BaseEnv(gym.Env):
             done = done_function_result or self.dones[v_id]
             self.dones[v_id] = done
 
-        should_done = engine_info.get(REPLAY_DONE, False) or (self.config["horizon"] and self.episode_steps >= self.config["horizon"])
+        should_done = engine_info.get(REPLAY_DONE, False
+                                      ) or (self.config["horizon"] and self.episode_steps >= self.config["horizon"])
 
         # TODO(pzh): This "auto_termination" is stupid. We should remove it.
         termination_infos = self.for_each_vehicle(auto_termination, should_done)

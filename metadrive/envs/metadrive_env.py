@@ -243,7 +243,8 @@ class MetaDriveEnv(BaseEnv):
         if self.main_camera is None:
             return
         self.main_camera.reset()
-        if self.config["prefer_track_agent"] is not None and self.config["prefer_track_agent"] in self.active_agents.keys():
+        if self.config["prefer_track_agent"] is not None and self.config["prefer_track_agent"
+                                                                         ] in self.active_agents.keys():
             new_v = self.active_agents[self.config["prefer_track_agent"]]
             current_track_vehicle = new_v
         else:

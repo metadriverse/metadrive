@@ -213,7 +213,6 @@ def _vis():
             # "manual_control": True,
             "num_agents": 2,
             "delay_done": 2,
-
             "idm_ratio": 0.5
         }
     )
@@ -239,9 +238,11 @@ def _vis():
         # }
         # env.render(text=render_text)
         env.render(mode="top_down")
-        print("Current step: {}, Active agents: {}, Controllable agents: {}".format(
-            i, len(env.agent_manager.active_agents), len(env.agent_manager.controllable_agents)
-        ))
+        print(
+            "Current step: {}, Active agents: {}, Controllable agents: {}".format(
+                i, len(env.agent_manager.active_agents), len(env.agent_manager.controllable_agents)
+            )
+        )
         # if d["__all__"]:
         if info["all_active_agents_done"]:
             print(

@@ -302,10 +302,7 @@ class AgentManager(BaseManager):
         if hasattr(self, "engine") and self.engine.replay_episode:
             return self.engine.replay_manager.replay_agents
         else:
-            return {
-                self._object_to_agent[k]: v
-                for k, v in self._active_objects.items() if self.is_active_object(k)
-            }
+            return {self._object_to_agent[k]: v for k, v in self._active_objects.items() if self.is_active_object(k)}
 
     @property
     def controllable_agents(self):
@@ -442,7 +439,5 @@ class AgentManager(BaseManager):
         for agent_name in self.not_controllable_agents.keys():
             done, done_info = done_function(agent_name)
             if done:
-                self.finish(
-                    agent_name, ignore_delay_done=done_info.get(TerminationState.SUCCESS, False)
-                )
+                self.finish(agent_name, ignore_delay_done=done_info.get(TerminationState.SUCCESS, False))
                 print("IDM agent {} is done! Done info: {}".format(agent_name, done_info))

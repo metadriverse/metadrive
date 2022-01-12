@@ -359,7 +359,6 @@ def _vis():
             "num_agents": 8,
             "delay_done": 10,
             # "parking_space_num": 4
-
             "idm_ratio": 0.9
         }
     )
