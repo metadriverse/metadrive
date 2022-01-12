@@ -6,7 +6,7 @@ from gym.spaces import Box, Dict
 from metadrive.constants import TerminationState
 from metadrive.envs.marl_envs.marl_inout_roundabout import MultiAgentRoundaboutEnv
 from metadrive.utils import distance_greater, norm
-
+from metadrive.constants import ALL_ACTIVE_AGENTS_DONE
 
 def _check_spaces_before_reset(env):
     a = set(env.config["target_vehicle_configs"].keys())
@@ -70,6 +70,7 @@ def _act(env, action):
     assert isinstance(reward, dict)
     assert isinstance(info, dict)
     assert isinstance(done, dict)
+    info.pop(ALL_ACTIVE_AGENTS_DONE)
     return obs, reward, done, info
 
 
@@ -143,7 +144,7 @@ def test_ma_roundabout_horizon():
                         assert i[kkk][TerminationState.OUT_OF_ROAD]
 
                 for kkk, iii in i.items():
-                    if iii and (iii[TerminationState.OUT_OF_ROAD] or iii["cost"] == 778):
+                    if kkk.startswith("agent") and iii and (iii[TerminationState.OUT_OF_ROAD] or iii["cost"] == 778):
                         assert d[kkk]
                         assert i[kkk]["cost"] == 778
                         assert i[kkk][TerminationState.OUT_OF_ROAD]
@@ -222,12 +223,12 @@ def test_ma_roundabout_reset():
                     assert len(v.navigation.checkpoints) > 2
 
                 for kkk, iii in i.items():
-                    if iii and iii[TerminationState.SUCCESS]:
+                    if kkk.startswith("agent") and iii and iii[TerminationState.SUCCESS]:
                         # print("{} success!".format(kkk))
                         success_count += 1
 
                 for kkk, ddd in d.items():
-                    if ddd and kkk not in ["__all__", "all_active_agents_done"]:
+                    if ddd and kkk not in ["__all__", ALL_ACTIVE_AGENTS_DONE]:
                         assert i[kkk][TerminationState.SUCCESS]
                         agent_count += 1
 
@@ -285,7 +286,7 @@ def test_ma_roundabout_reward_done_alignment():
                 act = {k: [action, 1] for k in env.vehicles.keys()}
                 o, r, d, i = _act(env, act)
                 for kkk, ddd in d.items():
-                    if ddd and kkk not in ["__all__", "all_active_agents_done"]:
+                    if ddd and kkk not in ["__all__", ALL_ACTIVE_AGENTS_DONE]:
                         # assert r[kkk] == -777
                         assert i[kkk][TerminationState.OUT_OF_ROAD]
                         # print('{} done passed!'.format(kkk))
@@ -343,7 +344,7 @@ def test_ma_roundabout_reward_done_alignment_1():
                 # assert r[kkk] == -1.7777
                 # for kkk, ddd in d.items():
                 ddd = d[kkk]
-                if ddd and kkk not in ["__all__", "all_active_agents_done"]:
+                if ddd and kkk not in ["__all__", ALL_ACTIVE_AGENTS_DONE]:
                     # assert r[kkk] == -1.7777
                     assert i[kkk][TerminationState.CRASH_VEHICLE]
                     assert i[kkk][TerminationState.CRASH]

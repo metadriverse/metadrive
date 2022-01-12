@@ -5,7 +5,7 @@ from gym.spaces import Box, Dict
 
 from metadrive.envs.marl_envs.marl_tollgate import MultiAgentTollgateEnv
 from metadrive.utils import distance_greater, norm
-
+from metadrive.constants import ALL_ACTIVE_AGENTS_DONE
 
 def _check_spaces_before_reset(env):
     a = set(env.config["target_vehicle_configs"].keys())
@@ -66,6 +66,7 @@ def _act(env, action):
     assert isinstance(reward, dict)
     assert isinstance(info, dict)
     assert isinstance(done, dict)
+    info.pop(ALL_ACTIVE_AGENTS_DONE)
     return obs, reward, done, info
 
 
@@ -137,7 +138,7 @@ def test_ma_toll_horizon():
                         assert i[kkk]["out_of_road"]
 
                 for kkk, iii in i.items():
-                    if iii and (iii["out_of_road"] or iii["cost"] == 778):
+                    if kkk.startswith("agent") and iii and (iii["out_of_road"] or iii["cost"] == 778):
                         assert d[kkk]
                         assert i[kkk]["cost"] == 778
                         assert i[kkk]["out_of_road"]
@@ -221,7 +222,7 @@ def test_ma_toll_reset():
                         success_count += 1
 
                 for kkk, ddd in d.items():
-                    if ddd and kkk not in ["__all__", "all_active_agents_done"]:
+                    if ddd and kkk not in ["__all__", ALL_ACTIVE_AGENTS_DONE]:
                         assert i[kkk]["arrive_dest"]
                         agent_count += 1
 
@@ -288,7 +289,7 @@ def test_ma_toll_reward_done_alignment_1():
                 act = {k: [action, 1] for k in env.vehicles.keys()}
                 o, r, d, i = _act(env, act)
                 for kkk, ddd in d.items():
-                    if ddd and kkk not in ["__all__", "all_active_agents_done"] and not d["__all__"] and not i[kkk]["max_step"]:
+                    if ddd and kkk not in ["__all__", ALL_ACTIVE_AGENTS_DONE] and not d["__all__"] and not i[kkk]["max_step"]:
                         if r[kkk] != -777:
                             raise ValueError
                         #assert r[kkk] == -777
@@ -346,7 +347,7 @@ def test_ma_toll_reward_done_alignment_1():
                 #assert r[kkk] == -1.7777
                 # for kkk, ddd in d.items():
                 ddd = d[kkk]
-                if ddd and kkk not in ["__all__", "all_active_agents_done"]:
+                if ddd and kkk not in ["__all__", ALL_ACTIVE_AGENTS_DONE]:
                     #assert r[kkk] == -1.7777
                     assert i[kkk]["crash_vehicle"]
                     assert i[kkk]["crash"]
@@ -404,7 +405,7 @@ def test_ma_toll_reward_done_alignment_2():
                     assert iii["crash"]
                     # #assert r[kkk] == -1.7777
             for kkk, ddd in d.items():
-                if ddd and kkk not in ["__all__", "all_active_agents_done"] and not d["__all__"]:
+                if ddd and kkk not in ["__all__", ALL_ACTIVE_AGENTS_DONE] and not d["__all__"]:
                     assert i[kkk]["out_of_road"] or i[kkk]["arrive_dest"] or i[kkk]["crash_building"]
                     # print('{} done passed!'.format(kkk))
             for kkk, rrr in r.items():

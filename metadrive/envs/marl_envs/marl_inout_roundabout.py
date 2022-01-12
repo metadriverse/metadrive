@@ -381,7 +381,7 @@ def _long_run():
             if any(d.values()):
                 print("Current Done: {}\nReward: {}".format(d, r))
                 for kkk, ddd in d.items():
-                    if ddd and kkk not in ["__all__", "all_active_agents_done"]:
+                    if ddd and kkk not in ["__all__", ALL_ACTIVE_AGENTS_DONE]:
                         print("Info {}: {}\n".format(kkk, i[kkk]))
                 print("\n")
 

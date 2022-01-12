@@ -3,6 +3,7 @@ import time
 import numpy as np
 from gym.spaces import Box, Dict
 
+from metadrive.constants import ALL_ACTIVE_AGENTS_DONE
 from metadrive.envs.marl_envs.marl_bottleneck import MultiAgentBottleneckEnv
 from metadrive.utils import distance_greater, norm
 
@@ -66,6 +67,7 @@ def _act(env, action):
     assert isinstance(reward, dict)
     assert isinstance(info, dict)
     assert isinstance(done, dict)
+    info.pop(ALL_ACTIVE_AGENTS_DONE)
     return obs, reward, done, info
 
 
@@ -138,11 +140,11 @@ def test_ma_bottleneck_horizon():
                         assert i[kkk]["out_of_road"]
 
                 for kkk, iii in i.items():
-                    if iii and (iii["out_of_road"] or iii["cost"] == 778):
+                    if kkk.startswith("agent") and iii and (iii["out_of_road"] or iii["cost"] == 778):
                         assert d[kkk]
                         assert i[kkk]["cost"] == 778
                         assert i[kkk]["out_of_road"]
-                        #assert r[kkk] == -777
+                        # assert r[kkk] == -777
 
                 if d["__all__"]:
                     break
@@ -203,8 +205,8 @@ def test_ma_bottleneck_reset():
                     long, lat = v.navigation.final_lane.local_coordinates(v.position)
                     flag1 = (v.navigation.final_lane.length - 5 < long < v.navigation.final_lane.length + 5)
                     flag2 = (
-                        v.navigation.get_current_lane_width() / 2 >= lat >=
-                        (0.5 - v.navigation.get_current_lane_num()) * v.navigation.get_current_lane_width()
+                            v.navigation.get_current_lane_width() / 2 >= lat >=
+                            (0.5 - v.navigation.get_current_lane_num()) * v.navigation.get_current_lane_width()
                     )
                     if not v.arrive_destination:
                         print('sss')
@@ -222,7 +224,7 @@ def test_ma_bottleneck_reset():
                         success_count += 1
 
                 for kkk, ddd in d.items():
-                    if ddd and kkk not in ["__all__", "all_active_agents_done"]:
+                    if ddd and kkk not in ["__all__", ALL_ACTIVE_AGENTS_DONE]:
                         assert i[kkk]["arrive_dest"]
                         agent_count += 1
 
@@ -290,10 +292,11 @@ def test_ma_bottleneck_reward_done_alignment():
                 act = {k: [action, 1] for k in env.vehicles.keys()}
                 o, r, d, i = _act(env, act)
                 for kkk, ddd in d.items():
-                    if ddd and kkk not in ["__all__", "all_active_agents_done"] and not d["__all__"] and not i[kkk]["max_step"]:
+                    if ddd and kkk not in ["__all__", ALL_ACTIVE_AGENTS_DONE] and not d["__all__"] and not i[kkk][
+                        "max_step"]:
                         if r[kkk] != -777:
                             raise ValueError
-                        #assert r[kkk] == -777
+                        # assert r[kkk] == -777
                         assert i[kkk]["out_of_road"]
                         # print('{} done passed!'.format(kkk))
                 for kkk, rrr in r.items():
@@ -345,11 +348,11 @@ def test_ma_bottleneck_reward_done_alignment():
                 iii = i[kkk]
                 assert iii["crash_vehicle"]
                 assert iii["crash"]
-                #assert r[kkk] == -1.7777
+                # assert r[kkk] == -1.7777
                 # for kkk, ddd in d.items():
                 ddd = d[kkk]
-                if ddd and kkk not in ["__all__", "all_active_agents_done"]:
-                    #assert r[kkk] == -1.7777
+                if ddd and kkk not in ["__all__", ALL_ACTIVE_AGENTS_DONE]:
+                    # assert r[kkk] == -1.7777
                     assert i[kkk]["crash_vehicle"]
                     assert i[kkk]["crash"]
                     # print('{} done passed!'.format(kkk))
@@ -404,9 +407,9 @@ def test_ma_bottleneck_reward_done_alignment():
                     assert iii["crash_vehicle"]
                 if iii["crash_vehicle"]:
                     assert iii["crash"]
-                    #assert r[kkk] == -1.7777
+                    # assert r[kkk] == -1.7777
             for kkk, ddd in d.items():
-                if ddd and kkk not in ["__all__", "all_active_agents_done"] and not d["__all__"]:
+                if ddd and kkk not in ["__all__", ALL_ACTIVE_AGENTS_DONE] and not d["__all__"]:
                     assert i[kkk]["out_of_road"] or i[kkk]["arrive_dest"]
                     # print('{} done passed!'.format(kkk))
             for kkk, rrr in r.items():
@@ -444,12 +447,12 @@ def test_ma_bottleneck_reward_done_alignment():
             if d["__all__"]:
                 break
             kkk = "agent0"
-            #assert r[kkk] == 999
+            # assert r[kkk] == 999
             assert i[kkk]["arrive_dest"]
             assert d[kkk]
 
             kkk = "agent1"
-            #assert r[kkk] != 999
+            # assert r[kkk] != 999
             assert not i[kkk]["arrive_dest"]
             assert not d[kkk]
             break
@@ -463,6 +466,7 @@ def test_ma_bottleneck_reward_sign():
     straight road before coming into bottleneck.
     However, some bugs cause the vehicles receive negative reward by doing this behavior!
     """
+
     class TestEnv(MultiAgentBottleneckEnv):
         _respawn_count = 0
 

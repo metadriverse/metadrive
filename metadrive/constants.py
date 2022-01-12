@@ -295,3 +295,6 @@ class WaymoLaneProperty:
     @staticmethod
     def get_line_type_and_line_color(waymo_type):
         pass
+
+
+ALL_ACTIVE_AGENTS_DONE = "all_active_agents_done"

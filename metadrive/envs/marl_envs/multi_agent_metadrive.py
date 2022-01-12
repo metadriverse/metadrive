@@ -3,7 +3,7 @@ import logging
 
 from metadrive.component.pgblock.first_block import FirstPGBlock
 from metadrive.component.road_network import Road
-from metadrive.constants import TerminationState
+from metadrive.constants import TerminationState, ALL_ACTIVE_AGENTS_DONE
 from metadrive.envs.metadrive_env import MetaDriveEnv
 from metadrive.manager.spawn_manager import SpawnManager
 from metadrive.utils import setup_logger, get_np_random, Config
@@ -154,9 +154,9 @@ class MultiAgentMetaDrive(MetaDriveEnv):
                 d[k] = True
 
         if len(self.agent_manager.active_agents) == 0:
-            i["all_active_agents_done"] = True
+            i[ALL_ACTIVE_AGENTS_DONE] = True
         else:
-            i["all_active_agents_done"] = False
+            i[ALL_ACTIVE_AGENTS_DONE] = False
 
         return o, r, d, i
 

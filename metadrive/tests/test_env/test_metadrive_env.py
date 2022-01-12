@@ -52,6 +52,7 @@ def _act(env, action):
         assert k in info
 
 
+
 @pytest.mark.parametrize("config", list(blackbox_test_configs.values()), ids=list(blackbox_test_configs.keys()))
 def test_pgdrive_env_blackbox(config):
     env = MetaDriveEnv(config=copy.deepcopy(config))
