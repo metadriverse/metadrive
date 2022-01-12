@@ -19,7 +19,7 @@ if __name__ == "__main__":
             # "agent_policy": WaymoIDMPolicy,
             "manual_control": True,
             # "debug":True,
-            "no_traffic":False,
+            "no_traffic": False,
             # "start_case_index": 192,
             "case_num": 100,
             "waymo_data_directory": "/home/liquanyi/validation",
