@@ -17,6 +17,9 @@ def _check_spaces_before_reset(env):
 
 
 def _check_spaces_after_reset(env, obs=None):
+    if env.config["idm_ratio"] != 0.0:
+        return
+
     a = set(env.config["target_vehicle_configs"].keys())
     b = set(env.observation_space.spaces.keys())
     assert a == b
@@ -71,16 +74,22 @@ def _act(env, action):
 
 
 def test_ma_roundabout_env():
-    for env in [MultiAgentRoundaboutEnv({"delay_done": 0, "num_agents": 1,
-                                         "vehicle_config": {"lidar": {"num_others": 8}}}),
-                MultiAgentRoundaboutEnv({"num_agents": 1, "delay_done": 0,
-                                         "vehicle_config": {"lidar": {"num_others": 0}}}),
-                MultiAgentRoundaboutEnv({"num_agents": 4, "delay_done": 0,
-                                         "vehicle_config": {"lidar": {"num_others": 8}}}),
-                MultiAgentRoundaboutEnv({"num_agents": 4, "delay_done": 0,
-                                         "vehicle_config": {"lidar": {"num_others": 0}}}),
-                MultiAgentRoundaboutEnv({"num_agents": 8, "delay_done": 0,
-                                         "vehicle_config": {"lidar": {"num_others": 0}}})]:
+    for env in [
+        MultiAgentRoundaboutEnv({"delay_done": 0, "num_agents": 1,
+                                 "vehicle_config": {"lidar": {"num_others": 8}}}),
+        MultiAgentRoundaboutEnv({"num_agents": 1, "delay_done": 0,
+                                 "vehicle_config": {"lidar": {"num_others": 0}}}),
+        MultiAgentRoundaboutEnv({"num_agents": 4, "delay_done": 0,
+                                 "vehicle_config": {"lidar": {"num_others": 8}}}),
+        MultiAgentRoundaboutEnv({"num_agents": 4, "delay_done": 0,
+                                 "vehicle_config": {"lidar": {"num_others": 0}}}),
+        MultiAgentRoundaboutEnv({"num_agents": 8, "delay_done": 0,
+                                 "vehicle_config": {"lidar": {"num_others": 0}}}),
+        MultiAgentRoundaboutEnv({"num_agents": 8, "delay_done": 0, "idm_ratio": 0.5,
+                                 "vehicle_config": {"lidar": {"num_others": 0}}}),
+        MultiAgentRoundaboutEnv({"num_agents": 8, "delay_done": 0, "idm_ratio": 1.0,
+                                 "vehicle_config": {"lidar": {"num_others": 0}}}),
+    ]:
         try:
             _check_spaces_before_reset(env)
             obs = env.reset()
@@ -143,7 +152,7 @@ def test_ma_roundabout_horizon():
                         assert d[kkk]
                         assert i[kkk]["cost"] == 778
                         assert i[kkk][TerminationState.OUT_OF_ROAD]
-                        #assert r[kkk] == -777
+                        # assert r[kkk] == -777
 
                 if d["__all__"]:
                     break
@@ -204,8 +213,8 @@ def test_ma_roundabout_reset():
                     long, lat = v.navigation.final_lane.local_coordinates(v.position)
                     flag1 = (v.navigation.final_lane.length - 5 < long < v.navigation.final_lane.length + 5)
                     flag2 = (
-                        v.navigation.get_current_lane_width() / 2 >= lat >=
-                        (0.5 - v.navigation.get_current_lane_num()) * v.navigation.get_current_lane_width()
+                            v.navigation.get_current_lane_width() / 2 >= lat >=
+                            (0.5 - v.navigation.get_current_lane_num()) * v.navigation.get_current_lane_width()
                     )
                     if not v.arrive_destination:
                         print('sss')
@@ -282,7 +291,7 @@ def test_ma_roundabout_reward_done_alignment():
                 o, r, d, i = _act(env, act)
                 for kkk, ddd in d.items():
                     if ddd and kkk != "__all__":
-                        #assert r[kkk] == -777
+                        # assert r[kkk] == -777
                         assert i[kkk][TerminationState.OUT_OF_ROAD]
                         # print('{} done passed!'.format(kkk))
                 for kkk, rrr in r.items():
@@ -336,11 +345,11 @@ def test_ma_roundabout_reward_done_alignment_1():
                 iii = i[kkk]
                 assert iii[TerminationState.CRASH_VEHICLE]
                 assert iii[TerminationState.CRASH]
-                #assert r[kkk] == -1.7777
+                # assert r[kkk] == -1.7777
                 # for kkk, ddd in d.items():
                 ddd = d[kkk]
                 if ddd and kkk != "__all__":
-                    #assert r[kkk] == -1.7777
+                    # assert r[kkk] == -1.7777
                     assert i[kkk][TerminationState.CRASH_VEHICLE]
                     assert i[kkk][TerminationState.CRASH]
                     # print('{} done passed!'.format(kkk))
@@ -430,12 +439,12 @@ def test_ma_roundabout_reward_done_alignment_1():
             if d["__all__"]:
                 break
             kkk = "agent0"
-            #assert r[kkk] == 999
+            # assert r[kkk] == 999
             assert i[kkk][TerminationState.SUCCESS]
             assert d[kkk]
 
             kkk = "agent1"
-            #assert r[kkk] != 999
+            # assert r[kkk] != 999
             assert not i[kkk][TerminationState.SUCCESS]
             assert not d[kkk]
             break
@@ -449,6 +458,7 @@ def test_ma_roundabout_reward_sign():
     straight road before coming into roundabout.
     However, some bugs cause the vehicles receive negative reward by doing this behavior!
     """
+
     class TestEnv(MultiAgentRoundaboutEnv):
         _respawn_count = 0
 
@@ -682,7 +692,7 @@ def test_randomize_spawn_place():
 
 
 if __name__ == '__main__':
-    # test_ma_roundabout_env()
+    test_ma_roundabout_env()
     # test_ma_roundabout_horizon()
     # test_ma_roundabout_reset()
     # test_ma_roundabout_reward_done_alignment()
@@ -690,7 +700,7 @@ if __name__ == '__main__':
     # test_ma_roundabout_reward_sign()
     # test_ma_roundabout_init_space()
     # test_ma_roundabout_no_short_episode()
-    test_ma_roundabout_horizon_termination()
+    # test_ma_roundabout_horizon_termination()
     # test_ma_roundabout_40_agent_reset_after_respawn()
     # test_ma_no_reset_error()
     # test_randomize_spawn_place()

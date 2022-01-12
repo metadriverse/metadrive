@@ -217,6 +217,12 @@ class MultiAgentMetaDrive(MetaDriveEnv):
         super(MultiAgentMetaDrive, self).setup_engine()
         self.engine.register_manager("spawn_manager", SpawnManager())
 
+    def reset(self, *args, **kwargs):
+        ret = super(MultiAgentMetaDrive, self).reset(*args, **kwargs)
+        if self.config["idm_ratio"] == 0:
+            assert (len(self.vehicles) == self.num_agents) or (self.num_agents == -1)
+        return ret
+
 
 def _test():
     setup_logger(True)

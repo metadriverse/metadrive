@@ -1,8 +1,9 @@
 import copy
 from typing import Dict
 
-from gym.spaces import Box, Dict, MultiDiscrete
 import numpy as np
+from gym.spaces import Box, Dict, MultiDiscrete
+
 from metadrive.constants import DEFAULT_AGENT
 from metadrive.manager.base_manager import BaseManager
 from metadrive.policy.AI_protect_policy import AIProtectPolicy
@@ -238,7 +239,7 @@ class AgentManager(BaseManager):
                 for old_agent_id, v_name in self._agents_finished_this_frame.items()
             }
             for obj_id, observation in self.observations.items():
-                if self.is_active_object(obj_id):
+                if self.is_controllable_object(obj_id):
                     ret[self.object_to_agent(obj_id)] = observation
             return ret
 
@@ -248,31 +249,46 @@ class AgentManager(BaseManager):
             for old_agent_id, v_name in self._agents_finished_this_frame.items()
         }
         for obj_id, space in self.observation_spaces.items():
-            if self.is_active_object(obj_id):
+            if self.is_controllable_object(obj_id):
                 ret[self.object_to_agent(obj_id)] = space
         return ret
 
     def get_action_spaces(self):
         ret = dict()
         for obj_id, space in self.action_spaces.items():
-            if self.is_active_object(obj_id):
+            if self.is_controllable_object(obj_id):
                 ret[self.object_to_agent(obj_id)] = space
         return ret
 
-    def is_active_object(self, object_name):
+    def is_controllable_object(self, object_name):
         if not self.INITIALIZED:
             return True
-        return True if object_name in self._active_objects.keys() else False
+
+        # If this agent is active, and it is control by external policy, then we count it into the action space.
+        if (
+                object_name in self._active_objects.keys() and
+                (isinstance(self.engine.get_policy(object_name), EnvInputPolicy))
+        ):
+            return True
+        return False
+
+    def is_active_object(self, object_name):
+        print("agent_manager.is_active_object function is deprecated! Please use is_controllable_object instead!")
+        return self.is_controllable_object(object_name)
 
     @property
     def active_agents(self):
         """
         Return Map<agent_id, BaseVehicle>
         """
-        return self.engine.replay_manager.replay_agents if hasattr(self, "engine") and self.engine.replay_episode else {
-            self._object_to_agent[k]: v
-            for k, v in self._active_objects.items()
-        }
+        if hasattr(self, "engine") and self.engine.replay_episode:
+            return self.engine.replay_manager.replay_agents
+        else:
+            return {
+                self._object_to_agent[k]: v
+                for k, v in self._active_objects.items()
+                if self.is_controllable_object(k)
+            }
 
     @property
     def active_objects(self):

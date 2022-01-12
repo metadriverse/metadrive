@@ -282,7 +282,7 @@ def _vis():
             # "manual_control": True,
 
             "num_agents": -1,
-            "idm_ratio": 0.9,
+            "idm_ratio": 1.0,
 
         }
     )
@@ -290,7 +290,7 @@ def _vis():
     total_r = 0
     ep_s = 0
     for i in range(1, 100000):
-        o, r, d, info = env.step({k: [0, .0] for k in env.vehicles.keys()})
+        o, r, d, info = env.step({k: [0, 1.0] for k in env.vehicles.keys()})
         for r_ in r.values():
             total_r += r_
         ep_s += 1

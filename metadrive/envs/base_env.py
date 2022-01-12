@@ -329,7 +329,6 @@ class BaseEnv(gym.Env):
         self.episode_steps = 0
         self.episode_rewards = defaultdict(float)
         self.episode_lengths = defaultdict(int)
-        assert (len(self.vehicles) == self.num_agents) or (self.num_agents == -1)
 
         return self._get_reset_return()
 
