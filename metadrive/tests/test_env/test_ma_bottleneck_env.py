@@ -205,8 +205,8 @@ def test_ma_bottleneck_reset():
                     long, lat = v.navigation.final_lane.local_coordinates(v.position)
                     flag1 = (v.navigation.final_lane.length - 5 < long < v.navigation.final_lane.length + 5)
                     flag2 = (
-                            v.navigation.get_current_lane_width() / 2 >= lat >=
-                            (0.5 - v.navigation.get_current_lane_num()) * v.navigation.get_current_lane_width()
+                        v.navigation.get_current_lane_width() / 2 >= lat >=
+                        (0.5 - v.navigation.get_current_lane_num()) * v.navigation.get_current_lane_width()
                     )
                     if not v.arrive_destination:
                         print('sss')
@@ -292,8 +292,8 @@ def test_ma_bottleneck_reward_done_alignment():
                 act = {k: [action, 1] for k in env.vehicles.keys()}
                 o, r, d, i = _act(env, act)
                 for kkk, ddd in d.items():
-                    if ddd and kkk not in ["__all__", ALL_ACTIVE_AGENTS_DONE] and not d["__all__"] and not i[kkk][
-                        "max_step"]:
+                    if ddd and kkk not in ["__all__", ALL_ACTIVE_AGENTS_DONE
+                                           ] and not d["__all__"] and not i[kkk]["max_step"]:
                         if r[kkk] != -777:
                             raise ValueError
                         # assert r[kkk] == -777
@@ -466,7 +466,6 @@ def test_ma_bottleneck_reward_sign():
     straight road before coming into bottleneck.
     However, some bugs cause the vehicles receive negative reward by doing this behavior!
     """
-
     class TestEnv(MultiAgentBottleneckEnv):
         _respawn_count = 0
 

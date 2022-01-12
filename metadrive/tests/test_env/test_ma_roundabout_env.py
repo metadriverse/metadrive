@@ -3,10 +3,11 @@ import time
 import numpy as np
 from gym.spaces import Box, Dict
 
+from metadrive.constants import ALL_ACTIVE_AGENTS_DONE
 from metadrive.constants import TerminationState
 from metadrive.envs.marl_envs.marl_inout_roundabout import MultiAgentRoundaboutEnv
 from metadrive.utils import distance_greater, norm
-from metadrive.constants import ALL_ACTIVE_AGENTS_DONE
+
 
 def _check_spaces_before_reset(env):
     a = set(env.config["target_vehicle_configs"].keys())

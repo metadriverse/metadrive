@@ -3,9 +3,10 @@ import time
 import numpy as np
 from gym.spaces import Box, Dict
 
+from metadrive.constants import ALL_ACTIVE_AGENTS_DONE
 from metadrive.envs.marl_envs.marl_tollgate import MultiAgentTollgateEnv
 from metadrive.utils import distance_greater, norm
-from metadrive.constants import ALL_ACTIVE_AGENTS_DONE
+
 
 def _check_spaces_before_reset(env):
     a = set(env.config["target_vehicle_configs"].keys())
@@ -289,7 +290,8 @@ def test_ma_toll_reward_done_alignment_1():
                 act = {k: [action, 1] for k in env.vehicles.keys()}
                 o, r, d, i = _act(env, act)
                 for kkk, ddd in d.items():
-                    if ddd and kkk not in ["__all__", ALL_ACTIVE_AGENTS_DONE] and not d["__all__"] and not i[kkk]["max_step"]:
+                    if ddd and kkk not in ["__all__", ALL_ACTIVE_AGENTS_DONE
+                                           ] and not d["__all__"] and not i[kkk]["max_step"]:
                         if r[kkk] != -777:
                             raise ValueError
                         #assert r[kkk] == -777
