@@ -41,7 +41,8 @@ class ManualControlPolicy(EnvInputPolicy):
         self.controller.process_others(takeover_callback=self.toggle_takeover)
 
         try:
-            if self.engine.current_track_vehicle.expert_takeover:
+            if self.engine.current_track_vehicle is not None and \
+                    self.engine.current_track_vehicle.expert_takeover:
                 return expert(self.engine.current_track_vehicle)
         except ValueError:
             # if observation doesn't match, fall back to manual control

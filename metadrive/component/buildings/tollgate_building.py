@@ -23,3 +23,11 @@ class TollGateBuilding(BaseBuilding):
             building_model.setH(90)
             building_model.reparentTo(self.origin)
             gate_model.reparentTo(self.origin)
+
+    @property
+    def top_down_length(self):
+        return 1
+
+    @property
+    def top_down_width(self):
+        return 1
