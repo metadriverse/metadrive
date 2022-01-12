@@ -290,3 +290,8 @@ class BaseObject(BaseRunnable):
         raise NotImplementedError(
             "Implement this func for rendering class {} in top down renderer".format(self.class_name)
         )
+
+    @property
+    def draw_contour(self):
+        """Whether to draw a black contour in the top-down view"""
+        return True

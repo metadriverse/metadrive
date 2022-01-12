@@ -193,7 +193,7 @@ class VehicleGraphics:
 
     @classmethod
     def display(
-        cls, vehicle, surface, color, heading, label: bool = False, draw_countour=False, contour_width=1
+        cls, vehicle, surface, color, heading, label: bool = False, draw_contour=False, contour_width=1
     ) -> None:
         """
         Display a vehicle on a pygame surface.
@@ -214,7 +214,7 @@ class VehicleGraphics:
         box_rotate = [p.rotate(angle) + position for p in box]
 
         pygame.draw.polygon(surface, color, box_rotate)
-        if draw_countour and pygame.ver.startswith("2"):
+        if draw_contour and pygame.ver.startswith("2"):
             pygame.draw.polygon(surface, cls.BLACK, box_rotate, width=contour_width)  # , 1)
 
         # Label

@@ -37,3 +37,7 @@ class TollGateBuilding(BaseBuilding):
     @property
     def top_down_color(self):
         return (255 - 35, 255 - 35, 255 - 35)
+
+    @property
+    def draw_contour(self):
+        return False

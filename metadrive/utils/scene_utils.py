@@ -81,11 +81,11 @@ def get_lanes_bounding_box(lanes, extra_lateral=3) -> Tuple:
         line_points = get_curve_contour(lanes, extra_lateral) if isinstance(lanes[0], CircularLane) \
             else get_straight_contour(lanes, extra_lateral)
     else:
-        line_points = get_waypoint_countour(lanes)
+        line_points = get_waypoint_contour(lanes)
     return get_points_bounding_box(line_points)
 
 
-def get_waypoint_countour(lanes):
+def get_waypoint_contour(lanes):
     assert isinstance(lanes[0], WayPointLane)
     ret = []
     for lane in lanes:

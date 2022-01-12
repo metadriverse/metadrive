@@ -14,7 +14,7 @@ pygame = import_pygame()
 
 color_white = (255, 255, 255)
 color_light_gray = (35, 35, 35)
-history_object = namedtuple("history_object", "name position heading_theta WIDTH LENGTH color done")
+history_object = namedtuple("history_object", "name position heading_theta WIDTH LENGTH color done draw_contour")
 
 
 def draw_top_down_map(
@@ -245,7 +245,8 @@ class TopDownRenderer:
                     LENGTH=obj.top_down_length,
                     position=obj.position,
                     color=obj.top_down_color,
-                    done=False
+                    done=False,
+                    draw_contour=obj.draw_contour
                 )
             )
         return frame_objects
@@ -271,7 +272,7 @@ class TopDownRenderer:
                     surface=self._runtime_canvas,
                     heading=h,
                     color=(c[0] + alpha_f * (255 - c[0]), c[1] + alpha_f * (255 - c[1]), c[2] + alpha_f * (255 - c[2])),
-                    draw_countour=False
+                    draw_contour=False
                 )
 
         # Use this line if you wish to draw "future" trajectory.
@@ -288,7 +289,7 @@ class TopDownRenderer:
                 surface=self._runtime_canvas,
                 heading=h,
                 color=(c[0] + alpha_f * (255 - c[0]), c[1] + alpha_f * (255 - c[1]), c[2] + alpha_f * (255 - c[2])),
-                draw_countour=True,
+                draw_contour=v.draw_contour,
                 contour_width=2
             )
 
