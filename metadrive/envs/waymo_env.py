@@ -73,7 +73,7 @@ class WaymoEnv(BaseEnv):
         self.engine.register_manager("map_manager", WaymoMapManager())
         if not self.config["no_traffic"]:
             self.engine.register_manager("traffic_manager", WaymoTrafficManager())
-        self.engine.accept("s", self.stop)
+        # self.engine.accept("s", self.stop)
 
     def step(self, actions):
         ret = super(WaymoEnv, self).step(actions)

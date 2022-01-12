@@ -53,6 +53,7 @@ class WaymoIDMTrafficManager(WaymoTrafficManager):
                     v = self.spawn_object(
                         SVehicle, position=init_info["position"], heading=init_info["heading"], vehicle_config=v_config
                     )
+                    v.set_position(v.position, height=0.8)
                     self.vehicle_destination_map[v.id] = destinations
                     self.add_policy(v.id, WaymoIDMPolicy(v, self.generate_seed()))
                     v.set_velocity(init_info["velocity"])
@@ -113,10 +114,10 @@ class WaymoIDMTrafficManager(WaymoTrafficManager):
         try:
             for start in start_lanes:
                 for end in end_lanes:
-                    path = self.engine.current_map.road_network.shortest_path(start[0].index, end[0].index)
+                    dest = end[0].index if start[0].index != end[0].index or len(end[0].exit_lanes)==0 else end[0].exit_lanes[0]
+                    path = self.engine.current_map.road_network.shortest_path(start[0].index, dest)
                     if len(path) > 0:
-                        signal.alarm(0)
-                        return (start[0].index, end[0].index)
+                        return (start[0].index, dest)
             return None, None
         except:
             return None, None
