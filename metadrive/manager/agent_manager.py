@@ -84,10 +84,11 @@ class AgentManager(BaseManager):
             else:
                 policy = ManualControlPolicy(obj, self.generate_seed())
 
-        elif self.engine.global_config["idm_ratio"]:
+        elif self.engine.global_config["idm_ratio"] > 0.0:
             assert self.engine.global_config["is_multi_agent"], "Mixed policies can only be triggered in MARL envs!"
             assert 0 <= self.engine.global_config["idm_ratio"] <= 1, "idm_ratio should in [0, 1]."
-            ratio = np.mean([isinstance(p, IDMPolicy) for p in self.engine.get_all_policies()])
+            ratio = [isinstance(p, IDMPolicy) for p in self.engine.get_all_policies()]
+            ratio = np.mean(ratio) if len(ratio) > 0 else 0.0
             if ratio < self.engine.global_config["idm_ratio"]:
                 policy = IDMPolicy(obj, self.generate_seed())  # IDM
 

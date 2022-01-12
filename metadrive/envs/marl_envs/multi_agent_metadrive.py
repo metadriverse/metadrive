@@ -147,8 +147,14 @@ class MultiAgentMetaDrive(MetaDriveEnv):
             or (self.episode_steps >= 5 * self.config["horizon"])
         )
         if d["__all__"]:
+            assert len(self.agent_manager.controllable_agents) == 0
             for k in d.keys():
                 d[k] = True
+
+        if len(self.agent_manager.active_agents) == 0:
+            i["all_active_agents_done"] = True
+        else:
+            i["all_active_agents_done"] = False
 
         return o, r, d, i
 

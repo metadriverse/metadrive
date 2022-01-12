@@ -410,7 +410,7 @@ def _vis():
             # "manual_control": True,
             "num_agents": 18,
 
-            "idm_ratio": 0.9
+            "idm_ratio": 1.0
         }
     )
     o = env.reset()
@@ -451,7 +451,8 @@ def _vis():
             )
         )
 
-        if d["__all__"]:
+        # if d["__all__"]:
+        if info["all_active_agents_done"]:
             print(info)
             print(
                 "Finish! Current step {}. Group Reward: {}. Average reward: {}".format(
