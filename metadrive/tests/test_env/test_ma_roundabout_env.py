@@ -87,11 +87,11 @@ def _act(env, action):
 
 def test_ma_roundabout_env():
     for env in [
-        # MultiAgentRoundaboutEnv({"delay_done": 0, "num_agents": 1, "vehicle_config": {"lidar": {"num_others": 8}}}),
-        # MultiAgentRoundaboutEnv({"num_agents": 1, "delay_done": 0, "vehicle_config": {"lidar": {"num_others": 0}}}),
-        # MultiAgentRoundaboutEnv({"num_agents": 4, "delay_done": 0, "vehicle_config": {"lidar": {"num_others": 8}}}),
-        # MultiAgentRoundaboutEnv({"num_agents": 4, "delay_done": 0, "vehicle_config": {"lidar": {"num_others": 0}}}),
-        # MultiAgentRoundaboutEnv({"num_agents": 8, "delay_done": 0, "vehicle_config": {"lidar": {"num_others": 0}}}),
+        MultiAgentRoundaboutEnv({"delay_done": 0, "num_agents": 1, "vehicle_config": {"lidar": {"num_others": 8}}}),
+        MultiAgentRoundaboutEnv({"num_agents": 1, "delay_done": 0, "vehicle_config": {"lidar": {"num_others": 0}}}),
+        MultiAgentRoundaboutEnv({"num_agents": 4, "delay_done": 0, "vehicle_config": {"lidar": {"num_others": 8}}}),
+        MultiAgentRoundaboutEnv({"num_agents": 4, "delay_done": 0, "vehicle_config": {"lidar": {"num_others": 0}}}),
+        MultiAgentRoundaboutEnv({"num_agents": 8, "delay_done": 0, "vehicle_config": {"lidar": {"num_others": 0}}}),
         MultiAgentRoundaboutEnv({"num_agents": 8, "delay_done": 0, "idm_ratio": 0.5,
                                  "vehicle_config": {"lidar": {"num_others": 0}}}),
         MultiAgentRoundaboutEnv({"num_agents": 8, "delay_done": 0, "idm_ratio": 1.0,
