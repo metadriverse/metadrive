@@ -32,7 +32,7 @@ class WaymoMapManager(BaseManager):
         self.update_route(map_config)
 
     def update_route(self, data):
-        init_state = WaymoTrafficManager.parse_vehicle_state(data["tracks"][data["sdc_index"]]["state"], 1)
+        init_state = WaymoTrafficManager.parse_vehicle_state(data["tracks"][data["sdc_index"]]["state"], 0)
         last_state = WaymoTrafficManager.parse_vehicle_state(data["tracks"][data["sdc_index"]]["state"], -1)
         init_position = init_state["position"]
         init_yaw = init_state["heading"]

@@ -21,8 +21,8 @@ if __name__ == "__main__":
             # "debug":True,
             "no_traffic": False,
             # "start_case_index": 192,
-            "case_num": 100,
-            "waymo_data_directory": "E:\\hk\\idm_filtered\\validation",
+            "case_num": 20,
+            "waymo_data_directory": "/Users/fenglan/Downloads/waymo/scenes_pred",
             "horizon": 1000,
             # "vehicle_config": dict(show_lidar=True,
             #                        show_lane_line_detector=True,
@@ -31,7 +31,7 @@ if __name__ == "__main__":
     )
     success = []
     for i in range(env.config["case_num"]):
-        env.reset(force_seed=3)
+        env.reset(force_seed=1)
         while True:
             o, r, d, info = env.step([0, 0])
             assert env.observation_space.contains(o)
@@ -47,7 +47,7 @@ if __name__ == "__main__":
                         # "ckpts": env.vehicle.navigation.checkpoints,
                         # "lane_heading": c_lane.heading_theta_at(long),
                         # "long": long,
-                        # "lat": lat,
+                        # "lat": lat,ﬁ
                         # "v_heading": env.vehicle.heading_theta,
                         "seed": env.engine.global_seed + env.config["start_case_index"],
                         "reward": r,
