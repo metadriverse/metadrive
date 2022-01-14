@@ -33,7 +33,11 @@ class WaymoIDMTrafficManager(WaymoTrafficManager):
                 if not init_info["valid"]:
                     continue
                 dest_info = self.parse_vehicle_state(type_traj["state"], -1)
+                start, destinations = self.get_route(init_info, dest_info)
+                if start is None:
+                    continue
                 if init_info['position'] == dest_info['position']:
+                    # statiic vehicle
                     v_config = copy.deepcopy(self.engine.global_config["vehicle_config"])
                     v_config.update(
                         dict(
@@ -43,7 +47,9 @@ class WaymoIDMTrafficManager(WaymoTrafficManager):
                             show_lidar=False,
                             show_lane_line_detector=False,
                             show_side_detector=False,
-                            need_navigation=False
+                            need_navigation=True,
+                            spawn_lane_index=start,
+                            destination=destinations[0]
                         )
                     )
                     v = self.spawn_object(
@@ -51,33 +57,28 @@ class WaymoIDMTrafficManager(WaymoTrafficManager):
                     )
                     v.set_position(v.position, height=0.8)
                     v.set_velocity((0,0))
-                    #v.set_static(True)
-                    continue
-
-                start, destinations = self.get_route(init_info, dest_info)
-                if start is None:
-                    continue
-
-                v_config = copy.deepcopy(self.engine.global_config["vehicle_config"])
-                v_config.update(
-                    dict(
-                        show_navi_mark=False,
-                        show_dest_mark=False,
-                        enable_reverse=False,
-                        show_lidar=False,
-                        show_lane_line_detector=False,
-                        show_side_detector=False,
-                        spawn_lane_index=start,
-                        destination=destinations[0]
+                    v.set_static(True)
+                else:
+                    v_config = copy.deepcopy(self.engine.global_config["vehicle_config"])
+                    v_config.update(
+                        dict(
+                            show_navi_mark=False,
+                            show_dest_mark=False,
+                            enable_reverse=False,
+                            show_lidar=False,
+                            show_lane_line_detector=False,
+                            show_side_detector=False,
+                            spawn_lane_index=start,
+                            destination=destinations[0]
+                        )
                     )
-                )
-                v = self.spawn_object(
-                    SVehicle, position=init_info["position"], heading=init_info["heading"], vehicle_config=v_config
-                )
-                v.set_position(v.position, height=0.8)
-                self.vehicle_destination_map[v.id] = destinations
-                self.add_policy(v.id, WaymoIDMPolicy(v, self.generate_seed()))
-                v.set_velocity(init_info['velocity'])
+                    v = self.spawn_object(
+                        SVehicle, position=init_info["position"], heading=init_info["heading"], vehicle_config=v_config
+                    )
+                    v.set_position(v.position, height=0.8)
+                    self.vehicle_destination_map[v.id] = destinations
+                    self.add_policy(v.id, WaymoIDMPolicy(v, self.generate_seed()))
+                    v.set_velocity(init_info['velocity'])
             elif type_traj["type"] == AgentType.VEHICLE and v_id == self.sdc_index:
                 # set Ego V velocity
                 init_info = self.parse_vehicle_state(type_traj["state"], 0)
@@ -89,7 +90,7 @@ class WaymoIDMTrafficManager(WaymoTrafficManager):
 
     def before_step(self, *args, **kwargs):
         for v in self.spawned_objects.values():
-            if v.name in self.engine._object_policies:
+            if self.engine.has_policy(v.id):
                 p = self.engine.get_policy(v.name)
                 v.before_step(p.act())
 
@@ -97,7 +98,7 @@ class WaymoIDMTrafficManager(WaymoTrafficManager):
     def after_step(self, *args, **kwargs):
         vehicles_to_clear = []
         for v in self.spawned_objects.values():
-            if not v.navigation: continue
+            if not self.engine.has_policy(v.name): continue
             if v.lane in self.vehicle_destination_map[v.id]:
                 vehicles_to_clear.append(v)
         self.clear_objects(vehicles_to_clear)

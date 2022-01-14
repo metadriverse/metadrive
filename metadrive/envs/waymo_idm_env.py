@@ -22,7 +22,7 @@ if __name__ == "__main__":
             "no_traffic": False,
             # "start_case_index": 192,
             "case_num": 20,
-            "waymo_data_directory": "/Users/fenglan/Downloads/waymo/scenes_pred",
+            "waymo_data_directory": "C:\\Users\\78587\\Desktop\\cases",
             "horizon": 1000,
             # "vehicle_config": dict(show_lidar=True,
             #                        show_lane_line_detector=True,
