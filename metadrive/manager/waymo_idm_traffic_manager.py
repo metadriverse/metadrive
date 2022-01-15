@@ -1,4 +1,5 @@
 import copy
+
 import signal
 
 import numpy as np
@@ -6,6 +7,7 @@ import numpy as np
 from metadrive.component.vehicle.vehicle_type import SVehicle
 from metadrive.manager.waymo_traffic_manager import WaymoTrafficManager
 from metadrive.policy.idm_policy import WaymoIDMPolicy
+from metadrive.policy.expert_policy import ExpertPolicy
 from metadrive.utils.scene_utils import ray_localization
 from metadrive.utils.waymo_utils.waymo_utils import AgentType
 
@@ -84,6 +86,7 @@ class WaymoIDMTrafficManager(WaymoTrafficManager):
                 init_info = self.parse_vehicle_state(type_traj["state"], 0)
                 ego_v = list(self.engine.agent_manager.active_agents.values())[0]
                 ego_v.set_velocity(init_info["velocity"])
+                ego_v.set_heading_theta(init_info["heading"], rad_to_degree=False)
                 ego_v.set_position(init_info["position"])
         # except:
         #     raise ValueError("Can not LOAD traffic for seed: {}".format(self.engine.global_random_seed))
