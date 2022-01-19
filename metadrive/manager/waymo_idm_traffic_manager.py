@@ -126,11 +126,9 @@ class WaymoIDMTrafficManager(WaymoTrafficManager):
             use_heading_filter=False
         )
         eventlet.monkey_patch()
-        try:
-            with eventlet.Timeout(1,True):
-                start, end = self.filter_path(start_lanes, end_lanes)
-        except eventlet.timeout.Timeout:
-            return None,None
+
+        start, end = self.filter_path(start_lanes, end_lanes)
+
         if start is None:
             return None, None
         lane = self.engine.current_map.road_network.get_lane(end)
@@ -144,12 +142,13 @@ class WaymoIDMTrafficManager(WaymoTrafficManager):
     def filter_path(self, start_lanes, end_lanes):
         # add some functions to store the filter information to avoid repeat filter when encountering the same cases
         try:
-            for start in start_lanes:
-                for end in end_lanes:
-                    dest = end[0].index if start[0].index != end[0].index or len(end[0].exit_lanes)==0 else end[0].exit_lanes[0]
-                    path = self.engine.current_map.road_network.shortest_path(start[0].index, dest)
-                    if len(path) > 0:
-                        return (start[0].index, dest)
-            return None, None
+            with eventlet.Timeout(0.1, True):
+                for start in start_lanes:
+                    for end in end_lanes:
+                        dest = end[0].index if start[0].index != end[0].index or len(end[0].exit_lanes)==0 else end[0].exit_lanes[0]
+                        path = self.engine.current_map.road_network.shortest_path(start[0].index, dest)
+                        if len(path) > 0:
+                            return (start[0].index, dest)
+                return None, None
         except:
             return None, None
