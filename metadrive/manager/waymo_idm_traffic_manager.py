@@ -1,7 +1,7 @@
 import copy
 
 import signal
-
+import eventlet
 import numpy as np
 
 from metadrive.component.vehicle.vehicle_type import SVehicle
@@ -125,8 +125,12 @@ class WaymoIDMTrafficManager(WaymoTrafficManager):
             return_all_result=True,
             use_heading_filter=False
         )
-
-        start, end = self.filter_path(start_lanes, end_lanes)
+        eventlet.monkey_patch()
+        try:
+            with eventlet.Timeout(1,True):
+                start, end = self.filter_path(start_lanes, end_lanes)
+        except eventlet.timeout.Timeout:
+            return None,None
         if start is None:
             return None, None
         lane = self.engine.current_map.road_network.get_lane(end)
