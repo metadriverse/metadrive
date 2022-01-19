@@ -1,7 +1,6 @@
 import copy
 
 import signal
-import eventlet
 import numpy as np
 
 from metadrive.component.vehicle.vehicle_type import SVehicle
@@ -11,6 +10,22 @@ from metadrive.policy.expert_policy import ExpertPolicy
 from metadrive.utils.scene_utils import ray_localization
 from metadrive.utils.waymo_utils.waymo_utils import AgentType
 
+import multiprocessing.pool
+import functools
+
+def timeout(max_timeout):
+    """Timeout decorator, parameter in seconds."""
+    def timeout_decorator(item):
+        """Wrap the original function."""
+        @functools.wraps(item)
+        def func_wrapper(*args, **kwargs):
+            """Closure for function."""
+            pool = multiprocessing.pool.ThreadPool(processes=1)
+            async_result = pool.apply_async(item, args, kwargs)
+            # raises a TimeoutError if execution exceeds max_timeout
+            return async_result.get(max_timeout)
+        return func_wrapper
+    return timeout_decorator
 
 def handler(signum, frame):
     raise Exception("end of time")
@@ -36,10 +51,10 @@ class WaymoIDMTrafficManager(WaymoTrafficManager):
                     continue
                 dest_info = self.parse_vehicle_state(type_traj["state"], -1)
 
-                eventlet.monkey_patch()
                 try:
-                    with eventlet.Timeout(0.5, True):
-                        start, destinations = self.get_route(init_info, dest_info)
+
+                    start, destinations = self.get_route(init_info, dest_info)
+
                 except:
                     start = None
 
@@ -113,6 +128,7 @@ class WaymoIDMTrafficManager(WaymoTrafficManager):
                 vehicles_to_clear.append(v)
         self.clear_objects(vehicles_to_clear)
 
+    @timeout(0.5)
     def get_route(self, init_state, last_state):
         init_position = init_state["position"]
         init_yaw = init_state["heading"]
