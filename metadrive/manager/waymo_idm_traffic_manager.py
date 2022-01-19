@@ -35,7 +35,14 @@ class WaymoIDMTrafficManager(WaymoTrafficManager):
                 if not init_info["valid"]:
                     continue
                 dest_info = self.parse_vehicle_state(type_traj["state"], -1)
-                start, destinations = self.get_route(init_info, dest_info)
+
+                eventlet.monkey_patch()
+                try:
+                    with eventlet.Timeout(0.5, True):
+                        start, destinations = self.get_route(init_info, dest_info)
+                except:
+                    start = None
+
                 if start is None:
                     continue
                 if init_info['position'] == dest_info['position']:
@@ -125,7 +132,7 @@ class WaymoIDMTrafficManager(WaymoTrafficManager):
             return_all_result=True,
             use_heading_filter=False
         )
-        eventlet.monkey_patch()
+
 
         start, end = self.filter_path(start_lanes, end_lanes)
 
@@ -142,13 +149,12 @@ class WaymoIDMTrafficManager(WaymoTrafficManager):
     def filter_path(self, start_lanes, end_lanes):
         # add some functions to store the filter information to avoid repeat filter when encountering the same cases
         try:
-            with eventlet.Timeout(0.1, True):
-                for start in start_lanes:
-                    for end in end_lanes:
-                        dest = end[0].index if start[0].index != end[0].index or len(end[0].exit_lanes)==0 else end[0].exit_lanes[0]
-                        path = self.engine.current_map.road_network.shortest_path(start[0].index, dest)
-                        if len(path) > 0:
-                            return (start[0].index, dest)
-                return None, None
+            for start in start_lanes:
+                for end in end_lanes:
+                    dest = end[0].index if start[0].index != end[0].index or len(end[0].exit_lanes)==0 else end[0].exit_lanes[0]
+                    path = self.engine.current_map.road_network.shortest_path(start[0].index, dest)
+                    if len(path) > 0:
+                        return (start[0].index, dest)
+            return None, None
         except:
             return None, None
