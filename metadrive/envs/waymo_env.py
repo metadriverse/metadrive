@@ -60,7 +60,7 @@ class WaymoEnv(BaseEnv):
             assert self.config["agent_policy"] is not WaymoIDMPolicy, "WaymoIDM will fail when interacting with traffic"
 
     def _merge_extra_config(self, config):
-        config = self.default_config().update(config, allow_add_new_key=False)
+        config = self.default_config().update(config, allow_add_new_key=True)
         return config
 
     def _get_observations(self):
