@@ -1,6 +1,6 @@
 from metadrive.envs.waymo_env import WaymoEnv
 from metadrive.manager.waymo_idm_traffic_manager import WaymoIDMTrafficManager
-
+from metadrive.manager.waymo_traffic_manager import WaymoTrafficManager
 
 class WaymoIDMEnv(WaymoEnv):
     """
@@ -9,7 +9,10 @@ class WaymoIDMEnv(WaymoEnv):
     def setup_engine(self):
         super(WaymoIDMEnv, self).setup_engine()
         assert not self.config["no_traffic"], "Please set no_traffic to False to use this environment"
-        self.engine.update_manager("traffic_manager", WaymoIDMTrafficManager())
+        if self.config['replay'] == False:
+            self.engine.update_manager("traffic_manager", WaymoIDMTrafficManager())
+        else:
+            self.engine.update_manager("traffic_manager", WaymoTrafficManager())
 
 
 if __name__ == "__main__":
