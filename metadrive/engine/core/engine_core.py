@@ -206,7 +206,7 @@ class EngineCore(ShowBase.ShowBase):
         self.force_fps = ForceFPS(self, start=True)
 
         # init terrain
-        self.terrain = Terrain()
+        self.terrain = Terrain(self.global_config["show_terrain"])
         self.terrain.attach_to_world(self.render, self.physics_world)
 
         # init other world elements
@@ -238,7 +238,7 @@ class EngineCore(ShowBase.ShowBase):
             lens = self.cam.node().getLens()
             lens.setFov(80)
 
-            self.sky_box = SkyBox()
+            self.sky_box = SkyBox(not self.global_config["show_skybox"])
             self.sky_box.attach_to_world(self.render, self.physics_world)
 
             self.world_light = Light(self.global_config)

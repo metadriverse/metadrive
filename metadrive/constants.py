@@ -202,7 +202,7 @@ TARGET_VEHICLES = "target_vehicles"
 TRAFFIC_VEHICLES = "traffic_vehicles"
 OBJECT_TO_AGENT = "object_to_agent"
 AGENT_TO_OBJECT = "agent_to_object"
-BKG_COLOR = Vec3(179 / 255, 211 / 255, 216 / 255)
+BKG_COLOR = Vec3(1, 1, 1)
 
 
 class LineType:
