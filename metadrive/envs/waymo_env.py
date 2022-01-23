@@ -69,6 +69,27 @@ class WaymoEnv(BaseEnv):
     def switch_to_top_down_view(self):
         self.main_camera.stop_track()
 
+    def switch_to_third_person_view(self):
+        if self.main_camera is None:
+            return
+        self.main_camera.reset()
+        if self.config["prefer_track_agent"] is not None and self.config["prefer_track_agent"] in self.vehicles.keys():
+            new_v = self.vehicles[self.config["prefer_track_agent"]]
+            current_track_vehicle = new_v
+        else:
+            if self.main_camera.is_bird_view_camera():
+                current_track_vehicle = self.current_track_vehicle
+            else:
+                vehicles = list(self.engine.agents.values())
+                if len(vehicles) <= 1:
+                    return
+                if self.current_track_vehicle in vehicles:
+                    vehicles.remove(self.current_track_vehicle)
+                new_v = get_np_random().choice(vehicles)
+                current_track_vehicle = new_v
+        self.main_camera.track(current_track_vehicle)
+        return
+
     def setup_engine(self):
         self.in_stop = False
         super(WaymoEnv, self).setup_engine()
@@ -77,6 +98,7 @@ class WaymoEnv(BaseEnv):
         if not self.config["no_traffic"]:
             self.engine.register_manager("traffic_manager", WaymoTrafficManager())
         self.engine.accept("s", self.stop)
+        self.engine.accept("q", self.switch_to_third_person_view)
         self.engine.accept("b", self.switch_to_top_down_view)
 
     def step(self, actions):

@@ -57,6 +57,8 @@ class MainCamera:
         self.inputs.watchWithModifiers('down', 's')
         self.inputs.watchWithModifiers('left', 'a')
         self.inputs.watchWithModifiers('right', 'd')
+        self.inputs.watchWithModifiers('left_rotate', '[')
+        self.inputs.watchWithModifiers('right_rotate', ']')
 
         self.engine.accept("wheel_up", self._wheel_up_height)
         self.engine.accept("wheel_down", self._wheel_down_height)
@@ -66,6 +68,7 @@ class MainCamera:
         self.top_down_camera_height = self.engine.global_config["top_down_camera_initial_z"]
         self.camera_x = self.engine.global_config["top_down_camera_initial_x"]
         self.camera_y = self.engine.global_config["top_down_camera_initial_y"]
+        self.camera_rotate = 0
         self.engine.interface.stop_track()
         self.engine.task_manager.add(self._top_down_task, self.TOP_DOWN_TASK_NAME, extraArgs=[], appendTask=True)
 
@@ -87,6 +90,7 @@ class MainCamera:
             # adjust hpr
             p_pos = panda_position(position)
             self.camera_x, self.camera_y = p_pos[0], p_pos[1]
+            self.camera_rotate = 0
             self.engine.task_manager.add(self._top_down_task, self.TOP_DOWN_TASK_NAME, extraArgs=[], appendTask=True)
 
     def reset(self):
@@ -245,6 +249,7 @@ class MainCamera:
             if bird_view_on_current_position:
                 current_pos = self.camera.getPos()
                 self.camera_x, self.camera_y = current_pos[0], current_pos[1]
+                self.camera_rotate = 0
             self.engine.task_manager.add(self._top_down_task, self.TOP_DOWN_TASK_NAME, extraArgs=[], appendTask=True)
 
     def _top_down_task(self, task):
@@ -258,8 +263,15 @@ class MainCamera:
             self.camera_x -= 1.0
         if self.inputs.isSet("right"):
             self.camera_x += 1.0
+
         self.camera.setPos(self.camera_x, self.camera_y, self.top_down_camera_height)
         self.camera.lookAt(self.camera_x, self.camera_y, 0)
+
+        if self.inputs.isSet("right_rotate"):
+            self.camera_rotate += 3
+        if self.inputs.isSet("left_rotate"):
+            self.camera_rotate -= 3
+        self.camera.setH(self.camera_rotate)
         return task.cont
 
     def _update_height(self, height):
