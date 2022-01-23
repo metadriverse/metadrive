@@ -13,7 +13,7 @@ class Terrain(BaseObject):
     COLLISION_MASK = CollisionGroup.Terrain
     HEIGHT = 0.0
 
-    def __init__(self):
+    def __init__(self, show_terrain):
         super(Terrain, self).__init__(random_seed=0)
         shape = BulletPlaneShape(Vec3(0, 0, 1), 0)
         node = BulletRigidBodyNode(BodyName.Ground)
@@ -24,7 +24,7 @@ class Terrain(BaseObject):
         self.dynamic_nodes.append(node)
 
         self.origin.attachNewNode(node)
-        if self.render:
+        if self.render and show_terrain:
             self.origin.hide(CamMask.MiniMap | CamMask.Shadow | CamMask.DepthCam | CamMask.ScreenshotCam)
             # self.terrain_normal = self.loader.loadTexture(
             #     AssetLoader.file_path( "textures", "grass2", "normal.jpg")
