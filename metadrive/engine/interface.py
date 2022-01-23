@@ -30,6 +30,7 @@ class Interface:
         self.current_banner = None
         self.need_interface = self.engine.mode == RENDER_MODE_ONSCREEN and not self.engine.global_config[
             "debug_physics_world"]
+        self.need_interface = self.need_interface and base_engine.global_config["show_interface"]
         self.init_interface()
         self._is_showing_arrow = True  # store the state of navigation mark
 

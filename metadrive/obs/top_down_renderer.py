@@ -121,7 +121,7 @@ class TopDownRenderer:
         light_background=True,
         num_stack=15,
         history_smooth=0,
-        road_color=(255, 255, 255),
+        road_color=(80, 80, 80),
         show_agent_name=False,
         track_target_vehicle=True,
         # current_track_vehicle=None

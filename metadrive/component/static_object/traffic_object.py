@@ -55,15 +55,15 @@ class TrafficCone(TrafficObject):
 
     @property
     def top_down_length(self):
-        return self.RADIUS * 2
+        return self.RADIUS * 4
 
     @property
     def top_down_width(self):
-        return self.RADIUS * 2
+        return self.RADIUS * 4
 
     @property
     def top_down_color(self):
-        return 100, 100, 100
+        return 235, 84, 42
 
 
 class TrafficWarning(TrafficObject):
@@ -88,11 +88,11 @@ class TrafficWarning(TrafficObject):
 
     @property
     def top_down_length(self):
-        return self.RADIUS
+        return self.RADIUS * 2
 
     @property
     def top_down_width(self):
-        return self.RADIUS
+        return self.RADIUS * 2
 
 
 class TrafficBarrier(TrafficObject):

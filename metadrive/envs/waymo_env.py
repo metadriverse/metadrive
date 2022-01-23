@@ -66,6 +66,9 @@ class WaymoEnv(BaseEnv):
     def _get_observations(self):
         return {self.DEFAULT_AGENT: self.get_single_observation(self.config["vehicle_config"])}
 
+    def switch_to_top_down_view(self):
+        self.main_camera.stop_track()
+
     def setup_engine(self):
         self.in_stop = False
         super(WaymoEnv, self).setup_engine()
@@ -74,6 +77,7 @@ class WaymoEnv(BaseEnv):
         if not self.config["no_traffic"]:
             self.engine.register_manager("traffic_manager", WaymoTrafficManager())
         self.engine.accept("s", self.stop)
+        self.engine.accept("b", self.switch_to_top_down_view)
 
     def step(self, actions):
         ret = super(WaymoEnv, self).step(actions)

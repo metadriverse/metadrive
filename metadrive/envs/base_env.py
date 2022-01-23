@@ -132,6 +132,9 @@ BASE_DEFAULT_CONFIG = dict(
     horizon=None,  # The maximum length of each episode. Set to None to remove this constraint
     show_interface_navi_mark=True,
     show_mouse=True,
+    show_skybox=True,
+    show_terrain=True,
+    show_interface=True,
 )
 
 
