@@ -90,7 +90,7 @@ class MainCamera:
             # adjust hpr
             p_pos = panda_position(position)
             self.camera_x, self.camera_y = p_pos[0], p_pos[1]
-            self.camera_rotate=0
+            self.camera_rotate = 0
             self.engine.task_manager.add(self._top_down_task, self.TOP_DOWN_TASK_NAME, extraArgs=[], appendTask=True)
 
     def reset(self):
@@ -249,7 +249,7 @@ class MainCamera:
             if bird_view_on_current_position:
                 current_pos = self.camera.getPos()
                 self.camera_x, self.camera_y = current_pos[0], current_pos[1]
-                self.camera_rotate=0
+                self.camera_rotate = 0
             self.engine.task_manager.add(self._top_down_task, self.TOP_DOWN_TASK_NAME, extraArgs=[], appendTask=True)
 
     def _top_down_task(self, task):
