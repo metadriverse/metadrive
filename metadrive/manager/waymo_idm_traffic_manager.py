@@ -113,7 +113,7 @@ class WaymoIDMTrafficManager(WaymoTrafficManager):
                 vehicles_to_clear.append(v)
         self.clear_objects(vehicles_to_clear)
 
-    @timeout(0.5)
+    @timeout(1)
     def get_route(self, init_state, last_state):
 
         init_position = init_state["position"]
