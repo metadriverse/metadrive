@@ -33,10 +33,10 @@ class WaymoIDMTrafficManager(WaymoTrafficManager):
         self.count = 0
         for v_id, type_traj in self.current_traffic_data.items():
             if type_traj["type"] == AgentType.VEHICLE and v_id != self.sdc_index:
-                init_info = self.parse_vehicle_state(type_traj["state"], 0)
+                init_info = self.parse_vehicle_state(type_traj["state"], self.engine.global_config["case_start_index"])
                 if not init_info["valid"]:
                     continue
-                dest_info = self.parse_vehicle_state(type_traj["state"], -1)
+                dest_info = self.parse_vehicle_state(type_traj["state"], self.engine.global_config["case_end_index"])
 
                 try:
                     start, destinations = self.get_route(init_info, dest_info)
@@ -90,7 +90,7 @@ class WaymoIDMTrafficManager(WaymoTrafficManager):
                     v.set_velocity(init_info['velocity'])
             elif type_traj["type"] == AgentType.VEHICLE and v_id == self.sdc_index:
                 # set Ego V velocity
-                init_info = self.parse_vehicle_state(type_traj["state"], 0)
+                init_info = self.parse_vehicle_state(type_traj["state"], self.engine.global_config["case_start_index"])
                 ego_v = list(self.engine.agent_manager.active_agents.values())[0]
                 ego_v.set_velocity(init_info["velocity"])
                 ego_v.set_heading_theta(init_info["heading"], rad_to_degree=False)

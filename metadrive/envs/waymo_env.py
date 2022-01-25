@@ -19,6 +19,8 @@ WAYMO_ENV_CONFIG = dict(
 
     # ===== Traffic =====
     no_traffic=False,
+    case_start_index=0,
+    case_end_index=-1,
 
     # ===== Agent config =====
     vehicle_config=dict(
