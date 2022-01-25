@@ -60,9 +60,9 @@ class AgentManager(BaseManager):
     def _get_vehicles(self, config_dict: dict):
         from metadrive.component.vehicle.vehicle_type import random_vehicle_type, vehicle_type
         ret = {}
-        v_type = random_vehicle_type(self.np_random) if self.engine.global_config["random_agent_model"] else \
-            vehicle_type[self.engine.global_config["vehicle_config"]["vehicle_model"]]
         for agent_id, v_config in config_dict.items():
+            v_type = random_vehicle_type(self.np_random) if self.engine.global_config["random_agent_model"] else \
+                vehicle_type[v_config["vehicle_model"] if v_config.get("vehicle_model", False) else "default"]
             obj = self.spawn_object(v_type, vehicle_config=v_config)
             ret[agent_id] = obj
             policy = self._get_policy(obj)
