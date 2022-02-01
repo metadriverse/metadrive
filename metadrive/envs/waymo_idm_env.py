@@ -1,4 +1,5 @@
 from metadrive.envs.waymo_env import WaymoEnv
+import pygame
 from metadrive.manager.waymo_idm_traffic_manager import WaymoIDMTrafficManager
 from metadrive.manager.waymo_traffic_manager import WaymoTrafficManager
 
@@ -23,9 +24,12 @@ if __name__ == "__main__":
             "manual_control": True,
             # "debug":True,
             "no_traffic": False,
-            # "start_case_index": 192,
+            "replay": True,
+            "case_start_index": 46,
+            "case_end_index": 150,
+            "start_case_index": 0,
             "case_num": 1,
-            "waymo_data_directory": "/home/liquanyi/waymo_test",
+            "waymo_data_directory": "C:\\Users\\78587\\Desktop\\rss\\cases\\cases\\real",
             "horizon": 1000,
             # "vehicle_config": dict(show_lidar=True,
             #                        show_lane_line_detector=True,
@@ -54,9 +58,13 @@ if __name__ == "__main__":
                         # "v_heading": env.vehicle.heading_theta,
                         "seed": env.engine.global_seed + env.config["start_case_index"],
                         "reward": r,
-                    }
+                    },
+                    mode="top_down",
+                    film_size=(5000, 5000)
                 )
 
+                # pygame.image.save(env._top_down_renderer._background_canvas, "render.png")
+                # break
             # if d:
             #     if info["arrive_dest"]:
             #         print("seed:{}, success".format(env.engine.global_random_seed))
