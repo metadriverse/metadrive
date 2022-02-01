@@ -29,7 +29,7 @@ class WaymoIDMTrafficManager(WaymoTrafficManager):
 
     def reset(self):
         # try:
-            # generate vehicle
+        # generate vehicle
         self.count = 0
         for v_id, type_traj in self.current_traffic_data.items():
             if type_traj["type"] == AgentType.VEHICLE and v_id != self.sdc_index:
@@ -65,7 +65,7 @@ class WaymoIDMTrafficManager(WaymoTrafficManager):
                         SVehicle, position=init_info["position"], heading=init_info["heading"], vehicle_config=v_config
                     )
                     v.set_position(v.position, height=0.8)
-                    v.set_velocity((0,0))
+                    v.set_velocity((0, 0))
                     v.set_static(True)
                 else:
                     v_config = copy.deepcopy(self.engine.global_config["vehicle_config"])
@@ -104,11 +104,11 @@ class WaymoIDMTrafficManager(WaymoTrafficManager):
                 p = self.engine.get_policy(v.name)
                 v.before_step(p.act())
 
-
     def after_step(self, *args, **kwargs):
         vehicles_to_clear = []
         for v in self.spawned_objects.values():
-            if not self.engine.has_policy(v.name): continue
+            if not self.engine.has_policy(v.name):
+                continue
             if v.lane in self.vehicle_destination_map[v.id]:
                 vehicles_to_clear.append(v)
         self.clear_objects(vehicles_to_clear)
@@ -135,7 +135,6 @@ class WaymoIDMTrafficManager(WaymoTrafficManager):
             use_heading_filter=False
         )
 
-
         start, end = self.filter_path(start_lanes, end_lanes)
 
         if start is None:
@@ -153,7 +152,8 @@ class WaymoIDMTrafficManager(WaymoTrafficManager):
         try:
             for start in start_lanes:
                 for end in end_lanes:
-                    dest = end[0].index if start[0].index != end[0].index or len(end[0].exit_lanes)==0 else end[0].exit_lanes[0]
+                    dest = end[0].index if start[0].index != end[0].index or len(end[0].exit_lanes
+                                                                                 ) == 0 else end[0].exit_lanes[0]
                     path = self.engine.current_map.road_network.shortest_path(start[0].index, dest)
                     if len(path) > 0:
                         return (start[0].index, dest)

@@ -3,6 +3,7 @@ import pygame
 from metadrive.manager.waymo_idm_traffic_manager import WaymoIDMTrafficManager
 from metadrive.manager.waymo_traffic_manager import WaymoTrafficManager
 
+
 class WaymoIDMEnv(WaymoEnv):
     """
     The Traffic in this environment will be controlled by IDM Policy
