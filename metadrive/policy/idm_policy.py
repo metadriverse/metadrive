@@ -366,7 +366,7 @@ class ManualControllableIDMPolicy(IDMPolicy):
 
 
 class WaymoIDMPolicy(IDMPolicy):
-    NORMAL_SPEED = 20
+    NORMAL_SPEED = 30
 
     def __init__(self, control_object, random_seed):
         super(IDMPolicy, self).__init__(control_object=control_object, random_seed=random_seed)
