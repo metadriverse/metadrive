@@ -24,7 +24,7 @@ def test_top_down_rendering():
             env.close()
 
 
-def test_top_down_with_panda_render():
+def _vis_top_down_with_panda_render():
     env = TopDownMetaDrive(dict(use_render=True))
     try:
         o = env.reset()
@@ -38,4 +38,4 @@ def test_top_down_with_panda_render():
 
 if __name__ == "__main__":
     # test_top_down_rendering()
-    test_top_down_with_panda_render()
+    _vis_top_down_with_panda_render()

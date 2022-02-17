@@ -441,7 +441,8 @@ class ObservationWindowMultiChannel:
             mask = pygame.mask.from_threshold(ret[key], (0, 0, 0, 0), (10, 10, 10, 255))
             mask.to_surface(canvas, setcolor=None, unsetcolor=color)
 
-        _draw(canvas, "navigation", pygame.Color("Blue"))
+        if "navigation" in ret:
+            _draw(canvas, "navigation", pygame.Color("Blue"))
         _draw(canvas, "road_network", pygame.Color("White"))
         _draw(canvas, "traffic_flow", pygame.Color("Red"))
         _draw(canvas, "target_vehicle", pygame.Color("Green"))
