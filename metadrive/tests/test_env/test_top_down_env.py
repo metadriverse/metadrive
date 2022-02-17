@@ -5,10 +5,10 @@ from metadrive.envs.top_down_env import TopDownSingleFrameMetaDriveEnv, TopDownM
 
 def test_top_down_rendering():
     for env in [
-            TopDownSingleFrameMetaDriveEnv(dict(environment_num=5, map="C", traffic_density=1.0)),
-            TopDownMetaDrive(dict(environment_num=5, map="C", traffic_density=1.0)),
-            TopDownMetaDrive(dict(environment_num=5, map="C", frame_stack=1, post_stack=2)),
-            TopDownMetaDriveEnvV2(dict(environment_num=5, map="C", frame_stack=1, post_stack=2)),
+        TopDownSingleFrameMetaDriveEnv(dict(environment_num=5, map="C", traffic_density=1.0)),
+        TopDownMetaDrive(dict(environment_num=5, map="C", traffic_density=1.0)),
+        TopDownMetaDrive(dict(environment_num=5, map="C", frame_stack=1, post_stack=2)),
+        TopDownMetaDriveEnvV2(dict(environment_num=5, map="C", frame_stack=1, post_stack=2)),
     ]:
         try:
             for _ in range(5):
@@ -24,5 +24,18 @@ def test_top_down_rendering():
             env.close()
 
 
+def test_top_down_with_panda_render():
+    env = TopDownMetaDrive(dict(use_render=True))
+    try:
+        o = env.reset()
+        for i in range(1000):
+            o, r, d, i = env.step([0, 1])
+            if d:
+                break
+    finally:
+        env.close()
+
+
 if __name__ == "__main__":
-    test_top_down_rendering()
+    # test_top_down_rendering()
+    test_top_down_with_panda_render()
