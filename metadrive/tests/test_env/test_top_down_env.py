@@ -5,10 +5,10 @@ from metadrive.envs.top_down_env import TopDownSingleFrameMetaDriveEnv, TopDownM
 
 def test_top_down_rendering():
     for env in [
-        TopDownSingleFrameMetaDriveEnv(dict(environment_num=5, map="C", traffic_density=1.0)),
-        TopDownMetaDrive(dict(environment_num=5, map="C", traffic_density=1.0)),
-        TopDownMetaDrive(dict(environment_num=5, map="C", frame_stack=1, post_stack=2)),
-        TopDownMetaDriveEnvV2(dict(environment_num=5, map="C", frame_stack=1, post_stack=2)),
+            TopDownSingleFrameMetaDriveEnv(dict(environment_num=5, map="C", traffic_density=1.0)),
+            TopDownMetaDrive(dict(environment_num=5, map="C", traffic_density=1.0)),
+            TopDownMetaDrive(dict(environment_num=5, map="C", frame_stack=1, post_stack=2)),
+            TopDownMetaDriveEnvV2(dict(environment_num=5, map="C", frame_stack=1, post_stack=2)),
     ]:
         try:
             for _ in range(5):
