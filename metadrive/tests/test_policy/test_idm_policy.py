@@ -27,7 +27,7 @@ def _create_vehicle():
     return v
 
 
-def _test_idm_policy_briefly():
+def test_idm_policy_briefly():
     env = MetaDriveEnv()
     env.reset()
     try:
@@ -52,22 +52,22 @@ def _test_idm_policy_briefly():
         env.close()
 
 
-def _test_idm_policy_is_moving(render=False, in_test=True):
+def test_idm_policy_is_moving(render=False, in_test=True):
     # config = {"traffic_mode": "hybrid", "map": "SS", "traffic_density": 1.0}
-    config = {"traffic_mode": "hybrid", "map": "SS", "traffic_density": 0.2}
+    config = {"traffic_mode": "respawn", "map": "SS", "traffic_density": 0.2}
     if render:
         config.update({"use_render": True, "manual_control": True})
     env = MetaDriveEnv(config)
     env.reset(force_seed=0)
     last_pos = None
     try:
-        for _ in range(1000):
+        for t in range(100):
             env.step(env.action_space.sample())
             vs = env.engine.traffic_manager.traffic_vehicles
             # print("Position: ", {str(v)[:4]: v.position for v in vs})
             new_pos = np.array([v.position for v in vs])
-            if last_pos is not None and in_test:
-                assert not np.all(new_pos == last_pos)
+            if t > 50 and last_pos is not None and in_test:
+                assert np.any(new_pos != last_pos)
             last_pos = new_pos
         env.reset()
     finally:
@@ -76,4 +76,4 @@ def _test_idm_policy_is_moving(render=False, in_test=True):
 
 if __name__ == '__main__':
     # test_idm_policy_briefly()
-    _test_idm_policy_is_moving(render=True, in_test=False)
+    test_idm_policy_is_moving(render=True, in_test=False)
