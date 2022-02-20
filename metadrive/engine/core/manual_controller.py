@@ -74,7 +74,7 @@ class KeyboardController(Controller):
 
         self.further_process(steering, throttle_brake)
 
-        return [self.steering, self.throttle_brake]
+        return np.array([self.steering, self.throttle_brake], dtype=np.float64)
 
     def further_process(self, steering, throttle_brake):
         if steering == 0.:
