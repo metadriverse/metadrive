@@ -8,7 +8,6 @@ class ManualControlPolicy(EnvInputPolicy):
     """
     Control the current track vehicle
     """
-
     def __init__(self, obj, seed):
         super(ManualControlPolicy, self).__init__(obj, seed)
         config = self.engine.global_config
@@ -65,7 +64,6 @@ class TakeoverPolicy(EnvInputPolicy):
     """
     Record the takeover signal
     """
-
     def __init__(self, obj, seed):
         super(TakeoverPolicy, self).__init__(obj, seed)
         config = get_global_config()
@@ -83,8 +81,8 @@ class TakeoverPolicy(EnvInputPolicy):
         if self.engine.global_config["manual_control"] and self.engine.agent_manager.get_agent(
                 agent_id) is self.engine.current_track_vehicle and not self.engine.main_camera.is_bird_view_camera():
             expert_action = self.controller.process_input(self.engine.current_track_vehicle)
-            if isinstance(self.controller, SteeringWheelController) and (
-                    self.controller.left_shift_paddle or self.controller.right_shift_paddle):
+            if isinstance(self.controller, SteeringWheelController) and (self.controller.left_shift_paddle
+                                                                         or self.controller.right_shift_paddle):
                 # if expert_action[0]*agent_action[0]< 0 or expert_action[1]*agent_action[1] < 0:
                 self.takeover = True
                 return expert_action
