@@ -171,7 +171,7 @@ Quanyi Li*, Zhenghao Peng*, Bolei Zhou
 \
 *ICLR 2022*
 \
-[<a href="https://openreview.net/pdf?id=0cgU-BZp2ky" target="_blank">Paper</a>]
+[<a href="https://arxiv.org/pdf/2202.10341.pdf" target="_blank">Paper</a>]
 [<a href="https://github.com/decisionforce/HACO" target="_blank">Code</a>]
 [<a href="https://decisionforce.github.io/HACO/" target="_blank">Webpage</a>]
     
