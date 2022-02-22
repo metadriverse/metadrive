@@ -111,6 +111,17 @@ Relevant Projects
     [<a href="https://decisionforce.github.io/EGPO/images/egpo_poster.png" target="_blank">Poster</a>]
 
     <br><br>
+    <b>
+        Efficient Learning of Safe Driving Policy via Human-AI Copilot Optimization
+    </b> <br>
+    Quanyi Li*, Zhenghao Peng*, Bolei Zhou
+    <br>
+    <i>ICLR 2022</i><br>
+    [<a href="https://arxiv.org/pdf/2202.10341.pdf" target="_blank">Paper</a>]
+    [<a href="https://github.com/decisionforce/HACO" target="_blank">Code</a>]
+    [<a href="https://decisionforce.github.io/HACO" target="_blank">Webpage</a>]
+
+    <br><br>
 
 
 Citation
