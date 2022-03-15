@@ -123,10 +123,13 @@ class TopDownRenderer:
         history_smooth=0,
         road_color=(80, 80, 80),
         show_agent_name=False,
-        track_target_vehicle=True,
+        camera_position=None,
+        track_target_vehicle=True,  # useless, remain here only for compatibility
         # current_track_vehicle=None
     ):
         # Setup some useful flags
+        track_target_vehicle = True if camera_position is None else False
+        self.position = camera_position
         self.track_target_vehicle = track_target_vehicle
         self.show_agent_name = show_agent_name
         if self.show_agent_name:
@@ -312,18 +315,13 @@ class TopDownRenderer:
                 )
                 self._deads.append(v)
 
-        if self.track_target_vehicle:
-            v = self.current_track_vehicle
-            canvas = self._runtime_canvas
-            field = self.canvas.get_width()
-            position = self._runtime_canvas.pos2pix(*v.position)
-            off = (position[0] - field / 2, position[1] - field / 2)
-            self.canvas.blit(source=canvas, dest=(0, 0), area=(off[0], off[1], field, field))
-        else:
-            raise ValueError()
-            # FIXME check this later
-            self.canvas.blit(self._runtime_canvas, (0, 0))
-            off = (0, 0)
+        v = self.current_track_vehicle
+        canvas = self._runtime_canvas
+        field = self.canvas.get_width()
+        cam_pos = v.position if self.track_target_vehicle else self.position
+        position = self._runtime_canvas.pos2pix(*cam_pos)
+        off = (position[0] - field / 2, position[1] - field / 2)
+        self.canvas.blit(source=canvas, dest=(0, 0), area=(off[0], off[1], field, field))
 
         if self.show_agent_name:
             raise ValueError()
