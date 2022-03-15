@@ -121,6 +121,8 @@ BASE_DEFAULT_CONFIG = dict(
     _disable_detector_mask=False,
     # clip rgb to (0, 1)
     rgb_clip=True,
+    #
+    force_render_fps=None,
 
     # ===== Others =====
     # The maximum distance used in PGLOD. Set to None will use the default values.

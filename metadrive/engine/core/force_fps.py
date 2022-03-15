@@ -9,10 +9,13 @@ class ForceFPS:
 
     def __init__(self, engine, start=False):
         self.engine = engine
-        fps = 1 / self.engine.global_config["physics_world_step_size"]
+        interval = engine.global_config["physics_world_step_size"] \
+            if engine.global_config["force_render_fps"] is None else 1 / engine.global_config["force_render_fps"]
+        fps = 1 / interval
         self.init_fps = fps
         if start:
             self.state = self.FORCED
+            self.engine.taskMgr.add(self.force_fps_task, "force_fps")
             self.fps = fps
         else:
             self.state = self.UNLIMITED
