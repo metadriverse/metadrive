@@ -49,9 +49,7 @@ def test_save_episode(vis=False):
         for i in range(1, 100000 if vis else 2000):
             o, r, d, info = env.step([0, 1])
             if vis:
-                env.render(
-                    mode="top_down",
-                )
+                env.render(mode="top_down", )
             if info.get("replay_done", False):
                 break
     finally:
