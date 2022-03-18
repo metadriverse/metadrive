@@ -203,7 +203,7 @@ class EngineCore(ShowBase.ShowBase):
         self.physics_world.dynamic_world.setContactAddedCallback(PythonCallbackObject(collision_callback))
 
         # for real time simulation
-        self.force_fps = ForceFPS(self, start=True)
+        self.force_fps = ForceFPS(self)
 
         # init terrain
         self.terrain = Terrain(self.global_config["show_terrain"])
