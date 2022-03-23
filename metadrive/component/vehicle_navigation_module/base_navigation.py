@@ -95,6 +95,16 @@ class BaseNavigation:
         self.map = map
         self.current_lane = current_lane
 
+    def get_checkpoints(self):
+        """Return next checkpoint and the next next checkpoint"""
+        later_middle = (float(self.get_current_lane_num()) / 2 - 0.5) * self.get_current_lane_width()
+        ref_lane1 = self.current_ref_lanes[0]
+        checkpoint1 = ref_lane1.position(ref_lane1.length, later_middle)
+        ref_lane2 = self.next_ref_lanes[0] if self.next_ref_lanes is not None else self.current_ref_lanes[0]
+        checkpoint2 = ref_lane2.position(ref_lane2.length, later_middle)
+        return checkpoint1, checkpoint2
+
+
     def set_route(self, current_lane_index: str, destination: str):
         """
         Find a shortest path from start road to end road

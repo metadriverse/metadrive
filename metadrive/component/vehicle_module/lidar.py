@@ -52,7 +52,7 @@ class Lidar(DistanceDetector):
                 vehicles.add(ret)
         return vehicles
 
-    def get_surrounding_vehicles_info(self, ego_vehicle, detected_objects, num_others: int = 4):
+    def get_surrounding_vehicles_info(self, ego_vehicle, detected_objects, num_others: int = 4, add_others_navi = False):
         from metadrive.utils.math_utils import norm, clip
         surrounding_vehicles = list(self.get_surrounding_vehicles(detected_objects))
         surrounding_vehicles.sort(
@@ -72,8 +72,19 @@ class Lidar(DistanceDetector):
                 relative_velocity = ego_vehicle.projection(vehicle.velocity - ego_vehicle.velocity)
                 res.append(clip((relative_velocity[0] / ego_vehicle.max_speed + 1) / 2, 0.0, 1.0))
                 res.append(clip((relative_velocity[1] / ego_vehicle.max_speed + 1) / 2, 0.0, 1.0))
+
+                if add_others_navi:
+                    ckpt1, ckpt2 = vehicle.navigation.get_checkpoints()
+
+                    print("stop here")
+
             else:
-                res += [0.0] * 4
+
+                if add_others_navi:
+                    pass
+                else:
+                    res += [0.0] * 4
+
         return res
 
     def _get_lidar_mask(self, vehicle):
