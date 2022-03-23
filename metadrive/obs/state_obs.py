@@ -146,7 +146,10 @@ class LidarStateObservation(ObservationBase):
         shape = list(self.state_obs.observation_space.shape)
         if self.config["lidar"]["num_lasers"] > 0 and self.config["lidar"]["distance"] > 0:
             # Number of lidar rays and distance should be positive!
-            shape[0] += self.config["lidar"]["num_lasers"] + self.config["lidar"]["num_others"] * 4
+            lidar_dim = self.config["lidar"]["num_lasers"] + self.config["lidar"]["num_others"] * 4
+            if self.config["lidar"]["add_others_navi"]:
+                lidar_dim += self.config["lidar"]["num_others"] * 4
+            shape[0] += lidar_dim
         return gym.spaces.Box(-0.0, 1.0, shape=tuple(shape), dtype=np.float32)
 
     def observe(self, vehicle):
@@ -180,7 +183,7 @@ class LidarStateObservation(ObservationBase):
             cloud_points, detected_objects = vehicle.lidar.perceive(vehicle, )
             if self.config["lidar"]["num_others"] > 0:
                 other_v_info += vehicle.lidar.get_surrounding_vehicles_info(
-                    vehicle, detected_objects, self.config["lidar"]["num_others"]
+                    vehicle, detected_objects, self.config["lidar"]["num_others"], self.config["lidar"]["add_others_navi"]
                 )
             other_v_info += self._add_noise_to_cloud_points(
                 cloud_points,

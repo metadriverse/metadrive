@@ -11,7 +11,7 @@ from metadrive.constants import CamMask, CollisionGroup
 from metadrive.engine.engine_utils import get_engine
 from metadrive.utils.coordinates_shift import panda_position
 from metadrive.utils.utils import get_object_from_node
-
+from metadrive.utils.math_utils import norm, clip
 
 class Lidar(DistanceDetector):
     ANGLE_FACTOR = True
@@ -52,18 +52,28 @@ class Lidar(DistanceDetector):
                 vehicles.add(ret)
         return vehicles
 
-    def get_surrounding_vehicles_info(self, ego_vehicle, detected_objects, num_others: int = 4, add_others_navi = False):
-        from metadrive.utils.math_utils import norm, clip
+    def _project_to_vehicle_system(self, target, vehicle):
+        diff = target - vehicle.position
+        norm_distance = norm(diff[0], diff[1])
+        if norm_distance > self.perceive_distance:
+            diff = diff / norm_distance * self.perceive_distance
+        relative = vehicle.projection(diff)
+        return relative
+
+    def get_surrounding_vehicles_info(self, ego_vehicle, detected_objects, num_others: int = 4, add_others_navi=False):
         surrounding_vehicles = list(self.get_surrounding_vehicles(detected_objects))
         surrounding_vehicles.sort(
             key=lambda v: norm(ego_vehicle.position[0] - v.position[0], ego_vehicle.position[1] - v.position[1])
         )
         surrounding_vehicles += [None] * num_others
         res = []
+
         for vehicle in surrounding_vehicles[:num_others]:
             if vehicle is not None:
+                ego_position = ego_vehicle.position
+
                 # assert isinstance(vehicle, IDMVehicle or Base), "Now MetaDrive Doesn't support other vehicle type"
-                relative_position = ego_vehicle.projection(vehicle.position - ego_vehicle.position)
+                relative_position = ego_vehicle.projection(vehicle.position - ego_position)
                 # It is possible that the centroid of other vehicle is too far away from ego but lidar shed on it.
                 # So the distance may greater than perceive distance.
                 res.append(clip((relative_position[0] / self.perceive_distance + 1) / 2, 0.0, 1.0))
@@ -76,12 +86,18 @@ class Lidar(DistanceDetector):
                 if add_others_navi:
                     ckpt1, ckpt2 = vehicle.navigation.get_checkpoints()
 
-                    print("stop here")
+                    relative_ckpt1 = self._project_to_vehicle_system(ckpt1, ego_vehicle)
+                    res.append(clip((relative_ckpt1[0] / self.perceive_distance + 1) / 2, 0.0, 1.0))
+                    res.append(clip((relative_ckpt1[1] / self.perceive_distance + 1) / 2, 0.0, 1.0))
+
+                    relative_ckpt2 = self._project_to_vehicle_system(ckpt2, ego_vehicle)
+                    res.append(clip((relative_ckpt2[0] / self.perceive_distance + 1) / 2, 0.0, 1.0))
+                    res.append(clip((relative_ckpt2[1] / self.perceive_distance + 1) / 2, 0.0, 1.0))
 
             else:
 
                 if add_others_navi:
-                    pass
+                    res += [0.0] * 8
                 else:
                     res += [0.0] * 4
 
