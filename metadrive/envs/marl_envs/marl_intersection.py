@@ -4,7 +4,8 @@ from metadrive.component.map.pg_map import PGMap
 from metadrive.component.pgblock.first_block import FirstPGBlock
 from metadrive.component.pgblock.intersection import InterSection
 from metadrive.component.road_network import Road
-from metadrive.envs.marl_envs.marl_inout_roundabout import LidarStateObservationMARound
+from metadrive.envs.marl_envs.marl_inout_roundabout import \
+    LidarStateObservationMARound
 from metadrive.envs.marl_envs.multi_agent_metadrive import MultiAgentMetaDrive
 from metadrive.manager.map_manager import MapManager
 from metadrive.manager.spawn_manager import SpawnManager
@@ -61,8 +62,14 @@ class MAIntersectionMap(PGMap):
 
 
 class MAIntersectionSpawnManager(SpawnManager):
+    def __init__(self, disable_u_turn=False):
+        super(MAIntersectionSpawnManager, self).__init__()
+        self.disable_u_turn = disable_u_turn
+
     def update_destination_for(self, agent_id, vehicle_config):
         end_roads = copy.deepcopy(self.engine.global_config["spawn_roads"])
+        if self.disable_u_turn:  # Remove the spawn road from end roads
+            end_roads = [r for r in end_roads if Road(*vehicle_config["spawn_lane_index"][:2]) != r]
         end_road = -self.np_random.choice(end_roads)  # Use negative road!
         vehicle_config["destination"] = end_road.end_node
         return vehicle_config
@@ -89,10 +96,23 @@ class MultiAgentIntersectionEnv(MultiAgentMetaDrive):
         return LidarStateObservationMARound(vehicle_config)
 
     def setup_engine(self):
+        disable_u_turn = self.config["map_config"]["lane_num"] < 2
         super(MultiAgentIntersectionEnv, self).setup_engine()
         self.engine.update_manager("map_manager", MAIntersectionMapManager())
-        self.engine.update_manager("spawn_manager", MAIntersectionSpawnManager())
+        self.engine.update_manager("spawn_manager", MAIntersectionSpawnManager(disable_u_turn=disable_u_turn))
 
+
+class MultiAgentTinyInter(MultiAgentIntersectionEnv):
+    @staticmethod
+    def default_config() -> Config:
+        tiny_config = dict(
+            num_agents=8,
+            map_config=dict(
+                exit_length=30,
+                lane_num=1,
+                lane_width=4,
+        ))
+        return MultiAgentIntersectionEnv.default_config().update(tiny_config, allow_add_new_key=True)
 
 def _draw():
     env = MultiAgentIntersectionEnv()
