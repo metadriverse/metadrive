@@ -54,7 +54,7 @@ class MAIntersectionMap(PGMap):
             # We disable U turn in TinyInter environment!
             last_block.enable_u_turn(True)
         else:
-            last_block.enable_u_turn(True)
+            last_block.enable_u_turn(False)
 
         last_block.construct_block(parent_node_path, physics_world)
         self.blocks.append(last_block)
