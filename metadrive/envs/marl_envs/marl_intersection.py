@@ -49,7 +49,13 @@ class MAIntersectionMap(PGMap):
         last_block = InterSection(
             1, last_block.get_socket(index=0), self.road_network, random_seed=1, ignore_intersection_checking=False
         )
-        last_block.add_u_turn(True)
+
+        if self.config["lane_num"] > 1:
+            # We disable U turn in TinyInter environment!
+            last_block.enable_u_turn(True)
+        else:
+            last_block.enable_u_turn(True)
+
         last_block.construct_block(parent_node_path, physics_world)
         self.blocks.append(last_block)
 

@@ -230,7 +230,7 @@ class InterSection(PGBlock):
             ignore_intersection_checking=self.ignore_intersection_checking
         )
 
-    def add_u_turn(self, enable_u_turn: bool):
+    def enable_u_turn(self, enable_u_turn: bool):
         self.enable_u_turn = enable_u_turn
 
     def get_intermediate_spawn_lanes(self):

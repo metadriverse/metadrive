@@ -1,17 +1,23 @@
 from metadrive.envs.marl_envs import MultiAgentIntersectionEnv
-from metadrive.utils import setup_logger
 
 
 class TestEnv(MultiAgentIntersectionEnv):
     def __init__(self):
         super(TestEnv, self).__init__(
             config={
-                "use_render": True,
-                "num_agents": 8,
+
+                # "num_agents": 8,
                 "map_config": {
                     "exit_length": 30,
-                    "lane_num": 1
-                }
+                    "lane_num": 1,
+                    "lane_width": 4
+                },
+
+                # === Debug ===
+                "vehicle_config": {"show_line_to_dest": True},
+                "manual_control": True,
+                "num_agents": 4,
+                "use_render": True,
             }
         )
 
