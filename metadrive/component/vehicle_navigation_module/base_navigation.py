@@ -108,7 +108,6 @@ class BaseNavigation:
         checkpoint2 = ref_lane2.position(ref_lane2.length, later_middle)
         return checkpoint1, checkpoint2
 
-
     def set_route(self, current_lane_index: str, destination: str):
         """
         Find a shortest path from start road to end road

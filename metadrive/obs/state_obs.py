@@ -183,7 +183,8 @@ class LidarStateObservation(ObservationBase):
             cloud_points, detected_objects = vehicle.lidar.perceive(vehicle, )
             if self.config["lidar"]["num_others"] > 0:
                 other_v_info += vehicle.lidar.get_surrounding_vehicles_info(
-                    vehicle, detected_objects, self.config["lidar"]["num_others"], self.config["lidar"]["add_others_navi"]
+                    vehicle, detected_objects, self.config["lidar"]["num_others"],
+                    self.config["lidar"]["add_others_navi"]
                 )
             other_v_info += self._add_noise_to_cloud_points(
                 cloud_points,

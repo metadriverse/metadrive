@@ -22,8 +22,9 @@ class EdgeNetworkNavigation(BaseNavigation):
         show_line_to_dest=False,
         panda_color=None
     ):
-        super(EdgeNetworkNavigation,
-              self).__init__(engine, show_navi_mark, random_navi_mark_color, show_dest_mark, show_line_to_dest, panda_color=panda_color)
+        super(EdgeNetworkNavigation, self).__init__(
+            engine, show_navi_mark, random_navi_mark_color, show_dest_mark, show_line_to_dest, panda_color=panda_color
+        )
 
     def reset(self, map, current_lane, destination=None, random_seed=None):
         super(EdgeNetworkNavigation, self).reset(map, current_lane)

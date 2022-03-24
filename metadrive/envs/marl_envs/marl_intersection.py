@@ -106,13 +106,14 @@ class MultiAgentTinyInter(MultiAgentIntersectionEnv):
     @staticmethod
     def default_config() -> Config:
         tiny_config = dict(
-            num_agents=8,
-            map_config=dict(
+            num_agents=8, map_config=dict(
                 exit_length=30,
                 lane_num=1,
                 lane_width=4,
-        ))
+            )
+        )
         return MultiAgentIntersectionEnv.default_config().update(tiny_config, allow_add_new_key=True)
+
 
 def _draw():
     env = MultiAgentIntersectionEnv()

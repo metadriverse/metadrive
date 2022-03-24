@@ -14,7 +14,9 @@ class TestEnv(MultiAgentTinyInter):
                 # },
 
                 # === Debug ===
-                "vehicle_config": {"show_line_to_dest": True},
+                "vehicle_config": {
+                    "show_line_to_dest": True
+                },
                 "manual_control": True,
                 # "num_agents": 4,
                 "use_render": True,

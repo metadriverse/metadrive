@@ -27,8 +27,9 @@ class NodeNetworkNavigation(BaseNavigation):
         This class define a helper for localizing vehicles and retrieving navigation information.
         It now only support from first block start to the end node, but can be extended easily.
         """
-        super(NodeNetworkNavigation,
-              self).__init__(engine, show_navi_mark, random_navi_mark_color, show_dest_mark, show_line_to_dest, panda_color=panda_color)
+        super(NodeNetworkNavigation, self).__init__(
+            engine, show_navi_mark, random_navi_mark_color, show_dest_mark, show_line_to_dest, panda_color=panda_color
+        )
         self.final_road = None
         self.current_road = None
         self.next_road = None
