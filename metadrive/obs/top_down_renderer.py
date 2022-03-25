@@ -124,7 +124,7 @@ class TopDownRenderer:
         road_color=(80, 80, 80),
         show_agent_name=False,
         camera_position=None,
-        track_target_vehicle=True,  # useless, remain here only for compatibility
+        # track_target_vehicle=True,  # useless, remain here only for compatibility
         # current_track_vehicle=None
     ):
         # Setup some useful flags
