@@ -80,6 +80,7 @@ class MultiAgentTinyInter(MultiAgentIntersectionEnv):
         d = self.agent_manager.filter_RL_agents(d)
         if "__all__" in d:
             d.pop("__all__")
+        assert len(d) == self.agent_manager.num_RL_agents
         d["__all__"] = all(d.values())
         return (
             self.agent_manager.filter_RL_agents(o),
@@ -124,7 +125,7 @@ if __name__ == "__main__":
     print("RL agent num", len(o))
     for i in range(1, 100000):
         o, r, d, info = env.step({k: [0, 1] for k in env.action_space.sample().keys()})
-        env.render("top_down", camera_position=(50, 0), film_size=(1000, 1000))
+        # env.render("top_down", camera_position=(50, 0), film_size=(1000, 1000))
         vehicles = env.vehicles
 
         if not d["__all__"]:
