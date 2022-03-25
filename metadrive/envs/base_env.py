@@ -153,6 +153,8 @@ class BaseEnv(gym.Env):
 
     # ===== Intialization =====
     def __init__(self, config: dict = None):
+        if config is None:
+            config = {}
         merged_config = self._merge_extra_config(config)
         global_config = self._post_process_config(merged_config)
         self.config = global_config
