@@ -137,6 +137,9 @@ BASE_DEFAULT_CONFIG = dict(
     show_skybox=True,
     show_terrain=True,
     show_interface=True,
+
+    # FIXME: Remove this! PZH
+    debug_should_done_always_false=False,
 )
 
 
@@ -362,8 +365,11 @@ class BaseEnv(gym.Env):
             done = done_function_result or self.dones[v_id]
             self.dones[v_id] = done
 
-        should_done = engine_info.get(REPLAY_DONE, False
-                                      ) or (self.config["horizon"] and self.episode_steps >= self.config["horizon"])
+        if self.config["debug_should_done_always_false"]:
+            should_done = False
+        else:
+            should_done = engine_info.get(REPLAY_DONE, False) or \
+                          (self.config["horizon"] and self.episode_steps >= self.config["horizon"])
         termination_infos = self.for_each_vehicle(auto_termination, should_done)
 
         step_infos = concat_step_infos([
