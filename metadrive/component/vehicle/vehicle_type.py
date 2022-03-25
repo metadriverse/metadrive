@@ -18,6 +18,10 @@ class DefaultVehicle(BaseVehicle):
     path = ['vehicle/ferra/', (factor, factor, factor), (0, 0.0, 0.), 0]
 
 
+class StaticDefaultVehicle(DefaultVehicle):
+    PARAMETER_SPACE = ParameterSpace(VehicleParameterSpace.STATIC_DEFAULT_VEHICLE)
+
+
 class XLVehicle(BaseVehicle):
     PARAMETER_SPACE = ParameterSpace(VehicleParameterSpace.XL_VEHICLE)
     LENGTH = 5.8
@@ -76,7 +80,8 @@ class SVehicle(BaseVehicle):
     path = ['vehicle/beetle/', (factor, factor, factor), (0, -0.2, 0.03), 0]
 
 
-vehicle_type = {"s": SVehicle, "m": MVehicle, "l": LVehicle, "xl": XLVehicle, "default": DefaultVehicle}
+vehicle_type = {"s": SVehicle, "m": MVehicle, "l": LVehicle, "xl": XLVehicle, "default": DefaultVehicle,
+                "static_default": StaticDefaultVehicle}
 
 
 def random_vehicle_type(np_random, p=None):
