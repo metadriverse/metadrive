@@ -200,19 +200,20 @@ class MultiAgentParkingLotEnv(MultiAgentMetaDrive):
         bp_index = get_np_random(self._DEBUG_RANDOM_SEED).choice(list(safe_places_dict.keys()), 1)[0]
         new_spawn_place = safe_places_dict[bp_index]
 
-        new_agent_id, vehicle = self.agent_manager.propose_new_vehicle()
+        new_agent_id, vehicle, step_info = self.agent_manager.propose_new_vehicle()
         new_spawn_place_config = new_spawn_place["config"]
         new_spawn_place_config = self.engine.spawn_manager.update_destination_for(new_agent_id, new_spawn_place_config)
         vehicle.config.update(new_spawn_place_config)
         vehicle.reset()
-        vehicle.after_step()
+        after_step_info = vehicle.after_step()
+        step_info.update(after_step_info)
         self.dones[new_agent_id] = False  # Put it in the internal dead-tracking dict.
 
         new_obs = self.observations[new_agent_id].observe(vehicle)
-        return new_agent_id, new_obs
+        return new_agent_id, new_obs, step_info
 
-    def get_single_observation(self, vehicle_config: "Config") -> "ObservationBase":
-        return LidarStateObservationMARound(vehicle_config)
+    # def get_single_observation(self, vehicle_config: "Config") -> "ObservationBase":
+    #     return LidarStateObservationMARound(vehicle_config)
 
     def done_function(self, vehicle_id):
         done, info = super(MultiAgentParkingLotEnv, self).done_function(vehicle_id)

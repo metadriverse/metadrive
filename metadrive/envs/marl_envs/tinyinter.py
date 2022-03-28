@@ -17,13 +17,9 @@ class MixedIDMAgentManager(AgentManager):
         self.dying_RL_agents = set()
 
     def filter_RL_agents(self, source_dict):
-        new_ret = {}
-        for k in self.RL_agents:
-            # if k in self.dying_RL_agents:
-            #     continue
-            assert k in source_dict
-            new_ret[k] = source_dict[k]
-        # assert len(new_ret) <= self.num_RL_agents
+        new_ret = {k: v for k, v in source_dict.items() if k in self.RL_agents}
+        if len(new_ret) > self.num_RL_agents:
+            assert len(self.RL_agents) - len(self.dying_RL_agents) == self.num_RL_agents
         return new_ret
 
     def get_observation_spaces(self):
@@ -71,6 +67,29 @@ class MixedIDMAgentManager(AgentManager):
         self.dying_RL_agents.clear()
         super(MixedIDMAgentManager, self).reset()
 
+    @property
+    def allow_respawn(self):
+        """In native implementation, we can only respawn new vehicle when the total vehicles in the scene
+        is less then num_agents. But here, since we always have N-K IDM vehicles and K RL vehicles, so
+        allow_respawn is always False. We set to True to allow spawning new vehicle.
+        """
+        if self._allow_respawn is False:
+            return False
+
+        if len(self.active_agents) < self.engine.global_config["num_agents"]:
+            return True
+
+        if len(self.RL_agents) - len(self.dying_RL_agents) < self.num_RL_agents:
+            return True
+
+        return False
+
+        # return True
+
+        if len(self.RL_agents) - len(self.dying_RL_agents) < self.num_RL_agents:
+            return True
+        return False
+
 
 class MultiAgentTinyInter(MultiAgentIntersectionEnv):
     @staticmethod
@@ -92,7 +111,7 @@ class MultiAgentTinyInter(MultiAgentIntersectionEnv):
         d = self.agent_manager.filter_RL_agents(d)
         if "__all__" in d:
             d.pop("__all__")
-        assert len(d) == self.agent_manager.num_RL_agents, d
+        # assert len(d) == self.agent_manager.num_RL_agents, d
         d["__all__"] = all(d.values())
         return (
             self.agent_manager.filter_RL_agents(o),
@@ -109,9 +128,7 @@ class MultiAgentTinyInter(MultiAgentIntersectionEnv):
     def __init__(self, config=None):
         self.num_RL_agents = 1
         super(MultiAgentTinyInter, self).__init__(config=config)
-        self.num_agents = self.num_RL_agents  # Hack
-
-
+        # self.num_agents = self.num_RL_agents  # Hack
         self.agent_manager = MixedIDMAgentManager(
             init_observations=self._get_observations(), init_action_space=self._get_action_space(), num_RL_agents=self.num_RL_agents
         )
@@ -128,6 +145,7 @@ if __name__ == '__main__':
 
 if __name__ == "__main__":
     env = MultiAgentTinyInter(config={
+        "num_agents": 3,
         "vehicle_config": {"show_line_to_dest": True, "lidar": {"num_others": 2, "add_others_navi": True}},
         # "manual_control": True,
         # "use_render": True,
@@ -136,17 +154,19 @@ if __name__ == "__main__":
     print("vehicle num", len(env.engine.traffic_manager.vehicles))
     print("RL agent num", len(o))
     for i in range(1, 100000):
-        o, r, d, info = env.step({k: [0, 1] for k in env.action_space.sample().keys()})
-        # env.render("top_down", camera_position=(50, 0), film_size=(1000, 1000))
+        o, r, d, info = env.step({k: [0, 0.21312] for k in env.action_space.sample().keys()})
+        env.render("top_down", camera_position=(50, 0), film_size=(1000, 1000))
         vehicles = env.vehicles
 
         if not d["__all__"]:
             assert sum([env.engine.get_policy(v.name).__class__.__name__ == "EnvInputPolicy" for k, v in vehicles.items()]) == 1
-            assert len(env.observation_space) == 1
-            assert len(env.action_space) == 1
+            # assert len(env.observation_space) == 1
+            # assert len(env.action_space) == 1
 
         if any(d.values()):
             print("Somebody dead.", d)
+
+            print("Step {}. Policies: {}".format(i, {k: v['policy'] for k, v in info.items()}))
 
         # if True in d.values():
         #     print("Somebody Done. ", info)
