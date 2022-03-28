@@ -2,7 +2,7 @@ from metadrive.envs.marl_envs.marl_intersection import MultiAgentIntersectionEnv
 from metadrive.manager.agent_manager import AgentManager
 from metadrive.policy.idm_policy import IDMPolicy
 from metadrive.utils import Config
-
+import copy
 
 class MixedIDMAgentManager(AgentManager):
     """In this manager, we can replace part of RL policy by IDM policy"""
@@ -13,9 +13,14 @@ class MixedIDMAgentManager(AgentManager):
         self.num_RL_agents = num_RL_agents
         self.RL_agents = set()
         self.dying_RL_agents = set()
+        self.all_previous_RL_agents = set()
 
-    def filter_RL_agents(self, source_dict):
-        new_ret = {k: v for k, v in source_dict.items() if k in self.RL_agents}
+    def filter_RL_agents(self, source_dict, original_done_dict=None):
+
+        # new_ret = {k: v for k, v in source_dict.items() if k in self.RL_agents}
+
+        new_ret = {k: v for k, v in source_dict.items() if k in self.all_previous_RL_agents}
+
         # if len(new_ret) > self.num_RL_agents:
         #     assert len(self.RL_agents) - len(self.dying_RL_agents) == self.num_RL_agents
         # if len(new_ret) < self.num_RL_agents:
@@ -39,7 +44,7 @@ class MixedIDMAgentManager(AgentManager):
             return ret
 
     def finish(self, agent_name, ignore_delay_done=False):
-        ignore_delay_done = True
+        # ignore_delay_done = True
         if agent_name in self.RL_agents:
             self.dying_RL_agents.add(agent_name)
         super(MixedIDMAgentManager, self).finish(agent_name, ignore_delay_done)
@@ -71,6 +76,7 @@ class MixedIDMAgentManager(AgentManager):
             else:
                 policy = self._get_policy(obj)
                 self.RL_agents.add(agent_id)
+                self.all_previous_RL_agents.add(agent_id)
                 obj._use_special_color = True
             self.add_policy(obj.id, policy)
         return ret
@@ -78,6 +84,7 @@ class MixedIDMAgentManager(AgentManager):
     def reset(self):
         self.RL_agents.clear()
         self.dying_RL_agents.clear()
+        self.all_previous_RL_agents.clear()
         super(MixedIDMAgentManager, self).reset()
 
     @property
@@ -118,16 +125,17 @@ class MultiAgentTinyInter(MultiAgentIntersectionEnv):
 
     def step(self, actions):
         o, r, d, i = super(MultiAgentTinyInter, self).step(actions)
-        d = self.agent_manager.filter_RL_agents(d)
+        original_done_dict = copy.deepcopy(d)
+        d = self.agent_manager.filter_RL_agents(d, original_done_dict=original_done_dict)
         if "__all__" in d:
             d.pop("__all__")
         # assert len(d) == self.agent_manager.num_RL_agents, d
         d["__all__"] = all(d.values())
         return (
-            self.agent_manager.filter_RL_agents(o),
-            self.agent_manager.filter_RL_agents(r),
+            self.agent_manager.filter_RL_agents(o, original_done_dict=original_done_dict),
+            self.agent_manager.filter_RL_agents(r, original_done_dict=original_done_dict),
             d,
-            self.agent_manager.filter_RL_agents(i),
+            self.agent_manager.filter_RL_agents(i, original_done_dict=original_done_dict),
         )
 
     def _preprocess_actions(self, actions):
