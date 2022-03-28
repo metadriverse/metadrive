@@ -14,13 +14,16 @@ class MixedIDMAgentManager(AgentManager):
         super(MixedIDMAgentManager, self).__init__(init_observations=init_observations, init_action_space=init_action_space)
         self.num_RL_agents = num_RL_agents
         self.RL_agents = set()
+        self.dying_RL_agents = set()
 
     def filter_RL_agents(self, source_dict):
         new_ret = {}
         for k in self.RL_agents:
+            # if k in self.dying_RL_agents:
+            #     continue
             assert k in source_dict
             new_ret[k] = source_dict[k]
-        assert len(new_ret) <= self.num_RL_agents
+        # assert len(new_ret) <= self.num_RL_agents
         return new_ret
 
     def get_observation_spaces(self):
@@ -29,14 +32,18 @@ class MixedIDMAgentManager(AgentManager):
     def get_action_spaces(self):
         return self.filter_RL_agents(super(MixedIDMAgentManager, self).get_action_spaces())
 
-    # @property
-    # def active_agents(self):
-    #     return self.filter_RL_agents(super(MixedIDMAgentManager, self).active_agents)
-
     def finish(self, agent_name, ignore_delay_done=False):
         if agent_name in self.RL_agents:
+            self.dying_RL_agents.add(agent_name)
+        super(MixedIDMAgentManager, self).finish(agent_name, ignore_delay_done)
+
+    def _remove_vehicle(self, v):
+        agent_name = self.object_to_agent(v.name)
+        if agent_name in self.RL_agents:
             self.RL_agents.remove(agent_name)
-        super(MixedIDMAgentManager, self).finish(agent_name=agent_name, ignore_delay_done=ignore_delay_done)
+        if agent_name in self.dying_RL_agents:
+            self.dying_RL_agents.remove(agent_name)
+        super(MixedIDMAgentManager, self)._remove_vehicle(v)
 
     def _get_vehicles(self, config_dict: dict):
         from metadrive.component.vehicle.vehicle_type import random_vehicle_type, vehicle_type
@@ -51,13 +58,18 @@ class MixedIDMAgentManager(AgentManager):
                     v_type = vehicle_type["default"]
             obj = self.spawn_object(v_type, vehicle_config=v_config)
             ret[agent_id] = obj
-            if len(self.RL_agents) >= self.num_RL_agents:
+            if (len(self.RL_agents) - len(self.dying_RL_agents)) >= self.num_RL_agents:
                 policy = IDMPolicy(obj, self.generate_seed())
             else:
                 policy = self._get_policy(obj)
                 self.RL_agents.add(agent_id)
             self.add_policy(obj.id, policy)
         return ret
+
+    def reset(self):
+        self.RL_agents.clear()
+        self.dying_RL_agents.clear()
+        super(MixedIDMAgentManager, self).reset()
 
 
 class MultiAgentTinyInter(MultiAgentIntersectionEnv):
@@ -80,7 +92,7 @@ class MultiAgentTinyInter(MultiAgentIntersectionEnv):
         d = self.agent_manager.filter_RL_agents(d)
         if "__all__" in d:
             d.pop("__all__")
-        assert len(d) == self.agent_manager.num_RL_agents
+        assert len(d) == self.agent_manager.num_RL_agents, d
         d["__all__"] = all(d.values())
         return (
             self.agent_manager.filter_RL_agents(o),
