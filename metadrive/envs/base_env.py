@@ -365,7 +365,9 @@ class BaseEnv(gym.Env):
         step_infos = concat_step_infos([engine_info, done_infos, reward_infos, cost_infos])
 
         # For extreme case only. Force to terminate all vehicles if the environmental step exceeds 5 times horizon.
-        should_external_done = self.episode_steps > 5 * self.config["horizon"]
+        should_external_done = False
+        if self.config["horizon"] is not None:
+            should_external_done = self.episode_steps > 5 * self.config["horizon"]
         if should_external_done:
             for k in self.dones:
                 self.dones[k] = True
