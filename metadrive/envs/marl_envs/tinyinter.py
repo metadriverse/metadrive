@@ -95,11 +95,16 @@ class MultiAgentTinyInter(MultiAgentIntersectionEnv):
     @staticmethod
     def default_config() -> Config:
         tiny_config = dict(
-            num_agents=8, map_config=dict(
+            num_agents=8,
+            num_RL_agents=1,
+
+            map_config=dict(
                 exit_length=30,
                 lane_num=1,
                 lane_width=4,
-            )
+            ),
+
+            disable_idm_deceleration=False,  # No emergency stopping
         )
         return MultiAgentIntersectionEnv.default_config().update(tiny_config, allow_add_new_key=True)
 
@@ -125,7 +130,8 @@ class MultiAgentTinyInter(MultiAgentIntersectionEnv):
         return actions
 
     def __init__(self, config=None):
-        self.num_RL_agents = 1
+        config = config or {}
+        self.num_RL_agents = config.get("num_RL_agents", self.default_config()["num_RL_agents"])
         super(MultiAgentTinyInter, self).__init__(config=config)
         self.agent_manager = MixedIDMAgentManager(
             init_observations=self._get_observations(),
@@ -140,7 +146,7 @@ if __name__ == '__main__':
 if __name__ == "__main__":
     env = MultiAgentTinyInter(
         config={
-            "num_agents": 3,
+            "num_agents": 8,
             "vehicle_config": {
                 "show_line_to_dest": True,
                 "lidar": {
@@ -174,5 +180,6 @@ if __name__ == "__main__":
         # env.reset()
         if d["__all__"]:
             print("Reset.", info)
+            break
             env.reset()
     env.close()
