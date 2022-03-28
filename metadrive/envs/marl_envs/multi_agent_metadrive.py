@@ -29,6 +29,7 @@ MULTI_AGENT_METADRIVE_DEFAULT_CONFIG = dict(
     # that, the episode won't terminate until all existing vehicles reach their horizon or done. The vehicle specified
     # horizon is also this value.
     horizon=1000,
+    max_step_per_agent=1000,  # Per agent maximum episode steps
 
     # Use to determine what neighborhood means
     neighbours_distance=10,
@@ -38,7 +39,13 @@ MULTI_AGENT_METADRIVE_DEFAULT_CONFIG = dict(
         lidar=dict(num_lasers=72, distance=40, num_others=0),
         random_color=True,
         not_randomize=False,
-        spawn_lane_index=(FirstPGBlock.NODE_1, FirstPGBlock.NODE_2, 0)
+        spawn_lane_index=(FirstPGBlock.NODE_1, FirstPGBlock.NODE_2, 0),
+
+        # We remove dynamics randomization in Multi-agent environments to make the results aligned with previous
+        # results published in papers. See
+        # https://github.com/decisionforce/metadrive/issues/161#issuecomment-1080114029
+        # for more information
+        vehicle_model="static_default",
     ),
     target_vehicle_configs=dict(),
 
