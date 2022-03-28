@@ -130,10 +130,8 @@ BASE_DEFAULT_CONFIG = dict(
     _debug_crash_object=False,
     record_episode=False,  # when replay_episode is not None ,this option will be useless
     replay_episode=None,  # set the replay file to enable replay
-
     horizon=None,  # The maximum length of each environmental episode. Set to None to remove this constraint
     max_step_per_agent=None,  # The maximum length of each agent episode. Raise max_step termination when reaches.
-
     show_interface_navi_mark=True,
     show_mouse=True,
     show_skybox=True,
