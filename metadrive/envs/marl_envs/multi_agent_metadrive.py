@@ -38,7 +38,13 @@ MULTI_AGENT_METADRIVE_DEFAULT_CONFIG = dict(
         lidar=dict(num_lasers=72, distance=40, num_others=0),
         random_color=True,
         not_randomize=False,
-        spawn_lane_index=(FirstPGBlock.NODE_1, FirstPGBlock.NODE_2, 0)
+        spawn_lane_index=(FirstPGBlock.NODE_1, FirstPGBlock.NODE_2, 0),
+
+        # We remove dynamics randomization in Multi-agent environments to make the results aligned with previous
+        # results published in papers. See
+        # https://github.com/decisionforce/metadrive/issues/161#issuecomment-1080114029
+        # for more information
+        vehicle_model="static_default",
     ),
     target_vehicle_configs=dict(),
 
