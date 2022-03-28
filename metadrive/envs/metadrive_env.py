@@ -144,9 +144,15 @@ class MetaDriveEnv(BaseEnv):
     def done_function(self, vehicle_id: str):
         vehicle = self.vehicles[vehicle_id]
         done = False
-        done_info = dict(
-            crash_vehicle=False, crash_object=False, crash_building=False, out_of_road=False, arrive_dest=False
-        )
+        done_info = {
+            TerminationState.CRASH_VEHICLE: False,
+            TerminationState.CRASH_OBJECT: False,
+            TerminationState.CRASH_BUILDING: False,
+            TerminationState.OUT_OF_ROAD: False,
+            TerminationState.SUCCESS: False,
+            TerminationState.MAX_STEP: False,
+            # crash_vehicle=False, crash_object=False, crash_building=False, out_of_road=False, arrive_dest=False,
+        }
         if vehicle.arrive_destination:
             done = True
             logging.info("Episode ended! Reason: arrive_dest.")
@@ -167,6 +173,11 @@ class MetaDriveEnv(BaseEnv):
             done = True
             done_info[TerminationState.CRASH_BUILDING] = True
             logging.info("Episode ended! Reason: crash building ")
+        if self.config["max_step_per_agent"] is not None and \
+                self.episode_lengths[vehicle_id] >= self.config["max_step_per_agent"]:
+            done = True
+            done_info[TerminationState.MAX_STEP] = True
+            logging.info("Episode ended! Reason: max step ")
 
         # for compatibility
         # crash almost equals to crashing with vehicles
