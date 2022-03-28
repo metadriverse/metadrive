@@ -266,7 +266,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
                 "steering": float(self.steering),
                 "acceleration": float(self.throttle_brake),
                 "step_energy": step_energy,
-                "episode_energy": episode_energy
+                "episode_energy": episode_energy,
+                "policy": self.engine.get_policy(self.name).name
             }
         )
         return step_info
