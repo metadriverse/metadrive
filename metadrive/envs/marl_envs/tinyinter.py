@@ -94,12 +94,6 @@ class MixedIDMAgentManager(AgentManager):
 
         return False
 
-        # return True
-
-        if len(self.RL_agents) - len(self.dying_RL_agents) < self.num_RL_agents:
-            return True
-        return False
-
 
 class MultiAgentTinyInter(MultiAgentIntersectionEnv):
     @staticmethod
@@ -112,9 +106,7 @@ class MultiAgentTinyInter(MultiAgentIntersectionEnv):
                 exit_length=30,
                 lane_num=1,
                 lane_width=4,
-            ),
-
-            disable_idm_deceleration=False,  # No emergency stopping
+            )
         )
         return MultiAgentIntersectionEnv.default_config().update(tiny_config, allow_add_new_key=True)
 
@@ -151,9 +143,6 @@ class MultiAgentTinyInter(MultiAgentIntersectionEnv):
 
 
 if __name__ == '__main__':
-    from metadrive.envs.marl_envs import MultiAgentTinyInter
-
-if __name__ == "__main__":
     env = MultiAgentTinyInter(
         config={
             "num_agents": 8,
@@ -175,19 +164,13 @@ if __name__ == "__main__":
         o, r, d, info = env.step({k: [0, 0.1] for k in env.action_space.sample().keys()})
         env.render("top_down", camera_position=(50, 0), film_size=(1000, 1000))
         vehicles = env.vehicles
-
         if not d["__all__"]:
             assert sum(
                 [env.engine.get_policy(v.name).__class__.__name__ == "EnvInputPolicy" for k, v in vehicles.items()]
             ) == 1
-
         if any(d.values()):
             print("Somebody dead.", d)
             print("Step {}. Policies: {}".format(i, {k: v['policy'] for k, v in info.items()}))
-
-        # if True in d.values():
-        #     print("Somebody Done. ", info)
-        # env.reset()
         if d["__all__"]:
             print("Reset.", info)
             break
