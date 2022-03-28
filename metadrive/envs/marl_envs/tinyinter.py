@@ -16,8 +16,10 @@ class MixedIDMAgentManager(AgentManager):
 
     def filter_RL_agents(self, source_dict):
         new_ret = {k: v for k, v in source_dict.items() if k in self.RL_agents}
-        if len(new_ret) > self.num_RL_agents:
-            assert len(self.RL_agents) - len(self.dying_RL_agents) == self.num_RL_agents
+        # if len(new_ret) > self.num_RL_agents:
+        #     assert len(self.RL_agents) - len(self.dying_RL_agents) == self.num_RL_agents
+        # if len(new_ret) < self.num_RL_agents:
+        #     print("Something wrong!")
         return new_ret
 
     def get_observation_spaces(self):
@@ -37,6 +39,7 @@ class MixedIDMAgentManager(AgentManager):
             return ret
 
     def finish(self, agent_name, ignore_delay_done=False):
+        ignore_delay_done = True
         if agent_name in self.RL_agents:
             self.dying_RL_agents.add(agent_name)
         super(MixedIDMAgentManager, self).finish(agent_name, ignore_delay_done)
@@ -146,13 +149,15 @@ if __name__ == '__main__':
     env = MultiAgentTinyInter(
         config={
             "num_agents": 8,
-            "vehicle_config": {
-                "show_line_to_dest": True,
-                "lidar": {
-                    "num_others": 2,
-                    "add_others_navi": True
-                }
-            },
+            "num_RL_agents": 8,
+
+            # "vehicle_config": {
+            #     "show_line_to_dest": True,
+            #     "lidar": {
+            #         "num_others": 2,
+            #         "add_others_navi": True
+            #     }
+            # },
             # "manual_control": True,
             # "use_render": True,
         }
@@ -161,18 +166,19 @@ if __name__ == '__main__':
     print("vehicle num", len(env.engine.traffic_manager.vehicles))
     print("RL agent num", len(o))
     for i in range(1, 100000):
-        o, r, d, info = env.step({k: [0, 0.1] for k in env.action_space.sample().keys()})
-        env.render("top_down", camera_position=(50, 0), film_size=(1000, 1000))
+        o, r, d, info = env.step({k: [0.01, 1] for k in env.action_space.sample().keys()})
+        env.render("top_down", camera_position=(42.5, 0), film_size=(1000, 1000))
         vehicles = env.vehicles
-        if not d["__all__"]:
-            assert sum(
-                [env.engine.get_policy(v.name).__class__.__name__ == "EnvInputPolicy" for k, v in vehicles.items()]
-            ) == 1
+        # if not d["__all__"]:
+        #     assert sum(
+        #         [env.engine.get_policy(v.name).__class__.__name__ == "EnvInputPolicy" for k, v in vehicles.items()]
+        #     ) == env.config["num_RL_agents"]
         if any(d.values()):
-            print("Somebody dead.", d)
+            print("Somebody dead.", d, info)
             print("Step {}. Policies: {}".format(i, {k: v['policy'] for k, v in info.items()}))
         if d["__all__"]:
-            print("Reset.", info)
+            # assert i >= 1000
+            print("Reset. ", i, info)
             break
             env.reset()
     env.close()
