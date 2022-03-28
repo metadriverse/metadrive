@@ -148,11 +148,14 @@ class MultiAgentMetaDrive(MetaDriveEnv):
                 d[new_id] = False
 
         # Update __all__
-        d["__all__"] = (
-            ((self.episode_steps >= self.config["horizon"]) and (all(d.values())))
-            or (len(self.vehicles) == 0)
-            or (self.episode_steps >= 5 * self.config["horizon"])
-        )
+        d_all = False
+        if self.config["horizon"] is not None:  # No agent alive or a too long episode happens
+            if (self.episode_steps >= self.config["horizon"] and all(d.values())) or \
+                    (self.episode_steps >= 5 * self.config["horizon"]):
+                d_all = True
+        if len(self.vehicles) == 0:  # No agent alive
+            d_all = True
+        d["__all__"] = d_all
         if d["__all__"]:
             for k in d.keys():
                 d[k] = True

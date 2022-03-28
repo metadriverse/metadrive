@@ -1,11 +1,7 @@
 from metadrive.envs.marl_envs.marl_intersection import MultiAgentIntersectionEnv
 from metadrive.manager.agent_manager import AgentManager
 from metadrive.policy.idm_policy import IDMPolicy
-from metadrive.policy.env_input_policy import EnvInputPolicy
-from metadrive.policy.manual_control_policy import ManualControlPolicy
 from metadrive.utils import Config
-
-import copy
 
 
 class MixedIDMAgentManager(AgentManager):
