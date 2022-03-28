@@ -21,10 +21,20 @@ class MixedIDMAgentManager(AgentManager):
         return new_ret
 
     def get_observation_spaces(self):
-        return self.filter_RL_agents(super(MixedIDMAgentManager, self).get_observation_spaces())
+        ret = self.filter_RL_agents(super(MixedIDMAgentManager, self).get_observation_spaces())
+        if len(ret) == 0:
+            k, v = list(super(MixedIDMAgentManager, self).get_observation_spaces().items())[0]
+            return {k: v}
+        else:
+            return ret
 
     def get_action_spaces(self):
-        return self.filter_RL_agents(super(MixedIDMAgentManager, self).get_action_spaces())
+        ret = self.filter_RL_agents(super(MixedIDMAgentManager, self).get_action_spaces())
+        if len(ret) == 0:
+            k, v = list(super(MixedIDMAgentManager, self).get_action_spaces().items())[0]
+            return {k: v}
+        else:
+            return ret
 
     def finish(self, agent_name, ignore_delay_done=False):
         if agent_name in self.RL_agents:
