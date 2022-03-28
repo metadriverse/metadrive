@@ -7,11 +7,13 @@ from metadrive.utils import Config
 
 import copy
 
+
 class MixedIDMAgentManager(AgentManager):
     """In this manager, we can replace part of RL policy by IDM policy"""
-
     def __init__(self, init_observations, init_action_space, num_RL_agents):
-        super(MixedIDMAgentManager, self).__init__(init_observations=init_observations, init_action_space=init_action_space)
+        super(MixedIDMAgentManager, self).__init__(
+            init_observations=init_observations, init_action_space=init_action_space
+        )
         self.num_RL_agents = num_RL_agents
         self.RL_agents = set()
         self.dying_RL_agents = set()
@@ -122,7 +124,6 @@ class MultiAgentTinyInter(MultiAgentIntersectionEnv):
             self.agent_manager.filter_RL_agents(i),
         )
 
-
     def _preprocess_actions(self, actions):
         actions = {v_id: actions[v_id] for v_id in self.vehicles.keys() if v_id in self.agent_manager.RL_agents}
         return actions
@@ -131,26 +132,30 @@ class MultiAgentTinyInter(MultiAgentIntersectionEnv):
         self.num_RL_agents = 1
         super(MultiAgentTinyInter, self).__init__(config=config)
         self.agent_manager = MixedIDMAgentManager(
-            init_observations=self._get_observations(), init_action_space=self._get_action_space(), num_RL_agents=self.num_RL_agents
+            init_observations=self._get_observations(),
+            init_action_space=self._get_action_space(),
+            num_RL_agents=self.num_RL_agents
         )
-
-
 
 
 if __name__ == '__main__':
     from metadrive.envs.marl_envs import MultiAgentTinyInter
 
-
-
-
-
 if __name__ == "__main__":
-    env = MultiAgentTinyInter(config={
-        "num_agents": 3,
-        "vehicle_config": {"show_line_to_dest": True, "lidar": {"num_others": 2, "add_others_navi": True}},
-        # "manual_control": True,
-        # "use_render": True,
-    })
+    env = MultiAgentTinyInter(
+        config={
+            "num_agents": 3,
+            "vehicle_config": {
+                "show_line_to_dest": True,
+                "lidar": {
+                    "num_others": 2,
+                    "add_others_navi": True
+                }
+            },
+            # "manual_control": True,
+            # "use_render": True,
+        }
+    )
     o = env.reset()
     print("vehicle num", len(env.engine.traffic_manager.vehicles))
     print("RL agent num", len(o))
@@ -160,7 +165,9 @@ if __name__ == "__main__":
         vehicles = env.vehicles
 
         if not d["__all__"]:
-            assert sum([env.engine.get_policy(v.name).__class__.__name__ == "EnvInputPolicy" for k, v in vehicles.items()]) == 1
+            assert sum(
+                [env.engine.get_policy(v.name).__class__.__name__ == "EnvInputPolicy" for k, v in vehicles.items()]
+            ) == 1
 
         if any(d.values()):
             print("Somebody dead.", d)
@@ -168,7 +175,7 @@ if __name__ == "__main__":
 
         # if True in d.values():
         #     print("Somebody Done. ", info)
-            # env.reset()
+        # env.reset()
         if d["__all__"]:
             print("Reset.", info)
             env.reset()
