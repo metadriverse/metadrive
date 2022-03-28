@@ -29,6 +29,7 @@ MULTI_AGENT_METADRIVE_DEFAULT_CONFIG = dict(
     # that, the episode won't terminate until all existing vehicles reach their horizon or done. The vehicle specified
     # horizon is also this value.
     horizon=1000,
+    max_step_per_agent=1000,  # Per agent maximum episode steps
 
     # Use to determine what neighborhood means
     neighbours_distance=10,
