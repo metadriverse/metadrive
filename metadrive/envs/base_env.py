@@ -18,7 +18,6 @@ from metadrive.obs.image_obs import ImageStateObservation
 from metadrive.obs.observation_base import ObservationBase
 from metadrive.obs.state_obs import LidarStateObservation
 from metadrive.utils import Config, merge_dicts, get_np_random, concat_step_infos
-from metadrive.utils.utils import auto_termination
 
 BASE_DEFAULT_CONFIG = dict(
 
@@ -131,7 +130,8 @@ BASE_DEFAULT_CONFIG = dict(
     _debug_crash_object=False,
     record_episode=False,  # when replay_episode is not None ,this option will be useless
     replay_episode=None,  # set the replay file to enable replay
-    horizon=None,  # The maximum length of each episode. Set to None to remove this constraint
+    horizon=None,  # The maximum length of each environmental episode. Set to None to remove this constraint
+    max_step_per_agent=None,  # The maximum length of each agent episode. Raise max_step termination when reaches.
     show_interface_navi_mark=True,
     show_mouse=True,
     show_skybox=True,
@@ -362,19 +362,13 @@ class BaseEnv(gym.Env):
             done = done_function_result or self.dones[v_id]
             self.dones[v_id] = done
 
-        should_done = engine_info.get(REPLAY_DONE, False
-                                      ) or (self.config["horizon"] and self.episode_steps >= self.config["horizon"])
-        termination_infos = self.for_each_vehicle(auto_termination, should_done)
+        step_infos = concat_step_infos([engine_info, done_infos, reward_infos, cost_infos])
 
-        step_infos = concat_step_infos([
-            engine_info,
-            done_infos,
-            reward_infos,
-            cost_infos,
-            termination_infos,
-        ])
-
-        if should_done:
+        # For extreme case only. Force to terminate all vehicles if the environmental step exceeds 5 times horizon.
+        should_external_done = False
+        if self.config["horizon"] is not None:
+            should_external_done = self.episode_steps > 5 * self.config["horizon"]
+        if should_external_done:
             for k in self.dones:
                 self.dones[k] = True
 
@@ -384,6 +378,7 @@ class BaseEnv(gym.Env):
             step_infos[v_id]["episode_reward"] = self.episode_rewards[v_id]
             self.episode_lengths[v_id] += 1
             step_infos[v_id]["episode_length"] = self.episode_lengths[v_id]
+
         if not self.is_multi_agent:
             return self._wrap_as_single_agent(obses), self._wrap_as_single_agent(rewards), \
                    self._wrap_as_single_agent(dones), self._wrap_as_single_agent(step_infos)

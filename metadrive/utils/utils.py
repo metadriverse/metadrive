@@ -5,8 +5,6 @@ import sys
 
 from panda3d.bullet import BulletBodyNode
 
-from metadrive.constants import TerminationState
-
 
 def import_pygame():
     os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
@@ -168,7 +166,3 @@ def get_object_from_node(node: BulletBodyNode):
         return get_object(ret)[ret]
     else:
         return ret
-
-
-def auto_termination(vehicle, should_done):
-    return {TerminationState.MAX_STEP: True if should_done else False}
