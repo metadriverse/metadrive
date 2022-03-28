@@ -4,8 +4,8 @@ from metadrive.component.map.pg_map import PGMap
 from metadrive.component.pgblock.first_block import FirstPGBlock
 from metadrive.component.pgblock.intersection import InterSection
 from metadrive.component.road_network import Road
-from metadrive.envs.marl_envs.marl_inout_roundabout import \
-    LidarStateObservationMARound
+# from metadrive.envs.marl_envs.marl_inout_roundabout import \
+#     LidarStateObservationMARound
 from metadrive.envs.marl_envs.multi_agent_metadrive import MultiAgentMetaDrive
 from metadrive.manager.map_manager import MapManager
 from metadrive.manager.spawn_manager import SpawnManager
@@ -92,27 +92,14 @@ class MultiAgentIntersectionEnv(MultiAgentMetaDrive):
     def default_config() -> Config:
         return MultiAgentMetaDrive.default_config().update(MAIntersectionConfig, allow_add_new_key=True)
 
-    def get_single_observation(self, vehicle_config: "Config") -> "ObservationBase":
-        return LidarStateObservationMARound(vehicle_config)
+    # def get_single_observation(self, vehicle_config: "Config") -> "ObservationBase":
+    #     return LidarStateObservationMARound(vehicle_config)
 
     def setup_engine(self):
         disable_u_turn = self.config["map_config"]["lane_num"] < 2
         super(MultiAgentIntersectionEnv, self).setup_engine()
         self.engine.update_manager("map_manager", MAIntersectionMapManager())
         self.engine.update_manager("spawn_manager", MAIntersectionSpawnManager(disable_u_turn=disable_u_turn))
-
-
-class MultiAgentTinyInter(MultiAgentIntersectionEnv):
-    @staticmethod
-    def default_config() -> Config:
-        tiny_config = dict(
-            num_agents=8, map_config=dict(
-                exit_length=30,
-                lane_num=1,
-                lane_width=4,
-            )
-        )
-        return MultiAgentIntersectionEnv.default_config().update(tiny_config, allow_add_new_key=True)
 
 
 def _draw():

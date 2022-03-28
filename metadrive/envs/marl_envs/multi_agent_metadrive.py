@@ -139,17 +139,18 @@ class MultiAgentMetaDrive(MetaDriveEnv):
         # Update respawn manager
         if self.episode_steps >= self.config["horizon"]:
             self.agent_manager.set_allow_respawn(False)
-        new_obs_dict = self._respawn_vehicles(randomize_position=self.config["random_traffic"])
+        new_obs_dict, new_info_dict = self._respawn_vehicles(randomize_position=self.config["random_traffic"])
         if new_obs_dict:
             for new_id, new_obs in new_obs_dict.items():
                 o[new_id] = new_obs
                 r[new_id] = 0.0
-                i[new_id] = {}
+                i[new_id] = new_info_dict[new_id]
                 d[new_id] = False
 
         # Update __all__
         d["__all__"] = (
-            ((self.episode_steps >= self.config["horizon"]) and (all(d.values()))) or (len(self.vehicles) == 0)
+            ((self.episode_steps >= self.config["horizon"]) and (all(d.values())))
+            or (len(self.vehicles) == 0)
             or (self.episode_steps >= 5 * self.config["horizon"])
         )
         if d["__all__"]:
@@ -186,15 +187,17 @@ class MultiAgentMetaDrive(MetaDriveEnv):
 
     def _respawn_vehicles(self, randomize_position=False):
         new_obs_dict = {}
+        new_info_dict = {}
         if not self.agent_manager.allow_respawn:
-            return new_obs_dict
+            return new_obs_dict, new_info_dict
         while True:
-            new_id, new_obs = self._respawn_single_vehicle(randomize_position=randomize_position)
+            new_id, new_obs, step_info = self._respawn_single_vehicle(randomize_position=randomize_position)
             if new_obs is not None:
                 new_obs_dict[new_id] = new_obs
+                new_info_dict[new_id] = step_info
             else:
                 break
-        return new_obs_dict
+        return new_obs_dict, new_info_dict
 
     def _respawn_single_vehicle(self, randomize_position=False):
         """
@@ -204,20 +207,21 @@ class MultiAgentMetaDrive(MetaDriveEnv):
             self.current_map, randomize=randomize_position
         )
         if len(safe_places_dict) == 0:
-            return None, None
+            return None, None, None
         born_place_index = get_np_random(self._DEBUG_RANDOM_SEED).choice(list(safe_places_dict.keys()), 1)[0]
         new_spawn_place = safe_places_dict[born_place_index]
 
-        new_agent_id, vehicle = self.agent_manager.propose_new_vehicle()
+        new_agent_id, vehicle, step_info = self.agent_manager.propose_new_vehicle()
         new_spawn_place_config = new_spawn_place["config"]
         new_spawn_place_config = self.engine.spawn_manager.update_destination_for(new_agent_id, new_spawn_place_config)
         vehicle.config.update(new_spawn_place_config)
         vehicle.reset()
-        vehicle.after_step()
+        after_step_info = vehicle.after_step()
+        step_info.update(after_step_info)
         self.dones[new_agent_id] = False  # Put it in the internal dead-tracking dict.
 
         new_obs = self.observations[new_agent_id].observe(vehicle)
-        return new_agent_id, new_obs
+        return new_agent_id, new_obs, step_info
 
     def setup_engine(self):
         super(MultiAgentMetaDrive, self).setup_engine()

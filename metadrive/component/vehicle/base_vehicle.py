@@ -149,10 +149,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self.max_steering = self.config["max_steering"]
 
         # visualization
-        if use_special_color:
-            color = sns.color_palette("colorblind")
-            rand_c = color[2]  # A pretty green
-            self.panda_color = rand_c
+        self._use_special_color = use_special_color
         self._add_visualization()
 
         # modules, get observation by using these modules
@@ -266,7 +263,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
                 "steering": float(self.steering),
                 "acceleration": float(self.throttle_brake),
                 "step_energy": step_energy,
-                "episode_energy": episode_energy
+                "episode_energy": episode_energy,
+                "policy": self.engine.get_policy(self.name).name
             }
         )
         return step_info
@@ -859,3 +857,12 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     @property
     def lane_index(self):
         return self.navigation.current_lane.index
+
+    @property
+    def panda_color(self):
+        c = super(BaseVehicle, self).panda_color
+        if self._use_special_color:
+            color = sns.color_palette("colorblind")
+            rand_c = color[2]  # A pretty green
+            c = rand_c
+        return c
