@@ -171,4 +171,8 @@ def get_object_from_node(node: BulletBodyNode):
 
 
 def auto_termination(vehicle, should_done):
+    """
+    This functionality is almost deprecated. We don't wish to terminate vehicle in any case.
+    This is because it is not reasonable to terminate a vehicle if it can't get relevant information like timestamps.
+    """
     return {TerminationState.MAX_STEP: True if should_done else False}
