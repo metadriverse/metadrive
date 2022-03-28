@@ -56,9 +56,11 @@ class MixedIDMAgentManager(AgentManager):
             ret[agent_id] = obj
             if (len(self.RL_agents) - len(self.dying_RL_agents)) >= self.num_RL_agents:
                 policy = IDMPolicy(obj, self.generate_seed())
+                obj._use_special_color = False
             else:
                 policy = self._get_policy(obj)
                 self.RL_agents.add(agent_id)
+                obj._use_special_color = True
             self.add_policy(obj.id, policy)
         return ret
 
@@ -128,7 +130,6 @@ class MultiAgentTinyInter(MultiAgentIntersectionEnv):
     def __init__(self, config=None):
         self.num_RL_agents = 1
         super(MultiAgentTinyInter, self).__init__(config=config)
-        # self.num_agents = self.num_RL_agents  # Hack
         self.agent_manager = MixedIDMAgentManager(
             init_observations=self._get_observations(), init_action_space=self._get_action_space(), num_RL_agents=self.num_RL_agents
         )
@@ -154,18 +155,15 @@ if __name__ == "__main__":
     print("vehicle num", len(env.engine.traffic_manager.vehicles))
     print("RL agent num", len(o))
     for i in range(1, 100000):
-        o, r, d, info = env.step({k: [0, 0.21312] for k in env.action_space.sample().keys()})
+        o, r, d, info = env.step({k: [0, 0.1] for k in env.action_space.sample().keys()})
         env.render("top_down", camera_position=(50, 0), film_size=(1000, 1000))
         vehicles = env.vehicles
 
         if not d["__all__"]:
             assert sum([env.engine.get_policy(v.name).__class__.__name__ == "EnvInputPolicy" for k, v in vehicles.items()]) == 1
-            # assert len(env.observation_space) == 1
-            # assert len(env.action_space) == 1
 
         if any(d.values()):
             print("Somebody dead.", d)
-
             print("Step {}. Policies: {}".format(i, {k: v['policy'] for k, v in info.items()}))
 
         # if True in d.values():

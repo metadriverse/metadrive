@@ -339,8 +339,7 @@ class BaseEnv(gym.Env):
         self.episode_rewards = defaultdict(float)
         self.episode_lengths = defaultdict(int)
 
-        # TODO(pzh): This check is useful. We should revert it and think how to check this better!
-        # assert (len(self.vehicles) == self.num_agents) or (self.num_agents == -1)
+        assert (len(self.vehicles) == self.num_agents) or (self.num_agents == -1)
 
         return self._get_reset_return()
 
