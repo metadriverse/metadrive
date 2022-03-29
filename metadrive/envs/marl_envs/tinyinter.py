@@ -163,7 +163,11 @@ class MultiAgentTinyInter(MultiAgentIntersectionEnv):
                 lane_num=1,
                 lane_width=4,
             ),
+
+            # Whether to remove dead vehicles immediately
             ignore_delay_done=True,
+
+            # The target speed of IDM agents, if any
             target_speed=10,
         )
         return MultiAgentIntersectionEnv.default_config().update(tiny_config, allow_add_new_key=True)
