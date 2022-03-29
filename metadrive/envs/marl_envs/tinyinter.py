@@ -146,6 +146,18 @@ class MultiAgentTinyInter(MultiAgentIntersectionEnv):
     @staticmethod
     def default_config() -> Config:
         tiny_config = dict(
+            success_reward=10.0,
+
+            # Default MARL MetaDrive setting:
+            out_of_road_penalty=10,
+            crash_vehicle_penalty=10,
+            crash_object_penalty=10,
+
+            # Default single-agent MetaDrive setting:
+            # out_of_road_penalty=5.0,
+            # crash_vehicle_penalty=5.0,
+            # crash_object_penalty=5.0,
+
             num_agents=8, num_RL_agents=8, map_config=dict(
                 exit_length=30,
                 lane_num=1,
