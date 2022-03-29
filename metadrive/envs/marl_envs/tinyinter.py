@@ -2,12 +2,43 @@ from metadrive.envs.marl_envs.marl_intersection import MultiAgentIntersectionEnv
 from metadrive.manager.agent_manager import AgentManager
 from metadrive.policy.idm_policy import IDMPolicy
 from metadrive.utils import Config
+import logging
+from metadrive.utils.math_utils import not_zero, wrap_to_pi
 import copy
+from metadrive.component.vehicle_module.PID_controller import PIDController
+
+
+class TinyInterRuleBasedPolicy(IDMPolicy):
+    """No IDM and PID are used in this Policy!"""
+
+    def __init__(self, control_object, random_seed, target_speed = 10):
+        super(TinyInterRuleBasedPolicy, self).__init__(control_object=control_object, random_seed=random_seed)
+        self.target_speed = target_speed  # Set to 10km/h. Default is 30km/h.
+
+    def act(self, *args, **kwargs):
+        self.move_to_next_road()
+
+        target_lane = self.routing_target_lane
+        long, lat = target_lane.local_coordinates(self.control_object.position)
+
+        increment = self.target_speed / 3.6 * \
+                    self.engine.global_config["physics_world_step_size"] * \
+                    self.engine.global_config["decision_repeat"]
+
+        new_long = long + increment
+        new_pos = target_lane.position(new_long, lat)
+
+        new_heading = target_lane.heading_theta_at(new_long + 1)
+        self.control_object.set_heading_theta(new_heading)
+        self.control_object.set_position(new_pos)
+
+        return [0, 0]
+
 
 
 class MixedIDMAgentManager(AgentManager):
     """In this manager, we can replace part of RL policy by IDM policy"""
-    def __init__(self, init_observations, init_action_space, num_RL_agents):
+    def __init__(self, init_observations, init_action_space, num_RL_agents, ignore_delay_done=None, target_speed=10):
         super(MixedIDMAgentManager, self).__init__(
             init_observations=init_observations, init_action_space=init_action_space
         )
@@ -15,6 +46,8 @@ class MixedIDMAgentManager(AgentManager):
         self.RL_agents = set()
         self.dying_RL_agents = set()
         self.all_previous_RL_agents = set()
+        self.ignore_delay_done = ignore_delay_done
+        self.target_speed = target_speed
 
     def filter_RL_agents(self, source_dict, original_done_dict=None):
 
@@ -46,6 +79,8 @@ class MixedIDMAgentManager(AgentManager):
 
     def finish(self, agent_name, ignore_delay_done=False):
         # ignore_delay_done = True
+        if self.ignore_delay_done is not None:
+            ignore_delay_done = self.ignore_delay_done
         if agent_name in self.RL_agents:
             self.dying_RL_agents.add(agent_name)
         super(MixedIDMAgentManager, self).finish(agent_name, ignore_delay_done)
@@ -72,7 +107,8 @@ class MixedIDMAgentManager(AgentManager):
             obj = self.spawn_object(v_type, vehicle_config=v_config)
             ret[agent_id] = obj
             if (len(self.RL_agents) - len(self.dying_RL_agents)) >= self.num_RL_agents:
-                policy = IDMPolicy(obj, self.generate_seed())
+                # policy = IDMPolicy(obj, self.generate_seed())
+                policy = TinyInterRuleBasedPolicy(obj, self.generate_seed(), target_speed=self.target_speed)
                 obj._use_special_color = False
             else:
                 policy = self._get_policy(obj)
@@ -114,7 +150,9 @@ class MultiAgentTinyInter(MultiAgentIntersectionEnv):
                 exit_length=30,
                 lane_num=1,
                 lane_width=4,
-            )
+            ),
+            ignore_delay_done=True,
+            target_speed=10,
         )
         return MultiAgentIntersectionEnv.default_config().update(tiny_config, allow_add_new_key=True)
 
@@ -159,23 +197,27 @@ class MultiAgentTinyInter(MultiAgentIntersectionEnv):
             self.agent_manager = MixedIDMAgentManager(
                 init_observations=self._get_observations(),
                 init_action_space=self._get_action_space(),
-                num_RL_agents=self.num_RL_agents
+                num_RL_agents=self.num_RL_agents,
+                ignore_delay_done=self.config["ignore_delay_done"],
+                target_speed=self.config["target_speed"]
             )
 
 
 if __name__ == '__main__':
     env = MultiAgentTinyInter(
         config={
-            "num_agents": 2,
-            "num_RL_agents": 2,
+            "num_agents": 4,
+            "num_RL_agents": 1,
 
-            # "vehicle_config": {
-            #     "show_line_to_dest": True,
+            "ignore_delay_done": True,
+
+            "vehicle_config": {
+                "show_line_to_dest": True,
             #     "lidar": {
             #         "num_others": 2,
             #         "add_others_navi": True
             #     }
-            # },
+            },
             # "manual_control": True,
             # "use_render": True,
         }
@@ -185,7 +227,7 @@ if __name__ == '__main__':
     print("vehicle num", len(env.engine.traffic_manager.vehicles))
     print("RL agent num", len(o))
     for i in range(1, 100000):
-        o, r, d, info = env.step({k: [-0.01, 1] for k in env.action_space.sample().keys()})
+        o, r, d, info = env.step({k: [0.0, 0.0] for k in env.action_space.sample().keys()})
         env.render("top_down", camera_position=(42.5, 0), film_size=(1000, 1000))
         vehicles = env.vehicles
         # if not d["__all__"]:
