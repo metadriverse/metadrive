@@ -4,6 +4,7 @@ from metadrive.policy.idm_policy import IDMPolicy
 from metadrive.utils import Config
 import copy
 
+
 class MixedIDMAgentManager(AgentManager):
     """In this manager, we can replace part of RL policy by IDM policy"""
     def __init__(self, init_observations, init_action_space, num_RL_agents):
@@ -109,10 +110,7 @@ class MultiAgentTinyInter(MultiAgentIntersectionEnv):
     @staticmethod
     def default_config() -> Config:
         tiny_config = dict(
-            num_agents=8,
-            num_RL_agents=1,
-
-            map_config=dict(
+            num_agents=8, num_RL_agents=8, map_config=dict(
                 exit_length=30,
                 lane_num=1,
                 lane_width=4,
@@ -121,10 +119,17 @@ class MultiAgentTinyInter(MultiAgentIntersectionEnv):
         return MultiAgentIntersectionEnv.default_config().update(tiny_config, allow_add_new_key=True)
 
     def _get_reset_return(self):
-        return self.agent_manager.filter_RL_agents(super(MultiAgentTinyInter, self)._get_reset_return())
+        org = super(MultiAgentTinyInter, self)._get_reset_return()
+        if self.num_RL_agents == self.num_agents:
+            return org
+
+        return self.agent_manager.filter_RL_agents(org)
 
     def step(self, actions):
         o, r, d, i = super(MultiAgentTinyInter, self).step(actions)
+        if self.num_RL_agents == self.num_agents:
+            return o, r, d, i
+
         original_done_dict = copy.deepcopy(d)
         d = self.agent_manager.filter_RL_agents(d, original_done_dict=original_done_dict)
         if "__all__" in d:
@@ -139,18 +144,23 @@ class MultiAgentTinyInter(MultiAgentIntersectionEnv):
         )
 
     def _preprocess_actions(self, actions):
+        if self.num_RL_agents == self.num_agents:
+            return super(MultiAgentTinyInter, self)._preprocess_actions(actions)
+
         actions = {v_id: actions[v_id] for v_id in self.vehicles.keys() if v_id in self.agent_manager.RL_agents}
         return actions
 
     def __init__(self, config=None):
-        config = config or {}
-        self.num_RL_agents = config.get("num_RL_agents", self.default_config()["num_RL_agents"])
         super(MultiAgentTinyInter, self).__init__(config=config)
-        self.agent_manager = MixedIDMAgentManager(
-            init_observations=self._get_observations(),
-            init_action_space=self._get_action_space(),
-            num_RL_agents=self.num_RL_agents
-        )
+        self.num_RL_agents = self.config["num_RL_agents"]
+        if self.num_RL_agents == self.num_agents:  # Not using mixed traffic and only RL agents are running.
+            pass
+        else:
+            self.agent_manager = MixedIDMAgentManager(
+                init_observations=self._get_observations(),
+                init_action_space=self._get_action_space(),
+                num_RL_agents=self.num_RL_agents
+            )
 
 
 if __name__ == '__main__':
