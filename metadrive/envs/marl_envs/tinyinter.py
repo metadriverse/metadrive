@@ -166,8 +166,8 @@ class MultiAgentTinyInter(MultiAgentIntersectionEnv):
 if __name__ == '__main__':
     env = MultiAgentTinyInter(
         config={
-            "num_agents": 8,
-            "num_RL_agents": 8,
+            "num_agents": 2,
+            "num_RL_agents": 2,
 
             # "vehicle_config": {
             #     "show_line_to_dest": True,
@@ -181,10 +181,11 @@ if __name__ == '__main__':
         }
     )
     o = env.reset()
+    env.engine.force_fps.toggle()
     print("vehicle num", len(env.engine.traffic_manager.vehicles))
     print("RL agent num", len(o))
     for i in range(1, 100000):
-        o, r, d, info = env.step({k: [0.01, 1] for k in env.action_space.sample().keys()})
+        o, r, d, info = env.step({k: [-0.01, 1] for k in env.action_space.sample().keys()})
         env.render("top_down", camera_position=(42.5, 0), film_size=(1000, 1000))
         vehicles = env.vehicles
         # if not d["__all__"]:
@@ -197,6 +198,6 @@ if __name__ == '__main__':
         if d["__all__"]:
             # assert i >= 1000
             print("Reset. ", i, info)
-            break
+            # break
             env.reset()
     env.close()

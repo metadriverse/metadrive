@@ -90,6 +90,7 @@ class BaseObject(BaseRunnable):
 
         # add color setting for visualization
         color = sns.color_palette("colorblind")
+        color.remove(color[2])  # Remove the green and leave it for special vehicle
         idx = get_np_random().randint(len(color))
         rand_c = color[idx]
         self._panda_color = rand_c
