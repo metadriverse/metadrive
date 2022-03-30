@@ -1,16 +1,14 @@
+import copy
+
+import gym
+import numpy as np
+
 from metadrive.envs.marl_envs.marl_intersection import MultiAgentIntersectionEnv
 from metadrive.manager.agent_manager import AgentManager
+from metadrive.obs.state_obs import LidarStateObservation
 from metadrive.policy.idm_policy import IDMPolicy
 from metadrive.utils import Config
-import logging
-from metadrive.utils.math_utils import not_zero, wrap_to_pi, Vector
-import copy
-from metadrive.component.vehicle_module.PID_controller import PIDController
-from metadrive.obs.state_obs import LidarStateObservation
-
-from metadrive.utils.math_utils import norm, clip
-import numpy as np
-import gym
+from metadrive.utils.math_utils import Vector, norm, clip
 
 
 class CommunicationObservation(LidarStateObservation):
@@ -31,12 +29,11 @@ class CommunicationObservation(LidarStateObservation):
         self.env = env
 
         self.agent_name_index_mapping = {}
+        self.agent_name_slot_mapping = {}
 
-
-    # def observe(self, vehicle):
-    #     agent_name = self.env.agent_manager.object_to_agent(vehicle.name)
-    #     if agent_name in self.env.agent_manager.RL_agents
-    #     print('111')
+    def reset(self, env, vehicle=None):
+        self.agent_name_index_mapping = {}
+        self.agent_name_slot_mapping = {}
 
     def lidar_observe(self, vehicle):
         other_v_info = []
@@ -88,11 +85,21 @@ class CommunicationObservation(LidarStateObservation):
         for k in new_agent_names:
             index = int(k.split("agent")[1])
             index = index % num_agents
-            index = index / (num_agents - 1)  # scale to 0-1
+            self.agent_name_slot_mapping[k] = index
+
+            index = (index + 1) / (num_agents)  # scale to [1/num_agents, 1]. 0 left to no vehicle.
             self.agent_name_index_mapping[k] = index
 
         # assert len(new_agents.symmetric_difference(self.agent_name_index_mapping.keys())) == 0
         assert all(k in self.agent_name_index_mapping for k in name_vehicle_mapping)
+        assert all(k in self.agent_name_slot_mapping.keys() for k in name_vehicle_mapping)
+        self.agent_name_index_mapping = {k: self.agent_name_index_mapping[k] for k in
+                                         sorted(self.agent_name_index_mapping.keys())}
+        self.agent_name_slot_mapping = {k: self.agent_name_slot_mapping[k] for k in
+                                        sorted(self.agent_name_slot_mapping.keys())}
+        # print("SLOT:", self.agent_name_slot_mapping)
+        # print("AGEN:", self.agent_name_index_mapping)
+
         return name_vehicle_mapping
 
     def _process_norm(self, vector, perceive_distance):
@@ -110,16 +117,25 @@ class CommunicationObservation(LidarStateObservation):
         name_vehicle_mapping = self.refresh_agent_name_index_mapping()
         add_others_navi = ego_vehicle.config["lidar"]["add_others_navi"]
 
-
         # surrounding_vehicles += [None] * num_others
-        res = []
+        num_agents = self.env.num_agents
+
+        if add_others_navi:
+            res_size = 5 + 4
+        else:
+            res_size = 5
+        res = [0.0] * res_size * num_agents
 
         for agent_name, vehicle in name_vehicle_mapping.items():
+            # for slot_index, agent_name in self.agent_name_slot_mapping.items():
+            #     vehicle = name_vehicle_mapping[agent_name]
+
+            slot_index = self.agent_name_slot_mapping[agent_name]
 
             ego_position = ego_vehicle.position
 
             assert agent_name in self.agent_name_index_mapping
-            res.append(self.agent_name_index_mapping[agent_name])
+            res[slot_index * res_size] = self.agent_name_index_mapping[agent_name]
 
             # assert isinstance(vehicle, IDMVehicle or Base), "Now MetaDrive Doesn't support other vehicle type"
 
@@ -128,36 +144,34 @@ class CommunicationObservation(LidarStateObservation):
 
             # It is possible that the centroid of other vehicle is too far away from ego but lidar shed on it.
             # So the distance may greater than perceive distance.
-            res.append(clip((relative_position[0] / perceive_distance + 1) / 2, 0.0, 1.0))
-            res.append(clip((relative_position[1] / perceive_distance + 1) / 2, 0.0, 1.0))
+            res[slot_index * res_size + 1] = clip((relative_position[0] / perceive_distance + 1) / 2, 0.0, 1.0)
+            res[slot_index * res_size + 2] = clip((relative_position[1] / perceive_distance + 1) / 2, 0.0, 1.0)
 
             relative_velocity = ego_vehicle.projection(vehicle.velocity - ego_vehicle.velocity)
             relative_velocity = self._process_norm(relative_velocity, speed_scale)
-            res.append(clip((relative_velocity[0] / speed_scale + 1) / 2, 0.0, 1.0))
-            res.append(clip((relative_velocity[1] / speed_scale + 1) / 2, 0.0, 1.0))
+            res[slot_index * res_size + 3] = clip((relative_velocity[0] / speed_scale + 1) / 2, 0.0, 1.0)
+            res[slot_index * res_size + 4] = clip((relative_velocity[1] / speed_scale + 1) / 2, 0.0, 1.0)
 
             if add_others_navi:
                 ckpt1, ckpt2 = vehicle.navigation.get_checkpoints()
 
                 relative_ckpt1 = ego_vehicle.lidar._project_to_vehicle_system(ckpt1, ego_vehicle)
                 relative_ckpt1 = self._process_norm(relative_ckpt1, perceive_distance)
-                res.append(clip((relative_ckpt1[0] / perceive_distance + 1) / 2, 0.0, 1.0))
-                res.append(clip((relative_ckpt1[1] / perceive_distance + 1) / 2, 0.0, 1.0))
+                res[slot_index * res_size + 5] = clip((relative_ckpt1[0] / perceive_distance + 1) / 2, 0.0, 1.0)
+                res[slot_index * res_size + 6] = clip((relative_ckpt1[1] / perceive_distance + 1) / 2, 0.0, 1.0)
 
                 relative_ckpt2 = ego_vehicle.lidar._project_to_vehicle_system(ckpt2, ego_vehicle)
                 relative_ckpt2 = self._process_norm(relative_ckpt2, perceive_distance)
-                res.append(clip((relative_ckpt2[0] / perceive_distance + 1) / 2, 0.0, 1.0))
-                res.append(clip((relative_ckpt2[1] / perceive_distance + 1) / 2, 0.0, 1.0))
+                res[slot_index * res_size + 7] = clip((relative_ckpt2[0] / perceive_distance + 1) / 2, 0.0, 1.0)
+                res[slot_index * res_size + 8] = clip((relative_ckpt2[1] / perceive_distance + 1) / 2, 0.0, 1.0)
 
-        assert len(res) == len(name_vehicle_mapping) * (5 + (4 if add_others_navi else 0))
+        # assert len(res) == len(name_vehicle_mapping) * (5 + (4 if add_others_navi else 0))
         return res
-
-
-
 
 
 class TinyInterRuleBasedPolicy(IDMPolicy):
     """No IDM and PID are used in this Policy!"""
+
     def __init__(self, control_object, random_seed, target_speed=10):
         super(TinyInterRuleBasedPolicy, self).__init__(control_object=control_object, random_seed=random_seed)
         self.target_speed = target_speed  # Set to 10km/h. Default is 30km/h.
@@ -184,6 +198,7 @@ class TinyInterRuleBasedPolicy(IDMPolicy):
 
 class MixedIDMAgentManager(AgentManager):
     """In this manager, we can replace part of RL policy by IDM policy"""
+
     def __init__(self, init_observations, init_action_space, num_RL_agents, ignore_delay_done=None, target_speed=10):
         super(MixedIDMAgentManager, self).__init__(
             init_observations=init_observations, init_action_space=init_action_space
@@ -398,7 +413,7 @@ if __name__ == '__main__':
     print("vehicle num", len(env.engine.traffic_manager.vehicles))
     print("RL agent num", len(o))
     for i in range(1, 100000):
-        o, r, d, info = env.step({k: [0.0, 0.05] for k in env.action_space.sample().keys()})
+        o, r, d, info = env.step({k: [0.0, 0.5] for k in env.action_space.sample().keys()})
         env.render("top_down", camera_position=(42.5, 0), film_size=(1000, 1000))
         vehicles = env.vehicles
         # if not d["__all__"]:
