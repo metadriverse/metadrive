@@ -31,6 +31,13 @@ class CommunicationObservation(LidarStateObservation):
         self.agent_name_index_mapping = {}
         self.agent_name_slot_mapping = {}
 
+    def observe(self, vehicle):
+        if self.env.num_RL_agents != self.env.num_agents:
+            agent_name = self.env.agent_manager.object_to_agent(vehicle.name)
+            if agent_name not in self.env.agent_manager.RL_agents:
+                return None  # Do not compute observation for non RL agents.
+        return super(CommunicationObservation, self).observe(vehicle=vehicle)
+
     def reset(self, env, vehicle=None):
         self.agent_name_index_mapping = {}
         self.agent_name_slot_mapping = {}
@@ -401,10 +408,10 @@ if __name__ == '__main__':
             "use_communication_obs": True,
             "vehicle_config": {
                 "show_line_to_dest": True,
-                #     "lidar": {
+                    "lidar": {
                 #         "num_others": 2,
-                #         "add_others_navi": True
-                #     }
+                        "add_others_navi": True
+                    }
             },
             # "manual_control": True,
             # "use_render": True,
@@ -416,7 +423,7 @@ if __name__ == '__main__':
     print("RL agent num", len(o))
     for i in range(1, 100000):
         o, r, d, info = env.step({k: [0.0, 0.5] for k in env.action_space.sample().keys()})
-        env.render("top_down", camera_position=(42.5, 0), film_size=(1000, 1000))
+        # env.render("top_down", camera_position=(42.5, 0), film_size=(1000, 1000))
         vehicles = env.vehicles
         # if not d["__all__"]:
         #     assert sum(
