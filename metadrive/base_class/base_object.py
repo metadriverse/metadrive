@@ -90,9 +90,14 @@ class BaseObject(BaseRunnable):
 
         # add color setting for visualization
         color = sns.color_palette("colorblind")
+        color.remove(color[2])  # Remove the green and leave it for special vehicle
         idx = get_np_random().randint(len(color))
         rand_c = color[idx]
-        self.panda_color = rand_c
+        self._panda_color = rand_c
+
+    @property
+    def panda_color(self):
+        return self._panda_color
 
     def add_body(self, physics_body):
         if self._body is None:

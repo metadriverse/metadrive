@@ -183,6 +183,7 @@ class IDMPolicy(BasePolicy):
         self.available_routing_index_range = None
         self.overtake_timer = self.np_random.randint(0, self.LANE_CHANGE_FREQ)
         self.enable_lane_change = self.engine.global_config.get("enable_idm_lane_change", True)
+        self.disable_idm_deceleration = self.engine.global_config.get("disable_idm_deceleration", False)
         self.heading_pid = PIDController(1.7, 0.01, 3.5)
         self.lateral_pid = PIDController(0.3, .002, 0.05)
 
@@ -254,7 +255,7 @@ class IDMPolicy(BasePolicy):
         ego_vehicle = self.control_object
         ego_target_speed = not_zero(self.target_speed, 0)
         acceleration = self.ACC_FACTOR * (1 - np.power(max(ego_vehicle.speed, 0) / ego_target_speed, self.DELTA))
-        if front_obj:
+        if front_obj and (not self.disable_idm_deceleration):
             d = dist_to_front
             speed_diff = self.desired_gap(ego_vehicle, front_obj) / not_zero(d)
             acceleration -= self.ACC_FACTOR * (speed_diff**2)

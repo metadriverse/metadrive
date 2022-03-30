@@ -34,3 +34,10 @@ class BasePolicy(Randomizable, Configurable):
         super(BasePolicy, self).destroy()
         self.control_object = None
         self.engine = None
+
+    @property
+    def name(self):
+        return self.__class__.__name__
+
+    def __repr__(self):
+        return self.name

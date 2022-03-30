@@ -31,7 +31,8 @@ class BaseNavigation:
         show_navi_mark: bool = False,
         random_navi_mark_color=False,
         show_dest_mark=False,
-        show_line_to_dest=False
+        show_line_to_dest=False,
+        panda_color=None
     ):
         """
         This class define a helper for localizing vehicles and retrieving navigation information.
@@ -50,6 +51,9 @@ class BaseNavigation:
         self._show_navi_info = (engine.mode == RENDER_MODE_ONSCREEN and not engine.global_config["debug_physics_world"])
         self.origin = NodePath("navigation_sign") if self._show_navi_info else None
         self.navi_mark_color = (0.6, 0.8, 0.5) if not random_navi_mark_color else get_np_random().rand(3)
+        if panda_color is not None:
+            assert len(panda_color) == 3 and 0 <= panda_color[0] <= 1
+            self.navi_mark_color = tuple(panda_color)
         self.navi_arrow_dir = [0, 0]
         self._dest_node_path = None
         self._goal_node_path = None
@@ -70,8 +74,8 @@ class BaseNavigation:
                 dest_point_model.reparentTo(self._dest_node_path)
             if show_line_to_dest:
                 line_seg = LineSegs("line_to_dest")
-                line_seg.setColor(self.navi_mark_color[0], self.navi_mark_color[1], self.navi_mark_color[2], 0.7)
-                line_seg.setThickness(2)
+                line_seg.setColor(self.navi_mark_color[0], self.navi_mark_color[1], self.navi_mark_color[2], 1.0)
+                line_seg.setThickness(4)
                 self._dynamic_line_np = NodePath(line_seg.create(True))
                 self._dynamic_line_np.reparentTo(self.origin)
                 self._line_to_dest = line_seg
@@ -94,6 +98,15 @@ class BaseNavigation:
     def reset(self, map: BaseMap, current_lane):
         self.map = map
         self.current_lane = current_lane
+
+    def get_checkpoints(self):
+        """Return next checkpoint and the next next checkpoint"""
+        later_middle = (float(self.get_current_lane_num()) / 2 - 0.5) * self.get_current_lane_width()
+        ref_lane1 = self.current_ref_lanes[0]
+        checkpoint1 = ref_lane1.position(ref_lane1.length, later_middle)
+        ref_lane2 = self.next_ref_lanes[0] if self.next_ref_lanes is not None else self.current_ref_lanes[0]
+        checkpoint2 = ref_lane2.position(ref_lane2.length, later_middle)
+        return checkpoint1, checkpoint2
 
     def set_route(self, current_lane_index: str, destination: str):
         """

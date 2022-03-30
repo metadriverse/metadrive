@@ -174,9 +174,9 @@ class AgentManager(BaseManager):
         self.action_spaces[new_v_name] = self._init_action_spaces["agent0"]
         self._active_objects[vehicle.name] = vehicle
         self._check()
-        vehicle.before_step([0, 0])
+        step_info = vehicle.before_step([0, 0])
         vehicle.set_static(False)
-        return agent_name, vehicle
+        return agent_name, vehicle, step_info
 
     def next_agent_id(self):
         ret = "agent{}".format(self.next_agent_count)
