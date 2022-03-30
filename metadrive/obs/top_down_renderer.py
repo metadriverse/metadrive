@@ -124,7 +124,7 @@ class TopDownRenderer:
         road_color=(80, 80, 80),
         show_agent_name=False,
         camera_position=None,
-        track_target_vehicle=True,  # useless, remain here only for compatibility
+        # track_target_vehicle=True,  # useless, remain here only for compatibility
         # current_track_vehicle=None
     ):
         # Setup some useful flags
@@ -135,7 +135,7 @@ class TopDownRenderer:
         if self.show_agent_name:
             pygame.init()
         self.engine = get_engine()
-        self._screen_size = screen_size
+        # self._screen_size = screen_size
         self.pygame_font = None
         self.map = self.engine.current_map
         self.stack_frames = deque(maxlen=num_stack)
@@ -163,7 +163,7 @@ class TopDownRenderer:
         # self._runtime_output = self._background_canvas.copy()  # TODO(pzh) what is this?
 
         # Setup some runtime variables
-        self._render_size = (1000, 1000)
+        self._render_size = screen_size or (1000, 1000)
         self._background_size = tuple(self._background_canvas.get_size())
         # screen_size = self._screen_size or self._render_size
         # self._blit_size = (int(screen_size[0] * self._zoomin), int(screen_size[1] * self._zoomin))

@@ -4,7 +4,8 @@ from metadrive.component.map.pg_map import PGMap
 from metadrive.component.pgblock.first_block import FirstPGBlock
 from metadrive.component.pgblock.intersection import InterSection
 from metadrive.component.road_network import Road
-from metadrive.envs.marl_envs.marl_inout_roundabout import LidarStateObservationMARound
+# from metadrive.envs.marl_envs.marl_inout_roundabout import \
+#     LidarStateObservationMARound
 from metadrive.envs.marl_envs.multi_agent_metadrive import MultiAgentMetaDrive
 from metadrive.manager.map_manager import MapManager
 from metadrive.manager.spawn_manager import SpawnManager
@@ -49,14 +50,26 @@ class MAIntersectionMap(PGMap):
         last_block = InterSection(
             1, last_block.get_socket(index=0), self.road_network, random_seed=1, ignore_intersection_checking=False
         )
-        last_block.add_u_turn(True)
+
+        if self.config["lane_num"] > 1:
+            # We disable U turn in TinyInter environment!
+            last_block.enable_u_turn(True)
+        else:
+            last_block.enable_u_turn(False)
+
         last_block.construct_block(parent_node_path, physics_world)
         self.blocks.append(last_block)
 
 
 class MAIntersectionSpawnManager(SpawnManager):
+    def __init__(self, disable_u_turn=False):
+        super(MAIntersectionSpawnManager, self).__init__()
+        self.disable_u_turn = disable_u_turn
+
     def update_destination_for(self, agent_id, vehicle_config):
         end_roads = copy.deepcopy(self.engine.global_config["spawn_roads"])
+        if self.disable_u_turn:  # Remove the spawn road from end roads
+            end_roads = [r for r in end_roads if Road(*vehicle_config["spawn_lane_index"][:2]) != r]
         end_road = -self.np_random.choice(end_roads)  # Use negative road!
         vehicle_config["destination"] = end_road.end_node
         return vehicle_config
@@ -79,13 +92,14 @@ class MultiAgentIntersectionEnv(MultiAgentMetaDrive):
     def default_config() -> Config:
         return MultiAgentMetaDrive.default_config().update(MAIntersectionConfig, allow_add_new_key=True)
 
-    def get_single_observation(self, vehicle_config: "Config") -> "ObservationBase":
-        return LidarStateObservationMARound(vehicle_config)
+    # def get_single_observation(self, vehicle_config: "Config") -> "ObservationBase":
+    #     return LidarStateObservationMARound(vehicle_config)
 
     def setup_engine(self):
+        disable_u_turn = self.config["map_config"]["lane_num"] < 2
         super(MultiAgentIntersectionEnv, self).setup_engine()
         self.engine.update_manager("map_manager", MAIntersectionMapManager())
-        self.engine.update_manager("spawn_manager", MAIntersectionSpawnManager())
+        self.engine.update_manager("spawn_manager", MAIntersectionSpawnManager(disable_u_turn=disable_u_turn))
 
 
 def _draw():
