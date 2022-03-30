@@ -70,6 +70,7 @@ class CommunicationObservation(LidarStateObservation):
             # This guy is done
 
             old_index = self.agent_name_index_mapping.pop(old_agent_name)
+            old_slot = self.agent_name_slot_mapping.pop(old_agent_name)
 
             # Search which new agent is not assigned yet, send old index to it.
             new_agent_names = new_agents.difference(existing_agents)
@@ -77,6 +78,7 @@ class CommunicationObservation(LidarStateObservation):
                 if new_agent_name not in self.agent_name_index_mapping:
                     # This new guy is not assigned index yet, just give it old index
                     self.agent_name_index_mapping[new_agent_name] = old_index
+                    self.agent_name_slot_mapping[new_agent_name] = old_slot
                     new_agents.remove(new_agent_name)
                     break
 
@@ -394,7 +396,7 @@ if __name__ == '__main__':
     env = MultiAgentTinyInter(
         config={
             "num_agents": 8,
-            "num_RL_agents": 8,
+            "num_RL_agents": 1,
             "ignore_delay_done": True,
             "use_communication_obs": True,
             "vehicle_config": {
