@@ -10,8 +10,7 @@ from metadrive.component.vehicle_module.PID_controller import PIDController
 
 class TinyInterRuleBasedPolicy(IDMPolicy):
     """No IDM and PID are used in this Policy!"""
-
-    def __init__(self, control_object, random_seed, target_speed = 10):
+    def __init__(self, control_object, random_seed, target_speed=10):
         super(TinyInterRuleBasedPolicy, self).__init__(control_object=control_object, random_seed=random_seed)
         self.target_speed = target_speed  # Set to 10km/h. Default is 30km/h.
 
@@ -33,7 +32,6 @@ class TinyInterRuleBasedPolicy(IDMPolicy):
         self.control_object.set_position(new_pos)
 
         return [0, 0]
-
 
 
 class MixedIDMAgentManager(AgentManager):
@@ -157,8 +155,9 @@ class MultiAgentTinyInter(MultiAgentIntersectionEnv):
             # out_of_road_penalty=5.0,
             # crash_vehicle_penalty=5.0,
             # crash_object_penalty=5.0,
-
-            num_agents=8, num_RL_agents=8, map_config=dict(
+            num_agents=8,
+            num_RL_agents=8,
+            map_config=dict(
                 exit_length=30,
                 lane_num=1,
                 lane_width=4,
@@ -224,15 +223,13 @@ if __name__ == '__main__':
         config={
             "num_agents": 4,
             "num_RL_agents": 1,
-
             "ignore_delay_done": True,
-
             "vehicle_config": {
                 "show_line_to_dest": True,
-            #     "lidar": {
-            #         "num_others": 2,
-            #         "add_others_navi": True
-            #     }
+                #     "lidar": {
+                #         "num_others": 2,
+                #         "add_others_navi": True
+                #     }
             },
             # "manual_control": True,
             # "use_render": True,
