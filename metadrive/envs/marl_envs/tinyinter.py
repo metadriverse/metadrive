@@ -200,6 +200,12 @@ class TinyInterRuleBasedPolicy(IDMPolicy):
 
         new_heading = target_lane.heading_theta_at(new_long + 1)
         self.control_object.set_heading_theta(new_heading)
+
+        # Note: the last_position is not correctly set since in vehicle.before_step
+        # we will set last_position to position at that time, which is the latest position.
+        # This leads to wrong reward for IDM agent.
+        # You need to comment out the line in before_step to make it correct!
+        self.control_object.last_position = self.control_object.position
         self.control_object.set_position(new_pos)
 
         return [0, 0]
@@ -402,39 +408,59 @@ class MultiAgentTinyInter(MultiAgentIntersectionEnv):
 if __name__ == '__main__':
     env = MultiAgentTinyInter(
         config={
-            "num_agents": 8,
-            "num_RL_agents": 1,
+            "num_agents": 3,
+            "num_RL_agents": 3,
             "ignore_delay_done": True,
-            "use_communication_obs": True,
-            "vehicle_config": {
-                "show_line_to_dest": True,
-                    "lidar": {
+            # "use_communication_obs": True,
+            # "vehicle_config": {
+            #     "show_line_to_dest": True,
+            #         "lidar": {
                 #         "num_others": 2,
-                        "add_others_navi": True
-                    }
-            },
+                #         "add_others_navi": True
+                #     }
+            # },
             # "manual_control": True,
             # "use_render": True,
         }
     )
     o = env.reset()
-    env.engine.force_fps.toggle()
+    # env.engine.force_fps.toggle()
     print("vehicle num", len(env.engine.traffic_manager.vehicles))
     print("RL agent num", len(o))
+    ep_success = 0
+    ep_done = 0
+    ep_reward_sum = 0.0
+    ep_success_reward_sum = 0.0
     for i in range(1, 100000):
-        o, r, d, info = env.step({k: [0.0, 0.5] for k in env.action_space.sample().keys()})
-        # env.render("top_down", camera_position=(42.5, 0), film_size=(1000, 1000))
+        o, r, d, info = env.step({k: [0.0, 0.02] for k in env.action_space.sample().keys()})
+        # env.render("top_down", camera_position=(42.5, 0), film_size=(500, 500))
         vehicles = env.vehicles
+
+        for k, v in d.items():
+            if v and k in info:
+                ep_success += int(info[k]["arrive_dest"])
+                ep_reward_sum += int(info[k]["episode_reward"])
+                ep_done += 1
+                if info[k]["arrive_dest"]:
+                    ep_success_reward_sum += int(info[k]["episode_reward"])
+
         # if not d["__all__"]:
         #     assert sum(
         #         [env.engine.get_policy(v.name).__class__.__name__ == "EnvInputPolicy" for k, v in vehicles.items()]
         #     ) == env.config["num_RL_agents"]
-        if any(d.values()):
-            print("Somebody dead.", d, info)
-            print("Step {}. Policies: {}".format(i, {k: v['policy'] for k, v in info.items()}))
+        # if any(d.values()):
+        #     print("Somebody dead.", d, info)
+        #     print("Step {}. Policies: {}".format(i, {k: v['policy'] for k, v in info.items()}))
         if d["__all__"]:
             # assert i >= 1000
-            print("Reset. ", i, info)
+            # print("Reset. ", i, info)
             # break
+            print("Success Rate: {:.3f}, reward: {:.3f}, success reward: {:.3f}, failed reward: {:.3f}, total num {}".format(
+                ep_success / ep_done if ep_done > 0 else -1,
+                ep_reward_sum / ep_done if ep_done > 0 else -1,
+                ep_success_reward_sum / ep_success if ep_success > 0 else -1,
+                (ep_reward_sum - ep_success_reward_sum) / (ep_done - ep_success) if (ep_done - ep_success) > 0 else -1,
+                ep_done
+            ))
             env.reset()
     env.close()
