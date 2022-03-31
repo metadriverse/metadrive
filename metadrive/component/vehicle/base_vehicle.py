@@ -257,6 +257,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         step_energy, episode_energy = self._update_energy_consumption()
         self.out_of_route = self._out_of_route()
         step_info = self._update_overtake_stat()
+        my_policy = self.engine.get_policy(self.name)
         step_info.update(
             {
                 "velocity": float(self.speed),
@@ -264,7 +265,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
                 "acceleration": float(self.throttle_brake),
                 "step_energy": step_energy,
                 "episode_energy": episode_energy,
-                "policy": self.engine.get_policy(self.name).name
+                "policy": my_policy.name if my_policy is not None else my_policy
             }
         )
         return step_info

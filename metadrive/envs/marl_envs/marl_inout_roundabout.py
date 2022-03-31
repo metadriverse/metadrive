@@ -77,6 +77,9 @@ class MARoundaboutMapManager(MapManager):
         self.current_map.spawn_roads = config["spawn_roads"]
 
 
+# Note: This class allow one agent accessing its neighbors' observation.
+# But we never use this functionality in formal experiment. Therefore we just deprecate it for
+# clarity!
 # class LidarStateObservationMARound(ObservationBase):
 #     def __init__(self, vehicle_config):
 #         self.state_obs = StateObservation(vehicle_config)
@@ -149,9 +152,6 @@ class MultiAgentRoundaboutEnv(MultiAgentMetaDrive):
     @staticmethod
     def default_config() -> Config:
         return MultiAgentMetaDrive.default_config().update(MARoundaboutConfig, allow_add_new_key=True)
-
-    # def get_single_observation(self, vehicle_config: "Config") -> "ObservationBase":
-    #     return LidarStateObservationMARound(vehicle_config)
 
     def setup_engine(self):
         super(MultiAgentRoundaboutEnv, self).setup_engine()
