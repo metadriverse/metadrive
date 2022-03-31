@@ -217,7 +217,7 @@ def test_ma_intersection_reset():
                     assert len(v.navigation.checkpoints) > 2
 
                 for kkk, iii in i.items():
-                    if iii and iii["arrive_dest"]:
+                    if "arrive_dest" in iii and iii["arrive_dest"]:
                         # print("{} success!".format(kkk))
                         success_count += 1
 

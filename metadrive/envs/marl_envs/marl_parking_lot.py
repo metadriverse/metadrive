@@ -5,10 +5,8 @@ from metadrive.component.pgblock.first_block import FirstPGBlock
 from metadrive.component.pgblock.parking_lot import ParkingLot
 from metadrive.component.pgblock.t_intersection import TInterSection
 from metadrive.component.road_network import Road
-# from metadrive.envs.marl_envs.marl_inout_roundabout import LidarStateObservationMARound
 from metadrive.envs.marl_envs.multi_agent_metadrive import MultiAgentMetaDrive
 from metadrive.manager.map_manager import MapManager
-from metadrive.obs.observation_base import ObservationBase
 from metadrive.utils import get_np_random, Config
 
 MAParkingLotConfig = dict(
@@ -211,9 +209,6 @@ class MultiAgentParkingLotEnv(MultiAgentMetaDrive):
 
         new_obs = self.observations[new_agent_id].observe(vehicle)
         return new_agent_id, new_obs, step_info
-
-    # def get_single_observation(self, vehicle_config: "Config") -> "ObservationBase":
-    #     return LidarStateObservationMARound(vehicle_config)
 
     def done_function(self, vehicle_id):
         done, info = super(MultiAgentParkingLotEnv, self).done_function(vehicle_id)
