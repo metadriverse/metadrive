@@ -137,7 +137,7 @@ def test_ma_toll_horizon():
                         assert i[kkk]["out_of_road"]
 
                 for kkk, iii in i.items():
-                    if iii and (iii["out_of_road"] or iii["cost"] == 778):
+                    if "out_of_road" in iii and (iii["out_of_road"] or iii["cost"] == 778):
                         assert d[kkk]
                         assert i[kkk]["cost"] == 778
                         assert i[kkk]["out_of_road"]
@@ -216,7 +216,7 @@ def test_ma_toll_reset():
                     assert len(v.navigation.checkpoints) > 2
 
                 for kkk, iii in i.items():
-                    if iii and iii["arrive_dest"]:
+                    if "arrive_dest" in iii and iii["arrive_dest"]:
                         # print("{} success!".format(kkk))
                         success_count += 1
 

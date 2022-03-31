@@ -138,7 +138,7 @@ def test_ma_parking_lot_horizon():
                         assert i[kkk]["out_of_road"]
 
                 for kkk, iii in i.items():
-                    if iii and (iii["out_of_road"] or iii["cost"] == 778):
+                    if "out_of_road" in iii and (iii["out_of_road"] or iii["cost"] == 778):
                         assert d[kkk]
                         assert i[kkk]["cost"] == 778
                         assert i[kkk]["out_of_road"]
@@ -217,7 +217,7 @@ def test_ma_parking_lot_reset():
                     assert len(v.navigation.checkpoints) > 2
 
                 for kkk, iii in i.items():
-                    if iii and iii["arrive_dest"]:
+                    if "arrive_dest" in iii and iii["arrive_dest"]:
                         # print("{} success!".format(kkk))
                         success_count += 1
 
@@ -532,16 +532,12 @@ def test_ma_parking_lot_horizon_termination():
             _check_spaces_after_reset(env, obs)
             assert env.observation_space.contains(obs)
             should_respawn = set()
-            special_agents = set(["agent0", "agent7"])
             for step in range(1, 10000):
                 act = {k: [0, 0] for k in env.vehicles.keys()}
                 for v_id in act.keys():
-                    if v_id in special_agents:
-                        act[v_id] = [1, 1]  # Add some randomness
-                    else:
-                        if v_id in env.vehicles:
-                            env.vehicles[v_id].set_static(True)
+                    env.vehicles[v_id].set_static(True)
                 obs, r, d, i = _act(env, act)
+                # env.render("top_down", camera_position=(42.5, 0), film_size=(500, 500))
                 if step == 0 or step == 1:
                     assert not any(d.values())
 
@@ -557,7 +553,7 @@ def test_ma_parking_lot_horizon_termination():
                     if ddd and kkk == "__all__":
                         print("Current: ", step)
                         continue
-                    if ddd and kkk not in special_agents:
+                    if ddd:
                         assert i[kkk]["max_step"]
                         assert not i[kkk]["out_of_road"]
                         assert not i[kkk]["crash"]

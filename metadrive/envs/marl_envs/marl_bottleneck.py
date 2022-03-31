@@ -2,10 +2,8 @@ from metadrive.component.map.pg_map import PGMap
 from metadrive.component.pgblock.bottleneck import Merge, Split
 from metadrive.component.pgblock.first_block import FirstPGBlock
 from metadrive.component.road_network import Road
-# from metadrive.envs.marl_envs.marl_inout_roundabout import LidarStateObservationMARound
 from metadrive.envs.marl_envs.multi_agent_metadrive import MultiAgentMetaDrive
 from metadrive.manager.map_manager import MapManager
-from metadrive.obs.observation_base import ObservationBase
 from metadrive.utils import Config
 from metadrive.utils.math_utils import clip
 
@@ -87,9 +85,6 @@ class MultiAgentBottleneckEnv(MultiAgentMetaDrive):
         assert MABottleneckConfig["vehicle_config"]["lane_line_detector"]["num_lasers"] > 2
         MABottleneckConfig["map_config"]["lane_num"] = MABottleneckConfig["map_config"]["bottle_lane_num"]
         return MultiAgentMetaDrive.default_config().update(MABottleneckConfig, allow_add_new_key=True)
-
-    def get_single_observation(self, vehicle_config: "Config") -> "ObservationBase":
-        return LidarStateObservationMARound(vehicle_config)
 
     def reward_function(self, vehicle_id: str):
         """
