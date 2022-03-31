@@ -190,13 +190,10 @@ class MultiAgentParkingLotEnv(MultiAgentMetaDrive):
                     filter_ret[id] = config
 
         # ===== same as super() =====
-        safe_places_dict = filter_ret
-        if len(safe_places_dict) == 0 or not self.agent_manager.allow_respawn:
-            # No more run, just wait!
-            return None, None
-        assert len(safe_places_dict) > 0
-        bp_index = get_np_random(self._DEBUG_RANDOM_SEED).choice(list(safe_places_dict.keys()), 1)[0]
-        new_spawn_place = safe_places_dict[bp_index]
+        if len(safe_places_dict) == 0:
+            return None, None, None
+        born_place_index = get_np_random(self._DEBUG_RANDOM_SEED).choice(list(safe_places_dict.keys()), 1)[0]
+        new_spawn_place = safe_places_dict[born_place_index]
 
         new_agent_id, vehicle, step_info = self.agent_manager.propose_new_vehicle()
         new_spawn_place_config = new_spawn_place["config"]
