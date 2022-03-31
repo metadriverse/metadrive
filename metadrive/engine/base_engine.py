@@ -68,8 +68,11 @@ class BaseEngine(EngineCore, Randomizable):
         :param object_id: a filter function, only return objects satisfying this condition
         :return: policy
         """
-        assert object_id in self._object_policies, "Can not find the policy for object(id: {})".format(object_id)
-        return self._object_policies[object_id]
+        if object_id in self._object_policies:
+            return self._object_policies[object_id]
+        else:
+            print("Can not find the policy for object(id: {})".format(object_id))
+            return None
 
     def get_task(self, object_id):
         """
