@@ -100,5 +100,5 @@ class TInterSection(InterSection):
             socket.set_index(self.name, len(self._sockets))
         self._sockets[socket.index] = socket
 
-    def add_u_turn(self, enable_u_turn: bool):
+    def enable_u_turn(self, enable_u_turn: bool):
         raise ValueError("T intersection didn't support u_turn now")
