@@ -450,9 +450,9 @@ if __name__ == '__main__':
         #     assert sum(
         #         [env.engine.get_policy(v.name).__class__.__name__ == "EnvInputPolicy" for k, v in vehicles.items()]
         #     ) == env.config["num_RL_agents"]
-        # if any(d.values()):
-        #     print("Somebody dead.", d, info)
-        #     print("Step {}. Policies: {}".format(i, {k: v['policy'] for k, v in info.items()}))
+        if any(d.values()):
+            print("Somebody dead.", d, info)
+            # print("Step {}. Policies: {}".format(i, {k: v['policy'] for k, v in info.items()}))
         if d["__all__"]:
             # assert i >= 1000
             print("Reset. ", i, info)
