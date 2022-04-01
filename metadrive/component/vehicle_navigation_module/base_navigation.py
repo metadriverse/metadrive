@@ -211,15 +211,15 @@ class BaseNavigation:
         """
         Called in update_localization to find current lane information
         """
-        possible_lanes = ray_localization(
-            ego_vehicle.heading, ego_vehicle.position, ego_vehicle.engine, return_all_result=True
+        possible_lanes, on_lane = ray_localization(
+            ego_vehicle.heading, ego_vehicle.position, ego_vehicle.engine, return_all_result=True, return_on_lane=True
         )
         for lane, index, l_1_dist in possible_lanes:
             if lane in self.current_ref_lanes:
-                return lane, index
+                return lane, index, on_lane
         nx_ckpt = self._target_checkpoints_index[-1]
         if nx_ckpt == self.checkpoints[-1] or self.next_ref_lanes is None:
-            return possible_lanes[0][:-1] if len(possible_lanes) > 0 else (None, None)
+            return (*possible_lanes[0][:-1], on_lane) if len(possible_lanes) > 0 else (None, None, on_lane)
 
         if self.map.road_network_type == NodeRoadNetwork:
             nx_nx_ckpt = nx_ckpt + 1
@@ -228,14 +228,14 @@ class BaseNavigation:
             next_ref_lanes = self.next_ref_lanes
         for lane, index, l_1_dist in possible_lanes:
             if lane in next_ref_lanes:
-                return lane, index
-        return possible_lanes[0][:-1] if len(possible_lanes) > 0 else (None, None)
+                return lane, index, on_lane
+        return (*possible_lanes[0][:-1], on_lane) if len(possible_lanes) > 0 else (None, None, on_lane)
 
     def _update_current_lane(self, ego_vehicle):
-        lane, lane_index = self._get_current_lane(ego_vehicle)
+        lane, lane_index, on_lane = self._get_current_lane(ego_vehicle)
+        ego_vehicle.on_lane = on_lane
         if lane is None:
             lane, lane_index = ego_vehicle.lane, ego_vehicle.lane_index
-            ego_vehicle.on_lane = False
             if self.FORCE_CALCULATE:
                 lane_index, _ = self.map.road_network.get_closest_lane_index(ego_vehicle.position)
                 lane = self.map.road_network.get_lane(lane_index)

@@ -127,25 +127,26 @@ class EdgeNetworkNavigation(BaseNavigation):
         """
         Called in update_localization to find current lane information
         """
-        possible_lanes = ray_localization(
+        possible_lanes, on_lane = ray_localization(
             ego_vehicle.heading,
             ego_vehicle.position,
             ego_vehicle.engine,
             return_all_result=True,
-            use_heading_filter=False
+            use_heading_filter=False,
+            return_on_lane=True
         )
         for lane, index, l_1_dist in possible_lanes:
             if lane in self.current_ref_lanes:
-                return lane, index
+                return lane, index, on_lane
         nx_ckpt = self._target_checkpoints_index[-1]
         if nx_ckpt == self.checkpoints[-1] or self.next_ref_lanes is None:
-            return possible_lanes[0][:-1] if len(possible_lanes) > 0 else (None, None)
+            return (*possible_lanes[0][:-1], on_lane) if len(possible_lanes) > 0 else (None, None, on_lane)
 
         next_ref_lanes = self.next_ref_lanes
         for lane, index, l_1_dist in possible_lanes:
             if lane in next_ref_lanes:
-                return lane, index
-        return possible_lanes[0][:-1] if len(possible_lanes) > 0 else (None, None)
+                return lane, index, on_lane
+        return (*possible_lanes[0][:-1], on_lane) if len(possible_lanes) > 0 else (None, None, on_lane)
 
     def _get_info_for_checkpoint(self, lanes_id, ref_lane, ego_vehicle):
 
