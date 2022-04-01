@@ -6,7 +6,7 @@ if __name__ == "__main__":
     env = MetaDriveEnv(
         {
             "environment_num": 100,
-            "traffic_density": .1,
+            "traffic_density":1,
             "traffic_mode": "trigger",
             "start_seed": 22,
             # "_disable_detector_mask":True,
@@ -38,6 +38,7 @@ if __name__ == "__main__":
             "random_lane_width": True,
             # "random_agent_model": True,
             "driving_reward": 1.0,
+            "force_destroy": False,
             "vehicle_config": {
                 "enable_reverse": False,
                 # "image_source": "depth_camera",
