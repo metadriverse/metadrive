@@ -122,8 +122,10 @@ BASE_DEFAULT_CONFIG = dict(
     _disable_detector_mask=False,
     # clip rgb to (0, 1)
     rgb_clip=True,
-    #
+    # None: unlimited, number: fps
     force_render_fps=None,
+    # if set to True all objects will be force destroyed when call clear()
+    force_destroy=False,
 
     # ===== Others =====
     # The maximum distance used in PGLOD. Set to None will use the default values.
