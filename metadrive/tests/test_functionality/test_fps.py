@@ -5,6 +5,7 @@ import numpy as np
 from metadrive import MetaDriveEnv
 from metadrive.utils import setup_logger
 
+
 def test_fps():
     print("Start to profile the efficiency of MetaDrive with 1000 maps and ~8 vehicles!")
     setup_logger(debug=False)
@@ -22,7 +23,8 @@ def test_fps():
         if d:
             env.reset()
             vehicle_num.append(len(env.engine.traffic_manager.vehicles))
-    assert total_steps / (time.time() - start)>160
+    assert total_steps / (time.time() - start) > 160
+
 
 if __name__ == '__main__':
     test_fps()
