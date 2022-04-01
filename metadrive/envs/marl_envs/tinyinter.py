@@ -429,8 +429,8 @@ if __name__ == '__main__':
             #         "add_others_navi": True
             #     }
             # },
-            "manual_control": True,
-            "use_render": True,
+            # "manual_control": True,
+            # "use_render": True,
 
             "debug_static_world": True,
         }

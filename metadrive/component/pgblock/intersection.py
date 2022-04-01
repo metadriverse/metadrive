@@ -44,10 +44,12 @@ class InterSection(PGBlock):
     # LEFT_TURN_NUM = 1 now it is useless
 
     def __init__(self, *args, **kwargs):
-        super(InterSection, self).__init__(*args, **kwargs)
         if "radius" in kwargs:
             self.radius = kwargs.pop("radius")
         else:
+            self.radius = None
+        super(InterSection, self).__init__(*args, **kwargs)
+        if self.radius is None:
             self.radius = self.get_config()[Parameter.radius]
 
     def _try_plug_into_previous_block(self) -> bool:
