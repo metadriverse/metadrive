@@ -423,8 +423,8 @@ if __name__ == '__main__':
             #         "add_others_navi": True
             #     }
             # },
-            "manual_control": True,
-            "use_render": True,
+            # "manual_control": True,
+            # "use_render": True,
         }
     )
     o = env.reset()
@@ -468,5 +468,6 @@ if __name__ == '__main__':
                     (ep_done - ep_success) > 0 else -1, ep_done
                 )
             )
+            break
             env.reset()
     env.close()
