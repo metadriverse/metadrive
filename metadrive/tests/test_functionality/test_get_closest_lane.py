@@ -4,7 +4,7 @@ from metadrive.envs.metadrive_env import MetaDriveEnv
 def test_get_lane_index(use_render=False):
     env = MetaDriveEnv(
         {
-            "map": "rRCXSOTCR",
+            "map": "SOTCR",
             "environment_num": 1,
             "traffic_density": 0.3,
             "traffic_mode": "respawn",
