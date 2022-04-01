@@ -102,10 +102,14 @@ class CommunicationObservation(LidarStateObservation):
         # assert len(new_agents.symmetric_difference(self.agent_name_index_mapping.keys())) == 0
         assert all(k in self.agent_name_index_mapping for k in name_vehicle_mapping)
         assert all(k in self.agent_name_slot_mapping.keys() for k in name_vehicle_mapping)
-        self.agent_name_index_mapping = {k: self.agent_name_index_mapping[k] for k in
-                                         sorted(self.agent_name_index_mapping.keys())}
-        self.agent_name_slot_mapping = {k: self.agent_name_slot_mapping[k] for k in
-                                        sorted(self.agent_name_slot_mapping.keys())}
+        self.agent_name_index_mapping = {
+            k: self.agent_name_index_mapping[k]
+            for k in sorted(self.agent_name_index_mapping.keys())
+        }
+        self.agent_name_slot_mapping = {
+            k: self.agent_name_slot_mapping[k]
+            for k in sorted(self.agent_name_slot_mapping.keys())
+        }
         # print("SLOT:", self.agent_name_slot_mapping)
         # print("AGEN:", self.agent_name_index_mapping)
 
@@ -180,7 +184,6 @@ class CommunicationObservation(LidarStateObservation):
 
 class TinyInterRuleBasedPolicy(IDMPolicy):
     """No IDM and PID are used in this Policy!"""
-
     def __init__(self, control_object, random_seed, target_speed=10):
         super(TinyInterRuleBasedPolicy, self).__init__(control_object=control_object, random_seed=random_seed)
         self.target_speed = target_speed  # Set to 10km/h. Default is 30km/h.
@@ -213,7 +216,6 @@ class TinyInterRuleBasedPolicy(IDMPolicy):
 
 class MixedIDMAgentManager(AgentManager):
     """In this manager, we can replace part of RL policy by IDM policy"""
-
     def __init__(self, init_observations, init_action_space, num_RL_agents, ignore_delay_done=None, target_speed=10):
         super(MixedIDMAgentManager, self).__init__(
             init_observations=init_observations, init_action_space=init_action_space
@@ -417,9 +419,9 @@ if __name__ == '__main__':
             # "vehicle_config": {
             #     "show_line_to_dest": True,
             #         "lidar": {
-                #         "num_others": 2,
-                #         "add_others_navi": True
-                #     }
+            #         "num_others": 2,
+            #         "add_others_navi": True
+            #     }
             # },
             "manual_control": True,
             "use_render": True,
@@ -457,12 +459,14 @@ if __name__ == '__main__':
             # assert i >= 1000
             print("Reset. ", i, info)
             # break
-            print("Success Rate: {:.3f}, reward: {:.3f}, success reward: {:.3f}, failed reward: {:.3f}, total num {}".format(
-                ep_success / ep_done if ep_done > 0 else -1,
-                ep_reward_sum / ep_done if ep_done > 0 else -1,
-                ep_success_reward_sum / ep_success if ep_success > 0 else -1,
-                (ep_reward_sum - ep_success_reward_sum) / (ep_done - ep_success) if (ep_done - ep_success) > 0 else -1,
-                ep_done
-            ))
+            print(
+                "Success Rate: {:.3f}, reward: {:.3f}, success reward: {:.3f}, failed reward: {:.3f}, total num {}".
+                format(
+                    ep_success / ep_done if ep_done > 0 else -1, ep_reward_sum / ep_done if ep_done > 0 else -1,
+                    ep_success_reward_sum / ep_success if ep_success > 0 else -1,
+                    (ep_reward_sum - ep_success_reward_sum) / (ep_done - ep_success) if
+                    (ep_done - ep_success) > 0 else -1, ep_done
+                )
+            )
             env.reset()
     env.close()
