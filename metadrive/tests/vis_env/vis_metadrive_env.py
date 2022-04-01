@@ -5,8 +5,8 @@ if __name__ == "__main__":
     setup_logger(True)
     env = MetaDriveEnv(
         {
-            "environment_num": 1,
-            "traffic_density": .0,
+            "environment_num": 100,
+            "traffic_density": .1,
             "traffic_mode": "trigger",
             "start_seed": 22,
             # "_disable_detector_mask":True,
@@ -33,7 +33,7 @@ if __name__ == "__main__":
             # },
             # "pstats": True,
             # "discrete_action": True,
-            "map": 5,
+            "map": "T",
             "random_traffic": False,
             "random_lane_width": True,
             # "random_agent_model": True,
@@ -83,7 +83,7 @@ if __name__ == "__main__":
         #             time.time() - start, (s + 1) / (time.time() - start)
         #         )
         #     )
-        # if d:
-        #     # env.close()
-        #     print(len(env.engine._spawned_objects))
-        #     env.reset()
+        if d:
+            #     # env.close()
+            #     print(len(env.engine._spawned_objects))
+            env.reset()

@@ -152,7 +152,8 @@ def ray_localization(
     position: tuple,
     engine: EngineCore,
     return_all_result=False,
-    use_heading_filter=True
+    use_heading_filter=True,
+    return_on_lane=False,
 ) -> Union[List[Tuple], Tuple]:
     """
     Get the index of the lane closest to a physx_world position.
@@ -163,6 +164,7 @@ def ray_localization(
     :param return_all_result: return a list instead of the lane with min L1 distance
     :return: list(closest lane) or closest lane.
     """
+    on_lane = False
     results = engine.physics_world.static_world.rayTestAll(
         panda_position(position, 1.0), panda_position(position, -1.0)
     )
@@ -170,6 +172,7 @@ def ray_localization(
     if results.hasHits():
         for res in results.getHits():
             if res.getNode().getName() == BodyName.Lane:
+                on_lane = True
                 lane = get_object_from_node(res.getNode())
                 long, _ = lane.local_coordinates(position)
                 lane_heading = lane.heading_theta_at(long)
@@ -193,14 +196,14 @@ def ray_localization(
             for lane, index, dist in lane_index_dist:
                 ret.append((lane, index, dist))
         sorted(ret, key=lambda k: k[2])
-        return ret
+        return (ret, on_lane) if return_on_lane else ret
     else:
         if len(lane_index_dist) > 0:
             ret_index = np.argmin([d for _, _, d in lane_index_dist])
             lane, index, dist = lane_index_dist[ret_index]
         else:
             lane, index, dist = None, None, None
-        return lane, index
+        return (lane, index) if not return_on_lane else (lane, index, on_lane)
 
 
 def rect_region_detection(
