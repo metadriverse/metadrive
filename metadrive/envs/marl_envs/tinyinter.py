@@ -354,15 +354,17 @@ class MultiAgentTinyInter(MultiAgentIntersectionEnv):
 
     def _get_reset_return(self):
         org = super(MultiAgentTinyInter, self)._get_reset_return()
-        if self.num_RL_agents == self.num_agents:
-            return org
+
+        # if self.num_RL_agents == self.num_agents:
+        #     return org
 
         return self.agent_manager.filter_RL_agents(org)
 
     def step(self, actions):
         o, r, d, i = super(MultiAgentTinyInter, self).step(actions)
-        if self.num_RL_agents == self.num_agents:
-            return o, r, d, i
+
+        # if self.num_RL_agents == self.num_agents:
+        #     return o, r, d, i
 
         original_done_dict = copy.deepcopy(d)
         d = self.agent_manager.filter_RL_agents(d, original_done_dict=original_done_dict)
@@ -387,16 +389,16 @@ class MultiAgentTinyInter(MultiAgentIntersectionEnv):
     def __init__(self, config=None):
         super(MultiAgentTinyInter, self).__init__(config=config)
         self.num_RL_agents = self.config["num_RL_agents"]
-        if self.num_RL_agents == self.num_agents:  # Not using mixed traffic and only RL agents are running.
-            pass
-        else:
-            self.agent_manager = MixedIDMAgentManager(
-                init_observations=self._get_observations(),
-                init_action_space=self._get_action_space(),
-                num_RL_agents=self.num_RL_agents,
-                ignore_delay_done=self.config["ignore_delay_done"],
-                target_speed=self.config["target_speed"]
-            )
+        # if self.num_RL_agents == self.num_agents:  # Not using mixed traffic and only RL agents are running.
+        #     pass
+        # else:
+        self.agent_manager = MixedIDMAgentManager(
+            init_observations=self._get_observations(),
+            init_action_space=self._get_action_space(),
+            num_RL_agents=self.num_RL_agents,
+            ignore_delay_done=self.config["ignore_delay_done"],
+            target_speed=self.config["target_speed"]
+        )
 
     def get_single_observation(self, vehicle_config: "Config"):
         if self.config["use_communication_obs"]:
@@ -408,9 +410,9 @@ class MultiAgentTinyInter(MultiAgentIntersectionEnv):
 if __name__ == '__main__':
     env = MultiAgentTinyInter(
         config={
-            "num_agents": 3,
-            "num_RL_agents": 3,
-            "ignore_delay_done": True,
+            "num_agents": 1,
+            "num_RL_agents": 1,
+            # "ignore_delay_done": True,
             # "use_communication_obs": True,
             # "vehicle_config": {
             #     "show_line_to_dest": True,
@@ -419,8 +421,8 @@ if __name__ == '__main__':
                 #         "add_others_navi": True
                 #     }
             # },
-            # "manual_control": True,
-            # "use_render": True,
+            "manual_control": True,
+            "use_render": True,
         }
     )
     o = env.reset()
@@ -432,7 +434,7 @@ if __name__ == '__main__':
     ep_reward_sum = 0.0
     ep_success_reward_sum = 0.0
     for i in range(1, 100000):
-        o, r, d, info = env.step({k: [0.0, 0.02] for k in env.action_space.sample().keys()})
+        o, r, d, info = env.step({k: [1.0, 0.02] for k in env.action_space.sample().keys()})
         # env.render("top_down", camera_position=(42.5, 0), film_size=(500, 500))
         vehicles = env.vehicles
 
@@ -453,7 +455,7 @@ if __name__ == '__main__':
         #     print("Step {}. Policies: {}".format(i, {k: v['policy'] for k, v in info.items()}))
         if d["__all__"]:
             # assert i >= 1000
-            # print("Reset. ", i, info)
+            print("Reset. ", i, info)
             # break
             print("Success Rate: {:.3f}, reward: {:.3f}, success reward: {:.3f}, failed reward: {:.3f}, total num {}".format(
                 ep_success / ep_done if ep_done > 0 else -1,
