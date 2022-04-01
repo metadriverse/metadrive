@@ -39,7 +39,7 @@ class InterSection(PGBlock):
     ANGLE = 90  # may support other angle in the future
     EXIT_PART_LENGTH = 30
 
-    enable_u_turn = False
+    _enable_u_turn_flag = False
 
     # LEFT_TURN_NUM = 1 now it is useless
 
@@ -101,7 +101,7 @@ class InterSection(PGBlock):
         self._create_left_turn(radius, lane_num, attach_left_lane, attach_road, intersect_nodes, part_idx)
 
         # u-turn
-        if self.enable_u_turn:
+        if self._enable_u_turn_flag:
             adverse_road = -attach_road
             self._create_u_turn(attach_road, part_idx)
 
@@ -231,7 +231,7 @@ class InterSection(PGBlock):
         )
 
     def enable_u_turn(self, enable_u_turn: bool):
-        self.enable_u_turn = enable_u_turn
+        self._enable_u_turn_flag = enable_u_turn
 
     def get_intermediate_spawn_lanes(self):
         """Override this function for intersection so that we won't spawn vehicles in the center of intersection."""
