@@ -43,6 +43,13 @@ class InterSection(PGBlock):
 
     # LEFT_TURN_NUM = 1 now it is useless
 
+    def __init__(self, *args, **kwargs):
+        if "radius" in kwargs:
+            self.radius = kwargs.pop("radius")
+        else:
+            self.radius = self.PARAMETER_SPACE[Parameter.radius]
+        super(InterSection, self).__init__(*args, **kwargs)
+
     def _try_plug_into_previous_block(self) -> bool:
         para = self.get_config()
         decrease_increase = -1 if para[Parameter.decrease_increase] == 0 else 1
@@ -64,7 +71,7 @@ class InterSection(PGBlock):
 
         for i in range(4):
             right_lane, success = self._create_part(
-                attach_lanes, attach_road, para[Parameter.radius], intersect_nodes, i
+                attach_lanes, attach_road, self.radius, intersect_nodes, i
             )
             no_cross = no_cross and success
             if i != 3:

@@ -341,6 +341,9 @@ class MultiAgentTinyInter(MultiAgentIntersectionEnv):
                 exit_length=30,
                 lane_num=1,
                 lane_width=4,
+
+                # Additional config to control the radius
+                radius=None
             ),
 
             # Whether to remove dead vehicles immediately
@@ -350,7 +353,8 @@ class MultiAgentTinyInter(MultiAgentIntersectionEnv):
             target_speed=10,
 
             # Whether to use full global relative information as obs
-            use_communication_obs=False
+            use_communication_obs=False,
+
         )
         return MultiAgentIntersectionEnv.default_config().update(tiny_config, allow_add_new_key=True)
 
@@ -414,6 +418,8 @@ if __name__ == '__main__':
         config={
             "num_agents": 1,
             "num_RL_agents": 1,
+
+            "map_config": {"radius": 50},
             # "ignore_delay_done": True,
             # "use_communication_obs": True,
             # "vehicle_config": {
@@ -423,8 +429,10 @@ if __name__ == '__main__':
             #         "add_others_navi": True
             #     }
             # },
-            # "manual_control": True,
-            # "use_render": True,
+            "manual_control": True,
+            "use_render": True,
+
+            "debug_static_world": True,
         }
     )
     o = env.reset()
