@@ -1,4 +1,5 @@
 from typing import Union
+from collections import  defaultdict
 from metadrive.envs.metadrive_env import MetaDriveEnv
 from metadrive.component.pgblock.first_block import FirstPGBlock
 from metadrive.component.map.base_map import BaseMap
@@ -93,10 +94,17 @@ class MixWaymoPGEnv(WaymoEnv):
 
         self.in_stop = False
         super(WaymoEnv, self).setup_engine()
-        self.engine.register_manager("data_manager", WaymoDataManager())
-        self.engine.register_manager("map_manager", self.waymo_map_manager)
-        if not self.config["no_traffic"]:
-            self.engine.register_manager("traffic_manager", self.waymo_traffic_manager)
+        if self.real_data_ratio > 0:
+            self.is_current_real_data = True
+            self.engine.register_manager("data_manager", WaymoDataManager())
+            self.engine.register_manager("map_manager", self.waymo_map_manager)
+            if not self.config["no_traffic"]:
+                self.engine.register_manager("traffic_manager", self.waymo_traffic_manager)
+        else:
+            self.is_current_real_data=False
+            self.engine.register_manager("traffic_manager", self.pg_traffic_manager)
+            self.engine.register_manager("map_manager", self.pg_map_manager)
+            self._init_pg_episode()
         self.engine.accept("s", self.stop)
         self.engine.accept("q", self.switch_to_third_person_view)
         self.engine.accept("b", self.switch_to_top_down_view)
@@ -122,9 +130,12 @@ class MixWaymoPGEnv(WaymoEnv):
                 self.engine.update_manager("traffic_manager",
                                            self.pg_traffic_manager,
                                            destroy_previous_manager=False)
-                self.config["target_vehicle_configs"]["default_agent"]["spawn_lane_index"] = (
-                FirstPGBlock.NODE_1, FirstPGBlock.NODE_2, self.engine.np_random.randint(3))
-                self.config["target_vehicle_configs"]["default_agent"]["destination"] = None
+                self._init_pg_episode()
+
+    def _init_pg_episode(self):
+        self.config["target_vehicle_configs"]["default_agent"]["spawn_lane_index"] = (
+            FirstPGBlock.NODE_1, FirstPGBlock.NODE_2, self.engine.np_random.randint(3))
+        self.config["target_vehicle_configs"]["default_agent"]["destination"] = None
 
     def reset(self, force_seed: Union[None, int] = None):
         self.change_suite()
@@ -185,9 +196,9 @@ if __name__ == "__main__":
     env = MixWaymoPGEnv(dict(manual_control=True,
                              use_render=True,
                              waymo_data_directory="E:\\PAMI_waymo_data\\idm_filtered\\validation",
-                             case_num=1,
+                             case_num=2,
                              # start_case=32,
-                             # environment_num=1
+                             environment_num=0
                              ))
     env.reset()
     while True:
