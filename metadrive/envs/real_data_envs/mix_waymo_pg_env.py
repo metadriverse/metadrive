@@ -37,9 +37,9 @@ MIX_WAYMO_PG_ENV_CONFIG = dict(
     random_lane_num=False,
 
     # ===== PG Traffic =====
-    traffic_density=0.1,
+    traffic_density=0.2,
     need_inverse_traffic=False,
-    traffic_mode=TrafficMode.Trigger,  # "Respawn", "Trigger"
+    traffic_mode=TrafficMode.Hybrid,  # "Respawn", "Trigger"
     random_traffic=False,  # Traffic is randomized at default.
     # this will update the vehicle_config and set to traffic
     traffic_vehicle_config=dict(
@@ -101,7 +101,7 @@ class MixWaymoPGEnv(WaymoEnv):
         self.engine.accept("q", self.switch_to_third_person_view)
         self.engine.accept("b", self.switch_to_top_down_view)
 
-    def reset(self, force_seed: Union[None, int] = None):
+    def change_suite(self):
         if engine_initialized():
             # must lazy initialize at first
             if get_np_random(None).rand() < self.real_data_ratio:
@@ -122,9 +122,38 @@ class MixWaymoPGEnv(WaymoEnv):
                 self.engine.update_manager("traffic_manager",
                                            self.pg_traffic_manager,
                                            destroy_previous_manager=False)
-                self.config["target_vehicle_configs"]["default_agent"]["spawn_lane_index"] = (FirstPGBlock.NODE_1, FirstPGBlock.NODE_2, 0)
+                self.config["target_vehicle_configs"]["default_agent"]["spawn_lane_index"] = (
+                FirstPGBlock.NODE_1, FirstPGBlock.NODE_2, self.engine.np_random.randint(3))
                 self.config["target_vehicle_configs"]["default_agent"]["destination"] = None
-        return super(MixWaymoPGEnv, self).reset()
+
+    def reset(self, force_seed: Union[None, int] = None):
+        self.change_suite()
+        # ===== same as BaseEnv =====
+        self.lazy_init()  # it only works the first time when reset() is called to avoid the error when render
+        self._reset_global_seed(force_seed)
+        if self.engine is None:
+            raise ValueError(
+                "Current MetaDrive instance is broken. Please make sure there is only one active MetaDrive "
+                "environment exists in one process. You can try to call env.close() and then call "
+                "env.reset() to rescue this environment. However, a better and safer solution is to check the "
+                "singleton of MetaDrive and restart your program."
+            )
+        self.engine.reset()
+        if self._top_down_renderer is not None:
+            self._top_down_renderer.reset(self.current_map)
+
+        self.dones = {agent_id: False for agent_id in self.vehicles.keys()}
+        self.episode_steps = 0
+        self.episode_rewards = defaultdict(float)
+        self.episode_lengths = defaultdict(int)
+
+        assert (len(self.vehicles) == self.num_agents) or (self.num_agents == -1)
+        # ^^^^^^ same as Base Env ^^^^^
+
+        if not self.is_current_real_data:
+            # give a initial speed when on metadrive
+            self.vehicle.set_velocity(self.vehicle.heading, self.engine.np_random.randint(10))
+        return self._get_reset_return()
 
     def _reset_global_seed(self, force_seed=None):
         current_seed = force_seed if force_seed is not None else get_np_random(None).randint(
@@ -157,8 +186,9 @@ if __name__ == "__main__":
                              use_render=True,
                              waymo_data_directory="E:\\PAMI_waymo_data\\idm_filtered\\validation",
                              case_num=1,
-                             start_case=32,
-                             environment_num=1))
+                             # start_case=32,
+                             # environment_num=1
+                             ))
     env.reset()
     while True:
         o, r, d, i = env.step(env.action_space.sample())
