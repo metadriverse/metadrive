@@ -174,6 +174,8 @@ Quanyi Li*, Zhenghao Peng*, Bolei Zhou
 [<a href="https://arxiv.org/pdf/2202.10341.pdf" target="_blank">Paper</a>]
 [<a href="https://github.com/decisionforce/HACO" target="_blank">Code</a>]
 [<a href="https://decisionforce.github.io/HACO/" target="_blank">Webpage</a>]
+[<a href="https://github.com/decisionforce/HACO/blob/main/docs/iclr_poster.pdf" target="_blank">Poster</a>]
+[<a href="https://youtu.be/PiJv4wtp8T8" target="_blank">Talk</a>]
     
 
 [![build](https://github.com/decisionforce/metadrive/workflows/test/badge.svg)](http://github.com/decisionforce/metadrive/actions)
