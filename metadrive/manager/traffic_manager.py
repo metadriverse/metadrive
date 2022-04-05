@@ -197,7 +197,7 @@ class TrafficManager(BaseManager):
         total_num = int(lane.length / self.VEHICLE_GAP)
         vehicle_longs = [i * self.VEHICLE_GAP for i in range(total_num)]
         self.np_random.shuffle(vehicle_longs)
-        for long in vehicle_longs[:int(traffic_density*len(vehicle_longs))]:
+        for long in vehicle_longs[:int(traffic_density * len(vehicle_longs))]:
             # if self.np_random.rand() > traffic_density and abs(lane.length - InRampOnStraight.RAMP_LEN) > 0.1:
             #     # Do special handling for ramp, and there must be vehicles created there
             #     continue

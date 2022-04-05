@@ -53,7 +53,7 @@ if __name__ == "__main__":
                 # # "show_line_to_dest": True,
                 # "show_dest_mark": True
             },
-            "force_destroy":True
+            "force_destroy": True
         }
     )
     import time

@@ -54,7 +54,6 @@ MIX_WAYMO_PG_ENV_CONFIG = dict(
 
     # ===== engine config =====
     force_destroy=True,
-
 )
 
 
@@ -62,15 +61,18 @@ class MixWaymoPGEnv(WaymoEnv):
     @classmethod
     def default_config(cls):
         config = super(MixWaymoPGEnv, cls).default_config()
-        MIX_WAYMO_PG_ENV_CONFIG.update(dict(
-            map_config={
-                BaseMap.GENERATE_TYPE: MapGenerateMethod.BIG_BLOCK_NUM,
-                BaseMap.GENERATE_CONFIG: MIX_WAYMO_PG_ENV_CONFIG["block_num"],
-                # it can be a file path / block num / block ID sequence
-                BaseMap.LANE_WIDTH: 3.5,
-                BaseMap.LANE_NUM: 3,
-                "exit_length": 50,
-            }))
+        MIX_WAYMO_PG_ENV_CONFIG.update(
+            dict(
+                map_config={
+                    BaseMap.GENERATE_TYPE: MapGenerateMethod.BIG_BLOCK_NUM,
+                    BaseMap.GENERATE_CONFIG: MIX_WAYMO_PG_ENV_CONFIG["block_num"],
+                    # it can be a file path / block num / block ID sequence
+                    BaseMap.LANE_WIDTH: 3.5,
+                    BaseMap.LANE_NUM: 3,
+                    "exit_length": 50,
+                }
+            )
+        )
         config.update(MIX_WAYMO_PG_ENV_CONFIG)
         return config
 
@@ -115,27 +117,22 @@ class MixWaymoPGEnv(WaymoEnv):
             # must lazy initialize at first
             if get_np_random(None).rand() < self.real_data_ratio:
                 # change to real environment
-                self.engine.update_manager("map_manager",
-                                           self.waymo_map_manager,
-                                           destroy_previous_manager=False)
-                self.engine.update_manager("traffic_manager",
-                                           self.waymo_traffic_manager,
-                                           destroy_previous_manager=False)
+                self.engine.update_manager("map_manager", self.waymo_map_manager, destroy_previous_manager=False)
+                self.engine.update_manager(
+                    "traffic_manager", self.waymo_traffic_manager, destroy_previous_manager=False
+                )
                 self.is_current_real_data = True
             else:
                 self.is_current_real_data = False
                 # change to PG environment
-                self.engine.update_manager("map_manager",
-                                           self.pg_map_manager,
-                                           destroy_previous_manager=False)
-                self.engine.update_manager("traffic_manager",
-                                           self.pg_traffic_manager,
-                                           destroy_previous_manager=False)
+                self.engine.update_manager("map_manager", self.pg_map_manager, destroy_previous_manager=False)
+                self.engine.update_manager("traffic_manager", self.pg_traffic_manager, destroy_previous_manager=False)
                 self._init_pg_episode()
 
     def _init_pg_episode(self):
         self.config["target_vehicle_configs"]["default_agent"]["spawn_lane_index"] = (
-            FirstPGBlock.NODE_1, FirstPGBlock.NODE_2, self.engine.np_random.randint(3))
+            FirstPGBlock.NODE_1, FirstPGBlock.NODE_2, self.engine.np_random.randint(3)
+        )
         self.config["target_vehicle_configs"]["default_agent"]["destination"] = None
 
     def reset(self, force_seed: Union[None, int] = None):
@@ -169,7 +166,8 @@ class MixWaymoPGEnv(WaymoEnv):
 
     def _reset_global_seed(self, force_seed=None):
         current_seed = force_seed if force_seed is not None else get_np_random(None).randint(
-            0, self.config["case_num"] if self.is_current_real_data else self.config["environment_num"])
+            0, self.config["case_num"] if self.is_current_real_data else self.config["environment_num"]
+        )
         self.seed(current_seed)
 
     def done_function(self, vehicle_id: str):
@@ -191,14 +189,40 @@ class MixWaymoPGEnv(WaymoEnv):
             return vehicle.on_yellow_continuous_line or vehicle.crash_sidewalk or (not vehicle.on_lane)
 
 
+class MixWaymoPGEnvWrapper(MixWaymoPGEnv):
+    """
+    This class is a convinient interface receive
+    {"real_data_ratio": xyz,
+    "total_case_num":xyz} as input
+    """
+    TOTAL_CASE = 100  # default 100
+
+    def __init__(self, config):
+        assert "waymo_data_directory" in config, "tell me waymo data path please"
+        assert "real_data_ratio" in config, "tell me waymo data path please"
+        env_config = config.copy()
+        ratio = config["real_data_ratio"]
+        assert 0 <= ratio <= 1, "ratio should be in [0, 1]"
+        env_config["case_num"] = int(config.get("total_case_num", self.TOTAL_CASE) * ratio)
+        env_config["environment_num"] = int(config.get("total_case_num", self.TOTAL_CASE) - env_config["case_num"])
+        env_config.pop("real_data_ratio")
+        env_config.pop("total_case_num")
+        super(MixWaymoPGEnvWrapper, self).__init__(env_config)
+
+
 if __name__ == "__main__":
-    env = MixWaymoPGEnv(dict(manual_control=True,
-                             use_render=True,
-                             waymo_data_directory="E:\\PAMI_waymo_data\\idm_filtered\\validation",
-                             case_num=2,
-                             # start_case=32,
-                             environment_num=0
-                             ))
+    env = MixWaymoPGEnvWrapper(
+        dict(
+            manual_control=True,
+            use_render=True,
+            waymo_data_directory="E:\\PAMI_waymo_data\\idm_filtered\\validation",
+            # case_num=2,
+            # # start_case=32,
+            # environment_num=0
+            total_case_num=10,
+            real_data_ratio=0.5
+        )
+    )
     env.reset()
     while True:
         o, r, d, i = env.step(env.action_space.sample())
