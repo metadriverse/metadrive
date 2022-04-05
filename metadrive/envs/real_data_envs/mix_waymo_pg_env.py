@@ -1,5 +1,5 @@
 from typing import Union
-from collections import  defaultdict
+from collections import defaultdict
 from metadrive.envs.metadrive_env import MetaDriveEnv
 from metadrive.component.pgblock.first_block import FirstPGBlock
 from metadrive.component.map.base_map import BaseMap
@@ -65,7 +65,8 @@ class MixWaymoPGEnv(WaymoEnv):
         MIX_WAYMO_PG_ENV_CONFIG.update(dict(
             map_config={
                 BaseMap.GENERATE_TYPE: MapGenerateMethod.BIG_BLOCK_NUM,
-                BaseMap.GENERATE_CONFIG: MIX_WAYMO_PG_ENV_CONFIG["block_num"],  # it can be a file path / block num / block ID sequence
+                BaseMap.GENERATE_CONFIG: MIX_WAYMO_PG_ENV_CONFIG["block_num"],
+                # it can be a file path / block num / block ID sequence
                 BaseMap.LANE_WIDTH: 3.5,
                 BaseMap.LANE_NUM: 3,
                 "exit_length": 50,
@@ -101,7 +102,7 @@ class MixWaymoPGEnv(WaymoEnv):
             if not self.config["no_traffic"]:
                 self.engine.register_manager("traffic_manager", self.waymo_traffic_manager)
         else:
-            self.is_current_real_data=False
+            self.is_current_real_data = False
             self.engine.register_manager("traffic_manager", self.pg_traffic_manager)
             self.engine.register_manager("map_manager", self.pg_map_manager)
             self._init_pg_episode()
@@ -171,7 +172,6 @@ class MixWaymoPGEnv(WaymoEnv):
             0, self.config["case_num"] if self.is_current_real_data else self.config["environment_num"])
         self.seed(current_seed)
 
-
     def done_function(self, vehicle_id: str):
         if self.is_current_real_data:
             return super(MixWaymoPGEnv, self).done_function(vehicle_id)
@@ -188,8 +188,7 @@ class MixWaymoPGEnv(WaymoEnv):
         if self.is_current_real_data:
             return super(MixWaymoPGEnv, self)._is_out_of_road(vehicle)
         else:
-            return MetaDriveEnv._is_out_of_road(self, vehicle)
-
+            return vehicle.on_yellow_continuous_line or vehicle.crash_sidewalk or (not vehicle.on_lane)
 
 
 if __name__ == "__main__":
