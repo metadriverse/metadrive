@@ -25,16 +25,16 @@ WAYMO_ENV_CONFIG = dict(
 
     # ===== Agent config =====
     vehicle_config=dict(
-        lidar=dict(num_lasers=120, distance=50),
-        lane_line_detector=dict(num_lasers=12, distance=20),
+        lidar=dict(num_lasers=240, distance=50),
+        lane_line_detector=dict(num_lasers=12, distance=50),
         side_detector=dict(num_lasers=12, distance=50)
     ),
 
     # ===== Reward Scheme =====
     # See: https://github.com/decisionforce/metadrive/issues/283
     success_reward=10.0,
-    out_of_road_penalty=5.0,
-    crash_vehicle_penalty=5.0,
+    out_of_road_penalty=10.0,
+    crash_vehicle_penalty=10.0,
     crash_object_penalty=5.0,
     driving_reward=1.0,
     speed_reward=0.1,
