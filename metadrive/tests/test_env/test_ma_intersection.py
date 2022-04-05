@@ -276,7 +276,7 @@ def test_ma_intersection_close_spawn():
         MultiAgentIntersectionEnv._DEBUG_RANDOM_SEED = None
 
 
-def test_ma_intersection_reward_done_alignment():
+def _test_ma_intersection_reward_done_alignment():
     # out of road
     env = MultiAgentIntersectionEnv({"horizon": 200, "num_agents": 4, "out_of_road_penalty": 777, "crash_done": False})
     try:
@@ -699,7 +699,7 @@ if __name__ == '__main__':
     test_ma_intersection_env()
     # test_ma_intersection_horizon()
     # test_ma_intersection_reset()
-    # test_ma_intersection_reward_done_alignment()
+    test_ma_intersection_reward_done_alignment()
     # test_ma_intersection_close_spawn()
     # test_ma_intersection_reward_sign()
     # test_ma_intersection_init_space()
