@@ -205,8 +205,10 @@ class MixWaymoPGEnvWrapper(MixWaymoPGEnv):
         assert 0 <= ratio <= 1, "ratio should be in [0, 1]"
         env_config["case_num"] = int(config.get("total_case_num", self.TOTAL_CASE) * ratio)
         env_config["environment_num"] = int(config.get("total_case_num", self.TOTAL_CASE) - env_config["case_num"])
-        env_config.pop("real_data_ratio")
-        env_config.pop("total_case_num")
+        if "real_data_ratio" in env_config:
+            env_config.pop("real_data_ratio")
+        if "total_case_num" in env_config:
+            env_config.pop("total_case_num")
         super(MixWaymoPGEnvWrapper, self).__init__(env_config)
 
 
