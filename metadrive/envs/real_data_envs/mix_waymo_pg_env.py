@@ -53,7 +53,7 @@ MIX_WAYMO_PG_ENV_CONFIG = dict(
     ),
 
     # ===== engine config =====
-    force_destroy=True,
+    force_destroy=False,
     horizon=2000,
     use_lateral=True
 )
@@ -224,7 +224,7 @@ if __name__ == "__main__":
             # # start_case=32,
             # environment_num=0
             total_case_num=10,
-            real_data_ratio=0.5
+            real_data_ratio=1
         )
     )
     env.reset()
