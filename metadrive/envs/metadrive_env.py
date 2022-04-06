@@ -179,6 +179,13 @@ class MetaDriveEnv(BaseEnv):
             done_info[TerminationState.MAX_STEP] = True
             logging.info("Episode ended! Reason: max step ")
 
+        if self.config["horizon"] is not None and \
+                self.episode_lengths[vehicle_id] >= self.config["horizon"] and not self.is_multi_agent:
+            # single agent horizon has the same meaning as max_step_per_agent
+            done = True
+            done_info[TerminationState.MAX_STEP] = True
+            logging.info("Episode ended! Reason: max step ")
+
         # for compatibility
         # crash almost equals to crashing with vehicles
         done_info[TerminationState.CRASH] = (

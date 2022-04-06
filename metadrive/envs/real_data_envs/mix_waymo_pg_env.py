@@ -54,6 +54,7 @@ MIX_WAYMO_PG_ENV_CONFIG = dict(
 
     # ===== engine config =====
     force_destroy=True,
+    horizon=2000,
 )
 
 
@@ -228,5 +229,6 @@ if __name__ == "__main__":
     env.reset()
     while True:
         o, r, d, i = env.step(env.action_space.sample())
+        env.render(text={"ts": env.episode_steps})
         if d:
             env.reset()
