@@ -143,6 +143,8 @@ class BaseEngine(EngineCore, Randomizable):
         Since we don't expect a iterator, and the number of objects is not so large, we don't use built-in filter()
         If force_destroy=True, we will destroy this element instead of storing them for next time using
         """
+        force_destroy_this_obj = True if force_destroy or self.global_config["force_destroy"] else False
+
         if isinstance(filter, list):
             exclude_objects = {obj_id: self._spawned_objects[obj_id] for obj_id in filter}
         elif callable(filter):
@@ -159,7 +161,7 @@ class BaseEngine(EngineCore, Randomizable):
             if id in self._object_policies:
                 policy = self._object_policies.pop(id)
                 policy.destroy()
-            if force_destroy:
+            if force_destroy_this_obj:
                 obj.destroy()
             else:
                 obj.detach_from_world(self.physics_world)
