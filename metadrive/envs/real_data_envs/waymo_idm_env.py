@@ -1,5 +1,4 @@
-from metadrive.envs.waymo_env import WaymoEnv
-import pygame
+from metadrive.envs.real_data_envs.waymo_env import WaymoEnv
 from metadrive.manager.waymo_idm_traffic_manager import WaymoIDMTrafficManager
 from metadrive.manager.waymo_traffic_manager import WaymoTrafficManager
 
