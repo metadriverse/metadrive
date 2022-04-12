@@ -128,7 +128,7 @@ class TopDownRenderer:
         # current_track_vehicle=None
     ):
         # Setup some useful flags
-        self.position = camera_position or (int(film_size[0] / 2), int(film_size[1] / 2))
+        self.position = camera_position
         self.track_target_vehicle = track_target_vehicle
         self.show_agent_name = show_agent_name
         if self.show_agent_name:
@@ -316,8 +316,11 @@ class TopDownRenderer:
         v = self.current_track_vehicle
         canvas = self._runtime_canvas
         field = self.canvas.get_width()
-        cam_pos = v.position if self.track_target_vehicle else self.position
-        position = self._runtime_canvas.pos2pix(*cam_pos)
+        if self.position is not None:
+            cam_pos = v.position if self.track_target_vehicle else self.position
+            position = self._runtime_canvas.pos2pix(*cam_pos)
+        else:
+            position = (field / 2, field / 2)
         off = (position[0] - field / 2, position[1] - field / 2)
         self.canvas.blit(source=canvas, dest=(0, 0), area=(off[0], off[1], field, field))
 
