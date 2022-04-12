@@ -5,8 +5,8 @@ if __name__ == "__main__":
     setup_logger(True)
     env = MetaDriveEnv(
         {
-            "environment_num": 100,
-            "traffic_density": 1,
+            "environment_num": 1,
+            "traffic_density": 0,
             "traffic_mode": "trigger",
             "start_seed": 22,
             # "_disable_detector_mask":True,
@@ -21,7 +21,7 @@ if __name__ == "__main__":
             "decision_repeat": 5,
             "need_inverse_traffic": True,
             "rgb_clip": True,
-            "debug": True,
+            "debug": False,
             # "debug_static_world": True,
             # "random_lane_num": True,
 
@@ -52,7 +52,8 @@ if __name__ == "__main__":
                 # "lane_line_detector": dict(num_lasers=2, distance=50),
                 # # "show_line_to_dest": True,
                 # "show_dest_mark": True
-            }
+            },
+            "force_destroy": True
         }
     )
     import time

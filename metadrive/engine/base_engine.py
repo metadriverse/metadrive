@@ -371,7 +371,7 @@ class BaseEngine(EngineCore, Randomizable):
                 objs_need_to_release) == 0, "You should clear all generated objects by using engine.clear_objects " \
                                             "in each manager.before_step()"
 
-    def update_manager(self, manager_name: str, manager: BaseManager):
+    def update_manager(self, manager_name: str, manager: BaseManager, destroy_previous_manager=True):
         """
         Update an existing manager with a new one
         :param manager_name: existing manager name
@@ -381,7 +381,8 @@ class BaseEngine(EngineCore, Randomizable):
             manager_name
         )
         existing_manager = self._managers.pop(manager_name)
-        existing_manager.destroy()
+        if destroy_previous_manager:
+            existing_manager.destroy()
         self._managers[manager_name] = manager
         setattr(self, manager_name, manager)
         self._managers = OrderedDict(sorted(self._managers.items(), key=lambda k_v: k_v[-1].PRIORITY))

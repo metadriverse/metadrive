@@ -9,6 +9,7 @@ class TestEnv(MultiAgentRoundaboutEnv):
                 "use_render": True,
                 "map": "SSS",
                 "num_agents": 4,
+                "force_destroy": True,
                 "manual_control": True,
                 "target_vehicle_configs": {"agent{}".format(i): {
                     "spawn_longitude": i * 5

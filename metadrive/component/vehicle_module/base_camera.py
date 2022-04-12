@@ -53,9 +53,9 @@ class BaseCamera(ImageBuffer):
             if type(self)._singleton.init_num > 1:
                 type(self)._singleton.init_num -= 1
             else:
-                assert type(self)._singleton.init_num == 1
-                ImageBuffer.destroy(type(self)._singleton)
-                type(self)._singleton = None
+                assert type(self)._singleton.init_num == 1 or type(self)._singleton.init_num == 0
+                # ImageBuffer.destroy(type(self)._singleton)
+                # type(self)._singleton = None
 
     def get_cam(self):
         return type(self)._singleton.cam
