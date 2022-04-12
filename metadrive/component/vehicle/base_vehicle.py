@@ -652,8 +652,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
 
     def destroy(self):
         super(BaseVehicle, self).destroy()
-
-        self.navigation.destroy()
+        if self.navigation is not None:
+            self.navigation.destroy()
         self.navigation = None
 
         if self.side_detector is not None:
