@@ -116,20 +116,19 @@ def draw_top_down_trajectory(
 class TopDownRenderer:
     def __init__(
         self,
-        film_size=None,
-        screen_size=None,
+        film_size=(1000, 1000),
+        screen_size=(1000, 1000),
         light_background=True,
         num_stack=15,
         history_smooth=0,
         road_color=(80, 80, 80),
         show_agent_name=False,
         camera_position=None,
-        # track_target_vehicle=True,  # useless, remain here only for compatibility
+        track_target_vehicle=False,
         # current_track_vehicle=None
     ):
         # Setup some useful flags
-        track_target_vehicle = True if camera_position is None else False
-        self.position = camera_position
+        self.position = camera_position or (int(film_size[0] / 2), int(film_size[1] / 2))
         self.track_target_vehicle = track_target_vehicle
         self.show_agent_name = show_agent_name
         if self.show_agent_name:
@@ -148,7 +147,6 @@ class TopDownRenderer:
         self._light_background = light_background
 
         # Setup the canvas
-        film_size = film_size or (3000, 3000)
         # (1) background is the underlying layer. It is fixed and will never change unless the map changes.
         self._background_canvas = draw_top_down_map(
             self.map, simple_draw=False, return_surface=True, film_size=film_size, road_color=road_color
@@ -163,7 +161,7 @@ class TopDownRenderer:
         # self._runtime_output = self._background_canvas.copy()  # TODO(pzh) what is this?
 
         # Setup some runtime variables
-        self._render_size = screen_size or (1000, 1000)
+        self._render_size = screen_size
         self._background_size = tuple(self._background_canvas.get_size())
         # screen_size = self._screen_size or self._render_size
         # self._blit_size = (int(screen_size[0] * self._zoomin), int(screen_size[1] * self._zoomin))
