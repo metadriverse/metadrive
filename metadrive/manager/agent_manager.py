@@ -271,7 +271,10 @@ class AgentManager(BaseManager):
     @property
     def just_terminated_agents(self):
         assert not self.engine.replay_episode
-        return {agent_name: self.get_objects(v_name) for agent_name, v_name in self._agents_finished_this_frame.items()}
+        return {
+            agent_name: self.get_agent(agent_name)[0]
+            for agent_name, v_name in self._agents_finished_this_frame.items()
+        }
 
     @property
     def active_objects(self):
