@@ -2,6 +2,7 @@ import copy
 from typing import Dict
 
 from gym.spaces import Box, Dict, MultiDiscrete
+
 from metadrive.constants import DEFAULT_AGENT
 from metadrive.manager.base_manager import BaseManager
 from metadrive.policy.AI_protect_policy import AIProtectPolicy
@@ -257,10 +258,15 @@ class AgentManager(BaseManager):
         """
         Return Map<agent_id, BaseVehicle>
         """
-        return self.engine.replay_manager.replay_agents if hasattr(self, "engine") and self.engine.replay_episode else {
-            self._object_to_agent[k]: v
-            for k, v in self._active_objects.items()
-        }
+        if hasattr(self, "engine") and self.engine.replay_episode:
+            return self.engine.replay_manager.replay_agents
+        else:
+            return {self._object_to_agent[k]: v for k, v in self._active_objects.items()}
+
+    @property
+    def dying_agents(self):
+        assert not self.engine.replay_episode
+        return {self._object_to_agent[k]: v for k, v in self._active_objects.items()}
 
     @property
     def active_objects(self):
