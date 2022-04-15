@@ -487,7 +487,7 @@ class BaseEnv(gym.Env):
         :return: Dict[agent_id:vehicle]
         """
         ret = self.agent_manager.active_agents
-        ret.update(self.agent_manager.dying_agents)
+        ret.update(self.agent_manager.just_terminated_agents)
         return ret
 
     def setup_engine(self):
