@@ -416,10 +416,10 @@ class MultiAgentTinyInter(MultiAgentIntersectionEnv):
 if __name__ == '__main__':
     env = MultiAgentTinyInter(
         config={
-            "num_agents": 1,
-            "num_RL_agents": 1,
+            "num_agents": 8,
+            "num_RL_agents": 8,
 
-            "map_config": {"radius": 50},
+            # "map_config": {"radius": 50},
             # "ignore_delay_done": True,
             # "use_communication_obs": True,
             # "vehicle_config": {
@@ -432,7 +432,7 @@ if __name__ == '__main__':
             # "manual_control": True,
             # "use_render": True,
 
-            "debug_static_world": True,
+            # "debug_static_world": True,
         }
     )
     o = env.reset()
@@ -444,7 +444,7 @@ if __name__ == '__main__':
     ep_reward_sum = 0.0
     ep_success_reward_sum = 0.0
     for i in range(1, 100000):
-        o, r, d, info = env.step({k: [1.0, 0.02] for k in env.action_space.sample().keys()})
+        o, r, d, info = env.step({k: [0.0, 1.0] for k in env.action_space.sample().keys()})
         # env.render("top_down", camera_position=(42.5, 0), film_size=(500, 500))
         vehicles = env.vehicles
 
