@@ -272,7 +272,7 @@ class AgentManager(BaseManager):
     def just_terminated_agents(self):
         assert not self.engine.replay_episode
         return {
-            agent_name: self.get_agent(agent_name)[0]
+            agent_name: self.get_object(v_name)[0]
             for agent_name, v_name in self._agents_finished_this_frame.items()
         }
 
