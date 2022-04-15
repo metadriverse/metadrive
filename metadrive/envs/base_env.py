@@ -481,13 +481,13 @@ class BaseEnv(gym.Env):
         return self.agent_manager.active_agents
 
     @property
-    def vehicles_including_terminated(self):
+    def vehicles_including_just_terminated(self):
         """
         Return all vehicles that occupy some space in current environments
         :return: Dict[agent_id:vehicle]
         """
         ret = self.agent_manager.active_agents
-        ret.update(self.agent_manager.dying_agents)
+        ret.update(self.agent_manager.just_terminated_agents)
         return ret
 
     def setup_engine(self):
