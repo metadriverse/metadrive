@@ -232,10 +232,10 @@ We don't suggest to modify this part if you are not confident on what you are do
 Default Config
 ################
 
-The default config dicts are widely spread in many files. The basic config about some general setting is provided in the `BaseEnv Class <https://github.com/decisionforce/metadrive/blob/main/metadrive/envs/base_env.py>`_.
-More detailed config is provided in the `MetaDriveEnv Class <https://github.com/decisionforce/metadrive/blob/main/metadrive/envs/metadrive_env.py>`_.
-Besides, for `SafeMetaDriveEnv Class <https://github.com/decisionforce/metadrive/blob/main/metadrive/envs/safe_metadrive_env.py>`_
-and `MultiAgentMetaDrive Class <https://github.com/decisionforce/metadrive/blob/main/metadrive/envs/marl_envs/multi_agent_metadrive.py>`_
+The default config dicts are widely spread in many files. The basic config about some general setting is provided in the `BaseEnv Class <https://github.com/metadriverse/metadrive/blob/main/metadrive/envs/base_env.py>`_.
+More detailed config is provided in the `MetaDriveEnv Class <https://github.com/metadriverse/metadrive/blob/main/metadrive/envs/metadrive_env.py>`_.
+Besides, for `SafeMetaDriveEnv Class <https://github.com/metadriverse/metadrive/blob/main/metadrive/envs/safe_metadrive_env.py>`_
+and `MultiAgentMetaDrive Class <https://github.com/metadriverse/metadrive/blob/main/metadrive/envs/marl_envs/multi_agent_metadrive.py>`_
 there also have many task-specified config. Please feel free to open issues if you have any question about the environmental settings!
 
 
