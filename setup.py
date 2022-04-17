@@ -50,7 +50,7 @@ setup(
     name="metadrive-simulator",
     version=version,
     description="An open-ended driving simulator with infinite scenes",
-    url="https://github.com/decisionforce/metadrive",
+    url="https://github.com/metadriverse/metadrive",
     author="MetaDrive Team",
     author_email="liquanyi@bupt.edu.cn, pengzh@ie.cuhk.edu.hk",
     packages=packages,
