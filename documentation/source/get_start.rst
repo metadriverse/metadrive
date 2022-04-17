@@ -71,6 +71,6 @@ The following scripts is a minimal example for instantiating a MetaDrive environ
     env.close()
 
 
-.. Note:: Please note that each process should only have one single MetaDrive instance due to the limit of the underlying simulation engine. As a workaround, we provide an asynchronous version of MetaDrive through `Ray framework <https://github.com/ray-project/ray>`_, please find the environment in `remove_env.py <https://github.com/decisionforce/metadrive/blob/main/metadrive/envs/remote_env.py>`_.
+.. Note:: Please note that each process should only have one single MetaDrive instance due to the limit of the underlying simulation engine. As a workaround, we provide an asynchronous version of MetaDrive through `Ray framework <https://github.com/ray-project/ray>`_, please find the environment in `remove_env.py <https://github.com/metadriverse/metadrive/blob/main/metadrive/envs/remote_env.py>`_.
 
 You can also try out our example of using RLLib to train RL policies in :ref:`Training with RLLib`.

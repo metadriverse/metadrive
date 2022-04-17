@@ -80,7 +80,7 @@ Specify the Data to Replay
 
 MetaDrive currently supports replaying the map and traffic flow in the sample dataset of argoverse-tracking.
 We will add more scenarios for customized selection in the near future.
-As shown in `ArgoverseEnv Class <https://github.com/decisionforce/metadrive/blob/main/metadrive/envs/argoverse_env.py>`_,
+As shown in `ArgoverseEnv Class <https://github.com/metadriverse/metadrive/blob/main/metadrive/envs/argoverse_env.py>`_,
 we use a few parameters to specify the data to be loaded. Here is the detailed explanation of those parameters:
 
 

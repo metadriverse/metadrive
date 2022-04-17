@@ -14,7 +14,7 @@
 |
 <a href="https://www.youtube.com/embed/3ziJPqC_-T4">Demo Video</a>
 |
-<a href="https://decisionforce.github.io/metadrive/">Website</a>
+<a href="https://metadriverse.github.io/metadrive/">Website</a>
 |
 <a href="https://arxiv.org/pdf/2109.12674.pdf">Paper</a>
 ]
@@ -34,7 +34,7 @@ MetaDrive is a driving simulator with the following key features:
 Install MetaDrive via:
 
 ```bash
-git clone https://github.com/decisionforce/metadrive.git
+git clone https://github.com/metadriverse/metadrive.git
 cd metadrive
 pip install -e .
 ```
@@ -178,9 +178,9 @@ Quanyi Li*, Zhenghao Peng*, Bolei Zhou
 [<a href="https://youtu.be/PiJv4wtp8T8" target="_blank">Talk</a>]
     
 
-[![build](https://github.com/decisionforce/metadrive/workflows/test/badge.svg)](http://github.com/decisionforce/metadrive/actions)
-[![codecov](https://codecov.io/gh/decisionforce/metadrive/branch/main/graph/badge.svg?token=1ZYN8L5397)](https://codecov.io/gh/decisionforce/metadrive)
+[![build](https://github.com/metadriverse/metadrive/workflows/test/badge.svg)](http://github.com/metadriverse/metadrive/actions)
+[![codecov](https://codecov.io/gh/metadriverse/metadrive/branch/main/graph/badge.svg?token=1ZYN8L5397)](https://codecov.io/gh/metadriverse/metadrive)
 [![Documentation](https://readthedocs.org/projects/metadrive/badge/?version=latest)](https://metadrive.readthedocs.io)
-[![GitHub license](https://img.shields.io/github/license/decisionforce/metadrive)](https://github.com/decisionforce/metadrive/blob/main/LICENSE.txt)
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/2d6fabe328a644b49e1269497b741057)](https://www.codacy.com/gh/decisionforce/metadrive/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=decisionforce/metadrive&amp;utm_campaign=Badge_Grade)
-[![GitHub contributors](https://img.shields.io/github/contributors/decisionforce/metadrive)](https://github.com/decisionforce/metadrive/graphs/contributors)
+[![GitHub license](https://img.shields.io/github/license/metadriverse/metadrive)](https://github.com/metadriverse/metadrive/blob/main/LICENSE.txt)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/2d6fabe328a644b49e1269497b741057)](https://www.codacy.com/gh/metadriverse/metadrive/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=metadriverse/metadrive&amp;utm_campaign=Badge_Grade)
+[![GitHub contributors](https://img.shields.io/github/contributors/metadriverse/metadrive)](https://github.com/metadriverse/metadrive/graphs/contributors)

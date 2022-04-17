@@ -21,7 +21,7 @@ MetaDrive is an efficient and compositional driving simulator with the following
 
 This documentation brings you the information on installation, usages and more of MetaDrive!
 
-You can also visit the `GitHub repo <https://github.com/decisionforce/metadrive>`_ of MetaDrive.
+You can also visit the `GitHub repo <https://github.com/metadriverse/metadrive>`_ of MetaDrive.
 Please feel free to contact us if you have any suggestions or ideas!
 
 
