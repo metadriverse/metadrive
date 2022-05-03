@@ -10,7 +10,10 @@ try:
     import tensorflow as tf
 except ImportError:
     pass
-from metadrive.utils.waymo_utils.protos import scenario_pb2
+try:
+    from metadrive.utils.waymo_utils.protos import scenario_pb2
+except ImportError:
+    pass
 import os
 import pickle
 import numpy as np
