@@ -53,6 +53,6 @@ if __name__ == "__main__":
                 env.reset()
                 env.current_track_vehicle.expert_takeover = True
     except:
-        print("Something Wrong happen in this example, would you kindly report it to developers? Thanks!")
+        pass
     finally:
         env.close()
