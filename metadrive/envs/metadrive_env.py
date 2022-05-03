@@ -269,10 +269,10 @@ class MetaDriveEnv(BaseEnv):
                 current_track_vehicle = self.current_track_vehicle
             else:
                 vehicles = list(self.engine.agents.values())
-                if len(vehicles) <= 1:
-                    return
                 if self.current_track_vehicle in vehicles:
                     vehicles.remove(self.current_track_vehicle)
+                if len(vehicles) < 1:
+                    return
                 new_v = get_np_random().choice(vehicles)
                 current_track_vehicle = new_v
         self.main_camera.track(current_track_vehicle)

@@ -70,21 +70,21 @@ if __name__ == "__main__":
             start_seed=random.randint(0, 1000),
         )
     )
-    # try:
-    o = env.reset()
-    for i in range(1, 100000):
-        o, r, d, info = env.step(expert(env.vehicle))
-        env.render(mode="top_down", film_size=(800, 800))
-        if d:
-            env.reset()
-        if i % 50 == 0:
-            draw_multi_channels_top_down_observation(o, show_time=4)  # show time 4s
-            # ret = input("Do you wish to quit? Type any ESC to quite, or press enter to continue")
-            # if len(ret) == 0:
-            #     continue
-            # else:
-            #     break
-    # except:
-    #     pass
-    # finally:
-    #     env.close()
+    try:
+        o = env.reset()
+        for i in range(1, 100000):
+            o, r, d, info = env.step(expert(env.vehicle))
+            env.render(mode="top_down", film_size=(800, 800))
+            if d:
+                env.reset()
+            if i % 50 == 0:
+                draw_multi_channels_top_down_observation(o, show_time=4)  # show time 4s
+                # ret = input("Do you wish to quit? Type any ESC to quite, or press enter to continue")
+                # if len(ret) == 0:
+                #     continue
+                # else:
+                #     break
+    except:
+        print("Something Wrong happen in this example, would you kindly report it to developers? Thanks!")
+    finally:
+        env.close()
