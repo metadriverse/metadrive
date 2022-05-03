@@ -85,6 +85,6 @@ if __name__ == "__main__":
                 # else:
                 #     break
     except:
-        print("Something Wrong happen in this example, would you kindly report it to developers? Thanks!")
+        pass
     finally:
         env.close()
