@@ -77,13 +77,8 @@ You can also launch an instance of Multi-Agent scenario as follows
 ```bash
 python -m metadrive.examples.drive_in_multi_agent_env --env roundabout
 ```
-Adding ```--pygame_render``` can launch and render in pygame front end. Argument of ```--env```  could be:
-- `roundabout` (default)
-- `intersection`
-- `tollgate`
-- `bottleneck`
-- `parkinglot`
-- `pgmap`
+```--env```  accepts following parmeters: `roundabout` (default), `intersection`, `tollgate`, `bottleneck`, `parkinglot`, `pgmap`.
+Adding ```--pygame_render``` can launch top-down pygame renderer. 
 
 
 
