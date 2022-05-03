@@ -77,14 +77,7 @@ You can also launch an instance of Multi-Agent scenario as follows
 ```bash
 python -m metadrive.examples.drive_in_multi_agent_env --env roundabout
 ```
-
-or launch and render in pygame front end 
-
-```bash
-python -m metadrive.examples.drive_in_multi_agent_env --pygame_render --env roundabout
-```
-
-env argument could be:
+Adding ```--pygame_render``` can launch and render in pygame front end. Argument of ```--env```  could be:
 - `roundabout` (default)
 - `intersection`
 - `tollgate`
@@ -92,12 +85,17 @@ env argument could be:
 - `parkinglot`
 - `pgmap`
 
+
+
+
 ### Real Environment
 Running the following script enables driving in a scenario constructed from Waymo motion dataset.
 
 ```bash
 python -m metadrive.examples.drive_in_waymo_env
 ```
+
+Press key ```r``` for loading a new scenario, and ```b``` or ```q``` for switching perspective. 
 
 [comment]: <> (### LQY: avoid introducing these trivial things )
 
