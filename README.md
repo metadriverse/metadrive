@@ -17,6 +17,8 @@
 <a href="https://metadriverse.github.io/metadrive/">Website</a>
 |
 <a href="https://arxiv.org/pdf/2109.12674.pdf">Paper</a>
+|
+<a href="https://metadriverse.github.io/">Relevant Projects</a>
 ]
 </strong>
 </div>
@@ -56,9 +58,9 @@ python -m metadrive.examples.profile_metadrive
 *Note that please do not run the above command in a folder that has a sub-folder called `./metadrive`.*
 
 ## 🚕 Examples
-
+We provide examples to demonstrate features and basic usages of MetaDrive.
+### Single Agent Environment
 Run the following command to launch a simple driving scenario with auto-drive mode on. Press W, A, S, D to drive the vehicle manually.
-
 ```bash
 python -m metadrive.examples.drive_in_single_agent_env
 ```
@@ -67,6 +69,8 @@ Run the following command to launch a safe driving scenario, which includes more
 ```bash
 python -m metadrive.examples.drive_in_safe_metadrive_env
 ```
+
+### Multi-Agent Environment
 
 You can also launch an instance of Multi-Agent scenario as follows
 
@@ -88,21 +92,36 @@ env argument could be:
 - `parkinglot`
 - `pgmap`
 
-Run the example of procedural generation of a new map as:
+### Real Environment
+Running the following script enables driving in a scenario constructed from Waymo motion dataset.
 
 ```bash
-python -m metadrive.examples.procedural_generation
+python -m metadrive.examples.drive_in_waymo_env
 ```
 
-*Note that the above four scripts can not be ran in a headless machine.*
-*Please refer to the installation guideline in documentation for more information about how to launch runing in a headless machine.*
+[comment]: <> (### LQY: avoid introducing these trivial things )
 
-Run the following command to draw the generated maps from procedural generation:
+[comment]: <> (Run the example of procedural generation of a new map as:)
 
-```bash
-python -m metadrive.examples.draw_maps
-```
+[comment]: <> (```bash)
 
+[comment]: <> (python -m metadrive.examples.procedural_generation)
+
+[comment]: <> (```)
+
+[comment]: <> (*Note that the scripts above can not be run in a headless machine.*)
+
+[comment]: <> (*Please refer to the installation guideline in documentation for more information about how to launch runing in a headless machine.*)
+
+[comment]: <> (Run the following command to draw the generated maps from procedural generation:)
+
+[comment]: <> (```bash)
+
+[comment]: <> (python -m metadrive.examples.draw_maps)
+
+[comment]: <> (```)
+
+### Basic Usage
 To build the RL environment in python script, you can simply code in the OpenAI gym format as:
 
 ```python
