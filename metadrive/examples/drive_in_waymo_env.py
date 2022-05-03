@@ -3,11 +3,22 @@ This script demonstrates how to use the environment where traffic and road map a
 """
 from metadrive.envs.real_data_envs.waymo_env import WaymoEnv
 from metadrive.engine.asset_loader import AssetLoader
+import random
+
+
+class DemoWaymoEnv(WaymoEnv):
+    def reset(self, force_seed=None):
+        if self.engine is not None:
+            seeds = [i for i in range(self.config["case_num"])]
+            seeds.remove(self.current_seed)
+            force_seed = random.choice(seeds)
+        super(DemoWaymoEnv, self).reset(force_seed=force_seed)
+
 
 if __name__ == "__main__":
     asset_path = AssetLoader.asset_path
     try:
-        env = WaymoEnv(
+        env = DemoWaymoEnv(
             {
                 "manual_control": True,
                 "replay": False,
