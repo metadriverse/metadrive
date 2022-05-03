@@ -7,7 +7,6 @@ import random
 
 
 class DemoWaymoEnv(WaymoEnv):
-
     def reset(self, force_seed=None):
         if self.engine is not None:
             seeds = [i for i in range(self.config["case_num"])]
