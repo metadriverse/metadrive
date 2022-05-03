@@ -75,6 +75,6 @@ if __name__ == "__main__":
                 if env.current_track_vehicle:
                     env.current_track_vehicle.expert_takeover = True
     except:
-        pass
+        print("Something Wrong happen in this example, would you kindly report it to developers? Thanks!")
     finally:
         env.close()
