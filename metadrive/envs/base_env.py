@@ -518,7 +518,7 @@ class BaseEnv(gym.Env):
         if self._top_down_renderer is None:
             from metadrive.obs.top_down_renderer import TopDownRenderer
             self._top_down_renderer = TopDownRenderer(*args, **kwargs)
-        return self._top_down_renderer.render()
+        return self._top_down_renderer.render(*args, **kwargs)
 
     @property
     def main_camera(self):
