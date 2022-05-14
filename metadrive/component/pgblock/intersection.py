@@ -72,9 +72,7 @@ class InterSection(PGBlock):
         )
 
         for i in range(4):
-            right_lane, success = self._create_part(
-                attach_lanes, attach_road, self.radius, intersect_nodes, i
-            )
+            right_lane, success = self._create_part(attach_lanes, attach_road, self.radius, intersect_nodes, i)
             no_cross = no_cross and success
             if i != 3:
                 lane_num = self.positive_lane_num if i == 1 else self.lane_num_intersect

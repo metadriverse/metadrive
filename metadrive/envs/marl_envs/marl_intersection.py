@@ -50,7 +50,11 @@ class MAIntersectionMap(PGMap):
         else:
             extra_kwargs = {}
         last_block = InterSection(
-            1, last_block.get_socket(index=0), self.road_network, random_seed=1, ignore_intersection_checking=False,
+            1,
+            last_block.get_socket(index=0),
+            self.road_network,
+            random_seed=1,
+            ignore_intersection_checking=False,
             **extra_kwargs
         )
 

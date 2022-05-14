@@ -354,7 +354,6 @@ class MultiAgentTinyInter(MultiAgentIntersectionEnv):
 
             # Whether to use full global relative information as obs
             use_communication_obs=False,
-
         )
         return MultiAgentIntersectionEnv.default_config().update(tiny_config, allow_add_new_key=True)
 
