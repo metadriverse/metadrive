@@ -147,7 +147,11 @@ class AgentManager(BaseManager):
         if not self.engine.replay_episode:
             vehicle_name = self._agent_to_object[agent_name]
             v = self._active_objects.pop(vehicle_name)
-            self._put_to_dying_queue(v, ignore_delay_done=ignore_delay_done)
+            if (not ignore_delay_done) and (self._delay_done > 0):
+                self._put_to_dying_queue(v)
+            else:
+                # move to invisible place
+                self._remove_vehicle(v)
             self._agents_finished_this_frame[agent_name] = v.name
             self._check()
 
