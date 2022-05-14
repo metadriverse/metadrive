@@ -23,13 +23,13 @@ var text_corpus = [
     MetaDrive can generate a diverse set of driving scenes through procedural generalization from basic traffic building blocks.\
      Currently the simulator is used to study the generalization of the driving agents trained from reinforcement learning. See <a href="">paper</a> for more detail.\ ', 
     '为了更好地评估和改善基于强化学习的自动驾驶系统的泛化性能，我们提出了一个开放式、极易配置的模拟器：MetaDrive！MetaDrive可以通过过程生成技术生成无限多的地图。\
-    目前我们利用这个仿真器来研究强化学习系统得到的智能体的范化性。欢迎访问 <a href="https://github.com/decisionforce/metadrive">github.com/decisionforce/metadrive</a> 来亲身感受！'],
+    目前我们利用这个仿真器来研究强化学习系统得到的智能体的范化性。欢迎访问 <a href="https://github.com/metadriverse/metadrive">github.com/metadriverse/metadrive</a> 来亲身感受！'],
     ['We first define the elementary road blocks as follows,','我们首先定义了如下的基础路块：'],
     ['we then follow the proposed algorithm of procedural generation to synthesize maps:', '随后我们用了过程生成的技术来生成地图：'],
     ['We exhibit more generated maps as follows, which are further turned into interactive environments for reinforcement learning of end-to-end driving.', '我们展示了更多生成的地图，它们都可以被转换成强化学习算法可以与之交互的环境：'],
-    ['We show that when trained with more procedurally generated maps, the driving agents from reinofrcement learning have better generalization performance on unseen test maps, and can handle more complex scenarios. The detailed experimental results are in the paper. You can reproduce the experiment through <a href="https://github.com/decisionforce/metadrive-generalization-paper">our generalization experiment code</a>.', '在训练中见识过更多地图的智能体展现出了更优越的测试性能，可以应对更加复杂的场景。这说明了我们的MetaDrive赋予了智能体更强大的泛化能力！你可以参考<a href="https://github.com/decisionforce/metadrive-generalization-paper">我们范化实验的代码</a>来复现展示的结果。'],
-    ['The demo video of the generalizable agent is shown as follows. You can run the agent on your local machine through the provided example in <a href="https://github.com/decisionforce/metadrive">the simulator codebase</a>.',
-     '以下视频展示了我们的范化性智能体。您可以在自己的机器上通过<a href="https://github.com/decisionforce/metadrive">模拟器代码</a>中提供的样例体验该智能体。'],
+    ['We show that when trained with more procedurally generated maps, the driving agents from reinofrcement learning have better generalization performance on unseen test maps, and can handle more complex scenarios. The detailed experimental results are in the paper. You can reproduce the experiment through <a href="https://github.com/metadriverse/metadrive-generalization-paper">our generalization experiment code</a>.', '在训练中见识过更多地图的智能体展现出了更优越的测试性能，可以应对更加复杂的场景。这说明了我们的MetaDrive赋予了智能体更强大的泛化能力！你可以参考<a href="https://github.com/metadriverse/metadrive-generalization-paper">我们范化实验的代码</a>来复现展示的结果。'],
+    ['The demo video of the generalizable agent is shown as follows. You can run the agent on your local machine through the provided example in <a href="https://github.com/metadriverse/metadrive">the simulator codebase</a>.',
+     '以下视频展示了我们的范化性智能体。您可以在自己的机器上通过<a href="https://github.com/metadriverse/metadrive">模拟器代码</a>中提供的样例体验该智能体。'],
     ['Download the vedio.','点击下载视频。'],
     ['Citation', '引用']
 ]

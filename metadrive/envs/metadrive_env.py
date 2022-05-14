@@ -64,7 +64,7 @@ METADRIVE_DEFAULT_CONFIG = dict(
     },
 
     # ===== Reward Scheme =====
-    # See: https://github.com/decisionforce/metadrive/issues/283
+    # See: https://github.com/metadriverse/metadrive/issues/283
     success_reward=10.0,
     out_of_road_penalty=5.0,
     crash_vehicle_penalty=5.0,
@@ -269,10 +269,10 @@ class MetaDriveEnv(BaseEnv):
                 current_track_vehicle = self.current_track_vehicle
             else:
                 vehicles = list(self.engine.agents.values())
-                if len(vehicles) <= 1:
-                    return
                 if self.current_track_vehicle in vehicles:
                     vehicles.remove(self.current_track_vehicle)
+                if len(vehicles) < 1:
+                    return
                 new_v = get_np_random().choice(vehicles)
                 current_track_vehicle = new_v
         self.main_camera.track(current_track_vehicle)

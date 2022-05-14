@@ -12,7 +12,7 @@ The installation of MetaDrive on different platforms is straightforward and easy
 
 We recommend to use the command following to install::
 
-    git clone https://github.com/decisionforce/metadrive.git
+    git clone https://github.com/metadriverse/metadrive.git
     cd metadrive
     pip install -e .
 

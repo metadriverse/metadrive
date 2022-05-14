@@ -43,7 +43,7 @@ MULTI_AGENT_METADRIVE_DEFAULT_CONFIG = dict(
 
         # We remove dynamics randomization in Multi-agent environments to make the results aligned with previous
         # results published in papers. See
-        # https://github.com/decisionforce/metadrive/issues/161#issuecomment-1080114029
+        # https://github.com/metadriverse/metadrive/issues/161#issuecomment-1080114029
         # for more information
         vehicle_model="static_default",
     ),
