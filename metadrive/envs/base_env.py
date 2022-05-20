@@ -130,6 +130,7 @@ BASE_DEFAULT_CONFIG = dict(
     # ===== Others =====
     # The maximum distance used in PGLOD. Set to None will use the default values.
     max_distance=None,
+    store_map=True, # turn off to disable saving pre-generated map, this will save the memory but lower reset efficiency
     # Force to generate objects in the left lane.
     _debug_crash_object=False,
     record_episode=False,  # when replay_episode is not None ,this option will be useless
