@@ -19,7 +19,7 @@ if __name__ == "__main__":
             # "controller": "joystick",
             "manual_control": True,
             "use_render": False,
-            "store_map": True,
+            "store_map": False,
             "decision_repeat": 5,
             "need_inverse_traffic": True,
             "rgb_clip": True,
@@ -40,7 +40,7 @@ if __name__ == "__main__":
             "random_lane_width": True,
             # "random_agent_model": True,
             "driving_reward": 1.0,
-            "force_destroy": False,
+            "force_destroy": True,
             "vehicle_config": {
                 "enable_reverse": False,
                 # "image_source": "depth_camera",

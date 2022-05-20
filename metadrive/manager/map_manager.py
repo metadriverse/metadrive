@@ -26,7 +26,11 @@ class MapManager(BaseManager):
         self.current_map = map
 
     def unload_map(self, map):
-        map.detach_from_world()
+        if self.engine.global_config.get("store_map", True):
+            map.detach_from_world()
+        else:
+            map.detach_from_world()
+            map.destroy()
         self.current_map = None
 
     def destroy(self):
@@ -35,11 +39,8 @@ class MapManager(BaseManager):
 
     def before_reset(self):
         # remove map from world before adding
-        if self.engine.global_config.get("store_map", True):
-            if self.current_map is not None:
-                self.unload_map(self.current_map)
-        else:
-            super(MapManager, self).before_reset()
+        if self.current_map is not None:
+            self.unload_map(self.current_map)
 
     def reset(self):
         config = self.engine.global_config.copy()
