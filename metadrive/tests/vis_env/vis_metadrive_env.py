@@ -9,7 +9,7 @@ if __name__ == "__main__":
             "traffic_density": 0,
             "traffic_mode": "trigger",
             "start_seed": 0,
-            "pstats":True,
+            "pstats": True,
             # "_disable_detector_mask":True,
             # "debug_physics_world": True,
             "global_light": True,
@@ -66,7 +66,7 @@ if __name__ == "__main__":
 
     for s in range(1, 10000):
         o = env.reset(force_seed=s)
-        d=False
+        d = False
         # print(env.engine.map_manager.maps)
         # if s % 100 == 0:
         #     env.close()
