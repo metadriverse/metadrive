@@ -95,7 +95,7 @@ class WaymoTrafficManager(BaseManager):
 
     @staticmethod
     def parse_full_trajectory(states):
-        trajectory = states[:, :2]
+        trajectory = copy.deepcopy(states[:, :2])
         # convert to metadrive coordinate
         trajectory*=[1, -1]
         return trajectory
