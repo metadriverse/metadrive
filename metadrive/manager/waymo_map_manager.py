@@ -4,6 +4,7 @@ from metadrive.constants import DEFAULT_AGENT
 from metadrive.manager.base_manager import BaseManager
 from metadrive.manager.waymo_traffic_manager import WaymoTrafficManager
 from metadrive.utils.scene_utils import ray_localization
+from metadrive.utils.interpolating_line import InterpolatingLine
 
 
 class WaymoMapManager(BaseManager):
@@ -18,6 +19,7 @@ class WaymoMapManager(BaseManager):
         self.sdc_start = None
         self.sdc_end = None
         self.sdc_destinations = []
+        self.current_sdc_route= None
 
     def reset(self):
         seed = self.engine.global_random_seed
@@ -32,6 +34,8 @@ class WaymoMapManager(BaseManager):
         self.update_route(map_config)
 
     def update_route(self, data):
+        sdc_traj = WaymoTrafficManager.parse_full_trajectory(data["tracks"][data["sdc_index"]]["state"])
+        self.current_sdc_route = InterpolatingLine(sdc_traj)
         init_state = WaymoTrafficManager.parse_vehicle_state(
             data["tracks"][data["sdc_index"]]["state"], self.engine.global_config["case_start_index"]
         )

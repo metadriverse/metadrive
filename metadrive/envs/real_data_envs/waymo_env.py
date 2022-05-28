@@ -12,7 +12,7 @@ from metadrive.utils import get_np_random
 
 WAYMO_ENV_CONFIG = dict(
     # ===== Map Config =====
-    waymo_data_directory=AssetLoader.file_path("waymo", "processed", return_raw_style=False),
+    waymo_data_directory=AssetLoader.file_path("waymo", return_raw_style=False),
     start_case_index=0,
     case_num=100,
     store_map=True,
@@ -39,6 +39,7 @@ WAYMO_ENV_CONFIG = dict(
     driving_reward=1.0,
     speed_reward=0.1,
     use_lateral=False,
+    use_waymo_reward=True,
 
     # ===== Cost Scheme =====
     crash_vehicle_cost=1.0,
@@ -167,10 +168,13 @@ class WaymoEnv(BaseEnv):
         step_info = dict()
 
         # Reward for moving forward in current lane
-        if vehicle.lane in vehicle.navigation.current_ref_lanes:
-            current_lane = vehicle.lane
+        if self.config["use_waymo_reward"]:
+            current_lane = self.engine.map_manager.current_sdc_route
         else:
-            current_lane = vehicle.navigation.current_ref_lanes[0]
+            if vehicle.lane in vehicle.navigation.current_ref_lanes:
+                current_lane = vehicle.lane
+            else:
+                current_lane = vehicle.navigation.current_ref_lanes[0]
         long_last, _ = current_lane.local_coordinates(vehicle.last_position)
         long_now, lateral_now = current_lane.local_coordinates(vehicle.position)
 
@@ -222,8 +226,8 @@ if __name__ == "__main__":
             # "debug":True,
             # "no_traffic":True,
             # "start_case_index": 192,
-            "case_num": 100,
-            "waymo_data_directory": "E:\\hk\\idm_filtered\\validation",
+            "case_num": 3,
+            # "waymo_data_directory": "E:\\hk\\idm_filtered\\validation",
             "horizon": 1000,
             # "vehicle_config": dict(show_lidar=True,
             #                        show_lane_line_detector=True,

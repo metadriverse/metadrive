@@ -92,3 +92,10 @@ class WaymoTrafficManager(BaseManager):
             self.sdc_index = str(self.engine.data_manager.get_case(self.engine.global_random_seed)["sdc_index"])
         except:
             raise ValueError("Can not CLEAN traffic for seed: {}".format(self.engine.global_random_seed))
+
+    @staticmethod
+    def parse_full_trajectory(states):
+        trajectory = states[:, :2]
+        # convert to metadrive coordinate
+        trajectory*=[1, -1]
+        return trajectory
