@@ -1,4 +1,7 @@
 import logging
+from metadrive.obs.state_obs import LidarStateObservation
+import gym
+import numpy as np
 
 from metadrive.constants import TerminationState
 from metadrive.engine.asset_loader import AssetLoader
@@ -29,6 +32,7 @@ WAYMO_ENV_CONFIG = dict(
         lane_line_detector=dict(num_lasers=12, distance=50),
         side_detector=dict(num_lasers=12, distance=50)
     ),
+    use_waymo_observation=True,
 
     # ===== Reward Scheme =====
     # See: https://github.com/metadriverse/metadrive/issues/283
@@ -51,6 +55,35 @@ WAYMO_ENV_CONFIG = dict(
 )
 
 
+class WaymoObservation(LidarStateObservation):
+    MAX_LATERAL_DIST = 20
+
+    def __init__(self, *args, **kwargs):
+        super(WaymoObservation, self).__init__(*args, **kwargs)
+        self.lateral_dist = 0
+
+    @property
+    def observation_space(self):
+        shape = list(self.state_obs.observation_space.shape)
+        if self.config["lidar"]["num_lasers"] > 0 and self.config["lidar"]["distance"] > 0:
+            # Number of lidar rays and distance should be positive!
+            lidar_dim = self.config["lidar"]["num_lasers"] + self.config["lidar"]["num_others"] * 4
+            if self.config["lidar"]["add_others_navi"]:
+                lidar_dim += self.config["lidar"]["num_others"] * 4
+            shape[0] += lidar_dim
+        shape[0] += 1  # add one dim for sensing lateral distance to the sdc trajectory
+        return gym.spaces.Box(-0.0, 1.0, shape=tuple(shape), dtype=np.float32)
+
+    def state_observe(self, vehicle):
+        ret = super(WaymoObservation, self).state_observe(vehicle)
+        lateral_obs = self.lateral_dist/self.MAX_LATERAL_DIST
+        return np.concatenate([ret, [clip((lateral_obs+1)/2, 0.0, 1.0)]])
+
+    def reset(self, env, vehicle=None):
+        super(WaymoObservation, self).reset(env, vehicle)
+        self.lateral_dist = 0
+
+
 class WaymoEnv(BaseEnv):
     @classmethod
     def default_config(cls):
@@ -69,6 +102,13 @@ class WaymoEnv(BaseEnv):
 
     def _get_observations(self):
         return {self.DEFAULT_AGENT: self.get_single_observation(self.config["vehicle_config"])}
+
+    def get_single_observation(self, vehicle_config):
+        if self.config["use_waymo_observation"]:
+            o = WaymoObservation(vehicle_config)
+        else:
+            o = LidarStateObservation(vehicle_config)
+        return o
 
     def switch_to_top_down_view(self):
         self.main_camera.stop_track()
@@ -141,8 +181,8 @@ class WaymoEnv(BaseEnv):
         # for compatibility
         # crash almost equals to crashing with vehicles
         done_info[TerminationState.CRASH] = (
-            done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
-            or done_info[TerminationState.CRASH_BUILDING]
+                done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
+                or done_info[TerminationState.CRASH_BUILDING]
         )
         return done, done_info
 
@@ -177,6 +217,7 @@ class WaymoEnv(BaseEnv):
                 current_lane = vehicle.navigation.current_ref_lanes[0]
         long_last, _ = current_lane.local_coordinates(vehicle.last_position)
         long_now, lateral_now = current_lane.local_coordinates(vehicle.position)
+        self.observations[vehicle_id].lateral_dist = lateral_now
 
         # reward for lane keeping, without it vehicle can learn to overtake but fail to keep in lane
         if self.config["use_lateral"]:
@@ -254,6 +295,8 @@ if __name__ == "__main__":
                         # "long": long,
                         # "lat": lat,
                         # "v_heading": env.vehicle.heading_theta,
+                        "obs_shape": len(o),
+                        "lateral": env.observations["default_agent"].lateral_dist,
                         "seed": env.engine.global_seed + env.config["start_case_index"],
                         "reward": r,
                     }
