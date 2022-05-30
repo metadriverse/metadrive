@@ -44,6 +44,7 @@ WAYMO_ENV_CONFIG = dict(
     speed_reward=0.1,
     use_lateral=False,
     use_waymo_reward=True,
+    horizon=1500,
 
     # ===== Cost Scheme =====
     crash_vehicle_cost=1.0,
@@ -52,6 +53,7 @@ WAYMO_ENV_CONFIG = dict(
 
     # ===== Termination Scheme =====
     out_of_route_done=False,
+    crash_vehicle_done=True,
 )
 
 
@@ -165,7 +167,7 @@ class WaymoEnv(BaseEnv):
             done = True
             logging.info("Episode ended! Reason: out_of_road.")
             done_info[TerminationState.OUT_OF_ROAD] = True
-        if vehicle.crash_vehicle:
+        if vehicle.crash_vehicle and self.config["crash_vehicle_done"]:
             done = True
             logging.info("Episode ended! Reason: crash vehicle ")
             done_info[TerminationState.CRASH_VEHICLE] = True
@@ -270,9 +272,11 @@ if __name__ == "__main__":
             "case_num": 3,
             # "waymo_data_directory": "E:\\hk\\idm_filtered\\validation",
             "horizon": 1000,
-            # "vehicle_config": dict(show_lidar=True,
-            #                        show_lane_line_detector=True,
-            #                        show_side_detector=True)
+            "vehicle_config": dict(show_lidar=True,
+                                   show_lane_line_detector=True,
+                                   show_side_detector=True,
+                                   lidar=dict(num_others=4),
+                                   )
         }
     )
     success = []
