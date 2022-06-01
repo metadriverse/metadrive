@@ -272,11 +272,11 @@ if __name__ == "__main__":
             "case_num": 3,
             # "waymo_data_directory": "E:\\hk\\idm_filtered\\validation",
             "horizon": 1000,
-            "vehicle_config": dict(show_lidar=True,
-                                   show_lane_line_detector=True,
-                                   show_side_detector=True,
-                                   lidar=dict(num_others=4),
-                                   )
+            "vehicle_config" : dict(
+        lidar=dict(num_lasers=120, distance=50,num_others=4),
+        lane_line_detector=dict(num_lasers=12, distance=50),
+        side_detector=dict(num_lasers=160, distance=50)
+    ),
         }
     )
     success = []
