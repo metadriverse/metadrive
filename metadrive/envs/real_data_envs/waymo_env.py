@@ -30,7 +30,7 @@ WAYMO_ENV_CONFIG = dict(
     vehicle_config=dict(
         lidar=dict(num_lasers=120, distance=50),
         lane_line_detector=dict(num_lasers=12, distance=50),
-        side_detector=dict(num_lasers=12, distance=50)
+        side_detector=dict(num_lasers=120, distance=50)
     ),
     use_waymo_observation=True,
 
@@ -44,7 +44,7 @@ WAYMO_ENV_CONFIG = dict(
     speed_reward=0.1,
     use_lateral=False,
     use_waymo_reward=True,
-    horizon=1500,
+    horizon=500,
 
     # ===== Cost Scheme =====
     crash_vehicle_cost=1.0,
@@ -228,9 +228,7 @@ class WaymoEnv(BaseEnv):
             lateral_factor = 1.0
 
         reward = 0
-        if not vehicle.on_white_continuous_line:
-            reward += self.config["driving_reward"] * (long_now - long_last) * lateral_factor
-            reward += self.config["speed_reward"] * (vehicle.speed / vehicle.max_speed)
+        reward += self.config["driving_reward"] * (long_now - long_last) * lateral_factor
 
         step_info["step_reward"] = reward
 
