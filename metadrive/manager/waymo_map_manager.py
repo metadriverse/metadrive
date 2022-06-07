@@ -19,7 +19,7 @@ class WaymoMapManager(BaseManager):
         self.sdc_start = None
         self.sdc_end = None
         self.sdc_destinations = []
-        self.current_sdc_route= None
+        self.current_sdc_route = None
 
     def reset(self):
         seed = self.engine.global_random_seed

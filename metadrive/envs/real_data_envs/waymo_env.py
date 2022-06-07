@@ -78,8 +78,8 @@ class WaymoObservation(LidarStateObservation):
 
     def state_observe(self, vehicle):
         ret = super(WaymoObservation, self).state_observe(vehicle)
-        lateral_obs = self.lateral_dist/self.MAX_LATERAL_DIST
-        return np.concatenate([ret, [clip((lateral_obs+1)/2, 0.0, 1.0)]])
+        lateral_obs = self.lateral_dist / self.MAX_LATERAL_DIST
+        return np.concatenate([ret, [clip((lateral_obs + 1) / 2, 0.0, 1.0)]])
 
     def reset(self, env, vehicle=None):
         super(WaymoObservation, self).reset(env, vehicle)
@@ -183,8 +183,8 @@ class WaymoEnv(BaseEnv):
         # for compatibility
         # crash almost equals to crashing with vehicles
         done_info[TerminationState.CRASH] = (
-                done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
-                or done_info[TerminationState.CRASH_BUILDING]
+            done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
+            or done_info[TerminationState.CRASH_BUILDING]
         )
         return done, done_info
 
@@ -270,11 +270,11 @@ if __name__ == "__main__":
             "case_num": 3,
             # "waymo_data_directory": "E:\\hk\\idm_filtered\\validation",
             "horizon": 1000,
-            "vehicle_config" : dict(
-        lidar=dict(num_lasers=120, distance=50,num_others=4),
-        lane_line_detector=dict(num_lasers=12, distance=50),
-        side_detector=dict(num_lasers=160, distance=50)
-    ),
+            "vehicle_config": dict(
+                lidar=dict(num_lasers=120, distance=50, num_others=4),
+                lane_line_detector=dict(num_lasers=12, distance=50),
+                side_detector=dict(num_lasers=160, distance=50)
+            ),
         }
     )
     success = []
