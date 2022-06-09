@@ -26,6 +26,7 @@ def handler(signum, frame):
 class WaymoIDMTrafficManager(WaymoTrafficManager):
     TRAJ_WIDTH = 1.2
     DEST_REGION = 5
+    MIN_DURATION = 20
 
     def __init__(self):
         super(WaymoIDMTrafficManager, self).__init__()
@@ -55,8 +56,13 @@ class WaymoIDMTrafficManager(WaymoTrafficManager):
                         full_traj = static_vehicle_info(init_info["position"], init_info["heading"])
                         static = True
                     else:
-                        full_traj = WayPointLane(self.parse_full_trajectory(type_traj["state"]), width=self.TRAJ_WIDTH)
-                        static = False
+                        full_traj = self.parse_full_trajectory(type_traj["state"])
+                        if len(full_traj) < self.MIN_DURATION:
+                            full_traj = static_vehicle_info(init_info["position"], init_info["heading"])
+                            static = True
+                        else:
+                            full_traj = WayPointLane(full_traj, width=self.TRAJ_WIDTH)
+                            static = False
                     traffic_traj_data[v_id] = {
                         "traj": full_traj,
                         "init_info": init_info,
