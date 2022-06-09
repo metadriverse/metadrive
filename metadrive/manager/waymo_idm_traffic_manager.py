@@ -43,29 +43,32 @@ class WaymoIDMTrafficManager(WaymoTrafficManager):
             traffic_traj_data = {}
             for v_id, type_traj in self.current_traffic_data.items():
                 if type_traj["type"] == AgentType.VEHICLE and v_id != self.sdc_index:
-                    init_info = self.parse_vehicle_state(type_traj["state"],
-                                                         self.engine.global_config["traj_start_index"])
-                    dest_info = self.parse_vehicle_state(type_traj["state"],
-                                                         self.engine.global_config["traj_end_index"],
-                                                         check_last_state=True)
+                    init_info = self.parse_vehicle_state(
+                        type_traj["state"], self.engine.global_config["traj_start_index"]
+                    )
+                    dest_info = self.parse_vehicle_state(
+                        type_traj["state"], self.engine.global_config["traj_end_index"], check_last_state=True
+                    )
                     if not init_info["valid"]:
                         continue
                     if np.linalg.norm(np.array(init_info["position"]) - np.array(dest_info["position"])) < 1:
                         full_traj = static_vehicle_info(init_info["position"], init_info["heading"])
                         static = True
                     else:
-                        full_traj = WayPointLane(self.parse_full_trajectory(type_traj["state"]),
-                                                 width=self.TRAJ_WIDTH)
+                        full_traj = WayPointLane(self.parse_full_trajectory(type_traj["state"]), width=self.TRAJ_WIDTH)
                         static = False
-                    traffic_traj_data[v_id] = {"traj": full_traj,
-                                               "init_info": init_info,
-                                               "static": static,
-                                               "dest_info": dest_info}
+                    traffic_traj_data[v_id] = {
+                        "traj": full_traj,
+                        "init_info": init_info,
+                        "static": static,
+                        "dest_info": dest_info
+                    }
 
                 elif type_traj["type"] == AgentType.VEHICLE and v_id == self.sdc_index:
                     # set Ego V velocity
-                    init_info = self.parse_vehicle_state(type_traj["state"],
-                                                         self.engine.global_config["traj_start_index"])
+                    init_info = self.parse_vehicle_state(
+                        type_traj["state"], self.engine.global_config["traj_start_index"]
+                    )
                     ego_v = list(self.engine.agent_manager.active_agents.values())[0]
                     ego_v.set_velocity(init_info["velocity"])
                     ego_v.set_heading_theta(init_info["heading"], rad_to_degree=False)
@@ -87,11 +90,10 @@ class WaymoIDMTrafficManager(WaymoTrafficManager):
                     need_navigation=False,
                 )
             )
-            v = self.spawn_object(SVehicle,
-                                  position=init_info["position"],
-                                  heading=init_info["heading"],
-                                  vehicle_config=v_config)
-            self.v_id_to_destination[v.id]=np.array(data["dest_info"]["position"])
+            v = self.spawn_object(
+                SVehicle, position=init_info["position"], heading=init_info["heading"], vehicle_config=v_config
+            )
+            self.v_id_to_destination[v.id] = np.array(data["dest_info"]["position"])
             if data["static"]:
                 # static vehicle
                 v.set_position(v.position, height=0.8)

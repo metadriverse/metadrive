@@ -60,7 +60,7 @@ class WaymoTrafficManager(BaseManager):
         state = states[time_idx]
         if check_last_state:
             for state in reversed(states):
-                if state[0] - 0 >1 and state[1] - 0 >1:
+                if state[0] - 0 > 1 and state[1] - 0 > 1:
                     break
 
         ret["position"] = waymo_2_metadrive_position([state[0], state[1]])
@@ -100,9 +100,9 @@ class WaymoTrafficManager(BaseManager):
 
     @staticmethod
     def parse_full_trajectory(states):
-        index=len(states)
+        index = len(states)
         for index, state in enumerate(states):
-            if state[0] - 0 <1 and state[1] - 0 <1:
+            if state[0] - 0 < 1 and state[1] - 0 < 1:
                 break
         states = states[:index]
         trajectory = copy.deepcopy(states[:, :2])

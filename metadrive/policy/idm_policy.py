@@ -154,9 +154,9 @@ class FrontBackObjects:
             if lane is None:
                 continue
             for obj in objs:
-                if np.linalg.norm(obj.position-position)>max_distance:
+                if np.linalg.norm(obj.position - position) > max_distance:
                     continue
-                long,lat = lane.local_coordinates(obj.position)
+                long, lat = lane.local_coordinates(obj.position)
                 if abs(lat) > lane.width:
                     continue
                 long = long - current_long[i]
@@ -294,7 +294,7 @@ class IDMPolicy(BasePolicy):
         if front_obj and (not self.disable_idm_deceleration):
             d = dist_to_front
             speed_diff = self.desired_gap(ego_vehicle, front_obj) / not_zero(d)
-            acceleration -= self.ACC_FACTOR * (speed_diff ** 2)
+            acceleration -= self.ACC_FACTOR * (speed_diff**2)
         return acceleration
 
     def desired_gap(self, ego_vehicle, front_obj, projected: bool = True) -> float:
