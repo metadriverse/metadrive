@@ -29,7 +29,7 @@ if __name__ == "__main__":
             "replay": False,
             "start_case_index": 0,
             "waymo_data_directory": AssetLoader.file_path(asset_path, "waymo", return_raw_style=False),
-            "case_num": 3,
+            "case_num": 1,
             "horizon": 1000,
             # "vehicle_config": dict(show_lidar=True,
             #                        show_lane_line_detector=True,
@@ -65,7 +65,7 @@ if __name__ == "__main__":
 
                 # pygame.image.save(env._top_down_renderer._background_canvas, "render.png")
                 # break
-            # if d:
-            #     if info["arrive_dest"]:
-            #         print("seed:{}, success".format(env.engine.global_random_seed))
-            #     break
+            if d:
+                if info["arrive_dest"]:
+                    print("seed:{}, success".format(env.engine.global_random_seed))
+                env.reset()

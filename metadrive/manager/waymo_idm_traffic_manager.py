@@ -11,7 +11,7 @@ from metadrive.utils.scene_utils import ray_localization
 from metadrive.component.lane.waymo_lane import WayPointLane
 from metadrive.component.map.waymo_map import WaymoMap
 from metadrive.utils.waymo_utils.waymo_utils import AgentType
-from collections import namedtuple
+from collections import namedtuple, OrderedDict
 
 from wrapt_timeout_decorator import *
 import time
@@ -27,18 +27,20 @@ class WaymoIDMTrafficManager(WaymoTrafficManager):
     TRAJ_WIDTH = 1.2
     DEST_REGION = 5
     MIN_DURATION = 20
+    ACT_FREQ = 3
+    MAX_HORIZON = 400  # waymo case is in 21s
 
     def __init__(self):
         super(WaymoIDMTrafficManager, self).__init__()
         self.seed_trajs = {}
-        self.v_id_to_destination = {}
+        self.v_id_to_destination = OrderedDict()
 
     def before_reset(self):
         super(WaymoIDMTrafficManager, self).before_reset()
 
     def reset(self):
         # try:
-        self.v_id_to_destination = {}
+        self.v_id_to_destination = OrderedDict()
         self.count = 0
         if self.engine.global_random_seed not in self.seed_trajs:
             traffic_traj_data = {}
@@ -67,22 +69,30 @@ class WaymoIDMTrafficManager(WaymoTrafficManager):
                         "traj": full_traj,
                         "init_info": init_info,
                         "static": static,
-                        "dest_info": dest_info
+                        "dest_info": dest_info,
+                        "is_sdc": False
                     }
 
                 elif type_traj["type"] == AgentType.VEHICLE and v_id == self.sdc_index:
                     # set Ego V velocity
-                    init_info = self.parse_vehicle_state(
-                        type_traj["state"], self.engine.global_config["traj_start_index"]
-                    )
-                    ego_v = list(self.engine.agent_manager.active_agents.values())[0]
-                    ego_v.set_velocity(init_info["velocity"])
-                    ego_v.set_heading_theta(init_info["heading"], rad_to_degree=False)
-                    ego_v.set_position(init_info["position"])
-
+                    init_info = self.parse_vehicle_state(type_traj["state"],
+                                                         self.engine.global_config["traj_start_index"])
+                    traffic_traj_data["sdc"] = {"traj": None,
+                                                "init_info": init_info,
+                                                "static": False,
+                                                "dest_info": None,
+                                                "is_sdc": True
+                                                }
             self.seed_trajs[self.engine.global_random_seed] = traffic_traj_data
-
+        policy_count = 0
         for v_traj_id, data in self.current_traffic_traj.items():
+            if v_traj_id == "sdc":
+                init_info = data["init_info"]
+                ego_v = list(self.engine.agent_manager.active_agents.values())[0]
+                ego_v.set_velocity(init_info["velocity"])
+                ego_v.set_heading_theta(init_info["heading"], rad_to_degree=False)
+                ego_v.set_position(init_info["position"])
+                continue
             init_info = data["init_info"]
             v_config = copy.deepcopy(self.engine.global_config["vehicle_config"])
             v_config.update(
@@ -107,23 +117,26 @@ class WaymoIDMTrafficManager(WaymoTrafficManager):
                 v.set_static(True)
             else:
                 v.set_position(v.position, height=0.8)
-                self.add_policy(v.id, WaymoIDMPolicy(v, self.generate_seed(), data["traj"]))
+                self.add_policy(v.id,
+                                WaymoIDMPolicy(v, self.generate_seed(), data["traj"], policy_count % self.ACT_FREQ))
                 v.set_velocity(init_info['velocity'])
+                policy_count += 1
 
     def before_step(self, *args, **kwargs):
         for v in self.spawned_objects.values():
             if self.engine.has_policy(v.id):
                 p = self.engine.get_policy(v.name)
-                v.before_step(p.act())
+                v.before_step(p.act(self.ACT_FREQ))
 
     def after_step(self, *args, **kwargs):
+        self.count += 1
         vehicles_to_clear = []
-
         # LQY: modify termination condition
         for v in self.spawned_objects.values():
             if not self.engine.has_policy(v.name):
                 continue
-            if np.linalg.norm(v.position - self.v_id_to_destination[v.id]) < self.DEST_REGION:
+            dist_to_dest = np.linalg.norm(v.position - self.v_id_to_destination[v.id])
+            if dist_to_dest < self.DEST_REGION or self.count > self.MAX_HORIZON:
                 vehicles_to_clear.append(v.id)
         self.clear_objects(vehicles_to_clear)
 

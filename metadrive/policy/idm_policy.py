@@ -405,9 +405,12 @@ class ManualControllableIDMPolicy(IDMPolicy):
 class WaymoIDMPolicy(IDMPolicy):
     NORMAL_SPEED = 30
     WAYMO_IDM_MAX_DIST = 10
+    ACC_FACTOR = 2.0
+    DISTANCE_WANTED = 15.0
 
-    def __init__(self, control_object, random_seed, traj_to_follow):
+    def __init__(self, control_object, random_seed, traj_to_follow, policy_index):
         super(WaymoIDMPolicy, self).__init__(control_object=control_object, random_seed=random_seed)
+        self.policy_index=policy_index
         self.traj_to_follow = traj_to_follow
         self.target_speed = self.NORMAL_SPEED
         self.routing_target_lane = self.traj_to_follow
@@ -417,6 +420,8 @@ class WaymoIDMPolicy(IDMPolicy):
 
         self.heading_pid = PIDController(1.2, 0.1, 3.5)
         self.lateral_pid = PIDController(0.3, .0, 0.0)
+
+        self.last_action = [0,0]
 
     def steering_control(self, target_lane) -> float:
         # heading control following a lateral distance control
@@ -428,21 +433,24 @@ class WaymoIDMPolicy(IDMPolicy):
         # steering += self.lateral_pid.get_result(-lat)
         return float(steering)
 
-    def act(self, *args, **kwargs):
+    def act(self, decision_freq, *args, **kwargs):
         # concat lane
         try:
-            all_objects = self.control_object.lidar.get_surrounding_objects(self.control_object)
-            # can not find routing target lane
-            surrounding_objects = FrontBackObjects.get_find_front_back_objs_waymo(
-                all_objects,
-                self.routing_target_lane,
-                self.control_object.position,
-                max_distance=self.WAYMO_IDM_MAX_DIST
-            )
-            acc_front_obj = surrounding_objects.front_object()
-            acc_front_dist = surrounding_objects.front_min_distance()
+            if self.policy_index % decision_freq == 0:
+                all_objects = self.control_object.lidar.get_surrounding_objects(self.control_object)
+                # can not find routing target lane
+                surrounding_objects = FrontBackObjects.get_find_front_back_objs_waymo(
+                    all_objects,
+                    self.routing_target_lane,
+                    self.control_object.position,
+                    max_distance=self.WAYMO_IDM_MAX_DIST
+                )
+                acc_front_obj = surrounding_objects.front_object()
+                acc_front_dist = surrounding_objects.front_min_distance()
 
-            acc = self.acceleration(acc_front_obj, acc_front_dist)
+                acc = self.acceleration(acc_front_obj, acc_front_dist)
+            else:
+                acc = self.last_action[-1]
         except:
             acc = 0
             print("WaymoIDM Longitudinal Planning failed, acceleration fall back to 0")
@@ -451,4 +459,5 @@ class WaymoIDMPolicy(IDMPolicy):
 
         # control by PID and IDM
         steering = self.steering_control(steering_target_lane)
+        self.last_action = [steering, acc]
         return [steering, acc]
