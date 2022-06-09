@@ -19,7 +19,6 @@ class WaymoMapManager(BaseManager):
         self.sdc_start = None
         self.sdc_end = None
         self.sdc_destinations = []
-        self.current_sdc_route = None
 
     def reset(self):
         seed = self.engine.global_random_seed
@@ -35,7 +34,6 @@ class WaymoMapManager(BaseManager):
 
     def update_route(self, data):
         sdc_traj = WaymoTrafficManager.parse_full_trajectory(data["tracks"][data["sdc_index"]]["state"])
-        self.current_sdc_route = WayPointLane(sdc_traj, 3.5)
         init_state = WaymoTrafficManager.parse_vehicle_state(
             data["tracks"][data["sdc_index"]]["state"], self.engine.global_config["traj_start_index"]
         )

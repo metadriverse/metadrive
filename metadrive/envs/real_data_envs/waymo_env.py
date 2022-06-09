@@ -42,8 +42,7 @@ WAYMO_ENV_CONFIG = dict(
     crash_object_penalty=5.0,
     driving_reward=1.0,
     speed_reward=0.1,
-    use_lateral=False,
-    use_waymo_reward=False,
+    use_lateral_reward=False,
     horizon=500,
 
     # ===== Cost Scheme =====
@@ -210,19 +209,16 @@ class WaymoEnv(BaseEnv):
         step_info = dict()
 
         # Reward for moving forward in current lane
-        if self.config["use_waymo_reward"]:
-            current_lane = self.engine.map_manager.current_sdc_route
+        if vehicle.lane in vehicle.navigation.current_ref_lanes:
+            current_lane = vehicle.lane
         else:
-            if vehicle.lane in vehicle.navigation.current_ref_lanes:
-                current_lane = vehicle.lane
-            else:
-                current_lane = vehicle.navigation.current_ref_lanes[0]
+            current_lane = vehicle.navigation.current_ref_lanes[0]
         long_last, _ = current_lane.local_coordinates(vehicle.last_position)
         long_now, lateral_now = current_lane.local_coordinates(vehicle.position)
         self.observations[vehicle_id].lateral_dist = lateral_now
 
         # reward for lane keeping, without it vehicle can learn to overtake but fail to keep in lane
-        if self.config["use_lateral"]:
+        if self.config["use_lateral_reward"]:
             lateral_factor = clip(1 - 2 * abs(lateral_now) / 6, 0.0, 1.0)
         else:
             lateral_factor = 1.0

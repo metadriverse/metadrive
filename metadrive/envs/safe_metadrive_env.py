@@ -19,7 +19,7 @@ class SafeMetaDriveEnv(MetaDriveEnv):
                 "crash_vehicle_cost": 1,
                 "crash_object_cost": 1,
                 "out_of_road_cost": 1.,  # only give penalty for out_of_road
-                "use_lateral": False
+                "use_lateral_reward": False
             },
             allow_add_new_key=True
         )

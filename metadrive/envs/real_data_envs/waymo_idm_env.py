@@ -29,11 +29,11 @@ if __name__ == "__main__":
             "replay": False,
             "start_case_index": 0,
             "waymo_data_directory": AssetLoader.file_path(asset_path, "waymo", return_raw_style=False),
-            "case_num": 1,
+            "case_num": 3,
             "horizon": 1000,
             # "vehicle_config": dict(show_lidar=True,
             #                        show_lane_line_detector=True,
-            #                        show_side_detector=True)
+            #                        show_side_detector=True)F
         }
     )
     success = []

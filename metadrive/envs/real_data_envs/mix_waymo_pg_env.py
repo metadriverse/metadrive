@@ -55,7 +55,7 @@ MIX_WAYMO_PG_ENV_CONFIG = dict(
     # ===== engine config =====
     force_destroy=True,
     horizon=2500,
-    # use_lateral=True
+    # use_lateral_reward=True
 )
 
 
