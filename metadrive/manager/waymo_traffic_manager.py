@@ -23,7 +23,7 @@ class WaymoTrafficManager(BaseManager):
             self.vid_to_obj = {}
             for v_id, type_traj in self.current_traffic_data.items():
                 if type_traj["type"] == AgentType.VEHICLE and v_id != self.sdc_index:
-                    info = self.parse_vehicle_state(type_traj["state"], self.engine.global_config["case_start_index"])
+                    info = self.parse_vehicle_state(type_traj["state"], self.engine.global_config["traj_start_index"])
                     if not info["valid"]:
                         continue
                     v_config = copy.deepcopy(self.engine.global_config["vehicle_config"])
@@ -45,7 +45,7 @@ class WaymoTrafficManager(BaseManager):
                     v.set_static(True)
                 elif type_traj["type"] == AgentType.VEHICLE and v_id == self.sdc_index:
                     # set Ego V velocity
-                    info = self.parse_vehicle_state(type_traj["state"], self.engine.global_config["case_start_index"])
+                    info = self.parse_vehicle_state(type_traj["state"], self.engine.global_config["traj_start_index"])
                     ego_v = list(self.engine.agent_manager.active_agents.values())[0]
                     ego_v.set_velocity(info["velocity"])
                     ego_v.set_position(info["position"])
@@ -53,11 +53,16 @@ class WaymoTrafficManager(BaseManager):
             raise ValueError("Can not LOAD traffic for seed: {}".format(self.engine.global_random_seed))
 
     @staticmethod
-    def parse_vehicle_state(states, time_idx):
+    def parse_vehicle_state(states, time_idx, check_last_state=False):
         ret = {}
         if time_idx >= len(states):
             time_idx = -1
         state = states[time_idx]
+        if check_last_state:
+            for state in reversed(states):
+                if state[0] - 0 >1 and state[1] - 0 >1:
+                    break
+
         ret["position"] = waymo_2_metadrive_position([state[0], state[1]])
         ret["length"] = state[3]
         ret["width"] = state[4]
@@ -72,8 +77,8 @@ class WaymoTrafficManager(BaseManager):
             for v_id, type_traj in self.current_traffic_data.items():
                 if v_id in self.vid_to_obj and self.vid_to_obj[v_id] in self.spawned_objects.keys():
                     info = self.parse_vehicle_state(type_traj["state"], self.count)
-                    time_end = self.count > self.engine.global_config["case_end_index"] and self.engine.global_config[
-                        "case_end_index"] != -1
+                    time_end = self.count > self.engine.global_config["traj_end_index"] and self.engine.global_config[
+                        "traj_end_index"] != -1
                     if (not info["valid"] or time_end) and v_id in self.vid_to_obj:
                         self.clear_objects([self.vid_to_obj[v_id]])
                         self.vid_to_obj.pop(v_id)
@@ -95,7 +100,13 @@ class WaymoTrafficManager(BaseManager):
 
     @staticmethod
     def parse_full_trajectory(states):
+        index=len(states)
+        for index, state in enumerate(states):
+            if state[0] - 0 <1 and state[1] - 0 <1:
+                break
+        states = states[:index]
         trajectory = copy.deepcopy(states[:, :2])
         # convert to metadrive coordinate
         trajectory *= [1, -1]
+
         return trajectory

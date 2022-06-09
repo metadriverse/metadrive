@@ -22,8 +22,8 @@ WAYMO_ENV_CONFIG = dict(
 
     # ===== Traffic =====
     no_traffic=False,
-    case_start_index=0,
-    case_end_index=-1,
+    traj_start_index=0,
+    traj_end_index=-1,
     replay=True,
 
     # ===== Agent config =====
@@ -43,7 +43,7 @@ WAYMO_ENV_CONFIG = dict(
     driving_reward=1.0,
     speed_reward=0.1,
     use_lateral=False,
-    use_waymo_reward=True,
+    use_waymo_reward=False,
     horizon=500,
 
     # ===== Cost Scheme =====

@@ -1,3 +1,4 @@
+from metadrive.engine.asset_loader import AssetLoader
 from metadrive.envs.real_data_envs.waymo_env import WaymoEnv
 from metadrive.manager.waymo_idm_traffic_manager import WaymoIDMTrafficManager
 from metadrive.manager.waymo_traffic_manager import WaymoTrafficManager
@@ -17,6 +18,7 @@ class WaymoIDMEnv(WaymoEnv):
 
 
 if __name__ == "__main__":
+    asset_path = AssetLoader.asset_path
     env = WaymoIDMEnv(
         {
             "use_render": True,
@@ -24,12 +26,10 @@ if __name__ == "__main__":
             "manual_control": True,
             # "debug":True,
             "no_traffic": False,
-            "replay": True,
-            "case_start_index": 46,
-            "case_end_index": 150,
+            "replay": False,
             "start_case_index": 0,
+            "waymo_data_directory": AssetLoader.file_path(asset_path, "waymo", return_raw_style=False),
             "case_num": 1,
-            "waymo_data_directory": "C:\\Users\\78587\\Desktop\\rss\\cases\\cases\\real",
             "horizon": 1000,
             # "vehicle_config": dict(show_lidar=True,
             #                        show_lane_line_detector=True,
@@ -59,8 +59,8 @@ if __name__ == "__main__":
                         "seed": env.engine.global_seed + env.config["start_case_index"],
                         "reward": r,
                     },
-                    mode="top_down",
-                    film_size=(5000, 5000)
+                    # mode="top_down",
+                    # film_size=(5000, 5000)
                 )
 
                 # pygame.image.save(env._top_down_renderer._background_canvas, "render.png")
