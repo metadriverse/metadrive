@@ -37,9 +37,9 @@ WAYMO_ENV_CONFIG = dict(
     # ===== Reward Scheme =====
     # See: https://github.com/metadriverse/metadrive/issues/283
     success_reward=10.0,
-    out_of_road_penalty=10.0,
-    crash_vehicle_penalty=10.0,
-    crash_object_penalty=5.0,
+    out_of_road_penalty=5.0,
+    crash_vehicle_penalty=5.0,
+    crash_object_penalty=1.0,
     driving_reward=1.0,
     speed_reward=0.1,
     use_lateral_reward=False,
@@ -158,7 +158,8 @@ class WaymoEnv(BaseEnv):
         done_info = dict(
             crash_vehicle=False, crash_object=False, crash_building=False, out_of_road=False, arrive_dest=False
         )
-        if vehicle.lane.index in self.engine.map_manager.sdc_destinations:
+        if np.linalg.norm(vehicle.position-self.engine.map_manager.sdc_dest_point) < 5 \
+                or vehicle.lane.index in self.engine.map_manager.sdc_destinations:
             done = True
             logging.info("Episode ended! Reason: arrive_dest.")
             done_info[TerminationState.SUCCESS] = True
@@ -230,7 +231,7 @@ class WaymoEnv(BaseEnv):
 
         if vehicle.arrive_destination:
             reward = +self.config["success_reward"]
-        elif self._is_out_of_road(vehicle):
+        elif self.vehicle.on_yellow_continuous_line or self._is_out_of_road(self.vehicle):
             reward = -self.config["out_of_road_penalty"]
         elif vehicle.crash_vehicle:
             reward = -self.config["crash_vehicle_penalty"]
@@ -246,7 +247,7 @@ class WaymoEnv(BaseEnv):
 
     def _is_out_of_road(self, vehicle):
         # A specified function to determine whether this vehicle should be done.
-        return vehicle.on_yellow_continuous_line or vehicle.crash_sidewalk
+        return vehicle.crash_sidewalk
         # ret = vehicle.crash_sidewalk
         # return ret
 

@@ -19,6 +19,7 @@ class WaymoMapManager(BaseManager):
         self.sdc_start = None
         self.sdc_end = None
         self.sdc_destinations = []
+        self.sdc_dest_point = None
 
     def reset(self):
         seed = self.engine.global_random_seed
@@ -62,6 +63,7 @@ class WaymoMapManager(BaseManager):
         self.sdc_start, self.sdc_end = self.filter_path(start_lanes, end_lanes)
         lane = self.current_map.road_network.get_lane(self.sdc_end)
         self.sdc_destinations = [self.sdc_end]
+        self.sdc_dest_point = lane.position(0,0)
         if len(lane.left_lanes) > 0:
             self.sdc_destinations += [lane["id"] for lane in lane.left_lanes]
         if len(lane.right_lanes) > 0:

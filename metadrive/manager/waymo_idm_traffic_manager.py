@@ -28,12 +28,13 @@ class WaymoIDMTrafficManager(WaymoTrafficManager):
     DEST_REGION = 5
     MIN_DURATION = 20
     ACT_FREQ = 3
-    MAX_HORIZON = 400  # waymo case is in 21s
+    MAX_HORIZON = 100
 
     def __init__(self):
         super(WaymoIDMTrafficManager, self).__init__()
         self.seed_trajs = {}
         self.v_id_to_destination = OrderedDict()
+        self.v_id_to_stop_time = OrderedDict()
 
     def before_reset(self):
         super(WaymoIDMTrafficManager, self).before_reset()
@@ -41,6 +42,7 @@ class WaymoIDMTrafficManager(WaymoTrafficManager):
     def reset(self):
         # try:
         self.v_id_to_destination = OrderedDict()
+        self.v_id_to_stop_time = OrderedDict()
         self.count = 0
         if self.engine.global_random_seed not in self.seed_trajs:
             traffic_traj_data = {}
@@ -110,6 +112,7 @@ class WaymoIDMTrafficManager(WaymoTrafficManager):
                 SVehicle, position=init_info["position"], heading=init_info["heading"], vehicle_config=v_config
             )
             self.v_id_to_destination[v.id] = np.array(data["dest_info"]["position"])
+            self.v_id_to_stop_time[v.id] = 0
             if data["static"]:
                 # static vehicle
                 v.set_position(v.position, height=0.8)
@@ -135,8 +138,12 @@ class WaymoIDMTrafficManager(WaymoTrafficManager):
         for v in self.spawned_objects.values():
             if not self.engine.has_policy(v.name):
                 continue
+            if v.speed < 1:
+                self.v_id_to_stop_time[v.id] += 1
+            else:
+                self.v_id_to_stop_time[v.id] = 0
             dist_to_dest = np.linalg.norm(v.position - self.v_id_to_destination[v.id])
-            if dist_to_dest < self.DEST_REGION or self.count > self.MAX_HORIZON:
+            if dist_to_dest < self.DEST_REGION or self.v_id_to_stop_time[v.id] > self.MAX_HORIZON:
                 vehicles_to_clear.append(v.id)
         self.clear_objects(vehicles_to_clear)
 
