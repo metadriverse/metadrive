@@ -215,7 +215,10 @@ class WaymoEnv(BaseEnv):
             current_lane = vehicle.navigation.current_ref_lanes[0]
         long_last, _ = current_lane.local_coordinates(vehicle.last_position)
         long_now, lateral_now = current_lane.local_coordinates(vehicle.position)
-        self.observations[vehicle_id].lateral_dist = lateral_now
+
+        # update obs
+        self.observations[vehicle_id].lateral_dist = \
+        self.engine.map_manager.current_sdc_route.local_coordinates(vehicle.position)[-1]
 
         # reward for lane keeping, without it vehicle can learn to overtake but fail to keep in lane
         if self.config["use_lateral_reward"]:
@@ -245,7 +248,10 @@ class WaymoEnv(BaseEnv):
 
     def _is_out_of_road(self, vehicle):
         # A specified function to determine whether this vehicle should be done.
-        return vehicle.crash_sidewalk or vehicle.on_yellow_continuous_line
+        done = vehicle.crash_sidewalk or vehicle.on_yellow_continuous_line
+        if self.config["out_of_route_done"]:
+            done = done or self.observations[vehicle.id].lateral_dist > 10
+        return done
         # ret = vehicle.crash_sidewalk
         # return ret
 
