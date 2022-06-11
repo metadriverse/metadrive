@@ -37,8 +37,8 @@ WAYMO_ENV_CONFIG = dict(
     # ===== Reward Scheme =====
     # See: https://github.com/metadriverse/metadrive/issues/283
     success_reward=10.0,
-    out_of_road_penalty=5.0,
-    crash_vehicle_penalty=5.0,
+    out_of_road_penalty=10.0,
+    crash_vehicle_penalty=10.0,
     crash_object_penalty=1.0,
     driving_reward=1.0,
     speed_reward=0.1,
@@ -158,7 +158,7 @@ class WaymoEnv(BaseEnv):
         done_info = dict(
             crash_vehicle=False, crash_object=False, crash_building=False, out_of_road=False, arrive_dest=False
         )
-        if np.linalg.norm(vehicle.position-self.engine.map_manager.sdc_dest_point) < 5 \
+        if np.linalg.norm(vehicle.position - self.engine.map_manager.sdc_dest_point) < 5 \
                 or vehicle.lane.index in self.engine.map_manager.sdc_destinations:
             done = True
             logging.info("Episode ended! Reason: arrive_dest.")
@@ -183,9 +183,8 @@ class WaymoEnv(BaseEnv):
         # for compatibility
         # crash almost equals to crashing with vehicles
         done_info[TerminationState.CRASH] = (
-            done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
-            or done_info[TerminationState.CRASH_BUILDING]
-        )
+                done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
+                or done_info[TerminationState.CRASH_BUILDING])
         return done, done_info
 
     def cost_function(self, vehicle_id: str):
@@ -231,7 +230,7 @@ class WaymoEnv(BaseEnv):
 
         if vehicle.arrive_destination:
             reward = +self.config["success_reward"]
-        elif self.vehicle.on_yellow_continuous_line or self._is_out_of_road(self.vehicle):
+        elif self._is_out_of_road(self.vehicle):
             reward = -self.config["out_of_road_penalty"]
         elif vehicle.crash_vehicle:
             reward = -self.config["crash_vehicle_penalty"]
@@ -240,14 +239,13 @@ class WaymoEnv(BaseEnv):
         return reward, step_info
 
     def _reset_global_seed(self, force_seed=None):
-        current_seed = force_seed if force_seed is not None else get_np_random(None).randint(
-            0, int(self.config["case_num"])
-        )
+        current_seed = force_seed if force_seed is not None else get_np_random(None).randint(0, int(
+            self.config["case_num"]))
         self.seed(current_seed)
 
     def _is_out_of_road(self, vehicle):
         # A specified function to determine whether this vehicle should be done.
-        return vehicle.crash_sidewalk
+        return vehicle.crash_sidewalk or vehicle.on_yellow_continuous_line
         # ret = vehicle.crash_sidewalk
         # return ret
 
