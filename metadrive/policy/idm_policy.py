@@ -405,8 +405,10 @@ class ManualControllableIDMPolicy(IDMPolicy):
 class WaymoIDMPolicy(IDMPolicy):
     NORMAL_SPEED = 30
     WAYMO_IDM_MAX_DIST = 10
-    ACC_FACTOR = 2.0
-    DISTANCE_WANTED = 15.0
+    DEACC_FACTOR = -20
+    ACC_FACTOR = 0.5
+    TIME_WANTED = 80
+    DISTANCE_WANTED = 55.0
 
     def __init__(self, control_object, random_seed, traj_to_follow, policy_index):
         super(WaymoIDMPolicy, self).__init__(control_object=control_object, random_seed=random_seed)
@@ -455,9 +457,11 @@ class WaymoIDMPolicy(IDMPolicy):
             acc = 0
             print("WaymoIDM Longitudinal Planning failed, acceleration fall back to 0")
 
+        # if self.policy_index % 2 == 0:
         steering_target_lane = self.routing_target_lane
-
         # control by PID and IDM
         steering = self.steering_control(steering_target_lane)
+        # else:
+        #     steering = self.last_action[0]
         self.last_action = [steering, acc]
         return [steering, acc]

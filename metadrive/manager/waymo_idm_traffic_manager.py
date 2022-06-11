@@ -27,7 +27,7 @@ class WaymoIDMTrafficManager(WaymoTrafficManager):
     TRAJ_WIDTH = 1.2
     DEST_REGION = 5
     MIN_DURATION = 20
-    ACT_FREQ = 3
+    ACT_FREQ = 4
     MAX_HORIZON = 100
 
     def __init__(self):
