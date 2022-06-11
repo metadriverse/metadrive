@@ -1,20 +1,13 @@
 import copy
+from collections import namedtuple, OrderedDict
 
-import signal
 import numpy as np
-from metadrive.utils.math_utils import norm
+
+from metadrive.component.lane.waymo_lane import WayPointLane
 from metadrive.component.vehicle.vehicle_type import SVehicle
 from metadrive.manager.waymo_traffic_manager import WaymoTrafficManager
 from metadrive.policy.idm_policy import WaymoIDMPolicy
-from metadrive.policy.expert_policy import ExpertPolicy
-from metadrive.utils.scene_utils import ray_localization
-from metadrive.component.lane.waymo_lane import WayPointLane
-from metadrive.component.map.waymo_map import WaymoMap
 from metadrive.utils.waymo_utils.waymo_utils import AgentType
-from collections import namedtuple, OrderedDict
-
-from wrapt_timeout_decorator import *
-import time
 
 static_vehicle_info = namedtuple("static_vehicle_info", "position heading")
 
