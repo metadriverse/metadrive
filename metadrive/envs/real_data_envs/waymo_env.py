@@ -25,7 +25,7 @@ WAYMO_ENV_CONFIG = dict(
     traj_start_index=0,
     traj_end_index=-1,
     replay=True,
-    no_static_traffic_vehicle=True,
+    no_static_traffic_vehicle=False,
 
     # ===== Agent config =====
     vehicle_config=dict(
