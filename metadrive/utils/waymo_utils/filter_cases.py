@@ -20,7 +20,7 @@ def handler(signum, frame):
 
 if __name__ == "__main__":
     case_data_path = sys.argv[1]
-    start = sys.argv[2]
+    start = int(sys.argv[2])
     processed_data_path = case_data_path + "_filtered"
     if not os.path.exists(processed_data_path):
         os.mkdir(processed_data_path)
@@ -54,7 +54,7 @@ if __name__ == "__main__":
         try:
             signal.signal(signal.SIGALRM, handler)
             signal.alarm(10)
-            env.reset(force_seed=i+start)
+            env.reset(force_seed=i)
             while True:
                 o, r, d, info = env.step([0, 0])
                 if d or env.episode_steps > max_step:
