@@ -294,7 +294,7 @@ class IDMPolicy(BasePolicy):
         if front_obj and (not self.disable_idm_deceleration):
             d = dist_to_front
             speed_diff = self.desired_gap(ego_vehicle, front_obj) / not_zero(d)
-            acceleration -= self.ACC_FACTOR * (speed_diff**2)
+            acceleration -= self.ACC_FACTOR * (speed_diff ** 2)
         return acceleration
 
     def desired_gap(self, ego_vehicle, front_obj, projected: bool = True) -> float:
@@ -412,7 +412,7 @@ class WaymoIDMPolicy(IDMPolicy):
 
     def __init__(self, control_object, random_seed, traj_to_follow, policy_index):
         super(WaymoIDMPolicy, self).__init__(control_object=control_object, random_seed=random_seed)
-        self.policy_index=policy_index
+        self.policy_index = policy_index
         self.traj_to_follow = traj_to_follow
         self.target_speed = self.NORMAL_SPEED
         self.routing_target_lane = self.traj_to_follow
@@ -423,7 +423,7 @@ class WaymoIDMPolicy(IDMPolicy):
         self.heading_pid = PIDController(1.2, 0.1, 3.5)
         self.lateral_pid = PIDController(0.3, .0, 0.0)
 
-        self.last_action = [0,0]
+        self.last_action = [0, 0]
 
     def steering_control(self, target_lane) -> float:
         # heading control following a lateral distance control
@@ -465,3 +465,48 @@ class WaymoIDMPolicy(IDMPolicy):
         #     steering = self.last_action[0]
         self.last_action = [steering, acc]
         return [steering, acc]
+
+
+class EgoWaymoIDMPolicy(IDMPolicy):
+    """
+    This policy is for Vehicles using navigation module, especially, ego car
+    """
+    NORMAL_SPEED = 30
+
+    def __init__(self, control_object, random_seed):
+        super(EgoWaymoIDMPolicy, self).__init__(control_object=control_object, random_seed=random_seed)
+        self.target_speed = self.NORMAL_SPEED
+        self.routing_target_lane = None
+        self.available_routing_index_range = None
+        self.overtake_timer = self.np_random.randint(0, self.LANE_CHANGE_FREQ)
+        self.enable_lane_change = False
+
+        self.heading_pid = PIDController(1.7, 0.01, 3.5)
+        self.lateral_pid = PIDController(0.3, .0, 0.0)
+
+    def steering_control(self, target_lane) -> float:
+        # heading control following a lateral distance control
+        ego_vehicle = self.control_object
+        long, lat = target_lane.local_coordinates(ego_vehicle.position)
+        lane_heading = target_lane.heading_theta_at(long + 1)
+        v_heading = ego_vehicle.heading_theta
+        steering = self.heading_pid.get_result(wrap_to_pi(lane_heading - v_heading))
+        # steering += self.lateral_pid.get_result(-lat)
+        return float(steering)
+
+    def move_to_next_road(self):
+        # routing target lane is in current ref lanes
+        current_lanes = self.control_object.navigation.current_ref_lanes
+        if self.routing_target_lane is None:
+            self.routing_target_lane = self.control_object.lane
+            return True if self.routing_target_lane in current_lanes else False
+        if self.routing_target_lane not in current_lanes:
+            for lane in current_lanes:
+                self.routing_target_lane = lane
+                return True
+                # lane change for lane num change
+            self.routing_target_lane = self.control_object.navigation.map.road_network.get_lane(
+                self.control_object.navigation.next_checkpoint_lane_index
+            )
+            return True
+        return False
