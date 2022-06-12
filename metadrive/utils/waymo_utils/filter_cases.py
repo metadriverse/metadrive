@@ -20,6 +20,7 @@ def handler(signum, frame):
 
 if __name__ == "__main__":
     case_data_path = sys.argv[1]
+    start = sys.argv[2]
     processed_data_path = case_data_path + "_filtered"
     if not os.path.exists(processed_data_path):
         os.mkdir(processed_data_path)
@@ -34,10 +35,12 @@ if __name__ == "__main__":
             "use_render": False,
             "agent_policy": EgoWaymoIDMPolicy,
             "waymo_data_directory": case_data_path,
+            "start_case_index":start*1000, 
             "case_num": case_num,
             "store_map": False,
             # "manual_control": True,
             # "debug":True,
+            "no traffic": True,
             "horizon": 1500,
         }
     )
@@ -51,7 +54,7 @@ if __name__ == "__main__":
         try:
             signal.signal(signal.SIGALRM, handler)
             signal.alarm(10)
-            env.reset(force_seed=i)
+            env.reset(force_seed=i+start)
             while True:
                 o, r, d, info = env.step([0, 0])
                 if d or env.episode_steps > max_step:
