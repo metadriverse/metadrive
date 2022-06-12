@@ -35,8 +35,7 @@ class WaymoMapManager(BaseManager):
         self.update_route(map_config)
 
     def update_route(self, data):
-        sdc_traj = WaymoTrafficManager.parse_full_trajectory(data["tracks"][data["sdc_index"]]["state"],
-                                                             check_last_state=False)
+        sdc_traj = WaymoTrafficManager.parse_full_trajectory(data["tracks"][data["sdc_index"]]["state"])
         self.current_sdc_route = WayPointLane(sdc_traj, 1.5)
         init_state = WaymoTrafficManager.parse_vehicle_state(
             data["tracks"][data["sdc_index"]]["state"], self.engine.global_config["traj_start_index"],
@@ -44,7 +43,7 @@ class WaymoMapManager(BaseManager):
         )
         last_state = WaymoTrafficManager.parse_vehicle_state(
             data["tracks"][data["sdc_index"]]["state"], self.engine.global_config["traj_end_index"],
-            check_last_state=False
+            check_last_state=True
         )
         init_position = init_state["position"]
         init_yaw = init_state["heading"]

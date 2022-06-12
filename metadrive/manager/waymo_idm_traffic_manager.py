@@ -20,7 +20,7 @@ class WaymoIDMTrafficManager(WaymoTrafficManager):
     TRAJ_WIDTH = 1.2
     DEST_REGION = 5
     MIN_DURATION = 20
-    ACT_FREQ = 4
+    ACT_FREQ = 5
     MAX_HORIZON = 100
 
     def __init__(self):
@@ -124,7 +124,8 @@ class WaymoIDMTrafficManager(WaymoTrafficManager):
         for v in self.spawned_objects.values():
             if self.engine.has_policy(v.id):
                 p = self.engine.get_policy(v.name)
-                v.before_step(p.act(self.ACT_FREQ))
+                do_speed_control = (p.policy_index+self.count)%self.ACT_FREQ==0
+                v.before_step(p.act(do_speed_control))
 
     def after_step(self, *args, **kwargs):
         self.count += 1

@@ -403,12 +403,12 @@ class ManualControllableIDMPolicy(IDMPolicy):
 
 
 class WaymoIDMPolicy(IDMPolicy):
-    NORMAL_SPEED = 30
-    WAYMO_IDM_MAX_DIST = 10
-    DEACC_FACTOR = -20
-    ACC_FACTOR = 0.5
-    TIME_WANTED = 80
-    DISTANCE_WANTED = 55.0
+    NORMAL_SPEED = 40
+    WAYMO_IDM_MAX_DIST = 20
+    # DEACC_FACTOR = -20
+    # ACC_FACTOR = 0.5
+    # TIME_WANTED = 80
+    # DISTANCE_WANTED = 55.0
 
     def __init__(self, control_object, random_seed, traj_to_follow, policy_index):
         super(WaymoIDMPolicy, self).__init__(control_object=control_object, random_seed=random_seed)
@@ -435,10 +435,10 @@ class WaymoIDMPolicy(IDMPolicy):
         # steering += self.lateral_pid.get_result(-lat)
         return float(steering)
 
-    def act(self, decision_freq, *args, **kwargs):
+    def act(self, do_speed_control, *args, **kwargs):
         # concat lane
         try:
-            if self.policy_index % decision_freq == 0:
+            if do_speed_control:
                 all_objects = self.control_object.lidar.get_surrounding_objects(self.control_object)
                 # can not find routing target lane
                 surrounding_objects = FrontBackObjects.get_find_front_back_objs_waymo(

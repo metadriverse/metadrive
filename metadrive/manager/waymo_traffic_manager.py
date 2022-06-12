@@ -59,8 +59,11 @@ class WaymoTrafficManager(BaseManager):
             time_idx = -1
         state = states[time_idx]
         if check_last_state:
-            for state in reversed(states):
-                if abs(state[0] - 0) > 1 and abs(state[1] - 0) > 1:
+            for current_idx in range(len(states)-1):
+                p_1 = states[current_idx][:2]
+                p_2 = states[current_idx+1][:2]
+                if np.linalg.norm(p_1-p_2) > 100:
+                    state = states[current_idx]
                     break
 
         ret["position"] = waymo_2_metadrive_position([state[0], state[1]])
@@ -99,12 +102,15 @@ class WaymoTrafficManager(BaseManager):
             raise ValueError("Can not CLEAN traffic for seed: {}".format(self.engine.global_random_seed))
 
     @staticmethod
-    def parse_full_trajectory(states, check_last_state=True):
+    def parse_full_trajectory(states):
         index = len(states)
-        if check_last_state:
-            for index, state in enumerate(states):
-                if abs(state[0] - 0) < 1 and abs(state[1] - 0) < 1:
-                    break
+        for current_idx in range(len(states)-1):
+            p_1 = states[current_idx][:2]
+            p_2 = states[current_idx + 1][:2]
+            if np.linalg.norm(p_1 - p_2) > 100:
+                index = current_idx
+                break
+
         states = states[:index]
         trajectory = copy.deepcopy(states[:, :2])
         # convert to metadrive coordinate
