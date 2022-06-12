@@ -27,9 +27,9 @@ if __name__ == "__main__":
             # "debug":True,
             "no_traffic": False,
             "replay": False,
-            "start_case_index": 0,
+            "start_case_index": 30,
             "waymo_data_directory": "E:\\PAMI_waymo_data\\idm_filtered\\validation\\validation",
-            "case_num": 100,
+            "case_num": 30,
             "horizon": 1000,
             # "vehicle_config": dict(show_lidar=True,
             #                        show_lane_line_detector=True,
@@ -38,7 +38,7 @@ if __name__ == "__main__":
     )
     success = []
     for i in range(env.config["case_num"]):
-        env.reset(force_seed=i)
+        env.reset(force_seed=1)
         while True:
             o, r, d, info = env.step([0, 0])
             assert env.observation_space.contains(o)
