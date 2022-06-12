@@ -28,7 +28,7 @@ if __name__ == "__main__":
         raise ValueError("Path Not exist")
     case_num = len(os.listdir(case_data_path))
     max_step = 1500
-    min_step = 100
+    min_step = 50
 
     env = WaymoEnv(
         {
@@ -40,7 +40,7 @@ if __name__ == "__main__":
             "store_map": False,
             # "manual_control": True,
             # "debug":True,
-            "no traffic": True,
+            "no_traffic": True,
             "horizon": 1500,
         }
     )
