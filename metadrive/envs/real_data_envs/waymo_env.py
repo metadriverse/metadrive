@@ -9,7 +9,7 @@ from metadrive.envs.base_env import BaseEnv
 from metadrive.manager.waymo_data_manager import WaymoDataManager
 from metadrive.manager.waymo_map_manager import WaymoMapManager
 from metadrive.manager.waymo_traffic_manager import WaymoTrafficManager
-from metadrive.policy.idm_policy import WaymoIDMPolicy
+from metadrive.policy.idm_policy import EgoWaymoIDMPolicy
 from metadrive.utils import clip
 from metadrive.utils import get_np_random
 
@@ -96,7 +96,7 @@ class WaymoEnv(BaseEnv):
     def __init__(self, config):
         super(WaymoEnv, self).__init__(config)
         if not self.config["no_traffic"]:
-            assert self.config["agent_policy"] is not WaymoIDMPolicy, "WaymoIDM will fail when interacting with traffic"
+            assert self.config["agent_policy"] is not EgoWaymoIDMPolicy, "WaymoIDM will fail when interacting with traffic"
 
     def _merge_extra_config(self, config):
         config = self.default_config().update(config, allow_add_new_key=True)
@@ -264,8 +264,9 @@ if __name__ == "__main__":
     env = WaymoEnv(
         {
             "use_render": True,
-            # "agent_policy": WaymoIDMPolicy,
+            "agent_policy": EgoWaymoIDMPolicy,
             "manual_control": True,
+            "no_traffic": True,
             # "debug":True,
             # "no_traffic":True,
             # "start_case_index": 192,
