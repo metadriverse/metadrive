@@ -99,11 +99,12 @@ class WaymoTrafficManager(BaseManager):
             raise ValueError("Can not CLEAN traffic for seed: {}".format(self.engine.global_random_seed))
 
     @staticmethod
-    def parse_full_trajectory(states):
+    def parse_full_trajectory(states, check_last_state=True):
         index = len(states)
-        for index, state in enumerate(states):
-            if abs(state[0] - 0) < 1 and abs(state[1] - 0) < 1:
-                break
+        if check_last_state:
+            for index, state in enumerate(states):
+                if abs(state[0] - 0) < 1 and abs(state[1] - 0) < 1:
+                    break
         states = states[:index]
         trajectory = copy.deepcopy(states[:, :2])
         # convert to metadrive coordinate

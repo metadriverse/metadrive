@@ -35,13 +35,16 @@ class WaymoMapManager(BaseManager):
         self.update_route(map_config)
 
     def update_route(self, data):
-        sdc_traj = WaymoTrafficManager.parse_full_trajectory(data["tracks"][data["sdc_index"]]["state"])
+        sdc_traj = WaymoTrafficManager.parse_full_trajectory(data["tracks"][data["sdc_index"]]["state"],
+                                                             check_last_state=False)
         self.current_sdc_route = WayPointLane(sdc_traj, 1.5)
         init_state = WaymoTrafficManager.parse_vehicle_state(
-            data["tracks"][data["sdc_index"]]["state"], self.engine.global_config["traj_start_index"]
+            data["tracks"][data["sdc_index"]]["state"], self.engine.global_config["traj_start_index"],
+            check_last_state=False,
         )
         last_state = WaymoTrafficManager.parse_vehicle_state(
-            data["tracks"][data["sdc_index"]]["state"], self.engine.global_config["traj_end_index"]
+            data["tracks"][data["sdc_index"]]["state"], self.engine.global_config["traj_end_index"],
+            check_last_state=False
         )
         init_position = init_state["position"]
         init_yaw = init_state["heading"]
@@ -65,7 +68,7 @@ class WaymoMapManager(BaseManager):
         self.sdc_start, self.sdc_end = self.filter_path(start_lanes, end_lanes)
         lane = self.current_map.road_network.get_lane(self.sdc_end)
         self.sdc_destinations = [self.sdc_end]
-        self.sdc_dest_point = lane.position(0,0)
+        self.sdc_dest_point = lane.position(0, 0)
         if len(lane.left_lanes) > 0:
             self.sdc_destinations += [lane["id"] for lane in lane.left_lanes]
         if len(lane.right_lanes) > 0:

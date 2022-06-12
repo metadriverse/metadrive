@@ -270,8 +270,9 @@ if __name__ == "__main__":
             # "debug":True,
             # "no_traffic":True,
             # "start_case_index": 192,
-            "case_num": 3,
-            # "waymo_data_directory": "E:\\hk\\idm_filtered\\validation",
+            "start_case_index":1000,
+            "case_num": 1,
+            "waymo_data_directory": "E:\\PAMI_waymo_data\\idm_filtered\\test",
             "horizon": 1000,
             "vehicle_config": dict(
                 lidar=dict(num_lasers=120, distance=50, num_others=4),
