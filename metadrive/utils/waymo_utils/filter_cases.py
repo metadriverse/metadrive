@@ -60,8 +60,8 @@ if __name__ == "__main__":
                 if d or env.episode_steps > max_step:
                     if info["arrive_dest"] and env.episode_steps > min_step:
                         os.rename(
-                            os.path.join(case_data_path, "{}.pkl".format(i)),
-                            os.path.join(processed_data_path, "{}.pkl".format(i))
+                            os.path.join(case_data_path, "{}.pkl".format(i+start*1000)),
+                            os.path.join(processed_data_path, "{}.pkl".format(i+start*1000))
                         )
                     break
         except:
