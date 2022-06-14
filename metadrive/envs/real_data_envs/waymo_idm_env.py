@@ -8,7 +8,6 @@ class WaymoIDMEnv(WaymoEnv):
     """
     The Traffic in this environment will be controlled by IDM Policy
     """
-
     def setup_engine(self):
         super(WaymoIDMEnv, self).setup_engine()
         assert not self.config["no_traffic"], "Please set no_traffic to False to use this environment"
@@ -22,7 +21,7 @@ class WaymoIDMEnv(WaymoEnv):
     # @property
     def next_seed_reset(self):
         # return (self.current_seed + 1) if self.current_seed is not None else 0
-        self.reset(self.current_seed+1)
+        self.reset(self.current_seed + 1)
 
     # @property
     def last_seed_reset(self):

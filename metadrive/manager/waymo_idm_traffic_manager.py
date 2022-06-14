@@ -70,14 +70,16 @@ class WaymoIDMTrafficManager(WaymoTrafficManager):
 
                 elif type_traj["type"] == AgentType.VEHICLE and v_id == self.sdc_index:
                     # set Ego V velocity
-                    init_info = self.parse_vehicle_state(type_traj["state"],
-                                                         self.engine.global_config["traj_start_index"])
-                    traffic_traj_data["sdc"] = {"traj": None,
-                                                "init_info": init_info,
-                                                "static": False,
-                                                "dest_info": None,
-                                                "is_sdc": True
-                                                }
+                    init_info = self.parse_vehicle_state(
+                        type_traj["state"], self.engine.global_config["traj_start_index"]
+                    )
+                    traffic_traj_data["sdc"] = {
+                        "traj": None,
+                        "init_info": init_info,
+                        "static": False,
+                        "dest_info": None,
+                        "is_sdc": True
+                    }
             self.seed_trajs[self.engine.global_random_seed] = traffic_traj_data
         policy_count = 0
         for v_traj_id, data in self.current_traffic_traj.items():
@@ -115,8 +117,9 @@ class WaymoIDMTrafficManager(WaymoTrafficManager):
                 v.set_static(True)
             else:
                 v.set_position(v.position, height=0.8)
-                self.add_policy(v.id,
-                                WaymoIDMPolicy(v, self.generate_seed(), data["traj"], policy_count % self.ACT_FREQ))
+                self.add_policy(
+                    v.id, WaymoIDMPolicy(v, self.generate_seed(), data["traj"], policy_count % self.ACT_FREQ)
+                )
                 v.set_velocity(init_info['velocity'])
                 policy_count += 1
 
@@ -124,7 +127,7 @@ class WaymoIDMTrafficManager(WaymoTrafficManager):
         for v in self.spawned_objects.values():
             if self.engine.has_policy(v.id):
                 p = self.engine.get_policy(v.name)
-                do_speed_control = (p.policy_index+self.count)%self.ACT_FREQ==0
+                do_speed_control = (p.policy_index + self.count) % self.ACT_FREQ == 0
                 v.before_step(p.act(do_speed_control))
 
     def after_step(self, *args, **kwargs):

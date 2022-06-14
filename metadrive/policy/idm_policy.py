@@ -294,7 +294,7 @@ class IDMPolicy(BasePolicy):
         if front_obj and (not self.disable_idm_deceleration):
             d = dist_to_front
             speed_diff = self.desired_gap(ego_vehicle, front_obj) / not_zero(d)
-            acceleration -= self.ACC_FACTOR * (speed_diff ** 2)
+            acceleration -= self.ACC_FACTOR * (speed_diff**2)
         return acceleration
 
     def desired_gap(self, ego_vehicle, front_obj, projected: bool = True) -> float:
@@ -405,6 +405,7 @@ class ManualControllableIDMPolicy(IDMPolicy):
 class WaymoIDMPolicy(IDMPolicy):
     NORMAL_SPEED = 40
     WAYMO_IDM_MAX_DIST = 20
+
     # DEACC_FACTOR = -20
     # ACC_FACTOR = 0.5
     # TIME_WANTED = 80

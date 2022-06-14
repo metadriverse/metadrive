@@ -59,10 +59,10 @@ class WaymoTrafficManager(BaseManager):
             time_idx = -1
         state = states[time_idx]
         if check_last_state:
-            for current_idx in range(len(states)-1):
+            for current_idx in range(len(states) - 1):
                 p_1 = states[current_idx][:2]
-                p_2 = states[current_idx+1][:2]
-                if np.linalg.norm(p_1-p_2) > 100:
+                p_2 = states[current_idx + 1][:2]
+                if np.linalg.norm(p_1 - p_2) > 100:
                     state = states[current_idx]
                     break
 
@@ -104,7 +104,7 @@ class WaymoTrafficManager(BaseManager):
     @staticmethod
     def parse_full_trajectory(states):
         index = len(states)
-        for current_idx in range(len(states)-1):
+        for current_idx in range(len(states) - 1):
             p_1 = states[current_idx][:2]
             p_2 = states[current_idx + 1][:2]
             if np.linalg.norm(p_1 - p_2) > 100:

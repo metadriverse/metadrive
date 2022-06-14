@@ -96,7 +96,8 @@ class WaymoEnv(BaseEnv):
     def __init__(self, config):
         super(WaymoEnv, self).__init__(config)
         if not self.config["no_traffic"]:
-            assert self.config["agent_policy"] is not EgoWaymoIDMPolicy, "WaymoIDM will fail when interacting with traffic"
+            assert self.config["agent_policy"
+                               ] is not EgoWaymoIDMPolicy, "WaymoIDM will fail when interacting with traffic"
 
     def _merge_extra_config(self, config):
         config = self.default_config().update(config, allow_add_new_key=True)
@@ -184,8 +185,9 @@ class WaymoEnv(BaseEnv):
         # for compatibility
         # crash almost equals to crashing with vehicles
         done_info[TerminationState.CRASH] = (
-                done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
-                or done_info[TerminationState.CRASH_BUILDING])
+            done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
+            or done_info[TerminationState.CRASH_BUILDING]
+        )
         return done, done_info
 
     def cost_function(self, vehicle_id: str):
@@ -243,8 +245,9 @@ class WaymoEnv(BaseEnv):
         return reward, step_info
 
     def _reset_global_seed(self, force_seed=None):
-        current_seed = force_seed if force_seed is not None else get_np_random(None).randint(0, int(
-            self.config["case_num"]))
+        current_seed = force_seed if force_seed is not None else get_np_random(None).randint(
+            0, int(self.config["case_num"])
+        )
         self.seed(current_seed)
 
     def _is_out_of_road(self, vehicle):
@@ -270,7 +273,7 @@ if __name__ == "__main__":
             # "debug":True,
             # "no_traffic":True,
             # "start_case_index": 192,
-            "start_case_index":1000,
+            "start_case_index": 1000,
             "case_num": 1,
             "waymo_data_directory": "E:\\PAMI_waymo_data\\idm_filtered\\test",
             "horizon": 1000,

@@ -35,7 +35,7 @@ if __name__ == "__main__":
             "use_render": False,
             "agent_policy": EgoWaymoIDMPolicy,
             "waymo_data_directory": case_data_path,
-            "start_case_index":start*1000, 
+            "start_case_index": start * 1000,
             "case_num": case_num,
             "store_map": False,
             # "manual_control": True,
@@ -60,8 +60,8 @@ if __name__ == "__main__":
                 if d or env.episode_steps > max_step:
                     if info["arrive_dest"] and env.episode_steps > min_step:
                         os.rename(
-                            os.path.join(case_data_path, "{}.pkl".format(i+start*1000)),
-                            os.path.join(processed_data_path, "{}.pkl".format(i+start*1000))
+                            os.path.join(case_data_path, "{}.pkl".format(i + start * 1000)),
+                            os.path.join(processed_data_path, "{}.pkl".format(i + start * 1000))
                         )
                     break
         except:
