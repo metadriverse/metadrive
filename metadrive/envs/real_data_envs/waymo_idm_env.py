@@ -8,6 +8,7 @@ class WaymoIDMEnv(WaymoEnv):
     """
     The Traffic in this environment will be controlled by IDM Policy
     """
+
     def setup_engine(self):
         super(WaymoIDMEnv, self).setup_engine()
         assert not self.config["no_traffic"], "Please set no_traffic to False to use this environment"
@@ -15,6 +16,18 @@ class WaymoIDMEnv(WaymoEnv):
             self.engine.update_manager("traffic_manager", WaymoIDMTrafficManager())
         else:
             self.engine.update_manager("traffic_manager", WaymoTrafficManager())
+        self.engine.accept("n", self.next_seed_reset)
+        self.engine.accept("b", self.last_seed_reset)
+
+    # @property
+    def next_seed_reset(self):
+        # return (self.current_seed + 1) if self.current_seed is not None else 0
+        self.reset(self.current_seed+1)
+
+    # @property
+    def last_seed_reset(self):
+        # return (self.current_seed - 1) if self.current_seed is not None else 0
+        self.reset(self.current_seed - 1)
 
 
 if __name__ == "__main__":
@@ -29,7 +42,7 @@ if __name__ == "__main__":
             "replay": False,
             "start_case_index": 0,
             "waymo_data_directory": "E:\\PAMI_waymo_data\\coRL_data\\1385_training",
-            "case_num": 1,
+            "case_num": 1000,
             "horizon": 1000,
             # "vehicle_config": dict(show_lidar=True,
             #                        show_lane_line_detector=True,
