@@ -30,6 +30,8 @@ BASE_DEFAULT_CONFIG = dict(
     is_multi_agent=False,
     allow_respawn=False,
     delay_done=0,  # How many steps for the agent to stay static at the death place after done.
+    # Whether only return single agent-like observation and action space
+    return_single_space=False,
 
     # ===== Action =====
     manual_control=False,
@@ -455,7 +457,7 @@ class BaseEnv(gym.Env):
         :return: Dict
         """
         ret = self.agent_manager.get_observation_spaces()
-        if not self.is_multi_agent:
+        if (not self.is_multi_agent) or self.config["return_single_space"]:
             return next(iter(ret.values()))
         else:
             return gym.spaces.Dict(ret)
@@ -467,7 +469,7 @@ class BaseEnv(gym.Env):
         :return: Dict
         """
         ret = self.agent_manager.get_action_spaces()
-        if not self.is_multi_agent:
+        if (not self.is_multi_agent) or self.config["return_single_space"]:
             return next(iter(ret.values()))
         else:
             return gym.spaces.Dict(ret)
@@ -516,7 +518,7 @@ class BaseEnv(gym.Env):
         if self._top_down_renderer is None:
             from metadrive.obs.top_down_renderer import TopDownRenderer
             self._top_down_renderer = TopDownRenderer(*args, **kwargs)
-        return self._top_down_renderer.render()
+        return self._top_down_renderer.render(*args, **kwargs)
 
     @property
     def main_camera(self):

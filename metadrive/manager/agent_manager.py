@@ -200,7 +200,7 @@ class AgentManager(BaseManager):
         finished = set()
         for v_name in self._dying_objects.keys():
             self._dying_objects[v_name][1] -= 1
-            if self._dying_objects[v_name][1] == 0:  # Countdown goes to 0, it's time to remove the vehicles!
+            if self._dying_objects[v_name][1] <= 0:  # Countdown goes to 0, it's time to remove the vehicles!
                 v = self._dying_objects[v_name][0]
                 self._remove_vehicle(v)
                 finished.add(v_name)
@@ -266,15 +266,16 @@ class AgentManager(BaseManager):
     @property
     def dying_agents(self):
         assert not self.engine.replay_episode
-        return {self._object_to_agent[k]: v for k, v in self._dying_objects.items()}
+        return {self._object_to_agent[k]: v for k, (v, _) in self._dying_objects.items()}
 
     @property
     def just_terminated_agents(self):
         assert not self.engine.replay_episode
-        return {
-            agent_name: self.get_agent(agent_name)[0]
-            for agent_name, v_name in self._agents_finished_this_frame.items()
-        }
+        ret = {}
+        for agent_name, v_name in self._agents_finished_this_frame.items():
+            v = self.get_object(v_name, raise_error=False)
+            ret[agent_name] = v
+        return ret
 
     @property
     def active_objects(self):
@@ -289,13 +290,16 @@ class AgentManager(BaseManager):
         object_name = self.agent_to_object(agent_name)
         return self.get_object(object_name)
 
-    def get_object(self, object_name):
+    def get_object(self, object_name, raise_error=True):
         if object_name in self._active_objects:
             return self._active_objects[object_name]
         elif object_name in self._dying_objects:
-            return self._dying_objects[object_name]
+            return self._dying_objects[object_name][0]
         else:
-            raise ValueError("Object {} not found!".format(object_name))
+            if raise_error:
+                raise ValueError("Object {} not found!".format(object_name))
+            else:
+                return None
 
     def object_to_agent(self, obj_name):
         """
@@ -336,10 +340,10 @@ class AgentManager(BaseManager):
         self.next_agent_count = 0
         self.INITIALIZED = False
 
-    def _put_to_dying_queue(self, v):
+    def _put_to_dying_queue(self, v, ignore_delay_done=False):
         vehicle_name = v.name
         v.set_static(True)
-        self._dying_objects[vehicle_name] = [v, self._delay_done]
+        self._dying_objects[vehicle_name] = [v, 0 if ignore_delay_done else self._delay_done]
 
     def _remove_vehicle(self, vehicle):
         vehicle_name = vehicle.name

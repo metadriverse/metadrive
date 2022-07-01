@@ -97,7 +97,7 @@ class TopDownObservation(ObservationBase):
             if screen.get_size() == self.screen.get_size():
                 self.screen.blit(screen, (0, 0))
             else:
-                pygame.transform.scale2x(self.obs_window.get_screen_window(), self.screen)
+                pygame.transform.smoothscale(self.obs_window.get_screen_window(), self.screen.get_size(), self.screen)
             pygame.display.flip()
 
     def get_screenshot(self, name="screenshot.png"):

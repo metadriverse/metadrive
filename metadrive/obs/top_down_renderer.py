@@ -125,6 +125,7 @@ class TopDownRenderer:
         show_agent_name=False,
         camera_position=None,
         track_target_vehicle=False,
+        **kwargs
         # current_track_vehicle=None
     ):
         # Setup some useful flags
@@ -182,6 +183,8 @@ class TopDownRenderer:
         # Draw
         self.blit()
 
+        self.kwargs = kwargs
+
     @property
     def canvas(self):
         return self._render_canvas
@@ -198,7 +201,7 @@ class TopDownRenderer:
 
         self._handle_event()
         self.refresh()
-        self._draw()
+        self._draw(*args, **kwargs)
         self.blit()
         ret = self.canvas.copy()
         ret = ret.convert(24)
@@ -250,7 +253,7 @@ class TopDownRenderer:
             )
         return frame_objects
 
-    def _draw(self):
+    def _draw(self, *args, **kwargs):
         """
         This is the core function to process the
         """
@@ -323,6 +326,18 @@ class TopDownRenderer:
             position = (field / 2, field / 2)
         off = (position[0] - field / 2, position[1] - field / 2)
         self.canvas.blit(source=canvas, dest=(0, 0), area=(off[0], off[1], field, field))
+
+        if "traffic_light_msg" in kwargs:
+            if kwargs["traffic_light_msg"] < 0.5:
+                traffic_light_color = (0, 255, 0)
+            else:
+                traffic_light_color = (255, 0, 0)
+            pygame.draw.circle(
+                surface=self.canvas,
+                color=traffic_light_color,
+                center=(self.canvas.get_size()[0] * 0.1, self.canvas.get_size()[1] * 0.1),
+                radius=20
+            )
 
         if self.show_agent_name:
             raise ValueError()

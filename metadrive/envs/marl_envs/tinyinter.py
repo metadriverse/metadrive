@@ -1,11 +1,185 @@
+import copy
+
+import gym
+import numpy as np
+
 from metadrive.envs.marl_envs.marl_intersection import MultiAgentIntersectionEnv
 from metadrive.manager.agent_manager import AgentManager
+from metadrive.obs.state_obs import LidarStateObservation
 from metadrive.policy.idm_policy import IDMPolicy
 from metadrive.utils import Config
-import logging
-from metadrive.utils.math_utils import not_zero, wrap_to_pi
-import copy
-from metadrive.component.vehicle_module.PID_controller import PIDController
+from metadrive.utils.math_utils import Vector, norm, clip
+
+
+class CommunicationObservation(LidarStateObservation):
+    @property
+    def observation_space(self):
+        shape = list(self.state_obs.observation_space.shape)
+        if self.config["lidar"]["num_lasers"] > 0 and self.config["lidar"]["distance"] > 0:
+            # Number of lidar rays and distance should be positive!
+            lidar_dim = self.config["lidar"]["num_lasers"]
+            lidar_dim += self.env.num_agents * (5 + (4 if self.config["lidar"]["add_others_navi"] else 0))
+            shape[0] += lidar_dim
+        return gym.spaces.Box(-0.0, 1.0, shape=tuple(shape), dtype=np.float32)
+
+    def __init__(self, vehicle_config, env):
+        # Restore this to default since we add all others info into obs
+        assert vehicle_config["lidar"]["num_others"] == 0
+        super(CommunicationObservation, self).__init__(vehicle_config=vehicle_config)
+        self.env = env
+
+        self.agent_name_index_mapping = {}
+        self.agent_name_slot_mapping = {}
+
+    def observe(self, vehicle):
+        if self.env.num_RL_agents != self.env.num_agents:
+            agent_name = self.env.agent_manager.object_to_agent(vehicle.name)
+            if agent_name not in self.env.agent_manager.RL_agents:
+                return None  # Do not compute observation for non RL agents.
+        return super(CommunicationObservation, self).observe(vehicle=vehicle)
+
+    def reset(self, env, vehicle=None):
+        self.agent_name_index_mapping = {}
+        self.agent_name_slot_mapping = {}
+
+    def lidar_observe(self, vehicle):
+        other_v_info = []
+        if vehicle.lidar.available:
+            cloud_points, detected_objects = vehicle.lidar.perceive(vehicle, )
+
+            other_v_info = self.get_global_info(vehicle)
+
+            other_v_info += self._add_noise_to_cloud_points(
+                cloud_points,
+                gaussian_noise=self.config["lidar"]["gaussian_noise"],
+                dropout_prob=self.config["lidar"]["dropout_prob"]
+            )
+
+            self.cloud_points = cloud_points
+            self.detected_objects = detected_objects
+        return other_v_info
+
+    def refresh_agent_name_index_mapping(self):
+        num_agents = self.env.num_agents
+        name_vehicle_mapping = self.env.agent_manager.active_agents
+        name_vehicle_mapping = {k: name_vehicle_mapping[k] for k in sorted(name_vehicle_mapping.keys())}
+
+        existing_agents = set(self.agent_name_index_mapping.keys())
+        new_agents = set(name_vehicle_mapping.keys())
+
+        if existing_agents == new_agents:
+            return name_vehicle_mapping
+
+        old_agent_names = existing_agents.difference(new_agents)
+
+        # Some new vehicles in and probability old vehicle terminates.
+        for old_agent_name in old_agent_names:
+            # This guy is done
+
+            old_index = self.agent_name_index_mapping.pop(old_agent_name)
+            old_slot = self.agent_name_slot_mapping.pop(old_agent_name)
+
+            # Search which new agent is not assigned yet, send old index to it.
+            new_agent_names = new_agents.difference(existing_agents)
+            for new_agent_name in new_agent_names:
+                if new_agent_name not in self.agent_name_index_mapping:
+                    # This new guy is not assigned index yet, just give it old index
+                    self.agent_name_index_mapping[new_agent_name] = old_index
+                    self.agent_name_slot_mapping[new_agent_name] = old_slot
+                    new_agents.remove(new_agent_name)
+                    break
+
+        # If new agent still exist, assigned new index to it.
+        new_agent_names = new_agents.difference(self.agent_name_index_mapping.keys())
+        for k in new_agent_names:
+            index = int(k.split("agent")[1])
+            index = index % num_agents
+            self.agent_name_slot_mapping[k] = index
+
+            index = (index + 1) / (num_agents)  # scale to [1/num_agents, 1]. 0 left to no vehicle.
+            self.agent_name_index_mapping[k] = index
+
+        # assert len(new_agents.symmetric_difference(self.agent_name_index_mapping.keys())) == 0
+        assert all(k in self.agent_name_index_mapping for k in name_vehicle_mapping)
+        assert all(k in self.agent_name_slot_mapping.keys() for k in name_vehicle_mapping)
+        self.agent_name_index_mapping = {
+            k: self.agent_name_index_mapping[k]
+            for k in sorted(self.agent_name_index_mapping.keys())
+        }
+        self.agent_name_slot_mapping = {
+            k: self.agent_name_slot_mapping[k]
+            for k in sorted(self.agent_name_slot_mapping.keys())
+        }
+        # print("SLOT:", self.agent_name_slot_mapping)
+        # print("AGEN:", self.agent_name_index_mapping)
+
+        return name_vehicle_mapping
+
+    def _process_norm(self, vector, perceive_distance):
+        vector_norm = norm(*vector)
+        vector = Vector(vector)
+        if vector_norm > perceive_distance:
+            vector = vector / vector_norm * perceive_distance
+        return vector
+
+    def get_global_info(self, ego_vehicle):
+        perceive_distance = ego_vehicle.lidar.perceive_distance
+        # perceive_distance = 20  # m
+        speed_scale = 20  # km/h
+
+        name_vehicle_mapping = self.refresh_agent_name_index_mapping()
+        add_others_navi = ego_vehicle.config["lidar"]["add_others_navi"]
+
+        # surrounding_vehicles += [None] * num_others
+        num_agents = self.env.num_agents
+
+        if add_others_navi:
+            res_size = 5 + 4
+        else:
+            res_size = 5
+        res = [0.0] * res_size * num_agents
+
+        for agent_name, vehicle in name_vehicle_mapping.items():
+            # for slot_index, agent_name in self.agent_name_slot_mapping.items():
+            #     vehicle = name_vehicle_mapping[agent_name]
+
+            slot_index = self.agent_name_slot_mapping[agent_name]
+
+            ego_position = ego_vehicle.position
+
+            assert agent_name in self.agent_name_index_mapping
+            res[slot_index * res_size] = self.agent_name_index_mapping[agent_name]
+
+            # assert isinstance(vehicle, IDMVehicle or Base), "Now MetaDrive Doesn't support other vehicle type"
+
+            relative_position = ego_vehicle.projection(vehicle.position - ego_position)
+            relative_position = self._process_norm(relative_position, perceive_distance)
+
+            # It is possible that the centroid of other vehicle is too far away from ego but lidar shed on it.
+            # So the distance may greater than perceive distance.
+            res[slot_index * res_size + 1] = clip((relative_position[0] / perceive_distance + 1) / 2, 0.0, 1.0)
+            res[slot_index * res_size + 2] = clip((relative_position[1] / perceive_distance + 1) / 2, 0.0, 1.0)
+
+            relative_velocity = ego_vehicle.projection(vehicle.velocity - ego_vehicle.velocity)
+            relative_velocity = self._process_norm(relative_velocity, speed_scale)
+            res[slot_index * res_size + 3] = clip((relative_velocity[0] / speed_scale + 1) / 2, 0.0, 1.0)
+            res[slot_index * res_size + 4] = clip((relative_velocity[1] / speed_scale + 1) / 2, 0.0, 1.0)
+
+            if add_others_navi:
+                ckpt1, ckpt2 = vehicle.navigation.get_checkpoints()
+
+                relative_ckpt1 = ego_vehicle.lidar._project_to_vehicle_system(ckpt1, ego_vehicle)
+                relative_ckpt1 = self._process_norm(relative_ckpt1, perceive_distance)
+                res[slot_index * res_size + 5] = clip((relative_ckpt1[0] / perceive_distance + 1) / 2, 0.0, 1.0)
+                res[slot_index * res_size + 6] = clip((relative_ckpt1[1] / perceive_distance + 1) / 2, 0.0, 1.0)
+
+                relative_ckpt2 = ego_vehicle.lidar._project_to_vehicle_system(ckpt2, ego_vehicle)
+                relative_ckpt2 = self._process_norm(relative_ckpt2, perceive_distance)
+                res[slot_index * res_size + 7] = clip((relative_ckpt2[0] / perceive_distance + 1) / 2, 0.0, 1.0)
+                res[slot_index * res_size + 8] = clip((relative_ckpt2[1] / perceive_distance + 1) / 2, 0.0, 1.0)
+
+        # assert len(res) == len(name_vehicle_mapping) * (5 + (4 if add_others_navi else 0))
+        return res
 
 
 class TinyInterRuleBasedPolicy(IDMPolicy):
@@ -29,6 +203,12 @@ class TinyInterRuleBasedPolicy(IDMPolicy):
 
         new_heading = target_lane.heading_theta_at(new_long + 1)
         self.control_object.set_heading_theta(new_heading)
+
+        # Note: the last_position is not correctly set since in vehicle.before_step
+        # we will set last_position to position at that time, which is the latest position.
+        # This leads to wrong reward for IDM agent.
+        # You need to comment out the line in before_step to make it correct!
+        self.control_object.last_position = self.control_object.position
         self.control_object.set_position(new_pos)
 
         return [0, 0]
@@ -161,6 +341,9 @@ class MultiAgentTinyInter(MultiAgentIntersectionEnv):
                 exit_length=30,
                 lane_num=1,
                 lane_width=4,
+
+                # Additional config to control the radius
+                radius=None
             ),
 
             # Whether to remove dead vehicles immediately
@@ -168,20 +351,25 @@ class MultiAgentTinyInter(MultiAgentIntersectionEnv):
 
             # The target speed of IDM agents, if any
             target_speed=10,
+
+            # Whether to use full global relative information as obs
+            use_communication_obs=False,
         )
         return MultiAgentIntersectionEnv.default_config().update(tiny_config, allow_add_new_key=True)
 
     def _get_reset_return(self):
         org = super(MultiAgentTinyInter, self)._get_reset_return()
-        if self.num_RL_agents == self.num_agents:
-            return org
+
+        # if self.num_RL_agents == self.num_agents:
+        #     return org
 
         return self.agent_manager.filter_RL_agents(org)
 
     def step(self, actions):
         o, r, d, i = super(MultiAgentTinyInter, self).step(actions)
-        if self.num_RL_agents == self.num_agents:
-            return o, r, d, i
+
+        # if self.num_RL_agents == self.num_agents:
+        #     return o, r, d, i
 
         original_done_dict = copy.deepcopy(d)
         d = self.agent_manager.filter_RL_agents(d, original_done_dict=original_done_dict)
@@ -206,53 +394,87 @@ class MultiAgentTinyInter(MultiAgentIntersectionEnv):
     def __init__(self, config=None):
         super(MultiAgentTinyInter, self).__init__(config=config)
         self.num_RL_agents = self.config["num_RL_agents"]
-        if self.num_RL_agents == self.num_agents:  # Not using mixed traffic and only RL agents are running.
-            pass
+        # if self.num_RL_agents == self.num_agents:  # Not using mixed traffic and only RL agents are running.
+        #     pass
+        # else:
+        self.agent_manager = MixedIDMAgentManager(
+            init_observations=self._get_observations(),
+            init_action_space=self._get_action_space(),
+            num_RL_agents=self.num_RL_agents,
+            ignore_delay_done=self.config["ignore_delay_done"],
+            target_speed=self.config["target_speed"]
+        )
+
+    def get_single_observation(self, vehicle_config: "Config"):
+        if self.config["use_communication_obs"]:
+            return CommunicationObservation(vehicle_config, self)
         else:
-            self.agent_manager = MixedIDMAgentManager(
-                init_observations=self._get_observations(),
-                init_action_space=self._get_action_space(),
-                num_RL_agents=self.num_RL_agents,
-                ignore_delay_done=self.config["ignore_delay_done"],
-                target_speed=self.config["target_speed"]
-            )
+            return LidarStateObservation(vehicle_config)
 
 
 if __name__ == '__main__':
     env = MultiAgentTinyInter(
         config={
-            "num_agents": 4,
-            "num_RL_agents": 1,
-            "ignore_delay_done": True,
-            "vehicle_config": {
-                "show_line_to_dest": True,
-                #     "lidar": {
-                #         "num_others": 2,
-                #         "add_others_navi": True
-                #     }
-            },
+            "num_agents": 8,
+            "num_RL_agents": 8,
+
+            # "map_config": {"radius": 50},
+            # "ignore_delay_done": True,
+            # "use_communication_obs": True,
+            # "vehicle_config": {
+            #     "show_line_to_dest": True,
+            #         "lidar": {
+            #         "num_others": 2,
+            #         "add_others_navi": True
+            #     }
+            # },
             # "manual_control": True,
             # "use_render": True,
+
+            # "debug_static_world": True,
         }
     )
     o = env.reset()
-    env.engine.force_fps.toggle()
+    # env.engine.force_fps.toggle()
     print("vehicle num", len(env.engine.traffic_manager.vehicles))
     print("RL agent num", len(o))
+    ep_success = 0
+    ep_done = 0
+    ep_reward_sum = 0.0
+    ep_success_reward_sum = 0.0
     for i in range(1, 100000):
-        o, r, d, info = env.step({k: [0.0, 0.0] for k in env.action_space.sample().keys()})
-        env.render("top_down", camera_position=(42.5, 0), film_size=(1000, 1000))
+        o, r, d, info = env.step({k: [0.0, 1.0] for k in env.action_space.sample().keys()})
+        # env.render("top_down", camera_position=(42.5, 0), film_size=(500, 500))
         vehicles = env.vehicles
+
+        for k, v in d.items():
+            if v and k in info:
+                ep_success += int(info[k]["arrive_dest"])
+                ep_reward_sum += int(info[k]["episode_reward"])
+                ep_done += 1
+                if info[k]["arrive_dest"]:
+                    ep_success_reward_sum += int(info[k]["episode_reward"])
+
         # if not d["__all__"]:
         #     assert sum(
         #         [env.engine.get_policy(v.name).__class__.__name__ == "EnvInputPolicy" for k, v in vehicles.items()]
         #     ) == env.config["num_RL_agents"]
         if any(d.values()):
             print("Somebody dead.", d, info)
-            print("Step {}. Policies: {}".format(i, {k: v['policy'] for k, v in info.items()}))
+            # print("Step {}. Policies: {}".format(i, {k: v['policy'] for k, v in info.items()}))
         if d["__all__"]:
             # assert i >= 1000
             print("Reset. ", i, info)
             # break
+            print(
+                "Success Rate: {:.3f}, reward: {:.3f}, success reward: {:.3f}, failed reward: {:.3f}, total num {}".
+                format(
+                    ep_success / ep_done if ep_done > 0 else -1, ep_reward_sum / ep_done if ep_done > 0 else -1,
+                    ep_success_reward_sum / ep_success if ep_success > 0 else -1,
+                    (ep_reward_sum - ep_success_reward_sum) / (ep_done - ep_success) if
+                    (ep_done - ep_success) > 0 else -1, ep_done
+                )
+            )
+            break
             env.reset()
     env.close()
