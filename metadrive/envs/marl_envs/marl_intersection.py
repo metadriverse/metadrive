@@ -44,8 +44,18 @@ class MAIntersectionMap(PGMap):
 
         # Build Intersection
         InterSection.EXIT_PART_LENGTH = length
+
+        if "radius" in self.config and self.config["radius"]:
+            extra_kwargs = dict(radius=self.config["radius"])
+        else:
+            extra_kwargs = {}
         last_block = InterSection(
-            1, last_block.get_socket(index=0), self.road_network, random_seed=1, ignore_intersection_checking=False
+            1,
+            last_block.get_socket(index=0),
+            self.road_network,
+            random_seed=1,
+            ignore_intersection_checking=False,
+            **extra_kwargs
         )
 
         if self.config["lane_num"] > 1:
