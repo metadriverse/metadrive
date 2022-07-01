@@ -76,7 +76,6 @@ class ImageBuffer:
         """
         # self.engine.graphicsEngine.renderFrame()
         img = PNMImage()
-        assert self.display_region
         self.buffer.getScreenshot(img)
         return img
 
@@ -110,7 +109,6 @@ class ImageBuffer:
         if self.engine.mode == RENDER_MODE_ONSCREEN and self.display_region is None:
             # only show them when onscreen
             self.display_region = self.engine.win.makeDisplayRegion(*display_region)
-            assert self.cam
             self.display_region.setCamera(self.cam)
             self.draw_border(display_region)
 

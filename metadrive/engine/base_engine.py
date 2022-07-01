@@ -271,7 +271,13 @@ class BaseEngine(EngineCore, Randomizable):
         Note:
         Instead of calling this func directly, close Engine by using engine_utils.close_engine
         """
+        if len(self._managers) > 0:
+            for name, manager in self._managers.items():
+                setattr(self, name, None)
+                if manager is not None:
+                    manager.destroy()
         # clear all objects in spawned_object
+        self.clear_objects([id for id in self._spawned_objects.keys()])
         for id, obj in self._spawned_objects.items():
             if id in self._object_policies:
                 self._object_policies.pop(id).destroy()
@@ -282,11 +288,6 @@ class BaseEngine(EngineCore, Randomizable):
                 obj.destroy()
         if self.main_camera is not None:
             self.main_camera.destroy()
-        if len(self._managers) > 0:
-            for name, manager in self._managers.items():
-                setattr(self, name, None)
-                if manager is not None:
-                    manager.destroy()
         self.interface.destroy()
         self.clear_world()
         self.close_world()
