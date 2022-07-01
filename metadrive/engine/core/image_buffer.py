@@ -20,17 +20,17 @@ class ImageBuffer:
     line_borders = []
 
     def __init__(
-        self,
-        length: float,
-        width: float,
-        pos: Vec3,
-        bkg_color: Union[Vec4, Vec3],
-        parent_node: NodePath = None,
-        frame_buffer_property=None,
-        engine=None
+            self,
+            length: float,
+            width: float,
+            pos: Vec3,
+            bkg_color: Union[Vec4, Vec3],
+            parent_node: NodePath = None,
+            frame_buffer_property=None,
+            # engine=None
     ):
-        from metadrive.engine.engine_utils import get_engine
-        self.engine = engine or get_engine()
+        # from metadrive.engine.engine_utils import get_engine
+        # self.engine = engine or get_engine()
         try:
             assert self.engine.win is not None, "{} cannot be made without use_render or offscreen_render".format(
                 self.__class__.__name__
@@ -65,12 +65,18 @@ class ImageBuffer:
             self.origin.reparentTo(parent_node)
         logging.debug("Load Image Buffer: {}".format(self.__class__.__name__))
 
+    @property
+    def engine(self):
+        from metadrive.engine.engine_utils import get_engine
+        return get_engine()
+
     def get_image(self):
         """
         Bugs here! when use offscreen mode, thus the front cam obs is not from front cam now
         """
         # self.engine.graphicsEngine.renderFrame()
         img = PNMImage()
+        assert self.display_region
         self.buffer.getScreenshot(img)
         return img
 
@@ -104,6 +110,7 @@ class ImageBuffer:
         if self.engine.mode == RENDER_MODE_ONSCREEN and self.display_region is None:
             # only show them when onscreen
             self.display_region = self.engine.win.makeDisplayRegion(*display_region)
+            assert self.cam
             self.display_region.setCamera(self.cam)
             self.draw_border(display_region)
 

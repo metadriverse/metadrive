@@ -6,8 +6,8 @@ from metadrive.engine.core.image_buffer import ImageBuffer
 
 class BaseCamera(ImageBuffer):
     """
-    To enable the image observation, set offscreen render to True. The instance of subclasses will be singleton, so that
-    every objects share the same camera to boost the efficiency and save memory. Camera configuration is read from the
+    To enable the image observation, set offscreen_render to True. The instance of subclasses will be singleton, so that
+    every objects share the same camera, to boost the efficiency and save memory. Camera configuration is read from the
     global config automatically.
     """
     # shape(dim_1, dim_2)

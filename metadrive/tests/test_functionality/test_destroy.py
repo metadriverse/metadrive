@@ -4,9 +4,16 @@ from metadrive.utils import setup_logger
 setup_logger(debug=True)
 
 
-def test_destroy():
+def test_destroy(obs="state"):
     # Close and reset
-    env = MetaDriveEnv({"environment_num": 1, "start_seed": 3, "manual_control": False})
+    config = {"environment_num": 1, "start_seed": 3, "manual_control": False}
+    if obs == "state":
+        pass
+    elif obs == "rgb":
+        config["offscreen_render"] = True
+    else:
+        config["use_render"] = True
+    env = MetaDriveEnv(config)
     try:
         env.reset()
         for i in range(1, 20):
@@ -17,7 +24,7 @@ def test_destroy():
         env.close()
 
         # Again!
-        env = MetaDriveEnv({"environment_num": 1, "start_seed": 3, "manual_control": False})
+        env = MetaDriveEnv(config)
         env.reset()
         for i in range(1, 20):
             env.step([1, 1])
@@ -28,4 +35,6 @@ def test_destroy():
 
 
 if __name__ == "__main__":
-    test_destroy()
+    test_destroy("state")
+    test_destroy("rgb")
+    test_destroy("online_rgb")
