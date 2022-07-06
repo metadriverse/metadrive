@@ -143,11 +143,11 @@ Find more details in: [MetaDrive](https://metadrive-simulator.readthedocs.io)
 If you use MetaDrive in your own work, please cite:
 
 ```latex
-@article{li2021metadrive,
-  title={MetaDrive: Composing Diverse Driving Scenarios for Generalizable Reinforcement Learning},
-  author={Li, Quanyi and Peng, Zhenghao and Xue, Zhenghai and Zhang, Qihang and Zhou, Bolei},
-  journal={arXiv preprint arXiv:2109.12674},
-  year={2021}
+@article{li2022metadrive,
+  title={Metadrive: Composing diverse driving scenarios for generalizable reinforcement learning},
+  author={Li, Quanyi and Peng, Zhenghao and Feng, Lan and Zhang, Qihang and Xue, Zhenghai and Zhou, Bolei},
+  journal={IEEE Transactions on Pattern Analysis and Machine Intelligence},
+  year={2022}
 }
 ```
 
