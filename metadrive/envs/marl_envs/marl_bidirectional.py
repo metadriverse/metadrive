@@ -1,44 +1,18 @@
-from metadrive.component.map.pg_map import PGMap
-from metadrive.component.road_network.road import Road
-from metadrive.envs.marl_envs.multi_agent_metadrive import MultiAgentMetaDrive
-from metadrive.utils import Config, get_np_random
-from metadrive.manager.map_manager import MapManager
-from metadrive.utils.math_utils import clip
-from metadrive.envs.marl_envs.marl_bottleneck import MultiAgentBottleneckEnv
-
-
-
-
-
-
-
 from panda3d.core import NodePath
 
-from metadrive.component.pgblock.create_pg_block_utils import CreateRoadFrom, CreateAdverseRoad, ExtendStraightLane
-from metadrive.component.pgblock.pg_block import PGBlock, PGBlockSocket, BaseBlock
 from metadrive.component.lane.straight_lane import StraightLane
+from metadrive.component.map.pg_map import PGMap
+from metadrive.component.pgblock.create_pg_block_utils import CreateRoadFrom, ExtendStraightLane, get_lanes_on_road
+from metadrive.component.pgblock.first_block import FirstPGBlock
 from metadrive.component.road_network import Road
 from metadrive.component.road_network.node_road_network import NodeRoadNetwork
-from metadrive.constants import Decoration, LineType
+from metadrive.constants import LineType
 from metadrive.engine.core.physics_world import PhysicsWorld
+from metadrive.envs.marl_envs.marl_bottleneck import MultiAgentBottleneckEnv
+from metadrive.manager.map_manager import MapManager
+from metadrive.utils import Config, get_np_random
 from metadrive.utils.space import ParameterSpace
 
-
-
-
-
-from metadrive.component.pgblock.create_pg_block_utils import get_lanes_on_road
-# from metadrive.component.blocks.pg_block import PGBlock, PGBlockSocket
-# from metadrive.component.road.road import Road
-# from metadrive.component.road_network.base_road_network import RoadNetwork
-from panda3d.core import NodePath
-
-from metadrive.component.lane.straight_lane import StraightLane
-from metadrive.constants import Decoration, LineType
-from metadrive.engine.core.physics_world import PhysicsWorld
-from metadrive.utils.space import ParameterSpace
-
-from metadrive.component.pgblock.first_block import FirstPGBlock
 
 class SecondPGBlock(FirstPGBlock):
     """
@@ -67,7 +41,9 @@ class SecondPGBlock(FirstPGBlock):
             ignore_intersection_checking=False
     ):
         # place_holder = PGBlockSocket(Road(Decoration.start, Decoration.end), Road(Decoration.start, Decoration.end))
-        super(SecondPGBlock, self).__init__(global_network=global_network, lane_width=lane_width, lane_num=lane_num, render_root_np=render_root_np, physics_world=physics_world, length=length, ignore_intersection_checking=ignore_intersection_checking)
+        super(SecondPGBlock, self).__init__(global_network=global_network, lane_width=lane_width, lane_num=lane_num,
+                                            render_root_np=render_root_np, physics_world=physics_world, length=length,
+                                            ignore_intersection_checking=ignore_intersection_checking)
         # assert length > self.ENTRANCE_LENGTH, (length, self.ENTRANCE_LENGTH)
         self._block_objects = []
         basic_lane = StraightLane(
@@ -76,7 +52,7 @@ class SecondPGBlock(FirstPGBlock):
             width=lane_width
         )
         ego_v_spawn_road = Road(self.NODE_1, self.NODE_2)
-        ego_v_spawn_road2 = Road(self.NODE_2, self.NODE_1)
+        # ego_v_spawn_road2 = Road(self.NODE_2, self.NODE_1)
         print("this is second block")
 
         CreateRoadFrom(
@@ -96,15 +72,15 @@ class SecondPGBlock(FirstPGBlock):
         reference_lane = lanes[-1]
         num = len(lanes)
         width = reference_lane.width_at(0)
-        if isinstance(reference_lane, StraightLane):
-            start_point = reference_lane.position(lanes[-1].length, -(num - 1) * width)
-            end_point = reference_lane.position(0, -(num - 1) * width)
+        assert isinstance(reference_lane, StraightLane)
+        start_point = reference_lane.position(lanes[-1].length, -(num - 1) * width)
+        end_point = reference_lane.position(0, -(num - 1) * width)
 
-            symmetric_lane = StraightLane(
-                start_point, end_point, width, lanes[-1].line_types, reference_lane.forbidden,
-                reference_lane.speed_limit,
-                reference_lane.priority
-            )
+        symmetric_lane = StraightLane(
+            start_point, end_point, width, lanes[-1].line_types, reference_lane.forbidden,
+            reference_lane.speed_limit,
+            reference_lane.priority
+        )
 
         CreateRoadFrom(
             symmetric_lane,
@@ -146,16 +122,16 @@ class SecondPGBlock(FirstPGBlock):
         reference_lane = lanes[-1]
         num = len(lanes)
         width = reference_lane.width_at(0)
-        if isinstance(reference_lane, StraightLane):
-            start_point = reference_lane.position(lanes[-1].length, -(num - 1) * width)
-            end_point = reference_lane.position(0, -(num - 1) * width)
-            print("startpoint: " + str(start_point))
-            print("endpoint: " + str(end_point))
-            symmetric_lane = StraightLane(
-                start_point, end_point, width, lanes[-1].line_types, reference_lane.forbidden,
-                reference_lane.speed_limit,
-                reference_lane.priority
-            )
+        assert isinstance(reference_lane, StraightLane)
+        start_point = reference_lane.position(lanes[-1].length, -(num - 1) * width)
+        end_point = reference_lane.position(0, -(num - 1) * width)
+        print("startpoint: " + str(start_point))
+        print("endpoint: " + str(end_point))
+        symmetric_lane = StraightLane(
+            start_point, end_point, width, lanes[-1].line_types, reference_lane.forbidden,
+            reference_lane.speed_limit,
+            reference_lane.priority
+        )
 
         print("symmetric_lane: " + str(symmetric_lane))
         CreateRoadFrom(
@@ -316,33 +292,15 @@ class SecondPGBlock(FirstPGBlock):
         self._respawn_roads = [other_v_spawn_road]
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 MABottleneckConfig = dict(
     spawn_roads=[Road(SecondPGBlock.NODE_2, SecondPGBlock.NODE_3)],
     num_agents=2,
     map_config=dict(exit_length=60, bottle_lane_num=1, neck_lane_num=1, neck_length=20, lane_width=3, lane_num=1),
     cross_yellow_line_done=False,
     vehicle_config={
-        #"show_lidar": True,
-        #"show_side_detector": True,
-        #"show_lane_line_detector": True,
+        # "show_lidar": True,
+        # "show_side_detector": True,
+        # "show_lane_line_detector": True,
         "side_detector": dict(num_lasers=4, distance=20),  # laser num, distance
         "lane_line_detector": dict(num_lasers=4, distance=20),
         "lidar": {'num_lasers': 72, 'distance': 30, 'num_others': 0, 'gaussian_noise': 0.0, 'dropout_prob': 0.0}
@@ -400,52 +358,69 @@ class MultiAgentBidirectional(MultiAgentBottleneckEnv):
         safe_places_dict = self.engine.spawn_manager.get_available_respawn_places(
             self.current_map, randomize=randomize_position
         )
-
-        #safe_places_dict = {'>>|>>>|0|0': {'identifier': '>>|>>>|0|0', 'config': {'spawn_lane_index': ('>>', '>>>', 0), 'spawn_longitude': 4.0, 'spawn_lateral': 0}, 'spawn_point_heading': 0.0, 'spawn_point_position': (14.0, 0.0)}, '>>>|>>|0|0': {'identifier': '>>>|>>|0|0', 'config': {'spawn_lane_index': ('>>>', '>>', 0), 'spawn_longitude': 0.0, 'spawn_lateral': 0}, 'spawn_point_heading': 0.0, 'spawn_point_position': (14.0, 0.0)} }
-
         if len(safe_places_dict) == 0:
-            return None, None
+            return None, None, None
 
-        safe_places_dict = {'>>|>>>|0|0': {'identifier': '>>|>>>|0|0', 'config': {'destination_node': ('1y0_1_'), 'spawn_lane_index': ('>>', '>>>', 0), 'spawn_longitude': 4.0, 'spawn_lateral': 0}, 'spawn_point_heading': 0.0, 'spawn_point_position': (14.0, 0.0)}, '1y0_1_|1y0_0_|0|0': {'identifier': '1y0_1_|1y0_0_|0|0', 'config': {'destination_node': ('>'), 'spawn_lane_index': ('1y0_1_', '1y0_0_', 0), 'spawn_longitude': 0.0, 'spawn_lateral': 0}, 'spawn_point_heading': 0.0, 'spawn_point_position': (14.0, 0.0)}}
+        safe_places_dict = {'>>|>>>|0|0': {'identifier': '>>|>>>|0|0', 'config': {'destination_node': ('1y0_1_'),
+                                                                                  'spawn_lane_index': ('>>', '>>>', 0),
+                                                                                  'spawn_longitude': 4.0,
+                                                                                  'spawn_lateral': 0},
+                                           'spawn_point_heading': 0.0, 'spawn_point_position': (14.0, 0.0)},
+                            '1y0_1_|1y0_0_|0|0': {'identifier': '1y0_1_|1y0_0_|0|0',
+                                                  'config': {'destination_node': ('>'),
+                                                             'spawn_lane_index': ('1y0_1_', '1y0_0_', 0),
+                                                             'spawn_longitude': 0.0, 'spawn_lateral': 0},
+                                                  'spawn_point_heading': 0.0, 'spawn_point_position': (14.0, 0.0)}}
 
-        #'1y0_0_|>>>|0|0': {'identifier': '1y0_0_|>>>|0|0', 'config': {'destination_node': ('>'), 'spawn_lane_index': ('1y0_0_', '>>>', 0), 'spawn_longitude': 0.0, 'spawn_lateral': 0}, 'spawn_point_heading': 0.0, 'spawn_point_position': (14.0, 0.0)} }
+        # '1y0_0_|>>>|0|0': {'identifier': '1y0_0_|>>>|0|0', 'config': {'destination_node': ('>'),
+        # 'spawn_lane_index': ('1y0_0_', '>>>', 0), 'spawn_longitude': 0.0, 'spawn_lateral': 0},
+        # 'spawn_point_heading': 0.0, 'spawn_point_position': (14.0, 0.0)} }
 
-        print("Safe Spawn places: "+str(safe_places_dict))
-        #file = open("car.txt", "a")
-        #file.write("Safe_places_dict = " + str(safe_places_dict)+" list(safe_places_dict.keys(): " + str(list(safe_places_dict.keys())))
-        #file.write("list(safe_places_dict.keys(): " + str(list(safe_places_dict.keys()))
-        #file.close()
+        # print("Safe Spawn places: "+str(safe_places_dict))
+        # file = open("car.txt", "a")
+        # file.write("Safe_places_dict = " + str(safe_places_dict)+" list(safe_places_dict.keys(): " + str(list(
+        # safe_places_dict.keys())))
+        # file.write("list(safe_places_dict.keys(): " + str(list(safe_places_dict.keys()))
+        # file.close()
 
         born_place_index = get_np_random(self._DEBUG_RANDOM_SEED).choice(list(safe_places_dict.keys()), 1)[0]
         new_spawn_place = safe_places_dict[born_place_index]
-        file = open("car1.txt", "w")
-        file.write("born_place_index = " + str(born_place_index)+" new_spawn_place: " + str(new_spawn_place))
-        file.close()
+        # file = open("car1.txt", "w")
+        # file.write("born_place_index = " + str(born_place_index)+" new_spawn_place: " + str(new_spawn_place))
+        # file.close()
 
-        #print("born_place_index :" +str(born_place_index))
-        #print("new_spawn_place :"+str(new_spawn_place))
-        new_agent_id, vehicle = self.agent_manager.propose_new_vehicle()
+        # born_place_index = get_np_random(self._DEBUG_RANDOM_SEED).choice(list(safe_places_dict.keys()), 1)[0]
+        # new_spawn_place = safe_places_dict[born_place_index]
+
+        new_agent_id, vehicle, step_info = self.agent_manager.propose_new_vehicle()
+        # new_spawn_place_config = new_spawn_place["config"]
+        # new_spawn_place_config = self.engine.spawn_manager.update_destination_for(new_agent_id,
+        # new_spawn_place_config)
+        # vehicle.config.update(new_spawn_place_config)
+
         new_spawn_place_config = new_spawn_place["config"]
         '''
         cho = randint(0, 1)
         if cho == 0:
-            new_spawn_place_config = {'spawn_lane_index': ('1y0_1_', '1y0_0_', 0), 'destination_node': ('>>'), 'spawn_longitude': 4.0, 'spawn_lateral': 0}
+            new_spawn_place_config = {'spawn_lane_index': ('1y0_1_', '1y0_0_', 0), 'destination_node': ('>>'), 
+            'spawn_longitude': 4.0, 'spawn_lateral': 0}
             cho = 1 
         else:
-            new_spawn_place_config = {'spawn_lane_index': ('>', '>>', 0), 'destination_node': ('1y0_0_'), 'spawn_longitude': 0.0, 'spawn_lateral': 0}
+            new_spawn_place_config = {'spawn_lane_index': ('>', '>>', 0), 'destination_node': ('1y0_0_'), 
+            'spawn_longitude': 0.0, 'spawn_lateral': 0}
             cho = 0
         '''
-        print("new_spawn_place_config:" +str(new_spawn_place_config))
+        print("new_spawn_place_config:" + str(new_spawn_place_config))
         new_spawn_place_config = self.engine.spawn_manager.update_destination_for(new_agent_id, new_spawn_place_config)
         vehicle.config.update(new_spawn_place_config)
+
         vehicle.reset()
-        vehicle.after_step()
+        after_step_info = vehicle.after_step()
+        step_info.update(after_step_info)
         self.dones[new_agent_id] = False  # Put it in the internal dead-tracking dict.
 
         new_obs = self.observations[new_agent_id].observe(vehicle)
-        return new_agent_id, new_obs
-
-
+        return new_agent_id, new_obs, step_info
 
 
 def _vis(render=True):
@@ -503,11 +478,9 @@ def _vis(render=True):
     env.close()
 
 
-
-
 if __name__ == "__main__":
     # _draw()
-    _vis(render=False)
+    _vis(render=True)
     # _vis_debug_respawn()
     # _profile()
     # _long_run()
