@@ -51,10 +51,12 @@ class SecondPGBlock(FirstPGBlock):
             line_types=(LineType.BROKEN, LineType.SIDE),
             width=lane_width
         )
+
+
+        # Node 1 -> Node 2
         ego_v_spawn_road = Road(self.NODE_1, self.NODE_2)
         # ego_v_spawn_road2 = Road(self.NODE_2, self.NODE_1)
-        print("this is second block")
-
+        # print("this is second block")
         CreateRoadFrom(
             basic_lane,
             lane_num,
@@ -67,6 +69,7 @@ class SecondPGBlock(FirstPGBlock):
             ignore_intersection_checking=self.ignore_intersection_checking
         )
 
+        # Node 2 -> Node 1
         adverse_road = Road(self.NODE_2, self.NODE_1)
         lanes = get_lanes_on_road(ego_v_spawn_road, self.block_network)
         reference_lane = lanes[-1]
@@ -439,6 +442,9 @@ def _vis(render=True):
             # "debug": True,
             "manual_control": render,
             "num_agents": 2,
+
+            # "debug_physics_world": True,
+            "debug": True,
         }
     )
     o = env.reset()
