@@ -17,11 +17,7 @@ if __name__ == "__main__":
         # map="r",  # seven block
 
         # Solution 2: you can define more complex map config
-        map_config=dict(
-            lane_num=1,
-            type="block_sequence",
-            config="r"
-        )
+        map_config=dict(lane_num=1, type="block_sequence", config="r")
     )
 
     env = MetaDriveEnv(config)
