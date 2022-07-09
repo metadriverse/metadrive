@@ -30,7 +30,7 @@ def _test_destroy(config):
         env.close()
 
 
-def test_destroy_rgb(obs="rgb"):
+def _test_destroy_rgb(obs="rgb"):
     # Close and reset
     config = {"environment_num": 1, "start_seed": 3, "manual_control": False}
     if obs == "state":
