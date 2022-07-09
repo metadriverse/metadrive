@@ -277,12 +277,13 @@ class BaseEngine(EngineCore, Randomizable):
                 if manager is not None:
                     manager.destroy()
         # clear all objects in spawned_object
-        self.clear_objects([id for id in self._spawned_objects.keys()])
+        # self.clear_objects([id for id in self._spawned_objects.keys()])
         for id, obj in self._spawned_objects.items():
             if id in self._object_policies:
                 self._object_policies.pop(id).destroy()
             if id in self._object_tasks:
                 self._object_tasks.pop(id).destroy()
+            obj.destroy()
         for cls, pending_obj in self._dying_objects.items():
             for obj in pending_obj:
                 obj.destroy()

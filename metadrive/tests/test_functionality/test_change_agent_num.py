@@ -17,13 +17,17 @@ class ChangeNEnv(MultiAgentRoundaboutEnv):
 
 def test_change_agent_num():
     e = ChangeNEnv({})
-    for num_agents in [1, 5, 10, 30]:
-        e.close_and_reset_num_agents(num_agents)
-        e.reset()
-        for _ in range(100):
-            e.step(e.action_space.sample())
-            # e.render("topdown")
-        print("Hi!!! We are in environment now! Current agents: ", len(e.vehicles.keys()))
+    try:
+        for num_agents in [1, 5, 10, 30]:
+            e.close_and_reset_num_agents(num_agents)
+            e.reset()
+            for _ in range(100):
+                e.step(e.action_space.sample())
+                # e.render("topdown")
+            print("Hi!!! We are in environment now! Current agents: ", len(e.vehicles.keys()))
+            e.close()
+    finally:
+        e.close()
 
 
 if __name__ == '__main__':
