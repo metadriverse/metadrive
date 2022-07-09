@@ -668,7 +668,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         if len(self.image_sensors) != 0:
             for sensor in self.image_sensors.values():
                 sensor.destroy()
-        self.image_sensors = None
+        self.image_sensors = {}
         self.engine = None
 
     def set_heading_theta(self, heading_theta, rad_to_degree=True) -> None:

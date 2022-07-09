@@ -271,22 +271,24 @@ class BaseEngine(EngineCore, Randomizable):
         Note:
         Instead of calling this func directly, close Engine by using engine_utils.close_engine
         """
-        # clear all objects in spawned_object
-        for id, obj in self._spawned_objects.items():
-            if id in self._object_policies:
-                self._object_policies.pop(id).destroy()
-            if id in self._object_tasks:
-                self._object_tasks.pop(id).destroy()
-        for cls, pending_obj in self._dying_objects.items():
-            for obj in pending_obj:
-                obj.destroy()
-        if self.main_camera is not None:
-            self.main_camera.destroy()
         if len(self._managers) > 0:
             for name, manager in self._managers.items():
                 setattr(self, name, None)
                 if manager is not None:
                     manager.destroy()
+        # clear all objects in spawned_object
+        # self.clear_objects([id for id in self._spawned_objects.keys()])
+        for id, obj in self._spawned_objects.items():
+            if id in self._object_policies:
+                self._object_policies.pop(id).destroy()
+            if id in self._object_tasks:
+                self._object_tasks.pop(id).destroy()
+            obj.destroy()
+        for cls, pending_obj in self._dying_objects.items():
+            for obj in pending_obj:
+                obj.destroy()
+        if self.main_camera is not None:
+            self.main_camera.destroy()
         self.interface.destroy()
         self.clear_world()
         self.close_world()
