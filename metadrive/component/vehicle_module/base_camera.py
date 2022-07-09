@@ -6,8 +6,8 @@ from metadrive.engine.core.image_buffer import ImageBuffer
 
 class BaseCamera(ImageBuffer):
     """
-    To enable the image observation, set offscreen render to True. The instance of subclasses will be singleton, so that
-    every objects share the same camera to boost the efficiency and save memory. Camera configuration is read from the
+    To enable the image observation, set offscreen_render to True. The instance of subclasses will be singleton, so that
+    every objects share the same camera, to boost the efficiency and save memory. Camera configuration is read from the
     global config automatically.
     """
     # shape(dim_1, dim_2)
@@ -27,7 +27,7 @@ class BaseCamera(ImageBuffer):
         if not self.initialized():
             super(BaseCamera, self).__init__(self.BUFFER_W, self.BUFFER_H, Vec3(0.0, 0.8, 1.5), self.BKG_COLOR)
             type(self)._singleton = self
-            self.init_num = 0
+            self.init_num = 1
         else:
             type(self)._singleton.init_num += 1
 
@@ -56,8 +56,9 @@ class BaseCamera(ImageBuffer):
                 type(self)._singleton = None
             else:
                 assert type(self)._singleton.init_num == 1 or type(self)._singleton.init_num == 0
-                # ImageBuffer.destroy(type(self)._singleton)
-                # type(self)._singleton = None
+                ImageBuffer.destroy(type(self)._singleton)
+                type(self)._singleton = None
+                type(self).init_num = 0
 
     def get_cam(self):
         return type(self)._singleton.cam

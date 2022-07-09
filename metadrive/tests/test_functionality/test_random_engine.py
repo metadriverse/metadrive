@@ -107,7 +107,7 @@ def test_random_traffic():
     has_traffic = False
     try:
         last_pos = None
-        for i in range(20):
+        for i in range(10):
             obs = env.reset(force_seed=5)
             assert env.engine.traffic_manager.random_traffic
             new_pos = [v.position for v in env.engine.traffic_manager.traffic_vehicles]

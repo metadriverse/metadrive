@@ -704,7 +704,7 @@ if __name__ == '__main__':
     # test_ma_toll_env()
     # test_ma_toll_horizon()
     # test_ma_toll_reset()
-    test_ma_toll_reward_done_alignment()
+    test_ma_toll_reward_done_alignment_1()
     # test_ma_toll_close_spawn()
     # test_ma_toll_reward_sign()
     # test_ma_toll_init_space()
