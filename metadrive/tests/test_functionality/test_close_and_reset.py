@@ -5,7 +5,7 @@ from metadrive.envs import MetaDriveEnv
 # https://github.com/metadriverse/metadrive/issues/191
 def test_close_and_reset():
 
-    env = MetaDriveEnv({"start_seed":1000, "environment_num":1})
+    env = MetaDriveEnv({"start_seed": 1000, "environment_num": 1})
     eval_env = MetaDriveEnv()
     env.reset()
     for i in range(100):
@@ -24,8 +24,6 @@ def test_close_and_reset():
     for i in range(100):
         env.step(env.action_space.sample())
     env.close()
-
-
 
 
 if __name__ == '__main__':
