@@ -24,7 +24,6 @@ class Space:
     code that applies to any Env. For example, you can choose a random
     action.
     """
-
     def __init__(self, shape=None, dtype=None):
         import numpy as np  # takes about 300-400ms to import, so we load lazily
         self.shape = None if shape is None else tuple(shape)
@@ -94,7 +93,6 @@ class Dict(Space):
         })
     })
     """
-
     def __init__(self, spaces=None, **spaces_kwargs):
         assert (spaces is None) or (not spaces_kwargs), 'Use either Dict(spaces=dict(...)) or Dict(foo=x, bar=z)'
         if spaces is None:
@@ -157,7 +155,6 @@ class ParameterSpace(Dict):
     Usage:
     PGSpace({"lane_length":length})
     """
-
     def __init__(self, our_config: tp.Dict[str, tp.Union[BoxSpace, DiscreteSpace, ConstantSpace]]):
         super(ParameterSpace, self).__init__(ParameterSpace.wrap2gym_space(our_config))
         self.parameters = set(our_config.keys())
@@ -167,11 +164,11 @@ class ParameterSpace(Dict):
         ret = dict()
         for key, value in our_config.items():
             if isinstance(value, BoxSpace):
-                ret[key] = Box(low=value.min, high=value.max, shape=(1,))
+                ret[key] = Box(low=value.min, high=value.max, shape=(1, ))
             elif isinstance(value, DiscreteSpace):
-                ret[key] = Box(low=value.min, high=value.max, shape=(1,), dtype=np.int64)
+                ret[key] = Box(low=value.min, high=value.max, shape=(1, ), dtype=np.int64)
             elif isinstance(value, ConstantSpace):
-                ret[key] = Box(low=value.value, high=value.value, shape=(1,))
+                ret[key] = Box(low=value.value, high=value.value, shape=(1, ))
             else:
                 raise ValueError("{} can not be wrapped in gym space".format(key))
         return ret
@@ -310,7 +307,7 @@ class BlockParameterSpace:
         Parameter.length: BoxSpace(min=20, max=50),  # the length of straigh part
         Parameter.lane_num: DiscreteSpace(min=1, max=2),  # the lane num increased or descreased now 1-2
         "bottle_len": ConstantSpace(20),
-        "solid_center_line": ConstantSpace(0) # bool, turn on yellow line or not
+        "solid_center_line": ConstantSpace(0)  # bool, turn on yellow line or not
     }
     TOLLGATE_PARAMETER = {
         Parameter.length: ConstantSpace(20),  # the length of straigh part
@@ -333,7 +330,6 @@ class Discrete(Space):
         >>> Discrete(2)
 
     """
-
     def __init__(self, n):
         assert n >= 0
         self.n = n
@@ -377,7 +373,6 @@ class Box(Space):
         Box(2,)
 
     """
-
     def __init__(self, low, high, shape=None, dtype=np.float32):
         assert dtype is not None, 'dtype must be explicitly provided. '
         self.dtype = np.dtype(dtype)

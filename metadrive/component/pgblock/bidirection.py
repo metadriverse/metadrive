@@ -8,16 +8,16 @@ from metadrive.utils.space import ParameterSpace, Parameter, BlockParameterSpace
 
 
 def create_overlap_road(
-        positive_road: "Road",
-        roadnet_to_get_road: "NodeRoadNetwork",  # mostly, block network
-        roadnet_to_check_cross: "NodeRoadNetwork",  # mostly, previous global network
-        ignore_start: str = None,
-        ignore_end: str = None,
-        center_line_type=LineType.CONTINUOUS,  # Identical to Block.CENTER_LINE_TYPE
-        side_lane_line_type=LineType.SIDE,
-        inner_lane_line_type=LineType.BROKEN,
-        center_line_color=LineColor.YELLOW,
-        ignore_intersection_checking=None
+    positive_road: "Road",
+    roadnet_to_get_road: "NodeRoadNetwork",  # mostly, block network
+    roadnet_to_check_cross: "NodeRoadNetwork",  # mostly, previous global network
+    ignore_start: str = None,
+    ignore_end: str = None,
+    center_line_type=LineType.CONTINUOUS,  # Identical to Block.CENTER_LINE_TYPE
+    side_lane_line_type=LineType.SIDE,
+    inner_lane_line_type=LineType.BROKEN,
+    center_line_color=LineColor.YELLOW,
+    ignore_intersection_checking=None
 ) -> bool:
     """
     Create overlap lanes
@@ -31,8 +31,7 @@ def create_overlap_road(
         start_point = reference_lane.position(lanes[-1].length, 0)
         end_point = reference_lane.position(0, 0)
         symmetric_lane = StraightLane(
-            start_point, end_point, width, lanes[-1].line_types, reference_lane.forbidden,
-            reference_lane.speed_limit,
+            start_point, end_point, width, lanes[-1].line_types, reference_lane.forbidden, reference_lane.speed_limit,
             reference_lane.priority
         )
     else:
@@ -57,11 +56,7 @@ def create_overlap_road(
 
 
 class BidirectionSocket(PGBlockSocket):
-    def __init__(self,
-                 fake_positive_lane,
-                 fake_negative_lane,
-                 positive_road: Road,
-                 negative_road: Road = None):
+    def __init__(self, fake_positive_lane, fake_negative_lane, positive_road: Road, negative_road: Road = None):
         super(BidirectionSocket, self).__init__(positive_road, negative_road)
         self.fake_positive_lane = fake_positive_lane
         self.fake_negative_lane = fake_negative_lane
@@ -117,5 +112,5 @@ class Bidirection(PGBlock):
             ignore_intersection_checking=self.ignore_intersection_checking
         ) and no_cross
         new_lane.line_colors = [LineColor.GREY, LineColor.GREY]
-        self.add_sockets(BidirectionSocket(fake_positive_lane, fake_negative_lane,socket, _socket))
+        self.add_sockets(BidirectionSocket(fake_positive_lane, fake_negative_lane, socket, _socket))
         return no_cross

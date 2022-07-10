@@ -48,15 +48,14 @@ class MABidirectionMap(PGMap):
             1, last_block.get_socket(index=0), self.road_network, random_seed=1, ignore_intersection_checking=False
         )
         merge.construct_from_config(
-            dict(
-                lane_num=self.config["bottle_lane_num"] - self.config["neck_lane_num"],
-                length=3
-            ), parent_node_path, physics_world
+            dict(lane_num=self.config["bottle_lane_num"] - self.config["neck_lane_num"], length=3), parent_node_path,
+            physics_world
         )
         self.blocks.append(merge)
 
-        straight = Bidirection(2, merge.get_socket(index=0), self.road_network, random_seed=1,
-                               ignore_intersection_checking=False)
+        straight = Bidirection(
+            2, merge.get_socket(index=0), self.road_network, random_seed=1, ignore_intersection_checking=False
+        )
         straight.construct_block(parent_node_path, physics_world)
         self.blocks.append(straight)
 
