@@ -1,4 +1,5 @@
 from metadrive.envs.metadrive_env import MetaDriveEnv
+from metadrive.policy.idm_policy import IDMPolicy
 from metadrive.utils import setup_logger
 
 if __name__ == "__main__":
@@ -23,6 +24,7 @@ if __name__ == "__main__":
             "rgb_clip": True,
             "debug": False,
             "map": "yBY",
+            "agent_policy": IDMPolicy,
             "random_traffic": False,
             "random_lane_width": True,
             # "random_agent_model": True,
@@ -57,14 +59,13 @@ if __name__ == "__main__":
         #     env.close()
         #     env.reset()
         # info["fuel"] = env.vehicle.energy_consumption
-        # env.render(
-        #     text={
-        #         "heading_diff": env.vehicle.heading_diff(env.vehicle.lane),
-        #         "engine_force": env.vehicle.config["max_engine_force"],
-        #         "current_seed": env.current_seed,
-        #         "lane_width": env.vehicle.lane.width
-        #     }
-        # )
+        env.render(
+            text={
+                "heading_diff": env.vehicle.heading_diff(env.vehicle.lane),
+                "lane_width": env.vehicle.lane.width,
+                "lateral": env.vehicle.lane.local_coordinates(env.vehicle.position)
+            }
+        )
         # # assert env.observation_space.contains(o)
         # if (s + 1) % 100 == 0:
         #     print(
@@ -73,7 +74,7 @@ if __name__ == "__main__":
         #             time.time() - start, (s + 1) / (time.time() - start)
         #         )
         #     )
-        if d:
-            #     # env.close()
-            #     print(len(env.engine._spawned_objects))
-            env.reset()
+        # if d:
+            # #     # env.close()
+            # #     print(len(env.engine._spawned_objects))
+            # env.reset()
