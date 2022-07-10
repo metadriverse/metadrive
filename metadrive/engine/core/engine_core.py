@@ -133,7 +133,8 @@ class EngineCore(ShowBase.ShowBase):
             loadPrcFileData("", "compressed-textures 1")  # Default to compress
 
         super(EngineCore, self).__init__(windowType=self.mode)
-
+        self.w_scale = 1
+        self.h_scale = 1
         # main_window_position = (0, 0)
         if self.mode == RENDER_MODE_ONSCREEN:
             h = self.pipe.getDisplayHeight()
@@ -166,8 +167,9 @@ class EngineCore(ShowBase.ShowBase):
             # )
 
         # screen scale factor
-        self.w_scale = max(self.global_config["window_size"][0] / self.global_config["window_size"][1], 1)
-        self.h_scale = max(self.global_config["window_size"][1] / self.global_config["window_size"][0], 1)
+        if self.mode == RENDER_MODE_ONSCREEN:
+            self.w_scale = max(self.global_config["window_size"][0] / self.global_config["window_size"][1], 1)
+            self.h_scale = max(self.global_config["window_size"][1] / self.global_config["window_size"][0], 1)
 
         if self.mode == RENDER_MODE_ONSCREEN:
             self.disableMouse()
