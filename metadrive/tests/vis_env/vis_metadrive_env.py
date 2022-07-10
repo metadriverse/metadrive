@@ -22,18 +22,7 @@ if __name__ == "__main__":
             "need_inverse_traffic": True,
             "rgb_clip": True,
             "debug": False,
-            # "debug_static_world": True,
-            # "random_lane_num": True,
-
-            # "map_config": {
-            #     Map.GENERATE_TYPE: MapGenerateMethod.BIG_BLOCK_SEQUENCE,
-            #     Map.GENERATE_CONFIG: "OXO",
-            #     Map.LANE_WIDTH: 3.5,
-            #     Map.LANE_NUM: 3,
-            # },
-            # "pstats": True,
-            # "discrete_action": True,
-            "map": "T",
+            "map": "yBY",
             "random_traffic": False,
             "random_lane_width": True,
             # "random_agent_model": True,
@@ -53,7 +42,6 @@ if __name__ == "__main__":
                 # # "show_line_to_dest": True,
                 # "show_dest_mark": True
             },
-            "force_destroy": True
         }
     )
     import time

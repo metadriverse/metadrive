@@ -55,6 +55,23 @@ def create_overlap_road(
     return success
 
 
+class BidirectionSocket(PGBlockSocket):
+    def __init__(self,
+                 fake_positive_lane,
+                 fake_negative_lane,
+                 positive_road: Road,
+                 negative_road: Road = None):
+        super(BidirectionSocket, self).__init__(positive_road, negative_road)
+        self.fake_positive_lane = fake_positive_lane
+        self.fake_negative_lane = fake_negative_lane
+
+    def get_positive_lanes(self, global_network):
+        return [self.fake_positive_lane]
+
+    def get_negative_lanes(self, global_network):
+        return [self.fake_negative_lane]
+
+
 class Bidirection(PGBlock):
     ID = "B"
     SOCKET_NUM = 1
@@ -64,9 +81,18 @@ class Bidirection(PGBlock):
         self.set_part_idx(0)  # only one part in simple block like straight, and curve
         para = self.get_config()
         length = para[Parameter.length]
-        basic_lane = self.positive_basic_lane
-        assert isinstance(basic_lane, Bidirection), "Straight road can only connect straight type"
-        new_lane = ExtendStraightLane(basic_lane, length, [LineType.BROKEN, LineType.SIDE])
+        basic_lane = self.positive_lanes[0]
+
+        fake_positive_lane = ExtendStraightLane(basic_lane, length, [LineType.BROKEN, LineType.SIDE])
+        reference_lane = fake_positive_lane
+        start_point = reference_lane.position(fake_positive_lane.length, -reference_lane.width)
+        end_point = reference_lane.position(0, -reference_lane.width)
+        symmetric_lane = StraightLane(start_point, end_point, reference_lane.width)
+        fake_negative_lane = symmetric_lane
+
+        start_position = basic_lane.position(basic_lane.length, -basic_lane.width / 2)
+        end_position = basic_lane.position(basic_lane.length + length, -basic_lane.width / 2)
+        new_lane = StraightLane(start_position, end_position, basic_lane.width, [LineType.BROKEN, LineType.SIDE])
         start = self.pre_block_socket.positive_road.end_node
         end = self.add_road_node()
         socket = Road(start, end)
@@ -75,7 +101,7 @@ class Bidirection(PGBlock):
         # create positive road
         no_cross = CreateRoadFrom(
             new_lane,
-            self.positive_lane_num,
+            1,
             socket,
             self.block_network,
             self._global_network,
@@ -88,5 +114,5 @@ class Bidirection(PGBlock):
             self._global_network,
             ignore_intersection_checking=self.ignore_intersection_checking
         ) and no_cross
-        self.add_sockets(PGBlockSocket(socket, _socket))
+        self.add_sockets(BidirectionSocket(fake_positive_lane, fake_negative_lane,socket, _socket))
         return no_cross
