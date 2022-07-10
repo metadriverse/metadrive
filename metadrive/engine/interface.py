@@ -234,7 +234,7 @@ class VehiclePanel(ImageBuffer):
             Vec3(-0.9, -1.01, 0.78),
             self.BKG_COLOR,
             parent_node=self.aspect2d_np,
-            engine=engine
+            # engine=engine
         )
         self.add_display_region(self.display_region_size)
 

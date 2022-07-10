@@ -27,10 +27,10 @@ class ImageBuffer:
         bkg_color: Union[Vec4, Vec3],
         parent_node: NodePath = None,
         frame_buffer_property=None,
-        engine=None
+        # engine=None
     ):
-        from metadrive.engine.engine_utils import get_engine
-        self.engine = engine or get_engine()
+        # from metadrive.engine.engine_utils import get_engine
+        # self.engine = engine or get_engine()
         try:
             assert self.engine.win is not None, "{} cannot be made without use_render or offscreen_render".format(
                 self.__class__.__name__
@@ -64,6 +64,11 @@ class ImageBuffer:
         if parent_node is not None:
             self.origin.reparentTo(parent_node)
         logging.debug("Load Image Buffer: {}".format(self.__class__.__name__))
+
+    @property
+    def engine(self):
+        from metadrive.engine.engine_utils import get_engine
+        return get_engine()
 
     def get_image(self):
         """
