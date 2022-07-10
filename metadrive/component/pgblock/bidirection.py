@@ -37,6 +37,7 @@ def create_overlap_road(
         )
     else:
         raise ValueError("Creating other lanes is not supported")
+    symmetric_lane.line_colors = [LineColor.GREY, LineColor.GREY]
     success = CreateRoadFrom(
         symmetric_lane,
         int(num / 2),
@@ -93,6 +94,7 @@ class Bidirection(PGBlock):
         start_position = basic_lane.position(basic_lane.length, -basic_lane.width / 2)
         end_position = basic_lane.position(basic_lane.length + length, -basic_lane.width / 2)
         new_lane = StraightLane(start_position, end_position, basic_lane.width, [LineType.BROKEN, LineType.SIDE])
+
         start = self.pre_block_socket.positive_road.end_node
         end = self.add_road_node()
         socket = Road(start, end)
@@ -114,5 +116,6 @@ class Bidirection(PGBlock):
             self._global_network,
             ignore_intersection_checking=self.ignore_intersection_checking
         ) and no_cross
+        new_lane.line_colors = [LineColor.GREY, LineColor.GREY]
         self.add_sockets(BidirectionSocket(fake_positive_lane, fake_negative_lane,socket, _socket))
         return no_cross

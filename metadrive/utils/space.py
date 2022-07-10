@@ -309,7 +309,8 @@ class BlockParameterSpace:
     BOTTLENECK_PARAMETER = {
         Parameter.length: BoxSpace(min=20, max=50),  # the length of straigh part
         Parameter.lane_num: DiscreteSpace(min=1, max=2),  # the lane num increased or descreased now 1-2
-        "bottle_len": ConstantSpace(20)
+        "bottle_len": ConstantSpace(20),
+        "solid_center_line": ConstantSpace(0) # bool, turn on yellow line or not
     }
     TOLLGATE_PARAMETER = {
         Parameter.length: ConstantSpace(20),  # the length of straigh part
