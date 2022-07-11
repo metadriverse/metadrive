@@ -5,10 +5,11 @@ if __name__ == "__main__":
     setup_logger(True)
     env = MetaDriveEnv(
         {
-            "environment_num": 1,
+            "environment_num": 1000,
             "traffic_density": 0,
             "traffic_mode": "trigger",
-            "start_seed": 22,
+            "start_seed": 0,
+            "pstats": True,
             # "_disable_detector_mask":True,
             # "debug_physics_world": True,
             "global_light": True,
@@ -17,7 +18,8 @@ if __name__ == "__main__":
             # "offscreen_render": True,
             # "controller": "joystick",
             "manual_control": True,
-            "use_render": True,
+            "use_render": False,
+            "store_map": False,
             "decision_repeat": 5,
             "need_inverse_traffic": True,
             "rgb_clip": True,
@@ -38,7 +40,7 @@ if __name__ == "__main__":
             "random_lane_width": True,
             # "random_agent_model": True,
             "driving_reward": 1.0,
-            "force_destroy": False,
+            "force_destroy": True,
             "vehicle_config": {
                 "enable_reverse": False,
                 # "image_source": "depth_camera",
@@ -53,7 +55,6 @@ if __name__ == "__main__":
                 # # "show_line_to_dest": True,
                 # "show_dest_mark": True
             },
-            "force_destroy": True
         }
     )
     import time
@@ -64,7 +65,9 @@ if __name__ == "__main__":
     print(env.vehicle.speed)
 
     for s in range(1, 10000):
-        o, r, d, info = env.step(env.action_space.sample())
+        o = env.reset(force_seed=s)
+        d = False
+        # print(env.engine.map_manager.maps)
         # if s % 100 == 0:
         #     env.close()
         #     env.reset()

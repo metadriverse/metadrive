@@ -37,18 +37,18 @@ def capture_image(headless):
 
 
 def vis_installation(headless=True):
-    try:
-        env = MetaDriveEnv({"use_render": False, "offscreen_render": False})
-        env.reset()
-        for i in range(1, 100):
-            o, r, d, info = env.step([0, 1])
-        env.close()
-        del env
-    except:
-        print("Error happens in Bullet physics world !")
-        sys.exit()
-    else:
-        print("Bullet physics world is launched successfully!")
+    # try:
+    #     env = MetaDriveEnv({"use_render": False, "offscreen_render": False})
+    #     env.reset()
+    #     for i in range(1, 100):
+    #         o, r, d, info = env.step([0, 1])
+    #     env.close()
+    #     del env
+    # except:
+    #     print("Error happens in Bullet physics world !")
+    #     sys.exit()
+    # else:
+    #     print("Bullet physics world is launched successfully!")
     try:
         capture_image(headless)
     except:

@@ -52,13 +52,13 @@ If the screen successfully shows up, then you can move on to :ref:`use_native_re
 However, if you want to use image to train your agent on headless machine, you have to compile a customized Panda3D.
 The customized Panda3D is built from the source code of panda3d following the instructions in `Panda3D: Building Panda3D <https://github.com/panda3d/panda3d#building-panda3d>`_. Please refer to the link to setup Panda3D dependencies. After setting up dependencies, we build our own wheel through the following command::
 
-    python ./makepanda/makepanda.py --everything --no-x11 --no-opencv --no-fmodex \
+    python ./makepanda/makepanda.py --everything --no-x11 --no-opencv --no-fmodex --use-egl --no-gtk3\
       --python-incdir /path/to/your/conda_env/include/ \
       --python-libdir /path/to/your/conda_env/lib/ \
       --thread 8 --wheel
 
-
-It will give you a Panda3D wheel which can run in EGL environment without the X11 support. Now please install the wheel file by::
+If you encounter jpeg-relevant bugs, you may also add `--jpeg-incdir /path/to/your/jpeg/include` and `--jpeg-libdir /path/to/your/jpeg/lib`.
+Finally, it will give you a Panda3D wheel which can run in EGL environment without the X11 support. Now please install the wheel file by::
 
     pip install panda3d-1.10.xxx.whl
 

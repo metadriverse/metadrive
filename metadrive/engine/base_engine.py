@@ -187,8 +187,8 @@ class BaseEngine(EngineCore, Randomizable):
         self.record_episode = self.global_config["record_episode"]
 
         # reset manager
-        for manager in self._managers.values():
-            # clean all manager
+        for manager in reversed(self._managers.values()):
+            # clean all manager in reverse order to avoid mutual reference!
             manager.before_reset()
         self._object_clean_check()
         for manager in self.managers.values():
