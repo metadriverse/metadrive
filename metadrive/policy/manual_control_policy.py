@@ -1,4 +1,4 @@
-from metadrive.engine.core.manual_controller import KeyboardController, SteeringWheelController
+from metadrive.engine.core.manual_controller import KeyboardController, SteeringWheelController, XboxController
 from metadrive.engine.engine_utils import get_global_config
 from metadrive.examples import expert
 from metadrive.policy.env_input_policy import EnvInputPolicy
@@ -25,9 +25,12 @@ class ManualControlPolicy(EnvInputPolicy):
         if config["manual_control"]:
             if config["controller"] == "keyboard":
                 self.controller = KeyboardController(pygame_control=pygame_control)
-            elif config["controller"] == "joystick":
+            elif config["controller"] in ["joystick", "xboxController"]:
                 try:
-                    self.controller = SteeringWheelController()
+                    if config["controller"] == "joystick":
+                        self.controller = SteeringWheelController()
+                    elif config["controller"] == "xboxController":
+                        self.controller = XboxController()
                 except:
                     print("Load Joystick Error! Fall back to keyboard control")
                     self.controller = KeyboardController(pygame_control=pygame_control)
@@ -72,6 +75,8 @@ class TakeoverPolicy(EnvInputPolicy):
                 self.controller = SteeringWheelController()
             elif config["controller"] == "keyboard":
                 self.controller = KeyboardController(False)
+            elif config["controller"] == "xboxController":
+                self.controller = XboxController()
             else:
                 raise ValueError("Unknown Policy: {}".format(config["controller"]))
         self.takeover = False
@@ -87,6 +92,9 @@ class TakeoverPolicy(EnvInputPolicy):
                 self.takeover = True
                 return expert_action
             elif isinstance(self.controller, KeyboardController) and abs(sum(expert_action)) > 1e-2:
+                self.takeover = True
+                return expert_action
+            elif isinstance(self.controller, XboxController) and (self.controller.button_x or self.controller.button_y):
                 self.takeover = True
                 return expert_action
         self.takeover = False

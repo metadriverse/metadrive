@@ -1,4 +1,5 @@
 import numpy as np
+import math
 from direct.controls.InputState import InputState
 
 from metadrive.utils import is_win, is_mac
@@ -185,3 +186,75 @@ class SteeringWheelController(Controller):
         self.button_right = True if hat[0] == 1 else False
 
         return [steering * self.STEERING_MAKEUP, throttle_brake / 2]
+
+
+class XboxController(Controller):
+    """Control class for Xbox wireless controller
+    Accept both wired and wireless connection
+    Max steering, throttle, and break are bound by _discount
+    """
+    STEERING_DISCOUNT = 0.3
+    THROTTLE_DISCOUNT = 0.3
+    BREAK_DISCOUNT = 0.4
+    BUTTON_X_MAP = 2
+    BUTTON_Y_MAP = 3
+    BUTTON_A_MAP = 0
+    BUTTON_B_MAP = 1
+    TRIGGER_RIGHT_MAP = 5
+    TRIGGER_LEFT_MAP = 2
+
+    def __init__(self):
+        try:
+            import evdev
+            from evdev import ecodes, InputDevice
+        except ImportError:
+            print(
+                "Fail to load evdev, which is required for steering wheel control. "
+                "Install evdev via pip install evdev"
+            )
+        pygame.display.init()
+        pygame.joystick.init()
+        assert not is_win(), "Joystick is supported in linux and mac only"
+        assert pygame.joystick.get_count() > 0, "Please connect joystick or use keyboard input"
+        print("Successfully Connect your Joystick!")
+
+        self.joystick = pygame.joystick.Joystick(0)
+        self.joystick.init()
+
+        self.button_x = False
+        self.button_y = False
+        self.button_a = False
+        self.button_b = False
+
+        self.button_up = False
+        self.button_down = False
+        self.button_right = False
+        self.button_left = False
+
+    def process_input(self, vehicle):
+        pygame.event.pump()
+        steering = -self.joystick.get_axis(0)
+        if abs(steering) < 0.05:
+            steering = 0
+        elif steering < 0:
+            steering = -(math.pow(2, abs(steering) * self.STEERING_DISCOUNT) - 1)
+        else:
+            steering = math.pow(2, abs(steering) * self.STEERING_DISCOUNT) - 1
+        raw_throttle = self.joystick.get_axis(self.TRIGGER_RIGHT_MAP)
+        raw_brake = self.joystick.get_axis(self.TRIGGER_LEFT_MAP)
+        throttle = (1 + raw_throttle) * self.THROTTLE_DISCOUNT
+        brake = (1 + raw_brake) * self.BREAK_DISCOUNT
+        throttle_brake = throttle - brake
+
+        self.button_x = True if self.joystick.get_button(self.BUTTON_X_MAP) else False
+        self.button_y = True if self.joystick.get_button(self.BUTTON_Y_MAP) else False
+        self.button_a = True if self.joystick.get_button(self.BUTTON_A_MAP) else False
+        self.button_b = True if self.joystick.get_button(self.BUTTON_B_MAP) else False
+
+        hat = self.joystick.get_hat(0)
+        self.button_up = True if hat[-1] == 1 else False
+        self.button_down = True if hat[-1] == -1 else False
+        self.button_left = True if hat[0] == -1 else False
+        self.button_right = True if hat[0] == 1 else False
+
+        return [steering, throttle_brake / 2]
