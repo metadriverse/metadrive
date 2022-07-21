@@ -193,9 +193,9 @@ class XboxController(Controller):
     Accept both wired and wireless connection
     Max steering, throttle, and break are bound by _discount
     """
-    STEERING_DISCOUNT = 0.3
-    THROTTLE_DISCOUNT = 0.3
-    BREAK_DISCOUNT = 0.4
+    STEERING_DISCOUNT = 0.5
+    THROTTLE_DISCOUNT = 0.5
+    BREAK_DISCOUNT = 0.5
     BUTTON_X_MAP = 2
     BUTTON_Y_MAP = 3
     BUTTON_A_MAP = 0
@@ -242,8 +242,9 @@ class XboxController(Controller):
             steering = math.pow(2, abs(steering) * self.STEERING_DISCOUNT) - 1
         raw_throttle = self.joystick.get_axis(self.TRIGGER_RIGHT_MAP)
         raw_brake = self.joystick.get_axis(self.TRIGGER_LEFT_MAP)
-        throttle = (1 + raw_throttle) * self.THROTTLE_DISCOUNT
-        brake = (1 + raw_brake) * self.BREAK_DISCOUNT
+        # 1+raw_throttle will map throttle between 0,2 need *0.5 to bound it between 0,1
+        throttle = (1 + raw_throttle) * 0.5 * self.THROTTLE_DISCOUNT
+        brake = (1 + raw_brake) * 0.5 * self.BREAK_DISCOUNT
         throttle_brake = throttle - brake
 
         self.button_x = True if self.joystick.get_button(self.BUTTON_X_MAP) else False
@@ -257,4 +258,4 @@ class XboxController(Controller):
         self.button_left = True if hat[0] == -1 else False
         self.button_right = True if hat[0] == 1 else False
 
-        return [steering, throttle_brake / 2]
+        return [steering, throttle_brake]
