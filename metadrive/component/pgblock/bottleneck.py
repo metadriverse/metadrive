@@ -33,6 +33,7 @@ class Merge(Bottleneck):
     def _try_plug_into_previous_block(self) -> bool:
         no_cross = True
         parameters = self.get_config()
+        center_line_type = LineType.CONTINUOUS if parameters["solid_center_line"] else LineType.BROKEN
         self.BOTTLENECK_LEN = parameters["bottle_len"]
         lane_num_changed = parameters[Parameter.lane_num]
 
@@ -52,7 +53,7 @@ class Merge(Bottleneck):
             straight_road,
             self.block_network,
             self._global_network,
-            center_line_type=LineType.CONTINUOUS,
+            center_line_type=center_line_type,
             side_lane_line_type=LineType.NONE,
             inner_lane_line_type=LineType.NONE,
             ignore_intersection_checking=self.ignore_intersection_checking
@@ -63,7 +64,7 @@ class Merge(Bottleneck):
             self._global_network,
             inner_lane_line_type=LineType.NONE,
             side_lane_line_type=LineType.NONE,
-            center_line_type=LineType.CONTINUOUS,
+            center_line_type=center_line_type,
             ignore_intersection_checking=self.ignore_intersection_checking
         ) and no_cross
 
@@ -76,7 +77,7 @@ class Merge(Bottleneck):
             socket_road,
             self.block_network,
             self._global_network,
-            center_line_type=LineType.CONTINUOUS,
+            center_line_type=center_line_type,
             side_lane_line_type=LineType.SIDE,
             inner_lane_line_type=LineType.BROKEN,
             ignore_intersection_checking=self.ignore_intersection_checking
@@ -87,7 +88,7 @@ class Merge(Bottleneck):
             self._global_network,
             inner_lane_line_type=LineType.BROKEN,
             side_lane_line_type=LineType.SIDE,
-            center_line_type=LineType.CONTINUOUS,
+            center_line_type=center_line_type,
             ignore_intersection_checking=self.ignore_intersection_checking
         ) and no_cross
 
@@ -177,6 +178,7 @@ class Split(Bottleneck):
         no_cross = True
         parameters = self.get_config()
         self.BOTTLENECK_LEN = parameters["bottle_len"]
+        center_line_type = LineType.CONTINUOUS if parameters["solid_center_line"] else LineType.BROKEN
         lane_num_changed = parameters[Parameter.lane_num]
 
         start_ndoe = self.pre_block_socket.positive_road.end_node
@@ -194,7 +196,7 @@ class Split(Bottleneck):
             straight_road,
             self.block_network,
             self._global_network,
-            center_line_type=LineType.CONTINUOUS,
+            center_line_type=center_line_type,
             side_lane_line_type=LineType.NONE,
             inner_lane_line_type=LineType.NONE,
             ignore_intersection_checking=self.ignore_intersection_checking
@@ -205,7 +207,7 @@ class Split(Bottleneck):
             self._global_network,
             inner_lane_line_type=LineType.NONE,
             side_lane_line_type=LineType.NONE,
-            center_line_type=LineType.CONTINUOUS,
+            center_line_type=center_line_type,
             ignore_intersection_checking=self.ignore_intersection_checking
         ) and no_cross
 

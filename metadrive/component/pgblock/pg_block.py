@@ -44,6 +44,12 @@ class PGBlockSocket:
     def is_same_socket(self, other):
         return True if self.positive_road == other.positive_road and self.negative_road == other.negative_road else False
 
+    def get_positive_lanes(self, global_network):
+        return self.positive_road.get_lanes(global_network)
+
+    def get_negative_lanes(self, global_network):
+        return self.negative_road.get_lanes(global_network)
+
 
 class PGBlock(BaseBlock):
     """
@@ -91,8 +97,8 @@ class PGBlock(BaseBlock):
 
         # used to create this block, but for first block it is nonsense
         if block_index != 0:
-            self.positive_lanes = self.pre_block_socket.positive_road.get_lanes(self._global_network)
-            self.negative_lanes = self.pre_block_socket.negative_road.get_lanes(self._global_network)
+            self.positive_lanes = self.pre_block_socket.get_positive_lanes(self._global_network)
+            self.negative_lanes = self.pre_block_socket.get_negative_lanes(self._global_network)
             self.positive_lane_num = len(self.positive_lanes)
             self.negative_lane_num = len(self.negative_lanes)
             self.positive_basic_lane = self.positive_lanes[-1]  # most right or outside lane is the basic lane

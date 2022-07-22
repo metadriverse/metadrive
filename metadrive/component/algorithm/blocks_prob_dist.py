@@ -8,6 +8,7 @@ from metadrive.component.pgblock.std_intersection import StdInterSection
 from metadrive.component.pgblock.std_t_intersection import StdTInterSection
 from metadrive.component.pgblock.straight import Straight
 from metadrive.component.pgblock.tollgate import TollGate
+from metadrive.component.pgblock.bidirection import Bidirection
 
 
 class PGBlockConfig:
@@ -45,7 +46,8 @@ class PGBlockConfig:
         Merge: 0.00,
         Split: 0.00,
         ParkingLot: 0.00,
-        TollGate: 0.00
+        TollGate: 0.00,
+        Bidirection: 0.00
     }
 
     @classmethod

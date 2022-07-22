@@ -106,7 +106,7 @@ BASE_DEFAULT_CONFIG = dict(
     target_vehicle_configs={DEFAULT_AGENT: dict(use_special_color=False, spawn_lane_index=None)},
 
     # ===== Engine Core config =====
-    window_size=(1200, 900),  # width, height
+    window_size=(1200, 900),  # or (width, height), if set to None, it will be automatically determined
     physics_world_step_size=2e-2,
     show_fps=True,
     global_light=False,
