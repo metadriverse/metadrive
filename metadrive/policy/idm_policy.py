@@ -225,9 +225,11 @@ class IDMPolicy(BasePolicy):
         if self.routing_target_lane is None:
             self.routing_target_lane = self.control_object.lane
             return True if self.routing_target_lane in current_lanes else False
+        routing_network = self.control_object.navigation.map.road_network
         if self.routing_target_lane not in current_lanes:
             for lane in current_lanes:
-                if self.routing_target_lane.is_previous_lane_of(lane):
+                if self.routing_target_lane.is_previous_lane_of(lane) or \
+                        routing_network.has_connection(self.routing_target_lane.index, lane.index):
                     # two lanes connect
                     self.routing_target_lane = lane
                     return True
