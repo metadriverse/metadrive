@@ -75,6 +75,6 @@ if __name__ == "__main__":
         #         )
         #     )
         # if d:
-            # #     # env.close()
-            # #     print(len(env.engine._spawned_objects))
-            # env.reset()
+        # #     # env.close()
+        # #     print(len(env.engine._spawned_objects))
+        # env.reset()
