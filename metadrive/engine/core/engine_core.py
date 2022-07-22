@@ -88,7 +88,7 @@ class EngineCore(ShowBase.ShowBase):
             # pstats debug provided by panda3d
             loadPrcFileData("", "want-pstats 1")
 
-        loadPrcFileData("", "win-size {} {}".format(1200, 900))
+        loadPrcFileData("", "win-size {} {}".format(*self.global_config["window_size"]))
 
         # Setup onscreen render
         if self.global_config["use_render"]:
@@ -133,21 +133,11 @@ class EngineCore(ShowBase.ShowBase):
             loadPrcFileData("", "compressed-textures 1")  # Default to compress
 
         super(EngineCore, self).__init__(windowType=self.mode)
-        self.w_scale = 1
-        self.h_scale = 1
+
         # main_window_position = (0, 0)
         if self.mode == RENDER_MODE_ONSCREEN:
             h = self.pipe.getDisplayHeight()
             w = self.pipe.getDisplayWidth()
-            if self.global_config["window_size"] is None:
-                # determine the window size automatically
-                scale = (h / 1080)
-                self.global_config["window_size"] = (int(scale) * 1200, int(scale) * 900)
-                from panda3d.core import WindowProperties
-                props = WindowProperties()
-                props.setSize(self.global_config["window_size"][0], self.global_config["window_size"][1])
-                self.win.requestProperties(props)
-
             if self.global_config["window_size"][0] > 0.9 * w or self.global_config["window_size"][1] > 0.9 * h:
                 old_scale = self.global_config["window_size"][0] / self.global_config["window_size"][1]
                 new_w = int(min(0.9 * w, 0.9 * h * old_scale))
@@ -167,9 +157,8 @@ class EngineCore(ShowBase.ShowBase):
             # )
 
         # screen scale factor
-        if self.mode == RENDER_MODE_ONSCREEN:
-            self.w_scale = max(self.global_config["window_size"][0] / self.global_config["window_size"][1], 1)
-            self.h_scale = max(self.global_config["window_size"][1] / self.global_config["window_size"][0], 1)
+        self.w_scale = max(self.global_config["window_size"][0] / self.global_config["window_size"][1], 1)
+        self.h_scale = max(self.global_config["window_size"][1] / self.global_config["window_size"][0], 1)
 
         if self.mode == RENDER_MODE_ONSCREEN:
             self.disableMouse()
