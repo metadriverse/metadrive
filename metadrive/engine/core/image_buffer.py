@@ -87,7 +87,8 @@ class ImageBuffer:
         img.write(name)
 
     def get_rgb_array(self):
-        self.engine.graphicsEngine.renderFrame()
+        if self.engine.episode_step <= 1:
+            self.engine.graphicsEngine.renderFrame()
         origin_img = self.cam.node().getDisplayRegion(0).getScreenshot()
         v = memoryview(origin_img.getRamImage()).tolist()
         img = np.array(v, dtype=np.uint8)

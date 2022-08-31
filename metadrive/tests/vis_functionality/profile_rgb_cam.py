@@ -9,7 +9,7 @@ if __name__ == "__main__":
             "traffic_density": 0.1,
             "start_seed": 4,
             "vehicle_config": {
-                "stack_size": 5,
+                # "stack_size": 5,
                 "rgb_camera": (64, 64)
             },
             "manual_control": True,
