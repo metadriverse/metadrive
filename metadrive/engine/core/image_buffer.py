@@ -86,20 +86,18 @@ class ImageBuffer:
         img = self.get_image()
         img.write(name)
 
-    def get_rgb_array(self, clip):
+    def get_rgb_array(self):
         self.engine.graphicsEngine.renderFrame()
         origin_img = self.cam.node().getDisplayRegion(0).getScreenshot()
         v = memoryview(origin_img.getRamImage()).tolist()
-        if not clip:
-            img = np.array(v, dtype=np.uint8)
-        else:
-            img = np.array(v, dtype=np.float32) / 255
+        img = np.array(v, dtype=np.uint8)
         img = img.reshape((origin_img.getYSize(), origin_img.getXSize(), 4))
         img = img[::-1]
-        return img
+        return img[...,:-1]
 
-    def get_grayscale_array(self, clip=True):
-        img = self.get_image()
+    @staticmethod
+    def get_grayscale_array(img, clip=True):
+        raise DeprecationWarning("This API is deprecated")
         if not clip:
             numpy_array = np.array(
                 [[int(img.getGray(i, j) * 255) for j in range(img.getYSize())] for i in range(img.getXSize())],
