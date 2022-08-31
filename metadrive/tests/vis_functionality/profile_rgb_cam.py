@@ -8,7 +8,7 @@ if __name__ == "__main__":
             "environment_num": 1,
             "traffic_density": 0.1,
             "start_seed": 4,
-            "vehicle_config": {"stack_size": 5, "rgb_clip": False, "rgb_camera": (64, 64)},
+            "vehicle_config": {"stack_size": 5,  "rgb_camera": (64, 64)},
             "manual_control": True,
             "use_render": False,
             "offscreen_render": True,  # it is a switch telling metadrive to use rgb as observation
