@@ -48,9 +48,8 @@ class ImageObservation(ObservationBase):
 
     @property
     def observation_space(self):
-        shape = (self.config[self.image_source][1], self.config[self.image_source][0]) + (
-            (self.STACK_SIZE,) if self.config[
-                "rgb_to_grayscale"] else (3, self.STACK_SIZE))
+        shape = (self.config[self.image_source][1], self.config[self.image_source][0]
+                 ) + ((self.STACK_SIZE, ) if self.config["rgb_to_grayscale"] else (3, self.STACK_SIZE))
         if self.rgb_clip:
             return gym.spaces.Box(-0.0, 1.0, shape=shape, dtype=np.float32)
         else:

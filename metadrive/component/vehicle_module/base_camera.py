@@ -53,7 +53,7 @@ class BaseCamera(ImageBuffer):
         if not clip:
             return ret.astype(np.uint8)
         else:
-            return ret/255
+            return ret / 255
 
     def destroy(self):
         if self.initialized():
