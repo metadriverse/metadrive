@@ -10,7 +10,7 @@ if __name__ == "__main__":
             "use_render": False,
             "offscreen_render": True,  # it is a switch telling metadrive to use rgb as observation
             "rgb_clip": True,  # clip rgb to range(0,1) instead of (0, 255)
-            "pstats": True,
+            # "pstats": True,
         }
     )
     env.reset()
@@ -18,11 +18,18 @@ if __name__ == "__main__":
     env.engine.accept(
         "m", env.vehicle.image_sensors[env.vehicle.config["image_source"]].save_image, extraArgs=[env.vehicle]
     )
-
+    import numpy as np
+    import cv2
     for i in range(1, 100000):
         o, r, d, info = env.step([0, 1])
         assert env.observation_space.contains(o)
+        # save
+        rgb_cam = env.vehicle.image_sensors[env.vehicle.config["image_source"]]
+        img = rgb_cam.get_rgb_array(clip=False)
         env.vehicle.image_sensors[env.vehicle.config["image_source"]].save_image(env.vehicle, name="{}.png".format(i))
+        cv2.imshow('img', img)
+        cv2.waitKey(0)
+
         # if env.config["use_render"]:
         # for i in range(ImageObservation.STACK_SIZE):
         #      ObservationType.show_gray_scale_array(o["image"][:, :, i])

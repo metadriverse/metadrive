@@ -98,6 +98,7 @@ BASE_DEFAULT_CONFIG = dict(
 
         # NOTE: rgb_clip will be modified by env level config when initialization
         rgb_clip=True,
+        rgb_to_grayscale=False,
         gaussian_noise=0.0,
         dropout_prob=0.0,
     ),

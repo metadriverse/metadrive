@@ -20,14 +20,14 @@ class ImageBuffer:
     line_borders = []
 
     def __init__(
-        self,
-        length: float,
-        width: float,
-        pos: Vec3,
-        bkg_color: Union[Vec4, Vec3],
-        parent_node: NodePath = None,
-        frame_buffer_property=None,
-        # engine=None
+            self,
+            length: float,
+            width: float,
+            pos: Vec3,
+            bkg_color: Union[Vec4, Vec3],
+            parent_node: NodePath = None,
+            frame_buffer_property=None,
+            # engine=None
     ):
         # from metadrive.engine.engine_utils import get_engine
         # self.engine = engine or get_engine()
@@ -86,15 +86,20 @@ class ImageBuffer:
         img = self.get_image()
         img.write(name)
 
-    def get_pixels_array(self, clip=True) -> np.ndarray:
-        """
-        default: For gray scale image, one channel. Override this func, when you want a new obs type
-        """
-        img = self.get_image()
-        return self.convert_to_array(img, clip)
+    def get_rgb_array(self, clip):
+        self.engine.graphicsEngine.renderFrame()
+        origin_img = self.cam.node().getDisplayRegion(0).getScreenshot()
+        v = memoryview(origin_img.getRamImage()).tolist()
+        if not clip:
+            img = np.array(v, dtype=np.uint8)
+        else:
+            img = np.array(v, dtype=np.float32) / 255
+        img = img.reshape((origin_img.getYSize(), origin_img.getXSize(), 4))
+        img = img[::-1]
+        return img
 
-    @staticmethod
-    def convert_to_array(img, clip=True):
+    def get_grayscale_array(self, clip=True):
+        img = self.get_image()
         if not clip:
             numpy_array = np.array(
                 [[int(img.getGray(i, j) * 255) for j in range(img.getYSize())] for i in range(img.getXSize())],
