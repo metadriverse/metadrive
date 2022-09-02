@@ -40,6 +40,7 @@ class ImageObservation(ObservationBase):
     STACK_SIZE = 3  # use continuous 3 image as the input
 
     def __init__(self, config, image_source: str, clip_rgb: bool):
+        self.STACK_SIZE = config["stack_size"]
         self.image_source = image_source
         super(ImageObservation, self).__init__(config)
         self.rgb_clip = clip_rgb
@@ -47,7 +48,8 @@ class ImageObservation(ObservationBase):
 
     @property
     def observation_space(self):
-        shape = tuple(self.config[self.image_source][0:2]) + (self.STACK_SIZE, )
+        shape = (self.config[self.image_source][1], self.config[self.image_source][0]
+                 ) + ((self.STACK_SIZE, ) if self.config["rgb_to_grayscale"] else (3, self.STACK_SIZE))
         if self.rgb_clip:
             return gym.spaces.Box(-0.0, 1.0, shape=shape, dtype=np.float32)
         else:
@@ -56,7 +58,7 @@ class ImageObservation(ObservationBase):
     def observe(self, vehicle):
         new_obs = vehicle.image_sensors[self.image_source].get_pixels_array(vehicle, self.rgb_clip)
         self.state = np.roll(self.state, -1, axis=-1)
-        self.state[:, :, -1] = new_obs
+        self.state[..., -1] = new_obs
         return self.state
 
     def get_image(self):

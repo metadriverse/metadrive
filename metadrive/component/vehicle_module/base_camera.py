@@ -45,8 +45,15 @@ class BaseCamera(ImageBuffer):
         img.write(name)
 
     def get_pixels_array(self, base_object, clip=True) -> np.ndarray:
-        img = self.get_image(base_object)
-        return type(self)._singleton.convert_to_array(img, clip)
+        # TODO LQY: modify the process of getting grayscale image
+        self.track(base_object)
+        ret = type(self)._singleton.get_rgb_array()
+        if self.engine.global_config["vehicle_config"]["rgb_to_grayscale"]:
+            ret = np.dot(ret[..., :3], [0.299, 0.587, 0.114])
+        if not clip:
+            return ret.astype(np.uint8)
+        else:
+            return ret / 255
 
     def destroy(self):
         if self.initialized():
