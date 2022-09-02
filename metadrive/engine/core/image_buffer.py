@@ -86,15 +86,19 @@ class ImageBuffer:
         img = self.get_image()
         img.write(name)
 
-    def get_pixels_array(self, clip=True) -> np.ndarray:
-        """
-        default: For gray scale image, one channel. Override this func, when you want a new obs type
-        """
-        img = self.get_image()
-        return self.convert_to_array(img, clip)
+    def get_rgb_array(self):
+        if self.engine.episode_step <= 1:
+            self.engine.graphicsEngine.renderFrame()
+        origin_img = self.cam.node().getDisplayRegion(0).getScreenshot()
+        v = memoryview(origin_img.getRamImage()).tolist()
+        img = np.array(v, dtype=np.uint8)
+        img = img.reshape((origin_img.getYSize(), origin_img.getXSize(), 4))
+        img = img[::-1]
+        return img[..., :-1]
 
     @staticmethod
-    def convert_to_array(img, clip=True):
+    def get_grayscale_array(img, clip=True):
+        raise DeprecationWarning("This API is deprecated")
         if not clip:
             numpy_array = np.array(
                 [[int(img.getGray(i, j) * 255) for j in range(img.getYSize())] for i in range(img.getXSize())],

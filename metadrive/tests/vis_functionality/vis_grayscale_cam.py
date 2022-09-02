@@ -9,12 +9,13 @@ if __name__ == "__main__":
             "vehicle_config": {
                 "stack_size": 5,
                 "rgb_clip": False,
-                "rgb_camera": (800, 500)
+                "rgb_camera": (800, 500),
+                "rgb_to_grayscale": True
             },
             "manual_control": True,
             "use_render": False,
             "offscreen_render": True,  # it is a switch telling metadrive to use rgb as observation
-            "rgb_clip": True,  # clip rgb to range(0,1) instead of (0, 255)
+            "rgb_clip": False,  # clip rgb to range(0,1) instead of (0, 255)
             # "pstats": True,
         }
     )
@@ -32,7 +33,7 @@ if __name__ == "__main__":
         # save
         rgb_cam = env.vehicle.image_sensors[env.vehicle.config["image_source"]]
         rgb_cam.save_image(env.vehicle, name="{}.png".format(i))
-        cv2.imshow('img', o["image"][..., -1])
+        cv2.imshow('img', o["image"][..., -1] / 255)
         cv2.waitKey(0)
 
         # if env.config["use_render"]:

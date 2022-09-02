@@ -97,7 +97,9 @@ BASE_DEFAULT_CONFIG = dict(
         show_lane_line_detector=False,
 
         # NOTE: rgb_clip will be modified by env level config when initialization
-        rgb_clip=True,
+        rgb_clip=True,  # clip 0-255 to 0-1
+        stack_size=3,  # the number of timesteps for stacking image observation
+        rgb_to_grayscale=False,
         gaussian_noise=0.0,
         dropout_prob=0.0,
     ),
