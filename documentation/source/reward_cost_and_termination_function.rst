@@ -27,7 +27,7 @@ The complete reward function is composed of four parts as follows:
 - The **speed reward** :math:`R_{speed} = v_t/v_{max}` incentives agent to drive fast. :math:`v_{t}` and :math:`v_{max}` denote the current velocity and the maximum velocity (80 km/h), respectively.
 - The **termination reward** :math:`R_{termination}` contains a set of sparse rewards. At the end of episode, other dense rewards will be disabled and only one sparse reward will be given to the agent at the end of the episode according to its termination state. We implement the :code:`success_reward`, :code:`out_of_road_penalty`, :code:`crash_vehicle_penalty` and :code:`crash_object_penalty` currently. The penalty will be given as negative reward.
 
-We also provide a config call :code:`use_lateral`, which is a multiplier in range [0, 1] indicating whether the ego vehicle is far from the center of current lane. The multiplier will apply to the driving reward.
+We also provide a config call :code:`use_lateral_reward`, which is a multiplier in range [0, 1] indicating whether the ego vehicle is far from the center of current lane. The multiplier will apply to the driving reward.
 
 We summarize the default reward config here:
 
@@ -38,7 +38,7 @@ We summarize the default reward config here:
 - :code:`crash_object_penalty = 5.0`: will use -5.0 as the termination reward.
 - :code:`driving_reward = 1.0`: the :math:`c_{1}` in reward function.
 - :code:`speed_reward = 0.1`: the :math:`c_{2}` in reward function.
-- :code:`use_lateral = False`: disable weighting the driving reward according to centering in the lane.
+- :code:`use_lateral_reward = False`: disable weighting the driving reward according to centering in the lane.
 
 The reward function is implemented in the :code:`reward_function` in `MetaDriveEnv <https://github.com/metadriverse/metadrive/blob/main/metadrive/envs/metadrive_env.py#L209>`_.
 

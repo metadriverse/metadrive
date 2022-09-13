@@ -365,13 +365,13 @@ class BaseEnv(gym.Env):
         reward_infos = {}
         rewards = {}
         for v_id, v in self.vehicles.items():
-            o = self.observations[v_id].observe(v)
-            obses[v_id] = o
-            done_function_result, done_infos[v_id] = self.done_function(v_id)
             rewards[v_id], reward_infos[v_id] = self.reward_function(v_id)
+            done_function_result, done_infos[v_id] = self.done_function(v_id)
             _, cost_infos[v_id] = self.cost_function(v_id)
             done = done_function_result or self.dones[v_id]
             self.dones[v_id] = done
+            o = self.observations[v_id].observe(v)
+            obses[v_id] = o
 
         step_infos = concat_step_infos([engine_info, done_infos, reward_infos, cost_infos])
 

@@ -71,7 +71,7 @@ METADRIVE_DEFAULT_CONFIG = dict(
     crash_object_penalty=5.0,
     driving_reward=1.0,
     speed_reward=0.1,
-    use_lateral=False,
+    use_lateral_reward=False,
 
     # ===== Cost Scheme =====
     crash_vehicle_cost=1.0,
@@ -236,7 +236,7 @@ class MetaDriveEnv(BaseEnv):
         long_now, lateral_now = current_lane.local_coordinates(vehicle.position)
 
         # reward for lane keeping, without it vehicle can learn to overtake but fail to keep in lane
-        if self.config["use_lateral"]:
+        if self.config["use_lateral_reward"]:
             lateral_factor = clip(1 - 2 * abs(lateral_now) / vehicle.navigation.get_current_lane_width(), 0.0, 1.0)
         else:
             lateral_factor = 1.0
