@@ -1,4 +1,7 @@
 import logging
+from metadrive.obs.state_obs import LidarStateObservation
+import gym
+import numpy as np
 
 from metadrive.constants import TerminationState
 from metadrive.engine.asset_loader import AssetLoader
@@ -6,39 +9,42 @@ from metadrive.envs.base_env import BaseEnv
 from metadrive.manager.waymo_data_manager import WaymoDataManager
 from metadrive.manager.waymo_map_manager import WaymoMapManager
 from metadrive.manager.waymo_traffic_manager import WaymoTrafficManager
-from metadrive.policy.idm_policy import WaymoIDMPolicy
+from metadrive.policy.idm_policy import EgoWaymoIDMPolicy
 from metadrive.utils import clip
 from metadrive.utils import get_np_random
 
 WAYMO_ENV_CONFIG = dict(
     # ===== Map Config =====
-    waymo_data_directory=AssetLoader.file_path("waymo", "processed", return_raw_style=False),
+    waymo_data_directory=AssetLoader.file_path("waymo", return_raw_style=False),
     start_case_index=0,
     case_num=100,
     store_map=True,
 
     # ===== Traffic =====
     no_traffic=False,
-    case_start_index=0,
-    case_end_index=-1,
+    traj_start_index=0,
+    traj_end_index=-1,
     replay=True,
+    no_static_traffic_vehicle=False,
 
     # ===== Agent config =====
     vehicle_config=dict(
         lidar=dict(num_lasers=120, distance=50),
         lane_line_detector=dict(num_lasers=12, distance=50),
-        side_detector=dict(num_lasers=12, distance=50)
+        side_detector=dict(num_lasers=120, distance=50)
     ),
+    use_waymo_observation=True,
 
     # ===== Reward Scheme =====
     # See: https://github.com/metadriverse/metadrive/issues/283
     success_reward=10.0,
     out_of_road_penalty=10.0,
     crash_vehicle_penalty=10.0,
-    crash_object_penalty=5.0,
+    crash_object_penalty=1.0,
     driving_reward=1.0,
     speed_reward=0.1,
-    use_lateral=False,
+    use_lateral_reward=False,
+    horizon=500,
 
     # ===== Cost Scheme =====
     crash_vehicle_cost=1.0,
@@ -47,7 +53,37 @@ WAYMO_ENV_CONFIG = dict(
 
     # ===== Termination Scheme =====
     out_of_route_done=False,
+    crash_vehicle_done=True,
 )
+
+
+class WaymoObservation(LidarStateObservation):
+    MAX_LATERAL_DIST = 20
+
+    def __init__(self, *args, **kwargs):
+        super(WaymoObservation, self).__init__(*args, **kwargs)
+        self.lateral_dist = 0
+
+    @property
+    def observation_space(self):
+        shape = list(self.state_obs.observation_space.shape)
+        if self.config["lidar"]["num_lasers"] > 0 and self.config["lidar"]["distance"] > 0:
+            # Number of lidar rays and distance should be positive!
+            lidar_dim = self.config["lidar"]["num_lasers"] + self.config["lidar"]["num_others"] * 4
+            if self.config["lidar"]["add_others_navi"]:
+                lidar_dim += self.config["lidar"]["num_others"] * 4
+            shape[0] += lidar_dim
+        shape[0] += 1  # add one dim for sensing lateral distance to the sdc trajectory
+        return gym.spaces.Box(-0.0, 1.0, shape=tuple(shape), dtype=np.float32)
+
+    def state_observe(self, vehicle):
+        ret = super(WaymoObservation, self).state_observe(vehicle)
+        lateral_obs = self.lateral_dist / self.MAX_LATERAL_DIST
+        return np.concatenate([ret, [clip((lateral_obs + 1) / 2, 0.0, 1.0)]])
+
+    def reset(self, env, vehicle=None):
+        super(WaymoObservation, self).reset(env, vehicle)
+        self.lateral_dist = 0
 
 
 class WaymoEnv(BaseEnv):
@@ -60,7 +96,8 @@ class WaymoEnv(BaseEnv):
     def __init__(self, config):
         super(WaymoEnv, self).__init__(config)
         if not self.config["no_traffic"]:
-            assert self.config["agent_policy"] is not WaymoIDMPolicy, "WaymoIDM will fail when interacting with traffic"
+            assert self.config["agent_policy"
+                               ] is not EgoWaymoIDMPolicy, "WaymoIDM will fail when interacting with traffic"
 
     def _merge_extra_config(self, config):
         config = self.default_config().update(config, allow_add_new_key=True)
@@ -68,6 +105,13 @@ class WaymoEnv(BaseEnv):
 
     def _get_observations(self):
         return {self.DEFAULT_AGENT: self.get_single_observation(self.config["vehicle_config"])}
+
+    def get_single_observation(self, vehicle_config):
+        if self.config["use_waymo_observation"]:
+            o = WaymoObservation(vehicle_config)
+        else:
+            o = LidarStateObservation(vehicle_config)
+        return o
 
     def switch_to_top_down_view(self):
         self.main_camera.stop_track()
@@ -100,7 +144,7 @@ class WaymoEnv(BaseEnv):
         self.engine.register_manager("map_manager", WaymoMapManager())
         if not self.config["no_traffic"]:
             self.engine.register_manager("traffic_manager", WaymoTrafficManager())
-        self.engine.accept("s", self.stop)
+        self.engine.accept("p", self.stop)
         self.engine.accept("q", self.switch_to_third_person_view)
         self.engine.accept("b", self.switch_to_top_down_view)
 
@@ -116,7 +160,8 @@ class WaymoEnv(BaseEnv):
         done_info = dict(
             crash_vehicle=False, crash_object=False, crash_building=False, out_of_road=False, arrive_dest=False
         )
-        if vehicle.lane.index in self.engine.map_manager.sdc_destinations:
+        if np.linalg.norm(vehicle.position - self.engine.map_manager.sdc_dest_point) < 5 \
+                or vehicle.lane.index in self.engine.map_manager.sdc_destinations:
             done = True
             logging.info("Episode ended! Reason: arrive_dest.")
             done_info[TerminationState.SUCCESS] = True
@@ -124,7 +169,7 @@ class WaymoEnv(BaseEnv):
             done = True
             logging.info("Episode ended! Reason: out_of_road.")
             done_info[TerminationState.OUT_OF_ROAD] = True
-        if vehicle.crash_vehicle:
+        if vehicle.crash_vehicle and self.config["crash_vehicle_done"]:
             done = True
             logging.info("Episode ended! Reason: crash vehicle ")
             done_info[TerminationState.CRASH_VEHICLE] = True
@@ -174,22 +219,24 @@ class WaymoEnv(BaseEnv):
         long_last, _ = current_lane.local_coordinates(vehicle.last_position)
         long_now, lateral_now = current_lane.local_coordinates(vehicle.position)
 
+        # update obs
+        self.observations[vehicle_id].lateral_dist = \
+        self.engine.map_manager.current_sdc_route.local_coordinates(vehicle.position)[-1]
+
         # reward for lane keeping, without it vehicle can learn to overtake but fail to keep in lane
-        if self.config["use_lateral"]:
+        if self.config["use_lateral_reward"]:
             lateral_factor = clip(1 - 2 * abs(lateral_now) / 6, 0.0, 1.0)
         else:
             lateral_factor = 1.0
 
         reward = 0
-        if not vehicle.on_white_continuous_line:
-            reward += self.config["driving_reward"] * (long_now - long_last) * lateral_factor
-            reward += self.config["speed_reward"] * (vehicle.speed / vehicle.max_speed)
+        reward += self.config["driving_reward"] * (long_now - long_last) * lateral_factor
 
         step_info["step_reward"] = reward
 
         if vehicle.arrive_destination:
             reward = +self.config["success_reward"]
-        elif self._is_out_of_road(vehicle):
+        elif self._is_out_of_road(self.vehicle):
             reward = -self.config["out_of_road_penalty"]
         elif vehicle.crash_vehicle:
             reward = -self.config["crash_vehicle_penalty"]
@@ -205,7 +252,10 @@ class WaymoEnv(BaseEnv):
 
     def _is_out_of_road(self, vehicle):
         # A specified function to determine whether this vehicle should be done.
-        return vehicle.on_yellow_continuous_line or vehicle.crash_sidewalk
+        done = vehicle.crash_sidewalk or vehicle.on_yellow_continuous_line
+        if self.config["out_of_route_done"]:
+            done = done or self.observations["default_agent"].lateral_dist > 10
+        return done
         # ret = vehicle.crash_sidewalk
         # return ret
 
@@ -217,17 +267,21 @@ if __name__ == "__main__":
     env = WaymoEnv(
         {
             "use_render": True,
-            # "agent_policy": WaymoIDMPolicy,
+            "agent_policy": EgoWaymoIDMPolicy,
             "manual_control": True,
+            "no_traffic": True,
             # "debug":True,
             # "no_traffic":True,
             # "start_case_index": 192,
-            "case_num": 100,
-            "waymo_data_directory": "E:\\hk\\idm_filtered\\validation",
+            "start_case_index": 1000,
+            "case_num": 1,
+            "waymo_data_directory": "E:\\PAMI_waymo_data\\idm_filtered\\test",
             "horizon": 1000,
-            # "vehicle_config": dict(show_lidar=True,
-            #                        show_lane_line_detector=True,
-            #                        show_side_detector=True)
+            "vehicle_config": dict(
+                lidar=dict(num_lasers=120, distance=50, num_others=4),
+                lane_line_detector=dict(num_lasers=12, distance=50),
+                side_detector=dict(num_lasers=160, distance=50)
+            ),
         }
     )
     success = []
@@ -250,6 +304,8 @@ if __name__ == "__main__":
                         # "long": long,
                         # "lat": lat,
                         # "v_heading": env.vehicle.heading_theta,
+                        "obs_shape": len(o),
+                        "lateral": env.observations["default_agent"].lateral_dist,
                         "seed": env.engine.global_seed + env.config["start_case_index"],
                         "reward": r,
                     }

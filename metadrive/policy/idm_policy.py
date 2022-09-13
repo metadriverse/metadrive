@@ -131,6 +131,42 @@ class FrontBackObjects:
 
         return cls(front_ret, back_ret, min_front_long, min_back_long)
 
+    @classmethod
+    def get_find_front_back_objs_waymo(cls, objs, lane, position, max_distance):
+        """
+        Find objects in front of/behind the lane and its left lanes/right lanes, return objs, dist.
+        If ref_lanes is None, return filter results of this lane
+        """
+        lanes = [None, lane, None]
+
+        min_front_long = [max_distance if lane is not None else None for lane in lanes]
+        min_back_long = [max_distance if lane is not None else None for lane in lanes]
+
+        front_ret = [None, None, None]
+        back_ret = [None, None, None]
+
+        find_front_in_current_lane = [False, False, False]
+        # find_back_in_current_lane = [False, False, False]
+
+        current_long = [lane.local_coordinates(position)[0] if lane is not None else None for lane in lanes]
+
+        for i, lane in enumerate(lanes):
+            if lane is None:
+                continue
+            for obj in objs:
+                if np.linalg.norm(obj.position - position) > max_distance:
+                    continue
+                long, lat = lane.local_coordinates(obj.position)
+                if abs(lat) > lane.width:
+                    continue
+                long = long - current_long[i]
+                if min_front_long[i] > long > 0:
+                    min_front_long[i] = long
+                    front_ret[i] = obj
+                    find_front_in_current_lane[i] = True
+
+        return cls(front_ret, back_ret, min_front_long, min_back_long)
+
 
 class IDMPolicy(BasePolicy):
     """
@@ -369,10 +405,79 @@ class ManualControllableIDMPolicy(IDMPolicy):
 
 
 class WaymoIDMPolicy(IDMPolicy):
+    NORMAL_SPEED = 40
+    WAYMO_IDM_MAX_DIST = 20
+
+    # DEACC_FACTOR = -20
+    # ACC_FACTOR = 0.5
+    # TIME_WANTED = 80
+    # DISTANCE_WANTED = 55.0
+
+    def __init__(self, control_object, random_seed, traj_to_follow, policy_index):
+        super(WaymoIDMPolicy, self).__init__(control_object=control_object, random_seed=random_seed)
+        self.policy_index = policy_index
+        self.traj_to_follow = traj_to_follow
+        self.target_speed = self.NORMAL_SPEED
+        self.routing_target_lane = self.traj_to_follow
+        self.available_routing_index_range = None
+        self.overtake_timer = self.np_random.randint(0, self.LANE_CHANGE_FREQ)
+        self.enable_lane_change = False
+
+        self.heading_pid = PIDController(1.2, 0.1, 3.5)
+        self.lateral_pid = PIDController(0.3, .0, 0.0)
+
+        self.last_action = [0, 0]
+
+    def steering_control(self, target_lane) -> float:
+        # heading control following a lateral distance control
+        ego_vehicle = self.control_object
+        long, lat = target_lane.local_coordinates(ego_vehicle.position)
+        lane_heading = target_lane.heading_theta_at(long + 1)
+        v_heading = ego_vehicle.heading_theta
+        steering = self.heading_pid.get_result(wrap_to_pi(lane_heading - v_heading))
+        # steering += self.lateral_pid.get_result(-lat)
+        return float(steering)
+
+    def act(self, do_speed_control, *args, **kwargs):
+        # concat lane
+        try:
+            if do_speed_control:
+                all_objects = self.control_object.lidar.get_surrounding_objects(self.control_object)
+                # can not find routing target lane
+                surrounding_objects = FrontBackObjects.get_find_front_back_objs_waymo(
+                    all_objects,
+                    self.routing_target_lane,
+                    self.control_object.position,
+                    max_distance=self.WAYMO_IDM_MAX_DIST
+                )
+                acc_front_obj = surrounding_objects.front_object()
+                acc_front_dist = surrounding_objects.front_min_distance()
+
+                acc = self.acceleration(acc_front_obj, acc_front_dist)
+            else:
+                acc = self.last_action[-1]
+        except:
+            acc = 0
+            print("WaymoIDM Longitudinal Planning failed, acceleration fall back to 0")
+
+        # if self.policy_index % 2 == 0:
+        steering_target_lane = self.routing_target_lane
+        # control by PID and IDM
+        steering = self.steering_control(steering_target_lane)
+        # else:
+        #     steering = self.last_action[0]
+        self.last_action = [steering, acc]
+        return [steering, acc]
+
+
+class EgoWaymoIDMPolicy(IDMPolicy):
+    """
+    This policy is for Vehicles using navigation module, especially, ego car
+    """
     NORMAL_SPEED = 30
 
     def __init__(self, control_object, random_seed):
-        super(WaymoIDMPolicy, self).__init__(control_object=control_object, random_seed=random_seed)
+        super(EgoWaymoIDMPolicy, self).__init__(control_object=control_object, random_seed=random_seed)
         self.target_speed = self.NORMAL_SPEED
         self.routing_target_lane = None
         self.available_routing_index_range = None

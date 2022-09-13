@@ -1,17 +1,15 @@
 import copy
+from collections import namedtuple, OrderedDict
 
-import signal
 import numpy as np
 
+from metadrive.component.lane.waymo_lane import WayPointLane
 from metadrive.component.vehicle.vehicle_type import SVehicle
 from metadrive.manager.waymo_traffic_manager import WaymoTrafficManager
 from metadrive.policy.idm_policy import WaymoIDMPolicy
-from metadrive.policy.expert_policy import ExpertPolicy
-from metadrive.utils.scene_utils import ray_localization
 from metadrive.utils.waymo_utils.waymo_utils import AgentType
 
-from wrapt_timeout_decorator import *
-import time
+static_vehicle_info = namedtuple("static_vehicle_info", "position heading")
 
 
 def handler(signum, frame):
@@ -19,144 +17,135 @@ def handler(signum, frame):
 
 
 class WaymoIDMTrafficManager(WaymoTrafficManager):
+    TRAJ_WIDTH = 1.2
+    DEST_REGION = 5
+    MIN_DURATION = 20
+    ACT_FREQ = 5
+    MAX_HORIZON = 100
+
     def __init__(self):
         super(WaymoIDMTrafficManager, self).__init__()
-        self.vehicle_destination_map = {}
+        self.seed_trajs = {}
+        self.v_id_to_destination = OrderedDict()
+        self.v_id_to_stop_time = OrderedDict()
 
     def before_reset(self):
         super(WaymoIDMTrafficManager, self).before_reset()
-        self.vehicle_destination_map = {}
 
     def reset(self):
         # try:
-        # generate vehicle
+        self.v_id_to_destination = OrderedDict()
+        self.v_id_to_stop_time = OrderedDict()
         self.count = 0
-        for v_id, type_traj in self.current_traffic_data.items():
-            if type_traj["type"] == AgentType.VEHICLE and v_id != self.sdc_index:
-                init_info = self.parse_vehicle_state(type_traj["state"], self.engine.global_config["case_start_index"])
-                if not init_info["valid"]:
-                    continue
-                dest_info = self.parse_vehicle_state(type_traj["state"], self.engine.global_config["case_end_index"])
+        if self.engine.global_random_seed not in self.seed_trajs:
+            traffic_traj_data = {}
+            for v_id, type_traj in self.current_traffic_data.items():
+                if type_traj["type"] == AgentType.VEHICLE and v_id != self.sdc_index:
+                    init_info = self.parse_vehicle_state(
+                        type_traj["state"], self.engine.global_config["traj_start_index"]
+                    )
+                    dest_info = self.parse_vehicle_state(
+                        type_traj["state"], self.engine.global_config["traj_end_index"], check_last_state=True
+                    )
+                    if not init_info["valid"]:
+                        continue
+                    if np.linalg.norm(np.array(init_info["position"]) - np.array(dest_info["position"])) < 1:
+                        full_traj = static_vehicle_info(init_info["position"], init_info["heading"])
+                        static = True
+                    else:
+                        full_traj = self.parse_full_trajectory(type_traj["state"])
+                        if len(full_traj) < self.MIN_DURATION:
+                            full_traj = static_vehicle_info(init_info["position"], init_info["heading"])
+                            static = True
+                        else:
+                            full_traj = WayPointLane(full_traj, width=self.TRAJ_WIDTH)
+                            static = False
+                    traffic_traj_data[v_id] = {
+                        "traj": full_traj,
+                        "init_info": init_info,
+                        "static": static,
+                        "dest_info": dest_info,
+                        "is_sdc": False
+                    }
 
-                try:
-                    start, destinations = self.get_route(init_info, dest_info)
-                except:
-                    start = None
-
-                if start is None:
-                    continue
-                if init_info['position'] == dest_info['position']:
-                    # statiic vehicle
-                    v_config = copy.deepcopy(self.engine.global_config["vehicle_config"])
-                    v_config.update(
-                        dict(
-                            show_navi_mark=False,
-                            show_dest_mark=False,
-                            enable_reverse=False,
-                            show_lidar=False,
-                            show_lane_line_detector=False,
-                            show_side_detector=False,
-                            need_navigation=True,
-                            spawn_lane_index=start,
-                            destination=destinations[0]
-                        )
+                elif type_traj["type"] == AgentType.VEHICLE and v_id == self.sdc_index:
+                    # set Ego V velocity
+                    init_info = self.parse_vehicle_state(
+                        type_traj["state"], self.engine.global_config["traj_start_index"]
                     )
-                    v = self.spawn_object(
-                        SVehicle, position=init_info["position"], heading=init_info["heading"], vehicle_config=v_config
-                    )
-                    v.set_position(v.position, height=0.8)
-                    v.set_velocity((0, 0))
-                    v.set_static(True)
-                else:
-                    v_config = copy.deepcopy(self.engine.global_config["vehicle_config"])
-                    v_config.update(
-                        dict(
-                            show_navi_mark=False,
-                            show_dest_mark=False,
-                            enable_reverse=False,
-                            show_lidar=False,
-                            show_lane_line_detector=False,
-                            show_side_detector=False,
-                            spawn_lane_index=start,
-                            destination=destinations[0]
-                        )
-                    )
-                    v = self.spawn_object(
-                        SVehicle, position=init_info["position"], heading=init_info["heading"], vehicle_config=v_config
-                    )
-                    v.set_position(v.position, height=0.8)
-                    self.vehicle_destination_map[v.id] = destinations
-                    self.add_policy(v.id, WaymoIDMPolicy(v, self.generate_seed()))
-                    v.set_velocity(init_info['velocity'])
-            elif type_traj["type"] == AgentType.VEHICLE and v_id == self.sdc_index:
-                # set Ego V velocity
-                init_info = self.parse_vehicle_state(type_traj["state"], self.engine.global_config["case_start_index"])
+                    traffic_traj_data["sdc"] = {
+                        "traj": None,
+                        "init_info": init_info,
+                        "static": False,
+                        "dest_info": None,
+                        "is_sdc": True
+                    }
+            self.seed_trajs[self.engine.global_random_seed] = traffic_traj_data
+        policy_count = 0
+        for v_traj_id, data in self.current_traffic_traj.items():
+            if data["static"] and self.engine.global_config["no_static_traffic_vehicle"]:
+                continue
+            if v_traj_id == "sdc":
+                init_info = data["init_info"]
                 ego_v = list(self.engine.agent_manager.active_agents.values())[0]
                 ego_v.set_velocity(init_info["velocity"])
                 ego_v.set_heading_theta(init_info["heading"], rad_to_degree=False)
                 ego_v.set_position(init_info["position"])
-        # except:
-        #     raise ValueError("Can not LOAD traffic for seed: {}".format(self.engine.global_random_seed))
+                continue
+            init_info = data["init_info"]
+            v_config = copy.deepcopy(self.engine.global_config["vehicle_config"])
+            v_config.update(
+                dict(
+                    show_navi_mark=False,
+                    show_dest_mark=False,
+                    enable_reverse=False,
+                    show_lidar=False,
+                    show_lane_line_detector=False,
+                    show_side_detector=False,
+                    need_navigation=False,
+                )
+            )
+            v = self.spawn_object(
+                SVehicle, position=init_info["position"], heading=init_info["heading"], vehicle_config=v_config
+            )
+            self.v_id_to_destination[v.id] = np.array(data["dest_info"]["position"])
+            self.v_id_to_stop_time[v.id] = 0
+            if data["static"]:
+                # static vehicle
+                v.set_position(v.position, height=0.8)
+                v.set_velocity((0, 0))
+                v.set_static(True)
+            else:
+                v.set_position(v.position, height=0.8)
+                self.add_policy(
+                    v.id, WaymoIDMPolicy(v, self.generate_seed(), data["traj"], policy_count % self.ACT_FREQ)
+                )
+                v.set_velocity(init_info['velocity'])
+                policy_count += 1
 
     def before_step(self, *args, **kwargs):
         for v in self.spawned_objects.values():
             if self.engine.has_policy(v.id):
                 p = self.engine.get_policy(v.name)
-                v.before_step(p.act())
+                do_speed_control = (p.policy_index + self.count) % self.ACT_FREQ == 0
+                v.before_step(p.act(do_speed_control))
 
     def after_step(self, *args, **kwargs):
+        self.count += 1
         vehicles_to_clear = []
+        # LQY: modify termination condition
         for v in self.spawned_objects.values():
             if not self.engine.has_policy(v.name):
                 continue
-            if v.lane in self.vehicle_destination_map[v.id]:
-                vehicles_to_clear.append(v)
+            if v.speed < 1:
+                self.v_id_to_stop_time[v.id] += 1
+            else:
+                self.v_id_to_stop_time[v.id] = 0
+            dist_to_dest = np.linalg.norm(v.position - self.v_id_to_destination[v.id])
+            if dist_to_dest < self.DEST_REGION or self.v_id_to_stop_time[v.id] > self.MAX_HORIZON:
+                vehicles_to_clear.append(v.id)
         self.clear_objects(vehicles_to_clear)
 
-    @timeout(1)
-    def get_route(self, init_state, last_state):
-
-        init_position = init_state["position"]
-        init_yaw = init_state["heading"]
-        last_position = last_state["position"]
-        last_yaw = last_state["heading"]
-        start_lanes = ray_localization(
-            (np.cos(init_yaw), np.sin(init_yaw)),
-            init_position,
-            self.engine,
-            return_all_result=True,
-            use_heading_filter=False
-        )
-        end_lanes = ray_localization(
-            (np.cos(last_yaw), np.sin(last_yaw)),
-            last_position,
-            self.engine,
-            return_all_result=True,
-            use_heading_filter=False
-        )
-
-        start, end = self.filter_path(start_lanes, end_lanes)
-
-        if start is None:
-            return None, None
-        lane = self.engine.current_map.road_network.get_lane(end)
-        destinations = [end]
-        if len(lane.left_lanes) > 0:
-            destinations += [lane["id"] for lane in lane.left_lanes]
-        if len(lane.right_lanes) > 0:
-            destinations += [lane["id"] for lane in lane.right_lanes]
-        return start, destinations
-
-    def filter_path(self, start_lanes, end_lanes):
-        # add some functions to store the filter information to avoid repeat filter when encountering the same cases
-        try:
-            for start in start_lanes:
-                for end in end_lanes:
-                    dest = end[0].index if start[0].index != end[0].index or len(end[0].exit_lanes
-                                                                                 ) == 0 else end[0].exit_lanes[0]
-                    path = self.engine.current_map.road_network.shortest_path(start[0].index, dest)
-                    if len(path) > 0:
-                        return (start[0].index, dest)
-            return None, None
-        except:
-            return None, None
+    @property
+    def current_traffic_traj(self):
+        return self.seed_trajs[self.engine.global_random_seed]

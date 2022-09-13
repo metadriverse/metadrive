@@ -24,8 +24,8 @@ MIX_WAYMO_PG_ENV_CONFIG = dict(
 
     # ===== Waymo Traffic Config =====
     no_traffic=False,
-    case_start_index=0,
-    case_end_index=-1,
+    traj_start_index=0,
+    traj_end_index=-1,
     replay=True,
 
     # ===== PG Map config =====
@@ -55,7 +55,7 @@ MIX_WAYMO_PG_ENV_CONFIG = dict(
     # ===== engine config =====
     force_destroy=True,
     horizon=2500,
-    # use_lateral=True
+    # use_lateral_reward=True
 )
 
 
