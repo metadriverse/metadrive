@@ -271,6 +271,8 @@ class BlockParameterSpace:
     otherwise, an error may happen in navigation info normalization
     """
     STRAIGHT = {Parameter.length: BoxSpace(min=40.0, max=80.0)}
+    BIDIRECTION = {Parameter.length: BoxSpace(min=40.0, max=80.0)}
+
     CURVE = {
         Parameter.length: BoxSpace(min=40.0, max=80.0),
         Parameter.radius: BoxSpace(min=25.0, max=60.0),
@@ -304,7 +306,8 @@ class BlockParameterSpace:
     BOTTLENECK_PARAMETER = {
         Parameter.length: BoxSpace(min=20, max=50),  # the length of straigh part
         Parameter.lane_num: DiscreteSpace(min=1, max=2),  # the lane num increased or descreased now 1-2
-        "bottle_len": ConstantSpace(20)
+        "bottle_len": ConstantSpace(20),
+        "solid_center_line": ConstantSpace(0)  # bool, turn on yellow line or not
     }
     TOLLGATE_PARAMETER = {
         Parameter.length: ConstantSpace(20),  # the length of straigh part
