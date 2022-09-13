@@ -27,7 +27,7 @@ print("We will install the following packages: ", packages)
 version = "0.2.5.1"
 
 install_requires = [
-    "gym",
+    "gym==0.19.0",
     "numpy<=1.19.3",
     "matplotlib",
     "pandas",
@@ -35,7 +35,7 @@ install_requires = [
     "tqdm",
     "yapf",
     "seaborn",
-    "panda3d~=1.10.8",
+    "panda3d==1.10.8",
     "panda3d-gltf",
     "panda3d-simplepbr",
     "pillow",
