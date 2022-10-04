@@ -4,7 +4,7 @@ import numpy as np
 
 from metadrive.component.lane.circular_lane import CircularLane
 from metadrive.component.lane.straight_lane import StraightLane
-from metadrive.constants import LineType
+from metadrive.constants import LineType, LineColor
 from metadrive.utils.utils import import_pygame
 
 PositionType = Union[Tuple[float, float], np.ndarray]
@@ -249,7 +249,7 @@ class LaneGraphics:
     LANE_LINE_WIDTH: float = 1
 
     @classmethod
-    def display(cls, lane, surface, two_side=True, color=None) -> None:
+    def display(cls, lane, surface, two_side=True, use_line_color=False, color=None) -> None:
         """
         Display a lane on a surface.
 
@@ -262,6 +262,13 @@ class LaneGraphics:
         s_origin, _ = lane.local_coordinates(surface.origin)
         s0 = (int(s_origin) // cls.STRIPE_SPACING - stripes_count // 2) * cls.STRIPE_SPACING
         for side in range(side):
+            if use_line_color:
+                if lane.line_colors[side] == LineColor.YELLOW and lane.line_types[side] == LineType.CONTINUOUS:
+                    color = (0, 80, 220)
+                elif lane.line_types[side] == LineType.SIDE:
+                    color = (160, 160, 160)
+                else:
+                    color = (80, 80, 80)
             if lane.line_types[side] == LineType.BROKEN:
                 cls.striped_line(lane, surface, stripes_count, s0, side, color=color)
             # circular side or continuous, it is same now
