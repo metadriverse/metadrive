@@ -93,7 +93,7 @@ class WaymoEnv(BaseEnv):
         config.update(WAYMO_ENV_CONFIG)
         return config
 
-    def __init__(self, config):
+    def __init__(self, config=None):
         super(WaymoEnv, self).__init__(config)
         if not self.config["no_traffic"]:
             assert self.config["agent_policy"

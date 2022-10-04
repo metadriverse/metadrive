@@ -47,7 +47,7 @@ def draw_top_down_map(
                     LaneGraphics.simple_draw(l, surface, color=road_color)
                 else:
                     two_side = True if l is map.road_network.graph[_from][_to][-1] or decoration else False
-                    LaneGraphics.display(l, surface, two_side, color=road_color)
+                    LaneGraphics.display(l, surface, two_side, use_line_color=True)
 
     if return_surface:
         return surface
