@@ -78,7 +78,7 @@ class MixWaymoPGEnv(WaymoEnv):
         config.update(MIX_WAYMO_PG_ENV_CONFIG)
         return config
 
-    def __init__(self, config):
+    def __init__(self, config=None):
         super(MixWaymoPGEnv, self).__init__(config)
         self.waymo_map_manager = None
         self.waymo_traffic_manager = None
@@ -199,7 +199,7 @@ class MixWaymoPGEnvWrapper(MixWaymoPGEnv):
     """
     TOTAL_CASE = 100  # default 100
 
-    def __init__(self, config):
+    def __init__(self, config=None):
         assert "waymo_data_directory" in config, "tell me waymo data path please"
         assert "real_data_ratio" in config, "tell me waymo data path please"
         env_config = config.copy()

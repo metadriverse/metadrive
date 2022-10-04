@@ -4,7 +4,7 @@ from metadrive.envs.marl_envs.marl_inout_roundabout import MultiAgentRoundaboutE
 
 
 class ChangeNEnv(MultiAgentRoundaboutEnv):
-    def __init__(self, config):
+    def __init__(self, config=None):
         self._raw_input_config = copy.deepcopy(config)
         super(ChangeNEnv, self).__init__(config)
 

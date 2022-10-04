@@ -173,7 +173,7 @@ class MATollGateMapManager(MapManager):
 
 
 class MultiAgentTollgateEnv(MultiAgentMetaDrive):
-    def __init__(self, config):
+    def __init__(self, config=None):
         super(MultiAgentTollgateEnv, self).__init__(config)
         self.stay_time_manager = StayTimeManager()
 
