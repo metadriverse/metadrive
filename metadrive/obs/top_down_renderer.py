@@ -319,7 +319,7 @@ class TopDownRenderer:
         v = self.current_track_vehicle
         canvas = self._runtime_canvas
         field = self.canvas.get_width()
-        if self.position is not None:
+        if self.position is not None or self.track_target_vehicle:
             cam_pos = v.position if self.track_target_vehicle else self.position
             position = self._runtime_canvas.pos2pix(*cam_pos)
         else:
