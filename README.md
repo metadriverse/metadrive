@@ -61,9 +61,7 @@ python -m metadrive.examples.profile_metadrive
 
 ## 🚕 Examples
 We provide examples to demonstrate features and basic usages of MetaDrive after the local installation.
-Or you can run some examples directly in Colab.
-\
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/metadriverse/metadrive/blob/main/metadrive/examples/Basic_MetaDrive_Usages.ipynb) 
+Or you can run some examples directly in Colab. [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/metadriverse/metadrive/blob/main/metadrive/examples/Basic_MetaDrive_Usages.ipynb) 
 
 ### Single Agent Environment
 Run the following command to launch a simple driving scenario with auto-drive mode on. Press W, A, S, D to drive the vehicle manually.
