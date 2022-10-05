@@ -12,6 +12,8 @@
 [
 <a href="https://metadrive-simulator.readthedocs.io">Documentation</a>
 |
+<a href="https://colab.research.google.com/github/metadriverse/metadrive/blob/main/metadrive/examples/Basic_MetaDrive_Usages.ipynb">Colab Example</a>
+|
 <a href="https://www.youtube.com/embed/3ziJPqC_-T4">Demo Video</a>
 |
 <a href="https://metadriverse.github.io/metadrive/">Website</a>
@@ -59,7 +61,9 @@ python -m metadrive.examples.profile_metadrive
 
 ## 🚕 Examples
 We provide examples to demonstrate features and basic usages of MetaDrive after the local installation.
-Or you can run some examples directly in Colab. [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/metadriverse/metadrive/blob/main/metadrive/examples/Basic_MetaDrive_Usages.ipynb) 
+Or you can run some examples directly in Colab.
+\
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/metadriverse/metadrive/blob/main/metadrive/examples/Basic_MetaDrive_Usages.ipynb) 
 
 ### Single Agent Environment
 Run the following command to launch a simple driving scenario with auto-drive mode on. Press W, A, S, D to drive the vehicle manually.
@@ -190,7 +194,16 @@ Quanyi Li*, Zhenghao Peng*, Bolei Zhou
 [<a href="https://decisionforce.github.io/HACO/" target="_blank">Webpage</a>]
 [<a href="https://github.com/decisionforce/HACO/blob/main/docs/iclr_poster.pdf" target="_blank">Poster</a>]
 [<a href="https://youtu.be/PiJv4wtp8T8" target="_blank">Talk</a>]
-    
+
+**Human-AI Shared Control via Policy Dissection**
+\
+Quanyi Li, Zhenghao Peng, Haibin Wu, Lan Feng, Bolei Zhou
+\
+*NeurIPS 2022*
+\
+[<a href="https://arxiv.org/pdf/2206.00152.pdf" target="_blank">Paper</a>]
+[<a href="https://github.com/metadriverse/policydissect" target="_blank">Code</a>]
+[<a href="https://metadriverse.github.io/policydissect/" target="_blank">Webpage</a>]
 
 [![build](https://github.com/metadriverse/metadrive/workflows/test/badge.svg)](http://github.com/metadriverse/metadrive/actions)
 [![codecov](https://codecov.io/gh/metadriverse/metadrive/branch/main/graph/badge.svg?token=1ZYN8L5397)](https://codecov.io/gh/metadriverse/metadrive)
