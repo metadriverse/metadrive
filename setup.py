@@ -28,7 +28,7 @@ version = "0.2.5.1"
 
 install_requires = [
     "gym==0.19.0",
-    "numpy==1.21.6",
+    "numpy",
     "matplotlib",
     "pandas",
     "pygame",
