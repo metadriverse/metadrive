@@ -24,7 +24,7 @@ packages = find_namespace_packages(
 print("We will install the following packages: ", packages)
 
 """ ===== Remember to modify the PG_EDITION at first ====="""
-version = "0.2.5.1"
+version = "0.2.5.2"
 
 install_requires = [
     "gym==0.19.0",
@@ -64,13 +64,12 @@ setup(
 """
 How to publish to pypi?  Noted by Zhenghao in Dec 27, 2020.
 
-0. Rename version in metadrive/constants.py and setup.py 
-
 1. Remove old files and ext_modules from setup() to get a clean wheel for all platforms in py3-none-any.wheel
     rm -rf dist/ build/ documentation/build/ metadrive_simulator.egg-info/ docs/build/
 
 2. Rename current version to X.Y.Z.rcA, where A is arbitrary value represent "release candidate A". 
-   This is really important since pypi do not support renaming and re-uploading.
+   This is really important since pypi do not support renaming and re-uploading. 
+   Rename version in metadrive/constants.py and setup.py 
 
 3. Get wheel
     python setup.py sdist bdist_wheel
