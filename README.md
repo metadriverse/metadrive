@@ -168,6 +168,7 @@ Zhenghao Peng, Quanyi Li, Chunxiao Liu, Bolei Zhou
 [<a href="https://decisionforce.github.io/CoPO" target="_blank">Webpage</a>]
 [<a href="https://decisionforce.github.io/CoPO/copo_poster.pdf" target="_blank">Poster</a>]
 [<a href="https://youtu.be/sOw43l8lwxE" target="_blank">Talk</a>]
+[<a href="https://github.com/metadriverse/metadrive-benchmark/tree/main/MARL" target="_blank">Results&Models</a>]
 
 
 **Safe Driving via Expert Guided Policy Optimization**
