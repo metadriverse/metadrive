@@ -401,6 +401,8 @@ class BaseEnv(gym.Env):
             close_engine()
         if self._top_down_renderer is not None:
             self._top_down_renderer.close()
+            del self._top_down_renderer
+            self._top_down_renderer = None
 
     def force_close(self):
         print("Closing environment ... Please wait")
