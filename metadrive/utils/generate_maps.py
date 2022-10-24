@@ -3,7 +3,7 @@ import os.path as osp
 
 from metadrive import MetaDriveEnv
 
-root = osp.dirname(osp.dirname(osp.abspath(__file__)))
+osp.dirname(osp.dirname(osp.abspath(__file__)))
 asset_path = osp.join(root, "assets", "maps")
 
 # The test script of this file is in metadrive/tests/test_functionality/test_loading_map_from_json.py
