@@ -2,6 +2,7 @@ from metadrive.policy.base_policy import BasePolicy
 from metadrive.utils.math_utils import clip
 from collections.abc import Iterable
 
+
 class EnvInputPolicy(BasePolicy):
     def __init__(self, obj, seed):
         # Since control object may change
@@ -25,10 +26,7 @@ class EnvInputPolicy(BasePolicy):
             to_process = self.convert_to_continuous_action(action)
 
         # clip to -1, 1
-        action = [
-            clip(to_process, -1.0, 1.0)
-            for i in range(len(to_process))
-        ]
+        action = [clip(to_process, -1.0, 1.0) for i in range(len(to_process))]
 
         return action
 
@@ -38,6 +36,6 @@ class EnvInputPolicy(BasePolicy):
             steering = action[0] * self.steering_unit - 1.0
             throttle = action[1] * self.throttle_unit - 1.0
         else:
-            steering = float(action % discrete_steering_dim) * self.steering_unit  - 1.0
-            throttle = float(action // discrete_steering_dim) * self.throttle_unit  - 1.0
+            steering = float(action % discrete_steering_dim) * self.steering_unit - 1.0
+            throttle = float(action // discrete_steering_dim) * self.throttle_unit - 1.0
         return steering, throttle
