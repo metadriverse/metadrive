@@ -14,8 +14,8 @@ class EnvInputPolicy(BasePolicy):
         self.throttle_unit = 2.0 / (
             self.engine.global_config["discrete_throttle_dim"] - 1
         )  # for discrete actions space
-        discrete_steering_dim = self.engine.global_config["discrete_steering_dim"]
-        discrete_throttle_dim = self.engine.global_config["discrete_throttle_dim"]
+        self.discrete_steering_dim = self.engine.global_config["discrete_steering_dim"]
+        self.discrete_throttle_dim = self.engine.global_config["discrete_throttle_dim"]
 
     def act(self, agent_id):
         action = self.engine.external_actions[agent_id]
@@ -26,7 +26,7 @@ class EnvInputPolicy(BasePolicy):
             to_process = self.convert_to_continuous_action(action)
 
         # clip to -1, 1
-        action = [clip(to_process, -1.0, 1.0) for i in range(len(to_process))]
+        action = [clip(to_process[i], -1.0, 1.0) for i in range(len(to_process))]
 
         return action
 
@@ -36,6 +36,8 @@ class EnvInputPolicy(BasePolicy):
             steering = action[0] * self.steering_unit - 1.0
             throttle = action[1] * self.throttle_unit - 1.0
         else:
-            steering = float(action % discrete_steering_dim) * self.steering_unit - 1.0
-            throttle = float(action // discrete_steering_dim) * self.throttle_unit - 1.0
+            steering = float(action % self.discrete_steering_dim) * self.steering_unit - 1.0
+            throttle = float(action // self.discrete_steering_dim) * self.throttle_unit - 1.0
+
+            print("Steering: ", steering, " Throttle: ", throttle)
         return steering, throttle
