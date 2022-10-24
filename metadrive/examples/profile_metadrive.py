@@ -1,3 +1,4 @@
+import argparse
 import time
 
 import numpy as np
@@ -6,6 +7,10 @@ from metadrive import MetaDriveEnv
 from metadrive.utils import setup_logger
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--num-steps", "-n", default=10_000, type=int, help="Total steps of profiling.")
+    args = parser.parse_args()
+
     print("Start to profile the efficiency of MetaDrive with 1000 maps and ~8 vehicles!")
     setup_logger(debug=False)
     env = MetaDriveEnv(dict(
@@ -15,7 +20,7 @@ if __name__ == '__main__':
     obs = env.reset()
     start = time.time()
     action = [0.0, 1.]
-    total_steps = 10000
+    total_steps = args.num_steps
     vehicle_num = [len(env.engine.traffic_manager.vehicles)]
     for s in range(total_steps):
         o, r, d, i = env.step(action)
