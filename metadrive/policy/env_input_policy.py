@@ -39,5 +39,5 @@ class EnvInputPolicy(BasePolicy):
             steering = float(action % self.discrete_steering_dim) * self.steering_unit - 1.0
             throttle = float(action // self.discrete_steering_dim) * self.throttle_unit - 1.0
 
-            print("Steering: ", steering, " Throttle: ", throttle)
+            # print("Steering: ", steering, " Throttle: ", throttle)
         return steering, throttle
