@@ -3,6 +3,24 @@ from metadrive.utils.opendrive_map_utils.link_index import LinkIndex
 from lxml import etree
 
 
+def get_lane_width(lane):
+    if not len(lane.widths) <= 1:
+        print("too many lane width value! move to logging warning")
+    if len(lane.widths) == 1:
+        width = lane.widths[0].polynomial_coefficients[0]
+        # assert sum(lane.widths[0].polynomial_coefficients) == self.width, "Only support fixed lane width"
+    else:
+        width = lane.roadMark.get("width", 0.5)
+    return float(width) if isinstance(width, str) else width
+
+
+def get_lane_id(lane):
+    section_id = lane.lane_section.idx
+    road_id = lane.lane_section.parentRoad.id
+    lane_id = lane.id
+    return "{}-{}-{}".format(road_id, section_id, lane_id)
+
+
 def load_opendrive_map(path):
     # Load road network and print some statistics
     try:
@@ -19,7 +37,7 @@ def load_opendrive_map(path):
 
 
 if __name__ == "__main__":
-    map = load_opendrive_map("/home/shady/data/carla_911/CarlaUE4/Content/Carla/Maps/OpenDrive/Town01.xodr")
+    map = load_opendrive_map("C:\\Users\\x1\\Desktop\\Town01.xodr")
     link_index = LinkIndex()
     link_index.create_from_opendrive(map)
     print(link_index)

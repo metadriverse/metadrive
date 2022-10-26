@@ -30,7 +30,7 @@ class Geometry(abc.ABC):
         self._heading = heading
 
     @property
-    def start_position(self) -> float:
+    def start_position(self) -> np.array:
         """Returns the overall geometry length"""
         return self._start_position
 
