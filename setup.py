@@ -41,6 +41,8 @@ install_requires = [
     "pillow",
     "pytest",
     "opencv-python-headless",
+    "lxml",
+    "scipy"
 ]
 
 # if (not is_mac()) and (not is_win()):

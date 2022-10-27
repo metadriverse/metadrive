@@ -102,3 +102,10 @@ class EdgeRoadNetwork(BaseRoadNetwork):
 
     def __del__(self):
         logging.debug("{} is released".format(self.__class__.__name__))
+
+
+class OpenDriveRoadNetwork(EdgeRoadNetwork):
+    def add_lane(self, lane) -> None:
+        self.graph[lane.index] = lane_info(
+            lane=lane, entry_lanes=None, exit_lanes=None, left_lanes=None, right_lanes=None
+        )
