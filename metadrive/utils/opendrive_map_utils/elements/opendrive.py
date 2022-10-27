@@ -11,7 +11,6 @@ __status__ = "Released"
 
 class OpenDrive:
     """ """
-
     def __init__(self):
         self.header = None
         self._roads = []
@@ -81,7 +80,6 @@ class OpenDrive:
 
 class Header:
     """ """
-
     def __init__(
         self,
         rev_major=None,

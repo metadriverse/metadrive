@@ -3,7 +3,6 @@
 import numpy as np
 from scipy import special
 
-
 __author__ = "Benjamin Orthen, Stefan Urban"
 __copyright__ = "TUM Cyber-Physical Systems Group"
 __credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles"]
@@ -15,7 +14,6 @@ __status__ = "Released"
 
 class EulerSpiral:
     """ """
-
     def __init__(self, gamma):
         self._gamma = gamma
 
@@ -62,26 +60,20 @@ class EulerSpiral:
 
         elif self._gamma == 0 and kappa0 != 0:
             # Arc
-            Cs = C0 + np.exp(1j * theta0) / kappa0 * (
-                np.sin(kappa0 * s) + 1j * (1 - np.cos(kappa0 * s))
-            )
+            Cs = C0 + np.exp(1j * theta0) / kappa0 * (np.sin(kappa0 * s) + 1j * (1 - np.cos(kappa0 * s)))
 
         else:
             # Fresnel integrals
-            Sa, Ca = special.fresnel(
-                (kappa0 + self._gamma * s) / np.sqrt(np.pi * np.abs(self._gamma))
-            )
+            Sa, Ca = special.fresnel((kappa0 + self._gamma * s) / np.sqrt(np.pi * np.abs(self._gamma)))
             Sb, Cb = special.fresnel(kappa0 / np.sqrt(np.pi * np.abs(self._gamma)))
 
             # Euler Spiral
-            Cs1 = np.sqrt(np.pi / np.abs(self._gamma)) * np.exp(
-                1j * (theta0 - kappa0 ** 2 / 2 / self._gamma)
-            )
+            Cs1 = np.sqrt(np.pi / np.abs(self._gamma)) * np.exp(1j * (theta0 - kappa0**2 / 2 / self._gamma))
             Cs2 = np.sign(self._gamma) * (Ca - Cb) + 1j * Sa - 1j * Sb
 
             Cs = C0 + Cs1 * Cs2
 
         # Tangent at each point
-        theta = self._gamma * s ** 2 / 2 + kappa0 * s + theta0
+        theta = self._gamma * s**2 / 2 + kappa0 * s + theta0
 
         return (Cs.real, Cs.imag, theta)

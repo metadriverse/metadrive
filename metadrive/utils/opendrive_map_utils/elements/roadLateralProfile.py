@@ -18,7 +18,6 @@ class LateralProfile:
 
     (Section 5.3.6 of OpenDRIVE 1.4)
     """
-
     def __init__(self):
         self._superelevations = []
         self._crossfalls = []
@@ -31,9 +30,7 @@ class LateralProfile:
 
     @superelevations.setter
     def superelevations(self, value):
-        if not isinstance(value, list) or not all(
-            isinstance(x, Superelevation) for x in value
-        ):
+        if not isinstance(value, list) or not all(isinstance(x, Superelevation) for x in value):
             raise TypeError("Value must be a list of Superelevation.")
 
         self._superelevations = value
@@ -45,9 +42,7 @@ class LateralProfile:
 
     @crossfalls.setter
     def crossfalls(self, value):
-        if not isinstance(value, list) or not all(
-            isinstance(x, Crossfall) for x in value
-        ):
+        if not isinstance(value, list) or not all(isinstance(x, Crossfall) for x in value):
             raise TypeError("Value must be a list of Crossfall.")
 
         self._crossfalls = value
@@ -79,10 +74,7 @@ class Crossfall(RoadRecord):
 
     (Section 5.3.6.2 of OpenDRIVE 1.4)
     """
-
-    def __init__(
-        self, *polynomial_coefficients: float, start_pos: float = None, side: str = None
-    ):
+    def __init__(self, *polynomial_coefficients: float, start_pos: float = None, side: str = None):
         super().__init__(*polynomial_coefficients, start_pos=start_pos)
         self.side = side
 
@@ -101,9 +93,7 @@ class Crossfall(RoadRecord):
     @side.setter
     def side(self, value):
         if value not in ["left", "right", "both"]:
-            raise TypeError(
-                "Value must be string with content 'left', 'right' or 'both'."
-            )
+            raise TypeError("Value must be string with content 'left', 'right' or 'both'.")
 
         self._side = value
 
@@ -129,7 +119,6 @@ class Shape(RoadRecord):
     (Section 5.3.6.3 of OpenDRIVE 1.4)
 
     """
-
     def __init__(
         self,
         *polynomial_coefficients: float,

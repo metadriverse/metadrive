@@ -34,7 +34,6 @@ class RoadRecord(ABC):
       polynomial_coefficients: List of values [a, b, c, d, ...] which can be evaluated with an
         polynomial function.
     """
-
     def __init__(self, *polynomial_coefficients: float, start_pos: float = None):
         self.start_pos = start_pos
         self.polynomial_coefficients = []

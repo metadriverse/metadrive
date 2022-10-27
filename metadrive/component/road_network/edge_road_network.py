@@ -22,7 +22,6 @@ class EdgeRoadNetwork(BaseRoadNetwork):
     Compared to NodeRoadNetwork representing the relation of lanes in a node-based graph, EdgeRoadNetwork stores the
     relationship in edge-based graph, which is more common in real map representation
     """
-
     def __init__(self):
         super(EdgeRoadNetwork, self).__init__()
         self.graph = {}
@@ -108,9 +107,5 @@ class EdgeRoadNetwork(BaseRoadNetwork):
 class OpenDriveRoadNetwork(EdgeRoadNetwork):
     def add_lane(self, lane) -> None:
         self.graph[lane.index] = lane_info(
-            lane=lane,
-            entry_lanes=None,
-            exit_lanes=None,
-            left_lanes=None,
-            right_lanes=None
+            lane=lane, entry_lanes=None, exit_lanes=None, left_lanes=None, right_lanes=None
         )

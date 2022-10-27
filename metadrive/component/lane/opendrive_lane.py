@@ -11,14 +11,8 @@ from metadrive.utils.opendrive_map_utils.map_load import get_lane_id
 
 class OpenDriveLane(AbstractLane, InterpolatingLine):
     ARC_SEGMENT_LENGTH = 1  # m
-
     """An OpenDrive Lane"""
-
-    def __init__(
-            self,
-            width,
-            lane_data
-    ) -> None:
+    def __init__(self, width, lane_data) -> None:
         AbstractLane.__init__(self)
         self.lane_data = lane_data
         self.index = get_lane_id(lane_data)
@@ -43,8 +37,7 @@ class OpenDriveLane(AbstractLane, InterpolatingLine):
                 points.append(start)
                 # if geo is geos[-1]:
                 #     # last geo
-                end = start + np.array(
-                    [np.cos(heading) * length, np.sin(heading) * length])
+                end = start + np.array([np.cos(heading) * length, np.sin(heading) * length])
                 points.append(end)
             elif isinstance(geo, Arc):
                 continue
@@ -113,8 +106,9 @@ class OpenDriveLane(AbstractLane, InterpolatingLine):
         self.construct_lane_segment(block, middle, width, self.length, theta, lane_index)
 
     def is_lane_line(self):
-        return True if self.roadMark_type in ["solid", "broken", "broken broken", "solid solid", "solid broken",
-                                              "broken solid"] else False
+        return True if self.roadMark_type in [
+            "solid", "broken", "broken broken", "solid solid", "solid broken", "broken solid"
+        ] else False
 
     def destroy(self):
         self.width = None

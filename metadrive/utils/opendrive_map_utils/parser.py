@@ -105,9 +105,7 @@ def parse_opendrive_road_link(newRoad, opendrive_road_link):
         )
 
     for neighbor in opendrive_road_link.findall("neighbor"):
-        newNeighbor = RoadLinkNeighbor(
-            neighbor.get("side"), neighbor.get("elementId"), neighbor.get("direction")
-        )
+        newNeighbor = RoadLinkNeighbor(neighbor.get("side"), neighbor.get("elementId"), neighbor.get("direction"))
 
         newRoad.link.neighbors.append(newNeighbor)
 
@@ -334,29 +332,21 @@ def parse_opendrive_road_lane_section(newRoad, lane_section_id, lane_section):
 
         for lane in side.findall("lane"):
 
-            new_lane = RoadLaneSectionLane(
-                parentRoad=newRoad, lane_section=newLaneSection
-            )
+            new_lane = RoadLaneSectionLane(parentRoad=newRoad, lane_section=newLaneSection)
             new_lane.id = lane.get("id")
             new_lane.type = lane.get("type")
 
             # In some sample files the level is not specified according to the OpenDRIVE spec
-            new_lane.level = (
-                "true" if lane.get("level") in [1, "1", "true"] else "false"
-            )
+            new_lane.level = ("true" if lane.get("level") in [1, "1", "true"] else "false")
 
             # Lane Links
             if lane.find("link") is not None:
 
                 if lane.find("link").find("predecessor") is not None:
-                    new_lane.link.predecessorId = (
-                        lane.find("link").find("predecessor").get("id")
-                    )
+                    new_lane.link.predecessorId = (lane.find("link").find("predecessor").get("id"))
 
                 if lane.find("link").find("successor") is not None:
-                    new_lane.link.successorId = (
-                        lane.find("link").find("successor").get("id")
-                    )
+                    new_lane.link.successorId = (lane.find("link").find("successor").get("id"))
 
             # Width
             for widthIdx, width in enumerate(lane.findall("width")):
@@ -475,9 +465,7 @@ def parse_opendrive_road(opendrive, road):
         parse_opendrive_road_lane_offset(newRoad, lane_offset)
 
     # Lane sections
-    for lane_section_id, lane_section in enumerate(
-            road.find("lanes").findall("laneSection")
-    ):
+    for lane_section_id, lane_section in enumerate(road.find("lanes").findall("laneSection")):
         parse_opendrive_road_lane_section(newRoad, lane_section_id, lane_section)
 
     # Objects
@@ -506,17 +494,12 @@ def calculate_lane_section_lengths(newRoad):
 
         # All but the last lane section end at the succeeding one
         else:
-            lane_section.length = (
-                    newRoad.lanes.lane_sections[lane_section.idx + 1].sPos
-                    - lane_section.sPos
-            )
+            lane_section.length = (newRoad.lanes.lane_sections[lane_section.idx + 1].sPos - lane_section.sPos)
 
     # OpenDRIVE does not provide lane width lengths by itself, calculate them by ourselves
     for lane_section in newRoad.lanes.lane_sections:
         for lane in lane_section.allLanes:
-            widthsPoses = np.array(
-                [x.start_offset for x in lane.widths] + [lane_section.length]
-            )
+            widthsPoses = np.array([x.start_offset for x in lane.widths] + [lane_section.length])
             widthsLengths = widthsPoses[1:] - widthsPoses[:-1]
 
             for widthIdx, width in enumerate(lane.widths):

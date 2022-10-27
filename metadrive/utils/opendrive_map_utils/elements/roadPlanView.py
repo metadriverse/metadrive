@@ -12,7 +12,6 @@ from metadrive.utils.opendrive_map_utils.elements.geometry import (
     Poly3,
 )
 
-
 __author__ = "Benjamin Orthen, Stefan Urban"
 __copyright__ = "TUM Cyber-Physical Systems Group"
 __credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles"]
@@ -29,7 +28,6 @@ class PlanView:
 
     (Section 5.3.4 of OpenDRIVE 1.4)
     """
-
     def __init__(self):
         self._geometries = []
         self._precalculation = None
@@ -89,9 +87,7 @@ class PlanView:
         """
         self._add_geometry(Arc(start_pos, heading, length, curvature), True)
 
-    def addParamPoly3(
-        self, start_pos, heading, length, aU, bU, cU, dU, aV, bV, cV, dV, pRange
-    ):
+    def addParamPoly3(self, start_pos, heading, length, aU, bU, cU, dU, aV, bV, cV, dV, pRange):
         """
 
         Args:
@@ -110,9 +106,7 @@ class PlanView:
 
         """
         self._add_geometry(
-            ParamPoly3(
-                start_pos, heading, length, aU, bU, cU, dU, aV, bV, cV, dV, pRange
-            ),
+            ParamPoly3(start_pos, heading, length, aU, bU, cU, dU, aV, bV, cV, dV, pRange),
             True,
         )
 
@@ -187,19 +181,17 @@ class PlanView:
         # we need idx for angle interpolation
         # so idx can be used anyway in the other np.interp function calls
         idx = np.abs(self._precalculation[:, 0] - s_pos).argmin()
-        if s_pos - self._precalculation[idx, 0] < 0 or idx + 1 == len(
-            self._precalculation
-        ):
+        if s_pos - self._precalculation[idx, 0] < 0 or idx + 1 == len(self._precalculation):
             idx -= 1
         result_pos_x = np.interp(
             s_pos,
-            self._precalculation[idx : idx + 2, 0],
-            self._precalculation[idx : idx + 2, 1],
+            self._precalculation[idx:idx + 2, 0],
+            self._precalculation[idx:idx + 2, 1],
         )
         result_pos_y = np.interp(
             s_pos,
-            self._precalculation[idx : idx + 2, 0],
-            self._precalculation[idx : idx + 2, 2],
+            self._precalculation[idx:idx + 2, 0],
+            self._precalculation[idx:idx + 2, 2],
         )
         result_tang = self.interpolate_angle(idx, s_pos)
         result_pos = np.array((result_pos_x, result_pos_y))
@@ -253,9 +245,7 @@ class PlanView:
                 )
 
         # geo_idx is index which geometry to use
-        return self._geometries[geo_idx].calc_position(
-            s_pos - self._geo_lengths[geo_idx]
-        )
+        return self._geometries[geo_idx].calc_position(s_pos - self._geo_lengths[geo_idx])
 
     def precalculate(self, precision: float = 0.5):
         """Precalculate coordinates of planView to save computing resources and time.
