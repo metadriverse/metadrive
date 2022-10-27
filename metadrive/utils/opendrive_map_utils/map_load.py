@@ -10,7 +10,8 @@ def get_lane_width(lane):
         width = lane.widths[0].polynomial_coefficients[0]
         # assert sum(lane.widths[0].polynomial_coefficients) == self.width, "Only support fixed lane width"
     else:
-        width = lane.roadMark.get("width", 0.5)
+        # TODO LQY: remove 4.0
+        width = lane.roadMark.get("width", 4.0)
     return float(width) if isinstance(width, str) else width
 
 

@@ -17,16 +17,18 @@ class OpenDriveBlock(BaseBlock):
         for lane in self.section_data.allLanes:
             # if lane.type == "driving":
             width = get_lane_width(lane)
-            if width is not None:
-                opendrive_lane = OpenDriveLane(width, lane)
-                self.block_network.add_lane(opendrive_lane)
+            opendrive_lane = OpenDriveLane(width, lane)
+            self.block_network.add_lane(opendrive_lane)
         return True
 
     def create_in_world(self):
         """
         The lane line should be created separately
         """
-        pass
+        graph = self.block_network.graph
+        for id, lane_info in graph.items():
+            lane = lane_info.lane
+            lane.construct_lane_in_block(self, lane_index=id)
 
     @property
     def block_network_type(self):

@@ -4,7 +4,7 @@ from typing import List, TYPE_CHECKING, Tuple, Union
 import numpy as np
 from metadrive.component.lane.circular_lane import CircularLane
 from metadrive.component.lane.metadrive_lane import MetaDriveLane
-from metadrive.component.lane.waypoint_lane import WayPointLane
+from metadrive.utils.interpolating_line import InterpolatingLine
 from metadrive.constants import CollisionGroup
 from metadrive.constants import Decoration, BodyName
 from metadrive.engine.core.engine_core import EngineCore
@@ -81,12 +81,12 @@ def get_lanes_bounding_box(lanes, extra_lateral=3) -> Tuple:
         line_points = get_curve_contour(lanes, extra_lateral) if isinstance(lanes[0], CircularLane) \
             else get_straight_contour(lanes, extra_lateral)
     else:
-        line_points = get_waypoint_countour(lanes)
+        line_points = get_interpolating_lane_countour(lanes)
     return get_points_bounding_box(line_points)
 
 
-def get_waypoint_countour(lanes):
-    assert isinstance(lanes[0], WayPointLane)
+def get_interpolating_lane_countour(lanes):
+    assert isinstance(lanes[0], InterpolatingLine)
     ret = []
     for lane in lanes:
         for seg in lane.segment_property:
