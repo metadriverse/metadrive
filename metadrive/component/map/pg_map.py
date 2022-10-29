@@ -102,7 +102,7 @@ class PGMap(BaseMap):
     def road_network_type(self):
         return NodeRoadNetwork
 
-    def save_map(self):
+    def get_meta_data(self):
         assert self.blocks is not None and len(self.blocks) > 0, "Please generate Map before saving it"
         map_config = []
         for b in self.blocks:

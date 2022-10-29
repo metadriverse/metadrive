@@ -68,7 +68,7 @@ class BaseMap(BaseRunnable):
         for block in self.blocks:
             block.detach_from_world(self.engine.physics_world or physics_world)
 
-    def save_map(self):
+    def get_meta_data(self):
         """
         Save the generated map to map file
         """

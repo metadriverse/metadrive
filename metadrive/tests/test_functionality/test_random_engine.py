@@ -59,7 +59,7 @@ def test_map_random_seeding():
             env.reset()
             env.reset()
             env.reset(force_seed=5)
-            map_configs.append(env.current_map.save_map)
+            map_configs.append(env.current_map.get_meta_data)
             lane_num.append(len(env.current_map.road_network.graph[FirstPGBlock.NODE_1][FirstPGBlock.NODE_2]))
             lane_width.append(
                 env.current_map.road_network.graph[FirstPGBlock.NODE_1][FirstPGBlock.NODE_2][0].width_at(0)

@@ -2,6 +2,7 @@ import copy
 import logging
 import os
 import sys
+import datetime
 
 from panda3d.bullet import BulletBodyNode
 
@@ -11,6 +12,8 @@ def import_pygame():
     import pygame
     return pygame
 
+def get_time_str():
+    return datetime.datetime.now().strftime("%y%m%d-%H%M%S")
 
 def setup_logger(debug=False):
     logging.basicConfig(

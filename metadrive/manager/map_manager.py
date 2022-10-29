@@ -1,10 +1,14 @@
-from metadrive.component.map.pg_map import PGMap
+import logging
+
+from metadrive.component.map.pg_map import PGMap, MapGenerateMethod
+import pickle
 from metadrive.manager.base_manager import BaseManager
+from metadrive.utils.utils import get_time_str
 
 
 class MapManager(BaseManager):
     """
-    MapManager contains a list of maps
+    MapManager contains a list of PGmaps
     """
     PRIORITY = 0  # Map update has the most high priority
 
@@ -13,8 +17,8 @@ class MapManager(BaseManager):
         self.current_map = None
 
         # for pgmaps
-        start_seed = self.engine.global_config["start_seed"]
-        env_num = self.engine.global_config["environment_num"]
+        start_seed = self.start_seed = self.engine.global_config["start_seed"]
+        env_num = self.env_num = self.engine.global_config["environment_num"]
         self.maps = {_seed: None for _seed in range(start_seed, start_seed + env_num)}
 
     def spawn_object(self, object_class, *args, **kwargs):
@@ -54,7 +58,67 @@ class MapManager(BaseManager):
     def add_random_to_map(self, map_config):
         if self.engine.global_config["random_lane_width"]:
             map_config[PGMap.LANE_WIDTH
-                       ] = self.np_random.rand() * (PGMap.MAX_LANE_WIDTH - PGMap.MIN_LANE_WIDTH) + PGMap.MIN_LANE_WIDTH
+            ] = self.np_random.rand() * (PGMap.MAX_LANE_WIDTH - PGMap.MIN_LANE_WIDTH) + PGMap.MIN_LANE_WIDTH
         if self.engine.global_config["random_lane_num"]:
             map_config[PGMap.LANE_NUM] = self.np_random.randint(PGMap.MIN_LANE_NUM, PGMap.MAX_LANE_NUM + 1)
         return map_config
+
+    def generate_all_maps(self):
+        """
+        Call this function to generate all maps before using them
+        """
+        for seed in self.maps.keys():
+            config = self.engine.global_config.copy()
+            current_seed = seed
+            if self.maps[current_seed] is None:
+                map_config = config["map_config"]
+                map_config.update({"seed": current_seed})
+                map_config = self.add_random_to_map(map_config)
+                map = self.spawn_object(PGMap, map_config=map_config, random_seed=None)
+                self.maps[current_seed] = map
+
+    def dump_all_maps(self, file_name=None):
+        """
+        Dump all maps. If some maps are not generated, we will generate it at first
+        """
+        if file_name is None:
+            start_seed = self.engine.global_config["start_seed"]
+            end_seed = start_seed + self.engine.global_config["environment_num"]
+            file_name = "{}_{}_{}.json".format(start_seed, end_seed, get_time_str())
+        self.generate_all_maps()
+        ret = {}
+        for seed, map in self.maps.items():
+            ret[seed] = map.get_meta_data()
+        with open(file_name, "wb+") as file:
+            pickle.dump(ret, file)
+        return ret
+
+    def load_all_maps(self, file_name):
+        with open(file_name, "rb+") as file:
+            loaded_map_data = pickle.load(file)
+        map_seeds = list(loaded_map_data.keys())
+        start_seed = min(map_seeds)
+        map_num = len(map_seeds)
+        assert self.env_num == map_num, "The environment num in config: {} must be the same as loaded ap num: {} ".format(
+            self.env_num, map_num)
+        if start_seed != self.engine.global_config["start_seed"]:
+            logging.warning(
+                "The start seed in config: {} mismatches with the start seed of loaded maps: {}".format(
+                    self.engine.global_config["start_seed"], start_seed))
+            logging.warning(
+                "We will overwrite {} maps from seed {} to {} with maps from seed {} to {}"
+                .format(self.env_num,
+                        self.start_seed,
+                        self.start_seed + self.env_num,
+                        start_seed,
+                        start_seed + self.env_num))
+
+        for i in range(self.env_num):
+            loaded_seed = i + start_seed
+            map_data = loaded_map_data[loaded_seed]
+            block_sequence = map_data["block_sequence"]
+            map_config = map_data["map_config"]
+            map_config[PGMap.GENERATE_TYPE] = MapGenerateMethod.PG_MAP_FILE
+            map_config[PGMap.GENERATE_CONFIG] = block_sequence
+            map = self.spawn_object(PGMap, map_config=map_config, random_seed=None)
+            self.maps[i + self.start_seed] = map
