@@ -23,14 +23,14 @@ class FirstPGBlock(PGBlock):
     ENTRANCE_LENGTH = 10
 
     def __init__(
-        self,
-        global_network: NodeRoadNetwork,
-        lane_width: float,
-        lane_num: int,
-        render_root_np: NodePath,
-        physics_world: PhysicsWorld,
-        length: float = 30,
-        ignore_intersection_checking=False
+            self,
+            global_network: NodeRoadNetwork,
+            lane_width: float,
+            lane_num: int,
+            render_root_np: NodePath,
+            physics_world: PhysicsWorld,
+            length: float = 30,
+            ignore_intersection_checking=False
     ):
         place_holder = PGBlockSocket(Road(Decoration.start, Decoration.end), Road(Decoration.start, Decoration.end))
         super(FirstPGBlock, self).__init__(
@@ -88,3 +88,10 @@ class FirstPGBlock(PGBlock):
         self.add_sockets(socket)
         self.attach_to_world(render_root_np, physics_world)
         self._respawn_roads = [other_v_spawn_road]
+
+    def _try_plug_into_previous_block(self) -> bool:
+        raise ValueError("BIG Recursive calculation error! Can not find a right sequence for building map! Check BIG")
+
+    def destruct_block(self, physics_world: PhysicsWorld):
+        """This block can not be destructed"""
+        pass

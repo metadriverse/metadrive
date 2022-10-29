@@ -25,19 +25,19 @@ class BigGenerateMethod:
 
 
 class BIG:
-    MAX_TRIAL = 2
+    MAX_TRIAL = 5
 
     def __init__(
-        self,
-        lane_num: int,
-        lane_width: float,
-        global_network: NodeRoadNetwork,
-        render_node_path: NodePath,
-        physics_world: PhysicsWorld,
-        # block_type_version: str,
-        exit_length=50,
-        random_seed=None,
-        block_dist_config=PGBlockDistConfig
+            self,
+            lane_num: int,
+            lane_width: float,
+            global_network: NodeRoadNetwork,
+            render_node_path: NodePath,
+            physics_world: PhysicsWorld,
+            # block_type_version: str,
+            exit_length=50,
+            random_seed=None,
+            block_dist_config=PGBlockDistConfig
     ):
         super(BIG, self).__init__()
         self.block_dist_config = block_dist_config
@@ -121,7 +121,11 @@ class BIG:
         block.destruct_block(self._physics_world)
 
     def construct(self, block) -> bool:
-        return block.construct_block(self._render_node_path, self._physics_world)
+        success = block.construct_block(self._render_node_path, self._physics_world)
+        lane_num = max([len(socket.get_positive_lanes(self._global_network)) for socket in block._sockets.values()])
+        if lane_num < self.block_dist_config.MIN_LANE_NUM or lane_num > self.block_dist_config.MAX_LANE_NUM:
+            success = False
+        return success
 
     def _forward(self):
         logging.debug("forward")
@@ -140,6 +144,9 @@ class BIG:
     def _search_sibling(self):
         logging.debug("sibling")
         block = self.blocks[-1]
+        if len(self.blocks)==1:
+            self.next_step = NextStep.forward
+            return
         if block.number_of_sample_trial < self.MAX_TRIAL:
             success = self.construct(block)
             self.next_step = NextStep.forward if success else NextStep.destruct_current
