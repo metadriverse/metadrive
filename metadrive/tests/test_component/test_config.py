@@ -18,14 +18,14 @@ def test_config_sync():
     try:
         env = MetaDriveEnv({"vehicle_config": dict(show_lidar=False, show_navi_mark=False)})
         env.reset()
-        recursive_equal(env.config, env.engine.global_config)
+        assert recursive_equal(env.config, env.engine.global_config)
         env.config.update({"vehicle_config": dict(show_lidar=True, show_navi_mark=True)})
-        recursive_equal(env.config, env.engine.global_config)
+        assert recursive_equal(env.config, env.engine.global_config)
         env.close()
         env.reset()
-        recursive_equal(env.config, env.engine.global_config)
+        assert recursive_equal(env.config, env.engine.global_config)
         env.engine.global_config.update({"vehicle_config": dict(show_lidar=False, show_navi_mark=False)})
-        recursive_equal(env.config, env.engine.global_config)
+        assert recursive_equal(env.config, env.engine.global_config)
     finally:
         env.close()
 

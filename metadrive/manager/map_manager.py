@@ -70,12 +70,14 @@ class MapManager(BaseManager):
         for seed in self.maps.keys():
             config = self.engine.global_config.copy()
             current_seed = seed
+            self.engine.seed(seed)
             if self.maps[current_seed] is None:
                 map_config = config["map_config"]
                 map_config.update({"seed": current_seed})
                 map_config = self.add_random_to_map(map_config)
                 map = self.spawn_object(PGMap, map_config=map_config, random_seed=None)
                 self.maps[current_seed] = map
+                map.detach_from_world()
 
     def dump_all_maps(self, file_name=None):
         """
@@ -94,6 +96,8 @@ class MapManager(BaseManager):
         return ret
 
     def load_all_maps(self, file_name):
+        if self.current_map is not None:
+            self.unload_map(self.current_map)
         with open(file_name, "rb+") as file:
             loaded_map_data = pickle.load(file)
         map_seeds = list(loaded_map_data.keys())

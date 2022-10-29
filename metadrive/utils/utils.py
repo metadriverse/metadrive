@@ -38,7 +38,7 @@ def recursive_equal(data1, data2, need_assert=False):
             return False
         ret = []
         for k in data1:
-            ret.append(recursive_equal(data1[k], data2[k]))
+            ret.append(recursive_equal(data1[k], data2[k], need_assert=need_assert))
         return all(ret)
 
     elif isinstance(data1, list):
@@ -50,7 +50,7 @@ def recursive_equal(data1, data2, need_assert=False):
             return False
         ret = []
         for i in range(len(data1)):
-            ret.append(recursive_equal(data1[i], data2[i]))
+            ret.append(recursive_equal(data1[i], data2[i], need_assert=need_assert))
         return all(ret)
 
     else:

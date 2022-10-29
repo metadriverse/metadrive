@@ -68,7 +68,7 @@ def test_map_random_seeding():
             env.close()
     for idx, map_cfg in enumerate(map_configs[:-1]):
         nxt_map_cfg = map_configs[idx + 1]
-        recursive_equal(map_cfg, nxt_map_cfg)
+        assert recursive_equal(map_cfg, nxt_map_cfg)
     assert np.std(lane_width) < 0.01 and np.std(lane_num) < 0.01, "random engine error"
 
 
