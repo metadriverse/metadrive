@@ -23,7 +23,7 @@ if __name__ == "__main__":
             "need_inverse_traffic": True,
             "rgb_clip": True,
             "debug": False,
-            "map": "yBY",
+            "map": "",
             "agent_policy": IDMPolicy,
             "random_traffic": False,
             "random_lane_width": True,
