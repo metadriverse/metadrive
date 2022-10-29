@@ -23,14 +23,14 @@ class FirstPGBlock(PGBlock):
     ENTRANCE_LENGTH = 10
 
     def __init__(
-            self,
-            global_network: NodeRoadNetwork,
-            lane_width: float,
-            lane_num: int,
-            render_root_np: NodePath,
-            physics_world: PhysicsWorld,
-            length: float = 30,
-            ignore_intersection_checking=False
+        self,
+        global_network: NodeRoadNetwork,
+        lane_width: float,
+        lane_num: int,
+        render_root_np: NodePath,
+        physics_world: PhysicsWorld,
+        length: float = 30,
+        ignore_intersection_checking=False
     ):
         place_holder = PGBlockSocket(Road(Decoration.start, Decoration.end), Road(Decoration.start, Decoration.end))
         super(FirstPGBlock, self).__init__(

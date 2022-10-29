@@ -12,8 +12,10 @@ def import_pygame():
     import pygame
     return pygame
 
+
 def get_time_str():
     return datetime.datetime.now().strftime("%y%m%d-%H%M%S")
+
 
 def setup_logger(debug=False):
     logging.basicConfig(

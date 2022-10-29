@@ -14,7 +14,6 @@ from metadrive.utils.space import ParameterSpace, Parameter, BlockParameterSpace
 
 
 class Fork(Ramp):
-
     """
     Similar to Ramp
     """
@@ -51,19 +50,25 @@ class InFork(Fork):
             side_lane_line_type=LineType.CONTINUOUS,
             ignore_intersection_checking=False
         ) and no_cross
-        no_cross = CreateAdverseRoad(extend_road, self.block_network, self._global_network,
-                                     ignore_intersection_checking=False) and no_cross
+        no_cross = CreateAdverseRoad(
+            extend_road, self.block_network, self._global_network, ignore_intersection_checking=False
+        ) and no_cross
 
         acc_side_lane = ExtendStraightLane(
             extend_lane, acc_lane_len + self.lane_width, [LineType.BROKEN, LineType.CONTINUOUS]
         )
         acc_road = Road(extend_road.end_node, self.add_road_node())
         no_cross = CreateRoadFrom(
-            acc_side_lane, self.positive_lane_num, acc_road, self.block_network, self._global_network,
+            acc_side_lane,
+            self.positive_lane_num,
+            acc_road,
+            self.block_network,
+            self._global_network,
             ignore_intersection_checking=False
         ) and no_cross
-        no_cross = CreateAdverseRoad(acc_road, self.block_network, self._global_network,
-                                     ignore_intersection_checking=False) and no_cross
+        no_cross = CreateAdverseRoad(
+            acc_road, self.block_network, self._global_network, ignore_intersection_checking=False
+        ) and no_cross
         acc_road.get_lanes(self.block_network)[-1].line_types = [LineType.BROKEN, LineType.BROKEN]
 
         # ramp part, part 1
@@ -92,11 +97,21 @@ class InFork(Fork):
         self.block_network.add_lane(bend_1_road.start_node, bend_1_road.end_node, bend_1)
         self.block_network.add_lane(connect_road.start_node, connect_road.end_node, connect_part)
         no_cross = CreateRoadFrom(
-            bend_1, fork_lane_num, bend_1_road, self.block_network, self._global_network, False,
+            bend_1,
+            fork_lane_num,
+            bend_1_road,
+            self.block_network,
+            self._global_network,
+            False,
             ignore_intersection_checking=False
         ) and no_cross
         no_cross = CreateRoadFrom(
-            connect_part, fork_lane_num, connect_road, self.block_network, self._global_network, False,
+            connect_part,
+            fork_lane_num,
+            connect_road,
+            self.block_network,
+            self._global_network,
+            False,
             ignore_intersection_checking=False
         ) and no_cross
 
@@ -175,11 +190,16 @@ class OutFork(Fork):
         )
         dec_road = Road(self.pre_block_socket.positive_road.end_node, self.add_road_node())
         no_cross = CreateRoadFrom(
-            dec_lane, self.positive_lane_num, dec_road, self.block_network, self._global_network,
+            dec_lane,
+            self.positive_lane_num,
+            dec_road,
+            self.block_network,
+            self._global_network,
             ignore_intersection_checking=False
         ) and no_cross
-        no_cross = CreateAdverseRoad(dec_road, self.block_network, self._global_network,
-                                     ignore_intersection_checking=False) and no_cross
+        no_cross = CreateAdverseRoad(
+            dec_road, self.block_network, self._global_network, ignore_intersection_checking=False
+        ) and no_cross
         dec_right_lane = dec_road.get_lanes(self.block_network)[-1]
         dec_right_lane.line_types = [LineType.BROKEN, LineType.BROKEN]
 
@@ -187,11 +207,16 @@ class OutFork(Fork):
         extend_lane = ExtendStraightLane(dec_right_lane, longitude_len, [LineType.BROKEN, LineType.CONTINUOUS])
         extend_road = Road(dec_road.end_node, self.add_road_node())
         no_cross = CreateRoadFrom(
-            extend_lane, self.positive_lane_num, extend_road, self.block_network, self._global_network,
+            extend_lane,
+            self.positive_lane_num,
+            extend_road,
+            self.block_network,
+            self._global_network,
             ignore_intersection_checking=False
         ) and no_cross
-        no_cross = CreateAdverseRoad(extend_road, self.block_network, self._global_network,
-                                     ignore_intersection_checking=False) and no_cross
+        no_cross = CreateAdverseRoad(
+            extend_road, self.block_network, self._global_network, ignore_intersection_checking=False
+        ) and no_cross
         self.add_sockets(self.create_socket_from_positive_road(extend_road))
 
         # part 1 road 0
@@ -199,13 +224,8 @@ class OutFork(Fork):
         dec_side_right_lane = self._get_deacc_lane(dec_right_lane)
         self.block_network.add_lane(dec_road.start_node, self.add_road_node(), dec_side_right_lane)
         no_cross = (
-                       not check_lane_on_road(
-                           self._global_network,
-                           dec_side_right_lane,
-                           0.95,
-                           ignore_intersection_checking=False
-                       )
-                   ) and no_cross
+            not check_lane_on_road(self._global_network, dec_side_right_lane, 0.95, ignore_intersection_checking=False)
+        ) and no_cross
 
         bend_1, connect_part = create_bend_straight(
             dec_side_right_lane,
@@ -222,16 +242,11 @@ class OutFork(Fork):
         self.block_network.add_lane(bend_1_road.start_node, bend_1_road.end_node, bend_1)
         self.block_network.add_lane(connect_road.start_node, connect_road.end_node, connect_part)
         no_cross = (
-                       not check_lane_on_road(
-                           self._global_network, bend_1, 0.95, ignore_intersection_checking=False
-                       )
-                   ) and no_cross
+            not check_lane_on_road(self._global_network, bend_1, 0.95, ignore_intersection_checking=False)
+        ) and no_cross
         no_cross = (
-                       not check_lane_on_road(
-                           self._global_network, connect_part, 0.95,
-                           ignore_intersection_checking=False
-                       )
-                   ) and no_cross
+            not check_lane_on_road(self._global_network, connect_part, 0.95, ignore_intersection_checking=False)
+        ) and no_cross
 
         bend_2, straight_part = create_bend_straight(
             connect_part,
@@ -248,16 +263,11 @@ class OutFork(Fork):
         self.block_network.add_lane(bend_2_road.start_node, bend_2_road.end_node, bend_2)
         self.block_network.add_lane(straight_road.start_node, straight_road.end_node, straight_part)
         no_cross = (
-                       not check_lane_on_road(
-                           self._global_network, bend_2, 0.95, ignore_intersection_checking=False
-                       )
-                   ) and no_cross
+            not check_lane_on_road(self._global_network, bend_2, 0.95, ignore_intersection_checking=False)
+        ) and no_cross
         no_cross = (
-                       not check_lane_on_road(
-                           self._global_network, straight_part, 0.95,
-                           ignore_intersection_checking=False
-                       )
-                   ) and no_cross
+            not check_lane_on_road(self._global_network, straight_part, 0.95, ignore_intersection_checking=False)
+        ) and no_cross
 
         decoration_part = self._get_merge_part(dec_side_right_lane)
         self.block_network.add_lane(Decoration.start, Decoration.end, decoration_part)

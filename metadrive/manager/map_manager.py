@@ -58,7 +58,7 @@ class MapManager(BaseManager):
     def add_random_to_map(self, map_config):
         if self.engine.global_config["random_lane_width"]:
             map_config[PGMap.LANE_WIDTH
-            ] = self.np_random.rand() * (PGMap.MAX_LANE_WIDTH - PGMap.MIN_LANE_WIDTH) + PGMap.MIN_LANE_WIDTH
+                       ] = self.np_random.rand() * (PGMap.MAX_LANE_WIDTH - PGMap.MIN_LANE_WIDTH) + PGMap.MIN_LANE_WIDTH
         if self.engine.global_config["random_lane_num"]:
             map_config[PGMap.LANE_NUM] = self.np_random.randint(PGMap.MIN_LANE_NUM, PGMap.MAX_LANE_NUM + 1)
         return map_config
@@ -103,8 +103,11 @@ class MapManager(BaseManager):
         map_seeds = list(loaded_map_data.keys())
         start_seed = min(map_seeds)
         map_num = len(map_seeds)
-        assert self.env_num == map_num and start_seed == self.engine.global_config["start_seed"], "The environment num and start seed in config: {}, {} must be the same as the env num and start seed: {}, {} in the loaded file".format(
-            self.env_num, self.start_seed, map_num, start_seed)
+        assert self.env_num == map_num and start_seed == self.engine.global_config[
+            "start_seed"
+        ], "The environment num and start seed in config: {}, {} must be the same as the env num and start seed: {}, {} in the loaded file".format(
+            self.env_num, self.start_seed, map_num, start_seed
+        )
 
         for i in range(self.env_num):
             loaded_seed = i + start_seed
