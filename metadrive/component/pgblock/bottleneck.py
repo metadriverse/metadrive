@@ -54,7 +54,7 @@ class Merge(Bottleneck):
             self.block_network,
             self._global_network,
             center_line_type=center_line_type,
-            side_lane_line_type=LineType.NONE,
+            side_lane_line_type=LineType.SIDE if circular_lane_num == 0 else LineType.NONE,
             inner_lane_line_type=LineType.NONE,
             ignore_intersection_checking=self.ignore_intersection_checking
         ) and no_cross
@@ -63,7 +63,7 @@ class Merge(Bottleneck):
             self.block_network,
             self._global_network,
             inner_lane_line_type=LineType.NONE,
-            side_lane_line_type=LineType.NONE,
+            side_lane_line_type=LineType.SIDE if circular_lane_num == 0 else LineType.NONE,
             center_line_type=center_line_type,
             ignore_intersection_checking=self.ignore_intersection_checking
         ) and no_cross
