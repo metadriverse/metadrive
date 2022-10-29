@@ -7,7 +7,7 @@ from metadrive.utils import recursive_equal, setup_logger
 def test_gen_map_read():
     env_num = 3
     generate_config = {"environment_num": env_num, "start_seed": 0}
-    restore_config = {"environment_num": env_num, "start_seed": 100}
+    restore_config = {"environment_num": env_num, "start_seed": 0}
 
     setup_logger(debug=True)
     try:

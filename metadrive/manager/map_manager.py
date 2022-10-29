@@ -103,19 +103,8 @@ class MapManager(BaseManager):
         map_seeds = list(loaded_map_data.keys())
         start_seed = min(map_seeds)
         map_num = len(map_seeds)
-        assert self.env_num == map_num, "The environment num in config: {} must be the same as loaded ap num: {} ".format(
-            self.env_num, map_num)
-        if start_seed != self.engine.global_config["start_seed"]:
-            logging.warning(
-                "The start seed in config: {} mismatches with the start seed of loaded maps: {}".format(
-                    self.engine.global_config["start_seed"], start_seed))
-            logging.warning(
-                "We will overwrite {} maps from seed {} to {} with maps from seed {} to {}"
-                .format(self.env_num,
-                        self.start_seed,
-                        self.start_seed + self.env_num,
-                        start_seed,
-                        start_seed + self.env_num))
+        assert self.env_num == map_num and start_seed == self.engine.global_config["start_seed"], "The environment num and start seed in config: {}, {} must be the same as the env num and start seed: {}, {} in the loaded file".format(
+            self.env_num, self.start_seed, map_num, start_seed)
 
         for i in range(self.env_num):
             loaded_seed = i + start_seed
