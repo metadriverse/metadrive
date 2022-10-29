@@ -126,3 +126,5 @@ class MapManager(BaseManager):
             map_config[PGMap.GENERATE_CONFIG] = block_sequence
             map = self.spawn_object(PGMap, map_config=map_config, random_seed=None)
             self.maps[i + self.start_seed] = map
+            map.detach_from_world()
+        return loaded_map_data

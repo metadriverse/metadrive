@@ -59,7 +59,7 @@ def test_map_random_seeding():
             env.reset()
             env.reset()
             env.reset(force_seed=5)
-            map_configs.append(env.current_map.get_meta_data)
+            map_configs.append(env.current_map.get_meta_data())
             lane_num.append(len(env.current_map.road_network.graph[FirstPGBlock.NODE_1][FirstPGBlock.NODE_2]))
             lane_width.append(
                 env.current_map.road_network.graph[FirstPGBlock.NODE_1][FirstPGBlock.NODE_2][0].width_at(0)
@@ -68,7 +68,8 @@ def test_map_random_seeding():
             env.close()
     for idx, map_cfg in enumerate(map_configs[:-1]):
         nxt_map_cfg = map_configs[idx + 1]
-        assert recursive_equal(map_cfg, nxt_map_cfg)
+        ret = recursive_equal(map_cfg, nxt_map_cfg)
+        assert ret, "Error"
     assert np.std(lane_width) < 0.01 and np.std(lane_num) < 0.01, "random engine error"
 
 
