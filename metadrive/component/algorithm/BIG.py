@@ -3,7 +3,7 @@ from typing import Union
 
 from panda3d.core import NodePath
 
-from metadrive.component.algorithm.blocks_prob_dist import PGBlockConfig
+from metadrive.component.algorithm.blocks_prob_dist import PGBlockDistConfig
 from metadrive.component.pgblock.first_block import FirstPGBlock
 from metadrive.component.pgblock.pg_block import PGBlock
 from metadrive.component.road_network.node_road_network import NodeRoadNetwork
@@ -36,9 +36,11 @@ class BIG:
         physics_world: PhysicsWorld,
         # block_type_version: str,
         exit_length=50,
-        random_seed=None
+        random_seed=None,
+        block_dist_config=PGBlockDistConfig
     ):
         super(BIG, self).__init__()
+        self.block_dist_config = block_dist_config
         self._block_sequence = None
         self.random_seed = random_seed
         self.np_random = get_np_random(random_seed)
@@ -98,12 +100,12 @@ class BIG:
         Sample a random block type
         """
         if self._block_sequence is None:
-            block_types = PGBlockConfig.all_blocks()
-            block_probabilities = PGBlockConfig.block_probability()
+            block_types = self.block_dist_config.all_blocks()
+            block_probabilities = self.block_dist_config.block_probability()
             block_type = self.np_random.choice(block_types, p=block_probabilities)
         else:
             type_id = self._block_sequence[len(self.blocks)]
-            block_type = PGBlockConfig.get_block(type_id)
+            block_type = self.block_dist_config.get_block(type_id)
 
         socket = self.np_random.choice(self.blocks[-1].get_socket_indices())
         block = block_type(
