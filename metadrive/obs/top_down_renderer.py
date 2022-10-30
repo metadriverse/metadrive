@@ -41,13 +41,23 @@ def draw_top_down_map(
     surface.move_display_window_to(centering_pos)
     for _from in map.road_network.graph.keys():
         decoration = True if _from == Decoration.start else False
-        for _to in map.road_network.graph[_from].keys():
-            for l in map.road_network.graph[_from][_to]:
-                if simple_draw:
-                    LaneGraphics.simple_draw(l, surface, color=road_color)
-                else:
-                    two_side = True if l is map.road_network.graph[_from][_to][-1] or decoration else False
-                    LaneGraphics.display(l, surface, two_side, use_line_color=True)
+
+        from_road = map.road_network.graph[_from]
+
+        if isinstance(from_road, dict):  # We are in node_road, instead of edge_road (Waymo dataset).
+            for _to in from_road.keys():
+                for l in from_road[_to]:
+                    if simple_draw:
+                        LaneGraphics.simple_draw(l, surface, color=road_color)
+                    else:
+                        two_side = True if l is from_road[_to][-1] or decoration else False
+                        LaneGraphics.display(l, surface, two_side, use_line_color=True)
+
+        else:  # It should be a `metadrive.component.road_network.edge_road_network.neighbor_lanes` instance
+            raise NotImplementedError(
+                "The Top-down view rendering for Waymo / Argoverse / OpenDrive format is not supported yet."
+            )
+
 
     if return_surface:
         return surface
