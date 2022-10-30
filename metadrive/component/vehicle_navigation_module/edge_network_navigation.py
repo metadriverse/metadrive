@@ -6,6 +6,7 @@ from metadrive.component.vehicle_navigation_module.base_navigation import BaseNa
 from metadrive.utils import clip, norm
 from metadrive.utils.scene_utils import ray_localization
 from metadrive.utils.space import Parameter, BlockParameterSpace
+from metadrive.utils.scene_utils import ray_localization
 
 
 class EdgeNetworkNavigation(BaseNavigation):
@@ -153,7 +154,7 @@ class EdgeNetworkNavigation(BaseNavigation):
         navi_information = []
         # Project the checkpoint position into the target vehicle's coordination, where
         # +x is the heading and +y is the right hand side.
-        check_point = ref_lane.position(ref_lane.length, 0)
+        check_point = ref_lane.end
         dir_vec = check_point - ego_vehicle.position  # get the vector from center of vehicle to checkpoint
         dir_norm = norm(dir_vec[0], dir_vec[1])
         if dir_norm > self.NAVI_POINT_DIST:  # if the checkpoint is too far then crop the direction vector

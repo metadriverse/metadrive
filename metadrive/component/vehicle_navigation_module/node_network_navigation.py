@@ -1,4 +1,5 @@
 from metadrive.component.road_network.node_road_network import NodeRoadNetwork
+from metadrive.utils.scene_utils import ray_localization
 
 import numpy as np
 

@@ -43,6 +43,8 @@ class BaseNavigation:
         It now only support from first block start to the end node, but can be extended easily.
         """
         self.engine = engine
+
+        # Make sure these variables are filled when making new subclass
         self.map = None
         self.checkpoints = None
         self.current_ref_lanes = None
@@ -125,7 +127,7 @@ class BaseNavigation:
 
     def update_localization(self, ego_vehicle):
         """
-        It is called every step
+        It is called every step. This is the core function of navigation module
         """
         raise NotImplementedError
 
