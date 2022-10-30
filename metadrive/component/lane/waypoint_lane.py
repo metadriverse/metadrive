@@ -33,7 +33,9 @@ class WayPointLane(AbstractLane, InterpolatingLine):
         self.is_straight = True if abs(self.heading_theta_at(0.1) -
                                        self.heading_theta_at(self.length - 0.1)) < np.deg2rad(10) else False
         self.start = self.position(0, 0)
+        assert np.linalg.norm(self.start - center_line_points[0][:-1]) < 0.1, "Start point error!"
         self.end = self.position(self.length, 0)
+        assert np.linalg.norm(self.end - center_line_points[-1][:-1]) < 0.1, "End point error!"
 
     def width_at(self, longitudinal: float) -> float:
         return self.width

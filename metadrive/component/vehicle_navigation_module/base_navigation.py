@@ -18,7 +18,8 @@ from metadrive.utils.space import Parameter, BlockParameterSpace
 
 class BaseNavigation:
     """
-    Implement all NotImplemented method for customizing a new navigation module
+    Implement all NotImplemented method for customizing a new navigation module.
+    This module interact with the map for findding lanes or expected positions
     """
     navigation_info_dim = 10
     NAVI_POINT_DIST = 50
@@ -41,13 +42,15 @@ class BaseNavigation:
         This class define a helper for localizing vehicles and retrieving navigation information.
         It now only support from first block start to the end node, but can be extended easily.
         """
+        self.engine = engine
         self.map = None
         self.checkpoints = None
-        self._target_checkpoints_index = None
         self.current_ref_lanes = None
         self.next_ref_lanes = None
         self.final_lane = None
         self.current_lane = None
+
+        self._target_checkpoints_index = None
         self._navi_info = np.zeros((self.navigation_info_dim, ), dtype=np.float32)  # navi information res
 
         # Vis
@@ -126,12 +129,6 @@ class BaseNavigation:
         """
         raise NotImplementedError
 
-    def _get_info_for_checkpoint(self, lanes_id, ref_lane, ego_vehicle):
-        raise NotImplementedError
-
-    def _update_target_checkpoints(self, ego_lane_index, ego_lane_longitude):
-        raise NotImplementedError
-
     def get_navi_info(self):
         return self._navi_info
 
@@ -160,21 +157,6 @@ class BaseNavigation:
 
     def get_current_lane_num(self) -> float:
         return len(self.current_ref_lanes)
-
-    def _get_current_lane(self, ego_vehicle):
-        raise NotImplementedError
-
-    def _update_current_lane(self, ego_vehicle):
-        lane, lane_index, on_lane = self._get_current_lane(ego_vehicle)
-        ego_vehicle.on_lane = on_lane
-        if lane is None:
-            lane, lane_index = ego_vehicle.lane, ego_vehicle.lane_index
-            if self.FORCE_CALCULATE:
-                lane_index, _ = self.map.road_network.get_closest_lane_index(ego_vehicle.position)
-                lane = self.map.road_network.get_lane(lane_index)
-        self.current_lane = lane
-        assert lane_index == lane.index, "lane index mismatch!"
-        return lane, lane_index
 
     def _ray_lateral_range(self, engine, start_position, dir, length=50):
         """

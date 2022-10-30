@@ -198,3 +198,15 @@ class EdgeNetworkNavigation(BaseNavigation):
             clip((np.rad2deg(angle) / BlockParameterSpace.CURVE[Parameter.angle].max + 1) / 2, 0.0, 1.0)
         )
         return navi_information, lanes_heading, check_point
+
+    def _update_current_lane(self, ego_vehicle):
+        lane, lane_index, on_lane = self._get_current_lane(ego_vehicle)
+        ego_vehicle.on_lane = on_lane
+        if lane is None:
+            lane, lane_index = ego_vehicle.lane, ego_vehicle.lane_index
+            if self.FORCE_CALCULATE:
+                lane_index, _ = self.map.road_network.get_closest_lane_index(ego_vehicle.position)
+                lane = self.map.road_network.get_lane(lane_index)
+        self.current_lane = lane
+        assert lane_index == lane.index, "lane index mismatch!"
+        return lane, lane_index

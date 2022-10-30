@@ -35,6 +35,9 @@ class WaymoMapManager(BaseManager):
         self.update_route(map_config)
 
     def update_route(self, data):
+        """
+        # TODO(LQY) Modify this part, if we finally deceide to use TrajNavi
+        """
         sdc_traj = WaymoTrafficManager.parse_full_trajectory(data["tracks"][data["sdc_index"]]["state"])
         self.current_sdc_route = WayPointLane(sdc_traj, 1.5)
         init_state = WaymoTrafficManager.parse_vehicle_state(
