@@ -1,5 +1,5 @@
 import pickle
-
+import tqdm
 from metadrive.envs.metadrive_env import MetaDriveEnv
 from metadrive.utils import recursive_equal, setup_logger
 
@@ -34,6 +34,10 @@ def test_gen_map_read():
             origin["map_config"].pop("type")
 
             recursive_equal(m, origin, need_assert=True)
+        for seed in tqdm.tqdm(range(env_num), desc="Test Scenario"):
+            env.reset(force_seed=seed)
+            for i in range(10):
+                env.step(env.action_space.sample())
         print("Finish!")
     finally:
         env.close()
