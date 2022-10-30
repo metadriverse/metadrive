@@ -15,13 +15,13 @@ from metadrive.component.vehicle_navigation_module.base_navigation import BaseNa
 
 class NodeNetworkNavigation(BaseNavigation):
     def __init__(
-        self,
-        engine,
-        show_navi_mark: bool = False,
-        random_navi_mark_color=False,
-        show_dest_mark=False,
-        show_line_to_dest=False,
-        panda_color=None
+            self,
+            engine,
+            show_navi_mark: bool = False,
+            random_navi_mark_color=False,
+            show_dest_mark=False,
+            show_line_to_dest=False,
+            panda_color=None
     ):
         """
         This class define a helper for localizing vehicles and retrieving navigation information.
@@ -86,7 +86,7 @@ class NodeNetworkNavigation(BaseNavigation):
         target_road_1_end = self.checkpoints[1]
         self.current_ref_lanes = self.map.road_network.graph[target_road_1_start][target_road_1_end]
         self.next_ref_lanes = self.map.road_network.graph[self.checkpoints[1]][self.checkpoints[2]
-                                                                               ] if len(self.checkpoints) > 2 else None
+        ] if len(self.checkpoints) > 2 else None
         self.current_road = Road(target_road_1_start, target_road_1_end)
         self.next_road = Road(self.checkpoints[1], self.checkpoints[2]) if len(self.checkpoints) > 2 else None
         if self._dest_node_path is not None:
@@ -181,3 +181,79 @@ class NodeNetworkNavigation(BaseNavigation):
             return self._ray_lateral_range(engine, current_position, self.current_ref_lanes[0].direction_lateral)
         else:
             return self.get_current_lane_width() * self.get_current_lane_num()
+
+    def _get_current_lane(self, ego_vehicle):
+        """
+              Called in update_localization to find current lane information
+              """
+        possible_lanes, on_lane = ray_localization(
+            ego_vehicle.heading, ego_vehicle.position, ego_vehicle.engine, return_all_result=True, return_on_lane=True
+        )
+        for lane, index, l_1_dist in possible_lanes:
+            if lane in self.current_ref_lanes:
+                return lane, index, on_lane
+        nx_ckpt = self._target_checkpoints_index[-1]
+        if nx_ckpt == self.checkpoints[-1] or self.next_ref_lanes is None:
+            return (*possible_lanes[0][:-1], on_lane) if len(possible_lanes) > 0 else (None, None, on_lane)
+
+        if self.map.road_network_type == NodeRoadNetwork:
+            nx_nx_ckpt = nx_ckpt + 1
+            next_ref_lanes = self.map.road_network.graph[self.checkpoints[nx_ckpt]][self.checkpoints[nx_nx_ckpt]]
+        else:
+            next_ref_lanes = self.next_ref_lanes
+        for lane, index, l_1_dist in possible_lanes:
+            if lane in next_ref_lanes:
+                return lane, index, on_lane
+        return (*possible_lanes[0][:-1], on_lane) if len(possible_lanes) > 0 else (None, None, on_lane)
+
+    def _get_info_for_checkpoint(self, lanes_id, ref_lane, ego_vehicle):
+
+        navi_information = []
+        # Project the checkpoint position into the target vehicle's coordination, where
+        # +x is the heading and +y is the right hand side.
+        later_middle = (float(self.get_current_lane_num()) / 2 - 0.5) * self.get_current_lane_width()
+        check_point = ref_lane.position(ref_lane.length, later_middle)
+        dir_vec = check_point - ego_vehicle.position  # get the vector from center of vehicle to checkpoint
+        dir_norm = norm(dir_vec[0], dir_vec[1])
+        if dir_norm > self.NAVI_POINT_DIST:  # if the checkpoint is too far then crop the direction vector
+            dir_vec = dir_vec / dir_norm * self.NAVI_POINT_DIST
+        ckpt_in_heading, ckpt_in_rhs = ego_vehicle.projection(dir_vec)  # project to ego vehicle's coordination
+
+        # Dim 1: the relative position of the checkpoint in the target vehicle's heading direction.
+        navi_information.append(clip((ckpt_in_heading / self.NAVI_POINT_DIST + 1) / 2, 0.0, 1.0))
+
+        # Dim 2: the relative position of the checkpoint in the target vehicle's right hand side direction.
+        navi_information.append(clip((ckpt_in_rhs / self.NAVI_POINT_DIST + 1) / 2, 0.0, 1.0))
+
+        if lanes_id == 0:
+            lanes_heading = ref_lane.heading_theta_at(ref_lane.local_coordinates(ego_vehicle.position)[0])
+        else:
+            lanes_heading = ref_lane.heading_theta_at(min(self.PRE_NOTIFY_DIST, ref_lane.length))
+
+        # Try to include the current lane's information into the navigation information
+        bendradius = 0.0
+        dir = 0.0
+        angle = 0.0
+        if isinstance(ref_lane, CircularLane):
+            bendradius = ref_lane.radius / (
+                BlockParameterSpace.CURVE[Parameter.radius].max +
+                self.get_current_lane_num() * self.get_current_lane_width()
+            )
+            dir = ref_lane.direction
+            if dir == 1:
+                angle = ref_lane.end_phase - ref_lane.start_phase
+            elif dir == -1:
+                angle = ref_lane.start_phase - ref_lane.end_phase
+
+        # Dim 3: The bending radius of current lane
+        navi_information.append(clip(bendradius, 0.0, 1.0))
+
+        # Dim 4: The bending direction of current lane (+1 for clockwise, -1 for counterclockwise)
+        navi_information.append(clip((dir + 1) / 2, 0.0, 1.0))
+
+        # Dim 5: The angular difference between the heading in lane ending position and
+        # the heading in lane starting position
+        navi_information.append(
+            clip((np.rad2deg(angle) / BlockParameterSpace.CURVE[Parameter.angle].max + 1) / 2, 0.0, 1.0)
+        )
+        return navi_information, lanes_heading, check_point

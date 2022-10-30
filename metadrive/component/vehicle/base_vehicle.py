@@ -574,8 +574,10 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     def add_navigation(self):
         if not self.config["need_navigation"]:
             return
-        navi = NodeNetworkNavigation if self.engine.current_map.road_network_type == NodeRoadNetwork \
-            else EdgeNetworkNavigation
+        navi = self.config["navigation_module"]
+        if navi is None:
+            navi = NodeNetworkNavigation if self.engine.current_map.road_network_type == NodeRoadNetwork \
+                else EdgeNetworkNavigation
         self.navigation = \
             navi(self.engine,
                  show_navi_mark=self.engine.global_config["vehicle_config"]["show_navi_mark"],
