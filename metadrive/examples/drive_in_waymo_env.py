@@ -31,7 +31,7 @@ if __name__ == "__main__":
 
         for i in range(1, 100000):
             o, r, d, info = env.step([1.0, 0.])
-            env.render(text={"Switch perspective": "Q or B", "Reset Episode": "r"})
+            env.render(text={"Switch perspective": "Q or B", "Reset Episode": "R"})
     except:
         print("Something Wrong happen in this example, would you kindly report it to developers? Thanks!")
     finally:
