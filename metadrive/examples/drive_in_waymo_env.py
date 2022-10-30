@@ -1,5 +1,5 @@
 """
-This script demonstrates how to use the environment where traffic and road map are loaded from argoverse dataset.
+This script demonstrates how to use the environment where traffic and road map are loaded from Waymo dataset.
 """
 from metadrive.envs.real_data_envs.waymo_env import WaymoEnv
 from metadrive.engine.asset_loader import AssetLoader
