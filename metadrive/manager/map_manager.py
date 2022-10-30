@@ -1,4 +1,5 @@
 import logging
+from tqdm import tqdm
 
 from metadrive.component.map.pg_map import PGMap, MapGenerateMethod
 import pickle
@@ -67,7 +68,7 @@ class MapManager(BaseManager):
         """
         Call this function to generate all maps before using them
         """
-        for seed in self.maps.keys():
+        for seed in tqdm(self.maps.keys(), desc="Generate maps"):
             config = self.engine.global_config.copy()
             current_seed = seed
             self.engine.seed(seed)
@@ -89,7 +90,7 @@ class MapManager(BaseManager):
             file_name = "{}_{}_{}.json".format(start_seed, end_seed, get_time_str())
         self.generate_all_maps()
         ret = {}
-        for seed, map in self.maps.items():
+        for seed, map in tqdm(self.maps.items(), desc="Dump maps"):
             ret[seed] = map.get_meta_data()
         with open(file_name, "wb+") as file:
             pickle.dump(ret, file)
@@ -109,7 +110,7 @@ class MapManager(BaseManager):
             self.env_num, self.start_seed, map_num, start_seed
         )
 
-        for i in range(self.env_num):
+        for i in tqdm(range(self.env_num), desc="Load maps"):
             loaded_seed = i + start_seed
             map_data = loaded_map_data[loaded_seed]
             block_sequence = map_data["block_sequence"]
@@ -119,4 +120,5 @@ class MapManager(BaseManager):
             map = self.spawn_object(PGMap, map_config=map_config, random_seed=None)
             self.maps[i + self.start_seed] = map
             map.detach_from_world()
+        self.reset()
         return loaded_map_data

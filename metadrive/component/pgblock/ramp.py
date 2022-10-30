@@ -204,10 +204,20 @@ class InRampOnStraight(Ramp):
         return no_cross
 
     def get_intermediate_spawn_lanes(self):
-        """Override this function for intersection so that we won't spawn vehicles in the center of intersection."""
-        respawn_lanes = super(InRampOnStraight, self).get_intermediate_spawn_lanes()
-        assert sum([abs(l.length - InRampOnStraight.RAMP_LEN) <= 0.1 for ls in respawn_lanes for l in ls]) == 1
-        return respawn_lanes
+        """
+        Remove lanes on socket
+        """
+        spawn_lanes = super(InRampOnStraight, self).get_intermediate_spawn_lanes()
+        lane_on_socket = self.get_socket(0).get_positive_lanes(self.block_network)[0]
+        filtered = []
+        for lanes in spawn_lanes:
+            if lane_on_socket in lanes:
+                continue
+            else:
+                filtered.append(lanes)
+        spawn_lanes = filtered
+        assert sum([abs(l.length - InRampOnStraight.RAMP_LEN) <= 0.1 for ls in spawn_lanes for l in ls]) == 1
+        return spawn_lanes
 
 
 class OutRampOnStraight(Ramp):
