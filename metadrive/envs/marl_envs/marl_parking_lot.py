@@ -48,10 +48,11 @@ class ParkingLotSpawnManager(SpawnManager):
         self.v_dest_pair = {}
 
     def get_parking_space(self, v_id):
-        if self._parking_spaces is None:
+        if self._parking_spaces is None or len(self.parking_space_available) == 0:
             self._parking_spaces = self.engine.map_manager.current_map.parking_space
             self.v_dest_pair = {}
             self.parking_space_available = set(copy.deepcopy(self._parking_spaces))
+        assert len(self.parking_space_available) > 0
         parking_space_idx = self.np_random.choice([i for i in range(len(self.parking_space_available))])
         parking_space = list(self.parking_space_available)[parking_space_idx]
         self.parking_space_available.remove(parking_space)
