@@ -46,7 +46,7 @@ class ManualControlPolicy(EnvInputPolicy):
         try:
             if self.engine.current_track_vehicle.expert_takeover:
                 return expert(self.engine.current_track_vehicle)
-        except ValueError:
+        except (ValueError, AssertionError):
             # if observation doesn't match, fall back to manual control
             pass
 
