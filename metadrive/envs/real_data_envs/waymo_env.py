@@ -98,7 +98,7 @@ class WaymoEnv(BaseEnv):
         super(WaymoEnv, self).__init__(config)
         if not self.config["no_traffic"]:
             assert self.config["agent_policy"
-                   ] is not EgoWaymoIDMPolicy, "WaymoIDM will fail when interacting with traffic"
+                               ] is not EgoWaymoIDMPolicy, "WaymoIDM will fail when interacting with traffic"
 
     def _merge_extra_config(self, config):
         config = self.default_config().update(config, allow_add_new_key=True)
@@ -187,8 +187,8 @@ class WaymoEnv(BaseEnv):
         # for compatibility
         # crash almost equals to crashing with vehicles
         done_info[TerminationState.CRASH] = (
-                done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
-                or done_info[TerminationState.CRASH_BUILDING]
+            done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
+            or done_info[TerminationState.CRASH_BUILDING]
         )
         return done, done_info
 

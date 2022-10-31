@@ -25,7 +25,9 @@ if __name__ == "__main__":
             "use_render": True,
             "waymo_data_directory": AssetLoader.file_path(asset_path, "waymo", return_raw_style=False),
             "case_num": 3,
-            "vehicle_config": {"navigation_module": WaymoTrajectoryNavigation}
+            "vehicle_config": {
+                "navigation_module": WaymoTrajectoryNavigation
+            }
         }
     )
     o = env.reset()

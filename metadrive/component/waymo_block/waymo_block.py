@@ -55,8 +55,9 @@ class WaymoBlock(BaseBlock):
             elif RoadEdgeType.is_road_edge(type) and RoadEdgeType.is_sidewalk(type):
                 self.construct_waymo_sidewalk(convert_polyline_to_metadrive(data[WaymoLaneProperty.POLYLINE]))
             elif RoadEdgeType.is_road_edge(type) and not RoadEdgeType.is_sidewalk(type):
-                self.construct_waymo_continuous_line(convert_polyline_to_metadrive(data[WaymoLaneProperty.POLYLINE]),
-                                                     LineColor.GREY)
+                self.construct_waymo_continuous_line(
+                    convert_polyline_to_metadrive(data[WaymoLaneProperty.POLYLINE]), LineColor.GREY
+                )
             elif type == "center_lane" or type is None:
                 continue
             # else:

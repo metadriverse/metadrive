@@ -64,7 +64,6 @@ class RoadEdgeType(Enum):
         return True if edge == RoadEdgeType.BOUNDARY else False
 
 
-
 class AgentType(Enum):
     UNSET = 0
     VEHICLE = 1

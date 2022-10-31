@@ -13,13 +13,13 @@ class WaymoTrajectoryNavigation(BaseNavigation):
     DESCRETE_LEN = 6  # m
 
     def __init__(
-            self,
-            engine,
-            show_navi_mark: bool = False,
-            random_navi_mark_color=False,
-            show_dest_mark=False,
-            show_line_to_dest=False,
-            panda_color=None
+        self,
+        engine,
+        show_navi_mark: bool = False,
+        random_navi_mark_color=False,
+        show_dest_mark=False,
+        show_line_to_dest=False,
+        panda_color=None
     ):
         super(WaymoTrajectoryNavigation, self).__init__(
             engine, show_navi_mark, random_navi_mark_color, show_dest_mark, show_line_to_dest, panda_color=panda_color
