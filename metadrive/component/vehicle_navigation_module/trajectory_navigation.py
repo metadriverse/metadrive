@@ -10,7 +10,7 @@ class WaymoTrajectoryNavigation(BaseNavigation):
     This module enabling follow a given reference trajectory given a map
     # TODO(LQY): make this module a general module for navigation
     """
-    DESCRETE_LEN = 4  # m
+    DESCRETE_LEN = 6  # m
 
     def __init__(
             self,
@@ -26,7 +26,7 @@ class WaymoTrajectoryNavigation(BaseNavigation):
         )
         self.reference_trajectory = None
 
-    def reset(self, map, current_lane):
+    def reset(self, map, current_lane, destination=None, random_seed=None):
         super(WaymoTrajectoryNavigation, self).reset(map, current_lane)
         self.reference_trajectory = self.get_trajectory()
         self.set_route(None, None)
@@ -57,7 +57,7 @@ class WaymoTrajectoryNavigation(BaseNavigation):
         length = self.reference_trajectory.length
         num = int(length / self.DESCRETE_LEN)
         for i in range(num):
-            ret.append(self.reference_trajectory.local_coordinates(i * self.DESCRETE_LEN, 0))
+            ret.append(self.reference_trajectory.position(i * self.DESCRETE_LEN, 0))
         ret.append(self.reference_trajectory.end)
         return ret
 
@@ -70,8 +70,8 @@ class WaymoTrajectoryNavigation(BaseNavigation):
         if self._target_checkpoints_index[0] != self._target_checkpoints_index[1]:  # on last road
             # arrive to second checkpoint
             if lat < self.reference_trajectory.width:
-                idx = int(long / self.DESCRETE_LEN)
-                self._target_checkpoints_index = [idx]
+                idx = int(long / self.DESCRETE_LEN) + 1
+                self._target_checkpoints_index = [min(idx, len(self.checkpoints) - 1)]
                 if idx + 1 == len(self.checkpoints):
                     self._target_checkpoints_index.append(idx)
                 else:
@@ -96,7 +96,7 @@ class WaymoTrajectoryNavigation(BaseNavigation):
             self._draw_line_to_dest(start_position=ego_vehicle.position, end_position=(dest_pos[0], -dest_pos[1]))
 
     def get_current_lateral_range(self, current_position, engine) -> float:
-        raise self.current_lane.width * 2
+        return self.current_lane.width * 2
 
     def get_current_lane_width(self) -> float:
         return self.current_lane.width

@@ -1,6 +1,6 @@
 import logging
 
-from metadrive.component.lane.waypoint_lane import WayPointLane
+from metadrive.component.lane.waypoint_lane import WayPointLane, LineType
 from metadrive.utils.math_utils import norm
 from metadrive.constants import WaymoLaneProperty
 from metadrive.engine.asset_loader import AssetLoader
@@ -21,6 +21,9 @@ class WaymoLane(WayPointLane):
         self.exit_lanes = waymo_map_data[waymo_lane_id][WaymoLaneProperty.EXIT]
         self.left_lanes = waymo_map_data[waymo_lane_id][WaymoLaneProperty.LEFT_NEIGHBORS]
         self.right_lanes = waymo_map_data[waymo_lane_id][WaymoLaneProperty.RIGHT_NEIGHBORS]
+        # left_type = LineType.CONTINUOUS if len(self.left_lanes) == 0 else LineType.NONE
+        # righ_type = LineType.CONTINUOUS if len(self.right_lanes) == 0 else LineType.NONE
+        # self.line_types = (left_type, righ_type)
 
     @staticmethod
     def get_lane_width(waymo_lane_id, waymo_map_data):
@@ -47,7 +50,7 @@ class WaymoLane(WayPointLane):
             n_point = left_lane[WaymoLaneProperty.POLYLINE][neighbor_start]
             self_point = waymo_map_data[waymo_lane_id][WaymoLaneProperty.POLYLINE][self_start]
             dist_to_left_lane = norm(n_point[0] - self_point[0], n_point[1] - self_point[1])
-        return max(dist_to_left_lane, dist_to_right_lane, 4)
+        return max(dist_to_left_lane, dist_to_right_lane, 6)
 
     def __del__(self):
         logging.debug("WaymoLane is released")
