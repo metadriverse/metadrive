@@ -1,7 +1,7 @@
 from typing import Union
 
 from metadrive.component.algorithm.BIG import BIG
-from metadrive.component.algorithm.blocks_prob_dist import PGBlockConfig
+from metadrive.component.algorithm.blocks_prob_dist import PGBlockDistConfig
 from metadrive.component.map.base_map import BaseMap
 from metadrive.component.pgblock.first_block import FirstPGBlock
 from metadrive.component.pgblock.pg_block import PGBlock
@@ -66,12 +66,12 @@ class CityBIG(BIG):
         Sample a random block type
         """
         if self._block_sequence is None:
-            block_types = PGBlockConfig.all_blocks()
-            block_probabilities = PGBlockConfig.block_probability()
+            block_types = PGBlockDistConfig.all_blocks()
+            block_probabilities = PGBlockDistConfig.block_probability()
             block_type = self.np_random.choice(block_types, p=block_probabilities)
         else:
             type_id = self._block_sequence[len(self.blocks)]
-            block_type = PGBlockConfig.get_block(type_id)
+            block_type = PGBlockDistConfig.get_block(type_id)
 
         # exclude first block
         socket_used = set([block.pre_block_socket for block in self.blocks[1:]])

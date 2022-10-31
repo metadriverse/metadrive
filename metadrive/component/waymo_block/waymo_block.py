@@ -35,6 +35,8 @@ class WaymoBlock(BaseBlock):
         for id, lane_info in graph.items():
             lane = lane_info.lane
             lane.construct_lane_in_block(self, lane_index=id)
+            # lane.construct_lane_line_in_block(self, [True if len(lane.left_lanes) == 0 else False,
+            #                                          True if len(lane.right_lanes) == 0 else False, ])
         for lane_id, data in self.waymo_map_data.items():
             type = data.get("type", None)
             if RoadLineType.is_road_line(type):
@@ -52,6 +54,14 @@ class WaymoBlock(BaseBlock):
                     )
             elif RoadEdgeType.is_road_edge(type) and RoadEdgeType.is_sidewalk(type):
                 self.construct_waymo_sidewalk(convert_polyline_to_metadrive(data[WaymoLaneProperty.POLYLINE]))
+            elif RoadEdgeType.is_road_edge(type) and not RoadEdgeType.is_sidewalk(type):
+                self.construct_waymo_continuous_line(
+                    convert_polyline_to_metadrive(data[WaymoLaneProperty.POLYLINE]), LineColor.GREY
+                )
+            elif type == "center_lane" or type is None:
+                continue
+            # else:
+            #     raise ValueError("Can not build lane line type: {}".format(type))
 
     def construct_waymo_continuous_line(self, polyline, color):
         line = InterpolatingLine(polyline)

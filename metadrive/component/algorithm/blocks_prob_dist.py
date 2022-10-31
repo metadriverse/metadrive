@@ -11,7 +11,10 @@ from metadrive.component.pgblock.tollgate import TollGate
 from metadrive.component.pgblock.bidirection import Bidirection
 
 
-class PGBlockConfig:
+class PGBlockDistConfig:
+    MAX_LANE_NUM = 5
+    MIN_LANE_NUM = 1
+
     # Register the block types here! Set their probability to 0.0 if you don't wish it appears in standard MetaDrive.
     BLOCK_TYPE_DISTRIBUTION_V1 = {
         Curve: 0.5,
