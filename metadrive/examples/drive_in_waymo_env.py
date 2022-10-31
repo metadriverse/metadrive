@@ -1,6 +1,7 @@
 """
 This script demonstrates how to use the environment where traffic and road map are loaded from argoverse dataset.
 """
+from metadrive.constants import HELP_MESSAGE
 from metadrive.envs.real_data_envs.waymo_idm_env import WaymoIDMEnv
 from metadrive.engine.asset_loader import AssetLoader
 import random
@@ -18,9 +19,10 @@ class DemoWaymoEnv(WaymoIDMEnv):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--reactive_traffic", type=str, default="store_true", choices=["lidar", "rgb_camera"])
+    parser.add_argument("--reactive_traffic", action="store_true")
     args = parser.parse_args()
     asset_path = AssetLoader.asset_path
+    print(HELP_MESSAGE)
     try:
         env = DemoWaymoEnv(
             {
@@ -37,6 +39,6 @@ if __name__ == "__main__":
             o, r, d, info = env.step([1.0, 0.])
             env.render(text={"Switch perspective": "Q or B", "Reset Episode": "R"})
     except:
-        print("Something Wrong happen in this example, would you kindly report it to developers? Thanks!")
+        pass
     finally:
         env.close()

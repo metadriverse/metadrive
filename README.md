@@ -96,8 +96,6 @@ python -m metadrive.examples.drive_in_waymo_env
 
 Traffic vehicles can not response to surrounding vchicles if directly replaying them.
 Add argument ```--reactive_traffic``` to use an IDM policy control them and make them reactive.
-
-
 Press key ```r``` for loading a new scenario, and ```b``` or ```q``` for switching perspective. 
 
 [comment]: <> (### LQY: avoid introducing these trivial things )
