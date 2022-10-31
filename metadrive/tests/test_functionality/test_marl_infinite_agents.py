@@ -20,10 +20,10 @@ def test_infinite_agents():
         max_num = old_num_of_vehicles = len(env.vehicles)
         for i in range(1, 1000):
             o, r, d, info = env.step({k: [1, 1] for k in env.vehicles})
-            print(
-                "{} Current active agents: ".format(i), len(env.vehicles), ". Objects: ",
-                len(env.agent_manager._object_to_agent)
-            )
+            # print(
+            #     "{} Current active agents: ".format(i), len(env.vehicles), ". Objects: ",
+            #     len(env.agent_manager._object_to_agent)
+            # )
             max_num = max(len(env.vehicles), max_num)
             # env.render(mode="top_down")
             for kkk, iii in info.items():
@@ -31,7 +31,7 @@ def test_infinite_agents():
                     assert iii["episode_length"] >= 1
             if d["__all__"]:
                 o = env.reset()
-                print("Finish {} steps.".format(i))
+                # print("Finish {} steps.".format(i))
     finally:
         env._DEBUG_RANDOM_SEED = None
         env.close()
