@@ -71,7 +71,7 @@ class BaseEngine(EngineCore, Randomizable):
         if object_id in self._object_policies:
             return self._object_policies[object_id]
         else:
-            print("Can not find the policy for object(id: {})".format(object_id))
+            # print("Can not find the policy for object(id: {})".format(object_id))
             return None
 
     def get_task(self, object_id):

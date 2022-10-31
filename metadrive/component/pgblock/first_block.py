@@ -88,3 +88,10 @@ class FirstPGBlock(PGBlock):
         self.add_sockets(socket)
         self.attach_to_world(render_root_np, physics_world)
         self._respawn_roads = [other_v_spawn_road]
+
+    def _try_plug_into_previous_block(self) -> bool:
+        raise ValueError("BIG Recursive calculation error! Can not find a right sequence for building map! Check BIG")
+
+    def destruct_block(self, physics_world: PhysicsWorld):
+        """This block can not be destructed"""
+        pass

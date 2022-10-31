@@ -13,7 +13,7 @@ def _t(num_blocks):
     try:
         map_config = default_config["map_config"]
         map_config.update(dict(type="block_num", config=num_blocks))
-        map = CityMap(map_config, random_seed=map_config["seed"])
+        map = CityMap(map_config)
         fig = draw_top_down_map(map, (1024, 1024))
         plt.imshow(fig, cmap="bone")
         plt.xticks([])

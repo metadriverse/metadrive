@@ -12,6 +12,7 @@ from metadrive.constants import DEFAULT_AGENT, TerminationState
 from metadrive.envs.base_env import BaseEnv
 from metadrive.manager.traffic_manager import TrafficMode
 from metadrive.utils import clip, Config, get_np_random
+from metadrive.component.algorithm.blocks_prob_dist import PGBlockDistConfig
 
 METADRIVE_DEFAULT_CONFIG = dict(
     # ===== Generalization =====
@@ -20,6 +21,7 @@ METADRIVE_DEFAULT_CONFIG = dict(
 
     # ===== Map Config =====
     map=3,  # int or string: an easy way to fill map_config
+    block_dist_config=PGBlockDistConfig,
     random_lane_width=False,
     random_lane_num=False,
     map_config={
