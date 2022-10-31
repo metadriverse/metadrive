@@ -20,18 +20,18 @@ def _test_loaded_map_alignment():
 
         e = MetaDriveEnv(env_config.copy())
         e.reset()
-        map_data_realtime_load = e.current_map.save_map()
+        map_data_realtime_load = e.current_map.get_meta_data()
         map_data_in_json = saved_v1["map_data"][str(seed)]
         e.close()
 
         e = MetaDriveEnv({"start_seed": seed, "environment_num": 1})
         e.reset()
-        map_data_realtime_generate = e.current_map.save_map()
+        map_data_realtime_generate = e.current_map.get_meta_data()
         e.close()
 
         e = MetaDriveEnv({"start_seed": seed, "environment_num": 10})
         e.reset(force_seed=seed)
-        map_data_realtime_generate_in_multiple_maps = e.current_map.save_map()
+        map_data_realtime_generate_in_multiple_maps = e.current_map.get_meta_data()
         e.close()
 
         # Assert v1 and v2 have same maps

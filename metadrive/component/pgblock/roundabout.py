@@ -19,7 +19,7 @@ class Roundabout(PGBlock):
     SOCKET_NUM = 3
     RADIUS_IN = 20
     ANGLE = 60
-    EXIT_PART_LENGTH = 30
+    EXIT_PART_LENGTH = 35
 
     def __init__(self, *args, **kwargs):
         super(Roundabout, self).__init__(*args, **kwargs)

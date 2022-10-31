@@ -51,7 +51,7 @@ class RecordManager(BaseManager):
         if self.engine.record_episode:
             self._update_objects_states()
             self.episode_info = dict(
-                map_data=self.engine.current_map.save_map(),
+                map_data=self.engine.current_map.get_meta_data(),
                 frame=[self.reset_frame],
             )
             self.current_frames = None

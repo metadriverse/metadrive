@@ -51,7 +51,7 @@ def test_expert_with_traffic(use_render=False):
         dict(
             environment_num=1,
             map="CCC",
-            start_seed=0,
+            start_seed=2,
             random_traffic=False,
             use_render=use_render,
             vehicle_config=dict(show_lidar=True),
@@ -60,7 +60,7 @@ def test_expert_with_traffic(use_render=False):
     )
 
     # We change the ego vehicle dynamics! So the expert is not reliable anymore!
-    assert 350 < ep_reward < 450, ep_reward
+    assert 300 < ep_reward < 350, ep_reward
     # assert success_rate == 1.0, success_rate
 
 
@@ -70,14 +70,15 @@ def test_expert_without_traffic():
             environment_num=1,
             random_agent_model=False,
             map="CCC",
-            start_seed=0,
+            use_render=False,
+            start_seed=2,
             traffic_density=0,
             random_traffic=False,
         ),
         num_episode=10,
         has_traffic=False
     )
-    assert 350 <= ep_reward <= 450, ep_reward
+    assert 300 <= ep_reward <= 350, ep_reward
 
     # We change the ego vehicle dynamics! So the expert is not reliable anymore!
     assert success_rate == 1.0, success_rate

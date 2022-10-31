@@ -15,8 +15,8 @@ class WaymoIDMEnv(WaymoEnv):
             self.engine.update_manager("traffic_manager", WaymoIDMTrafficManager())
         else:
             self.engine.update_manager("traffic_manager", WaymoTrafficManager())
-        self.engine.accept("n", self.next_seed_reset)
-        self.engine.accept("b", self.last_seed_reset)
+        # self.engine.accept("n", self.next_seed_reset)
+        # self.engine.accept("b", self.last_seed_reset)
 
     # @property
     def next_seed_reset(self):

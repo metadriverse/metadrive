@@ -3,7 +3,7 @@ from typing import Union
 
 from panda3d.core import NodePath
 
-from metadrive.component.algorithm.blocks_prob_dist import PGBlockConfig
+from metadrive.component.algorithm.blocks_prob_dist import PGBlockDistConfig
 from metadrive.component.pgblock.first_block import FirstPGBlock
 from metadrive.component.pgblock.pg_block import PGBlock
 from metadrive.component.road_network.node_road_network import NodeRoadNetwork
@@ -25,7 +25,7 @@ class BigGenerateMethod:
 
 
 class BIG:
-    MAX_TRIAL = 2
+    MAX_TRIAL = 5
 
     def __init__(
         self,
@@ -36,9 +36,11 @@ class BIG:
         physics_world: PhysicsWorld,
         # block_type_version: str,
         exit_length=50,
-        random_seed=None
+        random_seed=None,
+        block_dist_config=PGBlockDistConfig
     ):
         super(BIG, self).__init__()
+        self.block_dist_config = block_dist_config
         self._block_sequence = None
         self.random_seed = random_seed
         self.np_random = get_np_random(random_seed)
@@ -98,12 +100,12 @@ class BIG:
         Sample a random block type
         """
         if self._block_sequence is None:
-            block_types = PGBlockConfig.all_blocks()
-            block_probabilities = PGBlockConfig.block_probability()
+            block_types = self.block_dist_config.all_blocks()
+            block_probabilities = self.block_dist_config.block_probability()
             block_type = self.np_random.choice(block_types, p=block_probabilities)
         else:
             type_id = self._block_sequence[len(self.blocks)]
-            block_type = PGBlockConfig.get_block(type_id)
+            block_type = self.block_dist_config.get_block(type_id)
 
         socket = self.np_random.choice(self.blocks[-1].get_socket_indices())
         block = block_type(
@@ -119,7 +121,11 @@ class BIG:
         block.destruct_block(self._physics_world)
 
     def construct(self, block) -> bool:
-        return block.construct_block(self._render_node_path, self._physics_world)
+        success = block.construct_block(self._render_node_path, self._physics_world)
+        lane_num = max([len(socket.get_positive_lanes(self._global_network)) for socket in block._sockets.values()])
+        if lane_num < self.block_dist_config.MIN_LANE_NUM or lane_num > self.block_dist_config.MAX_LANE_NUM:
+            success = False
+        return success
 
     def _forward(self):
         logging.debug("forward")
@@ -138,6 +144,9 @@ class BIG:
     def _search_sibling(self):
         logging.debug("sibling")
         block = self.blocks[-1]
+        if len(self.blocks) == 1:
+            self.next_step = NextStep.forward
+            return
         if block.number_of_sample_trial < self.MAX_TRIAL:
             success = self.construct(block)
             self.next_step = NextStep.forward if success else NextStep.destruct_current

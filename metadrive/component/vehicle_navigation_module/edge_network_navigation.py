@@ -6,6 +6,7 @@ from metadrive.component.vehicle_navigation_module.base_navigation import BaseNa
 from metadrive.utils import clip, norm
 from metadrive.utils.scene_utils import ray_localization
 from metadrive.utils.space import Parameter, BlockParameterSpace
+from metadrive.utils.scene_utils import ray_localization
 
 
 class EdgeNetworkNavigation(BaseNavigation):
@@ -153,7 +154,7 @@ class EdgeNetworkNavigation(BaseNavigation):
         navi_information = []
         # Project the checkpoint position into the target vehicle's coordination, where
         # +x is the heading and +y is the right hand side.
-        check_point = ref_lane.position(ref_lane.length, 0)
+        check_point = ref_lane.end
         dir_vec = check_point - ego_vehicle.position  # get the vector from center of vehicle to checkpoint
         dir_norm = norm(dir_vec[0], dir_vec[1])
         if dir_norm > self.NAVI_POINT_DIST:  # if the checkpoint is too far then crop the direction vector
@@ -198,3 +199,15 @@ class EdgeNetworkNavigation(BaseNavigation):
             clip((np.rad2deg(angle) / BlockParameterSpace.CURVE[Parameter.angle].max + 1) / 2, 0.0, 1.0)
         )
         return navi_information, lanes_heading, check_point
+
+    def _update_current_lane(self, ego_vehicle):
+        lane, lane_index, on_lane = self._get_current_lane(ego_vehicle)
+        ego_vehicle.on_lane = on_lane
+        if lane is None:
+            lane, lane_index = ego_vehicle.lane, ego_vehicle.lane_index
+            if self.FORCE_CALCULATE:
+                lane_index, _ = self.map.road_network.get_closest_lane_index(ego_vehicle.position)
+                lane = self.map.road_network.get_lane(lane_index)
+        self.current_lane = lane
+        assert lane_index == lane.index, "lane index mismatch!"
+        return lane, lane_index

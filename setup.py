@@ -35,6 +35,7 @@ install_requires = [
     "tqdm",
     "yapf",
     "seaborn",
+    "tqdm",
     "panda3d==1.10.8",
     "panda3d-gltf",
     "panda3d-simplepbr",
