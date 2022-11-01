@@ -9,6 +9,7 @@ from metadrive.engine.engine_utils import get_engine
 from metadrive.obs.top_down_obs_impl import WorldSurface, VehicleGraphics, LaneGraphics
 from metadrive.utils.map_utils import is_map_related_instance
 from metadrive.utils.utils import import_pygame
+from metadrive.component.road_network import NodeRoadNetwork, EdgeRoadNetwork
 
 pygame = import_pygame()
 
@@ -39,12 +40,15 @@ def draw_top_down_map(
     surface.scaling = scaling
     centering_pos = ((b_box[0] + b_box[1]) / 2, (b_box[2] + b_box[3]) / 2)
     surface.move_display_window_to(centering_pos)
-    for _from in map.road_network.graph.keys():
-        decoration = True if _from == Decoration.start else False
 
-        from_road = map.road_network.graph[_from]
+    if isinstance(map.road_network, NodeRoadNetwork):
 
-        if isinstance(from_road, dict):  # We are in node_road, instead of edge_road (Waymo dataset).
+        for _from in map.road_network.graph.keys():
+            decoration = True if _from == Decoration.start else False
+
+            from_road = map.road_network.graph[_from]
+            assert isinstance(from_road, dict)
+
             for _to in from_road.keys():
                 for l in from_road[_to]:
                     if simple_draw:
@@ -53,11 +57,25 @@ def draw_top_down_map(
                         two_side = True if l is from_road[_to][-1] or decoration else False
                         LaneGraphics.display(l, surface, two_side, use_line_color=True)
 
-        else:  # It should be a `metadrive.component.road_network.edge_road_network.neighbor_lanes` instance
-            raise NotImplementedError(
-                "The Top-down view rendering for Waymo / Argoverse / OpenDrive format is not supported yet."
-            )
+    elif isinstance(map.road_network, EdgeRoadNetwork):
+        for lanes_index, lanes in map.road_network.graph.items():
+            if simple_draw:
+                LaneGraphics.simple_draw(lanes.lane, surface, color=road_color)
+            else:
+                print("Top down renderer is not properly implemented!!")
+                # two_side = True if from_road.lane is from_road[_to][-1] or decoration else False
+                two_side = True
+                LaneGraphics.display(lanes.lane, surface, two_side, use_line_color=True)
+        # for _to in from_road.keys():
+        #     for l in from_road[_to]:
+        #         if simple_draw:
+        #             LaneGraphics.simple_draw(l, surface, color=road_color)
+        #         else:
+        #             two_side = True if l is from_road[_to][-1] or decoration else False
+        #             LaneGraphics.display(l, surface, two_side, use_line_color=True)
 
+    else:
+        raise ValueError()
 
     if return_surface:
         return surface

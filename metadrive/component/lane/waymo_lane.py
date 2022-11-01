@@ -6,6 +6,9 @@ from metadrive.constants import WaymoLaneProperty
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.utils.waymo_utils.waymo_utils import read_waymo_data, convert_polyline_to_metadrive
 
+from metadrive.utils.waymo_utils.waymo_utils import RoadLineType, RoadEdgeType, convert_polyline_to_metadrive
+from metadrive.constants import LineType, LineColor
+
 
 class WaymoLane(WayPointLane):
     def __init__(self, waymo_lane_id: int, waymo_map_data: dict):
@@ -21,9 +24,30 @@ class WaymoLane(WayPointLane):
         self.exit_lanes = waymo_map_data[waymo_lane_id][WaymoLaneProperty.EXIT]
         self.left_lanes = waymo_map_data[waymo_lane_id][WaymoLaneProperty.LEFT_NEIGHBORS]
         self.right_lanes = waymo_map_data[waymo_lane_id][WaymoLaneProperty.RIGHT_NEIGHBORS]
+
         # left_type = LineType.CONTINUOUS if len(self.left_lanes) == 0 else LineType.NONE
-        # righ_type = LineType.CONTINUOUS if len(self.right_lanes) == 0 else LineType.NONE
-        # self.line_types = (left_type, righ_type)
+        # right_type = LineType.CONTINUOUS if len(self.right_lanes) == 0 else LineType.NONE
+        # self.line_types = (left_type, right_type)
+        lane_data = waymo_map_data[waymo_lane_id]
+        lane_type = lane_data.get("type", None)
+        if RoadLineType.is_road_line(lane_type):
+            if len(lane_data[WaymoLaneProperty.POLYLINE]) <= 1:
+                pass
+            if RoadLineType.is_broken(lane_type):
+                self.line_types = (LineType.BROKEN, LineType.BROKEN)
+            else:
+                self.line_types = (LineType.CONTINUOUS, LineType.CONTINUOUS)
+        elif RoadEdgeType.is_road_edge(lane_type) and RoadEdgeType.is_sidewalk(lane_type):
+            self.line_types = (LineType.CONTINUOUS, LineType.CONTINUOUS)
+            pass
+        elif RoadEdgeType.is_road_edge(lane_type) and not RoadEdgeType.is_sidewalk(lane_type):
+            self.line_types = (LineType.CONTINUOUS, LineType.CONTINUOUS)
+            pass
+        elif lane_type == "center_lane" or lane_type is None:
+            self.line_types = (LineType.BROKEN, LineType.BROKEN)
+            pass
+        # else:
+        #     raise ValueError("Can not build lane line type: {}".format(type))
 
     @staticmethod
     def get_lane_width(waymo_lane_id, waymo_map_data):
@@ -58,6 +82,6 @@ class WaymoLane(WayPointLane):
 
 if __name__ == "__main__":
     file_path = AssetLoader.file_path("waymo", "test.pkl", return_raw_style=False)
-    data = read_waymo_data(file_path)
-    print(data)
-    lane = WaymoLane(108, data["map"])
+    read_data = read_waymo_data(file_path)
+    print(read_data)
+    lane = WaymoLane(108, read_data["map"])
