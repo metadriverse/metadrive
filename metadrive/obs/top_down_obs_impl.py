@@ -2,8 +2,7 @@ from typing import List, Tuple, Union
 
 import numpy as np
 
-from metadrive.component.lane.circular_lane import CircularLane
-from metadrive.component.lane.straight_lane import StraightLane
+from metadrive.component.lane import CircularLane, StraightLane, WaymoLane
 from metadrive.constants import LineType, LineColor
 from metadrive.utils.utils import import_pygame
 
@@ -278,6 +277,8 @@ class LaneGraphics:
                 cls.continuous_curve(lane, surface, stripes_count, s0, side, color=color)
             # the line of continuous straight and side straight is same now
             elif (lane.line_types[side] == LineType.CONTINUOUS) and isinstance(lane, StraightLane):
+                cls.continuous_line(lane, surface, stripes_count, s0, side, color=color)
+            elif (lane.line_types[side] == LineType.CONTINUOUS) and isinstance(lane, WaymoLane):
                 cls.continuous_line(lane, surface, stripes_count, s0, side, color=color)
             elif (lane.line_types[side] == LineType.SIDE) and isinstance(lane, StraightLane):
                 cls.continuous_line(lane, surface, stripes_count, s0, side, color=color)

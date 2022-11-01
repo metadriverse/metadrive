@@ -13,22 +13,34 @@ from metadrive.constants import LineType, LineColor
 class WaymoLane(WayPointLane):
     def __init__(self, waymo_lane_id: int, waymo_map_data: dict):
         """
-        Extract the lane information of one waymo lane, and do coordinate shift
+        Extract the lane information of one waymo lane, and do coordinate shifting
         """
-        super(WaymoLane, self).__init__(
-            convert_polyline_to_metadrive(waymo_map_data[waymo_lane_id][WaymoLaneProperty.POLYLINE]),
-            self.get_lane_width(waymo_lane_id, waymo_map_data)
-        )
-        self.index = waymo_lane_id
-        self.entry_lanes = waymo_map_data[waymo_lane_id][WaymoLaneProperty.ENTRY]
-        self.exit_lanes = waymo_map_data[waymo_lane_id][WaymoLaneProperty.EXIT]
-        self.left_lanes = waymo_map_data[waymo_lane_id][WaymoLaneProperty.LEFT_NEIGHBORS]
-        self.right_lanes = waymo_map_data[waymo_lane_id][WaymoLaneProperty.RIGHT_NEIGHBORS]
 
-        # left_type = LineType.CONTINUOUS if len(self.left_lanes) == 0 else LineType.NONE
-        # right_type = LineType.CONTINUOUS if len(self.right_lanes) == 0 else LineType.NONE
-        # self.line_types = (left_type, right_type)
         lane_data = waymo_map_data[waymo_lane_id]
+
+        super(WaymoLane, self).__init__(
+            center_line_points=convert_polyline_to_metadrive(lane_data[WaymoLaneProperty.POLYLINE]),
+            width=self.get_lane_width(waymo_lane_id, waymo_map_data)
+        )
+
+        self.index = waymo_lane_id
+
+        self.entry_lanes = lane_data[WaymoLaneProperty.ENTRY]
+        self.exit_lanes = lane_data[WaymoLaneProperty.EXIT]
+        self.left_lanes = lane_data[WaymoLaneProperty.LEFT_NEIGHBORS]
+        self.right_lanes = lane_data[WaymoLaneProperty.RIGHT_NEIGHBORS]
+
+        if len(self.left_lanes) > 0:
+            left_type = LineType.BROKEN
+        else:
+            left_type = LineType.CONTINUOUS
+
+        if len(self.right_lanes) > 0:
+            right_type = LineType.BROKEN
+        else:
+            right_type = LineType.CONTINUOUS
+
+
         lane_type = lane_data.get("type", None)
         if RoadLineType.is_road_line(lane_type):
             if len(lane_data[WaymoLaneProperty.POLYLINE]) <= 1:
@@ -44,10 +56,15 @@ class WaymoLane(WayPointLane):
             self.line_types = (LineType.CONTINUOUS, LineType.CONTINUOUS)
             pass
         elif lane_type == "center_lane" or lane_type is None:
-            self.line_types = (LineType.BROKEN, LineType.BROKEN)
+            # self.line_types = (LineType.BROKEN, LineType.BROKEN)
+            left_type = left_type or LineType.BROKEN
+            right_type = right_type or LineType.BROKEN
             pass
-        # else:
-        #     raise ValueError("Can not build lane line type: {}".format(type))
+        else:
+            raise ValueError("Can not build lane line type: {}".format(type))
+
+
+        self.line_types = (left_type, right_type)
 
     @staticmethod
     def get_lane_width(waymo_lane_id, waymo_map_data):
