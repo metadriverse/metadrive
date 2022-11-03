@@ -63,8 +63,12 @@ class WaymoLane(WayPointLane):
         else:
             raise ValueError("Can not build lane line type: {}".format(type))
 
-
         self.line_types = (left_type, right_type)
+
+        self.line_colors = [
+            LineColor.YELLOW if left_type == LineType.CONTINUOUS else LineColor.GREY,
+            LineColor.YELLOW if right_type == LineType.CONTINUOUS else LineColor.GREY
+        ]
 
     @staticmethod
     def get_lane_width(waymo_lane_id, waymo_map_data):
