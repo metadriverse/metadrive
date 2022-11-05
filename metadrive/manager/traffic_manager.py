@@ -4,6 +4,7 @@ import math
 from collections import namedtuple
 from typing import Dict
 
+import numpy as np
 from metadrive.component.lane.abs_lane import AbstractLane
 from metadrive.component.map.base_map import BaseMap
 from metadrive.component.road_network import Road
@@ -25,6 +26,7 @@ class TrafficMode:
     # Hybrid, some vehicles are triggered once on map and disappear when arriving at destination, others exist all time
     Hybrid = "hybrid"
 
+
 class PGTrafficManager(BaseManager):
     VEHICLE_GAP = 10  # m
 
@@ -35,6 +37,8 @@ class PGTrafficManager(BaseManager):
         super(PGTrafficManager, self).__init__()
 
         self._traffic_vehicles = []
+
+        # triggered by the event. TODO(lqy) In the future, event trigger can be introduced
         self.block_triggered_vehicles = []
 
         # traffic property
@@ -57,7 +61,7 @@ class PGTrafficManager(BaseManager):
         traffic_density = self.density
         if abs(traffic_density) < 1e-2:
             return
-        self.respawn_lanes = self.respawn_lanes = self._get_available_respawn_lanes(map)
+        self.respawn_lanes = self._get_available_respawn_lanes(map)
         if self.mode == TrafficMode.Respawn:
             # add respawn vehicle
             self._create_respawn_vehicles(map, traffic_density)
@@ -94,13 +98,17 @@ class PGTrafficManager(BaseManager):
         for v in self._traffic_vehicles:
             v.after_step()
             if not v.on_lane:
-                v_to_remove.append(v)
-                # lane = self.respawn_lanes[self.np_random.randint(0, len(self.respawn_lanes))]
-                # lane_idx = lane.index
-                # long = self.np_random.rand() * lane.length / 2
-                # v.update_config({"spawn_lane_index": lane_idx, "spawn_longitude": long})
-                # v.reset(self.current_map)
-                # self.engine.get_policy(v.id).reset()
+                if self.mode == TrafficMode.Trigger:
+                    v_to_remove.append(v)
+                elif self.mode == TrafficMode.Respawn or self.mode != TrafficMode.Hybrid:
+                    lane = self.respawn_lanes[self.np_random.randint(0, len(self.respawn_lanes))]
+                    lane_idx = lane.index
+                    long = self.np_random.rand() * lane.length / 2
+                    v.update_config({"spawn_lane_index": lane_idx, "spawn_longitude": long})
+                    v.reset(random_seed=v.random_seed)
+                    self.engine.get_policy(v.id).reset()
+                else:
+                    raise ValueError("Traffic mode error: {}".format(self.mode))
         for v in v_to_remove:
             self.clear_objects([v.id])
             self._traffic_vehicles.remove(v)
@@ -183,32 +191,6 @@ class PGTrafficManager(BaseManager):
                     vehicles[vehicle.index] = init_state
         return vehicles
 
-    def _create_vehicles_on_lane(self, traffic_density: float, lane: AbstractLane, is_respawn_lane):
-        """
-        Create vehicles on a lane
-        :param traffic_density: traffic density according to num of vehicles per meter
-        :param lane: Circular lane or Straight lane
-        :param is_respawn_lane: Whether vehicles should be respawn on this lane or not
-        :return: List of vehicles
-        """
-
-        _traffic_vehicles = []
-        total_num = int(lane.length / self.VEHICLE_GAP)
-        vehicle_longs = [i * self.VEHICLE_GAP for i in range(total_num)]
-        self.np_random.shuffle(vehicle_longs)
-        for long in vehicle_longs[:int(traffic_density * len(vehicle_longs))]:
-            # if self.np_random.rand() > traffic_density and abs(lane.length - InRampOnStraight.RAMP_LEN) > 0.1:
-            #     # Do special handling for ramp, and there must be vehicles created there
-            #     continue
-            vehicle_type = self.random_vehicle_type()
-            traffic_v_config = {"spawn_lane_index": lane.index, "spawn_longitude": long}
-            traffic_v_config.update(self.engine.global_config["traffic_vehicle_config"])
-            random_v = self.spawn_object(vehicle_type, vehicle_config=traffic_v_config)
-            from metadrive.policy.idm_policy import IDMPolicy
-            self.add_policy(random_v.id, IDMPolicy(random_v, self.generate_seed()))
-            _traffic_vehicles.append(random_v)
-        return _traffic_vehicles
-
     def _propose_vehicle_configs(self, lane: AbstractLane):
         potential_vehicle_configs = []
         total_num = int(lane.length / self.VEHICLE_GAP)
@@ -220,9 +202,23 @@ class PGTrafficManager(BaseManager):
         return potential_vehicle_configs
 
     def _create_respawn_vehicles(self, map: BaseMap, traffic_density: float):
-        respawn_lanes = self._get_available_respawn_lanes(map)
-        for lane in respawn_lanes:
-            self._traffic_vehicles += self._create_vehicles_on_lane(traffic_density, lane, True)
+        total_num = len(self.respawn_lanes)
+        for lane in self.respawn_lanes:
+            _traffic_vehicles = []
+            total_num = int(lane.length / self.VEHICLE_GAP)
+            vehicle_longs = [i * self.VEHICLE_GAP for i in range(total_num)]
+            self.np_random.shuffle(vehicle_longs)
+            for long in vehicle_longs[:int(np.ceil(traffic_density * len(vehicle_longs)))]:
+                # if self.np_random.rand() > traffic_density and abs(lane.length - InRampOnStraight.RAMP_LEN) > 0.1:
+                #     # Do special handling for ramp, and there must be vehicles created there
+                #     continue
+                vehicle_type = self.random_vehicle_type()
+                traffic_v_config = {"spawn_lane_index": lane.index, "spawn_longitude": long}
+                traffic_v_config.update(self.engine.global_config["traffic_vehicle_config"])
+                random_v = self.spawn_object(vehicle_type, vehicle_config=traffic_v_config)
+                from metadrive.policy.idm_policy import IDMPolicy
+                self.add_policy(random_v.id, IDMPolicy(random_v, self.generate_seed()))
+                self._traffic_vehicles.append(random_v)
 
     def _create_vehicles_once(self, map: BaseMap, traffic_density: float) -> None:
         """
@@ -337,8 +333,10 @@ class PGTrafficManager(BaseManager):
     def current_map(self):
         return self.engine.map_manager.current_map
 
+
 # For compatibility check
 TrafficManager = PGTrafficManager
+
 
 class MixedPGTrafficManager(PGTrafficManager):
     def _create_respawn_vehicles(self, *args, **kwargs):

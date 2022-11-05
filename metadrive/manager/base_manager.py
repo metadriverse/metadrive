@@ -1,4 +1,30 @@
 from metadrive.base_class.randomizable import Randomizable
+from typing import Callable
+
+
+class Event:
+    """
+    Event is happed in episode level, all events will be cleared at the start of the episode
+    a event/condition func should take its manager instance and other args as input
+    """
+
+    def __init__(self, name, condition_func, event_func, cond_args=None, event_args=None):
+        self.name = name
+        self.event_func = event_func
+        self.event_args = event_args or {}
+        self.condition_func = condition_func
+        self.cond_args = cond_args or {}
+        self.triggered = False
+
+    def trigger(self, manager):
+        assert isinstance(manager, BaseManager)
+        assert not self.triggered, "evnt can not be trigged twiced!"
+        self.event_func(manager, **self.event_args)
+        self.triggered = True
+
+    def should_be_triggered(self, manager):
+        assert isinstance(manager, BaseManager)
+        return True if self.condition_func(manager, **self.cond_args) else False
 
 
 class BaseManager(Randomizable):
@@ -13,6 +39,37 @@ class BaseManager(Randomizable):
         self.engine = get_engine()
         Randomizable.__init__(self, self.engine.global_random_seed)
         self.spawned_objects = {}
+        self.events = {}
+
+    def _check_and_trigger_events(self):
+        """
+        This should usually be called in before_step()
+        """
+        for event in events.items():
+            if event.should_be_triggered(self):
+                event.trigger(self)
+
+    def get_untriggered_events(self):
+        ret = []
+        for name, event in self.events.items():
+            if not event.trigger:
+                ret.append(name)
+        return ret
+
+    def get_triggered_events(self):
+        ret = []
+        for name, event in self.events.items():
+            if event.trigger:
+                ret.append(name)
+        return ret
+
+    def _add_event(self, event):
+        assert isinstance(event, Event), "Only event type can be added"
+        self.events[event.name] = event
+
+    def _delete_event(self, event_name):
+        assert event_name in self.events, "No event in this manager {}".format(self)
+        self.events.pop(event_name)
 
     def before_step(self, *args, **kwargs) -> dict:
         """
