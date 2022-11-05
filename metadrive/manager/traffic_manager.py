@@ -25,15 +25,14 @@ class TrafficMode:
     # Hybrid, some vehicles are triggered once on map and disappear when arriving at destination, others exist all time
     Hybrid = "hybrid"
 
-
-class TrafficManager(BaseManager):
+class PGTrafficManager(BaseManager):
     VEHICLE_GAP = 10  # m
 
     def __init__(self):
         """
         Control the whole traffic flow
         """
-        super(TrafficManager, self).__init__()
+        super(PGTrafficManager, self).__init__()
 
         self._traffic_vehicles = []
         self.block_triggered_vehicles = []
@@ -112,7 +111,7 @@ class TrafficManager(BaseManager):
         Clear the scene and then reset the scene to empty
         :return: None
         """
-        super(TrafficManager, self).before_reset()
+        super(PGTrafficManager, self).before_reset()
         self.density = self.engine.global_config["traffic_density"]
         self.block_triggered_vehicles = []
         self._traffic_vehicles = []
@@ -332,14 +331,16 @@ class TrafficManager(BaseManager):
 
     def seed(self, random_seed):
         if not self.random_traffic:
-            super(TrafficManager, self).seed(random_seed)
+            super(PGTrafficManager, self).seed(random_seed)
 
     @property
     def current_map(self):
         return self.engine.map_manager.current_map
 
+# For compatibility check
+TrafficManager = PGTrafficManager
 
-class MixedTrafficManager(TrafficManager):
+class MixedPGTrafficManager(PGTrafficManager):
     def _create_respawn_vehicles(self, *args, **kwargs):
         raise NotImplementedError()
 
