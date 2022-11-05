@@ -100,7 +100,7 @@ class PGTrafficManager(BaseManager):
             if not v.on_lane:
                 if self.mode == TrafficMode.Trigger:
                     v_to_remove.append(v)
-                elif self.mode == TrafficMode.Respawn or self.mode != TrafficMode.Hybrid:
+                elif self.mode == TrafficMode.Respawn or self.mode == TrafficMode.Hybrid:
                     lane = self.respawn_lanes[self.np_random.randint(0, len(self.respawn_lanes))]
                     lane_idx = lane.index
                     long = self.np_random.rand() * lane.length / 2

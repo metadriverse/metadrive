@@ -41,6 +41,10 @@ class BaseManager(Randomizable):
         self.spawned_objects = {}
         self.events = {}
 
+    @property
+    def episode_step(self):
+        return self.engine.episode_step
+
     def _check_and_trigger_events(self):
         """
         This should usually be called in before_step()
