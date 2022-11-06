@@ -93,5 +93,23 @@ class BaseManager(Randomizable):
     def add_policy(self, object_id, policy):
         self.engine.add_policy(object_id, policy)
 
-    def get_episode_metadata(self):
+    def get_state(self):
+        """This function will be called by RecordManager to collect manager state, usually some mappings"""
         assert self.episode_step == 0, "This func can only be called after env.reset() without any env.step() called"
+        return {"spawned_objects": {name: v.class_name for name, v in self.spawned_objects.items()}}
+
+    def set_state(self, state: dict):
+        """
+        A basic function for restoring spawned objects mapping
+        """
+        assert self.episode_step == 0, "This func can only be called after env.reset() without any env.step() called"
+        spawned_objects = state["spawned_objects"]
+        for name, class_name in spawned_objects.items():
+            name_obj = self.engine.get_objects([name])
+            assert name in name_obj and name_obj[name].class_name == class_name, "Can not restore mappings!"
+            spawned_objects[name] = name_obj[name]
+        self.spawned_objects = spawned_objects
+
+    @property
+    def class_name(self):
+        return self.__class__.__name__

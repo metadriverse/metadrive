@@ -54,9 +54,19 @@ class RecordManager(BaseManager):
                 map_data=self.engine.current_map.get_meta_data(),
                 frame=[self.reset_frame],
             )
+            self.collect_manager_states()
+
             self.current_frames = None
             self.reset_frame = None
             self.current_step = 0
+
+    def collect_manager_states(self):
+        assert self.episode_step == 0, "This func can only be called after env.reset() without any env.step() called"
+        ret = {}
+        for manager in self.engine.managers.values():
+            mgr_state = manager.get_state()
+            ret[manager.class_name] = mgr_state
+        self.episode_info["manager_states"] = ret
 
     def before_step(self, *args, **kwargs) -> dict:
         if self.engine.record_episode:
@@ -85,7 +95,7 @@ class RecordManager(BaseManager):
         self.current_frame._agent_to_object = self.engine.agent_manager._agent_to_object
         self.current_frame._object_to_agent = self.engine.agent_manager._object_to_agent
 
-    def dump_episode(self):
+    def get_episode_metadata(self):
         assert self.engine.record_episode, "Turn on recording episode and then dump it"
         return copy.deepcopy(self.episode_info)
 
@@ -117,3 +127,9 @@ class RecordManager(BaseManager):
     @property
     def current_frame(self):
         return self.current_frames[self.current_step] if self.reset_frame is None else self.reset_frame
+
+    def set_state(self, state: dict):
+        return {}
+
+    def get_state(self):
+        return {}

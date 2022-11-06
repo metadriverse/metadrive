@@ -87,7 +87,7 @@ METADRIVE_DEFAULT_CONFIG = dict(
 
     record_episode=False,  # when replay_episode is not None ,this option will be useless
     replay_episode=None,  # set the replay file to enable replay
-    reactive_replay=False,  # True: env.step will call other managers instead of replay manager to get reactive behavior
+    only_replay_reset=False,  # Scenario will only be initialized, while future trajectories will not be replayed
 )
 
 

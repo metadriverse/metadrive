@@ -48,13 +48,24 @@ class ReplayManager(BaseManager):
             PGMap, map_config=map_config, auto_fill_random_seed=False, force_spawn=True
         )
         self.replay_frame()
+        if self.engine.global_config["only_replay_reset"]:
+            # do not replay full trajectory! set state for managers for interaction
+            self.restore_manager_states(self.restore_episode_info["manager_states"])
+
+    def restore_manager_states(self, states):
+        current_managers = [manager.class_name for manager in self.engine.managers.values()]
+        data_managers = states.keys()
+        assert current_managers == data_managers, "Manager not match, data: {}, current: {}".format(data_managers,
+                                                                                                    current_managers)
+        for manager in self.engine.managers.values():
+            manager.set_sate(states[manager.class_name])
 
     def step(self, *args, **kwargs):
-        if self.engine.replay_episode:
+        if self.engine.replay_episode and not self.engine.global_config["only_replay_reset"]:
             self.replay_frame()
 
     def after_step(self, *args, **kwargs):
-        if self.engine.replay_episode:
+        if self.engine.replay_episode and not self.engine.global_config["only_replay_reset"]:
             return self.engine.agent_manager.for_each_active_agents(lambda v: {REPLAY_DONE: self.replay_done})
         else:
             return dict()
@@ -107,3 +118,9 @@ class ReplayManager(BaseManager):
 
     def get_replay_agent_observations(self):
         return {k: self.observation for k in self.current_frame.agents}
+
+    def set_state(self, state: dict):
+        return {}
+
+    def get_state(self):
+        return {}

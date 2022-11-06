@@ -35,6 +35,7 @@ def _test_save_scenario(vis=False):
     )
     try:
         o = env.reset()
+        meta_data = env.engine.record_manager.get_episode_metadata()
         for i in range(1, 100000 if vis else 2000):
             o, r, d, info = env.step([0, 1])
             if vis:
