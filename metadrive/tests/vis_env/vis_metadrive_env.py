@@ -8,7 +8,7 @@ if __name__ == "__main__":
         {
             "environment_num": 1,
             "traffic_density": 0.4,
-            "traffic_mode": "respawn",
+            "traffic_mode": "hybrid",
             "start_seed": 22,
             # "_disable_detector_mask":True,
             # "debug_physics_world": True,

@@ -1,4 +1,6 @@
 import copy
+from metadrive.manager.record_manager import RecordManager
+from metadrive.manager.replay_manager import ReplayManager
 import logging
 from typing import Union
 
@@ -82,6 +84,10 @@ METADRIVE_DEFAULT_CONFIG = dict(
 
     # ===== Termination Scheme =====
     out_of_route_done=False,
+
+    record_episode=False,  # when replay_episode is not None ,this option will be useless
+    replay_episode=None,  # set the replay file to enable replay
+    reactive_replay=False,  # True: env.step will call other managers instead of replay manager to get reactive behavior
 )
 
 
@@ -191,8 +197,8 @@ class MetaDriveEnv(BaseEnv):
         # for compatibility
         # crash almost equals to crashing with vehicles
         done_info[TerminationState.CRASH] = (
-            done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
-            or done_info[TerminationState.CRASH_BUILDING]
+                done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
+                or done_info[TerminationState.CRASH_BUILDING]
         )
         return done, done_info
 
@@ -291,6 +297,8 @@ class MetaDriveEnv(BaseEnv):
         from metadrive.manager.map_manager import MapManager
         self.engine.register_manager("map_manager", MapManager())
         self.engine.register_manager("traffic_manager", PGTrafficManager())
+        self.engine.register_manager("record_manager", RecordManager())
+        self.engine.register_manager("replay_manager", ReplayManager())
 
     def _reset_global_seed(self, force_seed=None):
         current_seed = force_seed if force_seed is not None else \
@@ -306,6 +314,7 @@ if __name__ == '__main__':
         assert env.observation_space.contains(obs)
         assert np.isscalar(reward)
         assert isinstance(info, dict)
+
 
     env = MetaDriveEnv()
     try:

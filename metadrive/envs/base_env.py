@@ -12,8 +12,6 @@ from metadrive.engine.base_engine import BaseEngine
 from metadrive.engine.engine_utils import initialize_engine, close_engine, \
     engine_initialized, set_global_random_seed
 from metadrive.manager.agent_manager import AgentManager
-from metadrive.manager.record_manager import RecordManager
-from metadrive.manager.replay_manager import ReplayManager
 from metadrive.obs.image_obs import ImageStateObservation
 from metadrive.obs.observation_base import ObservationBase
 from metadrive.obs.state_obs import LidarStateObservation
@@ -137,8 +135,6 @@ BASE_DEFAULT_CONFIG = dict(
     max_distance=None,
     # Force to generate objects in the left lane.
     _debug_crash_object=False,
-    record_episode=False,  # when replay_episode is not None ,this option will be useless
-    replay_episode=None,  # set the replay file to enable replay
     horizon=None,  # The maximum length of each environmental episode. Set to None to remove this constraint
     max_step_per_agent=None,  # The maximum length of each agent episode. Raise max_step termination when reaches.
     show_interface_navi_mark=True,
@@ -504,8 +500,6 @@ class BaseEnv(gym.Env):
         self.engine.accept("r", self.reset)
         self.engine.accept("p", self.capture)
         self.engine.register_manager("agent_manager", self.agent_manager)
-        self.engine.register_manager("record_manager", RecordManager())
-        self.engine.register_manager("replay_manager", ReplayManager())
 
     @property
     def current_map(self):

@@ -28,7 +28,7 @@ class FrameInfo:
 
 class RecordManager(BaseManager):
     """
-    Record the episode information for replay
+    Record the episode information for replay or reloading episode
     """
     PRIORITY = 100  # lowest priority
 

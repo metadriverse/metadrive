@@ -395,7 +395,7 @@ class BaseEngine(EngineCore, Randomizable):
         return self._managers if not self.replay_episode else {"replay_manager": self.replay_manager}
 
     def change_object_name(self, obj, new_name):
-        raise DeprecationWarning("This function is too dangerous to use")
+        raise DeprecationWarning("This function is too dangerous to be used")
         """
         Change the name of one object, Note: it may bring some bugs if abusing
         """

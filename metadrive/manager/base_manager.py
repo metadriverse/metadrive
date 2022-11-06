@@ -92,3 +92,6 @@ class BaseManager(Randomizable):
 
     def add_policy(self, object_id, policy):
         self.engine.add_policy(object_id, policy)
+
+    def get_episode_metadata(self):
+        assert self.episode_step == 0, "This func can only be called after env.reset() without any env.step() called"
