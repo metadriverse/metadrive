@@ -21,7 +21,7 @@ def _test_save_scenario(vis=False):
             "traffic_density": 0.1,
             "start_seed": 1000,
             # "manual_control": vis,
-            "use_render": False,
+            "use_render": vis,
             "agent_policy": IDMPolicy,
             "traffic_mode": TrafficMode.Trigger,
             "record_episode": save_episode,
@@ -35,22 +35,20 @@ def _test_save_scenario(vis=False):
     )
     try:
         o = env.reset()
-        meta_data = env.engine.record_manager.get_episode_metadata()
         for i in range(1, 100000 if vis else 2000):
             o, r, d, info = env.step([0, 1])
-            if vis:
-                env.render(mode="top_down", road_color=(35, 35, 35))
+            # if vis:
+            #     env.render(mode="top_down", road_color=(35, 35, 35))
             if d:
-                epi_info = env.engine.dump_episode("test_dump.pkl" if test_dump else None)
+                epi_info = env.engine.record_manager.get_episode_metadata()
                 break
-        f = open("test_dump.pkl", "rb+")
-        env.config["replay_episode"] = pickle.load(f)
-        env.config["use_render"] = True
+        env.config["replay_episode"] = epi_info
+        env.config["use_render"] = vis
         o = env.reset()
         for i in range(1, 100000 if vis else 2000):
             o, r, d, info = env.step([0, 1])
-            if vis:
-                env.render(mode="top_down", )
+            # if vis:
+            #     env.render(mode="top_down", )
             if info.get("replay_done", False):
                 break
     finally:

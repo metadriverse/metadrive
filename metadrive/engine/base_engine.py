@@ -260,7 +260,7 @@ class BaseEngine(EngineCore, Randomizable):
     def dump_episode(self, pkl_file_name=None) -> None:
         """Dump the data of an episode."""
         assert self.record_manager is not None
-        episode_state = self.record_manager.dump_episode()
+        episode_state = self.record_manager.get_episode_metadata()
         if pkl_file_name is not None:
             with open(pkl_file_name, "wb+") as file:
                 pickle.dump(episode_state, file)
