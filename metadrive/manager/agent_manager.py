@@ -102,7 +102,8 @@ class AgentManager(BaseManager):
         self._infinite_agents = config["num_agents"] == -1
         self._allow_respawn = config["allow_respawn"]
         self.episode_created_agents = self._get_vehicles(
-            config_dict=self.engine.global_config["target_vehicle_configs"])
+            config_dict=self.engine.global_config["target_vehicle_configs"]
+        )
 
     def after_reset(self):
         init_vehicles = self.episode_created_agents

@@ -56,9 +56,8 @@ class ReplayManager(BaseManager):
     def restore_manager_states(self, states):
         current_managers = [manager.class_name for manager in self.engine.managers.values()]
         data_managers = states.keys()
-        assert len(current_managers - data_managers) == 0, "Manager not match, data: {}, current: {}".format(
-            data_managers,
-            current_managers)
+        assert len(current_managers - data_managers
+                   ) == 0, "Manager not match, data: {}, current: {}".format(data_managers, current_managers)
         for manager in self.engine.managers.values():
             manager.set_state(states[manager.class_name], old_name_to_current=self.record_name_to_current_name)
 

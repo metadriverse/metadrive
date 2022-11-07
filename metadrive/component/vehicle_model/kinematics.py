@@ -88,7 +88,12 @@ class Vehicle:
 
     @classmethod
     def create_random(
-        cls, traffic_mgr: PGTrafficManager, lane: AbstractLane, longitude: float, speed: float = None, random_seed=None
+        cls,
+        traffic_mgr: PGTrafficManager,
+        lane: AbstractLane,
+        longitude: float,
+        speed: float = None,
+        random_seed=None
     ):
         """
         Create a random vehicle on the road.

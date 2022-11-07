@@ -110,7 +110,8 @@ class BaseManager(Randomizable):
         for name, class_name in spawned_objects.items():
             current_name = old_name_to_current[name]
             name_obj = self.engine.get_objects([current_name])
-            assert current_name in name_obj and name_obj[current_name].class_name == class_name, "Can not restore mappings!"
+            assert current_name in name_obj and name_obj[current_name
+                                                         ].class_name == class_name, "Can not restore mappings!"
             ret[current_name] = name_obj[current_name]
         self.spawned_objects = spawned_objects
 

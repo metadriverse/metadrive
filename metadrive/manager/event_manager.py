@@ -7,9 +7,9 @@ class Event:
     All events will be cleared at the start of the episode
     A event/condition func should take its manager instance and other args as input
     """
-
-    def __init__(self, name, condition_func, event_func, cond_args=None, event_args=None, trigger_once=True,
-                 priority=100):
+    def __init__(
+        self, name, condition_func, event_func, cond_args=None, event_args=None, trigger_once=True, priority=100
+    ):
         assert DeprecationWarning("Not tested yet")
         self.name = name
         self.event_func = event_func
