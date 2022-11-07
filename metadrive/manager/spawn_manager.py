@@ -169,7 +169,6 @@ class SpawnManager(BaseManager):
         for bid, bp in self.safe_spawn_places.items():
             if bid in self.spawn_places_used:
                 continue
-
             # save time calculate once
             if not bp.get("spawn_point_position", False):
                 lane = map.road_network.get_lane(bp["config"]["spawn_lane_index"])

@@ -1,13 +1,23 @@
 import copy
 
+import numpy as np
+from panda3d.bullet import BulletBoxShape, BulletGhostNode
+from panda3d.core import Vec3
+
+from metadrive.component.lane.straight_lane import StraightLane
 from metadrive.component.map.pg_map import PGMap
 from metadrive.component.pgblock.first_block import FirstPGBlock
 from metadrive.component.pgblock.parking_lot import ParkingLot
 from metadrive.component.pgblock.t_intersection import TInterSection
 from metadrive.component.road_network import Road
+from metadrive.constants import BodyName
+from metadrive.constants import CollisionGroup
+from metadrive.engine.engine_utils import get_engine
 from metadrive.envs.marl_envs.multi_agent_metadrive import MultiAgentMetaDrive
 from metadrive.manager.map_manager import MapManager
 from metadrive.utils import get_np_random, Config
+from metadrive.utils.coordinates_shift import panda_position, panda_heading
+from metadrive.utils.scene_utils import rect_region_detection
 
 MAParkingLotConfig = dict(
     in_spawn_roads=[
@@ -48,7 +58,7 @@ class ParkingLotSpawnManager(SpawnManager):
         self.v_dest_pair = {}
 
     def get_parking_space(self, v_id):
-        if self._parking_spaces is None or len(self.parking_space_available) == 0:
+        if self._parking_spaces is None:
             self._parking_spaces = self.engine.map_manager.current_map.parking_space
             self.v_dest_pair = {}
             self.parking_space_available = set(copy.deepcopy(self._parking_spaces))
@@ -80,6 +90,56 @@ class ParkingLotSpawnManager(SpawnManager):
         vehicle_config["destination"] = end_road.end_node
         return vehicle_config
 
+    def get_available_respawn_places(self, map, randomize=False):
+        """
+        In each episode, we allow the vehicles to respawn at the start of road, randomize will give vehicles a random
+        position in the respawn region
+        """
+        engine = get_engine()
+        ret = {}
+        for bid, bp in self.safe_spawn_places.items():
+            if bid in self.spawn_places_used:
+                continue
+            if "P" not in bid and len(self.parking_space_available) == 0:
+                # If no parking space, vehicles will never be spawned.
+                continue
+            # save time calculate once
+            if not bp.get("spawn_point_position", False):
+                lane = map.road_network.get_lane(bp["config"]["spawn_lane_index"])
+                assert isinstance(lane, StraightLane), "Now we don't support respawn on circular lane"
+                long = self.RESPAWN_REGION_LONGITUDE / 2
+                spawn_point_position = lane.position(longitudinal=long, lateral=0)
+                bp.force_update(
+                    {
+                        "spawn_point_heading": np.rad2deg(lane.heading_theta_at(long)),
+                        "spawn_point_position": (spawn_point_position[0], spawn_point_position[1])
+                    }
+                )
+
+            spawn_point_position = bp["spawn_point_position"]
+            lane_heading = bp["spawn_point_heading"]
+            result = rect_region_detection(
+                engine, spawn_point_position, lane_heading, self.RESPAWN_REGION_LONGITUDE, self.RESPAWN_REGION_LATERAL,
+                CollisionGroup.Vehicle
+            )
+            if (engine.global_config["debug"] or engine.global_config["debug_physics_world"]) \
+                    and bp.get("need_debug", True):
+                shape = BulletBoxShape(Vec3(self.RESPAWN_REGION_LONGITUDE / 2, self.RESPAWN_REGION_LATERAL / 2, 1))
+                vis_body = engine.render.attach_new_node(BulletGhostNode("debug"))
+                vis_body.node().addShape(shape)
+                vis_body.setH(panda_heading(lane_heading))
+                vis_body.setPos(panda_position(spawn_point_position, z=2))
+                engine.physics_world.dynamic_world.attach(vis_body.node())
+                vis_body.node().setIntoCollideMask(CollisionGroup.AllOff)
+                bp.force_set("need_debug", False)
+
+            if not result.hasHit() or result.node.getName() != BodyName.Vehicle:
+                new_bp = copy.deepcopy(bp).get_dict()
+                if randomize:
+                    new_bp["config"] = self._randomize_position_in_slot(new_bp["config"])
+                ret[bid] = new_bp
+                self.spawn_places_used.append(bid)
+        return ret
 
 class MAParkingLotMap(PGMap):
     def _generate(self):
@@ -348,7 +408,7 @@ def _vis():
             "use_render": True,
             "debug": True,
             "manual_control": True,
-            "num_agents": 11,
+            "num_agents": 7,
             "delay_done": 10,
             # "parking_space_num": 4
         }
