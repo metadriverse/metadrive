@@ -59,9 +59,6 @@ class ParkingLotSpawnManager(SpawnManager):
         self.v_dest_pair[v_id] = parking_space
         return parking_space
 
-    def add_available_parking_space(self, parking_space: Road):
-        self.parking_space_available.add(parking_space)
-
     def after_vehicle_done(self, v_id):
         if v_id in self.v_dest_pair:
             dest = self.v_dest_pair.pop(v_id)
@@ -346,11 +343,12 @@ def _vis():
                 "show_lidar": False,
             },
             "debug_static_world": True,
+            "debug_physics_world": True,
             "global_light": True,
             "use_render": True,
             "debug": True,
             "manual_control": True,
-            "num_agents": 8,
+            "num_agents": 11,
             "delay_done": 10,
             # "parking_space_num": 4
         }
