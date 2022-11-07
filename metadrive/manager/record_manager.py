@@ -128,7 +128,8 @@ class RecordManager(BaseManager):
                 PolicyState.POLICY_CLASS: policy_class,
                 PolicyState.ARGS: args,
                 PolicyState.KWARGS: kwargs,
-                PolicyState.OBJ_NAME: name}
+                PolicyState.OBJ_NAME: name
+            }
 
     def add_clear_info(self, obj):
         """

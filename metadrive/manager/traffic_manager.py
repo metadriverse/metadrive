@@ -345,11 +345,12 @@ class PGTrafficManager(BaseManager):
     def set_state(self, state: dict, old_name_to_current=None):
         super(PGTrafficManager, self).set_state(state, old_name_to_current)
         self._traffic_vehicles = list(
-            self.get_objects([old_name_to_current[name] for name in state["_traffic_vehicles"]]).values())
+            self.get_objects([old_name_to_current[name] for name in state["_traffic_vehicles"]]).values()
+        )
         self.block_triggered_vehicles = [
-            BlockVehicles(trigger_road=Road(s, e),
-                          vehicles=[old_name_to_current[name] for name in v])
-            for s, e, v in state["block_triggered_vehicles"]]
+            BlockVehicles(trigger_road=Road(s, e), vehicles=[old_name_to_current[name] for name in v])
+            for s, e, v in state["block_triggered_vehicles"]
+        ]
 
 
 # For compatibility check
