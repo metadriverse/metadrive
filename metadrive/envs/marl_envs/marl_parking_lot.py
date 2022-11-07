@@ -141,6 +141,7 @@ class ParkingLotSpawnManager(SpawnManager):
                 self.spawn_places_used.append(bid)
         return ret
 
+
 class MAParkingLotMap(PGMap):
     def _generate(self):
         length = self.config["exit_length"]

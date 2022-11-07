@@ -142,7 +142,7 @@ class SpawnManager(BaseManager):
                     target_vehicle_configs.append(
                         Config(
                             dict(
-                                identifier="|".join((str(s) for s in lane_tuple + (j,))),
+                                identifier="|".join((str(s) for s in lane_tuple + (j, ))),
                                 config={
                                     "spawn_lane_index": lane_tuple,
                                     "spawn_longitude": long,
