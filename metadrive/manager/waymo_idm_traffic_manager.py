@@ -117,9 +117,8 @@ class WaymoIDMTrafficManager(WaymoTrafficManager):
                 v.set_static(True)
             else:
                 v.set_position(v.position, height=0.8)
-                self.add_policy(
-                    v.id, WaymoIDMPolicy(v, self.generate_seed(), data["traj"], policy_count % self.ACT_FREQ)
-                )
+                self.add_policy(v.id, WaymoIDMPolicy, v, self.generate_seed(), data["traj"],
+                                policy_count % self.ACT_FREQ)
                 v.set_velocity(init_info['velocity'])
                 policy_count += 1
 

@@ -17,7 +17,7 @@ BlockVehicles = namedtuple("block_vehicles", "trigger_road vehicles")
 
 
 class TrafficMode:
-    # Traffic vehicles will be respawn, once they arrive at the destinations
+    # Traffic vehicles will be respawned, once they arrive at the destinations
     Respawn = "respawn"
 
     # Traffic vehicles will be triggered only once
@@ -217,7 +217,7 @@ class PGTrafficManager(BaseManager):
                 traffic_v_config.update(self.engine.global_config["traffic_vehicle_config"])
                 random_v = self.spawn_object(vehicle_type, vehicle_config=traffic_v_config)
                 from metadrive.policy.idm_policy import IDMPolicy
-                self.add_policy(random_v.id, IDMPolicy(random_v, self.generate_seed()))
+                self.add_policy(random_v.id, IDMPolicy, random_v, self.generate_seed())
                 self._traffic_vehicles.append(random_v)
 
     def _create_vehicles_once(self, map: BaseMap, traffic_density: float) -> None:
@@ -259,7 +259,7 @@ class PGTrafficManager(BaseManager):
                 vehicle_type = self.random_vehicle_type()
                 v_config.update(self.engine.global_config["traffic_vehicle_config"])
                 random_v = self.spawn_object(vehicle_type, vehicle_config=v_config)
-                self.add_policy(random_v.id, IDMPolicy(random_v, self.generate_seed()))
+                self.add_policy(random_v.id, IDMPolicy, random_v, self.generate_seed())
                 vehicles_on_block.append(random_v)
 
             trigger_road = block.pre_block_socket.positive_road
@@ -379,9 +379,9 @@ class MixedPGTrafficManager(PGTrafficManager):
                 random_v = self.spawn_object(vehicle_type, vehicle_config=v_config)
                 if self.np_random.random() < self.engine.global_config["rl_agent_ratio"]:
                     # print("Vehicle {} is assigned with RL policy!".format(random_v.id))
-                    self.add_policy(random_v.id, ExpertPolicy(random_v, self.generate_seed()))
+                    self.add_policy(random_v.id, ExpertPolicy, random_v, self.generate_seed())
                 else:
-                    self.add_policy(random_v.id, IDMPolicy(random_v, self.generate_seed()))
+                    self.add_policy(random_v.id, IDMPolicy, random_v, self.generate_seed())
                 vehicles_on_block.append(random_v)
 
             trigger_road = block.pre_block_socket.positive_road

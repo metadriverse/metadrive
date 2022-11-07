@@ -184,6 +184,7 @@ class CommunicationObservation(LidarStateObservation):
 
 class TinyInterRuleBasedPolicy(IDMPolicy):
     """No IDM and PID are used in this Policy!"""
+
     def __init__(self, control_object, random_seed, target_speed=10):
         super(TinyInterRuleBasedPolicy, self).__init__(control_object=control_object, random_seed=random_seed)
         self.target_speed = target_speed  # Set to 10km/h. Default is 30km/h.
@@ -216,6 +217,7 @@ class TinyInterRuleBasedPolicy(IDMPolicy):
 
 class MixedIDMAgentManager(AgentManager):
     """In this manager, we can replace part of RL policy by IDM policy"""
+
     def __init__(self, init_observations, init_action_space, num_RL_agents, ignore_delay_done=None, target_speed=10):
         super(MixedIDMAgentManager, self).__init__(
             init_observations=init_observations, init_action_space=init_action_space
@@ -286,14 +288,15 @@ class MixedIDMAgentManager(AgentManager):
             ret[agent_id] = obj
             if (len(self.RL_agents) - len(self.dying_RL_agents)) >= self.num_RL_agents:
                 # policy = IDMPolicy(obj, self.generate_seed())
-                policy = TinyInterRuleBasedPolicy(obj, self.generate_seed(), target_speed=self.target_speed)
+                policy_cls = TinyInterRuleBasedPolicy
                 obj._use_special_color = False
+                self.add_policy(obj.id, policy_cls, obj, self.generate_seed(), target_speed=self.target_speed)
             else:
-                policy = self._get_policy(obj)
+                policy_cls = self._get_policy()
                 self.RL_agents.add(agent_id)
                 self.all_previous_RL_agents.add(agent_id)
                 obj._use_special_color = True
-            self.add_policy(obj.id, policy)
+                self.add_policy(obj.id, policy_cls, obj, self.generate_seed())
         return ret
 
     def reset(self):

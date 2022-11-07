@@ -57,8 +57,8 @@ class BaseEngine(EngineCore, Randomizable):
         # store external actions
         self.external_actions = None
 
-    def add_policy(self, object_id, policy):
-        self._object_policies[object_id] = policy
+    def add_policy(self, object_id, policy_class, *args, **kwargs):
+        self._object_policies[object_id] = policy_class(*args, **kwargs)
 
     def add_task(self, object_id, task):
         self._object_tasks[object_id] = task

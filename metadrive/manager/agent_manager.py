@@ -67,21 +67,21 @@ class AgentManager(BaseManager):
                 vehicle_type[v_config["vehicle_model"] if v_config.get("vehicle_model", False) else "default"]
             obj = self.spawn_object(v_type, vehicle_config=v_config)
             ret[agent_id] = obj
-            policy = self._get_policy(obj)
-            self.add_policy(obj.id, policy)
+            policy_cls = self._get_policy()
+            self.add_policy(obj.id, policy_cls, obj, self.generate_seed())
         return ret
 
-    def _get_policy(self, obj):
+    def _get_policy(self):
         # note: agent.id = object id
         if self.engine.global_config["agent_policy"] is not None:
-            return self.engine.global_config["agent_policy"](obj, self.generate_seed())
+            return self.engine.global_config["agent_policy"]
         if self.engine.global_config["manual_control"]:
             if self.engine.global_config.get("use_AI_protector", False):
-                policy = AIProtectPolicy(obj, self.generate_seed())
+                policy = AIProtectPolicy
             else:
-                policy = ManualControlPolicy(obj, self.generate_seed())
+                policy = ManualControlPolicy
         else:
-            policy = EnvInputPolicy(obj, self.generate_seed())
+            policy = EnvInputPolicy
         return policy
 
     def before_reset(self):
