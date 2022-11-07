@@ -53,6 +53,8 @@ class RecordManager(BaseManager):
             self.episode_info = dict(
                 map_data=self.engine.current_map.get_meta_data(),
                 frame=[self.reset_frame],
+                scenario_seed=self.engine.global_seed,
+                global_config=self.engine.global_config
             )
             self.collect_manager_states()
 
