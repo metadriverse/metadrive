@@ -84,7 +84,7 @@ class PGTrafficManager(BaseManager):
                 if len(self.block_triggered_vehicles) > 0 and \
                         ego_road == self.block_triggered_vehicles[-1].trigger_road:
                     block_vehicles = self.block_triggered_vehicles.pop()
-                    self._traffic_vehicles += block_vehicles.vehicles
+                    self._traffic_vehicles += list(self.get_objects(block_vehicles.vehicles).values())
         for v in self._traffic_vehicles:
             p = self.engine.get_policy(v.name)
             v.before_step(p.act())
@@ -260,7 +260,7 @@ class PGTrafficManager(BaseManager):
                 v_config.update(self.engine.global_config["traffic_vehicle_config"])
                 random_v = self.spawn_object(vehicle_type, vehicle_config=v_config)
                 self.add_policy(random_v.id, IDMPolicy, random_v, self.generate_seed())
-                vehicles_on_block.append(random_v)
+                vehicles_on_block.append(random_v.name)
 
             trigger_road = block.pre_block_socket.positive_road
             block_vehicles = BlockVehicles(trigger_road=trigger_road, vehicles=vehicles_on_block)
@@ -333,6 +333,24 @@ class PGTrafficManager(BaseManager):
     def current_map(self):
         return self.engine.map_manager.current_map
 
+    def get_state(self):
+        ret = super(PGTrafficManager, self).get_state()
+        ret["_traffic_vehicles"] = [v.name for v in self._traffic_vehicles]
+        flat = []
+        for b_v in self.block_triggered_vehicles:
+            flat.append((b_v.trigger_road.start_node, b_v.trigger_road.end_node, b_v.vehicles))
+        ret["block_triggered_vehicles"] = flat
+        return ret
+
+    def set_state(self, state: dict, old_name_to_current=None):
+        super(PGTrafficManager, self).set_state(state, old_name_to_current)
+        self._traffic_vehicles = list(
+            self.get_objects([old_name_to_current[name] for name in state["_traffic_vehicles"]]).values())
+        self.block_triggered_vehicles = [
+            BlockVehicles(trigger_road=Road(s, e),
+                          vehicles=[old_name_to_current[name] for name in v])
+            for s, e, v in state["block_triggered_vehicles"]]
+
 
 # For compatibility check
 TrafficManager = PGTrafficManager
@@ -382,7 +400,7 @@ class MixedPGTrafficManager(PGTrafficManager):
                     self.add_policy(random_v.id, ExpertPolicy, random_v, self.generate_seed())
                 else:
                     self.add_policy(random_v.id, IDMPolicy, random_v, self.generate_seed())
-                vehicles_on_block.append(random_v)
+                vehicles_on_block.append(random_v.name)
 
             trigger_road = block.pre_block_socket.positive_road
             block_vehicles = BlockVehicles(trigger_road=trigger_road, vehicles=vehicles_on_block)

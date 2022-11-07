@@ -19,7 +19,7 @@ def _test_save_scenario(vis=False):
             "environment_num": 1,
             "traffic_density": 0.1,
             "start_seed": 1000,
-            "manual_control": None,
+            "manual_control": True,
             "use_render": vis,
             # "agent_policy": IDMPolicy if vis,
             "traffic_mode": TrafficMode.Trigger,

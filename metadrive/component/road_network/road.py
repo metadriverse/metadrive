@@ -60,3 +60,4 @@ class Road:
 
     def to_json(self):
         return (self.start_node, self.end_node)
+

@@ -68,6 +68,7 @@ class RecordManager(BaseManager):
         ret = {}
         for manager in self.engine.managers.values():
             mgr_state = manager.get_state()
+            assert mgr_state is not None, "No return value for manager.get_state()"
             ret[manager.class_name] = mgr_state
         self.episode_info["manager_states"] = ret
 
