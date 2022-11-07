@@ -1,7 +1,7 @@
 import copy
 import logging
 
-from metadrive.constants import ObjectState
+from metadrive.constants import ObjectState, PolicyState
 from metadrive.manager.base_manager import BaseManager
 from metadrive.utils.map_utils import is_map_related_instance, is_map_related_class
 
@@ -11,6 +11,7 @@ class FrameInfo:
         self.episode_step = episode_step
         # used to track the objects spawn info
         self.spawn_info = {}
+        self.policy_info = {}
         # used to track update objects state in the scene
         self.step_info = {}
         # used to track the objects cleared
@@ -104,7 +105,7 @@ class RecordManager(BaseManager):
     def destroy(self):
         self.episode_info = None
 
-    def add_spawn_info(self, object_class, kwargs, name):
+    def add_spawn_info(self, name, object_class, kwargs):
         """
         Call when spawn new objects, ignore map related things
         """
@@ -115,6 +116,18 @@ class RecordManager(BaseManager):
                 ObjectState.INIT_KWARGS: kwargs,
                 ObjectState.NAME: name
             }
+
+    def add_policy_info(self, name, policy_class, args, kwargs):
+        """
+        Call when spawn new objects, ignore map related things
+        """
+        if self.engine.record_episode:
+            assert name not in self.current_frame.policy_info, "Duplicated record!"
+            self.current_frame.policy_info[name] = {
+                PolicyState.POLICY_CLASS: policy_class,
+                PolicyState.ARGS: args,
+                PolicyState.KWARGS: kwargs,
+                PolicyState.OBJ_NAME: name}
 
     def add_clear_info(self, obj):
         """

@@ -91,7 +91,7 @@ class BaseManager(Randomizable):
         obj.name = new_name
 
     def add_policy(self, object_id, policy_class, *policy_args, **policy_kwargs):
-        self.engine.add_policy(object_id, policy_class, *policy_args, **policy_kwargs)
+        return self.engine.add_policy(object_id, policy_class, *policy_args, **policy_kwargs)
 
     def get_state(self):
         """This function will be called by RecordManager to collect manager state, usually some mappings"""

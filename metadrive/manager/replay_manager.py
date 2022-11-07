@@ -1,6 +1,7 @@
 import copy
+from metadrive.constants import PolicyState
 import logging
-
+from metadrive.base_class.base_object import BaseObject
 from metadrive.component.map.base_map import BaseMap
 from metadrive.component.map.pg_map import PGMap, MapGenerateMethod
 from metadrive.component.vehicle.base_vehicle import BaseVehicle
@@ -53,6 +54,17 @@ class ReplayManager(BaseManager):
             # do not replay full trajectory! set state for managers for interaction
             self.restore_manager_states(self.restore_episode_info["manager_states"])
 
+    def restore_policy_states(self, policy_infos):
+        for policy_info in policy_infos.values():
+            p_class = policy_info[PolicyState.POLICY_CLASS]
+            args = policy_info[PolicyState.ARGS]
+            kwargs = policy_info[PolicyState.KWARGS]
+            obj_name = self.record_name_to_current_name[policy_info[PolicyState.OBJ_NAME]]
+            policy = self.add_policy(obj_name, p_class, *args, **kwargs)
+            if policy.control_object is BaseObject:
+                obj = list(self.engine.get_objects([obj_name]).values())[0]
+                policy.control_object = obj
+
     def restore_manager_states(self, states):
         current_managers = [manager.class_name for manager in self.engine.managers.values()]
         data_managers = states.keys()
@@ -100,6 +112,7 @@ class ReplayManager(BaseManager):
             self.spawned_objects[self.record_name_to_current_name[name]].after_step()
         self.clear_objects([self.record_name_to_current_name[name] for name in self.current_frame.clear_info])
         self.replay_done = False
+        self.restore_policy_states(self.current_frame.policy_info)
 
     @property
     def replay_agents(self):

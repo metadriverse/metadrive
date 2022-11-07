@@ -3,7 +3,7 @@ import pickle
 import time
 from collections import OrderedDict
 from typing import Callable, Optional, Union, List, Dict, AnyStr
-
+from metadrive.base_class.base_object import BaseObject
 import numpy as np
 
 from metadrive.base_class.randomizable import Randomizable
@@ -58,10 +58,18 @@ class BaseEngine(EngineCore, Randomizable):
         self.external_actions = None
 
     def add_policy(self, object_id, policy_class, *args, **kwargs):
-        self._object_policies[object_id] = policy_class(*args, **kwargs)
+        policy = policy_class(*args, **kwargs)
+        self._object_policies[object_id] = policy
         if self.record_episode:
             assert self.record_manager is not None, "No record manager"
-
+            filtered_args = []
+            for arg in args:
+                filtered_args.append(arg) if not isinstance(arg, BaseObject) else filtered_args.append(BaseObject)
+            filtered_kwargs = {}
+            for k, v in kwargs.items():
+                filtered_kwargs[k] = v if not isinstance(arg, BaseObject) else BaseObject
+            self.record_manager.add_policy_info(object_id, policy_class, filtered_args, kwargs)
+        return policy
 
     def add_task(self, object_id, task):
         self._object_tasks[object_id] = task
@@ -112,7 +120,7 @@ class BaseEngine(EngineCore, Randomizable):
             obj = self._dying_objects[object_class.__name__].pop()
             obj.reset(**kwargs)
         if self.global_config["record_episode"] and not self.replay_episode:
-            self.record_manager.add_spawn_info(object_class, kwargs, obj.name)
+            self.record_manager.add_spawn_info(obj.name, object_class, kwargs)
         self._spawned_objects[obj.id] = obj
         obj.attach_to_world(self.pbr_worldNP if pbr_model else self.worldNP, self.physics_world)
         return obj
