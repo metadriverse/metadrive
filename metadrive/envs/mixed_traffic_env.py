@@ -13,8 +13,8 @@ class MixedTrafficEnv(MetaDriveEnv):
         self.engine.accept("b", self.switch_to_top_down_view)
         self.engine.accept("q", self.switch_to_third_person_view)
         from metadrive.manager.traffic_manager import MixedPGTrafficManager
-        from metadrive.manager.map_manager import MapManager
-        self.engine.register_manager("map_manager", MapManager())
+        from metadrive.manager.map_manager import PGMapManager
+        self.engine.register_manager("map_manager", PGMapManager())
         self.engine.register_manager("traffic_manager", MixedPGTrafficManager())
 
 

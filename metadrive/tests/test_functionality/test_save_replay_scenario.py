@@ -11,7 +11,6 @@ from metadrive.utils import setup_logger
 def _test_save_scenario(vis=False):
     setup_logger(True)
 
-    test_dump = True
     save_episode = True
     vis = vis
     env = SafeMetaDriveEnv(
@@ -20,9 +19,9 @@ def _test_save_scenario(vis=False):
             "environment_num": 1,
             "traffic_density": 0.1,
             "start_seed": 1000,
-            # "manual_control": vis,
+            "manual_control": None,
             "use_render": vis,
-            "agent_policy": IDMPolicy,
+            # "agent_policy": IDMPolicy if vis,
             "traffic_mode": TrafficMode.Trigger,
             "record_episode": save_episode,
             "map_config": {
@@ -43,7 +42,8 @@ def _test_save_scenario(vis=False):
                 epi_info = env.engine.record_manager.get_episode_metadata()
                 break
         env.config["replay_episode"] = epi_info
-        env.config["use_render"] = vis
+        env.config["record_episode"] = False
+        env.config["only_reset_when_replay"] = True
         o = env.reset()
         for i in range(1, 100000 if vis else 2000):
             o, r, d, info = env.step([0, 1])

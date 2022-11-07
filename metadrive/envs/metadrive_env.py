@@ -1,6 +1,4 @@
 import copy
-from metadrive.manager.record_manager import RecordManager
-from metadrive.manager.replay_manager import ReplayManager
 import logging
 from typing import Union
 
@@ -84,10 +82,6 @@ METADRIVE_DEFAULT_CONFIG = dict(
 
     # ===== Termination Scheme =====
     out_of_route_done=False,
-
-    record_episode=False,  # when replay_episode is not None ,this option will be useless
-    replay_episode=None,  # set the replay file to enable replay
-    only_replay_reset=False,  # Scenario will only be initialized, while future trajectories will not be replayed
 )
 
 
@@ -294,11 +288,9 @@ class MetaDriveEnv(BaseEnv):
         self.engine.accept("b", self.switch_to_top_down_view)
         self.engine.accept("q", self.switch_to_third_person_view)
         from metadrive.manager.traffic_manager import PGTrafficManager
-        from metadrive.manager.map_manager import MapManager
-        self.engine.register_manager("map_manager", MapManager())
+        from metadrive.manager.map_manager import PGMapManager
+        self.engine.register_manager("map_manager", PGMapManager())
         self.engine.register_manager("traffic_manager", PGTrafficManager())
-        self.engine.register_manager("record_manager", RecordManager())
-        self.engine.register_manager("replay_manager", ReplayManager())
 
     def _reset_global_seed(self, force_seed=None):
         current_seed = force_seed if force_seed is not None else \

@@ -98,16 +98,20 @@ class BaseManager(Randomizable):
         assert self.episode_step == 0, "This func can only be called after env.reset() without any env.step() called"
         return {"spawned_objects": {name: v.class_name for name, v in self.spawned_objects.items()}}
 
-    def set_state(self, state: dict):
+    def set_state(self, state: dict, old_name_to_current=None):
         """
         A basic function for restoring spawned objects mapping
         """
         assert self.episode_step == 0, "This func can only be called after env.reset() without any env.step() called"
+        if old_name_to_current is None:
+            old_name_to_current = {key: key for key in state.keys()}
         spawned_objects = state["spawned_objects"]
+        ret = {}
         for name, class_name in spawned_objects.items():
-            name_obj = self.engine.get_objects([name])
-            assert name in name_obj and name_obj[name].class_name == class_name, "Can not restore mappings!"
-            spawned_objects[name] = name_obj[name]
+            current_name = old_name_to_current[name]
+            name_obj = self.engine.get_objects([current_name])
+            assert current_name in name_obj and name_obj[current_name].class_name == class_name, "Can not restore mappings!"
+            ret[current_name] = name_obj[current_name]
         self.spawned_objects = spawned_objects
 
     @property

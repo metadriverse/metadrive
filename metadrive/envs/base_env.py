@@ -1,7 +1,8 @@
 import time
 from collections import defaultdict
 from typing import Union, Dict, AnyStr, Optional, Tuple
-
+from metadrive.manager.record_manager import RecordManager
+from metadrive.manager.replay_manager import ReplayManager
 import gym
 import numpy as np
 from panda3d.core import PNMImage
@@ -142,6 +143,11 @@ BASE_DEFAULT_CONFIG = dict(
     show_skybox=True,
     show_terrain=True,
     show_interface=True,
+
+    # record/replay metadata
+    record_episode=False,  # when replay_episode is not None ,this option will be useless
+    replay_episode=None,  # set the replay file to enable replay
+    only_reset_when_replay=False,  # Scenario will only be initialized, while future trajectories will not be replayed
 )
 
 
@@ -500,6 +506,8 @@ class BaseEnv(gym.Env):
         self.engine.accept("r", self.reset)
         self.engine.accept("p", self.capture)
         self.engine.register_manager("agent_manager", self.agent_manager)
+        self.engine.register_manager("record_manager", RecordManager())
+        self.engine.register_manager("replay_manager", ReplayManager())
 
     @property
     def current_map(self):

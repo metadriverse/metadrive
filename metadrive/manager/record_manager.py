@@ -128,7 +128,7 @@ class RecordManager(BaseManager):
     def current_frame(self):
         return self.current_frames[self.current_step] if self.reset_frame is None else self.reset_frame
 
-    def set_state(self, state: dict):
+    def set_state(self, state: dict, old_name_to_current=None):
         return {}
 
     def get_state(self):

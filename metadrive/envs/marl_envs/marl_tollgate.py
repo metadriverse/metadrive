@@ -8,7 +8,7 @@ from metadrive.component.pgblock.tollgate import TollGate
 from metadrive.component.road_network import Road
 from metadrive.constants import TerminationState
 from metadrive.envs.marl_envs.multi_agent_metadrive import MultiAgentMetaDrive
-from metadrive.manager.map_manager import MapManager
+from metadrive.manager.map_manager import PGMapManager
 from metadrive.obs.state_obs import LidarStateObservation, StateObservation
 from metadrive.utils import Config, clip
 
@@ -160,7 +160,7 @@ class MATollGateMap(PGMap):
         self.blocks.append(merge)
 
 
-class MATollGateMapManager(MapManager):
+class MATollGatePGMapManager(PGMapManager):
     def reset(self):
         config = self.engine.global_config
         if len(self.spawned_objects) == 0:
@@ -278,7 +278,7 @@ class MultiAgentTollgateEnv(MultiAgentMetaDrive):
 
     def setup_engine(self):
         super(MultiAgentTollgateEnv, self).setup_engine()
-        self.engine.update_manager("map_manager", MATollGateMapManager())
+        self.engine.update_manager("map_manager", MATollGatePGMapManager())
 
 
 def _draw():

@@ -7,7 +7,7 @@ from metadrive.component.map.pg_map import MapGenerateMethod
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.engine.engine_utils import engine_initialized
 from metadrive.envs.real_data_envs.waymo_env import WaymoEnv
-from metadrive.manager.map_manager import MapManager
+from metadrive.manager.map_manager import PGMapManager
 from metadrive.manager.traffic_manager import PGTrafficManager
 from metadrive.manager.traffic_manager import TrafficMode
 from metadrive.manager.waymo_map_manager import WaymoMapManager
@@ -94,7 +94,7 @@ class MixWaymoPGEnv(WaymoEnv):
         self.waymo_map_manager = WaymoMapManager()
         self.waymo_traffic_manager = WaymoTrafficManager()
 
-        self.pg_map_manager = MapManager()
+        self.pg_map_manager = PGMapManager()
         self.pg_traffic_manager = PGTrafficManager()
 
         self.in_stop = False

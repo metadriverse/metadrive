@@ -33,6 +33,7 @@ class ReplayManager(BaseManager):
     def reset(self):
         if not self.engine.replay_episode:
             return
+        assert not self.engine.record_episode, "When replay, please set record to False"
         self.record_name_to_current_name = dict()
         self.current_name_to_record_name = dict()
         self.restore_episode_info = self.engine.global_config["replay_episode"]
@@ -48,24 +49,25 @@ class ReplayManager(BaseManager):
             PGMap, map_config=map_config, auto_fill_random_seed=False, force_spawn=True
         )
         self.replay_frame()
-        if self.engine.global_config["only_replay_reset"]:
+        if self.engine.only_reset_when_replay:
             # do not replay full trajectory! set state for managers for interaction
             self.restore_manager_states(self.restore_episode_info["manager_states"])
 
     def restore_manager_states(self, states):
         current_managers = [manager.class_name for manager in self.engine.managers.values()]
         data_managers = states.keys()
-        assert current_managers == data_managers, "Manager not match, data: {}, current: {}".format(data_managers,
-                                                                                                    current_managers)
+        assert len(current_managers - data_managers) == 0, "Manager not match, data: {}, current: {}".format(
+            data_managers,
+            current_managers)
         for manager in self.engine.managers.values():
-            manager.set_sate(states[manager.class_name])
+            manager.set_state(states[manager.class_name], old_name_to_current=self.record_name_to_current_name)
 
     def step(self, *args, **kwargs):
-        if self.engine.replay_episode and not self.engine.global_config["only_replay_reset"]:
+        if self.engine.replay_episode and not self.engine.only_reset_when_replay:
             self.replay_frame()
 
     def after_step(self, *args, **kwargs):
-        if self.engine.replay_episode and not self.engine.global_config["only_replay_reset"]:
+        if self.engine.replay_episode and not self.engine.only_reset_when_replay:
             return self.engine.agent_manager.for_each_active_agents(lambda v: {REPLAY_DONE: self.replay_done})
         else:
             return dict()
@@ -119,7 +121,7 @@ class ReplayManager(BaseManager):
     def get_replay_agent_observations(self):
         return {k: self.observation for k in self.current_frame.agents}
 
-    def set_state(self, state: dict):
+    def set_state(self, state: dict, old_name_to_current=None):
         return {}
 
     def get_state(self):

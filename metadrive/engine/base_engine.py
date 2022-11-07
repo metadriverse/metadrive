@@ -38,6 +38,7 @@ class BaseEngine(EngineCore, Randomizable):
         # for recovering, they can not exist together
         self.record_episode = False
         self.replay_episode = False
+        self.only_reset_when_replay = False
         # self.accept("s", self._stop_replay)
 
         # cull scene
@@ -185,14 +186,20 @@ class BaseEngine(EngineCore, Randomizable):
         # record replay
         self.replay_episode = True if self.global_config["replay_episode"] is not None else False
         self.record_episode = self.global_config["record_episode"]
+        self.only_reset_when_replay = self.global_config["only_reset_when_replay"]
 
         # reset manager
         for manager in self._managers.values():
             # clean all manager
             manager.before_reset()
         self._object_clean_check()
+
         for manager in self.managers.values():
+            if self.replay_episode and self.only_reset_when_replay and manager is not self.replay_manager:
+                # The scene will be generated from replay manager in only reset replay mode
+                continue
             manager.reset()
+
         for manager in self.managers.values():
             manager.after_reset()
 
@@ -392,7 +399,8 @@ class BaseEngine(EngineCore, Randomizable):
     @property
     def managers(self):
         # whether to froze other managers
-        return self._managers if not self.replay_episode else {"replay_manager": self.replay_manager}
+        return {"replay_manager": self.replay_manager} if self.replay_episode and not \
+            self.only_reset_when_replay else self._managers
 
     def change_object_name(self, obj, new_name):
         raise DeprecationWarning("This function is too dangerous to be used")

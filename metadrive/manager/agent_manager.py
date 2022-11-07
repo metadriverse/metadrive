@@ -47,6 +47,7 @@ class AgentManager(BaseManager):
         self._init_action_spaces = init_action_space
         self.observation_spaces = copy.copy(observation_space)
         self.action_spaces = copy.copy(init_action_space)
+        self.episode_created_agents = None
 
         # this map will be override when the env.init() is first called and vehicles are made
         self._agent_to_object = {k: k for k in self.observations.keys()}  # no target vehicles created, fake init
@@ -88,6 +89,7 @@ class AgentManager(BaseManager):
             super(AgentManager, self).__init__()
             self.INITIALIZED = True
         super(AgentManager, self).before_reset()
+        self.episode_created_agents = None
 
     def reset(self):
         """
@@ -99,7 +101,11 @@ class AgentManager(BaseManager):
         self._delay_done = config["delay_done"]
         self._infinite_agents = config["num_agents"] == -1
         self._allow_respawn = config["allow_respawn"]
-        init_vehicles = self._get_vehicles(config_dict=self.engine.global_config["target_vehicle_configs"])
+        self.episode_created_agents = self._get_vehicles(
+            config_dict=self.engine.global_config["target_vehicle_configs"])
+
+    def after_reset(self):
+        init_vehicles = self.episode_created_agents
         vehicles_created = set(init_vehicles.keys())
         vehicles_in_config = set(self._init_observations.keys())
         assert vehicles_created == vehicles_in_config, "{} not defined in target vehicles config".format(
@@ -129,6 +135,21 @@ class AgentManager(BaseManager):
             self.action_spaces[vehicle.name] = action_space
             assert isinstance(action_space, Box) or isinstance(action_space, MultiDiscrete)
         self.next_agent_count = len(init_vehicles)
+
+    def set_state(self, state: dict, old_name_to_current=None):
+        super(AgentManager, self).set_state(state, old_name_to_current)
+        created_agents = state["created_agents"]
+        created_agents = {agent_id: old_name_to_current[obj_name] for agent_id, obj_name in created_agents.items()}
+        episode_created_agents = {}
+        for a_id, name in created_agents.items():
+            episode_created_agents[a_id] = self.engine.get_objects([name])[name]
+        self.episode_created_agents = episode_created_agents
+
+    def get_state(self):
+        ret = super(AgentManager, self).get_state()
+        agent_info = {agent_id: obj.name for agent_id, obj in self.episode_created_agents.items()}
+        ret["created_agents"] = agent_info
+        return ret
 
     def random_spawn_lane_in_single_agent(self):
         if not self.engine.global_config["is_multi_agent"] and \
