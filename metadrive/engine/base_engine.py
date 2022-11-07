@@ -59,6 +59,9 @@ class BaseEngine(EngineCore, Randomizable):
 
     def add_policy(self, object_id, policy_class, *args, **kwargs):
         self._object_policies[object_id] = policy_class(*args, **kwargs)
+        if self.record_episode:
+            assert self.record_manager is not None, "No record manager"
+
 
     def add_task(self, object_id, task):
         self._object_tasks[object_id] = task
