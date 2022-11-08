@@ -86,7 +86,7 @@ class PGMap(BaseMap):
         )
         self.blocks.append(last_block)
         for block_index, b in enumerate(blocks_config[1:], 1):
-            block_type = PGBlockDistConfig.get_block(b.pop(self.BLOCK_ID))
+            block_type = self.engine.global_config["block_dist_config"].get_block(b.pop(self.BLOCK_ID))
             pre_block_socket_index = b.pop(self.PRE_BLOCK_SOCKET_INDEX)
             last_block = block_type(
                 block_index,

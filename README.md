@@ -207,8 +207,6 @@ Quanyi Li, Zhenghao Peng, Haibin Wu, Lan Feng, Bolei Zhou
 [<a href="https://metadriverse.github.io/policydissect/" target="_blank">Webpage</a>]
 
 [![build](https://github.com/metadriverse/metadrive/workflows/test/badge.svg)](http://github.com/metadriverse/metadrive/actions)
-[![codecov](https://codecov.io/gh/metadriverse/metadrive/branch/main/graph/badge.svg?token=1ZYN8L5397)](https://codecov.io/gh/metadriverse/metadrive)
 [![Documentation](https://readthedocs.org/projects/metadrive/badge/?version=latest)](https://metadrive.readthedocs.io)
 [![GitHub license](https://img.shields.io/github/license/metadriverse/metadrive)](https://github.com/metadriverse/metadrive/blob/main/LICENSE.txt)
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/2d6fabe328a644b49e1269497b741057)](https://www.codacy.com/gh/metadriverse/metadrive/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=metadriverse/metadrive&amp;utm_campaign=Badge_Grade)
 [![GitHub contributors](https://img.shields.io/github/contributors/metadriverse/metadrive)](https://github.com/metadriverse/metadrive/graphs/contributors)

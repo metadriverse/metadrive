@@ -135,7 +135,7 @@ class RecordManager(BaseManager):
         """
         Call when clear objects, ignore map related things
         """
-        if not is_map_related_instance(obj) and self.engine.record_episode:
+        if not is_map_related_instance(obj) and self.engine.record_episode and self.episode_step != 0:
             self.current_frame.clear_info.append(obj.name)
 
     def __del__(self):
