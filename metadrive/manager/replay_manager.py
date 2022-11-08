@@ -60,10 +60,12 @@ class ReplayManager(BaseManager):
             args = policy_info[PolicyState.ARGS]
             kwargs = policy_info[PolicyState.KWARGS]
             obj_name = self.record_name_to_current_name[policy_info[PolicyState.OBJ_NAME]]
+            assert obj_name in self.engine.get_objects().keys(), "Can not find obj when restoring policies"
             policy = self.add_policy(obj_name, p_class, *args, **kwargs)
             if policy.control_object is BaseObject:
                 obj = list(self.engine.get_objects([obj_name]).values())[0]
                 policy.control_object = obj
+                assert obj.id == obj_name
 
     def restore_manager_states(self, states):
         current_managers = [manager.class_name for manager in self.engine.managers.values()]

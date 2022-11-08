@@ -113,7 +113,7 @@ class BaseManager(Randomizable):
             assert current_name in name_obj and name_obj[current_name
                                                          ].class_name == class_name, "Can not restore mappings!"
             ret[current_name] = name_obj[current_name]
-        self.spawned_objects = spawned_objects
+        self.spawned_objects = ret
 
     @property
     def class_name(self):
