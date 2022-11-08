@@ -108,10 +108,12 @@ class ReplayManager(BaseManager):
                     self.restore_episode_info["frame"][-1].step_info[name]["spawn_road"],
                     self.restore_episode_info["frame"][-1].step_info[name]["destination"][-1]
                 )
-        for name, state in self.current_frame.step_info.items():
-            self.spawned_objects[self.record_name_to_current_name[name]].before_step()
-            self.spawned_objects[self.record_name_to_current_name[name]].set_state(state)
-            self.spawned_objects[self.record_name_to_current_name[name]].after_step()
+        if not self.engine.only_reset_when_replay:
+            # Do not set position, in this mode, or randomness will be introduced!
+            for name, state in self.current_frame.step_info.items():
+                self.spawned_objects[self.record_name_to_current_name[name]].before_step()
+                self.spawned_objects[self.record_name_to_current_name[name]].set_state(state)
+                self.spawned_objects[self.record_name_to_current_name[name]].after_step()
         self.clear_objects([self.record_name_to_current_name[name] for name in self.current_frame.clear_info])
         self.replay_done = False
         self.restore_policy_states(self.current_frame.policy_info)

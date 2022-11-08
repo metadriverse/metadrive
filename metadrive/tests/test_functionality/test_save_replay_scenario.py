@@ -18,26 +18,26 @@ def assert_equal_pos(dict_1, dict_2):
         assert diff < 1, "pos mismatch for vehicle: {}, distance: {}".format(name, diff)
 
 
-def _test_save_scenario(vis=False):
-    setup_logger(True)
+def test_save_recreate_scenario(vis=False):
+    # setup_logger(True)
     cfg = {
-            "accident_prob": 0.8,
-            "environment_num": 1,
-            "traffic_density": 0.1,
-            "start_seed": 1000,
-            "manual_control": True,
-            "debug": True,
-            "use_render": vis,
-            "agent_policy": IDMPolicy,
-            "traffic_mode": TrafficMode.Trigger,
-            "record_episode": True,
-            "map_config": {
-                BaseMap.GENERATE_TYPE: MapGenerateMethod.BIG_BLOCK_SEQUENCE,
-                BaseMap.GENERATE_CONFIG: "CrCSC",
-                BaseMap.LANE_WIDTH: 3.5,
-                BaseMap.LANE_NUM: 3,
-            }
+        "accident_prob": 0.8,
+        "environment_num": 1,
+        "traffic_density": 0.1,
+        "start_seed": 1000,
+        "manual_control": True,
+        "debug": False,
+        "use_render": vis,
+        "agent_policy": IDMPolicy,
+        "traffic_mode": TrafficMode.Trigger,
+        "record_episode": True,
+        "map_config": {
+            BaseMap.GENERATE_TYPE: MapGenerateMethod.BIG_BLOCK_SEQUENCE,
+            BaseMap.GENERATE_CONFIG: "CrCSC",
+            BaseMap.LANE_WIDTH: 3.5,
+            BaseMap.LANE_NUM: 3,
         }
+    }
     save_episode = True
     env = SafeMetaDriveEnv(cfg)
     # try:
@@ -50,13 +50,13 @@ def _test_save_scenario(vis=False):
             epi_info = env.engine.record_manager.get_episode_metadata()
             break
     env.close()
-    positions_1.reverse()
     env = SafeMetaDriveEnv(cfg)
     env.config["replay_episode"] = epi_info
     env.config["record_episode"] = False
     env.config["only_reset_when_replay"] = True
     o = env.reset()
-    for i in range(1, 100000 if vis else 2000):
+    positions_1.reverse()
+    for i in range(0, 100000 if vis else 2000):
         o, r, d, info = env.step([0, 1])
         position = positions_1.pop()
         position = {env.engine.replay_manager.record_name_to_current_name[key]: v for key, v in position.items()}
@@ -69,4 +69,4 @@ def _test_save_scenario(vis=False):
 
 
 if __name__ == "__main__":
-    _test_save_scenario(vis=True)
+    test_save_recreate_scenario(vis=True)
