@@ -7,8 +7,8 @@ if __name__ == "__main__":
     env = MetaDriveEnv(
         {
             "environment_num": 1,
-            "traffic_density": 0.1,
-            "traffic_mode": "trigger",
+            "traffic_density": 0.4,
+            "traffic_mode": "hybrid",
             "start_seed": 22,
             # "_disable_detector_mask":True,
             # "debug_physics_world": True,
@@ -23,7 +23,7 @@ if __name__ == "__main__":
             "need_inverse_traffic": False,
             "rgb_clip": True,
             "debug": False,
-            "map": "rrr",
+            "map": "X",
             "agent_policy": IDMPolicy,
             "random_traffic": False,
             "random_lane_width": True,

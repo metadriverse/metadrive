@@ -100,7 +100,7 @@ class TrafficObjectManager(BaseManager):
     def prohibit_scene(self, lane: AbstractLane, longitude_position: float, lateral_len: float, on_left=False):
         """
         Generate an accident scene on the most left or most right lane
-        :param lane lane object
+        :param lane object
         :param longitude_position: longitude position of the accident on the lane
         :param lateral_len: the distance that traffic cones extend on lateral direction
         :param on_left: on left or right side
@@ -120,5 +120,26 @@ class TrafficObjectManager(BaseManager):
         left = 1 if on_left else -1
         for p in pos:
             p_ = (p[0] + longitude_position, left * p[1])
-            cone = self.spawn_object(TrafficCone, lane=lane, longitude=p_[0], lateral=p_[1])
-            cone
+            self.spawn_object(TrafficCone, lane=lane, longitude=p_[0], lateral=p_[1])
+
+    def set_state(self, state: dict, old_name_to_current=None):
+        """
+        Copied from super(). Restoring some states before reassigning value to spawned_objets
+        """
+        assert self.episode_step == 0, "This func can only be called after env.reset() without any env.step() called"
+        if old_name_to_current is None:
+            old_name_to_current = {key: key for key in state.keys()}
+        spawned_objects = state["spawned_objects"]
+        ret = {}
+        for name, class_name in spawned_objects.items():
+            current_name = old_name_to_current[name]
+            name_obj = self.engine.get_objects([current_name])
+            assert current_name in name_obj and name_obj[current_name
+                                                         ].class_name == class_name, "Can not restore mappings!"
+            # Restore some internal states
+            name_obj[current_name].lane = self.engine.current_map.road_network.get_lane(
+                name_obj[current_name].lane.index
+            )
+
+            ret[current_name] = name_obj[current_name]
+        self.spawned_objects = ret

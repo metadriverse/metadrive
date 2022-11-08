@@ -6,7 +6,7 @@ from metadrive.component.pgblock.parking_lot import ParkingLot
 from metadrive.component.pgblock.t_intersection import TInterSection
 from metadrive.component.road_network import Road
 from metadrive.envs.marl_envs.multi_agent_metadrive import MultiAgentMetaDrive
-from metadrive.manager.map_manager import MapManager
+from metadrive.manager.map_manager import PGMapManager
 from metadrive.utils import get_np_random, Config
 
 MAParkingLotConfig = dict(
@@ -126,7 +126,7 @@ class MAParkingLotMap(PGMap):
         self.blocks.append(last_block)
 
 
-class MAParkinglotMapManager(MapManager):
+class MAParkinglotPGMapManager(PGMapManager):
     def reset(self):
         config = self.engine.global_config
         if len(self.spawned_objects) == 0:
@@ -222,7 +222,7 @@ class MultiAgentParkingLotEnv(MultiAgentMetaDrive):
     def setup_engine(self):
         super(MultiAgentParkingLotEnv, self).setup_engine()
         self.engine.update_manager("spawn_manager", ParkingLotSpawnManager())
-        self.engine.update_manager("map_manager", MAParkinglotMapManager())
+        self.engine.update_manager("map_manager", MAParkinglotPGMapManager())
 
 
 def _draw():

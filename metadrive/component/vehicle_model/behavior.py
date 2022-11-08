@@ -7,7 +7,7 @@ from metadrive.component.highway_vehicle.kinematics import Vehicle
 import metadrive.utils.math_utils as utils
 from metadrive.component.static_object.base_static_object import BaseStaticObject
 from metadrive.constants import Route, LaneIndex
-from metadrive.manager.traffic_manager import TrafficManager
+from metadrive.manager.traffic_manager import PGTrafficManager
 from metadrive.utils.math_utils import clip
 
 
@@ -47,7 +47,7 @@ class IDMVehicle(ControlledVehicle):
 
     def __init__(
         self,
-        traffic_mgr: TrafficManager,
+        traffic_mgr: PGTrafficManager,
         position: List,
         heading: float = 0,
         speed: float = 0,
@@ -331,7 +331,7 @@ class LinearVehicle(IDMVehicle):
 
     def __init__(
         self,
-        traffic_mgr: TrafficManager,
+        traffic_mgr: PGTrafficManager,
         position: List,
         heading: float = 0,
         speed: float = 0,

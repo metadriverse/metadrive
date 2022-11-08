@@ -185,7 +185,7 @@ class EngineCore(ShowBase.ShowBase):
         # these element will not be removed when clear_world() is called
         self.pbr_render = self.render.attachNewNode("pbrNP")
 
-        # attach node to this root root whose children nodes will be clear after calling clear_world()
+        # attach node to this root whose children nodes will be clear after calling clear_world()
         self.worldNP = self.render.attachNewNode("world_np")
 
         # same as worldNP, but this node is only used for render gltf model with pbr material

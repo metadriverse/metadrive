@@ -41,6 +41,7 @@ def test_save_episode(vis=False):
 
         # input episode_info to restore
         env.config["replay_episode"] = pickle.load(epi_record)
+        env.config["record_episode"] = False
         o = env.reset()
         for i in range(1, 100000 if vis else 2000):
             o, r, d, info = env.step({agent_id: [0, 0.1] for agent_id in env.vehicles.keys()})

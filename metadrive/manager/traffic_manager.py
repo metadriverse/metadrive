@@ -4,6 +4,7 @@ import math
 from collections import namedtuple
 from typing import Dict
 
+import numpy as np
 from metadrive.component.lane.abs_lane import AbstractLane
 from metadrive.component.map.base_map import BaseMap
 from metadrive.component.road_network import Road
@@ -16,7 +17,7 @@ BlockVehicles = namedtuple("block_vehicles", "trigger_road vehicles")
 
 
 class TrafficMode:
-    # Traffic vehicles will be respawn, once they arrive at the destinations
+    # Traffic vehicles will be respawned, once they arrive at the destinations
     Respawn = "respawn"
 
     # Traffic vehicles will be triggered only once
@@ -26,16 +27,18 @@ class TrafficMode:
     Hybrid = "hybrid"
 
 
-class TrafficManager(BaseManager):
+class PGTrafficManager(BaseManager):
     VEHICLE_GAP = 10  # m
 
     def __init__(self):
         """
         Control the whole traffic flow
         """
-        super(TrafficManager, self).__init__()
+        super(PGTrafficManager, self).__init__()
 
         self._traffic_vehicles = []
+
+        # triggered by the event. TODO(lqy) In the future, event trigger can be introduced
         self.block_triggered_vehicles = []
 
         # traffic property
@@ -58,7 +61,7 @@ class TrafficManager(BaseManager):
         traffic_density = self.density
         if abs(traffic_density) < 1e-2:
             return
-        self.respawn_lanes = self.respawn_lanes = self._get_available_respawn_lanes(map)
+        self.respawn_lanes = self._get_available_respawn_lanes(map)
         if self.mode == TrafficMode.Respawn:
             # add respawn vehicle
             self._create_respawn_vehicles(map, traffic_density)
@@ -81,7 +84,7 @@ class TrafficManager(BaseManager):
                 if len(self.block_triggered_vehicles) > 0 and \
                         ego_road == self.block_triggered_vehicles[-1].trigger_road:
                     block_vehicles = self.block_triggered_vehicles.pop()
-                    self._traffic_vehicles += block_vehicles.vehicles
+                    self._traffic_vehicles += list(self.get_objects(block_vehicles.vehicles).values())
         for v in self._traffic_vehicles:
             p = self.engine.get_policy(v.name)
             v.before_step(p.act())
@@ -95,13 +98,17 @@ class TrafficManager(BaseManager):
         for v in self._traffic_vehicles:
             v.after_step()
             if not v.on_lane:
-                v_to_remove.append(v)
-                # lane = self.respawn_lanes[self.np_random.randint(0, len(self.respawn_lanes))]
-                # lane_idx = lane.index
-                # long = self.np_random.rand() * lane.length / 2
-                # v.update_config({"spawn_lane_index": lane_idx, "spawn_longitude": long})
-                # v.reset(self.current_map)
-                # self.engine.get_policy(v.id).reset()
+                if self.mode == TrafficMode.Trigger:
+                    v_to_remove.append(v)
+                elif self.mode == TrafficMode.Respawn or self.mode == TrafficMode.Hybrid:
+                    lane = self.respawn_lanes[self.np_random.randint(0, len(self.respawn_lanes))]
+                    lane_idx = lane.index
+                    long = self.np_random.rand() * lane.length / 2
+                    v.update_config({"spawn_lane_index": lane_idx, "spawn_longitude": long})
+                    v.reset(random_seed=v.random_seed)
+                    self.engine.get_policy(v.id).reset()
+                else:
+                    raise ValueError("Traffic mode error: {}".format(self.mode))
         for v in v_to_remove:
             self.clear_objects([v.id])
             self._traffic_vehicles.remove(v)
@@ -112,7 +119,7 @@ class TrafficManager(BaseManager):
         Clear the scene and then reset the scene to empty
         :return: None
         """
-        super(TrafficManager, self).before_reset()
+        super(PGTrafficManager, self).before_reset()
         self.density = self.engine.global_config["traffic_density"]
         self.block_triggered_vehicles = []
         self._traffic_vehicles = []
@@ -184,32 +191,6 @@ class TrafficManager(BaseManager):
                     vehicles[vehicle.index] = init_state
         return vehicles
 
-    def _create_vehicles_on_lane(self, traffic_density: float, lane: AbstractLane, is_respawn_lane):
-        """
-        Create vehicles on a lane
-        :param traffic_density: traffic density according to num of vehicles per meter
-        :param lane: Circular lane or Straight lane
-        :param is_respawn_lane: Whether vehicles should be respawn on this lane or not
-        :return: List of vehicles
-        """
-
-        _traffic_vehicles = []
-        total_num = int(lane.length / self.VEHICLE_GAP)
-        vehicle_longs = [i * self.VEHICLE_GAP for i in range(total_num)]
-        self.np_random.shuffle(vehicle_longs)
-        for long in vehicle_longs[:int(traffic_density * len(vehicle_longs))]:
-            # if self.np_random.rand() > traffic_density and abs(lane.length - InRampOnStraight.RAMP_LEN) > 0.1:
-            #     # Do special handling for ramp, and there must be vehicles created there
-            #     continue
-            vehicle_type = self.random_vehicle_type()
-            traffic_v_config = {"spawn_lane_index": lane.index, "spawn_longitude": long}
-            traffic_v_config.update(self.engine.global_config["traffic_vehicle_config"])
-            random_v = self.spawn_object(vehicle_type, vehicle_config=traffic_v_config)
-            from metadrive.policy.idm_policy import IDMPolicy
-            self.add_policy(random_v.id, IDMPolicy(random_v, self.generate_seed()))
-            _traffic_vehicles.append(random_v)
-        return _traffic_vehicles
-
     def _propose_vehicle_configs(self, lane: AbstractLane):
         potential_vehicle_configs = []
         total_num = int(lane.length / self.VEHICLE_GAP)
@@ -221,9 +202,23 @@ class TrafficManager(BaseManager):
         return potential_vehicle_configs
 
     def _create_respawn_vehicles(self, map: BaseMap, traffic_density: float):
-        respawn_lanes = self._get_available_respawn_lanes(map)
-        for lane in respawn_lanes:
-            self._traffic_vehicles += self._create_vehicles_on_lane(traffic_density, lane, True)
+        total_num = len(self.respawn_lanes)
+        for lane in self.respawn_lanes:
+            _traffic_vehicles = []
+            total_num = int(lane.length / self.VEHICLE_GAP)
+            vehicle_longs = [i * self.VEHICLE_GAP for i in range(total_num)]
+            self.np_random.shuffle(vehicle_longs)
+            for long in vehicle_longs[:int(np.ceil(traffic_density * len(vehicle_longs)))]:
+                # if self.np_random.rand() > traffic_density and abs(lane.length - InRampOnStraight.RAMP_LEN) > 0.1:
+                #     # Do special handling for ramp, and there must be vehicles created there
+                #     continue
+                vehicle_type = self.random_vehicle_type()
+                traffic_v_config = {"spawn_lane_index": lane.index, "spawn_longitude": long}
+                traffic_v_config.update(self.engine.global_config["traffic_vehicle_config"])
+                random_v = self.spawn_object(vehicle_type, vehicle_config=traffic_v_config)
+                from metadrive.policy.idm_policy import IDMPolicy
+                self.add_policy(random_v.id, IDMPolicy, random_v, self.generate_seed())
+                self._traffic_vehicles.append(random_v)
 
     def _create_vehicles_once(self, map: BaseMap, traffic_density: float) -> None:
         """
@@ -264,8 +259,8 @@ class TrafficManager(BaseManager):
                 vehicle_type = self.random_vehicle_type()
                 v_config.update(self.engine.global_config["traffic_vehicle_config"])
                 random_v = self.spawn_object(vehicle_type, vehicle_config=v_config)
-                self.add_policy(random_v.id, IDMPolicy(random_v, self.generate_seed()))
-                vehicles_on_block.append(random_v)
+                self.add_policy(random_v.id, IDMPolicy, random_v, self.generate_seed())
+                vehicles_on_block.append(random_v.name)
 
             trigger_road = block.pre_block_socket.positive_road
             block_vehicles = BlockVehicles(trigger_road=trigger_road, vehicles=vehicles_on_block)
@@ -332,14 +327,37 @@ class TrafficManager(BaseManager):
 
     def seed(self, random_seed):
         if not self.random_traffic:
-            super(TrafficManager, self).seed(random_seed)
+            super(PGTrafficManager, self).seed(random_seed)
 
     @property
     def current_map(self):
         return self.engine.map_manager.current_map
 
+    def get_state(self):
+        ret = super(PGTrafficManager, self).get_state()
+        ret["_traffic_vehicles"] = [v.name for v in self._traffic_vehicles]
+        flat = []
+        for b_v in self.block_triggered_vehicles:
+            flat.append((b_v.trigger_road.start_node, b_v.trigger_road.end_node, b_v.vehicles))
+        ret["block_triggered_vehicles"] = flat
+        return ret
 
-class MixedTrafficManager(TrafficManager):
+    def set_state(self, state: dict, old_name_to_current=None):
+        super(PGTrafficManager, self).set_state(state, old_name_to_current)
+        self._traffic_vehicles = list(
+            self.get_objects([old_name_to_current[name] for name in state["_traffic_vehicles"]]).values()
+        )
+        self.block_triggered_vehicles = [
+            BlockVehicles(trigger_road=Road(s, e), vehicles=[old_name_to_current[name] for name in v])
+            for s, e, v in state["block_triggered_vehicles"]
+        ]
+
+
+# For compatibility check
+TrafficManager = PGTrafficManager
+
+
+class MixedPGTrafficManager(PGTrafficManager):
     def _create_respawn_vehicles(self, *args, **kwargs):
         raise NotImplementedError()
 
@@ -380,10 +398,10 @@ class MixedTrafficManager(TrafficManager):
                 random_v = self.spawn_object(vehicle_type, vehicle_config=v_config)
                 if self.np_random.random() < self.engine.global_config["rl_agent_ratio"]:
                     # print("Vehicle {} is assigned with RL policy!".format(random_v.id))
-                    self.add_policy(random_v.id, ExpertPolicy(random_v, self.generate_seed()))
+                    self.add_policy(random_v.id, ExpertPolicy, random_v, self.generate_seed())
                 else:
-                    self.add_policy(random_v.id, IDMPolicy(random_v, self.generate_seed()))
-                vehicles_on_block.append(random_v)
+                    self.add_policy(random_v.id, IDMPolicy, random_v, self.generate_seed())
+                vehicles_on_block.append(random_v.name)
 
             trigger_road = block.pre_block_socket.positive_road
             block_vehicles = BlockVehicles(trigger_road=trigger_road, vehicles=vehicles_on_block)

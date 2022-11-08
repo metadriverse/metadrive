@@ -8,7 +8,7 @@ from metadrive.component.pgblock.first_block import FirstPGBlock
 from metadrive.component.pgblock.roundabout import Roundabout
 from metadrive.component.road_network import Road
 from metadrive.envs.marl_envs.multi_agent_metadrive import MultiAgentMetaDrive
-from metadrive.manager.map_manager import MapManager
+from metadrive.manager.map_manager import PGMapManager
 from metadrive.manager.spawn_manager import SpawnManager
 from metadrive.obs.observation_base import ObservationBase
 from metadrive.obs.state_obs import StateObservation
@@ -65,7 +65,7 @@ class MARoundaboutMap(PGMap):
         self.blocks.append(last_block)
 
 
-class MARoundaboutMapManager(MapManager):
+class MARoundaboutPGMapManager(PGMapManager):
     def reset(self):
         config = self.engine.global_config
         if len(self.spawned_objects) == 0:
@@ -156,7 +156,7 @@ class MultiAgentRoundaboutEnv(MultiAgentMetaDrive):
     def setup_engine(self):
         super(MultiAgentRoundaboutEnv, self).setup_engine()
         self.engine.update_manager("spawn_manager", RoundaboutSpawnManager())
-        self.engine.update_manager("map_manager", MARoundaboutMapManager())
+        self.engine.update_manager("map_manager", MARoundaboutPGMapManager())
 
 
 def _draw():

@@ -287,10 +287,10 @@ class MetaDriveEnv(BaseEnv):
         super(MetaDriveEnv, self).setup_engine()
         self.engine.accept("b", self.switch_to_top_down_view)
         self.engine.accept("q", self.switch_to_third_person_view)
-        from metadrive.manager.traffic_manager import TrafficManager
-        from metadrive.manager.map_manager import MapManager
-        self.engine.register_manager("map_manager", MapManager())
-        self.engine.register_manager("traffic_manager", TrafficManager())
+        from metadrive.manager.traffic_manager import PGTrafficManager
+        from metadrive.manager.map_manager import PGMapManager
+        self.engine.register_manager("map_manager", PGMapManager())
+        self.engine.register_manager("traffic_manager", PGTrafficManager())
 
     def _reset_global_seed(self, force_seed=None):
         current_seed = force_seed if force_seed is not None else \

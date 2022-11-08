@@ -4,7 +4,7 @@ from typing import List
 import numpy as np
 
 from metadrive.component.lane.abs_lane import AbstractLane
-from metadrive.manager.traffic_manager import TrafficManager
+from metadrive.manager.traffic_manager import PGTrafficManager
 from metadrive.utils import get_np_random, random_string
 from metadrive.utils.utils import deprecation_warning
 
@@ -30,7 +30,7 @@ class Vehicle:
     """ Maximum reachable speed [m/s] """
     def __init__(
         self,
-        traffic_mgr: TrafficManager,
+        traffic_mgr: PGTrafficManager,
         position: List,
         heading: float = 0,
         speed: float = 0,
@@ -88,7 +88,12 @@ class Vehicle:
 
     @classmethod
     def create_random(
-        cls, traffic_mgr: TrafficManager, lane: AbstractLane, longitude: float, speed: float = None, random_seed=None
+        cls,
+        traffic_mgr: PGTrafficManager,
+        lane: AbstractLane,
+        longitude: float,
+        speed: float = None,
+        random_seed=None
     ):
         """
         Create a random vehicle on the road.
