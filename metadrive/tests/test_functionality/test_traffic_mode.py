@@ -9,7 +9,7 @@ def test_traffic_mode(render=False):
             env = MetaDriveEnv(
                 {
                     "environment_num": 1,
-                    "traffic_density": 0.2,
+                    "traffic_density": 0.1,
                     "traffic_mode": mode,
                     "start_seed": 22,
                     "use_render": render,
