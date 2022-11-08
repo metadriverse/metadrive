@@ -67,11 +67,11 @@ class AgentManager(BaseManager):
                 vehicle_type[v_config["vehicle_model"] if v_config.get("vehicle_model", False) else "default"]
             obj = self.spawn_object(v_type, vehicle_config=v_config)
             ret[agent_id] = obj
-            policy_cls = self._get_policy()
+            policy_cls = self.get_policy()
             self.add_policy(obj.id, policy_cls, obj, self.generate_seed())
         return ret
 
-    def _get_policy(self):
+    def get_policy(self):
         # note: agent.id = object id
         if self.engine.global_config["agent_policy"] is not None:
             return self.engine.global_config["agent_policy"]

@@ -1,4 +1,5 @@
 import copy
+from metadrive.constants import DEFAULT_AGENT
 from metadrive.constants import PolicyState
 import logging
 from metadrive.base_class.base_object import BaseObject
@@ -13,6 +14,8 @@ from metadrive.obs.state_obs import LidarStateObservation
 
 
 class ReplayManager(BaseManager):
+    PRIORITY = 100  # lowest
+
     def __init__(self):
         super(ReplayManager, self).__init__()
         self.restore_episode_info = None
@@ -27,9 +30,25 @@ class ReplayManager(BaseManager):
         """
         Clean generated objects
         """
-        self.clear_objects([name for name in self.spawned_objects])
+        if self.engine.only_reset_when_replay:
+            for name in self.spawned_objects.keys():
+                assert name not in self.engine._spawned_objects, \
+                    "Other Managers failed to clean objects loaded by ReplayManager"
+            self.spawned_objects = {}
+            assert len(self.engine._object_policies) == 0, "Policy should be cleaned for reducing memory usage"
+        else:
+            self.clear_objects([name for name in self.spawned_objects])
         self.replay_done = False
-        return super(ReplayManager, self).before_reset()
+
+    def spawn_object(self, object_class, **kwargs):
+        """
+        Spawn one objects
+        """
+        object = self.engine.spawn_object(object_class, **kwargs)
+        if not isinstance(object, BaseMap):
+            # map has different treatment as what has been done in MapManager
+            self.spawned_objects[object.id] = object
+        return object
 
     def reset(self):
         if not self.engine.replay_episode:
@@ -53,13 +72,20 @@ class ReplayManager(BaseManager):
         if self.engine.only_reset_when_replay:
             # do not replay full trajectory! set state for managers for interaction
             self.restore_manager_states(self.restore_episode_info["manager_states"])
+            # Do special treatment to map manager
+            self.engine.map_manager.current_map = self.current_map
+            self.engine.map_manager.maps[self.engine.global_seed] = self.current_map
 
     def restore_policy_states(self, policy_infos):
-        for policy_info in policy_infos.values():
-            p_class = policy_info[PolicyState.POLICY_CLASS]
+        # restore agent policy
+        agent_policy = self.engine.agent_manager.get_policy()
+        agent_obj_name = self.engine.agent_manager.active_agents[DEFAULT_AGENT].name
+        for name, policy_info in policy_infos.items():
+            obj_name = self.record_name_to_current_name[name]
+            p_class = policy_info[PolicyState.POLICY_CLASS] if obj_name != agent_obj_name else agent_policy
             args = policy_info[PolicyState.ARGS]
             kwargs = policy_info[PolicyState.KWARGS]
-            obj_name = self.record_name_to_current_name[policy_info[PolicyState.OBJ_NAME]]
+            assert obj_name == self.record_name_to_current_name[policy_info[PolicyState.OBJ_NAME]]
             assert obj_name in self.engine.get_objects().keys(), "Can not find obj when restoring policies"
             policy = self.add_policy(obj_name, p_class, *args, **kwargs)
             if policy.control_object is BaseObject:

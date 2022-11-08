@@ -194,7 +194,7 @@ class BaseEngine(EngineCore, Randomizable):
         if self.global_config["debug_physics_world"]:
             self.addTask(self.report_body_nums, "report_num")
 
-        # record replay
+        # Update record replay
         self.replay_episode = True if self.global_config["replay_episode"] is not None else False
         self.record_episode = self.global_config["record_episode"]
         self.only_reset_when_replay = self.global_config["only_reset_when_replay"]
