@@ -3,7 +3,7 @@ from typing import List
 import numpy as np
 from metadrive.component.highway_vehicle.kinematics import Vehicle
 
-from metadrive.manager.traffic_manager import TrafficManager
+from metadrive.manager.traffic_manager import PGTrafficManager
 
 
 class ControlledVehicle(Vehicle):
@@ -29,7 +29,7 @@ class ControlledVehicle(Vehicle):
 
     def __init__(
         self,
-        road: TrafficManager,
+        road: PGTrafficManager,
         position: List,
         heading: float = 0,
         speed: float = 0,

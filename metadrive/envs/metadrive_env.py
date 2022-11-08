@@ -12,6 +12,7 @@ from metadrive.constants import DEFAULT_AGENT, TerminationState
 from metadrive.envs.base_env import BaseEnv
 from metadrive.manager.traffic_manager import TrafficMode
 from metadrive.utils import clip, Config, get_np_random
+from metadrive.component.algorithm.blocks_prob_dist import PGBlockDistConfig
 
 METADRIVE_DEFAULT_CONFIG = dict(
     # ===== Generalization =====
@@ -20,6 +21,7 @@ METADRIVE_DEFAULT_CONFIG = dict(
 
     # ===== Map Config =====
     map=3,  # int or string: an easy way to fill map_config
+    block_dist_config=PGBlockDistConfig,
     random_lane_width=False,
     random_lane_num=False,
     map_config={
@@ -285,10 +287,10 @@ class MetaDriveEnv(BaseEnv):
         super(MetaDriveEnv, self).setup_engine()
         self.engine.accept("b", self.switch_to_top_down_view)
         self.engine.accept("q", self.switch_to_third_person_view)
-        from metadrive.manager.traffic_manager import TrafficManager
-        from metadrive.manager.map_manager import MapManager
-        self.engine.register_manager("map_manager", MapManager())
-        self.engine.register_manager("traffic_manager", TrafficManager())
+        from metadrive.manager.traffic_manager import PGTrafficManager
+        from metadrive.manager.map_manager import PGMapManager
+        self.engine.register_manager("map_manager", PGMapManager())
+        self.engine.register_manager("traffic_manager", PGTrafficManager())
 
     def _reset_global_seed(self, force_seed=None):
         current_seed = force_seed if force_seed is not None else \

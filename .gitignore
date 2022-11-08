@@ -26,3 +26,5 @@
 /metadrive/assets/waymo/raw/
 /metadrive/assets/waymo/processed/
 **/demo.gif
+/metadrive/tests/test_functionality/test_10maps.pickle
+/metadrive/tests/vis_functionality/test_10maps.pickle

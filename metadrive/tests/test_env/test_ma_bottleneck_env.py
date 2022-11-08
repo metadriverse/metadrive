@@ -90,7 +90,7 @@ def test_ma_bottleneck_env():
                 o, r, d, i = _act(env, act)
                 if step == 0:
                     assert not any(d.values())
-                print("Current number of vehicles: ", len(env.vehicles))
+                # print("Current number of vehicles: ", len(env.vehicles))
         finally:
             env.close()
 

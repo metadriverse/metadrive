@@ -277,6 +277,13 @@ class ObjectState:
     NAME = "name"
 
 
+class PolicyState:
+    ARGS = "args"
+    KWARGS = "kwargs"
+    POLICY_CLASS = "policy_class"
+    OBJ_NAME = "obj_name"
+
+
 REPLAY_DONE = "replay_done"
 
 

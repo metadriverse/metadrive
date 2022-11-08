@@ -37,7 +37,7 @@ class InterSection(PGBlock):
     PARAMETER_SPACE = ParameterSpace(BlockParameterSpace.INTERSECTION)
     SOCKET_NUM = 3
     ANGLE = 90  # may support other angle in the future
-    EXIT_PART_LENGTH = 30
+    EXIT_PART_LENGTH = 35
 
     _enable_u_turn_flag = False
 

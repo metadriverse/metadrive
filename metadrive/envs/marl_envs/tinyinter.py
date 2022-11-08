@@ -286,14 +286,15 @@ class MixedIDMAgentManager(AgentManager):
             ret[agent_id] = obj
             if (len(self.RL_agents) - len(self.dying_RL_agents)) >= self.num_RL_agents:
                 # policy = IDMPolicy(obj, self.generate_seed())
-                policy = TinyInterRuleBasedPolicy(obj, self.generate_seed(), target_speed=self.target_speed)
+                policy_cls = TinyInterRuleBasedPolicy
                 obj._use_special_color = False
+                self.add_policy(obj.id, policy_cls, obj, self.generate_seed(), target_speed=self.target_speed)
             else:
-                policy = self._get_policy(obj)
+                policy_cls = self._get_policy()
                 self.RL_agents.add(agent_id)
                 self.all_previous_RL_agents.add(agent_id)
                 obj._use_special_color = True
-            self.add_policy(obj.id, policy)
+                self.add_policy(obj.id, policy_cls, obj, self.generate_seed())
         return ret
 
     def reset(self):

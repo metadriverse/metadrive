@@ -2,7 +2,7 @@ from typing import List
 import copy
 
 from metadrive.component.algorithm.BIG import BigGenerateMethod, BIG
-from metadrive.component.algorithm.blocks_prob_dist import PGBlockConfig
+from metadrive.component.algorithm.blocks_prob_dist import PGBlockDistConfig
 from metadrive.component.map.base_map import BaseMap
 from metadrive.component.pgblock.first_block import FirstPGBlock
 from metadrive.component.road_network.node_road_network import NodeRoadNetwork
@@ -68,6 +68,7 @@ class PGMap(BaseMap):
             # self._config["block_type_version"],
             exit_length=self._config["exit_length"],
             random_seed=self.engine.global_random_seed,
+            block_dist_config=self.engine.global_config["block_dist_config"]
         )
         big_map.generate(self._config[self.GENERATE_TYPE], self._config[self.GENERATE_CONFIG])
         self.blocks = big_map.blocks
@@ -85,7 +86,7 @@ class PGMap(BaseMap):
         )
         self.blocks.append(last_block)
         for block_index, b in enumerate(blocks_config[1:], 1):
-            block_type = PGBlockConfig.get_block(b.pop(self.BLOCK_ID))
+            block_type = self.engine.global_config["block_dist_config"].get_block(b.pop(self.BLOCK_ID))
             pre_block_socket_index = b.pop(self.PRE_BLOCK_SOCKET_INDEX)
             last_block = block_type(
                 block_index,
@@ -101,7 +102,7 @@ class PGMap(BaseMap):
     def road_network_type(self):
         return NodeRoadNetwork
 
-    def save_map(self):
+    def get_meta_data(self):
         assert self.blocks is not None and len(self.blocks) > 0, "Please generate Map before saving it"
         map_config = []
         for b in self.blocks:

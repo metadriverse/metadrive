@@ -1,7 +1,7 @@
 import copy
 import logging
 
-from metadrive.constants import ObjectState
+from metadrive.constants import ObjectState, PolicyState
 from metadrive.manager.base_manager import BaseManager
 from metadrive.utils.map_utils import is_map_related_instance, is_map_related_class
 
@@ -11,6 +11,7 @@ class FrameInfo:
         self.episode_step = episode_step
         # used to track the objects spawn info
         self.spawn_info = {}
+        self.policy_info = {}
         # used to track update objects state in the scene
         self.step_info = {}
         # used to track the objects cleared
@@ -28,7 +29,7 @@ class FrameInfo:
 
 class RecordManager(BaseManager):
     """
-    Record the episode information for replay
+    Record the episode information for replay or reloading episode
     """
     PRIORITY = 100  # lowest priority
 
@@ -51,12 +52,25 @@ class RecordManager(BaseManager):
         if self.engine.record_episode:
             self._update_objects_states()
             self.episode_info = dict(
-                map_data=self.engine.current_map.save_map(),
+                map_data=self.engine.current_map.get_meta_data(),
                 frame=[self.reset_frame],
+                scenario_seed=self.engine.global_seed,
+                global_config=self.engine.global_config
             )
+            self.collect_manager_states()
+
             self.current_frames = None
             self.reset_frame = None
             self.current_step = 0
+
+    def collect_manager_states(self):
+        assert self.episode_step == 0, "This func can only be called after env.reset() without any env.step() called"
+        ret = {}
+        for manager in self.engine.managers.values():
+            mgr_state = manager.get_state()
+            assert mgr_state is not None, "No return value for manager.get_state()"
+            ret[manager.class_name] = mgr_state
+        self.episode_info["manager_states"] = ret
 
     def before_step(self, *args, **kwargs) -> dict:
         if self.engine.record_episode:
@@ -85,14 +99,14 @@ class RecordManager(BaseManager):
         self.current_frame._agent_to_object = self.engine.agent_manager._agent_to_object
         self.current_frame._object_to_agent = self.engine.agent_manager._object_to_agent
 
-    def dump_episode(self):
+    def get_episode_metadata(self):
         assert self.engine.record_episode, "Turn on recording episode and then dump it"
         return copy.deepcopy(self.episode_info)
 
     def destroy(self):
         self.episode_info = None
 
-    def add_spawn_info(self, object_class, kwargs, name):
+    def add_spawn_info(self, name, object_class, kwargs):
         """
         Call when spawn new objects, ignore map related things
         """
@@ -104,11 +118,24 @@ class RecordManager(BaseManager):
                 ObjectState.NAME: name
             }
 
+    def add_policy_info(self, name, policy_class, args, kwargs):
+        """
+        Call when spawn new objects, ignore map related things
+        """
+        if self.engine.record_episode:
+            assert name not in self.current_frame.policy_info, "Duplicated record!"
+            self.current_frame.policy_info[name] = {
+                PolicyState.POLICY_CLASS: policy_class,
+                PolicyState.ARGS: args,
+                PolicyState.KWARGS: kwargs,
+                PolicyState.OBJ_NAME: name
+            }
+
     def add_clear_info(self, obj):
         """
         Call when clear objects, ignore map related things
         """
-        if not is_map_related_instance(obj) and self.engine.record_episode:
+        if not is_map_related_instance(obj) and self.engine.record_episode and self.episode_step != 0:
             self.current_frame.clear_info.append(obj.name)
 
     def __del__(self):
@@ -117,3 +144,9 @@ class RecordManager(BaseManager):
     @property
     def current_frame(self):
         return self.current_frames[self.current_step] if self.reset_frame is None else self.reset_frame
+
+    def set_state(self, state: dict, old_name_to_current=None):
+        return {}
+
+    def get_state(self):
+        return {}

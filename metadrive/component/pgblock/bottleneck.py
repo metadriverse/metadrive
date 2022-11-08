@@ -4,6 +4,7 @@ from metadrive.component.pgblock.pg_block import PGBlock, PGBlockSocket
 from metadrive.component.road_network import Road
 from metadrive.constants import LineType
 from metadrive.utils.space import ParameterSpace, Parameter, BlockParameterSpace
+from metadrive.component.lane.straight_lane import StraightLane
 
 
 class Bottleneck(PGBlock):
@@ -16,6 +17,17 @@ class Bottleneck(PGBlock):
 
     # property of bottleneck
     BOTTLENECK_LEN = None
+
+    def get_intermediate_spawn_lanes(self):
+        """
+        Only spawn on straight lane
+        """
+        lanes = super(Bottleneck, self).get_intermediate_spawn_lanes()
+        filtered_lanes = []
+        for lane in lanes:
+            if isinstance(lane[0], StraightLane):
+                filtered_lanes.append(lane)
+        return filtered_lanes
 
 
 class Merge(Bottleneck):
@@ -54,7 +66,7 @@ class Merge(Bottleneck):
             self.block_network,
             self._global_network,
             center_line_type=center_line_type,
-            side_lane_line_type=LineType.NONE,
+            side_lane_line_type=LineType.SIDE if circular_lane_num == 0 else LineType.NONE,
             inner_lane_line_type=LineType.NONE,
             ignore_intersection_checking=self.ignore_intersection_checking
         ) and no_cross
@@ -63,7 +75,7 @@ class Merge(Bottleneck):
             self.block_network,
             self._global_network,
             inner_lane_line_type=LineType.NONE,
-            side_lane_line_type=LineType.NONE,
+            side_lane_line_type=LineType.SIDE if circular_lane_num == 0 else LineType.NONE,
             center_line_type=center_line_type,
             ignore_intersection_checking=self.ignore_intersection_checking
         ) and no_cross

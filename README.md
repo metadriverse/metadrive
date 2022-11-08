@@ -94,6 +94,8 @@ Running the following script enables driving in a scenario constructed from Waym
 python -m metadrive.examples.drive_in_waymo_env
 ```
 
+Traffic vehicles can not response to surrounding vchicles if directly replaying them.
+Add argument ```--reactive_traffic``` to use an IDM policy control them and make them reactive.
 Press key ```r``` for loading a new scenario, and ```b``` or ```q``` for switching perspective. 
 
 [comment]: <> (### LQY: avoid introducing these trivial things )
@@ -205,8 +207,6 @@ Quanyi Li, Zhenghao Peng, Haibin Wu, Lan Feng, Bolei Zhou
 [<a href="https://metadriverse.github.io/policydissect/" target="_blank">Webpage</a>]
 
 [![build](https://github.com/metadriverse/metadrive/workflows/test/badge.svg)](http://github.com/metadriverse/metadrive/actions)
-[![codecov](https://codecov.io/gh/metadriverse/metadrive/branch/main/graph/badge.svg?token=1ZYN8L5397)](https://codecov.io/gh/metadriverse/metadrive)
 [![Documentation](https://readthedocs.org/projects/metadrive/badge/?version=latest)](https://metadrive.readthedocs.io)
 [![GitHub license](https://img.shields.io/github/license/metadriverse/metadrive)](https://github.com/metadriverse/metadrive/blob/main/LICENSE.txt)
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/2d6fabe328a644b49e1269497b741057)](https://www.codacy.com/gh/metadriverse/metadrive/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=metadriverse/metadrive&amp;utm_campaign=Badge_Grade)
 [![GitHub contributors](https://img.shields.io/github/contributors/metadriverse/metadrive)](https://github.com/metadriverse/metadrive/graphs/contributors)

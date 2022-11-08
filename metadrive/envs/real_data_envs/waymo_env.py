@@ -24,14 +24,15 @@ WAYMO_ENV_CONFIG = dict(
     no_traffic=False,
     traj_start_index=0,
     traj_end_index=-1,
-    replay=True,
+    # replay=True,
     no_static_traffic_vehicle=False,
 
     # ===== Agent config =====
     vehicle_config=dict(
         lidar=dict(num_lasers=120, distance=50),
         lane_line_detector=dict(num_lasers=12, distance=50),
-        side_detector=dict(num_lasers=120, distance=50)
+        side_detector=dict(num_lasers=120, distance=50),
+        show_dest_mark=True,
     ),
     use_waymo_observation=True,
 
@@ -96,8 +97,8 @@ class WaymoEnv(BaseEnv):
     def __init__(self, config=None):
         super(WaymoEnv, self).__init__(config)
         if not self.config["no_traffic"]:
-            assert self.config["agent_policy"
-                               ] is not EgoWaymoIDMPolicy, "WaymoIDM will fail when interacting with traffic"
+            assert self.config["agent_policy"] is not EgoWaymoIDMPolicy, \
+                "WaymoIDM will fail when interacting with traffic"
 
     def _merge_extra_config(self, config):
         config = self.default_config().update(config, allow_add_new_key=True)
@@ -160,8 +161,9 @@ class WaymoEnv(BaseEnv):
         done_info = dict(
             crash_vehicle=False, crash_object=False, crash_building=False, out_of_road=False, arrive_dest=False
         )
-        if np.linalg.norm(vehicle.position - self.engine.map_manager.sdc_dest_point) < 5 \
-                or vehicle.lane.index in self.engine.map_manager.sdc_destinations:
+        # if np.linalg.norm(vehicle.position - self.engine.map_manager.sdc_dest_point) < 5 \
+        #         or vehicle.lane.index in self.engine.map_manager.sdc_destinations:
+        if np.linalg.norm(vehicle.position - self.engine.map_manager.sdc_dest_point) < 5:
             done = True
             logging.info("Episode ended! Reason: arrive_dest.")
             done_info[TerminationState.SUCCESS] = True
@@ -221,7 +223,7 @@ class WaymoEnv(BaseEnv):
 
         # update obs
         self.observations[vehicle_id].lateral_dist = \
-        self.engine.map_manager.current_sdc_route.local_coordinates(vehicle.position)[-1]
+            self.engine.map_manager.current_sdc_route.local_coordinates(vehicle.position)[-1]
 
         # reward for lane keeping, without it vehicle can learn to overtake but fail to keep in lane
         if self.config["use_lateral_reward"]:

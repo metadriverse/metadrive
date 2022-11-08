@@ -3,7 +3,7 @@ import pickle
 import time
 from collections import OrderedDict
 from typing import Callable, Optional, Union, List, Dict, AnyStr
-
+from metadrive.base_class.base_object import BaseObject
 import numpy as np
 
 from metadrive.base_class.randomizable import Randomizable
@@ -38,6 +38,7 @@ class BaseEngine(EngineCore, Randomizable):
         # for recovering, they can not exist together
         self.record_episode = False
         self.replay_episode = False
+        self.only_reset_when_replay = False
         # self.accept("s", self._stop_replay)
 
         # cull scene
@@ -56,8 +57,19 @@ class BaseEngine(EngineCore, Randomizable):
         # store external actions
         self.external_actions = None
 
-    def add_policy(self, object_id, policy):
+    def add_policy(self, object_id, policy_class, *args, **kwargs):
+        policy = policy_class(*args, **kwargs)
         self._object_policies[object_id] = policy
+        if self.record_episode:
+            assert self.record_manager is not None, "No record manager"
+            filtered_args = []
+            for arg in args:
+                filtered_args.append(arg) if not isinstance(arg, BaseObject) else filtered_args.append(BaseObject)
+            filtered_kwargs = {}
+            for k, v in kwargs.items():
+                filtered_kwargs[k] = v if not isinstance(arg, BaseObject) else BaseObject
+            self.record_manager.add_policy_info(object_id, policy_class, filtered_args, kwargs)
+        return policy
 
     def add_task(self, object_id, task):
         self._object_tasks[object_id] = task
@@ -71,7 +83,7 @@ class BaseEngine(EngineCore, Randomizable):
         if object_id in self._object_policies:
             return self._object_policies[object_id]
         else:
-            print("Can not find the policy for object(id: {})".format(object_id))
+            # print("Can not find the policy for object(id: {})".format(object_id))
             return None
 
     def get_task(self, object_id):
@@ -108,7 +120,7 @@ class BaseEngine(EngineCore, Randomizable):
             obj = self._dying_objects[object_class.__name__].pop()
             obj.reset(**kwargs)
         if self.global_config["record_episode"] and not self.replay_episode:
-            self.record_manager.add_spawn_info(object_class, kwargs, obj.name)
+            self.record_manager.add_spawn_info(obj.name, object_class, kwargs)
         self._spawned_objects[obj.id] = obj
         obj.attach_to_world(self.pbr_worldNP if pbr_model else self.worldNP, self.physics_world)
         return obj
@@ -182,17 +194,23 @@ class BaseEngine(EngineCore, Randomizable):
         if self.global_config["debug_physics_world"]:
             self.addTask(self.report_body_nums, "report_num")
 
-        # record replay
+        # Update record replay
         self.replay_episode = True if self.global_config["replay_episode"] is not None else False
         self.record_episode = self.global_config["record_episode"]
+        self.only_reset_when_replay = self.global_config["only_reset_when_replay"]
 
         # reset manager
         for manager in self._managers.values():
             # clean all manager
             manager.before_reset()
         self._object_clean_check()
+
         for manager in self.managers.values():
+            if self.replay_episode and self.only_reset_when_replay and manager is not self.replay_manager:
+                # The scene will be generated from replay manager in only reset replay mode
+                continue
             manager.reset()
+
         for manager in self.managers.values():
             manager.after_reset()
 
@@ -260,7 +278,7 @@ class BaseEngine(EngineCore, Randomizable):
     def dump_episode(self, pkl_file_name=None) -> None:
         """Dump the data of an episode."""
         assert self.record_manager is not None
-        episode_state = self.record_manager.dump_episode()
+        episode_state = self.record_manager.get_episode_metadata()
         if pkl_file_name is not None:
             with open(pkl_file_name, "wb+") as file:
                 pickle.dump(episode_state, file)
@@ -392,10 +410,11 @@ class BaseEngine(EngineCore, Randomizable):
     @property
     def managers(self):
         # whether to froze other managers
-        return self._managers if not self.replay_episode else {"replay_manager": self.replay_manager}
+        return {"replay_manager": self.replay_manager} if self.replay_episode and not \
+            self.only_reset_when_replay else self._managers
 
     def change_object_name(self, obj, new_name):
-        raise DeprecationWarning("This function is too dangerous to use")
+        raise DeprecationWarning("This function is too dangerous to be used")
         """
         Change the name of one object, Note: it may bring some bugs if abusing
         """

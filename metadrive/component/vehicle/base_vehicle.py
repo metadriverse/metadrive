@@ -71,7 +71,6 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     Vehicle chassis and its wheels index
                     0       1
                     II-----II
-                    II-----II
                         |
                         |  <---chassis/wheelbase
                         |
@@ -574,8 +573,10 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     def add_navigation(self):
         if not self.config["need_navigation"]:
             return
-        navi = NodeNetworkNavigation if self.engine.current_map.road_network_type == NodeRoadNetwork \
-            else EdgeNetworkNavigation
+        navi = self.config["navigation_module"]
+        if navi is None:
+            navi = NodeNetworkNavigation if self.engine.current_map.road_network_type == NodeRoadNetwork \
+                else EdgeNetworkNavigation
         self.navigation = \
             navi(self.engine,
                  show_navi_mark=self.engine.global_config["vehicle_config"]["show_navi_mark"],
@@ -689,8 +690,6 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         final_road = self.navigation.final_road
         state.update(
             {
-                "spawn_road": self.config["spawn_lane_index"][:-1],
-                "destination": (final_road.start_node, final_road.end_node),
                 "steering": self.steering,
                 "throttle_brake": self.throttle_brake,
                 "crash_vehicle": self.crash_vehicle,
@@ -699,6 +698,13 @@ class BaseVehicle(BaseObject, BaseVehicleState):
                 "crash_sidewalk": self.crash_sidewalk
             }
         )
+        if isinstance(self.navigation, NodeNetworkNavigation):
+            state.update(
+                {
+                    "spawn_road": self.config["spawn_lane_index"][:-1],
+                    "destination": (final_road.start_node, final_road.end_node)
+                }
+            )
         return state
 
     def set_state(self, state):

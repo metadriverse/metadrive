@@ -5,7 +5,7 @@ from metadrive.component.pgblock.first_block import FirstPGBlock
 from metadrive.component.pgblock.intersection import InterSection
 from metadrive.component.road_network import Road
 from metadrive.envs.marl_envs.multi_agent_metadrive import MultiAgentMetaDrive
-from metadrive.manager.map_manager import MapManager
+from metadrive.manager.map_manager import PGMapManager
 from metadrive.manager.spawn_manager import SpawnManager
 from metadrive.utils import Config
 
@@ -82,7 +82,7 @@ class MAIntersectionSpawnManager(SpawnManager):
         return vehicle_config
 
 
-class MAIntersectionMapManager(MapManager):
+class MAIntersectionPGMapManager(PGMapManager):
     def reset(self):
         config = self.engine.global_config
         if len(self.spawned_objects) == 0:
@@ -102,7 +102,7 @@ class MultiAgentIntersectionEnv(MultiAgentMetaDrive):
     def setup_engine(self):
         disable_u_turn = self.config["map_config"]["lane_num"] < 2
         super(MultiAgentIntersectionEnv, self).setup_engine()
-        self.engine.update_manager("map_manager", MAIntersectionMapManager())
+        self.engine.update_manager("map_manager", MAIntersectionPGMapManager())
         self.engine.update_manager("spawn_manager", MAIntersectionSpawnManager(disable_u_turn=disable_u_turn))
 
 
