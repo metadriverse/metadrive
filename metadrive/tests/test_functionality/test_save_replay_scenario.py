@@ -33,7 +33,7 @@ def test_save_recreate_scenario(vis=False):
         "record_episode": True,
         "map_config": {
             BaseMap.GENERATE_TYPE: MapGenerateMethod.BIG_BLOCK_SEQUENCE,
-            BaseMap.GENERATE_CONFIG: "CrCSC",
+            BaseMap.GENERATE_CONFIG: "CrCSX",
             BaseMap.LANE_WIDTH: 3.5,
             BaseMap.LANE_NUM: 3,
         }
@@ -42,11 +42,11 @@ def test_save_recreate_scenario(vis=False):
     try:
         positions_1 = []
         o = env.reset()
+        epi_info = env.engine.record_manager.get_episode_metadata()
         for i in range(1, 100000 if vis else 2000):
             o, r, d, info = env.step([0, 1])
             positions_1.append({v.name: v.position for v in env.engine.traffic_manager.spawned_objects.values()})
             if d:
-                epi_info = env.engine.record_manager.get_episode_metadata()
                 break
         env.close()
         env = SafeMetaDriveEnv(cfg)

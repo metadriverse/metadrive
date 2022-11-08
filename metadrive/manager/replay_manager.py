@@ -105,8 +105,8 @@ class ReplayManager(BaseManager):
             self.record_name_to_current_name[name] = obj.name
             if issubclass(config[ObjectState.CLASS], BaseVehicle):
                 obj.navigation.set_route(
-                    self.restore_episode_info["frame"][-1].step_info[name]["spawn_road"],
-                    self.restore_episode_info["frame"][-1].step_info[name]["destination"][-1]
+                    self.current_frame.step_info[name]["spawn_road"],
+                    self.current_frame.step_info[name]["destination"][-1]
                 )
         if not self.engine.only_reset_when_replay:
             # Do not set position, in this mode, or randomness will be introduced!
