@@ -71,7 +71,6 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     Vehicle chassis and its wheels index
                     0       1
                     II-----II
-                    II-----II
                         |
                         |  <---chassis/wheelbase
                         |

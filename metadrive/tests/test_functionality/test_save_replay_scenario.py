@@ -19,7 +19,7 @@ def assert_equal_pos(dict_1, dict_2):
 
 
 def test_save_recreate_scenario(vis=False):
-    # setup_logger(True)
+    setup_logger(True)
     cfg = {
         "accident_prob": 0.8,
         "environment_num": 1,
@@ -38,34 +38,33 @@ def test_save_recreate_scenario(vis=False):
             BaseMap.LANE_NUM: 3,
         }
     }
-    save_episode = True
     env = SafeMetaDriveEnv(cfg)
-    # try:
-    positions_1 = []
-    o = env.reset()
-    for i in range(1, 100000 if vis else 2000):
-        o, r, d, info = env.step([0, 1])
-        positions_1.append({v.name: v.position for v in env.engine.traffic_manager.spawned_objects.values()})
-        if d:
-            epi_info = env.engine.record_manager.get_episode_metadata()
-            break
-    env.close()
-    env = SafeMetaDriveEnv(cfg)
-    env.config["replay_episode"] = epi_info
-    env.config["record_episode"] = False
-    env.config["only_reset_when_replay"] = True
-    o = env.reset()
-    positions_1.reverse()
-    for i in range(0, 100000 if vis else 2000):
-        o, r, d, info = env.step([0, 1])
-        position = positions_1.pop()
-        position = {env.engine.replay_manager.record_name_to_current_name[key]: v for key, v in position.items()}
-        current_position = {v.name: v.position for v in env.engine.traffic_manager.spawned_objects.values()}
-        assert_equal_pos(position, current_position)
-        if d:
-            break
-    # finally:
-    #     env.close()
+    try:
+        positions_1 = []
+        o = env.reset()
+        for i in range(1, 100000 if vis else 2000):
+            o, r, d, info = env.step([0, 1])
+            positions_1.append({v.name: v.position for v in env.engine.traffic_manager.spawned_objects.values()})
+            if d:
+                epi_info = env.engine.record_manager.get_episode_metadata()
+                break
+        env.close()
+        env = SafeMetaDriveEnv(cfg)
+        env.config["replay_episode"] = epi_info
+        env.config["record_episode"] = False
+        env.config["only_reset_when_replay"] = True
+        o = env.reset()
+        positions_1.reverse()
+        for i in range(0, 100000 if vis else 2000):
+            o, r, d, info = env.step([0, 1])
+            position = positions_1.pop()
+            position = {env.engine.replay_manager.record_name_to_current_name[key]: v for key, v in position.items()}
+            current_position = {v.name: v.position for v in env.engine.traffic_manager.spawned_objects.values()}
+            assert_equal_pos(position, current_position)
+            if d:
+                break
+    finally:
+        env.close()
 
 
 if __name__ == "__main__":
