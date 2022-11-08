@@ -23,7 +23,7 @@ class TrafficObject(BaseStaticObject):
 
     def __init__(self, lane, longitude: float, lateral: float, random_seed):
         """
-       :param lane: the lane to spawn object
+        :param lane: the lane to spawn object
         :param longitude: use to calculate cartesian position of object in the surface
         :param lateral: use to calculate the angle from positive direction of horizontal axis
         """
