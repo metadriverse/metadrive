@@ -4,6 +4,7 @@ from metadrive.base_class.randomizable import Randomizable
 class BaseManager(Randomizable):
     """
     Managers should be created and registered after launching BaseEngine
+    TODO LQY, inherit event manager so that we can control the process in a standard way
     """
     PRIORITY = 10  # the engine will call managers according to the priority
 
@@ -13,6 +14,10 @@ class BaseManager(Randomizable):
         self.engine = get_engine()
         Randomizable.__init__(self, self.engine.global_random_seed)
         self.spawned_objects = {}
+
+    @property
+    def episode_step(self):
+        return self.engine.episode_step
 
     def before_step(self, *args, **kwargs) -> dict:
         """
@@ -85,5 +90,31 @@ class BaseManager(Randomizable):
         self.spawned_objects[new_name] = obj
         obj.name = new_name
 
-    def add_policy(self, object_id, policy):
-        self.engine.add_policy(object_id, policy)
+    def add_policy(self, object_id, policy_class, *policy_args, **policy_kwargs):
+        return self.engine.add_policy(object_id, policy_class, *policy_args, **policy_kwargs)
+
+    def get_state(self):
+        """This function will be called by RecordManager to collect manager state, usually some mappings"""
+        assert self.episode_step == 0, "This func can only be called after env.reset() without any env.step() called"
+        return {"spawned_objects": {name: v.class_name for name, v in self.spawned_objects.items()}}
+
+    def set_state(self, state: dict, old_name_to_current=None):
+        """
+        A basic function for restoring spawned objects mapping
+        """
+        assert self.episode_step == 0, "This func can only be called after env.reset() without any env.step() called"
+        if old_name_to_current is None:
+            old_name_to_current = {key: key for key in state.keys()}
+        spawned_objects = state["spawned_objects"]
+        ret = {}
+        for name, class_name in spawned_objects.items():
+            current_name = old_name_to_current[name]
+            name_obj = self.engine.get_objects([current_name])
+            assert current_name in name_obj and name_obj[current_name
+                                                         ].class_name == class_name, "Can not restore mappings!"
+            ret[current_name] = name_obj[current_name]
+        self.spawned_objects = ret
+
+    @property
+    def class_name(self):
+        return self.__class__.__name__

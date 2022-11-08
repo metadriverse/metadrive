@@ -3,7 +3,7 @@ from metadrive.component.pgblock.bottleneck import Merge, Split
 from metadrive.component.pgblock.first_block import FirstPGBlock
 from metadrive.component.road_network import Road
 from metadrive.envs.marl_envs.multi_agent_metadrive import MultiAgentMetaDrive
-from metadrive.manager.map_manager import MapManager
+from metadrive.manager.map_manager import PGMapManager
 from metadrive.utils import Config
 from metadrive.utils.math_utils import clip
 
@@ -66,7 +66,7 @@ class MABottleneckMap(PGMap):
         self.blocks.append(split)
 
 
-class MABottleneckMapManager(MapManager):
+class MABottleneckPGMapManager(PGMapManager):
     def reset(self):
         config = self.engine.global_config
         if len(self.spawned_objects) == 0:
@@ -136,7 +136,7 @@ class MultiAgentBottleneckEnv(MultiAgentMetaDrive):
 
     def setup_engine(self):
         super(MultiAgentBottleneckEnv, self).setup_engine()
-        self.engine.update_manager("map_manager", MABottleneckMapManager())
+        self.engine.update_manager("map_manager", MABottleneckPGMapManager())
 
 
 def _draw():

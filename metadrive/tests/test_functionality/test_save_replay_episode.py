@@ -44,7 +44,7 @@ def test_save_episode(vis=False):
                 break
         f = open("test_dump.pkl", "rb+")
         env.config["replay_episode"] = pickle.load(f)
-        env.config["use_render"] = True
+        env.config["record_episode"] = False
         o = env.reset()
         for i in range(1, 100000 if vis else 2000):
             o, r, d, info = env.step([0, 1])

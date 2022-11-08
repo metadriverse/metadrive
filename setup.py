@@ -40,6 +40,7 @@ install_requires = [
     "panda3d-gltf",
     "panda3d-simplepbr",
     "pillow",
+    "protobuf==3.20.1",
     "pytest",
     "opencv-python-headless",
     "lxml",

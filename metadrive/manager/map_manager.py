@@ -7,14 +7,14 @@ from metadrive.manager.base_manager import BaseManager
 from metadrive.utils.utils import get_time_str
 
 
-class MapManager(BaseManager):
+class PGMapManager(BaseManager):
     """
     MapManager contains a list of PGmaps
     """
     PRIORITY = 0  # Map update has the most high priority
 
     def __init__(self):
-        super(MapManager, self).__init__()
+        super(PGMapManager, self).__init__()
         self.current_map = None
 
         # for pgmaps
@@ -36,7 +36,7 @@ class MapManager(BaseManager):
 
     def destroy(self):
         self.maps = None
-        super(MapManager, self).destroy()
+        super(PGMapManager, self).destroy()
 
     def before_reset(self):
         # remove map from world before adding
@@ -122,3 +122,7 @@ class MapManager(BaseManager):
             map.detach_from_world()
         self.reset()
         return loaded_map_data
+
+
+# For compatibility
+MapManager = PGMapManager

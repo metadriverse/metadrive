@@ -3,7 +3,7 @@ import pickle
 
 from metadrive.component.map.argoverse_map import ArgoverseMap
 from metadrive.envs.metadrive_env import MetaDriveEnv
-from metadrive.manager.map_manager import MapManager
+from metadrive.manager.map_manager import PGMapManager
 from metadrive.utils import is_win
 
 argoverse_city = "PIT"
@@ -14,7 +14,7 @@ argoverse_destination = "968"
 argoverse_log_id = "c6911883-1843-3727-8eaa-41dc8cda8993"
 
 
-class ArgoverseMapManager(MapManager):
+class ArgoversePGMapManager(PGMapManager):
     def before_reset(self):
         # do not unload map
         pass
@@ -52,4 +52,4 @@ class ArgoverseEnv(MetaDriveEnv):
         super(ArgoverseEnv, self).setup_engine()
         from metadrive.manager.real_data_manager import RealDataManager
         self.engine.register_manager("real_data_manager", RealDataManager())
-        self.engine.update_manager("map_manager", ArgoverseMapManager())
+        self.engine.update_manager("map_manager", ArgoversePGMapManager())
