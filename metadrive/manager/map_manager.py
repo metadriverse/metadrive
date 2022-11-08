@@ -123,5 +123,6 @@ class PGMapManager(BaseManager):
         self.reset()
         return loaded_map_data
 
+
 # For compatibility
 MapManager = PGMapManager
