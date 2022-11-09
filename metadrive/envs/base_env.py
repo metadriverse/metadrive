@@ -1,69 +1,22 @@
 import time
 from collections import defaultdict
 from typing import Union, Dict, AnyStr, Optional, Tuple
-
+from metadrive.manager.record_manager import RecordManager
+from metadrive.manager.replay_manager import ReplayManager
 import gym
 import numpy as np
+from panda3d.core import PNMImage
+
 from metadrive.component.vehicle.base_vehicle import BaseVehicle
-from metadrive.constants import RENDER_MODE_NONE, DEFAULT_AGENT
+from metadrive.constants import RENDER_MODE_NONE, DEFAULT_AGENT, REPLAY_DONE
 from metadrive.engine.base_engine import BaseEngine
 from metadrive.engine.engine_utils import initialize_engine, close_engine, \
     engine_initialized, set_global_random_seed
 from metadrive.manager.agent_manager import AgentManager
-from metadrive.manager.record_manager import RecordManager
-from metadrive.manager.replay_manager import ReplayManager
 from metadrive.obs.image_obs import ImageStateObservation
 from metadrive.obs.observation_base import ObservationBase
 from metadrive.obs.state_obs import LidarStateObservation
 from metadrive.utils import Config, merge_dicts, get_np_random, concat_step_infos
-from panda3d.core import PNMImage
-
-BASE_VEHICLE_CONFIG = dict(
-    random_agent_model=False,  # will be overwritten by env.config["random_agent_model"]
-    increment_steering=False,
-    vehicle_model="default",
-    show_navi_mark=True,
-    extra_action_dim=0,
-    enable_reverse=False,
-    random_navi_mark_color=False,
-    show_dest_mark=False,
-    show_line_to_dest=False,
-    use_special_color=False,
-
-    # ===== use image =====
-    image_source="rgb_camera",  # take effect when only when offscreen_render == True
-
-    # ===== vehicle spawn and destination =====
-    navigation_module=None,  # a class type for self-defined navigation
-    need_navigation=True,
-    spawn_lane_index=None,
-    spawn_longitude=5.0,
-    spawn_lateral=0.0,
-    destination=None,
-
-    # ==== others ====
-    overtake_stat=False,  # we usually set to True when evaluation
-    action_check=False,
-    random_color=False,
-
-    # ===== vehicle module config =====
-    lidar=dict(num_lasers=240, distance=50, num_others=0, gaussian_noise=0.0, dropout_prob=0.0, add_others_navi=False),
-    side_detector=dict(num_lasers=0, distance=50, gaussian_noise=0.0, dropout_prob=0.0),
-    lane_line_detector=dict(num_lasers=0, distance=20, gaussian_noise=0.0, dropout_prob=0.0),
-    show_lidar=False,
-    mini_map=(84, 84, 250),  # buffer length, width
-    rgb_camera=(84, 84),  # buffer length, width
-    depth_camera=(84, 84, True),  # buffer length, width, view_ground
-    show_side_detector=False,
-    show_lane_line_detector=False,
-
-    # NOTE: rgb_clip will be modified by env level config when initialization
-    rgb_clip=True,  # clip 0-255 to 0-1
-    stack_size=3,  # the number of timesteps for stacking image observation
-    rgb_to_grayscale=False,
-    gaussian_noise=0.0,
-    dropout_prob=0.0,
-)
 
 BASE_DEFAULT_CONFIG = dict(
 
@@ -103,10 +56,57 @@ BASE_DEFAULT_CONFIG = dict(
     show_logo=True,
 
     # ===== Vehicle =====
-    vehicle_config=BASE_VEHICLE_CONFIG,
+    vehicle_config=dict(
+        increment_steering=False,
+        vehicle_model="default",
+        show_navi_mark=True,
+        extra_action_dim=0,
+        enable_reverse=False,
+        random_navi_mark_color=False,
+        show_dest_mark=False,
+        show_line_to_dest=False,
+        use_special_color=False,
+
+        # ===== use image =====
+        image_source="rgb_camera",  # take effect when only when offscreen_render == True
+
+        # ===== vehicle spawn and destination =====
+        navigation_module=None,  # a class type for self-defined navigation
+        need_navigation=True,
+        spawn_lane_index=None,
+        spawn_longitude=5.0,
+        spawn_lateral=0.0,
+        destination=None,
+
+        # ==== others ====
+        overtake_stat=False,  # we usually set to True when evaluation
+        action_check=False,
+        random_color=False,
+        random_agent_model=False,  # this will be overwritten by env.config["random_agent_model"]
+
+        # ===== vehicle module config =====
+        lidar=dict(
+            num_lasers=240, distance=50, num_others=0, gaussian_noise=0.0, dropout_prob=0.0, add_others_navi=False
+        ),
+        side_detector=dict(num_lasers=0, distance=50, gaussian_noise=0.0, dropout_prob=0.0),
+        lane_line_detector=dict(num_lasers=0, distance=20, gaussian_noise=0.0, dropout_prob=0.0),
+        show_lidar=False,
+        mini_map=(84, 84, 250),  # buffer length, width
+        rgb_camera=(84, 84),  # buffer length, width
+        depth_camera=(84, 84, True),  # buffer length, width, view_ground
+        show_side_detector=False,
+        show_lane_line_detector=False,
+
+        # NOTE: rgb_clip will be modified by env level config when initialization
+        rgb_clip=True,  # clip 0-255 to 0-1
+        stack_size=3,  # the number of timesteps for stacking image observation
+        rgb_to_grayscale=False,
+        gaussian_noise=0.0,
+        dropout_prob=0.0,
+    ),
 
     # ===== Agent config =====
-    target_vehicle_configs={DEFAULT_AGENT: BASE_VEHICLE_CONFIG},
+    target_vehicle_configs={DEFAULT_AGENT: dict(use_special_color=False, spawn_lane_index=None)},
 
     # ===== Engine Core config =====
     window_size=(1200, 900),  # or (width, height), if set to None, it will be automatically determined
