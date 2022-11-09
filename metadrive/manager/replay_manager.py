@@ -1,4 +1,5 @@
 import copy
+from metadrive.utils import Config, recursive_equal
 from metadrive.constants import DEFAULT_AGENT
 from metadrive.constants import PolicyState
 import logging
@@ -65,9 +66,16 @@ class ReplayManager(BaseManager):
         map_config = copy.deepcopy(map_data["map_config"])
         map_config[BaseMap.GENERATE_TYPE] = MapGenerateMethod.PG_MAP_FILE
         map_config[BaseMap.GENERATE_CONFIG] = map_data["block_sequence"]
-        self.current_map = self.spawn_object(
-            PGMap, map_config=map_config, auto_fill_random_seed=False, force_spawn=True
-        )
+        if self.engine.map_manager.maps[self.engine.global_seed] is not None:
+            self.current_map = self.engine.map_manager.maps[self.engine.global_seed]
+            assert recursive_equal(
+                self.current_map.get_meta_data()["block_sequence"], map_data["block_sequence"], need_assert=True
+            ), "Loaded data mismatch stored data"
+            self.engine.map_manager.load_map(self.current_map)
+        else:
+            self.current_map = self.spawn_object(
+                PGMap, map_config=map_config, auto_fill_random_seed=False, force_spawn=True
+            )
         self.replay_frame()
         if self.engine.only_reset_when_replay:
             # do not replay full trajectory! set state for managers for interaction
@@ -134,15 +142,18 @@ class ReplayManager(BaseManager):
                     self.current_frame.step_info[name]["spawn_road"],
                     self.current_frame.step_info[name]["destination"][-1]
                 )
-        if not self.engine.only_reset_when_replay:
+        if self.engine.only_reset_when_replay:
+            # for generation policies
+            self.restore_policy_states(self.current_frame.policy_info)
+        else:
             # Do not set position, in this mode, or randomness will be introduced!
             for name, state in self.current_frame.step_info.items():
                 self.spawned_objects[self.record_name_to_current_name[name]].before_step()
                 self.spawned_objects[self.record_name_to_current_name[name]].set_state(state)
                 self.spawned_objects[self.record_name_to_current_name[name]].after_step()
+
         self.clear_objects([self.record_name_to_current_name[name] for name in self.current_frame.clear_info])
         self.replay_done = False
-        self.restore_policy_states(self.current_frame.policy_info)
 
     @property
     def replay_agents(self):
