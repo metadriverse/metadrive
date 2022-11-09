@@ -68,12 +68,14 @@ class ReplayManager(BaseManager):
         map_config[BaseMap.GENERATE_CONFIG] = map_data["block_sequence"]
         if self.engine.map_manager.maps[self.engine.global_seed] is not None:
             self.current_map = self.engine.map_manager.maps[self.engine.global_seed]
-            assert recursive_equal(self.current_map.get_meta_data()["block_sequence"], map_data["block_sequence"],
-                                   need_assert=True), "Loaded data mismatch stored data"
+            assert recursive_equal(
+                self.current_map.get_meta_data()["block_sequence"], map_data["block_sequence"], need_assert=True
+            ), "Loaded data mismatch stored data"
             self.engine.map_manager.load_map(self.current_map)
         else:
-            self.current_map = self.spawn_object(PGMap, map_config=map_config, auto_fill_random_seed=False,
-                                                 force_spawn=True)
+            self.current_map = self.spawn_object(
+                PGMap, map_config=map_config, auto_fill_random_seed=False, force_spawn=True
+            )
         self.replay_frame()
         if self.engine.only_reset_when_replay:
             # do not replay full trajectory! set state for managers for interaction
