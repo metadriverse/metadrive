@@ -81,7 +81,8 @@ METADRIVE_DEFAULT_CONFIG = dict(
     out_of_road_cost=1.0,
 
     # ===== Termination Scheme =====
-    out_of_route_done=False,
+    out_of_route_done=True,
+    on_continuous_line_done=False
 )
 
 
@@ -153,6 +154,8 @@ class MetaDriveEnv(BaseEnv):
             TerminationState.OUT_OF_ROAD: False,
             TerminationState.SUCCESS: False,
             TerminationState.MAX_STEP: False,
+            TerminationState.CURRENT_BLOCK: self.vehicle.navigation.current_road.block_ID(),
+            TerminationState.ENV_SEED: self.current_seed,
             # crash_vehicle=False, crash_object=False, crash_building=False, out_of_road=False, arrive_dest=False,
         }
         if vehicle.arrive_destination:
@@ -191,8 +194,8 @@ class MetaDriveEnv(BaseEnv):
         # for compatibility
         # crash almost equals to crashing with vehicles
         done_info[TerminationState.CRASH] = (
-            done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
-            or done_info[TerminationState.CRASH_BUILDING]
+                done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
+                or done_info[TerminationState.CRASH_BUILDING]
         )
         return done, done_info
 
@@ -211,10 +214,11 @@ class MetaDriveEnv(BaseEnv):
     def _is_out_of_road(self, vehicle):
         # A specified function to determine whether this vehicle should be done.
         # return vehicle.on_yellow_continuous_line or (not vehicle.on_lane) or vehicle.crash_sidewalk
-        ret = vehicle.on_yellow_continuous_line or vehicle.on_white_continuous_line or \
-              (not vehicle.on_lane) or vehicle.crash_sidewalk
+        ret = not vehicle.on_lane
         if self.config["out_of_route_done"]:
             ret = ret or vehicle.out_of_route
+        elif self.config["on_continuous_line_done"]:
+            ret = vehicle.on_yellow_continuous_line or vehicle.on_white_continuous_line or vehicle.crash_sidewalk
         return ret
 
     def reward_function(self, vehicle_id: str):
@@ -306,6 +310,7 @@ if __name__ == '__main__':
         assert env.observation_space.contains(obs)
         assert np.isscalar(reward)
         assert isinstance(info, dict)
+
 
     env = MetaDriveEnv()
     try:

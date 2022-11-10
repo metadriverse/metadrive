@@ -169,8 +169,8 @@ class BaseNavigation:
         :return: lateral range [m]
         """
         end_position = start_position[0] + dir[0] * length, start_position[1] + dir[1] * length
-        start_position = panda_position(start_position, z=0.15)
-        end_position = panda_position(end_position, z=0.15)
+        start_position = panda_position(start_position, z=0.2)
+        end_position = panda_position(end_position, z=0.2)
         mask = FirstPGBlock.CONTINUOUS_COLLISION_MASK
         res = engine.physics_world.static_world.rayTestClosest(start_position, end_position, mask=mask)
         if not res.hasHit():
