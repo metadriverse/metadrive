@@ -168,7 +168,9 @@ class MixWaymoPGEnv(WaymoEnv):
 
     def _reset_global_seed(self, force_seed=None):
         current_seed = force_seed if force_seed is not None else get_np_random(None).randint(
-            0, self.config["case_num"] if self.is_current_real_data else self.config["environment_num"]
+            self.config["start_case_index"],
+            self.config["start_case_index"] + self.config["case_num"] if self.is_current_real_data else self.config[
+                "environment_num"]
         )
         self.seed(current_seed)
 

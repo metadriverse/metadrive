@@ -14,7 +14,7 @@ class WaymoMapManager(BaseManager):
         super(WaymoMapManager, self).__init__()
         self.current_map = None
         self.map_num = self.engine.global_config["case_num"]
-        self.maps = {_seed: None for _seed in range(0, self.map_num)}
+        self.maps = {_seed: None for _seed in range(self.engine.global_config["start_case_index"], self.map_num)}
         # we put the route-find funcrion here
         self.sdc_start = None
         self.sdc_destinations = []

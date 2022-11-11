@@ -249,8 +249,10 @@ class WaymoEnv(BaseEnv):
 
     def _reset_global_seed(self, force_seed=None):
         current_seed = force_seed if force_seed is not None else get_np_random(None).randint(
-            0, int(self.config["case_num"])
+            self.config["start_case_index"], self.config["start_case_index"] + int(self.config["case_num"])
         )
+        assert self.config["start_case_index"] <= current_seed < \
+               self.config["start_case_index"] + self.config["case_num"], "Force seed range Error!"
         self.seed(current_seed)
 
     def _is_out_of_road(self, vehicle):
