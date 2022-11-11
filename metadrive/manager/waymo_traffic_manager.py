@@ -16,41 +16,41 @@ class WaymoTrafficManager(BaseManager):
         self.sdc_index = None
         self.vid_to_obj = None
 
-    def reset(self):
-        try:
-            # generate vehicle
-            self.count = 0
-            self.vid_to_obj = {}
-            for v_id, type_traj in self.current_traffic_data.items():
-                if type_traj["type"] == AgentType.VEHICLE and v_id != self.sdc_index:
-                    info = self.parse_vehicle_state(type_traj["state"], self.engine.global_config["traj_start_index"])
-                    if not info["valid"]:
-                        continue
-                    v_config = copy.deepcopy(self.engine.global_config["vehicle_config"])
-                    v_config["need_navigation"] = False
-                    v_config.update(
-                        dict(
-                            show_navi_mark=False,
-                            show_dest_mark=False,
-                            enable_reverse=False,
-                            show_lidar=False,
-                            show_lane_line_detector=False,
-                            show_side_detector=False,
-                        )
+    def after_reset(self):
+        # try:
+        # generate vehicle
+        self.count = 0
+        self.vid_to_obj = {}
+        for v_id, type_traj in self.current_traffic_data.items():
+            if type_traj["type"] == AgentType.VEHICLE and v_id != self.sdc_index:
+                info = self.parse_vehicle_state(type_traj["state"], self.engine.global_config["traj_start_index"])
+                if not info["valid"]:
+                    continue
+                v_config = copy.deepcopy(self.engine.global_config["vehicle_config"])
+                v_config["need_navigation"] = False
+                v_config.update(
+                    dict(
+                        show_navi_mark=False,
+                        show_dest_mark=False,
+                        enable_reverse=False,
+                        show_lidar=False,
+                        show_lane_line_detector=False,
+                        show_side_detector=False,
                     )
-                    v = self.spawn_object(
-                        SVehicle, position=info["position"], heading=info["heading"], vehicle_config=v_config
-                    )
-                    self.vid_to_obj[v_id] = v.name
-                    v.set_static(True)
-                elif type_traj["type"] == AgentType.VEHICLE and v_id == self.sdc_index:
-                    # set Ego V velocity
-                    info = self.parse_vehicle_state(type_traj["state"], self.engine.global_config["traj_start_index"])
-                    ego_v = list(self.engine.agent_manager.active_agents.values())[0]
-                    ego_v.set_velocity(info["velocity"])
-                    ego_v.set_position(info["position"])
-        except:
-            raise ValueError("Can not LOAD traffic for seed: {}".format(self.engine.global_random_seed))
+                )
+                v = self.spawn_object(
+                    SVehicle, position=info["position"], heading=info["heading"], vehicle_config=v_config
+                )
+                self.vid_to_obj[v_id] = v.name
+                v.set_static(True)
+            elif type_traj["type"] == AgentType.VEHICLE and v_id == self.sdc_index:
+                # set Ego V velocity
+                info = self.parse_vehicle_state(type_traj["state"], self.engine.global_config["traj_start_index"])
+                ego_v = list(self.engine.agent_manager.active_agents.values())[0]
+                ego_v.set_velocity(info["velocity"])
+                ego_v.set_position(info["position"])
+        # except:
+        #     raise ValueError("Can not LOAD traffic for seed: {}".format(self.engine.global_random_seed))
 
     @staticmethod
     def parse_vehicle_state(states, time_idx, check_last_state=False):

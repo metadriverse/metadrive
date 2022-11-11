@@ -2,7 +2,7 @@ import logging
 from metadrive.obs.state_obs import LidarStateObservation
 import gym
 import numpy as np
-
+from metadrive.component.vehicle_navigation_module.trajectory_navigation import WaymoTrajectoryNavigation
 from metadrive.constants import TerminationState
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.envs.base_env import BaseEnv
@@ -24,7 +24,7 @@ WAYMO_ENV_CONFIG = dict(
     no_traffic=False,
     traj_start_index=0,
     traj_end_index=-1,
-    # replay=True,
+    replay=True,
     no_static_traffic_vehicle=False,
 
     # ===== Agent config =====
@@ -33,6 +33,7 @@ WAYMO_ENV_CONFIG = dict(
         lane_line_detector=dict(num_lasers=12, distance=50),
         side_detector=dict(num_lasers=120, distance=50),
         show_dest_mark=True,
+        navigation_module=WaymoTrajectoryNavigation,
     ),
     use_waymo_observation=True,
 
@@ -187,8 +188,8 @@ class WaymoEnv(BaseEnv):
         # for compatibility
         # crash almost equals to crashing with vehicles
         done_info[TerminationState.CRASH] = (
-            done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
-            or done_info[TerminationState.CRASH_BUILDING]
+                done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
+                or done_info[TerminationState.CRASH_BUILDING]
         )
         return done, done_info
 

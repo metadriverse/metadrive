@@ -11,7 +11,7 @@ class WaymoIDMEnv(WaymoEnv):
     def setup_engine(self):
         super(WaymoIDMEnv, self).setup_engine()
         assert not self.config["no_traffic"], "Please set no_traffic to False to use this environment"
-        if self.config['replay'] == False:
+        if not self.config['replay']:
             self.engine.update_manager("traffic_manager", WaymoIDMTrafficManager())
         else:
             self.engine.update_manager("traffic_manager", WaymoTrafficManager())

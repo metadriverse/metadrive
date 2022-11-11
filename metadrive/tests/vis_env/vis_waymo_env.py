@@ -35,7 +35,7 @@ if __name__ == "__main__":
     for i in range(1, 100000):
         o, r, d, info = env.step([1.0, 0.])
         env.render(text={"Switch perspective": "Q or B", "Reset Episode": "R"})
-        # if d:
-        #     print(info["arrive_dest"])
-        #     env.reset()
+        if d:
+            print(info["arrive_dest"])
+            env.reset()
     env.close()

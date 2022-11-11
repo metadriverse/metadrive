@@ -35,9 +35,6 @@ class WaymoTrajectoryNavigation(BaseNavigation):
         self.checkpoints = self.descretize_reference_trajectory()
         self._target_checkpoints_index = [0, 1]
         # update routing info
-        if len(self.checkpoints) <= 2:
-            self.checkpoints = [current_lane_index[0], current_lane_index[1]]
-            self._target_checkpoints_index = [0, 0]
         assert len(self.checkpoints
                    ) >= 2, "Can not find a route from {} to {}".format(current_lane_index[0], destination)
 
