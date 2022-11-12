@@ -24,10 +24,12 @@ if __name__ == "__main__":
             "replay": False,
             "use_render": True,
             "waymo_data_directory": AssetLoader.file_path(asset_path, "waymo", return_raw_style=False),
-            "case_num": 2,
-            "start_case_index": 1,
+            "case_num": 3,
+            "start_case_index": 0,
             "vehicle_config": {
-                "navigation_module": WaymoTrajectoryNavigation
+                "navigation_module": WaymoTrajectoryNavigation,
+                "show_side_detector": True,
+                "show_lane_line_detector": True,
             }
         }
     )
@@ -38,5 +40,5 @@ if __name__ == "__main__":
         env.render(text={"seed": env.current_seed})
         if d:
             print(info["arrive_dest"])
-            env.reset(force_seed=0)
+            env.reset()
     env.close()

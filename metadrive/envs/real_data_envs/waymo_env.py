@@ -257,7 +257,7 @@ class WaymoEnv(BaseEnv):
 
     def _is_out_of_road(self, vehicle):
         # A specified function to determine whether this vehicle should be done.
-        done = vehicle.crash_sidewalk or vehicle.on_yellow_continuous_line
+        done = vehicle.crash_sidewalk or vehicle.on_yellow_continuous_line or vehicle.on_white_continuous_line
         if self.config["out_of_route_done"]:
             done = done or self.observations["default_agent"].lateral_dist > 10
         return done
