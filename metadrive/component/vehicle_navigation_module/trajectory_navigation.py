@@ -63,12 +63,13 @@ class WaymoTrajectoryNavigation(BaseNavigation):
         It is called every step
         """
         # Update ckpt index
-        long, lat = self.reference_trajectory.local_coordinates(ego_vehicle.position)
+        long, lat = self.reference_trajectory.local_coordinates(ego_vehicle.position, only_in_lane_point=True)
         if self._target_checkpoints_index[0] != self._target_checkpoints_index[1]:  # on last road
             # arrive to second checkpoint
             if lat < self.reference_trajectory.width:
                 idx = int(long / self.DESCRETE_LEN) + 1
-                self._target_checkpoints_index = [min(idx, len(self.checkpoints) - 1)]
+                idx = min(idx, len(self.checkpoints) - 1)
+                self._target_checkpoints_index = [idx]
                 if idx + 1 == len(self.checkpoints):
                     self._target_checkpoints_index.append(idx)
                 else:
