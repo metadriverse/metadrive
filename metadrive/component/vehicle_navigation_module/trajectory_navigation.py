@@ -74,9 +74,12 @@ class WaymoTrajectoryNavigation(BaseNavigation):
                     self._target_checkpoints_index.append(idx)
                 else:
                     self._target_checkpoints_index.append(idx + 1)
-
-        ckpt_1 = self.checkpoints[self._target_checkpoints_index[0]]
-        ckpt_2 = self.checkpoints[self._target_checkpoints_index[1]]
+        try:
+            ckpt_1 = self.checkpoints[self._target_checkpoints_index[0]]
+            ckpt_2 = self.checkpoints[self._target_checkpoints_index[1]]
+        except:
+            print(self.engine.global_seed)
+            raise ValueError("target_ckpt".format(self._target_checkpoints_index))
         # target_road_1 is the road segment the vehicle is driving on.
         self._navi_info.fill(0.0)
         half = self.navigation_info_dim // 2
