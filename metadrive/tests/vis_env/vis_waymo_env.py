@@ -26,6 +26,8 @@ if __name__ == "__main__":
             "waymo_data_directory": AssetLoader.file_path(asset_path, "waymo", return_raw_style=False),
             "case_num": 3,
             "start_case_index": 0,
+            "crash_vehicle_done": False,
+            "crash_vehicle_penalty": 0,
             "vehicle_config": {
                 "navigation_module": WaymoTrajectoryNavigation,
                 "show_side_detector": True,
@@ -37,7 +39,7 @@ if __name__ == "__main__":
 
     for i in range(1, 100000):
         o, r, d, info = env.step([1.0, 0.])
-        env.render(text={"seed": env.current_seed})
+        env.render(text={"seed": env.current_seed, "reward":r})
         if d:
             print(info["arrive_dest"])
             env.reset()

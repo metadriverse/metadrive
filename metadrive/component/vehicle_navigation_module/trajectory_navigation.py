@@ -13,13 +13,13 @@ class WaymoTrajectoryNavigation(BaseNavigation):
     DESCRETE_LEN = 6  # m
 
     def __init__(
-        self,
-        engine,
-        show_navi_mark: bool = False,
-        random_navi_mark_color=False,
-        show_dest_mark=False,
-        show_line_to_dest=False,
-        panda_color=None
+            self,
+            engine,
+            show_navi_mark: bool = False,
+            random_navi_mark_color=False,
+            show_dest_mark=False,
+            show_line_to_dest=False,
+            panda_color=None
     ):
         super(WaymoTrajectoryNavigation, self).__init__(
             engine, show_navi_mark, random_navi_mark_color, show_dest_mark, show_line_to_dest, panda_color=panda_color
@@ -33,7 +33,7 @@ class WaymoTrajectoryNavigation(BaseNavigation):
 
     def set_route(self, current_lane_index: str, destination: str):
         self.checkpoints = self.descretize_reference_trajectory()
-        self._target_checkpoints_index = [0, 1] if len(self.checkpoints) >=2 else [0,0]
+        self._target_checkpoints_index = [0, 1] if len(self.checkpoints) >= 2 else [0, 0]
         # update routing info
         # assert len(self.checkpoints
         #            ) >= 2, "Can not find a route from {} to {}".format(current_lane_index[0], destination)
@@ -67,7 +67,7 @@ class WaymoTrajectoryNavigation(BaseNavigation):
         if self._target_checkpoints_index[0] != self._target_checkpoints_index[1]:  # on last road
             # arrive to second checkpoint
             if lat < self.reference_trajectory.width:
-                idx = int(long / self.DESCRETE_LEN) + 1
+                idx = max(int(long / self.DESCRETE_LEN) + 1, 0)
                 idx = min(idx, len(self.checkpoints) - 1)
                 self._target_checkpoints_index = [idx]
                 if idx + 1 == len(self.checkpoints):
