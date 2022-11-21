@@ -33,13 +33,10 @@ class WaymoTrajectoryNavigation(BaseNavigation):
 
     def set_route(self, current_lane_index: str, destination: str):
         self.checkpoints = self.descretize_reference_trajectory()
-        self._target_checkpoints_index = [0, 1]
+        self._target_checkpoints_index = [0, 1] if len(self.checkpoints) >= 2 else [0, 0]
         # update routing info
-        if len(self.checkpoints) <= 2:
-            self.checkpoints = [current_lane_index[0], current_lane_index[1]]
-            self._target_checkpoints_index = [0, 0]
-        assert len(self.checkpoints
-                   ) >= 2, "Can not find a route from {} to {}".format(current_lane_index[0], destination)
+        # assert len(self.checkpoints
+        #            ) >= 2, "Can not find a route from {} to {}".format(current_lane_index[0], destination)
 
         self._navi_info.fill(0.0)
         self.current_ref_lanes = [self.reference_trajectory]
@@ -66,19 +63,23 @@ class WaymoTrajectoryNavigation(BaseNavigation):
         It is called every step
         """
         # Update ckpt index
-        long, lat = self.reference_trajectory.local_coordinates(ego_vehicle.position)
+        long, lat = self.reference_trajectory.local_coordinates(ego_vehicle.position, only_in_lane_point=True)
         if self._target_checkpoints_index[0] != self._target_checkpoints_index[1]:  # on last road
             # arrive to second checkpoint
             if lat < self.reference_trajectory.width:
-                idx = int(long / self.DESCRETE_LEN) + 1
-                self._target_checkpoints_index = [min(idx, len(self.checkpoints) - 1)]
+                idx = max(int(long / self.DESCRETE_LEN) + 1, 0)
+                idx = min(idx, len(self.checkpoints) - 1)
+                self._target_checkpoints_index = [idx]
                 if idx + 1 == len(self.checkpoints):
                     self._target_checkpoints_index.append(idx)
                 else:
                     self._target_checkpoints_index.append(idx + 1)
-
-        ckpt_1 = self.checkpoints[self._target_checkpoints_index[0]]
-        ckpt_2 = self.checkpoints[self._target_checkpoints_index[1]]
+        try:
+            ckpt_1 = self.checkpoints[self._target_checkpoints_index[0]]
+            ckpt_2 = self.checkpoints[self._target_checkpoints_index[1]]
+        except:
+            print(self.engine.global_seed)
+            raise ValueError("target_ckpt".format(self._target_checkpoints_index))
         # target_road_1 is the road segment the vehicle is driving on.
         self._navi_info.fill(0.0)
         half = self.navigation_info_dim // 2

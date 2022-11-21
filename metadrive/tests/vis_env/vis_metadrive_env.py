@@ -63,9 +63,12 @@ if __name__ == "__main__":
             text={
                 "heading_diff": env.vehicle.heading_diff(env.vehicle.lane),
                 "lane_width": env.vehicle.lane.width,
-                "lateral": env.vehicle.lane.local_coordinates(env.vehicle.position)
+                "lateral": env.vehicle.lane.local_coordinates(env.vehicle.position),
+                "current_seed": env.current_seed
             }
         )
+        if d:
+            env.reset(0)
         # # assert env.observation_space.contains(o)
         # if (s + 1) % 100 == 0:
         #     print(
