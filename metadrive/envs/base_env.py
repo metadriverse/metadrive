@@ -77,6 +77,7 @@ BASE_DEFAULT_CONFIG = dict(
         spawn_longitude=5.0,
         spawn_lateral=0.0,
         destination=None,
+        spawn_position_heading=None,
 
         # ==== others ====
         overtake_stat=False,  # we usually set to True when evaluation

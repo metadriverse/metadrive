@@ -2,7 +2,7 @@ import logging
 from metadrive.obs.state_obs import LidarStateObservation
 import gym
 import numpy as np
-
+from metadrive.component.vehicle_navigation_module.trajectory_navigation import WaymoTrajectoryNavigation
 from metadrive.constants import TerminationState
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.envs.base_env import BaseEnv
@@ -24,7 +24,7 @@ WAYMO_ENV_CONFIG = dict(
     no_traffic=False,
     traj_start_index=0,
     traj_end_index=-1,
-    # replay=True,
+    replay=True,
     no_static_traffic_vehicle=False,
 
     # ===== Agent config =====
@@ -33,6 +33,7 @@ WAYMO_ENV_CONFIG = dict(
         lane_line_detector=dict(num_lasers=12, distance=50),
         side_detector=dict(num_lasers=120, distance=50),
         show_dest_mark=True,
+        navigation_module=WaymoTrajectoryNavigation,
     ),
     use_waymo_observation=True,
 
@@ -248,13 +249,15 @@ class WaymoEnv(BaseEnv):
 
     def _reset_global_seed(self, force_seed=None):
         current_seed = force_seed if force_seed is not None else get_np_random(None).randint(
-            0, int(self.config["case_num"])
+            self.config["start_case_index"], self.config["start_case_index"] + int(self.config["case_num"])
         )
+        assert self.config["start_case_index"] <= current_seed < \
+               self.config["start_case_index"] + self.config["case_num"], "Force seed range Error!"
         self.seed(current_seed)
 
     def _is_out_of_road(self, vehicle):
         # A specified function to determine whether this vehicle should be done.
-        done = vehicle.crash_sidewalk or vehicle.on_yellow_continuous_line
+        done = vehicle.crash_sidewalk or vehicle.on_yellow_continuous_line or vehicle.on_white_continuous_line
         if self.config["out_of_route_done"]:
             done = done or self.observations["default_agent"].lateral_dist > 10
         return done

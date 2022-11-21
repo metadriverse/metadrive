@@ -14,7 +14,8 @@ class WaymoMapManager(BaseManager):
         super(WaymoMapManager, self).__init__()
         self.current_map = None
         self.map_num = self.engine.global_config["case_num"]
-        self.maps = {_seed: None for _seed in range(0, self.map_num)}
+        start = self.engine.global_config["start_case_index"]
+        self.maps = {_seed: None for _seed in range(start, start + self.map_num)}
         # we put the route-find funcrion here
         self.sdc_start = None
         self.sdc_destinations = []
@@ -57,43 +58,34 @@ class WaymoMapManager(BaseManager):
         # TODO(LQY):
         #  The Following part is for EdgeNetworkNavi
         #  Consider removing them if we finally choose to use TrajectoryNavi
-        start_lanes = ray_localization(
-            [np.cos(init_yaw), np.sin(init_yaw)],
-            init_position,
-            self.engine,
-            return_all_result=True,
-            use_heading_filter=False
-        )
-        end_lanes = ray_localization(
-            [np.cos(last_yaw), np.sin(last_yaw)],
-            last_position,
-            self.engine,
-            return_all_result=True,
-            use_heading_filter=False
-        )
-
-        self.sdc_start, sdc_end = self.filter_path(start_lanes, end_lanes)
-        initial_long, initial_lat = self.current_map.road_network. \
-            get_lane(self.sdc_start).local_coordinates(init_position)
+        # start_lanes = ray_localization(
+        #     [np.cos(init_yaw), np.sin(init_yaw)],
+        #     init_position,
+        #     self.engine,
+        #     return_all_result=True,
+        #     use_heading_filter=False
+        # )
+        # end_lanes = ray_localization(
+        #     [np.cos(last_yaw), np.sin(last_yaw)],
+        #     last_position,
+        #     self.engine,
+        #     return_all_result=True,
+        #     use_heading_filter=False
+        # )
+        #
+        # self.sdc_start, sdc_end = self.filter_path(start_lanes, end_lanes)
+        # initial_long, initial_lat = self.current_map.road_network. \
+        #     get_lane(self.sdc_start).local_coordinates(init_position)
 
         self.sdc_dest_point = last_position
-        self.sdc_destinations = [sdc_end]
-        lane = self.current_map.road_network.get_lane(sdc_end)
-        if len(lane.left_lanes) > 0:
-            self.sdc_destinations += [lane["id"] for lane in lane.left_lanes]
-        if len(lane.right_lanes) > 0:
-            self.sdc_destinations += [lane["id"] for lane in lane.right_lanes]
+        # self.sdc_destinations = [sdc_end]
+        # lane = self.current_map.road_network.get_lane(sdc_end)
+        # if len(lane.left_lanes) > 0:
+        #     self.sdc_destinations += [lane["id"] for lane in lane.left_lanes]
+        # if len(lane.right_lanes) > 0:
+        #     self.sdc_destinations += [lane["id"] for lane in lane.right_lanes]
         self.engine.global_config.update(
-            dict(
-                target_vehicle_configs={
-                    DEFAULT_AGENT: dict(
-                        spawn_lane_index=self.sdc_start,
-                        spawn_longitude=initial_long,
-                        spawn_lateral=initial_lat,
-                        destination=sdc_end
-                    )
-                }
-            )
+            dict(target_vehicle_configs={DEFAULT_AGENT: dict(spawn_position_heading=(init_position, init_yaw))})
         )
 
     def filter_path(self, start_lanes, end_lanes):
