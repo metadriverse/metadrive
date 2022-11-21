@@ -32,7 +32,7 @@ class WaymoIDMTrafficManager(WaymoTrafficManager):
     def before_reset(self):
         super(WaymoIDMTrafficManager, self).before_reset()
 
-    def reset(self):
+    def after_reset(self):
         # try:
         self.v_id_to_destination = OrderedDict()
         self.v_id_to_stop_time = OrderedDict()

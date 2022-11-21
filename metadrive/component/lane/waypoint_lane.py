@@ -49,16 +49,26 @@ class WayPointLane(AbstractLane, InterpolatingLine):
     def position(self, longitudinal: float, lateral: float) -> np.ndarray:
         return self.get_point(longitudinal, lateral)
 
-    def local_coordinates(self, position: Tuple[float, float]):
+    def local_coordinates(self, position: Tuple[float, float], only_in_lane_point=False):
         ret = []  # ret_longitude, ret_lateral, sort_key
+        exclude_ret = []
         accumulate_len = 0
         for seg in self.segment_property:
             delta_x = position[0] - seg["start_point"][0]
             delta_y = position[1] - seg["start_point"][1]
             longitudinal = delta_x * seg["direction"][0] + delta_y * seg["direction"][1]
             lateral = delta_x * seg["lateral_direction"][0] + delta_y * seg["lateral_direction"][1]
-            ret.append([accumulate_len + longitudinal, lateral])
+            if not only_in_lane_point:
+                ret.append([accumulate_len + longitudinal, lateral])
+            else:
+                if abs(lateral) <= self.width / 2 and -1. <= accumulate_len + longitudinal <= self.length + 1:
+                    ret.append([accumulate_len + longitudinal, lateral])
+                else:
+                    exclude_ret.append([accumulate_len + longitudinal, lateral])
             accumulate_len += seg["length"]
+        if len(ret) == 0:
+            # for corner case
+            ret = exclude_ret
         ret.sort(key=lambda seg: abs(seg[-1]))
         return ret[0][0], ret[0][1]
 

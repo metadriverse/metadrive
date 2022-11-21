@@ -307,10 +307,20 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         if vehicle_config is not None:
             self.update_config(vehicle_config)
         map = self.engine.current_map
-        if position is None:
+
+        if position is not None:
+            # Highest priority
+            pass
+        elif self.config["spawn_position_heading"] is None:
+            # spawn_lane_index has second priority
             lane = map.road_network.get_lane(self.config["spawn_lane_index"])
             position = lane.position(self.config["spawn_longitude"], self.config["spawn_lateral"])
             heading = np.rad2deg(lane.heading_theta_at(self.config["spawn_longitude"]))
+        else:
+            assert self.config["spawn_position_heading"] is not None, "At least setting one initialization method"
+            position = self.config["spawn_position_heading"][0]
+            heading = self.config["spawn_position_heading"][1]
+
         self.spawn_place = position
         heading = -np.deg2rad(heading) - np.pi / 2
         self.set_static(False)
