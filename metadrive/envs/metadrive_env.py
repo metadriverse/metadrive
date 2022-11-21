@@ -154,7 +154,7 @@ class MetaDriveEnv(BaseEnv):
             TerminationState.OUT_OF_ROAD: False,
             TerminationState.SUCCESS: False,
             TerminationState.MAX_STEP: False,
-            TerminationState.CURRENT_BLOCK: self.vehicle.navigation.current_road.block_ID(),
+            # TerminationState.CURRENT_BLOCK: self.vehicle.navigation.current_road.block_ID(),
             TerminationState.ENV_SEED: self.current_seed,
             # crash_vehicle=False, crash_object=False, crash_building=False, out_of_road=False, arrive_dest=False,
         }
