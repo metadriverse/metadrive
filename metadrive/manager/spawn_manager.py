@@ -1,4 +1,5 @@
 import copy
+from metadrive.constants import BodyName
 from math import floor
 from typing import Union, List, Dict
 
@@ -48,7 +49,7 @@ class SpawnManager(BaseManager):
         self.spawn_roads = []
         self.safe_spawn_places = {}
         self.need_update_spawn_places = True
-        self.spawn_places_used = []
+        self.spawn_places_used = []  # reset every step
 
         target_vehicle_configs = copy.copy(self.engine.global_config["target_vehicle_configs"])
         self.available_target_vehicle_configs: Union[List, Dict] = target_vehicle_configs
@@ -168,7 +169,6 @@ class SpawnManager(BaseManager):
         for bid, bp in self.safe_spawn_places.items():
             if bid in self.spawn_places_used:
                 continue
-
             # save time calculate once
             if not bp.get("spawn_point_position", False):
                 lane = map.road_network.get_lane(bp["config"]["spawn_lane_index"])
@@ -199,7 +199,7 @@ class SpawnManager(BaseManager):
                 vis_body.node().setIntoCollideMask(CollisionGroup.AllOff)
                 bp.force_set("need_debug", False)
 
-            if not result.hasHit():
+            if not result.hasHit() or result.node.getName() != BodyName.Vehicle:
                 new_bp = copy.deepcopy(bp).get_dict()
                 if randomize:
                     new_bp["config"] = self._randomize_position_in_slot(new_bp["config"])
