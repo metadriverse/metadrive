@@ -1,4 +1,5 @@
 from collections import deque, namedtuple
+import copy
 from typing import Optional, Union, Iterable
 
 import cv2
@@ -146,6 +147,9 @@ class TopDownRenderer:
             assert self.current_track_vehicle is not None, "Specify which vehicle to track"
         self.road_color = road_color
         self._light_background = light_background
+        self._text_render_pos = [50, 50]
+        self._font_size = 25
+        self._text_render_interval = 20
 
         # Setup the canvas
         # (1) background is the underlying layer. It is fixed and will never change unless the map changes.
@@ -182,8 +186,10 @@ class TopDownRenderer:
 
         # Draw
         self.blit()
-
         self.kwargs = kwargs
+
+        # key accept
+        self.need_reset = False
 
     @property
     def canvas(self):
@@ -193,7 +199,12 @@ class TopDownRenderer:
         self._runtime_canvas.blit(self._background_canvas, (0, 0))
         self.canvas.fill(color_white)
 
-    def render(self, *args, **kwargs):
+    def render(self, text, *args, **kwargs):
+        self.need_reset = False
+        key_press = pygame.key.get_pressed()
+        if key_press[pygame.K_r]:
+            self.need_reset = True
+
         # Record current target vehicle
         objects = self.engine.get_objects(lambda obj: not is_map_related_instance(obj))
         this_frame_objects = self._append_frame_objects(objects)
@@ -202,10 +213,25 @@ class TopDownRenderer:
         self._handle_event()
         self.refresh()
         self._draw(*args, **kwargs)
+        self._add_text(text)
         self.blit()
         ret = self.canvas.copy()
         ret = ret.convert(24)
         return ret
+
+    def _add_text(self, text: dict):
+        if not pygame.get_init():
+            pygame.init()
+        font2 = pygame.font.SysFont('didot.ttc', 25)
+        # pygame do not support multiline text render
+        count = 0
+        for key, value in text.items():
+            line = str(key) + ":" + str(value)
+            img2 = font2.render(line, True, (0, 0, 0))
+            this_line_pos = copy.copy(self._text_render_pos)
+            this_line_pos[-1] += count * self._text_render_interval
+            self._render_canvas.blit(img2, this_line_pos)
+            count += 1
 
     def blit(self):
         # self._render_canvas.blit(self._runtime_canvas, (0, 0))
