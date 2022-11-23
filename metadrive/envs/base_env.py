@@ -184,7 +184,7 @@ class BaseEnv(gym.Env):
 
         # lazy initialization, create the main vehicle in the lazy_init() func
         self.engine: Optional[BaseEngine] = None
-        self._top_down_renderer = None
+
         self.episode_steps = 0
         # self.current_seed = None
 
@@ -304,8 +304,10 @@ class BaseEnv(gym.Env):
         :return: when mode is 'rgb', image array is returned
         """
         if mode in ["top_down", "topdown", "bev", "birdview"]:
-            return self._render_topdown(*args, **kwargs)
-        assert self.config["use_render"] or self.engine.mode != RENDER_MODE_NONE, ("render is off now, can not render")
+            ret = self._render_topdown(text=text, *args, **kwargs)
+            return ret
+        assert self.config["use_render"] or self.engine.mode != RENDER_MODE_NONE, \
+            ("Panda Renderring is off now, can not render")
         self.engine.render_frame(text)
         if mode != "human" and self.config["offscreen_render"]:
             # fetch img from img stack to be make this func compatible with other render func in RL setting
@@ -404,10 +406,6 @@ class BaseEnv(gym.Env):
     def close(self):
         if self.engine is not None:
             close_engine()
-        if self._top_down_renderer is not None:
-            self._top_down_renderer.close()
-            del self._top_down_renderer
-            self._top_down_renderer = None
 
     def force_close(self):
         print("Closing environment ... Please wait")
@@ -523,11 +521,8 @@ class BaseEnv(gym.Env):
     def maps(self):
         return self.engine.map_manager.maps
 
-    def _render_topdown(self, *args, **kwargs):
-        if self._top_down_renderer is None:
-            from metadrive.obs.top_down_renderer import TopDownRenderer
-            self._top_down_renderer = TopDownRenderer(*args, **kwargs)
-        return self._top_down_renderer.render(*args, **kwargs)
+    def _render_topdown(self, text, *args, **kwargs):
+        return self.engine.render_topdown(text, *args, **kwargs)
 
     @property
     def main_camera(self):
@@ -536,3 +531,7 @@ class BaseEnv(gym.Env):
     @property
     def current_track_vehicle(self):
         return self.engine.current_track_vehicle
+
+    @property
+    def _top_down_renderer(self):
+        return self.engine._top_down_renderer

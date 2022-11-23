@@ -247,8 +247,8 @@ class IDMPolicy(BasePolicy):
             acc_front_obj = None
             acc_front_dist = 5
             steering_target_lane = self.routing_target_lane
-            logging.warning("IDM bug! fall back")
-            print("IDM bug! fall back")
+            # logging.warning("IDM bug! fall back")
+            # print("IDM bug! fall back")
 
         # control by PID and IDM
         steering = self.steering_control(steering_target_lane)
