@@ -52,7 +52,6 @@ class SpawnManager(BaseManager):
         self.spawn_places_used = []  # reset every step
 
         target_vehicle_configs = copy.copy(self.engine.global_config["target_vehicle_configs"])
-        self.available_target_vehicle_configs: Union[List, Dict] = target_vehicle_configs
         self._init_target_vehicle_configs = target_vehicle_configs
 
         spawn_roads = self.engine.global_config["spawn_roads"]
@@ -93,12 +92,13 @@ class SpawnManager(BaseManager):
         else:
             ret["agent0"] = self._randomize_position_in_slot(self.available_target_vehicle_configs[0]["config"])
 
-        # set the destination
+        # set the destination/spawn point and update target_v config
         target_vehicle_configs = {}
         for agent_id, config in ret.items():
-            # if agent_id in self._init_target_vehicle_configs:
-            init_config = self._init_target_vehicle_configs[agent_id]
-            config = init_config.update(config)
+            init_config = copy.deepcopy(self._init_target_vehicle_configs[agent_id])
+            if not init_config.get("_specified_spawn_lane", False):
+                init_config.update(config)
+            config = init_config
             if not config.get("destination", False) or config["destination"] is None:
                 config = self.update_destination_for(agent_id, config)
             target_vehicle_configs[agent_id] = config
