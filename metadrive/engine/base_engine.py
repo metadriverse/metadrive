@@ -57,6 +57,9 @@ class BaseEngine(EngineCore, Randomizable):
         # store external actions
         self.external_actions = None
 
+        # topdown renderer
+        self._top_down_renderer = None
+
     def add_policy(self, object_id, policy_class, *args, **kwargs):
         policy = policy_class(*args, **kwargs)
         self._object_policies[object_id] = policy
@@ -311,6 +314,11 @@ class BaseEngine(EngineCore, Randomizable):
         self.clear_world()
         self.close_world()
 
+        if self._top_down_renderer is not None:
+            self._top_down_renderer.close()
+            del self._top_down_renderer
+            self._top_down_renderer = None
+
     def __del__(self):
         logging.debug("{} is destroyed".format(self.__class__.__name__))
 
@@ -432,3 +440,9 @@ class BaseEngine(EngineCore, Randomizable):
             return self.replay_manager.current_frame.agent_to_object(agent_name)
         else:
             return self.agent_manager.agent_to_object(agent_name)
+
+    def render_topdown(self, text, *args, **kwargs):
+        if self._top_down_renderer is None:
+            from metadrive.obs.top_down_renderer import TopDownRenderer
+            self._top_down_renderer = TopDownRenderer(*args, **kwargs)
+        return self._top_down_renderer.render(text, *args, **kwargs)

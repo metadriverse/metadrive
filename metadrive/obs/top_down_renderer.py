@@ -1,4 +1,5 @@
 from collections import deque, namedtuple
+import copy
 from typing import Optional, Union, Iterable
 
 import cv2
@@ -17,13 +18,13 @@ history_object = namedtuple("history_object", "name position heading_theta WIDTH
 
 
 def draw_top_down_map(
-    map,
-    resolution: Iterable = (512, 512),
-    simple_draw=True,
-    return_surface=False,
-    film_size=None,
-    reverse_color=False,
-    road_color=color_white
+        map,
+        resolution: Iterable = (512, 512),
+        simple_draw=True,
+        return_surface=False,
+        film_size=None,
+        reverse_color=False,
+        road_color=color_white
 ) -> Optional[Union[np.ndarray, pygame.Surface]]:
     film_size = film_size or map.film_size
     surface = WorldSurface(film_size, 0, pygame.Surface(film_size))
@@ -56,7 +57,7 @@ def draw_top_down_map(
 
 
 def draw_top_down_trajectory(
-    surface: WorldSurface, episode_data: dict, entry_differ_color=False, exit_differ_color=False, color_list=None
+        surface: WorldSurface, episode_data: dict, entry_differ_color=False, exit_differ_color=False, color_list=None
 ):
     if entry_differ_color or exit_differ_color:
         assert color_list is not None
@@ -115,18 +116,18 @@ def draw_top_down_trajectory(
 
 class TopDownRenderer:
     def __init__(
-        self,
-        film_size=(1000, 1000),
-        screen_size=(1000, 1000),
-        light_background=True,
-        num_stack=15,
-        history_smooth=0,
-        road_color=(80, 80, 80),
-        show_agent_name=False,
-        camera_position=None,
-        track_target_vehicle=False,
-        **kwargs
-        # current_track_vehicle=None
+            self,
+            film_size=(1000, 1000),
+            screen_size=(1000, 1000),
+            light_background=True,
+            num_stack=15,
+            history_smooth=0,
+            road_color=(80, 80, 80),
+            show_agent_name=False,
+            camera_position=None,
+            track_target_vehicle=False,
+            **kwargs
+            # current_track_vehicle=None
     ):
         # Setup some useful flags
         self.position = camera_position
@@ -146,6 +147,9 @@ class TopDownRenderer:
             assert self.current_track_vehicle is not None, "Specify which vehicle to track"
         self.road_color = road_color
         self._light_background = light_background
+        self._text_render_pos = [50, 50]
+        self._font_size = 25
+        self._text_render_interval = 20
 
         # Setup the canvas
         # (1) background is the underlying layer. It is fixed and will never change unless the map changes.
@@ -154,7 +158,7 @@ class TopDownRenderer:
         )
         if self._light_background:
             pixels = pygame.surfarray.pixels2d(self._background_canvas)
-            pixels ^= 2**32 - 1
+            pixels ^= 2 ** 32 - 1
             del pixels
         # (2) runtime is a copy of the background so you can draw movable things on it. It is super large
         # and our vehicles can draw on this large canvas.
@@ -182,8 +186,10 @@ class TopDownRenderer:
 
         # Draw
         self.blit()
-
         self.kwargs = kwargs
+
+        # key accept
+        self.need_reset = False
 
     @property
     def canvas(self):
@@ -193,7 +199,12 @@ class TopDownRenderer:
         self._runtime_canvas.blit(self._background_canvas, (0, 0))
         self.canvas.fill(color_white)
 
-    def render(self, *args, **kwargs):
+    def render(self, text, *args, **kwargs):
+        self.need_reset = False
+        key_press = pygame.key.get_pressed()
+        if key_press[pygame.K_r]:
+            self.need_reset = True
+
         # Record current target vehicle
         objects = self.engine.get_objects(lambda obj: not is_map_related_instance(obj))
         this_frame_objects = self._append_frame_objects(objects)
@@ -202,10 +213,25 @@ class TopDownRenderer:
         self._handle_event()
         self.refresh()
         self._draw(*args, **kwargs)
+        self._add_text(text)
         self.blit()
         ret = self.canvas.copy()
         ret = ret.convert(24)
         return ret
+
+    def _add_text(self, text: dict):
+        if not pygame.get_init():
+            return 
+        font2 = pygame.font.SysFont('didot.ttc', 25)
+        # pygame do not support multiline text render
+        count = 0
+        for key, value in text.items():
+            line = str(key) + ":" + str(value)
+            img2 = font2.render(line, True, (0, 0, 0))
+            this_line_pos = copy.copy(self._text_render_pos)
+            this_line_pos[-1] += count * self._text_render_interval
+            self._render_canvas.blit(img2, this_line_pos)
+            count += 1
 
     def blit(self):
         # self._render_canvas.blit(self._runtime_canvas, (0, 0))
@@ -222,7 +248,7 @@ class TopDownRenderer:
         self._light_background = self._light_background
         if self._light_background:
             pixels = pygame.surfarray.pixels2d(self._background_canvas)
-            pixels ^= 2**32 - 1
+            pixels ^= 2 ** 32 - 1
             del pixels
 
         # Reset several useful variables.
