@@ -53,7 +53,7 @@ class SpawnManager(BaseManager):
 
         target_vehicle_configs = copy.copy(self.engine.global_config["target_vehicle_configs"])
         self.available_target_vehicle_configs: Union[List, Dict] = target_vehicle_configs
-        self._init_target_vehicle_configs = self.get_not_randomize_vehicle_configs(target_vehicle_configs)
+        self._init_target_vehicle_configs = target_vehicle_configs
 
         spawn_roads = self.engine.global_config["spawn_roads"]
         target_vehicle_configs, safe_spawn_places = self._auto_fill_spawn_roads_randomly(spawn_roads)
@@ -64,6 +64,7 @@ class SpawnManager(BaseManager):
 
     @staticmethod
     def get_not_randomize_vehicle_configs(configs):
+        raise DeprecationWarning
         ret = {}
         for id, config in configs.items():
             if config["not_randomize"]:
@@ -95,8 +96,9 @@ class SpawnManager(BaseManager):
         # set the destination
         target_vehicle_configs = {}
         for agent_id, config in ret.items():
-            if agent_id in self._init_target_vehicle_configs:
-                config = self._init_target_vehicle_configs[agent_id]
+            # if agent_id in self._init_target_vehicle_configs:
+            init_config = self._init_target_vehicle_configs[agent_id]
+            config = init_config.update(config)
             if not config.get("destination", False) or config["destination"] is None:
                 config = self.update_destination_for(agent_id, config)
             target_vehicle_configs[agent_id] = config

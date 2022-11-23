@@ -38,7 +38,6 @@ MULTI_AGENT_METADRIVE_DEFAULT_CONFIG = dict(
     vehicle_config=dict(
         lidar=dict(num_lasers=72, distance=40, num_others=0),
         random_color=True,
-        not_randomize=False,
         spawn_lane_index=(FirstPGBlock.NODE_1, FirstPGBlock.NODE_2, 0),
 
         # We remove dynamics randomization in Multi-agent environments to make the results aligned with previous
@@ -110,7 +109,6 @@ class MultiAgentMetaDrive(MetaDriveEnv):
             config = copy.deepcopy(ret_config["vehicle_config"])
             if agent_id in ret_config["target_vehicle_configs"]:
                 config.update(ret_config["target_vehicle_configs"][agent_id])
-                config["not_randomize"] = True
             target_vehicle_configs[agent_id] = config
         ret_config["target_vehicle_configs"] = target_vehicle_configs
         return ret_config
@@ -269,7 +267,10 @@ def _vis():
             "start_seed": 8000,
             "environment_num": 1,
             "map": "SSS",
-
+            "vehicle_config": {"vehicle_model":"s"},
+            "target_vehicle_configs": {"agent0": {"vehicle_model": "static_default"},
+                                       "agent1": {"vehicle_model": "m"},
+                                       "agent2": {"vehicle_model": "xl"}},
             # "allow_respawn": False,
             # "manual_control": True,
         }
