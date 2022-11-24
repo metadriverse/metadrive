@@ -72,7 +72,7 @@ def test_respawn():
     print("Finish {} dones.".format(done_count))
 
 
-def test_delay_done():
+def test_delay_done(render=False):
     # Put agent 0 in the left, agent 1 in the right, and let agent 0 dead at first.
     # We wish to see agent 1 hits the dead body of agent 0.
     env = MultiAgentRoundaboutEnv(
@@ -94,7 +94,8 @@ def test_delay_done():
             "num_agents": 2,
             "traffic_density": 0,
             "delay_done": 100,
-            "horizon": 100
+            "horizon": 100,
+            "use_render": render
         }
     )
     try:
@@ -147,6 +148,6 @@ def test_delay_done():
 
 
 if __name__ == '__main__':
-    setup_logger(True)
-    test_respawn()
-    test_delay_done()
+    # setup_logger(True)
+    # test_respawn()
+    test_delay_done(True)
