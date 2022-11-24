@@ -1,15 +1,22 @@
-from collections import deque, namedtuple
 import copy
+from metadrive.utils.interpolating_line import InterpolatingLine
+
+from collections import deque, namedtuple
 from typing import Optional, Union, Iterable
 
 import cv2
 import numpy as np
 
+from metadrive.component.map.waymo_map import WaymoMap
 from metadrive.constants import Decoration, TARGET_VEHICLES
+from metadrive.constants import LineColor
+from metadrive.constants import WaymoLaneProperty
+
 from metadrive.engine.engine_utils import get_engine
 from metadrive.obs.top_down_obs_impl import WorldSurface, VehicleGraphics, LaneGraphics
 from metadrive.utils.map_utils import is_map_related_instance
 from metadrive.utils.utils import import_pygame
+from metadrive.utils.waymo_utils.waymo_utils import RoadLineType, RoadEdgeType, convert_polyline_to_metadrive
 
 pygame = import_pygame()
 
@@ -40,16 +47,25 @@ def draw_top_down_map(
     surface.scaling = scaling
     centering_pos = ((b_box[0] + b_box[1]) / 2, (b_box[2] + b_box[3]) / 2)
     surface.move_display_window_to(centering_pos)
-    for _from in map.road_network.graph.keys():
-        decoration = True if _from == Decoration.start else False
-        for _to in map.road_network.graph[_from].keys():
-            for l in map.road_network.graph[_from][_to]:
-                if simple_draw:
-                    LaneGraphics.simple_draw(l, surface, color=road_color)
-                else:
-                    two_side = True if l is map.road_network.graph[_from][_to][-1] or decoration else False
-                    LaneGraphics.display(l, surface, two_side, use_line_color=True)
 
+    if isinstance(map, WaymoMap):
+        assert not simple_draw, "Simple Draw does not support now"
+        for data in map.blocks[-1].waymo_map_data.values():
+            if WaymoLaneProperty.POLYLINE not in data:
+                continue
+            type = data.get("type", None)
+            waymo_line = InterpolatingLine(convert_polyline_to_metadrive(data[WaymoLaneProperty.POLYLINE]))
+            LaneGraphics.display_waymo(waymo_line, type, surface)
+    else:
+        for _from in map.road_network.graph.keys():
+            decoration = True if _from == Decoration.start else False
+            for _to in map.road_network.graph[_from].keys():
+                for l in map.road_network.graph[_from][_to]:
+                    if simple_draw:
+                        LaneGraphics.simple_draw(l, surface, color=road_color)
+                    else:
+                        two_side = True if l is map.road_network.graph[_from][_to][-1] or decoration else False
+                        LaneGraphics.display(l, surface, two_side, use_line_color=True)
     if return_surface:
         return surface
     ret = cv2.resize(pygame.surfarray.pixels_red(surface), resolution, interpolation=cv2.INTER_LINEAR)

@@ -37,6 +37,7 @@ class WaymoBlock(BaseBlock):
             lane.construct_lane_in_block(self, lane_index=id)
             # lane.construct_lane_line_in_block(self, [True if len(lane.left_lanes) == 0 else False,
             #                                          True if len(lane.right_lanes) == 0 else False, ])
+        # draw
         for lane_id, data in self.waymo_map_data.items():
             type = data.get("type", None)
             if RoadLineType.is_road_line(type):
