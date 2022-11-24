@@ -5,7 +5,6 @@ from metadrive.policy.base_policy import BasePolicy
 
 has_rendered = False
 
-
 # class ReplayPolicy(BasePolicy):
 #     def __init__(self, control_object, locate_info):
 #         super(ReplayPolicy, self).__init__(control_object=control_object)
@@ -44,9 +43,11 @@ class ReplayEgoCarPolicy(BasePolicy):
     def __init__(self, control_object, random_seed):
         super(ReplayEgoCarPolicy, self).__init__(control_object=control_object)
         self.trajectory_data = self.engine.traffic_manager.current_traffic_data
-        self.traj_info = [self.engine.traffic_manager.parse_vehicle_state(
-            self.trajectory_data[self.engine.traffic_manager.sdc_index]["state"], i) for i in
-            range(len(self.trajectory_data[self.engine.traffic_manager.sdc_index]["state"]))]
+        self.traj_info = [
+            self.engine.traffic_manager.parse_vehicle_state(
+                self.trajectory_data[self.engine.traffic_manager.sdc_index]["state"], i
+            ) for i in range(len(self.trajectory_data[self.engine.traffic_manager.sdc_index]["state"]))
+        ]
         self.start_index = 0
         self.init_pos = self.traj_info[0]["position"]
         self.heading = self.traj_info[0]["heading"]
