@@ -2,6 +2,7 @@ import copy
 from metadrive.utils.interpolating_line import InterpolatingLine
 
 from collections import deque, namedtuple
+import copy
 from typing import Optional, Union, Iterable
 
 import cv2
