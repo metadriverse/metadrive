@@ -185,9 +185,6 @@ class BaseEnv(gym.Env):
         # lazy initialization, create the main vehicle in the lazy_init() func
         self.engine: Optional[BaseEngine] = None
 
-        self.episode_steps = 0
-        # self.current_seed = None
-
         # In MARL envs with respawn mechanism, varying episode lengths might happen.
         self.dones = None
         self.episode_rewards = defaultdict(float)
@@ -245,7 +242,6 @@ class BaseEnv(gym.Env):
 
     # ===== Run-time =====
     def step(self, actions: Union[np.ndarray, Dict[AnyStr, np.ndarray]]):
-        self.episode_steps += 1
         actions = self._preprocess_actions(actions)
         engine_info = self._step_simulator(actions)
         o, r, d, i = self._get_step_return(actions, engine_info=engine_info)
@@ -348,7 +344,6 @@ class BaseEnv(gym.Env):
             self._top_down_renderer.reset(self.current_map)
 
         self.dones = {agent_id: False for agent_id in self.vehicles.keys()}
-        self.episode_steps = 0
         self.episode_rewards = defaultdict(float)
         self.episode_lengths = defaultdict(int)
 
@@ -385,7 +380,7 @@ class BaseEnv(gym.Env):
         # For extreme case only. Force to terminate all vehicles if the environmental step exceeds 5 times horizon.
         should_external_done = False
         if self.config["horizon"] is not None:
-            should_external_done = self.episode_steps > 5 * self.config["horizon"]
+            should_external_done = self.episode_step > 5 * self.config["horizon"]
         if should_external_done:
             for k in self.dones:
                 self.dones[k] = True
@@ -535,3 +530,8 @@ class BaseEnv(gym.Env):
     @property
     def _top_down_renderer(self):
         return self.engine._top_down_renderer
+
+    @property
+    def episode_step(self):
+        return self.engine.episode_step if self.engine is not None else 0
+

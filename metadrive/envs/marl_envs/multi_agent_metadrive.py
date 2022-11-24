@@ -137,7 +137,7 @@ class MultiAgentMetaDrive(MetaDriveEnv):
         o, r, d, i = self._after_vehicle_done(o, r, d, i)
 
         # Update respawn manager
-        if self.episode_steps >= self.config["horizon"]:
+        if self.episode_step >= self.config["horizon"]:
             self.agent_manager.set_allow_respawn(False)
         new_obs_dict, new_info_dict = self._respawn_vehicles(randomize_position=self.config["random_traffic"])
         if new_obs_dict:
@@ -150,8 +150,8 @@ class MultiAgentMetaDrive(MetaDriveEnv):
         # Update __all__
         d_all = False
         if self.config["horizon"] is not None:  # No agent alive or a too long episode happens
-            if (self.episode_steps >= self.config["horizon"] and all(d.values())) or \
-                    (self.episode_steps >= 5 * self.config["horizon"]):
+            if (self.episode_step >= self.config["horizon"] and all(d.values())) or \
+                    (self.episode_step >= 5 * self.config["horizon"]):
                 d_all = True
         if len(self.vehicles) == 0:  # No agent alive
             d_all = True
