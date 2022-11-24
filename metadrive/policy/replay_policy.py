@@ -4,7 +4,6 @@ from metadrive.policy.base_policy import BasePolicy
 
 has_rendered = False
 
-
 # class ReplayPolicy(BasePolicy):
 #     def __init__(self, control_object, locate_info):
 #         super(ReplayPolicy, self).__init__(control_object=control_object)
@@ -74,4 +73,3 @@ class ReplayEgoCarPolicy(BasePolicy):
             self.control_object.set_heading_theta(this_heading)
 
         return [0, 0]
-
