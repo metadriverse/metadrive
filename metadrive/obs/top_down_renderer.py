@@ -362,14 +362,14 @@ class TopDownRenderer:
 
         v = self.current_track_vehicle
         canvas = self._runtime_canvas
-        field = self.canvas.get_width()
+        field = self._render_canvas.get_size()
         if self.position is not None or self.track_target_vehicle:
             cam_pos = v.position if self.track_target_vehicle else self.position
             position = self._runtime_canvas.pos2pix(*cam_pos)
         else:
-            position = (field / 2, field / 2)
-        off = (position[0] - field / 2, position[1] - field / 2)
-        self.canvas.blit(source=canvas, dest=(0, 0), area=(off[0], off[1], field, field))
+            position = (field[0] / 2, field[1] / 2)
+        off = (position[0] - field[0] / 2, position[1] - field[1] / 2)
+        self.canvas.blit(source=canvas, dest=(0, 0), area=(off[0], off[1], field[0], field[1]))
 
         if "traffic_light_msg" in kwargs:
             if kwargs["traffic_light_msg"] < 0.5:
