@@ -24,7 +24,7 @@ packages = find_namespace_packages(
 print("We will install the following packages: ", packages)
 
 """ ===== Remember to modify the PG_EDITION at first ====="""
-version = "0.2.5.2"
+version = "0.2.6.0"
 
 install_requires = [
     "gym==0.19.0",
