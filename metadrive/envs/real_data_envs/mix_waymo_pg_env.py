@@ -154,7 +154,6 @@ class MixWaymoPGEnv(WaymoEnv):
             self._top_down_renderer.reset(self.current_map)
 
         self.dones = {agent_id: False for agent_id in self.vehicles.keys()}
-        self.episode_steps = 0
         self.episode_rewards = defaultdict(float)
         self.episode_lengths = defaultdict(int)
 
@@ -231,6 +230,6 @@ if __name__ == "__main__":
     env.reset()
     while True:
         o, r, d, i = env.step(env.action_space.sample())
-        env.render(text={"ts": env.episode_steps})
+        env.render(text={"ts": env.episode_step})
         if d:
             env.reset()

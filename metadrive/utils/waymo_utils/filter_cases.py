@@ -57,8 +57,8 @@ if __name__ == "__main__":
             env.reset(force_seed=i)
             while True:
                 o, r, d, info = env.step([0, 0])
-                if d or env.episode_steps > max_step:
-                    if info["arrive_dest"] and env.episode_steps > min_step:
+                if d or env.episode_step > max_step:
+                    if info["arrive_dest"] and env.episode_step > min_step:
                         os.rename(
                             os.path.join(case_data_path, "{}.pkl".format(i + start * 1000)),
                             os.path.join(processed_data_path, "{}.pkl".format(i + start * 1000))

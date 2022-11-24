@@ -1,3 +1,6 @@
+import copy
+from metadrive.utils.interpolating_line import InterpolatingLine
+
 from collections import deque, namedtuple
 import copy
 from typing import Optional, Union, Iterable
@@ -5,11 +8,16 @@ from typing import Optional, Union, Iterable
 import cv2
 import numpy as np
 
+from metadrive.component.map.waymo_map import WaymoMap
 from metadrive.constants import Decoration, TARGET_VEHICLES
+from metadrive.constants import LineColor
+from metadrive.constants import WaymoLaneProperty
+
 from metadrive.engine.engine_utils import get_engine
 from metadrive.obs.top_down_obs_impl import WorldSurface, VehicleGraphics, LaneGraphics
 from metadrive.utils.map_utils import is_map_related_instance
 from metadrive.utils.utils import import_pygame
+from metadrive.utils.waymo_utils.waymo_utils import RoadLineType, RoadEdgeType, convert_polyline_to_metadrive
 
 pygame = import_pygame()
 
@@ -40,16 +48,25 @@ def draw_top_down_map(
     surface.scaling = scaling
     centering_pos = ((b_box[0] + b_box[1]) / 2, (b_box[2] + b_box[3]) / 2)
     surface.move_display_window_to(centering_pos)
-    for _from in map.road_network.graph.keys():
-        decoration = True if _from == Decoration.start else False
-        for _to in map.road_network.graph[_from].keys():
-            for l in map.road_network.graph[_from][_to]:
-                if simple_draw:
-                    LaneGraphics.simple_draw(l, surface, color=road_color)
-                else:
-                    two_side = True if l is map.road_network.graph[_from][_to][-1] or decoration else False
-                    LaneGraphics.display(l, surface, two_side, use_line_color=True)
 
+    if isinstance(map, WaymoMap):
+        assert not simple_draw, "Simple Draw does not support now"
+        for data in map.blocks[-1].waymo_map_data.values():
+            if WaymoLaneProperty.POLYLINE not in data:
+                continue
+            type = data.get("type", None)
+            waymo_line = InterpolatingLine(convert_polyline_to_metadrive(data[WaymoLaneProperty.POLYLINE]))
+            LaneGraphics.display_waymo(waymo_line, type, surface)
+    else:
+        for _from in map.road_network.graph.keys():
+            decoration = True if _from == Decoration.start else False
+            for _to in map.road_network.graph[_from].keys():
+                for l in map.road_network.graph[_from][_to]:
+                    if simple_draw:
+                        LaneGraphics.simple_draw(l, surface, color=road_color)
+                    else:
+                        two_side = True if l is map.road_network.graph[_from][_to][-1] or decoration else False
+                        LaneGraphics.display(l, surface, two_side, use_line_color=True)
     if return_surface:
         return surface
     ret = cv2.resize(pygame.surfarray.pixels_red(surface), resolution, interpolation=cv2.INTER_LINEAR)
@@ -220,6 +237,8 @@ class TopDownRenderer:
         return ret
 
     def _add_text(self, text: dict):
+        if not text:
+            return
         if not pygame.get_init():
             pygame.init()
         font2 = pygame.font.SysFont('didot.ttc', 25)
@@ -344,14 +363,14 @@ class TopDownRenderer:
 
         v = self.current_track_vehicle
         canvas = self._runtime_canvas
-        field = self.canvas.get_width()
+        field = self._render_canvas.get_size()
         if self.position is not None or self.track_target_vehicle:
             cam_pos = v.position if self.track_target_vehicle else self.position
             position = self._runtime_canvas.pos2pix(*cam_pos)
         else:
-            position = (field / 2, field / 2)
-        off = (position[0] - field / 2, position[1] - field / 2)
-        self.canvas.blit(source=canvas, dest=(0, 0), area=(off[0], off[1], field, field))
+            position = (field[0] / 2, field[1] / 2)
+        off = (position[0] - field[0] / 2, position[1] - field[1] / 2)
+        self.canvas.blit(source=canvas, dest=(0, 0), area=(off[0], off[1], field[0], field[1]))
 
         if "traffic_light_msg" in kwargs:
             if kwargs["traffic_light_msg"] < 0.5:

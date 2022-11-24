@@ -273,7 +273,7 @@ class MultiAgentTollgateEnv(MultiAgentMetaDrive):
 
     def step(self, actions):
         o, r, d, i = super(MultiAgentTollgateEnv, self).step(actions)
-        self.stay_time_manager.record(self.agent_manager.active_agents, self.episode_steps)
+        self.stay_time_manager.record(self.agent_manager.active_agents, self.episode_step)
         return o, r, d, i
 
     def setup_engine(self):
