@@ -236,6 +236,8 @@ class TopDownRenderer:
         return ret
 
     def _add_text(self, text: dict):
+        if not text:
+            return
         if not pygame.get_init():
             pygame.init()
         font2 = pygame.font.SysFont('didot.ttc', 25)

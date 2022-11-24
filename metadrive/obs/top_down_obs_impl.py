@@ -206,7 +206,7 @@ class VehicleGraphics:
 
     @classmethod
     def display(
-            cls, vehicle, surface, color, heading, label: bool = False, draw_countour=False, contour_width=1
+        cls, vehicle, surface, color, heading, label: bool = False, draw_countour=False, contour_width=1
     ) -> None:
         """
         Display a vehicle on a pygame surface.
@@ -320,7 +320,8 @@ class LaneGraphics:
             if len(waymo_poly_line.segment_property) <= 1:
                 return
             stripes_count = int(
-                2 * (surface.get_height() + surface.get_width()) / (cls.STRIPE_SPACING * surface.scaling))
+                2 * (surface.get_height() + surface.get_width()) / (cls.STRIPE_SPACING * surface.scaling)
+            )
             s_origin, _ = lane.local_coordinates(surface.origin)
             s0 = (int(s_origin) // cls.STRIPE_SPACING - stripes_count // 2) * cls.STRIPE_SPACING
 

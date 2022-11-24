@@ -9,7 +9,6 @@ class InterpolatingLine:
     """
     This class provides point set with interpolating function
     """
-
     def __init__(self, points):
         self.segment_property = self._get_properties(points)
         self.length = sum([seg["length"] for seg in self.segment_property])
