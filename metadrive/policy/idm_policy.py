@@ -467,14 +467,15 @@ class WaymoIDMPolicy(IDMPolicy):
         return [steering, acc]
 
 
-class EgoWaymoIDMPolicy(IDMPolicy):
+class _EgoWaymoIDMPolicy(IDMPolicy):
     """
     This policy is customized for the ego car in Waymo environment.
+    We use this to help filter out invalid cases in waymo dataset.
     """
     NORMAL_SPEED = 30
 
     def __init__(self, control_object, random_seed):
-        super(EgoWaymoIDMPolicy, self).__init__(control_object=control_object, random_seed=random_seed)
+        super(_EgoWaymoIDMPolicy, self).__init__(control_object=control_object, random_seed=random_seed)
         self.target_speed = self.NORMAL_SPEED
         self.routing_target_lane = None
         self.available_routing_index_range = None
