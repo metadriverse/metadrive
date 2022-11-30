@@ -55,6 +55,7 @@ Please feel free to contact us if you have any suggestions or ideas!
 
    concept.rst
    development.rst
+   policy.rst
 
 
 .. toctree::
