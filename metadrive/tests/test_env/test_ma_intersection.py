@@ -470,7 +470,7 @@ def test_ma_intersection_reward_sign():
                 safe_places.append((bid, self.engine.spawn_manager.safe_spawn_places[bid]))
             return safe_places
 
-    env = TestEnv({"num_agents": 1, "use_render": True})
+    env = TestEnv({"num_agents": 1})
     np.random.seed(10)
     try:
         _check_spaces_before_reset(env)
