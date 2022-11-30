@@ -205,9 +205,9 @@ def test_ma_toll_reset():
                         v.navigation.get_current_lane_width() / 2 >= lat >=
                         (0.5 - v.navigation.get_current_lane_num()) * v.navigation.get_current_lane_width()
                     )
-                    if not v.arrive_destination:
+                    if not env._is_arrive_destination(v):
                         print('sss')
-                    assert v.arrive_destination
+                    assert env._is_arrive_destination(v)
 
                 act = {k: [0, 0] for k in env.vehicles.keys()}
                 o, r, d, i = _act(env, act)
