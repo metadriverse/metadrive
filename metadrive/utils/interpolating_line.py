@@ -9,6 +9,7 @@ class InterpolatingLine:
     """
     This class provides point set with interpolating function
     """
+
     def __init__(self, points):
         self.segment_property = self._get_properties(points)
         self.length = sum([seg["length"] for seg in self.segment_property])
@@ -41,8 +42,13 @@ class InterpolatingLine:
 
     def _get_properties(self, points):
         ret = []
-        for idx, p_start in enumerate(points[:-1]):
-            p_end = points[idx + 1]
+        p_start_idx = 0
+        while p_start_idx < len(points) - 1:
+            for p_end_idx in range(p_start_idx + 1, len(points)):
+                if np.linalg.norm(points[p_start_idx] - points[p_end_idx]) > 0.3:
+                    break
+            p_start = points[p_start_idx]
+            p_end = points[p_end_idx]
             seg_property = {
                 "length": self.points_distance(p_start, p_end),
                 "direction": self.points_direction(p_start, p_end),
@@ -52,6 +58,7 @@ class InterpolatingLine:
                 "end_point": p_end
             }
             ret.append(seg_property)
+            p_start_idx = p_end_idx # next
         return ret
 
     @staticmethod
