@@ -10,7 +10,7 @@ from metadrive.envs.base_env import BaseEnv
 from metadrive.manager.waymo_data_manager import WaymoDataManager
 from metadrive.manager.waymo_map_manager import WaymoMapManager
 from metadrive.manager.waymo_traffic_manager import WaymoTrafficManager
-from metadrive.policy.idm_policy import EgoWaymoIDMPolicy
+from metadrive.policy.idm_policy import WaymoIDMPolicy
 from metadrive.utils import clip
 from metadrive.utils import get_np_random
 
@@ -98,9 +98,9 @@ class WaymoEnv(BaseEnv):
 
     def __init__(self, config=None):
         super(WaymoEnv, self).__init__(config)
-        if not self.config["no_traffic"]:
-            assert self.config["agent_policy"] is not EgoWaymoIDMPolicy, \
-                "WaymoIDM will fail when interacting with traffic"
+        # if not self.config["no_traffic"]:
+        #     assert self.config["agent_policy"] is not EgoWaymoIDMPolicy, \
+        #         "WaymoIDM will fail when interacting with traffic"
 
     def _merge_extra_config(self, config):
         config = self.default_config().update(config, allow_add_new_key=True)
@@ -147,9 +147,9 @@ class WaymoEnv(BaseEnv):
         self.engine.register_manager("map_manager", WaymoMapManager())
         if not self.config["no_traffic"]:
             if not self.config['replay']:
-                self.engine.update_manager("traffic_manager", WaymoIDMTrafficManager())
+                self.engine.register_manager("traffic_manager", WaymoIDMTrafficManager())
             else:
-                self.engine.update_manager("traffic_manager", WaymoTrafficManager())
+                self.engine.register_manager("traffic_manager", WaymoTrafficManager())
         self.engine.accept("p", self.stop)
         self.engine.accept("q", self.switch_to_third_person_view)
         self.engine.accept("b", self.switch_to_top_down_view)
@@ -287,15 +287,16 @@ if __name__ == "__main__":
     env = WaymoEnv(
         {
             "use_render": True,
-            "agent_policy": EgoWaymoIDMPolicy,
+            "agent_policy": WaymoIDMPolicy,
             "manual_control": True,
-            "no_traffic": True,
+            "replay": False,
+            "no_traffic": False,
             # "debug":True,
             # "no_traffic":True,
             # "start_case_index": 192,
-            "start_case_index": 1000,
+            # "start_case_index": 1000,
             "case_num": 1,
-            "waymo_data_directory": "E:\\PAMI_waymo_data\\idm_filtered\\test",
+            # "waymo_data_directory": "E:\\PAMI_waymo_data\\idm_filtered\\test",
             "horizon": 1000,
             "vehicle_config": dict(
                 lidar=dict(num_lasers=120, distance=50, num_others=4),
