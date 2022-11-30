@@ -116,7 +116,7 @@ class MultiAgentBottleneckEnv(MultiAgentMetaDrive):
 
         step_info["step_reward"] = reward
 
-        if vehicle.arrive_destination:
+        if self._is_arrive_destination(vehicle):
             reward = +self.config["success_reward"]
         elif self._is_out_of_road(vehicle):
             reward = -self.config["out_of_road_penalty"]
