@@ -410,7 +410,7 @@ class WaymoIDMPolicy(IDMPolicy):
     NORMAL_SPEED = 40
     WAYMO_IDM_MAX_DIST = 20
 
-    def __init__(self, control_object, random_seed, traj_to_follow, policy_index):
+    def __init__(self, control_object, random_seed, traj_to_follow=None, policy_index=None):
         super(WaymoIDMPolicy, self).__init__(control_object=control_object, random_seed=random_seed)
         self.policy_index = policy_index
         self.traj_to_follow = traj_to_follow
