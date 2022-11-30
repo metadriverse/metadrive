@@ -44,7 +44,7 @@ class InterpolatingLine:
         p_start_idx = 0
         while p_start_idx < len(points) - 1:
             for p_end_idx in range(p_start_idx + 1, len(points)):
-                if np.linalg.norm(points[p_start_idx] - points[p_end_idx]) > 0.3:
+                if np.linalg.norm(points[p_start_idx] - points[p_end_idx]) > 1:
                     break
             p_start = points[p_start_idx]
             p_end = points[p_end_idx]
