@@ -164,7 +164,7 @@ class WaymoEnv(BaseEnv):
         )
         # if np.linalg.norm(vehicle.position - self.engine.map_manager.sdc_dest_point) < 5 \
         #         or vehicle.lane.index in self.engine.map_manager.sdc_destinations:
-        if np.linalg.norm(vehicle.position - self.engine.map_manager.sdc_dest_point) < 5:
+        if self._is_arrive_destination(vehicle):
             done = True
             logging.info("Episode ended! Reason: arrive_dest.")
             done_info[TerminationState.SUCCESS] = True
@@ -188,8 +188,8 @@ class WaymoEnv(BaseEnv):
         # for compatibility
         # crash almost equals to crashing with vehicles
         done_info[TerminationState.CRASH] = (
-            done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
-            or done_info[TerminationState.CRASH_BUILDING]
+                done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
+                or done_info[TerminationState.CRASH_BUILDING]
         )
         return done, done_info
 
@@ -237,7 +237,7 @@ class WaymoEnv(BaseEnv):
 
         step_info["step_reward"] = reward
 
-        if vehicle.arrive_destination:
+        if self._is_arrive_destination(vehicle):
             reward = +self.config["success_reward"]
         elif self._is_out_of_road(self.vehicle):
             reward = -self.config["out_of_road_penalty"]
@@ -246,6 +246,9 @@ class WaymoEnv(BaseEnv):
         elif vehicle.crash_object:
             reward = -self.config["crash_object_penalty"]
         return reward, step_info
+
+    def _is_arrive_destination(self, vehicle):
+        return True if np.linalg.norm(vehicle.position - self.engine.map_manager.sdc_dest_point) < 5 else False
 
     def _reset_global_seed(self, force_seed=None):
         current_seed = force_seed if force_seed is not None else get_np_random(None).randint(

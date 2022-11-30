@@ -158,7 +158,7 @@ class MetaDriveEnv(BaseEnv):
             TerminationState.ENV_SEED: self.current_seed,
             # crash_vehicle=False, crash_object=False, crash_building=False, out_of_road=False, arrive_dest=False,
         }
-        if vehicle.arrive_destination:
+        if self._is_arrive_destination(vehicle):
             done = True
             logging.info("Episode ended! Reason: arrive_dest.")
             done_info[TerminationState.SUCCESS] = True
@@ -194,8 +194,8 @@ class MetaDriveEnv(BaseEnv):
         # for compatibility
         # crash almost equals to crashing with vehicles
         done_info[TerminationState.CRASH] = (
-            done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
-            or done_info[TerminationState.CRASH_BUILDING]
+                done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
+                or done_info[TerminationState.CRASH_BUILDING]
         )
         return done, done_info
 
@@ -210,6 +210,14 @@ class MetaDriveEnv(BaseEnv):
         elif vehicle.crash_object:
             step_info["cost"] = self.config["crash_object_cost"]
         return step_info['cost'], step_info
+
+    def _is_arrive_destination(self, vehicle):
+        long, lat = vehicle.navigation.final_lane.local_coordinates(vehicle.position)
+        flag = (vehicle.navigation.final_lane.length - 5 < long < vehicle.navigation.final_lane.length + 5) and (
+                vehicle.navigation.get_current_lane_width() / 2 >= lat >=
+                (0.5 - vehicle.navigation.get_current_lane_num()) * vehicle.navigation.get_current_lane_width()
+        )
+        return flag
 
     def _is_out_of_road(self, vehicle):
         # A specified function to determine whether this vehicle should be done.
@@ -253,7 +261,7 @@ class MetaDriveEnv(BaseEnv):
 
         step_info["step_reward"] = reward
 
-        if vehicle.arrive_destination:
+        if self._is_arrive_destination(vehicle):
             reward = +self.config["success_reward"]
         elif self._is_out_of_road(vehicle):
             reward = -self.config["out_of_road_penalty"]
@@ -310,6 +318,7 @@ if __name__ == '__main__':
         assert env.observation_space.contains(obs)
         assert np.isscalar(reward)
         assert isinstance(info, dict)
+
 
     env = MetaDriveEnv()
     try:
