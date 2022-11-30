@@ -761,15 +761,6 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self.wheels = None
 
     @property
-    def arrive_destination(self):
-        long, lat = self.navigation.final_lane.local_coordinates(self.position)
-        flag = (self.navigation.final_lane.length - 5 < long < self.navigation.final_lane.length + 5) and (
-            self.navigation.get_current_lane_width() / 2 >= lat >=
-            (0.5 - self.navigation.get_current_lane_num()) * self.navigation.get_current_lane_width()
-        )
-        return flag
-
-    @property
     def reference_lanes(self):
         return self.navigation.current_ref_lanes
 

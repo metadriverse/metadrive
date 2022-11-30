@@ -1,4 +1,5 @@
 import logging
+from metadrive.manager.waymo_idm_traffic_manager import WaymoIDMTrafficManager
 from metadrive.obs.state_obs import LidarStateObservation
 import gym
 import numpy as np
@@ -9,7 +10,7 @@ from metadrive.envs.base_env import BaseEnv
 from metadrive.manager.waymo_data_manager import WaymoDataManager
 from metadrive.manager.waymo_map_manager import WaymoMapManager
 from metadrive.manager.waymo_traffic_manager import WaymoTrafficManager
-from metadrive.policy.idm_policy import EgoWaymoIDMPolicy
+from metadrive.policy.idm_policy import WaymoIDMPolicy
 from metadrive.utils import clip
 from metadrive.utils import get_np_random
 
@@ -97,9 +98,9 @@ class WaymoEnv(BaseEnv):
 
     def __init__(self, config=None):
         super(WaymoEnv, self).__init__(config)
-        if not self.config["no_traffic"]:
-            assert self.config["agent_policy"] is not EgoWaymoIDMPolicy, \
-                "WaymoIDM will fail when interacting with traffic"
+        # if not self.config["no_traffic"]:
+        #     assert self.config["agent_policy"] is not EgoWaymoIDMPolicy, \
+        #         "WaymoIDM will fail when interacting with traffic"
 
     def _merge_extra_config(self, config):
         config = self.default_config().update(config, allow_add_new_key=True)
@@ -145,10 +146,21 @@ class WaymoEnv(BaseEnv):
         self.engine.register_manager("data_manager", WaymoDataManager())
         self.engine.register_manager("map_manager", WaymoMapManager())
         if not self.config["no_traffic"]:
-            self.engine.register_manager("traffic_manager", WaymoTrafficManager())
+            if not self.config['replay']:
+                self.engine.register_manager("traffic_manager", WaymoIDMTrafficManager())
+            else:
+                self.engine.register_manager("traffic_manager", WaymoTrafficManager())
         self.engine.accept("p", self.stop)
         self.engine.accept("q", self.switch_to_third_person_view)
         self.engine.accept("b", self.switch_to_top_down_view)
+        # self.engine.accept("n", self.next_seed_reset)
+        # self.engine.accept("b", self.last_seed_reset)
+
+    def next_seed_reset(self):
+        self.reset(self.current_seed + 1)
+
+    def last_seed_reset(self):
+        self.reset(self.current_seed - 1)
 
     def step(self, actions):
         ret = super(WaymoEnv, self).step(actions)
@@ -164,7 +176,7 @@ class WaymoEnv(BaseEnv):
         )
         # if np.linalg.norm(vehicle.position - self.engine.map_manager.sdc_dest_point) < 5 \
         #         or vehicle.lane.index in self.engine.map_manager.sdc_destinations:
-        if np.linalg.norm(vehicle.position - self.engine.map_manager.sdc_dest_point) < 5:
+        if self._is_arrive_destination(vehicle):
             done = True
             logging.info("Episode ended! Reason: arrive_dest.")
             done_info[TerminationState.SUCCESS] = True
@@ -237,7 +249,7 @@ class WaymoEnv(BaseEnv):
 
         step_info["step_reward"] = reward
 
-        if vehicle.arrive_destination:
+        if self._is_arrive_destination(vehicle):
             reward = +self.config["success_reward"]
         elif self._is_out_of_road(self.vehicle):
             reward = -self.config["out_of_road_penalty"]
@@ -246,6 +258,9 @@ class WaymoEnv(BaseEnv):
         elif vehicle.crash_object:
             reward = -self.config["crash_object_penalty"]
         return reward, step_info
+
+    def _is_arrive_destination(self, vehicle):
+        return True if np.linalg.norm(vehicle.position - self.engine.map_manager.sdc_dest_point) < 5 else False
 
     def _reset_global_seed(self, force_seed=None):
         current_seed = force_seed if force_seed is not None else get_np_random(None).randint(
@@ -272,15 +287,16 @@ if __name__ == "__main__":
     env = WaymoEnv(
         {
             "use_render": True,
-            "agent_policy": EgoWaymoIDMPolicy,
+            "agent_policy": WaymoIDMPolicy,
             "manual_control": True,
-            "no_traffic": True,
+            "replay": False,
+            "no_traffic": False,
             # "debug":True,
             # "no_traffic":True,
             # "start_case_index": 192,
-            "start_case_index": 1000,
+            # "start_case_index": 1000,
             "case_num": 1,
-            "waymo_data_directory": "E:\\PAMI_waymo_data\\idm_filtered\\test",
+            # "waymo_data_directory": "E:\\PAMI_waymo_data\\idm_filtered\\test",
             "horizon": 1000,
             "vehicle_config": dict(
                 lidar=dict(num_lasers=120, distance=50, num_others=4),
