@@ -470,7 +470,8 @@ def test_ma_intersection_reward_sign():
                 safe_places.append((bid, self.engine.spawn_manager.safe_spawn_places[bid]))
             return safe_places
 
-    env = TestEnv({"num_agents": 1})
+    env = TestEnv({"num_agents": 1, "use_render": True})
+    np.random.seed(10)
     try:
         _check_spaces_before_reset(env)
         obs = env.reset()
@@ -699,7 +700,7 @@ if __name__ == '__main__':
     test_ma_intersection_env()
     # test_ma_intersection_horizon()
     # test_ma_intersection_reset()
-    test_ma_intersection_reward_done_alignment()
+    # test_ma_intersection_reward_done_alignment()
     # test_ma_intersection_close_spawn()
     # test_ma_intersection_reward_sign()
     # test_ma_intersection_init_space()

@@ -226,7 +226,7 @@ class MetaDriveEnv(BaseEnv):
         if self.config["out_of_route_done"]:
             ret = ret or vehicle.out_of_route
         elif self.config["on_continuous_line_done"]:
-            ret = vehicle.on_yellow_continuous_line or vehicle.on_white_continuous_line or vehicle.crash_sidewalk
+            ret = ret or vehicle.on_yellow_continuous_line or vehicle.on_white_continuous_line or vehicle.crash_sidewalk
         return ret
 
     def reward_function(self, vehicle_id: str):

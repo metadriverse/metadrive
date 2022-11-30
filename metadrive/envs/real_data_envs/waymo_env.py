@@ -98,9 +98,6 @@ class WaymoEnv(BaseEnv):
 
     def __init__(self, config=None):
         super(WaymoEnv, self).__init__(config)
-        # if not self.config["no_traffic"]:
-        #     assert self.config["agent_policy"] is not EgoWaymoIDMPolicy, \
-        #         "WaymoIDM will fail when interacting with traffic"
 
     def _merge_extra_config(self, config):
         config = self.default_config().update(config, allow_add_new_key=True)
