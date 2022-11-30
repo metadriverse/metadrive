@@ -1,4 +1,5 @@
 import logging
+from metadrive.manager.waymo_idm_traffic_manager import WaymoIDMTrafficManager
 from metadrive.obs.state_obs import LidarStateObservation
 import gym
 import numpy as np
@@ -145,10 +146,21 @@ class WaymoEnv(BaseEnv):
         self.engine.register_manager("data_manager", WaymoDataManager())
         self.engine.register_manager("map_manager", WaymoMapManager())
         if not self.config["no_traffic"]:
-            self.engine.register_manager("traffic_manager", WaymoTrafficManager())
+            if not self.config['replay']:
+                self.engine.update_manager("traffic_manager", WaymoIDMTrafficManager())
+            else:
+                self.engine.update_manager("traffic_manager", WaymoTrafficManager())
         self.engine.accept("p", self.stop)
         self.engine.accept("q", self.switch_to_third_person_view)
         self.engine.accept("b", self.switch_to_top_down_view)
+        # self.engine.accept("n", self.next_seed_reset)
+        # self.engine.accept("b", self.last_seed_reset)
+
+    def next_seed_reset(self):
+        self.reset(self.current_seed + 1)
+
+    def last_seed_reset(self):
+        self.reset(self.current_seed - 1)
 
     def step(self, actions):
         ret = super(WaymoEnv, self).step(actions)
