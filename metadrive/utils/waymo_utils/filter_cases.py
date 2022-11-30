@@ -3,7 +3,7 @@ import signal
 import sys
 
 from metadrive.envs.real_data_envs.waymo_env import WaymoEnv
-from metadrive.policy.idm_policy import EgoWaymoIDMPolicy
+from metadrive.policy.idm_policy import WaymoIDMPolicy
 from tqdm import tqdm
 
 try:
@@ -33,7 +33,7 @@ if __name__ == "__main__":
     env = WaymoEnv(
         {
             "use_render": False,
-            "agent_policy": EgoWaymoIDMPolicy,
+            "agent_policy": WaymoIDMPolicy,
             "waymo_data_directory": case_data_path,
             "start_case_index": start * 1000,
             "case_num": case_num,
