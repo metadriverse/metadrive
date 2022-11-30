@@ -392,6 +392,7 @@ class IDMPolicy(BasePolicy):
 
 
 class ManualControllableIDMPolicy(IDMPolicy):
+    """If human is not taking over, then use IDM policy."""
     def __init__(self, *args, **kwargs):
         super(ManualControllableIDMPolicy, self).__init__(*args, **kwargs)
         self.manual_control_policy = ManualControlPolicy(*args, **kwargs)
@@ -405,13 +406,9 @@ class ManualControllableIDMPolicy(IDMPolicy):
 
 
 class WaymoIDMPolicy(IDMPolicy):
+    """This policy is customized for the traffic car in Waymo environment. (Ego car is not included!)"""
     NORMAL_SPEED = 40
     WAYMO_IDM_MAX_DIST = 20
-
-    # DEACC_FACTOR = -20
-    # ACC_FACTOR = 0.5
-    # TIME_WANTED = 80
-    # DISTANCE_WANTED = 55.0
 
     def __init__(self, control_object, random_seed, traj_to_follow, policy_index):
         super(WaymoIDMPolicy, self).__init__(control_object=control_object, random_seed=random_seed)
@@ -472,7 +469,7 @@ class WaymoIDMPolicy(IDMPolicy):
 
 class EgoWaymoIDMPolicy(IDMPolicy):
     """
-    This policy is for Vehicles using navigation module, especially, ego car
+    This policy is customized for the ego car in Waymo environment.
     """
     NORMAL_SPEED = 30
 
@@ -488,6 +485,7 @@ class EgoWaymoIDMPolicy(IDMPolicy):
         self.lateral_pid = PIDController(0.3, .0, 0.0)
 
     def steering_control(self, target_lane) -> float:
+        """Identical to the steering control of WaymoIDMPolicy"""
         # heading control following a lateral distance control
         ego_vehicle = self.control_object
         long, lat = target_lane.local_coordinates(ego_vehicle.position)
