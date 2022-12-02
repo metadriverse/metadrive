@@ -1,6 +1,6 @@
 # Please don't change the order of following packages!
 import sys
-from distutils.core import setup
+from setuptools import setup
 from os import path
 import os
 import shutil
@@ -9,6 +9,7 @@ from setuptools import find_namespace_packages  # This should be place at top!
 from os.path import join as pjoin
 
 ROOT_DIR = os.path.dirname(__file__)
+
 
 def is_mac():
     return sys.platform == "darwin"
@@ -29,7 +30,6 @@ print("We will install the following packages: ", packages)
 
 """ ===== Remember to modify the PG_EDITION at first ====="""
 version = "0.2.6.0"
-
 
 # Can install specific branch via:
 # pip install git+https://github.com/metadriverse/metadrive.git@fix-asset-copy
@@ -77,9 +77,6 @@ version = "0.2.6.0"
 # except OSError:
 #     pass
 # copy_assets("lib")
-
-
-
 
 
 install_requires = [
