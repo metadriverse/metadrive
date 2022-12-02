@@ -39,44 +39,44 @@ version = "0.2.6.0"
 
 # PZH: We need to copy assets to destination
 # Code from: https://github.com/apache/arrow/blob/master/python/setup.py
-scm_version_write_to_prefix = os.environ.get(
-    'SETUPTOOLS_SCM_VERSION_WRITE_TO_PREFIX', ROOT_DIR)
-print("Write to: ", scm_version_write_to_prefix)
-def copy_assets(dir):
-    working_dir = pjoin(os.getcwd())
-
-    print("Root directory: ", ROOT_DIR)
-
-    print("Working directory: ", working_dir)
-    for path in os.listdir(pjoin(working_dir, "metadrive", "assets")):
-        print("The files in the assets folders: ", path)
-
-    # The files you already download:
-
-
-    for path in os.listdir(pjoin(working_dir, dir)):
-
-        print("Path: ", path)
-
-        if "python" in path:
-            metadrive_path = pjoin(working_dir, "metadrive", path)
-
-            print("MetaDrive path: ", metadrive_path)
-
-            if os.path.exists(metadrive_path):
-                os.remove(metadrive_path)
-            metadrive_asset_path = pjoin(working_dir, dir, path)
-            print(f"Copying {metadrive_asset_path} to {metadrive_path}")
-            shutil.copy(metadrive_asset_path, metadrive_path)
-
-
-# Move libraries to python/pyarrow
-# For windows builds, move DLL from bin/
-try:
-    copy_assets("bin")
-except OSError:
-    pass
-copy_assets("lib")
+# scm_version_write_to_prefix = os.environ.get(
+#     'SETUPTOOLS_SCM_VERSION_WRITE_TO_PREFIX', ROOT_DIR)
+# print("Write to: ", scm_version_write_to_prefix)
+# def copy_assets(dir):
+#     working_dir = pjoin(os.getcwd())
+#
+#     print("Root directory: ", ROOT_DIR)
+#
+#     print("Working directory: ", working_dir)
+#     for path in os.listdir(pjoin(working_dir, "metadrive", "assets")):
+#         print("The files in the assets folders: ", path)
+#
+#     # The files you already download:
+#
+#
+#     for path in os.listdir(pjoin(working_dir, dir)):
+#
+#         print("Path: ", path)
+#
+#         if "python" in path:
+#             metadrive_path = pjoin(working_dir, "metadrive", path)
+#
+#             print("MetaDrive path: ", metadrive_path)
+#
+#             if os.path.exists(metadrive_path):
+#                 os.remove(metadrive_path)
+#             metadrive_asset_path = pjoin(working_dir, dir, path)
+#             print(f"Copying {metadrive_asset_path} to {metadrive_path}")
+#             shutil.copy(metadrive_asset_path, metadrive_path)
+#
+#
+# # Move libraries to python/pyarrow
+# # For windows builds, move DLL from bin/
+# try:
+#     copy_assets("bin")
+# except OSError:
+#     pass
+# copy_assets("lib")
 
 
 
