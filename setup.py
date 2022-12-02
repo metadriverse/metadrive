@@ -39,6 +39,9 @@ version = "0.2.6.0"
 
 # PZH: We need to copy assets to destination
 # Code from: https://github.com/apache/arrow/blob/master/python/setup.py
+scm_version_write_to_prefix = os.environ.get(
+    'SETUPTOOLS_SCM_VERSION_WRITE_TO_PREFIX', ROOT_DIR)
+print("Write to: ", scm_version_write_to_prefix)
 def copy_assets(dir):
     working_dir = pjoin(os.getcwd())
 
