@@ -89,7 +89,7 @@ install_requires = [
     "yapf",
     "seaborn",
     "tqdm",
-    "panda3d==1.10.8",
+    # "panda3d==1.10.8",
     "panda3d-gltf",
     "panda3d-simplepbr",
     "pillow",
