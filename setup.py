@@ -8,6 +8,8 @@ from setuptools import find_namespace_packages  # This should be place at top!
 
 from os.path import join as pjoin
 
+ROOT_DIR = os.path.dirname(__file__)
+
 def is_mac():
     return sys.platform == "darwin"
 
@@ -36,6 +38,8 @@ version = "0.2.6.0"
 # Code from: https://github.com/apache/arrow/blob/master/python/setup.py
 def copy_assets(dir):
     working_dir = pjoin(os.getcwd())
+
+    print("Root directory: ", ROOT_DIR)
 
     print("Working directory: ", working_dir)
     for path in os.listdir(pjoin(working_dir, "metadrive", "assets")):
