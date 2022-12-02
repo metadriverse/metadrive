@@ -90,6 +90,7 @@ install_requires = [
     "seaborn",
     "tqdm",
     # "panda3d==1.10.8",
+    "panda3d",
     "panda3d-gltf",
     "panda3d-simplepbr",
     "pillow",
