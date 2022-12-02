@@ -29,6 +29,8 @@ print("We will install the following packages: ", packages)
 version = "0.2.6.0"
 
 
+# Can install specific branch via:
+# pip install git+https://github.com/metadriverse/metadrive.git@fix-asset-copy
 
 # PZH: We need to copy assets to destination
 # Code from: https://github.com/apache/arrow/blob/master/python/setup.py
@@ -36,6 +38,8 @@ def copy_assets(dir):
     working_dir = pjoin(os.getcwd())
 
     print("Working directory: ", working_dir)
+    for path in os.listdir(pjoin(working_dir)):
+        print("TMP contains: ", path)
 
     for path in os.listdir(pjoin(working_dir, dir)):
 
