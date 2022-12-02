@@ -1,10 +1,9 @@
 # Please don't change the order of following packages!
 import sys
-from setuptools import setup
 from os import path
 import os
 import shutil
-from setuptools import find_namespace_packages  # This should be place at top!
+from setuptools import setup, find_namespace_packages  # This should be place at top!
 
 from os.path import join as pjoin
 
@@ -110,8 +109,15 @@ setup(
     description="An open-ended driving simulator with infinite scenes",
     url="https://github.com/metadriverse/metadrive",
     author="MetaDrive Team",
-    author_email="liquanyi@bupt.edu.cn, pengzh@ie.cuhk.edu.hk",
+    author_email="liquanyi@bupt.edu.cn, pzh@cs.ucla.edu",
     packages=packages,
+    # package_data={"": [
+    #     "metadrive/assets/*",
+    #     "metadrive/examples/*",
+    #     "metadrive\\examples\\*",
+    #     "metadrive\\examples\\*",
+    #     "metadrive\\examples\\*"
+    # ]},
     install_requires=install_requires,
     include_package_data=True,
     license="Apache 2.0",
