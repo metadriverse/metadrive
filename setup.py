@@ -38,7 +38,7 @@ def copy_assets(dir):
     working_dir = pjoin(os.getcwd())
 
     print("Working directory: ", working_dir)
-    for path in os.listdir(pjoin(working_dir, "metadrive")):
+    for path in os.listdir(pjoin(working_dir, "metadrive", "assets")):
         print("The files you already download: ", path)
 
     # The files you already download:
