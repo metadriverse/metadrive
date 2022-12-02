@@ -39,7 +39,7 @@ def copy_assets(dir):
 
     print("Working directory: ", working_dir)
     for path in os.listdir(pjoin(working_dir, "metadrive", "assets")):
-        print("The files you already download: ", path)
+        print("The files in the assets folders: ", path)
 
     # The files you already download:
 
