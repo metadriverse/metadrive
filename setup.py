@@ -25,7 +25,7 @@ this_directory = path.abspath(path.dirname(__file__))
 with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 packages = find_namespace_packages(
-    exclude=("docs", "docs.*", "documentation", "documentation.*", "metadrive.assets.*", "build.*"))
+    exclude=("docs", "docs.*", "documentation", "documentation.*", "build.*"))
 print("We will install the following packages: ", packages)
 
 """ ===== Remember to modify the PG_EDITION at first ====="""
