@@ -2,9 +2,11 @@
 import sys
 from distutils.core import setup
 from os import path
-
+import os
+import shutil
 from setuptools import find_namespace_packages  # This should be place at top!
 
+from os.path import join as pjoin
 
 def is_mac():
     return sys.platform == "darwin"
@@ -25,6 +27,43 @@ print("We will install the following packages: ", packages)
 
 """ ===== Remember to modify the PG_EDITION at first ====="""
 version = "0.2.6.0"
+
+
+
+# PZH: We need to copy assets to destination
+# Code from: https://github.com/apache/arrow/blob/master/python/setup.py
+def copy_assets(dir):
+    working_dir = pjoin(os.getcwd())
+
+    print("Working directory: ", working_dir)
+
+    for path in os.listdir(pjoin(working_dir, dir)):
+
+        print("Path: ", path)
+
+        if "python" in path:
+            metadrive_path = pjoin(working_dir, "metadrive", path)
+
+            print("MetaDrive path: ", metadrive_path)
+
+            if os.path.exists(metadrive_path):
+                os.remove(metadrive_path)
+            metadrive_asset_path = pjoin(working_dir, dir, path)
+            print(f"Copying {metadrive_asset_path} to {metadrive_path}")
+            shutil.copy(metadrive_asset_path, metadrive_path)
+
+
+# Move libraries to python/pyarrow
+# For windows builds, move DLL from bin/
+try:
+    copy_assets("bin")
+except OSError:
+    pass
+copy_assets("lib")
+
+
+
+
 
 install_requires = [
     "gym==0.19.0",
