@@ -111,13 +111,6 @@ setup(
     author="MetaDrive Team",
     author_email="liquanyi@bupt.edu.cn, pzh@cs.ucla.edu",
     packages=packages,
-    # package_data={"": [
-    #     "metadrive/assets/*",
-    #     "metadrive/examples/*",
-    #     "metadrive\\examples\\*",
-    #     "metadrive\\examples\\*",
-    #     "metadrive\\examples\\*"
-    # ]},
     install_requires=install_requires,
     include_package_data=True,
     license="Apache 2.0",
