@@ -1,9 +1,13 @@
 # Please don't change the order of following packages!
 import sys
-from distutils.core import setup
 from os import path
+import os
+import shutil
+from setuptools import setup, find_namespace_packages  # This should be place at top!
 
-from setuptools import find_namespace_packages  # This should be place at top!
+from os.path import join as pjoin
+
+ROOT_DIR = os.path.dirname(__file__)
 
 
 def is_mac():
@@ -20,11 +24,59 @@ this_directory = path.abspath(path.dirname(__file__))
 with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 packages = find_namespace_packages(
-    exclude=("docs", "docs.*", "documentation", "documentation.*", "metadrive.assets.*", "build.*"))
+    exclude=("docs", "docs.*", "documentation", "documentation.*", "build.*"))
 print("We will install the following packages: ", packages)
 
 """ ===== Remember to modify the PG_EDITION at first ====="""
 version = "0.2.6.0"
+
+# Can install specific branch via:
+# pip install git+https://github.com/metadriverse/metadrive.git@fix-asset-copy
+
+# Our target destniation is:
+# /Users/pengzhenghao/opt/anaconda3/envs/cs260/lib/python3.8/site-packages
+
+# PZH: We need to copy assets to destination
+# Code from: https://github.com/apache/arrow/blob/master/python/setup.py
+# scm_version_write_to_prefix = os.environ.get(
+#     'SETUPTOOLS_SCM_VERSION_WRITE_TO_PREFIX', ROOT_DIR)
+# print("Write to: ", scm_version_write_to_prefix)
+# def copy_assets(dir):
+#     working_dir = pjoin(os.getcwd())
+#
+#     print("Root directory: ", ROOT_DIR)
+#
+#     print("Working directory: ", working_dir)
+#     for path in os.listdir(pjoin(working_dir, "metadrive", "assets")):
+#         print("The files in the assets folders: ", path)
+#
+#     # The files you already download:
+#
+#
+#     for path in os.listdir(pjoin(working_dir, dir)):
+#
+#         print("Path: ", path)
+#
+#         if "python" in path:
+#             metadrive_path = pjoin(working_dir, "metadrive", path)
+#
+#             print("MetaDrive path: ", metadrive_path)
+#
+#             if os.path.exists(metadrive_path):
+#                 os.remove(metadrive_path)
+#             metadrive_asset_path = pjoin(working_dir, dir, path)
+#             print(f"Copying {metadrive_asset_path} to {metadrive_path}")
+#             shutil.copy(metadrive_asset_path, metadrive_path)
+#
+#
+# # Move libraries to python/pyarrow
+# # For windows builds, move DLL from bin/
+# try:
+#     copy_assets("bin")
+# except OSError:
+#     pass
+# copy_assets("lib")
+
 
 install_requires = [
     "gym==0.19.0",
@@ -56,7 +108,7 @@ setup(
     description="An open-ended driving simulator with infinite scenes",
     url="https://github.com/metadriverse/metadrive",
     author="MetaDrive Team",
-    author_email="liquanyi@bupt.edu.cn, pengzh@ie.cuhk.edu.hk",
+    author_email="liquanyi@bupt.edu.cn, pzh@cs.ucla.edu",
     packages=packages,
     install_requires=install_requires,
     include_package_data=True,
