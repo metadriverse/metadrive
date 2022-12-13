@@ -13,7 +13,8 @@ class WaymoDataManager(BaseManager):
         self.start_case_index = self.engine.global_config["start_case_index"]
         self.waymo_case = {}
         for i in tqdm(range(self.start_case_index, self.start_case_index + self.case_num), desc="Check Waymo Data"):
-            assert os.path.exists(os.path.join(self.directory, "{}.pkl".format(i))), "No Data {}".format(i)
+            p = os.path.join(self.directory, "{}.pkl".format(i))
+            assert os.path.exists(p), "No Data {} at path: {}".format(i, p)
             self.waymo_case[i] = self._get_case(i)
 
     def _get_case(self, i):
