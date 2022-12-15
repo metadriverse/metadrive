@@ -615,16 +615,17 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         )
         possible_lane_indexes = [lane_index for lane, lane_index, dist in possible_lanes]
 
-        if len(possible_lanes) and self.config["spawn_lane_index"] is None:
+        if len(possible_lanes) == 0 and self.config["spawn_lane_index"] is None:
             from metadrive.utils.error_class import NavigationError
             raise NavigationError("Can't find valid navigation for this car.")
 
-        try:
+        if self.config["spawn_lane_index"] is not None and self.config["spawn_lane_index"] in possible_lane_indexes:
             idx = possible_lane_indexes.index(self.config["spawn_lane_index"])
-        except ValueError:
-            lane, new_l_index = possible_lanes[0][:-1]
-        else:
             lane, new_l_index = possible_lanes[idx][:-1]
+        else:
+            assert len(possible_lanes) > 0
+            lane, new_l_index = possible_lanes[0][:-1]
+
         dest = self.config["destination"]
         self.navigation.reset(
             map,
