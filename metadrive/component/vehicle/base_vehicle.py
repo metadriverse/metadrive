@@ -116,7 +116,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         name: str = None,
         random_seed=None,
         position=None,
-        heading=None
+        heading=None   # In degree!
     ):
         """
         This Vehicle Config is different from self.get_config(), and it is used to define which modules to use, and
@@ -292,7 +292,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         random_seed=None,
         vehicle_config=None,
         position: np.ndarray = None,
-        heading: float = 0.0,
+        heading: float = 0.0,  # In degree!
         *args,
         **kwargs
     ):
@@ -598,7 +598,13 @@ class BaseVehicle(BaseObject, BaseVehicleState):
 
     def update_map_info(self, map):
         """
-        Update map info after reset()
+        Update map information that are used by this vehicle, after reset()
+        This function will query the map about the spawn position and destination of current vehicle,
+        and update the navigation module by feeding the information of spawn point and destination.
+
+        For the spawn position, if it is not specify in the config["spawn_lane_index"], we will automatically
+        select one lane based on the localization results.
+
         :param map: new map
         :return: None
         """
@@ -608,6 +614,10 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             self.heading, self.spawn_place, self.engine, return_all_result=True, use_heading_filter=False
         )
         possible_lane_indexes = [lane_index for lane, lane_index, dist in possible_lanes]
+
+        if len(possible_lanes) and self.config["spawn_lane_index"] is None:
+            raise ValueError("Can't find valid navigation for this car.")
+
         try:
             idx = possible_lane_indexes.index(self.config["spawn_lane_index"])
         except ValueError:
