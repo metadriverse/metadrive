@@ -248,7 +248,7 @@ class WaymoEnv(BaseEnv):
 
         if self._is_arrive_destination(vehicle):
             reward = +self.config["success_reward"]
-        elif self._is_out_of_road(self.vehicle):
+        elif self._is_out_of_road(vehicle):
             reward = -self.config["out_of_road_penalty"]
         elif vehicle.crash_vehicle:
             reward = -self.config["crash_vehicle_penalty"]
@@ -271,7 +271,7 @@ class WaymoEnv(BaseEnv):
         # A specified function to determine whether this vehicle should be done.
         done = vehicle.crash_sidewalk or vehicle.on_yellow_continuous_line or vehicle.on_white_continuous_line
         if self.config["out_of_route_done"]:
-            done = done or self.observations["default_agent"].lateral_dist > 10
+            done = done or self.observations[self.DEFAULT_AGENT].lateral_dist > 10
         return done
         # ret = vehicle.crash_sidewalk
         # return ret
