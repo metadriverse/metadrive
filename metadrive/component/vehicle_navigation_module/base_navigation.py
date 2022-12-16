@@ -36,13 +36,15 @@ class BaseNavigation:
         random_navi_mark_color=False,
         show_dest_mark=False,
         show_line_to_dest=False,
-        panda_color=None
+        panda_color=None,
+        name=None
     ):
         """
         This class define a helper for localizing vehicles and retrieving navigation information.
         It now only support from first block start to the end node, but can be extended easily.
         """
         self.engine = engine
+        self.name = name
 
         # Make sure these variables are filled when making new subclass
         self.map = None
