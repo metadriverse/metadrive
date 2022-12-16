@@ -49,7 +49,7 @@ class InterpolatingLine:
             p_start = points[p_start_idx]
             p_end = points[p_end_idx]
 
-            if np.linalg.norm(p_start, p_end) < 0.1:
+            if np.linalg.norm(p_start - p_end) < 0.1:
                 p_start_idx = p_end_idx  # next
                 continue
 
