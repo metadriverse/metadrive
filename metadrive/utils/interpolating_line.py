@@ -50,7 +50,7 @@ class InterpolatingLine:
             p_end = points[p_end_idx]
 
             if np.linalg.norm(p_start - p_end) < 1e-6:
-                # p_start_idx = p_end_idx  # next
+                p_start_idx = p_end_idx  # next
                 continue
 
             seg_property = {
