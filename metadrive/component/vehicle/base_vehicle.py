@@ -593,7 +593,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
                  random_navi_mark_color=self.engine.global_config["vehicle_config"]["random_navi_mark_color"],
                  show_dest_mark=self.engine.global_config["vehicle_config"]["show_dest_mark"],
                  show_line_to_dest=self.engine.global_config["vehicle_config"]["show_line_to_dest"],
-                 panda_color=self.panda_color
+                 panda_color=self.panda_color,
+                 name=self.name
                  )
 
     def update_map_info(self, map):
