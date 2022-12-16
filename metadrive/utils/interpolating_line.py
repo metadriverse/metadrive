@@ -48,6 +48,11 @@ class InterpolatingLine:
                     break
             p_start = points[p_start_idx]
             p_end = points[p_end_idx]
+
+            if norm(p_start, p_end) < 0.1:
+                p_start_idx = p_end_idx  # next
+                continue
+
             seg_property = {
                 "length": self.points_distance(p_start, p_end),
                 "direction": self.points_direction(p_start, p_end),
