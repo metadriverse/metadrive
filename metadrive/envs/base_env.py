@@ -84,6 +84,11 @@ BASE_DEFAULT_CONFIG = dict(
         action_check=False,
         random_color=False,
         random_agent_model=False,  # this will be overwritten by env.config["random_agent_model"]
+        # The shape of vehicle are predefined by its class. But in special case (WaymoVehicle) we might want to
+        # set to arbitrary shape.
+        width=None,
+        length=None,
+        height=None,
 
         # ===== vehicle module config =====
         lidar=dict(
