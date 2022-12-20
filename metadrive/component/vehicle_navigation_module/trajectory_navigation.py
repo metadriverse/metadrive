@@ -151,3 +151,13 @@ class WaymoTrajectoryNavigation(BaseNavigation):
             clip((np.rad2deg(angle) / BlockParameterSpace.CURVE[Parameter.angle].max + 1) / 2, 0.0, 1.0)
         )
         return navi_information, lanes_heading
+
+    def destroy(self):
+        self.map = None
+        self.checkpoints = None
+        self.current_ref_lanes = None
+        self.next_ref_lanes = None
+        self.final_lane = None
+        self.current_lane = None
+        self.reference_trajectory = None
+        super(WaymoTrajectoryNavigation, self).destroy()

@@ -17,7 +17,7 @@ def test_gen_map_read():
         env.close()
 
         # Check load
-        with open("test_10maps.pickle", "rb+") as f:
+        with open("test_10maps.pickle", "rb") as f:
             restored_data = pickle.load(f)
 
         env = MetaDriveEnv(restore_config)

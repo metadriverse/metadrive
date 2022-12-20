@@ -189,6 +189,10 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             self.reset(position=position, heading=heading)
 
     def _add_modules_for_vehicle(self, ):
+        """
+        This function is related to the self.update_config, which will create modules if needed for resetting a new
+        vehicle
+        """
         config = self.config
 
         # add routing module
@@ -214,6 +218,37 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self.add_image_sensor("rgb_camera", RGBCamera())
         self.add_image_sensor("mini_map", MiniMap())
         self.add_image_sensor("depth_camera", DepthCamera())
+
+    def _add_modules_for_vehicle_when_reset(self):
+        config = self.config
+
+        # add routing module
+        if self.navigation is None:
+            self.add_navigation()  # default added
+
+        # add distance detector/lidar
+        if self.side_detector is None:
+            self.side_detector = SideDetector(
+                config["side_detector"]["num_lasers"], config["side_detector"]["distance"],
+                self.engine.global_config["vehicle_config"]["show_side_detector"]
+            )
+
+        if self.lane_line_detector is None:
+            self.lane_line_detector = LaneLineDetector(
+                config["lane_line_detector"]["num_lasers"], config["lane_line_detector"]["distance"],
+                self.engine.global_config["vehicle_config"]["show_lane_line_detector"]
+            )
+
+        if self.lidar is None:
+            self.lidar = Lidar(
+                config["lidar"]["num_lasers"], config["lidar"]["distance"],
+                self.engine.global_config["vehicle_config"]["show_lidar"]
+            )
+
+        # vision modules
+        # self.add_image_sensor("rgb_camera", RGBCamera())
+        # self.add_image_sensor("mini_map", MiniMap())
+        # self.add_image_sensor("depth_camera", DepthCamera())
 
     def _init_step_info(self):
         # done info will be initialized every frame
@@ -306,6 +341,10 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             self.sample_parameters()
         if vehicle_config is not None:
             self.update_config(vehicle_config)
+
+        # Update some modules that might not be initialized before
+        self._add_modules_for_vehicle_when_reset()
+
         map = self.engine.current_map
 
         if position is not None:

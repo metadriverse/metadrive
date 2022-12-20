@@ -129,5 +129,6 @@ class InterpolatingLine:
         return lateral
 
     def destroy(self):
-        self.segment_property = None
+        del self.segment_property
+        self.segment_property = []
         self.length = None

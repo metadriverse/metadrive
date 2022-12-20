@@ -37,7 +37,7 @@ def test_save_episode(vis=False):
                 break
                 # env.reset()
 
-        epi_record = open("test_dump.pkl", "rb+")
+        epi_record = open("test_dump.pkl", "rb")
 
         # input episode_info to restore
         env.config["replay_episode"] = pickle.load(epi_record)
