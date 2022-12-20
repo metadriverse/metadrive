@@ -137,6 +137,11 @@ BASE_DEFAULT_CONFIG = dict(
     force_render_fps=None,
     # if set to True all objects will be force destroyed when call clear()
     force_destroy=False,
+    # number of buffering objects for each class.
+    # we will maintain a set of buffers in the engine to store the used objects and can reuse them
+    # when possible. But it is possible that some classes of objects are always forcefully respawn
+    # and thus those used objects are stored in the buffer and never be reused.
+    num_buffering_objects=200,
 
     # ===== Others =====
     # The maximum distance used in PGLOD. Set to None will use the default values.

@@ -182,7 +182,11 @@ class BaseEngine(EngineCore, Randomizable):
                 obj.detach_from_world(self.physics_world)
                 if obj.class_name not in self._dying_objects:
                     self._dying_objects[obj.class_name] = []
-                self._dying_objects[obj.class_name].append(obj)
+                # We have a limit for buffering objects
+                if len(self._dying_objects[obj.class_name]) < self.global_config["num_buffering_objects"]:
+                    self._dying_objects[obj.class_name].append(obj)
+                else:
+                    obj.destroy()
             if self.global_config["record_episode"] and not self.replay_episode:
                 self.record_manager.add_clear_info(obj)
         return exclude_objects.keys()
