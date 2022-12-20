@@ -24,7 +24,7 @@ class NodeNetworkNavigation(BaseNavigation):
         show_line_to_dest=False,
         panda_color=None,
         name=None,
-            vehicle_config=None
+        vehicle_config=None
     ):
         """
         This class define a helper for localizing vehicles and retrieving navigation information.

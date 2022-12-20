@@ -23,7 +23,7 @@ class EdgeNetworkNavigation(BaseNavigation):
         show_line_to_dest=False,
         panda_color=None,
         name=None,
-            vehicle_config=None
+        vehicle_config=None
     ):
         super(EdgeNetworkNavigation, self).__init__(
             engine=engine,
