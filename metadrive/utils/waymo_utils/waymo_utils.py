@@ -252,7 +252,9 @@ class CustomUnpickler(pickle.Unpickler):
 
 
 def read_waymo_data(file_path):
-    data = CustomUnpickler(open(file_path, "rb+")).load()
+    with open(file_path, "rb+") as f:
+        unpickler = CustomUnpickler(f)
+        data = unpickler.load()
     new_track = {}
     for key, value in data["tracks"].items():
         new_track[str(key)] = value

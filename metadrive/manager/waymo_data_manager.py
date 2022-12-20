@@ -42,9 +42,12 @@ class WaymoDataManager(BaseManager):
             # i-th case is not loaded yet
             while len(self.loaded_case) >= self.max_len:
                 should_remove = self.loaded_case.popleft()
-                self.waymo_case.pop(should_remove)
+                tmp = self.waymo_case.pop(should_remove)
+                del tmp
+                # print("[DataManager] Existing cases {} / {} exceeds the max len {}".format(len(self.loaded_case), len(self.waymo_case), self.max_len))
 
             self.waymo_case[i] = self._get_case(i)
+            self.loaded_case.append(i)
             return self.waymo_case[i]
 
         else:

@@ -71,7 +71,7 @@ class BaseRunnable(Configurable, Nameable, Randomizable):
         After advancing all objects for a time period, their state should be updated for statistic or other purpose
         """
 
-    def reset(self, random_seed, *args, **kwargs):
+    def reset(self, random_seed=None, *args, **kwargs):
         """
         Call this function to re-init objects. Since some __init__ process of creating objects is redundant, reset can
         help us reuse this object by resetting some necessary attributes
