@@ -22,7 +22,8 @@ class EdgeNetworkNavigation(BaseNavigation):
         show_dest_mark=False,
         show_line_to_dest=False,
         panda_color=None,
-        name=None
+        name=None,
+            vehicle_config=None
     ):
         super(EdgeNetworkNavigation, self).__init__(
             engine=engine,
@@ -31,7 +32,8 @@ class EdgeNetworkNavigation(BaseNavigation):
             show_dest_mark=show_dest_mark,
             show_line_to_dest=show_line_to_dest,
             panda_color=panda_color,
-            name=name
+            name=name,
+            vehicle_config=vehicle_config
         )
 
     def reset(self, map, current_lane, destination=None, random_seed=None):

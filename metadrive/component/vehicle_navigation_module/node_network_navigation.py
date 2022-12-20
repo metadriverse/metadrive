@@ -23,7 +23,8 @@ class NodeNetworkNavigation(BaseNavigation):
         show_dest_mark=False,
         show_line_to_dest=False,
         panda_color=None,
-        name=None
+        name=None,
+            vehicle_config=None
     ):
         """
         This class define a helper for localizing vehicles and retrieving navigation information.
@@ -36,7 +37,8 @@ class NodeNetworkNavigation(BaseNavigation):
             show_dest_mark=show_dest_mark,
             show_line_to_dest=show_line_to_dest,
             panda_color=panda_color,
-            name=name
+            name=name,
+            vehicle_config=vehicle_config
         )
         self.final_road = None
         self.current_road = None
