@@ -180,6 +180,11 @@ class BaseEngine(EngineCore, Randomizable):
                 obj.destroy()
             else:
                 obj.detach_from_world(self.physics_world)
+
+                # We might want to remove some episode-relevant information when recycling some objects
+                if hasattr(obj, "before_reset"):
+                    obj.before_reset()
+
                 if obj.class_name not in self._dying_objects:
                     self._dying_objects[obj.class_name] = []
                 # We have a limit for buffering objects
