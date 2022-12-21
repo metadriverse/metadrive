@@ -22,7 +22,7 @@ def test_waymo_env_memory_leak():
 
     env = WaymoEnv(dict(
         random_seed=0,
-        case_num=5,
+        case_num=3,
         sequential_seed=True,
 
         save_memory=True,
