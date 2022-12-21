@@ -25,10 +25,11 @@ def test_waymo_env_memory_leak():
         case_num=3,
         sequential_seed=True,
 
-        save_memory=True,
-        save_memory_max_len=1,
+        # save_memory=True,
+        # save_memory_max_len=1,
 
-        store_map=False
+        store_map=True,
+        store_map_buffer_size=1
 
     ))
 

@@ -102,7 +102,8 @@ class WaymoEnv(BaseEnv):
         super(WaymoEnv, self).__init__(config)
 
     def _merge_extra_config(self, config):
-        config = self.default_config().update(config, allow_add_new_key=True)
+        # config = self.default_config().update(config, allow_add_new_key=True)
+        config = self.default_config().update(config, allow_add_new_key=False)
         return config
 
     def _get_observations(self):
