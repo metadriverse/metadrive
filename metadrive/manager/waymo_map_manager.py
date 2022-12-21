@@ -26,7 +26,6 @@ class WaymoMapManager(BaseManager):
         self.store_map = store_map
         self.store_map_buffer = DataBuffer(store_data_buffer_size=store_map_buffer_size if self.store_map else None)
 
-
     def reset(self):
         seed = self.engine.global_random_seed
         assert self.start <= seed < self.start + self.map_num
