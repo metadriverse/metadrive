@@ -15,7 +15,7 @@ def process_memory():
     return mem_info.rss
 
 
-if __name__ == "__main__":
+def test_waymo_env_memory_leak():
 
     import tracemalloc
 
@@ -52,3 +52,7 @@ if __name__ == "__main__":
     print("[ Top 10 ]")
     for stat in top_stats[:10]:
         print(stat)
+
+
+if __name__ == "main":
+    test_waymo_env_memory_leak()
