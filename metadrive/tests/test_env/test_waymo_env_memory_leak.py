@@ -1,11 +1,11 @@
+import os
 import os.path as osp
+import time
 
+import psutil
 from tqdm import tqdm
 
 from metadrive.envs.real_data_envs.waymo_env import WaymoEnv
-import time
-import os
-import psutil
 
 
 # inner psutil function
@@ -16,7 +16,6 @@ def process_memory():
 
 
 def test_waymo_env_memory_leak():
-
     import tracemalloc
 
     tracemalloc.start()
@@ -54,5 +53,5 @@ def test_waymo_env_memory_leak():
         print(stat)
 
 
-if __name__ == "main":
+if __name__ == "__main__":
     test_waymo_env_memory_leak()
