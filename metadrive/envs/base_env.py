@@ -84,6 +84,11 @@ BASE_DEFAULT_CONFIG = dict(
         action_check=False,
         random_color=False,
         random_agent_model=False,  # this will be overwritten by env.config["random_agent_model"]
+        # The shape of vehicle are predefined by its class. But in special case (WaymoVehicle) we might want to
+        # set to arbitrary shape.
+        width=None,
+        length=None,
+        height=None,
 
         # ===== vehicle module config =====
         lidar=dict(
@@ -132,6 +137,11 @@ BASE_DEFAULT_CONFIG = dict(
     force_render_fps=None,
     # if set to True all objects will be force destroyed when call clear()
     force_destroy=False,
+    # number of buffering objects for each class.
+    # we will maintain a set of buffers in the engine to store the used objects and can reuse them
+    # when possible. But it is possible that some classes of objects are always forcefully respawn
+    # and thus those used objects are stored in the buffer and never be reused.
+    num_buffering_objects=200,
 
     # ===== Others =====
     # The maximum distance used in PGLOD. Set to None will use the default values.

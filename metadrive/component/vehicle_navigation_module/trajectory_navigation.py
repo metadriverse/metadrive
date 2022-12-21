@@ -19,10 +19,19 @@ class WaymoTrajectoryNavigation(BaseNavigation):
         random_navi_mark_color=False,
         show_dest_mark=False,
         show_line_to_dest=False,
-        panda_color=None
+        panda_color=None,
+        name=None,
+        vehicle_config=None
     ):
         super(WaymoTrajectoryNavigation, self).__init__(
-            engine, show_navi_mark, random_navi_mark_color, show_dest_mark, show_line_to_dest, panda_color=panda_color
+            engine=engine,
+            show_navi_mark=show_navi_mark,
+            random_navi_mark_color=random_navi_mark_color,
+            show_dest_mark=show_dest_mark,
+            show_line_to_dest=show_line_to_dest,
+            panda_color=panda_color,
+            name=name,
+            vehicle_config=vehicle_config
         )
         self.reference_trajectory = None
 
@@ -47,6 +56,7 @@ class WaymoTrajectoryNavigation(BaseNavigation):
             self._dest_node_path.setPos(check_point[0], -check_point[1], 1.8)
 
     def get_trajectory(self):
+        """This function breaks Multi-agent Waymo Env since we don't set this in map_manager."""
         return self.engine.map_manager.current_sdc_route
 
     def descretize_reference_trajectory(self):
@@ -141,3 +151,13 @@ class WaymoTrajectoryNavigation(BaseNavigation):
             clip((np.rad2deg(angle) / BlockParameterSpace.CURVE[Parameter.angle].max + 1) / 2, 0.0, 1.0)
         )
         return navi_information, lanes_heading
+
+    def destroy(self):
+        self.map = None
+        self.checkpoints = None
+        self.current_ref_lanes = None
+        self.next_ref_lanes = None
+        self.final_lane = None
+        self.current_lane = None
+        self.reference_trajectory = None
+        super(WaymoTrajectoryNavigation, self).destroy()

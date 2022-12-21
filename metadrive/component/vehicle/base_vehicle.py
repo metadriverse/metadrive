@@ -116,7 +116,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         name: str = None,
         random_seed=None,
         position=None,
-        heading=None
+        heading=None  # In degree!
     ):
         """
         This Vehicle Config is different from self.get_config(), and it is used to define which modules to use, and
@@ -189,6 +189,10 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             self.reset(position=position, heading=heading)
 
     def _add_modules_for_vehicle(self, ):
+        """
+        This function is related to the self.update_config, which will create modules if needed for resetting a new
+        vehicle
+        """
         config = self.config
 
         # add routing module
@@ -214,6 +218,37 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self.add_image_sensor("rgb_camera", RGBCamera())
         self.add_image_sensor("mini_map", MiniMap())
         self.add_image_sensor("depth_camera", DepthCamera())
+
+    def _add_modules_for_vehicle_when_reset(self):
+        config = self.config
+
+        # add routing module
+        if self.navigation is None:
+            self.add_navigation()  # default added
+
+        # add distance detector/lidar
+        if self.side_detector is None:
+            self.side_detector = SideDetector(
+                config["side_detector"]["num_lasers"], config["side_detector"]["distance"],
+                self.engine.global_config["vehicle_config"]["show_side_detector"]
+            )
+
+        if self.lane_line_detector is None:
+            self.lane_line_detector = LaneLineDetector(
+                config["lane_line_detector"]["num_lasers"], config["lane_line_detector"]["distance"],
+                self.engine.global_config["vehicle_config"]["show_lane_line_detector"]
+            )
+
+        if self.lidar is None:
+            self.lidar = Lidar(
+                config["lidar"]["num_lasers"], config["lidar"]["distance"],
+                self.engine.global_config["vehicle_config"]["show_lidar"]
+            )
+
+        # vision modules
+        # self.add_image_sensor("rgb_camera", RGBCamera())
+        # self.add_image_sensor("mini_map", MiniMap())
+        # self.add_image_sensor("depth_camera", DepthCamera())
 
     def _init_step_info(self):
         # done info will be initialized every frame
@@ -292,7 +327,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         random_seed=None,
         vehicle_config=None,
         position: np.ndarray = None,
-        heading: float = 0.0,
+        heading: float = 0.0,  # In degree!
         *args,
         **kwargs
     ):
@@ -306,6 +341,10 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             self.sample_parameters()
         if vehicle_config is not None:
             self.update_config(vehicle_config)
+
+        # Update some modules that might not be initialized before
+        self._add_modules_for_vehicle_when_reset()
+
         map = self.engine.current_map
 
         if position is not None:
@@ -587,18 +626,26 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         if navi is None:
             navi = NodeNetworkNavigation if self.engine.current_map.road_network_type == NodeRoadNetwork \
                 else EdgeNetworkNavigation
-        self.navigation = \
-            navi(self.engine,
-                 show_navi_mark=self.engine.global_config["vehicle_config"]["show_navi_mark"],
-                 random_navi_mark_color=self.engine.global_config["vehicle_config"]["random_navi_mark_color"],
-                 show_dest_mark=self.engine.global_config["vehicle_config"]["show_dest_mark"],
-                 show_line_to_dest=self.engine.global_config["vehicle_config"]["show_line_to_dest"],
-                 panda_color=self.panda_color
-                 )
+        self.navigation = navi(
+            self.engine,
+            show_navi_mark=self.engine.global_config["vehicle_config"]["show_navi_mark"],
+            random_navi_mark_color=self.engine.global_config["vehicle_config"]["random_navi_mark_color"],
+            show_dest_mark=self.engine.global_config["vehicle_config"]["show_dest_mark"],
+            show_line_to_dest=self.engine.global_config["vehicle_config"]["show_line_to_dest"],
+            panda_color=self.panda_color,
+            name=self.name,
+            vehicle_config=self.config
+        )
 
     def update_map_info(self, map):
         """
-        Update map info after reset()
+        Update map information that are used by this vehicle, after reset()
+        This function will query the map about the spawn position and destination of current vehicle,
+        and update the navigation module by feeding the information of spawn point and destination.
+
+        For the spawn position, if it is not specify in the config["spawn_lane_index"], we will automatically
+        select one lane based on the localization results.
+
         :param map: new map
         :return: None
         """
@@ -608,12 +655,18 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             self.heading, self.spawn_place, self.engine, return_all_result=True, use_heading_filter=False
         )
         possible_lane_indexes = [lane_index for lane, lane_index, dist in possible_lanes]
-        try:
+
+        if len(possible_lanes) == 0 and self.config["spawn_lane_index"] is None:
+            from metadrive.utils.error_class import NavigationError
+            raise NavigationError("Can't find valid navigation for this car.")
+
+        if self.config["spawn_lane_index"] is not None and self.config["spawn_lane_index"] in possible_lane_indexes:
             idx = possible_lane_indexes.index(self.config["spawn_lane_index"])
-        except ValueError:
-            lane, new_l_index = possible_lanes[0][:-1]
-        else:
             lane, new_l_index = possible_lanes[idx][:-1]
+        else:
+            assert len(possible_lanes) > 0
+            lane, new_l_index = possible_lanes[0][:-1]
+
         dest = self.config["destination"]
         self.navigation.reset(
             map,

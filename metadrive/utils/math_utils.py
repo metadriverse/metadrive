@@ -66,9 +66,10 @@ def distance_greater(vec1, vec2, length):
 
 
 def get_laser_end(lidar_range, perceive_distance, laser_index, heading_theta, vehicle_position_x, vehicle_position_y):
+    angle = lidar_range[laser_index] + heading_theta
     return (
-        perceive_distance * math.cos(lidar_range[laser_index] + heading_theta) + vehicle_position_x,
-        perceive_distance * math.sin(lidar_range[laser_index] + heading_theta) + vehicle_position_y
+        perceive_distance * math.cos(angle) + vehicle_position_x,
+        perceive_distance * math.sin(angle) + vehicle_position_y
     )
 
 
