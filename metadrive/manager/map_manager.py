@@ -100,7 +100,7 @@ class PGMapManager(BaseManager):
     def load_all_maps(self, file_name):
         if self.current_map is not None:
             self.unload_map(self.current_map)
-        with open(file_name, "rb+") as file:
+        with open(file_name, "rb") as file:
             loaded_map_data = pickle.load(file)
         map_seeds = list(loaded_map_data.keys())
         start_seed = min(map_seeds)

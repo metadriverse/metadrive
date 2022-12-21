@@ -106,13 +106,25 @@ class TrafficBarrier(TrafficObject):
     def __init__(self, lane, longitude: float, lateral: float, static: bool = False, random_seed=None):
         super(TrafficBarrier, self).__init__(lane, longitude, lateral, random_seed)
         self.add_body(BaseRigidBodyNode(self.name, self.NAME))
-        self.body.addShape(BulletBoxShape((self.WIDTH / 2, self.LENGTH / 2, self.HEIGHT / 2)))
+        self.body.addShape(BulletBoxShape((self.width / 2, self.length / 2, self.height / 2)))
         self.body.setIntoCollideMask(self.COLLISION_GROUP)
         self.set_static(static)
         if self.render:
             model = self.loader.loadModel(AssetLoader.file_path("models", "barrier", "scene.gltf"))
             model.setH(-90)
             model.reparentTo(self.origin)
+
+    @property
+    def width(self):
+        return self.WIDTH
+
+    @property
+    def length(self):
+        return self.LENGTH
+
+    @property
+    def height(self):
+        return self.HEIGHT
 
     @property
     def top_down_length(self):

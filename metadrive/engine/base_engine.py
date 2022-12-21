@@ -180,9 +180,18 @@ class BaseEngine(EngineCore, Randomizable):
                 obj.destroy()
             else:
                 obj.detach_from_world(self.physics_world)
+
+                # We might want to remove some episode-relevant information when recycling some objects
+                if hasattr(obj, "before_reset"):
+                    obj.before_reset()
+
                 if obj.class_name not in self._dying_objects:
                     self._dying_objects[obj.class_name] = []
-                self._dying_objects[obj.class_name].append(obj)
+                # We have a limit for buffering objects
+                if len(self._dying_objects[obj.class_name]) < self.global_config["num_buffering_objects"]:
+                    self._dying_objects[obj.class_name].append(obj)
+                else:
+                    obj.destroy()
             if self.global_config["record_episode"] and not self.replay_episode:
                 self.record_manager.add_clear_info(obj)
         return exclude_objects.keys()
@@ -202,20 +211,48 @@ class BaseEngine(EngineCore, Randomizable):
         self.record_episode = self.global_config["record_episode"]
         self.only_reset_when_replay = self.global_config["only_reset_when_replay"]
 
+        # def process_memory():
+        #     import psutil
+        #     import os
+        #     process = psutil.Process(os.getpid())
+        #     mem_info = process.memory_info()
+        #     return mem_info.rss
+        #
+        # cm = process_memory()
+
         # reset manager
-        for manager in self._managers.values():
+        for manager_name, manager in self._managers.items():
             # clean all manager
             manager.before_reset()
+
+            # lm = process_memory()
+            # print("{}: Before Reset! Mem Change {:.3f}MB".format(
+            #     manager_name, (lm - cm) / 1e6
+            # ))
+            # cm = lm
+
         self._object_clean_check()
 
-        for manager in self.managers.values():
+        for manager_name, manager in self.managers.items():
             if self.replay_episode and self.only_reset_when_replay and manager is not self.replay_manager:
                 # The scene will be generated from replay manager in only reset replay mode
                 continue
             manager.reset()
 
-        for manager in self.managers.values():
+            # lm = process_memory()
+            # print("{}: Reset! Mem Change {:.3f}MB".format(
+            #     manager_name, (lm - cm) / 1e6
+            # ))
+            # cm = lm
+
+        for manager_name, manager in self.managers.items():
             manager.after_reset()
+
+            # lm = process_memory()
+            # print("{}: After Reset! Mem Change {:.3f}MB".format(
+            #     manager_name, (lm - cm) / 1e6
+            # ))
+            # cm = lm
 
         # reset cam
         if self.main_camera is not None:

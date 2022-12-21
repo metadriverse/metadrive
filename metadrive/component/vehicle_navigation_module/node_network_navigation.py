@@ -22,14 +22,23 @@ class NodeNetworkNavigation(BaseNavigation):
         random_navi_mark_color=False,
         show_dest_mark=False,
         show_line_to_dest=False,
-        panda_color=None
+        panda_color=None,
+        name=None,
+        vehicle_config=None
     ):
         """
         This class define a helper for localizing vehicles and retrieving navigation information.
         It now only support from first block start to the end node, but can be extended easily.
         """
         super(NodeNetworkNavigation, self).__init__(
-            engine, show_navi_mark, random_navi_mark_color, show_dest_mark, show_line_to_dest, panda_color=panda_color
+            engine=engine,
+            show_navi_mark=show_navi_mark,
+            random_navi_mark_color=random_navi_mark_color,
+            show_dest_mark=show_dest_mark,
+            show_line_to_dest=show_line_to_dest,
+            panda_color=panda_color,
+            name=name,
+            vehicle_config=vehicle_config
         )
         self.final_road = None
         self.current_road = None

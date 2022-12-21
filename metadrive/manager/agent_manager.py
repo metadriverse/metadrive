@@ -215,6 +215,7 @@ class AgentManager(BaseManager):
         step_infos = {}
         for agent_id in self.active_agents.keys():
             policy = self.engine.get_policy(self._agent_to_object[agent_id])
+            assert policy is not None, "No policy is set for agent {}".format(agent_id)
             action = policy.act(agent_id)
             step_infos[agent_id] = policy.get_action_info()
             step_infos[agent_id].update(self.get_agent(agent_id).before_step(action))

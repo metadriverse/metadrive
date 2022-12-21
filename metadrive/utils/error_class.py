@@ -1,0 +1,2 @@
+class NavigationError(ValueError):
+    pass

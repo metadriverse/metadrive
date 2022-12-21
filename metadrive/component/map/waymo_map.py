@@ -8,7 +8,7 @@ from metadrive.component.road_network.edge_road_network import EdgeRoadNetwork
 
 
 class WaymoMap(BaseMap):
-    def __init__(self, waymo_data):
+    def __init__(self, waymo_data, random_seed=None):
         self.map_id = waymo_data["id"]
         self.waymo_data = waymo_data
         super(WaymoMap, self).__init__(dict(id=waymo_data["id"]))

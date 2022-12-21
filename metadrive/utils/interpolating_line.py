@@ -48,6 +48,11 @@ class InterpolatingLine:
                     break
             p_start = points[p_start_idx]
             p_end = points[p_end_idx]
+
+            if np.linalg.norm(p_start - p_end) < 1e-6:
+                p_start_idx = p_end_idx  # next
+                continue
+
             seg_property = {
                 "length": self.points_distance(p_start, p_end),
                 "direction": self.points_direction(p_start, p_end),
@@ -97,6 +102,9 @@ class InterpolatingLine:
         In rad
         """
         accumulate_len = 0
+
+        assert len(self.segment_property) > 0
+
         for seg in self.segment_property:
             accumulate_len += seg["length"]
             if accumulate_len > longitudinal:
@@ -121,5 +129,6 @@ class InterpolatingLine:
         return lateral
 
     def destroy(self):
-        self.segment_property = None
+        del self.segment_property
+        self.segment_property = []
         self.length = None

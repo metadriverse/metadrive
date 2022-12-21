@@ -36,13 +36,16 @@ class BaseNavigation:
         random_navi_mark_color=False,
         show_dest_mark=False,
         show_line_to_dest=False,
-        panda_color=None
+        panda_color=None,
+        name=None,
+        vehicle_config=None
     ):
         """
         This class define a helper for localizing vehicles and retrieving navigation information.
         It now only support from first block start to the end node, but can be extended easily.
         """
         self.engine = engine
+        self.name = name
 
         # Make sure these variables are filled when making new subclass
         self.map = None
@@ -51,6 +54,7 @@ class BaseNavigation:
         self.next_ref_lanes = None
         self.final_lane = None
         self.current_lane = None
+        self.vehicle_config = vehicle_config
 
         self._target_checkpoints_index = None
         self._navi_info = np.zeros((self.navigation_info_dim, ), dtype=np.float32)  # navi information res
@@ -103,9 +107,11 @@ class BaseNavigation:
             self._dest_node_path.show(CamMask.MainCam)
         logging.debug("Load Vehicle Module: {}".format(self.__class__.__name__))
 
-    def reset(self, map: BaseMap, current_lane):
+    def reset(self, map: BaseMap, current_lane, vehicle_config=None):
         self.map = map
         self.current_lane = current_lane
+        if vehicle_config is not None:
+            self.vehicle_config = vehicle_config
 
     def get_checkpoints(self):
         """Return next checkpoint and the next next checkpoint"""

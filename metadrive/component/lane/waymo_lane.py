@@ -55,6 +55,14 @@ class WaymoLane(WayPointLane):
     def __del__(self):
         logging.debug("WaymoLane is released")
 
+    def destroy(self):
+        self.index = None
+        self.entry_lanes = None
+        self.exit_lanes = None
+        self.left_lanes = None
+        self.right_lanes = None
+        super(WaymoLane, self).destroy()
+
 
 if __name__ == "__main__":
     file_path = AssetLoader.file_path("waymo", "test.pkl", return_raw_style=False)
