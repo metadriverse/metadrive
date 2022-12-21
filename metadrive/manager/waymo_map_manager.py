@@ -1,37 +1,42 @@
-import numpy as np
+from collections import deque
+
+from metadrive.component.lane.waypoint_lane import WayPointLane
+from metadrive.utils.waymo_utils.data_buffer import DataBuffer
 from metadrive.component.map.waymo_map import WaymoMap
 from metadrive.constants import DEFAULT_AGENT
 from metadrive.manager.base_manager import BaseManager
 from metadrive.manager.waymo_traffic_manager import WaymoTrafficManager
-from metadrive.utils.scene_utils import ray_localization
-from metadrive.component.lane.waypoint_lane import WayPointLane
 
 
 class WaymoMapManager(BaseManager):
     PRIORITY = 0  # Map update has the most high priority
 
-    def __init__(self):
+    def __init__(self, store_map=False, store_map_buffer_size=200):
         super(WaymoMapManager, self).__init__()
         self.current_map = None
         self.map_num = self.engine.global_config["case_num"]
-        start = self.engine.global_config["start_case_index"]
-        self.maps = {_seed: None for _seed in range(start, start + self.map_num)}
-        # we put the route-find funcrion here
+        self.start = self.engine.global_config["start_case_index"]
+
+        # we put the route-find function here
         self.sdc_start = None
         self.sdc_destinations = []
         self.sdc_dest_point = None
         self.current_sdc_route = None
 
+        self.store_map = store_map
+        self.store_map_buffer = DataBuffer(store_data_buffer_size=store_map_buffer_size if self.store_map else None)
+
+
     def reset(self):
         seed = self.engine.global_random_seed
+        assert self.start <= seed < self.start + self.map_num
         map_config = self.engine.data_manager.get_case(seed)
-        if self.maps[seed] is None:
-            map = self.spawn_object(WaymoMap, waymo_data=map_config, force_spawn=True)
-            if self.engine.global_config["store_map"]:
-                self.maps[seed] = map
+        if seed in self.store_map_buffer:
+            new_map = self.store_map_buffer[seed]
         else:
-            map = self.maps[seed]
-        self.load_map(map)
+            new_map = self.spawn_object(WaymoMap, waymo_data=map_config, force_spawn=True)
+            self.store_map_buffer[seed] = new_map
+        self.load_map(new_map)
         self.update_route(map_config)
 
     def update_route(self, data):

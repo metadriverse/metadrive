@@ -11,6 +11,7 @@ from metadrive.engine.core.engine_core import EngineCore
 from metadrive.engine.interface import Interface
 from metadrive.manager.base_manager import BaseManager
 from metadrive.utils import concat_step_infos
+from collections import Iterable
 
 logger = logging.getLogger(__name__)
 
@@ -195,6 +196,16 @@ class BaseEngine(EngineCore, Randomizable):
             if self.global_config["record_episode"] and not self.replay_episode:
                 self.record_manager.add_clear_info(obj)
         return exclude_objects.keys()
+
+    def clear_object_if_possible(self, obj, force_destroy):
+        if obj in self._spawned_objects:
+            self.clear_objects([obj], force_destroy=force_destroy)
+        if force_destroy and \
+                obj.class_name in self._dying_objects and \
+                obj in self._dying_objects[obj.class_name]:
+            self._dying_objects[obj.class_name].remove(obj)
+            if hasattr(obj, "destroy"):
+                obj.destroy()
 
     def reset(self):
         """
