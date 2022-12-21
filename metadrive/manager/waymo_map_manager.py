@@ -26,7 +26,7 @@ class WaymoMapManager(BaseManager):
         seed = self.engine.global_random_seed
         map_config = self.engine.data_manager.get_case(seed)
         if self.maps[seed] is None:
-            map = self.spawn_object(WaymoMap, waymo_data=map_config)
+            map = self.spawn_object(WaymoMap, waymo_data=map_config, force_spawn=True)
             if self.engine.global_config["store_map"]:
                 self.maps[seed] = map
         else:
@@ -109,7 +109,7 @@ class WaymoMapManager(BaseManager):
         map.detach_from_world()
         self.current_map = None
         if not self.engine.global_config["store_map"]:
-            self.clear_objects([map.id], force_destroy=True)
+            self.clear_objects([map.id])
             assert len(self.spawned_objects) == 0
 
     def destroy(self):
@@ -121,3 +121,9 @@ class WaymoMapManager(BaseManager):
         # remove map from world before adding
         if self.current_map is not None:
             self.unload_map(self.current_map)
+
+    def clear_objects(self, *args, **kwargs):
+        """
+        As Map instance should not be recycled, we will forcefully destroy useless map instances.
+        """
+        return super(WaymoMapManager, self).clear_objects(force_destroy=True, *args, **kwargs)
