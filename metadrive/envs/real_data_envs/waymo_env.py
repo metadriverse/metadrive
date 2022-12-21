@@ -20,7 +20,7 @@ WAYMO_ENV_CONFIG = dict(
     start_case_index=0,
     case_num=100,
     store_map=True,
-    store_map_buffer_size=200,
+    store_map_buffer_size=2000,
     sequential_seed=False,  # Whether to set seed (the index of map) sequentially across episodes
 
     # ===== Traffic =====
