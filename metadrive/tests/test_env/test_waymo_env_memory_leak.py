@@ -32,7 +32,7 @@ def test_waymo_env_memory_leak():
             t + 1, nlt - lt, nlt - ct, lm - cm
         ))
         if t > 20:
-            assert abs((lm - cm) - last_mem) < 1024  # Memory should not have change > 1KB
+            assert abs((lm - cm) - last_mem) < 512 * 1024  # Memory should not have change > 512KB
         last_mem = lm - cm
 
 
