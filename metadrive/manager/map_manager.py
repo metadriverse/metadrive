@@ -23,7 +23,8 @@ class PGMapManager(BaseManager):
         self.maps = {_seed: None for _seed in range(start_seed, start_seed + env_num)}
 
     def spawn_object(self, object_class, *args, **kwargs):
-        map = self.engine.spawn_object(object_class, auto_fill_random_seed=False, *args, **kwargs)
+        # Note: Map instance should not be reused / recycled.
+        map = self.engine.spawn_object(object_class, auto_fill_random_seed=False, force_spawn=True, *args, **kwargs)
         return map
 
     def load_map(self, map):
@@ -122,6 +123,12 @@ class PGMapManager(BaseManager):
             map.detach_from_world()
         self.reset()
         return loaded_map_data
+
+    def clear_objects(self, *args, **kwargs):
+        """
+        As Map instance should not be recycled, we will forcefully destroy useless map instances.
+        """
+        return super(PGMapManager, self).clear_objects(force_destroy=True, *args, **kwargs)
 
 
 # For compatibility
