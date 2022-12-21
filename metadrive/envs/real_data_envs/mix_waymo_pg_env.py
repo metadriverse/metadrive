@@ -21,6 +21,7 @@ MIX_WAYMO_PG_ENV_CONFIG = dict(
     start_case_index=0,
     case_num=50,
     store_map=True,
+    store_map_buffer_size=200,
 
     # ===== Waymo Traffic Config =====
     no_traffic=False,
