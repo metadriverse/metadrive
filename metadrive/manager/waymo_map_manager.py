@@ -17,7 +17,7 @@ class WaymoMapManager(BaseManager):
         self.map_num = self.engine.global_config["case_num"]
         self.start = self.engine.global_config["start_case_index"]
 
-        # we put the route-find function here
+        # we put the route searching function here
         self.sdc_start = None
         self.sdc_destinations = []
         self.sdc_dest_point = None
@@ -33,7 +33,8 @@ class WaymoMapManager(BaseManager):
         if seed in self.store_map_buffer:
             new_map = self.store_map_buffer[seed]
         else:
-            new_map = self.spawn_object(WaymoMap, waymo_data=map_config, force_spawn=True)
+            # new_map = self.spawn_object(WaymoMap, waymo_data=map_config, force_spawn=True)
+            new_map = WaymoMap(waymo_data=map_config)
             self.store_map_buffer[seed] = new_map
         self.load_map(new_map)
         self.update_route(map_config)
@@ -112,19 +113,30 @@ class WaymoMapManager(BaseManager):
     def unload_map(self, map):
         map.detach_from_world()
         self.current_map = None
-        if not self.engine.global_config["store_map"]:
-            self.clear_objects([map.id])
-            assert len(self.spawned_objects) == 0
+        # if not self.engine.global_config["store_map"]:
+        #     self.clear_objects([map.id])
+        #     assert len(self.spawned_objects) == 0
 
     def destroy(self):
         self.maps = None
         self.current_map = None
+
+        self.sdc_start = None
+        self.sdc_destinations = []
+        self.sdc_dest_point = None
+        self.current_sdc_route = None
+
         super(WaymoMapManager, self).destroy()
 
     def before_reset(self):
         # remove map from world before adding
         if self.current_map is not None:
             self.unload_map(self.current_map)
+
+        self.sdc_start = None
+        self.sdc_destinations = []
+        self.sdc_dest_point = None
+        self.current_sdc_route = None
 
     def clear_objects(self, *args, **kwargs):
         """

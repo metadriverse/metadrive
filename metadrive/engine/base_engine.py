@@ -198,6 +198,8 @@ class BaseEngine(EngineCore, Randomizable):
         return exclude_objects.keys()
 
     def clear_object_if_possible(self, obj, force_destroy):
+        if isinstance(obj, dict):
+            return
         if obj in self._spawned_objects:
             self.clear_objects([obj], force_destroy=force_destroy)
         if force_destroy and \
@@ -222,25 +224,25 @@ class BaseEngine(EngineCore, Randomizable):
         self.record_episode = self.global_config["record_episode"]
         self.only_reset_when_replay = self.global_config["only_reset_when_replay"]
 
-        # def process_memory():
-        #     import psutil
-        #     import os
-        #     process = psutil.Process(os.getpid())
-        #     mem_info = process.memory_info()
-        #     return mem_info.rss
-        #
-        # cm = process_memory()
+        def process_memory():
+            import psutil
+            import os
+            process = psutil.Process(os.getpid())
+            mem_info = process.memory_info()
+            return mem_info.rss
+
+        cm = process_memory()
 
         # reset manager
         for manager_name, manager in self._managers.items():
             # clean all manager
             manager.before_reset()
 
-            # lm = process_memory()
-            # print("{}: Before Reset! Mem Change {:.3f}MB".format(
-            #     manager_name, (lm - cm) / 1e6
-            # ))
-            # cm = lm
+            lm = process_memory()
+            print("{}: Before Reset! Mem Change {:.3f}MB".format(
+                manager_name, (lm - cm) / 1e6
+            ))
+            cm = lm
 
         self._object_clean_check()
 
@@ -250,20 +252,20 @@ class BaseEngine(EngineCore, Randomizable):
                 continue
             manager.reset()
 
-            # lm = process_memory()
-            # print("{}: Reset! Mem Change {:.3f}MB".format(
-            #     manager_name, (lm - cm) / 1e6
-            # ))
-            # cm = lm
+            lm = process_memory()
+            print("{}: Reset! Mem Change {:.3f}MB".format(
+                manager_name, (lm - cm) / 1e6
+            ))
+            cm = lm
 
         for manager_name, manager in self.managers.items():
             manager.after_reset()
 
-            # lm = process_memory()
-            # print("{}: After Reset! Mem Change {:.3f}MB".format(
-            #     manager_name, (lm - cm) / 1e6
-            # ))
-            # cm = lm
+            lm = process_memory()
+            print("{}: After Reset! Mem Change {:.3f}MB".format(
+                manager_name, (lm - cm) / 1e6
+            ))
+            cm = lm
 
         # reset cam
         if self.main_camera is not None:

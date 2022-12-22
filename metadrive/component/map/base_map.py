@@ -83,7 +83,8 @@ class BaseMap(BaseRunnable):
         for block in self.blocks:
             block.destroy()
         self.blocks = []
-        self.road_network.destroy()
+        if self.road_network is not None:
+            self.road_network.destroy()
         self.road_network = None
         self.spawn_roads = None
         super(BaseMap, self).destroy()

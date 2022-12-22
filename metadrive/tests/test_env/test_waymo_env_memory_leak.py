@@ -13,7 +13,7 @@ def process_memory():
 
 
 def test_waymo_env_memory_leak():
-    env = WaymoEnv(dict(random_seed=0, case_num=3, sequential_seed=True, store_map=True, store_map_buffer_size=1))
+    env = WaymoEnv(dict(case_num=3, sequential_seed=True, store_map=True, store_map_buffer_size=1))
     ct = time.time()
     cm = process_memory()
     last_mem = 0.0
