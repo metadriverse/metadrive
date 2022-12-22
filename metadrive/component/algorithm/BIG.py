@@ -135,7 +135,11 @@ class BIG:
 
     def _go_back(self):
         logging.debug("back")
-        self.blocks.pop()
+
+        to_delete_block = self.blocks.pop()
+        to_delete_block.destroy()
+        del to_delete_block
+
         last_block = self.blocks[-1]
         self.destruct(last_block)
         self.next_step = NextStep.search_sibling

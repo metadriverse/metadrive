@@ -22,7 +22,7 @@ def test_pg_map_memory_leak():
     ct = time.time()
     last_lm = cm = process_memory()
     last_mem = 0.0
-    for t in range(1000):
+    for t in range(50):
         lt = time.time()
 
         our_map = PGMap(default_config["map_config"])
