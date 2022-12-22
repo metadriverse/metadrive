@@ -927,3 +927,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             rand_c = color[2]  # A pretty green
             c = rand_c
         return c
+
+    def before_reset(self):
+        for obj in [self.navigation, self.lidar, self.side_detector, self.lane_line_detector]:
+            if obj is not None and hasattr(obj, "before_reset"):
+                obj.before_reset()

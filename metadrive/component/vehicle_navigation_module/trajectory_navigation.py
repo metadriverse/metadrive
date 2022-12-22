@@ -169,3 +169,12 @@ class WaymoTrajectoryNavigation(BaseNavigation):
         self.current_lane = None
         self.reference_trajectory = None
         super(WaymoTrajectoryNavigation, self).destroy()
+
+    def before_reset(self):
+        self.map = None
+        self.checkpoints = None
+        self.current_ref_lanes = None
+        self.next_ref_lanes = None
+        self.final_lane = None
+        self.current_lane = None
+        self.reference_trajectory = None
