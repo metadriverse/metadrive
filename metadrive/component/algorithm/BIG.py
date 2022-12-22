@@ -101,16 +101,11 @@ class BIG:
         if self._block_sequence is None:
             block_types = self.block_dist_config.all_blocks()
             block_probabilities = self.block_dist_config.block_probability()
-            # block_type = self.np_random.choice(block_types, p=block_probabilities)
+            block_type = self.np_random.choice(block_types, p=block_probabilities)
+        else:
+            type_id = self._block_sequence[len(self.blocks)]
+            block_type = self.block_dist_config.get_block(type_id)
 
-            block_type = block_types[0]
-
-        # else:
-        #     type_id = self._block_sequence[len(self.blocks)]
-        #     block_type = self.block_dist_config.get_block(type_id)
-
-        # from metadrive.component.pgblock.straight import Straight
-        # block_type = Straight
 
 
         socket = self.np_random.choice(self.blocks[-1].get_socket_indices())

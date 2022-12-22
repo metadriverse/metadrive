@@ -106,7 +106,10 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
     def destruct_block(self, physics_world: PhysicsWorld):
         self._clear_topology()
         self.detach_from_world(physics_world)
+
         self.origin.removeNode()
+        self.origin = None
+
         self.dynamic_nodes.clear()
         self.static_nodes.clear()
         for obj in self._block_objects:
