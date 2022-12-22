@@ -14,8 +14,14 @@ from metadrive.tests.test_functionality.test_memory_leak_engine import process_m
 
 def test_pg_map_memory_leak():
     default_config = MetaDriveEnv.default_config()
+
+    # default_config["map_config"]["config"] = "SSS"
+    # default_config["map_config"]["type"] = "block_sequence"
+
     default_config["map_config"]["config"] = 3
-    # default_config["debug"] = True
+
+    default_config["debug"] = True
+    # default_config["debug_physics_world"] = True
 
     engine = initialize_engine(default_config)
 
@@ -33,6 +39,8 @@ def test_pg_map_memory_leak():
         size = total_size(our_map)
         print("map size: {:,}".format(size))
         del our_map
+
+        print(engine.physics_world.report_bodies())
 
         nlt = time.time()
         lm = process_memory()
