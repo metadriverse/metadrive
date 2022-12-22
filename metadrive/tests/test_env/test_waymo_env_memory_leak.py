@@ -7,13 +7,14 @@ from metadrive.envs.real_data_envs.waymo_env import WaymoEnv
 # inner psutil function
 def process_memory():
     import psutil
+    import os
     process = psutil.Process(os.getpid())
     mem_info = process.memory_info()
     return mem_info.rss
 
 
 def test_waymo_env_memory_leak():
-    env = WaymoEnv(dict(case_num=3, sequential_seed=True, store_map=True, store_map_buffer_size=1))
+    env = WaymoEnv(dict(case_num=2, sequential_seed=True, store_map=True, store_map_buffer_size=1))
     ct = time.time()
     cm = process_memory()
     last_mem = 0.0
@@ -33,4 +34,40 @@ def test_waymo_env_memory_leak():
 
 
 if __name__ == "__main__":
+
+
+    # https://code.activestate.com/recipes/65333/
+
+
+    import gc
+
+
+    def dump_garbage():
+        """
+        show us what's the garbage about
+        """
+
+        # force collection
+        print("\nGARBAGE:")
+        gc.collect()
+
+        print("\nGARBAGE OBJECTS:")
+        res = []
+        for x in gc.garbage:
+            s = str(x)
+            if len(s) > 80:
+                s = s[:80]
+            print(type(x), "\n  ", s)
+            res.append([type(x), s, x])
+        return res
+
+
+    gc.enable()
+    gc.set_debug(gc.DEBUG_LEAK)
+
     test_waymo_env_memory_leak()
+
+    # show the dirt ;-)
+    # ret = dump_garbage()
+
+    # print(ret)

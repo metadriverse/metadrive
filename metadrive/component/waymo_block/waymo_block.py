@@ -21,6 +21,11 @@ class WaymoBlock(BaseBlock):
         self.map_index = map_index
         super(WaymoBlock, self).__init__(block_index, global_network, random_seed)
 
+        e = get_engine()
+        self.waymo_map_data = e.data_manager.get_case(self.map_index)["map"]
+
+        # print(1)
+
     def _sample_topology(self) -> bool:
         for lane_id, data in self.waymo_map_data.items():
             if data.get("type", False) == WaymoLaneProperty.LANE_TYPE:
@@ -122,10 +127,10 @@ class WaymoBlock(BaseBlock):
         return EdgeRoadNetwork
 
     def destroy(self):
-        # self.waymo_map_data = None
+        self.waymo_map_data = None
         super(WaymoBlock, self).destroy()
 
-    @property
-    def waymo_map_data(self):
-        e = get_engine()
-        return e.data_manager.get_case(self.map_index)["map"]
+    # @property
+    # def waymo_map_data(self):
+    #     e = get_engine()
+    #     return e.data_manager.get_case(self.map_index)["map"]

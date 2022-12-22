@@ -38,7 +38,37 @@ class DataBuffer:
             get_engine().clear_object_if_possible(tmp_obj, force_destroy=True)
             if hasattr(tmp_obj, "destroy"):
                 tmp_obj.destroy()
-            del tmp_obj
+
+
+
+            res = gc.get_objects()
+
+            print(11)
+            # if isinstance(tmp_obj, dict):
+
+                # def _d(d, layer=0):
+                #     if isinstance(d, dict):
+                #         keys = list(d.keys())
+                #         for k in keys:
+                #             if k in d:
+                #                 v = d.pop(k)
+                #                 # print(k)
+                #                 _d(v, layer=layer+1)
+                #
+                #                 # print("k=", k)
+                #
+                #                 del v
+                #     else:
+                #         del d
+                # _d(tmp_obj, layer=0)
+
+            # else:
+            #     keys = list(tmp_obj.__dict__.keys())
+            #     for k in keys:
+            #         v = tmp_obj.__dict__.pop(k)
+            #         del v
+
+            # del tmp_obj, refs
 
     def __getitem__(self, item):
         assert item in self.store_data_buffer

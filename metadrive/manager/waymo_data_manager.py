@@ -1,7 +1,7 @@
 import os
 
 from tqdm import tqdm
-
+import copy
 from metadrive.manager.base_manager import BaseManager
 from metadrive.utils.waymo_utils.data_buffer import DataBuffer
 from metadrive.utils.waymo_utils.waymo_utils import read_waymo_data
@@ -30,9 +30,41 @@ class WaymoDataManager(BaseManager):
         assert self.start_case_index <= i < self.start_case_index + self.case_num, \
             "Case ID exceeds range"
         file_path = os.path.join(self.directory, "{}.pkl".format(i))
-        return read_waymo_data(file_path)
+        return copy.deepcopy(read_waymo_data(file_path))
 
     def get_case(self, i):
         if i not in self.waymo_case:
+            # inner psutil function
+            def process_memory():
+                import psutil
+                import os
+                process = psutil.Process(os.getpid())
+                mem_info = process.memory_info()
+                return mem_info.rss
+
+            cm = process_memory()
+
+            self.waymo_case.clear_if_necessary()
+
+
+            lm = process_memory()
+            print("{}:  Reset! Mem Change {:.3f}MB".format(
+                "data manager 1", (lm - cm) / 1e6
+            ))
+            cm = lm
+
+
+
             self.waymo_case[i] = self._get_case(i)
-        return self.waymo_case[i]
+
+
+
+            lm = process_memory()
+            print("{}:  Reset! Mem Change {:.3f}MB".format(
+                "data manager 2", (lm - cm) / 1e6
+            ))
+            cm = lm
+
+
+
+        return copy.deepcopy(self.waymo_case[i])
