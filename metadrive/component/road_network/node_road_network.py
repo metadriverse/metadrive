@@ -46,7 +46,7 @@ class NodeRoadNetwork(BaseRoadNetwork):
             raise ValueError("Same start node {} in two road network".format(intersect))
         # handle decoration_lanes
         dec_lanes = self.get_all_decoration_lanes() + other.get_all_decoration_lanes()
-        self.graph.update(copy.copy(other.graph))
+        self.graph.update(copy.deepcopy(other.graph))
         self.update_decoration_lanes(dec_lanes)
         return self
 

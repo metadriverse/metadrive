@@ -83,12 +83,17 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
         Randomly Construct a block, if overlap return False
         """
         self.sample_parameters()
-        self.origin = NodePath(self.name)
+
+        if not isinstance(self.origin, NodePath):
+            self.origin = NodePath(self.name)
+        # else:
+        #     print("Origin already exists: ", self.origin)
+
         self._block_objects = []
         if extra_config:
             assert set(extra_config.keys()).issubset(self.PARAMETER_SPACE.parameters), \
                 "Make sure the parameters' name are as same as what defined in pg_space.py"
-            raw_config = self.get_config()
+            raw_config = self.get_config(copy=True)
             raw_config.update(extra_config)
             self.update_config(raw_config)
         self._clear_topology()
@@ -258,6 +263,15 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
         raise NotImplementedError
 
     def destroy(self):
+        for node_path in [
+            self.lane_line_node_path,
+            self.sidewalk_node_path,
+            self.lane_node_path,
+            self.lane_vis_node_path
+        ]:
+            if isinstance(node_path, NodePath):
+                node_path.removeNode()
+
         if self.block_network is not None:
             self.block_network.destroy()
             self.block_network = None

@@ -113,6 +113,10 @@ class BaseObject(BaseRunnable):
             new_origin.setH(self.origin.getH())
             new_origin.setPos(self.origin.getPos())
             self.origin.getChildren().reparentTo(new_origin)
+
+            # TODO(PZH): We don't call this sentence:. It might cause problem since we don't remove old origin?
+            # self.origin.removeNode()
+
             self.origin = new_origin
             self.dynamic_nodes.append(physics_body)
             if self.MASS is not None:
