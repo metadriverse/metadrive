@@ -14,7 +14,7 @@ def initialize_engine(env_global_config):
     return cls.singleton
 
 
-def get_engine():
+def get_engine() -> BaseEngine:
     return BaseEngine.singleton
 
 

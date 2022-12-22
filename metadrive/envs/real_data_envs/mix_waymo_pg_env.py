@@ -21,6 +21,7 @@ MIX_WAYMO_PG_ENV_CONFIG = dict(
     start_case_index=0,
     case_num=50,
     store_map=True,
+    store_map_buffer_size=200,
 
     # ===== Waymo Traffic Config =====
     no_traffic=False,
@@ -91,7 +92,9 @@ class MixWaymoPGEnv(WaymoEnv):
 
     def setup_engine(self):
         # Initialize all managers
-        self.waymo_map_manager = WaymoMapManager()
+        self.waymo_map_manager = WaymoMapManager(
+            store_map=self.config["store_map"], store_map_buffer_size=self.config["store_map_buffer_size"]
+        )
         self.waymo_traffic_manager = WaymoTrafficManager()
 
         self.pg_map_manager = PGMapManager()
@@ -101,7 +104,12 @@ class MixWaymoPGEnv(WaymoEnv):
         super(WaymoEnv, self).setup_engine()
         if self.real_data_ratio > 0:
             self.is_current_real_data = True
-            self.engine.register_manager("data_manager", WaymoDataManager())
+            self.engine.register_manager(
+                "data_manager",
+                WaymoDataManager(
+                    store_map=self.config["store_map"], store_map_buffer_size=self.config["store_map_buffer_size"]
+                )
+            )
             self.engine.register_manager("map_manager", self.waymo_map_manager)
             if not self.config["no_traffic"]:
                 self.engine.register_manager("traffic_manager", self.waymo_traffic_manager)

@@ -11,9 +11,9 @@ from metadrive.utils.waymo_utils.waymo_utils import AgentType
 class WaymoTrafficManager(BaseManager):
     def __init__(self):
         super(WaymoTrafficManager, self).__init__()
-        self.current_traffic_data = None
+        # self.current_traffic_data = None
         self.count = 0
-        self.sdc_index = None
+        # self.sdc_index = None
         self.vid_to_obj = None
 
     def after_reset(self):
@@ -96,8 +96,8 @@ class WaymoTrafficManager(BaseManager):
         try:
             # clean previous episode data
             super(WaymoTrafficManager, self).before_reset()
-            self.current_traffic_data = self.engine.data_manager.get_case(self.engine.global_random_seed)["tracks"]
-            self.sdc_index = str(self.engine.data_manager.get_case(self.engine.global_random_seed)["sdc_index"])
+            # self.current_traffic_data = self.engine.data_manager.get_case(self.engine.global_random_seed)["tracks"]
+            # self.sdc_index = str(self.engine.data_manager.get_case(self.engine.global_random_seed)["sdc_index"])
         except:
             raise ValueError("Can not CLEAN traffic for seed: {}".format(self.engine.global_random_seed))
 
@@ -117,3 +117,11 @@ class WaymoTrafficManager(BaseManager):
         trajectory *= [1, -1]
 
         return trajectory
+
+    @property
+    def current_traffic_data(self):
+        return self.engine.data_manager.get_case(self.engine.global_random_seed)["tracks"]
+
+    @property
+    def sdc_index(self):
+        return str(self.engine.data_manager.get_case(self.engine.global_random_seed)["sdc_index"])
