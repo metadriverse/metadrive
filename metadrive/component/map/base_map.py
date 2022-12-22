@@ -1,7 +1,10 @@
+import logging
+
 from metadrive.base_class.base_runnable import BaseRunnable
 from metadrive.engine.engine_utils import get_engine, get_global_config
 from metadrive.utils import import_pygame
 
+logger = logging.getLogger(__name__)
 pygame = import_pygame()
 
 
@@ -100,3 +103,7 @@ class BaseMap(BaseRunnable):
     def get_center_point(self):
         x_min, x_max, y_min, y_max = self.road_network.get_bounding_box()
         return (x_max + x_min) / 2, (y_max + y_min) / 2
+
+    def __del__(self):
+        self.destroy()
+        logger.debug("{} is being deleted.".format(type(self)))

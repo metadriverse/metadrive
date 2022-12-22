@@ -15,6 +15,7 @@ from metadrive.tests.test_functionality.test_memory_leak_engine import process_m
 def test_pg_map_memory_leak():
     default_config = MetaDriveEnv.default_config()
     default_config["map_config"]["config"] = 3
+    default_config["debug"] = True
 
     engine = initialize_engine(default_config)
 
@@ -24,11 +25,13 @@ def test_pg_map_memory_leak():
     for t in range(50000):
         lt = time.time()
 
-        map = PGMap(default_config["map_config"])
-        size = total_size(map)
+        our_map = PGMap(default_config["map_config"])
+
+        our_map.blocks = []
+
+        size = total_size(our_map)
         print("map size: {:,}".format(size))
-        # map.destroy()
-        del map, size
+        del our_map
 
         # map = {"aaa": 222}
         # del map

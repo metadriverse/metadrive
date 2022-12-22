@@ -24,13 +24,14 @@ def total_size(o, handlers={}, verbose=False):
 
     """
     dict_handler = lambda d: chain.from_iterable(d.items())
-    all_handlers = {tuple: iter,
-                    list: iter,
-                    deque: iter,
-                    dict: dict_handler,
-                    set: iter,
-                    frozenset: iter,
-                    }
+    all_handlers = {
+        tuple: iter,
+        list: iter,
+        deque: iter,
+        dict: dict_handler,
+        set: iter,
+        frozenset: iter,
+    }
     all_handlers.update(handlers)  # user handlers take precedence
     seen = set()  # track which object id's have already been seen
     default_size = getsizeof(0)  # estimate sizeof object without __sizeof__
@@ -96,7 +97,6 @@ def test_engine_memory_leak():
 
 
 def test_config_memory_leak():
-
 
     ct = time.time()
     last_lm = cm = process_memory()

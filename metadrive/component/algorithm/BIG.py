@@ -39,7 +39,6 @@ class BIG:
         random_seed=None,
         block_dist_config=PGBlockDistConfig
     ):
-        super(BIG, self).__init__()
         self.block_dist_config = block_dist_config
         self._block_sequence = None
         self.random_seed = random_seed

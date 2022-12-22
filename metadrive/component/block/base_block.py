@@ -1,19 +1,24 @@
+import logging
+from typing import List, Dict
+
 import math
-from typing import Dict, List
+from panda3d.bullet import BulletBoxShape, BulletGhostNode
+from panda3d.core import Vec3, LQuaternionf, Vec4, TextureStage, RigidBodyCombiner, \
+    SamplerState, NodePath
 
 from metadrive.base_class.base_object import BaseObject
 from metadrive.component.lane.abs_lane import AbstractLane
 from metadrive.component.lane.waypoint_lane import WayPointLane
-from metadrive.component.road_network import Road
 from metadrive.component.road_network.node_road_network import NodeRoadNetwork
+from metadrive.component.road_network.road import Road
 from metadrive.constants import BodyName, CamMask, LineType, LineColor, DrivableAreaProperty
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.engine.core.physics_world import PhysicsWorld
+from metadrive.utils import import_pygame
 from metadrive.utils.coordinates_shift import panda_position
 from metadrive.utils.math_utils import norm
-from panda3d.bullet import BulletBoxShape, BulletGhostNode
-from panda3d.core import Vec3, LQuaternionf, Vec4, TextureStage, RigidBodyCombiner, \
-    SamplerState, NodePath
+
+logger = logging.getLogger(__name__)
 
 
 class BaseBlock(BaseObject, DrivableAreaProperty):
@@ -257,3 +262,7 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
             self.block_network.destroy()
             self.block_network = None
         super(BaseBlock, self).destroy()
+
+    def __del__(self):
+        self.destroy()
+        logger.debug("{} is being deleted.".format(type(self)))
