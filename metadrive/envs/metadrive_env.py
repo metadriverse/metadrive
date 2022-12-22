@@ -91,8 +91,8 @@ class MetaDriveEnv(BaseEnv):
     def default_config(cls) -> "Config":
         config = super(MetaDriveEnv, cls).default_config()
         config.update(METADRIVE_DEFAULT_CONFIG)
-        config.register_type("map", str, int)
-        config["map_config"].register_type("config", None)
+        # config.register_type("map", str, int)
+        # config["map_config"].register_type("config", None)
         return config
 
     def __init__(self, config: dict = None):

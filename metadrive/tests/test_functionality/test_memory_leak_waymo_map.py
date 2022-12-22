@@ -5,18 +5,7 @@ from metadrive.engine.asset_loader import AssetLoader
 from metadrive.engine.engine_utils import initialize_engine
 from metadrive.envs.real_data_envs.waymo_env import WaymoEnv
 from metadrive.manager.waymo_data_manager import WaymoDataManager
-from metadrive.utils.waymo_utils.waymo_utils import AgentType
-from metadrive.utils.waymo_utils.waymo_utils import RoadEdgeType
-from metadrive.utils.waymo_utils.waymo_utils import RoadLineType
-
-
-# inner psutil function
-def process_memory():
-    import psutil
-    import os
-    process = psutil.Process(os.getpid())
-    mem_info = process.memory_info()
-    return mem_info.rss
+from metadrive.tests.test_functionality.test_memory_leak_engine import process_memory
 
 
 def test_waymo_env_memory_leak():
