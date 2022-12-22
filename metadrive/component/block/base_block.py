@@ -256,4 +256,5 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
         if self.block_network is not None:
             self.block_network.destroy()
             self.block_network = None
+        self._global_network = None
         super(BaseBlock, self).destroy()

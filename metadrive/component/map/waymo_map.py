@@ -13,9 +13,36 @@ class WaymoMap(BaseMap):
         super(WaymoMap, self).__init__(dict(id=self.map_index))
 
     def _generate(self):
-        block = WaymoBlock(0, self.road_network, 0, self.map_index)
-        block.construct_block(self.engine.worldNP, self.engine.physics_world)
-        self.blocks.append(block)
+        # block = WaymoBlock(0, self.road_network, 0, self.map_index)
+        # block.construct_block(self.engine.worldNP, self.engine.physics_world)
+        # self.blocks.append(block)
+
+        from typing import List
+        import copy
+
+        from metadrive.component.algorithm.BIG import BigGenerateMethod, BIG
+        from metadrive.component.algorithm.blocks_prob_dist import PGBlockDistConfig
+        from metadrive.component.map.base_map import BaseMap
+        from metadrive.component.pgblock.first_block import FirstPGBlock
+        from metadrive.component.road_network.node_road_network import NodeRoadNetwork
+        from metadrive.engine.core.physics_world import PhysicsWorld
+        from metadrive.utils import Config
+        from panda3d.core import NodePath
+        parent_node_path, physics_world = self.engine.worldNP, self.engine.physics_world
+        # Build a first-block
+        last_block = FirstPGBlock(
+            self.road_network,
+            1,
+            1,
+            # self.config[self.LANE_WIDTH],
+            # self.config["lane_num"],
+            parent_node_path,
+            physics_world,
+            # length=length
+        )
+        self.blocks.append(last_block)
+
+
 
     @staticmethod
     def waymo_position(pos):
@@ -30,11 +57,11 @@ class WaymoMap(BaseMap):
         return EdgeRoadNetwork
 
     def destroy(self):
-        # self.waymo_data = None
+        self.map_index = None
         super(WaymoMap, self).destroy()
 
     def __del__(self):
-        self.destroy()
+        # self.destroy()
         logging.debug("Map is Released")
         print("[WaymoMap] Map is Released")
 

@@ -127,8 +127,14 @@ class WaymoBlock(BaseBlock):
         return EdgeRoadNetwork
 
     def destroy(self):
+        self.map_index = None
         self.waymo_map_data = None
         super(WaymoBlock, self).destroy()
+
+    def __del__(self):
+        self.destroy()
+        super(WaymoBlock, self).__del__()
+        print("Waymo Block is being deleted.")
 
     # @property
     # def waymo_map_data(self):

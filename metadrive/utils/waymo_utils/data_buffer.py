@@ -20,55 +20,23 @@ class DataBuffer:
 
     def clear_if_necessary(self):
         while len(self.store_data_buffer) >= self.store_data_buffer_size:
-            # print("[MapManager] Existing cases {} / {} exceeds the max len {}".format(
-            #     len(self.maps), len(self.loaded_case), self.max_len
-            # ))
+
+
 
             tmp_index = self.store_data_indices.popleft()
+
+
+            if not isinstance(self.store_data_buffer[tmp_index], dict):
+                self.store_data_indices.appendleft(tmp_index)
+                return
+
+
             tmp_obj = self.store_data_buffer.pop(tmp_index)
-
-
-
-            import gc
-            # gc.collect()
-            # print("GC: ", len(gc.get_referrers(tmp_obj)))
-            refs = gc.get_referrers(tmp_obj)
-            print("\t\tDataBuffer: Deleting object Index-{} Class-{} Refs-{}".format(tmp_index, type(tmp_obj), len(refs)))
-
             get_engine().clear_object_if_possible(tmp_obj, force_destroy=True)
             if hasattr(tmp_obj, "destroy"):
+                print("Destroy object: ", type(tmp_obj))
                 tmp_obj.destroy()
-
-
-
-            res = gc.get_objects()
-
-            print(11)
-            # if isinstance(tmp_obj, dict):
-
-                # def _d(d, layer=0):
-                #     if isinstance(d, dict):
-                #         keys = list(d.keys())
-                #         for k in keys:
-                #             if k in d:
-                #                 v = d.pop(k)
-                #                 # print(k)
-                #                 _d(v, layer=layer+1)
-                #
-                #                 # print("k=", k)
-                #
-                #                 del v
-                #     else:
-                #         del d
-                # _d(tmp_obj, layer=0)
-
-            # else:
-            #     keys = list(tmp_obj.__dict__.keys())
-            #     for k in keys:
-            #         v = tmp_obj.__dict__.pop(k)
-            #         del v
-
-            # del tmp_obj, refs
+            del tmp_obj
 
     def __getitem__(self, item):
         assert item in self.store_data_buffer
@@ -89,5 +57,5 @@ class DataBuffer:
         self.store_data_buffer[key] = value
         self.store_data_indices.append(key)
 
-        assert len(self.store_data_indices) == len(self.store_data_buffer)
-        assert len(self.store_data_indices) <= self.store_data_buffer_size
+        # assert len(self.store_data_indices) == len(self.store_data_buffer)
+        # assert len(self.store_data_indices) <= self.store_data_buffer_size
