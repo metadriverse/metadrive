@@ -12,10 +12,13 @@ from metadrive.utils.interpolating_line import InterpolatingLine
 from metadrive.utils.math_utils import wrap_to_pi, norm
 from metadrive.utils.waymo_utils.waymo_utils import RoadLineType, RoadEdgeType, convert_polyline_to_metadrive
 
+from metadrive.engine.engine_utils import get_engine
+
 
 class WaymoBlock(BaseBlock):
-    def __init__(self, block_index: int, global_network, random_seed, waymo_map_data: dict):
-        self.waymo_map_data = waymo_map_data
+    def __init__(self, block_index: int, global_network, random_seed, map_index):
+        # self.waymo_map_data = waymo_map_data
+        self.map_index = map_index
         super(WaymoBlock, self).__init__(block_index, global_network, random_seed)
 
     def _sample_topology(self) -> bool:
@@ -119,5 +122,10 @@ class WaymoBlock(BaseBlock):
         return EdgeRoadNetwork
 
     def destroy(self):
-        self.waymo_map_data = None
+        # self.waymo_map_data = None
         super(WaymoBlock, self).destroy()
+
+    @property
+    def waymo_map_data(self):
+        e = get_engine()
+        return e.data_manager.get_case(self.map_index)["map"]

@@ -34,7 +34,7 @@ class WaymoMapManager(BaseManager):
             new_map = self.store_map_buffer[seed]
         else:
             # new_map = self.spawn_object(WaymoMap, waymo_data=map_config, force_spawn=True)
-            new_map = WaymoMap(waymo_data=map_config)
+            new_map = WaymoMap(waymo_data=map_config["id"])
             self.store_map_buffer[seed] = new_map
         self.load_map(new_map)
         self.update_route(map_config)

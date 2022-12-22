@@ -42,8 +42,7 @@ class DataBuffer:
 
             import gc
             gc.collect()
-            count = gc.get_referrers(tmp_obj)
-            print("GC: ", len(count))
+            print("GC: ", len(gc.get_referrers(tmp_obj)))
 
             get_engine().clear_object_if_possible(tmp_obj, force_destroy=True)
             if hasattr(tmp_obj, "destroy"):
