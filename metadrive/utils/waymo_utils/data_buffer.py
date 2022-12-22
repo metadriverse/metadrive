@@ -26,10 +26,9 @@ class DataBuffer:
         return key in self.store_data_buffer
 
     def __setitem__(self, key, value):
-        engine = get_engine()
 
-        map_num = engine.global_config["case_num"]
-        start = engine.global_config["start_case_index"]
+        map_num = get_engine().global_config["case_num"]
+        start = get_engine().global_config["start_case_index"]
 
         assert start <= key < start + map_num, (start, key, start + map_num)
 
@@ -46,7 +45,7 @@ class DataBuffer:
             count = gc.get_referrers(tmp_obj)
             print("GC: ", len(count))
 
-            engine.clear_object_if_possible(tmp_obj, force_destroy=True)
+            get_engine().clear_object_if_possible(tmp_obj, force_destroy=True)
             if hasattr(tmp_obj, "destroy"):
                 tmp_obj.destroy()
             del tmp_obj

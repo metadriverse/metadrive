@@ -35,10 +35,15 @@ class WaymoTrajectoryNavigation(BaseNavigation):
         )
         self.reference_trajectory = None
 
-    def reset(self, map, current_lane, destination=None, random_seed=None):
-        super(WaymoTrajectoryNavigation, self).reset(map, current_lane)
+    def reset(self, map=None, current_lane=None, destination=None, random_seed=None):
+
+        # We do not want to store map within the navigation module!
+        # TODO(PZH): In future, we can let all navigation module get latest map on-the-fly instead of
+        #  caching a class local variable.
+        super(WaymoTrajectoryNavigation, self).reset(map=None, current_lane=None)
         self.reference_trajectory = self.get_trajectory()
-        self.set_route(None, None)
+        if self.reference_trajectory is not None:
+            self.set_route(None, None)
 
     def set_route(self, current_lane_index: str, destination: str):
         self.checkpoints = self.descretize_reference_trajectory()
@@ -72,6 +77,9 @@ class WaymoTrajectoryNavigation(BaseNavigation):
         """
         It is called every step
         """
+        if self.reference_trajectory is None:
+            return
+
         # Update ckpt index
         long, lat = self.reference_trajectory.local_coordinates(ego_vehicle.position, only_in_lane_point=True)
         if self._target_checkpoints_index[0] != self._target_checkpoints_index[1]:  # on last road
