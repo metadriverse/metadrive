@@ -29,20 +29,20 @@ class WaymoMapManager(BaseManager):
     def reset(self):
         seed = self.engine.global_random_seed
         assert self.start <= seed < self.start + self.map_num
-        map_config = self.engine.data_manager.get_case(seed)
         if seed in self.store_map_buffer:
             new_map = self.store_map_buffer[seed]
         else:
-            # new_map = self.spawn_object(WaymoMap, waymo_data=map_config, force_spawn=True)
             new_map = WaymoMap(map_index=seed)
             self.store_map_buffer[seed] = new_map
         self.load_map(new_map)
-        self.update_route(map_config)
+        self.update_route()
 
-    def update_route(self, data):
+    def update_route(self):
         """
         # TODO(LQY) Modify this part, if we finally deceide to use TrajNavi
         """
+        data = self.engine.data_manager.get_case(self.engine.global_random_seed)
+
         sdc_traj = WaymoTrafficManager.parse_full_trajectory(data["tracks"][data["sdc_index"]]["state"])
         self.current_sdc_route = WayPointLane(sdc_traj, 1.5)
         init_state = WaymoTrafficManager.parse_vehicle_state(
@@ -102,9 +102,10 @@ class WaymoMapManager(BaseManager):
         return None
 
     def spawn_object(self, object_class, *args, **kwargs):
-        map = self.engine.spawn_object(object_class, auto_fill_random_seed=False, *args, **kwargs)
-        self.spawned_objects[map.id] = map
-        return map
+        raise ValueError("Please create WaymoMap instance directly without calling spawn_object function.")
+        # map = self.engine.spawn_object(object_class, auto_fill_random_seed=False, *args, **kwargs)
+        # self.spawned_objects[map.id] = map
+        # return map
 
     def load_map(self, map):
         map.attach_to_world()

@@ -40,9 +40,9 @@ class DataBuffer:
             tmp_index = self.store_data_indices.popleft()
             tmp_obj = self.store_data_buffer.pop(tmp_index)
 
-            import gc
-            gc.collect()
-            print("GC: ", len(gc.get_referrers(tmp_obj)))
+            # import gc
+            # gc.collect()
+            # print("GC: ", len(gc.get_referrers(tmp_obj)))
 
             get_engine().clear_object_if_possible(tmp_obj, force_destroy=True)
             if hasattr(tmp_obj, "destroy"):
