@@ -88,8 +88,17 @@ class AgentManager(BaseManager):
         if not self.INITIALIZED:
             super(AgentManager, self).__init__()
             self.INITIALIZED = True
-        super(AgentManager, self).before_reset()
+
         self.episode_created_agents = None
+
+        for v in self.dying_agents.values():
+            self._remove_vehicle(v)
+
+        for v in self.get_vehicle_list():
+            if hasattr(v, "before_reset"):
+                v.before_reset()
+
+        super(AgentManager, self).before_reset()
 
     def reset(self):
         """

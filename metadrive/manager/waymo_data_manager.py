@@ -21,10 +21,10 @@ class WaymoDataManager(BaseManager):
             p = os.path.join(self.directory, "{}.pkl".format(i))
             assert os.path.exists(p), "No Data {} at path: {}".format(i, p)
 
-            if self.store_map:
+            # if self.store_map:
                 # If we wish to store map (which requires huge memory), we load data immediately to exchange effiency
                 # later
-                self.waymo_case[i] = self._get_case(i)
+                # self.waymo_case[i] = self._get_case(i)
 
     def _get_case(self, i):
         assert self.start_case_index <= i < self.start_case_index + self.case_num, \
