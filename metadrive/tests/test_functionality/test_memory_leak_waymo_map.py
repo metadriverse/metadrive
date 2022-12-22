@@ -38,7 +38,7 @@ def test_waymo_map_memory_leak():
     ct = time.time()
     cm = process_memory()
     last_mem = 0.0
-    for t in range(10000):
+    for t in range(1000):
         lt = time.time()
 
         map = WaymoMap(map_index=0)
@@ -55,31 +55,33 @@ def test_waymo_map_memory_leak():
         #     assert abs((lm - cm) - last_mem) < 1024  # Memory should not have change > 1KB
         last_mem = lm - cm
 
+    assert lm - cm < 1024 * 1024 * 10, "We expect will cause 18MB memory leak."
+
 
 if __name__ == "__main__":
 
     # https://code.activestate.com/recipes/65333/
 
-    import gc
+    # import gc
 
-    def dump_garbage():
-        """
-        show us what's the garbage about
-        """
-
-        # force collection
-        print("\nGARBAGE:")
-        gc.collect()
-
-        print("\nGARBAGE OBJECTS:")
-        res = []
-        for x in gc.garbage:
-            s = str(x)
-            if len(s) > 80:
-                s = s[:80]
-            print(type(x), "\n  ", s)
-            res.append([type(x), s, x])
-        return res
+    # def dump_garbage():
+    #     """
+    #     show us what's the garbage about
+    #     """
+    #
+    #     # force collection
+    #     print("\nGARBAGE:")
+    #     gc.collect()
+    #
+    #     print("\nGARBAGE OBJECTS:")
+    #     res = []
+    #     for x in gc.garbage:
+    #         s = str(x)
+    #         if len(s) > 80:
+    #             s = s[:80]
+    #         print(type(x), "\n  ", s)
+    #         res.append([type(x), s, x])
+    #     return res
 
     # gc.enable()
     # gc.set_debug(gc.DEBUG_LEAK)
