@@ -13,21 +13,21 @@ from metadrive.tests.test_functionality.test_memory_leak_engine import process_m
 
 
 def test_pg_map_memory_leak():
-    default_config = MetaDriveEnv.default_config()
-
-    # default_config["map_config"]["config"] = "SSS"
-    # default_config["map_config"]["type"] = "block_sequence"
-
-    default_config["map_config"]["config"] = 1
-
-    # default_config["debug"] = True
-    # default_config["debug_physics_world"] = True
-
-    close_engine()
-
-    engine = initialize_engine(default_config)
 
     try:
+        default_config = MetaDriveEnv.default_config()
+
+        # default_config["map_config"]["config"] = "SSS"
+        # default_config["map_config"]["type"] = "block_sequence"
+
+        default_config["map_config"]["config"] = 1
+
+        # default_config["debug"] = True
+        # default_config["debug_physics_world"] = True
+
+        close_engine()
+        engine = initialize_engine(default_config)
+
         ct = time.time()
         last_lm = cm = process_memory()
         last_mem = 0.0

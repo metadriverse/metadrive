@@ -68,13 +68,15 @@ def process_memory():
 
 
 def test_engine_memory_leak():
-    default_config = MetaDriveEnv.default_config()
-    default_config["map_config"]["config"] = 3
-
-    close_engine()
-
-    engine = initialize_engine(default_config)
     try:
+
+        default_config = MetaDriveEnv.default_config()
+        default_config["map_config"]["config"] = 3
+
+        close_engine()
+
+        engine = initialize_engine(default_config)
+
         ct = time.time()
         last_lm = cm = process_memory()
         last_mem = 0.0
