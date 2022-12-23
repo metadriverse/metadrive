@@ -58,6 +58,8 @@ def test_pg_map_memory_leak():
 
     close_engine()
 
+    assert lm - cm < 1024 * 1024 * 35, "We expect will cause ~28 memory leak."
+
 
 if __name__ == "__main__":
     test_pg_map_memory_leak()
