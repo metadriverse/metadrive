@@ -11,21 +11,13 @@ from typing import Optional
 import numpy as np
 
 
-class RandomState(np.random.RandomState):
-    def choice(self, a, size=None, replace=True, p=None):
-        """For some reasons, using native numpy choice would cause memory leak!"""
-        s = super(RandomState, self).choice(np.arange(len(a)), size=size, replace=replace, p=p)
-        return a[s]
-
-
 def get_np_random(seed=None, return_seed=False):
     if seed is not None and not (isinstance(seed, int) and 0 <= seed):
         raise logging.error('Seed must be a non-negative integer or omitted, not {}'.format(seed))
 
     seed = create_seed(seed)
 
-    # rng = np.random.RandomState()
-    rng = RandomState()
+    rng = np.random.RandomState()
 
     rng.seed(_int_list_from_bigint(hash_seed(seed)))
 

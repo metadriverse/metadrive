@@ -109,8 +109,10 @@ class Config:
         :param allow_add_new_key: whether allowing to add new keys to existing configs or not
         :param stop_recursive_update: Deep update and recursive-check will NOT be applied to keys in stop_recursive_update
         """
-        stop_recursive_update = stop_recursive_update or []
         new_dict = new_dict or dict()
+        if len(new_dict) == 0:
+            return
+        stop_recursive_update = stop_recursive_update or []
         new_dict = copy.deepcopy(new_dict)
         if not allow_add_new_key:
             old_keys = set(self._config)

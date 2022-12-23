@@ -82,7 +82,13 @@ class BaseRunnable(Configurable, Nameable, Randomizable):
         """
         Fix a value of the random parameters in PARAMETER_SPACE
         """
+
+        # PZH: Original one which causes memory leaks
         random_seed = self.np_random.randint(low=0, high=int(1e6))
+
+        # TODO(PZH): New one that should fix the bug!
+        # random_seed = self.generate_seed()
+
         self.PARAMETER_SPACE.seed(random_seed)
         ret = self.PARAMETER_SPACE.sample()
         self.update_config(ret)

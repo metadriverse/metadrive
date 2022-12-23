@@ -18,9 +18,9 @@ def test_pg_map_memory_leak():
     # default_config["map_config"]["config"] = "SSS"
     # default_config["map_config"]["type"] = "block_sequence"
 
-    default_config["map_config"]["config"] = 3
+    default_config["map_config"]["config"] = 1
 
-    default_config["debug"] = True
+    # default_config["debug"] = True
     # default_config["debug_physics_world"] = True
 
     engine = initialize_engine(default_config)
@@ -33,8 +33,8 @@ def test_pg_map_memory_leak():
 
         our_map = PGMap(default_config["map_config"])
 
-        our_map.blocks.clear()
-        our_map.blocks = []
+        # our_map.blocks.clear()
+        # our_map.blocks = []
 
         size = total_size(our_map)
         print("map size: {:,}".format(size))
