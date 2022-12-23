@@ -68,36 +68,38 @@ def process_memory():
 
 
 def test_engine_memory_leak():
-    default_config = MetaDriveEnv.default_config()
-    default_config["map_config"]["config"] = 3
+    try:
 
-    close_engine()
+        default_config = MetaDriveEnv.default_config()
+        default_config["map_config"]["config"] = 3
 
-    engine = initialize_engine(default_config)
+        close_engine()
 
-    ct = time.time()
-    last_lm = cm = process_memory()
-    last_mem = 0.0
-    for t in range(500):
-        lt = time.time()
+        engine = initialize_engine(default_config)
 
-        engine.seed(0)
+        ct = time.time()
+        last_lm = cm = process_memory()
+        last_mem = 0.0
+        for t in range(500):
+            lt = time.time()
 
-        engine = get_engine()
+            engine.seed(0)
 
-        nlt = time.time()
-        lm = process_memory()
-        # print(
-        #     "After {} Iters, Time {:.3f} Total Time {:.3f}, Memory Usage {:,} Memory Change {:,}".format(
-        #         t + 1, nlt - lt, nlt - ct, lm - cm, lm - last_lm
-        #     )
-        # )
-        last_lm = lm
-        if t > 100:
-            assert abs((lm - cm) - last_mem) < 10  # Memory should not have change > 1KB
-        last_mem = lm - cm
+            engine = get_engine()
 
-    close_engine()
+            nlt = time.time()
+            lm = process_memory()
+            # print(
+            #     "After {} Iters, Time {:.3f} Total Time {:.3f}, Memory Usage {:,} Memory Change {:,}".format(
+            #         t + 1, nlt - lt, nlt - ct, lm - cm, lm - last_lm
+            #     )
+            # )
+            last_lm = lm
+            if t > 100:
+                assert abs((lm - cm) - last_mem) < 10  # Memory should not have change > 1KB
+            last_mem = lm - cm
+    finally:
+        close_engine()
 
 
 def test_config_memory_leak():

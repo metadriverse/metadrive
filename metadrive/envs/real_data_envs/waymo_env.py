@@ -20,6 +20,8 @@ WAYMO_ENV_CONFIG = dict(
     start_case_index=0,
     case_num=100,
     store_map=True,
+    store_map_buffer_size=2000,
+    sequential_seed=False,  # Whether to set seed (the index of map) sequentially across episodes
 
     # ===== Traffic =====
     no_traffic=False,
@@ -100,7 +102,8 @@ class WaymoEnv(BaseEnv):
         super(WaymoEnv, self).__init__(config)
 
     def _merge_extra_config(self, config):
-        config = self.default_config().update(config, allow_add_new_key=True)
+        # config = self.default_config().update(config, allow_add_new_key=True)
+        config = self.default_config().update(config, allow_add_new_key=False)
         return config
 
     def _get_observations(self):
@@ -140,8 +143,18 @@ class WaymoEnv(BaseEnv):
     def setup_engine(self):
         self.in_stop = False
         super(WaymoEnv, self).setup_engine()
-        self.engine.register_manager("data_manager", WaymoDataManager())
-        self.engine.register_manager("map_manager", WaymoMapManager())
+        self.engine.register_manager(
+            "data_manager",
+            WaymoDataManager(
+                store_map=self.config["store_map"], store_map_buffer_size=self.config["store_map_buffer_size"]
+            )
+        )
+        self.engine.register_manager(
+            "map_manager",
+            WaymoMapManager(
+                store_map=self.config["store_map"], store_map_buffer_size=self.config["store_map_buffer_size"]
+            )
+        )
         if not self.config["no_traffic"]:
             if not self.config['replay']:
                 self.engine.register_manager("traffic_manager", WaymoIDMTrafficManager())
@@ -260,9 +273,21 @@ class WaymoEnv(BaseEnv):
         return True if np.linalg.norm(vehicle.position - self.engine.map_manager.sdc_dest_point) < 5 else False
 
     def _reset_global_seed(self, force_seed=None):
-        current_seed = force_seed if force_seed is not None else get_np_random(None).randint(
-            self.config["start_case_index"], self.config["start_case_index"] + int(self.config["case_num"])
-        )
+        if force_seed is not None:
+            current_seed = force_seed
+        elif self.config["sequential_seed"]:
+            current_seed = self.engine.global_seed
+            if current_seed is None:
+                current_seed = self.config["start_case_index"]
+            else:
+                current_seed += 1
+            if current_seed >= self.config["start_case_index"] + int(self.config["case_num"]):
+                current_seed = self.config["start_case_index"]
+        else:
+            current_seed = get_np_random(None).randint(
+                self.config["start_case_index"], self.config["start_case_index"] + int(self.config["case_num"])
+            )
+
         assert self.config["start_case_index"] <= current_seed < \
                self.config["start_case_index"] + self.config["case_num"], "Force seed range Error!"
         self.seed(current_seed)

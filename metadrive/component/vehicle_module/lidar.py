@@ -36,6 +36,8 @@ class Lidar(DistanceDetector):
         engine.physics_world.static_world.attach(self.broad_detector.node())
         self.enable_mask = True if not engine.global_config["_disable_detector_mask"] else False
 
+        self._node_path_list.append(self.broad_detector)
+
     def perceive(self, base_vehicle, detector_mask=True):
         res = self._get_lidar_mask(base_vehicle)
         lidar_mask = res[0] if detector_mask and self.enable_mask else None
@@ -108,7 +110,7 @@ class Lidar(DistanceDetector):
         pos1 = vehicle.position
         head1 = vehicle.heading_theta
 
-        mask = np.zeros((self.num_lasers, ), dtype=np.bool)
+        mask = np.zeros((self.num_lasers, ), dtype=bool)
         mask.fill(False)
         objs = self.get_surrounding_objects(vehicle)
         for obj in objs:

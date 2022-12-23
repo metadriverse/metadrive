@@ -20,10 +20,11 @@ class MetaDriveLane(AbstractLane):
                     factor = (1 - block.SIDEWALK_LINE_DIST / radius)
                 else:
                     factor = (1 + block.SIDEWALK_WIDTH / radius) * (1 + block.SIDEWALK_LINE_DIST / radius)
-            self.construct_sidewalk_segment(
+            node_path_list = self.construct_sidewalk_segment(
                 block,
                 lane_start,
                 lane_end,
                 length_multiply=factor,
                 extra_thrust=DrivableAreaProperty.SIDEWALK_WIDTH / 2 + DrivableAreaProperty.SIDEWALK_LINE_DIST
             )
+            self._node_path_list.extend(node_path_list)

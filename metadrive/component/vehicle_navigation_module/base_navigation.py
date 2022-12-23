@@ -1,19 +1,13 @@
 import logging
-from metadrive.component.road_network.node_road_network import NodeRoadNetwork
 
 import numpy as np
-from panda3d.core import TransparencyAttrib, LineSegs, NodePath
-
-from metadrive.component.lane.circular_lane import CircularLane
 from metadrive.component.map.base_map import BaseMap
 from metadrive.component.pgblock.first_block import FirstPGBlock
-from metadrive.component.road_network import Road
 from metadrive.constants import RENDER_MODE_ONSCREEN, CamMask
 from metadrive.engine.asset_loader import AssetLoader
-from metadrive.utils import clip, norm, get_np_random
+from metadrive.utils import get_np_random
 from metadrive.utils.coordinates_shift import panda_position
-from metadrive.utils.scene_utils import ray_localization
-from metadrive.utils.space import Parameter, BlockParameterSpace
+from panda3d.core import TransparencyAttrib, LineSegs, NodePath
 
 
 class BaseNavigation:
@@ -70,6 +64,8 @@ class BaseNavigation:
         self._dest_node_path = None
         self._goal_node_path = None
 
+        self._node_path_list = []
+
         self._line_to_dest = None
         self._show_line_to_dest = show_line_to_dest
         if self._show_navi_info:
@@ -77,6 +73,10 @@ class BaseNavigation:
             self._line_to_dest = self.origin.attachNewNode("line")
             self._goal_node_path = self.origin.attachNewNode("target")
             self._dest_node_path = self.origin.attachNewNode("dest")
+
+            self._node_path_list.append(self._line_to_dest)
+            self._node_path_list.append(self._goal_node_path)
+            self._node_path_list.append(self._dest_node_path)
 
             if show_navi_mark:
                 navi_point_model = AssetLoader.loader.loadModel(AssetLoader.file_path("models", "box.bam"))
@@ -89,6 +89,9 @@ class BaseNavigation:
                 line_seg.setColor(self.navi_mark_color[0], self.navi_mark_color[1], self.navi_mark_color[2], 1.0)
                 line_seg.setThickness(4)
                 self._dynamic_line_np = NodePath(line_seg.create(True))
+
+                self._node_path_list.append(self._dynamic_line_np)
+
                 self._dynamic_line_np.reparentTo(self.origin)
                 self._line_to_dest = line_seg
 
@@ -155,6 +158,7 @@ class BaseNavigation:
         self.FORCE_CALCULATE = force
 
     def __del__(self):
+        self.destroy()
         logging.debug("{} is destroyed".format(self.__class__.__name__))
 
     def get_current_lateral_range(self, current_position, engine) -> float:
@@ -192,13 +196,23 @@ class BaseNavigation:
         line_seg.drawTo(panda_position(end_position, self.LINE_TO_DEST_HEIGHT))
         self._dynamic_line_np.removeNode()
         self._dynamic_line_np = NodePath(line_seg.create(False))
+
+        self._node_path_list.append(self._dynamic_line_np)
+
         self._dynamic_line_np.hide(CamMask.Shadow | CamMask.RgbCam)
         self._dynamic_line_np.reparentTo(self.origin)
 
     def detach_from_world(self):
         if isinstance(self.origin, NodePath):
             self.origin.detachNode()
+        for np in self._node_path_list:
+            np.detachNode()
 
     def attach_to_world(self, engine):
         if isinstance(self.origin, NodePath):
             self.origin.reparentTo(engine.render)
+
+    def destroy(self):
+        for np in self._node_path_list:
+            np.detachNode()
+            np.removeNode()
