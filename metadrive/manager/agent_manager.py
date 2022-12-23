@@ -91,8 +91,9 @@ class AgentManager(BaseManager):
 
         self.episode_created_agents = None
 
-        for v in self.dying_agents.values():
-            self._remove_vehicle(v)
+        if not self.engine.replay_episode:
+            for v in self.dying_agents.values():
+                self._remove_vehicle(v)
 
         for v in self.get_vehicle_list():
             if hasattr(v, "before_reset"):
