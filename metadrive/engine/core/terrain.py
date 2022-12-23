@@ -23,7 +23,9 @@ class Terrain(BaseObject):
         node.setIntoCollideMask(self.COLLISION_MASK)
         self.dynamic_nodes.append(node)
 
-        self.origin.attachNewNode(node)
+        np = self.origin.attachNewNode(node)
+        self._node_path_list.append(np)
+
         if self.render and show_terrain:
             self.origin.hide(CamMask.MiniMap | CamMask.Shadow | CamMask.DepthCam | CamMask.ScreenshotCam)
             # self.terrain_normal = self.loader.loadTexture(
@@ -40,6 +42,9 @@ class Terrain(BaseObject):
             scale = 20000
             cm.setUvRange((0, 0), (scale / 10, scale / 10))
             card = self.origin.attachNewNode(cm.generate())
+
+            self._node_path_list.append(card)
+
             # scale = 1 if self.use_hollow else 20000
             card.set_scale(scale)
             card.setPos(-scale / 2, -scale / 2, -0.1)

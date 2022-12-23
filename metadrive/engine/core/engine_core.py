@@ -294,6 +294,7 @@ class EngineCore(ShowBase.ShowBase):
         debugNP = self.render.attachNewNode(debugNode)
         self.physics_world.dynamic_world.setDebugNode(debugNP.node())
         self.debug_node = debugNP
+        # TODO: debugNP is not registered.
 
     def toggleAnalyze(self):
         self.worldNP.analyze()
@@ -363,6 +364,7 @@ class EngineCore(ShowBase.ShowBase):
         line_seg.drawTo(end_p[0] * self.w_scale, 0, end_p[1] * self.h_scale)
         line_seg.setThickness(thickness)
         line_np = self.aspect2d.attachNewNode(line_seg.create(False))
+        # TODO: line_np is not registered.
         return line_np
 
     def remove_logo(self, task):

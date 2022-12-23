@@ -61,12 +61,18 @@ class Interface:
             ) if self.engine.global_config["vehicle_config"]["image_source"] != "depth_camera" else DepthCamera()
             self.left_panel = MiniMap()
             self.arrow = self.engine.aspect2d.attachNewNode("arrow")
+            self._node_path_list.append(self.arrow)
+
             navi_arrow_model = AssetLoader.loader.loadModel(AssetLoader.file_path("models", "navi_arrow.gltf"))
             navi_arrow_model.setScale(0.1, 0.12, 0.2)
             navi_arrow_model.setPos(2, 1.15, -0.221)
             self._left_arrow = self.arrow.attachNewNode("left arrow")
+            self._node_path_list.append(self._left_arrow)
+
             self._left_arrow.setP(180)
             self._right_arrow = self.arrow.attachNewNode("right arrow")
+            self._node_path_list.append(self._right_arrow)
+
             self._left_arrow.setColor(self.ARROW_COLOR)
             self._right_arrow.setColor(self.ARROW_COLOR)
             if self.engine.global_config["show_interface_navi_mark"]:
@@ -199,6 +205,8 @@ class VehiclePanel(ImageBuffer):
         self.aspect2d_np = NodePath(PGTop("aspect2d"))
         self.aspect2d_np.show(self.CAM_MASK)
         self.para_vis_np = {}
+
+        tmp_node_path_list = []
         # make_buffer_func, make_camera_func = engine.win.makeTextureBuffer, engine.makeCamera
 
         # don't delete the space in word, it is used to set a proper position
@@ -207,6 +215,8 @@ class VehiclePanel(ImageBuffer):
             text.setText(np_name)
             text.setSlant(0.1)
             textNodePath = self.aspect2d_np.attachNewNode(text)
+            tmp_node_path_list.append(textNodePath)
+
             textNodePath.setScale(0.052)
             text.setFrameColor(0, 0, 0, 1)
             text.setTextColor(0, 0, 0, 1)
@@ -218,6 +228,8 @@ class VehiclePanel(ImageBuffer):
                 cm.setFrame(0, self.PARA_VIS_LENGTH - 0.21, -self.PARA_VIS_HEIGHT / 2 + 0.1, self.PARA_VIS_HEIGHT / 2)
                 cm.setHasNormals(True)
                 card = textNodePath.attachNewNode(cm.generate())
+                tmp_node_path_list.append(card)
+
                 card.setPos(0.21, 0, 0.22)
                 self.para_vis_np[np_name.lstrip()] = card
             else:
@@ -229,6 +241,8 @@ class VehiclePanel(ImageBuffer):
                 )
                 cm.setHasNormals(True)
                 card = textNodePath.attachNewNode(cm.generate())
+                tmp_node_path_list.append(card)
+
                 card.setPos(0.2 + self.PARA_VIS_LENGTH / 2, 0, 0.22)
                 self.para_vis_np[name] = card
                 # right
@@ -239,6 +253,8 @@ class VehiclePanel(ImageBuffer):
                 )
                 cm.setHasNormals(True)
                 card = textNodePath.attachNewNode(cm.generate())
+                tmp_node_path_list.append(card)
+
                 card.setPos(0.2 + self.PARA_VIS_LENGTH / 2, 0, 0.22)
                 self.para_vis_np[name] = card
         super(VehiclePanel, self).__init__(
@@ -250,6 +266,8 @@ class VehiclePanel(ImageBuffer):
             # engine=engine
         )
         self.add_display_region(self.display_region_size)
+
+        self._node_path_list.extend(tmp_node_path_list)
 
     def update_vehicle_state(self, vehicle):
         steering, throttle_brake, speed = vehicle.steering, vehicle.throttle_brake, vehicle.speed

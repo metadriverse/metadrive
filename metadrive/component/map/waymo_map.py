@@ -18,14 +18,10 @@ class WaymoMap(BaseMap):
         self.blocks.append(block)
 
     def play(self):
-        from metadrive.tests.test_functionality.test_memory_leak_engine import process_memory
-
-
+        # For debug
         for b in self.blocks:
-
-            b._create_in_world()
+            b._create_in_world(skip=True)
             b.attach_to_world(self.engine.worldNP, self.engine.physics_world)
-
             b.detach_from_world(self.engine.physics_world)
 
 

@@ -81,7 +81,8 @@ class WaymoBlock(BaseBlock):
                 end = line.get_point(line.length)
             else:
                 end = line.get_point((segment + 1) * DrivableAreaProperty.STRIPE_LENGTH)
-            WaymoLane.construct_lane_line_segment(self, start, end, color, LineType.CONTINUOUS)
+            node_path_list = WaymoLane.construct_lane_line_segment(self, start, end, color, LineType.CONTINUOUS)
+            self._node_path_list.extend(node_path_list)
 
     def construct_waymo_broken_line(self, polyline, color):
         line = InterpolatingLine(polyline)
@@ -91,7 +92,8 @@ class WaymoBlock(BaseBlock):
             end = line.get_point(segment * DrivableAreaProperty.STRIPE_LENGTH * 2 + DrivableAreaProperty.STRIPE_LENGTH)
             if segment == segment_num - 1:
                 end = line.get_point(line.length - DrivableAreaProperty.STRIPE_LENGTH)
-            WaymoLane.construct_lane_line_segment(self, start, end, color, LineType.BROKEN)
+            node_path_list = WaymoLane.construct_lane_line_segment(self, start, end, color, LineType.BROKEN)
+            self._node_path_list.extend(node_path_list)
 
     def construct_waymo_sidewalk(self, polyline):
         line = InterpolatingLine(polyline)
@@ -120,7 +122,8 @@ class WaymoBlock(BaseBlock):
                             lane_start[0] - lane_end[0], lane_start[1] - lane_end[1]
                         )
             last_theta = theta
-            WaymoLane.construct_sidewalk_segment(self, lane_start, lane_end, length_multiply=factor, extra_thrust=1)
+            node_path_list = WaymoLane.construct_sidewalk_segment(self, lane_start, lane_end, length_multiply=factor, extra_thrust=1)
+            self._node_path_list.extend(node_path_list)
 
     @property
     def block_network_type(self):

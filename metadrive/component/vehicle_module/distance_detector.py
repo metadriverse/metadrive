@@ -96,6 +96,8 @@ class DistanceDetector:
 
     def __init__(self, num_lasers: int = 16, distance: float = 50, enable_show=True):
         # properties
+        self._node_path_list = []
+
         self.available = True if num_lasers > 0 and distance > 0 else False
         parent_node_np: NodePath = get_engine().render
         self.origin = parent_node_np.attachNewNode("Could_points")
@@ -126,8 +128,6 @@ class DistanceDetector:
                 self.cloud_points_vis.append(laser_np)
                 ball.getChildren().reparentTo(laser_np)
             # self.origin.flattenStrong()
-
-        self._node_path_list = []
 
     def perceive(self, base_vehicle, physics_world, detector_mask: np.ndarray = None):
         assert self.available

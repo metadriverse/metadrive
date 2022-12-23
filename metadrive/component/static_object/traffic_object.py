@@ -43,7 +43,11 @@ class TrafficCone(TrafficObject):
 
     def __init__(self, lane, longitude: float, lateral: float, static: bool = False, random_seed=None):
         super(TrafficCone, self).__init__(lane, longitude, lateral, random_seed)
-        self.add_body(BaseRigidBodyNode(self.name, self.NAME))
+
+        n = BaseRigidBodyNode(self.name, self.NAME)
+        self.add_body(n)
+        self._node_path_list.append(n)
+
         self.body.addShape(BulletCylinderShape(self.RADIUS, self.HEIGHT))
         self.body.setIntoCollideMask(self.COLLISION_GROUP)
         self.set_static(static)
@@ -75,7 +79,11 @@ class TrafficWarning(TrafficObject):
 
     def __init__(self, lane, longitude: float, lateral: float, static: bool = False, random_seed=None):
         super(TrafficWarning, self).__init__(lane, longitude, lateral, random_seed)
-        self.add_body(BaseRigidBodyNode(self.name, self.NAME))
+
+        n = BaseRigidBodyNode(self.name, self.NAME)
+        self.add_body(n)
+        self._node_path_list.append(n)
+
         self.body.addShape(BulletCylinderShape(self.RADIUS, self.HEIGHT))
         self.body.setIntoCollideMask(self.COLLISION_GROUP)
         self.set_static(static)
@@ -105,7 +113,10 @@ class TrafficBarrier(TrafficObject):
 
     def __init__(self, lane, longitude: float, lateral: float, static: bool = False, random_seed=None):
         super(TrafficBarrier, self).__init__(lane, longitude, lateral, random_seed)
-        self.add_body(BaseRigidBodyNode(self.name, self.NAME))
+        n = BaseRigidBodyNode(self.name, self.NAME)
+        self.add_body(n)
+        self._node_path_list.append(n)
+
         self.body.addShape(BulletBoxShape((self.width / 2, self.length / 2, self.height / 2)))
         self.body.setIntoCollideMask(self.COLLISION_GROUP)
         self.set_static(static)

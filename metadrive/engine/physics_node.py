@@ -14,7 +14,13 @@ class BaseRigidBodyNode(BulletRigidBodyNode):
         super(BaseRigidBodyNode, self).__init__(node_name)
         self.setPythonTag(node_name, self)
         self.base_object_name = base_object_name
+        self._clear_python_tag = False
 
     def destroy(self):
+        # This sentence is extremely important!
         self.base_object_name = None
         self.clearPythonTag(self.getName())
+        self._clear_python_tag = True
+
+    def __del__(self):
+        assert self._clear_python_tag, "You should call destroy() of BaseRigidBodyNode!"

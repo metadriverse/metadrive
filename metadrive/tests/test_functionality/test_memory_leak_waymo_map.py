@@ -51,8 +51,6 @@ def test_waymo_map_memory_leak():
 
         engine.data_manager = WaymoDataManager()
 
-        map = WaymoMap(map_index=0)
-        # del map
 
         lm = process_memory()
         nlt = time.time()
@@ -62,12 +60,13 @@ def test_waymo_map_memory_leak():
             )
         )
 
-
-        for t in range(100):
+        for t in range(10):
             lt = time.time()
 
+            map = WaymoMap(map_index=0)
+            del map
 
-            map.play()
+            # map.play()
 
             nlt = time.time()
             lm = process_memory()
@@ -80,7 +79,7 @@ def test_waymo_map_memory_leak():
             #     assert abs((lm - cm) - last_mem) < 1024  # Memory should not have change > 1KB
             last_mem = lm - cm
 
-        assert lm - cm < 1024 * 1024 * 25, "We expect will cause 18MB memory leak."
+        assert lm - cm < 1024 * 1024 * 40, "We expect will cause ~33MB memory leak."
 
     finally:
         close_engine()

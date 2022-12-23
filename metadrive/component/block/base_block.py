@@ -154,7 +154,7 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
 
     """------------------------------------- For Render and Physics Calculation ---------------------------------- """
 
-    def _create_in_world(self):
+    def _create_in_world(self, skip=False):
         """
         Create NodePath and Geom node to perform both collision detection and render
 
@@ -165,7 +165,12 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
         self.sidewalk_node_path = NodePath(RigidBodyCombiner(self.name + "_sidewalk"))
         self.lane_node_path = NodePath(RigidBodyCombiner(self.name + "_lane"))
         self.lane_vis_node_path = NodePath(RigidBodyCombiner(self.name + "_lane_vis"))
-        self.create_in_world()
+
+        if skip:  # for debug
+            pass
+        else:
+            self.create_in_world()
+
         self.lane_line_node_path.flattenStrong()
         self.lane_line_node_path.node().collect()
 
@@ -250,6 +255,9 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
         body_node.setKinematic(False)
         body_node.setStatic(True)
         body_np = parent_np.attachNewNode(body_node)
+
+        self._node_path_list.append(body_np)
+
         shape = BulletBoxShape(
             Vec3(length / 2, DrivableAreaProperty.LANE_LINE_WIDTH / 2, DrivableAreaProperty.LANE_LINE_GHOST_HEIGHT)
         )

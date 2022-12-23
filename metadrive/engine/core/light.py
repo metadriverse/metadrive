@@ -14,6 +14,8 @@ class Light(BaseObject):
         self.direction_np = NodePath(DirectionalLight("direction light"))
         # self.light.node().setScene(self.render)
 
+        self._node_path_list.append(self.direction_np)
+
         # Too large will cause the graphics card out of memory.
         # self.direction_np.node().setShadowCaster(True, 8192, 8192)
         # self.direction_np.node().setShadowCaster(True, 4096, 4096)
@@ -44,6 +46,8 @@ class Light(BaseObject):
         self.ambient_np = NodePath(AmbientLight("Ambient"))
         self.ambient_np.node().setColor(LVector4(0.8, 0.8, 0.8, 1))
         self.ambient_np.reparentTo(self.origin)
+
+        self._node_path_list.append(self.ambient_np)
 
     def step(self, pos):
         if not self.global_light:

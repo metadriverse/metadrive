@@ -107,6 +107,7 @@ class TestBlock(ShowBase.ShowBase):
         line_seg.setThickness(thickness)
         np = NodePath(line_seg.create(False))
         np.reparentTo(self.render)
+        # TODO(PZH): NodePath is not registered.
 
     def show_bounding_box(self, road_network):
         bound_box = road_network.get_bounding_box()

@@ -5,13 +5,13 @@ import math
 import numpy as np
 import seaborn as sns
 from panda3d.bullet import BulletWorld, BulletBodyNode
-from panda3d.core import LVector3
-from panda3d.core import NodePath
+from panda3d.core import LVector3, NodePath, PandaNode
 
 from metadrive.base_class.base_runnable import BaseRunnable
 from metadrive.constants import ObjectState
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.engine.core.physics_world import PhysicsWorld
+from metadrive.engine.physics_node import BaseRigidBodyNode
 from metadrive.utils import Vector
 from metadrive.utils import get_np_random
 from metadrive.utils.coordinates_shift import panda_position, metadrive_position, panda_heading, metadrive_heading
@@ -19,6 +19,41 @@ from metadrive.utils.math_utils import clip
 from metadrive.utils.math_utils import norm
 
 logger = logging.getLogger(__name__)
+
+
+def _clean_a_node_path(node_path):
+    for sub_node_path in node_path.getChildren():
+        _clean_a_node_path(sub_node_path)
+    node_path.detachNode()
+    node_path.removeNode()
+
+
+def clear_node_list(node_path_list):
+    from metadrive.engine.engine_utils import get_engine
+    engine = get_engine()
+    for node_path in node_path_list:
+        if isinstance(node_path, NodePath):
+            _clean_a_node_path(node_path)
+            continue
+
+        elif isinstance(node_path, BaseRigidBodyNode):
+            # PZH: Note that this line is extremely important!!!
+            # It breaks the cycle reference thus we can release nodes!!!
+            # It saves Waymo env!!!
+            node_path.destroy()
+
+        elif isinstance(node_path, BulletBodyNode):
+            pass
+
+        elif isinstance(node_path, PandaNode):
+            node_path.removeAllChildren()
+            node_path.clearPythonTag(node_path.getName())
+
+        else:
+            raise ValueError(node_path)
+
+        engine.physics_world.static_world.remove(node_path)
+        engine.physics_world.dynamic_world.remove(node_path)
 
 
 class PhysicsNodeList(list):
@@ -53,7 +88,7 @@ class PhysicsNodeList(list):
     def destroy_node_list(self, bullet_world: BulletWorld):
         for node in self:
             bullet_world.remove(node)
-
+        self.clear()
 
 
 class BaseObject(BaseRunnable):
@@ -176,10 +211,11 @@ class BaseObject(BaseRunnable):
         if self.origin is not None:
             self.origin.removeNode()
 
-        for np in self._node_path_list:
-            assert isinstance(np, NodePath)
-            np.detachNode()
-            np.removeNode()
+        clear_node_list(self._node_path_list)
+
+        logger.debug("Finish cleaning {} node path.".format(len(self._node_path_list)))
+        self._node_path_list.clear()
+        self._node_path_list = []
 
         self.dynamic_nodes.destroy_node_list(bullet_world=engine.physics_world.dynamic_world)
         self.static_nodes.destroy_node_list(bullet_world=engine.physics_world.static_world)
