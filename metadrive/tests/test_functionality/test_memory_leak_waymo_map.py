@@ -35,45 +35,45 @@ def test_waymo_map_memory_leak():
     default_config["waymo_data_directory"] = AssetLoader.file_path("waymo", return_raw_style=False)
     default_config["case_num"] = 1
 
-    try:
-        close_engine()
-        engine = initialize_engine(default_config)
+    # try:
+    close_engine()
+    engine = initialize_engine(default_config)
 
-        ct = time.time()
-        cm = process_memory()
-        last_mem = 0.0
+    ct = time.time()
+    cm = process_memory()
+    last_mem = 0.0
 
+    lt = time.time()
+
+    engine.data_manager = WaymoDataManager()
+
+    lm = process_memory()
+    nlt = time.time()
+    print("After {} Iters, Time {:.3f} Total Time {:.3f}, Memory Usage {:,}".format(0, nlt - lt, nlt - ct, lm - cm))
+
+    for t in range(10):
         lt = time.time()
 
-        engine.data_manager = WaymoDataManager()
+        map = WaymoMap(map_index=0)
+        del map
 
-        lm = process_memory()
+        # map.play()
+
         nlt = time.time()
-        print("After {} Iters, Time {:.3f} Total Time {:.3f}, Memory Usage {:,}".format(0, nlt - lt, nlt - ct, lm - cm))
-
-        for t in range(10):
-            lt = time.time()
-
-            map = WaymoMap(map_index=0)
-            del map
-
-            # map.play()
-
-            nlt = time.time()
-            lm = process_memory()
-            print(
-                "After {} Iters, Time {:.3f} Total Time {:.3f}, Memory Usage {:,}".format(
-                    t + 1, nlt - lt, nlt - ct, lm - cm
-                )
+        lm = process_memory()
+        print(
+            "After {} Iters, Time {:.3f} Total Time {:.3f}, Memory Usage {:,}".format(
+                t + 1, nlt - lt, nlt - ct, lm - cm
             )
-            # if t > 5:
-            #     assert abs((lm - cm) - last_mem) < 1024  # Memory should not have change > 1KB
-            last_mem = lm - cm
+        )
+        # if t > 5:
+        #     assert abs((lm - cm) - last_mem) < 1024  # Memory should not have change > 1KB
+        last_mem = lm - cm
 
-        assert lm - cm < 1024 * 1024 * 40, "We expect will cause ~33MB memory leak."
+    assert lm - cm < 1024 * 1024 * 40, "We expect will cause ~33MB memory leak."
 
-    finally:
-        close_engine()
+    # finally:
+    #     close_engine()
 
 
 if __name__ == "__main__":
