@@ -49,7 +49,7 @@ def test_waymo_map_memory_leak():
     ct = time.time()
     cm = process_memory()
     last_mem = 0.0
-    for t in range(10000):
+    for t in range(100):
         lt = time.time()
 
         map = WaymoMap(map_index=0)

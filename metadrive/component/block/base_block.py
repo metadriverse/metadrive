@@ -267,11 +267,6 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
         raise NotImplementedError
 
     def destroy(self):
-        for node_path in [self.lane_line_node_path, self.sidewalk_node_path, self.lane_node_path,
-                          self.lane_vis_node_path]:
-            if isinstance(node_path, NodePath):
-                node_path.removeNode()
-
         if self.block_network is not None:
             self.block_network.destroy()
             self.block_network = None
