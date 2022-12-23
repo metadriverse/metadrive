@@ -2,6 +2,7 @@ from typing import Optional, List
 
 import numpy as np
 from argoverse.map_representation.lane_segment import LaneSegment
+
 from metadrive.component.lane.waypoint_lane import WayPointLane
 from metadrive.constants import LineType, LineColor
 

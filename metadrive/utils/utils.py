@@ -1,8 +1,8 @@
 import copy
+import datetime
 import logging
 import os
 import sys
-import datetime
 
 from panda3d.bullet import BulletBodyNode
 

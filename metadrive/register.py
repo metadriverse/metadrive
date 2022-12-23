@@ -1,9 +1,9 @@
 from gym.envs.registration import register, registry
 
 from metadrive.envs import MetaDriveEnv
-from metadrive.envs import SafeMetaDriveEnv
 from metadrive.envs import MultiAgentTollgateEnv, MultiAgentBottleneckEnv, MultiAgentRoundaboutEnv, \
     MultiAgentIntersectionEnv, MultiAgentParkingLotEnv, MultiAgentMetaDrive
+from metadrive.envs import SafeMetaDriveEnv
 
 metadrive_environment_dict = {
     "MetaDrive-validation-v0": {

@@ -2,9 +2,10 @@ import os
 import signal
 import sys
 
+from tqdm import tqdm
+
 from metadrive.envs.real_data_envs.waymo_env import WaymoEnv
 from metadrive.policy.idm_policy import WaymoIDMPolicy
-from tqdm import tqdm
 
 try:
     from metadrive.utils.waymo_utils.waymo_utils import AgentType

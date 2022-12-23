@@ -1,6 +1,7 @@
+from collections.abc import Iterable
+
 from metadrive.policy.base_policy import BasePolicy
 from metadrive.utils.math_utils import clip
-from collections.abc import Iterable
 
 
 class EnvInputPolicy(BasePolicy):

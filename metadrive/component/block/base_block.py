@@ -14,7 +14,6 @@ from metadrive.component.road_network.road import Road
 from metadrive.constants import BodyName, CamMask, LineType, LineColor, DrivableAreaProperty
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.engine.core.physics_world import PhysicsWorld
-from metadrive.utils import import_pygame
 from metadrive.utils.coordinates_shift import panda_position
 from metadrive.utils.math_utils import norm
 

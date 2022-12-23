@@ -1,7 +1,8 @@
-import math
 from typing import Tuple, Sequence, Union
 
+import math
 import numpy as np
+
 from metadrive.component.lane.metadrive_lane import MetaDriveLane
 from metadrive.constants import LineType
 from metadrive.utils.math_utils import norm

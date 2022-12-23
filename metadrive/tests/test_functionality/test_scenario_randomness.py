@@ -1,5 +1,3 @@
-import pickle
-
 from metadrive.component.map.base_map import BaseMap
 from metadrive.component.map.pg_map import MapGenerateMethod
 from metadrive.envs.safe_metadrive_env import SafeMetaDriveEnv

@@ -1,8 +1,8 @@
-from metadrive.component.vehicle_navigation_module.base_navigation import BaseNavigation
-from metadrive.manager.waymo_map_manager import WaymoMapManager
-from metadrive.utils.space import BlockParameterSpace, Parameter
-from metadrive.utils.math_utils import norm, clip
 import numpy as np
+
+from metadrive.component.vehicle_navigation_module.base_navigation import BaseNavigation
+from metadrive.utils.math_utils import norm, clip
+from metadrive.utils.space import BlockParameterSpace, Parameter
 
 
 class WaymoTrajectoryNavigation(BaseNavigation):

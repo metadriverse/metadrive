@@ -1,6 +1,6 @@
 from metadrive.component.block.base_block import BaseBlock
-from metadrive.component.road_network.edge_road_network import OpenDriveRoadNetwork
 from metadrive.component.lane.opendrive_lane import OpenDriveLane
+from metadrive.component.road_network.edge_road_network import OpenDriveRoadNetwork
 from metadrive.utils.opendrive_map_utils.map_load import get_lane_width
 
 

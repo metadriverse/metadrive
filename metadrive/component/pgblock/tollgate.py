@@ -1,7 +1,7 @@
+from metadrive.component.buildings.tollgate_building import TollGateBuilding
 from metadrive.component.pgblock.bottleneck import PGBlock
 from metadrive.component.pgblock.create_pg_block_utils import CreateAdverseRoad, CreateRoadFrom, ExtendStraightLane
 from metadrive.component.pgblock.pg_block import PGBlockSocket
-from metadrive.component.buildings.tollgate_building import TollGateBuilding
 from metadrive.component.road_network import Road
 from metadrive.constants import LineType, LineColor
 from metadrive.engine.engine_utils import get_engine

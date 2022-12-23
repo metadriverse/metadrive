@@ -1,7 +1,7 @@
-import math
 import time
 from typing import Tuple
 
+import math
 import numpy as np
 
 number_pos_inf = float("inf")

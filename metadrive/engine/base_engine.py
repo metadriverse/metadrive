@@ -3,15 +3,15 @@ import pickle
 import time
 from collections import OrderedDict
 from typing import Callable, Optional, Union, List, Dict, AnyStr
-from metadrive.base_class.base_object import BaseObject
+
 import numpy as np
 
+from metadrive.base_class.base_object import BaseObject
 from metadrive.base_class.randomizable import Randomizable
 from metadrive.engine.core.engine_core import EngineCore
 from metadrive.engine.interface import Interface
 from metadrive.manager.base_manager import BaseManager
 from metadrive.utils import concat_step_infos
-from collections import Iterable
 
 logger = logging.getLogger(__name__)
 

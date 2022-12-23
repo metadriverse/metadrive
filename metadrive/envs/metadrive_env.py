@@ -4,6 +4,7 @@ from typing import Union
 
 import numpy as np
 
+from metadrive.component.algorithm.blocks_prob_dist import PGBlockDistConfig
 from metadrive.component.map.base_map import BaseMap
 from metadrive.component.map.pg_map import parse_map_config, MapGenerateMethod
 from metadrive.component.pgblock.first_block import FirstPGBlock
@@ -12,7 +13,6 @@ from metadrive.constants import DEFAULT_AGENT, TerminationState
 from metadrive.envs.base_env import BaseEnv
 from metadrive.manager.traffic_manager import TrafficMode
 from metadrive.utils import clip, Config, get_np_random
-from metadrive.component.algorithm.blocks_prob_dist import PGBlockDistConfig
 
 METADRIVE_DEFAULT_CONFIG = dict(
     # ===== Generalization =====

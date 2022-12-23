@@ -1,6 +1,6 @@
-import math
 from typing import List
 
+import math
 import numpy as np
 
 from metadrive.component.lane.abs_lane import AbstractLane

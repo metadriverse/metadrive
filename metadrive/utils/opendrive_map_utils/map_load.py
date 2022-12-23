@@ -1,6 +1,7 @@
-from metadrive.utils.opendrive_map_utils.parser import parse_opendrive
-from metadrive.utils.opendrive_map_utils.link_index import LinkIndex
 from lxml import etree
+
+from metadrive.utils.opendrive_map_utils.link_index import LinkIndex
+from metadrive.utils.opendrive_map_utils.parser import parse_opendrive
 
 
 def get_lane_width(lane):

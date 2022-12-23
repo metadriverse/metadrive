@@ -1,6 +1,5 @@
 from metadrive.constants import TerminationState
 from metadrive.envs.marl_envs.marl_inout_roundabout import MultiAgentRoundaboutEnv
-from metadrive.utils import setup_logger
 
 
 def test_respawn():

@@ -1,6 +1,4 @@
 from metadrive.envs.metadrive_env import MetaDriveEnv
-from metadrive.policy.idm_policy import IDMPolicy
-from metadrive.utils import setup_logger
 
 
 def test_traffic_mode(render=False):

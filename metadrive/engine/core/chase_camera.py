@@ -1,8 +1,8 @@
-import math
 import queue
 from collections import deque
 from typing import Tuple
 
+import math
 import numpy as np
 from direct.controls.InputState import InputState
 from panda3d.core import Vec3, Point3

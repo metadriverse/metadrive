@@ -1,11 +1,12 @@
 """
 This script demonstrates how to use the environment where traffic and road map are loaded from argoverse dataset.
 """
-from metadrive.envs.real_data_envs.waymo_env import WaymoEnv
+import random
+
 from metadrive.component.vehicle_navigation_module.trajectory_navigation import WaymoTrajectoryNavigation
 from metadrive.engine.asset_loader import AssetLoader
+from metadrive.envs.real_data_envs.waymo_env import WaymoEnv
 from metadrive.policy.replay_policy import ReplayEgoCarPolicy
-import random
 
 
 class DemoWaymoEnv(WaymoEnv):

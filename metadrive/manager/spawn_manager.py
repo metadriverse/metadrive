@@ -1,15 +1,14 @@
 import copy
-from metadrive.constants import BodyName
-from math import floor
-from typing import Union, List, Dict
 
 import numpy as np
+from math import floor
 from panda3d.bullet import BulletBoxShape, BulletGhostNode
 from panda3d.core import Vec3
 
 from metadrive.component.lane.straight_lane import StraightLane
 from metadrive.component.pgblock.first_block import FirstPGBlock
 from metadrive.component.vehicle.base_vehicle import BaseVehicle
+from metadrive.constants import BodyName
 from metadrive.constants import CollisionGroup
 from metadrive.engine.engine_utils import get_engine
 from metadrive.manager.base_manager import BaseManager

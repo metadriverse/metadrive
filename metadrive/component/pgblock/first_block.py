@@ -1,8 +1,8 @@
 from panda3d.core import NodePath
 
+from metadrive.component.lane.straight_lane import StraightLane
 from metadrive.component.pgblock.create_pg_block_utils import CreateRoadFrom, CreateAdverseRoad, ExtendStraightLane
 from metadrive.component.pgblock.pg_block import PGBlock, PGBlockSocket
-from metadrive.component.lane.straight_lane import StraightLane
 from metadrive.component.road_network import Road
 from metadrive.component.road_network.node_road_network import NodeRoadNetwork
 from metadrive.constants import Decoration, LineType

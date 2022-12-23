@@ -1,6 +1,3 @@
-import numpy as np
-from metadrive.utils.math_utils import wrap_to_pi
-
 from metadrive.policy.base_policy import BasePolicy
 
 has_rendered = False

@@ -1,5 +1,5 @@
-import numpy as np
 import math
+import numpy as np
 from direct.controls.InputState import InputState
 
 from metadrive.utils import is_win, is_mac

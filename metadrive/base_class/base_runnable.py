@@ -1,4 +1,3 @@
-import copy
 from typing import Dict
 
 from metadrive.base_class.configurable import Configurable
