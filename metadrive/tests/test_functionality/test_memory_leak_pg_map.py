@@ -1,7 +1,7 @@
 import time
 
 from metadrive.component.map.pg_map import PGMap
-from metadrive.engine.engine_utils import initialize_engine
+from metadrive.engine.engine_utils import initialize_engine, close_engine
 from metadrive.envs import MetaDriveEnv
 
 try:
@@ -22,6 +22,8 @@ def test_pg_map_memory_leak():
 
     # default_config["debug"] = True
     # default_config["debug_physics_world"] = True
+
+    close_engine()
 
     engine = initialize_engine(default_config)
 
@@ -53,6 +55,8 @@ def test_pg_map_memory_leak():
         # if t > 100:
         #     assert abs((lm - cm) - last_mem) < 1024  # Memory should not have change > 1KB
         # last_mem = lm - cm
+
+    close_engine()
 
 
 if __name__ == "__main__":

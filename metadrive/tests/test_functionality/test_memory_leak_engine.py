@@ -3,7 +3,7 @@ from collections import deque
 from itertools import chain
 from sys import getsizeof, stderr
 
-from metadrive.engine.engine_utils import initialize_engine, get_engine
+from metadrive.engine.engine_utils import initialize_engine, get_engine, close_engine
 from metadrive.envs import MetaDriveEnv
 
 try:
@@ -71,6 +71,8 @@ def test_engine_memory_leak():
     default_config = MetaDriveEnv.default_config()
     default_config["map_config"]["config"] = 3
 
+    close_engine()
+
     engine = initialize_engine(default_config)
 
     ct = time.time()
@@ -94,6 +96,8 @@ def test_engine_memory_leak():
         if t > 100:
             assert abs((lm - cm) - last_mem) < 10  # Memory should not have change > 1KB
         last_mem = lm - cm
+
+    close_engine()
 
 
 def test_config_memory_leak():

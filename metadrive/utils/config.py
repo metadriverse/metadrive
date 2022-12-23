@@ -111,7 +111,7 @@ class Config:
         """
         new_dict = new_dict or dict()
         if len(new_dict) == 0:
-            return
+            return self
         stop_recursive_update = stop_recursive_update or []
         new_dict = copy.deepcopy(new_dict)
         if not allow_add_new_key:
