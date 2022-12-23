@@ -29,6 +29,9 @@ class ImageBuffer:
         frame_buffer_property=None,
         # engine=None
     ):
+
+        self._node_path_list = []
+
         # from metadrive.engine.engine_utils import get_engine
         # self.engine = engine or get_engine()
         try:
@@ -40,6 +43,8 @@ class ImageBuffer:
             logging.debug("Cannot create {}".format(self.__class__.__name__))
             self.buffer = None
             self.cam = NodePath(Camera("non-sense camera"))
+            self._node_path_list.append(self.cam)
+
             self.lens = self.cam.node().getLens()
             return
 
@@ -155,6 +160,9 @@ class ImageBuffer:
         self.line_borders = []
         if hasattr(self, "origin"):
             self.origin.removeNode()
+
+        from metadrive.base_class.base_object import clear_node_list
+        clear_node_list(self._node_path_list)
 
     def __del__(self):
         logging.debug("{} is destroyed".format(self.__class__.__name__))

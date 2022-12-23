@@ -1,8 +1,13 @@
-import math
 from abc import ABCMeta, abstractmethod
 from typing import Tuple
 
+import math
 import numpy as np
+from panda3d.bullet import BulletBoxShape
+from panda3d.bullet import BulletGhostNode
+from panda3d.core import Vec3, LQuaternionf, CardMaker, TransparencyAttrib, NodePath
+from panda3d.core import Vec4
+
 from metadrive.constants import BodyName
 from metadrive.constants import DrivableAreaProperty
 from metadrive.constants import LineType, LineColor
@@ -12,10 +17,6 @@ from metadrive.engine.physics_node import BulletRigidBodyNode
 from metadrive.utils import norm
 from metadrive.utils.coordinates_shift import panda_position
 from metadrive.utils.math_utils import Vector
-from panda3d.bullet import BulletBoxShape
-from panda3d.bullet import BulletGhostNode
-from panda3d.core import Vec3, LQuaternionf, CardMaker, TransparencyAttrib, NodePath
-from panda3d.core import Vec4
 
 
 class AbstractLane:
@@ -33,6 +34,8 @@ class AbstractLane:
     def __init__(self):
         self.speed_limit = 1000  # should be set manually
         self.index = None
+
+        self._node_path_list = []
 
     def set_speed_limit(self, speed_limit):
         self.speed_limit = speed_limit
@@ -166,7 +169,8 @@ class AbstractLane:
             )
             if segment == segment_num - 1:
                 end = self.position(self.length - DrivableAreaProperty.STRIPE_LENGTH, lateral)
-            self.construct_lane_line_segment(block, start, end, line_color, line_type)
+            node_path_list = self.construct_lane_line_segment(block, start, end, line_color, line_type)
+            self._node_path_list.extend(node_path_list)
 
     def construct_continuous_line(self, block, lateral, line_color, line_type):
         """
@@ -177,14 +181,16 @@ class AbstractLane:
         if segment_num == 0:
             start = self.position(0, lateral)
             end = self.position(self.length, lateral)
-            self.construct_lane_line_segment(block, start, end, line_color, line_type)
+            node_path_list = self.construct_lane_line_segment(block, start, end, line_color, line_type)
+            self._node_path_list.extend(node_path_list)
         for segment in range(segment_num):
             start = self.position(DrivableAreaProperty.LANE_SEGMENT_LENGTH * segment, lateral)
             if segment == segment_num - 1:
                 end = self.position(self.length, lateral)
             else:
                 end = self.position((segment + 1) * DrivableAreaProperty.LANE_SEGMENT_LENGTH, lateral)
-            self.construct_lane_line_segment(block, start, end, line_color, line_type)
+            node_path_list = self.construct_lane_line_segment(block, start, end, line_color, line_type)
+            self._node_path_list.extend(node_path_list)
 
     def construct_sidewalk(self, block, lateral):
         """
@@ -208,7 +214,13 @@ class AbstractLane:
         length += 0.1
         if lane_index is not None:
             lane.index = lane_index
-        segment_np = NodePath(BaseRigidBodyNode(lane, BodyName.Lane))
+
+        n = BaseRigidBodyNode(lane, BodyName.Lane)
+        segment_np = NodePath(n)
+
+        self._node_path_list.append(segment_np)
+        self._node_path_list.append(n)
+
         segment_node = segment_np.node()
         segment_node.set_active(False)
         segment_node.setKinematic(False)
@@ -231,6 +243,8 @@ class AbstractLane:
             cm.setHasNormals(True)
             cm.setUvRange((0, 0), (length / 20, width / 10))
             card = block.lane_vis_node_path.attachNewNode(cm.generate())
+            self._node_path_list.append(card)
+
             card.setPos(panda_position(position, np.random.rand() * 0.01 - 0.01))
 
             card.setQuat(
@@ -245,11 +259,15 @@ class AbstractLane:
 
     @staticmethod
     def construct_lane_line_segment(block, start_point, end_point, line_color: Vec4, line_type: LineType):
+        node_path_list = []
+        # static_node_list = []
+        # dynamic_node_list = []
+
         length = norm(end_point[0] - start_point[0], end_point[1] - start_point[1])
         middle = (start_point + end_point) / 2
         parent_np = block.lane_line_node_path
         if length <= 0:
-            return
+            return []
         if LineType.prohibit(line_type):
             node_name = BodyName.White_continuous_line if line_color == LineColor.GREY else BodyName.Yellow_continuous_line
         else:
@@ -261,6 +279,9 @@ class AbstractLane:
         body_node.setKinematic(False)
         body_node.setStatic(True)
         body_np = parent_np.attachNewNode(body_node)
+        node_path_list.append(body_np)
+        node_path_list.append(body_node)
+
         # its scale will change by setScale
         body_height = DrivableAreaProperty.LANE_LINE_GHOST_HEIGHT
         shape = BulletBoxShape(Vec3(length / 2, DrivableAreaProperty.LANE_LINE_WIDTH / 4, body_height))
@@ -284,11 +305,15 @@ class AbstractLane:
             lane_line.reparentTo(body_np)
             body_np.set_color(line_color)
 
+        return node_path_list
+
     @staticmethod
     def construct_sidewalk_segment(block, lane_start, lane_end, length_multiply=1, extra_thrust=0, width=0):
+        node_path_list = []
+
         direction_v = lane_end - lane_start
         if abs(norm(direction_v[0], direction_v[1])) < 0.1:
-            return
+            return []
         width = width or block.SIDEWALK_WIDTH
         middle = (lane_start + lane_end) / 2
         length = norm(lane_end[0] - lane_start[0], lane_end[1] - lane_start[1])
@@ -296,6 +321,8 @@ class AbstractLane:
         body_node.setKinematic(False)
         body_node.setStatic(True)
         side_np = block.sidewalk_node_path.attachNewNode(body_node)
+        node_path_list.append(side_np)
+
         shape = BulletBoxShape(Vec3(1 / 2, 1 / 2, 1 / 2))
         body_node.addShape(shape)
         body_node.setIntoCollideMask(block.SIDEWALK_COLLISION_MASK)
@@ -316,3 +343,16 @@ class AbstractLane:
         if block.render:
             side_np.setTexture(block.ts_color, block.side_texture)
             block.sidewalk.instanceTo(side_np)
+
+        return node_path_list
+
+    def destroy(self):
+        try:
+            from metadrive.base_class.base_object import clear_node_list
+        except ImportError:
+            self._node_path_list.clear()
+        else:
+            clear_node_list(self._node_path_list)
+
+    def __del__(self):
+        self.destroy()

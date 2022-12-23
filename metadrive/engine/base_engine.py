@@ -11,6 +11,7 @@ from metadrive.engine.core.engine_core import EngineCore
 from metadrive.engine.interface import Interface
 from metadrive.manager.base_manager import BaseManager
 from metadrive.utils import concat_step_infos
+from collections import Iterable
 
 logger = logging.getLogger(__name__)
 
@@ -196,6 +197,18 @@ class BaseEngine(EngineCore, Randomizable):
                 self.record_manager.add_clear_info(obj)
         return exclude_objects.keys()
 
+    def clear_object_if_possible(self, obj, force_destroy):
+        if isinstance(obj, dict):
+            return
+        if obj in self._spawned_objects:
+            self.clear_objects([obj], force_destroy=force_destroy)
+        if force_destroy and \
+                obj.class_name in self._dying_objects and \
+                obj in self._dying_objects[obj.class_name]:
+            self._dying_objects[obj.class_name].remove(obj)
+            if hasattr(obj, "destroy"):
+                obj.destroy()
+
     def reset(self):
         """
         Clear and generate the whole scene
@@ -226,9 +239,7 @@ class BaseEngine(EngineCore, Randomizable):
             manager.before_reset()
 
             # lm = process_memory()
-            # print("{}: Before Reset! Mem Change {:.3f}MB".format(
-            #     manager_name, (lm - cm) / 1e6
-            # ))
+            # print("{}: Before Reset! Mem Change {:.3f}MB".format(manager_name, (lm - cm) / 1e6))
             # cm = lm
 
         self._object_clean_check()
@@ -240,18 +251,14 @@ class BaseEngine(EngineCore, Randomizable):
             manager.reset()
 
             # lm = process_memory()
-            # print("{}: Reset! Mem Change {:.3f}MB".format(
-            #     manager_name, (lm - cm) / 1e6
-            # ))
+            # print("{}: Reset! Mem Change {:.3f}MB".format(manager_name, (lm - cm) / 1e6))
             # cm = lm
 
         for manager_name, manager in self.managers.items():
             manager.after_reset()
 
             # lm = process_memory()
-            # print("{}: After Reset! Mem Change {:.3f}MB".format(
-            #     manager_name, (lm - cm) / 1e6
-            # ))
+            # print("{}: After Reset! Mem Change {:.3f}MB".format(manager_name, (lm - cm) / 1e6))
             # cm = lm
 
         # reset cam

@@ -96,6 +96,8 @@ class DistanceDetector:
 
     def __init__(self, num_lasers: int = 16, distance: float = 50, enable_show=True):
         # properties
+        self._node_path_list = []
+
         self.available = True if num_lasers > 0 and distance > 0 else False
         parent_node_np: NodePath = get_engine().render
         self.origin = parent_node_np.attachNewNode("Could_points")
@@ -178,6 +180,9 @@ class DistanceDetector:
             for vis_laser in self.cloud_points_vis:
                 vis_laser.removeNode()
         self.origin.removeNode()
+        for np in self._node_path_list:
+            np.detachNode()
+            np.removeNode()
 
     def set_start_phase_offset(self, angle: float):
         """

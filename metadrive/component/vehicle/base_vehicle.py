@@ -536,6 +536,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         assert self.WIDTH < BaseVehicle.MAX_WIDTH, "Vehicle is too large!"
 
         chassis = BaseRigidBodyNode(self.name, BodyName.Vehicle)
+        self._node_path_list.append(chassis)
+
         chassis.setIntoCollideMask(CollisionGroup.Vehicle)
         chassis_shape = BulletBoxShape(Vec3(self.WIDTH / 2, self.LENGTH / 2, self.HEIGHT / 2))
         ts = TransformState.makePos(Vec3(0, 0, self.HEIGHT / 2))
@@ -594,6 +596,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
 
     def _add_wheel(self, pos: Vec3, radius: float, front: bool, left):
         wheel_np = self.origin.attachNewNode("wheel")
+        self._node_path_list.append(wheel_np)
+
         if self.render:
             model = 'right_tire_front.gltf' if front else 'right_tire_back.gltf'
             model_path = AssetLoader.file_path("models", self.path[0], model)
@@ -927,3 +931,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             rand_c = color[2]  # A pretty green
             c = rand_c
         return c
+
+    def before_reset(self):
+        for obj in [self.navigation, self.lidar, self.side_detector, self.lane_line_detector]:
+            if obj is not None and hasattr(obj, "before_reset"):
+                obj.before_reset()

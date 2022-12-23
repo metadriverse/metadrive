@@ -12,11 +12,19 @@ from metadrive.utils.interpolating_line import InterpolatingLine
 from metadrive.utils.math_utils import wrap_to_pi, norm
 from metadrive.utils.waymo_utils.waymo_utils import RoadLineType, RoadEdgeType, convert_polyline_to_metadrive
 
+from metadrive.engine.engine_utils import get_engine
+
 
 class WaymoBlock(BaseBlock):
-    def __init__(self, block_index: int, global_network, random_seed, waymo_map_data: dict):
-        self.waymo_map_data = waymo_map_data
+    def __init__(self, block_index: int, global_network, random_seed, map_index):
+        # self.waymo_map_data = waymo_map_data
+        self.map_index = map_index
         super(WaymoBlock, self).__init__(block_index, global_network, random_seed)
+
+        e = get_engine()
+        self.waymo_map_data = e.data_manager.get_case(self.map_index)["map"]
+
+        # print(1)
 
     def _sample_topology(self) -> bool:
         for lane_id, data in self.waymo_map_data.items():
@@ -73,7 +81,8 @@ class WaymoBlock(BaseBlock):
                 end = line.get_point(line.length)
             else:
                 end = line.get_point((segment + 1) * DrivableAreaProperty.STRIPE_LENGTH)
-            WaymoLane.construct_lane_line_segment(self, start, end, color, LineType.CONTINUOUS)
+            node_path_list = WaymoLane.construct_lane_line_segment(self, start, end, color, LineType.CONTINUOUS)
+            self._node_path_list.extend(node_path_list)
 
     def construct_waymo_broken_line(self, polyline, color):
         line = InterpolatingLine(polyline)
@@ -83,7 +92,8 @@ class WaymoBlock(BaseBlock):
             end = line.get_point(segment * DrivableAreaProperty.STRIPE_LENGTH * 2 + DrivableAreaProperty.STRIPE_LENGTH)
             if segment == segment_num - 1:
                 end = line.get_point(line.length - DrivableAreaProperty.STRIPE_LENGTH)
-            WaymoLane.construct_lane_line_segment(self, start, end, color, LineType.BROKEN)
+            node_path_list = WaymoLane.construct_lane_line_segment(self, start, end, color, LineType.BROKEN)
+            self._node_path_list.extend(node_path_list)
 
     def construct_waymo_sidewalk(self, polyline):
         line = InterpolatingLine(polyline)
@@ -112,12 +122,26 @@ class WaymoBlock(BaseBlock):
                             lane_start[0] - lane_end[0], lane_start[1] - lane_end[1]
                         )
             last_theta = theta
-            WaymoLane.construct_sidewalk_segment(self, lane_start, lane_end, length_multiply=factor, extra_thrust=1)
+            node_path_list = WaymoLane.construct_sidewalk_segment(
+                self, lane_start, lane_end, length_multiply=factor, extra_thrust=1
+            )
+            self._node_path_list.extend(node_path_list)
 
     @property
     def block_network_type(self):
         return EdgeRoadNetwork
 
     def destroy(self):
+        self.map_index = None
         self.waymo_map_data = None
         super(WaymoBlock, self).destroy()
+
+    def __del__(self):
+        self.destroy()
+        super(WaymoBlock, self).__del__()
+        print("Waymo Block is being deleted.")
+
+    # @property
+    # def waymo_map_data(self):
+    #     e = get_engine()
+    #     return e.data_manager.get_case(self.map_index)["map"]

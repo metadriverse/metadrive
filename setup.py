@@ -96,7 +96,8 @@ install_requires = [
     "pytest",
     "opencv-python-headless",
     "lxml",
-    "scipy"
+    "scipy",
+    "psutil"
 ]
 
 # if (not is_mac()) and (not is_win()):
