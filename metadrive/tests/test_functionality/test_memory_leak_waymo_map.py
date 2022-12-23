@@ -35,10 +35,9 @@ def test_waymo_map_memory_leak():
     default_config["waymo_data_directory"] = AssetLoader.file_path("waymo", return_raw_style=False)
     default_config["case_num"] = 1
 
-    close_engine()
-    engine = initialize_engine(default_config)
-
     try:
+        close_engine()
+        engine = initialize_engine(default_config)
 
         ct = time.time()
         cm = process_memory()
@@ -106,8 +105,8 @@ if __name__ == "__main__":
     # gc.set_debug(gc.DEBUG_LEAK)
 
     test_waymo_env_memory_leak()
-    #
-    # test_waymo_map_memory_leak()
+
+    test_waymo_map_memory_leak()
 
     # show the dirt ;-)
     # ret = dump_garbage()
