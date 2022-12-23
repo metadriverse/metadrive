@@ -180,7 +180,10 @@ class PGBlock(BaseBlock):
         return PGBlockSocket(positive_road, -positive_road)
 
     def get_socket_indices(self):
-        return list(self._sockets.keys())
+        ret = list(self._sockets.keys())
+        for r in ret:
+            assert isinstance(r, str)
+        return ret
 
     def get_socket_list(self):
         return list(self._sockets.values())

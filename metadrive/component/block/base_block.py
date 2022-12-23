@@ -1,19 +1,24 @@
+import logging
+from typing import List, Dict
+
 import math
-from typing import Dict, List
+from panda3d.bullet import BulletBoxShape, BulletGhostNode
+from panda3d.core import Vec3, LQuaternionf, Vec4, TextureStage, RigidBodyCombiner, \
+    SamplerState, NodePath
 
 from metadrive.base_class.base_object import BaseObject
 from metadrive.component.lane.abs_lane import AbstractLane
 from metadrive.component.lane.waypoint_lane import WayPointLane
-from metadrive.component.road_network import Road
 from metadrive.component.road_network.node_road_network import NodeRoadNetwork
+from metadrive.component.road_network.road import Road
 from metadrive.constants import BodyName, CamMask, LineType, LineColor, DrivableAreaProperty
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.engine.core.physics_world import PhysicsWorld
+from metadrive.utils import import_pygame
 from metadrive.utils.coordinates_shift import panda_position
 from metadrive.utils.math_utils import norm
-from panda3d.bullet import BulletBoxShape, BulletGhostNode
-from panda3d.core import Vec3, LQuaternionf, Vec4, TextureStage, RigidBodyCombiner, \
-    SamplerState, NodePath
+
+logger = logging.getLogger(__name__)
 
 
 class BaseBlock(BaseObject, DrivableAreaProperty):
@@ -78,12 +83,17 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
         Randomly Construct a block, if overlap return False
         """
         self.sample_parameters()
-        self.origin = NodePath(self.name)
+
+        if not isinstance(self.origin, NodePath):
+            self.origin = NodePath(self.name)
+        # else:
+        #     print("Origin already exists: ", self.origin)
+
         self._block_objects = []
         if extra_config:
             assert set(extra_config.keys()).issubset(self.PARAMETER_SPACE.parameters), \
                 "Make sure the parameters' name are as same as what defined in pg_space.py"
-            raw_config = self.get_config()
+            raw_config = self.get_config(copy=True)
             raw_config.update(extra_config)
             self.update_config(raw_config)
         self._clear_topology()
@@ -96,7 +106,10 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
     def destruct_block(self, physics_world: PhysicsWorld):
         self._clear_topology()
         self.detach_from_world(physics_world)
+
         self.origin.removeNode()
+        self.origin = None
+
         self.dynamic_nodes.clear()
         self.static_nodes.clear()
         for obj in self._block_objects:
@@ -253,8 +266,17 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
         raise NotImplementedError
 
     def destroy(self):
+        for node_path in [self.lane_line_node_path, self.sidewalk_node_path, self.lane_node_path,
+                          self.lane_vis_node_path]:
+            if isinstance(node_path, NodePath):
+                node_path.removeNode()
+
         if self.block_network is not None:
             self.block_network.destroy()
             self.block_network = None
         self._global_network = None
         super(BaseBlock, self).destroy()
+
+    def __del__(self):
+        self.destroy()
+        logger.debug("{} is being deleted.".format(type(self)))

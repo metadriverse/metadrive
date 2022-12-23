@@ -50,7 +50,7 @@ class InterSection(PGBlock):
             self.radius = None
         super(InterSection, self).__init__(*args, **kwargs)
         if self.radius is None:
-            self.radius = self.get_config()[Parameter.radius]
+            self.radius = self.get_config(copy=False)[Parameter.radius]
 
     def _try_plug_into_previous_block(self) -> bool:
         para = self.get_config()
