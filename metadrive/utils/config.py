@@ -88,13 +88,13 @@ class Config:
     def clear(self):
         self._config.clear()
 
-    # def register_type(self, key, *types):
-    #     """
-    #     Register special types for item in config. This is used for mixed type declaration.
-    #     Note that is the type is declared as None, then we will not check type for this item.
-    #     """
-    #     assert key in self._config
-    #     self._types[key] = set(types)
+    def register_type(self, key, *types):
+        """
+        Register special types for item in config. This is used for mixed type declaration.
+        Note that is the type is declared as None, then we will not check type for this item.
+        """
+        assert key in self._config
+        self._types[key] = set(types)
 
     def get_dict(self):
         return config_to_dict(self._config, serializable=False)
@@ -278,8 +278,8 @@ class Config:
         assert isinstance(new_dict, (dict, Config))
         return _is_identical("", self, "", new_dict)
 
-    # def get(self, key, *args):
-    #     return copy.copy(self._config.get(key, *args))
+    def get(self, key, *args):
+        return self._config.get(key, *args)
 
     def force_update(self, new_config):
         self._unchangeable = False

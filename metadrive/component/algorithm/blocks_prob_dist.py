@@ -49,7 +49,7 @@ class PGBlockDistConfig:
 
     @classmethod
     def get_block(cls, block_id: str, version: str = "v2"):
-        from metadrive import get_metadrive_class
+        from metadrive.utils.registry import get_metadrive_class
 
         for block in cls.all_blocks(version):
             block = get_metadrive_class(block)
