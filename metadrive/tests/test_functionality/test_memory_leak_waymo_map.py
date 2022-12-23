@@ -38,6 +38,7 @@ def test_waymo_map_memory_leak():
     default_config["waymo_data_directory"] = AssetLoader.file_path("waymo", return_raw_style=False)
     default_config["case_num"] = 1
 
+    close_engine()
     engine = initialize_engine(default_config)
 
     try:
