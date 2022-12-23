@@ -35,25 +35,25 @@ class WaymoDataManager(BaseManager):
     def get_case(self, i):
         if i not in self.waymo_case:
             # inner psutil function
-            def process_memory():
-                import psutil
-                import os
-                process = psutil.Process(os.getpid())
-                mem_info = process.memory_info()
-                return mem_info.rss
-
-            cm = process_memory()
+            # def process_memory():
+            #     import psutil
+            #     import os
+            #     process = psutil.Process(os.getpid())
+            #     mem_info = process.memory_info()
+            #     return mem_info.rss
+            #
+            # cm = process_memory()
 
             self.waymo_case.clear_if_necessary()
 
-            lm = process_memory()
-            print("{}:  Reset! Mem Change {:.3f}MB".format("data manager 1", (lm - cm) / 1e6))
-            cm = lm
+            # lm = process_memory()
+            # print("{}:  Reset! Mem Change {:.3f}MB".format("data manager 1", (lm - cm) / 1e6))
+            # cm = lm
 
             self.waymo_case[i] = self._get_case(i)
 
-            lm = process_memory()
-            print("{}:  Reset! Mem Change {:.3f}MB".format("data manager 2", (lm - cm) / 1e6))
-            cm = lm
+            # lm = process_memory()
+            # print("{}:  Reset! Mem Change {:.3f}MB".format("data manager 2", (lm - cm) / 1e6))
+            # cm = lm
 
         return copy.deepcopy(self.waymo_case[i])

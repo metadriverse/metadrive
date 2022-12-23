@@ -347,8 +347,12 @@ class AbstractLane:
         return node_path_list
 
     def destroy(self):
-        from metadrive.base_class.base_object import clear_node_list
-        clear_node_list(self._node_path_list)
+        try:
+            from metadrive.base_class.base_object import clear_node_list
+        except ImportError:
+            self._node_path_list.clear()
+        else:
+            clear_node_list(self._node_path_list)
 
     def __del__(self):
         self.destroy()

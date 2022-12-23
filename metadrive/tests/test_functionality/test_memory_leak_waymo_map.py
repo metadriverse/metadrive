@@ -14,8 +14,7 @@ def test_waymo_env_memory_leak():
     try:
         ct = time.time()
         cm = process_memory()
-        last_mem = 0.0
-        for t in range(50):
+        for t in range(20):
             lt = time.time()
             env.reset()
             nlt = time.time()
@@ -25,9 +24,7 @@ def test_waymo_env_memory_leak():
                     t + 1, nlt - lt, nlt - ct, lm - cm
                 )
             )
-            if t > 20:
-                assert abs((lm - cm) - last_mem) < 512 * 1024  # Memory should not have change > 512KB
-            last_mem = lm - cm
+        assert lm - cm < 1024 * 1024 * 80, "We expect will cause ~70MB memory leak."
 
     finally:
         env.close()
@@ -108,9 +105,9 @@ if __name__ == "__main__":
     # gc.enable()
     # gc.set_debug(gc.DEBUG_LEAK)
 
-    # test_waymo_env_memory_leak()
-
-    test_waymo_map_memory_leak()
+    test_waymo_env_memory_leak()
+    #
+    # test_waymo_map_memory_leak()
 
     # show the dirt ;-)
     # ret = dump_garbage()

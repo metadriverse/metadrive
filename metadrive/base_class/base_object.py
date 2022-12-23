@@ -204,25 +204,29 @@ class BaseObject(BaseRunnable):
         """
         Fully delete this element and release the memory
         """
-        from metadrive.engine.engine_utils import get_engine
-        engine = get_engine()
-        self.detach_from_world(engine.physics_world)
-        if self._body is not None and hasattr(self.body, "object"):
-            self.body.generated_object = None
-        if self.origin is not None:
-            self.origin.removeNode()
+        try:
+            from metadrive.engine.engine_utils import get_engine
+        except ImportError:
+            pass
+        else:
+            engine = get_engine()
+            self.detach_from_world(engine.physics_world)
+            if self._body is not None and hasattr(self.body, "object"):
+                self.body.generated_object = None
+            if self.origin is not None:
+                self.origin.removeNode()
 
-        clear_node_list(self._node_path_list)
+            clear_node_list(self._node_path_list)
 
-        logger.debug("Finish cleaning {} node path.".format(len(self._node_path_list)))
-        self._node_path_list.clear()
-        self._node_path_list = []
+            logger.debug("Finish cleaning {} node path.".format(len(self._node_path_list)))
+            self._node_path_list.clear()
+            self._node_path_list = []
 
-        self.dynamic_nodes.destroy_node_list(bullet_world=engine.physics_world.dynamic_world)
-        self.static_nodes.destroy_node_list(bullet_world=engine.physics_world.static_world)
-        self.dynamic_nodes.clear()
-        self.static_nodes.clear()
-        self._config.clear()
+            self.dynamic_nodes.destroy_node_list(bullet_world=engine.physics_world.dynamic_world)
+            self.static_nodes.destroy_node_list(bullet_world=engine.physics_world.static_world)
+            self.dynamic_nodes.clear()
+            self.static_nodes.clear()
+            self._config.clear()
 
     def set_position(self, position, height=0.4):
         """
