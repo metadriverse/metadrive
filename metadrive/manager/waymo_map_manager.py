@@ -38,68 +38,45 @@ class WaymoMapManager(BaseManager):
             mem_info = process.memory_info()
             return mem_info.rss
 
-
-
         cm = process_memory()
-
 
         if seed in self.store_map_buffer:
             new_map = self.store_map_buffer[seed]
         else:
 
             lm = process_memory()
-            print("{}:  Reset! Mem Change {:.3f}MB".format(
-                1, (lm - cm) / 1e6
-            ))
+            print("{}:  Reset! Mem Change {:.3f}MB".format(1, (lm - cm) / 1e6))
             cm = lm
 
             self.store_map_buffer.clear_if_necessary()
 
             lm = process_memory()
-            print("{}:  Reset! Mem Change {:.3f}MB".format(
-                2, (lm - cm) / 1e6
-            ))
+            print("{}:  Reset! Mem Change {:.3f}MB".format(2, (lm - cm) / 1e6))
             cm = lm
-
-
 
             new_map = WaymoMap(map_index=seed)
 
             lm = process_memory()
-            print("{}:  Reset! Mem Change {:.3f}MB".format(
-                3, (lm - cm) / 1e6
-            ))
+            print("{}:  Reset! Mem Change {:.3f}MB".format(3, (lm - cm) / 1e6))
             cm = lm
-
-
-
 
             self.store_map_buffer[seed] = new_map
 
             lm = process_memory()
-            print("{}:  Reset! Mem Change {:.3f}MB".format(
-                4, (lm - cm) / 1e6
-            ))
+            print("{}:  Reset! Mem Change {:.3f}MB".format(4, (lm - cm) / 1e6))
             cm = lm
-
-
 
         self.load_map(new_map)
 
         lm = process_memory()
-        print("{}:  Reset! Mem Change {:.3f}MB".format(
-            5, (lm - cm) / 1e6
-        ))
+        print("{}:  Reset! Mem Change {:.3f}MB".format(5, (lm - cm) / 1e6))
         cm = lm
 
         self.update_route()
 
         lm = process_memory()
-        print("{}:  Reset! Mem Change {:.3f}MB".format(
-            6, (lm - cm) / 1e6
-        ))
+        print("{}:  Reset! Mem Change {:.3f}MB".format(6, (lm - cm) / 1e6))
         cm = lm
-
 
     def update_route(self):
         """

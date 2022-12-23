@@ -49,7 +49,6 @@ if __name__ == "__main__":
 
     import gc
 
-
     def dump_garbage():
         """
         show us what's the garbage about
@@ -69,10 +68,8 @@ if __name__ == "__main__":
             res.append([type(x), s, x])
         return res
 
-
     # gc.enable()
     # gc.set_debug(gc.DEBUG_LEAK)
-
 
     test_pg_map_memory_leak()
 

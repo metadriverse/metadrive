@@ -73,7 +73,6 @@ if __name__ == "__main__":
 
     import gc
 
-
     def dump_garbage():
         """
         show us what's the garbage about
@@ -92,7 +91,6 @@ if __name__ == "__main__":
             print(type(x), "\n  ", s)
             res.append([type(x), s, x])
         return res
-
 
     # gc.enable()
     # gc.set_debug(gc.DEBUG_LEAK)

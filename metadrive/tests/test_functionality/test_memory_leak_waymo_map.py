@@ -33,7 +33,6 @@ def test_waymo_env_memory_leak():
         env.close()
 
 
-
 def test_waymo_map_memory_leak():
     default_config = WaymoEnv.default_config()
     default_config["waymo_data_directory"] = AssetLoader.file_path("waymo", return_raw_style=False)
@@ -51,14 +50,9 @@ def test_waymo_map_memory_leak():
 
         engine.data_manager = WaymoDataManager()
 
-
         lm = process_memory()
         nlt = time.time()
-        print(
-            "After {} Iters, Time {:.3f} Total Time {:.3f}, Memory Usage {:,}".format(
-                0, nlt - lt, nlt - ct, lm - cm
-            )
-        )
+        print("After {} Iters, Time {:.3f} Total Time {:.3f}, Memory Usage {:,}".format(0, nlt - lt, nlt - ct, lm - cm))
 
         for t in range(10):
             lt = time.time()
@@ -83,6 +77,7 @@ def test_waymo_map_memory_leak():
 
     finally:
         close_engine()
+
 
 if __name__ == "__main__":
 

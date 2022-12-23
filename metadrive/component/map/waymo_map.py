@@ -24,7 +24,6 @@ class WaymoMap(BaseMap):
             b.attach_to_world(self.engine.worldNP, self.engine.physics_world)
             b.detach_from_world(self.engine.physics_world)
 
-
     @staticmethod
     def waymo_position(pos):
         return pos[0], -pos[1]

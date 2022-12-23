@@ -22,9 +22,9 @@ class WaymoDataManager(BaseManager):
             assert os.path.exists(p), "No Data {} at path: {}".format(i, p)
 
             # if self.store_map:
-                # If we wish to store map (which requires huge memory), we load data immediately to exchange effiency
-                # later
-                # self.waymo_case[i] = self._get_case(i)
+            # If we wish to store map (which requires huge memory), we load data immediately to exchange effiency
+            # later
+            # self.waymo_case[i] = self._get_case(i)
 
     def _get_case(self, i):
         assert self.start_case_index <= i < self.start_case_index + self.case_num, \
@@ -46,25 +46,14 @@ class WaymoDataManager(BaseManager):
 
             self.waymo_case.clear_if_necessary()
 
-
             lm = process_memory()
-            print("{}:  Reset! Mem Change {:.3f}MB".format(
-                "data manager 1", (lm - cm) / 1e6
-            ))
+            print("{}:  Reset! Mem Change {:.3f}MB".format("data manager 1", (lm - cm) / 1e6))
             cm = lm
-
-
 
             self.waymo_case[i] = self._get_case(i)
 
-
-
             lm = process_memory()
-            print("{}:  Reset! Mem Change {:.3f}MB".format(
-                "data manager 2", (lm - cm) / 1e6
-            ))
+            print("{}:  Reset! Mem Change {:.3f}MB".format("data manager 2", (lm - cm) / 1e6))
             cm = lm
-
-
 
         return copy.deepcopy(self.waymo_case[i])

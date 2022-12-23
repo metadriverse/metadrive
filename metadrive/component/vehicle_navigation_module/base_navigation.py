@@ -24,15 +24,15 @@ class BaseNavigation:
     LINE_TO_DEST_HEIGHT = 0.6
 
     def __init__(
-            self,
-            engine,
-            show_navi_mark: bool = False,
-            random_navi_mark_color=False,
-            show_dest_mark=False,
-            show_line_to_dest=False,
-            panda_color=None,
-            name=None,
-            vehicle_config=None
+        self,
+        engine,
+        show_navi_mark: bool = False,
+        random_navi_mark_color=False,
+        show_dest_mark=False,
+        show_line_to_dest=False,
+        panda_color=None,
+        name=None,
+        vehicle_config=None
     ):
         """
         This class define a helper for localizing vehicles and retrieving navigation information.
@@ -51,7 +51,7 @@ class BaseNavigation:
         self.vehicle_config = vehicle_config
 
         self._target_checkpoints_index = None
-        self._navi_info = np.zeros((self.navigation_info_dim,), dtype=np.float32)  # navi information res
+        self._navi_info = np.zeros((self.navigation_info_dim, ), dtype=np.float32)  # navi information res
 
         # Vis
         self._show_navi_info = (engine.mode == RENDER_MODE_ONSCREEN and not engine.global_config["debug_physics_world"])

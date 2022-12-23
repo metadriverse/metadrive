@@ -21,15 +21,11 @@ class DataBuffer:
     def clear_if_necessary(self):
         while len(self.store_data_buffer) >= self.store_data_buffer_size:
 
-
-
             tmp_index = self.store_data_indices.popleft()
-
 
             if not isinstance(self.store_data_buffer[tmp_index], dict):
                 self.store_data_indices.appendleft(tmp_index)
                 return
-
 
             tmp_obj = self.store_data_buffer.pop(tmp_index)
             get_engine().clear_object_if_possible(tmp_obj, force_destroy=True)

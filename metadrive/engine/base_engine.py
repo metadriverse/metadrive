@@ -239,9 +239,7 @@ class BaseEngine(EngineCore, Randomizable):
             manager.before_reset()
 
             lm = process_memory()
-            print("{}: Before Reset! Mem Change {:.3f}MB".format(
-                manager_name, (lm - cm) / 1e6
-            ))
+            print("{}: Before Reset! Mem Change {:.3f}MB".format(manager_name, (lm - cm) / 1e6))
             cm = lm
 
         self._object_clean_check()
@@ -253,18 +251,14 @@ class BaseEngine(EngineCore, Randomizable):
             manager.reset()
 
             lm = process_memory()
-            print("{}: Reset! Mem Change {:.3f}MB".format(
-                manager_name, (lm - cm) / 1e6
-            ))
+            print("{}: Reset! Mem Change {:.3f}MB".format(manager_name, (lm - cm) / 1e6))
             cm = lm
 
         for manager_name, manager in self.managers.items():
             manager.after_reset()
 
             lm = process_memory()
-            print("{}: After Reset! Mem Change {:.3f}MB".format(
-                manager_name, (lm - cm) / 1e6
-            ))
+            print("{}: After Reset! Mem Change {:.3f}MB".format(manager_name, (lm - cm) / 1e6))
             cm = lm
 
         # reset cam

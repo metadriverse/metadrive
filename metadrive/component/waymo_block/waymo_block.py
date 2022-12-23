@@ -122,7 +122,9 @@ class WaymoBlock(BaseBlock):
                             lane_start[0] - lane_end[0], lane_start[1] - lane_end[1]
                         )
             last_theta = theta
-            node_path_list = WaymoLane.construct_sidewalk_segment(self, lane_start, lane_end, length_multiply=factor, extra_thrust=1)
+            node_path_list = WaymoLane.construct_sidewalk_segment(
+                self, lane_start, lane_end, length_multiply=factor, extra_thrust=1
+            )
             self._node_path_list.extend(node_path_list)
 
     @property
