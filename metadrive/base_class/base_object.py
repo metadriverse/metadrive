@@ -211,11 +211,16 @@ class BaseObject(BaseRunnable):
             pass
         else:
             engine = get_engine()
-            self.detach_from_world(engine.physics_world)
-            if self._body is not None and hasattr(self.body, "object"):
-                self.body.generated_object = None
-            if self.origin is not None:
-                self.origin.removeNode()
+
+            if engine is not None:
+                self.detach_from_world(engine.physics_world)
+                if self._body is not None and hasattr(self.body, "object"):
+                    self.body.generated_object = None
+                if self.origin is not None:
+                    self.origin.removeNode()
+
+                self.dynamic_nodes.destroy_node_list(bullet_world=engine.physics_world.dynamic_world)
+                self.static_nodes.destroy_node_list(bullet_world=engine.physics_world.static_world)
 
             clear_node_list(self._node_path_list)
 
@@ -223,8 +228,6 @@ class BaseObject(BaseRunnable):
             self._node_path_list.clear()
             self._node_path_list = []
 
-            self.dynamic_nodes.destroy_node_list(bullet_world=engine.physics_world.dynamic_world)
-            self.static_nodes.destroy_node_list(bullet_world=engine.physics_world.static_world)
             self.dynamic_nodes.clear()
             self.static_nodes.clear()
             self._config.clear()
