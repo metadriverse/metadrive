@@ -18,7 +18,9 @@ def get_np_random(seed=None, return_seed=False):
     seed = create_seed(seed)
 
     rng = np.random.RandomState()
+
     rng.seed(_int_list_from_bigint(hash_seed(seed)))
+
     if return_seed:
         return rng, seed
     else:

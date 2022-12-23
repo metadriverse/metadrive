@@ -1,8 +1,9 @@
-import math
-import seaborn as sns
+import logging
 from typing import Dict
-from metadrive.utils import get_np_random
+
+import math
 import numpy as np
+import seaborn as sns
 from panda3d.bullet import BulletWorld, BulletBodyNode
 from panda3d.core import LVector3
 from panda3d.core import NodePath
@@ -12,9 +13,12 @@ from metadrive.constants import ObjectState
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.engine.core.physics_world import PhysicsWorld
 from metadrive.utils import Vector
+from metadrive.utils import get_np_random
 from metadrive.utils.coordinates_shift import panda_position, metadrive_position, panda_heading, metadrive_heading
 from metadrive.utils.math_utils import clip
 from metadrive.utils.math_utils import norm
+
+logger = logging.getLogger(__name__)
 
 
 class PhysicsNodeList(list):
@@ -109,6 +113,10 @@ class BaseObject(BaseRunnable):
             new_origin.setH(self.origin.getH())
             new_origin.setPos(self.origin.getPos())
             self.origin.getChildren().reparentTo(new_origin)
+
+            # TODO(PZH): We don't call this sentence:. It might cause problem since we don't remove old origin?
+            # self.origin.removeNode()
+
             self.origin = new_origin
             self.dynamic_nodes.append(physics_body)
             if self.MASS is not None:
@@ -135,6 +143,7 @@ class BaseObject(BaseRunnable):
             self.origin.reparentTo(parent_node_path)
         self.dynamic_nodes.attach_to_physics_world(physics_world.dynamic_world)
         self.static_nodes.attach_to_physics_world(physics_world.static_world)
+        logger.debug("{} is attached to the world.".format(type(self)))
 
     def detach_from_world(self, physics_world: PhysicsWorld):
         """
@@ -144,6 +153,7 @@ class BaseObject(BaseRunnable):
             self.origin.detachNode()
         self.dynamic_nodes.detach_from_physics_world(physics_world.dynamic_world)
         self.static_nodes.detach_from_physics_world(physics_world.static_world)
+        logger.debug("{} is detached from the world.".format(type(self)))
 
     def destroy(self):
         """

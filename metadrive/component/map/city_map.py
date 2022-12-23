@@ -69,6 +69,8 @@ class CityBIG(BIG):
             block_types = PGBlockDistConfig.all_blocks()
             block_probabilities = PGBlockDistConfig.block_probability()
             block_type = self.np_random.choice(block_types, p=block_probabilities)
+            from metadrive.utils.registry import get_metadrive_class
+            block_type = get_metadrive_class(block_type)
         else:
             type_id = self._block_sequence[len(self.blocks)]
             block_type = PGBlockDistConfig.get_block(type_id)
