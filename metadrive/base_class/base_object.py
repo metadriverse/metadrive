@@ -22,8 +22,9 @@ logger = logging.getLogger(__name__)
 
 
 def _clean_a_node_path(node_path):
-    for sub_node_path in node_path.getChildren():
-        _clean_a_node_path(sub_node_path)
+    if not node_path.isEmpty():
+        for sub_node_path in node_path.getChildren():
+            _clean_a_node_path(sub_node_path)
     node_path.detachNode()
     node_path.removeNode()
 
