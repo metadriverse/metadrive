@@ -34,6 +34,8 @@ class AbstractLane:
         self.speed_limit = 1000  # should be set manually
         self.index = None
 
+        self._node_path_list = []
+
     def set_speed_limit(self, speed_limit):
         self.speed_limit = speed_limit
 
@@ -209,6 +211,9 @@ class AbstractLane:
         if lane_index is not None:
             lane.index = lane_index
         segment_np = NodePath(BaseRigidBodyNode(lane, BodyName.Lane))
+
+        self._node_path_list.append(segment_np)
+
         segment_node = segment_np.node()
         segment_node.set_active(False)
         segment_node.setKinematic(False)
@@ -261,6 +266,7 @@ class AbstractLane:
         body_node.setKinematic(False)
         body_node.setStatic(True)
         body_np = parent_np.attachNewNode(body_node)
+
         # its scale will change by setScale
         body_height = DrivableAreaProperty.LANE_LINE_GHOST_HEIGHT
         shape = BulletBoxShape(Vec3(length / 2, DrivableAreaProperty.LANE_LINE_WIDTH / 4, body_height))
@@ -316,3 +322,11 @@ class AbstractLane:
         if block.render:
             side_np.setTexture(block.ts_color, block.side_texture)
             block.sidewalk.instanceTo(side_np)
+
+    def destroy(self):
+        for np in self._node_path_list:
+            np.detachNode()
+            np.removeNode()
+
+    def __del__(self):
+        self.destroy()

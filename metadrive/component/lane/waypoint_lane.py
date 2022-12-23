@@ -80,3 +80,4 @@ class WayPointLane(AbstractLane, InterpolatingLine):
         self.start = None
         self.end = None
         InterpolatingLine.destroy(self)
+        super(WayPointLane, self).destroy()

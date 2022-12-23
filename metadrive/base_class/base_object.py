@@ -50,6 +50,11 @@ class PhysicsNodeList(list):
             bullet_world.remove(node)
         self.attached = False
 
+    def destroy_node_list(self, bullet_world: BulletWorld):
+        for node in self:
+            bullet_world.remove(node)
+
+
 
 class BaseObject(BaseRunnable):
     """
@@ -99,6 +104,8 @@ class BaseObject(BaseRunnable):
         rand_c = color[idx]
         self._panda_color = rand_c
 
+        self._node_path_list = []
+
     @property
     def panda_color(self):
         return self._panda_color
@@ -116,6 +123,8 @@ class BaseObject(BaseRunnable):
 
             # TODO(PZH): We don't call this sentence:. It might cause problem since we don't remove old origin?
             # self.origin.removeNode()
+
+            self._node_path_list.append(self.origin)
 
             self.origin = new_origin
             self.dynamic_nodes.append(physics_body)
@@ -166,6 +175,14 @@ class BaseObject(BaseRunnable):
             self.body.generated_object = None
         if self.origin is not None:
             self.origin.removeNode()
+
+        for np in self._node_path_list:
+            assert isinstance(np, NodePath)
+            np.detachNode()
+            np.removeNode()
+
+        self.dynamic_nodes.destroy_node_list(bullet_world=engine.physics_world.dynamic_world)
+        self.static_nodes.destroy_node_list(bullet_world=engine.physics_world.static_world)
         self.dynamic_nodes.clear()
         self.static_nodes.clear()
         self._config.clear()

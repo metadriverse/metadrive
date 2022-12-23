@@ -14,8 +14,20 @@ class WaymoMap(BaseMap):
 
     def _generate(self):
         block = WaymoBlock(0, self.road_network, 0, self.map_index)
-        block.construct_block(self.engine.worldNP, self.engine.physics_world)
+        block.construct_block(self.engine.worldNP, self.engine.physics_world, attach_to_world=True)
         self.blocks.append(block)
+
+    def play(self):
+        from metadrive.tests.test_functionality.test_memory_leak_engine import process_memory
+
+
+        for b in self.blocks:
+
+            b._create_in_world()
+            b.attach_to_world(self.engine.worldNP, self.engine.physics_world)
+
+            b.detach_from_world(self.engine.physics_world)
+
 
     @staticmethod
     def waymo_position(pos):

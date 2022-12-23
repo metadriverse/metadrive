@@ -127,6 +127,8 @@ class DistanceDetector:
                 ball.getChildren().reparentTo(laser_np)
             # self.origin.flattenStrong()
 
+        self._node_path_list = []
+
     def perceive(self, base_vehicle, physics_world, detector_mask: np.ndarray = None):
         assert self.available
         extra_filter_node = set(base_vehicle.dynamic_nodes)
@@ -178,6 +180,9 @@ class DistanceDetector:
             for vis_laser in self.cloud_points_vis:
                 vis_laser.removeNode()
         self.origin.removeNode()
+        for np in self._node_path_list:
+            np.detachNode()
+            np.removeNode()
 
     def set_start_phase_offset(self, angle: float):
         """

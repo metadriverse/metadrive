@@ -42,16 +42,32 @@ def test_waymo_map_memory_leak():
     engine = initialize_engine(default_config)
 
     try:
-        engine.data_manager = WaymoDataManager()
 
         ct = time.time()
         cm = process_memory()
         last_mem = 0.0
+
+        lt = time.time()
+
+        engine.data_manager = WaymoDataManager()
+
+        map = WaymoMap(map_index=0)
+        # del map
+
+        lm = process_memory()
+        nlt = time.time()
+        print(
+            "After {} Iters, Time {:.3f} Total Time {:.3f}, Memory Usage {:,}".format(
+                0, nlt - lt, nlt - ct, lm - cm
+            )
+        )
+
+
         for t in range(100):
             lt = time.time()
 
-            map = WaymoMap(map_index=0)
-            del map
+
+            map.play()
 
             nlt = time.time()
             lm = process_memory()

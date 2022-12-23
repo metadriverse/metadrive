@@ -100,8 +100,11 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
         self._clear_topology()
         success = self._sample_topology()
         self._global_network.add(self.block_network, no_same_node)
-        self._create_in_world()
-        self.attach_to_world(root_render_np, physics_world)
+
+        if attach_to_world:
+            self._create_in_world()
+            self.attach_to_world(root_render_np, physics_world)
+
         return success
 
     def destruct_block(self, physics_world: PhysicsWorld):
@@ -187,6 +190,11 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
 
         self.bounding_box = self.block_network.get_bounding_box()
 
+        self._node_path_list.append(self.sidewalk_node_path)
+        self._node_path_list.append(self.lane_line_node_path)
+        self._node_path_list.append(self.lane_node_path)
+        self._node_path_list.append(self.lane_vis_node_path)
+
     def create_in_world(self):
         """
         Create lane in the panda3D world
@@ -269,7 +277,12 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
     def destroy(self):
         if self.block_network is not None:
             self.block_network.destroy()
+            if self.block_network.graph is not None:
+                self.block_network.graph.clear()
             self.block_network = None
+        self.PART_IDX = 0
+        self.ROAD_IDX = 0
+        self._respawn_roads.clear()
         self._global_network = None
         super(BaseBlock, self).destroy()
 

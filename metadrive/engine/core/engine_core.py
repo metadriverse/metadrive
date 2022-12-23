@@ -381,7 +381,9 @@ class EngineCore(ShowBase.ShowBase):
         line_seg.moveTo(start_p)
         line_seg.drawTo(end_p)
         line_seg.setThickness(thickness)
-        NodePath(line_seg.create(False)).reparentTo(self.render)
+        np = NodePath(line_seg.create(False))
+        np.reparentTo(self.render)
+        # TODO(PZH): This NP is not removed.
 
 
 if __name__ == "__main__":

@@ -34,6 +34,8 @@ class Interface:
         self.init_interface()
         self._is_showing_arrow = True  # store the state of navigation mark
 
+        self._node_path_list = []
+
     def after_step(self):
         if self.engine.current_track_vehicle is not None and self.need_interface:
             track_v = self.engine.current_track_vehicle
@@ -49,6 +51,9 @@ class Interface:
         if self.need_interface:
             info_np = NodePath("Collision info nodepath")
             info_np.reparentTo(self.engine.aspect2d)
+
+            self._node_path_list.append(info_np)
+
             self.contact_result_render = info_np
             self.vehicle_panel = VehiclePanel(self.engine)
             self.right_panel = self.vehicle_panel
@@ -106,6 +111,9 @@ class Interface:
             self.current_banner = self._contact_banners[text]
         else:
             new_banner = NodePath(TextNode("collision_info:{}".format(text)))
+
+            self._node_path_list.append(new_banner)
+
             self._contact_banners[text] = new_banner
             text_node = new_banner.node()
             text_node.setCardColor(color)
@@ -131,6 +139,11 @@ class Interface:
             self._render_banner(text, COLLISION_INFO_COLOR[COLOR[text]][1])
 
     def destroy(self):
+
+        for np in self._node_path_list:
+            np.detachNode()
+            np.removeNode()
+
         if self.need_interface:
             self.stop_track()
             self.vehicle_panel.destroy()
