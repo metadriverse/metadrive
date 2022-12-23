@@ -61,6 +61,9 @@ class Space:
         # By default, assume identity is JSONable
         return sample_n
 
+    def __del__(self):
+        del self.np_random
+
 
 class Dict(Space):
     """
@@ -107,7 +110,8 @@ class Dict(Space):
         super(Dict, self).__init__(None, None)  # None for shape and dtype, since it'll require special handling
 
     def seed(self, seed=None):
-        [space.seed(seed) for space in self.spaces.values()]
+        for space in self.spaces.values():
+            space.seed(seed)
 
     def sample(self):
         return OrderedDict([(k, space.sample()) for k, space in self.spaces.items()])

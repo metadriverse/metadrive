@@ -1,14 +1,13 @@
 import logging
 from typing import Union
 
-from panda3d.core import NodePath
-
 from metadrive.component.algorithm.blocks_prob_dist import PGBlockDistConfig
 from metadrive.component.pgblock.first_block import FirstPGBlock
 from metadrive.component.pgblock.pg_block import PGBlock
 from metadrive.component.road_network.node_road_network import NodeRoadNetwork
 from metadrive.engine.core.physics_world import PhysicsWorld
-from metadrive.utils import get_np_random
+from metadrive.utils import get_np_random, get_metadrive_class
+from panda3d.core import NodePath
 
 
 class NextStep:
@@ -39,7 +38,6 @@ class BIG:
         random_seed=None,
         block_dist_config=PGBlockDistConfig
     ):
-        super(BIG, self).__init__()
         self.block_dist_config = block_dist_config
         self._block_sequence = None
         self.random_seed = random_seed
@@ -103,6 +101,7 @@ class BIG:
             block_types = self.block_dist_config.all_blocks()
             block_probabilities = self.block_dist_config.block_probability()
             block_type = self.np_random.choice(block_types, p=block_probabilities)
+            block_type = get_metadrive_class(block_type)
         else:
             type_id = self._block_sequence[len(self.blocks)]
             block_type = self.block_dist_config.get_block(type_id)
@@ -136,7 +135,11 @@ class BIG:
 
     def _go_back(self):
         logging.debug("back")
-        self.blocks.pop()
+
+        to_delete_block = self.blocks.pop()
+        to_delete_block.destroy()
+        del to_delete_block
+
         last_block = self.blocks[-1]
         self.destruct(last_block)
         self.next_step = NextStep.search_sibling

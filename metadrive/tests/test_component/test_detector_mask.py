@@ -313,5 +313,5 @@ def test_detector_mask_in_lidar():
 
 
 if __name__ == '__main__':
-    test_detector_mask()
+    # test_detector_mask()
     test_detector_mask_in_lidar()
