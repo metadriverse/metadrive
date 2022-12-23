@@ -53,8 +53,9 @@ def clear_node_list(node_path_list):
         else:
             raise ValueError(node_path)
 
-        engine.physics_world.static_world.remove(node_path)
-        engine.physics_world.dynamic_world.remove(node_path)
+        if engine is not None:
+            engine.physics_world.static_world.remove(node_path)
+            engine.physics_world.dynamic_world.remove(node_path)
 
 
 class PhysicsNodeList(list):
