@@ -77,7 +77,8 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
         root_render_np: NodePath,
         physics_world: PhysicsWorld,
         extra_config: Dict = None,
-        no_same_node=True
+        no_same_node=True,
+        attach_to_world=True
     ) -> bool:
         """
         Randomly Construct a block, if overlap return False

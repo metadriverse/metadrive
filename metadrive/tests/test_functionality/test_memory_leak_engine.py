@@ -74,30 +74,30 @@ def test_engine_memory_leak():
     close_engine()
 
     engine = initialize_engine(default_config)
+    try:
+        ct = time.time()
+        last_lm = cm = process_memory()
+        last_mem = 0.0
+        for t in range(500):
+            lt = time.time()
 
-    ct = time.time()
-    last_lm = cm = process_memory()
-    last_mem = 0.0
-    for t in range(500):
-        lt = time.time()
+            engine.seed(0)
 
-        engine.seed(0)
+            engine = get_engine()
 
-        engine = get_engine()
-
-        nlt = time.time()
-        lm = process_memory()
-        # print(
-        #     "After {} Iters, Time {:.3f} Total Time {:.3f}, Memory Usage {:,} Memory Change {:,}".format(
-        #         t + 1, nlt - lt, nlt - ct, lm - cm, lm - last_lm
-        #     )
-        # )
-        last_lm = lm
-        if t > 100:
-            assert abs((lm - cm) - last_mem) < 10  # Memory should not have change > 1KB
-        last_mem = lm - cm
-
-    close_engine()
+            nlt = time.time()
+            lm = process_memory()
+            # print(
+            #     "After {} Iters, Time {:.3f} Total Time {:.3f}, Memory Usage {:,} Memory Change {:,}".format(
+            #         t + 1, nlt - lt, nlt - ct, lm - cm, lm - last_lm
+            #     )
+            # )
+            last_lm = lm
+            if t > 100:
+                assert abs((lm - cm) - last_mem) < 10  # Memory should not have change > 1KB
+            last_mem = lm - cm
+    finally:
+        close_engine()
 
 
 def test_config_memory_leak():

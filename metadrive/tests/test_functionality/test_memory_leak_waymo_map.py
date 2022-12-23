@@ -2,7 +2,7 @@ import time
 
 from metadrive.component.map.waymo_map import WaymoMap
 from metadrive.engine.asset_loader import AssetLoader
-from metadrive.engine.engine_utils import initialize_engine
+from metadrive.engine.engine_utils import initialize_engine, close_engine
 from metadrive.envs.real_data_envs.waymo_env import WaymoEnv
 from metadrive.manager.waymo_data_manager import WaymoDataManager
 from metadrive.tests.test_functionality.test_memory_leak_engine import process_memory
@@ -10,53 +10,64 @@ from metadrive.tests.test_functionality.test_memory_leak_engine import process_m
 
 def test_waymo_env_memory_leak():
     env = WaymoEnv(dict(case_num=2, sequential_seed=True, store_map=True, store_map_buffer_size=1))
-    ct = time.time()
-    cm = process_memory()
-    last_mem = 0.0
-    for t in range(50):
-        lt = time.time()
-        env.reset()
-        nlt = time.time()
-        lm = process_memory()
-        print(
-            "After {} Iters, Time {:.3f} Total Time {:.3f}, Memory Usage {:,}".format(
-                t + 1, nlt - lt, nlt - ct, lm - cm
+
+    try:
+        ct = time.time()
+        cm = process_memory()
+        last_mem = 0.0
+        for t in range(50):
+            lt = time.time()
+            env.reset()
+            nlt = time.time()
+            lm = process_memory()
+            print(
+                "After {} Iters, Time {:.3f} Total Time {:.3f}, Memory Usage {:,}".format(
+                    t + 1, nlt - lt, nlt - ct, lm - cm
+                )
             )
-        )
-        if t > 20:
-            assert abs((lm - cm) - last_mem) < 512 * 1024  # Memory should not have change > 512KB
-        last_mem = lm - cm
+            if t > 20:
+                assert abs((lm - cm) - last_mem) < 512 * 1024  # Memory should not have change > 512KB
+            last_mem = lm - cm
+
+    finally:
+        env.close()
+
 
 
 def test_waymo_map_memory_leak():
     default_config = WaymoEnv.default_config()
     default_config["waymo_data_directory"] = AssetLoader.file_path("waymo", return_raw_style=False)
     default_config["case_num"] = 1
+
     engine = initialize_engine(default_config)
-    engine.data_manager = WaymoDataManager()
 
-    ct = time.time()
-    cm = process_memory()
-    last_mem = 0.0
-    for t in range(1000):
-        lt = time.time()
+    try:
+        engine.data_manager = WaymoDataManager()
 
-        map = WaymoMap(map_index=0)
-        del map
+        ct = time.time()
+        cm = process_memory()
+        last_mem = 0.0
+        for t in range(1000):
+            lt = time.time()
 
-        nlt = time.time()
-        lm = process_memory()
-        print(
-            "After {} Iters, Time {:.3f} Total Time {:.3f}, Memory Usage {:,}".format(
-                t + 1, nlt - lt, nlt - ct, lm - cm
+            map = WaymoMap(map_index=0)
+            del map
+
+            nlt = time.time()
+            lm = process_memory()
+            print(
+                "After {} Iters, Time {:.3f} Total Time {:.3f}, Memory Usage {:,}".format(
+                    t + 1, nlt - lt, nlt - ct, lm - cm
+                )
             )
-        )
-        # if t > 5:
-        #     assert abs((lm - cm) - last_mem) < 1024  # Memory should not have change > 1KB
-        last_mem = lm - cm
+            # if t > 5:
+            #     assert abs((lm - cm) - last_mem) < 1024  # Memory should not have change > 1KB
+            last_mem = lm - cm
 
-    assert lm - cm < 1024 * 1024 * 25, "We expect will cause 18MB memory leak."
+        assert lm - cm < 1024 * 1024 * 25, "We expect will cause 18MB memory leak."
 
+    finally:
+        close_engine()
 
 if __name__ == "__main__":
 
