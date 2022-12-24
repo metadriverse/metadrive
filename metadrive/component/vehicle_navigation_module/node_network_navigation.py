@@ -1,17 +1,16 @@
-from metadrive.component.road_network.node_road_network import NodeRoadNetwork
-from metadrive.utils.scene_utils import ray_localization
-
 import numpy as np
 
-from metadrive.component.pgblock.bottleneck import Merge, Split
-from metadrive.component.pgblock.first_block import FirstPGBlock
 from metadrive.component.lane.circular_lane import CircularLane
 from metadrive.component.lane.straight_lane import StraightLane
 from metadrive.component.map.base_map import BaseMap
+from metadrive.component.pgblock.bottleneck import Merge, Split
+from metadrive.component.pgblock.first_block import FirstPGBlock
 from metadrive.component.road_network import Road
-from metadrive.utils import clip, norm, get_np_random
-from metadrive.utils.space import Parameter, BlockParameterSpace
+from metadrive.component.road_network.node_road_network import NodeRoadNetwork
 from metadrive.component.vehicle_navigation_module.base_navigation import BaseNavigation
+from metadrive.utils import clip, norm, get_np_random
+from metadrive.utils.scene_utils import ray_localization
+from metadrive.utils.space import Parameter, BlockParameterSpace
 
 
 class NodeNetworkNavigation(BaseNavigation):

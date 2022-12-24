@@ -1,7 +1,7 @@
 import logging
-import math
 from collections import namedtuple
 
+import math
 import numpy as np
 from panda3d.bullet import BulletGhostNode, BulletSphereShape
 from panda3d.core import NodePath

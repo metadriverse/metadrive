@@ -6,7 +6,6 @@ from metadrive.component.vehicle_navigation_module.base_navigation import BaseNa
 from metadrive.utils import clip, norm
 from metadrive.utils.scene_utils import ray_localization
 from metadrive.utils.space import Parameter, BlockParameterSpace
-from metadrive.utils.scene_utils import ray_localization
 
 
 class EdgeNetworkNavigation(BaseNavigation):

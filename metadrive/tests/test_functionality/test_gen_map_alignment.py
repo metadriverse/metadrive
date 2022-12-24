@@ -1,5 +1,3 @@
-import pickle
-
 from metadrive.envs.metadrive_env import MetaDriveEnv
 from metadrive.utils import recursive_equal, setup_logger
 

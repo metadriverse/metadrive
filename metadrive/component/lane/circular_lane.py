@@ -1,5 +1,6 @@
-import math
 from typing import Tuple
+
+import math
 
 from metadrive.component.lane.metadrive_lane import MetaDriveLane
 from metadrive.constants import LineType

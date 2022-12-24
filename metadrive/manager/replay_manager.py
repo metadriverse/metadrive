@@ -1,17 +1,18 @@
 import copy
-from metadrive.utils import Config, recursive_equal
-from metadrive.constants import DEFAULT_AGENT
-from metadrive.constants import PolicyState
 import logging
+
 from metadrive.base_class.base_object import BaseObject
 from metadrive.component.map.base_map import BaseMap
 from metadrive.component.map.pg_map import PGMap, MapGenerateMethod
 from metadrive.component.vehicle.base_vehicle import BaseVehicle
 from metadrive.component.vehicle.vehicle_type import DefaultVehicle
+from metadrive.constants import DEFAULT_AGENT
 from metadrive.constants import ObjectState
+from metadrive.constants import PolicyState
 from metadrive.constants import REPLAY_DONE
 from metadrive.manager.base_manager import BaseManager
 from metadrive.obs.state_obs import LidarStateObservation
+from metadrive.utils import recursive_equal
 
 
 class ReplayManager(BaseManager):

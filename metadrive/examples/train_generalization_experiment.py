@@ -10,6 +10,7 @@ import copy
 from typing import Dict
 
 import numpy as np
+
 from metadrive import MetaDriveEnv
 
 try:

@@ -1,6 +1,5 @@
 # import numpy
 import math
-
 from panda3d.bullet import BulletRigidBodyNode, BulletPlaneShape
 from panda3d.core import Vec3, CardMaker, LQuaternionf, TextureStage, Texture, SamplerState
 

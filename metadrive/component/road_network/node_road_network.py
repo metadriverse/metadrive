@@ -2,10 +2,9 @@ import copy
 import logging
 from typing import List, Tuple, Dict
 
-import numpy as np
 from metadrive.component.lane.abs_lane import AbstractLane
-from metadrive.component.road_network.road import Road
 from metadrive.component.road_network.base_road_network import BaseRoadNetwork
+from metadrive.component.road_network.road import Road
 from metadrive.constants import Decoration
 from metadrive.utils.math_utils import get_boxes_bounding_box
 from metadrive.utils.scene_utils import get_lanes_bounding_box

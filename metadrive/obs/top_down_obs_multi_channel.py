@@ -1,7 +1,7 @@
-import math
 from collections import deque
 
 import gym
+import math
 import numpy as np
 
 from metadrive.component.vehicle.base_vehicle import BaseVehicle

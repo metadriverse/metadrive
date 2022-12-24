@@ -1,6 +1,6 @@
-import math
 from typing import Set
 
+import math
 import numpy as np
 from panda3d.bullet import BulletGhostNode, BulletCylinderShape
 from panda3d.core import NodePath
@@ -10,8 +10,8 @@ from metadrive.component.vehicle_module.distance_detector import DistanceDetecto
 from metadrive.constants import CamMask, CollisionGroup
 from metadrive.engine.engine_utils import get_engine
 from metadrive.utils.coordinates_shift import panda_position
-from metadrive.utils.utils import get_object_from_node
 from metadrive.utils.math_utils import norm, clip
+from metadrive.utils.utils import get_object_from_node
 
 
 class Lidar(DistanceDetector):

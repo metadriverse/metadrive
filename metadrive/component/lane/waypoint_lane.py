@@ -1,6 +1,7 @@
 from typing import Tuple, Union
 
 import numpy as np
+
 from metadrive.component.lane.abs_lane import AbstractLane
 from metadrive.constants import LineType
 from metadrive.utils.interpolating_line import InterpolatingLine

@@ -1,18 +1,16 @@
-import logging
 import math
-from metadrive.component.road_network.edge_road_network import EdgeRoadNetwork
-
 import numpy as np
+
 from metadrive.component.block.base_block import BaseBlock
 from metadrive.component.lane.waymo_lane import WaymoLane
+from metadrive.component.road_network.edge_road_network import EdgeRoadNetwork
 from metadrive.constants import DrivableAreaProperty
 from metadrive.constants import LineType, LineColor
 from metadrive.constants import WaymoLaneProperty
+from metadrive.engine.engine_utils import get_engine
 from metadrive.utils.interpolating_line import InterpolatingLine
 from metadrive.utils.math_utils import wrap_to_pi, norm
 from metadrive.utils.waymo_utils.waymo_utils import RoadLineType, RoadEdgeType, convert_polyline_to_metadrive
-
-from metadrive.engine.engine_utils import get_engine
 
 
 class WaymoBlock(BaseBlock):

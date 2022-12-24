@@ -1,13 +1,14 @@
 import logging
 
 import numpy as np
+from panda3d.core import TransparencyAttrib, LineSegs, NodePath
+
 from metadrive.component.map.base_map import BaseMap
 from metadrive.component.pgblock.first_block import FirstPGBlock
 from metadrive.constants import RENDER_MODE_ONSCREEN, CamMask
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.utils import get_np_random
 from metadrive.utils.coordinates_shift import panda_position
-from panda3d.core import TransparencyAttrib, LineSegs, NodePath
 
 
 class BaseNavigation:

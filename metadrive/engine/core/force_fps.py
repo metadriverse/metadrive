@@ -1,6 +1,6 @@
 import time
 
-from metadrive.constants import RENDER_MODE_ONSCREEN, RENDER_MODE_NONE
+from metadrive.constants import RENDER_MODE_ONSCREEN
 
 
 class ForceFPS:

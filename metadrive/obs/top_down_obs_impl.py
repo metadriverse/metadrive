@@ -1,17 +1,4 @@
 from typing import List, Tuple, Union
-import logging
-import math
-from metadrive.component.road_network.edge_road_network import EdgeRoadNetwork
-
-import numpy as np
-from metadrive.component.block.base_block import BaseBlock
-from metadrive.component.lane.waymo_lane import WaymoLane
-from metadrive.constants import DrivableAreaProperty
-from metadrive.constants import LineType, LineColor
-from metadrive.constants import WaymoLaneProperty
-from metadrive.utils.interpolating_line import InterpolatingLine
-from metadrive.utils.math_utils import wrap_to_pi, norm
-from metadrive.utils.waymo_utils.waymo_utils import RoadLineType, RoadEdgeType, convert_polyline_to_metadrive
 
 import numpy as np
 
@@ -19,6 +6,7 @@ from metadrive.component.lane.circular_lane import CircularLane
 from metadrive.component.lane.straight_lane import StraightLane
 from metadrive.constants import LineType, LineColor
 from metadrive.utils.utils import import_pygame
+from metadrive.utils.waymo_utils.waymo_utils import RoadLineType, RoadEdgeType
 
 PositionType = Union[Tuple[float, float], np.ndarray]
 pygame = import_pygame()
