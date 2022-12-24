@@ -84,9 +84,10 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     MAX_WIDTH = 2.5
     MAX_STEERING = 60
 
-    LENGTH = None
-    WIDTH = None
-    HEIGHT = None
+    # LENGTH = None
+    # WIDTH = None
+    # HEIGHT = None
+
     TIRE_RADIUS = None
     LATERAL_TIRE_TO_CENTER = None
     TIRE_WIDTH = 0.4
@@ -529,10 +530,23 @@ class BaseVehicle(BaseObject, BaseVehicleState):
 
     """-------------------------------------- for vehicle making ------------------------------------------"""
 
+    @property
+    def LENGTH(self):
+        raise NotImplementedError()
+
+    @property
+    def HEIGHT(self):
+        raise NotImplementedError()
+
+    @property
+    def WIDTH(self):
+        raise NotImplementedError()
+
     def _create_vehicle_chassis(self):
-        self.LENGTH = type(self).LENGTH
-        self.WIDTH = type(self).WIDTH
-        self.HEIGHT = type(self).HEIGHT
+        # self.LENGTH = type(self).LENGTH
+        # self.WIDTH = type(self).WIDTH
+        # self.HEIGHT = type(self).HEIGHT
+
         assert self.LENGTH < BaseVehicle.MAX_LENGTH, "Vehicle is too large!"
         assert self.WIDTH < BaseVehicle.MAX_WIDTH, "Vehicle is too large!"
 
