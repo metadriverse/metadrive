@@ -1,9 +1,8 @@
 import argparse
 import time
-import gc
 
 import numpy as np
-import gc
+
 from metadrive import MultiAgentRoundaboutEnv
 from metadrive.utils import setup_logger
 

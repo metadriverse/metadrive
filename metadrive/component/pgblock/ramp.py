@@ -1,11 +1,10 @@
 import math
-
 import numpy as np
 
+from metadrive.component.lane.straight_lane import StraightLane
 from metadrive.component.pgblock.create_pg_block_utils import ExtendStraightLane, CreateRoadFrom, CreateAdverseRoad, \
     create_bend_straight
 from metadrive.component.pgblock.pg_block import PGBlock
-from metadrive.component.lane.straight_lane import StraightLane
 from metadrive.component.road_network import Road
 from metadrive.constants import Decoration, LineType
 from metadrive.utils.scene_utils import check_lane_on_road

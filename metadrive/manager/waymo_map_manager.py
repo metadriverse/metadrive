@@ -1,11 +1,9 @@
-from collections import deque
-
 from metadrive.component.lane.waypoint_lane import WayPointLane
-from metadrive.utils.waymo_utils.data_buffer import DataBuffer
 from metadrive.component.map.waymo_map import WaymoMap
 from metadrive.constants import DEFAULT_AGENT
 from metadrive.manager.base_manager import BaseManager
 from metadrive.manager.waymo_traffic_manager import WaymoTrafficManager
+from metadrive.utils.waymo_utils.data_buffer import DataBuffer
 
 
 class WaymoMapManager(BaseManager):

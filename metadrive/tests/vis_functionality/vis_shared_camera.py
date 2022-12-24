@@ -1,5 +1,6 @@
-from metadrive.envs.marl_envs.marl_parking_lot import MultiAgentParkingLotEnv
 import cv2
+
+from metadrive.envs.marl_envs.marl_parking_lot import MultiAgentParkingLotEnv
 
 
 def vis_ma_parking_lot_env():

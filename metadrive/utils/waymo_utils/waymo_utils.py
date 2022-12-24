@@ -1,10 +1,9 @@
-from enum import Enum
 import sys
-from tqdm import tqdm
+from enum import Enum
+
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import figure
-
-from metadrive.engine.asset_loader import AssetLoader
+from tqdm import tqdm
 
 try:
     import tensorflow as tf

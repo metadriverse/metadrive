@@ -1,9 +1,9 @@
 import logging
 
-from metadrive.component.lane.waypoint_lane import WayPointLane, LineType
-from metadrive.utils.math_utils import norm
+from metadrive.component.lane.waypoint_lane import WayPointLane
 from metadrive.constants import WaymoLaneProperty
 from metadrive.engine.asset_loader import AssetLoader
+from metadrive.utils.math_utils import norm
 from metadrive.utils.waymo_utils.waymo_utils import read_waymo_data, convert_polyline_to_metadrive
 
 

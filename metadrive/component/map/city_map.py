@@ -1,5 +1,7 @@
 from typing import Union
 
+from panda3d.core import NodePath
+
 from metadrive.component.algorithm.BIG import BIG
 from metadrive.component.algorithm.blocks_prob_dist import PGBlockDistConfig
 from metadrive.component.map.base_map import BaseMap
@@ -7,7 +9,6 @@ from metadrive.component.pgblock.first_block import FirstPGBlock
 from metadrive.component.pgblock.pg_block import PGBlock
 from metadrive.component.road_network.node_road_network import NodeRoadNetwork
 from metadrive.engine.core.physics_world import PhysicsWorld
-from panda3d.core import NodePath
 
 
 class NextStep:

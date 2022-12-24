@@ -1,18 +1,19 @@
 import time
 from collections import defaultdict
 from typing import Union, Dict, AnyStr, Optional, Tuple
-from metadrive.manager.record_manager import RecordManager
-from metadrive.manager.replay_manager import ReplayManager
+
 import gym
 import numpy as np
 from panda3d.core import PNMImage
 
 from metadrive.component.vehicle.base_vehicle import BaseVehicle
-from metadrive.constants import RENDER_MODE_NONE, DEFAULT_AGENT, REPLAY_DONE
+from metadrive.constants import RENDER_MODE_NONE, DEFAULT_AGENT
 from metadrive.engine.base_engine import BaseEngine
 from metadrive.engine.engine_utils import initialize_engine, close_engine, \
     engine_initialized, set_global_random_seed
 from metadrive.manager.agent_manager import AgentManager
+from metadrive.manager.record_manager import RecordManager
+from metadrive.manager.replay_manager import ReplayManager
 from metadrive.obs.image_obs import ImageStateObservation
 from metadrive.obs.observation_base import ObservationBase
 from metadrive.obs.state_obs import LidarStateObservation

@@ -1,6 +1,6 @@
-import math
 import time
 
+import math
 import numpy as np
 from panda3d.core import NodePath, TextNode, PGTop, CardMaker, Vec3, LQuaternionf
 

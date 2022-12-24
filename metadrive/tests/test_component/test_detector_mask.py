@@ -1,8 +1,8 @@
 import copy
 import logging
-import math
 from collections import defaultdict, namedtuple
 
+import math
 import numpy as np
 
 from metadrive.component.vehicle.base_vehicle import BaseVehicle

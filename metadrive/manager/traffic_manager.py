@@ -1,10 +1,11 @@
 import copy
 import logging
-import math
 from collections import namedtuple
 from typing import Dict
 
+import math
 import numpy as np
+
 from metadrive.component.lane.abs_lane import AbstractLane
 from metadrive.component.map.base_map import BaseMap
 from metadrive.component.road_network import Road

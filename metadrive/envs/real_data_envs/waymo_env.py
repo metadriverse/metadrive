@@ -1,15 +1,17 @@
 import logging
-from metadrive.manager.waymo_idm_traffic_manager import WaymoIDMTrafficManager
-from metadrive.obs.state_obs import LidarStateObservation
+
 import gym
 import numpy as np
+
 from metadrive.component.vehicle_navigation_module.trajectory_navigation import WaymoTrajectoryNavigation
 from metadrive.constants import TerminationState
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.envs.base_env import BaseEnv
 from metadrive.manager.waymo_data_manager import WaymoDataManager
+from metadrive.manager.waymo_idm_traffic_manager import WaymoIDMTrafficManager
 from metadrive.manager.waymo_map_manager import WaymoMapManager
 from metadrive.manager.waymo_traffic_manager import WaymoTrafficManager
+from metadrive.obs.state_obs import LidarStateObservation
 from metadrive.policy.idm_policy import WaymoIDMPolicy
 from metadrive.utils import clip
 from metadrive.utils import get_np_random

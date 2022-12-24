@@ -1,5 +1,4 @@
 import math
-
 import numpy as np
 
 from metadrive.utils.math_utils import norm

@@ -1,8 +1,8 @@
-import logging
+import pickle
+
 from tqdm import tqdm
 
 from metadrive.component.map.pg_map import PGMap, MapGenerateMethod
-import pickle
 from metadrive.manager.base_manager import BaseManager
 from metadrive.utils.utils import get_time_str
 

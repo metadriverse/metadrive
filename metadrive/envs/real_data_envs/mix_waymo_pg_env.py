@@ -1,19 +1,20 @@
-from typing import Union
 from collections import defaultdict
-from metadrive.envs.metadrive_env import MetaDriveEnv
-from metadrive.component.pgblock.first_block import FirstPGBlock
+from typing import Union
+
 from metadrive.component.map.base_map import BaseMap
 from metadrive.component.map.pg_map import MapGenerateMethod
+from metadrive.component.pgblock.first_block import FirstPGBlock
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.engine.engine_utils import engine_initialized
+from metadrive.envs.metadrive_env import MetaDriveEnv
 from metadrive.envs.real_data_envs.waymo_env import WaymoEnv
 from metadrive.manager.map_manager import PGMapManager
 from metadrive.manager.traffic_manager import PGTrafficManager
 from metadrive.manager.traffic_manager import TrafficMode
+from metadrive.manager.waymo_data_manager import WaymoDataManager
 from metadrive.manager.waymo_map_manager import WaymoMapManager
 from metadrive.manager.waymo_traffic_manager import WaymoTrafficManager
-from metadrive.manager.waymo_data_manager import WaymoDataManager
-from metadrive.utils import Config, merge_dicts, get_np_random, concat_step_infos
+from metadrive.utils import get_np_random
 
 MIX_WAYMO_PG_ENV_CONFIG = dict(
     # ===== Waymo Map Config =====

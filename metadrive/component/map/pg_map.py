@@ -1,14 +1,14 @@
-from typing import List
 import copy
+from typing import List
+
+from panda3d.core import NodePath
 
 from metadrive.component.algorithm.BIG import BigGenerateMethod, BIG
-from metadrive.component.algorithm.blocks_prob_dist import PGBlockDistConfig
 from metadrive.component.map.base_map import BaseMap
 from metadrive.component.pgblock.first_block import FirstPGBlock
 from metadrive.component.road_network.node_road_network import NodeRoadNetwork
 from metadrive.engine.core.physics_world import PhysicsWorld
 from metadrive.utils import Config
-from panda3d.core import NodePath
 
 
 def parse_map_config(easy_map_config, new_map_config, default_config):
