@@ -153,3 +153,46 @@ vehicle_type = {
 def random_vehicle_type(np_random, p=None):
     prob = [1 / len(vehicle_type) for _ in range(len(vehicle_type))] if p is None else p
     return vehicle_type[np_random.choice(list(vehicle_type.keys()), p=prob)]
+
+
+class VaryingShapeVehicle(DefaultVehicle):
+    @property
+    def WIDTH(self):
+        return self.config["width"] if self.config["width"] is not None else super(VaryingShapeVehicle, self).WIDTH
+
+    @property
+    def LENGTH(self):
+        return self.config["length"] if self.config["length"] is not None else super(VaryingShapeVehicle, self).LENGTH
+
+    @property
+    def HEIGHT(self):
+        return self.config["height"] if self.config["height"] is not None else super(VaryingShapeVehicle, self).HEIGHT
+
+    def reset(
+        self,
+        random_seed=None,
+        vehicle_config=None,
+        position=None,
+        heading: float = 0.0,  # In degree!
+        *args,
+        **kwargs
+    ):
+
+        assert "width" not in self.PARAMETER_SPACE
+        assert "height" not in self.PARAMETER_SPACE
+        assert "length" not in self.PARAMETER_SPACE
+        should_force_reset = False
+        if vehicle_config is not None:
+            if vehicle_config["width"] is not None and vehicle_config["width"] != self.WIDTH:
+                should_force_reset = True
+            if vehicle_config["height"] is not None and vehicle_config["height"] != self.HEIGHT:
+                should_force_reset = True
+            if vehicle_config["length"] is not None and vehicle_config["length"] != self.LENGTH:
+                should_force_reset = True
+        if should_force_reset:
+            self.destroy()
+            self.__init__(vehicle_config=vehicle_config, name=self.name, random_seed=self.random_seed)
+
+        return super(VaryingShapeVehicle, self).reset(
+            random_seed=random_seed, vehicle_config=vehicle_config, position=position, heading=heading, *args, **kwargs
+        )

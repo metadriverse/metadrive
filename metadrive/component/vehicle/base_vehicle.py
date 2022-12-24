@@ -339,6 +339,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         else, vehicle will be reset to spawn place
         """
         if random_seed is not None:
+            assert isinstance(random_seed, int)
             self.seed(random_seed)
             self.sample_parameters()
         if vehicle_config is not None:
@@ -547,8 +548,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         # self.WIDTH = type(self).WIDTH
         # self.HEIGHT = type(self).HEIGHT
 
-        assert self.LENGTH < BaseVehicle.MAX_LENGTH, "Vehicle is too large!"
-        assert self.WIDTH < BaseVehicle.MAX_WIDTH, "Vehicle is too large!"
+        # assert self.LENGTH < BaseVehicle.MAX_LENGTH, "Vehicle is too large!"
+        # assert self.WIDTH < BaseVehicle.MAX_WIDTH, "Vehicle is too large!"
 
         chassis = BaseRigidBodyNode(self.name, BodyName.Vehicle)
         self._node_path_list.append(chassis)
