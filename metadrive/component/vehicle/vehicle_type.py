@@ -185,13 +185,16 @@ class VaryingShapeVehicle(DefaultVehicle):
         if vehicle_config is not None:
             if vehicle_config["width"] is not None and vehicle_config["width"] != self.WIDTH:
                 should_force_reset = True
-            if vehicle_config["height"] is not None and vehicle_config["height"] != self.HEIGHT:
+            if vehicle_config["height"] is not None and vehicle_config["height"] !=  self.HEIGHT:
                 should_force_reset = True
             if vehicle_config["length"] is not None and vehicle_config["length"] != self.LENGTH:
                 should_force_reset = True
         if should_force_reset:
             self.destroy()
-            self.__init__(vehicle_config=vehicle_config, name=self.name, random_seed=self.random_seed)
+            self.__init__(
+                vehicle_config=vehicle_config, name=self.name, random_seed=self.random_seed,
+                position=position, heading=heading
+            )
 
         return super(VaryingShapeVehicle, self).reset(
             random_seed=random_seed, vehicle_config=vehicle_config, position=position, heading=heading, *args, **kwargs
