@@ -269,8 +269,8 @@ class BaseEngine(EngineCore, Randomizable):
                 current_track_vehicle = vehicles[0]
                 self.main_camera.set_follow_lane(self.global_config["use_chase_camera_follow_lane"])
                 self.main_camera.track(current_track_vehicle)
-                if self.global_config["is_multi_agent"]:
-                    self.main_camera.stop_track(bird_view_on_current_position=False)
+                # if self.global_config["is_multi_agent"]:
+                #     self.main_camera.stop_track(bird_view_on_current_position=False)
         self.taskMgr.step()
 
     def before_step(self, external_actions: Dict[AnyStr, np.array]):

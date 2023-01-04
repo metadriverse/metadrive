@@ -84,7 +84,7 @@ if __name__ == "__main__":
                 #     continue
                 # else:
                 #     break
-    except:
-        pass
+    except Exception as e:
+        raise e
     finally:
         env.close()

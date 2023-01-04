@@ -17,6 +17,7 @@ class Interface:
     ARROW_COLOR = COLLISION_INFO_COLOR["green"][1]
 
     def __init__(self, base_engine):
+        self._node_path_list = []
         self.engine = base_engine
         self.vehicle_panel = None
         self.right_panel = None
@@ -33,8 +34,6 @@ class Interface:
         self.need_interface = self.need_interface and base_engine.global_config["show_interface"]
         self.init_interface()
         self._is_showing_arrow = True  # store the state of navigation mark
-
-        self._node_path_list = []
 
     def after_step(self):
         if self.engine.current_track_vehicle is not None and self.need_interface:
