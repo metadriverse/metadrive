@@ -396,7 +396,10 @@ class BaseEngine(EngineCore, Randomizable):
         if self.replay_episode:
             return self.replay_manager.current_map
         else:
-            return self.map_manager.current_map
+            if hasattr(self, "map_manager"):
+                return self.map_manager.current_map
+            else:
+                return None
 
     @property
     def current_track_vehicle(self):
