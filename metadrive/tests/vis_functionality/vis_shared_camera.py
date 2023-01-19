@@ -1,9 +1,8 @@
-import cv2
-
 from metadrive.envs.marl_envs.marl_parking_lot import MultiAgentParkingLotEnv
 
 
 def vis_ma_parking_lot_env():
+    import cv2
     env = MultiAgentParkingLotEnv(
         {
             "use_render": False,
