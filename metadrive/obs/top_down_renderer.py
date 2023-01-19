@@ -2,7 +2,6 @@ import copy
 from collections import deque, namedtuple
 from typing import Optional, Union, Iterable
 
-import cv2
 import numpy as np
 
 from metadrive.component.map.waymo_map import WaymoMap
@@ -30,6 +29,7 @@ def draw_top_down_map(
     reverse_color=False,
     road_color=color_white
 ) -> Optional[Union[np.ndarray, pygame.Surface]]:
+    import cv2
     film_size = film_size or map.film_size
     surface = WorldSurface(film_size, 0, pygame.Surface(film_size))
     if reverse_color:
