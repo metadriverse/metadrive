@@ -94,7 +94,7 @@ install_requires = [
     "pillow",
     "protobuf==3.20.1",
     "pytest",
-    "opencv-python-headless",
+    "opencv-python",
     "lxml",
     "scipy",
     "psutil"
