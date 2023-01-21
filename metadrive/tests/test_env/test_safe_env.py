@@ -1,8 +1,13 @@
 from metadrive.envs.safe_metadrive_env import SafeMetaDriveEnv
 
 
-def test_safe_env():
-    env = SafeMetaDriveEnv({"environment_num": 100, "start_seed": 75})
+def test_safe_env(vis=False):
+    config = {"environment_num": 100, "start_seed": 75}
+    if vis:
+        config["vehicle_config"] = {"show_line_to_navi_mark": True}
+        config["use_render"] = True
+
+    env = SafeMetaDriveEnv(config)
     try:
         o = env.reset()
         total_cost = 0
@@ -21,4 +26,4 @@ def test_safe_env():
 
 
 if __name__ == '__main__':
-    test_safe_env()
+    test_safe_env(vis=True)
