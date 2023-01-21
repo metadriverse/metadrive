@@ -6,6 +6,8 @@ def test_safe_env(vis=False):
     if vis:
         config["vehicle_config"] = {"show_line_to_navi_mark": True}
         config["use_render"] = True
+        config["manual_control"] = True
+        config["controller"] = "joystick"
 
     env = SafeMetaDriveEnv(config)
     try:
