@@ -147,15 +147,11 @@ class WaymoEnv(BaseEnv):
         super(WaymoEnv, self).setup_engine()
         self.engine.register_manager(
             "data_manager",
-            WaymoDataManager(
-                store_map=self.config["store_map"], store_map_buffer_size=self.config["store_map_buffer_size"]
-            )
+            WaymoDataManager()
         )
         self.engine.register_manager(
             "map_manager",
-            WaymoMapManager(
-                store_map=self.config["store_map"], store_map_buffer_size=self.config["store_map_buffer_size"]
-            )
+            WaymoMapManager()
         )
         if not self.config["no_traffic"]:
             if not self.config['replay']:

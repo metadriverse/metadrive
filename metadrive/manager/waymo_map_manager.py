@@ -9,8 +9,10 @@ from metadrive.utils.waymo_utils.data_buffer import DataBuffer
 class WaymoMapManager(BaseManager):
     PRIORITY = 0  # Map update has the most high priority
 
-    def __init__(self, store_map=False, store_map_buffer_size=200):
+    def __init__(self):
         super(WaymoMapManager, self).__init__()
+        store_map = self.engine.global_config.get("store_map", False)
+        store_map_buffer_size = self.engine.global_config.get("store_map_buffer_size", 200)
         self.current_map = None
         self.map_num = self.engine.global_config["case_num"]
         self.start = self.engine.global_config["start_case_index"]

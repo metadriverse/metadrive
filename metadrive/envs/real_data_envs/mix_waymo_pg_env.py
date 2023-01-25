@@ -1,4 +1,5 @@
 from collections import defaultdict
+from metadrive.component.algorithm.blocks_prob_dist import PGBlockDistConfig
 from typing import Union
 
 from metadrive.component.map.base_map import BaseMap
@@ -18,7 +19,7 @@ from metadrive.utils import get_np_random
 
 MIX_WAYMO_PG_ENV_CONFIG = dict(
     # ===== Waymo Map Config =====
-    waymo_data_directory=AssetLoader.file_path("waymo", "processed", return_raw_style=False),
+    waymo_data_directory=AssetLoader.file_path("waymo", return_raw_style=False),
     start_case_index=0,
     case_num=50,
     store_map=True,
@@ -33,6 +34,7 @@ MIX_WAYMO_PG_ENV_CONFIG = dict(
     # ===== PG Map config =====
     start_seed=0,
     environment_num=50,
+    block_dist_config=PGBlockDistConfig,
 
     # ===== PG Map Config =====
     block_num=1,  # block_num
@@ -62,6 +64,8 @@ MIX_WAYMO_PG_ENV_CONFIG = dict(
 
 
 class MixWaymoPGEnv(WaymoEnv):
+    raise DeprecationWarning("Navigation error exists in this env, fix it")
+
     @classmethod
     def default_config(cls):
         config = super(MixWaymoPGEnv, cls).default_config()
@@ -93,9 +97,7 @@ class MixWaymoPGEnv(WaymoEnv):
 
     def setup_engine(self):
         # Initialize all managers
-        self.waymo_map_manager = WaymoMapManager(
-            store_map=self.config["store_map"], store_map_buffer_size=self.config["store_map_buffer_size"]
-        )
+        self.waymo_map_manager = WaymoMapManager()
         self.waymo_traffic_manager = WaymoTrafficManager()
 
         self.pg_map_manager = PGMapManager()
@@ -107,9 +109,7 @@ class MixWaymoPGEnv(WaymoEnv):
             self.is_current_real_data = True
             self.engine.register_manager(
                 "data_manager",
-                WaymoDataManager(
-                    store_map=self.config["store_map"], store_map_buffer_size=self.config["store_map_buffer_size"]
-                )
+                WaymoDataManager()
             )
             self.engine.register_manager("map_manager", self.waymo_map_manager)
             if not self.config["no_traffic"]:
@@ -177,7 +177,8 @@ class MixWaymoPGEnv(WaymoEnv):
     def _reset_global_seed(self, force_seed=None):
         current_seed = force_seed if force_seed is not None else get_np_random(None).randint(
             self.config["start_case_index"], self.config["start_case_index"] +
-            self.config["case_num"] if self.is_current_real_data else self.config["environment_num"]
+                                             self.config["case_num"] if self.is_current_real_data else self.config[
+                "environment_num"]
         )
         self.seed(current_seed)
 
@@ -228,11 +229,9 @@ if __name__ == "__main__":
         dict(
             manual_control=True,
             use_render=True,
-            waymo_data_directory="E:\\PAMI_waymo_data\\idm_filtered\\validation",
-            # case_num=2,
+            waymo_data_directory=AssetLoader.file_path("waymo", return_raw_style=False),
             # # start_case=32,
-            # environment_num=0
-            # total_case_num=10,
+            total_case_num=10,
             real_data_ratio=0.3
         )
     )
