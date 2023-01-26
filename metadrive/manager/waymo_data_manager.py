@@ -9,10 +9,12 @@ from metadrive.utils.waymo_utils.waymo_utils import read_waymo_data
 
 
 class WaymoDataManager(BaseManager):
+    DEFAULT_DATA_BUFFER_SIZE = 100
+
     def __init__(self):
         super(WaymoDataManager, self).__init__()
         store_map = self.engine.global_config.get("store_map", False)
-        store_map_buffer_size = self.engine.global_config.get("store_map_buffer_size", 100)
+        store_map_buffer_size = self.engine.global_config.get("store_map_buffer_size", self.DEFAULT_DATA_BUFFER_SIZE)
         self.directory = self.engine.global_config["waymo_data_directory"]
         self.case_num = self.engine.global_config["case_num"]
         self.start_case_index = self.engine.global_config["start_case_index"]

@@ -8,7 +8,7 @@ from panda3d.core import Vec3, LQuaternionf, Vec4, TextureStage, RigidBodyCombin
 
 from metadrive.base_class.base_object import BaseObject
 from metadrive.component.lane.abs_lane import AbstractLane
-from metadrive.component.lane.waypoint_lane import PointLane
+from metadrive.component.lane.point_lane import PointLane
 from metadrive.component.road_network.node_road_network import NodeRoadNetwork
 from metadrive.component.road_network.road import Road
 from metadrive.constants import BodyName, CamMask, LineType, LineColor, DrivableAreaProperty

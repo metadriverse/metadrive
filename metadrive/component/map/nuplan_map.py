@@ -1,19 +1,18 @@
 import logging
+from nuplan.common.maps.nuplan_map.nuplan_map import NuPlanMap
 
 from metadrive.component.map.base_map import BaseMap
+from metadrive.component.nuplan_block.nuplan_block import NuPlanBlock
 from metadrive.component.road_network.edge_road_network import EdgeRoadNetwork
-from metadrive.component.waymo_block.waymo_block import WaymoBlock
-from metadrive.engine.asset_loader import AssetLoader
-from metadrive.utils.waymo_utils.waymo_utils import read_waymo_data
 
 
-class WaymoMap(BaseMap):
+class NuPlanMap(BaseMap):
     def __init__(self, map_index, random_seed=None):
         self.map_index = map_index
-        super(WaymoMap, self).__init__(dict(id=self.map_index), random_seed=random_seed)
+        super(NuPlanMap, self).__init__(dict(id=map_index), random_seed=random_seed)
 
     def _generate(self):
-        block = WaymoBlock(0, self.road_network, 0, self.map_index)
+        block = NuPlanBlock(0, self.road_network, 0, self.map_index)
         block.construct_block(self.engine.worldNP, self.engine.physics_world, attach_to_world=True)
         self.blocks.append(block)
 
@@ -25,7 +24,7 @@ class WaymoMap(BaseMap):
             b.detach_from_world(self.engine.physics_world)
 
     @staticmethod
-    def waymo_position(pos):
+    def nuplan_position(pos):
         return pos[0], -pos[1]
 
     @staticmethod
@@ -38,40 +37,28 @@ class WaymoMap(BaseMap):
 
     def destroy(self):
         self.map_index = None
-        super(WaymoMap, self).destroy()
+        super(NuPlanMap, self).destroy()
 
     def __del__(self):
         # self.destroy()
         logging.debug("Map is Released")
-        print("[WaymoMap] Map is Released")
+        print("[NuPlanMap] Map is Released")
 
 
 if __name__ == "__main__":
-    from metadrive.engine.engine_utils import initialize_engine
-    from metadrive.envs.real_data_envs.waymo_env import WaymoEnv
-    from metadrive.utils.waymo_utils.waymo_utils import AgentType
-    from metadrive.utils.waymo_utils.waymo_utils import RoadEdgeType
-    from metadrive.utils.waymo_utils.waymo_utils import RoadLineType
-    from metadrive.manager.waymo_data_manager import WaymoDataManager
+    from metadrive.envs.real_data_envs.nuplan_env import NuPlanEnv
+    from metadrive.manager.nuplan_data_manager import NuPlanDataManager
+    from metadrive.engine.engine_utils import initialize_engine, set_global_random_seed
 
-    # touch these items so that pickle can work
-    _ = AgentType
-    _ = RoadLineType
-    _ = RoadEdgeType
-
-    file_path = AssetLoader.file_path("waymo", "0.pkl", return_raw_style=False)
-    data = read_waymo_data(file_path)
-
-    default_config = WaymoEnv.default_config()
+    default_config = NuPlanEnv.default_config()
     default_config["use_render"] = True
     default_config["debug"] = True
     default_config["debug_static_world"] = True
-    default_config["waymo_data_directory"] = AssetLoader.file_path("waymo", return_raw_style=False)
-    default_config["case_num"] = 1
     engine = initialize_engine(default_config)
+    set_global_random_seed(0)
 
-    engine.data_manager = WaymoDataManager()
-    map = WaymoMap(map_index=0)
+    engine.data_manager = NuPlanDataManager()
+    map = NuPlanMap(map_index=0)
     map.attach_to_world()
     engine.enableMouse()
     map.road_network.show_bounding_box(engine)

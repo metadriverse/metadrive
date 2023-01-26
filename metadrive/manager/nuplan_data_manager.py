@@ -40,8 +40,12 @@ class NuPlanDataManager(BaseManager):
         self._nuplan_scenarios = scenarios
         logger.info("\n \n ############### Finish Loading NuPlan Data ############### \n")
 
-        self.scenario_num = len(self._nuplan_scenarios)
+        self._scenario_num = len(self._nuplan_scenarios)
         self._current_scenario_index = 0
+
+    @property
+    def scenario_num(self):
+        return self._scenario_num
 
     @property
     def current_scenario_index(self):

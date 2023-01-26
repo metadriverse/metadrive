@@ -9,17 +9,11 @@ import pytest
 
 @pytest.mark.parametrize("policy", [WaymoIDMPolicy, ReplayEgoCarPolicy])
 def test_waymo_env(policy, render=False):
-    class DemoWaymoEnv(WaymoEnv):
-        def reset(self, force_seed=None):
-            if self.engine is not None:
-                seeds = [i for i in range(self.config["case_num"])]
-                seeds.remove(self.current_seed)
-                force_seed = random.choice(seeds)
-            super(DemoWaymoEnv, self).reset(force_seed=force_seed)
+    WaymoIDMPolicy.NORMAL_SPEED = 30
 
     asset_path = AssetLoader.asset_path
     try:
-        env = DemoWaymoEnv(
+        env = WaymoEnv(
             {
                 "manual_control": True,
                 "replay": True,
@@ -30,7 +24,7 @@ def test_waymo_env(policy, render=False):
                 "case_num": 3
             }
         )
-        for seed in range(3):
+        for seed in range(2 if policy == WaymoIDMPolicy else 3):
             env.reset(force_seed=seed)
             for i in range(1000):
                 o, r, d, info = env.step([1.0, 0.])

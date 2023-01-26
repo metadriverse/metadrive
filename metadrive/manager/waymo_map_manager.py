@@ -1,4 +1,4 @@
-from metadrive.component.lane.waypoint_lane import PointLane
+from metadrive.component.lane.point_lane import PointLane
 from metadrive.component.map.waymo_map import WaymoMap
 from metadrive.constants import DEFAULT_AGENT
 from metadrive.manager.base_manager import BaseManager
@@ -8,11 +8,12 @@ from metadrive.utils.data_buffer import DataBuffer
 
 class WaymoMapManager(BaseManager):
     PRIORITY = 0  # Map update has the most high priority
+    DEFAULT_DATA_BUFFER_SIZE = 200
 
     def __init__(self):
         super(WaymoMapManager, self).__init__()
         store_map = self.engine.global_config.get("store_map", False)
-        store_map_buffer_size = self.engine.global_config.get("store_map_buffer_size", 200)
+        store_map_buffer_size = self.engine.global_config.get("store_map_buffer_size", self.DEFAULT_DATA_BUFFER_SIZE)
         self.current_map = None
         self.map_num = self.engine.global_config["case_num"]
         self.start = self.engine.global_config["start_case_index"]
