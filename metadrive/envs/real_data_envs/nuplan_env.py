@@ -13,15 +13,17 @@ from metadrive.obs.state_obs import LidarStateObservation
 from metadrive.policy.idm_policy import WaymoIDMPolicy
 from metadrive.utils import clip
 from metadrive.utils import get_np_random
+import os
 
 NUPLAN_ENV_CONFIG = dict(
-    # ===== Map Config =====
-    nuplan_data_directory=AssetLoader.file_path("waymo", return_raw_style=False),
-    start_case_index=0,
-    case_num=100,
-    store_map=True,
-    store_map_buffer_size=2000,
-    sequential_seed=False,  # Whether to set seed (the index of map) sequentially across episodes
+    # ===== Dataset Config =====
+    # These parameters remain the same as the meaning of those in nuplan-devkit
+    DATASET_PARAMS=[
+        'scenario_builder=nuplan_mini',  # use nuplan mini database (2.5h of 8 autolabeled logs in Las Vegas)
+        'scenario_filter=one_continuous_log',  # simulate only one log
+        "scenario_filter.log_names=['2021.07.16.20.45.29_veh-35_01095_01486']",
+        'scenario_filter.limit_total_scenarios=2',  # use 2 total scenarios
+    ],
 
     # ===== Traffic =====
     no_traffic=False,
@@ -39,7 +41,7 @@ NUPLAN_ENV_CONFIG = dict(
         # TODO NAVI
         navigation_module=WaymoTrajectoryNavigation,
     ),
-    #TODO
+    # TODO
     use_waymo_observation=True,
 
     # ===== Reward Scheme =====
@@ -180,8 +182,8 @@ class NuPlanEnv(BaseEnv):
         # for compatibility
         # crash almost equals to crashing with vehicles
         done_info[TerminationState.CRASH] = (
-            done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
-            or done_info[TerminationState.CRASH_BUILDING]
+                done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
+                or done_info[TerminationState.CRASH_BUILDING]
         )
         return done, done_info
 
@@ -287,7 +289,6 @@ if __name__ == "__main__":
             # "no_traffic":True,
             # "start_case_index": 192,
             # "start_case_index": 1000,
-            "case_num": 1,
             # "waymo_data_directory": "E:\\PAMI_waymo_data\\idm_filtered\\test",
             "horizon": 1000,
             "vehicle_config": dict(
@@ -298,7 +299,7 @@ if __name__ == "__main__":
         }
     )
     success = []
-    for i in range(env.config["case_num"]):
+    for i in range(3):
         env.reset(force_seed=i)
         while True:
             o, r, d, info = env.step([0, 0])
