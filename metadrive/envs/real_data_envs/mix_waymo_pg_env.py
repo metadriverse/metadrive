@@ -107,10 +107,7 @@ class MixWaymoPGEnv(WaymoEnv):
         super(WaymoEnv, self).setup_engine()
         if self.real_data_ratio > 0:
             self.is_current_real_data = True
-            self.engine.register_manager(
-                "data_manager",
-                WaymoDataManager()
-            )
+            self.engine.register_manager("data_manager", WaymoDataManager())
             self.engine.register_manager("map_manager", self.waymo_map_manager)
             if not self.config["no_traffic"]:
                 self.engine.register_manager("traffic_manager", self.waymo_traffic_manager)
@@ -177,8 +174,7 @@ class MixWaymoPGEnv(WaymoEnv):
     def _reset_global_seed(self, force_seed=None):
         current_seed = force_seed if force_seed is not None else get_np_random(None).randint(
             self.config["start_case_index"], self.config["start_case_index"] +
-                                             self.config["case_num"] if self.is_current_real_data else self.config[
-                "environment_num"]
+            self.config["case_num"] if self.is_current_real_data else self.config["environment_num"]
         )
         self.seed(current_seed)
 

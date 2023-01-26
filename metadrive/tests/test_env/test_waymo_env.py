@@ -1,10 +1,9 @@
-import argparse
-import random
-from metadrive.policy.replay_policy import ReplayEgoCarPolicy
-from metadrive.policy.idm_policy import WaymoIDMPolicy
+import pytest
+
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.envs.real_data_envs.waymo_env import WaymoEnv
-import pytest
+from metadrive.policy.idm_policy import WaymoIDMPolicy
+from metadrive.policy.replay_policy import ReplayEgoCarPolicy
 
 
 @pytest.mark.parametrize("policy", [WaymoIDMPolicy, ReplayEgoCarPolicy])

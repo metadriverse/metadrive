@@ -75,7 +75,7 @@ class PointLane(AbstractLane, InterpolatingLine):
         self.width = None
         self.forbidden = None
         self.priority = None
-        
+
         self.line_types = None
         self.is_straight = None
         self.start = None

@@ -118,14 +118,8 @@ class NuPlanEnv(BaseEnv):
     def setup_engine(self):
         self.in_stop = False
         super(NuPlanEnv, self).setup_engine()
-        self.engine.register_manager(
-            "data_manager",
-            NuPlanDataManager()
-        )
-        self.engine.register_manager(
-            "map_manager",
-            NuPlanMapManager()
-        )
+        self.engine.register_manager("data_manager", NuPlanDataManager())
+        self.engine.register_manager("map_manager", NuPlanMapManager())
         # TODO Traffic
         # if not self.config["no_traffic"]:
         #     if not self.config['replay']:
@@ -182,8 +176,8 @@ class NuPlanEnv(BaseEnv):
         # for compatibility
         # crash almost equals to crashing with vehicles
         done_info[TerminationState.CRASH] = (
-                done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
-                or done_info[TerminationState.CRASH_BUILDING]
+            done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
+            or done_info[TerminationState.CRASH_BUILDING]
         )
         return done, done_info
 

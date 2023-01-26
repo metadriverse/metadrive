@@ -58,8 +58,9 @@ class NuPlanDataManager(BaseManager):
     def _get_nuplan_cfg(self):
         from tutorials.utils.tutorial_utils import construct_simulation_hydra_paths
 
-        BASE_CONFIG_PATH = os.path.relpath(os.path.join(self.NUPLAN_PACKAGE_PATH, "planning", "script"),
-                                           start=os.path.dirname(__file__))
+        BASE_CONFIG_PATH = os.path.relpath(
+            os.path.join(self.NUPLAN_PACKAGE_PATH, "planning", "script"), start=os.path.dirname(__file__)
+        )
         simulation_hydra_paths = construct_simulation_hydra_paths(BASE_CONFIG_PATH)
 
         # Initialize configuration management system
@@ -73,16 +74,19 @@ class NuPlanDataManager(BaseManager):
         DATASET_PARAMS = self.engine.global_config["DATASET_PARAMS"]
 
         # Compose the configuration
-        cfg = hydra.compose(config_name=simulation_hydra_paths.config_name, overrides=[
-            f'group={SAVE_DIR}',
-            f'experiment_name=planner_tutorial',
-            'worker=sequential',
-            f'ego_controller={EGO_CONTROLLER}',
-            f'observation={OBSERVATION}',
-            f'hydra.searchpath=[{simulation_hydra_paths.common_dir}, {simulation_hydra_paths.experiment_dir}]',
-            'output_dir=${group}/${experiment}',
-            *DATASET_PARAMS,
-        ])
+        cfg = hydra.compose(
+            config_name=simulation_hydra_paths.config_name,
+            overrides=[
+                f'group={SAVE_DIR}',
+                f'experiment_name=planner_tutorial',
+                'worker=sequential',
+                f'ego_controller={EGO_CONTROLLER}',
+                f'observation={OBSERVATION}',
+                f'hydra.searchpath=[{simulation_hydra_paths.common_dir}, {simulation_hydra_paths.experiment_dir}]',
+                'output_dir=${group}/${experiment}',
+                *DATASET_PARAMS,
+            ]
+        )
         return cfg
 
     def get_case(self, index, force_get_current_case=True):
