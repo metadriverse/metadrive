@@ -6,19 +6,17 @@ from metadrive.component.vehicle_navigation_module.trajectory_navigation import 
 from metadrive.constants import TerminationState
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.envs.base_env import BaseEnv
-from metadrive.manager.waymo_data_manager import WaymoDataManager
-from metadrive.manager.waymo_idm_traffic_manager import WaymoIDMTrafficManager
-from metadrive.manager.waymo_map_manager import WaymoMapManager
-from metadrive.manager.waymo_traffic_manager import WaymoTrafficManager
-from metadrive.obs.real_env_observation import WaymoObservation
+from metadrive.obs.real_env_observation import NuPlanObservation
+from metadrive.manager.nuplan_data_manager import NuPlanDataManager
+from metadrive.manager.nuplan_map_manager import NuPlanMapManager
 from metadrive.obs.state_obs import LidarStateObservation
 from metadrive.policy.idm_policy import WaymoIDMPolicy
 from metadrive.utils import clip
 from metadrive.utils import get_np_random
 
-WAYMO_ENV_CONFIG = dict(
+NUPLAN_ENV_CONFIG = dict(
     # ===== Map Config =====
-    waymo_data_directory=AssetLoader.file_path("waymo", return_raw_style=False),
+    nuplan_data_directory=AssetLoader.file_path("waymo", return_raw_style=False),
     start_case_index=0,
     case_num=100,
     store_map=True,
@@ -38,8 +36,10 @@ WAYMO_ENV_CONFIG = dict(
         lane_line_detector=dict(num_lasers=12, distance=50),
         side_detector=dict(num_lasers=120, distance=50),
         show_dest_mark=True,
+        # TODO NAVI
         navigation_module=WaymoTrajectoryNavigation,
     ),
+    #TODO
     use_waymo_observation=True,
 
     # ===== Reward Scheme =====
@@ -64,15 +64,15 @@ WAYMO_ENV_CONFIG = dict(
 )
 
 
-class WaymoEnv(BaseEnv):
+class NuPlanEnv(BaseEnv):
     @classmethod
     def default_config(cls):
-        config = super(WaymoEnv, cls).default_config()
-        config.update(WAYMO_ENV_CONFIG)
+        config = super(NuPlanEnv, cls).default_config()
+        config.update(NUPLAN_ENV_CONFIG)
         return config
 
     def __init__(self, config=None):
-        super(WaymoEnv, self).__init__(config)
+        super(NuPlanEnv, self).__init__(config)
 
     def _merge_extra_config(self, config):
         # config = self.default_config().update(config, allow_add_new_key=True)
@@ -84,7 +84,7 @@ class WaymoEnv(BaseEnv):
 
     def get_single_observation(self, vehicle_config):
         if self.config["use_waymo_observation"]:
-            o = WaymoObservation(vehicle_config)
+            o = NuPlanObservation(vehicle_config)
         else:
             o = LidarStateObservation(vehicle_config)
         return o
@@ -115,20 +115,21 @@ class WaymoEnv(BaseEnv):
 
     def setup_engine(self):
         self.in_stop = False
-        super(WaymoEnv, self).setup_engine()
+        super(NuPlanEnv, self).setup_engine()
         self.engine.register_manager(
             "data_manager",
-            WaymoDataManager()
+            NuPlanDataManager()
         )
         self.engine.register_manager(
             "map_manager",
-            WaymoMapManager()
+            NuPlanMapManager()
         )
-        if not self.config["no_traffic"]:
-            if not self.config['replay']:
-                self.engine.register_manager("traffic_manager", WaymoIDMTrafficManager())
-            else:
-                self.engine.register_manager("traffic_manager", WaymoTrafficManager())
+        # TODO Traffic
+        # if not self.config["no_traffic"]:
+        #     if not self.config['replay']:
+        #         self.engine.register_manager("traffic_manager", WaymoIDMTrafficManager())
+        #     else:
+        #         self.engine.register_manager("traffic_manager", WaymoTrafficManager())
         self.engine.accept("p", self.stop)
         self.engine.accept("q", self.switch_to_third_person_view)
         self.engine.accept("b", self.switch_to_top_down_view)
@@ -142,7 +143,7 @@ class WaymoEnv(BaseEnv):
         self.reset(self.current_seed - 1)
 
     def step(self, actions):
-        ret = super(WaymoEnv, self).step(actions)
+        ret = super(NuPlanEnv, self).step(actions)
         while self.in_stop:
             self.engine.taskMgr.step()
         return ret
@@ -275,7 +276,7 @@ class WaymoEnv(BaseEnv):
 
 
 if __name__ == "__main__":
-    env = WaymoEnv(
+    env = NuPlanEnv(
         {
             "use_render": True,
             "agent_policy": WaymoIDMPolicy,
