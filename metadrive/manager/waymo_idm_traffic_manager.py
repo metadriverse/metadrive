@@ -3,7 +3,7 @@ from collections import namedtuple, OrderedDict
 
 import numpy as np
 
-from metadrive.component.lane.waymo_lane import WayPointLane
+from metadrive.component.lane.waymo_lane import PointLane
 from metadrive.component.vehicle.vehicle_type import SVehicle
 from metadrive.manager.waymo_traffic_manager import WaymoTrafficManager
 from metadrive.policy.idm_policy import WaymoIDMPolicy
@@ -58,7 +58,7 @@ class WaymoIDMTrafficManager(WaymoTrafficManager):
                             full_traj = static_vehicle_info(init_info["position"], init_info["heading"])
                             static = True
                         else:
-                            full_traj = WayPointLane(full_traj, width=self.TRAJ_WIDTH)
+                            full_traj = PointLane(full_traj, width=self.TRAJ_WIDTH)
                             static = False
                     traffic_traj_data[v_id] = {
                         "traj": full_traj,

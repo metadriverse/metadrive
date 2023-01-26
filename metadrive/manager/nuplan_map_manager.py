@@ -1,4 +1,10 @@
 from metadrive.manager.base_manager import BaseManager
+from metadrive.component.lane.waypoint_lane import PointLane
+from metadrive.component.map.waymo_map import WaymoMap
+from metadrive.constants import DEFAULT_AGENT
+from metadrive.manager.base_manager import BaseManager
+from metadrive.manager.waymo_traffic_manager import WaymoTrafficManager
+from metadrive.utils.data_buffer import DataBuffer
 
 
 class NuPlanMapManager(BaseManager):
@@ -80,7 +86,7 @@ class NuPlanMapManager(BaseManager):
         data = self.engine.data_manager.get_case(self.engine.global_random_seed)
 
         sdc_traj = WaymoTrafficManager.parse_full_trajectory(data["tracks"][data["sdc_index"]]["state"])
-        self.current_sdc_route = WayPointLane(sdc_traj, 1.5)
+        self.current_sdc_route = PointLane(sdc_traj, 1.5)
         init_state = WaymoTrafficManager.parse_vehicle_state(
             data["tracks"][data["sdc_index"]]["state"],
             self.engine.global_config["traj_start_index"],
