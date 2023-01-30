@@ -57,4 +57,5 @@ class WaymoDataManager(BaseManager):
             # print("{}:  Reset! Mem Change {:.3f}MB".format("data manager 2", (lm - cm) / 1e6))
             # cm = lm
 
-        return copy.deepcopy(self.waymo_case[i])
+        # return copy.deepcopy(self.waymo_case[i])
+        return self.waymo_case[i]
