@@ -66,6 +66,7 @@ BASE_DEFAULT_CONFIG = dict(
         random_navi_mark_color=False,
         show_dest_mark=False,
         show_line_to_dest=False,
+        show_line_to_navi_mark=False,
         use_special_color=False,
 
         # ===== use image =====
@@ -200,6 +201,7 @@ class BaseEnv(gym.Env):
         self.dones = None
         self.episode_rewards = defaultdict(float)
         self.episode_lengths = defaultdict(int)
+        self.total_steps = 0
 
     def _merge_extra_config(self, config: Union[dict, "Config"]) -> "Config":
         """Check, update, sync and overwrite some config."""
@@ -256,6 +258,7 @@ class BaseEnv(gym.Env):
         actions = self._preprocess_actions(actions)
         engine_info = self._step_simulator(actions)
         o, r, d, i = self._get_step_return(actions, engine_info=engine_info)
+        self.total_steps += 1
         return o, r, d, i
 
     def _preprocess_actions(self, actions: Union[np.ndarray, Dict[AnyStr, np.ndarray]]) \

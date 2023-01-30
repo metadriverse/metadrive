@@ -25,7 +25,7 @@ class ManualControlPolicy(EnvInputPolicy):
         if config["manual_control"]:
             if config["controller"] == "keyboard":
                 self.controller = KeyboardController(pygame_control=pygame_control)
-            elif config["controller"] in ["xboxController", "xboxcontroller", "xbox"]:
+            elif config["controller"] in ["xboxController", "xboxcontroller", "xbox", "joystick"]:
                 try:
                     if config["controller"] == "joystick":
                         self.controller = SteeringWheelController()
