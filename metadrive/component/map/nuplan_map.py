@@ -50,8 +50,8 @@ if __name__ == "__main__":
 
     default_config = NuPlanEnv.default_config()
     default_config["use_render"] = True
-    default_config["debug"] = False
-    default_config["debug_static_world"] = False
+    default_config["debug"] = True
+    default_config["debug_static_world"] = True
     engine = initialize_engine(default_config)
     set_global_random_seed(0)
 

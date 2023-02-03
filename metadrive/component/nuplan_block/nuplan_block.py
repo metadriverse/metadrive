@@ -1,4 +1,5 @@
 import math
+from nuplan.common.maps.nuplan_map.lane_connector import NuPlanLaneConnector
 
 import numpy as np
 from nuplan.common.maps.maps_datatypes import SemanticMapLayer, StopLineType
@@ -13,7 +14,17 @@ from metadrive.constants import LineType
 from metadrive.engine.engine_utils import get_engine
 from metadrive.utils.interpolating_line import InterpolatingLine
 from metadrive.utils.math_utils import wrap_to_pi, norm
+from dataclasses import dataclass
 from metadrive.utils.waymo_utils.waymo_utils import convert_polyline_to_metadrive
+from metadrive.constants import LineColor, LineType
+
+
+@dataclass
+class LaneLineProperty:
+    points: list
+    color: LineColor
+    type: LineType
+    in_road_connector: bool
 
 
 class NuPlanBlock(BaseBlock):
@@ -27,7 +38,7 @@ class NuPlanBlock(BaseBlock):
         self.engine = get_engine()
         self._nuplan_map_api = self.engine.data_manager.get_case(self.map_index).map_api
         # TODO LQY, make it a dict
-        self.lines = []
+        self.lines = {}
 
     @property
     def map_api(self):
@@ -48,6 +59,10 @@ class NuPlanBlock(BaseBlock):
             SemanticMapLayer.CARPARK_AREA,
             SemanticMapLayer.ROADBLOCK,
             SemanticMapLayer.ROADBLOCK_CONNECTOR,
+
+            # unsupported yet
+            # SemanticMapLayer.STOP_SIGN,
+            # SemanticMapLayer.DRIVABLE_AREA,
         ]
 
         center = self.engine.data_manager.get_case(self.map_index).get_ego_state_at_iteration(0).center.point
@@ -60,31 +75,15 @@ class NuPlanBlock(BaseBlock):
                 stop_polygon for stop_polygon in stop_polygons if stop_polygon.stop_line_type != StopLineType.TURN_STOP
             ]
 
-        # Draw polygons
-        polygon_layer_names = [
-            SemanticMapLayer.LANE,
-            SemanticMapLayer.LANE_CONNECTOR,
-            SemanticMapLayer.INTERSECTION,
-            SemanticMapLayer.STOP_LINE,
-            SemanticMapLayer.CROSSWALK,
-            SemanticMapLayer.WALKWAYS,
-            SemanticMapLayer.CARPARK_AREA,
-        ]
-
-        line_layer_names = [
-            SemanticMapLayer.LANE,
-            SemanticMapLayer.LANE_CONNECTOR
-        ]
-        for layer_name in polygon_layer_names:
-            layer = nearest_vector_map[layer_name]
-            for map_obj in layer:
-                if hasattr(map_obj, "baseline_path"):
-                    center_line = self._extract_centerline(map_obj)
-                    # TODO (LQY) maybe using convexhull to build the collision shape in the future
-                    self.block_network.add_lane(NuPlanLane(map_obj.id, center_line, width=5, lane_meta_data=map_obj))
-                if layer_name in line_layer_names:
-                    self.lines.append(self._extract_lane_line(map_obj.right_boundary))
-                    self.lines.append(self._extract_lane_line(map_obj.left_boundary))
+        for layer in [SemanticMapLayer.ROADBLOCK, SemanticMapLayer.ROADBLOCK_CONNECTOR]:
+            for block in nearest_vector_map[layer]:
+                for lane in block.interior_edges:
+                    if hasattr(lane, "baseline_path"):
+                        center_line = self._extract_centerline(lane)
+                        # TODO (LQY) maybe using convexhull to build the collision shape in the future
+                        self.block_network.add_lane(NuPlanLane(lane.id, center_line, width=5, lane_meta_data=lane))
+                        is_connector = True if layer == SemanticMapLayer.ROADBLOCK_CONNECTOR else False
+                        self._get_lane_line(lane, is_road_connector=is_connector)
 
         return True
 
@@ -98,47 +97,18 @@ class NuPlanBlock(BaseBlock):
             lane.construct_lane_in_block(self, lane_index=id)
             # lane.construct_lane_line_in_block(self, [True if len(lane.left_lanes) == 0 else False,
             #                                          True if len(lane.right_lanes) == 0 else False, ])
-        for line in self.lines:
-            self.construct_nuplan_continuous_line(
-                line,
-                LineColor.GREY
-            )
-        # draw line
-        # for lane_id, data in self.nuplan_map_data.items():
-        #     type = data.get("type", None)
-        #     if RoadLineType.is_road_line(type):
-        #         if len(data[NuPlanLaneProperty.POLYLINE]) <= 1:
-        #             continue
-        #         if RoadLineType.is_broken(type):
-        #             self.construct_nuplan_broken_line(
-        #                 convert_polyline_to_metadrive(data[NuPlanLaneProperty.POLYLINE]),
-        #                 LineColor.YELLOW if RoadLineType.is_yellow(type) else LineColor.GREY
-        #             )
-        #         else:
-        #             self.construct_nuplan_continuous_line(
-        #                 convert_polyline_to_metadrive(data[NuPlanLaneProperty.POLYLINE]),
-        #                 LineColor.YELLOW if RoadLineType.is_yellow(type) else LineColor.GREY
-        #             )
-        #     elif RoadEdgeType.is_road_edge(type) and RoadEdgeType.is_sidewalk(type):
-        #         self.construct_nuplan_sidewalk(convert_polyline_to_metadrive(data[NuPlanLaneProperty.POLYLINE]))
-        #     elif RoadEdgeType.is_road_edge(type) and not RoadEdgeType.is_sidewalk(type):
-        #         self.construct_nuplan_continuous_line(
-        #             convert_polyline_to_metadrive(data[NuPlanLaneProperty.POLYLINE]), LineColor.GREY
-        #         )
-        #     elif type == "center_lane" or type is None:
-        #         continue
-        #     # else:
-        #     raise ValueError("Can not build lane line type: {}".format(type))
+        for line_prop in self.lines.values():
+            if line_prop.type == LineType.CONTINUOUS:
+                self.construct_nuplan_continuous_line(
+                    line_prop.points,
+                    line_prop.color)
+            if line_prop.type == LineType.BROKEN:
+                self.construct_nuplan_broken_line(
+                    line_prop.points,
+                    line_prop.color)
 
     def construct_nuplan_continuous_line(self, polyline, color):
-        line = InterpolatingLine(polyline)
-        segment_num = int(line.length / DrivableAreaProperty.STRIPE_LENGTH)
-        for segment in range(segment_num):
-            start = line.get_point(DrivableAreaProperty.STRIPE_LENGTH * segment)
-            if segment == segment_num - 1:
-                end = line.get_point(line.length)
-            else:
-                end = line.get_point((segment + 1) * DrivableAreaProperty.STRIPE_LENGTH)
+        for start, end, in zip(polyline[:-1], polyline[1:]):
             node_path_list = NuPlanLane.construct_lane_line_segment(self, start, end, color, LineType.CONTINUOUS)
             self._node_path_list.extend(node_path_list)
 
@@ -205,13 +175,39 @@ class NuPlanBlock(BaseBlock):
     #     return e.data_manager.get_case(self.map_index)["map"]
 
     def _extract_centerline(self, map_obj):
-        # TODO (LQY) Remove the offset, which is for debug
         path = map_obj.baseline_path.discrete_path
         points = [np.array([pose.x, pose.y]) for pose in path]
         return points
 
-    def _extract_lane_line(self, boundary):
-        # TODO (LQY) Remove the offset, which is for debug
-        path = boundary.discrete_path
-        points = [np.array([pose.x, pose.y]) for pose in path]
-        return points
+    def _get_lane_line(self, lane, is_road_connector):
+        def _get_points(boundary):
+            path = boundary.discrete_path
+            points = [np.array([pose.x, pose.y]) for pose in path]
+            return points
+
+        if not is_road_connector:
+            right = lane.right_boundary
+            if right.id not in self.lines:
+                line_type = LineType.CONTINUOUS if lane.adjacent_edges[-1] is None else LineType.BROKEN
+                self.lines[right.id] = LaneLineProperty(_get_points(right), LineColor.GREY, line_type,
+                                                        in_road_connector=is_road_connector)
+
+            left = lane.left_boundary
+            if left.id not in self.lines:
+                line_type = LineType.CONTINUOUS if lane.adjacent_edges[0] is None else LineType.BROKEN
+                line_color = LineColor.YELLOW if lane.adjacent_edges[0] is None and lane.adjacent_edges[
+                    1] is not None else LineColor.GREY
+                self.lines[left.id] = LaneLineProperty(_get_points(left), line_color, line_type,
+                                                       in_road_connector=is_road_connector)
+        # else:
+        #     right: NuPlanLaneConnector = lane.right_boundary
+        # left: NuPlanLaneConnector = lane.left_boundary
+        # if left.id not in self.lines:
+        #     if lane.incoming_edges[0].adjacent_edges[0] is None or lane.outgoing_edges[0].adjacent_edges[0] is None:
+        #         self.lines[left.id] = LaneLineProperty(_get_points(left), LineColor.YELLOW, LineType.CONTINUOUS,
+        #                                                in_road_connector=is_road_connector)
+        # if right.id not in self.lines:
+        #     if lane.incoming_edges[-1].adjacent_edges[-1] is None \
+        #             or lane.outgoing_edges[-1].adjacent_edges[-1] is None:
+        #         self.lines[right.id] = LaneLineProperty(_get_points(right), LineColor.GREY, LineType.CONTINUOUS,
+        #                                                 in_road_connector=is_road_connector)
