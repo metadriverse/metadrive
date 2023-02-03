@@ -1,56 +1,23 @@
 import math
-import numpy as np
-import json
-import logging
-import lzma
-import pathlib
-import pickle
-from concurrent.futures import ThreadPoolExecutor
-from functools import partial
-from pathlib import Path
-from typing import Any, Dict, List, Optional
 
-import cv2
-import msgpack
 import numpy as np
-from bokeh.document import without_document_lock
-from bokeh.document.document import Document
-from bokeh.events import PointEvent
-from bokeh.io.export import get_screenshot_as_png
-from bokeh.layouts import column, gridplot
-from bokeh.models import Button, ColumnDataSource, Slider, Title
-from bokeh.plotting.figure import Figure
-from selenium import webdriver
-from tornado import gen
-from tqdm import tqdm
-
-from nuplan.common.actor_state.ego_state import EgoState
-from nuplan.common.actor_state.state_representation import Point2D
-from nuplan.common.actor_state.vehicle_parameters import VehicleParameters
-from nuplan.common.maps.abstract_map import AbstractMap
-from nuplan.common.maps.abstract_map_factory import AbstractMapFactory
 from nuplan.common.maps.maps_datatypes import SemanticMapLayer, StopLineType
-from nuplan.planning.nuboard.base.data_class import SimulationScenarioKey
-from nuplan.planning.nuboard.base.experiment_file_data import ExperimentFileData
-from nuplan.planning.nuboard.base.plot_data import MapPoint, SimulationData, SimulationFigure
-from nuplan.planning.nuboard.style import simulation_map_layer_color, simulation_tile_style
-from nuplan.planning.simulation.simulation_log import SimulationLog
+from nuplan.planning.nuboard.style import simulation_map_layer_color
+
 from metadrive.component.block.base_block import BaseBlock
 from metadrive.component.lane.nuplan_lane import NuPlanLane
 from metadrive.component.road_network.edge_road_network import EdgeRoadNetwork
 from metadrive.constants import DrivableAreaProperty
-from metadrive.constants import LineType, LineColor
-from metadrive.constants import NuPlanLaneProperty
+from metadrive.constants import LineColor
+from metadrive.constants import LineType
 from metadrive.engine.engine_utils import get_engine
 from metadrive.utils.interpolating_line import InterpolatingLine
 from metadrive.utils.math_utils import wrap_to_pi, norm
-
-# TODO rename?
-from metadrive.utils.waymo_utils.waymo_utils import RoadLineType, RoadEdgeType, convert_polyline_to_metadrive
+from metadrive.utils.waymo_utils.waymo_utils import convert_polyline_to_metadrive
 
 
 class NuPlanBlock(BaseBlock):
-    _radius = 500  # [m] show 500m map
+    _radius = 200  # [m] show 500m map
 
     def __init__(self, block_index: int, global_network, random_seed, map_index):
         self.map_index = map_index
@@ -59,6 +26,8 @@ class NuPlanBlock(BaseBlock):
         # authorize engine access for this object
         self.engine = get_engine()
         self._nuplan_map_api = self.engine.data_manager.get_case(self.map_index).map_api
+        # TODO LQY, make it a dict
+        self.lines = []
 
     @property
     def map_api(self):
@@ -77,6 +46,8 @@ class NuPlanBlock(BaseBlock):
             SemanticMapLayer.STOP_LINE,
             SemanticMapLayer.WALKWAYS,
             SemanticMapLayer.CARPARK_AREA,
+            SemanticMapLayer.ROADBLOCK,
+            SemanticMapLayer.ROADBLOCK_CONNECTOR,
         ]
 
         center = self.engine.data_manager.get_case(self.map_index).get_ego_state_at_iteration(0).center.point
@@ -91,35 +62,29 @@ class NuPlanBlock(BaseBlock):
 
         # Draw polygons
         polygon_layer_names = [
-            (SemanticMapLayer.LANE, simulation_map_layer_color[SemanticMapLayer.LANE]),
-            (SemanticMapLayer.INTERSECTION, simulation_map_layer_color[SemanticMapLayer.INTERSECTION]),
-            (SemanticMapLayer.STOP_LINE, simulation_map_layer_color[SemanticMapLayer.STOP_LINE]),
-            (SemanticMapLayer.CROSSWALK, simulation_map_layer_color[SemanticMapLayer.CROSSWALK]),
-            (SemanticMapLayer.WALKWAYS, simulation_map_layer_color[SemanticMapLayer.WALKWAYS]),
-            (SemanticMapLayer.CARPARK_AREA, simulation_map_layer_color[SemanticMapLayer.CARPARK_AREA]),
+            SemanticMapLayer.LANE,
+            SemanticMapLayer.LANE_CONNECTOR,
+            SemanticMapLayer.INTERSECTION,
+            SemanticMapLayer.STOP_LINE,
+            SemanticMapLayer.CROSSWALK,
+            SemanticMapLayer.WALKWAYS,
+            SemanticMapLayer.CARPARK_AREA,
         ]
 
-        for layer_name, color in polygon_layer_names:
-            layer = nearest_vector_map[layer_name]
-            for map_obj in layer:
-                # draw me
-                pass
-
-        # Draw lines
         line_layer_names = [
-            (SemanticMapLayer.LANE, simulation_map_layer_color[SemanticMapLayer.BASELINE_PATHS]),
-            (SemanticMapLayer.LANE_CONNECTOR, simulation_map_layer_color[SemanticMapLayer.LANE_CONNECTOR]),
+            SemanticMapLayer.LANE,
+            SemanticMapLayer.LANE_CONNECTOR
         ]
-        for layer_name, color in line_layer_names:
+        for layer_name in polygon_layer_names:
             layer = nearest_vector_map[layer_name]
             for map_obj in layer:
-                pass
-                # Draw me
-
-        # main_figure.lane_connectors = {
-        #     lane_connector.id: lane_connector for lane_connector in
-        #     nearest_vector_map[SemanticMapLayer.LANE_CONNECTOR]
-        # }
+                if hasattr(map_obj, "baseline_path"):
+                    center_line = self._extract_centerline(map_obj)
+                    # TODO (LQY) maybe using convexhull to build the collision shape in the future
+                    self.block_network.add_lane(NuPlanLane(map_obj.id, center_line, width=5, lane_meta_data=map_obj))
+                if layer_name in line_layer_names:
+                    self.lines.append(self._extract_lane_line(map_obj.right_boundary))
+                    self.lines.append(self._extract_lane_line(map_obj.left_boundary))
 
         return True
 
@@ -133,32 +98,37 @@ class NuPlanBlock(BaseBlock):
             lane.construct_lane_in_block(self, lane_index=id)
             # lane.construct_lane_line_in_block(self, [True if len(lane.left_lanes) == 0 else False,
             #                                          True if len(lane.right_lanes) == 0 else False, ])
-        # draw
-        for lane_id, data in self.nuplan_map_data.items():
-            type = data.get("type", None)
-            if RoadLineType.is_road_line(type):
-                if len(data[NuPlanLaneProperty.POLYLINE]) <= 1:
-                    continue
-                if RoadLineType.is_broken(type):
-                    self.construct_nuplan_broken_line(
-                        convert_polyline_to_metadrive(data[NuPlanLaneProperty.POLYLINE]),
-                        LineColor.YELLOW if RoadLineType.is_yellow(type) else LineColor.GREY
-                    )
-                else:
-                    self.construct_nuplan_continuous_line(
-                        convert_polyline_to_metadrive(data[NuPlanLaneProperty.POLYLINE]),
-                        LineColor.YELLOW if RoadLineType.is_yellow(type) else LineColor.GREY
-                    )
-            elif RoadEdgeType.is_road_edge(type) and RoadEdgeType.is_sidewalk(type):
-                self.construct_nuplan_sidewalk(convert_polyline_to_metadrive(data[NuPlanLaneProperty.POLYLINE]))
-            elif RoadEdgeType.is_road_edge(type) and not RoadEdgeType.is_sidewalk(type):
-                self.construct_nuplan_continuous_line(
-                    convert_polyline_to_metadrive(data[NuPlanLaneProperty.POLYLINE]), LineColor.GREY
-                )
-            elif type == "center_lane" or type is None:
-                continue
-            # else:
-            #     raise ValueError("Can not build lane line type: {}".format(type))
+        for line in self.lines:
+            self.construct_nuplan_continuous_line(
+                line,
+                LineColor.GREY
+            )
+        # draw line
+        # for lane_id, data in self.nuplan_map_data.items():
+        #     type = data.get("type", None)
+        #     if RoadLineType.is_road_line(type):
+        #         if len(data[NuPlanLaneProperty.POLYLINE]) <= 1:
+        #             continue
+        #         if RoadLineType.is_broken(type):
+        #             self.construct_nuplan_broken_line(
+        #                 convert_polyline_to_metadrive(data[NuPlanLaneProperty.POLYLINE]),
+        #                 LineColor.YELLOW if RoadLineType.is_yellow(type) else LineColor.GREY
+        #             )
+        #         else:
+        #             self.construct_nuplan_continuous_line(
+        #                 convert_polyline_to_metadrive(data[NuPlanLaneProperty.POLYLINE]),
+        #                 LineColor.YELLOW if RoadLineType.is_yellow(type) else LineColor.GREY
+        #             )
+        #     elif RoadEdgeType.is_road_edge(type) and RoadEdgeType.is_sidewalk(type):
+        #         self.construct_nuplan_sidewalk(convert_polyline_to_metadrive(data[NuPlanLaneProperty.POLYLINE]))
+        #     elif RoadEdgeType.is_road_edge(type) and not RoadEdgeType.is_sidewalk(type):
+        #         self.construct_nuplan_continuous_line(
+        #             convert_polyline_to_metadrive(data[NuPlanLaneProperty.POLYLINE]), LineColor.GREY
+        #         )
+        #     elif type == "center_lane" or type is None:
+        #         continue
+        #     # else:
+        #     raise ValueError("Can not build lane line type: {}".format(type))
 
     def construct_nuplan_continuous_line(self, polyline, color):
         line = InterpolatingLine(polyline)
@@ -233,3 +203,15 @@ class NuPlanBlock(BaseBlock):
     # def nuplan_map_data(self):
     #     e = get_engine()
     #     return e.data_manager.get_case(self.map_index)["map"]
+
+    def _extract_centerline(self, map_obj):
+        # TODO (LQY) Remove the offset, which is for debug
+        path = map_obj.baseline_path.discrete_path
+        points = [np.array([pose.x, pose.y]) for pose in path]
+        return points
+
+    def _extract_lane_line(self, boundary):
+        # TODO (LQY) Remove the offset, which is for debug
+        path = boundary.discrete_path
+        points = [np.array([pose.x, pose.y]) for pose in path]
+        return points

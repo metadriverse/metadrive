@@ -1,6 +1,4 @@
 import logging
-from nuplan.common.maps.nuplan_map.nuplan_map import NuPlanMap
-
 from metadrive.component.map.base_map import BaseMap
 from metadrive.component.nuplan_block.nuplan_block import NuPlanBlock
 from metadrive.component.road_network.edge_road_network import EdgeRoadNetwork
@@ -52,19 +50,20 @@ if __name__ == "__main__":
 
     default_config = NuPlanEnv.default_config()
     default_config["use_render"] = True
-    default_config["debug"] = True
-    default_config["debug_static_world"] = True
+    default_config["debug"] = False
+    default_config["debug_static_world"] = False
     engine = initialize_engine(default_config)
     set_global_random_seed(0)
 
     engine.data_manager = NuPlanDataManager()
     map = NuPlanMap(map_index=0)
     map.attach_to_world()
-    engine.enableMouse()
+    # engine.enableMouse()
     map.road_network.show_bounding_box(engine)
 
     # argoverse data set is as the same coordinates as panda3d
     pos = map.get_center_point()
     engine.main_camera.set_bird_view_pos(pos)
+
     while True:
         map.engine.step()

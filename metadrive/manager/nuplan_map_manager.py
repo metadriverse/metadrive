@@ -58,14 +58,7 @@ class NuPlanMapManager(BaseManager):
         #     assert len(self.spawned_objects) == 0
 
     def destroy(self):
-        self.maps = None
         self.current_map = None
-
-        self.sdc_start = None
-        self.sdc_destinations = []
-        self.sdc_dest_point = None
-        self.current_sdc_route = None
-
         super(NuPlanMapManager, self).destroy()
 
     def before_reset(self):
