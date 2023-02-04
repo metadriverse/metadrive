@@ -91,6 +91,7 @@ BASE_DEFAULT_CONFIG = dict(
         width=None,
         length=None,
         height=None,
+        mass=None,
 
         # ===== vehicle module config =====
         lidar=dict(

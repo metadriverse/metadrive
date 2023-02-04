@@ -93,7 +93,9 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     TIRE_WIDTH = 0.4
     FRONT_WHEELBASE = None
     REAR_WHEELBASE = None
-    MASS = None
+
+    # MASS = None
+
     CHASSIS_TO_WHEEL_AXIS = 0.2
     SUSPENSION_LENGTH = 15
     SUSPENSION_STIFFNESS = 40
@@ -789,6 +791,36 @@ class BaseVehicle(BaseObject, BaseVehicleState):
                 }
             )
         return state
+
+    def get_raw_state(self):
+        ret = dict(
+            position=self.position,
+            heading=self.heading,
+            velocity=self.velocity
+        )
+        return ret
+
+    def get_dynamics_parameters(self):
+        # These two can be changed on the fly
+        max_engine_force = self.config["max_engine_force"]
+        max_brake_force = self.config["max_brake_force"]
+
+        # These two can only be changed in init
+        wheel_friction = self.config["wheel_friction"]
+        assert self.max_steering == self.config["max_steering"]
+        max_steering = self.max_steering
+
+        mass = self.config["mass"] if self.config["mass"] else self.MASS
+
+        ret = dict(
+            max_engine_force=max_engine_force,
+            max_brake_force=max_brake_force,
+            wheel_friction=wheel_friction,
+            max_steering=max_steering,
+            mass=mass
+        )
+        return ret
+
 
     def set_state(self, state):
         super(BaseVehicle, self).set_state(state)

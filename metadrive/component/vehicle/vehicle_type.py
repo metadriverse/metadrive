@@ -168,6 +168,10 @@ class VaryingShapeVehicle(DefaultVehicle):
     def HEIGHT(self):
         return self.config["height"] if self.config["height"] is not None else super(VaryingShapeVehicle, self).HEIGHT
 
+    @property
+    def MASS(self):
+        return self.config["mass"] if self.config["mass"] is not None else super(VaryingShapeVehicle, self).MASS
+
     def reset(
         self,
         random_seed=None,
@@ -189,6 +193,29 @@ class VaryingShapeVehicle(DefaultVehicle):
                 should_force_reset = True
             if vehicle_config["length"] is not None and vehicle_config["length"] != self.LENGTH:
                 should_force_reset = True
+            if "max_engine_force" in vehicle_config and \
+                    vehicle_config["max_engine_force"] is not None and \
+                    vehicle_config["max_engine_force"] != self.config["max_engine_force"]:
+                should_force_reset = True
+            if "max_brake_force" in vehicle_config and \
+                    vehicle_config["max_brake_force"] is not None and \
+                    vehicle_config["max_brake_force"] != self.config["max_brake_force"]:
+                should_force_reset = True
+            if "wheel_friction" in vehicle_config and \
+                    vehicle_config["wheel_friction"] is not None and \
+                    vehicle_config["wheel_friction"] != self.config["wheel_friction"]:
+                should_force_reset = True
+            if "max_steering" in vehicle_config and \
+                    vehicle_config["max_steering"] is not None and \
+                    vehicle_config["max_steering"] != self.config["max_steering"]:
+                self.max_steering = vehicle_config["max_steering"]
+                should_force_reset = True
+                assert self.max_steering == self.config["max_steering"]
+            if "mass" in vehicle_config and \
+                    vehicle_config["mass"] is not None and \
+                    vehicle_config["mass"] != self.config["mass"]:
+                should_force_reset = True
+
         if should_force_reset:
             self.destroy()
             self.__init__(
@@ -198,6 +225,8 @@ class VaryingShapeVehicle(DefaultVehicle):
                 position=position,
                 heading=heading
             )
+
+        assert self.max_steering == self.config["max_steering"]
 
         return super(VaryingShapeVehicle, self).reset(
             random_seed=random_seed, vehicle_config=vehicle_config, position=position, heading=heading, *args, **kwargs
