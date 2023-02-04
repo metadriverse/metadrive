@@ -793,11 +793,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         return state
 
     def get_raw_state(self):
-        ret = dict(
-            position=self.position,
-            heading=self.heading,
-            velocity=self.velocity
-        )
+        ret = dict(position=self.position, heading=self.heading, velocity=self.velocity)
         return ret
 
     def get_dynamics_parameters(self):
@@ -820,7 +816,6 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             mass=mass
         )
         return ret
-
 
     def set_state(self, state):
         super(BaseVehicle, self).set_state(state)
