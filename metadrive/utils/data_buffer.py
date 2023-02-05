@@ -9,6 +9,7 @@ class DataBuffer:
     You can store map / traffic tracks in it.
     The maximum size of the buffer is determined by store_data_buffer_size
     """
+
     def __init__(self, store_data_buffer_size=None):
         self.store_data_buffer = {}
 
@@ -42,11 +43,11 @@ class DataBuffer:
         return key in self.store_data_buffer
 
     def __setitem__(self, key, value):
-
-        map_num = get_engine().global_config["case_num"]
-        start = get_engine().global_config["start_case_index"]
-
-        assert start <= key < start + map_num, (start, key, start + map_num)
+        # This should be checked in map manager instead of here
+        # map_num = get_engine().global_config["case_num"]
+        # start = get_engine().global_config["start_case_index"]
+        #
+        # assert start <= key < start + map_num, (start, key, start + map_num)
 
         self.clear_if_necessary()
 

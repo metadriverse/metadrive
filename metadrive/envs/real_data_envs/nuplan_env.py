@@ -199,6 +199,7 @@ class NuPlanEnv(BaseEnv):
         :param vehicle_id: id of BaseVehicle
         :return: reward
         """
+        return 0
         vehicle = self.vehicles[vehicle_id]
         step_info = dict()
 
@@ -239,24 +240,25 @@ class NuPlanEnv(BaseEnv):
         return True if np.linalg.norm(vehicle.position - self.engine.map_manager.sdc_dest_point) < 5 else False
 
     def _reset_global_seed(self, force_seed=None):
-        if force_seed is not None:
-            current_seed = force_seed
-        elif self.config["sequential_seed"]:
-            current_seed = self.engine.global_seed
-            if current_seed is None:
-                current_seed = self.config["start_case_index"]
-            else:
-                current_seed += 1
-            if current_seed >= self.config["start_case_index"] + int(self.config["case_num"]):
-                current_seed = self.config["start_case_index"]
-        else:
-            current_seed = get_np_random(None).randint(
-                self.config["start_case_index"], self.config["start_case_index"] + int(self.config["case_num"])
-            )
-
-        assert self.config["start_case_index"] <= current_seed < \
-               self.config["start_case_index"] + self.config["case_num"], "Force seed range Error!"
-        self.seed(current_seed)
+        # TODO LQY: Fix this!
+        # if force_seed is not None:
+        #     current_seed = force_seed
+        # elif self.config["sequential_seed"]:
+        #     current_seed = self.engine.global_seed
+        #     if current_seed is None:
+        #         current_seed = self.config["start_case_index"]
+        #     else:
+        #         current_seed += 1
+        #     if current_seed >= self.config["start_case_index"] + int(self.config["case_num"]):
+        #         current_seed = self.config["start_case_index"]
+        # else:
+        #     current_seed = get_np_random(None).randint(
+        #         self.config["start_case_index"], self.config["start_case_index"] + int(self.config["case_num"])
+        #     )
+        #
+        # assert self.config["start_case_index"] <= current_seed < \
+        #        self.config["start_case_index"] + self.config["case_num"], "Force seed range Error!"
+        self.seed(0)
 
     def _is_out_of_road(self, vehicle):
         # A specified function to determine whether this vehicle should be done.
@@ -275,7 +277,7 @@ if __name__ == "__main__":
     env = NuPlanEnv(
         {
             "use_render": True,
-            "agent_policy": WaymoIDMPolicy,
+            # "agent_policy": WaymoIDMPolicy,
             "manual_control": True,
             "replay": False,
             "no_traffic": False,
@@ -288,38 +290,40 @@ if __name__ == "__main__":
             "vehicle_config": dict(
                 lidar=dict(num_lasers=120, distance=50, num_others=4),
                 lane_line_detector=dict(num_lasers=12, distance=50),
-                side_detector=dict(num_lasers=160, distance=50)
+                side_detector=dict(num_lasers=160, distance=50),
+                need_navigation=False
             ),
+            "show_interface":False
         }
     )
     success = []
+    env.reset(force_seed=0)
     for i in range(3):
-        env.reset(force_seed=i)
         while True:
             o, r, d, info = env.step([0, 0])
-            assert env.observation_space.contains(o)
-            c_lane = env.vehicle.lane
-            long, lat, = c_lane.local_coordinates(env.vehicle.position)
-            if env.config["use_render"]:
-                env.render(
-                    text={
-                        # "routing_lane_idx": env.engine._object_policies[env.vehicle.id].routing_target_lane.index,
-                        # "lane_index": env.vehicle.lane_index,
-                        # "current_ckpt_index": env.vehicle.navigation.current_checkpoint_lane_index,
-                        # "next_ckpt_index": env.vehicle.navigation.next_checkpoint_lane_index,
-                        # "ckpts": env.vehicle.navigation.checkpoints,
-                        # "lane_heading": c_lane.heading_theta_at(long),
-                        # "long": long,
-                        # "lat": lat,
-                        # "v_heading": env.vehicle.heading_theta,
-                        "obs_shape": len(o),
-                        "lateral": env.observations["default_agent"].lateral_dist,
-                        "seed": env.engine.global_seed + env.config["start_case_index"],
-                        "reward": r,
-                    }
-                )
-
-            if d:
-                if info["arrive_dest"]:
-                    print("seed:{}, success".format(env.engine.global_random_seed))
-                break
+            # assert env.observation_space.contains(o)
+            # c_lane = env.vehicle.lane
+            # long, lat, = c_lane.local_coordinates(env.vehicle.position)
+            # if env.config["use_render"]:
+            #     env.render(
+            #         text={
+            #             # "routing_lane_idx": env.engine._object_policies[env.vehicle.id].routing_target_lane.index,
+            #             # "lane_index": env.vehicle.lane_index,
+            #             # "current_ckpt_index": env.vehicle.navigation.current_checkpoint_lane_index,
+            #             # "next_ckpt_index": env.vehicle.navigation.next_checkpoint_lane_index,
+            #             # "ckpts": env.vehicle.navigation.checkpoints,
+            #             # "lane_heading": c_lane.heading_theta_at(long),
+            #             # "long": long,
+            #             # "lat": lat,
+            #             # "v_heading": env.vehicle.heading_theta,
+            #             "obs_shape": len(o),
+            #             "lateral": env.observations["default_agent"].lateral_dist,
+            #             "seed": env.engine.global_seed + env.config["start_case_index"],
+            #             "reward": r,
+            #         }
+            #     )
+            #
+            # if d:
+            #     if info["arrive_dest"]:
+            #         print("seed:{}, success".format(env.engine.global_random_seed))
+            #     break

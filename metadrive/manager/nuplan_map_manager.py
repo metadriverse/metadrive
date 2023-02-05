@@ -1,4 +1,5 @@
 from metadrive.component.map.nuplan_map import NuPlanMap
+from metadrive.constants import DEFAULT_AGENT
 from metadrive.manager.base_manager import BaseManager
 from metadrive.utils.data_buffer import DataBuffer
 
@@ -21,16 +22,18 @@ class NuPlanMapManager(BaseManager):
 
     def reset(self):
         seed = self.engine.global_random_seed
-        assert self.start <= seed < self.start + self.map_num
+        # TODO(LQY) add assert
+        # assert self.start <= seed < self.start + self.map_num
 
         if seed in self.store_map_buffer:
             new_map = self.store_map_buffer[seed]
         else:
             self.store_map_buffer.clear_if_necessary()
-            new_map = NuPlanMap(map_index=seed)
+            new_map = NuPlanMap(map_index=0)
             self.store_map_buffer[seed] = new_map
 
         self.load_map(new_map)
+        self.update_ego_route()
 
     def filter_path(self, start_lanes, end_lanes):
         for start in start_lanes:
@@ -71,3 +74,66 @@ class NuPlanMapManager(BaseManager):
         As Map instance should not be recycled, we will forcefully destroy useless map instances.
         """
         return super(NuPlanMapManager, self).clear_objects(force_destroy=True, *args, **kwargs)
+
+    def update_ego_route(self):
+        """
+        # TODO(LQY) Modify this part, if we finally deceide to use TrajNavi
+        """
+        data = self.engine.data_manager.get_case(self.engine.global_random_seed)
+
+        ########################TODO(LQY) Fix this after building traffic manager
+        # sdc_traj = WaymoTrafficManager.parse_full_trajectory(data["tracks"][data["sdc_index"]]["state"])
+        # self.current_sdc_route = PointLane(sdc_traj, 1.5)
+        # init_state = WaymoTrafficManager.parse_vehicle_state(
+        #     data["tracks"][data["sdc_index"]]["state"],
+        #     self.engine.global_config["traj_start_index"],
+        #     check_last_state=False,
+        # )
+        # last_state = WaymoTrafficManager.parse_vehicle_state(
+        #     data["tracks"][data["sdc_index"]]["state"],
+        #     self.engine.global_config["traj_end_index"],
+        #     check_last_state=True
+        # )
+
+        # init_position = init_state["position"]
+        # init_yaw = init_state["heading"]
+        # last_position = last_state["position"]
+        # last_yaw = last_state["heading"]
+        # self.sdc_dest_point = last_position
+        ##############################
+
+        # TODO(LQY):
+        #  The Following part is for EdgeNetworkNavi
+        #  Consider removing them if we finally choose to use TrajectoryNavi
+        # start_lanes = ray_localization(
+        #     [np.cos(init_yaw), np.sin(init_yaw)],
+        #     init_position,
+        #     self.engine,
+        #     return_all_result=True,
+        #     use_heading_filter=False
+        # )
+        # end_lanes = ray_localization(
+        #     [np.cos(last_yaw), np.sin(last_yaw)],
+        #     last_position,
+        #     self.engine,
+        #     return_all_result=True,
+        #     use_heading_filter=False
+        # )
+        #
+        # self.sdc_start, sdc_end = self.filter_path(start_lanes, end_lanes)
+        # initial_long, initial_lat = self.current_map.road_network. \
+        #     get_lane(self.sdc_start).local_coordinates(init_position)
+
+
+
+        # self.sdc_destinations = [sdc_end]
+        # lane = self.current_map.road_network.get_lane(sdc_end)
+        # if len(lane.left_lanes) > 0:
+        #     self.sdc_destinations += [lane["id"] for lane in lane.left_lanes]
+        # if len(lane.right_lanes) > 0:
+        #     self.sdc_destinations += [lane["id"] for lane in lane.right_lanes]
+        start = [664396.54429387, 3997613.41534655]
+        end = [ 664396.30707505, 3997613.49425936]
+        self.engine.global_config.update(
+            dict(target_vehicle_configs={DEFAULT_AGENT: dict(spawn_position_heading=(start, 0))})
+        )
