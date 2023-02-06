@@ -210,7 +210,6 @@ class VaryingShapeVehicle(DefaultVehicle):
                     vehicle_config["max_steering"] != self.config["max_steering"]:
                 self.max_steering = vehicle_config["max_steering"]
                 should_force_reset = True
-                assert self.max_steering == self.config["max_steering"]
             if "mass" in vehicle_config and \
                     vehicle_config["mass"] is not None and \
                     vehicle_config["mass"] != self.config["mass"]:
