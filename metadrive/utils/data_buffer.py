@@ -9,7 +9,6 @@ class DataBuffer:
     You can store map / traffic tracks in it.
     The maximum size of the buffer is determined by store_data_buffer_size
     """
-
     def __init__(self, store_data_buffer_size=None):
         self.store_data_buffer = {}
 

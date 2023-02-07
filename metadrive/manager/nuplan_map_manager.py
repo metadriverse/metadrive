@@ -93,14 +93,16 @@ class NuPlanMapManager(BaseManager):
         """
         scenario: NuPlanScenario = self.engine.data_manager.get_case(self.engine.global_random_seed)
 
-        sdc_traj = NuPlanTrafficManager.parse_full_trajectory(scenario.get_expert_ego_trajectory(),
-                                                              self.current_map.nuplan_center)
+        sdc_traj = NuPlanTrafficManager.parse_full_trajectory(
+            scenario.get_expert_ego_trajectory(), self.current_map.nuplan_center
+        )
         self.current_sdc_route = PointLane(sdc_traj, 1.5)
-        init_state = NuPlanTrafficManager.parse_vehicle_state(scenario.get_ego_state_at_iteration(0),
-                                                              self.current_map.nuplan_center)
+        init_state = NuPlanTrafficManager.parse_vehicle_state(
+            scenario.get_ego_state_at_iteration(0), self.current_map.nuplan_center
+        )
         last_state = NuPlanTrafficManager.parse_vehicle_state(
-            scenario.get_ego_state_at_iteration(scenario.get_number_of_iterations() - 1),
-            self.current_map.nuplan_center)
+            scenario.get_ego_state_at_iteration(scenario.get_number_of_iterations() - 1), self.current_map.nuplan_center
+        )
 
         init_position = init_state["position"]
         init_yaw = init_state["heading"]

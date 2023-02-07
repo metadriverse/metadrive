@@ -104,13 +104,9 @@ class NuPlanBlock(BaseBlock):
             #                                          True if len(lane.right_lanes) == 0 else False, ])
         for line_prop in self.lines.values():
             if line_prop.type == LineType.CONTINUOUS:
-                self.construct_nuplan_continuous_line(
-                    line_prop.points,
-                    line_prop.color)
+                self.construct_nuplan_continuous_line(line_prop.points, line_prop.color)
             if line_prop.type == LineType.BROKEN:
-                self.construct_nuplan_broken_line(
-                    line_prop.points,
-                    line_prop.color)
+                self.construct_nuplan_broken_line(line_prop.points, line_prop.color)
             # if line_prop.type == LineType.SIDE:
             #     self.construct_nuplan_sidewalk(
             #         line_prop.points)
@@ -195,16 +191,18 @@ class NuPlanBlock(BaseBlock):
             right = lane.right_boundary
             if right.id not in self.lines:
                 line_type = self._metadrive_line_type(int(boundaries.loc[[str(right.id)]]["boundary_type_fid"]))
-                self.lines[right.id] = LaneLineProperty(_get_points(right), LineColor.GREY, line_type,
-                                                        in_road_connector=is_road_connector)
+                self.lines[right.id] = LaneLineProperty(
+                    _get_points(right), LineColor.GREY, line_type, in_road_connector=is_road_connector
+                )
 
             left = lane.left_boundary
             if left.id not in self.lines:
                 line_type = self._metadrive_line_type(int(boundaries.loc[[str(left.id)]]["boundary_type_fid"]))
                 line_color = LineColor.YELLOW if lane.adjacent_edges[0] is None and lane.adjacent_edges[
                     1] is not None else LineColor.GREY
-                self.lines[left.id] = LaneLineProperty(_get_points(left), line_color, line_type,
-                                                       in_road_connector=is_road_connector)
+                self.lines[left.id] = LaneLineProperty(
+                    _get_points(left), line_color, line_type, in_road_connector=is_road_connector
+                )
 
         # else:
         # (Disable currently)
@@ -224,10 +222,14 @@ class NuPlanBlock(BaseBlock):
         center = nuplan_center
         if walkway.id not in self.lines:
             points = np.array(
-                [i for i in zip(walkway.polygon.boundary.coords.xy[0] - center[0],
-                                walkway.polygon.boundary.coords.xy[1] - center[1])])
-            self.lines[walkway.id] = LaneLineProperty(points, LineColor.GREY, LineType.SIDE,
-                                                      in_road_connector=False)
+                [
+                    i for i in zip(
+                        walkway.polygon.boundary.coords.xy[0] - center[0], walkway.polygon.boundary.coords.xy[1] -
+                        center[1]
+                    )
+                ]
+            )
+            self.lines[walkway.id] = LaneLineProperty(points, LineColor.GREY, LineType.SIDE, in_road_connector=False)
 
     def _get_lane_boundary(self, line):
         pass
