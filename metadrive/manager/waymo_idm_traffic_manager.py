@@ -86,11 +86,6 @@ class WaymoIDMTrafficManager(WaymoTrafficManager):
             if data["static"] and self.engine.global_config["no_static_traffic_vehicle"]:
                 continue
             if v_traj_id == "sdc":
-                init_info = data["init_info"]
-                ego_v = list(self.engine.agent_manager.active_agents.values())[0]
-                ego_v.set_velocity(init_info["velocity"])
-                ego_v.set_heading_theta(init_info["heading"], rad_to_degree=False)
-                ego_v.set_position(init_info["position"])
                 continue
             init_info = data["init_info"]
             v_config = copy.deepcopy(self.engine.global_config["vehicle_config"])

@@ -1,7 +1,7 @@
 from metadrive.component.map.nuplan_map import NuPlanMap
 from nuplan.planning.scenario_builder.nuplan_db.nuplan_scenario import NuPlanScenario
 from metadrive.component.lane.point_lane import PointLane
-
+from metadrive.utils.nuplan_utils.parse_traffic import parse_ego_vehicle_trajectory, parse_ego_vehicle_state
 from metadrive.constants import DEFAULT_AGENT
 from metadrive.manager.base_manager import BaseManager
 from metadrive.manager.nuplan_traffic_manager import NuPlanTrafficManager
@@ -93,14 +93,14 @@ class NuPlanMapManager(BaseManager):
         """
         scenario: NuPlanScenario = self.engine.data_manager.get_case(self.engine.global_random_seed)
 
-        sdc_traj = NuPlanTrafficManager.parse_full_trajectory(
+        sdc_traj = parse_ego_vehicle_trajectory(
             scenario.get_expert_ego_trajectory(), self.current_map.nuplan_center
         )
         self.current_sdc_route = PointLane(sdc_traj, 1.5)
-        init_state = NuPlanTrafficManager.parse_vehicle_state(
+        init_state = parse_ego_vehicle_state(
             scenario.get_ego_state_at_iteration(0), self.current_map.nuplan_center
         )
-        last_state = NuPlanTrafficManager.parse_vehicle_state(
+        last_state = parse_ego_vehicle_state(
             scenario.get_ego_state_at_iteration(scenario.get_number_of_iterations() - 1), self.current_map.nuplan_center
         )
 
@@ -110,5 +110,6 @@ class NuPlanMapManager(BaseManager):
 
         self.sdc_dest_point = last_position
         self.engine.global_config.update(
-            dict(target_vehicle_configs={DEFAULT_AGENT: dict(spawn_position_heading=(init_position, init_yaw))})
+            dict(target_vehicle_configs={DEFAULT_AGENT: dict(spawn_position_heading=(init_position, init_yaw),
+                                                             spawn_velocity=init_state["velocity"])})
         )

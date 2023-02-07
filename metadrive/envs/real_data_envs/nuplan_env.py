@@ -28,8 +28,6 @@ NUPLAN_ENV_CONFIG = dict(
 
     # ===== Traffic =====
     no_traffic=False,
-    traj_start_index=0,
-    traj_end_index=-1,
     replay=True,
     no_static_traffic_vehicle=False,
 

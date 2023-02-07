@@ -43,12 +43,6 @@ class WaymoTrafficManager(BaseManager):
                 )
                 self.vid_to_obj[v_id] = v.name
                 v.set_static(True)
-            elif type_traj["type"] == AgentType.VEHICLE and v_id == self.sdc_index:
-                # set Ego V velocity
-                info = self.parse_vehicle_state(type_traj["state"], self.engine.global_config["traj_start_index"])
-                ego_v = list(self.engine.agent_manager.active_agents.values())[0]
-                ego_v.set_velocity(info["velocity"])
-                ego_v.set_position(info["position"])
         # except:
         #     raise ValueError("Can not LOAD traffic for seed: {}".format(self.engine.global_random_seed))
 

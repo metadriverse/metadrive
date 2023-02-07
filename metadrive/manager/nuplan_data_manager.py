@@ -99,3 +99,7 @@ class NuPlanDataManager(BaseManager):
     def seed(self, random_seed):
         super(NuPlanDataManager, self).seed(random_seed)
         self._current_scenario_index = random_seed
+
+    @property
+    def current_scenario_length(self):
+        return self.current_scenario.get_number_of_iterations()

@@ -2,6 +2,7 @@ from metadrive.policy.base_policy import BasePolicy
 
 has_rendered = False
 
+
 # class ReplayPolicy(BasePolicy):
 #     def __init__(self, control_object, locate_info):
 #         super(ReplayPolicy, self).__init__(control_object=control_object)
@@ -40,6 +41,7 @@ class ReplayEgoCarPolicy(BasePolicy):
     """
     Replay policy from Real data. For adding new policy, overwrite get_trajectory_info()
     """
+
     def __init__(self, control_object, random_seed):
         super(ReplayEgoCarPolicy, self).__init__(control_object=control_object)
         self.traj_info = self.get_trajectory_info()
@@ -55,7 +57,7 @@ class ReplayEgoCarPolicy(BasePolicy):
         from metadrive.manager.waymo_map_manager import WaymoMapManager
         from metadrive.manager.waymo_traffic_manager import WaymoTrafficManager
         from metadrive.manager.nuplan_map_manager import NuPlanMapManager
-        from metadrive.manager.nuplan_traffic_manager import NuPlanTrafficManager
+        from metadrive.utils.nuplan_utils.parse_traffic import parse_ego_vehicle_state
         if isinstance(self.engine.map_manager, WaymoMapManager):
             trajectory_data = self.engine.data_manager.get_case(self.engine.global_random_seed)["tracks"]
             sdc_index = str(self.engine.data_manager.get_case(self.engine.global_random_seed)["sdc_index"])
@@ -66,9 +68,8 @@ class ReplayEgoCarPolicy(BasePolicy):
         elif isinstance(self.engine.map_manager, NuPlanMapManager):
             scenario = self.engine.data_manager.current_scenario
             return [
-                NuPlanTrafficManager.parse_vehicle_state(
-                    scenario.get_ego_state_at_iteration(i), self.engine.current_map.nuplan_center
-                ) for i in range(scenario.get_number_of_iterations())
+                parse_ego_vehicle_state(scenario.get_ego_state_at_iteration(i), self.engine.current_map.nuplan_center
+                                        ) for i in range(scenario.get_number_of_iterations())
             ]
 
     def act(self, *args, **kwargs):
