@@ -9,7 +9,7 @@ number_neg_inf = float("-inf")
 
 
 def safe_clip(array, min_val, max_val):
-    array = np.nan_to_num(array.astype(np.float), copy=False, nan=0.0, posinf=max_val, neginf=min_val)
+    array = np.nan_to_num(array.astype(np.float64), copy=False, nan=0.0, posinf=max_val, neginf=min_val)
     return np.clip(array, min_val, max_val).astype(np.float64)
 
 
