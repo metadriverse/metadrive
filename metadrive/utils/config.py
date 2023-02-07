@@ -212,9 +212,9 @@ class Config:
         if isinstance(value, np.ndarray) and len(value) == 1:
             # handle 1-d box shape sample
             value = value[0]
-            if isinstance(value, (np.float32, np.float64, np.float)):
+            if isinstance(value, (np.float32, np.float64, float)):
                 value = float(value)
-            if isinstance(value, (np.int, np.int32, np.int64, np.uint)):
+            if isinstance(value, (np.int32, np.int64, np.uint)):
                 value = int(value)
         if self._unchangeable:
             raise ValueError("This config is not changeable!")
