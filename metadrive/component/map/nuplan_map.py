@@ -5,12 +5,17 @@ from metadrive.component.road_network.edge_road_network import EdgeRoadNetwork
 
 
 class NuPlanMap(BaseMap):
-    def __init__(self, map_index, random_seed=None):
+    def __init__(self, map_index, nuplan_center, random_seed=None):
         self.map_index = map_index
+        self._center = nuplan_center
         super(NuPlanMap, self).__init__(dict(id=map_index), random_seed=random_seed)
 
+    @property
+    def nuplan_center(self):
+        return self._center
+
     def _generate(self):
-        block = NuPlanBlock(0, self.road_network, 0, self.map_index)
+        block = NuPlanBlock(0, self.road_network, 0, self.map_index, self.nuplan_center)
         block.construct_block(self.engine.worldNP, self.engine.physics_world, attach_to_world=True)
         self.blocks.append(block)
 
@@ -21,13 +26,11 @@ class NuPlanMap(BaseMap):
             b.attach_to_world(self.engine.worldNP, self.engine.physics_world)
             b.detach_from_world(self.engine.physics_world)
 
-    @staticmethod
-    def nuplan_position(pos):
-        return pos[0], -pos[1]
+    def metadrive_to_nuplan_position(self, pos):
+        return pos[0] + self.nuplan_center[0], pos[1] + self.nuplan_center[1]
 
-    @staticmethod
-    def metadrive_position(pos):
-        return pos[0], -pos[1]
+    def nuplan_to_metadrive_position(self, pos):
+        return pos[0] - self.nuplan_center[0], pos[1] - self.nuplan_center[1]
 
     @property
     def road_network_type(self):
@@ -56,7 +59,7 @@ if __name__ == "__main__":
     set_global_random_seed(0)
 
     engine.data_manager = NuPlanDataManager()
-    map = NuPlanMap(map_index=0)
+    map = NuPlanMap(map_index=0, nuplan_center=[664396.54429387, 3997613.41534655])
     map.attach_to_world()
     # engine.enableMouse()
     map.road_network.show_bounding_box(engine)

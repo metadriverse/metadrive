@@ -1,4 +1,5 @@
 import math
+from nuplan.common.actor_state.state_representation import Point2D
 from nuplan.common.maps.nuplan_map.lane_connector import NuPlanLaneConnector
 
 import numpy as np
@@ -30,8 +31,9 @@ class LaneLineProperty:
 class NuPlanBlock(BaseBlock):
     _radius = 200  # [m] show 500m map
 
-    def __init__(self, block_index: int, global_network, random_seed, map_index):
+    def __init__(self, block_index: int, global_network, random_seed, map_index, nuplan_center):
         self.map_index = map_index
+        self.nuplan_center = nuplan_center
         super(NuPlanBlock, self).__init__(block_index, global_network, random_seed)
 
         # authorize engine access for this object
@@ -49,6 +51,8 @@ class NuPlanBlock(BaseBlock):
         This function is modified from _render_map in nuplan-devkit.simulation_tile.py
         """
         map_api = self._nuplan_map_api
+        # Center is Important !
+        center = self.nuplan_center
         layer_names = [
             SemanticMapLayer.LANE_CONNECTOR,
             SemanticMapLayer.LANE,
@@ -64,9 +68,8 @@ class NuPlanBlock(BaseBlock):
             # SemanticMapLayer.STOP_SIGN,
             # SemanticMapLayer.DRIVABLE_AREA,
         ]
-        center = self.engine.data_manager.get_case(self.map_index).get_ego_state_at_iteration(0).center.point
 
-        nearest_vector_map = map_api.get_proximal_map_objects(center, self._radius, layer_names)
+        nearest_vector_map = map_api.get_proximal_map_objects(Point2D(*center), self._radius, layer_names)
         # Filter out stop polygons in turn stop
         if SemanticMapLayer.STOP_LINE in nearest_vector_map:
             stop_polygons = nearest_vector_map[SemanticMapLayer.STOP_LINE]
@@ -80,13 +83,13 @@ class NuPlanBlock(BaseBlock):
                 for lane in block.interior_edges:
                     if hasattr(lane, "baseline_path"):
                         # TODO (LQY) maybe using convexhull to build the collision shape in the future
-                        self.block_network.add_lane(NuPlanLane(lane_meta_data=lane))
+                        self.block_network.add_lane(NuPlanLane(nuplan_center=center, lane_meta_data=lane))
                         is_connector = True if layer == SemanticMapLayer.ROADBLOCK_CONNECTOR else False
-                        self._get_lane_line(lane, is_road_connector=is_connector)
+                        self._get_lane_line(lane, is_road_connector=is_connector, nuplan_center=center)
 
         # walkway (Disable currently)
         # for walkway in nearest_vector_map[SemanticMapLayer.WALKWAYS]:
-        #     self._get_sidewalk(walkway)
+        #     self._get_sidewalk(walkway, center)
         return True
 
     def create_in_world(self):
@@ -179,12 +182,13 @@ class NuPlanBlock(BaseBlock):
     #     e = get_engine()
     #     return e.data_manager.get_case(self.map_index)["map"]
 
-    def _get_lane_line(self, lane, is_road_connector=False):
+    def _get_lane_line(self, lane, nuplan_center, is_road_connector=False):
+        center = nuplan_center
         boundaries = self.map_api._get_vector_map_layer(13)
 
         def _get_points(boundary):
             path = boundary.discrete_path
-            points = [np.array([pose.x, pose.y]) for pose in path]
+            points = [np.array([pose.x - center[0], pose.y - center[1]]) for pose in path]
             return points
 
         if not is_road_connector:
@@ -216,10 +220,12 @@ class NuPlanBlock(BaseBlock):
         #             self.lines[right.id] = LaneLineProperty(_get_points(right), LineColor.GREY, LineType.CONTINUOUS,
         #                                                     in_road_connector=is_road_connector)
 
-    def _get_sidewalk(self, walkway):
+    def _get_sidewalk(self, walkway, nuplan_center):
+        center = nuplan_center
         if walkway.id not in self.lines:
             points = np.array(
-                [i for i in zip(walkway.polygon.boundary.coords.xy[0], walkway.polygon.boundary.coords.xy[1])])
+                [i for i in zip(walkway.polygon.boundary.coords.xy[0] - center[0],
+                                walkway.polygon.boundary.coords.xy[1] - center[1])])
             self.lines[walkway.id] = LaneLineProperty(points, LineColor.GREY, LineType.SIDE,
                                                       in_road_connector=False)
 

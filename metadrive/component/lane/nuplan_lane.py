@@ -10,11 +10,11 @@ from metadrive.utils.waymo_utils.waymo_utils import read_waymo_data
 
 
 class NuPlanLane(PointLane):
-    def __init__(self, lane_meta_data):
+    def __init__(self, lane_meta_data, nuplan_center):
         """
         Extract the lane information of one waymo lane, and do coordinate shift
         """
-        super(NuPlanLane, self).__init__(self._extract_centerline(lane_meta_data), None)
+        super(NuPlanLane, self).__init__(self._extract_centerline(lane_meta_data, nuplan_center), None)
         self.index = lane_meta_data.id
 
         self.entry_lanes = lane_meta_data.incoming_edges,
@@ -26,9 +26,11 @@ class NuPlanLane(PointLane):
         self.right_boundary = InterpolatingLine(self._get_boundary_points(lane_meta_data.right_boundary))
         self.width = None
 
-    def _extract_centerline(self, map_obj):
+    @staticmethod
+    def _extract_centerline(map_obj, nuplan_center):
+        center = nuplan_center
         path = map_obj.baseline_path.discrete_path
-        points = [np.array([pose.x, pose.y]) for pose in path]
+        points = [np.array([pose.x - center[0], pose.y - center[1]]) for pose in path]
         return points
 
     def width_at(self, longitudinal: float) -> float:

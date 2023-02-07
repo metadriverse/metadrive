@@ -68,7 +68,8 @@ class ReplayEgoCarPolicy(BasePolicy):
             ]
         elif isinstance(self.engine.map_manager, NuPlanMapManager):
             scenario = self.engine.data_manager.current_scenario
-            return [NuPlanTrafficManager.parse_vehicle_state(scenario.get_ego_state_at_iteration(i)) for i in
+            return [NuPlanTrafficManager.parse_vehicle_state(scenario.get_ego_state_at_iteration(i),
+                                                             self.engine.current_map.nuplan_center) for i in
                     range(scenario.get_number_of_iterations())]
 
     def act(self, *args, **kwargs):

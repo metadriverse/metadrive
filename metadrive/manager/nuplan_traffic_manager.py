@@ -49,9 +49,10 @@ class NuPlanTrafficManager(BaseManager):
     #     raise ValueError("Can not LOAD traffic for seed: {}".format(self.engine.global_random_seed))
 
     @staticmethod
-    def parse_vehicle_state(state):
+    def parse_vehicle_state(state, nuplan_center):
+        center = nuplan_center
         ret = {}
-        ret["position"] = nuplan_2_metadrive_position([state.waypoint.x, state.waypoint.y])
+        ret["position"] = nuplan_2_metadrive_position([state.waypoint.x, state.waypoint.y], center)
         ret["heading"] = nuplan_2_metadrive_heading(np.rad2deg(state.waypoint.heading))
         ret["velocity"] = nuplan_2_metadrive_position([state.waypoint.velocity.x, state.waypoint.velocity.y])
         ret["valid"] = True
@@ -85,10 +86,11 @@ class NuPlanTrafficManager(BaseManager):
     #         raise ValueError("Can not CLEAN traffic for seed: {}".format(self.engine.global_random_seed))
 
     @staticmethod
-    def parse_full_trajectory(states):
+    def parse_full_trajectory(states, nuplan_center):
+        center = nuplan_center
         traj = []
         for state in states:
-            traj.append([state.waypoint.x, state.waypoint.y])
+            traj.append([state.waypoint.x - center[0], state.waypoint.y - center[1]])
 
         trajectory = np.array(traj)
         trajectory *= [1, -1]

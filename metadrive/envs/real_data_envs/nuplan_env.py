@@ -278,7 +278,7 @@ if __name__ == "__main__":
         {
             "use_render": True,
             "agent_policy": ReplayEgoCarPolicy,
-            "manual_control": False,
+            "manual_control": True,
             "replay": True,
             "no_traffic": False,
             "debug":True,
