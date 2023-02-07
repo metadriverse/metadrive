@@ -2,6 +2,7 @@ from metadrive.policy.base_policy import BasePolicy
 
 has_rendered = False
 
+
 # class ReplayPolicy(BasePolicy):
 #     def __init__(self, control_object, locate_info):
 #         super(ReplayPolicy, self).__init__(control_object=control_object)
@@ -37,14 +38,13 @@ has_rendered = False
 
 
 class ReplayEgoCarPolicy(BasePolicy):
+    """
+    Replay policy from Real data. For adding new policy, overwrite get_trajectory_info()
+    """
+
     def __init__(self, control_object, random_seed):
         super(ReplayEgoCarPolicy, self).__init__(control_object=control_object)
-        self.trajectory_data = self.engine.traffic_manager.current_traffic_data
-        self.traj_info = [
-            self.engine.traffic_manager.parse_vehicle_state(
-                self.trajectory_data[self.engine.traffic_manager.sdc_index]["state"], i
-            ) for i in range(len(self.trajectory_data[self.engine.traffic_manager.sdc_index]["state"]))
-        ]
+        self.traj_info = self.get_trajectory_info()
         self.start_index = 0
         self.init_pos = self.traj_info[0]["position"]
         self.heading = self.traj_info[0]["heading"]
@@ -52,6 +52,24 @@ class ReplayEgoCarPolicy(BasePolicy):
         self.damp = 0
         # how many times the replay data is slowed down
         self.damp_interval = 1
+
+    def get_trajectory_info(self):
+        from metadrive.manager.waymo_map_manager import WaymoMapManager
+        from metadrive.manager.waymo_traffic_manager import WaymoTrafficManager
+        from metadrive.manager.nuplan_map_manager import NuPlanMapManager
+        from metadrive.manager.nuplan_traffic_manager import NuPlanTrafficManager
+        if isinstance(self.engine.map_manager, WaymoMapManager):
+            trajectory_data = self.engine.data_manager.get_case(self.engine.global_random_seed)["tracks"]
+            sdc_index = str(self.engine.data_manager.get_case(self.engine.global_random_seed)["sdc_index"])
+            return [
+                WaymoTrafficManager.parse_vehicle_state(
+                    trajectory_data[sdc_index]["state"], i
+                ) for i in range(len(trajectory_data[sdc_index]["state"]))
+            ]
+        elif isinstance(self.engine.map_manager, NuPlanMapManager):
+            scenario = self.engine.data_manager.current_scenario
+            return [NuPlanTrafficManager.parse_vehicle_state(scenario.get_ego_state_at_iteration(i)) for i in
+                    range(scenario.get_number_of_iterations())]
 
     def act(self, *args, **kwargs):
         self.damp += self.damp_interval

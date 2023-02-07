@@ -68,3 +68,11 @@ def waymo_2_metadrive_position(position):
 
 def waymo_2_metadrive_heading(heading):
     return -heading
+
+
+def nuplan_2_metadrive_position(position):
+    return position[0], position[1]
+
+
+def nuplan_2_metadrive_heading(heading):
+    return heading

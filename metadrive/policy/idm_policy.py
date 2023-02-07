@@ -295,7 +295,7 @@ class IDMPolicy(BasePolicy):
         if front_obj and (not self.disable_idm_deceleration):
             d = dist_to_front
             speed_diff = self.desired_gap(ego_vehicle, front_obj) / not_zero(d)
-            acceleration -= self.ACC_FACTOR * (speed_diff**2)
+            acceleration -= self.ACC_FACTOR * (speed_diff ** 2)
         return acceleration
 
     def desired_gap(self, ego_vehicle, front_obj, projected: bool = True) -> float:
@@ -392,6 +392,7 @@ class IDMPolicy(BasePolicy):
 
 class ManualControllableIDMPolicy(IDMPolicy):
     """If human is not taking over, then use IDM policy."""
+
     def __init__(self, *args, **kwargs):
         super(ManualControllableIDMPolicy, self).__init__(*args, **kwargs)
         self.manual_control_policy = ManualControlPolicy(*args, **kwargs)
@@ -404,13 +405,13 @@ class ManualControllableIDMPolicy(IDMPolicy):
             return super(ManualControllableIDMPolicy, self).act(agent_id)
 
 
-class WaymoIDMPolicy(IDMPolicy):
+class TrajectoryIDMPOlicy(IDMPolicy):
     """This policy is customized for the traffic car in Waymo environment. (Ego car is not included!)"""
     NORMAL_SPEED = 40
     WAYMO_IDM_MAX_DIST = 20
 
     def __init__(self, control_object, random_seed, traj_to_follow=None, policy_index=None):
-        super(WaymoIDMPolicy, self).__init__(control_object=control_object, random_seed=random_seed)
+        super(TrajectoryIDMPOlicy, self).__init__(control_object=control_object, random_seed=random_seed)
         self.policy_index = policy_index
         self.traj_to_follow = self.engine.map_manager.current_sdc_route if traj_to_follow is None else traj_to_follow
         self.target_speed = self.NORMAL_SPEED
@@ -466,9 +467,6 @@ class WaymoIDMPolicy(IDMPolicy):
         return [steering, acc]
 
 
-EgoWaymoIDMPolicy = WaymoIDMPolicy
-
-
 class _EgoWaymoIDMPolicy(IDMPolicy):
     """
     DeprecationWarning("This policy is merged with WaymoIDM Policy now")
@@ -514,3 +512,9 @@ class _EgoWaymoIDMPolicy(IDMPolicy):
             )
             return True
         return False
+
+
+# Currently, all policies are the same
+EgoWaymoIDMPolicy = TrajectoryIDMPOlicy
+WaymoIDMPolicy = TrajectoryIDMPOlicy
+NuPlanIDMPolicy = TrajectoryIDMPOlicy

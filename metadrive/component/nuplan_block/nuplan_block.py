@@ -84,9 +84,9 @@ class NuPlanBlock(BaseBlock):
                         is_connector = True if layer == SemanticMapLayer.ROADBLOCK_CONNECTOR else False
                         self._get_lane_line(lane, is_road_connector=is_connector)
 
-        # walkway
-        for walkway in nearest_vector_map[SemanticMapLayer.WALKWAYS]:
-            self._get_sidewalk(walkway)
+        # walkway (Disable currently)
+        # for walkway in nearest_vector_map[SemanticMapLayer.WALKWAYS]:
+        #     self._get_sidewalk(walkway)
         return True
 
     def create_in_world(self):
@@ -201,18 +201,20 @@ class NuPlanBlock(BaseBlock):
                     1] is not None else LineColor.GREY
                 self.lines[left.id] = LaneLineProperty(_get_points(left), line_color, line_type,
                                                        in_road_connector=is_road_connector)
-        else:
-            right: NuPlanLaneConnector = lane.right_boundary
-            left: NuPlanLaneConnector = lane.left_boundary
-            if left.id not in self.lines:
-                if lane.incoming_edges[0].adjacent_edges[0] is None or lane.outgoing_edges[0].adjacent_edges[0] is None:
-                    self.lines[left.id] = LaneLineProperty(_get_points(left), LineColor.YELLOW, LineType.CONTINUOUS,
-                                                           in_road_connector=is_road_connector)
-            if right.id not in self.lines:
-                if lane.incoming_edges[-1].adjacent_edges[-1] is None \
-                        or lane.outgoing_edges[-1].adjacent_edges[-1] is None:
-                    self.lines[right.id] = LaneLineProperty(_get_points(right), LineColor.GREY, LineType.CONTINUOUS,
-                                                            in_road_connector=is_road_connector)
+
+        # else:
+        # (Disable currently)
+        #     right: NuPlanLaneConnector = lane.right_boundary
+        #     left: NuPlanLaneConnector = lane.left_boundary
+        #     if left.id not in self.lines:
+        #         if lane.incoming_edges[0].adjacent_edges[0] is None or lane.outgoing_edges[0].adjacent_edges[0] is None:
+        #             self.lines[left.id] = LaneLineProperty(_get_points(left), LineColor.YELLOW, LineType.CONTINUOUS,
+        #                                                    in_road_connector=is_road_connector)
+        #     if right.id not in self.lines:
+        #         if lane.incoming_edges[-1].adjacent_edges[-1] is None \
+        #                 or lane.outgoing_edges[-1].adjacent_edges[-1] is None:
+        #             self.lines[right.id] = LaneLineProperty(_get_points(right), LineColor.GREY, LineType.CONTINUOUS,
+        #                                                     in_road_connector=is_road_connector)
 
     def _get_sidewalk(self, walkway):
         if walkway.id not in self.lines:

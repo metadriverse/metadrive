@@ -4,13 +4,14 @@ import numpy as np
 
 from metadrive.component.vehicle_navigation_module.trajectory_navigation import WaymoTrajectoryNavigation
 from metadrive.constants import TerminationState
+from metadrive.manager.nuplan_traffic_manager import NuPlanTrafficManager
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.envs.base_env import BaseEnv
 from metadrive.obs.real_env_observation import NuPlanObservation
 from metadrive.manager.nuplan_data_manager import NuPlanDataManager
 from metadrive.manager.nuplan_map_manager import NuPlanMapManager
 from metadrive.obs.state_obs import LidarStateObservation
-from metadrive.policy.idm_policy import WaymoIDMPolicy
+from metadrive.policy.replay_policy import ReplayEgoCarPolicy
 from metadrive.utils import clip
 from metadrive.utils import get_np_random
 import os
@@ -120,12 +121,12 @@ class NuPlanEnv(BaseEnv):
         super(NuPlanEnv, self).setup_engine()
         self.engine.register_manager("data_manager", NuPlanDataManager())
         self.engine.register_manager("map_manager", NuPlanMapManager())
-        # TODO Traffic
-        # if not self.config["no_traffic"]:
-        #     if not self.config['replay']:
-        #         self.engine.register_manager("traffic_manager", WaymoIDMTrafficManager())
-        #     else:
-        #         self.engine.register_manager("traffic_manager", WaymoTrafficManager())
+        if not self.config["no_traffic"]:
+            if not self.config['replay']:
+                raise ValueError
+                self.engine.register_manager("traffic_manager", NuPlanIDMTrafficManager())
+            else:
+                self.engine.register_manager("traffic_manager", NuPlanTrafficManager())
         self.engine.accept("p", self.stop)
         self.engine.accept("q", self.switch_to_third_person_view)
         self.engine.accept("b", self.switch_to_top_down_view)
@@ -199,7 +200,6 @@ class NuPlanEnv(BaseEnv):
         :param vehicle_id: id of BaseVehicle
         :return: reward
         """
-        return 0
         vehicle = self.vehicles[vehicle_id]
         step_info = dict()
 
@@ -277,11 +277,12 @@ if __name__ == "__main__":
     env = NuPlanEnv(
         {
             "use_render": True,
-            # "agent_policy": WaymoIDMPolicy,
-            "manual_control": True,
-            "replay": False,
+            "agent_policy": ReplayEgoCarPolicy,
+            "manual_control": False,
+            "replay": True,
             "no_traffic": False,
-            # "debug":True,
+            "debug":True,
+            "debug_static_world":True,
             # "no_traffic":True,
             # "start_case_index": 192,
             # "start_case_index": 1000,
@@ -291,9 +292,9 @@ if __name__ == "__main__":
                 lidar=dict(num_lasers=120, distance=50, num_others=4),
                 lane_line_detector=dict(num_lasers=12, distance=50),
                 side_detector=dict(num_lasers=160, distance=50),
-                need_navigation=False
+                # need_navigation=False
             ),
-            "show_interface":False
+            # "show_interface":False
         }
     )
     success = []
