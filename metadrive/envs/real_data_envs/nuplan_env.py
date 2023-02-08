@@ -4,17 +4,15 @@ import numpy as np
 
 from metadrive.component.vehicle_navigation_module.trajectory_navigation import WaymoTrajectoryNavigation
 from metadrive.constants import TerminationState
-from metadrive.manager.nuplan_traffic_manager import NuPlanTrafficManager
-from metadrive.engine.asset_loader import AssetLoader
 from metadrive.envs.base_env import BaseEnv
-from metadrive.obs.real_env_observation import NuPlanObservation
 from metadrive.manager.nuplan_data_manager import NuPlanDataManager
 from metadrive.manager.nuplan_map_manager import NuPlanMapManager
+from metadrive.manager.nuplan_traffic_manager import NuPlanTrafficManager
+from metadrive.obs.real_env_observation import NuPlanObservation
 from metadrive.obs.state_obs import LidarStateObservation
 from metadrive.policy.replay_policy import NuPlanReplayEgoCarPolicy
 from metadrive.utils import clip
 from metadrive.utils import get_np_random
-import os
 
 NUPLAN_ENV_CONFIG = dict(
     # ===== Dataset Config =====
@@ -297,7 +295,7 @@ if __name__ == "__main__":
     )
     success = []
     env.reset(force_seed=0)
-    for i in range(3):
+    for i in range(10):
         env.reset(force_seed=0)
         for i in range(150):
             o, r, d, info = env.step([0, 0])

@@ -1,10 +1,12 @@
+import math
 from abc import ABCMeta, abstractmethod
 from typing import Tuple
 
-import math
 import numpy as np
 from panda3d.bullet import BulletBoxShape
+from panda3d.bullet import BulletConvexHullShape
 from panda3d.bullet import BulletGhostNode
+from panda3d.core import LPoint3f
 from panda3d.core import Vec3, LQuaternionf, CardMaker, TransparencyAttrib, NodePath
 from panda3d.core import Vec4
 
@@ -345,6 +347,56 @@ class AbstractLane:
             block.sidewalk.instanceTo(side_np)
 
         return node_path_list
+
+    def _construct_lane_only_physics_polygon(self, block, polygon):
+        """
+        This usually used with _construct_lane_only_vis_segment
+        """
+        lane = self
+        n = BaseRigidBodyNode(lane, BodyName.Lane)
+        segment_np = NodePath(n)
+
+        self._node_path_list.append(segment_np)
+        self._node_path_list.append(n)
+
+        segment_node = segment_np.node()
+        segment_node.set_active(False)
+        segment_node.setKinematic(False)
+        segment_node.setStatic(True)
+        shape = BulletConvexHullShape()
+        for point in polygon:
+            # Panda coordinate is different from metadrive coordinate
+            point[1] *= -1
+            shape.addPoint(LPoint3f(*point))
+        segment_node.addShape(shape)
+        block.static_nodes.append(segment_node)
+        segment_np.reparentTo(block.lane_node_path)
+
+    def _construct_lane_only_vis_segment(self, block, position, width, length, theta):
+        """
+        Only create visual part for this lane, usually used with _construct_lane_only_physics_polygon()
+        """
+        length += 0.1
+
+        if block.render:
+            cm = CardMaker('card')
+            cm.setFrame(-length / 2, length / 2, -width / 2, width / 2)
+            cm.setHasNormals(True)
+            cm.setUvRange((0, 0), (length / 20, width / 10))
+            card = block.lane_vis_node_path.attachNewNode(cm.generate())
+            self._node_path_list.append(card)
+
+            card.setPos(panda_position(position, np.random.rand() * 0.01 - 0.01))
+
+            card.setQuat(
+                LQuaternionf(
+                    math.cos(theta / 2) * math.cos(-math.pi / 4),
+                    math.cos(theta / 2) * math.sin(-math.pi / 4), -math.sin(theta / 2) * math.cos(-math.pi / 4),
+                    math.sin(theta / 2) * math.cos(-math.pi / 4)
+                )
+            )
+            card.setTransparency(TransparencyAttrib.MMultisample)
+            card.setTexture(block.ts_color, block.road_texture)
 
     def destroy(self):
         try:
