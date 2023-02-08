@@ -49,12 +49,14 @@ class NuPlanTrafficManager(BaseManager):
         # generate vehicle
         if self.episode_step >= self.current_scenario_length:
             return
+
+        vehicles_to_eliminate = self.vid_to_obj.keys() - self._current_traffic_data[self.engine.episode_step].keys()
+        for v_id in list(vehicles_to_eliminate):
+            self.clear_objects([self.vid_to_obj[v_id]])
+            self.vid_to_obj.pop(v_id)
+
         for v_id, obj_state in self._current_traffic_data[self.engine.episode_step].items():
             if v_id in self.vid_to_obj and self.vid_to_obj[v_id] in self.spawned_objects.keys():
-                if v_id in self.vid_to_obj:
-                    self.clear_objects([self.vid_to_obj[v_id]])
-                    self.vid_to_obj.pop(v_id)
-                    continue
                 self.spawned_objects[self.vid_to_obj[v_id]].set_position(
                     nuplan_2_metadrive_position([obj_state.center.x, obj_state.center.y],
                                                 self.engine.current_map.nuplan_center))
