@@ -39,7 +39,8 @@ class NuPlanTrafficManager(BaseManager):
                 vehicle_config=v_config
             )
             self.vid_to_obj[v_id] = v.name
-            v.set_static(True)
+            # v.set_static(True)
+            v.set_velocity([obj_state.velocity.x, obj_state.velocity.y])
 
     # except:
     #     raise ValueError("Can not LOAD traffic for seed: {}".format(self.engine.global_random_seed))
@@ -62,6 +63,7 @@ class NuPlanTrafficManager(BaseManager):
                                                 self.engine.current_map.nuplan_center))
                 self.spawned_objects[self.vid_to_obj[v_id]].set_heading_theta(obj_state.center.heading,
                                                                               rad_to_degree=True)
+                self.spawned_objects[self.vid_to_obj[v_id]].set_velocity([obj_state.velocity.x, obj_state.velocity.y])
             else:
                 # spawn
                 v_config = copy.deepcopy(self.engine.global_config["vehicle_config"])
@@ -83,7 +85,8 @@ class NuPlanTrafficManager(BaseManager):
                     vehicle_config=v_config
                 )
                 self.vid_to_obj[v_id] = v.name
-                v.set_static(True)
+                # v.set_static(True)
+                v.set_velocity([obj_state.velocity.x, obj_state.velocity.y])
         # except:
         #     raise ValueError("Can not UPDATE traffic for seed: {}".format(self.engine.global_random_seed))
 

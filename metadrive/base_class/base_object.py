@@ -143,6 +143,13 @@ class BaseObject(BaseRunnable):
 
         self._node_path_list = []
 
+    def disable_gravity(self):
+        self._body.setGravity(LVector3(0, 0, 0))
+
+    @property
+    def height(self):
+        return self.origin.getPos()[-1]
+
     @property
     def panda_color(self):
         return self._panda_color
@@ -232,9 +239,9 @@ class BaseObject(BaseRunnable):
             self.static_nodes.clear()
             self._config.clear()
 
-    def set_position(self, position, height=0.4):
+    def set_position(self, position, height=0.543):
         """
-        Set this object to a place
+        Set this object to a place, the default value is the regular height for red car
         :param position: 2d array or list
         """
         self.origin.setPos(panda_position(position, height))

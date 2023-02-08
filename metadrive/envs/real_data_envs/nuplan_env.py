@@ -11,7 +11,7 @@ from metadrive.obs.real_env_observation import NuPlanObservation
 from metadrive.manager.nuplan_data_manager import NuPlanDataManager
 from metadrive.manager.nuplan_map_manager import NuPlanMapManager
 from metadrive.obs.state_obs import LidarStateObservation
-from metadrive.policy.replay_policy import ReplayEgoCarPolicy
+from metadrive.policy.replay_policy import NuPlanReplayEgoCarPolicy
 from metadrive.utils import clip
 from metadrive.utils import get_np_random
 import os
@@ -275,7 +275,7 @@ if __name__ == "__main__":
     env = NuPlanEnv(
         {
             "use_render": True,
-            "agent_policy": ReplayEgoCarPolicy,
+            "agent_policy": NuPlanReplayEgoCarPolicy,
             "manual_control": True,
             "replay": True,
             "no_traffic": False,

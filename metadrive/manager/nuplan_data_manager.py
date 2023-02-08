@@ -44,6 +44,10 @@ class NuPlanDataManager(BaseManager):
         self._current_scenario_index = 0
 
     @property
+    def time_interval(self):
+        return self.current_scenario.database_interval
+
+    @property
     def scenario_num(self):
         return self._scenario_num
 

@@ -1,11 +1,11 @@
-from metadrive.component.map.nuplan_map import NuPlanMap
 from nuplan.planning.scenario_builder.nuplan_db.nuplan_scenario import NuPlanScenario
+
 from metadrive.component.lane.point_lane import PointLane
-from metadrive.utils.nuplan_utils.parse_traffic import parse_ego_vehicle_trajectory, parse_ego_vehicle_state
+from metadrive.component.map.nuplan_map import NuPlanMap
 from metadrive.constants import DEFAULT_AGENT
 from metadrive.manager.base_manager import BaseManager
-from metadrive.manager.nuplan_traffic_manager import NuPlanTrafficManager
 from metadrive.utils.data_buffer import DataBuffer
+from metadrive.utils.nuplan_utils.parse_traffic import parse_ego_vehicle_trajectory, parse_ego_vehicle_state
 
 
 class NuPlanMapManager(BaseManager):

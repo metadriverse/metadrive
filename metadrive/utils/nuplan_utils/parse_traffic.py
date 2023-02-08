@@ -10,7 +10,7 @@ def parse_ego_vehicle_state(state, nuplan_center):
     ret = {}
     ret["position"] = nuplan_2_metadrive_position([state.waypoint.x, state.waypoint.y], center)
     ret["heading"] = nuplan_2_metadrive_heading(np.rad2deg(state.waypoint.heading))
-    ret["velocity"] = nuplan_2_metadrive_position([state.waypoint.velocity.x, state.waypoint.velocity.y])
+    ret["velocity"] = [state.agent.velocity.x, state.agent.velocity.y]
     ret["valid"] = True
     return ret
 

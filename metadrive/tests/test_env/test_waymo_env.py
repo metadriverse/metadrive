@@ -3,10 +3,10 @@ import pytest
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.envs.real_data_envs.waymo_env import WaymoEnv
 from metadrive.policy.idm_policy import WaymoIDMPolicy
-from metadrive.policy.replay_policy import ReplayEgoCarPolicy
+from metadrive.policy.replay_policy import WaymoReplayEgoCarPolicy
 
 
-@pytest.mark.parametrize("policy", [WaymoIDMPolicy, ReplayEgoCarPolicy])
+@pytest.mark.parametrize("policy", [WaymoIDMPolicy, WaymoReplayEgoCarPolicy])
 def test_waymo_env(policy, render=False):
     WaymoIDMPolicy.NORMAL_SPEED = 30
 
