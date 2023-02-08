@@ -132,8 +132,13 @@ class WaymoMapManager(BaseManager):
         # if len(lane.right_lanes) > 0:
         #     self.sdc_destinations += [lane["id"] for lane in lane.right_lanes]
         self.engine.global_config.update(
-            dict(target_vehicle_configs={DEFAULT_AGENT: dict(spawn_position_heading=(init_position, init_yaw),
-                                                             spawn_velocity=init_state["velocity"])})
+            dict(
+                target_vehicle_configs={
+                    DEFAULT_AGENT: dict(
+                        spawn_position_heading=(init_position, init_yaw), spawn_velocity=init_state["velocity"]
+                    )
+                }
+            )
         )
 
     def filter_path(self, start_lanes, end_lanes):

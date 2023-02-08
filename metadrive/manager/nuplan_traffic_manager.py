@@ -33,8 +33,10 @@ class NuPlanTrafficManager(BaseManager):
                 )
             )
             v = self.spawn_object(
-                SVehicle, position=nuplan_2_metadrive_position([obj_state.center.x, obj_state.center.y],
-                                                               self.engine.current_map.nuplan_center),
+                SVehicle,
+                position=nuplan_2_metadrive_position(
+                    [obj_state.center.x, obj_state.center.y], self.engine.current_map.nuplan_center
+                ),
                 heading=obj_state.center.heading * 180 / np.pi,
                 vehicle_config=v_config
             )
@@ -59,10 +61,13 @@ class NuPlanTrafficManager(BaseManager):
         for v_id, obj_state in self._current_traffic_data[self.engine.episode_step].items():
             if v_id in self.vid_to_obj and self.vid_to_obj[v_id] in self.spawned_objects.keys():
                 self.spawned_objects[self.vid_to_obj[v_id]].set_position(
-                    nuplan_2_metadrive_position([obj_state.center.x, obj_state.center.y],
-                                                self.engine.current_map.nuplan_center))
-                self.spawned_objects[self.vid_to_obj[v_id]].set_heading_theta(obj_state.center.heading,
-                                                                              rad_to_degree=True)
+                    nuplan_2_metadrive_position(
+                        [obj_state.center.x, obj_state.center.y], self.engine.current_map.nuplan_center
+                    )
+                )
+                self.spawned_objects[self.vid_to_obj[v_id]].set_heading_theta(
+                    obj_state.center.heading, rad_to_degree=True
+                )
                 self.spawned_objects[self.vid_to_obj[v_id]].set_velocity([obj_state.velocity.x, obj_state.velocity.y])
             else:
                 # spawn
@@ -79,8 +84,10 @@ class NuPlanTrafficManager(BaseManager):
                     )
                 )
                 v = self.spawn_object(
-                    SVehicle, position=nuplan_2_metadrive_position([obj_state.center.x, obj_state.center.y],
-                                                                   self.engine.current_map.nuplan_center),
+                    SVehicle,
+                    position=nuplan_2_metadrive_position(
+                        [obj_state.center.x, obj_state.center.y], self.engine.current_map.nuplan_center
+                    ),
                     heading=obj_state.center.heading,
                     vehicle_config=v_config
                 )
@@ -98,7 +105,8 @@ class NuPlanTrafficManager(BaseManager):
         length = self.engine.data_manager.current_scenario.get_number_of_iterations()
         detection_ret = {
             i: self.engine.data_manager.current_scenario.get_tracked_objects_at_iteration(i).tracked_objects
-            for i in range(length)}
+            for i in range(length)
+        }
         for step, frame_data in detection_ret.items():
             new_frame_data = {}
             for obj in frame_data:
