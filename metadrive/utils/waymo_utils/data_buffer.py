@@ -1,7 +1,31 @@
 from collections import deque
 
 from metadrive.engine.engine_utils import get_engine
+from collections import Iterable
+import numpy as np
 
+def _clear_if_necessary(obj, depth=0):
+    if depth > 5:
+        obj = None
+        del obj
+        return
+
+    if isinstance(obj, dict):
+        keys = set(obj.keys())
+        for k in keys:
+            if k in obj:
+                _clear_if_necessary(obj[k], depth + 1)
+                obj[k] = None
+        obj.clear()
+    elif isinstance(obj, str):
+        del obj
+    elif isinstance(obj, list):
+        obj.clear()
+        del obj
+    elif isinstance(obj, np.ndarray):
+        del obj
+    else:
+        del obj
 
 class DataBuffer:
     """
@@ -32,7 +56,8 @@ class DataBuffer:
             if hasattr(tmp_obj, "destroy"):
                 print("Destroy object: ", type(tmp_obj))
                 tmp_obj.destroy()
-            del tmp_obj
+
+            _clear_if_necessary(tmp_obj)
 
     def __getitem__(self, item):
         assert item in self.store_data_buffer
