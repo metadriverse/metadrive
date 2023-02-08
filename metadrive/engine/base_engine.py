@@ -208,6 +208,7 @@ class BaseEngine(EngineCore, Randomizable):
             self._dying_objects[obj.class_name].remove(obj)
             if hasattr(obj, "destroy"):
                 obj.destroy()
+        del obj
 
     def reset(self):
         """

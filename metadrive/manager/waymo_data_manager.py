@@ -31,9 +31,9 @@ class WaymoDataManager(BaseManager):
         assert self.start_case_index <= i < self.start_case_index + self.case_num, \
             "Case ID exceeds range"
         file_path = os.path.join(self.directory, "{}.pkl".format(i))
-        return copy.deepcopy(read_waymo_data(file_path))
+        return read_waymo_data(file_path)
 
-    def get_case(self, i):
+    def get_case(self, i, should_copy=False):
         if i not in self.waymo_case:
             # inner psutil function
             # def process_memory():
@@ -51,11 +51,17 @@ class WaymoDataManager(BaseManager):
             # print("{}:  Reset! Mem Change {:.3f}MB".format("data manager 1", (lm - cm) / 1e6))
             # cm = lm
 
+            # print("===Getting new case: ", i)
             self.waymo_case[i] = self._get_case(i)
 
             # lm = process_memory()
             # print("{}:  Reset! Mem Change {:.3f}MB".format("data manager 2", (lm - cm) / 1e6))
             # cm = lm
 
-        # return copy.deepcopy(self.waymo_case[i])
+        else:
+            pass
+            # print("===Don't need to get new case. Just return: ", i)
+
+        if should_copy:
+            return copy.deepcopy(self.waymo_case[i])
         return self.waymo_case[i]

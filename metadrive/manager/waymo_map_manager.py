@@ -1,3 +1,5 @@
+import copy
+
 from metadrive.component.lane.waypoint_lane import WayPointLane
 from metadrive.component.map.waymo_map import WaymoMap
 from metadrive.constants import DEFAULT_AGENT
@@ -25,8 +27,6 @@ class WaymoMapManager(BaseManager):
         self.store_map_buffer = DataBuffer(store_data_buffer_size=store_map_buffer_size if self.store_map else None)
 
     def reset(self):
-        seed = self.engine.global_random_seed
-        assert self.start <= seed < self.start + self.map_num
 
         # inner psutil function
         # def process_memory():
@@ -37,6 +37,16 @@ class WaymoMapManager(BaseManager):
         #     return mem_info.rss
         #
         # cm = process_memory()
+
+        self.current_sdc_route = None
+        self.sdc_dest_point = None
+
+        seed = self.engine.global_random_seed
+        assert self.start <= seed < self.start + self.map_num
+
+        # lm = process_memory()
+        # print("{}:  Reset! Mem Change {:.3f}MB".format(0, (lm - cm) / 1e6))
+        # cm = lm
 
         if seed in self.store_map_buffer:
             new_map = self.store_map_buffer[seed]
@@ -83,7 +93,7 @@ class WaymoMapManager(BaseManager):
         data = self.engine.data_manager.get_case(self.engine.global_random_seed)
 
         sdc_traj = WaymoTrafficManager.parse_full_trajectory(data["tracks"][data["sdc_index"]]["state"])
-        self.current_sdc_route = WayPointLane(sdc_traj, 1.5)
+
         init_state = WaymoTrafficManager.parse_vehicle_state(
             data["tracks"][data["sdc_index"]]["state"],
             self.engine.global_config["traj_start_index"],
@@ -99,37 +109,12 @@ class WaymoMapManager(BaseManager):
         last_position = last_state["position"]
         last_yaw = last_state["heading"]
 
-        # TODO(LQY):
-        #  The Following part is for EdgeNetworkNavi
-        #  Consider removing them if we finally choose to use TrajectoryNavi
-        # start_lanes = ray_localization(
-        #     [np.cos(init_yaw), np.sin(init_yaw)],
-        #     init_position,
-        #     self.engine,
-        #     return_all_result=True,
-        #     use_heading_filter=False
-        # )
-        # end_lanes = ray_localization(
-        #     [np.cos(last_yaw), np.sin(last_yaw)],
-        #     last_position,
-        #     self.engine,
-        #     return_all_result=True,
-        #     use_heading_filter=False
-        # )
-        #
-        # self.sdc_start, sdc_end = self.filter_path(start_lanes, end_lanes)
-        # initial_long, initial_lat = self.current_map.road_network. \
-        #     get_lane(self.sdc_start).local_coordinates(init_position)
+        self.current_sdc_route = copy.deepcopy(WayPointLane(sdc_traj, 1.5))
 
-        self.sdc_dest_point = last_position
-        # self.sdc_destinations = [sdc_end]
-        # lane = self.current_map.road_network.get_lane(sdc_end)
-        # if len(lane.left_lanes) > 0:
-        #     self.sdc_destinations += [lane["id"] for lane in lane.left_lanes]
-        # if len(lane.right_lanes) > 0:
-        #     self.sdc_destinations += [lane["id"] for lane in lane.right_lanes]
+        self.sdc_dest_point = copy.deepcopy(last_position)
+
         self.engine.global_config.update(
-            dict(target_vehicle_configs={DEFAULT_AGENT: dict(spawn_position_heading=(init_position, init_yaw))})
+            copy.deepcopy(dict(target_vehicle_configs={DEFAULT_AGENT: dict(spawn_position_heading=(init_position, init_yaw))}))
         )
 
     def filter_path(self, start_lanes, end_lanes):
