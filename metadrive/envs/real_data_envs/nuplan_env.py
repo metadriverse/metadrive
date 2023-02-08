@@ -279,8 +279,8 @@ if __name__ == "__main__":
             "manual_control": True,
             "replay": True,
             "no_traffic": False,
-            "debug": True,
-            "debug_static_world": True,
+            # "debug": True,
+            # "debug_static_world": True,
             # "no_traffic":True,
             # "start_case_index": 192,
             # "start_case_index": 1000,
@@ -298,7 +298,8 @@ if __name__ == "__main__":
     success = []
     env.reset(force_seed=0)
     for i in range(3):
-        while True:
+        env.reset(force_seed=0)
+        for i in range(150):
             o, r, d, info = env.step([0, 0])
             # assert env.observation_space.contains(o)
             # c_lane = env.vehicle.lane

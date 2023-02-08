@@ -47,9 +47,11 @@ class NuPlanTrafficManager(BaseManager):
     def after_step(self, *args, **kwargs):
         # try:
         # generate vehicle
+        if self.episode_step >= self.current_scenario_length:
+            return
         for v_id, obj_state in self._current_traffic_data[self.engine.episode_step].items():
             if v_id in self.vid_to_obj and self.vid_to_obj[v_id] in self.spawned_objects.keys():
-                if self.episode_step >= self.current_scenario_length and v_id in self.vid_to_obj:
+                if v_id in self.vid_to_obj:
                     self.clear_objects([self.vid_to_obj[v_id]])
                     self.vid_to_obj.pop(v_id)
                     continue
