@@ -18,7 +18,7 @@ class Interface:
 
     def __init__(self, base_engine):
         self._node_path_list = []
-        self.engine = base_engine
+        # self.engine = base_engine
         self.vehicle_panel = None
         self.right_panel = None
         self.mid_panel = None
@@ -305,3 +305,8 @@ class VehiclePanel(ImageBuffer):
         for para in self.para_vis_np.values():
             para.removeNode()
         self.aspect2d_np.removeNode()
+
+    @property
+    def engine(self):
+        from metadrive.engine.engine_utils import get_engine
+        return get_engine()

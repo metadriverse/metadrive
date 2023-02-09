@@ -20,6 +20,7 @@ class WaymoDataManager(BaseManager):
         self.start_case_index = engine.global_config["start_case_index"]
 
         self.store_map = store_map
+
         self.waymo_case = DataBuffer(store_map_buffer_size if self.store_map else self.case_num)
 
         for i in tqdm(range(self.start_case_index, self.start_case_index + self.case_num), desc="Check Waymo Data"):

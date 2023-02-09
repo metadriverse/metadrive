@@ -58,7 +58,7 @@ class BaseManager(Randomizable):
         """
         Destroy manager
         """
-        self.engine = None
+        # self.engine = None
         self.spawned_objects = None
 
     def spawn_object(self, object_class, **kwargs):

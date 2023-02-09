@@ -225,7 +225,7 @@ class BaseEngine(EngineCore, Randomizable):
         self.record_episode = self.global_config["record_episode"]
         self.only_reset_when_replay = self.global_config["only_reset_when_replay"]
 
-        _debug_memory_usage = False
+        _debug_memory_usage = True
 
         if _debug_memory_usage:
             def process_memory():

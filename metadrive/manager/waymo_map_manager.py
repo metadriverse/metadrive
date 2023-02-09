@@ -137,7 +137,6 @@ class WaymoMapManager(BaseManager):
 
     def unload_map(self, map):
         map.detach_from_world()
-        del map
         self.current_map = None
 
         # if not self.engine.global_config["store_map"]:
