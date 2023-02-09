@@ -1,4 +1,5 @@
 import copy
+from nuplan.common.actor_state.tracked_objects_types import TrackedObjectType
 from nuplan.planning.scenario_builder.nuplan_db.nuplan_scenario import NuPlanScenario
 import numpy as np
 from metadrive.utils.coordinates_shift import nuplan_2_metadrive_heading, nuplan_2_metadrive_position
@@ -20,6 +21,8 @@ class NuPlanTrafficManager(BaseManager):
         assert self.engine.episode_step == 0
         self.vid_to_obj = {}
         for v_id, obj_state in self._current_traffic_data[0].items():
+            if obj_state.tracked_object_type != TrackedObjectType.VEHICLE:
+                continue
             v_config = copy.deepcopy(self.engine.global_config["vehicle_config"])
             v_config["need_navigation"] = False
             v_config.update(
@@ -59,6 +62,8 @@ class NuPlanTrafficManager(BaseManager):
             self.vid_to_obj.pop(v_id)
 
         for v_id, obj_state in self._current_traffic_data[self.engine.episode_step].items():
+            if obj_state.tracked_object_type != TrackedObjectType.VEHICLE:
+                continue
             if v_id in self.vid_to_obj and self.vid_to_obj[v_id] in self.spawned_objects.keys():
                 self.spawned_objects[self.vid_to_obj[v_id]].set_position(
                     nuplan_2_metadrive_position(

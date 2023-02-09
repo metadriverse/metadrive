@@ -27,6 +27,7 @@ NUPLAN_ENV_CONFIG = dict(
     case_num=100,
     store_map=True,
     store_map_buffer_size=200,
+    sequential_seed=False,
 
     # ===== Traffic =====
     no_traffic=False,
@@ -41,8 +42,7 @@ NUPLAN_ENV_CONFIG = dict(
         show_dest_mark=True,
         navigation_module=NuPlanTrajectoryNavigation,
     ),
-    # TODO
-    use_waymo_observation=True,
+    use_nuplan_observation=True,
 
     # ===== Reward Scheme =====
     # See: https://github.com/metadriverse/metadrive/issues/283
@@ -85,7 +85,7 @@ class NuPlanEnv(BaseEnv):
         return {self.DEFAULT_AGENT: self.get_single_observation(self.config["vehicle_config"])}
 
     def get_single_observation(self, vehicle_config):
-        if self.config["use_waymo_observation"]:
+        if self.config["use_nuplan_observation"]:
             o = NuPlanObservation(vehicle_config)
         else:
             o = LidarStateObservation(vehicle_config)
