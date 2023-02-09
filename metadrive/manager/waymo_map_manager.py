@@ -23,8 +23,8 @@ class WaymoMapManager(BaseManager):
         self.sdc_dest_point = None
         self.current_sdc_route = None
 
-        self.store_map = store_map
-        self.store_map_buffer = DataBuffer(store_data_buffer_size=store_map_buffer_size if self.store_map else None)
+        # self.store_map = store_map
+        # self.store_map_buffer = DataBuffer(store_data_buffer_size=store_map_buffer_size if self.store_map else None)
 
     def reset(self):
 
@@ -48,27 +48,27 @@ class WaymoMapManager(BaseManager):
         # print("{}:  Reset! Mem Change {:.3f}MB".format(0, (lm - cm) / 1e6))
         # cm = lm
 
-        if seed in self.store_map_buffer:
-            new_map = self.store_map_buffer[seed]
-        else:
-
-            # lm = process_memory()
-            # print("{}:  Reset! Mem Change {:.3f}MB".format(1, (lm - cm) / 1e6))
-            # cm = lm
-
-            self.store_map_buffer.clear_if_necessary()
+        # if seed in self.store_map_buffer:
+        #     new_map = self.store_map_buffer[seed]
+        # else:
+        #
+        #     # lm = process_memory()
+        #     # print("{}:  Reset! Mem Change {:.3f}MB".format(1, (lm - cm) / 1e6))
+        #     # cm = lm
+        #
+        #     self.store_map_buffer.clear_if_necessary()
 
             # lm = process_memory()
             # print("{}:  Reset! Mem Change {:.3f}MB".format(2, (lm - cm) / 1e6))
             # cm = lm
 
-            new_map = WaymoMap(map_index=seed)
+        new_map = WaymoMap(map_index=seed)
 
             # lm = process_memory()
             # print("{}:  Reset! Mem Change {:.3f}MB".format(3, (lm - cm) / 1e6))
             # cm = lm
 
-            self.store_map_buffer[seed] = new_map
+            # self.store_map_buffer[seed] = new_map
 
             # lm = process_memory()
             # print("{}:  Reset! Mem Change {:.3f}MB".format(4, (lm - cm) / 1e6))
@@ -137,7 +137,9 @@ class WaymoMapManager(BaseManager):
 
     def unload_map(self, map):
         map.detach_from_world()
+        del map
         self.current_map = None
+
         # if not self.engine.global_config["store_map"]:
         #     self.clear_objects([map.id])
         #     assert len(self.spawned_objects) == 0
@@ -162,6 +164,7 @@ class WaymoMapManager(BaseManager):
         self.sdc_destinations = []
         self.sdc_dest_point = None
         self.current_sdc_route = None
+        self.current_map = None
 
     def clear_objects(self, *args, **kwargs):
         """

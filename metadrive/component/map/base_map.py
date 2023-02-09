@@ -48,7 +48,7 @@ class BaseMap(BaseRunnable):
         self.blocks = []
 
         # Generate map and insert blocks
-        self.engine = get_engine()
+        # self.engine = get_engine()
         self._generate()
         assert self.blocks, "The generate methods does not fill blocks!"
 

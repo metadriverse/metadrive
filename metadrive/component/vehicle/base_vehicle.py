@@ -133,7 +133,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         assert engine_initialized(), "Please make sure game engine is successfully initialized!"
 
         # NOTE: it is the game engine, not vehicle drivetrain
-        self.engine = get_engine()
+        # self.engine = get_engine()
         BaseObject.__init__(self, name, random_seed, self.engine.global_config["vehicle_config"])
         BaseVehicleState.__init__(self)
         self.update_config(vehicle_config)
@@ -755,7 +755,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             for sensor in self.image_sensors.values():
                 sensor.destroy()
         self.image_sensors = {}
-        self.engine = None
+        # self.engine = None
 
     def set_heading_theta(self, heading_theta, rad_to_degree=True) -> None:
         """
@@ -853,7 +853,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
 
     def __del__(self):
         super(BaseVehicle, self).__del__()
-        self.engine = None
+        # self.engine = None
         self.lidar = None
         self.mini_map = None
         self.rgb_camera = None

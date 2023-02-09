@@ -11,9 +11,13 @@ from metadrive.utils.waymo_utils.waymo_utils import read_waymo_data
 class WaymoDataManager(BaseManager):
     def __init__(self, store_map=False, store_map_buffer_size=100):
         super(WaymoDataManager, self).__init__()
-        self.directory = self.engine.global_config["waymo_data_directory"]
-        self.case_num = self.engine.global_config["case_num"]
-        self.start_case_index = self.engine.global_config["start_case_index"]
+
+        from metadrive.engine.engine_utils import get_engine
+        engine = get_engine()
+
+        self.directory = engine.global_config["waymo_data_directory"]
+        self.case_num = engine.global_config["case_num"]
+        self.start_case_index = engine.global_config["start_case_index"]
 
         self.store_map = store_map
         self.waymo_case = DataBuffer(store_map_buffer_size if self.store_map else self.case_num)
@@ -34,29 +38,36 @@ class WaymoDataManager(BaseManager):
         return read_waymo_data(file_path)
 
     def get_case(self, i, should_copy=False):
+
+        _debug_memory_leak = False
+
         if i not in self.waymo_case:
-            # inner psutil function
-            # def process_memory():
-            #     import psutil
-            #     import os
-            #     process = psutil.Process(os.getpid())
-            #     mem_info = process.memory_info()
-            #     return mem_info.rss
-            #
-            # cm = process_memory()
+
+            if _debug_memory_leak:
+                # inner psutil function
+                def process_memory():
+                    import psutil
+                    import os
+                    process = psutil.Process(os.getpid())
+                    mem_info = process.memory_info()
+                    return mem_info.rss
+
+                cm = process_memory()
 
             self.waymo_case.clear_if_necessary()
 
-            # lm = process_memory()
-            # print("{}:  Reset! Mem Change {:.3f}MB".format("data manager 1", (lm - cm) / 1e6))
-            # cm = lm
+            if _debug_memory_leak:
+                lm = process_memory()
+                print("{}:  Reset! Mem Change {:.3f}MB".format("data manager clear case", (lm - cm) / 1e6))
+                cm = lm
 
             # print("===Getting new case: ", i)
             self.waymo_case[i] = self._get_case(i)
 
-            # lm = process_memory()
-            # print("{}:  Reset! Mem Change {:.3f}MB".format("data manager 2", (lm - cm) / 1e6))
-            # cm = lm
+            if _debug_memory_leak:
+                lm = process_memory()
+                print("{}:  Reset! Mem Change {:.3f}MB".format("data manager read case", (lm - cm) / 1e6))
+                cm = lm
 
         else:
             pass

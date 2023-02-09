@@ -196,7 +196,7 @@ class BaseEnv(gym.Env):
         )
 
         # lazy initialization, create the main vehicle in the lazy_init() func
-        self.engine: Optional[BaseEngine] = None
+        # self.engine: Optional[BaseEngine] = None
 
         # In MARL envs with respawn mechanism, varying episode lengths might happen.
         self.dones = None
@@ -245,11 +245,16 @@ class BaseEnv(gym.Env):
         # It is the true init() func to create the main vehicle and its module, to avoid incompatible with ray
         if engine_initialized():
             return
-        self.engine = initialize_engine(self.config)
+        engine = initialize_engine(self.config)
         # engine setup
         self.setup_engine()
         # other optional initialization
         self._after_lazy_init()
+
+    @property
+    def engine(self):
+        from metadrive.engine.engine_utils import get_engine
+        return get_engine()
 
     def _after_lazy_init(self):
         pass

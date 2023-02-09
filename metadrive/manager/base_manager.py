@@ -11,8 +11,8 @@ class BaseManager(Randomizable):
     def __init__(self):
         from metadrive.engine.engine_utils import get_engine, engine_initialized
         assert engine_initialized(), "You should not create manager before the initialization of BaseEngine"
-        self.engine = get_engine()
-        Randomizable.__init__(self, self.engine.global_random_seed)
+        # self.engine = get_engine()
+        Randomizable.__init__(self, get_engine().global_random_seed)
         self.spawned_objects = {}
 
     @property
@@ -118,3 +118,8 @@ class BaseManager(Randomizable):
     @property
     def class_name(self):
         return self.__class__.__name__
+
+    @property
+    def engine(self):
+        from metadrive.engine.engine_utils import get_engine
+        return get_engine()

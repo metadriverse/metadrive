@@ -9,7 +9,7 @@ class BasePolicy(Randomizable, Configurable):
     def __init__(self, control_object, random_seed=None, config=None):
         Randomizable.__init__(self, random_seed)
         Configurable.__init__(self, config)
-        self.engine = get_engine()
+        # self.engine = get_engine()
         self.control_object = control_object
         self.action_info = dict()
 
@@ -33,7 +33,7 @@ class BasePolicy(Randomizable, Configurable):
         logging.debug("{} is released".format(self.__class__.__name__))
         super(BasePolicy, self).destroy()
         self.control_object = None
-        self.engine = None
+        # self.engine = None
 
     @property
     def name(self):
@@ -41,3 +41,7 @@ class BasePolicy(Randomizable, Configurable):
 
     def __repr__(self):
         return self.name
+
+    @property
+    def engine(self):
+        return get_engine()

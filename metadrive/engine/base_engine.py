@@ -225,9 +225,9 @@ class BaseEngine(EngineCore, Randomizable):
         self.record_episode = self.global_config["record_episode"]
         self.only_reset_when_replay = self.global_config["only_reset_when_replay"]
 
-        _profile_memory_usage = False
+        _debug_memory_usage = False
 
-        if _profile_memory_usage:
+        if _debug_memory_usage:
             def process_memory():
                 import psutil
                 import os
@@ -242,9 +242,10 @@ class BaseEngine(EngineCore, Randomizable):
             # clean all manager
             manager.before_reset()
 
-            if _profile_memory_usage:
+            if _debug_memory_usage:
                 lm = process_memory()
-                print("{}: Before Reset! Mem Change {:.3f}MB".format(manager_name, (lm - cm) / 1e6))
+                if lm - cm != 0:
+                    print("{}: Before Reset! Mem Change {:.3f}MB".format(manager_name, (lm - cm) / 1e6))
                 cm = lm
 
         self._object_clean_check()
@@ -255,17 +256,19 @@ class BaseEngine(EngineCore, Randomizable):
                 continue
             manager.reset()
 
-            if _profile_memory_usage:
+            if _debug_memory_usage:
                 lm = process_memory()
-                print("{}: Reset! Mem Change {:.3f}MB".format(manager_name, (lm - cm) / 1e6))
+                if lm - cm != 0:
+                    print("{}: Reset! Mem Change {:.3f}MB".format(manager_name, (lm - cm) / 1e6))
                 cm = lm
 
         for manager_name, manager in self.managers.items():
             manager.after_reset()
 
-            if _profile_memory_usage:
+            if _debug_memory_usage:
                 lm = process_memory()
-                print("{}: After Reset! Mem Change {:.3f}MB".format(manager_name, (lm - cm) / 1e6))
+                if lm - cm != 0:
+                    print("{}: After Reset! Mem Change {:.3f}MB".format(manager_name, (lm - cm) / 1e6))
                 cm = lm
 
         # reset cam

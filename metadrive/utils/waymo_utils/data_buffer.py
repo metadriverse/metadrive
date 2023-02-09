@@ -34,6 +34,7 @@ class DataBuffer:
     The maximum size of the buffer is determined by store_data_buffer_size
     """
     def __init__(self, store_data_buffer_size=None):
+
         self.store_data_buffer = {}
 
         if store_data_buffer_size is None:
