@@ -1,6 +1,7 @@
 import copy
 import logging
 
+from metadrive.base_class.base_object import BaseObject
 from metadrive.constants import ObjectState, PolicyState
 from metadrive.manager.base_manager import BaseManager
 from metadrive.utils.map_utils import is_map_related_instance, is_map_related_class
@@ -118,10 +119,16 @@ class RecordManager(BaseManager):
                 ObjectState.NAME: name
             }
 
-    def add_policy_info(self, name, policy_class, args, kwargs):
+    def add_policy_info(self, name, policy_class, *args, **kwargs):
         """
         Call when spawn new objects, ignore map related things
         """
+        filtered_args = []
+        for arg in args:
+            filtered_args.append(arg) if not isinstance(arg, BaseObject) else filtered_args.append(BaseObject)
+        filtered_kwargs = {}
+        for k, v in kwargs.items():
+            filtered_kwargs[k] = v if not isinstance(v, BaseObject) else BaseObject
         if self.engine.record_episode:
             assert name not in self.current_frame.policy_info, "Duplicated record!"
             self.current_frame.policy_info[name] = {

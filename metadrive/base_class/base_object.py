@@ -250,20 +250,28 @@ class BaseObject(BaseRunnable):
     def position(self):
         return metadrive_position(self.origin.getPos())
 
-    def set_velocity(self, direction: list, value=None):
+    def set_velocity(self, direction: list, value=None, in_local_frame=False):
         """
         Set velocity for object including the direction of velocity and the value (speed)
         The direction of velocity will be normalized automatically, value decided its scale
-        :param position: 2d array or list
+        :param direction: 2d array or list
         :param value: speed [m/s]
+        :param in_local_frame: True, apply speed to local fram
         """
+        if in_local_frame:
+            from metadrive.engine.engine_utils import get_engine
+            engine = get_engine()
+            direction = LVector3(*direction, 0.)
+            direction[1] *= -1
+            ret = engine.worldNP.getRelativeVector(self.origin, direction)
+            direction = [-ret[1], -ret[0]]
         if value is not None:
             norm_ratio = value / (norm(direction[0], direction[1]) + 1e-3)
         else:
             norm_ratio = 1
         self._body.setLinearVelocity(
             LVector3(direction[0] * norm_ratio, -direction[1] * norm_ratio,
-                     self.origin.getPos()[-1])
+                     self._body.getLinearVelocity()[-1])
         )
 
     @property

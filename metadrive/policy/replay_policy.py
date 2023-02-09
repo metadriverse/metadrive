@@ -125,7 +125,7 @@ class NuPlanReplayEgoCarPolicy(ReplayEgoCarPolicy):
             self.control_object.set_position(self.traj_info[int(self.timestep)]["position"])
             velocity = self.traj_info[int(self.timestep)]["velocity"]
             self.control_object.set_velocity([velocity[-1], -velocity[0]])
-            # self.control_object.set_velocity(self.traj_info[int(self.timestep)]["velocity"])
+            self.control_object.set_velocity(self.traj_info[int(self.timestep)]["velocity"])
 
         if self.heading is None or self.timestep >= len(self.traj_info):
             pass

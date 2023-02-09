@@ -55,6 +55,8 @@ if __name__ == "__main__":
 
     for s in range(1, 10000):
         o, r, d, info = env.step(env.action_space.sample())
+        env.vehicle.set_velocity([5, 0], in_local_frame=True)
+        # else:
         # if s % 100 == 0:
         #     env.close()
         #     env.reset()
