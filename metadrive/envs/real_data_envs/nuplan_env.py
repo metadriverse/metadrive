@@ -2,7 +2,7 @@ import logging
 
 import numpy as np
 
-from metadrive.component.vehicle_navigation_module.trajectory_navigation import WaymoTrajectoryNavigation
+from metadrive.component.vehicle_navigation_module.trajectory_navigation import NuPlanTrajectoryNavigation
 from metadrive.constants import TerminationState
 from metadrive.envs.base_env import BaseEnv
 from metadrive.manager.nuplan_data_manager import NuPlanDataManager
@@ -21,8 +21,12 @@ NUPLAN_ENV_CONFIG = dict(
         'scenario_builder=nuplan_mini',  # use nuplan mini database (2.5h of 8 autolabeled logs in Las Vegas)
         'scenario_filter=one_continuous_log',  # simulate only one log
         "scenario_filter.log_names=['2021.07.16.20.45.29_veh-35_01095_01486']",
-        'scenario_filter.limit_total_scenarios=2',  # use 2 total scenarios
+        'scenario_filter.limit_total_scenarios=2800',  # use 2 total scenarios
     ],
+    start_case_index=0,
+    case_num=100,
+    store_map=True,
+    store_map_buffer_size=200,
 
     # ===== Traffic =====
     no_traffic=False,
@@ -35,8 +39,7 @@ NUPLAN_ENV_CONFIG = dict(
         lane_line_detector=dict(num_lasers=12, distance=50),
         side_detector=dict(num_lasers=120, distance=50),
         show_dest_mark=True,
-        # TODO NAVI
-        navigation_module=WaymoTrajectoryNavigation,
+        navigation_module=NuPlanTrajectoryNavigation,
     ),
     # TODO
     use_waymo_observation=True,
@@ -173,8 +176,8 @@ class NuPlanEnv(BaseEnv):
         # for compatibility
         # crash almost equals to crashing with vehicles
         done_info[TerminationState.CRASH] = (
-            done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
-            or done_info[TerminationState.CRASH_BUILDING]
+                done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
+                or done_info[TerminationState.CRASH_BUILDING]
         )
         return done, done_info
 
@@ -236,25 +239,24 @@ class NuPlanEnv(BaseEnv):
         return True if np.linalg.norm(vehicle.position - self.engine.map_manager.sdc_dest_point) < 5 else False
 
     def _reset_global_seed(self, force_seed=None):
-        # TODO LQY: Fix this!
-        # if force_seed is not None:
-        #     current_seed = force_seed
-        # elif self.config["sequential_seed"]:
-        #     current_seed = self.engine.global_seed
-        #     if current_seed is None:
-        #         current_seed = self.config["start_case_index"]
-        #     else:
-        #         current_seed += 1
-        #     if current_seed >= self.config["start_case_index"] + int(self.config["case_num"]):
-        #         current_seed = self.config["start_case_index"]
-        # else:
-        #     current_seed = get_np_random(None).randint(
-        #         self.config["start_case_index"], self.config["start_case_index"] + int(self.config["case_num"])
-        #     )
-        #
-        # assert self.config["start_case_index"] <= current_seed < \
-        #        self.config["start_case_index"] + self.config["case_num"], "Force seed range Error!"
-        self.seed(0)
+        if force_seed is not None:
+            current_seed = force_seed
+        elif self.config["sequential_seed"]:
+            current_seed = self.engine.global_seed
+            if current_seed is None:
+                current_seed = self.config["start_case_index"]
+            else:
+                current_seed += 1
+            if current_seed >= self.config["start_case_index"] + int(self.config["case_num"]):
+                current_seed = self.config["start_case_index"]
+        else:
+            current_seed = get_np_random(None).randint(
+                self.config["start_case_index"], self.config["start_case_index"] + int(self.config["case_num"])
+            )
+
+        assert self.config["start_case_index"] <= current_seed < \
+               self.config["start_case_index"] + self.config["case_num"], "Force seed range Error!"
+        self.seed(current_seed)
 
     def _is_out_of_road(self, vehicle):
         # A specified function to determine whether this vehicle should be done.
@@ -283,6 +285,8 @@ if __name__ == "__main__":
             # "start_case_index": 192,
             # "start_case_index": 1000,
             # "waymo_data_directory": "E:\\PAMI_waymo_data\\idm_filtered\\test",
+            "start_case_index": 200,
+            "case_num": 2000,
             "horizon": 1000,
             "vehicle_config": dict(
                 lidar=dict(num_lasers=120, distance=50, num_others=4),
@@ -294,10 +298,9 @@ if __name__ == "__main__":
         }
     )
     success = []
-    env.reset(force_seed=0)
-    for i in range(10):
-        env.reset(force_seed=0)
-        for i in range(150):
+    for seed in range(300, 2000):
+        env.reset(force_seed=seed)
+        for i in range(env.engine.data_manager.current_scenario_length):
             o, r, d, info = env.step([0, 0])
             # assert env.observation_space.contains(o)
             # c_lane = env.vehicle.lane

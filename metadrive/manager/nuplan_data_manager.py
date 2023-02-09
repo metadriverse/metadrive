@@ -1,4 +1,5 @@
 import logging
+from metadrive.utils.data_buffer import DataBuffer
 # Useful imports
 import os
 import tempfile
@@ -36,12 +37,16 @@ class NuPlanDataManager(BaseManager):
         scenario_filter = build_scenario_filter(cfg.scenario_filter)
 
         # get scenarios from database
-        scenarios = scenario_builder.get_scenarios(scenario_filter, common_builder.worker)
-        self._nuplan_scenarios = scenarios
+        self._nuplan_scenarios = scenario_builder.get_scenarios(scenario_filter, common_builder.worker)
+
+        # filter case according to config
+        self.start_case_index = self.engine.global_config["start_case_index"]
+        self.case_num = self.engine.global_config["case_num"]
+        assert len(self._nuplan_scenarios) > self.start_case_index + self.case_num, "Number of scenes are not enough"
         logger.info("\n \n ############### Finish Loading NuPlan Data ############### \n")
 
-        self._scenario_num = len(self._nuplan_scenarios)
-        self._current_scenario_index = 0
+        self._scenario_num = self.case_num
+        self._current_scenario_index = None
 
     @property
     def time_interval(self):
@@ -94,6 +99,7 @@ class NuPlanDataManager(BaseManager):
         return cfg
 
     def get_case(self, index, force_get_current_case=True):
+        assert self.start_case_index <= index < self.start_case_index + self.case_num
         if force_get_current_case:
             assert index == self.random_seed
             return self.current_scenario
@@ -101,6 +107,7 @@ class NuPlanDataManager(BaseManager):
             return self._nuplan_scenarios[index]
 
     def seed(self, random_seed):
+        assert self.start_case_index <= random_seed < self.start_case_index + self.case_num
         super(NuPlanDataManager, self).seed(random_seed)
         self._current_scenario_index = random_seed
 

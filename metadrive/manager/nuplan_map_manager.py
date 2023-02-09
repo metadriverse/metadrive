@@ -21,6 +21,7 @@ class NuPlanMapManager(BaseManager):
         store_map_buffer_size = self.engine.global_config.get("store_map_buffer_size", self.DEFAULT_DATA_BUFFER_SIZE)
         self.current_map = None
         self.map_num = self.engine.data_manager.scenario_num
+        self.start = self.engine.global_config["start_case_index"]
         self.sdc_dest_point = None
         self.current_sdc_route = None
 
@@ -28,8 +29,7 @@ class NuPlanMapManager(BaseManager):
 
     def reset(self):
         seed = self.engine.global_random_seed
-        # TODO(LQY) add assert
-        # assert self.start <= seed < self.start + self.map_num
+        assert self.start <= seed < self.start + self.map_num
 
         if seed in self.store_map_buffer:
             new_map = self.store_map_buffer[seed]
@@ -37,7 +37,7 @@ class NuPlanMapManager(BaseManager):
             self.store_map_buffer.clear_if_necessary()
             state = self.engine.data_manager.current_scenario.get_ego_state_at_iteration(0)
             center = [state.waypoint.x, state.waypoint.y]
-            new_map = NuPlanMap(nuplan_center=center, map_index=0)
+            new_map = NuPlanMap(nuplan_center=center, map_index=seed)
             self.store_map_buffer[seed] = new_map
 
         self.load_map(new_map)

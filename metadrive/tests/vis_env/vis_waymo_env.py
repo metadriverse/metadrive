@@ -27,8 +27,8 @@ if __name__ == "__main__":
             "replay": True,
             "use_render": True,
             "waymo_data_directory": AssetLoader.file_path(asset_path, "waymo", return_raw_style=False),
-            "case_num": 3,
-            "start_case_index": 0,
+            "case_num": 2,
+            "start_case_index": 1,
             "crash_vehicle_done": False,
             "crash_vehicle_penalty": 0,
             "vehicle_config": {
@@ -38,7 +38,7 @@ if __name__ == "__main__":
             }
         }
     )
-    o = env.reset()
+    o = env.reset(force_seed=0)
 
     for i in range(1, 100000):
         o, r, d, info = env.step([1.0, 0.])
