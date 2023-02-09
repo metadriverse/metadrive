@@ -58,21 +58,21 @@ class WaymoMapManager(BaseManager):
         #
         #     self.store_map_buffer.clear_if_necessary()
 
-            # lm = process_memory()
-            # print("{}:  Reset! Mem Change {:.3f}MB".format(2, (lm - cm) / 1e6))
-            # cm = lm
+        # lm = process_memory()
+        # print("{}:  Reset! Mem Change {:.3f}MB".format(2, (lm - cm) / 1e6))
+        # cm = lm
 
         new_map = WaymoMap(map_index=seed)
 
-            # lm = process_memory()
-            # print("{}:  Reset! Mem Change {:.3f}MB".format(3, (lm - cm) / 1e6))
-            # cm = lm
+        # lm = process_memory()
+        # print("{}:  Reset! Mem Change {:.3f}MB".format(3, (lm - cm) / 1e6))
+        # cm = lm
 
-            # self.store_map_buffer[seed] = new_map
+        # self.store_map_buffer[seed] = new_map
 
-            # lm = process_memory()
-            # print("{}:  Reset! Mem Change {:.3f}MB".format(4, (lm - cm) / 1e6))
-            # cm = lm
+        # lm = process_memory()
+        # print("{}:  Reset! Mem Change {:.3f}MB".format(4, (lm - cm) / 1e6))
+        # cm = lm
 
         self.load_map(new_map)
 
@@ -114,7 +114,9 @@ class WaymoMapManager(BaseManager):
         self.sdc_dest_point = copy.deepcopy(last_position)
 
         self.engine.global_config.update(
-            copy.deepcopy(dict(target_vehicle_configs={DEFAULT_AGENT: dict(spawn_position_heading=(init_position, init_yaw))}))
+            copy.deepcopy(
+                dict(target_vehicle_configs={DEFAULT_AGENT: dict(spawn_position_heading=(init_position, init_yaw))})
+            )
         )
 
     def filter_path(self, start_lanes, end_lanes):

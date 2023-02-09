@@ -42,13 +42,10 @@ class WaymoTrajectoryNavigation(BaseNavigation):
         #  caching a class local variable.
         super(WaymoTrajectoryNavigation, self).reset(map=None, current_lane=None)
 
-
         # self.reference_trajectory = self.get_trajectory()
-
 
         if self.reference_trajectory is not None:
             self.set_route(None, None)
-
 
     @property
     def reference_trajectory(self):

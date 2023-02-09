@@ -27,7 +27,6 @@ class WaymoBlock(BaseBlock):
         e = get_engine()
         return e.data_manager.get_case(self.map_index, should_copy=False)["map"]
 
-
     def _sample_topology(self) -> bool:
         for lane_id, data in self.waymo_map_data.items():
             if data.get("type", False) == WaymoLaneProperty.LANE_TYPE:

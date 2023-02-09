@@ -4,6 +4,7 @@ from metadrive.engine.engine_utils import get_engine
 from collections import Iterable
 import numpy as np
 
+
 def _clear_if_necessary(obj, depth=0):
     if depth > 5:
         obj = None
@@ -26,6 +27,7 @@ def _clear_if_necessary(obj, depth=0):
         del obj
     else:
         del obj
+
 
 class DataBuffer:
     """

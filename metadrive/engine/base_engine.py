@@ -228,6 +228,7 @@ class BaseEngine(EngineCore, Randomizable):
         _debug_memory_usage = True
 
         if _debug_memory_usage:
+
             def process_memory():
                 import psutil
                 import os
