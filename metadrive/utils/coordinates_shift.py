@@ -68,3 +68,12 @@ def waymo_2_metadrive_position(position):
 
 def waymo_2_metadrive_heading(heading):
     return -heading
+
+
+def nuplan_2_metadrive_position(position, nuplan_center=(0, 0)):
+    "All positions in nuplan should be centered in (0,0) to avoid numerical explosion"
+    return position[0] - nuplan_center[0], position[1] - nuplan_center[1]
+
+
+def nuplan_2_metadrive_heading(heading):
+    return heading

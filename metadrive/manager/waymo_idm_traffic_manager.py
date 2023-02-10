@@ -3,7 +3,7 @@ from collections import namedtuple, OrderedDict
 
 import numpy as np
 
-from metadrive.component.lane.waymo_lane import WayPointLane
+from metadrive.component.lane.waymo_lane import PointLane
 from metadrive.component.vehicle.vehicle_type import SVehicle
 from metadrive.manager.waymo_traffic_manager import WaymoTrafficManager
 from metadrive.policy.idm_policy import WaymoIDMPolicy
@@ -58,7 +58,7 @@ class WaymoIDMTrafficManager(WaymoTrafficManager):
                             full_traj = static_vehicle_info(init_info["position"], init_info["heading"])
                             static = True
                         else:
-                            full_traj = WayPointLane(full_traj, width=self.TRAJ_WIDTH)
+                            full_traj = PointLane(full_traj, width=self.TRAJ_WIDTH)
                             static = False
                     traffic_traj_data[v_id] = {
                         "traj": full_traj,
@@ -86,11 +86,6 @@ class WaymoIDMTrafficManager(WaymoTrafficManager):
             if data["static"] and self.engine.global_config["no_static_traffic_vehicle"]:
                 continue
             if v_traj_id == "sdc":
-                init_info = data["init_info"]
-                ego_v = list(self.engine.agent_manager.active_agents.values())[0]
-                ego_v.set_velocity(init_info["velocity"])
-                ego_v.set_heading_theta(init_info["heading"], rad_to_degree=False)
-                ego_v.set_position(init_info["position"])
                 continue
             init_info = data["init_info"]
             v_config = copy.deepcopy(self.engine.global_config["vehicle_config"])

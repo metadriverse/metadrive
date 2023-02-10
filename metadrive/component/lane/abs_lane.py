@@ -1,10 +1,12 @@
+import math
 from abc import ABCMeta, abstractmethod
 from typing import Tuple
 
-import math
 import numpy as np
 from panda3d.bullet import BulletBoxShape
+from panda3d.bullet import BulletConvexHullShape
 from panda3d.bullet import BulletGhostNode
+from panda3d.core import LPoint3f
 from panda3d.core import Vec3, LQuaternionf, CardMaker, TransparencyAttrib, NodePath
 from panda3d.core import Vec4
 
@@ -263,6 +265,11 @@ class AbstractLane:
         # static_node_list = []
         # dynamic_node_list = []
 
+        if not isinstance(start_point, np.ndarray):
+            start_point = np.array(start_point)
+        if not isinstance(end_point, np.ndarray):
+            end_point = np.array(end_point)
+
         length = norm(end_point[0] - start_point[0], end_point[1] - start_point[1])
         middle = (start_point + end_point) / 2
         parent_np = block.lane_line_node_path
@@ -301,7 +308,9 @@ class AbstractLane:
             # For visualization
             lane_line = block.loader.loadModel(AssetLoader.file_path("models", "box.bam"))
             lane_line.setScale(length, DrivableAreaProperty.LANE_LINE_WIDTH, DrivableAreaProperty.LANE_LINE_THICKNESS)
-            lane_line.setPos(Vec3(0, 0 - DrivableAreaProperty.LANE_LINE_GHOST_HEIGHT / 2))
+            height = -DrivableAreaProperty.LANE_LINE_GHOST_HEIGHT / 2
+            height += 0.01 if line_color == LineColor.YELLOW else 0
+            lane_line.setPos(Vec3(0, 0, height))
             lane_line.reparentTo(body_np)
             body_np.set_color(line_color)
 
@@ -345,6 +354,56 @@ class AbstractLane:
             block.sidewalk.instanceTo(side_np)
 
         return node_path_list
+
+    def _construct_lane_only_physics_polygon(self, block, polygon):
+        """
+        This usually used with _construct_lane_only_vis_segment
+        """
+        lane = self
+        n = BaseRigidBodyNode(lane, BodyName.Lane)
+        segment_np = NodePath(n)
+
+        self._node_path_list.append(segment_np)
+        self._node_path_list.append(n)
+
+        segment_node = segment_np.node()
+        segment_node.set_active(False)
+        segment_node.setKinematic(False)
+        segment_node.setStatic(True)
+        shape = BulletConvexHullShape()
+        for point in polygon:
+            # Panda coordinate is different from metadrive coordinate
+            point[1] *= -1
+            shape.addPoint(LPoint3f(*point))
+        segment_node.addShape(shape)
+        block.static_nodes.append(segment_node)
+        segment_np.reparentTo(block.lane_node_path)
+
+    def _construct_lane_only_vis_segment(self, block, position, width, length, theta):
+        """
+        Only create visual part for this lane, usually used with _construct_lane_only_physics_polygon()
+        """
+        length += 0.1
+
+        if block.render:
+            cm = CardMaker('card')
+            cm.setFrame(-length / 2, length / 2, -width / 2, width / 2)
+            cm.setHasNormals(True)
+            cm.setUvRange((0, 0), (length / 20, width / 10))
+            card = block.lane_vis_node_path.attachNewNode(cm.generate())
+            self._node_path_list.append(card)
+
+            card.setPos(panda_position(position, np.random.rand() * 0.01 - 0.01))
+
+            card.setQuat(
+                LQuaternionf(
+                    math.cos(theta / 2) * math.cos(-math.pi / 4),
+                    math.cos(theta / 2) * math.sin(-math.pi / 4), -math.sin(theta / 2) * math.cos(-math.pi / 4),
+                    math.sin(theta / 2) * math.cos(-math.pi / 4)
+                )
+            )
+            card.setTransparency(TransparencyAttrib.MMultisample)
+            card.setTexture(block.ts_color, block.road_texture)
 
     def destroy(self):
         try:

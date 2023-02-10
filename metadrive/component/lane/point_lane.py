@@ -9,7 +9,7 @@ from metadrive.utils.math_utils import get_points_bounding_box
 from metadrive.utils.math_utils import wrap_to_pi
 
 
-class WayPointLane(AbstractLane, InterpolatingLine):
+class PointLane(AbstractLane, InterpolatingLine):
     """
     CenterLineLane is created by giving the center line points array or way points array.
     By using this lane type, map can be constructed from Waymo/Argoverse/OpenstreetMap dataset
@@ -75,10 +75,10 @@ class WayPointLane(AbstractLane, InterpolatingLine):
         self.width = None
         self.forbidden = None
         self.priority = None
-        # waymo lane line will be processed separately
+
         self.line_types = None
         self.is_straight = None
         self.start = None
         self.end = None
         InterpolatingLine.destroy(self)
-        super(WayPointLane, self).destroy()
+        super(PointLane, self).destroy()

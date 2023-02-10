@@ -12,8 +12,9 @@ if __name__ == "__main__":
             "start_seed": 22,
             # "_disable_detector_mask":True,
             # "debug_physics_world": True,
+            "debug": True,
             "global_light": True,
-            # "debug_static_world":True,
+            "debug_static_world": True,
             "cull_scene": False,
             # "offscreen_render": True,
             # "controller": "joystick",
@@ -22,9 +23,8 @@ if __name__ == "__main__":
             "decision_repeat": 5,
             "need_inverse_traffic": False,
             "rgb_clip": True,
-            "debug": False,
             "map": "X",
-            "agent_policy": IDMPolicy,
+            # "agent_policy": IDMPolicy,
             "random_traffic": False,
             "random_lane_width": True,
             # "random_agent_model": True,
@@ -55,6 +55,8 @@ if __name__ == "__main__":
 
     for s in range(1, 10000):
         o, r, d, info = env.step(env.action_space.sample())
+        env.vehicle.set_velocity([5, 0], in_local_frame=True)
+        # else:
         # if s % 100 == 0:
         #     env.close()
         #     env.reset()
@@ -67,8 +69,8 @@ if __name__ == "__main__":
                 "current_seed": env.current_seed
             }
         )
-        if d:
-            env.reset(0)
+        # if d:
+        #     env.reset()
         # # assert env.observation_space.contains(o)
         # if (s + 1) % 100 == 0:
         #     print(
