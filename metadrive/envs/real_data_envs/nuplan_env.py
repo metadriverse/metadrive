@@ -176,8 +176,8 @@ class NuPlanEnv(BaseEnv):
         # for compatibility
         # crash almost equals to crashing with vehicles
         done_info[TerminationState.CRASH] = (
-                done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
-                or done_info[TerminationState.CRASH_BUILDING]
+            done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
+            or done_info[TerminationState.CRASH_BUILDING]
         )
         return done, done_info
 
@@ -300,7 +300,7 @@ if __name__ == "__main__":
     success = []
     for seed in range(300, 2000):
         env.reset(force_seed=302)
-        for i in range(env.engine.data_manager.current_scenario_length*10):
+        for i in range(env.engine.data_manager.current_scenario_length * 10):
             o, r, d, info = env.step([0, 0])
             # assert env.observation_space.contains(o)
             # c_lane = env.vehicle.lane

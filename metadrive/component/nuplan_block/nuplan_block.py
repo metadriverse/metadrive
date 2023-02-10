@@ -94,22 +94,18 @@ class NuPlanBlock(BaseBlock):
         # boundaries.plot()
         # plt.show()
         for idx, boundary in enumerate(boundaries[0]):
-            block_points = np.array(list(
-                i for i in zip(
-                    boundary.coords.xy[0], boundary.coords.xy[1]
-                )))
+            block_points = np.array(list(i for i in zip(boundary.coords.xy[0], boundary.coords.xy[1])))
             block_points -= center
-            self.boundaries["boundary_{}".format(idx)] = LaneLineProperty(block_points, LineColor.GREY,
-                                                                          LineType.CONTINUOUS,
-                                                                          in_road_connector=False)
+            self.boundaries["boundary_{}".format(idx)] = LaneLineProperty(
+                block_points, LineColor.GREY, LineType.CONTINUOUS, in_road_connector=False
+            )
 
     def _add_block_connector_boundary(self, block, center, road_block_points):
         raise ValueError("Deprecated")
         block_points = list(
-            i for i in zip(
-                block.polygon.boundary.coords.xy[0] - center[0], block.polygon.boundary.coords.xy[1] -
-                center[1]
-            ))
+            i for i in
+            zip(block.polygon.boundary.coords.xy[0] - center[0], block.polygon.boundary.coords.xy[1] - center[1])
+        )
         line_to_remove = {}
         for block_id, block_points in road_block_points.items():
             point_on_road = [True if p in block_points else False for p in block_points]
@@ -129,18 +125,18 @@ class NuPlanBlock(BaseBlock):
             if on:
                 if last_add:
                     line.append(block_points[idx])
-                    self.lines[block.id + "{}".format(count)] = LaneLineProperty(line, LineColor.GREY,
-                                                                                 LineType.CONTINUOUS,
-                                                                                 in_road_connector=True)
+                    self.lines[block.id + "{}".format(count)] = LaneLineProperty(
+                        line, LineColor.GREY, LineType.CONTINUOUS, in_road_connector=True
+                    )
                     count += 1
                     last_add = False
                     line = []
                 else:
                     last_add = False
         if len(line) > 0 and last_add:
-            self.lines[block.id + "{}".format(count)] = LaneLineProperty(line, LineColor.GREY,
-                                                                         LineType.CONTINUOUS,
-                                                                         in_road_connector=True)
+            self.lines[block.id + "{}".format(count)] = LaneLineProperty(
+                line, LineColor.GREY, LineType.CONTINUOUS, in_road_connector=True
+            )
 
     def create_in_world(self):
         """
@@ -247,12 +243,16 @@ class NuPlanBlock(BaseBlock):
                     1] is not None else LineColor.GREY
                 if line_color == LineColor.YELLOW:
                     self.lines[left.id] = LaneLineProperty(
-                        self._get_points_from_boundary(left, center), line_color, line_type,
+                        self._get_points_from_boundary(left, center),
+                        line_color,
+                        line_type,
                         in_road_connector=is_road_connector
                     )
                 elif line_type == LineType.BROKEN:
                     self.lines[left.id] = LaneLineProperty(
-                        self._get_points_from_boundary(left, center), LineColor.GREY, line_type,
+                        self._get_points_from_boundary(left, center),
+                        LineColor.GREY,
+                        line_type,
                         in_road_connector=is_road_connector
                     )
 
@@ -271,9 +271,9 @@ class NuPlanBlock(BaseBlock):
             points = np.array(
                 [
                     i for i in zip(
-                    walkway.polygon.boundary.coords.xy[0] - center[0], walkway.polygon.boundary.coords.xy[1] -
-                    center[1]
-                )
+                        walkway.polygon.boundary.coords.xy[0] - center[0], walkway.polygon.boundary.coords.xy[1] -
+                        center[1]
+                    )
                 ]
             )
             self.lines[walkway.id] = LaneLineProperty(points, LineColor.GREY, LineType.SIDE, in_road_connector=False)

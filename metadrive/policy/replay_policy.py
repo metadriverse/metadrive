@@ -4,7 +4,6 @@ from metadrive.policy.base_policy import BasePolicy
 
 has_rendered = False
 
-
 # class ReplayPolicy(BasePolicy):
 #     def __init__(self, control_object, locate_info):
 #         super(ReplayPolicy, self).__init__(control_object=control_object)
@@ -44,7 +43,6 @@ class ReplayEgoCarPolicy(BasePolicy):
     Replay policy from Real data. For adding new policy, overwrite get_trajectory_info()
     This policy is designed for Waymo Policy by default
     """
-
     def __init__(self, control_object, random_seed):
         super(ReplayEgoCarPolicy, self).__init__(control_object=control_object)
         self.traj_info = self.get_trajectory_info()

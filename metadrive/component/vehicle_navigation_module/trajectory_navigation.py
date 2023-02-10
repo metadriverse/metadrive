@@ -13,15 +13,15 @@ class TrajectoryNavigation(BaseNavigation):
     DESCRETE_LEN = 8  # m
 
     def __init__(
-            self,
-            engine,
-            show_navi_mark: bool = False,
-            random_navi_mark_color=False,
-            show_dest_mark=False,
-            show_line_to_dest=False,
-            panda_color=None,
-            name=None,
-            vehicle_config=None
+        self,
+        engine,
+        show_navi_mark: bool = False,
+        random_navi_mark_color=False,
+        show_dest_mark=False,
+        show_line_to_dest=False,
+        panda_color=None,
+        name=None,
+        vehicle_config=None
     ):
         super(TrajectoryNavigation, self).__init__(
             engine=engine,

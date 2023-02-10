@@ -310,8 +310,7 @@ class AbstractLane:
             lane_line.setScale(length, DrivableAreaProperty.LANE_LINE_WIDTH, DrivableAreaProperty.LANE_LINE_THICKNESS)
             height = -DrivableAreaProperty.LANE_LINE_GHOST_HEIGHT / 2
             height += 0.01 if line_color == LineColor.YELLOW else 0
-            lane_line.setPos(
-                Vec3(0, 0, height))
+            lane_line.setPos(Vec3(0, 0, height))
             lane_line.reparentTo(body_np)
             body_np.set_color(line_color)
 
