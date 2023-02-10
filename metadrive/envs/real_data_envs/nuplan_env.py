@@ -285,6 +285,7 @@ if __name__ == "__main__":
             # "start_case_index": 192,
             # "start_case_index": 1000,
             # "waymo_data_directory": "E:\\PAMI_waymo_data\\idm_filtered\\test",
+            "window_size": (2400, 1600),
             "start_case_index": 200,
             "case_num": 2000,
             "horizon": 1000,
