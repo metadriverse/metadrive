@@ -133,8 +133,8 @@ class RecordManager(BaseManager):
             assert name not in self.current_frame.policy_info, "Duplicated record!"
             self.current_frame.policy_info[name] = {
                 PolicyState.POLICY_CLASS: policy_class,
-                PolicyState.ARGS: args,
-                PolicyState.KWARGS: kwargs,
+                PolicyState.ARGS: filtered_args,
+                PolicyState.KWARGS: filtered_kwargs,
                 PolicyState.OBJ_NAME: name
             }
 
