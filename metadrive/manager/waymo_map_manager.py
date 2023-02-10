@@ -1,12 +1,10 @@
-from metadrive.component.lane.point_lane import PointLane
 import copy
 
-from metadrive.component.lane.waypoint_lane import WayPointLane
+from metadrive.component.lane.point_lane import PointLane
 from metadrive.component.map.waymo_map import WaymoMap
 from metadrive.constants import DEFAULT_AGENT
 from metadrive.manager.base_manager import BaseManager
 from metadrive.manager.waymo_traffic_manager import WaymoTrafficManager
-from metadrive.utils.data_buffer import DataBuffer
 
 
 class WaymoMapManager(BaseManager):
@@ -115,7 +113,7 @@ class WaymoMapManager(BaseManager):
         last_position = last_state["position"]
         last_yaw = last_state["heading"]
 
-        self.current_sdc_route = copy.deepcopy(WayPointLane(sdc_traj, 1.5))
+        self.current_sdc_route = copy.deepcopy(PointLane(sdc_traj, 1.5))
 
         self.sdc_dest_point = copy.deepcopy(last_position)
 

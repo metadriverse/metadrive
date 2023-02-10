@@ -31,15 +31,15 @@ class TrajectoryNavigation(BaseNavigation):
             name=name,
             vehicle_config=vehicle_config
         )
-        self.reference_trajectory = None
+        # self.reference_trajectory = None
 
     def reset(self, map=None, current_lane=None, destination=None, random_seed=None):
 
         # We do not want to store map within the navigation module!
         # TODO(PZH): In future, we can let all navigation module get latest map on-the-fly instead of
         #  caching a class local variable.
-        super(TrajectoryNavigation, self).reset(map=None, current_lane=None)
-        self.reference_trajectory = self.get_trajectory()
+        super(TrajectoryNavigation, self).reset(map=map, current_lane=current_lane)
+        # self.reference_trajectory = self.get_trajectory()
         if self.reference_trajectory is not None:
             self.set_route(None, None)
 
@@ -171,21 +171,21 @@ class TrajectoryNavigation(BaseNavigation):
     def destroy(self):
         self.map = None
         self.checkpoints = None
-        self.current_ref_lanes = None
+        # self.current_ref_lanes = None
         self.next_ref_lanes = None
         self.final_lane = None
-        self.current_lane = None
+        self._current_lane = None
         # self.reference_trajectory = None
         super(TrajectoryNavigation, self).destroy()
 
     def before_reset(self):
         self.map = None
         self.checkpoints = None
-        self.current_ref_lanes = None
+        # self.current_ref_lanes = None
         self.next_ref_lanes = None
         self.final_lane = None
-        self.current_lane = None
-        self.reference_trajectory = None
+        self._current_lane = None
+        # self.reference_trajectory = None
 
 
 WaymoTrajectoryNavigation = TrajectoryNavigation

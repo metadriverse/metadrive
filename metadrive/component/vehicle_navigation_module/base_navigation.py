@@ -41,12 +41,13 @@ class BaseNavigation:
         self.name = name
 
         # Make sure these variables are filled when making new subclass
-        self.map = None
-        self.checkpoints = None
-        self.current_ref_lanes = None
-        self.next_ref_lanes = None
-        self.final_lane = None
-        self.current_lane = None
+        # self.map = None
+        # self.checkpoints = None
+        # self.current_ref_lanes = None
+        # self.next_ref_lanes = None
+        # self.final_lane = None
+        # self.current_lane = None
+
         self.vehicle_config = vehicle_config
 
         self._target_checkpoints_index = None
@@ -127,9 +128,13 @@ class BaseNavigation:
 
     def reset(self, map: BaseMap, current_lane, vehicle_config=None):
         self.map = map
-        self.current_lane = current_lane
+        self._current_lane = current_lane
         if vehicle_config is not None:
             self.vehicle_config = vehicle_config
+
+    @property
+    def current_lane(self):
+        return self._current_lane
 
     def get_checkpoints(self):
         """Return next checkpoint and the next next checkpoint"""
