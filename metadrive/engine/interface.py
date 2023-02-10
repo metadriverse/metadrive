@@ -191,6 +191,7 @@ class Interface:
         from metadrive.engine.engine_utils import get_engine
         return get_engine()
 
+
 class VehiclePanel(ImageBuffer):
     PARA_VIS_LENGTH = 12
     PARA_VIS_HEIGHT = 1

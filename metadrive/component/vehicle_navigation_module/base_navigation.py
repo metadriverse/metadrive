@@ -53,7 +53,9 @@ class BaseNavigation:
         self._navi_info = np.zeros((self.navigation_info_dim, ), dtype=np.float32)  # navi information res
 
         # Vis
-        self._show_navi_info = (self.engine.mode == RENDER_MODE_ONSCREEN and not self.engine.global_config["debug_physics_world"])
+        self._show_navi_info = (
+            self.engine.mode == RENDER_MODE_ONSCREEN and not self.engine.global_config["debug_physics_world"]
+        )
         self.origin = NodePath("navigation_sign") if self._show_navi_info else None
         self.navi_mark_color = (0.6, 0.8, 0.5) if not random_navi_mark_color else get_np_random().rand(3)
         if panda_color is not None:
