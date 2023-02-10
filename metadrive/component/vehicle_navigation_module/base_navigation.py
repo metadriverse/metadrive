@@ -68,6 +68,7 @@ class BaseNavigation:
         self._node_path_list = []
 
         self._line_to_dest = None
+        self._line_to_navi = None
         self._show_line_to_dest = show_line_to_dest
         if self._show_navi_info:
             # nodepath
@@ -95,6 +96,19 @@ class BaseNavigation:
 
                 self._dynamic_line_np.reparentTo(self.origin)
                 self._line_to_dest = line_seg
+
+            show_line_to_navi_mark = self.vehicle_config["show_line_to_navi_mark"]
+            self._show_line_to_navi_mark = show_line_to_navi_mark
+            if show_line_to_navi_mark:
+                line_seg = LineSegs("line_to_dest")
+                line_seg.setColor(self.navi_mark_color[0], self.navi_mark_color[1], self.navi_mark_color[2], 1.0)
+                line_seg.setThickness(4)
+                self._dynamic_line_np_2 = NodePath(line_seg.create(True))
+
+                self._node_path_list.append(self._dynamic_line_np_2)
+
+                self._dynamic_line_np_2.reparentTo(self.origin)
+                self._line_to_navi = line_seg
 
             self._goal_node_path.setTransparency(TransparencyAttrib.M_alpha)
             self._dest_node_path.setTransparency(TransparencyAttrib.M_alpha)
@@ -147,7 +161,10 @@ class BaseNavigation:
     def destroy(self):
         if self._show_navi_info:
             try:
-                self._line_to_dest.removeNode()
+                if self._line_to_dest is not None:
+                    self._line_to_dest.removeNode()
+                if self._line_to_navi is not None:
+                    self._line_to_navi.removeNode()
             except AttributeError:
                 pass
             self._dest_node_path.removeNode()
@@ -202,6 +219,20 @@ class BaseNavigation:
 
         self._dynamic_line_np.hide(CamMask.Shadow | CamMask.RgbCam)
         self._dynamic_line_np.reparentTo(self.origin)
+
+    def _draw_line_to_navi(self, start_position, end_position):
+        if not self._show_line_to_navi_mark:
+            return
+        line_seg = self._line_to_navi
+        line_seg.moveTo(panda_position(start_position, self.LINE_TO_DEST_HEIGHT))
+        line_seg.drawTo(panda_position(end_position, self.LINE_TO_DEST_HEIGHT))
+        self._dynamic_line_np_2.removeNode()
+        self._dynamic_line_np_2 = NodePath(line_seg.create(False))
+
+        self._node_path_list.append(self._dynamic_line_np_2)
+
+        self._dynamic_line_np_2.hide(CamMask.Shadow | CamMask.RgbCam)
+        self._dynamic_line_np_2.reparentTo(self.origin)
 
     def detach_from_world(self):
         if isinstance(self.origin, NodePath):

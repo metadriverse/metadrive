@@ -113,6 +113,8 @@ class TrajectoryNavigation(BaseNavigation):
             self.navi_arrow_dir = [lanes_heading1, lanes_heading2]
             dest_pos = self._dest_node_path.getPos()
             self._draw_line_to_dest(start_position=ego_vehicle.position, end_position=(dest_pos[0], -dest_pos[1]))
+            navi_pos = self._goal_node_path.getPos()
+            self._draw_line_to_navi(start_position=ego_vehicle.position, end_position=(navi_pos[0], -navi_pos[1]))
 
     def get_current_lateral_range(self, current_position, engine) -> float:
         return self.current_lane.width * 2
