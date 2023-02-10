@@ -6,7 +6,6 @@ from typing import Callable, Optional, Union, List, Dict, AnyStr
 
 import numpy as np
 
-from metadrive.base_class.base_object import BaseObject
 from metadrive.base_class.randomizable import Randomizable
 from metadrive.engine.core.engine_core import EngineCore
 from metadrive.engine.interface import Interface
@@ -66,13 +65,7 @@ class BaseEngine(EngineCore, Randomizable):
         self._object_policies[object_id] = policy
         if self.record_episode:
             assert self.record_manager is not None, "No record manager"
-            filtered_args = []
-            for arg in args:
-                filtered_args.append(arg) if not isinstance(arg, BaseObject) else filtered_args.append(BaseObject)
-            filtered_kwargs = {}
-            for k, v in kwargs.items():
-                filtered_kwargs[k] = v if not isinstance(arg, BaseObject) else BaseObject
-            self.record_manager.add_policy_info(object_id, policy_class, filtered_args, kwargs)
+            self.record_manager.add_policy_info(object_id, policy_class, *args, **kwargs)
         return policy
 
     def add_task(self, object_id, task):

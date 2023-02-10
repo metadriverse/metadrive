@@ -1,3 +1,4 @@
+from metadrive.component.lane.point_lane import PointLane
 import copy
 
 from metadrive.component.lane.waypoint_lane import WayPointLane
@@ -5,14 +6,17 @@ from metadrive.component.map.waymo_map import WaymoMap
 from metadrive.constants import DEFAULT_AGENT
 from metadrive.manager.base_manager import BaseManager
 from metadrive.manager.waymo_traffic_manager import WaymoTrafficManager
-from metadrive.utils.waymo_utils.data_buffer import DataBuffer
+from metadrive.utils.data_buffer import DataBuffer
 
 
 class WaymoMapManager(BaseManager):
     PRIORITY = 0  # Map update has the most high priority
+    DEFAULT_DATA_BUFFER_SIZE = 200
 
-    def __init__(self, store_map=False, store_map_buffer_size=200):
+    def __init__(self):
         super(WaymoMapManager, self).__init__()
+        store_map = self.engine.global_config.get("store_map", False)
+        store_map_buffer_size = self.engine.global_config.get("store_map_buffer_size", self.DEFAULT_DATA_BUFFER_SIZE)
         self.current_map = None
         self.map_num = self.engine.global_config["case_num"]
         self.start = self.engine.global_config["start_case_index"]
@@ -27,6 +31,8 @@ class WaymoMapManager(BaseManager):
         # self.store_map_buffer = DataBuffer(store_data_buffer_size=store_map_buffer_size if self.store_map else None)
 
     def reset(self):
+        seed = self.engine.global_random_seed
+        assert self.start <= seed < self.start + self.map_num
 
         # inner psutil function
         # def process_memory():
@@ -115,7 +121,9 @@ class WaymoMapManager(BaseManager):
 
         self.engine.global_config.update(
             copy.deepcopy(
-                dict(target_vehicle_configs={DEFAULT_AGENT: dict(spawn_position_heading=(init_position, init_yaw))})
+                dict(target_vehicle_configs={DEFAULT_AGENT: dict(
+                    spawn_position_heading=(init_position, init_yaw), spawn_velocity=init_state["velocity"])
+                })
             )
         )
 
@@ -140,7 +148,6 @@ class WaymoMapManager(BaseManager):
     def unload_map(self, map):
         map.detach_from_world()
         self.current_map = None
-
         # if not self.engine.global_config["store_map"]:
         #     self.clear_objects([map.id])
         #     assert len(self.spawned_objects) == 0

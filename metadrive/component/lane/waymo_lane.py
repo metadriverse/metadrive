@@ -1,13 +1,13 @@
 import logging
 
-from metadrive.component.lane.waypoint_lane import WayPointLane
+from metadrive.component.lane.point_lane import PointLane
 from metadrive.constants import WaymoLaneProperty
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.utils.math_utils import norm
 from metadrive.utils.waymo_utils.waymo_utils import read_waymo_data, convert_polyline_to_metadrive
 
 
-class WaymoLane(WayPointLane):
+class WaymoLane(PointLane):
     def __init__(self, waymo_lane_id: int, waymo_map_data: dict):
         """
         Extract the lane information of one waymo lane, and do coordinate shift

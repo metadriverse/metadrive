@@ -4,23 +4,26 @@ import os
 from tqdm import tqdm
 
 from metadrive.manager.base_manager import BaseManager
-from metadrive.utils.waymo_utils.data_buffer import DataBuffer
+from metadrive.utils.data_buffer import DataBuffer
 from metadrive.utils.waymo_utils.waymo_utils import read_waymo_data
 
 
 class WaymoDataManager(BaseManager):
-    def __init__(self, store_map=False, store_map_buffer_size=100):
+    DEFAULT_DATA_BUFFER_SIZE = 100
+
+    def __init__(self):
         super(WaymoDataManager, self).__init__()
 
         from metadrive.engine.engine_utils import get_engine
         engine = get_engine()
 
+        store_map = engine.global_config.get("store_map", False)
+        store_map_buffer_size = engine.global_config.get("store_map_buffer_size", self.DEFAULT_DATA_BUFFER_SIZE)
         self.directory = engine.global_config["waymo_data_directory"]
         self.case_num = engine.global_config["case_num"]
         self.start_case_index = engine.global_config["start_case_index"]
 
         self.store_map = store_map
-
         self.waymo_case = DataBuffer(store_map_buffer_size if self.store_map else self.case_num)
 
         for i in tqdm(range(self.start_case_index, self.start_case_index + self.case_num), desc="Check Waymo Data"):
