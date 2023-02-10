@@ -12,7 +12,7 @@ from metadrive.base_class.base_object import BaseObject
 from metadrive.component.lane.abs_lane import AbstractLane
 from metadrive.component.lane.circular_lane import CircularLane
 from metadrive.component.lane.straight_lane import StraightLane
-from metadrive.component.lane.waypoint_lane import WayPointLane
+from metadrive.component.lane.point_lane import PointLane
 from metadrive.component.road_network.node_road_network import NodeRoadNetwork
 from metadrive.component.vehicle_module.depth_camera import DepthCamera
 from metadrive.component.vehicle_module.distance_detector import SideDetector, LaneLineDetector
@@ -397,6 +397,9 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         if self.config["need_navigation"]:
             assert self.navigation
 
+        if self.config["spawn_velocity"] is not None:
+            self.set_velocity(self.config["spawn_velocity"], self.config["spawn_velocity_car_frame"])
+
     """------------------------------------------- act -------------------------------------------------"""
 
     def _set_action(self, action):
@@ -486,7 +489,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
                 lateral = self.position - target_lane.center
             else:
                 lateral = target_lane.center - self.position
-        elif isinstance(target_lane, WayPointLane):
+        elif isinstance(target_lane, PointLane):
             lateral = target_lane.lateral_direction(target_lane.local_coordinates(self.position)[0])
 
         lateral_norm = norm(lateral[0], lateral[1])
@@ -915,8 +918,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         theta = wrap_to_pi(self.heading_theta) + wrap_to_pi(theta)
         norm_len = norm(project_on_heading, project_on_side)
         position = self.position
-        heading = np.sin(theta) * norm_len
-        side = np.cos(theta) * norm_len
+        heading = math.sin(theta) * norm_len
+        side = math.cos(theta) * norm_len
         return position[0] + side, position[1] + heading
 
     @property

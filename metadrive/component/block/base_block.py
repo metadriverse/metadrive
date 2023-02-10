@@ -8,7 +8,7 @@ from panda3d.core import Vec3, LQuaternionf, Vec4, TextureStage, RigidBodyCombin
 
 from metadrive.base_class.base_object import BaseObject
 from metadrive.component.lane.abs_lane import AbstractLane
-from metadrive.component.lane.waypoint_lane import WayPointLane
+from metadrive.component.lane.point_lane import PointLane
 from metadrive.component.road_network.node_road_network import NodeRoadNetwork
 from metadrive.component.road_network.road import Road
 from metadrive.constants import BodyName, CamMask, LineType, LineColor, DrivableAreaProperty
@@ -226,7 +226,7 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
 
     def _add_lane_line(self, lane: AbstractLane, colors: List[Vec4], contruct_two_side=True):
         raise DeprecationWarning("Leave for argoverse using")
-        if isinstance(lane, WayPointLane):
+        if isinstance(lane, PointLane):
             parent_np = self.lane_line_node_path
             lane_width = lane.width_at(0)
             for c, i in enumerate([-1, 1]):

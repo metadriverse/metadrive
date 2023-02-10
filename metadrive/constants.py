@@ -304,3 +304,7 @@ class WaymoLaneProperty:
     @staticmethod
     def get_line_type_and_line_color(waymo_type):
         pass
+
+
+class NuPlanLaneProperty:
+    pass

@@ -3,11 +3,11 @@ from typing import Optional, List
 import numpy as np
 from argoverse.map_representation.lane_segment import LaneSegment
 
-from metadrive.component.lane.waypoint_lane import WayPointLane
+from metadrive.component.lane.point_lane import PointLane
 from metadrive.constants import LineType, LineColor
 
 
-class ArgoverseLane(WayPointLane, LaneSegment):
+class ArgoverseLane(PointLane, LaneSegment):
     # according to api of get_vector_map_lane_polygons(), the lane width in argoverse dataset is 3.8m
     LANE_WIDTH = 3.8
 
@@ -32,7 +32,7 @@ class ArgoverseLane(WayPointLane, LaneSegment):
             self, id, has_traffic_control, turn_direction, is_intersection, l_neighbor_id, r_neighbor_id, predecessors,
             successors, centerline
         )
-        WayPointLane.__init__(self, centerline, self.LANE_WIDTH if lane_width is None else lane_width)
+        PointLane.__init__(self, centerline, self.LANE_WIDTH if lane_width is None else lane_width)
         self.start_node = start_node
         self.end_node = end_node
         # if is_intersection:

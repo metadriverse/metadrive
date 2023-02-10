@@ -6,10 +6,10 @@ import random
 
 from metadrive.constants import HELP_MESSAGE
 from metadrive.engine.asset_loader import AssetLoader
-from metadrive.envs.real_data_envs.waymo_idm_env import WaymoIDMEnv
+from metadrive.envs.real_data_envs.waymo_env import WaymoEnv
 
 
-class DemoWaymoEnv(WaymoIDMEnv):
+class DemoWaymoEnv(WaymoEnv):
     def reset(self, force_seed=None):
         if self.engine is not None:
             seeds = [i for i in range(self.config["case_num"])]

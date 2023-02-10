@@ -6,7 +6,7 @@ import random
 from metadrive.component.vehicle_navigation_module.trajectory_navigation import WaymoTrajectoryNavigation
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.envs.real_data_envs.waymo_env import WaymoEnv
-from metadrive.policy.replay_policy import ReplayEgoCarPolicy
+from metadrive.policy.replay_policy import WaymoReplayEgoCarPolicy
 
 
 class DemoWaymoEnv(WaymoEnv):
@@ -23,8 +23,8 @@ if __name__ == "__main__":
     env = DemoWaymoEnv(
         {
             "manual_control": False,
-            "agent_policy": ReplayEgoCarPolicy,
-            "replay": False,
+            "agent_policy": WaymoReplayEgoCarPolicy,
+            "replay": True,
             "use_render": True,
             "waymo_data_directory": AssetLoader.file_path(asset_path, "waymo", return_raw_style=False),
             "case_num": 3,
@@ -38,10 +38,11 @@ if __name__ == "__main__":
             }
         }
     )
-    o = env.reset()
+    o = env.reset(force_seed=0)
 
     for i in range(1, 100000):
         o, r, d, info = env.step([1.0, 0.])
+        print(env.vehicle.height)
         env.render(text={"seed": env.current_seed, "reward": r})
         if d:
             print(info["arrive_dest"])

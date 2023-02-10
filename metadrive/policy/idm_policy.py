@@ -404,13 +404,13 @@ class ManualControllableIDMPolicy(IDMPolicy):
             return super(ManualControllableIDMPolicy, self).act(agent_id)
 
 
-class WaymoIDMPolicy(IDMPolicy):
+class TrajectoryIDMPOlicy(IDMPolicy):
     """This policy is customized for the traffic car in Waymo environment. (Ego car is not included!)"""
     NORMAL_SPEED = 40
     WAYMO_IDM_MAX_DIST = 20
 
     def __init__(self, control_object, random_seed, traj_to_follow=None, policy_index=None):
-        super(WaymoIDMPolicy, self).__init__(control_object=control_object, random_seed=random_seed)
+        super(TrajectoryIDMPOlicy, self).__init__(control_object=control_object, random_seed=random_seed)
         self.policy_index = policy_index
         self.traj_to_follow = self.engine.map_manager.current_sdc_route if traj_to_follow is None else traj_to_follow
         self.target_speed = self.NORMAL_SPEED
@@ -466,9 +466,6 @@ class WaymoIDMPolicy(IDMPolicy):
         return [steering, acc]
 
 
-EgoWaymoIDMPolicy = WaymoIDMPolicy
-
-
 class _EgoWaymoIDMPolicy(IDMPolicy):
     """
     DeprecationWarning("This policy is merged with WaymoIDM Policy now")
@@ -514,3 +511,9 @@ class _EgoWaymoIDMPolicy(IDMPolicy):
             )
             return True
         return False
+
+
+# Currently, all policies are the same
+EgoWaymoIDMPolicy = TrajectoryIDMPOlicy
+WaymoIDMPolicy = TrajectoryIDMPOlicy
+NuPlanIDMPolicy = TrajectoryIDMPOlicy

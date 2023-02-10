@@ -5,12 +5,12 @@ from metadrive.utils.math_utils import norm, clip
 from metadrive.utils.space import BlockParameterSpace, Parameter
 
 
-class WaymoTrajectoryNavigation(BaseNavigation):
+class TrajectoryNavigation(BaseNavigation):
     """
     This module enabling follow a given reference trajectory given a map
     # TODO(LQY): make this module a general module for navigation
     """
-    DESCRETE_LEN = 6  # m
+    DESCRETE_LEN = 8  # m
 
     def __init__(
         self,
@@ -23,7 +23,7 @@ class WaymoTrajectoryNavigation(BaseNavigation):
         name=None,
         vehicle_config=None
     ):
-        super(WaymoTrajectoryNavigation, self).__init__(
+        super(TrajectoryNavigation, self).__init__(
             engine=engine,
             show_navi_mark=show_navi_mark,
             random_navi_mark_color=random_navi_mark_color,
@@ -40,7 +40,7 @@ class WaymoTrajectoryNavigation(BaseNavigation):
         # We do not want to store map within the navigation module!
         # TODO(PZH): In future, we can let all navigation module get latest map on-the-fly instead of
         #  caching a class local variable.
-        super(WaymoTrajectoryNavigation, self).reset(map=None, current_lane=None)
+        super(TrajectoryNavigation, self).reset(map=None, current_lane=None)
         self.reference_trajectory = self.get_trajectory()
         if self.reference_trajectory is not None:
             self.set_route(None, None)
@@ -170,7 +170,7 @@ class WaymoTrajectoryNavigation(BaseNavigation):
         self.final_lane = None
         self.current_lane = None
         self.reference_trajectory = None
-        super(WaymoTrajectoryNavigation, self).destroy()
+        super(TrajectoryNavigation, self).destroy()
 
     def before_reset(self):
         self.map = None
@@ -180,3 +180,7 @@ class WaymoTrajectoryNavigation(BaseNavigation):
         self.final_lane = None
         self.current_lane = None
         self.reference_trajectory = None
+
+
+WaymoTrajectoryNavigation = TrajectoryNavigation
+NuPlanTrajectoryNavigation = TrajectoryNavigation
