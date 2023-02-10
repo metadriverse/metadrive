@@ -121,7 +121,7 @@ class RecordManager(BaseManager):
 
     def add_policy_info(self, name, policy_class, *args, **kwargs):
         """
-        Call when spawn new objects, ignore map related things
+        Call when spawn new objects, ignore map related stuff
         """
         filtered_args = []
         for arg in args:
