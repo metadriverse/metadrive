@@ -80,6 +80,7 @@ BASE_DEFAULT_CONFIG = dict(
         destination=None,
         spawn_position_heading=None,
         spawn_velocity=None,
+        spawn_velocity_car_frame=False,
 
         # ==== others ====
         overtake_stat=False,  # we usually set to True when evaluation

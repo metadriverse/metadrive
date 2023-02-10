@@ -10,7 +10,7 @@ class TrajectoryNavigation(BaseNavigation):
     This module enabling follow a given reference trajectory given a map
     # TODO(LQY): make this module a general module for navigation
     """
-    DESCRETE_LEN = 6  # m
+    DESCRETE_LEN = 8  # m
 
     def __init__(
             self,

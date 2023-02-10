@@ -265,6 +265,11 @@ class AbstractLane:
         # static_node_list = []
         # dynamic_node_list = []
 
+        if not isinstance(start_point, np.ndarray):
+            start_point = np.array(start_point)
+        if not isinstance(end_point, np.ndarray):
+            end_point = np.array(end_point)
+
         length = norm(end_point[0] - start_point[0], end_point[1] - start_point[1])
         middle = (start_point + end_point) / 2
         parent_np = block.lane_line_node_path
@@ -303,7 +308,10 @@ class AbstractLane:
             # For visualization
             lane_line = block.loader.loadModel(AssetLoader.file_path("models", "box.bam"))
             lane_line.setScale(length, DrivableAreaProperty.LANE_LINE_WIDTH, DrivableAreaProperty.LANE_LINE_THICKNESS)
-            lane_line.setPos(Vec3(0, 0 - DrivableAreaProperty.LANE_LINE_GHOST_HEIGHT / 2))
+            height = -DrivableAreaProperty.LANE_LINE_GHOST_HEIGHT / 2
+            height += 0.01 if line_color == LineColor.YELLOW else 0
+            lane_line.setPos(
+                Vec3(0, 0, height))
             lane_line.reparentTo(body_np)
             body_np.set_color(line_color)
 

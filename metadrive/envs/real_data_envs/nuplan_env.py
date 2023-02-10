@@ -129,8 +129,8 @@ class NuPlanEnv(BaseEnv):
         self.engine.accept("p", self.stop)
         self.engine.accept("q", self.switch_to_third_person_view)
         self.engine.accept("b", self.switch_to_top_down_view)
-        # self.engine.accept("n", self.next_seed_reset)
-        # self.engine.accept("b", self.last_seed_reset)
+        self.engine.accept("]", self.next_seed_reset)
+        self.engine.accept("[", self.last_seed_reset)
 
     def next_seed_reset(self):
         self.reset(self.current_seed + 1)
@@ -299,8 +299,8 @@ if __name__ == "__main__":
     )
     success = []
     for seed in range(300, 2000):
-        env.reset(force_seed=seed)
-        for i in range(env.engine.data_manager.current_scenario_length):
+        env.reset(force_seed=302)
+        for i in range(env.engine.data_manager.current_scenario_length*10):
             o, r, d, info = env.step([0, 0])
             # assert env.observation_space.contains(o)
             # c_lane = env.vehicle.lane

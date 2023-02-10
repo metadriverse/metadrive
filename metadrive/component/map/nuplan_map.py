@@ -59,6 +59,7 @@ if __name__ == "__main__":
     set_global_random_seed(0)
 
     engine.data_manager = NuPlanDataManager()
+    engine.data_manager.seed(0)
     map = NuPlanMap(map_index=0, nuplan_center=[664396.54429387, 3997613.41534655])
     map.attach_to_world()
     # engine.enableMouse()

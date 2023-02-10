@@ -109,7 +109,9 @@ class NuPlanMapManager(BaseManager):
             dict(
                 target_vehicle_configs={
                     DEFAULT_AGENT: dict(
-                        spawn_position_heading=(init_position, init_yaw), spawn_velocity=init_state["velocity"]
+                        spawn_position_heading=(init_position, init_yaw),
+                        spawn_velocity=init_state["velocity"],
+                        spawn_velocity_car_frame=True,
                     )
                 }
             )

@@ -113,12 +113,12 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     path = None
 
     def __init__(
-        self,
-        vehicle_config: Union[dict, Config] = None,
-        name: str = None,
-        random_seed=None,
-        position=None,
-        heading=None  # In degree!
+            self,
+            vehicle_config: Union[dict, Config] = None,
+            name: str = None,
+            random_seed=None,
+            position=None,
+            heading=None  # In degree!
     ):
         """
         This Vehicle Config is different from self.get_config(), and it is used to define which modules to use, and
@@ -325,13 +325,13 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         return step_energy, self.energy_consumption
 
     def reset(
-        self,
-        random_seed=None,
-        vehicle_config=None,
-        position: np.ndarray = None,
-        heading: float = 0.0,  # In degree!
-        *args,
-        **kwargs
+            self,
+            random_seed=None,
+            vehicle_config=None,
+            position: np.ndarray = None,
+            heading: float = 0.0,  # In degree!
+            *args,
+            **kwargs
     ):
         """
         pos is a 2-d array, and heading is a float (unit degree)
@@ -398,7 +398,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             assert self.navigation
 
         if self.config["spawn_velocity"] is not None:
-            self.set_velocity(self.config["spawn_velocity"])
+            self.set_velocity(self.config["spawn_velocity"], self.config["spawn_velocity_car_frame"])
 
     """------------------------------------------- act -------------------------------------------------"""
 
@@ -499,8 +499,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         if not lateral_norm * forward_direction_norm:
             return 0
         cos = (
-            (forward_direction[0] * lateral[0] + forward_direction[1] * lateral[1]) /
-            (lateral_norm * forward_direction_norm)
+                (forward_direction[0] * lateral[0] + forward_direction[1] * lateral[1]) /
+                (lateral_norm * forward_direction_norm)
         )
         # return cos
         # Normalize to 0, 1
@@ -805,7 +805,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             ckpt_idx = routing._target_checkpoints_index
             for surrounding_v in surrounding_vs:
                 if surrounding_v.lane_index[:-1] == (routing.checkpoints[ckpt_idx[0]], routing.checkpoints[ckpt_idx[1]
-                                                                                                           ]):
+                ]):
                     if self.lane.local_coordinates(self.position)[0] - \
                             self.lane.local_coordinates(surrounding_v.position)[0] < 0:
                         self.front_vehicles.add(surrounding_v)
@@ -820,10 +820,10 @@ class BaseVehicle(BaseObject, BaseVehicleState):
 
     @classmethod
     def get_action_space_before_init(
-        cls, extra_action_dim: int = 0, discrete_action=False, steering_dim=5, throttle_dim=5
+            cls, extra_action_dim: int = 0, discrete_action=False, steering_dim=5, throttle_dim=5
     ):
         if not discrete_action:
-            return gym.spaces.Box(-1.0, 1.0, shape=(2 + extra_action_dim, ), dtype=np.float32)
+            return gym.spaces.Box(-1.0, 1.0, shape=(2 + extra_action_dim,), dtype=np.float32)
         else:
             return gym.spaces.MultiDiscrete([steering_dim, throttle_dim])
 
@@ -852,9 +852,9 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     @property
     def replay_done(self):
         return self._replay_done if hasattr(self, "_replay_done") else (
-            self.crash_building or self.crash_vehicle or
-            # self.on_white_continuous_line or
-            self.on_yellow_continuous_line
+                self.crash_building or self.crash_vehicle or
+                # self.on_white_continuous_line or
+                self.on_yellow_continuous_line
         )
 
     @property
