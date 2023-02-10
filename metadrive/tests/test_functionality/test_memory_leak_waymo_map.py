@@ -8,7 +8,7 @@ from metadrive.manager.waymo_data_manager import WaymoDataManager
 from metadrive.tests.test_functionality.test_memory_leak_engine import process_memory
 
 
-def test_waymo_env_memory_leak(num_reset=20):
+def test_waymo_env_memory_leak(num_reset=100):
     env = WaymoEnv(dict(case_num=2, sequential_seed=True, store_map=True, store_map_buffer_size=1))
 
     try:
