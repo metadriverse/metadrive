@@ -266,7 +266,7 @@ class BaseObject(BaseRunnable):
             ret = engine.worldNP.getRelativeVector(self.origin, direction)
             direction = [-ret[1], -ret[0]]
         if value is not None:
-            norm_ratio = value / (norm(direction[0], direction[1]) + 1e-3)
+            norm_ratio = value / (norm(direction[0], direction[1]) + 1e-6)
         else:
             norm_ratio = 1
         self._body.setLinearVelocity(
