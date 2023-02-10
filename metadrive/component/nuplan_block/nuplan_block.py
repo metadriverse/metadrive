@@ -1,12 +1,11 @@
 import math
-from matplotlib import pyplot as plt
-from shapely.ops import cascaded_union
-from shapely.ops import unary_union
 from dataclasses import dataclass
+
 import geopandas as gpd
 import numpy as np
 from nuplan.common.actor_state.state_representation import Point2D
 from nuplan.common.maps.maps_datatypes import SemanticMapLayer, StopLineType
+from shapely.ops import unary_union
 
 from metadrive.component.block.base_block import BaseBlock
 from metadrive.component.lane.nuplan_lane import NuPlanLane
@@ -100,44 +99,6 @@ class NuPlanBlock(BaseBlock):
                 block_points, LineColor.GREY, LineType.CONTINUOUS, in_road_connector=False
             )
 
-    def _add_block_connector_boundary(self, block, center, road_block_points):
-        raise ValueError("Deprecated")
-        block_points = list(
-            i for i in
-            zip(block.polygon.boundary.coords.xy[0] - center[0], block.polygon.boundary.coords.xy[1] - center[1])
-        )
-        line_to_remove = {}
-        for block_id, block_points in road_block_points.items():
-            point_on_road = [True if p in block_points else False for p in block_points]
-            point_on_road.index(True)
-
-        count = 0
-        line = []
-        last_add = False
-        for idx, on in enumerate(point_on_road):
-            if not on:
-                if not last_add:
-                    assert len(line) == 0
-                if idx != 0:
-                    line.append(block_points[idx - 1])
-                line.append(block_points[idx])
-                last_add = True
-            if on:
-                if last_add:
-                    line.append(block_points[idx])
-                    self.lines[block.id + "{}".format(count)] = LaneLineProperty(
-                        line, LineColor.GREY, LineType.CONTINUOUS, in_road_connector=True
-                    )
-                    count += 1
-                    last_add = False
-                    line = []
-                else:
-                    last_add = False
-        if len(line) > 0 and last_add:
-            self.lines[block.id + "{}".format(count)] = LaneLineProperty(
-                line, LineColor.GREY, LineType.CONTINUOUS, in_road_connector=True
-            )
-
     def create_in_world(self):
         """
         The lane line should be created separately
@@ -218,11 +179,6 @@ class NuPlanBlock(BaseBlock):
         self.destroy()
         super(NuPlanBlock, self).__del__()
         print("NuPlan Block is being deleted.")
-
-    # @property
-    # def nuplan_map_data(self):
-    #     e = get_engine()
-    #     return e.data_manager.get_case(self.map_index)["map"]
 
     @staticmethod
     def _get_points_from_boundary(boundary, center):

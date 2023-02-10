@@ -1,6 +1,4 @@
 import numpy as np
-from metadrive.utils.coordinates_shift import nuplan_2_metadrive_heading, nuplan_2_metadrive_position
-import numpy as np
 
 from metadrive.utils.coordinates_shift import nuplan_2_metadrive_heading, nuplan_2_metadrive_position
 

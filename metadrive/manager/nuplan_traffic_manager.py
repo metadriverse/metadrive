@@ -1,11 +1,11 @@
 import copy
-from nuplan.common.actor_state.tracked_objects_types import TrackedObjectType
-from nuplan.planning.scenario_builder.nuplan_db.nuplan_scenario import NuPlanScenario
+
 import numpy as np
-from metadrive.utils.coordinates_shift import nuplan_2_metadrive_heading, nuplan_2_metadrive_position
+from nuplan.common.actor_state.tracked_objects_types import TrackedObjectType
+
 from metadrive.component.vehicle.vehicle_type import SVehicle
 from metadrive.manager.base_manager import BaseManager
-from metadrive.utils.waymo_utils.waymo_utils import AgentType
+from metadrive.utils.coordinates_shift import nuplan_2_metadrive_position
 
 
 class NuPlanTrafficManager(BaseManager):

@@ -1,6 +1,4 @@
 import logging
-from metadrive.utils.data_buffer import DataBuffer
-# Useful imports
 import os
 import tempfile
 
