@@ -112,11 +112,11 @@ class WaymoBlock(BaseBlock):
                 if last_theta is not None:
                     diff = wrap_to_pi(theta) - wrap_to_pi(last_theta)
                     if diff > 0:
-                        factor += np.sin(abs(diff) / 2) * DrivableAreaProperty.SIDEWALK_WIDTH / norm(
+                        factor += math.sin(abs(diff) / 2) * DrivableAreaProperty.SIDEWALK_WIDTH / norm(
                             lane_start[0] - lane_end[0], lane_start[1] - lane_end[1]
                         ) + 0.15
                     else:
-                        factor -= np.sin(abs(diff) / 2) * DrivableAreaProperty.SIDEWALK_WIDTH / norm(
+                        factor -= math.sin(abs(diff) / 2) * DrivableAreaProperty.SIDEWALK_WIDTH / norm(
                             lane_start[0] - lane_end[0], lane_start[1] - lane_end[1]
                         )
             last_theta = theta

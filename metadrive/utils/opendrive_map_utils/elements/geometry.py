@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-
 import abc
+import math
 
 import numpy as np
 
@@ -69,6 +69,7 @@ class Line(Geometry):
 
     (Section 5.3.4.1.1 of OpenDRIVE 1.4)
     """
+
     def calc_position(self, s_pos):
         """
 
@@ -90,6 +91,7 @@ class Arc(Geometry):
 
     (Section 5.3.4.1.3 of OpenDRIVE 1.4)
     """
+
     def __init__(self, start_position, heading, length, curvature):
         self.curvature = curvature
         super().__init__(start_position=start_position, heading=heading, length=length)
@@ -126,6 +128,7 @@ class Spiral(Geometry):
 
     (Section 5.3.4.1.2 of OpenDRIVE 1.4)
     """
+
     def __init__(self, start_position, heading, length, curvStart, curvEnd):
         self._curvStart = curvStart
         self._curvEnd = curvEnd
@@ -159,6 +162,7 @@ class Poly3(Geometry):
 
     (Section 5.3.4.1.4 of OpenDRIVE 1.4)
     """
+
     def __init__(self, start_position, heading, length, a, b, c, d):
         self._a = a
         self._b = b
@@ -204,6 +208,7 @@ class ParamPoly3(Geometry):
 
     (Section 5.3.4.1.5 of OpenDRIVE 1.4)
     """
+
     def __init__(self, start_position, heading, length, aU, bU, cU, dU, aV, bV, cV, dV, pRange):
         super().__init__(start_position=start_position, heading=heading, length=length)
 
@@ -240,8 +245,8 @@ class ParamPoly3(Geometry):
         x = np.polynomial.polynomial.polyval(pos, coeffsU)
         y = np.polynomial.polynomial.polyval(pos, coeffsV)
 
-        xrot = x * np.cos(self.heading) - y * np.sin(self.heading)
-        yrot = x * np.sin(self.heading) + y * np.cos(self.heading)
+        xrot = x * math.cos(self.heading) - y * math.sin(self.heading)
+        yrot = x * math.sin(self.heading) + y * math.cos(self.heading)
 
         # Tangent is defined by derivation
         dCoeffsU = coeffsU[1:] * np.array(np.arange(1, len(coeffsU)))

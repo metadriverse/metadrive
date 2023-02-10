@@ -918,8 +918,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         theta = wrap_to_pi(self.heading_theta) + wrap_to_pi(theta)
         norm_len = norm(project_on_heading, project_on_side)
         position = self.position
-        heading = np.sin(theta) * norm_len
-        side = np.cos(theta) * norm_len
+        heading = math.sin(theta) * norm_len
+        side = math.cos(theta) * norm_len
         return position[0] + side, position[1] + heading
 
     @property
