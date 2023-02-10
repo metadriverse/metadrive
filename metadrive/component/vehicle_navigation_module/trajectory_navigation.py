@@ -14,7 +14,6 @@ class WaymoTrajectoryNavigation(BaseNavigation):
 
     def __init__(
         self,
-        engine,
         show_navi_mark: bool = False,
         random_navi_mark_color=False,
         show_dest_mark=False,
@@ -24,7 +23,6 @@ class WaymoTrajectoryNavigation(BaseNavigation):
         vehicle_config=None
     ):
         super(WaymoTrajectoryNavigation, self).__init__(
-            engine=engine,
             show_navi_mark=show_navi_mark,
             random_navi_mark_color=random_navi_mark_color,
             show_dest_mark=show_dest_mark,

@@ -649,7 +649,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             navi = NodeNetworkNavigation if self.engine.current_map.road_network_type == NodeRoadNetwork \
                 else EdgeNetworkNavigation
         self.navigation = navi(
-            self.engine,
+            # self.engine,
             show_navi_mark=self.engine.global_config["vehicle_config"]["show_navi_mark"],
             random_navi_mark_color=self.engine.global_config["vehicle_config"]["random_navi_mark_color"],
             show_dest_mark=self.engine.global_config["vehicle_config"]["show_dest_mark"],

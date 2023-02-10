@@ -26,7 +26,6 @@ class BaseNavigation:
 
     def __init__(
         self,
-        # engine,
         show_navi_mark: bool = False,
         random_navi_mark_color=False,
         show_dest_mark=False,
@@ -39,7 +38,6 @@ class BaseNavigation:
         This class define a helper for localizing vehicles and retrieving navigation information.
         It now only support from first block start to the end node, but can be extended easily.
         """
-        # self.engine = engine
         self.name = name
 
         # Make sure these variables are filled when making new subclass

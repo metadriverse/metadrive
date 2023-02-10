@@ -16,7 +16,6 @@ from metadrive.utils.space import Parameter, BlockParameterSpace
 class NodeNetworkNavigation(BaseNavigation):
     def __init__(
         self,
-        engine,
         show_navi_mark: bool = False,
         random_navi_mark_color=False,
         show_dest_mark=False,
@@ -30,7 +29,6 @@ class NodeNetworkNavigation(BaseNavigation):
         It now only support from first block start to the end node, but can be extended easily.
         """
         super(NodeNetworkNavigation, self).__init__(
-            engine=engine,
             show_navi_mark=show_navi_mark,
             random_navi_mark_color=random_navi_mark_color,
             show_dest_mark=show_dest_mark,
