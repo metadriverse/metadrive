@@ -279,6 +279,6 @@ class NodeNetworkNavigation(BaseNavigation):
             if self.FORCE_CALCULATE:
                 lane_index, _ = self.map.road_network.get_closest_lane_index(ego_vehicle.position)
                 lane = self.map.road_network.get_lane(lane_index)
-        self.current_lane = lane
+        self._current_lane = lane
         assert lane_index == lane.index, "lane index mismatch!"
         return lane, lane_index
