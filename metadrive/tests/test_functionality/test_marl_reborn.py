@@ -16,12 +16,14 @@ def test_respawn():
         }
     )
     try:
-        assert set(env.observations.keys()) == {"agent0", "agent1"}
+
         assert set(env.action_space.spaces.keys()) == {"agent0", "agent1"}
         assert set(env.config["target_vehicle_configs"].keys()) == {"agent0", "agent1"}
         assert set(env.vehicles.keys()) == set()  # Not initialized yet!
 
         o = env.reset()
+
+        assert set(env.observations.keys()) == {"agent0", "agent1"}
 
         assert set(o.keys()) == {"agent0", "agent1"}
         assert set(env.observations.keys()) == {"agent0", "agent1"}
@@ -148,5 +150,5 @@ def test_delay_done(render=False):
 
 if __name__ == '__main__':
     # setup_logger(True)
-    # test_respawn()
-    test_delay_done(True)
+    test_respawn()
+    # test_delay_done(True)
