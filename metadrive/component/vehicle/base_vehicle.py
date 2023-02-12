@@ -795,9 +795,9 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             )
         return state
 
-    def get_raw_state(self):
-        ret = dict(position=self.position, heading=self.heading, velocity=self.velocity)
-        return ret
+    # def get_raw_state(self):
+    #     ret = dict(position=self.position, heading=self.heading, velocity=self.velocity)
+    #     return ret
 
     def get_dynamics_parameters(self):
         # These two can be changed on the fly
