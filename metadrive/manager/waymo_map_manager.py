@@ -25,22 +25,9 @@ class WaymoMapManager(BaseManager):
         self.sdc_dest_point = None
         self.current_sdc_route = None
 
-        # self.store_map = store_map
-        # self.store_map_buffer = DataBuffer(store_data_buffer_size=store_map_buffer_size if self.store_map else None)
-
     def reset(self):
         seed = self.engine.global_random_seed
         assert self.start <= seed < self.start + self.map_num
-
-        # inner psutil function
-        # def process_memory():
-        #     import psutil
-        #     import os
-        #     process = psutil.Process(os.getpid())
-        #     mem_info = process.memory_info()
-        #     return mem_info.rss
-        #
-        # cm = process_memory()
 
         self.current_sdc_route = None
         self.sdc_dest_point = None
@@ -48,52 +35,12 @@ class WaymoMapManager(BaseManager):
         seed = self.engine.global_random_seed
         assert self.start <= seed < self.start + self.map_num
 
-        # lm = process_memory()
-        # print("{}:  Reset! Mem Change {:.3f}MB".format(0, (lm - cm) / 1e6))
-        # cm = lm
-
-        # if seed in self.store_map_buffer:
-        #     new_map = self.store_map_buffer[seed]
-        # else:
-        #
-        #     # lm = process_memory()
-        #     # print("{}:  Reset! Mem Change {:.3f}MB".format(1, (lm - cm) / 1e6))
-        #     # cm = lm
-        #
-        #     self.store_map_buffer.clear_if_necessary()
-
-        # lm = process_memory()
-        # print("{}:  Reset! Mem Change {:.3f}MB".format(2, (lm - cm) / 1e6))
-        # cm = lm
-
         new_map = WaymoMap(map_index=seed)
-
-        # lm = process_memory()
-        # print("{}:  Reset! Mem Change {:.3f}MB".format(3, (lm - cm) / 1e6))
-        # cm = lm
-
-        # self.store_map_buffer[seed] = new_map
-
-        # lm = process_memory()
-        # print("{}:  Reset! Mem Change {:.3f}MB".format(4, (lm - cm) / 1e6))
-        # cm = lm
-
         self.load_map(new_map)
-
-        # lm = process_memory()
-        # print("{}:  Reset! Mem Change {:.3f}MB".format(5, (lm - cm) / 1e6))
-        # cm = lm
 
         self.update_route()
 
-        # lm = process_memory()
-        # print("{}:  Reset! Mem Change {:.3f}MB".format(6, (lm - cm) / 1e6))
-        # cm = lm
-
     def update_route(self):
-        """
-        # TODO(LQY) Modify this part, if we finally deceide to use TrajNavi
-        """
         data = self.engine.data_manager.get_case(self.engine.global_random_seed)
 
         sdc_traj = WaymoTrafficManager.parse_full_trajectory(data["tracks"][data["sdc_index"]]["state"])
