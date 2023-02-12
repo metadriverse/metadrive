@@ -58,7 +58,7 @@ class Merge(Bottleneck):
         # part 1, straight road 0
         basic_lane = self.positive_lanes[straight_lane_num - 1]
         ref_lane = ExtendStraightLane(basic_lane, self.BOTTLENECK_LEN, [LineType.NONE, LineType.NONE])
-        straight_road = Road(start_ndoe, self.road_node(0, 0))
+        straight_road = Road(start_node, self.road_node(0, 0))
         no_cross = CreateRoadFrom(
             ref_lane,
             straight_lane_num,
@@ -105,7 +105,7 @@ class Merge(Bottleneck):
         ) and no_cross
 
         negative_socket_road = -socket_road
-        self.add_sockets(PGBlockSocket(socket_road, negative_sockect_road))
+        self.add_sockets(PGBlockSocket(socket_road, negative_socket_road))
 
         # part 2, circular part
         for index, lane in enumerate(self.positive_lanes[straight_lane_num:], 1):
@@ -115,7 +115,7 @@ class Merge(Bottleneck):
 
             # positive part
             circular_1, circular_2, _ = create_wave_lanes(lane, lateral_dist, self.BOTTLENECK_LEN, 5, self.lane_width)
-            road_1 = Road(start_ndoe, inner_node)
+            road_1 = Road(start_node, inner_node)
             no_cross = CreateRoadFrom(
                 circular_1,
                 1,
@@ -141,7 +141,7 @@ class Merge(Bottleneck):
             ) and no_cross
 
             # adverse part
-            lane = negative_sockect_road.get_lanes(self.block_network)[-1]
+            lane = negative_socket_road.get_lanes(self.block_network)[-1]
             circular_2, circular_1, _ = create_wave_lanes(
                 lane, lateral_dist, self.BOTTLENECK_LEN, 5, self.lane_width, False
             )
@@ -201,7 +201,7 @@ class Split(Bottleneck):
         # part 1, straight road 0
         basic_lane = self.positive_lanes[straight_lane_num - 1]
         ref_lane = ExtendStraightLane(basic_lane, self.BOTTLENECK_LEN, [LineType.NONE, LineType.NONE])
-        straight_road = Road(start_ndoe, self.road_node(0, 0))
+        straight_road = Road(start_node, self.road_node(0, 0))
         no_cross = CreateRoadFrom(
             ref_lane,
             straight_lane_num,
@@ -237,7 +237,7 @@ class Split(Bottleneck):
             )
             if index == circular_lane_num:
                 socket_road_ref_lane = straight
-            road_1 = Road(start_ndoe, inner_node)
+            road_1 = Road(start_node, inner_node)
             no_cross = CreateRoadFrom(
                 circular_1,
                 1,
@@ -286,10 +286,10 @@ class Split(Bottleneck):
         ) and no_cross
 
         negative_socket_road = -socket_road
-        self.add_sockets(PGBlockSocket(socket_road, negative_sockect_road))
+        self.add_sockets(PGBlockSocket(socket_road, negative_socket_road))
 
         # part 2, circular part
-        lanes = negative_sockect_road.get_lanes(self.block_network)
+        lanes = negative_socket_road.get_lanes(self.block_network)
         for index, lane in enumerate(lanes[self.positive_lane_num:], 1):
             lateral_dist = index * self.lane_width / 2
             inner_node = self.road_node(1, index)
@@ -310,7 +310,7 @@ class Split(Bottleneck):
                 inner_lane_line_type=LineType.NONE,
                 ignore_intersection_checking=self.ignore_intersection_checking
             ) and no_cross
-            road_2 = -Road(start_ndoe, inner_node)
+            road_2 = -Road(start_node, inner_node)
             no_cross = CreateRoadFrom(
                 circular_2,
                 1,
