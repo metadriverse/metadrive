@@ -67,7 +67,7 @@ class TopDownMultiChannel(TopDownObservation):
         self.canvas_past_pos = pygame.Surface(self.resolution)  # A local view
 
     def reset(self, env, vehicle=None):
-        self.engine = env.engine
+        # self.engine = env.engine
         self.road_network = env.current_map.road_network
         self.target_vehicle = vehicle
         self._should_draw_map = True

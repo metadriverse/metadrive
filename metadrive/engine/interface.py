@@ -18,7 +18,7 @@ class Interface:
 
     def __init__(self, base_engine):
         self._node_path_list = []
-        self.engine = base_engine
+        # self.engine = base_engine
         self.vehicle_panel = None
         self.right_panel = None
         self.mid_panel = None
@@ -29,7 +29,7 @@ class Interface:
         self._right_arrow = None
         self._contact_banners = {}  # to save time/memory
         self.current_banner = None
-        self.need_interface = self.engine.mode == RENDER_MODE_ONSCREEN and not self.engine.global_config[
+        self.need_interface = base_engine.mode == RENDER_MODE_ONSCREEN and not base_engine.global_config[
             "debug_physics_world"]
         self.need_interface = self.need_interface and base_engine.global_config["show_interface"]
         self.init_interface()
@@ -186,6 +186,11 @@ class Interface:
                 if self._left_arrow.hasParent():
                     self._left_arrow.detachNode()
 
+    @property
+    def engine(self):
+        from metadrive.engine.engine_utils import get_engine
+        return get_engine()
+
 
 class VehiclePanel(ImageBuffer):
     PARA_VIS_LENGTH = 12
@@ -305,3 +310,8 @@ class VehiclePanel(ImageBuffer):
         for para in self.para_vis_np.values():
             para.removeNode()
         self.aspect2d_np.removeNode()
+
+    @property
+    def engine(self):
+        from metadrive.engine.engine_utils import get_engine
+        return get_engine()

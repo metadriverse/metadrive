@@ -13,11 +13,15 @@ class WaymoDataManager(BaseManager):
 
     def __init__(self):
         super(WaymoDataManager, self).__init__()
-        store_map = self.engine.global_config.get("store_map", False)
-        store_map_buffer_size = self.engine.global_config.get("store_map_buffer_size", self.DEFAULT_DATA_BUFFER_SIZE)
-        self.directory = self.engine.global_config["waymo_data_directory"]
-        self.case_num = self.engine.global_config["case_num"]
-        self.start_case_index = self.engine.global_config["start_case_index"]
+
+        from metadrive.engine.engine_utils import get_engine
+        engine = get_engine()
+
+        store_map = engine.global_config.get("store_map", False)
+        store_map_buffer_size = engine.global_config.get("store_map_buffer_size", self.DEFAULT_DATA_BUFFER_SIZE)
+        self.directory = engine.global_config["waymo_data_directory"]
+        self.case_num = engine.global_config["case_num"]
+        self.start_case_index = engine.global_config["start_case_index"]
 
         self.store_map = store_map
         self.waymo_case = DataBuffer(store_map_buffer_size if self.store_map else self.case_num)
@@ -35,31 +39,44 @@ class WaymoDataManager(BaseManager):
         assert self.start_case_index <= i < self.start_case_index + self.case_num, \
             "Case ID exceeds range"
         file_path = os.path.join(self.directory, "{}.pkl".format(i))
-        return copy.deepcopy(read_waymo_data(file_path))
+        return read_waymo_data(file_path)
 
-    def get_case(self, i):
+    def get_case(self, i, should_copy=False):
+
+        _debug_memory_leak = False
+
         if i not in self.waymo_case:
-            # inner psutil function
-            # def process_memory():
-            #     import psutil
-            #     import os
-            #     process = psutil.Process(os.getpid())
-            #     mem_info = process.memory_info()
-            #     return mem_info.rss
-            #
-            # cm = process_memory()
+
+            if _debug_memory_leak:
+                # inner psutil function
+                def process_memory():
+                    import psutil
+                    import os
+                    process = psutil.Process(os.getpid())
+                    mem_info = process.memory_info()
+                    return mem_info.rss
+
+                cm = process_memory()
 
             self.waymo_case.clear_if_necessary()
 
-            # lm = process_memory()
-            # print("{}:  Reset! Mem Change {:.3f}MB".format("data manager 1", (lm - cm) / 1e6))
-            # cm = lm
+            if _debug_memory_leak:
+                lm = process_memory()
+                print("{}:  Reset! Mem Change {:.3f}MB".format("data manager clear case", (lm - cm) / 1e6))
+                cm = lm
 
+            # print("===Getting new case: ", i)
             self.waymo_case[i] = self._get_case(i)
 
-            # lm = process_memory()
-            # print("{}:  Reset! Mem Change {:.3f}MB".format("data manager 2", (lm - cm) / 1e6))
-            # cm = lm
+            if _debug_memory_leak:
+                lm = process_memory()
+                print("{}:  Reset! Mem Change {:.3f}MB".format("data manager read case", (lm - cm) / 1e6))
+                cm = lm
 
-        # return copy.deepcopy(self.waymo_case[i])
+        else:
+            pass
+            # print("===Don't need to get new case. Just return: ", i)
+
+        if should_copy:
+            return copy.deepcopy(self.waymo_case[i])
         return self.waymo_case[i]

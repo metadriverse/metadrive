@@ -34,7 +34,7 @@ class NuPlanBlock(BaseBlock):
         super(NuPlanBlock, self).__init__(block_index, global_network, random_seed)
 
         # authorize engine access for this object
-        self.engine = get_engine()
+        # self.engine = get_engine()
         self._nuplan_map_api = self.engine.data_manager.get_case(self.map_index).map_api
         # TODO LQY, make it a dict
         self.lines = {}

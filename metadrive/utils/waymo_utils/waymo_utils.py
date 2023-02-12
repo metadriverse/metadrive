@@ -169,12 +169,12 @@ def extract_crosswalk(f):
 
 
 def extract_bump(f):
-    speed_bump = dict()
+    speed_bump_data = dict()
     f = f.speed_bump
-    speed_bump['type'] = speed_bump
-    speed_bump['polygon'] = extract_poly(f.polygon)
+    speed_bump_data['type'] = "speed_bump"
+    speed_bump_data['polygon'] = extract_poly(f.polygon)
 
-    return speed_bump
+    return speed_bump_data
 
 
 def extract_tracks(f, sdc_idx):

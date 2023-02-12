@@ -168,6 +168,10 @@ class VaryingShapeVehicle(DefaultVehicle):
     def HEIGHT(self):
         return self.config["height"] if self.config["height"] is not None else super(VaryingShapeVehicle, self).HEIGHT
 
+    @property
+    def MASS(self):
+        return self.config["mass"] if self.config["mass"] is not None else super(VaryingShapeVehicle, self).MASS
+
     def reset(
         self,
         random_seed=None,
@@ -189,7 +193,39 @@ class VaryingShapeVehicle(DefaultVehicle):
                 should_force_reset = True
             if vehicle_config["length"] is not None and vehicle_config["length"] != self.LENGTH:
                 should_force_reset = True
+            if "max_engine_force" in vehicle_config and \
+                    vehicle_config["max_engine_force"] is not None and \
+                    vehicle_config["max_engine_force"] != self.config["max_engine_force"]:
+                should_force_reset = True
+            if "max_brake_force" in vehicle_config and \
+                    vehicle_config["max_brake_force"] is not None and \
+                    vehicle_config["max_brake_force"] != self.config["max_brake_force"]:
+                should_force_reset = True
+            if "wheel_friction" in vehicle_config and \
+                    vehicle_config["wheel_friction"] is not None and \
+                    vehicle_config["wheel_friction"] != self.config["wheel_friction"]:
+                should_force_reset = True
+            if "max_steering" in vehicle_config and \
+                    vehicle_config["max_steering"] is not None and \
+                    vehicle_config["max_steering"] != self.config["max_steering"]:
+                self.max_steering = vehicle_config["max_steering"]
+                should_force_reset = True
+            if "mass" in vehicle_config and \
+                    vehicle_config["mass"] is not None and \
+                    vehicle_config["mass"] != self.config["mass"]:
+                should_force_reset = True
+
+        # def process_memory():
+        #     import psutil
+        #     import os
+        #     process = psutil.Process(os.getpid())
+        #     mem_info = process.memory_info()
+        #     return mem_info.rss
+        #
+        # cm = process_memory()
+
         if should_force_reset:
+
             self.destroy()
             self.__init__(
                 vehicle_config=vehicle_config,
@@ -199,6 +235,18 @@ class VaryingShapeVehicle(DefaultVehicle):
                 heading=heading
             )
 
-        return super(VaryingShapeVehicle, self).reset(
+            # lm = process_memory()
+            # print("{}:  Reset! Mem Change {:.3f}MB".format("1 Force Re-Init Vehicle", (lm - cm) / 1e6))
+            # cm = lm
+
+        assert self.max_steering == self.config["max_steering"]
+
+        ret = super(VaryingShapeVehicle, self).reset(
             random_seed=random_seed, vehicle_config=vehicle_config, position=position, heading=heading, *args, **kwargs
         )
+
+        # lm = process_memory()
+        # print("{}:  Reset! Mem Change {:.3f}MB".format("2 Force Reset Vehicle", (lm - cm) / 1e6))
+        # cm = lm
+
+        return ret

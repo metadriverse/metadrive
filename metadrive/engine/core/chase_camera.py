@@ -31,7 +31,7 @@ class MainCamera:
 
     def __init__(self, engine, camera_height: float, camera_dist: float):
         self._origin_height = camera_height
-        self.engine = engine
+        # self.engine = engine
 
         # vehicle chase camera
         self.camera = engine.cam
@@ -325,3 +325,8 @@ class MainCamera:
     @property
     def mouse_into_window(self):
         return True if not self._last_frame_has_mouse and self.has_mouse else False
+
+    @property
+    def engine(self):
+        from metadrive.engine.engine_utils import get_engine
+        return get_engine()

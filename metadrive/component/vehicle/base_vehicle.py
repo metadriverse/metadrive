@@ -93,7 +93,9 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     TIRE_WIDTH = 0.4
     FRONT_WHEELBASE = None
     REAR_WHEELBASE = None
-    MASS = None
+
+    # MASS = None
+
     CHASSIS_TO_WHEEL_AXIS = 0.2
     SUSPENSION_LENGTH = 15
     SUSPENSION_STIFFNESS = 40
@@ -131,7 +133,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         assert engine_initialized(), "Please make sure game engine is successfully initialized!"
 
         # NOTE: it is the game engine, not vehicle drivetrain
-        self.engine = get_engine()
+        # self.engine = get_engine()
         BaseObject.__init__(self, name, random_seed, self.engine.global_config["vehicle_config"])
         BaseVehicleState.__init__(self)
         self.update_config(vehicle_config)
@@ -650,7 +652,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             navi = NodeNetworkNavigation if self.engine.current_map.road_network_type == NodeRoadNetwork \
                 else EdgeNetworkNavigation
         self.navigation = navi(
-            self.engine,
+            # self.engine,
             show_navi_mark=self.engine.global_config["vehicle_config"]["show_navi_mark"],
             random_navi_mark_color=self.engine.global_config["vehicle_config"]["random_navi_mark_color"],
             show_dest_mark=self.engine.global_config["vehicle_config"]["show_dest_mark"],
@@ -756,7 +758,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             for sensor in self.image_sensors.values():
                 sensor.destroy()
         self.image_sensors = {}
-        self.engine = None
+        # self.engine = None
 
     def set_heading_theta(self, heading_theta, rad_to_degree=True) -> None:
         """
@@ -792,6 +794,31 @@ class BaseVehicle(BaseObject, BaseVehicleState):
                 }
             )
         return state
+
+    # def get_raw_state(self):
+    #     ret = dict(position=self.position, heading=self.heading, velocity=self.velocity)
+    #     return ret
+
+    def get_dynamics_parameters(self):
+        # These two can be changed on the fly
+        max_engine_force = self.config["max_engine_force"]
+        max_brake_force = self.config["max_brake_force"]
+
+        # These two can only be changed in init
+        wheel_friction = self.config["wheel_friction"]
+        assert self.max_steering == self.config["max_steering"]
+        max_steering = self.max_steering
+
+        mass = self.config["mass"] if self.config["mass"] else self.MASS
+
+        ret = dict(
+            max_engine_force=max_engine_force,
+            max_brake_force=max_brake_force,
+            wheel_friction=wheel_friction,
+            max_steering=max_steering,
+            mass=mass
+        )
+        return ret
 
     def set_state(self, state):
         super(BaseVehicle, self).set_state(state)
@@ -829,7 +856,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
 
     def __del__(self):
         super(BaseVehicle, self).__del__()
-        self.engine = None
+        # self.engine = None
         self.lidar = None
         self.mini_map = None
         self.rgb_camera = None
