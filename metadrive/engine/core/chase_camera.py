@@ -174,7 +174,7 @@ class MainCamera:
     def _dir_of_lane(lane, pos: Tuple) -> Tuple:
         """
         Get direction of lane
-        :param lane: Abstractlane
+        :param lane: AbstractLane
         :param pos: metadrive position, tuple
         :return: dir, tuple
         """

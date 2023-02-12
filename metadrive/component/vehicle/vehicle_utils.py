@@ -9,7 +9,7 @@ class PhysicSetting:
     Work in progress
     """
     def __init__(self, size, hpr, offset, model_path):
-        # doffset is used for 4 wheels.
+        # offset is used for 4 wheels.
         self.size = size
         self.hpr = hpr
         self.offset = offset

@@ -206,6 +206,19 @@ Quanyi Li, Zhenghao Peng, Haibin Wu, Lan Feng, Bolei Zhou
 [<a href="https://github.com/metadriverse/policydissect" target="_blank">Code</a>]
 [<a href="https://metadriverse.github.io/policydissect/" target="_blank">Webpage</a>]
 
+
+And more:
+
+
+* Yang, Yujie, Yuxuan Jiang, Yichen Liu, Jianyu Chen, and Shengbo Eben Li. "Model-Free Safe Reinforcement Learning through Neural Barrier Certificate." IEEE Robotics and Automation Letters (2023).
+
+* Feng, Lan, Quanyi Li, Zhenghao Peng, Shuhan Tan, and Bolei Zhou. "TrafficGen: Learning to Generate Diverse and Realistic Traffic Scenarios." (**ICRA 2023**)
+
+* Zhenghai Xue, Zhenghao Peng, Quanyi Li, Zhihan Liu, Bolei Zhou. "Guarded Policy Optimization with Imperfect Online Demonstrations." (**ICLR 2023**)
+
+
+
+
 [![build](https://github.com/metadriverse/metadrive/workflows/test/badge.svg)](http://github.com/metadriverse/metadrive/actions)
 [![Documentation](https://readthedocs.org/projects/metadrive/badge/?version=latest)](https://metadrive.readthedocs.io)
 [![GitHub license](https://img.shields.io/github/license/metadriverse/metadrive)](https://github.com/metadriverse/metadrive/blob/main/LICENSE.txt)
