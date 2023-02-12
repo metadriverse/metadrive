@@ -82,6 +82,8 @@ Please feel free to contact us if you have any suggestions or ideas!
     <br><br>
 
 
+We also make a video to benchmark the FPS of MetaDrive in different platforms. It can run at +2000FPS at MacBook Pro. Please checkout the
+`YouTube video <https://youtu.be/8P4jKAvq_54>`_.
 
 
 Relevant Projects
