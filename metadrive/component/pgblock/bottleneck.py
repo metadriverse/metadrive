@@ -49,7 +49,7 @@ class Merge(Bottleneck):
         self.BOTTLENECK_LEN = parameters["bottle_len"]
         lane_num_changed = parameters[Parameter.lane_num]
 
-        start_ndoe = self.pre_block_socket.positive_road.end_node
+        start_node = self.pre_block_socket.positive_road.end_node
         straight_lane_num = int(self.positive_lane_num - lane_num_changed)
         straight_lane_num = max(1, straight_lane_num)
 
@@ -104,7 +104,7 @@ class Merge(Bottleneck):
             ignore_intersection_checking=self.ignore_intersection_checking
         ) and no_cross
 
-        negative_sockect_road = -socket_road
+        negative_socket_road = -socket_road
         self.add_sockets(PGBlockSocket(socket_road, negative_sockect_road))
 
         # part 2, circular part
@@ -193,7 +193,7 @@ class Split(Bottleneck):
         center_line_type = LineType.CONTINUOUS if parameters["solid_center_line"] else LineType.BROKEN
         lane_num_changed = parameters[Parameter.lane_num]
 
-        start_ndoe = self.pre_block_socket.positive_road.end_node
+        start_node = self.pre_block_socket.positive_road.end_node
         straight_lane_num = self.positive_lane_num
         circular_lane_num = lane_num_changed
         total_num = straight_lane_num + circular_lane_num
@@ -285,7 +285,7 @@ class Split(Bottleneck):
             ignore_intersection_checking=self.ignore_intersection_checking
         ) and no_cross
 
-        negative_sockect_road = -socket_road
+        negative_socket_road = -socket_road
         self.add_sockets(PGBlockSocket(socket_road, negative_sockect_road))
 
         # part 2, circular part

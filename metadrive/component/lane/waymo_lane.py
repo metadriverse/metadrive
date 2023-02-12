@@ -21,9 +21,6 @@ class WaymoLane(PointLane):
         self.exit_lanes = waymo_map_data[waymo_lane_id][WaymoLaneProperty.EXIT]
         self.left_lanes = waymo_map_data[waymo_lane_id][WaymoLaneProperty.LEFT_NEIGHBORS]
         self.right_lanes = waymo_map_data[waymo_lane_id][WaymoLaneProperty.RIGHT_NEIGHBORS]
-        # left_type = LineType.CONTINUOUS if len(self.left_lanes) == 0 else LineType.NONE
-        # righ_type = LineType.CONTINUOUS if len(self.right_lanes) == 0 else LineType.NONE
-        # self.line_types = (left_type, righ_type)
 
     @staticmethod
     def get_lane_width(waymo_lane_id, waymo_map_data):
