@@ -26,7 +26,6 @@ class BaseNavigation:
 
     def __init__(
         self,
-        engine,
         show_navi_mark: bool = False,
         random_navi_mark_color=False,
         show_dest_mark=False,
@@ -39,23 +38,25 @@ class BaseNavigation:
         This class define a helper for localizing vehicles and retrieving navigation information.
         It now only support from first block start to the end node, but can be extended easily.
         """
-        self.engine = engine
         self.name = name
 
         # Make sure these variables are filled when making new subclass
-        self.map = None
-        self.checkpoints = None
-        self.current_ref_lanes = None
-        self.next_ref_lanes = None
-        self.final_lane = None
-        self.current_lane = None
+        # self.map = None
+        # self.checkpoints = None
+        # self.current_ref_lanes = None
+        # self.next_ref_lanes = None
+        # self.final_lane = None
+        # self.current_lane = None
+
         self.vehicle_config = vehicle_config
 
         self._target_checkpoints_index = None
         self._navi_info = np.zeros((self.navigation_info_dim, ), dtype=np.float32)  # navi information res
 
         # Vis
-        self._show_navi_info = (engine.mode == RENDER_MODE_ONSCREEN and not engine.global_config["debug_physics_world"])
+        self._show_navi_info = (
+            self.engine.mode == RENDER_MODE_ONSCREEN and not self.engine.global_config["debug_physics_world"]
+        )
         self.origin = NodePath("navigation_sign") if self._show_navi_info else None
         self.navi_mark_color = (0.6, 0.8, 0.5) if not random_navi_mark_color else get_np_random().rand(3)
         if panda_color is not None:
@@ -127,9 +128,13 @@ class BaseNavigation:
 
     def reset(self, map: BaseMap, current_lane, vehicle_config=None):
         self.map = map
-        self.current_lane = current_lane
+        self._current_lane = current_lane
         if vehicle_config is not None:
             self.vehicle_config = vehicle_config
+
+    @property
+    def current_lane(self):
+        return self._current_lane
 
     def get_checkpoints(self):
         """Return next checkpoint and the next next checkpoint"""
@@ -248,3 +253,8 @@ class BaseNavigation:
         for np in self._node_path_list:
             np.detachNode()
             np.removeNode()
+
+    @property
+    def engine(self):
+        from metadrive.engine.engine_utils import get_engine
+        return get_engine()

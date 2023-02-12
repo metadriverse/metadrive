@@ -291,7 +291,7 @@ class AgentManager(BaseManager):
         """
         Return Map<agent_id, BaseVehicle>
         """
-        if hasattr(self, "engine") and self.engine.replay_episode:
+        if hasattr(self, "engine") and self.engine is not None and self.engine.replay_episode:
             return self.engine.replay_manager.replay_agents
         else:
             return {self._object_to_agent[k]: v for k, v in self._active_objects.items()}

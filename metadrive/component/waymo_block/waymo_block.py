@@ -18,11 +18,14 @@ class WaymoBlock(BaseBlock):
         # self.waymo_map_data = waymo_map_data
         self.map_index = map_index
         super(WaymoBlock, self).__init__(block_index, global_network, random_seed)
+        #
+        # e = get_engine()
+        # self.waymo_map_data = e.data_manager.get_case(self.map_index, should_copy=True)["map"]
 
+    @property
+    def waymo_map_data(self):
         e = get_engine()
-        self.waymo_map_data = e.data_manager.get_case(self.map_index)["map"]
-
-        # print(1)
+        return e.data_manager.get_case(self.map_index, should_copy=False)["map"]
 
     def _sample_topology(self) -> bool:
         for lane_id, data in self.waymo_map_data.items():
@@ -131,7 +134,7 @@ class WaymoBlock(BaseBlock):
 
     def destroy(self):
         self.map_index = None
-        self.waymo_map_data = None
+        # self.waymo_map_data = None
         super(WaymoBlock, self).destroy()
 
     def __del__(self):

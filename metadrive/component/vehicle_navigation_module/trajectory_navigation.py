@@ -14,7 +14,6 @@ class TrajectoryNavigation(BaseNavigation):
 
     def __init__(
         self,
-        engine,
         show_navi_mark: bool = False,
         random_navi_mark_color=False,
         show_dest_mark=False,
@@ -24,7 +23,6 @@ class TrajectoryNavigation(BaseNavigation):
         vehicle_config=None
     ):
         super(TrajectoryNavigation, self).__init__(
-            engine=engine,
             show_navi_mark=show_navi_mark,
             random_navi_mark_color=random_navi_mark_color,
             show_dest_mark=show_dest_mark,
@@ -33,17 +31,25 @@ class TrajectoryNavigation(BaseNavigation):
             name=name,
             vehicle_config=vehicle_config
         )
-        self.reference_trajectory = None
+        # self.reference_trajectory = None
 
     def reset(self, map=None, current_lane=None, destination=None, random_seed=None):
 
         # We do not want to store map within the navigation module!
         # TODO(PZH): In future, we can let all navigation module get latest map on-the-fly instead of
         #  caching a class local variable.
-        super(TrajectoryNavigation, self).reset(map=None, current_lane=None)
-        self.reference_trajectory = self.get_trajectory()
+        super(TrajectoryNavigation, self).reset(map=map, current_lane=current_lane)
+        # self.reference_trajectory = self.get_trajectory()
         if self.reference_trajectory is not None:
             self.set_route(None, None)
+
+    @property
+    def reference_trajectory(self):
+        return self.engine.map_manager.current_sdc_route
+
+    @property
+    def current_ref_lanes(self):
+        return [self.reference_trajectory]
 
     def set_route(self, current_lane_index: str, destination: str):
         self.checkpoints = self.descretize_reference_trajectory()
@@ -53,16 +59,16 @@ class TrajectoryNavigation(BaseNavigation):
         #            ) >= 2, "Can not find a route from {} to {}".format(current_lane_index[0], destination)
 
         self._navi_info.fill(0.0)
-        self.current_ref_lanes = [self.reference_trajectory]
+        # self.current_ref_lanes = [self.reference_trajectory]
         self.next_ref_lanes = None
-        self.current_lane = self.final_lane = self.reference_trajectory
+        # self.current_lane = self.final_lane = self.reference_trajectory
         if self._dest_node_path is not None:
             check_point = self.reference_trajectory.end
             self._dest_node_path.setPos(check_point[0], -check_point[1], 1.8)
 
-    def get_trajectory(self):
-        """This function breaks Multi-agent Waymo Env since we don't set this in map_manager."""
-        return self.engine.map_manager.current_sdc_route
+    # def get_trajectory(self):
+    #     """This function breaks Multi-agent Waymo Env since we don't set this in map_manager."""
+    #     return self.engine.map_manager.current_sdc_route
 
     def descretize_reference_trajectory(self):
         ret = []
@@ -165,21 +171,21 @@ class TrajectoryNavigation(BaseNavigation):
     def destroy(self):
         self.map = None
         self.checkpoints = None
-        self.current_ref_lanes = None
+        # self.current_ref_lanes = None
         self.next_ref_lanes = None
         self.final_lane = None
-        self.current_lane = None
-        self.reference_trajectory = None
+        self._current_lane = None
+        # self.reference_trajectory = None
         super(TrajectoryNavigation, self).destroy()
 
     def before_reset(self):
         self.map = None
         self.checkpoints = None
-        self.current_ref_lanes = None
+        # self.current_ref_lanes = None
         self.next_ref_lanes = None
         self.final_lane = None
-        self.current_lane = None
-        self.reference_trajectory = None
+        self._current_lane = None
+        # self.reference_trajectory = None
 
 
 WaymoTrajectoryNavigation = TrajectoryNavigation

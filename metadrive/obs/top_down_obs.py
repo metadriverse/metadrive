@@ -50,7 +50,7 @@ class TopDownObservation(ObservationBase):
 
         # scene
         self.road_network = None
-        self.engine = None
+        # self.engine = None
 
         # initialize
         pygame.init()
@@ -75,7 +75,7 @@ class TopDownObservation(ObservationBase):
         self.canvas_background = WorldSurface(self.MAP_RESOLUTION, 0, pygame.Surface(self.MAP_RESOLUTION))
 
     def reset(self, env, vehicle=None):
-        self.engine = env.engine
+        # self.engine = env.engine
         self.road_network = env.current_map.road_network
         self._should_draw_map = True
 
@@ -228,3 +228,8 @@ class TopDownObservation(ObservationBase):
         else:
             img = img.astype(np.uint8)
         return np.transpose(img, (1, 0, 2))
+
+    @property
+    def engine(self):
+        from metadrive.engine.engine_utils import get_engine
+        return get_engine()

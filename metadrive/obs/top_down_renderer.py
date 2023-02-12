@@ -148,7 +148,7 @@ class TopDownRenderer:
         self.show_agent_name = show_agent_name
         if self.show_agent_name:
             pygame.init()
-        self.engine = get_engine()
+        # self.engine = get_engine()
         # self._screen_size = screen_size
         self.pygame_font = None
         self.map = self.engine.current_map
@@ -412,3 +412,8 @@ class TopDownRenderer:
                 if event.key == pygame.K_ESCAPE:
                     import sys
                     sys.exit()
+
+    @property
+    def engine(self):
+        from metadrive.engine.engine_utils import get_engine
+        return get_engine()
