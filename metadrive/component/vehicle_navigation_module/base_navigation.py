@@ -14,7 +14,7 @@ from metadrive.utils.coordinates_shift import panda_position
 class BaseNavigation:
     """
     Implement all NotImplemented method for customizing a new navigation module.
-    This module interact with the map for findding lanes or expected positions
+    This module interact with the map for finding lanes or expected positions
     """
     navigation_info_dim = 10
     NAVI_POINT_DIST = 50

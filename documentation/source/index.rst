@@ -82,6 +82,8 @@ Please feel free to contact us if you have any suggestions or ideas!
     <br><br>
 
 
+We also make a video to benchmark the FPS of MetaDrive in different platforms. It can run at +2000FPS at MacBook Pro. Please checkout the
+`YouTube video <https://youtu.be/8P4jKAvq_54>`_.
 
 
 Relevant Projects
@@ -123,6 +125,19 @@ Relevant Projects
     [<a href="https://decisionforce.github.io/HACO" target="_blank">Webpage</a>]
 
     <br><br>
+
+
+And more:
+
+* Quanyi Li, Zhenghao Peng, Haibin Wu, Lan Feng, Bolei Zhou. "Human-AI Shared Control via Policy Dissection." (**NeurIPS 2022**)
+
+* Yang, Yujie, Yuxuan Jiang, Yichen Liu, Jianyu Chen, and Shengbo Eben Li. "Model-Free Safe Reinforcement Learning through Neural Barrier Certificate." IEEE Robotics and Automation Letters (2023).
+
+* Feng, Lan, Quanyi Li, Zhenghao Peng, Shuhan Tan, and Bolei Zhou. "TrafficGen: Learning to Generate Diverse and Realistic Traffic Scenarios." (**ICRA 2023**)
+
+* Zhenghai Xue, Zhenghao Peng, Quanyi Li, Zhihan Liu, Bolei Zhou. "Guarded Policy Optimization with Imperfect Online Demonstrations." (**ICLR 2023**)
+
+
 
 
 Citation

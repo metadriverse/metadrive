@@ -291,9 +291,9 @@ def extract_width(map, polyline, boundary):
         start_index = nearest_point(start_p, b_polyline)
         seg_len = b['index'][1] - b['index'][0]
         end_index = min(start_index + seg_len, lb['polyline'].shape[0] - 1)
-        leng = min(end_index - start_index, b['index'][1] - b['index'][0]) + 1
-        self_range = range(b['index'][0], b['index'][0] + leng)
-        bound_range = range(start_index, start_index + leng)
+        length = min(end_index - start_index, b['index'][1] - b['index'][0]) + 1
+        self_range = range(b['index'][0], b['index'][0] + length)
+        bound_range = range(start_index, start_index + length)
         centerLane = polyline[self_range]
         bound = b_polyline[bound_range]
         dist = np.square(centerLane - bound)
@@ -321,12 +321,12 @@ def compute_width(map):
 
 
 # parse raw data from input path to output path
-def parse_data(inut_path, output_path):
+def parse_data(input, output_path):
     cnt = 0
     scenario = scenario_pb2.Scenario()
-    file_list = os.listdir(inut_path)
+    file_list = os.listdir(input)
     for file in tqdm(file_list):
-        file_path = os.path.join(inut_path, file)
+        file_path = os.path.join(input, file)
         if not 'scenario' in file_path:
             continue
         dataset = tf.data.TFRecordDataset(file_path, compression_type='')

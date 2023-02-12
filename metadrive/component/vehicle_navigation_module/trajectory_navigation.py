@@ -10,7 +10,7 @@ class TrajectoryNavigation(BaseNavigation):
     This module enabling follow a given reference trajectory given a map
     # TODO(LQY): make this module a general module for navigation
     """
-    DESCRETE_LEN = 8  # m
+    DISCRETE_LEN = 8  # m
 
     def __init__(
         self,
@@ -52,7 +52,7 @@ class TrajectoryNavigation(BaseNavigation):
         return [self.reference_trajectory]
 
     def set_route(self, current_lane_index: str, destination: str):
-        self.checkpoints = self.descretize_reference_trajectory()
+        self.checkpoints = self.discretize_reference_trajectory()
         self._target_checkpoints_index = [0, 1] if len(self.checkpoints) >= 2 else [0, 0]
         # update routing info
         # assert len(self.checkpoints
@@ -70,12 +70,12 @@ class TrajectoryNavigation(BaseNavigation):
     #     """This function breaks Multi-agent Waymo Env since we don't set this in map_manager."""
     #     return self.engine.map_manager.current_sdc_route
 
-    def descretize_reference_trajectory(self):
+    def discretize_reference_trajectory(self):
         ret = []
         length = self.reference_trajectory.length
-        num = int(length / self.DESCRETE_LEN)
+        num = int(length / self.DISCRETE_LEN)
         for i in range(num):
-            ret.append(self.reference_trajectory.position(i * self.DESCRETE_LEN, 0))
+            ret.append(self.reference_trajectory.position(i * self.DISCRETE_LEN, 0))
         ret.append(self.reference_trajectory.end)
         return ret
 
@@ -91,7 +91,7 @@ class TrajectoryNavigation(BaseNavigation):
         if self._target_checkpoints_index[0] != self._target_checkpoints_index[1]:  # on last road
             # arrive to second checkpoint
             if lat < self.reference_trajectory.width:
-                idx = max(int(long / self.DESCRETE_LEN) + 1, 0)
+                idx = max(int(long / self.DISCRETE_LEN) + 1, 0)
                 idx = min(idx, len(self.checkpoints) - 1)
                 self._target_checkpoints_index = [idx]
                 if idx + 1 == len(self.checkpoints):
