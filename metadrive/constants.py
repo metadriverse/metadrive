@@ -64,6 +64,8 @@ class BodyName:
     Lane = "Lane"
     Traffic_object = "Traffic Object"
     TollGate = "Toll Gate"
+    Pedestrian = "Pedestrian"
+    Cyclist = "Cyclist"
 
 
 COLOR = {
@@ -123,9 +125,13 @@ class CollisionGroup(Mask):
     ContinuousLaneLine = BitMask32.bit(7)
     InvisibleWall = BitMask32.bit(8)
     LidarBroadDetector = BitMask32.bit(9)
+    TrafficParticipants = BitMask32.bit(10)
 
     @classmethod
     def collision_rules(cls):
+        """
+        This should be a diagonal matrix
+        """
         return [
             # terrain collision
             (cls.Terrain, cls.Terrain, False),
@@ -137,6 +143,7 @@ class CollisionGroup(Mask):
             (cls.Terrain, cls.Sidewalk, True),
             (cls.Terrain, cls.LidarBroadDetector, False),
             (cls.Terrain, cls.TrafficObject, True),
+            (cls.Terrain, cls.TrafficParticipants, True),
 
             # block collision
             (cls.BrokenLaneLine, cls.BrokenLaneLine, False),
@@ -148,6 +155,7 @@ class CollisionGroup(Mask):
             (cls.BrokenLaneLine, cls.Sidewalk, False),
             (cls.BrokenLaneLine, cls.LidarBroadDetector, False),
             (cls.BrokenLaneLine, cls.TrafficObject, True),
+            (cls.BrokenLaneLine, cls.TrafficParticipants, True),
 
             # ego vehicle collision
             (cls.Vehicle, cls.Vehicle, True),
@@ -157,6 +165,7 @@ class CollisionGroup(Mask):
             (cls.Vehicle, cls.Sidewalk, True),
             (cls.Vehicle, cls.LidarBroadDetector, True),
             (cls.Vehicle, cls.TrafficObject, True),
+            (cls.Vehicle, cls.TrafficParticipants, True),
 
             # lane surface
             (cls.LaneSurface, cls.LaneSurface, False),
@@ -165,6 +174,7 @@ class CollisionGroup(Mask):
             (cls.LaneSurface, cls.Sidewalk, False),
             (cls.LaneSurface, cls.LidarBroadDetector, False),
             (cls.LaneSurface, cls.TrafficObject, True),
+            (cls.LaneSurface, cls.TrafficParticipants, True),
 
             # continuous lane line
             (cls.ContinuousLaneLine, cls.ContinuousLaneLine, False),
@@ -172,21 +182,32 @@ class CollisionGroup(Mask):
             (cls.ContinuousLaneLine, cls.Sidewalk, False),
             (cls.ContinuousLaneLine, cls.LidarBroadDetector, False),
             (cls.ContinuousLaneLine, cls.TrafficObject, False),
+            (cls.ContinuousLaneLine, cls.TrafficParticipants, True),
 
             # invisible wall
             (cls.InvisibleWall, cls.InvisibleWall, False),
             (cls.InvisibleWall, cls.Sidewalk, False),
             (cls.InvisibleWall, cls.LidarBroadDetector, True),
             (cls.InvisibleWall, cls.TrafficObject, False),
+            (cls.InvisibleWall, cls.TrafficParticipants, True),
 
             # side walk
             (cls.Sidewalk, cls.Sidewalk, False),
             (cls.Sidewalk, cls.LidarBroadDetector, False),
             (cls.Sidewalk, cls.TrafficObject, True),
+            (cls.Sidewalk, cls.TrafficParticipants, True),
 
-            #
+            # LidarBroadDetector
             (cls.LidarBroadDetector, cls.LidarBroadDetector, False),
             (cls.LidarBroadDetector, cls.TrafficObject, True),
+            (cls.LidarBroadDetector, cls.TrafficParticipants, True,),
+
+            # TrafficObject
+            (cls.TrafficObject, cls.TrafficObject, True),
+            (cls.TrafficObject, cls.TrafficParticipants, True),
+
+            # TrafficParticipant
+            (cls.TrafficParticipants, cls.TrafficParticipants, True)
         ]
 
     @classmethod
