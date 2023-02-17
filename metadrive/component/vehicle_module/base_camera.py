@@ -45,7 +45,6 @@ class BaseCamera(ImageBuffer):
         img.write(name)
 
     def get_pixels_array(self, base_object, clip=True) -> np.ndarray:
-        # TODO LQY: modify the process of getting grayscale image
         self.track(base_object)
         ret = type(self)._singleton.get_rgb_array()
         if self.engine.global_config["vehicle_config"]["rgb_to_grayscale"]:
