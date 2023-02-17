@@ -4,16 +4,15 @@ from metadrive.engine.engine_utils import get_engine
 
 
 class InterfaceCamera:
-
     def __init__(self):
         engine = get_engine()
         if engine.global_config["vehicle_config"]["image_source"] == "main_camera":
-            assert engine.global_config[
-                       "show_interface"] is False, "Turn off interface by [show_interface=False] for using main camera"
-            assert engine.global_config[
-                       "show_logo"] is False, "Turn off logo-showing by [show_logo=False] for using main camera"
-            assert engine.global_config[
-                       "show_fps"] is False, "Turn off fps-showing by [show_fps=False] for using main camera"
+            assert engine.global_config["show_interface"
+                                        ] is False, "Turn off interface by [show_interface=False] for using main camera"
+            assert engine.global_config["show_logo"
+                                        ] is False, "Turn off logo-showing by [show_logo=False] for using main camera"
+            assert engine.global_config["show_fps"
+                                        ] is False, "Turn off fps-showing by [show_fps=False] for using main camera"
 
     @staticmethod
     def get_pixels_array(vehicle, clip):

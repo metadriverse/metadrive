@@ -5,17 +5,19 @@ from metadrive import MetaDriveEnv
 
 def test_main_camera_as_obs():
     try:
-        env = MetaDriveEnv(dict(
-            environment_num=1000,
-            start_seed=1010,
-            traffic_density=0.05,
-            offscreen_render=True,
-            use_render=False,
-            vehicle_config=dict(image_source="main_camera"),
-            show_interface=False,
-            show_logo=False,
-            show_fps=False,
-        ))
+        env = MetaDriveEnv(
+            dict(
+                environment_num=1000,
+                start_seed=1010,
+                traffic_density=0.05,
+                offscreen_render=True,
+                use_render=False,
+                vehicle_config=dict(image_source="main_camera"),
+                show_interface=False,
+                show_logo=False,
+                show_fps=False,
+            )
+        )
         obs = env.reset()
         action = [0.0, 1.]
         for _ in range(3):
@@ -41,17 +43,19 @@ def test_main_camera_as_obs():
 
 def test_rgb_camera_as_obs():
     try:
-        env = MetaDriveEnv(dict(
-            environment_num=1000,
-            start_seed=1010,
-            traffic_density=0.05,
-            offscreen_render=True,
-            use_render=False,
-            vehicle_config=dict(image_source="rgb_camera"),
-            show_interface=False,
-            show_logo=False,
-            show_fps=False,
-        ))
+        env = MetaDriveEnv(
+            dict(
+                environment_num=1000,
+                start_seed=1010,
+                traffic_density=0.05,
+                offscreen_render=True,
+                use_render=False,
+                vehicle_config=dict(image_source="rgb_camera"),
+                show_interface=False,
+                show_logo=False,
+                show_fps=False,
+            )
+        )
         obs = env.reset()
         action = [0.0, 1.]
         for _ in range(3):
