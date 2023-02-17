@@ -13,6 +13,7 @@ class ForceFPS:
             interval = engine.global_config["physics_world_step_size"]
         else:
             interval = 1 / engine.global_config["force_render_fps"]
+        self.engine = engine
         fps = 1 / interval
         self.init_fps = fps
         if engine.mode == RENDER_MODE_ONSCREEN:
@@ -50,8 +51,3 @@ class ForceFPS:
     @property
     def real_time_simulation(self):
         return self.state == self.FORCED and self.engine.mode == RENDER_MODE_ONSCREEN
-
-    @property
-    def engine(self):
-        from metadrive.engine.engine_utils import get_engine
-        return get_engine()
