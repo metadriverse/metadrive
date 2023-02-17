@@ -29,7 +29,7 @@ packages = find_namespace_packages(
 print("We will install the following packages: ", packages)
 
 """ ===== Remember to modify the PG_EDITION at first ====="""
-version = "0.2.6.0"
+version = "0.2.7.0"
 
 # Can install specific branch via:
 # pip install git+https://github.com/metadriverse/metadrive.git@fix-asset-copy
@@ -107,7 +107,7 @@ install_requires = [
 
 setup(
     name="metadrive-simulator",
-    python_requires='>=3.7, <=3.9',
+    python_requires='>=3.7, <3.10',
     version=version,
     description="An open-ended driving simulator with infinite scenes",
     url="https://github.com/metadriverse/metadrive",
