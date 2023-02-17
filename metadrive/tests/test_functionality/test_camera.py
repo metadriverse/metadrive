@@ -1,0 +1,78 @@
+import numpy as np
+
+from metadrive import MetaDriveEnv
+
+
+def _test_main_camera_as_obs():
+    try:
+        env = MetaDriveEnv(
+            dict(
+                environment_num=1000,
+                start_seed=1010,
+                traffic_density=0.05,
+                offscreen_render=True,
+                use_render=False,
+                vehicle_config=dict(image_source="main_camera"),
+                show_interface=False,
+                show_logo=False,
+                show_fps=False,
+            )
+        )
+        obs = env.reset()
+        action = [0.0, 1.]
+        for _ in range(3):
+            env.reset()
+            for s in range(20):
+                o, r, d, i = env.step(action)
+                # engine = env.engine
+                # if engine.episode_step <= 1:
+                #     engine.graphicsEngine.renderFrame()
+                # origin_img = engine.win.getDisplayRegion(0).getScreenshot()
+                # v = memoryview(origin_img.getRamImage).tolist()
+                # img = np.array(v)
+                # img = img.reshape((origin_img.getYSize(), origin_img.getXSize(), 4))
+                # img = img[::-1]
+                # img = img[..., :-1]
+                # img = img/255
+                assert np.sum(o["image"][..., -1]) > 10
+                assert not env.engine.interface.need_interface
+                # cv2.waitKey(1)
+    finally:
+        env.close()
+
+
+def _test_rgb_camera_as_obs():
+    try:
+        env = MetaDriveEnv(
+            dict(
+                environment_num=1000,
+                start_seed=1010,
+                traffic_density=0.05,
+                offscreen_render=True,
+                use_render=False,
+                vehicle_config=dict(image_source="rgb_camera"),
+                show_interface=False,
+                show_logo=False,
+                show_fps=False,
+            )
+        )
+        obs = env.reset()
+        action = [0.0, 1.]
+        for _ in range(3):
+            env.reset()
+            for s in range(20):
+                o, r, d, i = env.step(action)
+                # engine = env.engine
+                # if engine.episode_step <= 1:
+                #     engine.graphicsEngine.renderFrame()
+                # origin_img = engine.win.getDisplayRegion(0).getScreenshot()
+                # v = memoryview(origin_img.getRamImage).tolist()
+                # img = np.array(v)
+                # img = img.reshape((origin_img.getYSize(), origin_img.getXSize(), 4))
+                # img = img[::-1]
+                # img = img[..., :-1]
+                # img = img/255
+                assert np.sum(o["image"][..., -1]) > 10
+                # cv2.waitKey(1)
+    finally:
+        env.close()

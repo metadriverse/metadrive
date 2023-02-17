@@ -1,4 +1,5 @@
 from collections import deque
+from metadrive.component.vehicle_module.interface_camera import InterfaceCamera
 from typing import Union, Optional
 
 import gym
@@ -222,6 +223,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self.add_image_sensor("rgb_camera", RGBCamera())
         self.add_image_sensor("mini_map", MiniMap())
         self.add_image_sensor("depth_camera", DepthCamera())
+        self.add_image_sensor("main_camera", InterfaceCamera())
 
     def _add_modules_for_vehicle_when_reset(self):
         config = self.config

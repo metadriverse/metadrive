@@ -30,6 +30,11 @@ if __name__ == "__main__":
             # "random_agent_model": True,
             "driving_reward": 1.0,
             "force_destroy": False,
+            "camera_dist": -1,
+            "camera_pitch": 30,
+            "camera_height": 1,
+            "camera_smooth": False,
+            # "camera_height": -1,
             "vehicle_config": {
                 "enable_reverse": False,
                 # "image_source": "depth_camera",
@@ -55,7 +60,7 @@ if __name__ == "__main__":
 
     for s in range(1, 10000):
         o, r, d, info = env.step(env.action_space.sample())
-        env.vehicle.set_velocity([5, 0], in_local_frame=True)
+        # env.vehicle.set_velocity([5, 0], in_local_frame=True)
         # else:
         # if s % 100 == 0:
         #     env.close()

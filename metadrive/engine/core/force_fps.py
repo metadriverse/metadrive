@@ -51,8 +51,3 @@ class ForceFPS:
     @property
     def real_time_simulation(self):
         return self.state == self.FORCED and self.engine.mode == RENDER_MODE_ONSCREEN
-
-    # @property
-    # def engine(self):
-    #     from metadrive.engine.engine_utils import get_engine
-    #     return get_engine()

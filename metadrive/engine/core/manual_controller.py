@@ -105,9 +105,9 @@ class KeyboardController(Controller):
             self.throttle_brake = min(self.throttle_brake, 0.)
             self.throttle_brake -= self.BRAKE_INCREMENT
 
-        rand = self.np_random.rand(2, 1) / 10000
+        rand = self.np_random.rand() / 10000
         # self.throttle_brake += rand[0]
-        self.steering += rand[1]
+        self.steering += rand
 
         self.throttle_brake = min(max(-1., self.throttle_brake), 1.)
         self.steering = min(max(-1., self.steering), 1.)

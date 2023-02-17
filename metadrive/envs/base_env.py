@@ -49,6 +49,8 @@ BASE_DEFAULT_CONFIG = dict(
     use_chase_camera_follow_lane=False,  # If true, then vision would be more stable.
     camera_height=1.8,
     camera_dist=6.0,
+    camera_pitch=None,  # degree
+    camera_smooth=True,  # degree
     prefer_track_agent=None,
     draw_map_resolution=1024,  # Drawing the map in a canvas of (x, x) pixels.
     top_down_camera_initial_x=0,
@@ -105,6 +107,7 @@ BASE_DEFAULT_CONFIG = dict(
         mini_map=(84, 84, 250),  # buffer length, width
         rgb_camera=(84, 84),  # buffer length, width
         depth_camera=(84, 84, True),  # buffer length, width, view_ground
+        main_camera=None,  # buffer length, width
         show_side_detector=False,
         show_lane_line_detector=False,
 
@@ -184,6 +187,7 @@ class BaseEnv(gym.Env):
         merged_config = self._merge_extra_config(config)
         global_config = self._post_process_config(merged_config)
         self.config = global_config
+        self.config["vehicle_config"]["main_camera"] = self.config["window_size"]
 
         # agent check
         self.num_agents = self.config["num_agents"]

@@ -37,7 +37,10 @@ class MainCamera:
         self.camera = engine.cam
         self.camera_queue = None
         self.camera_dist = camera_dist
-        self.direction_running_mean = deque(maxlen=20)
+        self.camera_pitch = -engine.global_config["camera_pitch"] if engine.global_config["camera_pitch"
+                                                                                          ] is not None else None
+        self.camera_smooth = engine.global_config["camera_smooth"]
+        self.direction_running_mean = deque(maxlen=20 if self.camera_smooth else 1)
         self.world_light = self.engine.world_light  # light chases the chase camera, when not using global light
         self.inputs = InputState()
         self.current_track_vehicle = None
@@ -128,20 +131,24 @@ class MainCamera:
     def _chase_task(self, vehicle, task):
         self.update_mouse_info()
         self.chase_camera_height = self._update_height(self.chase_camera_height)
-        self.camera_queue.put(vehicle.chassis.get_pos())
+        chassis_pos = vehicle.chassis.get_pos()
+        self.camera_queue.put(chassis_pos)
         if not self.FOLLOW_LANE:
             forward_dir = vehicle.system.get_forward_vector()
-            current_forward_dir = forward_dir[0], forward_dir[1]
+            current_forward_dir = [forward_dir[0], forward_dir[1]]
         else:
             current_forward_dir = self._dir_of_lane(vehicle.navigation.current_ref_lanes[0], vehicle.position)
         self.direction_running_mean.append(current_forward_dir)
-        forward_dir = np.mean(self.direction_running_mean, axis=0)
+        forward_dir = np.mean(self.direction_running_mean, axis=0) if self.camera_smooth else current_forward_dir
         forward_dir[0] = np.cos(self.mouse_rotate) * current_forward_dir[0] - np.sin(self.mouse_rotate) * \
                          current_forward_dir[1]
         forward_dir[1] = np.sin(self.mouse_rotate) * current_forward_dir[0] + np.cos(self.mouse_rotate) * \
                          current_forward_dir[1]
 
+        # don't put this line to if-else, strange bug happened
         camera_pos = list(self.camera_queue.get())
+        if not self.camera_smooth:
+            camera_pos = chassis_pos
         camera_pos[2] += self.chase_camera_height + vehicle.HEIGHT / 2
         camera_pos[0] += -forward_dir[0] * self.camera_dist
         camera_pos[1] += -forward_dir[1] * self.camera_dist
@@ -149,7 +156,13 @@ class MainCamera:
         self.camera.setPos(*camera_pos)
         current_pos = vehicle.chassis.getPos()
         current_pos[2] += 2
-        self.camera.lookAt(current_pos)
+
+        if self.camera_pitch is None:
+            self.camera.lookAt(current_pos)
+            self.camera.setH(vehicle.origin.getH() + np.rad2deg(self.mouse_rotate))
+        else:
+            self.camera.setHpr(vehicle.origin.getHpr())
+            self.camera.setP(self.camera.getP() + self.camera_pitch)
         if self.FOLLOW_LANE:
             self.camera.setH(
                 self._heading_of_lane(vehicle.navigation.current_ref_lanes[0], vehicle.position) / np.pi * 180 - 90
@@ -313,6 +326,8 @@ class MainCamera:
 
     @property
     def has_mouse(self):
+        if self.engine.mouseWatcherNode is None:
+            return False
         return True if self.engine.mouseWatcherNode.hasMouse() else False
 
     def set_mouse_to_center(self):
