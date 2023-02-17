@@ -105,6 +105,7 @@ install_requires = [
 
 setup(
     name="metadrive-simulator",
+    python_requires='>=3.7, <=3.9',
     version=version,
     description="An open-ended driving simulator with infinite scenes",
     url="https://github.com/metadriverse/metadrive",
