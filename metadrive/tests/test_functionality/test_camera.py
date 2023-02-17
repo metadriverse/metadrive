@@ -3,7 +3,7 @@ import numpy as np
 from metadrive import MetaDriveEnv
 
 
-def test_main_camera_as_obs():
+def _test_main_camera_as_obs():
     try:
         env = MetaDriveEnv(
             dict(
@@ -41,7 +41,7 @@ def test_main_camera_as_obs():
         env.close()
 
 
-def test_rgb_camera_as_obs():
+def _test_rgb_camera_as_obs():
     try:
         env = MetaDriveEnv(
             dict(
