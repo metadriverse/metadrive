@@ -326,6 +326,8 @@ class MainCamera:
 
     @property
     def has_mouse(self):
+        if self.engine.mouseWatcherNode is None:
+            return False
         return True if self.engine.mouseWatcherNode.hasMouse() else False
 
     def set_mouse_to_center(self):
