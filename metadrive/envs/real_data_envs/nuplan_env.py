@@ -121,12 +121,12 @@ class NuPlanEnv(BaseEnv):
         super(NuPlanEnv, self).setup_engine()
         self.engine.register_manager("data_manager", NuPlanDataManager())
         self.engine.register_manager("map_manager", NuPlanMapManager())
-        if not self.config["no_traffic"]:
-            if not self.config['replay']:
-                raise ValueError
-                self.engine.register_manager("traffic_manager", NuPlanIDMTrafficManager())
-            else:
-                self.engine.register_manager("traffic_manager", NuPlanTrafficManager())
+        # if not self.config["no_traffic"]:
+        #     if not self.config['replay']:
+        #         raise ValueError
+        #         self.engine.register_manager("traffic_manager", NuPlanIDMTrafficManager())
+        #     else:
+        #         self.engine.register_manager("traffic_manager", NuPlanTrafficManager())
         self.engine.register_manager("participant_manager", NuplanParticipantManager())
         self.engine.accept("p", self.stop)
         self.engine.accept("q", self.switch_to_third_person_view)
@@ -289,7 +289,8 @@ if __name__ == "__main__":
             # "start_case_index": 1000,
             # "waymo_data_directory": "E:\\PAMI_waymo_data\\idm_filtered\\test",
             "window_size": (2400, 1600),
-            "start_case_index": 304,
+            "start_case_index": 4,
+            "pstats": True,
             "case_num": 1,
             "horizon": 1000,
             "vehicle_config": dict(
@@ -303,7 +304,7 @@ if __name__ == "__main__":
     )
     success = []
     for seed in range(300, 2000):
-        env.reset(force_seed=304)
+        env.reset(force_seed=4)
         for i in range(env.engine.data_manager.current_scenario_length * 10):
             o, r, d, info = env.step([0, 0])
 
