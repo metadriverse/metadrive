@@ -80,8 +80,8 @@ version = "0.2.6.0"
 
 
 install_requires = [
-    "gym==0.19.0",
-    "numpy",
+    "gym>=0.20.0, <=0.24.1",
+    "numpy>=1.21.6, <=1.24.2",
     "matplotlib",
     "pandas",
     "pygame",
