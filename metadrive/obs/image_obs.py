@@ -1,6 +1,6 @@
 import gym
 import numpy as np
-
+from metadrive.engine.engine_utils import get_engine
 from metadrive.component.vehicle.base_vehicle import BaseVehicle
 from metadrive.obs.observation_base import ObservationBase
 from metadrive.obs.state_obs import StateObservation
