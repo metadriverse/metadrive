@@ -159,7 +159,7 @@ class MainCamera:
 
         if self.camera_pitch is None:
             self.camera.lookAt(current_pos)
-            self.camera.setH(vehicle.origin.getH())
+            self.camera.setH(vehicle.origin.getH() + np.rad2deg(self.mouse_rotate))
         else:
             self.camera.setHpr(vehicle.origin.getHpr())
             self.camera.setP(self.camera.getP() + self.camera_pitch)
