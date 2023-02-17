@@ -18,7 +18,8 @@ def is_win():
     return sys.platform == "win32"
 
 
-assert sys.version_info.major == 3 and sys.version_info.minor >= 6, "python version >= 3.6 is required"
+assert sys.version_info.major == 3 and sys.version_info.minor >= 6 and sys.version_info.minor <= 9, \
+    "python version >= 3.6, <=3.9 is required"
 
 this_directory = path.abspath(path.dirname(__file__))
 with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
@@ -105,11 +106,12 @@ install_requires = [
 
 setup(
     name="metadrive-simulator",
+    python_requires='>=3.7, <=3.9',
     version=version,
     description="An open-ended driving simulator with infinite scenes",
     url="https://github.com/metadriverse/metadrive",
     author="MetaDrive Team",
-    author_email="liquanyi@bupt.edu.cn, pzh@cs.ucla.edu",
+    author_email="quanyili0057@gmail.com, pzh@cs.ucla.edu",
     packages=packages,
     install_requires=install_requires,
     include_package_data=True,
