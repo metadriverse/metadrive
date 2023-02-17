@@ -95,11 +95,11 @@ class ImageBuffer:
         if self.engine.episode_step <= 1:
             self.engine.graphicsEngine.renderFrame()
         origin_img = self.cam.node().getDisplayRegion(0).getScreenshot()
-        v = memoryview(origin_img.getRamImage()).tolist()
-        img = np.array(v, dtype=np.uint8)
+        img = np.frombuffer(origin_img.getRamImage().getData(), dtype=np.uint8)
         img = img.reshape((origin_img.getYSize(), origin_img.getXSize(), 4))
         img = img[::-1]
-        return img[..., :-1]
+        img = img[..., :-1]
+        return img
 
     @staticmethod
     def get_grayscale_array(img, clip=True):
