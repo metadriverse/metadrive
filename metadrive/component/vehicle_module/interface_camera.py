@@ -16,8 +16,9 @@ class InterfaceCamera:
                        "show_fps"] is False, "Turn off fps-showing by [show_fps=False] for using main camera"
 
     @staticmethod
-    def get_pixels_array(_, clip):
+    def get_pixels_array(vehicle, clip):
         engine = get_engine()
+        assert engine.main_camera.current_track_vehicle is vehicle, "Tracked vehicle mismatch"
         if engine.episode_step <= 1:
             engine.graphicsEngine.renderFrame()
         origin_img = engine.win.getDisplayRegion(0).getScreenshot()
