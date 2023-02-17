@@ -82,6 +82,7 @@ class Pedestrian(BaseTrafficParticipant):
             LVector3(direction[0] * norm_ratio, direction[1] * norm_ratio,
                      self._body.getLinearVelocity()[-1])
         )
+        self.origin.setR(0)
 
     @staticmethod
     def get_speed_model(target_speed):

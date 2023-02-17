@@ -56,21 +56,9 @@ if __name__ == "__main__":
 
     start = time.time()
     o = env.reset()
-    obj_1 = env.engine.spawn_object(Pedestrian, position=[30, 0], heading_theta=0, random_seed=1)
-    obj_2 = env.engine.spawn_object(Pedestrian, position=[30, 6], heading_theta=0, random_seed=1)
-    obj_1.set_velocity([1, 0], 0, in_local_frame=True)
-    obj_2.set_velocity([1, 0], 0, in_local_frame=True)
     env.vehicle.set_velocity([5, 0], in_local_frame=False)
     for s in range(1, 10000):
         o, r, d, info = env.step(env.action_space.sample())
-        if s < 200:
-            obj_1.set_velocity([1, 0], 0, in_local_frame=True)
-            # obj_2.set_velocity([1, 0], 0, in_local_frame=True)
-        else:
-            obj_1.set_velocity([1, 0], 2, in_local_frame=True)
-
-        if s > 100:
-            obj_2.set_velocity([1, 0], 2, in_local_frame=True)
 
         # else:
         # if s % 100 == 0:

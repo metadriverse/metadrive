@@ -13,7 +13,7 @@ if __name__ == "__main__":
             "start_seed": 22,
             # "_disable_detector_mask":True,
             # "debug_physics_world": True,
-            "debug": True,
+            # "debug": True,
             "global_light": True,
             # "debug_static_world": True,
             "cull_scene": False,
@@ -69,8 +69,11 @@ if __name__ == "__main__":
         else:
             obj_1.set_velocity([1, 0], 2, in_local_frame=True)
 
-        if s > 100:
+        if 100< s < 300:
             obj_2.set_velocity([1, 0], 2, in_local_frame=True)
+        if s > 300:
+            print("here stop")
+            obj_2.set_velocity([1, 0], 0, in_local_frame=True)
 
         # else:
         # if s % 100 == 0:
@@ -82,7 +85,8 @@ if __name__ == "__main__":
                 "heading_diff": env.vehicle.heading_diff(env.vehicle.lane),
                 "lane_width": env.vehicle.lane.width,
                 "lateral": env.vehicle.lane.local_coordinates(env.vehicle.position),
-                "current_seed": env.current_seed
+                "current_seed": env.current_seed,
+                "step":s,
             }
         )
         # if d:
