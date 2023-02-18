@@ -1,7 +1,6 @@
 from collections import deque
 
 from metadrive.engine.engine_utils import get_engine
-from collections import Iterable
 import numpy as np
 
 
