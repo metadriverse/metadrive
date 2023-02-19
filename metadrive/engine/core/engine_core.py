@@ -99,6 +99,11 @@ class EngineCore(ShowBase.ShowBase):
         else:
             if self.global_config["offscreen_render"]:
                 self.mode = RENDER_MODE_OFFSCREEN
+
+                if self.global_config["show_interface"]:
+                    # Disable useless camera capturing
+                    self.global_config["show_interface"] = False
+
                 loadPrcFileData("", "threading-model Cull/Draw")
             else:
                 self.mode = RENDER_MODE_NONE
