@@ -1,0 +1,11 @@
+Model Information:
+* title:	Nathan Animated 003 - Walking 3D Man
+* source:	https://sketchfab.com/3d-models/nathan-animated-003-walking-3d-man-143a2b1ea5eb4385ae90a73657aca3bc
+* author:	Renderpeople (https://sketchfab.com/renderpeople)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Nathan Animated 003 - Walking 3D Man" (https://sketchfab.com/3d-models/nathan-animated-003-walking-3d-man-143a2b1ea5eb4385ae90a73657aca3bc) by Renderpeople (https://sketchfab.com/renderpeople) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

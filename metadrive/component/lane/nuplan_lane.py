@@ -35,7 +35,7 @@ class NuPlanLane(PointLane):
 
         self.left_boundary = InterpolatingLine(self._get_boundary_points(lane_meta_data.left_boundary))
         self.right_boundary = InterpolatingLine(self._get_boundary_points(lane_meta_data.right_boundary))
-        self.width = None
+        self.width = self.VIS_LANE_WIDTH
 
     @staticmethod
     def _extract_centerline(map_obj, nuplan_center):
@@ -47,7 +47,7 @@ class NuPlanLane(PointLane):
     def width_at(self, longitudinal: float) -> float:
         l_pos = self.left_boundary.position(longitudinal, 0)
         r_pos = self.right_boundary.position(longitudinal, 0)
-        return min(np.linalg.norm(r_pos - l_pos), 6)
+        return min(np.linalg.norm(r_pos - l_pos), self.VIS_LANE_WIDTH)
 
     def __del__(self):
         logging.debug("NuPlanLane is released")
