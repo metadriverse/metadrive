@@ -8,6 +8,7 @@ from metadrive.envs.base_env import BaseEnv
 from metadrive.manager.nuplan_data_manager import NuPlanDataManager
 from metadrive.manager.nuplan_map_manager import NuPlanMapManager
 from metadrive.manager.nuplan_traffic_manager import NuPlanTrafficManager
+from metadrive.manager.nuplan_participant_manager import NuplanParticipantManager
 from metadrive.obs.real_env_observation import NuPlanObservation
 from metadrive.obs.state_obs import LidarStateObservation
 from metadrive.policy.replay_policy import NuPlanReplayEgoCarPolicy
@@ -120,12 +121,13 @@ class NuPlanEnv(BaseEnv):
         super(NuPlanEnv, self).setup_engine()
         self.engine.register_manager("data_manager", NuPlanDataManager())
         self.engine.register_manager("map_manager", NuPlanMapManager())
-        if not self.config["no_traffic"]:
-            if not self.config['replay']:
-                raise ValueError
-                self.engine.register_manager("traffic_manager", NuPlanIDMTrafficManager())
-            else:
-                self.engine.register_manager("traffic_manager", NuPlanTrafficManager())
+        # if not self.config["no_traffic"]:
+        #     if not self.config['replay']:
+        #         raise ValueError
+        #         self.engine.register_manager("traffic_manager", NuPlanIDMTrafficManager())
+        #     else:
+        #         self.engine.register_manager("traffic_manager", NuPlanTrafficManager())
+        self.engine.register_manager("participant_manager", NuplanParticipantManager())
         self.engine.accept("p", self.stop)
         self.engine.accept("q", self.switch_to_third_person_view)
         self.engine.accept("b", self.switch_to_top_down_view)
@@ -275,19 +277,21 @@ if __name__ == "__main__":
     env = NuPlanEnv(
         {
             "use_render": True,
-            "agent_policy": NuPlanReplayEgoCarPolicy,
+            # "agent_policy": NuPlanReplayEgoCarPolicy,
             "manual_control": True,
             "replay": True,
             "no_traffic": False,
             # "debug": True,
             # "debug_static_world": True,
+            # "debug_physics_world": True,
             # "no_traffic":True,
             # "start_case_index": 192,
             # "start_case_index": 1000,
             # "waymo_data_directory": "E:\\PAMI_waymo_data\\idm_filtered\\test",
             "window_size": (2400, 1600),
-            "start_case_index": 200,
-            "case_num": 2000,
+            "start_case_index": 4,
+            "pstats": True,
+            "case_num": 1,
             "horizon": 1000,
             "vehicle_config": dict(
                 lidar=dict(num_lasers=120, distance=50, num_others=4),
@@ -300,9 +304,10 @@ if __name__ == "__main__":
     )
     success = []
     for seed in range(300, 2000):
-        env.reset(force_seed=302)
+        env.reset(force_seed=4)
         for i in range(env.engine.data_manager.current_scenario_length * 10):
             o, r, d, info = env.step([0, 0])
+
             # assert env.observation_space.contains(o)
             # c_lane = env.vehicle.lane
             # long, lat, = c_lane.local_coordinates(env.vehicle.position)
