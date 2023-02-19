@@ -42,7 +42,7 @@ def test_pedestrian(render=False):
         obj_2.set_velocity([1, 0], 0, in_local_frame=True)
         env.vehicle.set_velocity([5, 0], in_local_frame=False)
         for s in range(1, 1000):
-            o, r, d, info = env.step(env.action_space.sample())
+            o, r, d, info = env.step([0,0])
             # obj_1.set_velocity([1, 0], 2, in_local_frame=True)
             # obj_2.set_velocity([1, 0], 0.8, in_local_frame=True)
             if s == 300:
