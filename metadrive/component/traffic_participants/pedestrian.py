@@ -20,7 +20,7 @@ class Pedestrian(BaseTrafficParticipant):
 
     _MODEL = {}
 
-    SPEED_LIST = [0.1, 0.6, 1.1, 1.6]
+    SPEED_LIST = [0.6, 1.4, 2]
 
     def __init__(self, position, heading_theta, random_seed=None):
         super(Pedestrian, self).__init__(position, heading_theta, random_seed)
@@ -33,7 +33,7 @@ class Pedestrian(BaseTrafficParticipant):
         self.body.setIntoCollideMask(self.COLLISION_GROUP)
         # self.set_static(True)
         self.animation_controller = None
-        self.current_speed_model = 0.1
+        self.current_speed_model = self.SPEED_LIST[0]
         if self.render:
             if len(Pedestrian._MODEL) == 0:
                 self._init_pedestrian_model()
@@ -49,10 +49,12 @@ class Pedestrian(BaseTrafficParticipant):
             model.setPos(0, 0, -cls.HEIGHT / 2)
             Pedestrian._MODEL[speed] = model
             if idx == 0:
-                pass
+                animation_controller = model.get_anim_control("Take 001")
+                animation_controller.setPlayRate(idx)
+                animation_controller.pose(1)
             else:
                 animation_controller = model.get_anim_control("Take 001")
-                animation_controller.setPlayRate(1 * speed / cls.SPEED_LIST[-1])
+                animation_controller.setPlayRate(speed / 2)
                 animation_controller.loop("Take 001")
 
     def set_velocity(self, direction: list, value=None, in_local_frame=False):
@@ -83,6 +85,7 @@ class Pedestrian(BaseTrafficParticipant):
                      self._body.getLinearVelocity()[-1])
         )
         self.origin.setR(0)
+        self.origin.setP(0)
 
     @staticmethod
     def get_speed_model(target_speed):
