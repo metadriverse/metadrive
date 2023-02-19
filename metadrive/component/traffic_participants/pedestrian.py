@@ -15,12 +15,12 @@ class Pedestrian(BaseTrafficParticipant):
     NAME = BodyName.Pedestrian
     COLLISION_GROUP = CollisionGroup.TrafficParticipants
 
-    RADIUS = 0.3
+    RADIUS = 0.35
     HEIGHT = 1.75
 
     _MODEL = {}
 
-    SPEED_LIST = [0.6, 1.4, 2]
+    SPEED_LIST = [0.6, 1.6, 2.2]
 
     def __init__(self, position, heading_theta, random_seed=None):
         super(Pedestrian, self).__init__(position, heading_theta, random_seed)
@@ -56,6 +56,8 @@ class Pedestrian(BaseTrafficParticipant):
                 animation_controller.loop("Take 001")
 
     def set_velocity(self, direction: list, value=None, in_local_frame=False):
+        self.set_roll(0)
+        self.set_pitch(0)
         if in_local_frame:
             from metadrive.engine.engine_utils import get_engine
             engine = get_engine()

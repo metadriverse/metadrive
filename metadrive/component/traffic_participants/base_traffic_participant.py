@@ -1,5 +1,5 @@
 from typing import Tuple, Sequence
-
+from panda3d.core import LVector3
 from metadrive.base_class.base_object import BaseObject
 
 LaneIndex = Tuple[str, str, int]
@@ -35,3 +35,8 @@ class BaseTrafficParticipant(BaseObject):
     @property
     def pitch(self):
         return self.origin.getR()
+
+    def add_body(self, physics_body):
+        super(BaseTrafficParticipant, self).add_body(physics_body)
+        self._body.set_friction(0.)
+        self._body.set_anisotropic_friction(LVector3(0., 0., 0.))
