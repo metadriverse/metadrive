@@ -12,18 +12,14 @@ if __name__ == '__main__':
         # controller="joystick",
 
         # use_render=True,
-
         offscreen_render=True,
-
         manual_control=True,  # set false for external subscriber control
         traffic_density=0.0,
         environment_num=100,
         random_agent_model=True,
         random_lane_width=True,
         random_lane_num=True,
-        vehicle_config=dict(image_source="rgb_camera",
-                            rgb_camera=(W, H),
-                            stack_size=1),
+        vehicle_config=dict(image_source="rgb_camera", rgb_camera=(W, H), stack_size=1),
         map=4,  # seven block
         start_seed=0,
         window_size=(300, 200),

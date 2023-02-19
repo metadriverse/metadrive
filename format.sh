@@ -4,7 +4,7 @@
 # Check yapf version.
 ver=$(yapf --version)
 if ! echo $ver | grep -q 0.30.0; then
-  echo "Wrong YAPF version installed: 0.30.0 is required, not $ver."
+  echo "Wrong YAPF version installed: 0.30.0 is required, not $ver. Please install via `pip install yapf==0.30.0`"
   exit 1
 fi
 
