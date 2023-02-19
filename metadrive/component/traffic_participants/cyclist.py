@@ -25,7 +25,6 @@ class Cyclist(BaseTrafficParticipant):
 
         n = BaseRigidBodyNode(self.name, self.NAME)
         self.add_body(n)
-        self._node_path_list.append(n)
 
         self.body.addShape(BulletBoxShape((self.WIDTH / 2, self.LENGTH / 2, self.HEIGHT / 2)))
         self.body.setIntoCollideMask(self.COLLISION_GROUP)

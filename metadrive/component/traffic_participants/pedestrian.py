@@ -27,8 +27,6 @@ class Pedestrian(BaseTrafficParticipant):
 
         n = BaseRigidBodyNode(self.name, self.NAME)
         self.add_body(n)
-        self._node_path_list.append(n)
-
         self.body.addShape(BulletCylinderShape(self.RADIUS, self.HEIGHT))
         self.body.setIntoCollideMask(self.COLLISION_GROUP)
         # self.set_static(True)

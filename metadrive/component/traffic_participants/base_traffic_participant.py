@@ -21,3 +21,17 @@ class BaseTrafficParticipant(BaseObject):
         raise NotImplementedError(
             "Implement this func for rendering class {} in top down renderer".format(self.class_name)
         )
+
+    def set_roll(self, roll):
+        self.origin.setP(roll)
+
+    def set_pitch(self, pitch):
+        self.origin.setR(pitch)
+
+    @property
+    def roll(self):
+        return self.origin.getP()
+
+    @property
+    def pitch(self):
+        return self.origin.getR()
