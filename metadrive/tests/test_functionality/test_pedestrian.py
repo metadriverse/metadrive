@@ -11,7 +11,7 @@ def test_pedestrian(render=False):
             "start_seed": 22,
             "debug": False,
             "cull_scene": False,
-            "manual_control": True,
+            "manual_control": False,
             "use_render": render,
             "decision_repeat": 5,
             "need_inverse_traffic": False,
