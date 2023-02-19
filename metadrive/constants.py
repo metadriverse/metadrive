@@ -200,7 +200,11 @@ class CollisionGroup(Mask):
             # LidarBroadDetector
             (cls.LidarBroadDetector, cls.LidarBroadDetector, False),
             (cls.LidarBroadDetector, cls.TrafficObject, True),
-            (cls.LidarBroadDetector, cls.TrafficParticipants, True,),
+            (
+                cls.LidarBroadDetector,
+                cls.TrafficParticipants,
+                True,
+            ),
 
             # TrafficObject
             (cls.TrafficObject, cls.TrafficObject, True),

@@ -13,7 +13,6 @@ class NuplanParticipantManager(BaseManager):
     """
     This manager will control the walker and cyclist in the scenario
     """
-
     def __init__(self):
         super(NuplanParticipantManager, self).__init__()
         self.nuplan_id_to_obj = {}
@@ -44,8 +43,8 @@ class NuplanParticipantManager(BaseManager):
         if self.episode_step >= self.current_scenario_length:
             return
 
-        objs_to_eliminate = self.nuplan_id_to_obj.keys() - self._current_traffic_participants[
-            self.engine.episode_step].keys()
+        objs_to_eliminate = self.nuplan_id_to_obj.keys() - self._current_traffic_participants[self.engine.episode_step
+                                                                                              ].keys()
         for nuplan_id in list(objs_to_eliminate):
             self.clear_objects([self.nuplan_id_to_obj[nuplan_id]])
             self.nuplan_id_to_obj.pop(nuplan_id)
@@ -64,7 +63,8 @@ class NuplanParticipantManager(BaseManager):
                     obj_state.center.heading, rad_to_degree=True
                 )
                 self.spawned_objects[self.nuplan_id_to_obj[nuplan_id]].set_velocity(
-                    [obj_state.velocity.x, obj_state.velocity.y])
+                    [obj_state.velocity.x, obj_state.velocity.y]
+                )
             else:
                 v = self.spawn_object(
                     Cyclist if obj_state.tracked_object_type == TrackedObjectType.BICYCLE else Pedestrian,
