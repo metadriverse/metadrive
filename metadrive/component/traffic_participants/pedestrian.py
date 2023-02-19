@@ -20,7 +20,7 @@ class Pedestrian(BaseTrafficParticipant):
 
     _MODEL = {}
 
-    SPEED_LIST = [0.6, 1.6, 2.2]
+    SPEED_LIST = [0.6, 1.2, 2.2]
 
     def __init__(self, position, heading_theta, random_seed=None):
         super(Pedestrian, self).__init__(position, heading_theta, random_seed)
@@ -52,7 +52,7 @@ class Pedestrian(BaseTrafficParticipant):
                 animation_controller.pose(1)
             else:
                 animation_controller = model.get_anim_control("Take 001")
-                animation_controller.setPlayRate(speed / 2)
+                animation_controller.setPlayRate(speed / 2 + 0.2)
                 animation_controller.loop("Take 001")
 
     def set_velocity(self, direction: list, value=None, in_local_frame=False):

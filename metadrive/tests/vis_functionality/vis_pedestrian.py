@@ -70,12 +70,12 @@ if __name__ == "__main__":
             obj_1.set_velocity([1, 0], 0, in_local_frame=True)
             # obj_2.set_velocity([1, 0], 0, in_local_frame=True)
         elif s == 500:
-            obj_1.set_velocity([1, 0], 2, in_local_frame=True)
+            obj_1.set_velocity([1, 0], 1, in_local_frame=True)
         # else:
         #     obj_1.set_velocity([1, 0], 1, in_local_frame=True)
 
         if 100 < s < 300:
-            obj_2.set_velocity([1, 0], 1, in_local_frame=True)
+            obj_2.set_velocity([1, 0], 2, in_local_frame=True)
         elif 500 > s > 300:
             print("here stop")
             obj_2.set_velocity([1, 0], 0, in_local_frame=True)
