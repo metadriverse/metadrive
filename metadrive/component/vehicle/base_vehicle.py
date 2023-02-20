@@ -1,9 +1,8 @@
+import math
 from collections import deque
-from metadrive.component.vehicle_module.interface_camera import InterfaceCamera
 from typing import Union, Optional
 
 import gym
-import math
 import numpy as np
 import seaborn as sns
 from panda3d.bullet import BulletVehicle, BulletBoxShape, ZUp
@@ -12,8 +11,8 @@ from panda3d.core import Material, Vec3, TransformState, LQuaternionf
 from metadrive.base_class.base_object import BaseObject
 from metadrive.component.lane.abs_lane import AbstractLane
 from metadrive.component.lane.circular_lane import CircularLane
-from metadrive.component.lane.straight_lane import StraightLane
 from metadrive.component.lane.point_lane import PointLane
+from metadrive.component.lane.straight_lane import StraightLane
 from metadrive.component.road_network.node_road_network import NodeRoadNetwork
 from metadrive.component.vehicle_module.depth_camera import DepthCamera
 from metadrive.component.vehicle_module.distance_detector import SideDetector, LaneLineDetector
@@ -116,12 +115,12 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     path = None
 
     def __init__(
-        self,
-        vehicle_config: Union[dict, Config] = None,
-        name: str = None,
-        random_seed=None,
-        position=None,
-        heading=None  # In degree!
+            self,
+            vehicle_config: Union[dict, Config] = None,
+            name: str = None,
+            random_seed=None,
+            position=None,
+            heading=None  # In degree!
     ):
         """
         This Vehicle Config is different from self.get_config(), and it is used to define which modules to use, and
@@ -223,7 +222,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self.add_image_sensor("rgb_camera", RGBCamera())
         self.add_image_sensor("mini_map", MiniMap())
         self.add_image_sensor("depth_camera", DepthCamera())
-        self.add_image_sensor("main_camera", InterfaceCamera())
+        self.add_image_sensor("main_camera", self.engine.main_camera)
 
     def _add_modules_for_vehicle_when_reset(self):
         config = self.config
@@ -329,13 +328,13 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         return step_energy, self.energy_consumption
 
     def reset(
-        self,
-        random_seed=None,
-        vehicle_config=None,
-        position: np.ndarray = None,
-        heading: float = 0.0,  # In degree!
-        *args,
-        **kwargs
+            self,
+            random_seed=None,
+            vehicle_config=None,
+            position: np.ndarray = None,
+            heading: float = 0.0,  # In degree!
+            *args,
+            **kwargs
     ):
         """
         pos is a 2-d array, and heading is a float (unit degree)
@@ -503,8 +502,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         if not lateral_norm * forward_direction_norm:
             return 0
         cos = (
-            (forward_direction[0] * lateral[0] + forward_direction[1] * lateral[1]) /
-            (lateral_norm * forward_direction_norm)
+                (forward_direction[0] * lateral[0] + forward_direction[1] * lateral[1]) /
+                (lateral_norm * forward_direction_norm)
         )
         # return cos
         # Normalize to 0, 1
@@ -758,9 +757,9 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             self.lidar = None
         if len(self.image_sensors) != 0:
             for sensor in self.image_sensors.values():
-                sensor.destroy()
+                if sensor is not self.engine.main_camera:
+                    sensor.destroy()
         self.image_sensors = {}
-        # self.engine = None
 
     def set_heading_theta(self, heading_theta, rad_to_degree=True) -> None:
         """
@@ -834,7 +833,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             ckpt_idx = routing._target_checkpoints_index
             for surrounding_v in surrounding_vs:
                 if surrounding_v.lane_index[:-1] == (routing.checkpoints[ckpt_idx[0]], routing.checkpoints[ckpt_idx[1]
-                                                                                                           ]):
+                ]):
                     if self.lane.local_coordinates(self.position)[0] - \
                             self.lane.local_coordinates(surrounding_v.position)[0] < 0:
                         self.front_vehicles.add(surrounding_v)
@@ -849,10 +848,10 @@ class BaseVehicle(BaseObject, BaseVehicleState):
 
     @classmethod
     def get_action_space_before_init(
-        cls, extra_action_dim: int = 0, discrete_action=False, steering_dim=5, throttle_dim=5
+            cls, extra_action_dim: int = 0, discrete_action=False, steering_dim=5, throttle_dim=5
     ):
         if not discrete_action:
-            return gym.spaces.Box(-1.0, 1.0, shape=(2 + extra_action_dim, ), dtype=np.float32)
+            return gym.spaces.Box(-1.0, 1.0, shape=(2 + extra_action_dim,), dtype=np.float32)
         else:
             return gym.spaces.MultiDiscrete([steering_dim, throttle_dim])
 
@@ -881,9 +880,9 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     @property
     def replay_done(self):
         return self._replay_done if hasattr(self, "_replay_done") else (
-            self.crash_building or self.crash_vehicle or
-            # self.on_white_continuous_line or
-            self.on_yellow_continuous_line
+                self.crash_building or self.crash_vehicle or
+                # self.on_white_continuous_line or
+                self.on_yellow_continuous_line
         )
 
     @property
