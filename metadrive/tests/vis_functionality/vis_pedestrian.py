@@ -14,7 +14,7 @@ if __name__ == "__main__":
             # "_disable_detector_mask":True,
             # "debug_physics_world": True,
             "debug": True,
-            "global_light": True,
+            # "global_light": True,
             # "debug_static_world": True,
             "cull_scene": False,
             # "offscreen_render": True,
@@ -36,6 +36,7 @@ if __name__ == "__main__":
             # "camera_height": 1,
             # "camera_smooth": False,
             # "camera_height": -1,
+            "window_size": (2400, 1600),
             "vehicle_config": {
                 "enable_reverse": False,
                 # "image_source": "depth_camera",
@@ -56,9 +57,30 @@ if __name__ == "__main__":
 
     start = time.time()
     o = env.reset()
+    obj_1 = env.engine.spawn_object(Pedestrian, position=[30, 0], heading_theta=0, random_seed=1)
+    obj_2 = env.engine.spawn_object(Pedestrian, position=[30, 6], heading_theta=0, random_seed=1)
+    obj_1.set_velocity([1, 0], 1, in_local_frame=True)
+    obj_2.set_velocity([1, 0], 2, in_local_frame=True)
     env.vehicle.set_velocity([5, 0], in_local_frame=False)
     for s in range(1, 10000):
         o, r, d, info = env.step(env.action_space.sample())
+        # obj_1.set_velocity([1, 0], 2, in_local_frame=True)
+        # obj_2.set_velocity([1, 0], 0.8, in_local_frame=True)
+        if s == 300:
+            obj_1.set_velocity([1, 0], 0, in_local_frame=True)
+            # obj_2.set_velocity([1, 0], 0, in_local_frame=True)
+        elif s == 500:
+            obj_1.set_velocity([1, 0], 1, in_local_frame=True)
+        # else:
+        #     obj_1.set_velocity([1, 0], 1, in_local_frame=True)
+
+        if 100 < s < 300:
+            obj_2.set_velocity([1, 0], 2, in_local_frame=True)
+        elif 500 > s > 300:
+            print("here stop")
+            obj_2.set_velocity([1, 0], 0, in_local_frame=True)
+        elif s >= 500:
+            obj_2.set_velocity([1, 0], 2, in_local_frame=True)
 
         # else:
         # if s % 100 == 0:
@@ -70,7 +92,8 @@ if __name__ == "__main__":
                 "heading_diff": env.vehicle.heading_diff(env.vehicle.lane),
                 "lane_width": env.vehicle.lane.width,
                 "lateral": env.vehicle.lane.local_coordinates(env.vehicle.position),
-                "current_seed": env.current_seed
+                "current_seed": env.current_seed,
+                "step": s,
             }
         )
         # if d:
