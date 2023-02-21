@@ -1,7 +1,8 @@
 import time
 import cv2
-from panda3d.core import Texture, GraphicsOutput, GraphicsStateGuardianBase
+from panda3d.core import Texture, GraphicsOutput, GraphicsStateGuardianBase, GraphicsStateGuardian
 from cuda.cudart import cudaGraphicsGLRegisterImage, cudaGraphicsRegisterFlags, GLuint, GLenum
+
 
 import numpy as np
 
@@ -12,7 +13,7 @@ from metadrive.component.road_network.node_road_network import NodeRoadNetwork
 from metadrive.tests.vis_block.vis_block_base import TestBlock
 
 if __name__ == "__main__":
-    engine = TestBlock(window_type="offscreen")
+    engine = TestBlock(window_type="onscreen")
     from metadrive.engine.asset_loader import initialize_asset_loader
 
     initialize_asset_loader(engine)
@@ -38,16 +39,22 @@ if __name__ == "__main__":
     my_texture = Texture()
     my_texture.setMinfilter(Texture.FTLinear)
     my_texture.setFormat(Texture.FRgba32)
-
-    start_time = time.time()
+    type=my_texture.get_texture_type()
     engine.win.add_render_texture(my_texture, GraphicsOutput.RTMCopyTexture)
+    for i in range(100):
+        engine.taskMgr.step()
     gsg = GraphicsStateGuardianBase.getDefaultGsg()
+    engine.graphicsEngine.renderFrame()
+    engine.graphicsEngine.renderFrame()
     texture_context = my_texture.prepareNow(0, gsg.prepared_objects, gsg)
     # texture_context = my_texture.prepare(gsg.prepared_objects)
+    engine.graphicsEngine.renderFrame()
+    engine.graphicsEngine.renderFrame()
     identifier = texture_context.getNativeId()
-    flag, resource = cudaGraphicsGLRegisterImage(identifier, 1,
+    flag, resource = cudaGraphicsGLRegisterImage(GLuint(identifier), GLenum(1),
                                                  cudaGraphicsRegisterFlags.cudaGraphicsRegisterFlagsNone)
 
+    start_time = time.time()
     for i in range(10000):
         engine.taskMgr.step()
         # origin_img = engine.win.getDisplayRegion(0).getScreenshot()
