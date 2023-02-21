@@ -55,5 +55,5 @@ def test_destroy_state(obs="state"):
 
 
 if __name__ == "__main__":
-    test_destroy_rgb()
+    # test_destroy_rgb()
     test_destroy_state()

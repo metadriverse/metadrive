@@ -26,9 +26,7 @@ def main_thread():
         random_agent_model=True,
         random_lane_width=True,
         random_lane_num=True,
-        vehicle_config=dict(image_source="rgb_camera",
-                            rgb_camera=(W, H),
-                            stack_size=1),
+        vehicle_config=dict(image_source="rgb_camera", rgb_camera=(W, H), stack_size=1),
         map=4,  # seven block
         start_seed=random.randint(0, 1000),
         window_size=(300, 200)
