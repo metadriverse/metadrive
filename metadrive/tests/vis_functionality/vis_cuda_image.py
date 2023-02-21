@@ -1,6 +1,7 @@
 import time
 import cv2
 from panda3d.core import Texture, GraphicsOutput, GraphicsStateGuardianBase
+from cuda.cudart import cudaGraphicsGLRegisterImage, cudaGraphicsRegisterFlags, GLuint, GLenum
 
 import numpy as np
 
@@ -39,22 +40,21 @@ if __name__ == "__main__":
     my_texture.setFormat(Texture.FRgba32)
 
     start_time = time.time()
-    engine.taskMgr.step()
-    engine.win.add_render_texture(my_texture, GraphicsOutput.RTMCopyRam)
-
+    engine.win.add_render_texture(my_texture, GraphicsOutput.RTMCopyTexture)
+    gsg = GraphicsStateGuardianBase.getDefaultGsg()
+    texture_context = my_texture.prepareNow(0, gsg.prepared_objects, gsg)
+    # texture_context = my_texture.prepare(gsg.prepared_objects)
+    identifier = texture_context.getNativeId()
+    flag, resource = cudaGraphicsGLRegisterImage(identifier, 1,
+                                                 cudaGraphicsRegisterFlags.cudaGraphicsRegisterFlagsNone)
 
     for i in range(10000):
         engine.taskMgr.step()
-        origin_img = engine.win.getDisplayRegion(0).getScreenshot()
-        img = np.frombuffer(origin_img.getRamImage().getData(), dtype=np.uint8)
-        img = img.reshape((origin_img.getYSize(), origin_img.getXSize(), 4))
-        img = img[::-1]
-        img = img[..., :-1]
-
-        # gsg = GraphicsStateGuardianBase.getDefaultGsg()
-        # texture_context = my_texture.prepareNow(0, gsg.prepared_objects, gsg)
-        # # texture_context = my_texture.prepare(0)
-        # identifier = texture_context.getNativeId()
+        # origin_img = engine.win.getDisplayRegion(0).getScreenshot()
+        # img = np.frombuffer(origin_img.getRamImage().getData(), dtype=np.uint8)
+        # img = img.reshape((origin_img.getYSize(), origin_img.getXSize(), 4))
+        # img = img[::-1]
+        # img = img[..., :-1]
 
         # img = np.frombuffer(my_texture.getRamImage().getData(), dtype=np.uint8)
         # img = img.reshape((my_texture.getYSize(), my_texture.getXSize(), 4))
