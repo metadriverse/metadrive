@@ -1,9 +1,8 @@
+import math
 from collections import deque
-from metadrive.component.vehicle_module.interface_camera import InterfaceCamera
 from typing import Union, Optional
 
 import gym
-import math
 import numpy as np
 import seaborn as sns
 from panda3d.bullet import BulletVehicle, BulletBoxShape, ZUp
@@ -12,8 +11,8 @@ from panda3d.core import Material, Vec3, TransformState, LQuaternionf
 from metadrive.base_class.base_object import BaseObject
 from metadrive.component.lane.abs_lane import AbstractLane
 from metadrive.component.lane.circular_lane import CircularLane
-from metadrive.component.lane.straight_lane import StraightLane
 from metadrive.component.lane.point_lane import PointLane
+from metadrive.component.lane.straight_lane import StraightLane
 from metadrive.component.road_network.node_road_network import NodeRoadNetwork
 from metadrive.component.vehicle_module.depth_camera import DepthCamera
 from metadrive.component.vehicle_module.distance_detector import SideDetector, LaneLineDetector
@@ -223,7 +222,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self.add_image_sensor("rgb_camera", RGBCamera())
         self.add_image_sensor("mini_map", MiniMap())
         self.add_image_sensor("depth_camera", DepthCamera())
-        self.add_image_sensor("main_camera", InterfaceCamera())
+        self.add_image_sensor("main_camera", self.engine.main_camera)
 
     def _add_modules_for_vehicle_when_reset(self):
         config = self.config
@@ -758,9 +757,9 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             self.lidar = None
         if len(self.image_sensors) != 0:
             for sensor in self.image_sensors.values():
-                sensor.destroy()
+                if sensor is not self.engine.main_camera:
+                    sensor.destroy()
         self.image_sensors = {}
-        # self.engine = None
 
     def set_heading_theta(self, heading_theta, rad_to_degree=True) -> None:
         """

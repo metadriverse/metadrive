@@ -1,9 +1,10 @@
 import numpy as np
+import cv2
 
 from metadrive import MetaDriveEnv
 
 
-def _test_main_camera_as_obs():
+def _test_main_camera_as_obs(render):
     try:
         env = MetaDriveEnv(
             dict(
@@ -36,7 +37,9 @@ def _test_main_camera_as_obs():
                 # img = img/255
                 assert np.sum(o["image"][..., -1]) > 10
                 assert not env.engine.interface.need_interface
-                # cv2.waitKey(1)
+                if render:
+                    cv2.imshow("window", o["image"][..., -1])
+                    cv2.waitKey(1)
     finally:
         env.close()
 
@@ -76,3 +79,7 @@ def _test_rgb_camera_as_obs():
                 # cv2.waitKey(1)
     finally:
         env.close()
+
+
+if __name__ == "__main__":
+    _test_main_camera_as_obs(True)
