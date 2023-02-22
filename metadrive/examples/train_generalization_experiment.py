@@ -2,11 +2,12 @@
 This script demonstrates how to train a set of policies under different number of training scenarios and test them
 in the same test set using rllib.
 
-We verified this script with ray==1.2.0. Please report to use if you find newer version of ray is not compatible with
+We verified this script with ray==2.2.0. Please report to use if you find newer version of ray is not compatible with
 this script.
 """
 import argparse
 import copy
+import logging
 from typing import Dict
 
 import numpy as np
@@ -18,7 +19,7 @@ try:
     from ray import tune
 
     from ray.tune import CLIReporter
-    from ray.rllib.agents.callbacks import DefaultCallbacks
+    from ray.rllib.algorithms.callbacks import DefaultCallbacks
     from ray.rllib.env import BaseEnv
     from ray.rllib.evaluation import MultiAgentEpisode, RolloutWorker
     from ray.rllib.policy import Policy
@@ -29,8 +30,8 @@ except ImportError:
 
 class DrivingCallbacks(DefaultCallbacks):
     def on_episode_start(
-        self, *, worker: RolloutWorker, base_env: BaseEnv, policies: Dict[str, Policy], episode: MultiAgentEpisode,
-        env_index: int, **kwargs
+            self, *, worker: RolloutWorker, base_env: BaseEnv, policies: Dict[str, Policy], episode: MultiAgentEpisode,
+            env_index: int, **kwargs
     ):
         episode.user_data["velocity"] = []
         episode.user_data["steering"] = []
@@ -39,7 +40,7 @@ class DrivingCallbacks(DefaultCallbacks):
         episode.user_data["cost"] = []
 
     def on_episode_step(
-        self, *, worker: RolloutWorker, base_env: BaseEnv, episode: MultiAgentEpisode, env_index: int, **kwargs
+            self, *, worker: RolloutWorker, base_env: BaseEnv, episode: MultiAgentEpisode, env_index: int, **kwargs
     ):
         info = episode.last_info_for()
         if info is not None:
@@ -50,8 +51,8 @@ class DrivingCallbacks(DefaultCallbacks):
             episode.user_data["cost"].append(info["cost"])
 
     def on_episode_end(
-        self, worker: RolloutWorker, base_env: BaseEnv, policies: Dict[str, Policy], episode: MultiAgentEpisode,
-        **kwargs
+            self, worker: RolloutWorker, base_env: BaseEnv, policies: Dict[str, Policy], episode: MultiAgentEpisode,
+            **kwargs
     ):
         arrive_dest = episode.last_info_for()["arrive_dest"]
         crash = episode.last_info_for()["crash"]
@@ -75,7 +76,7 @@ class DrivingCallbacks(DefaultCallbacks):
         episode.custom_metrics["step_reward_min"] = float(np.min(episode.user_data["step_reward"]))
         episode.custom_metrics["cost"] = float(sum(episode.user_data["cost"]))
 
-    def on_train_result(self, *, trainer, result: dict, **kwargs):
+    def on_train_result(self, *, algorithm, result: dict, **kwargs):
         result["success"] = np.nan
         result["crash"] = np.nan
         result["out"] = np.nan
@@ -95,19 +96,23 @@ class DrivingCallbacks(DefaultCallbacks):
 
 
 def train(
-    trainer,
-    config,
-    stop,
-    exp_name,
-    num_gpus=0,
-    test_mode=False,
-    checkpoint_freq=10,
-    keep_checkpoints_num=None,
-    custom_callback=None,
-    max_failures=5,
-    **kwargs
+        trainer,
+        config,
+        stop,
+        exp_name,
+        num_gpus=0,
+        test_mode=False,
+        checkpoint_freq=10,
+        keep_checkpoints_num=None,
+        custom_callback=None,
+        max_failures=5,
+        **kwargs
 ):
-    ray.init(num_gpus=num_gpus)
+    ray.init(
+        num_gpus=num_gpus,
+        logging_level=logging.ERROR if not test_mode else logging.DEBUG,
+        log_to_driver=test_mode,
+    )
     used_config = {
         "callbacks": custom_callback if custom_callback else DrivingCallbacks,  # Must Have!
     }
@@ -124,7 +129,7 @@ def train(
         kwargs["checkpoint_score_attr"] = "episode_reward_mean"
 
     metric_columns = CLIReporter.DEFAULT_COLUMNS.copy()
-    progress_reporter = CLIReporter(metric_columns)
+    progress_reporter = CLIReporter(metric_columns=metric_columns)
     progress_reporter.add_metric_column("success")
     progress_reporter.add_metric_column("crash")
     progress_reporter.add_metric_column("out")
@@ -166,10 +171,10 @@ if __name__ == '__main__':
         # Train the policies in scenario sets with different number of scenarios.
         env=MetaDriveEnv,
         env_config=dict(
-            environment_num=tune.grid_search([1, 3, 5, 1000]),
+            # environment_num=tune.grid_search([1, 3, 5, 1000]),
             start_seed=tune.grid_search([5000, ]),
             random_traffic=False,
-            traffic_density=tune.grid_search([0.1, 0.3])
+            # traffic_density=tune.grid_search([0.1, 0.3])
         ),
 
         # ===== Framework =====
@@ -207,4 +212,5 @@ if __name__ == '__main__':
         stop=stop,
         config=config,
         num_gpus=args.num_gpus,
+        test_mode=False
     )
