@@ -144,7 +144,8 @@ class AgentManager(BaseManager):
                 assert isinstance(obs_space, Dict), "Multi-agent observation should be gym.Dict"
             action_space = self._init_action_spaces[agent_id]
             self.action_spaces[vehicle.name] = action_space
-            assert isinstance(action_space, Box) or isinstance(action_space, MultiDiscrete) or isinstance(action_space, Discrete)
+            assert isinstance(action_space, Box) or isinstance(action_space,
+                                                               MultiDiscrete) or isinstance(action_space, Discrete)
         self.next_agent_count = len(init_vehicles)
 
     def set_state(self, state: dict, old_name_to_current=None):

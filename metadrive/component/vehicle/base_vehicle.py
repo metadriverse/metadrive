@@ -854,8 +854,12 @@ class BaseVehicle(BaseObject, BaseVehicleState):
 
     @classmethod
     def get_action_space_before_init(
-        cls, extra_action_dim: int = 0, discrete_action=False, discrete_steering_dim=5, discrete_throttle_dim=5,
-            use_multi_discrete=False
+        cls,
+        extra_action_dim: int = 0,
+        discrete_action=False,
+        discrete_steering_dim=5,
+        discrete_throttle_dim=5,
+        use_multi_discrete=False
     ):
         if not discrete_action:
             return gym.spaces.Box(-1.0, 1.0, shape=(2 + extra_action_dim, ), dtype=np.float32)
