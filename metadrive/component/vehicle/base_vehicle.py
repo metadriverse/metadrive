@@ -182,7 +182,13 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self.takeover = False
         self.expert_takeover = False
         self.energy_consumption = 0
-        self.action_space = self.get_action_space_before_init(extra_action_dim=self.config["extra_action_dim"])
+        # self.action_space = self.get_action_space_before_init(
+        #     extra_action_dim=self.config["extra_action_dim"],
+        #     discrete_action=self.config["discrete_action"],
+        #     discrete_steering_dim=self.config["discrete_steering_dim"],
+        #     discrete_throttle_dim=self.config["discrete_throttle_dim"],
+        #     use_multi_discrete=self.config["use_multi_discrete"]
+        # )
         self.break_down = False
 
         # overtake_stat
@@ -848,12 +854,16 @@ class BaseVehicle(BaseObject, BaseVehicleState):
 
     @classmethod
     def get_action_space_before_init(
-        cls, extra_action_dim: int = 0, discrete_action=False, steering_dim=5, throttle_dim=5
+        cls, extra_action_dim: int = 0, discrete_action=False, discrete_steering_dim=5, discrete_throttle_dim=5,
+            use_multi_discrete=False
     ):
         if not discrete_action:
             return gym.spaces.Box(-1.0, 1.0, shape=(2 + extra_action_dim, ), dtype=np.float32)
         else:
-            return gym.spaces.MultiDiscrete([steering_dim, throttle_dim])
+            if use_multi_discrete:
+                return gym.spaces.MultiDiscrete([discrete_steering_dim, discrete_throttle_dim])
+            else:
+                return gym.spaces.Discrete(discrete_steering_dim * discrete_throttle_dim)
 
     def __del__(self):
         super(BaseVehicle, self).__del__()
