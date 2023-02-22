@@ -172,6 +172,9 @@ if __name__ == '__main__':
             traffic_density=tune.grid_search([0.1, 0.3])
         ),
 
+        # ===== Framework =====
+        framework="torch",
+
         # ===== Evaluation =====
         # Evaluate the trained policies in unseen 200 scenarios.
         evaluation_interval=2,
