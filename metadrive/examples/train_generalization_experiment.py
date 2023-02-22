@@ -30,8 +30,8 @@ except ImportError:
 
 class DrivingCallbacks(DefaultCallbacks):
     def on_episode_start(
-            self, *, worker: RolloutWorker, base_env: BaseEnv, policies: Dict[str, Policy], episode: MultiAgentEpisode,
-            env_index: int, **kwargs
+        self, *, worker: RolloutWorker, base_env: BaseEnv, policies: Dict[str, Policy], episode: MultiAgentEpisode,
+        env_index: int, **kwargs
     ):
         episode.user_data["velocity"] = []
         episode.user_data["steering"] = []
@@ -40,7 +40,7 @@ class DrivingCallbacks(DefaultCallbacks):
         episode.user_data["cost"] = []
 
     def on_episode_step(
-            self, *, worker: RolloutWorker, base_env: BaseEnv, episode: MultiAgentEpisode, env_index: int, **kwargs
+        self, *, worker: RolloutWorker, base_env: BaseEnv, episode: MultiAgentEpisode, env_index: int, **kwargs
     ):
         info = episode.last_info_for()
         if info is not None:
@@ -51,8 +51,8 @@ class DrivingCallbacks(DefaultCallbacks):
             episode.user_data["cost"].append(info["cost"])
 
     def on_episode_end(
-            self, worker: RolloutWorker, base_env: BaseEnv, policies: Dict[str, Policy], episode: MultiAgentEpisode,
-            **kwargs
+        self, worker: RolloutWorker, base_env: BaseEnv, policies: Dict[str, Policy], episode: MultiAgentEpisode,
+        **kwargs
     ):
         arrive_dest = episode.last_info_for()["arrive_dest"]
         crash = episode.last_info_for()["crash"]
@@ -96,17 +96,17 @@ class DrivingCallbacks(DefaultCallbacks):
 
 
 def train(
-        trainer,
-        config,
-        stop,
-        exp_name,
-        num_gpus=0,
-        test_mode=False,
-        checkpoint_freq=10,
-        keep_checkpoints_num=None,
-        custom_callback=None,
-        max_failures=5,
-        **kwargs
+    trainer,
+    config,
+    stop,
+    exp_name,
+    num_gpus=0,
+    test_mode=False,
+    checkpoint_freq=10,
+    keep_checkpoints_num=None,
+    custom_callback=None,
+    max_failures=5,
+    **kwargs
 ):
     ray.init(
         num_gpus=num_gpus,
@@ -172,7 +172,9 @@ if __name__ == '__main__':
         env=MetaDriveEnv,
         env_config=dict(
             # environment_num=tune.grid_search([1, 3, 5, 1000]),
-            start_seed=tune.grid_search([5000, ]),
+            start_seed=tune.grid_search([
+                5000,
+            ]),
             random_traffic=False,
             # traffic_density=tune.grid_search([0.1, 0.3])
         ),
