@@ -171,12 +171,10 @@ if __name__ == '__main__':
         # Train the policies in scenario sets with different number of scenarios.
         env=MetaDriveEnv,
         env_config=dict(
-            # environment_num=tune.grid_search([1, 3, 5, 1000]),
-            start_seed=tune.grid_search([
-                5000,
-            ]),
+            environment_num=tune.grid_search([1, 3, 5, 1000]),
+            start_seed=tune.grid_search([5000]),
             random_traffic=False,
-            # traffic_density=tune.grid_search([0.1, 0.3])
+            traffic_density=tune.grid_search([0.1, 0.3])
         ),
 
         # ===== Framework =====
