@@ -1,7 +1,7 @@
 import time
 from collections import defaultdict
 from typing import Union, Dict, AnyStr, Optional, Tuple
-
+from metadrive.policy.env_input_policy import EnvInputPolicy
 import gym
 import numpy as np
 from panda3d.core import PNMImage
@@ -23,7 +23,7 @@ BASE_DEFAULT_CONFIG = dict(
 
     # ===== agent =====
     random_agent_model=False,
-    agent_policy=None,
+    agent_policy=EnvInputPolicy,
 
     # ===== multi-agent =====
     num_agents=1,  # Note that this can be set to >1 in MARL envs, or set to -1 for as many vehicles as possible.
@@ -210,7 +210,6 @@ class BaseEnv(gym.Env):
         self.dones = None
         self.episode_rewards = defaultdict(float)
         self.episode_lengths = defaultdict(int)
-        self.total_steps = 0
 
     def _merge_extra_config(self, config: Union[dict, "Config"]) -> "Config":
         """Check, update, sync and overwrite some config."""
@@ -274,15 +273,14 @@ class BaseEnv(gym.Env):
         pass
 
     # ===== Run-time =====
-    def step(self, actions: Union[np.ndarray, Dict[AnyStr, np.ndarray]]):
+    def step(self, actions: Union[np.ndarray, Dict[AnyStr, np.ndarray], int]):
         actions = self._preprocess_actions(actions)
         engine_info = self._step_simulator(actions)
         o, r, d, i = self._get_step_return(actions, engine_info=engine_info)
-        self.total_steps += 1
         return o, r, d, i
 
-    def _preprocess_actions(self, actions: Union[np.ndarray, Dict[AnyStr, np.ndarray]]) \
-            -> Union[np.ndarray, Dict[AnyStr, np.ndarray]]:
+    def _preprocess_actions(self, actions: Union[np.ndarray, Dict[AnyStr, np.ndarray], int]) \
+            -> Union[np.ndarray, Dict[AnyStr, np.ndarray], int]:
         if not self.is_multi_agent:
             actions = {v_id: actions for v_id in self.vehicles.keys()}
         else:
@@ -567,4 +565,8 @@ class BaseEnv(gym.Env):
 
     @property
     def episode_step(self):
+        return self.engine.episode_step if self.engine is not None else 0
+
+    @property
+    def total_step(self):
         return self.engine.episode_step if self.engine is not None else 0
