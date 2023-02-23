@@ -11,7 +11,7 @@ class EnvInputPolicy(BasePolicy):
 
     def __init__(self, obj, seed):
         # Since control object may change
-        super(EnvInputPolicy, self).__init__(control_object=None)
+        super(EnvInputPolicy, self).__init__(control_object=obj, random_seed=seed)
         self.discrete_action = self.engine.global_config["discrete_action"]
         self.use_multi_discrete = self.engine.global_config["use_multi_discrete"]
         self.steering_unit = 2.0 / (
