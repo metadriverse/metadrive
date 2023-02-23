@@ -1,22 +1,21 @@
 import time
 from collections import defaultdict
 from typing import Union, Dict, AnyStr, Optional, Tuple
-from metadrive.policy.env_input_policy import EnvInputPolicy
+
 import gym
 import numpy as np
 from panda3d.core import PNMImage
 
-from metadrive.component.vehicle.base_vehicle import BaseVehicle
 from metadrive.constants import RENDER_MODE_NONE, DEFAULT_AGENT
-from metadrive.engine.base_engine import BaseEngine
 from metadrive.engine.engine_utils import initialize_engine, close_engine, \
-    engine_initialized, set_global_random_seed
+    engine_initialized, set_global_random_seed, initialize_global_config
 from metadrive.manager.agent_manager import AgentManager
 from metadrive.manager.record_manager import RecordManager
 from metadrive.manager.replay_manager import ReplayManager
 from metadrive.obs.image_obs import ImageStateObservation
 from metadrive.obs.observation_base import ObservationBase
 from metadrive.obs.state_obs import LidarStateObservation
+from metadrive.policy.env_input_policy import EnvInputPolicy
 from metadrive.utils import Config, merge_dicts, get_np_random, concat_step_infos
 
 BASE_DEFAULT_CONFIG = dict(
@@ -188,8 +187,10 @@ class BaseEnv(gym.Env):
             config = {}
         merged_config = self._merge_extra_config(config)
         global_config = self._post_process_config(merged_config)
+        global_config["vehicle_config"]["main_camera"] = global_config["window_size"]
+
         self.config = global_config
-        self.config["vehicle_config"]["main_camera"] = self.config["window_size"]
+        initialize_global_config(self.config)
 
         # agent check
         self.num_agents = self.config["num_agents"]
@@ -230,9 +231,9 @@ class BaseEnv(gym.Env):
     def _get_action_space(self):
         if self.is_multi_agent:
             return {
-                v_id: self.config["agent_policy"].input_space for v_id in self.config["target_vehicle_configs"].keys()}
+                v_id: self.config["agent_policy"].get_input_space() for v_id in self.config["target_vehicle_configs"].keys()}
         else:
-            return {DEFAULT_AGENT: self.config["agent_policy"].input_space}
+            return {DEFAULT_AGENT: self.config["agent_policy"].get_input_space()}
 
     def lazy_init(self):
         """

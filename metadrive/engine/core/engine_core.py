@@ -62,6 +62,7 @@ def attach_logo(engine):
 
 class EngineCore(ShowBase.ShowBase):
     DEBUG = False
+    global_config = None  # global config can exist before engine initialization
     loadPrcFileData("", "window-title {}".format(EDITION))
     loadPrcFileData("", "framebuffer-multisample 1")
     loadPrcFileData("", "multisamples 8")
@@ -83,7 +84,11 @@ class EngineCore(ShowBase.ShowBase):
     # loadPrcFileData("", "gl-version 3 2")
 
     def __init__(self, global_config):
-        self.global_config = global_config
+        if global_config is not None:
+            self.global_config.update(global_config)
+        else:
+            self.global_config = global_config
+        assert self.global_config is not None
         if self.global_config["pstats"]:
             # pstats debug provided by panda3d
             loadPrcFileData("", "want-pstats 1")

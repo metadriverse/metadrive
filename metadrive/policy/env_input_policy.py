@@ -1,5 +1,5 @@
 import gym
-from functools import cached_property
+from metadrive.engine.engine_utils import get_global_config
 import numpy as np
 
 from metadrive.policy.base_policy import BasePolicy
@@ -7,6 +7,8 @@ from metadrive.utils.math_utils import clip
 
 
 class EnvInputPolicy(BasePolicy):
+    _input_space = None
+
     def __init__(self, obj, seed):
         # Since control object may change
         super(EnvInputPolicy, self).__init__(control_object=None)
@@ -23,7 +25,10 @@ class EnvInputPolicy(BasePolicy):
 
     def act(self, agent_id):
         action = self.engine.external_actions[agent_id]
-
+        if self.engine.global_config["action_check"]:
+            # Do action check for external input in EnvInputPolicy
+            assert self.get_input_space().contains(action), "Input {} is not compatible with action space {}!".format(
+                action, self.input_space)
         if not self.discrete_action:
             to_process = action
         else:
@@ -31,12 +36,6 @@ class EnvInputPolicy(BasePolicy):
 
         # clip to -1, 1
         action = [clip(to_process[i], -1.0, 1.0) for i in range(len(to_process))]
-
-        if self.engine.global_config["action_check"]:
-            # Do action check for external input in EnvInputPolicy
-            assert self.input_space.contains(action), "Input {} is not compatible with action space {}!".format(
-                action, self.input_space)
-
         return action
 
     def convert_to_continuous_action(self, action):
@@ -55,21 +54,24 @@ class EnvInputPolicy(BasePolicy):
 
         return steering, throttle
 
-    @property
-    def input_space(self):
-        if self._input_space is None:
-            extra_action_dim = self.engine.global_config["vehicle_config"]["extra_action_dim"],
-            discrete_action = self.engine.global_config["discrete_action"],
-            discrete_steering_dim = self.engine.global_config["discrete_steering_dim"],
-            discrete_throttle_dim = self.engine.global_config["discrete_throttle_dim"],
-            use_multi_discrete = self.engine.global_config["use_multi_discrete"]
+    @classmethod
+    def get_input_space(cls):
+        """
+        The Input space is a class attribute
+        """
+        engine_global_config = get_global_config()
+        if cls._input_space is None:
+            extra_action_dim = engine_global_config["vehicle_config"]["extra_action_dim"]
+            discrete_action = engine_global_config["discrete_action"]
+            discrete_steering_dim = engine_global_config["discrete_steering_dim"]
+            discrete_throttle_dim = engine_global_config["discrete_throttle_dim"]
+            use_multi_discrete = engine_global_config["use_multi_discrete"]
 
             if not discrete_action:
-                self._input_space = gym.spaces.Box(-1.0, 1.0, shape=(2 + extra_action_dim,), dtype=np.float32)
+                cls._input_space = gym.spaces.Box(-1.0, 1.0, shape=(2 + extra_action_dim,), dtype=np.float32)
             else:
                 if use_multi_discrete:
-                    self._input_space = gym.spaces.MultiDiscrete([discrete_steering_dim, discrete_throttle_dim])
+                    cls._input_space = gym.spaces.MultiDiscrete([discrete_steering_dim, discrete_throttle_dim])
                 else:
-                    self._input_space = gym.spaces.Discrete(discrete_steering_dim * discrete_throttle_dim)
-        else:
-            return self._input_space
+                    cls._input_space = gym.spaces.Discrete(discrete_steering_dim * discrete_throttle_dim)
+        return cls._input_space

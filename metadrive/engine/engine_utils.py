@@ -33,8 +33,12 @@ def close_engine():
 
 
 def get_global_config():
-    engine = get_engine()
-    return engine.global_config
+    return BaseEngine.global_config
+
+
+def initialize_global_config(global_config):
+    assert BaseEngine.global_config is None, "Can not force overwrite existing config!"
+    BaseEngine.global_config = global_config
 
 
 def set_global_random_seed(random_seed: Optional[int]):
