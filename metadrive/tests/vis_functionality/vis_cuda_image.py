@@ -1,10 +1,9 @@
 import time
 import cv2
-from panda3d.core import Texture, GraphicsOutput, GraphicsStateGuardianBase, GraphicsStateGuardian
+from panda3d.core import Texture, GraphicsOutput, GraphicsStateGuardianBase, GraphicsStateGuardian, CallbackObject, loadPrcFileData
 from cuda.cudart import cudaGraphicsGLRegisterImage, cudaGraphicsRegisterFlags, GLuint, GLenum
+from OpenGL.GL import GL_TEXTURE_2D
 
-
-import numpy as np
 
 from metadrive.component.pgblock.curve import Curve
 from metadrive.component.pgblock.first_block import FirstPGBlock
@@ -12,7 +11,9 @@ from metadrive.component.pgblock.intersection import InterSection
 from metadrive.component.road_network.node_road_network import NodeRoadNetwork
 from metadrive.tests.vis_block.vis_block_base import TestBlock
 
+
 if __name__ == "__main__":
+    # loadPrcFileData("", "threading-model Cull/Draw")
     engine = TestBlock(window_type="onscreen")
     from metadrive.engine.asset_loader import initialize_asset_loader
 
@@ -41,22 +42,25 @@ if __name__ == "__main__":
     my_texture.setFormat(Texture.FRgba32)
     type=my_texture.get_texture_type()
     engine.win.add_render_texture(my_texture, GraphicsOutput.RTMCopyTexture)
-    for i in range(100):
-        engine.taskMgr.step()
+
+    # get gsg
     gsg = GraphicsStateGuardianBase.getDefaultGsg()
-    engine.graphicsEngine.renderFrame()
-    engine.graphicsEngine.renderFrame()
-    texture_context = my_texture.prepareNow(0, gsg.prepared_objects, gsg)
-    # texture_context = my_texture.prepare(gsg.prepared_objects)
-    engine.graphicsEngine.renderFrame()
-    engine.graphicsEngine.renderFrame()
-    identifier = texture_context.getNativeId()
-    flag, resource = cudaGraphicsGLRegisterImage(GLuint(identifier), GLenum(1),
-                                                 cudaGraphicsRegisterFlags.cudaGraphicsRegisterFlagsNone)
+
+    # draw callback
+    def _callback_func(cbdata):
+        texture_context = my_texture.prepareNow(0, gsg.prepared_objects, gsg)
+        identifier = texture_context.getNativeId()
+        flag, resource = cudaGraphicsGLRegisterImage(identifier, GL_TEXTURE_2D,
+                                                     cudaGraphicsRegisterFlags.cudaGraphicsRegisterFlagsReadOnly)
+        cbdata.upcall()
+
+    engine.win.getDisplayRegion(1).setDrawCallback(_callback_func)
 
     start_time = time.time()
     for i in range(10000):
         engine.taskMgr.step()
+        # do something with resource handle
+
         # origin_img = engine.win.getDisplayRegion(0).getScreenshot()
         # img = np.frombuffer(origin_img.getRamImage().getData(), dtype=np.uint8)
         # img = img.reshape((origin_img.getYSize(), origin_img.getXSize(), 4))
