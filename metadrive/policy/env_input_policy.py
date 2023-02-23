@@ -9,6 +9,7 @@ class EnvInputPolicy(BasePolicy):
         # Since control object may change
         super(EnvInputPolicy, self).__init__(control_object=None)
         self.discrete_action = self.engine.global_config["discrete_action"]
+        self.use_multi_discrete = self.engine.global_config["use_multi_discrete"]
         self.steering_unit = 2.0 / (
             self.engine.global_config["discrete_steering_dim"] - 1
         )  # for discrete actions space
@@ -32,13 +33,17 @@ class EnvInputPolicy(BasePolicy):
         return action
 
     def convert_to_continuous_action(self, action):
-        if isinstance(action, Iterable):
-            assert len(action) == 2
+        # if isinstance(action, Iterable):
+        #     assert len(action) == 2
+        #     steering = action[0] * self.steering_unit - 1.0
+        #     throttle = action[1] * self.throttle_unit - 1.0
+        # else:
+        # A more clear implementation:
+        if self.use_multi_discrete:
             steering = action[0] * self.steering_unit - 1.0
             throttle = action[1] * self.throttle_unit - 1.0
         else:
             steering = float(action % self.discrete_steering_dim) * self.steering_unit - 1.0
             throttle = float(action // self.discrete_steering_dim) * self.throttle_unit - 1.0
 
-            # print("Steering: ", steering, " Throttle: ", throttle)
         return steering, throttle
