@@ -115,6 +115,7 @@ def train(
     )
     used_config = {
         "callbacks": custom_callback if custom_callback else DrivingCallbacks,  # Must Have!
+        "log_level": "DEBUG" if test_mode else "WARN",
     }
     used_config.update(config)
     config = copy.deepcopy(used_config)
@@ -137,6 +138,9 @@ def train(
     progress_reporter.add_metric_column("length")
     progress_reporter.add_metric_column("cost")
     kwargs["progress_reporter"] = progress_reporter
+
+    if "verbose" not in kwargs:
+        kwargs["verbose"] = 1 if not test_mode else 2
 
     # start training
     analysis = tune.run(
