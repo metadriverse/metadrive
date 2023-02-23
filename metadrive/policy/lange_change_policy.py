@@ -6,10 +6,10 @@ from metadrive.policy.env_input_policy import EnvInputPolicy
 from metadrive.utils.math_utils import wrap_to_pi
 
 
-class LaneChangeAgentPolicy(EnvInputPolicy):
+class AgentLaneChangePolicy(EnvInputPolicy):
     def __init__(self, obj, seed):
         # Since control object may change
-        super(LaneChangeAgentPolicy, self).__init__(obj, seed)
+        super(AgentLaneChangePolicy, self).__init__(obj, seed)
         self.discrete_action = self.engine.global_config["discrete_action"]
         assert self.discrete_action, "Must set discrete_action=True for using this control policy"
         self.use_multi_discrete = self.engine.global_config["use_multi_discrete"]
@@ -24,7 +24,7 @@ class LaneChangeAgentPolicy(EnvInputPolicy):
         self.lateral_pid = PIDController(0.3, .002, 0.05)
 
     def act(self, agent_id):
-        action = super(LaneChangeAgentPolicy, self).act(agent_id)
+        action = super(AgentLaneChangePolicy, self).act(agent_id)
         steering = action[0]
         throttle = action[1]
         current_lane = self.control_object.navigation.current_lane
@@ -40,24 +40,23 @@ class LaneChangeAgentPolicy(EnvInputPolicy):
             raise ValueError("Steering Error, can only be in [-1, 0, 1]")
         return [self.steering_control(target_lane), throttle]
 
-    def input_space(cls):
+    @classmethod
+    def get_input_space(cls):
         """
        The Input space is a class attribute
        """
         engine_global_config = get_global_config()
-        if cls._input_space is None:
-            extra_action_dim = engine_global_config["vehicle_config"]["extra_action_dim"]
-            discrete_action = engine_global_config["discrete_action"]
-            assert discrete_action
-            discrete_throttle_dim = engine_global_config["discrete_throttle_dim"]
-            use_multi_discrete = engine_global_config["use_multi_discrete"]
-            discrete_steering_dim = 3
+        extra_action_dim = engine_global_config["vehicle_config"]["extra_action_dim"]
+        discrete_action = engine_global_config["discrete_action"]
+        assert discrete_action
+        discrete_throttle_dim = engine_global_config["discrete_throttle_dim"]
+        use_multi_discrete = engine_global_config["use_multi_discrete"]
+        discrete_steering_dim = 3
 
-            if use_multi_discrete:
-                cls._input_space = gym.spaces.MultiDiscrete([discrete_steering_dim, discrete_throttle_dim])
-            else:
-                cls._input_space = gym.spaces.Discrete(discrete_steering_dim * discrete_throttle_dim)
-        return cls._input_space
+        if use_multi_discrete:
+            return gym.spaces.MultiDiscrete([discrete_steering_dim, discrete_throttle_dim])
+        else:
+            return gym.spaces.Discrete(discrete_steering_dim * discrete_throttle_dim)
 
     def steering_control(self, target_lane) -> float:
         # heading control following a lateral distance control

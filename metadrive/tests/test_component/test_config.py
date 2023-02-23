@@ -60,6 +60,36 @@ def test_config_sync():
         env.close()
 
 
+def test_config_set():
+    """
+    The config in BaseEngine should be the same as env.config, if BaseEngine exists in process
+    """
+    try:
+        env = MetaDriveEnv({"vehicle_config": dict(show_lidar=False, show_navi_mark=False)})
+        initialize_global_config({})
+        passed= False
+        try:
+            env.reset()
+        except AssertionError:
+            passed = True
+        assert passed
+        env.close()
+        env=None
+        env = MetaDriveEnv({"vehicle_config": dict(show_lidar=False, show_navi_mark=False)})
+        env.reset()
+        env.close()
+        assert env.config is BaseEngine.global_config
+        assert recursive_equal(env.config, get_global_config())
+        assert recursive_equal(env.config, BaseEngine.global_config)
+        old_cfg_1 = BaseEngine.global_config
+        env.close()
+        old_cfg_2 = BaseEngine.global_config
+        assert old_cfg_1 is old_cfg_2 is env.config
+        env.close()
+    finally:
+        env.close()
+
+
 def test_config_set_conce():
     """
     The config in BaseEngine should be the same as env.config, if BaseEngine exists in process

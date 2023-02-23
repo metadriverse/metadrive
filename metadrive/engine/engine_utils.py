@@ -37,7 +37,7 @@ def get_global_config():
 
 
 def initialize_global_config(global_config):
-    assert BaseEngine.global_config is None, "Can not force overwrite existing config!"
+    assert not engine_initialized(), "Can not call this API after engine initialization!"
     BaseEngine.global_config = global_config
 
 

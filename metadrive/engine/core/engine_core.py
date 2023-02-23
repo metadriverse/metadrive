@@ -2,7 +2,6 @@ import logging
 import sys
 import time
 from typing import Optional, Union, Tuple
-
 import gltf
 from direct.gui.OnscreenImage import OnscreenImage
 from direct.showbase import ShowBase
@@ -85,7 +84,8 @@ class EngineCore(ShowBase.ShowBase):
 
     def __init__(self, global_config):
         if global_config is not None:
-            self.global_config.update(global_config)
+            assert global_config is self.global_config, \
+                "No allowed to change ptr of global config, which may cause issue"
         else:
             self.global_config = global_config
         assert self.global_config is not None

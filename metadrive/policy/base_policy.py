@@ -47,7 +47,7 @@ class BasePolicy(Randomizable, Configurable):
         return get_engine()
 
     @classmethod
-    def input_space(cls):
+    def get_input_space(cls):
         """
         It defines the input space of this class of policy
         """
