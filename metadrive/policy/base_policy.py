@@ -12,6 +12,7 @@ class BasePolicy(Randomizable, Configurable):
         # self.engine = get_engine()
         self.control_object = control_object
         self.action_info = dict()
+        self._input_space = None
 
     def act(self, *args, **kwargs):
         """
@@ -45,3 +46,13 @@ class BasePolicy(Randomizable, Configurable):
     @property
     def engine(self):
         return get_engine()
+
+    @property
+    def input_space(self):
+        """
+        It defines the action space of action taken by act()
+        """
+        logging.warning(
+            "No input space set for this policy! If you are querying an action space, "
+            "the agent policy may not take any external input from env.step() and thus the env.action_space is None")
+        return None

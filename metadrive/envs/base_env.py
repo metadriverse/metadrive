@@ -42,6 +42,7 @@ BASE_DEFAULT_CONFIG = dict(
     discrete_throttle_dim=5,
     # When discrete_action=True: If True, use MultiDiscrete action space. Otherwise, use Discrete.
     use_multi_discrete=False,
+    action_check=False,
 
     # ===== Rendering =====
     use_render=False,  # pop a window to render or not
@@ -89,7 +90,6 @@ BASE_DEFAULT_CONFIG = dict(
 
         # ==== others ====
         overtake_stat=False,  # we usually set to True when evaluation
-        action_check=False,
         random_color=False,
         random_agent_model=False,  # this will be overwritten by env.config["random_agent_model"]
         # The shape of vehicle are predefined by its class. But in special case (WaymoVehicle) we might want to
@@ -230,25 +230,9 @@ class BaseEnv(gym.Env):
     def _get_action_space(self):
         if self.is_multi_agent:
             return {
-                v_id: BaseVehicle.get_action_space_before_init(
-                    extra_action_dim=self.config["vehicle_config"]["extra_action_dim"],
-                    discrete_action=self.config["discrete_action"],
-                    discrete_steering_dim=self.config["discrete_steering_dim"],
-                    discrete_throttle_dim=self.config["discrete_throttle_dim"],
-                    use_multi_discrete=self.config["use_multi_discrete"]
-                )
-                for v_id in self.config["target_vehicle_configs"].keys()
-            }
+                v_id: self.config["agent_policy"].input_space for v_id in self.config["target_vehicle_configs"].keys()}
         else:
-            return {
-                DEFAULT_AGENT: BaseVehicle.get_action_space_before_init(
-                    extra_action_dim=self.config["vehicle_config"]["extra_action_dim"],
-                    discrete_action=self.config["discrete_action"],
-                    discrete_steering_dim=self.config["discrete_steering_dim"],
-                    discrete_throttle_dim=self.config["discrete_throttle_dim"],
-                    use_multi_discrete=self.config["use_multi_discrete"]
-                )
-            }
+            return {DEFAULT_AGENT: self.config["agent_policy"].input_space}
 
     def lazy_init(self):
         """
@@ -284,7 +268,7 @@ class BaseEnv(gym.Env):
         if not self.is_multi_agent:
             actions = {v_id: actions for v_id in self.vehicles.keys()}
         else:
-            if self.config["vehicle_config"]["action_check"]:
+            if self.config["action_check"]:
                 # Check whether some actions are not provided.
                 given_keys = set(actions.keys())
                 have_keys = set(self.vehicles.keys())
