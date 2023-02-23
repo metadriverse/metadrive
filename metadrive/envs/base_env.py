@@ -40,6 +40,8 @@ BASE_DEFAULT_CONFIG = dict(
     discrete_action=False,
     discrete_steering_dim=5,
     discrete_throttle_dim=5,
+    # When discrete_action=True: If True, use MultiDiscrete action space. Otherwise, use Discrete.
+    use_multi_discrete=False,
 
     # ===== Rendering =====
     use_render=False,  # pop a window to render or not
@@ -230,16 +232,22 @@ class BaseEnv(gym.Env):
         if self.is_multi_agent:
             return {
                 v_id: BaseVehicle.get_action_space_before_init(
-                    self.config["vehicle_config"]["extra_action_dim"], self.config["discrete_action"],
-                    self.config["discrete_steering_dim"], self.config["discrete_throttle_dim"]
+                    extra_action_dim=self.config["vehicle_config"]["extra_action_dim"],
+                    discrete_action=self.config["discrete_action"],
+                    discrete_steering_dim=self.config["discrete_steering_dim"],
+                    discrete_throttle_dim=self.config["discrete_throttle_dim"],
+                    use_multi_discrete=self.config["use_multi_discrete"]
                 )
                 for v_id in self.config["target_vehicle_configs"].keys()
             }
         else:
             return {
                 DEFAULT_AGENT: BaseVehicle.get_action_space_before_init(
-                    self.config["vehicle_config"]["extra_action_dim"], self.config["discrete_action"],
-                    self.config["discrete_steering_dim"], self.config["discrete_throttle_dim"]
+                    extra_action_dim=self.config["vehicle_config"]["extra_action_dim"],
+                    discrete_action=self.config["discrete_action"],
+                    discrete_steering_dim=self.config["discrete_steering_dim"],
+                    discrete_throttle_dim=self.config["discrete_throttle_dim"],
+                    use_multi_discrete=self.config["use_multi_discrete"]
                 )
             }
 

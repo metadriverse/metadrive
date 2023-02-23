@@ -18,8 +18,8 @@ def is_win():
     return sys.platform == "win32"
 
 
-assert sys.version_info.major == 3 and sys.version_info.minor >= 6 and sys.version_info.minor <= 9, \
-    "python version >= 3.6, <=3.9 is required"
+assert sys.version_info.major == 3 and sys.version_info.minor >= 6 and sys.version_info.minor < 12, \
+    "python version >= 3.6, <3.12 is required"
 
 this_directory = path.abspath(path.dirname(__file__))
 with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
@@ -29,7 +29,7 @@ packages = find_namespace_packages(
 print("We will install the following packages: ", packages)
 
 """ ===== Remember to modify the PG_EDITION at first ====="""
-version = "0.2.6.0"
+version = "0.2.7.0"
 
 # Can install specific branch via:
 # pip install git+https://github.com/metadriverse/metadrive.git@fix-asset-copy
@@ -80,8 +80,8 @@ version = "0.2.6.0"
 
 
 install_requires = [
-    "gym==0.19.0",
-    "numpy",
+    "gym>=0.20.0, <=0.22.0",
+    "numpy>=1.21.6, <=1.24.2",
     "matplotlib",
     "pandas",
     "pygame",
@@ -89,7 +89,8 @@ install_requires = [
     "yapf",
     "seaborn",
     "tqdm",
-    "panda3d==1.10.8",
+    # "panda3d==1.10.8",
+    "panda3d>=1.10.8, <=1.10.13",
     "panda3d-gltf",
     "panda3d-simplepbr",
     "pillow",
@@ -106,7 +107,7 @@ install_requires = [
 
 setup(
     name="metadrive-simulator",
-    python_requires='>=3.7, <=3.9',
+    python_requires='>=3.6, <3.12', # do version check with assert
     version=version,
     description="An open-ended driving simulator with infinite scenes",
     url="https://github.com/metadriverse/metadrive",

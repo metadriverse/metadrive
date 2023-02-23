@@ -345,3 +345,19 @@ class MainCamera:
     def engine(self):
         from metadrive.engine.engine_utils import get_engine
         return get_engine()
+
+    @staticmethod
+    def get_pixels_array(vehicle, clip):
+        engine = get_engine()
+        assert engine.main_camera.current_track_vehicle is vehicle, "Tracked vehicle mismatch"
+        if engine.episode_step <= 1:
+            engine.graphicsEngine.renderFrame()
+        origin_img = engine.main_camera.camera.node().getDisplayRegion(0).getScreenshot()
+        img = np.frombuffer(origin_img.getRamImage().getData(), dtype=np.uint8)
+        img = img.reshape((origin_img.getYSize(), origin_img.getXSize(), 4))
+        img = img[::-1]
+        img = img[..., :-1]
+        if not clip:
+            return img.astype(np.uint8)
+        else:
+            return img / 255
