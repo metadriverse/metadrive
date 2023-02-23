@@ -98,7 +98,8 @@ Action Config
     - :code:`manual_control` (bool = False): whether to control ego vehicle by user in the interface (require :code:`use_render = True`)
     - :code:`controller` (str = "keyboard"): select in ["keyboard", "joystick"], the controller for user to control the ego vehicle
     - :code:`discrete_action` (bool = False): whether to discretize the action space
-    - :code:`discrete_steering/throttle_dim` (int = 5, 5): how many dimensions used to discrtize the action space
+    - :code:`use_multi_discrete` (bool = False): whether to MultiDiscrete action space, if `discrete_action=True`
+    - :code:`discrete_steering/throttle_dim` (int = 5, 5): how many dimensions used to discrete the action space
     - :code:`decision_repeat` (int): how many times for the simulation engine to repeat the applied action to the vehicles. The minimal simulation interval :code:`physics_world_step_size` is 0.02 s. Therefore each RL step will last :code:`decision_repeat * 0.02 s` in the simulation world.
 
 
