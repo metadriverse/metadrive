@@ -44,6 +44,11 @@ class ForceFPS:
             self.state = self.UNLIMITED
             self.fps = None
 
+    def disable(self):
+        self.engine.task_manager.remove("force_fps")
+        self.state = self.UNLIMITED
+        self.fps = None
+
     def force_fps_task(self, task):
         self.tick()
         return task.cont

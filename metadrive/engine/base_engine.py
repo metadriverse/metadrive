@@ -498,3 +498,23 @@ class BaseEngine(EngineCore, Randomizable):
             from metadrive.obs.top_down_renderer import TopDownRenderer
             self._top_down_renderer = TopDownRenderer(*args, **kwargs)
         return self._top_down_renderer.render(text, *args, **kwargs)
+
+    def get_window_image(self, return_bytes=False):
+        window_count = self.graphicsEngine.getNumWindows() - 1
+        texture = self.graphicsEngine.getWindow(window_count).getDisplayRegion(0).getScreenshot()
+
+        assert texture.getXSize() == self.global_config["window_size"][0], (texture.getXSize(), texture.getYSize(), self.global_config["window_size"])
+        assert texture.getYSize() == self.global_config["window_size"][1], (texture.getXSize(), texture.getYSize(), self.global_config["window_size"])
+
+        image_bytes = texture.getRamImage().getData()
+
+        if return_bytes:
+            return image_bytes, (texture.getXSize(), texture.getYSize())
+
+        img = np.frombuffer(image_bytes, dtype=np.uint8)
+        img = img.reshape((texture.getYSize(), texture.getXSize(), 4))
+        img = img[::-1]  # Flip vertically
+        img = img[..., :-1]  # Discard useless alpha channel
+        img = img[..., ::-1]  # Correct the colors
+
+        return img

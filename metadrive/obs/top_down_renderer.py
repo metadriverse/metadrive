@@ -139,6 +139,7 @@ class TopDownRenderer:
         show_agent_name=False,
         camera_position=None,
         track_target_vehicle=False,
+        draw_target_vehicle_trajectory=False,
         **kwargs
         # current_track_vehicle=None
     ):
@@ -146,14 +147,18 @@ class TopDownRenderer:
         self.position = camera_position
         self.track_target_vehicle = track_target_vehicle
         self.show_agent_name = show_agent_name
+        self.draw_target_vehicle_trajectory = draw_target_vehicle_trajectory
+
         if self.show_agent_name:
             pygame.init()
+
         # self.engine = get_engine()
         # self._screen_size = screen_size
         self.pygame_font = None
         self.map = self.engine.current_map
         self.stack_frames = deque(maxlen=num_stack)
         self.history_objects = deque(maxlen=num_stack)
+        self.history_target_vehicle = []
         self.history_smooth = history_smooth
         # self.current_track_vehicle = current_track_vehicle
         if self.track_target_vehicle:
@@ -223,6 +228,18 @@ class TopDownRenderer:
         this_frame_objects = self._append_frame_objects(objects)
         self.history_objects.append(this_frame_objects)
 
+        if self.draw_target_vehicle_trajectory:
+            self.history_target_vehicle.append(history_object(
+                    name=self.current_track_vehicle.name,
+                    heading_theta=self.current_track_vehicle.heading_theta,
+                    WIDTH=self.current_track_vehicle.top_down_width,
+                    LENGTH=self.current_track_vehicle.top_down_length,
+                    position=self.current_track_vehicle.position,
+                    color=self.current_track_vehicle.top_down_color,
+                    done=False
+                )
+            )
+
         self._handle_event()
         self.refresh()
         self._draw(*args, **kwargs)
@@ -274,6 +291,9 @@ class TopDownRenderer:
         # self._runtime_output = self._background_canvas.copy()
         self._background_size = tuple(self._background_canvas.get_size())
 
+        self.history_objects.clear()
+        self.history_target_vehicle.clear()
+
     @property
     def current_track_vehicle(self):
         return self.engine.current_track_vehicle
@@ -300,6 +320,7 @@ class TopDownRenderer:
         """
         if len(self.history_objects) == 0:
             return
+
         for i, objects in enumerate(self.history_objects):
             i = len(self.history_objects) - i
             if self.history_smooth != 0 and (i % self.history_smooth != 0):
@@ -318,6 +339,29 @@ class TopDownRenderer:
                     draw_countour=False
                 )
 
+        # Draw the whole trajectory of ego vehicle with no gradient colors:
+        if self.draw_target_vehicle_trajectory:
+            for i, v in enumerate(self.history_target_vehicle):
+                i = len(self.history_target_vehicle) - i
+                if self.history_smooth != 0 and (i % self.history_smooth != 0):
+                    continue
+                c = v.color
+                h = v.heading_theta
+                h = h if abs(h) > 2 * np.pi / 180 else 0
+                x = abs(int(i))
+                alpha_f = min(x / len(self.history_target_vehicle), 0.5)
+                # alpha_f = 0
+                VehicleGraphics.display(
+                    vehicle=v,
+                    surface=self._runtime_canvas,
+                    heading=h,
+                    color=(
+                    c[0] + alpha_f * (255 - c[0]), c[1] + alpha_f * (255 - c[1]), c[2] + alpha_f * (255 - c[2])),
+                    draw_countour=False
+                )
+
+
+        # Draw current vehicle with black contour
         # Use this line if you wish to draw "future" trajectory.
         # i is the index of vehicle that we will render a black box for it.
         # i = int(len(self.history_vehicles) / 2)
