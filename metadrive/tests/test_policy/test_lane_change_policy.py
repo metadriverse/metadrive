@@ -62,7 +62,7 @@ def test_lane_change(render=False):
             "environment_num": 1,
             "traffic_density": 0.,
             "start_seed": 22,
-            "debug": True,
+            "debug": False,
             "global_light": True,
             "use_render": render,
             "decision_repeat": 5,
@@ -71,8 +71,8 @@ def test_lane_change(render=False):
             "discrete_action": True,
             "use_multi_discrete": True,
             "action_check": True,
-            "debug_static_world": True,
-            "debug_physics_world": True,
+            # "debug_static_world": True,
+            # "debug_physics_world": True,
         }
     )
     try:

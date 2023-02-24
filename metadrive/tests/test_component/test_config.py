@@ -103,6 +103,30 @@ def test_config_set_unchange():
         env.close()
 
 
+def test_config_two_env():
+    """
+    The config in BaseEngine should be the same as env.config, if BaseEngine exists in process
+    """
+    cfg_1 = dict(show_lidar=False, show_navi_mark=False)
+    env_1 = MetaDriveEnv({"vehicle_config": cfg_1})
+    assert env_1.config is BaseEngine.global_config
+    cfg_2 = dict(show_lidar=False, show_navi_mark=True)
+    env_2 = MetaDriveEnv({"vehicle_config": cfg_2})
+    try:
+        assert get_global_config() is BaseEngine.global_config is env_2.config
+        env_1.reset()
+        assert get_global_config() is BaseEngine.global_config is env_1.config
+        env_1.close()
+        assert get_global_config() is None and BaseEngine.global_config is None
+        env_2.reset()
+        assert env_1.config is not env_2.config and (env_2.config is BaseEngine.global_config is get_global_config())
+        env_2.close()
+        assert get_global_config() is None and BaseEngine.global_config is None
+    finally:
+        env_1.close()
+        env_2.close()
+
+
 def _test_config_set_conce():
     """
     The config in BaseEngine should be the same as env.config, if BaseEngine exists in process

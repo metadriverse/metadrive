@@ -60,7 +60,7 @@ class WaymoMapManager(BaseManager):
         last_position = last_state["position"]
         last_yaw = last_state["heading"]
 
-        self.current_sdc_route = copy.deepcopy(PointLane(sdc_traj, 1.5))
+        self.current_sdc_route = copy.copy(PointLane(sdc_traj, 1.5))
 
         self.sdc_dest_point = copy.deepcopy(last_position)
 

@@ -38,6 +38,9 @@ def get_global_config():
 
 
 def initialize_global_config(global_config):
+    """
+    You can, of course, preset the engine config before launching the engine.
+    """
     assert not engine_initialized(), "Can not call this API after engine initialization!"
     EngineCore.global_config = global_config
 
