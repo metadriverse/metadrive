@@ -45,7 +45,8 @@ class ForceFPS:
             self.fps = None
 
     def disable(self):
-        self.engine.task_manager.remove("force_fps")
+        if self.engine.task_manager.hasTaskNamed("force_fps"):
+            self.engine.task_manager.remove("force_fps")
         self.state = self.UNLIMITED
         self.fps = None
 
