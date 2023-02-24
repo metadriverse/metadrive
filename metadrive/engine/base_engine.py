@@ -503,8 +503,12 @@ class BaseEngine(EngineCore, Randomizable):
         window_count = self.graphicsEngine.getNumWindows() - 1
         texture = self.graphicsEngine.getWindow(window_count).getDisplayRegion(0).getScreenshot()
 
-        assert texture.getXSize() == self.global_config["window_size"][0], (texture.getXSize(), texture.getYSize(), self.global_config["window_size"])
-        assert texture.getYSize() == self.global_config["window_size"][1], (texture.getXSize(), texture.getYSize(), self.global_config["window_size"])
+        assert texture.getXSize() == self.global_config["window_size"][0], (
+            texture.getXSize(), texture.getYSize(), self.global_config["window_size"]
+        )
+        assert texture.getYSize() == self.global_config["window_size"][1], (
+            texture.getXSize(), texture.getYSize(), self.global_config["window_size"]
+        )
 
         image_bytes = texture.getRamImage().getData()
 

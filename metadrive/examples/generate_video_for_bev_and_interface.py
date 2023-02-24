@@ -50,7 +50,8 @@ if __name__ == '__main__':
     if generate_video:
         folder_name = "example_video_{}".format(str(uuid.uuid4())[:6])
 
-    env=MetaDriveEnv(dict(
+    env = MetaDriveEnv(
+        dict(
             environment_num=environment_num,
             start_seed=start_seed,
             random_traffic=False,
@@ -58,7 +59,8 @@ if __name__ == '__main__':
             window_size=(1600, 1200),
             crash_vehicle_done=False,
             manual_control=True,  # For using expert policy. You don't need to control it.
-    ))
+        )
+    )
 
     ep_count = 0
     step_count = 0
@@ -140,7 +142,6 @@ if __name__ == '__main__':
             o = env.reset(force_seed=ep_count + start_seed)
             env.vehicle.expert_takeover = True
             env.engine.force_fps.disable()
-
 
     # if generate_video:
     # from metadrive.utils.image_to_video import image_list_to_video

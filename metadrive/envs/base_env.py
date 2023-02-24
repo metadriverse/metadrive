@@ -318,7 +318,12 @@ class BaseEnv(gym.Env):
     def done_function(self, vehicle_id: str) -> Tuple[bool, Dict]:
         raise NotImplementedError()
 
-    def render(self, mode='human', text: Optional[Union[dict, str]] = None, return_bytes=False, *args, **kwargs) -> Optional[np.ndarray]:
+    def render(self,
+               mode='human',
+               text: Optional[Union[dict, str]] = None,
+               return_bytes=False,
+               *args,
+               **kwargs) -> Optional[np.ndarray]:
         """
         This is a pseudo-render function, only used to update onscreen message when using panda3d backend
         :param mode: 'rgb'/'human'
@@ -349,7 +354,6 @@ class BaseEnv(gym.Env):
             # self.temporary_img_obs.observe(self.vehicles[DEFAULT_AGENT])
             # return self.temporary_img_obs.get_image()
             return self.engine.get_window_image(return_bytes=return_bytes)
-
 
         # logging.warning("You do not set 'offscreen_render' or 'offscreen_render' to True, so no image will be returned!")
         return None

@@ -229,7 +229,8 @@ class TopDownRenderer:
         self.history_objects.append(this_frame_objects)
 
         if self.draw_target_vehicle_trajectory:
-            self.history_target_vehicle.append(history_object(
+            self.history_target_vehicle.append(
+                history_object(
                     name=self.current_track_vehicle.name,
                     heading_theta=self.current_track_vehicle.heading_theta,
                     WIDTH=self.current_track_vehicle.top_down_width,
@@ -355,11 +356,9 @@ class TopDownRenderer:
                     vehicle=v,
                     surface=self._runtime_canvas,
                     heading=h,
-                    color=(
-                    c[0] + alpha_f * (255 - c[0]), c[1] + alpha_f * (255 - c[1]), c[2] + alpha_f * (255 - c[2])),
+                    color=(c[0] + alpha_f * (255 - c[0]), c[1] + alpha_f * (255 - c[1]), c[2] + alpha_f * (255 - c[2])),
                     draw_countour=False
                 )
-
 
         # Draw current vehicle with black contour
         # Use this line if you wish to draw "future" trajectory.
