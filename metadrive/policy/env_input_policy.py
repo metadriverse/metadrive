@@ -7,17 +7,16 @@ from metadrive.utils.math_utils import clip
 
 
 class EnvInputPolicy(BasePolicy):
-
     def __init__(self, obj, seed):
         # Since control object may change
         super(EnvInputPolicy, self).__init__(control_object=obj, random_seed=seed)
         self.discrete_action = self.engine.global_config["discrete_action"]
         self.use_multi_discrete = self.engine.global_config["use_multi_discrete"]
         self.steering_unit = 2.0 / (
-                self.engine.global_config["discrete_steering_dim"] - 1
+            self.engine.global_config["discrete_steering_dim"] - 1
         )  # for discrete actions space
         self.throttle_unit = 2.0 / (
-                self.engine.global_config["discrete_throttle_dim"] - 1
+            self.engine.global_config["discrete_throttle_dim"] - 1
         )  # for discrete actions space
         self.discrete_steering_dim = self.engine.global_config["discrete_steering_dim"]
         self.discrete_throttle_dim = self.engine.global_config["discrete_throttle_dim"]
@@ -27,7 +26,8 @@ class EnvInputPolicy(BasePolicy):
         if self.engine.global_config["action_check"]:
             # Do action check for external input in EnvInputPolicy
             assert self.get_input_space().contains(action), "Input {} is not compatible with action space {}!".format(
-                action, self.get_input_space())
+                action, self.get_input_space()
+            )
         if not self.discrete_action:
             to_process = action
         else:
@@ -66,11 +66,10 @@ class EnvInputPolicy(BasePolicy):
         use_multi_discrete = engine_global_config["use_multi_discrete"]
 
         if not discrete_action:
-            _input_space = gym.spaces.Box(-1.0, 1.0, shape=(2 + extra_action_dim,), dtype=np.float32)
+            _input_space = gym.spaces.Box(-1.0, 1.0, shape=(2 + extra_action_dim, ), dtype=np.float32)
         else:
             if use_multi_discrete:
                 _input_space = gym.spaces.MultiDiscrete([discrete_steering_dim, discrete_throttle_dim])
             else:
                 _input_space = gym.spaces.Discrete(discrete_steering_dim * discrete_throttle_dim)
         return _input_space
-

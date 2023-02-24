@@ -67,7 +67,7 @@ def test_config_set():
     try:
         env = MetaDriveEnv({"vehicle_config": dict(show_lidar=False, show_navi_mark=False)})
         initialize_global_config(None)
-        env=None
+        env = None
         env = MetaDriveEnv({"vehicle_config": dict(show_lidar=False, show_navi_mark=False)})
         initialize_global_config(None)
         env.reset()
@@ -76,7 +76,7 @@ def test_config_set():
         env = MetaDriveEnv({"vehicle_config": dict(show_lidar=False, show_navi_mark=False)})
         # initialize_global_config(None)
         env.reset()
-        
+
         old_cfg = BaseEngine.global_config
         env.close()
         assert env.config is old_cfg

@@ -8,7 +8,7 @@ from panda3d.core import PNMImage
 
 from metadrive.constants import RENDER_MODE_NONE, DEFAULT_AGENT
 from metadrive.engine.engine_utils import initialize_engine, close_engine, \
-    engine_initialized, set_global_random_seed, initialize_global_config
+    engine_initialized, set_global_random_seed, initialize_global_config, get_global_config
 from metadrive.manager.agent_manager import AgentManager
 from metadrive.manager.record_manager import RecordManager
 from metadrive.manager.replay_manager import ReplayManager
@@ -231,7 +231,9 @@ class BaseEnv(gym.Env):
     def _get_action_space(self):
         if self.is_multi_agent:
             return {
-                v_id: self.config["agent_policy"].get_input_space() for v_id in self.config["target_vehicle_configs"].keys()}
+                v_id: self.config["agent_policy"].get_input_space()
+                for v_id in self.config["target_vehicle_configs"].keys()
+            }
         else:
             return {DEFAULT_AGENT: self.config["agent_policy"].get_input_space()}
 
@@ -365,7 +367,7 @@ class BaseEnv(gym.Env):
         self.episode_lengths = defaultdict(int)
 
         assert (len(self.vehicles) == self.num_agents) or (self.num_agents == -1)
-
+        assert self.config is self.engine.global_config is get_global_config(), "Inconsistent config may bring errors!"
         return self._get_reset_return()
 
     def _get_reset_return(self):
