@@ -83,12 +83,13 @@ class EngineCore(ShowBase.ShowBase):
     # loadPrcFileData("", "gl-version 3 2")
 
     def __init__(self, global_config):
-        if global_config is not None:
-            assert global_config is self.global_config, \
-                "No allowed to change ptr of global config, which may cause issue"
-        else:
-            self.global_config = global_config
-        assert self.global_config is not None
+        # if EngineCore.global_config is not None:
+        #     # assert global_config is EngineCore.global_config, \
+        #     #     "No allowed to change ptr of global config, which may cause issue"
+        #     pass
+        # else:
+        EngineCore.global_config = global_config
+
         if self.global_config["pstats"]:
             # pstats debug provided by panda3d
             loadPrcFileData("", "want-pstats 1")
@@ -342,6 +343,7 @@ class EngineCore(ShowBase.ShowBase):
         self.physics_world.destroy()
         self.destroy()
         close_asset_loader()
+        EngineCore.global_config = None
 
         import sys
         if sys.version_info >= (3, 0):
