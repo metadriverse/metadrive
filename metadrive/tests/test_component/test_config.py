@@ -60,20 +60,35 @@ def test_config_sync():
         env.close()
 
 
-def test_config_set():
+def test_config_set_unchange():
     """
     The config in BaseEngine should be the same as env.config, if BaseEngine exists in process
     """
     try:
         env = MetaDriveEnv({"vehicle_config": dict(show_lidar=False, show_navi_mark=False)})
+        evn_cfg = env.config
+        assert evn_cfg is BaseEngine.global_config
         initialize_global_config(None)
         env = None
         env = MetaDriveEnv({"vehicle_config": dict(show_lidar=False, show_navi_mark=False)})
+        assert env.config is not evn_cfg
+        env_cfg = env.config
         initialize_global_config(None)
+        assert BaseEngine.global_config is None
         env.reset()
+        assert env.config is env_cfg
+        assert env_cfg is BaseEngine.global_config
+        env.close()
+        assert env.config is env_cfg
+        assert BaseEngine.global_config is None
+        env.reset()
+        assert env.config is env_cfg
+        assert BaseEngine.global_config is env_cfg
         env.close()
 
         env = MetaDriveEnv({"vehicle_config": dict(show_lidar=False, show_navi_mark=False)})
+        assert env.config is not env_cfg
+        assert BaseEngine.global_config is env.config
         # initialize_global_config(None)
         env.reset()
 
