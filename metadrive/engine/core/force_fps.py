@@ -35,9 +35,6 @@ class ForceFPS:
             time.sleep(self.interval - sim_interval)
 
     def toggle(self):
-    """
-    Change between two modes. It is the interface for keyboard switching
-    """
         if self.state == self.UNLIMITED:
             self.engine.task_manager.add(self.force_fps_task, "force_fps")
             self.state = self.FORCED
