@@ -73,15 +73,14 @@ class AgentManager(BaseManager):
 
     def get_policy(self):
         # note: agent.id = object id
-        if self.engine.global_config["agent_policy"] is not None:
-            return self.engine.global_config["agent_policy"]
+
         if self.engine.global_config["manual_control"]:
             if self.engine.global_config.get("use_AI_protector", False):
                 policy = AIProtectPolicy
             else:
                 policy = ManualControlPolicy
         else:
-            policy = EnvInputPolicy
+            policy = self.engine.global_config["agent_policy"]
         return policy
 
     def before_reset(self):

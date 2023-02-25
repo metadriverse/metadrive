@@ -90,7 +90,7 @@ def CreateRoadFrom(
     lanes = []
     lane_width = lane.width_at(0)
     for i in range(lane_num, 0, -1):
-        side_lane = copy.deepcopy(lane)
+        side_lane = copy.copy(lane)
         if isinstance(lane, StraightLane):
             width = -lane_width if toward_smaller_lane_index else lane_width
             start = side_lane.position(0, width)
@@ -161,7 +161,7 @@ def CreateRoadFrom(
 
 
 def ExtendStraightLane(lane: "StraightLane", extend_length: float, line_types: (LineType, LineType)) -> "StraightLane":
-    new_lane = copy.deepcopy(lane)
+    new_lane = copy.copy(lane)
     start_point = lane.end
     end_point = lane.position(lane.length + extend_length, 0)
     new_lane.start = start_point
