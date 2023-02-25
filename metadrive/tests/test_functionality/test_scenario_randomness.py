@@ -22,7 +22,7 @@ def test_scenario_randomness(vis=False):
         "environment_num": 1,
         "traffic_density": 0.1,
         "start_seed": 1000,
-        "manual_control": True,
+        "manual_control": False,
         "use_render": vis,
         "agent_policy": IDMPolicy,
         "traffic_mode": TrafficMode.Trigger,

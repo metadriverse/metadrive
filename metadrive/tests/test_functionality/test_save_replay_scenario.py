@@ -23,7 +23,7 @@ def test_save_recreate_scenario(vis=False):
         "environment_num": 1,
         "traffic_density": 0.1,
         "start_seed": 1000,
-        "manual_control": True,
+        "manual_control": False,
         "debug": False,
         "use_render": vis,
         "agent_policy": IDMPolicy,
