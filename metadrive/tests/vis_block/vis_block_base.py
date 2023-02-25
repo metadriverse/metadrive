@@ -16,9 +16,10 @@ class TestBlock(ShowBase.ShowBase):
         self.debug = debug
         super(TestBlock, self).__init__(windowType=window_type)
         self.setBackgroundColor(BKG_COLOR)
-        self.setFrameRateMeter(True)
-        self.cam.setPos(0, 0, 300)
-        self.cam.lookAt(0, 0, 0)
+        if window_type != "none":
+            self.setFrameRateMeter(True)
+            self.cam.setPos(0, 0, 300)
+            self.cam.lookAt(0, 0, 0)
         self.map = None
         self.worldNP = None
         self.world = None

@@ -1,4 +1,5 @@
 import sys
+import cv2
 
 from cuda import cudart
 
@@ -214,6 +215,9 @@ def update_vertices(t, vertex_buffer):
 
     with vertex_buffer as V:
         (Ny, Nx, _) = V.shape
+        # np_image = cp.asnumpy(V)
+        # cv2.imshow("window", np_image)
+        # cv2.waitKey(1)
         θ = cp.linspace(0, np.pi, Nx)[None, :]
         φ = cp.linspace(0, 2 * np.pi, Ny)[:, None]
         V[..., 0] = r * cp.cos(φ) * cp.sin(θ)
