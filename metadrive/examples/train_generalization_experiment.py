@@ -2,11 +2,12 @@
 This script demonstrates how to train a set of policies under different number of training scenarios and test them
 in the same test set using rllib.
 
-We verified this script with ray==1.2.0. Please report to use if you find newer version of ray is not compatible with
+We verified this script with ray==2.2.0. Please report to use if you find newer version of ray is not compatible with
 this script.
 """
 import argparse
 import copy
+import logging
 from typing import Dict
 
 import numpy as np
@@ -18,7 +19,7 @@ try:
     from ray import tune
 
     from ray.tune import CLIReporter
-    from ray.rllib.agents.callbacks import DefaultCallbacks
+    from ray.rllib.algorithms.callbacks import DefaultCallbacks
     from ray.rllib.env import BaseEnv
     from ray.rllib.evaluation import MultiAgentEpisode, RolloutWorker
     from ray.rllib.policy import Policy
@@ -75,7 +76,7 @@ class DrivingCallbacks(DefaultCallbacks):
         episode.custom_metrics["step_reward_min"] = float(np.min(episode.user_data["step_reward"]))
         episode.custom_metrics["cost"] = float(sum(episode.user_data["cost"]))
 
-    def on_train_result(self, *, trainer, result: dict, **kwargs):
+    def on_train_result(self, *, algorithm, result: dict, **kwargs):
         result["success"] = np.nan
         result["crash"] = np.nan
         result["out"] = np.nan
@@ -107,9 +108,14 @@ def train(
     max_failures=5,
     **kwargs
 ):
-    ray.init(num_gpus=num_gpus)
+    ray.init(
+        num_gpus=num_gpus,
+        logging_level=logging.ERROR if not test_mode else logging.DEBUG,
+        log_to_driver=test_mode,
+    )
     used_config = {
         "callbacks": custom_callback if custom_callback else DrivingCallbacks,  # Must Have!
+        "log_level": "DEBUG" if test_mode else "WARN",
     }
     used_config.update(config)
     config = copy.deepcopy(used_config)
@@ -124,7 +130,7 @@ def train(
         kwargs["checkpoint_score_attr"] = "episode_reward_mean"
 
     metric_columns = CLIReporter.DEFAULT_COLUMNS.copy()
-    progress_reporter = CLIReporter(metric_columns)
+    progress_reporter = CLIReporter(metric_columns=metric_columns)
     progress_reporter.add_metric_column("success")
     progress_reporter.add_metric_column("crash")
     progress_reporter.add_metric_column("out")
@@ -132,6 +138,9 @@ def train(
     progress_reporter.add_metric_column("length")
     progress_reporter.add_metric_column("cost")
     kwargs["progress_reporter"] = progress_reporter
+
+    if "verbose" not in kwargs:
+        kwargs["verbose"] = 1 if not test_mode else 2
 
     # start training
     analysis = tune.run(
@@ -166,10 +175,14 @@ if __name__ == '__main__':
         # Train the policies in scenario sets with different number of scenarios.
         env=MetaDriveEnv,
         env_config=dict(
-            environment_num=tune.grid_search([1, 5, 10, 20, 50, 100, 300, 1000]),
-            start_seed=tune.grid_search([5000, 6000, 7000]),
+            environment_num=tune.grid_search([1, 3, 5, 1000]),
+            start_seed=tune.grid_search([5000]),
             random_traffic=False,
+            traffic_density=tune.grid_search([0.1, 0.3])
         ),
+
+        # ===== Framework =====
+        framework="torch",
 
         # ===== Evaluation =====
         # Evaluate the trained policies in unseen 200 scenarios.
@@ -203,4 +216,5 @@ if __name__ == '__main__':
         stop=stop,
         config=config,
         num_gpus=args.num_gpus,
+        test_mode=False
     )
