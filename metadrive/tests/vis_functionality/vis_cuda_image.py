@@ -1,4 +1,5 @@
 from cuda import cudart
+import cv2
 
 import cupy as cp
 from panda3d.core import NodePath, GraphicsOutput, Texture, GraphicsStateGuardianBase
@@ -56,7 +57,8 @@ def check_cudart_err(args):
 
 
 class CUDATest:
-    def __init__(self, window_type="onscreen"):
+    def __init__(self, window_type="onscreen", shape=None):
+        assert shape is not None
         self.engine = engine = TestBlock(window_type=window_type)
         from metadrive.engine.asset_loader import initialize_asset_loader
 
@@ -80,8 +82,8 @@ class CUDATest:
         engine.show_bounding_box(global_network)
 
         # buffer property
-        self._dtype = np.uint32
-        self._shape = (800, 600, 4)
+        self._dtype = np.uint8
+        self._shape = shape
         self._strides = None
         self._order = "C"
 
@@ -92,10 +94,10 @@ class CUDATest:
         self._cuda_buffer = None
 
         # # make buffer
-        self.texture = Texture()
-        self.texture.setMinfilter(Texture.FTLinear)
-        self.texture.setFormat(Texture.FRgba32)
-        self.engine.win.addRenderTexture(self.texture, GraphicsOutput.RTMBindOrCopy)
+        self.texture = self.engine.loader.loadTexture("/home/shady/Desktop/test.jpg")
+        # self.texture.setMinfilter(Texture.FTLinear)
+        # self.texture.setFormat(Texture.FRgba32)
+        # self.engine.win.addRenderTexture(self.texture, GraphicsOutput.RTMBindOrCopy)
 
         self.texture_identifier = None
         self.gsg = GraphicsStateGuardianBase.getDefaultGsg()
@@ -177,27 +179,29 @@ class CUDATest:
         array = check_cudart_err(cudart.cudaGraphicsSubResourceGetMappedArray(self.graphics_resource, 0, 0))
         channelformat, cudaextent, flag = check_cudart_err(cudart.cudaArrayGetInfo(array))
 
-        if cudaextent.width == 1024 and cudaextent.height == 1024:
-            success, self.new_cuda_mem_ptr = cudart.cudaMalloc(1)
-            check_cudart_err(
-                cudart.cudaMemcpy2DFromArray(self.new_cuda_mem_ptr, 1, array, 0,
-                                             0,
-                                             1, 1,
-                                             cudart.cudaMemcpyKind.cudaMemcpyDeviceToDevice))
-            self._cuda_buffer = cp.cuda.MemoryPointer(
-                cp.cuda.UnownedMemory(self.new_cuda_mem_ptr, 1, self), 0)
-        else:
-            success, self.new_cuda_mem_ptr = cudart.cudaMalloc(
-                cudaextent.height * cudaextent.width * 4 * cudaextent.depth)
-            check_cudart_err(
-                cudart.cudaMemcpy2DFromArray(self.new_cuda_mem_ptr, cudaextent.width * 4 * cudaextent.depth, array, 0,
-                                             0,
-                                             cudaextent.width * 4 * cudaextent.depth, cudaextent.height,
-                                             cudart.cudaMemcpyKind.cudaMemcpyDeviceToDevice))
-            self._cuda_buffer = cp.cuda.MemoryPointer(
-                cp.cuda.UnownedMemory(self.new_cuda_mem_ptr,
-                                      cudaextent.width * cudaextent.depth * 4 * cudaextent.height,
-                                      self), 0)
+        # if cudaextent.width == 1024 and cudaextent.height == 1024:
+        #     success, self.new_cuda_mem_ptr = cudart.cudaMalloc(1)
+        #     check_cudart_err(
+        #         cudart.cudaMemcpy2DFromArray(self.new_cuda_mem_ptr, 1, array, 0,
+        #                                      0,
+        #                                      1, 1,
+        #                                      cudart.cudaMemcpyKind.cudaMemcpyDeviceToDevice))
+        #     self._cuda_buffer = cp.cuda.MemoryPointer(
+        #         cp.cuda.UnownedMemory(self.new_cuda_mem_ptr, 1, self), 0)
+        # else:
+        depth = 1
+        byte = 4
+        success, self.new_cuda_mem_ptr = cudart.cudaMalloc(
+            cudaextent.height * cudaextent.width * byte * depth)
+        check_cudart_err(
+            cudart.cudaMemcpy2DFromArray(self.new_cuda_mem_ptr, cudaextent.width * byte * depth, array, 0,
+                                         0,
+                                         cudaextent.width * byte * depth, cudaextent.height,
+                                         cudart.cudaMemcpyKind.cudaMemcpyDeviceToDevice))
+        self._cuda_buffer = cp.cuda.MemoryPointer(
+            cp.cuda.UnownedMemory(self.new_cuda_mem_ptr,
+                                  cudaextent.width * depth * byte * cudaextent.height,
+                                  self), 0)
         return self.cuda_array
 
     def unmap(self, stream=None):
@@ -220,7 +224,7 @@ class CUDATest:
 if __name__ == "__main__":
     # loadPrcFileData("", "threading-model Cull/Draw")
     #
-    env = CUDATest(window_type="offscreen")
+    env = CUDATest(window_type="offscreen", shape=(512, 512, 4))
     env.step()
     env.step()
 
@@ -228,7 +232,9 @@ if __name__ == "__main__":
         env.step()
         with env as array:
             ret = array
-            # np_array = cp.asnumpy(ret)
+            np_array = cp.asnumpy(ret)[::-1]
+            cv2.imshow("win", np_array)
+            cv2.waitKey(1)
         pass
         # if ret is not None:
         #     np_ret = cp.asnumpy(ret)
