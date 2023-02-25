@@ -2,6 +2,7 @@ import logging
 from typing import Optional
 
 from metadrive.engine.base_engine import BaseEngine
+from metadrive.engine.core.engine_core import EngineCore
 
 
 def initialize_engine(env_global_config):
@@ -33,8 +34,15 @@ def close_engine():
 
 
 def get_global_config():
-    engine = get_engine()
-    return engine.global_config
+    return EngineCore.global_config
+
+
+def initialize_global_config(global_config):
+    """
+    You can, of course, preset the engine config before launching the engine.
+    """
+    assert not engine_initialized(), "Can not call this API after engine initialization!"
+    EngineCore.global_config = global_config
 
 
 def set_global_random_seed(random_seed: Optional[int]):

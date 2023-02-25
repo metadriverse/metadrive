@@ -113,7 +113,7 @@ class InterSection(PGBlock):
             self._create_u_turn(attach_road, part_idx)
 
         # go forward part
-        lanes_on_road = copy.deepcopy(attach_lanes)
+        lanes_on_road = copy.copy(attach_lanes)
         straight_lane_len = 2 * radius + (2 * lane_num - 1) * lanes_on_road[0].width_at(0)
         for l in lanes_on_road:
             next_lane = ExtendStraightLane(l, straight_lane_len, (LineType.NONE, LineType.NONE))

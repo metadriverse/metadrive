@@ -35,7 +35,13 @@ def _test_destroy(config):
 def test_discrete_action():
     # Close and reset
     env = MetaDriveEnv(
-        dict(discrete_action=True, use_multi_discrete=False, discrete_steering_dim=3, discrete_throttle_dim=5)
+        dict(
+            discrete_action=True,
+            use_multi_discrete=False,
+            discrete_steering_dim=3,
+            discrete_throttle_dim=5,
+            action_check=True
+        )
     )
     try:
         env.reset()
@@ -59,7 +65,13 @@ def test_discrete_action():
 def test_multi_discrete_action():
     # Close and reset
     env = MetaDriveEnv(
-        dict(discrete_action=True, use_multi_discrete=True, discrete_steering_dim=3, discrete_throttle_dim=5)
+        dict(
+            discrete_action=True,
+            use_multi_discrete=True,
+            discrete_steering_dim=3,
+            discrete_throttle_dim=5,
+            action_check=True
+        )
     )
     try:
         env.reset()
