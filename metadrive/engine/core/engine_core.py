@@ -2,7 +2,6 @@ import logging
 import sys
 import time
 from typing import Optional, Union, Tuple
-
 import gltf
 from direct.gui.OnscreenImage import OnscreenImage
 from direct.showbase import ShowBase
@@ -62,6 +61,7 @@ def attach_logo(engine):
 
 class EngineCore(ShowBase.ShowBase):
     DEBUG = False
+    global_config = None  # global config can exist before engine initialization
     loadPrcFileData("", "window-title {}".format(EDITION))
     loadPrcFileData("", "framebuffer-multisample 1")
     loadPrcFileData("", "multisamples 8")
@@ -83,7 +83,13 @@ class EngineCore(ShowBase.ShowBase):
     # loadPrcFileData("", "gl-version 3 2")
 
     def __init__(self, global_config):
-        self.global_config = global_config
+        # if EngineCore.global_config is not None:
+        #     # assert global_config is EngineCore.global_config, \
+        #     #     "No allowed to change ptr of global config, which may cause issue"
+        #     pass
+        # else:
+        EngineCore.global_config = global_config
+
         if self.global_config["pstats"]:
             # pstats debug provided by panda3d
             loadPrcFileData("", "want-pstats 1")
@@ -337,6 +343,7 @@ class EngineCore(ShowBase.ShowBase):
         self.physics_world.destroy()
         self.destroy()
         close_asset_loader()
+        EngineCore.global_config = None
 
         import sys
         if sys.version_info >= (3, 0):

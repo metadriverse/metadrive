@@ -14,7 +14,7 @@ def test_waymo_env(policy, render=False):
     try:
         env = WaymoEnv(
             {
-                "manual_control": True,
+                "manual_control": False,
                 "replay": True,
                 "no_traffic": True if policy == WaymoIDMPolicy else False,
                 "use_render": render,

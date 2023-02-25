@@ -6,24 +6,23 @@ import gym
 import numpy as np
 from panda3d.core import PNMImage
 
-from metadrive.component.vehicle.base_vehicle import BaseVehicle
 from metadrive.constants import RENDER_MODE_NONE, DEFAULT_AGENT
-from metadrive.engine.base_engine import BaseEngine
 from metadrive.engine.engine_utils import initialize_engine, close_engine, \
-    engine_initialized, set_global_random_seed
+    engine_initialized, set_global_random_seed, initialize_global_config, get_global_config
 from metadrive.manager.agent_manager import AgentManager
 from metadrive.manager.record_manager import RecordManager
 from metadrive.manager.replay_manager import ReplayManager
 from metadrive.obs.image_obs import ImageStateObservation
 from metadrive.obs.observation_base import ObservationBase
 from metadrive.obs.state_obs import LidarStateObservation
+from metadrive.policy.env_input_policy import EnvInputPolicy
 from metadrive.utils import Config, merge_dicts, get_np_random, concat_step_infos
 
 BASE_DEFAULT_CONFIG = dict(
 
     # ===== agent =====
     random_agent_model=False,
-    agent_policy=None,
+    agent_policy=EnvInputPolicy,
 
     # ===== multi-agent =====
     num_agents=1,  # Note that this can be set to >1 in MARL envs, or set to -1 for as many vehicles as possible.
@@ -42,6 +41,7 @@ BASE_DEFAULT_CONFIG = dict(
     discrete_throttle_dim=5,
     # When discrete_action=True: If True, use MultiDiscrete action space. Otherwise, use Discrete.
     use_multi_discrete=False,
+    action_check=False,
 
     # ===== Rendering =====
     use_render=False,  # pop a window to render or not
@@ -89,7 +89,6 @@ BASE_DEFAULT_CONFIG = dict(
 
         # ==== others ====
         overtake_stat=False,  # we usually set to True when evaluation
-        action_check=False,
         random_color=False,
         random_agent_model=False,  # this will be overwritten by env.config["random_agent_model"]
         # The shape of vehicle are predefined by its class. But in special case (WaymoVehicle) we might want to
@@ -188,8 +187,10 @@ class BaseEnv(gym.Env):
             config = {}
         merged_config = self._merge_extra_config(config)
         global_config = self._post_process_config(merged_config)
+        global_config["vehicle_config"]["main_camera"] = global_config["window_size"]
+
         self.config = global_config
-        self.config["vehicle_config"]["main_camera"] = self.config["window_size"]
+        initialize_global_config(self.config)
 
         # agent check
         self.num_agents = self.config["num_agents"]
@@ -210,7 +211,6 @@ class BaseEnv(gym.Env):
         self.dones = None
         self.episode_rewards = defaultdict(float)
         self.episode_lengths = defaultdict(int)
-        self.total_steps = 0
 
     def _merge_extra_config(self, config: Union[dict, "Config"]) -> "Config":
         """Check, update, sync and overwrite some config."""
@@ -231,25 +231,11 @@ class BaseEnv(gym.Env):
     def _get_action_space(self):
         if self.is_multi_agent:
             return {
-                v_id: BaseVehicle.get_action_space_before_init(
-                    extra_action_dim=self.config["vehicle_config"]["extra_action_dim"],
-                    discrete_action=self.config["discrete_action"],
-                    discrete_steering_dim=self.config["discrete_steering_dim"],
-                    discrete_throttle_dim=self.config["discrete_throttle_dim"],
-                    use_multi_discrete=self.config["use_multi_discrete"]
-                )
+                v_id: self.config["agent_policy"].get_input_space()
                 for v_id in self.config["target_vehicle_configs"].keys()
             }
         else:
-            return {
-                DEFAULT_AGENT: BaseVehicle.get_action_space_before_init(
-                    extra_action_dim=self.config["vehicle_config"]["extra_action_dim"],
-                    discrete_action=self.config["discrete_action"],
-                    discrete_steering_dim=self.config["discrete_steering_dim"],
-                    discrete_throttle_dim=self.config["discrete_throttle_dim"],
-                    use_multi_discrete=self.config["use_multi_discrete"]
-                )
-            }
+            return {DEFAULT_AGENT: self.config["agent_policy"].get_input_space()}
 
     def lazy_init(self):
         """
@@ -274,19 +260,18 @@ class BaseEnv(gym.Env):
         pass
 
     # ===== Run-time =====
-    def step(self, actions: Union[np.ndarray, Dict[AnyStr, np.ndarray]]):
+    def step(self, actions: Union[np.ndarray, Dict[AnyStr, np.ndarray], int]):
         actions = self._preprocess_actions(actions)
         engine_info = self._step_simulator(actions)
         o, r, d, i = self._get_step_return(actions, engine_info=engine_info)
-        self.total_steps += 1
         return o, r, d, i
 
-    def _preprocess_actions(self, actions: Union[np.ndarray, Dict[AnyStr, np.ndarray]]) \
-            -> Union[np.ndarray, Dict[AnyStr, np.ndarray]]:
+    def _preprocess_actions(self, actions: Union[np.ndarray, Dict[AnyStr, np.ndarray], int]) \
+            -> Union[np.ndarray, Dict[AnyStr, np.ndarray], int]:
         if not self.is_multi_agent:
             actions = {v_id: actions for v_id in self.vehicles.keys()}
         else:
-            if self.config["vehicle_config"]["action_check"]:
+            if self.config["action_check"]:
                 # Check whether some actions are not provided.
                 given_keys = set(actions.keys())
                 have_keys = set(self.vehicles.keys())
@@ -382,7 +367,7 @@ class BaseEnv(gym.Env):
         self.episode_lengths = defaultdict(int)
 
         assert (len(self.vehicles) == self.num_agents) or (self.num_agents == -1)
-
+        assert self.config is self.engine.global_config is get_global_config(), "Inconsistent config may bring errors!"
         return self._get_reset_return()
 
     def _get_reset_return(self):
@@ -567,4 +552,8 @@ class BaseEnv(gym.Env):
 
     @property
     def episode_step(self):
+        return self.engine.episode_step if self.engine is not None else 0
+
+    @property
+    def total_step(self):
         return self.engine.episode_step if self.engine is not None else 0

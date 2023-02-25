@@ -182,13 +182,6 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self.takeover = False
         self.expert_takeover = False
         self.energy_consumption = 0
-        # self.action_space = self.get_action_space_before_init(
-        #     extra_action_dim=self.config["extra_action_dim"],
-        #     discrete_action=self.config["discrete_action"],
-        #     discrete_steering_dim=self.config["discrete_steering_dim"],
-        #     discrete_throttle_dim=self.config["discrete_throttle_dim"],
-        #     use_multi_discrete=self.config["use_multi_discrete"]
-        # )
         self.break_down = False
 
         # overtake_stat
@@ -267,12 +260,9 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self.out_of_route = False  # re-route is required if is false
         self.on_lane = True  # on lane surface or not
 
-    def _preprocess_action(self, action):
+    @staticmethod
+    def _preprocess_action(action):
         action = safe_clip_for_small_array(action, -1, 1)
-        if self.config["action_check"]:
-            assert self.action_space.contains(action), "Input {} is not compatible with action space {}!".format(
-                action, self.action_space
-            )
         return action, {'raw_action': (action[0], action[1])}
 
     def before_step(self, action=None):
@@ -851,23 +841,6 @@ class BaseVehicle(BaseObject, BaseVehicleState):
 
     def get_overtake_num(self):
         return len(self.front_vehicles.intersection(self.back_vehicles))
-
-    @classmethod
-    def get_action_space_before_init(
-        cls,
-        extra_action_dim: int = 0,
-        discrete_action=False,
-        discrete_steering_dim=5,
-        discrete_throttle_dim=5,
-        use_multi_discrete=False
-    ):
-        if not discrete_action:
-            return gym.spaces.Box(-1.0, 1.0, shape=(2 + extra_action_dim, ), dtype=np.float32)
-        else:
-            if use_multi_discrete:
-                return gym.spaces.MultiDiscrete([discrete_steering_dim, discrete_throttle_dim])
-            else:
-                return gym.spaces.Discrete(discrete_steering_dim * discrete_throttle_dim)
 
     def __del__(self):
         super(BaseVehicle, self).__del__()
