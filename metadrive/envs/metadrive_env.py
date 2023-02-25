@@ -82,7 +82,8 @@ METADRIVE_DEFAULT_CONFIG = dict(
 
     # ===== Termination Scheme =====
     out_of_route_done=False,
-    on_continuous_line_done=True
+    on_continuous_line_done=True,
+    crash_vehicle_done=True
 )
 
 
@@ -166,7 +167,7 @@ class MetaDriveEnv(BaseEnv):
             done = True
             logging.info("Episode ended! Reason: out_of_road.")
             done_info[TerminationState.OUT_OF_ROAD] = True
-        if vehicle.crash_vehicle:
+        if vehicle.crash_vehicle and self.config["crash_vehicle_done"]:
             done = True
             logging.info("Episode ended! Reason: crash vehicle ")
             done_info[TerminationState.CRASH_VEHICLE] = True
