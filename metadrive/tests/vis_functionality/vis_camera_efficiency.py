@@ -14,7 +14,6 @@ def _test_rgb_camera_as_obs(render=False):
             offscreen_render=True,
             use_render=False,
             vehicle_config=dict(image_source="rgb_camera", rgb_camera=(1200, 800)),
-
             show_interface=False,
             show_logo=False,
             show_fps=False,

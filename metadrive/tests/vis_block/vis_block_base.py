@@ -15,7 +15,7 @@ class TestBlock(ShowBase.ShowBase):
     def __init__(self, debug=False, window_type="onscreen"):
         self.debug = debug
         super(TestBlock, self).__init__(windowType=window_type)
-        self.setBackgroundColor([1,0,0])
+        self.setBackgroundColor(BKG_COLOR)
         self.setFrameRateMeter(True)
         self.cam.setPos(0, 0, 300)
         self.cam.lookAt(0, 0, 0)

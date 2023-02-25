@@ -11,13 +11,13 @@ import glfw
 from OpenGL.GL import *  # noqa F403
 import OpenGL.GL.shaders
 
-
 # require:
 # 1. pip install cupy-cuda12x
 # 2. CUDA-Python
 # 3. PyOpenGL
 # 4. pyrr
 # 5. glfw
+
 
 def format_cudart_err(err):
     return (
@@ -92,18 +92,14 @@ class CudaOpenGLMappedBuffer:
     def register(self):
         if self.registered:
             return self._graphics_ressource
-        self._graphics_ressource = check_cudart_err(
-            cudart.cudaGraphicsGLRegisterBuffer(self._gl_buffer, self._flags)
-        )
+        self._graphics_ressource = check_cudart_err(cudart.cudaGraphicsGLRegisterBuffer(self._gl_buffer, self._flags))
         return self._graphics_ressource
 
     def unregister(self):
         if not self.registered:
             return self
         self.unmap()
-        self._graphics_ressource = check_cudart_err(
-            cudart.cudaGraphicsUnregisterResource(self._graphics_ressource)
-        )
+        self._graphics_ressource = check_cudart_err(cudart.cudaGraphicsUnregisterResource(self._graphics_ressource))
         return self
 
     def map(self, stream=None):
@@ -112,17 +108,11 @@ class CudaOpenGLMappedBuffer:
         if self.mapped:
             return self._cuda_buffer
 
-        check_cudart_err(
-            cudart.cudaGraphicsMapResources(1, self._graphics_ressource, stream)
-        )
+        check_cudart_err(cudart.cudaGraphicsMapResources(1, self._graphics_ressource, stream))
 
-        ptr, size = check_cudart_err(
-            cudart.cudaGraphicsResourceGetMappedPointer(self._graphics_ressource)
-        )
+        ptr, size = check_cudart_err(cudart.cudaGraphicsResourceGetMappedPointer(self._graphics_ressource))
 
-        self._cuda_buffer = cp.cuda.MemoryPointer(
-            cp.cuda.UnownedMemory(ptr, size, self), 0
-        )
+        self._cuda_buffer = cp.cuda.MemoryPointer(cp.cuda.UnownedMemory(ptr, size, self), 0)
 
         return self._cuda_buffer
 
@@ -132,9 +122,7 @@ class CudaOpenGLMappedBuffer:
         if not self.mapped:
             return self
 
-        self._cuda_buffer = check_cudart_err(
-            cudart.cudaGraphicsUnmapResources(1, self._graphics_ressource, stream)
-        )
+        self._cuda_buffer = check_cudart_err(cudart.cudaGraphicsUnmapResources(1, self._graphics_ressource, stream))
 
         return self
 

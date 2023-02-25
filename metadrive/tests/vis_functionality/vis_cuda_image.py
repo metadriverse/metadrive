@@ -4,13 +4,11 @@ from panda3d.core import Texture, GraphicsOutput, GraphicsStateGuardianBase, Gra
 from cuda.cudart import cudaGraphicsGLRegisterImage, cudaGraphicsRegisterFlags, GLuint, GLenum
 from OpenGL.GL import GL_TEXTURE_2D
 
-
 from metadrive.component.pgblock.curve import Curve
 from metadrive.component.pgblock.first_block import FirstPGBlock
 from metadrive.component.pgblock.intersection import InterSection
 from metadrive.component.road_network.node_road_network import NodeRoadNetwork
 from metadrive.tests.vis_block.vis_block_base import TestBlock
-
 
 if __name__ == "__main__":
     # loadPrcFileData("", "threading-model Cull/Draw")
@@ -40,7 +38,7 @@ if __name__ == "__main__":
     my_texture = Texture()
     my_texture.setMinfilter(Texture.FTLinear)
     my_texture.setFormat(Texture.FRgba32)
-    type=my_texture.get_texture_type()
+    type = my_texture.get_texture_type()
     engine.win.add_render_texture(my_texture, GraphicsOutput.RTMCopyTexture)
 
     # get gsg
@@ -50,8 +48,9 @@ if __name__ == "__main__":
     def _callback_func(cbdata):
         texture_context = my_texture.prepareNow(0, gsg.prepared_objects, gsg)
         identifier = texture_context.getNativeId()
-        flag, resource = cudaGraphicsGLRegisterImage(identifier, GL_TEXTURE_2D,
-                                                     cudaGraphicsRegisterFlags.cudaGraphicsRegisterFlagsReadOnly)
+        flag, resource = cudaGraphicsGLRegisterImage(
+            identifier, GL_TEXTURE_2D, cudaGraphicsRegisterFlags.cudaGraphicsRegisterFlagsReadOnly
+        )
         cbdata.upcall()
 
     engine.win.getDisplayRegion(1).setDrawCallback(_callback_func)
