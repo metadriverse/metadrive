@@ -207,7 +207,7 @@ if __name__ == "__main__":
     loadPrcFileData("", "win-size {} {}".format(*win_size))
     test_ram_image = False
     render = False
-    env = CUDATest(window_type="onscreen", shape=(*win_size, 4), test_ram_image=test_ram_image)
+    env = CUDATest(window_type="offscreen", shape=(*win_size, 4), test_ram_image=test_ram_image)
     env.step()
     env.step()
     start = time.time()
