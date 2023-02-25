@@ -22,7 +22,6 @@ from metadrive.component.road_network.node_road_network import NodeRoadNetwork
 from metadrive.tests.vis_block.vis_block_base import TestBlock, BKG_COLOR
 from OpenGL.GL import glGenBuffers
 
-
 # require:
 # 1. pip install cupy-cuda12x
 # 2. CUDA-Python
@@ -144,9 +143,11 @@ class CUDATest:
         assert self.texture_identifier is not None
         if self.registered:
             return self._graphics_resource
-        self._graphics_resource = check_cudart_err(cudart.cudaGraphicsGLRegisterImage(self.texture_identifier,
-                                                                                      GL_TEXTURE_2D,
-                                                                                      cudaGraphicsRegisterFlags.cudaGraphicsRegisterFlagsReadOnly))
+        self._graphics_resource = check_cudart_err(
+            cudart.cudaGraphicsGLRegisterImage(
+                self.texture_identifier, GL_TEXTURE_2D, cudaGraphicsRegisterFlags.cudaGraphicsRegisterFlagsReadOnly
+            )
+        )
         return self._graphics_resource
 
     def unregister(self):
@@ -169,18 +170,18 @@ class CUDATest:
         depth = 1
         byte = 4  # four channel
         if self.new_cuda_mem_ptr is None:
-            success, self.new_cuda_mem_ptr = cudart.cudaMalloc(
-                cudaextent.height * cudaextent.width * byte * depth)
+            success, self.new_cuda_mem_ptr = cudart.cudaMalloc(cudaextent.height * cudaextent.width * byte * depth)
         check_cudart_err(
-            cudart.cudaMemcpy2DFromArray(self.new_cuda_mem_ptr, cudaextent.width * byte * depth, array, 0,
-                                         0,
-                                         cudaextent.width * byte * depth, cudaextent.height,
-                                         cudart.cudaMemcpyKind.cudaMemcpyDeviceToDevice))
+            cudart.cudaMemcpy2DFromArray(
+                self.new_cuda_mem_ptr, cudaextent.width * byte * depth, array, 0, 0, cudaextent.width * byte * depth,
+                cudaextent.height, cudart.cudaMemcpyKind.cudaMemcpyDeviceToDevice
+            )
+        )
         if self._cuda_buffer is None:
             self._cuda_buffer = cp.cuda.MemoryPointer(
-                cp.cuda.UnownedMemory(self.new_cuda_mem_ptr,
-                                      cudaextent.width * depth * byte * cudaextent.height,
-                                      self), 0)
+                cp.cuda.UnownedMemory(self.new_cuda_mem_ptr, cudaextent.width * depth * byte * cudaextent.height, self),
+                0
+            )
         return self.cuda_array
 
     def unmap(self, stream=None):

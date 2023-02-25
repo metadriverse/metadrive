@@ -15,7 +15,6 @@ from metadrive.component.road_network.node_road_network import NodeRoadNetwork
 from metadrive.tests.vis_block.vis_block_base import TestBlock, BKG_COLOR
 from OpenGL.GL import glGenBuffers
 
-
 # loadPrcFileData("", "win-size {} {}".format(1024, 1024))
 
 # require:
@@ -191,7 +190,7 @@ class CUDATest:
 if __name__ == "__main__":
     # loadPrcFileData("", "threading-model Cull/Draw")
     #
-    env = CUDATest(window_type="offscreen", buffer_id=9, shape=(18,))
+    env = CUDATest(window_type="offscreen", buffer_id=9, shape=(18, ))
     env.step()
     env.step()
 
