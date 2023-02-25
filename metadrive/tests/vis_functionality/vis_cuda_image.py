@@ -1,5 +1,5 @@
 import time
-
+from metadrive.engine.asset_loader import AssetLoader
 import torch
 from torch.utils.dlpack import to_dlpack
 from torch.utils.dlpack import from_dlpack
@@ -64,26 +64,13 @@ class CUDATest:
     def __init__(self, window_type="onscreen", shape=None, test_ram_image=False):
         assert shape is not None
         self.engine = engine = TestBlock(window_type=window_type)
-        from metadrive.engine.asset_loader import initialize_asset_loader
 
-        initialize_asset_loader(engine)
+        model = self.engine.loader.loadModel(AssetLoader.file_path("models", "box.bam"))
+        model.setColor(0.3, 0.5, 0.8)
+        model.reparentTo(engine.worldNP)
 
-        global_network = NodeRoadNetwork()
-        first = FirstPGBlock(global_network, 3.0, 2, engine.render, engine.world, 20)
-
-        intersection = InterSection(3, first.get_socket(0), global_network, 1)
-        print(intersection.construct_block(engine.render, engine.world))
-
-        id = 4
-        for socket_idx in range(intersection.SOCKET_NUM):
-            block = Curve(id, intersection.get_socket(socket_idx), global_network, id)
-            block.construct_block(engine.render, engine.world)
-            id += 1
-
-        intersection = InterSection(id, block.get_socket(0), global_network, 1)
-        intersection.construct_block(engine.render, engine.world)
-
-        engine.show_bounding_box(global_network)
+        self.engine.cam.setPos(0, 0, 30)
+        self.engine.cam.lookAt(0, 0, 0)
 
         # buffer property
         self._dtype = np.uint8
@@ -114,7 +101,7 @@ class CUDATest:
     def cuda_array(self):
         assert self.mapped
         return cp.ndarray(
-            shape=self._shape,
+            shape=(self._shape[1], self._shape[0], self._shape[-1]),
             dtype=self._dtype,
             strides=self._strides,
             order=self._order,
@@ -174,7 +161,7 @@ class CUDATest:
             raise RuntimeError("Cannot map an unregistered buffer.")
         if self.mapped:
             return self._cuda_buffer
-
+        # self.engine.graphicsEngine.renderFrame()
         check_cudart_err(cudart.cudaGraphicsMapResources(1, self._graphics_resource, stream))
         array = check_cudart_err(cudart.cudaGraphicsSubResourceGetMappedArray(self.graphics_resource, 0, 0))
         channelformat, cudaextent, flag = check_cudart_err(cudart.cudaArrayGetInfo(array))
@@ -214,11 +201,12 @@ class CUDATest:
 
 
 if __name__ == "__main__":
-    loadPrcFileData("", "win-size {} {}".format(1024, 1024))
+    win_size = (1920, 1080)
     loadPrcFileData("", "textures-power-2 none")
-    test_ram_image = True
+    loadPrcFileData("", "win-size {} {}".format(*win_size))
+    test_ram_image = False
     render = False
-    env = CUDATest(window_type="offscreen", shape=(1024, 1024, 4), test_ram_image=test_ram_image)
+    env = CUDATest(window_type="onscreen", shape=(*win_size, 4), test_ram_image=test_ram_image)
     env.step()
     env.step()
     start = time.time()
