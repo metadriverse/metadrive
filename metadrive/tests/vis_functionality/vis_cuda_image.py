@@ -1,26 +1,19 @@
 import time
-from metadrive.engine.asset_loader import AssetLoader
-import torch
-from torch.utils.dlpack import to_dlpack
-from torch.utils.dlpack import from_dlpack
 
-from cuda import cudart
+import cupy as cp
 import cv2
-
-import cupy as cp
-from panda3d.core import NodePath, GraphicsOutput, Texture, GraphicsStateGuardianBase
-import cupy as cp
 import numpy as np
+import torch
 from OpenGL.GL import *  # noqa F403
 from cuda import cudart
 from cuda.cudart import cudaGraphicsRegisterFlags
+from panda3d.core import GraphicsOutput, Texture, GraphicsStateGuardianBase
 from panda3d.core import loadPrcFileData
-from metadrive.component.pgblock.curve import Curve
-from metadrive.component.pgblock.first_block import FirstPGBlock
-from metadrive.component.pgblock.intersection import InterSection
-from metadrive.component.road_network.node_road_network import NodeRoadNetwork
-from metadrive.tests.vis_block.vis_block_base import TestBlock, BKG_COLOR
-from OpenGL.GL import glGenBuffers
+from torch.utils.dlpack import from_dlpack
+
+from metadrive.engine.asset_loader import AssetLoader
+from metadrive.tests.vis_block.vis_block_base import TestBlock
+
 
 # require:
 # 1. pip install cupy-cuda12x
