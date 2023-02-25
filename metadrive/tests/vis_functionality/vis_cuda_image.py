@@ -1,3 +1,9 @@
+import time
+
+import torch
+from torch.utils.dlpack import to_dlpack
+from torch.utils.dlpack import from_dlpack
+
 from cuda import cudart
 import cv2
 
@@ -16,8 +22,6 @@ from metadrive.component.road_network.node_road_network import NodeRoadNetwork
 from metadrive.tests.vis_block.vis_block_base import TestBlock, BKG_COLOR
 from OpenGL.GL import glGenBuffers
 
-
-# loadPrcFileData("", "win-size {} {}".format(1024, 1024))
 
 # require:
 # 1. pip install cupy-cuda12x
@@ -57,7 +61,7 @@ def check_cudart_err(args):
 
 
 class CUDATest:
-    def __init__(self, window_type="onscreen", shape=None):
+    def __init__(self, window_type="onscreen", shape=None, test_ram_image=False):
         assert shape is not None
         self.engine = engine = TestBlock(window_type=window_type)
         from metadrive.engine.asset_loader import initialize_asset_loader
@@ -94,20 +98,17 @@ class CUDATest:
         self._cuda_buffer = None
 
         # # make buffer
-        self.texture = self.engine.loader.loadTexture("/home/shady/Desktop/test.jpg")
+        # self.texture = self.engine.loader.loadTexture("/home/shady/Desktop/test.jpg")
+        self.texture = Texture()
         # self.texture.setMinfilter(Texture.FTLinear)
         # self.texture.setFormat(Texture.FRgba32)
-        # self.engine.win.addRenderTexture(self.texture, GraphicsOutput.RTMBindOrCopy)
+        mode = GraphicsOutput.RTMCopyRam if test_ram_image else GraphicsOutput.RTMBindOrCopy
+        self.engine.win.addRenderTexture(self.texture, mode)
 
         self.texture_identifier = None
         self.gsg = GraphicsStateGuardianBase.getDefaultGsg()
         self.texture_context_future = self.texture.prepare(self.gsg.prepared_objects)
         self.new_cuda_mem_ptr = None
-        #
-        # self.origin = NodePath("new render")
-        # # this takes care of setting up their camera properly
-        # self.cam = self.engine.makeCamera(self.buffer, clearColor=BKG_COLOR)
-        # self.cam.reparentTo(self.engine.worldNP)
 
     @property
     def cuda_array(self):
@@ -175,33 +176,24 @@ class CUDATest:
             return self._cuda_buffer
 
         check_cudart_err(cudart.cudaGraphicsMapResources(1, self._graphics_resource, stream))
-        # ptr, size = check_cudart_err(cudart.cudaGraphicsResourceGetMappedPointer(self._graphics_resource))
         array = check_cudart_err(cudart.cudaGraphicsSubResourceGetMappedArray(self.graphics_resource, 0, 0))
         channelformat, cudaextent, flag = check_cudart_err(cudart.cudaArrayGetInfo(array))
 
-        # if cudaextent.width == 1024 and cudaextent.height == 1024:
-        #     success, self.new_cuda_mem_ptr = cudart.cudaMalloc(1)
-        #     check_cudart_err(
-        #         cudart.cudaMemcpy2DFromArray(self.new_cuda_mem_ptr, 1, array, 0,
-        #                                      0,
-        #                                      1, 1,
-        #                                      cudart.cudaMemcpyKind.cudaMemcpyDeviceToDevice))
-        #     self._cuda_buffer = cp.cuda.MemoryPointer(
-        #         cp.cuda.UnownedMemory(self.new_cuda_mem_ptr, 1, self), 0)
-        # else:
         depth = 1
-        byte = 4
-        success, self.new_cuda_mem_ptr = cudart.cudaMalloc(
-            cudaextent.height * cudaextent.width * byte * depth)
+        byte = 4  # four channel
+        if self.new_cuda_mem_ptr is None:
+            success, self.new_cuda_mem_ptr = cudart.cudaMalloc(
+                cudaextent.height * cudaextent.width * byte * depth)
         check_cudart_err(
             cudart.cudaMemcpy2DFromArray(self.new_cuda_mem_ptr, cudaextent.width * byte * depth, array, 0,
                                          0,
                                          cudaextent.width * byte * depth, cudaextent.height,
                                          cudart.cudaMemcpyKind.cudaMemcpyDeviceToDevice))
-        self._cuda_buffer = cp.cuda.MemoryPointer(
-            cp.cuda.UnownedMemory(self.new_cuda_mem_ptr,
-                                  cudaextent.width * depth * byte * cudaextent.height,
-                                  self), 0)
+        if self._cuda_buffer is None:
+            self._cuda_buffer = cp.cuda.MemoryPointer(
+                cp.cuda.UnownedMemory(self.new_cuda_mem_ptr,
+                                      cudaextent.width * depth * byte * cudaextent.height,
+                                      self), 0)
         return self.cuda_array
 
     def unmap(self, stream=None):
@@ -222,27 +214,33 @@ class CUDATest:
 
 
 if __name__ == "__main__":
-    # loadPrcFileData("", "threading-model Cull/Draw")
-    #
-    env = CUDATest(window_type="offscreen", shape=(512, 512, 4))
+    loadPrcFileData("", "win-size {} {}".format(1024, 1024))
+    loadPrcFileData("", "textures-power-2 none")
+    test_ram_image = True
+    render = False
+    env = CUDATest(window_type="offscreen", shape=(1024, 1024, 4), test_ram_image=test_ram_image)
     env.step()
     env.step()
-
-    for _ in range(10000000):
+    start = time.time()
+    for s in range(10000000):
         env.step()
-        with env as array:
-            ret = array
-            np_array = cp.asnumpy(ret)[::-1]
-            cv2.imshow("win", np_array)
-            cv2.waitKey(1)
+        if test_ram_image:
+            origin_img = env.texture
+            img = np.frombuffer(origin_img.getRamImage().getData(), dtype=np.uint8)
+            img = img.reshape((origin_img.getYSize(), origin_img.getXSize(), 4))
+            img = img
+            torch_img = torch.from_numpy(img)
+            if render:
+                cv2.imshow("win", img)
+                cv2.waitKey(1)
+        else:
+            with env as array:
+                ret = from_dlpack(array.toDlpack())
+            if render:
+                np_array = cp.asnumpy(ret)[::-1]
+                cv2.imshow("win", np_array)
+                cv2.waitKey(1)
+        if s % 2000 == 0 and s != 0:
+            print("FPS: {}".format(s / (time.time() - start)))
+
         pass
-        # if ret is not None:
-        #     np_ret = cp.asnumpy(ret)
-        # if ret is not None:
-        #     image = torch.as_tensor(ret, device='cpu')
-        # img = np.frombuffer(env.my_texture.getRamImage().getData(), dtype=np.uint8)
-        # img = img.reshape((env.my_texture.getYSize(), env.my_texture.getXSize(), 4))
-        # img = img[::-1]
-        # img = img[..., :-1]
-        # cv2.imshow("window", img)
-        # cv2.waitKey(1)
