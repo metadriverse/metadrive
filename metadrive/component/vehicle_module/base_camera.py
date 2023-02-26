@@ -70,10 +70,10 @@ class BaseCamera(ImageBuffer):
                 def _callback_func(cbdata: DisplayRegionDrawCallbackData):
                     # print("DRAW CALLBACK!!!!!!!!!!!!!!!11")
                     cbdata.upcall()
-                    if not self.registered and self.texture_context_future.done():
-                        self.register()
-                    with self as array:
-                        self.cuda_rendered_result = array
+                    if not type(self)._singleton.registered and type(self)._singleton.texture_context_future.done():
+                        type(self)._singleton.register()
+                    with type(self)._singleton as array:
+                        type(self)._singleton.cuda_rendered_result = array
 
                 # Fill the buffer due to multi-thread
                 self.engine.graphicsEngine.renderFrame()
@@ -109,7 +109,7 @@ class BaseCamera(ImageBuffer):
 
     def get_pixels_array(self, base_object, clip=True) -> np.ndarray:
         self.track(base_object)
-        if type(self)._singleton.enable_cuda:
+        if self.enable_cuda:
             assert type(self)._singleton.cuda_rendered_result is not None
             ret = type(self)._singleton.cuda_rendered_result[..., :-1]
         else:
@@ -166,7 +166,7 @@ class BaseCamera(ImageBuffer):
     def cuda_array(self):
         assert type(self)._singleton.mapped
         return cp.ndarray(
-            shape=(type(self)._singleton.cuda_shape[0], type(self)._singleton.cuda_shape[1], 4),
+            shape=(type(self)._singleton.cuda_shape[1], type(self)._singleton.cuda_shape[0], 4),
             dtype=type(self)._singleton.cuda_dtype,
             strides=type(self)._singleton.cuda_strides,
             order=type(self)._singleton.cuda_order,

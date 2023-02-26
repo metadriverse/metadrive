@@ -1,4 +1,5 @@
 from OpenGL.GL import *  # noqa F403
+import cupy as cp
 from cuda import cudart
 
 
@@ -28,3 +29,7 @@ def check_cudart_err(args):
         raise RuntimeError(format_cudart_err(err))
 
     return ret
+
+
+def restore_channel_and_shape(cuda_image):
+    return cuda_image[..., ::-1][::-1]
