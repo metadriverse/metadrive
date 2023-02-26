@@ -1,21 +1,19 @@
-from cuda import cudart
+import time
 
 import cupy as cp
-from panda3d.core import NodePath, GraphicsOutput, Texture
-import cupy as cp
+import cv2
 import numpy as np
+import torch
 from OpenGL.GL import *  # noqa F403
 from cuda import cudart
 from cuda.cudart import cudaGraphicsRegisterFlags
+from panda3d.core import GraphicsOutput, Texture, GraphicsStateGuardianBase
 from panda3d.core import loadPrcFileData
-from metadrive.component.pgblock.curve import Curve
-from metadrive.component.pgblock.first_block import FirstPGBlock
-from metadrive.component.pgblock.intersection import InterSection
-from metadrive.component.road_network.node_road_network import NodeRoadNetwork
-from metadrive.tests.vis_block.vis_block_base import TestBlock, BKG_COLOR
-from OpenGL.GL import glGenBuffers
+from torch.utils.dlpack import from_dlpack
 
-# loadPrcFileData("", "win-size {} {}".format(1024, 1024))
+from metadrive.engine.asset_loader import AssetLoader
+from metadrive.tests.vis_block.vis_block_base import TestBlock
+
 
 # require:
 # 1. pip install cupy-cuda12x
@@ -55,56 +53,47 @@ def check_cudart_err(args):
 
 
 class CUDATest:
-    def __init__(self, window_type="onscreen", buffer_id=1, shape=(800, 600)):
+    def __init__(self, window_type="onscreen", shape=None, test_ram_image=False):
+        assert shape is not None
         self.engine = engine = TestBlock(window_type=window_type)
-        from metadrive.engine.asset_loader import initialize_asset_loader
 
-        initialize_asset_loader(engine)
+        model = self.engine.loader.loadModel(AssetLoader.file_path("models", "box.bam"))
+        model.setColor(0.3, 0.5, 0.8)
+        model.reparentTo(engine.worldNP)
 
-        global_network = NodeRoadNetwork()
-        first = FirstPGBlock(global_network, 3.0, 2, engine.render, engine.world, 20)
-
-        intersection = InterSection(3, first.get_socket(0), global_network, 1)
-        print(intersection.construct_block(engine.render, engine.world))
-
-        id = 4
-        for socket_idx in range(intersection.SOCKET_NUM):
-            block = Curve(id, intersection.get_socket(socket_idx), global_network, id)
-            block.construct_block(engine.render, engine.world)
-            id += 1
-
-        intersection = InterSection(id, block.get_socket(0), global_network, 1)
-        intersection.construct_block(engine.render, engine.world)
-
-        engine.show_bounding_box(global_network)
+        self.engine.cam.setPos(0, 0, 30)
+        self.engine.cam.lookAt(0, 0, 0)
 
         # buffer property
-        self._dtype = np.uint32
+        self._dtype = np.uint8
         self._shape = shape
         self._strides = None
         self._order = "C"
 
-        self._gl_buffer = buffer_id
+        self._gl_buffer = None
         self._flags = cudaGraphicsRegisterFlags.cudaGraphicsRegisterFlagsNone
 
-        self._graphics_ressource = None
+        self._graphics_resource = None
         self._cuda_buffer = None
 
         # # make buffer
-        # self.texture = Texture()
-        # self.buffer = self.engine.win.makeTextureBuffer("camera", *shape)
-        # self.buffer.addRenderTexture(self.texture, GraphicsOutput.RTMBindOrCopy)
-        #
-        # self.origin = NodePath("new render")
-        # # this takes care of setting up their camera properly
-        # self.cam = self.engine.makeCamera(self.buffer, clearColor=BKG_COLOR)
-        # self.cam.reparentTo(self.engine.worldNP)
+        # self.texture = self.engine.loader.loadTexture("/home/shady/Desktop/test.jpg")
+        self.texture = Texture()
+        # self.texture.setMinfilter(Texture.FTLinear)
+        # self.texture.setFormat(Texture.FRgba32)
+        mode = GraphicsOutput.RTMCopyRam if test_ram_image else GraphicsOutput.RTMBindOrCopy
+        self.engine.win.addRenderTexture(self.texture, mode)
+
+        self.texture_identifier = None
+        self.gsg = GraphicsStateGuardianBase.getDefaultGsg()
+        self.texture_context_future = self.texture.prepare(self.gsg.prepared_objects)
+        self.new_cuda_mem_ptr = None
 
     @property
     def cuda_array(self):
         assert self.mapped
         return cp.ndarray(
-            shape=self._shape,
+            shape=(self._shape[1], self._shape[0], self._shape[-1]),
             dtype=self._dtype,
             strides=self._strides,
             order=self._order,
@@ -123,11 +112,11 @@ class CUDATest:
     @property
     def graphics_resource(self):
         assert self.registered
-        return self._graphics_ressource
+        return self._graphics_resource
 
     @property
     def registered(self):
-        return self._graphics_ressource is not None
+        return self._graphics_resource is not None
 
     @property
     def mapped(self):
@@ -144,31 +133,48 @@ class CUDATest:
         self.unregister()
 
     def register(self):
+        assert self.texture_identifier is not None
         if self.registered:
-            return self._graphics_ressource
-        self._graphics_ressource = check_cudart_err(cudart.cudaGraphicsGLRegisterBuffer(self._gl_buffer, self._flags))
-        return self._graphics_ressource
+            return self._graphics_resource
+        self._graphics_resource = check_cudart_err(
+            cudart.cudaGraphicsGLRegisterImage(
+                self.texture_identifier, GL_TEXTURE_2D, cudaGraphicsRegisterFlags.cudaGraphicsRegisterFlagsReadOnly
+            )
+        )
+        return self._graphics_resource
 
     def unregister(self):
         if not self.registered:
             return self
         self.unmap()
-        self._graphics_ressource = check_cudart_err(cudart.cudaGraphicsUnregisterResource(self._graphics_ressource))
+        self._graphics_resource = check_cudart_err(cudart.cudaGraphicsUnregisterResource(self._graphics_resource))
         return self
 
-    def map(self, stream=None):
+    def map(self, stream=0):
         if not self.registered:
             raise RuntimeError("Cannot map an unregistered buffer.")
         if self.mapped:
             return self._cuda_buffer
+        # self.engine.graphicsEngine.renderFrame()
+        check_cudart_err(cudart.cudaGraphicsMapResources(1, self._graphics_resource, stream))
+        array = check_cudart_err(cudart.cudaGraphicsSubResourceGetMappedArray(self.graphics_resource, 0, 0))
+        channelformat, cudaextent, flag = check_cudart_err(cudart.cudaArrayGetInfo(array))
 
-        check_cudart_err(cudart.cudaGraphicsMapResources(1, self._graphics_ressource, stream))
-        ptr, size = check_cudart_err(cudart.cudaGraphicsResourceGetMappedPointer(self._graphics_ressource))
-        # array = check_cudart_err(cudart.cudaGraphicsSubResourceGetMappedArray(self.graphics_resource, 0,0))
-        info = cudart.cudaPointerGetAttributes(ptr)
-
-        self._cuda_buffer = cp.cuda.MemoryPointer(cp.cuda.UnownedMemory(ptr, size, self), 0)
-
+        depth = 1
+        byte = 4  # four channel
+        if self.new_cuda_mem_ptr is None:
+            success, self.new_cuda_mem_ptr = cudart.cudaMalloc(cudaextent.height * cudaextent.width * byte * depth)
+        check_cudart_err(
+            cudart.cudaMemcpy2DFromArray(
+                self.new_cuda_mem_ptr, cudaextent.width * byte * depth, array, 0, 0, cudaextent.width * byte * depth,
+                cudaextent.height, cudart.cudaMemcpyKind.cudaMemcpyDeviceToDevice
+            )
+        )
+        if self._cuda_buffer is None:
+            self._cuda_buffer = cp.cuda.MemoryPointer(
+                cp.cuda.UnownedMemory(self.new_cuda_mem_ptr, cudaextent.width * depth * byte * cudaextent.height, self),
+                0
+            )
         return self.cuda_array
 
     def unmap(self, stream=None):
@@ -177,36 +183,46 @@ class CUDATest:
         if not self.mapped:
             return self
 
-        self._cuda_buffer = check_cudart_err(cudart.cudaGraphicsUnmapResources(1, self._graphics_ressource, stream))
+        self._cuda_buffer = check_cudart_err(cudart.cudaGraphicsUnmapResources(1, self._graphics_resource, stream))
 
         return self
 
     def step(self):
         self.engine.taskMgr.step()
-        if not self.registered:
+        if not self.registered and self.texture_context_future.done():
+            self.texture_identifier = self.texture_context_future.result().getNativeId()
             self.register()
 
 
 if __name__ == "__main__":
-    # loadPrcFileData("", "threading-model Cull/Draw")
-    #
-    env = CUDATest(window_type="offscreen", buffer_id=9, shape=(18, ))
+    win_size = (1920, 1080)
+    loadPrcFileData("", "textures-power-2 none")
+    loadPrcFileData("", "win-size {} {}".format(*win_size))
+    test_ram_image = False
+    render = False
+    env = CUDATest(window_type="offscreen", shape=(*win_size, 4), test_ram_image=test_ram_image)
     env.step()
     env.step()
-
-    for _ in range(10000000):
+    start = time.time()
+    for s in range(10000000):
         env.step()
-        with env as array:
-            ret = array
-            np_array = cp.asnumpy(ret)
+        if test_ram_image:
+            origin_img = env.texture
+            img = np.frombuffer(origin_img.getRamImage().getData(), dtype=np.uint8)
+            img = img.reshape((origin_img.getYSize(), origin_img.getXSize(), 4))
+            img = img
+            torch_img = torch.from_numpy(img)
+            if render:
+                cv2.imshow("win", img)
+                cv2.waitKey(1)
+        else:
+            with env as array:
+                ret = from_dlpack(array.toDlpack())
+            if render:
+                np_array = cp.asnumpy(ret)[::-1]
+                cv2.imshow("win", np_array)
+                cv2.waitKey(1)
+        if s % 2000 == 0 and s != 0:
+            print("FPS: {}".format(s / (time.time() - start)))
+
         pass
-        # if ret is not None:
-        #     np_ret = cp.asnumpy(ret)
-        # if ret is not None:
-        #     image = torch.as_tensor(ret, device='cpu')
-        # img = np.frombuffer(env.my_texture.getRamImage().getData(), dtype=np.uint8)
-        # img = img.reshape((env.my_texture.getYSize(), env.my_texture.getXSize(), 4))
-        # img = img[::-1]
-        # img = img[..., :-1]
-        # cv2.imshow("window", img)
-        # cv2.waitKey(1)
