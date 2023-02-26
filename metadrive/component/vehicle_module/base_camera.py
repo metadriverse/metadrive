@@ -1,4 +1,17 @@
 import numpy as np
+import logging
+
+from metadrive.utils.cuda import check_cudart_err
+
+_cuda_enable = True
+try:
+    import cupy as cp
+    from OpenGL.GL import GL_TEXTURE_2D  # noqa F403
+    from cuda import cudart
+    from cuda.cudart import cudaGraphicsRegisterFlags
+    from panda3d.core import GraphicsOutput, Texture, GraphicsStateGuardianBase, DisplayRegionDrawCallbackData
+except ImportError:
+    _cuda_enable = False
 from panda3d.core import Vec3
 
 from metadrive.engine.core.image_buffer import ImageBuffer
@@ -28,8 +41,58 @@ class BaseCamera(ImageBuffer):
             super(BaseCamera, self).__init__(self.BUFFER_W, self.BUFFER_H, Vec3(0.0, 0.8, 1.5), self.BKG_COLOR)
             type(self)._singleton = self
             self.init_num = 1
+            self._enable_cuda = self.engine.global_config["image_on_cuda"]
+
+            width = self.BUFFER_W
+            height = self.BUFFER_H
+            if (width > 100 or height > 100) and not self.enable_cuda:
+                # Too large height or width will cause corruption in Mac.
+                logging.warning("You may using too large buffer! The height is {}, and width is {}. "
+                                "It may lower the sample efficiency! Considering reduce buffer size or using cuda image by"
+                                " set [image_on_cuda=True].".format(height, width))
+
+            if self.enable_cuda:
+                assert _cuda_enable, "Can not enable cuda rendering pipeline"
+
+                # returned tensor property
+                self.cuda_dtype = np.uint8
+                self.cuda_shape = (self.BUFFER_W, self.BUFFER_H)
+                self.cuda_strides = None
+                self.cuda_order = "C"
+
+                self.cuda_graphics_resource = None
+                self._cuda_buffer = None
+
+                # make texture
+                self.cuda_texture = Texture()
+                self.engine.win.addRenderTexture(self.cuda_texture, GraphicsOutput.RTMBindOrCopy)
+
+                def _callback_func(cbdata: DisplayRegionDrawCallbackData):
+                    # print("DRAW CALLBACK!!!!!!!!!!!!!!!11")
+                    cbdata.upcall()
+                    if not self.registered and self.texture_context_future.done():
+                        self.register()
+                    with self as array:
+                        self.cuda_rendered_result = array
+
+                # Fill the buffer due to multi-thread
+                self.engine.graphicsEngine.renderFrame()
+                self.engine.graphicsEngine.renderFrame()
+                self.engine.graphicsEngine.renderFrame()
+                self.cam.node().getDisplayRegion(0).setDrawCallback(_callback_func)
+
+                self.gsg = GraphicsStateGuardianBase.getDefaultGsg()
+                self.texture_context_future = self.cuda_texture.prepare(self.gsg.prepared_objects)
+                self.cuda_texture_identifier = None
+                self.new_cuda_mem_ptr = None
+                self.cuda_rendered_result = None
+
         else:
             type(self)._singleton.init_num += 1
+
+    @property
+    def enable_cuda(self):
+        return type(self)._singleton._enable_cuda
 
     def get_image(self, base_object):
         """
@@ -46,7 +109,11 @@ class BaseCamera(ImageBuffer):
 
     def get_pixels_array(self, base_object, clip=True) -> np.ndarray:
         self.track(base_object)
-        ret = type(self)._singleton.get_rgb_array()
+        if type(self)._singleton.enable_cuda:
+            assert type(self)._singleton.cuda_rendered_result is not None
+            ret = type(self)._singleton.cuda_rendered_result[..., :-1]
+        else:
+            ret = type(self)._singleton.get_rgb_array()
         if self.engine.global_config["vehicle_config"]["rgb_to_grayscale"]:
             ret = np.dot(ret[..., :3], [0.299, 0.587, 0.114])
         if not clip:
@@ -84,3 +151,110 @@ class BaseCamera(ImageBuffer):
         if base_object is not None:
             self.attached_object = base_object
             type(self)._singleton.origin.reparentTo(base_object.origin)
+
+    def __del__(self):
+        if self.enable_cuda:
+            type(self)._singleton.unregister()
+        type(self)._singleton = None
+        super(BaseCamera, self).__del__()
+
+    """
+    Following functions are cuda support
+    """
+
+    @property
+    def cuda_array(self):
+        assert type(self)._singleton.mapped
+        return cp.ndarray(
+            shape=(type(self)._singleton.cuda_shape[0], type(self)._singleton.cuda_shape[1], 4),
+            dtype=type(self)._singleton.cuda_dtype,
+            strides=type(self)._singleton.cuda_strides,
+            order=type(self)._singleton.cuda_order,
+            memptr=type(self)._singleton._cuda_buffer)
+
+    @property
+    def cuda_buffer(self):
+        assert type(self)._singleton.mapped
+        return type(self)._singleton._cuda_buffer
+
+    @property
+    def graphics_resource(self):
+        assert type(self)._singleton.registered
+        return type(self)._singleton.cuda_graphics_resource
+
+    @property
+    def registered(self):
+        return type(self)._singleton.cuda_graphics_resource is not None
+
+    @property
+    def mapped(self):
+        return type(self)._singleton._cuda_buffer is not None
+
+    def __enter__(self):
+        return type(self)._singleton.map()
+
+    def __exit__(self, exc_type, exc_value, trace):
+        type(self)._singleton.unmap()
+        return False
+
+    def register(self):
+        type(self)._singleton.cuda_texture_identifier = type(
+            self)._singleton.texture_context_future.result().getNativeId()
+        assert type(self)._singleton.cuda_texture_identifier is not None
+        if type(self)._singleton.registered:
+            return type(self)._singleton.cuda_graphics_resource
+        type(self)._singleton.cuda_graphics_resource = check_cudart_err(
+            cudart.cudaGraphicsGLRegisterImage(
+                type(self)._singleton.cuda_texture_identifier, GL_TEXTURE_2D,
+                cudaGraphicsRegisterFlags.cudaGraphicsRegisterFlagsReadOnly
+            )
+        )
+        return type(self)._singleton.cuda_graphics_resource
+
+    def unregister(self):
+        if not type(self)._singleton.registered:
+            return type(self)._singleton
+        type(self)._singleton.unmap()
+        type(self)._singleton.cuda_graphics_resource = check_cudart_err(
+            cudart.cudaGraphicsUnregisterResource(type(self)._singleton.cuda_graphics_resource))
+        return self
+
+    def map(self, stream=0):
+        if not type(self)._singleton.registered:
+            raise RuntimeError("Cannot map an unregistered buffer.")
+        if type(self)._singleton.mapped:
+            return type(self)._singleton._cuda_buffer
+        # self.engine.graphicsEngine.renderFrame()
+        check_cudart_err(cudart.cudaGraphicsMapResources(1, type(self)._singleton.cuda_graphics_resource, stream))
+        array = check_cudart_err(
+            cudart.cudaGraphicsSubResourceGetMappedArray(type(self)._singleton.graphics_resource, 0, 0))
+        channelformat, cudaextent, flag = check_cudart_err(cudart.cudaArrayGetInfo(array))
+
+        depth = 1
+        byte = 4  # four channel
+        if type(self)._singleton.new_cuda_mem_ptr is None:
+            success, type(self)._singleton.new_cuda_mem_ptr = cudart.cudaMalloc(
+                cudaextent.height * cudaextent.width * byte * depth)
+        check_cudart_err(
+            cudart.cudaMemcpy2DFromArray(
+                type(self)._singleton.new_cuda_mem_ptr, cudaextent.width * byte * depth, array, 0, 0,
+                                                        cudaextent.width * byte * depth,
+                cudaextent.height, cudart.cudaMemcpyKind.cudaMemcpyDeviceToDevice
+            )
+        )
+        if type(self)._singleton._cuda_buffer is None:
+            type(self)._singleton._cuda_buffer = cp.cuda.MemoryPointer(
+                cp.cuda.UnownedMemory(type(self)._singleton.new_cuda_mem_ptr,
+                                      cudaextent.width * depth * byte * cudaextent.height, type(self)._singleton),
+                0
+            )
+        return type(self)._singleton.cuda_array
+
+    def unmap(self, stream=None):
+        if not type(self)._singleton.registered:
+            raise RuntimeError("Cannot unmap an unregistered buffer.")
+        if not type(self)._singleton.mapped:
+            return type(self)._singleton
+        type(self)._singleton._cuda_buffer = check_cudart_err(
+            cudart.cudaGraphicsUnmapResources(1, type(self)._singleton.cuda_graphics_resource, stream))
+        return type(self)._singleton

@@ -138,6 +138,8 @@ BASE_DEFAULT_CONFIG = dict(
     pstats=False,
     # if need running in offscreen
     offscreen_render=False,
+    # this is an advanced feature for accessing image with moving them to ram!
+    image_on_cuda=False,
     # accelerate the lidar perception
     _disable_detector_mask=False,
     # clip rgb to (0, 1)

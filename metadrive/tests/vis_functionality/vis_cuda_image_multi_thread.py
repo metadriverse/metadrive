@@ -71,7 +71,6 @@ class CUDATest:
         self._order = "C"
 
         self._gl_buffer = None
-        self._flags = cudaGraphicsRegisterFlags.cudaGraphicsRegisterFlagsNone
 
         self._graphics_resource = None
         self._cuda_buffer = None

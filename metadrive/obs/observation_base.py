@@ -15,3 +15,8 @@ class ObservationBase(ABC):
 
     def reset(self, env, vehicle=None):
         pass
+
+    @property
+    def global_config(self):
+        from metadrive.engine.engine_utils import get_global_config
+        return get_global_config()

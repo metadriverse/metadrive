@@ -1,9 +1,15 @@
 import gym
 import numpy as np
-from metadrive.engine.engine_utils import get_engine
+
 from metadrive.component.vehicle.base_vehicle import BaseVehicle
 from metadrive.obs.observation_base import ObservationBase
 from metadrive.obs.state_obs import StateObservation
+
+_cuda_enable = True
+try:
+    import cupy as cp
+except ImportError:
+    _cuda_enable = False
 
 
 class ImageStateObservation(ObservationBase):
@@ -40,16 +46,21 @@ class ImageObservation(ObservationBase):
     STACK_SIZE = 3  # use continuous 3 image as the input
 
     def __init__(self, config, image_source: str, clip_rgb: bool):
+        self.enable_cuda = self.global_config["image_on_cuda"]
+        if self.enable_cuda:
+            assert _cuda_enable, "CuPy is not enabled"
         self.STACK_SIZE = config["stack_size"]
         self.image_source = image_source
         super(ImageObservation, self).__init__(config)
         self.rgb_clip = clip_rgb
         self.state = np.zeros(self.observation_space.shape, dtype=np.float32)
+        if self.enable_cuda:
+            self.state = cp.asarray(self.state)
 
     @property
     def observation_space(self):
-        shape = (self.config[self.image_source][1], self.config[self.image_source][0]
-                 ) + ((self.STACK_SIZE, ) if self.config["rgb_to_grayscale"] else (3, self.STACK_SIZE))
+        shape = (self.config[self.image_source][0], self.config[self.image_source][1]
+                 ) + ((self.STACK_SIZE,) if self.config["rgb_to_grayscale"] else (3, self.STACK_SIZE))
         if self.rgb_clip:
             return gym.spaces.Box(-0.0, 1.0, shape=shape, dtype=np.float32)
         else:
@@ -57,7 +68,7 @@ class ImageObservation(ObservationBase):
 
     def observe(self, vehicle):
         new_obs = vehicle.image_sensors[self.image_source].get_pixels_array(vehicle, self.rgb_clip)
-        self.state = np.roll(self.state, -1, axis=-1)
+        self.state = cp.roll(self.state, -1, axis=-1) if self.enable_cuda else np.roll(self.state, -1, axis=-1)
         self.state[..., -1] = new_obs
         return self.state
 
@@ -72,3 +83,5 @@ class ImageObservation(ObservationBase):
         :return: None
         """
         self.state = np.zeros(self.observation_space.shape, dtype=np.float32)
+        if self.enable_cuda:
+            self.state = cp.asarray(self.state)

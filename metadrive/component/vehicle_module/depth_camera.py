@@ -1,4 +1,5 @@
 from panda3d.core import Shader, RenderState, ShaderAttrib, GeoMipTerrain
+import numpy as np
 
 from metadrive.component.vehicle_module.base_camera import BaseCamera
 from metadrive.constants import CamMask
