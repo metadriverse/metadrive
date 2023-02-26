@@ -61,8 +61,9 @@ class CUDATest:
         model.setColor(0.3, 0.5, 0.8)
         model.reparentTo(engine.worldNP)
 
-        self.engine.cam.setPos(0, 0, 30)
+        self.engine.cam.setPos(3, 5, 10)
         self.engine.cam.lookAt(0, 0, 0)
+
 
         # buffer property
         self._dtype = np.uint8
@@ -222,7 +223,7 @@ if __name__ == "__main__":
                 np_array = cp.asnumpy(ret)[::-1]
                 cv2.imshow("win", np_array)
                 cv2.waitKey(1)
-        if s % 2000 == 0 and s != 0:
+        if s % 10000 == 0 and s != 0:
             print("FPS: {}".format(s / (time.time() - start)))
 
         pass

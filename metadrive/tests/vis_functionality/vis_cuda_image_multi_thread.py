@@ -7,7 +7,7 @@ import torch
 from OpenGL.GL import *  # noqa F403
 from cuda import cudart
 from cuda.cudart import cudaGraphicsRegisterFlags
-from panda3d.core import GraphicsOutput, Texture, GraphicsStateGuardianBase
+from panda3d.core import GraphicsOutput, Texture, GraphicsStateGuardianBase, DisplayRegionDrawCallbackData
 from panda3d.core import loadPrcFileData
 from torch.utils.dlpack import from_dlpack
 
@@ -61,7 +61,7 @@ class CUDATest:
         model.setColor(0.3, 0.5, 0.8)
         model.reparentTo(engine.worldNP)
 
-        self.engine.cam.setPos(0, 0, 30)
+        self.engine.cam.setPos(3, 5, 10)
         self.engine.cam.lookAt(0, 0, 0)
 
         # buffer property
@@ -84,10 +84,24 @@ class CUDATest:
         mode = GraphicsOutput.RTMCopyRam if test_ram_image else GraphicsOutput.RTMBindOrCopy
         self.engine.win.addRenderTexture(self.texture, mode)
 
+        def _callback_func(cbdata: DisplayRegionDrawCallbackData):
+            cbdata.upcall()
+            if not self.registered and self.texture_context_future.done():
+                self.register()
+            with self as array:
+                self.current_data = array
+
+        self.engine.graphicsEngine.renderFrame()
+        self.engine.graphicsEngine.renderFrame()
+        self.engine.graphicsEngine.renderFrame()
+        self.engine.cam.node().getDisplayRegion(0).setDrawCallback(_callback_func)
+
         self.texture_identifier = None
         self.gsg = GraphicsStateGuardianBase.getDefaultGsg()
         self.texture_context_future = self.texture.prepare(self.gsg.prepared_objects)
         self.new_cuda_mem_ptr = None
+
+        self.current_data = None
 
     @property
     def cuda_array(self):
@@ -97,8 +111,7 @@ class CUDATest:
             dtype=self._dtype,
             strides=self._strides,
             order=self._order,
-            memptr=self._cuda_buffer,
-        )
+            memptr=self._cuda_buffer)
 
     @property
     def gl_buffer(self):
@@ -133,6 +146,7 @@ class CUDATest:
         self.unregister()
 
     def register(self):
+        self.texture_identifier = self.texture_context_future.result().getNativeId()
         assert self.texture_identifier is not None
         if self.registered:
             return self._graphics_resource
@@ -189,20 +203,21 @@ class CUDATest:
 
     def step(self):
         self.engine.taskMgr.step()
-        if not self.registered and self.texture_context_future.done():
-            self.texture_identifier = self.texture_context_future.result().getNativeId()
-            self.register()
 
 
 if __name__ == "__main__":
     win_size = (1920, 1080)
+    loadPrcFileData("", "threading-model Cull/Draw")
     loadPrcFileData("", "textures-power-2 none")
     loadPrcFileData("", "win-size {} {}".format(*win_size))
     test_ram_image = False
     render = False
     env = CUDATest(window_type="offscreen", shape=(*win_size, 4), test_ram_image=test_ram_image)
-    env.step()
-    env.step()
+
+    # important
+    env.engine.graphicsEngine.renderFrame()
+    env.engine.graphicsEngine.renderFrame()
+
     start = time.time()
     for s in range(10000000):
         env.step()
@@ -216,13 +231,10 @@ if __name__ == "__main__":
                 cv2.imshow("win", img)
                 cv2.waitKey(1)
         else:
-            with env as array:
-                ret = from_dlpack(array.toDlpack())
+            ret = from_dlpack(env.current_data.toDlpack())
             if render:
                 np_array = cp.asnumpy(ret)[::-1]
                 cv2.imshow("win", np_array)
                 cv2.waitKey(1)
-        if s % 2000 == 0 and s != 0:
+        if s % 10000 == 0 and s != 0:
             print("FPS: {}".format(s / (time.time() - start)))
-
-        pass
