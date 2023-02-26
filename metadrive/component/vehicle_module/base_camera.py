@@ -47,9 +47,11 @@ class BaseCamera(ImageBuffer):
             height = self.BUFFER_H
             if (width > 100 or height > 100) and not self.enable_cuda:
                 # Too large height or width will cause corruption in Mac.
-                logging.warning("You may using too large buffer! The height is {}, and width is {}. "
-                                "It may lower the sample efficiency! Considering reduce buffer size or using cuda image by"
-                                " set [image_on_cuda=True].".format(height, width))
+                logging.warning(
+                    "You may using too large buffer! The height is {}, and width is {}. "
+                    "It may lower the sample efficiency! Considering reduce buffer size or using cuda image by"
+                    " set [image_on_cuda=True].".format(height, width)
+                )
 
             if self.enable_cuda:
                 assert _cuda_enable, "Can not enable cuda rendering pipeline"
@@ -170,7 +172,8 @@ class BaseCamera(ImageBuffer):
             dtype=type(self)._singleton.cuda_dtype,
             strides=type(self)._singleton.cuda_strides,
             order=type(self)._singleton.cuda_order,
-            memptr=type(self)._singleton._cuda_buffer)
+            memptr=type(self)._singleton._cuda_buffer
+        )
 
     @property
     def cuda_buffer(self):
@@ -198,8 +201,8 @@ class BaseCamera(ImageBuffer):
         return False
 
     def register(self):
-        type(self)._singleton.cuda_texture_identifier = type(
-            self)._singleton.texture_context_future.result().getNativeId()
+        type(self)._singleton.cuda_texture_identifier = type(self
+                                                             )._singleton.texture_context_future.result().getNativeId()
         assert type(self)._singleton.cuda_texture_identifier is not None
         if type(self)._singleton.registered:
             return type(self)._singleton.cuda_graphics_resource
@@ -215,7 +218,8 @@ class BaseCamera(ImageBuffer):
         if type(self)._singleton.registered:
             type(self)._singleton.unmap()
             type(self)._singleton.cuda_graphics_resource = check_cudart_err(
-                cudart.cudaGraphicsUnregisterResource(type(self)._singleton.cuda_graphics_resource))
+                cudart.cudaGraphicsUnregisterResource(type(self)._singleton.cuda_graphics_resource)
+            )
 
     def map(self, stream=0):
         if not type(self)._singleton.registered:
@@ -225,26 +229,28 @@ class BaseCamera(ImageBuffer):
         # self.engine.graphicsEngine.renderFrame()
         check_cudart_err(cudart.cudaGraphicsMapResources(1, type(self)._singleton.cuda_graphics_resource, stream))
         array = check_cudart_err(
-            cudart.cudaGraphicsSubResourceGetMappedArray(type(self)._singleton.graphics_resource, 0, 0))
+            cudart.cudaGraphicsSubResourceGetMappedArray(type(self)._singleton.graphics_resource, 0, 0)
+        )
         channelformat, cudaextent, flag = check_cudart_err(cudart.cudaArrayGetInfo(array))
 
         depth = 1
         byte = 4  # four channel
         if type(self)._singleton.new_cuda_mem_ptr is None:
             success, type(self)._singleton.new_cuda_mem_ptr = cudart.cudaMalloc(
-                cudaextent.height * cudaextent.width * byte * depth)
+                cudaextent.height * cudaextent.width * byte * depth
+            )
         check_cudart_err(
             cudart.cudaMemcpy2DFromArray(
                 type(self)._singleton.new_cuda_mem_ptr, cudaextent.width * byte * depth, array, 0, 0,
-                                                        cudaextent.width * byte * depth,
-                cudaextent.height, cudart.cudaMemcpyKind.cudaMemcpyDeviceToDevice
+                cudaextent.width * byte * depth, cudaextent.height, cudart.cudaMemcpyKind.cudaMemcpyDeviceToDevice
             )
         )
         if type(self)._singleton._cuda_buffer is None:
             type(self)._singleton._cuda_buffer = cp.cuda.MemoryPointer(
-                cp.cuda.UnownedMemory(type(self)._singleton.new_cuda_mem_ptr,
-                                      cudaextent.width * depth * byte * cudaextent.height, type(self)._singleton),
-                0
+                cp.cuda.UnownedMemory(
+                    type(self)._singleton.new_cuda_mem_ptr, cudaextent.width * depth * byte * cudaextent.height,
+                    type(self)._singleton
+                ), 0
             )
         return type(self)._singleton.cuda_array
 
@@ -254,5 +260,7 @@ class BaseCamera(ImageBuffer):
         if not type(self)._singleton.mapped:
             return type(self)._singleton
         type(self)._singleton._cuda_buffer = check_cudart_err(
-            cudart.cudaGraphicsUnmapResources(1, type(self)._singleton.cuda_graphics_resource, stream))
+            cudart.cudaGraphicsUnmapResources(1,
+                                              type(self)._singleton.cuda_graphics_resource, stream)
+        )
         return type(self)._singleton

@@ -14,7 +14,6 @@ from torch.utils.dlpack import from_dlpack
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.tests.vis_block.vis_block_base import TestBlock, BKG_COLOR
 
-
 # require:
 # 1. pip install cupy-cuda12x
 # 2. CUDA-Python
@@ -116,7 +115,8 @@ class CUDATest:
             dtype=self._dtype,
             strides=self._strides,
             order=self._order,
-            memptr=self._cuda_buffer)
+            memptr=self._cuda_buffer
+        )
 
     @property
     def gl_buffer(self):

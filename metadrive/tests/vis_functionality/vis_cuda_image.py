@@ -14,7 +14,6 @@ from torch.utils.dlpack import from_dlpack
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.tests.vis_block.vis_block_base import TestBlock
 
-
 # require:
 # 1. pip install cupy-cuda12x
 # 2. CUDA-Python
@@ -63,7 +62,6 @@ class CUDATest:
 
         self.engine.cam.setPos(3, 5, 10)
         self.engine.cam.lookAt(0, 0, 0)
-
 
         # buffer property
         self._dtype = np.uint8

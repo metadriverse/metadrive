@@ -49,7 +49,7 @@ class MainCamera:
         self.camera_queue = None
         self.camera_dist = camera_dist
         self.camera_pitch = -engine.global_config["camera_pitch"] if engine.global_config["camera_pitch"
-                                                                     ] is not None else None
+                                                                                          ] is not None else None
         self.camera_smooth = engine.global_config["camera_smooth"]
         self.direction_running_mean = deque(maxlen=20 if self.camera_smooth else 1)
         self.world_light = self.engine.world_light  # light chases the chase camera, when not using global light
@@ -431,7 +431,8 @@ class MainCamera:
             dtype=self.cuda_dtype,
             strides=self.cuda_strides,
             order=self.cuda_order,
-            memptr=self._cuda_buffer)
+            memptr=self._cuda_buffer
+        )
 
     @property
     def cuda_buffer(self):
@@ -465,8 +466,7 @@ class MainCamera:
             return self.cuda_graphics_resource
         self.cuda_graphics_resource = check_cudart_err(
             cudart.cudaGraphicsGLRegisterImage(
-                self.cuda_texture_identifier, GL_TEXTURE_2D,
-                cudaGraphicsRegisterFlags.cudaGraphicsRegisterFlagsReadOnly
+                self.cuda_texture_identifier, GL_TEXTURE_2D, cudaGraphicsRegisterFlags.cudaGraphicsRegisterFlagsReadOnly
             )
         )
         return self.cuda_graphics_resource
@@ -475,7 +475,8 @@ class MainCamera:
         if self.registered:
             self.unmap()
             self.cuda_graphics_resource = check_cudart_err(
-                cudart.cudaGraphicsUnregisterResource(self.cuda_graphics_resource))
+                cudart.cudaGraphicsUnregisterResource(self.cuda_graphics_resource)
+            )
 
     def map(self, stream=0):
         if not self.registered:
@@ -484,26 +485,22 @@ class MainCamera:
             return self._cuda_buffer
         # self.engine.graphicsEngine.renderFrame()
         check_cudart_err(cudart.cudaGraphicsMapResources(1, self.cuda_graphics_resource, stream))
-        array = check_cudart_err(
-            cudart.cudaGraphicsSubResourceGetMappedArray(self.graphics_resource, 0, 0))
+        array = check_cudart_err(cudart.cudaGraphicsSubResourceGetMappedArray(self.graphics_resource, 0, 0))
         channelformat, cudaextent, flag = check_cudart_err(cudart.cudaArrayGetInfo(array))
 
         depth = 1
         byte = 4  # four channel
         if self.new_cuda_mem_ptr is None:
-            success, self.new_cuda_mem_ptr = cudart.cudaMalloc(
-                cudaextent.height * cudaextent.width * byte * depth)
+            success, self.new_cuda_mem_ptr = cudart.cudaMalloc(cudaextent.height * cudaextent.width * byte * depth)
         check_cudart_err(
             cudart.cudaMemcpy2DFromArray(
-                self.new_cuda_mem_ptr, cudaextent.width * byte * depth, array, 0, 0,
-                                       cudaextent.width * byte * depth,
+                self.new_cuda_mem_ptr, cudaextent.width * byte * depth, array, 0, 0, cudaextent.width * byte * depth,
                 cudaextent.height, cudart.cudaMemcpyKind.cudaMemcpyDeviceToDevice
             )
         )
         if self._cuda_buffer is None:
             self._cuda_buffer = cp.cuda.MemoryPointer(
-                cp.cuda.UnownedMemory(self.new_cuda_mem_ptr,
-                                      cudaextent.width * depth * byte * cudaextent.height, self),
+                cp.cuda.UnownedMemory(self.new_cuda_mem_ptr, cudaextent.width * depth * byte * cudaextent.height, self),
                 0
             )
         return self.cuda_array
@@ -513,6 +510,5 @@ class MainCamera:
             raise RuntimeError("Cannot unmap an unregistered buffer.")
         if not self.mapped:
             return self
-        self._cuda_buffer = check_cudart_err(
-            cudart.cudaGraphicsUnmapResources(1, self.cuda_graphics_resource, stream))
+        self._cuda_buffer = check_cudart_err(cudart.cudaGraphicsUnmapResources(1, self.cuda_graphics_resource, stream))
         return self
