@@ -199,6 +199,8 @@ class BaseEnv(gym.Env):
         self.is_multi_agent = self.config["is_multi_agent"]
         if not self.is_multi_agent:
             assert self.num_agents == 1
+        else:
+            assert not self.config["image_on_cuda"], "Image on cuda don't support Multi-agent!"
         assert isinstance(self.num_agents, int) and (self.num_agents > 0 or self.num_agents == -1)
 
         # observation and action space

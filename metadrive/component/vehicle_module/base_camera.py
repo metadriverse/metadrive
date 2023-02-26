@@ -65,7 +65,7 @@ class BaseCamera(ImageBuffer):
 
                 # make texture
                 self.cuda_texture = Texture()
-                self.engine.win.addRenderTexture(self.cuda_texture, GraphicsOutput.RTMBindOrCopy)
+                self.buffer.addRenderTexture(self.cuda_texture, GraphicsOutput.RTMBindOrCopy)
 
                 def _callback_func(cbdata: DisplayRegionDrawCallbackData):
                     # print("DRAW CALLBACK!!!!!!!!!!!!!!!11")
