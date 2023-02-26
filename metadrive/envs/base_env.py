@@ -311,7 +311,12 @@ class BaseEnv(gym.Env):
     def done_function(self, vehicle_id: str) -> Tuple[bool, Dict]:
         raise NotImplementedError()
 
-    def render(self, mode='human', text: Optional[Union[dict, str]] = None, *args, **kwargs) -> Optional[np.ndarray]:
+    def render(self,
+               mode='human',
+               text: Optional[Union[dict, str]] = None,
+               return_bytes=False,
+               *args,
+               **kwargs) -> Optional[np.ndarray]:
         """
         This is a pseudo-render function, only used to update onscreen message when using panda3d backend
         :param mode: 'rgb'/'human'
@@ -322,22 +327,26 @@ class BaseEnv(gym.Env):
             ret = self._render_topdown(text=text, *args, **kwargs)
             return ret
         assert self.config["use_render"] or self.engine.mode != RENDER_MODE_NONE, \
-            ("Panda Renderring is off now, can not render")
+            ("Panda Renderring is off now, can not render. Please set config['use_render'] = True!")
+
         self.engine.render_frame(text)
+
         if mode != "human" and self.config["offscreen_render"]:
             # fetch img from img stack to be make this func compatible with other render func in RL setting
             return self.vehicle.observations.img_obs.get_image()
 
-        if mode == "rgb_array" and self.config["use_render"]:
-            if not hasattr(self, "_temporary_img_obs"):
-                from metadrive.obs.observation_base import ImageObservation
-                image_source = "rgb_camera"
-                assert len(self.vehicles) == 1, "Multi-agent not supported yet!"
-                self.temporary_img_obs = ImageObservation(self.vehicles[DEFAULT_AGENT].config, image_source, False)
-            else:
-                raise ValueError("Not implemented yet!")
-            self.temporary_img_obs.observe(self.vehicles[DEFAULT_AGENT].image_sensors[image_source])
-            return self.temporary_img_obs.get_image()
+        if mode == "rgb_array":
+            assert self.config["use_render"], "You should create a Panda3d window before rendering images!"
+            # if not hasattr(self, "temporary_img_obs"):
+            #     from metadrive.obs.image_obs import ImageObservation
+            #     image_source = "rgb_camera"
+            #     assert len(self.vehicles) == 1, "Multi-agent not supported yet!"
+            #     self.temporary_img_obs = ImageObservation(self.vehicles[DEFAULT_AGENT].config, image_source, False)
+            # # else:
+            # #     raise ValueError("Not implemented yet!")
+            # self.temporary_img_obs.observe(self.vehicles[DEFAULT_AGENT])
+            # return self.temporary_img_obs.get_image()
+            return self.engine.get_window_image(return_bytes=return_bytes)
 
         # logging.warning("You do not set 'offscreen_render' or 'offscreen_render' to True, so no image will be returned!")
         return None
@@ -427,10 +436,13 @@ class BaseEnv(gym.Env):
         time.sleep(2)  # Sleep two seconds
         raise KeyboardInterrupt("'Esc' is pressed. MetaDrive exits now.")
 
-    def capture(self):
-        img = PNMImage()
-        self.engine.win.getScreenshot(img)
-        img.write("main_{}.png".format(time.time()))
+    def capture(self, file_name=None):
+        if not hasattr(self, "_capture_img"):
+            self._capture_img = PNMImage()
+        self.engine.win.getScreenshot(self._capture_img)
+        if file_name is None:
+            file_name = "main_{}.png".format(time.time())
+        self._capture_img.write(file_name)
 
     def for_each_vehicle(self, func, *args, **kwargs):
         return self.agent_manager.for_each_active_agents(func, *args, **kwargs)
