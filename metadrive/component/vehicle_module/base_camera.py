@@ -111,7 +111,7 @@ class BaseCamera(ImageBuffer):
         self.track(base_object)
         if self.enable_cuda:
             assert type(self)._singleton.cuda_rendered_result is not None
-            ret = type(self)._singleton.cuda_rendered_result[..., :-1]
+            ret = type(self)._singleton.cuda_rendered_result[..., :-1][..., ::-1][::-1]
         else:
             ret = type(self)._singleton.get_rgb_array()
         if self.engine.global_config["vehicle_config"]["rgb_to_grayscale"]:
@@ -212,12 +212,10 @@ class BaseCamera(ImageBuffer):
         return type(self)._singleton.cuda_graphics_resource
 
     def unregister(self):
-        if not type(self)._singleton.registered:
-            return type(self)._singleton
-        type(self)._singleton.unmap()
-        type(self)._singleton.cuda_graphics_resource = check_cudart_err(
-            cudart.cudaGraphicsUnregisterResource(type(self)._singleton.cuda_graphics_resource))
-        return self
+        if type(self)._singleton.registered:
+            type(self)._singleton.unmap()
+            type(self)._singleton.cuda_graphics_resource = check_cudart_err(
+                cudart.cudaGraphicsUnregisterResource(type(self)._singleton.cuda_graphics_resource))
 
     def map(self, stream=0):
         if not type(self)._singleton.registered:

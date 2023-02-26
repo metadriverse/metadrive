@@ -163,11 +163,9 @@ class CUDATest:
         return self._graphics_resource
 
     def unregister(self):
-        if not self.registered:
-            return self
-        self.unmap()
-        self._graphics_resource = check_cudart_err(cudart.cudaGraphicsUnregisterResource(self._graphics_resource))
-        return self
+        if self.registered:
+            self.unmap()
+            self._graphics_resource = check_cudart_err(cudart.cudaGraphicsUnregisterResource(self._graphics_resource))
 
     def map(self, stream=0):
         if not self.registered:

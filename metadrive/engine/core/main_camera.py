@@ -472,12 +472,10 @@ class MainCamera:
         return self.cuda_graphics_resource
 
     def unregister(self):
-        if not self.registered:
-            return self
-        self.unmap()
-        self.cuda_graphics_resource = check_cudart_err(
-            cudart.cudaGraphicsUnregisterResource(self.cuda_graphics_resource))
-        return self
+        if self.registered:
+            self.unmap()
+            self.cuda_graphics_resource = check_cudart_err(
+                cudart.cudaGraphicsUnregisterResource(self.cuda_graphics_resource))
 
     def map(self, stream=0):
         if not self.registered:
