@@ -1,4 +1,4 @@
-from panda3d.core import Shader, RenderState, ShaderAttrib, GeoMipTerrain
+from panda3d.core import Shader, RenderState, ShaderAttrib, GeoMipTerrain, LVector3, PNMImage
 import numpy as np
 
 from metadrive.component.vehicle_module.base_camera import BaseCamera
@@ -12,7 +12,7 @@ class DepthCamera(BaseCamera):
     # shape(dim_1, dim_2)
     CAM_MASK = CamMask.DepthCam
 
-    GROUND_HEIGHT = -1.2
+    GROUND_HEIGHT = -0.4
     VIEW_GROUND = False
     GROUND = None
     GROUND_MODEL = None
@@ -49,12 +49,21 @@ class DepthCamera(BaseCamera):
         if self.VIEW_GROUND:
             self.GROUND = GeoMipTerrain("mySimpleTerrain")
             self.GROUND.setHeightfield(AssetLoader.file_path("textures", "height_map.png"))
+            self.GROUND.setAutoFlatten(GeoMipTerrain.AFMStrong)
             # terrain.setBruteforce(True)
             # # Since the terrain is a texture, shader will not calculate the depth information, we add a moving terrain
             # # model to enable the depth information of terrain
             self.GROUND_MODEL = self.GROUND.getRoot()
-            self.GROUND_MODEL.setPos(-128, 0, self.GROUND_HEIGHT)
+            self.GROUND_MODEL.setPos(-128, -128, self.GROUND_HEIGHT)
             self.GROUND_MODEL.reparentTo(type(self)._singleton.origin)
             self.GROUND_MODEL.hide(CamMask.AllOn)
             self.GROUND_MODEL.show(CamMask.DepthCam)
             self.GROUND.generate()
+
+    def track(self, base_object):
+        if self.VIEW_GROUND:
+            pos = base_object.origin.getPos()
+            type(self)._singleton.GROUND_MODEL.setZ(-pos[-1]+self.GROUND_HEIGHT)
+            # type(self)._singleton.GROUND_MODEL.setP(-base_object.origin.getR())
+            # type(self)._singleton.GROUND_MODEL.setR(-base_object.origin.getR())
+        return super(DepthCamera, self).track(base_object)
