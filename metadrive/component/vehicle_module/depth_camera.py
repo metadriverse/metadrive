@@ -63,7 +63,7 @@ class DepthCamera(BaseCamera):
     def track(self, base_object):
         if self.VIEW_GROUND:
             pos = base_object.origin.getPos()
-            type(self)._singleton.GROUND_MODEL.setZ(-pos[-1]+self.GROUND_HEIGHT)
+            type(self)._singleton.GROUND_MODEL.setZ(-pos[-1] + self.GROUND_HEIGHT)
             # type(self)._singleton.GROUND_MODEL.setP(-base_object.origin.getR())
             # type(self)._singleton.GROUND_MODEL.setR(-base_object.origin.getR())
         return super(DepthCamera, self).track(base_object)
