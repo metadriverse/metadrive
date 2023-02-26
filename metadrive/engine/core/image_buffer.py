@@ -4,7 +4,7 @@ from typing import Union, List
 import numpy as np
 from panda3d.core import NodePath, Vec3, Vec4, Camera, PNMImage
 
-from metadrive.constants import RENDER_MODE_ONSCREEN, BKG_COLOR
+from metadrive.constants import RENDER_MODE_ONSCREEN, BKG_COLOR, RENDER_MODE_NONE
 
 
 class ImageBuffer:
@@ -115,7 +115,7 @@ class ImageBuffer:
             return np.clip(numpy_array, 0, 1)
 
     def add_display_region(self, display_region: List[float]):
-        if self.engine.mode == RENDER_MODE_ONSCREEN and self.display_region is None:
+        if self.engine.mode != RENDER_MODE_NONE and self.display_region is None:
             # only show them when onscreen
             self.display_region = self.engine.win.makeDisplayRegion(*display_region)
             self.display_region.setCamera(self.cam)
