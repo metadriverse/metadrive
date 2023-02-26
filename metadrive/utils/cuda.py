@@ -1,6 +1,9 @@
-from OpenGL.GL import *  # noqa F403
-import cupy as cp
-from cuda import cudart
+try:
+    from OpenGL.GL import *  # noqa F403
+    import cupy as cp
+    from cuda import cudart
+except ImportError:
+    pass
 
 
 def format_cudart_err(err):
@@ -32,4 +35,5 @@ def check_cudart_err(args):
 
 
 def restore_channel_and_shape(cuda_image):
+    raise DeprecationWarning()
     return cuda_image[..., ::-1][::-1]
