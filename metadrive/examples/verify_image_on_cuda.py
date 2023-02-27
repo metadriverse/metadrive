@@ -28,15 +28,18 @@ def _test_rgb_camera_as_obs(render=False, image_on_cuda=True):
     env.reset()
     action = [0.0, 0.1]
     start = time.time()
-    print("Use {} with resolution {}".format(env.config["vehicle_config"]["image_source"],
-                                             (env.observation_space["image"].shape[0],
-                                              env.observation_space["image"].shape[1])))
+    print(
+        "Use {} with resolution {}".format(
+            env.config["vehicle_config"]["image_source"],
+            (env.observation_space["image"].shape[0], env.observation_space["image"].shape[1])
+        )
+    )
     for i in range(20000):
         o, r, d, _ = env.step(action)
         if image_on_cuda:
             torch_tensor = from_dlpack(o["image"].toDlpack())
         else:
-            torch_tensor=torch.Tensor(o["image"])
+            torch_tensor = torch.Tensor(o["image"])
         if render:
             ret = o["image"].get()[..., -1] if env.config["image_on_cuda"] else o["image"][..., -1]
             cv2.imshow("window", ret)
