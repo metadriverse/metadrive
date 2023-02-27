@@ -301,6 +301,8 @@ class MainCamera:
         if engine.task_manager.hasTaskNamed(self.TOP_DOWN_TASK_NAME):
             engine.task_manager.remove(self.TOP_DOWN_TASK_NAME)
         self.current_track_vehicle = None
+        if self.registered:
+            self.unregister()
 
     def stop_track(self, bird_view_on_current_position=True):
         self.engine.interface.stop_track()

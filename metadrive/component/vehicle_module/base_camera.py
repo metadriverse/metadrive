@@ -134,6 +134,8 @@ class BaseCamera(ImageBuffer):
                 ImageBuffer.destroy(type(self)._singleton)
                 type(self)._singleton = None
                 type(self).init_num = 0
+        if self.registered:
+            self.unregister()
 
     def get_cam(self):
         return type(self)._singleton.cam

@@ -56,6 +56,7 @@ def _test_main_rgb_camera_as_obs(render=False):
     obs = env.reset()
     action = [0.0, 0.1]
     start = time.time()
+    reset_time = 0
     for i in range(20000):
         o, r, d, _ = env.step(action)
         if render:
@@ -63,9 +64,10 @@ def _test_main_rgb_camera_as_obs(render=False):
             cv2.imshow("window", ret)
             cv2.waitKey(1)
         if d:
-            print("FPS: {}".format(i / (time.time() - start)))
-            # env.reset()
-            # break
+            current = time.time()
+            env.reset()
+            reset_time += time.time()-current
+            print("FPS: {}".format(i / (current - start- reset_time)))
 
 
 def _test_main_rgb_camera_no_interface(render=False):
@@ -134,4 +136,4 @@ if __name__ == "__main__":
     # _test_rgb_camera_as_obs(True)
     # _test_depth_camera_as_obs(False)
     # _test_main_rgb_camera_as_obs(False)
-    _test_main_rgb_camera_no_interface(True)
+    _test_main_rgb_camera_no_interface(False)
