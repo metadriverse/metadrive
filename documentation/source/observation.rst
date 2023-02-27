@@ -119,3 +119,6 @@ The script should print a message:
 
 The image rendering consumes memory in the first GPU of your machine (if any). Please be careful when using this.
 
+
+If you feel the visual data collection is slow, why not try our advanced offscreen render: :ref:`install_render_cuda`.
+After verifying your installation, set `config["image_on_cuda"] = True` to get **10x** faster data collection!

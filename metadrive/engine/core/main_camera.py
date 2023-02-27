@@ -1,8 +1,8 @@
+import math
 import queue
 from collections import deque
 from typing import Tuple
 
-import math
 import numpy as np
 from direct.controls.InputState import InputState
 from panda3d.core import Vec3, Point3
@@ -11,6 +11,17 @@ from panda3d.core import WindowProperties
 from metadrive.constants import CollisionGroup
 from metadrive.engine.engine_utils import get_engine
 from metadrive.utils.coordinates_shift import panda_heading, panda_position
+from metadrive.utils.cuda import check_cudart_err
+
+_cuda_enable = True
+try:
+    import cupy as cp
+    from OpenGL.GL import GL_TEXTURE_2D  # noqa F403
+    from cuda import cudart
+    from cuda.cudart import cudaGraphicsRegisterFlags
+    from panda3d.core import GraphicsOutput, Texture, GraphicsStateGuardianBase, DisplayRegionDrawCallbackData
+except ImportError:
+    _cuda_enable = False
 
 
 class MainCamera:
@@ -87,6 +98,44 @@ class MainCamera:
         self.move_into_window_timer = 0
         self._in_recover = False
         self._last_frame_has_mouse = False
+
+        self.enable_cuda = self.engine.global_config["image_on_cuda"]
+
+        self.cuda_graphics_resource = None
+        if self.enable_cuda:
+            assert _cuda_enable, "Can not enable cuda rendering pipeline"
+
+            # returned tensor property
+            self.cuda_dtype = np.uint8
+            self.cuda_shape = self.engine.global_config["window_size"]
+            self.cuda_strides = None
+            self.cuda_order = "C"
+
+            self._cuda_buffer = None
+
+            # make texture
+            self.cuda_texture = Texture()
+            self.engine.win.addRenderTexture(self.cuda_texture, GraphicsOutput.RTMCopyTexture)
+
+            def _callback_func(cbdata: DisplayRegionDrawCallbackData):
+                # print("DRAW CALLBACK!!!!!!!!!!!!!!!11")
+                cbdata.upcall()
+                if not self.registered and self.texture_context_future.done():
+                    self.register()
+                with self as array:
+                    self.cuda_rendered_result = array
+
+            # Fill the buffer due to multi-thread
+            self.engine.graphicsEngine.renderFrame()
+            self.engine.graphicsEngine.renderFrame()
+            self.engine.graphicsEngine.renderFrame()
+            self.camera.node().getDisplayRegion(0).setDrawCallback(_callback_func)
+
+            self.gsg = GraphicsStateGuardianBase.getDefaultGsg()
+            self.texture_context_future = self.cuda_texture.prepare(self.gsg.prepared_objects)
+            self.cuda_texture_identifier = None
+            self.new_cuda_mem_ptr = None
+            self.cuda_rendered_result = None
 
     def set_bird_view_pos(self, position):
         if self.engine.task_manager.hasTaskNamed(self.TOP_DOWN_TASK_NAME):
@@ -252,6 +301,8 @@ class MainCamera:
         if engine.task_manager.hasTaskNamed(self.TOP_DOWN_TASK_NAME):
             engine.task_manager.remove(self.TOP_DOWN_TASK_NAME)
         self.current_track_vehicle = None
+        if self.registered:
+            self.unregister()
 
     def stop_track(self, bird_view_on_current_position=True):
         self.engine.interface.stop_track()
@@ -346,18 +397,120 @@ class MainCamera:
         from metadrive.engine.engine_utils import get_engine
         return get_engine()
 
-    @staticmethod
-    def get_pixels_array(vehicle, clip):
+    def get_pixels_array(self, vehicle, clip):
         engine = get_engine()
         assert engine.main_camera.current_track_vehicle is vehicle, "Tracked vehicle mismatch"
         if engine.episode_step <= 1:
             engine.graphicsEngine.renderFrame()
-        origin_img = engine.main_camera.camera.node().getDisplayRegion(0).getScreenshot()
-        img = np.frombuffer(origin_img.getRamImage().getData(), dtype=np.uint8)
-        img = img.reshape((origin_img.getYSize(), origin_img.getXSize(), 4))
-        img = img[::-1]
-        img = img[..., :-1]
+        if self.enable_cuda:
+            assert self.cuda_rendered_result is not None
+            img = self.cuda_rendered_result[..., :-1][..., ::-1][::-1]
+        else:
+            origin_img = engine.main_camera.camera.node().getDisplayRegion(0).getScreenshot()
+            img = np.frombuffer(origin_img.getRamImage().getData(), dtype=np.uint8)
+            img = img.reshape((origin_img.getYSize(), origin_img.getXSize(), 4))
+            img = img[::-1]
+            img = img[..., :-1]
+
         if not clip:
             return img.astype(np.uint8)
         else:
             return img / 255
+
+    def __del__(self):
+        if self.enable_cuda:
+            self.unregister()
+
+    """
+    Following functions are cuda support
+    """
+
+    @property
+    def cuda_array(self):
+        assert self.mapped
+        return cp.ndarray(
+            shape=(self.cuda_shape[1], self.cuda_shape[0], 4),
+            dtype=self.cuda_dtype,
+            strides=self.cuda_strides,
+            order=self.cuda_order,
+            memptr=self._cuda_buffer
+        )
+
+    @property
+    def cuda_buffer(self):
+        assert self.mapped
+        return self._cuda_buffer
+
+    @property
+    def graphics_resource(self):
+        assert self.registered
+        return self.cuda_graphics_resource
+
+    @property
+    def registered(self):
+        return self.cuda_graphics_resource is not None
+
+    @property
+    def mapped(self):
+        return self._cuda_buffer is not None
+
+    def __enter__(self):
+        return self.map()
+
+    def __exit__(self, exc_type, exc_value, trace):
+        self.unmap()
+        return False
+
+    def register(self):
+        self.cuda_texture_identifier = self.texture_context_future.result().getNativeId()
+        assert self.cuda_texture_identifier is not None
+        if self.registered:
+            return self.cuda_graphics_resource
+        self.cuda_graphics_resource = check_cudart_err(
+            cudart.cudaGraphicsGLRegisterImage(
+                self.cuda_texture_identifier, GL_TEXTURE_2D, cudaGraphicsRegisterFlags.cudaGraphicsRegisterFlagsReadOnly
+            )
+        )
+        return self.cuda_graphics_resource
+
+    def unregister(self):
+        if self.registered:
+            self.unmap()
+            self.cuda_graphics_resource = check_cudart_err(
+                cudart.cudaGraphicsUnregisterResource(self.cuda_graphics_resource)
+            )
+
+    def map(self, stream=0):
+        if not self.registered:
+            raise RuntimeError("Cannot map an unregistered buffer.")
+        if self.mapped:
+            return self._cuda_buffer
+        # self.engine.graphicsEngine.renderFrame()
+        check_cudart_err(cudart.cudaGraphicsMapResources(1, self.cuda_graphics_resource, stream))
+        array = check_cudart_err(cudart.cudaGraphicsSubResourceGetMappedArray(self.graphics_resource, 0, 0))
+        channelformat, cudaextent, flag = check_cudart_err(cudart.cudaArrayGetInfo(array))
+
+        depth = 1
+        byte = 4  # four channel
+        if self.new_cuda_mem_ptr is None:
+            success, self.new_cuda_mem_ptr = cudart.cudaMalloc(cudaextent.height * cudaextent.width * byte * depth)
+        check_cudart_err(
+            cudart.cudaMemcpy2DFromArray(
+                self.new_cuda_mem_ptr, cudaextent.width * byte * depth, array, 0, 0, cudaextent.width * byte * depth,
+                cudaextent.height, cudart.cudaMemcpyKind.cudaMemcpyDeviceToDevice
+            )
+        )
+        if self._cuda_buffer is None:
+            self._cuda_buffer = cp.cuda.MemoryPointer(
+                cp.cuda.UnownedMemory(self.new_cuda_mem_ptr, cudaextent.width * depth * byte * cudaextent.height, self),
+                0
+            )
+        return self.cuda_array
+
+    def unmap(self, stream=None):
+        if not self.registered:
+            raise RuntimeError("Cannot unmap an unregistered buffer.")
+        if not self.mapped:
+            return self
+        self._cuda_buffer = check_cudart_err(cudart.cudaGraphicsUnmapResources(1, self.cuda_graphics_resource, stream))
+        return self

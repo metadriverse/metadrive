@@ -107,7 +107,7 @@ BASE_DEFAULT_CONFIG = dict(
         show_lidar=False,
         mini_map=(84, 84, 250),  # buffer length, width
         rgb_camera=(84, 84),  # buffer length, width
-        depth_camera=(84, 84, True),  # buffer length, width, view_ground
+        depth_camera=(84, 84, False),  # buffer length, width, view_ground
         main_camera=None,  # buffer length, width
         show_side_detector=False,
         show_lane_line_detector=False,
@@ -138,6 +138,8 @@ BASE_DEFAULT_CONFIG = dict(
     pstats=False,
     # if need running in offscreen
     offscreen_render=False,
+    # this is an advanced feature for accessing image with moving them to ram!
+    image_on_cuda=False,
     # accelerate the lidar perception
     _disable_detector_mask=False,
     # clip rgb to (0, 1)
@@ -197,6 +199,8 @@ class BaseEnv(gym.Env):
         self.is_multi_agent = self.config["is_multi_agent"]
         if not self.is_multi_agent:
             assert self.num_agents == 1
+        else:
+            assert not self.config["image_on_cuda"], "Image on cuda don't support Multi-agent!"
         assert isinstance(self.num_agents, int) and (self.num_agents > 0 or self.num_agents == -1)
 
         # observation and action space

@@ -4,7 +4,7 @@ import math
 import numpy as np
 from panda3d.core import NodePath, TextNode, PGTop, CardMaker, Vec3, LQuaternionf
 
-from metadrive.constants import RENDER_MODE_ONSCREEN, RENDER_MODE_OFFSCREEN, COLLISION_INFO_COLOR, COLOR, BodyName, CamMask
+from metadrive.constants import RENDER_MODE_ONSCREEN, RENDER_MODE_OFFSCREEN, COLLISION_INFO_COLOR, COLOR, BodyName, CamMask, RENDER_MODE_NONE
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.engine.core.engine_core import EngineCore
 from metadrive.engine.core.image_buffer import ImageBuffer
@@ -29,10 +29,9 @@ class Interface:
         self._right_arrow = None
         self._contact_banners = {}  # to save time/memory
         self.current_banner = None
-        self.need_interface = base_engine.mode == RENDER_MODE_ONSCREEN and not base_engine.global_config[
-            "debug_physics_world"]
-        self.need_interface = self.need_interface and base_engine.global_config["show_interface"]
-        if base_engine.mode == RENDER_MODE_OFFSCREEN:
+        self.need_interface = base_engine.mode != RENDER_MODE_NONE and not base_engine.global_config[
+            "debug_physics_world"] and base_engine.global_config["show_interface"]
+        if base_engine.mode == RENDER_MODE_NONE:
             assert self.need_interface is False, \
                 "We should not using interface with extra cameras when in offscreen mode!"
         self.init_interface()
