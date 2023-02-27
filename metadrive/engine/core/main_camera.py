@@ -402,7 +402,7 @@ class MainCamera:
             engine.graphicsEngine.renderFrame()
         if self.enable_cuda:
             assert self.cuda_rendered_result is not None
-            img = self.cuda_rendered_result[..., :-1]
+            img = self.cuda_rendered_result[..., :-1][..., ::-1][::-1]
         else:
             origin_img = engine.main_camera.camera.node().getDisplayRegion(0).getScreenshot()
             img = np.frombuffer(origin_img.getRamImage().getData(), dtype=np.uint8)
