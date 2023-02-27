@@ -68,6 +68,7 @@ class EngineCore(ShowBase.ShowBase):
     loadPrcFileData("", 'bullet-filter-algorithm groups-mask')
     loadPrcFileData("", "audio-library-name null")
     loadPrcFileData("", "model-cache-compressed-textures 1")
+    loadPrcFileData("", "textures-power-2 none")
 
     # loadPrcFileData("", "transform-cache 0")
     # loadPrcFileData("", "state-cache 0")
@@ -105,14 +106,12 @@ class EngineCore(ShowBase.ShowBase):
         else:
             if self.global_config["offscreen_render"]:
                 self.mode = RENDER_MODE_OFFSCREEN
-
-                if self.global_config["show_interface"]:
-                    # Disable useless camera capturing
-                    self.global_config["show_interface"] = False
-
                 loadPrcFileData("", "threading-model Cull/Draw")
             else:
                 self.mode = RENDER_MODE_NONE
+                if self.global_config["show_interface"]:
+                    # Disable useless camera capturing in none mode
+                    self.global_config["show_interface"] = False
 
         if is_mac() and (self.mode == RENDER_MODE_OFFSCREEN):  # Mac don't support offscreen rendering
             self.mode = RENDER_MODE_ONSCREEN

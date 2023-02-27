@@ -102,12 +102,30 @@ install_requires = [
     "psutil"
 ]
 
-# if (not is_mac()) and (not is_win()):
-#     install_requires.append("evdev")
+
+# add torch support via the following lines maybe
+# def _load_requirements(path_dir: str , file_name: str = 'requirements.txt', comment_char: str = '#') -> List[str]:
+#     """Load requirements from a file
+#     >>> _load_requirements(PROJECT_ROOT)  # doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
+#     ['numpy...', 'torch...', ...]
+#     """
+#     with open(os.path.join(path_dir, file_name), 'r') as file:
+#         lines = [ln.strip() for ln in file.readlines()]
+#     reqs = []
+#     for ln in lines:
+#         # filer all comments
+#         if comment_char in ln:
+#             ln = ln[:ln.index(comment_char)].strip()
+#         # skip directly installed dependencies
+#         if ln.startswith('http'):
+#             continue
+#         if ln:  # if requirement is not empty
+#             reqs.append(ln)
+#     return reqs
 
 setup(
     name="metadrive-simulator",
-    python_requires='>=3.6, <3.12', # do version check with assert
+    python_requires='>=3.6, <3.12',  # do version check with assert
     version=version,
     description="An open-ended driving simulator with infinite scenes",
     url="https://github.com/metadriverse/metadrive",
@@ -115,6 +133,18 @@ setup(
     author_email="quanyili0057@gmail.com, pzh@cs.ucla.edu",
     packages=packages,
     install_requires=install_requires,
+    extras_require={
+        "cuda": ["cuda-python==12.0.0",
+                 "PyOpenGL==3.1.6",
+                 "PyOpenGL-accelerate==3.1.6",
+                 "pyrr==0.10.3",
+                 "glfw",
+                 ],
+        "nuplan": ["nuplan-devkit==1.0.0",
+                   "bokeh==2.4",
+                   "hydra",
+                   ]
+    },
     include_package_data=True,
     license="Apache 2.0",
     long_description=long_description,

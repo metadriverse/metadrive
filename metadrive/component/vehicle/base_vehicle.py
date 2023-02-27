@@ -2,7 +2,6 @@ import math
 from collections import deque
 from typing import Union, Optional
 
-import gym
 import numpy as np
 import seaborn as sns
 from panda3d.bullet import BulletVehicle, BulletBoxShape, ZUp
@@ -218,10 +217,19 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         )
 
         # vision modules
-        self.add_image_sensor("rgb_camera", RGBCamera())
-        self.add_image_sensor("mini_map", MiniMap())
-        self.add_image_sensor("depth_camera", DepthCamera())
-        self.add_image_sensor("main_camera", self.engine.main_camera)
+        # self.add_image_sensor("rgb_camera", RGBCamera())
+        # self.add_image_sensor("mini_map", MiniMap())
+        # self.add_image_sensor("depth_camera", DepthCamera())
+        # self.add_image_sensor("main_camera", self.get_image_sensor())
+        self.setup_sensors()
+
+    def setup_sensors(self):
+        def _main_cam():
+            assert self.engine.main_camera is not None, "Main camera doesn't exist"
+            return self.engine.main_camera
+
+        sensors = {"rgb_camera": RGBCamera, "mini_map": MiniMap, "depth_camera": DepthCamera, "main_camera": _main_cam}
+        self.add_image_sensor(self.config["image_source"], sensors[self.config["image_source"]]())
 
     def _add_modules_for_vehicle_when_reset(self):
         config = self.config
@@ -640,6 +648,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
 
     def add_image_sensor(self, name: str, sensor: ImageBuffer):
         self.image_sensors[name] = sensor
+        self.engine.graphicsEngine.render_frame()
+        self.engine.graphicsEngine.render_frame()
 
     def add_navigation(self):
         if not self.config["need_navigation"]:

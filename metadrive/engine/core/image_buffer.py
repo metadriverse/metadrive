@@ -4,7 +4,7 @@ from typing import Union, List
 import numpy as np
 from panda3d.core import NodePath, Vec3, Vec4, Camera, PNMImage
 
-from metadrive.constants import RENDER_MODE_ONSCREEN, BKG_COLOR
+from metadrive.constants import RENDER_MODE_ONSCREEN, BKG_COLOR, RENDER_MODE_NONE
 
 
 class ImageBuffer:
@@ -21,8 +21,8 @@ class ImageBuffer:
 
     def __init__(
         self,
-        length: float,
         width: float,
+        height: float,
         pos: Vec3,
         bkg_color: Union[Vec4, Vec3],
         parent_node: NodePath = None,
@@ -48,15 +48,11 @@ class ImageBuffer:
             self.lens = self.cam.node().getLens()
             return
 
-        if length > 100 or width > 100:
-            # Too large width or length will cause corruption in Mac.
-            logging.warning("You may using too large buffer! The width is {}, and length is {}.".format(width, length))
-
         # self.texture = Texture()
         if frame_buffer_property is None:
-            self.buffer = self.engine.win.makeTextureBuffer("camera", length, width)
+            self.buffer = self.engine.win.makeTextureBuffer("camera", width, height)
         else:
-            self.buffer = self.engine.win.makeTextureBuffer("camera", length, width, fbp=frame_buffer_property)
+            self.buffer = self.engine.win.makeTextureBuffer("camera", width, height, fbp=frame_buffer_property)
             # now we have to setup a new scene graph to make this scene
 
         self.origin = NodePath("new render")
@@ -97,6 +93,7 @@ class ImageBuffer:
         origin_img = self.cam.node().getDisplayRegion(0).getScreenshot()
         img = np.frombuffer(origin_img.getRamImage().getData(), dtype=np.uint8)
         img = img.reshape((origin_img.getYSize(), origin_img.getXSize(), 4))
+        # img = np.swapaxes(img, 1, 0)
         img = img[::-1]
         img = img[..., :-1]
         return img
@@ -115,7 +112,7 @@ class ImageBuffer:
             return np.clip(numpy_array, 0, 1)
 
     def add_display_region(self, display_region: List[float]):
-        if self.engine.mode == RENDER_MODE_ONSCREEN and self.display_region is None:
+        if self.engine.mode != RENDER_MODE_NONE and self.display_region is None:
             # only show them when onscreen
             self.display_region = self.engine.win.makeDisplayRegion(*display_region)
             self.display_region.setCamera(self.cam)

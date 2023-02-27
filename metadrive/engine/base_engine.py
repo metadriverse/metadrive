@@ -60,6 +60,10 @@ class BaseEngine(EngineCore, Randomizable):
         # topdown renderer
         self._top_down_renderer = None
 
+        # for multi-thread rendering
+        self.graphicsEngine.renderFrame()
+        self.graphicsEngine.renderFrame()
+
     def add_policy(self, object_id, policy_class, *args, **kwargs):
         policy = policy_class(*args, **kwargs)
         self._object_policies[object_id] = policy
