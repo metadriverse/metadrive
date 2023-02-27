@@ -52,7 +52,7 @@ class BaseCamera(ImageBuffer):
                     "It may lower the sample efficiency! Considering reduce buffer size or using cuda image by"
                     " set [image_on_cuda=True].".format(height, width)
                 )
-
+            self.cuda_graphics_resource = None
             if self.enable_cuda:
                 assert _cuda_enable, "Can not enable cuda rendering pipeline"
 
@@ -62,7 +62,6 @@ class BaseCamera(ImageBuffer):
                 self.cuda_strides = None
                 self.cuda_order = "C"
 
-                self.cuda_graphics_resource = None
                 self._cuda_buffer = None
 
                 # make texture
@@ -94,7 +93,7 @@ class BaseCamera(ImageBuffer):
 
     @property
     def enable_cuda(self):
-        return type(self)._singleton._enable_cuda
+        return type(self)._singleton is not None and type(self)._singleton._enable_cuda
 
     def get_image(self, base_object):
         """
@@ -134,7 +133,7 @@ class BaseCamera(ImageBuffer):
                 ImageBuffer.destroy(type(self)._singleton)
                 type(self)._singleton = None
                 type(self).init_num = 0
-        if self.registered:
+        if type(self)._singleton is not None and type(self)._singleton.registered:
             self.unregister()
 
     def get_cam(self):

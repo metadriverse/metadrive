@@ -101,6 +101,7 @@ class MainCamera:
 
         self.enable_cuda = self.engine.global_config["image_on_cuda"]
 
+        self.cuda_graphics_resource = None
         if self.enable_cuda:
             assert _cuda_enable, "Can not enable cuda rendering pipeline"
 
@@ -110,7 +111,6 @@ class MainCamera:
             self.cuda_strides = None
             self.cuda_order = "C"
 
-            self.cuda_graphics_resource = None
             self._cuda_buffer = None
 
             # make texture
