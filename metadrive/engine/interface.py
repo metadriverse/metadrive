@@ -29,7 +29,8 @@ class Interface:
         self._right_arrow = None
         self._contact_banners = {}  # to save time/memory
         self.current_banner = None
-        self.need_interface = False
+        self.need_interface = base_engine.mode != RENDER_MODE_NONE and not base_engine.global_config[
+            "debug_physics_world"] and base_engine.global_config["show_interface"]
         if base_engine.mode == RENDER_MODE_NONE:
             assert self.need_interface is False, \
                 "We should not using interface with extra cameras when in offscreen mode!"
