@@ -140,6 +140,7 @@ setup(
                  "PyOpenGL-accelerate==3.1.6",
                  "pyrr==0.10.3",
                  "glfw",
+                 "torch"
                  ],
         "nuplan": ["nuplan-devkit==1.0.0",
                    "bokeh==2.4",

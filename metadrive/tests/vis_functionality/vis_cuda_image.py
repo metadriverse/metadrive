@@ -80,7 +80,7 @@ class CUDATest:
         self.texture = Texture()
         # self.texture.setMinfilter(Texture.FTLinear)
         # self.texture.setFormat(Texture.FRgba32)
-        mode = GraphicsOutput.RTMCopyRam if test_ram_image else GraphicsOutput.RTMBindOrCopy
+        mode = GraphicsOutput.RTMCopyRam if test_ram_image else GraphicsOutput.RTMCopyTexture
         self.engine.win.addRenderTexture(self.texture, mode)
 
         self.texture_identifier = None
