@@ -27,18 +27,42 @@ You can also verify the efficiency of MetaDrive through the printed messages. Th
 .. note:: Please do not run the above command in the folder that has a sub-folder called :code:`./metadrive`.
 
 
-.. _install_headless:
+.. _install_render_cuda:
 
-Install MetaDrive with offscreen rendering
-############################################
-
-
-
+Install MetaDrive with advanced offscreen rendering
+#####################################################
 The default observation contains information on ego vehicle's states, Lidar-like cloud points showing neighboring vehicles, and information about navigation and tasks. Besides, you can also try the Pygame-based Top-down rendering (See :ref:`use_pygame_rendering`), which is also runnable in most headless machine without any special treatment.
 
 
 If the above observation is not enough for your RL algorithms and you wish to use the Panda3D camera to provide realistic RGB images as the observation, please continue reading this section.
 
+Generally, the default installation method supports getting rendered image. In this case, images will be returned as numpy array, which is retrieved from GPU and costs latency. We provide an advanced function to allow accessing images on GPU directly,
+so that you can read them by **Torch** or **Tensorflow**. With such a treatment, the image-based data sampling can be **10x** faster! See: https://github.com/metadriverse/metadrive/issues/306
+
+Requirements:
+
+* CUDA Runtime >= 12.0
+* Windows or Linux
+
+
+
+
+Installation:
+
+#. After cloning the repo, use ``pip install -e .[cuda]`` to install, or ``pip install -e metadrive-simulator[cuda]`` if you are using pip.
+#. Install Torch: ``conda install pytorch==1.12.1 torchvision==0.13.1 torchaudio==0.12.1 cudatoolkit=11.6 -c pytorch -c conda-forge``
+#. Install CuPy: ``conda install -c conda-forge cupy``
+#. Install Cuda-Python: ``conda install -c nvidia cuda-python``
+#. For verifying your installation, cd ``metadrive/examples`` and run ``python verify_image_on_cuda.py``
+
+
+After running the script, if no error messages, then congratulations! It works. you can also use ``python verify_image_on_cuda.py --render`` to visualize the image observations.
+Besides, a ``--native`` flag can be added to benchmark the original image collection pipeline as a comparison.  
+
+.. _install_headless:
+
+Install MetaDrive with headless rendering
+############################################
 
 If your machine already has a screen, please try the following script to verify whether the Panda3D window can successfully pop up.
 

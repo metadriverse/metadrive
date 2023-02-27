@@ -68,6 +68,7 @@ class EngineCore(ShowBase.ShowBase):
     loadPrcFileData("", 'bullet-filter-algorithm groups-mask')
     loadPrcFileData("", "audio-library-name null")
     loadPrcFileData("", "model-cache-compressed-textures 1")
+    loadPrcFileData("", "textures-power-2 none")
 
     # loadPrcFileData("", "transform-cache 0")
     # loadPrcFileData("", "state-cache 0")

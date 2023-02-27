@@ -135,7 +135,6 @@ setup(
     install_requires=install_requires,
     extras_require={
         "cuda": ["cuda-python==12.0.0",
-                 "cupy-cuda12x==11.5.0",
                  "PyOpenGL==3.1.6",
                  "PyOpenGL-accelerate==3.1.6",
                  "pyrr==0.10.3",

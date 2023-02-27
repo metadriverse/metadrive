@@ -101,6 +101,7 @@ class MainCamera:
 
         self.enable_cuda = self.engine.global_config["image_on_cuda"]
 
+        self.cuda_graphics_resource = None
         if self.enable_cuda:
             assert _cuda_enable, "Can not enable cuda rendering pipeline"
 
@@ -110,12 +111,11 @@ class MainCamera:
             self.cuda_strides = None
             self.cuda_order = "C"
 
-            self.cuda_graphics_resource = None
             self._cuda_buffer = None
 
             # make texture
             self.cuda_texture = Texture()
-            self.engine.win.addRenderTexture(self.cuda_texture, GraphicsOutput.RTMBindOrCopy)
+            self.engine.win.addRenderTexture(self.cuda_texture, GraphicsOutput.RTMCopyTexture)
 
             def _callback_func(cbdata: DisplayRegionDrawCallbackData):
                 # print("DRAW CALLBACK!!!!!!!!!!!!!!!11")

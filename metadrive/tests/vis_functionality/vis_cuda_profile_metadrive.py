@@ -67,7 +67,7 @@ def _test_main_rgb_camera_as_obs(render=False):
             current = time.time()
             # env.reset()
             # reset_time += time.time()-current
-            print("FPS: {}".format(i / (current - start- reset_time)))
+            print("FPS: {}".format(i / (current - start - reset_time)))
             break
 
 

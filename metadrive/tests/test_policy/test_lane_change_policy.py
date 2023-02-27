@@ -79,10 +79,13 @@ def test_lane_change(render=False):
         o = env.reset()
         for s in range(1, 60):
             o, r, d, info = env.step([2, 3])
+        assert env.vehicle.lane.index[-1] == 0
         for s in range(1, 40):
             o, r, d, info = env.step([0, 3])
+        assert env.vehicle.lane.index[-1] == 2
         for s in range(1, 70):
             o, r, d, info = env.step([1, 3])
+        assert env.vehicle.lane.index[-1] == 2
     finally:
         env.close()
 
