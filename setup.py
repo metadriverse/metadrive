@@ -80,7 +80,7 @@ version = "0.2.7.0"
 
 
 install_requires = [
-    "gym>=0.20.0, <=0.22.0",
+    "gym>=0.20.0, <0.26.0, !=0.23.*, !=0.24.*",
     "numpy>=1.21.6, <=1.24.2",
     "matplotlib",
     "pandas",
