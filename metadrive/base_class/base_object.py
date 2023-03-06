@@ -250,7 +250,7 @@ class BaseObject(BaseRunnable):
     def position(self):
         return metadrive_position(self.origin.getPos())
 
-    def set_velocity(self, direction: list, value=None, in_local_frame=False):
+    def set_velocity(self, direction: np.array, value=None, in_local_frame=False):
         """
         Set velocity for object including the direction of velocity and the value (speed)
         The direction of velocity will be normalized automatically, value decided its scale
@@ -274,6 +274,14 @@ class BaseObject(BaseRunnable):
                      self._body.getLinearVelocity()[-1])
         )
 
+    def set_velocity_km_h(self, direction: list, value=None, in_local_frame=False):
+        direction = np.array(direction)
+        if value is None:
+            direction /= 3.6
+        else:
+            value /= 3.6
+        return self.set_velocity(direction, value, in_local_frame)
+
     @property
     def velocity(self):
         """
@@ -283,12 +291,28 @@ class BaseObject(BaseRunnable):
         return np.asarray([velocity[0], -velocity[1]])
 
     @property
+    def velocity_km_h(self):
+        """
+        Velocity, unit: m/s
+        """
+        return self.velocity*3.6
+
+    @property
     def speed(self):
         """
         return the speed in m/s
         """
         velocity = self.body.get_linear_velocity()
         speed = norm(velocity[0], velocity[1])
+        return clip(speed, 0.0, 100000.0)
+
+    @property
+    def speed_km_h(self):
+        """
+        km/h
+        """
+        velocity = self.body.get_linear_velocity()
+        speed = norm(velocity[0], velocity[1]) * 3.6
         return clip(speed, 0.0, 100000.0)
 
     def set_heading_theta(self, heading_theta, rad_to_degree=True) -> None:
