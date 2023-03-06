@@ -12,7 +12,7 @@ def _assert_vehicle(vehicle):
     pos = vehicle.position
     assert -200 < pos[0] < 200
     assert -200 < pos[1] < 200
-    speed = vehicle.speed
+    speed = vehicle.speed_km_h
     assert 0 <= speed <= 120
     velocity_direction = vehicle.velocity_direction
     np.testing.assert_almost_equal(abs(np.linalg.norm(velocity_direction)), 1.0)

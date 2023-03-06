@@ -1,7 +1,7 @@
 from typing import List
 
 import numpy as np
-from metadrive.component.highway_vehicle.kinematics import Vehicle
+from metadrive.component.vehicle_model.kinematics import Vehicle
 
 from metadrive.manager.traffic_manager import PGTrafficManager
 

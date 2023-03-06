@@ -132,7 +132,7 @@ class WaymoIDMTrafficManager(WaymoTrafficManager):
         for v in self.spawned_objects.values():
             if not self.engine.has_policy(v.name):
                 continue
-            if v.speed < 1:
+            if v.speed_km_h < 1:
                 self.v_id_to_stop_time[v.id] += 1
             else:
                 self.v_id_to_stop_time[v.id] = 0

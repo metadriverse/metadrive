@@ -216,12 +216,12 @@ class MultiAgentTollgateEnv(MultiAgentMetaDrive):
 
         if vehicle.navigation.current_road.block_ID() == TollGate.ID:
             if vehicle.overspeed:  # Too fast!
-                reward = -self.config["overspeed_penalty"] * vehicle.speed / vehicle.max_speed
+                reward = -self.config["overspeed_penalty"] * vehicle.speed_km_h / vehicle.max_speed_km_h
             else:
                 # Good! At very low speed
                 pass
         else:
-            reward += self.config["speed_reward"] * (vehicle.speed / vehicle.max_speed)
+            reward += self.config["speed_reward"] * (vehicle.speed_km_h / vehicle.max_speed_km_h)
 
         step_info["step_reward"] = reward
 

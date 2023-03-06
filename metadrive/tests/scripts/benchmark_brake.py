@@ -10,7 +10,7 @@ from metadrive.envs import MetaDriveEnv
 def get_result(env):
     obs = env.reset()
     start = time.time()
-    max_speed = 0.0
+    max_speed_km_h = 0.0
     reported_max_speed = None
     reported_end = None
     reported_start = None
@@ -21,37 +21,37 @@ def get_result(env):
     for s in range(10000):
         if s < 20:
             action = np.array([0.0, 0.0])
-        elif env.vehicle.speed < 100 and not reported_max_speed:
+        elif env.vehicle.speed_km_h < 100 and not reported_max_speed:
             action = np.array([0.0, 1.0])
         else:
             action = np.array([0.0, -1.0])
             # action = np.array([0.0, 0.0])
 
-        if s > 20 and env.vehicle.speed > 1.0 and not reported_start:
+        if s > 20 and env.vehicle.speed_km_h > 1.0 and not reported_start:
             print("Start the car at {}".format(s))
             reported_start = s
             start_time = time.time()
 
-        if s > 20 and env.vehicle.speed >= 100 and not reported_max_speed:
+        if s > 20 and env.vehicle.speed_km_h >= 100 and not reported_max_speed:
             spend = (s - 1 - reported_start) * 0.1
             print(
                 "Achieve max speed: {} at {}. Spend {} s. Current location: {}".format(
-                    max_speed, s - 1, spend, env.vehicle.position
+                    max_speed_km_h, s - 1, spend, env.vehicle.position
                 )
             )
             print("real time spend to acc: {}".format(time.time() - start_time))
             reported_max_speed = s
             max_speed_loc = env.vehicle.position
 
-        max_speed = max(max_speed, env.vehicle.speed)
+        max_speed_km_h = max(max_speed_km_h, env.vehicle.speed_km_h)
 
-        if s > 20 and env.vehicle.speed <= 1.0 and reported_max_speed and not reported_end:
+        if s > 20 and env.vehicle.speed_km_h <= 1.0 and reported_max_speed and not reported_end:
             dist = env.vehicle.position - max_speed_loc
             dist = dist[0]
             print("Stop the car at {}. Distance {}. Current location: {}".format(s, dist, env.vehicle.position))
             reported_end = True
 
-        speed = env.vehicle.speed
+        speed = env.vehicle.speed_km_h
         current_heading = env.vehicle.heading_theta
         if reported_end and not reported_rotation:
             if rotate_start_pos is None:

@@ -325,7 +325,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         :return: None
         """
         distance = norm(*(self.last_position - self.position)) / 1000  # km
-        step_energy = 3.25 * math.pow(np.e, 0.01 * self.speed) * distance / 100
+        step_energy = 3.25 * math.pow(np.e, 0.01 * self.speed_km_h) * distance / 100
         # step_energy is in Liter, we return mL
         step_energy = step_energy * 1000
         self.energy_consumption += step_energy  # L/100 km
@@ -432,7 +432,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         for wheel_index in range(4):
             if throttle_brake >= 0:
                 self.system.setBrake(2.0, wheel_index)
-                if self.speed > self.max_speed:
+                if self.speed_km_h > self.max_speed_km_h:
                     self.system.applyEngineForce(0.0, wheel_index)
                 else:
                     self.system.applyEngineForce(max_engine_force * throttle_brake, wheel_index)
@@ -468,7 +468,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         return (metadrive_heading(self.origin.getH()) - 90) / 180 * math.pi
 
     @property
-    def speed(self):
+    def speed_km_h(self):
         """
         km/h
         """
@@ -872,7 +872,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
 
     @property
     def overspeed(self):
-        return True if self.lane.speed_limit < self.speed else False
+        return True if self.lane.speed_limit < self.speed_km_h else False
 
     @property
     def replay_done(self):
@@ -948,8 +948,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         return position[0] + side, position[1] + heading
 
     @property
-    def max_speed(self):
-        return self.config["max_speed"]
+    def max_speed_km_h(self):
+        return self.config["max_speed_km_h"]
 
     @property
     def top_down_length(self):

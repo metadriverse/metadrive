@@ -80,8 +80,8 @@ class RoadType:
 
 class Speed:
     """ """
-    def __init__(self, max_speed=None, unit=None):
-        self._max = max_speed
+    def __init__(self, max_speed_km_h=None, unit=None):
+        self._max = max_speed_km_h
         self._unit = unit
 
     @property

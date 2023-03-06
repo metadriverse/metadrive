@@ -276,7 +276,7 @@ class VehiclePanel(ImageBuffer):
         self._node_path_list.extend(tmp_node_path_list)
 
     def update_vehicle_state(self, vehicle):
-        steering, throttle_brake, speed = vehicle.steering, vehicle.throttle_brake, vehicle.speed
+        steering, throttle_brake, speed = vehicle.steering, vehicle.throttle_brake, vehicle.speed_km_h
         if throttle_brake < 0:
             self.para_vis_np["Throttle"].setScale(0, 1, 1)
             self.para_vis_np["Brake"].setScale(-throttle_brake, 1, 1)
