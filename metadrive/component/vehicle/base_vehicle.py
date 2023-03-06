@@ -768,7 +768,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
 
     def set_heading_theta(self, heading_theta, rad_to_degree=True) -> None:
         """
-        Set heading theta for this object
+        Set heading theta for this object. Vehicle local frame has a 90 degree offset
         :param heading_theta: float in rad
         """
         h = panda_heading(heading_theta)
