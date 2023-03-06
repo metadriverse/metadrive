@@ -82,9 +82,9 @@ class Lidar(DistanceDetector):
                 res.append(clip((relative_position[0] / self.perceive_distance + 1) / 2, 0.0, 1.0))
                 res.append(clip((relative_position[1] / self.perceive_distance + 1) / 2, 0.0, 1.0))
 
-                relative_velocity = ego_vehicle.projection(vehicle.velocity - ego_vehicle.velocity)
-                res.append(clip((relative_velocity[0] / ego_vehicle.max_speed + 1) / 2, 0.0, 1.0))
-                res.append(clip((relative_velocity[1] / ego_vehicle.max_speed + 1) / 2, 0.0, 1.0))
+                relative_velocity = ego_vehicle.projection(vehicle.velocity_km_h - ego_vehicle.velocity_km_h)
+                res.append(clip((relative_velocity[0] / ego_vehicle.max_speed_km_h + 1) / 2, 0.0, 1.0))
+                res.append(clip((relative_velocity[1] / ego_vehicle.max_speed_km_h + 1) / 2, 0.0, 1.0))
 
                 if add_others_navi:
                     ckpt1, ckpt2 = vehicle.navigation.get_checkpoints()

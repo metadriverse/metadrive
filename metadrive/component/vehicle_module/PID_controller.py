@@ -23,9 +23,12 @@ class PIDController:
 
 
 class Target:
-    def __init__(self, target_lateral, target_speed):
+    def __init__(self, target_lateral, target_speed_km_h):
+        """
+        target speed: Km/h
+        """
         self.lateral = target_lateral
-        self.speed = target_speed
+        self.speed_km_h = target_speed_km_h
 
     def go_right(self):
         self.lateral += 0.25 if self.lateral < 0.625 else 0
@@ -34,7 +37,7 @@ class Target:
         self.lateral -= 0.25 if self.lateral > 0.125 else 0
 
     def faster(self):
-        self.speed += 10
+        self.speed_km_h += 10
 
     def slower(self):
-        self.speed -= 10
+        self.speed_km_h -= 10

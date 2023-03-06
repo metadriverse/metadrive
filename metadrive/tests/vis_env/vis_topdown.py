@@ -17,14 +17,14 @@ if __name__ == "__main__":
             "cull_scene": False,
             # "offscreen_render": True,
             # "controller": "joystick",
-            "manual_control": True,
+            # "manual_control": True,
             "use_render": False,
             "decision_repeat": 5,
             "need_inverse_traffic": True,
             "rgb_clip": True,
             "debug": False,
             "map": "yBY",
-            "agent_policy": IDMPolicy,
+            # "agent_policy": IDMPolicy,
             "random_traffic": False,
             "random_lane_width": True,
             # "random_agent_model": True,
@@ -47,14 +47,19 @@ if __name__ == "__main__":
         }
     )
     import time
-
+    # [9.95036221 0.99503618]
     start = time.time()
     o = env.reset()
     env.vehicle.set_velocity([1, 0.1], 10)
     print(env.vehicle.speed)
 
     for s in range(1, 10000):
-        o, r, d, info = env.step(env.action_space.sample())
+        o, r, d, info = env.step([1, 0.5])
+        print("heading: {} forward_direction: {}".format(env.vehicle.heading, env.vehicle.velocity_direction))
+
+        # env.vehicle.set_velocity([1, 10], 10)
+        # print(env.vehicle.velocity)
+
         # if s % 100 == 0:
         #     env.close()
         #     env.reset()

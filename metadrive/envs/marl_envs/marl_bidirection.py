@@ -117,7 +117,7 @@ class MultiAgentBidirectionEnv(MultiAgentMetaDrive):
 
         reward = 0.0
         reward += self.config["driving_reward"] * (long_now - long_last) * lateral_factor
-        reward += self.config["speed_reward"] * (vehicle.speed / vehicle.max_speed)
+        reward += self.config["speed_reward"] * (vehicle.speed_km_h / vehicle.max_speed_km_h)
 
         step_info["step_reward"] = reward
 
