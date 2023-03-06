@@ -27,7 +27,6 @@ NUPLAN_ENV_CONFIG = dict(
     start_case_index=0,
     case_num=100,
     store_map=True,
-    store_map_buffer_size=200,
     sequential_seed=False,
 
     # ===== Traffic =====
@@ -178,8 +177,8 @@ class NuPlanEnv(BaseEnv):
         # for compatibility
         # crash almost equals to crashing with vehicles
         done_info[TerminationState.CRASH] = (
-            done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
-            or done_info[TerminationState.CRASH_BUILDING]
+                done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
+                or done_info[TerminationState.CRASH_BUILDING]
         )
         return done, done_info
 

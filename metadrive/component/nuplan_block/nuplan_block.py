@@ -12,7 +12,6 @@ from metadrive.component.lane.nuplan_lane import NuPlanLane
 from metadrive.component.road_network.edge_road_network import EdgeRoadNetwork
 from metadrive.constants import DrivableAreaProperty
 from metadrive.constants import LineColor, LineType
-from metadrive.engine.engine_utils import get_engine
 from metadrive.utils.interpolating_line import InterpolatingLine
 from metadrive.utils.math_utils import wrap_to_pi, norm
 
@@ -26,7 +25,7 @@ class LaneLineProperty:
 
 
 class NuPlanBlock(BaseBlock):
-    _radius = 200  # [m] show 500m map
+    _radius = None  # [m] show 500m map
 
     def __init__(self, block_index: int, global_network, random_seed, map_index, nuplan_center):
         self.map_index = map_index
@@ -46,8 +45,10 @@ class NuPlanBlock(BaseBlock):
 
     def _sample_topology(self) -> bool:
         """
-        This function is modified from _render_map in nuplan-devkit.simulation_tile.py
+        This function is modified from _render_map in nuplan-devkit.simulation_tile.py, it should be setting outside now
         """
+
+        return True
         map_api = self._nuplan_map_api
         # Center is Important !
         center = self.nuplan_center
@@ -186,7 +187,7 @@ class NuPlanBlock(BaseBlock):
         points = [np.array([pose.x - center[0], pose.y - center[1]]) for pose in path]
         return points
 
-    def _get_lane_line(self, lane, nuplan_center, is_road_connector=False):
+    def set_lane_line(self, lane, nuplan_center, is_road_connector=False):
         center = nuplan_center
         boundaries = self.map_api._get_vector_map_layer(SemanticMapLayer.BOUNDARIES)
 
@@ -227,9 +228,9 @@ class NuPlanBlock(BaseBlock):
             points = np.array(
                 [
                     i for i in zip(
-                        walkway.polygon.boundary.coords.xy[0] - center[0], walkway.polygon.boundary.coords.xy[1] -
-                        center[1]
-                    )
+                    walkway.polygon.boundary.coords.xy[0] - center[0], walkway.polygon.boundary.coords.xy[1] -
+                    center[1]
+                )
                 ]
             )
             self.lines[walkway.id] = LaneLineProperty(points, LineColor.GREY, LineType.SIDE, in_road_connector=False)

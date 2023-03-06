@@ -1,15 +1,13 @@
 import logging
 import math
-from panda3d.core import LPoint3f
+
+import geopandas as gpd
 import numpy as np
-from panda3d.bullet import BulletBoxShape, BulletConvexHullShape
-from panda3d.core import Vec3, LQuaternionf, CardMaker, TransparencyAttrib, NodePath
+from shapely.geometry.linestring import LineString
+from shapely.geometry.multilinestring import MultiLineString
 
 from metadrive.component.lane.point_lane import PointLane
-from metadrive.constants import BodyName
 from metadrive.constants import DrivableAreaProperty
-from metadrive.engine.physics_node import BaseRigidBodyNode
-from metadrive.utils.coordinates_shift import panda_position
 from metadrive.utils.interpolating_line import InterpolatingLine
 
 
@@ -22,7 +20,14 @@ class NuPlanLane(PointLane):
         """
         super(NuPlanLane, self).__init__(self._extract_centerline(lane_meta_data, nuplan_center), None)
         self.index = lane_meta_data.id
-        points = lane_meta_data.polygon.boundary.xy
+        if isinstance(lane_meta_data.polygon.boundary, MultiLineString):
+            boundary = gpd.GeoSeries(lane_meta_data.polygon.boundary).explode()
+            sizes = []
+            for idx, polygon in enumerate(boundary[0]):
+                sizes.append(len(polygon.xy[1]))
+            points= boundary[0][np.argmax(sizes)].xy
+        elif isinstance(lane_meta_data.polygon.boundary, LineString):
+            points = lane_meta_data.polygon.boundary.xy
         self.polygon = [[points[0][i], points[1][i], 0.1] for i in range(len(points[0]))]
         self.polygon += [[points[0][i], points[1][i], 0.] for i in range(len(points[0]))]
         self.polygon = np.array(self.polygon)

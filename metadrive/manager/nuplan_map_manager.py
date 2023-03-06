@@ -4,7 +4,6 @@ from metadrive.component.lane.point_lane import PointLane
 from metadrive.component.map.nuplan_map import NuPlanMap
 from metadrive.constants import DEFAULT_AGENT
 from metadrive.manager.base_manager import BaseManager
-from metadrive.utils.data_buffer import DataBuffer
 from metadrive.utils.nuplan_utils.parse_traffic import parse_ego_vehicle_trajectory, parse_ego_vehicle_state
 
 
@@ -14,33 +13,31 @@ class NuPlanMapManager(BaseManager):
     """
     PRIORITY = 0  # Map update has the most high priority
     DEFAULT_DATA_BUFFER_SIZE = 200
+    MAP_CENTERS = {'us-nv-las-vegas-strip': [664396.54429387, 3997613.41534655]}
 
     def __init__(self):
         super(NuPlanMapManager, self).__init__()
         self.store_map = self.engine.global_config.get("store_map", False)
-        store_map_buffer_size = self.engine.global_config.get("store_map_buffer_size", self.DEFAULT_DATA_BUFFER_SIZE)
         self.current_map = None
         self.map_num = self.engine.data_manager.scenario_num
         self.start = self.engine.global_config["start_case_index"]
         self.sdc_dest_point = None
         self.current_sdc_route = None
 
-        self.store_map_buffer = DataBuffer(store_data_buffer_size=store_map_buffer_size if self.store_map else None)
+        # Now we store the whole city map which is the largest map! There are four maps in NuPlan
+        self.store_map_buffer = {}
 
     def reset(self):
-        seed = self.engine.global_random_seed
-        assert self.start <= seed < self.start + self.map_num
-
-        if seed in self.store_map_buffer:
-            new_map = self.store_map_buffer[seed]
+        current_map_name = self.engine.data_manager.current_scenario.map_api.map_name
+        if current_map_name in self.store_map_buffer:
+            new_map = self.store_map_buffer[current_map_name]
         else:
-            self.store_map_buffer.clear_if_necessary()
-            state = self.engine.data_manager.current_scenario.get_ego_state_at_iteration(0)
-            center = [state.waypoint.x, state.waypoint.y]
-            new_map = NuPlanMap(nuplan_center=center, map_index=seed)
-            self.store_map_buffer[seed] = new_map
-
-        self.load_map(new_map)
+            center = self.MAP_CENTERS[current_map_name]
+            new_map = NuPlanMap(nuplan_center=center, map_index=current_map_name)
+            self.store_map_buffer[current_map_name] = new_map
+        state = self.engine.data_manager.current_scenario.get_ego_state_at_iteration(0)
+        scenario_center = state[state.waypoint.x, state.waypoint.y]
+        self.load_map(new_map, scenario_center)
         self.update_ego_route()
 
     def filter_path(self, start_lanes, end_lanes):
@@ -57,7 +54,7 @@ class NuPlanMapManager(BaseManager):
         # self.spawned_objects[map.id] = map
         # return map
 
-    def load_map(self, map):
+    def load_map(self, map, center):
         map.attach_to_world()
         self.current_map = map
 
