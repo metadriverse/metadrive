@@ -33,6 +33,8 @@ class ArgoversePGMapManager(PGMapManager):
 
 
 class ArgoverseEnv(MetaDriveEnv):
+    raise DeprecationWarning("Due to poor data, we are not maintaining this environment now!")
+
     def _post_process_config(self, config):
         config = super(ArgoverseEnv, self)._post_process_config(config)
         config["vehicle_config"]["spawn_lane_index"] = argoverse_spawn_lane_index
