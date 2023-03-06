@@ -325,7 +325,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         :return: None
         """
         distance = norm(*(self.last_position - self.position)) / 1000  # km
-        step_energy = 3.25 * math.pow(np.e, 0.01 * self.speed) * distance / 100
+        step_energy = 3.25 * math.pow(np.e, 0.01 * self.speed_km_h) * distance / 100
         # step_energy is in Liter, we return mL
         step_energy = step_energy * 1000
         self.energy_consumption += step_energy  # L/100 km
@@ -432,7 +432,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         for wheel_index in range(4):
             if throttle_brake >= 0:
                 self.system.setBrake(2.0, wheel_index)
-                if self.speed > self.max_speed:
+                if self.speed_km_h > self.max_speed_km_h:
                     self.system.applyEngineForce(0.0, wheel_index)
                 else:
                     self.system.applyEngineForce(max_engine_force * throttle_brake, wheel_index)
@@ -467,21 +467,20 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         """
         return (metadrive_heading(self.origin.getH()) - 90) / 180 * math.pi
 
-    @property
-    def speed(self):
-        """
-        km/h
-        """
-        velocity = self.body.get_linear_velocity()
-        speed = norm(velocity[0], velocity[1]) * 3.6
-        return clip(speed, 0.0, 100000.0)
+    # @property
+    # def velocity(self) -> np.ndarray:
+    #     return self.speed * self.velocity_direction
+    #
+    # @property
+    # def velocity_km_h(self) -> np.ndarray:
+    #     return self.speed * self.velocity_direction * 3.6
 
     @property
-    def velocity(self) -> np.ndarray:
-        return self.speed * self.velocity_direction
-
-    @property
-    def velocity_direction(self):
+    def chassis_velocity_direction(self):
+        raise DeprecationWarning(
+            "This API returns the direction of velocity which is approximately heading direction. "
+            "Deprecate it and make things easy"
+        )
         direction = self.system.getForwardVector()
         return np.asarray([direction[0], -direction[1]])
 
@@ -872,7 +871,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
 
     @property
     def overspeed(self):
-        return True if self.lane.speed_limit < self.speed else False
+        return True if self.lane.speed_limit < self.speed_km_h else False
 
     @property
     def replay_done(self):
@@ -948,8 +947,12 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         return position[0] + side, position[1] + heading
 
     @property
-    def max_speed(self):
-        return self.config["max_speed"]
+    def max_speed_km_h(self):
+        return self.config["max_speed_km_h"]
+
+    @property
+    def max_speed_m_s(self):
+        return self.config["max_speed_km_h"] / 3.6
 
     @property
     def top_down_length(self):

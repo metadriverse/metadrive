@@ -199,10 +199,10 @@ class IDMPolicy(BasePolicy):
     LANE_CHANGE_SPEED_INCREASE = 10
     SAFE_LANE_CHANGE_DISTANCE = 15
     MAX_LONG_DIST = 30
-    MAX_SPEED = 100
+    MAX_SPEED = 100  # km/h
 
     # Normal speed
-    NORMAL_SPEED = 30
+    NORMAL_SPEED = 30  # km/h
 
     # Creep Speed
     CREEP_SPEED = 5
@@ -291,7 +291,7 @@ class IDMPolicy(BasePolicy):
     def acceleration(self, front_obj, dist_to_front) -> float:
         ego_vehicle = self.control_object
         ego_target_speed = not_zero(self.target_speed, 0)
-        acceleration = self.ACC_FACTOR * (1 - np.power(max(ego_vehicle.speed, 0) / ego_target_speed, self.DELTA))
+        acceleration = self.ACC_FACTOR * (1 - np.power(max(ego_vehicle.speed_km_h, 0) / ego_target_speed, self.DELTA))
         if front_obj and (not self.disable_idm_deceleration):
             d = dist_to_front
             speed_diff = self.desired_gap(ego_vehicle, front_obj) / not_zero(d)
@@ -302,9 +302,9 @@ class IDMPolicy(BasePolicy):
         d0 = self.DISTANCE_WANTED
         tau = self.TIME_WANTED
         ab = -self.ACC_FACTOR * self.DEACC_FACTOR
-        dv = np.dot(ego_vehicle.velocity - front_obj.velocity, ego_vehicle.heading) if projected \
-            else ego_vehicle.speed - front_obj.speed
-        d_star = d0 + ego_vehicle.speed * tau + ego_vehicle.speed * dv / (2 * np.sqrt(ab))
+        dv = np.dot(ego_vehicle.velocity_km_h - front_obj.velocity_km_h, ego_vehicle.heading) if projected \
+            else ego_vehicle.speed_km_h - front_obj.speed_km_h
+        d_star = d0 + ego_vehicle.speed_km_h * tau + ego_vehicle.speed_km_h * dv / (2 * np.sqrt(ab))
         return d_star
 
     def reset(self):
@@ -362,15 +362,15 @@ class IDMPolicy(BasePolicy):
                                current_lanes[self.routing_target_lane.index[-1] + 1]
 
         # lane follow or active change lane/overtake for high driving speed
-        if abs(self.control_object.speed - self.NORMAL_SPEED) > 3 and surrounding_objects.has_front_object(
-        ) and abs(surrounding_objects.front_object().speed -
+        if abs(self.control_object.speed_km_h - self.NORMAL_SPEED) > 3 and surrounding_objects.has_front_object(
+        ) and abs(surrounding_objects.front_object().speed_km_h -
                   self.NORMAL_SPEED) > 3 and self.overtake_timer > self.LANE_CHANGE_FREQ:
             # may lane change
-            right_front_speed = surrounding_objects.right_front_object().speed if surrounding_objects.has_right_front_object() else self.MAX_SPEED \
+            right_front_speed = surrounding_objects.right_front_object().speed_km_h if surrounding_objects.has_right_front_object() else self.MAX_SPEED \
                 if surrounding_objects.right_lane_exist() and surrounding_objects.right_front_min_distance() > self.SAFE_LANE_CHANGE_DISTANCE and surrounding_objects.right_back_min_distance() > self.SAFE_LANE_CHANGE_DISTANCE else None
-            front_speed = surrounding_objects.front_object().speed if surrounding_objects.has_front_object(
+            front_speed = surrounding_objects.front_object().speed_km_h if surrounding_objects.has_front_object(
             ) else self.MAX_SPEED
-            left_front_speed = surrounding_objects.left_front_object().speed if surrounding_objects.has_left_front_object() else self.MAX_SPEED \
+            left_front_speed = surrounding_objects.left_front_object().speed_km_h if surrounding_objects.has_left_front_object() else self.MAX_SPEED \
                 if surrounding_objects.left_lane_exist() and surrounding_objects.left_front_min_distance() > self.SAFE_LANE_CHANGE_DISTANCE and surrounding_objects.left_back_min_distance() > self.SAFE_LANE_CHANGE_DISTANCE else None
             if left_front_speed is not None and left_front_speed - front_speed > self.LANE_CHANGE_SPEED_INCREASE:
                 # left overtake has a high priority

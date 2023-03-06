@@ -94,7 +94,7 @@ class StateObservation(ObservationBase):
                 vehicle.heading_diff(current_reference_lane),
 
                 # The velocity of target vehicle
-                clip((vehicle.speed + 1) / (vehicle.max_speed + 1), 0.0, 1.0),
+                clip((vehicle.speed_km_h + 1) / (vehicle.max_speed_km_h + 1), 0.0, 1.0),
 
                 # Current steering
                 clip((vehicle.steering / vehicle.MAX_STEERING + 1) / 2, 0.0, 1.0),
