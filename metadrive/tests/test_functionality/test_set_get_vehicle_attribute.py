@@ -11,7 +11,8 @@ def test_set_get_vehicle_attribute(render=False):
             "decision_repeat": 1,
             "map": "SSS",
             "use_render": render,
-        })
+        }
+    )
     try:
         o = env.reset()
         for _ in range(10):
@@ -34,9 +35,12 @@ def test_set_get_vehicle_attribute(render=False):
             o, r, d, info = env.step([0, 0])
             env.vehicle.set_velocity([5, 3], value=10, in_local_frame=False)
             assert abs(env.vehicle.speed - 10) < 0.1
-            assert np.isclose(env.vehicle.velocity, np.array(
-                [5 / np.linalg.norm(np.array([5, 3])) * 10, 3 / np.linalg.norm(np.array([5, 3])) * 10]), rtol=1e-5,
-                              atol=1e-5).all()
+            assert np.isclose(
+                env.vehicle.velocity,
+                np.array([5 / np.linalg.norm(np.array([5, 3])) * 10, 3 / np.linalg.norm(np.array([5, 3])) * 10]),
+                rtol=1e-5,
+                atol=1e-5
+            ).all()
             assert env.vehicle.speed == env.vehicle.speed_km_h / 3.6
             assert (env.vehicle.velocity == env.vehicle.velocity_km_h / 3.6).all()
 
@@ -44,10 +48,14 @@ def test_set_get_vehicle_attribute(render=False):
             o, r, d, info = env.step([0, 0])
             env.vehicle.set_velocity([0.3, 0.1], value=10, in_local_frame=False)
             assert abs(env.vehicle.speed - 10) < 0.1
-            assert np.isclose(env.vehicle.velocity,
-                              np.array([0.3 / np.linalg.norm(np.array([0.3, 0.1])) * 10,
-                                        0.1 / np.linalg.norm(np.array([0.3, 0.1])) * 10]), rtol=1e-5,
-                              atol=1e-5).all()
+            assert np.isclose(
+                env.vehicle.velocity,
+                np.array(
+                    [0.3 / np.linalg.norm(np.array([0.3, 0.1])) * 10, 0.1 / np.linalg.norm(np.array([0.3, 0.1])) * 10]
+                ),
+                rtol=1e-5,
+                atol=1e-5
+            ).all()
             assert abs(env.vehicle.speed - env.vehicle.speed_km_h / 3.6) < 0.0001
             assert (env.vehicle.velocity == env.vehicle.velocity_km_h / 3.6).all()
 
@@ -61,10 +69,13 @@ def test_coordinates(render=False):
             "environment_num": 1,
             "traffic_density": 0.,
             "decision_repeat": 1,
-            "vehicle_config": {"enable_reverse": True},
+            "vehicle_config": {
+                "enable_reverse": True
+            },
             "map": "SSS",
             "use_render": render,
-        })
+        }
+    )
     try:
         o = env.reset()
         assert abs(env.vehicle.heading_theta) == 0
@@ -103,7 +114,7 @@ def test_coordinates(render=False):
         for _ in range(100):
             o, r, d, info = env.step([0.8, 0.8])
         assert env.vehicle.velocity[1] < -1. and abs(env.vehicle.velocity[0]) > 1
-        assert env.vehicle.heading_theta < -0.3 # rad
+        assert env.vehicle.heading_theta < -0.3  # rad
         assert env.vehicle.position[0] > begining_pos[0] and env.vehicle.position[1] < begining_pos[1]
 
         # steering right
@@ -116,7 +127,7 @@ def test_coordinates(render=False):
             o, r, d, info = env.step([-0.8, 0.8])
         assert env.vehicle.velocity[1] > -1. and abs(env.vehicle.velocity[0]) > 1
         assert env.vehicle.position[0] > begining_pos[0] and env.vehicle.position[1] > begining_pos[1]
-        assert env.vehicle.heading_theta > 0.3 # rad
+        assert env.vehicle.heading_theta > 0.3  # rad
 
     finally:
         env.close()

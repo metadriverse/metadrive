@@ -295,7 +295,7 @@ class BaseObject(BaseRunnable):
         """
         Velocity, unit: m/s
         """
-        return self.velocity*3.6
+        return self.velocity * 3.6
 
     @property
     def speed(self):
