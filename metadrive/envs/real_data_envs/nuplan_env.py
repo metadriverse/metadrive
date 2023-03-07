@@ -30,8 +30,9 @@ NUPLAN_ENV_CONFIG = dict(
     sequential_seed=False,
 
     # ===== Map Config =====
-    city_map_radius=30000,  # load the whole map!
+    city_map_radius=1000,  # load the whole map!
     scenario_radius=250,  # radius for per case
+    map_centers={'us-nv-las-vegas-strip': [664396, 3997613]},
 
     # ===== Traffic =====
     no_pedestrian=True,
@@ -298,6 +299,7 @@ if __name__ == "__main__":
             "start_case_index": 300,
             "pstats": True,
             "case_num": 1,
+            "show_coordinates": True,
             "horizon": 1000,
             "vehicle_config": dict(
                 lidar=dict(num_lasers=120, distance=50, num_others=4),

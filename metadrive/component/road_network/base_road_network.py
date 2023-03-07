@@ -71,7 +71,7 @@ class BaseRoadNetwork:
         if color is None:
             color = list(np.random.choice(range(256), size=3) / 256) + [1]
         bound_box = self.get_bounding_box()
-        points = [(x, -y) for x in bound_box[:2] for y in bound_box[2:]]
+        points = [(x, y) for x in bound_box[:2] for y in bound_box[2:]]
         for k, p in enumerate(points[:-1]):
             for p_ in points[k + 1:]:
                 self._lines_np.append(engine.add_line((*p, 2), (*p_, 2), color, 2))

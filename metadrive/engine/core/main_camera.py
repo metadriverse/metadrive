@@ -49,7 +49,7 @@ class MainCamera:
         self.camera_queue = None
         self.camera_dist = camera_dist
         self.camera_pitch = -engine.global_config["camera_pitch"] if engine.global_config["camera_pitch"
-                                                                                          ] is not None else None
+                                                                     ] is not None else None
         self.camera_smooth = engine.global_config["camera_smooth"]
         self.direction_running_mean = deque(maxlen=20 if self.camera_smooth else 1)
         self.world_light = self.engine.world_light  # light chases the chase camera, when not using global light
@@ -203,6 +203,8 @@ class MainCamera:
         camera_pos[1] += -forward_dir[1] * self.camera_dist
 
         self.camera.setPos(*camera_pos)
+        if self.engine.global_config["show_coordinates"]:
+            self.engine.set_coordinates_indicator_pos(chassis_pos)
         current_pos = vehicle.chassis.getPos()
         current_pos[2] += 2
 
@@ -329,6 +331,8 @@ class MainCamera:
             self.camera_x += 1.0
 
         self.camera.setPos(self.camera_x, self.camera_y, self.top_down_camera_height)
+        if self.engine.global_config["show_coordinates"]:
+            self.engine.set_coordinates_indicator_pos([self.camera_x, self.camera_y])
         self.camera.lookAt(self.camera_x, self.camera_y, 0)
 
         if self.inputs.isSet("right_rotate"):

@@ -277,6 +277,10 @@ class EngineCore(ShowBase.ShowBase):
         # task manager
         self.taskMgr.remove('audioLoop')
 
+        self.coordinate_line = []
+        if self.global_config["show_coordinates"]:
+            self.show_coordinates()
+
     def render_frame(self, text: Optional[Union[dict, str]] = None):
         """
         The real rendering is conducted by the igLoop task maintained by panda3d.
@@ -389,14 +393,35 @@ class EngineCore(ShowBase.ShowBase):
             return task.cont
 
     def add_line(self, start_p: Union[Vec3, Tuple], end_p: Union[Vec3, Tuple], color, thickness: float):
+        start_p = [*start_p]
+        end_p = [*end_p]
+        start_p[1] *= -1
+        end_p[1] *= -1
         line_seg = LineSegs("interface")
         line_seg.setColor(*color)
-        line_seg.moveTo(start_p)
-        line_seg.drawTo(end_p)
+        line_seg.moveTo(Vec3(*start_p))
+        line_seg.drawTo(Vec3(*end_p))
         line_seg.setThickness(thickness)
         np = NodePath(line_seg.create(False))
         np.reparentTo(self.render)
         return np
+
+    def show_coordinates(self):
+        np_x = self.add_line(Vec3(0, 0, 0), Vec3(100, 0, 0), color=[1, 0, 0, 1], thickness=2)
+        np_y = self.add_line(Vec3(0, 0, 0), Vec3(0, 100, 0), color=[0, 1, 0, 1], thickness=2)
+        self.coordinate_line.append(np_x)
+        self.coordinate_line.append(np_y)
+
+    def remove_coordinates(self):
+        for line in self.coordinate_line:
+            line.detachNode()
+            line.removeNode()
+
+    def set_coordinates_indicator_pos(self, pos):
+        if len(self.coordinate_line) == 0:
+            return
+        for line in self.coordinate_line:
+            line.setPos(pos[0], -pos[1], 0)
 
 
 if __name__ == "__main__":
