@@ -1,7 +1,7 @@
+import numpy as np
+
 from metadrive.envs.metadrive_env import MetaDriveEnv
-from metadrive.policy.idm_policy import IDMPolicy
 from metadrive.utils import setup_logger
-from metadrive.component.traffic_participants.pedestrian import Pedestrian
 
 if __name__ == "__main__":
     setup_logger(True)
@@ -13,7 +13,7 @@ if __name__ == "__main__":
             "start_seed": 22,
             # "_disable_detector_mask":True,
             # "debug_physics_world": True,
-            "debug": True,
+            "debug": False,
             "global_light": True,
             # "debug_static_world": True,
             "cull_scene": False,
@@ -38,10 +38,13 @@ if __name__ == "__main__":
             # "camera_height": -1,
             "vehicle_config": {
                 "enable_reverse": False,
+                "spawn_velocity": [8.728615581032535, -0.24411703918728195],
+                "spawn_position_heading": [(10, -2), -np.pi / 2],
+                "spawn_velocity_car_frame": True,
                 # "image_source": "depth_camera",
                 # "random_color": True
                 # "show_lidar": True,
-                # "spawn_lane_index":("1r1_0_", "1r1_1_", 0),
+                "spawn_lane_index": None,
                 # "destination":"2R1_3_",
                 # "show_side_detector": True,
                 # "show_lane_line_detector": True,
@@ -54,10 +57,14 @@ if __name__ == "__main__":
     )
     import time
 
+    init_state = {'position': (40.82264362985734, -509.3641208712943), 'heading': -89.41878393159747,
+                  'velocity': [8.728615581032535, -0.24411703918728195], 'valid': True}
+
     start = time.time()
     o = env.reset()
-    env.vehicle.set_velocity([5, 0], in_local_frame=False)
+    # env.vehicle.set_velocity([5, 0], in_local_frame=True)
     for s in range(1, 10000):
+        env.vehicle.set_velocity([8.728615581032535, -2.24411703918728195], in_local_frame=True)
         o, r, d, info = env.step(env.action_space.sample())
 
         # else:

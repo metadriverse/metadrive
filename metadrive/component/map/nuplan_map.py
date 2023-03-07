@@ -89,8 +89,11 @@ class NuPlanMap(BaseMap):
         block_polygons = []
         # Lane and lane line
         block_index = 0
+        name = {SemanticMapLayer.ROADBLOCK: "Road Block",
+                SemanticMapLayer.ROADBLOCK_CONNECTOR: "Road Connector"}
+
         for layer in tqdm.tqdm([SemanticMapLayer.ROADBLOCK, SemanticMapLayer.ROADBLOCK_CONNECTOR]):
-            for block in tqdm.tqdm(nearest_vector_map[layer], leave=False):
+            for block in tqdm.tqdm(nearest_vector_map[layer], leave=False, desc="Building {}".format(name[layer])):
                 road_block = NuPlanBlock(block_index, self.road_network, 0, self.map_name, self.nuplan_center)
 
                 # We implement the sample() function outside the Block instance, block._sample() will do nothing

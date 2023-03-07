@@ -34,6 +34,7 @@ NUPLAN_ENV_CONFIG = dict(
     scenario_radius=250,  # radius for per case
 
     # ===== Traffic =====
+    no_pedestrian=True,
     no_traffic=False,
     replay=True,
     no_static_traffic_vehicle=False,
@@ -130,7 +131,8 @@ class NuPlanEnv(BaseEnv):
                 self.engine.register_manager("traffic_manager", NuPlanIDMTrafficManager())
             else:
                 self.engine.register_manager("traffic_manager", NuPlanTrafficManager())
-        self.engine.register_manager("participant_manager", NuplanParticipantManager())
+        if not self.config["no_pedestrian"]:
+            self.engine.register_manager("participant_manager", NuplanParticipantManager())
         self.engine.accept("p", self.stop)
         self.engine.accept("q", self.switch_to_third_person_view)
         self.engine.accept("b", self.switch_to_top_down_view)
@@ -280,10 +282,11 @@ if __name__ == "__main__":
     env = NuPlanEnv(
         {
             "use_render": True,
-            # "agent_policy": NuPlanReplayEgoCarPolicy,
+            "agent_policy": NuPlanReplayEgoCarPolicy,
             "manual_control": True,
             "replay": True,
             "no_traffic": True,
+            "no_pedestrian": True,
             # "debug": True,
             # "debug_static_world": True,
             # "debug_physics_world": True,
