@@ -1,4 +1,9 @@
 import logging
+import tqdm
+import logging
+
+import tqdm
+
 from metadrive.engine.engine_utils import get_global_config
 import geopandas as gpd
 import numpy as np
@@ -15,8 +20,13 @@ from metadrive.constants import LineColor, LineType
 from metadrive.engine.scene_cull import SceneCull
 
 
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+
 class NuPlanMap(BaseMap):
     def __init__(self, map_name, nuplan_center, random_seed=None):
+
         self.map_name = map_name
         self._center = np.array(nuplan_center)
         self._nuplan_map_api = self.engine.data_manager.current_scenario.map_api
@@ -47,6 +57,8 @@ class NuPlanMap(BaseMap):
             block.detach_from_world(self.engine.physics_world or physics_world)
 
     def _generate(self):
+        logger.info("\n \n ############### Start Building Map: {} ############### \n".format(self.map_name))
+        np.seterr(all='ignore')
         map_api = self._nuplan_map_api
         # Center is Important !
         center = self.nuplan_center
@@ -77,8 +89,8 @@ class NuPlanMap(BaseMap):
         block_polygons = []
         # Lane and lane line
         block_index = 0
-        for layer in [SemanticMapLayer.ROADBLOCK, SemanticMapLayer.ROADBLOCK_CONNECTOR]:
-            for block in nearest_vector_map[layer]:
+        for layer in tqdm.tqdm([SemanticMapLayer.ROADBLOCK, SemanticMapLayer.ROADBLOCK_CONNECTOR]):
+            for block in tqdm.tqdm(nearest_vector_map[layer], leave=False):
                 road_block = NuPlanBlock(block_index, self.road_network, 0, self.map_name, self.nuplan_center)
 
                 # We implement the sample() function outside the Block instance, block._sample() will do nothing
@@ -109,6 +121,9 @@ class NuPlanMap(BaseMap):
                 block_points, LineColor.GREY, LineType.CONTINUOUS, in_road_connector=False
             )
         self.boundary_block.construct_block(self.engine.worldNP, self.engine.physics_world, attach_to_world=True)
+        np.seterr(all='warn')
+
+        logger.info("\n \n ############### Finish Building Map: {} ############### \n".format(self.map_name))
 
     def play(self):
         # For debug

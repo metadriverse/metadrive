@@ -124,12 +124,12 @@ class NuPlanEnv(BaseEnv):
         super(NuPlanEnv, self).setup_engine()
         self.engine.register_manager("data_manager", NuPlanDataManager())
         self.engine.register_manager("map_manager", NuPlanMapManager())
-        # if not self.config["no_traffic"]:
-        #     if not self.config['replay']:
-        #         raise ValueError
-        #         self.engine.register_manager("traffic_manager", NuPlanIDMTrafficManager())
-        #     else:
-        #         self.engine.register_manager("traffic_manager", NuPlanTrafficManager())
+        if not self.config["no_traffic"]:
+            if not self.config['replay']:
+                raise ValueError
+                self.engine.register_manager("traffic_manager", NuPlanIDMTrafficManager())
+            else:
+                self.engine.register_manager("traffic_manager", NuPlanTrafficManager())
         self.engine.register_manager("participant_manager", NuplanParticipantManager())
         self.engine.accept("p", self.stop)
         self.engine.accept("q", self.switch_to_third_person_view)
@@ -283,7 +283,7 @@ if __name__ == "__main__":
             # "agent_policy": NuPlanReplayEgoCarPolicy,
             "manual_control": True,
             "replay": True,
-            "no_traffic": False,
+            "no_traffic": True,
             # "debug": True,
             # "debug_static_world": True,
             # "debug_physics_world": True,
