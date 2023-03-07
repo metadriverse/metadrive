@@ -297,7 +297,7 @@ if __name__ == "__main__":
             "window_size": (1200, 800),
             "start_case_index": 300,
             "pstats": True,
-            "case_num": 2000,
+            "case_num": 1,
             "horizon": 1000,
             "vehicle_config": dict(
                 lidar=dict(num_lasers=120, distance=50, num_others=4),

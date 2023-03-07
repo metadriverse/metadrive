@@ -19,7 +19,6 @@ from metadrive.component.road_network.edge_road_network import EdgeRoadNetwork
 from metadrive.constants import LineColor, LineType
 from metadrive.engine.scene_cull import SceneCull
 
-
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -98,11 +97,13 @@ class NuPlanMap(BaseMap):
 
                 # We implement the sample() function outside the Block instance, block._sample() will do nothing
                 def _sample_topology():
-                    for lane in block.interior_edges:
-                        if hasattr(lane, "baseline_path"):
-                            road_block.block_network.add_lane(NuPlanLane(nuplan_center=center, lane_meta_data=lane))
+                    for lane_meta_data in block.interior_edges:
+                        if hasattr(lane_meta_data, "baseline_path"):
+                            road_block.block_network.add_lane(
+                                NuPlanLane(nuplan_center=center, lane_meta_data=lane_meta_data))
                             is_connector = True if layer == SemanticMapLayer.ROADBLOCK_CONNECTOR else False
-                            road_block.set_lane_line(lane, is_road_connector=is_connector, nuplan_center=center)
+                            road_block.set_lane_line(lane_meta_data, is_road_connector=is_connector,
+                                                     nuplan_center=center)
 
                 if layer == SemanticMapLayer.ROADBLOCK:
                     block_polygons.append(block.polygon)
@@ -162,8 +163,9 @@ if __name__ == "__main__":
 
     default_config = NuPlanEnv.default_config()
     default_config["use_render"] = True
-    default_config["debug"] = False
-    default_config["debug_static_world"] = False
+    default_config["city_map_radius"] = 500
+    default_config["debug"] = True
+    default_config["debug_static_world"] = True
     engine = initialize_engine(default_config)
     set_global_random_seed(0)
 

@@ -13,7 +13,6 @@ class NuPlanMapManager(BaseManager):
     """
     PRIORITY = 0  # Map update has the most high priority
     DEFAULT_DATA_BUFFER_SIZE = 200
-    MAP_CENTERS = {'us-nv-las-vegas-strip': [664396.54429387, 3997613.41534655]}
 
     def __init__(self):
         super(NuPlanMapManager, self).__init__()
@@ -23,6 +22,7 @@ class NuPlanMapManager(BaseManager):
         self.start = self.engine.global_config["start_case_index"]
         self.sdc_dest_point = None
         self.current_sdc_route = None
+        self.MAP_CENTERS = self.engine.global_config["map_centers"]
 
         # Now we store the whole city map which is the largest map! There are four maps in NuPlan
         self.store_map_buffer = {}

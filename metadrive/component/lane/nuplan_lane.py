@@ -38,8 +38,8 @@ class NuPlanLane(PointLane):
         self.left_lanes = lane_meta_data.adjacent_edges[0],
         self.right_lanes = lane_meta_data.adjacent_edges[-1]
 
-        self.left_boundary = InterpolatingLine(self._get_boundary_points(lane_meta_data.left_boundary))
-        self.right_boundary = InterpolatingLine(self._get_boundary_points(lane_meta_data.right_boundary))
+        self.left_boundary = InterpolatingLine(self._get_boundary_points(lane_meta_data.left_boundary, nuplan_center))
+        self.right_boundary = InterpolatingLine(self._get_boundary_points(lane_meta_data.right_boundary, nuplan_center))
         self.width = self.VIS_LANE_WIDTH
 
     @staticmethod
@@ -62,9 +62,9 @@ class NuPlanLane(PointLane):
         super(NuPlanLane, self).destroy()
 
     @staticmethod
-    def _get_boundary_points(boundary):
+    def _get_boundary_points(boundary, center):
         path = boundary.discrete_path
-        points = [np.array([pose.x, pose.y]) for pose in path]
+        points = np.array([np.array([pose.x - center[0], pose.y - center[1]]) for pose in path])
         return points
 
     def construct_lane_in_block(self, block, lane_index):
