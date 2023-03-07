@@ -141,6 +141,7 @@ class BaseObject(BaseRunnable):
         rand_c = color[idx]
         self._panda_color = rand_c
 
+        # store all NodePath reparented to this node
         self._node_path_list = []
 
     def disable_gravity(self):
