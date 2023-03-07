@@ -73,9 +73,9 @@ class AbstractLane:
         """
         raise NotImplementedError()
 
-    def heading_at(self, longitudinal) -> list:
+    def heading_at(self, longitudinal) -> np.array:
         heaidng_theta = self.heading_theta_at(longitudinal)
-        return [math.cos(heaidng_theta), math.sin(heaidng_theta)]
+        return np.array([math.cos(heaidng_theta), math.sin(heaidng_theta)])
 
     @abstractmethod
     def width_at(self, longitudinal: float) -> float:

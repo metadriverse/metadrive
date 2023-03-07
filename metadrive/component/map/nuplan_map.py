@@ -176,7 +176,8 @@ if __name__ == "__main__":
     map.attach_to_world([664396.54429387, 3997613.41534655])
     # engine.enableMouse()
     map.road_network.show_bounding_box(engine, (1, 0, 0, 1))
-
+    lanes = [lane_info.lane for lane_info in map.road_network.graph.values()]
+    engine.show_lane_coordinates(lanes)
 
     def detach_map():
         map.road_network.remove_bounding_box()
@@ -184,7 +185,7 @@ if __name__ == "__main__":
 
 
     def attach_map():
-        position = np.array([664396, 3997613 + np.random.randint(0, 1000)])
+        position = np.array([664396, 3997613])
         map.attach_to_world(position)
         map.road_network.show_bounding_box(engine, (1, 0, 0, 1))
         engine.main_camera.set_bird_view_pos(pos)
