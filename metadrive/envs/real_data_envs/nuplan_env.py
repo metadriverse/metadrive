@@ -7,8 +7,8 @@ from metadrive.constants import TerminationState
 from metadrive.envs.base_env import BaseEnv
 from metadrive.manager.nuplan_data_manager import NuPlanDataManager
 from metadrive.manager.nuplan_map_manager import NuPlanMapManager
-from metadrive.manager.nuplan_traffic_manager import NuPlanTrafficManager
 from metadrive.manager.nuplan_participant_manager import NuplanParticipantManager
+from metadrive.manager.nuplan_traffic_manager import NuPlanTrafficManager
 from metadrive.obs.real_env_observation import NuPlanObservation
 from metadrive.obs.state_obs import LidarStateObservation
 from metadrive.policy.replay_policy import NuPlanReplayEgoCarPolicy
@@ -30,8 +30,9 @@ NUPLAN_ENV_CONFIG = dict(
     sequential_seed=False,
 
     # ===== Map Config =====
-    city_map_radius=20000,  # load the whole map!
+    city_map_radius=20000,  # load the whole map, setting as large as possible
     scenario_radius=250,  # radius for per case
+    load_city_map=False,
     map_centers={'us-nv-las-vegas-strip': [664396, 3997613]},
 
     # ===== Traffic =====
@@ -295,10 +296,11 @@ if __name__ == "__main__":
             # "start_case_index": 192,
             # "start_case_index": 1000,
             # "waymo_data_directory": "E:\\PAMI_waymo_data\\idm_filtered\\test",
+            "load_city_map": False,
             "window_size": (1200, 800),
             "start_case_index": 300,
             "pstats": True,
-            "case_num": 2000,
+            "case_num": 1,
             "show_coordinates": True,
             "horizon": 1000,
             "vehicle_config": dict(
@@ -312,7 +314,7 @@ if __name__ == "__main__":
     )
     success = []
     for seed in range(300, 2300):
-        env.reset(force_seed=seed)
+        env.reset(force_seed=300)
         for i in range(env.engine.data_manager.current_scenario_length * 10):
             o, r, d, info = env.step([0, 0])
 

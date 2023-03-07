@@ -23,20 +23,37 @@ class NuPlanMapManager(BaseManager):
         self.sdc_dest_point = None
         self.current_sdc_route = None
         self.MAP_CENTERS = self.engine.global_config["map_centers"]
+        self.MAP_RADIUS = self.engine.global_config["city_map_radius"] \
+            if self.engine.global_config["load_city_map"] else self.engine.global_config["scenario_radius"]
 
         # Now we store the whole city map which is the largest map! There are four maps in NuPlan
+        self.city_maps = {}
+
+        # It is used for storing maps separately
         self.store_map_buffer = {}
 
     def reset(self):
         current_map_name = self.engine.data_manager.current_scenario.map_api.map_name
-        if current_map_name in self.store_map_buffer:
-            new_map = self.store_map_buffer[current_map_name]
-        else:
-            center = self.MAP_CENTERS[current_map_name]
-            new_map = NuPlanMap(nuplan_center=center, map_name=current_map_name)
-            self.store_map_buffer[current_map_name] = new_map
         state = self.engine.data_manager.current_scenario.get_ego_state_at_iteration(0)
         scenario_center = [state.waypoint.x, state.waypoint.y]
+        if not self.engine.global_config["load_city_map"]:
+            # In this mode we don't buffer map for saving time
+            if current_map_name in self.city_maps:
+                self.city_maps.pop(current_map_name)
+            if self.engine.data_manager.current_scenario_index in self.store_map_buffer:
+                new_map = self.store_map_buffer[self.engine.data_manager.current_scenario_index]
+            else:
+                new_map = NuPlanMap(nuplan_center=scenario_center, map_name=current_map_name, radius=self.MAP_RADIUS)
+                self.store_map_buffer[self.engine.data_manager.current_scenario_index] = new_map
+            self.city_maps[current_map_name] = new_map
+        else:
+            # When setting loading city map, the whole map will be created
+            if current_map_name in self.city_maps:
+                new_map = self.city_maps[current_map_name]
+            else:
+                center = self.MAP_CENTERS[current_map_name]
+                new_map = NuPlanMap(nuplan_center=center, map_name=current_map_name, radius=self.MAP_RADIUS)
+                self.city_maps[current_map_name] = new_map
         self.load_map(new_map, scenario_center)
         self.update_ego_route()
 

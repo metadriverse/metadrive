@@ -24,14 +24,14 @@ logger = logging.getLogger(__name__)
 
 
 class NuPlanMap(BaseMap):
-    def __init__(self, map_name, nuplan_center, random_seed=None):
+    def __init__(self, map_name, nuplan_center, radius, random_seed=None):
 
         self.map_name = map_name
         self._center = np.array(nuplan_center)
         self._nuplan_map_api = self.engine.data_manager.current_scenario.map_api
         self._attached_block = []
         self.boundary_block = None  # it won't be detached
-        self._radius = get_global_config()["city_map_radius"]
+        self._radius = radius
         self.cull_dist = get_global_config()["scenario_radius"]
         super(NuPlanMap, self).__init__(dict(id=map_name), random_seed=random_seed)
 
