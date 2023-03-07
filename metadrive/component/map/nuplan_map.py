@@ -16,12 +16,12 @@ from metadrive.engine.scene_cull import SceneCull
 
 
 class NuPlanMap(BaseMap):
-    _radius = 10000  # as large as possible to include all map elements, for setting a small value for debugging
+    _radius = 20000  # as large as possible to include all map elements, for setting a small value for debugging
     cull_dist = 250
 
     def __init__(self, map_index, nuplan_center, random_seed=None):
         self.map_index = map_index
-        self._center = nuplan_center
+        self._center = np.array(nuplan_center)
         self._nuplan_map_api = self.engine.data_manager.get_case(self.map_index).map_api
         self._attached_block = []
         self.boundary_block = None  # it won't be detached
@@ -35,8 +35,11 @@ class NuPlanMap(BaseMap):
         parent_node_path, physics_world = self.engine.worldNP or parent_np, self.engine.physics_world or physics_world
         self.road_network = self.road_network_type()
         for block in self.blocks:
-            if not SceneCull.all_out_of_bounding_box(block.bounding_box, [center_point], self.cull_dist):
-                self.road_network += block.block_network
+            # block.block_network.show_bounding_box(self.engine)
+            if not SceneCull.out_of_bounding_box(block.bounding_box,
+                                                 np.array(center_point) - self.nuplan_center,
+                                                 self.cull_dist):
+                self.road_network.add(block.block_network)
                 block.attach_to_world(parent_node_path, physics_world)
                 self._attached_block.append(block)
 
@@ -142,8 +145,8 @@ if __name__ == "__main__":
 
     default_config = NuPlanEnv.default_config()
     default_config["use_render"] = True
-    default_config["debug"] = True
-    default_config["debug_static_world"] = True
+    default_config["debug"] = False
+    default_config["debug_static_world"] = False
     engine = initialize_engine(default_config)
     set_global_random_seed(0)
 
@@ -152,7 +155,23 @@ if __name__ == "__main__":
     map = NuPlanMap(map_index=0, nuplan_center=[664396.54429387, 3997613.41534655])
     map.attach_to_world([664396.54429387, 3997613.41534655])
     # engine.enableMouse()
-    map.road_network.show_bounding_box(engine)
+    map.road_network.show_bounding_box(engine, (1, 0, 0, 1))
+
+
+    def detach_map():
+        map.road_network.remove_bounding_box()
+        map.detach_from_world()
+
+
+    def attach_map():
+        position = np.array([664396, 3997613+np.random.randint(0, 1000)])
+        map.attach_to_world(position)
+        map.road_network.show_bounding_box(engine, (1, 0, 0, 1))
+        engine.main_camera.set_bird_view_pos(pos)
+
+
+    engine.accept("d", detach_map)
+    engine.accept("a", attach_map)
 
     # argoverse data set is as the same coordinates as panda3d
     pos = map.get_center_point()

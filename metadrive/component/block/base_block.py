@@ -1,7 +1,7 @@
 import logging
+import math
 from typing import List, Dict
 
-import math
 from panda3d.bullet import BulletBoxShape, BulletGhostNode
 from panda3d.core import Vec3, LQuaternionf, Vec4, TextureStage, RigidBodyCombiner, \
     SamplerState, NodePath

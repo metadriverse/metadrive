@@ -396,7 +396,7 @@ class EngineCore(ShowBase.ShowBase):
         line_seg.setThickness(thickness)
         np = NodePath(line_seg.create(False))
         np.reparentTo(self.render)
-        # TODO(PZH): This NP is not removed.
+        return np
 
 
 if __name__ == "__main__":

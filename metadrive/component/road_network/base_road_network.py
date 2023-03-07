@@ -1,6 +1,7 @@
 import logging
+import numpy as np
 from typing import List, Tuple, Union
-
+from panda3d.core import NodePath
 from metadrive.component.lane.abs_lane import AbstractLane
 
 logger = logging.getLogger(__name__)
@@ -12,6 +13,7 @@ class BaseRoadNetwork:
     def __init__(self, debug=False):
         self.graph = None
         self.bounding_box = None
+        self._lines_np = []
 
     def clear(self):
         self.graph.clear()
@@ -65,12 +67,21 @@ class BaseRoadNetwork:
         ret -= other
         return ret
 
-    def show_bounding_box(self, engine):
+    def show_bounding_box(self, engine, color=None):
+        if color is None:
+            color = list(np.random.choice(range(256), size=3) / 256) + [1]
         bound_box = self.get_bounding_box()
         points = [(x, -y) for x in bound_box[:2] for y in bound_box[2:]]
         for k, p in enumerate(points[:-1]):
             for p_ in points[k + 1:]:
-                engine.add_line((*p, 2), (*p_, 2), (1, 0., 0., 1), 2)
+                self._lines_np.append(engine.add_line((*p, 2), (*p_, 2), color, 2))
+
+    def remove_bounding_box(self):
+        if len(self._lines_np) == 0:
+            return
+        for np in self._lines_np:
+            np.detachNode()
+            np.removeNode()
 
     def destroy(self):
         self.bounding_box = None
