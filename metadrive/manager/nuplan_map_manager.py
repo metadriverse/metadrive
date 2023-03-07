@@ -33,10 +33,10 @@ class NuPlanMapManager(BaseManager):
             new_map = self.store_map_buffer[current_map_name]
         else:
             center = self.MAP_CENTERS[current_map_name]
-            new_map = NuPlanMap(nuplan_center=center, map_index=current_map_name)
+            new_map = NuPlanMap(nuplan_center=center, map_name=current_map_name)
             self.store_map_buffer[current_map_name] = new_map
         state = self.engine.data_manager.current_scenario.get_ego_state_at_iteration(0)
-        scenario_center = state[state.waypoint.x, state.waypoint.y]
+        scenario_center = [state.waypoint.x, state.waypoint.y]
         self.load_map(new_map, scenario_center)
         self.update_ego_route()
 
@@ -55,7 +55,7 @@ class NuPlanMapManager(BaseManager):
         # return map
 
     def load_map(self, map, center):
-        map.attach_to_world()
+        map.attach_to_world(center)
         self.current_map = map
 
     def unload_map(self, map):

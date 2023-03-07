@@ -197,7 +197,8 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
         try:
             self.bounding_box = self.block_network.get_bounding_box()
         except:
-            logging.warning("Can not find bounding box for it")
+            if len(self.block_network.graph) > 0:
+                logging.warning("Can not find bounding box for it")
             self.bounding_box = None, None, None, None
 
         self._node_path_list.append(self.sidewalk_node_path)

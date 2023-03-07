@@ -1,5 +1,5 @@
 import logging
-
+from metadrive.engine.engine_utils import get_global_config
 import geopandas as gpd
 import numpy as np
 from nuplan.common.actor_state.state_representation import Point2D
@@ -16,16 +16,15 @@ from metadrive.engine.scene_cull import SceneCull
 
 
 class NuPlanMap(BaseMap):
-    _radius = 20000  # as large as possible to include all map elements, for setting a small value for debugging
-    cull_dist = 250
-
-    def __init__(self, map_index, nuplan_center, random_seed=None):
-        self.map_index = map_index
+    def __init__(self, map_name, nuplan_center, random_seed=None):
+        self.map_name = map_name
         self._center = np.array(nuplan_center)
-        self._nuplan_map_api = self.engine.data_manager.get_case(self.map_index).map_api
+        self._nuplan_map_api = self.engine.data_manager.current_scenario.map_api
         self._attached_block = []
         self.boundary_block = None  # it won't be detached
-        super(NuPlanMap, self).__init__(dict(id=map_index), random_seed=random_seed)
+        self._radius = get_global_config()["city_map_radius"]
+        self.cull_dist = get_global_config()["scenario_radius"]
+        super(NuPlanMap, self).__init__(dict(id=map_name), random_seed=random_seed)
 
     @property
     def nuplan_center(self):
@@ -80,7 +79,7 @@ class NuPlanMap(BaseMap):
         block_index = 0
         for layer in [SemanticMapLayer.ROADBLOCK, SemanticMapLayer.ROADBLOCK_CONNECTOR]:
             for block in nearest_vector_map[layer]:
-                road_block = NuPlanBlock(block_index, self.road_network, 0, self.map_index, self.nuplan_center)
+                road_block = NuPlanBlock(block_index, self.road_network, 0, self.map_name, self.nuplan_center)
 
                 # We implement the sample() function outside the Block instance, block._sample() will do nothing
                 def _sample_topology():
@@ -98,7 +97,7 @@ class NuPlanMap(BaseMap):
                 self.blocks.append(road_block)
                 # intersection road connector
 
-        self.boundary_block = NuPlanBlock(block_index, self.road_network, 0, self.map_index, self.nuplan_center)
+        self.boundary_block = NuPlanBlock(block_index, self.road_network, 0, self.map_name, self.nuplan_center)
         interpolygons = [block.polygon for block in nearest_vector_map[SemanticMapLayer.INTERSECTION]]
         boundaries = gpd.GeoSeries(unary_union(interpolygons + block_polygons)).boundary.explode()
         # boundaries.plot()
@@ -129,7 +128,7 @@ class NuPlanMap(BaseMap):
         return EdgeRoadNetwork
 
     def destroy(self):
-        self.map_index = None
+        self.map_name = None
         super(NuPlanMap, self).destroy()
 
     def __del__(self):
@@ -152,7 +151,7 @@ if __name__ == "__main__":
 
     engine.data_manager = NuPlanDataManager()
     engine.data_manager.seed(0)
-    map = NuPlanMap(map_index=0, nuplan_center=[664396.54429387, 3997613.41534655])
+    map = NuPlanMap(map_name=0, nuplan_center=[664396.54429387, 3997613.41534655])
     map.attach_to_world([664396.54429387, 3997613.41534655])
     # engine.enableMouse()
     map.road_network.show_bounding_box(engine, (1, 0, 0, 1))
@@ -164,7 +163,7 @@ if __name__ == "__main__":
 
 
     def attach_map():
-        position = np.array([664396, 3997613+np.random.randint(0, 1000)])
+        position = np.array([664396, 3997613 + np.random.randint(0, 1000)])
         map.attach_to_world(position)
         map.road_network.show_bounding_box(engine, (1, 0, 0, 1))
         engine.main_camera.set_bird_view_pos(pos)

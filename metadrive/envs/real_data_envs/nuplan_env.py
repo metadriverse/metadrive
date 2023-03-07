@@ -29,6 +29,10 @@ NUPLAN_ENV_CONFIG = dict(
     store_map=True,
     sequential_seed=False,
 
+    # ===== Map Config =====
+    city_map_radius=30000,  # load the whole map!
+    scenario_radius=250,  # radius for per case
+
     # ===== Traffic =====
     no_traffic=False,
     replay=True,
@@ -287,10 +291,10 @@ if __name__ == "__main__":
             # "start_case_index": 192,
             # "start_case_index": 1000,
             # "waymo_data_directory": "E:\\PAMI_waymo_data\\idm_filtered\\test",
-            "window_size": (2400, 1600),
-            "start_case_index": 4,
+            "window_size": (1200, 800),
+            "start_case_index": 300,
             "pstats": True,
-            "case_num": 1,
+            "case_num": 2000,
             "horizon": 1000,
             "vehicle_config": dict(
                 lidar=dict(num_lasers=120, distance=50, num_others=4),
@@ -303,7 +307,7 @@ if __name__ == "__main__":
     )
     success = []
     for seed in range(300, 2000):
-        env.reset(force_seed=4)
+        env.reset(force_seed=seed)
         for i in range(env.engine.data_manager.current_scenario_length * 10):
             o, r, d, info = env.step([0, 0])
 

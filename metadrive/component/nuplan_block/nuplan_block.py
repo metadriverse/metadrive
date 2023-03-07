@@ -25,7 +25,6 @@ class LaneLineProperty:
 
 
 class NuPlanBlock(BaseBlock):
-    _radius = None  # [m] show 500m map
 
     def __init__(self, block_index: int, global_network, random_seed, map_index, nuplan_center):
         self.map_index = map_index
@@ -34,8 +33,8 @@ class NuPlanBlock(BaseBlock):
 
         # authorize engine access for this object
         # self.engine = get_engine()
-        self._nuplan_map_api = self.engine.data_manager.get_case(self.map_index).map_api
-        # TODO LQY, make it a dict
+        self._nuplan_map_api = self.engine.data_manager.current_scenario.map_api
+
         self.lines = {}
         self.boundaries = {}
 
@@ -49,6 +48,7 @@ class NuPlanBlock(BaseBlock):
         """
 
         return True
+        # Deprecated
         map_api = self._nuplan_map_api
         # Center is Important !
         center = self.nuplan_center
