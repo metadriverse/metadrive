@@ -406,7 +406,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             assert self.navigation
 
         if self.config["spawn_velocity"] is not None:
-            self.set_velocity(self.config["spawn_velocity"], self.config["spawn_velocity_car_frame"])
+            self.set_velocity(self.config["spawn_velocity"], in_local_frame=self.config["spawn_velocity_car_frame"])
 
     """------------------------------------------- act -------------------------------------------------"""
 

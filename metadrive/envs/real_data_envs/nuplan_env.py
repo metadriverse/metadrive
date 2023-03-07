@@ -30,7 +30,7 @@ NUPLAN_ENV_CONFIG = dict(
     sequential_seed=False,
 
     # ===== Map Config =====
-    city_map_radius=1000,  # load the whole map!
+    city_map_radius=20000,  # load the whole map!
     scenario_radius=250,  # radius for per case
     map_centers={'us-nv-las-vegas-strip': [664396, 3997613]},
 
@@ -284,9 +284,9 @@ if __name__ == "__main__":
         {
             "use_render": True,
             "agent_policy": NuPlanReplayEgoCarPolicy,
-            "manual_control": True,
+            # "manual_control": True,
             "replay": True,
-            "no_traffic": True,
+            "no_traffic": False,
             "no_pedestrian": True,
             # "debug": True,
             # "debug_static_world": True,
@@ -298,7 +298,7 @@ if __name__ == "__main__":
             "window_size": (1200, 800),
             "start_case_index": 300,
             "pstats": True,
-            "case_num": 1,
+            "case_num": 2000,
             "show_coordinates": True,
             "horizon": 1000,
             "vehicle_config": dict(
@@ -311,7 +311,7 @@ if __name__ == "__main__":
         }
     )
     success = []
-    for seed in range(300, 2000):
+    for seed in range(300, 2300):
         env.reset(force_seed=seed)
         for i in range(env.engine.data_manager.current_scenario_length * 10):
             o, r, d, info = env.step([0, 0])
@@ -338,7 +338,7 @@ if __name__ == "__main__":
             #         }
             #     )
             #
-            # if d:
-            #     if info["arrive_dest"]:
-            #         print("seed:{}, success".format(env.engine.global_random_seed))
-            #     break
+            if d:
+                if info["arrive_dest"]:
+                    print("seed:{}, success".format(env.engine.global_random_seed))
+                break
