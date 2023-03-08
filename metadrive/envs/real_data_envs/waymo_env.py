@@ -276,7 +276,7 @@ if __name__ == "__main__":
             "manual_control": True,
             "replay": False,
             "no_traffic": False,
-            "debug":True,
+            "debug": True,
             "debug_static_world": True,
             # "no_traffic":True,
             # "start_case_index": 192,

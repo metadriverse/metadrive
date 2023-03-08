@@ -27,7 +27,6 @@ class WaymoLane(PointLane):
         self.left_lanes = waymo_map_data[waymo_lane_id][WaymoLaneProperty.LEFT_NEIGHBORS]
         self.right_lanes = waymo_map_data[waymo_lane_id][WaymoLaneProperty.RIGHT_NEIGHBORS]
 
-
     def get_lane_width(self, waymo_lane_id, waymo_map_data):
         """
         We use this function to get possible lane width from raw data
@@ -91,8 +90,9 @@ class WaymoLane(PointLane):
                 direction_v = end - middle
                 theta = -math.atan2(direction_v[1], direction_v[0])
                 length = self.length
-                self._construct_lane_only_vis_segment(block, middle, self.VIS_LANE_WIDTH, length * 1.3 / segment_num,
-                                                      theta)
+                self._construct_lane_only_vis_segment(
+                    block, middle, self.VIS_LANE_WIDTH, length * 1.3 / segment_num, theta
+                )
 
 
 if __name__ == "__main__":

@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 
 class NuPlanMap(BaseMap):
     def __init__(self, map_name, nuplan_center, radius, random_seed=None, need_lane_localization=True):
-        self.need_lane_localization=need_lane_localization
+        self.need_lane_localization = need_lane_localization
         self.map_name = map_name
         self._center = np.array(nuplan_center)
         self._nuplan_map_api = self.engine.data_manager.current_scenario.map_api
@@ -102,7 +102,11 @@ class NuPlanMap(BaseMap):
                     for lane_meta_data in block.interior_edges:
                         if hasattr(lane_meta_data, "baseline_path"):
                             road_block.block_network.add_lane(
-                                NuPlanLane(nuplan_center=center, lane_meta_data=lane_meta_data, need_lane_localization=self.need_lane_localization)
+                                NuPlanLane(
+                                    nuplan_center=center,
+                                    lane_meta_data=lane_meta_data,
+                                    need_lane_localization=self.need_lane_localization
+                                )
                             )
                             is_connector = True if layer == SemanticMapLayer.ROADBLOCK_CONNECTOR else False
                             road_block.set_lane_line(
