@@ -13,6 +13,44 @@ def process_memory():
     return mem_info.rss / 1024 / 1024
 
 
+def benchmark_fps():
+    env = NuPlanEnv(
+        {
+            "use_render": False,
+            "agent_policy": NuPlanReplayEgoCarPolicy,
+            "replay": True,
+            "no_traffic": False,
+            "no_pedestrian": True,
+            "load_city_map": True,
+            "window_size": (1200, 800),
+            "start_case_index": 300,
+            "pstats": True,
+            "case_num": 2000,
+            "horizon": 1000,
+            "vehicle_config": dict(
+                lidar=dict(num_lasers=120, distance=50, num_others=4),
+                lane_line_detector=dict(num_lasers=12, distance=50),
+                side_detector=dict(num_lasers=160, distance=50),
+            ),
+        }
+    )
+    env.reset()
+    total_time = 0
+    total_steps = 0
+    for seed in range(300, 400):
+        env.reset(force_seed=seed)
+        start = time.time()
+        for i in range(env.engine.data_manager.current_scenario_length * 10):
+            o, r, d, info = env.step([0, 0])
+            total_steps += 1
+            if d:
+                break
+        total_time += time.time() - start
+        if (seed + 300) % 20 == 0:
+            print("Seed: {}, FPS: {}".format(seed, total_steps / total_time))
+    print("FPS: {}".format(total_steps / total_time))
+
+
 def benchmark_reset_5_map_1000_times(load_city_map=True):
     env = NuPlanEnv(
         {
@@ -88,4 +126,5 @@ def benchmark_reset_1000(load_city_map=True):
 if __name__ == "__main__":
     # benchmark_reset_1000(load_city_map=False)
     # benchmark_reset_1000(load_city_map=False)
-    benchmark_reset_5_map_1000_times(True)
+    # benchmark_reset_5_map_1000_times(True)
+    benchmark_fps()

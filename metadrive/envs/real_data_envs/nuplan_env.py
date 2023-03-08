@@ -296,7 +296,7 @@ if __name__ == "__main__":
             "window_size": (1200, 800),
             "start_case_index": 300,
             "pstats": True,
-            "case_num": 5,
+            "case_num": 2000,
             "show_coordinates": True,
             "horizon": 1000,
             "vehicle_config": dict(
@@ -310,7 +310,7 @@ if __name__ == "__main__":
     )
     success = []
     for seed in range(300, 2300):
-        env.reset(force_seed=300 + seed % 5)
+        env.reset(force_seed=seed)
         for i in range(env.engine.data_manager.current_scenario_length * 10):
             o, r, d, info = env.step([0, 0])
 
