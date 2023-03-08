@@ -14,6 +14,7 @@ from metadrive.obs.state_obs import LidarStateObservation
 from metadrive.policy.replay_policy import NuPlanReplayEgoCarPolicy
 from metadrive.utils import clip
 from metadrive.utils import get_np_random
+from metadrive.utils.coordinates_shift import nuplan_to_metadrive_vector
 
 NUPLAN_ENV_CONFIG = dict(
     # ===== Dataset Config =====
@@ -33,7 +34,7 @@ NUPLAN_ENV_CONFIG = dict(
     city_map_radius=20000,  # load the whole map, setting as large as possible
     scenario_radius=250,  # radius for per case
     load_city_map=False,
-    map_centers={'us-nv-las-vegas-strip': [664396, 3997613]},
+    map_centers={'us-nv-las-vegas-strip': nuplan_to_metadrive_vector([664396, 3997613])},
 
     # ===== Traffic =====
     no_pedestrian=True,
@@ -291,8 +292,8 @@ if __name__ == "__main__":
             "no_pedestrian": True,
             # "debug": True,
             # "debug_static_world": True,
-            "debug_physics_world": True,
-            "load_city_map": False,
+            "debug_physics_world": False,
+            "load_city_map": True,
             "window_size": (1200, 800),
             "start_case_index": 300,
             "pstats": True,

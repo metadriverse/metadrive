@@ -1,10 +1,11 @@
 from nuplan.planning.scenario_builder.nuplan_db.nuplan_scenario import NuPlanScenario
+from metadrive.utils.coordinates_shift import nuplan_to_metadrive_vector
 
 from metadrive.component.lane.point_lane import PointLane
 from metadrive.component.map.nuplan_map import NuPlanMap
 from metadrive.constants import DEFAULT_AGENT
 from metadrive.manager.base_manager import BaseManager
-from metadrive.utils.nuplan_utils.parse_traffic import parse_ego_vehicle_trajectory, parse_ego_vehicle_state
+from metadrive.utils.nuplan_utils.parse_object_state import parse_ego_vehicle_trajectory, parse_ego_vehicle_state
 
 
 class NuPlanMapManager(BaseManager):
@@ -35,7 +36,7 @@ class NuPlanMapManager(BaseManager):
     def reset(self):
         current_map_name = self.engine.data_manager.current_scenario.map_api.map_name
         state = self.engine.data_manager.current_scenario.get_ego_state_at_iteration(0)
-        scenario_center = [state.waypoint.x, state.waypoint.y]
+        scenario_center = nuplan_to_metadrive_vector([state.waypoint.x, state.waypoint.y])
         if not self.engine.global_config["load_city_map"]:
             # In this mode we don't buffer map for saving time
             if current_map_name in self.city_maps:

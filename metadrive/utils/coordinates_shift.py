@@ -1,3 +1,4 @@
+import numpy as np
 from panda3d.core import Vec3
 
 from metadrive.utils.math_utils import Vector
@@ -62,18 +63,39 @@ def metadrive_heading(heading: float) -> float:
     return -heading
 
 
-def waymo_2_metadrive_position(position):
-    return position[0], -position[1]
+def waymo_to_metadrive_vector(vector):
+    return vector[0], -vector[1]
 
 
-def waymo_2_metadrive_heading(heading):
+def waymo_to_metadrive_heading(heading):
     return -heading
 
 
-def nuplan_2_metadrive_position(position, nuplan_center=(0, 0)):
-    "All positions in nuplan should be centered in (0,0) to avoid numerical explosion"
-    return position[0] - nuplan_center[0], position[1] - nuplan_center[1]
+def nuplan_to_metadrive_vector(vector, nuplan_center=(0, 0)):
+    "All vec in nuplan should be centered in (0,0) to avoid numerical explosion"
+    vector = np.array(vector)
+    if len(vector.shape) == 1:
+        vector[1] *= -1
+    else:
+        vector[:, 1] *= -1
+    vector -= nuplan_center
+    return vector
 
 
-def nuplan_2_metadrive_heading(heading):
-    return heading
+def metadrive_to_nuplan_vector(vector, nuplan_center=(0, 0)):
+    "All vec in nuplan should be centered in (0,0) to avoid numerical explosion"
+    vector = np.array(vector)
+    vector += nuplan_center
+    if len(vector.shape) == 1:
+        vector[1] *= -1
+    else:
+        vector[:, 1] *= -1
+    return vector
+
+
+def nuplan_to_metadrive_heading(heading):
+    return -heading
+
+
+def metadrive_to_nuplan_heading(heading):
+    return -heading

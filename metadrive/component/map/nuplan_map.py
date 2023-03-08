@@ -1,12 +1,8 @@
 import logging
-import tqdm
-import logging
 
-import tqdm
-
-from metadrive.engine.engine_utils import get_global_config
 import geopandas as gpd
 import numpy as np
+import tqdm
 from nuplan.common.actor_state.state_representation import Point2D
 from nuplan.common.maps.maps_datatypes import SemanticMapLayer, StopLineType
 from shapely.ops import unary_union
@@ -17,7 +13,9 @@ from metadrive.component.nuplan_block.nuplan_block import LaneLineProperty
 from metadrive.component.nuplan_block.nuplan_block import NuPlanBlock
 from metadrive.component.road_network.edge_road_network import EdgeRoadNetwork
 from metadrive.constants import LineColor, LineType
+from metadrive.engine.engine_utils import get_global_config
 from metadrive.engine.scene_cull import SceneCull
+from metadrive.utils.coordinates_shift import nuplan_to_metadrive_vector, metadrive_to_nuplan_vector
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -79,8 +77,8 @@ class NuPlanMap(BaseMap):
             # SemanticMapLayer.STOP_SIGN,
             # SemanticMapLayer.DRIVABLE_AREA,
         ]
-
-        nearest_vector_map = map_api.get_proximal_map_objects(Point2D(*center), self._radius, layer_names)
+        center_for_query = Point2D(*metadrive_to_nuplan_vector(center))
+        nearest_vector_map = map_api.get_proximal_map_objects(center_for_query, self._radius, layer_names)
         # Filter out stop polygons in turn stop
         if SemanticMapLayer.STOP_LINE in nearest_vector_map:
             stop_polygons = nearest_vector_map[SemanticMapLayer.STOP_LINE]
@@ -128,7 +126,7 @@ class NuPlanMap(BaseMap):
         # plt.show()
         for idx, boundary in enumerate(boundaries[0]):
             block_points = np.array(list(i for i in zip(boundary.coords.xy[0], boundary.coords.xy[1])))
-            block_points -= center
+            block_points = nuplan_to_metadrive_vector(block_points, self.nuplan_center)
             self.boundary_block.boundaries["boundary_{}".format(idx)] = LaneLineProperty(
                 block_points, LineColor.GREY, LineType.CONTINUOUS, in_road_connector=False
             )
@@ -144,11 +142,8 @@ class NuPlanMap(BaseMap):
             b.attach_to_world(self.engine.worldNP, self.engine.physics_world)
             b.detach_from_world(self.engine.physics_world)
 
-    def metadrive_to_nuplan_position(self, pos):
-        return pos[0] + self.nuplan_center[0], pos[1] + self.nuplan_center[1]
-
     def nuplan_to_metadrive_position(self, pos):
-        return pos[0] - self.nuplan_center[0], pos[1] - self.nuplan_center[1]
+        return nuplan_to_metadrive_vector(pos, self.nuplan_center)
 
     @property
     def road_network_type(self):
@@ -179,22 +174,28 @@ if __name__ == "__main__":
 
     engine.data_manager = NuPlanDataManager()
     engine.data_manager.seed(0)
-    map = NuPlanMap(map_name=0, nuplan_center=[664396.54429387, 3997613.41534655], radius=500)
-    map.attach_to_world([664396.54429387, 3997613.41534655])
+
+    center = nuplan_to_metadrive_vector([664396, 3997613])
+
+    map = NuPlanMap(map_name=0, nuplan_center=center, radius=500)
+    map.attach_to_world(center)
     # engine.enableMouse()
     map.road_network.show_bounding_box(engine, (1, 0, 0, 1))
     lanes = [lane_info.lane for lane_info in map.road_network.graph.values()]
     engine.show_lane_coordinates(lanes)
 
+
     def detach_map():
         map.road_network.remove_bounding_box()
         map.detach_from_world()
 
+
     def attach_map():
-        position = np.array([664396, 3997613])
+        position = np.array(center)
         map.attach_to_world(position)
         map.road_network.show_bounding_box(engine, (1, 0, 0, 1))
         engine.main_camera.set_bird_view_pos(pos)
+
 
     engine.accept("d", detach_map)
     engine.accept("a", attach_map)

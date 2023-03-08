@@ -5,7 +5,7 @@ import geopandas as gpd
 import numpy as np
 from shapely.geometry.linestring import LineString
 from shapely.geometry.multilinestring import MultiLineString
-
+from metadrive.utils.coordinates_shift import nuplan_to_metadrive_vector
 from metadrive.component.lane.point_lane import PointLane
 from metadrive.constants import DrivableAreaProperty
 from metadrive.utils.interpolating_line import InterpolatingLine
@@ -31,8 +31,7 @@ class NuPlanLane(PointLane):
             points = lane_meta_data.polygon.boundary.xy
         self.polygon = [[points[0][i], points[1][i], 0.1] for i in range(len(points[0]))]
         self.polygon += [[points[0][i], points[1][i], 0.] for i in range(len(points[0]))]
-        self.polygon = np.array(self.polygon)
-        self.polygon -= np.array([nuplan_center[0], nuplan_center[1], 0])
+        self.polygon = nuplan_to_metadrive_vector(self.polygon, nuplan_center=[nuplan_center[0], nuplan_center[1], 0])
 
         self.entry_lanes = lane_meta_data.incoming_edges,
         self.exit_lanes = lane_meta_data.outgoing_edges,
@@ -45,9 +44,8 @@ class NuPlanLane(PointLane):
 
     @staticmethod
     def _extract_centerline(map_obj, nuplan_center):
-        center = nuplan_center
         path = map_obj.baseline_path.discrete_path
-        points = [np.array([pose.x - center[0], pose.y - center[1]]) for pose in path]
+        points = np.array([nuplan_to_metadrive_vector([pose.x, pose.y], nuplan_center) for pose in path])
         return points
 
     def width_at(self, longitudinal: float) -> float:
@@ -65,7 +63,7 @@ class NuPlanLane(PointLane):
     @staticmethod
     def _get_boundary_points(boundary, center):
         path = boundary.discrete_path
-        points = np.array([np.array([pose.x - center[0], pose.y - center[1]]) for pose in path])
+        points = np.array([nuplan_to_metadrive_vector([pose.x, pose.y], nuplan_center=center) for pose in path])
         return points
 
     def construct_lane_in_block(self, block, lane_index):
@@ -93,8 +91,9 @@ class NuPlanLane(PointLane):
             self._construct_lane_only_vis_segment(block, middle, self.VIS_LANE_WIDTH, length * 1.3 / segment_num, theta)
 
         # build physics contact
-        self._construct_lane_only_physics_polygon(block, self.polygon)
-        self.polygon = None  # save memory
+        if self.need_lane_localization:
+            self._construct_lane_only_physics_polygon(block, self.polygon)
+            self.polygon = None  # save memory
 
 
 if __name__ == "__main__":

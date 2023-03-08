@@ -1,6 +1,6 @@
 import math
 from dataclasses import dataclass
-
+from metadrive.utils.coordinates_shift import nuplan_to_metadrive_vector
 import geopandas as gpd
 import numpy as np
 from nuplan.common.actor_state.state_representation import Point2D
@@ -183,7 +183,8 @@ class NuPlanBlock(BaseBlock):
     @staticmethod
     def _get_points_from_boundary(boundary, center):
         path = boundary.discrete_path
-        points = [np.array([pose.x - center[0], pose.y - center[1]]) for pose in path]
+        points = [(pose.x, pose.y) for pose in path]
+        points = nuplan_to_metadrive_vector(points, center)
         return points
 
     def set_lane_line(self, lane, nuplan_center, is_road_connector=False):
@@ -227,9 +228,9 @@ class NuPlanBlock(BaseBlock):
             points = np.array(
                 [
                     i for i in zip(
-                        walkway.polygon.boundary.coords.xy[0] - center[0], walkway.polygon.boundary.coords.xy[1] -
-                        center[1]
-                    )
+                    walkway.polygon.boundary.coords.xy[0] - center[0], walkway.polygon.boundary.coords.xy[1] -
+                    center[1]
+                )
                 ]
             )
             self.lines[walkway.id] = LaneLineProperty(points, LineColor.GREY, LineType.SIDE, in_road_connector=False)
