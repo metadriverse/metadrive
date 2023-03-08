@@ -8,12 +8,13 @@ from metadrive.utils.waymo_utils.waymo_utils import read_waymo_data
 
 
 class WaymoMap(BaseMap):
-    def __init__(self, map_index, random_seed=None):
+    def __init__(self, map_index, random_seed=None, need_lane_localization=True):
         self.map_index = map_index
+        self.need_lane_localization = need_lane_localization
         super(WaymoMap, self).__init__(dict(id=self.map_index), random_seed=random_seed)
 
     def _generate(self):
-        block = WaymoBlock(0, self.road_network, 0, self.map_index)
+        block = WaymoBlock(0, self.road_network, 0, self.map_index, self.need_lane_localization)
         block.construct_block(self.engine.worldNP, self.engine.physics_world, attach_to_world=True)
         self.blocks.append(block)
 

@@ -1,5 +1,4 @@
 import math
-import numpy as np
 
 from metadrive.component.block.base_block import BaseBlock
 from metadrive.component.lane.waymo_lane import WaymoLane
@@ -14,8 +13,9 @@ from metadrive.utils.waymo_utils.waymo_utils import RoadLineType, RoadEdgeType, 
 
 
 class WaymoBlock(BaseBlock):
-    def __init__(self, block_index: int, global_network, random_seed, map_index):
+    def __init__(self, block_index: int, global_network, random_seed, map_index, need_lane_localization):
         # self.waymo_map_data = waymo_map_data
+        self.need_lane_localization = need_lane_localization
         self.map_index = map_index
         super(WaymoBlock, self).__init__(block_index, global_network, random_seed)
         #
@@ -32,7 +32,7 @@ class WaymoBlock(BaseBlock):
             if data.get("type", False) == WaymoLaneProperty.LANE_TYPE:
                 if len(data[WaymoLaneProperty.POLYLINE]) <= 1:
                     continue
-                waymo_lane = WaymoLane(lane_id, self.waymo_map_data)
+                waymo_lane = WaymoLane(lane_id, self.waymo_map_data, self.need_lane_localization)
                 self.block_network.add_lane(waymo_lane)
         return True
 

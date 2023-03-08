@@ -14,12 +14,13 @@ from metadrive.utils.interpolating_line import InterpolatingLine
 class NuPlanLane(PointLane):
     VIS_LANE_WIDTH = 6.5
 
-    def __init__(self, lane_meta_data, nuplan_center):
+    def __init__(self, lane_meta_data, nuplan_center, need_lane_localization):
         """
         Extract the lane information of one waymo lane, and do coordinate shift
         """
         super(NuPlanLane, self).__init__(self._extract_centerline(lane_meta_data, nuplan_center), None)
         self.index = lane_meta_data.id
+        self.need_lane_localization = need_lane_localization
         if isinstance(lane_meta_data.polygon.boundary, MultiLineString):
             boundary = gpd.GeoSeries(lane_meta_data.polygon.boundary).explode()
             sizes = []

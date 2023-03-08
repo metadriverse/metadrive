@@ -19,7 +19,7 @@ def benchmark_fps():
             "use_render": False,
             "agent_policy": NuPlanReplayEgoCarPolicy,
             "replay": True,
-            "no_traffic": False,
+            "no_traffic": True,
             "no_pedestrian": True,
             "load_city_map": True,
             "window_size": (1200, 800),

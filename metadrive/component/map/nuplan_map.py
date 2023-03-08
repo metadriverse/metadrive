@@ -24,8 +24,8 @@ logger = logging.getLogger(__name__)
 
 
 class NuPlanMap(BaseMap):
-    def __init__(self, map_name, nuplan_center, radius, random_seed=None):
-
+    def __init__(self, map_name, nuplan_center, radius, random_seed=None, need_lane_localization=True):
+        self.need_lane_localization=need_lane_localization
         self.map_name = map_name
         self._center = np.array(nuplan_center)
         self._nuplan_map_api = self.engine.data_manager.current_scenario.map_api
@@ -102,7 +102,7 @@ class NuPlanMap(BaseMap):
                     for lane_meta_data in block.interior_edges:
                         if hasattr(lane_meta_data, "baseline_path"):
                             road_block.block_network.add_lane(
-                                NuPlanLane(nuplan_center=center, lane_meta_data=lane_meta_data)
+                                NuPlanLane(nuplan_center=center, lane_meta_data=lane_meta_data, need_lane_localization=self.need_lane_localization)
                             )
                             is_connector = True if layer == SemanticMapLayer.ROADBLOCK_CONNECTOR else False
                             road_block.set_lane_line(
@@ -167,7 +167,6 @@ if __name__ == "__main__":
 
     default_config = NuPlanEnv.default_config()
     default_config["use_render"] = True
-    default_config["city_map_radius"] = 500
     default_config["debug"] = True
     default_config["show_coordinates"] = True
     default_config["debug_static_world"] = True
@@ -176,7 +175,7 @@ if __name__ == "__main__":
 
     engine.data_manager = NuPlanDataManager()
     engine.data_manager.seed(0)
-    map = NuPlanMap(map_name=0, nuplan_center=[664396.54429387, 3997613.41534655])
+    map = NuPlanMap(map_name=0, nuplan_center=[664396.54429387, 3997613.41534655], radius=500)
     map.attach_to_world([664396.54429387, 3997613.41534655])
     # engine.enableMouse()
     map.road_network.show_bounding_box(engine, (1, 0, 0, 1))
