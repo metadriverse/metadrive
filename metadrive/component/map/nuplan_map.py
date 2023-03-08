@@ -44,8 +44,7 @@ class NuPlanMap(BaseMap):
         self.road_network = self.road_network_type()
         for block in self.blocks:
             # block.block_network.show_bounding_box(self.engine)
-            if not SceneCull.out_of_bounding_box(block.bounding_box,
-                                                 np.array(center_point) - self.nuplan_center,
+            if not SceneCull.out_of_bounding_box(block.bounding_box, np.array(center_point) - self.nuplan_center,
                                                  self.cull_dist):
                 self.road_network.add(block.block_network)
                 block.attach_to_world(parent_node_path, physics_world)
@@ -92,8 +91,7 @@ class NuPlanMap(BaseMap):
         block_polygons = []
         # Lane and lane line
         block_index = 0
-        name = {SemanticMapLayer.ROADBLOCK: "Road Block",
-                SemanticMapLayer.ROADBLOCK_CONNECTOR: "Road Connector"}
+        name = {SemanticMapLayer.ROADBLOCK: "Road Block", SemanticMapLayer.ROADBLOCK_CONNECTOR: "Road Connector"}
 
         for layer in tqdm.tqdm([SemanticMapLayer.ROADBLOCK, SemanticMapLayer.ROADBLOCK_CONNECTOR]):
             for block in tqdm.tqdm(nearest_vector_map[layer], leave=False, desc="Building {}".format(name[layer])):
@@ -104,10 +102,12 @@ class NuPlanMap(BaseMap):
                     for lane_meta_data in block.interior_edges:
                         if hasattr(lane_meta_data, "baseline_path"):
                             road_block.block_network.add_lane(
-                                NuPlanLane(nuplan_center=center, lane_meta_data=lane_meta_data))
+                                NuPlanLane(nuplan_center=center, lane_meta_data=lane_meta_data)
+                            )
                             is_connector = True if layer == SemanticMapLayer.ROADBLOCK_CONNECTOR else False
-                            road_block.set_lane_line(lane_meta_data, is_road_connector=is_connector,
-                                                     nuplan_center=center)
+                            road_block.set_lane_line(
+                                lane_meta_data, is_road_connector=is_connector, nuplan_center=center
+                            )
 
                 if layer == SemanticMapLayer.ROADBLOCK:
                     block_polygons.append(block.polygon)
@@ -187,13 +187,11 @@ if __name__ == "__main__":
         map.road_network.remove_bounding_box()
         map.detach_from_world()
 
-
     def attach_map():
         position = np.array([664396, 3997613])
         map.attach_to_world(position)
         map.road_network.show_bounding_box(engine, (1, 0, 0, 1))
         engine.main_camera.set_bird_view_pos(pos)
-
 
     engine.accept("d", detach_map)
     engine.accept("a", attach_map)

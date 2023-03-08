@@ -142,7 +142,7 @@ def test_coordinates(render=False):
         for _ in range(10):
             o, r, d, info, = env.step([-0., 0.])
         assert wrap_to_pi(abs(env.vehicle.heading_theta - np.deg2rad(45))) < 1
-        assert np.isclose(env.vehicle.heading, np.array([np.sqrt(2)/2, np.sqrt(2)/2])).all()
+        assert np.isclose(env.vehicle.heading, np.array([np.sqrt(2) / 2, np.sqrt(2) / 2])).all()
 
         env.reset()
         env.vehicle.set_heading_theta(np.deg2rad(-90))

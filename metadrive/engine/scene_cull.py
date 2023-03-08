@@ -80,7 +80,9 @@ class SceneCull:
 
     @staticmethod
     def out_of_bounding_box(bounding_box, pose, margin_distance):
-        bb2 = [pose[0] - margin_distance, pose[0] + margin_distance, pose[1] - margin_distance, pose[1] + margin_distance]
+        bb2 = [
+            pose[0] - margin_distance, pose[0] + margin_distance, pose[1] - margin_distance, pose[1] + margin_distance
+        ]
         if bounding_box[0] > bb2[1] or \
                 bounding_box[1] < bb2[0] or \
                 bounding_box[2] > bb2[3] or \

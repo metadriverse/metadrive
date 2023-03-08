@@ -57,8 +57,12 @@ if __name__ == "__main__":
     )
     import time
 
-    init_state = {'position': (40.82264362985734, -509.3641208712943), 'heading': -89.41878393159747,
-                  'velocity': [8.728615581032535, -0.24411703918728195], 'valid': True}
+    init_state = {
+        'position': (40.82264362985734, -509.3641208712943),
+        'heading': -89.41878393159747,
+        'velocity': [8.728615581032535, -0.24411703918728195],
+        'valid': True
+    }
 
     start = time.time()
     o = env.reset()

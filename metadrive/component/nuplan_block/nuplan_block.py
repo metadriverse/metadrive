@@ -25,7 +25,6 @@ class LaneLineProperty:
 
 
 class NuPlanBlock(BaseBlock):
-
     def __init__(self, block_index: int, global_network, random_seed, map_index, nuplan_center):
         self.map_index = map_index
         self.nuplan_center = nuplan_center
@@ -228,9 +227,9 @@ class NuPlanBlock(BaseBlock):
             points = np.array(
                 [
                     i for i in zip(
-                    walkway.polygon.boundary.coords.xy[0] - center[0], walkway.polygon.boundary.coords.xy[1] -
-                    center[1]
-                )
+                        walkway.polygon.boundary.coords.xy[0] - center[0], walkway.polygon.boundary.coords.xy[1] -
+                        center[1]
+                    )
                 ]
             )
             self.lines[walkway.id] = LaneLineProperty(points, LineColor.GREY, LineType.SIDE, in_road_connector=False)

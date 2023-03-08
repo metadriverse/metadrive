@@ -42,8 +42,11 @@ def benchmark_reset_5_map_1000_times(load_city_map=True):
         env.reset(force_seed=(seed % 5) + 300)
         if seed % 500 == 0:
             print("reset: {}, Time: {}, Process Memory: {}".format(seed, time.time() - start_time, process_memory()))
-    print("Total Time: {}, Load time: {}, Total process Memory: {}".format(time.time() - start_time, load_time,
-                                                                           process_memory()))
+    print(
+        "Total Time: {}, Load time: {}, Total process Memory: {}".format(
+            time.time() - start_time, load_time, process_memory()
+        )
+    )
 
 
 def benchmark_reset_1000(load_city_map=True):
@@ -75,8 +78,11 @@ def benchmark_reset_1000(load_city_map=True):
         env.reset(force_seed=seed)
         if seed % 500 == 0:
             print("reset: {}, Time: {}, Process Memory: {}".format(seed, time.time() - start_time, process_memory()))
-    print("Total Time: {}, Load time: {}, Total process Memory: {}".format(time.time() - start_time, load_time,
-                                                                           process_memory()))
+    print(
+        "Total Time: {}, Load time: {}, Total process Memory: {}".format(
+            time.time() - start_time, load_time, process_memory()
+        )
+    )
 
 
 if __name__ == "__main__":

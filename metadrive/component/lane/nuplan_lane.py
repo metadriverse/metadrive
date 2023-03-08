@@ -25,7 +25,7 @@ class NuPlanLane(PointLane):
             sizes = []
             for idx, polygon in enumerate(boundary[0]):
                 sizes.append(len(polygon.xy[1]))
-            points= boundary[0][np.argmax(sizes)].xy
+            points = boundary[0][np.argmax(sizes)].xy
         elif isinstance(lane_meta_data.polygon.boundary, LineString):
             points = lane_meta_data.polygon.boundary.xy
         self.polygon = [[points[0][i], points[1][i], 0.1] for i in range(len(points[0]))]
