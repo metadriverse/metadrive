@@ -50,8 +50,12 @@ class NuPlanMap(BaseMap):
                 self.road_network.add(block.block_network)
                 block.attach_to_world(parent_node_path, physics_world)
                 self._attached_block.append(block)
+        if not self.engine.global_config["load_city_map"]:
+            self.boundary_block.attach_to_world(parent_node_path, physics_world)
 
     def detach_from_world(self, physics_world=None):
+        if not self.engine.global_config["load_city_map"]:
+            self.boundary_block.detach_from_world(self.engine.physics_world or physics_world)
         for block in self._attached_block:
             block.detach_from_world(self.engine.physics_world or physics_world)
 
