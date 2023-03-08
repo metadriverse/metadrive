@@ -184,18 +184,15 @@ if __name__ == "__main__":
     lanes = [lane_info.lane for lane_info in map.road_network.graph.values()]
     engine.show_lane_coordinates(lanes)
 
-
     def detach_map():
         map.road_network.remove_bounding_box()
         map.detach_from_world()
-
 
     def attach_map():
         position = np.array(center)
         map.attach_to_world(position)
         map.road_network.show_bounding_box(engine, (1, 0, 0, 1))
         engine.main_camera.set_bird_view_pos(pos)
-
 
     engine.accept("d", detach_map)
     engine.accept("a", attach_map)
