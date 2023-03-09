@@ -146,6 +146,7 @@ class BaseObject(BaseRunnable):
 
         # debug
         self.coordinates_debug_np = None
+        self.need_show_coordinates = False
 
     def disable_gravity(self):
         self._body.setGravity(LVector3(0, 0, 0))
@@ -182,6 +183,7 @@ class BaseObject(BaseRunnable):
                 self._body.setMass(self.MASS)
 
             if self.engine is not None and self.engine.global_config["show_coordinates"]:
+                self.need_show_coordinates = True
                 self.show_coordinates()
         else:
             raise AttributeError("You can not set the object body for twice")

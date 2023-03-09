@@ -45,6 +45,8 @@ class BaseTrafficParticipant(BaseObject):
         self._body.set_anisotropic_friction(LVector3(0., 0., 0.))
 
     def show_coordinates(self):
+        if not self.need_show_coordinates:
+            return
         if self.coordinates_debug_np is not None:
             self.coordinates_debug_np.reparentTo(self.origin)
         height = self.HEIGHT

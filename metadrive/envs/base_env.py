@@ -166,7 +166,7 @@ BASE_DEFAULT_CONFIG = dict(
     show_skybox=True,
     show_terrain=True,
     show_interface=True,
-    show_coordinates=False,
+    show_coordinates=False, # show coordinates for maps and objects for debug
 
     # record/replay metadata
     record_episode=False,  # when replay_episode is not None ,this option will be useless
