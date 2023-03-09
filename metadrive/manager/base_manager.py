@@ -93,6 +93,9 @@ class BaseManager(Randomizable):
     def add_policy(self, object_id, policy_class, *policy_args, **policy_kwargs):
         return self.engine.add_policy(object_id, policy_class, *policy_args, **policy_kwargs)
 
+    def get_policy(self, object_id):
+        return self.engine.get_policy(object_id)
+
     def get_state(self):
         """This function will be called by RecordManager to collect manager state, usually some mappings"""
         assert self.episode_step == 0, "This func can only be called after env.reset() without any env.step() called"
@@ -111,7 +114,7 @@ class BaseManager(Randomizable):
             current_name = old_name_to_current[name]
             name_obj = self.engine.get_objects([current_name])
             assert current_name in name_obj and name_obj[current_name
-                                                         ].class_name == class_name, "Can not restore mappings!"
+            ].class_name == class_name, "Can not restore mappings!"
             ret[current_name] = name_obj[current_name]
         self.spawned_objects = ret
 

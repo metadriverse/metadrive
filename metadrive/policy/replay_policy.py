@@ -4,6 +4,7 @@ from metadrive.policy.base_policy import BasePolicy
 
 has_rendered = False
 
+
 # class ReplayPolicy(BasePolicy):
 #     def __init__(self, control_object, locate_info):
 #         super(ReplayPolicy, self).__init__(control_object=control_object)
@@ -43,6 +44,7 @@ class ReplayEgoCarPolicy(BasePolicy):
     Replay policy from Real data. For adding new policy, overwrite get_trajectory_info()
     This policy is designed for Waymo Policy by default
     """
+
     def __init__(self, control_object, random_seed):
         super(ReplayEgoCarPolicy, self).__init__(control_object=control_object)
         self.traj_info = self.get_trajectory_info()
@@ -133,4 +135,30 @@ class NuPlanReplayEgoCarPolicy(ReplayEgoCarPolicy):
             this_heading = self.traj_info[int(self.timestep)]["heading"]
             self.control_object.set_heading_theta(this_heading, rad_to_degree=False)
 
+        return [0, 0]
+
+
+class NuPlanReplayTrafficParticipantPolicy(BasePolicy):
+    """
+    This policy should be used with TrafficParticipantManager Together
+    """
+
+    def __init__(self, *args, **kwargs):
+        super(NuPlanReplayTrafficParticipantPolicy, self).__init__(*args, **kwargs)
+        self.timestep = 0
+        self.damp = 0
+        self.start_index = 0
+        # how many times the replay data is slowed down
+        self.damp_interval = 1
+
+    def act(self, obj_state, *args, **kwargs):
+        self.damp += self.damp_interval
+        if self.damp == self.damp_interval:
+            self.timestep += 1
+            self.damp = 0
+        else:
+            return [0, 0]
+        self.control_object.set_position(obj_state["position"])
+        self.control_object.set_heading_theta(obj_state["heading"], rad_to_degree=True)
+        self.control_object.set_velocity(obj_state["velocity"])
         return [0, 0]
