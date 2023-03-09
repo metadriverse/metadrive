@@ -13,21 +13,21 @@ class ImageBuffer:
     BUFFER_W = 84  # left to right
     BUFFER_H = 84  # bottom to top
     BKG_COLOR = BKG_COLOR
-    display_bottom = 0.8
-    display_top = 1
+    # display_bottom = 0.8
+    # display_top = 1
     display_region = None
     display_region_size = [1 / 3, 2 / 3, 0.8, 1.0]
     line_borders = []
 
     def __init__(
-        self,
-        width: float,
-        height: float,
-        pos: Vec3,
-        bkg_color: Union[Vec4, Vec3],
-        parent_node: NodePath = None,
-        frame_buffer_property=None,
-        # engine=None
+            self,
+            width: float,
+            height: float,
+            pos: Vec3,
+            bkg_color: Union[Vec4, Vec3],
+            parent_node: NodePath = None,
+            frame_buffer_property=None,
+            # engine=None
     ):
 
         self._node_path_list = []
@@ -163,3 +163,7 @@ class ImageBuffer:
 
     def __del__(self):
         logging.debug("{} is destroyed".format(self.__class__.__name__))
+
+    @classmethod
+    def update_display_region_size(cls, display_region_size):
+        cls.display_region_size = display_region_size

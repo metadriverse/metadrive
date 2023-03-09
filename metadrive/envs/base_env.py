@@ -1,7 +1,10 @@
 import time
+
 from collections import defaultdict
 from typing import Union, Dict, AnyStr, Optional, Tuple
-
+from metadrive.component.vehicle_module.mini_map import MiniMap
+from metadrive.component.vehicle_module.rgb_camera import RGBCamera
+from metadrive.component.vehicle_module.vehicle_panel import VehiclePanel
 import gym
 import numpy as np
 from panda3d.core import PNMImage
@@ -166,6 +169,7 @@ BASE_DEFAULT_CONFIG = dict(
     show_skybox=True,
     show_terrain=True,
     show_interface=True,
+    interface_panel=[MiniMap, RGBCamera, VehiclePanel],
     show_coordinates=False, # show coordinates for maps and objects for debug
 
     # record/replay metadata

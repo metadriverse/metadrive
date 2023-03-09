@@ -1,4 +1,7 @@
 import numpy as np
+from metadrive.component.vehicle_module.mini_map import MiniMap
+from metadrive.component.vehicle_module.rgb_camera import RGBCamera
+from metadrive.component.vehicle_module.vehicle_panel import VehiclePanel
 
 from metadrive.envs.metadrive_env import MetaDriveEnv
 from metadrive.utils import setup_logger
@@ -23,6 +26,7 @@ if __name__ == "__main__":
             "manual_control": True,
             "use_render": True,
             "decision_repeat": 5,
+            "interface_panel": [MiniMap, VehiclePanel, RGBCamera],
             "need_inverse_traffic": False,
             "rgb_clip": True,
             "map": "X",

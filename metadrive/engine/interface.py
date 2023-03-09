@@ -2,12 +2,18 @@ import time
 
 import math
 import numpy as np
-from panda3d.core import NodePath, TextNode, PGTop, CardMaker, Vec3, LQuaternionf
+from panda3d.core import NodePath, TextNode, LQuaternionf
 
-from metadrive.constants import RENDER_MODE_ONSCREEN, RENDER_MODE_OFFSCREEN, COLLISION_INFO_COLOR, COLOR, BodyName, CamMask, RENDER_MODE_NONE
+from metadrive.component.vehicle_module.vehicle_panel import VehiclePanel
+from metadrive.constants import COLLISION_INFO_COLOR, COLOR, BodyName, \
+    CamMask, RENDER_MODE_NONE
 from metadrive.engine.asset_loader import AssetLoader
-from metadrive.engine.core.engine_core import EngineCore
-from metadrive.engine.core.image_buffer import ImageBuffer
+
+
+class DisplayRegionPosition:
+    left = [0., 1 / 3, 0.8, 1.0]
+    mid = [1 / 3, 2 / 3, 0.8, 1.0]
+    right = [2 / 3, 1, 0.8, 1.0]
 
 
 class Interface:
@@ -38,17 +44,15 @@ class Interface:
         self._is_showing_arrow = True  # store the state of navigation mark
 
     def after_step(self):
-        if self.engine.current_track_vehicle is not None and self.need_interface:
+        if self.engine.current_track_vehicle is not None and self.need_interface and self.engine.mode != RENDER_MODE_NONE:
             track_v = self.engine.current_track_vehicle
-            self.vehicle_panel.update_vehicle_state(track_v)
+            if self.vehicle_panel is not None:
+                self.vehicle_panel.update_vehicle_state(track_v)
             self._render_contact_result(track_v.contact_results)
             if hasattr(track_v, "navigation") and track_v.navigation is not None:
                 self._update_navi_arrow(track_v.navigation.navi_arrow_dir)
 
     def init_interface(self):
-        from metadrive.component.vehicle_module.mini_map import MiniMap
-        from metadrive.component.vehicle_module.rgb_camera import RGBCamera
-        from metadrive.component.vehicle_module.depth_camera import DepthCamera
         if self.need_interface:
             info_np = NodePath("Collision info nodepath")
             info_np.reparentTo(self.engine.aspect2d)
@@ -56,11 +60,25 @@ class Interface:
             self._node_path_list.append(info_np)
 
             self.contact_result_render = info_np
-            self.vehicle_panel = VehiclePanel(self.engine)
-            self.right_panel = self.vehicle_panel
-            self.mid_panel = RGBCamera(
-            ) if self.engine.global_config["vehicle_config"]["image_source"] != "depth_camera" else DepthCamera()
-            self.left_panel = MiniMap()
+            for idx, panel_cls, in enumerate(reversed(self.engine.global_config["interface_panel"])):
+                if idx == 0:
+                    if panel_cls is VehiclePanel:
+                        self.vehicle_panel = self.right_panel = panel_cls(self.engine)
+                    else:
+                        self.right_panel = panel_cls()
+                elif idx == 1:
+                    if panel_cls is VehiclePanel:
+                        self.vehicle_panel = self.mid_panel = panel_cls(self.engine)
+                    else:
+                        self.mid_panel = panel_cls()
+                elif idx == 2:
+                    if panel_cls is VehiclePanel:
+                        self.vehicle_panel = self.left_panel = panel_cls(self.engine)
+                    else:
+                        self.left_panel = panel_cls()
+                else:
+                    raise ValueError("Can not add > 3 panels!")
+
             self.arrow = self.engine.aspect2d.attachNewNode("arrow")
             self._node_path_list.append(self.arrow)
 
@@ -88,22 +106,29 @@ class Interface:
 
     def stop_track(self):
         if self.need_interface:
-            self.vehicle_panel.remove_display_region()
-            self.vehicle_panel.buffer.set_active(False)
+            if self.right_panel:
+                self.right_panel.remove_display_region()
+            if self.mid_panel:
+                self.mid_panel.remove_display_region()
+            if self.left_panel:
+                self.left_panel.remove_display_region()
             self.contact_result_render.detachNode()
-            self.mid_panel.remove_display_region()
-            self.left_panel.remove_display_region()
             self.arrow.detachNode()
 
     def track(self, vehicle):
         if self.need_interface:
-            self.vehicle_panel.buffer.set_active(True)
+            if self.right_panel:
+                self.right_panel.add_display_region(DisplayRegionPosition.right)
+                self.right_panel.track(vehicle)
+            if self.mid_panel:
+                self.mid_panel.add_display_region(DisplayRegionPosition.mid)
+                self.mid_panel.track(vehicle)
+            if self.left_panel:
+                self.left_panel.add_display_region(DisplayRegionPosition.left)
+                self.left_panel.track(vehicle)
+
             self.arrow.reparentTo(self.engine.aspect2d)
             self.contact_result_render.reparentTo(self.engine.aspect2d)
-            self.vehicle_panel.add_display_region(self.vehicle_panel.display_region_size)
-            for p in [self.left_panel, self.mid_panel]:
-                p.track(vehicle)
-                p.add_display_region(p.display_region_size)
 
     def _render_banner(self, text, color=COLLISION_INFO_COLOR["green"][1]):
         """
@@ -153,14 +178,17 @@ class Interface:
 
         if self.need_interface:
             self.stop_track()
-            self.vehicle_panel.destroy()
             self.contact_result_render.removeNode()
             self.arrow.removeNode()
             self.contact_result_render = None
             self._contact_banners = None
             self.current_banner = None
-            self.mid_panel.destroy()
-            self.left_panel.destroy()
+            if self.right_panel:
+                self.right_panel.destroy()
+            if self.mid_panel:
+                self.mid_panel.destroy()
+            if self.left_panel:
+                self.left_panel.destroy()
 
     def _update_navi_arrow(self, lanes_heading):
         lane_0_heading = lanes_heading[0]
@@ -187,131 +215,6 @@ class Interface:
                     self._right_arrow.reparentTo(self.arrow)
                 if self._left_arrow.hasParent():
                     self._left_arrow.detachNode()
-
-    @property
-    def engine(self):
-        from metadrive.engine.engine_utils import get_engine
-        return get_engine()
-
-
-class VehiclePanel(ImageBuffer):
-    PARA_VIS_LENGTH = 12
-    PARA_VIS_HEIGHT = 1
-    MAX_SPEED = 120
-    BUFFER_W = 2
-    BUFFER_H = 1
-    CAM_MASK = CamMask.PARA_VIS
-    GAP = 4.1
-    TASK_NAME = "update panel"
-    display_region_size = [2 / 3, 1, ImageBuffer.display_bottom, ImageBuffer.display_top]
-
-    def __init__(self, engine: EngineCore):
-        if engine.win is None:
-            return
-        self.aspect2d_np = NodePath(PGTop("aspect2d"))
-        self.aspect2d_np.show(self.CAM_MASK)
-        self.para_vis_np = {}
-
-        tmp_node_path_list = []
-        # make_buffer_func, make_camera_func = engine.win.makeTextureBuffer, engine.makeCamera
-
-        # don't delete the space in word, it is used to set a proper position
-        for i, np_name in enumerate(["Steering", " Throttle", "     Brake", "    Speed"]):
-            text = TextNode(np_name)
-            text.setText(np_name)
-            text.setSlant(0.1)
-            textNodePath = self.aspect2d_np.attachNewNode(text)
-            tmp_node_path_list.append(textNodePath)
-
-            textNodePath.setScale(0.052)
-            text.setFrameColor(0, 0, 0, 1)
-            text.setTextColor(0, 0, 0, 1)
-            text.setFrameAsMargin(-self.GAP, self.PARA_VIS_LENGTH, 0, 0)
-            text.setAlign(TextNode.ARight)
-            textNodePath.setPos(-1.125111, 0, 0.9 - i * 0.08)
-            if i != 0:
-                cm = CardMaker(np_name)
-                cm.setFrame(0, self.PARA_VIS_LENGTH - 0.21, -self.PARA_VIS_HEIGHT / 2 + 0.1, self.PARA_VIS_HEIGHT / 2)
-                cm.setHasNormals(True)
-                card = textNodePath.attachNewNode(cm.generate())
-                tmp_node_path_list.append(card)
-
-                card.setPos(0.21, 0, 0.22)
-                self.para_vis_np[np_name.lstrip()] = card
-            else:
-                # left
-                name = "Left"
-                cm = CardMaker(name)
-                cm.setFrame(
-                    0, (self.PARA_VIS_LENGTH - 0.4) / 2, -self.PARA_VIS_HEIGHT / 2 + 0.1, self.PARA_VIS_HEIGHT / 2
-                )
-                cm.setHasNormals(True)
-                card = textNodePath.attachNewNode(cm.generate())
-                tmp_node_path_list.append(card)
-
-                card.setPos(0.2 + self.PARA_VIS_LENGTH / 2, 0, 0.22)
-                self.para_vis_np[name] = card
-                # right
-                name = "Right"
-                cm = CardMaker(np_name)
-                cm.setFrame(
-                    -(self.PARA_VIS_LENGTH - 0.1) / 2, 0, -self.PARA_VIS_HEIGHT / 2 + 0.1, self.PARA_VIS_HEIGHT / 2
-                )
-                cm.setHasNormals(True)
-                card = textNodePath.attachNewNode(cm.generate())
-                tmp_node_path_list.append(card)
-
-                card.setPos(0.2 + self.PARA_VIS_LENGTH / 2, 0, 0.22)
-                self.para_vis_np[name] = card
-        super(VehiclePanel, self).__init__(
-            self.BUFFER_W,
-            self.BUFFER_H,
-            Vec3(-0.9, -1.01, 0.78),
-            self.BKG_COLOR,
-            parent_node=self.aspect2d_np,
-            # engine=engine
-        )
-        self.add_display_region(self.display_region_size)
-
-        self._node_path_list.extend(tmp_node_path_list)
-
-    def update_vehicle_state(self, vehicle):
-        steering, throttle_brake, speed = vehicle.steering, vehicle.throttle_brake, vehicle.speed_km_h
-        if throttle_brake < 0:
-            self.para_vis_np["Throttle"].setScale(0, 1, 1)
-            self.para_vis_np["Brake"].setScale(-throttle_brake, 1, 1)
-        elif throttle_brake > 0:
-            self.para_vis_np["Throttle"].setScale(throttle_brake, 1, 1)
-            self.para_vis_np["Brake"].setScale(0, 1, 1)
-        else:
-            self.para_vis_np["Throttle"].setScale(0, 1, 1)
-            self.para_vis_np["Brake"].setScale(0, 1, 1)
-
-        steering_value = abs(steering)
-        if steering < 0:
-            self.para_vis_np["Left"].setScale(steering_value, 1, 1)
-            self.para_vis_np["Right"].setScale(0, 1, 1)
-        elif steering > 0:
-            self.para_vis_np["Right"].setScale(steering_value, 1, 1)
-            self.para_vis_np["Left"].setScale(0, 1, 1)
-        else:
-            self.para_vis_np["Right"].setScale(0, 1, 1)
-            self.para_vis_np["Left"].setScale(0, 1, 1)
-        speed_value = speed / self.MAX_SPEED
-        self.para_vis_np["Speed"].setScale(speed_value, 1, 1)
-
-    def remove_display_region(self):
-        super(VehiclePanel, self).remove_display_region()
-
-    def add_display_region(self, display_region):
-        super(VehiclePanel, self).add_display_region(display_region)
-        self.origin.reparentTo(self.aspect2d_np)
-
-    def destroy(self):
-        super(VehiclePanel, self).destroy()
-        for para in self.para_vis_np.values():
-            para.removeNode()
-        self.aspect2d_np.removeNode()
 
     @property
     def engine(self):

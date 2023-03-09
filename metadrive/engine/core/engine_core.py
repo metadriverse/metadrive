@@ -102,7 +102,9 @@ class EngineCore(ShowBase.ShowBase):
             self.mode = RENDER_MODE_ONSCREEN
             # Warning it may cause memory leak, Pand3d Official has fixed this in their master branch.
             # You can enable it if your panda version is latest.
-            loadPrcFileData("", "threading-model Cull/Draw")  # multi-thread render, accelerate simulation when evaluate
+            if not self.global_config["pstats"]:
+                loadPrcFileData("",
+                                "threading-model Cull/Draw")  # multi-thread render, accelerate simulation when evaluate
         else:
             self.global_config["show_coordinates"] = False
             if self.global_config["offscreen_render"]:

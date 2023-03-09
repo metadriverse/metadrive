@@ -1,4 +1,5 @@
 import logging
+from metadrive.component.vehicle_module.vehicle_panel import VehiclePanel
 
 import numpy as np
 
@@ -70,6 +71,9 @@ NUPLAN_ENV_CONFIG = dict(
     # ===== Termination Scheme =====
     out_of_route_done=False,
     crash_vehicle_done=True,
+
+    # others
+    interface_panel=[VehiclePanel]  # for boosting efficiency
 )
 
 
@@ -178,8 +182,8 @@ class NuPlanEnv(BaseEnv):
         # for compatibility
         # crash almost equals to crashing with vehicles
         done_info[TerminationState.CRASH] = (
-            done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
-            or done_info[TerminationState.CRASH_BUILDING]
+                done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
+                or done_info[TerminationState.CRASH_BUILDING]
         )
         return done, done_info
 
@@ -288,7 +292,7 @@ if __name__ == "__main__":
             "load_city_map": False,
             "window_size": (1200, 800),
             "start_case_index": 300,
-            "pstats": True,
+            "pstats": False,
             "case_num": 1,
             "show_coordinates": False,
             "horizon": 1000,
@@ -333,3 +337,6 @@ if __name__ == "__main__":
                 if info["arrive_dest"]:
                     print("seed:{}, success".format(env.engine.global_random_seed))
                 break
+
+# cull/draw camera
+# draw set_state
