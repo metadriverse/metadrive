@@ -24,7 +24,7 @@ class Lidar(DistanceDetector):
     def __init__(self, num_lasers: int = 240, distance: float = 50, enable_show=False):
         super(Lidar, self).__init__(num_lasers, distance, enable_show)
         self.origin.hide(CamMask.RgbCam | CamMask.Shadow | CamMask.Shadow | CamMask.DepthCam)
-        self.mask = CollisionGroup.Vehicle | CollisionGroup.InvisibleWall | CollisionGroup.TrafficObject
+        self.mask = CollisionGroup.can_be_lidar_detected()
 
         # lidar can calculate the detector mask by itself
         self.angle_delta = 360 / num_lasers if num_lasers > 0 else None
@@ -110,7 +110,7 @@ class Lidar(DistanceDetector):
         pos1 = vehicle.position
         head1 = vehicle.heading_theta
 
-        mask = np.zeros((self.num_lasers, ), dtype=bool)
+        mask = np.zeros((self.num_lasers,), dtype=bool)
         mask.fill(False)
         objs = self.get_surrounding_objects(vehicle)
         for obj in objs:
@@ -119,7 +119,7 @@ class Lidar(DistanceDetector):
             width = obj.WIDTH if hasattr(obj, "WIDTH") else vehicle.WIDTH
             half_max_span_square = ((length + width) / 2)**2
             diff = (pos2[0] - pos1[0], pos2[1] - pos1[1])
-            dist_square = diff[0]**2 + diff[1]**2
+            dist_square = diff[0] ** 2 + diff[1] ** 2
             if dist_square < half_max_span_square:
                 mask.fill(True)
                 continue

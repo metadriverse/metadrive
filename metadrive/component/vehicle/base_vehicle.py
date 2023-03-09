@@ -564,7 +564,6 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         chassis = BaseRigidBodyNode(self.name, BodyName.Vehicle)
         self._node_path_list.append(chassis)
 
-        chassis.setIntoCollideMask(CollisionGroup.Vehicle)
         chassis_shape = BulletBoxShape(Vec3(self.WIDTH / 2, self.LENGTH / 2, self.HEIGHT / 2))
         ts = TransformState.makePos(Vec3(0, 0, self.HEIGHT / 2))
         chassis.addShape(chassis_shape, ts)

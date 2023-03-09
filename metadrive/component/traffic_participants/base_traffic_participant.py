@@ -1,4 +1,5 @@
 from typing import Tuple, Sequence
+from metadrive.constants import CollisionGroup
 
 from panda3d.core import LVector3, NodePath
 
@@ -9,7 +10,7 @@ LaneIndex = Tuple[str, str, int]
 
 class BaseTrafficParticipant(BaseObject):
     NAME = None
-    COLLISION_GROUP = None
+    COLLISION_MASK = CollisionGroup.TrafficParticipants
     HEIGHT = None
 
     def __init__(self, position: Sequence[float], heading_theta: float = 0., random_seed=None):
@@ -18,7 +19,7 @@ class BaseTrafficParticipant(BaseObject):
         self.set_heading_theta(heading_theta)
         assert self.MASS is not None, "No mass for {}".format(self.class_name)
         assert self.NAME is not None, "No name for {}".format(self.class_name)
-        assert self.COLLISION_GROUP is not None, "No collision group for {}".format(self.class_name)
+        assert self.COLLISION_MASK is not None, "No collision group for {}".format(self.class_name)
 
     def top_down_color(self):
         raise NotImplementedError(

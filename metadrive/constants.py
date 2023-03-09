@@ -200,11 +200,7 @@ class CollisionGroup(Mask):
             # LidarBroadDetector
             (cls.LidarBroadDetector, cls.LidarBroadDetector, False),
             (cls.LidarBroadDetector, cls.TrafficObject, True),
-            (
-                cls.LidarBroadDetector,
-                cls.TrafficParticipants,
-                True,
-            ),
+            (cls.LidarBroadDetector, cls.TrafficParticipants, True),
 
             # TrafficObject
             (cls.TrafficObject, cls.TrafficObject, True),
@@ -221,6 +217,10 @@ class CollisionGroup(Mask):
             group_2 = int(math.log(rule[1].getWord(), 2))
             relation = rule[-1]
             world.setGroupCollisionFlag(group_1, group_2, relation)
+
+    @classmethod
+    def can_be_lidar_detected(cls):
+        return cls.Vehicle | cls.InvisibleWall | cls.TrafficObject | cls.TrafficParticipants
 
 
 LaneIndex = Tuple[str, str, int]

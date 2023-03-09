@@ -11,7 +11,7 @@ if __name__ == "__main__":
     env = MetaDriveEnv(
         {
             "environment_num": 1,
-            "traffic_density": 0.,
+            "traffic_density": 0.2,
             "traffic_mode": "hybrid",
             "start_seed": 22,
             # "_disable_detector_mask":True,
@@ -48,7 +48,8 @@ if __name__ == "__main__":
                 "spawn_velocity_car_frame": True,
                 # "image_source": "depth_camera",
                 # "random_color": True
-                # "show_lidar": True,
+                "show_lidar": True,
+
                 "spawn_lane_index": None,
                 # "destination":"2R1_3_",
                 # "show_side_detector": True,

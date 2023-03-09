@@ -4,7 +4,7 @@ from metadrive.utils import setup_logger
 from metadrive.component.traffic_participants.pedestrian import Pedestrian
 
 if __name__ == "__main__":
-    setup_logger(True)
+    # setup_logger(True)
     env = MetaDriveEnv(
         {
             "environment_num": 1,
@@ -14,7 +14,7 @@ if __name__ == "__main__":
             "accident_prob": 1.0,
             # "_disable_detector_mask":True,
             # "debug_physics_world": True,
-            "debug": True,
+            "debug": False,
             # "global_light": True,
             # "debug_static_world": True,
             "cull_scene": False,
@@ -37,10 +37,11 @@ if __name__ == "__main__":
             # "camera_height": 1,
             # "camera_smooth": False,
             # "camera_height": -1,
-            "window_size": (2400, 1600),
+            # "window_size": (2400, 1600),
             "show_coordinates": True,
             "vehicle_config": {
                 "enable_reverse": False,
+                "show_lidar":True
                 # "image_source": "depth_camera",
                 # "random_color": True
                 # "show_lidar": True,

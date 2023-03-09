@@ -297,9 +297,10 @@ if __name__ == "__main__":
             "show_coordinates": False,
             "horizon": 1000,
             "vehicle_config": dict(
-                lidar=dict(num_lasers=120, distance=50, num_others=4),
+                lidar=dict(num_lasers=120, distance=50, num_others=0),
                 lane_line_detector=dict(num_lasers=12, distance=50),
                 side_detector=dict(num_lasers=160, distance=50),
+                show_lidar=True
                 # need_navigation=False
             ),
             # "show_interface":False
