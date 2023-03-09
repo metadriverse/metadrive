@@ -20,7 +20,7 @@ WAYMO_ENV_CONFIG = dict(
     # ===== Map Config =====
     waymo_data_directory=AssetLoader.file_path("waymo", return_raw_style=False),
     start_case_index=0,
-    case_num=100,
+    case_num=3,
     store_map=True,
     store_map_buffer_size=2000,
     sequential_seed=False,  # Whether to set seed (the index of map) sequentially across episodes
@@ -276,7 +276,8 @@ if __name__ == "__main__":
             "manual_control": True,
             "replay": False,
             "no_traffic": False,
-            # "debug":True,
+            "debug": True,
+            "debug_static_world": True,
             # "no_traffic":True,
             # "start_case_index": 192,
             # "start_case_index": 1000,

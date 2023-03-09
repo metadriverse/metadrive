@@ -1,11 +1,11 @@
 import copy
 
-import numpy as np
 from nuplan.common.actor_state.tracked_objects_types import TrackedObjectType
 
 from metadrive.component.vehicle.vehicle_type import SVehicle
 from metadrive.manager.base_manager import BaseManager
-from metadrive.utils.coordinates_shift import nuplan_2_metadrive_position
+from metadrive.utils.coordinates_shift import nuplan_to_metadrive_vector
+from metadrive.utils.nuplan_utils.parse_object_state import parse_object_state
 
 
 class NuPlanTrafficManager(BaseManager):
@@ -23,6 +23,7 @@ class NuPlanTrafficManager(BaseManager):
         for v_id, obj_state in self._current_traffic_data[0].items():
             if obj_state.tracked_object_type != TrackedObjectType.VEHICLE:
                 continue
+            state = parse_object_state(obj_state, self.engine.current_map.nuplan_center)
             v_config = copy.deepcopy(self.engine.global_config["vehicle_config"])
             v_config["need_navigation"] = False
             v_config.update(
@@ -33,19 +34,19 @@ class NuPlanTrafficManager(BaseManager):
                     show_lidar=False,
                     show_lane_line_detector=False,
                     show_side_detector=False,
+                    spawn_velocity=state["velocity"],
+                    spawn_velocity_car_frame=False,
                 )
             )
             v = self.spawn_object(
                 SVehicle,
-                position=nuplan_2_metadrive_position(
-                    [obj_state.center.x, obj_state.center.y], self.engine.current_map.nuplan_center
-                ),
-                heading=obj_state.center.heading * 180 / np.pi,
-                vehicle_config=v_config
+                position=nuplan_to_metadrive_vector(state["position"]),
+                heading=state["heading"],
+                vehicle_config=v_config,
             )
             self.vid_to_obj[v_id] = v.name
             # v.set_static(True)
-            v.set_velocity([obj_state.velocity.x, obj_state.velocity.y])
+            v.set_velocity(state["velocity"])
 
     # except:
     #     raise ValueError("Can not LOAD traffic for seed: {}".format(self.engine.global_random_seed))
@@ -64,16 +65,11 @@ class NuPlanTrafficManager(BaseManager):
         for v_id, obj_state in self._current_traffic_data[self.engine.episode_step].items():
             if obj_state.tracked_object_type != TrackedObjectType.VEHICLE:
                 continue
+            state = parse_object_state(obj_state, self.engine.current_map.nuplan_center)
             if v_id in self.vid_to_obj and self.vid_to_obj[v_id] in self.spawned_objects.keys():
-                self.spawned_objects[self.vid_to_obj[v_id]].set_position(
-                    nuplan_2_metadrive_position(
-                        [obj_state.center.x, obj_state.center.y], self.engine.current_map.nuplan_center
-                    )
-                )
-                self.spawned_objects[self.vid_to_obj[v_id]].set_heading_theta(
-                    obj_state.center.heading, rad_to_degree=True
-                )
-                self.spawned_objects[self.vid_to_obj[v_id]].set_velocity([obj_state.velocity.x, obj_state.velocity.y])
+                self.spawned_objects[self.vid_to_obj[v_id]].set_position(state["position"])
+                self.spawned_objects[self.vid_to_obj[v_id]].set_heading_theta(state["heading"], rad_to_degree=True)
+                self.spawned_objects[self.vid_to_obj[v_id]].set_velocity(state["velocity"])
             else:
                 # spawn
                 v_config = copy.deepcopy(self.engine.global_config["vehicle_config"])
@@ -86,19 +82,19 @@ class NuPlanTrafficManager(BaseManager):
                         show_lidar=False,
                         show_lane_line_detector=False,
                         show_side_detector=False,
+                        spawn_velocity=state["velocity"],
+                        spawn_velocity_car_frame=False,
                     )
                 )
                 v = self.spawn_object(
                     SVehicle,
-                    position=nuplan_2_metadrive_position(
-                        [obj_state.center.x, obj_state.center.y], self.engine.current_map.nuplan_center
-                    ),
-                    heading=obj_state.center.heading,
-                    vehicle_config=v_config
+                    position=nuplan_to_metadrive_vector(state["position"]),
+                    heading=state["heading"],
+                    vehicle_config=v_config,
                 )
                 self.vid_to_obj[v_id] = v.name
                 # v.set_static(True)
-                v.set_velocity([obj_state.velocity.x, obj_state.velocity.y])
+                v.set_velocity(state["velocity"])
         # except:
         #     raise ValueError("Can not UPDATE traffic for seed: {}".format(self.engine.global_random_seed))
 

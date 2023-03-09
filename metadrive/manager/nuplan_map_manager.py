@@ -1,11 +1,11 @@
 from nuplan.planning.scenario_builder.nuplan_db.nuplan_scenario import NuPlanScenario
+from metadrive.utils.coordinates_shift import nuplan_to_metadrive_vector
 
 from metadrive.component.lane.point_lane import PointLane
 from metadrive.component.map.nuplan_map import NuPlanMap
 from metadrive.constants import DEFAULT_AGENT
 from metadrive.manager.base_manager import BaseManager
-from metadrive.utils.data_buffer import DataBuffer
-from metadrive.utils.nuplan_utils.parse_traffic import parse_ego_vehicle_trajectory, parse_ego_vehicle_state
+from metadrive.utils.nuplan_utils.parse_object_state import parse_ego_vehicle_trajectory, parse_ego_vehicle_state
 
 
 class NuPlanMapManager(BaseManager):
@@ -18,29 +18,44 @@ class NuPlanMapManager(BaseManager):
     def __init__(self):
         super(NuPlanMapManager, self).__init__()
         self.store_map = self.engine.global_config.get("store_map", False)
-        store_map_buffer_size = self.engine.global_config.get("store_map_buffer_size", self.DEFAULT_DATA_BUFFER_SIZE)
         self.current_map = None
         self.map_num = self.engine.data_manager.scenario_num
         self.start = self.engine.global_config["start_case_index"]
         self.sdc_dest_point = None
         self.current_sdc_route = None
+        self.MAP_CENTERS = self.engine.global_config["map_centers"]
+        self.MAP_RADIUS = self.engine.global_config["city_map_radius"] \
+            if self.engine.global_config["load_city_map"] else self.engine.global_config["scenario_radius"]
 
-        self.store_map_buffer = DataBuffer(store_data_buffer_size=store_map_buffer_size if self.store_map else None)
+        # Now we store the whole city map which is the largest map! There are four maps in NuPlan
+        self.city_maps = {}
+
+        # It is used for storing maps separately
+        self.store_map_buffer = {}
 
     def reset(self):
-        seed = self.engine.global_random_seed
-        assert self.start <= seed < self.start + self.map_num
-
-        if seed in self.store_map_buffer:
-            new_map = self.store_map_buffer[seed]
+        current_map_name = self.engine.data_manager.current_scenario.map_api.map_name
+        state = self.engine.data_manager.current_scenario.get_ego_state_at_iteration(0)
+        scenario_center = nuplan_to_metadrive_vector([state.waypoint.x, state.waypoint.y])
+        if not self.engine.global_config["load_city_map"]:
+            # In this mode we don't buffer map for saving time
+            if current_map_name in self.city_maps:
+                self.city_maps.pop(current_map_name)
+            if self.engine.data_manager.current_scenario_index in self.store_map_buffer:
+                new_map = self.store_map_buffer[self.engine.data_manager.current_scenario_index]
+            else:
+                new_map = NuPlanMap(nuplan_center=scenario_center, map_name=current_map_name, radius=self.MAP_RADIUS)
+                self.store_map_buffer[self.engine.data_manager.current_scenario_index] = new_map
+            self.city_maps[current_map_name] = new_map
         else:
-            self.store_map_buffer.clear_if_necessary()
-            state = self.engine.data_manager.current_scenario.get_ego_state_at_iteration(0)
-            center = [state.waypoint.x, state.waypoint.y]
-            new_map = NuPlanMap(nuplan_center=center, map_index=seed)
-            self.store_map_buffer[seed] = new_map
-
-        self.load_map(new_map)
+            # When setting loading city map, the whole map will be created
+            if current_map_name in self.city_maps:
+                new_map = self.city_maps[current_map_name]
+            else:
+                center = self.MAP_CENTERS[current_map_name]
+                new_map = NuPlanMap(nuplan_center=center, map_name=current_map_name, radius=self.MAP_RADIUS)
+                self.city_maps[current_map_name] = new_map
+        self.load_map(new_map, scenario_center)
         self.update_ego_route()
 
     def filter_path(self, start_lanes, end_lanes):
@@ -57,8 +72,8 @@ class NuPlanMapManager(BaseManager):
         # self.spawned_objects[map.id] = map
         # return map
 
-    def load_map(self, map):
-        map.attach_to_world()
+    def load_map(self, map, center):
+        map.attach_to_world(center)
         self.current_map = map
 
     def unload_map(self, map):

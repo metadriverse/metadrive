@@ -7,13 +7,14 @@ from metadrive.constants import TerminationState
 from metadrive.envs.base_env import BaseEnv
 from metadrive.manager.nuplan_data_manager import NuPlanDataManager
 from metadrive.manager.nuplan_map_manager import NuPlanMapManager
-from metadrive.manager.nuplan_traffic_manager import NuPlanTrafficManager
 from metadrive.manager.nuplan_participant_manager import NuplanParticipantManager
+from metadrive.manager.nuplan_traffic_manager import NuPlanTrafficManager
 from metadrive.obs.real_env_observation import NuPlanObservation
 from metadrive.obs.state_obs import LidarStateObservation
 from metadrive.policy.replay_policy import NuPlanReplayEgoCarPolicy
 from metadrive.utils import clip
 from metadrive.utils import get_np_random
+from metadrive.utils.coordinates_shift import nuplan_to_metadrive_vector
 
 NUPLAN_ENV_CONFIG = dict(
     # ===== Dataset Config =====
@@ -27,10 +28,16 @@ NUPLAN_ENV_CONFIG = dict(
     start_case_index=0,
     case_num=100,
     store_map=True,
-    store_map_buffer_size=200,
     sequential_seed=False,
 
+    # ===== Map Config =====
+    city_map_radius=20000,  # load the whole map, setting as large as possible
+    scenario_radius=250,  # radius for per case
+    load_city_map=False,
+    map_centers={'us-nv-las-vegas-strip': nuplan_to_metadrive_vector([664396, 3997613])},
+
     # ===== Traffic =====
+    no_pedestrian=True,
     no_traffic=False,
     replay=True,
     no_static_traffic_vehicle=False,
@@ -121,13 +128,14 @@ class NuPlanEnv(BaseEnv):
         super(NuPlanEnv, self).setup_engine()
         self.engine.register_manager("data_manager", NuPlanDataManager())
         self.engine.register_manager("map_manager", NuPlanMapManager())
-        # if not self.config["no_traffic"]:
-        #     if not self.config['replay']:
-        #         raise ValueError
-        #         self.engine.register_manager("traffic_manager", NuPlanIDMTrafficManager())
-        #     else:
-        #         self.engine.register_manager("traffic_manager", NuPlanTrafficManager())
-        self.engine.register_manager("participant_manager", NuplanParticipantManager())
+        if not self.config["no_traffic"]:
+            if not self.config['replay']:
+                raise ValueError
+                self.engine.register_manager("traffic_manager", NuPlanIDMTrafficManager())
+            else:
+                self.engine.register_manager("traffic_manager", NuPlanTrafficManager())
+        if not self.config["no_pedestrian"]:
+            self.engine.register_manager("participant_manager", NuplanParticipantManager())
         self.engine.accept("p", self.stop)
         self.engine.accept("q", self.switch_to_third_person_view)
         self.engine.accept("b", self.switch_to_top_down_view)
@@ -277,21 +285,20 @@ if __name__ == "__main__":
     env = NuPlanEnv(
         {
             "use_render": True,
-            # "agent_policy": NuPlanReplayEgoCarPolicy,
-            "manual_control": True,
+            "agent_policy": NuPlanReplayEgoCarPolicy,
+            # "manual_control": True,
             "replay": True,
             "no_traffic": False,
+            "no_pedestrian": True,
             # "debug": True,
             # "debug_static_world": True,
-            # "debug_physics_world": True,
-            # "no_traffic":True,
-            # "start_case_index": 192,
-            # "start_case_index": 1000,
-            # "waymo_data_directory": "E:\\PAMI_waymo_data\\idm_filtered\\test",
-            "window_size": (2400, 1600),
-            "start_case_index": 4,
+            "debug_physics_world": False,
+            "load_city_map": True,
+            "window_size": (1200, 800),
+            "start_case_index": 300,
             "pstats": True,
-            "case_num": 1,
+            "case_num": 2000,
+            "show_coordinates": True,
             "horizon": 1000,
             "vehicle_config": dict(
                 lidar=dict(num_lasers=120, distance=50, num_others=4),
@@ -303,8 +310,8 @@ if __name__ == "__main__":
         }
     )
     success = []
-    for seed in range(300, 2000):
-        env.reset(force_seed=4)
+    for seed in range(300, 2300):
+        env.reset(force_seed=seed)
         for i in range(env.engine.data_manager.current_scenario_length * 10):
             o, r, d, info = env.step([0, 0])
 
@@ -330,7 +337,7 @@ if __name__ == "__main__":
             #         }
             #     )
             #
-            # if d:
-            #     if info["arrive_dest"]:
-            #         print("seed:{}, success".format(env.engine.global_random_seed))
-            #     break
+            if d:
+                if info["arrive_dest"]:
+                    print("seed:{}, success".format(env.engine.global_random_seed))
+                break
