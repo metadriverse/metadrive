@@ -115,3 +115,10 @@ class PGMap(BaseMap):
 
         saved_data = copy.deepcopy({self.BLOCK_SEQUENCE: map_config, "map_config": self.config.copy()})
         return saved_data
+
+    def show_coordinates(self):
+        lanes = []
+        for to_ in self.road_network.graph.values():
+            for lanes_to_add in to_.values():
+                lanes += lanes_to_add
+        self.engine.show_lane_coordinates(lanes)

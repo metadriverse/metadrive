@@ -19,6 +19,7 @@ if __name__ == "__main__":
             "cull_scene": False,
             # "offscreen_render": True,
             # "controller": "joystick",
+            "show_coordinates": True,
             "manual_control": True,
             "use_render": True,
             "decision_repeat": 5,
@@ -66,6 +67,8 @@ if __name__ == "__main__":
 
     start = time.time()
     o = env.reset()
+    # for line in env.engine.coordinate_line:
+    #     line.reparentTo(env.vehicle.origin)
     # env.vehicle.set_velocity([5, 0], in_local_frame=True)
     for s in range(1, 10000):
         env.vehicle.set_velocity([8.728615581032535, -2.24411703918728195], in_local_frame=True)

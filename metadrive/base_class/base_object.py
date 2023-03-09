@@ -144,6 +144,9 @@ class BaseObject(BaseRunnable):
         # store all NodePath reparented to this node
         self._node_path_list = []
 
+        # debug
+        self.coordinates_debug_np = None
+
     def disable_gravity(self):
         self._body.setGravity(LVector3(0, 0, 0))
 
@@ -177,6 +180,9 @@ class BaseObject(BaseRunnable):
                 assert isinstance(self.MASS,
                                   int) or isinstance(self.MASS, float), "MASS should be a float or an integer"
                 self._body.setMass(self.MASS)
+
+            if self.engine is not None and self.engine.global_config["show_coordinates"]:
+                self.show_coordinates()
         else:
             raise AttributeError("You can not set the object body for twice")
 
@@ -409,3 +415,6 @@ class BaseObject(BaseRunnable):
         raise NotImplementedError(
             "Implement this func for rendering class {} in top down renderer".format(self.class_name)
         )
+
+    def show_coordinates(self):
+        pass

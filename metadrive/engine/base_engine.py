@@ -229,7 +229,6 @@ class BaseEngine(EngineCore, Randomizable):
         _debug_memory_usage = False
 
         if _debug_memory_usage:
-
             def process_memory():
                 import psutil
                 import os
@@ -539,9 +538,9 @@ class BaseEngine(EngineCore, Randomizable):
         self.lane_coordinates_debug_node = NodePath("Lane Coordinates debug")
         for lane in lanes:
             long_start = lateral_start = lane.position(0, 0)
-            lateral_end = lane.position(0, 5)
+            lateral_end = lane.position(0, 2)
 
-            long_end = long_start + lane.heading_at(0) * 5
+            long_end = long_start + lane.heading_at(0) * 4
             np_x = self.add_line(Vec3(*long_start, 0), Vec3(*long_end, 0), color=[1, 0, 0, 1], thickness=2)
             np_y = self.add_line(Vec3(*lateral_start, 0), Vec3(*lateral_end, 0), color=[0, 1, 0, 1], thickness=2)
             np_x.reparentTo(self.lane_coordinates_debug_node)

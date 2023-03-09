@@ -1,5 +1,5 @@
 import math
-from panda3d.core import TransformState
+from panda3d.core import NodePath
 from collections import deque
 from typing import Union, Optional
 
@@ -115,12 +115,12 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     path = None
 
     def __init__(
-        self,
-        vehicle_config: Union[dict, Config] = None,
-        name: str = None,
-        random_seed=None,
-        position=None,
-        heading=None  # In degree!
+            self,
+            vehicle_config: Union[dict, Config] = None,
+            name: str = None,
+            random_seed=None,
+            position=None,
+            heading=None  # In degree!
     ):
         """
         This Vehicle Config is different from self.get_config(), and it is used to define which modules to use, and
@@ -333,13 +333,13 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         return step_energy, self.energy_consumption
 
     def reset(
-        self,
-        random_seed=None,
-        vehicle_config=None,
-        position: np.ndarray = None,
-        heading: float = 0.0,  # In degree!
-        *args,
-        **kwargs
+            self,
+            random_seed=None,
+            vehicle_config=None,
+            position: np.ndarray = None,
+            heading: float = 0.0,  # In degree!
+            *args,
+            **kwargs
     ):
         """
         pos is a 2-d array, and heading is a float (unit degree)
@@ -506,8 +506,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         if not lateral_norm * forward_direction_norm:
             return 0
         cos = (
-            (forward_direction[0] * lateral[0] + forward_direction[1] * lateral[1]) /
-            (lateral_norm * forward_direction_norm)
+                (forward_direction[0] * lateral[0] + forward_direction[1] * lateral[1]) /
+                (lateral_norm * forward_direction_norm)
         )
         # return cos
         # Normalize to 0, 1
@@ -839,7 +839,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             ckpt_idx = routing._target_checkpoints_index
             for surrounding_v in surrounding_vs:
                 if surrounding_v.lane_index[:-1] == (routing.checkpoints[ckpt_idx[0]], routing.checkpoints[ckpt_idx[1]
-                                                                                                           ]):
+                ]):
                     if self.lane.local_coordinates(self.position)[0] - \
                             self.lane.local_coordinates(surrounding_v.position)[0] < 0:
                         self.front_vehicles.add(surrounding_v)
@@ -877,9 +877,9 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     @property
     def replay_done(self):
         return self._replay_done if hasattr(self, "_replay_done") else (
-            self.crash_building or self.crash_vehicle or
-            # self.on_white_continuous_line or
-            self.on_yellow_continuous_line
+                self.crash_building or self.crash_vehicle or
+                # self.on_white_continuous_line or
+                self.on_yellow_continuous_line
         )
 
     @property
@@ -984,3 +984,17 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         for obj in [self.navigation, self.lidar, self.side_detector, self.lane_line_detector]:
             if obj is not None and hasattr(obj, "before_reset"):
                 obj.before_reset()
+
+    def show_coordinates(self):
+        if self.coordinates_debug_np is not None:
+            return
+        height = self.HEIGHT
+        self.coordinates_debug_np = NodePath("debug coordinate")
+        # 90 degree diff
+        x = self.engine.add_line([0, 0, height], [0, -2, height], [0, 1, 0, 1], 1)
+        y = self.engine.add_line([0, 0, height], [1, 0, height], [0, 1, 0, 1], 1)
+        z = self.engine.add_line([0, 0, height], [0, 0, height + 0.5], [0, 0, 1, 1], 2)
+        x.reparentTo(self.coordinates_debug_np)
+        y.reparentTo(self.coordinates_debug_np)
+        z.reparentTo(self.coordinates_debug_np)
+        self.coordinates_debug_np.reparentTo(self.origin)
