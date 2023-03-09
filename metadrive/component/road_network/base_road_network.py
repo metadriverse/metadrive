@@ -74,7 +74,9 @@ class BaseRoadNetwork:
         points = [(x, y) for x in bound_box[:2] for y in bound_box[2:]]
         for k, p in enumerate(points[:-1]):
             for p_ in points[k + 1:]:
-                self._lines_np.append(engine.add_line((*p, 2), (*p_, 2), color, 2))
+                line = engine.add_line((*p, 2), (*p_, 2), color, 2)
+                line.reparentTo(engine.render)
+                self._lines_np.append(line)
 
     def remove_bounding_box(self):
         if len(self._lines_np) == 0:

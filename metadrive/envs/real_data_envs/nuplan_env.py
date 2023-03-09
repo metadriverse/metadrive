@@ -7,7 +7,6 @@ from metadrive.constants import TerminationState
 from metadrive.envs.base_env import BaseEnv
 from metadrive.manager.nuplan_data_manager import NuPlanDataManager
 from metadrive.manager.nuplan_map_manager import NuPlanMapManager
-from metadrive.manager.nuplan_participant_manager import NuplanParticipantManager
 from metadrive.manager.nuplan_traffic_manager import NuPlanTrafficManager
 from metadrive.obs.real_env_observation import NuPlanObservation
 from metadrive.obs.state_obs import LidarStateObservation
@@ -128,14 +127,7 @@ class NuPlanEnv(BaseEnv):
         super(NuPlanEnv, self).setup_engine()
         self.engine.register_manager("data_manager", NuPlanDataManager())
         self.engine.register_manager("map_manager", NuPlanMapManager())
-        if not self.config["no_traffic"]:
-            if not self.config['replay']:
-                raise ValueError
-                self.engine.register_manager("traffic_manager", NuPlanIDMTrafficManager())
-            else:
-                self.engine.register_manager("traffic_manager", NuPlanTrafficManager())
-        if not self.config["no_pedestrian"]:
-            self.engine.register_manager("participant_manager", NuplanParticipantManager())
+        self.engine.register_manager("traffic_manager", NuPlanTrafficManager())
         self.engine.accept("p", self.stop)
         self.engine.accept("q", self.switch_to_third_person_view)
         self.engine.accept("b", self.switch_to_top_down_view)
@@ -289,15 +281,15 @@ if __name__ == "__main__":
             # "manual_control": True,
             "replay": True,
             "no_traffic": False,
-            "no_pedestrian": True,
+            "no_pedestrian": False,
             # "debug": True,
             # "debug_static_world": True,
             "debug_physics_world": False,
-            "load_city_map": True,
+            "load_city_map": False,
             "window_size": (1200, 800),
             "start_case_index": 300,
             "pstats": True,
-            "case_num": 2000,
+            "case_num": 1,
             "show_coordinates": True,
             "horizon": 1000,
             "vehicle_config": dict(
@@ -311,7 +303,7 @@ if __name__ == "__main__":
     )
     success = []
     for seed in range(300, 2300):
-        env.reset(force_seed=seed)
+        env.reset(force_seed=300)
         for i in range(env.engine.data_manager.current_scenario_length * 10):
             o, r, d, info = env.step([0, 0])
 

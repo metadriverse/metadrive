@@ -104,6 +104,7 @@ class EngineCore(ShowBase.ShowBase):
             # You can enable it if your panda version is latest.
             loadPrcFileData("", "threading-model Cull/Draw")  # multi-thread render, accelerate simulation when evaluate
         else:
+            self.global_config["show_coordinates"] = False
             if self.global_config["offscreen_render"]:
                 self.mode = RENDER_MODE_OFFSCREEN
                 loadPrcFileData("", "threading-model Cull/Draw")
@@ -393,6 +394,7 @@ class EngineCore(ShowBase.ShowBase):
             return task.cont
 
     def add_line(self, start_p: Union[Vec3, Tuple], end_p: Union[Vec3, Tuple], color, thickness: float):
+        assert self.mode == RENDER_MODE_ONSCREEN, "Can not call this API in render mode: {}".format(self.mode)
         start_p = [*start_p]
         end_p = [*end_p]
         start_p[1] *= -1
@@ -403,12 +405,18 @@ class EngineCore(ShowBase.ShowBase):
         line_seg.drawTo(Vec3(*end_p))
         line_seg.setThickness(thickness)
         np = NodePath(line_seg.create(False))
-        np.reparentTo(self.render)
+        # np.reparentTo(self.render)
         return np
 
     def show_coordinates(self):
+        if len(self.coordinate_line) > 0:
+            return
+        # x direction = red
         np_x = self.add_line(Vec3(0, 0, 0), Vec3(100, 0, 0), color=[1, 0, 0, 1], thickness=2)
-        np_y = self.add_line(Vec3(0, 0, 0), Vec3(0, 100, 0), color=[0, 1, 0, 1], thickness=2)
+        np_x.reparentTo(self.render)
+        # y direction = blue
+        np_y = self.add_line(Vec3(0, 0, 0), Vec3(0, 50, 0), color=[0, 1, 0, 1], thickness=2)
+        np_y.reparentTo(self.render)
         self.coordinate_line.append(np_x)
         self.coordinate_line.append(np_y)
 
