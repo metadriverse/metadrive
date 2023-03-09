@@ -407,7 +407,9 @@ class EngineCore(ShowBase.ShowBase):
         return np
 
     def show_coordinates(self):
+        # x direction = red
         np_x = self.add_line(Vec3(0, 0, 0), Vec3(100, 0, 0), color=[1, 0, 0, 1], thickness=2)
+        # y direction = blue
         np_y = self.add_line(Vec3(0, 0, 0), Vec3(0, 100, 0), color=[0, 1, 0, 1], thickness=2)
         self.coordinate_line.append(np_x)
         self.coordinate_line.append(np_y)
