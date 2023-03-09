@@ -25,14 +25,14 @@ class BaseNavigation:
     LINE_TO_DEST_HEIGHT = 0.6
 
     def __init__(
-        self,
-        show_navi_mark: bool = False,
-        random_navi_mark_color=False,
-        show_dest_mark=False,
-        show_line_to_dest=False,
-        panda_color=None,
-        name=None,
-        vehicle_config=None
+            self,
+            show_navi_mark: bool = False,
+            random_navi_mark_color=False,
+            show_dest_mark=False,
+            show_line_to_dest=False,
+            panda_color=None,
+            name=None,
+            vehicle_config=None
     ):
         """
         This class define a helper for localizing vehicles and retrieving navigation information.
@@ -51,11 +51,11 @@ class BaseNavigation:
         self.vehicle_config = vehicle_config
 
         self._target_checkpoints_index = None
-        self._navi_info = np.zeros((self.navigation_info_dim, ), dtype=np.float32)  # navi information res
+        self._navi_info = np.zeros((self.navigation_info_dim,), dtype=np.float32)  # navi information res
 
         # Vis
         self._show_navi_info = (
-            self.engine.mode == RENDER_MODE_ONSCREEN and not self.engine.global_config["debug_physics_world"]
+                self.engine.mode == RENDER_MODE_ONSCREEN and not self.engine.global_config["debug_physics_world"]
         )
         self.origin = NodePath("navigation_sign") if self._show_navi_info else None
         self.navi_mark_color = (0.6, 0.8, 0.5) if not random_navi_mark_color else get_np_random().rand(3)
@@ -174,6 +174,10 @@ class BaseNavigation:
                 pass
             self._dest_node_path.removeNode()
             self._goal_node_path.removeNode()
+
+        for np in self._node_path_list:
+            np.detachNode()
+            np.removeNode()
         self.next_ref_lanes = None
         self.current_ref_lanes = None
 
@@ -242,17 +246,10 @@ class BaseNavigation:
     def detach_from_world(self):
         if isinstance(self.origin, NodePath):
             self.origin.detachNode()
-        for np in self._node_path_list:
-            np.detachNode()
 
     def attach_to_world(self, engine):
         if isinstance(self.origin, NodePath):
             self.origin.reparentTo(engine.render)
-
-    def destroy(self):
-        for np in self._node_path_list:
-            np.detachNode()
-            np.removeNode()
 
     @property
     def engine(self):
