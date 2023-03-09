@@ -1,4 +1,5 @@
 import math
+from panda3d.core import TransformState
 from collections import deque
 from typing import Union, Optional
 
@@ -405,7 +406,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             assert self.navigation
 
         if self.config["spawn_velocity"] is not None:
-            self.set_velocity(self.config["spawn_velocity"], self.config["spawn_velocity_car_frame"])
+            self.set_velocity(self.config["spawn_velocity"], in_local_frame=self.config["spawn_velocity_car_frame"])
 
     """------------------------------------------- act -------------------------------------------------"""
 
@@ -768,7 +769,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
 
     def set_heading_theta(self, heading_theta, rad_to_degree=True) -> None:
         """
-        Set heading theta for this object
+        Set heading theta for this object. Vehicle local frame has a 90 degree offset
         :param heading_theta: float in rad
         """
         h = panda_heading(heading_theta)

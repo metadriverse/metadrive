@@ -73,9 +73,9 @@ class AbstractLane:
         """
         raise NotImplementedError()
 
-    def heading_at(self, longitudinal) -> list:
+    def heading_at(self, longitudinal) -> np.array:
         heaidng_theta = self.heading_theta_at(longitudinal)
-        return [math.cos(heaidng_theta), math.sin(heaidng_theta)]
+        return np.array([math.cos(heaidng_theta), math.sin(heaidng_theta)])
 
     @abstractmethod
     def width_at(self, longitudinal: float) -> float:
@@ -308,10 +308,11 @@ class AbstractLane:
             # For visualization
             lane_line = block.loader.loadModel(AssetLoader.file_path("models", "box.bam"))
             lane_line.setScale(length, DrivableAreaProperty.LANE_LINE_WIDTH, DrivableAreaProperty.LANE_LINE_THICKNESS)
-            height = -DrivableAreaProperty.LANE_LINE_GHOST_HEIGHT / 2
+            height = 0
             height += 0.01 if line_color == LineColor.YELLOW else 0
-            lane_line.setPos(Vec3(0, 0, height))
-            lane_line.reparentTo(body_np)
+            lane_line.setQuat(LQuaternionf(math.cos(theta / 2), 0, 0, math.sin(theta / 2)))
+            lane_line.setPos(panda_position(middle, height))
+            lane_line.reparentTo(parent_np)
             body_np.set_color(line_color)
 
         return node_path_list

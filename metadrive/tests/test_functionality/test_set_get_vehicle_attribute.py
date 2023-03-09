@@ -1,4 +1,5 @@
 import numpy as np
+from metadrive.utils.math_utils import wrap_to_pi
 
 from metadrive.envs.metadrive_env import MetaDriveEnv
 
@@ -128,6 +129,27 @@ def test_coordinates(render=False):
         assert env.vehicle.velocity[1] > -1. and abs(env.vehicle.velocity[0]) > 1
         assert env.vehicle.position[0] > begining_pos[0] and env.vehicle.position[1] > begining_pos[1]
         assert env.vehicle.heading_theta > 0.3  # rad
+
+        env.reset()
+        env.vehicle.set_heading_theta(np.deg2rad(90))
+        for _ in range(10):
+            o, r, d, info, = env.step([-0., 0.])
+        assert wrap_to_pi(abs(env.vehicle.heading_theta - np.deg2rad(90))) < 1
+        assert np.isclose(env.vehicle.heading, np.array([0, 1])).all()
+
+        env.reset()
+        env.vehicle.set_heading_theta(np.deg2rad(45))
+        for _ in range(10):
+            o, r, d, info, = env.step([-0., 0.])
+        assert wrap_to_pi(abs(env.vehicle.heading_theta - np.deg2rad(45))) < 1
+        assert np.isclose(env.vehicle.heading, np.array([np.sqrt(2) / 2, np.sqrt(2) / 2])).all()
+
+        env.reset()
+        env.vehicle.set_heading_theta(np.deg2rad(-90))
+        for _ in range(10):
+            o, r, d, info, = env.step([-0., 0.])
+        assert wrap_to_pi(abs(env.vehicle.heading_theta + np.deg2rad(-90))) < 1
+        assert np.isclose(env.vehicle.heading, np.array([0, -1])).all()
 
     finally:
         env.close()

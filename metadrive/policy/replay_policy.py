@@ -102,7 +102,7 @@ class NuPlanReplayEgoCarPolicy(ReplayEgoCarPolicy):
         # self.control_object.disable_gravity()
 
     def get_trajectory_info(self):
-        from metadrive.utils.nuplan_utils.parse_traffic import parse_ego_vehicle_state
+        from metadrive.utils.nuplan_utils.parse_object_state import parse_ego_vehicle_state
         scenario = self.engine.data_manager.current_scenario
         return [
             parse_ego_vehicle_state(scenario.get_ego_state_at_iteration(i), self.engine.current_map.nuplan_center)

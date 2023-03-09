@@ -4,7 +4,7 @@ import numpy as np
 
 from metadrive.component.vehicle.vehicle_type import SVehicle
 from metadrive.manager.base_manager import BaseManager
-from metadrive.utils.coordinates_shift import waymo_2_metadrive_heading, waymo_2_metadrive_position
+from metadrive.utils.coordinates_shift import waymo_to_metadrive_heading, waymo_to_metadrive_vector
 from metadrive.utils.waymo_utils.waymo_utils import AgentType
 
 
@@ -61,11 +61,11 @@ class WaymoTrafficManager(BaseManager):
                     state = states[current_idx]
                     break
 
-        ret["position"] = waymo_2_metadrive_position([state[0], state[1]])
+        ret["position"] = waymo_to_metadrive_vector([state[0], state[1]])
         ret["length"] = state[3]
         ret["width"] = state[4]
-        ret["heading"] = waymo_2_metadrive_heading(np.rad2deg(state[6]))
-        ret["velocity"] = waymo_2_metadrive_position([state[7], state[8]])
+        ret["heading"] = waymo_to_metadrive_heading(np.rad2deg(state[6]))
+        ret["velocity"] = waymo_to_metadrive_vector([state[7], state[8]])
         ret["valid"] = state[9]
         return ret
 

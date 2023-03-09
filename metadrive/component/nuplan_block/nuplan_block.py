@@ -1,6 +1,6 @@
 import math
 from dataclasses import dataclass
-
+from metadrive.utils.coordinates_shift import nuplan_to_metadrive_vector
 import geopandas as gpd
 import numpy as np
 from nuplan.common.actor_state.state_representation import Point2D
@@ -12,7 +12,6 @@ from metadrive.component.lane.nuplan_lane import NuPlanLane
 from metadrive.component.road_network.edge_road_network import EdgeRoadNetwork
 from metadrive.constants import DrivableAreaProperty
 from metadrive.constants import LineColor, LineType
-from metadrive.engine.engine_utils import get_engine
 from metadrive.utils.interpolating_line import InterpolatingLine
 from metadrive.utils.math_utils import wrap_to_pi, norm
 
@@ -26,8 +25,6 @@ class LaneLineProperty:
 
 
 class NuPlanBlock(BaseBlock):
-    _radius = 200  # [m] show 500m map
-
     def __init__(self, block_index: int, global_network, random_seed, map_index, nuplan_center):
         self.map_index = map_index
         self.nuplan_center = nuplan_center
@@ -35,8 +32,8 @@ class NuPlanBlock(BaseBlock):
 
         # authorize engine access for this object
         # self.engine = get_engine()
-        self._nuplan_map_api = self.engine.data_manager.get_case(self.map_index).map_api
-        # TODO LQY, make it a dict
+        self._nuplan_map_api = self.engine.data_manager.current_scenario.map_api
+
         self.lines = {}
         self.boundaries = {}
 
@@ -46,8 +43,11 @@ class NuPlanBlock(BaseBlock):
 
     def _sample_topology(self) -> bool:
         """
-        This function is modified from _render_map in nuplan-devkit.simulation_tile.py
+        This function is modified from _render_map in nuplan-devkit.simulation_tile.py, it should be setting outside now
         """
+
+        return True
+        # Deprecated
         map_api = self._nuplan_map_api
         # Center is Important !
         center = self.nuplan_center
@@ -183,10 +183,11 @@ class NuPlanBlock(BaseBlock):
     @staticmethod
     def _get_points_from_boundary(boundary, center):
         path = boundary.discrete_path
-        points = [np.array([pose.x - center[0], pose.y - center[1]]) for pose in path]
+        points = [(pose.x, pose.y) for pose in path]
+        points = nuplan_to_metadrive_vector(points, center)
         return points
 
-    def _get_lane_line(self, lane, nuplan_center, is_road_connector=False):
+    def set_lane_line(self, lane, nuplan_center, is_road_connector=False):
         center = nuplan_center
         boundaries = self.map_api._get_vector_map_layer(SemanticMapLayer.BOUNDARIES)
 
