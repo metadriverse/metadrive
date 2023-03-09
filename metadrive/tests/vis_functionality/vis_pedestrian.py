@@ -38,7 +38,7 @@ if __name__ == "__main__":
             # "camera_smooth": False,
             # "camera_height": -1,
             "window_size": (2400, 1600),
-            "show_coordinates":True,
+            "show_coordinates": True,
             "vehicle_config": {
                 "enable_reverse": False,
                 # "image_source": "depth_camera",

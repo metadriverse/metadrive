@@ -10,7 +10,6 @@ class NuplanParticipantManager(BaseManager):
     """
     This manager will control the walker and cyclist in the scenario
     """
-
     def __init__(self):
         raise DeprecationWarning("No all traffic participants are actuated by TrafficManager")
         super(NuplanParticipantManager, self).__init__()
@@ -38,7 +37,7 @@ class NuplanParticipantManager(BaseManager):
             return
 
         objs_to_eliminate = self.nuplan_id_to_obj.keys() - self._current_traffic_participants[self.engine.episode_step
-        ].keys()
+                                                                                              ].keys()
         for nuplan_id in list(objs_to_eliminate):
             self.clear_objects([self.nuplan_id_to_obj[nuplan_id]])
             self.nuplan_id_to_obj.pop(nuplan_id)

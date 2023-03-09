@@ -2,7 +2,6 @@ from metadrive.policy.base_policy import BasePolicy
 
 has_rendered = False
 
-
 # class ReplayPolicy(BasePolicy):
 #     def __init__(self, control_object, locate_info):
 #         super(ReplayPolicy, self).__init__(control_object=control_object)
@@ -42,7 +41,6 @@ class ReplayEgoCarPolicy(BasePolicy):
     Replay policy from Real data. For adding new policy, overwrite get_trajectory_info()
     This policy is designed for Waymo Policy by default
     """
-
     def __init__(self, control_object, random_seed):
         super(ReplayEgoCarPolicy, self).__init__(control_object=control_object)
         self.traj_info = self.get_trajectory_info()
@@ -120,8 +118,8 @@ class NuPlanReplayEgoCarPolicy(ReplayEgoCarPolicy):
         if self.timestep < len(self.traj_info):
             self.control_object.set_position(self.traj_info[int(self.timestep)]["position"])
             if self.timestep < len(self.traj_info) - 1:
-                velocity = self.traj_info[int(self.timestep + 1)]["position"] - self.traj_info[int(self.timestep)][
-                    "position"]
+                velocity = self.traj_info[int(self.timestep + 1)]["position"] - self.traj_info[int(self.timestep
+                                                                                                   )]["position"]
                 velocity /= self.sim_time_interval
                 self.control_object.set_velocity(velocity, in_local_frame=False)
             else:
@@ -141,7 +139,6 @@ class NuPlanReplayTrafficParticipantPolicy(BasePolicy):
     """
     This policy should be used with TrafficParticipantManager Together
     """
-
     def __init__(self, *args, **kwargs):
         super(NuPlanReplayTrafficParticipantPolicy, self).__init__(*args, **kwargs)
         self.timestep = 0
