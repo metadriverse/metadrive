@@ -240,11 +240,13 @@ class BaseObject(BaseRunnable):
             self.static_nodes.clear()
             self._config.clear()
 
-    def set_position(self, position, height=0.543):
+    def set_position(self, position, height=None):
         """
         Set this object to a place, the default value is the regular height for red car
         :param position: 2d array or list
         """
+        if height is None:
+            height = self.origin.getPos()[-1]
         self.origin.setPos(panda_position(position, height))
 
     @property

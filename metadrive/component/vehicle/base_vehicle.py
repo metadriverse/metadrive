@@ -374,7 +374,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self.spawn_place = position
         heading = -np.deg2rad(heading) - np.pi / 2
         self.set_static(False)
-        self.set_position(position, self.HEIGHT / 2 + 1)
+        self.set_position(position, self.HEIGHT / 2)
         self.origin.setQuat(LQuaternionf(math.cos(heading / 2), 0, 0, math.sin(heading / 2)))
         self.update_map_info(map)
         self.body.clearForces()
