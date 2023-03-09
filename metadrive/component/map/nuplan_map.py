@@ -158,6 +158,10 @@ class NuPlanMap(BaseMap):
         logging.debug("Map is Released")
         print("[NuPlanMap] Map is Released")
 
+    def show_coordinates(self):
+        lanes = [lane_info.lane for lane_info in self.road_network.graph.values()]
+        self.engine.show_lane_coordinates(lanes)
+
 
 if __name__ == "__main__":
     from metadrive.envs.real_data_envs.nuplan_env import NuPlanEnv

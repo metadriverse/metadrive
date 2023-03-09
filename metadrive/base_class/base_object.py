@@ -144,6 +144,9 @@ class BaseObject(BaseRunnable):
         # store all NodePath reparented to this node
         self._node_path_list = []
 
+        # debug
+        self.coordinates_debug_np = None
+
     def disable_gravity(self):
         self._body.setGravity(LVector3(0, 0, 0))
 
@@ -177,6 +180,9 @@ class BaseObject(BaseRunnable):
                 assert isinstance(self.MASS,
                                   int) or isinstance(self.MASS, float), "MASS should be a float or an integer"
                 self._body.setMass(self.MASS)
+
+            if self.engine is not None and self.engine.global_config["show_coordinates"]:
+                self.show_coordinates()
         else:
             raise AttributeError("You can not set the object body for twice")
 
@@ -240,11 +246,13 @@ class BaseObject(BaseRunnable):
             self.static_nodes.clear()
             self._config.clear()
 
-    def set_position(self, position, height=0.543):
+    def set_position(self, position, height=None):
         """
         Set this object to a place, the default value is the regular height for red car
         :param position: 2d array or list
         """
+        if height is None:
+            height = self.origin.getPos()[-1]
         self.origin.setPos(panda_position(position, height))
 
     @property
@@ -407,3 +415,6 @@ class BaseObject(BaseRunnable):
         raise NotImplementedError(
             "Implement this func for rendering class {} in top down renderer".format(self.class_name)
         )
+
+    def show_coordinates(self):
+        pass

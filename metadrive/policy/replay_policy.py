@@ -1,5 +1,3 @@
-import numpy as np
-
 from metadrive.policy.base_policy import BasePolicy
 
 has_rendered = False
@@ -117,20 +115,46 @@ class NuPlanReplayEgoCarPolicy(ReplayEgoCarPolicy):
         else:
             return [0, 0]
 
-        if self.timestep == self.start_index:
-            self.control_object.set_position(self.init_pos)
-            velocity = np.array(self.traj_info[0]["velocity"])
-            self.control_object.set_velocity(velocity, in_local_frame=True)
-        elif self.timestep < len(self.traj_info):
+        if self.timestep < len(self.traj_info):
             self.control_object.set_position(self.traj_info[int(self.timestep)]["position"])
-            velocity = self.traj_info[int(self.timestep)]["velocity"]
-            self.control_object.set_velocity(velocity, in_local_frame=True)
+            if self.timestep < len(self.traj_info) - 1:
+                velocity = self.traj_info[int(self.timestep + 1)]["position"] - self.traj_info[int(self.timestep
+                                                                                                   )]["position"]
+                velocity /= self.sim_time_interval
+                self.control_object.set_velocity(velocity, in_local_frame=False)
+            else:
+                velocity = self.traj_info[int(self.timestep)]["velocity"]
+                self.control_object.set_velocity(velocity, in_local_frame=True)
             # self.control_object.set_velocity(self.traj_info[int(self.timestep)]["velocity"])
-
         if self.heading is None or self.timestep >= len(self.traj_info):
             pass
         else:
             this_heading = self.traj_info[int(self.timestep)]["heading"]
             self.control_object.set_heading_theta(this_heading, rad_to_degree=False)
 
+        return [0, 0]
+
+
+class NuPlanReplayTrafficParticipantPolicy(BasePolicy):
+    """
+    This policy should be used with TrafficParticipantManager Together
+    """
+    def __init__(self, *args, **kwargs):
+        super(NuPlanReplayTrafficParticipantPolicy, self).__init__(*args, **kwargs)
+        self.timestep = 0
+        self.damp = 0
+        self.start_index = 0
+        # how many times the replay data is slowed down
+        self.damp_interval = 1
+
+    def act(self, obj_state, *args, **kwargs):
+        self.damp += self.damp_interval
+        if self.damp == self.damp_interval:
+            self.timestep += 1
+            self.damp = 0
+        else:
+            return [0, 0]
+        self.control_object.set_position(obj_state["position"])
+        self.control_object.set_heading_theta(obj_state["heading"], rad_to_degree=True)
+        self.control_object.set_velocity(obj_state["velocity"])
         return [0, 0]

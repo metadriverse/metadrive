@@ -6,7 +6,6 @@ from gym.spaces import Box, Dict, MultiDiscrete, Discrete
 from metadrive.constants import DEFAULT_AGENT
 from metadrive.manager.base_manager import BaseManager
 from metadrive.policy.AI_protect_policy import AIProtectPolicy
-from metadrive.policy.env_input_policy import EnvInputPolicy
 from metadrive.policy.manual_control_policy import ManualControlPolicy
 
 
@@ -67,11 +66,12 @@ class AgentManager(BaseManager):
                 vehicle_type[v_config["vehicle_model"] if v_config.get("vehicle_model", False) else "default"]
             obj = self.spawn_object(v_type, vehicle_config=v_config)
             ret[agent_id] = obj
-            policy_cls = self.get_policy()
+            policy_cls = self.agent_policy
             self.add_policy(obj.id, policy_cls, obj, self.generate_seed())
         return ret
 
-    def get_policy(self):
+    @property
+    def agent_policy(self):
         # note: agent.id = object id
 
         if self.engine.global_config["manual_control"]:
@@ -224,7 +224,7 @@ class AgentManager(BaseManager):
         self._agents_finished_this_frame = dict()
         step_infos = {}
         for agent_id in self.active_agents.keys():
-            policy = self.engine.get_policy(self._agent_to_object[agent_id])
+            policy = self.get_policy(self._agent_to_object[agent_id])
             assert policy is not None, "No policy is set for agent {}".format(agent_id)
             action = policy.act(agent_id)
             step_infos[agent_id] = policy.get_action_info()

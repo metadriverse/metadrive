@@ -11,6 +11,7 @@ if __name__ == "__main__":
             "traffic_density": 0.,
             "traffic_mode": "hybrid",
             "start_seed": 22,
+            "accident_prob": 1.0,
             # "_disable_detector_mask":True,
             # "debug_physics_world": True,
             "debug": True,
@@ -24,7 +25,7 @@ if __name__ == "__main__":
             "decision_repeat": 5,
             "need_inverse_traffic": False,
             "rgb_clip": True,
-            "map": "X",
+            "map": "XSS",
             # "agent_policy": IDMPolicy,
             "random_traffic": False,
             "random_lane_width": True,
@@ -37,6 +38,7 @@ if __name__ == "__main__":
             # "camera_smooth": False,
             # "camera_height": -1,
             "window_size": (2400, 1600),
+            "show_coordinates": True,
             "vehicle_config": {
                 "enable_reverse": False,
                 # "image_source": "depth_camera",
@@ -60,7 +62,9 @@ if __name__ == "__main__":
     obj_1 = env.engine.spawn_object(Pedestrian, position=[30, 0], heading_theta=0, random_seed=1)
     obj_2 = env.engine.spawn_object(Pedestrian, position=[30, 6], heading_theta=0, random_seed=1)
     obj_1.set_velocity([1, 0], 1, in_local_frame=True)
+    # obj_1.show_coordinates()
     obj_2.set_velocity([1, 0], 2, in_local_frame=True)
+    # obj_2.show_coordinates()
     env.vehicle.set_velocity([5, 0], in_local_frame=False)
     for s in range(1, 10000):
         o, r, d, info = env.step(env.action_space.sample())

@@ -11,6 +11,7 @@ class NuplanParticipantManager(BaseManager):
     This manager will control the walker and cyclist in the scenario
     """
     def __init__(self):
+        raise DeprecationWarning("No all traffic participants are actuated by TrafficManager")
         super(NuplanParticipantManager, self).__init__()
         self.nuplan_id_to_obj = {}
         self._current_traffic_participants = None

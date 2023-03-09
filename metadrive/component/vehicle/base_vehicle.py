@@ -1,5 +1,5 @@
 import math
-from panda3d.core import TransformState
+from panda3d.core import NodePath
 from collections import deque
 from typing import Union, Optional
 
@@ -374,7 +374,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self.spawn_place = position
         heading = -np.deg2rad(heading) - np.pi / 2
         self.set_static(False)
-        self.set_position(position, self.HEIGHT / 2 + 1)
+        self.set_position(position, self.HEIGHT / 2)
         self.origin.setQuat(LQuaternionf(math.cos(heading / 2), 0, 0, math.sin(heading / 2)))
         self.update_map_info(map)
         self.body.clearForces()
@@ -984,3 +984,17 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         for obj in [self.navigation, self.lidar, self.side_detector, self.lane_line_detector]:
             if obj is not None and hasattr(obj, "before_reset"):
                 obj.before_reset()
+
+    def show_coordinates(self):
+        if self.coordinates_debug_np is not None:
+            return
+        height = self.HEIGHT
+        self.coordinates_debug_np = NodePath("debug coordinate")
+        # 90 degree diff
+        x = self.engine.add_line([0, 0, height], [0, -2, height], [0, 1, 0, 1], 1)
+        y = self.engine.add_line([0, 0, height], [1, 0, height], [0, 1, 0, 1], 1)
+        z = self.engine.add_line([0, 0, height], [0, 0, height + 0.5], [0, 0, 1, 1], 2)
+        x.reparentTo(self.coordinates_debug_np)
+        y.reparentTo(self.coordinates_debug_np)
+        z.reparentTo(self.coordinates_debug_np)
+        self.coordinates_debug_np.reparentTo(self.origin)

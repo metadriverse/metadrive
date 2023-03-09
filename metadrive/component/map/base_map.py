@@ -55,6 +55,8 @@ class BaseMap(BaseRunnable):
         #  a trick to optimize performance
         self.spawn_roads = None
         self.detach_from_world()
+        if self.engine.global_config["show_coordinates"]:
+            self.show_coordinates()
 
     def _generate(self):
         """Key function! Please overwrite it! This func aims at fill the self.road_network adn self.blocks"""
@@ -105,3 +107,6 @@ class BaseMap(BaseRunnable):
     def __del__(self):
         # self.destroy()
         logger.debug("{} is being deleted.".format(type(self)))
+
+    def show_coordinates(self):
+        pass

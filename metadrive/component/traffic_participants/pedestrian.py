@@ -36,6 +36,7 @@ class Pedestrian(BaseTrafficParticipant):
             if len(Pedestrian._MODEL) == 0:
                 self._init_pedestrian_model()
             Pedestrian._MODEL[self.current_speed_model].instanceTo(self.origin)
+            self.show_coordinates()
 
     @classmethod
     def _init_pedestrian_model(cls):
@@ -79,6 +80,7 @@ class Pedestrian(BaseTrafficParticipant):
                 child.detach()
                 Pedestrian._MODEL[speed_model_index].instanceTo(self.origin)
                 self.current_speed_model = speed_model_index
+            self.show_coordinates()
 
         self._body.setLinearVelocity(
             LVector3(direction[0] * norm_ratio, direction[1] * norm_ratio,

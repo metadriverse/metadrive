@@ -87,7 +87,7 @@ class ReplayManager(BaseManager):
 
     def restore_policy_states(self, policy_infos):
         # restore agent policy
-        agent_policy = self.engine.agent_manager.get_policy()
+        agent_policy = self.engine.agent_manager.agent_policy
         agent_obj_name = self.engine.agent_manager.active_agents[DEFAULT_AGENT].name
         for name, policy_info in policy_infos.items():
             obj_name = self.record_name_to_current_name[name]
