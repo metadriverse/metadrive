@@ -289,11 +289,14 @@ if __name__ == "__main__":
             # "debug": True,
             "debug_static_world": False,
             "debug_physics_world": False,
+
             "load_city_map": True,
             "multi_thread_render": True,
+            "multi_thread_render_mode": "Cull",
+
             "window_size": (1200, 800),
             "start_case_index": 300,
-            "pstats": True,
+            # "pstats": True,
             "case_num": 1,
             "show_coordinates": False,
             "horizon": 1000,

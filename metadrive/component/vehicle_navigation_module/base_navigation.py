@@ -178,8 +178,8 @@ class BaseNavigation:
         for np in self._node_path_list:
             np.detachNode()
             np.removeNode()
-        self.next_ref_lanes = None
-        self.current_ref_lanes = None
+        # self.next_ref_lanes = None
+        # self.current_ref_lanes = None
 
     def set_force_calculate_lane_index(self, force: bool):
         self.FORCE_CALCULATE = force
