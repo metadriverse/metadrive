@@ -2,6 +2,7 @@ import logging
 import sys
 import time
 from typing import Optional, Union, Tuple
+
 import gltf
 from direct.gui.OnscreenImage import OnscreenImage
 from direct.showbase import ShowBase
@@ -102,12 +103,15 @@ class EngineCore(ShowBase.ShowBase):
             self.mode = RENDER_MODE_ONSCREEN
             # Warning it may cause memory leak, Pand3d Official has fixed this in their master branch.
             # You can enable it if your panda version is latest.
-            loadPrcFileData("", "threading-model Cull/Draw")  # multi-thread render, accelerate simulation when evaluate
+            if self.global_config["multi_thread_render"]:
+                # multi-thread render, accelerate simulation
+                loadPrcFileData("", "threading-model {}".format(self.global_config["multi_thread_render_mode"]))
         else:
             self.global_config["show_coordinates"] = False
             if self.global_config["offscreen_render"]:
                 self.mode = RENDER_MODE_OFFSCREEN
-                loadPrcFileData("", "threading-model Cull/Draw")
+                if self.global_config["multi_thread_render"]:
+                    loadPrcFileData("", "threading-model {}".format(self.global_config["multi_thread_render_mode"]))
             else:
                 self.mode = RENDER_MODE_NONE
                 if self.global_config["show_interface"]:
@@ -206,6 +210,7 @@ class EngineCore(ShowBase.ShowBase):
         # some render attribute
         self.pbrpipe = None
         self.world_light = None
+        self.common_filter = None
 
         # physics world
         self.physics_world = PhysicsWorld(self.global_config["debug_static_world"])
@@ -241,6 +246,11 @@ class EngineCore(ShowBase.ShowBase):
             self.pbrpipe.render_node.set_antialias(AntialiasAttrib.M_auto)
             self.pbrpipe._recompile_pbr()
             self.pbrpipe.manager.cleanup()
+            #
+            # # filter
+            # from direct.filter.CommonFilters import CommonFilters
+            # self.common_filter = CommonFilters(self.win, self.cam)
+            # self.common_filter.set_gamma_adjust(0.8)
 
             # set main cam
             self.cam.node().setCameraMask(CamMask.MainCam)

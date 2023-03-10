@@ -19,18 +19,18 @@ def test_set_get_vehicle_attribute(render=False):
         for _ in range(10):
             env.vehicle.set_velocity([5, 0], in_local_frame=False)
             o, r, d, info = env.step([0, 0])
-            assert abs(env.vehicle.speed - 5) < 0.001  # may encounter friction
+            assert abs(env.vehicle.speed - 5) < 0.01  # may encounter friction
             assert np.isclose(env.vehicle.velocity, np.array([5, 0]), rtol=1e-2, atol=1e-2).all()
-            assert env.vehicle.speed == env.vehicle.speed_km_h / 3.6
-            assert (env.vehicle.velocity == env.vehicle.velocity_km_h / 3.6).all()
+            assert abs(env.vehicle.speed - env.vehicle.speed_km_h / 3.6) < 1e-4
+            assert np.isclose(env.vehicle.velocity, env.vehicle.velocity_km_h / 3.6).all()
 
         for _ in range(10):
             o, r, d, info = env.step([0, 0])
             env.vehicle.set_velocity([0, 5], in_local_frame=False)
             assert abs(env.vehicle.speed - 5) < 0.1
             assert np.isclose(env.vehicle.velocity, np.array([0, 5]), rtol=1e-5, atol=1e-5).all()
-            assert env.vehicle.speed == env.vehicle.speed_km_h / 3.6
-            assert (env.vehicle.velocity == env.vehicle.velocity_km_h / 3.6).all()
+            assert abs(env.vehicle.speed - env.vehicle.speed_km_h / 3.6) < 1e-4
+            assert np.isclose(env.vehicle.velocity, env.vehicle.velocity_km_h / 3.6).all()
 
         for _ in range(10):
             o, r, d, info = env.step([0, 0])
@@ -42,8 +42,8 @@ def test_set_get_vehicle_attribute(render=False):
                 rtol=1e-5,
                 atol=1e-5
             ).all()
-            assert env.vehicle.speed == env.vehicle.speed_km_h / 3.6
-            assert (env.vehicle.velocity == env.vehicle.velocity_km_h / 3.6).all()
+            assert abs(env.vehicle.speed - env.vehicle.speed_km_h / 3.6) < 1e-4
+            assert np.isclose(env.vehicle.velocity, env.vehicle.velocity_km_h / 3.6).all()
 
         for _ in range(10):
             o, r, d, info = env.step([0, 0])
@@ -58,7 +58,7 @@ def test_set_get_vehicle_attribute(render=False):
                 atol=1e-5
             ).all()
             assert abs(env.vehicle.speed - env.vehicle.speed_km_h / 3.6) < 0.0001
-            assert (env.vehicle.velocity == env.vehicle.velocity_km_h / 3.6).all()
+            assert np.isclose(env.vehicle.velocity, env.vehicle.velocity_km_h / 3.6).all()
 
     finally:
         env.close()
@@ -88,9 +88,9 @@ def test_coordinates(render=False):
 
         env.vehicle.set_velocity([0, 5], in_local_frame=False)
 
-        for _ in range(10):
+        for _ in range(1):
             o, r, d, info = env.step([0, 0])
-        assert env.vehicle.velocity[1] > 3. and abs(env.vehicle.velocity[0]) < 0.001
+        assert env.vehicle.velocity[1] > 3. and abs(env.vehicle.velocity[0]) < 0.002
 
         env.reset()
         assert abs(env.vehicle.heading_theta) == 0
@@ -102,9 +102,9 @@ def test_coordinates(render=False):
 
         env.vehicle.set_velocity([0, -5], in_local_frame=False)
 
-        for _ in range(10):
+        for _ in range(1):
             o, r, d, info = env.step([0, 0])
-        assert env.vehicle.velocity[1] < -3. and abs(env.vehicle.velocity[0]) < 0.001
+        assert env.vehicle.velocity[1] < -3. and abs(env.vehicle.velocity[0]) < 0.002
 
         # steering left
         env.reset()

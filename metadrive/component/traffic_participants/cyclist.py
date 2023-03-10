@@ -14,7 +14,7 @@ from metadrive.engine.physics_node import BaseRigidBodyNode
 class Cyclist(BaseTrafficParticipant):
     MASS = 80  # kg
     NAME = BodyName.Cyclist
-    COLLISION_GROUP = CollisionGroup.TrafficParticipants
+    COLLISION_MASK = CollisionGroup.TrafficParticipants
 
     WIDTH = 0.4
     LENGTH = 1.75
@@ -27,7 +27,6 @@ class Cyclist(BaseTrafficParticipant):
         self.add_body(n)
 
         self.body.addShape(BulletBoxShape((self.WIDTH / 2, self.LENGTH / 2, self.HEIGHT / 2)))
-        self.body.setIntoCollideMask(self.COLLISION_GROUP)
         self.set_static(True)
         if self.render:
             model = self.loader.loadModel(AssetLoader.file_path("models", "box.bam"))

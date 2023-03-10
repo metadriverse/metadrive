@@ -1,4 +1,7 @@
 import numpy as np
+from metadrive.component.vehicle_module.mini_map import MiniMap
+from metadrive.component.vehicle_module.rgb_camera import RGBCamera
+from metadrive.component.vehicle_module.vehicle_panel import VehiclePanel
 
 from metadrive.envs.metadrive_env import MetaDriveEnv
 from metadrive.utils import setup_logger
@@ -8,7 +11,7 @@ if __name__ == "__main__":
     env = MetaDriveEnv(
         {
             "environment_num": 1,
-            "traffic_density": 0.,
+            "traffic_density": 0.2,
             "traffic_mode": "hybrid",
             "start_seed": 22,
             # "_disable_detector_mask":True,
@@ -19,13 +22,14 @@ if __name__ == "__main__":
             "cull_scene": False,
             # "offscreen_render": True,
             # "controller": "joystick",
-            "show_coordinates": True,
+            # "show_coordinates": True,
             "manual_control": True,
             "use_render": True,
             "decision_repeat": 5,
+            "interface_panel": [MiniMap, VehiclePanel, RGBCamera],
             "need_inverse_traffic": False,
             "rgb_clip": True,
-            "map": "X",
+            "map": "SSS",
             # "agent_policy": IDMPolicy,
             "random_traffic": False,
             "random_lane_width": True,
@@ -39,8 +43,8 @@ if __name__ == "__main__":
             # "camera_height": -1,
             "vehicle_config": {
                 "enable_reverse": False,
-                "spawn_velocity": [8.728615581032535, -0.24411703918728195],
-                "spawn_position_heading": [(10, -2), -np.pi / 2],
+                # "spawn_velocity": [8.728615581032535, -0.24411703918728195],
+                # "spawn_position_heading": [(10, -2), -np.pi / 2],
                 "spawn_velocity_car_frame": True,
                 # "image_source": "depth_camera",
                 # "random_color": True
@@ -51,8 +55,9 @@ if __name__ == "__main__":
                 # "show_lane_line_detector": True,
                 # "side_detector": dict(num_lasers=2, distance=50),
                 # "lane_line_detector": dict(num_lasers=2, distance=50),
-                # # "show_line_to_dest": True,
-                # "show_dest_mark": True
+                "show_line_to_navi_mark": True,
+                "show_navi_mark": True,
+                "show_dest_mark": True
             },
         }
     )
@@ -71,7 +76,7 @@ if __name__ == "__main__":
     #     line.reparentTo(env.vehicle.origin)
     # env.vehicle.set_velocity([5, 0], in_local_frame=True)
     for s in range(1, 10000):
-        env.vehicle.set_velocity([8.728615581032535, -2.24411703918728195], in_local_frame=True)
+        # env.vehicle.set_velocity([8.728615581032535, -2.24411703918728195], in_local_frame=True)
         o, r, d, info = env.step(env.action_space.sample())
 
         # else:

@@ -1,7 +1,10 @@
 import time
+
 from collections import defaultdict
 from typing import Union, Dict, AnyStr, Optional, Tuple
-
+from metadrive.component.vehicle_module.mini_map import MiniMap
+from metadrive.component.vehicle_module.rgb_camera import RGBCamera
+from metadrive.component.vehicle_module.vehicle_panel import VehiclePanel
 import gym
 import numpy as np
 from panda3d.core import PNMImage
@@ -127,7 +130,7 @@ BASE_DEFAULT_CONFIG = dict(
     window_size=(1200, 900),  # or (width, height), if set to None, it will be automatically determined
     physics_world_step_size=2e-2,
     show_fps=True,
-    global_light=False,
+    global_light=True,
     # only render physics world without model, a special debug option
     debug_physics_world=False,
     # debug static world
@@ -166,7 +169,10 @@ BASE_DEFAULT_CONFIG = dict(
     show_skybox=True,
     show_terrain=True,
     show_interface=True,
-    show_coordinates=False,
+    interface_panel=[MiniMap, RGBCamera, VehiclePanel],
+    show_coordinates=False,  # show coordinates for maps and objects for debug
+    multi_thread_render=True,
+    multi_thread_render_mode="Cull",  # or "Cull/Draw"
 
     # record/replay metadata
     record_episode=False,  # when replay_episode is not None ,this option will be useless

@@ -1,7 +1,7 @@
 import logging
 
 import numpy as np
-
+from metadrive.component.vehicle_module.vehicle_panel import VehiclePanel
 from metadrive.component.vehicle_navigation_module.trajectory_navigation import WaymoTrajectoryNavigation
 from metadrive.constants import TerminationState
 from metadrive.engine.asset_loader import AssetLoader
@@ -61,6 +61,9 @@ WAYMO_ENV_CONFIG = dict(
     # ===== Termination Scheme =====
     out_of_route_done=False,
     crash_vehicle_done=True,
+
+    # others
+    interface_panel=[VehiclePanel]  # for boosting efficiency
 )
 
 
@@ -322,3 +325,5 @@ if __name__ == "__main__":
                 if info["arrive_dest"]:
                     print("seed:{}, success".format(env.engine.global_random_seed))
                 break
+    print("Finish Run")
+    env.close()

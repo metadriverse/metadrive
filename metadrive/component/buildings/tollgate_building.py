@@ -6,6 +6,7 @@ from metadrive.utils.scene_utils import generate_invisible_static_wall
 class TollGateBuilding(BaseBuilding):
     BUILDING_LENGTH = 10
     BUILDING_HEIGHT = 5
+    HEIGHT = BUILDING_HEIGHT
     MASS = 0
 
     def __init__(self, lane, position, heading_theta, random_seed):
