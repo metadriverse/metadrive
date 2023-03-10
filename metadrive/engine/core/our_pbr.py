@@ -22,19 +22,19 @@ class OurPipeline(Pipeline):
     # raise DeprecationWarning("This feature is deprecated now")
 
     def __init__(
-            self,
-            render_node=None,
-            window=None,
-            camera_node=None,
-            taskmgr=None,
-            msaa_samples=4,
-            max_lights=8,
-            use_normal_maps=False,
-            use_emission_maps=True,
-            exposure=1.0,
-            enable_shadows=False,
-            enable_fog=False,
-            use_occlusion_maps=False
+        self,
+        render_node=None,
+        window=None,
+        camera_node=None,
+        taskmgr=None,
+        msaa_samples=4,
+        max_lights=8,
+        use_normal_maps=False,
+        use_emission_maps=True,
+        exposure=1.0,
+        enable_shadows=False,
+        enable_fog=False,
+        use_occlusion_maps=False
     ):
         super(OurPipeline, self).__init__(
             render_node=render_node,

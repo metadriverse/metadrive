@@ -41,7 +41,7 @@ class NuPlanTrafficManager(BaseManager):
             return
 
         vehicles_to_eliminate = self.nuplan_id_to_obj_id.keys() - self._current_traffic_data[self.engine.episode_step
-        ].keys()
+                                                                                             ].keys()
         for nuplan_id in list(vehicles_to_eliminate):
             self.clear_objects([self.nuplan_id_to_obj_id[nuplan_id]])
             self.nuplan_id_to_obj_id.pop(nuplan_id)

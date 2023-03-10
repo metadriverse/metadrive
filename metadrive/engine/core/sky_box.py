@@ -1,6 +1,5 @@
 from panda3d.core import SamplerState, Shader, ConfigVariableString, Texture
 
-
 from metadrive.base_class.base_object import BaseObject
 from metadrive.constants import CamMask
 from metadrive.engine.asset_loader import AssetLoader
