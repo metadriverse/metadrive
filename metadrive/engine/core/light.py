@@ -32,7 +32,7 @@ class Light(BaseObject):
         # self.direction_np.node().showFrustum()
         # self.light.node().getLens().setNearFar(10, 100)
 
-        self.direction_np.node().setColor(LVector4(1, 1, 1, 1))
+        self.direction_np.node().setColor(LVector4(0.6, 0.6, 0.6, 1))
         self.direction_np.node().setCameraMask(CamMask.Shadow)
 
         dlens = self.direction_np.node().getLens()
@@ -47,7 +47,7 @@ class Light(BaseObject):
         self.direction_np.reparentTo(self.origin)
 
         self.ambient_np = NodePath(AmbientLight("Ambient"))
-        self.ambient_np.node().setColor(LVector4(0.8, 0.8, 0.8, 1))
+        self.ambient_np.node().setColor(LVector4(0.1, 0.1, 0.1, 1))
         self.ambient_np.reparentTo(self.origin)
 
         self._node_path_list.append(self.ambient_np)

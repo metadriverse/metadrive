@@ -1,4 +1,5 @@
 import logging
+import simplepbr
 import sys
 import time
 from typing import Optional, Union, Tuple
@@ -208,7 +209,6 @@ class EngineCore(ShowBase.ShowBase):
         self.debug_node = None
 
         # some render attribute
-        self.pbrpipe = None
         self.world_light = None
 
         # physics world
@@ -226,25 +226,8 @@ class EngineCore(ShowBase.ShowBase):
 
         # init other world elements
         if self.mode != RENDER_MODE_NONE:
-
-            from metadrive.engine.core.our_pbr import OurPipeline
-            self.pbrpipe = OurPipeline(
-                render_node=None,
-                window=None,
-                camera_node=None,
-                msaa_samples=4,
-                max_lights=8,
-                use_normal_maps=False,
-                use_emission_maps=True,
-                exposure=1.0,
-                enable_shadows=False,
-                enable_fog=False,
-                use_occlusion_maps=False
-            )
-            self.pbrpipe.render_node = self.pbr_render
-            self.pbrpipe.render_node.set_antialias(AntialiasAttrib.M_auto)
-            self.pbrpipe._recompile_pbr()
-            self.pbrpipe.manager.cleanup()
+            pbrpipe = simplepbr.init(render_node=self.pbr_render)
+            # pbrpipe.manager.cleanup()
 
             # set main cam
             self.cam.node().setCameraMask(CamMask.MainCam)
@@ -333,6 +316,8 @@ class EngineCore(ShowBase.ShowBase):
         return task.done
 
     def close_world(self):
+        self.worldNP.removeNode()
+        self.pbr_worldNP.removeNode()
         self.taskMgr.stop()
         # It will report a warning said AsynTaskChain is created when taskMgr.destroy() is called but a new showbase is
         # created.
@@ -360,10 +345,6 @@ class EngineCore(ShowBase.ShowBase):
             import __builtin__ as builtins
         if hasattr(builtins, 'base'):
             del builtins.base
-
-    def clear_world(self):
-        self.worldNP.removeNode()
-        self.pbr_worldNP.removeNode()
 
     def toggle_help_message(self):
         if self.on_screen_message:

@@ -22,7 +22,7 @@ if __name__ == "__main__":
             "cull_scene": False,
             # "offscreen_render": True,
             # "controller": "joystick",
-            "show_coordinates": True,
+            # "show_coordinates": True,
             "manual_control": True,
             "use_render": True,
             "decision_repeat": 5,
@@ -48,7 +48,7 @@ if __name__ == "__main__":
                 "spawn_velocity_car_frame": True,
                 # "image_source": "depth_camera",
                 # "random_color": True
-                "show_lidar": True,
+                # "show_lidar": True,
                 "spawn_lane_index": None,
                 # "destination":"2R1_3_",
                 # "show_side_detector": True,
