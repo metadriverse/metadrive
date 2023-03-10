@@ -210,6 +210,7 @@ class EngineCore(ShowBase.ShowBase):
         # some render attribute
         self.pbrpipe = None
         self.world_light = None
+        self.common_filter = None
 
         # physics world
         self.physics_world = PhysicsWorld(self.global_config["debug_static_world"])
@@ -245,6 +246,11 @@ class EngineCore(ShowBase.ShowBase):
             self.pbrpipe.render_node.set_antialias(AntialiasAttrib.M_auto)
             self.pbrpipe._recompile_pbr()
             self.pbrpipe.manager.cleanup()
+            #
+            # # filter
+            # from direct.filter.CommonFilters import CommonFilters
+            # self.common_filter = CommonFilters(self.win, self.cam)
+            # self.common_filter.set_gamma_adjust(0.8)
 
             # set main cam
             self.cam.node().setCameraMask(CamMask.MainCam)
