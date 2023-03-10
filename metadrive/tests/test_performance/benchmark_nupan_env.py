@@ -114,7 +114,9 @@ def benchmark_reset_1000(load_city_map=True):
     load_time = time.time() - start_time
     print("After first reset process Memory: {}".format(process_memory()))
     for seed in tqdm.tqdm(range(300, 1300)):
+        thisscenario = time.time()
         env.reset(force_seed=seed)
+        print("Seed: {}, Time: {}".format(seed, time.time() - thisscenario))
         if seed % 500 == 0:
             print("reset: {}, Time: {}, Process Memory: {}".format(seed, time.time() - start_time, process_memory()))
     print(
@@ -125,7 +127,7 @@ def benchmark_reset_1000(load_city_map=True):
 
 
 if __name__ == "__main__":
-    # benchmark_reset_1000(load_city_map=False)
+    benchmark_reset_1000(load_city_map=False)
     # benchmark_reset_1000(load_city_map=False)
     # benchmark_reset_5_map_1000_times(True)
-    benchmark_fps()
+    # benchmark_fps()

@@ -289,13 +289,12 @@ if __name__ == "__main__":
             # "debug": True,
             "debug_static_world": False,
             "debug_physics_world": False,
-            "load_city_map": True,
-            "multi_thread_render": True,
-            "multi_thread_render_mode": "Cull",
+            "load_city_map": False,
+            "global_light":True,
             "window_size": (1200, 800),
             "start_case_index": 300,
             # "pstats": True,
-            "case_num": 1,
+            "case_num": 1000,
             "show_coordinates": False,
             "horizon": 1000,
             "vehicle_config": dict(
@@ -309,7 +308,7 @@ if __name__ == "__main__":
         }
     )
     success = []
-    env.reset()
+    # env.reset()
     for seed in range(300, 2300):
         env.reset(force_seed=300)
         for i in range(env.engine.data_manager.current_scenario_length * 10):
