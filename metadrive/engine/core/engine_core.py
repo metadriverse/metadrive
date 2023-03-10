@@ -2,6 +2,7 @@ import logging
 import sys
 import time
 from typing import Optional, Union, Tuple
+
 import gltf
 from direct.gui.OnscreenImage import OnscreenImage
 from direct.showbase import ShowBase
@@ -102,14 +103,15 @@ class EngineCore(ShowBase.ShowBase):
             self.mode = RENDER_MODE_ONSCREEN
             # Warning it may cause memory leak, Pand3d Official has fixed this in their master branch.
             # You can enable it if your panda version is latest.
-            if not self.global_config["pstats"]:
-                loadPrcFileData("",
-                                "threading-model Cull/Draw")  # multi-thread render, accelerate simulation when evaluate
+            if self.global_config["multi_thread_render"]:
+                # multi-thread render, accelerate simulation
+                loadPrcFileData("", "threading-model {}".format(self.global_config["multi_thread_render_mode"]))
         else:
             self.global_config["show_coordinates"] = False
             if self.global_config["offscreen_render"]:
                 self.mode = RENDER_MODE_OFFSCREEN
-                loadPrcFileData("", "threading-model Cull/Draw")
+                if self.global_config["multi_thread_render"]:
+                    loadPrcFileData("", "threading-model {}".format(self.global_config["multi_thread_render_mode"]))
             else:
                 self.mode = RENDER_MODE_NONE
                 if self.global_config["show_interface"]:

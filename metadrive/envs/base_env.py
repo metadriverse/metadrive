@@ -170,7 +170,9 @@ BASE_DEFAULT_CONFIG = dict(
     show_terrain=True,
     show_interface=True,
     interface_panel=[MiniMap, RGBCamera, VehiclePanel],
-    show_coordinates=False, # show coordinates for maps and objects for debug
+    show_coordinates=False,  # show coordinates for maps and objects for debug
+    multi_thread_render=True,
+    multi_thread_render_mode="Cull",  # or "Cull/Draw"
 
     # record/replay metadata
     record_episode=False,  # when replay_episode is not None ,this option will be useless
