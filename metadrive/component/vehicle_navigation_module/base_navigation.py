@@ -174,8 +174,12 @@ class BaseNavigation:
                 pass
             self._dest_node_path.removeNode()
             self._goal_node_path.removeNode()
-        self.next_ref_lanes = None
-        self.current_ref_lanes = None
+
+        for np in self._node_path_list:
+            np.detachNode()
+            np.removeNode()
+        # self.next_ref_lanes = None
+        # self.current_ref_lanes = None
 
     def set_force_calculate_lane_index(self, force: bool):
         self.FORCE_CALCULATE = force
@@ -242,17 +246,10 @@ class BaseNavigation:
     def detach_from_world(self):
         if isinstance(self.origin, NodePath):
             self.origin.detachNode()
-        for np in self._node_path_list:
-            np.detachNode()
 
     def attach_to_world(self, engine):
         if isinstance(self.origin, NodePath):
             self.origin.reparentTo(engine.render)
-
-    def destroy(self):
-        for np in self._node_path_list:
-            np.detachNode()
-            np.removeNode()
 
     @property
     def engine(self):

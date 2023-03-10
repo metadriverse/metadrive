@@ -17,7 +17,7 @@ class TrafficObject(BaseStaticObject):
     Common interface for objects that appear on the road, beside vehicles.
     """
     NAME = BodyName.Traffic_object
-    COLLISION_GROUP = CollisionGroup.TrafficObject
+    COLLISION_MASK = CollisionGroup.TrafficObject
 
     COST_ONCE = True  # cost will give at the first time
 
@@ -48,7 +48,6 @@ class TrafficCone(TrafficObject):
         self.add_body(n)
 
         self.body.addShape(BulletCylinderShape(self.RADIUS, self.HEIGHT))
-        self.body.setIntoCollideMask(self.COLLISION_GROUP)
         self.set_static(static)
         if self.render:
             model = self.loader.loadModel(AssetLoader.file_path("models", "traffic_cone", "scene.gltf"))
@@ -68,6 +67,14 @@ class TrafficCone(TrafficObject):
     def top_down_color(self):
         return 235, 84, 42
 
+    @property
+    def LENGTH(self):
+        return self.RADIUS
+
+    @property
+    def WIDTH(self):
+        return self.RADIUS
+
 
 class TrafficWarning(TrafficObject):
     """Placed behind the vehicle when it breaks down"""
@@ -83,7 +90,6 @@ class TrafficWarning(TrafficObject):
         self.add_body(n)
 
         self.body.addShape(BulletCylinderShape(self.RADIUS, self.HEIGHT))
-        self.body.setIntoCollideMask(self.COLLISION_GROUP)
         self.set_static(static)
         if self.render:
             model = self.loader.loadModel(AssetLoader.file_path("models", "warning", "warning.gltf"))
@@ -100,6 +106,14 @@ class TrafficWarning(TrafficObject):
     def top_down_width(self):
         return self.RADIUS * 2
 
+    @property
+    def LENGTH(self):
+        return self.RADIUS
+
+    @property
+    def WIDTH(self):
+        return self.RADIUS
+
 
 class TrafficBarrier(TrafficObject):
     """A barrier"""
@@ -115,7 +129,6 @@ class TrafficBarrier(TrafficObject):
         self.add_body(n)
 
         self.body.addShape(BulletBoxShape((self.width / 2, self.length / 2, self.height / 2)))
-        self.body.setIntoCollideMask(self.COLLISION_GROUP)
         self.set_static(static)
         if self.render:
             model = self.loader.loadModel(AssetLoader.file_path("models", "barrier", "scene.gltf"))

@@ -19,6 +19,8 @@ def _load_shader_str(shaderpath, defines=None):
 
 
 class OurPipeline(Pipeline):
+    # raise DeprecationWarning("This feature is deprecated now")
+
     def __init__(
         self,
         render_node=None,
@@ -49,9 +51,9 @@ class OurPipeline(Pipeline):
             use_occlusion_maps=use_occlusion_maps
         )
 
-    def _setup_tonemapping(self):
-        # this func cause error under opengles model
-        pass
+    # def _setup_tonemapping(self):
+    #     # this func cause error under opengles model
+    #     pass
 
     def _recompile_pbr(self):
         gles = ConfigVariableString("load-display").getValue()

@@ -27,7 +27,7 @@ class BaseCamera(ImageBuffer):
     BUFFER_W = 84  # dim 1
     BUFFER_H = 84  # dim 2
     CAM_MASK = None
-    display_region_size = [1 / 3, 2 / 3, ImageBuffer.display_bottom, ImageBuffer.display_top]
+    display_region_size = [1 / 3, 2 / 3, 0.8, 1.0]
     _singleton = None
 
     attached_object = None

@@ -367,7 +367,6 @@ class BaseEngine(EngineCore, Randomizable):
         if self.main_camera is not None:
             self.main_camera.destroy()
         self.interface.destroy()
-        self.clear_world()
         self.close_world()
 
         if self._top_down_renderer is not None:

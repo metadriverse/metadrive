@@ -103,6 +103,7 @@ class BaseObject(BaseRunnable):
     calling __init__().
     """
     MASS = None  # if object has a body, the mass will be set automatically
+    COLLISION_MASK = None
 
     def __init__(self, name=None, random_seed=None, config=None, escape_random_seed_assertion=False):
         """
@@ -146,6 +147,7 @@ class BaseObject(BaseRunnable):
 
         # debug
         self.coordinates_debug_np = None
+        self.need_show_coordinates = False
 
     def disable_gravity(self):
         self._body.setGravity(LVector3(0, 0, 0))
@@ -172,8 +174,10 @@ class BaseObject(BaseRunnable):
             # TODO(PZH): We don't call this sentence:. It might cause problem since we don't remove old origin?
             # self.origin.removeNode()
 
-            self._node_path_list.append(self.origin)
+            if self.COLLISION_MASK is not None:
+                self._body.setIntoCollideMask(self.COLLISION_MASK)
 
+            self._node_path_list.append(self.origin)
             self.origin = new_origin
             self.dynamic_nodes.append(physics_body)
             if self.MASS is not None:
@@ -182,6 +186,7 @@ class BaseObject(BaseRunnable):
                 self._body.setMass(self.MASS)
 
             if self.engine is not None and self.engine.global_config["show_coordinates"]:
+                self.need_show_coordinates = True
                 self.show_coordinates()
         else:
             raise AttributeError("You can not set the object body for twice")

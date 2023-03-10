@@ -29,7 +29,7 @@ class Light(BaseObject):
         # self.direction_np.node().showFrustum()
         # self.light.node().getLens().setNearFar(10, 100)
 
-        self.direction_np.node().setColor(LVector4(1, 1, 0.8, 1))
+        self.direction_np.node().setColor(LVector4(1, 1, 1, 1))
         self.direction_np.node().setCameraMask(CamMask.Shadow)
 
         dlens = self.direction_np.node().getLens()

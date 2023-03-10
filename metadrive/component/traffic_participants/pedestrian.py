@@ -4,7 +4,7 @@ from panda3d.core import LVector3
 
 from metadrive.component.traffic_participants.base_traffic_participant import BaseTrafficParticipant
 from metadrive.constants import BodyName
-from metadrive.constants import CollisionGroup
+
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.engine.physics_node import BaseRigidBodyNode
 from metadrive.utils.math_utils import norm
@@ -13,7 +13,6 @@ from metadrive.utils.math_utils import norm
 class Pedestrian(BaseTrafficParticipant):
     MASS = 70  # kg
     NAME = BodyName.Pedestrian
-    COLLISION_GROUP = CollisionGroup.TrafficParticipants
 
     RADIUS = 0.35
     HEIGHT = 1.75
@@ -28,7 +27,6 @@ class Pedestrian(BaseTrafficParticipant):
         n = BaseRigidBodyNode(self.name, self.NAME)
         self.add_body(n)
         self.body.addShape(BulletCylinderShape(self.RADIUS, self.HEIGHT))
-        self.body.setIntoCollideMask(self.COLLISION_GROUP)
         # self.set_static(True)
         self.animation_controller = None
         self.current_speed_model = self.SPEED_LIST[0]
@@ -95,3 +93,11 @@ class Pedestrian(BaseTrafficParticipant):
             if target_speed < speed:
                 return speed
         return Pedestrian.SPEED_LIST[-1]
+
+    @property
+    def LENGTH(self):
+        return self.RADIUS
+
+    @property
+    def WIDTH(self):
+        return self.RADIUS

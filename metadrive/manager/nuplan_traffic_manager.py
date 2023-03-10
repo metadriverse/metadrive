@@ -1,4 +1,5 @@
 import copy
+from metadrive.component.vehicle.vehicle_type import XLVehicle, SVehicle, MVehicle, LVehicle
 from metadrive.component.traffic_participants.cyclist import Cyclist
 from metadrive.component.traffic_participants.pedestrian import Pedestrian
 from metadrive.policy.replay_policy import NuPlanReplayTrafficParticipantPolicy
@@ -98,7 +99,7 @@ class NuPlanTrafficManager(BaseManager):
             )
         )
         v = self.spawn_object(
-            SVehicle,
+            self.get_vehicle_type(state["length"]),
             position=nuplan_to_metadrive_vector(state["position"]),
             heading=state["heading"],
             vehicle_config=v_config,
@@ -134,3 +135,6 @@ class NuPlanTrafficManager(BaseManager):
         if self.need_pedestrian:
             ret += [TrackedObjectType.BICYCLE, TrackedObjectType.PEDESTRIAN]
         return ret
+
+    def get_vehicle_type(self, length):
+        return [LVehicle, MVehicle, SVehicle, XLVehicle][self.np_random.randint(4)]
