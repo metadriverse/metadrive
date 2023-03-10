@@ -54,7 +54,7 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
         if self.render:
             # render pre-load
             self.road_texture = self.loader.loadTexture(AssetLoader.file_path("textures", "sci", "color.jpg"))
-            # self.road_texture.set_format(Texture.F_srgb)
+            self.road_texture.set_format(Texture.F_srgb)
             self.road_texture.setMinfilter(SamplerState.FT_linear_mipmap_linear)
             self.road_texture.setAnisotropicDegree(8)
             self.road_normal = self.loader.loadTexture(AssetLoader.file_path("textures", "sci", "normal.jpg"))
@@ -62,7 +62,7 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
             self.ts_color = TextureStage("color")
             self.ts_normal = TextureStage("normal")
             self.side_texture = self.loader.loadTexture(AssetLoader.file_path("textures", "sidewalk", "color.png"))
-            # self.side_texture.set_format(Texture.F_srgb)
+            self.side_texture.set_format(Texture.F_srgb)
             self.side_texture.setMinfilter(SamplerState.FT_linear_mipmap_linear)
             self.side_texture.setAnisotropicDegree(8)
             self.side_normal = self.loader.loadTexture(AssetLoader.file_path("textures", "sidewalk", "normal.png"))

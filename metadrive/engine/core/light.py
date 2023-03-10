@@ -40,11 +40,11 @@ class Light(BaseObject):
         # dlens.setFocalLength(1)
         # dlens.setNear(3)
 
-        self.direction_np.node().setColorTemperature(4000)
+        self.direction_np.node().setColorTemperature(6200)
         self.direction_np.reparentTo(self.origin)
 
         self.ambient_np = NodePath(AmbientLight("Ambient"))
-        self.ambient_np.node().setColor(LVector4(0.8, 0.8, 0.8, 1))
+        self.ambient_np.node().setColor(LVector4(0.1, 0.1, 0.1, 1))
         self.ambient_np.reparentTo(self.origin)
 
         self._node_path_list.append(self.ambient_np)
