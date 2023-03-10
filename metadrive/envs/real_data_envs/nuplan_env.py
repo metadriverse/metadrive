@@ -182,8 +182,8 @@ class NuPlanEnv(BaseEnv):
         # for compatibility
         # crash almost equals to crashing with vehicles
         done_info[TerminationState.CRASH] = (
-                done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
-                or done_info[TerminationState.CRASH_BUILDING]
+            done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
+            or done_info[TerminationState.CRASH_BUILDING]
         )
         return done, done_info
 
@@ -289,11 +289,9 @@ if __name__ == "__main__":
             # "debug": True,
             "debug_static_world": False,
             "debug_physics_world": False,
-
             "load_city_map": True,
             "multi_thread_render": True,
             "multi_thread_render_mode": "Cull",
-
             "window_size": (1200, 800),
             "start_case_index": 300,
             # "pstats": True,

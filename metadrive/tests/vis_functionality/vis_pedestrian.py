@@ -41,7 +41,7 @@ if __name__ == "__main__":
             "show_coordinates": True,
             "vehicle_config": {
                 "enable_reverse": False,
-                "show_lidar":True
+                "show_lidar": True
                 # "image_source": "depth_camera",
                 # "random_color": True
                 # "show_lidar": True,

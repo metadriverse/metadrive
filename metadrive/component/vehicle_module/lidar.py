@@ -110,7 +110,7 @@ class Lidar(DistanceDetector):
         pos1 = vehicle.position
         head1 = vehicle.heading_theta
 
-        mask = np.zeros((self.num_lasers,), dtype=bool)
+        mask = np.zeros((self.num_lasers, ), dtype=bool)
         mask.fill(False)
         objs = self.get_surrounding_objects(vehicle)
         for obj in objs:
@@ -119,7 +119,7 @@ class Lidar(DistanceDetector):
             width = obj.WIDTH if hasattr(obj, "WIDTH") else vehicle.WIDTH
             half_max_span_square = ((length + width) / 2)**2
             diff = (pos2[0] - pos1[0], pos2[1] - pos1[1])
-            dist_square = diff[0] ** 2 + diff[1] ** 2
+            dist_square = diff[0]**2 + diff[1]**2
             if dist_square < half_max_span_square:
                 mask.fill(True)
                 continue

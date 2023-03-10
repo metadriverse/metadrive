@@ -49,7 +49,6 @@ if __name__ == "__main__":
                 # "image_source": "depth_camera",
                 # "random_color": True
                 "show_lidar": True,
-
                 "spawn_lane_index": None,
                 # "destination":"2R1_3_",
                 # "show_side_detector": True,
