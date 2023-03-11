@@ -97,6 +97,7 @@ def test_save_episode_marl(vis=False):
         env.config["record_episode"] = False
         o = env.reset()
         for i in range(1, 100000 if vis else 2000):
+            print("Replay MARL step: {}".format(i))
             o, r, d, info = env.step({agent_id: [0, 0.1] for agent_id in env.vehicles.keys()})
             if vis:
                 env.render()
