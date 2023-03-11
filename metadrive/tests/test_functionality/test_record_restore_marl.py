@@ -12,7 +12,7 @@ def test_save_episode(vis=False):
     4. Input episode data to reset() function can replay the episode !
     """
 
-    setup_logger(True)
+    # setup_logger(True)
 
     test_dump = True
     dump_recent_episode = 5
