@@ -374,7 +374,7 @@ def test_ma_parking_lot_reward_done_alignment():
             "crash_vehicle_penalty": 1.7777,
             "parking_space_num": 16,
             "crash_done": False,
-            "use_render": True
+            "use_render": False
         }
     )
     try:
