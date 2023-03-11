@@ -59,7 +59,7 @@ jobs:
           pip install pytest-cov
           pip install ray
           cd metadrive/
-          pytest --cov=./ --cov-config=.coveragerc --cov-report=xml -sv tests/test_environment
+          pytest --cov=./ --cov-config=.coveragerc --cov-report=xml -sv tests/test_env
 
   test_policy:
     runs-on: ubuntu-latest
