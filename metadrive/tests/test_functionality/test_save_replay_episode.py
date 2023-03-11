@@ -1,5 +1,6 @@
 import pickle
 
+from metadrive import MultiAgentRoundaboutEnv
 from metadrive.component.map.base_map import BaseMap
 from metadrive.component.map.pg_map import MapGenerateMethod
 from metadrive.envs.safe_metadrive_env import SafeMetaDriveEnv
@@ -40,9 +41,9 @@ def test_save_episode(vis=False):
             if vis:
                 env.render(mode="top_down", road_color=(35, 35, 35))
             if d:
-                epi_info = env.engine.dump_episode("test_dump.pkl" if test_dump else None)
+                epi_info = env.engine.dump_episode("test_dump_single.pkl" if test_dump else None)
                 break
-        f = open("test_dump.pkl", "rb")
+        f = open("test_dump_single.pkl", "rb")
         env.config["replay_episode"] = pickle.load(f)
         env.config["record_episode"] = False
         o = env.reset()
@@ -56,5 +57,55 @@ def test_save_episode(vis=False):
         env.close()
 
 
+def test_save_episode_marl(vis=False):
+    """
+    1. Set record_episode=True to record each episode
+    2. dump_episode when done[__all__] == True
+    3. You can keep recent episodes
+    4. Input episode data to reset() function can replay the episode !
+    """
+
+    # setup_logger(True)
+
+    test_dump = True
+    dump_recent_episode = 5
+    dump_count = 0
+    env = MultiAgentRoundaboutEnv(dict(use_render=vis, manual_control=False, record_episode=True, horizon=100))
+    try:
+        # Test Record
+        o = env.reset(force_seed=1)
+        epi_info = None
+        for i in range(1, 100000 if vis else 600):
+            o, r, d, info = env.step({agent_id: [0, .2] for agent_id in env.vehicles.keys()})
+            if vis:
+                env.render()
+            if d["__all__"]:
+                epi_info = env.engine.dump_episode("test_dump.pkl")
+                # test dump json
+                # if test_dump:
+                #     with open("test_dump_{}.json".format(dump_count), "w") as f:
+                #         json.dump(epi_info, f)
+                #     dump_count += 1
+                #     dump_count = dump_count % dump_recent_episode
+                break
+                # env.reset()
+
+        epi_record = open("test_dump.pkl", "rb")
+
+        # input episode_info to restore
+        env.config["replay_episode"] = pickle.load(epi_record)
+        env.config["record_episode"] = False
+        o = env.reset()
+        for i in range(1, 100000 if vis else 2000):
+            o, r, d, info = env.step({agent_id: [0, 0.1] for agent_id in env.vehicles.keys()})
+            if vis:
+                env.render()
+            if d["__all__"]:
+                break
+    finally:
+        env.close()
+
+
 if __name__ == "__main__":
-    test_save_episode(vis=False)
+    test_save_episode_marl(vis=False)
+    # test_save_episode(vis=False)
