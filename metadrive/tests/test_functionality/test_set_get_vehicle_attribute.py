@@ -148,7 +148,7 @@ def test_coordinates(render=False):
         env.vehicle.set_heading_theta(np.deg2rad(-90))
         for _ in range(10):
             o, r, d, info, = env.step([-0., 0.])
-        assert wrap_to_pi(abs(env.vehicle.heading_theta + np.deg2rad(-90))) < 1
+        assert abs(env.vehicle.heading_theta + np.deg2rad(-90) + np.pi) < 0.01
         assert np.isclose(env.vehicle.heading, np.array([0, -1])).all()
 
     finally:

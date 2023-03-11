@@ -27,7 +27,10 @@ def safe_clip_for_small_array(array, min_val, max_val):
 
 
 def wrap_to_pi(x: float) -> float:
-    return ((x + np.pi) % (2 * np.pi)) - np.pi
+    angles = x
+    angles %= 2 * np.pi
+    angles -= 2 * np.pi * (angles > np.pi)
+    return angles
 
 
 def get_vertical_vector(vector: np.array):
