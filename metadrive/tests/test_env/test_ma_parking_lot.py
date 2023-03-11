@@ -374,11 +374,14 @@ def test_ma_parking_lot_reward_done_alignment():
             "crash_vehicle_penalty": 1.7777,
             "parking_space_num": 16,
             "crash_done": False,
+            "use_render": True
         }
     )
     try:
         _check_spaces_before_reset(env)
         obs = env.reset()
+        env.engine.spawn_manager.np_random = np.random.RandomState(0)
+        obs = env.reset(force_seed=0)
         _check_spaces_after_reset(env, obs)
         for step in range(1):
             act = {k: [0, 0] for k in env.vehicles.keys()}
