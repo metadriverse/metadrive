@@ -42,7 +42,7 @@ jobs:
           cd metadrive/
           pytest --cov=./ --cov-config=.coveragerc --cov-report=xml -sv tests/test_functionality
 
-    test_environment:
+  test_environment:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -61,7 +61,7 @@ jobs:
           cd metadrive/
           pytest --cov=./ --cov-config=.coveragerc --cov-report=xml -sv tests/test_environment
 
-    test_policy:
+  test_policy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -80,7 +80,7 @@ jobs:
           cd metadrive/
           pytest --cov=./ --cov-config=.coveragerc --cov-report=xml -sv tests/test_policy
 
-    test_component:
+  test_component:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
