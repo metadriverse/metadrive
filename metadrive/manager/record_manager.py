@@ -97,8 +97,8 @@ class RecordManager(BaseManager):
             if not is_map_related_instance(obj):
                 self.current_frame.step_info[name] = obj.get_state()
         self.current_frame.agents = list(self.engine.agents.keys())
-        self.current_frame._agent_to_object = self.engine.agent_manager._agent_to_object
-        self.current_frame._object_to_agent = self.engine.agent_manager._object_to_agent
+        self.current_frame._agent_to_object = copy.deepcopy(self.engine.agent_manager._agent_to_object)
+        self.current_frame._object_to_agent = copy.deepcopy(self.engine.agent_manager._object_to_agent)
 
     def get_episode_metadata(self):
         assert self.engine.record_episode, "Turn on recording episode and then dump it"
