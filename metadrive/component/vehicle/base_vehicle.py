@@ -595,7 +595,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
                     (
                         self.panda_color[0] * self.MATERIAL_COLOR_COEFF,
                         self.panda_color[1] * self.MATERIAL_COLOR_COEFF,
-                        self.panda_color[2] * self.MATERIAL_COLOR_COEFF, 0.2
+                        self.panda_color[2] * self.MATERIAL_COLOR_COEFF, 1
                     )
                 )
                 material.setMetallic(self.MATERIAL_METAL_COEFF)

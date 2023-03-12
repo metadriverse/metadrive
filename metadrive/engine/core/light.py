@@ -29,14 +29,14 @@ class Light(BaseObject):
         # self.direction_np.node().showFrustum()
         # self.light.node().getLens().setNearFar(10, 100)
 
-        self.direction_np.node().setColor(LVector4(1, 1, 1, 1))
+        self.direction_np.node().setColor(LVector4(0.9, 0.9, 0.9, 1))
         self.direction_np.node().setCameraMask(CamMask.Shadow)
 
         dlens = self.direction_np.node().getLens()
         if self.global_light:
             dlens.setFilmSize(256, 256)
         else:
-            dlens.setFilmSize(8, 8)
+            dlens.setFilmSize(16, 16)
         # dlens.setFocalLength(1)
         # dlens.setNear(3)
 
@@ -50,9 +50,9 @@ class Light(BaseObject):
         self._node_path_list.append(self.ambient_np)
 
     def step(self, pos):
-        if not self.global_light:
-            self.direction_np.setPos(pos[0] - 200, pos[1] + 100, 150)
-            self.direction_np.lookAt(pos[0], pos[1], 0)
+        # if not self.global_light:
+        self.direction_np.setPos(pos[0] - 100, pos[1] + 100, 150)
+        self.direction_np.lookAt(pos[0], pos[1], 0)
 
     def reset(self, random_seed=None, *args, **kwargs):
         if self.direction_np is not None and not self.global_light:

@@ -52,7 +52,7 @@ class SkyBox(BaseObject):
         skybox.set_shader(skybox_shader)
         skybox.reparentTo(self.origin)
         skybox.setZ(-4400)
-        skybox.setH(30)
+        skybox.setH(0)
 
     def step(self):
         if not self.render:
