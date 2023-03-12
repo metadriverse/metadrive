@@ -36,9 +36,10 @@ class BaseCamera(ImageBuffer):
     def initialized(cls):
         return True if cls._singleton is not None else False
 
-    def __init__(self):
+    def __init__(self, setup_pbr=False):
         if not self.initialized():
-            super(BaseCamera, self).__init__(self.BUFFER_W, self.BUFFER_H, Vec3(0.0, 0.8, 1.5), self.BKG_COLOR)
+            super(BaseCamera, self).__init__(self.BUFFER_W, self.BUFFER_H, Vec3(0.0, 0.8, 1.5), self.BKG_COLOR,
+                                             setup_pbr=setup_pbr)
             type(self)._singleton = self
             self.init_num = 1
             self._enable_cuda = self.engine.global_config["image_on_cuda"]
@@ -243,7 +244,8 @@ class BaseCamera(ImageBuffer):
         check_cudart_err(
             cudart.cudaMemcpy2DFromArray(
                 type(self)._singleton.new_cuda_mem_ptr, cudaextent.width * byte * depth, array, 0, 0,
-                cudaextent.width * byte * depth, cudaextent.height, cudart.cudaMemcpyKind.cudaMemcpyDeviceToDevice
+                                                        cudaextent.width * byte * depth, cudaextent.height,
+                cudart.cudaMemcpyKind.cudaMemcpyDeviceToDevice
             )
         )
         if type(self)._singleton._cuda_buffer is None:

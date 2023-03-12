@@ -1,8 +1,11 @@
 import logging
+from direct.filter.FilterManager import FilterManager
+import panda3d.core as p3d
+from simplepbr import _load_shader_str
 from typing import Union, List
 
 import numpy as np
-from panda3d.core import NodePath, Vec3, Vec4, Camera, PNMImage
+from panda3d.core import NodePath, Vec3, Vec4, Camera, PNMImage, Shader, RenderState, ShaderAttrib
 
 from metadrive.constants import RENDER_MODE_ONSCREEN, BKG_COLOR, RENDER_MODE_NONE
 
@@ -16,18 +19,20 @@ class ImageBuffer:
     # display_bottom = 0.8
     # display_top = 1
     display_region = None
+    display_region_number = 0
     display_region_size = [1 / 3, 2 / 3, 0.8, 1.0]
     line_borders = []
 
     def __init__(
-        self,
-        width: float,
-        height: float,
-        pos: Vec3,
-        bkg_color: Union[Vec4, Vec3],
-        parent_node: NodePath = None,
-        frame_buffer_property=None,
-        # engine=None
+            self,
+            width: float,
+            height: float,
+            pos: Vec3,
+            bkg_color: Union[Vec4, Vec3],
+            parent_node: NodePath = None,
+            frame_buffer_property=None,
+            setup_pbr=False,
+            # engine=None
     ):
 
         self._node_path_list = []
@@ -64,6 +69,33 @@ class ImageBuffer:
         self.cam.node().setCameraMask(self.CAM_MASK)
         if parent_node is not None:
             self.origin.reparentTo(parent_node)
+
+        if setup_pbr:
+            self.display_region_number = 1
+            self.manager = FilterManager(self.buffer, self.cam)
+            fbprops = p3d.FrameBufferProperties()
+            fbprops.float_color = True
+            fbprops.set_rgba_bits(16, 16, 16, 16)
+            fbprops.set_depth_bits(24)
+            fbprops.set_multisamples(4)
+            scene_tex = p3d.Texture()
+            scene_tex.set_format(p3d.Texture.F_rgba16)
+            scene_tex.set_component_type(p3d.Texture.T_float)
+            self.tonemap_quad = self.manager.render_scene_into(colortex=scene_tex, fbprops=fbprops)
+            #
+            defines = {}
+            #
+            post_vert_str = _load_shader_str('post.vert', defines)
+            post_frag_str = _load_shader_str('tonemap.frag', defines)
+            tonemap_shader = p3d.Shader.make(
+                p3d.Shader.SL_GLSL,
+                vertex=post_vert_str,
+                fragment=post_frag_str,
+            )
+            self.tonemap_quad.set_shader(tonemap_shader)
+            self.tonemap_quad.set_shader_input('tex', scene_tex)
+            self.tonemap_quad.set_shader_input('exposure', 1.0)
+
         logging.debug("Load Image Buffer: {}".format(self.__class__.__name__))
 
     @property
@@ -77,7 +109,7 @@ class ImageBuffer:
         """
         # self.engine.graphicsEngine.renderFrame()
         img = PNMImage()
-        self.buffer.getScreenshot(img)
+        self.buffer.getDisplayRegions()[1].getScreenshot(img)
         return img
 
     def save_image(self, name="debug.png"):
@@ -115,7 +147,7 @@ class ImageBuffer:
         if self.engine.mode != RENDER_MODE_NONE and self.display_region is None:
             # only show them when onscreen
             self.display_region = self.engine.win.makeDisplayRegion(*display_region)
-            self.display_region.setCamera(self.cam)
+            self.display_region.setCamera(self.buffer.getDisplayRegions()[1].camera)
             self.draw_border(display_region)
 
     def draw_border(self, display_region):
