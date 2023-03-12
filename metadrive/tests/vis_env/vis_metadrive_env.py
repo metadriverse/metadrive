@@ -74,7 +74,7 @@ if __name__ == "__main__":
     start = time.time()
     from metadrive.component.vehicle_module.rgb_camera import RGBCamera
     o = env.reset()
-    env.vehicle.image_sensors["rgb_camera"].save_image(env.vehicle)
+    # env.vehicle.image_sensors["rgb_camera"].save_image(env.vehicle)
     # for line in env.engine.coordinate_line:
     #     line.reparentTo(env.vehicle.origin)
     # env.vehicle.set_velocity([5, 0], in_local_frame=True)
