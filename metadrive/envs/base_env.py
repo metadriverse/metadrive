@@ -109,7 +109,7 @@ BASE_DEFAULT_CONFIG = dict(
         lane_line_detector=dict(num_lasers=0, distance=20, gaussian_noise=0.0, dropout_prob=0.0),
         show_lidar=False,
         mini_map=(84, 84, 250),  # buffer length, width
-        rgb_camera=(84, 84),  # buffer length, width
+        rgb_camera=(256, 256),  # buffer length, width
         depth_camera=(84, 84, False),  # buffer length, width, view_ground
         main_camera=None,  # buffer length, width
         show_side_detector=False,

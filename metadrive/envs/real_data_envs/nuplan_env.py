@@ -304,7 +304,6 @@ if __name__ == "__main__":
                 lane_line_detector=dict(num_lasers=12, distance=50),
                 side_detector=dict(num_lasers=160, distance=50),
                 # show_lidar=True
-
                 show_navi_mark=False,
                 show_dest_mark=False
             ),
@@ -314,7 +313,7 @@ if __name__ == "__main__":
     success = []
     # env.reset()
     for seed in range(290, 2300):
-        env.reset(force_seed=seed+10)
+        env.reset(force_seed=seed + 10)
         for i in range(env.engine.data_manager.current_scenario_length * 10):
             o, r, d, info = env.step([0, 0])
 
