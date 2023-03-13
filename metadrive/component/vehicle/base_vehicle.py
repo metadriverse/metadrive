@@ -1,8 +1,9 @@
 import math
+from metadrive.constants import TrafficLightStatus
 from panda3d.core import NodePath
 from collections import deque
 from typing import Union, Optional
-
+from metadrive.utils.utils import get_object_from_node
 import numpy as np
 import seaborn as sns
 from panda3d.bullet import BulletVehicle, BulletBoxShape, ZUp
@@ -37,18 +38,7 @@ from metadrive.utils.space import VehicleParameterSpace, ParameterSpace
 
 class BaseVehicleState:
     def __init__(self):
-        self.crash_vehicle = False
-        self.crash_object = False
-        self.crash_sidewalk = False
-        self.crash_building = False
-
-        # lane line detection
-        self.on_yellow_continuous_line = False
-        self.on_white_continuous_line = False
-        self.on_broken_line = False
-
-        # contact results, a set containing objects type name for rendering
-        self.contact_results = None
+        self.init_state_info()
 
     def init_state_info(self):
         """
@@ -59,11 +49,17 @@ class BaseVehicleState:
         self.crash_sidewalk = False
         self.crash_building = False
 
+        # traffic light
+        self.red_light = False
+        self.yellow_light = False
+        self.green_light = False
+
+        # lane line detection
         self.on_yellow_continuous_line = False
         self.on_white_continuous_line = False
         self.on_broken_line = False
 
-        # contact results
+        # contact results, a set containing objects type name for rendering
         self.contact_results = set()
 
 
@@ -117,12 +113,12 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     path = None
 
     def __init__(
-        self,
-        vehicle_config: Union[dict, Config] = None,
-        name: str = None,
-        random_seed=None,
-        position=None,
-        heading=None  # In degree!
+            self,
+            vehicle_config: Union[dict, Config] = None,
+            name: str = None,
+            random_seed=None,
+            position=None,
+            heading=None  # In degree!
     ):
         """
         This Vehicle Config is different from self.get_config(), and it is used to define which modules to use, and
@@ -335,13 +331,13 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         return step_energy, self.energy_consumption
 
     def reset(
-        self,
-        random_seed=None,
-        vehicle_config=None,
-        position: np.ndarray = None,
-        heading: float = 0.0,  # In degree!
-        *args,
-        **kwargs
+            self,
+            random_seed=None,
+            vehicle_config=None,
+            position: np.ndarray = None,
+            heading: float = 0.0,  # In degree!
+            *args,
+            **kwargs
     ):
         """
         pos is a 2-d array, and heading is a float (unit degree)
@@ -508,8 +504,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         if not lateral_norm * forward_direction_norm:
             return 0
         cos = (
-            (forward_direction[0] * lateral[0] + forward_direction[1] * lateral[1]) /
-            (lateral_norm * forward_direction_norm)
+                (forward_direction[0] * lateral[0] + forward_direction[1] * lateral[1]) /
+                (lateral_norm * forward_direction_norm)
         )
         # return cos
         # Normalize to 0, 1
@@ -721,18 +717,29 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         for contact in result_1.getContacts() + result_2.getContacts():
             node0 = contact.getNode0()
             node1 = contact.getNode1()
-            name = [node0.getName(), node1.getName()]
-            name.remove(BodyName.Vehicle)
-            if name[0] == BodyName.White_continuous_line:
+            node = node0 if node1.getName() == BodyName.Vehicle else node1
+            name = node.getName()
+            assert name != BodyName.Vehicle
+            if name == BodyName.White_continuous_line:
                 self.on_white_continuous_line = True
-            elif name[0] == BodyName.Yellow_continuous_line:
+            elif name == BodyName.Yellow_continuous_line:
                 self.on_yellow_continuous_line = True
-            elif name[0] == BodyName.Broken_line:
+            elif name == BodyName.Broken_line:
                 self.on_broken_line = True
+            elif name == BodyName.TrafficLight:
+                light = get_object_from_node(node)
+                if light.status == TrafficLightStatus.GREEN:
+                    self.green_light = True
+                    continue
+                elif light.status == TrafficLightStatus.RED:
+                    self.red_light = True
+                elif light.status == TrafficLightStatus.YELLOW:
+                    self.yellow_light = True
+                name = TrafficLightStatus.semantics(light.status)
             else:
                 # didn't add
                 continue
-            contacts.add(name[0])
+            contacts.add(name)
         # side walk detect
         res = rect_region_detection(
             self.engine,
@@ -841,7 +848,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             ckpt_idx = routing._target_checkpoints_index
             for surrounding_v in surrounding_vs:
                 if surrounding_v.lane_index[:-1] == (routing.checkpoints[ckpt_idx[0]], routing.checkpoints[ckpt_idx[1]
-                                                                                                           ]):
+                ]):
                     if self.lane.local_coordinates(self.position)[0] - \
                             self.lane.local_coordinates(surrounding_v.position)[0] < 0:
                         self.front_vehicles.add(surrounding_v)
@@ -879,9 +886,9 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     @property
     def replay_done(self):
         return self._replay_done if hasattr(self, "_replay_done") else (
-            self.crash_building or self.crash_vehicle or
-            # self.on_white_continuous_line or
-            self.on_yellow_continuous_line
+                self.crash_building or self.crash_vehicle or
+                # self.on_white_continuous_line or
+                self.on_yellow_continuous_line
         )
 
     @property

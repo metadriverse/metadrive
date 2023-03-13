@@ -53,6 +53,24 @@ COLLISION_INFO_COLOR = dict(
 )
 
 
+class TrafficLightStatus:
+    GREEN = 1
+    RED = 2
+    YELLOW = 3
+    UNKNOWN = 4
+
+    @classmethod
+    def semantics(self, status):
+        if status == self.GREEN:
+            return "Traffic Light: Green"
+        if status == self.RED:
+            return "Traffic Light: Red"
+        if status == self.YELLOW:
+            return "Traffic Light: Yellow"
+        if status == self.UNKNOWN:
+            return "Traffic Light: Unknown"
+
+
 class BodyName:
     White_continuous_line = "White Continuous Line"
     Yellow_continuous_line = "Yellow Continuous Line"
@@ -78,6 +96,8 @@ COLOR = {
     BodyName.Traffic_object: "orange",
     BodyName.InvisibleWall: "red",
     BodyName.TollGate: "red",
+    TrafficLightStatus.semantics(TrafficLightStatus.RED): "red",
+    TrafficLightStatus.semantics(TrafficLightStatus.YELLOW): "orange",
 }
 
 
@@ -252,23 +272,6 @@ class LineType:
 class LineColor:
     GREY = (1, 1, 1, 1)
     YELLOW = (245 / 255, 192 / 255, 67 / 255, 1)
-
-
-class TrafficLightStatus:
-    GREEN = 1
-    RED = 2
-    YELLOW = 3
-    UNKNOWN = 4
-
-    def semantics(self, status):
-        if status == self.GREEN:
-            return "Traffic Light: Green"
-        if status == self.RED:
-            return "Traffic Light: Red"
-        if status == self.YELLOW:
-            return "Traffic Light: Yellow"
-        if status == self.UNKNOWN:
-            return "Traffic Light: Unknown"
 
 
 class DrivableAreaProperty:

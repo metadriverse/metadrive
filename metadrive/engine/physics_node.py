@@ -26,7 +26,7 @@ class BaseRigidBodyNode(BulletRigidBodyNode):
         assert self._clear_python_tag, "You should call destroy() of BaseRigidBodyNode!"
 
 
-class BaseGhostBodyNode(BulletRigidBodyNode):
+class BaseGhostBodyNode(BulletGhostNode):
     """
     Ghost node will not collide with any bodies, while contact information can still be accessed
     """
