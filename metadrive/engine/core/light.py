@@ -27,7 +27,7 @@ class Light(BaseObject):
         # self.direction_np.node().showFrustum()
         # self.light.node().getLens().setNearFar(10, 100)
 
-        self.direction_np.node().setColor(LVector4(0.9, 0.9, 0.9, 1))
+        self.direction_np.node().setColor(LVector4(1, 1, 1, 1))
         self.direction_np.node().setCameraMask(CamMask.Shadow)
 
         dlens = self.direction_np.node().getLens()
@@ -38,11 +38,11 @@ class Light(BaseObject):
         # dlens.setFocalLength(1)
         # dlens.setNear(3)
 
-        self.direction_np.node().setColorTemperature(6200)
+        self.direction_np.node().setColorTemperature(6800)
         self.direction_np.reparentTo(self.origin)
 
         self.ambient_np = NodePath(AmbientLight("Ambient"))
-        self.ambient_np.node().setColor(LVector4(0.19, 0.19, 0.19, 1))
+        self.ambient_np.node().setColor(LVector4(0.13, 0.15, 0.15, 1))
         self.ambient_np.reparentTo(self.origin)
 
         self._node_path_list.append(self.ambient_np)

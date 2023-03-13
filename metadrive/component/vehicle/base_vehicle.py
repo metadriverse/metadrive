@@ -89,7 +89,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     # HEIGHT = None
 
     TIRE_RADIUS = None
-    TIRE_MODEL_CORRECT=1
+    TIRE_MODEL_CORRECT = 1  # correct model left right error
+    TIRE_TWO_SIDED = False  # tires for some vehicles need two-sided enabled for correctly visualization
     LATERAL_TIRE_TO_CENTER = None
     TIRE_WIDTH = 0.4
     FRONT_WHEELBASE = None
@@ -116,12 +117,12 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     path = None
 
     def __init__(
-        self,
-        vehicle_config: Union[dict, Config] = None,
-        name: str = None,
-        random_seed=None,
-        position=None,
-        heading=None  # In degree!
+            self,
+            vehicle_config: Union[dict, Config] = None,
+            name: str = None,
+            random_seed=None,
+            position=None,
+            heading=None  # In degree!
     ):
         """
         This Vehicle Config is different from self.get_config(), and it is used to define which modules to use, and
@@ -334,13 +335,13 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         return step_energy, self.energy_consumption
 
     def reset(
-        self,
-        random_seed=None,
-        vehicle_config=None,
-        position: np.ndarray = None,
-        heading: float = 0.0,  # In degree!
-        *args,
-        **kwargs
+            self,
+            random_seed=None,
+            vehicle_config=None,
+            position: np.ndarray = None,
+            heading: float = 0.0,  # In degree!
+            *args,
+            **kwargs
     ):
         """
         pos is a 2-d array, and heading is a float (unit degree)
@@ -507,8 +508,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         if not lateral_norm * forward_direction_norm:
             return 0
         cos = (
-            (forward_direction[0] * lateral[0] + forward_direction[1] * lateral[1]) /
-            (lateral_norm * forward_direction_norm)
+                (forward_direction[0] * lateral[0] + forward_direction[1] * lateral[1]) /
+                (lateral_norm * forward_direction_norm)
         )
         # return cos
         # Normalize to 0, 1
@@ -628,8 +629,9 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             model = 'right_tire_front.gltf' if front else 'right_tire_back.gltf'
             model_path = AssetLoader.file_path("models", self.path[0], model)
             wheel_model = self.loader.loadModel(model_path)
+            wheel_model.setTwoSided(self.TIRE_TWO_SIDED)
             wheel_model.reparentTo(wheel_np)
-            wheel_model.set_scale(1*self.TIRE_MODEL_CORRECT if left else -1 * self.TIRE_MODEL_CORRECT)
+            wheel_model.set_scale(1 * self.TIRE_MODEL_CORRECT if left else -1 * self.TIRE_MODEL_CORRECT)
         wheel = self.system.create_wheel()
         wheel.setNode(wheel_np.node())
         wheel.setChassisConnectionPointCs(pos)
@@ -839,7 +841,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             ckpt_idx = routing._target_checkpoints_index
             for surrounding_v in surrounding_vs:
                 if surrounding_v.lane_index[:-1] == (routing.checkpoints[ckpt_idx[0]], routing.checkpoints[ckpt_idx[1]
-                                                                                                           ]):
+                ]):
                     if self.lane.local_coordinates(self.position)[0] - \
                             self.lane.local_coordinates(surrounding_v.position)[0] < 0:
                         self.front_vehicles.add(surrounding_v)
@@ -877,9 +879,9 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     @property
     def replay_done(self):
         return self._replay_done if hasattr(self, "_replay_done") else (
-            self.crash_building or self.crash_vehicle or
-            # self.on_white_continuous_line or
-            self.on_yellow_continuous_line
+                self.crash_building or self.crash_vehicle or
+                # self.on_white_continuous_line or
+                self.on_yellow_continuous_line
         )
 
     @property

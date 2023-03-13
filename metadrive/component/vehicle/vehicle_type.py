@@ -121,6 +121,7 @@ class SVehicle(BaseVehicle):
     # WIDTH = 1.7
     # HEIGHT = 1.7
     LATERAL_TIRE_TO_CENTER = 0.7
+    TIRE_TWO_SIDED = True
     FRONT_WHEELBASE = 1.4126
     REAR_WHEELBASE = 1.07
     TIRE_RADIUS = 0.376

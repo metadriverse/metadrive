@@ -1,7 +1,8 @@
 # import numpy
+import math
+
 from panda3d.bullet import BulletRigidBodyNode, BulletPlaneShape
-from panda3d.core import GeoMipTerrain
-from panda3d.core import Vec3, CardMaker, TextureStage, Texture
+from panda3d.core import Vec3, CardMaker, TextureStage, Texture, LQuaternionf, SamplerState
 
 from metadrive.base_class.base_object import BaseObject
 from metadrive.constants import BodyName, CamMask, CollisionGroup
@@ -44,6 +45,15 @@ class Terrain(BaseObject):
             card = self.origin.attachNewNode(cm.generate())
 
             self._node_path_list.append(card)
+
+            card.set_scale(scale)
+            card.setPos(-scale / 2, -scale / 2, -0.1)
+            card.setZ(-.05)
+            card.setTexture(self.ts_color, self.terrain_texture)
+            # card.setTexture(self.ts_normal, self.terrain_normal)
+            self.terrain_texture.setMinfilter(SamplerState.FT_linear_mipmap_linear)
+            self.terrain_texture.setAnisotropicDegree(8)
+            card.setQuat(LQuaternionf(math.cos(-math.pi / 4), math.sin(-math.pi / 4), 0, 0))
 
             # self.GROUND = GeoMipTerrain("mySimpleTerrain")
             # self.GROUND.setHeightfield(AssetLoader.file_path("textures", "height_map.png"))
