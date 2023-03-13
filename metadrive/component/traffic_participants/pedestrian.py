@@ -23,7 +23,7 @@ class Pedestrian(BaseTrafficParticipant):
 
     def __init__(self, position, heading_theta, random_seed=None):
         super(Pedestrian, self).__init__(position, heading_theta, random_seed)
-
+        # self.origin.setDepthOffset(1)
         n = BaseRigidBodyNode(self.name, self.NAME)
         self.add_body(n)
         self.body.addShape(BulletCylinderShape(self.RADIUS, self.HEIGHT))

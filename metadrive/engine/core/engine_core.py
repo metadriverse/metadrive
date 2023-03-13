@@ -233,7 +233,7 @@ class EngineCore(ShowBase.ShowBase):
                 render_node=None,
                 window=None,
                 camera_node=None,
-                msaa_samples=4,
+                msaa_samples=16,
                 max_lights=8,
                 use_normal_maps=False,
                 use_emission_maps=True,
@@ -245,7 +245,7 @@ class EngineCore(ShowBase.ShowBase):
             self.pbrpipe.render_node = self.pbr_render
             self.pbrpipe.render_node.set_antialias(AntialiasAttrib.M_auto)
             self.pbrpipe._recompile_pbr()
-            self.pbrpipe.manager.cleanup()
+            # self.pbrpipe.manager.cleanup()
             #
             # # filter
             # from direct.filter.CommonFilters import CommonFilters

@@ -290,27 +290,30 @@ if __name__ == "__main__":
             "debug_static_world": False,
             "debug_physics_world": False,
             "load_city_map": False,
-            "global_light": False,
+            # "global_light": False,
             "window_size": (1200, 800),
+            # "multi_thread_render_mode": "Cull/Draw",
             "start_case_index": 300,
             # "pstats": True,
             "case_num": 1000,
             "show_coordinates": False,
             "horizon": 1000,
+            # "show_fps": False,
             "vehicle_config": dict(
                 lidar=dict(num_lasers=120, distance=50, num_others=0),
                 lane_line_detector=dict(num_lasers=12, distance=50),
                 side_detector=dict(num_lasers=160, distance=50),
                 # show_lidar=True
-                # need_navigation=False
+                show_navi_mark=False,
+                show_dest_mark=False
             ),
             # "show_interface":False
         }
     )
     success = []
     # env.reset()
-    for seed in range(300, 2300):
-        env.reset(force_seed=300)
+    for seed in range(290, 2300):
+        env.reset(force_seed=seed + 10)
         for i in range(env.engine.data_manager.current_scenario_length * 10):
             o, r, d, info = env.step([0, 0])
 

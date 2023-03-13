@@ -89,6 +89,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     # HEIGHT = None
 
     TIRE_RADIUS = None
+    TIRE_MODEL_CORRECT = 1  # correct model left right error
+    TIRE_TWO_SIDED = False  # tires for some vehicles need two-sided enabled for correctly visualization
     LATERAL_TIRE_TO_CENTER = None
     TIRE_WIDTH = 0.4
     FRONT_WHEELBASE = None
@@ -101,10 +103,10 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     SUSPENSION_STIFFNESS = 40
 
     # for random color choosing
-    MATERIAL_COLOR_COEFF = 10  # to resist other factors, since other setting may make color dark
-    MATERIAL_METAL_COEFF = 1  # 0-1
+    MATERIAL_COLOR_COEFF = 2  # to resist other factors, since other setting may make color dark
+    MATERIAL_METAL_COEFF = 0.1  # 0-1
     MATERIAL_ROUGHNESS = 0.8  # smaller to make it more smooth, and reflect more light
-    MATERIAL_SHININESS = 1  # 0-128 smaller to make it more smooth, and reflect more light
+    MATERIAL_SHININESS = 128  # 0-128 smaller to make it more smooth, and reflect more light
     MATERIAL_SPECULAR_COLOR = (3, 3, 3, 3)
 
     # control
@@ -627,8 +629,9 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             model = 'right_tire_front.gltf' if front else 'right_tire_back.gltf'
             model_path = AssetLoader.file_path("models", self.path[0], model)
             wheel_model = self.loader.loadModel(model_path)
+            wheel_model.setTwoSided(self.TIRE_TWO_SIDED)
             wheel_model.reparentTo(wheel_np)
-            wheel_model.set_scale(1 if left else -1)
+            wheel_model.set_scale(1 * self.TIRE_MODEL_CORRECT if left else -1 * self.TIRE_MODEL_CORRECT)
         wheel = self.system.create_wheel()
         wheel.setNode(wheel_np.node())
         wheel.setChassisConnectionPointCs(pos)

@@ -258,6 +258,7 @@ class AbstractLane:
             )
             card.setTransparency(TransparencyAttrib.MMultisample)
             card.setTexture(block.ts_color, block.road_texture)
+            # card.setTexture(block.ts_normal, block.road_normal)
 
     @staticmethod
     def construct_lane_line_segment(block, start_point, end_point, line_color: Vec4, line_type: LineType):
@@ -352,6 +353,7 @@ class AbstractLane:
         side_np.setScale(length * length_multiply, width, block.SIDEWALK_THICKNESS * (1 + 0.1 * np.random.rand()))
         if block.render:
             side_np.setTexture(block.ts_color, block.side_texture)
+            # side_np.setTexture(block.ts_normal, block.side_normal)
             block.sidewalk.instanceTo(side_np)
 
         return node_path_list

@@ -17,7 +17,7 @@ if __name__ == "__main__":
             # "_disable_detector_mask":True,
             # "debug_physics_world": True,
             "debug": False,
-            "global_light": True,
+            # "global_light": False,
             # "debug_static_world": True,
             "cull_scene": False,
             # "offscreen_render": True,
@@ -43,6 +43,8 @@ if __name__ == "__main__":
             # "camera_height": -1,
             "vehicle_config": {
                 "enable_reverse": False,
+                # "vehicle_model": "xl",
+                # "rgb_camera": (1024, 1024),
                 # "spawn_velocity": [8.728615581032535, -0.24411703918728195],
                 # "spawn_position_heading": [(10, -2), -np.pi / 2],
                 "spawn_velocity_car_frame": True,
@@ -71,7 +73,9 @@ if __name__ == "__main__":
     }
 
     start = time.time()
+    from metadrive.component.vehicle_module.rgb_camera import RGBCamera
     o = env.reset()
+    # env.vehicle.image_sensors["rgb_camera"].save_image(env.vehicle)
     # for line in env.engine.coordinate_line:
     #     line.reparentTo(env.vehicle.origin)
     # env.vehicle.set_velocity([5, 0], in_local_frame=True)
