@@ -89,6 +89,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     # HEIGHT = None
 
     TIRE_RADIUS = None
+    TIRE_MODEL_CORRECT=1
     LATERAL_TIRE_TO_CENTER = None
     TIRE_WIDTH = 0.4
     FRONT_WHEELBASE = None
@@ -628,7 +629,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             model_path = AssetLoader.file_path("models", self.path[0], model)
             wheel_model = self.loader.loadModel(model_path)
             wheel_model.reparentTo(wheel_np)
-            wheel_model.set_scale(1 if left else -1)
+            wheel_model.set_scale(1*self.TIRE_MODEL_CORRECT if left else -1 * self.TIRE_MODEL_CORRECT)
         wheel = self.system.create_wheel()
         wheel.setNode(wheel_np.node())
         wheel.setChassisConnectionPointCs(pos)

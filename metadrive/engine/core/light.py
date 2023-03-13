@@ -17,12 +17,10 @@ class Light(BaseObject):
         self._node_path_list.append(self.direction_np)
 
         # Too large will cause the graphics card out of memory.
-        # self.direction_np.node().setShadowCaster(True, 8192, 8192)
-        # self.direction_np.node().setShadowCaster(True, 4096, 4096)
         if self.global_light:
             self.direction_np.node().setShadowCaster(True, 16384, 16384)
-            self.direction_np.setPos(0, 0, 50)
-            self.direction_np.lookAt(100, -30, 0)
+            # self.direction_np.setPos(0, 0, 50)
+            # self.direction_np.lookAt(100, -30, 0)
         else:
             self.direction_np.node().setShadowCaster(True, 128, 128)
 
@@ -44,14 +42,14 @@ class Light(BaseObject):
         self.direction_np.reparentTo(self.origin)
 
         self.ambient_np = NodePath(AmbientLight("Ambient"))
-        self.ambient_np.node().setColor(LVector4(0.1, 0.1, 0.1, 1))
+        self.ambient_np.node().setColor(LVector4(0.19, 0.19, 0.19, 1))
         self.ambient_np.reparentTo(self.origin)
 
         self._node_path_list.append(self.ambient_np)
 
     def step(self, pos):
         # if not self.global_light:
-        self.direction_np.setPos(pos[0] - 100, pos[1] + 100, 150)
+        self.direction_np.setPos(pos[0] - 100, pos[1] + 100, 120)
         self.direction_np.lookAt(pos[0], pos[1], 0)
 
     def reset(self, random_seed=None, *args, **kwargs):
