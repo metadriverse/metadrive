@@ -1,4 +1,5 @@
 import copy
+from metadrive.component.vehicle_module.vehicle_panel import VehiclePanel
 import logging
 
 from metadrive.component.pgblock.first_block import FirstPGBlock
@@ -61,7 +62,8 @@ MULTI_AGENT_METADRIVE_DEFAULT_CONFIG = dict(
     # ===== Environmental Setting =====
     traffic_density=0.,
     camera_height=4,
-    map_file_path=""
+    map_file_path="",
+    interface_panel=[VehiclePanel]
 )
 
 

@@ -17,12 +17,10 @@ class Light(BaseObject):
         self._node_path_list.append(self.direction_np)
 
         # Too large will cause the graphics card out of memory.
-        # self.direction_np.node().setShadowCaster(True, 8192, 8192)
-        # self.direction_np.node().setShadowCaster(True, 4096, 4096)
         if self.global_light:
-            self.direction_np.node().setShadowCaster(True, 16384, 16384)
-            self.direction_np.setPos(0, 0, 50)
-            self.direction_np.lookAt(100, -30, 0)
+            self.direction_np.node().setShadowCaster(True, 8192, 8192)
+            # self.direction_np.setPos(0, 0, 50)
+            # self.direction_np.lookAt(100, -30, 0)
         else:
             self.direction_np.node().setShadowCaster(True, 128, 128)
 
@@ -34,25 +32,25 @@ class Light(BaseObject):
 
         dlens = self.direction_np.node().getLens()
         if self.global_light:
-            dlens.setFilmSize(256, 256)
+            dlens.setFilmSize(64, 64)
         else:
-            dlens.setFilmSize(8, 8)
+            dlens.setFilmSize(16, 16)
         # dlens.setFocalLength(1)
         # dlens.setNear(3)
 
-        self.direction_np.node().setColorTemperature(4000)
+        self.direction_np.node().setColorTemperature(6800)
         self.direction_np.reparentTo(self.origin)
 
         self.ambient_np = NodePath(AmbientLight("Ambient"))
-        self.ambient_np.node().setColor(LVector4(0.8, 0.8, 0.8, 1))
+        self.ambient_np.node().setColor(LVector4(0.13, 0.15, 0.15, 1))
         self.ambient_np.reparentTo(self.origin)
 
         self._node_path_list.append(self.ambient_np)
 
     def step(self, pos):
-        if not self.global_light:
-            self.direction_np.setPos(pos[0] - 200, pos[1] + 100, 150)
-            self.direction_np.lookAt(pos[0], pos[1], 0)
+        # if not self.global_light:
+        self.direction_np.setPos(pos[0] - 100, pos[1] + 100, 120)
+        self.direction_np.lookAt(pos[0], pos[1], 0)
 
     def reset(self, random_seed=None, *args, **kwargs):
         if self.direction_np is not None and not self.global_light:

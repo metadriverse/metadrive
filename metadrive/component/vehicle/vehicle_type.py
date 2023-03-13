@@ -40,6 +40,7 @@ class XLVehicle(BaseVehicle):
     # WIDTH = 2.3
     # HEIGHT = 2.8
     TIRE_RADIUS = 0.37
+    TIRE_MODEL_CORRECT = -1
     REAR_WHEELBASE = 1.075
     FRONT_WHEELBASE = 1.726
     LATERAL_TIRE_TO_CENTER = 0.931
@@ -120,6 +121,7 @@ class SVehicle(BaseVehicle):
     # WIDTH = 1.7
     # HEIGHT = 1.7
     LATERAL_TIRE_TO_CENTER = 0.7
+    TIRE_TWO_SIDED = True
     FRONT_WHEELBASE = 1.4126
     REAR_WHEELBASE = 1.07
     TIRE_RADIUS = 0.376

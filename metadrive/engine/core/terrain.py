@@ -1,7 +1,8 @@
 # import numpy
 import math
+
 from panda3d.bullet import BulletRigidBodyNode, BulletPlaneShape
-from panda3d.core import Vec3, CardMaker, LQuaternionf, TextureStage, Texture, SamplerState
+from panda3d.core import Vec3, CardMaker, TextureStage, Texture, LQuaternionf, SamplerState
 
 from metadrive.base_class.base_object import BaseObject
 from metadrive.constants import BodyName, CamMask, CollisionGroup
@@ -31,7 +32,7 @@ class Terrain(BaseObject):
             #     AssetLoader.file_path( "textures", "grass2", "normal.jpg")
             # )
             self.terrain_texture = self.loader.loadTexture(AssetLoader.file_path("textures", "ground.png"))
-            # self.terrain_texture.set_format(Texture.F_srgb)
+            self.terrain_texture.set_format(Texture.F_srgb)
             self.terrain_texture.setWrapU(Texture.WM_repeat)
             self.terrain_texture.setWrapV(Texture.WM_repeat)
             self.ts_color = TextureStage("color")
@@ -45,7 +46,6 @@ class Terrain(BaseObject):
 
             self._node_path_list.append(card)
 
-            # scale = 1 if self.use_hollow else 20000
             card.set_scale(scale)
             card.setPos(-scale / 2, -scale / 2, -0.1)
             card.setZ(-.05)
@@ -54,3 +54,20 @@ class Terrain(BaseObject):
             self.terrain_texture.setMinfilter(SamplerState.FT_linear_mipmap_linear)
             self.terrain_texture.setAnisotropicDegree(8)
             card.setQuat(LQuaternionf(math.cos(-math.pi / 4), math.sin(-math.pi / 4), 0, 0))
+
+            # self.GROUND = GeoMipTerrain("mySimpleTerrain")
+            # self.GROUND.setHeightfield(AssetLoader.file_path("textures", "height_map.png"))
+            # self.GROUND.setAutoFlatten(GeoMipTerrain.AFMStrong)
+            # # terrain.setBruteforce(True)
+            # # # Since the terrain is a texture, shader will not calculate the depth information, we add a moving terrain
+            # # # model to enable the depth information of terrain
+            # self.GROUND_MODEL = self.GROUND.getRoot()
+            # self.GROUND_MODEL.setPos(-128, -128, -0.5)
+            # self.GROUND_MODEL.reparentTo(self.origin)
+            # self.GROUND_MODEL.setTexture(self.ts_color, self.terrain_texture)
+            # self.GROUND_MODEL.setTexture(self.ts_normal, self.terrain_normal)
+            # self.GROUND_MODEL.setTexScale(self.ts_color, 100, 100)
+            # self.GROUND_MODEL.setTexScale(self.ts_normal, 100, 100)
+            # # self.GROUND_MODEL.hide(CamMask.AllOn)
+            # # self.GROUND_MODEL.show(CamMask.DepthCam)
+            # self.GROUND.generate()
