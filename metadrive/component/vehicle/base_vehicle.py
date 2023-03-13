@@ -101,7 +101,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     SUSPENSION_STIFFNESS = 40
 
     # for random color choosing
-    MATERIAL_COLOR_COEFF = 2 # to resist other factors, since other setting may make color dark
+    MATERIAL_COLOR_COEFF = 2  # to resist other factors, since other setting may make color dark
     MATERIAL_METAL_COEFF = 0.1  # 0-1
     MATERIAL_ROUGHNESS = 0.8  # smaller to make it more smooth, and reflect more light
     MATERIAL_SHININESS = 128  # 0-128 smaller to make it more smooth, and reflect more light
