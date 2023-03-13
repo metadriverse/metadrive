@@ -101,10 +101,10 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     SUSPENSION_STIFFNESS = 40
 
     # for random color choosing
-    MATERIAL_COLOR_COEFF = 10  # to resist other factors, since other setting may make color dark
-    MATERIAL_METAL_COEFF = 1  # 0-1
+    MATERIAL_COLOR_COEFF = 2 # to resist other factors, since other setting may make color dark
+    MATERIAL_METAL_COEFF = 0.1  # 0-1
     MATERIAL_ROUGHNESS = 0.8  # smaller to make it more smooth, and reflect more light
-    MATERIAL_SHININESS = 1  # 0-128 smaller to make it more smooth, and reflect more light
+    MATERIAL_SHININESS = 128  # 0-128 smaller to make it more smooth, and reflect more light
     MATERIAL_SPECULAR_COLOR = (3, 3, 3, 3)
 
     # control
@@ -595,7 +595,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
                     (
                         self.panda_color[0] * self.MATERIAL_COLOR_COEFF,
                         self.panda_color[1] * self.MATERIAL_COLOR_COEFF,
-                        self.panda_color[2] * self.MATERIAL_COLOR_COEFF, 1
+                        self.panda_color[2] * self.MATERIAL_COLOR_COEFF, 0.2
                     )
                 )
                 material.setMetallic(self.MATERIAL_METAL_COEFF)

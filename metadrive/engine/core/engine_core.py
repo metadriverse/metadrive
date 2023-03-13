@@ -233,7 +233,7 @@ class EngineCore(ShowBase.ShowBase):
                 render_node=None,
                 window=None,
                 camera_node=None,
-                msaa_samples=4,
+                msaa_samples=16,
                 max_lights=8,
                 use_normal_maps=False,
                 use_emission_maps=True,

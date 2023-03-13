@@ -1,4 +1,5 @@
 import copy
+from metadrive.component.vehicle_module.vehicle_panel import VehiclePanel
 import logging
 
 from metadrive.component.pgblock.first_block import FirstPGBlock
@@ -61,7 +62,8 @@ MULTI_AGENT_METADRIVE_DEFAULT_CONFIG = dict(
     # ===== Environmental Setting =====
     traffic_density=0.,
     camera_height=4,
-    map_file_path=""
+    map_file_path="",
+    interface_panel=[VehiclePanel]
 )
 
 
@@ -111,9 +113,9 @@ class MultiAgentMetaDrive(MetaDriveEnv):
             config = copy.deepcopy(ret_config["vehicle_config"])
             if agent_id in ret_config["target_vehicle_configs"]:
                 config["_specified_spawn_lane"
-                       ] = True if "spawn_lane_index" in ret_config["target_vehicle_configs"][agent_id] else False
+                ] = True if "spawn_lane_index" in ret_config["target_vehicle_configs"][agent_id] else False
                 config["_specified_destination"
-                       ] = True if "destination" in ret_config["target_vehicle_configs"][agent_id] else False
+                ] = True if "destination" in ret_config["target_vehicle_configs"][agent_id] else False
                 config.update(ret_config["target_vehicle_configs"][agent_id])
             target_vehicle_configs[agent_id] = config
         ret_config["target_vehicle_configs"] = target_vehicle_configs

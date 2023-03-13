@@ -77,7 +77,7 @@ class ImageBuffer:
             fbprops.float_color = True
             fbprops.set_rgba_bits(16, 16, 16, 16)
             fbprops.set_depth_bits(24)
-            fbprops.set_multisamples(4)
+            fbprops.set_multisamples(self.engine.pbrpipe.msaa_samples)
             scene_tex = p3d.Texture()
             scene_tex.set_format(p3d.Texture.F_rgba16)
             scene_tex.set_component_type(p3d.Texture.T_float)
