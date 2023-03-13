@@ -60,6 +60,7 @@ class BodyName:
     Sidewalk = "Sidewalk"
     Ground = "Ground"
     InvisibleWall = "InvisibleWall"
+    TrafficLight = "Traffic Light"
     Vehicle = "Vehicle"
     Lane = "Lane"
     Traffic_object = "Traffic Object"
@@ -251,6 +252,23 @@ class LineType:
 class LineColor:
     GREY = (1, 1, 1, 1)
     YELLOW = (245 / 255, 192 / 255, 67 / 255, 1)
+
+
+class TrafficLightStatus:
+    GREEN = 1
+    RED = 2
+    YELLOW = 3
+    UNKNOWN = 4
+
+    def semantics(self, status):
+        if status == self.GREEN:
+            return "Traffic Light: Green"
+        if status == self.RED:
+            return "Traffic Light: Red"
+        if status == self.YELLOW:
+            return "Traffic Light: Yellow"
+        if status == self.UNKNOWN:
+            return "Traffic Light: Unknown"
 
 
 class DrivableAreaProperty:
