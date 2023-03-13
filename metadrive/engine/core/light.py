@@ -18,7 +18,7 @@ class Light(BaseObject):
 
         # Too large will cause the graphics card out of memory.
         if self.global_light:
-            self.direction_np.node().setShadowCaster(True, 16384, 16384)
+            self.direction_np.node().setShadowCaster(True, 8192, 8192)
             # self.direction_np.setPos(0, 0, 50)
             # self.direction_np.lookAt(100, -30, 0)
         else:
@@ -32,7 +32,7 @@ class Light(BaseObject):
 
         dlens = self.direction_np.node().getLens()
         if self.global_light:
-            dlens.setFilmSize(256, 256)
+            dlens.setFilmSize(64, 64)
         else:
             dlens.setFilmSize(16, 16)
         # dlens.setFocalLength(1)
