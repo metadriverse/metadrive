@@ -69,7 +69,7 @@ class ImageBuffer:
         self.cam.node().setCameraMask(self.CAM_MASK)
         if parent_node is not None:
             self.origin.reparentTo(parent_node)
-
+        self.scene_tex=None
         if setup_pbr:
             self.display_region_number = 1
             self.manager = FilterManager(self.buffer, self.cam)
@@ -78,10 +78,10 @@ class ImageBuffer:
             fbprops.set_rgba_bits(16, 16, 16, 16)
             fbprops.set_depth_bits(24)
             fbprops.set_multisamples(self.engine.pbrpipe.msaa_samples)
-            scene_tex = p3d.Texture()
-            scene_tex.set_format(p3d.Texture.F_rgba16)
-            scene_tex.set_component_type(p3d.Texture.T_float)
-            self.tonemap_quad = self.manager.render_scene_into(colortex=scene_tex, fbprops=fbprops)
+            self.scene_tex = p3d.Texture()
+            self.scene_tex.set_format(p3d.Texture.F_rgba16)
+            self.scene_tex.set_component_type(p3d.Texture.T_float)
+            self.tonemap_quad = self.manager.render_scene_into(colortex=self.scene_tex, fbprops=fbprops)
             #
             defines = {}
             #
@@ -93,7 +93,7 @@ class ImageBuffer:
                 fragment=post_frag_str,
             )
             self.tonemap_quad.set_shader(tonemap_shader)
-            self.tonemap_quad.set_shader_input('tex', scene_tex)
+            self.tonemap_quad.set_shader_input('tex', self.scene_tex)
             self.tonemap_quad.set_shader_input('exposure', 1.0)
 
         logging.debug("Load Image Buffer: {}".format(self.__class__.__name__))
