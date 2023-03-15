@@ -410,7 +410,7 @@ class MainCamera:
             assert self.cuda_rendered_result is not None
             img = self.cuda_rendered_result[..., :-1][..., ::-1][::-1]
         else:
-            origin_img = engine.main_camera.camera.node().getDisplayRegion(0).getScreenshot()
+            origin_img = engine.win.getDisplayRegion(1).getScreenshot()
             img = np.frombuffer(origin_img.getRamImage().getData(), dtype=np.uint8)
             img = img.reshape((origin_img.getYSize(), origin_img.getXSize(), 4))
             img = img[::-1]

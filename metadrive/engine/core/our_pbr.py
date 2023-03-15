@@ -2,21 +2,21 @@
 import panda3d.core as p3d
 
 from panda3d.core import Shader, ConfigVariableString
-from simplepbr import Pipeline, _add_shader_defines
+from simplepbr import Pipeline, _add_shader_defines, _load_shader_str
 
 from metadrive.engine.asset_loader import AssetLoader
 
 
-def _load_shader_str(shaderpath, defines=None):
-    shader_dir = AssetLoader.file_path("shaders", "pbr_shaders", shaderpath)
-
-    with open(shader_dir) as shaderfile:
-        shaderstr = shaderfile.read()
-
-    if defines is not None:
-        shaderstr = _add_shader_defines(shaderstr, defines)
-
-    return shaderstr
+# def _load_shader_str(shaderpath, defines=None):
+#     shader_dir = AssetLoader.file_path("shaders", "pbr_shaders", shaderpath)
+#
+#     with open(shader_dir) as shaderfile:
+#         shaderstr = shaderfile.read()
+#
+#     if defines is not None:
+#         shaderstr = _add_shader_defines(shaderstr, defines)
+#
+#     return shaderstr
 
 
 class OurPipeline(Pipeline):
@@ -53,8 +53,7 @@ class OurPipeline(Pipeline):
         )
 
     def _setup_tonemapping(self):
-        return
-        # this func cause error under opengles model
+        # return
         if self._shader_ready:
             # Destroy previous buffers so we can re-create
             self.manager.cleanup()
