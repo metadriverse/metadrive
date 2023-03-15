@@ -1,4 +1,5 @@
 # in order to use pbr in opengles pipe on clusters, we temporally inherit from simple pbr
+import panda3d.core as p3d
 
 from panda3d.core import Shader, ConfigVariableString
 from simplepbr import Pipeline, _add_shader_defines
@@ -52,8 +53,42 @@ class OurPipeline(Pipeline):
         )
 
     def _setup_tonemapping(self):
+        return
         # this func cause error under opengles model
-        pass
+        if self._shader_ready:
+            # Destroy previous buffers so we can re-create
+            self.manager.cleanup()
+
+            # Fix shadow buffers after FilterManager.cleanup()
+            for caster in self.get_all_casters():
+                sbuff_size = caster.get_shadow_buffer_size()
+                caster.set_shadow_buffer_size((0, 0))
+                caster.set_shadow_buffer_size(sbuff_size)
+
+        fbprops = p3d.FrameBufferProperties()
+        fbprops.float_color = True
+        fbprops.set_rgba_bits(16, 16, 16, 16)
+        fbprops.set_depth_bits(24)
+        fbprops.set_multisamples(self.msaa_samples)
+        scene_tex = p3d.Texture()
+        scene_tex.set_format(p3d.Texture.F_rgba16)
+        scene_tex.set_component_type(p3d.Texture.T_float)
+        self.tonemap_quad = self.manager.render_scene_into(colortex=scene_tex, fbprops=fbprops)
+
+        defines = {}
+        if self.use_330:
+            defines['USE_330'] = ''
+
+        post_vert_str = _load_shader_str('post.vert', defines)
+        post_frag_str = _load_shader_str('tonemap.frag', defines)
+        tonemap_shader = p3d.Shader.make(
+            p3d.Shader.SL_GLSL,
+            vertex=post_vert_str,
+            fragment=post_frag_str,
+        )
+        self.tonemap_quad.set_shader(tonemap_shader)
+        self.tonemap_quad.set_shader_input('tex', scene_tex)
+        self.tonemap_quad.set_shader_input('exposure', self.exposure)
 
     def _recompile_pbr(self):
         gles = ConfigVariableString("load-display").getValue()
