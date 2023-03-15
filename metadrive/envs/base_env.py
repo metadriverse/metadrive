@@ -136,7 +136,6 @@ BASE_DEFAULT_CONFIG = dict(
     # debug static world
     debug_static_world=False,
     # (Deprecated) set to true only when on headless machine and use rgb image!!!!!!
-    headless_machine_render=False,
     # turn on to profile the efficiency
     pstats=False,
     # if need running in offscreen

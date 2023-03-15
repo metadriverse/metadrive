@@ -167,8 +167,6 @@ The vehicle config decides many of the observational config.
 
     - :code:`image_observation` (bool = False): If you want to use vision-based observation, please set this to True. See :ref:`use_native_rendering` for more information.
     - :code:`rgb_clip` (bool = True): if True than squeeze the value between \[0, 255\] to \[0.0, 1.0\]
-    - :code:`headless_machine_render` (bool = False): Set this to True only when training on headless machine and using rgb image
-
 
 Traffic Config
 ##################################
