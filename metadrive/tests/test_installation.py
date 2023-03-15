@@ -16,7 +16,11 @@ def capture_headless_image(image_source="main_camera"):
             traffic_density=0.1,
             offscreen_render=True,
             interface_panel=[MiniMap, RGBCamera, VehiclePanel],
-            vehicle_config={"image_source": image_source, "rgb_camera": (512, 512), "depth_camera": (512, 512, False)},
+            vehicle_config={
+                "image_source": image_source,
+                "rgb_camera": (512, 512),
+                "depth_camera": (512, 512, False)
+            },
         )
     )
     env.reset()

@@ -69,7 +69,7 @@ class ImageBuffer:
         self.cam.node().setCameraMask(self.CAM_MASK)
         if parent_node is not None:
             self.origin.reparentTo(parent_node)
-        self.scene_tex=None
+        self.scene_tex = None
         if setup_pbr:
             self.display_region_number = 1
             self.manager = FilterManager(self.buffer, self.cam)
