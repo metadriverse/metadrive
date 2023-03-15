@@ -153,7 +153,7 @@ class BaseCamera(ImageBuffer):
         super(BaseCamera, self).remove_display_region()
 
     def track(self, base_object):
-        if base_object is not None:
+        if base_object is not None and type(self)._singleton is not None:
             self.attached_object = base_object
             type(self)._singleton.origin.reparentTo(base_object.origin)
 
