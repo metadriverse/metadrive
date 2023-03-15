@@ -51,9 +51,9 @@ class OurPipeline(Pipeline):
             use_occlusion_maps=use_occlusion_maps
         )
 
-    # def _setup_tonemapping(self):
-    #     # this func cause error under opengles model
-    #     pass
+    def _setup_tonemapping(self):
+        # this func cause error under opengles model
+        pass
 
     def _recompile_pbr(self):
         gles = ConfigVariableString("load-display").getValue()

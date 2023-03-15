@@ -24,7 +24,7 @@ class SkyBox(BaseObject):
         skybox.set_scale(20000)
 
         skybox_texture = self.loader.loadTexture(AssetLoader.file_path("textures", "skybox.jpg"))
-        skybox_texture.set_format(Texture.F_srgb)
+        # skybox_texture.set_format(Texture.F_srgb)
         skybox_texture.set_minfilter(SamplerState.FT_linear)
         skybox_texture.set_magfilter(SamplerState.FT_linear)
         skybox_texture.set_wrap_u(SamplerState.WM_repeat)
