@@ -1,7 +1,8 @@
 import sys
+import os
 
 import cv2
-from panda3d.core import PNMImage
+from metadrive import MetaDrive_PACKAGE_DIR
 from metadrive.component.vehicle_module.mini_map import MiniMap
 from metadrive.component.vehicle_module.rgb_camera import RGBCamera
 from metadrive.component.vehicle_module.vehicle_panel import VehiclePanel
@@ -29,8 +30,11 @@ def capture_headless_image(image_source="main_camera"):
     assert isinstance(o, dict)
     print("The observation is a dict with numpy arrays as values: ", {k: v.shape for k, v in o.items()})
     o = o["image"][..., -1] * 255
-    cv2.imwrite("{}_from_observation.png".format(image_source), o)
-    env.vehicle.image_sensors[image_source].save_image(env.vehicle, "{}_from_buffer.png".format(image_source))
+    cv2.imwrite(os.path.join(MetaDrive_PACKAGE_DIR, "examples", "{}_from_observation.png".format(image_source)), o)
+    cam = env.vehicle.image_sensors[image_source]
+    cam.save_image(
+        env.vehicle, os.path.join(MetaDrive_PACKAGE_DIR, "examples", "{}_from_buffer.png".format(image_source))
+    )
     # if image_source == "main_camera":
     #     ret = PNMImage()
     #     env.engine.win.getDisplayRegion(6).camera.node().getDisplayRegion(0).getScreenshot(ret)
