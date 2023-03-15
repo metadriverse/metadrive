@@ -14,6 +14,7 @@ def capture_headless_image(headless):
             start_seed=666,
             traffic_density=0.1,
             offscreen_render=True,
+            vehicle_config={"image_source": "main_camera"},
             # headless_machine_render=headless
         )
     )
@@ -36,7 +37,7 @@ def capture_headless_image(headless):
         )
 
 
-def vis_installation(headless=True):
+def verify_installation(headless=True):
     try:
         env = MetaDriveEnv({"use_render": False, "offscreen_render": False})
         env.reset()
@@ -56,4 +57,4 @@ def vis_installation(headless=True):
 
 
 if __name__ == "__main__":
-    vis_installation(False)
+    verify_installation(False)

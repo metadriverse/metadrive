@@ -1,7 +1,6 @@
 from panda3d.core import loadPrcFileData
-
-from metadrive.tests.vis_functionality.vis_installation import capture_headless_image
+from metadrive.tests.vis_functionality.vis_installation import verify_installation
 
 if __name__ == "__main__":
     loadPrcFileData("", "notify-level-task fatal")
-    capture_headless_image(headless=True)
+    verify_installation(headless=True)
