@@ -10,7 +10,7 @@ if __name__ == "__main__":
             "start_seed": 4,
             "manual_control": True,
             "use_render": True,
-            "offscreen_render": True,
+            "image_observation": True,
             "rgb_clip": True,
             "vehicle_config": dict(depth_camera=(200, 88, False), image_source="depth_camera"),
             "map_config": {

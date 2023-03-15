@@ -15,7 +15,7 @@ def capture_headless_image(image_source="main_camera"):
             use_render=False,
             start_seed=666,
             traffic_density=0.1,
-            offscreen_render=True,
+            image_observation=True,
             interface_panel=[MiniMap, RGBCamera, VehiclePanel],
             vehicle_config={
                 "image_source": image_source,
@@ -52,7 +52,7 @@ def capture_headless_image(image_source="main_camera"):
 
 
 def verify_installation():
-    env = MetaDriveEnv({"use_render": False, "offscreen_render": False})
+    env = MetaDriveEnv({"use_render": False, "image_observation": False})
     try:
         env.reset()
         for i in range(1, 100):

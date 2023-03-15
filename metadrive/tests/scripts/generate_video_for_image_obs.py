@@ -148,7 +148,7 @@ if __name__ == '__main__':
                 BaseMap.GENERATE_CONFIG: 7
             },
             traffic_density=0.5,
-            offscreen_render=True,
+            image_observation=True,
         )
     )
     start = time.time()

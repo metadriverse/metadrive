@@ -77,7 +77,7 @@ BASE_DEFAULT_CONFIG = dict(
         use_special_color=False,
 
         # ===== use image =====
-        image_source="rgb_camera",  # take effect when only when offscreen_render == True
+        image_source="rgb_camera",  # take effect when only when image_observation == True
 
         # ===== vehicle spawn and destination =====
         navigation_module=None,  # a class type for self-defined navigation
@@ -140,7 +140,7 @@ BASE_DEFAULT_CONFIG = dict(
     # turn on to profile the efficiency
     pstats=False,
     # if need running in offscreen
-    offscreen_render=False,
+    image_observation=False,
     # this is an advanced feature for accessing image with moving them to ram!
     image_on_cuda=False,
     # accelerate the lidar perception
@@ -342,7 +342,7 @@ class BaseEnv(gym.Env):
 
         self.engine.render_frame(text)
 
-        if mode != "human" and self.config["offscreen_render"]:
+        if mode != "human" and self.config["image_observation"]:
             # fetch img from img stack to be make this func compatible with other render func in RL setting
             return self.vehicle.observations.img_obs.get_image()
 
@@ -359,7 +359,7 @@ class BaseEnv(gym.Env):
             # return self.temporary_img_obs.get_image()
             return self.engine.get_window_image(return_bytes=return_bytes)
 
-        # logging.warning("You do not set 'offscreen_render' or 'offscreen_render' to True, so no image will be returned!")
+        # logging.warning("You do not set 'image_observation' or 'image_observation' to True, so no image will be returned!")
         return None
 
     def reset(self, force_seed: Union[None, int] = None):
@@ -469,7 +469,7 @@ class BaseEnv(gym.Env):
         return ego_v
 
     def get_single_observation(self, vehicle_config: "Config"):
-        if self.config["offscreen_render"]:
+        if self.config["image_observation"]:
             o = ImageStateObservation(vehicle_config)
         else:
             o = LidarStateObservation(vehicle_config)

@@ -9,7 +9,7 @@ if __name__ == "__main__":
             "image_source": "mini_map",
             "manual_control": True,
             "use_render": True,
-            "offscreen_render": True,
+            "image_observation": True,
             "rgb_clip": True,
         }
     )

@@ -431,7 +431,7 @@ class BaseEngine(EngineCore, Randomizable):
     def setup_main_camera(self):
         from metadrive.engine.core.main_camera import MainCamera
         # Not we should always enable main camera if image obs is required! Or RGBCamera will return incorrect result
-        if self.global_config["use_render"] or self.global_config["offscreen_render"]:
+        if self.global_config["use_render"] or self.global_config["image_observation"]:
             return MainCamera(self, self.global_config["camera_height"], self.global_config["camera_dist"])
         else:
             return None

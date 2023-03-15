@@ -36,7 +36,7 @@ def _test_destroy_rgb(obs="rgb"):
     if obs == "state":
         pass
     elif obs == "rgb":
-        config["offscreen_render"] = True
+        config["image_observation"] = True
     else:
         config["use_render"] = True
     _test_destroy(config)
@@ -48,7 +48,7 @@ def test_destroy_state(obs="state"):
     if obs == "state":
         pass
     elif obs == "rgb":
-        config["offscreen_render"] = True
+        config["image_observation"] = True
         config["use_render"] = False
         config["rgb_clip"] = True
     _test_destroy(config)

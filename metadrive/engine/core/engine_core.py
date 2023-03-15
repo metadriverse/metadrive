@@ -108,7 +108,7 @@ class EngineCore(ShowBase.ShowBase):
                 loadPrcFileData("", "threading-model {}".format(self.global_config["multi_thread_render_mode"]))
         else:
             self.global_config["show_coordinates"] = False
-            if self.global_config["offscreen_render"]:
+            if self.global_config["image_observation"]:
                 self.mode = RENDER_MODE_OFFSCREEN
                 if self.global_config["multi_thread_render"]:
                     loadPrcFileData("", "threading-model {}".format(self.global_config["multi_thread_render_mode"]))

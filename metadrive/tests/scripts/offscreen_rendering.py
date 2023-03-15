@@ -12,7 +12,7 @@ if __name__ == '__main__':
         # controller="joystick",
 
         # use_render=True,
-        offscreen_render=True,
+        image_observation=True,
         manual_control=True,  # set false for external subscriber control
         traffic_density=0.0,
         environment_num=100,

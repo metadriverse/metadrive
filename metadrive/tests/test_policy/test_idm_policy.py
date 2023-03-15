@@ -11,13 +11,13 @@ from metadrive.utils import Config
 
 def _create_vehicle():
     v_config = Config(BASE_DEFAULT_CONFIG["vehicle_config"]).update(METADRIVE_DEFAULT_CONFIG["vehicle_config"])
-    v_config.update({"use_render": False, "offscreen_render": False})
+    v_config.update({"use_render": False, "image_observation": False})
     config = Config(BASE_DEFAULT_CONFIG)
     config.update(
         {
             "use_render": False,
             "pstats": False,
-            "offscreen_render": False,
+            "image_observation": False,
             "debug": False,
             "vehicle_config": v_config
         }

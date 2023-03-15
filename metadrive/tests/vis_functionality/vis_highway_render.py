@@ -12,7 +12,7 @@ def vis_top_down_render_with_panda_render():
             "environment_num": 1,
             "manual_control": True,
             "use_render": True,
-            "offscreen_render": False,
+            "image_observation": False,
             "traffic_mode": "respawn"
         }
     )
