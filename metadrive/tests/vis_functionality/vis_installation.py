@@ -35,11 +35,12 @@ def capture_headless_image(headless):
             "Headless mode Offscreen render launched successfully! \n "
             "A image named \'tset_install.png\' is saved. Open it to check if offscreen mode works well"
         )
+    env.close()
 
 
 def verify_installation(headless=True):
+    env = MetaDriveEnv({"use_render": False, "offscreen_render": False})
     try:
-        env = MetaDriveEnv({"use_render": False, "offscreen_render": False})
         env.reset()
         for i in range(1, 100):
             o, r, d, info = env.step([0, 1])
@@ -50,10 +51,7 @@ def verify_installation(headless=True):
         sys.exit()
     else:
         print("Bullet physics world is launched successfully!")
-    try:
-        capture_headless_image(headless)
-    except:
-        print("Error happens when drawing scene in offscreen mode!")
+    capture_headless_image(headless)
 
 
 if __name__ == "__main__":
