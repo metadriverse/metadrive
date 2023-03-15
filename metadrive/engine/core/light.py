@@ -42,8 +42,8 @@ class Light(BaseObject):
         self.direction_np.reparentTo(self.origin)
 
         self.ambient_np = NodePath(AmbientLight("Ambient"))
-        # self.ambient_np.node().setColor(LVector4(0.13, 0.15, 0.15, 1))
-        self.ambient_np.node().setColor(LVector4(0.8, 0.8, 0.8, 1))
+        self.ambient_np.node().setColor(LVector4(0.13, 0.15, 0.15, 1))
+        # self.ambient_np.node().setColor(LVector4(0.8, 0.8, 0.8, 1))
         self.ambient_np.reparentTo(self.origin)
 
         self._node_path_list.append(self.ambient_np)
