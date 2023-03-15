@@ -13,7 +13,6 @@ if __name__ == "__main__":
             "offscreen_render": True,
             "rgb_clip": True,
             "vehicle_config": dict(depth_camera=(200, 88, False), image_source="depth_camera"),
-            "headless_machine_render": False,
             "map_config": {
                 BaseMap.GENERATE_TYPE: MapGenerateMethod.BIG_BLOCK_NUM,
                 BaseMap.GENERATE_CONFIG: 12,

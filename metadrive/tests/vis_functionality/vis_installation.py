@@ -16,7 +16,6 @@ def capture_headless_image(headless):
             traffic_density=0.1,
             offscreen_render=True,
             vehicle_config={"image_source": "main_camera"},
-            # headless_machine_render=headless
         )
     )
     env.reset()

@@ -124,7 +124,9 @@ class EngineCore(ShowBase.ShowBase):
         # Setup some debug options
         if self.global_config["headless_machine_render"]:
             # headless machine support
-            loadPrcFileData("", "load-display  pandagles2")
+            # loadPrcFileData("", "load-display  pandagles2")
+            # no further actions will be applied now!
+            pass
         if self.global_config["debug"]:
             # debug setting
             EngineCore.DEBUG = True

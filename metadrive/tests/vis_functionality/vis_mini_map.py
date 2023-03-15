@@ -11,7 +11,6 @@ if __name__ == "__main__":
             "use_render": True,
             "offscreen_render": True,
             "rgb_clip": True,
-            "headless_machine_render": False
         }
     )
     env.reset()

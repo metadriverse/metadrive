@@ -32,17 +32,17 @@ class DepthCamera(BaseCamera):
         if get_engine().mode == RENDER_MODE_NONE or not AssetLoader.initialized() or type(self)._singleton.init_num > 1:
             return
         # add shader for it
-        if get_global_config()["headless_machine_render"]:
-            vert_path = AssetLoader.file_path("shaders", "depth_cam_gles.vert.glsl")
-            frag_path = AssetLoader.file_path("shaders", "depth_cam_gles.frag.glsl")
+        # if get_global_config()["headless_machine_render"]:
+        #     vert_path = AssetLoader.file_path("shaders", "depth_cam_gles.vert.glsl")
+        #     frag_path = AssetLoader.file_path("shaders", "depth_cam_gles.frag.glsl")
+        # else:
+        from metadrive.utils import is_mac
+        if is_mac():
+            vert_path = AssetLoader.file_path("shaders", "depth_cam_mac.vert.glsl")
+            frag_path = AssetLoader.file_path("shaders", "depth_cam_mac.frag.glsl")
         else:
-            from metadrive.utils import is_mac
-            if is_mac():
-                vert_path = AssetLoader.file_path("shaders", "depth_cam_mac.vert.glsl")
-                frag_path = AssetLoader.file_path("shaders", "depth_cam_mac.frag.glsl")
-            else:
-                vert_path = AssetLoader.file_path("shaders", "depth_cam.vert.glsl")
-                frag_path = AssetLoader.file_path("shaders", "depth_cam.frag.glsl")
+            vert_path = AssetLoader.file_path("shaders", "depth_cam.vert.glsl")
+            frag_path = AssetLoader.file_path("shaders", "depth_cam.frag.glsl")
         custom_shader = Shader.load(Shader.SL_GLSL, vertex=vert_path, fragment=frag_path)
         cam.node().setInitialState(RenderState.make(ShaderAttrib.make(custom_shader, 1)))
 
