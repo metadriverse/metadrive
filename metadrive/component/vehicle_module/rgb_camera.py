@@ -15,7 +15,7 @@ class RGBCamera(BaseCamera):
         assert engine_initialized(), "You should initialize engine before adding camera to vehicle"
         config = get_global_config()["vehicle_config"]["rgb_camera"]
         self.BUFFER_W, self.BUFFER_H = config[0], config[1]
-        super(RGBCamera, self).__init__(False)
+        super(RGBCamera, self).__init__(True)
         cam = self.get_cam()
         lens = self.get_lens()
         cam.lookAt(0, 2.4, 1.3)

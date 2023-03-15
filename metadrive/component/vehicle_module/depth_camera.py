@@ -1,4 +1,5 @@
 from panda3d.core import Shader, RenderState, ShaderAttrib, GeoMipTerrain, LVector3, PNMImage
+import cv2
 import numpy as np
 
 from metadrive.component.vehicle_module.base_camera import BaseCamera
@@ -67,3 +68,13 @@ class DepthCamera(BaseCamera):
             # type(self)._singleton.GROUND_MODEL.setP(-base_object.origin.getR())
             # type(self)._singleton.GROUND_MODEL.setR(-base_object.origin.getR())
         return super(DepthCamera, self).track(base_object)
+
+    def get_image(self, base_object):
+        type(self)._singleton.origin.reparentTo(base_object.origin)
+        img = super(DepthCamera, type(self)._singleton).get_rgb_array()
+        self.track(self.attached_object)
+        return img
+
+    def save_image(self, base_object, name="debug.png"):
+        img = self.get_image(base_object)
+        cv2.imwrite(name, img)

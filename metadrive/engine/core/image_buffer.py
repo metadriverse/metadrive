@@ -122,7 +122,7 @@ class ImageBuffer:
     def get_rgb_array(self):
         if self.engine.episode_step <= 1:
             self.engine.graphicsEngine.renderFrame()
-        origin_img = self.cam.node().getDisplayRegion(0).getScreenshot()
+        origin_img = self.buffer.getDisplayRegion(1).getScreenshot()
         img = np.frombuffer(origin_img.getRamImage().getData(), dtype=np.uint8)
         img = img.reshape((origin_img.getYSize(), origin_img.getXSize(), 4))
         # img = np.swapaxes(img, 1, 0)

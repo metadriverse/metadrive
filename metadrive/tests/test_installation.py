@@ -15,7 +15,7 @@ def capture_headless_image(image_source="main_camera"):
             start_seed=666,
             traffic_density=0.1,
             offscreen_render=True,
-            vehicle_config={"image_source": image_source, "rgb_camera": (512, 512)},
+            vehicle_config={"image_source": image_source, "rgb_camera": (512, 512), "depth_camera": (512, 512, False)},
         )
     )
     env.reset()
@@ -28,9 +28,9 @@ def capture_headless_image(image_source="main_camera"):
     env.vehicle.image_sensors[image_source].save_image(env.vehicle, "{}_from_buffer.png".format(image_source))
     env.close()
     print(
-        "Headless mode Offscreen render launched successfully! \n"
-        "images named \'main_camera.png\' and \'image_from_observation.png\' are saved. "
-        "Open it to check if offscreen mode works well"
+        "{} Test result: \nHeadless mode Offscreen render launched successfully! \n"
+        "images named \'{}_from_observation.png\' and \'{}_from_buffer.png\' are saved. "
+        "Open it to check if offscreen mode works well".format(image_source, image_source, image_source)
     )
 
 
@@ -47,8 +47,9 @@ def verify_installation():
         sys.exit()
     else:
         print("Bullet physics world is launched successfully!")
-    capture_headless_image()
     capture_headless_image(image_source="rgb_camera")
+    capture_headless_image(image_source="depth_camera")
+    capture_headless_image()
 
 
 if __name__ == "__main__":
