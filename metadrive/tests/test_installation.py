@@ -1,7 +1,7 @@
 import sys
 
 import cv2
-
+from panda3d.core import PNMImage
 from metadrive.component.vehicle_module.mini_map import MiniMap
 from metadrive.component.vehicle_module.rgb_camera import RGBCamera
 from metadrive.component.vehicle_module.vehicle_panel import VehiclePanel
@@ -27,6 +27,14 @@ def capture_headless_image(image_source="main_camera"):
     o = o["image"][..., -1] * 255
     cv2.imwrite("{}_from_observation.png".format(image_source), o)
     env.vehicle.image_sensors[image_source].save_image(env.vehicle, "{}_from_buffer.png".format(image_source))
+    # if image_source == "main_camera":
+    #     ret = PNMImage()
+    #     env.engine.win.getDisplayRegion(6).camera.node().getDisplayRegion(0).getScreenshot(ret)
+    #     ret.write("test_1.png")
+    #     new_ret = PNMImage()
+    #     RGBCamera._singleton.buffer.getDisplayRegion(1).getScreenshot(new_ret)
+    #     new_ret.write("test_2.png")
+
     env.close()
     print(
         "{} Test result: \nHeadless mode Offscreen render launched successfully! \n"
