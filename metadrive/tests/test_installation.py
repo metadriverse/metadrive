@@ -1,10 +1,10 @@
-import os
 import sys
 
 import cv2
-from PIL import Image
-from panda3d.core import PNMImage
 
+from metadrive.component.vehicle_module.mini_map import MiniMap
+from metadrive.component.vehicle_module.rgb_camera import RGBCamera
+from metadrive.component.vehicle_module.vehicle_panel import VehiclePanel
 from metadrive.envs.metadrive_env import MetaDriveEnv
 
 
@@ -15,6 +15,7 @@ def capture_headless_image(image_source="main_camera"):
             start_seed=666,
             traffic_density=0.1,
             offscreen_render=True,
+            interface_panel=[MiniMap, RGBCamera, VehiclePanel],
             vehicle_config={"image_source": image_source, "rgb_camera": (512, 512), "depth_camera": (512, 512, False)},
         )
     )
@@ -47,9 +48,9 @@ def verify_installation():
         sys.exit()
     else:
         print("Bullet physics world is launched successfully!")
+    capture_headless_image()
     capture_headless_image(image_source="rgb_camera")
     capture_headless_image(image_source="depth_camera")
-    capture_headless_image()
 
 
 if __name__ == "__main__":

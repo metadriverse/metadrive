@@ -79,7 +79,7 @@ class ImageBuffer:
             fbprops.set_depth_bits(24)
             fbprops.set_multisamples(self.engine.pbrpipe.msaa_samples)
             self.scene_tex = p3d.Texture()
-            # self.scene_tex.set_format(p3d.Texture.F_rgba16)
+            self.scene_tex.set_format(p3d.Texture.F_rgba16)
             self.scene_tex.set_component_type(p3d.Texture.T_float)
             self.tonemap_quad = self.manager.render_scene_into(colortex=self.scene_tex, fbprops=fbprops)
             #
