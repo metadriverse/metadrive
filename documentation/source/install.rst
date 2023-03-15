@@ -90,7 +90,7 @@ Finally, it will give you a Panda3D wheel which can run in EGL environment witho
 In principle, the installation of MetaDrive in headless machine is finished.
 To verify the installation on cluster, run following command instead::
 
-    python -m metadrive.tests.test_headless
+    python -m metadrive.examples.verify_headless_installation
 
 
 The script will generate images to current directory. Please fetch anc check those images from cluster to ensure MetaDrive can draw scene and capture images.

@@ -7,14 +7,14 @@ from panda3d.core import PNMImage
 from metadrive.envs.metadrive_env import MetaDriveEnv
 
 
-def capture_image(headless):
+def capture_headless_image(headless):
     env = MetaDriveEnv(
         dict(
             use_render=False,
             start_seed=666,
             traffic_density=0.1,
             offscreen_render=True,
-            headless_machine_render=headless
+            # headless_machine_render=headless
         )
     )
     env.reset()
@@ -50,7 +50,7 @@ def vis_installation(headless=True):
     else:
         print("Bullet physics world is launched successfully!")
     try:
-        capture_image(headless)
+        capture_headless_image(headless)
     except:
         print("Error happens when drawing scene in offscreen mode!")
 
