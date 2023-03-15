@@ -1,6 +1,7 @@
 import os
 import sys
 
+import cv2
 from PIL import Image
 from panda3d.core import PNMImage
 
@@ -20,10 +21,14 @@ def capture_headless_image(headless):
     )
     env.reset()
     for i in range(10):
-        env.step([0, 1])
+        o, r, d, i = env.step([0, 1])
+    assert isinstance(o, dict)
+    print("The observation is a dict with numpy arrays as values: ", {k: v.shape for k, v in o.items()})
+    o = o["image"][..., -1]*255
+    cv2.imwrite("image_from_observation.png", o)
     img = PNMImage()
     env.engine.win.getScreenshot(img)
-    img.write("vis_installation.png")
+    img.write("main_camera.png")
     env.close()
     if not headless:
         im = Image.open("vis_installation.png")
@@ -32,8 +37,9 @@ def capture_headless_image(headless):
         print("Offscreen render launched successfully! \n ")
     else:
         print(
-            "Headless mode Offscreen render launched successfully! \n "
-            "A image named \'tset_install.png\' is saved. Open it to check if offscreen mode works well"
+            "Headless mode Offscreen render launched successfully! \n"
+            "images named \'main_camera.png\' and \'image_from_observation.png\' are saved. "
+            "Open it to check if offscreen mode works well"
         )
     env.close()
 

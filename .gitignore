@@ -18,7 +18,8 @@
 **/*.ipynb_checkpoints/
 /metadrive/cutils.cpython-38-x86_64-linux-gnu.so
 **/*.c
-**/vis_installation.png
+**/image_from_observation.png
+**/main_camera.png
 /seed*.json
 **/.vscode
 **/.idea
