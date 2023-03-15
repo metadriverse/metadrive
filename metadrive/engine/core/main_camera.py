@@ -519,11 +519,13 @@ class MainCamera:
         self._cuda_buffer = check_cudart_err(cudart.cudaGraphicsUnmapResources(1, self.cuda_graphics_resource, stream))
         return self
 
-    def get_image(self, *args, **kwargs):
+    def get_image(self):
+        # The Tracked obj arg is only for compatibility
         img = PNMImage()
         self.engine.win.getScreenshot(img)
         return img
 
-    def save_image(self, *args, file_name="main_camera.png", **kwargs):
+    def save_image(self, tracked_obj, file_name="main_camera.png", **kwargs):
+        # The Tracked obj arg is only for compatibility
         img = self.get_image()
         img.write(file_name)
