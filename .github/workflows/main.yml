@@ -81,7 +81,7 @@ jobs:
           pytest --cov=./ --cov-config=.coveragerc --cov-report=xml -sv tests/test_policy
 
   test_component:
-    runs-on: ubuntu-latest
+    runs-on: [ubuntu-latest, gpu]
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python 3.7
