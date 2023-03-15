@@ -8,14 +8,14 @@ from panda3d.core import PNMImage
 from metadrive.envs.metadrive_env import MetaDriveEnv
 
 
-def capture_headless_image(headless):
+def capture_headless_image(image_source="main_camera"):
     env = MetaDriveEnv(
         dict(
             use_render=False,
             start_seed=666,
             traffic_density=0.1,
             offscreen_render=True,
-            vehicle_config={"image_source": "main_camera"},
+            vehicle_config={"image_source": image_source, "rgb_camera": (512, 512)},
         )
     )
     env.reset()
@@ -23,27 +23,18 @@ def capture_headless_image(headless):
         o, r, d, i = env.step([0, 1])
     assert isinstance(o, dict)
     print("The observation is a dict with numpy arrays as values: ", {k: v.shape for k, v in o.items()})
-    o = o["image"][..., -1]*255
-    cv2.imwrite("image_from_observation.png", o)
-    img = PNMImage()
-    env.engine.win.getScreenshot(img)
-    img.write("main_camera.png")
+    o = o["image"][..., -1] * 255
+    cv2.imwrite("{}_from_observation.png".format(image_source), o)
+    env.vehicle.image_sensors[image_source].save_image(env.vehicle, "{}_from_buffer.png".format(image_source))
     env.close()
-    if not headless:
-        im = Image.open("vis_installation.png")
-        im.show()
-        os.remove("vis_installation.png")
-        print("Offscreen render launched successfully! \n ")
-    else:
-        print(
-            "Headless mode Offscreen render launched successfully! \n"
-            "images named \'main_camera.png\' and \'image_from_observation.png\' are saved. "
-            "Open it to check if offscreen mode works well"
-        )
-    env.close()
+    print(
+        "Headless mode Offscreen render launched successfully! \n"
+        "images named \'main_camera.png\' and \'image_from_observation.png\' are saved. "
+        "Open it to check if offscreen mode works well"
+    )
 
 
-def verify_installation(headless=True):
+def verify_installation():
     env = MetaDriveEnv({"use_render": False, "offscreen_render": False})
     try:
         env.reset()
@@ -56,8 +47,9 @@ def verify_installation(headless=True):
         sys.exit()
     else:
         print("Bullet physics world is launched successfully!")
-    capture_headless_image(headless)
+    capture_headless_image()
+    capture_headless_image(image_source="rgb_camera")
 
 
 if __name__ == "__main__":
-    verify_installation(False)
+    verify_installation()

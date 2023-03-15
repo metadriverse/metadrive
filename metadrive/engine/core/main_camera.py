@@ -5,7 +5,7 @@ from typing import Tuple
 
 import numpy as np
 from direct.controls.InputState import InputState
-from panda3d.core import Vec3, Point3
+from panda3d.core import Vec3, Point3, PNMImage
 from panda3d.core import WindowProperties
 
 from metadrive.constants import CollisionGroup
@@ -49,7 +49,7 @@ class MainCamera:
         self.camera_queue = None
         self.camera_dist = camera_dist
         self.camera_pitch = -engine.global_config["camera_pitch"] if engine.global_config["camera_pitch"
-                                                                                          ] is not None else None
+                                                                     ] is not None else None
         self.camera_smooth = engine.global_config["camera_smooth"]
         self.direction_running_mean = deque(maxlen=20 if self.camera_smooth else 1)
         self.world_light = self.engine.world_light  # light chases the chase camera, when not using global light
@@ -518,3 +518,12 @@ class MainCamera:
             return self
         self._cuda_buffer = check_cudart_err(cudart.cudaGraphicsUnmapResources(1, self.cuda_graphics_resource, stream))
         return self
+
+    def get_image(self, *args, **kwargs):
+        img = PNMImage()
+        self.engine.win.getScreenshot(img)
+        return img
+
+    def save_image(self, *args, file_name="main_camera.png", **kwargs):
+        img = self.get_image()
+        img.write(file_name)

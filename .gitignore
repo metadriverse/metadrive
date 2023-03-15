@@ -12,6 +12,8 @@
 .DS_Store
 **/.DS_Store
 **/test_10maps.json
+/metadrive/examples/**.png
+/metadrive/examples/**.jpg
 **/tmp_images/
 **/test.png
 /metadrive/cutils.cpython-37m-x86_64-linux-gnu.so
