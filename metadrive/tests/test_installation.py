@@ -9,11 +9,12 @@ from metadrive.component.vehicle_module.vehicle_panel import VehiclePanel
 from metadrive.envs.metadrive_env import MetaDriveEnv
 
 
-def capture_headless_image(image_source="main_camera"):
+def capture_headless_image(cuda, image_source="main_camera"):
     env = MetaDriveEnv(
         dict(
             use_render=False,
             start_seed=666,
+            image_on_cuda=cuda,
             traffic_density=0.1,
             image_observation=True,
             interface_panel=[MiniMap, RGBCamera, VehiclePanel],
@@ -30,7 +31,7 @@ def capture_headless_image(image_source="main_camera"):
             o, r, d, i = env.step([0, 1])
         assert isinstance(o, dict)
         print("The observation is a dict with numpy arrays as values: ", {k: v.shape for k, v in o.items()})
-        o = o["image"][..., -1] * 255
+        o = o["image"][..., -1] * 255 if not cuda else o["image"].get()[..., -1]*255
         cv2.imwrite(os.path.join(MetaDrive_PACKAGE_DIR, "examples", "{}_from_observation.png".format(image_source)), o)
         cam = env.vehicle.image_sensors[image_source]
         cam.save_image(
@@ -52,7 +53,7 @@ def capture_headless_image(image_source="main_camera"):
         env.close()
 
 
-def verify_installation():
+def verify_installation(cuda=False):
     env = MetaDriveEnv({"use_render": False, "image_observation": False})
     try:
         env.reset()
@@ -65,9 +66,9 @@ def verify_installation():
         print("Bullet physics world is launched successfully!")
     finally:
         env.close()
-    capture_headless_image()
-    capture_headless_image(image_source="rgb_camera")
-    capture_headless_image(image_source="depth_camera")
+    capture_headless_image(cuda)
+    capture_headless_image(cuda, image_source="rgb_camera")
+    capture_headless_image(cuda, image_source="depth_camera")
 
 
 if __name__ == "__main__":
