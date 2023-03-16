@@ -48,8 +48,9 @@ def capture_headless_image(cuda, image_source="main_camera"):
         #     new_ret.write("test_2.png")
         print(
             "{} Test result: \nHeadless mode Offscreen render launched successfully! \n"
-            "images named \'{}_from_observation.png\' and \'{}_from_buffer.png\' are saved. "
-            "Open it to check if offscreen mode works well".format(image_source, image_source, image_source)
+            "images named \'{}_from_observation.png\' and \'{}_from_buffer.png\' are saved to {}. "
+            "Open it to check if offscreen mode works well".format(image_source, image_source, image_source,
+                                                                   os.path.join(MetaDrive_PACKAGE_DIR, "examples"))
         )
     finally:
         env.close()
