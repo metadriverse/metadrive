@@ -37,7 +37,7 @@ def _test_depth_camera_as_obs(render=False):
             # break
 
 
-def _test_main_rgb_camera_as_obs(render=False):
+def _test_main_rgb_camera_as_obs_with_interface(render=False):
     env = MetaDriveEnv(
         dict(
             environment_num=1,
@@ -136,5 +136,5 @@ def _test_rgb_camera_as_obs(render=False):
 if __name__ == "__main__":
     # _test_depth_camera_as_obs(False)
     _test_rgb_camera_as_obs(True)
-    # _test_main_rgb_camera_as_obs(False)
-    # _test_main_rgb_camera_no_interface(False)
+    # _test_main_rgb_camera_as_obs_with_interface(False)
+    # _test_main_rgb_camera_no_interface(True)

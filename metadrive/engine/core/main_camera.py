@@ -99,7 +99,8 @@ class MainCamera:
         self._in_recover = False
         self._last_frame_has_mouse = False
 
-        self.enable_cuda = self.engine.global_config["image_on_cuda"]
+        need_cuda = self.engine.global_config["vehicle_config"]["image_source"] == "main_camera"
+        self.enable_cuda = self.engine.global_config["image_on_cuda"] and need_cuda
 
         self.cuda_graphics_resource = None
         if self.enable_cuda:

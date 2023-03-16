@@ -96,8 +96,6 @@ class EngineCore(ShowBase.ShowBase):
             # pstats debug provided by panda3d
             loadPrcFileData("", "want-pstats 1")
 
-        loadPrcFileData("", "win-size {} {}".format(*self.global_config["window_size"]))
-
         # Setup onscreen render
         if self.global_config["use_render"]:
             self.mode = RENDER_MODE_ONSCREEN
@@ -112,6 +110,10 @@ class EngineCore(ShowBase.ShowBase):
                 self.mode = RENDER_MODE_OFFSCREEN
                 if self.global_config["multi_thread_render"]:
                     loadPrcFileData("", "threading-model {}".format(self.global_config["multi_thread_render_mode"]))
+                if self.global_config["vehicle_config"]["image_source"] != "main_camera":
+                    # reduce size as we don't use the main camera content for improving efficiency
+                    self.global_config["window_size"] = (1, 1)
+
             else:
                 self.mode = RENDER_MODE_NONE
                 if self.global_config["show_interface"]:
@@ -121,6 +123,7 @@ class EngineCore(ShowBase.ShowBase):
         if is_mac() and (self.mode == RENDER_MODE_OFFSCREEN):  # Mac don't support offscreen rendering
             self.mode = RENDER_MODE_ONSCREEN
 
+        loadPrcFileData("", "win-size {} {}".format(*self.global_config["window_size"]))
         # Setup some debug options
         # if self.global_config["headless_machine_render"]:
         #     # headless machine support

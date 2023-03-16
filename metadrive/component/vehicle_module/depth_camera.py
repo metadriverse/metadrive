@@ -23,7 +23,8 @@ class DepthCamera(BaseCamera):
         config = get_global_config()["vehicle_config"]["depth_camera"]
         self.BUFFER_W, self.BUFFER_H = config[0], config[1]
         self.VIEW_GROUND = config[2]
-        super(DepthCamera, self).__init__()
+        cuda = True if get_global_config()["vehicle_config"]["image_source"] == "depth_camera" else False
+        super(DepthCamera, self).__init__(False, cuda)
         cam = self.get_cam()
         lens = self.get_lens()
 
