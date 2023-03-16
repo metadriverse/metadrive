@@ -19,7 +19,6 @@ class ImageBuffer:
     # display_bottom = 0.8
     # display_top = 1
     display_region = None
-    display_region_number = 0
     display_region_size = [1 / 3, 2 / 3, 0.8, 1.0]
     line_borders = []
 
@@ -71,7 +70,6 @@ class ImageBuffer:
             self.origin.reparentTo(parent_node)
         self.scene_tex = None
         if setup_pbr:
-            self.display_region_number = 1
             self.manager = FilterManager(self.buffer, self.cam)
             fbprops = p3d.FrameBufferProperties()
             fbprops.float_color = True
