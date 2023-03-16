@@ -5,7 +5,7 @@ from typing import Tuple
 
 import numpy as np
 from direct.controls.InputState import InputState
-from panda3d.core import Vec3, Point3
+from panda3d.core import Vec3, Point3, PNMImage
 from panda3d.core import WindowProperties
 
 from metadrive.constants import CollisionGroup
@@ -99,7 +99,8 @@ class MainCamera:
         self._in_recover = False
         self._last_frame_has_mouse = False
 
-        self.enable_cuda = self.engine.global_config["image_on_cuda"]
+        need_cuda = self.engine.global_config["vehicle_config"]["image_source"] == "main_camera"
+        self.enable_cuda = self.engine.global_config["image_on_cuda"] and need_cuda
 
         self.cuda_graphics_resource = None
         if self.enable_cuda:
@@ -122,8 +123,9 @@ class MainCamera:
                 cbdata.upcall()
                 if not self.registered and self.texture_context_future.done():
                     self.register()
-                with self as array:
-                    self.cuda_rendered_result = array
+                if self.registered:
+                    with self as array:
+                        self.cuda_rendered_result = array
 
             # Fill the buffer due to multi-thread
             self.engine.graphicsEngine.renderFrame()
@@ -305,6 +307,7 @@ class MainCamera:
         self.current_track_vehicle = None
         if self.registered:
             self.unregister()
+            self.camera.node().getDisplayRegion(0).clearDrawCallback()
 
     def stop_track(self, bird_view_on_current_position=True):
         self.engine.interface.stop_track()
@@ -410,7 +413,7 @@ class MainCamera:
             assert self.cuda_rendered_result is not None
             img = self.cuda_rendered_result[..., :-1][..., ::-1][::-1]
         else:
-            origin_img = engine.main_camera.camera.node().getDisplayRegion(0).getScreenshot()
+            origin_img = engine.win.getDisplayRegion(1).getScreenshot()
             img = np.frombuffer(origin_img.getRamImage().getData(), dtype=np.uint8)
             img = img.reshape((origin_img.getYSize(), origin_img.getXSize(), 4))
             img = img[::-1]
@@ -518,3 +521,14 @@ class MainCamera:
             return self
         self._cuda_buffer = check_cudart_err(cudart.cudaGraphicsUnmapResources(1, self.cuda_graphics_resource, stream))
         return self
+
+    def get_image(self):
+        # The Tracked obj arg is only for compatibility
+        img = PNMImage()
+        self.engine.win.getScreenshot(img)
+        return img
+
+    def save_image(self, tracked_obj, file_name="main_camera.png", **kwargs):
+        # The Tracked obj arg is only for compatibility
+        img = self.get_image()
+        img.write(file_name)

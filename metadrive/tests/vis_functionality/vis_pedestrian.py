@@ -18,7 +18,7 @@ if __name__ == "__main__":
             # "global_light": True,
             # "debug_static_world": True,
             "cull_scene": False,
-            # "offscreen_render": True,
+            # "image_observation": True,
             # "controller": "joystick",
             "manual_control": True,
             "use_render": True,

@@ -15,10 +15,9 @@ if __name__ == "__main__":
             "start_seed": 4,
             "manual_control": True,
             "use_render": True,
-            "offscreen_render": True,
+            "image_observation": True,
             "rgb_clip": True,
             "vehicle_config": dict(depth_camera=(200, 88, True), image_source="depth_camera"),
-            "headless_machine_render": False,
             "map_config": {
                 BaseMap.GENERATE_TYPE: MapGenerateMethod.BIG_BLOCK_NUM,
                 BaseMap.GENERATE_CONFIG: 12,
