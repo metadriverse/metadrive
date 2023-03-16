@@ -103,7 +103,7 @@ machine. The setup tutorial is at :ref:`install_headless`.
 
 Now we can setup the vision-based observation in MetaDrive:
 
-* Step 1. Set the :code:`config["offscreen_render"] = True` to tell MetaDrive maintaining a image buffer in memory even no popup window exists.
+* Step 1. Set the :code:`config["image_observation"] = True` to tell MetaDrive maintaining a image buffer in memory even no popup window exists.
 * Step 2. Set the :code:`config["vehicle_config"]["image_source"]` to :code:`"rgb_camera"` or :code:`"depth_camera"` according to your demand.
 * Step 3. The image size (width and height) will be determined by the camera parameters. The default setting is (84, 84) following the image size in Atari. You can customize the size by configuring :code:`config["vehicle_config"]["rgb_camera"]`. For example, :code:`config["vehicle_config"]["rgb_camera"] = (200, 88)` means that the image has 200 pixels in width and 88 pixels in height.
 

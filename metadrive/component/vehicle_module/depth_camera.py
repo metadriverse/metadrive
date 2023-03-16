@@ -1,4 +1,5 @@
 from panda3d.core import Shader, RenderState, ShaderAttrib, GeoMipTerrain, LVector3, PNMImage
+import cv2
 import numpy as np
 
 from metadrive.component.vehicle_module.base_camera import BaseCamera
@@ -22,7 +23,8 @@ class DepthCamera(BaseCamera):
         config = get_global_config()["vehicle_config"]["depth_camera"]
         self.BUFFER_W, self.BUFFER_H = config[0], config[1]
         self.VIEW_GROUND = config[2]
-        super(DepthCamera, self).__init__()
+        cuda = True if get_global_config()["vehicle_config"]["image_source"] == "depth_camera" else False
+        super(DepthCamera, self).__init__(False, cuda)
         cam = self.get_cam()
         lens = self.get_lens()
 
@@ -32,17 +34,17 @@ class DepthCamera(BaseCamera):
         if get_engine().mode == RENDER_MODE_NONE or not AssetLoader.initialized() or type(self)._singleton.init_num > 1:
             return
         # add shader for it
-        if get_global_config()["headless_machine_render"]:
-            vert_path = AssetLoader.file_path("shaders", "depth_cam_gles.vert.glsl")
-            frag_path = AssetLoader.file_path("shaders", "depth_cam_gles.frag.glsl")
+        # if get_global_config()["headless_machine_render"]:
+        #     vert_path = AssetLoader.file_path("shaders", "depth_cam_gles.vert.glsl")
+        #     frag_path = AssetLoader.file_path("shaders", "depth_cam_gles.frag.glsl")
+        # else:
+        from metadrive.utils import is_mac
+        if is_mac():
+            vert_path = AssetLoader.file_path("shaders", "depth_cam_mac.vert.glsl")
+            frag_path = AssetLoader.file_path("shaders", "depth_cam_mac.frag.glsl")
         else:
-            from metadrive.utils import is_mac
-            if is_mac():
-                vert_path = AssetLoader.file_path("shaders", "depth_cam_mac.vert.glsl")
-                frag_path = AssetLoader.file_path("shaders", "depth_cam_mac.frag.glsl")
-            else:
-                vert_path = AssetLoader.file_path("shaders", "depth_cam.vert.glsl")
-                frag_path = AssetLoader.file_path("shaders", "depth_cam.frag.glsl")
+            vert_path = AssetLoader.file_path("shaders", "depth_cam.vert.glsl")
+            frag_path = AssetLoader.file_path("shaders", "depth_cam.frag.glsl")
         custom_shader = Shader.load(Shader.SL_GLSL, vertex=vert_path, fragment=frag_path)
         cam.node().setInitialState(RenderState.make(ShaderAttrib.make(custom_shader, 1)))
 
@@ -67,3 +69,13 @@ class DepthCamera(BaseCamera):
             # type(self)._singleton.GROUND_MODEL.setP(-base_object.origin.getR())
             # type(self)._singleton.GROUND_MODEL.setR(-base_object.origin.getR())
         return super(DepthCamera, self).track(base_object)
+
+    def get_image(self, base_object):
+        type(self)._singleton.origin.reparentTo(base_object.origin)
+        img = super(DepthCamera, type(self)._singleton).get_rgb_array()
+        self.track(self.attached_object)
+        return img
+
+    def save_image(self, base_object, name="debug.png"):
+        img = self.get_image(base_object)
+        cv2.imwrite(name, img)

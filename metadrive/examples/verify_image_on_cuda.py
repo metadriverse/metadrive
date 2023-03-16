@@ -16,7 +16,7 @@ def _test_rgb_camera_as_obs(render=False, image_on_cuda=True):
             start_seed=1010,
             agent_policy=IDMPolicy,
             traffic_density=0.0,
-            offscreen_render=True,
+            image_observation=True,
             image_on_cuda=True if image_on_cuda else False,
             use_render=False,
             vehicle_config=dict(image_source="main_camera"),

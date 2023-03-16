@@ -19,7 +19,7 @@ from metadrive.engine.core.image_buffer import ImageBuffer
 
 class BaseCamera(ImageBuffer):
     """
-    To enable the image observation, set offscreen_render to True. The instance of subclasses will be singleton, so that
+    To enable the image observation, set image_observation to True. The instance of subclasses will be singleton, so that
     every objects share the same camera, to boost the efficiency and save memory. Camera configuration is read from the
     global config automatically.
     """
@@ -36,14 +36,14 @@ class BaseCamera(ImageBuffer):
     def initialized(cls):
         return True if cls._singleton is not None else False
 
-    def __init__(self, setup_pbr=False):
+    def __init__(self, setup_pbr=False, need_cuda=False):
         if not self.initialized():
             super(BaseCamera, self).__init__(
                 self.BUFFER_W, self.BUFFER_H, Vec3(0.0, 0.8, 1.5), self.BKG_COLOR, setup_pbr=setup_pbr
             )
             type(self)._singleton = self
             self.init_num = 1
-            self._enable_cuda = self.engine.global_config["image_on_cuda"]
+            self._enable_cuda = self.engine.global_config["image_on_cuda"] and need_cuda
 
             width = self.BUFFER_W
             height = self.BUFFER_H
@@ -75,8 +75,9 @@ class BaseCamera(ImageBuffer):
                     cbdata.upcall()
                     if not type(self)._singleton.registered and type(self)._singleton.texture_context_future.done():
                         type(self)._singleton.register()
-                    with type(self)._singleton as array:
-                        type(self)._singleton.cuda_rendered_result = array
+                    if type(self)._singleton.registered:
+                        with type(self)._singleton as array:
+                            type(self)._singleton.cuda_rendered_result = array
 
                 # Fill the buffer due to multi-thread
                 self.engine.graphicsEngine.renderFrame()
@@ -129,14 +130,14 @@ class BaseCamera(ImageBuffer):
             if type(self)._singleton.init_num > 1:
                 type(self)._singleton.init_num -= 1
             elif type(self)._singleton.init_num == 0:
-                type(self)._singleton = None
+                raise RuntimeError("No {}, can not destroy".format(self.__class__.__name__))
             else:
+                type(self).init_num = 0
                 assert type(self)._singleton.init_num == 1 or type(self)._singleton.init_num == 0
+                if type(self)._singleton is not None and type(self)._singleton.registered:
+                    self.unregister()
                 ImageBuffer.destroy(type(self)._singleton)
                 type(self)._singleton = None
-                type(self).init_num = 0
-        if type(self)._singleton is not None and type(self)._singleton.registered:
-            self.unregister()
 
     def get_cam(self):
         return type(self)._singleton.cam
@@ -153,7 +154,7 @@ class BaseCamera(ImageBuffer):
         super(BaseCamera, self).remove_display_region()
 
     def track(self, base_object):
-        if base_object is not None:
+        if base_object is not None and type(self)._singleton is not None:
             self.attached_object = base_object
             type(self)._singleton.origin.reparentTo(base_object.origin)
 
@@ -223,6 +224,7 @@ class BaseCamera(ImageBuffer):
             type(self)._singleton.cuda_graphics_resource = check_cudart_err(
                 cudart.cudaGraphicsUnregisterResource(type(self)._singleton.cuda_graphics_resource)
             )
+            self.cam.node().getDisplayRegion(0).clearDrawCallback()
 
     def map(self, stream=0):
         if not type(self)._singleton.registered:

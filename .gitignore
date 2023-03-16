@@ -12,12 +12,16 @@
 .DS_Store
 **/.DS_Store
 **/test_10maps.json
+/metadrive/examples/**.png
+/metadrive/examples/**.jpg
 **/tmp_images/
 **/test.png
 /metadrive/cutils.cpython-37m-x86_64-linux-gnu.so
 **/*.ipynb_checkpoints/
 /metadrive/cutils.cpython-38-x86_64-linux-gnu.so
 **/*.c
+**/image_from_observation.png
+**/main_camera.png
 /seed*.json
 **/.vscode
 **/.idea

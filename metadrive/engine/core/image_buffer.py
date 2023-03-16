@@ -19,7 +19,6 @@ class ImageBuffer:
     # display_bottom = 0.8
     # display_top = 1
     display_region = None
-    display_region_number = 0
     display_region_size = [1 / 3, 2 / 3, 0.8, 1.0]
     line_borders = []
 
@@ -40,7 +39,7 @@ class ImageBuffer:
         # from metadrive.engine.engine_utils import get_engine
         # self.engine = engine or get_engine()
         try:
-            assert self.engine.win is not None, "{} cannot be made without use_render or offscreen_render".format(
+            assert self.engine.win is not None, "{} cannot be made without use_render or image_observation".format(
                 self.__class__.__name__
             )
             assert self.CAM_MASK is not None, "Define a camera mask for every image buffer"
@@ -69,19 +68,18 @@ class ImageBuffer:
         self.cam.node().setCameraMask(self.CAM_MASK)
         if parent_node is not None:
             self.origin.reparentTo(parent_node)
-
+        self.scene_tex = None
         if setup_pbr:
-            self.display_region_number = 1
             self.manager = FilterManager(self.buffer, self.cam)
             fbprops = p3d.FrameBufferProperties()
             fbprops.float_color = True
             fbprops.set_rgba_bits(16, 16, 16, 16)
             fbprops.set_depth_bits(24)
             fbprops.set_multisamples(self.engine.pbrpipe.msaa_samples)
-            scene_tex = p3d.Texture()
-            scene_tex.set_format(p3d.Texture.F_rgba16)
-            scene_tex.set_component_type(p3d.Texture.T_float)
-            self.tonemap_quad = self.manager.render_scene_into(colortex=scene_tex, fbprops=fbprops)
+            self.scene_tex = p3d.Texture()
+            self.scene_tex.set_format(p3d.Texture.F_rgba16)
+            self.scene_tex.set_component_type(p3d.Texture.T_float)
+            self.tonemap_quad = self.manager.render_scene_into(colortex=self.scene_tex, fbprops=fbprops)
             #
             defines = {}
             #
@@ -93,7 +91,7 @@ class ImageBuffer:
                 fragment=post_frag_str,
             )
             self.tonemap_quad.set_shader(tonemap_shader)
-            self.tonemap_quad.set_shader_input('tex', scene_tex)
+            self.tonemap_quad.set_shader_input('tex', self.scene_tex)
             self.tonemap_quad.set_shader_input('exposure', 1.0)
 
         logging.debug("Load Image Buffer: {}".format(self.__class__.__name__))
@@ -122,7 +120,7 @@ class ImageBuffer:
     def get_rgb_array(self):
         if self.engine.episode_step <= 1:
             self.engine.graphicsEngine.renderFrame()
-        origin_img = self.cam.node().getDisplayRegion(0).getScreenshot()
+        origin_img = self.buffer.getDisplayRegion(1).getScreenshot()
         img = np.frombuffer(origin_img.getRamImage().getData(), dtype=np.uint8)
         img = img.reshape((origin_img.getYSize(), origin_img.getXSize(), 4))
         # img = np.swapaxes(img, 1, 0)
