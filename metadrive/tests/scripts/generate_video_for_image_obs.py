@@ -140,7 +140,6 @@ def gen_video(frames, file="tmp"):
 
 
 if __name__ == '__main__':
-    headless = True
     env = MetaDriveEnv(
         dict(
             use_render=False,
@@ -149,8 +148,7 @@ if __name__ == '__main__':
                 BaseMap.GENERATE_CONFIG: 7
             },
             traffic_density=0.5,
-            offscreen_render=True,
-            headless_machine_render=headless
+            image_observation=True,
         )
     )
     start = time.time()

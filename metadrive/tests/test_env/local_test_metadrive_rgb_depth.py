@@ -20,7 +20,7 @@ def _act(env, action):
 
 
 def test_metadrive_env_rgb():
-    env = MetaDriveEnv(dict(offscreen_render=True))
+    env = MetaDriveEnv(dict(image_observation=True))
     try:
         obs = env.reset()
         assert env.observation_space.contains(obs)

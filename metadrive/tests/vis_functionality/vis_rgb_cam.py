@@ -13,7 +13,7 @@ if __name__ == "__main__":
             },
             "manual_control": True,
             "use_render": False,
-            "offscreen_render": True,  # it is a switch telling metadrive to use rgb as observation
+            "image_observation": True,  # it is a switch telling metadrive to use rgb as observation
             "rgb_clip": True,  # clip rgb to range(0,1) instead of (0, 255)
             # "pstats": True,
         }

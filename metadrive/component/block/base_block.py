@@ -67,7 +67,7 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
             self.side_texture.setMinfilter(SamplerState.FT_linear_mipmap_linear)
             self.side_texture.setAnisotropicDegree(8)
             self.side_normal = self.loader.loadTexture(AssetLoader.file_path("textures", "sidewalk", "normal.png"))
-            # self.side_normal.set_format(Texture.F_srgb)
+            self.side_normal.set_format(Texture.F_srgb)
             self.sidewalk = self.loader.loadModel(AssetLoader.file_path("models", "box.bam"))
 
     def _sample_topology(self) -> bool:
