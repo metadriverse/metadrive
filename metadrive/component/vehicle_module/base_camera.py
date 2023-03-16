@@ -247,8 +247,7 @@ class BaseCamera(ImageBuffer):
         check_cudart_err(
             cudart.cudaMemcpy2DFromArray(
                 type(self)._singleton.new_cuda_mem_ptr, cudaextent.width * byte * depth, array, 0, 0,
-                                                        cudaextent.width * byte * depth, cudaextent.height,
-                cudart.cudaMemcpyKind.cudaMemcpyDeviceToDevice
+                cudaextent.width * byte * depth, cudaextent.height, cudart.cudaMemcpyKind.cudaMemcpyDeviceToDevice
             )
         )
         if type(self)._singleton._cuda_buffer is None:

@@ -32,12 +32,18 @@ def capture_headless_image(cuda, image_source="main_camera"):
         assert isinstance(o, dict)
         print("The observation is a dict with numpy arrays as values: ", {k: v.shape for k, v in o.items()})
         o = o["image"][..., -1] * 255 if not cuda else o["image"].get()[..., -1] * 255
-        cv2.imwrite(os.path.join(MetaDrive_PACKAGE_DIR, "examples",
-                                 "{}_from_observation{}.png".format(image_source, "_cuda" if cuda else "")), o)
+        cv2.imwrite(
+            os.path.join(
+                MetaDrive_PACKAGE_DIR, "examples",
+                "{}_from_observation{}.png".format(image_source, "_cuda" if cuda else "")
+            ), o
+        )
         cam = env.vehicle.image_sensors[image_source]
         cam.save_image(
-            env.vehicle, os.path.join(MetaDrive_PACKAGE_DIR, "examples",
-                                      "{}_from_buffer{}.png".format(image_source, "_cuda" if cuda else ""))
+            env.vehicle,
+            os.path.join(
+                MetaDrive_PACKAGE_DIR, "examples", "{}_from_buffer{}.png".format(image_source, "_cuda" if cuda else "")
+            )
         )
         # if image_source == "main_camera":
         #     ret = PNMImage()
@@ -49,8 +55,9 @@ def capture_headless_image(cuda, image_source="main_camera"):
         print(
             "{} Test result: \nHeadless mode Offscreen render launched successfully! \n"
             "images named \'{}_from_observation.png\' and \'{}_from_buffer.png\' are saved to {}. "
-            "Open it to check if offscreen mode works well".format(image_source, image_source, image_source,
-                                                                   os.path.join(MetaDrive_PACKAGE_DIR, "examples"))
+            "Open it to check if offscreen mode works well".format(
+                image_source, image_source, image_source, os.path.join(MetaDrive_PACKAGE_DIR, "examples")
+            )
         )
     finally:
         env.close()
