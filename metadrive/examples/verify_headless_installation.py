@@ -5,8 +5,7 @@ import argparse
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--cuda", action="store_true")
-    parser.add_argument("--cuda_camera", action="store_true")
+    parser.add_argument("--camera", type=str, default="main", choices=["main", "rgb", "depth"])
     args = parser.parse_args()
     loadPrcFileData("", "notify-level-task fatal")
-    # args.cuda=True
-    verify_installation(args.cuda, args.cuda_camera)
+    verify_installation(args.cuda, args.camera)

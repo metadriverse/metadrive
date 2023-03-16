@@ -55,7 +55,7 @@ def capture_headless_image(cuda, image_source="main_camera"):
         env.close()
 
 
-def verify_installation(cuda=False, cuda_camera="main"):
+def verify_installation(cuda=False, camera="main"):
     env = MetaDriveEnv({"use_render": False, "image_observation": False})
     try:
         env.reset()
@@ -68,19 +68,14 @@ def verify_installation(cuda=False, cuda_camera="main"):
         print("Bullet physics world is launched successfully!")
     finally:
         env.close()
-    if not cuda:
-        capture_headless_image(cuda)
-        capture_headless_image(cuda, image_source="rgb_camera")
-        capture_headless_image(cuda, image_source="depth_camera")
-    else:
-        if cuda_camera == "main":
+        if camera == "main":
             capture_headless_image(cuda)
-        elif cuda_camera == "rgb":
+        elif camera == "rgb":
             capture_headless_image(cuda, image_source="rgb_camera")
-        elif cuda_camera == "depth":
+        elif camera == "depth":
             capture_headless_image(cuda, image_source="depth_camera")
         else:
-            raise ValueError("Can not find cuda_camera: {}, please select from [rgb, depth, main]".format(cuda_camera))
+            raise ValueError("Can not find camera: {}, please select from [rgb, depth, main]".format(camera))
 
 
 if __name__ == "__main__":

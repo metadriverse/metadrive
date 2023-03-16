@@ -38,7 +38,9 @@ The latest MetaDrive is already built to support headless-rendering. But for a d
     python -m metadrive.examples.verify_headless_installation
 
 The script will generate two **same** images to current directory, one from agent observation, the other from panda3d internal rendering buffer.
-Please fetch anc check those images from cluster to ensure MetaDrive can draw scene and capture images.
+Please fetch anc check those images from cluster to ensure MetaDrive can draw scene and capture images correctly.
+By default, it only generates images from the main camera. Set ```--camera [rgb/depth]``` to check other cameras.
+Also, ```--cuda``` flag can be added to test image_on_cuda pipeline for your headless machine.
 
 If the captured images is complete as following, then the installation in headless machine is successful and please move on to :ref:`use_native_rendering`.
 
