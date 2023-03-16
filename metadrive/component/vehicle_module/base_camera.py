@@ -75,8 +75,9 @@ class BaseCamera(ImageBuffer):
                     cbdata.upcall()
                     if not type(self)._singleton.registered and type(self)._singleton.texture_context_future.done():
                         type(self)._singleton.register()
-                    with type(self)._singleton as array:
-                        type(self)._singleton.cuda_rendered_result = array
+                    if type(self)._singleton.registered:
+                        with type(self)._singleton as array:
+                            type(self)._singleton.cuda_rendered_result = array
 
                 # Fill the buffer due to multi-thread
                 self.engine.graphicsEngine.renderFrame()
@@ -129,14 +130,14 @@ class BaseCamera(ImageBuffer):
             if type(self)._singleton.init_num > 1:
                 type(self)._singleton.init_num -= 1
             elif type(self)._singleton.init_num == 0:
-                type(self)._singleton = None
+                raise RuntimeError("No {}, can not destroy".format(self.__class__.__name__))
             else:
+                type(self).init_num = 0
                 assert type(self)._singleton.init_num == 1 or type(self)._singleton.init_num == 0
+                if type(self)._singleton is not None and type(self)._singleton.registered:
+                    self.unregister()
                 ImageBuffer.destroy(type(self)._singleton)
                 type(self)._singleton = None
-                type(self).init_num = 0
-        if type(self)._singleton is not None and type(self)._singleton.registered:
-            self.unregister()
 
     def get_cam(self):
         return type(self)._singleton.cam
@@ -223,6 +224,7 @@ class BaseCamera(ImageBuffer):
             type(self)._singleton.cuda_graphics_resource = check_cudart_err(
                 cudart.cudaGraphicsUnregisterResource(type(self)._singleton.cuda_graphics_resource)
             )
+            self.cam.node().getDisplayRegion(0).clearDrawCallback()
 
     def map(self, stream=0):
         if not type(self)._singleton.registered:

@@ -7,4 +7,5 @@ if __name__ == "__main__":
     parser.add_argument("--cuda", action="store_true")
     args = parser.parse_args()
     loadPrcFileData("", "notify-level-task fatal")
+    args.cuda=True
     verify_installation(args.cuda)

@@ -31,11 +31,13 @@ def capture_headless_image(cuda, image_source="main_camera"):
             o, r, d, i = env.step([0, 1])
         assert isinstance(o, dict)
         print("The observation is a dict with numpy arrays as values: ", {k: v.shape for k, v in o.items()})
-        o = o["image"][..., -1] * 255 if not cuda else o["image"].get()[..., -1]*255
-        cv2.imwrite(os.path.join(MetaDrive_PACKAGE_DIR, "examples", "{}_from_observation.png".format(image_source)), o)
+        o = o["image"][..., -1] * 255 if not cuda else o["image"].get()[..., -1] * 255
+        cv2.imwrite(os.path.join(MetaDrive_PACKAGE_DIR, "examples",
+                                 "{}_from_observation{}.png".format(image_source, "_cuda" if cuda else "")), o)
         cam = env.vehicle.image_sensors[image_source]
         cam.save_image(
-            env.vehicle, os.path.join(MetaDrive_PACKAGE_DIR, "examples", "{}_from_buffer.png".format(image_source))
+            env.vehicle, os.path.join(MetaDrive_PACKAGE_DIR, "examples",
+                                      "{}_from_buffer{}.png".format(image_source, "_cuda" if cuda else ""))
         )
         # if image_source == "main_camera":
         #     ret = PNMImage()

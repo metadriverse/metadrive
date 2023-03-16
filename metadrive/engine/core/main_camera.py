@@ -49,7 +49,7 @@ class MainCamera:
         self.camera_queue = None
         self.camera_dist = camera_dist
         self.camera_pitch = -engine.global_config["camera_pitch"] if engine.global_config["camera_pitch"
-                                                                                          ] is not None else None
+                                                                     ] is not None else None
         self.camera_smooth = engine.global_config["camera_smooth"]
         self.direction_running_mean = deque(maxlen=20 if self.camera_smooth else 1)
         self.world_light = self.engine.world_light  # light chases the chase camera, when not using global light
@@ -122,8 +122,9 @@ class MainCamera:
                 cbdata.upcall()
                 if not self.registered and self.texture_context_future.done():
                     self.register()
-                with self as array:
-                    self.cuda_rendered_result = array
+                if self.registered:
+                    with self as array:
+                        self.cuda_rendered_result = array
 
             # Fill the buffer due to multi-thread
             self.engine.graphicsEngine.renderFrame()
@@ -305,6 +306,7 @@ class MainCamera:
         self.current_track_vehicle = None
         if self.registered:
             self.unregister()
+            self.camera.node().getDisplayRegion(0).clearDrawCallback()
 
     def stop_track(self, bird_view_on_current_position=True):
         self.engine.interface.stop_track()
