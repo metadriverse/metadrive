@@ -29,7 +29,7 @@ packages = find_namespace_packages(
 print("We will install the following packages: ", packages)
 
 """ ===== Remember to modify the PG_EDITION at first ====="""
-version = "0.2.7.0"
+version = "0.3.0.1"
 
 # Can install specific branch via:
 # pip install git+https://github.com/metadriverse/metadrive.git@fix-asset-copy
@@ -153,6 +153,8 @@ setup(
 
 """
 How to publish to pypi?  Noted by Zhenghao in Dec 27, 2020.
+
+0. Rename version in metadrive/constants.py and setup.py
 
 1. Remove old files and ext_modules from setup() to get a clean wheel for all platforms in py3-none-any.wheel
     rm -rf dist/ build/ documentation/build/ metadrive_simulator.egg-info/ docs/build/
