@@ -1,7 +1,7 @@
 from metadrive.base_class.base_object import BaseObject
+from metadrive.constants import TrafficLightStatus, BodyName
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.utils.scene_utils import generate_static_box_physics_body
-from metadrive.constants import TrafficLightStatus, BodyName
 
 
 class BaseTrafficLight(BaseObject):
@@ -11,7 +11,10 @@ class BaseTrafficLight(BaseObject):
     """
     AIR_WALL_LENGTH = 0.25
     AIR_WALL_HEIGHT = 1.5
+    TRAFFIC_LIGHT_HEIGHT = 3.5
     TRAFFIC_LIGHT_MODEL = None
+    LIGHT_VIS_HEIGHT = 0.8
+    LIGHT_VIS_WIDTH = 0.8
 
     def __init__(self, lane, name=None, random_seed=None, config=None, escape_random_seed_assertion=False):
         super(BaseTrafficLight, self).__init__(name, random_seed, config, escape_random_seed_assertion)
@@ -35,8 +38,9 @@ class BaseTrafficLight(BaseObject):
         if self.render:
             if BaseTrafficLight.TRAFFIC_LIGHT_MODEL is None:
                 BaseTrafficLight.TRAFFIC_LIGHT_MODEL = self.loader.loadModel(AssetLoader.file_path("models", "box.bam"))
+                BaseTrafficLight.TRAFFIC_LIGHT_MODEL.setPos(0, 0, self.TRAFFIC_LIGHT_HEIGHT)
             BaseTrafficLight.TRAFFIC_LIGHT_MODEL.instanceTo(self.origin)
-            self.origin.setScale(self.AIR_WALL_LENGTH, width, self.AIR_WALL_HEIGHT)
+            self.origin.setScale(self.AIR_WALL_LENGTH / 2, self.LIGHT_VIS_WIDTH, self.LIGHT_VIS_HEIGHT)
 
     def set_green(self):
         self.origin.setColor(0 / 255, 255 / 255, 0, 1)

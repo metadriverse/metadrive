@@ -719,7 +719,6 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             node1 = contact.getNode1()
             node = node0 if node1.getName() == BodyName.Vehicle else node1
             name = node.getName()
-            assert name != BodyName.Vehicle
             if name == BodyName.White_continuous_line:
                 self.on_white_continuous_line = True
             elif name == BodyName.Yellow_continuous_line:

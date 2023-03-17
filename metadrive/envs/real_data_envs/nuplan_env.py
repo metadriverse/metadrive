@@ -1,12 +1,13 @@
 import logging
-from metadrive.component.vehicle_module.vehicle_panel import VehiclePanel
 
 import numpy as np
 
+from metadrive.component.vehicle_module.vehicle_panel import VehiclePanel
 from metadrive.component.vehicle_navigation_module.trajectory_navigation import NuPlanTrajectoryNavigation
 from metadrive.constants import TerminationState
 from metadrive.envs.base_env import BaseEnv
 from metadrive.manager.nuplan_data_manager import NuPlanDataManager
+from metadrive.manager.nuplan_light_manager import NuPlanLightManager
 from metadrive.manager.nuplan_map_manager import NuPlanMapManager
 from metadrive.manager.nuplan_traffic_manager import NuPlanTrafficManager
 from metadrive.obs.real_env_observation import NuPlanObservation
@@ -39,6 +40,7 @@ NUPLAN_ENV_CONFIG = dict(
     # ===== Traffic =====
     no_pedestrian=True,
     no_traffic=False,
+    no_light=False,
     replay=True,
     no_static_traffic_vehicle=False,
 
@@ -131,7 +133,10 @@ class NuPlanEnv(BaseEnv):
         super(NuPlanEnv, self).setup_engine()
         self.engine.register_manager("data_manager", NuPlanDataManager())
         self.engine.register_manager("map_manager", NuPlanMapManager())
-        self.engine.register_manager("traffic_manager", NuPlanTrafficManager())
+        if not (self.config["no_traffic"] and self.config["no_pedestrian"]):
+            self.engine.register_manager("traffic_manager", NuPlanTrafficManager())
+        if not self.config["no_light"]:
+            self.engine.register_manager("light_manager", NuPlanLightManager())
         self.engine.accept("p", self.stop)
         self.engine.accept("q", self.switch_to_third_person_view)
         self.engine.accept("b", self.switch_to_top_down_view)
@@ -182,8 +187,8 @@ class NuPlanEnv(BaseEnv):
         # for compatibility
         # crash almost equals to crashing with vehicles
         done_info[TerminationState.CRASH] = (
-            done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
-            or done_info[TerminationState.CRASH_BUILDING]
+                done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
+                or done_info[TerminationState.CRASH_BUILDING]
         )
         return done, done_info
 
@@ -286,6 +291,7 @@ if __name__ == "__main__":
             "replay": True,
             "no_traffic": False,
             "no_pedestrian": False,
+            "no_light": False,
             # "debug": True,
             "debug_static_world": False,
             "debug_physics_world": False,
@@ -312,8 +318,8 @@ if __name__ == "__main__":
     )
     success = []
     # env.reset()
-    for seed in range(290, 2300):
-        env.reset(force_seed=seed + 10)
+    for seed in range(300, 2300, 5):
+        env.reset(force_seed=seed)
         for i in range(env.engine.data_manager.current_scenario_length * 10):
             o, r, d, info = env.step([0, 0])
 
@@ -321,22 +327,9 @@ if __name__ == "__main__":
             # c_lane = env.vehicle.lane
             # long, lat, = c_lane.local_coordinates(env.vehicle.position)
             # if env.config["use_render"]:
-            #     env.render(
-            #         text={
-            #             # "routing_lane_idx": env.engine._object_policies[env.vehicle.id].routing_target_lane.index,
-            #             # "lane_index": env.vehicle.lane_index,
-            #             # "current_ckpt_index": env.vehicle.navigation.current_checkpoint_lane_index,
-            #             # "next_ckpt_index": env.vehicle.navigation.next_checkpoint_lane_index,
-            #             # "ckpts": env.vehicle.navigation.checkpoints,
-            #             # "lane_heading": c_lane.heading_theta_at(long),
-            #             # "long": long,
-            #             # "lat": lat,
-            #             # "v_heading": env.vehicle.heading_theta,
-            #             "obs_shape": len(o),
-            #             "lateral": env.observations["default_agent"].lateral_dist,
-            #             "seed": env.engine.global_seed + env.config["start_case_index"],
-            #             "reward": r,
-            #         }
+            env.render(
+                text={
+                    "seed": seed})
             #     )
             #
             if d:

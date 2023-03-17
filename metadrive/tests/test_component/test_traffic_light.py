@@ -3,7 +3,7 @@ from metadrive.component.traffic_light.base_traffic_light import BaseTrafficLigh
 from metadrive.envs.metadrive_env import MetaDriveEnv
 
 
-def test_pedestrian(render=False, manual_control=False, debug=False):
+def test_traffic_light(render=False, manual_control=False, debug=False):
     env = MetaDriveEnv(
         {
             "environment_num": 1,
@@ -66,4 +66,4 @@ def test_pedestrian(render=False, manual_control=False, debug=False):
 
 
 if __name__ == "__main__":
-    test_pedestrian(True, manual_control=True)
+    test_traffic_light(True, manual_control=True)
