@@ -1,8 +1,9 @@
 import math
+from metadrive.constants import TrafficLightStatus
 from panda3d.core import NodePath
 from collections import deque
 from typing import Union, Optional
-
+from metadrive.utils.utils import get_object_from_node
 import numpy as np
 import seaborn as sns
 from panda3d.bullet import BulletVehicle, BulletBoxShape, ZUp
@@ -37,18 +38,7 @@ from metadrive.utils.space import VehicleParameterSpace, ParameterSpace
 
 class BaseVehicleState:
     def __init__(self):
-        self.crash_vehicle = False
-        self.crash_object = False
-        self.crash_sidewalk = False
-        self.crash_building = False
-
-        # lane line detection
-        self.on_yellow_continuous_line = False
-        self.on_white_continuous_line = False
-        self.on_broken_line = False
-
-        # contact results, a set containing objects type name for rendering
-        self.contact_results = None
+        self.init_state_info()
 
     def init_state_info(self):
         """
@@ -59,11 +49,17 @@ class BaseVehicleState:
         self.crash_sidewalk = False
         self.crash_building = False
 
+        # traffic light
+        self.red_light = False
+        self.yellow_light = False
+        self.green_light = False
+
+        # lane line detection
         self.on_yellow_continuous_line = False
         self.on_white_continuous_line = False
         self.on_broken_line = False
 
-        # contact results
+        # contact results, a set containing objects type name for rendering
         self.contact_results = set()
 
 
@@ -220,19 +216,27 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         )
 
         # vision modules
-        # self.add_image_sensor("rgb_camera", RGBCamera())
-        # self.add_image_sensor("mini_map", MiniMap())
-        # self.add_image_sensor("depth_camera", DepthCamera())
-        # self.add_image_sensor("main_camera", self.get_image_sensor())
         self.setup_sensors()
 
-    def setup_sensors(self):
+    def _available_sensors(self):
         def _main_cam():
             assert self.engine.main_camera is not None, "Main camera doesn't exist"
             return self.engine.main_camera
 
-        sensors = {"rgb_camera": RGBCamera, "mini_map": MiniMap, "depth_camera": DepthCamera, "main_camera": _main_cam}
-        self.add_image_sensor(self.config["image_source"], sensors[self.config["image_source"]]())
+        return {"rgb_camera": RGBCamera, "mini_map": MiniMap, "depth_camera": DepthCamera, "main_camera": _main_cam}
+
+    def setup_sensors(self):
+        if self.engine.global_config["image_observation"]:
+            sensors = self._available_sensors()
+            self.add_image_sensor(self.config["image_source"], sensors[self.config["image_source"]]())
+
+    def get_camera(self, camera_type_str):
+        sensors = self._available_sensors()
+        if camera_type_str not in sensors:
+            raise ValueError("Can not get {}, available type: {}".format(camera_type_str, sensors.keys()))
+        if camera_type_str not in self.image_sensors:
+            self.add_image_sensor(camera_type_str, sensors[camera_type_str]())
+        return self.image_sensors[camera_type_str]
 
     def _add_modules_for_vehicle_when_reset(self):
         config = self.config
@@ -721,18 +725,27 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         for contact in result_1.getContacts() + result_2.getContacts():
             node0 = contact.getNode0()
             node1 = contact.getNode1()
-            name = [node0.getName(), node1.getName()]
-            name.remove(BodyName.Vehicle)
-            if name[0] == BodyName.White_continuous_line:
+            node = node0 if node1.getName() == BodyName.Vehicle else node1
+            name = node.getName()
+            if name == BodyName.White_continuous_line:
                 self.on_white_continuous_line = True
-            elif name[0] == BodyName.Yellow_continuous_line:
+            elif name == BodyName.Yellow_continuous_line:
                 self.on_yellow_continuous_line = True
-            elif name[0] == BodyName.Broken_line:
+            elif name == BodyName.Broken_line:
                 self.on_broken_line = True
+            elif name == BodyName.TrafficLight:
+                light = get_object_from_node(node)
+                if light.status == TrafficLightStatus.GREEN:
+                    self.green_light = True
+                elif light.status == TrafficLightStatus.RED:
+                    self.red_light = True
+                elif light.status == TrafficLightStatus.YELLOW:
+                    self.yellow_light = True
+                name = TrafficLightStatus.semantics(light.status)
             else:
                 # didn't add
                 continue
-            contacts.add(name[0])
+            contacts.add(name)
         # side walk detect
         res = rect_region_detection(
             self.engine,

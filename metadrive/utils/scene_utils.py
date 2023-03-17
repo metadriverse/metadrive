@@ -12,7 +12,7 @@ from metadrive.component.lane.metadrive_lane import MetaDriveLane
 from metadrive.constants import CollisionGroup
 from metadrive.constants import Decoration, BodyName
 from metadrive.engine.core.engine_core import EngineCore
-from metadrive.engine.physics_node import BaseRigidBodyNode
+from metadrive.engine.physics_node import BaseRigidBodyNode, BaseGhostBodyNode
 from metadrive.utils.coordinates_shift import panda_heading
 from metadrive.utils.coordinates_shift import panda_position
 from metadrive.utils.interpolating_line import InterpolatingLine
@@ -280,10 +280,11 @@ def circle_region_detection(
     return result
 
 
-def generate_invisible_static_wall(
+def generate_static_box_physics_body(
     heading_length: float,
     side_width: float,
     height=10,
+    ghost_node=False,
     object_id=None,
     type_name=BodyName.InvisibleWall,
     collision_group=CollisionGroup.InvisibleWall
@@ -304,12 +305,13 @@ def generate_invisible_static_wall(
     :param side_width: rect width in side direction
     :param height: the detect will be executed from this height to 0
     :param object_id: name of this invisible wall
+    :param ghost_node: need physics reaction or not
     :param type_name: default invisible wall
     :param collision_group: control the collision of this static wall and other elements
     :return node_path
     """
     shape = BulletBoxShape(Vec3(heading_length / 2, side_width / 2, height))
-    body_node = BaseRigidBodyNode(object_id, type_name)
+    body_node = BaseRigidBodyNode(object_id, type_name) if not ghost_node else BaseGhostBodyNode(object_id, type_name)
     body_node.setActive(False)
     body_node.setKinematic(False)
     body_node.setStatic(True)

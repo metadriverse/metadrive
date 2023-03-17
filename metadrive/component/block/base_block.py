@@ -26,7 +26,6 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
     Note: overriding the _sample() function to fill block_network/respawn_roads in subclass
     Call Block.construct_block() to add it to world
     """
-
     ID = "B"
 
     def __init__(
@@ -52,16 +51,41 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
         self._block_objects = None
 
         if self.render:
-            # render pre-load
-            self.road_texture = self.loader.loadTexture(AssetLoader.file_path("textures", "sci", "color.jpg"))
-            self.road_texture.set_format(Texture.F_srgb)
-            self.road_texture.setMinfilter(SamplerState.FT_linear_mipmap_linear)
-            self.road_texture.setAnisotropicDegree(8)
-            self.road_normal = self.loader.loadTexture(AssetLoader.file_path("textures", "sci", "normal.jpg"))
-            self.road_normal.set_format(Texture.F_srgb)
             self.ts_color = TextureStage("color")
             self.ts_normal = TextureStage("normal")
             self.ts_normal.setMode(TextureStage.M_normal)
+
+            # Only maintain one copy of asset
+            self.road_texture = self.loader.loadTexture(AssetLoader.file_path("textures", "sci", "new_color.png"))
+            self.road_normal = self.loader.loadTexture(AssetLoader.file_path("textures", "sci", "normal.jpg"))
+            self.road_texture.set_format(Texture.F_srgb)
+            self.road_normal.set_format(Texture.F_srgb)
+            self.road_texture.setMinfilter(SamplerState.FT_linear_mipmap_linear)
+            self.road_texture.setAnisotropicDegree(8)
+
+            # # continuous line
+            # self.lane_line_model = self.loader.loadModel(AssetLoader.file_path("models", "box.bam"))
+            # self.lane_line_model.setPos(0, 0, -DrivableAreaProperty.LANE_LINE_GHOST_HEIGHT / 2)
+            self.lane_line_texture = self.loader.loadTexture(AssetLoader.file_path("textures", "sci", "floor.jpg"))
+            # self.lane_line_model.setScale(DrivableAreaProperty.STRIPE_LENGTH*4,
+            #                                    DrivableAreaProperty.LANE_LINE_WIDTH,
+            #                                    DrivableAreaProperty.LANE_LINE_THICKNESS)
+            # # self.lane_line_normal = self.loader.loadTexture(
+            # #     AssetLoader.file_path("textures", "sci", "floor_normal.jpg"))
+            # # self.lane_line_texture.set_format(Texture.F_srgb)
+            # # self.lane_line_normal.set_format(Texture.F_srgb)
+            # self.lane_line_model.setTexture(self.ts_color, self.lane_line_texture)
+            # # self.lane_line_model.setTexture(self.ts_normal, self.lane_line_normal)
+            #
+            # # # broken line
+            # self.broken_lane_line_model = self.loader.loadModel(AssetLoader.file_path("models", "box.bam"))
+            # self.broken_lane_line_model.setScale(DrivableAreaProperty.STRIPE_LENGTH,
+            #                                           DrivableAreaProperty.LANE_LINE_WIDTH,
+            #                                           DrivableAreaProperty.LANE_LINE_THICKNESS)
+            # self.broken_lane_line_model.setPos(0, 0, -DrivableAreaProperty.LANE_LINE_GHOST_HEIGHT / 2)
+            # self.broken_lane_line_model.setTexture(self.ts_color, self.lane_line_texture)
+
+            # side
             self.side_texture = self.loader.loadTexture(AssetLoader.file_path("textures", "sidewalk", "color.png"))
             self.side_texture.set_format(Texture.F_srgb)
             self.side_texture.setMinfilter(SamplerState.FT_linear_mipmap_linear)
@@ -69,6 +93,9 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
             self.side_normal = self.loader.loadTexture(AssetLoader.file_path("textures", "sidewalk", "normal.png"))
             self.side_normal.set_format(Texture.F_srgb)
             self.sidewalk = self.loader.loadModel(AssetLoader.file_path("models", "box.bam"))
+            self.sidewalk.setTexture(self.ts_color, self.side_texture)
+            # self.sidewalk = self.loader.loadModel(AssetLoader.file_path("models", "output.egg"))
+            # self.sidewalk.setTexture(self.ts_normal, self.side_normal)
 
     def _sample_topology(self) -> bool:
         """

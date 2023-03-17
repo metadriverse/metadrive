@@ -5,7 +5,7 @@ from metadrive.envs.metadrive_env import MetaDriveEnv
 if __name__ == "__main__":
 
     def get_image(env):
-        env.vehicle.image_sensors[env.vehicle.config["image_source"]].save_image(env.vehicle, "debug.jpg")
+        env.vehicle.get_camera(env.vehicle.config["image_source"]).save_image(env.vehicle, "debug.jpg")
         env.engine.screenshot()
 
     env = MetaDriveEnv(

@@ -1,6 +1,6 @@
 from metadrive.component.buildings.base_building import BaseBuilding
 from metadrive.engine.asset_loader import AssetLoader
-from metadrive.utils.scene_utils import generate_invisible_static_wall
+from metadrive.utils.scene_utils import generate_static_box_physics_body
 
 
 class TollGateBuilding(BaseBuilding):
@@ -11,7 +11,7 @@ class TollGateBuilding(BaseBuilding):
 
     def __init__(self, lane, position, heading_theta, random_seed):
         super(TollGateBuilding, self).__init__(lane, position, heading_theta, random_seed)
-        air_wall = generate_invisible_static_wall(
+        air_wall = generate_static_box_physics_body(
             self.BUILDING_LENGTH, lane.width, self.BUILDING_HEIGHT / 2, object_id=self.id
         )
         self.add_body(air_wall)
