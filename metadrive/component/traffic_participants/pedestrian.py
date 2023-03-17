@@ -4,7 +4,6 @@ from panda3d.core import LVector3
 
 from metadrive.component.traffic_participants.base_traffic_participant import BaseTrafficParticipant
 from metadrive.constants import BodyName
-
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.engine.physics_node import BaseRigidBodyNode
 from metadrive.utils.math_utils import norm
