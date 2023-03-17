@@ -49,7 +49,7 @@ if __name__ == "__main__":
     env = envs[env_cls_name](
         {
             "use_render": True if not args.pygame_render else False,
-            "manual_control": True,
+            "manual_control": False,
             "crash_done": False,
             "agent_policy": ManualControllableIDMPolicy
         }
