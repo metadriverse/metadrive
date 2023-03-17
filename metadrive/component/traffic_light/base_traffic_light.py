@@ -47,19 +47,23 @@ class BaseTrafficLight(BaseObject):
             self.origin.setScale(0.5, 1.2, 1.2)
 
     def set_green(self):
-        BaseTrafficLight.TRAFFIC_LIGHT_MODEL["green"].instanceTo(self.origin)
+        if self.render:
+            BaseTrafficLight.TRAFFIC_LIGHT_MODEL["green"].instanceTo(self.origin)
         self.status = TrafficLightStatus.GREEN
 
     def set_red(self):
-        BaseTrafficLight.TRAFFIC_LIGHT_MODEL["red"].instanceTo(self.origin)
+        if self.render:
+            BaseTrafficLight.TRAFFIC_LIGHT_MODEL["red"].instanceTo(self.origin)
         self.status = TrafficLightStatus.RED
 
     def set_yellow(self):
-        BaseTrafficLight.TRAFFIC_LIGHT_MODEL["yellow"].instanceTo(self.origin)
+        if self.render:
+            BaseTrafficLight.TRAFFIC_LIGHT_MODEL["yellow"].instanceTo(self.origin)
         self.status = TrafficLightStatus.YELLOW
 
     def set_unknown(self):
-        BaseTrafficLight.TRAFFIC_LIGHT_MODEL["known"].instanceTo(self.origin)
+        if self.render:
+            BaseTrafficLight.TRAFFIC_LIGHT_MODEL["known"].instanceTo(self.origin)
         self.status = TrafficLightStatus.UNKNOWN
 
     def destroy(self):
