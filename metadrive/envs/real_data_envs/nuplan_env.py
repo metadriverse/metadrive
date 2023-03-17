@@ -300,7 +300,7 @@ if __name__ == "__main__":
             "window_size": (1200, 800),
             # "multi_thread_render_mode": "Cull/Draw",
             "start_case_index": 300,
-            # "pstats": True,
+            "pstats": True,
             "case_num": 1000,
             "show_coordinates": False,
             "horizon": 1000,

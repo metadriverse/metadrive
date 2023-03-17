@@ -1,13 +1,13 @@
 import copy
-from metadrive.component.vehicle.vehicle_type import XLVehicle, SVehicle, MVehicle, LVehicle
-from metadrive.component.traffic_participants.cyclist import Cyclist
-from metadrive.component.traffic_participants.pedestrian import Pedestrian
-from metadrive.policy.replay_policy import NuPlanReplayTrafficParticipantPolicy
 
 from nuplan.common.actor_state.tracked_objects_types import TrackedObjectType
 
+from metadrive.component.traffic_participants.cyclist import Cyclist
+from metadrive.component.traffic_participants.pedestrian import Pedestrian
 from metadrive.component.vehicle.vehicle_type import SVehicle
+from metadrive.component.vehicle.vehicle_type import XLVehicle, MVehicle, LVehicle
 from metadrive.manager.base_manager import BaseManager
+from metadrive.policy.replay_policy import NuPlanReplayTrafficParticipantPolicy
 from metadrive.utils.coordinates_shift import nuplan_to_metadrive_vector
 from metadrive.utils.nuplan_utils.parse_object_state import parse_object_state
 
@@ -18,14 +18,14 @@ class NuPlanTrafficManager(BaseManager):
         self.nuplan_id_to_obj_id = {}
         self.need_traffic = not self.engine.global_config["no_traffic"]
         self.need_pedestrian = not self.engine.global_config["no_pedestrian"]
-        self._current_traffic_data = None
+        self._episode_traffic_data = None
         self.available_type = self.get_available_type()
 
     def after_reset(self):
-        self._current_traffic_data = self._get_current_traffic_data()
+        self._episode_traffic_data = self._get_episode_traffic_data()
         assert self.engine.episode_step == 0
         self.nuplan_id_to_obj_id = {}
-        for nuplan_id, obj_state in self._current_traffic_data[0].items():
+        for nuplan_id, obj_state in self._episode_traffic_data[0].items():
             if obj_state.tracked_object_type == TrackedObjectType.VEHICLE and self.need_traffic:
                 state = parse_object_state(obj_state, self.engine.current_map.nuplan_center)
                 self.spawn_vehicle(state, nuplan_id)
@@ -40,13 +40,13 @@ class NuPlanTrafficManager(BaseManager):
         if self.episode_step >= self.current_scenario_length:
             return
 
-        vehicles_to_eliminate = self.nuplan_id_to_obj_id.keys() - self._current_traffic_data[self.engine.episode_step
-                                                                                             ].keys()
+        vehicles_to_eliminate = self.nuplan_id_to_obj_id.keys() - self._episode_traffic_data[self.engine.episode_step
+        ].keys()
         for nuplan_id in list(vehicles_to_eliminate):
             self.clear_objects([self.nuplan_id_to_obj_id[nuplan_id]])
             self.nuplan_id_to_obj_id.pop(nuplan_id)
 
-        for nuplan_id, obj_state in self._current_traffic_data[self.engine.episode_step].items():
+        for nuplan_id, obj_state in self._episode_traffic_data[self.engine.episode_step].items():
             if obj_state.tracked_object_type not in self.available_type:
                 continue
             state = parse_object_state(obj_state, self.engine.current_map.nuplan_center)
@@ -66,7 +66,7 @@ class NuPlanTrafficManager(BaseManager):
     def current_scenario(self):
         return self.engine.data_manager.current_scenario
 
-    def _get_current_traffic_data(self):
+    def _get_episode_traffic_data(self):
         length = self.engine.data_manager.current_scenario.get_number_of_iterations()
         detection_ret = {
             i: self.engine.data_manager.current_scenario.get_tracked_objects_at_iteration(i).tracked_objects
@@ -137,4 +137,6 @@ class NuPlanTrafficManager(BaseManager):
         return ret
 
     def get_vehicle_type(self, length):
+        if length <= 4:
+            return SVehicle
         return [LVehicle, MVehicle, SVehicle, XLVehicle][self.np_random.randint(4)]
