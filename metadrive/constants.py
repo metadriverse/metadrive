@@ -5,7 +5,7 @@ from panda3d.bullet import BulletWorld
 from panda3d.core import Vec3
 from panda3d.core import Vec4, BitMask32
 
-EDITION = "MetaDrive v0.2.7.0"
+EDITION = "MetaDrive v0.3.0.1"
 DEFAULT_AGENT = "default_agent"
 RENDER_MODE_NONE = "none"  # Do not render
 RENDER_MODE_ONSCREEN = "onscreen"  # Pop up a window and draw image in it
