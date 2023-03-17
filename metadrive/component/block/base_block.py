@@ -26,11 +26,11 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
     Note: overriding the _sample() function to fill block_network/respawn_roads in subclass
     Call Block.construct_block() to add it to world
     """
-
+    asset_loaded = False
     ID = "B"
 
     def __init__(
-        self, block_index: int, global_network: NodeRoadNetwork, random_seed, ignore_intersection_checking=False
+            self, block_index: int, global_network: NodeRoadNetwork, random_seed, ignore_intersection_checking=False
     ):
         super(BaseBlock, self).__init__(str(block_index) + self.ID, random_seed, escape_random_seed_assertion=True)
         # block information
@@ -51,24 +51,28 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
         self._respawn_roads = []
         self._block_objects = None
 
-        if self.render:
-            # render pre-load
-            self.road_texture = self.loader.loadTexture(AssetLoader.file_path("textures", "sci", "color.jpg"))
-            self.road_texture.set_format(Texture.F_srgb)
-            self.road_texture.setMinfilter(SamplerState.FT_linear_mipmap_linear)
-            self.road_texture.setAnisotropicDegree(8)
-            self.road_normal = self.loader.loadTexture(AssetLoader.file_path("textures", "sci", "normal.jpg"))
-            self.road_normal.set_format(Texture.F_srgb)
-            self.ts_color = TextureStage("color")
-            self.ts_normal = TextureStage("normal")
-            self.ts_normal.setMode(TextureStage.M_normal)
-            self.side_texture = self.loader.loadTexture(AssetLoader.file_path("textures", "sidewalk", "color.png"))
-            self.side_texture.set_format(Texture.F_srgb)
-            self.side_texture.setMinfilter(SamplerState.FT_linear_mipmap_linear)
-            self.side_texture.setAnisotropicDegree(8)
-            self.side_normal = self.loader.loadTexture(AssetLoader.file_path("textures", "sidewalk", "normal.png"))
-            self.side_normal.set_format(Texture.F_srgb)
-            self.sidewalk = self.loader.loadModel(AssetLoader.file_path("models", "box.bam"))
+        if self.render and not BaseBlock.asset_loaded:
+            # Only maintain one copy of asset
+            BaseBlock.road_texture = self.loader.loadTexture(AssetLoader.file_path("textures", "sci", "color.jpg"))
+            BaseBlock.road_texture.set_format(Texture.F_srgb)
+            BaseBlock.road_texture.setMinfilter(SamplerState.FT_linear_mipmap_linear)
+            BaseBlock.road_texture.setAnisotropicDegree(8)
+            BaseBlock.road_normal = self.loader.loadTexture(AssetLoader.file_path("textures", "sci", "normal.jpg"))
+            BaseBlock.road_normal.set_format(Texture.F_srgb)
+            BaseBlock.ts_color = TextureStage("color")
+            BaseBlock.ts_normal = TextureStage("normal")
+            BaseBlock.ts_normal.setMode(TextureStage.M_normal)
+            BaseBlock.side_texture = self.loader.loadTexture(AssetLoader.file_path("textures", "sidewalk", "color.png"))
+            BaseBlock.side_texture.set_format(Texture.F_srgb)
+            BaseBlock.side_texture.setMinfilter(SamplerState.FT_linear_mipmap_linear)
+            BaseBlock.side_texture.setAnisotropicDegree(8)
+            BaseBlock.side_normal = self.loader.loadTexture(AssetLoader.file_path("textures", "sidewalk", "normal.png"))
+            BaseBlock.side_normal.set_format(Texture.F_srgb)
+            BaseBlock.sidewalk = self.loader.loadModel(AssetLoader.file_path("models", "box.bam"))
+            BaseBlock.sidewalk.setTexture(BaseBlock.ts_color, BaseBlock.side_texture)
+            # BaseBlock.sidewalk = self.loader.loadModel(AssetLoader.file_path("models", "output.egg"))
+            # BaseBlock.sidewalk.setTexture(BaseBlock.ts_normal, BaseBlock.side_normal)
+            BaseBlock.asset_loaded = True
 
     def _sample_topology(self) -> bool:
         """
@@ -77,12 +81,12 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
         raise NotImplementedError
 
     def construct_block(
-        self,
-        root_render_np: NodePath,
-        physics_world: PhysicsWorld,
-        extra_config: Dict = None,
-        no_same_node=True,
-        attach_to_world=True
+            self,
+            root_render_np: NodePath,
+            physics_world: PhysicsWorld,
+            extra_config: Dict = None,
+            no_same_node=True,
+            attach_to_world=True
     ) -> bool:
         """
         Randomly Construct a block, if overlap return False

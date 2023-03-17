@@ -352,8 +352,6 @@ class AbstractLane:
         side_np.setQuat(LQuaternionf(math.cos(theta / 2), 0, 0, math.sin(theta / 2)))
         side_np.setScale(length * length_multiply, width, block.SIDEWALK_THICKNESS * (1 + 0.1 * np.random.rand()))
         if block.render:
-            side_np.setTexture(block.ts_color, block.side_texture)
-            # side_np.setTexture(block.ts_normal, block.side_normal)
             block.sidewalk.instanceTo(side_np)
 
         return node_path_list
