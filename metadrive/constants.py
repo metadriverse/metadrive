@@ -272,7 +272,7 @@ class LineType:
 
 class LineColor:
     GREY = (1, 1, 1, 1)
-    YELLOW = (255 / 255, 180 / 255, 0 / 255, 1)
+    YELLOW = (255 / 255, 200 / 255, 0 / 255, 1)
 
 
 class DrivableAreaProperty:
@@ -286,7 +286,7 @@ class DrivableAreaProperty:
     LANE_SEGMENT_LENGTH = 4
     STRIPE_LENGTH = 1.5
     LANE_LINE_WIDTH = 0.15
-    LANE_LINE_THICKNESS = 0.01
+    LANE_LINE_THICKNESS = 0.016
 
     SIDEWALK_THICKNESS = 0.4
     SIDEWALK_LENGTH = 3

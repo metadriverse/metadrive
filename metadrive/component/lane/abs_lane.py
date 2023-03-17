@@ -247,7 +247,7 @@ class AbstractLane:
             card = block.lane_vis_node_path.attachNewNode(cm.generate())
             self._node_path_list.append(card)
 
-            card.setPos(panda_position(position, np.random.rand() * 0.01 - 0.01))
+            card.setPos(panda_position(position, np.random.rand() * 0.02 - 0.015))
 
             card.setQuat(
                 LQuaternionf(
@@ -310,6 +310,7 @@ class AbstractLane:
             lane_line = block.loader.loadModel(AssetLoader.file_path("models", "box.bam"))
             lane_line.setScale(length, DrivableAreaProperty.LANE_LINE_WIDTH, DrivableAreaProperty.LANE_LINE_THICKNESS)
             height = 0
+            lane_line.setTexture(block.ts_color, block.lane_line_texture)
             height += 0.01 if line_color == LineColor.YELLOW else 0
             lane_line.setQuat(LQuaternionf(math.cos(theta / 2), 0, 0, math.sin(theta / 2)))
             lane_line.setPos(panda_position(middle, height))
