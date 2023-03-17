@@ -53,6 +53,24 @@ COLLISION_INFO_COLOR = dict(
 )
 
 
+class TrafficLightStatus:
+    GREEN = 1
+    RED = 2
+    YELLOW = 3
+    UNKNOWN = 4
+
+    @classmethod
+    def semantics(self, status):
+        if status == self.GREEN:
+            return "Traffic Light: Green"
+        if status == self.RED:
+            return "Traffic Light: Red"
+        if status == self.YELLOW:
+            return "Traffic Light: Yellow"
+        if status == self.UNKNOWN:
+            return "Traffic Light: Unknown"
+
+
 class BodyName:
     White_continuous_line = "White Continuous Line"
     Yellow_continuous_line = "Yellow Continuous Line"
@@ -60,6 +78,7 @@ class BodyName:
     Sidewalk = "Sidewalk"
     Ground = "Ground"
     InvisibleWall = "InvisibleWall"
+    TrafficLight = "Traffic Light"
     Vehicle = "Vehicle"
     Lane = "Lane"
     Traffic_object = "Traffic Object"
@@ -71,12 +90,15 @@ class BodyName:
 COLOR = {
     BodyName.Sidewalk: "red",
     BodyName.White_continuous_line: "orange",
-    BodyName.Yellow_continuous_line: "red",
+    BodyName.Yellow_continuous_line: "orange",
     BodyName.Broken_line: "yellow",
     BodyName.Vehicle: "red",
     BodyName.Traffic_object: "orange",
     BodyName.InvisibleWall: "red",
     BodyName.TollGate: "red",
+    TrafficLightStatus.semantics(TrafficLightStatus.RED): "red",
+    TrafficLightStatus.semantics(TrafficLightStatus.YELLOW): "orange",
+    TrafficLightStatus.semantics(TrafficLightStatus.GREEN): "yellow",
 }
 
 
@@ -250,7 +272,7 @@ class LineType:
 
 class LineColor:
     GREY = (1, 1, 1, 1)
-    YELLOW = (245 / 255, 192 / 255, 67 / 255, 1)
+    YELLOW = (255 / 255, 200 / 255, 0 / 255, 1)
 
 
 class DrivableAreaProperty:
@@ -264,7 +286,7 @@ class DrivableAreaProperty:
     LANE_SEGMENT_LENGTH = 4
     STRIPE_LENGTH = 1.5
     LANE_LINE_WIDTH = 0.15
-    LANE_LINE_THICKNESS = 0.01
+    LANE_LINE_THICKNESS = 0.016
 
     SIDEWALK_THICKNESS = 0.4
     SIDEWALK_LENGTH = 3

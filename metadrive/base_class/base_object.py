@@ -160,7 +160,7 @@ class BaseObject(BaseRunnable):
     def panda_color(self):
         return self._panda_color
 
-    def add_body(self, physics_body):
+    def add_body(self, physics_body, add_to_static_world=False):
         if self._body is None:
             # add it to physics world, in which this object will interact with other object (like collision)
             if not isinstance(physics_body, BulletBodyNode):
@@ -179,7 +179,10 @@ class BaseObject(BaseRunnable):
 
             self._node_path_list.append(self.origin)
             self.origin = new_origin
-            self.dynamic_nodes.append(physics_body)
+            if add_to_static_world:
+                self.static_nodes.append(physics_body)
+            else:
+                self.dynamic_nodes.append(physics_body)
             if self.MASS is not None:
                 assert isinstance(self.MASS,
                                   int) or isinstance(self.MASS, float), "MASS should be a float or an integer"

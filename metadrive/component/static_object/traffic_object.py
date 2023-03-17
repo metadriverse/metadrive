@@ -16,7 +16,7 @@ class TrafficObject(BaseStaticObject):
     """
     Common interface for objects that appear on the road, beside vehicles.
     """
-    NAME = BodyName.Traffic_object
+    CLASS_NAME = BodyName.Traffic_object
     COLLISION_MASK = CollisionGroup.TrafficObject
 
     COST_ONCE = True  # cost will give at the first time
@@ -29,7 +29,7 @@ class TrafficObject(BaseStaticObject):
         """
         position = lane.position(longitude, lateral)
         heading_theta = lane.heading_theta_at(longitude)
-        assert self.NAME is not None, "Assign a name for this class for finding it easily"
+        assert self.CLASS_NAME is not None, "Assign a name for this class for finding it easily"
         super(TrafficObject, self).__init__(lane, position, heading_theta, random_seed)
         self.crashed = False
 
@@ -44,7 +44,7 @@ class TrafficCone(TrafficObject):
     def __init__(self, lane, longitude: float, lateral: float, static: bool = False, random_seed=None):
         super(TrafficCone, self).__init__(lane, longitude, lateral, random_seed)
 
-        n = BaseRigidBodyNode(self.name, self.NAME)
+        n = BaseRigidBodyNode(self.name, self.CLASS_NAME)
         self.add_body(n)
 
         self.body.addShape(BulletCylinderShape(self.RADIUS, self.HEIGHT))
@@ -86,7 +86,7 @@ class TrafficWarning(TrafficObject):
     def __init__(self, lane, longitude: float, lateral: float, static: bool = False, random_seed=None):
         super(TrafficWarning, self).__init__(lane, longitude, lateral, random_seed)
 
-        n = BaseRigidBodyNode(self.name, self.NAME)
+        n = BaseRigidBodyNode(self.name, self.CLASS_NAME)
         self.add_body(n)
 
         self.body.addShape(BulletCylinderShape(self.RADIUS, self.HEIGHT))
@@ -125,7 +125,7 @@ class TrafficBarrier(TrafficObject):
 
     def __init__(self, lane, longitude: float, lateral: float, static: bool = False, random_seed=None):
         super(TrafficBarrier, self).__init__(lane, longitude, lateral, random_seed)
-        n = BaseRigidBodyNode(self.name, self.NAME)
+        n = BaseRigidBodyNode(self.name, self.CLASS_NAME)
         self.add_body(n)
 
         self.body.addShape(BulletBoxShape((self.width / 2, self.length / 2, self.height / 2)))

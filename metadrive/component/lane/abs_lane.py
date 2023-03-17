@@ -243,11 +243,11 @@ class AbstractLane:
             cm = CardMaker('card')
             cm.setFrame(-length / 2, length / 2, -width / 2, width / 2)
             cm.setHasNormals(True)
-            cm.setUvRange((0, 0), (length / 20, width / 10))
+            cm.setUvRange((-length / 5, -width / 5), (length / 5, width / 5))
             card = block.lane_vis_node_path.attachNewNode(cm.generate())
             self._node_path_list.append(card)
 
-            card.setPos(panda_position(position, np.random.rand() * 0.01 - 0.01))
+            card.setPos(panda_position(position, np.random.rand() * 0.02 - 0.015))
 
             card.setQuat(
                 LQuaternionf(
@@ -256,9 +256,9 @@ class AbstractLane:
                     math.sin(theta / 2) * math.cos(-math.pi / 4)
                 )
             )
-            card.setTransparency(TransparencyAttrib.MMultisample)
-            card.setTexture(block.ts_color, block.road_texture)
+            # card.setTransparency(TransparencyAttrib.MMultisample)
             # card.setTexture(block.ts_normal, block.road_normal)
+            card.setTexture(block.ts_color, block.road_texture)
 
     @staticmethod
     def construct_lane_line_segment(block, start_point, end_point, line_color: Vec4, line_type: LineType):
@@ -310,11 +310,12 @@ class AbstractLane:
             lane_line = block.loader.loadModel(AssetLoader.file_path("models", "box.bam"))
             lane_line.setScale(length, DrivableAreaProperty.LANE_LINE_WIDTH, DrivableAreaProperty.LANE_LINE_THICKNESS)
             height = 0
+            lane_line.setTexture(block.ts_color, block.lane_line_texture)
             height += 0.01 if line_color == LineColor.YELLOW else 0
             lane_line.setQuat(LQuaternionf(math.cos(theta / 2), 0, 0, math.sin(theta / 2)))
             lane_line.setPos(panda_position(middle, height))
             lane_line.reparentTo(parent_np)
-            body_np.set_color(line_color)
+            lane_line.set_color(line_color)
 
         return node_path_list
 
@@ -352,8 +353,6 @@ class AbstractLane:
         side_np.setQuat(LQuaternionf(math.cos(theta / 2), 0, 0, math.sin(theta / 2)))
         side_np.setScale(length * length_multiply, width, block.SIDEWALK_THICKNESS * (1 + 0.1 * np.random.rand()))
         if block.render:
-            side_np.setTexture(block.ts_color, block.side_texture)
-            # side_np.setTexture(block.ts_normal, block.side_normal)
             block.sidewalk.instanceTo(side_np)
 
         return node_path_list

@@ -38,7 +38,7 @@ def capture_headless_image(cuda, image_source="main_camera"):
                 "{}_from_observation{}.png".format(image_source, "_cuda" if cuda else "")
             ), o
         )
-        cam = env.vehicle.image_sensors[image_source]
+        cam = env.vehicle.get_camera(image_source)
         cam.save_image(
             env.vehicle,
             os.path.join(
@@ -87,4 +87,4 @@ def verify_installation(cuda=False, camera="main"):
 
 
 if __name__ == "__main__":
-    verify_installation()
+    verify_installation(camera="rgb")
