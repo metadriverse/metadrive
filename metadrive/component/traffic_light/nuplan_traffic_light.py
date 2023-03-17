@@ -3,7 +3,6 @@ from nuplan.common.maps.maps_datatypes import TrafficLightStatusType
 
 
 class NuplanTrafficLight(BaseTrafficLight):
-
     def set_status(self, status: TrafficLightStatusType):
         if status == TrafficLightStatusType.GREEN:
             self.set_green()

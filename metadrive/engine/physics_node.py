@@ -30,7 +30,6 @@ class BaseGhostBodyNode(BulletGhostNode):
     """
     Ghost node will not collide with any bodies, while contact information can still be accessed
     """
-
     def __init__(self, base_object_name, type_name=None):
         node_name = base_object_name if type_name is None else type_name
         super(BaseGhostBodyNode, self).__init__(node_name)
