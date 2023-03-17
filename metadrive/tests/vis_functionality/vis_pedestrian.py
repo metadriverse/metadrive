@@ -31,6 +31,7 @@ if __name__ == "__main__":
             "random_lane_width": True,
             # "random_agent_model": True,
             "driving_reward": 1.0,
+            "show_interface": False,
             "force_destroy": False,
             # "camera_dist": -1,
             # "camera_pitch": 30,

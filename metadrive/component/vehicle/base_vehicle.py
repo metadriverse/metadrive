@@ -113,12 +113,12 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     path = None
 
     def __init__(
-        self,
-        vehicle_config: Union[dict, Config] = None,
-        name: str = None,
-        random_seed=None,
-        position=None,
-        heading=None  # In degree!
+            self,
+            vehicle_config: Union[dict, Config] = None,
+            name: str = None,
+            random_seed=None,
+            position=None,
+            heading=None  # In degree!
     ):
         """
         This Vehicle Config is different from self.get_config(), and it is used to define which modules to use, and
@@ -216,19 +216,27 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         )
 
         # vision modules
-        # self.add_image_sensor("rgb_camera", RGBCamera())
-        # self.add_image_sensor("mini_map", MiniMap())
-        # self.add_image_sensor("depth_camera", DepthCamera())
-        # self.add_image_sensor("main_camera", self.get_image_sensor())
         self.setup_sensors()
 
-    def setup_sensors(self):
+    def _available_sensors(self):
         def _main_cam():
             assert self.engine.main_camera is not None, "Main camera doesn't exist"
             return self.engine.main_camera
 
-        sensors = {"rgb_camera": RGBCamera, "mini_map": MiniMap, "depth_camera": DepthCamera, "main_camera": _main_cam}
-        self.add_image_sensor(self.config["image_source"], sensors[self.config["image_source"]]())
+        return {"rgb_camera": RGBCamera, "mini_map": MiniMap, "depth_camera": DepthCamera, "main_camera": _main_cam}
+
+    def setup_sensors(self):
+        if self.engine.global_config["image_observation"]:
+            sensors = self._available_sensors()
+            self.add_image_sensor(self.config["image_source"], sensors[self.config["image_source"]]())
+
+    def get_camera(self, camera_type_str):
+        sensors = self._available_sensors()
+        if camera_type_str not in sensors:
+            raise ValueError("Can not get {}, available type: {}".format(camera_type_str, sensors.keys()))
+        if camera_type_str not in self.image_sensors:
+            self.add_image_sensor(camera_type_str, sensors[camera_type_str]())
+        return self.image_sensors[camera_type_str]
 
     def _add_modules_for_vehicle_when_reset(self):
         config = self.config
@@ -331,13 +339,13 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         return step_energy, self.energy_consumption
 
     def reset(
-        self,
-        random_seed=None,
-        vehicle_config=None,
-        position: np.ndarray = None,
-        heading: float = 0.0,  # In degree!
-        *args,
-        **kwargs
+            self,
+            random_seed=None,
+            vehicle_config=None,
+            position: np.ndarray = None,
+            heading: float = 0.0,  # In degree!
+            *args,
+            **kwargs
     ):
         """
         pos is a 2-d array, and heading is a float (unit degree)
@@ -504,8 +512,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         if not lateral_norm * forward_direction_norm:
             return 0
         cos = (
-            (forward_direction[0] * lateral[0] + forward_direction[1] * lateral[1]) /
-            (lateral_norm * forward_direction_norm)
+                (forward_direction[0] * lateral[0] + forward_direction[1] * lateral[1]) /
+                (lateral_norm * forward_direction_norm)
         )
         # return cos
         # Normalize to 0, 1
@@ -847,7 +855,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             ckpt_idx = routing._target_checkpoints_index
             for surrounding_v in surrounding_vs:
                 if surrounding_v.lane_index[:-1] == (routing.checkpoints[ckpt_idx[0]], routing.checkpoints[ckpt_idx[1]
-                                                                                                           ]):
+                ]):
                     if self.lane.local_coordinates(self.position)[0] - \
                             self.lane.local_coordinates(surrounding_v.position)[0] < 0:
                         self.front_vehicles.add(surrounding_v)
@@ -885,9 +893,9 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     @property
     def replay_done(self):
         return self._replay_done if hasattr(self, "_replay_done") else (
-            self.crash_building or self.crash_vehicle or
-            # self.on_white_continuous_line or
-            self.on_yellow_continuous_line
+                self.crash_building or self.crash_vehicle or
+                # self.on_white_continuous_line or
+                self.on_yellow_continuous_line
         )
 
     @property

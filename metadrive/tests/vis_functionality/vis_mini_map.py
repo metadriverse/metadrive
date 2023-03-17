@@ -14,7 +14,7 @@ if __name__ == "__main__":
         }
     )
     env.reset()
-    env.engine.accept("m", env.vehicle.image_sensors[env.config["image_source"]].save_image)
+    env.engine.accept("m", env.vehicle.get_camera([env.config["image_source"]]).save_image)
 
     for i in range(1, 100000):
         o, r, d, info = env.step([0, 1])

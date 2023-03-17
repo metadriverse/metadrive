@@ -22,7 +22,7 @@ if __name__ == "__main__":
     env.reset()
     # print m to capture rgb observation
     env.engine.accept(
-        "m", env.vehicle.image_sensors[env.vehicle.config["image_source"]].save_image, extraArgs=[env.vehicle]
+        "m", env.vehicle.get_camera(env.vehicle.config["image_source"]).save_image, extraArgs=[env.vehicle]
     )
     start = time.time()
     for i in range(1, 100000):
