@@ -11,8 +11,8 @@ class BaseTrafficLight(BaseObject):
     """
     AIR_WALL_LENGTH = 0.25
     AIR_WALL_HEIGHT = 1.5
-    TRAFFIC_LIGHT_HEIGHT = 3.5
-    TRAFFIC_LIGHT_MODEL = None
+    TRAFFIC_LIGHT_HEIGHT = 3
+    TRAFFIC_LIGHT_MODEL = {}
     LIGHT_VIS_HEIGHT = 0.8
     LIGHT_VIS_WIDTH = 0.8
 
@@ -36,23 +36,30 @@ class BaseTrafficLight(BaseObject):
         self.set_heading_theta(lane.heading_theta_at(0))
 
         if self.render:
-            if BaseTrafficLight.TRAFFIC_LIGHT_MODEL is None:
-                BaseTrafficLight.TRAFFIC_LIGHT_MODEL = self.loader.loadModel(AssetLoader.file_path("models", "box.bam"))
-                BaseTrafficLight.TRAFFIC_LIGHT_MODEL.setPos(0, 0, self.TRAFFIC_LIGHT_HEIGHT)
-            BaseTrafficLight.TRAFFIC_LIGHT_MODEL.instanceTo(self.origin)
-            self.origin.setScale(self.AIR_WALL_LENGTH / 2, self.LIGHT_VIS_WIDTH, self.LIGHT_VIS_HEIGHT)
+            if len(BaseTrafficLight.TRAFFIC_LIGHT_MODEL) == 0:
+                for color in ["green", "red", "yellow", "unknown"]:
+                    model = self.loader.loadModel(
+                        AssetLoader.file_path("models", "traffic_light", "{}.gltf".format(color)))
+                    model.setPos(0, 0, self.TRAFFIC_LIGHT_HEIGHT)
+                    model.setH(-90)
+                    BaseTrafficLight.TRAFFIC_LIGHT_MODEL[color] = model
+            self.origin.setScale(0.5, 1.2, 1.2)
 
     def set_green(self):
-        self.origin.setColor(0 / 255, 255 / 255, 0, 1)
+        BaseTrafficLight.TRAFFIC_LIGHT_MODEL["green"].instanceTo(self.origin)
         self.status = TrafficLightStatus.GREEN
 
     def set_red(self):
-        self.origin.setColor(255 / 255, 0, 0)
+        BaseTrafficLight.TRAFFIC_LIGHT_MODEL["red"].instanceTo(self.origin)
         self.status = TrafficLightStatus.RED
 
     def set_yellow(self):
-        self.origin.setColor(252 / 255, 244 / 255, 3 / 255)
+        BaseTrafficLight.TRAFFIC_LIGHT_MODEL["yellow"].instanceTo(self.origin)
         self.status = TrafficLightStatus.YELLOW
+
+    def set_unknown(self):
+        BaseTrafficLight.TRAFFIC_LIGHT_MODEL["known"].instanceTo(self.origin)
+        self.status = TrafficLightStatus.UNKNOWN
 
     def destroy(self):
         super(BaseTrafficLight, self).destroy()

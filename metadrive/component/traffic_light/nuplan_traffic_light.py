@@ -11,4 +11,4 @@ class NuplanTrafficLight(BaseTrafficLight):
         elif status == TrafficLightStatusType.YELLOW:
             self.set_yellow()
         elif status == TrafficLightStatusType.UNKNOWN:
-            self.set_green()
+            self.set_unknown()
