@@ -39,7 +39,8 @@ class BaseTrafficLight(BaseObject):
             if len(BaseTrafficLight.TRAFFIC_LIGHT_MODEL) == 0:
                 for color in ["green", "red", "yellow", "unknown"]:
                     model = self.loader.loadModel(
-                        AssetLoader.file_path("models", "traffic_light", "{}.gltf".format(color)))
+                        AssetLoader.file_path("models", "traffic_light", "{}.gltf".format(color))
+                    )
                     model.setPos(0, 0, self.TRAFFIC_LIGHT_HEIGHT)
                     model.setH(-90)
                     BaseTrafficLight.TRAFFIC_LIGHT_MODEL[color] = model

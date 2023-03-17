@@ -1,16 +1,5 @@
-import copy
-from metadrive.component.vehicle.vehicle_type import XLVehicle, SVehicle, MVehicle, LVehicle
-from metadrive.component.traffic_participants.cyclist import Cyclist
-from metadrive.component.traffic_participants.pedestrian import Pedestrian
-from metadrive.policy.replay_policy import NuPlanReplayTrafficParticipantPolicy
-
-from nuplan.common.actor_state.tracked_objects_types import TrackedObjectType
-
-from metadrive.component.vehicle.vehicle_type import SVehicle
-from metadrive.manager.base_manager import BaseManager
-from metadrive.utils.coordinates_shift import nuplan_to_metadrive_vector
-from metadrive.utils.nuplan_utils.parse_object_state import parse_object_state
 from metadrive.component.traffic_light.nuplan_traffic_light import NuplanTrafficLight
+from metadrive.manager.base_manager import BaseManager
 
 
 class NuPlanLightManager(BaseManager):
@@ -25,7 +14,7 @@ class NuPlanLightManager(BaseManager):
     def after_reset(self):
         for light in self.traffic_light_status_at(0):
             lane_info = self.engine.current_map.road_network.graph[str(light.lane_connector_id)]
-            traffic_light = self.spawn_object(NuplanTrafficLight, lane=lane_info.lane, pbr_model=False)
+            traffic_light = self.spawn_object(NuplanTrafficLight, lane=lane_info.lane)
             self._lane_to_lights[lane_info.lane.index] = traffic_light
             traffic_light.set_status(light.status)
 
