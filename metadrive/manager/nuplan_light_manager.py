@@ -28,6 +28,9 @@ class NuPlanLightManager(BaseManager):
                 self._lane_to_lights[lane_info.lane.index] = traffic_light
             traffic_light.set_status(light.status)
 
+    def has_traffic_light(self, lane_index):
+        return True if lane_index in self._lane_to_lights else False
+
     @property
     def current_scenario(self):
         return self.engine.data_manager.current_scenario
