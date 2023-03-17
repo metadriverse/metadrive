@@ -243,7 +243,7 @@ class AbstractLane:
             cm = CardMaker('card')
             cm.setFrame(-length / 2, length / 2, -width / 2, width / 2)
             cm.setHasNormals(True)
-            cm.setUvRange((0, 0), (length / 20, width / 10))
+            cm.setUvRange((-length / 5, -width / 5), (length / 5, width / 5))
             card = block.lane_vis_node_path.attachNewNode(cm.generate())
             self._node_path_list.append(card)
 
@@ -256,9 +256,9 @@ class AbstractLane:
                     math.sin(theta / 2) * math.cos(-math.pi / 4)
                 )
             )
-            card.setTransparency(TransparencyAttrib.MMultisample)
-            card.setTexture(block.ts_color, block.road_texture)
+            # card.setTransparency(TransparencyAttrib.MMultisample)
             # card.setTexture(block.ts_normal, block.road_normal)
+            card.setTexture(block.ts_color, block.road_texture)
 
     @staticmethod
     def construct_lane_line_segment(block, start_point, end_point, line_color: Vec4, line_type: LineType):

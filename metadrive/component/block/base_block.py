@@ -52,16 +52,41 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
         self._block_objects = None
 
         if self.render and not BaseBlock.asset_loaded:
-            # Only maintain one copy of asset
-            BaseBlock.road_texture = self.loader.loadTexture(AssetLoader.file_path("textures", "sci", "color.jpg"))
-            BaseBlock.road_texture.set_format(Texture.F_srgb)
-            BaseBlock.road_texture.setMinfilter(SamplerState.FT_linear_mipmap_linear)
-            BaseBlock.road_texture.setAnisotropicDegree(8)
-            BaseBlock.road_normal = self.loader.loadTexture(AssetLoader.file_path("textures", "sci", "normal.jpg"))
-            BaseBlock.road_normal.set_format(Texture.F_srgb)
             BaseBlock.ts_color = TextureStage("color")
             BaseBlock.ts_normal = TextureStage("normal")
             BaseBlock.ts_normal.setMode(TextureStage.M_normal)
+
+            # Only maintain one copy of asset
+            BaseBlock.road_texture = self.loader.loadTexture(AssetLoader.file_path("textures", "sci", "new_color.png"))
+            BaseBlock.road_normal = self.loader.loadTexture(AssetLoader.file_path("textures", "sci", "normal.jpg"))
+            BaseBlock.road_texture.set_format(Texture.F_srgb)
+            BaseBlock.road_normal.set_format(Texture.F_srgb)
+            BaseBlock.road_texture.setMinfilter(SamplerState.FT_linear_mipmap_linear)
+            BaseBlock.road_texture.setAnisotropicDegree(8)
+
+            # continuous line
+            BaseBlock.lane_line_model = self.loader.loadModel(AssetLoader.file_path("models", "box.bam"))
+            BaseBlock.lane_line_model.setPos(0, 0, -DrivableAreaProperty.LANE_LINE_GHOST_HEIGHT / 2)
+            BaseBlock.lane_line_texture = self.loader.loadTexture(AssetLoader.file_path("textures", "sci", "floor.jpg"))
+            BaseBlock.lane_line_model.setScale(DrivableAreaProperty.STRIPE_LENGTH*4,
+                                               DrivableAreaProperty.LANE_LINE_WIDTH,
+                                               DrivableAreaProperty.LANE_LINE_THICKNESS)
+            # BaseBlock.lane_line_normal = self.loader.loadTexture(
+            #     AssetLoader.file_path("textures", "sci", "floor_normal.jpg"))
+            # BaseBlock.lane_line_texture.set_format(Texture.F_srgb)
+            # BaseBlock.lane_line_normal.set_format(Texture.F_srgb)
+            BaseBlock.lane_line_model.setTexture(BaseBlock.ts_color, BaseBlock.lane_line_texture)
+            # BaseBlock.lane_line_model.setTexture(BaseBlock.ts_normal, BaseBlock.lane_line_normal)
+
+            # # broken line
+            BaseBlock.broken_lane_line_model = self.loader.loadModel(AssetLoader.file_path("models", "box.bam"))
+            BaseBlock.broken_lane_line_model.setScale(DrivableAreaProperty.STRIPE_LENGTH,
+                                                      DrivableAreaProperty.LANE_LINE_WIDTH,
+                                                      DrivableAreaProperty.LANE_LINE_THICKNESS)
+            BaseBlock.broken_lane_line_model.setPos(0, 0, -DrivableAreaProperty.LANE_LINE_GHOST_HEIGHT / 2)
+            BaseBlock.broken_lane_line_model.setTexture(BaseBlock.ts_color, BaseBlock.lane_line_texture)
+
+            # side
             BaseBlock.side_texture = self.loader.loadTexture(AssetLoader.file_path("textures", "sidewalk", "color.png"))
             BaseBlock.side_texture.set_format(Texture.F_srgb)
             BaseBlock.side_texture.setMinfilter(SamplerState.FT_linear_mipmap_linear)
