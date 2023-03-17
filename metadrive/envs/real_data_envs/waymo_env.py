@@ -284,7 +284,7 @@ if __name__ == "__main__":
             # "no_traffic":True,
             # "start_case_index": 192,
             # "start_case_index": 1000,
-            "case_num": 1,
+            "case_num": 3,
             # "waymo_data_directory": "E:\\PAMI_waymo_data\\idm_filtered\\test",
             "horizon": 1000,
             "vehicle_config": dict(

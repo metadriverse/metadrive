@@ -19,7 +19,8 @@ class Pedestrian(BaseTrafficParticipant):
 
     _MODEL = {}
 
-    SPEED_LIST = [0.6]
+    # SPEED_LIST = [0.6, 1.2, 2.2] Too much speed choice jeopardise the performance
+    SPEED_LIST = [0.6, 1.2]
 
     def __init__(self, position, heading_theta, random_seed=None):
         super(Pedestrian, self).__init__(position, heading_theta, random_seed)
@@ -47,7 +48,7 @@ class Pedestrian(BaseTrafficParticipant):
             Pedestrian._MODEL[speed] = model
             if idx == 0:
                 animation_controller = model.get_anim_control("Take 001")
-                animation_controller.setPlayRate(idx)
+                animation_controller.setPlayRate(0)
                 animation_controller.pose(1)
             else:
                 animation_controller = model.get_anim_control("Take 001")

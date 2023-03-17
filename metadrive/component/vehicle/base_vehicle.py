@@ -737,7 +737,6 @@ class BaseVehicle(BaseObject, BaseVehicleState):
                 light = get_object_from_node(node)
                 if light.status == TrafficLightStatus.GREEN:
                     self.green_light = True
-                    continue
                 elif light.status == TrafficLightStatus.RED:
                     self.red_light = True
                 elif light.status == TrafficLightStatus.YELLOW:

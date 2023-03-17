@@ -90,7 +90,7 @@ class BodyName:
 COLOR = {
     BodyName.Sidewalk: "red",
     BodyName.White_continuous_line: "orange",
-    BodyName.Yellow_continuous_line: "red",
+    BodyName.Yellow_continuous_line: "orange",
     BodyName.Broken_line: "yellow",
     BodyName.Vehicle: "red",
     BodyName.Traffic_object: "orange",
@@ -98,6 +98,7 @@ COLOR = {
     BodyName.TollGate: "red",
     TrafficLightStatus.semantics(TrafficLightStatus.RED): "red",
     TrafficLightStatus.semantics(TrafficLightStatus.YELLOW): "orange",
+    TrafficLightStatus.semantics(TrafficLightStatus.GREEN): "yellow",
 }
 
 
@@ -271,7 +272,7 @@ class LineType:
 
 class LineColor:
     GREY = (1, 1, 1, 1)
-    YELLOW = (245 / 255, 192 / 255, 67 / 255, 1)
+    YELLOW = (255 / 255, 180 / 255, 0 / 255, 1)
 
 
 class DrivableAreaProperty:

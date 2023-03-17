@@ -314,7 +314,7 @@ class AbstractLane:
             lane_line.setQuat(LQuaternionf(math.cos(theta / 2), 0, 0, math.sin(theta / 2)))
             lane_line.setPos(panda_position(middle, height))
             lane_line.reparentTo(parent_np)
-            body_np.set_color(line_color)
+            lane_line.set_color(line_color)
 
         return node_path_list
 
