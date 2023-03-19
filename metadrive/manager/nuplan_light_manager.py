@@ -38,7 +38,10 @@ class NuPlanLightManager(BaseManager):
             if str(light.lane_connector_id) in self._lane_to_lights:
                 traffic_light = self._lane_to_lights[str(light.lane_connector_id)]
             else:
-                lane_info = self.engine.current_map.road_network.graph[str(light.lane_connector_id)]
+                try:
+                    lane_info = self.engine.current_map.road_network.graph[str(light.lane_connector_id)]
+                except KeyError:
+                    continue
                 traffic_light = self.spawn_object(NuplanTrafficLight, lane=lane_info.lane)
                 assert str(light.lane_connector_id) == lane_info.lane.index
                 self._lane_to_lights[lane_info.lane.index] = traffic_light

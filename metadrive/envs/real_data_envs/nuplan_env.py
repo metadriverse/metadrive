@@ -289,7 +289,7 @@ if __name__ == "__main__":
             # "debug": True,
             "debug_static_world": False,
             "debug_physics_world": False,
-            "load_city_map": True,
+            "load_city_map": False,
             # "global_light": False,
             "window_size": (1200, 800),
             # "multi_thread_render_mode": "Cull/Draw",
@@ -311,23 +311,23 @@ if __name__ == "__main__":
             "show_logo": False,
             "force_render_fps": 40,
             "show_fps": False,
-            "DATASET_PARAMS": [
-                'scenario_builder=nuplan_mini',
-                # use nuplan mini database (2.5h of 8 autolabeled logs in Las Vegas)
-                'scenario_filter=one_continuous_log',  # simulate only one log
-                "scenario_filter.log_names=['2021.05.12.22.00.38_veh-35_01008_01518']",
-                'scenario_filter.limit_total_scenarios=1000',  # use 2 total scenarios
-            ],
-            "show_mouse": False,
+            # "DATASET_PARAMS": [
+            #     'scenario_builder=nuplan_mini',
+            #     # use nuplan mini database (2.5h of 8 autolabeled logs in Las Vegas)
+            #     'scenario_filter=one_continuous_log',  # simulate only one log
+            #     "scenario_filter.log_names=['2021.05.12.22.00.38_veh-35_01008_01518']",
+            #     'scenario_filter.limit_total_scenarios=1000',  # use 2 total scenarios
+            # ],
+            # "show_mouse": False,
         }
     )
     success = []
-    env.reset(force_seed=60)
-    for seed in [i for i in range(22, 28)] + [35, 39, 42, 43, 44, 49, 51, 55, 58, 60]:
+    env.reset(force_seed=300)
+    for seed in range(9, 514):
         env.reset(force_seed=seed)
         for i in range(env.engine.data_manager.current_scenario_length * 10):
             o, r, d, info = env.step([0, 0])
-            # env.render(text={"seed": env.current_seed})
+            env.render(text={"seed": env.current_seed})
             if info["replay_done"]:
                 break
     sys.exit()
