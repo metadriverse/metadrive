@@ -8,7 +8,6 @@ from metadrive.component.vehicle.vehicle_type import SVehicle
 from metadrive.component.vehicle.vehicle_type import XLVehicle, MVehicle, LVehicle
 from metadrive.manager.base_manager import BaseManager
 from metadrive.policy.replay_policy import NuPlanReplayTrafficParticipantPolicy
-from metadrive.utils.coordinates_shift import nuplan_to_metadrive_vector
 from metadrive.utils.nuplan_utils.parse_object_state import parse_object_state
 
 
@@ -101,12 +100,13 @@ class NuPlanTrafficManager(BaseManager):
         )
         v = self.spawn_object(
             self.get_vehicle_type(state["length"]),
-            position=nuplan_to_metadrive_vector(state["position"]),
+            position=state["position"],
             heading=state["heading"],
             vehicle_config=v_config,
         )
         self.nuplan_id_to_obj_id[nuplan_id] = v.name
         v.set_velocity(state["velocity"])
+        v.set_position(state["position"], 0.5)
         self.add_policy(v.name, NuPlanReplayTrafficParticipantPolicy, v)
 
     def spawn_pedestrian(self, state, nuplan_id):
