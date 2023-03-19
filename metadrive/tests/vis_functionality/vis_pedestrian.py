@@ -2,6 +2,7 @@ from metadrive.envs.metadrive_env import MetaDriveEnv
 from metadrive.policy.idm_policy import IDMPolicy
 from metadrive.utils import setup_logger
 from metadrive.component.traffic_participants.pedestrian import Pedestrian
+from metadrive.component.traffic_participants.cyclist import Cyclist
 
 if __name__ == "__main__":
     # setup_logger(True)
@@ -14,7 +15,7 @@ if __name__ == "__main__":
             "accident_prob": 1.0,
             # "_disable_detector_mask":True,
             # "debug_physics_world": True,
-            "debug": False,
+            "debug": True,
             # "global_light": True,
             # "debug_static_world": True,
             "cull_scene": False,
@@ -41,8 +42,8 @@ if __name__ == "__main__":
             # "window_size": (2400, 1600),
             "show_coordinates": True,
             "vehicle_config": {
-                "enable_reverse": False,
-                "show_lidar": True
+                "enable_reverse": True,
+                # "show_lidar": True
                 # "image_source": "depth_camera",
                 # "random_color": True
                 # "show_lidar": True,
@@ -63,12 +64,15 @@ if __name__ == "__main__":
     o = env.reset()
     obj_1 = env.engine.spawn_object(Pedestrian, position=[30, 0], heading_theta=0, random_seed=1)
     obj_2 = env.engine.spawn_object(Pedestrian, position=[30, 6], heading_theta=0, random_seed=1)
+    c_1 = env.engine.spawn_object(Cyclist, position=[30, 8], heading_theta=0, random_seed=1)
     obj_1.set_velocity([1, 0], 1, in_local_frame=True)
     # obj_1.show_coordinates()
     obj_2.set_velocity([1, 0], 2, in_local_frame=True)
+    c_1.set_velocity([3, 0], 2, in_local_frame=True)
     # obj_2.show_coordinates()
-    env.vehicle.set_velocity([5, 0], in_local_frame=False)
+    env.vehicle.set_velocity([10, 0], in_local_frame=False)
     for s in range(1, 10000):
+        print(c_1.heading_theta)
         o, r, d, info = env.step(env.action_space.sample())
         # obj_1.set_velocity([1, 0], 2, in_local_frame=True)
         # obj_2.set_velocity([1, 0], 0.8, in_local_frame=True)

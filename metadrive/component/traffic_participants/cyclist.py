@@ -16,6 +16,8 @@ class Cyclist(BaseTrafficParticipant):
     NAME = BodyName.Cyclist
     COLLISION_MASK = CollisionGroup.TrafficParticipants
 
+    MODEL = None
+
     WIDTH = 0.4
     LENGTH = 1.75
     HEIGHT = 1.75
@@ -26,10 +28,11 @@ class Cyclist(BaseTrafficParticipant):
         n = BaseRigidBodyNode(self.name, self.NAME)
         self.add_body(n)
 
-        self.body.addShape(BulletBoxShape((self.WIDTH / 2, self.LENGTH / 2, self.HEIGHT / 2)))
-        self.set_static(True)
+        self.body.addShape(BulletBoxShape((self.LENGTH / 2, self.WIDTH / 2, self.HEIGHT / 2)))
         if self.render:
-            model = self.loader.loadModel(AssetLoader.file_path("models", "box.bam"))
-            # model.setH(-90)
-            model.setScale(self.WIDTH, self.LENGTH, self.HEIGHT)
-            model.reparentTo(self.origin)
+            if Cyclist.MODEL is None:
+                model = self.loader.loadModel(AssetLoader.file_path("models", "bicycle", "scene.gltf"))
+                model.setScale(0.15)
+                model.setPos(0, 0, -0.3)
+                Cyclist.MODEL = model
+            Cyclist.MODEL.instanceTo(self.origin)

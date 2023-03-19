@@ -32,6 +32,12 @@ def vis_traffic_light(render=True, manual_control=False, debug=False):
         light.set_green()
         test_success = False
         for s in range(1, 1000):
+            if s < 100:
+                light.set_green()
+            elif s < 300:
+                light.set_red()
+            else:
+                light.set_yellow()
             env.step([0, 1])
         light.destroy()
 

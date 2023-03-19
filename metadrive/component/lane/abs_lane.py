@@ -32,6 +32,8 @@ class AbstractLane:
     start = None
     end = None
     VEHICLE_LENGTH = 4
+    _RANDOM_HEIGHT_OFFSET = np.arange(0, 0.02, 0.0005)
+    _RANDOM_HEIGHT_OFFSET_INDEX = 0
 
     def __init__(self):
         self.speed_limit = 1000  # should be set manually
@@ -395,7 +397,7 @@ class AbstractLane:
             card = block.lane_vis_node_path.attachNewNode(cm.generate())
             self._node_path_list.append(card)
 
-            card.setPos(panda_position(position, np.random.rand() * 0.01 - 0.01))
+            card.setPos(panda_position(position, np.random.rand() * 0.02 - 0.015))
 
             card.setQuat(
                 LQuaternionf(

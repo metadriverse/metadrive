@@ -40,7 +40,11 @@ class NuPlanDataManager(BaseManager):
         # filter case according to config
         self.start_case_index = self.engine.global_config["start_case_index"]
         self.case_num = self.engine.global_config["case_num"]
-        assert len(self._nuplan_scenarios) > self.start_case_index + self.case_num, "Number of scenes are not enough"
+        assert len(self._nuplan_scenarios) >= self.start_case_index + self.case_num, \
+            "Number of scenes are not enough, " \
+            "\n num nuplan scenarios: {}" \
+            "\n start_case_index: {}" \
+            "\n case num: {}".format(len(self._nuplan_scenarios), self.start_case_index, self.case_num)
         logger.info("\n \n ############### Finish Loading NuPlan Data ############### \n")
 
         self._scenario_num = self.case_num

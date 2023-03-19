@@ -1,4 +1,5 @@
 import logging
+import sys
 
 import numpy as np
 
@@ -129,7 +130,6 @@ class NuPlanEnv(BaseEnv):
         return
 
     def setup_engine(self):
-        self.in_stop = False
         super(NuPlanEnv, self).setup_engine()
         self.engine.register_manager("data_manager", NuPlanDataManager())
         self.engine.register_manager("map_manager", NuPlanMapManager())
@@ -137,7 +137,6 @@ class NuPlanEnv(BaseEnv):
             self.engine.register_manager("traffic_manager", NuPlanTrafficManager())
         if not self.config["no_light"]:
             self.engine.register_manager("light_manager", NuPlanLightManager())
-        self.engine.accept("p", self.stop)
         self.engine.accept("q", self.switch_to_third_person_view)
         self.engine.accept("b", self.switch_to_top_down_view)
         self.engine.accept("]", self.next_seed_reset)
@@ -151,8 +150,6 @@ class NuPlanEnv(BaseEnv):
 
     def step(self, actions):
         ret = super(NuPlanEnv, self).step(actions)
-        while self.in_stop:
-            self.engine.taskMgr.step()
         return ret
 
     def done_function(self, vehicle_id: str):
@@ -278,9 +275,6 @@ class NuPlanEnv(BaseEnv):
         # ret = vehicle.crash_sidewalk
         # return ret
 
-    def stop(self):
-        self.in_stop = not self.in_stop
-
 
 if __name__ == "__main__":
     env = NuPlanEnv(
@@ -295,11 +289,11 @@ if __name__ == "__main__":
             # "debug": True,
             "debug_static_world": False,
             "debug_physics_world": False,
-            "load_city_map": True,
+            "load_city_map": False,
             # "global_light": False,
             "window_size": (1200, 800),
             # "multi_thread_render_mode": "Cull/Draw",
-            "start_case_index": 300,
+            "start_case_index": 0,
             # "pstats": True,
             "case_num": 1000,
             "show_coordinates": False,
@@ -313,27 +307,30 @@ if __name__ == "__main__":
                 show_navi_mark=False,
                 show_dest_mark=False
             ),
-            # "show_interface":False
+            "show_interface": False,
+            "show_logo": False,
+            "force_render_fps": 40,
+            "show_fps": False,
+            # "DATASET_PARAMS": [
+            #     'scenario_builder=nuplan_mini',
+            #     # use nuplan mini database (2.5h of 8 autolabeled logs in Las Vegas)
+            #     'scenario_filter=one_continuous_log',  # simulate only one log
+            #     "scenario_filter.log_names=['2021.05.12.22.00.38_veh-35_01008_01518']",
+            #     'scenario_filter.limit_total_scenarios=1000',  # use 2 total scenarios
+            # ],
+            # "show_mouse": False,
         }
     )
     success = []
-    # env.reset()
-    for seed in range(300, 2300, 5):
+    env.reset(force_seed=300)
+    for seed in range(9, 514):
         env.reset(force_seed=seed)
         for i in range(env.engine.data_manager.current_scenario_length * 10):
             o, r, d, info = env.step([0, 0])
-
-            # assert env.observation_space.contains(o)
-            # c_lane = env.vehicle.lane
-            # long, lat, = c_lane.local_coordinates(env.vehicle.position)
-            # if env.config["use_render"]:
-            env.render(text={"seed": seed})
-            #     )
-            #
-            if d:
-                if info["arrive_dest"]:
-                    print("seed:{}, success".format(env.engine.global_random_seed))
+            env.render(text={"seed": env.current_seed})
+            if info["replay_done"]:
                 break
+    sys.exit()
 
 # cull/draw camera
 # draw set_state

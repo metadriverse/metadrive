@@ -15,11 +15,11 @@ class DefaultVehicle(BaseVehicle):
     LATERAL_TIRE_TO_CENTER = 0.815
     FRONT_WHEELBASE = 1.05234
     REAR_WHEELBASE = 1.4166
-    path = ['vehicle/ferra/', (factor, factor, factor), (0, 0.0, 0.), 0]
+    path = ['vehicle/ferra/', (factor, factor, factor), (0, 0.075, 0.), 0]
 
     @property
     def LENGTH(self):
-        return 4.51  # meters
+        return 4.515  # meters
 
     @property
     def HEIGHT(self):
@@ -47,11 +47,11 @@ class XLVehicle(BaseVehicle):
     CHASSIS_TO_WHEEL_AXIS = 0.3
     TIRE_WIDTH = 0.5
     MASS = 1600
-    path = ['vehicle/truck/', (factor, factor, factor), (0, 0.3, 0.04), 0]
+    path = ['vehicle/truck/', (factor, factor, factor), (0, 0.25, 0.04), 0]
 
     @property
     def LENGTH(self):
-        return 5.8  # meters
+        return 5.74  # meters
 
     @property
     def HEIGHT(self):
@@ -67,17 +67,17 @@ class LVehicle(BaseVehicle):
     # LENGTH = 4.5
     # WIDTH = 1.86
     # HEIGHT = 1.85
-    TIRE_RADIUS = 0.39
-    REAR_WHEELBASE = 1.10751
-    FRONT_WHEELBASE = 1.391
+    TIRE_RADIUS = 0.429
+    REAR_WHEELBASE = 1.218261
+    FRONT_WHEELBASE = 1.5301
     LATERAL_TIRE_TO_CENTER = 0.75
     TIRE_WIDTH = 0.35
     MASS = 1300
-    path = ['vehicle/lada/', (factor, factor, factor), (0, -0.25, 0.07), 0]
+    path = ['vehicle/lada/', (1.1, 1.1, 1.1), (0, -0.27, 0.07), 0]
 
     @property
     def LENGTH(self):
-        return 4.5  # meters
+        return 4.87  # meters
 
     @property
     def HEIGHT(self):
@@ -85,7 +85,7 @@ class LVehicle(BaseVehicle):
 
     @property
     def WIDTH(self):
-        return 1.86  # meters
+        return 2.046  # meters
 
 
 class MVehicle(BaseVehicle):
@@ -104,7 +104,7 @@ class MVehicle(BaseVehicle):
 
     @property
     def LENGTH(self):
-        return 4.4  # meters
+        return 4.6  # meters
 
     @property
     def HEIGHT(self):
@@ -127,11 +127,11 @@ class SVehicle(BaseVehicle):
     TIRE_RADIUS = 0.376
     TIRE_WIDTH = 0.25
     MASS = 800
-    path = ['vehicle/beetle/', (factor, factor, factor), (0, -0.2, 0.03), 0]
+    path = ['vehicle/beetle/', (factor, factor, factor), (0, -0.26, 0.03), 0]
 
     @property
     def LENGTH(self):
-        return 4.25  # meters
+        return 4.3  # meters
 
     @property
     def HEIGHT(self):
