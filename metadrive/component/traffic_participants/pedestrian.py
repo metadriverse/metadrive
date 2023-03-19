@@ -30,10 +30,11 @@ class Pedestrian(BaseTrafficParticipant):
         # self.set_static(True)
         self.animation_controller = None
         self.current_speed_model = self.SPEED_LIST[0]
+        self._instance = None
         if self.render:
             if len(Pedestrian._MODEL) == 0:
                 self._init_pedestrian_model()
-            Pedestrian._MODEL[self.current_speed_model].instanceTo(self.origin)
+            self._instance = Pedestrian._MODEL[self.current_speed_model].instanceTo(self.origin)
             self.show_coordinates()
 
     @classmethod
@@ -63,7 +64,6 @@ class Pedestrian(BaseTrafficParticipant):
             direction = LVector3(*direction, 0.)
             direction[1] *= -1
             ret = engine.worldNP.getRelativeVector(self.origin, direction)
-            # no need for spinning 90 degree
             direction = ret
         speed = (norm(direction[0], direction[1]) + 1e-6)
         if value is not None:
@@ -74,9 +74,8 @@ class Pedestrian(BaseTrafficParticipant):
         if self.render:
             speed_model_index = self.get_speed_model(target_speed=speed if value is None else value)
             if speed_model_index != self.current_speed_model:
-                child = self.origin.getChildren()
-                child.detach()
-                Pedestrian._MODEL[speed_model_index].instanceTo(self.origin)
+                self._instance.detachNode()
+                self._instance = Pedestrian._MODEL[speed_model_index].instanceTo(self.origin)
                 self.current_speed_model = speed_model_index
             self.show_coordinates()
 
