@@ -34,6 +34,7 @@ class BaseTrafficLight(BaseObject):
 
         self.set_position(lane.position(0, 0), self.AIR_WALL_HEIGHT / 2)
         self.set_heading_theta(lane.heading_theta_at(0))
+        self.current_light = None
 
         if self.render:
             if len(BaseTrafficLight.TRAFFIC_LIGHT_MODEL) == 0:
@@ -48,22 +49,30 @@ class BaseTrafficLight(BaseObject):
 
     def set_green(self):
         if self.render:
-            BaseTrafficLight.TRAFFIC_LIGHT_MODEL["green"].instanceTo(self.origin)
+            if self.current_light is not None:
+                self.current_light.detachNode()
+            self.current_light = BaseTrafficLight.TRAFFIC_LIGHT_MODEL["green"].instanceTo(self.origin)
         self.status = TrafficLightStatus.GREEN
 
     def set_red(self):
         if self.render:
-            BaseTrafficLight.TRAFFIC_LIGHT_MODEL["red"].instanceTo(self.origin)
+            if self.current_light is not None:
+                self.current_light.detachNode()
+            self.current_light = BaseTrafficLight.TRAFFIC_LIGHT_MODEL["red"].instanceTo(self.origin)
         self.status = TrafficLightStatus.RED
 
     def set_yellow(self):
         if self.render:
-            BaseTrafficLight.TRAFFIC_LIGHT_MODEL["yellow"].instanceTo(self.origin)
+            if self.current_light is not None:
+                self.current_light.detachNode()
+            self.current_light = BaseTrafficLight.TRAFFIC_LIGHT_MODEL["yellow"].instanceTo(self.origin)
         self.status = TrafficLightStatus.YELLOW
 
     def set_unknown(self):
         if self.render:
-            BaseTrafficLight.TRAFFIC_LIGHT_MODEL["known"].instanceTo(self.origin)
+            if self.current_light is not None:
+                self.current_light.detachNode()
+            self.current_light = BaseTrafficLight.TRAFFIC_LIGHT_MODEL["known"].instanceTo(self.origin)
         self.status = TrafficLightStatus.UNKNOWN
 
     def destroy(self):

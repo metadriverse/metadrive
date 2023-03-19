@@ -29,7 +29,7 @@ class Cyclist(BaseTrafficParticipant):
         self.body.addShape(BulletBoxShape((self.WIDTH / 2, self.LENGTH / 2, self.HEIGHT / 2)))
         self.set_static(True)
         if self.render:
-            model = self.loader.loadModel(AssetLoader.file_path("models", "box.bam"))
-            # model.setH(-90)
-            model.setScale(self.WIDTH, self.LENGTH, self.HEIGHT)
+            model = self.loader.loadModel("/home/shady/Downloads/cafe_racer_motorcycle/scene.gltf")
+            model.setH(-90)
             model.reparentTo(self.origin)
+            # model.setScale(self.WIDTH, self.LENGTH, self.HEIGHT)

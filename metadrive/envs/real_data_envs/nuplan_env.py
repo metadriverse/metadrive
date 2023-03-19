@@ -187,8 +187,8 @@ class NuPlanEnv(BaseEnv):
         # for compatibility
         # crash almost equals to crashing with vehicles
         done_info[TerminationState.CRASH] = (
-            done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
-            or done_info[TerminationState.CRASH_BUILDING]
+                done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
+                or done_info[TerminationState.CRASH_BUILDING]
         )
         return done, done_info
 
@@ -299,7 +299,7 @@ if __name__ == "__main__":
             # "global_light": False,
             "window_size": (1200, 800),
             # "multi_thread_render_mode": "Cull/Draw",
-            "start_case_index": 300,
+            "start_case_index": 0,
             # "pstats": True,
             "case_num": 1000,
             "show_coordinates": False,
@@ -313,17 +313,27 @@ if __name__ == "__main__":
                 show_navi_mark=False,
                 show_dest_mark=False
             ),
-            # "show_interface":False,
-            # "force_render_fps": 40,
-            # "show_fps": False,
+            "show_interface": False,
+            "show_logo": False,
+            "force_render_fps": 40,
+            "show_fps": False,
+            "DATASET_PARAMS": [
+                'scenario_builder=nuplan_mini',
+                # use nuplan mini database (2.5h of 8 autolabeled logs in Las Vegas)
+                'scenario_filter=one_continuous_log',  # simulate only one log
+                "scenario_filter.log_names=['2021.05.12.22.00.38_veh-35_01008_01518']",
+                'scenario_filter.limit_total_scenarios=1000',  # use 2 total scenarios
+            ],
+            "show_mouse": False,
         }
     )
     success = []
     # env.reset()
-    for seed in range(300, 2300, 5):
+    for seed in range(23, 28):
         env.reset(force_seed=seed)
         for i in range(env.engine.data_manager.current_scenario_length * 10):
             o, r, d, info = env.step([0, 0])
+            env.render(text={"seed": env.current_seed})
             if info["replay_done"]:
                 break
 
