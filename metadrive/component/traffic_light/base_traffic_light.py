@@ -15,6 +15,7 @@ class BaseTrafficLight(BaseObject):
     TRAFFIC_LIGHT_MODEL = {}
     LIGHT_VIS_HEIGHT = 0.8
     LIGHT_VIS_WIDTH = 0.8
+    PLACE_LONGITUDE = 5
 
     def __init__(self, lane, name=None, random_seed=None, config=None, escape_random_seed_assertion=False):
         super(BaseTrafficLight, self).__init__(name, random_seed, config, escape_random_seed_assertion)
@@ -32,8 +33,8 @@ class BaseTrafficLight(BaseObject):
         )
         self.add_body(air_wall, add_to_static_world=True)
 
-        self.set_position(lane.position(0, 0), self.AIR_WALL_HEIGHT / 2)
-        self.set_heading_theta(lane.heading_theta_at(0))
+        self.set_position(lane.position(self.PLACE_LONGITUDE, 0), self.AIR_WALL_HEIGHT / 2)
+        self.set_heading_theta(lane.heading_theta_at(self.PLACE_LONGITUDE))
         self.current_light = None
 
         if self.render:

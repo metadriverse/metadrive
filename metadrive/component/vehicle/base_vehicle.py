@@ -378,10 +378,9 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             heading = self.config["spawn_position_heading"][1]
 
         self.spawn_place = position
-        heading = -np.deg2rad(heading) - np.pi / 2
+        self.set_heading_theta(heading)
         self.set_static(False)
         self.set_position(position, self.HEIGHT / 2)
-        self.origin.setQuat(LQuaternionf(math.cos(heading / 2), 0, 0, math.sin(heading / 2)))
         self.update_map_info(map)
         self.body.clearForces()
         self.body.setLinearVelocity(Vec3(0, 0, 0))

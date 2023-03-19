@@ -384,14 +384,16 @@ class BaseObject(BaseRunnable):
         self.body.setStatic(flag)
 
     def get_panda_pos(self):
+        raise DeprecationWarning("It is not allowed to access Panda Pos!")
         return self.origin.getPos()
 
     def set_panda_pos(self, pos):
+        raise DeprecationWarning("It is not allowed to access Panda Pos!")
         self.origin.setPos(pos)
 
     def get_state(self) -> Dict:
         state = {
-            ObjectState.POSITION: self.get_panda_pos(),
+            ObjectState.POSITION: self.position,
             ObjectState.HEADING_THETA: self.heading_theta,
             ObjectState.ROLL: self.roll,
             ObjectState.PITCH: self.pitch,
@@ -400,7 +402,7 @@ class BaseObject(BaseRunnable):
         return state
 
     def set_state(self, state: Dict):
-        self.set_panda_pos(state[ObjectState.POSITION])
+        self.set_position(state[ObjectState.POSITION])
         self.set_heading_theta(state[ObjectState.HEADING_THETA])
         self.set_pitch(state[ObjectState.PITCH])
         self.set_roll(state[ObjectState.ROLL])
