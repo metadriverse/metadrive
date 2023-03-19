@@ -280,8 +280,7 @@ class BaseObject(BaseRunnable):
             engine = get_engine()
             direction = LVector3(*direction, 0.)
             direction[1] *= -1
-            ret = engine.worldNP.getRelativeVector(self.origin, direction)
-            direction = [-ret[1], -ret[0]]
+            direction = engine.worldNP.getRelativeVector(self.origin, direction)
         if value is not None:
             norm_ratio = value / (norm(direction[0], direction[1]) + 1e-6)
         else:
