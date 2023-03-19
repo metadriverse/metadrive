@@ -7,7 +7,7 @@ from metadrive.utils.utils import get_object_from_node
 import numpy as np
 import seaborn as sns
 from panda3d.bullet import BulletVehicle, BulletBoxShape, ZUp
-from panda3d.core import Material, Vec3, TransformState, LQuaternionf
+from panda3d.core import Material, Vec3, TransformState, LQuaternionf, LVector3
 
 from metadrive.base_class.base_object import BaseObject
 from metadrive.component.lane.abs_lane import AbstractLane
@@ -378,10 +378,9 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             heading = self.config["spawn_position_heading"][1]
 
         self.spawn_place = position
-        heading = -np.deg2rad(heading) - np.pi / 2
+        self.set_heading_theta(heading)
         self.set_static(False)
         self.set_position(position, self.HEIGHT / 2)
-        self.origin.setQuat(LQuaternionf(math.cos(heading / 2), 0, 0, math.sin(heading / 2)))
         self.update_map_info(map)
         self.body.clearForces()
         self.body.setLinearVelocity(Vec3(0, 0, 0))
@@ -588,12 +587,12 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             if path not in BaseVehicle.model_collection:
                 car_model = self.loader.loadModel(AssetLoader.file_path("models", path, "vehicle.gltf"))
                 BaseVehicle.model_collection[path] = car_model
+                car_model.setScale(scale)
+                car_model.setH(H)
+                car_model.setPos(x_y_z_offset)
+                car_model.setZ(-self.TIRE_RADIUS - self.CHASSIS_TO_WHEEL_AXIS + x_y_z_offset[-1])
             else:
                 car_model = BaseVehicle.model_collection[path]
-            car_model.setScale(scale)
-            car_model.setH(H)
-            car_model.setPos(x_y_z_offset)
-            car_model.setZ(-self.TIRE_RADIUS - self.CHASSIS_TO_WHEEL_AXIS + x_y_z_offset[-1])
             car_model.instanceTo(self.origin)
             if self.config["random_color"]:
                 material = Material()
@@ -1013,3 +1012,24 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         y.reparentTo(self.coordinates_debug_np)
         z.reparentTo(self.coordinates_debug_np)
         self.coordinates_debug_np.reparentTo(self.origin)
+
+    def set_velocity(self, direction: np.array, value=None, in_local_frame=False):
+        """
+        Vehicle's coordinates is has a 90 offset
+        """
+        if in_local_frame:
+            from metadrive.engine.engine_utils import get_engine
+            engine = get_engine()
+            direction = LVector3(*direction, 0.)
+            direction[1] *= -1
+            direction = engine.worldNP.getRelativeVector(self.origin, direction)
+            # 90 degree offset correction!
+            direction = [-direction[1], -direction[0]]
+        if value is not None:
+            norm_ratio = value / (norm(direction[0], direction[1]) + 1e-6)
+        else:
+            norm_ratio = 1
+        self._body.setLinearVelocity(
+            LVector3(direction[0] * norm_ratio, -direction[1] * norm_ratio,
+                     self._body.getLinearVelocity()[-1])
+        )

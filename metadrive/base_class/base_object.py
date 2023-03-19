@@ -280,8 +280,7 @@ class BaseObject(BaseRunnable):
             engine = get_engine()
             direction = LVector3(*direction, 0.)
             direction[1] *= -1
-            ret = engine.worldNP.getRelativeVector(self.origin, direction)
-            direction = [-ret[1], -ret[0]]
+            direction = engine.worldNP.getRelativeVector(self.origin, direction)
         if value is not None:
             norm_ratio = value / (norm(direction[0], direction[1]) + 1e-6)
         else:
@@ -366,7 +365,7 @@ class BaseObject(BaseRunnable):
         """
         Return the roll of this object
         """
-        return self.origin.getR()
+        return np.deg2rad(self.origin.getR())
 
     def set_roll(self, roll):
         self.origin.setR(roll)
@@ -376,7 +375,7 @@ class BaseObject(BaseRunnable):
         """
         Return the pitch of this object
         """
-        return self.origin.getP()
+        return np.deg2rad(self.origin.getP())
 
     def set_pitch(self, pitch):
         self.origin.setP(pitch)
@@ -385,14 +384,16 @@ class BaseObject(BaseRunnable):
         self.body.setStatic(flag)
 
     def get_panda_pos(self):
+        raise DeprecationWarning("It is not allowed to access Panda Pos!")
         return self.origin.getPos()
 
     def set_panda_pos(self, pos):
+        raise DeprecationWarning("It is not allowed to access Panda Pos!")
         self.origin.setPos(pos)
 
     def get_state(self) -> Dict:
         state = {
-            ObjectState.POSITION: self.get_panda_pos(),
+            ObjectState.POSITION: self.position,
             ObjectState.HEADING_THETA: self.heading_theta,
             ObjectState.ROLL: self.roll,
             ObjectState.PITCH: self.pitch,
@@ -401,7 +402,7 @@ class BaseObject(BaseRunnable):
         return state
 
     def set_state(self, state: Dict):
-        self.set_panda_pos(state[ObjectState.POSITION])
+        self.set_position(state[ObjectState.POSITION])
         self.set_heading_theta(state[ObjectState.HEADING_THETA])
         self.set_pitch(state[ObjectState.PITCH])
         self.set_roll(state[ObjectState.ROLL])
@@ -426,3 +427,6 @@ class BaseObject(BaseRunnable):
 
     def show_coordinates(self):
         pass
+
+    def get_z(self):
+        return self.origin.getZ()
