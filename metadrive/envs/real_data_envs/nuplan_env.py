@@ -1,4 +1,5 @@
 import logging
+import sys
 
 import numpy as np
 
@@ -129,7 +130,6 @@ class NuPlanEnv(BaseEnv):
         return
 
     def setup_engine(self):
-        self.in_stop = False
         super(NuPlanEnv, self).setup_engine()
         self.engine.register_manager("data_manager", NuPlanDataManager())
         self.engine.register_manager("map_manager", NuPlanMapManager())
@@ -137,7 +137,6 @@ class NuPlanEnv(BaseEnv):
             self.engine.register_manager("traffic_manager", NuPlanTrafficManager())
         if not self.config["no_light"]:
             self.engine.register_manager("light_manager", NuPlanLightManager())
-        self.engine.accept("p", self.stop)
         self.engine.accept("q", self.switch_to_third_person_view)
         self.engine.accept("b", self.switch_to_top_down_view)
         self.engine.accept("]", self.next_seed_reset)
@@ -151,8 +150,6 @@ class NuPlanEnv(BaseEnv):
 
     def step(self, actions):
         ret = super(NuPlanEnv, self).step(actions)
-        while self.in_stop:
-            self.engine.taskMgr.step()
         return ret
 
     def done_function(self, vehicle_id: str):
@@ -278,9 +275,6 @@ class NuPlanEnv(BaseEnv):
         # ret = vehicle.crash_sidewalk
         # return ret
 
-    def stop(self):
-        self.in_stop = not self.in_stop
-
 
 if __name__ == "__main__":
     env = NuPlanEnv(
@@ -295,7 +289,7 @@ if __name__ == "__main__":
             # "debug": True,
             "debug_static_world": False,
             "debug_physics_world": False,
-            "load_city_map": False,
+            "load_city_map": True,
             # "global_light": False,
             "window_size": (1200, 800),
             # "multi_thread_render_mode": "Cull/Draw",
@@ -328,14 +322,15 @@ if __name__ == "__main__":
         }
     )
     success = []
-    # env.reset()
-    for seed in range(23, 28):
+    env.reset(force_seed=60)
+    for seed in [i for i in range(22, 28)] + [35, 39, 42, 43, 44, 49, 51, 55, 58, 60]:
         env.reset(force_seed=seed)
         for i in range(env.engine.data_manager.current_scenario_length * 10):
             o, r, d, info = env.step([0, 0])
-            env.render(text={"seed": env.current_seed})
+            # env.render(text={"seed": env.current_seed})
             if info["replay_done"]:
                 break
+    sys.exit()
 
 # cull/draw camera
 # draw set_state

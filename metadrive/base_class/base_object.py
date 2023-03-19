@@ -365,7 +365,7 @@ class BaseObject(BaseRunnable):
         """
         Return the roll of this object
         """
-        return self.origin.getR()
+        return np.deg2rad(self.origin.getR())
 
     def set_roll(self, roll):
         self.origin.setR(roll)
@@ -375,7 +375,7 @@ class BaseObject(BaseRunnable):
         """
         Return the pitch of this object
         """
-        return self.origin.getP()
+        return np.deg2rad(self.origin.getP())
 
     def set_pitch(self, pitch):
         self.origin.setP(pitch)
@@ -425,3 +425,6 @@ class BaseObject(BaseRunnable):
 
     def show_coordinates(self):
         pass
+
+    def get_z(self):
+        return self.origin.getZ()

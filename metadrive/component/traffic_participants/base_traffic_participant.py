@@ -1,4 +1,5 @@
 from typing import Tuple, Sequence
+import numpy as np
 from metadrive.constants import CollisionGroup
 
 from panda3d.core import LVector3, NodePath
@@ -34,11 +35,11 @@ class BaseTrafficParticipant(BaseObject):
 
     @property
     def roll(self):
-        return self.origin.getP()
+        return np.deg2rad(self.origin.getP())
 
     @property
     def pitch(self):
-        return self.origin.getR()
+        return np.deg2rad(self.origin.getR())
 
     def add_body(self, physics_body):
         super(BaseTrafficParticipant, self).add_body(physics_body)

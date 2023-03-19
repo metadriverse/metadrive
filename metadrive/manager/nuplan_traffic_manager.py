@@ -1,4 +1,5 @@
 import copy
+import numpy as np
 
 from nuplan.common.actor_state.tracked_objects_types import TrackedObjectType
 from metadrive.constants import DEFAULT_AGENT
@@ -40,10 +41,7 @@ class NuPlanTrafficManager(BaseManager):
             return dict(default_agent=dict(replay_done=True))
 
         vehicles_to_eliminate = self.nuplan_id_to_obj_id.keys() - self._episode_traffic_data[self.engine.episode_step
-                                                                                             ].keys()
-        for nuplan_id in list(vehicles_to_eliminate):
-            self.clear_objects([self.nuplan_id_to_obj_id[nuplan_id]])
-            self.nuplan_id_to_obj_id.pop(nuplan_id)
+        ].keys()
 
         for nuplan_id, obj_state in self._episode_traffic_data[self.engine.episode_step].items():
             if obj_state.tracked_object_type not in self.available_type:
@@ -51,6 +49,9 @@ class NuPlanTrafficManager(BaseManager):
             state = parse_object_state(obj_state, self.engine.current_map.nuplan_center)
             if nuplan_id in self.nuplan_id_to_obj_id and \
                     self.nuplan_id_to_obj_id[nuplan_id] in self.spawned_objects.keys():
+                if self.is_outlier(nuplan_id):
+                    vehicles_to_eliminate.add(nuplan_id)
+                    continue
                 policy = self.get_policy(self.nuplan_id_to_obj_id[nuplan_id])
                 policy.act(state)
             else:
@@ -60,6 +61,10 @@ class NuPlanTrafficManager(BaseManager):
                     self.spawn_cyclist(state, nuplan_id)
                 elif obj_state.tracked_object_type == TrackedObjectType.PEDESTRIAN:
                     self.spawn_pedestrian(state, nuplan_id)
+
+        for nuplan_id in list(vehicles_to_eliminate):
+            self.clear_objects([self.nuplan_id_to_obj_id[nuplan_id]])
+            self.nuplan_id_to_obj_id.pop(nuplan_id)
         return dict(default_agent=dict(replay_done=False))
 
     @property
@@ -141,3 +146,10 @@ class NuPlanTrafficManager(BaseManager):
         if length <= 4:
             return SVehicle
         return [LVehicle, MVehicle, SVehicle, XLVehicle][self.np_random.randint(4)]
+
+    def is_outlier(self, nuplan_id):
+        obj = self.spawned_objects[self.nuplan_id_to_obj_id[nuplan_id]]
+        if obj.get_z() > 2. or abs(obj.roll) > np.pi / 12 or abs(obj.pitch) > np.pi / 12:
+            return True
+        else:
+            return False
