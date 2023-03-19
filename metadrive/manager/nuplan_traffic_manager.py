@@ -1,7 +1,7 @@
 import copy
 
 from nuplan.common.actor_state.tracked_objects_types import TrackedObjectType
-
+from metadrive.constants import DEFAULT_AGENT
 from metadrive.component.traffic_participants.cyclist import Cyclist
 from metadrive.component.traffic_participants.pedestrian import Pedestrian
 from metadrive.component.vehicle.vehicle_type import SVehicle
@@ -38,7 +38,7 @@ class NuPlanTrafficManager(BaseManager):
 
     def after_step(self, *args, **kwargs):
         if self.episode_step >= self.current_scenario_length:
-            return dict(replay_done=True)
+            return dict(default_agent=dict(replay_done=True))
 
         vehicles_to_eliminate = self.nuplan_id_to_obj_id.keys() - self._episode_traffic_data[self.engine.episode_step
         ].keys()
@@ -61,7 +61,7 @@ class NuPlanTrafficManager(BaseManager):
                     self.spawn_cyclist(state, nuplan_id)
                 elif obj_state.tracked_object_type == TrackedObjectType.PEDESTRIAN:
                     self.spawn_pedestrian(state, nuplan_id)
-        return dict(replay_done=False)
+        return dict(default_agent=dict(replay_done=False))
 
     @property
     def current_scenario(self):

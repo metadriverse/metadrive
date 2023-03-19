@@ -74,6 +74,8 @@ class EngineCore(ShowBase.ShowBase):
     # loadPrcFileData("", "transform-cache 0")
     # loadPrcFileData("", "state-cache 0")
     loadPrcFileData("", "garbage-collect-states 0")
+    # loadPrcFileData("", "allow-incomplete-render #t")
+    # loadPrcFileData("", "# even-animation #t")
 
     # loadPrcFileData("", " framebuffer-srgb truein")
     # loadPrcFileData("", "geom-cache-size 50000")

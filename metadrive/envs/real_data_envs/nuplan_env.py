@@ -313,9 +313,9 @@ if __name__ == "__main__":
                 show_navi_mark=False,
                 show_dest_mark=False
             ),
-            "show_interface":False,
-            "force_render_fps": 40,
-            "show_fps": False,
+            # "show_interface":False,
+            # "force_render_fps": 40,
+            # "show_fps": False,
         }
     )
     success = []
