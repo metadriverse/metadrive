@@ -187,8 +187,8 @@ class NuPlanEnv(BaseEnv):
         # for compatibility
         # crash almost equals to crashing with vehicles
         done_info[TerminationState.CRASH] = (
-            done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
-            or done_info[TerminationState.CRASH_BUILDING]
+                done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
+                or done_info[TerminationState.CRASH_BUILDING]
         )
         return done, done_info
 
@@ -295,7 +295,7 @@ if __name__ == "__main__":
             # "debug": True,
             "debug_static_world": False,
             "debug_physics_world": False,
-            "load_city_map": True,
+            "load_city_map": False,
             # "global_light": False,
             "window_size": (1200, 800),
             # "multi_thread_render_mode": "Cull/Draw",
@@ -313,7 +313,9 @@ if __name__ == "__main__":
                 show_navi_mark=False,
                 show_dest_mark=False
             ),
-            # "show_interface":False
+            "show_interface":False,
+            "force_render_fps": 40,
+            "show_fps": False,
         }
     )
     success = []
@@ -322,17 +324,7 @@ if __name__ == "__main__":
         env.reset(force_seed=seed)
         for i in range(env.engine.data_manager.current_scenario_length * 10):
             o, r, d, info = env.step([0, 0])
-
-            # assert env.observation_space.contains(o)
-            # c_lane = env.vehicle.lane
-            # long, lat, = c_lane.local_coordinates(env.vehicle.position)
-            # if env.config["use_render"]:
-            env.render(text={"seed": seed})
-            #     )
-            #
-            if d:
-                if info["arrive_dest"]:
-                    print("seed:{}, success".format(env.engine.global_random_seed))
+            if info["replay_done"]:
                 break
 
 # cull/draw camera

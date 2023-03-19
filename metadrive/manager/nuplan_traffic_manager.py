@@ -38,10 +38,10 @@ class NuPlanTrafficManager(BaseManager):
 
     def after_step(self, *args, **kwargs):
         if self.episode_step >= self.current_scenario_length:
-            return
+            return dict(replay_done=True)
 
         vehicles_to_eliminate = self.nuplan_id_to_obj_id.keys() - self._episode_traffic_data[self.engine.episode_step
-                                                                                             ].keys()
+        ].keys()
         for nuplan_id in list(vehicles_to_eliminate):
             self.clear_objects([self.nuplan_id_to_obj_id[nuplan_id]])
             self.nuplan_id_to_obj_id.pop(nuplan_id)
@@ -61,6 +61,7 @@ class NuPlanTrafficManager(BaseManager):
                     self.spawn_cyclist(state, nuplan_id)
                 elif obj_state.tracked_object_type == TrackedObjectType.PEDESTRIAN:
                     self.spawn_pedestrian(state, nuplan_id)
+        return dict(replay_done=False)
 
     @property
     def current_scenario(self):
