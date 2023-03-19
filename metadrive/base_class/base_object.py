@@ -331,14 +331,14 @@ class BaseObject(BaseRunnable):
         speed = norm(velocity[0], velocity[1]) * 3.6
         return clip(speed, 0.0, 100000.0)
 
-    def set_heading_theta(self, heading_theta, rad_to_degree=True) -> None:
+    def set_heading_theta(self, heading_theta, in_rad=True) -> None:
         """
         Set heading theta for this object
         :param heading_theta: float
-        :param in_rad: when set to True transfer to degree automatically
+        :param in_rad: when set to True, heading theta should be in rad, otherwise, in degree
         """
         h = panda_heading(heading_theta)
-        if rad_to_degree:
+        if in_rad:
             h = h * 180 / np.pi
         self.origin.setH(h)
 

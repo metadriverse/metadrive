@@ -50,7 +50,7 @@ class NuplanParticipantManager(BaseManager):
             if nuplan_id in self.nuplan_id_to_obj and self.nuplan_id_to_obj[nuplan_id] in self.spawned_objects.keys():
                 self.spawned_objects[self.nuplan_id_to_obj[nuplan_id]].set_position(state["position"])
                 self.spawned_objects[self.nuplan_id_to_obj[nuplan_id]].set_heading_theta(
-                    state["heading"], rad_to_degree=True
+                    state["heading"], in_rad=True
                 )
                 self.spawned_objects[self.nuplan_id_to_obj[nuplan_id]].set_velocity(state["velocity"])
             else:

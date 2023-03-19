@@ -80,7 +80,7 @@ class ReplayEgoCarPolicy(BasePolicy):
             pass
         else:
             this_heading = self.traj_info[int(self.timestep)]["heading"]
-            self.control_object.set_heading_theta(this_heading, rad_to_degree=False)
+            self.control_object.set_heading_theta(this_heading)
 
         return [0, 0]
 
@@ -130,7 +130,7 @@ class NuPlanReplayEgoCarPolicy(ReplayEgoCarPolicy):
             pass
         else:
             this_heading = self.traj_info[int(self.timestep)]["heading"]
-            self.control_object.set_heading_theta(this_heading, rad_to_degree=False)
+            self.control_object.set_heading_theta(this_heading, in_rad=True)
 
         return [0, 0]
 
@@ -156,6 +156,6 @@ class NuPlanReplayTrafficParticipantPolicy(BasePolicy):
         else:
             return [0, 0]
         self.control_object.set_position(obj_state["position"], self.fix_height)
-        self.control_object.set_heading_theta(obj_state["heading"], rad_to_degree=True)
+        self.control_object.set_heading_theta(obj_state["heading"], in_rad=True)
         self.control_object.set_velocity(obj_state["velocity"])
         return [0, 0]
