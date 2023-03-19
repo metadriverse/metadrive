@@ -587,12 +587,12 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             if path not in BaseVehicle.model_collection:
                 car_model = self.loader.loadModel(AssetLoader.file_path("models", path, "vehicle.gltf"))
                 BaseVehicle.model_collection[path] = car_model
+                car_model.setScale(scale)
+                car_model.setH(H)
+                car_model.setPos(x_y_z_offset)
+                car_model.setZ(-self.TIRE_RADIUS - self.CHASSIS_TO_WHEEL_AXIS + x_y_z_offset[-1])
             else:
                 car_model = BaseVehicle.model_collection[path]
-            car_model.setScale(scale)
-            car_model.setH(H)
-            car_model.setPos(x_y_z_offset)
-            car_model.setZ(-self.TIRE_RADIUS - self.CHASSIS_TO_WHEEL_AXIS + x_y_z_offset[-1])
             car_model.instanceTo(self.origin)
             if self.config["random_color"]:
                 material = Material()
