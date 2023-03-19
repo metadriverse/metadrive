@@ -28,7 +28,7 @@ class Cyclist(BaseTrafficParticipant):
         n = BaseRigidBodyNode(self.name, self.NAME)
         self.add_body(n)
 
-        self.body.addShape(BulletBoxShape((self.LENGTH / 2, self.WIDTH / 2,  self.HEIGHT / 2)))
+        self.body.addShape(BulletBoxShape((self.LENGTH / 2, self.WIDTH / 2, self.HEIGHT / 2)))
         if self.render:
             if Cyclist.MODEL is None:
                 model = self.loader.loadModel(AssetLoader.file_path("models", "bicycle", "scene.gltf"))

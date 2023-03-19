@@ -2,7 +2,6 @@ from metadrive.policy.base_policy import BasePolicy
 
 has_rendered = False
 
-
 # class ReplayPolicy(BasePolicy):
 #     def __init__(self, control_object, locate_info):
 #         super(ReplayPolicy, self).__init__(control_object=control_object)
@@ -42,7 +41,6 @@ class ReplayEgoCarPolicy(BasePolicy):
     Replay policy from Real data. For adding new policy, overwrite get_trajectory_info()
     This policy is designed for Waymo Policy by default
     """
-
     def __init__(self, control_object, random_seed):
         super(ReplayEgoCarPolicy, self).__init__(control_object=control_object)
         self.traj_info = self.get_trajectory_info()
@@ -141,7 +139,6 @@ class NuPlanReplayTrafficParticipantPolicy(BasePolicy):
     """
     This policy should be used with TrafficParticipantManager Together
     """
-
     def __init__(self, control_object, fix_height=None, random_seed=None, config=None):
         super(NuPlanReplayTrafficParticipantPolicy, self).__init__(control_object, random_seed, config)
         self.fix_height = fix_height
