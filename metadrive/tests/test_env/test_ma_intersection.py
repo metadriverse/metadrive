@@ -198,6 +198,8 @@ def test_ma_intersection_reset():
                 # Force vehicle to success!
                 for v_id, v in env.vehicles.items():
                     loc = v.navigation.final_lane.end
+                    # vehicle will stack together to explode!
+                    v.set_position(loc, height=int(v_id[5:]) * 2)
                     v.set_position(loc)
                     pos = v.position
                     np.testing.assert_almost_equal(pos, loc, decimal=3)

@@ -199,7 +199,8 @@ def test_ma_roundabout_reset():
                 # Force vehicle to success!
                 for v_id, v in env.vehicles.items():
                     loc = v.navigation.final_lane.end
-                    v.set_position(loc)
+                    # vehicle will stack together to explode!
+                    v.set_position(loc, height=int(v_id[5:]) * 2)
                     pos = v.position
                     np.testing.assert_almost_equal(pos, loc, decimal=3)
                     new_loc = v.navigation.final_lane.end

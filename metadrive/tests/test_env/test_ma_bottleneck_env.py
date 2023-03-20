@@ -180,7 +180,7 @@ def test_ma_bottleneck_reset():
         env.close()
 
     # Put vehicles to destination and then reset. This might cause error if agent is assigned destination BEFORE reset.
-    env = MultiAgentBottleneckEnv({"horizon": 100, "num_agents": 32, "success_reward": 777})
+    env = MultiAgentBottleneckEnv({"horizon": 100, "num_agents": 32, "success_reward": 777, "use_render": False})
     try:
         _check_spaces_before_reset(env)
         success_count = 0
@@ -199,7 +199,8 @@ def test_ma_bottleneck_reset():
                 # Force vehicle to success!
                 for v_id, v in env.vehicles.items():
                     loc = v.navigation.final_lane.end
-                    v.set_position(loc)
+                    # vehicle will stack together to explode!
+                    v.set_position(loc, height=int(v_id[5:]) * 2)
                     pos = v.position
                     np.testing.assert_almost_equal(pos, loc, decimal=3)
                     new_loc = v.navigation.final_lane.end
