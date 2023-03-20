@@ -15,6 +15,8 @@ MULTI_AGENT_METADRIVE_DEFAULT_CONFIG = dict(
     num_agents=15,
     # If num_agents is set to None, then endless vehicles will be added only the empty spawn points exist
     random_agent_model=False,
+    # If True, the spawn position will be deterministic for each episode, usually used for deterministic test
+    force_seed_spawn_manager=False,
 
     # Whether to terminate a vehicle if it crash with others. Since in MA env the crash is extremely dense, so
     # frequently done might not be a good idea.
@@ -113,9 +115,9 @@ class MultiAgentMetaDrive(MetaDriveEnv):
             config = copy.deepcopy(ret_config["vehicle_config"])
             if agent_id in ret_config["target_vehicle_configs"]:
                 config["_specified_spawn_lane"
-                       ] = True if "spawn_lane_index" in ret_config["target_vehicle_configs"][agent_id] else False
+                ] = True if "spawn_lane_index" in ret_config["target_vehicle_configs"][agent_id] else False
                 config["_specified_destination"
-                       ] = True if "destination" in ret_config["target_vehicle_configs"][agent_id] else False
+                ] = True if "destination" in ret_config["target_vehicle_configs"][agent_id] else False
                 config.update(ret_config["target_vehicle_configs"][agent_id])
             target_vehicle_configs[agent_id] = config
         ret_config["target_vehicle_configs"] = target_vehicle_configs

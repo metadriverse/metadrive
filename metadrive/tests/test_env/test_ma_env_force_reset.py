@@ -1,5 +1,6 @@
 import copy
-
+from metadrive.envs.marl_envs.multi_agent_metadrive import MULTI_AGENT_METADRIVE_DEFAULT_CONFIG
+MULTI_AGENT_METADRIVE_DEFAULT_CONFIG["force_seed_spawn_manager"]= True
 from metadrive.envs.marl_envs.marl_inout_roundabout import MultiAgentRoundaboutEnv
 
 

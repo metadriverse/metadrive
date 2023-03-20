@@ -1,5 +1,6 @@
 import time
-
+from metadrive.envs.marl_envs.multi_agent_metadrive import MULTI_AGENT_METADRIVE_DEFAULT_CONFIG
+MULTI_AGENT_METADRIVE_DEFAULT_CONFIG["force_seed_spawn_manager"]= True
 import numpy as np
 from gym.spaces import Box, Dict
 
@@ -689,7 +690,7 @@ def test_ma_no_reset_error():
 
 def test_randomize_spawn_place():
     last_pos = {}
-    env = MultiAgentTollgateEnv({"num_agents": 4, "use_render": False})
+    env = MultiAgentTollgateEnv({"num_agents": 4, "use_render": False, "force_seed_spawn_manager": False})
     try:
         obs = env.reset()
         for step in range(100):

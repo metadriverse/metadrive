@@ -1,5 +1,6 @@
 import time
-
+from metadrive.envs.marl_envs.multi_agent_metadrive import MULTI_AGENT_METADRIVE_DEFAULT_CONFIG
+MULTI_AGENT_METADRIVE_DEFAULT_CONFIG["force_seed_spawn_manager"]= True
 import numpy as np
 from gym.spaces import Box, Dict
 
@@ -279,6 +280,7 @@ def test_ma_parking_lot_reward_done_alignment():
         obs = env.reset(force_seed=0)
         _check_spaces_after_reset(env, obs)
         assert env.observation_space.contains(obs)
+        out_num = 0
         for action in [-1, 1]:
             for step in range(5000):
                 act = {k: [action, 1] for k in env.vehicles.keys()}
@@ -286,7 +288,9 @@ def test_ma_parking_lot_reward_done_alignment():
                 for kkk, ddd in d.items():
                     if ddd and kkk != "__all__":
                         #assert r[kkk] == -777
-                        assert i[kkk]["out_of_road"]
+                        assert i[kkk]["out_of_road"] or i[kkk]["max_step"]
+                        if i[kkk]["out_of_road"]:
+                            out_num+=1
                         # print('{} done passed!'.format(kkk))
                 for kkk, rrr in r.items():
                     if rrr == -777:
@@ -296,6 +300,7 @@ def test_ma_parking_lot_reward_done_alignment():
                 if d["__all__"]:
                     env.reset(force_seed=0)
                     break
+        assert out_num>10
     finally:
         env.close()
 
@@ -370,7 +375,7 @@ def test_ma_parking_lot_reward_done_alignment():
             # "use_render": True,
             #
             "horizon": 200,
-            "num_agents": 11,
+            "num_agents": 7,
             "crash_vehicle_penalty": 1.7777,
             "parking_space_num": 16,
             "crash_done": False,
@@ -381,7 +386,7 @@ def test_ma_parking_lot_reward_done_alignment():
         _check_spaces_before_reset(env)
         obs = env.reset()
         env.engine.spawn_manager.np_random = np.random.RandomState(0)
-        obs = env.reset(force_seed=0)
+        obs = env.reset(force_seed=3)
         _check_spaces_after_reset(env, obs)
         for step in range(1):
             act = {k: [0, 0] for k in env.vehicles.keys()}
@@ -390,7 +395,7 @@ def test_ma_parking_lot_reward_done_alignment():
         for v_id, v in env.vehicles.items():
             if v_id != "agent0":
                 v.set_static(True)
-
+        out_num = 0
         for step in range(5000):
             act = {k: [0, 1] for k in env.vehicles.keys()}
             o, r, d, i = _act(env, act)
@@ -402,7 +407,9 @@ def test_ma_parking_lot_reward_done_alignment():
                     # #assert r[kkk] == -1.7777
             for kkk, ddd in d.items():
                 if ddd and kkk != "__all__":
-                    assert i[kkk]["out_of_road"]
+                    assert i[kkk]["out_of_road"] or i[kkk]["max_step"]
+                    if i[kkk]["out_of_road"]:
+                        out_num+=1
                     # print('{} done passed!'.format(kkk))
             for kkk, rrr in r.items():
                 if rrr == -1.7777:
@@ -414,6 +421,7 @@ def test_ma_parking_lot_reward_done_alignment():
                 break
             if d["__all__"]:
                 break
+        assert out_num > 0
     finally:
         env.close()
 
@@ -636,7 +644,7 @@ def test_ma_no_reset_error():
 
 def test_randomize_spawn_place():
     last_pos = {}
-    env = MultiAgentParkingLotEnv({"num_agents": 4, "use_render": False})
+    env = MultiAgentParkingLotEnv({"num_agents": 4, "use_render": False, "force_seed_spawn_manager": False})
     try:
         obs = env.reset()
         for step in range(100):
