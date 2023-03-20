@@ -174,7 +174,9 @@ def test_set_angular_v_and_set_v_no_friction(render=False):
             "decision_repeat": 5,
             "map": "SSS",
             "use_render": render,
-            "vehicle_config": {"no_wheel_friction": True}
+            "vehicle_config": {
+                "no_wheel_friction": True
+            }
         }
     )
     try:
@@ -239,7 +241,9 @@ def test_set_angular_v_and_set_v_no_friction_pedestrian(render=False):
             "decision_repeat": 5,
             "map": "S",
             "use_render": render,
-            "vehicle_config": {"no_wheel_friction": True}
+            "vehicle_config": {
+                "no_wheel_friction": True
+            }
         }
     )
     try:
@@ -250,7 +254,7 @@ def test_set_angular_v_and_set_v_no_friction_pedestrian(render=False):
             # 10 s , np.pi/10 per second
             obj_1.set_angular_velocity(np.pi / 10)
             o, r, d, info = env.step([0, 0])
-        assert abs(wrap_to_pi(obj_1.heading_theta) - np.pi/10) < 1e-2, obj_1.heading_theta
+        assert abs(wrap_to_pi(obj_1.heading_theta) - np.pi / 10) < 1e-2, obj_1.heading_theta
         obj_1.destroy()
 
         o = env.reset()
@@ -261,7 +265,7 @@ def test_set_angular_v_and_set_v_no_friction_pedestrian(render=False):
             # 10 s , np.pi/10 per second
             obj_1.set_angular_velocity(18, in_rad=False)
             o, r, d, info = env.step([0, 0])
-        assert abs(wrap_to_pi(obj_1.heading_theta) - np.pi/10) < 1e-2, obj_1.heading_theta
+        assert abs(wrap_to_pi(obj_1.heading_theta) - np.pi / 10) < 1e-2, obj_1.heading_theta
         print(obj_1.heading_theta / np.pi * 180)
         obj_1.destroy()
 

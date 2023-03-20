@@ -43,7 +43,6 @@ def clear_node_list(node_path_list):
             # It saves Waymo env!!!
             node_path.destroy()
 
-
         elif isinstance(node_path, BaseGhostBodyNode):
             # PZH: Note that this line is extremely important!!!
             # It breaks the cycle reference thus we can release nodes!!!

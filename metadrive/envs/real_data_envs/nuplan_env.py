@@ -36,8 +36,10 @@ NUPLAN_ENV_CONFIG = dict(
     city_map_radius=20000,  # load the whole map, setting as large as possible
     scenario_radius=250,  # radius for per case
     load_city_map=False,
-    map_centers={'us-nv-las-vegas-strip': nuplan_to_metadrive_vector([664396, 3997613]),
-                 'sg-one-north': nuplan_to_metadrive_vector([365427, 143908])},
+    map_centers={
+        'us-nv-las-vegas-strip': nuplan_to_metadrive_vector([664396, 3997613]),
+        'sg-one-north': nuplan_to_metadrive_vector([365427, 143908])
+    },
 
     # ===== Traffic =====
     no_pedestrian=True,
@@ -185,8 +187,8 @@ class NuPlanEnv(BaseEnv):
         # for compatibility
         # crash almost equals to crashing with vehicles
         done_info[TerminationState.CRASH] = (
-                done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
-                or done_info[TerminationState.CRASH_BUILDING]
+            done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
+            or done_info[TerminationState.CRASH_BUILDING]
         )
         return done, done_info
 
