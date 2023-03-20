@@ -46,7 +46,6 @@ if __name__ == "__main__":
                 # "vehicle_model": "xl",
                 # "rgb_camera": (1024, 1024),
                 # "spawn_velocity": [8.728615581032535, -0.24411703918728195],
-                # "spawn_position_heading": [(10, -2), -np.pi / 2],
                 "spawn_velocity_car_frame": True,
                 # "image_source": "depth_camera",
                 # "random_color": True

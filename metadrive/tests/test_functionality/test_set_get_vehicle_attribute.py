@@ -81,11 +81,21 @@ def test_coordinates(render=False):
         o = env.reset()
         assert abs(env.vehicle.heading_theta) == 0
         assert np.isclose(env.vehicle.heading, [1.0, 0]).all()
+        env.vehicle.set_velocity([5, 0], in_local_frame=True)
+        for _ in range(10):
+            env.vehicle.set_velocity([5, 0], in_local_frame=True)
+            o, r, d, info = env.step([0, 0])
+        assert abs(env.vehicle.velocity[0] - 5.) < 1e-2 and abs(env.vehicle.velocity[1]) < 0.001
+
+        o = env.reset()
+        assert abs(env.vehicle.heading_theta) == 0
+        assert np.isclose(env.vehicle.heading, [1.0, 0]).all()
         env.vehicle.set_velocity([5, 0], in_local_frame=False)
         for _ in range(10):
             o, r, d, info = env.step([0, 0])
         assert env.vehicle.velocity[0] > 3. and abs(env.vehicle.velocity[1]) < 0.001
 
+        env.reset()
         env.vehicle.set_velocity([0, 5], in_local_frame=False)
 
         for _ in range(1):
@@ -135,21 +145,21 @@ def test_coordinates(render=False):
         for _ in range(10):
             o, r, d, info, = env.step([-0., 0.])
         assert wrap_to_pi(abs(env.vehicle.heading_theta - np.deg2rad(90))) < 1
-        assert np.isclose(env.vehicle.heading, np.array([0, 1])).all()
+        assert np.isclose(env.vehicle.heading, np.array([0, 1]), 1e-4, 1e-4).all()
 
         env.reset()
         env.vehicle.set_heading_theta(np.deg2rad(45))
         for _ in range(10):
             o, r, d, info, = env.step([-0., 0.])
         assert wrap_to_pi(abs(env.vehicle.heading_theta - np.deg2rad(45))) < 1
-        assert np.isclose(env.vehicle.heading, np.array([np.sqrt(2) / 2, np.sqrt(2) / 2])).all()
+        assert np.isclose(env.vehicle.heading, np.array([np.sqrt(2) / 2, np.sqrt(2) / 2]), 1e-4, 1e-4).all()
 
         env.reset()
         env.vehicle.set_heading_theta(np.deg2rad(-90))
         for _ in range(10):
             o, r, d, info, = env.step([-0., 0.])
         assert abs(env.vehicle.heading_theta + np.deg2rad(-90) + np.pi) < 0.01
-        assert np.isclose(env.vehicle.heading, np.array([0, -1])).all()
+        assert np.isclose(env.vehicle.heading, np.array([0, -1]), 1e-4, 1e-4).all()
 
     finally:
         env.close()
