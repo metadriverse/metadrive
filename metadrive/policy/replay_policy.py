@@ -1,4 +1,9 @@
+import logging
+
 from metadrive.policy.base_policy import BasePolicy
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 has_rendered = False
 
@@ -98,6 +103,8 @@ class NuPlanReplayEgoCarPolicy(ReplayEgoCarPolicy):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.sim_time_interval = self.engine.data_manager.time_interval
+        if not self.control_object.config["no_wheel_friction"]:
+            logger.warning("\nNOTE:set no_wheel_friction in vehicle config can make the replay more smooth! \n")
 
         # self.control_object.disable_gravity()
 

@@ -306,12 +306,13 @@ if __name__ == "__main__":
                 side_detector=dict(num_lasers=160, distance=50),
                 # show_lidar=True
                 show_navi_mark=False,
-                show_dest_mark=False
+                show_dest_mark=False,
+                no_wheel_friction=True,
             ),
             "show_interface": False,
             "show_logo": False,
             "force_render_fps": 40,
-            "show_fps": True,
+            # "show_fps": True,
             "DATASET_PARAMS": [
                 'scenario_builder=nuplan_mini',
                 # use nuplan mini database (2.5h of 8 autolabeled logs in Las Vegas)
@@ -319,7 +320,7 @@ if __name__ == "__main__":
                 "scenario_filter.log_names=['2021.10.11.02.57.41_veh-50_01522_02088']",
                 'scenario_filter.limit_total_scenarios=1000',  # use 2 total scenarios
             ],
-            # "show_mouse": False,
+            "show_mouse": False,
         }
     )
     success = []
