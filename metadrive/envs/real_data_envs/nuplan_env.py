@@ -38,7 +38,8 @@ NUPLAN_ENV_CONFIG = dict(
     load_city_map=False,
     map_centers={
         'us-nv-las-vegas-strip': nuplan_to_metadrive_vector([664396, 3997613]),
-        'sg-one-north': nuplan_to_metadrive_vector([365427, 143908])
+        'sg-one-north': nuplan_to_metadrive_vector([365427, 143908]),
+        'us-pa-pittsburgh-hazelwood': nuplan_to_metadrive_vector([587631, 4475539])
     },
 
     # ===== Traffic =====
@@ -314,28 +315,29 @@ if __name__ == "__main__":
             "show_interface": False,
             "show_logo": False,
             "force_render_fps": 40,
-            # "show_fps": True,
+            "show_fps": False,
             "DATASET_PARAMS": [
                 'scenario_builder=nuplan_mini',
                 # use nuplan mini database (2.5h of 8 autolabeled logs in Las Vegas)
                 'scenario_filter=one_continuous_log',  # simulate only one log
-                "scenario_filter.log_names=['2021.10.11.02.57.41_veh-50_01522_02088']",
+                "scenario_filter.log_names=['2021.09.16.15.12.03_veh-42_01037_01434']",
                 'scenario_filter.limit_total_scenarios=1000',  # use 2 total scenarios
             ],
             "show_mouse": False,
         }
     )
     success = []
-    env.reset(force_seed=128)
-    for seed in range(10000):
-        env.reset(128)
+    env.reset(8)
+    for seed in [8, 14] * 10:
+        env.reset(seed)
+        # env.reset(seed)
         for i in range(env.engine.data_manager.current_scenario_length * 10):
             o, r, d, info = env.step([0, 0])
-            env.render(text={"seed": env.current_seed})
+            # env.render(text={"seed": env.current_seed})
             if info["replay_done"]:
                 break
     sys.exit()
 
 # cull/draw camera
 # draw set_state
-# 128
+# 2021.09.16.15.12.03_veh-42_01037_01434: 8/14
