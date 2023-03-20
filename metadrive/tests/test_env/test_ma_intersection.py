@@ -7,7 +7,8 @@ from metadrive.envs.marl_envs.marl_intersection import MultiAgentIntersectionEnv
 from metadrive.utils import distance_greater, norm
 
 from metadrive.envs.marl_envs.multi_agent_metadrive import MULTI_AGENT_METADRIVE_DEFAULT_CONFIG
-MULTI_AGENT_METADRIVE_DEFAULT_CONFIG["force_seed_spawn_manager"]= True
+MULTI_AGENT_METADRIVE_DEFAULT_CONFIG["force_seed_spawn_manager"] = True
+
 
 def _check_spaces_before_reset(env):
     a = set(env.config["target_vehicle_configs"].keys())
@@ -685,7 +686,7 @@ def test_ma_no_reset_error():
 
 def test_randomize_spawn_place():
     last_pos = {}
-    env = MultiAgentIntersectionEnv({"num_agents": 4, "use_render": False,  "force_seed_spawn_manager": False})
+    env = MultiAgentIntersectionEnv({"num_agents": 4, "use_render": False, "force_seed_spawn_manager": False})
     try:
         obs = env.reset()
         for step in range(100):

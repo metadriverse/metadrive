@@ -1,6 +1,6 @@
 import time
 from metadrive.envs.marl_envs.multi_agent_metadrive import MULTI_AGENT_METADRIVE_DEFAULT_CONFIG
-MULTI_AGENT_METADRIVE_DEFAULT_CONFIG["force_seed_spawn_manager"]= True
+MULTI_AGENT_METADRIVE_DEFAULT_CONFIG["force_seed_spawn_manager"] = True
 import numpy as np
 from gym.spaces import Box, Dict
 

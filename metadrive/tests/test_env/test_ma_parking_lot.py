@@ -1,6 +1,6 @@
 import time
 from metadrive.envs.marl_envs.multi_agent_metadrive import MULTI_AGENT_METADRIVE_DEFAULT_CONFIG
-MULTI_AGENT_METADRIVE_DEFAULT_CONFIG["force_seed_spawn_manager"]= True
+MULTI_AGENT_METADRIVE_DEFAULT_CONFIG["force_seed_spawn_manager"] = True
 import numpy as np
 from gym.spaces import Box, Dict
 
@@ -292,7 +292,7 @@ def test_ma_parking_lot_reward_done_alignment():
                         #assert r[kkk] == -777
                         assert i[kkk]["out_of_road"] or i[kkk]["max_step"]
                         if i[kkk]["out_of_road"]:
-                            out_num+=1
+                            out_num += 1
                         # print('{} done passed!'.format(kkk))
                 for kkk, rrr in r.items():
                     if rrr == -777:
@@ -302,7 +302,7 @@ def test_ma_parking_lot_reward_done_alignment():
                 if d["__all__"]:
                     env.reset(force_seed=0)
                     break
-        assert out_num>10
+        assert out_num > 10
     finally:
         env.close()
 
@@ -411,7 +411,7 @@ def test_ma_parking_lot_reward_done_alignment():
                 if ddd and kkk != "__all__":
                     assert i[kkk]["out_of_road"] or i[kkk]["max_step"]
                     if i[kkk]["out_of_road"]:
-                        out_num+=1
+                        out_num += 1
                     # print('{} done passed!'.format(kkk))
             for kkk, rrr in r.items():
                 if rrr == -1.7777:

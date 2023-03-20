@@ -115,9 +115,9 @@ class MultiAgentMetaDrive(MetaDriveEnv):
             config = copy.deepcopy(ret_config["vehicle_config"])
             if agent_id in ret_config["target_vehicle_configs"]:
                 config["_specified_spawn_lane"
-                ] = True if "spawn_lane_index" in ret_config["target_vehicle_configs"][agent_id] else False
+                       ] = True if "spawn_lane_index" in ret_config["target_vehicle_configs"][agent_id] else False
                 config["_specified_destination"
-                ] = True if "destination" in ret_config["target_vehicle_configs"][agent_id] else False
+                       ] = True if "destination" in ret_config["target_vehicle_configs"][agent_id] else False
                 config.update(ret_config["target_vehicle_configs"][agent_id])
             target_vehicle_configs[agent_id] = config
         ret_config["target_vehicle_configs"] = target_vehicle_configs

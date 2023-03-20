@@ -207,8 +207,8 @@ def test_ma_bottleneck_reset():
                     long, lat = v.navigation.final_lane.local_coordinates(v.position)
                     flag1 = (v.navigation.final_lane.length - 5 < long < v.navigation.final_lane.length + 5)
                     flag2 = (
-                            v.navigation.get_current_lane_width() / 2 >= lat >=
-                            (0.5 - v.navigation.get_current_lane_num()) * v.navigation.get_current_lane_width()
+                        v.navigation.get_current_lane_width() / 2 >= lat >=
+                        (0.5 - v.navigation.get_current_lane_num()) * v.navigation.get_current_lane_width()
                     )
                     if not env._is_arrive_destination(v):
                         print('sss')
@@ -467,7 +467,6 @@ def test_ma_bottleneck_reward_sign():
     straight road before coming into bottleneck.
     However, some bugs cause the vehicles receive negative reward by doing this behavior!
     """
-
     class TestEnv(MultiAgentBottleneckEnv):
         _respawn_count = 0
 
@@ -696,8 +695,14 @@ def test_ma_no_reset_error():
 
 def test_randomize_spawn_place():
     last_pos = {}
-    env = MultiAgentBottleneckEnv({"num_agents": 4, "use_render": False, "crash_done": False,
-                                   "force_seed_spawn_manager": False})
+    env = MultiAgentBottleneckEnv(
+        {
+            "num_agents": 4,
+            "use_render": False,
+            "crash_done": False,
+            "force_seed_spawn_manager": False
+        }
+    )
     try:
         obs = env.reset()
         for step in range(100):
