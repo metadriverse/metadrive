@@ -315,7 +315,7 @@ if __name__ == "__main__":
             "show_interface": False,
             "show_logo": False,
             "force_render_fps": 40,
-            "show_fps": False,
+            "show_fps": True,
             "DATASET_PARAMS": [
                 'scenario_builder=nuplan_mini',
                 # use nuplan mini database (2.5h of 8 autolabeled logs in Las Vegas)

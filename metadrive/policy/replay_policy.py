@@ -137,7 +137,6 @@ class NuPlanReplayEgoCarPolicy(ReplayEgoCarPolicy):
             angular_v = self.traj_info[int(self.timestep)]["angular_velocity"]
             self.control_object.set_heading_theta(this_heading)
             self.control_object.set_angular_velocity(angular_v)
-            # print(angular_v)
 
         return [0, 0]
 

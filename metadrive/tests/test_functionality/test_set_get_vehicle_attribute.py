@@ -161,7 +161,6 @@ def test_coordinates(render=False):
             o, r, d, info, = env.step([-0., 0.])
         assert abs(env.vehicle.heading_theta + np.deg2rad(-90) + np.pi) < 0.01
         assert np.isclose(env.vehicle.heading, np.array([0, -1]), 1e-4, 1e-4).all()
-
     finally:
         env.close()
 
