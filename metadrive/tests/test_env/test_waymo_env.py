@@ -37,4 +37,4 @@ def test_waymo_env(policy, render=False):
 
 
 if __name__ == "__main__":
-    test_waymo_env(policy=WaymoIDMPolicy, render=True)
+    test_waymo_env(policy=WaymoReplayEgoCarPolicy, render=True)

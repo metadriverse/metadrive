@@ -371,7 +371,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             # spawn_lane_index has second priority
             lane = map.road_network.get_lane(self.config["spawn_lane_index"])
             position = lane.position(self.config["spawn_longitude"], self.config["spawn_lateral"])
-            heading = np.rad2deg(lane.heading_theta_at(self.config["spawn_longitude"]))
+            heading = lane.heading_theta_at(self.config["spawn_longitude"])
         else:
             assert self.config["spawn_position_heading"] is not None, "At least setting one initialization method"
             position = self.config["spawn_position_heading"][0]
@@ -781,13 +781,14 @@ class BaseVehicle(BaseObject, BaseVehicleState):
                     sensor.destroy()
         self.image_sensors = {}
 
-    def set_heading_theta(self, heading_theta, rad_to_degree=True) -> None:
+    def set_heading_theta(self, heading_theta, in_rad=True) -> None:
         """
         Set heading theta for this object. Vehicle local frame has a 90 degree offset
         :param heading_theta: float in rad
+        :param in_rad: when set to True, heading theta should be in rad, otherwise, in degree
         """
         h = panda_heading(heading_theta)
-        if rad_to_degree:
+        if in_rad:
             h *= 180 / np.pi
         self.origin.setH(h - 90)
 

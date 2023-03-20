@@ -64,7 +64,7 @@ class WaymoTrafficManager(BaseManager):
         ret["position"] = waymo_to_metadrive_vector([state[0], state[1]])
         ret["length"] = state[3]
         ret["width"] = state[4]
-        ret["heading"] = waymo_to_metadrive_heading(np.rad2deg(state[6]))
+        ret["heading"] = waymo_to_metadrive_heading((state[6]))
         ret["velocity"] = waymo_to_metadrive_vector([state[7], state[8]])
         ret["valid"] = state[9]
         return ret
@@ -82,7 +82,7 @@ class WaymoTrafficManager(BaseManager):
                         self.vid_to_obj.pop(v_id)
                         continue
                     self.spawned_objects[self.vid_to_obj[v_id]].set_position(info["position"])
-                    self.spawned_objects[self.vid_to_obj[v_id]].set_heading_theta(info["heading"], rad_to_degree=False)
+                    self.spawned_objects[self.vid_to_obj[v_id]].set_heading_theta(info["heading"])
                     self.spawned_objects[self.vid_to_obj[v_id]].set_velocity(info["velocity"])
             self.count += 1
         except:

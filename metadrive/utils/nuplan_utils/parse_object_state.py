@@ -7,7 +7,7 @@ def parse_ego_vehicle_state(state, nuplan_center):
     center = nuplan_center
     ret = {}
     ret["position"] = nuplan_to_metadrive_vector([state.waypoint.x, state.waypoint.y], center)
-    ret["heading"] = nuplan_to_metadrive_heading(np.rad2deg(state.waypoint.heading))
+    ret["heading"] = nuplan_to_metadrive_heading(state.waypoint.heading)
     ret["velocity"] = nuplan_to_metadrive_vector([state.agent.velocity.x, state.agent.velocity.y])
     ret["valid"] = True
     ret["length"] = state.agent.box.length
