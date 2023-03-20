@@ -1,5 +1,7 @@
 from metadrive.envs.metadrive_env import MetaDriveEnv
 from metadrive.policy.idm_policy import IDMPolicy
+from metadrive.envs.marl_envs.multi_agent_metadrive import MULTI_AGENT_METADRIVE_DEFAULT_CONFIG
+MULTI_AGENT_METADRIVE_DEFAULT_CONFIG["force_seed_spawn_manager"] = True
 
 
 def test_ma_bidirection_idm(render=False):

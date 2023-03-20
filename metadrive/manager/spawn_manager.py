@@ -218,7 +218,8 @@ class SpawnManager(BaseManager):
 
     def seed(self, random_seed):
         """this class is used to ranomly choose the spawn places, which will not be controlled by any seed"""
-        return
+        if self.engine.global_config["force_seed_spawn_manager"]:
+            super(SpawnManager, self).seed(random_seed)
 
     def update_destination_for(self, agent_id, vehicle_config):
         """

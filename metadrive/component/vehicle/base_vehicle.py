@@ -7,7 +7,7 @@ from metadrive.utils.utils import get_object_from_node
 import numpy as np
 import seaborn as sns
 from panda3d.bullet import BulletVehicle, BulletBoxShape, ZUp
-from panda3d.core import Material, Vec3, TransformState, LQuaternionf, LVector3
+from panda3d.core import Material, Vec3, TransformState, LVector3
 
 from metadrive.base_class.base_object import BaseObject
 from metadrive.component.lane.abs_lane import AbstractLane
@@ -33,7 +33,7 @@ from metadrive.utils.math_utils import get_vertical_vector, norm, clip
 from metadrive.utils.math_utils import wrap_to_pi
 from metadrive.utils.scene_utils import ray_localization
 from metadrive.utils.scene_utils import rect_region_detection
-from metadrive.utils.space import VehicleParameterSpace, ParameterSpace
+from metadrive.component.pg_space import VehicleParameterSpace, ParameterSpace
 
 
 class BaseVehicleState:
@@ -647,7 +647,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         wheel.setSuspensionStiffness(self.SUSPENSION_STIFFNESS)
         wheel.setWheelsDampingRelaxation(4.8)
         wheel.setWheelsDampingCompression(1.2)
-        wheel.setFrictionSlip(self.config["wheel_friction"])
+        wheel.setFrictionSlip(self.config["wheel_friction"] if not self.config["no_wheel_friction"] else 0)
         wheel.setRollInfluence(0.5)
         return wheel
 

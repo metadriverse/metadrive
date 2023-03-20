@@ -7,7 +7,7 @@ from metadrive.component.pgblock.create_pg_block_utils import CreateAdverseRoad,
 from metadrive.component.pgblock.pg_block import PGBlock, PGBlockSocket
 from metadrive.component.road_network import Road
 from metadrive.constants import LineType, LineColor
-from metadrive.utils.space import ParameterSpace, Parameter, BlockParameterSpace
+from metadrive.component.pg_space import ParameterSpace, Parameter, BlockParameterSpace
 
 
 class ParkingLot(PGBlock):

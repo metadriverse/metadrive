@@ -36,7 +36,11 @@ NUPLAN_ENV_CONFIG = dict(
     city_map_radius=20000,  # load the whole map, setting as large as possible
     scenario_radius=250,  # radius for per case
     load_city_map=False,
-    map_centers={'us-nv-las-vegas-strip': nuplan_to_metadrive_vector([664396, 3997613])},
+    map_centers={
+        'us-nv-las-vegas-strip': nuplan_to_metadrive_vector([664396, 3997613]),
+        'sg-one-north': nuplan_to_metadrive_vector([365427, 143908]),
+        'us-pa-pittsburgh-hazelwood': nuplan_to_metadrive_vector([587631, 4475539])
+    },
 
     # ===== Traffic =====
     no_pedestrian=True,
@@ -295,7 +299,7 @@ if __name__ == "__main__":
             # "multi_thread_render_mode": "Cull/Draw",
             "start_case_index": 0,
             # "pstats": True,
-            "case_num": 1000,
+            "case_num": 400,
             "show_coordinates": False,
             "horizon": 1000,
             # "show_fps": False,
@@ -305,7 +309,8 @@ if __name__ == "__main__":
                 side_detector=dict(num_lasers=160, distance=50),
                 # show_lidar=True
                 show_navi_mark=False,
-                show_dest_mark=False
+                show_dest_mark=False,
+                no_wheel_friction=True,
             ),
             "show_interface": False,
             "show_logo": False,
@@ -315,22 +320,24 @@ if __name__ == "__main__":
                 'scenario_builder=nuplan_mini',
                 # use nuplan mini database (2.5h of 8 autolabeled logs in Las Vegas)
                 'scenario_filter=one_continuous_log',  # simulate only one log
-                "scenario_filter.log_names=['2021.05.12.22.00.38_veh-35_01008_01518']",
+                "scenario_filter.log_names=['2021.09.16.15.12.03_veh-42_01037_01434']",
                 'scenario_filter.limit_total_scenarios=1000',  # use 2 total scenarios
             ],
             "show_mouse": False,
         }
     )
     success = []
-    env.reset(force_seed=300)
-    for seed in range(9, 514):
-        env.reset(force_seed=seed)
+    env.reset(8)
+    for seed in [8, 14] * 10:
+        env.reset(seed)
+        # env.reset(seed)
         for i in range(env.engine.data_manager.current_scenario_length * 10):
             o, r, d, info = env.step([0, 0])
-            env.render(text={"seed": env.current_seed})
+            # env.render(text={"seed": env.current_seed})
             if info["replay_done"]:
                 break
     sys.exit()
 
 # cull/draw camera
 # draw set_state
+# 2021.09.16.15.12.03_veh-42_01037_01434: 8/14

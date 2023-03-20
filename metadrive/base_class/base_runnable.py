@@ -3,7 +3,7 @@ from typing import Dict
 from metadrive.base_class.configurable import Configurable
 from metadrive.base_class.nameable import Nameable
 from metadrive.base_class.randomizable import Randomizable
-from metadrive.utils.space import ParameterSpace
+from metadrive.component.pg_space import ParameterSpace
 
 
 class BaseRunnable(Configurable, Nameable, Randomizable):

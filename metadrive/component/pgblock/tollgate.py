@@ -5,7 +5,7 @@ from metadrive.component.pgblock.pg_block import PGBlockSocket
 from metadrive.component.road_network import Road
 from metadrive.constants import LineType, LineColor
 from metadrive.engine.engine_utils import get_engine
-from metadrive.utils.space import ParameterSpace, Parameter, BlockParameterSpace
+from metadrive.component.pg_space import ParameterSpace, Parameter, BlockParameterSpace
 
 
 class TollGate(PGBlock):

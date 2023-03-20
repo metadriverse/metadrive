@@ -9,10 +9,21 @@ def parse_ego_vehicle_state(state, nuplan_center):
     ret["position"] = nuplan_to_metadrive_vector([state.waypoint.x, state.waypoint.y], center)
     ret["heading"] = nuplan_to_metadrive_heading(state.waypoint.heading)
     ret["velocity"] = nuplan_to_metadrive_vector([state.agent.velocity.x, state.agent.velocity.y])
+    ret["angular_velocity"] = nuplan_to_metadrive_heading(state.dynamic_car_state.angular_velocity)
     ret["valid"] = True
     ret["length"] = state.agent.box.length
     ret["width"] = state.agent.box.width
     return ret
+
+
+def parse_ego_vehicle_state_trajectory(scenario, nuplan_center):
+    data = [
+        parse_ego_vehicle_state(scenario.get_ego_state_at_iteration(i), nuplan_center)
+        for i in range(scenario.get_number_of_iterations())
+    ]
+    for i in range(len(data) - 1):
+        data[i]["angular_velocity"] = (data[i + 1]["heading"] - data[i]["heading"]) / scenario.database_interval
+    return data
 
 
 def parse_ego_vehicle_trajectory(states, nuplan_center):
