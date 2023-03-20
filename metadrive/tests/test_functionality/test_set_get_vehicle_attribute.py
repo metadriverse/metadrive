@@ -1,4 +1,5 @@
 import numpy as np
+from metadrive.component.traffic_participants.pedestrian import Pedestrian
 from metadrive.utils.math_utils import wrap_to_pi
 
 from metadrive.envs.metadrive_env import MetaDriveEnv
@@ -165,6 +166,111 @@ def test_coordinates(render=False):
         env.close()
 
 
+def test_set_angular_v_and_set_v_no_friction(render=False):
+    env = MetaDriveEnv(
+        {
+            "environment_num": 1,
+            "traffic_density": 0.,
+            "decision_repeat": 5,
+            "map": "SSS",
+            "use_render": render,
+            "vehicle_config": {"no_wheel_friction": True}
+        }
+    )
+    try:
+        o = env.reset()
+        for _ in range(100):
+            # 10 s , np.pi/10 per second
+            env.vehicle.set_angular_velocity(np.pi / 10)
+            o, r, d, info = env.step([0, 0])
+        assert abs(wrap_to_pi(env.vehicle.heading_theta) - np.pi) < 1e-2, env.vehicle.heading_theta
+        print(env.vehicle.heading_theta / np.pi * 180)
+
+        o = env.reset()
+        for _ in range(100):
+            # 10 s , np.pi/10 per second
+            env.vehicle.set_angular_velocity(18, in_rad=False)
+            o, r, d, info = env.step([0, 0])
+        assert abs(wrap_to_pi(env.vehicle.heading_theta) - np.pi) < 1e-2, env.vehicle.heading_theta
+        print(env.vehicle.heading_theta / np.pi * 180)
+
+        o = env.reset()
+        start = env.vehicle.position[0]
+        for _ in range(100):
+            # 10 s
+            env.vehicle.set_velocity([1, 0], in_local_frame=True)
+            o, r, d, info = env.step([0, 0])
+        assert abs(env.vehicle.position[0] - start - 10) < 5e-2, env.vehicle.position
+
+        o = env.reset()
+        start = env.vehicle.position[0]
+        for _ in range(100):
+            # 10 s
+            env.vehicle.set_velocity([1, 0], in_local_frame=False)
+            o, r, d, info = env.step([0, 0])
+        assert abs(env.vehicle.position[0] - start - 10) < 5e-2, env.vehicle.position
+
+        o = env.reset()
+        start = env.vehicle.position[0]
+        env.vehicle.set_heading_theta(-np.pi / 2)
+        for _ in range(100):
+            # 10 s
+            env.vehicle.set_velocity([0, 1], in_local_frame=True)
+            o, r, d, info = env.step([0, 0])
+        assert abs(env.vehicle.position[0] - start - 10) < 5e-2, env.vehicle.position
+
+        o = env.reset()
+        start = env.vehicle.position[0]
+        env.vehicle.set_heading_theta(-np.pi / 2)
+        for _ in range(100):
+            # 10 s
+            env.vehicle.set_velocity([1, 0], in_local_frame=False)
+            o, r, d, info = env.step([0, 0])
+        assert abs(env.vehicle.position[0] - start - 10) < 5e-2, env.vehicle.position
+    finally:
+        env.close()
+
+
+def test_set_angular_v_and_set_v_no_friction_pedestrian(render=False):
+    env = MetaDriveEnv(
+        {
+            "environment_num": 1,
+            "traffic_density": 0.,
+            "decision_repeat": 5,
+            "map": "S",
+            "use_render": render,
+            "vehicle_config": {"no_wheel_friction": True}
+        }
+    )
+    try:
+        o = env.reset()
+        env.engine.terrain.dynamic_nodes[0].setFriction(0.)
+        obj_1 = env.engine.spawn_object(Pedestrian, position=[10, 3], heading_theta=0, random_seed=1)
+        for _ in range(10):
+            # 10 s , np.pi/10 per second
+            obj_1.set_angular_velocity(np.pi / 10)
+            o, r, d, info = env.step([0, 0])
+        assert abs(wrap_to_pi(obj_1.heading_theta) - np.pi/10) < 1e-2, obj_1.heading_theta
+        obj_1.destroy()
+
+        o = env.reset()
+        env.engine.terrain.dynamic_nodes[0].setFriction(0.)
+        obj_1 = env.engine.spawn_object(Pedestrian, position=[10, 3], heading_theta=0, random_seed=1)
+        for _ in range(10):
+            # obj_1.set_position([30,0], 10)
+            # 10 s , np.pi/10 per second
+            obj_1.set_angular_velocity(18, in_rad=False)
+            o, r, d, info = env.step([0, 0])
+        assert abs(wrap_to_pi(obj_1.heading_theta) - np.pi/10) < 1e-2, obj_1.heading_theta
+        print(obj_1.heading_theta / np.pi * 180)
+        obj_1.destroy()
+
+    finally:
+        env.close()
+
+
 if __name__ == "__main__":
-    test_coordinates(False)
+    test_set_angular_v_and_set_v_no_friction_pedestrian(True)
+    # test_set_angular_v_and_set_v_no_friction(True)
+    # test_coordinates(False)
     # test_set_get_vehicle_attribute(True)

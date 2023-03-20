@@ -2,6 +2,7 @@ from metadrive.policy.base_policy import BasePolicy
 
 has_rendered = False
 
+
 # class ReplayPolicy(BasePolicy):
 #     def __init__(self, control_object, locate_info):
 #         super(ReplayPolicy, self).__init__(control_object=control_object)
@@ -41,6 +42,7 @@ class ReplayEgoCarPolicy(BasePolicy):
     Replay policy from Real data. For adding new policy, overwrite get_trajectory_info()
     This policy is designed for Waymo Policy by default
     """
+
     def __init__(self, control_object, random_seed):
         super(ReplayEgoCarPolicy, self).__init__(control_object=control_object)
         self.traj_info = self.get_trajectory_info()
@@ -100,12 +102,9 @@ class NuPlanReplayEgoCarPolicy(ReplayEgoCarPolicy):
         # self.control_object.disable_gravity()
 
     def get_trajectory_info(self):
-        from metadrive.utils.nuplan_utils.parse_object_state import parse_ego_vehicle_state
+        from metadrive.utils.nuplan_utils.parse_object_state import parse_ego_vehicle_state_trajectory
         scenario = self.engine.data_manager.current_scenario
-        return [
-            parse_ego_vehicle_state(scenario.get_ego_state_at_iteration(i), self.engine.current_map.nuplan_center)
-            for i in range(scenario.get_number_of_iterations())
-        ]
+        return parse_ego_vehicle_state_trajectory(scenario, self.engine.current_map.nuplan_center)
 
     def act(self, *args, **kwargs):
         self.damp += self.damp_interval
@@ -130,7 +129,10 @@ class NuPlanReplayEgoCarPolicy(ReplayEgoCarPolicy):
             pass
         else:
             this_heading = self.traj_info[int(self.timestep)]["heading"]
+            angular_v = self.traj_info[int(self.timestep)]["angular_velocity"]
             self.control_object.set_heading_theta(this_heading)
+            self.control_object.set_angular_velocity(angular_v)
+            print(angular_v)
 
         return [0, 0]
 
@@ -139,6 +141,7 @@ class NuPlanReplayTrafficParticipantPolicy(BasePolicy):
     """
     This policy should be used with TrafficParticipantManager Together
     """
+
     def __init__(self, control_object, fix_height=None, random_seed=None, config=None):
         super(NuPlanReplayTrafficParticipantPolicy, self).__init__(control_object, random_seed, config)
         self.fix_height = fix_height
