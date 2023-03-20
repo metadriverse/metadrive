@@ -277,7 +277,7 @@ if __name__ == "__main__":
             "use_render": True,
             "agent_policy": WaymoIDMPolicy,
             "manual_control": True,
-            "replay": False,
+            "replay": True,
             "no_traffic": False,
             "debug": False,
             "debug_static_world": False,

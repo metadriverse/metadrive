@@ -82,7 +82,7 @@ class WaymoTrafficManager(BaseManager):
                         self.vid_to_obj.pop(v_id)
                         continue
                     self.spawned_objects[self.vid_to_obj[v_id]].set_position(info["position"])
-                    self.spawned_objects[self.vid_to_obj[v_id]].set_heading_theta(info["heading"], in_rad=False)
+                    self.spawned_objects[self.vid_to_obj[v_id]].set_heading_theta(info["heading"])
                     self.spawned_objects[self.vid_to_obj[v_id]].set_velocity(info["velocity"])
             self.count += 1
         except:

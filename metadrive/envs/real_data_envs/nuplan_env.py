@@ -310,15 +310,15 @@ if __name__ == "__main__":
             "show_interface": False,
             "show_logo": False,
             "force_render_fps": 40,
-            "show_fps": False,
-            # "DATASET_PARAMS": [
-            #     'scenario_builder=nuplan_mini',
-            #     # use nuplan mini database (2.5h of 8 autolabeled logs in Las Vegas)
-            #     'scenario_filter=one_continuous_log',  # simulate only one log
-            #     "scenario_filter.log_names=['2021.05.12.22.00.38_veh-35_01008_01518']",
-            #     'scenario_filter.limit_total_scenarios=1000',  # use 2 total scenarios
-            # ],
-            # "show_mouse": False,
+            "show_fps": True,
+            "DATASET_PARAMS": [
+                'scenario_builder=nuplan_mini',
+                # use nuplan mini database (2.5h of 8 autolabeled logs in Las Vegas)
+                'scenario_filter=one_continuous_log',  # simulate only one log
+                "scenario_filter.log_names=['2021.05.12.22.00.38_veh-35_01008_01518']",
+                'scenario_filter.limit_total_scenarios=1000',  # use 2 total scenarios
+            ],
+            "show_mouse": False,
         }
     )
     success = []
