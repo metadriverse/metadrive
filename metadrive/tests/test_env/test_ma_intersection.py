@@ -6,6 +6,9 @@ from gym.spaces import Box, Dict
 from metadrive.envs.marl_envs.marl_intersection import MultiAgentIntersectionEnv
 from metadrive.utils import distance_greater, norm
 
+from metadrive.envs.marl_envs.multi_agent_metadrive import MULTI_AGENT_METADRIVE_DEFAULT_CONFIG
+MULTI_AGENT_METADRIVE_DEFAULT_CONFIG["force_seed_spawn_manager"] = True
+
 
 def _check_spaces_before_reset(env):
     a = set(env.config["target_vehicle_configs"].keys())
@@ -196,6 +199,8 @@ def test_ma_intersection_reset():
                 # Force vehicle to success!
                 for v_id, v in env.vehicles.items():
                     loc = v.navigation.final_lane.end
+                    # vehicle will stack together to explode!
+                    v.set_position(loc, height=int(v_id[5:]) * 2)
                     v.set_position(loc)
                     pos = v.position
                     np.testing.assert_almost_equal(pos, loc, decimal=3)
@@ -681,7 +686,7 @@ def test_ma_no_reset_error():
 
 def test_randomize_spawn_place():
     last_pos = {}
-    env = MultiAgentIntersectionEnv({"num_agents": 4, "use_render": False})
+    env = MultiAgentIntersectionEnv({"num_agents": 4, "use_render": False, "force_seed_spawn_manager": False})
     try:
         obs = env.reset()
         for step in range(100):

@@ -70,11 +70,18 @@ def test_save_episode_marl(vis=False):
     test_dump = True
     dump_recent_episode = 5
     dump_count = 0
-    env = MultiAgentRoundaboutEnv(dict(use_render=vis, manual_control=False, record_episode=True, horizon=100))
+    env = MultiAgentRoundaboutEnv(
+        dict(use_render=vis, manual_control=False, record_episode=True, horizon=100, force_seed_spawn_manager=True)
+    )
     try:
         # Test Record
         o = env.reset(force_seed=1)
         epi_info = None
+        # for tt in range(10, 100):
+        tt = 13
+        print("\nseed: {}\n".format(tt))
+        env.engine.spawn_manager.seed(tt)
+        o = env.reset()
         for i in range(1, 100000 if vis else 600):
             o, r, d, info = env.step({agent_id: [0, .2] for agent_id in env.vehicles.keys()})
             if vis:

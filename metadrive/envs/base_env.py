@@ -75,6 +75,7 @@ BASE_DEFAULT_CONFIG = dict(
         show_line_to_dest=False,
         show_line_to_navi_mark=False,
         use_special_color=False,
+        no_wheel_friction=False,
 
         # ===== use image =====
         image_source="rgb_camera",  # take effect when only when image_observation == True

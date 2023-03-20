@@ -15,6 +15,8 @@ MULTI_AGENT_METADRIVE_DEFAULT_CONFIG = dict(
     num_agents=15,
     # If num_agents is set to None, then endless vehicles will be added only the empty spawn points exist
     random_agent_model=False,
+    # If True, the spawn position will be deterministic for each episode, usually used for deterministic test
+    force_seed_spawn_manager=False,
 
     # Whether to terminate a vehicle if it crash with others. Since in MA env the crash is extremely dense, so
     # frequently done might not be a good idea.

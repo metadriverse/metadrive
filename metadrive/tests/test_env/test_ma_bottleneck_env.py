@@ -1,5 +1,7 @@
 import time
+from metadrive.envs.marl_envs.multi_agent_metadrive import MULTI_AGENT_METADRIVE_DEFAULT_CONFIG
 
+MULTI_AGENT_METADRIVE_DEFAULT_CONFIG["force_seed_spawn_manager"] = True
 import numpy as np
 from gym.spaces import Box, Dict
 
@@ -143,7 +145,7 @@ def test_ma_bottleneck_horizon():
                         assert d[kkk]
                         assert i[kkk]["cost"] == 778
                         assert i[kkk]["out_of_road"]
-                        #assert r[kkk] == -777
+                        # assert r[kkk] == -777
 
                 if d["__all__"]:
                     break
@@ -178,7 +180,7 @@ def test_ma_bottleneck_reset():
         env.close()
 
     # Put vehicles to destination and then reset. This might cause error if agent is assigned destination BEFORE reset.
-    env = MultiAgentBottleneckEnv({"horizon": 100, "num_agents": 32, "success_reward": 777})
+    env = MultiAgentBottleneckEnv({"horizon": 100, "num_agents": 32, "success_reward": 777, "use_render": False})
     try:
         _check_spaces_before_reset(env)
         success_count = 0
@@ -197,7 +199,8 @@ def test_ma_bottleneck_reset():
                 # Force vehicle to success!
                 for v_id, v in env.vehicles.items():
                     loc = v.navigation.final_lane.end
-                    v.set_position(loc)
+                    # vehicle will stack together to explode!
+                    v.set_position(loc, height=int(v_id[5:]) * 2)
                     pos = v.position
                     np.testing.assert_almost_equal(pos, loc, decimal=3)
                     new_loc = v.navigation.final_lane.end
@@ -294,7 +297,7 @@ def test_ma_bottleneck_reward_done_alignment():
                     if ddd and kkk != "__all__" and not d["__all__"] and not i[kkk]["max_step"]:
                         if r[kkk] != -777:
                             raise ValueError
-                        #assert r[kkk] == -777
+                        # assert r[kkk] == -777
                         assert i[kkk]["out_of_road"]
                         # print('{} done passed!'.format(kkk))
                 for kkk, rrr in r.items():
@@ -346,11 +349,11 @@ def test_ma_bottleneck_reward_done_alignment():
                 iii = i[kkk]
                 assert iii["crash_vehicle"]
                 assert iii["crash"]
-                #assert r[kkk] == -1.7777
+                # assert r[kkk] == -1.7777
                 # for kkk, ddd in d.items():
                 ddd = d[kkk]
                 if ddd and kkk != "__all__":
-                    #assert r[kkk] == -1.7777
+                    # assert r[kkk] == -1.7777
                     assert i[kkk]["crash_vehicle"]
                     assert i[kkk]["crash"]
                     # print('{} done passed!'.format(kkk))
@@ -405,7 +408,7 @@ def test_ma_bottleneck_reward_done_alignment():
                     assert iii["crash_vehicle"]
                 if iii["crash_vehicle"]:
                     assert iii["crash"]
-                    #assert r[kkk] == -1.7777
+                    # assert r[kkk] == -1.7777
             for kkk, ddd in d.items():
                 if ddd and kkk != "__all__" and not d["__all__"]:
                     assert i[kkk]["out_of_road"] or i[kkk]["arrive_dest"]
@@ -445,12 +448,12 @@ def test_ma_bottleneck_reward_done_alignment():
             if d["__all__"]:
                 break
             kkk = "agent0"
-            #assert r[kkk] == 999
+            # assert r[kkk] == 999
             assert i[kkk]["arrive_dest"]
             assert d[kkk]
 
             kkk = "agent1"
-            #assert r[kkk] != 999
+            # assert r[kkk] != 999
             assert not i[kkk]["arrive_dest"]
             assert not d[kkk]
             break
@@ -692,7 +695,14 @@ def test_ma_no_reset_error():
 
 def test_randomize_spawn_place():
     last_pos = {}
-    env = MultiAgentBottleneckEnv({"num_agents": 4, "use_render": False, "crash_done": False})
+    env = MultiAgentBottleneckEnv(
+        {
+            "num_agents": 4,
+            "use_render": False,
+            "crash_done": False,
+            "force_seed_spawn_manager": False
+        }
+    )
     try:
         obs = env.reset()
         for step in range(100):

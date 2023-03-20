@@ -1,5 +1,5 @@
 from metadrive.component.vehicle.base_vehicle import BaseVehicle
-from metadrive.utils.space import ParameterSpace, VehicleParameterSpace
+from metadrive.component.pg_space import ParameterSpace, VehicleParameterSpace
 
 factor = 1
 

@@ -7,7 +7,7 @@ from metadrive.component.road_network import Road
 from metadrive.component.road_network.node_road_network import NodeRoadNetwork
 from metadrive.constants import Decoration, LineType
 from metadrive.engine.core.physics_world import PhysicsWorld
-from metadrive.utils.space import ParameterSpace
+from metadrive.component.pg_space import ParameterSpace
 
 
 class FirstPGBlock(PGBlock):

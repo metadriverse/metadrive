@@ -11,7 +11,7 @@ from metadrive.base_class.base_runnable import BaseRunnable
 from metadrive.constants import ObjectState
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.engine.core.physics_world import PhysicsWorld
-from metadrive.engine.physics_node import BaseRigidBodyNode
+from metadrive.engine.physics_node import BaseRigidBodyNode, BaseGhostBodyNode
 from metadrive.utils import Vector
 from metadrive.utils import get_np_random
 from metadrive.utils.coordinates_shift import panda_position, metadrive_position, panda_heading, metadrive_heading
@@ -38,6 +38,12 @@ def clear_node_list(node_path_list):
             continue
 
         elif isinstance(node_path, BaseRigidBodyNode):
+            # PZH: Note that this line is extremely important!!!
+            # It breaks the cycle reference thus we can release nodes!!!
+            # It saves Waymo env!!!
+            node_path.destroy()
+
+        elif isinstance(node_path, BaseGhostBodyNode):
             # PZH: Note that this line is extremely important!!!
             # It breaks the cycle reference thus we can release nodes!!!
             # It saves Waymo env!!!
@@ -430,3 +436,9 @@ class BaseObject(BaseRunnable):
 
     def get_z(self):
         return self.origin.getZ()
+
+    def set_angular_velocity(self, angular_velocity, in_rad=True):
+        angular_velocity *= -1  # to panda coordinates
+        if not in_rad:
+            angular_velocity = angular_velocity / 180 * np.pi
+        self._body.setAngularVelocity(LVector3(0, 0, angular_velocity))

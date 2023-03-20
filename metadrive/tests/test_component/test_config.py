@@ -1,4 +1,4 @@
-from metadrive.envs.metadrive_env import MetaDriveEnv
+from metadrive.envs.metadrive_env import MetaDriveEnv, METADRIVE_DEFAULT_CONFIG
 from metadrive.engine.base_engine import BaseEngine
 from metadrive.engine.engine_utils import get_global_config, initialize_global_config
 from metadrive.utils import Config, recursive_equal
@@ -127,19 +127,20 @@ def test_config_two_env():
         env_2.close()
 
 
-def _test_config_set_conce():
+def test_config_overwrite():
     """
     The config in BaseEngine should be the same as env.config, if BaseEngine exists in process
     """
+    METADRIVE_DEFAULT_CONFIG["map"] = "S"
+    env = MetaDriveEnv({"vehicle_config": dict(show_lidar=False, show_navi_mark=False)})
     try:
-        env = MetaDriveEnv({"vehicle_config": dict(show_lidar=False, show_navi_mark=False)})
-        test_pass = False
-        try:
-            initialize_global_config({})
-            env.reset()
-        except AssertionError:
-            test_pass = True
-        assert test_pass, "Test Fail"
+        env.reset()
+        assert env.current_map.blocks[-1].ID == "S" and len(env.current_map.blocks) == 2
+        env.close()
+        env = MetaDriveEnv({"map": "C", "vehicle_config": dict(show_lidar=False, show_navi_mark=False)})
+        env.reset()
+        assert env.current_map.blocks[-1].ID == "C" and len(env.current_map.blocks) == 2
+        env.close()
     finally:
         env.close()
 
