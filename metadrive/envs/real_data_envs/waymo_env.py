@@ -1,7 +1,7 @@
 import logging
 
 import numpy as np
-from metadrive.component.vehicle_module.vehicle_panel import VehiclePanel
+
 from metadrive.component.vehicle_navigation_module.trajectory_navigation import WaymoTrajectoryNavigation
 from metadrive.constants import TerminationState
 from metadrive.engine.asset_loader import AssetLoader
@@ -20,7 +20,7 @@ WAYMO_ENV_CONFIG = dict(
     # ===== Map Config =====
     waymo_data_directory=AssetLoader.file_path("waymo", return_raw_style=False),
     start_case_index=0,
-    case_num=3,
+    case_num=100,
     store_map=True,
     store_map_buffer_size=2000,
     sequential_seed=False,  # Whether to set seed (the index of map) sequentially across episodes
@@ -30,7 +30,7 @@ WAYMO_ENV_CONFIG = dict(
     traj_start_index=0,
     traj_end_index=-1,
     replay=True,
-    no_static_traffic_vehicle=False,
+    no_static_traffic_vehicle=True,
 
     # ===== Agent config =====
     vehicle_config=dict(
@@ -46,7 +46,7 @@ WAYMO_ENV_CONFIG = dict(
     # See: https://github.com/metadriverse/metadrive/issues/283
     success_reward=10.0,
     out_of_road_penalty=10.0,
-    crash_vehicle_penalty=10.0,
+    crash_vehicle_penalty=1,
     crash_object_penalty=1.0,
     driving_reward=1.0,
     speed_reward=0.1,
@@ -60,10 +60,7 @@ WAYMO_ENV_CONFIG = dict(
 
     # ===== Termination Scheme =====
     out_of_route_done=False,
-    crash_vehicle_done=True,
-
-    # others
-    interface_panel=[VehiclePanel]  # for boosting efficiency
+    crash_vehicle_done=False,
 )
 
 
@@ -277,14 +274,13 @@ if __name__ == "__main__":
             "use_render": True,
             "agent_policy": WaymoIDMPolicy,
             "manual_control": True,
-            "replay": True,
+            "replay": False,
             "no_traffic": False,
-            "debug": False,
-            "debug_static_world": False,
+            # "debug":True,
             # "no_traffic":True,
             # "start_case_index": 192,
             # "start_case_index": 1000,
-            "case_num": 3,
+            "case_num": 1,
             # "waymo_data_directory": "E:\\PAMI_waymo_data\\idm_filtered\\test",
             "horizon": 1000,
             "vehicle_config": dict(
@@ -325,5 +321,3 @@ if __name__ == "__main__":
                 if info["arrive_dest"]:
                     print("seed:{}, success".format(env.engine.global_random_seed))
                 break
-    print("Finish Run")
-    env.close()
