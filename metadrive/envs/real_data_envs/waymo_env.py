@@ -63,6 +63,7 @@ WAYMO_ENV_CONFIG = dict(
     # ===== Termination Scheme =====
     out_of_route_done=False,
     crash_vehicle_done=False,
+    relax_out_of_road_done=True,
 )
 
 
@@ -278,7 +279,44 @@ class WaymoEnv(BaseEnv):
         return reward, step_info
 
     def _is_arrive_destination(self, vehicle):
-        return True if np.linalg.norm(vehicle.position - self.engine.map_manager.sdc_dest_point) < 5 else False
+        long, lat = vehicle.navigation.reference_trajectory.local_coordinates(vehicle.position)
+
+        total_length = vehicle.navigation.reference_trajectory.length
+        current_distance = long
+
+        # agent_name = self.agent_manager.object_to_agent(vehicle.name)
+        # threshold = 5
+
+        # if np.linalg.norm(vehicle.position - self.engine.map_manager.dest_points[agent_name]) < threshold:
+        #     return True
+        # elif current_distance + threshold > total_length:  # Route Completion ~= 1.0
+        #     return True
+        # else:
+        #     return False
+
+        # Update 2022-02-05: Use RC as the only criterion to determine arrival.
+        route_completion = current_distance / total_length
+        if route_completion > 0.95:  # Route Completion ~= 1.0
+            return True
+        else:
+            return False
+
+    def _is_out_of_road(self, vehicle):
+        # A specified function to determine whether this vehicle should be done.
+
+        if self.config["relax_out_of_road_done"]:
+            agent_name = self.agent_manager.object_to_agent(vehicle.name)
+            lat = abs(self.observations[agent_name].lateral_dist)
+            done = lat > 10
+            done = done or vehicle.on_yellow_continuous_line or vehicle.on_white_continuous_line
+            return done
+
+        done = vehicle.crash_sidewalk or vehicle.on_yellow_continuous_line or vehicle.on_white_continuous_line
+        if self.config["out_of_route_done"]:
+            agent_name = self.agent_manager.object_to_agent(vehicle.name)
+            done = done or abs(self.observations[agent_name].lateral_dist) > 10
+        return done
+
 
     def _reset_global_seed(self, force_seed=None):
         if force_seed is not None:
@@ -299,15 +337,6 @@ class WaymoEnv(BaseEnv):
         assert self.config["start_case_index"] <= current_seed < \
                self.config["start_case_index"] + self.config["case_num"], "Force seed range Error!"
         self.seed(current_seed)
-
-    def _is_out_of_road(self, vehicle):
-        # A specified function to determine whether this vehicle should be done.
-        done = vehicle.crash_sidewalk or vehicle.on_yellow_continuous_line or vehicle.on_white_continuous_line
-        if self.config["out_of_route_done"]:
-            done = done or self.observations[self.DEFAULT_AGENT].lateral_dist > 10
-        return done
-        # ret = vehicle.crash_sidewalk
-        # return ret
 
     def stop(self):
         self.in_stop = not self.in_stop
