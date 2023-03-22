@@ -16,6 +16,8 @@ from metadrive.policy.idm_policy import WaymoIDMPolicy
 from metadrive.utils import clip
 from metadrive.utils import get_np_random
 
+from metadrive.utils.coordinates_shift import waymo_2_metadrive_position
+
 WAYMO_ENV_CONFIG = dict(
     # ===== Map Config =====
     waymo_data_directory=AssetLoader.file_path("waymo", return_raw_style=False),
@@ -230,6 +232,49 @@ class WaymoEnv(BaseEnv):
             reward = -self.config["crash_vehicle_penalty"]
         elif vehicle.crash_object:
             reward = -self.config["crash_object_penalty"]
+
+        step_info["track_length"] = vehicle.navigation.reference_trajectory.length
+        step_info["current_distance"] = vehicle.navigation.reference_trajectory.local_coordinates(vehicle.position)[0]
+        rc = step_info["current_distance"] / step_info["track_length"]
+        step_info["route_completion"] = rc
+
+        step_info["carsize"] = [vehicle.WIDTH / 10, vehicle.LENGTH / 10]
+
+        # Compute state difference metrics
+        data = self.engine.data_manager.get_case(self.engine.global_seed)
+        agent_xy = vehicle.position
+        if vehicle_id == "sdc":
+            native_vid = data["sdc_index"]
+        else:
+            native_vid = vehicle_id
+
+        if native_vid in data["tracks"] and len(data["tracks"][native_vid]["state"]) > 0:
+            expert_state_list = data["tracks"][native_vid]["state"]
+            mask = expert_state_list[:, -1]
+            largest_valid_index = np.max(np.where(expert_state_list[:, -1] == 1)[0])
+
+            if self.episode_step > largest_valid_index:
+                current_step = largest_valid_index
+            else:
+                current_step = self.episode_step
+
+            while mask[current_step] == 0.0:
+                current_step -= 1
+                if current_step == 0:
+                    break
+
+            expert_state = expert_state_list[current_step]
+            expert_xy = waymo_2_metadrive_position(expert_state[:2])
+            dist = np.linalg.norm(agent_xy - expert_xy)
+            step_info["distance_error"] = dist
+
+            last_state = expert_state_list[largest_valid_index]
+            last_expert_xy = waymo_2_metadrive_position(last_state[:2])
+            last_dist = np.linalg.norm(agent_xy - last_expert_xy)
+            step_info["distance_error_final"] = last_dist
+
+            # reward = reward - self.config["distance_penalty"] * dist
+
         return reward, step_info
 
     def _is_arrive_destination(self, vehicle):
