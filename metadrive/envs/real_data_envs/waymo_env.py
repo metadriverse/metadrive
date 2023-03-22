@@ -238,12 +238,12 @@ class WaymoEnv(BaseEnv):
         rc = step_info["current_distance"] / step_info["track_length"]
         step_info["route_completion"] = rc
 
-        step_info["carsize"] = [vehicle.WIDTH / 10, vehicle.LENGTH / 10]
+        step_info["carsize"] = [vehicle.WIDTH, vehicle.LENGTH]
 
         # Compute state difference metrics
         data = self.engine.data_manager.get_case(self.engine.global_seed)
         agent_xy = vehicle.position
-        if vehicle_id == "sdc":
+        if vehicle_id == "sdc" or vehicle_id == "default_agent":
             native_vid = data["sdc_index"]
         else:
             native_vid = vehicle_id
