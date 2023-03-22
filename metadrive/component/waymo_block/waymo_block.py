@@ -140,7 +140,7 @@ class WaymoBlock(BaseBlock):
     def __del__(self):
         self.destroy()
         super(WaymoBlock, self).__del__()
-        print("Waymo Block is being deleted.")
+        # print("Waymo Block is being deleted.")
 
     # @property
     # def waymo_map_data(self):

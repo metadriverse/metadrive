@@ -44,7 +44,7 @@ class WaymoMap(BaseMap):
     def __del__(self):
         # self.destroy()
         logging.debug("Map is Released")
-        print("[WaymoMap] Map is Released")
+        # print("[WaymoMap] Map is Released")
 
 
 if __name__ == "__main__":
