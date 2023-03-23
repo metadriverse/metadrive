@@ -111,5 +111,5 @@ class BaseMap(BaseRunnable):
     def show_coordinates(self):
         pass
 
-    def get_map_vector(self, interval):
-        return self.road_network.get_vector(interval)
+    def get_map_vector(self, interval=2):
+        return self.road_network.get_center_line_vector(interval)
