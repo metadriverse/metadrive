@@ -248,8 +248,8 @@ class WaymoEnv(BaseEnv):
         else:
             native_vid = vehicle_id
 
-        if native_vid in data["tracks"] and len(data["tracks"][native_vid]["state"]) > 0:
-            expert_state_list = data["tracks"][native_vid]["state"]
+        if native_vid in data["tracks"] and len(data["tracks"][native_vid]) > 0:
+            expert_state_list = data["tracks"][native_vid]
             mask = expert_state_list[:, -1]
             largest_valid_index = np.max(np.where(expert_state_list[:, -1] == 1)[0])
 

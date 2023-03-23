@@ -63,8 +63,8 @@ class ReplayEgoCarPolicy(BasePolicy):
         trajectory_data = self.engine.data_manager.get_case(self.engine.global_random_seed)["tracks"]
         sdc_track_index = str(self.engine.data_manager.get_case(self.engine.global_random_seed)["sdc_track_index"])
         return [
-            WaymoTrafficManager.parse_vehicle_state(trajectory_data[sdc_track_index]["state"], i)
-            for i in range(len(trajectory_data[sdc_track_index]["state"]))
+            WaymoTrafficManager.parse_vehicle_state(trajectory_data[sdc_track_index], i)
+            for i in range(len(trajectory_data[sdc_track_index]))
         ]
 
     def act(self, *args, **kwargs):
