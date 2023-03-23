@@ -150,13 +150,23 @@ class WaymoEnv(BaseEnv):
         done_info = dict(
             crash_vehicle=False, crash_object=False, crash_building=False, out_of_road=False, arrive_dest=False
         )
+
+
+        long, lat = vehicle.navigation.reference_trajectory.local_coordinates(vehicle.position)
+
+        total_length = vehicle.navigation.reference_trajectory.length
+        current_distance = long
+
+        route_completion = current_distance / total_length
+
+
         # if np.linalg.norm(vehicle.position - self.engine.map_manager.sdc_dest_point) < 5 \
         #         or vehicle.lane.index in self.engine.map_manager.sdc_destinations:
-        if self._is_arrive_destination(vehicle):
+        if self._is_arrive_destination(vehicle) or route_completion > 1.0:
             done = True
             logging.info("Episode ended! Reason: arrive_dest.")
             done_info[TerminationState.SUCCESS] = True
-        if self._is_out_of_road(vehicle):
+        if self._is_out_of_road(vehicle) or route_completion < -0.1:
             done = True
             logging.info("Episode ended! Reason: out_of_road.")
             done_info[TerminationState.OUT_OF_ROAD] = True
@@ -275,6 +285,13 @@ class WaymoEnv(BaseEnv):
             step_info["distance_error_final"] = last_dist
 
             # reward = reward - self.config["distance_penalty"] * dist
+
+        # print("Vehicle {} Track Length {:.3f} Current Dis {:.3f} Route Completion {:.4f}".format(
+        #     vehicle, step_info["track_length"] , step_info["current_distance"] , step_info["route_completion"]
+        # ))
+
+        if hasattr(vehicle, "_dynamics_mode"):
+            step_info["dynamics_mode"] = vehicle._dynamics_mode
 
         return reward, step_info
 
