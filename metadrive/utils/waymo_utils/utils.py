@@ -213,13 +213,13 @@ def read_waymo_data(file_path):
     for key, value in data["tracks"].items():
         new_track[str(key)] = value
     data["tracks"] = new_track
-    data["sdc_index"] = str(data["sdc_index"])
+    data["sdc_track_index"] = str(data["sdc_track_index"])
     return data
 
 
 def draw_waymo_map(data):
     figure(figsize=(8, 6), dpi=500)
-    for key, value in data["map"].items():
+    for key, value in data["map_features"].items():
         if value.get("type", None) == "center_lane":
             plt.scatter([x[0] for x in value["polyline"]], [y[1] for y in value["polyline"]], s=0.5)
         elif value.get("type", None) == "road_edge":

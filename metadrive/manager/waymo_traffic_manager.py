@@ -13,7 +13,7 @@ class WaymoTrafficManager(BaseManager):
         super(WaymoTrafficManager, self).__init__()
         # self.current_traffic_data = None
         self.count = 0
-        # self.sdc_index = None
+        # self.sdc_track_index = None
         self.vid_to_obj = None
 
     def after_reset(self):
@@ -22,7 +22,7 @@ class WaymoTrafficManager(BaseManager):
         self.count = 0
         self.vid_to_obj = {}
         for v_id, type_traj in self.current_traffic_data.items():
-            if type_traj["type"] == AgentType.VEHICLE and v_id != self.sdc_index:
+            if type_traj["type"] == AgentType.VEHICLE and v_id != self.sdc_track_index:
                 info = self.parse_vehicle_state(type_traj["state"], self.engine.global_config["traj_start_index"])
                 if not info["valid"]:
                     continue
@@ -93,7 +93,7 @@ class WaymoTrafficManager(BaseManager):
             # clean previous episode data
             super(WaymoTrafficManager, self).before_reset()
             # self.current_traffic_data = self.engine.data_manager.get_case(self.engine.global_random_seed)["tracks"]
-            # self.sdc_index = str(self.engine.data_manager.get_case(self.engine.global_random_seed)["sdc_index"])
+            # self.sdc_track_index = str(self.engine.data_manager.get_case(self.engine.global_random_seed)["sdc_track_index"])
         except:
             raise ValueError("Can not CLEAN traffic for seed: {}".format(self.engine.global_random_seed))
 
@@ -119,5 +119,5 @@ class WaymoTrafficManager(BaseManager):
         return self.engine.data_manager.get_case(self.engine.global_random_seed)["tracks"]
 
     @property
-    def sdc_index(self):
-        return str(self.engine.data_manager.get_case(self.engine.global_random_seed)["sdc_index"])
+    def sdc_track_index(self):
+        return str(self.engine.data_manager.get_case(self.engine.global_random_seed)["sdc_track_index"])

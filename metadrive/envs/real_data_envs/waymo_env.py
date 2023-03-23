@@ -244,7 +244,7 @@ class WaymoEnv(BaseEnv):
         data = self.engine.data_manager.get_case(self.engine.global_seed)
         agent_xy = vehicle.position
         if vehicle_id == "sdc" or vehicle_id == "default_agent":
-            native_vid = data["sdc_index"]
+            native_vid = data["sdc_track_index"]
         else:
             native_vid = vehicle_id
 
@@ -326,7 +326,7 @@ if __name__ == "__main__":
             # "start_case_index": 192,
             # "start_case_index": 1000,
             "case_num": 1,
-            # "waymo_data_directory": "E:\\PAMI_waymo_data\\idm_filtered\\test",
+            "waymo_data_directory": "/home/shady/Downloads/test_processed",
             "horizon": 1000,
             "vehicle_config": dict(
                 lidar=dict(num_lasers=120, distance=50, num_others=4),

@@ -1,5 +1,3 @@
-from enum import Enum
-
 LaneType = {0: 'UNKNOWN', 1: 'LANE_FREEWAY', 2: 'LANE_SURFACE_STREET', 3: 'LANE_BIKE_LANE'}
 
 TrafficSignal = {
@@ -15,7 +13,7 @@ TrafficSignal = {
 }
 
 
-class RoadLineType(Enum):
+class RoadLineTypeClass:
     UNKNOWN = 0
     BROKEN_SINGLE_WHITE = 1
     SOLID_SINGLE_WHITE = 2
@@ -28,36 +26,38 @@ class RoadLineType(Enum):
 
     @staticmethod
     def is_road_line(line):
-        return True if line.__class__ == RoadLineType else False
+        return True if line.__class__ == RoadLineTypeClass else False
 
     @staticmethod
     def is_yellow(line):
         return True if line in [
-            RoadLineType.SOLID_DOUBLE_YELLOW, RoadLineType.PASSING_DOUBLE_YELLOW, RoadLineType.SOLID_SINGLE_YELLOW,
-            RoadLineType.BROKEN_DOUBLE_YELLOW, RoadLineType.BROKEN_SINGLE_YELLOW
+            RoadLineTypeClass.SOLID_DOUBLE_YELLOW, RoadLineTypeClass.PASSING_DOUBLE_YELLOW,
+            RoadLineTypeClass.SOLID_SINGLE_YELLOW,
+            RoadLineTypeClass.BROKEN_DOUBLE_YELLOW, RoadLineTypeClass.BROKEN_SINGLE_YELLOW
         ] else False
 
     @staticmethod
     def is_broken(line):
         return True if line in [
-            RoadLineType.BROKEN_DOUBLE_YELLOW, RoadLineType.BROKEN_SINGLE_YELLOW, RoadLineType.BROKEN_SINGLE_WHITE
+            RoadLineTypeClass.BROKEN_DOUBLE_YELLOW, RoadLineTypeClass.BROKEN_SINGLE_YELLOW,
+            RoadLineTypeClass.BROKEN_SINGLE_WHITE
         ] else False
 
     def __getitem__(self, item):
         return {
-            RoadLineType.UNKNOWN: 'UNKNOWN',
-            RoadLineType.BROKEN_SINGLE_WHITE: 'ROAD_LINE_BROKEN_SINGLE_WHITE',
-            RoadLineType.SOLID_SINGLE_WHITE: 'ROAD_LINE_SOLID_SINGLE_WHITE',
-            RoadLineType.SOLID_DOUBLE_WHITE: 'ROAD_LINE_DOUBLE_WHITE',
-            RoadLineType.BROKEN_SINGLE_YELLOW: 'ROAD_LINE_BROKEN_SINGLE_YELLOW',
-            RoadLineType.BROKEN_DOUBLE_YELLOW: 'ROAD_LINE_BROKEN_DOUBLE_YELLOW',
-            RoadLineType.SOLID_SINGLE_YELLOW: 'ROAD_LINE_SOLID_SINGLE_YELLOW',
-            RoadLineType.SOLID_DOUBLE_YELLOW: 'ROAD_LINE_SOLID_DOUBLE_YELLOW',
-            RoadLineType.PASSING_DOUBLE_YELLOW: 'ROAD_LINE_PASSING_DOUBLE_YELLOW'
+            RoadLineTypeClass.UNKNOWN: 'UNKNOWN',
+            RoadLineTypeClass.BROKEN_SINGLE_WHITE: 'ROAD_LINE_BROKEN_SINGLE_WHITE',
+            RoadLineTypeClass.SOLID_SINGLE_WHITE: 'ROAD_LINE_SOLID_SINGLE_WHITE',
+            RoadLineTypeClass.SOLID_DOUBLE_WHITE: 'ROAD_LINE_DOUBLE_WHITE',
+            RoadLineTypeClass.BROKEN_SINGLE_YELLOW: 'ROAD_LINE_BROKEN_SINGLE_YELLOW',
+            RoadLineTypeClass.BROKEN_DOUBLE_YELLOW: 'ROAD_LINE_BROKEN_DOUBLE_YELLOW',
+            RoadLineTypeClass.SOLID_SINGLE_YELLOW: 'ROAD_LINE_SOLID_SINGLE_YELLOW',
+            RoadLineTypeClass.SOLID_DOUBLE_YELLOW: 'ROAD_LINE_SOLID_DOUBLE_YELLOW',
+            RoadLineTypeClass.PASSING_DOUBLE_YELLOW: 'ROAD_LINE_PASSING_DOUBLE_YELLOW'
         }[item]
 
 
-class RoadEdgeType(Enum):
+class RoadEdgeTypeClass:
     UNKNOWN = 0
     # Physical road boundary that doesn't have traffic on the other side (e.g., a curb or the k-rail on the right side of a freeway).
     BOUNDARY = 1
@@ -66,19 +66,19 @@ class RoadEdgeType(Enum):
 
     @staticmethod
     def is_road_edge(edge):
-        return True if edge.__class__ == RoadEdgeType else False
+        return True if edge.__class__ == RoadEdgeTypeClass else False
 
     @staticmethod
     def is_sidewalk(edge):
-        return True if edge == RoadEdgeType.BOUNDARY else False
+        return True if edge == RoadEdgeTypeClass.BOUNDARY else False
 
     def __getitem__(self, item):
-        return {RoadEdgeType.UNKNOWN: 'UNKNOWN',
-                RoadEdgeType.BOUNDARY: 'ROAD_EDGE_BOUNDARY',
-                RoadEdgeType.MEDIAN: 'ROAD_EDGE_MEDIAN'}[item]
+        return {RoadEdgeTypeClass.UNKNOWN: 'UNKNOWN',
+                RoadEdgeTypeClass.BOUNDARY: 'ROAD_EDGE_BOUNDARY',
+                RoadEdgeTypeClass.MEDIAN: 'ROAD_EDGE_MEDIAN'}[item]
 
 
-class AgentType(Enum):
+class AgentTypeClass:
     UNSET = 0
     VEHICLE = 1
     PEDESTRIAN = 2
@@ -86,8 +86,13 @@ class AgentType(Enum):
     OTHER = 4
 
     def __getitem__(self, item):
-        return {AgentType.UNSET: 'UNSET',
-                AgentType.VEHICLE: 'VEHICLE',
-                AgentType.PEDESTRIAN: 'PEDESTRIAN',
-                AgentType.CYCLIST: 'CYCLIST',
-                AgentType.OTHER: 'OTHER'}[item]
+        return {AgentTypeClass.UNSET: 'UNSET',
+                AgentTypeClass.VEHICLE: 'VEHICLE',
+                AgentTypeClass.PEDESTRIAN: 'PEDESTRIAN',
+                AgentTypeClass.CYCLIST: 'CYCLIST',
+                AgentTypeClass.OTHER: 'OTHER'}[item]
+
+
+AgentType = AgentTypeClass()
+RoadLineType = RoadLineTypeClass()
+RoadEdgeType = RoadEdgeTypeClass()

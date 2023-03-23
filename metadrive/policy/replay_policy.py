@@ -61,10 +61,10 @@ class ReplayEgoCarPolicy(BasePolicy):
     def get_trajectory_info(self):
         from metadrive.manager.waymo_traffic_manager import WaymoTrafficManager
         trajectory_data = self.engine.data_manager.get_case(self.engine.global_random_seed)["tracks"]
-        sdc_index = str(self.engine.data_manager.get_case(self.engine.global_random_seed)["sdc_index"])
+        sdc_track_index = str(self.engine.data_manager.get_case(self.engine.global_random_seed)["sdc_track_index"])
         return [
-            WaymoTrafficManager.parse_vehicle_state(trajectory_data[sdc_index]["state"], i)
-            for i in range(len(trajectory_data[sdc_index]["state"]))
+            WaymoTrafficManager.parse_vehicle_state(trajectory_data[sdc_track_index]["state"], i)
+            for i in range(len(trajectory_data[sdc_track_index]["state"]))
         ]
 
     def act(self, *args, **kwargs):

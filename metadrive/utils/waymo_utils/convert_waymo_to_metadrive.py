@@ -48,7 +48,7 @@ def parse_data(input, output_path):
 
 
 if __name__ == "__main__":
-    case_data_path = sys.argv[1]
+    case_data_path = "/home/shady/Downloads/test"
     try:
         os.mkdir(case_data_path + "_processed")
     except:
@@ -58,7 +58,7 @@ if __name__ == "__main__":
     # parse raw data from input path to output path,
     # there is 1000 raw data in google cloud, each of them produce about 500 pkl file
     parse_data(raw_data_path, processed_data_path)
-
+    sys.exit()
     # file_path = AssetLoader.file_path("waymo", "processed", "0.pkl", return_raw_style=False)
     # data = read_waymo_data(file_path)
     # draw_waymo_map(data)

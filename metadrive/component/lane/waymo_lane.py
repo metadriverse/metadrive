@@ -99,4 +99,4 @@ if __name__ == "__main__":
     file_path = AssetLoader.file_path("waymo", "test.pkl", return_raw_style=False)
     data = read_waymo_data(file_path)
     print(data)
-    lane = WaymoLane(108, data["map"])
+    lane = WaymoLane(108, data["map_features"])
