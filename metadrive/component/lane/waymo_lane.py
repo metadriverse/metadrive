@@ -3,7 +3,7 @@ import math
 
 from metadrive.component.lane.point_lane import PointLane
 from metadrive.constants import DrivableAreaProperty
-from metadrive.constants import WaymoLaneProperty
+from metadrive.utils.waymo_utils.waymo_type import WaymoLaneProperty
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.utils.math_utils import norm
 from metadrive.utils.waymo_utils.utils import read_waymo_data, convert_polyline_to_metadrive
@@ -19,9 +19,11 @@ class WaymoLane(PointLane):
         self.need_lane_localization = need_lane_localization
         super(WaymoLane, self).__init__(
             convert_polyline_to_metadrive(waymo_map_data[waymo_lane_id][WaymoLaneProperty.POLYLINE]),
-            self.get_lane_width(waymo_lane_id, waymo_map_data)
+            self.get_lane_width(waymo_lane_id, waymo_map_data),
+            speed_limit=waymo_map_data[waymo_lane_id]["speed_limit_mph"] * 1.609344  # to km/h
         )
         self.index = waymo_lane_id
+        self.lane_type = waymo_map_data[waymo_lane_id]["type"]
         self.entry_lanes = waymo_map_data[waymo_lane_id][WaymoLaneProperty.ENTRY]
         self.exit_lanes = waymo_map_data[waymo_lane_id][WaymoLaneProperty.EXIT]
         self.left_lanes = waymo_map_data[waymo_lane_id][WaymoLaneProperty.LEFT_NEIGHBORS]
@@ -38,16 +40,16 @@ class WaymoLane(PointLane):
         dist_to_left_lane = 0
         dist_to_right_lane = 0
         if len(right_lanes) > 0:
-            right_lane = waymo_map_data[right_lanes[0]["id"]]
-            self_start = right_lanes[0]["indexes"][0]
-            neighbor_start = right_lanes[0]["indexes"][2]
+            right_lane = waymo_map_data[right_lanes[0]["feature_id"]]
+            self_start = right_lanes[0]["self_start_index"]
+            neighbor_start = right_lanes[0]["neighbor_start_index"]
             n_point = right_lane[WaymoLaneProperty.POLYLINE][neighbor_start]
             self_point = waymo_map_data[waymo_lane_id][WaymoLaneProperty.POLYLINE][self_start]
             dist_to_right_lane = norm(n_point[0] - self_point[0], n_point[1] - self_point[1])
         if len(left_lanes) > 0:
-            left_lane = waymo_map_data[left_lanes[-1]["id"]]
-            self_start = left_lanes[-1]["indexes"][0]
-            neighbor_start = left_lanes[-1]["indexes"][2]
+            left_lane = waymo_map_data[left_lanes[-1]["feature_id"]]
+            self_start = left_lanes[-1]["self_start_index"]
+            neighbor_start = left_lanes[-1]["neighbor_start_index"]
             n_point = left_lane[WaymoLaneProperty.POLYLINE][neighbor_start]
             self_point = waymo_map_data[waymo_lane_id][WaymoLaneProperty.POLYLINE][self_start]
             dist_to_left_lane = norm(n_point[0] - self_point[0], n_point[1] - self_point[1])

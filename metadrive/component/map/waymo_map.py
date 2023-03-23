@@ -59,14 +59,16 @@ if __name__ == "__main__":
     _ = RoadLineType
     _ = RoadEdgeType
 
-    file_path = AssetLoader.file_path("waymo", "0.pkl", return_raw_style=False)
+    # file_path = AssetLoader.file_path("waymo", "0.pkl", return_raw_style=False)
+    file_path = "/home/shady/Downloads/test_processed/1.pkl"
     data = read_waymo_data(file_path)
 
     default_config = WaymoEnv.default_config()
     default_config["use_render"] = True
     default_config["debug"] = True
     default_config["debug_static_world"] = True
-    default_config["waymo_data_directory"] = AssetLoader.file_path("waymo", return_raw_style=False)
+    # default_config["waymo_data_directory"] = AssetLoader.file_path("waymo", return_raw_style=False)
+    default_config["waymo_data_directory"] = "/home/shady/Downloads/test_processed"
     default_config["case_num"] = 1
     engine = initialize_engine(default_config)
 

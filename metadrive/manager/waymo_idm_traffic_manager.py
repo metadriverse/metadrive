@@ -1,4 +1,5 @@
 import copy
+from metadrive.utils.waymo_utils.parse_object_state import parse_full_trajectory, parse_vehicle_state
 from collections import namedtuple, OrderedDict
 
 import numpy as np
@@ -41,10 +42,10 @@ class WaymoIDMTrafficManager(WaymoTrafficManager):
             traffic_traj_data = {}
             for v_id, type_traj in self.current_traffic_data.items():
                 if type_traj["type"] == AgentType.VEHICLE and v_id != self.sdc_track_index:
-                    init_info = self.parse_vehicle_state(
+                    init_info = parse_vehicle_state(
                         type_traj, self.engine.global_config["traj_start_index"]
                     )
-                    dest_info = self.parse_vehicle_state(
+                    dest_info = parse_vehicle_state(
                         type_traj, self.engine.global_config["traj_end_index"], check_last_state=True
                     )
                     if not init_info["valid"]:
@@ -53,7 +54,7 @@ class WaymoIDMTrafficManager(WaymoTrafficManager):
                         full_traj = static_vehicle_info(init_info["position"], init_info["heading"])
                         static = True
                     else:
-                        full_traj = self.parse_full_trajectory(type_traj)
+                        full_traj = parse_full_trajectory(type_traj)
                         if len(full_traj) < self.MIN_DURATION:
                             full_traj = static_vehicle_info(init_info["position"], init_info["heading"])
                             static = True
@@ -70,7 +71,7 @@ class WaymoIDMTrafficManager(WaymoTrafficManager):
 
                 elif type_traj["type"] == AgentType.VEHICLE and v_id == self.sdc_track_index:
                     # set Ego V velocity
-                    init_info = self.parse_vehicle_state(
+                    init_info = parse_vehicle_state(
                         type_traj, self.engine.global_config["traj_start_index"]
                     )
                     traffic_traj_data["sdc"] = {

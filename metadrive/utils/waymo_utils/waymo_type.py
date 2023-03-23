@@ -1,5 +1,3 @@
-LaneType = {0: 'UNKNOWN', 1: 'LANE_FREEWAY', 2: 'LANE_SURFACE_STREET', 3: 'LANE_BIKE_LANE'}
-
 TrafficSignal = {
     0: 'LANE_STATE_UNKNOWN',
     1: 'LANE_STATE_ARROW_STOP',
@@ -11,6 +9,23 @@ TrafficSignal = {
     7: 'LANE_STATE_FLASHING_STOP',
     8: 'LANE_STATE_FLASHING_CAUTION'
 }
+
+
+class LaneTypeClass:
+    UNKNOWN = 0
+    LANE_FREEWAY = 1
+    LANE_SURFACE_STREET = 2
+    LANE_BIKE_LANE = 3
+
+    def __getitem__(self, item):
+        return {0: 'UNKNOWN', 1: 'LANE_FREEWAY', 2: 'LANE_SURFACE_STREET', 3: 'LANE_BIKE_LANE'}[item]
+
+    @staticmethod
+    def is_lane(type):
+        if type in {'LANE_FREEWAY', 'LANE_SURFACE_STREET', 'UNKNOWN', 'LANE_BIKE_LANE'}:
+            return True
+        else:
+            return False
 
 
 class RoadLineTypeClass:
@@ -93,6 +108,24 @@ class AgentTypeClass:
                 AgentTypeClass.OTHER: 'OTHER'}[item]
 
 
+LaneType = LaneTypeClass()
 AgentType = AgentTypeClass()
 RoadLineType = RoadLineTypeClass()
 RoadEdgeType = RoadEdgeTypeClass()
+
+
+class WaymoLaneProperty:
+    LANE_TYPE = "center_lane"
+    LANE_LINE_TYPE = "road_line"
+    LANE_EDGE_TYPE = "road_edge"
+    POLYLINE = "polyline"
+    LEFT_BOUNDARIES = "left_boundaries"
+    RIGHT_BOUNDARIES = "right_boundaries"
+    LEFT_NEIGHBORS = "left_neighbor"
+    RIGHT_NEIGHBORS = "right_neighbor"
+    ENTRY = "entry_lanes"
+    EXIT = "exit_lanes"
+
+    @staticmethod
+    def get_line_type_and_line_color(waymo_type):
+        pass

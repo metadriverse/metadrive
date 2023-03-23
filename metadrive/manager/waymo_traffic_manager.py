@@ -1,10 +1,8 @@
 import copy
 
-import numpy as np
-
 from metadrive.component.vehicle.vehicle_type import SVehicle
 from metadrive.manager.base_manager import BaseManager
-from metadrive.utils.coordinates_shift import waymo_to_metadrive_heading, waymo_to_metadrive_vector
+from metadrive.utils.waymo_utils.parse_object_state import parse_vehicle_state
 from metadrive.utils.waymo_utils.waymo_type import AgentType
 
 
@@ -23,7 +21,7 @@ class WaymoTrafficManager(BaseManager):
         self.vid_to_obj = {}
         for v_id, type_traj in self.current_traffic_data.items():
             if type_traj["type"] == AgentType.VEHICLE and v_id != self.sdc_track_index:
-                info = self.parse_vehicle_state(type_traj, self.engine.global_config["traj_start_index"])
+                info = parse_vehicle_state(type_traj, self.engine.global_config["traj_start_index"])
                 if not info["valid"]:
                     continue
                 v_config = copy.deepcopy(self.engine.global_config["vehicle_config"])
@@ -47,34 +45,12 @@ class WaymoTrafficManager(BaseManager):
         # except:
         #     raise ValueError("Can not LOAD traffic for seed: {}".format(self.engine.global_random_seed))
 
-    @staticmethod
-    def parse_vehicle_state(states, time_idx, check_last_state=False):
-        ret = {}
-        if time_idx >= len(states):
-            time_idx = -1
-        state = states[time_idx]
-        if check_last_state:
-            for current_idx in range(len(states) - 1):
-                p_1 = states[current_idx][:2]
-                p_2 = states[current_idx + 1][:2]
-                if np.linalg.norm(p_1 - p_2) > 100:
-                    state = states[current_idx]
-                    break
-
-        ret["position"] = waymo_to_metadrive_vector([state[0], state[1]])
-        ret["length"] = state[3]
-        ret["width"] = state[4]
-        ret["heading"] = waymo_to_metadrive_heading((state[6]))
-        ret["velocity"] = waymo_to_metadrive_vector([state[7], state[8]])
-        ret["valid"] = state[9]
-        return ret
-
     def after_step(self, *args, **kwargs):
         try:
             # generate vehicle
             for v_id, type_traj in self.current_traffic_data.items():
                 if v_id in self.vid_to_obj and self.vid_to_obj[v_id] in self.spawned_objects.keys():
-                    info = self.parse_vehicle_state(type_traj, self.count)
+                    info = parse_vehicle_state(type_traj, self.count)
                     time_end = self.count > self.engine.global_config["traj_end_index"] and self.engine.global_config[
                         "traj_end_index"] != -1
                     if (not info["valid"] or time_end) and v_id in self.vid_to_obj:
@@ -96,23 +72,6 @@ class WaymoTrafficManager(BaseManager):
             # self.sdc_track_index = str(self.engine.data_manager.get_case(self.engine.global_random_seed)["sdc_track_index"])
         except:
             raise ValueError("Can not CLEAN traffic for seed: {}".format(self.engine.global_random_seed))
-
-    @staticmethod
-    def parse_full_trajectory(states):
-        index = len(states)
-        for current_idx in range(len(states) - 1):
-            p_1 = states[current_idx][:2]
-            p_2 = states[current_idx + 1][:2]
-            if np.linalg.norm(p_1 - p_2) > 100:
-                index = current_idx
-                break
-
-        states = states[:index]
-        trajectory = copy.deepcopy(states[:, :2])
-        # convert to metadrive coordinate
-        trajectory *= [1, -1]
-
-        return trajectory
 
     @property
     def current_traffic_data(self):

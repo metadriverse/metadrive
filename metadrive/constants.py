@@ -336,22 +336,5 @@ class PolicyState:
 REPLAY_DONE = "replay_done"
 
 
-class WaymoLaneProperty:
-    LANE_TYPE = "center_lane"
-    LANE_LINE_TYPE = "road_line"
-    LANE_EDGE_TYPE = "road_edge"
-    POLYLINE = "polyline"
-    LEFT_BOUNDARIES = "left_boundaries"
-    RIGHT_BOUNDARIES = "right_boundaries"
-    LEFT_NEIGHBORS = "left_neighbor"
-    RIGHT_NEIGHBORS = "right_neighbor"
-    ENTRY = "entry"
-    EXIT = "exit"
-
-    @staticmethod
-    def get_line_type_and_line_color(waymo_type):
-        pass
-
-
 class NuPlanLaneProperty:
     pass
