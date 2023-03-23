@@ -110,3 +110,6 @@ class BaseMap(BaseRunnable):
 
     def show_coordinates(self):
         pass
+
+    def get_map_vector(self, interval):
+        return self.road_network.get_vector(interval)

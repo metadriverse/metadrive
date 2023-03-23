@@ -419,3 +419,12 @@ class AbstractLane:
 
     def __del__(self):
         self.destroy()
+
+    def get_center_line_vector(self, interval=2):
+        """
+        This method will return the center line of this Lane in a discrete vector representation
+        """
+        ret = []
+        for i in range(0, self.length, interval):
+            ret.append(self.position(i, 0))
+        return np.array(ret)

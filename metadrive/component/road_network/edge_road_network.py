@@ -15,6 +15,7 @@ class EdgeRoadNetwork(BaseRoadNetwork):
     Compared to NodeRoadNetwork representing the relation of lanes in a node-based graph, EdgeRoadNetwork stores the
     relationship in edge-based graph, which is more common in real map representation
     """
+
     def __init__(self):
         super(EdgeRoadNetwork, self).__init__()
         self.graph = {}
@@ -95,6 +96,13 @@ class EdgeRoadNetwork(BaseRoadNetwork):
 
     def __del__(self):
         logging.debug("{} is released".format(self.__class__.__name__))
+
+    def get_center_line_vector(self, interval=2):
+        ret = {}
+        for id, lane_info in self.graph.items():
+            assert id == lane_info.lane.id
+            ret[id] = lane_info.lane.get_center_line_vector(interval)
+        return ret
 
 
 class OpenDriveRoadNetwork(EdgeRoadNetwork):
