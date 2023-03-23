@@ -5,7 +5,7 @@ import numpy as np
 from metadrive.component.vehicle.vehicle_type import SVehicle
 from metadrive.manager.base_manager import BaseManager
 from metadrive.utils.coordinates_shift import waymo_to_metadrive_heading, waymo_to_metadrive_vector
-from metadrive.utils.waymo_utils.waymo_utils import AgentType
+from metadrive.utils.waymo_utils.waymo_type import AgentType
 
 
 class WaymoTrafficManager(BaseManager):

@@ -7,7 +7,7 @@ from metadrive.component.lane.waymo_lane import PointLane
 from metadrive.component.vehicle.vehicle_type import SVehicle
 from metadrive.manager.waymo_traffic_manager import WaymoTrafficManager
 from metadrive.policy.idm_policy import WaymoIDMPolicy
-from metadrive.utils.waymo_utils.waymo_utils import AgentType
+from metadrive.utils.waymo_utils.waymo_type import AgentType
 
 static_vehicle_info = namedtuple("static_vehicle_info", "position heading")
 

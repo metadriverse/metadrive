@@ -1,9 +1,8 @@
-import sys
-from enum import Enum
-
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import figure
-from tqdm import tqdm
+
+from metadrive.utils.waymo_utils import RoadLineType, RoadEdgeType
+from metadrive.utils.waymo_utils.waymo_type import LaneType, AgentType, TrafficSignal
 
 try:
     import tensorflow as tf
@@ -13,54 +12,8 @@ try:
     from metadrive.utils.waymo_utils.protos import scenario_pb2
 except ImportError:
     pass
-import os
 import pickle
 import numpy as np
-
-LaneType = {
-    0: 'UNKNOWN',
-    1: 'LANE_FREEWAY',
-    2: 'LANE_SURFACE_STREET',
-    3: 'LANE_BIKE_LANE'
-}
-
-RoadLineType = {
-    0: 'UNKNOWN',
-    1: 'ROAD_LINE_BROKEN_SINGLE_WHITE',
-    2: 'ROAD_LINE_SOLID_SINGLE_WHITE',
-    3: 'ROAD_LINE_DOUBLE_WHITE',
-    4: 'ROAD_LINE_BROKEN_SINGLE_YELLOW',
-    5: 'ROAD_LINE_BROKEN_DOUBLE_YELLOW',
-    6: 'ROAD_LINE_SOLID_SINGLE_YELLOW',
-    7: 'ROAD_LINE_SOLID_DOUBLE_YELLOW',
-    8: 'ROAD_LINE_PASSING_DOUBLE_YELLOW'
-}
-
-RoadEdgeType = {
-    0: 'UNKNOWN',
-    1: 'ROAD_EDGE_BOUNDARY',
-    2: 'ROAD_EDGE_MEDIAN'
-}
-
-AgentType = {
-    0: 'UNSET',
-    1: 'VEHICLE',
-    2: 'PEDESTRIAN',
-    3: 'CYCLIST',
-    4: 'OTHER'
-}
-
-TrafficSignal = {
-    0: 'LANE_STATE_UNKNOWN',
-    1: 'LANE_STATE_ARROW_STOP',
-    2: 'LANE_STATE_ARROW_CAUTION',
-    3: 'LANE_STATE_ARROW_GO',
-    4: 'LANE_STATE_STOP',
-    5: 'LANE_STATE_CAUTION',
-    6: 'LANE_STATE_GO',
-    7: 'LANE_STATE_FLASHING_STOP',
-    8: 'LANE_STATE_FLASHING_CAUTION'
-}
 
 
 def extract_poly(message):
@@ -322,39 +275,6 @@ def compute_width(map):
 
 
 # parse raw data from input path to output path
-def parse_data(input, output_path):
-    cnt = 0
-    scenario = scenario_pb2.Scenario()
-    file_list = os.listdir(input)
-    for file in tqdm(file_list):
-        file_path = os.path.join(input, file)
-        if not 'tfrecord' in file_path:
-            continue
-        dataset = tf.data.TFRecordDataset(file_path, compression_type='')
-        for j, data in enumerate(dataset.as_numpy_iterator()):
-            scenario.ParseFromString(data)
-            scene = dict()
-            scene['id'] = scenario.scenario_id
-
-            scene['version'] = 'Mar23'  # March of 2023
-
-            scene['ts'] = [ts for ts in scenario.timestamps_seconds]
-
-            scene['tracks'], sdc_id = extract_tracks(scenario.tracks, scenario.sdc_track_index)
-
-            scene['sdc_track_index'] = sdc_id
-
-            scene['dynamic_map_states'] = extract_dynamic(scenario.dynamic_map_states)
-
-            scene['map_features'] = extract_map(scenario.map_features)
-
-            compute_width(scene['map_features'])
-
-            p = os.path.join(output_path, f'{cnt}.pkl')
-            with open(p, 'wb') as f:
-                pickle.dump(scene, f)
-            cnt += 1
-    return
 
 
 def convert_polyline_to_metadrive(waymo_polyline):
@@ -362,20 +282,3 @@ def convert_polyline_to_metadrive(waymo_polyline):
     Waymo lane is in a different coordinate system, using them after converting
     """
     return [np.array([p[0], -p[1]]) for p in waymo_polyline]
-
-
-if __name__ == "__main__":
-    case_data_path = sys.argv[1]
-    try:
-        os.mkdir(case_data_path + "_processed")
-    except:
-        pass
-    raw_data_path = case_data_path
-    processed_data_path = case_data_path + "_processed"
-    # parse raw data from input path to output path,
-    # there is 1000 raw data in google cloud, each of them produce about 500 pkl file
-    parse_data(raw_data_path, processed_data_path)
-
-    # file_path = AssetLoader.file_path("waymo", "processed", "0.pkl", return_raw_style=False)
-    # data = read_waymo_data(file_path)
-    # draw_waymo_map(data)
