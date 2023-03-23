@@ -6,7 +6,7 @@ from metadrive.component.lane.circular_lane import CircularLane
 from metadrive.component.lane.straight_lane import StraightLane
 from metadrive.constants import LineType, LineColor
 from metadrive.utils.utils import import_pygame
-from metadrive.utils.waymo_utils import RoadLineType, RoadEdgeType
+from metadrive.utils.waymo_utils.waymo_type import RoadLineType, RoadEdgeType
 
 PositionType = Union[Tuple[float, float], np.ndarray]
 pygame = import_pygame()

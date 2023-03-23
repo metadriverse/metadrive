@@ -51,7 +51,7 @@ if __name__ == "__main__":
     from metadrive.engine.engine_utils import initialize_engine
     from metadrive.envs.real_data_envs.waymo_env import WaymoEnv
     from metadrive.utils.waymo_utils.waymo_type import AgentType
-    from metadrive.utils.waymo_utils import RoadLineType, RoadEdgeType
+    from metadrive.utils.waymo_utils.waymo_type import RoadLineType, RoadEdgeType
     from metadrive.manager.waymo_data_manager import WaymoDataManager
 
     # touch these items so that pickle can work

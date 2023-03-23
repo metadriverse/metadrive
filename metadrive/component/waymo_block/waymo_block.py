@@ -10,7 +10,7 @@ from metadrive.engine.engine_utils import get_engine
 from metadrive.utils.interpolating_line import InterpolatingLine
 from metadrive.utils.math_utils import wrap_to_pi, norm
 from metadrive.utils.waymo_utils.utils import convert_polyline_to_metadrive
-from metadrive.utils.waymo_utils import RoadLineType, RoadEdgeType
+from metadrive.utils.waymo_utils.waymo_type import RoadLineType, RoadEdgeType
 
 
 class WaymoBlock(BaseBlock):

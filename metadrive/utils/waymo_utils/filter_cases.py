@@ -9,7 +9,7 @@ from metadrive.policy.idm_policy import WaymoIDMPolicy
 
 try:
     from metadrive.utils.waymo_utils.waymo_type import AgentType
-    from metadrive.utils.waymo_utils import RoadLineType, RoadEdgeType
+    from metadrive.utils.waymo_utils.waymo_type import RoadLineType, RoadEdgeType
 finally:
     pass
 

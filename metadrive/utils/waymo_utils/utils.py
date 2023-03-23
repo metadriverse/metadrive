@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import figure
 
-from metadrive.utils.waymo_utils import RoadLineType, RoadEdgeType
+from metadrive.utils.waymo_utils.waymo_type import RoadLineType, RoadEdgeType
 from metadrive.utils.waymo_utils.waymo_type import LaneType, AgentType, TrafficSignal
 
 try:
