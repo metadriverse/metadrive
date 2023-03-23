@@ -1,9 +1,4 @@
-LaneType = {
-    0: 'UNKNOWN',
-    1: 'LANE_FREEWAY',
-    2: 'LANE_SURFACE_STREET',
-    3: 'LANE_BIKE_LANE'
-}
+LaneType = {0: 'UNKNOWN', 1: 'LANE_FREEWAY', 2: 'LANE_SURFACE_STREET', 3: 'LANE_BIKE_LANE'}
 RoadLineType = {
     0: 'UNKNOWN',
     1: 'ROAD_LINE_BROKEN_SINGLE_WHITE',
@@ -15,18 +10,8 @@ RoadLineType = {
     7: 'ROAD_LINE_SOLID_DOUBLE_YELLOW',
     8: 'ROAD_LINE_PASSING_DOUBLE_YELLOW'
 }
-RoadEdgeType = {
-    0: 'UNKNOWN',
-    1: 'ROAD_EDGE_BOUNDARY',
-    2: 'ROAD_EDGE_MEDIAN'
-}
-AgentType = {
-    0: 'UNSET',
-    1: 'VEHICLE',
-    2: 'PEDESTRIAN',
-    3: 'CYCLIST',
-    4: 'OTHER'
-}
+RoadEdgeType = {0: 'UNKNOWN', 1: 'ROAD_EDGE_BOUNDARY', 2: 'ROAD_EDGE_MEDIAN'}
+AgentType = {0: 'UNSET', 1: 'VEHICLE', 2: 'PEDESTRIAN', 3: 'CYCLIST', 4: 'OTHER'}
 TrafficSignal = {
     0: 'LANE_STATE_UNKNOWN',
     1: 'LANE_STATE_ARROW_STOP',

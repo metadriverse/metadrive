@@ -6,7 +6,7 @@ from metadrive.constants import DrivableAreaProperty
 from metadrive.constants import WaymoLaneProperty
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.utils.math_utils import norm
-from metadrive.utils.waymo_utils.waymo_utils import read_waymo_data, convert_polyline_to_metadrive
+from metadrive.utils.waymo_utils.utils import read_waymo_data, convert_polyline_to_metadrive
 
 
 class WaymoLane(PointLane):

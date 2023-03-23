@@ -4,7 +4,7 @@ from metadrive.component.map.base_map import BaseMap
 from metadrive.component.road_network.edge_road_network import EdgeRoadNetwork
 from metadrive.component.waymo_block.waymo_block import WaymoBlock
 from metadrive.engine.asset_loader import AssetLoader
-from metadrive.utils.waymo_utils.waymo_utils import read_waymo_data
+from metadrive.utils.waymo_utils.utils import read_waymo_data
 
 
 class WaymoMap(BaseMap):

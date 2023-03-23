@@ -184,8 +184,9 @@ def extract_dynamic(f):
             tls_t_j = dict()
             tls_t_j['lane'] = f_i_j.lane
             tls_t_j['state'] = TrafficSignal[f_i_j.state]
-            tls_t_j['stop_point'] = np.array([f_i_j.stop_point.x, f_i_j.stop_point.y, f_i_j.stop_point.z],
-                                             dtype='float32')
+            tls_t_j['stop_point'] = np.array(
+                [f_i_j.stop_point.x, f_i_j.stop_point.y, f_i_j.stop_point.z], dtype='float32'
+            )
             tls_t.append(tls_t_j)
 
         dynamics.append(tls_t)

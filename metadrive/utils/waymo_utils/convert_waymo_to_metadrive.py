@@ -8,7 +8,7 @@ try:
 except ImportError:
     pass
 from metadrive.utils.waymo_utils.protos import scenario_pb2
-from metadrive.utils.waymo_utils.waymo_utils import extract_tracks, extract_dynamic, extract_map, compute_width
+from metadrive.utils.waymo_utils.utils import extract_tracks, extract_dynamic, extract_map, compute_width
 import sys
 
 
