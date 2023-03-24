@@ -55,7 +55,7 @@ def draw_top_down_map(
             waymo_line = InterpolatingLine(convert_polyline_to_metadrive(data[WaymoLaneProperty.POLYLINE]))
             LaneGraphics.display_waymo(waymo_line, type, surface)
 
-    if isinstance(map, NuPlanMap):
+    elif isinstance(map, NuPlanMap):
         assert not simple_draw, "Simple Draw does not support now"
         for block in map.attached_blocks + [map.boundary_block]:
             for boundary in block.boundaries.values():

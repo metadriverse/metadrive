@@ -314,7 +314,7 @@ class WaymoEnv(BaseEnv):
 if __name__ == "__main__":
     env = WaymoEnv(
         {
-            "use_render": True,
+            "use_render": False,
             "agent_policy": WaymoReplayEgoCarPolicy,
             "manual_control": False,
             "replay": True,
@@ -342,15 +342,16 @@ if __name__ == "__main__":
             assert env.observation_space.contains(o)
             c_lane = env.vehicle.lane
             long, lat, = c_lane.local_coordinates(env.vehicle.position)
-            if env.config["use_render"]:
-                env.render(
-                    text={
-                        "obs_shape": len(o),
-                        "lateral": env.observations["default_agent"].lateral_dist,
-                        "seed": env.engine.global_seed + env.config["start_case_index"],
-                        "reward": r,
-                    }
-                )
+            # if env.config["use_render"]:
+            env.render(
+                # text={
+                #     "obs_shape": len(o),
+                #     "lateral": env.observations["default_agent"].lateral_dist,
+                #     "seed": env.engine.global_seed + env.config["start_case_index"],
+                #     "reward": r,
+                # }
+                mode="topdown"
+            )
 
             if d:
                 if info["arrive_dest"]:

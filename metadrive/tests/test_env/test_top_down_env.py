@@ -1,14 +1,17 @@
 import numpy as np
-
+from metadrive.envs.real_data_envs.waymo_env import WaymoEnv
 from metadrive.envs.top_down_env import TopDownSingleFrameMetaDriveEnv, TopDownMetaDrive, TopDownMetaDriveEnvV2
 
 
 def test_top_down_rendering():
     for env in [
-            TopDownSingleFrameMetaDriveEnv(dict(environment_num=5, map="C", traffic_density=1.0)),
-            TopDownMetaDrive(dict(environment_num=5, map="C", traffic_density=1.0)),
-            TopDownMetaDrive(dict(environment_num=5, map="C", frame_stack=1, post_stack=2)),
-            TopDownMetaDriveEnvV2(dict(environment_num=5, map="C", frame_stack=1, post_stack=2)),
+        TopDownSingleFrameMetaDriveEnv(dict(environment_num=5, map="C", traffic_density=1.0)),
+        TopDownMetaDrive(dict(environment_num=5, map="C", traffic_density=1.0)),
+        TopDownMetaDrive(dict(environment_num=5, map="C", frame_stack=1, post_stack=2)),
+        TopDownMetaDriveEnvV2(dict(environment_num=5, map="C", frame_stack=1, post_stack=2)),
+        WaymoEnv(dict(case_num=1, start_case_index=0)),
+        WaymoEnv(dict(case_num=1, start_case_index=1)),
+        WaymoEnv(dict(case_num=1, start_case_index=2)),
     ]:
         try:
             for _ in range(5):
