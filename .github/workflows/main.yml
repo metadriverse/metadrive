@@ -35,7 +35,7 @@ jobs:
         run: |
           pip install cython
           pip install numpy
-          pip install -e .[all]
+          pip install -e .
           pip install pytest
           pip install pytest-cov
           pip install ray
@@ -54,7 +54,7 @@ jobs:
         run: |
           pip install cython
           pip install numpy
-          pip install -e .[all]
+          pip install -e .
           pip install pytest
           pip install pytest-cov
           pip install ray
@@ -73,7 +73,7 @@ jobs:
         run: |
           pip install cython
           pip install numpy
-          pip install -e .[all]
+          pip install -e .
           pip install pytest
           pip install pytest-cov
           pip install ray
@@ -92,7 +92,7 @@ jobs:
         run: |
           pip install cython
           pip install numpy
-          pip install -e .[all]
+          pip install -e .
           pip install pytest
           pip install pytest-cov
           pip install ray
