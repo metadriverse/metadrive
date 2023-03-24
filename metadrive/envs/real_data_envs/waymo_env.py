@@ -175,8 +175,8 @@ class WaymoEnv(BaseEnv):
         # for compatibility
         # crash almost equals to crashing with vehicles
         done_info[TerminationState.CRASH] = (
-            done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
-            or done_info[TerminationState.CRASH_BUILDING]
+                done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
+                or done_info[TerminationState.CRASH_BUILDING]
         )
         return done, done_info
 
@@ -250,8 +250,8 @@ class WaymoEnv(BaseEnv):
 
         if native_vid in data["tracks"] and len(data["tracks"][native_vid]) > 0:
             expert_state_list = data["tracks"][native_vid]
-            mask = expert_state_list[:, -1]
-            largest_valid_index = np.max(np.where(expert_state_list[:, -1] == 1)[0])
+            mask = expert_state_list["valid"]
+            largest_valid_index = np.max(np.where(mask == True)[0])
 
             if self.episode_step > largest_valid_index:
                 current_step = largest_valid_index
@@ -263,12 +263,11 @@ class WaymoEnv(BaseEnv):
                 if current_step == 0:
                     break
 
-            expert_state = expert_state_list[current_step]
-            expert_xy = waymo_2_metadrive_position(expert_state[:2])
+            expert_xy = waymo_2_metadrive_position(expert_state_list["position"][current_step][:2])
             dist = np.linalg.norm(agent_xy - expert_xy)
             step_info["distance_error"] = dist
 
-            last_state = expert_state_list[largest_valid_index]
+            last_state = expert_state_list["position"][largest_valid_index]
             last_expert_xy = waymo_2_metadrive_position(last_state[:2])
             last_dist = np.linalg.norm(agent_xy - last_expert_xy)
             step_info["distance_error_final"] = last_dist
@@ -318,7 +317,7 @@ if __name__ == "__main__":
         {
             "use_render": True,
             "agent_policy": WaymoIDMPolicy,
-            "manual_control": True,
+            "manual_control": False,
             "replay": False,
             "no_traffic": False,
             # "debug":True,
