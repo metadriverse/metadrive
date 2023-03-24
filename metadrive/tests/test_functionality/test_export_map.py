@@ -1,5 +1,9 @@
 from metadrive.engine.asset_loader import AssetLoader
-from metadrive.envs.real_data_envs.nuplan_env import NuPlanEnv
+
+try:
+    from metadrive.envs.real_data_envs.nuplan_env import NuPlanEnv
+except ImportError:
+    pass
 from metadrive.utils.export_utils.utils import draw_map
 from metadrive.envs.metadrive_env import MetaDriveEnv
 from metadrive.envs.real_data_envs.waymo_env import WaymoEnv
