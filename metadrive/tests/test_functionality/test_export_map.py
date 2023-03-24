@@ -1,4 +1,5 @@
 from metadrive.engine.asset_loader import AssetLoader
+from metadrive.envs.real_data_envs.nuplan_env import NuPlanEnv
 from metadrive.utils.export_utils.utils import draw_map
 from metadrive.envs.metadrive_env import MetaDriveEnv
 from metadrive.envs.real_data_envs.waymo_env import WaymoEnv
@@ -37,5 +38,25 @@ def test_metadrive_map_export(render=False):
         env.close()
 
 
+def _test_nuplan_map_export(render=False):
+    env = NuPlanEnv(
+        {
+            "DATASET_PARAMS": [
+                'scenario_builder=nuplan_mini',
+                'scenario_filter=one_continuous_log',  # simulate only one log
+                "scenario_filter.log_names=['2021.09.16.15.12.03_veh-42_01037_01434']",
+                'scenario_filter.limit_total_scenarios=1000',  # use 2 total scenarios
+            ]
+        }
+    )
+    try:
+        env.reset(force_seed=0)
+        map_vector = env.current_map.get_map_vector()
+        draw_map(map_vector["map_features"], True if render else False)
+    finally:
+        env.close()
+
+
 if __name__ == "__main__":
-    test_export_waymo_map(True)
+    # test_export_waymo_map(True)
+    _test_nuplan_map_export(True)

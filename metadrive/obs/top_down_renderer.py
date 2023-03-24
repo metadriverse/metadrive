@@ -58,7 +58,7 @@ def draw_top_down_map(
     elif isinstance(map, NuPlanMap):
         assert not simple_draw, "Simple Draw does not support now"
         for block in map.attached_blocks + [map.boundary_block]:
-            for boundary in block.boundaries.values():
+            for boundary in block.lines.values():
                 line = InterpolatingLine(boundary.points)
                 LaneGraphics.display_nuplan(line, boundary.type, boundary.color, surface)
 

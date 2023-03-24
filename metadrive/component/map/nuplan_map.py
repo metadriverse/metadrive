@@ -1,4 +1,5 @@
 import logging
+from metadrive.utils.export_utils.type import MetaDriveSceneElement
 
 import geopandas as gpd
 import numpy as np
@@ -131,8 +132,9 @@ class NuPlanMap(BaseMap):
         for idx, boundary in enumerate(boundaries[0]):
             block_points = np.array(list(i for i in zip(boundary.coords.xy[0], boundary.coords.xy[1])))
             block_points = nuplan_to_metadrive_vector(block_points, self.nuplan_center)
-            self.boundary_block.boundaries["boundary_{}".format(idx)] = LaneLineProperty(
-                block_points, LineColor.GREY, LineType.CONTINUOUS, in_road_connector=False
+            id = "boundary_{}".format(idx)
+            self.boundary_block.lines[id] = LaneLineProperty(
+                id, block_points, LineColor.GREY, LineType.CONTINUOUS, in_road_connector=False
             )
         self.boundary_block.construct_block(self.engine.worldNP, self.engine.physics_world, attach_to_world=True)
         np.seterr(all='warn')
@@ -165,6 +167,25 @@ class NuPlanMap(BaseMap):
     def show_coordinates(self):
         lanes = [lane_info.lane for lane_info in self.road_network.graph.values()]
         self.engine.show_lane_coordinates(lanes)
+
+    def get_boundary_line_vector(self, interval):
+        ret = {}
+        for block in self.attached_blocks + [self.boundary_block]:
+            for boundary in block.lines.values():
+                type = boundary.type
+                if type == LineType.BROKEN:
+                    ret[boundary.id] = {
+                        "type": MetaDriveSceneElement.BROKEN_YELLOW_LINE
+                        if boundary.color == LineColor.YELLOW else MetaDriveSceneElement.BROKEN_GREY_LINE,
+                        "polyline": boundary.points
+                    }
+                else:
+                    ret[boundary.id] = {
+                        "polyline": boundary.points,
+                        "type": MetaDriveSceneElement.CONTINUOUS_YELLOW_LINE
+                        if boundary.color == LineColor.YELLOW else MetaDriveSceneElement.CONTINUOUS_GREY_LINE
+                    }
+        return ret
 
 
 if __name__ == "__main__":
