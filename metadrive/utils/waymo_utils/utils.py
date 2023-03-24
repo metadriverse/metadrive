@@ -196,6 +196,7 @@ def extract_dynamic(f):
 
 class CustomUnpickler(pickle.Unpickler):
     def __init__(self, load_old_case, *args, **kwargs):
+        raise DeprecationWarning("Now we don't pickle any customized data type, so this class is deprecated now")
         super(CustomUnpickler, self).__init__(*args, **kwargs)
         self.load_old_case = load_old_case
 
@@ -214,8 +215,8 @@ class CustomUnpickler(pickle.Unpickler):
 
 def read_waymo_data(file_path):
     with open(file_path, "rb") as f:
-        unpickler = CustomUnpickler(False, f)
-        data = unpickler.load()
+        # unpickler = CustomUnpickler(f)
+        data = pickle.load(f)
     new_track = {}
     for key, value in data["tracks"].items():
         new_track[str(key)] = value
