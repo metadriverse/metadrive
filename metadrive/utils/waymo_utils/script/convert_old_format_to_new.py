@@ -162,7 +162,8 @@ def convert_case(file_path, new_path):
 
 
 if __name__ == "__main__":
-    file_path = AssetLoader.file_path("waymo", "0.pkl", return_raw_style=False)
-    new_file_path = AssetLoader.file_path("waymo", "3.pkl", return_raw_style=False)
-    convert_case(file_path, new_file_path)
+    for i in range(3):
+        file_path = AssetLoader.file_path("waymo", "{}.pkl".format(i), return_raw_style=False)
+        new_file_path = AssetLoader.file_path("waymo", "{}.pkl".format(i + 3), return_raw_style=False)
+        convert_case(file_path, new_file_path)
     sys.exit()
