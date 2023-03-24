@@ -14,10 +14,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Set up Python 3.7
+      - name: Set up Python 3.9
         uses: actions/setup-python@v2
         with:
-          python-version: 3.7
+          python-version: 3.9
       - name: Check code style
         run: |
           pip install "yapf==0.30.0"
@@ -27,15 +27,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Set up Python 3.7
+      - name: Set up Python 3.9
         uses: actions/setup-python@v2
         with:
-          python-version: 3.7
+          python-version: 3.9
       - name: Blackbox tests
         run: |
           pip install cython
           pip install numpy
-          pip install -e .[nuplan]
+          pip install -e .[all]
           pip install pytest
           pip install pytest-cov
           pip install ray
@@ -46,15 +46,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Set up Python 3.7
+      - name: Set up Python 3.9
         uses: actions/setup-python@v2
         with:
-          python-version: 3.7
+          python-version: 3.9
       - name: Blackbox tests
         run: |
           pip install cython
           pip install numpy
-          pip install -e .[nuplan]
+          pip install -e .[all]
           pip install pytest
           pip install pytest-cov
           pip install ray
@@ -65,15 +65,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Set up Python 3.7
+      - name: Set up Python 3.9
         uses: actions/setup-python@v2
         with:
-          python-version: 3.7
+          python-version: 3.9
       - name: Blackbox tests
         run: |
           pip install cython
           pip install numpy
-          pip install -e .[nuplan]
+          pip install -e .[all]
           pip install pytest
           pip install pytest-cov
           pip install ray
@@ -84,15 +84,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Set up Python 3.7
+      - name: Set up Python 3.9
         uses: actions/setup-python@v2
         with:
-          python-version: 3.7
+          python-version: 3.9
       - name: Blackbox tests
         run: |
           pip install cython
           pip install numpy
-          pip install -e .[nuplan]
+          pip install -e .[all]
           pip install pytest
           pip install pytest-cov
           pip install ray
