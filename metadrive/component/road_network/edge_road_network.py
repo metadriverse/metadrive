@@ -100,7 +100,7 @@ class EdgeRoadNetwork(BaseRoadNetwork):
         ret = {}
         for id, lane_info in self.graph.items():
             assert id == lane_info.lane.index
-            ret[id] = lane_info.lane.get_center_line_vector(interval)
+            ret[id] = lane_info.lane.get_polyline(interval)
         return ret
 
 
