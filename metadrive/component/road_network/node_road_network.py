@@ -274,5 +274,5 @@ class NodeRoadNetwork(BaseRoadNetwork):
         for _from, _to_dict in self.graph.items():
             for _to, lanes in _to_dict.items():
                 for k, lane in enumerate(lanes):
-                    ret["{}_to_{}_{}".format(_from, _to, k)] = lane.get_center_line_vector(interval)
+                    ret["{}".format(lane.index)] = lane.get_center_line_vector(interval)
         return ret

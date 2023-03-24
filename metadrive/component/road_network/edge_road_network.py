@@ -99,7 +99,7 @@ class EdgeRoadNetwork(BaseRoadNetwork):
     def get_center_line_vector(self, interval=2):
         ret = {}
         for id, lane_info in self.graph.items():
-            assert id == lane_info.lane.id
+            assert id == lane_info.lane.index
             ret[id] = lane_info.lane.get_center_line_vector(interval)
         return ret
 
