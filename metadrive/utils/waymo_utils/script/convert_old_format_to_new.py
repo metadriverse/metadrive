@@ -132,10 +132,20 @@ def convert_case(file_path, new_path):
         if new_data["map_features"][map_id]["type"] == "center_lane":
             # remove neighbor and boundary
             new_data["map_features"][map_id]["type"] = "LANE_SURFACE_STREET"
-            new_data["map_features"][map_id]["left_boundaries"] = []
-            new_data["map_features"][map_id]["right_boundaries"] = []
-            new_data["map_features"][map_id]["right_neighbor"] = []
-            new_data["map_features"][map_id]["left_neighbor"] = []
+            for b in new_data["map_features"][map_id]["left_boundaries"]:
+                b["type"] = b["type"].ENUM_TO_STR.value[b["type"].value]
+            for b in new_data["map_features"][map_id]["right_boundaries"]:
+                b["type"] = b["type"].ENUM_TO_STR.value[b["type"].value]
+
+            new_neighbor = []
+            for b in new_data["map_features"][map_id]["right_neighbor"]:
+                new_neighbor.append({"id": b["id"]})
+            new_data["map_features"][map_id]["right_neighbor"] = new_neighbor
+            new_neighbor = []
+
+            for b in new_data["map_features"][map_id]["left_boundaries"]:
+                new_neighbor.append({"id": b["id"]})
+            new_data["map_features"][map_id]["left_neighbor"] = new_neighbor
             new_data["map_features"][map_id]["entry_lanes"] = new_data["map_features"][map_id]["entry"]
             new_data["map_features"][map_id]["exit_lanes"] = new_data["map_features"][map_id]["exit"]
         if isinstance(new_data["map_features"][map_id]["type"], Enum):

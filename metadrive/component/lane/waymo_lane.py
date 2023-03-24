@@ -39,14 +39,14 @@ class WaymoLane(PointLane):
             return max(sum(waymo_map_data[waymo_lane_id]["width"][0]), self.VIS_LANE_WIDTH)
         dist_to_left_lane = 0
         dist_to_right_lane = 0
-        if len(right_lanes) > 0:
+        if len(right_lanes) > 0 and "feature_id" in right_lanes[0]:
             right_lane = waymo_map_data[right_lanes[0]["feature_id"]]
             self_start = right_lanes[0]["self_start_index"]
             neighbor_start = right_lanes[0]["neighbor_start_index"]
             n_point = right_lane[WaymoLaneProperty.POLYLINE][neighbor_start]
             self_point = waymo_map_data[waymo_lane_id][WaymoLaneProperty.POLYLINE][self_start]
             dist_to_right_lane = norm(n_point[0] - self_point[0], n_point[1] - self_point[1])
-        if len(left_lanes) > 0:
+        if len(left_lanes) > 0 and "feature_id" in left_lanes[0]:
             left_lane = waymo_map_data[left_lanes[-1]["feature_id"]]
             self_start = left_lanes[-1]["self_start_index"]
             neighbor_start = left_lanes[-1]["neighbor_start_index"]
