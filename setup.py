@@ -122,10 +122,10 @@ install_requires = [
 #             reqs.append(ln)
 #     return reqs
 
-nuplan_requirement = ["nuplan-devkit==1.0.0",
-                      "bokeh==2.4",
+nuplan_requirement = ["bokeh==2.4",
                       "hydra",
-                      ]
+                      "geopandas",
+                      "shapely"]
 
 cuda_requirement = ["cuda-python==12.0.0",
                     "PyOpenGL==3.1.6",
