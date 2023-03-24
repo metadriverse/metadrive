@@ -1,11 +1,15 @@
 import math
 from dataclasses import dataclass
 from metadrive.utils.coordinates_shift import nuplan_to_metadrive_vector
-import geopandas as gpd
 import numpy as np
-from nuplan.common.actor_state.state_representation import Point2D
-from nuplan.common.maps.maps_datatypes import SemanticMapLayer, StopLineType
-from shapely.ops import unary_union
+
+try:
+    import geopandas as gpd
+    from nuplan.common.actor_state.state_representation import Point2D
+    from nuplan.common.maps.maps_datatypes import SemanticMapLayer, StopLineType
+    from shapely.ops import unary_union
+except ImportError:
+    pass
 
 from metadrive.component.block.base_block import BaseBlock
 from metadrive.component.lane.nuplan_lane import NuPlanLane
