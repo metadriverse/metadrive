@@ -8,6 +8,13 @@ from enum import Enum
 from metadrive.engine.asset_loader import AssetLoader
 
 
+class LaneTypeClass:
+    UNKNOWN = 0
+    LANE_FREEWAY = 1
+    LANE_SURFACE_STREET = 2
+    LANE_BIKE_LANE = 3
+
+
 class RoadLineType(Enum):
     UNKNOWN = 0
     BROKEN_SINGLE_WHITE = 1
@@ -18,6 +25,18 @@ class RoadLineType(Enum):
     SOLID_SINGLE_YELLOW = 6
     SOLID_DOUBLE_YELLOW = 7
     PASSING_DOUBLE_YELLOW = 8
+
+    ENUM_TO_STR = {
+        UNKNOWN: 'UNKNOWN',
+        BROKEN_SINGLE_WHITE: 'ROAD_LINE_BROKEN_SINGLE_WHITE',
+        SOLID_SINGLE_WHITE: 'ROAD_LINE_SOLID_SINGLE_WHITE',
+        SOLID_DOUBLE_WHITE: 'ROAD_LINE_SOLID_DOUBLE_WHITE',
+        BROKEN_SINGLE_YELLOW: 'ROAD_LINE_BROKEN_SINGLE_YELLOW',
+        BROKEN_DOUBLE_YELLOW: 'ROAD_LINE_BROKEN_DOUBLE_YELLOW',
+        SOLID_SINGLE_YELLOW: 'ROAD_LINE_SOLID_SINGLE_YELLOW',
+        SOLID_DOUBLE_YELLOW: 'ROAD_LINE_SOLID_DOUBLE_YELLOW',
+        PASSING_DOUBLE_YELLOW: 'ROAD_LINE_PASSING_DOUBLE_YELLOW'
+    }
 
     @staticmethod
     def is_road_line(line):
@@ -44,6 +63,8 @@ class RoadEdgeType(Enum):
     # Physical road boundary that separates the car from other traffic (e.g. a k-rail or an island).
     MEDIAN = 2
 
+    ENUM_TO_STR = {UNKNOWN: 'UNKNOWN', BOUNDARY: 'ROAD_EDGE_BOUNDARY', MEDIAN: 'ROAD_EDGE_MEDIAN'}
+
     @staticmethod
     def is_road_edge(edge):
         return True if edge.__class__ == RoadEdgeType else False
@@ -59,6 +80,8 @@ class AgentType(Enum):
     PEDESTRIAN = 2
     CYCLIST = 3
     OTHER = 4
+
+    ENUM_TO_STR = {UNSET: 'UNSET', VEHICLE: 'VEHICLE', PEDESTRIAN: 'PEDESTRIAN', CYCLIST: 'CYCLIST', OTHER: 'OTHER'}
 
 
 class CustomUnpickler(pickle.Unpickler):
@@ -79,6 +102,17 @@ class CustomUnpickler(pickle.Unpickler):
             return super().find_class(module, name)
 
 
+def parse_state(v_feature):
+    state = v_feature["state"]
+    ret = {}
+    ret["position"] = v_feature["state"][..., 0:2]
+    ret["size"] = v_feature["state"][..., 0:2]
+    ret["heading"] = v_feature["state"][..., 0:2]
+    ret["velocity"] = v_feature["state"][..., 0:2]
+    ret["valid"] = v_feature["state"][..., 0:2]
+    return ret
+
+
 def convert_case(file_path, new_path):
     with open(file_path, "rb+") as file:
         data = pickle.load(file)
@@ -87,10 +121,29 @@ def convert_case(file_path, new_path):
     new_data["dynamic_map_states"] = [[{}]]  # old data has no traffic light info
     new_data["ts"] = data["ts"]  # old data has no traffic light info
     new_data["version"] = "old format"  # old data has no traffic light info
-    new_data["sdc_track_index"] = data["sdc_index"]  # old data has no traffic light info
+    new_data["sdc_track_index"] = str(data["sdc_index"])  # old data has no traffic light info
     new_data["map_features"] = data["map"]  # old data has no traffic light info
-    new_data["tracks"] = data["tracks"]  # old data has no traffic light info
+    new_track = {}
+    for key, value in data["tracks"].items():
+        new_track[str(key)] = value
+    new_data["tracks"] = new_track
 
+    # convert clas type
+    for map_id, map_feature in new_data["map_features"].items():
+        if "type" not in new_data["map_features"][map_id]:
+            # filter sign and crosswalk
+            continue
+        if new_data["map_features"][map_id]["type"] == "center_lane":
+            new_data["map_features"][map_id]["type"] = LaneTypeClass.LANE_SURFACE_STREET
+        if isinstance(new_data["map_features"][map_id]["type"], Enum):
+            new_data["map_features"][map_id]["type"] = new_data["map_features"][map_id]["type"].ENUM_TO_STR.value[
+                new_data["map_features"][map_id]["type"].value]
+
+    for v_id, v_feature in new_data["tracks"].items():
+        new_v_feature = {}
+        new_v_feature["type"] = v_feature["type"].ENUM_TO_STR.value[v_feature["type"].value]
+        new_v_feature.update(parse_state(v_feature))
+        new_data["tracks"][v_id] = new_v_feature
     with open(new_path, "wb+") as file:
         pickle.dump(new_path, file)
 

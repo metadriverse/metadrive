@@ -45,7 +45,7 @@ class RoadLineTypeClass:
     SOLID_DOUBLE_YELLOW = 7
     PASSING_DOUBLE_YELLOW = 8
 
-    ENUM_to_STR = {
+    ENUM_TO_STR = {
         UNKNOWN: 'UNKNOWN',
         BROKEN_SINGLE_WHITE: 'ROAD_LINE_BROKEN_SINGLE_WHITE',
         SOLID_SINGLE_WHITE: 'ROAD_LINE_SOLID_SINGLE_WHITE',
@@ -58,11 +58,11 @@ class RoadLineTypeClass:
     }
 
     def is_road_line(self, line):
-        return True if line in self.ENUM_to_STR.values() else False
+        return True if line in self.ENUM_TO_STR.values() else False
 
     def is_yellow(self, line):
         return True if line in [
-            self.ENUM_to_STR[t] for t in [
+            self.ENUM_TO_STR[t] for t in [
                 RoadLineTypeClass.SOLID_DOUBLE_YELLOW, RoadLineTypeClass.PASSING_DOUBLE_YELLOW, RoadLineTypeClass.
                 SOLID_SINGLE_YELLOW, RoadLineTypeClass.BROKEN_DOUBLE_YELLOW, RoadLineTypeClass.BROKEN_SINGLE_YELLOW
             ]
@@ -70,14 +70,14 @@ class RoadLineTypeClass:
 
     def is_broken(self, line):
         return True if line in [
-            self.ENUM_to_STR[t] for t in [
+            self.ENUM_TO_STR[t] for t in [
                 RoadLineTypeClass.BROKEN_DOUBLE_YELLOW, RoadLineTypeClass.BROKEN_SINGLE_YELLOW,
                 RoadLineTypeClass.BROKEN_SINGLE_WHITE
             ]
         ] else False
 
     def __getitem__(self, item):
-        return self.ENUM_to_STR[item]
+        return self.ENUM_TO_STR[item]
 
 
 class RoadEdgeTypeClass:
