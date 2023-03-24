@@ -1,5 +1,5 @@
 import copy
-from metadrive.utils.metadrive_scene_format.type import MetaDriveSceneType
+from metadrive.utils.export_utils.type import MetaDriveSceneElement
 from metadrive.constants import LineType, LineColor
 from typing import List
 
@@ -150,10 +150,10 @@ class PGMap(BaseMap):
 
     def get_line_type(self, type, color):
         if type == LineType.CONTINUOUS and color == LineColor.YELLOW:
-            return MetaDriveSceneType.CONTINUOUS_YELLOW_LINE
+            return MetaDriveSceneElement.CONTINUOUS_YELLOW_LINE
         elif type == LineType.BROKEN and color == LineColor.YELLOW:
-            return MetaDriveSceneType.BROKEN_YELLOW_LINE
+            return MetaDriveSceneElement.BROKEN_YELLOW_LINE
         elif type == LineType.CONTINUOUS and color == LineColor.GREY:
-            return MetaDriveSceneType.CONTINUOUS_GREY_LINE
+            return MetaDriveSceneElement.CONTINUOUS_GREY_LINE
         elif type == LineType.BROKEN and color == LineColor.GREY:
-            return MetaDriveSceneType.BROKEN_GREY_LINE
+            return MetaDriveSceneElement.BROKEN_GREY_LINE

@@ -4,7 +4,7 @@ from metadrive.component.map.base_map import BaseMap
 from metadrive.component.road_network.edge_road_network import EdgeRoadNetwork
 from metadrive.component.waymo_block.waymo_block import WaymoBlock
 from metadrive.engine.asset_loader import AssetLoader
-from metadrive.utils.metadrive_scene_format.type import MetaDriveSceneType
+from metadrive.utils.export_utils.type import MetaDriveSceneElement
 from metadrive.utils.waymo_utils.utils import convert_polyline_to_metadrive
 from metadrive.utils.waymo_utils.utils import read_waymo_data
 from metadrive.utils.waymo_utils.waymo_type import RoadLineType, RoadEdgeType
@@ -59,20 +59,20 @@ class WaymoMap(BaseMap):
                     continue
                 if RoadLineType.is_broken(type):
                     ret[lane_id] = {
-                        "type": MetaDriveSceneType.BROKEN_YELLOW_LINE
-                        if RoadLineType.is_yellow(type) else MetaDriveSceneType.BROKEN_GREY_LINE,
+                        "type": MetaDriveSceneElement.BROKEN_YELLOW_LINE
+                        if RoadLineType.is_yellow(type) else MetaDriveSceneElement.BROKEN_GREY_LINE,
                         "polyline": convert_polyline_to_metadrive(data[WaymoLaneProperty.POLYLINE])
                     }
                 else:
                     ret[lane_id] = {
                         "polyline": convert_polyline_to_metadrive(data[WaymoLaneProperty.POLYLINE]),
-                        "type": MetaDriveSceneType.CONTINUOUS_YELLOW_LINE
-                        if RoadLineType.is_yellow(type) else MetaDriveSceneType.CONTINUOUS_GREY_LINE
+                        "type": MetaDriveSceneElement.CONTINUOUS_YELLOW_LINE
+                        if RoadLineType.is_yellow(type) else MetaDriveSceneElement.CONTINUOUS_GREY_LINE
                     }
             elif RoadEdgeType.is_road_edge(type):
                 ret[lane_id] = {
                     "polyline": convert_polyline_to_metadrive(data[WaymoLaneProperty.POLYLINE]),
-                    "type": MetaDriveSceneType.CONTINUOUS_GREY_LINE
+                    "type": MetaDriveSceneElement.CONTINUOUS_GREY_LINE
                 }
         return ret
 

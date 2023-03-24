@@ -1,4 +1,4 @@
-class MetaDriveSceneType:
+class MetaDriveSceneElement:
     """
     Follow waymo style
     """
