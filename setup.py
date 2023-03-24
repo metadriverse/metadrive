@@ -99,7 +99,9 @@ install_requires = [
     "opencv-python",
     "lxml",
     "scipy",
-    "psutil"
+    "psutil",
+    "geopandas",
+    "shapely"
 ]
 
 # add torch support via the following lines maybe
@@ -123,9 +125,7 @@ install_requires = [
 #     return reqs
 
 nuplan_requirement = ["bokeh==2.4",
-                      "hydra",
-                      "geopandas",
-                      "shapely"]
+                      "hydra"]
 
 cuda_requirement = ["cuda-python==12.0.0",
                     "PyOpenGL==3.1.6",
