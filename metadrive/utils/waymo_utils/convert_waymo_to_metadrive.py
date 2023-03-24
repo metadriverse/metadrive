@@ -48,7 +48,7 @@ def parse_data(input, output_path):
 
 
 if __name__ == "__main__":
-    case_data_path = "/home/shady/Downloads/test"
+    case_data_path = sys.argv[1]
     try:
         os.mkdir(case_data_path + "_processed")
     except:

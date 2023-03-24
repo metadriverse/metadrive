@@ -69,8 +69,6 @@ class WaymoBlock(BaseBlock):
                 self.construct_waymo_continuous_line(
                     convert_polyline_to_metadrive(data[WaymoLaneProperty.POLYLINE]), LineColor.GREY
                 )
-            elif type == "center_lane" or type is None:
-                continue
             # else:
             #     raise ValueError("Can not build lane line type: {}".format(type))
 
