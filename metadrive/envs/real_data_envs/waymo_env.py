@@ -325,8 +325,8 @@ if __name__ == "__main__":
             # "no_traffic":True,
             # "start_case_index": 192,
             # "start_case_index": 1000,
-            "case_num": 10,
-            "waymo_data_directory": "/home/shady/Downloads/test_processed",
+            "case_num": 4,
+            # "waymo_data_directory": "/home/shady/Downloads/test_processed",
             "horizon": 1000,
             "vehicle_config": dict(
                 no_wheel_friction=True,
@@ -337,8 +337,8 @@ if __name__ == "__main__":
         }
     )
     success = []
-    for i in range(env.config["case_num"]):
-        env.reset(force_seed=6)
+    for i in range(1000):
+        env.reset(force_seed=3)
         while True:
             o, r, d, info = env.step([0, 0])
             assert env.observation_space.contains(o)
@@ -347,15 +347,6 @@ if __name__ == "__main__":
             if env.config["use_render"]:
                 env.render(
                     text={
-                        # "routing_lane_idx": env.engine._object_policies[env.vehicle.id].routing_target_lane.index,
-                        # "lane_index": env.vehicle.lane_index,
-                        # "current_ckpt_index": env.vehicle.navigation.current_checkpoint_lane_index,
-                        # "next_ckpt_index": env.vehicle.navigation.next_checkpoint_lane_index,
-                        # "ckpts": env.vehicle.navigation.checkpoints,
-                        # "lane_heading": c_lane.heading_theta_at(long),
-                        # "long": long,
-                        # "lat": lat,
-                        # "v_heading": env.vehicle.heading_theta,
                         "obs_shape": len(o),
                         "lateral": env.observations["default_agent"].lateral_dist,
                         "seed": env.engine.global_seed + env.config["start_case_index"],

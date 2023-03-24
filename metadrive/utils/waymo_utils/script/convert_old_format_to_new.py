@@ -3,6 +3,7 @@ I only use this script to convert 3 old pickle cases into new format. People sho
 convert_waymo_to_metadrive.py
 """
 import pickle
+import sys
 from enum import Enum
 
 from metadrive.engine.asset_loader import AssetLoader
@@ -85,56 +86,58 @@ class AgentType(Enum):
 
 
 class CustomUnpickler(pickle.Unpickler):
-    def __init__(self, load_old_case, *args, **kwargs):
-        super(CustomUnpickler, self).__init__(*args, **kwargs)
-        self.load_old_case = load_old_case
-
     def find_class(self, module, name):
-        if self.load_old_case:
-            if name == 'AgentType':
-                return AgentType
-            elif name == "RoadLineType":
-                return RoadLineType
-            elif name == "RoadEdgeType":
-                return RoadEdgeType
-            return super().find_class(module, name)
-        else:
-            return super().find_class(module, name)
+        if name == 'AgentType':
+            return AgentType
+        elif name == "RoadLineType":
+            return RoadLineType
+        elif name == "RoadEdgeType":
+            return RoadEdgeType
+        return super(CustomUnpickler, self).find_class(module, name)
 
 
 def parse_state(v_feature):
-    state = v_feature["state"]
     ret = {}
-    ret["position"] = v_feature["state"][..., 0:2]
-    ret["size"] = v_feature["state"][..., 0:2]
-    ret["heading"] = v_feature["state"][..., 0:2]
-    ret["velocity"] = v_feature["state"][..., 0:2]
-    ret["valid"] = v_feature["state"][..., 0:2]
+
+    ret["position"] = v_feature["state"][..., 0:3]
+    ret["size"] = v_feature["state"][..., 3:6]
+    ret["heading"] = v_feature["state"][..., 6:7]
+    ret["velocity"] = v_feature["state"][..., 7:9]
+    ret["valid"] = v_feature["state"][..., 9:10]
     return ret
 
 
 def convert_case(file_path, new_path):
     with open(file_path, "rb+") as file:
-        data = pickle.load(file)
+        loader = CustomUnpickler(file)
+        data = loader.load()
     new_data = {}
     new_data["id"] = data["id"]
     new_data["dynamic_map_states"] = [[{}]]  # old data has no traffic light info
     new_data["ts"] = data["ts"]  # old data has no traffic light info
     new_data["version"] = "old format"  # old data has no traffic light info
     new_data["sdc_track_index"] = str(data["sdc_index"])  # old data has no traffic light info
-    new_data["map_features"] = data["map"]  # old data has no traffic light info
     new_track = {}
     for key, value in data["tracks"].items():
         new_track[str(key)] = value
     new_data["tracks"] = new_track
 
     # convert clas type
-    for map_id, map_feature in new_data["map_features"].items():
-        if "type" not in new_data["map_features"][map_id]:
+    new_data["map_features"] = {}
+    for map_id, map_feature in data["map"].items():
+        if "type" not in data["map"][map_id]:
             # filter sign and crosswalk
             continue
+        new_data["map_features"][map_id] = data["map"][map_id]
         if new_data["map_features"][map_id]["type"] == "center_lane":
-            new_data["map_features"][map_id]["type"] = LaneTypeClass.LANE_SURFACE_STREET
+            # remove neighbor and boundary
+            new_data["map_features"][map_id]["type"] = "LANE_SURFACE_STREET"
+            new_data["map_features"][map_id]["left_boundaries"] = []
+            new_data["map_features"][map_id]["right_boundaries"] = []
+            new_data["map_features"][map_id]["right_neighbor"] = []
+            new_data["map_features"][map_id]["left_neighbor"] = []
+            new_data["map_features"][map_id]["entry_lanes"] = new_data["map_features"][map_id]["entry"]
+            new_data["map_features"][map_id]["exit_lanes"] = new_data["map_features"][map_id]["exit"]
         if isinstance(new_data["map_features"][map_id]["type"], Enum):
             new_data["map_features"][map_id]["type"] = new_data["map_features"][map_id]["type"].ENUM_TO_STR.value[
                 new_data["map_features"][map_id]["type"].value]
@@ -145,10 +148,11 @@ def convert_case(file_path, new_path):
         new_v_feature.update(parse_state(v_feature))
         new_data["tracks"][v_id] = new_v_feature
     with open(new_path, "wb+") as file:
-        pickle.dump(new_path, file)
+        pickle.dump(new_data, file)
 
 
 if __name__ == "__main__":
     file_path = AssetLoader.file_path("waymo", "0.pkl", return_raw_style=False)
-    new_file_path = AssetLoader.file_path("waymo", "0_new.pkl", return_raw_style=False)
+    new_file_path = AssetLoader.file_path("waymo", "3.pkl", return_raw_style=False)
     convert_case(file_path, new_file_path)
+    sys.exit()

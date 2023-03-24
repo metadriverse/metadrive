@@ -20,7 +20,7 @@ class WaymoLane(PointLane):
         super(WaymoLane, self).__init__(
             convert_polyline_to_metadrive(waymo_map_data[waymo_lane_id][WaymoLaneProperty.POLYLINE]),
             self.get_lane_width(waymo_lane_id, waymo_map_data),
-            speed_limit=waymo_map_data[waymo_lane_id]["speed_limit_mph"] * 1.609344  # to km/h
+            speed_limit=waymo_map_data[waymo_lane_id].get("speed_limit_mph", 0) * 1.609344  # to km/h
         )
         self.index = waymo_lane_id
         self.lane_type = waymo_map_data[waymo_lane_id]["type"]
