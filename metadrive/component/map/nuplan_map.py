@@ -27,7 +27,7 @@ class NuPlanMap(BaseMap):
         self.map_name = map_name
         self._center = np.array(nuplan_center)
         self._nuplan_map_api = self.engine.data_manager.current_scenario.map_api
-        self._attached_block = []
+        self.attached_blocks = []
         self.boundary_block = None  # it won't be detached
         self._radius = radius
         self.cull_dist = get_global_config()["scenario_radius"]
@@ -46,14 +46,14 @@ class NuPlanMap(BaseMap):
                                                  self.cull_dist):
                 self.road_network.add(block.block_network)
                 block.attach_to_world(parent_node_path, physics_world)
-                self._attached_block.append(block)
+                self.attached_blocks.append(block)
         if not self.engine.global_config["load_city_map"]:
             self.boundary_block.attach_to_world(parent_node_path, physics_world)
 
     def detach_from_world(self, physics_world=None):
         if not self.engine.global_config["load_city_map"]:
             self.boundary_block.detach_from_world(self.engine.physics_world or physics_world)
-        for block in self._attached_block:
+        for block in self.attached_blocks:
             block.detach_from_world(self.engine.physics_world or physics_world)
 
     def _generate(self):

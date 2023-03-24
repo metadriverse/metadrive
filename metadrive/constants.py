@@ -70,6 +70,17 @@ class TrafficLightStatus:
         if status == self.UNKNOWN:
             return "Traffic Light: Unknown"
 
+    @classmethod
+    def color(self, status):
+        if status == self.GREEN:
+            return [0, 255, 0]
+        if status == self.RED:
+            return [1, 255, 0]
+        if status == self.YELLOW:
+            return [255, 255, 0]
+        if status == self.UNKNOWN:
+            return [180, 180, 180]
+
 
 class BodyName:
     White_continuous_line = "White Continuous Line"
