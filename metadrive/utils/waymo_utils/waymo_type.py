@@ -17,10 +17,12 @@ class LaneTypeClass:
     LANE_SURFACE_STREET = 2
     LANE_BIKE_LANE = 3
 
-    ENUM_TO_STR = {UNKNOWN: 'UNKNOWN',
-                   LANE_FREEWAY: 'LANE_FREEWAY',
-                   LANE_SURFACE_STREET: 'LANE_SURFACE_STREET',
-                   LANE_BIKE_LANE: 'LANE_BIKE_LANE'}
+    ENUM_TO_STR = {
+        UNKNOWN: 'UNKNOWN',
+        LANE_FREEWAY: 'LANE_FREEWAY',
+        LANE_SURFACE_STREET: 'LANE_SURFACE_STREET',
+        LANE_BIKE_LANE: 'LANE_BIKE_LANE'
+    }
 
     def __getitem__(self, item):
         return self.ENUM_TO_STR[item]
@@ -59,17 +61,20 @@ class RoadLineTypeClass:
         return True if line in self.ENUM_to_STR.values() else False
 
     def is_yellow(self, line):
-        return True if line in [self.ENUM_to_STR[t] for t in [
-            RoadLineTypeClass.SOLID_DOUBLE_YELLOW, RoadLineTypeClass.PASSING_DOUBLE_YELLOW,
-            RoadLineTypeClass.SOLID_SINGLE_YELLOW,
-            RoadLineTypeClass.BROKEN_DOUBLE_YELLOW, RoadLineTypeClass.BROKEN_SINGLE_YELLOW
-        ]] else False
+        return True if line in [
+            self.ENUM_to_STR[t] for t in [
+                RoadLineTypeClass.SOLID_DOUBLE_YELLOW, RoadLineTypeClass.PASSING_DOUBLE_YELLOW, RoadLineTypeClass.
+                SOLID_SINGLE_YELLOW, RoadLineTypeClass.BROKEN_DOUBLE_YELLOW, RoadLineTypeClass.BROKEN_SINGLE_YELLOW
+            ]
+        ] else False
 
     def is_broken(self, line):
-        return True if line in [self.ENUM_to_STR[t] for t in [
-            RoadLineTypeClass.BROKEN_DOUBLE_YELLOW, RoadLineTypeClass.BROKEN_SINGLE_YELLOW,
-            RoadLineTypeClass.BROKEN_SINGLE_WHITE
-        ]] else False
+        return True if line in [
+            self.ENUM_to_STR[t] for t in [
+                RoadLineTypeClass.BROKEN_DOUBLE_YELLOW, RoadLineTypeClass.BROKEN_SINGLE_YELLOW,
+                RoadLineTypeClass.BROKEN_SINGLE_WHITE
+            ]
+        ] else False
 
     def __getitem__(self, item):
         return self.ENUM_to_STR[item]
@@ -82,9 +87,7 @@ class RoadEdgeTypeClass:
     # Physical road boundary that separates the car from other traffic (e.g. a k-rail or an island).
     MEDIAN = 2
 
-    ENUM_TO_STR = {UNKNOWN: 'UNKNOWN',
-                   BOUNDARY: 'ROAD_EDGE_BOUNDARY',
-                   MEDIAN: 'ROAD_EDGE_MEDIAN'}
+    ENUM_TO_STR = {UNKNOWN: 'UNKNOWN', BOUNDARY: 'ROAD_EDGE_BOUNDARY', MEDIAN: 'ROAD_EDGE_MEDIAN'}
 
     def is_road_edge(self, edge):
         return True if edge in self.ENUM_TO_STR.values() else False
@@ -103,11 +106,7 @@ class AgentTypeClass:
     CYCLIST = 3
     OTHER = 4
 
-    ENUM_TO_STR = {UNSET: 'UNSET',
-                   VEHICLE: 'VEHICLE',
-                   PEDESTRIAN: 'PEDESTRIAN',
-                   CYCLIST: 'CYCLIST',
-                   OTHER: 'OTHER'}
+    ENUM_TO_STR = {UNSET: 'UNSET', VEHICLE: 'VEHICLE', PEDESTRIAN: 'PEDESTRIAN', CYCLIST: 'CYCLIST', OTHER: 'OTHER'}
 
     def __getitem__(self, item):
         return self.ENUM_TO_STR[item]

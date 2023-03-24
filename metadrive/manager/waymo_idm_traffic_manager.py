@@ -42,9 +42,7 @@ class WaymoIDMTrafficManager(WaymoTrafficManager):
             traffic_traj_data = {}
             for v_id, type_traj in self.current_traffic_data.items():
                 if AgentType.is_vehicle(type_traj["type"]) and v_id != self.sdc_track_index:
-                    init_info = parse_vehicle_state(
-                        type_traj, self.engine.global_config["traj_start_index"]
-                    )
+                    init_info = parse_vehicle_state(type_traj, self.engine.global_config["traj_start_index"])
                     dest_info = parse_vehicle_state(
                         type_traj, self.engine.global_config["traj_end_index"], check_last_state=True
                     )
@@ -71,9 +69,7 @@ class WaymoIDMTrafficManager(WaymoTrafficManager):
 
                 elif AgentType.is_vehicle(type_traj["type"]) and v_id == self.sdc_track_index:
                     # set Ego V velocity
-                    init_info = parse_vehicle_state(
-                        type_traj, self.engine.global_config["traj_start_index"]
-                    )
+                    init_info = parse_vehicle_state(type_traj, self.engine.global_config["traj_start_index"])
                     traffic_traj_data["sdc"] = {
                         "traj": None,
                         "init_info": init_info,

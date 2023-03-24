@@ -52,9 +52,7 @@ class WaymoMapManager(BaseManager):
             check_last_state=False,
         )
         last_state = parse_vehicle_state(
-            data["tracks"][data["sdc_track_index"]],
-            self.engine.global_config["traj_end_index"],
-            check_last_state=True
+            data["tracks"][data["sdc_track_index"]], self.engine.global_config["traj_end_index"], check_last_state=True
         )
         init_position = init_state["position"]
         init_yaw = init_state["heading"]
