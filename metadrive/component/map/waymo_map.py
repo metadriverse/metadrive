@@ -58,16 +58,22 @@ class WaymoMap(BaseMap):
                 if len(data[WaymoLaneProperty.POLYLINE]) <= 1:
                     continue
                 if RoadLineType.is_broken(type):
-                    ret[lane_id] = {"type": MetaDriveSceneType.BROKEN_YELLOW_LINE if RoadLineType.is_yellow(
-                        type) else MetaDriveSceneType.BROKEN_GREY_LINE,
-                                    "polyline": convert_polyline_to_metadrive(data[WaymoLaneProperty.POLYLINE])}
+                    ret[lane_id] = {
+                        "type": MetaDriveSceneType.BROKEN_YELLOW_LINE
+                        if RoadLineType.is_yellow(type) else MetaDriveSceneType.BROKEN_GREY_LINE,
+                        "polyline": convert_polyline_to_metadrive(data[WaymoLaneProperty.POLYLINE])
+                    }
                 else:
-                    ret[lane_id] = {"polyline": convert_polyline_to_metadrive(data[WaymoLaneProperty.POLYLINE]),
-                                    "type": MetaDriveSceneType.CONTINUOUS_YELLOW_LINE if RoadLineType.is_yellow(
-                                        type) else MetaDriveSceneType.CONTINUOUS_GREY_LINE}
+                    ret[lane_id] = {
+                        "polyline": convert_polyline_to_metadrive(data[WaymoLaneProperty.POLYLINE]),
+                        "type": MetaDriveSceneType.CONTINUOUS_YELLOW_LINE
+                        if RoadLineType.is_yellow(type) else MetaDriveSceneType.CONTINUOUS_GREY_LINE
+                    }
             elif RoadEdgeType.is_road_edge(type):
-                ret[lane_id] = {"polyline": convert_polyline_to_metadrive(data[WaymoLaneProperty.POLYLINE]),
-                                "type": MetaDriveSceneType.CONTINUOUS_GREY_LINE}
+                ret[lane_id] = {
+                    "polyline": convert_polyline_to_metadrive(data[WaymoLaneProperty.POLYLINE]),
+                    "type": MetaDriveSceneType.CONTINUOUS_GREY_LINE
+                }
         return ret
 
 

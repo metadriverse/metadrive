@@ -142,8 +142,10 @@ class PGMap(BaseMap):
                         lateral = l.width_at(0) / 2
                         if side == 0:
                             lateral *= -1
-                        ret["{}_{}".format(l.index, side)] = {"type": line_type,
-                                                              "polyline": l.get_polyline(interval, lateral)}
+                        ret["{}_{}".format(l.index, side)] = {
+                            "type": line_type,
+                            "polyline": l.get_polyline(interval, lateral)
+                        }
         return ret
 
     def get_line_type(self, type, color):
