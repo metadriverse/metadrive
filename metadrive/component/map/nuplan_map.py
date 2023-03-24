@@ -3,9 +3,13 @@ import logging
 import geopandas as gpd
 import numpy as np
 import tqdm
-from nuplan.common.actor_state.state_representation import Point2D
-from nuplan.common.maps.maps_datatypes import SemanticMapLayer, StopLineType
-from shapely.ops import unary_union
+
+try:
+    from nuplan.common.actor_state.state_representation import Point2D
+    from nuplan.common.maps.maps_datatypes import SemanticMapLayer, StopLineType
+    from shapely.ops import unary_union
+except ImportError:
+    pass
 
 from metadrive.component.lane.nuplan_lane import NuPlanLane
 from metadrive.component.map.base_map import BaseMap
