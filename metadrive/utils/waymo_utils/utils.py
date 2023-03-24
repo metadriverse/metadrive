@@ -1,8 +1,8 @@
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import figure
 
-from metadrive.utils.waymo_utils.waymo_type import LaneType, AgentType, TrafficSignal
-from metadrive.utils.waymo_utils.waymo_type import RoadLineType, RoadEdgeType
+from metadrive.utils.waymo_utils.waymo_type import LaneType, AgentType, TrafficSignal, AgentTypeClass, LaneTypeClass
+from metadrive.utils.waymo_utils.waymo_type import RoadLineType, RoadEdgeType, RoadLineTypeClass, RoadEdgeTypeClass
 
 try:
     import tensorflow as tf
@@ -195,21 +195,26 @@ def extract_dynamic(f):
 
 
 class CustomUnpickler(pickle.Unpickler):
+    def __init__(self, load_old_case, *args, **kwargs):
+        super(CustomUnpickler, self).__init__(*args, **kwargs)
+        self.load_old_case = load_old_case
+
     def find_class(self, module, name):
-        return super().find_class(module, name)
-        # deprecated
-        if name == 'AgentType':
-            return AgentType
-        elif name == "RoadLineType":
-            return RoadLineType
-        elif name == "RoadEdgeType":
-            return RoadEdgeType
-        return super().find_class(module, name)
+        if self.load_old_case:
+            if name == 'AgentType':
+                return AgentTypeClass
+            elif name == "RoadLineType":
+                return RoadLineTypeClass
+            elif name == "RoadEdgeType":
+                return RoadEdgeTypeClass
+            return super().find_class(module, name)
+        else:
+            return super().find_class(module, name)
 
 
 def read_waymo_data(file_path):
     with open(file_path, "rb") as f:
-        unpickler = CustomUnpickler(f)
+        unpickler = CustomUnpickler(False, f)
         data = unpickler.load()
     new_track = {}
     for key, value in data["tracks"].items():

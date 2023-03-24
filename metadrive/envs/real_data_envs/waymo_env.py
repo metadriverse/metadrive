@@ -13,6 +13,7 @@ from metadrive.manager.waymo_traffic_manager import WaymoTrafficManager
 from metadrive.obs.real_env_observation import WaymoObservation
 from metadrive.obs.state_obs import LidarStateObservation
 from metadrive.policy.idm_policy import WaymoIDMPolicy
+from metadrive.policy.replay_policy import WaymoReplayEgoCarPolicy
 from metadrive.utils import clip
 from metadrive.utils import get_np_random
 
@@ -175,8 +176,8 @@ class WaymoEnv(BaseEnv):
         # for compatibility
         # crash almost equals to crashing with vehicles
         done_info[TerminationState.CRASH] = (
-            done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
-            or done_info[TerminationState.CRASH_BUILDING]
+                done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
+                or done_info[TerminationState.CRASH_BUILDING]
         )
         return done, done_info
 
@@ -316,18 +317,19 @@ if __name__ == "__main__":
     env = WaymoEnv(
         {
             "use_render": True,
-            "agent_policy": WaymoIDMPolicy,
+            "agent_policy": WaymoReplayEgoCarPolicy,
             "manual_control": False,
-            "replay": False,
+            "replay": True,
             "no_traffic": False,
             # "debug":True,
             # "no_traffic":True,
             # "start_case_index": 192,
             # "start_case_index": 1000,
-            "case_num": 1,
+            "case_num": 10,
             "waymo_data_directory": "/home/shady/Downloads/test_processed",
             "horizon": 1000,
             "vehicle_config": dict(
+                no_wheel_friction=True,
                 lidar=dict(num_lasers=120, distance=50, num_others=4),
                 lane_line_detector=dict(num_lasers=12, distance=50),
                 side_detector=dict(num_lasers=160, distance=50)
@@ -336,7 +338,7 @@ if __name__ == "__main__":
     )
     success = []
     for i in range(env.config["case_num"]):
-        env.reset(force_seed=i)
+        env.reset(force_seed=6)
         while True:
             o, r, d, info = env.step([0, 0])
             assert env.observation_space.contains(o)

@@ -64,7 +64,7 @@ class ReplayEgoCarPolicy(BasePolicy):
         sdc_track_index = str(self.engine.data_manager.get_case(self.engine.global_random_seed)["sdc_track_index"])
         return [
             parse_vehicle_state(trajectory_data[sdc_track_index], i)
-            for i in range(len(trajectory_data[sdc_track_index]))
+            for i in range(len(trajectory_data[sdc_track_index]["position"]))
         ]
 
     def act(self, *args, **kwargs):
@@ -85,7 +85,9 @@ class ReplayEgoCarPolicy(BasePolicy):
             pass
         else:
             this_heading = self.traj_info[int(self.timestep)]["heading"]
+            angular_velocity = self.traj_info[int(self.timestep)]["angular_velocity"]
             self.control_object.set_heading_theta(this_heading)
+            self.control_object.set_angular_velocity(angular_velocity)
 
         return [0, 0]
 

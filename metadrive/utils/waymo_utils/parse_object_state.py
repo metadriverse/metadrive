@@ -5,7 +5,7 @@ import numpy as np
 from metadrive.utils.coordinates_shift import waymo_to_metadrive_heading, waymo_to_metadrive_vector
 
 
-def parse_vehicle_state(states, time_idx, check_last_state=False):
+def parse_vehicle_state(states, time_idx, check_last_state=False, sim_time_interval=0.1):
     ret = {}
     epi_length = len(states["position"])
     if time_idx < 0:
@@ -27,6 +27,11 @@ def parse_vehicle_state(states, time_idx, check_last_state=False):
     ret["heading"] = waymo_to_metadrive_heading(states["heading"][time_idx])
     ret["velocity"] = waymo_to_metadrive_vector(states["velocity"][time_idx])
     ret["valid"] = states["valid"][time_idx]
+    if time_idx < len(states["position"]) - 1:
+        ret["angular_velocity"] = waymo_to_metadrive_heading(
+            (states["heading"][time_idx + 1] - states["heading"][time_idx]) / sim_time_interval)
+    else:
+        ret["angular_velocity"] = 0
     return ret
 
 
