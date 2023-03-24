@@ -7,6 +7,10 @@ from metadrive.utils.coordinates_shift import waymo_to_metadrive_heading, waymo_
 
 def parse_vehicle_state(states, time_idx, check_last_state=False):
     ret = {}
+    epi_length = len(states["position"])
+    if time_idx < 0:
+        time_idx = epi_length + time_idx
+
     if time_idx >= len(states["position"]):
         time_idx = len(states["position"]) - 1
     if check_last_state:

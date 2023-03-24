@@ -196,6 +196,8 @@ def extract_dynamic(f):
 
 class CustomUnpickler(pickle.Unpickler):
     def find_class(self, module, name):
+        return super().find_class(module, name)
+        # deprecated
         if name == 'AgentType':
             return AgentType
         elif name == "RoadLineType":

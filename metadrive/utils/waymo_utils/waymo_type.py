@@ -112,6 +112,9 @@ class AgentTypeClass:
     def __getitem__(self, item):
         return self.ENUM_TO_STR[item]
 
+    def is_vehicle(self, type):
+        return True if type == self.ENUM_TO_STR[self.VEHICLE] else False
+
 
 LaneType = LaneTypeClass()
 AgentType = AgentTypeClass()
