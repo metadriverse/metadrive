@@ -3,17 +3,21 @@ import random
 import matplotlib.pyplot as plt
 
 from metadrive import MetaDriveEnv
+from metadrive.envs.real_data_envs.waymo_env import WaymoEnv
 from metadrive.utils.draw_top_down_map import draw_top_down_map
 
 if __name__ == '__main__':
-    env = MetaDriveEnv(config=dict(environment_num=100, map=7, start_seed=random.randint(0, 1000)))
-    fig, axs = plt.subplots(4, 4, figsize=(10, 10), dpi=100)
+    env = MetaDriveEnv(config=dict(environment_num=100, map=7, start_seed=0))
+    fig, axs = plt.subplots(2, 3, figsize=(10, 10), dpi=100)
     count = 0
-    print("We are going to draw 16 maps!")
-    for i in range(4):
-        for j in range(4):
+    print("We are going to draw 6 maps! 3 for PG maps, 3 for real world ones!")
+    for i in range(2):
+        if i==1:
+            env.close()
+            env=WaymoEnv(dict(start_case_index=0, case_num=3))
+        for j in range(3):
             count += 1
-            env.reset()
+            env.reset(force_seed=j)
             m = draw_top_down_map(env.current_map)
             # m = env.get_map()
             ax = axs[i][j]
