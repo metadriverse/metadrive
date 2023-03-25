@@ -24,7 +24,7 @@ history_object = namedtuple("history_object", "name position heading_theta WIDTH
 def draw_top_down_map(
     map,
     resolution: Iterable = (512, 512),
-    simple_draw=True,
+    draw_drivable_area=True,
     return_surface=False,
     film_size=None,
     reverse_color=False,
@@ -47,28 +47,34 @@ def draw_top_down_map(
     surface.move_display_window_to(centering_pos)
 
     if isinstance(map, WaymoMap):
-        assert not simple_draw, "Simple Draw does not support now"
-        for data in map.blocks[-1].waymo_map_data.values():
-            if WaymoLaneProperty.POLYLINE not in data:
-                continue
-            type = data.get("type", None)
-            waymo_line = InterpolatingLine(convert_polyline_to_metadrive(data[WaymoLaneProperty.POLYLINE]))
-            LaneGraphics.display_waymo(waymo_line, type, surface)
+        if draw_drivable_area:
+            for lane_info in map.road_network.graph.values():
+                LaneGraphics.draw_drivable_area(lane_info.lane, surface, color=road_color)
+        else:
+            for data in map.blocks[-1].waymo_map_data.values():
+                if WaymoLaneProperty.POLYLINE not in data:
+                    continue
+                type = data.get("type", None)
+                waymo_line = InterpolatingLine(convert_polyline_to_metadrive(data[WaymoLaneProperty.POLYLINE]))
+                LaneGraphics.display_waymo(waymo_line, type, surface)
 
     elif isinstance(map, NuPlanMap):
-        assert not simple_draw, "Simple Draw does not support now"
-        for block in map.attached_blocks + [map.boundary_block]:
-            for boundary in block.lines.values():
-                line = InterpolatingLine(boundary.points)
-                LaneGraphics.display_nuplan(line, boundary.type, boundary.color, surface)
+        if draw_drivable_area:
+            for lane_info in map.road_network.graph.values():
+                LaneGraphics.draw_drivable_area(lane_info.lane, surface, color=road_color)
+        else:
+            for block in map.attached_blocks + [map.boundary_block]:
+                for boundary in block.lines.values():
+                    line = InterpolatingLine(boundary.points)
+                    LaneGraphics.display_nuplan(line, boundary.type, boundary.color, surface)
 
     else:
         for _from in map.road_network.graph.keys():
             decoration = True if _from == Decoration.start else False
             for _to in map.road_network.graph[_from].keys():
                 for l in map.road_network.graph[_from][_to]:
-                    if simple_draw:
-                        LaneGraphics.simple_draw(l, surface, color=road_color)
+                    if draw_drivable_area:
+                        LaneGraphics.draw_drivable_area(l, surface, color=road_color)
                     else:
                         two_side = True if l is map.road_network.graph[_from][_to][-1] or decoration else False
                         LaneGraphics.display(l, surface, two_side, use_line_color=True)
@@ -181,7 +187,7 @@ class TopDownRenderer:
         # Setup the canvas
         # (1) background is the underlying layer. It is fixed and will never change unless the map changes.
         self._background_canvas = draw_top_down_map(
-            self.map, simple_draw=False, return_surface=True, film_size=film_size, road_color=road_color
+            self.map, draw_drivable_area=False, return_surface=True, film_size=film_size, road_color=road_color
         )
         if self._light_background:
             pixels = pygame.surfarray.pixels2d(self._background_canvas)
@@ -285,7 +291,11 @@ class TopDownRenderer:
     def reset(self, map):
         # Reset the super large background
         self._background_canvas = draw_top_down_map(
-            map, simple_draw=False, return_surface=True, film_size=self._background_size, road_color=self.road_color
+            map,
+            draw_drivable_area=False,
+            return_surface=True,
+            film_size=self._background_size,
+            road_color=self.road_color
         )
         self._light_background = self._light_background
         if self._light_background:
