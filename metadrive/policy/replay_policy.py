@@ -1,6 +1,7 @@
 import logging
 
 from metadrive.policy.base_policy import BasePolicy
+from metadrive.utils.waymo_utils.parse_object_state import parse_vehicle_state
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -59,12 +60,11 @@ class ReplayEgoCarPolicy(BasePolicy):
         # self.control_object.disable_gravity()
 
     def get_trajectory_info(self):
-        from metadrive.manager.waymo_traffic_manager import WaymoTrafficManager
         trajectory_data = self.engine.data_manager.get_case(self.engine.global_random_seed)["tracks"]
-        sdc_index = str(self.engine.data_manager.get_case(self.engine.global_random_seed)["sdc_index"])
+        sdc_track_index = str(self.engine.data_manager.get_case(self.engine.global_random_seed)["sdc_track_index"])
         return [
-            WaymoTrafficManager.parse_vehicle_state(trajectory_data[sdc_index]["state"], i)
-            for i in range(len(trajectory_data[sdc_index]["state"]))
+            parse_vehicle_state(trajectory_data[sdc_track_index], i)
+            for i in range(len(trajectory_data[sdc_track_index]["position"]))
         ]
 
     def act(self, *args, **kwargs):
@@ -85,7 +85,9 @@ class ReplayEgoCarPolicy(BasePolicy):
             pass
         else:
             this_heading = self.traj_info[int(self.timestep)]["heading"]
+            angular_velocity = self.traj_info[int(self.timestep)]["angular_velocity"]
             self.control_object.set_heading_theta(this_heading)
+            self.control_object.set_angular_velocity(angular_velocity)
 
         return [0, 0]
 

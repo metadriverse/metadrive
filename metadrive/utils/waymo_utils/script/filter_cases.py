@@ -8,9 +8,8 @@ from metadrive.envs.real_data_envs.waymo_env import WaymoEnv
 from metadrive.policy.idm_policy import WaymoIDMPolicy
 
 try:
-    from metadrive.utils.waymo_utils.waymo_utils import AgentType
-    from metadrive.utils.waymo_utils.waymo_utils import RoadEdgeType
-    from metadrive.utils.waymo_utils.waymo_utils import RoadLineType
+    from metadrive.utils.waymo_utils.waymo_type import AgentType
+    from metadrive.utils.waymo_utils.waymo_type import RoadLineType, RoadEdgeType
 finally:
     pass
 

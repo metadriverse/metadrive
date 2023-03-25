@@ -1,11 +1,16 @@
 import logging
+from metadrive.utils.export_utils.type import MetaDriveSceneElement
 
 import geopandas as gpd
 import numpy as np
 import tqdm
-from nuplan.common.actor_state.state_representation import Point2D
-from nuplan.common.maps.maps_datatypes import SemanticMapLayer, StopLineType
-from shapely.ops import unary_union
+
+try:
+    from nuplan.common.actor_state.state_representation import Point2D
+    from nuplan.common.maps.maps_datatypes import SemanticMapLayer, StopLineType
+    from shapely.ops import unary_union
+except ImportError:
+    pass
 
 from metadrive.component.lane.nuplan_lane import NuPlanLane
 from metadrive.component.map.base_map import BaseMap
@@ -27,7 +32,7 @@ class NuPlanMap(BaseMap):
         self.map_name = map_name
         self._center = np.array(nuplan_center)
         self._nuplan_map_api = self.engine.data_manager.current_scenario.map_api
-        self._attached_block = []
+        self.attached_blocks = []
         self.boundary_block = None  # it won't be detached
         self._radius = radius
         self.cull_dist = get_global_config()["scenario_radius"]
@@ -46,14 +51,14 @@ class NuPlanMap(BaseMap):
                                                  self.cull_dist):
                 self.road_network.add(block.block_network)
                 block.attach_to_world(parent_node_path, physics_world)
-                self._attached_block.append(block)
+                self.attached_blocks.append(block)
         if not self.engine.global_config["load_city_map"]:
             self.boundary_block.attach_to_world(parent_node_path, physics_world)
 
     def detach_from_world(self, physics_world=None):
         if not self.engine.global_config["load_city_map"]:
             self.boundary_block.detach_from_world(self.engine.physics_world or physics_world)
-        for block in self._attached_block:
+        for block in self.attached_blocks:
             block.detach_from_world(self.engine.physics_world or physics_world)
 
     def _generate(self):
@@ -127,8 +132,9 @@ class NuPlanMap(BaseMap):
         for idx, boundary in enumerate(boundaries[0]):
             block_points = np.array(list(i for i in zip(boundary.coords.xy[0], boundary.coords.xy[1])))
             block_points = nuplan_to_metadrive_vector(block_points, self.nuplan_center)
-            self.boundary_block.boundaries["boundary_{}".format(idx)] = LaneLineProperty(
-                block_points, LineColor.GREY, LineType.CONTINUOUS, in_road_connector=False
+            id = "boundary_{}".format(idx)
+            self.boundary_block.lines[id] = LaneLineProperty(
+                id, block_points, LineColor.GREY, LineType.CONTINUOUS, in_road_connector=False
             )
         self.boundary_block.construct_block(self.engine.worldNP, self.engine.physics_world, attach_to_world=True)
         np.seterr(all='warn')
@@ -161,6 +167,25 @@ class NuPlanMap(BaseMap):
     def show_coordinates(self):
         lanes = [lane_info.lane for lane_info in self.road_network.graph.values()]
         self.engine.show_lane_coordinates(lanes)
+
+    def get_boundary_line_vector(self, interval):
+        ret = {}
+        for block in self.attached_blocks + [self.boundary_block]:
+            for boundary in block.lines.values():
+                type = boundary.type
+                if type == LineType.BROKEN:
+                    ret[boundary.id] = {
+                        "type": MetaDriveSceneElement.BROKEN_YELLOW_LINE
+                        if boundary.color == LineColor.YELLOW else MetaDriveSceneElement.BROKEN_GREY_LINE,
+                        "polyline": boundary.points
+                    }
+                else:
+                    ret[boundary.id] = {
+                        "polyline": boundary.points,
+                        "type": MetaDriveSceneElement.CONTINUOUS_YELLOW_LINE
+                        if boundary.color == LineColor.YELLOW else MetaDriveSceneElement.CONTINUOUS_GREY_LINE
+                    }
+        return ret
 
 
 if __name__ == "__main__":

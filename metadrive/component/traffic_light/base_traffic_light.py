@@ -79,3 +79,15 @@ class BaseTrafficLight(BaseObject):
     def destroy(self):
         super(BaseTrafficLight, self).destroy()
         self.lane = None
+
+    @property
+    def top_down_color(self):
+        return TrafficLightStatus.color(self.status)
+
+    @property
+    def top_down_width(self):
+        return 1.5
+
+    @property
+    def top_down_length(self):
+        return 1.5
