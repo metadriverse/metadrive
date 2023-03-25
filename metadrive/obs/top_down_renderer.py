@@ -5,14 +5,15 @@ from typing import Optional, Union, Iterable
 import numpy as np
 
 from metadrive.component.map.waymo_map import WaymoMap
+from metadrive.component.map.nuplan_map import NuPlanMap
 from metadrive.constants import Decoration, TARGET_VEHICLES
-from metadrive.constants import WaymoLaneProperty
+from metadrive.utils.waymo_utils.waymo_type import WaymoLaneProperty
 from metadrive.engine.engine_utils import get_engine
 from metadrive.obs.top_down_obs_impl import WorldSurface, VehicleGraphics, LaneGraphics
 from metadrive.utils.interpolating_line import InterpolatingLine
 from metadrive.utils.map_utils import is_map_related_instance
 from metadrive.utils.utils import import_pygame
-from metadrive.utils.waymo_utils.waymo_utils import convert_polyline_to_metadrive
+from metadrive.utils.waymo_utils.utils import convert_polyline_to_metadrive
 
 pygame = import_pygame()
 
@@ -53,6 +54,14 @@ def draw_top_down_map(
             type = data.get("type", None)
             waymo_line = InterpolatingLine(convert_polyline_to_metadrive(data[WaymoLaneProperty.POLYLINE]))
             LaneGraphics.display_waymo(waymo_line, type, surface)
+
+    elif isinstance(map, NuPlanMap):
+        assert not simple_draw, "Simple Draw does not support now"
+        for block in map.attached_blocks + [map.boundary_block]:
+            for boundary in block.lines.values():
+                line = InterpolatingLine(boundary.points)
+                LaneGraphics.display_nuplan(line, boundary.type, boundary.color, surface)
+
     else:
         for _from in map.road_network.graph.keys():
             decoration = True if _from == Decoration.start else False

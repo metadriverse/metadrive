@@ -333,7 +333,7 @@ if __name__ == "__main__":
         # env.reset(seed)
         for i in range(env.engine.data_manager.current_scenario_length * 10):
             o, r, d, info = env.step([0, 0])
-            # env.render(text={"seed": env.current_seed})
+            # env.render(mode="topdown")
             if info["replay_done"]:
                 break
     sys.exit()

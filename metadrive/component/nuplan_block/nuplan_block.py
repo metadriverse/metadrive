@@ -1,11 +1,15 @@
 import math
 from dataclasses import dataclass
 from metadrive.utils.coordinates_shift import nuplan_to_metadrive_vector
-import geopandas as gpd
 import numpy as np
-from nuplan.common.actor_state.state_representation import Point2D
-from nuplan.common.maps.maps_datatypes import SemanticMapLayer, StopLineType
-from shapely.ops import unary_union
+
+try:
+    import geopandas as gpd
+    from nuplan.common.actor_state.state_representation import Point2D
+    from nuplan.common.maps.maps_datatypes import SemanticMapLayer, StopLineType
+    from shapely.ops import unary_union
+except ImportError:
+    pass
 
 from metadrive.component.block.base_block import BaseBlock
 from metadrive.component.lane.nuplan_lane import NuPlanLane
@@ -18,6 +22,7 @@ from metadrive.utils.math_utils import wrap_to_pi, norm
 
 @dataclass
 class LaneLineProperty:
+    id: str
     points: list
     color: LineColor
     type: LineType
@@ -35,7 +40,7 @@ class NuPlanBlock(BaseBlock):
         self._nuplan_map_api = self.engine.data_manager.current_scenario.map_api
 
         self.lines = {}
-        self.boundaries = {}
+        # self.boundaries = {}
 
     @property
     def map_api(self):
@@ -95,7 +100,7 @@ class NuPlanBlock(BaseBlock):
         for idx, boundary in enumerate(boundaries[0]):
             block_points = np.array(list(i for i in zip(boundary.coords.xy[0], boundary.coords.xy[1])))
             block_points -= center
-            self.boundaries["boundary_{}".format(idx)] = LaneLineProperty(
+            self.lines["boundary_{}".format(idx)] = LaneLineProperty(
                 block_points, LineColor.GREY, LineType.CONTINUOUS, in_road_connector=False
             )
 
@@ -109,8 +114,8 @@ class NuPlanBlock(BaseBlock):
             lane.construct_lane_in_block(self, lane_index=id)
             # lane.construct_lane_line_in_block(self, [True if len(lane.left_lanes) == 0 else False,
             #                                          True if len(lane.right_lanes) == 0 else False, ])
-        for line_prop in self.boundaries.values():
-            self.construct_nuplan_continuous_line(line_prop.points, line_prop.color)
+        # for line_prop in self.lines.values():
+        #     self.construct_nuplan_continuous_line(line_prop.points, line_prop.color)
 
         for line_prop in self.lines.values():
             if line_prop.type == LineType.CONTINUOUS:
@@ -200,6 +205,7 @@ class NuPlanBlock(BaseBlock):
                     1] is not None else LineColor.GREY
                 if line_color == LineColor.YELLOW:
                     self.lines[left.id] = LaneLineProperty(
+                        left.id,
                         self._get_points_from_boundary(left, center),
                         line_color,
                         line_type,
@@ -207,6 +213,7 @@ class NuPlanBlock(BaseBlock):
                     )
                 elif line_type == LineType.BROKEN:
                     self.lines[left.id] = LaneLineProperty(
+                        left.id,
                         self._get_points_from_boundary(left, center),
                         LineColor.GREY,
                         line_type,
@@ -233,7 +240,9 @@ class NuPlanBlock(BaseBlock):
                     )
                 ]
             )
-            self.lines[walkway.id] = LaneLineProperty(points, LineColor.GREY, LineType.SIDE, in_road_connector=False)
+            self.lines[walkway.id] = LaneLineProperty(
+                walkway.id, points, LineColor.GREY, LineType.SIDE, in_road_connector=False
+            )
 
     def _get_lane_boundary(self, line):
         pass

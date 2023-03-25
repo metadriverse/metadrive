@@ -99,9 +99,10 @@ install_requires = [
     "opencv-python",
     "lxml",
     "scipy",
-    "psutil"
+    "psutil",
+    "geopandas",
+    "shapely"
 ]
-
 
 # add torch support via the following lines maybe
 # def _load_requirements(path_dir: str , file_name: str = 'requirements.txt', comment_char: str = '#') -> List[str]:
@@ -123,6 +124,15 @@ install_requires = [
 #             reqs.append(ln)
 #     return reqs
 
+nuplan_requirement = ["bokeh==2.4",
+                      "hydra"]
+
+cuda_requirement = ["cuda-python==12.0.0",
+                    "PyOpenGL==3.1.6",
+                    "PyOpenGL-accelerate==3.1.6",
+                    "pyrr==0.10.3",
+                    "glfw",
+                    ]
 setup(
     name="metadrive-simulator",
     python_requires='>=3.6, <3.12',  # do version check with assert
@@ -134,16 +144,9 @@ setup(
     packages=packages,
     install_requires=install_requires,
     extras_require={
-        "cuda": ["cuda-python==12.0.0",
-                 "PyOpenGL==3.1.6",
-                 "PyOpenGL-accelerate==3.1.6",
-                 "pyrr==0.10.3",
-                 "glfw",
-                 ],
-        "nuplan": ["nuplan-devkit==1.0.0",
-                   "bokeh==2.4",
-                   "hydra",
-                   ]
+        "cuda": cuda_requirement,
+        "nuplan": nuplan_requirement,
+        "all": nuplan_requirement + cuda_requirement
     },
     include_package_data=True,
     license="Apache 2.0",

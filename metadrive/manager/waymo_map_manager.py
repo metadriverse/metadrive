@@ -1,4 +1,5 @@
 import copy
+from metadrive.utils.waymo_utils.parse_object_state import parse_full_trajectory, parse_vehicle_state
 
 from metadrive.component.lane.point_lane import PointLane
 from metadrive.component.map.waymo_map import WaymoMap
@@ -43,17 +44,15 @@ class WaymoMapManager(BaseManager):
     def update_route(self):
         data = self.engine.data_manager.get_case(self.engine.global_random_seed)
 
-        sdc_traj = WaymoTrafficManager.parse_full_trajectory(data["tracks"][data["sdc_index"]]["state"])
+        sdc_traj = parse_full_trajectory(data["tracks"][data["sdc_track_index"]])
 
-        init_state = WaymoTrafficManager.parse_vehicle_state(
-            data["tracks"][data["sdc_index"]]["state"],
+        init_state = parse_vehicle_state(
+            data["tracks"][data["sdc_track_index"]],
             self.engine.global_config["traj_start_index"],
             check_last_state=False,
         )
-        last_state = WaymoTrafficManager.parse_vehicle_state(
-            data["tracks"][data["sdc_index"]]["state"],
-            self.engine.global_config["traj_end_index"],
-            check_last_state=True
+        last_state = parse_vehicle_state(
+            data["tracks"][data["sdc_track_index"]], self.engine.global_config["traj_end_index"], check_last_state=True
         )
         init_position = init_state["position"]
         init_yaw = init_state["heading"]

@@ -18,8 +18,6 @@ class Cyclist(BaseTrafficParticipant):
 
     MODEL = None
 
-    WIDTH = 0.4
-    LENGTH = 1.75
     HEIGHT = 1.75
 
     def __init__(self, position, heading_theta, random_seed):
@@ -36,3 +34,11 @@ class Cyclist(BaseTrafficParticipant):
                 model.setPos(0, 0, -0.3)
                 Cyclist.MODEL = model
             Cyclist.MODEL.instanceTo(self.origin)
+
+    @property
+    def WIDTH(self):
+        return 0.4
+
+    @property
+    def LENGTH(self):
+        return 1.75
