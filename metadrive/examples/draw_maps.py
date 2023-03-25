@@ -12,9 +12,9 @@ if __name__ == '__main__':
     count = 0
     print("We are going to draw 6 maps! 3 for PG maps, 3 for real world ones!")
     for i in range(2):
-        if i==1:
+        if i == 1:
             env.close()
-            env=WaymoEnv(dict(start_case_index=0, case_num=3))
+            env = WaymoEnv(dict(start_case_index=0, case_num=3))
         for j in range(3):
             count += 1
             env.reset(force_seed=j)
