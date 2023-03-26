@@ -1,4 +1,5 @@
 import time
+from metadrive.utils.scene_export_utils.utils import convert_recorded_scenario_exported
 
 from collections import defaultdict
 from typing import Union, Dict, AnyStr, Optional, Tuple, Callable
@@ -581,7 +582,11 @@ class BaseEnv(gym.Env):
     def total_step(self):
         return self.engine.episode_step if self.engine is not None else 0
 
-    def export_scenarios(self, policies: Union[dict, Callable], scenario_index: Union[list, int]):
+    def export_scenarios(self, policies: Union[dict, Callable], scenario_index: Union[list, int], time_interval=0.1):
+        """
+        We export scenarios into a unified format with 10hz sample rate
+        """
+
         def _act(observation):
             if isinstance(policies, dict):
                 ret = {}
@@ -608,6 +613,6 @@ class BaseEnv(gym.Env):
                 obs, reward, done, info = self.step(_act(obs))
                 count += 1
             episode = self.engine.dump_episode()
-            scenarios_to_export[index] = episode
+            scenarios_to_export[index] = convert_recorded_scenario_exported(episode, time_interval)
         self.config["record_episode"] = False
         return scenarios_to_export

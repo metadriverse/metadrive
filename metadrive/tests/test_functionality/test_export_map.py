@@ -4,7 +4,7 @@ try:
     from metadrive.envs.real_data_envs.nuplan_env import NuPlanEnv
 except ImportError:
     pass
-from metadrive.utils.scene_utils.utils import draw_map
+from metadrive.utils.scene_export_utils.utils import draw_map
 from metadrive.envs.metadrive_env import MetaDriveEnv
 from metadrive.envs.real_data_envs.waymo_env import WaymoEnv
 from metadrive.policy.idm_policy import WaymoIDMPolicy
@@ -21,7 +21,7 @@ def test_export_waymo_map(render=False):
                 "no_traffic": True,
                 "use_render": False,
                 "waymo_data_directory": AssetLoader.file_path(asset_path, "waymo", return_raw_style=False),
-                "case_num": 3
+                "scenario_num": 3
             }
         )
         for seed in range(3):

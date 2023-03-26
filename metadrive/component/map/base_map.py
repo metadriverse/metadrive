@@ -1,5 +1,5 @@
 import logging
-from metadrive.utils.scene_utils.type import MetaDriveSceneElement
+from metadrive.utils.scene_export_utils.type import MetaDriveSceneElement
 
 from metadrive.base_class.base_runnable import BaseRunnable
 from metadrive.engine.engine_utils import get_global_config
@@ -76,7 +76,7 @@ class BaseMap(BaseRunnable):
         """
         Save the generated map to map file
         """
-        return dict(map_features=self.get_map_vector())
+        return dict(map_type=self.class_name, map_features=self.get_map_vector())
 
     @property
     def num_blocks(self):

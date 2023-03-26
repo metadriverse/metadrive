@@ -1,5 +1,5 @@
 import copy
-from metadrive.utils.scene_utils.type import MetaDriveSceneElement
+from metadrive.utils.scene_export_utils.type import MetaDriveSceneElement
 from metadrive.constants import LineType, LineColor
 from typing import List
 
