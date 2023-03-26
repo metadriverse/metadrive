@@ -4,7 +4,7 @@ import logging
 from metadrive.base_class.base_object import BaseObject
 from metadrive.constants import ObjectState, PolicyState
 from metadrive.manager.base_manager import BaseManager
-from metadrive.utils.map_utils import is_map_related_instance, is_map_related_class
+from metadrive.utils.utils import is_map_related_instance, is_map_related_class
 
 
 class FrameInfo:

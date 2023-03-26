@@ -31,8 +31,8 @@ from metadrive.utils import Config, safe_clip_for_small_array
 from metadrive.utils.coordinates_shift import panda_heading, metadrive_heading
 from metadrive.utils.math_utils import get_vertical_vector, norm, clip
 from metadrive.utils.math_utils import wrap_to_pi
-from metadrive.utils.scene_utils import ray_localization
-from metadrive.utils.scene_utils import rect_region_detection
+from metadrive.utils.pg_utils.utils import ray_localization
+from metadrive.utils.pg_utils.utils import rect_region_detection
 from metadrive.component.pg_space import VehicleParameterSpace, ParameterSpace
 
 

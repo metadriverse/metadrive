@@ -17,7 +17,7 @@ from metadrive.envs.marl_envs.multi_agent_metadrive import MultiAgentMetaDrive
 from metadrive.manager.map_manager import PGMapManager
 from metadrive.utils import get_np_random, Config
 from metadrive.utils.coordinates_shift import panda_position, panda_heading
-from metadrive.utils.scene_utils import rect_region_detection
+from metadrive.utils.pg_utils.utils import rect_region_detection
 
 MAParkingLotConfig = dict(
     in_spawn_roads=[

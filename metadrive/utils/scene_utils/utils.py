@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import figure
-from metadrive.utils.export_utils.type import MetaDriveSceneElement
+from metadrive.utils.scene_utils.type import MetaDriveSceneElement
 
 
 def draw_map(map_features, show=False):

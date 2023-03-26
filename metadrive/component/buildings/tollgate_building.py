@@ -1,6 +1,6 @@
 from metadrive.component.buildings.base_building import BaseBuilding
 from metadrive.engine.asset_loader import AssetLoader
-from metadrive.utils.scene_utils import generate_static_box_physics_body
+from metadrive.utils.pg_utils.utils import generate_static_box_physics_body
 
 
 class TollGateBuilding(BaseBuilding):

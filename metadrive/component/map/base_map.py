@@ -1,8 +1,8 @@
 import logging
-from metadrive.utils.export_utils.type import MetaDriveSceneElement
+from metadrive.utils.scene_utils.type import MetaDriveSceneElement
 
 from metadrive.base_class.base_runnable import BaseRunnable
-from metadrive.engine.engine_utils import get_engine, get_global_config
+from metadrive.engine.engine_utils import get_global_config
 
 logger = logging.getLogger(__name__)
 
