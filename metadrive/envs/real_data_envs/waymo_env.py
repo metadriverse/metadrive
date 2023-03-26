@@ -282,32 +282,18 @@ class WaymoEnv(BaseEnv):
 
             # reward = reward - self.config["distance_penalty"] * dist
 
-        # print("Vehicle {} Track Length {:.3f} Current Dis {:.3f} Route Completion {:.4f}".format(
-        #     vehicle, step_info["track_length"] , step_info["current_distance"] , step_info["route_completion"]
-        # ))
-
         if hasattr(vehicle, "_dynamics_mode"):
             step_info["dynamics_mode"] = vehicle._dynamics_mode
 
         return reward, step_info
 
     def _is_arrive_destination(self, vehicle):
+        # Use RC as the only criterion to determine arrival in Waymo env.
         long, lat = vehicle.navigation.reference_trajectory.local_coordinates(vehicle.position)
 
         total_length = vehicle.navigation.reference_trajectory.length
         current_distance = long
 
-        # agent_name = self.agent_manager.object_to_agent(vehicle.name)
-        # threshold = 5
-
-        # if np.linalg.norm(vehicle.position - self.engine.map_manager.dest_points[agent_name]) < threshold:
-        #     return True
-        # elif current_distance + threshold > total_length:  # Route Completion ~= 1.0
-        #     return True
-        # else:
-        #     return False
-
-        # Update 2022-02-05: Use RC as the only criterion to determine arrival.
         route_completion = current_distance / total_length
         if route_completion > 0.95:  # Route Completion ~= 1.0
             return True
@@ -318,6 +304,7 @@ class WaymoEnv(BaseEnv):
         # A specified function to determine whether this vehicle should be done.
 
         if self.config["relax_out_of_road_done"]:
+            # We prefer using this out of road termination criterion.
             agent_name = self.agent_manager.object_to_agent(vehicle.name)
             lat = abs(self.observations[agent_name].lateral_dist)
             done = lat > 10
