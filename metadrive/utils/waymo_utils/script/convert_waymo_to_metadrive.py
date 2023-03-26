@@ -1,3 +1,13 @@
+"""
+Note on version:
+
+from datetime import datetime
+date_object = datetime.strptime(date_string, "%Y-%M")
+
+You can compare date with this:
+
+datetime.strptime("2023-03", "%Y-%M") > datetime.strptime("2022-04", "%Y-%M")
+"""
 import os
 import pickle
 
@@ -18,30 +28,30 @@ def parse_data(input, output_path):
     file_list = os.listdir(input)
     for file in tqdm(file_list):
         file_path = os.path.join(input, file)
-        if not 'tfrecord' in file_path:
+        if not "tfrecord" in file_path:
             continue
-        dataset = tf.data.TFRecordDataset(file_path, compression_type='')
+        dataset = tf.data.TFRecordDataset(file_path, compression_type="")
         for j, data in enumerate(dataset.as_numpy_iterator()):
             scenario.ParseFromString(data)
             scene = dict()
-            scene['id'] = scenario.scenario_id
+            scene["id"] = scenario.scenario_id
 
-            scene['version'] = 'Mar23'  # March of 2023
+            scene["version"] = "2023-03"  # March of 2023
 
-            scene['ts'] = [ts for ts in scenario.timestamps_seconds]
+            scene["ts"] = [ts for ts in scenario.timestamps_seconds]
 
-            scene['tracks'], sdc_id = extract_tracks(scenario.tracks, scenario.sdc_track_index)
+            scene["tracks"], sdc_id = extract_tracks(scenario.tracks, scenario.sdc_track_index)
 
-            scene['sdc_track_index'] = sdc_id
+            scene["sdc_track_index"] = sdc_id
 
-            scene['dynamic_map_states'] = extract_dynamic(scenario.dynamic_map_states)
+            scene["dynamic_map_states"] = extract_dynamic(scenario.dynamic_map_states)
 
-            scene['map_features'] = extract_map(scenario.map_features)
+            scene["map_features"] = extract_map(scenario.map_features)
 
-            compute_width(scene['map_features'])
+            compute_width(scene["map_features"])
 
-            p = os.path.join(output_path, f'{cnt}.pkl')
-            with open(p, 'wb') as f:
+            p = os.path.join(output_path, f"{cnt}.pkl")
+            with open(p, "wb") as f:
                 pickle.dump(scene, f)
             cnt += 1
     return
