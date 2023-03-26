@@ -14,11 +14,12 @@ class WaymoMapManager(BaseManager):
 
     def __init__(self):
         super(WaymoMapManager, self).__init__()
-        store_map = self.engine.global_config.get("store_map", False)
-        store_map_buffer_size = self.engine.global_config.get("store_map_buffer_size", self.DEFAULT_DATA_BUFFER_SIZE)
+        self.store_map = self.engine.global_config.get("store_map", False)
+        # store_map_buffer_size = self.engine.global_config.get("store_map_buffer_size", self.DEFAULT_DATA_BUFFER_SIZE)
         self.current_map = None
         self.map_num = self.engine.global_config["case_num"]
-        self.start = self.engine.global_config["start_case_index"]
+        self.start_case_index = self.engine.global_config["start_case_index"]
+        self._stored_maps = {i: None for i in range(self.start_case_index, self.start_case_index + self.map_num)}
 
         # we put the route searching function here
         self.sdc_start = None
@@ -28,15 +29,19 @@ class WaymoMapManager(BaseManager):
 
     def reset(self):
         seed = self.engine.global_random_seed
-        assert self.start <= seed < self.start + self.map_num
+        assert self.start_case_index <= seed < self.start_case_index + self.map_num
 
         self.current_sdc_route = None
         self.sdc_dest_point = None
 
         seed = self.engine.global_random_seed
-        assert self.start <= seed < self.start + self.map_num
+        assert self.start_case_index <= seed < self.start_case_index + self.map_num
 
-        new_map = WaymoMap(map_index=seed)
+        if self._stored_maps[seed] is None and self.store_map:
+            new_map = WaymoMap(map_index=seed)
+            self._stored_maps[seed] = new_map
+        else:
+            new_map = self._stored_maps[seed]
         self.load_map(new_map)
 
         self.update_route()
