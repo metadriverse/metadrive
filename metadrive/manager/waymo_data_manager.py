@@ -5,7 +5,7 @@ from tqdm import tqdm
 
 from metadrive.manager.base_manager import BaseManager
 from metadrive.utils.data_buffer import DataBuffer
-from metadrive.utils.waymo_utils.waymo_utils import read_waymo_data
+from metadrive.utils.waymo_utils.utils import read_waymo_data
 
 
 class WaymoDataManager(BaseManager):

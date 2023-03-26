@@ -419,3 +419,12 @@ class AbstractLane:
 
     def __del__(self):
         self.destroy()
+
+    def get_polyline(self, interval=2, lateral=0):
+        """
+        This method will return the center line of this Lane in a discrete vector representation
+        """
+        ret = []
+        for i in np.arange(0, self.length, interval):
+            ret.append(self.position(i, lateral))
+        return np.array(ret)

@@ -1,8 +1,9 @@
 from metadrive.engine.asset_loader import AssetLoader
-from metadrive.utils.waymo_utils.waymo_utils import read_waymo_data
+from metadrive.utils.waymo_utils.utils import read_waymo_data
 
 
-def _test_read_waymo_data():
-    file_path = AssetLoader.file_path("waymo", "test.pkl", return_raw_style=False)
-    data = read_waymo_data(file_path)
-    print(data)
+def test_read_waymo_data():
+    for i in range(3):
+        file_path = AssetLoader.file_path("waymo", "{}.pkl".format(i), return_raw_style=False)
+        data = read_waymo_data(file_path)
+        # print(data)

@@ -1,4 +1,6 @@
 import copy
+from metadrive.utils.export_utils.type import MetaDriveSceneElement
+from metadrive.constants import LineType, LineColor
 from typing import List
 
 from panda3d.core import NodePath
@@ -7,7 +9,9 @@ from metadrive.component.algorithm.BIG import BigGenerateMethod, BIG
 from metadrive.component.map.base_map import BaseMap
 from metadrive.component.pgblock.first_block import FirstPGBlock
 from metadrive.component.road_network.node_road_network import NodeRoadNetwork
+from metadrive.constants import Decoration
 from metadrive.engine.core.physics_world import PhysicsWorld
+from metadrive.obs.top_down_obs_impl import LaneGraphics
 from metadrive.utils import Config
 
 
@@ -122,3 +126,34 @@ class PGMap(BaseMap):
             for lanes_to_add in to_.values():
                 lanes += lanes_to_add
         self.engine.show_lane_coordinates(lanes)
+
+    def get_boundary_line_vector(self, interval):
+        map = self
+        ret = {}
+        for _from in map.road_network.graph.keys():
+            decoration = True if _from == Decoration.start else False
+            for _to in map.road_network.graph[_from].keys():
+                for l in map.road_network.graph[_from][_to]:
+                    sides = 2 if l is map.road_network.graph[_from][_to][-1] or decoration else 1
+                    for side in range(sides):
+                        type = l.line_types[side]
+                        color = l.line_colors[side]
+                        line_type = self.get_line_type(type, color)
+                        lateral = l.width_at(0) / 2
+                        if side == 0:
+                            lateral *= -1
+                        ret["{}_{}".format(l.index, side)] = {
+                            "type": line_type,
+                            "polyline": l.get_polyline(interval, lateral)
+                        }
+        return ret
+
+    def get_line_type(self, type, color):
+        if type == LineType.CONTINUOUS and color == LineColor.YELLOW:
+            return MetaDriveSceneElement.CONTINUOUS_YELLOW_LINE
+        elif type == LineType.BROKEN and color == LineColor.YELLOW:
+            return MetaDriveSceneElement.BROKEN_YELLOW_LINE
+        elif type == LineType.CONTINUOUS and color == LineColor.GREY:
+            return MetaDriveSceneElement.CONTINUOUS_GREY_LINE
+        elif type == LineType.BROKEN and color == LineColor.GREY:
+            return MetaDriveSceneElement.BROKEN_GREY_LINE

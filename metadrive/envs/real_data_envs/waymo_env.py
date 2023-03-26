@@ -12,10 +12,9 @@ from metadrive.manager.waymo_map_manager import WaymoMapManager
 from metadrive.manager.waymo_traffic_manager import WaymoTrafficManager
 from metadrive.obs.real_env_observation import WaymoObservation
 from metadrive.obs.state_obs import LidarStateObservation
-from metadrive.policy.idm_policy import WaymoIDMPolicy
+from metadrive.policy.replay_policy import WaymoReplayEgoCarPolicy
 from metadrive.utils import clip
 from metadrive.utils import get_np_random
-
 from metadrive.utils.coordinates_shift import waymo_2_metadrive_position
 
 WAYMO_ENV_CONFIG = dict(
@@ -255,14 +254,14 @@ class WaymoEnv(BaseEnv):
         data = self.engine.data_manager.get_case(self.engine.global_seed)
         agent_xy = vehicle.position
         if vehicle_id == "sdc" or vehicle_id == "default_agent":
-            native_vid = data["sdc_index"]
+            native_vid = data["sdc_track_index"]
         else:
             native_vid = vehicle_id
 
-        if native_vid in data["tracks"] and len(data["tracks"][native_vid]["state"]) > 0:
-            expert_state_list = data["tracks"][native_vid]["state"]
-            mask = expert_state_list[:, -1]
-            largest_valid_index = np.max(np.where(expert_state_list[:, -1] == 1)[0])
+        if native_vid in data["tracks"] and len(data["tracks"][native_vid]) > 0:
+            expert_state_list = data["tracks"][native_vid]
+            mask = expert_state_list["valid"]
+            largest_valid_index = np.max(np.where(mask == True)[0])
 
             if self.episode_step > largest_valid_index:
                 current_step = largest_valid_index
@@ -274,12 +273,11 @@ class WaymoEnv(BaseEnv):
                 if current_step == 0:
                     break
 
-            expert_state = expert_state_list[current_step]
-            expert_xy = waymo_2_metadrive_position(expert_state[:2])
+            expert_xy = waymo_2_metadrive_position(expert_state_list["position"][current_step][:2])
             dist = np.linalg.norm(agent_xy - expert_xy)
             step_info["distance_error"] = dist
 
-            last_state = expert_state_list[largest_valid_index]
+            last_state = expert_state_list["position"][largest_valid_index]
             last_expert_xy = waymo_2_metadrive_position(last_state[:2])
             last_dist = np.linalg.norm(agent_xy - last_expert_xy)
             step_info["distance_error_final"] = last_dist
@@ -362,19 +360,20 @@ class WaymoEnv(BaseEnv):
 if __name__ == "__main__":
     env = WaymoEnv(
         {
-            "use_render": True,
-            "agent_policy": WaymoIDMPolicy,
-            "manual_control": True,
-            "replay": False,
+            "use_render": False,
+            "agent_policy": WaymoReplayEgoCarPolicy,
+            "manual_control": False,
+            "replay": True,
             "no_traffic": False,
             # "debug":True,
             # "no_traffic":True,
             # "start_case_index": 192,
             # "start_case_index": 1000,
-            "case_num": 1,
-            # "waymo_data_directory": "E:\\PAMI_waymo_data\\idm_filtered\\test",
+            "case_num": 3,
+            # "waymo_data_directory": "/home/shady/Downloads/test_processed",
             "horizon": 1000,
             "vehicle_config": dict(
+                no_wheel_friction=True,
                 lidar=dict(num_lasers=120, distance=50, num_others=4),
                 lane_line_detector=dict(num_lasers=12, distance=50),
                 side_detector=dict(num_lasers=160, distance=50)
@@ -382,31 +381,23 @@ if __name__ == "__main__":
         }
     )
     success = []
-    for i in range(env.config["case_num"]):
+    for i in range(3):
         env.reset(force_seed=i)
         while True:
             o, r, d, info = env.step([0, 0])
             assert env.observation_space.contains(o)
             c_lane = env.vehicle.lane
             long, lat, = c_lane.local_coordinates(env.vehicle.position)
-            if env.config["use_render"]:
-                env.render(
-                    text={
-                        # "routing_lane_idx": env.engine._object_policies[env.vehicle.id].routing_target_lane.index,
-                        # "lane_index": env.vehicle.lane_index,
-                        # "current_ckpt_index": env.vehicle.navigation.current_checkpoint_lane_index,
-                        # "next_ckpt_index": env.vehicle.navigation.next_checkpoint_lane_index,
-                        # "ckpts": env.vehicle.navigation.checkpoints,
-                        # "lane_heading": c_lane.heading_theta_at(long),
-                        # "long": long,
-                        # "lat": lat,
-                        # "v_heading": env.vehicle.heading_theta,
-                        "obs_shape": len(o),
-                        "lateral": env.observations["default_agent"].lateral_dist,
-                        "seed": env.engine.global_seed + env.config["start_case_index"],
-                        "reward": r,
-                    }
-                )
+            # if env.config["use_render"]:
+            env.render(
+                # text={
+                #     "obs_shape": len(o),
+                #     "lateral": env.observations["default_agent"].lateral_dist,
+                #     "seed": env.engine.global_seed + env.config["start_case_index"],
+                #     "reward": r,
+                # }
+                mode="topdown"
+            )
 
             if d:
                 if info["arrive_dest"]:

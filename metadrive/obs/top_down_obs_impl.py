@@ -6,7 +6,7 @@ from metadrive.component.lane.circular_lane import CircularLane
 from metadrive.component.lane.straight_lane import StraightLane
 from metadrive.constants import LineType, LineColor
 from metadrive.utils.utils import import_pygame
-from metadrive.utils.waymo_utils.waymo_utils import RoadLineType, RoadEdgeType
+from metadrive.utils.waymo_utils.waymo_type import RoadLineType, RoadEdgeType
 
 PositionType = Union[Tuple[float, float], np.ndarray]
 pygame = import_pygame()
@@ -326,6 +326,34 @@ class LaneGraphics:
             pass
 
     @classmethod
+    def display_nuplan(cls, poly_line, type, color, surface) -> None:
+        """
+        Display a lane on a surface.
+        """
+        lane = poly_line
+        if color == LineColor.YELLOW:
+            color = (0, 80, 220)
+        # elif RoadEdgeType.is_road_edge(type):
+        #     color = (160, 160, 160)
+        else:
+            color = (80, 80, 80)
+        if len(poly_line.segment_property) <= 1:
+            return
+        stripes_count = int(2 * (surface.get_height() + surface.get_width()) / (cls.STRIPE_SPACING * surface.scaling))
+        s_origin, _ = lane.local_coordinates(surface.origin)
+        s0 = (int(s_origin) // cls.STRIPE_SPACING - stripes_count // 2) * cls.STRIPE_SPACING
+
+        if type == LineType.BROKEN:
+            starts = s0 + np.arange(stripes_count) * cls.STRIPE_SPACING
+            ends = s0 + np.arange(stripes_count) * cls.STRIPE_SPACING + cls.STRIPE_LENGTH
+            lats = [0 for s in starts]
+        else:
+            starts = s0 + np.arange(stripes_count) * cls.STRIPE_SPACING
+            ends = s0 + np.arange(stripes_count) * cls.STRIPE_SPACING + cls.STRIPE_SPACING
+            lats = [0 for s in starts]
+        cls.draw_stripes(lane, surface, starts, ends, lats, color=color)
+
+    @classmethod
     def striped_line(cls, lane, surface, stripes_count: int, longitudinal: float, side: int, color=None) -> None:
         """
         Draw a striped line on one side of a lane, on a surface.
@@ -397,7 +425,7 @@ class LaneGraphics:
                 )
 
     @classmethod
-    def simple_draw(cls, lane, surface, color=(255, 255, 255)):
+    def draw_drivable_area(cls, lane, surface, color=(255, 255, 255)):
         from metadrive.component.pgblock.pg_block import PGBlock
         segment_num = int(lane.length / PGBlock.LANE_SEGMENT_LENGTH)
         width = lane.width

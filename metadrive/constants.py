@@ -70,6 +70,17 @@ class TrafficLightStatus:
         if status == self.UNKNOWN:
             return "Traffic Light: Unknown"
 
+    @classmethod
+    def color(self, status):
+        if status == self.GREEN:
+            return [0, 255, 0]
+        if status == self.RED:
+            return [1, 255, 0]
+        if status == self.YELLOW:
+            return [255, 255, 0]
+        if status == self.UNKNOWN:
+            return [180, 180, 180]
+
 
 class BodyName:
     White_continuous_line = "White Continuous Line"
@@ -334,23 +345,6 @@ class PolicyState:
 
 
 REPLAY_DONE = "replay_done"
-
-
-class WaymoLaneProperty:
-    LANE_TYPE = "center_lane"
-    LANE_LINE_TYPE = "road_line"
-    LANE_EDGE_TYPE = "road_edge"
-    POLYLINE = "polyline"
-    LEFT_BOUNDARIES = "left_boundaries"
-    RIGHT_BOUNDARIES = "right_boundaries"
-    LEFT_NEIGHBORS = "left_neighbor"
-    RIGHT_NEIGHBORS = "right_neighbor"
-    ENTRY = "entry"
-    EXIT = "exit"
-
-    @staticmethod
-    def get_line_type_and_line_color(waymo_type):
-        pass
 
 
 class NuPlanLaneProperty:

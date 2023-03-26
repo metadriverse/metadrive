@@ -1,4 +1,5 @@
 import numpy as np
+from metadrive.utils.math_utils import wrap_to_pi
 from panda3d.core import Vec3
 
 from metadrive.utils.math_utils import Vector
@@ -77,7 +78,7 @@ waymo_2_metadrive_position = waymo_to_metadrive_vector
 
 
 def waymo_to_metadrive_heading(heading):
-    return -heading
+    return -wrap_to_pi(heading)
 
 # Compatibility
 waymo_2_metadrive_heading = waymo_to_metadrive_heading
@@ -106,8 +107,8 @@ def metadrive_to_nuplan_vector(vector, nuplan_center=(0, 0)):
 
 
 def nuplan_to_metadrive_heading(heading):
-    return -heading
+    return -wrap_to_pi(heading)
 
 
 def metadrive_to_nuplan_heading(heading):
-    return -heading
+    return -wrap_to_pi(heading)

@@ -261,7 +261,7 @@ class TopDownMultiChannel(TopDownObservation):
         for i, c in enumerate(checkpoints[:-1]):
             lanes = self.road_network.graph[c][checkpoints[i + 1]]
             for lane in lanes:
-                LaneGraphics.simple_draw(lane, canvas, color=color)
+                LaneGraphics.draw_drivable_area(lane, canvas, color=color)
 
     def _get_stack_indices(self, length, frame_skip=None):
         frame_skip = frame_skip or self.frame_skip

@@ -100,3 +100,11 @@ class Pedestrian(BaseTrafficParticipant):
     @property
     def WIDTH(self):
         return self.RADIUS
+
+    @property
+    def top_down_width(self):
+        return self.RADIUS
+
+    @property
+    def top_down_length(self):
+        return self.RADIUS

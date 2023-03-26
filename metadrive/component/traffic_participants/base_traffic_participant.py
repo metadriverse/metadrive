@@ -22,10 +22,25 @@ class BaseTrafficParticipant(BaseObject):
         assert self.NAME is not None, "No name for {}".format(self.class_name)
         assert self.COLLISION_MASK is not None, "No collision group for {}".format(self.class_name)
 
-    def top_down_color(self):
-        raise NotImplementedError(
-            "Implement this func for rendering class {} in top down renderer".format(self.class_name)
-        )
+    # def top_down_color(self):
+    #     return super(BaseTrafficParticipant, self).top_down_color
+    # raise NotImplementedError(
+    #     "Implement this func for rendering class {} in top down renderer".format(self.class_name)
+    # )
+
+    @property
+    def LENGTH(self):
+        return None
+
+    @property
+    def WIDTH(self):
+        return None
+
+    def top_down_width(self):
+        return self.WIDTH
+
+    def top_down_length(self):
+        return self.LENGTH
 
     def set_roll(self, roll):
         self.origin.setP(roll)
