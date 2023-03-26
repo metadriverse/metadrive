@@ -797,7 +797,6 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         Fetch more information
         """
         state = super(BaseVehicle, self).get_state()
-        final_road = self.navigation.final_road
         state.update(
             {
                 "steering": self.steering,
@@ -808,13 +807,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
                 "crash_sidewalk": self.crash_sidewalk
             }
         )
-        if isinstance(self.navigation, NodeNetworkNavigation):
-            state.update(
-                {
-                    "spawn_road": self.config["spawn_lane_index"][:-1],
-                    "destination": (final_road.start_node, final_road.end_node)
-                }
-            )
+        state.update(self.navigation.get_state())
         return state
 
     # def get_raw_state(self):
