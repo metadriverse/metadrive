@@ -150,14 +150,12 @@ class WaymoEnv(BaseEnv):
             crash_vehicle=False, crash_object=False, crash_building=False, out_of_road=False, arrive_dest=False
         )
 
-
         long, lat = vehicle.navigation.reference_trajectory.local_coordinates(vehicle.position)
 
         total_length = vehicle.navigation.reference_trajectory.length
         current_distance = long
 
         route_completion = current_distance / total_length
-
 
         # if np.linalg.norm(vehicle.position - self.engine.map_manager.sdc_dest_point) < 5 \
         #         or vehicle.lane.index in self.engine.map_manager.sdc_destinations:
@@ -331,7 +329,6 @@ class WaymoEnv(BaseEnv):
             agent_name = self.agent_manager.object_to_agent(vehicle.name)
             done = done or abs(self.observations[agent_name].lateral_dist) > 10
         return done
-
 
     def _reset_global_seed(self, force_seed=None):
         if force_seed is not None:

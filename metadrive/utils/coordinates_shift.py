@@ -80,6 +80,7 @@ waymo_2_metadrive_position = waymo_to_metadrive_vector
 def waymo_to_metadrive_heading(heading):
     return -wrap_to_pi(heading)
 
+
 # Compatibility
 waymo_2_metadrive_heading = waymo_to_metadrive_heading
 
