@@ -118,6 +118,7 @@ class PGMap(BaseMap):
             map_config.append(json_config)
 
         saved_data = copy.deepcopy({self.BLOCK_SEQUENCE: map_config, "map_config": self.config.copy()})
+        saved_data["map_features"] = self.get_map_vector()
         return saved_data
 
     def show_coordinates(self):

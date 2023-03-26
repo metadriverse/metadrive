@@ -76,7 +76,7 @@ class BaseMap(BaseRunnable):
         """
         Save the generated map to map file
         """
-        raise NotImplementedError
+        return dict(map_features=self.get_map_vector())
 
     @property
     def num_blocks(self):

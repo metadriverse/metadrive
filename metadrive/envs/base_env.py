@@ -1,7 +1,7 @@
 import time
 
 from collections import defaultdict
-from typing import Union, Dict, AnyStr, Optional, Tuple
+from typing import Union, Dict, AnyStr, Optional, Tuple, Callable
 from metadrive.component.vehicle_module.mini_map import MiniMap
 from metadrive.component.vehicle_module.rgb_camera import RGBCamera
 from metadrive.component.vehicle_module.vehicle_panel import VehiclePanel
@@ -580,3 +580,34 @@ class BaseEnv(gym.Env):
     @property
     def total_step(self):
         return self.engine.episode_step if self.engine is not None else 0
+
+    def export_scenarios(self, policies: Union[dict, Callable], scenario_index: Union[list, int]):
+        def _act(observation):
+            if isinstance(policies, dict):
+                ret = {}
+                for id, o in observation.items():
+                    ret[id] = policies[id](o)
+            else:
+                ret = policies(observation)
+            return ret
+
+        if self.is_multi_agent:
+            assert isinstance(policies, dict), "In MARL setting, policies should be mapped to agents according to id"
+        else:
+            assert isinstance(policies, Callable), "In single agent case, policy should be a callable object, taking" \
+                                                   "observation as input."
+        scenarios_to_export = dict()
+        if isinstance(scenario_index, int):
+            scenario_index = [scenario_index]
+        self.config["record_episode"] = True
+        for index in scenario_index:
+            obs = self.reset(force_seed=index)
+            done = False
+            count = 0
+            while not done:
+                obs, reward, done, info = self.step(_act(obs))
+                count += 1
+            episode = self.engine.dump_episode()
+            scenarios_to_export[index] = episode
+        self.config["record_episode"] = False
+        return scenarios_to_export
