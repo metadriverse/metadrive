@@ -80,6 +80,10 @@ def waymo_to_metadrive_heading(heading):
     return -heading
 
 
+# Compatibility
+waymo_2_metadrive_heading = waymo_to_metadrive_heading
+
+
 def nuplan_to_metadrive_vector(vector, nuplan_center=(0, 0)):
     "All vec in nuplan should be centered in (0,0) to avoid numerical explosion"
     vector = np.array(vector)
