@@ -32,7 +32,7 @@ def _test_depth_camera_as_obs(render=False):
             cv2.imshow("window", ret)
             cv2.waitKey(1)
         if d:
-            print("FPS: {}".format(i / (time.time() - start)))
+            # print("FPS: {}".format(i / (time.time() - start)))
             # env.reset()
             # break
 
@@ -67,7 +67,7 @@ def _test_main_rgb_camera_as_obs_with_interface(render=False):
             current = time.time()
             # env.reset()
             # reset_time += time.time()-current
-            print("FPS: {}".format(i / (current - start - reset_time)))
+            # print("FPS: {}".format(i / (current - start - reset_time)))
             break
 
 
@@ -97,7 +97,7 @@ def _test_main_rgb_camera_no_interface(render=False):
             cv2.imshow("window", ret)
             cv2.waitKey(1)
         if d:
-            print("FPS: {}".format(i / (time.time() - start)))
+            # print("FPS: {}".format(i / (time.time() - start)))
             # env.reset()
             break
 
@@ -128,7 +128,7 @@ def _test_rgb_camera_as_obs(render=False):
             cv2.imshow("window", ret)
             cv2.waitKey(1)
         if d:
-            print("FPS: {}".format(i / (time.time() - start)))
+            # print("FPS: {}".format(i / (time.time() - start)))
             env.reset()
             # break
 

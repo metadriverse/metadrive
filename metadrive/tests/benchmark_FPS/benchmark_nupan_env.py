@@ -48,8 +48,8 @@ def benchmark_fps():
                 break
         total_time += time.time() - start
         if (seed + 300) % 20 == 0:
-            print("Seed: {}, FPS: {}".format(seed, total_steps / total_time))
-    print("FPS: {}".format(total_steps / total_time))
+            # print("Seed: {}, FPS: {}".format(seed, total_steps / total_time))
+    # print("FPS: {}".format(total_steps / total_time))
 
 
 def benchmark_reset_5_map_1000_times(load_city_map=True):
@@ -73,15 +73,15 @@ def benchmark_reset_5_map_1000_times(load_city_map=True):
         }
     )
     start_time = time.time()
-    print("Before first reset process Memory: {}".format(process_memory()))
+    # print("Before first reset process Memory: {}".format(process_memory()))
     env.reset()
     load_time = time.time() - start_time
-    print("After first reset process Memory: {}".format(process_memory()))
+    # print("After first reset process Memory: {}".format(process_memory()))
     for seed in tqdm.tqdm(range(300, 1300)):
         env.reset(force_seed=(seed % 5) + 300)
         if seed % 500 == 0:
-            print("reset: {}, Time: {}, Process Memory: {}".format(seed, time.time() - start_time, process_memory()))
-    print(
+            # print("reset: {}, Time: {}, Process Memory: {}".format(seed, time.time() - start_time, process_memory()))
+    # print(
         "Total Time: {}, Load time: {}, Total process Memory: {}".format(
             time.time() - start_time, load_time, process_memory()
         )
@@ -109,17 +109,17 @@ def benchmark_reset_1000(load_city_map=True):
         }
     )
     start_time = time.time()
-    print("Before first reset process Memory: {}".format(process_memory()))
+    # print("Before first reset process Memory: {}".format(process_memory()))
     env.reset()
     load_time = time.time() - start_time
-    print("After first reset process Memory: {}".format(process_memory()))
+    # print("After first reset process Memory: {}".format(process_memory()))
     for seed in tqdm.tqdm(range(300, 1300)):
         thisscenario = time.time()
         env.reset(force_seed=seed)
-        print("Seed: {}, Time: {}".format(seed, time.time() - thisscenario))
+        # print("Seed: {}, Time: {}".format(seed, time.time() - thisscenario))
         if seed % 500 == 0:
-            print("reset: {}, Time: {}, Process Memory: {}".format(seed, time.time() - start_time, process_memory()))
-    print(
+            # print("reset: {}, Time: {}, Process Memory: {}".format(seed, time.time() - start_time, process_memory()))
+    # print(
         "Total Time: {}, Load time: {}, Total process Memory: {}".format(
             time.time() - start_time, load_time, process_memory()
         )

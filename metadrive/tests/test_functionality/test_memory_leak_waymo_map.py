@@ -19,7 +19,7 @@ def test_waymo_env_memory_leak(num_reset=100):
             env.reset()
             nlt = time.time()
             lm = process_memory()
-            print(
+            # print(
                 "After {} Iters, Time {:.3f} Total Time {:.3f}, Memory Usage {:,}".format(
                     t + 1, nlt - lt, nlt - ct, lm - cm
                 )
@@ -49,7 +49,7 @@ def test_waymo_map_memory_leak():
 
         lm = process_memory()
         nlt = time.time()
-        print("After {} Iters, Time {:.3f} Total Time {:.3f}, Memory Usage {:,}".format(0, nlt - lt, nlt - ct, lm - cm))
+        # print("After {} Iters, Time {:.3f} Total Time {:.3f}, Memory Usage {:,}".format(0, nlt - lt, nlt - ct, lm - cm))
 
         for t in range(10):
             lt = time.time()
@@ -61,7 +61,7 @@ def test_waymo_map_memory_leak():
 
             nlt = time.time()
             lm = process_memory()
-            print(
+            # print(
                 "After {} Iters, Time {:.3f} Total Time {:.3f}, Memory Usage {:,}".format(
                     t + 1, nlt - lt, nlt - ct, lm - cm
                 )
@@ -88,16 +88,16 @@ if __name__ == "__main__":
     #     """
     #
     #     # force collection
-    #     print("\nGARBAGE:")
+    #     # print("\nGARBAGE:")
     #     gc.collect()
     #
-    #     print("\nGARBAGE OBJECTS:")
+    #     # print("\nGARBAGE OBJECTS:")
     #     res = []
     #     for x in gc.garbage:
     #         s = str(x)
     #         if len(s) > 80:
     #             s = s[:80]
-    #         print(type(x), "\n  ", s)
+    #         # print(type(x), "\n  ", s)
     #         res.append([type(x), s, x])
     #     return res
 
@@ -111,4 +111,4 @@ if __name__ == "__main__":
     # show the dirt ;-)
     # ret = dump_garbage()
 
-    # print(ret)
+    # # print(ret)

@@ -241,7 +241,7 @@ def test_detector_mask():
                 for stick_1_heading_deg in angles1:
                     for stick_2_heading_deg in angles2:
                         _test_mask(mask, stick_1_heading_deg, stick_2_heading_deg, max_span, pos1_x, pos2_x)
-                print("Finish. ", max_span, pos1_x, pos2_x)
+                # print("Finish. ", max_span, pos1_x, pos2_x)
 
 
 def test_detector_mask_in_lidar():
@@ -264,7 +264,7 @@ def test_detector_mask_in_lidar():
         for tt in range(3000):
             o, r, d, i = env.step([0, 1])
 
-            print("We have: {} vehicles!".format(env.engine.traffic_manager.get_vehicle_num()))
+            # print("We have: {} vehicles!".format(env.engine.traffic_manager.get_vehicle_num()))
 
             v = env.vehicle
             c_p, objs = v.lidar.perceive(v, detector_mask=None)
@@ -287,10 +287,10 @@ def test_detector_mask_in_lidar():
             mask = detector_mask.get_mask(env.vehicle.name)
             stack = np.stack([old_cloud_points, real_mask, mask])
             if not all(mask[real_mask]):
-                print('stop')
+                # print('stop')
             assert all(mask[real_mask])  # mask 1 should at least include all True of real mask.
 
-            print(
+            # print(
                 "Num of true in our mask: {}, in old mask: {}. Overlap: {}. We have {} more.".format(
                     sum(mask.astype(int)), sum(real_mask.astype(int)), sum(mask[real_mask].astype(int)),
                     sum(mask.astype(int)) - sum(real_mask.astype(int))

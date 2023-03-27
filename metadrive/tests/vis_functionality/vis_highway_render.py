@@ -29,7 +29,7 @@ def vis_top_down_render_with_panda_render():
         # if d:
         #     env.reset()
         if i % 1000 == 0:
-            print("Steps: {}, Time: {}".format(i, time.time() - s))
+            # print("Steps: {}, Time: {}".format(i, time.time() - s))
     env.close()
 
 

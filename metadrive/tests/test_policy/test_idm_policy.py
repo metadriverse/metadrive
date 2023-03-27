@@ -64,7 +64,7 @@ def test_idm_policy_is_moving(render=False, in_test=True):
         for t in range(100):
             env.step(env.action_space.sample())
             vs = env.engine.traffic_manager.traffic_vehicles
-            # print("Position: ", {str(v)[:4]: v.position for v in vs})
+            # # print("Position: ", {str(v)[:4]: v.position for v in vs})
             new_pos = np.array([v.position for v in vs])
             if t > 50 and last_pos is not None and in_test:
                 assert np.any(new_pos != last_pos)

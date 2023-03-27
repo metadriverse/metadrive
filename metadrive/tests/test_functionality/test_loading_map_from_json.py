@@ -46,7 +46,7 @@ def _test_loaded_map_alignment():
         # Assert json and generated maps in
         recursive_equal(map_data_in_json, map_data_realtime_generate_in_multiple_maps, True)
 
-    print(saved_v1)
+    # print(saved_v1)
 
 
 def test_map_buffering():

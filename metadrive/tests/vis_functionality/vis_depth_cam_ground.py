@@ -37,6 +37,6 @@ if __name__ == "__main__":
             #     ObservationType.show_gray_scale_array(o["image"][:, :, i])
             env.render()
         # if d:
-        #     print("Reset")
+        #     # print("Reset")
         #     env.reset()
     env.close()

@@ -51,14 +51,14 @@ if __name__ == "__main__":
     start = time.time()
     o = env.reset()
     env.vehicle.set_velocity([1, 0.1], 10)
-    print(env.vehicle.speed)
+    # print(env.vehicle.speed)
 
     for s in range(1, 10000):
         o, r, d, info = env.step([1, 0.5])
-        print("heading: {} forward_direction: {}".format(env.vehicle.heading, env.vehicle.velocity_direction))
+        # print("heading: {} forward_direction: {}".format(env.vehicle.heading, env.vehicle.velocity_direction))
 
         # env.vehicle.set_velocity([1, 10], 10)
-        # print(env.vehicle.velocity)
+        # # print(env.vehicle.velocity)
 
         # if s % 100 == 0:
         #     env.close()

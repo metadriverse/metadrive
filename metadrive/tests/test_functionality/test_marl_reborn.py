@@ -70,7 +70,7 @@ def test_respawn():
     finally:
         env.close()
     assert done_count > 0
-    print("Finish {} dones.".format(done_count))
+    # print("Finish {} dones.".format(done_count))
 
 
 def test_delay_done(render=False):
@@ -119,7 +119,7 @@ def test_delay_done(render=False):
             if agent0_done:
                 if info["agent1"][TerminationState.CRASH_VEHICLE]:
                     agent1_already_hit = True
-                    print("Hit!")
+                    # print("Hit!")
             if d["__all__"]:
                 assert agent1_already_hit
                 agent0_done = False
@@ -136,8 +136,8 @@ def test_delay_done(render=False):
             o, r, d, i = env.step({k: [1, 1] for k in env.vehicles.keys()})
             for dead_name in dead:
                 assert dead_name not in o
-            print("{} there!".format(env.vehicles.keys()))
-            print("{} dead!".format([kkk for kkk, ddd in d.items() if ddd]))
+            # print("{} there!".format(env.vehicles.keys()))
+            # print("{} dead!".format([kkk for kkk, ddd in d.items() if ddd]))
             for kkk, ddd in d.items():
                 if ddd and kkk != "__all__":
                     dead.add(kkk)

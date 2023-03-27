@@ -6,12 +6,12 @@ def _test_remote_metadrive_env():
     # Test
     envs = [RemoteMetaDrive(dict(map=7)) for _ in range(3)]
     ret = [env.reset() for env in envs]
-    print(ret)
+    # print(ret)
     ret = [env.step(env.action_space.sample()) for env in envs]
-    print(ret)
+    # print(ret)
     [env.reset() for env in envs]
     [env.close() for env in envs]
-    print('Success!')
+    # print('Success!')
 
 
 if __name__ == '__main__':

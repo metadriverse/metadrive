@@ -51,7 +51,7 @@ def test_original_lidar(render=False):
             if d:
                 break
         if not (detect_traffic_vehicle and detect_base_vehicle):
-            print("Lidar detection failed")
+            # print("Lidar detection failed")
         assert detect_traffic_vehicle and detect_base_vehicle, "Lidar detection failed"
     finally:
         env.close()
@@ -103,7 +103,7 @@ def test_lidar_with_mask(render=False):
             if d:
                 break
         if not (detect_traffic_vehicle and detect_base_vehicle):
-            print("Lidar detection failed")
+            # print("Lidar detection failed")
         assert detect_traffic_vehicle and detect_base_vehicle, "Lidar detection failed"
     finally:
         env.close()

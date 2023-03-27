@@ -47,22 +47,22 @@ if __name__ == "__main__":
     def add_x():
         model = get_v_path()
         model.setX(model.getX() + 0.1)
-        print(model.getPos())
+        # print(model.getPos())
 
     def decrease_x():
         model = get_v_path()
         model.setX(model.getX() - 0.1)
-        print(model.getPos())
+        # print(model.getPos())
 
     def add_y():
         model = get_v_path()
         model.setY(model.getY() + 0.1)
-        print(model.getPos())
+        # print(model.getPos())
 
     def decrease_y():
         model = get_v_path()
         model.setY(model.getY() - 0.1)
-        print(model.getPos())
+        # print(model.getPos())
 
     env.engine.accept("i", add_x)
     env.engine.accept("k", decrease_x)

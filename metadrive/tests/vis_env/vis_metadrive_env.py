@@ -99,7 +99,7 @@ if __name__ == "__main__":
         #     env.reset()
         # # assert env.observation_space.contains(o)
         # if (s + 1) % 100 == 0:
-        #     print(
+        #     # print(
         #         "Finish {}/10000 simulation steps. Time elapse: {:.4f}. Average FPS: {:.4f}".format(
         #             s + 1,f
         #             time.time() - start, (s + 1) / (time.time() - start)
@@ -107,5 +107,5 @@ if __name__ == "__main__":
         #     )
         # if d:
         # #     # env.close()
-        # #     print(len(env.engine._spawned_objects))
+        # #     # print(len(env.engine._spawned_objects))
         # env.reset()

@@ -39,7 +39,7 @@ def _test_rgb_camera_as_obs(render=False):
             cv2.waitKey(1)
         #
         if i % 100 == 0 and i != 0:
-            print("FPS: {}".format(i / (time.time() - start)))
+            # print("FPS: {}".format(i / (time.time() - start)))
 
 
 if __name__ == "__main__":

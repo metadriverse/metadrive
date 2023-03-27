@@ -20,7 +20,7 @@ if __name__ == "__main__":
         }
     )
     env.reset()
-    # print m to capture rgb observation
+    # # print m to capture rgb observation
     env.engine.accept(
         "m", env.vehicle.get_camera(env.vehicle.config["image_source"]).save_image, extraArgs=[env.vehicle]
     )
@@ -29,8 +29,8 @@ if __name__ == "__main__":
         o, r, d, info = env.step([0, 0])
         assert env.observation_space.contains(o)
         if i % 1000 == 0:
-            print("FPS: {}".format(i / (time.time() - start)))
+            # print("FPS: {}".format(i / (time.time() - start)))
         if d:
-            print("Reset")
+            # print("Reset")
             env.reset()
     env.close()

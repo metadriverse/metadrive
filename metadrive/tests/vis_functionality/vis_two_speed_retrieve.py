@@ -25,7 +25,7 @@ if __name__ == "__main__":
     env.reset()
     for i in range(1, 100000):
         o, r, d, info = env.step(acc)
-        print(
+        # print(
             "new:{}, old:{}, diff:{}".format(
                 env.vehicle.speed_km_h, env.vehicle.system.get_current_speed_km_hour(),
                 env.vehicle.speed_km_h - env.vehicle.system.get_current_speed_km_hour()

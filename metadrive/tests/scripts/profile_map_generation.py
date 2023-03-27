@@ -18,4 +18,4 @@ if __name__ == '__main__':
     for i in range(100):
         env.reset()
         map = draw_top_down_map(env.current_map)
-        print("Finish {} maps!".format(i + 1))
+        # print("Finish {} maps!".format(i + 1))

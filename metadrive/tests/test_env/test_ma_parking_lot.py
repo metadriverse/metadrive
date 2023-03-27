@@ -130,7 +130,7 @@ def test_ma_parking_lot_horizon():
                     for k in new_keys.difference(last_keys):
                         assert k in o
                         assert k in d
-                    print("Step {}, Done: {}".format(step, d))
+                    # print("Step {}, Done: {}".format(step, d))
 
                 for kkk, rrr in r.items():
                     if rrr == -777:
@@ -210,7 +210,7 @@ def test_ma_parking_lot_reset():
                         (0.5 - v.navigation.get_current_lane_num()) * v.navigation.get_current_lane_width()
                     )
                     if not env._is_arrive_destination(v):
-                        print('sss')
+                        # print('sss')
                     assert env._is_arrive_destination(v)
 
                 act = {k: [0, 0] for k in env.vehicles.keys()}
@@ -221,7 +221,7 @@ def test_ma_parking_lot_reset():
 
                 for kkk, iii in i.items():
                     if "arrive_dest" in iii and iii["arrive_dest"]:
-                        # print("{} success!".format(kkk))
+                        # # print("{} success!".format(kkk))
                         success_count += 1
 
                 for kkk, ddd in d.items():
@@ -234,7 +234,7 @@ def test_ma_parking_lot_reset():
                         assert rrr == 777
 
                 if d["__all__"]:
-                    print("Finish {} agents. Success {} agents.".format(agent_count, success_count))
+                    # print("Finish {} agents. Success {} agents.".format(agent_count, success_count))
                     o = env.reset()
                     assert env.observation_space.contains(o)
                     _check_spaces_after_reset(env, o)
@@ -268,7 +268,7 @@ def test_ma_parking_lot_close_spawn():
                 o, r, d, i = env.step({k: [0, 0] for k in env.vehicles.keys()})
                 assert not any(d.values())
             _no_close_spawn(env.vehicles)
-            print('Finish {} resets.'.format(num_r))
+            # print('Finish {} resets.'.format(num_r))
     finally:
         env.close()
         MultiAgentParkingLotEnv._DEBUG_RANDOM_SEED = None
@@ -293,12 +293,12 @@ def test_ma_parking_lot_reward_done_alignment():
                         assert i[kkk]["out_of_road"] or i[kkk]["max_step"]
                         if i[kkk]["out_of_road"]:
                             out_num += 1
-                        # print('{} done passed!'.format(kkk))
+                        # # print('{} done passed!'.format(kkk))
                 for kkk, rrr in r.items():
                     if rrr == -777:
                         assert d[kkk]
                         assert i[kkk]["out_of_road"]
-                        # print('{} reward passed!'.format(kkk))
+                        # # print('{} reward passed!'.format(kkk))
                 if d["__all__"]:
                     env.reset(force_seed=0)
                     break
@@ -351,14 +351,14 @@ def test_ma_parking_lot_reward_done_alignment():
                     #assert r[kkk] == -1.7777
                     assert i[kkk]["crash_vehicle"]
                     assert i[kkk]["crash"]
-                    # print('{} done passed!'.format(kkk))
+                    # # print('{} done passed!'.format(kkk))
                 # for kkk, rrr in r.items():
                 rrr = r[kkk]
                 if rrr == -1.7777:
                     assert d[kkk]
                     assert i[kkk]["crash_vehicle"]
                     assert i[kkk]["crash"]
-                    # print('{} reward passed!'.format(kkk))
+                    # # print('{} reward passed!'.format(kkk))
             # assert d["__all__"]
             # if d["__all__"]:
             break
@@ -412,13 +412,13 @@ def test_ma_parking_lot_reward_done_alignment():
                     assert i[kkk]["out_of_road"] or i[kkk]["max_step"]
                     if i[kkk]["out_of_road"]:
                         out_num += 1
-                    # print('{} done passed!'.format(kkk))
+                    # # print('{} done passed!'.format(kkk))
             for kkk, rrr in r.items():
                 if rrr == -1.7777:
                     # assert d[kkk]
                     assert i[kkk]["crash_vehicle"]
                     assert i[kkk]["crash"]
-                    # print('{} reward passed!'.format(kkk))
+                    # # print('{} reward passed!'.format(kkk))
             if d["agent0"]:
                 break
             if d["__all__"]:
@@ -488,7 +488,7 @@ def test_ma_parking_lot_init_space():
                         env.reset()
                         _check_spaces_after_reset(env)
                         env.close()
-                        print('Finish: ', env_config)
+                        # print('Finish: ', env_config)
     finally:
         if "env" in locals():
             env.close()
@@ -523,7 +523,7 @@ def test_ma_parking_lot_no_short_episode():
                 o = env.reset()
                 d = {"__all__": False}
             if (step + 1) % 100 == 0:
-                print(
+                # print(
                     "Finish {}/2000 simulation steps. Time elapse: {:.4f}. Average FPS: {:.4f}".format(
                         step + 1,
                         time.time() - start, (step + 1) / (time.time() - start)
@@ -564,7 +564,7 @@ def test_ma_parking_lot_horizon_termination():
 
                 for kkk, ddd in d.items():
                     if ddd and kkk == "__all__":
-                        print("Current: ", step)
+                        # print("Current: ", step)
                         continue
                     if ddd:
                         assert i[kkk]["max_step"]
