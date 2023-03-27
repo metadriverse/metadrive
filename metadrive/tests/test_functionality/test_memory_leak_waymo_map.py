@@ -20,10 +20,10 @@ def test_waymo_env_memory_leak(num_reset=100):
             nlt = time.time()
             lm = process_memory()
             # print(
-                "After {} Iters, Time {:.3f} Total Time {:.3f}, Memory Usage {:,}".format(
-                    t + 1, nlt - lt, nlt - ct, lm - cm
-                )
-            )
+            #     "After {} Iters, Time {:.3f} Total Time {:.3f}, Memory Usage {:,}".format(
+            #         t + 1, nlt - lt, nlt - ct, lm - cm
+            #     )
+            # )
         assert lm - cm < 1024 * 1024 * 80, "We expect will cause ~70MB memory leak."
 
     finally:
@@ -62,10 +62,10 @@ def test_waymo_map_memory_leak():
             nlt = time.time()
             lm = process_memory()
             # print(
-                "After {} Iters, Time {:.3f} Total Time {:.3f}, Memory Usage {:,}".format(
-                    t + 1, nlt - lt, nlt - ct, lm - cm
-                )
-            )
+            #     "After {} Iters, Time {:.3f} Total Time {:.3f}, Memory Usage {:,}".format(
+            #         t + 1, nlt - lt, nlt - ct, lm - cm
+            #     )
+            # )
             # if t > 5:
             #     assert abs((lm - cm) - last_mem) < 1024  # Memory should not have change > 1KB
             last_mem = lm - cm

@@ -34,7 +34,7 @@ def get_result(env):
 
         if s > 20 and env.vehicle.speed_km_h >= 100 and not reported_max_speed:
             spend = (s - 1 - reported_start) * 0.1
-            # print(
+            print(
                 "Achieve max speed: {} at {}. Spend {} s. Current location: {}".format(
                     max_speed_km_h, s - 1, spend, env.vehicle.position
                 )
@@ -96,7 +96,7 @@ if __name__ == '__main__':
             }
         )
         acc_time, brake_dist, rotate_dis = get_result(env)
-        # print(
+        print(
             "Friction {}. Acceleration time: {:.3f}. Brake distance: {:.3f}. Rotation 90 degree displacement X: {:.3f}, Y: {:.3f}\n\n"
             .format(friction, acc_time, brake_dist, rotate_dis[0], rotate_dis[1])
         )

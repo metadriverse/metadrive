@@ -9,7 +9,7 @@ def test_config_unchangeable():
     try:
         c['aaa'] = 1000
     except ValueError as e:
-        # print('Great! ', e)
+        print('Great! ', e)
     assert c['aaa'] == 100
 
 

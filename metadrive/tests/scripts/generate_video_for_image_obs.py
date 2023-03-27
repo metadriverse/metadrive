@@ -130,7 +130,7 @@ def gen_video(frames, file="tmp"):
         encoder.capture_frame(f)
     encoder.close()
     del encoder
-    # print("Video is saved at: ", path)
+    print("Video is saved at: ", path)
     # video = io.open(path, 'r+b').read()
     # encoded = base64.b64encode(video)
     # ipythondisplay.display(HTML(data='''<video alt="test" autoplay

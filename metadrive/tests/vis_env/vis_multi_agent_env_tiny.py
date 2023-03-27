@@ -31,6 +31,6 @@ if __name__ == "__main__":
     for i in range(1, 100000):
         o, r, d, info = env.step(env.action_space.sample())
         if True in d.values():
-            # print("Somebody Done. ", info)
+            print("Somebody Done. ", info)
             # env.reset()
     env.close()

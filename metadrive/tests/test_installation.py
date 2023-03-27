@@ -52,7 +52,7 @@ def capture_headless_image(cuda, image_source="main_camera"):
         #     new_ret = PNMImage()
         #     RGBCamera._singleton.buffer.getDisplayRegion(1).getScreenshot(new_ret)
         #     new_ret.write("test_2.png")
-        # print(
+        print(
             "{} Test result: \nHeadless mode Offscreen render launched successfully! \n"
             "images named \'{}_from_observation.png\' and \'{}_from_buffer.png\' are saved to {}. "
             "Open it to check if offscreen mode works well".format(
@@ -70,10 +70,10 @@ def verify_installation(cuda=False, camera="main"):
         for i in range(1, 100):
             o, r, d, info = env.step([0, 1])
     except:
-        # print("Error happens in Bullet physics world !")
+        print("Error happens in Bullet physics world !")
         sys.exit()
     else:
-        # print("Bullet physics world is launched successfully!")
+        print("Bullet physics world is launched successfully!")
     finally:
         env.close()
         if camera == "main":

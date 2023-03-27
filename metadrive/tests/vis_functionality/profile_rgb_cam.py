@@ -28,8 +28,8 @@ if __name__ == "__main__":
     for i in range(1, 100000):
         o, r, d, info = env.step([0, 0])
         assert env.observation_space.contains(o)
-        if i % 1000 == 0:
-            # print("FPS: {}".format(i / (time.time() - start)))
+        # if i % 1000 == 0:
+        # print("FPS: {}".format(i / (time.time() - start)))
         if d:
             # print("Reset")
             env.reset()

@@ -42,7 +42,7 @@ def benchmark_fps():
                 break
         total_time += time.time() - start
         if (seed + 300) % 20 == 0:
-            # print("Seed: {}, FPS: {}".format(seed, total_steps / total_time))
+            print("Seed: {}, FPS: {}".format(seed, total_steps / total_time))
     # print("FPS: {}".format(total_steps / total_time))
 
 

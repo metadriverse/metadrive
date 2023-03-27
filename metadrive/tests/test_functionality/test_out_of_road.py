@@ -25,7 +25,7 @@ def test_out_of_road():
                             env.vehicle.side_detector.perceive(env.vehicle,
                                                                env.vehicle.engine.physics_world.static_world).cloud_points
                         assert min(points) < tolerance, (min(points), tolerance)
-                        # print(
+                        print(
                             "Side detector minimal distance: {}, Current distance: {}, steering: {}".format(
                                 min(points) * distance, distance, steering
                             )
@@ -35,7 +35,7 @@ def test_out_of_road():
                 env.close()
 
 
-def useless_left_right_distance_# printing():
+def useless_left_right_distance_printing():
     # env = MetaDriveEnv(dict(vehicle_config=dict(side_detector=dict(num_lasers=8))))
     for steering in [-0.01, 0.01, -1, 1]:
         # for distance in [10, 50, 100]:
@@ -52,7 +52,7 @@ def useless_left_right_distance_# printing():
                 total_width = float(
                     (vehicle.navigation.get_current_lane_num() + 1) * vehicle.navigation.get_current_lane_width()
                 )
-                # print(
+                print(
                     "Left {}, Right {}, Total {}. Clip Total {}".format(
                         l / total_width, r / total_width, (l + r) / total_width,
                         clip(l / total_width, 0, 1) + clip(r / total_width, 0, 1)
@@ -66,4 +66,4 @@ def useless_left_right_distance_# printing():
 
 if __name__ == '__main__':
     # test_out_of_road()
-    useless_left_right_distance_# printing()
+    useless_left_right_distance_printing()

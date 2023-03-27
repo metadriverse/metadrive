@@ -39,9 +39,9 @@ if __name__ == '__main__':
         # plt.imshow(frame)
         # plt.show()
         # print(
-            "Finish {}/100 simulation steps. Time elapse: {:.4f}. Average FPS: {:.4f}".format(
-                num_frames + 1,
-                time.time() - start, (num_frames + 1) / (time.time() - start)
-            )
-        )
+        #     "Finish {}/100 simulation steps. Time elapse: {:.4f}. Average FPS: {:.4f}".format(
+        #         num_frames + 1,
+        #         time.time() - start, (num_frames + 1) / (time.time() - start)
+        #     )
+        # )
     env.close()

@@ -31,10 +31,10 @@ def _test_depth_camera_as_obs(render=False):
             ret = o["image"].get()[..., -1] if env.config["image_on_cuda"] else o["image"][..., -1]
             cv2.imshow("window", ret)
             cv2.waitKey(1)
-        if d:
-            # print("FPS: {}".format(i / (time.time() - start)))
-            # env.reset()
-            # break
+        # if d:
+        # print("FPS: {}".format(i / (time.time() - start)))
+        # env.reset()
+        # break
 
 
 def _test_main_rgb_camera_as_obs_with_interface(render=False):

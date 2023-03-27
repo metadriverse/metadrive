@@ -287,10 +287,10 @@ def test_detector_mask_in_lidar():
             mask = detector_mask.get_mask(env.vehicle.name)
             stack = np.stack([old_cloud_points, real_mask, mask])
             if not all(mask[real_mask]):
-                # print('stop')
+                print('stop')
             assert all(mask[real_mask])  # mask 1 should at least include all True of real mask.
 
-            # print(
+            print(
                 "Num of true in our mask: {}, in old mask: {}. Overlap: {}. We have {} more.".format(
                     sum(mask.astype(int)), sum(real_mask.astype(int)), sum(mask[real_mask].astype(int)),
                     sum(mask.astype(int)) - sum(real_mask.astype(int))

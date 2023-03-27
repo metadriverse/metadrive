@@ -209,8 +209,8 @@ def test_ma_parking_lot_reset():
                         v.navigation.get_current_lane_width() / 2 >= lat >=
                         (0.5 - v.navigation.get_current_lane_num()) * v.navigation.get_current_lane_width()
                     )
-                    if not env._is_arrive_destination(v):
-                        # print('sss')
+                    # if not env._is_arrive_destination(v):
+                    # print('sss')
                     assert env._is_arrive_destination(v)
 
                 act = {k: [0, 0] for k in env.vehicles.keys()}
@@ -522,13 +522,13 @@ def test_ma_parking_lot_no_short_episode():
             if d["__all__"]:
                 o = env.reset()
                 d = {"__all__": False}
-            if (step + 1) % 100 == 0:
-                # print(
-                    "Finish {}/2000 simulation steps. Time elapse: {:.4f}. Average FPS: {:.4f}".format(
-                        step + 1,
-                        time.time() - start, (step + 1) / (time.time() - start)
-                    )
-                )
+            # if (step + 1) % 100 == 0:
+            #     # print(
+            #         "Finish {}/2000 simulation steps. Time elapse: {:.4f}. Average FPS: {:.4f}".format(
+            #             step + 1,
+            #             time.time() - start, (step + 1) / (time.time() - start)
+            #         )
+            #     )
             if d_count > 200:
                 break
     finally:

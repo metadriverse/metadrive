@@ -222,6 +222,6 @@ if __name__ == "__main__":
                 cv2.imshow("win", np_array)
                 cv2.waitKey(1)
         if s % 10000 == 0 and s != 0:
-            # print("FPS: {}".format(s / (time.time() - start)))
+            print("FPS: {}".format(s / (time.time() - start)))
 
         pass
