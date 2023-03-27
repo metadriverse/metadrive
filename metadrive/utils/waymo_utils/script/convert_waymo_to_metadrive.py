@@ -55,6 +55,8 @@ def parse_data(input, output_path):
 
             md_scenario[ScenarioDescription.TRACKS] = tracks
 
+            md_scenario[ScenarioDescription.METADRIVE_PROCESSED] = False
+
             # TODO: Should we create a new key for this?
             md_scenario["sdc_track_index"] = sdc_id
 

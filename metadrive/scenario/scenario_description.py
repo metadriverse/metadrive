@@ -126,7 +126,8 @@ class ScenarioDescription(dict):
     @classmethod
     def sanity_check(cls, scenario_dict):
         # Whether input has all required keys
-        cls.FIRST_LEVEL_KEYS.issubset(set(scenario_dict.keys()))
+        assert cls.FIRST_LEVEL_KEYS.issubset(set(scenario_dict.keys())), \
+            "You lack these keys in first level: {}".format(cls.FIRST_LEVEL_KEYS.difference(set(scenario_dict.keys())))
 
         # Check types, only native python objects
         # This is to avoid issue in pickle deserialization
