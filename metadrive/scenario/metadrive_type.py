@@ -24,8 +24,8 @@ class MetaDriveType:
 
     @classmethod
     def from_waymo(cls, waymo_type_string: str):
-        # TODO: WIP
-        return ""
+        assert cls.__dict__[waymo_type_string]
+        return waymo_type_string
 
     @classmethod
     def from_nuplan(cls, waymo_type_string: str):

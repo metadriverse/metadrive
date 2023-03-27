@@ -3,7 +3,7 @@ from matplotlib.pyplot import figure
 
 from metadrive.utils.waymo_utils.waymo_type import WaymoLaneType, WaymoAgentType
 from metadrive.utils.waymo_utils.waymo_type import WaymoRoadLineType, WaymoRoadEdgeType
-
+from metadrive.scenario import MetaDriveType
 try:
     import tensorflow as tf
 except ImportError:
@@ -89,7 +89,10 @@ def extract_line(f):
 def extract_edge(f):
     edge = dict()
     f_ = f.road_edge
-    edge["type"] = WaymoRoadEdgeType[f_.type]
+
+    # TODO: Need to transform this to MetaDrive version
+    edge["type"] = WaymoRoadEdgeType.from_waymo(f_.type)
+
     edge["polyline"] = extract_poly(f_.polyline)
 
     return edge
@@ -126,7 +129,10 @@ def extract_tracks(tracks, sdc_idx):
 
     for obj in tracks:
         obj_state = dict()
-        obj_state["type"] = WaymoAgentType[obj.object_type]
+
+        waymo_string = WaymoAgentType.from_waymo(obj.object_type)  # Load waymo type string
+        metadrive_type = MetaDriveType.from_waymo(waymo_string)  # Transform it to Waymo type string
+        obj_state["type"] = metadrive_type
 
         obj_state["state"] = {}
 
@@ -152,7 +158,7 @@ def extract_tracks(tracks, sdc_idx):
 
         obj_state["metadata"] = dict(
             track_length=obj_state["state"]["position"].shape[0],
-            type=WaymoAgentType[obj.object_type],
+            type=metadrive_type,
             object_id=obj.id
         )
 
@@ -194,7 +200,7 @@ def extract_dynamic_map_states(dynamic_map_states):
 
     def _traffic_light_state_template(object_id):
         return dict(
-            type="TRAFFICLIGHT",  # TODO: Use a more formal way to specify the object type
+            type=MetaDriveType.TRAFFIC_LIGHT,
             state=dict(
                 stop_point=np.zeros([track_length, 3], dtype=np.float32),
                 object_state=np.zeros([
@@ -204,7 +210,7 @@ def extract_dynamic_map_states(dynamic_map_states):
                     track_length,
                 ], dtype=int),
             ),
-            metadata=dict(track_length=track_length, type="TRAFFICLIGHT", object_id=object_id)
+            metadata=dict(track_length=track_length, type=MetaDriveType.TRAFFIC_LIGHT, object_id=object_id)
         )
 
     # FIXME: TODO: This function is not finished yet.
