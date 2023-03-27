@@ -195,14 +195,14 @@ def extract_dynamic_map_states(dynamic_map_states):
             type="TRAFFICLIGHT",  # TODO: Use a more formal way to specify the object type
             state=dict(
                 stop_point=np.zeros([track_length, 3], dtype=np.float32),
-                object_state=np.zeros([track_length, ], dtype=int),
-                lane=np.zeros([track_length, ], dtype=int),
+                object_state=np.zeros([
+                    track_length,
+                ], dtype=int),
+                lane=np.zeros([
+                    track_length,
+                ], dtype=int),
             ),
-            metadata=dict(
-                track_length=track_length,
-                type="TRAFFICLIGHT",
-                object_id=object_id
-            )
+            metadata=dict(track_length=track_length, type="TRAFFICLIGHT", object_id=object_id)
         )
 
     # FIXME: TODO: This function is not finished yet.
