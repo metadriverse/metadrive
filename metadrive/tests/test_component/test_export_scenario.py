@@ -21,7 +21,6 @@ def test_export_metadrive_scenario(render_export_env=False, render_load_env=Fals
             with open(os.path.join(dir, "{}.pkl".format(i)), "wb+") as file:
                 pickle.dump(data, file)
         env.close()
-        del env
 
         env = WaymoEnv(
             dict(
@@ -53,7 +52,6 @@ def test_export_waymo_scenario(render_export_env=False, render_load_env=False):
             with open(os.path.join(dir, "{}.pkl".format(i)), "wb+") as file:
                 pickle.dump(data, file)
         env.close()
-        del env
 
         env = WaymoEnv(
             dict(
@@ -74,5 +72,5 @@ def test_export_waymo_scenario(render_export_env=False, render_load_env=False):
 
 
 if __name__ == "__main__":
-    # test_export_metadrive_scenario(render_export_env=True, render_load_env=True)
-    test_export_waymo_scenario(render_export_env=True, render_load_env=True)
+    test_export_metadrive_scenario(render_export_env=False, render_load_env=True)
+    # test_export_waymo_scenario(render_export_env=True, render_load_env=True)

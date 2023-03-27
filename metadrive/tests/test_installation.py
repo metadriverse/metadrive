@@ -30,7 +30,7 @@ def capture_headless_image(cuda, image_source="main_camera"):
         for i in range(10):
             o, r, d, i = env.step([0, 1])
         assert isinstance(o, dict)
-        print("The observation is a dict with numpy arrays as values: ", {k: v.shape for k, v in o.items()})
+        # print("The observation is a dict with numpy arrays as values: ", {k: v.shape for k, v in o.items()})
         o = o["image"][..., -1] * 255 if not cuda else o["image"].get()[..., -1] * 255
         cv2.imwrite(
             os.path.join(

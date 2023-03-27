@@ -19,7 +19,7 @@ if __name__ == "__main__":
         }
     )
     env.reset()
-    # print m to capture rgb observation
+    # # print m to capture rgb observation
     env.engine.accept(
         "m", env.vehicle.get_camera(env.vehicle.config["image_source"]).save_image, extraArgs=[env.vehicle]
     )
@@ -40,6 +40,6 @@ if __name__ == "__main__":
         # image = env.render(mode="any str except human", text={"can you see me": i})
         # ObservationType.show_gray_scale_array(image)
         if d:
-            print("Reset")
+            # print("Reset")
             env.reset()
     env.close()

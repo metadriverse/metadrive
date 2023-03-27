@@ -13,17 +13,17 @@ from metadrive.policy.idm_policy import WaymoIDMPolicy
 def test_export_waymo_map(render=False):
     WaymoIDMPolicy.NORMAL_SPEED = 30
     asset_path = AssetLoader.asset_path
+    env = WaymoEnv(
+        {
+            "manual_control": False,
+            "replay": True,
+            "no_traffic": True,
+            "use_render": False,
+            "waymo_data_directory": AssetLoader.file_path(asset_path, "waymo", return_raw_style=False),
+            "case_num": 3
+        }
+    )
     try:
-        env = WaymoEnv(
-            {
-                "manual_control": False,
-                "replay": True,
-                "no_traffic": True,
-                "use_render": False,
-                "waymo_data_directory": AssetLoader.file_path(asset_path, "waymo", return_raw_style=False),
-                "scenario_num": 3
-            }
-        )
         for seed in range(3):
             env.reset(force_seed=seed)
             map_vector = env.current_map.get_map_vector()

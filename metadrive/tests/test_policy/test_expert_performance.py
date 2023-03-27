@@ -38,9 +38,9 @@ def _evaluate(env_config, num_episode, has_traffic=True):
         t = time.time() - s
         ep_reward_mean = sum(reward_list) / len(reward_list)
         success_rate = sum(success_list) / len(success_list)
-        print(
-            f"Finish {ep_count} episodes in {t:.3f} s. Episode reward: {ep_reward_mean}, success rate: {success_rate}."
-        )
+        # print(
+        #     f"Finish {ep_count} episodes in {t:.3f} s. Episode reward: {ep_reward_mean}, success rate: {success_rate}."
+        # )
     finally:
         env.close()
     return ep_reward_mean, success_rate

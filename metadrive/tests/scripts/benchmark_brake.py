@@ -28,7 +28,7 @@ def get_result(env):
             # action = np.array([0.0, 0.0])
 
         if s > 20 and env.vehicle.speed_km_h > 1.0 and not reported_start:
-            print("Start the car at {}".format(s))
+            # print("Start the car at {}".format(s))
             reported_start = s
             start_time = time.time()
 
@@ -39,7 +39,7 @@ def get_result(env):
                     max_speed_km_h, s - 1, spend, env.vehicle.position
                 )
             )
-            print("real time spend to acc: {}".format(time.time() - start_time))
+            # print("real time spend to acc: {}".format(time.time() - start_time))
             reported_max_speed = s
             max_speed_loc = env.vehicle.position
 
@@ -48,7 +48,7 @@ def get_result(env):
         if s > 20 and env.vehicle.speed_km_h <= 1.0 and reported_max_speed and not reported_end:
             dist = env.vehicle.position - max_speed_loc
             dist = dist[0]
-            print("Stop the car at {}. Distance {}. Current location: {}".format(s, dist, env.vehicle.position))
+            # print("Stop the car at {}. Distance {}. Current location: {}".format(s, dist, env.vehicle.position))
             reported_end = True
 
         speed = env.vehicle.speed_km_h

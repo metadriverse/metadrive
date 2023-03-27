@@ -57,7 +57,7 @@ def _test_bicycle_model():
         index = s - horizon
         if index >= 0:
             state = predict_states[index]
-            print(norm(state["x"] - vehicle.position[0], state["y"] - vehicle.position[1]))
+            # print(norm(state["x"] - vehicle.position[0], state["y"] - vehicle.position[1]))
 
 
 if __name__ == "__main__":

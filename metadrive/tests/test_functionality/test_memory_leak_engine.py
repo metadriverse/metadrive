@@ -13,7 +13,7 @@ except ImportError:
 
 
 def total_size(o, handlers={}, verbose=False):
-    """ Returns the approximate memory footprint an object and all of its contents.
+    """ Returns the approximate memory foot# print an object and all of its contents.
 
     Automatically finds the contents of the following builtin containers and
     their subclasses:  tuple, list, deque, dict, set and frozenset.
@@ -46,8 +46,8 @@ def total_size(o, handlers={}, verbose=False):
         seen.add(id(o))
         s = getsizeof(o, default_size)
 
-        if verbose:
-            print(s, type(o), repr(o), file=stderr)
+        # if verbose:
+        # print(s, type(o), repr(o), file=stderr)
 
         for typ, handler in all_handlers.items():
             if isinstance(o, typ):
@@ -89,7 +89,7 @@ def test_engine_memory_leak():
 
             nlt = time.time()
             lm = process_memory()
-            # print(
+            # # print(
             #     "After {} Iters, Time {:.3f} Total Time {:.3f}, Memory Usage {:,} Memory Change {:,}".format(
             #         t + 1, nlt - lt, nlt - ct, lm - cm, lm - last_lm
             #     )
@@ -116,11 +116,11 @@ def test_config_memory_leak():
 
         nlt = time.time()
         lm = process_memory()
-        print(
-            "After {} Iters, Time {:.3f} Total Time {:.3f}, Memory Usage {:,} Memory Change {:,}".format(
-                t + 1, nlt - lt, nlt - ct, lm - cm, lm - last_lm
-            )
-        )
+        # print(
+        #     "After {} Iters, Time {:.3f} Total Time {:.3f}, Memory Usage {:,} Memory Change {:,}".format(
+        #         t + 1, nlt - lt, nlt - ct, lm - cm, lm - last_lm
+        #     )
+        # )
         last_lm = lm
         if t > 500:
             assert abs((lm - cm) - last_mem) < 10  # Memory should not have change > 1KB
