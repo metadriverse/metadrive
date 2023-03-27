@@ -290,7 +290,9 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self._init_step_info()
         action, step_info = self._preprocess_action(action)
 
-        self.last_position = self.position
+        self.last_position = self.position  # 2D vector
+        self.last_velocity = self.velocity  # 2D vector
+        self.last_speed = self.speed  # Scalar
         self.last_heading_dir = self.heading
         self.last_current_action.append(action)  # the real step of physics world is implemented in taskMgr.step()
         if self.increment_steering:
@@ -398,6 +400,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self.last_current_action = deque([(0.0, 0.0), (0.0, 0.0)], maxlen=2)
         self.last_position = self.spawn_place
         self.last_heading_dir = self.heading
+        self.last_velocity = self.velocity  # 2D vector
+        self.last_speed = self.speed  # Scalar
 
         self.update_dist_to_left_right()
         self.takeover = False
@@ -792,6 +796,26 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             h *= 180 / np.pi
         self.origin.setH(h - 90)
 
+        self.last_heading_dir = self.heading
+
+    def set_velocity(self, *args, **kwargs):
+        super(BaseVehicle, self).set_velocity(*args, **kwargs)
+        self.last_velocity = self.velocity
+        self.last_speed = self.speed
+
+    def set_state(self, state):
+        super(BaseVehicle, self).set_state(state)
+        self.throttle_brake = state["throttle_brake"]
+        self.steering = state["steering"]
+
+    def set_panda_pos(self, pos):
+        super(BaseVehicle, self).set_panda_pos(pos)
+        self.last_position = self.position
+
+    def set_position(self, *args, **kwargs):
+        super(BaseVehicle, self).set_position(*args, **kwargs)
+        self.last_position = self.position
+
     def get_state(self):
         """
         Fetch more information
@@ -836,11 +860,6 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             mass=mass
         )
         return ret
-
-    def set_state(self, state):
-        super(BaseVehicle, self).set_state(state)
-        self.throttle_brake = state["throttle_brake"]
-        self.steering = state["steering"]
 
     def _update_overtake_stat(self):
         if self.config["overtake_stat"] and self.lidar.available:
