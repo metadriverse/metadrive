@@ -128,6 +128,8 @@ def extract_tracks(tracks, sdc_idx):
     ret = dict()
 
     for obj in tracks:
+        object_id = str(obj.id)
+
         obj_state = dict()
 
         waymo_string = WaymoAgentType.from_waymo(obj.object_type)  # Load waymo type string
@@ -157,10 +159,10 @@ def extract_tracks(tracks, sdc_idx):
         obj_state["state"]["valid"] = np.array(valid)[:, np.newaxis]
 
         obj_state["metadata"] = dict(
-            track_length=obj_state["state"]["position"].shape[0], type=metadrive_type, object_id=obj.id
+            track_length=obj_state["state"]["position"].shape[0], type=metadrive_type, object_id=object_id
         )
 
-        ret[obj.id] = obj_state
+        ret[object_id] = obj_state
 
     return ret, tracks[sdc_idx].id
 
@@ -169,7 +171,7 @@ def extract_map_features(map_features):
     ret = {}
 
     for lane_state in map_features:
-        lane_id = lane_state.id
+        lane_id = str(lane_state.id)
 
         if lane_state.HasField("lane"):
             ret[lane_id] = extract_center(lane_state)
@@ -287,7 +289,8 @@ def nearest_point(point, line):
 def extract_width(map, polyline, boundary):
     l_width = np.zeros(polyline.shape[0], dtype="float32")
     for b in boundary:
-        lb = map[b["boundary_feature_id"]]
+        b_feat_id = str(b["boundary_feature_id"])
+        lb = map[b_feat_id]
         b_polyline = lb["polyline"][:, :2]
 
         start_p = polyline[b["lane_start_index"]]
@@ -306,7 +309,7 @@ def extract_width(map, polyline, boundary):
 
 
 def compute_width(map):
-    for id, lane in map.items():
+    for map_feat_id, lane in map.items():
 
         if not "LANE" in lane["type"]:
             continue

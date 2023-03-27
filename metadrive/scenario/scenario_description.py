@@ -73,6 +73,7 @@ import numpy as np
 
 from metadrive.scenario.metadrive_type import MetaDriveType
 
+
 class ScenarioDescription(dict):
     """
     MetaDrive Scenario Description
@@ -97,59 +98,66 @@ class ScenarioDescription(dict):
 
     STATE_DICT_KEYS = {TYPE, STATE, METADATA}
 
+    ALLOW_TYPES = (int, float, str, np.ndarray, dict, list)
+
+    @classmethod
+    def _check_object_state_dict(cls, obj_state, scenario_length, object_id):
+        # Check keys
+        assert set(obj_state) == cls.STATE_DICT_KEYS
+
+        # Check type
+        assert MetaDriveType.has_type(obj_state[cls.TYPE])
+
+        # Check state arrays temporal consistency
+        assert isinstance(obj_state[cls.STATE], dict)
+        for state_key, state_array in obj_state[cls.STATE].items():
+            assert isinstance(state_array, np.ndarray)
+            assert state_array.shape[0] == scenario_length
+
+        # Check metadata
+        assert isinstance(obj_state[cls.METADATA], dict)
+        for metadata_key in (cls.TYPE, cls.OBJECT_ID):
+            assert metadata_key in obj_state[cls.METADATA]
+
+        # Check metadata alignment
+        if cls.OBJECT_ID in obj_state[cls.METADATA]:
+            assert obj_state[cls.METADATA][cls.OBJECT_ID] == object_id
+
     @classmethod
     def sanity_check(cls, scenario_dict):
         # Whether input has all required keys
         cls.FIRST_LEVEL_KEYS.issubset(set(scenario_dict.keys()))
 
+        # Check types, only native python objects
+        # This is to avoid issue in pickle deserialization
+        _recursive_check_type(scenario_dict, cls.ALLOW_TYPES)
+
         scenario_length = scenario_dict[cls.LENGTH]
 
-        assert scenario_dict[cls.TIMESTEP].shape == (scenario_length, )
+        assert scenario_dict[cls.TIMESTEP].shape == (scenario_length,)
 
         # Check tracks data
         assert isinstance(scenario_dict[cls.TRACKS], dict)
         for obj_id, obj_state in scenario_dict[cls.TRACKS].items():
-
-            # Check keys
-            assert set(obj_state) == cls.STATE_DICT_KEYS
-
-            # Check type
-            assert MetaDriveType.has_type(obj_state[cls.TYPE])
-
-            # Check state arrays temporal consistency
-            assert isinstance(obj_state[cls.STATE], dict)
-            for state_key, state_array in obj_state[cls.STATE].items():
-                assert isinstance(state_array, np.ndarray)
-                assert state_array.shape[0] == scenario_length
-
-            # Check metadata
-            assert isinstance(obj_state[cls.METADATA], dict)
-            for metadata_key in (cls.TYPE, cls.OBJECT_ID):
-                assert metadata_key in obj_state[cls.METADATA]
+            cls._check_object_state_dict(obj_state, scenario_length=scenario_length, object_id=obj_id)
 
         # Check dynamic_map_state
         assert isinstance(scenario_dict[cls.DYNAMIC_MAP_STATES], dict)
         for obj_id, obj_state in scenario_dict[cls.DYNAMIC_MAP_STATES].items():
-
-            # Check keys
-            assert set(obj_state) == cls.STATE_DICT_KEYS
-
-            # Check type
-            assert MetaDriveType.has_type(obj_state[cls.TYPE])
-
-            # Check state arrays temporal consistency
-            assert isinstance(obj_state[cls.STATE], dict)
-            for state_key, state_array in obj_state[cls.STATE].items():
-                assert isinstance(state_array, np.ndarray)
-                assert state_array.shape[0] == scenario_length
-
-            # Check metadata
-            assert isinstance(obj_state[cls.METADATA], dict)
-            for metadata_key in (cls.TYPE, cls.OBJECT_ID):
-                assert metadata_key in obj_state[cls.METADATA]
+            cls._check_object_state_dict(obj_state, scenario_length=scenario_length, object_id=obj_id)
 
 
+def _recursive_check_type(obj, allow_types, depth=0):
+    if isinstance(obj, dict):
+        for k, v in obj.items():
+            assert isinstance(k, str), "Must use string to be dict keys"
+            _recursive_check_type(v, allow_types, depth=depth + 1)
 
+    if isinstance(obj, list):
+        for v in obj:
+            _recursive_check_type(v, allow_types, depth=depth + 1)
 
+    assert isinstance(obj, allow_types), "Object type {} not allowed! ({})".format(type(obj), allow_types)
 
-
+    if depth > 1000:
+        raise ValueError()

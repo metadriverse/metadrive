@@ -13,12 +13,14 @@ import pickle
 from tqdm import tqdm
 
 from metadrive.constants import DATA_VERSION
+import numpy as np
 
 try:
     import tensorflow as tf
 except ImportError:
     pass
 from metadrive.utils.waymo_utils.protos import scenario_pb2
+from metadrive.scenario import ScenarioDescription
 from metadrive.utils.waymo_utils.utils import extract_tracks, extract_dynamic_map_states, extract_map_features, compute_width
 import sys
 
@@ -34,26 +36,40 @@ def parse_data(input, output_path):
         dataset = tf.data.TFRecordDataset(file_path, compression_type="")
         for j, data in enumerate(dataset.as_numpy_iterator()):
             scenario.ParseFromString(data)
-            scene = dict()
-            scene["id"] = scenario.scenario_id
 
-            scene["version"] = DATA_VERSION
+            md_scenario = ScenarioDescription()
 
-            scene["ts"] = [ts for ts in scenario.timestamps_seconds]
+            md_scenario[ScenarioDescription.ID] = scenario.scenario_id
 
-            scene["tracks"], sdc_id = extract_tracks(scenario.tracks, scenario.sdc_track_index)
+            md_scenario[ScenarioDescription.VERSION] = DATA_VERSION
 
-            scene["sdc_track_index"] = sdc_id
+            md_scenario["version"] = DATA_VERSION
 
-            scene["dynamic_map_states"] = extract_dynamic_map_states(scenario.dynamic_map_states)
+            md_scenario[ScenarioDescription.TIMESTEP] = np.asarray(
+                [ts for ts in scenario.timestamps_seconds], np.float32
+            )
 
-            scene["map_features"] = extract_map_features(scenario.map_features)
+            tracks, sdc_id = extract_tracks(scenario.tracks, scenario.sdc_track_index)
 
-            compute_width(scene["map_features"])
+            md_scenario[ScenarioDescription.LENGTH] = list(tracks.values())[0]["state"]["position"].shape[0]
+
+            md_scenario[ScenarioDescription.TRACKS] = tracks
+
+            # TODO: Should we create a new key for this?
+            md_scenario["sdc_track_index"] = sdc_id
+
+            md_scenario[ScenarioDescription.DYNAMIC_MAP_STATES] = extract_dynamic_map_states(scenario.dynamic_map_states)
+
+            md_scenario[ScenarioDescription.MAP_FEATURES] = extract_map_features(scenario.map_features)
+
+            compute_width(md_scenario[ScenarioDescription.MAP_FEATURES])
+
+            ScenarioDescription.sanity_check(md_scenario)
 
             p = os.path.join(output_path, f"{cnt}.pkl")
             with open(p, "wb") as f:
-                pickle.dump(scene, f)
+                pickle.dump(md_scenario, f)
+            print("Scenario {} is saved at: {}".format(cnt, p))
             cnt += 1
     return
 
