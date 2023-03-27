@@ -1,3 +1,5 @@
+import copy
+
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.pyplot import figure
@@ -34,9 +36,15 @@ def get_type_from_class(obj_class):
 
 
 def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1):
+    """
+    This function utilizes the recorded data natively emerging from MetaDrive run.
+    The output data structure follows MetaDrive data format, but some changes might happen compared to original data.
+    For example, MetaDrive InterpolateLane will reformat the Lane data and making all waypoints equal distancing.
+    We call this lane sampling rate, which is 0.2m in MetaDrive but might different in other dataset.
+    """
     result = dict()
     result["id"] = "{}-{}".format(record_episode["map_data"]["map_type"], record_episode["scenario_index"])
-    result["dynamic_map_states"] = {}  # old data has no traffic light info
+
     result["version"] = DATA_VERSION
     result["sdc_track_index"] = record_episode["frame"][0]._agent_to_object[DEFAULT_AGENT]
     result["tracks"] = {}
@@ -79,4 +87,12 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
                 tracks[id]["state"]["size"][frame_idx] = state["size"]
 
     result["tracks"] = tracks
+
+    # Traffic Light: Straight-through forward from original data
+    result["dynamic_map_states"] = {}  # old data has no traffic light info
+    for k, manager_state in record_episode["manager_states"].items():
+        if "DataManager" in k:
+            if "raw_data" in manager_state:
+                result["dynamic_map_states"] = copy.deepcopy(manager_state["raw_data"]["dynamic_map_states"])
+
     return result

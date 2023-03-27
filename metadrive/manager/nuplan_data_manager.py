@@ -148,3 +148,9 @@ class NuPlanDataManager(BaseManager):
     @property
     def current_scenario_length(self):
         return self.current_scenario.get_number_of_iterations()
+
+    def get_state(self):
+        raw_data = self.get_case(self.engine.global_seed)
+        state = super(NuPlanDataManager, self).get_state()
+        state["raw_data"] = raw_data
+        return state

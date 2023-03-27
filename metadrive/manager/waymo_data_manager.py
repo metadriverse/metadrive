@@ -80,3 +80,9 @@ class WaymoDataManager(BaseManager):
         if should_copy:
             return copy.deepcopy(self.waymo_case[i])
         return self.waymo_case[i]
+
+    def get_state(self):
+        raw_data = self.get_case(self.engine.global_seed)
+        state = super(WaymoDataManager, self).get_state()
+        state["raw_data"] = raw_data
+        return state
