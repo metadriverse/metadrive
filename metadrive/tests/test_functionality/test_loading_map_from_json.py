@@ -2,7 +2,7 @@ import json
 
 from metadrive import MetaDriveEnv
 from metadrive.utils import recursive_equal
-from metadrive.utils.pg_utils.generate_maps  import generate_maps
+from metadrive.utils.pg_utils.generate_maps import generate_maps
 
 
 def _test_loaded_map_alignment():

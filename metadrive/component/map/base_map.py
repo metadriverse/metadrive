@@ -119,7 +119,7 @@ class BaseMap(BaseRunnable):
             map_features[id] = {"polyline": line, "type": MetaDriveSceneElement.LANE_CENTER_LINE}
         boundary_line_vector = self.get_boundary_line_vector(interval)
         map_features.update(boundary_line_vector)
-        return {"map_features": map_features}
+        return map_features
 
     def get_boundary_line_vector(self, interval):
         return {}

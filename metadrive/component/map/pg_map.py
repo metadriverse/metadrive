@@ -118,7 +118,7 @@ class PGMap(BaseMap):
             map_config.append(json_config)
 
         saved_data = copy.deepcopy({self.BLOCK_SEQUENCE: map_config, "map_config": self.config.copy()})
-        saved_data["map_features"] = self.get_map_vector()
+        saved_data.update(super(PGMap, self).get_meta_data())
         return saved_data
 
     def show_coordinates(self):
@@ -158,3 +158,5 @@ class PGMap(BaseMap):
             return MetaDriveSceneElement.CONTINUOUS_GREY_LINE
         elif type == LineType.BROKEN and color == LineColor.GREY:
             return MetaDriveSceneElement.BROKEN_GREY_LINE
+        elif type == LineType.SIDE:
+            return MetaDriveSceneElement.CONTINUOUS_GREY_LINE

@@ -586,7 +586,6 @@ class BaseEnv(gym.Env):
         """
         We export scenarios into a unified format with 10hz sample rate
         """
-
         def _act(observation):
             if isinstance(policies, dict):
                 ret = {}
