@@ -6,8 +6,11 @@ import numpy as np
 from metadrive.utils.coordinates_shift import waymo_to_metadrive_heading, waymo_to_metadrive_vector
 
 
-def parse_vehicle_state(states, time_idx, check_last_state=False, sim_time_interval=0.1):
+def parse_vehicle_state(object_dict, time_idx, check_last_state=False, sim_time_interval=0.1):
+
     ret = {}
+    states = object_dict["state"]
+
     epi_length = len(states["position"])
     if time_idx < 0:
         time_idx = epi_length + time_idx
@@ -37,8 +40,8 @@ def parse_vehicle_state(states, time_idx, check_last_state=False, sim_time_inter
     return ret
 
 
-def parse_full_trajectory(states):
-    positions = states["position"]
+def parse_full_trajectory(object_dict):
+    positions = object_dict["state"]["position"]
     index = len(positions)
     for current_idx in range(len(positions) - 1):
         p_1 = positions[current_idx][:2]
@@ -46,7 +49,6 @@ def parse_full_trajectory(states):
         if np.linalg.norm(p_1 - p_2) > 100:
             index = current_idx
             break
-
     positions = positions[:index]
     trajectory = copy.deepcopy(positions[:, :2])
     # convert to metadrive coordinate

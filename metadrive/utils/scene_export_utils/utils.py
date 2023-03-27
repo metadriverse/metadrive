@@ -55,11 +55,14 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
     tracks = {
         k: dict(
             type=MetaDriveSceneElement.UNSET,
-            position=np.zeros(shape=(length, 3)),
-            size=np.zeros(shape=(length, 3)),
-            heading=np.zeros(shape=(length, 1)),
-            velocity=np.zeros(shape=(length, 2)),
-            valid=np.zeros(shape=(length, 1))
+            state=dict(
+                position=np.zeros(shape=(length, 3)),
+                size=np.zeros(shape=(length, 3)),
+                heading=np.zeros(shape=(length, 1)),
+                velocity=np.zeros(shape=(length, 2)),
+                valid=np.zeros(shape=(length, 1))
+            ),
+            metadata=dict(track_length=length)
         )
         for k in list(all_objs)
     }
@@ -68,17 +71,12 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
             tracks[id]["type"] = get_type_from_class(state["type"])
 
             # Introducing the state item
-            tracks[id]["state"] = {}
             tracks[id]["state"]["position"][frame_idx] = state["position"]
             tracks[id]["state"]["heading"][frame_idx] = state["heading_theta"]
             tracks[id]["state"]["velocity"][frame_idx] = state["velocity"]
             tracks[id]["state"]["valid"][frame_idx] = 1
             if "size" in state:
                 tracks[id]["state"]["size"][frame_idx] = state["size"]
-
-            # Introducing the meta data
-            tracks[id]["metadata"] = {}
-            tracks[id]["metadata"]["object_id"] = id
 
     result["tracks"] = tracks
     return result
