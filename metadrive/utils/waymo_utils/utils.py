@@ -151,9 +151,7 @@ def extract_tracks(tracks, sdc_idx):
         obj_state["state"]["valid"] = np.array(valid)[:, np.newaxis]
 
         obj_state["metadata"] = dict(
-            track_length=obj_state["state"]["position"].shape[0],
-            type=AgentType[obj.object_type],
-            object_id=obj.id
+            track_length=obj_state["state"]["position"].shape[0], type=AgentType[obj.object_type], object_id=obj.id
         )
 
         ret[obj.id] = obj_state

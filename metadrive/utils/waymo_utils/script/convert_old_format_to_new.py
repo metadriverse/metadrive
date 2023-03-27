@@ -155,9 +155,7 @@ def convert_case(file_path, new_path):
         new_v_feature["state"] = state_dict
 
         new_v_feature["metadata"] = dict(
-            track_length=state_dict["position"].shape[0],
-            type=new_v_feature["type"],
-            object_id=v_id
+            track_length=state_dict["position"].shape[0], type=new_v_feature["type"], object_id=v_id
         )
 
         new_data["tracks"][v_id] = new_v_feature
