@@ -45,6 +45,8 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
     result = dict()
     result["id"] = "{}-{}".format(record_episode["map_data"]["map_type"], record_episode["scenario_index"])
 
+    result["phase"] = "MetaDriveExported"
+
     result["version"] = DATA_VERSION
     result["sdc_track_index"] = record_episode["frame"][0]._agent_to_object[DEFAULT_AGENT]
     result["tracks"] = {}
