@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 
 ROOT = os.path.dirname(__file__)
 
+
 # Copied from nuplan-devkit tutorial_utils.py
 @dataclass
 class HydraConfigPaths:
