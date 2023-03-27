@@ -427,4 +427,5 @@ class AbstractLane:
         ret = []
         for i in np.arange(0, self.length, interval):
             ret.append(self.position(i, lateral))
+        ret.append(self.position(self.length, lateral))
         return np.array(ret)
