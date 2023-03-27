@@ -11,7 +11,7 @@ TrafficSignal = {
 }
 
 
-class LaneTypeClass:
+class LaneType:
     UNKNOWN = 0
     LANE_FREEWAY = 1
     LANE_SURFACE_STREET = 2
@@ -24,17 +24,19 @@ class LaneTypeClass:
         LANE_BIKE_LANE: 'LANE_BIKE_LANE'
     }
 
-    def __getitem__(self, item):
-        return self.ENUM_TO_STR[item]
-
-    def is_lane(self, type):
-        if type in self.ENUM_TO_STR.values():
+    @classmethod
+    def is_lane(cls, type):
+        if type in cls.ENUM_TO_STR.values():
             return True
         else:
             return False
 
+    @classmethod
+    def from_waymo(cls, item):
+        return cls.ENUM_TO_STR[item]
 
-class RoadLineTypeClass:
+
+class RoadLineType:
     UNKNOWN = 0
     BROKEN_SINGLE_WHITE = 1
     SOLID_SINGLE_WHITE = 2
@@ -57,30 +59,38 @@ class RoadLineTypeClass:
         PASSING_DOUBLE_YELLOW: 'ROAD_LINE_PASSING_DOUBLE_YELLOW'
     }
 
-    def is_road_line(self, line):
-        return True if line in self.ENUM_TO_STR.values() else False
+    @classmethod
+    def is_road_line(cls, line):
+        return True if line in cls.ENUM_TO_STR.values() else False
 
-    def is_yellow(self, line):
+    @classmethod
+    def is_yellow(cls, line):
         return True if line in [
-            self.ENUM_TO_STR[t] for t in [
-                RoadLineTypeClass.SOLID_DOUBLE_YELLOW, RoadLineTypeClass.PASSING_DOUBLE_YELLOW, RoadLineTypeClass.
-                SOLID_SINGLE_YELLOW, RoadLineTypeClass.BROKEN_DOUBLE_YELLOW, RoadLineTypeClass.BROKEN_SINGLE_YELLOW
+            cls.ENUM_TO_STR[t] for t in [
+                RoadLineType.SOLID_DOUBLE_YELLOW,
+                RoadLineType.PASSING_DOUBLE_YELLOW,
+                RoadLineType.SOLID_SINGLE_YELLOW,
+                RoadLineType.BROKEN_DOUBLE_YELLOW,
+                RoadLineType.BROKEN_SINGLE_YELLOW
             ]
         ] else False
 
-    def is_broken(self, line):
+    @classmethod
+    def is_broken(cls, line):
         return True if line in [
-            self.ENUM_TO_STR[t] for t in [
-                RoadLineTypeClass.BROKEN_DOUBLE_YELLOW, RoadLineTypeClass.BROKEN_SINGLE_YELLOW,
-                RoadLineTypeClass.BROKEN_SINGLE_WHITE
+            cls.ENUM_TO_STR[t] for t in [
+                RoadLineType.BROKEN_DOUBLE_YELLOW,
+                RoadLineType.BROKEN_SINGLE_YELLOW,
+                RoadLineType.BROKEN_SINGLE_WHITE
             ]
         ] else False
 
-    def __getitem__(self, item):
-        return self.ENUM_TO_STR[item]
+    @classmethod
+    def from_waymo(cls, item):
+        return cls.ENUM_TO_STR[item]
 
 
-class RoadEdgeTypeClass:
+class RoadEdgeType:
     UNKNOWN = 0
     # Physical road boundary that doesn't have traffic on the other side (e.g., a curb or the k-rail on the right side of a freeway).
     BOUNDARY = 1
@@ -89,17 +99,20 @@ class RoadEdgeTypeClass:
 
     ENUM_TO_STR = {UNKNOWN: 'UNKNOWN', BOUNDARY: 'ROAD_EDGE_BOUNDARY', MEDIAN: 'ROAD_EDGE_MEDIAN'}
 
-    def is_road_edge(self, edge):
-        return True if edge in self.ENUM_TO_STR.values() else False
+    @classmethod
+    def is_road_edge(cls, edge):
+        return True if edge in cls.ENUM_TO_STR.values() else False
 
-    def is_sidewalk(self, edge):
-        return True if edge == self.ENUM_TO_STR[RoadEdgeTypeClass.BOUNDARY] else False
+    @classmethod
+    def is_sidewalk(cls, edge):
+        return True if edge == cls.ENUM_TO_STR[RoadEdgeType.BOUNDARY] else False
 
-    def __getitem__(self, item):
-        return self.ENUM_TO_STR[item]
+    @classmethod
+    def from_waymo(cls, item):
+        return cls.ENUM_TO_STR[item]
 
 
-class AgentTypeClass:
+class AgentType:
     UNSET = 0
     VEHICLE = 1
     PEDESTRIAN = 2
@@ -108,17 +121,13 @@ class AgentTypeClass:
 
     ENUM_TO_STR = {UNSET: 'UNSET', VEHICLE: 'VEHICLE', PEDESTRIAN: 'PEDESTRIAN', CYCLIST: 'CYCLIST', OTHER: 'OTHER'}
 
-    def __getitem__(self, item):
-        return self.ENUM_TO_STR[item]
+    @classmethod
+    def from_waymo(cls, item):
+        return cls.ENUM_TO_STR[item]
 
+    @classmethod
     def is_vehicle(self, type):
         return True if type == self.ENUM_TO_STR[self.VEHICLE] else False
-
-
-LaneType = LaneTypeClass()
-AgentType = AgentTypeClass()
-RoadLineType = RoadLineTypeClass()
-RoadEdgeType = RoadEdgeTypeClass()
 
 
 class WaymoLaneProperty:
@@ -133,6 +142,3 @@ class WaymoLaneProperty:
     ENTRY = "entry_lanes"
     EXIT = "exit_lanes"
 
-    @staticmethod
-    def get_line_type_and_line_color(waymo_type):
-        pass

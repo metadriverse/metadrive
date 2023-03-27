@@ -31,7 +31,7 @@ def extract_boundaries(fb):
         c = dict()
         c["lane_start_index"] = fb[k].lane_start_index
         c["lane_end_index"] = fb[k].lane_end_index
-        c["boundary_type"] = RoadLineType[fb[k].boundary_type]
+        c["boundary_type"] = RoadLineType.from_waymo(fb[k].boundary_type)
         c["boundary_feature_id"] = fb[k].boundary_feature_id
         b.append(c)
 
@@ -57,7 +57,7 @@ def extract_center(f):
     f = f.lane
     center["speed_limit_mph"] = f.speed_limit_mph
 
-    center["type"] = LaneType[f.type]
+    center["type"] = LaneType.from_waymo(f.type)
 
     center["polyline"] = extract_poly(f.polyline)
 
@@ -81,7 +81,7 @@ def extract_center(f):
 def extract_line(f):
     line = dict()
     f = f.road_line
-    line["type"] = RoadLineType[f.type]
+    line["type"] = RoadLineType.from_waymo(f.type)
     line["polyline"] = extract_poly(f.polyline)
     return line
 
