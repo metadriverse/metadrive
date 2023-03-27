@@ -1,0 +1,155 @@
+"""
+A unified data format to describe a scenario that can be replayed by MetaDrive Simulator.
+
+Example:
+
+    scenario = {
+
+        # ===== Meta data about the scenario =====
+        # string. The name of the scenario
+        "id": "Waymo-001",
+
+        # string. The version of data format.
+        "version": "MetaDrive v0.3.0.1",
+
+        # bool. Whether the scenario is processed and exported by MetaDrive.
+        # Some operations may be done, such as interpolating the lane to
+        # make way points uniformly scattered in given interval.
+        "metadrive_processed": True,
+
+        # int. The length of all trajectory and state arrays (T).
+        "length": 200,
+
+        # np.ndarray in (T, ). The time stamp of each time step.
+        "ts": np.array([0.0, 0.1, 0.2, ...], dtype=np.float32),
+
+        # ===== Trajectories of active participants, e.g. vehicles, pedestrians =====
+        # a dict mapping object ID to it's state dict.
+        "tracks": {
+            "vehicle1": {
+
+                # The type string in metadrive.scenario.MetaDriveType
+                "type": "VEHICLE",
+
+                # The state dict. All values must have T elements.
+                "state": {
+                    "position": np.ones([200, 3], dtype=np.float32),
+                    ...
+                },
+
+                # The meta data dict. Store useful information about the object
+                "metadata": {
+                    "type": "VEHICLE",
+                    "track_length": 200
+                }
+            },
+
+            "pedestrian1": ...
+        },
+
+        # ===== States sequence of dynamics objects, e.g. traffic light =====
+        # a dict mapping object ID to it's state dict.
+        "dynamic_map_states": {
+            "trafficlight1": {
+
+                # The type string in metadrive.scenario.MetaDriveType
+                "type": "TRAFFIC_LIGHT",
+
+                # The state dict. All values must have T elements.
+                "state": {
+                    "object_state": np.ones([200, ], dtype=int),
+                    ...
+                },
+
+                # The meta data dict. Store useful information about the object
+                "metadata": {
+                    "type": "TRAFFIC_LIGHT",
+                    "track_length": 200
+                }
+        }
+    }
+"""
+import numpy as np
+
+from metadrive.scenario.metadrive_type import MetaDriveType
+
+class ScenarioDescription(dict):
+    """
+    MetaDrive Scenario Description
+    """
+    TRACKS = "tracks"
+    VERSION = "version"
+    METADRIVE_PROCESSED = "metadrive_processed"
+    TIMESTEP = "ts"
+    ID = "id"
+    DYNAMIC_MAP_STATES = "dynamic_map_states"
+    MAP_FEATURES = "map_features"
+    LENGTH = "length"
+
+    FIRST_LEVEL_KEYS = {
+        TRACKS, VERSION, METADRIVE_PROCESSED, TIMESTEP, ID, DYNAMIC_MAP_STATES, MAP_FEATURES, LENGTH
+    }
+
+    TYPE = "type"
+    STATE = "state"
+    METADATA = "metadata"
+    OBJECT_ID = "object_id"
+
+    STATE_DICT_KEYS = {TYPE, STATE, METADATA}
+
+    @classmethod
+    def sanity_check(cls, scenario_dict):
+        # Whether input has all required keys
+        cls.FIRST_LEVEL_KEYS.issubset(set(scenario_dict.keys()))
+
+        scenario_length = scenario_dict[cls.LENGTH]
+
+        assert scenario_dict[cls.TIMESTEP].shape == (scenario_length, )
+
+        # Check tracks data
+        assert isinstance(scenario_dict[cls.TRACKS], dict)
+        for obj_id, obj_state in scenario_dict[cls.TRACKS].items():
+
+            # Check keys
+            assert set(obj_state) == cls.STATE_DICT_KEYS
+
+            # Check type
+            assert MetaDriveType.has_type(obj_state[cls.TYPE])
+
+            # Check state arrays temporal consistency
+            assert isinstance(obj_state[cls.STATE], dict)
+            for state_key, state_array in obj_state[cls.STATE].items():
+                assert isinstance(state_array, np.ndarray)
+                assert state_array.shape[0] == scenario_length
+
+            # Check metadata
+            assert isinstance(obj_state[cls.METADATA], dict)
+            for metadata_key in (cls.TYPE, cls.OBJECT_ID):
+                assert metadata_key in obj_state[cls.METADATA]
+
+        # Check dynamic_map_state
+        assert isinstance(scenario_dict[cls.DYNAMIC_MAP_STATES], dict)
+        for obj_id, obj_state in scenario_dict[cls.DYNAMIC_MAP_STATES].items():
+
+            # Check keys
+            assert set(obj_state) == cls.STATE_DICT_KEYS
+
+            # Check type
+            assert MetaDriveType.has_type(obj_state[cls.TYPE])
+
+            # Check state arrays temporal consistency
+            assert isinstance(obj_state[cls.STATE], dict)
+            for state_key, state_array in obj_state[cls.STATE].items():
+                assert isinstance(state_array, np.ndarray)
+                assert state_array.shape[0] == scenario_length
+
+            # Check metadata
+            assert isinstance(obj_state[cls.METADATA], dict)
+            for metadata_key in (cls.TYPE, cls.OBJECT_ID):
+                assert metadata_key in obj_state[cls.METADATA]
+
+
+
+
+
+

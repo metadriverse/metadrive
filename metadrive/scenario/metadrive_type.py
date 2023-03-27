@@ -23,6 +23,10 @@ class MetaDriveType:
     TRAFFIC_CONE = "TRAFFIC_CONE"
 
     @classmethod
+    def has_type(cls, type_string: str):
+        return type_string in cls.__dict__
+
+    @classmethod
     def from_waymo(cls, waymo_type_string: str):
         assert cls.__dict__[waymo_type_string]
         return waymo_type_string
