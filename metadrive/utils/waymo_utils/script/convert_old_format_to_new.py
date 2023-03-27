@@ -96,17 +96,6 @@ class CustomUnpickler(pickle.Unpickler):
         return super(CustomUnpickler, self).find_class(module, name)
 
 
-def parse_state(v_feature):
-    ret = {}
-
-    ret["position"] = v_feature["state"][..., 0:3]
-    ret["size"] = v_feature["state"][..., 3:6]
-    ret["heading"] = v_feature["state"][..., 6:7]
-    ret["velocity"] = v_feature["state"][..., 7:9]
-    ret["valid"] = v_feature["state"][..., 9:10]
-    return ret
-
-
 def convert_case(file_path, new_path):
     with open(file_path, "rb+") as file:
         loader = CustomUnpickler(file)
@@ -115,7 +104,7 @@ def convert_case(file_path, new_path):
     new_data["id"] = data["id"]
     new_data["dynamic_map_states"] = [[{}]]  # old data has no traffic light info
     new_data["ts"] = data["ts"]  # old data has no traffic light info
-    new_data["version"] = "old format"  # old data has no traffic light info
+    new_data["version"] = "2022-10"  # old data has no traffic light info
     new_data["sdc_track_index"] = str(data["sdc_index"])  # old data has no traffic light info
     new_track = {}
     for key, value in data["tracks"].items():
@@ -155,7 +144,18 @@ def convert_case(file_path, new_path):
     for v_id, v_feature in new_data["tracks"].items():
         new_v_feature = {}
         new_v_feature["type"] = v_feature["type"].ENUM_TO_STR.value[v_feature["type"].value]
-        new_v_feature.update(parse_state(v_feature))
+
+        state_dict = {}
+        state_dict["position"] = v_feature["state"][..., 0:3]
+        state_dict["size"] = v_feature["state"][..., 3:6]
+        state_dict["heading"] = v_feature["state"][..., 6:7]
+        state_dict["velocity"] = v_feature["state"][..., 7:9]
+        state_dict["valid"] = v_feature["state"][..., 9:10]
+
+        new_v_feature["state"] = state_dict
+
+        new_v_feature["metadata"] = {}
+
         new_data["tracks"][v_id] = new_v_feature
     with open(new_path, "wb+") as file:
         pickle.dump(new_data, file)

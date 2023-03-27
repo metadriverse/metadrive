@@ -13,6 +13,8 @@ import pickle
 
 from tqdm import tqdm
 
+from metadrive.constants import DATA_VERSION
+
 try:
     import tensorflow as tf
 except ImportError:
@@ -36,7 +38,7 @@ def parse_data(input, output_path):
             scene = dict()
             scene["id"] = scenario.scenario_id
 
-            scene["version"] = "2023-03"  # March of 2023
+            scene["version"] = DATA_VERSION
 
             scene["ts"] = [ts for ts in scenario.timestamps_seconds]
 

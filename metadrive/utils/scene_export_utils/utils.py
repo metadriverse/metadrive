@@ -5,7 +5,7 @@ from matplotlib.pyplot import figure
 from metadrive.component.traffic_participants.cyclist import Cyclist
 from metadrive.component.traffic_participants.pedestrian import Pedestrian
 from metadrive.component.vehicle.base_vehicle import BaseVehicle
-from metadrive.constants import EDITION, DEFAULT_AGENT
+from metadrive.constants import DATA_VERSION, DEFAULT_AGENT
 from metadrive.utils.scene_export_utils.type import MetaDriveSceneElement
 
 
@@ -37,7 +37,7 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
     result = dict()
     result["id"] = "{}-{}".format(record_episode["map_data"]["map_type"], record_episode["scenario_index"])
     result["dynamic_map_states"] = [[{}]]  # old data has no traffic light info
-    result["version"] = EDITION
+    result["version"] = DATA_VERSION
     result["sdc_track_index"] = record_episode["frame"][0]._agent_to_object[DEFAULT_AGENT]
     result["tracks"] = {}
     result["map_features"] = record_episode["map_data"]["map_features"]
@@ -66,11 +66,19 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
     for frame_idx in range(len(result["ts"])):
         for id, state in frames[frame_idx].step_info.items():
             tracks[id]["type"] = get_type_from_class(state["type"])
-            tracks[id]["position"][frame_idx] = state["position"]
-            tracks[id]["heading"][frame_idx] = state["heading_theta"]
-            tracks[id]["velocity"][frame_idx] = state["velocity"]
-            tracks[id]["valid"][frame_idx] = 1
+
+            # Introducing the state item
+            tracks[id]["state"] = {}
+            tracks[id]["state"]["position"][frame_idx] = state["position"]
+            tracks[id]["state"]["heading"][frame_idx] = state["heading_theta"]
+            tracks[id]["state"]["velocity"][frame_idx] = state["velocity"]
+            tracks[id]["state"]["valid"][frame_idx] = 1
             if "size" in state:
-                tracks[id]["size"][frame_idx] = state["size"]
+                tracks[id]["state"]["size"][frame_idx] = state["size"]
+
+            # Introducing the meta data
+            tracks[id]["metadata"] = {}
+            tracks[id]["metadata"]["object_id"] = id
+
     result["tracks"] = tracks
     return result
