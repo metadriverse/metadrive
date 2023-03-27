@@ -18,6 +18,7 @@ def convert_case(file_path, new_path):
             metadata=dict(track_length=obj_dict["position"].shape[0], type=obj_dict["type"], object_id=obj_id)
         )
         data["tracks"][obj_id] = new_obj_dict
+    data["version"] = "2023-03-26"
     with open(new_path, "wb+") as file:
         pickle.dump(data, file)
 
