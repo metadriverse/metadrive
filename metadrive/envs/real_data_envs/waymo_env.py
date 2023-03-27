@@ -257,7 +257,8 @@ class WaymoEnv(BaseEnv):
             native_vid = vehicle_id
 
         if native_vid in data["tracks"] and len(data["tracks"][native_vid]) > 0:
-            expert_state_list = data["tracks"][native_vid]
+            expert_state_list = data["tracks"][native_vid]["state"]
+
             mask = expert_state_list["valid"]
             largest_valid_index = np.max(np.where(mask == True)[0])
 
@@ -334,7 +335,7 @@ class WaymoEnv(BaseEnv):
             )
 
         assert self.config["start_case_index"] <= current_seed < \
-               self.config["start_case_index"] + self.config["case_num"], "Force seed range Error!"
+               self.config["start_case_index"] + self.config["case_num"], "Force seed {} is out of range [{}, {}).".format(current_seed, self.config["start_case_index"], self.config["start_case_index"] + self.config["case_num"])
         self.seed(current_seed)
 
     def stop(self):

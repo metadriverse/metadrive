@@ -64,7 +64,7 @@ class ReplayEgoCarPolicy(BasePolicy):
         sdc_track_index = str(self.engine.data_manager.get_case(self.engine.global_random_seed)["sdc_track_index"])
         return [
             parse_vehicle_state(trajectory_data[sdc_track_index], i)
-            for i in range(len(trajectory_data[sdc_track_index]["position"]))
+            for i in range(len(trajectory_data[sdc_track_index]["state"]["position"]))
         ]
 
     def act(self, *args, **kwargs):
