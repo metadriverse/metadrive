@@ -36,7 +36,7 @@ def get_type_from_class(obj_class):
 def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1):
     result = dict()
     result["id"] = "{}-{}".format(record_episode["map_data"]["map_type"], record_episode["scenario_index"])
-    result["dynamic_map_states"] = [[{}]]  # old data has no traffic light info
+    result["dynamic_map_states"] = {}  # old data has no traffic light info
     result["version"] = DATA_VERSION
     result["sdc_track_index"] = record_episode["frame"][0]._agent_to_object[DEFAULT_AGENT]
     result["tracks"] = {}
@@ -62,7 +62,7 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
                 velocity=np.zeros(shape=(length, 2)),
                 valid=np.zeros(shape=(length, 1))
             ),
-            metadata=dict(track_length=length)
+            metadata=dict(track_length=length, type=MetaDriveSceneElement.UNSET, object_id=k)
         )
         for k in list(all_objs)
     }

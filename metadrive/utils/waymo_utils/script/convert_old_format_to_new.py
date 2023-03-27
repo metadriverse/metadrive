@@ -102,7 +102,7 @@ def convert_case(file_path, new_path):
         data = loader.load()
     new_data = {}
     new_data["id"] = data["id"]
-    new_data["dynamic_map_states"] = [[{}]]  # old data has no traffic light info
+    new_data["dynamic_map_states"] = {}  # old data has no traffic light info
     new_data["ts"] = data["ts"]  # old data has no traffic light info
     new_data["version"] = "2022-10"  # old data has no traffic light info
     new_data["sdc_track_index"] = str(data["sdc_index"])  # old data has no traffic light info
@@ -154,7 +154,11 @@ def convert_case(file_path, new_path):
 
         new_v_feature["state"] = state_dict
 
-        new_v_feature["metadata"] = {}
+        new_v_feature["metadata"] = dict(
+            track_length=state_dict["position"].shape[0],
+            type=new_v_feature["type"],
+            object_id=v_id
+        )
 
         new_data["tracks"][v_id] = new_v_feature
     with open(new_path, "wb+") as file:

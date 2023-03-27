@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import figure
 
-from metadrive.utils.waymo_utils.waymo_type import LaneType, AgentType, TrafficSignal, AgentTypeClass, LaneTypeClass
+from metadrive.utils.waymo_utils.waymo_type import LaneType, AgentType, AgentTypeClass
 from metadrive.utils.waymo_utils.waymo_type import RoadLineType, RoadEdgeType, RoadLineTypeClass, RoadEdgeTypeClass
 
 try:
@@ -125,12 +125,10 @@ def extract_tracks(tracks, sdc_idx):
     ret = dict()
 
     for obj in tracks:
-
         obj_state = dict()
         obj_state["type"] = AgentType[obj.object_type]
 
         obj_state["state"] = {}
-        obj_state["metastate"] = {}
 
         x = [state.center_x for state in obj.states]
         y = [state.center_y for state in obj.states]
@@ -151,6 +149,12 @@ def extract_tracks(tracks, sdc_idx):
 
         valid = [state.valid for state in obj.states]
         obj_state["state"]["valid"] = np.array(valid)[:, np.newaxis]
+
+        obj_state["metadata"] = dict(
+            track_length=obj_state["state"]["position"].shape[0],
+            type=AgentType[obj.object_type],
+            object_id=obj.id
+        )
 
         ret[obj.id] = obj_state
 
@@ -185,21 +189,23 @@ def extract_map(f):
 
 
 def extract_dynamic(f):
-    dynamics = []
-    for i in range(len(f)):
-        f_i = f[i].lane_states
-        tls_t = []
-        for j in range(len(f_i)):
-            f_i_j = f_i[j]
-            tls_t_j = dict()
-            tls_t_j["lane"] = f_i_j.lane
-            tls_t_j["state"] = TrafficSignal[f_i_j.state]
-            tls_t_j["stop_point"] = np.array(
-                [f_i_j.stop_point.x, f_i_j.stop_point.y, f_i_j.stop_point.z], dtype="float32"
-            )
-            tls_t.append(tls_t_j)
+    dynamics = {}
 
-        dynamics.append(tls_t)
+    # FIXME: TODO: This function is not finished yet.
+    # for i in range(len(f)):
+    #     f_i = f[i].lane_states
+    #     tls_t = []
+    #     for j in range(len(f_i)):
+    #         f_i_j = f_i[j]
+    #         tls_t_j = dict()
+    #         tls_t_j["lane"] = f_i_j.lane
+    #         tls_t_j["state"] = TrafficSignal[f_i_j.state]
+    #         tls_t_j["stop_point"] = np.array(
+    #             [f_i_j.stop_point.x, f_i_j.stop_point.y, f_i_j.stop_point.z], dtype="float32"
+    #         )
+    #         tls_t.append(tls_t_j)
+    #
+    #     dynamics.append(tls_t)
 
     return dynamics
 

@@ -1,13 +1,12 @@
 """
-Note on version:
+This script takes --folder as input. It is the folder storing a batch of tfrecord file.
+This script will create the output folder "processed_data" sharing the same level as `--folder`.
 
-from datetime import datetime
-date_object = datetime.strptime(date_string, "%Y-%M")
+-- folder
+-- processed_data
 
-You can compare date with this:
-
-datetime.strptime("2023-03", "%Y-%M") > datetime.strptime("2022-04", "%Y-%M")
 """
+import argparse
 import os
 import pickle
 
@@ -30,7 +29,7 @@ def parse_data(input, output_path):
     file_list = os.listdir(input)
     for file in tqdm(file_list):
         file_path = os.path.join(input, file)
-        if not "tfrecord" in file_path:
+        if ("tfrecord" not in file_path) or (not os.path.isfile(file_path)):
             continue
         dataset = tf.data.TFRecordDataset(file_path, compression_type="")
         for j, data in enumerate(dataset.as_numpy_iterator()):
@@ -60,16 +59,21 @@ def parse_data(input, output_path):
 
 
 if __name__ == "__main__":
-    case_data_path = sys.argv[1]
-    try:
-        os.mkdir(case_data_path + "_processed")
-    except:
-        pass
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--folder", required=True, help="The data folder storing raw tfrecord from Waymo dataset.")
+    args = parser.parse_args()
+
+    case_data_path = args.folder
+
+    output_path: str = os.path.dirname(case_data_path)
+    output_path = os.path.join(output_path, "processed_data")
+    os.makedirs(output_path, exist_ok=True)
+
     raw_data_path = case_data_path
-    processed_data_path = case_data_path + "_processed"
+
     # parse raw data from input path to output path,
     # there is 1000 raw data in google cloud, each of them produce about 500 pkl file
-    parse_data(raw_data_path, processed_data_path)
+    parse_data(raw_data_path, output_path)
     sys.exit()
     # file_path = AssetLoader.file_path("waymo", "processed", "0.pkl", return_raw_style=False)
     # data = read_waymo_data(file_path)
