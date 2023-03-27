@@ -58,7 +58,8 @@ nuplan_requirement = [
     "bokeh==2.4",
     "hydra-core",
     "chardet",
-    "pyarrow"
+    "pyarrow",
+    "fcntl"
 ]
 
 cuda_requirement = [
