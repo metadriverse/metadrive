@@ -4,6 +4,7 @@ import logging
 import os
 import sys
 
+import numpy as np
 from panda3d.bullet import BulletBodyNode
 
 
@@ -30,6 +31,14 @@ def recursive_equal(data1, data2, need_assert=False):
         data1 = data1.get_dict()
     if isinstance(data2, Config):
         data2 = data2.get_dict()
+
+    if isinstance(data1, np.ndarray):
+        tmp = np.asarray(data2)
+        return np.all(data1 == tmp)
+
+    if isinstance(data2, np.ndarray):
+        tmp = np.asarray(data1)
+        return np.all(tmp == data2)
 
     if isinstance(data1, dict):
         is_ins = isinstance(data2, dict)

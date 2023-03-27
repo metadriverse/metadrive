@@ -209,6 +209,6 @@ def test_random_vehicle_parameter():
 
 
 if __name__ == '__main__':
-    # test_map_random_seeding()
+    test_map_random_seeding()
     # test_seeding()
-    test_random_lane_width()
+    # test_random_lane_width()
