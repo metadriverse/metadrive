@@ -67,11 +67,8 @@ class WaymoRoadLineType:
     def is_yellow(cls, line):
         return True if line in [
             cls.ENUM_TO_STR[t] for t in [
-                WaymoRoadLineType.SOLID_DOUBLE_YELLOW,
-                WaymoRoadLineType.PASSING_DOUBLE_YELLOW,
-                WaymoRoadLineType.SOLID_SINGLE_YELLOW,
-                WaymoRoadLineType.BROKEN_DOUBLE_YELLOW,
-                WaymoRoadLineType.BROKEN_SINGLE_YELLOW
+                WaymoRoadLineType.SOLID_DOUBLE_YELLOW, WaymoRoadLineType.PASSING_DOUBLE_YELLOW, WaymoRoadLineType.
+                SOLID_SINGLE_YELLOW, WaymoRoadLineType.BROKEN_DOUBLE_YELLOW, WaymoRoadLineType.BROKEN_SINGLE_YELLOW
             ]
         ] else False
 
@@ -79,8 +76,7 @@ class WaymoRoadLineType:
     def is_broken(cls, line):
         return True if line in [
             cls.ENUM_TO_STR[t] for t in [
-                WaymoRoadLineType.BROKEN_DOUBLE_YELLOW,
-                WaymoRoadLineType.BROKEN_SINGLE_YELLOW,
+                WaymoRoadLineType.BROKEN_DOUBLE_YELLOW, WaymoRoadLineType.BROKEN_SINGLE_YELLOW,
                 WaymoRoadLineType.BROKEN_SINGLE_WHITE
             ]
         ] else False
@@ -141,4 +137,3 @@ class WaymoLaneProperty:
     RIGHT_NEIGHBORS = "right_neighbor"
     ENTRY = "entry_lanes"
     EXIT = "exit_lanes"
-
