@@ -1,9 +1,9 @@
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import figure
 
-from metadrive.utils.waymo_utils.waymo_type import LaneType, AgentType, AgentTypeClass
-from metadrive.utils.waymo_utils.waymo_type import RoadLineType, RoadEdgeType, RoadLineTypeClass, RoadEdgeTypeClass
-
+from metadrive.utils.waymo_utils.waymo_type import WaymoLaneType, WaymoAgentType
+from metadrive.utils.waymo_utils.waymo_type import WaymoRoadLineType, WaymoRoadEdgeType
+from metadrive.scenario import MetaDriveType
 try:
     import tensorflow as tf
 except ImportError:
@@ -31,7 +31,7 @@ def extract_boundaries(fb):
         c = dict()
         c["lane_start_index"] = fb[k].lane_start_index
         c["lane_end_index"] = fb[k].lane_end_index
-        c["boundary_type"] = RoadLineType[fb[k].boundary_type]
+        c["boundary_type"] = WaymoRoadLineType.from_waymo(fb[k].boundary_type)
         c["boundary_feature_id"] = fb[k].boundary_feature_id
         b.append(c)
 
@@ -57,7 +57,7 @@ def extract_center(f):
     f = f.lane
     center["speed_limit_mph"] = f.speed_limit_mph
 
-    center["type"] = LaneType[f.type]
+    center["type"] = WaymoLaneType.from_waymo(f.type)
 
     center["polyline"] = extract_poly(f.polyline)
 
@@ -81,7 +81,7 @@ def extract_center(f):
 def extract_line(f):
     line = dict()
     f = f.road_line
-    line["type"] = RoadLineType[f.type]
+    line["type"] = WaymoRoadLineType.from_waymo(f.type)
     line["polyline"] = extract_poly(f.polyline)
     return line
 
@@ -89,7 +89,10 @@ def extract_line(f):
 def extract_edge(f):
     edge = dict()
     f_ = f.road_edge
-    edge["type"] = RoadEdgeType[f_.type]
+
+    # TODO: Need to transform this to MetaDrive version
+    edge["type"] = WaymoRoadEdgeType.from_waymo(f_.type)
+
     edge["polyline"] = extract_poly(f_.polyline)
 
     return edge
@@ -126,7 +129,10 @@ def extract_tracks(tracks, sdc_idx):
 
     for obj in tracks:
         obj_state = dict()
-        obj_state["type"] = AgentType[obj.object_type]
+
+        waymo_string = WaymoAgentType.from_waymo(obj.object_type)  # Load waymo type string
+        metadrive_type = MetaDriveType.from_waymo(waymo_string)  # Transform it to Waymo type string
+        obj_state["type"] = metadrive_type
 
         obj_state["state"] = {}
 
@@ -151,7 +157,7 @@ def extract_tracks(tracks, sdc_idx):
         obj_state["state"]["valid"] = np.array(valid)[:, np.newaxis]
 
         obj_state["metadata"] = dict(
-            track_length=obj_state["state"]["position"].shape[0], type=AgentType[obj.object_type], object_id=obj.id
+            track_length=obj_state["state"]["position"].shape[0], type=metadrive_type, object_id=obj.id
         )
 
         ret[obj.id] = obj_state
@@ -192,7 +198,7 @@ def extract_dynamic_map_states(dynamic_map_states):
 
     def _traffic_light_state_template(object_id):
         return dict(
-            type="TRAFFICLIGHT",  # TODO: Use a more formal way to specify the object type
+            type=MetaDriveType.TRAFFIC_LIGHT,
             state=dict(
                 stop_point=np.zeros([track_length, 3], dtype=np.float32),
                 object_state=np.zeros([
@@ -202,7 +208,7 @@ def extract_dynamic_map_states(dynamic_map_states):
                     track_length,
                 ], dtype=int),
             ),
-            metadata=dict(track_length=track_length, type="TRAFFICLIGHT", object_id=object_id)
+            metadata=dict(track_length=track_length, type=MetaDriveType.TRAFFIC_LIGHT, object_id=object_id)
         )
 
     # FIXME: TODO: This function is not finished yet.
@@ -235,6 +241,7 @@ class CustomUnpickler(pickle.Unpickler):
 
     def find_class(self, module, name):
         if self.load_old_case:
+            raise ValueError("Old case is completely deprecated. Can't load it any more.")
             if name == "AgentType":
                 return AgentTypeClass
             elif name == "RoadLineType":

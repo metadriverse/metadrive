@@ -1,5 +1,5 @@
 import time
-from metadrive.utils.scene_export_utils.utils import convert_recorded_scenario_exported
+from metadrive.scenario.utils import convert_recorded_scenario_exported
 
 from collections import defaultdict
 from typing import Union, Dict, AnyStr, Optional, Tuple, Callable

@@ -1,5 +1,5 @@
 import logging
-from metadrive.utils.scene_export_utils.type import MetaDriveSceneElement
+from metadrive.scenario.metadrive_type import MetaDriveType
 
 import geopandas as gpd
 import numpy as np
@@ -175,15 +175,15 @@ class NuPlanMap(BaseMap):
                 type = boundary.type
                 if type == LineType.BROKEN:
                     ret[boundary.id] = {
-                        "type": MetaDriveSceneElement.BROKEN_YELLOW_LINE
-                        if boundary.color == LineColor.YELLOW else MetaDriveSceneElement.BROKEN_GREY_LINE,
+                        "type": MetaDriveType.BROKEN_YELLOW_LINE
+                        if boundary.color == LineColor.YELLOW else MetaDriveType.BROKEN_GREY_LINE,
                         "polyline": boundary.points
                     }
                 else:
                     ret[boundary.id] = {
                         "polyline": boundary.points,
-                        "type": MetaDriveSceneElement.CONTINUOUS_YELLOW_LINE
-                        if boundary.color == LineColor.YELLOW else MetaDriveSceneElement.CONTINUOUS_GREY_LINE
+                        "type": MetaDriveType.CONTINUOUS_YELLOW_LINE
+                        if boundary.color == LineColor.YELLOW else MetaDriveType.CONTINUOUS_GREY_LINE
                     }
         return ret
 
