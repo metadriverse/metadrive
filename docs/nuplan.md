@@ -47,14 +47,14 @@ Here is our workflow:
 * Step 1: Go to https://www.nuscenes.org/nuplan#download to download (1) maps, (2) mini split.
 * Step 2: Unzip the map to `~/nuplan/dataset` (it will create a `maps` folder) and unzip the mini split to
 `~/nuplan/dataset` and rename folders to make sure they comply [file hierarchy](https://nuplan-devkit.readthedocs.io/en/latest/dataset_setup.html#filesystem-hierarchy).
-
-We might wish to change the path to dataset. Change the following environment variables in `~/.bashrc`:
+* Step 3: Add the following paths to `~/.bashrc`:
 
 ```bash
 export NUPLAN_DATA_ROOT="$HOME/nuplan/dataset"
 export NUPLAN_MAPS_ROOT="$HOME/nuplan/dataset/maps"
 export NUPLAN_EXP_ROOT="$HOME/nuplan/exp"
 ```
+
 
 We also provide a script to accelerate environment setup. First, `cd` to the folder where you already downloaded the zip files.
 
@@ -67,6 +67,17 @@ unzip nuplan-v1.1_mini.zip -d ~/nuplan/dataset/
 
 mv ~/nuplan/dataset/data/cache/mini ~/nuplan/dataset/nuplan-v1.1/  # Will move "mini" folder to nuplan-v1.1
 rm ~/nuplan/dataset/data/ -r  # Remove empty folder
+
+# Add the paths to .bashrc:
+vim ~/.bashrc
+
+export NUPLAN_DATA_ROOT="$HOME/nuplan/dataset"
+export NUPLAN_MAPS_ROOT="$HOME/nuplan/dataset/maps"
+export NUPLAN_EXP_ROOT="$HOME/nuplan/exp"
 ```
 
-## Prepare dataset
+Now you can run the following scripts to verify the installation:
+
+```bash
+python metadrive/envs/real_data_envs/nuplan_env.py
+```

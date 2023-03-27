@@ -1,17 +1,44 @@
 import logging
 import os
 import tempfile
-
+from os.path import join
 import hydra
 import nuplan.planning.script.builders.worker_pool_builder
 from nuplan.planning.script.builders.scenario_building_builder import build_scenario_builder
 from nuplan.planning.script.builders.scenario_filter_builder import build_scenario_filter
 from nuplan.planning.script.utils import set_up_common_builder
-
+from dataclasses import dataclass
 from metadrive.manager.base_manager import BaseManager
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+ROOT = os.path.dirname(__file__)
+
+# Copied from nuplan-devkit tutorial_utils.py
+@dataclass
+class HydraConfigPaths:
+    """
+    Stores relative hydra paths to declutter tutorial.
+    """
+
+    common_dir: str
+    config_name: str
+    config_path: str
+    experiment_dir: str
+
+
+def construct_simulation_hydra_paths(base_config_path: str):
+    """
+    Specifies relative paths to simulation configs to pass to hydra to declutter tutorial.
+    :param base_config_path: Base config path.
+    :return: Hydra config path.
+    """
+    common_dir = "file://" + join(base_config_path, 'config', 'common')
+    config_name = 'default_simulation'
+    config_path = join(base_config_path, 'config', 'simulation')
+    experiment_dir = "file://" + join(base_config_path, 'experiments')
+    return HydraConfigPaths(common_dir, config_name, config_path, experiment_dir)
 
 
 class NuPlanDataManager(BaseManager):
@@ -67,16 +94,12 @@ class NuPlanDataManager(BaseManager):
         return self._nuplan_scenarios[self._current_scenario_index]
 
     def _get_nuplan_cfg(self):
-        from tutorials.utils.tutorial_utils import construct_simulation_hydra_paths
-
-        BASE_CONFIG_PATH = os.path.relpath(
-            os.path.join(self.NUPLAN_PACKAGE_PATH, "planning", "script"), start=os.path.dirname(__file__)
-        )
+        BASE_CONFIG_PATH = os.path.join(self.NUPLAN_PACKAGE_PATH, "planning", "script")
         simulation_hydra_paths = construct_simulation_hydra_paths(BASE_CONFIG_PATH)
 
         # Initialize configuration management system
         hydra.core.global_hydra.GlobalHydra.instance().clear()  # reinitialize hydra if already initialized
-        hydra.initialize(config_path=simulation_hydra_paths.config_path)
+        hydra.initialize_config_dir(config_dir=simulation_hydra_paths.config_path)
 
         SAVE_DIR = tempfile.mkdtemp()
         EGO_CONTROLLER = 'perfect_tracking_controller'  # [log_play_back_controller, perfect_tracking_controller]
@@ -89,13 +112,21 @@ class NuPlanDataManager(BaseManager):
             config_name=simulation_hydra_paths.config_name,
             overrides=[
                 f'group={SAVE_DIR}',
-                f'experiment_name=planner_tutorial',
                 'worker=sequential',
                 f'ego_controller={EGO_CONTROLLER}',
                 f'observation={OBSERVATION}',
                 f'hydra.searchpath=[{simulation_hydra_paths.common_dir}, {simulation_hydra_paths.experiment_dir}]',
                 'output_dir=${group}/${experiment}',
                 *DATASET_PARAMS,
+
+                # TODO: Check which one is correct.
+                # Option 1: LQY write:
+                # f'experiment_name=planner_tutorial',
+
+                # Option 2: planning tutorial:
+                # Copied from tutorial
+                f'job_name=planner_tutorial',
+                'experiment=${experiment_name}/${job_name}/${experiment_time}',
             ]
         )
         return cfg
