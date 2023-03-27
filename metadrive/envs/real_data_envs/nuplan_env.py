@@ -323,7 +323,7 @@ if __name__ == "__main__":
                 "scenario_filter.log_names=['2021.09.16.15.12.03_veh-42_01037_01434']",
                 'scenario_filter.limit_total_scenarios=1000',  # use 2 total scenarios
             ],
-            "show_mouse": False,
+            "show_mouse": True,
         }
     )
     success = []
