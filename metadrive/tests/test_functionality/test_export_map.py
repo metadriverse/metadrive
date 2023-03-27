@@ -62,5 +62,5 @@ def _test_nuplan_map_export(render=False):
 
 
 if __name__ == "__main__":
-    # test_export_waymo_map(True)
-    _test_nuplan_map_export(True)
+    test_export_waymo_map(True)
+    # _test_nuplan_map_export(True)

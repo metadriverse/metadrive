@@ -335,7 +335,7 @@ class WaymoEnv(BaseEnv):
             )
 
         assert self.config["start_case_index"] <= current_seed < \
-               self.config["start_case_index"] + self.config["case_num"], "Force seed range Error!"
+               self.config["start_case_index"] + self.config["case_num"], "Force seed {} is out of range [{}, {}).".format(current_seed, self.config["start_case_index"], self.config["start_case_index"] + self.config["case_num"])
         self.seed(current_seed)
 
     def stop(self):

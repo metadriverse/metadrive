@@ -125,10 +125,10 @@ def extract_tracks(tracks, sdc_idx):
     ret = dict()
 
     for obj in tracks:
-        
+
         obj_state = dict()
         obj_state["type"] = AgentType[obj.object_type]
-        
+
         obj_state["state"] = {}
         obj_state["metastate"] = {}
 
@@ -151,7 +151,7 @@ def extract_tracks(tracks, sdc_idx):
 
         valid = [state.valid for state in obj.states]
         obj_state["state"]["valid"] = np.array(valid)[:, np.newaxis]
-        
+
         ret[obj.id] = obj_state
 
     return ret, tracks[sdc_idx].id
