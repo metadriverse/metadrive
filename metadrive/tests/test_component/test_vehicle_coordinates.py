@@ -20,7 +20,7 @@ def test_coordinates_shift():
         )
         env.reset()
         env.vehicle.set_velocity([1, 0], 10)
-        print(env.vehicle.speed)
+        # print(env.vehicle.speed)
         pos = [(x, y) for x in [-10, 0, 10] for y in [-20, 0, 20]] * 10
         p = pos.pop()
         for s in range(1, 100000):

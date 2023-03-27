@@ -24,6 +24,6 @@ if __name__ == "__main__":
         text = {"save": env.save_mode}
         env.render(text=text)
         # if d:
-        #     print("Reset")
+        #     # print("Reset")
         #     env.reset()
     env.close()

@@ -13,5 +13,5 @@ nodes, edges = osm.get_network(nodes=True, network_type="driving")
 G = osm.to_graph(nodes, edges, graph_type="networkx")
 
 ccc = edges.head(40)
-print(ccc.geometry)
+# print(ccc.geometry)
 ox.plot_graph(G)

@@ -21,12 +21,12 @@ if __name__ == '__main__':
         ep_reward = 0
         while True:
             o, r, d, i = env.step([0.01, 1])
-            print("Obs shape {}, reward {:.8f}, done {}, info {}".format(o.shape, r, d, i))
+            # print("Obs shape {}, reward {:.8f}, done {}, info {}".format(o.shape, r, d, i))
             env.render()
 
             ep_reward += r
             if d:
-                print("Episode reward: ", ep_reward)
+                # print("Episode reward: ", ep_reward)
                 ep_reward = 0
                 env.reset()
 

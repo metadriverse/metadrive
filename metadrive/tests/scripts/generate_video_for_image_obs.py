@@ -164,6 +164,6 @@ if __name__ == '__main__':
                 frame[i, j] = img.get_pixel(i, j)
         frame = frame.swapaxes(0, 1)[..., :3]
         frames.append(frame)
-        print(f"Finish {num_frames + 1} frames")
+        # print(f"Finish {num_frames + 1} frames")
     env.close()
     gen_video(frames)

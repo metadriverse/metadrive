@@ -5,7 +5,7 @@ from metadrive.utils import setup_logger
 
 
 def _test_fps():
-    print("Start to profile the efficiency of MetaDrive with 1000 maps and ~8 vehicles!")
+    # print("Start to profile the efficiency of MetaDrive with 1000 maps and ~8 vehicles!")
     try:
         setup_logger(debug=False)
         env = MetaDriveEnv(dict(

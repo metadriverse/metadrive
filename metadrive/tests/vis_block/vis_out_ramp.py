@@ -13,7 +13,7 @@ if __name__ == "__main__":
     straight = FirstPGBlock(global_network, 3.0, 1, test.render, test.world, 1)
     for i in range(1, 3):
         straight = OutRampOnStraight(i, straight.get_socket(0), global_network, i)
-        print(straight.construct_block(test.render, test.world))
-        print(len(straight.dynamic_nodes))
+        # print(straight.construct_block(test.render, test.world))
+        # print(len(straight.dynamic_nodes))
     test.show_bounding_box(global_network)
     test.run()

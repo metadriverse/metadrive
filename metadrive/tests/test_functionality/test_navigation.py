@@ -78,7 +78,7 @@ def test_navigation(vis=False):
             else:
                 env.render()
         if d:
-            print("Reset")
+            # print("Reset")
             o = env.reset()
 
             steering_controller.reset()

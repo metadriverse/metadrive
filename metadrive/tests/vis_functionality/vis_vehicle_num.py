@@ -11,9 +11,9 @@ if __name__ == "__main__":
     for i in range(1, 101):
         o, r, d, info = env.step([0, 1])
         env.reset()
-        print(
-            "Current map {}, vehicle number {}.".format(env.current_seed, env.engine.traffic_manager.get_vehicle_num())
-        )
+        # print(
+        #     "Current map {}, vehicle number {}.".format(env.current_seed, env.engine.traffic_manager.get_vehicle_num())
+        # )
         count.append(env.engine.traffic_manager.get_vehicle_num())
-    print(min(count), sum(count) / len(count), max(count))
+    # print(min(count), sum(count) / len(count), max(count))
     env.close()

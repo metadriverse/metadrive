@@ -14,7 +14,7 @@ if __name__ == "__main__":
     straight = FirstPGBlock(global_network, 3.0, 1, test.render, test.world, 1)
 
     rd = Roundabout(1, straight.get_socket(0), global_network, 1)
-    print(rd.construct_block(test.render, test.world))
+    # print(rd.construct_block(test.render, test.world))
 
     id = 4
     for socket_idx in range(rd.SOCKET_NUM):
