@@ -83,5 +83,5 @@ def test_export_waymo_scenario(render_export_env=False, render_load_env=False):
 
 
 if __name__ == "__main__":
-    # test_export_metadrive_scenario(render_export_env=True, render_load_env=True)
-    test_export_waymo_scenario(render_export_env=False, render_load_env=False)
+    test_export_metadrive_scenario(render_export_env=False, render_load_env=False)
+    # test_export_waymo_scenario(render_export_env=False, render_load_env=False)
