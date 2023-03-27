@@ -11,7 +11,7 @@ TrafficSignal = {
 }
 
 
-class LaneType:
+class WaymoLaneType:
     UNKNOWN = 0
     LANE_FREEWAY = 1
     LANE_SURFACE_STREET = 2
@@ -36,7 +36,7 @@ class LaneType:
         return cls.ENUM_TO_STR[item]
 
 
-class RoadLineType:
+class WaymoRoadLineType:
     UNKNOWN = 0
     BROKEN_SINGLE_WHITE = 1
     SOLID_SINGLE_WHITE = 2
@@ -67,11 +67,11 @@ class RoadLineType:
     def is_yellow(cls, line):
         return True if line in [
             cls.ENUM_TO_STR[t] for t in [
-                RoadLineType.SOLID_DOUBLE_YELLOW,
-                RoadLineType.PASSING_DOUBLE_YELLOW,
-                RoadLineType.SOLID_SINGLE_YELLOW,
-                RoadLineType.BROKEN_DOUBLE_YELLOW,
-                RoadLineType.BROKEN_SINGLE_YELLOW
+                WaymoRoadLineType.SOLID_DOUBLE_YELLOW,
+                WaymoRoadLineType.PASSING_DOUBLE_YELLOW,
+                WaymoRoadLineType.SOLID_SINGLE_YELLOW,
+                WaymoRoadLineType.BROKEN_DOUBLE_YELLOW,
+                WaymoRoadLineType.BROKEN_SINGLE_YELLOW
             ]
         ] else False
 
@@ -79,9 +79,9 @@ class RoadLineType:
     def is_broken(cls, line):
         return True if line in [
             cls.ENUM_TO_STR[t] for t in [
-                RoadLineType.BROKEN_DOUBLE_YELLOW,
-                RoadLineType.BROKEN_SINGLE_YELLOW,
-                RoadLineType.BROKEN_SINGLE_WHITE
+                WaymoRoadLineType.BROKEN_DOUBLE_YELLOW,
+                WaymoRoadLineType.BROKEN_SINGLE_YELLOW,
+                WaymoRoadLineType.BROKEN_SINGLE_WHITE
             ]
         ] else False
 
@@ -90,7 +90,7 @@ class RoadLineType:
         return cls.ENUM_TO_STR[item]
 
 
-class RoadEdgeType:
+class WaymoRoadEdgeType:
     UNKNOWN = 0
     # Physical road boundary that doesn't have traffic on the other side (e.g., a curb or the k-rail on the right side of a freeway).
     BOUNDARY = 1
@@ -105,14 +105,14 @@ class RoadEdgeType:
 
     @classmethod
     def is_sidewalk(cls, edge):
-        return True if edge == cls.ENUM_TO_STR[RoadEdgeType.BOUNDARY] else False
+        return True if edge == cls.ENUM_TO_STR[WaymoRoadEdgeType.BOUNDARY] else False
 
     @classmethod
     def from_waymo(cls, item):
         return cls.ENUM_TO_STR[item]
 
 
-class AgentType:
+class WaymoAgentType:
     UNSET = 0
     VEHICLE = 1
     PEDESTRIAN = 2
