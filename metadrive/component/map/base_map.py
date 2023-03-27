@@ -1,5 +1,5 @@
 import logging
-from metadrive.utils.scene_export_utils.type import MetaDriveSceneElement
+from metadrive.scenario.metadrive_type import MetaDriveType
 
 from metadrive.base_class.base_runnable import BaseRunnable
 from metadrive.engine.engine_utils import get_global_config
@@ -116,7 +116,7 @@ class BaseMap(BaseRunnable):
         center_line_vector = self.road_network.get_center_line_vector(interval)
         map_features = {}
         for id, line in center_line_vector.items():
-            map_features[id] = {"polyline": line, "type": MetaDriveSceneElement.LANE_CENTER_LINE}
+            map_features[id] = {"polyline": line, "type": MetaDriveType.LANE_CENTER_LINE}
         boundary_line_vector = self.get_boundary_line_vector(interval)
         map_features.update(boundary_line_vector)
         return map_features

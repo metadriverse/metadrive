@@ -1,5 +1,5 @@
 import copy
-from metadrive.utils.scene_export_utils.type import MetaDriveSceneElement
+from metadrive.scenario.metadrive_type import MetaDriveType
 from metadrive.constants import LineType, LineColor
 from typing import List
 
@@ -11,7 +11,6 @@ from metadrive.component.pgblock.first_block import FirstPGBlock
 from metadrive.component.road_network.node_road_network import NodeRoadNetwork
 from metadrive.constants import Decoration
 from metadrive.engine.core.physics_world import PhysicsWorld
-from metadrive.obs.top_down_obs_impl import LaneGraphics
 from metadrive.utils import Config
 
 
@@ -151,12 +150,12 @@ class PGMap(BaseMap):
 
     def get_line_type(self, type, color):
         if type == LineType.CONTINUOUS and color == LineColor.YELLOW:
-            return MetaDriveSceneElement.CONTINUOUS_YELLOW_LINE
+            return MetaDriveType.CONTINUOUS_YELLOW_LINE
         elif type == LineType.BROKEN and color == LineColor.YELLOW:
-            return MetaDriveSceneElement.BROKEN_YELLOW_LINE
+            return MetaDriveType.BROKEN_YELLOW_LINE
         elif type == LineType.CONTINUOUS and color == LineColor.GREY:
-            return MetaDriveSceneElement.CONTINUOUS_GREY_LINE
+            return MetaDriveType.CONTINUOUS_GREY_LINE
         elif type == LineType.BROKEN and color == LineColor.GREY:
-            return MetaDriveSceneElement.BROKEN_GREY_LINE
+            return MetaDriveType.BROKEN_GREY_LINE
         elif type == LineType.SIDE:
-            return MetaDriveSceneElement.CONTINUOUS_GREY_LINE
+            return MetaDriveType.CONTINUOUS_GREY_LINE

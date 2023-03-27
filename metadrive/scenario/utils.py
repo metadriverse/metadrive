@@ -8,13 +8,13 @@ from metadrive.component.traffic_participants.cyclist import Cyclist
 from metadrive.component.traffic_participants.pedestrian import Pedestrian
 from metadrive.component.vehicle.base_vehicle import BaseVehicle
 from metadrive.constants import DATA_VERSION, DEFAULT_AGENT
-from metadrive.utils.scene_export_utils.type import MetaDriveSceneElement
+from metadrive.scenario.metadrive_type import MetaDriveType
 
 
 def draw_map(map_features, show=False):
     figure(figsize=(8, 6), dpi=500)
     for key, value in map_features.items():
-        if value.get("type", None) == MetaDriveSceneElement.LANE_CENTER_LINE:
+        if value.get("type", None) == MetaDriveType.LANE_CENTER_LINE:
             plt.scatter([x[0] for x in value["polyline"]], [y[1] for y in value["polyline"]], s=0.1)
         elif value.get("type", None) == "road_edge":
             plt.scatter([x[0] for x in value["polyline"]], [y[1] for y in value["polyline"]], s=0.1, c=(0, 0, 0))
@@ -26,13 +26,13 @@ def draw_map(map_features, show=False):
 
 def get_type_from_class(obj_class):
     if issubclass(obj_class, BaseVehicle) or obj_class is BaseVehicle:
-        return MetaDriveSceneElement.VEHICLE
+        return MetaDriveType.VEHICLE
     elif issubclass(obj_class, Pedestrian) or obj_class is Pedestrian:
-        return MetaDriveSceneElement.PEDESTRIAN
+        return MetaDriveType.PEDESTRIAN
     elif issubclass(obj_class, Cyclist) or obj_class is Cyclist:
-        return MetaDriveSceneElement.CYCLIST
+        return MetaDriveType.CYCLIST
     else:
-        return MetaDriveSceneElement.OTHER
+        return MetaDriveType.OTHER
 
 
 def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1):
@@ -64,7 +64,7 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
         all_objs.update(frame.step_info.keys())
     tracks = {
         k: dict(
-            type=MetaDriveSceneElement.UNSET,
+            type=MetaDriveType.UNSET,
             state=dict(
                 position=np.zeros(shape=(length, 3)),
                 size=np.zeros(shape=(length, 3)),
@@ -72,7 +72,7 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
                 velocity=np.zeros(shape=(length, 2)),
                 valid=np.zeros(shape=(length, 1))
             ),
-            metadata=dict(track_length=length, type=MetaDriveSceneElement.UNSET, object_id=k)
+            metadata=dict(track_length=length, type=MetaDriveType.UNSET, object_id=k)
         )
         for k in list(all_objs)
     }
