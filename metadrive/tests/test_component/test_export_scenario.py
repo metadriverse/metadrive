@@ -13,6 +13,7 @@ def test_export_metadrive_scenario(render_export_env=False, render_load_env=Fals
         dict(start_seed=0, use_render=render_export_env, environment_num=scenario_num, agent_policy=IDMPolicy)
     )
     policy = lambda x: [0, 1]
+    dir = None
     try:
         scenarios = env.export_scenarios(policy, scenario_index=[i for i in range(scenario_num)])
         dir = os.path.join(os.path.dirname(__file__), "test_export")
@@ -37,13 +38,22 @@ def test_export_metadrive_scenario(render_export_env=False, render_load_env=Fals
                 o, r, done, i = env.step([0, 0])
     finally:
         env.close()
-        shutil.rmtree(dir)
+        if dir is not None:
+            shutil.rmtree(dir)
 
 
 def test_export_waymo_scenario(render_export_env=False, render_load_env=False):
     scenario_num = 3
-    env = WaymoEnv(dict(agent_policy=WaymoReplayEgoCarPolicy, use_render=render_export_env))
+    env = WaymoEnv(
+        dict(
+            agent_policy=WaymoReplayEgoCarPolicy,
+            use_render=render_export_env,
+            start_case_index=0,
+            case_num=scenario_num
+        )
+    )
     policy = lambda x: [0, 1]
+    dir = None
     try:
         scenarios = env.export_scenarios(policy, scenario_index=[i for i in range(scenario_num)])
         dir = os.path.join(os.path.dirname(__file__), "test_export")
@@ -68,9 +78,10 @@ def test_export_waymo_scenario(render_export_env=False, render_load_env=False):
                 o, r, done, i = env.step([0, 0])
     finally:
         env.close()
-        shutil.rmtree(dir)
+        if dir is not None:
+            shutil.rmtree(dir)
 
 
 if __name__ == "__main__":
-    test_export_metadrive_scenario(render_export_env=False, render_load_env=True)
-    # test_export_waymo_scenario(render_export_env=True, render_load_env=True)
+    # test_export_metadrive_scenario(render_export_env=True, render_load_env=True)
+    test_export_waymo_scenario(render_export_env=True, render_load_env=True)
