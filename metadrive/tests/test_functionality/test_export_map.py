@@ -21,7 +21,7 @@ def test_export_waymo_map(render=False):
                 "no_traffic": True,
                 "use_render": False,
                 "waymo_data_directory": AssetLoader.file_path(asset_path, "waymo", return_raw_style=False),
-                "scenario_num": 3
+                "case_num": 3
             }
         )
         for seed in range(3):
@@ -62,5 +62,5 @@ def _test_nuplan_map_export(render=False):
 
 
 if __name__ == "__main__":
-    test_export_waymo_map(True)
+    test_export_waymo_map(False)
     # _test_nuplan_map_export(True)
