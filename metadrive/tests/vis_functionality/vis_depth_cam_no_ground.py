@@ -33,6 +33,6 @@ if __name__ == "__main__":
             env.render(text={"can you see me": i})
         if d:
             env.vehicle.get_camera("rgb_camera").save_image(env.vehicle)
-            print("Reset")
+            # print("Reset")
             env.reset()
     env.close()

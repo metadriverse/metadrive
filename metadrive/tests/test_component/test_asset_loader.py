@@ -9,9 +9,9 @@ def test_asset_loader():
     try:
         world.clear_world()
         initialize_asset_loader(world)
-        print(AssetLoader.asset_path)
-        print(AssetLoader.file_path("aaa"))
-    # print(AssetLoader.get_loader())
+        # print(AssetLoader.asset_path)
+        # print(AssetLoader.file_path("aaa"))
+    # # print(AssetLoader.get_loader())
     finally:
         world.close_world()
 

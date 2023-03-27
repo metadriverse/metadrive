@@ -129,7 +129,7 @@ def test_ma_toll_horizon():
                     for k in new_keys.difference(last_keys):
                         assert k in o
                         assert k in d
-                    print("Step {}, Done: {}".format(step, d))
+                    # print("Step {}, Done: {}".format(step, d))
 
                 for kkk, rrr in r.items():
                     if rrr == -777:
@@ -208,8 +208,8 @@ def test_ma_toll_reset():
                         v.navigation.get_current_lane_width() / 2 >= lat >=
                         (0.5 - v.navigation.get_current_lane_num()) * v.navigation.get_current_lane_width()
                     )
-                    if not env._is_arrive_destination(v):
-                        print('sss')
+                    # if not env._is_arrive_destination(v):
+                    # print('sss')
                     assert env._is_arrive_destination(v)
 
                 act = {k: [0, 0] for k in env.vehicles.keys()}
@@ -220,7 +220,7 @@ def test_ma_toll_reset():
 
                 for kkk, iii in i.items():
                     if "arrive_dest" in iii and iii["arrive_dest"]:
-                        # print("{} success!".format(kkk))
+                        # # print("{} success!".format(kkk))
                         success_count += 1
 
                 for kkk, ddd in d.items():
@@ -233,7 +233,7 @@ def test_ma_toll_reset():
                         assert rrr == 777
 
                 if d["__all__"]:
-                    print("Finish {} agents. Success {} agents.".format(agent_count, success_count))
+                    # print("Finish {} agents. Success {} agents.".format(agent_count, success_count))
                     o = env.reset()
                     assert env.observation_space.contains(o)
                     _check_spaces_after_reset(env, o)
@@ -272,7 +272,7 @@ def test_ma_toll_close_spawn():
                 o, r, d, i = env.step({k: [0, 0] for k in env.vehicles.keys()})
                 assert not any(d.values())
             _no_close_spawn(env.vehicles)
-            print('Finish {} resets.'.format(num_r))
+            # print('Finish {} resets.'.format(num_r))
     finally:
         env.close()
         MultiAgentTollgateEnv._DEBUG_RANDOM_SEED = None
@@ -296,12 +296,12 @@ def test_ma_toll_reward_done_alignment_1():
                             raise ValueError
                         #assert r[kkk] == -777
                         assert i[kkk]["out_of_road"]
-                        # print('{} done passed!'.format(kkk))
+                        # # print('{} done passed!'.format(kkk))
                 for kkk, rrr in r.items():
                     if rrr == -777:
                         assert d[kkk]
                         assert i[kkk]["out_of_road"]
-                        # print('{} reward passed!'.format(kkk))
+                        # # print('{} reward passed!'.format(kkk))
                 if d["__all__"]:
                     env.reset()
                     break
@@ -353,14 +353,14 @@ def test_ma_toll_reward_done_alignment_1():
                     #assert r[kkk] == -1.7777
                     assert i[kkk]["crash_vehicle"]
                     assert i[kkk]["crash"]
-                    # print('{} done passed!'.format(kkk))
+                    # # print('{} done passed!'.format(kkk))
                 # for kkk, rrr in r.items():
                 rrr = r[kkk]
                 if rrr == -1.7777:
                     assert d[kkk]
                     assert i[kkk]["crash_vehicle"]
                     assert i[kkk]["crash"]
-                    # print('{} reward passed!'.format(kkk))
+                    # # print('{} reward passed!'.format(kkk))
             # assert d["__all__"]
             # if d["__all__"]:
             break
@@ -409,13 +409,13 @@ def test_ma_toll_reward_done_alignment_2():
             for kkk, ddd in d.items():
                 if ddd and kkk != "__all__" and not d["__all__"]:
                     assert i[kkk]["out_of_road"] or i[kkk]["arrive_dest"] or i[kkk]["crash_building"]
-                    # print('{} done passed!'.format(kkk))
+                    # # print('{} done passed!'.format(kkk))
             for kkk, rrr in r.items():
                 if rrr == -1.7777:
                     # assert d[kkk]
                     assert i[kkk]["crash_vehicle"]
                     assert i[kkk]["crash"]
-                    # print('{} reward passed!'.format(kkk))
+                    # # print('{} reward passed!'.format(kkk))
             if d["agent0"]:
                 break
             if d["__all__"]:
@@ -485,7 +485,7 @@ def test_ma_toll_reward_sign():
             o, r, d, i = env.step(act)
             ep_reward += next(iter(r.values()))
             if any(d.values()):
-                print("Finish respawn count: {}, reward {}".format(env._respawn_count, ep_reward))
+                # print("Finish respawn count: {}, reward {}".format(env._respawn_count, ep_reward))
                 env._respawn_count += 1
                 assert ep_reward > 10, ep_reward
                 ep_reward = 0
@@ -523,7 +523,7 @@ def test_ma_toll_init_space():
                         env.reset()
                         _check_spaces_after_reset(env)
                         env.close()
-                        print('Finish: ', env_config)
+                        # print('Finish: ', env_config)
     finally:
         if "env" in locals():
             env.close()
@@ -556,13 +556,13 @@ def test_ma_toll_no_short_episode():
             if d["__all__"]:
                 o = env.reset()
                 d = {"__all__": False}
-            if (step + 1) % 100 == 0:
-                print(
-                    "Finish {}/2000 simulation steps. Time elapse: {:.4f}. Average FPS: {:.4f}".format(
-                        step + 1,
-                        time.time() - start, (step + 1) / (time.time() - start)
-                    )
-                )
+            # if (step + 1) % 100 == 0:
+            #     # print(
+            #         "Finish {}/2000 simulation steps. Time elapse: {:.4f}. Average FPS: {:.4f}".format(
+            #             step + 1,
+            #             time.time() - start, (step + 1) / (time.time() - start)
+            #         )
+            #     )
             if d_count > 200:
                 break
     finally:
@@ -610,7 +610,7 @@ def test_ma_toll_horizon_termination(vis=False):
 
                 for kkk, ddd in d.items():
                     if ddd and kkk == "__all__":
-                        print("Current: ", step)
+                        # print("Current: ", step)
                         continue
                     if ddd and kkk not in special_agents:
                         assert i[kkk]["max_step"]

@@ -35,13 +35,13 @@ if __name__ == '__main__':
         # frame = 1 - frame
         # frame *= 255
         # frame = frame.astype(np.uint8)
-        print(f"Finish {num_frames + 1} frames")
+        # print(f"Finish {num_frames + 1} frames")
         # plt.imshow(frame)
         # plt.show()
-        print(
-            "Finish {}/100 simulation steps. Time elapse: {:.4f}. Average FPS: {:.4f}".format(
-                num_frames + 1,
-                time.time() - start, (num_frames + 1) / (time.time() - start)
-            )
-        )
+        # print(
+        #     "Finish {}/100 simulation steps. Time elapse: {:.4f}. Average FPS: {:.4f}".format(
+        #         num_frames + 1,
+        #         time.time() - start, (num_frames + 1) / (time.time() - start)
+        #     )
+        # )
     env.close()

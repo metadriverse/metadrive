@@ -72,7 +72,7 @@ if __name__ == "__main__":
     # obj_2.show_coordinates()
     env.vehicle.set_velocity([10, 0], in_local_frame=False)
     for s in range(1, 10000):
-        print(c_1.heading_theta)
+        # print(c_1.heading_theta)
         o, r, d, info = env.step(env.action_space.sample())
         # obj_1.set_velocity([1, 0], 2, in_local_frame=True)
         # obj_2.set_velocity([1, 0], 0.8, in_local_frame=True)
@@ -87,7 +87,7 @@ if __name__ == "__main__":
         if 100 < s < 300:
             obj_2.set_velocity([1, 0], 2, in_local_frame=True)
         elif 500 > s > 300:
-            print("here stop")
+            # print("here stop")
             obj_2.set_velocity([1, 0], 0, in_local_frame=True)
         elif s >= 500:
             obj_2.set_velocity([1, 0], 2, in_local_frame=True)
@@ -110,7 +110,7 @@ if __name__ == "__main__":
         #     env.reset()
         # # assert env.observation_space.contains(o)
         # if (s + 1) % 100 == 0:
-        #     print(
+        #     # print(
         #         "Finish {}/10000 simulation steps. Time elapse: {:.4f}. Average FPS: {:.4f}".format(
         #             s + 1,f
         #             time.time() - start, (s + 1) / (time.time() - start)
@@ -118,5 +118,5 @@ if __name__ == "__main__":
         #     )
         # if d:
         # #     # env.close()
-        # #     print(len(env.engine._spawned_objects))
+        # #     # print(len(env.engine._spawned_objects))
         # env.reset()

@@ -13,6 +13,7 @@ def test_export_metadrive_scenario(render_export_env=False, render_load_env=Fals
         dict(start_seed=0, use_render=render_export_env, environment_num=scenario_num, agent_policy=IDMPolicy)
     )
     policy = lambda x: [0, 1]
+    dir = None
     try:
         scenarios = env.export_scenarios(policy, scenario_index=[i for i in range(scenario_num)])
         dir = os.path.join(os.path.dirname(__file__), "test_export")
@@ -21,7 +22,6 @@ def test_export_metadrive_scenario(render_export_env=False, render_load_env=Fals
             with open(os.path.join(dir, "{}.pkl".format(i)), "wb+") as file:
                 pickle.dump(data, file)
         env.close()
-        del env
 
         env = WaymoEnv(
             dict(
@@ -38,7 +38,8 @@ def test_export_metadrive_scenario(render_export_env=False, render_load_env=Fals
                 o, r, done, i = env.step([0, 0])
     finally:
         env.close()
-        shutil.rmtree(dir)
+        if dir is not None:
+            shutil.rmtree(dir)
 
 
 def test_export_waymo_scenario(render_export_env=False, render_load_env=False):
@@ -52,6 +53,7 @@ def test_export_waymo_scenario(render_export_env=False, render_load_env=False):
         )
     )
     policy = lambda x: [0, 1]
+    dir = None
     try:
         scenarios = env.export_scenarios(policy, scenario_index=[i for i in range(scenario_num)])
         dir = os.path.join(os.path.dirname(__file__), "test_export")
@@ -60,7 +62,6 @@ def test_export_waymo_scenario(render_export_env=False, render_load_env=False):
             with open(os.path.join(dir, "{}.pkl".format(i)), "wb+") as file:
                 pickle.dump(data, file)
         env.close()
-        del env
 
         env = WaymoEnv(
             dict(
@@ -77,9 +78,10 @@ def test_export_waymo_scenario(render_export_env=False, render_load_env=False):
                 o, r, done, i = env.step([0, 0])
     finally:
         env.close()
-        # shutil.rmtree(dir)
+        if dir is not None:
+            shutil.rmtree(dir)
 
 
 if __name__ == "__main__":
-    # test_export_metadrive_scenario(render_export_env=False, render_load_env=False)
-    test_export_waymo_scenario(render_export_env=False, render_load_env=False)
+    # test_export_metadrive_scenario(render_export_env=True, render_load_env=True)
+    test_export_waymo_scenario(render_export_env=True, render_load_env=True)

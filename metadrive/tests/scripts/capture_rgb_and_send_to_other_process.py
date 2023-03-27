@@ -34,7 +34,7 @@ def main_thread():
     env = MetaDriveEnv(config)
     try:
         o = env.reset()
-        print(HELP_MESSAGE)
+        # print(HELP_MESSAGE)
         env.vehicle.expert_takeover = False
         context = zmq.Context()
         socket = context.socket(zmq.PUSH)
@@ -59,12 +59,12 @@ def main_thread():
                 compressed_image = lz4.compress(img)
                 socket.send(compressed_image, zmq.NOBLOCK)
             except zmq.error.Again:
-                print("Dropped frame")
+                # print("Dropped frame")
                 pass
             try:
                 vehicle_socket.send_pyobj(step_infos, zmq.NOBLOCK)
             except zmq.error.Again:
-                print("Dropped vehicle state")
+                # print("Dropped vehicle state")
                 pass
     except Exception as e:
         raise e

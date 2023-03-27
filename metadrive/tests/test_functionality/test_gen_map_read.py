@@ -40,7 +40,7 @@ def test_gen_map_read():
             env.reset(force_seed=seed)
             for i in range(10):
                 env.step(env.action_space.sample())
-        print("Finish!")
+        # print("Finish!")
     finally:
         env.close()
 

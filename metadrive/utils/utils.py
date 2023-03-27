@@ -1,4 +1,5 @@
 import copy
+import numpy as np
 import datetime
 import logging
 import os
@@ -63,7 +64,11 @@ def recursive_equal(data1, data2, need_assert=False):
         for i in range(len(data1)):
             ret.append(recursive_equal(data1[i], data2[i], need_assert=need_assert))
         return all(ret)
-
+    elif isinstance(data1, np.ndarray):
+        ret = np.isclose(data1, data2).all()
+        if need_assert:
+            assert ret, (type(data1), type(data2), data1, data2)
+        return ret
     else:
         ret = data1 == data2
         if need_assert:

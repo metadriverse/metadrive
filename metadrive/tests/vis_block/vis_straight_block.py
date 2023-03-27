@@ -14,6 +14,6 @@ if __name__ == "__main__":
     for i in range(1, 3):
         straight = Straight(i, straight.get_socket(0), global_network, i)
         straight.construct_block(test.render, test.world)
-        print(len(straight.dynamic_nodes))
+        # print(len(straight.dynamic_nodes))
     test.show_bounding_box(global_network)
     test.run()

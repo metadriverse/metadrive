@@ -61,7 +61,7 @@ def test_reward_cost_done():
         for _ in range(1000):
             o, r, d, i = env.step([0, 1])
             epr += r
-            print("R: {}, Accu R: {}".format(r, epr))
+            # print("R: {}, Accu R: {}".format(r, epr))
             if d:
                 epr = 0
                 break

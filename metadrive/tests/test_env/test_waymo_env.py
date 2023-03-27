@@ -75,7 +75,7 @@ def test_store_map_memory_leakage(render=False):
                 return mem_info.rss
 
             memory.append(process_memory() / 1024 / 1024)  # in mb
-        print(memory)
+        # print(memory)
         assert np.std(memory) < 0.5, "They should be almost the same"
     finally:
         env.close()

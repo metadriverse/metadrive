@@ -24,7 +24,7 @@ def test_change_agent_num():
             for _ in range(100):
                 e.step(e.action_space.sample())
                 # e.render("topdown")
-            print("Hi!!! We are in environment now! Current agents: ", len(e.vehicles.keys()))
+            # print("Hi!!! We are in environment now! Current agents: ", len(e.vehicles.keys()))
             e.close()
     finally:
         e.close()

@@ -20,7 +20,7 @@ def test_safe_env(vis=False):
                 assert env.observation_space.contains(o)
                 if d:
                     total_cost = 0
-                    print("Reset")
+                    # print("Reset")
                     env.reset()
         env.close()
     finally:
