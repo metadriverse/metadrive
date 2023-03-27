@@ -9,7 +9,7 @@ from metadrive.component.pgblock.create_pg_block_utils import CreateAdverseRoad,
 from metadrive.component.pgblock.pg_block import PGBlock, PGBlockSocket
 from metadrive.component.road_network import Road
 from metadrive.constants import LineType
-from metadrive.utils.scene_utils import check_lane_on_road
+from metadrive.utils.pg_utils.utils import check_lane_on_road
 from metadrive.component.pg_space import ParameterSpace, Parameter, BlockParameterSpace
 
 

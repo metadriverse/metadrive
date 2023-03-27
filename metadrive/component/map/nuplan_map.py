@@ -1,5 +1,5 @@
 import logging
-from metadrive.utils.export_utils.type import MetaDriveSceneElement
+from metadrive.utils.scene_export_utils.type import MetaDriveSceneElement
 
 import geopandas as gpd
 import numpy as np

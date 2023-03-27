@@ -398,12 +398,14 @@ class BaseObject(BaseRunnable):
         self.origin.setPos(pos)
 
     def get_state(self) -> Dict:
+        pos = self.position
         state = {
-            ObjectState.POSITION: self.position,
+            ObjectState.POSITION: [pos[0], pos[1], self.get_z()],
             ObjectState.HEADING_THETA: self.heading_theta,
             ObjectState.ROLL: self.roll,
             ObjectState.PITCH: self.pitch,
             ObjectState.VELOCITY: self.velocity,
+            ObjectState.TYPE: type(self)
         }
         return state
 

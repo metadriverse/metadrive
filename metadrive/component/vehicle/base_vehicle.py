@@ -31,8 +31,8 @@ from metadrive.utils import Config, safe_clip_for_small_array
 from metadrive.utils.coordinates_shift import panda_heading, metadrive_heading
 from metadrive.utils.math_utils import get_vertical_vector, norm, clip
 from metadrive.utils.math_utils import wrap_to_pi
-from metadrive.utils.scene_utils import ray_localization
-from metadrive.utils.scene_utils import rect_region_detection
+from metadrive.utils.pg_utils.utils import ray_localization
+from metadrive.utils.pg_utils.utils import rect_region_detection
 from metadrive.component.pg_space import VehicleParameterSpace, ParameterSpace
 
 
@@ -821,7 +821,6 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         Fetch more information
         """
         state = super(BaseVehicle, self).get_state()
-        final_road = self.navigation.final_road
         state.update(
             {
                 "steering": self.steering,
@@ -829,16 +828,12 @@ class BaseVehicle(BaseObject, BaseVehicleState):
                 "crash_vehicle": self.crash_vehicle,
                 "crash_object": self.crash_object,
                 "crash_building": self.crash_building,
-                "crash_sidewalk": self.crash_sidewalk
+                "crash_sidewalk": self.crash_sidewalk,
+                "size": (self.LENGTH, self.WIDTH, self.HEIGHT)
             }
         )
-        if isinstance(self.navigation, NodeNetworkNavigation):
-            state.update(
-                {
-                    "spawn_road": self.config["spawn_lane_index"][:-1],
-                    "destination": (final_road.start_node, final_road.end_node)
-                }
-            )
+        if self.navigation is not None:
+            state.update(self.navigation.get_state())
         return state
 
     # def get_raw_state(self):

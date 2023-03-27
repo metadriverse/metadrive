@@ -1,4 +1,5 @@
 import pickle
+import numpy as np
 
 from metadrive import MultiAgentRoundaboutEnv
 from metadrive.component.map.base_map import BaseMap
@@ -48,6 +49,12 @@ def test_save_episode(vis=False):
         env.config["record_episode"] = False
         o = env.reset()
         for i in range(1, 100000 if vis else 2000):
+            pos = env.engine.replay_manager.get_object_from_agent("default_agent").position
+            assert env.vehicle.position == pos
+            record_pos = env.engine.replay_manager.current_frame.step_info[
+                env.engine.replay_manager.current_frame.agent_to_object("default_agent")]["position"]
+            assert np.isclose(np.array(env.vehicle.position), np.array(record_pos[:-1])).all()
+            assert abs(env.vehicle.get_z() - record_pos[-1]) < 1e-3
             o, r, d, info = env.step([0, 1])
             if vis:
                 env.render(mode="top_down", )
@@ -115,5 +122,5 @@ def test_save_episode_marl(vis=False):
 
 
 if __name__ == "__main__":
-    test_save_episode_marl(vis=False)
-    # test_save_episode(vis=False)
+    test_save_episode(vis=False)
+    # test_save_episode_marl(vis=False)
