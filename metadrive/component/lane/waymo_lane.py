@@ -24,15 +24,18 @@ class WaymoLane(PointLane):
         )
         self.index = waymo_lane_id
         self.lane_type = waymo_map_data[waymo_lane_id]["type"]
-        self.entry_lanes = waymo_map_data[waymo_lane_id][WaymoLaneProperty.ENTRY]
-        self.exit_lanes = waymo_map_data[waymo_lane_id][WaymoLaneProperty.EXIT]
-        self.left_lanes = waymo_map_data[waymo_lane_id][WaymoLaneProperty.LEFT_NEIGHBORS]
-        self.right_lanes = waymo_map_data[waymo_lane_id][WaymoLaneProperty.RIGHT_NEIGHBORS]
+        self.entry_lanes = waymo_map_data[waymo_lane_id].get(WaymoLaneProperty.ENTRY, None)
+        self.exit_lanes = waymo_map_data[waymo_lane_id].get(WaymoLaneProperty.EXIT, None)
+        self.left_lanes = waymo_map_data[waymo_lane_id].get(WaymoLaneProperty.LEFT_NEIGHBORS, None)
+        self.right_lanes = waymo_map_data[waymo_lane_id].get(WaymoLaneProperty.RIGHT_NEIGHBORS, None)
 
     def get_lane_width(self, waymo_lane_id, waymo_map_data):
         """
         We use this function to get possible lane width from raw data
         """
+        if not (WaymoLaneProperty.RIGHT_NEIGHBORS in waymo_map_data[waymo_lane_id]
+                and WaymoLaneProperty.LEFT_NEIGHBORS in waymo_map_data[waymo_lane_id]):
+            return self.VIS_LANE_WIDTH
         right_lanes = waymo_map_data[waymo_lane_id][WaymoLaneProperty.RIGHT_NEIGHBORS]
         left_lanes = waymo_map_data[waymo_lane_id][WaymoLaneProperty.LEFT_NEIGHBORS]
         if len(right_lanes) + len(left_lanes) == 0:

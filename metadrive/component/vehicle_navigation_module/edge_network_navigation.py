@@ -4,7 +4,7 @@ from metadrive.component.lane.circular_lane import CircularLane
 from metadrive.component.road_network.edge_road_network import EdgeRoadNetwork
 from metadrive.component.vehicle_navigation_module.base_navigation import BaseNavigation
 from metadrive.utils import clip, norm
-from metadrive.utils.scene_utils import ray_localization
+from metadrive.utils.pg_utils.utils import ray_localization
 from metadrive.component.pg_space import Parameter, BlockParameterSpace
 
 

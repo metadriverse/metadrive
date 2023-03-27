@@ -1,4 +1,5 @@
 import pytest
+import numpy as np
 
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.envs.real_data_envs.waymo_env import WaymoEnv
@@ -36,5 +37,50 @@ def test_waymo_env(policy, render=False):
         env.close()
 
 
+def test_store_map_memory_leakage(render=False):
+    WaymoIDMPolicy.NORMAL_SPEED = 30
+    asset_path = AssetLoader.asset_path
+    env = WaymoEnv(
+        {
+            "manual_control": False,
+            "replay": True,
+            "no_traffic": False,
+            "store_map": True,
+            "use_render": render,
+            "agent_policy": WaymoReplayEgoCarPolicy,
+            "waymo_data_directory": AssetLoader.file_path(asset_path, "waymo", return_raw_style=False),
+            "case_num": 3
+        }
+    )
+    try:
+
+        memory = []
+        for _ in range(10):
+            # test twp times for testing loading stored map
+            for seed in range(3):
+                env.reset(force_seed=seed)
+                for i in range(1000):
+                    o, r, d, info = env.step([1.0, 0.])
+                    if d:
+                        assert info["arrive_dest"], "Can not arrive dest"
+                        break
+                    if i == 999:
+                        raise ValueError("Can not arrive dest")
+
+            def process_memory():
+                import psutil
+                import os
+                process = psutil.Process(os.getpid())
+                mem_info = process.memory_info()
+                return mem_info.rss
+
+            memory.append(process_memory() / 1024 / 1024)  # in mb
+        print(memory)
+        assert np.std(memory) < 0.5, "They should be almost the same"
+    finally:
+        env.close()
+
+
 if __name__ == "__main__":
-    test_waymo_env(policy=WaymoReplayEgoCarPolicy, render=True)
+    test_store_map_memory_leakage(render=True)
+    # test_waymo_env(policy=WaymoReplayEgoCarPolicy, render=True)

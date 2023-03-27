@@ -1,8 +1,8 @@
 import logging
-from metadrive.utils.export_utils.type import MetaDriveSceneElement
+from metadrive.utils.scene_export_utils.type import MetaDriveSceneElement
 
 from metadrive.base_class.base_runnable import BaseRunnable
-from metadrive.engine.engine_utils import get_engine, get_global_config
+from metadrive.engine.engine_utils import get_global_config
 
 logger = logging.getLogger(__name__)
 
@@ -76,7 +76,7 @@ class BaseMap(BaseRunnable):
         """
         Save the generated map to map file
         """
-        raise NotImplementedError
+        return dict(map_type=self.class_name, map_features=self.get_map_vector())
 
     @property
     def num_blocks(self):
@@ -119,7 +119,7 @@ class BaseMap(BaseRunnable):
             map_features[id] = {"polyline": line, "type": MetaDriveSceneElement.LANE_CENTER_LINE}
         boundary_line_vector = self.get_boundary_line_vector(interval)
         map_features.update(boundary_line_vector)
-        return {"map_features": map_features}
+        return map_features
 
     def get_boundary_line_vector(self, interval):
         return {}

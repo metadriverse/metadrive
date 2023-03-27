@@ -1,10 +1,11 @@
 import copy
+from metadrive.utils.utils import get_time_str
 import logging
 
 from metadrive.base_class.base_object import BaseObject
 from metadrive.constants import ObjectState, PolicyState
 from metadrive.manager.base_manager import BaseManager
-from metadrive.utils.map_utils import is_map_related_instance, is_map_related_class
+from metadrive.utils.utils import is_map_related_instance, is_map_related_class
 
 
 class FrameInfo:
@@ -55,8 +56,10 @@ class RecordManager(BaseManager):
             self.episode_info = dict(
                 map_data=self.engine.current_map.get_meta_data(),
                 frame=[self.reset_frame],
-                scenario_seed=self.engine.global_seed,
-                global_config=self.engine.global_config
+                scenario_index=self.engine.global_seed,
+                global_config=self.engine.global_config,
+                coordinate="MetaDrive",
+                time=get_time_str()
             )
             self.collect_manager_states()
 

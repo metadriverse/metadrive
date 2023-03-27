@@ -9,7 +9,7 @@ from metadrive.component.road_network import Road
 from metadrive.component.road_network.node_road_network import NodeRoadNetwork
 from metadrive.component.vehicle_navigation_module.base_navigation import BaseNavigation
 from metadrive.utils import clip, norm, get_np_random
-from metadrive.utils.scene_utils import ray_localization
+from metadrive.utils.pg_utils.utils import ray_localization
 from metadrive.component.pg_space import Parameter, BlockParameterSpace
 
 
@@ -38,6 +38,7 @@ class NodeNetworkNavigation(BaseNavigation):
             vehicle_config=vehicle_config
         )
         self.final_road = None
+        self.spawn_road = None
         self.current_road = None
         self.next_road = None
 
@@ -77,6 +78,7 @@ class NodeNetworkNavigation(BaseNavigation):
         :param destination: end road node or end lane index
         :return: None
         """
+        self.spawn_road = current_lane_index[:-1]
         self.checkpoints = self.map.road_network.shortest_path(current_lane_index, destination)
         self._target_checkpoints_index = [0, 1]
         # update routing info
@@ -282,3 +284,7 @@ class NodeNetworkNavigation(BaseNavigation):
         self._current_lane = lane
         assert lane_index == lane.index, "lane index mismatch!"
         return lane, lane_index
+
+    def get_state(self):
+        final_road = self.final_road
+        return {"spawn_road": self.spawn_road, "destination": (final_road.start_node, final_road.end_node)}

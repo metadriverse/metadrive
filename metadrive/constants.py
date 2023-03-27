@@ -335,6 +335,8 @@ class ObjectState:
     CLASS = "type"
     INIT_KWARGS = "config"
     NAME = "name"
+    SIZE = "size"
+    TYPE = "type"
 
 
 class PolicyState:

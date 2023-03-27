@@ -255,3 +255,6 @@ class BaseNavigation:
     def engine(self):
         from metadrive.engine.engine_utils import get_engine
         return get_engine()
+
+    def get_state(self):
+        return {}

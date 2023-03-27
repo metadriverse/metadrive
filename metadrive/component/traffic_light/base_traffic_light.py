@@ -1,7 +1,7 @@
 from metadrive.base_class.base_object import BaseObject
 from metadrive.constants import TrafficLightStatus, BodyName
 from metadrive.engine.asset_loader import AssetLoader
-from metadrive.utils.scene_utils import generate_static_box_physics_body
+from metadrive.utils.pg_utils.utils import generate_static_box_physics_body
 
 
 class BaseTrafficLight(BaseObject):

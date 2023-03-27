@@ -14,7 +14,7 @@ from metadrive.engine.engine_utils import get_engine
 from metadrive.manager.base_manager import BaseManager
 from metadrive.utils import Config
 from metadrive.utils.coordinates_shift import panda_position, panda_heading
-from metadrive.utils.scene_utils import rect_region_detection
+from metadrive.utils.pg_utils.utils import rect_region_detection
 
 
 class SpawnManager(BaseManager):
