@@ -1,8 +1,8 @@
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import figure
 
-from metadrive.utils.waymo_utils.waymo_type import WaymoLaneType, WaymoAgentType, AgentTypeClass
-from metadrive.utils.waymo_utils.waymo_type import WaymoRoadLineType, WaymoRoadEdgeType, RoadLineTypeClass, RoadEdgeTypeClass
+from metadrive.utils.waymo_utils.waymo_type import WaymoLaneType, WaymoAgentType
+from metadrive.utils.waymo_utils.waymo_type import WaymoRoadLineType, WaymoRoadEdgeType
 
 try:
     import tensorflow as tf
@@ -235,6 +235,7 @@ class CustomUnpickler(pickle.Unpickler):
 
     def find_class(self, module, name):
         if self.load_old_case:
+            raise ValueError("Old case is completely deprecated. Can't load it any more.")
             if name == "AgentType":
                 return AgentTypeClass
             elif name == "RoadLineType":
