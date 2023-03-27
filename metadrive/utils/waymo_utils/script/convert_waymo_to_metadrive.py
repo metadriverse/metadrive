@@ -19,7 +19,7 @@ try:
 except ImportError:
     pass
 from metadrive.utils.waymo_utils.protos import scenario_pb2
-from metadrive.utils.waymo_utils.utils import extract_tracks, extract_dynamic, extract_map, compute_width
+from metadrive.utils.waymo_utils.utils import extract_tracks, extract_dynamic_map_states, extract_map_features, compute_width
 import sys
 
 
@@ -45,9 +45,9 @@ def parse_data(input, output_path):
 
             scene["sdc_track_index"] = sdc_id
 
-            scene["dynamic_map_states"] = extract_dynamic(scenario.dynamic_map_states)
+            scene["dynamic_map_states"] = extract_dynamic_map_states(scenario.dynamic_map_states)
 
-            scene["map_features"] = extract_map(scenario.map_features)
+            scene["map_features"] = extract_map_features(scenario.map_features)
 
             compute_width(scene["map_features"])
 

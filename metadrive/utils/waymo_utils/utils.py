@@ -159,53 +159,72 @@ def extract_tracks(tracks, sdc_idx):
     return ret, tracks[sdc_idx].id
 
 
-def extract_map(f):
-    map_features = {}
+def extract_map_features(map_features):
+    ret = {}
 
-    for i in range(len(f)):
-        f_i = f[i]
-        id = f_i.id
-        if f_i.HasField("lane"):
-            map_features[id] = extract_center(f_i)
+    for lane_state in map_features:
+        lane_id = lane_state.id
 
-        if f_i.HasField("road_line"):
-            map_features[id] = extract_line(f_i)
+        if lane_state.HasField("lane"):
+            ret[lane_id] = extract_center(lane_state)
 
-        if f_i.HasField("road_edge"):
-            map_features[id] = extract_edge(f_i)
+        if lane_state.HasField("road_line"):
+            ret[lane_id] = extract_line(lane_state)
 
-        if f_i.HasField("stop_sign"):
-            map_features[id] = extract_stop(f_i)
+        if lane_state.HasField("road_edge"):
+            ret[lane_id] = extract_edge(lane_state)
 
-        if f_i.HasField("crosswalk"):
-            map_features[id] = extract_crosswalk(f_i)
+        if lane_state.HasField("stop_sign"):
+            ret[lane_id] = extract_stop(lane_state)
 
-        if f_i.HasField("speed_bump"):
-            map_features[id] = extract_bump(f_i)
+        if lane_state.HasField("crosswalk"):
+            ret[lane_id] = extract_crosswalk(lane_state)
 
-    return map_features
+        if lane_state.HasField("speed_bump"):
+            ret[lane_id] = extract_bump(lane_state)
+
+    return ret
 
 
-def extract_dynamic(f):
-    dynamics = {}
+def extract_dynamic_map_states(dynamic_map_states):
+    processed_dynamics_map_states = {}
+    track_length = len(dynamic_map_states)
+
+    def _traffic_light_state_template(object_id):
+        return dict(
+            type="TRAFFICLIGHT",  # TODO: Use a more formal way to specify the object type
+            state=dict(
+                stop_point=np.zeros([track_length, 3], dtype=np.float32),
+                object_state=np.zeros([track_length, ], dtype=int),
+                lane=np.zeros([track_length, ], dtype=int),
+            ),
+            metadata=dict(
+                track_length=track_length,
+                type="TRAFFICLIGHT",
+                object_id=object_id
+            )
+        )
 
     # FIXME: TODO: This function is not finished yet.
-    # for i in range(len(f)):
-    #     f_i = f[i].lane_states
-    #     tls_t = []
-    #     for j in range(len(f_i)):
-    #         f_i_j = f_i[j]
-    #         tls_t_j = dict()
-    #         tls_t_j["lane"] = f_i_j.lane
-    #         tls_t_j["state"] = TrafficSignal[f_i_j.state]
-    #         tls_t_j["stop_point"] = np.array(
-    #             [f_i_j.stop_point.x, f_i_j.stop_point.y, f_i_j.stop_point.z], dtype="float32"
-    #         )
-    #         tls_t.append(tls_t_j)
-    #
-    #     dynamics.append(tls_t)
+    for step_count, step_states in enumerate(dynamic_map_states):
+        # Each step_states is the state of all objects in one time step
+        lane_states = step_states.lane_states
 
-    return dynamics
+        for object_state in lane_states:
+            lane = object_state.lane
+
+            # We will use lane index to serve as the traffic light index.
+            if lane not in processed_dynamics_map_states:
+                object_id = str(lane)  # Always use string to specify object id
+                processed_dynamics_map_states[object_id] = _traffic_light_state_template(object_id=object_id)
+
+            processed_dynamics_map_states[object_id]["state"]["lane"][step_count] = lane
+            processed_dynamics_map_states[object_id]["state"]["object_state"][step_count] = object_state.state
+            processed_dynamics_map_states[object_id]["state"]["stop_point"][step_count][0] = object_state.stop_point.x
+            processed_dynamics_map_states[object_id]["state"]["stop_point"][step_count][1] = object_state.stop_point.y
+            processed_dynamics_map_states[object_id]["state"]["stop_point"][step_count][2] = object_state.stop_point.z
+
+    return processed_dynamics_map_states
 
 
 class CustomUnpickler(pickle.Unpickler):
