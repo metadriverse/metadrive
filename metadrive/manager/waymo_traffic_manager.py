@@ -3,7 +3,7 @@ import copy
 from metadrive.component.vehicle.vehicle_type import SVehicle
 from metadrive.manager.base_manager import BaseManager
 from metadrive.utils.waymo_utils.parse_object_state import parse_vehicle_state
-from metadrive.utils.waymo_utils.waymo_type import AgentType
+from metadrive.utils.waymo_utils.waymo_type import WaymoAgentType
 
 
 class WaymoTrafficManager(BaseManager):
@@ -20,7 +20,7 @@ class WaymoTrafficManager(BaseManager):
         self.count = 0
         self.vid_to_obj = {}
         for v_id, type_traj in self.current_traffic_data.items():
-            if AgentType.is_vehicle(type_traj["type"]) and v_id != self.sdc_track_index:
+            if WaymoAgentType.is_vehicle(type_traj["type"]) and v_id != self.sdc_track_index:
                 info = parse_vehicle_state(type_traj, self.engine.global_config["traj_start_index"])
                 if not info["valid"]:
                     continue
