@@ -4,6 +4,7 @@ from metadrive.policy.replay_policy import WaymoReplayEgoCarPolicy
 from metadrive.envs.real_data_envs.waymo_env import WaymoEnv
 import pickle
 import os
+import shutil
 
 
 def test_export_metadrive_scenario(render_export_env=False, render_load_env=False):
@@ -37,6 +38,7 @@ def test_export_metadrive_scenario(render_export_env=False, render_load_env=Fals
                 o, r, done, i = env.step([0, 0])
     finally:
         env.close()
+        shutil.rmtree(dir)
 
 
 def test_export_waymo_scenario(render_export_env=False, render_load_env=False):
@@ -68,8 +70,9 @@ def test_export_waymo_scenario(render_export_env=False, render_load_env=False):
                 o, r, done, i = env.step([0, 0])
     finally:
         env.close()
+        shutil.rmtree(dir)
 
 
 if __name__ == "__main__":
-    test_export_metadrive_scenario(render_load_env=True)
-    # test_export_waymo_scenario(render_load_env=True)
+    # test_export_metadrive_scenario(render_export_env=True, render_load_env=True)
+    test_export_waymo_scenario(render_export_env=True, render_load_env=True)
