@@ -9,6 +9,7 @@ from metadrive.policy.replay_policy import WaymoReplayEgoCarPolicy
 import numpy as np
 from metadrive.scenario import ScenarioDescription as SD
 
+
 def test_export_metadrive_scenario(render_export_env=False, render_load_env=False):
 
     # ===== Save data =====

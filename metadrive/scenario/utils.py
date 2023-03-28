@@ -44,9 +44,8 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
     """
     result = ScenarioDescription()
 
-    result[ScenarioDescription.ID] = "{}-{}".format(
-        record_episode["map_data"]["map_type"], record_episode["scenario_index"]
-    )
+    result[ScenarioDescription.ID
+           ] = "{}-{}".format(record_episode["map_data"]["map_type"], record_episode["scenario_index"])
 
     result[ScenarioDescription.METADRIVE_PROCESSED] = True
 
@@ -65,9 +64,8 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
     episode_len = len(frames)
     result[ScenarioDescription.LENGTH] = episode_len
 
-    result[ScenarioDescription.TIMESTEP] = np.asarray(
-        [scenario_log_interval * i for i in range(episode_len)], dtype=np.float32
-    )
+    result[ScenarioDescription.TIMESTEP
+           ] = np.asarray([scenario_log_interval * i for i in range(episode_len)], dtype=np.float32)
 
     # Fill tracks
     all_objs = set()
@@ -105,9 +103,7 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
     for k, manager_state in record_episode["manager_states"].items():
         if "DataManager" in k:
             if "raw_data" in manager_state:
-                original_dynamic_map = copy.deepcopy(
-                    manager_state["raw_data"][ScenarioDescription.DYNAMIC_MAP_STATES]
-                )
+                original_dynamic_map = copy.deepcopy(manager_state["raw_data"][ScenarioDescription.DYNAMIC_MAP_STATES])
                 clipped_dynamic_map = {}
                 for obj_id, obj_state in original_dynamic_map.items():
                     obj_state["state"] = {k: v[:episode_len] for k, v in obj_state["state"].items()}

@@ -87,9 +87,7 @@ class ScenarioDescription(dict):
     MAP_FEATURES = "map_features"
     LENGTH = "length"
 
-    FIRST_LEVEL_KEYS = {
-        TRACKS, VERSION, METADRIVE_PROCESSED, TIMESTEP, ID, DYNAMIC_MAP_STATES, MAP_FEATURES, LENGTH
-    }
+    FIRST_LEVEL_KEYS = {TRACKS, VERSION, METADRIVE_PROCESSED, TIMESTEP, ID, DYNAMIC_MAP_STATES, MAP_FEATURES, LENGTH}
 
     TYPE = "type"
     STATE = "state"
@@ -106,7 +104,8 @@ class ScenarioDescription(dict):
         assert set(obj_state) == cls.STATE_DICT_KEYS
 
         # Check type
-        assert MetaDriveType.has_type(obj_state[cls.TYPE]), "MetaDrive doesn't have this type: {}".format(obj_state[cls.TYPE])
+        assert MetaDriveType.has_type(obj_state[cls.TYPE]
+                                      ), "MetaDrive doesn't have this type: {}".format(obj_state[cls.TYPE])
 
         # Check state arrays temporal consistency
         assert isinstance(obj_state[cls.STATE], dict)
@@ -135,7 +134,7 @@ class ScenarioDescription(dict):
 
         scenario_length = scenario_dict[cls.LENGTH]
 
-        assert scenario_dict[cls.TIMESTEP].shape == (scenario_length,)
+        assert scenario_dict[cls.TIMESTEP].shape == (scenario_length, )
 
         # Check tracks data
         assert isinstance(scenario_dict[cls.TRACKS], dict)

@@ -578,7 +578,9 @@ class BaseEnv(gym.Env):
     def episode_step(self):
         return self.engine.episode_step if self.engine is not None else 0
 
-    def export_scenarios(self, policies: Union[dict, Callable], scenario_index: Union[list, int], time_interval=0.1, verbose=False):
+    def export_scenarios(
+        self, policies: Union[dict, Callable], scenario_index: Union[list, int], time_interval=0.1, verbose=False
+    ):
         """
         We export scenarios into a unified format with 10hz sample rate
         """
