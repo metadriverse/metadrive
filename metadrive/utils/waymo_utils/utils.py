@@ -342,6 +342,6 @@ def convert_polyline_to_metadrive(waymo_polyline, coordinate_transform=True):
     """
     waymo_polyline = np.asarray(waymo_polyline)
     if coordinate_transform:
-        return np.concatenate([waymo_polyline[:, 0], -waymo_polyline[:, 1]], axis=1)
+        return np.stack([waymo_polyline[:, 0], -waymo_polyline[:, 1]], axis=1)
     else:
         return waymo_polyline
