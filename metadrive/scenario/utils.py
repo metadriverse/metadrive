@@ -1,9 +1,9 @@
 import copy
+import time
 
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.pyplot import figure
-
 from metadrive.component.traffic_participants.cyclist import Cyclist
 from metadrive.component.traffic_participants.pedestrian import Pedestrian
 from metadrive.component.vehicle.base_vehicle import BaseVehicle
@@ -90,7 +90,9 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
     }
     for frame_idx in range(result[SD.LENGTH]):
         for id, state in frames[frame_idx].step_info.items():
+            # Fill type
             tracks[id]["type"] = get_type_from_class(state["type"])
+            tracks[id][SD.METADATA]["type"] = tracks[id]["type"]
 
             # Introducing the state item
             tracks[id]["state"]["position"][frame_idx] = state["position"]

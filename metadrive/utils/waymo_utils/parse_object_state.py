@@ -1,14 +1,14 @@
 import copy
-from metadrive.utils.math_utils import wrap_to_pi
 
 import numpy as np
-
+from metadrive.scenario.metadrive_type import MetaDriveType
 from metadrive.utils.coordinates_shift import waymo_to_metadrive_heading, waymo_to_metadrive_vector
 
 
 def parse_vehicle_state(
     object_dict, time_idx, coordinate_transform=True, check_last_state=False, sim_time_interval=0.1
 ):
+    assert object_dict["type"] == MetaDriveType.VEHICLE
 
     ret = {}
     states = object_dict["state"]
@@ -40,7 +40,6 @@ def parse_vehicle_state(
 
     ret["valid"] = states["valid"][time_idx]
     if time_idx < len(states["position"]) - 1:
-
         angular_velocity = (states["heading"][time_idx + 1] - states["heading"][time_idx]) / sim_time_interval
         if coordinate_transform:
             ret["angular_velocity"] = waymo_to_metadrive_heading(angular_velocity)
