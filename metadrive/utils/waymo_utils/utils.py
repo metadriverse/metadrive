@@ -215,7 +215,9 @@ def extract_dynamic_map_states(dynamic_map_states):
                     track_length,
                 ], dtype=int),
             ),
-            metadata=dict(track_length=track_length, type=MetaDriveType.TRAFFIC_LIGHT, object_id=object_id)
+            metadata=dict(
+                track_length=track_length, type=MetaDriveType.TRAFFIC_LIGHT, object_id=object_id, dataset="waymo"
+            )
         )
 
     # FIXME: TODO: This function is not finished yet.

@@ -61,6 +61,10 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
 
     result[SD.METADATA] = {}
     result[SD.METADATA][SD.METADRIVE_PROCESSED] = True
+    result[SD.METADATA]["dataset"] = "metadrive"
+    result[SD.METADATA]["seed"] = record_episode["global_seed"]
+    result[SD.METADATA]["scenario_id"] = record_episode["scenario_index"]
+    result[SD.METADATA][SD.CREATED_TIME] = time.time()
     result[SD.METADATA][SD.COORDINATE] = MetaDriveType.COORDINATE_METADRIVE
     result[SD.METADATA][SD.SDC_ID] = str(record_episode["frame"][0]._agent_to_object[DEFAULT_AGENT])
     result[SD.METADATA][SD.TIMESTEP] = \
@@ -84,7 +88,7 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
         )
         for k in list(all_objs)
     }
-    for frame_idx in range(len(result["ts"])):
+    for frame_idx in range(result[SD.LENGTH]):
         for id, state in frames[frame_idx].step_info.items():
             tracks[id]["type"] = get_type_from_class(state["type"])
 
@@ -107,6 +111,7 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
                 for obj_id, obj_state in original_dynamic_map.items():
                     obj_state["state"] = {k: v[:episode_len] for k, v in obj_state["state"].items()}
                     clipped_dynamic_map[obj_id] = obj_state
+                result[SD.METADATA]["history_metadata"] = manager_state["raw_data"][SD.METADATA]
 
     SD.sanity_check(result)
     return result

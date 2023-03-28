@@ -105,6 +105,9 @@ def parse_data(input, output_path, _selective=False):
             md_scenario[SD.METADATA][SD.METADRIVE_PROCESSED] = False
             md_scenario[SD.METADATA][SD.METADRIVE_PROCESSED] = False
             md_scenario[SD.METADATA][SD.SDC_ID] = str(sdc_id)
+            md_scenario[SD.METADATA]["dataset"] = "waymo"
+            md_scenario[SD.METADATA]["scenario_id"] = scenario.scenario_id
+            md_scenario[SD.METADATA]["source_file"] = str(file)
 
             SD.sanity_check(md_scenario)
 

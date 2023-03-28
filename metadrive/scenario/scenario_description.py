@@ -12,16 +12,33 @@ Example:
         # string. The version of data format.
         "version": "MetaDrive v0.3.0.1",
 
-        # bool. Whether the scenario is processed and exported by MetaDrive.
-        # Some operations may be done, such as interpolating the lane to
-        # make way points uniformly scattered in given interval.
-        "metadrive_processed": True,
 
         # int. The length of all trajectory and state arrays (T).
         "length": 200,
 
-        # np.ndarray in (T, ). The time stamp of each time step.
-        "ts": np.array([0.0, 0.1, 0.2, ...], dtype=np.float32),
+        # ===== Meta data ===
+        "metadata": {
+
+            # np.ndarray in (T, ). The time stamp of each time step.
+            "ts": np.array([0.0, 0.1, 0.2, ...], dtype=np.float32),
+
+
+            # bool. Whether the scenario is processed and exported by MetaDrive.
+            # Some operations may be done, such as interpolating the lane to
+            # make way points uniformly scattered in given interval.
+            "metadrive_processed": True,
+
+            # string. Coordinate system.
+            "coordinate": "metadrive",
+
+            # optional keys
+            "source_file": "training_20s.tfrecord-00014-of-01000",
+            "dataset": "waymo",
+            "scenario_id": "dd0c8c27fdd6ef59",  # Used in Waymo dataset
+            "seed": 512,
+            "history_metadata": {},
+
+        },
 
         # ===== Trajectories of active participants, e.g. vehicles, pedestrians =====
         # a dict mapping object ID to it's state dict.
@@ -64,7 +81,7 @@ Example:
                 # The meta data dict. Store useful information about the object
                 "metadata": {
                     "type": "TRAFFIC_LIGHT",
-                    "track_length": 200
+                    "track_length": 200,
                 }
         }
     }
@@ -98,7 +115,8 @@ class ScenarioDescription(dict):
     TIMESTEP = "ts"
     COORDINATE = "coordinate"
     SDC_ID = "sdc_id"  # Not necessary, but can be stored in metadata.
-    METADATA_KEYS = {METADRIVE_PROCESSED, COORDINATE, TIMESTEP}
+    CREATED_TIME = "created_time"
+    METADATA_KEYS = {METADRIVE_PROCESSED, COORDINATE, TIMESTEP, CREATED_TIME}
 
     ALLOW_TYPES = (int, float, str, np.ndarray, dict, list)
 
