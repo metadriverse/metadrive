@@ -6,7 +6,9 @@ import numpy as np
 from metadrive.utils.coordinates_shift import waymo_to_metadrive_heading, waymo_to_metadrive_vector
 
 
-def parse_vehicle_state(object_dict, time_idx, coordinate_transform=False, check_last_state=False, sim_time_interval=0.1):
+def parse_vehicle_state(
+    object_dict, time_idx, coordinate_transform=False, check_last_state=False, sim_time_interval=0.1
+):
 
     ret = {}
     states = object_dict["state"]
@@ -35,7 +37,6 @@ def parse_vehicle_state(object_dict, time_idx, coordinate_transform=False, check
 
     ret["length"] = states["size"][time_idx][0]
     ret["width"] = states["size"][time_idx][1]
-
 
     ret["valid"] = states["valid"][time_idx]
     if time_idx < len(states["position"]) - 1:

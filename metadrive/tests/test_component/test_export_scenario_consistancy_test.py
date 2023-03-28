@@ -109,8 +109,9 @@ def test_export_metadrive_scenario_easy(render_export_env=False, render_load_env
         )
     )
     try:
-        scenarios_restored = env.export_scenarios(policy, scenario_index=[i for i in range(scenario_num)],
-                                                  render_topdown=True)
+        scenarios_restored = env.export_scenarios(
+            policy, scenario_index=[i for i in range(scenario_num)], render_topdown=True
+        )
     finally:
         env.close()
 
@@ -148,8 +149,9 @@ def test_export_metadrive_scenario_hard(render_export_env=False, render_load_env
         )
     )
     try:
-        scenarios_restored = env.export_scenarios(policy, scenario_index=[i for i in range(scenario_num)],
-                                                  render_topdown=True)
+        scenarios_restored = env.export_scenarios(
+            policy, scenario_index=[i for i in range(scenario_num)], render_topdown=True
+        )
     finally:
         env.close()
 
