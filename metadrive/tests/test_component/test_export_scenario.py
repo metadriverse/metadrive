@@ -65,7 +65,6 @@ def test_export_waymo_scenario(render_export_env=False, render_load_env=False):
         env.close()
 
         print("===== Start restoring =====")
-
         env = WaymoEnv(
             dict(
                 agent_policy=WaymoReplayEgoCarPolicy,
