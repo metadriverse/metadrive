@@ -9,11 +9,11 @@ This script will create the output folder "processed_data" sharing the same leve
 import argparse
 import os
 import pickle
+import time
 
-from tqdm import tqdm
-
-from metadrive.constants import DATA_VERSION
 import numpy as np
+from metadrive.constants import DATA_VERSION
+from tqdm import tqdm
 
 try:
     import tensorflow as tf
@@ -108,6 +108,7 @@ def parse_data(input, output_path, _selective=False):
             md_scenario[SD.METADATA]["dataset"] = "waymo"
             md_scenario[SD.METADATA]["scenario_id"] = scenario.scenario_id
             md_scenario[SD.METADATA]["source_file"] = str(file)
+            md_scenario[SD.METADATA][SD.CREATED_TIME] = time.time()
 
             SD.sanity_check(md_scenario)
 
