@@ -20,9 +20,36 @@ try:
 except ImportError:
     pass
 from metadrive.utils.waymo_utils.protos import scenario_pb2
-from metadrive.scenario import ScenarioDescription
+from metadrive.scenario import ScenarioDescription as SD
 from metadrive.utils.waymo_utils.utils import extract_tracks, extract_dynamic_map_states, extract_map_features, compute_width
 import sys
+
+def validate_sdc_track(sdc_state):
+    """
+    This function filters the scenario based on SDC information.
+
+    Rule 1: Filter out if the trajectory length < 10
+
+    Rule 2: Filter out if the whole trajectory last < 5s, assuming sampling frequency = 10Hz.
+    """
+    valid_array = sdc_state["valid"]
+    sdc_trajectory = sdc_state["position"][valid_array, :2]
+    sdc_track_length = [
+        np.linalg.norm(sdc_trajectory[i] - sdc_trajectory[i + 1]) for i in range(sdc_trajectory.shape[0] - 1)
+    ]
+    sdc_track_length = sum(sdc_track_length)
+
+    # Rule 1
+    if sdc_track_length < 10:
+        return False
+
+    print("sdc_track_length: ", sdc_track_length)
+
+    # Rule 2
+    if valid_array.sum() < 50:
+        return False
+
+    return True
 
 
 def parse_data(input, output_path, _selective=False):
@@ -37,29 +64,36 @@ def parse_data(input, output_path, _selective=False):
         for j, data in enumerate(dataset.as_numpy_iterator()):
             scenario.ParseFromString(data)
 
-            md_scenario = ScenarioDescription()
+            md_scenario = SD()
 
-            md_scenario[ScenarioDescription.ID] = scenario.scenario_id
+            md_scenario[SD.ID] = scenario.scenario_id
 
-            md_scenario[ScenarioDescription.VERSION] = DATA_VERSION
+            md_scenario[SD.VERSION] = DATA_VERSION
 
-            md_scenario[ScenarioDescription.COORDINATE] = "metadrive"
+            md_scenario[SD.COORDINATE] = "metadrive"
 
-            md_scenario[ScenarioDescription.TIMESTEP] = \
+            md_scenario[SD.TIMESTEP] = \
                 np.asarray([ts for ts in scenario.timestamps_seconds], np.float32)
 
+            # Please note that SDC track index is not identical to sdc_id.
+            # sdc_id is a unique indicator to a track, while sdc_track_index is only the index of the sdc track
+            # in the tracks datastructure.
             tracks, sdc_id = extract_tracks(scenario.tracks, scenario.sdc_track_index)
 
-            md_scenario[ScenarioDescription.LENGTH] = list(tracks.values())[0]["state"]["position"].shape[0]
+            valid = validate_sdc_track(tracks[sdc_id][SD.STATE])
+            if not valid:
+                continue
+
+            md_scenario[SD.LENGTH] = list(tracks.values())[0]["state"]["position"].shape[0]
 
             num_agent_types = len(set(v["type"] for v in tracks.values()))
             if _selective and num_agent_types < 3:
                 print("Skip case {} because of lack of participant types {}.".format(j, num_agent_types))
                 continue
 
-            md_scenario[ScenarioDescription.TRACKS] = tracks
+            md_scenario[SD.TRACKS] = tracks
 
-            md_scenario[ScenarioDescription.METADRIVE_PROCESSED] = False
+            md_scenario[SD.METADRIVE_PROCESSED] = False
 
             # TODO: Should we create a new key for this?
             md_scenario["sdc_track_index"] = sdc_id
@@ -68,13 +102,13 @@ def parse_data(input, output_path, _selective=False):
             if _selective and not dynamic_states:
                 print("Skip case {} because of lack of traffic light.".format(j))
                 continue
-            md_scenario[ScenarioDescription.DYNAMIC_MAP_STATES] = dynamic_states
+            md_scenario[SD.DYNAMIC_MAP_STATES] = dynamic_states
 
-            md_scenario[ScenarioDescription.MAP_FEATURES] = extract_map_features(scenario.map_features)
+            md_scenario[SD.MAP_FEATURES] = extract_map_features(scenario.map_features)
 
-            compute_width(md_scenario[ScenarioDescription.MAP_FEATURES])
+            compute_width(md_scenario[SD.MAP_FEATURES])
 
-            ScenarioDescription.sanity_check(md_scenario)
+            SD.sanity_check(md_scenario)
 
             p = os.path.join(output_path, f"{cnt}.pkl")
             with open(p, "wb") as f:
