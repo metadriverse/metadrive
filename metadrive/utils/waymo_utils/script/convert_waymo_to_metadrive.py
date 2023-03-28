@@ -20,7 +20,7 @@ try:
 except ImportError:
     pass
 from metadrive.utils.waymo_utils.protos import scenario_pb2
-from metadrive.scenario import ScenarioDescription as SD
+from metadrive.scenario import ScenarioDescription as SD, MetaDriveType
 from metadrive.utils.waymo_utils.utils import extract_tracks, extract_dynamic_map_states, extract_map_features, compute_width
 import sys
 
@@ -70,7 +70,7 @@ def parse_data(input, output_path, _selective=False):
 
             md_scenario[SD.VERSION] = DATA_VERSION
 
-            md_scenario[SD.COORDINATE] = "metadrive"
+            md_scenario[SD.COORDINATE] = MetaDriveType.COORDINATE_WAYMO
 
             md_scenario[SD.TIMESTEP] = \
                 np.asarray([ts for ts in scenario.timestamps_seconds], np.float32)

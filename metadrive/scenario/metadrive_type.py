@@ -13,15 +13,19 @@ class MetaDriveType:
     UNKNOWN_LINE = "UNKNOWN_LINE"
 
     # ===== Agent type =====
-    UNSET = 'UNSET'
-    VEHICLE = 'VEHICLE'
-    PEDESTRIAN = 'PEDESTRIAN'
-    CYCLIST = 'CYCLIST'
-    OTHER = 'OTHER'
+    UNSET = "UNSET"
+    VEHICLE = "VEHICLE"
+    PEDESTRIAN = "PEDESTRIAN"
+    CYCLIST = "CYCLIST"
+    OTHER = "OTHER"
 
     # ===== Object type =====
     TRAFFIC_LIGHT = "TRAFFIC_LIGHT"
     TRAFFIC_CONE = "TRAFFIC_CONE"
+    
+    # ===== Coordinate system =====
+    COORDINATE_METADRIVE = "metadrive"
+    COORDINATE_WAYMO = "waymo"
 
     @classmethod
     def has_type(cls, type_string: str):
