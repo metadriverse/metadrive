@@ -8,7 +8,7 @@ from metadrive.component.traffic_participants.cyclist import Cyclist
 from metadrive.component.traffic_participants.pedestrian import Pedestrian
 from metadrive.component.vehicle.base_vehicle import BaseVehicle
 from metadrive.constants import DATA_VERSION, DEFAULT_AGENT
-from metadrive.scenario import MetaDriveType, ScenarioDescription
+from metadrive.scenario import MetaDriveType, ScenarioDescription as SD
 
 
 def draw_map(map_features, show=False):
@@ -42,18 +42,11 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
     For example, MetaDrive InterpolateLane will reformat the Lane data and making all waypoints equal distancing.
     We call this lane sampling rate, which is 0.2m in MetaDrive but might different in other dataset.
     """
-    result = ScenarioDescription()
+    result = SD()
 
-    result[ScenarioDescription.ID
-           ] = "{}-{}".format(record_episode["map_data"]["map_type"], record_episode["scenario_index"])
+    result[SD.ID] = "{}-{}".format(record_episode["map_data"]["map_type"], record_episode["scenario_index"])
 
-    result[ScenarioDescription.METADRIVE_PROCESSED] = True
-
-    result[ScenarioDescription.VERSION] = DATA_VERSION
-
-    result[ScenarioDescription.COORDINATE] = MetaDriveType.COORDINATE_METADRIVE
-
-    result["sdc_track_index"] = record_episode["frame"][0]._agent_to_object[DEFAULT_AGENT]
+    result[SD.VERSION] = DATA_VERSION
 
     result["map_features"] = record_episode["map_data"]["map_features"]
 
@@ -64,9 +57,13 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
     frames = [record_episode["frame"][i] for i in range(0, len(record_episode["frame"]), frames_skip)]
 
     episode_len = len(frames)
-    result[ScenarioDescription.LENGTH] = episode_len
+    result[SD.LENGTH] = episode_len
 
-    result[ScenarioDescription.TIMESTEP] = \
+    result[SD.METADATA] = {}
+    result[SD.METADATA][SD.METADRIVE_PROCESSED] = True
+    result[SD.METADATA][SD.COORDINATE] = MetaDriveType.COORDINATE_METADRIVE
+    result[SD.METADATA][SD.SDC_ID] = str(record_episode["frame"][0]._agent_to_object[DEFAULT_AGENT])
+    result[SD.METADATA][SD.TIMESTEP] = \
         np.asarray([scenario_log_interval * i for i in range(episode_len)], dtype=np.float32)
 
     # Fill tracks
@@ -98,18 +95,18 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
             tracks[id]["state"]["valid"][frame_idx] = 1
             if "size" in state:
                 tracks[id]["state"]["size"][frame_idx] = state["size"]
-    result[ScenarioDescription.TRACKS] = tracks
+    result[SD.TRACKS] = tracks
 
     # Traffic Light: Straight-through forward from original data
-    result[ScenarioDescription.DYNAMIC_MAP_STATES] = {}  # old data has no traffic light info
+    result[SD.DYNAMIC_MAP_STATES] = {}  # old data has no traffic light info
     for k, manager_state in record_episode["manager_states"].items():
         if "DataManager" in k:
             if "raw_data" in manager_state:
-                original_dynamic_map = copy.deepcopy(manager_state["raw_data"][ScenarioDescription.DYNAMIC_MAP_STATES])
+                original_dynamic_map = copy.deepcopy(manager_state["raw_data"][SD.DYNAMIC_MAP_STATES])
                 clipped_dynamic_map = {}
                 for obj_id, obj_state in original_dynamic_map.items():
                     obj_state["state"] = {k: v[:episode_len] for k, v in obj_state["state"].items()}
                     clipped_dynamic_map[obj_id] = obj_state
 
-    ScenarioDescription.sanity_check(result)
+    SD.sanity_check(result)
     return result

@@ -14,6 +14,7 @@ except ImportError:
     pass
 import pickle
 import numpy as np
+from metadrive.scenario.scenario_description import ScenarioDescription
 
 
 def extract_poly(message):
@@ -260,20 +261,23 @@ class CustomUnpickler(pickle.Unpickler):
 
 
 def read_waymo_data(file_path):
+    """
+    TODO: This function transform data again. We should remove it and let MetaDrive read native data completly.
+    """
     with open(file_path, "rb") as f:
         # unpickler = CustomUnpickler(f)
         data = pickle.load(f)
     new_track = {}
-    for key, value in data["tracks"].items():
+    for key, value in data[ScenarioDescription.TRACKS].items():
         new_track[str(key)] = value
     data["tracks"] = new_track
-    data["sdc_track_index"] = str(data["sdc_track_index"])
+    data["sdc_track_index"] = str(data[ScenarioDescription.METADATA][ScenarioDescription.SDC_ID])
     return data
 
 
 def draw_waymo_map(data):
     figure(figsize=(8, 6), dpi=500)
-    for key, value in data["map_features"].items():
+    for key, value in data[ScenarioDescription.MAP_FEATURES].items():
         if value.get("type", None) == "center_lane":
             plt.scatter([x[0] for x in value["polyline"]], [y[1] for y in value["polyline"]], s=0.5)
         elif value.get("type", None) == "road_edge":

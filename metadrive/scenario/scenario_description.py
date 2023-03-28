@@ -80,26 +80,59 @@ class ScenarioDescription(dict):
     """
     TRACKS = "tracks"
     VERSION = "version"
-    METADRIVE_PROCESSED = "metadrive_processed"
-    TIMESTEP = "ts"
     ID = "id"
     DYNAMIC_MAP_STATES = "dynamic_map_states"
     MAP_FEATURES = "map_features"
     LENGTH = "length"
-    COORDINATE = "coordinate"
-
+    METADATA = "metadata"
     FIRST_LEVEL_KEYS = {
-        TRACKS, VERSION, METADRIVE_PROCESSED, TIMESTEP, ID, DYNAMIC_MAP_STATES, MAP_FEATURES, LENGTH, COORDINATE
+        TRACKS, VERSION, ID, DYNAMIC_MAP_STATES, MAP_FEATURES, LENGTH, METADATA
     }
 
     TYPE = "type"
     STATE = "state"
-    METADATA = "metadata"
     OBJECT_ID = "object_id"
-
     STATE_DICT_KEYS = {TYPE, STATE, METADATA}
 
+    METADRIVE_PROCESSED = "metadrive_processed"
+    TIMESTEP = "ts"
+    COORDINATE = "coordinate"
+    SDC_ID = "sdc_id"  # Not necessary, but can be stored in metadata.
+    METADATA_KEYS = {METADRIVE_PROCESSED, COORDINATE, TIMESTEP}
+
     ALLOW_TYPES = (int, float, str, np.ndarray, dict, list)
+
+    @classmethod
+    def sanity_check(cls, scenario_dict):
+        # Whether input has all required keys
+        assert cls.FIRST_LEVEL_KEYS.issubset(set(scenario_dict.keys())), \
+            "You lack these keys in first level: {}".format(cls.FIRST_LEVEL_KEYS.difference(set(scenario_dict.keys())))
+
+        # Check types, only native python objects
+        # This is to avoid issue in pickle deserialization
+        _recursive_check_type(scenario_dict, cls.ALLOW_TYPES)
+
+        scenario_length = scenario_dict[cls.LENGTH]
+
+
+
+        # Check tracks data
+        assert isinstance(scenario_dict[cls.TRACKS], dict)
+        for obj_id, obj_state in scenario_dict[cls.TRACKS].items():
+            cls._check_object_state_dict(obj_state, scenario_length=scenario_length, object_id=obj_id)
+
+        # Check dynamic_map_state
+        assert isinstance(scenario_dict[cls.DYNAMIC_MAP_STATES], dict)
+        for obj_id, obj_state in scenario_dict[cls.DYNAMIC_MAP_STATES].items():
+            cls._check_object_state_dict(obj_state, scenario_length=scenario_length, object_id=obj_id)
+
+        # Check metadata
+        assert isinstance(scenario_dict[cls.METADATA], dict)
+        assert cls.METADATA_KEYS.issubset(set(scenario_dict[cls.METADATA].keys())), \
+            "You lack these keys in metadata: {}".format(
+                cls.METADATA_KEYS.difference(set(scenario_dict[cls.METADATA].keys()))
+            )
+        assert scenario_dict[cls.METADATA][cls.TIMESTEP].shape == (scenario_length,)
 
     @classmethod
     def _check_object_state_dict(cls, obj_state, scenario_length, object_id):
@@ -125,29 +158,6 @@ class ScenarioDescription(dict):
         if cls.OBJECT_ID in obj_state[cls.METADATA]:
             assert obj_state[cls.METADATA][cls.OBJECT_ID] == object_id
 
-    @classmethod
-    def sanity_check(cls, scenario_dict):
-        # Whether input has all required keys
-        assert cls.FIRST_LEVEL_KEYS.issubset(set(scenario_dict.keys())), \
-            "You lack these keys in first level: {}".format(cls.FIRST_LEVEL_KEYS.difference(set(scenario_dict.keys())))
-
-        # Check types, only native python objects
-        # This is to avoid issue in pickle deserialization
-        _recursive_check_type(scenario_dict, cls.ALLOW_TYPES)
-
-        scenario_length = scenario_dict[cls.LENGTH]
-
-        assert scenario_dict[cls.TIMESTEP].shape == (scenario_length, )
-
-        # Check tracks data
-        assert isinstance(scenario_dict[cls.TRACKS], dict)
-        for obj_id, obj_state in scenario_dict[cls.TRACKS].items():
-            cls._check_object_state_dict(obj_state, scenario_length=scenario_length, object_id=obj_id)
-
-        # Check dynamic_map_state
-        assert isinstance(scenario_dict[cls.DYNAMIC_MAP_STATES], dict)
-        for obj_id, obj_state in scenario_dict[cls.DYNAMIC_MAP_STATES].items():
-            cls._check_object_state_dict(obj_state, scenario_length=scenario_length, object_id=obj_id)
 
 
 def _recursive_check_type(obj, allow_types, depth=0):

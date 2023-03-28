@@ -70,11 +70,6 @@ def parse_data(input, output_path, _selective=False):
 
             md_scenario[SD.VERSION] = DATA_VERSION
 
-            md_scenario[SD.COORDINATE] = MetaDriveType.COORDINATE_WAYMO
-
-            md_scenario[SD.TIMESTEP] = \
-                np.asarray([ts for ts in scenario.timestamps_seconds], np.float32)
-
             # Please note that SDC track index is not identical to sdc_id.
             # sdc_id is a unique indicator to a track, while sdc_track_index is only the index of the sdc track
             # in the tracks datastructure.
@@ -93,11 +88,6 @@ def parse_data(input, output_path, _selective=False):
 
             md_scenario[SD.TRACKS] = tracks
 
-            md_scenario[SD.METADRIVE_PROCESSED] = False
-
-            # TODO: Should we create a new key for this?
-            md_scenario["sdc_track_index"] = sdc_id
-
             dynamic_states = extract_dynamic_map_states(scenario.dynamic_map_states)
             if _selective and not dynamic_states:
                 print("Skip case {} because of lack of traffic light.".format(j))
@@ -107,6 +97,14 @@ def parse_data(input, output_path, _selective=False):
             md_scenario[SD.MAP_FEATURES] = extract_map_features(scenario.map_features)
 
             compute_width(md_scenario[SD.MAP_FEATURES])
+
+            md_scenario[SD.METADATA] = {}
+            md_scenario[SD.METADATA][SD.COORDINATE] = MetaDriveType.COORDINATE_WAYMO
+            md_scenario[SD.METADATA][SD.TIMESTEP] = \
+                np.asarray([ts for ts in scenario.timestamps_seconds], np.float32)
+            md_scenario[SD.METADATA][SD.METADRIVE_PROCESSED] = False
+            md_scenario[SD.METADATA][SD.METADRIVE_PROCESSED] = False
+            md_scenario[SD.METADATA][SD.SDC_ID] = str(sdc_id)
 
             SD.sanity_check(md_scenario)
 
