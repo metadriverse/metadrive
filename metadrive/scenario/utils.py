@@ -51,6 +51,8 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
 
     result[ScenarioDescription.VERSION] = DATA_VERSION
 
+    result[ScenarioDescription.COORDINATE] = "metadrive"
+
     result["sdc_track_index"] = record_episode["frame"][0]._agent_to_object[DEFAULT_AGENT]
 
     result["map_features"] = record_episode["map_data"]["map_features"]

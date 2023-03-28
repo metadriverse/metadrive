@@ -43,10 +43,10 @@ def parse_data(input, output_path, _selective=False):
 
             md_scenario[ScenarioDescription.VERSION] = DATA_VERSION
 
-            md_scenario["version"] = DATA_VERSION
+            md_scenario[ScenarioDescription.COORDINATE] = "metadrive"
 
-            md_scenario[ScenarioDescription.TIMESTEP
-                        ] = np.asarray([ts for ts in scenario.timestamps_seconds], np.float32)
+            md_scenario[ScenarioDescription.TIMESTEP] = \
+                np.asarray([ts for ts in scenario.timestamps_seconds], np.float32)
 
             tracks, sdc_id = extract_tracks(scenario.tracks, scenario.sdc_track_index)
 

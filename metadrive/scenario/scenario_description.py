@@ -86,8 +86,11 @@ class ScenarioDescription(dict):
     DYNAMIC_MAP_STATES = "dynamic_map_states"
     MAP_FEATURES = "map_features"
     LENGTH = "length"
+    COORDINATE = "coordinate"
 
-    FIRST_LEVEL_KEYS = {TRACKS, VERSION, METADRIVE_PROCESSED, TIMESTEP, ID, DYNAMIC_MAP_STATES, MAP_FEATURES, LENGTH}
+    FIRST_LEVEL_KEYS = {
+        TRACKS, VERSION, METADRIVE_PROCESSED, TIMESTEP, ID, DYNAMIC_MAP_STATES, MAP_FEATURES, LENGTH, COORDINATE
+    }
 
     TYPE = "type"
     STATE = "state"
