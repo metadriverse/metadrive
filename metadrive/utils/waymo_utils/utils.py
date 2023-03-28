@@ -33,6 +33,8 @@ def extract_boundaries(fb):
         c["lane_end_index"] = fb[k].lane_end_index
         c["boundary_type"] = WaymoRoadLineType.from_waymo(fb[k].boundary_type)
         c["boundary_feature_id"] = fb[k].boundary_feature_id
+        for key in c:
+            c[key] = str(c[key])
         b.append(c)
 
     return b
@@ -47,6 +49,8 @@ def extract_neighbors(fb):
         nb["self_end_index"] = fb[k].self_end_index
         nb["neighbor_start_index"] = fb[k].neighbor_start_index
         nb["neighbor_end_index"] = fb[k].neighbor_end_index
+        for key in nb:
+            nb[key] = str(nb[key])
         nb["boundaries"] = extract_boundaries(fb[k].boundaries)
         nbs.append(nb)
     return nbs
@@ -289,16 +293,19 @@ def nearest_point(point, line):
 def extract_width(map, polyline, boundary):
     l_width = np.zeros(polyline.shape[0], dtype="float32")
     for b in boundary:
-        b_feat_id = str(b["boundary_feature_id"])
+
+        boundary_int = {k: int(v) if k != "boundary_type" else v for k, v in b.items()}  # All values are int
+
+        b_feat_id = str(boundary_int["boundary_feature_id"])
         lb = map[b_feat_id]
         b_polyline = lb["polyline"][:, :2]
 
-        start_p = polyline[b["lane_start_index"]]
+        start_p = polyline[boundary_int["lane_start_index"]]
         start_index = nearest_point(start_p, b_polyline)
-        seg_len = b["lane_end_index"] - b["lane_start_index"]
+        seg_len = boundary_int["lane_end_index"] - boundary_int["lane_start_index"]
         end_index = min(start_index + seg_len, lb["polyline"].shape[0] - 1)
-        length = min(end_index - start_index, b["lane_end_index"] - b["lane_start_index"]) + 1
-        self_range = range(b["lane_start_index"], b["lane_start_index"] + length)
+        length = min(end_index - start_index, seg_len) + 1
+        self_range = range(boundary_int["lane_start_index"], boundary_int["lane_start_index"] + length)
         bound_range = range(start_index, start_index + length)
         centerLane = polyline[self_range]
         bound = b_polyline[bound_range]

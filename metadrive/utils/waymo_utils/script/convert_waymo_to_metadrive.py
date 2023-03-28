@@ -25,7 +25,7 @@ from metadrive.utils.waymo_utils.utils import extract_tracks, extract_dynamic_ma
 import sys
 
 
-def parse_data(input, output_path):
+def parse_data(input, output_path, _selective=False):
     cnt = 0
     scenario = scenario_pb2.Scenario()
     file_list = os.listdir(input)
@@ -53,6 +53,11 @@ def parse_data(input, output_path):
 
             md_scenario[ScenarioDescription.LENGTH] = list(tracks.values())[0]["state"]["position"].shape[0]
 
+            num_agent_types = len(set(v["type"] for v in tracks.values()))
+            if _selective and num_agent_types < 3:
+                print("Skip case {} because of lack of participant types {}.".format(j, num_agent_types))
+                continue
+
             md_scenario[ScenarioDescription.TRACKS] = tracks
 
             md_scenario[ScenarioDescription.METADRIVE_PROCESSED] = False
@@ -60,7 +65,11 @@ def parse_data(input, output_path):
             # TODO: Should we create a new key for this?
             md_scenario["sdc_track_index"] = sdc_id
 
-            md_scenario[ScenarioDescription.DYNAMIC_MAP_STATES] = extract_dynamic_map_states(scenario.dynamic_map_states)
+            dynamic_states = extract_dynamic_map_states(scenario.dynamic_map_states)
+            if _selective and not dynamic_states:
+                print("Skip case {} because of lack of traffic light.".format(j))
+                continue
+            md_scenario[ScenarioDescription.DYNAMIC_MAP_STATES] = dynamic_states
 
             md_scenario[ScenarioDescription.MAP_FEATURES] = extract_map_features(scenario.map_features)
 
@@ -79,6 +88,7 @@ def parse_data(input, output_path):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--folder", required=True, help="The data folder storing raw tfrecord from Waymo dataset.")
+    parser.add_argument("--selective", action="store_true", help="Whether select high-diversity valuable case.")
     args = parser.parse_args()
 
     case_data_path = args.folder
@@ -91,7 +101,7 @@ if __name__ == "__main__":
 
     # parse raw data from input path to output path,
     # there is 1000 raw data in google cloud, each of them produce about 500 pkl file
-    parse_data(raw_data_path, output_path)
+    parse_data(raw_data_path, output_path, _selective=args.selective)
     sys.exit()
     # file_path = AssetLoader.file_path("waymo", "processed", "0.pkl", return_raw_style=False)
     # data = read_waymo_data(file_path)

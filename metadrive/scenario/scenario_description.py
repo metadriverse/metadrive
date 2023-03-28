@@ -106,7 +106,7 @@ class ScenarioDescription(dict):
         assert set(obj_state) == cls.STATE_DICT_KEYS
 
         # Check type
-        assert MetaDriveType.has_type(obj_state[cls.TYPE])
+        assert MetaDriveType.has_type(obj_state[cls.TYPE]), "MetaDrive doesn't have this type: {}".format(obj_state[cls.TYPE])
 
         # Check state arrays temporal consistency
         assert isinstance(obj_state[cls.STATE], dict)

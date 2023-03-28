@@ -1,10 +1,11 @@
+import os
+import pickle
+import shutil
+
 from metadrive.envs.metadrive_env import MetaDriveEnv
+from metadrive.envs.real_data_envs.waymo_env import WaymoEnv
 from metadrive.policy.idm_policy import IDMPolicy
 from metadrive.policy.replay_policy import WaymoReplayEgoCarPolicy
-from metadrive.envs.real_data_envs.waymo_env import WaymoEnv
-import pickle
-import os
-import shutil
 
 
 def test_export_metadrive_scenario(render_export_env=False, render_load_env=False):
@@ -55,13 +56,15 @@ def test_export_waymo_scenario(render_export_env=False, render_load_env=False):
     policy = lambda x: [0, 1]
     dir = None
     try:
-        scenarios = env.export_scenarios(policy, scenario_index=[i for i in range(scenario_num)])
+        scenarios = env.export_scenarios(policy, scenario_index=[i for i in range(scenario_num)], verbose=True)
         dir = os.path.join(os.path.dirname(__file__), "test_export")
         os.makedirs(dir, exist_ok=True)
         for i, data in scenarios.items():
             with open(os.path.join(dir, "{}.pkl".format(i)), "wb+") as file:
                 pickle.dump(data, file)
         env.close()
+
+        print("===== Start restoring =====")
 
         env = WaymoEnv(
             dict(
@@ -72,10 +75,14 @@ def test_export_waymo_scenario(render_export_env=False, render_load_env=False):
             )
         )
         for index in range(scenario_num):
+            print("Start replaying scenario {}".format(index))
             env.reset(force_seed=index)
             done = False
+            count = 0
             while not done:
                 o, r, done, i = env.step([0, 0])
+                count += 1
+            print("Finish replaying scenario {} with step {}".format(index, count))
     finally:
         env.close()
         if dir is not None:
@@ -84,4 +91,4 @@ def test_export_waymo_scenario(render_export_env=False, render_load_env=False):
 
 if __name__ == "__main__":
     # test_export_metadrive_scenario(render_export_env=False, render_load_env=False)
-    test_export_waymo_scenario(render_export_env=False, render_load_env=False)
+    test_export_waymo_scenario(render_export_env=True, render_load_env=True)

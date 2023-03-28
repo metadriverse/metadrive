@@ -62,11 +62,11 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
 
     frames = [record_episode["frame"][i] for i in range(0, len(record_episode["frame"]), frames_skip)]
 
-    length = len(frames)
-    result[ScenarioDescription.LENGTH] = length
+    episode_len = len(frames)
+    result[ScenarioDescription.LENGTH] = episode_len
 
     result[ScenarioDescription.TIMESTEP] = np.asarray(
-        [scenario_log_interval * i for i in range(length)], dtype=np.float32
+        [scenario_log_interval * i for i in range(episode_len)], dtype=np.float32
     )
 
     # Fill tracks
@@ -77,13 +77,13 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
         k: dict(
             type=MetaDriveType.UNSET,
             state=dict(
-                position=np.zeros(shape=(length, 3)),
-                size=np.zeros(shape=(length, 3)),
-                heading=np.zeros(shape=(length, 1)),
-                velocity=np.zeros(shape=(length, 2)),
-                valid=np.zeros(shape=(length, 1))
+                position=np.zeros(shape=(episode_len, 3)),
+                size=np.zeros(shape=(episode_len, 3)),
+                heading=np.zeros(shape=(episode_len, 1)),
+                velocity=np.zeros(shape=(episode_len, 2)),
+                valid=np.zeros(shape=(episode_len, 1))
             ),
-            metadata=dict(track_length=length, type=MetaDriveType.UNSET, object_id=k)
+            metadata=dict(track_length=episode_len, type=MetaDriveType.UNSET, object_id=k)
         )
         for k in list(all_objs)
     }
@@ -105,9 +105,13 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
     for k, manager_state in record_episode["manager_states"].items():
         if "DataManager" in k:
             if "raw_data" in manager_state:
-                result[ScenarioDescription.DYNAMIC_MAP_STATES] = copy.deepcopy(
+                original_dynamic_map = copy.deepcopy(
                     manager_state["raw_data"][ScenarioDescription.DYNAMIC_MAP_STATES]
                 )
+                clipped_dynamic_map = {}
+                for obj_id, obj_state in original_dynamic_map.items():
+                    obj_state["state"] = {k: v[:episode_len] for k, v in obj_state["state"].items()}
+                    clipped_dynamic_map[obj_id] = obj_state
 
     ScenarioDescription.sanity_check(result)
     return result
