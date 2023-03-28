@@ -66,8 +66,8 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
     episode_len = len(frames)
     result[ScenarioDescription.LENGTH] = episode_len
 
-    result[ScenarioDescription.TIMESTEP
-           ] = np.asarray([scenario_log_interval * i for i in range(episode_len)], dtype=np.float32)
+    result[ScenarioDescription.TIMESTEP] = \
+        np.asarray([scenario_log_interval * i for i in range(episode_len)], dtype=np.float32)
 
     # Fill tracks
     all_objs = set()
