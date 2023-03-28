@@ -153,14 +153,14 @@ def extract_tracks(tracks, sdc_idx):
         obj_state["state"]["size"] = np.stack([l, w, h], 1).astype("float32")
 
         heading = [state.heading for state in obj.states]
-        obj_state["state"]["heading"] = np.array(heading, dtype="float32")[:, np.newaxis]
+        obj_state["state"]["heading"] = np.array(heading, dtype="float32")
 
         vx = [state.velocity_x for state in obj.states]
         vy = [state.velocity_y for state in obj.states]
         obj_state["state"]["velocity"] = np.stack([vx, vy], 1).astype("float32")
 
         valid = [state.valid for state in obj.states]
-        obj_state["state"]["valid"] = np.array(valid)[:, np.newaxis]
+        obj_state["state"]["valid"] = np.array(valid, dtype=bool)
 
         obj_state["metadata"] = dict(
             track_length=obj_state["state"]["position"].shape[0], type=metadrive_type, object_id=object_id
@@ -168,7 +168,7 @@ def extract_tracks(tracks, sdc_idx):
 
         ret[object_id] = obj_state
 
-    return ret, tracks[sdc_idx].id
+    return ret, str(tracks[sdc_idx].id)
 
 
 def extract_map_features(map_features):
