@@ -336,7 +336,7 @@ def compute_width(map):
 # parse raw data from input path to output path
 
 
-def convert_polyline_to_metadrive(waymo_polyline, coordinate_transform=False):
+def convert_polyline_to_metadrive(waymo_polyline, coordinate_transform=True):
     """
     Waymo lane is in a different coordinate system, using them after converting
     """
