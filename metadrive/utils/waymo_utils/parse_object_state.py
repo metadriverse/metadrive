@@ -6,7 +6,7 @@ import numpy as np
 from metadrive.utils.coordinates_shift import waymo_to_metadrive_heading, waymo_to_metadrive_vector
 
 
-def parse_vehicle_state(object_dict, time_idx, check_last_state=False, sim_time_interval=0.1):
+def parse_vehicle_state(object_dict, time_idx, coordinate_transform=False, check_last_state=False, sim_time_interval=0.1):
 
     ret = {}
     states = object_dict["state"]
@@ -24,23 +24,33 @@ def parse_vehicle_state(object_dict, time_idx, check_last_state=False, sim_time_
             if np.linalg.norm(p_1 - p_2) > 100:
                 time_idx = current_idx
                 break
+    if coordinate_transform:
+        ret["position"] = waymo_to_metadrive_vector(states["position"][time_idx][:2])
+        ret["heading"] = waymo_to_metadrive_heading(states["heading"][time_idx])
+        ret["velocity"] = waymo_to_metadrive_vector(states["velocity"][time_idx])
+    else:
+        ret["position"] = states["position"][time_idx][:2]
+        ret["heading"] = states["heading"][time_idx]
+        ret["velocity"] = states["velocity"][time_idx]
 
-    ret["position"] = waymo_to_metadrive_vector(states["position"][time_idx][:2])
     ret["length"] = states["size"][time_idx][0]
     ret["width"] = states["size"][time_idx][1]
-    ret["heading"] = waymo_to_metadrive_heading(states["heading"][time_idx])
-    ret["velocity"] = waymo_to_metadrive_vector(states["velocity"][time_idx])
+
+
     ret["valid"] = states["valid"][time_idx]
     if time_idx < len(states["position"]) - 1:
-        ret["angular_velocity"] = waymo_to_metadrive_heading(
-            (states["heading"][time_idx + 1] - states["heading"][time_idx]) / sim_time_interval
-        )
+
+        angular_velocity = (states["heading"][time_idx + 1] - states["heading"][time_idx]) / sim_time_interval
+        if coordinate_transform:
+            ret["angular_velocity"] = waymo_to_metadrive_heading(angular_velocity)
+        else:
+            ret["angular_velocity"] = angular_velocity
     else:
         ret["angular_velocity"] = 0
     return ret
 
 
-def parse_full_trajectory(object_dict):
+def parse_full_trajectory(object_dict, coordinate_transform=False):
     positions = object_dict["state"]["position"]
     index = len(positions)
     for current_idx in range(len(positions) - 1):
@@ -52,6 +62,7 @@ def parse_full_trajectory(object_dict):
     positions = positions[:index]
     trajectory = copy.deepcopy(positions[:, :2])
     # convert to metadrive coordinate
-    trajectory = waymo_to_metadrive_vector(trajectory)
+    if coordinate_transform:
+        trajectory = waymo_to_metadrive_vector(trajectory)
 
     return trajectory
