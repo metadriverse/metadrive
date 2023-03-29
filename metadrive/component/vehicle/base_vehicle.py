@@ -333,7 +333,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         default: 3rd gear, try to use ae^bx to fit it, dp: (90, 8), (130, 12)
         :return: None
         """
-        distance = norm(*(self.last_position - self.position)) / 1000  # km
+        distance = norm(self.last_position[0] - self.position[0], self.last_position[1] - self.position[1]) / 1000  # km
         step_energy = 3.25 * math.pow(np.e, 0.01 * self.speed_km_h) * distance / 100
         # step_energy is in Liter, we return mL
         step_energy = step_energy * 1000
@@ -382,7 +382,14 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self.spawn_place = position
         self.set_heading_theta(heading)
         self.set_static(False)
-        self.set_position(position, self.HEIGHT / 2)
+
+        if len(position) == 2:
+            self.set_position(position, height=self.HEIGHT / 2)
+        elif len(position) == 3:
+            self.set_position(position[:2], height=position[-1])
+        else:
+            raise ValueError()
+
         self.update_map_info(map)
         self.body.clearForces()
         self.body.setLinearVelocity(Vec3(0, 0, 0))
@@ -812,8 +819,12 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         super(BaseVehicle, self).set_panda_pos(pos)
         self.last_position = self.position
 
-    def set_position(self, *args, **kwargs):
-        super(BaseVehicle, self).set_position(*args, **kwargs)
+    def set_position(self, position, height=None):
+        if len(position) == 3:
+            assert height is None
+            height = position[-1]
+            position = position[:2]
+        super(BaseVehicle, self).set_position(position, height)
         self.last_position = self.position
 
     def get_state(self):

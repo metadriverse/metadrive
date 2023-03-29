@@ -65,11 +65,13 @@ def metadrive_heading(heading: float) -> float:
 
 
 def waymo_to_metadrive_vector(vector):
-    vector = np.array(vector)
-    if len(vector.shape) == 1:
+    vector = np.array(vector, copy=True)
+    if vector.ndim == 1:
         vector[1] *= -1
-    else:
+    elif vector.ndim == 2:
         vector[:, 1] *= -1
+    else:
+        print(11111)
     return vector
 
 

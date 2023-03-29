@@ -267,6 +267,7 @@ class BaseObject(BaseRunnable):
         """
         if height is None:
             height = self.origin.getPos()[-1]
+        assert len(position) == 2
         self.origin.setPos(panda_position(position, height))
 
     @property
