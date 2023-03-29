@@ -14,6 +14,7 @@ class FrameInfo:
         # used to track the objects spawn info
         self.spawn_info = {}
         self.policy_info = {}
+        self.policy_spawn_info = {}
         # used to track update objects state in the scene
         self.step_info = {}
         # used to track the objects cleared
@@ -138,8 +139,8 @@ class RecordManager(BaseManager):
         for k, v in kwargs.items():
             filtered_kwargs[k] = v if not isinstance(v, BaseObject) else BaseObject
         if self.engine.record_episode:
-            assert name not in self.current_frame.policy_info, "Duplicated record!"
-            self.current_frame.policy_info[name] = {
+            assert name not in self.current_frame.policy_spawn_info, "Duplicated record!"
+            self.current_frame.policy_spawn_info[name] = {
                 PolicyState.POLICY_CLASS: policy_class,
                 PolicyState.ARGS: filtered_args,
                 PolicyState.KWARGS: filtered_kwargs,
