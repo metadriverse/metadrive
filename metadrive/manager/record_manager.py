@@ -39,7 +39,7 @@ class RecordManager(BaseManager):
         super(RecordManager, self).__init__()
         self.episode_info = None
         self.current_frames = None
-        self.current_step = 0
+        self.current_frame_count = 0
         self.reset_frame = None
 
     def before_reset(self):
@@ -55,7 +55,7 @@ class RecordManager(BaseManager):
             self._update_objects_states()
             self.episode_info = dict(
                 map_data=self.engine.current_map.get_meta_data(),
-                frame=[self.reset_frame],
+                frame=[[self.reset_frame]],
                 scenario_index=self.engine.global_seed,
                 global_config=self.engine.global_config,
                 global_seed=self.engine.global_seed,
@@ -66,7 +66,7 @@ class RecordManager(BaseManager):
 
             self.current_frames = None
             self.reset_frame = None
-            self.current_step = 0
+            self.current_frame_count = 0
 
     def collect_manager_states(self):
         assert self.episode_step == 0, "This func can only be called after env.reset() without any env.step() called"
@@ -82,18 +82,18 @@ class RecordManager(BaseManager):
             self.current_frames = [
                 FrameInfo(self.engine.episode_step) for _ in range(self.engine.global_config["decision_repeat"])
             ]
-            self.current_step = 0
+            self.current_frame_count = 0
         return {}
 
     def step(self, *args, **kwargs):
         if self.engine.record_episode:
             self._update_objects_states()
-            self.current_step += 1 if self.current_step < len(self.current_frames) - 1 else 0
+            self.current_frame_count += 1 if self.current_frame_count < len(self.current_frames) - 1 else 0
             # self.episode_info["frame"].append(self.current_frames.pop())
 
     def after_step(self, *args, **kwargs) -> dict:
-        if self.engine.record_episode and self.current_step:
-            self.episode_info["frame"] += self.current_frames
+        if self.engine.record_episode and self.current_frame_count:
+            self.episode_info["frame"].append(self.current_frames)
         return {}
 
     def _update_objects_states(self):
@@ -154,7 +154,7 @@ class RecordManager(BaseManager):
 
     @property
     def current_frame(self):
-        return self.current_frames[self.current_step] if self.reset_frame is None else self.reset_frame
+        return self.current_frames[self.current_frame_count] if self.reset_frame is None else self.reset_frame
 
     def set_state(self, state: dict, old_name_to_current=None):
         return {}

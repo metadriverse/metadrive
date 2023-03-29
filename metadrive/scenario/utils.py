@@ -54,7 +54,7 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
 
     frames_skip = int(scenario_log_interval / record_episode["global_config"]["physics_world_step_size"])
 
-    frames = [record_episode["frame"][i] for i in range(0, len(record_episode["frame"]), frames_skip)]
+    frames = [step_frame_list[0] for step_frame_list in record_episode["frame"]]
 
     episode_len = len(frames)
     result[SD.LENGTH] = episode_len
@@ -66,7 +66,7 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
     result[SD.METADATA]["scenario_id"] = record_episode["scenario_index"]
     result[SD.METADATA][SD.CREATED_TIME] = time.time()
     result[SD.METADATA][SD.COORDINATE] = MetaDriveType.COORDINATE_METADRIVE
-    result[SD.METADATA][SD.SDC_ID] = str(record_episode["frame"][0]._agent_to_object[DEFAULT_AGENT])
+    result[SD.METADATA][SD.SDC_ID] = str(frames[0]._agent_to_object[DEFAULT_AGENT])
     result[SD.METADATA][SD.TIMESTEP] = \
         np.asarray([scenario_log_interval * i for i in range(episode_len)], dtype=np.float32)
 
