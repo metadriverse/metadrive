@@ -1,7 +1,7 @@
 import logging
+import math
 from typing import Dict
 
-import math
 import numpy as np
 import seaborn as sns
 from panda3d.bullet import BulletWorld, BulletBodyNode
@@ -265,9 +265,13 @@ class BaseObject(BaseRunnable):
         Set this object to a place, the default value is the regular height for red car
         :param position: 2d array or list
         """
-        if height is None:
-            height = self.origin.getPos()[-1]
-        assert len(position) == 2
+        assert len(position) == 2 or len(position) == 3
+        if len(position) == 3:
+            height = position[-1]
+            position = position[:-1]
+        else:
+            if height is None:
+                height = self.origin.getPos()[-1]
         self.origin.setPos(panda_position(position, height))
 
     @property

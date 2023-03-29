@@ -94,7 +94,7 @@ class WaymoLane(PointLane):
                 middle = self.position(self.length * (i + .5) / segment_num, 0)
                 end = self.position(self.length * (i + 1) / segment_num, 0)
                 direction_v = end - middle
-                theta = -math.atan2(direction_v[1], direction_v[0])
+                theta = math.atan2(direction_v[1], direction_v[0])
                 length = self.length
                 self._construct_lane_only_vis_segment(
                     block, middle, self.VIS_LANE_WIDTH, length * 1.3 / segment_num, theta

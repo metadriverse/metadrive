@@ -1,4 +1,5 @@
 import math
+from metadrive.utils.coordinates_shift import panda_heading
 
 from metadrive.component.block.base_block import BaseBlock
 from metadrive.component.lane.waymo_lane import WaymoLane
@@ -103,7 +104,7 @@ class WaymoBlock(BaseBlock):
             if segment == segment_num - 1:
                 lane_end = line.get_point(line.length)
             direction_v = lane_end - lane_start
-            theta = -math.atan2(direction_v[1], direction_v[0])
+            theta = panda_heading(math.atan2(direction_v[1], direction_v[0]))
             if segment == segment_num - 1:
                 factor = 1
             else:

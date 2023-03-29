@@ -235,7 +235,6 @@ class BaseEngine(EngineCore, Randomizable):
         _debug_memory_usage = False
 
         if _debug_memory_usage:
-
             def process_memory():
                 import psutil
                 import os
@@ -312,9 +311,14 @@ class BaseEngine(EngineCore, Randomizable):
         """
         for i in range(step_num):
             # simulate or replay
-            for manager in self.managers.values():
-                manager.step()
+            for name, manager in self.managers.items():
+                if name != "record_manager":
+                    manager.step()
             self.step_physics_world()
+            # the recording should happen after step physics world
+            if "record_manager" in self.managers:
+                self.record_manager.step()
+
             if self.force_fps.real_time_simulation and i < step_num - 1:
                 self.task_manager.step()
         #  panda3d render and garbage collecting loop

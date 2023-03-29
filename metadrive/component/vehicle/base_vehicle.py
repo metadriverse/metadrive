@@ -820,10 +820,6 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self.last_position = self.position
 
     def set_position(self, position, height=None):
-        if len(position) == 3:
-            assert height is None
-            height = position[-1]
-            position = position[:2]
         super(BaseVehicle, self).set_position(position, height)
         self.last_position = self.position
 

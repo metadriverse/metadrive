@@ -79,6 +79,6 @@ class StraightLane(MetaDriveLane):
         middle = self.position(self.length / 2, 0)
         end = self.position(self.length, 0)
         direction_v = end - middle
-        theta = -math.atan2(direction_v[1], direction_v[0])
+        theta = math.atan2(direction_v[1], direction_v[0])
         width = self.width_at(0) + block.SIDEWALK_LINE_DIST * 2
         self.construct_lane_segment(block, middle, width, self.length, theta, lane_index)
