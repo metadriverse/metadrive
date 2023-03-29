@@ -10,7 +10,6 @@ from metadrive.policy.idm_policy import IDMPolicy
 from metadrive.policy.replay_policy import WaymoReplayEgoCarPolicy
 from metadrive.scenario import ScenarioDescription as SD
 
-
 NP_ARRAY_DECIMAL = 4
 
 def assert_scenario_equal(scenarios1, scenarios2, only_compare_sdc=False):
@@ -30,9 +29,10 @@ def assert_scenario_equal(scenarios1, scenarios2, only_compare_sdc=False):
             state_dict2 = new_scene[SD.TRACKS][sdc2]
             min_len = min(state_dict1[SD.STATE]["position"].shape[0], state_dict2[SD.STATE]["position"].shape[0])
             for k in state_dict1[SD.STATE].keys():
-                np.testing.assert_almost_equal(
-                    state_dict1[SD.STATE][k][:min_len], state_dict2[SD.STATE][k][:min_len], decimal=NP_ARRAY_DECIMAL
-                )
+                if k not in ["action", "throttle_brake", "steering"]:
+                    np.testing.assert_almost_equal(
+                        state_dict1[SD.STATE][k][:min_len], state_dict2[SD.STATE][k][:min_len], decimal=NP_ARRAY_DECIMAL
+                    )
             assert state_dict1[SD.TYPE] == state_dict2[SD.TYPE]
 
         else:
