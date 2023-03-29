@@ -578,7 +578,14 @@ class BaseEnv(gym.Env):
     def episode_step(self):
         return self.engine.episode_step if self.engine is not None else 0
 
-    def export_scenarios(self, policies: Union[dict, Callable], scenario_index: Union[list, int], time_interval=0.1):
+    def export_scenarios(
+        self,
+        policies: Union[dict, Callable],
+        scenario_index: Union[list, int],
+        time_interval=0.1,
+        verbose=False,
+        render_topdown=False
+    ):
         """
         We export scenarios into a unified format with 10hz sample rate
         """
@@ -607,7 +614,11 @@ class BaseEnv(gym.Env):
             while not done:
                 obs, reward, done, info = self.step(_act(obs))
                 count += 1
+                if render_topdown:
+                    self.render("topdown")
             episode = self.engine.dump_episode()
+            if verbose:
+                print("Finish scenario {} with {} steps.".format(index, count))
             scenarios_to_export[index] = convert_recorded_scenario_exported(episode, time_interval)
         self.config["record_episode"] = False
         return scenarios_to_export

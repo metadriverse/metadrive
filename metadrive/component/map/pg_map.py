@@ -159,3 +159,6 @@ class PGMap(BaseMap):
             return MetaDriveType.BROKEN_GREY_LINE
         elif type == LineType.SIDE:
             return MetaDriveType.CONTINUOUS_GREY_LINE
+        else:
+            # Unknown line type
+            return MetaDriveType.UNKNOWN_LINE

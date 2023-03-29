@@ -9,21 +9,51 @@ This script will create the output folder "processed_data" sharing the same leve
 import argparse
 import os
 import pickle
+import time
 
-from tqdm import tqdm
-
+import numpy as np
 from metadrive.constants import DATA_VERSION
+from tqdm import tqdm
 
 try:
     import tensorflow as tf
 except ImportError:
     pass
 from metadrive.utils.waymo_utils.protos import scenario_pb2
+from metadrive.scenario import ScenarioDescription as SD, MetaDriveType
 from metadrive.utils.waymo_utils.utils import extract_tracks, extract_dynamic_map_states, extract_map_features, compute_width
 import sys
 
 
-def parse_data(input, output_path):
+def validate_sdc_track(sdc_state):
+    """
+    This function filters the scenario based on SDC information.
+
+    Rule 1: Filter out if the trajectory length < 10
+
+    Rule 2: Filter out if the whole trajectory last < 5s, assuming sampling frequency = 10Hz.
+    """
+    valid_array = sdc_state["valid"]
+    sdc_trajectory = sdc_state["position"][valid_array, :2]
+    sdc_track_length = [
+        np.linalg.norm(sdc_trajectory[i] - sdc_trajectory[i + 1]) for i in range(sdc_trajectory.shape[0] - 1)
+    ]
+    sdc_track_length = sum(sdc_track_length)
+
+    # Rule 1
+    if sdc_track_length < 10:
+        return False
+
+    print("sdc_track_length: ", sdc_track_length)
+
+    # Rule 2
+    if valid_array.sum() < 50:
+        return False
+
+    return True
+
+
+def parse_data(input, output_path, _selective=False):
     cnt = 0
     scenario = scenario_pb2.Scenario()
     file_list = os.listdir(input)
@@ -34,26 +64,59 @@ def parse_data(input, output_path):
         dataset = tf.data.TFRecordDataset(file_path, compression_type="")
         for j, data in enumerate(dataset.as_numpy_iterator()):
             scenario.ParseFromString(data)
-            scene = dict()
-            scene["id"] = scenario.scenario_id
 
-            scene["version"] = DATA_VERSION
+            md_scenario = SD()
 
-            scene["ts"] = [ts for ts in scenario.timestamps_seconds]
+            md_scenario[SD.ID] = scenario.scenario_id
 
-            scene["tracks"], sdc_id = extract_tracks(scenario.tracks, scenario.sdc_track_index)
+            md_scenario[SD.VERSION] = DATA_VERSION
 
-            scene["sdc_track_index"] = sdc_id
+            # Please note that SDC track index is not identical to sdc_id.
+            # sdc_id is a unique indicator to a track, while sdc_track_index is only the index of the sdc track
+            # in the tracks datastructure.
+            tracks, sdc_id = extract_tracks(scenario.tracks, scenario.sdc_track_index)
 
-            scene["dynamic_map_states"] = extract_dynamic_map_states(scenario.dynamic_map_states)
+            valid = validate_sdc_track(tracks[sdc_id][SD.STATE])
+            if not valid:
+                continue
 
-            scene["map_features"] = extract_map_features(scenario.map_features)
+            md_scenario[SD.LENGTH] = list(tracks.values())[0]["state"]["position"].shape[0]
 
-            compute_width(scene["map_features"])
+            num_agent_types = len(set(v["type"] for v in tracks.values()))
+            if _selective and num_agent_types < 3:
+                print("Skip case {} because of lack of participant types {}.".format(j, num_agent_types))
+                continue
+
+            md_scenario[SD.TRACKS] = tracks
+
+            dynamic_states = extract_dynamic_map_states(scenario.dynamic_map_states)
+            if _selective and not dynamic_states:
+                print("Skip case {} because of lack of traffic light.".format(j))
+                continue
+            md_scenario[SD.DYNAMIC_MAP_STATES] = dynamic_states
+
+            md_scenario[SD.MAP_FEATURES] = extract_map_features(scenario.map_features)
+
+            compute_width(md_scenario[SD.MAP_FEATURES])
+
+            md_scenario[SD.METADATA] = {}
+            md_scenario[SD.METADATA][SD.COORDINATE] = MetaDriveType.COORDINATE_WAYMO
+            md_scenario[SD.METADATA][SD.TIMESTEP] = \
+                np.asarray([ts for ts in scenario.timestamps_seconds], np.float32)
+            md_scenario[SD.METADATA][SD.METADRIVE_PROCESSED] = False
+            md_scenario[SD.METADATA][SD.METADRIVE_PROCESSED] = False
+            md_scenario[SD.METADATA][SD.SDC_ID] = str(sdc_id)
+            md_scenario[SD.METADATA]["dataset"] = "waymo"
+            md_scenario[SD.METADATA]["scenario_id"] = scenario.scenario_id
+            md_scenario[SD.METADATA]["source_file"] = str(file)
+            md_scenario[SD.METADATA][SD.CREATED_TIME] = time.time()
+
+            SD.sanity_check(md_scenario)
 
             p = os.path.join(output_path, f"{cnt}.pkl")
             with open(p, "wb") as f:
-                pickle.dump(scene, f)
+                pickle.dump(md_scenario, f)
+            print("Scenario {} is saved at: {}".format(cnt, p))
             cnt += 1
     return
 
@@ -61,6 +124,7 @@ def parse_data(input, output_path):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--folder", required=True, help="The data folder storing raw tfrecord from Waymo dataset.")
+    parser.add_argument("--selective", action="store_true", help="Whether select high-diversity valuable case.")
     args = parser.parse_args()
 
     case_data_path = args.folder
@@ -73,7 +137,7 @@ if __name__ == "__main__":
 
     # parse raw data from input path to output path,
     # there is 1000 raw data in google cloud, each of them produce about 500 pkl file
-    parse_data(raw_data_path, output_path)
+    parse_data(raw_data_path, output_path, _selective=args.selective)
     sys.exit()
     # file_path = AssetLoader.file_path("waymo", "processed", "0.pkl", return_raw_style=False)
     # data = read_waymo_data(file_path)

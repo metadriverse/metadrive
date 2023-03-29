@@ -1,1 +1,2 @@
 from metadrive.scenario.metadrive_type import MetaDriveType
+from metadrive.scenario.scenario_description import ScenarioDescription

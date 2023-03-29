@@ -14,6 +14,7 @@ except ImportError:
     pass
 import pickle
 import numpy as np
+from metadrive.scenario.scenario_description import ScenarioDescription
 
 
 def extract_poly(message):
@@ -33,6 +34,8 @@ def extract_boundaries(fb):
         c["lane_end_index"] = fb[k].lane_end_index
         c["boundary_type"] = WaymoRoadLineType.from_waymo(fb[k].boundary_type)
         c["boundary_feature_id"] = fb[k].boundary_feature_id
+        for key in c:
+            c[key] = str(c[key])
         b.append(c)
 
     return b
@@ -47,6 +50,8 @@ def extract_neighbors(fb):
         nb["self_end_index"] = fb[k].self_end_index
         nb["neighbor_start_index"] = fb[k].neighbor_start_index
         nb["neighbor_end_index"] = fb[k].neighbor_end_index
+        for key in nb:
+            nb[key] = str(nb[key])
         nb["boundaries"] = extract_boundaries(fb[k].boundaries)
         nbs.append(nb)
     return nbs
@@ -128,6 +133,8 @@ def extract_tracks(tracks, sdc_idx):
     ret = dict()
 
     for obj in tracks:
+        object_id = str(obj.id)
+
         obj_state = dict()
 
         waymo_string = WaymoAgentType.from_waymo(obj.object_type)  # Load waymo type string
@@ -147,29 +154,29 @@ def extract_tracks(tracks, sdc_idx):
         obj_state["state"]["size"] = np.stack([l, w, h], 1).astype("float32")
 
         heading = [state.heading for state in obj.states]
-        obj_state["state"]["heading"] = np.array(heading, dtype="float32")[:, np.newaxis]
+        obj_state["state"]["heading"] = np.array(heading, dtype="float32")
 
         vx = [state.velocity_x for state in obj.states]
         vy = [state.velocity_y for state in obj.states]
         obj_state["state"]["velocity"] = np.stack([vx, vy], 1).astype("float32")
 
         valid = [state.valid for state in obj.states]
-        obj_state["state"]["valid"] = np.array(valid)[:, np.newaxis]
+        obj_state["state"]["valid"] = np.array(valid, dtype=bool)
 
         obj_state["metadata"] = dict(
-            track_length=obj_state["state"]["position"].shape[0], type=metadrive_type, object_id=obj.id
+            track_length=obj_state["state"]["position"].shape[0], type=metadrive_type, object_id=object_id
         )
 
-        ret[obj.id] = obj_state
+        ret[object_id] = obj_state
 
-    return ret, tracks[sdc_idx].id
+    return ret, str(tracks[sdc_idx].id)
 
 
 def extract_map_features(map_features):
     ret = {}
 
     for lane_state in map_features:
-        lane_id = lane_state.id
+        lane_id = str(lane_state.id)
 
         if lane_state.HasField("lane"):
             ret[lane_id] = extract_center(lane_state)
@@ -208,7 +215,9 @@ def extract_dynamic_map_states(dynamic_map_states):
                     track_length,
                 ], dtype=int),
             ),
-            metadata=dict(track_length=track_length, type=MetaDriveType.TRAFFIC_LIGHT, object_id=object_id)
+            metadata=dict(
+                track_length=track_length, type=MetaDriveType.TRAFFIC_LIGHT, object_id=object_id, dataset="waymo"
+            )
         )
 
     # FIXME: TODO: This function is not finished yet.
@@ -254,20 +263,23 @@ class CustomUnpickler(pickle.Unpickler):
 
 
 def read_waymo_data(file_path):
+    """
+    TODO: This function transform data again. We should remove it and let MetaDrive read native data completly.
+    """
     with open(file_path, "rb") as f:
         # unpickler = CustomUnpickler(f)
         data = pickle.load(f)
     new_track = {}
-    for key, value in data["tracks"].items():
+    for key, value in data[ScenarioDescription.TRACKS].items():
         new_track[str(key)] = value
     data["tracks"] = new_track
-    data["sdc_track_index"] = str(data["sdc_track_index"])
+    data["sdc_track_index"] = str(data[ScenarioDescription.METADATA][ScenarioDescription.SDC_ID])
     return data
 
 
 def draw_waymo_map(data):
     figure(figsize=(8, 6), dpi=500)
-    for key, value in data["map_features"].items():
+    for key, value in data[ScenarioDescription.MAP_FEATURES].items():
         if value.get("type", None) == "center_lane":
             plt.scatter([x[0] for x in value["polyline"]], [y[1] for y in value["polyline"]], s=0.5)
         elif value.get("type", None) == "road_edge":
@@ -287,15 +299,19 @@ def nearest_point(point, line):
 def extract_width(map, polyline, boundary):
     l_width = np.zeros(polyline.shape[0], dtype="float32")
     for b in boundary:
-        lb = map[b["boundary_feature_id"]]
+
+        boundary_int = {k: int(v) if k != "boundary_type" else v for k, v in b.items()}  # All values are int
+
+        b_feat_id = str(boundary_int["boundary_feature_id"])
+        lb = map[b_feat_id]
         b_polyline = lb["polyline"][:, :2]
 
-        start_p = polyline[b["lane_start_index"]]
+        start_p = polyline[boundary_int["lane_start_index"]]
         start_index = nearest_point(start_p, b_polyline)
-        seg_len = b["lane_end_index"] - b["lane_start_index"]
+        seg_len = boundary_int["lane_end_index"] - boundary_int["lane_start_index"]
         end_index = min(start_index + seg_len, lb["polyline"].shape[0] - 1)
-        length = min(end_index - start_index, b["lane_end_index"] - b["lane_start_index"]) + 1
-        self_range = range(b["lane_start_index"], b["lane_start_index"] + length)
+        length = min(end_index - start_index, seg_len) + 1
+        self_range = range(boundary_int["lane_start_index"], boundary_int["lane_start_index"] + length)
         bound_range = range(start_index, start_index + length)
         centerLane = polyline[self_range]
         bound = b_polyline[bound_range]
@@ -306,7 +322,7 @@ def extract_width(map, polyline, boundary):
 
 
 def compute_width(map):
-    for id, lane in map.items():
+    for map_feat_id, lane in map.items():
 
         if not "LANE" in lane["type"]:
             continue
@@ -326,8 +342,12 @@ def compute_width(map):
 # parse raw data from input path to output path
 
 
-def convert_polyline_to_metadrive(waymo_polyline):
+def convert_polyline_to_metadrive(waymo_polyline, coordinate_transform=True):
     """
     Waymo lane is in a different coordinate system, using them after converting
     """
-    return np.array([np.array([p[0], -p[1]]) for p in waymo_polyline])
+    waymo_polyline = np.asarray(waymo_polyline)
+    if coordinate_transform:
+        return np.stack([waymo_polyline[:, 0], -waymo_polyline[:, 1]], axis=1)
+    else:
+        return waymo_polyline
