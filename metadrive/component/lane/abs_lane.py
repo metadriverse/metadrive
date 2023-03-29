@@ -17,7 +17,7 @@ from metadrive.engine.asset_loader import AssetLoader
 from metadrive.engine.physics_node import BaseRigidBodyNode
 from metadrive.engine.physics_node import BulletRigidBodyNode
 from metadrive.utils import norm
-from metadrive.utils.coordinates_shift import panda_position
+from metadrive.utils.coordinates_shift import panda_position, panda_heading
 from metadrive.utils.math_utils import Vector
 
 
@@ -133,7 +133,7 @@ class AbstractLane:
             middle = self.position(self.length * (i + .5) / segment_num, 0)
             end = self.position(self.length * (i + 1) / segment_num, 0)
             direction_v = end - middle
-            theta = -math.atan2(direction_v[1], direction_v[0])
+            theta = math.atan2(direction_v[1], direction_v[0])
             width = self.width_at(0) + DrivableAreaProperty.SIDEWALK_LINE_DIST * 2
             length = self.length
             self.construct_lane_segment(block, middle, width, length * 1.3 / segment_num, theta, lane_index)
@@ -214,6 +214,7 @@ class AbstractLane:
         :param theta: Rotate theta
         :param lane_index: set index for this lane, sometimes lane index is decided after building graph
         """
+        theta=panda_heading(theta)
         lane = self
         length += 0.1
         if lane_index is not None:
@@ -304,7 +305,7 @@ class AbstractLane:
         body_np.setPos(panda_position(middle, DrivableAreaProperty.LANE_LINE_GHOST_HEIGHT / 2))
         direction_v = end_point - start_point
         # theta = -numpy.arctan2(direction_v[1], direction_v[0])
-        theta = -math.atan2(direction_v[1], direction_v[0])
+        theta = panda_heading(math.atan2(direction_v[1], direction_v[0]))
         body_np.setQuat(LQuaternionf(math.cos(theta / 2), 0, 0, math.sin(theta / 2)))
 
         if block.render:
@@ -351,7 +352,7 @@ class AbstractLane:
             vertical_v = Vector((-direction_v[1], direction_v[0])) / norm(*direction_v)
             middle += vertical_v * extra_thrust
         side_np.setPos(panda_position(middle, 0))
-        theta = -math.atan2(direction_v[1], direction_v[0])
+        theta = panda_heading(math.atan2(direction_v[1], direction_v[0]))
         side_np.setQuat(LQuaternionf(math.cos(theta / 2), 0, 0, math.sin(theta / 2)))
         side_np.setScale(length * length_multiply, width, block.SIDEWALK_THICKNESS * (1 + 0.1 * np.random.rand()))
         if block.render:
@@ -388,7 +389,7 @@ class AbstractLane:
         Only create visual part for this lane, usually used with _construct_lane_only_physics_polygon()
         """
         length += 0.1
-
+        theta=panda_heading(theta)
         if block.render:
             cm = CardMaker('card')
             cm.setFrame(-length / 2, length / 2, -width / 2, width / 2)
