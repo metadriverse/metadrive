@@ -1,7 +1,8 @@
+import copy
 import logging
-import numpy as np
 
 import gym
+import numpy as np
 
 from metadrive.base_class.configurable import Configurable
 from metadrive.base_class.randomizable import Randomizable
@@ -27,7 +28,7 @@ class BasePolicy(Randomizable, Configurable):
         """
         Get current action info for env.step() retrieve
         """
-        return self.action_info
+        return copy.deepcopy(self.action_info)
 
     def reset(self):
         self.action_info.clear()
