@@ -33,8 +33,6 @@ def test_waymo_env(policy, render=False, case_num=3):
                     # assert info["arrive_dest"], "Can not arrive dest"
                     break
 
-
-
                 if i == 999:
                     raise ValueError("Can not arrive dest")
     finally:

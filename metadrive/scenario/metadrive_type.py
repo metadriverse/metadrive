@@ -22,7 +22,7 @@ class MetaDriveType:
     # ===== Object type =====
     TRAFFIC_LIGHT = "TRAFFIC_LIGHT"
     TRAFFIC_CONE = "TRAFFIC_CONE"
-    
+
     # ===== Coordinate system =====
     COORDINATE_METADRIVE = "metadrive"
     COORDINATE_WAYMO = "waymo"

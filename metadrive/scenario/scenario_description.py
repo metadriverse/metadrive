@@ -102,9 +102,7 @@ class ScenarioDescription(dict):
     MAP_FEATURES = "map_features"
     LENGTH = "length"
     METADATA = "metadata"
-    FIRST_LEVEL_KEYS = {
-        TRACKS, VERSION, ID, DYNAMIC_MAP_STATES, MAP_FEATURES, LENGTH, METADATA
-    }
+    FIRST_LEVEL_KEYS = {TRACKS, VERSION, ID, DYNAMIC_MAP_STATES, MAP_FEATURES, LENGTH, METADATA}
 
     TYPE = "type"
     STATE = "state"
@@ -132,8 +130,6 @@ class ScenarioDescription(dict):
 
         scenario_length = scenario_dict[cls.LENGTH]
 
-
-
         # Check tracks data
         assert isinstance(scenario_dict[cls.TRACKS], dict)
         for obj_id, obj_state in scenario_dict[cls.TRACKS].items():
@@ -150,7 +146,7 @@ class ScenarioDescription(dict):
             "You lack these keys in metadata: {}".format(
                 cls.METADATA_KEYS.difference(set(scenario_dict[cls.METADATA].keys()))
             )
-        assert scenario_dict[cls.METADATA][cls.TIMESTEP].shape == (scenario_length,)
+        assert scenario_dict[cls.METADATA][cls.TIMESTEP].shape == (scenario_length, )
 
     @classmethod
     def _check_object_state_dict(cls, obj_state, scenario_length, object_id):
@@ -175,7 +171,6 @@ class ScenarioDescription(dict):
         # Check metadata alignment
         if cls.OBJECT_ID in obj_state[cls.METADATA]:
             assert obj_state[cls.METADATA][cls.OBJECT_ID] == object_id
-
 
 
 def _recursive_check_type(obj, allow_types, depth=0):

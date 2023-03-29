@@ -24,6 +24,7 @@ from metadrive.scenario import ScenarioDescription as SD, MetaDriveType
 from metadrive.utils.waymo_utils.utils import extract_tracks, extract_dynamic_map_states, extract_map_features, compute_width
 import sys
 
+
 def validate_sdc_track(sdc_state):
     """
     This function filters the scenario based on SDC information.
