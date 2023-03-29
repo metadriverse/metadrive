@@ -151,6 +151,12 @@ class BaseEngine(EngineCore, Randomizable):
         else:
             raise ValueError("filter should be a list or a function")
 
+    def get_policies(self):
+        """
+        Return a mapping from object ID to policy instance.
+        """
+        return self._object_policies
+
     def get_object(self, object_id):
         return self.get_objects([object_id])
 

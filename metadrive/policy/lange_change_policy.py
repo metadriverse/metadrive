@@ -38,7 +38,9 @@ class AgentLaneChangePolicy(EnvInputPolicy):
                 min(current_lane.index[-1] + 1, lane_num - 1)]
         else:
             raise ValueError("Steering Error, can only be in [-1, 0, 1]")
-        return [self.steering_control(target_lane), throttle]
+        action = [self.steering_control(target_lane), throttle]
+        self.action_info["action"] = action
+        return action
 
     @classmethod
     def get_input_space(cls):

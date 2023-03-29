@@ -52,7 +52,7 @@ class WaymoIDMTrafficManager(WaymoTrafficManager):
                         full_traj = static_vehicle_info(init_info["position"], init_info["heading"])
                         static = True
                     else:
-                        full_traj = parse_full_trajectory(type_traj)
+                        full_traj = parse_full_trajectory(type_traj, coordinate_transform=self.engine.global_config["coordinate_transform"])
                         if len(full_traj) < self.MIN_DURATION:
                             full_traj = static_vehicle_info(init_info["position"], init_info["heading"])
                             static = True

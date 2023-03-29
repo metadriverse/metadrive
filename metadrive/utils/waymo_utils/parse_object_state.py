@@ -6,12 +6,12 @@ from metadrive.utils.coordinates_shift import waymo_to_metadrive_heading, waymo_
 
 
 def parse_vehicle_state(
-    object_dict, time_idx, coordinate_transform=True, check_last_state=False, sim_time_interval=0.1
+    object_dict, time_idx, coordinate_transform, check_last_state=False, sim_time_interval=0.1
 ):
     assert object_dict["type"] == MetaDriveType.VEHICLE
 
-    ret = {}
     states = object_dict["state"]
+    ret = {k: v[time_idx] for k, v in states.items()}
 
     epi_length = len(states["position"])
     if time_idx < 0:
@@ -50,7 +50,7 @@ def parse_vehicle_state(
     return ret
 
 
-def parse_full_trajectory(object_dict, coordinate_transform=True):
+def parse_full_trajectory(object_dict, coordinate_transform):
     positions = object_dict["state"]["position"]
     index = len(positions)
     for current_idx in range(len(positions) - 1):

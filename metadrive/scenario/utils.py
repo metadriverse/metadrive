@@ -101,6 +101,16 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
             tracks[id]["state"]["valid"][frame_idx] = 1
             if "size" in state:
                 tracks[id]["state"]["size"][frame_idx] = state["size"]
+
+        for id, policy_info in frames[frame_idx].policy_info.items():
+            # Maybe actions is also recorded. If so, add item to tracks:
+            if "action" in policy_info and policy_info["action"] is not {}:
+                # TODO: In the case of discrete action, what should we do?
+                action = np.asarray(policy_info["action"]).astype(np.float32)
+                if "action" not in tracks[id]["state"]:
+                    tracks[id]["state"]["action"] = np.zeros(shape=(episode_len, action.size), dtype=action.dtype)
+                tracks[id]["state"]["action"][frame_idx] = action
+
     result[SD.TRACKS] = tracks
 
     # Traffic Light: Straight-through forward from original data

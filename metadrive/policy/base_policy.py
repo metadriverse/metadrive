@@ -30,7 +30,7 @@ class BasePolicy(Randomizable, Configurable):
         return self.action_info
 
     def reset(self):
-        pass
+        self.action_info.clear()
 
     def destroy(self):
         logging.debug("{} is released".format(self.__class__.__name__))
@@ -59,3 +59,6 @@ class BasePolicy(Randomizable, Configurable):
             "the agent policy may not take any external input from env.step() and thus the env.action_space is None"
         )
         return gym.spaces.Box(-1.0, 1.0, shape=(2, ), dtype=np.float32)
+
+    def get_state(self):
+        return self.get_action_info()

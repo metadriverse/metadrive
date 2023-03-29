@@ -78,6 +78,11 @@ class ReplayEgoCarPolicy(BasePolicy):
         else:
             return [0, 0]
 
+        # Before step
+        action = self.traj_info[int(self.timestep)].get("action", None)
+        self.control_object.before_step(action)
+
+        # Update state
         if self.timestep == self.start_index:
             self.control_object.set_position(self.init_pos)
         elif self.timestep < len(self.traj_info):
@@ -91,6 +96,9 @@ class ReplayEgoCarPolicy(BasePolicy):
             angular_velocity = self.traj_info[int(self.timestep)]["angular_velocity"]
             self.control_object.set_heading_theta(this_heading)
             self.control_object.set_angular_velocity(angular_velocity)
+
+        # After step
+        self.control_object.after_step()
 
         return [0, 0]
 

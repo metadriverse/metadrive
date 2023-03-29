@@ -97,9 +97,13 @@ class RecordManager(BaseManager):
         return {}
 
     def _update_objects_states(self):
+        policy_mapping = self.engine.get_policies()
         for name, obj in self.engine.get_objects().items():
             if not is_map_related_instance(obj):
                 self.current_frame.step_info[name] = obj.get_state()
+                if name in policy_mapping:
+                    self.current_frame.policy_info[name] = policy_mapping[name].get_state()
+
         self.current_frame.agents = list(self.engine.agents.keys())
         self.current_frame._agent_to_object = copy.deepcopy(self.engine.agent_manager._agent_to_object)
         self.current_frame._object_to_agent = copy.deepcopy(self.engine.agent_manager._object_to_agent)

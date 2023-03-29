@@ -36,7 +36,7 @@ class WaymoMapManager(BaseManager):
         self.sdc_dest_point = None
 
         if self._stored_maps[seed] is None and self.store_map:
-            new_map = WaymoMap(map_index=seed, coordinate_transform=self.engine.global_config.get("coordinate_transform", False))
+            new_map = WaymoMap(map_index=seed)
             self._stored_maps[seed] = new_map
         else:
             new_map = self._stored_maps[seed]
@@ -49,7 +49,7 @@ class WaymoMapManager(BaseManager):
 
         sdc_track = data["tracks"][data[SD.METADATA][SD.SDC_ID]]
 
-        sdc_traj = parse_full_trajectory(sdc_track)
+        sdc_traj = parse_full_trajectory(sdc_track, coordinate_transform=self.engine.global_config["coordinate_transform"])
 
         init_state = parse_vehicle_state(
             sdc_track,

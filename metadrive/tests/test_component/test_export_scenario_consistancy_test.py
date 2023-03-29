@@ -139,21 +139,21 @@ def test_export_metadrive_scenario_easy(scenario_num=2, render_export_env=False,
 
 def test_export_metadrive_scenario_hard(scenario_num=3, render_export_env=False, render_load_env=False):
     # ===== Save data =====
-    # env = MetaDriveEnv(
-    #     dict(start_seed=0, map=7, use_render=render_export_env, environment_num=scenario_num, agent_policy=IDMPolicy)
-    # )
+    env = MetaDriveEnv(
+        dict(start_seed=0, map=7, use_render=render_export_env, environment_num=scenario_num, agent_policy=IDMPolicy)
+    )
     policy = lambda x: [0, 1]
     dir1 = None
     try:
-        # scenarios = env.export_scenarios(policy, scenario_index=[i for i in range(scenario_num)])
+        scenarios = env.export_scenarios(policy, scenario_index=[i for i in range(scenario_num)])
         dir1 = os.path.join(os.path.dirname(__file__), "test_export_metadrive_scenario_hard")
         os.makedirs(dir1, exist_ok=True)
-        # for i, data in scenarios.items():
-        #     with open(os.path.join(dir1, "{}.pkl".format(i)), "wb+") as file:
-        #         pickle.dump(data, file)
+        for i, data in scenarios.items():
+            with open(os.path.join(dir1, "{}.pkl".format(i)), "wb+") as file:
+                pickle.dump(data, file)
     finally:
-        # env.close()
-        pass
+        env.close()
+        # pass
 
     # ===== Save data of the restoring environment =====
     env = WaymoEnv(
@@ -161,7 +161,10 @@ def test_export_metadrive_scenario_hard(scenario_num=3, render_export_env=False,
             agent_policy=WaymoReplayEgoCarPolicy,
             waymo_data_directory=dir1,
             use_render=render_load_env,
-            case_num=scenario_num
+            case_num=scenario_num,
+            debug=True,
+            # debug_physics_world=True,
+            # debug_static_world=True
         )
     )
     try:
@@ -171,10 +174,10 @@ def test_export_metadrive_scenario_hard(scenario_num=3, render_export_env=False,
     finally:
         env.close()
 
-    # if dir1 is not None:
-    #     shutil.rmtree(dir1)
+    if dir1 is not None:
+        shutil.rmtree(dir1)
 
-    # assert_scenario_equal(scenarios, scenarios_restored, only_compare_sdc=True)
+    assert_scenario_equal(scenarios, scenarios_restored, only_compare_sdc=True)
 
 
 def test_export_waymo_scenario(render_export_env=False, render_load_env=False):

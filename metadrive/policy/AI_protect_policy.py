@@ -56,4 +56,6 @@ class AIProtectPolicy(ManualControlPolicy):
             "takeover_end": True if pre_save and not vehicle.takeover else False,
             "takeover": vehicle.takeover if pre_save else False
         }
-        return (steering, throttle) if self.action_info["takeover"] else action
+        action = (steering, throttle) if self.action_info["takeover"] else action
+        self.action_info["action"] = action
+        return action
