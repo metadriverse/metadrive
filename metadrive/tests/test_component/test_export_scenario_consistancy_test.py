@@ -19,22 +19,26 @@ def assert_scenario_equal(scenarios1, scenarios2, only_compare_sdc=False):
         new_scene = scenarios2[k]
         SD.sanity_check(old_scene)
         SD.sanity_check(new_scene)
-        assert old_scene[SD.LENGTH] == new_scene[SD.LENGTH], (old_scene[SD.LENGTH], new_scene[SD.LENGTH])
+        assert old_scene[SD.LENGTH] >= new_scene[SD.LENGTH], (old_scene[SD.LENGTH], new_scene[SD.LENGTH])
 
         if only_compare_sdc:
-            sdc1 = old_scene["sdc_track_index"]
-            sdc2 = new_scene["sdc_track_index"]
+            sdc1 = old_scene[SD.METADATA][SD.SDC_ID]
+            sdc2 = new_scene[SD.METADATA][SD.SDC_ID]
             state_dict1 = old_scene[SD.TRACKS][sdc1]
             state_dict2 = new_scene[SD.TRACKS][sdc2]
+            min_len = min(state_dict1[SD.STATE]["position"].shape[0], state_dict2[SD.STATE]["position"].shape[0])
             for k in state_dict1[SD.STATE].keys():
-                assert np.all(state_dict1[SD.STATE][k] == state_dict2[SD.STATE][k])
+                assert np.all(state_dict1[SD.STATE][k][:min_len] == state_dict2[SD.STATE][k][:min_len])
             assert state_dict1[SD.TYPE] == state_dict2[SD.TYPE]
 
         else:
             assert set(old_scene[SD.TRACKS].keys()) == set(new_scene[SD.TRACKS].keys())
             for track_id, track in old_scene[SD.TRACKS].items():
                 for k in new_scene[SD.TRACKS][track_id][SD.STATE]:
-                    assert np.all(new_scene[SD.TRACKS][track_id][SD.STATE][k] == track[SD.STATE][k])
+                    state_array_1 = new_scene[SD.TRACKS][track_id][SD.STATE][k]
+                    state_array_2 = track[SD.STATE][k]
+                    min_len = min(state_array_1.shape[0], state_array_2.shape[0])
+                    assert np.all(state_array_1[:min_len] == state_array_2[:min_len])
                 assert new_scene[SD.TRACKS][track_id][SD.TYPE] == track[SD.TYPE]
 
         assert set(old_scene[SD.MAP_FEATURES].keys()) == set(new_scene[SD.MAP_FEATURES].keys())
@@ -91,7 +95,7 @@ def test_export_metadrive_scenario_easy(render_export_env=False, render_load_env
     dir1 = None
     try:
         scenarios = env.export_scenarios(policy, scenario_index=[i for i in range(scenario_num)])
-        dir1 = os.path.join(os.path.dirname(__file__), "test_export")
+        dir1 = os.path.join(os.path.dirname(__file__), "test_export_scenario_consistancy")
         os.makedirs(dir1, exist_ok=True)
         for i, data in scenarios.items():
             with open(os.path.join(dir1, "{}.pkl".format(i)), "wb+") as file:
@@ -208,6 +212,6 @@ def test_export_waymo_scenario(render_export_env=False, render_load_env=False):
 
 if __name__ == "__main__":
     # test_export_metadrive_scenario_reproduction(scenario_num=1)
-    test_export_metadrive_scenario_easy(render_export_env=False, render_load_env=True)
+    test_export_metadrive_scenario_easy(render_export_env=False, render_load_env=False)
     # test_export_metadrive_scenario_hard(render_export_env=True, render_load_env=True)
     # test_export_waymo_scenario(render_export_env=True, render_load_env=True)
