@@ -6,7 +6,7 @@ from tqdm import tqdm
 from metadrive.manager.base_manager import BaseManager
 from metadrive.utils.data_buffer import DataBuffer
 from metadrive.utils.waymo_utils.utils import read_waymo_data
-
+from metadrive.scenario.scenario_description import ScenarioDescription as SD, MetaDriveType
 
 class WaymoDataManager(BaseManager):
     DEFAULT_DATA_BUFFER_SIZE = 100
@@ -79,10 +79,24 @@ class WaymoDataManager(BaseManager):
 
         if should_copy:
             return copy.deepcopy(self.waymo_case[i])
-        return self.waymo_case[i]
+
+        # Waymo Data Manager is the first manager that accesses Waymo data.
+        # It is proper to let it validate the metadata and change the global config if needed.
+        ret = self.waymo_case[i]
+        self.validate_data(ret)
+
+        return ret
 
     def get_state(self):
         raw_data = self.get_case(self.engine.global_seed)
         state = super(WaymoDataManager, self).get_state()
         state["raw_data"] = raw_data
         return state
+
+    def validate_data(self, scenario):
+        if scenario[SD.METADATA][SD.COORDINATE] == MetaDriveType.COORDINATE_WAYMO:
+            self.engine.global_config["coordinate_transform"] = True
+        elif scenario[SD.METADATA][SD.COORDINATE] == MetaDriveType.COORDINATE_METADRIVE:
+            self.engine.global_config["coordinate_transform"] = False
+        else:
+            raise ValueError()

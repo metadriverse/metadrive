@@ -61,11 +61,14 @@ class ReplayEgoCarPolicy(BasePolicy):
 
     def get_trajectory_info(self):
         trajectory_data = self.engine.data_manager.get_case(self.engine.global_random_seed)["tracks"]
-        sdc_track_index = str(self.engine.data_manager.get_case(self.engine.global_random_seed)["sdc_track_index"])
-        return [
-            parse_vehicle_state(trajectory_data[sdc_track_index], i)
-            for i in range(len(trajectory_data[sdc_track_index]["state"]["position"]))
-        ]
+        sdc_track_index = str(self.engine.data_manager.get_case(self.engine.global_random_seed)["metadata"]["sdc_id"])
+        ret = []
+        for i in range(len(trajectory_data[sdc_track_index]["state"]["position"])):
+            ret.append(parse_vehicle_state(
+                trajectory_data[sdc_track_index], i,
+                coordinate_transform=self.engine.global_config["coordinate_transform"]
+            ))
+        return ret
 
     def act(self, *args, **kwargs):
         self.damp += self.damp_interval

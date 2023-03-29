@@ -28,7 +28,8 @@ def draw_top_down_map(
     return_surface=False,
     film_size=None,
     reverse_color=False,
-    road_color=color_white
+    road_color=color_white,
+    coordinate_transform=False  # Set to True for waymo map
 ) -> Optional[Union[np.ndarray, pygame.Surface]]:
     import cv2
     film_size = film_size or map.film_size
@@ -55,7 +56,7 @@ def draw_top_down_map(
                 if WaymoLaneProperty.POLYLINE not in data:
                     continue
                 type = data.get("type", None)
-                waymo_line = InterpolatingLine(convert_polyline_to_metadrive(data[WaymoLaneProperty.POLYLINE]))
+                waymo_line = InterpolatingLine(convert_polyline_to_metadrive(data[WaymoLaneProperty.POLYLINE], coordinate_transform=coordinate_transform))
                 LaneGraphics.display_waymo(waymo_line, type, surface)
 
     elif isinstance(map, NuPlanMap):
@@ -183,11 +184,13 @@ class TopDownRenderer:
         self._text_render_pos = [50, 50]
         self._font_size = 25
         self._text_render_interval = 20
+        self.coordinate_transform = self.engine.global_config.get("coordinate_transform", False)
 
         # Setup the canvas
         # (1) background is the underlying layer. It is fixed and will never change unless the map changes.
         self._background_canvas = draw_top_down_map(
-            self.map, draw_drivable_area=False, return_surface=True, film_size=film_size, road_color=road_color
+            self.map, draw_drivable_area=False, return_surface=True, film_size=film_size, road_color=road_color,
+            coordinate_transform=self.coordinate_transform
         )
         if self._light_background:
             pixels = pygame.surfarray.pixels2d(self._background_canvas)
@@ -295,7 +298,8 @@ class TopDownRenderer:
             draw_drivable_area=False,
             return_surface=True,
             film_size=self._background_size,
-            road_color=self.road_color
+            road_color=self.road_color,
+            coordinate_transform=self.coordinate_transform
         )
         self._light_background = self._light_background
         if self._light_background:

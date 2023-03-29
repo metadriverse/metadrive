@@ -111,7 +111,9 @@ def parse_data(input, output_path, _selective=False):
             md_scenario[SD.METADATA]["source_file"] = str(file)
             md_scenario[SD.METADATA][SD.CREATED_TIME] = time.time()
 
-            SD.sanity_check(md_scenario)
+            md_scenario = md_scenario.to_dict()
+
+            SD.sanity_check(md_scenario, check_self_type=True)
 
             p = os.path.join(output_path, f"{cnt}.pkl")
             with open(p, "wb") as f:

@@ -119,7 +119,12 @@ class ScenarioDescription(dict):
     ALLOW_TYPES = (int, float, str, np.ndarray, dict, list)
 
     @classmethod
-    def sanity_check(cls, scenario_dict):
+    def sanity_check(cls, scenario_dict, check_self_type=False):
+
+        if check_self_type:
+            assert isinstance(scenario_dict, dict)
+            assert not isinstance(scenario_dict, ScenarioDescription)
+
         # Whether input has all required keys
         assert cls.FIRST_LEVEL_KEYS.issubset(set(scenario_dict.keys())), \
             "You lack these keys in first level: {}".format(cls.FIRST_LEVEL_KEYS.difference(set(scenario_dict.keys())))
@@ -171,6 +176,9 @@ class ScenarioDescription(dict):
         # Check metadata alignment
         if cls.OBJECT_ID in obj_state[cls.METADATA]:
             assert obj_state[cls.METADATA][cls.OBJECT_ID] == object_id
+
+    def to_dict(self):
+        return dict(self)
 
 
 def _recursive_check_type(obj, allow_types, depth=0):

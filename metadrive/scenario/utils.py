@@ -115,5 +115,7 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
                     clipped_dynamic_map[obj_id] = obj_state
                 result[SD.METADATA]["history_metadata"] = manager_state["raw_data"][SD.METADATA]
 
-    SD.sanity_check(result)
+    result = result.to_dict()
+    SD.sanity_check(result, check_self_type=True)
+
     return result

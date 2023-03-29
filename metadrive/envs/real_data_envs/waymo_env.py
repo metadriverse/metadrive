@@ -15,7 +15,8 @@ from metadrive.obs.state_obs import LidarStateObservation
 from metadrive.policy.replay_policy import WaymoReplayEgoCarPolicy
 from metadrive.utils import clip
 from metadrive.utils import get_np_random
-from metadrive.utils.coordinates_shift import waymo_2_metadrive_position
+from metadrive.utils.coordinates_shift import waymo_to_metadrive_vector
+from metadrive.scenario.scenario_description import ScenarioDescription
 
 WAYMO_ENV_CONFIG = dict(
     # ===== Map Config =====
@@ -63,6 +64,9 @@ WAYMO_ENV_CONFIG = dict(
     out_of_route_done=False,
     crash_vehicle_done=False,
     relax_out_of_road_done=True,
+
+    # ===== Coordinate system =====
+    coordinate_transform=True,  # If False, then don't do the coordinate transformation
 )
 
 
@@ -252,7 +256,7 @@ class WaymoEnv(BaseEnv):
         data = self.engine.data_manager.get_case(self.engine.global_seed)
         agent_xy = vehicle.position
         if vehicle_id == "sdc" or vehicle_id == "default_agent":
-            native_vid = data["sdc_track_index"]
+            native_vid = data[ScenarioDescription.METADATA][ScenarioDescription.SDC_ID]
         else:
             native_vid = vehicle_id
 
@@ -272,12 +276,18 @@ class WaymoEnv(BaseEnv):
                 if current_step == 0:
                     break
 
-            expert_xy = waymo_2_metadrive_position(expert_state_list["position"][current_step][:2])
+            if self.engine.global_config["coordinate_transform"]:
+                expert_xy = waymo_to_metadrive_vector(expert_state_list["position"][current_step][:2])
+            else:
+                expert_xy = expert_state_list["position"][current_step][:2]
             dist = np.linalg.norm(agent_xy - expert_xy)
             step_info["distance_error"] = dist
 
             last_state = expert_state_list["position"][largest_valid_index]
-            last_expert_xy = waymo_2_metadrive_position(last_state[:2])
+            if self.engine.global_config["coordinate_transform"]:
+                last_expert_xy = waymo_to_metadrive_vector(last_state[:2])
+            else:
+                last_expert_xy = last_state[:2]
             last_dist = np.linalg.norm(agent_xy - last_expert_xy)
             step_info["distance_error_final"] = last_dist
 

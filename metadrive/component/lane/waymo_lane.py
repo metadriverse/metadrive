@@ -12,14 +12,15 @@ from metadrive.utils.waymo_utils.utils import read_waymo_data, convert_polyline_
 class WaymoLane(PointLane):
     VIS_LANE_WIDTH = 6
 
-    def __init__(self, waymo_lane_id: int, waymo_map_data: dict, need_lane_localization):
+    def __init__(self, waymo_lane_id: int, waymo_map_data: dict, need_lane_localization, coordinate_transform):
         """
         Extract the lane information of one waymo lane, and do coordinate shift
         """
         self.need_lane_localization = need_lane_localization
+        center_line_points = convert_polyline_to_metadrive(waymo_map_data[waymo_lane_id][WaymoLaneProperty.POLYLINE], coordinate_transform=coordinate_transform)
         super(WaymoLane, self).__init__(
-            convert_polyline_to_metadrive(waymo_map_data[waymo_lane_id][WaymoLaneProperty.POLYLINE]),
-            self.get_lane_width(waymo_lane_id, waymo_map_data),
+            center_line_points=center_line_points,
+            width=self.get_lane_width(waymo_lane_id, waymo_map_data),
             speed_limit=waymo_map_data[waymo_lane_id].get("speed_limit_mph", 0) * 1.609344  # to km/h
         )
         self.index = waymo_lane_id
@@ -104,4 +105,4 @@ if __name__ == "__main__":
     file_path = AssetLoader.file_path("waymo", "test.pkl", return_raw_style=False)
     data = read_waymo_data(file_path)
     print(data)
-    lane = WaymoLane(108, data["map_features"])
+    lane = WaymoLane(108, data["map_features"], coordinate_transform=True)

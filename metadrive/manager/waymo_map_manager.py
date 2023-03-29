@@ -7,6 +7,7 @@ from metadrive.constants import DEFAULT_AGENT
 from metadrive.manager.base_manager import BaseManager
 from metadrive.manager.waymo_traffic_manager import WaymoTrafficManager
 
+from metadrive.scenario.scenario_description import ScenarioDescription as SD
 
 class WaymoMapManager(BaseManager):
     PRIORITY = 0  # Map update has the most high priority
@@ -34,11 +35,8 @@ class WaymoMapManager(BaseManager):
         self.current_sdc_route = None
         self.sdc_dest_point = None
 
-        seed = self.engine.global_random_seed
-        assert self.start_case_index <= seed < self.start_case_index + self.map_num
-
         if self._stored_maps[seed] is None and self.store_map:
-            new_map = WaymoMap(map_index=seed)
+            new_map = WaymoMap(map_index=seed, coordinate_transform=self.engine.global_config.get("coordinate_transform", False))
             self._stored_maps[seed] = new_map
         else:
             new_map = self._stored_maps[seed]
@@ -49,15 +47,21 @@ class WaymoMapManager(BaseManager):
     def update_route(self):
         data = self.engine.data_manager.get_case(self.engine.global_random_seed)
 
-        sdc_traj = parse_full_trajectory(data["tracks"][data["sdc_track_index"]])
+        sdc_track = data["tracks"][data[SD.METADATA][SD.SDC_ID]]
+
+        sdc_traj = parse_full_trajectory(sdc_track)
 
         init_state = parse_vehicle_state(
-            data["tracks"][data["sdc_track_index"]],
+            sdc_track,
             self.engine.global_config["traj_start_index"],
             check_last_state=False,
+            coordinate_transform=self.engine.global_config["coordinate_transform"]
         )
         last_state = parse_vehicle_state(
-            data["tracks"][data["sdc_track_index"]], self.engine.global_config["traj_end_index"], check_last_state=True
+            sdc_track,
+            self.engine.global_config["traj_end_index"],
+            check_last_state=True,
+            coordinate_transform=self.engine.global_config["coordinate_transform"]
         )
         init_position = init_state["position"]
         init_yaw = init_state["heading"]
@@ -69,15 +73,13 @@ class WaymoMapManager(BaseManager):
         self.sdc_dest_point = copy.deepcopy(last_position)
 
         self.engine.global_config.update(
-            copy.deepcopy(
-                dict(
-                    target_vehicle_configs={
-                        DEFAULT_AGENT: dict(
-                            spawn_position_heading=(init_position, init_yaw), spawn_velocity=init_state["velocity"]
-                        )
-                    }
-                )
-            )
+            copy.deepcopy(dict(
+                target_vehicle_configs={
+                    DEFAULT_AGENT: dict(
+                        spawn_position_heading=(init_position, init_yaw), spawn_velocity=init_state["velocity"]
+                    )
+                }
+            ))
         )
 
     def filter_path(self, start_lanes, end_lanes):

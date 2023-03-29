@@ -71,7 +71,7 @@ def waymo_to_metadrive_vector(vector):
     elif vector.ndim == 2:
         vector[:, 1] *= -1
     else:
-        print(11111)
+        raise ValueError()
     return vector
 
 
