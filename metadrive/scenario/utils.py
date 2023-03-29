@@ -84,6 +84,8 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
                 heading=np.zeros(shape=(episode_len, 1)),
                 velocity=np.zeros(shape=(episode_len, 2)),
                 valid=np.zeros(shape=(episode_len, 1)),
+                throttle_brake=np.zeros(shape=(episode_len, 1)),
+                steering=np.zeros(shape=(episode_len, 1)),
             ),
             metadata=dict(track_length=episode_len, type=MetaDriveType.UNSET, object_id=k)
         )
