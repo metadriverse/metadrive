@@ -28,12 +28,11 @@ def parse_vehicle_state(
                 break
     if coordinate_transform:
         ret["position"] = waymo_to_metadrive_vector(states["position"][time_idx])
-        ret["heading"] = waymo_to_metadrive_heading(states["heading"][time_idx])
         ret["velocity"] = waymo_to_metadrive_vector(states["velocity"][time_idx])
     else:
         ret["position"] = states["position"][time_idx]
-        ret["heading"] = states["heading"][time_idx]
         ret["velocity"] = states["velocity"][time_idx]
+    ret["heading"] = waymo_to_metadrive_heading(states["heading"][time_idx], coordinate_transform=coordinate_transform)
 
     ret["length"] = states["size"][time_idx][0]
     ret["width"] = states["size"][time_idx][1]
@@ -41,10 +40,7 @@ def parse_vehicle_state(
     ret["valid"] = states["valid"][time_idx]
     if time_idx < len(states["position"]) - 1:
         angular_velocity = (states["heading"][time_idx + 1] - states["heading"][time_idx]) / sim_time_interval
-        if coordinate_transform:
-            ret["angular_velocity"] = waymo_to_metadrive_heading(angular_velocity)
-        else:
-            ret["angular_velocity"] = angular_velocity
+        ret["angular_velocity"] = waymo_to_metadrive_heading(angular_velocity, coordinate_transform=coordinate_transform)
     else:
         ret["angular_velocity"] = 0
     return ret
