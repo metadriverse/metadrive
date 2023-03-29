@@ -14,15 +14,11 @@ from metadrive.utils.waymo_utils.waymo_type import WaymoRoadLineType, WaymoRoadE
 
 
 class WaymoBlock(BaseBlock):
-    def __init__(self, block_index: int, global_network, random_seed, map_index, need_lane_localization, coordinate_transform):
+    def __init__(self, block_index: int, global_network, random_seed, map_index, need_lane_localization):
         # self.waymo_map_data = waymo_map_data
         self.need_lane_localization = need_lane_localization
         self.map_index = map_index
-        self.coordinate_transform = coordinate_transform
         super(WaymoBlock, self).__init__(block_index, global_network, random_seed)
-        #
-        # e = get_engine()
-        # self.waymo_map_data = e.data_manager.get_case(self.map_index, should_copy=True)["map"]
 
     @property
     def waymo_map_data(self):
@@ -65,7 +61,7 @@ class WaymoBlock(BaseBlock):
                         LineColor.YELLOW if WaymoRoadLineType.is_yellow(type) else LineColor.GREY
                     )
             elif WaymoRoadEdgeType.is_road_edge(type) and WaymoRoadEdgeType.is_sidewalk(type):
-                self.construct_waymo_sidewalk(convert_polyline_to_metadrive(data[WaymoLaneProperty.POLYLINE]), coordinate_transform=self.coordinate_transform)
+                self.construct_waymo_sidewalk(convert_polyline_to_metadrive(data[WaymoLaneProperty.POLYLINE], coordinate_transform=self.coordinate_transform))
             elif WaymoRoadEdgeType.is_road_edge(type) and not WaymoRoadEdgeType.is_sidewalk(type):
                 self.construct_waymo_continuous_line(
                     convert_polyline_to_metadrive(data[WaymoLaneProperty.POLYLINE], coordinate_transform=self.coordinate_transform), LineColor.GREY
@@ -141,6 +137,11 @@ class WaymoBlock(BaseBlock):
         self.destroy()
         super(WaymoBlock, self).__del__()
         # print("Waymo Block is being deleted.")
+
+    @property
+    def coordinate_transform(self):
+        return self.engine.global_config["coordinate_transform"]
+
 
     # @property
     # def waymo_map_data(self):

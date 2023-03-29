@@ -12,16 +12,15 @@ from metadrive.utils.waymo_utils.waymo_type import WaymoLaneProperty
 
 
 class WaymoMap(BaseMap):
-    def __init__(self, map_index, random_seed=None, need_lane_localization=True, coordinate_transform=True):
+    def __init__(self, map_index, random_seed=None, need_lane_localization=True):
         self.map_index = map_index
         self.need_lane_localization = need_lane_localization
-        self.coordinate_transform = coordinate_transform
         super(WaymoMap, self).__init__(dict(id=self.map_index), random_seed=random_seed)
 
     def _generate(self):
         block = WaymoBlock(
             block_index=0, global_network=self.road_network, random_seed=0, map_index=self.map_index,
-            need_lane_localization=self.need_lane_localization, coordinate_transform=self.coordinate_transform
+            need_lane_localization=self.need_lane_localization
         )
         block.construct_block(self.engine.worldNP, self.engine.physics_world, attach_to_world=True)
         self.blocks.append(block)
@@ -32,14 +31,6 @@ class WaymoMap(BaseMap):
             b._create_in_world(skip=True)
             b.attach_to_world(self.engine.worldNP, self.engine.physics_world)
             b.detach_from_world(self.engine.physics_world)
-
-    @staticmethod
-    def waymo_position(pos):
-        return pos[0], -pos[1]
-
-    @staticmethod
-    def metadrive_position(pos):
-        return pos[0], -pos[1]
 
     @property
     def road_network_type(self):
@@ -80,6 +71,10 @@ class WaymoMap(BaseMap):
                     "type": MetaDriveType.CONTINUOUS_GREY_LINE
                 }
         return ret
+
+    @property
+    def coordinate_transform(self):
+        return self.engine.global_config["coordinate_transform"]
 
 
 if __name__ == "__main__":

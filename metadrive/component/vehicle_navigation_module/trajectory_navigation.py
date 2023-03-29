@@ -1,8 +1,9 @@
 import numpy as np
 
+from metadrive.component.pg_space import BlockParameterSpace, Parameter
 from metadrive.component.vehicle_navigation_module.base_navigation import BaseNavigation
 from metadrive.utils.math_utils import norm, clip
-from metadrive.component.pg_space import BlockParameterSpace, Parameter
+from metadrive.utils.math_utils import panda_position
 
 
 class TrajectoryNavigation(BaseNavigation):
@@ -64,7 +65,7 @@ class TrajectoryNavigation(BaseNavigation):
         # self.current_lane = self.final_lane = self.reference_trajectory
         if self._dest_node_path is not None:
             check_point = self.reference_trajectory.end
-            self._dest_node_path.setPos(check_point[0], -check_point[1], 1.8)
+            self._dest_node_path.setPos(panda_position(check_point[0], check_point[1], 1.8))
 
     # def get_trajectory(self):
     #     """This function breaks Multi-agent Waymo Env since we don't set this in map_manager."""
@@ -114,7 +115,7 @@ class TrajectoryNavigation(BaseNavigation):
         if self._show_navi_info:
             # Whether to visualize little boxes in the scene denoting the checkpoints
             pos_of_goal = ckpt_1
-            self._goal_node_path.setPos(pos_of_goal[0], -pos_of_goal[1], 1.8)
+            self._goal_node_path.setPos(panda_position(pos_of_goal[0], pos_of_goal[1], 1.8))
             self._goal_node_path.setH(self._goal_node_path.getH() + 3)
             self.navi_arrow_dir = [lanes_heading1, lanes_heading2]
             dest_pos = self._dest_node_path.getPos()
