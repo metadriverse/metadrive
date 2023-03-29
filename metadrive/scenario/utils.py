@@ -4,6 +4,7 @@ import time
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.pyplot import figure
+
 from metadrive.component.traffic_participants.cyclist import Cyclist
 from metadrive.component.traffic_participants.pedestrian import Pedestrian
 from metadrive.component.vehicle.base_vehicle import BaseVehicle

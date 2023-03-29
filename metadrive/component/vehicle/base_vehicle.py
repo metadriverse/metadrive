@@ -1,19 +1,19 @@
 import math
-from metadrive.constants import TrafficLightStatus
-from panda3d.core import NodePath
 from collections import deque
 from typing import Union, Optional
-from metadrive.utils.utils import get_object_from_node
+
 import numpy as np
 import seaborn as sns
 from panda3d.bullet import BulletVehicle, BulletBoxShape, ZUp
 from panda3d.core import Material, Vec3, TransformState, LVector3
+from panda3d.core import NodePath
 
 from metadrive.base_class.base_object import BaseObject
 from metadrive.component.lane.abs_lane import AbstractLane
 from metadrive.component.lane.circular_lane import CircularLane
 from metadrive.component.lane.point_lane import PointLane
 from metadrive.component.lane.straight_lane import StraightLane
+from metadrive.component.pg_space import VehicleParameterSpace, ParameterSpace
 from metadrive.component.road_network.node_road_network import NodeRoadNetwork
 from metadrive.component.vehicle_module.depth_camera import DepthCamera
 from metadrive.component.vehicle_module.distance_detector import SideDetector, LaneLineDetector
@@ -23,6 +23,7 @@ from metadrive.component.vehicle_module.rgb_camera import RGBCamera
 from metadrive.component.vehicle_navigation_module.edge_network_navigation import EdgeNetworkNavigation
 from metadrive.component.vehicle_navigation_module.node_network_navigation import NodeNetworkNavigation
 from metadrive.constants import BodyName, CollisionGroup
+from metadrive.constants import TrafficLightStatus
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.engine.core.image_buffer import ImageBuffer
 from metadrive.engine.engine_utils import get_engine, engine_initialized
@@ -33,7 +34,7 @@ from metadrive.utils.math_utils import get_vertical_vector, norm, clip
 from metadrive.utils.math_utils import wrap_to_pi
 from metadrive.utils.pg_utils.utils import ray_localization
 from metadrive.utils.pg_utils.utils import rect_region_detection
-from metadrive.component.pg_space import VehicleParameterSpace, ParameterSpace
+from metadrive.utils.utils import get_object_from_node
 
 
 class BaseVehicleState:
