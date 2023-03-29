@@ -22,6 +22,7 @@ class ReplayManager(BaseManager):
         super(ReplayManager, self).__init__()
         self.restore_episode_info = None
         self.current_map = None
+        self.current_frames = None
         self.current_frame = None
         self.replay_done = False
         self.record_name_to_current_name = dict()
@@ -77,6 +78,7 @@ class ReplayManager(BaseManager):
             self.current_map = self.spawn_object(
                 PGMap, map_config=map_config, auto_fill_random_seed=False, force_spawn=True
             )
+        self.current_frames = self.restore_episode_info["frame"].pop()
         self.replay_frame()
         if self.engine.only_reset_when_replay:
             # do not replay full trajectory! set state for managers for interaction
@@ -130,7 +132,7 @@ class ReplayManager(BaseManager):
         if len(self.restore_episode_info["frame"]) == 0:
             self.replay_done = True
             return
-        self.current_frame = self.restore_episode_info["frame"].pop()
+        self.current_frame = self.current_frames.pop()
         # create
         for name, config in self.current_frame.spawn_info.items():
             if config[ObjectState.CLASS] == DefaultVehicle:
@@ -153,7 +155,13 @@ class ReplayManager(BaseManager):
                 self.spawned_objects[self.record_name_to_current_name[name]].set_state(state)
                 self.spawned_objects[self.record_name_to_current_name[name]].after_step()
 
-        self.clear_objects([self.record_name_to_current_name[name] for name in self.current_frame.clear_info])
+        to_clear = []
+        for name in self.current_frame.clear_info:
+            to_clear.append(self.record_name_to_current_name[name])
+            self.current_name_to_record_name.pop(self.record_name_to_current_name[name])
+            self.record_name_to_current_name.pop(name)
+        self.clear_objects(to_clear)
+
         self.replay_done = False
 
     @property
@@ -179,4 +187,11 @@ class ReplayManager(BaseManager):
         return {}
 
     def get_state(self):
+        return {}
+
+    def before_step(self, *args, **kwargs) -> dict:
+        super(ReplayManager, self).before_step()
+        if self.engine.replay_episode:
+            self.current_frames = self.restore_episode_info["frame"].pop()
+            self.current_frames.reverse()
         return {}

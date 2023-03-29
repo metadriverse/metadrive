@@ -1,4 +1,5 @@
 import pickle
+from metadrive.utils.math_utils import wrap_to_pi
 import numpy as np
 
 from metadrive import MultiAgentRoundaboutEnv
@@ -35,9 +36,12 @@ def test_save_episode(vis=False):
             }
         }
     )
+    step_info = []
     try:
         o = env.reset()
         for i in range(1, 100000 if vis else 2000):
+            step_info.append(
+                {name: [obj.position, obj.heading_theta, obj.class_name] for name, obj in env.engine._spawned_objects.items()})
             o, r, d, info = env.step([0, 1])
             if vis:
                 env.render(mode="top_down", road_color=(35, 35, 35))
@@ -49,12 +53,19 @@ def test_save_episode(vis=False):
         env.config["record_episode"] = False
         o = env.reset()
         for i in range(1, 100000 if vis else 2000):
-            pos = env.engine.replay_manager.get_object_from_agent("default_agent").position
-            assert env.vehicle.position == pos
-            record_pos = env.engine.replay_manager.current_frame.step_info[
-                env.engine.replay_manager.current_frame.agent_to_object("default_agent")]["position"]
-            assert np.isclose(np.array(env.vehicle.position), np.array(record_pos[:-1])).all()
-            assert abs(env.vehicle.get_z() - record_pos[-1]) < 1e-3
+            # if i % 5 ==0:
+            for old_id, new_id in env.engine.replay_manager.record_name_to_current_name.items():
+                obj = env.engine.replay_manager.spawned_objects[new_id]
+                pos = obj.position
+                heading = obj.heading_theta
+                record_pos = env.engine.replay_manager.current_frame.step_info[old_id]["position"]
+                record_heading = env.engine.replay_manager.current_frame.step_info[old_id]["heading_theta"]
+                assert np.isclose(np.array([pos[0], pos[1], obj.get_z()]), np.array(record_pos)).all()
+                assert abs(wrap_to_pi(heading - record_heading)) < 1e-2
+
+                assert np.isclose(np.array([pos[0], pos[1]]), np.array(step_info[i-1][old_id][0]), 1e-2, 1e-2).all()
+                assert abs(wrap_to_pi(heading - np.array(step_info[i-1][old_id][1]))) < 1e-2
+            # assert abs(env.vehicle.get_z() - record_pos[-1]) < 1e-3
             o, r, d, info = env.step([0, 1])
             if vis:
                 env.render(mode="top_down", )
@@ -111,6 +122,15 @@ def test_save_episode_marl(vis=False):
         env.config["record_episode"] = False
         o = env.reset()
         for i in range(1, 100000 if vis else 2000):
+            # if i % 5 ==0:
+            for old_id, new_id in env.engine.replay_manager.record_name_to_current_name.items():
+                obj = env.engine.replay_manager.spawned_objects[new_id]
+                pos = obj.position
+                heading = obj.heading_theta
+                record_pos = env.engine.replay_manager.current_frame.step_info[old_id]["position"]
+                record_heading = env.engine.replay_manager.current_frame.step_info[old_id]["heading_theta"]
+                assert np.isclose(np.array([pos[0], pos[1], obj.get_z()]), np.array(record_pos)).all()
+                assert abs(wrap_to_pi(heading - record_heading)) < 1e-2
             # print("Replay MARL step: {}".format(i))
             o, r, d, info = env.step({agent_id: [0, 0.1] for agent_id in env.vehicles.keys()})
             if vis:
