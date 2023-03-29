@@ -41,7 +41,11 @@ def test_save_episode(vis=False):
         o = env.reset()
         for i in range(1, 100000 if vis else 2000):
             step_info.append(
-                {name: [obj.position, obj.heading_theta, obj.class_name] for name, obj in env.engine._spawned_objects.items()})
+                {
+                    name: [obj.position, obj.heading_theta, obj.class_name]
+                    for name, obj in env.engine._spawned_objects.items()
+                }
+            )
             o, r, d, info = env.step([0, 1])
             if vis:
                 env.render(mode="top_down", road_color=(35, 35, 35))

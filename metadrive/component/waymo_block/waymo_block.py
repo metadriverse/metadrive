@@ -31,7 +31,12 @@ class WaymoBlock(BaseBlock):
             if WaymoLaneType.is_lane(data.get("type", False)):
                 if len(data[WaymoLaneProperty.POLYLINE]) <= 1:
                     continue
-                waymo_lane = WaymoLane(lane_id, self.waymo_map_data, self.need_lane_localization, coordinate_transform=self.coordinate_transform)
+                waymo_lane = WaymoLane(
+                    lane_id,
+                    self.waymo_map_data,
+                    self.need_lane_localization,
+                    coordinate_transform=self.coordinate_transform
+                )
                 self.block_network.add_lane(waymo_lane)
         return True
 
@@ -53,19 +58,27 @@ class WaymoBlock(BaseBlock):
                     continue
                 if WaymoRoadLineType.is_broken(type):
                     self.construct_waymo_broken_line(
-                        convert_polyline_to_metadrive(data[WaymoLaneProperty.POLYLINE], coordinate_transform=self.coordinate_transform),
-                        LineColor.YELLOW if WaymoRoadLineType.is_yellow(type) else LineColor.GREY
+                        convert_polyline_to_metadrive(
+                            data[WaymoLaneProperty.POLYLINE], coordinate_transform=self.coordinate_transform
+                        ), LineColor.YELLOW if WaymoRoadLineType.is_yellow(type) else LineColor.GREY
                     )
                 else:
                     self.construct_waymo_continuous_line(
-                        convert_polyline_to_metadrive(data[WaymoLaneProperty.POLYLINE], coordinate_transform=self.coordinate_transform),
-                        LineColor.YELLOW if WaymoRoadLineType.is_yellow(type) else LineColor.GREY
+                        convert_polyline_to_metadrive(
+                            data[WaymoLaneProperty.POLYLINE], coordinate_transform=self.coordinate_transform
+                        ), LineColor.YELLOW if WaymoRoadLineType.is_yellow(type) else LineColor.GREY
                     )
             elif WaymoRoadEdgeType.is_road_edge(type) and WaymoRoadEdgeType.is_sidewalk(type):
-                self.construct_waymo_sidewalk(convert_polyline_to_metadrive(data[WaymoLaneProperty.POLYLINE], coordinate_transform=self.coordinate_transform))
+                self.construct_waymo_sidewalk(
+                    convert_polyline_to_metadrive(
+                        data[WaymoLaneProperty.POLYLINE], coordinate_transform=self.coordinate_transform
+                    )
+                )
             elif WaymoRoadEdgeType.is_road_edge(type) and not WaymoRoadEdgeType.is_sidewalk(type):
                 self.construct_waymo_continuous_line(
-                    convert_polyline_to_metadrive(data[WaymoLaneProperty.POLYLINE], coordinate_transform=self.coordinate_transform), LineColor.GREY
+                    convert_polyline_to_metadrive(
+                        data[WaymoLaneProperty.POLYLINE], coordinate_transform=self.coordinate_transform
+                    ), LineColor.GREY
                 )
             # else:
             #     raise ValueError("Can not build lane line type: {}".format(type))
@@ -142,7 +155,6 @@ class WaymoBlock(BaseBlock):
     @property
     def coordinate_transform(self):
         return self.engine.global_config["coordinate_transform"]
-
 
     # @property
     # def waymo_map_data(self):

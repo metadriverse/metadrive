@@ -22,7 +22,11 @@ class WaymoTrafficManager(BaseManager):
         self.vid_to_obj = {}
         for v_id, type_traj in self.current_traffic_data.items():
             if WaymoAgentType.is_vehicle(type_traj["type"]) and v_id != self.sdc_track_index:
-                info = parse_vehicle_state(type_traj, self.engine.global_config["traj_start_index"], coordinate_transform=self.engine.global_config["coordinate_transform"])
+                info = parse_vehicle_state(
+                    type_traj,
+                    self.engine.global_config["traj_start_index"],
+                    coordinate_transform=self.engine.global_config["coordinate_transform"]
+                )
                 if not info["valid"]:
                     continue
                 v_config = copy.deepcopy(self.engine.global_config["vehicle_config"])
@@ -51,8 +55,11 @@ class WaymoTrafficManager(BaseManager):
             # generate vehicle
             for v_id, type_traj in self.current_traffic_data.items():
                 if v_id in self.vid_to_obj and self.vid_to_obj[v_id] in self.spawned_objects.keys():
-                    info = parse_vehicle_state(type_traj, self.count, coordinate_transform=self.engine.global_config["coordinate_transform"])
-                    time_end = self.count > self.engine.global_config["traj_end_index"] and self.engine.global_config["traj_end_index"] != -1
+                    info = parse_vehicle_state(
+                        type_traj, self.count, coordinate_transform=self.engine.global_config["coordinate_transform"]
+                    )
+                    time_end = self.count > self.engine.global_config["traj_end_index"] and self.engine.global_config[
+                        "traj_end_index"] != -1
                     if (not info["valid"] or time_end) and v_id in self.vid_to_obj:
                         self.clear_objects([self.vid_to_obj[v_id]])
                         self.vid_to_obj.pop(v_id)

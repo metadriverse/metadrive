@@ -17,7 +17,9 @@ class WaymoLane(PointLane):
         Extract the lane information of one waymo lane, and do coordinate shift
         """
         self.need_lane_localization = need_lane_localization
-        center_line_points = convert_polyline_to_metadrive(waymo_map_data[waymo_lane_id][WaymoLaneProperty.POLYLINE], coordinate_transform=coordinate_transform)
+        center_line_points = convert_polyline_to_metadrive(
+            waymo_map_data[waymo_lane_id][WaymoLaneProperty.POLYLINE], coordinate_transform=coordinate_transform
+        )
         super(WaymoLane, self).__init__(
             center_line_points=center_line_points,
             width=self.get_lane_width(waymo_lane_id, waymo_map_data),

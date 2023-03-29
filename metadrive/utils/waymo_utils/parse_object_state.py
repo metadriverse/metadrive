@@ -6,9 +6,7 @@ from metadrive.scenario.metadrive_type import MetaDriveType
 from metadrive.utils.coordinates_shift import waymo_to_metadrive_heading, waymo_to_metadrive_vector
 
 
-def parse_vehicle_state(
-    object_dict, time_idx, coordinate_transform, check_last_state=False, sim_time_interval=0.1
-):
+def parse_vehicle_state(object_dict, time_idx, coordinate_transform, check_last_state=False, sim_time_interval=0.1):
     assert object_dict["type"] == MetaDriveType.VEHICLE
 
     states = object_dict["state"]

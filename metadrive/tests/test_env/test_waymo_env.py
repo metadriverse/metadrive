@@ -23,7 +23,7 @@ def test_waymo_env(policy, render=False, case_num=3):
                 "case_num": case_num
             }
         )
-        for seed in range(1 if policy==WaymoIDMPolicy else 0,case_num):
+        for seed in range(1 if policy == WaymoIDMPolicy else 0, case_num):
             env.reset(force_seed=seed)
             for i in range(1000):
                 o, r, d, info = env.step([1.0, 0.])

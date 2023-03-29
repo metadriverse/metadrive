@@ -9,6 +9,7 @@ from metadrive.manager.waymo_traffic_manager import WaymoTrafficManager
 
 from metadrive.scenario.scenario_description import ScenarioDescription as SD
 
+
 class WaymoMapManager(BaseManager):
     PRIORITY = 0  # Map update has the most high priority
     DEFAULT_DATA_BUFFER_SIZE = 200
@@ -49,7 +50,9 @@ class WaymoMapManager(BaseManager):
 
         sdc_track = data["tracks"][data[SD.METADATA][SD.SDC_ID]]
 
-        sdc_traj = parse_full_trajectory(sdc_track, coordinate_transform=self.engine.global_config["coordinate_transform"])
+        sdc_traj = parse_full_trajectory(
+            sdc_track, coordinate_transform=self.engine.global_config["coordinate_transform"]
+        )
 
         init_state = parse_vehicle_state(
             sdc_track,
@@ -73,13 +76,15 @@ class WaymoMapManager(BaseManager):
         self.sdc_dest_point = copy.deepcopy(last_position)
 
         self.engine.global_config.update(
-            copy.deepcopy(dict(
-                target_vehicle_configs={
-                    DEFAULT_AGENT: dict(
-                        spawn_position_heading=(init_position, init_yaw), spawn_velocity=init_state["velocity"]
-                    )
-                }
-            ))
+            copy.deepcopy(
+                dict(
+                    target_vehicle_configs={
+                        DEFAULT_AGENT: dict(
+                            spawn_position_heading=(init_position, init_yaw), spawn_velocity=init_state["velocity"]
+                        )
+                    }
+                )
+            )
         )
 
     def filter_path(self, start_lanes, end_lanes):

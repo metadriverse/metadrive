@@ -56,7 +56,11 @@ def draw_top_down_map(
                 if WaymoLaneProperty.POLYLINE not in data:
                     continue
                 type = data.get("type", None)
-                waymo_line = InterpolatingLine(convert_polyline_to_metadrive(data[WaymoLaneProperty.POLYLINE], coordinate_transform=coordinate_transform))
+                waymo_line = InterpolatingLine(
+                    convert_polyline_to_metadrive(
+                        data[WaymoLaneProperty.POLYLINE], coordinate_transform=coordinate_transform
+                    )
+                )
                 LaneGraphics.display_waymo(waymo_line, type, surface)
 
     elif isinstance(map, NuPlanMap):
@@ -189,7 +193,11 @@ class TopDownRenderer:
         # Setup the canvas
         # (1) background is the underlying layer. It is fixed and will never change unless the map changes.
         self._background_canvas = draw_top_down_map(
-            self.map, draw_drivable_area=False, return_surface=True, film_size=film_size, road_color=road_color,
+            self.map,
+            draw_drivable_area=False,
+            return_surface=True,
+            film_size=film_size,
+            road_color=road_color,
             coordinate_transform=self.coordinate_transform
         )
         if self._light_background:

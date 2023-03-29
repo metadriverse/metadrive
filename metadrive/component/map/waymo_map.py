@@ -19,7 +19,10 @@ class WaymoMap(BaseMap):
 
     def _generate(self):
         block = WaymoBlock(
-            block_index=0, global_network=self.road_network, random_seed=0, map_index=self.map_index,
+            block_index=0,
+            global_network=self.road_network,
+            random_seed=0,
+            map_index=self.map_index,
             need_lane_localization=self.need_lane_localization
         )
         block.construct_block(self.engine.worldNP, self.engine.physics_world, attach_to_world=True)
@@ -57,20 +60,26 @@ class WaymoMap(BaseMap):
                     ret[map_feat_id] = {
                         "type": MetaDriveType.BROKEN_YELLOW_LINE
                         if WaymoRoadLineType.is_yellow(type) else MetaDriveType.BROKEN_GREY_LINE,
-                        "polyline": convert_polyline_to_metadrive(data[WaymoLaneProperty.POLYLINE], coordinate_transform=self.coordinate_transform)
+                        "polyline": convert_polyline_to_metadrive(
+                            data[WaymoLaneProperty.POLYLINE], coordinate_transform=self.coordinate_transform
+                        )
                     }
                 else:
                     ret[map_feat_id] = {
-                        "polyline": convert_polyline_to_metadrive(data[WaymoLaneProperty.POLYLINE], coordinate_transform=self.coordinate_transform),
+                        "polyline": convert_polyline_to_metadrive(
+                            data[WaymoLaneProperty.POLYLINE], coordinate_transform=self.coordinate_transform
+                        ),
                         "type": MetaDriveType.CONTINUOUS_YELLOW_LINE
                         if WaymoRoadLineType.is_yellow(type) else MetaDriveType.CONTINUOUS_GREY_LINE
                     }
             elif WaymoRoadEdgeType.is_road_edge(type):
                 ret[map_feat_id] = {
-                    "polyline": convert_polyline_to_metadrive(data[WaymoLaneProperty.POLYLINE], coordinate_transform=self.coordinate_transform),
+                    "polyline": convert_polyline_to_metadrive(
+                        data[WaymoLaneProperty.POLYLINE], coordinate_transform=self.coordinate_transform
+                    ),
                     "type": MetaDriveType.CONTINUOUS_GREY_LINE
                 }
-            elif type==MetaDriveType.LANE_CENTER_LINE:
+            elif type == MetaDriveType.LANE_CENTER_LINE:
                 continue
             # else:
             # # for debug

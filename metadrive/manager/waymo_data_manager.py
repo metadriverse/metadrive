@@ -8,6 +8,7 @@ from metadrive.utils.data_buffer import DataBuffer
 from metadrive.utils.waymo_utils.utils import read_waymo_data
 from metadrive.scenario.scenario_description import ScenarioDescription as SD, MetaDriveType
 
+
 class WaymoDataManager(BaseManager):
     DEFAULT_DATA_BUFFER_SIZE = 100
 

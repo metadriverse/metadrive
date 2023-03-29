@@ -35,17 +35,22 @@ def assert_scenario_equal(scenarios1, scenarios2, only_compare_sdc=False):
                     continue
                 elif k == "position":
                     np.testing.assert_almost_equal(
-                        state_dict1[SD.STATE][k][:min_len][..., :2], state_dict2[SD.STATE][k][:min_len][..., :2],
+                        state_dict1[SD.STATE][k][:min_len][..., :2],
+                        state_dict2[SD.STATE][k][:min_len][..., :2],
                         decimal=NP_ARRAY_DECIMAL
                     )
                 elif k == "heading":
                     np.testing.assert_almost_equal(
-                        state_dict1[SD.STATE][k][:min_len], state_dict2[SD.STATE][k][:min_len],
-                        decimal=NP_ARRAY_DECIMAL)
+                        state_dict1[SD.STATE][k][:min_len],
+                        state_dict2[SD.STATE][k][:min_len],
+                        decimal=NP_ARRAY_DECIMAL
+                    )
                 elif k == "velocity":
                     np.testing.assert_almost_equal(
-                        state_dict1[SD.STATE][k][:min_len], state_dict2[SD.STATE][k][:min_len],
-                        decimal=VELOCITY_DECIMAL)
+                        state_dict1[SD.STATE][k][:min_len],
+                        state_dict2[SD.STATE][k][:min_len],
+                        decimal=VELOCITY_DECIMAL
+                    )
             assert state_dict1[SD.TYPE] == state_dict2[SD.TYPE]
 
         else:
