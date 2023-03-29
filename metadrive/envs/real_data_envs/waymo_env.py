@@ -355,11 +355,11 @@ class WaymoEnv(BaseEnv):
 if __name__ == "__main__":
     env = WaymoEnv(
         {
-            "use_render": False,
+            "use_render": True,
             "agent_policy": WaymoReplayEgoCarPolicy,
             "manual_control": False,
             "replay": True,
-            "no_traffic": False,
+            "no_traffic": True,
             # "debug":True,
             # "no_traffic":True,
             # "start_case_index": 192,
@@ -391,7 +391,7 @@ if __name__ == "__main__":
                 #     "seed": env.engine.global_seed + env.config["start_case_index"],
                 #     "reward": r,
                 # }
-                mode="topdown"
+                # mode="topdown"
             )
 
             if d:

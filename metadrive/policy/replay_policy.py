@@ -79,8 +79,9 @@ class ReplayEgoCarPolicy(BasePolicy):
             return [0, 0]
 
         # Before step
-        action = self.traj_info[int(self.timestep)].get("action", None)
-        self.control_object.before_step(action)
+        # Warning by LQY: Don't call before step here! Before step should be called by manager
+        # action = self.traj_info[int(self.timestep)].get("action", None)
+        # self.control_object.before_step(action)
 
         # Update state
         if self.timestep == self.start_index:

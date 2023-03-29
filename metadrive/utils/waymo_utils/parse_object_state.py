@@ -28,11 +28,11 @@ def parse_vehicle_state(
                 time_idx = current_idx
                 break
     if coordinate_transform:
-        ret["position"] = waymo_to_metadrive_vector(states["position"][time_idx])
+        ret["position"] = waymo_to_metadrive_vector(states["position"][time_idx][:2])
         ret["heading"] = waymo_to_metadrive_heading(states["heading"][time_idx])
         ret["velocity"] = waymo_to_metadrive_vector(states["velocity"][time_idx])
     else:
-        ret["position"] = states["position"][time_idx]
+        ret["position"] = states["position"][time_idx][:2]
         ret["heading"] = states["heading"][time_idx]
         ret["velocity"] = states["velocity"][time_idx]
 

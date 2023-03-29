@@ -51,8 +51,9 @@ def test_save_episode(vis=False):
         f = open("test_dump_single.pkl", "rb")
         env.config["replay_episode"] = pickle.load(f)
         env.config["record_episode"] = False
+        f.close()
         o = env.reset()
-        for i in range(1, 100000 if vis else 2000):
+        for i in range(0, 100000 if vis else 2000):
             # if i % 5 ==0:
             for old_id, new_id in env.engine.replay_manager.record_name_to_current_name.items():
                 obj = env.engine.replay_manager.spawned_objects[new_id]
@@ -63,8 +64,8 @@ def test_save_episode(vis=False):
                 assert np.isclose(np.array([pos[0], pos[1], obj.get_z()]), np.array(record_pos)).all()
                 assert abs(wrap_to_pi(heading - record_heading)) < 1e-2
 
-                assert np.isclose(np.array([pos[0], pos[1]]), np.array(step_info[i-1][old_id][0]), 1e-2, 1e-2).all()
-                assert abs(wrap_to_pi(heading - np.array(step_info[i-1][old_id][1]))) < 1e-2
+                assert np.isclose(np.array([pos[0], pos[1]]), np.array(step_info[i][old_id][0]), 1e-2, 1e-2).all()
+                assert abs(wrap_to_pi(heading - np.array(step_info[i][old_id][1]))) < 1e-2
             # assert abs(env.vehicle.get_z() - record_pos[-1]) < 1e-3
             o, r, d, info = env.step([0, 1])
             if vis:

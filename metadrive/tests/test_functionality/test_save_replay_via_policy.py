@@ -66,4 +66,4 @@ def test_save_recreate_scenario(vis=False):
 
 
 if __name__ == "__main__":
-    test_save_recreate_scenario(vis=True)
+    test_save_recreate_scenario(vis=False)
