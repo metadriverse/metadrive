@@ -1,4 +1,5 @@
 import copy
+from metadrive.utils.math_utils import wrap_to_pi
 
 import numpy as np
 from metadrive.scenario.metadrive_type import MetaDriveType
@@ -44,7 +45,7 @@ def parse_vehicle_state(
         if coordinate_transform:
             ret["angular_velocity"] = waymo_to_metadrive_heading(angular_velocity)
         else:
-            ret["angular_velocity"] = angular_velocity
+            ret["angular_velocity"] = wrap_to_pi(angular_velocity)
     else:
         ret["angular_velocity"] = 0
     return ret
