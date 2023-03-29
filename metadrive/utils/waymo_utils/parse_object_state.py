@@ -1,7 +1,7 @@
 import copy
-from metadrive.utils.math_utils import wrap_to_pi
 
 import numpy as np
+
 from metadrive.scenario.metadrive_type import MetaDriveType
 from metadrive.utils.coordinates_shift import waymo_to_metadrive_heading, waymo_to_metadrive_vector
 
@@ -27,12 +27,11 @@ def parse_vehicle_state(object_dict, time_idx, coordinate_transform, check_last_
                 break
     if coordinate_transform:
         ret["position"] = waymo_to_metadrive_vector(states["position"][time_idx][:2])
-        ret["heading"] = waymo_to_metadrive_heading(states["heading"][time_idx])
         ret["velocity"] = waymo_to_metadrive_vector(states["velocity"][time_idx])
     else:
-        ret["position"] = states["position"][time_idx][:2]
-        ret["heading"] = states["heading"][time_idx]
+        ret["position"] = states["position"][time_idx]
         ret["velocity"] = states["velocity"][time_idx]
+    ret["heading"] = waymo_to_metadrive_heading(states["heading"][time_idx], coordinate_transform=coordinate_transform)
 
     ret["length"] = states["size"][time_idx][0]
     ret["width"] = states["size"][time_idx][1]
@@ -40,10 +39,9 @@ def parse_vehicle_state(object_dict, time_idx, coordinate_transform, check_last_
     ret["valid"] = states["valid"][time_idx]
     if time_idx < len(states["position"]) - 1:
         angular_velocity = (states["heading"][time_idx + 1] - states["heading"][time_idx]) / sim_time_interval
-        if coordinate_transform:
-            ret["angular_velocity"] = waymo_to_metadrive_heading(angular_velocity)
-        else:
-            ret["angular_velocity"] = wrap_to_pi(angular_velocity)
+        ret["angular_velocity"] = waymo_to_metadrive_heading(
+            angular_velocity, coordinate_transform=coordinate_transform
+        )
     else:
         ret["angular_velocity"] = 0
     return ret

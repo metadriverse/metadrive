@@ -4,6 +4,7 @@ import time
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.pyplot import figure
+
 from metadrive.component.traffic_participants.cyclist import Cyclist
 from metadrive.component.traffic_participants.pedestrian import Pedestrian
 from metadrive.component.vehicle.base_vehicle import BaseVehicle
@@ -83,9 +84,6 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
                 heading=np.zeros(shape=(episode_len, 1)),
                 velocity=np.zeros(shape=(episode_len, 2)),
                 valid=np.zeros(shape=(episode_len, 1)),
-                # 0 for objects except vehicle
-                throttle_brake=np.zeros(shape=(episode_len, 1)),
-                steering=np.zeros(shape=(episode_len, 1))
             ),
             metadata=dict(track_length=episode_len, type=MetaDriveType.UNSET, object_id=k)
         )
