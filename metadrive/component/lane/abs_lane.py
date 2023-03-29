@@ -214,7 +214,7 @@ class AbstractLane:
         :param theta: Rotate theta
         :param lane_index: set index for this lane, sometimes lane index is decided after building graph
         """
-        theta=panda_heading(theta)
+        theta = panda_heading(theta)
         lane = self
         length += 0.1
         if lane_index is not None:
@@ -234,13 +234,9 @@ class AbstractLane:
         segment_node.addShape(shape)
         block.static_nodes.append(segment_node)
         segment_np.setPos(panda_position(position, -0.1))
-        segment_np.setQuat(
-            LQuaternionf(
-                math.cos(theta / 2) * math.cos(-math.pi / 4),
-                math.cos(theta / 2) * math.sin(-math.pi / 4), -math.sin(theta / 2) * math.cos(-math.pi / 4),
-                math.sin(theta / 2) * math.cos(-math.pi / 4)
-            )
-        )
+
+        segment_np.setH(theta / np.pi * 180)
+        segment_np.setP(-90)
         segment_np.reparentTo(block.lane_node_path)
         if block.render:
             cm = CardMaker('card')
@@ -252,13 +248,8 @@ class AbstractLane:
 
             card.setPos(panda_position(position, np.random.rand() * 0.02 - 0.015))
 
-            card.setQuat(
-                LQuaternionf(
-                    math.cos(theta / 2) * math.cos(-math.pi / 4),
-                    math.cos(theta / 2) * math.sin(-math.pi / 4), -math.sin(theta / 2) * math.cos(-math.pi / 4),
-                    math.sin(theta / 2) * math.cos(-math.pi / 4)
-                )
-            )
+            card.setH(theta / np.pi * 180)
+            card.setP(-90)
             # card.setTransparency(TransparencyAttrib.MMultisample)
             # card.setTexture(block.ts_normal, block.road_normal)
             card.setTexture(block.ts_color, block.road_texture)
@@ -389,7 +380,7 @@ class AbstractLane:
         Only create visual part for this lane, usually used with _construct_lane_only_physics_polygon()
         """
         length += 0.1
-        theta=panda_heading(theta)
+        theta = panda_heading(theta)
         if block.render:
             cm = CardMaker('card')
             cm.setFrame(-length / 2, length / 2, -width / 2, width / 2)
@@ -400,13 +391,8 @@ class AbstractLane:
 
             card.setPos(panda_position(position, np.random.rand() * 0.02 - 0.015))
 
-            card.setQuat(
-                LQuaternionf(
-                    math.cos(theta / 2) * math.cos(-math.pi / 4),
-                    math.cos(theta / 2) * math.sin(-math.pi / 4), -math.sin(theta / 2) * math.cos(-math.pi / 4),
-                    math.sin(theta / 2) * math.cos(-math.pi / 4)
-                )
-            )
+            card.setH(theta / np.pi * 180)
+            card.setP(-90)
             card.setTransparency(TransparencyAttrib.MMultisample)
             card.setTexture(block.ts_color, block.road_texture)
 
