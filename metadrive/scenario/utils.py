@@ -36,6 +36,16 @@ def get_type_from_class(obj_class):
         return MetaDriveType.OTHER
 
 
+def _convert_type_to_string(nested):
+    if isinstance(nested, type):
+        return (nested.__module__, nested.__name__)
+    if isinstance(nested, (list, tuple)):
+        return [_convert_type_to_string(v) for v in nested]
+    if isinstance(nested, dict):
+        return {k: _convert_type_to_string(v) for k, v in nested.items()}
+    return nested
+
+
 def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1):
     """
     This function utilizes the recorded data natively emerging from MetaDrive run.
@@ -106,16 +116,25 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
             tracks[id]["state"]["steering"][frame_idx] = state.get("steering", 0)
             tracks[id]["state"]["size"][frame_idx] = state.get("size", [0, 0, 0])
 
-        # TODO: Determine if we need recording action or not.
-        #  IMO, throttle_brake and steering are enough, as everything is turned into throttle steering
+            if id in frames[frame_idx]._object_to_agent:
+                tracks[id]["metadata"]["agent_name"] = frames[frame_idx]._object_to_agent[id]
+
         for id, policy_info in frames[frame_idx].policy_info.items():
             # Maybe actions is also recorded. If so, add item to tracks:
-            if "action" in policy_info and policy_info["action"] is not {}:
-                # TODO: In the case of discrete action, what should we do?
-                action = np.asarray(policy_info["action"]).astype(np.float32)
-                if "action" not in tracks[id]["state"]:
-                    tracks[id]["state"]["action"] = np.zeros(shape=(episode_len, action.size), dtype=action.dtype)
-                tracks[id]["state"]["action"][frame_idx] = action
+            # TODO: In the case of discrete action, what should we do?
+            for key, policy_state in policy_info.items():
+                if policy_state is {}:
+                    continue
+                policy_state = np.asarray(policy_state)
+                assert policy_state.dtype != object
+                if key not in tracks[id]["state"]:
+                    tracks[id]["state"][key] = np.zeros(
+                        shape=(episode_len, policy_state.size), dtype=policy_state.dtype
+                    )
+                tracks[id]["state"][key][frame_idx] = policy_state
+
+        for id, policy_spawn_info in frames[frame_idx].policy_spawn_info.items():
+            tracks[id]["metadata"]["policy_spawn_info"] = copy.deepcopy(_convert_type_to_string(policy_spawn_info))
 
     result[SD.TRACKS] = tracks
 

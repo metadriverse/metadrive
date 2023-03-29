@@ -53,9 +53,9 @@ def recursive_equal(data1, data2, need_assert=False):
             ret.append(recursive_equal(data1[k], data2[k], need_assert=need_assert))
         return all(ret)
 
-    elif isinstance(data1, list):
+    elif isinstance(data1, (list, tuple)):
         len_right = len(data1) == len(data2)
-        is_ins = isinstance(data2, list)
+        is_ins = isinstance(data2, (list, tuple))
         if need_assert:
             assert len_right and is_ins, (len(data1), len(data2), data1, data2)
         if not (is_ins and len_right):

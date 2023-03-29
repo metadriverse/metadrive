@@ -37,6 +37,9 @@ Example:
             "scenario_id": "dd0c8c27fdd6ef59",  # Used in Waymo dataset
             "seed": 512,
             "history_metadata": {},
+            "created_time": 1680132795.238,
+
+            "sdc_id": "172",  # A key exists in tracks
 
         },
 
@@ -57,7 +60,16 @@ Example:
                 # The meta data dict. Store useful information about the object
                 "metadata": {
                     "type": "VEHICLE",
-                    "track_length": 200
+                    "track_length": 200,
+                    "object_id": "vehicle1",
+
+                    # Optional keys
+                    "agent_name": "default_agent",
+                    "policy_spawn_info": {  # Information needed to re-instantiate the policy
+                        "policy_class": ("metadrive.policy.idm_policy", "IDMPolicy"),
+                        "args": ...,
+                        "kwargs": ...,
+                    }
                 }
             },
 
@@ -83,6 +95,17 @@ Example:
                     "type": "TRAFFIC_LIGHT",
                     "track_length": 200,
                 }
+        }
+
+        # ===== Map features =====
+        # A dict mapping from map feature ID to a line segment
+        "map_features": {
+            "219": {
+                "type": "LANE_SURFACE_STREET",
+                "polyline": np.array in [21, 2],  # A set of 2D points describing a line segment
+            },
+            "182": ...
+            ...
         }
     }
 """
@@ -116,7 +139,7 @@ class ScenarioDescription(dict):
     CREATED_TIME = "created_time"
     METADATA_KEYS = {METADRIVE_PROCESSED, COORDINATE, TIMESTEP, CREATED_TIME}
 
-    ALLOW_TYPES = (int, float, str, np.ndarray, dict, list)
+    ALLOW_TYPES = (int, float, str, np.ndarray, dict, list, tuple)
 
     @classmethod
     def sanity_check(cls, scenario_dict, check_self_type=False):

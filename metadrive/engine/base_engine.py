@@ -140,7 +140,7 @@ class BaseEngine(EngineCore, Randomizable):
         """
         if filter is None:
             return self._spawned_objects
-        elif isinstance(filter, list):
+        elif isinstance(filter, (list, tuple)):
             return {id: self._spawned_objects[id] for id in filter}
         elif callable(filter):
             res = dict()
@@ -168,7 +168,7 @@ class BaseEngine(EngineCore, Randomizable):
         """
         force_destroy_this_obj = True if force_destroy or self.global_config["force_destroy"] else False
 
-        if isinstance(filter, list):
+        if isinstance(filter, (list, tuple)):
             exclude_objects = {obj_id: self._spawned_objects[obj_id] for obj_id in filter}
         elif callable(filter):
             exclude_objects = dict()
