@@ -10,17 +10,26 @@ class MetaDriveType:
     CONTINUOUS_GREY_LINE = "ROAD_LINE_SOLID_SINGLE_WHITE"
     BROKEN_GREY_LINE = "ROAD_LINE_BROKEN_SINGLE_WHITE"
     BROKEN_YELLOW_LINE = "BROKEN_SINGLE_YELLOW"
+    UNKNOWN_LINE = "UNKNOWN_LINE"
 
     # ===== Agent type =====
-    UNSET = 'UNSET'
-    VEHICLE = 'VEHICLE'
-    PEDESTRIAN = 'PEDESTRIAN'
-    CYCLIST = 'CYCLIST'
-    OTHER = 'OTHER'
+    UNSET = "UNSET"
+    VEHICLE = "VEHICLE"
+    PEDESTRIAN = "PEDESTRIAN"
+    CYCLIST = "CYCLIST"
+    OTHER = "OTHER"
 
     # ===== Object type =====
     TRAFFIC_LIGHT = "TRAFFIC_LIGHT"
     TRAFFIC_CONE = "TRAFFIC_CONE"
+
+    # ===== Coordinate system =====
+    COORDINATE_METADRIVE = "metadrive"
+    COORDINATE_WAYMO = "waymo"
+
+    @classmethod
+    def has_type(cls, type_string: str):
+        return type_string in cls.__dict__
 
     @classmethod
     def from_waymo(cls, waymo_type_string: str):

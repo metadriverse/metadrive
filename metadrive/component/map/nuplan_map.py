@@ -173,14 +173,16 @@ class NuPlanMap(BaseMap):
         for block in self.attached_blocks + [self.boundary_block]:
             for boundary in block.lines.values():
                 type = boundary.type
+                map_feat_id = str(boundary.id)
+
                 if type == LineType.BROKEN:
-                    ret[boundary.id] = {
+                    ret[map_feat_id] = {
                         "type": MetaDriveType.BROKEN_YELLOW_LINE
                         if boundary.color == LineColor.YELLOW else MetaDriveType.BROKEN_GREY_LINE,
                         "polyline": boundary.points
                     }
                 else:
-                    ret[boundary.id] = {
+                    ret[map_feat_id] = {
                         "polyline": boundary.points,
                         "type": MetaDriveType.CONTINUOUS_YELLOW_LINE
                         if boundary.color == LineColor.YELLOW else MetaDriveType.CONTINUOUS_GREY_LINE

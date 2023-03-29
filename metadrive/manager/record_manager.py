@@ -58,6 +58,7 @@ class RecordManager(BaseManager):
                 frame=[self.reset_frame],
                 scenario_index=self.engine.global_seed,
                 global_config=self.engine.global_config,
+                global_seed=self.engine.global_seed,
                 coordinate="MetaDrive",
                 time=get_time_str()
             )

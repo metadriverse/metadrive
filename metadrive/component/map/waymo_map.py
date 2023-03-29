@@ -54,23 +54,24 @@ class WaymoMap(BaseMap):
         ret = {}
         for lane_id, data in self.blocks[-1].waymo_map_data.items():
             type = data.get("type", None)
+            map_feat_id = str(lane_id)
             if WaymoRoadLineType.is_road_line(type):
                 if len(data[WaymoLaneProperty.POLYLINE]) <= 1:
                     continue
                 if WaymoRoadLineType.is_broken(type):
-                    ret[lane_id] = {
+                    ret[map_feat_id] = {
                         "type": MetaDriveType.BROKEN_YELLOW_LINE
                         if WaymoRoadLineType.is_yellow(type) else MetaDriveType.BROKEN_GREY_LINE,
                         "polyline": convert_polyline_to_metadrive(data[WaymoLaneProperty.POLYLINE])
                     }
                 else:
-                    ret[lane_id] = {
+                    ret[map_feat_id] = {
                         "polyline": convert_polyline_to_metadrive(data[WaymoLaneProperty.POLYLINE]),
                         "type": MetaDriveType.CONTINUOUS_YELLOW_LINE
                         if WaymoRoadLineType.is_yellow(type) else MetaDriveType.CONTINUOUS_GREY_LINE
                     }
             elif WaymoRoadEdgeType.is_road_edge(type):
-                ret[lane_id] = {
+                ret[map_feat_id] = {
                     "polyline": convert_polyline_to_metadrive(data[WaymoLaneProperty.POLYLINE]),
                     "type": MetaDriveType.CONTINUOUS_GREY_LINE
                 }
