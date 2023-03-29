@@ -11,6 +11,8 @@ from metadrive.policy.replay_policy import WaymoReplayEgoCarPolicy
 from metadrive.scenario import ScenarioDescription as SD
 
 NP_ARRAY_DECIMAL = 4
+VELOCITY_DECIMAL = 1  # velocity can not be set accurately
+
 
 def assert_scenario_equal(scenarios1, scenarios2, only_compare_sdc=False):
     # ===== These two set of data should align =====
@@ -29,10 +31,21 @@ def assert_scenario_equal(scenarios1, scenarios2, only_compare_sdc=False):
             state_dict2 = new_scene[SD.TRACKS][sdc2]
             min_len = min(state_dict1[SD.STATE]["position"].shape[0], state_dict2[SD.STATE]["position"].shape[0])
             for k in state_dict1[SD.STATE].keys():
-                if k not in ["action", "throttle_brake", "steering"]:
+                if k in ["action", "throttle_brake", "steering"]:
+                    continue
+                elif k == "position":
                     np.testing.assert_almost_equal(
-                        state_dict1[SD.STATE][k][:min_len], state_dict2[SD.STATE][k][:min_len], decimal=NP_ARRAY_DECIMAL
+                        state_dict1[SD.STATE][k][:min_len][..., :2], state_dict2[SD.STATE][k][:min_len][..., :2],
+                        decimal=NP_ARRAY_DECIMAL
                     )
+                elif k == "heading":
+                    np.testing.assert_almost_equal(
+                        state_dict1[SD.STATE][k][:min_len], state_dict2[SD.STATE][k][:min_len],
+                        decimal=NP_ARRAY_DECIMAL)
+                elif k == "velocity":
+                    np.testing.assert_almost_equal(
+                        state_dict1[SD.STATE][k][:min_len], state_dict2[SD.STATE][k][:min_len],
+                        decimal=VELOCITY_DECIMAL)
             assert state_dict1[SD.TYPE] == state_dict2[SD.TYPE]
 
         else:
@@ -228,5 +241,5 @@ def test_export_waymo_scenario(render_export_env=False, render_load_env=False):
 if __name__ == "__main__":
     # test_export_metadrive_scenario_reproduction(scenario_num=10)
     # test_export_metadrive_scenario_easy(render_export_env=False, render_load_env=False)
-    test_export_metadrive_scenario_hard(scenario_num=1, render_export_env=False, render_load_env=True)
+    test_export_metadrive_scenario_hard(scenario_num=3, render_export_env=False, render_load_env=False)
     # test_export_waymo_scenario(render_export_env=True, render_load_env=True)

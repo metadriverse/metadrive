@@ -70,6 +70,11 @@ class WaymoMap(BaseMap):
                     "polyline": convert_polyline_to_metadrive(data[WaymoLaneProperty.POLYLINE], coordinate_transform=self.coordinate_transform),
                     "type": MetaDriveType.CONTINUOUS_GREY_LINE
                 }
+            elif type==MetaDriveType.LANE_CENTER_LINE:
+                continue
+            # else:
+            # # for debug
+            #     raise ValueError
         return ret
 
     @property
