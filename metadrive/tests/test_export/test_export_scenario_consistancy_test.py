@@ -136,7 +136,7 @@ def test_export_metadrive_scenario_reproduction(scenario_num=3, render_export_en
     dir1 = None
     try:
         scenarios = env.export_scenarios(policy, scenario_index=[i for i in range(scenario_num)])
-        dir1 = os.path.join(os.path.dirname(__file__), "test_export")
+        dir1 = os.path.join(os.path.dirname(__file__), "../test_component/test_export")
         os.makedirs(dir1, exist_ok=True)
         for i, data in scenarios.items():
             with open(os.path.join(dir1, "{}.pkl".format(i)), "wb+") as file:
@@ -270,7 +270,7 @@ def test_export_waymo_scenario(scenario_num=3, render_export_env=False, render_l
     dir = None
     try:
         scenarios = env.export_scenarios(policy, scenario_index=[i for i in range(scenario_num)], verbose=True)
-        dir = os.path.join(os.path.dirname(__file__), "test_export")
+        dir = os.path.join(os.path.dirname(__file__), "../test_component/test_export")
         os.makedirs(dir, exist_ok=True)
         for i, data in scenarios.items():
             with open(os.path.join(dir, "{}.pkl".format(i)), "wb+") as file:
