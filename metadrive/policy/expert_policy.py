@@ -4,4 +4,6 @@ from metadrive.policy.base_policy import BasePolicy
 
 class ExpertPolicy(BasePolicy):
     def act(self, agent_id=None):
-        return expert(self.control_object)
+        action = expert(self.control_object)
+        self.action_info["action"] = action
+        return action

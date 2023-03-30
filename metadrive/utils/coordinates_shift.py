@@ -1,8 +1,8 @@
 import numpy as np
-from metadrive.utils.math_utils import wrap_to_pi
 from panda3d.core import Vec3
 
 from metadrive.utils.math_utils import Vector
+from metadrive.utils.math_utils import wrap_to_pi
 
 
 # In MetaDrive, the direction of y axis is adverse to Panda3d. It is required to use these function to transform when sync
@@ -65,11 +65,13 @@ def metadrive_heading(heading: float) -> float:
 
 
 def waymo_to_metadrive_vector(vector):
-    vector = np.array(vector)
-    if len(vector.shape) == 1:
+    vector = np.array(vector, copy=True)
+    if vector.ndim == 1:
         vector[1] *= -1
-    else:
+    elif vector.ndim == 2:
         vector[:, 1] *= -1
+    else:
+        raise ValueError()
     return vector
 
 
@@ -77,8 +79,12 @@ def waymo_to_metadrive_vector(vector):
 waymo_2_metadrive_position = waymo_to_metadrive_vector
 
 
-def waymo_to_metadrive_heading(heading):
-    return -wrap_to_pi(heading)
+def waymo_to_metadrive_heading(heading, coordinate_transform=True):
+    heading = wrap_to_pi(heading)
+    if coordinate_transform:
+        return -heading
+    else:
+        return heading
 
 
 # Compatibility

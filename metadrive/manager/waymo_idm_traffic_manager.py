@@ -42,9 +42,16 @@ class WaymoIDMTrafficManager(WaymoTrafficManager):
             traffic_traj_data = {}
             for v_id, type_traj in self.current_traffic_data.items():
                 if WaymoAgentType.is_vehicle(type_traj["type"]) and v_id != self.sdc_track_index:
-                    init_info = parse_vehicle_state(type_traj, self.engine.global_config["traj_start_index"])
+                    init_info = parse_vehicle_state(
+                        type_traj,
+                        self.engine.global_config["traj_start_index"],
+                        coordinate_transform=self.engine.global_config["coordinate_transform"]
+                    )
                     dest_info = parse_vehicle_state(
-                        type_traj, self.engine.global_config["traj_end_index"], check_last_state=True
+                        type_traj,
+                        self.engine.global_config["traj_end_index"],
+                        check_last_state=True,
+                        coordinate_transform=self.engine.global_config["coordinate_transform"]
                     )
                     if not init_info["valid"]:
                         continue
@@ -52,7 +59,9 @@ class WaymoIDMTrafficManager(WaymoTrafficManager):
                         full_traj = static_vehicle_info(init_info["position"], init_info["heading"])
                         static = True
                     else:
-                        full_traj = parse_full_trajectory(type_traj)
+                        full_traj = parse_full_trajectory(
+                            type_traj, coordinate_transform=self.engine.global_config["coordinate_transform"]
+                        )
                         if len(full_traj) < self.MIN_DURATION:
                             full_traj = static_vehicle_info(init_info["position"], init_info["heading"])
                             static = True
@@ -69,7 +78,11 @@ class WaymoIDMTrafficManager(WaymoTrafficManager):
 
                 elif WaymoAgentType.is_vehicle(type_traj["type"]) and v_id == self.sdc_track_index:
                     # set Ego V velocity
-                    init_info = parse_vehicle_state(type_traj, self.engine.global_config["traj_start_index"])
+                    init_info = parse_vehicle_state(
+                        type_traj,
+                        self.engine.global_config["traj_start_index"],
+                        coordinate_transform=self.engine.global_config["coordinate_transform"]
+                    )
                     traffic_traj_data["sdc"] = {
                         "traj": None,
                         "init_info": init_info,

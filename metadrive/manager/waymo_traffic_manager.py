@@ -2,6 +2,7 @@ import copy
 
 from metadrive.component.vehicle.vehicle_type import SVehicle
 from metadrive.manager.base_manager import BaseManager
+from metadrive.scenario.scenario_description import ScenarioDescription as SD
 from metadrive.utils.waymo_utils.parse_object_state import parse_vehicle_state
 from metadrive.utils.waymo_utils.waymo_type import WaymoAgentType
 
@@ -21,7 +22,11 @@ class WaymoTrafficManager(BaseManager):
         self.vid_to_obj = {}
         for v_id, type_traj in self.current_traffic_data.items():
             if WaymoAgentType.is_vehicle(type_traj["type"]) and v_id != self.sdc_track_index:
-                info = parse_vehicle_state(type_traj, self.engine.global_config["traj_start_index"])
+                info = parse_vehicle_state(
+                    type_traj,
+                    self.engine.global_config["traj_start_index"],
+                    coordinate_transform=self.engine.global_config["coordinate_transform"]
+                )
                 if not info["valid"]:
                     continue
                 v_config = copy.deepcopy(self.engine.global_config["vehicle_config"])
@@ -50,7 +55,9 @@ class WaymoTrafficManager(BaseManager):
             # generate vehicle
             for v_id, type_traj in self.current_traffic_data.items():
                 if v_id in self.vid_to_obj and self.vid_to_obj[v_id] in self.spawned_objects.keys():
-                    info = parse_vehicle_state(type_traj, self.count)
+                    info = parse_vehicle_state(
+                        type_traj, self.count, coordinate_transform=self.engine.global_config["coordinate_transform"]
+                    )
                     time_end = self.count > self.engine.global_config["traj_end_index"] and self.engine.global_config[
                         "traj_end_index"] != -1
                     if (not info["valid"] or time_end) and v_id in self.vid_to_obj:
@@ -79,4 +86,4 @@ class WaymoTrafficManager(BaseManager):
 
     @property
     def sdc_track_index(self):
-        return str(self.engine.data_manager.get_case(self.engine.global_random_seed)["sdc_track_index"])
+        return str(self.engine.data_manager.get_case(self.engine.global_random_seed)[SD.METADATA][SD.SDC_ID])

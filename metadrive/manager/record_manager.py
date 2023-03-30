@@ -14,6 +14,7 @@ class FrameInfo:
         # used to track the objects spawn info
         self.spawn_info = {}
         self.policy_info = {}
+        self.policy_spawn_info = {}
         # used to track update objects state in the scene
         self.step_info = {}
         # used to track the objects cleared
@@ -39,7 +40,7 @@ class RecordManager(BaseManager):
         super(RecordManager, self).__init__()
         self.episode_info = None
         self.current_frames = None
-        self.current_step = 0
+        self.current_frame_count = 0
         self.reset_frame = None
 
     def before_reset(self):
@@ -55,7 +56,7 @@ class RecordManager(BaseManager):
             self._update_objects_states()
             self.episode_info = dict(
                 map_data=self.engine.current_map.get_meta_data(),
-                frame=[self.reset_frame],
+                frame=[[self.reset_frame]],
                 scenario_index=self.engine.global_seed,
                 global_config=self.engine.global_config,
                 global_seed=self.engine.global_seed,
@@ -66,7 +67,7 @@ class RecordManager(BaseManager):
 
             self.current_frames = None
             self.reset_frame = None
-            self.current_step = 0
+            self.current_frame_count = 0
 
     def collect_manager_states(self):
         assert self.episode_step == 0, "This func can only be called after env.reset() without any env.step() called"
@@ -82,24 +83,28 @@ class RecordManager(BaseManager):
             self.current_frames = [
                 FrameInfo(self.engine.episode_step) for _ in range(self.engine.global_config["decision_repeat"])
             ]
-            self.current_step = 0
+            self.current_frame_count = 0
         return {}
 
     def step(self, *args, **kwargs):
         if self.engine.record_episode:
             self._update_objects_states()
-            self.current_step += 1 if self.current_step < len(self.current_frames) - 1 else 0
+            self.current_frame_count += 1 if self.current_frame_count < len(self.current_frames) - 1 else 0
             # self.episode_info["frame"].append(self.current_frames.pop())
 
     def after_step(self, *args, **kwargs) -> dict:
-        if self.engine.record_episode and self.current_step:
-            self.episode_info["frame"] += self.current_frames
+        if self.engine.record_episode and self.current_frame_count:
+            self.episode_info["frame"].append(self.current_frames)
         return {}
 
     def _update_objects_states(self):
+        policy_mapping = self.engine.get_policies()
         for name, obj in self.engine.get_objects().items():
             if not is_map_related_instance(obj):
                 self.current_frame.step_info[name] = obj.get_state()
+                if name in policy_mapping:
+                    self.current_frame.policy_info[name] = policy_mapping[name].get_state()
+
         self.current_frame.agents = list(self.engine.agents.keys())
         self.current_frame._agent_to_object = copy.deepcopy(self.engine.agent_manager._agent_to_object)
         self.current_frame._object_to_agent = copy.deepcopy(self.engine.agent_manager._object_to_agent)
@@ -134,8 +139,8 @@ class RecordManager(BaseManager):
         for k, v in kwargs.items():
             filtered_kwargs[k] = v if not isinstance(v, BaseObject) else BaseObject
         if self.engine.record_episode:
-            assert name not in self.current_frame.policy_info, "Duplicated record!"
-            self.current_frame.policy_info[name] = {
+            assert name not in self.current_frame.policy_spawn_info, "Duplicated record!"
+            self.current_frame.policy_spawn_info[name] = {
                 PolicyState.POLICY_CLASS: policy_class,
                 PolicyState.ARGS: filtered_args,
                 PolicyState.KWARGS: filtered_kwargs,
@@ -154,7 +159,7 @@ class RecordManager(BaseManager):
 
     @property
     def current_frame(self):
-        return self.current_frames[self.current_step] if self.reset_frame is None else self.reset_frame
+        return self.current_frames[self.current_frame_count] if self.reset_frame is None else self.reset_frame
 
     def set_state(self, state: dict, old_name_to_current=None):
         return {}

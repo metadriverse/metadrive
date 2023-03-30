@@ -37,6 +37,9 @@ Example:
             "scenario_id": "dd0c8c27fdd6ef59",  # Used in Waymo dataset
             "seed": 512,
             "history_metadata": {},
+            "created_time": 1680132795.238,
+
+            "sdc_id": "172",  # A key exists in tracks
 
         },
 
@@ -57,7 +60,16 @@ Example:
                 # The meta data dict. Store useful information about the object
                 "metadata": {
                     "type": "VEHICLE",
-                    "track_length": 200
+                    "track_length": 200,
+                    "object_id": "vehicle1",
+
+                    # Optional keys
+                    "agent_name": "default_agent",
+                    "policy_spawn_info": {  # Information needed to re-instantiate the policy
+                        "policy_class": ("metadrive.policy.idm_policy", "IDMPolicy"),
+                        "args": ...,
+                        "kwargs": ...,
+                    }
                 }
             },
 
@@ -83,6 +95,17 @@ Example:
                     "type": "TRAFFIC_LIGHT",
                     "track_length": 200,
                 }
+        }
+
+        # ===== Map features =====
+        # A dict mapping from map feature ID to a line segment
+        "map_features": {
+            "219": {
+                "type": "LANE_SURFACE_STREET",
+                "polyline": np.array in [21, 2],  # A set of 2D points describing a line segment
+            },
+            "182": ...
+            ...
         }
     }
 """
@@ -116,10 +139,15 @@ class ScenarioDescription(dict):
     CREATED_TIME = "created_time"
     METADATA_KEYS = {METADRIVE_PROCESSED, COORDINATE, TIMESTEP, CREATED_TIME}
 
-    ALLOW_TYPES = (int, float, str, np.ndarray, dict, list)
+    ALLOW_TYPES = (int, float, str, np.ndarray, dict, list, tuple)
 
     @classmethod
-    def sanity_check(cls, scenario_dict):
+    def sanity_check(cls, scenario_dict, check_self_type=False):
+
+        if check_self_type:
+            assert isinstance(scenario_dict, dict)
+            assert not isinstance(scenario_dict, ScenarioDescription)
+
         # Whether input has all required keys
         assert cls.FIRST_LEVEL_KEYS.issubset(set(scenario_dict.keys())), \
             "You lack these keys in first level: {}".format(cls.FIRST_LEVEL_KEYS.difference(set(scenario_dict.keys())))
@@ -171,6 +199,14 @@ class ScenarioDescription(dict):
         # Check metadata alignment
         if cls.OBJECT_ID in obj_state[cls.METADATA]:
             assert obj_state[cls.METADATA][cls.OBJECT_ID] == object_id
+
+    def to_dict(self):
+        return dict(self)
+
+    def get_sdc_track(self):
+        assert self.SDC_ID in self[self.METADATA]
+        sdc_id = self[self.METADATA][self.SDC_ID]
+        return self[self.TRACKS][sdc_id]
 
 
 def _recursive_check_type(obj, allow_types, depth=0):

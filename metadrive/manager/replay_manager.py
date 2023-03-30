@@ -22,6 +22,7 @@ class ReplayManager(BaseManager):
         super(ReplayManager, self).__init__()
         self.restore_episode_info = None
         self.current_map = None
+        self.current_frames = None
         self.current_frame = None
         self.replay_done = False
         self.record_name_to_current_name = dict()
@@ -77,6 +78,7 @@ class ReplayManager(BaseManager):
             self.current_map = self.spawn_object(
                 PGMap, map_config=map_config, auto_fill_random_seed=False, force_spawn=True
             )
+        self.current_frames = self.restore_episode_info["frame"].pop()
         self.replay_frame()
         if self.engine.only_reset_when_replay:
             # do not replay full trajectory! set state for managers for interaction
@@ -85,16 +87,16 @@ class ReplayManager(BaseManager):
             self.engine.map_manager.current_map = self.current_map
             self.engine.map_manager.maps[self.engine.global_seed] = self.current_map
 
-    def restore_policy_states(self, policy_infos):
+    def restore_policy_states(self, policy_spawn_infos):
         # restore agent policy
         agent_policy = self.engine.agent_manager.agent_policy
         agent_obj_name = self.engine.agent_manager.active_agents[DEFAULT_AGENT].name
-        for name, policy_info in policy_infos.items():
+        for name, policy_spawn_info in policy_spawn_infos.items():
             obj_name = self.record_name_to_current_name[name]
-            p_class = policy_info[PolicyState.POLICY_CLASS] if obj_name != agent_obj_name else agent_policy
-            args = policy_info[PolicyState.ARGS]
-            kwargs = policy_info[PolicyState.KWARGS]
-            assert obj_name == self.record_name_to_current_name[policy_info[PolicyState.OBJ_NAME]]
+            p_class = policy_spawn_info[PolicyState.POLICY_CLASS] if obj_name != agent_obj_name else agent_policy
+            args = policy_spawn_info[PolicyState.ARGS]
+            kwargs = policy_spawn_info[PolicyState.KWARGS]
+            assert obj_name == self.record_name_to_current_name[policy_spawn_info[PolicyState.OBJ_NAME]]
             assert obj_name in self.engine.get_objects().keys(), "Can not find obj when restoring policies"
             policy = self.add_policy(obj_name, p_class, *args, **kwargs)
             if policy.control_object is BaseObject:
@@ -116,6 +118,8 @@ class ReplayManager(BaseManager):
 
     def after_step(self, *args, **kwargs):
         if self.engine.replay_episode and not self.engine.only_reset_when_replay:
+            if len(self.restore_episode_info["frame"]) == 0:
+                self.replay_done = True
             return self.engine.agent_manager.for_each_active_agents(lambda v: {REPLAY_DONE: self.replay_done})
         else:
             return dict()
@@ -127,10 +131,9 @@ class ReplayManager(BaseManager):
         self.current_map = None
 
     def replay_frame(self):
-        if len(self.restore_episode_info["frame"]) == 0:
-            self.replay_done = True
+        if len(self.current_frames) == 0:
             return
-        self.current_frame = self.restore_episode_info["frame"].pop()
+        self.current_frame = self.current_frames.pop()
         # create
         for name, config in self.current_frame.spawn_info.items():
             if config[ObjectState.CLASS] == DefaultVehicle:
@@ -145,7 +148,7 @@ class ReplayManager(BaseManager):
                 )
         if self.engine.only_reset_when_replay:
             # for generation policies
-            self.restore_policy_states(self.current_frame.policy_info)
+            self.restore_policy_states(self.current_frame.policy_spawn_info)
         else:
             # Do not set position, in this mode, or randomness will be introduced!
             for name, state in self.current_frame.step_info.items():
@@ -153,7 +156,13 @@ class ReplayManager(BaseManager):
                 self.spawned_objects[self.record_name_to_current_name[name]].set_state(state)
                 self.spawned_objects[self.record_name_to_current_name[name]].after_step()
 
-        self.clear_objects([self.record_name_to_current_name[name] for name in self.current_frame.clear_info])
+        to_clear = []
+        for name in self.current_frame.clear_info:
+            to_clear.append(self.record_name_to_current_name[name])
+            self.current_name_to_record_name.pop(self.record_name_to_current_name[name])
+            self.record_name_to_current_name.pop(name)
+        self.clear_objects(to_clear)
+
         self.replay_done = False
 
     @property
@@ -179,4 +188,11 @@ class ReplayManager(BaseManager):
         return {}
 
     def get_state(self):
+        return {}
+
+    def before_step(self, *args, **kwargs) -> dict:
+        super(ReplayManager, self).before_step()
+        if self.engine.replay_episode and not self.engine.only_reset_when_replay:
+            self.current_frames = self.restore_episode_info["frame"].pop()
+            self.current_frames.reverse()
         return {}
