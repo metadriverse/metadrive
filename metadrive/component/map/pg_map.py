@@ -137,6 +137,8 @@ class PGMap(BaseMap):
                     sides = 2 if l is map.road_network.graph[_from][_to][-1] or decoration else 1
                     for side in range(sides):
                         type = l.line_types[side]
+                        if type == LineType.NONE:
+                            continue
                         color = l.line_colors[side]
                         line_type = self.get_line_type(type, color)
                         lateral = l.width_at(0) / 2

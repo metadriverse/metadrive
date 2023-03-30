@@ -35,6 +35,7 @@ class EnvInputPolicy(BasePolicy):
 
         # clip to -1, 1
         action = [clip(to_process[i], -1.0, 1.0) for i in range(len(to_process))]
+        self.action_info["action"] = action
         return action
 
     def convert_to_continuous_action(self, action):

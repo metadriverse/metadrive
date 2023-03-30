@@ -252,7 +252,9 @@ class IDMPolicy(BasePolicy):
         # control by PID and IDM
         steering = self.steering_control(steering_target_lane)
         acc = self.acceleration(acc_front_obj, acc_front_dist)
-        return [steering, acc]
+        action = [steering, acc]
+        self.action_info["action"] = action
+        return action
 
     def move_to_next_road(self):
         # routing target lane is in current ref lanes
@@ -399,8 +401,11 @@ class ManualControllableIDMPolicy(IDMPolicy):
     def act(self, agent_id):
         if self.control_object is self.engine.current_track_vehicle and self.engine.global_config["manual_control"] \
                 and not self.engine.current_track_vehicle.expert_takeover:
-            return self.manual_control_policy.act(agent_id)
+            action = self.manual_control_policy.act(agent_id)
+            self.action_info["action"] = action
+            self.action_info["manual_control"] = True
         else:
+            self.action_info["manual_control"] = False
             return super(ManualControllableIDMPolicy, self).act(agent_id)
 
 
@@ -463,7 +468,9 @@ class TrajectoryIDMPOlicy(IDMPolicy):
         # else:
         #     steering = self.last_action[0]
         self.last_action = [steering, acc]
-        return [steering, acc]
+        action = [steering, acc]
+        self.action_info["action"] = action
+        return action
 
 
 class _EgoWaymoIDMPolicy(IDMPolicy):

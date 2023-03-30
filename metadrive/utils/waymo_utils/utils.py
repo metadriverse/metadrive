@@ -269,11 +269,7 @@ def read_waymo_data(file_path):
     with open(file_path, "rb") as f:
         # unpickler = CustomUnpickler(f)
         data = pickle.load(f)
-    new_track = {}
-    for key, value in data[ScenarioDescription.TRACKS].items():
-        new_track[str(key)] = value
-    data["tracks"] = new_track
-    data["sdc_track_index"] = str(data[ScenarioDescription.METADATA][ScenarioDescription.SDC_ID])
+    data = ScenarioDescription(data)
     return data
 
 

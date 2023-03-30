@@ -167,6 +167,12 @@ def ray_localization(
     :return: list(closest lane) or closest lane.
     """
     on_lane = False
+
+    if len(position) == 3:
+        position = position[:2]
+    assert len(position) == 2
+    assert len(heading) == 2
+
     results = engine.physics_world.static_world.rayTestAll(
         panda_position(position, 1.0), panda_position(position, -1.0)
     )

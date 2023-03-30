@@ -140,7 +140,7 @@ class BaseEngine(EngineCore, Randomizable):
         """
         if filter is None:
             return self._spawned_objects
-        elif isinstance(filter, list):
+        elif isinstance(filter, (list, tuple)):
             return {id: self._spawned_objects[id] for id in filter}
         elif callable(filter):
             res = dict()
@@ -150,6 +150,12 @@ class BaseEngine(EngineCore, Randomizable):
             return res
         else:
             raise ValueError("filter should be a list or a function")
+
+    def get_policies(self):
+        """
+        Return a mapping from object ID to policy instance.
+        """
+        return self._object_policies
 
     def get_object(self, object_id):
         return self.get_objects([object_id])
@@ -162,7 +168,7 @@ class BaseEngine(EngineCore, Randomizable):
         """
         force_destroy_this_obj = True if force_destroy or self.global_config["force_destroy"] else False
 
-        if isinstance(filter, list):
+        if isinstance(filter, (list, tuple)):
             exclude_objects = {obj_id: self._spawned_objects[obj_id] for obj_id in filter}
         elif callable(filter):
             exclude_objects = dict()
@@ -306,9 +312,14 @@ class BaseEngine(EngineCore, Randomizable):
         """
         for i in range(step_num):
             # simulate or replay
-            for manager in self.managers.values():
-                manager.step()
+            for name, manager in self.managers.items():
+                if name != "record_manager":
+                    manager.step()
             self.step_physics_world()
+            # the recording should happen after step physics world
+            if "record_manager" in self.managers:
+                self.record_manager.step()
+
             if self.force_fps.real_time_simulation and i < step_num - 1:
                 self.task_manager.step()
         #  panda3d render and garbage collecting loop

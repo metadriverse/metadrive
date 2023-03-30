@@ -102,6 +102,8 @@ def convert_case(file_path, new_path):
         data = loader.load()
     new_data = {}
     new_data["id"] = data["id"]
+
+    # TODO: FIXME: This data is not compatible with latest data in 03/28
     new_data["dynamic_map_states"] = {}  # old data has no traffic light info
     new_data["ts"] = data["ts"]  # old data has no traffic light info
     new_data["version"] = "2022-10"  # old data has no traffic light info

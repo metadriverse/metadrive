@@ -61,11 +61,17 @@ class ReplayEgoCarPolicy(BasePolicy):
 
     def get_trajectory_info(self):
         trajectory_data = self.engine.data_manager.get_case(self.engine.global_random_seed)["tracks"]
-        sdc_track_index = str(self.engine.data_manager.get_case(self.engine.global_random_seed)["sdc_track_index"])
-        return [
-            parse_vehicle_state(trajectory_data[sdc_track_index], i)
-            for i in range(len(trajectory_data[sdc_track_index]["state"]["position"]))
-        ]
+        sdc_track_index = str(self.engine.data_manager.get_case(self.engine.global_random_seed)["metadata"]["sdc_id"])
+        ret = []
+        for i in range(len(trajectory_data[sdc_track_index]["state"]["position"])):
+            ret.append(
+                parse_vehicle_state(
+                    trajectory_data[sdc_track_index],
+                    i,
+                    coordinate_transform=self.engine.global_config["coordinate_transform"]
+                )
+            )
+        return ret
 
     def act(self, *args, **kwargs):
         self.damp += self.damp_interval
@@ -75,6 +81,12 @@ class ReplayEgoCarPolicy(BasePolicy):
         else:
             return [0, 0]
 
+        # Before step
+        # Warning by LQY: Don't call before step here! Before step should be called by manager
+        # action = self.traj_info[int(self.timestep)].get("action", None)
+        # self.control_object.before_step(action)
+
+        # Update state
         if self.timestep == self.start_index:
             self.control_object.set_position(self.init_pos)
         elif self.timestep < len(self.traj_info):
@@ -88,6 +100,9 @@ class ReplayEgoCarPolicy(BasePolicy):
             angular_velocity = self.traj_info[int(self.timestep)]["angular_velocity"]
             self.control_object.set_heading_theta(this_heading)
             self.control_object.set_angular_velocity(angular_velocity)
+
+        # After step
+        self.control_object.after_step()
 
         return [0, 0]
 
