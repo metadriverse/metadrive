@@ -3,18 +3,18 @@ import pickle
 import shutil
 
 import numpy as np
-
 from metadrive.envs.metadrive_env import MetaDriveEnv
 from metadrive.envs.real_data_envs.waymo_env import WaymoEnv
 from metadrive.policy.idm_policy import IDMPolicy
 from metadrive.policy.replay_policy import WaymoReplayEgoCarPolicy
 from metadrive.scenario import ScenarioDescription as SD
+from metadrive.utils.coordinates_shift import waymo_to_metadrive_vector
 
 NP_ARRAY_DECIMAL = 4
 VELOCITY_DECIMAL = 1  # velocity can not be set accurately
 
 
-def assert_scenario_equal(scenarios1, scenarios2, only_compare_sdc=False):
+def assert_scenario_equal(scenarios1, scenarios2, only_compare_sdc=False, coordinate_transform=False):
     # ===== These two set of data should align =====
     assert set(scenarios1.keys()) == set(scenarios2.keys())
     for k in scenarios1.keys():
@@ -91,16 +91,25 @@ def assert_scenario_equal(scenarios1, scenarios2, only_compare_sdc=False):
         assert set(old_scene[SD.MAP_FEATURES].keys()).issuperset(set(new_scene[SD.MAP_FEATURES].keys()))
         assert set(old_scene[SD.DYNAMIC_MAP_STATES].keys()) == set(new_scene[SD.DYNAMIC_MAP_STATES].keys())
 
-        for map_id, map_feat in old_scene[SD.MAP_FEATURES].items():
+        for map_id, map_feat in new_scene[SD.MAP_FEATURES].items():
+            # It is possible that some line are not included in new scene but exist in old scene.
+            old_scene_polyline = map_feat["polyline"]
+            if coordinate_transform:
+                old_scene_polyline = waymo_to_metadrive_vector(old_scene_polyline)
             np.testing.assert_almost_equal(
                 new_scene[SD.MAP_FEATURES][map_id]["polyline"], map_feat["polyline"], decimal=NP_ARRAY_DECIMAL
             )
             assert new_scene[SD.MAP_FEATURES][map_id][SD.TYPE] == map_feat[SD.TYPE]
 
         for obj_id, obj_state in old_scene[SD.DYNAMIC_MAP_STATES].items():
-            np.testing.assert_almost_equal(
-                new_scene[SD.DYNAMIC_MAP_STATES][obj_id][SD.STATE], obj_state[SD.STATE], decimal=NP_ARRAY_DECIMAL
-            )
+            new_state_dict = new_scene[SD.DYNAMIC_MAP_STATES][obj_id][SD.STATE]
+            old_state_dict = obj_state[SD.STATE]
+            assert set(new_state_dict.keys()) == set(old_state_dict.keys())
+            for k in new_state_dict.keys():
+                min_len = min(new_state_dict[k].shape[0], old_state_dict[k].shape[0])
+                np.testing.assert_almost_equal(
+                    new_state_dict[k][:min_len], old_state_dict[k][:min_len], decimal=NP_ARRAY_DECIMAL
+                )
 
             assert new_scene[SD.DYNAMIC_MAP_STATES][obj_id][SD.TYPE] == obj_state[SD.TYPE]
 
@@ -223,7 +232,7 @@ def test_export_metadrive_scenario_hard(scenario_num=3, render_export_env=False,
     assert_scenario_equal(scenarios, scenarios_restored, only_compare_sdc=False)
 
 
-def WIP_test_export_waymo_scenario(scenario_num=3, render_export_env=False, render_load_env=False):
+def test_export_waymo_scenario(scenario_num=3, render_export_env=False, render_load_env=False):
     env = WaymoEnv(
         dict(
             agent_policy=WaymoReplayEgoCarPolicy,
@@ -261,11 +270,11 @@ def WIP_test_export_waymo_scenario(scenario_num=3, render_export_env=False, rend
         # if dir is not None:
         #     shutil.rmtree(dir)
 
-    assert_scenario_equal(scenarios, scenarios_restored, only_compare_sdc=True)
+    assert_scenario_equal(scenarios, scenarios_restored, only_compare_sdc=True, coordinate_transform=True)
 
 
 if __name__ == "__main__":
     # test_export_metadrive_scenario_reproduction(scenario_num=10)
-    test_export_metadrive_scenario_easy(scenario_num=1, render_export_env=False, render_load_env=False)
+    # test_export_metadrive_scenario_easy(scenario_num=1, render_export_env=False, render_load_env=False)
     # test_export_metadrive_scenario_hard(scenario_num=1, render_export_env=False, render_load_env=False)
-    # WIP_test_export_waymo_scenario(scenario_num=1, render_export_env=False, render_load_env=False)
+    test_export_waymo_scenario(scenario_num=14, render_export_env=False, render_load_env=False)

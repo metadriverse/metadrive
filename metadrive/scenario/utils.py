@@ -172,6 +172,7 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
                     obj_state["state"] = {k: v[:episode_len] for k, v in obj_state["state"].items()}
                     clipped_dynamic_map[obj_id] = obj_state
                 result[SD.METADATA]["history_metadata"] = manager_state["raw_data"][SD.METADATA]
+                result[SD.DYNAMIC_MAP_STATES] = clipped_dynamic_map
 
     # Record agent2object, object2agent metadata
     result[SD.METADATA]["agent_to_object"] = {str(k): str(v) for k, v in agent_to_object.items()}
