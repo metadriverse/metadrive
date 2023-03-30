@@ -355,7 +355,6 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         *args,
         **kwargs
     ):
-
         """
         pos is a 2-d array, and heading is a float (unit degree)
         if pos is not None, vehicle will be reset to the position
