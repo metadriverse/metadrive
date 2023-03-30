@@ -278,7 +278,7 @@ class BaseObject(BaseRunnable):
     def position(self):
         return metadrive_position(self.origin.getPos())
 
-    def set_velocity(self, direction: np.array, value=None, in_local_frame=False):
+    def set_velocity(self, direction: np.array, value=None, in_local_frame=False, offset_90_deg=False):
         """
         Set velocity for object including the direction of velocity and the value (speed)
         The direction of velocity will be normalized automatically, value decided its scale
@@ -292,6 +292,11 @@ class BaseObject(BaseRunnable):
             direction = LVector3(*direction, 0.)
             direction[1] *= -1
             direction = engine.worldNP.getRelativeVector(self.origin, direction)
+
+            # For some reason, we need 90 degree offset for vehicle.
+            if offset_90_deg:
+                direction = [-direction[1], -direction[0]]
+
         if value is not None:
             norm_ratio = value / (norm(direction[0], direction[1]) + 1e-6)
         else:

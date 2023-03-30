@@ -826,7 +826,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self.last_heading_dir = self.heading
 
     def set_velocity(self, direction, *args, **kwargs):
-        super(BaseVehicle, self).set_velocity(direction, *args, **kwargs)
+        super(BaseVehicle, self).set_velocity(direction, *args, offset_90_deg=True, **kwargs)
         self.last_velocity = self.velocity
         self.last_speed = self.speed
 
