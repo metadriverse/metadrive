@@ -46,7 +46,7 @@ def _convert_type_to_string(nested):
     return nested
 
 
-def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1):
+def convert_recorded_scenario_exported(record_episode, scenario_log_interval=None):
     """
     This function utilizes the recorded data natively emerging from MetaDrive run.
     The output data structure follows MetaDrive data format, but some changes might happen compared to original data.
@@ -61,9 +61,13 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
 
     result["map_features"] = record_episode["map_data"]["map_features"]
 
-    scenario_log_interval = scenario_log_interval or record_episode["global_config"]["physics_world_step_size"]
+    # TODO: Fix this
+    if scenario_log_interval is not None:
+        raise ValueError("We don't support varying the scenario log interval yet.")
 
-    frames_skip = int(scenario_log_interval / record_episode["global_config"]["physics_world_step_size"])
+    # scenario_log_interval = scenario_log_interval or record_episode["global_config"]["physics_world_step_size"]
+
+    # frames_skip = int(scenario_log_interval / record_episode["global_config"]["physics_world_step_size"])
 
     frames = [step_frame_list[0] for step_frame_list in record_episode["frame"]]
 

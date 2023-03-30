@@ -619,6 +619,14 @@ class BaseEnv(gym.Env):
             episode = self.engine.dump_episode()
             if verbose:
                 print("Finish scenario {} with {} steps.".format(index, count))
-            scenarios_to_export[index] = convert_recorded_scenario_exported(episode, time_interval)
+            scenarios_to_export[index] = convert_recorded_scenario_exported(episode)
         self.config["record_episode"] = False
         return scenarios_to_export
+
+    def export_single_scenario(self):
+        """
+        Similar export_scenarios, this function transform the internal recorded frames to a standard
+        scenario description.
+        """
+        episode = self.engine.dump_episode()
+        return convert_recorded_scenario_exported(episode)
