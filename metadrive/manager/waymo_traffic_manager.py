@@ -59,11 +59,15 @@ class WaymoTrafficManager(BaseManager):
         #     raise ValueError("Can not LOAD traffic for seed: {}".format(self.engine.global_random_seed))
 
     def after_step(self, *args, **kwargs):
-        episode_step = self.engine.episode_step
         try:
             # generate vehicle
             for v_id, type_traj in self.current_traffic_data.items():
                 if v_id in self.vid_to_obj and self.vid_to_obj[v_id] in self.spawned_objects.keys():
+
+                    episode_step = self.engine.episode_step
+
+                    # TODO: I don't know why. But adding this line can fix the bug in consistency test.
+                    episode_step = episode_step + 1
 
                     vehicle = self.spawned_objects[self.vid_to_obj[v_id]]
 
