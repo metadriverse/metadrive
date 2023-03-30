@@ -64,7 +64,7 @@ class AgentManager(BaseManager):
         for agent_id, v_config in config_dict.items():
             v_type = random_vehicle_type(self.np_random) if self.engine.global_config["random_agent_model"] else \
                 vehicle_type[v_config["vehicle_model"] if v_config.get("vehicle_model", False) else "default"]
-            obj = self.spawn_object(v_type, vehicle_config=v_config)
+            obj = self.spawn_object(v_type, vehicle_config=v_config, name=agent_id)
             ret[agent_id] = obj
             policy_cls = self.agent_policy
             self.add_policy(obj.id, policy_cls, obj, self.generate_seed())

@@ -41,8 +41,10 @@ class WaymoTrafficManager(BaseManager):
                         show_side_detector=False,
                     )
                 )
+
+                # TODO: We can specify the vehicle type (SVehicle, LVehicle, etc) if data stores this.
                 v = self.spawn_object(
-                    SVehicle, position=info["position"], heading=info["heading"], vehicle_config=v_config
+                    SVehicle, position=info["position"], heading=info["heading"], vehicle_config=v_config, name=v_id
                 )
                 self.vid_to_obj[v_id] = v.name
                 v.set_velocity(info["velocity"])
