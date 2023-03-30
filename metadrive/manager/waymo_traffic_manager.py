@@ -42,8 +42,7 @@ class WaymoTrafficManager(BaseManager):
                 else:
                     vehicle_class = SVehicle
                 v = self.spawn_object(
-                    vehicle_class, position=info["position"], heading=info["heading"], vehicle_config=v_config,
-                    name=v_id
+                    vehicle_class, position=info["position"], heading=info["heading"], vehicle_config=v_config
                 )
                 self.vid_to_obj[v_id] = v.name
                 v.set_velocity(info["velocity"])
