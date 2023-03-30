@@ -327,7 +327,7 @@ class BaseEngine(EngineCore, Randomizable):
         if self.on_screen_message is not None:
             self.on_screen_message.render()
 
-    def after_step(self, *args, **kwargs) -> Dict:
+    def after_step(self, *args, call_from_reset=False, **kwargs) -> Dict:
         """
         Update states after finishing movement
         :return: if this episode is done
@@ -339,6 +339,15 @@ class BaseEngine(EngineCore, Randomizable):
             step_infos = concat_step_infos([step_infos, new_step_info])
         self.interface.after_step()
 
+        # === Option 1: Set episode_step to "num of calls to env.step"
+        # We want to make sure that the episode_step is always aligned to the "number of calls to env.step"
+        # So if this function is called in env.reset, we will not increment episode_step.
+        # if call_from_reset:
+        #     pass
+        # else:
+        #     self.episode_step += 1
+
+        # === Option 2: Following old code.
         # Note that this function will be called in _get_reset_return.
         # Therefore, after reset the episode_step is immediately goes to 1
         # even if no env.step is called.
