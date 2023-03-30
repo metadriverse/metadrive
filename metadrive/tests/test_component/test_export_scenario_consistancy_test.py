@@ -286,6 +286,7 @@ def test_export_waymo_scenario(scenario_num=3, render_export_env=False, render_l
                 waymo_data_directory=dir,
                 use_render=render_load_env,
                 case_num=scenario_num,
+                force_reuse_object_name=True,
                 vehicle_config=dict(no_wheel_friction=True)
             )
         )
@@ -296,11 +297,11 @@ def test_export_waymo_scenario(scenario_num=3, render_export_env=False, render_l
         # if dir is not None:
         #     shutil.rmtree(dir)
 
-    assert_scenario_equal(scenarios, scenarios_restored, only_compare_sdc=True, coordinate_transform=True)
+    assert_scenario_equal(scenarios, scenarios_restored, only_compare_sdc=False, coordinate_transform=True)
 
 
 if __name__ == "__main__":
     # test_export_metadrive_scenario_reproduction(scenario_num=10)
     # test_export_metadrive_scenario_easy(scenario_num=3, render_export_env=False, render_load_env=False)
-    test_export_metadrive_scenario_hard(scenario_num=3, render_export_env=False, render_load_env=False)
-    # test_export_waymo_scenario(scenario_num=14, render_export_env=False, render_load_env=False)
+    # test_export_metadrive_scenario_hard(scenario_num=3, render_export_env=False, render_load_env=False)
+    test_export_waymo_scenario(scenario_num=3, render_export_env=False, render_load_env=False)
