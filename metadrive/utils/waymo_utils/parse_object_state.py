@@ -10,7 +10,6 @@ def parse_vehicle_state(object_dict, time_idx, coordinate_transform, check_last_
     assert object_dict["type"] == MetaDriveType.VEHICLE
 
     states = object_dict["state"]
-    ret = {k: v[time_idx] for k, v in states.items()}
 
     epi_length = len(states["position"])
     if time_idx < 0:
@@ -25,6 +24,9 @@ def parse_vehicle_state(object_dict, time_idx, coordinate_transform, check_last_
             if np.linalg.norm(p_1 - p_2) > 100:
                 time_idx = current_idx
                 break
+
+    ret = {k: v[time_idx] for k, v in states.items()}
+
     if coordinate_transform:
         ret["position"] = waymo_to_metadrive_vector(states["position"][time_idx][:2])
         ret["velocity"] = waymo_to_metadrive_vector(states["velocity"][time_idx])

@@ -264,7 +264,7 @@ class CustomUnpickler(pickle.Unpickler):
 
 def read_waymo_data(file_path):
     """
-    TODO: This function transform data again. We should remove it and let MetaDrive read native data completly.
+    TODO: This function transform data again. We should remove it and let MetaDrive read native data completely.
     """
     with open(file_path, "rb") as f:
         # unpickler = CustomUnpickler(f)
