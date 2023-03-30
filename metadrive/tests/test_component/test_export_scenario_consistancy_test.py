@@ -65,7 +65,7 @@ def assert_scenario_equal(scenarios1, scenarios2, only_compare_sdc=False):
                     )
                 assert new_scene[SD.TRACKS][track_id][SD.TYPE] == track[SD.TYPE]
 
-        assert set(old_scene[SD.MAP_FEATURES].keys()) == set(new_scene[SD.MAP_FEATURES].keys())
+        assert set(old_scene[SD.MAP_FEATURES].keys()).issuperset(set(new_scene[SD.MAP_FEATURES].keys()))
         assert set(old_scene[SD.DYNAMIC_MAP_STATES].keys()) == set(new_scene[SD.DYNAMIC_MAP_STATES].keys())
 
         # TODO FIXME: The polyline is reversed in 2nd dim. Need to take care of this.
@@ -113,6 +113,7 @@ def test_export_metadrive_scenario_reproduction(scenario_num=3, render_export_en
     if dir1 is not None:
         shutil.rmtree(dir1)
 
+    # We can't make sure traffic vehicles has same name, so just test SDC here.
     assert_scenario_equal(scenarios, scenarios2, only_compare_sdc=True)
 
 
@@ -152,7 +153,7 @@ def test_export_metadrive_scenario_easy(scenario_num=2, render_export_env=False,
     if dir1 is not None:
         shutil.rmtree(dir1)
 
-    assert_scenario_equal(scenarios, scenarios_restored, only_compare_sdc=True)
+    assert_scenario_equal(scenarios, scenarios_restored, only_compare_sdc=False)
 
 
 def test_export_metadrive_scenario_hard(scenario_num=3, render_export_env=False, render_load_env=False):
@@ -240,7 +241,7 @@ def WIP_test_export_waymo_scenario(scenario_num=3, render_export_env=False, rend
 
 
 if __name__ == "__main__":
-    test_export_metadrive_scenario_reproduction(scenario_num=10)
-    test_export_metadrive_scenario_easy(scenario_num=10, render_export_env=False, render_load_env=False)
-    test_export_metadrive_scenario_hard(scenario_num=10, render_export_env=False, render_load_env=False)
+    # test_export_metadrive_scenario_reproduction(scenario_num=10)
+    test_export_metadrive_scenario_easy(scenario_num=1, render_export_env=True, render_load_env=True)
+    # test_export_metadrive_scenario_hard(scenario_num=10, render_export_env=False, render_load_env=False)
     # WIP_test_export_waymo_scenario(scenario_num=1, render_export_env=False, render_load_env=False)

@@ -81,23 +81,31 @@ class ReplayEgoCarPolicy(BasePolicy):
         else:
             return [0, 0]
 
+        info = self.traj_info[int(self.timestep)]
+
         # Before step
         # Warning by LQY: Don't call before step here! Before step should be called by manager
         # action = self.traj_info[int(self.timestep)].get("action", None)
         # self.control_object.before_step(action)
 
+        # Update throttle and steering.
+        if "throttle_brake" in info:
+            self.control_object.set_throttle_brake(float(info["throttle_brake"]))
+        if "steering" in info:
+            self.control_object.set_throttle_brake(float(info["steering"]))
+
         # Update state
         if self.timestep == self.start_index:
             self.control_object.set_position(self.init_pos)
         elif self.timestep < len(self.traj_info):
-            self.control_object.set_position(self.traj_info[int(self.timestep)]["position"])
-            self.control_object.set_velocity(self.traj_info[int(self.timestep)]["velocity"])
+            self.control_object.set_position(info["position"])
+            self.control_object.set_velocity(info["velocity"])
 
         if self.heading is None or self.timestep >= len(self.traj_info):
             pass
         else:
-            this_heading = self.traj_info[int(self.timestep)]["heading"]
-            angular_velocity = self.traj_info[int(self.timestep)]["angular_velocity"]
+            this_heading = info["heading"]
+            angular_velocity = info["angular_velocity"]
             self.control_object.set_heading_theta(this_heading)
             self.control_object.set_angular_velocity(angular_velocity)
 

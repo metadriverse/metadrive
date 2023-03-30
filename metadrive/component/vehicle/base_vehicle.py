@@ -427,6 +427,15 @@ class BaseVehicle(BaseObject, BaseVehicleState):
 
     """------------------------------------------- act -------------------------------------------------"""
 
+    def set_steering(self, steering):
+        assert isinstance(steering, float)
+        self.system.setSteeringValue(steering, 0)
+        self.system.setSteeringValue(steering, 1)
+
+    def set_throttle_brake(self, throttle_brake):
+        assert isinstance(throttle_brake, float)
+        self._apply_throttle_brake(throttle_brake)
+
     def _set_action(self, action):
         steering = action[0]
         self.throttle_brake = action[1]
