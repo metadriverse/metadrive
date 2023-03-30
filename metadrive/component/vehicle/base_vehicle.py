@@ -431,10 +431,12 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         assert isinstance(steering, float)
         self.system.setSteeringValue(steering, 0)
         self.system.setSteeringValue(steering, 1)
+        self.steering = steering
 
     def set_throttle_brake(self, throttle_brake):
         assert isinstance(throttle_brake, float)
         self._apply_throttle_brake(throttle_brake)
+        self.throttle_brake = throttle_brake
 
     def _set_action(self, action):
         steering = action[0]
@@ -822,8 +824,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
 
     def set_state(self, state):
         super(BaseVehicle, self).set_state(state)
-        self.throttle_brake = state["throttle_brake"]
-        self.steering = state["steering"]
+        self.set_throttle_brake(state["throttle_brake"])
+        self.set_steering(state["steering"])
 
     def set_panda_pos(self, pos):
         super(BaseVehicle, self).set_panda_pos(pos)

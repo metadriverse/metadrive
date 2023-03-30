@@ -60,6 +60,9 @@ class WaymoTrafficManager(BaseManager):
             # generate vehicle
             for v_id, type_traj in self.current_traffic_data.items():
                 if v_id in self.vid_to_obj and self.vid_to_obj[v_id] in self.spawned_objects.keys():
+
+                    vehicle = self.spawned_objects[self.vid_to_obj[v_id]]
+
                     info = parse_vehicle_state(
                         type_traj, episode_step, coordinate_transform=self.engine.global_config["coordinate_transform"]
                     )
@@ -69,15 +72,16 @@ class WaymoTrafficManager(BaseManager):
                         self.clear_objects([self.vid_to_obj[v_id]])
                         self.vid_to_obj.pop(v_id)
                         continue
-                    self.spawned_objects[self.vid_to_obj[v_id]].set_position(info["position"])
-                    self.spawned_objects[self.vid_to_obj[v_id]].set_heading_theta(float(info["heading"]))
-                    self.spawned_objects[self.vid_to_obj[v_id]].set_velocity(info["velocity"])
 
+                    vehicle.set_position(info["position"])
+                    vehicle.set_heading_theta(float(info["heading"]))
+                    vehicle.set_velocity(info["velocity"])
                     if "throttle_brake" in info:
-                        self.spawned_objects[self.vid_to_obj[v_id]].set_throttle_brake(float(info["throttle_brake"]))
-
+                        vehicle.set_throttle_brake(float(info["throttle_brake"]))
                     if "steering" in info:
-                        self.spawned_objects[self.vid_to_obj[v_id]].set_throttle_brake(float(info["steering"]))
+                        vehicle.set_steering(float(info["steering"]))
+                    if "angular_velocity" in info:
+                        vehicle.set_angular_velocity(float(info["angular_velocity"]))
 
         except:
             raise ValueError("Can not UPDATE traffic for seed: {}".format(self.engine.global_random_seed))

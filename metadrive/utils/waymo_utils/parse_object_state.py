@@ -33,7 +33,8 @@ def parse_vehicle_state(object_dict, time_idx, coordinate_transform, check_last_
     else:
         ret["position"] = states["position"][time_idx]
         ret["velocity"] = states["velocity"][time_idx]
-    ret["heading"] = waymo_to_metadrive_heading(states["heading"][time_idx], coordinate_transform=coordinate_transform)
+    ret["heading_theta"] = waymo_to_metadrive_heading(states["heading"][time_idx], coordinate_transform=coordinate_transform)
+    ret["heading"] = ret["heading_theta"]
 
     ret["length"] = states["size"][time_idx][0]
     ret["width"] = states["size"][time_idx][1]
