@@ -139,8 +139,8 @@ class NuPlanReplayEgoCarPolicy(ReplayEgoCarPolicy):
         if self.episode_step < len(self.traj_info):
             self.control_object.set_position(self.traj_info[int(self.episode_step)]["position"])
             if self.episode_step < len(self.traj_info) - 1:
-                velocity = self.traj_info[int(self.episode_step + 1)]["position"] - self.traj_info[int(self.episode_step
-                                                                                                   )]["position"]
+                velocity = self.traj_info[int(self.episode_step +
+                                              1)]["position"] - self.traj_info[int(self.episode_step)]["position"]
                 velocity /= self.sim_time_interval
                 self.control_object.set_velocity(velocity, in_local_frame=False)
             else:
