@@ -32,5 +32,6 @@
 **/demo.gif
 **/test_10maps.pickle
 /metadrive/tests/test_functionality/test_dump_single.pkl
-/metadrive/tests/test_component/test_export/
+**/test_export/
+**/test_export_scenario_consistancy/
 **/test_export_metadrive_scenario_hard/
