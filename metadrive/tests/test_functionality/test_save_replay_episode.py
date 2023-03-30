@@ -52,8 +52,8 @@ def test_save_episode(vis=False):
             if d:
                 epi_info = env.engine.dump_episode("test_dump_single.pkl" if test_dump else None)
                 break
-        f = open("test_dump_single.pkl", "rb")
-        env.config["replay_episode"] = pickle.load(f)
+        with open("test_dump_single.pkl", "rb") as f:
+            env.config["replay_episode"] = pickle.load(f)
         env.config["record_episode"] = False
         f.close()
         o = env.reset()
@@ -120,10 +120,10 @@ def test_save_episode_marl(vis=False):
                 break
                 # env.reset()
 
-        epi_record = open("test_dump.pkl", "rb")
+        with open("test_dump.pkl", "rb") as epi_record:
+            # input episode_info to restore
+            env.config["replay_episode"] = pickle.load(epi_record)
 
-        # input episode_info to restore
-        env.config["replay_episode"] = pickle.load(epi_record)
         env.config["record_episode"] = False
         o = env.reset()
         for i in range(1, 100000 if vis else 2000):
