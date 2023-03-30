@@ -8,7 +8,7 @@ from metadrive.policy.replay_policy import WaymoReplayEgoCarPolicy
 
 
 @pytest.mark.parametrize("policy", [WaymoIDMPolicy, WaymoReplayEgoCarPolicy])
-def test_waymo_env(policy, render=False, case_num=3):
+def test_waymo_env(policy, render=False, num_scenario=3):
     WaymoIDMPolicy.NORMAL_SPEED = 30
     asset_path = AssetLoader.asset_path
     try:
@@ -20,10 +20,10 @@ def test_waymo_env(policy, render=False, case_num=3):
                 "use_render": render,
                 "agent_policy": policy,
                 "waymo_data_directory": AssetLoader.file_path(asset_path, "waymo", return_raw_style=False),
-                "case_num": case_num
+                "num_scenario": num_scenario
             }
         )
-        for seed in range(1 if policy == WaymoIDMPolicy else 0, case_num):
+        for seed in range(0, num_scenario):
             env.reset(force_seed=seed)
             for i in range(1000):
                 o, r, d, info = env.step([1.0, 0.])
@@ -51,7 +51,7 @@ def test_store_map_memory_leakage(render=False):
             "use_render": render,
             "agent_policy": WaymoReplayEgoCarPolicy,
             "waymo_data_directory": AssetLoader.file_path(asset_path, "waymo", return_raw_style=False),
-            "case_num": 3
+            "num_scenario": 3
         }
     )
     try:
@@ -86,4 +86,4 @@ def test_store_map_memory_leakage(render=False):
 
 if __name__ == "__main__":
     # test_store_map_memory_leakage(render=True)
-    test_waymo_env(policy=WaymoReplayEgoCarPolicy, render=False, case_num=55)
+    test_waymo_env(policy=WaymoIDMPolicy, render=True)

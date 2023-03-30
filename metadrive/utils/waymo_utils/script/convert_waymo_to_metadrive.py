@@ -84,14 +84,14 @@ def parse_data(input, output_path, _selective=False):
 
             num_agent_types = len(set(v["type"] for v in tracks.values()))
             if _selective and num_agent_types < 3:
-                print("Skip case {} because of lack of participant types {}.".format(j, num_agent_types))
+                print("Skip scenario {} because of lack of participant types {}.".format(j, num_agent_types))
                 continue
 
             md_scenario[SD.TRACKS] = tracks
 
             dynamic_states = extract_dynamic_map_states(scenario.dynamic_map_states)
             if _selective and not dynamic_states:
-                print("Skip case {} because of lack of traffic light.".format(j))
+                print("Skip scenario {} because of lack of traffic light.".format(j))
                 continue
             md_scenario[SD.DYNAMIC_MAP_STATES] = dynamic_states
 
@@ -126,16 +126,16 @@ def parse_data(input, output_path, _selective=False):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--folder", required=True, help="The data folder storing raw tfrecord from Waymo dataset.")
-    parser.add_argument("--selective", action="store_true", help="Whether select high-diversity valuable case.")
+    parser.add_argument("--selective", action="store_true", help="Whether select high-diversity valuable scenario.")
     args = parser.parse_args()
 
-    case_data_path = args.folder
+    scenario_data_path = args.folder
 
-    output_path: str = os.path.dirname(case_data_path)
+    output_path: str = os.path.dirname(scenario_data_path)
     output_path = os.path.join(output_path, "processed_data")
     os.makedirs(output_path, exist_ok=True)
 
-    raw_data_path = case_data_path
+    raw_data_path = scenario_data_path
 
     # parse raw data from input path to output path,
     # there is 1000 raw data in google cloud, each of them produce about 500 pkl file

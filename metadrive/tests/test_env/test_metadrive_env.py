@@ -7,7 +7,7 @@ import pytest
 from metadrive import MetaDriveEnv
 from metadrive.constants import TerminationState
 
-# Key: case name, value: environmental config
+# Key: scenario name, value: environmental config
 blackbox_test_configs = dict(
     default=dict(),
     random_traffic=dict(random_traffic=True),

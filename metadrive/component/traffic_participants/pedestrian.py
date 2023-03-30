@@ -11,7 +11,7 @@ from metadrive.utils.math_utils import norm
 
 class Pedestrian(BaseTrafficParticipant):
     MASS = 70  # kg
-    NAME = BodyName.Pedestrian
+    TYPE_NAME = BodyName.Pedestrian
 
     RADIUS = 0.35
     HEIGHT = 1.75
@@ -24,7 +24,7 @@ class Pedestrian(BaseTrafficParticipant):
     def __init__(self, position, heading_theta, random_seed=None):
         super(Pedestrian, self).__init__(position, heading_theta, random_seed)
         # self.origin.setDepthOffset(1)
-        n = BaseRigidBodyNode(self.name, self.NAME)
+        n = BaseRigidBodyNode(self.name, self.TYPE_NAME)
         self.add_body(n)
         self.body.addShape(BulletCylinderShape(self.RADIUS, self.HEIGHT))
         # self.set_static(True)

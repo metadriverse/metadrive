@@ -243,14 +243,14 @@ def extract_dynamic_map_states(dynamic_map_states):
 
 
 class CustomUnpickler(pickle.Unpickler):
-    def __init__(self, load_old_case, *args, **kwargs):
+    def __init__(self, load_old_scenario, *args, **kwargs):
         raise DeprecationWarning("Now we don't pickle any customized data type, so this class is deprecated now")
         super(CustomUnpickler, self).__init__(*args, **kwargs)
-        self.load_old_case = load_old_case
+        self.load_old_scenario = load_old_scenario
 
     def find_class(self, module, name):
-        if self.load_old_case:
-            raise ValueError("Old case is completely deprecated. Can't load it any more.")
+        if self.load_old_scenario:
+            raise ValueError("Old scenario is completely deprecated. Can't load it any more.")
             if name == "AgentType":
                 return AgentTypeClass
             elif name == "RoadLineType":
@@ -264,7 +264,7 @@ class CustomUnpickler(pickle.Unpickler):
 
 def read_waymo_data(file_path):
     """
-    TODO: This function transform data again. We should remove it and let MetaDrive read native data completly.
+    TODO: This function transform data again. We should remove it and let MetaDrive read native data completely.
     """
     with open(file_path, "rb") as f:
         # unpickler = CustomUnpickler(f)

@@ -16,6 +16,9 @@ class BaseRigidBodyNode(BulletRigidBodyNode):
         self.base_object_name = base_object_name
         self._clear_python_tag = False
 
+    def rename(self, new_name):
+        self.base_object_name = new_name
+
     def destroy(self):
         # This sentence is extremely important!
         self.base_object_name = None
@@ -36,6 +39,9 @@ class BaseGhostBodyNode(BulletGhostNode):
         self.setPythonTag(node_name, self)
         self.base_object_name = base_object_name
         self._clear_python_tag = False
+
+    def rename(self, new_name):
+        self.base_object_name = new_name
 
     def destroy(self):
         # This sentence is extremely important!

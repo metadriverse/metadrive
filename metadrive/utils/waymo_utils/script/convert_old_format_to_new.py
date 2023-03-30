@@ -96,7 +96,7 @@ class CustomUnpickler(pickle.Unpickler):
         return super(CustomUnpickler, self).find_class(module, name)
 
 
-def convert_case(file_path, new_path):
+def convert_scenario(file_path, new_path):
     with open(file_path, "rb+") as file:
         loader = CustomUnpickler(file)
         data = loader.load()
@@ -169,5 +169,5 @@ if __name__ == "__main__":
     for i in range(3):
         file_path = AssetLoader.file_path("waymo", "{}.pkl".format(i), return_raw_style=False)
         new_file_path = AssetLoader.file_path("waymo", "{}.pkl".format(i + 3), return_raw_style=False)
-        convert_case(file_path, new_file_path)
+        convert_scenario(file_path, new_file_path)
     sys.exit()

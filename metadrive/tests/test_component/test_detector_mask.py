@@ -97,7 +97,7 @@ class DetectorMask:
 
         small_index = math.floor(small_angle / self.angle_delta)
         large_index = math.ceil(large_angle / self.angle_delta)
-        if large_angle < small_angle:  # We are in the case like small=355, large=5
+        if large_angle < small_angle:  # We are in the scenario like small=355, large=5
             self.masks[name][small_index:] = True
             self.masks[name][:large_index + 1] = True
         else:

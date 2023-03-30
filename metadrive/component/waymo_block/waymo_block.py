@@ -24,7 +24,7 @@ class WaymoBlock(BaseBlock):
     @property
     def waymo_map_data(self):
         e = get_engine()
-        return e.data_manager.get_case(self.map_index, should_copy=False)["map_features"]
+        return e.data_manager.get_scenario(self.map_index, should_copy=False)["map_features"]
 
     def _sample_topology(self) -> bool:
         for lane_id, data in self.waymo_map_data.items():
@@ -68,20 +68,26 @@ class WaymoBlock(BaseBlock):
                             data[WaymoLaneProperty.POLYLINE], coordinate_transform=self.coordinate_transform
                         ), LineColor.YELLOW if WaymoRoadLineType.is_yellow(type) else LineColor.GREY
                     )
-            elif WaymoRoadEdgeType.is_road_edge(type) and WaymoRoadEdgeType.is_sidewalk(type):
+            # elif WaymoRoadEdgeType.is_road_edge(type) and WaymoRoadEdgeType.is_sidewalk(type):
+            #     self.construct_waymo_sidewalk(
+            #         convert_polyline_to_metadrive(
+            #             data[WaymoLaneProperty.POLYLINE], coordinate_transform=self.coordinate_transform
+            #         )
+            #     )
+            # elif WaymoRoadEdgeType.is_road_edge(type) and not WaymoRoadEdgeType.is_sidewalk(type):
+            #     self.construct_waymo_continuous_line(
+            #         convert_polyline_to_metadrive(
+            #             data[WaymoLaneProperty.POLYLINE], coordinate_transform=self.coordinate_transform
+            #         ), LineColor.GREY
+            #     )
+            # else:
+            #     raise ValueError("Can not build lane line type: {}".format(type))
+            elif WaymoRoadEdgeType.is_road_edge(type):
                 self.construct_waymo_sidewalk(
                     convert_polyline_to_metadrive(
                         data[WaymoLaneProperty.POLYLINE], coordinate_transform=self.coordinate_transform
                     )
                 )
-            elif WaymoRoadEdgeType.is_road_edge(type) and not WaymoRoadEdgeType.is_sidewalk(type):
-                self.construct_waymo_continuous_line(
-                    convert_polyline_to_metadrive(
-                        data[WaymoLaneProperty.POLYLINE], coordinate_transform=self.coordinate_transform
-                    ), LineColor.GREY
-                )
-            # else:
-            #     raise ValueError("Can not build lane line type: {}".format(type))
 
     def construct_waymo_continuous_line(self, polyline, color):
         line = InterpolatingLine(polyline)
@@ -110,7 +116,7 @@ class WaymoBlock(BaseBlock):
         line = InterpolatingLine(polyline)
         seg_len = DrivableAreaProperty.LANE_SEGMENT_LENGTH
         segment_num = int(line.length / seg_len)
-        last_theta = None
+        # last_theta = None
         for segment in range(segment_num):
             lane_start = line.get_point(segment * seg_len)
             lane_end = line.get_point((segment + 1) * seg_len)
@@ -118,23 +124,23 @@ class WaymoBlock(BaseBlock):
                 lane_end = line.get_point(line.length)
             direction_v = lane_end - lane_start
             theta = panda_heading(math.atan2(direction_v[1], direction_v[0]))
-            if segment == segment_num - 1:
-                factor = 1
-            else:
-                factor = 1.25
-                if last_theta is not None:
-                    diff = wrap_to_pi(theta) - wrap_to_pi(last_theta)
-                    if diff > 0:
-                        factor += math.sin(abs(diff) / 2) * DrivableAreaProperty.SIDEWALK_WIDTH / norm(
-                            lane_start[0] - lane_end[0], lane_start[1] - lane_end[1]
-                        ) + 0.15
-                    else:
-                        factor -= math.sin(abs(diff) / 2) * DrivableAreaProperty.SIDEWALK_WIDTH / norm(
-                            lane_start[0] - lane_end[0], lane_start[1] - lane_end[1]
-                        )
+            # if segment == segment_num - 1:
+            #     factor = 1
+            # else:
+            #     factor = 1.25
+            #     if last_theta is not None:
+            #         diff = wrap_to_pi(theta) - wrap_to_pi(last_theta)
+            #         if diff > 0:
+            #             factor += math.sin(abs(diff) / 2) * DrivableAreaProperty.SIDEWALK_WIDTH / norm(
+            #                 lane_start[0] - lane_end[0], lane_start[1] - lane_end[1]
+            #             ) + 0.15
+            #         else:
+            #             factor -= math.sin(abs(diff) / 2) * DrivableAreaProperty.SIDEWALK_WIDTH / norm(
+            #                 lane_start[0] - lane_end[0], lane_start[1] - lane_end[1]
+            #             )
             last_theta = theta
             node_path_list = WaymoLane.construct_sidewalk_segment(
-                self, lane_start, lane_end, length_multiply=factor, extra_thrust=1
+                self, lane_start, lane_end, length_multiply=1, extra_thrust=0, width=0.2
             )
             self._node_path_list.extend(node_path_list)
 
@@ -159,4 +165,4 @@ class WaymoBlock(BaseBlock):
     # @property
     # def waymo_map_data(self):
     #     e = get_engine()
-    #     return e.data_manager.get_case(self.map_index)["map"]
+    #     return e.data_manager.get_scenario(self.map_index)["map"]

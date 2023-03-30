@@ -59,7 +59,7 @@ class RemoteMetaDrive(gym.Env):
 
 
 if __name__ == '__main__':
-    # Test and also show cases!
+    # Test and also show scenarios!
     envs = [RemoteMetaDrive(dict(map=7)) for _ in range(3)]
     ret = [env.reset() for env in envs]
     print(ret)

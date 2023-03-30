@@ -282,7 +282,7 @@ class LaneGraphics:
                 cls.continuous_line(lane, surface, stripes_count, s0, side, color=color)
             elif (lane.line_types[side] == LineType.SIDE) and isinstance(lane, StraightLane):
                 cls.continuous_line(lane, surface, stripes_count, s0, side, color=color)
-            # special case
+            # special scenario
             elif lane.line_types[side] == LineType.NONE:
                 continue
             else:

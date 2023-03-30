@@ -12,7 +12,7 @@ from metadrive.policy.replay_policy import WaymoReplayEgoCarPolicy
 class DemoWaymoEnv(WaymoEnv):
     def reset(self, force_seed=None):
         if self.engine is not None and force_seed is None:
-            seeds = [i for i in range(self.config["case_num"])]
+            seeds = [i for i in range(self.config["num_scenario"])]
             seeds.remove(self.current_seed)
             force_seed = random.choice(seeds)
         super(DemoWaymoEnv, self).reset(force_seed=force_seed)
@@ -27,8 +27,8 @@ if __name__ == "__main__":
             "replay": True,
             "use_render": True,
             "waymo_data_directory": AssetLoader.file_path(asset_path, "waymo", return_raw_style=False),
-            "case_num": 3,
-            "start_case_index": 0,
+            "num_scenario": 3,
+            "start_scenario_index": 0,
             "crash_vehicle_done": False,
             "crash_vehicle_penalty": 0,
             "vehicle_config": {

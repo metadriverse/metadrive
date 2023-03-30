@@ -14,7 +14,7 @@ if __name__ == '__main__':
     for i in range(2):
         if i == 1:
             env.close()
-            env = WaymoEnv(dict(start_case_index=0, case_num=3))
+            env = WaymoEnv(dict(start_scenario_index=0, num_scenario=3))
         for j in range(3):
             count += 1
             env.reset(force_seed=j)

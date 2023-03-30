@@ -61,13 +61,18 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
 
     result["map_features"] = record_episode["map_data"]["map_features"]
 
-    scenario_log_interval = scenario_log_interval or record_episode["global_config"]["physics_world_step_size"]
+    # TODO: Fix this
+    if scenario_log_interval != 0.1:
+        raise ValueError("We don't support varying the scenario log interval yet.")
 
-    frames_skip = int(scenario_log_interval / record_episode["global_config"]["physics_world_step_size"])
+    # scenario_log_interval = scenario_log_interval or record_episode["global_config"]["physics_world_step_size"]
+
+    # frames_skip = int(scenario_log_interval / record_episode["global_config"]["physics_world_step_size"])
 
     frames = [step_frame_list[0] for step_frame_list in record_episode["frame"]]
 
     episode_len = len(frames)
+    assert frames[-1].episode_step == episode_len - 1, "Length mismatch"
     result[SD.LENGTH] = episode_len
 
     result[SD.METADATA] = {}
@@ -147,6 +152,14 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
         agent_to_object.update(frames[frame_idx]._agent_to_object)
         object_to_agent.update(frames[frame_idx]._object_to_agent)
 
+        # Record spawn information
+        for obj_name, spawn_info in frames[frame_idx].spawn_info.items():
+            spawn_info = copy.deepcopy(spawn_info)
+            spawn_info = _convert_type_to_string(spawn_info)
+            if "config" in spawn_info:
+                spawn_info.pop("config")
+            tracks[obj_name]["metadata"]["spawn_info"] = spawn_info
+
     result[SD.TRACKS] = tracks
 
     # Traffic Light: Straight-through forward from original data
@@ -160,8 +173,7 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
                     obj_state["state"] = {k: v[:episode_len] for k, v in obj_state["state"].items()}
                     clipped_dynamic_map[obj_id] = obj_state
                 result[SD.METADATA]["history_metadata"] = manager_state["raw_data"][SD.METADATA]
-
-    # TODO: Record vehicle type (LVehicle, XLVehicle etc.) This data stored in XXX
+                result[SD.DYNAMIC_MAP_STATES] = clipped_dynamic_map
 
     # Record agent2object, object2agent metadata
     result[SD.METADATA]["agent_to_object"] = {str(k): str(v) for k, v in agent_to_object.items()}

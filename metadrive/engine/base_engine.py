@@ -124,6 +124,12 @@ class BaseEngine(EngineCore, Randomizable):
         else:
             obj = self._dying_objects[object_class.__name__].pop()
             obj.reset(**kwargs)
+
+        if "name" in kwargs and kwargs["name"] is not None:
+            assert kwargs["name"] == obj.name == obj.id
+        if "id" in kwargs and kwargs["name"] is not None:
+            assert kwargs["id"] == obj.id == obj.name
+
         if self.global_config["record_episode"] and not self.replay_episode:
             self.record_manager.add_spawn_info(obj.name, object_class, kwargs)
         self._spawned_objects[obj.id] = obj
@@ -298,6 +304,7 @@ class BaseEngine(EngineCore, Randomizable):
         :param external_actions: Dict[agent_id:action]
         :return:
         """
+        self.episode_step += 1
         step_infos = {}
         self.external_actions = external_actions
         for manager in self.managers.values():
@@ -327,17 +334,32 @@ class BaseEngine(EngineCore, Randomizable):
         if self.on_screen_message is not None:
             self.on_screen_message.render()
 
-    def after_step(self) -> Dict:
+    def after_step(self, *args, **kwargs) -> Dict:
         """
         Update states after finishing movement
         :return: if this episode is done
         """
-        self.episode_step += 1
+
         step_infos = {}
         for manager in self.managers.values():
-            new_step_info = manager.after_step()
+            new_step_info = manager.after_step(*args, **kwargs)
             step_infos = concat_step_infos([step_infos, new_step_info])
         self.interface.after_step()
+
+        # === Option 1: Set episode_step to "num of calls to env.step"
+        # We want to make sure that the episode_step is always aligned to the "number of calls to env.step"
+        # So if this function is called in env.reset, we will not increment episode_step.
+        # if call_from_reset:
+        #     pass
+        # else:
+        #     self.episode_step += 1
+
+        # === Option 2: Following old code.
+        # Note that this function will be called in _get_reset_return.
+        # Therefore, after reset the episode_step is immediately goes to 1
+        # even if no env.step is called.
+
+        # Episode_step should be increased before env.step(). I moved it to engine.before_step() now.
 
         # cull distant blocks
         # poses = [v.position for v in self.agent_manager.active_agents.values()]

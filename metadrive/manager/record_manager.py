@@ -87,12 +87,14 @@ class RecordManager(BaseManager):
         return {}
 
     def step(self, *args, **kwargs):
+        # Note: Update object state must be written in step, because the simulator will step 5 times for each RL step.
+        # We need to record the intermediate states.
         if self.engine.record_episode:
             self._update_objects_states()
             self.current_frame_count += 1 if self.current_frame_count < len(self.current_frames) - 1 else 0
-            # self.episode_info["frame"].append(self.current_frames.pop())
 
     def after_step(self, *args, **kwargs) -> dict:
+
         if self.engine.record_episode and self.current_frame_count:
             self.episode_info["frame"].append(self.current_frames)
         return {}

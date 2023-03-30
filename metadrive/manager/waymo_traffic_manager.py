@@ -10,15 +10,11 @@ from metadrive.utils.waymo_utils.waymo_type import WaymoAgentType
 class WaymoTrafficManager(BaseManager):
     def __init__(self):
         super(WaymoTrafficManager, self).__init__()
-        # self.current_traffic_data = None
-        self.count = 0
-        # self.sdc_track_index = None
         self.vid_to_obj = None
 
     def after_reset(self):
         # try:
         # generate vehicle
-        self.count = 0
         self.vid_to_obj = {}
         for v_id, type_traj in self.current_traffic_data.items():
             if WaymoAgentType.is_vehicle(type_traj["type"]) and v_id != self.sdc_track_index:
@@ -41,11 +37,23 @@ class WaymoTrafficManager(BaseManager):
                         show_side_detector=False,
                     )
                 )
+                if info["vehicle_class"]:
+                    vehicle_class = info["vehicle_class"]
+                else:
+                    vehicle_class = SVehicle
+                obj_name = v_id if self.engine.global_config["force_reuse_object_name"] else None
                 v = self.spawn_object(
-                    SVehicle, position=info["position"], heading=info["heading"], vehicle_config=v_config
+                    vehicle_class,
+                    position=info["position"],
+                    heading=info["heading"],
+                    vehicle_config=v_config,
+                    name=obj_name
                 )
                 self.vid_to_obj[v_id] = v.name
                 v.set_velocity(info["velocity"])
+                if "angular_velocity" in info:
+                    v.set_angular_velocity(info["angular_velocity"])
+
                 # v.set_static(True)
         # except:
         #     raise ValueError("Can not LOAD traffic for seed: {}".format(self.engine.global_random_seed))
@@ -55,19 +63,34 @@ class WaymoTrafficManager(BaseManager):
             # generate vehicle
             for v_id, type_traj in self.current_traffic_data.items():
                 if v_id in self.vid_to_obj and self.vid_to_obj[v_id] in self.spawned_objects.keys():
+
+                    episode_step = self.engine.episode_step
+
+                    # TODO: I don't know why. But adding this line can fix the bug in consistency test.
+                    episode_step = episode_step + 1
+
+                    vehicle = self.spawned_objects[self.vid_to_obj[v_id]]
+
                     info = parse_vehicle_state(
-                        type_traj, self.count, coordinate_transform=self.engine.global_config["coordinate_transform"]
+                        type_traj, episode_step, coordinate_transform=self.engine.global_config["coordinate_transform"]
                     )
-                    time_end = self.count > self.engine.global_config["traj_end_index"] and self.engine.global_config[
-                        "traj_end_index"] != -1
+                    time_end = episode_step > self.engine.global_config["traj_end_index"] and \
+                               self.engine.global_config["traj_end_index"] != -1
                     if (not info["valid"] or time_end) and v_id in self.vid_to_obj:
                         self.clear_objects([self.vid_to_obj[v_id]])
                         self.vid_to_obj.pop(v_id)
                         continue
-                    self.spawned_objects[self.vid_to_obj[v_id]].set_position(info["position"])
-                    self.spawned_objects[self.vid_to_obj[v_id]].set_heading_theta(info["heading"])
-                    self.spawned_objects[self.vid_to_obj[v_id]].set_velocity(info["velocity"])
-            self.count += 1
+
+                    vehicle.set_position(info["position"])
+                    vehicle.set_heading_theta(float(info["heading"]))
+                    vehicle.set_velocity(info["velocity"])
+                    if "throttle_brake" in info:
+                        vehicle.set_throttle_brake(float(info["throttle_brake"]))
+                    if "steering" in info:
+                        vehicle.set_steering(float(info["steering"]))
+                    if "angular_velocity" in info:
+                        vehicle.set_angular_velocity(float(info["angular_velocity"]))
+
         except:
             raise ValueError("Can not UPDATE traffic for seed: {}".format(self.engine.global_random_seed))
 
@@ -75,15 +98,15 @@ class WaymoTrafficManager(BaseManager):
         try:
             # clean previous episode data
             super(WaymoTrafficManager, self).before_reset()
-            # self.current_traffic_data = self.engine.data_manager.get_case(self.engine.global_random_seed)["tracks"]
-            # self.sdc_track_index = str(self.engine.data_manager.get_case(self.engine.global_random_seed)["sdc_track_index"])
+            # self.current_traffic_data = self.engine.data_manager.get_scenario(self.engine.global_random_seed)["tracks"]
+            # self.sdc_track_index = str(self.engine.data_manager.get_scenario(self.engine.global_random_seed)["sdc_track_index"])
         except:
             raise ValueError("Can not CLEAN traffic for seed: {}".format(self.engine.global_random_seed))
 
     @property
     def current_traffic_data(self):
-        return self.engine.data_manager.get_case(self.engine.global_random_seed)["tracks"]
+        return self.engine.data_manager.get_scenario(self.engine.global_random_seed)["tracks"]
 
     @property
     def sdc_track_index(self):
-        return str(self.engine.data_manager.get_case(self.engine.global_random_seed)[SD.METADATA][SD.SDC_ID])
+        return str(self.engine.data_manager.get_scenario(self.engine.global_random_seed)[SD.METADATA][SD.SDC_ID])

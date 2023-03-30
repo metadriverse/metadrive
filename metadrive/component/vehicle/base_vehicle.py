@@ -278,6 +278,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
 
     @staticmethod
     def _preprocess_action(action):
+        if action is None:
+            return None, {"raw_action": None}
         action = safe_clip_for_small_array(action, -1, 1)
         return action, {'raw_action': (action[0], action[1])}
 
@@ -286,8 +288,9 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         Save info and make decision before action
         """
         # init step info to store info before each step
-        if action is None:
-            action = [0, 0]
+        # if action is None:
+        #     action = [0, 0]
+
         self._init_step_info()
         action, step_info = self._preprocess_action(action)
 
@@ -295,7 +298,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self.last_velocity = self.velocity  # 2D vector
         self.last_speed = self.speed  # Scalar
         self.last_heading_dir = self.heading
-        self.last_current_action.append(action)  # the real step of physics world is implemented in taskMgr.step()
+        if action is not None:
+            self.last_current_action.append(action)  # the real step of physics world is implemented in taskMgr.step()
         if self.increment_steering:
             self._set_incremental_action(action)
         else:
@@ -343,8 +347,9 @@ class BaseVehicle(BaseObject, BaseVehicleState):
 
     def reset(
         self,
-        random_seed=None,
         vehicle_config=None,
+        name=None,
+        random_seed=None,
         position: np.ndarray = None,
         heading: float = 0.0,  # In degree!
         *args,
@@ -355,6 +360,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         if pos is not None, vehicle will be reset to the position
         else, vehicle will be reset to spawn place
         """
+        if name is not None:
+            self.rename(name)
         if random_seed is not None:
             assert isinstance(random_seed, int)
             self.seed(random_seed)
@@ -427,7 +434,20 @@ class BaseVehicle(BaseObject, BaseVehicleState):
 
     """------------------------------------------- act -------------------------------------------------"""
 
+    def set_steering(self, steering):
+        steering = float(steering)
+        self.system.setSteeringValue(steering, 0)
+        self.system.setSteeringValue(steering, 1)
+        self.steering = steering
+
+    def set_throttle_brake(self, throttle_brake):
+        throttle_brake = float(throttle_brake)
+        self._apply_throttle_brake(throttle_brake)
+        self.throttle_brake = throttle_brake
+
     def _set_action(self, action):
+        if action is None:
+            return
         steering = action[0]
         self.throttle_brake = action[1]
         self.steering = steering
@@ -436,6 +456,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self._apply_throttle_brake(action[1])
 
     def _set_incremental_action(self, action: np.ndarray):
+        if action is None:
+            return
         self.throttle_brake = action[1]
         self.steering += action[0] * self.STEERING_INCREMENT
         self.steering = clip(self.steering, -1, 1)
@@ -483,7 +505,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         Get the heading theta of vehicle, unit [rad]
         :return:  heading in rad
         """
-        return (metadrive_heading(self.origin.getH()) - 90) / 180 * math.pi
+        return wrap_to_pi((metadrive_heading(self.origin.getH()) - 90) / 180 * math.pi)
 
     # @property
     # def velocity(self) -> np.ndarray:
@@ -806,15 +828,19 @@ class BaseVehicle(BaseObject, BaseVehicleState):
 
         self.last_heading_dir = self.heading
 
-    def set_velocity(self, *args, **kwargs):
-        super(BaseVehicle, self).set_velocity(*args, **kwargs)
+    def set_velocity(self, direction, *args, **kwargs):
+        super(BaseVehicle, self).set_velocity(direction, *args, offset_90_deg=True, **kwargs)
         self.last_velocity = self.velocity
         self.last_speed = self.speed
 
     def set_state(self, state):
         super(BaseVehicle, self).set_state(state)
-        self.throttle_brake = state["throttle_brake"]
-        self.steering = state["steering"]
+        self.set_throttle_brake(float(state["throttle_brake"]))
+        self.set_steering(float(state["steering"]))
+        self.last_velocity = self.velocity
+        self.last_speed = self.speed
+        self.last_position = self.position
+        self.last_heading_dir = self.heading
 
     def set_panda_pos(self, pos):
         super(BaseVehicle, self).set_panda_pos(pos)
@@ -1035,24 +1061,3 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         y.reparentTo(self.coordinates_debug_np)
         z.reparentTo(self.coordinates_debug_np)
         self.coordinates_debug_np.reparentTo(self.origin)
-
-    def set_velocity(self, direction: np.array, value=None, in_local_frame=False):
-        """
-        Vehicle's coordinates is has a 90 offset
-        """
-        if in_local_frame:
-            from metadrive.engine.engine_utils import get_engine
-            engine = get_engine()
-            direction = LVector3(*direction, 0.)
-            direction[1] *= -1
-            direction = engine.worldNP.getRelativeVector(self.origin, direction)
-            # 90 degree offset correction!
-            direction = [-direction[1], -direction[0]]
-        if value is not None:
-            norm_ratio = value / (norm(direction[0], direction[1]) + 1e-6)
-        else:
-            norm_ratio = 1
-        self._body.setLinearVelocity(
-            LVector3(direction[0] * norm_ratio, -direction[1] * norm_ratio,
-                     self._body.getLinearVelocity()[-1])
-        )

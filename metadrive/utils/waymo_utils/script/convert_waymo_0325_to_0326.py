@@ -7,7 +7,7 @@ import sys
 from metadrive.engine.asset_loader import AssetLoader
 
 
-def convert_case(file_path, new_path):
+def convert_scenario(file_path, new_path):
     with open(file_path, "rb+") as file:
         data = pickle.load(file)
     for obj_id, obj_dict in data["tracks"].items():
@@ -27,5 +27,5 @@ if __name__ == "__main__":
     for i in range(3):
         file_path = AssetLoader.file_path("waymo", "{}.pkl".format(i), return_raw_style=False)
         new_file_path = AssetLoader.file_path("waymo", "{}.pkl".format(i), return_raw_style=False)
-        convert_case(file_path, new_file_path)
+        convert_scenario(file_path, new_file_path)
     sys.exit()
