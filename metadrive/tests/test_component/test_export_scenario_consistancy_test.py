@@ -179,7 +179,8 @@ def test_export_metadrive_scenario_easy(scenario_num=5, render_export_env=False,
             waymo_data_directory=dir1,
             use_render=render_load_env,
             case_num=scenario_num,
-            force_reuse_object_name=True
+            force_reuse_object_name=True,
+            vehicle_config=dict(no_wheel_friction=True)
         )
     )
     try:
@@ -221,7 +222,8 @@ def test_export_metadrive_scenario_hard(scenario_num=3, render_export_env=False,
             use_render=render_load_env,
             case_num=scenario_num,
             debug=True,
-            force_reuse_object_name=True
+            force_reuse_object_name=True,
+            vehicle_config=dict(no_wheel_friction=True)
             # debug_physics_world=True,
             # debug_static_world=True
         )
@@ -267,7 +269,8 @@ def test_export_waymo_scenario(scenario_num=3, render_export_env=False, render_l
                 agent_policy=WaymoReplayEgoCarPolicy,
                 waymo_data_directory=dir,
                 use_render=render_load_env,
-                case_num=scenario_num
+                case_num=scenario_num,
+                vehicle_config=dict(no_wheel_friction=True)
             )
         )
         scenarios_restored = env.export_scenarios(policy, scenario_index=[i for i in range(scenario_num)], verbose=True)

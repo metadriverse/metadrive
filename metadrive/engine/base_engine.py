@@ -298,6 +298,7 @@ class BaseEngine(EngineCore, Randomizable):
         :param external_actions: Dict[agent_id:action]
         :return:
         """
+        self.episode_step += 1
         step_infos = {}
         self.external_actions = external_actions
         for manager in self.managers.values():
@@ -327,7 +328,7 @@ class BaseEngine(EngineCore, Randomizable):
         if self.on_screen_message is not None:
             self.on_screen_message.render()
 
-    def after_step(self, *args, call_from_reset=False, **kwargs) -> Dict:
+    def after_step(self, *args, **kwargs) -> Dict:
         """
         Update states after finishing movement
         :return: if this episode is done
@@ -351,7 +352,8 @@ class BaseEngine(EngineCore, Randomizable):
         # Note that this function will be called in _get_reset_return.
         # Therefore, after reset the episode_step is immediately goes to 1
         # even if no env.step is called.
-        self.episode_step += 1
+
+        # Episode_step should be increased before env.step(). I moved it to engine.before_step() now.
 
         # cull distant blocks
         # poses = [v.position for v in self.agent_manager.active_agents.values()]

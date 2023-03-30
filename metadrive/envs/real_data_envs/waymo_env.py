@@ -319,7 +319,7 @@ class WaymoEnv(BaseEnv):
             agent_name = self.agent_manager.object_to_agent(vehicle.name)
             lat = abs(self.observations[agent_name].lateral_dist)
             done = lat > 10
-            done = done or vehicle.on_yellow_continuous_line or vehicle.on_white_continuous_line
+            done = done or vehicle.on_yellow_continuous_line or vehicle.crash_sidewalk
             return done
 
         done = vehicle.crash_sidewalk or vehicle.on_yellow_continuous_line or vehicle.on_white_continuous_line

@@ -72,6 +72,7 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
     frames = [step_frame_list[0] for step_frame_list in record_episode["frame"]]
 
     episode_len = len(frames)
+    assert frames[-1].episode_step == episode_len-1, "Length mismatch"
     result[SD.LENGTH] = episode_len
 
     result[SD.METADATA] = {}

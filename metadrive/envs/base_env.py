@@ -394,7 +394,7 @@ class BaseEnv(gym.Env):
 
     def _get_reset_return(self):
         ret = {}
-        self.engine.after_step(call_from_reset=True)
+        self.engine.after_step( )
         for v_id, v in self.vehicles.items():
             self.observations[v_id].reset(self, v)
             ret[v_id] = self.observations[v_id].observe(v)

@@ -23,7 +23,7 @@ def test_waymo_env(policy, render=False, case_num=3):
                 "case_num": case_num
             }
         )
-        for seed in range(1 if policy == WaymoIDMPolicy else 0, case_num):
+        for seed in range(0, case_num):
             env.reset(force_seed=seed)
             for i in range(1000):
                 o, r, d, info = env.step([1.0, 0.])
@@ -86,4 +86,4 @@ def test_store_map_memory_leakage(render=False):
 
 if __name__ == "__main__":
     # test_store_map_memory_leakage(render=True)
-    test_waymo_env(policy=WaymoReplayEgoCarPolicy, render=False, case_num=55)
+    test_waymo_env(policy=WaymoIDMPolicy, render=True)
