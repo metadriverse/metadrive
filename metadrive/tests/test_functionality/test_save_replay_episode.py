@@ -148,4 +148,4 @@ def test_save_episode_marl(vis=False):
 
 if __name__ == "__main__":
     test_save_episode(vis=False)
-    # test_save_episode_marl(vis=False)
+    test_save_episode_marl(vis=False)

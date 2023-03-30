@@ -112,11 +112,14 @@ class ReplayManager(BaseManager):
         for manager in self.engine.managers.values():
             manager.set_state(states[manager.class_name], old_name_to_current=self.record_name_to_current_name)
 
-    def step(self, *args, **kwargs):
+    # def step(self, *args, **kwargs):
+    #     if self.engine.replay_episode and not self.engine.only_reset_when_replay:
+    #         self.replay_frame()
+
+    def after_step(self, *args, **kwargs):
         if self.engine.replay_episode and not self.engine.only_reset_when_replay:
             self.replay_frame()
 
-    def after_step(self, *args, **kwargs):
         if self.engine.replay_episode and not self.engine.only_reset_when_replay:
             if len(self.restore_episode_info["frame"]) == 0:
                 self.replay_done = True

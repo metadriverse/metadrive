@@ -179,6 +179,7 @@ BASE_DEFAULT_CONFIG = dict(
     record_episode=False,  # when replay_episode is not None ,this option will be useless
     replay_episode=None,  # set the replay file to enable replay
     only_reset_when_replay=False,  # Scenario will only be initialized, while future trajectories will not be replayed
+    force_reuse_object_name=False,  # If True, when restoring objects, use the same ID as in dataset
 )
 
 
@@ -393,7 +394,7 @@ class BaseEnv(gym.Env):
 
     def _get_reset_return(self):
         ret = {}
-        self.engine.after_step(call_from_reset=True)
+        self.engine.after_step()
         for v_id, v in self.vehicles.items():
             self.observations[v_id].reset(self, v)
             ret[v_id] = self.observations[v_id].observe(v)

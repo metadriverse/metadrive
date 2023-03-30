@@ -327,20 +327,21 @@ class BaseEngine(EngineCore, Randomizable):
         if self.on_screen_message is not None:
             self.on_screen_message.render()
 
-    def after_step(self, *args, call_from_reset=False, **kwargs) -> Dict:
+    def after_step(self, *args, **kwargs) -> Dict:
         """
         Update states after finishing movement
         :return: if this episode is done
         """
+
         step_infos = {}
         for manager in self.managers.values():
             new_step_info = manager.after_step(*args, **kwargs)
             step_infos = concat_step_infos([step_infos, new_step_info])
         self.interface.after_step()
 
-        # if call_from_reset:
-        #     pass
-        # else:
+        # Note that this function will be called in _get_reset_return.
+        # Therefore, after reset the episode_step is immediately goes to 1
+        # even if no env.step is called.
         self.episode_step += 1
 
         # cull distant blocks
