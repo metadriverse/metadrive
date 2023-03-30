@@ -55,7 +55,12 @@ def assert_scenario_equal(scenarios1, scenarios2, only_compare_sdc=False):
 
         else:
             assert set(old_scene[SD.TRACKS].keys()) == set(new_scene[SD.TRACKS].keys())
+
+
+
             for track_id, track in old_scene[SD.TRACKS].items():
+                if track_id == "default_agent":
+                    continue
                 for k in new_scene[SD.TRACKS][track_id][SD.STATE]:
                     state_array_1 = new_scene[SD.TRACKS][track_id][SD.STATE][k]
                     state_array_2 = track[SD.STATE][k]
@@ -64,6 +69,16 @@ def assert_scenario_equal(scenarios1, scenarios2, only_compare_sdc=False):
                         state_array_1[:min_len], state_array_2[:min_len], decimal=NP_ARRAY_DECIMAL
                     )
                 assert new_scene[SD.TRACKS][track_id][SD.TYPE] == track[SD.TYPE]
+
+            track_id = "default_agent"
+            for k in new_scene[SD.TRACKS][track_id][SD.STATE]:
+                state_array_1 = new_scene[SD.TRACKS][track_id][SD.STATE][k]
+                state_array_2 = track[SD.STATE][k]
+                min_len = min(state_array_1.shape[0], state_array_2.shape[0])
+                np.testing.assert_almost_equal(
+                    state_array_1[:min_len], state_array_2[:min_len], decimal=NP_ARRAY_DECIMAL
+                )
+            assert new_scene[SD.TRACKS][track_id][SD.TYPE] == track[SD.TYPE]
 
         assert set(old_scene[SD.MAP_FEATURES].keys()).issuperset(set(new_scene[SD.MAP_FEATURES].keys()))
         assert set(old_scene[SD.DYNAMIC_MAP_STATES].keys()) == set(new_scene[SD.DYNAMIC_MAP_STATES].keys())
@@ -133,6 +148,7 @@ def test_export_metadrive_scenario_easy(scenario_num=2, render_export_env=False,
                 pickle.dump(data, file)
     finally:
         env.close()
+        # pass
 
     # ===== Save data of the restoring environment =====
     env = WaymoEnv(
@@ -150,8 +166,8 @@ def test_export_metadrive_scenario_easy(scenario_num=2, render_export_env=False,
     finally:
         env.close()
 
-    if dir1 is not None:
-        shutil.rmtree(dir1)
+    # if dir1 is not None:
+    #     shutil.rmtree(dir1)
 
     assert_scenario_equal(scenarios, scenarios_restored, only_compare_sdc=False)
 
