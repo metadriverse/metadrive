@@ -60,8 +60,8 @@ class ReplayEgoCarPolicy(BasePolicy):
         # self.control_object.disable_gravity()
 
     def get_trajectory_info(self):
-        trajectory_data = self.engine.data_manager.get_case(self.engine.global_random_seed)["tracks"]
-        sdc_track_index = str(self.engine.data_manager.get_case(self.engine.global_random_seed)["metadata"]["sdc_id"])
+        trajectory_data = self.engine.data_manager.get_scenario(self.engine.global_random_seed)["tracks"]
+        sdc_track_index = str(self.engine.data_manager.get_scenario(self.engine.global_random_seed)["metadata"]["sdc_id"])
         ret = []
         for i in range(len(trajectory_data[sdc_track_index]["state"]["position"])):
             ret.append(

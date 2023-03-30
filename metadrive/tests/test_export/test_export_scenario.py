@@ -29,7 +29,7 @@ def test_export_metadrive_scenario(render_export_env=False, render_load_env=Fals
                 agent_policy=WaymoReplayEgoCarPolicy,
                 waymo_data_directory=dir,
                 use_render=render_load_env,
-                case_num=scenario_num
+                scenario_num=scenario_num
             )
         )
         for index in range(scenario_num):
@@ -49,8 +49,8 @@ def test_export_waymo_scenario(render_export_env=False, render_load_env=False):
         dict(
             agent_policy=WaymoReplayEgoCarPolicy,
             use_render=render_export_env,
-            start_case_index=0,
-            case_num=scenario_num
+            start_scenario_index=0,
+            scenario_num=scenario_num
         )
     )
     policy = lambda x: [0, 1]
@@ -70,7 +70,7 @@ def test_export_waymo_scenario(render_export_env=False, render_load_env=False):
                 agent_policy=WaymoReplayEgoCarPolicy,
                 waymo_data_directory=dir,
                 use_render=render_load_env,
-                case_num=scenario_num
+                scenario_num=scenario_num
             )
         )
         for index in range(scenario_num):

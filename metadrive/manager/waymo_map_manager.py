@@ -17,9 +17,9 @@ class WaymoMapManager(BaseManager):
         self.store_map = self.engine.global_config.get("store_map", False)
         # store_map_buffer_size = self.engine.global_config.get("store_map_buffer_size", self.DEFAULT_DATA_BUFFER_SIZE)
         self.current_map = None
-        self.map_num = self.engine.global_config["case_num"]
-        self.start_case_index = self.engine.global_config["start_case_index"]
-        self._stored_maps = {i: None for i in range(self.start_case_index, self.start_case_index + self.map_num)}
+        self.map_num = self.engine.global_config["scenario_num"]
+        self.start_scenario_index = self.engine.global_config["start_scenario_index"]
+        self._stored_maps = {i: None for i in range(self.start_scenario_index, self.start_scenario_index + self.map_num)}
 
         # we put the route searching function here
         self.sdc_start = None
@@ -29,7 +29,7 @@ class WaymoMapManager(BaseManager):
 
     def reset(self):
         seed = self.engine.global_random_seed
-        assert self.start_case_index <= seed < self.start_case_index + self.map_num
+        assert self.start_scenario_index <= seed < self.start_scenario_index + self.map_num
 
         self.current_sdc_route = None
         self.sdc_dest_point = None
@@ -44,7 +44,7 @@ class WaymoMapManager(BaseManager):
         self.update_route()
 
     def update_route(self):
-        data = self.engine.data_manager.get_case(self.engine.global_random_seed)
+        data = self.engine.data_manager.get_scenario(self.engine.global_random_seed)
 
         sdc_track = data.get_sdc_track()
 

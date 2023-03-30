@@ -96,7 +96,7 @@ BASE_DEFAULT_CONFIG = dict(
         overtake_stat=False,  # we usually set to True when evaluation
         random_color=False,
         random_agent_model=False,  # this will be overwritten by env.config["random_agent_model"]
-        # The shape of vehicle are predefined by its class. But in special case (WaymoVehicle) we might want to
+        # The shape of vehicle are predefined by its class. But in special scenario (WaymoVehicle) we might want to
         # set to arbitrary shape.
         width=None,
         length=None,
@@ -418,7 +418,7 @@ class BaseEnv(gym.Env):
 
         step_infos = concat_step_infos([engine_info, done_infos, reward_infos, cost_infos])
 
-        # For extreme case only. Force to terminate all vehicles if the environmental step exceeds 5 times horizon.
+        # For extreme scenario only. Force to terminate all vehicles if the environmental step exceeds 5 times horizon.
         should_external_done = False
         if self.config["horizon"] is not None:
             should_external_done = self.episode_step > 5 * self.config["horizon"]

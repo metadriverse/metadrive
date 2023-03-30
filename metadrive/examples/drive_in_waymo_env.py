@@ -12,7 +12,7 @@ from metadrive.envs.real_data_envs.waymo_env import WaymoEnv
 class DemoWaymoEnv(WaymoEnv):
     def reset(self, force_seed=None):
         if self.engine is not None:
-            seeds = [i for i in range(self.config["case_num"])]
+            seeds = [i for i in range(self.config["scenario_num"])]
             seeds.remove(self.current_seed)
             force_seed = random.choice(seeds)
         super(DemoWaymoEnv, self).reset(force_seed=force_seed)
@@ -31,7 +31,7 @@ if __name__ == "__main__":
                 "replay": False if args.reactive_traffic else True,
                 "use_render": True,
                 "waymo_data_directory": AssetLoader.file_path(asset_path, "waymo", return_raw_style=False),
-                "case_num": 3
+                "scenario_num": 3
             }
         )
         o = env.reset()

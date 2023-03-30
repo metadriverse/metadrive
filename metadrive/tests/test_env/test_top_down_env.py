@@ -9,9 +9,9 @@ def test_top_down_rendering():
             TopDownMetaDrive(dict(environment_num=5, map="C", traffic_density=1.0)),
             TopDownMetaDrive(dict(environment_num=5, map="C", frame_stack=1, post_stack=2)),
             TopDownMetaDriveEnvV2(dict(environment_num=5, map="C", frame_stack=1, post_stack=2)),
-            WaymoEnv(dict(case_num=1, start_case_index=0)),
-            WaymoEnv(dict(case_num=1, start_case_index=1)),
-            WaymoEnv(dict(case_num=1, start_case_index=2)),
+            WaymoEnv(dict(scenario_num=1, start_scenario_index=0)),
+            WaymoEnv(dict(scenario_num=1, start_scenario_index=1)),
+            WaymoEnv(dict(scenario_num=1, start_scenario_index=2)),
     ]:
         try:
             for _ in range(5):

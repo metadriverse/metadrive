@@ -70,8 +70,8 @@ class DataBuffer:
 
     def __setitem__(self, key, value):
         # This should be checked in map manager instead of here
-        # map_num = get_engine().global_config["case_num"]
-        # start = get_engine().global_config["start_case_index"]
+        # map_num = get_engine().global_config["scenario_num"]
+        # start = get_engine().global_config["start_scenario_index"]
         #
         # assert start <= key < start + map_num, (start, key, start + map_num)
 

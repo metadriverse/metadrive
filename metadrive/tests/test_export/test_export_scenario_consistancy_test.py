@@ -185,7 +185,7 @@ def test_export_metadrive_scenario_easy(scenario_num=5, render_export_env=False,
             agent_policy=WaymoReplayEgoCarPolicy,
             waymo_data_directory=dir1,
             use_render=render_load_env,
-            case_num=scenario_num,
+            scenario_num=scenario_num,
             force_reuse_object_name=True,
             vehicle_config=dict(no_wheel_friction=True)
         )
@@ -235,8 +235,8 @@ def test_export_metadrive_scenario_hard(start_seed=0, scenario_num=3, render_exp
             agent_policy=WaymoReplayEgoCarPolicy,
             waymo_data_directory=dir1,
             use_render=render_load_env,
-            case_num=scenario_num,
-            start_case_index=start_seed,
+            scenario_num=scenario_num,
+            start_scenario_index=start_seed,
             debug=True,
             force_reuse_object_name=True,
             vehicle_config=dict(no_wheel_friction=True)
@@ -262,8 +262,8 @@ def test_export_waymo_scenario(scenario_num=3, render_export_env=False, render_l
         dict(
             agent_policy=WaymoReplayEgoCarPolicy,
             use_render=render_export_env,
-            start_case_index=0,
-            case_num=scenario_num
+            start_scenario_index=0,
+            scenario_num=scenario_num
         )
     )
     policy = lambda x: [0, 1]
@@ -285,7 +285,7 @@ def test_export_waymo_scenario(scenario_num=3, render_export_env=False, render_l
                 agent_policy=WaymoReplayEgoCarPolicy,
                 waymo_data_directory=dir,
                 use_render=render_load_env,
-                case_num=scenario_num,
+                scenario_num=scenario_num,
                 force_reuse_object_name=True,
                 vehicle_config=dict(no_wheel_friction=True)
             )

@@ -98,15 +98,15 @@ class WaymoTrafficManager(BaseManager):
         try:
             # clean previous episode data
             super(WaymoTrafficManager, self).before_reset()
-            # self.current_traffic_data = self.engine.data_manager.get_case(self.engine.global_random_seed)["tracks"]
-            # self.sdc_track_index = str(self.engine.data_manager.get_case(self.engine.global_random_seed)["sdc_track_index"])
+            # self.current_traffic_data = self.engine.data_manager.get_scenario(self.engine.global_random_seed)["tracks"]
+            # self.sdc_track_index = str(self.engine.data_manager.get_scenario(self.engine.global_random_seed)["sdc_track_index"])
         except:
             raise ValueError("Can not CLEAN traffic for seed: {}".format(self.engine.global_random_seed))
 
     @property
     def current_traffic_data(self):
-        return self.engine.data_manager.get_case(self.engine.global_random_seed)["tracks"]
+        return self.engine.data_manager.get_scenario(self.engine.global_random_seed)["tracks"]
 
     @property
     def sdc_track_index(self):
-        return str(self.engine.data_manager.get_case(self.engine.global_random_seed)[SD.METADATA][SD.SDC_ID])
+        return str(self.engine.data_manager.get_scenario(self.engine.global_random_seed)[SD.METADATA][SD.SDC_ID])
