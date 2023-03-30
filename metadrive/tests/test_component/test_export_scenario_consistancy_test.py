@@ -79,10 +79,12 @@ def assert_scenario_equal(scenarios1, scenarios2, only_compare_sdc=False):
 
                 # TODO FIXME: I can't solve this bug. Please help @LQY
                 if k == "velocity":
-                    continue
+                    decimal = VELOCITY_DECIMAL
+                else:
+                    decimal = NP_ARRAY_DECIMAL
 
                 np.testing.assert_almost_equal(
-                    state_array_1[:min_len], state_array_2[:min_len], decimal=NP_ARRAY_DECIMAL
+                    state_array_1[:min_len], state_array_2[:min_len], decimal=decimal
                 )
             assert new_scene[SD.TRACKS][track_id][SD.TYPE] == track[SD.TYPE]
 
@@ -173,8 +175,8 @@ def test_export_metadrive_scenario_easy(scenario_num=2, render_export_env=False,
     finally:
         env.close()
 
-    # if dir1 is not None:
-    #     shutil.rmtree(dir1)
+    if dir1 is not None:
+        shutil.rmtree(dir1)
 
     assert_scenario_equal(scenarios, scenarios_restored, only_compare_sdc=False)
 
@@ -266,6 +268,6 @@ def WIP_test_export_waymo_scenario(scenario_num=3, render_export_env=False, rend
 
 if __name__ == "__main__":
     # test_export_metadrive_scenario_reproduction(scenario_num=10)
-    # test_export_metadrive_scenario_easy(scenario_num=1, render_export_env=False, render_load_env=False)
-    test_export_metadrive_scenario_hard(scenario_num=1, render_export_env=False, render_load_env=False)
+    test_export_metadrive_scenario_easy(scenario_num=1, render_export_env=False, render_load_env=False)
+    # test_export_metadrive_scenario_hard(scenario_num=1, render_export_env=False, render_load_env=False)
     # WIP_test_export_waymo_scenario(scenario_num=1, render_export_env=False, render_load_env=False)
