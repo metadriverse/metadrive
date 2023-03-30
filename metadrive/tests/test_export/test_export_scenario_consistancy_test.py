@@ -128,14 +128,14 @@ def assert_scenario_equal(scenarios1, scenarios2, only_compare_sdc=False, coordi
             assert new_scene[SD.DYNAMIC_MAP_STATES][obj_id][SD.TYPE] == obj_state[SD.TYPE]
 
 
-def test_export_metadrive_scenario_reproduction(scenario_num=3, render_export_env=False, render_load_env=False):
+def test_export_metadrive_scenario_reproduction(num_scenario=3, render_export_env=False, render_load_env=False):
     env = MetaDriveEnv(
-        dict(start_seed=0, use_render=render_export_env, environment_num=scenario_num, agent_policy=IDMPolicy)
+        dict(start_seed=0, use_render=render_export_env, environment_num=num_scenario, agent_policy=IDMPolicy)
     )
     policy = lambda x: [0, 1]
     dir1 = None
     try:
-        scenarios = env.export_scenarios(policy, scenario_index=[i for i in range(scenario_num)])
+        scenarios = env.export_scenarios(policy, scenario_index=[i for i in range(num_scenario)])
         dir1 = os.path.join(os.path.dirname(__file__), "../test_component/test_export")
         os.makedirs(dir1, exist_ok=True)
         for i, data in scenarios.items():
@@ -146,11 +146,11 @@ def test_export_metadrive_scenario_reproduction(scenario_num=3, render_export_en
 
     # Same environment, same config
     env = MetaDriveEnv(
-        dict(start_seed=0, use_render=render_load_env, environment_num=scenario_num, agent_policy=IDMPolicy)
+        dict(start_seed=0, use_render=render_load_env, environment_num=num_scenario, agent_policy=IDMPolicy)
     )
     policy = lambda x: [0, 1]
     try:
-        scenarios2 = env.export_scenarios(policy, scenario_index=[i for i in range(scenario_num)])
+        scenarios2 = env.export_scenarios(policy, scenario_index=[i for i in range(num_scenario)])
     finally:
         env.close()
 
@@ -161,15 +161,15 @@ def test_export_metadrive_scenario_reproduction(scenario_num=3, render_export_en
     assert_scenario_equal(scenarios, scenarios2, only_compare_sdc=True)
 
 
-def test_export_metadrive_scenario_easy(scenario_num=5, render_export_env=False, render_load_env=False):
+def test_export_metadrive_scenario_easy(num_scenario=5, render_export_env=False, render_load_env=False):
     # ===== Save data =====
     env = MetaDriveEnv(
-        dict(start_seed=0, map="S", use_render=render_export_env, environment_num=scenario_num, agent_policy=IDMPolicy)
+        dict(start_seed=0, map="S", use_render=render_export_env, environment_num=num_scenario, agent_policy=IDMPolicy)
     )
     policy = lambda x: [0, 1]
     dir1 = None
     try:
-        scenarios = env.export_scenarios(policy, scenario_index=[i for i in range(scenario_num)])
+        scenarios = env.export_scenarios(policy, scenario_index=[i for i in range(num_scenario)])
         dir1 = os.path.join(os.path.dirname(__file__), "test_export_scenario_consistancy")
         os.makedirs(dir1, exist_ok=True)
         for i, data in scenarios.items():
@@ -185,14 +185,14 @@ def test_export_metadrive_scenario_easy(scenario_num=5, render_export_env=False,
             agent_policy=WaymoReplayEgoCarPolicy,
             waymo_data_directory=dir1,
             use_render=render_load_env,
-            scenario_num=scenario_num,
+            num_scenario=num_scenario,
             force_reuse_object_name=True,
             vehicle_config=dict(no_wheel_friction=True)
         )
     )
     try:
         scenarios_restored = env.export_scenarios(
-            policy, scenario_index=[i for i in range(scenario_num)], render_topdown=render_load_env
+            policy, scenario_index=[i for i in range(num_scenario)], render_topdown=render_load_env
         )
     finally:
         env.close()
@@ -203,14 +203,14 @@ def test_export_metadrive_scenario_easy(scenario_num=5, render_export_env=False,
     assert_scenario_equal(scenarios, scenarios_restored, only_compare_sdc=False)
 
 
-def test_export_metadrive_scenario_hard(start_seed=0, scenario_num=3, render_export_env=False, render_load_env=False):
+def test_export_metadrive_scenario_hard(start_seed=0, num_scenario=3, render_export_env=False, render_load_env=False):
     # ===== Save data =====
     env = MetaDriveEnv(
         dict(
             start_seed=start_seed,
             map=7,
             use_render=render_export_env,
-            environment_num=scenario_num,
+            environment_num=num_scenario,
             agent_policy=IDMPolicy
         )
     )
@@ -218,7 +218,7 @@ def test_export_metadrive_scenario_hard(start_seed=0, scenario_num=3, render_exp
     dir1 = None
     try:
         scenarios = env.export_scenarios(
-            policy, scenario_index=[i for i in range(start_seed, start_seed + scenario_num)]
+            policy, scenario_index=[i for i in range(start_seed, start_seed + num_scenario)]
         )
         dir1 = os.path.join(os.path.dirname(__file__), "test_export_metadrive_scenario_hard")
         os.makedirs(dir1, exist_ok=True)
@@ -235,7 +235,7 @@ def test_export_metadrive_scenario_hard(start_seed=0, scenario_num=3, render_exp
             agent_policy=WaymoReplayEgoCarPolicy,
             waymo_data_directory=dir1,
             use_render=render_load_env,
-            scenario_num=scenario_num,
+            num_scenario=num_scenario,
             start_scenario_index=start_seed,
             debug=True,
             force_reuse_object_name=True,
@@ -246,7 +246,7 @@ def test_export_metadrive_scenario_hard(start_seed=0, scenario_num=3, render_exp
     )
     try:
         scenarios_restored = env.export_scenarios(
-            policy, scenario_index=[i for i in range(scenario_num)], render_topdown=False
+            policy, scenario_index=[i for i in range(num_scenario)], render_topdown=False
         )
     finally:
         env.close()
@@ -257,19 +257,19 @@ def test_export_metadrive_scenario_hard(start_seed=0, scenario_num=3, render_exp
     assert_scenario_equal(scenarios, scenarios_restored, only_compare_sdc=False)
 
 
-def test_export_waymo_scenario(scenario_num=3, render_export_env=False, render_load_env=False):
+def test_export_waymo_scenario(num_scenario=3, render_export_env=False, render_load_env=False):
     env = WaymoEnv(
         dict(
             agent_policy=WaymoReplayEgoCarPolicy,
             use_render=render_export_env,
             start_scenario_index=0,
-            scenario_num=scenario_num
+            num_scenario=num_scenario
         )
     )
     policy = lambda x: [0, 1]
     dir = None
     try:
-        scenarios = env.export_scenarios(policy, scenario_index=[i for i in range(scenario_num)], verbose=True)
+        scenarios = env.export_scenarios(policy, scenario_index=[i for i in range(num_scenario)], verbose=True)
         dir = os.path.join(os.path.dirname(__file__), "../test_component/test_export")
         os.makedirs(dir, exist_ok=True)
         for i, data in scenarios.items():
@@ -285,12 +285,12 @@ def test_export_waymo_scenario(scenario_num=3, render_export_env=False, render_l
                 agent_policy=WaymoReplayEgoCarPolicy,
                 waymo_data_directory=dir,
                 use_render=render_load_env,
-                scenario_num=scenario_num,
+                num_scenario=num_scenario,
                 force_reuse_object_name=True,
                 vehicle_config=dict(no_wheel_friction=True)
             )
         )
-        scenarios_restored = env.export_scenarios(policy, scenario_index=[i for i in range(scenario_num)], verbose=True)
+        scenarios_restored = env.export_scenarios(policy, scenario_index=[i for i in range(num_scenario)], verbose=True)
 
     finally:
         env.close()
@@ -301,7 +301,7 @@ def test_export_waymo_scenario(scenario_num=3, render_export_env=False, render_l
 
 
 if __name__ == "__main__":
-    # test_export_metadrive_scenario_reproduction(scenario_num=10)
-    # test_export_metadrive_scenario_easy(scenario_num=3, render_export_env=False, render_load_env=False)
-    # test_export_metadrive_scenario_hard(scenario_num=3, render_export_env=False, render_load_env=False)
-    test_export_waymo_scenario(scenario_num=3, render_export_env=False, render_load_env=False)
+    # test_export_metadrive_scenario_reproduction(num_scenario=10)
+    # test_export_metadrive_scenario_easy(num_scenario=3, render_export_env=False, render_load_env=False)
+    # test_export_metadrive_scenario_hard(num_scenario=3, render_export_env=False, render_load_env=False)
+    test_export_waymo_scenario(num_scenario=3, render_export_env=False, render_load_env=False)

@@ -21,13 +21,13 @@ class WaymoDataManager(BaseManager):
         store_map = engine.global_config.get("store_map", False)
         store_map_buffer_size = engine.global_config.get("store_map_buffer_size", self.DEFAULT_DATA_BUFFER_SIZE)
         self.directory = engine.global_config["waymo_data_directory"]
-        self.scenario_num = engine.global_config["scenario_num"]
+        self.num_scenario = engine.global_config["num_scenario"]
         self.start_scenario_index = engine.global_config["start_scenario_index"]
 
         self.store_map = store_map
-        self.waymo_scenario = DataBuffer(store_map_buffer_size if self.store_map else self.scenario_num)
+        self.waymo_scenario = DataBuffer(store_map_buffer_size if self.store_map else self.num_scenario)
 
-        for i in tqdm(range(self.start_scenario_index, self.start_scenario_index + self.scenario_num),
+        for i in tqdm(range(self.start_scenario_index, self.start_scenario_index + self.num_scenario),
                       desc="Check Waymo Data"):
             p = os.path.join(self.directory, "{}.pkl".format(i))
             assert os.path.exists(p), "No Data {} at path: {}".format(i, p)
@@ -38,7 +38,7 @@ class WaymoDataManager(BaseManager):
             # self.waymo_scenario[i] = self._get_scenario(i)
 
     def _get_scenario(self, i):
-        assert self.start_scenario_index <= i < self.start_scenario_index + self.scenario_num, \
+        assert self.start_scenario_index <= i < self.start_scenario_index + self.num_scenario, \
             "scenario ID exceeds range"
         file_path = os.path.join(self.directory, "{}.pkl".format(i))
         ret = read_waymo_data(file_path)

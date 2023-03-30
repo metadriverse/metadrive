@@ -19,7 +19,7 @@ class NuPlanMapManager(BaseManager):
         super(NuPlanMapManager, self).__init__()
         self.store_map = self.engine.global_config.get("store_map", False)
         self.current_map = None
-        self.map_num = self.engine.data_manager.scenario_num
+        self.map_num = self.engine.data_manager.num_scenario
         self.start = self.engine.global_config["start_scenario_index"]
         self.sdc_dest_point = None
         self.current_sdc_route = None

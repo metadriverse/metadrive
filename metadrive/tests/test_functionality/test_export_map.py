@@ -20,7 +20,7 @@ def test_export_waymo_map(render=False):
             "no_traffic": True,
             "use_render": False,
             "waymo_data_directory": AssetLoader.file_path(asset_path, "waymo", return_raw_style=False),
-            "scenario_num": 3
+            "num_scenario": 3
         }
     )
     try:

@@ -22,7 +22,7 @@ WAYMO_ENV_CONFIG = dict(
     # ===== Map Config =====
     waymo_data_directory=AssetLoader.file_path("waymo", return_raw_style=False),
     start_scenario_index=0,
-    scenario_num=3,
+    num_scenario=3,
     store_map=True,
     store_map_buffer_size=2000,
     sequential_seed=False,  # Whether to set seed (the index of map) sequentially across episodes
@@ -337,16 +337,16 @@ class WaymoEnv(BaseEnv):
                 current_seed = self.config["start_scenario_index"]
             else:
                 current_seed += 1
-            if current_seed >= self.config["start_scenario_index"] + int(self.config["scenario_num"]):
+            if current_seed >= self.config["start_scenario_index"] + int(self.config["num_scenario"]):
                 current_seed = self.config["start_scenario_index"]
         else:
             current_seed = get_np_random(None).randint(
                 self.config["start_scenario_index"],
-                self.config["start_scenario_index"] + int(self.config["scenario_num"])
+                self.config["start_scenario_index"] + int(self.config["num_scenario"])
             )
 
         assert self.config["start_scenario_index"] <= current_seed < \
-               self.config["start_scenario_index"] + self.config["scenario_num"], "Force seed {} is out of range [{}, {}).".format(current_seed, self.config["start_scenario_index"], self.config["start_scenario_index"] + self.config["scenario_num"])
+               self.config["start_scenario_index"] + self.config["num_scenario"], "Force seed {} is out of range [{}, {}).".format(current_seed, self.config["start_scenario_index"], self.config["start_scenario_index"] + self.config["num_scenario"])
         self.seed(current_seed)
 
     def stop(self):
@@ -365,7 +365,7 @@ if __name__ == "__main__":
             # "no_traffic":True,
             # "start_scenario_index": 192,
             # "start_scenario_index": 1000,
-            "scenario_num": 3,
+            "num_scenario": 3,
             # "waymo_data_directory": "/home/shady/Downloads/test_processed",
             "horizon": 1000,
             "vehicle_config": dict(

@@ -17,7 +17,7 @@ class WaymoMapManager(BaseManager):
         self.store_map = self.engine.global_config.get("store_map", False)
         # store_map_buffer_size = self.engine.global_config.get("store_map_buffer_size", self.DEFAULT_DATA_BUFFER_SIZE)
         self.current_map = None
-        self.map_num = self.engine.global_config["scenario_num"]
+        self.map_num = self.engine.global_config["num_scenario"]
         self.start_scenario_index = self.engine.global_config["start_scenario_index"]
         self._stored_maps = {
             i: None

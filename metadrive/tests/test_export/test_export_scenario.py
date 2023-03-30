@@ -9,14 +9,14 @@ from metadrive.policy.replay_policy import WaymoReplayEgoCarPolicy
 
 
 def test_export_metadrive_scenario(render_export_env=False, render_load_env=False):
-    scenario_num = 3
+    num_scenario = 3
     env = MetaDriveEnv(
-        dict(start_seed=0, use_render=render_export_env, environment_num=scenario_num, agent_policy=IDMPolicy)
+        dict(start_seed=0, use_render=render_export_env, environment_num=num_scenario, agent_policy=IDMPolicy)
     )
     policy = lambda x: [0, 1]
     dir = None
     try:
-        scenarios = env.export_scenarios(policy, scenario_index=[i for i in range(scenario_num)])
+        scenarios = env.export_scenarios(policy, scenario_index=[i for i in range(num_scenario)])
         dir = os.path.join(os.path.dirname(__file__), "../test_component/test_export")
         os.makedirs(dir, exist_ok=True)
         for i, data in scenarios.items():
@@ -29,10 +29,10 @@ def test_export_metadrive_scenario(render_export_env=False, render_load_env=Fals
                 agent_policy=WaymoReplayEgoCarPolicy,
                 waymo_data_directory=dir,
                 use_render=render_load_env,
-                scenario_num=scenario_num
+                num_scenario=num_scenario
             )
         )
-        for index in range(scenario_num):
+        for index in range(num_scenario):
             env.reset(force_seed=index)
             done = False
             while not done:
@@ -44,19 +44,19 @@ def test_export_metadrive_scenario(render_export_env=False, render_load_env=Fals
 
 
 def test_export_waymo_scenario(render_export_env=False, render_load_env=False):
-    scenario_num = 3
+    num_scenario = 3
     env = WaymoEnv(
         dict(
             agent_policy=WaymoReplayEgoCarPolicy,
             use_render=render_export_env,
             start_scenario_index=0,
-            scenario_num=scenario_num
+            num_scenario=num_scenario
         )
     )
     policy = lambda x: [0, 1]
     dir = None
     try:
-        scenarios = env.export_scenarios(policy, scenario_index=[i for i in range(scenario_num)], verbose=True)
+        scenarios = env.export_scenarios(policy, scenario_index=[i for i in range(num_scenario)], verbose=True)
         dir = os.path.join(os.path.dirname(__file__), "../test_component/test_export")
         os.makedirs(dir, exist_ok=True)
         for i, data in scenarios.items():
@@ -70,10 +70,10 @@ def test_export_waymo_scenario(render_export_env=False, render_load_env=False):
                 agent_policy=WaymoReplayEgoCarPolicy,
                 waymo_data_directory=dir,
                 use_render=render_load_env,
-                scenario_num=scenario_num
+                num_scenario=num_scenario
             )
         )
-        for index in range(scenario_num):
+        for index in range(num_scenario):
             print("Start replaying scenario {}".format(index))
             env.reset(force_seed=index)
             done = False
