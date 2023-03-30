@@ -506,7 +506,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         Get the heading theta of vehicle, unit [rad]
         :return:  heading in rad
         """
-        return (metadrive_heading(self.origin.getH()) - 90) / 180 * math.pi
+        return wrap_to_pi((metadrive_heading(self.origin.getH()) - 90) / 180 * math.pi)
 
     # @property
     # def velocity(self) -> np.ndarray:

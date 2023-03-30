@@ -1,4 +1,5 @@
 import logging
+from metadrive.utils.math_utils import wrap_to_pi
 
 import math
 from typing import Dict
@@ -365,7 +366,7 @@ class BaseObject(BaseRunnable):
         Get the heading theta of this object, unit [rad]
         :return:  heading in rad
         """
-        return metadrive_heading(self.origin.getH()) / 180 * math.pi
+        return wrap_to_pi(metadrive_heading(self.origin.getH()) / 180 * math.pi)
 
     @property
     def heading(self):

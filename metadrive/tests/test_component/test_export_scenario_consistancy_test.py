@@ -1,4 +1,5 @@
 import os
+from metadrive.utils.math_utils import wrap_to_pi
 import pickle
 import shutil
 
@@ -43,10 +44,8 @@ def assert_scenario_equal(scenarios1, scenarios2, only_compare_sdc=False, coordi
                     )
                 elif k == "heading":
                     np.testing.assert_almost_equal(
-                        state_dict1[SD.STATE][k][:min_len],
-                        state_dict2[SD.STATE][k][:min_len],
-                        decimal=NP_ARRAY_DECIMAL
-                    )
+                        wrap_to_pi(state_dict1[SD.STATE][k][:min_len] - state_dict2[SD.STATE][k][:min_len]),
+                        np.zeros_like(state_dict2[SD.STATE][k][:min_len]), decimal=NP_ARRAY_DECIMAL)
                 elif k == "velocity":
                     np.testing.assert_almost_equal(
                         state_dict1[SD.STATE][k][:min_len],
@@ -72,7 +71,14 @@ def assert_scenario_equal(scenarios1, scenarios2, only_compare_sdc=False, coordi
                         decimal = VELOCITY_DECIMAL
                     else:
                         decimal = NP_ARRAY_DECIMAL
-                    np.testing.assert_almost_equal(state_array_1[:min_len], state_array_2[:min_len], decimal=decimal)
+
+                    if state_k == "heading":
+                        np.testing.assert_almost_equal(
+                            wrap_to_pi(state_array_1[:min_len] - state_array_2[:min_len]),
+                            np.zeros_like(state_array_1[:min_len]), decimal=NP_ARRAY_DECIMAL)
+                    else:
+                        np.testing.assert_almost_equal(state_array_1[:min_len], state_array_2[:min_len],
+                                                       decimal=decimal)
 
                 assert new_scene[SD.TRACKS][track_id][SD.TYPE] == track[SD.TYPE]
 
@@ -192,15 +198,17 @@ def test_export_metadrive_scenario_easy(scenario_num=5, render_export_env=False,
     assert_scenario_equal(scenarios, scenarios_restored, only_compare_sdc=False)
 
 
-def test_export_metadrive_scenario_hard(scenario_num=3, render_export_env=False, render_load_env=False):
+def test_export_metadrive_scenario_hard(start_seed=0, scenario_num=3, render_export_env=False, render_load_env=False):
     # ===== Save data =====
     env = MetaDriveEnv(
-        dict(start_seed=0, map=7, use_render=render_export_env, environment_num=scenario_num, agent_policy=IDMPolicy)
+        dict(start_seed=start_seed, map=7, use_render=render_export_env, environment_num=scenario_num,
+             agent_policy=IDMPolicy)
     )
     policy = lambda x: [0, 1]
     dir1 = None
     try:
-        scenarios = env.export_scenarios(policy, scenario_index=[i for i in range(scenario_num)])
+        scenarios = env.export_scenarios(policy,
+                                         scenario_index=[i for i in range(start_seed, start_seed + scenario_num)])
         dir1 = os.path.join(os.path.dirname(__file__), "test_export_metadrive_scenario_hard")
         os.makedirs(dir1, exist_ok=True)
         for i, data in scenarios.items():
@@ -217,6 +225,7 @@ def test_export_metadrive_scenario_hard(scenario_num=3, render_export_env=False,
             waymo_data_directory=dir1,
             use_render=render_load_env,
             case_num=scenario_num,
+            start_case_index=start_seed,
             debug=True,
             force_reuse_object_name=True,
             vehicle_config=dict(no_wheel_friction=True)
