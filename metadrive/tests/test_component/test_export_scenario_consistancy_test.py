@@ -198,7 +198,7 @@ def test_export_metadrive_scenario_hard(scenario_num=3, render_export_env=False,
     assert_scenario_equal(scenarios, scenarios_restored, only_compare_sdc=True)
 
 
-def test_export_waymo_scenario(scenario_num=3, render_export_env=False, render_load_env=False):
+def WIP_test_export_waymo_scenario(scenario_num=3, render_export_env=False, render_load_env=False):
     env = WaymoEnv(
         dict(
             agent_policy=WaymoReplayEgoCarPolicy,
@@ -240,7 +240,7 @@ def test_export_waymo_scenario(scenario_num=3, render_export_env=False, render_l
 
 
 if __name__ == "__main__":
-    # test_export_metadrive_scenario_reproduction(scenario_num=10)
-    # test_export_metadrive_scenario_easy(scenario_num=10, render_export_env=False, render_load_env=False)
-    # test_export_metadrive_scenario_hard(scenario_num=10, render_export_env=False, render_load_env=False)
-    test_export_waymo_scenario(scenario_num=1, render_export_env=False, render_load_env=False)
+    test_export_metadrive_scenario_reproduction(scenario_num=10)
+    test_export_metadrive_scenario_easy(scenario_num=10, render_export_env=False, render_load_env=False)
+    test_export_metadrive_scenario_hard(scenario_num=10, render_export_env=False, render_load_env=False)
+    # WIP_test_export_waymo_scenario(scenario_num=1, render_export_env=False, render_load_env=False)

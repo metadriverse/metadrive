@@ -46,7 +46,7 @@ class WaymoMapManager(BaseManager):
     def update_route(self):
         data = self.engine.data_manager.get_case(self.engine.global_random_seed)
 
-        sdc_track = data["tracks"][data[SD.METADATA][SD.SDC_ID]]
+        sdc_track = data.get_sdc_track()
 
         sdc_traj = parse_full_trajectory(
             sdc_track, coordinate_transform=self.engine.global_config["coordinate_transform"]

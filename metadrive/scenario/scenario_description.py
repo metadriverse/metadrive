@@ -203,6 +203,11 @@ class ScenarioDescription(dict):
     def to_dict(self):
         return dict(self)
 
+    def get_sdc_track(self):
+        assert self.SDC_ID in self[self.METADATA]
+        sdc_id = self[self.METADATA][self.SDC_ID]
+        return self[self.TRACKS][sdc_id]
+
 
 def _recursive_check_type(obj, allow_types, depth=0):
     if isinstance(obj, dict):
