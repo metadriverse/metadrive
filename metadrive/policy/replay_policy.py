@@ -15,7 +15,7 @@ has_rendered = False
 #         self.start_index = min(self.traj_info.keys())
 #         self.init_pos = locate_info["init_pos"]
 #         self.heading = locate_info["heading"]
-#         self.timestep = 0
+#         self.episode_step = 0
 #         self.damp = 0
 #         # how many times the replay data is slowed down
 #         self.damp_interval = 1
@@ -23,20 +23,20 @@ has_rendered = False
 #     def act(self, *args, **kwargs):
 #         self.damp += self.damp_interval
 #         if self.damp == self.damp_interval:
-#             self.timestep += 1
+#             self.episode_step += 1
 #             self.damp = 0
 #         else:
 #             return [0, 0]
 #
-#         if str(self.timestep) == self.start_index:
+#         if str(self.episode_step) == self.start_index:
 #             self.control_object.set_position(self.init_pos)
-#         elif str(self.timestep) in self.traj_info.keys():
-#             self.control_object.set_position(self.traj_info[str(self.timestep)])
+#         elif str(self.episode_step) in self.traj_info.keys():
+#             self.control_object.set_position(self.traj_info[str(self.episode_step)])
 #
-#         if self.heading is None or str(self.timestep - 1) not in self.heading.keys():
+#         if self.heading is None or str(self.episode_step - 1) not in self.heading.keys():
 #             pass
 #         else:
-#             this_heading = self.heading[str(self.timestep - 1)]
+#             this_heading = self.heading[str(self.episode_step - 1)]
 #             self.control_object.set_heading_theta(np.arctan2(this_heading[0], this_heading[1]) - np.pi / 2)
 #
 #         return [0, 0]
@@ -53,10 +53,10 @@ class ReplayEgoCarPolicy(BasePolicy):
         self.start_index = 0
         self.init_pos = self.traj_info[0]["position"]
         self.heading = self.traj_info[0]["heading"]
-        self.timestep = 0
-        self.damp = 0
+        # self.episode_step = 0
+        # self.damp = 0
         # how many times the replay data is slowed down
-        self.damp_interval = 1
+        # self.damp_interval = 1
         # self.control_object.disable_gravity()
 
     def get_trajectory_info(self):
@@ -74,18 +74,18 @@ class ReplayEgoCarPolicy(BasePolicy):
         return ret
 
     def act(self, *args, **kwargs):
-        self.damp += self.damp_interval
-        if self.damp == self.damp_interval:
-            self.timestep += 1
-            self.damp = 0
-        else:
-            return [0, 0]
+        # self.damp += self.damp_interval
+        # if self.damp == self.damp_interval:
+        #     self.episode_step += 1
+        #     self.damp = 0
+        # else:
+        #     return [0, 0]
 
-        info = self.traj_info[int(self.timestep)]
+        info = self.traj_info[int(self.episode_step)]
 
         # Before step
         # Warning by LQY: Don't call before step here! Before step should be called by manager
-        # action = self.traj_info[int(self.timestep)].get("action", None)
+        # action = self.traj_info[int(self.episode_step)].get("action", None)
         # self.control_object.before_step(action)
 
         # Update throttle and steering.
@@ -95,13 +95,13 @@ class ReplayEgoCarPolicy(BasePolicy):
             self.control_object.set_throttle_brake(float(info["steering"]))
 
         # Update state
-        if self.timestep == self.start_index:
+        if self.episode_step == self.start_index:
             self.control_object.set_position(self.init_pos)
-        elif self.timestep < len(self.traj_info):
+        elif self.episode_step < len(self.traj_info):
             self.control_object.set_position(info["position"])
             self.control_object.set_velocity(info["velocity"])
 
-        if self.heading is None or self.timestep >= len(self.traj_info):
+        if self.heading is None or self.episode_step >= len(self.traj_info):
             pass
         else:
             this_heading = info["heading"]
@@ -137,29 +137,29 @@ class NuPlanReplayEgoCarPolicy(ReplayEgoCarPolicy):
         return parse_ego_vehicle_state_trajectory(scenario, self.engine.current_map.nuplan_center)
 
     def act(self, *args, **kwargs):
-        self.damp += self.damp_interval
-        if self.damp == self.damp_interval:
-            self.timestep += 1
-            self.damp = 0
-        else:
-            return [0, 0]
+        # self.damp += self.damp_interval
+        # if self.damp == self.damp_interval:
+        #     self.episode_step += 1
+        #     self.damp = 0
+        # else:
+        #     return [0, 0]
 
-        if self.timestep < len(self.traj_info):
-            self.control_object.set_position(self.traj_info[int(self.timestep)]["position"])
-            if self.timestep < len(self.traj_info) - 1:
-                velocity = self.traj_info[int(self.timestep + 1)]["position"] - self.traj_info[int(self.timestep
+        if self.episode_step < len(self.traj_info):
+            self.control_object.set_position(self.traj_info[int(self.episode_step)]["position"])
+            if self.episode_step < len(self.traj_info) - 1:
+                velocity = self.traj_info[int(self.episode_step + 1)]["position"] - self.traj_info[int(self.episode_step
                                                                                                    )]["position"]
                 velocity /= self.sim_time_interval
                 self.control_object.set_velocity(velocity, in_local_frame=False)
             else:
-                velocity = self.traj_info[int(self.timestep)]["velocity"]
+                velocity = self.traj_info[int(self.episode_step)]["velocity"]
                 self.control_object.set_velocity(velocity, in_local_frame=True)
-            # self.control_object.set_velocity(self.traj_info[int(self.timestep)]["velocity"])
-        if self.heading is None or self.timestep >= len(self.traj_info):
+            # self.control_object.set_velocity(self.traj_info[int(self.episode_step)]["velocity"])
+        if self.heading is None or self.episode_step >= len(self.traj_info):
             pass
         else:
-            this_heading = self.traj_info[int(self.timestep)]["heading"]
-            angular_v = self.traj_info[int(self.timestep)]["angular_velocity"]
+            this_heading = self.traj_info[int(self.episode_step)]["heading"]
+            angular_v = self.traj_info[int(self.episode_step)]["angular_velocity"]
             self.control_object.set_heading_theta(this_heading)
             self.control_object.set_angular_velocity(angular_v)
 
@@ -173,19 +173,19 @@ class NuPlanReplayTrafficParticipantPolicy(BasePolicy):
     def __init__(self, control_object, fix_height=None, random_seed=None, config=None):
         super(NuPlanReplayTrafficParticipantPolicy, self).__init__(control_object, random_seed, config)
         self.fix_height = fix_height
-        self.timestep = 0
-        self.damp = 0
-        self.start_index = 0
+        # self.episode_step = 0
+        # self.damp = 0
+        # self.start_index = 0
         # how many times the replay data is slowed down
-        self.damp_interval = 1
+        # self.damp_interval = 1
 
     def act(self, obj_state, *args, **kwargs):
-        self.damp += self.damp_interval
-        if self.damp == self.damp_interval:
-            self.timestep += 1
-            self.damp = 0
-        else:
-            return [0, 0]
+        # self.damp += self.damp_interval
+        # if self.damp == self.damp_interval:
+        #     self.episode_step += 1
+        #     self.damp = 0
+        # else:
+        #     return [0, 0]
         self.control_object.set_position(obj_state["position"], self.fix_height)
         self.control_object.set_heading_theta(obj_state["heading"])
         self.control_object.set_velocity(obj_state["velocity"])
