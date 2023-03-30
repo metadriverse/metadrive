@@ -91,7 +91,7 @@ class PGTrafficManager(BaseManager):
             v.before_step(p.act())
         return dict()
 
-    def after_step(self):
+    def after_step(self, *args, **kwargs):
         """
         Update all traffic vehicles' states,
         """

@@ -21,8 +21,8 @@ from metadrive.scenario.scenario_description import ScenarioDescription
 WAYMO_ENV_CONFIG = dict(
     # ===== Map Config =====
     waymo_data_directory=AssetLoader.file_path("waymo", return_raw_style=False),
-    start_case_index=0,
-    case_num=3,
+    start_scenario_index=0,
+    num_scenario=3,
     store_map=True,
     store_map_buffer_size=2000,
     sequential_seed=False,  # Whether to set seed (the index of map) sequentially across episodes
@@ -253,7 +253,7 @@ class WaymoEnv(BaseEnv):
         step_info["carsize"] = [vehicle.WIDTH, vehicle.LENGTH]
 
         # Compute state difference metrics
-        data = self.engine.data_manager.get_case(self.engine.global_seed)
+        data = self.engine.data_manager.get_scenario(self.engine.global_seed)
         agent_xy = vehicle.position
         if vehicle_id == "sdc" or vehicle_id == "default_agent":
             native_vid = data[ScenarioDescription.METADATA][ScenarioDescription.SDC_ID]
@@ -319,7 +319,7 @@ class WaymoEnv(BaseEnv):
             agent_name = self.agent_manager.object_to_agent(vehicle.name)
             lat = abs(self.observations[agent_name].lateral_dist)
             done = lat > 10
-            done = done or vehicle.on_yellow_continuous_line or vehicle.on_white_continuous_line
+            done = done or vehicle.on_yellow_continuous_line or vehicle.crash_sidewalk
             return done
 
         done = vehicle.crash_sidewalk or vehicle.on_yellow_continuous_line or vehicle.on_white_continuous_line
@@ -334,18 +334,19 @@ class WaymoEnv(BaseEnv):
         elif self.config["sequential_seed"]:
             current_seed = self.engine.global_seed
             if current_seed is None:
-                current_seed = self.config["start_case_index"]
+                current_seed = self.config["start_scenario_index"]
             else:
                 current_seed += 1
-            if current_seed >= self.config["start_case_index"] + int(self.config["case_num"]):
-                current_seed = self.config["start_case_index"]
+            if current_seed >= self.config["start_scenario_index"] + int(self.config["num_scenario"]):
+                current_seed = self.config["start_scenario_index"]
         else:
             current_seed = get_np_random(None).randint(
-                self.config["start_case_index"], self.config["start_case_index"] + int(self.config["case_num"])
+                self.config["start_scenario_index"],
+                self.config["start_scenario_index"] + int(self.config["num_scenario"])
             )
 
-        assert self.config["start_case_index"] <= current_seed < \
-               self.config["start_case_index"] + self.config["case_num"], "Force seed {} is out of range [{}, {}).".format(current_seed, self.config["start_case_index"], self.config["start_case_index"] + self.config["case_num"])
+        assert self.config["start_scenario_index"] <= current_seed < \
+               self.config["start_scenario_index"] + self.config["num_scenario"], "Force seed {} is out of range [{}, {}).".format(current_seed, self.config["start_scenario_index"], self.config["start_scenario_index"] + self.config["num_scenario"])
         self.seed(current_seed)
 
     def stop(self):
@@ -362,9 +363,9 @@ if __name__ == "__main__":
             "no_traffic": True,
             # "debug":True,
             # "no_traffic":True,
-            # "start_case_index": 192,
-            # "start_case_index": 1000,
-            "case_num": 3,
+            # "start_scenario_index": 192,
+            # "start_scenario_index": 1000,
+            "num_scenario": 3,
             # "waymo_data_directory": "/home/shady/Downloads/test_processed",
             "horizon": 1000,
             "vehicle_config": dict(
@@ -388,7 +389,7 @@ if __name__ == "__main__":
                 # text={
                 #     "obs_shape": len(o),
                 #     "lateral": env.observations["default_agent"].lateral_dist,
-                #     "seed": env.engine.global_seed + env.config["start_case_index"],
+                #     "seed": env.engine.global_seed + env.config["start_scenario_index"],
                 #     "reward": r,
                 # }
                 # mode="topdown"

@@ -65,17 +65,16 @@ class NuPlanDataManager(BaseManager):
         # get scenarios from database
         self._nuplan_scenarios = scenario_builder.get_scenarios(scenario_filter, common_builder.worker)
 
-        # filter case according to config
-        self.start_case_index = self.engine.global_config["start_case_index"]
-        self.case_num = self.engine.global_config["case_num"]
-        assert len(self._nuplan_scenarios) >= self.start_case_index + self.case_num, \
+        # filter scenario according to config
+        self.start_scenario_index = self.engine.global_config["start_scenario_index"]
+        self._num_scenario = self.engine.global_config["num_scenario"]
+        assert len(self._nuplan_scenarios) >= self.start_scenario_index + self.num_scenario, \
             "Number of scenes are not enough, " \
             "\n num nuplan scenarios: {}" \
-            "\n start_case_index: {}" \
-            "\n case num: {}".format(len(self._nuplan_scenarios), self.start_case_index, self.case_num)
+            "\n start_scenario_index: {}" \
+            "\n scenario num: {}".format(len(self._nuplan_scenarios), self.start_scenario_index, self.num_scenario)
         logger.info("\n \n ############### Finish Loading NuPlan Data ############### \n")
 
-        self._scenario_num = self.case_num
         self._current_scenario_index = None
 
     @property
@@ -83,8 +82,8 @@ class NuPlanDataManager(BaseManager):
         return self.current_scenario.database_interval
 
     @property
-    def scenario_num(self):
-        return self._scenario_num
+    def num_scenario(self):
+        return self._num_scenario
 
     @property
     def current_scenario_index(self):
@@ -132,16 +131,16 @@ class NuPlanDataManager(BaseManager):
         )
         return cfg
 
-    def get_case(self, index, force_get_current_case=True):
-        assert self.start_case_index <= index < self.start_case_index + self.case_num
-        if force_get_current_case:
+    def get_scenario(self, index, force_get_current_scenario=True):
+        assert self.start_scenario_index <= index < self.start_scenario_index + self.num_scenario
+        if force_get_current_scenario:
             assert index == self.random_seed
             return self.current_scenario
         else:
             return self._nuplan_scenarios[index]
 
     def seed(self, random_seed):
-        assert self.start_case_index <= random_seed < self.start_case_index + self.case_num
+        assert self.start_scenario_index <= random_seed < self.start_scenario_index + self.num_scenario
         super(NuPlanDataManager, self).seed(random_seed)
         self._current_scenario_index = random_seed
 
@@ -150,7 +149,7 @@ class NuPlanDataManager(BaseManager):
         return self.current_scenario.get_number_of_iterations()
 
     def get_state(self):
-        raw_data = self.get_case(self.engine.global_seed)
+        raw_data = self.get_scenario(self.engine.global_seed)
         state = super(NuPlanDataManager, self).get_state()
         state["raw_data"] = raw_data
         return state

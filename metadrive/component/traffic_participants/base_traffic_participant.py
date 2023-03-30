@@ -10,7 +10,7 @@ LaneIndex = Tuple[str, str, int]
 
 
 class BaseTrafficParticipant(BaseObject):
-    NAME = None
+    TYPE_NAME = None
     COLLISION_MASK = CollisionGroup.TrafficParticipants
     HEIGHT = None
 
@@ -19,7 +19,7 @@ class BaseTrafficParticipant(BaseObject):
         self.set_position(position, self.HEIGHT / 2 if hasattr(self, "HEIGHT") else 0)
         self.set_heading_theta(heading_theta)
         assert self.MASS is not None, "No mass for {}".format(self.class_name)
-        assert self.NAME is not None, "No name for {}".format(self.class_name)
+        assert self.TYPE_NAME is not None, "No name for {}".format(self.class_name)
         assert self.COLLISION_MASK is not None, "No collision group for {}".format(self.class_name)
 
     # def top_down_color(self):

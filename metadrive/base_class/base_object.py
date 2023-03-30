@@ -1,7 +1,9 @@
 import logging
+from metadrive.utils.math_utils import wrap_to_pi
+
 import math
 from typing import Dict
-
+from metadrive.engine.physics_node import BaseRigidBodyNode, BaseGhostBodyNode
 import numpy as np
 import seaborn as sns
 from panda3d.bullet import BulletWorld, BulletBodyNode
@@ -278,7 +280,7 @@ class BaseObject(BaseRunnable):
     def position(self):
         return metadrive_position(self.origin.getPos())
 
-    def set_velocity(self, direction: np.array, value=None, in_local_frame=False):
+    def set_velocity(self, direction: np.array, value=None, in_local_frame=False, offset_90_deg=False):
         """
         Set velocity for object including the direction of velocity and the value (speed)
         The direction of velocity will be normalized automatically, value decided its scale
@@ -292,6 +294,11 @@ class BaseObject(BaseRunnable):
             direction = LVector3(*direction, 0.)
             direction[1] *= -1
             direction = engine.worldNP.getRelativeVector(self.origin, direction)
+
+            # For some reason, we need 90 degree offset for vehicle.
+            if offset_90_deg:
+                direction = [-direction[1], -direction[0]]
+
         if value is not None:
             norm_ratio = value / (norm(direction[0], direction[1]) + 1e-6)
         else:
@@ -359,7 +366,7 @@ class BaseObject(BaseRunnable):
         Get the heading theta of this object, unit [rad]
         :return:  heading in rad
         """
-        return metadrive_heading(self.origin.getH()) / 180 * math.pi
+        return wrap_to_pi(metadrive_heading(self.origin.getH()) / 180 * math.pi)
 
     @property
     def heading(self):
@@ -449,3 +456,9 @@ class BaseObject(BaseRunnable):
         if not in_rad:
             angular_velocity = angular_velocity / 180 * np.pi
         self._body.setAngularVelocity(LVector3(0, 0, angular_velocity))
+
+    def rename(self, new_name):
+        super(BaseObject, self).rename(new_name)
+        physics_node = self._body.getPythonTag(self._body.getName())
+        if isinstance(physics_node, BaseRigidBodyNode) or isinstance(physics_node, BaseRigidBodyNode):
+            physics_node.rename(new_name)

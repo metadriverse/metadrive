@@ -10,7 +10,6 @@ def parse_vehicle_state(object_dict, time_idx, coordinate_transform, check_last_
     assert object_dict["type"] == MetaDriveType.VEHICLE
 
     states = object_dict["state"]
-    ret = {k: v[time_idx] for k, v in states.items()}
 
     epi_length = len(states["position"])
     if time_idx < 0:
@@ -25,13 +24,19 @@ def parse_vehicle_state(object_dict, time_idx, coordinate_transform, check_last_
             if np.linalg.norm(p_1 - p_2) > 100:
                 time_idx = current_idx
                 break
+
+    ret = {k: v[time_idx] for k, v in states.items()}
+
     if coordinate_transform:
         ret["position"] = waymo_to_metadrive_vector(states["position"][time_idx][:2])
         ret["velocity"] = waymo_to_metadrive_vector(states["velocity"][time_idx])
     else:
         ret["position"] = states["position"][time_idx]
         ret["velocity"] = states["velocity"][time_idx]
-    ret["heading"] = waymo_to_metadrive_heading(states["heading"][time_idx], coordinate_transform=coordinate_transform)
+    ret["heading_theta"] = waymo_to_metadrive_heading(
+        states["heading"][time_idx], coordinate_transform=coordinate_transform
+    )
+    ret["heading"] = ret["heading_theta"]
 
     ret["length"] = states["size"][time_idx][0]
     ret["width"] = states["size"][time_idx][1]
@@ -44,6 +49,16 @@ def parse_vehicle_state(object_dict, time_idx, coordinate_transform, check_last_
         )
     else:
         ret["angular_velocity"] = 0
+
+    # Retrieve vehicle type
+    ret["vehicle_class"] = None
+    if "spawn_info" in object_dict["metadata"]:
+        type_module, type_cls_name = object_dict["metadata"]["spawn_info"]["type"]
+        import importlib
+        module = importlib.import_module(type_module)
+        cls = getattr(module, type_cls_name)
+        ret["vehicle_class"] = cls
+
     return ret
 
 

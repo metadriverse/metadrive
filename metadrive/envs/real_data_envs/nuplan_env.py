@@ -27,14 +27,14 @@ NUPLAN_ENV_CONFIG = dict(
         "scenario_filter.log_names=['2021.07.16.20.45.29_veh-35_01095_01486']",
         'scenario_filter.limit_total_scenarios=2800',  # use 2 total scenarios
     ],
-    start_case_index=0,
-    case_num=100,
+    start_scenario_index=0,
+    num_scenario=100,
     store_map=True,
     sequential_seed=False,
 
     # ===== Map Config =====
     city_map_radius=20000,  # load the whole map, setting as large as possible
-    scenario_radius=250,  # radius for per case
+    scenario_radius=250,  # radius for per scenario
     load_city_map=False,
     map_centers={
         'us-nv-las-vegas-strip': nuplan_to_metadrive_vector([664396, 3997613]),
@@ -256,18 +256,19 @@ class NuPlanEnv(BaseEnv):
         elif self.config["sequential_seed"]:
             current_seed = self.engine.global_seed
             if current_seed is None:
-                current_seed = self.config["start_case_index"]
+                current_seed = self.config["start_scenario_index"]
             else:
                 current_seed += 1
-            if current_seed >= self.config["start_case_index"] + int(self.config["case_num"]):
-                current_seed = self.config["start_case_index"]
+            if current_seed >= self.config["start_scenario_index"] + int(self.config["num_scenario"]):
+                current_seed = self.config["start_scenario_index"]
         else:
             current_seed = get_np_random(None).randint(
-                self.config["start_case_index"], self.config["start_case_index"] + int(self.config["case_num"])
+                self.config["start_scenario_index"],
+                self.config["start_scenario_index"] + int(self.config["num_scenario"])
             )
 
-        assert self.config["start_case_index"] <= current_seed < \
-               self.config["start_case_index"] + self.config["case_num"], "Force seed range Error!"
+        assert self.config["start_scenario_index"] <= current_seed < \
+               self.config["start_scenario_index"] + self.config["num_scenario"], "Force seed range Error!"
         self.seed(current_seed)
 
     def _is_out_of_road(self, vehicle):
@@ -297,9 +298,9 @@ if __name__ == "__main__":
             # "global_light": False,
             "window_size": (1200, 800),
             # "multi_thread_render_mode": "Cull/Draw",
-            "start_case_index": 0,
+            "start_scenario_index": 0,
             # "pstats": True,
-            "case_num": 400,
+            "num_scenario": 400,
             "show_coordinates": False,
             "horizon": 1000,
             # "show_fps": False,

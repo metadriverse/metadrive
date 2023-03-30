@@ -63,3 +63,7 @@ class BasePolicy(Randomizable, Configurable):
 
     def get_state(self):
         return self.get_action_info()
+
+    @property
+    def episode_step(self):
+        return self.engine.episode_step

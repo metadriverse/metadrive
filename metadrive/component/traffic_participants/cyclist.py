@@ -13,7 +13,7 @@ from metadrive.engine.physics_node import BaseRigidBodyNode
 
 class Cyclist(BaseTrafficParticipant):
     MASS = 80  # kg
-    NAME = BodyName.Cyclist
+    TYPE_NAME = BodyName.Cyclist
     COLLISION_MASK = CollisionGroup.TrafficParticipants
 
     MODEL = None
@@ -23,7 +23,7 @@ class Cyclist(BaseTrafficParticipant):
     def __init__(self, position, heading_theta, random_seed):
         super(Cyclist, self).__init__(position, heading_theta, random_seed)
 
-        n = BaseRigidBodyNode(self.name, self.NAME)
+        n = BaseRigidBodyNode(self.name, self.TYPE_NAME)
         self.add_body(n)
 
         self.body.addShape(BulletBoxShape((self.LENGTH / 2, self.WIDTH / 2, self.HEIGHT / 2)))

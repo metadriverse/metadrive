@@ -96,7 +96,7 @@ BASE_DEFAULT_CONFIG = dict(
         overtake_stat=False,  # we usually set to True when evaluation
         random_color=False,
         random_agent_model=False,  # this will be overwritten by env.config["random_agent_model"]
-        # The shape of vehicle are predefined by its class. But in special case (WaymoVehicle) we might want to
+        # The shape of vehicle are predefined by its class. But in special scenario (WaymoVehicle) we might want to
         # set to arbitrary shape.
         width=None,
         length=None,
@@ -179,6 +179,7 @@ BASE_DEFAULT_CONFIG = dict(
     record_episode=False,  # when replay_episode is not None ,this option will be useless
     replay_episode=None,  # set the replay file to enable replay
     only_reset_when_replay=False,  # Scenario will only be initialized, while future trajectories will not be replayed
+    force_reuse_object_name=False,  # If True, when restoring objects, use the same ID as in dataset
 )
 
 
@@ -417,7 +418,7 @@ class BaseEnv(gym.Env):
 
         step_infos = concat_step_infos([engine_info, done_infos, reward_infos, cost_infos])
 
-        # For extreme case only. Force to terminate all vehicles if the environmental step exceeds 5 times horizon.
+        # For extreme scenario only. Force to terminate all vehicles if the environmental step exceeds 5 times horizon.
         should_external_done = False
         if self.config["horizon"] is not None:
             should_external_done = self.episode_step > 5 * self.config["horizon"]
@@ -619,6 +620,14 @@ class BaseEnv(gym.Env):
             episode = self.engine.dump_episode()
             if verbose:
                 print("Finish scenario {} with {} steps.".format(index, count))
-            scenarios_to_export[index] = convert_recorded_scenario_exported(episode, time_interval)
+            scenarios_to_export[index] = convert_recorded_scenario_exported(episode)
         self.config["record_episode"] = False
         return scenarios_to_export
+
+    def export_single_scenario(self):
+        """
+        Similar export_scenarios, this function transform the internal recorded frames to a standard
+        scenario description.
+        """
+        episode = self.engine.dump_episode()
+        return convert_recorded_scenario_exported(episode)
