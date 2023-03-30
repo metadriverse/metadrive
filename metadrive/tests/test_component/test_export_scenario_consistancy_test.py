@@ -198,8 +198,7 @@ def test_export_metadrive_scenario_hard(scenario_num=3, render_export_env=False,
     assert_scenario_equal(scenarios, scenarios_restored, only_compare_sdc=True)
 
 
-def test_export_waymo_scenario(render_export_env=False, render_load_env=False):
-    scenario_num = 3
+def test_export_waymo_scenario(scenario_num=3, render_export_env=False, render_load_env=False):
     env = WaymoEnv(
         dict(
             agent_policy=WaymoReplayEgoCarPolicy,
@@ -217,8 +216,10 @@ def test_export_waymo_scenario(render_export_env=False, render_load_env=False):
         for i, data in scenarios.items():
             with open(os.path.join(dir, "{}.pkl".format(i)), "wb+") as file:
                 pickle.dump(data, file)
+    finally:
         env.close()
 
+    try:
         print("===== Start restoring =====")
         env = WaymoEnv(
             dict(
@@ -228,23 +229,18 @@ def test_export_waymo_scenario(render_export_env=False, render_load_env=False):
                 case_num=scenario_num
             )
         )
-        for index in range(scenario_num):
-            print("Start replaying scenario {}".format(index))
-            env.reset(force_seed=index)
-            done = False
-            count = 0
-            while not done:
-                o, r, done, i = env.step([0, 0])
-                count += 1
-            print("Finish replaying scenario {} with step {}".format(index, count))
+        scenarios_restored = env.export_scenarios(policy, scenario_index=[i for i in range(scenario_num)], verbose=True)
+
     finally:
         env.close()
-        if dir is not None:
-            shutil.rmtree(dir)
+        # if dir is not None:
+        #     shutil.rmtree(dir)
+
+    assert_scenario_equal(scenarios, scenarios_restored, only_compare_sdc=True)
 
 
 if __name__ == "__main__":
     # test_export_metadrive_scenario_reproduction(scenario_num=10)
-    # test_export_metadrive_scenario_easy(render_export_env=False, render_load_env=False)
-    test_export_metadrive_scenario_hard(scenario_num=3, render_export_env=False, render_load_env=False)
-    # test_export_waymo_scenario(render_export_env=True, render_load_env=True)
+    # test_export_metadrive_scenario_easy(scenario_num=10, render_export_env=False, render_load_env=False)
+    # test_export_metadrive_scenario_hard(scenario_num=10, render_export_env=False, render_load_env=False)
+    test_export_waymo_scenario(scenario_num=1, render_export_env=False, render_load_env=False)

@@ -81,6 +81,9 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
     result[SD.METADATA][SD.TIMESTEP] = \
         np.asarray([scenario_log_interval * i for i in range(episode_len)], dtype=np.float32)
 
+    agent_to_object = {}
+    object_to_agent = {}
+
     # Fill tracks
     all_objs = set()
     for frame in frames:
@@ -102,6 +105,8 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
         for k in list(all_objs)
     }
     for frame_idx in range(result[SD.LENGTH]):
+
+        # Record all agents' states (position, velocity, ...)
         for id, state in frames[frame_idx].step_info.items():
             # Fill type
             tracks[id]["type"] = get_type_from_class(state["type"])
@@ -119,6 +124,7 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
             if id in frames[frame_idx]._object_to_agent:
                 tracks[id]["metadata"]["agent_name"] = frames[frame_idx]._object_to_agent[id]
 
+        # Record all policies' states (action, ...)
         for id, policy_info in frames[frame_idx].policy_info.items():
             # Maybe actions is also recorded. If so, add item to tracks:
             # TODO: In the case of discrete action, what should we do?
@@ -133,8 +139,13 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
                     )
                 tracks[id]["state"][key][frame_idx] = policy_state
 
+        # Record policy metadata
         for id, policy_spawn_info in frames[frame_idx].policy_spawn_info.items():
             tracks[id]["metadata"]["policy_spawn_info"] = copy.deepcopy(_convert_type_to_string(policy_spawn_info))
+
+        # Record agent2object, object2agent mapping for metadata
+        agent_to_object.update(frames[frame_idx]._agent_to_object)
+        object_to_agent.update(frames[frame_idx]._object_to_agent)
 
     result[SD.TRACKS] = tracks
 
@@ -149,6 +160,12 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
                     obj_state["state"] = {k: v[:episode_len] for k, v in obj_state["state"].items()}
                     clipped_dynamic_map[obj_id] = obj_state
                 result[SD.METADATA]["history_metadata"] = manager_state["raw_data"][SD.METADATA]
+
+    # TODO: Record vehicle type (LVehicle, XLVehicle etc.) This data stored in XXX
+
+    # Record agent2object, object2agent metadata
+    result[SD.METADATA]["agent_to_object"] = {str(k): str(v) for k, v in agent_to_object.items()}
+    result[SD.METADATA]["object_to_agent"] = {str(k): str(v) for k, v in object_to_agent.items()}
 
     result = result.to_dict()
     SD.sanity_check(result, check_self_type=True)

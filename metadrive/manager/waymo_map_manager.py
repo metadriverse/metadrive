@@ -1,13 +1,11 @@
 import copy
-from metadrive.utils.waymo_utils.parse_object_state import parse_full_trajectory, parse_vehicle_state
 
 from metadrive.component.lane.point_lane import PointLane
 from metadrive.component.map.waymo_map import WaymoMap
 from metadrive.constants import DEFAULT_AGENT
 from metadrive.manager.base_manager import BaseManager
-from metadrive.manager.waymo_traffic_manager import WaymoTrafficManager
-
 from metadrive.scenario.scenario_description import ScenarioDescription as SD
+from metadrive.utils.waymo_utils.parse_object_state import parse_full_trajectory, parse_vehicle_state
 
 
 class WaymoMapManager(BaseManager):
