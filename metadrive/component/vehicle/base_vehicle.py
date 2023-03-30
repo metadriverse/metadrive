@@ -347,18 +347,22 @@ class BaseVehicle(BaseObject, BaseVehicleState):
 
     def reset(
         self,
-        random_seed=None,
         vehicle_config=None,
+        name=None,
+        random_seed=None,
         position: np.ndarray = None,
         heading: float = 0.0,  # In degree!
         *args,
         **kwargs
     ):
+
         """
         pos is a 2-d array, and heading is a float (unit degree)
         if pos is not None, vehicle will be reset to the position
         else, vehicle will be reset to spawn place
         """
+        if name is not None:
+            self.rename(name)
         if random_seed is not None:
             assert isinstance(random_seed, int)
             self.seed(random_seed)

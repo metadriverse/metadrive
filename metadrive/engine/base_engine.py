@@ -124,6 +124,12 @@ class BaseEngine(EngineCore, Randomizable):
         else:
             obj = self._dying_objects[object_class.__name__].pop()
             obj.reset(**kwargs)
+
+        if "name" in kwargs and kwargs["name"] is not None:
+            assert kwargs["name"] == obj.name == obj.id
+        if "id" in kwargs and kwargs["name"] is not None:
+            assert kwargs["id"] == obj.id == obj.name
+
         if self.global_config["record_episode"] and not self.replay_episode:
             self.record_manager.add_spawn_info(obj.name, object_class, kwargs)
         self._spawned_objects[obj.id] = obj
@@ -235,7 +241,6 @@ class BaseEngine(EngineCore, Randomizable):
         _debug_memory_usage = False
 
         if _debug_memory_usage:
-
             def process_memory():
                 import psutil
                 import os

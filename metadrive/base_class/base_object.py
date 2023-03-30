@@ -1,7 +1,8 @@
 import logging
+
 import math
 from typing import Dict
-
+from metadrive.engine.physics_node import BaseRigidBodyNode, BaseGhostBodyNode
 import numpy as np
 import seaborn as sns
 from panda3d.bullet import BulletWorld, BulletBodyNode
@@ -454,3 +455,9 @@ class BaseObject(BaseRunnable):
         if not in_rad:
             angular_velocity = angular_velocity / 180 * np.pi
         self._body.setAngularVelocity(LVector3(0, 0, angular_velocity))
+
+    def rename(self, new_name):
+        super(BaseObject, self).rename(new_name)
+        physics_node = self._body.getPythonTag(self._body.getName())
+        if isinstance(physics_node, BaseRigidBodyNode) or isinstance(physics_node, BaseRigidBodyNode):
+            physics_node.rename(new_name)
