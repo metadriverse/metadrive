@@ -91,13 +91,11 @@ def assert_scenario_equal(scenarios1, scenarios2, only_compare_sdc=False):
         assert set(old_scene[SD.MAP_FEATURES].keys()).issuperset(set(new_scene[SD.MAP_FEATURES].keys()))
         assert set(old_scene[SD.DYNAMIC_MAP_STATES].keys()) == set(new_scene[SD.DYNAMIC_MAP_STATES].keys())
 
-        # TODO FIXME: The polyline is reversed in 2nd dim. Need to take care of this.
-        #  Temporarily disable the test
-        # for map_id, map_feat in old_scene[SD.MAP_FEATURES].items():
-        #     np.testing.assert_almost_equal(
-        #         new_scene[SD.MAP_FEATURES][map_id]["polyline"], map_feat["polyline"], decimal=NP_ARRAY_DECIMAL
-        #     )
-        #     assert new_scene[SD.MAP_FEATURES][map_id][SD.TYPE] == map_feat[SD.TYPE]
+        for map_id, map_feat in old_scene[SD.MAP_FEATURES].items():
+            np.testing.assert_almost_equal(
+                new_scene[SD.MAP_FEATURES][map_id]["polyline"], map_feat["polyline"], decimal=NP_ARRAY_DECIMAL
+            )
+            assert new_scene[SD.MAP_FEATURES][map_id][SD.TYPE] == map_feat[SD.TYPE]
 
         for obj_id, obj_state in old_scene[SD.DYNAMIC_MAP_STATES].items():
             np.testing.assert_almost_equal(
