@@ -85,7 +85,9 @@ class WaymoBlock(BaseBlock):
             elif WaymoRoadEdgeType.is_road_edge(type):
                 self.construct_waymo_sidewalk(
                     convert_polyline_to_metadrive(
-                        data[WaymoLaneProperty.POLYLINE], coordinate_transform=self.coordinate_transform))
+                        data[WaymoLaneProperty.POLYLINE], coordinate_transform=self.coordinate_transform
+                    )
+                )
 
     def construct_waymo_continuous_line(self, polyline, color):
         line = InterpolatingLine(polyline)

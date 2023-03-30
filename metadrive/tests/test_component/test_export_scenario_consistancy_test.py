@@ -72,9 +72,7 @@ def assert_scenario_equal(scenarios1, scenarios2, only_compare_sdc=False, coordi
                         decimal = VELOCITY_DECIMAL
                     else:
                         decimal = NP_ARRAY_DECIMAL
-                    np.testing.assert_almost_equal(
-                        state_array_1[:min_len], state_array_2[:min_len], decimal=decimal
-                    )
+                    np.testing.assert_almost_equal(state_array_1[:min_len], state_array_2[:min_len], decimal=decimal)
 
                 assert new_scene[SD.TRACKS][track_id][SD.TYPE] == track[SD.TYPE]
 
@@ -89,9 +87,7 @@ def assert_scenario_equal(scenarios1, scenarios2, only_compare_sdc=False, coordi
                     decimal = VELOCITY_DECIMAL
                 else:
                     decimal = NP_ARRAY_DECIMAL
-                np.testing.assert_almost_equal(
-                    state_array_1[:min_len], state_array_2[:min_len], decimal=decimal
-                )
+                np.testing.assert_almost_equal(state_array_1[:min_len], state_array_2[:min_len], decimal=decimal)
 
             assert new_scene[SD.TRACKS][track_id][SD.TYPE] == track[SD.TYPE]
 
