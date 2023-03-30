@@ -341,7 +341,8 @@ class WaymoEnv(BaseEnv):
                 current_seed = self.config["start_scenario_index"]
         else:
             current_seed = get_np_random(None).randint(
-                self.config["start_scenario_index"], self.config["start_scenario_index"] + int(self.config["scenario_num"])
+                self.config["start_scenario_index"],
+                self.config["start_scenario_index"] + int(self.config["scenario_num"])
             )
 
         assert self.config["start_scenario_index"] <= current_seed < \

@@ -19,7 +19,10 @@ class WaymoMapManager(BaseManager):
         self.current_map = None
         self.map_num = self.engine.global_config["scenario_num"]
         self.start_scenario_index = self.engine.global_config["start_scenario_index"]
-        self._stored_maps = {i: None for i in range(self.start_scenario_index, self.start_scenario_index + self.map_num)}
+        self._stored_maps = {
+            i: None
+            for i in range(self.start_scenario_index, self.start_scenario_index + self.map_num)
+        }
 
         # we put the route searching function here
         self.sdc_start = None

@@ -27,7 +27,8 @@ class WaymoDataManager(BaseManager):
         self.store_map = store_map
         self.waymo_scenario = DataBuffer(store_map_buffer_size if self.store_map else self.scenario_num)
 
-        for i in tqdm(range(self.start_scenario_index, self.start_scenario_index + self.scenario_num), desc="Check Waymo Data"):
+        for i in tqdm(range(self.start_scenario_index, self.start_scenario_index + self.scenario_num),
+                      desc="Check Waymo Data"):
             p = os.path.join(self.directory, "{}.pkl".format(i))
             assert os.path.exists(p), "No Data {} at path: {}".format(i, p)
 
