@@ -17,11 +17,11 @@ VELOCITY_DECIMAL = 1  # velocity can not be set accurately
 def assert_scenario_equal(scenarios1, scenarios2, only_compare_sdc=False, coordinate_transform=False):
     # ===== These two set of data should align =====
     assert set(scenarios1.keys()) == set(scenarios2.keys())
-    for k in scenarios1.keys():
-        SD.sanity_check(scenarios1[k], check_self_type=True)
-        SD.sanity_check(scenarios2[k], check_self_type=True)
-        old_scene = SD(scenarios1[k])
-        new_scene = SD(scenarios2[k])
+    for scenario_id in scenarios1.keys():
+        SD.sanity_check(scenarios1[scenario_id], check_self_type=True)
+        SD.sanity_check(scenarios2[scenario_id], check_self_type=True)
+        old_scene = SD(scenarios1[scenario_id])
+        new_scene = SD(scenarios2[scenario_id])
         SD.sanity_check(old_scene)
         SD.sanity_check(new_scene)
         assert old_scene[SD.LENGTH] >= new_scene[SD.LENGTH], (old_scene[SD.LENGTH], new_scene[SD.LENGTH])
@@ -60,11 +60,11 @@ def assert_scenario_equal(scenarios1, scenarios2, only_compare_sdc=False, coordi
             for track_id, track in old_scene[SD.TRACKS].items():
                 if track_id == "default_agent":
                     continue
-                if k not in new_scene[SD.TRACKS]:
+                if track_id not in new_scene[SD.TRACKS]:
                     continue
-                for k in new_scene[SD.TRACKS][track_id][SD.STATE]:
-                    state_array_1 = new_scene[SD.TRACKS][track_id][SD.STATE][k]
-                    state_array_2 = track[SD.STATE][k]
+                for state_k in new_scene[SD.TRACKS][track_id][SD.STATE]:
+                    state_array_1 = new_scene[SD.TRACKS][track_id][SD.STATE][state_k]
+                    state_array_2 = track[SD.STATE][state_k]
                     min_len = min(state_array_1.shape[0], state_array_2.shape[0])
                     np.testing.assert_almost_equal(
                         state_array_1[:min_len], state_array_2[:min_len], decimal=NP_ARRAY_DECIMAL
@@ -275,6 +275,6 @@ def test_export_waymo_scenario(scenario_num=3, render_export_env=False, render_l
 
 if __name__ == "__main__":
     # test_export_metadrive_scenario_reproduction(scenario_num=10)
-    # test_export_metadrive_scenario_easy(scenario_num=1, render_export_env=False, render_load_env=False)
+    test_export_metadrive_scenario_easy(scenario_num=3, render_export_env=False, render_load_env=False)
     # test_export_metadrive_scenario_hard(scenario_num=1, render_export_env=False, render_load_env=False)
-    test_export_waymo_scenario(scenario_num=14, render_export_env=False, render_load_env=False)
+    # test_export_waymo_scenario(scenario_num=14, render_export_env=False, render_load_env=False)
