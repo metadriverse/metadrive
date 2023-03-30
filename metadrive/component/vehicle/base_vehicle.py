@@ -826,6 +826,10 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         super(BaseVehicle, self).set_state(state)
         self.set_throttle_brake(float(state["throttle_brake"]))
         self.set_steering(float(state["steering"]))
+        self.last_velocity = self.velocity
+        self.last_speed = self.speed
+        self.last_position = self.position
+        self.last_heading_dir = self.heading
 
     def set_panda_pos(self, pos):
         super(BaseVehicle, self).set_panda_pos(pos)
