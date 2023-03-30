@@ -44,6 +44,16 @@ def parse_vehicle_state(object_dict, time_idx, coordinate_transform, check_last_
         )
     else:
         ret["angular_velocity"] = 0
+
+    # Retrieve vehicle type
+    ret["vehicle_class"] = None
+    if "spawn_info" in  object_dict["metadata"]:
+        type_module, type_cls_name = object_dict["metadata"]["spawn_info"]["type"]
+        import importlib
+        module = importlib.import_module(type_module)
+        cls = getattr(module, type_cls_name)
+        ret["vehicle_class"] = cls
+
     return ret
 
 

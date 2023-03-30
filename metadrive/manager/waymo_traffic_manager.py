@@ -41,10 +41,13 @@ class WaymoTrafficManager(BaseManager):
                         show_side_detector=False,
                     )
                 )
-
-                # TODO: We can specify the vehicle type (SVehicle, LVehicle, etc) if data stores this.
+                if info["vehicle_class"]:
+                    vehicle_class = info["vehicle_class"]
+                else:
+                    vehicle_class = SVehicle
                 v = self.spawn_object(
-                    SVehicle, position=info["position"], heading=info["heading"], vehicle_config=v_config, name=v_id
+                    vehicle_class, position=info["position"], heading=info["heading"], vehicle_config=v_config,
+                    name=v_id
                 )
                 self.vid_to_obj[v_id] = v.name
                 v.set_velocity(info["velocity"])
@@ -67,8 +70,15 @@ class WaymoTrafficManager(BaseManager):
                         self.vid_to_obj.pop(v_id)
                         continue
                     self.spawned_objects[self.vid_to_obj[v_id]].set_position(info["position"])
-                    self.spawned_objects[self.vid_to_obj[v_id]].set_heading_theta(info["heading"])
+                    self.spawned_objects[self.vid_to_obj[v_id]].set_heading_theta(float(info["heading"]))
                     self.spawned_objects[self.vid_to_obj[v_id]].set_velocity(info["velocity"])
+
+                    if "throttle_brake" in info:
+                        self.spawned_objects[self.vid_to_obj[v_id]].set_throttle_brake(float(info["throttle_brake"]))
+
+                    if "steering" in info:
+                        self.spawned_objects[self.vid_to_obj[v_id]].set_throttle_brake(float(info["steering"]))
+
             self.count += 1
         except:
             raise ValueError("Can not UPDATE traffic for seed: {}".format(self.engine.global_random_seed))

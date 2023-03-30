@@ -46,7 +46,7 @@ def _convert_type_to_string(nested):
     return nested
 
 
-def convert_recorded_scenario_exported(record_episode, scenario_log_interval=None):
+def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1):
     """
     This function utilizes the recorded data natively emerging from MetaDrive run.
     The output data structure follows MetaDrive data format, but some changes might happen compared to original data.
@@ -62,7 +62,7 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=Non
     result["map_features"] = record_episode["map_data"]["map_features"]
 
     # TODO: Fix this
-    if scenario_log_interval is not None:
+    if scenario_log_interval != 0.1:
         raise ValueError("We don't support varying the scenario log interval yet.")
 
     # scenario_log_interval = scenario_log_interval or record_episode["global_config"]["physics_world_step_size"]
@@ -151,6 +151,14 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=Non
         agent_to_object.update(frames[frame_idx]._agent_to_object)
         object_to_agent.update(frames[frame_idx]._object_to_agent)
 
+        # Record spawn information
+        for obj_name, spawn_info in frames[frame_idx].spawn_info.items():
+            spawn_info = copy.deepcopy(spawn_info)
+            spawn_info = _convert_type_to_string(spawn_info)
+            if "config" in spawn_info:
+                spawn_info.pop("config")
+            tracks[obj_name]["metadata"]["spawn_info"] = spawn_info
+
     result[SD.TRACKS] = tracks
 
     # Traffic Light: Straight-through forward from original data
@@ -164,8 +172,6 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=Non
                     obj_state["state"] = {k: v[:episode_len] for k, v in obj_state["state"].items()}
                     clipped_dynamic_map[obj_id] = obj_state
                 result[SD.METADATA]["history_metadata"] = manager_state["raw_data"][SD.METADATA]
-
-    # TODO: Record vehicle type (LVehicle, XLVehicle etc.) This data stored in XXX
 
     # Record agent2object, object2agent metadata
     result[SD.METADATA]["agent_to_object"] = {str(k): str(v) for k, v in agent_to_object.items()}
