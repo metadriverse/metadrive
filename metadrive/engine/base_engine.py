@@ -327,18 +327,17 @@ class BaseEngine(EngineCore, Randomizable):
         if self.on_screen_message is not None:
             self.on_screen_message.render()
 
-    def after_step(self) -> Dict:
+    def after_step(self, *args, **kwargs) -> Dict:
         """
         Update states after finishing movement
         :return: if this episode is done
         """
-        self.episode_step += 1
         step_infos = {}
         for manager in self.managers.values():
-            new_step_info = manager.after_step()
+            new_step_info = manager.after_step(*args, **kwargs)
             step_infos = concat_step_infos([step_infos, new_step_info])
         self.interface.after_step()
-
+        self.episode_step += 1
         # cull distant blocks
         # poses = [v.position for v in self.agent_manager.active_agents.values()]
         # if self.cull_scene and False:
