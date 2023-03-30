@@ -10,15 +10,11 @@ from metadrive.utils.waymo_utils.waymo_type import WaymoAgentType
 class WaymoTrafficManager(BaseManager):
     def __init__(self):
         super(WaymoTrafficManager, self).__init__()
-        # self.current_traffic_data = None
-        self.count = 0
-        # self.sdc_track_index = None
         self.vid_to_obj = None
 
     def after_reset(self):
         # try:
         # generate vehicle
-        self.count = 0
         self.vid_to_obj = {}
         for v_id, type_traj in self.current_traffic_data.items():
             if WaymoAgentType.is_vehicle(type_traj["type"]) and v_id != self.sdc_track_index:
@@ -51,20 +47,24 @@ class WaymoTrafficManager(BaseManager):
                 )
                 self.vid_to_obj[v_id] = v.name
                 v.set_velocity(info["velocity"])
+                if "angular_velocity" in info:
+                    v.set_angular_velocity(info["angular_velocity"])
+
                 # v.set_static(True)
         # except:
         #     raise ValueError("Can not LOAD traffic for seed: {}".format(self.engine.global_random_seed))
 
     def after_step(self, *args, **kwargs):
+        episode_step = self.engine.episode_step
         try:
             # generate vehicle
             for v_id, type_traj in self.current_traffic_data.items():
                 if v_id in self.vid_to_obj and self.vid_to_obj[v_id] in self.spawned_objects.keys():
                     info = parse_vehicle_state(
-                        type_traj, self.count, coordinate_transform=self.engine.global_config["coordinate_transform"]
+                        type_traj, episode_step, coordinate_transform=self.engine.global_config["coordinate_transform"]
                     )
-                    time_end = self.count > self.engine.global_config["traj_end_index"] and self.engine.global_config[
-                        "traj_end_index"] != -1
+                    time_end = episode_step > self.engine.global_config["traj_end_index"] and \
+                               self.engine.global_config["traj_end_index"] != -1
                     if (not info["valid"] or time_end) and v_id in self.vid_to_obj:
                         self.clear_objects([self.vid_to_obj[v_id]])
                         self.vid_to_obj.pop(v_id)
@@ -79,7 +79,6 @@ class WaymoTrafficManager(BaseManager):
                     if "steering" in info:
                         self.spawned_objects[self.vid_to_obj[v_id]].set_throttle_brake(float(info["steering"]))
 
-            self.count += 1
         except:
             raise ValueError("Can not UPDATE traffic for seed: {}".format(self.engine.global_random_seed))
 
