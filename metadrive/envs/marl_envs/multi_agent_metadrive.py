@@ -275,7 +275,7 @@ def _vis():
             "use_render": True,
             "num_agents": 5,
             "start_seed": 8000,
-            "environment_num": 1,
+            "num_scenarios": 1,
             "map": "SSS",
             "vehicle_config": {
                 "vehicle_model": "s"

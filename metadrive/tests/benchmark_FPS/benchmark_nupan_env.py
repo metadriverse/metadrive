@@ -26,7 +26,7 @@ def benchmark_fps():
             "start_scenario_index": 300,
             "scenario_radius": 200,
             "pstats": True,
-            "num_scenario": 2000,
+            "num_scenarios": 2000,
             "horizon": 1000,
             "vehicle_config": dict(
                 lidar=dict(num_lasers=120, distance=50, num_others=4),
@@ -62,7 +62,7 @@ def benchmark_reset_5_map_1000_times(load_city_map=True):
             "no_pedestrian": True,
             "load_city_map": load_city_map,
             "start_scenario_index": 300,
-            "num_scenario": 5,
+            "num_scenarios": 5,
             "show_coordinates": False,
             "horizon": 1000,
             "vehicle_config": dict(
@@ -98,7 +98,7 @@ def benchmark_reset_1000(load_city_map=True):
             "no_pedestrian": True,
             "load_city_map": load_city_map,
             "start_scenario_index": 300,
-            "num_scenario": 1000,
+            "num_scenarios": 1000,
             "show_coordinates": False,
             "horizon": 1000,
             "vehicle_config": dict(

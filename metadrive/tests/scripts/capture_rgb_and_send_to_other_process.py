@@ -22,7 +22,7 @@ def main_thread():
         image_observation=True,
         manual_control=True,  # set false for external subscriber control
         traffic_density=0.0,
-        environment_num=100,
+        num_scenarios=100,
         random_agent_model=True,
         random_lane_width=True,
         random_lane_num=True,

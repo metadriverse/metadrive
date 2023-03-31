@@ -2,7 +2,7 @@ from metadrive.envs.metadrive_env import MetaDriveEnv
 
 if __name__ == "__main__":
     config = {
-        "environment_num": 10,
+        "num_scenarios": 10,
         "traffic_density": .0,
         # "use_render":True,
         "map": "SSSSS",

@@ -12,7 +12,7 @@ def test_original_lidar(render=False):
         {
             "use_render": render,
             "manual_control": render,
-            "environment_num": 1,
+            "num_scenarios": 1,
             "traffic_density": 0.3,
             "vehicle_config": {
                 "show_lidar": True,
@@ -63,7 +63,7 @@ def test_lidar_with_mask(render=False):
         {
             "use_render": render,
             "manual_control": render,
-            "environment_num": 1,
+            "num_scenarios": 1,
             "traffic_density": 0.3,
             "vehicle_config": {
                 "show_lidar": True,

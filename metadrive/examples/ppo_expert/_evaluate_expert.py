@@ -122,7 +122,7 @@ def get_trainer(checkpoint_path=None, extra_config=None, num_workers=10):
 
         # Setup the correct environment
         env=GeneralizationRacing,
-        env_config=dict(environment_num=10000)
+        env_config=dict(num_scenarios=10000)
     )
     if extra_config:
         config.update(extra_config)

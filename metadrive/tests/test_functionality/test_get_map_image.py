@@ -10,7 +10,7 @@ from metadrive.utils.draw_top_down_map import draw_top_down_map
 def test_save_map_image():
     os.makedirs("tmp_images", exist_ok=True)
     setup_logger(debug=True)
-    env = MetaDriveEnv(dict(environment_num=20, start_seed=0, map=10))
+    env = MetaDriveEnv(dict(num_scenarios=20, start_seed=0, map=10))
     try:
         for i in range(5):
             env.reset()

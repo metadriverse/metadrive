@@ -49,7 +49,7 @@ def _evaluate(env_config, num_episode, has_traffic=True):
 def test_expert_with_traffic(use_render=False):
     ep_reward, success_rate = _evaluate(
         dict(
-            environment_num=1,
+            num_scenarios=1,
             map="CCC",
             start_seed=2,
             random_traffic=False,
@@ -67,7 +67,7 @@ def test_expert_with_traffic(use_render=False):
 def test_expert_without_traffic():
     ep_reward, success_rate = _evaluate(
         dict(
-            environment_num=1,
+            num_scenarios=1,
             random_agent_model=False,
             map="CCC",
             use_render=False,

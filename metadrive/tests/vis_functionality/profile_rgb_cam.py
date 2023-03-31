@@ -5,7 +5,7 @@ from metadrive.envs.metadrive_env import MetaDriveEnv
 if __name__ == "__main__":
     env = MetaDriveEnv(
         {
-            "environment_num": 1,
+            "num_scenarios": 1,
             "traffic_density": 0.1,
             "start_seed": 4,
             "vehicle_config": {

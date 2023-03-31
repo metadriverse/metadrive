@@ -23,9 +23,9 @@ def generate_maps(env_class, env_config, json_file_path):
 if __name__ == '__main__':
     to_generate_map_config = {
         "start_seed": 0,
-        "environment_num": 30000,
+        "num_scenarios": 30000,
     }
     generate_maps(
         MetaDriveEnv, to_generate_map_config,
-        osp.join(asset_path, "20210814_generated_maps_start_seed_0_environment_num_30000.json")
+        osp.join(asset_path, "20210814_generated_maps_start_seed_0_num_scenarios_30000.json")
     )

@@ -25,7 +25,7 @@ class Target:
 def test_navigation(vis=False):
     env = MetaDriveEnv(
         {
-            "environment_num": 10,
+            "num_scenarios": 10,
             "traffic_density": 0.0,
             "use_render": vis,
             "start_seed": 5,

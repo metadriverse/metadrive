@@ -8,7 +8,7 @@ from metadrive import MetaDriveEnv
 def _test_rgb_camera_as_obs(render=False):
     env = MetaDriveEnv(
         dict(
-            environment_num=1,
+            num_scenarios=1,
             start_seed=1010,
             traffic_density=0.0,
             image_observation=True,

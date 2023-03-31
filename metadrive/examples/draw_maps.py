@@ -7,14 +7,14 @@ from metadrive.envs.real_data_envs.waymo_env import WaymoEnv
 from metadrive.utils.draw_top_down_map import draw_top_down_map
 
 if __name__ == '__main__':
-    env = MetaDriveEnv(config=dict(environment_num=100, map=7, start_seed=0))
+    env = MetaDriveEnv(config=dict(num_scenarios=100, map=7, start_seed=0))
     fig, axs = plt.subplots(2, 3, figsize=(10, 10), dpi=100)
     count = 0
     print("We are going to draw 6 maps! 3 for PG maps, 3 for real world ones!")
     for i in range(2):
         if i == 1:
             env.close()
-            env = WaymoEnv(dict(start_scenario_index=0, num_scenario=3))
+            env = WaymoEnv(dict(start_scenario_index=0, num_scenarios=3))
         for j in range(3):
             count += 1
             env.reset(force_seed=j)

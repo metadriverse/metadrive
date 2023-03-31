@@ -5,7 +5,7 @@ from metadrive.utils import setup_logger
 def test_traffic_respawn(vis=False):
     setup_logger(vis)
 
-    env = MetaDriveEnv({"environment_num": 1, "manual_control": vis, "use_render": vis, "traffic_mode": "respawn"})
+    env = MetaDriveEnv({"num_scenarios": 1, "manual_control": vis, "use_render": vis, "traffic_mode": "respawn"})
     env.reset()
     try:
         for i in range(1, 3000):

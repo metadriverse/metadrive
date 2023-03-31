@@ -67,12 +67,12 @@ class NuPlanDataManager(BaseManager):
 
         # filter scenario according to config
         self.start_scenario_index = self.engine.global_config["start_scenario_index"]
-        self._num_scenario = self.engine.global_config["num_scenario"]
-        assert len(self._nuplan_scenarios) >= self.start_scenario_index + self.num_scenario, \
+        self._num_scenarios = self.engine.global_config["num_scenarios"]
+        assert len(self._nuplan_scenarios) >= self.start_scenario_index + self.num_scenarios, \
             "Number of scenes are not enough, " \
             "\n num nuplan scenarios: {}" \
             "\n start_scenario_index: {}" \
-            "\n scenario num: {}".format(len(self._nuplan_scenarios), self.start_scenario_index, self.num_scenario)
+            "\n scenario num: {}".format(len(self._nuplan_scenarios), self.start_scenario_index, self.num_scenarios)
         logger.info("\n \n ############### Finish Loading NuPlan Data ############### \n")
 
         self._current_scenario_index = None
@@ -82,8 +82,8 @@ class NuPlanDataManager(BaseManager):
         return self.current_scenario.database_interval
 
     @property
-    def num_scenario(self):
-        return self._num_scenario
+    def num_scenarios(self):
+        return self._num_scenarios
 
     @property
     def current_scenario_index(self):
@@ -132,7 +132,7 @@ class NuPlanDataManager(BaseManager):
         return cfg
 
     def get_scenario(self, index, force_get_current_scenario=True):
-        assert self.start_scenario_index <= index < self.start_scenario_index + self.num_scenario
+        assert self.start_scenario_index <= index < self.start_scenario_index + self.num_scenarios
         if force_get_current_scenario:
             assert index == self.random_seed
             return self.current_scenario
@@ -140,7 +140,7 @@ class NuPlanDataManager(BaseManager):
             return self._nuplan_scenarios[index]
 
     def seed(self, random_seed):
-        assert self.start_scenario_index <= random_seed < self.start_scenario_index + self.num_scenario
+        assert self.start_scenario_index <= random_seed < self.start_scenario_index + self.num_scenarios
         super(NuPlanDataManager, self).seed(random_seed)
         self._current_scenario_index = random_seed
 

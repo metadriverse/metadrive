@@ -5,7 +5,7 @@ from metadrive.policy.lange_change_policy import AgentLaneChangePolicy
 def test_check_discrete_space(render=False):
     env = MetaDriveEnv(
         {
-            "environment_num": 1,
+            "num_scenarios": 1,
             "traffic_density": 0.,
             "start_seed": 22,
             "debug": True,
@@ -32,7 +32,7 @@ def test_check_discrete_space(render=False):
 def test_check_multi_discrete_space(render=False):
     env = MetaDriveEnv(
         {
-            "environment_num": 1,
+            "num_scenarios": 1,
             "traffic_density": 0.,
             "start_seed": 22,
             "debug": True,
@@ -59,7 +59,7 @@ def test_check_multi_discrete_space(render=False):
 def test_lane_change(render=False):
     env = MetaDriveEnv(
         {
-            "environment_num": 1,
+            "num_scenarios": 1,
             "traffic_density": 0.,
             "start_seed": 22,
             "debug": False,

@@ -43,7 +43,7 @@ class VideoRecorder:
 
 
 if __name__ == '__main__':
-    environment_num = 1  # Will run each seed for 1 episode.
+    num_scenarios = 1  # Will run each seed for 1 episode.
     start_seed = 100
     generate_video = True
 
@@ -52,7 +52,7 @@ if __name__ == '__main__':
 
     env = MetaDriveEnv(
         dict(
-            environment_num=environment_num,
+            num_scenarios=num_scenarios,
             start_seed=start_seed,
             random_traffic=False,
             use_render=True,
@@ -132,7 +132,7 @@ if __name__ == '__main__':
                 video_name_interface = video_base_name + "_interface.mp4"
                 # video_list_interface = []
 
-            if ep_count >= environment_num:
+            if ep_count >= num_scenarios:
                 break
 
             if generate_video:
