@@ -116,7 +116,7 @@ jobs:
           pip install pytest-cov
           pip install ray
           cd metadrive/
-          pytest --cov=./ --cov-config=.coveragerc --cov-report=xml -sv tests/test_export
+          pytest --cov=./ --cov-config=.coveragerc --cov-report=xml -sv tests/test_export_record_scenario
 
 #      - name: Upload coverage to Codecov
 #        uses: codecov/codecov-action@v1

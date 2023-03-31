@@ -3,10 +3,10 @@ import math
 
 from metadrive.component.lane.point_lane import PointLane
 from metadrive.constants import DrivableAreaProperty
-from metadrive.utils.waymo_utils.waymo_type import WaymoLaneProperty
 from metadrive.engine.asset_loader import AssetLoader
-from metadrive.utils.math_utils import norm
+from metadrive.utils.math_utils import norm, mph_to_kmh
 from metadrive.utils.waymo_utils.utils import read_waymo_data, convert_polyline_to_metadrive
+from metadrive.utils.waymo_utils.waymo_type import WaymoLaneProperty
 
 
 class WaymoLane(PointLane):
@@ -20,10 +20,14 @@ class WaymoLane(PointLane):
         center_line_points = convert_polyline_to_metadrive(
             waymo_map_data[waymo_lane_id][WaymoLaneProperty.POLYLINE], coordinate_transform=coordinate_transform
         )
+        assert "speed_limit_kmh" in waymo_map_data[waymo_lane_id] or "speed_limit_mph" in waymo_map_data[waymo_lane_id]
+        speed_limit_kmh = waymo_map_data[waymo_lane_id].get("speed_limit_kmh", None)
+        if speed_limit_kmh is None:
+            speed_limit_kmh = mph_to_kmh(waymo_map_data[waymo_lane_id]["speed_limit_mph"])
         super(WaymoLane, self).__init__(
             center_line_points=center_line_points,
             width=self.get_lane_width(waymo_lane_id, waymo_map_data),
-            speed_limit=waymo_map_data[waymo_lane_id].get("speed_limit_mph", 0) * 1.609344  # to km/h
+            speed_limit=speed_limit_kmh
         )
         self.index = waymo_lane_id
         self.lane_type = waymo_map_data[waymo_lane_id]["type"]

@@ -26,7 +26,7 @@ def test_export_waymo_map(render=False):
     try:
         for seed in range(3):
             env.reset(force_seed=seed)
-            map_vector = env.current_map.get_map_vector()
+            map_vector = env.current_map.get_map_features()
             draw_map(map_vector, True if render else False)
     finally:
         env.close()
@@ -36,7 +36,7 @@ def test_metadrive_map_export(render=False):
     env = MetaDriveEnv(dict(image_observation=False, map=6, environment_num=1, start_seed=0))
     try:
         env.reset(force_seed=0)
-        map_vector = env.current_map.get_map_vector()
+        map_vector = env.current_map.get_map_features()
         draw_map(map_vector, True if render else False)
     finally:
         env.close()
@@ -55,7 +55,7 @@ def _test_nuplan_map_export(render=False):
     )
     try:
         env.reset(force_seed=0)
-        map_vector = env.current_map.get_map_vector()
+        map_vector = env.current_map.get_map_features()
         draw_map(map_vector, True if render else False)
     finally:
         env.close()

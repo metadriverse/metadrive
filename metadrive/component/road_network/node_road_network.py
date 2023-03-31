@@ -269,10 +269,16 @@ class NodeRoadNetwork(BaseRoadNetwork):
         assert start != goal
         return next(self.bfs_paths(start_road_node, goal), [])
 
-    def get_center_line_vector(self, interval=2):
+    def get_map_features(self, interval=2):
+        from metadrive.scenario.metadrive_type import MetaDriveType
+
         ret = {}
         for _from, _to_dict in self.graph.items():
             for _to, lanes in _to_dict.items():
                 for k, lane in enumerate(lanes):
-                    ret["{}".format(lane.index)] = lane.get_polyline(interval)
+                    ret["{}".format(lane.index)] = {
+                        "polyline": lane.get_polyline(interval),
+                        "type": MetaDriveType.LANE_CENTER_LINE,
+                        "speed_limit_kmh": lane.speed_limit
+                    }
         return ret
