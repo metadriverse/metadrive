@@ -8,7 +8,7 @@ def test_gen_map_alignment():
     """
     env_num = 2
     step = 1000
-    generate_config = {"environment_num": env_num, "start_seed": 0, "use_render": False}
+    generate_config = {"num_scenarios": env_num, "start_seed": 0, "use_render": False}
 
     setup_logger(debug=True)
     try:

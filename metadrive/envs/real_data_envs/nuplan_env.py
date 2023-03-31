@@ -28,7 +28,7 @@ NUPLAN_ENV_CONFIG = dict(
         'scenario_filter.limit_total_scenarios=2800',  # use 2 total scenarios
     ],
     start_scenario_index=0,
-    num_scenario=100,
+    num_scenarios=100,
     store_map=True,
     sequential_seed=False,
 
@@ -259,16 +259,16 @@ class NuPlanEnv(BaseEnv):
                 current_seed = self.config["start_scenario_index"]
             else:
                 current_seed += 1
-            if current_seed >= self.config["start_scenario_index"] + int(self.config["num_scenario"]):
+            if current_seed >= self.config["start_scenario_index"] + int(self.config["num_scenarios"]):
                 current_seed = self.config["start_scenario_index"]
         else:
             current_seed = get_np_random(None).randint(
                 self.config["start_scenario_index"],
-                self.config["start_scenario_index"] + int(self.config["num_scenario"])
+                self.config["start_scenario_index"] + int(self.config["num_scenarios"])
             )
 
         assert self.config["start_scenario_index"] <= current_seed < \
-               self.config["start_scenario_index"] + self.config["num_scenario"], "Force seed range Error!"
+               self.config["start_scenario_index"] + self.config["num_scenarios"], "Force seed range Error!"
         self.seed(current_seed)
 
     def _is_out_of_road(self, vehicle):
@@ -300,7 +300,7 @@ if __name__ == "__main__":
             # "multi_thread_render_mode": "Cull/Draw",
             "start_scenario_index": 0,
             # "pstats": True,
-            "num_scenario": 400,
+            "num_scenarios": 400,
             "show_coordinates": False,
             "horizon": 1000,
             # "show_fps": False,

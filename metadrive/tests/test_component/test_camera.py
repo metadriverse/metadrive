@@ -8,7 +8,7 @@ def _test_main_camera_as_obs(render):
     try:
         env = MetaDriveEnv(
             dict(
-                environment_num=1000,
+                num_scenarios=1000,
                 start_seed=1010,
                 traffic_density=0.05,
                 image_observation=True,
@@ -48,7 +48,7 @@ def _test_rgb_camera_as_obs():
     try:
         env = MetaDriveEnv(
             dict(
-                environment_num=1000,
+                num_scenarios=1000,
                 start_seed=1010,
                 traffic_density=0.05,
                 image_observation=True,

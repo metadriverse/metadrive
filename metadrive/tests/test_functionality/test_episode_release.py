@@ -6,7 +6,7 @@ def test_episode_release():
         env = SafeMetaDriveEnv(
             {
                 "use_render": False,
-                "environment_num": 100,
+                "num_scenarios": 100,
                 "accident_prob": .8,
                 "traffic_density": 0.5,
                 "debug": True

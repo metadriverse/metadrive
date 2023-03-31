@@ -9,7 +9,7 @@ def vis_top_down_render_with_panda_render():
 
     env = TopDownSingleFrameMetaDriveEnv(
         {
-            "environment_num": 1,
+            "num_scenarios": 1,
             "manual_control": True,
             "use_render": True,
             "image_observation": False,

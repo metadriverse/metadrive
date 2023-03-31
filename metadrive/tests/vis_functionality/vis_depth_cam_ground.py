@@ -10,7 +10,7 @@ if __name__ == "__main__":
 
     env = MetaDriveEnv(
         {
-            "environment_num": 1,
+            "num_scenarios": 1,
             "traffic_density": 0.1,
             "start_seed": 4,
             "manual_control": True,

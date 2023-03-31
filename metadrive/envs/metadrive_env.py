@@ -17,7 +17,7 @@ from metadrive.utils import clip, Config, get_np_random
 METADRIVE_DEFAULT_CONFIG = dict(
     # ===== Generalization =====
     start_seed=0,
-    environment_num=1,
+    num_scenarios=1,
 
     # ===== Map Config =====
     map=3,  # int or string: an easy way to fill map_config
@@ -102,7 +102,7 @@ class MetaDriveEnv(BaseEnv):
 
         # map setting
         self.start_seed = self.config["start_seed"]
-        self.env_num = self.config["environment_num"]
+        self.env_num = self.config["num_scenarios"]
 
     def _merge_extra_config(self, config: Union[dict, "Config"]) -> "Config":
         config = self.default_config().update(config, allow_add_new_key=False)

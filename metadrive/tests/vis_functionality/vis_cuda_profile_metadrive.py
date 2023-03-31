@@ -9,7 +9,7 @@ from metadrive.policy.idm_policy import IDMPolicy
 def _test_depth_camera_as_obs(render=False):
     env = MetaDriveEnv(
         dict(
-            environment_num=1,
+            num_scenarios=1,
             start_seed=1010,
             agent_policy=IDMPolicy,
             traffic_density=0.0,
@@ -40,7 +40,7 @@ def _test_depth_camera_as_obs(render=False):
 def _test_main_rgb_camera_as_obs_with_interface(render=False):
     env = MetaDriveEnv(
         dict(
-            environment_num=1,
+            num_scenarios=1,
             start_seed=1010,
             agent_policy=IDMPolicy,
             traffic_density=0.0,
@@ -74,7 +74,7 @@ def _test_main_rgb_camera_as_obs_with_interface(render=False):
 def _test_main_rgb_camera_no_interface(render=False):
     env = MetaDriveEnv(
         dict(
-            environment_num=1,
+            num_scenarios=1,
             start_seed=1010,
             agent_policy=IDMPolicy,
             traffic_density=0.0,
@@ -105,7 +105,7 @@ def _test_main_rgb_camera_no_interface(render=False):
 def _test_rgb_camera_as_obs(render=False):
     env = MetaDriveEnv(
         dict(
-            environment_num=1,
+            num_scenarios=1,
             start_seed=1010,
             agent_policy=IDMPolicy,
             traffic_density=0.0,

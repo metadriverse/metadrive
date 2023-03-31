@@ -14,7 +14,7 @@ if __name__ == '__main__':
     print("Start to profile the efficiency of MetaDrive with 1000 maps and ~4 vehicles!")
     setup_logger(debug=False)
     env = MetaDriveEnv(dict(
-        environment_num=1000,
+        num_scenarios=1000,
         start_seed=1010,
         traffic_density=0.05,
     ))

@@ -5,7 +5,7 @@ from metadrive.utils import recursive_equal, norm
 
 
 def test_seeding():
-    env = MetaDriveEnv({"environment_num": 1000})
+    env = MetaDriveEnv({"num_scenarios": 1000})
     try:
         env.reset()
         env.seed(999)
@@ -20,31 +20,31 @@ def test_seeding():
 
 def test_map_random_seeding():
     cfg_1 = {
-        "environment_num": 1,
+        "num_scenarios": 1,
         "start_seed": 5,
         "random_lane_width": True,
         "random_lane_num": True,
     }
     cfg_2 = {
-        "environment_num": 10,
+        "num_scenarios": 10,
         "start_seed": 5,
         "random_lane_width": True,
         "random_lane_num": True,
     }
     cfg_3 = {
-        "environment_num": 100,
+        "num_scenarios": 100,
         "start_seed": 5,
         "random_lane_width": True,
         "random_lane_num": True,
     }
     cfg_4 = {
-        "environment_num": 10,
+        "num_scenarios": 10,
         "start_seed": 0,
         "random_lane_width": True,
         "random_lane_num": True,
     }
     cfg_5 = {
-        "environment_num": 3,
+        "num_scenarios": 3,
         "start_seed": 3,
         "random_lane_width": True,
         "random_lane_num": True,
@@ -127,7 +127,7 @@ def test_random_traffic():
 def test_random_lane_width():
     env = MetaDriveEnv(
         {
-            "environment_num": 5,
+            "num_scenarios": 5,
             "traffic_density": .2,
             "traffic_mode": "trigger",
             "start_seed": 12,
@@ -154,7 +154,7 @@ def test_random_lane_width():
 def test_random_lane_num():
     env = MetaDriveEnv(
         {
-            "environment_num": 5,
+            "num_scenarios": 5,
             "traffic_density": .2,
             "traffic_mode": "trigger",
             "start_seed": 12,
@@ -185,7 +185,7 @@ def test_random_lane_num():
 def test_random_vehicle_parameter():
     env = MetaDriveEnv(
         {
-            "environment_num": 5,
+            "num_scenarios": 5,
             "traffic_density": .2,
             "traffic_mode": "trigger",
             "start_seed": 12,

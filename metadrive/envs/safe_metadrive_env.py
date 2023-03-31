@@ -9,7 +9,7 @@ class SafeMetaDriveEnv(MetaDriveEnv):
         config = super(SafeMetaDriveEnv, self).default_config()
         config.update(
             {
-                "environment_num": 100,
+                "num_scenarios": 100,
                 "accident_prob": 0.8,
                 "traffic_density": 0.05,
                 "safe_rl_env": True,  # Should always be True. But we just leave it here for historical reason.
@@ -69,10 +69,10 @@ if __name__ == "__main__":
             "manual_control": True,
             "use_render": True,
             # "debug": True,
-            'environment_num': 10,
+            'num_scenarios': 10,
             "start_seed": 129,
             # "traffic_density": 0.2,
-            # "environment_num": 1,
+            # "num_scenarios": 1,
             # # "start_seed": 187,
             # "out_of_road_cost": 1,
             # "debug": True,
