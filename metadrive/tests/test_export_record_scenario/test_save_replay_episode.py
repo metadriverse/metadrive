@@ -52,7 +52,7 @@ def test_save_episode(vis=False):
             if d:
                 epi_info = env.engine.dump_episode("test_dump_single.pkl" if test_dump else None)
                 break
-        # with open("../test_export/test_dump_single.pkl", "rb") as f:
+        # with open("../test_export_record_scenario/test_dump_single.pkl", "rb") as f:
         env.config["replay_episode"] = epi_info
         env.config["record_episode"] = False
         o = env.reset()
@@ -119,7 +119,7 @@ def test_save_episode_marl(vis=False):
                 break
                 # env.reset()
 
-        # with open("../test_export/test_dump.pkl", "rb") as epi_record:
+        # with open("../test_export_record_scenario/test_dump.pkl", "rb") as epi_record:
         # input episode_info to restore
         env.config["replay_episode"] = epi_info
 
