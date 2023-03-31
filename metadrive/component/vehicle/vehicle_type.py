@@ -1,5 +1,5 @@
-from metadrive.component.vehicle.base_vehicle import BaseVehicle
 from metadrive.component.pg_space import ParameterSpace, VehicleParameterSpace
+from metadrive.component.vehicle.base_vehicle import BaseVehicle
 
 factor = 1
 
@@ -142,21 +142,6 @@ class SVehicle(BaseVehicle):
         return 1.70  # meters
 
 
-vehicle_type = {
-    "s": SVehicle,
-    "m": MVehicle,
-    "l": LVehicle,
-    "xl": XLVehicle,
-    "default": DefaultVehicle,
-    "static_default": StaticDefaultVehicle
-}
-
-
-def random_vehicle_type(np_random, p=None):
-    prob = [1 / len(vehicle_type) for _ in range(len(vehicle_type))] if p is None else p
-    return vehicle_type[np_random.choice(list(vehicle_type.keys()), p=prob)]
-
-
 class VaryingDynamicsVehicle(DefaultVehicle):
     @property
     def WIDTH(self):
@@ -164,24 +149,26 @@ class VaryingDynamicsVehicle(DefaultVehicle):
 
     @property
     def LENGTH(self):
-        return self.config["length"] if self.config["length"] is not None else super(VaryingDynamicsVehicle, self).LENGTH
+        return self.config["length"] if self.config["length"] is not None else super(VaryingDynamicsVehicle,
+                                                                                     self).LENGTH
 
     @property
     def HEIGHT(self):
-        return self.config["height"] if self.config["height"] is not None else super(VaryingDynamicsVehicle, self).HEIGHT
+        return self.config["height"] if self.config["height"] is not None else super(VaryingDynamicsVehicle,
+                                                                                     self).HEIGHT
 
     @property
     def MASS(self):
         return self.config["mass"] if self.config["mass"] is not None else super(VaryingDynamicsVehicle, self).MASS
 
     def reset(
-        self,
-        random_seed=None,
-        vehicle_config=None,
-        position=None,
-        heading: float = 0.0,  # In degree!
-        *args,
-        **kwargs
+            self,
+            random_seed=None,
+            vehicle_config=None,
+            position=None,
+            heading: float = 0.0,  # In degree!
+            *args,
+            **kwargs
     ):
 
         assert "width" not in self.PARAMETER_SPACE
@@ -227,7 +214,6 @@ class VaryingDynamicsVehicle(DefaultVehicle):
         # cm = process_memory()
 
         if should_force_reset:
-
             self.destroy()
             self.__init__(
                 vehicle_config=vehicle_config,
@@ -252,5 +238,21 @@ class VaryingDynamicsVehicle(DefaultVehicle):
         # cm = lm
 
         return ret
+
+
+def random_vehicle_type(np_random, p=None):
+    prob = [1 / len(vehicle_type) for _ in range(len(vehicle_type))] if p is None else p
+    return vehicle_type[np_random.choice(list(vehicle_type.keys()), p=prob)]
+
+
+vehicle_type = {
+    "s": SVehicle,
+    "m": MVehicle,
+    "l": LVehicle,
+    "xl": XLVehicle,
+    "default": DefaultVehicle,
+    "static_default": StaticDefaultVehicle,
+    "varying_dynamics": VaryingDynamicsVehicle
+}
 
 VaryingShapeVehicle = VaryingDynamicsVehicle
