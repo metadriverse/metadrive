@@ -1,9 +1,9 @@
 from metadrive import MetaDriveEnv
-from metadrive.component.vehicle.vehicle_type import VaryingShapeVehicle, DefaultVehicle
+from metadrive.component.vehicle.vehicle_type import VaryingDynamicsVehicle, DefaultVehicle
 from metadrive.engine import initialize_engine, close_engine
 
 
-def test_varying_shape_vehicle():
+def test_varying_dynamics_vehicle():
     try:
 
         env = MetaDriveEnv()
@@ -17,7 +17,7 @@ def test_varying_shape_vehicle():
 
         v_config["need_navigation"] = False
 
-        v = VaryingShapeVehicle(v_config, random_seed=0)
+        v = VaryingDynamicsVehicle(v_config, random_seed=0)
         ref_v = DefaultVehicle(v_config, random_seed=0)
         assert v.WIDTH == ref_v.WIDTH
         assert v.LENGTH == ref_v.LENGTH
@@ -26,14 +26,19 @@ def test_varying_shape_vehicle():
         for width in [ref_v.WIDTH, 2, 3, 4]:
             for height in [ref_v.HEIGHT, 1, 2]:
                 for length in [ref_v.LENGTH, 4, 6, 9, 13, 15]:
-                    v.reset(vehicle_config={"width": width, "height": height, "length": length})
-                    assert v.WIDTH == width
-                    assert v.LENGTH == length
-                    assert v.HEIGHT == height
+                    for friction in [0, 10, 50, 200]:
+                        v.reset(vehicle_config={
+                            "width": width, "height": height, "length": length, "wheel_friction": friction
+                        })
+                        assert v.WIDTH == width
+                        assert v.LENGTH == length
+                        assert v.HEIGHT == height
+                        for wheel in v.wheels:
+                            assert wheel.getFrictionSlip() == friction
 
     finally:
         close_engine()
 
 
 if __name__ == "__main__":
-    test_varying_shape_vehicle()
+    test_varying_dynamics_vehicle()
