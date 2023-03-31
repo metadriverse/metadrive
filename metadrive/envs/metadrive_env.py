@@ -18,6 +18,7 @@ METADRIVE_DEFAULT_CONFIG = dict(
     # ===== Generalization =====
     start_seed=0,
     num_scenarios=1,
+    environment_num=-1,  # This key is deprecated, use num_scenarios instead!
 
     # ===== Map Config =====
     map=3,  # int or string: an easy way to fill map_config
@@ -117,6 +118,13 @@ class MetaDriveEnv(BaseEnv):
                 "You have set rgb_clip = False, which means the observation will be uint8 values in [0, 255]. "
                 "Please make sure you have parsed them later before feeding them to network!"
             )
+        if config["environment_num"] != -1:
+            logging.warning(
+                "environment_num is deprecated. Use num_scenarios instead!"
+            )
+            assert config["num_scenarios"] == 1
+            config["num_scenarios"] = config["environment_num"]
+
         config["map_config"] = parse_map_config(
             easy_map_config=config["map"], new_map_config=config["map_config"], default_config=self.default_config_copy
         )
