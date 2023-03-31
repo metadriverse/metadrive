@@ -5,10 +5,9 @@ from metadrive.component.road_network.edge_road_network import EdgeRoadNetwork
 from metadrive.component.waymo_block.waymo_block import WaymoBlock
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.scenario.metadrive_type import MetaDriveType
-from metadrive.utils.waymo_utils.utils import convert_polyline_to_metadrive
-from metadrive.utils.waymo_utils.utils import read_waymo_data
-from metadrive.utils.waymo_utils.waymo_type import WaymoRoadLineType, WaymoRoadEdgeType
+from metadrive.utils.waymo_utils.utils import convert_polyline_to_metadrive, read_waymo_data
 from metadrive.utils.waymo_utils.waymo_type import WaymoLaneProperty
+from metadrive.utils.waymo_utils.waymo_type import WaymoRoadLineType, WaymoRoadEdgeType
 
 
 class WaymoMap(BaseMap):
@@ -89,6 +88,45 @@ class WaymoMap(BaseMap):
     @property
     def coordinate_transform(self):
         return self.engine.global_config["coordinate_transform"]
+
+    def get_map_features(self, interval=2):
+        map_features = super(WaymoMap, self).get_map_features(interval=interval)
+
+        # Adding the information stored in original data to here
+        original_map_features = self.engine.data_manager.get_scenario(self.map_index)["map_features"]
+
+        for map_feat_key, old_map_feat in original_map_features.items():
+
+            if map_feat_key not in map_features:
+                # Discard the data for those map features that are not reconstructed by MetaDrive.
+                pass
+
+                # old_map_feat = copy.deepcopy(old_map_feat)
+                # old_map_feat["valid"] = False
+                #
+                # map_features[map_feat_key] = old_map_feat
+                #
+                # if "polyline" in old_map_feat:
+                #     map_features[map_feat_key]["polyline"] = convert_polyline_to_metadrive(
+                #         old_map_feat["polyline"], coordinate_transform=self.coordinate_transform
+                #     )
+                #
+                # if "position" in old_map_feat:
+                #     if self.coordinate_transform:
+                #         map_features[map_feat_key]["position"] = waymo_to_metadrive_vector(old_map_feat["position"])
+                #     else:
+                #         map_features[map_feat_key]["position"] = old_map_feat["position"]
+
+            else:
+                # This map features are in both original data and current data.
+                # We will check if in original data this map features contains some useful metadata.
+                # If so, copied it to the new data.
+                if "speed_limit_kmh" in old_map_feat:
+                    map_features[map_feat_key]["speed_limit_kmh"] = old_map_feat["speed_limit_kmh"]
+                if "speed_limit_mph" in old_map_feat:
+                    map_features[map_feat_key]["speed_limit_mph"] = old_map_feat["speed_limit_mph"]
+
+        return map_features
 
 
 if __name__ == "__main__":

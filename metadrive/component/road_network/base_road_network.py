@@ -94,5 +94,5 @@ class BaseRoadNetwork:
         """
         return True if lane_index_2[1] in self.graph[lane_index_1[1]] else False
 
-    def get_center_line_vector(self, interval=2):
+    def get_map_features(self, interval=2):
         raise NotImplementedError

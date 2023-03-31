@@ -302,6 +302,6 @@ def test_export_waymo_scenario(num_scenario=3, render_export_env=False, render_l
 
 if __name__ == "__main__":
     # test_export_metadrive_scenario_reproduction(num_scenario=10)
-    # test_export_metadrive_scenario_easy(num_scenario=3, render_export_env=False, render_load_env=False)
+    test_export_metadrive_scenario_easy(num_scenario=1, render_export_env=False, render_load_env=False)
     # test_export_metadrive_scenario_hard(num_scenario=3, render_export_env=False, render_load_env=False)
-    test_export_waymo_scenario(num_scenario=3, render_export_env=False, render_load_env=False)
+    # test_export_waymo_scenario(num_scenario=3, render_export_env=False, render_load_env=False)
