@@ -119,9 +119,7 @@ class MetaDriveEnv(BaseEnv):
                 "Please make sure you have parsed them later before feeding them to network!"
             )
         if config["environment_num"] != -1:
-            logging.warning(
-                "environment_num is deprecated. Use num_scenarios instead!"
-            )
+            logging.warning("environment_num is deprecated. Use num_scenarios instead!")
             assert config["num_scenarios"] == 1
             config["num_scenarios"] = config["environment_num"]
 

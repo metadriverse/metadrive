@@ -290,7 +290,9 @@ def test_export_waymo_scenario(num_scenarios=3, render_export_env=False, render_
                 vehicle_config=dict(no_wheel_friction=True)
             )
         )
-        scenarios_restored = env.export_scenarios(policy, scenario_index=[i for i in range(num_scenarios)], verbose=True)
+        scenarios_restored = env.export_scenarios(
+            policy, scenario_index=[i for i in range(num_scenarios)], verbose=True
+        )
 
     finally:
         env.close()
