@@ -21,9 +21,9 @@ class WaymoLane(PointLane):
             waymo_map_data[waymo_lane_id][WaymoLaneProperty.POLYLINE], coordinate_transform=coordinate_transform
         )
         assert "speed_limit_kmh" in waymo_map_data[waymo_lane_id] or "speed_limit_mph" in waymo_map_data[waymo_lane_id]
-        speed_limit_kmh = waymo_map_data[waymo_lane_id].get(
-            "speed_limit_kmh", mph_to_kmh(waymo_map_data[waymo_lane_id]["speed_limit_mph"])
-        )
+        speed_limit_kmh = waymo_map_data[waymo_lane_id].get("speed_limit_kmh", None)
+        if speed_limit_kmh is None:
+            speed_limit_kmh = mph_to_kmh(waymo_map_data[waymo_lane_id]["speed_limit_mph"])
         super(WaymoLane, self).__init__(
             center_line_points=center_line_points,
             width=self.get_lane_width(waymo_lane_id, waymo_map_data),

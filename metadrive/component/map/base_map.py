@@ -113,13 +113,12 @@ class BaseMap(BaseRunnable):
         pass
 
     def get_map_features(self, interval=2):
-        center_line_vector = self.road_network.get_center_line_vector(interval)
-        map_features = {}
-        for map_feat_id, line in center_line_vector.items():
-            map_feat_id = str(map_feat_id)
-            map_features[map_feat_id] = {"polyline": line, "type": MetaDriveType.LANE_CENTER_LINE}
+        map_features = self.road_network.get_map_features(interval)
+
         boundary_line_vector = self.get_boundary_line_vector(interval)
+
         map_features.update(boundary_line_vector)
+
         return map_features
 
     def get_boundary_line_vector(self, interval):
