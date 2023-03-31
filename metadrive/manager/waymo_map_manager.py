@@ -4,7 +4,6 @@ from metadrive.component.lane.point_lane import PointLane
 from metadrive.component.map.waymo_map import WaymoMap
 from metadrive.constants import DEFAULT_AGENT
 from metadrive.manager.base_manager import BaseManager
-from metadrive.scenario.scenario_description import ScenarioDescription as SD
 from metadrive.utils.waymo_utils.parse_object_state import parse_full_trajectory, parse_vehicle_state
 
 
@@ -140,11 +139,3 @@ class WaymoMapManager(BaseManager):
         As Map instance should not be recycled, we will forcefully destroy useless map instances.
         """
         return super(WaymoMapManager, self).clear_objects(force_destroy=True, *args, **kwargs)
-
-    def get_map_features(self, interval=2):
-        map_features = super(WaymoMapManager, self).get_map_features(interval=interval)
-
-        # Adding the information stored in original data to here
-        print(111)
-
-        return map_features

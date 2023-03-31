@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 from matplotlib.pyplot import figure
 
 from metadrive.scenario import MetaDriveType
+from metadrive.utils.math_utils import mph_to_kmh
 from metadrive.utils.waymo_utils.waymo_type import WaymoLaneType, WaymoAgentType
 from metadrive.utils.waymo_utils.waymo_type import WaymoRoadLineType, WaymoRoadEdgeType
 
@@ -63,7 +64,7 @@ def extract_center(f):
     f = f.lane
     center["speed_limit_mph"] = f.speed_limit_mph
 
-    center["speed_limit_kmh"] = speed_limit_kmh(f.speed_limit_mph)
+    center["speed_limit_kmh"] = mph_to_kmh(f.speed_limit_mph)
 
     center["type"] = WaymoLaneType.from_waymo(f.type)
 
@@ -298,7 +299,6 @@ def nearest_point(point, line):
 def extract_width(map, polyline, boundary):
     l_width = np.zeros(polyline.shape[0], dtype="float32")
     for b in boundary:
-
         boundary_int = {k: int(v) if k != "boundary_type" else v for k, v in b.items()}  # All values are int
 
         b_feat_id = str(boundary_int["boundary_feature_id"])
