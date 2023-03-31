@@ -127,7 +127,9 @@ def parse_data(input, output_path, _selective=False):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--input", required=True, help="The data folder storing raw tfrecord from Waymo dataset.")
-    parser.add_argument("--output", default="processed_data", type=str, help="The data folder storing raw tfrecord from Waymo dataset.")
+    parser.add_argument(
+        "--output", default="processed_data", type=str, help="The data folder storing raw tfrecord from Waymo dataset."
+    )
     parser.add_argument("--selective", action="store_true", help="Whether select high-diversity valuable scenario.")
     args = parser.parse_args()
 
