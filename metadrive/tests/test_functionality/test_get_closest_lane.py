@@ -5,7 +5,7 @@ def test_get_lane_index(use_render=False):
     env = MetaDriveEnv(
         {
             "map": "SOTCR",
-            "environment_num": 1,
+            "num_scenarios": 1,
             "traffic_density": 0.3,
             "traffic_mode": "trigger",
             "use_render": use_render

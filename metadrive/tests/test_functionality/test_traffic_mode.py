@@ -6,7 +6,7 @@ def test_traffic_mode(render=False):
         for mode in ["hybrid", "trigger", "respawn"]:
             env = MetaDriveEnv(
                 {
-                    "environment_num": 1,
+                    "num_scenarios": 1,
                     "traffic_density": 0.1,
                     "traffic_mode": mode,
                     "start_seed": 22,

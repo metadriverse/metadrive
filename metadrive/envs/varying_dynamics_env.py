@@ -4,8 +4,8 @@ generalization experiments, this file provides a environment where you can furth
 vehicle.
 
 Note that the sampled dynamics parameters will not be changed if you don't change the global seed.
-This means that if environment_num = 1, then you will deterministically sample the same agent with
-the same dynamics. Set environment_num > 1 to allow more diverse dynamics.
+This means that if num_scenarios = 1, then you will deterministically sample the same agent with
+the same dynamics. Set num_scenarios > 1 to allow more diverse dynamics.
 """
 
 from metadrive.envs.metadrive_env import MetaDriveEnv
@@ -64,7 +64,7 @@ class VaryingDynamicsEnv(MetaDriveEnv):
 if __name__ == '__main__':
     # Local test
     env = VaryingDynamicsEnv({
-        "environment_num": 10,  # Allow 10 random envs.
+        "num_scenarios": 10,  # Allow 10 random envs.
     })
     for ep in range(3):
         obs = env.reset()

@@ -5,7 +5,7 @@ def test_coordinates_shift():
     try:
         env = MetaDriveEnv(
             {
-                "environment_num": 100,
+                "num_scenarios": 100,
                 "traffic_density": .0,
                 "traffic_mode": "trigger",
                 "start_seed": 22,

@@ -175,7 +175,7 @@ if __name__ == '__main__':
         # Train the policies in scenario sets with different number of scenarios.
         env=MetaDriveEnv,
         env_config=dict(
-            environment_num=tune.grid_search([1, 3, 5, 1000]),
+            num_scenarios=tune.grid_search([1, 3, 5, 1000]),
             start_seed=tune.grid_search([5000]),
             random_traffic=False,
             traffic_density=tune.grid_search([0.1, 0.3])
@@ -189,7 +189,7 @@ if __name__ == '__main__':
         evaluation_interval=2,
         evaluation_num_episodes=40,
         metrics_smoothing_episodes=200,
-        evaluation_config=dict(env_config=dict(environment_num=200, start_seed=0)),
+        evaluation_config=dict(env_config=dict(num_scenarios=200, start_seed=0)),
         evaluation_num_workers=5,
 
         # ===== Training =====

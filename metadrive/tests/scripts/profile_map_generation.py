@@ -6,7 +6,7 @@ from metadrive.utils.draw_top_down_map import draw_top_down_map
 if __name__ == '__main__':
     env = MetaDriveEnv(
         dict(
-            environment_num=1,
+            num_scenarios=1,
             map_config={
                 BaseMap.GENERATE_TYPE: MapGenerateMethod.BIG_BLOCK_SEQUENCE,
                 BaseMap.GENERATE_CONFIG: "OCrRCTXRCCCCrOr",

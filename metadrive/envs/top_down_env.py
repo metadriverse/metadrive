@@ -78,7 +78,7 @@ if __name__ == '__main__':
     import matplotlib.pyplot as plt
 
     # Test single RGB frame
-    # env = TopDownSingleFrameMetaDriveEnv(dict(use_render=True, environment_num=1, map="C", traffic_density=1.0))
+    # env = TopDownSingleFrameMetaDriveEnv(dict(use_render=True, num_scenarios=1, map="C", traffic_density=1.0))
     # env.reset()
     # for _ in range(20):
     #     o, *_ = env.step([0, 1])
@@ -92,8 +92,8 @@ if __name__ == '__main__':
     # env.close()
 
     # Test multi-channel frames
-    env = TopDownMetaDriveEnvV2(dict(environment_num=1, start_seed=5000, distance=30))
-    # env = TopDownMetaDrive(dict(environment_num=1, map="XTO", traffic_density=0.1, frame_stack=5))
+    env = TopDownMetaDriveEnvV2(dict(num_scenarios=1, start_seed=5000, distance=30))
+    # env = TopDownMetaDrive(dict(num_scenarios=1, map="XTO", traffic_density=0.1, frame_stack=5))
     # env = TopDownMetaDrive(dict(use_render=True, manual_control=True))
     env.reset()
     names = [

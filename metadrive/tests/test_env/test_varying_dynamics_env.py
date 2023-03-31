@@ -4,7 +4,7 @@ from metadrive.envs import VaryingDynamicsEnv
 
 
 def test_varying_dynamics_env():
-    env = VaryingDynamicsEnv({"environment_num": 10})
+    env = VaryingDynamicsEnv({"num_scenarios": 10})
     try:
         dys = []
         for seed in range(10):

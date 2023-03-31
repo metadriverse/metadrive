@@ -8,7 +8,7 @@ from metadrive.envs.metadrive_env import MetaDriveEnv
 def test_set_get_vehicle_attribute(render=False):
     env = MetaDriveEnv(
         {
-            "environment_num": 1,
+            "num_scenarios": 1,
             "traffic_density": 0.,
             "decision_repeat": 1,
             "map": "SSS",
@@ -68,7 +68,7 @@ def test_set_get_vehicle_attribute(render=False):
 def test_coordinates(render=False):
     env = MetaDriveEnv(
         {
-            "environment_num": 1,
+            "num_scenarios": 1,
             "traffic_density": 0.,
             "decision_repeat": 1,
             "vehicle_config": {
@@ -168,7 +168,7 @@ def test_coordinates(render=False):
 def test_set_angular_v_and_set_v_no_friction(render=False):
     env = MetaDriveEnv(
         {
-            "environment_num": 1,
+            "num_scenarios": 1,
             "traffic_density": 0.,
             "decision_repeat": 5,
             "map": "SSS",
@@ -235,7 +235,7 @@ def test_set_angular_v_and_set_v_no_friction(render=False):
 def test_set_angular_v_and_set_v_no_friction_pedestrian(render=False):
     env = MetaDriveEnv(
         {
-            "environment_num": 1,
+            "num_scenarios": 1,
             "traffic_density": 0.,
             "decision_repeat": 5,
             "map": "S",

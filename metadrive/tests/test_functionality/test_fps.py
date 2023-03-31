@@ -9,7 +9,7 @@ def _test_fps():
     try:
         setup_logger(debug=False)
         env = MetaDriveEnv(dict(
-            environment_num=1000,
+            num_scenarios=1000,
             start_seed=1010,
         ))
         obs = env.reset()

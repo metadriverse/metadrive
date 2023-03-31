@@ -77,7 +77,7 @@ if __name__ == '__main__':
     for friction in [0.8]:
         env = MetaDriveEnv(
             {
-                "environment_num": 1,
+                "num_scenarios": 1,
                 "traffic_density": 0.0,
                 "start_seed": 4,
                 "manual_control": True,
