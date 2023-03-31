@@ -15,7 +15,7 @@ VaryingDynamicsConfig = dict(
     vehicle_config=dict(vehicle_model="varying_dynamics", ),
     random_dynamics=dict(
         # We will sample each parameter from (min_value, max_value)
-        # You can comment out some keys or set it to None to stop randomizing the parameter.
+        # You can set it to None to stop randomizing the parameter.
         max_engine_force=(100, 3000),
         max_brake_force=(20, 600),
         wheel_friction=(0.1, 2.5),
