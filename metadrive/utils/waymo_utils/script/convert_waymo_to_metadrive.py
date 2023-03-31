@@ -12,8 +12,9 @@ import pickle
 import time
 
 import numpy as np
-from metadrive.constants import DATA_VERSION
 from tqdm import tqdm
+
+from metadrive.constants import DATA_VERSION
 
 try:
     import tensorflow as tf
@@ -125,14 +126,15 @@ def parse_data(input, output_path, _selective=False):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--folder", required=True, help="The data folder storing raw tfrecord from Waymo dataset.")
+    parser.add_argument("--input", required=True, help="The data folder storing raw tfrecord from Waymo dataset.")
+    parser.add_argument("--output", default="processed_data", type=str, help="The data folder storing raw tfrecord from Waymo dataset.")
     parser.add_argument("--selective", action="store_true", help="Whether select high-diversity valuable scenario.")
     args = parser.parse_args()
 
-    scenario_data_path = args.folder
+    scenario_data_path = args.input
 
     output_path: str = os.path.dirname(scenario_data_path)
-    output_path = os.path.join(output_path, "processed_data")
+    output_path = os.path.join(output_path, args.output)
     os.makedirs(output_path, exist_ok=True)
 
     raw_data_path = scenario_data_path

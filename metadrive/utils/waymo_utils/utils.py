@@ -1,9 +1,10 @@
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import figure
 
+from metadrive.scenario import MetaDriveType
 from metadrive.utils.waymo_utils.waymo_type import WaymoLaneType, WaymoAgentType
 from metadrive.utils.waymo_utils.waymo_type import WaymoRoadLineType, WaymoRoadEdgeType
-from metadrive.scenario import MetaDriveType
+
 try:
     import tensorflow as tf
 except ImportError:
@@ -61,6 +62,8 @@ def extract_center(f):
     center = dict()
     f = f.lane
     center["speed_limit_mph"] = f.speed_limit_mph
+
+    center["speed_limit_kmh"] = speed_limit_kmh(f.speed_limit_mph)
 
     center["type"] = WaymoLaneType.from_waymo(f.type)
 
