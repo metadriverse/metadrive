@@ -12,10 +12,7 @@ from metadrive.envs.metadrive_env import MetaDriveEnv
 from metadrive.manager.agent_manager import AgentManager
 
 VaryingDynamicsConfig = dict(
-    vehicle_config=dict(
-        vehicle_model="varying_dynamics",
-    ),
-
+    vehicle_config=dict(vehicle_model="varying_dynamics", ),
     random_dynamics=dict(
         # We will sample each parameter from (min_value, max_value)
         # You can comment out some keys or set it to None to stop randomizing the parameter.

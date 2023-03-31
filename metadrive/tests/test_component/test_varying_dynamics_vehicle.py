@@ -27,9 +27,14 @@ def test_varying_dynamics_vehicle():
             for height in [ref_v.HEIGHT, 1, 2]:
                 for length in [ref_v.LENGTH, 4, 6, 9, 13, 15]:
                     for friction in [0, 10, 50, 200]:
-                        v.reset(vehicle_config={
-                            "width": width, "height": height, "length": length, "wheel_friction": friction
-                        })
+                        v.reset(
+                            vehicle_config={
+                                "width": width,
+                                "height": height,
+                                "length": length,
+                                "wheel_friction": friction
+                            }
+                        )
                         assert v.WIDTH == width
                         assert v.LENGTH == length
                         assert v.HEIGHT == height

@@ -249,9 +249,7 @@ class BaseEnv(gym.Env):
             return {DEFAULT_AGENT: self.config["agent_policy"].get_input_space()}
 
     def _get_agent_manager(self):
-        return AgentManager(
-            init_observations=self._get_observations(), init_action_space=self._get_action_space()
-        )
+        return AgentManager(init_observations=self._get_observations(), init_action_space=self._get_action_space())
 
     def lazy_init(self):
         """

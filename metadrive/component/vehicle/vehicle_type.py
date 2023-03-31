@@ -149,26 +149,28 @@ class VaryingDynamicsVehicle(DefaultVehicle):
 
     @property
     def LENGTH(self):
-        return self.config["length"] if self.config["length"] is not None else super(VaryingDynamicsVehicle,
-                                                                                     self).LENGTH
+        return self.config["length"] if self.config["length"] is not None else super(
+            VaryingDynamicsVehicle, self
+        ).LENGTH
 
     @property
     def HEIGHT(self):
-        return self.config["height"] if self.config["height"] is not None else super(VaryingDynamicsVehicle,
-                                                                                     self).HEIGHT
+        return self.config["height"] if self.config["height"] is not None else super(
+            VaryingDynamicsVehicle, self
+        ).HEIGHT
 
     @property
     def MASS(self):
         return self.config["mass"] if self.config["mass"] is not None else super(VaryingDynamicsVehicle, self).MASS
 
     def reset(
-            self,
-            random_seed=None,
-            vehicle_config=None,
-            position=None,
-            heading: float = 0.0,  # In degree!
-            *args,
-            **kwargs
+        self,
+        random_seed=None,
+        vehicle_config=None,
+        position=None,
+        heading: float = 0.0,  # In degree!
+        *args,
+        **kwargs
     ):
 
         assert "width" not in self.PARAMETER_SPACE
