@@ -213,9 +213,7 @@ class BaseEnv(gym.Env):
         assert isinstance(self.num_agents, int) and (self.num_agents > 0 or self.num_agents == -1)
 
         # observation and action space
-        self.agent_manager = AgentManager(
-            init_observations=self._get_observations(), init_action_space=self._get_action_space()
-        )
+        self.agent_manager = self._get_agent_manager()
 
         # lazy initialization, create the main vehicle in the lazy_init() func
         # self.engine: Optional[BaseEngine] = None
@@ -249,6 +247,9 @@ class BaseEnv(gym.Env):
             }
         else:
             return {DEFAULT_AGENT: self.config["agent_policy"].get_input_space()}
+
+    def _get_agent_manager(self):
+        return AgentManager(init_observations=self._get_observations(), init_action_space=self._get_action_space())
 
     def lazy_init(self):
         """
