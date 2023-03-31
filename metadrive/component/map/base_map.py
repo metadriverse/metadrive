@@ -76,7 +76,7 @@ class BaseMap(BaseRunnable):
         """
         Save the generated map to map file
         """
-        return dict(map_type=self.class_name, map_features=self.get_map_vector())
+        return dict(map_type=self.class_name, map_features=self.get_map_features())
 
     @property
     def num_blocks(self):
@@ -112,7 +112,7 @@ class BaseMap(BaseRunnable):
     def show_coordinates(self):
         pass
 
-    def get_map_vector(self, interval=2):
+    def get_map_features(self, interval=2):
         center_line_vector = self.road_network.get_center_line_vector(interval)
         map_features = {}
         for map_feat_id, line in center_line_vector.items():

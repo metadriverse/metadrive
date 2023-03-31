@@ -140,3 +140,11 @@ class WaymoMapManager(BaseManager):
         As Map instance should not be recycled, we will forcefully destroy useless map instances.
         """
         return super(WaymoMapManager, self).clear_objects(force_destroy=True, *args, **kwargs)
+
+    def get_map_features(self, interval=2):
+        map_features = super(WaymoMapManager, self).get_map_features(interval=interval)
+
+        # Adding the information stored in original data to here
+        print(111)
+
+        return map_features
