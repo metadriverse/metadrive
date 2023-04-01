@@ -16,14 +16,54 @@ class InterpolatingLine:
         return self.get_point(longitudinal, lateral)
 
     def local_coordinates(self, position, only_in_lane_point=False):
+        """
+        Finding the local coordinate of a given point when projected to this interpolating line.
+        We will iterate over all segments, from start to end, and compute the relative position of the point
+        w.r.t. the start point of the segment.
+        Since each line segment is straight, the relative position of the position to the start point is exactly
+        the local coordination.
+        If the point is not fall into this line segment, then we will increment the "longitudinal position" by the
+        length of this line segment, and then computing next line segment.
+
+        Here we provide two implementations.
+
+        Option 1: Iterate over all segments, and when finding the longitudinal position of the point w.r.t. the
+        start point of the segment is negative, stop iteration and return current "accumulated longitudinal position"
+        and lateral position.
+        This option assumes the longitudinal position is accumulating increasingly when iterating over segments.
+        Option 1 might be problematic in the case of extremely curved road.
+        (PZH: But I can't image such case and why it fails option 1.)
+
+        Option 2: Iterate over all segments and never stop the iteration until all segments are visited. Compute the
+        "accumulated longitudinal position" and lateral position of the point in each segment when assuming the point
+        is exactly falling into the segment. Then, search all reported coordinates in all segments, find the one
+        with minimal lateral position, and report the value.
+        This option is problematic as raised by PZH that the return value might be wrong.
+        Let's say there is a correct segment A where the position is falling into, and there exists another segment
+        B where the lateral position of the point in segment B is 0, but segment B is far away from A in longitudinal.
+        In this case, the option 2 algorithm will return segment B because it has minimal lateral, but it is wrong.
+
+        We will use Option 1.
+        """
         ret = []  # ret_longitude, ret_lateral, sort_key
         exclude_ret = []
         accumulate_len = 0
+
+        # _debug = []
+
         for seg in self.segment_property:
             delta_x = position[0] - seg["start_point"][0]
             delta_y = position[1] - seg["start_point"][1]
             longitudinal = delta_x * seg["direction"][0] + delta_y * seg["direction"][1]
             lateral = delta_x * seg["lateral_direction"][0] + delta_y * seg["lateral_direction"][1]
+
+            # _debug.append(longitudinal)
+
+            if longitudinal < 0.0:
+                current_long = accumulate_len + longitudinal
+                current_lat = lateral
+                return current_long, current_lat
+
             if not only_in_lane_point:
                 ret.append([accumulate_len + longitudinal, lateral])
             else:
