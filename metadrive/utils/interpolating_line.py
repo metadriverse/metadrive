@@ -60,12 +60,9 @@ class InterpolatingLine:
             # _debug.append(longitudinal)
 
             if longitudinal < 0.0:
-                last_long = ret[-1][0]
-                last_lat = ret[-1][1]
-                # current_long = accumulate_len + longitudinal
-                # current_lat = lateral
-                # Note: last_long/cat and current_long/lat should be very closed.
-                return last_long, last_lat
+                current_long = accumulate_len + longitudinal
+                current_lat = lateral
+                return current_long, current_lat
 
             if not only_in_lane_point:
                 ret.append([accumulate_len + longitudinal, lateral])
