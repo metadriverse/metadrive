@@ -390,6 +390,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self.spawn_place = position
         self.set_heading_theta(heading)
         self.set_static(False)
+        self.set_wheel_friction(self.config["wheel_friction"])
 
         if len(position) == 2:
             self.set_position(position, height=self.HEIGHT / 2)
@@ -929,7 +930,6 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         return self.navigation.current_ref_lanes
 
     def set_wheel_friction(self, new_friction):
-        raise DeprecationWarning("Bug exists here")
         for wheel in self.wheels:
             wheel.setFrictionSlip(new_friction)
 
