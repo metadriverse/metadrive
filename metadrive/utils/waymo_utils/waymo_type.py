@@ -25,13 +25,6 @@ class WaymoLaneType:
     }
 
     @classmethod
-    def is_lane(cls, type):
-        if type in cls.ENUM_TO_STR.values():
-            return True
-        else:
-            return False
-
-    @classmethod
     def from_waymo(cls, item):
         return cls.ENUM_TO_STR[item]
 
@@ -60,28 +53,6 @@ class WaymoRoadLineType:
     }
 
     @classmethod
-    def is_road_line(cls, line):
-        return True if line in cls.ENUM_TO_STR.values() else False
-
-    @classmethod
-    def is_yellow(cls, line):
-        return True if line in [
-            cls.ENUM_TO_STR[t] for t in [
-                WaymoRoadLineType.SOLID_DOUBLE_YELLOW, WaymoRoadLineType.PASSING_DOUBLE_YELLOW, WaymoRoadLineType.
-                SOLID_SINGLE_YELLOW, WaymoRoadLineType.BROKEN_DOUBLE_YELLOW, WaymoRoadLineType.BROKEN_SINGLE_YELLOW
-            ]
-        ] else False
-
-    @classmethod
-    def is_broken(cls, line):
-        return True if line in [
-            cls.ENUM_TO_STR[t] for t in [
-                WaymoRoadLineType.BROKEN_DOUBLE_YELLOW, WaymoRoadLineType.BROKEN_SINGLE_YELLOW,
-                WaymoRoadLineType.BROKEN_SINGLE_WHITE
-            ]
-        ] else False
-
-    @classmethod
     def from_waymo(cls, item):
         return cls.ENUM_TO_STR[item]
 
@@ -94,14 +65,6 @@ class WaymoRoadEdgeType:
     MEDIAN = 2
 
     ENUM_TO_STR = {UNKNOWN: 'UNKNOWN', BOUNDARY: 'ROAD_EDGE_BOUNDARY', MEDIAN: 'ROAD_EDGE_MEDIAN'}
-
-    @classmethod
-    def is_road_edge(cls, edge):
-        return True if edge in cls.ENUM_TO_STR.values() else False
-
-    @classmethod
-    def is_sidewalk(cls, edge):
-        return True if edge == cls.ENUM_TO_STR[WaymoRoadEdgeType.BOUNDARY] else False
 
     @classmethod
     def from_waymo(cls, item):
@@ -120,11 +83,6 @@ class WaymoAgentType:
     @classmethod
     def from_waymo(cls, item):
         return cls.ENUM_TO_STR[item]
-
-    @classmethod
-    def is_vehicle(self, type):
-        return True if type == self.ENUM_TO_STR[self.VEHICLE] else False
-
 
 class WaymoLaneProperty:
     LANE_TYPE = "center_lane"

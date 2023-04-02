@@ -2,6 +2,8 @@ class MetaDriveType:
     """
     Following waymo style, this class defines a set of strings used to denote different types of objects.
     Those types are used within MetaDrive and might mismatch to the strings used in other dataset.
+
+    NOTE: when add new keys, make sure class method works well for them
     """
 
     # ===== Lane, Road =====
@@ -65,3 +67,50 @@ class MetaDriveType:
     def from_nuplan(cls, waymo_type_string: str):
         # TODO: WIP
         return ""
+
+    @classmethod
+    def is_lane(cls, type):
+        if type in [cls.LANE_CENTER_LINE, cls.LANE_FREEWAY, cls.LANE_BIKE_LANE]:
+            return True
+        else:
+            return False
+
+    @classmethod
+    def is_road_line(cls, line):
+        return True if line in [cls.LINE_UNKNOWN,
+                                cls.LINE_BROKEN_SINGLE_WHITE,
+                                cls.LINE_SOLID_SINGLE_WHITE,
+                                cls.LINE_SOLID_DOUBLE_WHITE,
+                                cls.LINE_BROKEN_SINGLE_YELLOW,
+                                cls.LINE_BROKEN_DOUBLE_YELLOW,
+                                cls.LINE_SOLID_SINGLE_YELLOW,
+                                cls.LINE_SOLID_DOUBLE_YELLOW,
+                                cls.LINE_PASSING_DOUBLE_YELLOW] else False
+
+    @classmethod
+    def is_yellow(cls, line):
+        return True if line in [
+            cls.LINE_SOLID_DOUBLE_YELLOW, cls.LINE_PASSING_DOUBLE_YELLOW, cls.LINE_SOLID_SINGLE_YELLOW,
+            cls.LINE_BROKEN_DOUBLE_YELLOW, cls.LINE_BROKEN_SINGLE_YELLOW
+        ] else False
+
+    @classmethod
+    def is_broken(cls, line):
+        return True if line in [
+            cls.LINE_BROKEN_DOUBLE_YELLOW, cls.LINE_BROKEN_SINGLE_YELLOW,
+            cls.LINE_BROKEN_SINGLE_WHITE
+        ] else False
+
+    @classmethod
+    def is_road_edge(cls, edge):
+        return True if edge in [cls.BOUNDARY_UNKNOWN,
+                                cls.BOUNDARY_LINE,
+                                cls.BOUNDARY_MEDIAN] else False
+
+    @classmethod
+    def is_sidewalk(cls, edge):
+        return True if edge == cls.BOUNDARY_LINE else False
+
+    @classmethod
+    def is_vehicle(cls, type):
+        return True if type == cls.VEHICLE else False
