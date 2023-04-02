@@ -9,7 +9,6 @@ This script will create the output folder "processed_data" sharing the same leve
 import argparse
 import os
 import pickle
-import time
 
 import numpy as np
 from tqdm import tqdm
