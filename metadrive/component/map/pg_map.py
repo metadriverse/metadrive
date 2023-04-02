@@ -153,15 +153,15 @@ class PGMap(BaseMap):
 
     def get_line_type(self, type, color):
         if type == LineType.CONTINUOUS and color == LineColor.YELLOW:
-            return MetaDriveType.CONTINUOUS_YELLOW_LINE
+            return MetaDriveType.LINE_SOLID_SINGLE_YELLOW
         elif type == LineType.BROKEN and color == LineColor.YELLOW:
-            return MetaDriveType.BROKEN_YELLOW_LINE
+            return MetaDriveType.LINE_BROKEN_SINGLE_YELLOW
         elif type == LineType.CONTINUOUS and color == LineColor.GREY:
-            return MetaDriveType.CONTINUOUS_GREY_LINE
+            return MetaDriveType.LINE_SOLID_SINGLE_WHITE
         elif type == LineType.BROKEN and color == LineColor.GREY:
-            return MetaDriveType.BROKEN_GREY_LINE
+            return MetaDriveType.LINE_BROKEN_SINGLE_WHITE
         elif type == LineType.SIDE:
-            return MetaDriveType.CONTINUOUS_GREY_LINE
+            return MetaDriveType.LINE_SOLID_SINGLE_WHITE
         else:
             # Unknown line type
-            return MetaDriveType.UNKNOWN_LINE
+            return MetaDriveType.LINE_UNKNOWN
