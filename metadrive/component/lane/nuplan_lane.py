@@ -1,7 +1,11 @@
 import logging
 import math
 
-import geopandas as gpd
+try:
+    import geopandas as gpd
+except ImportError:
+    pass
+
 import numpy as np
 from shapely.geometry.linestring import LineString
 from shapely.geometry.multilinestring import MultiLineString

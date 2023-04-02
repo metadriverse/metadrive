@@ -1,11 +1,11 @@
 import logging
 from metadrive.scenario.metadrive_type import MetaDriveType
 
-import geopandas as gpd
 import numpy as np
 import tqdm
 
 try:
+    import geopandas as gpd
     from nuplan.common.actor_state.state_representation import Point2D
     from nuplan.common.maps.maps_datatypes import SemanticMapLayer, StopLineType
     from shapely.ops import unary_union

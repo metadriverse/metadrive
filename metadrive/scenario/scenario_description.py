@@ -203,7 +203,7 @@ class ScenarioDescription(dict):
 
     def get_sdc_track(self):
         assert self.SDC_ID in self[self.METADATA]
-        sdc_id = self[self.METADATA][self.SDC_ID]
+        sdc_id = str(self[self.METADATA][self.SDC_ID])
         return self[self.TRACKS][sdc_id]
 
 
