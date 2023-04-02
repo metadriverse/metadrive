@@ -17,7 +17,7 @@ from metadrive.engine.asset_loader import AssetLoader
 from metadrive.engine.physics_node import BaseRigidBodyNode
 from metadrive.engine.physics_node import BulletRigidBodyNode
 from metadrive.utils import norm
-from metadrive.utils.coordinates_shift import panda_position, panda_heading
+from metadrive.utils.coordinates_shift import panda_vector, panda_heading
 from metadrive.utils.math_utils import Vector
 
 
@@ -233,7 +233,7 @@ class AbstractLane:
         shape = BulletBoxShape(Vec3(length / 2, 0.1, width / 2))
         segment_node.addShape(shape)
         block.static_nodes.append(segment_node)
-        segment_np.setPos(panda_position(position, -0.1))
+        segment_np.setPos(panda_vector(position, -0.1))
 
         segment_np.setH(theta / np.pi * 180)
         segment_np.setP(-90)
@@ -246,7 +246,7 @@ class AbstractLane:
             card = block.lane_vis_node_path.attachNewNode(cm.generate())
             self._node_path_list.append(card)
 
-            card.setPos(panda_position(position, np.random.rand() * 0.02 - 0.015))
+            card.setPos(panda_vector(position, np.random.rand() * 0.02 - 0.015))
 
             card.setH(theta / np.pi * 180)
             card.setP(-90)
@@ -293,7 +293,7 @@ class AbstractLane:
         block.static_nodes.append(body_np.node())
 
         # position and heading
-        body_np.setPos(panda_position(middle, DrivableAreaProperty.LANE_LINE_GHOST_HEIGHT / 2))
+        body_np.setPos(panda_vector(middle, DrivableAreaProperty.LANE_LINE_GHOST_HEIGHT / 2))
         direction_v = end_point - start_point
         # theta = -numpy.arctan2(direction_v[1], direction_v[0])
         theta = panda_heading(math.atan2(direction_v[1], direction_v[0]))
@@ -307,7 +307,7 @@ class AbstractLane:
             lane_line.setTexture(block.ts_color, block.lane_line_texture)
             height += 0.01 if line_color == LineColor.YELLOW else 0
             lane_line.setQuat(LQuaternionf(math.cos(theta / 2), 0, 0, math.sin(theta / 2)))
-            lane_line.setPos(panda_position(middle, height))
+            lane_line.setPos(panda_vector(middle, height))
             lane_line.reparentTo(parent_np)
             lane_line.set_color(line_color)
 
@@ -342,7 +342,7 @@ class AbstractLane:
         if extra_thrust != 0:
             vertical_v = Vector((-direction_v[1], direction_v[0])) / norm(*direction_v)
             middle += vertical_v * extra_thrust
-        side_np.setPos(panda_position(middle, 0))
+        side_np.setPos(panda_vector(middle, 0))
         theta = panda_heading(math.atan2(direction_v[1], direction_v[0]))
         side_np.setQuat(LQuaternionf(math.cos(theta / 2), 0, 0, math.sin(theta / 2)))
         side_np.setScale(length * length_multiply, width, block.SIDEWALK_THICKNESS * (1 + 0.1 * np.random.rand()))
@@ -389,7 +389,7 @@ class AbstractLane:
             card = block.lane_vis_node_path.attachNewNode(cm.generate())
             self._node_path_list.append(card)
 
-            card.setPos(panda_position(position, np.random.rand() * 0.02 - 0.015))
+            card.setPos(panda_vector(position, np.random.rand() * 0.02 - 0.015))
 
             card.setH(theta / np.pi * 180)
             card.setP(-90)

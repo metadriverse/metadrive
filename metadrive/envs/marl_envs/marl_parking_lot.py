@@ -16,7 +16,7 @@ from metadrive.engine.engine_utils import get_engine
 from metadrive.envs.marl_envs.multi_agent_metadrive import MultiAgentMetaDrive
 from metadrive.manager.map_manager import PGMapManager
 from metadrive.utils import get_np_random, Config
-from metadrive.utils.coordinates_shift import panda_position, panda_heading
+from metadrive.utils.coordinates_shift import panda_vector, panda_heading
 from metadrive.utils.pg_utils.utils import rect_region_detection
 
 MAParkingLotConfig = dict(
@@ -128,7 +128,7 @@ class ParkingLotSpawnManager(SpawnManager):
                 vis_body = engine.render.attach_new_node(BulletGhostNode("debug"))
                 vis_body.node().addShape(shape)
                 vis_body.setH(panda_heading(lane_heading))
-                vis_body.setPos(panda_position(spawn_point_position, z=2))
+                vis_body.setPos(panda_vector(spawn_point_position, z=2))
                 engine.physics_world.dynamic_world.attach(vis_body.node())
                 vis_body.node().setIntoCollideMask(CollisionGroup.AllOff)
                 bp.force_set("need_debug", False)

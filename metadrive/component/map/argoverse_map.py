@@ -141,7 +141,7 @@ class ArgoverseMap(BaseMap):
         return pos
 
     @staticmethod
-    def metadrive_position(pos):
+    def metadrive_vector(pos):
         pos[1] *= -1
         return pos
 
@@ -165,7 +165,7 @@ if __name__ == "__main__":
         {
             "city": "PIT",
             # "draw_map_resolution": 1024,
-            "center": ArgoverseMap.metadrive_position([xcenter, ycenter]),
+            "center": ArgoverseMap.metadrive_vector([xcenter, ycenter]),
             "radius": 100
         }
     )
@@ -173,6 +173,6 @@ if __name__ == "__main__":
     engine.enableMouse()
 
     # argoverse data set is as the same coordinates as panda3d
-    engine.main_camera.set_bird_view_pos(ArgoverseMap.metadrive_position([xcenter, ycenter]))
+    engine.main_camera.set_bird_view_pos(ArgoverseMap.metadrive_vector([xcenter, ycenter]))
     while True:
         map.engine.step()

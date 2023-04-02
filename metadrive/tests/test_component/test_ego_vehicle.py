@@ -5,7 +5,7 @@ from metadrive.component.vehicle.vehicle_type import DefaultVehicle
 from metadrive.envs.base_env import BASE_DEFAULT_CONFIG
 from metadrive.envs.metadrive_env import METADRIVE_DEFAULT_CONFIG
 from metadrive.utils import Config
-from metadrive.utils.coordinates_shift import metadrive_position
+from metadrive.utils.coordinates_shift import metadrive_vector
 
 
 def _assert_vehicle(vehicle):
@@ -65,7 +65,7 @@ def test_base_vehicle():
                 state = v.get_state()
                 v.set_state(state)
                 assert _get_heading_deg(v.heading_theta) == _get_heading_deg(state["heading_theta"])
-                np.testing.assert_almost_equal(v.position, metadrive_position(state["position"]))
+                np.testing.assert_almost_equal(v.position, metadrive_vector(state["position"]))
                 v.projection([a_x, a_y])
 
         _nan_speed(env)

@@ -8,7 +8,7 @@ from metadrive.component.pgblock.first_block import FirstPGBlock
 from metadrive.constants import RENDER_MODE_ONSCREEN, CamMask
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.utils import get_np_random
-from metadrive.utils.coordinates_shift import panda_position
+from metadrive.utils.coordinates_shift import panda_vector
 
 
 class BaseNavigation:
@@ -206,8 +206,8 @@ class BaseNavigation:
         :return: lateral range [m]
         """
         end_position = start_position[0] + dir[0] * length, start_position[1] + dir[1] * length
-        start_position = panda_position(start_position, z=0.2)
-        end_position = panda_position(end_position, z=0.2)
+        start_position = panda_vector(start_position, z=0.2)
+        end_position = panda_vector(end_position, z=0.2)
         mask = FirstPGBlock.CONTINUOUS_COLLISION_MASK
         res = engine.physics_world.static_world.rayTestClosest(start_position, end_position, mask=mask)
         if not res.hasHit():
@@ -219,8 +219,8 @@ class BaseNavigation:
         if not self._show_line_to_dest:
             return
         line_seg = self._line_to_dest
-        line_seg.moveTo(panda_position(start_position, self.LINE_TO_DEST_HEIGHT))
-        line_seg.drawTo(panda_position(end_position, self.LINE_TO_DEST_HEIGHT))
+        line_seg.moveTo(panda_vector(start_position, self.LINE_TO_DEST_HEIGHT))
+        line_seg.drawTo(panda_vector(end_position, self.LINE_TO_DEST_HEIGHT))
         self._dynamic_line_np.removeNode()
         self._dynamic_line_np = NodePath(line_seg.create(False))
 
@@ -233,8 +233,8 @@ class BaseNavigation:
         if not self._show_line_to_navi_mark:
             return
         line_seg = self._line_to_navi
-        line_seg.moveTo(panda_position(start_position, self.LINE_TO_DEST_HEIGHT))
-        line_seg.drawTo(panda_position(end_position, self.LINE_TO_DEST_HEIGHT))
+        line_seg.moveTo(panda_vector(start_position, self.LINE_TO_DEST_HEIGHT))
+        line_seg.drawTo(panda_vector(end_position, self.LINE_TO_DEST_HEIGHT))
         self._dynamic_line_np_2.removeNode()
         self._dynamic_line_np_2 = NodePath(line_seg.create(False))
 

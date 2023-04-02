@@ -24,7 +24,7 @@ class ArgoversePGMapManager(PGMapManager):
             self.engine.global_config["map_config"].update(
                 {
                     "city": argoverse_city,
-                    "center": ArgoverseMap.metadrive_position(argoverse_map_center),
+                    "center": ArgoverseMap.metadrive_vector(argoverse_map_center),
                     "radius": argoverse_map_radius
                 }
             )

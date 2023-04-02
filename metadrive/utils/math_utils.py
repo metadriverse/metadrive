@@ -59,7 +59,7 @@ def point_distance(x, y):
     return norm(x[0] - y[0], x[1] - y[1])
 
 
-def panda_position(position_x, position_y, z=0.0):
+def panda_vector(position_x, position_y, z=0.0):
     return position_x, -position_y, z
 
 

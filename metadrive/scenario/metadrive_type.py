@@ -4,8 +4,13 @@ class MetaDriveType:
     Those types are used within MetaDrive and might mismatch to the strings used in other dataset.
     """
 
-    # ===== Lane, Line, Road =====
+    # ===== Lane, Road =====
     LANE_CENTER_LINE = "LANE_SURFACE_STREET"
+    LANE_UNKNOWN = "LANE_UNKNOWN"
+    LANE_FREEWAY = "LANE_FREEWAY"
+    LANE_BIKE_LANE = "LANE_BIKE_LANE"
+
+    # ===== Lane Line =====
     CONTINUOUS_YELLOW_LINE = "ROAD_LINE_SOLID_SINGLE_YELLOW"
     CONTINUOUS_GREY_LINE = "ROAD_LINE_SOLID_SINGLE_WHITE"
     BROKEN_GREY_LINE = "ROAD_LINE_BROKEN_SINGLE_WHITE"
