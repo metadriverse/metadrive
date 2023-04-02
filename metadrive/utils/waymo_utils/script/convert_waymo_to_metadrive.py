@@ -110,7 +110,6 @@ def parse_data(input, output_path, _selective=False):
             md_scenario[SD.METADATA]["dataset"] = "waymo"
             md_scenario[SD.METADATA]["scenario_id"] = scenario.scenario_id
             md_scenario[SD.METADATA]["source_file"] = str(file)
-            md_scenario[SD.METADATA][SD.CREATED_TIME] = time.time()
 
             md_scenario = md_scenario.to_dict()
 
