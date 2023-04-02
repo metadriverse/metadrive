@@ -3,12 +3,12 @@ from metadrive.envs.top_down_env import TopDownMetaDrive
 if __name__ == '__main__':
     env = TopDownMetaDrive(
         dict(
-            # environment_num=100,
+            # num_scenarios=100,
             use_render=True,
             # manual_control=True,
 
             # Extremely easy environment
-            environment_num=100,
+            num_scenarios=100,
             traffic_density=0.0,
             # map="S",
             start_seed=5000,

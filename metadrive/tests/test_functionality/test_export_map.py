@@ -20,7 +20,7 @@ def test_export_waymo_map(render=False):
             "no_traffic": True,
             "use_render": False,
             "waymo_data_directory": AssetLoader.file_path(asset_path, "waymo", return_raw_style=False),
-            "num_scenario": 3
+            "num_scenarios": 3
         }
     )
     try:
@@ -33,7 +33,7 @@ def test_export_waymo_map(render=False):
 
 
 def test_metadrive_map_export(render=False):
-    env = MetaDriveEnv(dict(image_observation=False, map=6, environment_num=1, start_seed=0))
+    env = MetaDriveEnv(dict(image_observation=False, map=6, num_scenarios=1, start_seed=0))
     try:
         env.reset(force_seed=0)
         map_vector = env.current_map.get_map_features()

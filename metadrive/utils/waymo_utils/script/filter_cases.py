@@ -26,7 +26,7 @@ if __name__ == "__main__":
         os.mkdir(processed_data_path)
     if not os.path.exists(scenario_data_path) or not os.path.exists(processed_data_path):
         raise ValueError("Path Not exist")
-    num_scenario = len(os.listdir(scenario_data_path))
+    num_scenarios = len(os.listdir(scenario_data_path))
     max_step = 1500
     min_step = 50
 
@@ -36,7 +36,7 @@ if __name__ == "__main__":
             "agent_policy": WaymoIDMPolicy,
             "waymo_data_directory": scenario_data_path,
             "start_scenario_index": start * 1000,
-            "num_scenario": num_scenario,
+            "num_scenarios": num_scenarios,
             "store_map": False,
             # "manual_control": True,
             # "debug":True,
@@ -50,7 +50,7 @@ if __name__ == "__main__":
         pass
     finally:
         pass
-    for i in tqdm(range(num_scenario)):
+    for i in tqdm(range(num_scenarios)):
         try:
             signal.signal(signal.SIGALRM, handler)
             signal.alarm(10)

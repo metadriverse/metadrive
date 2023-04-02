@@ -26,7 +26,7 @@ if __name__ == '__main__':
             # "use_render": True,
             "disable_model_compression": True,
             # "map": "SS",
-            "environment_num": 100,
+            "num_scenarios": 100,
         }
     )
     try:

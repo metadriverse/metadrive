@@ -130,7 +130,7 @@ class ComplexEnv(SafeMetaDriveEnv):
         config = super(ComplexEnv, self).default_config()
         config.update(
             {
-                "environment_num": 1,
+                "num_scenarios": 1,
                 "traffic_density": 0.05,
                 "start_seed": 5,
                 "accident_prob": 0.0,

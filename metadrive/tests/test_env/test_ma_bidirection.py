@@ -7,7 +7,7 @@ MULTI_AGENT_METADRIVE_DEFAULT_CONFIG["force_seed_spawn_manager"] = True
 def test_ma_bidirection_idm(render=False):
     env = MetaDriveEnv(
         {
-            "environment_num": 1,
+            "num_scenarios": 1,
             "traffic_density": 0,
             "start_seed": 22,
             "manual_control": False,

@@ -8,54 +8,54 @@ from metadrive.envs import SafeMetaDriveEnv
 metadrive_environment_dict = {
     "MetaDrive-validation-v0": {
         "start_seed": 0,
-        "environment_num": 1000
+        "num_scenarios": 1000
     },
     "MetaDrive-10env-v0": {
         "start_seed": 1000,
-        "environment_num": 10
+        "num_scenarios": 10
     },
     "MetaDrive-100envs-v0": {
         "start_seed": 1000,
-        "environment_num": 100
+        "num_scenarios": 100
     },
     "MetaDrive-1000envs-v0": {
         "start_seed": 1000,
-        "environment_num": 1000
+        "num_scenarios": 1000
     },
     # "MetaDrive-test-v0": {
     #     "start_seed": 0,
-    #     "environment_num": 200
+    #     "num_scenarios": 200
     # },
     # "MetaDrive-training0-v0": {
     #     "start_seed": 3000,
-    #     "environment_num": 1000
+    #     "num_scenarios": 1000
     # },
     # "MetaDrive-training1-v0": {
     #     "start_seed": 5000,
-    #     "environment_num": 1000
+    #     "num_scenarios": 1000
     # },
     # "MetaDrive-training2-v0": {
     #     "start_seed": 7000,
-    #     "environment_num": 1000
+    #     "num_scenarios": 1000
     # },
 }
 
 safe_metadrive_environment_dict = {
     "SafeMetaDrive-validation-v0": {
         "start_seed": 0,
-        "environment_num": 100
+        "num_scenarios": 100
     },
     "SafeMetaDrive-10env-v0": {
         "start_seed": 1000,
-        "environment_num": 10
+        "num_scenarios": 10
     },
     "SafeMetaDrive-100envs-v0": {
         "start_seed": 1000,
-        "environment_num": 100
+        "num_scenarios": 100
     },
     "SafeMetaDrive-1000envs-v0": {
         "start_seed": 1000,
-        "environment_num": 1000
+        "num_scenarios": 1000
     },
 }
 

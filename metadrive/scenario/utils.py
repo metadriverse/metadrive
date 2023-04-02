@@ -1,5 +1,4 @@
 import copy
-import time
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -80,7 +79,6 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
     result[SD.METADATA]["dataset"] = "metadrive"
     result[SD.METADATA]["seed"] = record_episode["global_seed"]
     result[SD.METADATA]["scenario_id"] = record_episode["scenario_index"]
-    result[SD.METADATA][SD.CREATED_TIME] = time.time()
     result[SD.METADATA][SD.COORDINATE] = MetaDriveType.COORDINATE_METADRIVE
     result[SD.METADATA][SD.SDC_ID] = str(frames[0]._agent_to_object[DEFAULT_AGENT])
     result[SD.METADATA][SD.TIMESTEP] = \

@@ -21,7 +21,7 @@ MIX_WAYMO_PG_ENV_CONFIG = dict(
     # ===== Waymo Map Config =====
     waymo_data_directory=AssetLoader.file_path("waymo", return_raw_style=False),
     start_scenario_index=0,
-    num_scenario=50,
+    num_scenarios=50,
     store_map=True,
     store_map_buffer_size=200,
 
@@ -33,7 +33,7 @@ MIX_WAYMO_PG_ENV_CONFIG = dict(
 
     # ===== PG Map config =====
     start_seed=0,
-    environment_num=50,
+    num_scenarios=50,
     block_dist_config=PGBlockDistConfig,
 
     # ===== PG Map Config =====
@@ -91,8 +91,8 @@ class MixWaymoPGEnv(WaymoEnv):
         self.pg_map_manager = None
         self.pg_traffic_manager = None
 
-        self.total_environment = self.config["num_scenario"] + self.config["environment_num"]
-        self.real_data_ratio = self.config["num_scenario"] / self.total_environment
+        self.total_environment = self.config["num_scenarios"] + self.config["num_scenarios"]
+        self.real_data_ratio = self.config["num_scenarios"] / self.total_environment
         self.is_current_real_data = True
 
     def setup_engine(self):
@@ -174,7 +174,7 @@ class MixWaymoPGEnv(WaymoEnv):
     def _reset_global_seed(self, force_seed=None):
         current_seed = force_seed if force_seed is not None else get_np_random(None).randint(
             self.config["start_scenario_index"], self.config["start_scenario_index"] +
-            self.config["num_scenario"] if self.is_current_real_data else self.config["environment_num"]
+            self.config["num_scenarios"] if self.is_current_real_data else self.config["num_scenarios"]
         )
         self.seed(current_seed)
 
@@ -201,7 +201,7 @@ class MixWaymoPGEnvWrapper(MixWaymoPGEnv):
     """
     This class is a convinient interface receive
     {"real_data_ratio": xyz,
-    "total_num_scenario":xyz} as input
+    "total_num_scenarios":xyz} as input
     """
     TOTAL_SCENARIO = 100  # default 100
 
@@ -211,14 +211,14 @@ class MixWaymoPGEnvWrapper(MixWaymoPGEnv):
         env_config = config.copy()
         ratio = config["real_data_ratio"]
         assert 0 <= ratio <= 1, "ratio should be in [0, 1]"
-        env_config["num_scenario"] = int(config.get("total_num_scenario", self.TOTAL_SCENARIO) * ratio)
-        env_config["environment_num"] = int(
-            config.get("total_num_scenario", self.TOTAL_SCENARIO) - env_config["num_scenario"]
+        env_config["num_scenarios"] = int(config.get("total_num_scenarios", self.TOTAL_SCENARIO) * ratio)
+        env_config["num_scenarios"] = int(
+            config.get("total_num_scenarios", self.TOTAL_SCENARIO) - env_config["num_scenarios"]
         )
         if "real_data_ratio" in env_config:
             env_config.pop("real_data_ratio")
-        if "total_num_scenario" in env_config:
-            env_config.pop("total_num_scenario")
+        if "total_num_scenarios" in env_config:
+            env_config.pop("total_num_scenarios")
         super(MixWaymoPGEnvWrapper, self).__init__(env_config)
 
 
@@ -229,7 +229,7 @@ if __name__ == "__main__":
             use_render=True,
             waymo_data_directory=AssetLoader.file_path("waymo", return_raw_style=False),
             # # start_scenario=32,
-            total_num_scenario=10,
+            total_num_scenarios=10,
             real_data_ratio=0.3
         )
     )

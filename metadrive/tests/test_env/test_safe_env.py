@@ -2,7 +2,7 @@ from metadrive.envs.safe_metadrive_env import SafeMetaDriveEnv
 
 
 def test_safe_env(vis=False):
-    config = {"environment_num": 100, "start_seed": 75}
+    config = {"num_scenarios": 100, "start_seed": 75}
     if vis:
         config["vehicle_config"] = {"show_line_to_navi_mark": True}
         config["use_render"] = True

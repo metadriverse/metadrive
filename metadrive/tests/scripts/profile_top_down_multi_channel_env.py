@@ -3,7 +3,7 @@ import time
 from metadrive import TopDownMetaDriveEnvV2
 
 if __name__ == '__main__':
-    env = TopDownMetaDriveEnvV2(dict(environment_num=10, frame_stack=10, frame_skip=3))
+    env = TopDownMetaDriveEnvV2(dict(num_scenarios=10, frame_stack=10, frame_skip=3))
     o = env.reset()
     start = time.time()
     action = [0.0, 0.1]

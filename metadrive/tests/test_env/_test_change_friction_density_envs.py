@@ -18,8 +18,8 @@ def _run(env):
 
 
 def test_change_friction():
-    _run(ChangeFrictionEnv(config={"environment_num": 100, "start_seed": 1000, "change_friction": True}))
-    _run(ChangeFrictionEnv(config={"environment_num": 100, "start_seed": 1000, "change_friction": False}))
+    _run(ChangeFrictionEnv(config={"num_scenarios": 100, "start_seed": 1000, "change_friction": True}))
+    _run(ChangeFrictionEnv(config={"num_scenarios": 100, "start_seed": 1000, "change_friction": False}))
 
 
 # SidePassEnv is tested in test_object_collision.py!

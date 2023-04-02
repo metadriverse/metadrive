@@ -20,7 +20,7 @@ def test_save_episode(vis=False):
     env = SafeMetaDriveEnv(
         {
             "accident_prob": 0.8,
-            "environment_num": 1,
+            "num_scenarios": 1,
             "traffic_density": 0.1,
             "start_seed": 1000,
             # "manual_control": vis,

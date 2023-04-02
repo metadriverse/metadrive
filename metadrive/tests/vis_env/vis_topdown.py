@@ -6,7 +6,7 @@ if __name__ == "__main__":
     setup_logger(True)
     env = MetaDriveEnv(
         {
-            "environment_num": 1,
+            "num_scenarios": 1,
             "traffic_density": 0,
             "traffic_mode": "trigger",
             "start_seed": 22,

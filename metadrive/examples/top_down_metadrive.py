@@ -66,7 +66,7 @@ if __name__ == "__main__":
             # manual_control=True,
             map="SSSS",
             traffic_density=0.1,
-            environment_num=100,
+            num_scenarios=100,
             start_seed=random.randint(0, 1000),
         )
     )

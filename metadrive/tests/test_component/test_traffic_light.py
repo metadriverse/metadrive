@@ -6,7 +6,7 @@ from metadrive.envs.metadrive_env import MetaDriveEnv
 def test_traffic_light(render=False, manual_control=False, debug=False):
     env = MetaDriveEnv(
         {
-            "environment_num": 1,
+            "num_scenarios": 1,
             "traffic_density": 0.,
             "traffic_mode": "hybrid",
             "manual_control": manual_control,

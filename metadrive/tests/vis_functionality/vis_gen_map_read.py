@@ -10,8 +10,8 @@ def vis_gen_map_read():
     """
     env_num = 3
     step = 500
-    generate_config = {"environment_num": env_num, "start_seed": 0, "use_render": True}
-    restore_config = {"environment_num": env_num, "start_seed": 0, "use_render": True}
+    generate_config = {"num_scenarios": env_num, "start_seed": 0, "use_render": True}
+    restore_config = {"num_scenarios": env_num, "start_seed": 0, "use_render": True}
 
     setup_logger(debug=True)
     try:
