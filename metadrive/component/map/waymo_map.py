@@ -76,7 +76,7 @@ class WaymoMap(BaseMap):
                     "polyline": convert_polyline_to_metadrive(
                         data[WaymoLaneProperty.POLYLINE], coordinate_transform=self.coordinate_transform
                     ),
-                    "type": MetaDriveType.LINE_SOLID_SINGLE_WHITE
+                    "type": MetaDriveType.BOUNDARY_LINE
                 }
             elif type == MetaDriveType.LANE_CENTER_LINE:
                 continue

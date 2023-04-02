@@ -161,7 +161,7 @@ class PGMap(BaseMap):
         elif type == LineType.BROKEN and color == LineColor.GREY:
             return MetaDriveType.LINE_BROKEN_SINGLE_WHITE
         elif type == LineType.SIDE:
-            return MetaDriveType.LINE_SOLID_SINGLE_WHITE
+            return MetaDriveType.BOUNDARY_LINE
         else:
             # Unknown line type
             return MetaDriveType.LINE_UNKNOWN
