@@ -84,6 +84,7 @@ class WaymoAgentType:
     def from_waymo(cls, item):
         return cls.ENUM_TO_STR[item]
 
+
 class WaymoLaneProperty:
     LANE_TYPE = "center_lane"
     LANE_LINE_TYPE = "road_line"

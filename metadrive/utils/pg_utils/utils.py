@@ -173,9 +173,7 @@ def ray_localization(
     assert len(position) == 2
     assert len(heading) == 2
 
-    results = engine.physics_world.static_world.rayTestAll(
-        panda_vector(position, 1.0), panda_vector(position, -1.0)
-    )
+    results = engine.physics_world.static_world.rayTestAll(panda_vector(position, 1.0), panda_vector(position, -1.0))
     lane_index_dist = []
     if results.hasHits():
         for res in results.getHits():

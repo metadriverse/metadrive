@@ -77,15 +77,11 @@ class MetaDriveType:
 
     @classmethod
     def is_road_line(cls, line):
-        return True if line in [cls.LINE_UNKNOWN,
-                                cls.LINE_BROKEN_SINGLE_WHITE,
-                                cls.LINE_SOLID_SINGLE_WHITE,
-                                cls.LINE_SOLID_DOUBLE_WHITE,
-                                cls.LINE_BROKEN_SINGLE_YELLOW,
-                                cls.LINE_BROKEN_DOUBLE_YELLOW,
-                                cls.LINE_SOLID_SINGLE_YELLOW,
-                                cls.LINE_SOLID_DOUBLE_YELLOW,
-                                cls.LINE_PASSING_DOUBLE_YELLOW] else False
+        return True if line in [
+            cls.LINE_UNKNOWN, cls.LINE_BROKEN_SINGLE_WHITE, cls.LINE_SOLID_SINGLE_WHITE, cls.LINE_SOLID_DOUBLE_WHITE,
+            cls.LINE_BROKEN_SINGLE_YELLOW, cls.LINE_BROKEN_DOUBLE_YELLOW, cls.LINE_SOLID_SINGLE_YELLOW,
+            cls.LINE_SOLID_DOUBLE_YELLOW, cls.LINE_PASSING_DOUBLE_YELLOW
+        ] else False
 
     @classmethod
     def is_yellow_line(cls, line):
@@ -97,15 +93,12 @@ class MetaDriveType:
     @classmethod
     def is_broken_line(cls, line):
         return True if line in [
-            cls.LINE_BROKEN_DOUBLE_YELLOW, cls.LINE_BROKEN_SINGLE_YELLOW,
-            cls.LINE_BROKEN_SINGLE_WHITE
+            cls.LINE_BROKEN_DOUBLE_YELLOW, cls.LINE_BROKEN_SINGLE_YELLOW, cls.LINE_BROKEN_SINGLE_WHITE
         ] else False
 
     @classmethod
     def is_road_edge(cls, edge):
-        return True if edge in [cls.BOUNDARY_UNKNOWN,
-                                cls.BOUNDARY_LINE,
-                                cls.BOUNDARY_MEDIAN] else False
+        return True if edge in [cls.BOUNDARY_UNKNOWN, cls.BOUNDARY_LINE, cls.BOUNDARY_MEDIAN] else False
 
     @classmethod
     def is_sidewalk(cls, edge):
