@@ -390,7 +390,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self.spawn_place = position
         self.set_heading_theta(heading)
         self.set_static(False)
-        self.set_wheel_friction(self.config["wheel_friction"])
+        # self.set_wheel_friction(self.config["wheel_friction"])
 
         if len(position) == 2:
             self.set_position(position, height=self.HEIGHT / 2)
