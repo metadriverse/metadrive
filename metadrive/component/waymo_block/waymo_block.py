@@ -56,17 +56,17 @@ class WaymoBlock(BaseBlock):
             if MetaDriveType.is_road_line(type):
                 if len(data[WaymoLaneProperty.POLYLINE]) <= 1:
                     continue
-                if MetaDriveType.is_broken(type):
+                if MetaDriveType.is_broken_line(type):
                     self.construct_waymo_broken_line(
                         convert_polyline_to_metadrive(
                             data[WaymoLaneProperty.POLYLINE], coordinate_transform=self.coordinate_transform
-                        ), LineColor.YELLOW if MetaDriveType.is_yellow(type) else LineColor.GREY
+                        ), LineColor.YELLOW if MetaDriveType.is_yellow_line(type) else LineColor.GREY
                     )
                 else:
                     self.construct_waymo_continuous_line(
                         convert_polyline_to_metadrive(
                             data[WaymoLaneProperty.POLYLINE], coordinate_transform=self.coordinate_transform
-                        ), LineColor.YELLOW if MetaDriveType.is_yellow(type) else LineColor.GREY
+                        ), LineColor.YELLOW if MetaDriveType.is_yellow_line(type) else LineColor.GREY
                     )
             # elif MetaDriveType.is_road_edge(type) and MetaDriveType.is_sidewalk(type):
             #     self.construct_waymo_sidewalk(

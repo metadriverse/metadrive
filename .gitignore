@@ -33,3 +33,4 @@
 **/test_10maps.pickle
 /metadrive/tests/test_functionality/test_dump_single.pkl
 **/test_export/
+**/test_export_record_scenario/

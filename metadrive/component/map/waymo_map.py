@@ -55,10 +55,10 @@ class WaymoMap(BaseMap):
             if MetaDriveType.is_road_line(type):
                 if len(data[WaymoLaneProperty.POLYLINE]) <= 1:
                     continue
-                if MetaDriveType.is_broken(type):
+                if MetaDriveType.is_broken_line(type):
                     ret[map_feat_id] = {
                         "type": MetaDriveType.LINE_BROKEN_SINGLE_YELLOW
-                        if MetaDriveType.is_yellow(type) else MetaDriveType.LINE_BROKEN_SINGLE_WHITE,
+                        if MetaDriveType.is_yellow_line(type) else MetaDriveType.LINE_BROKEN_SINGLE_WHITE,
                         "polyline": convert_polyline_to_metadrive(
                             data[WaymoLaneProperty.POLYLINE], coordinate_transform=self.coordinate_transform
                         )
@@ -69,7 +69,7 @@ class WaymoMap(BaseMap):
                             data[WaymoLaneProperty.POLYLINE], coordinate_transform=self.coordinate_transform
                         ),
                         "type": MetaDriveType.LINE_SOLID_SINGLE_YELLOW
-                        if MetaDriveType.is_yellow(type) else MetaDriveType.LINE_SOLID_SINGLE_WHITE
+                        if MetaDriveType.is_yellow_line(type) else MetaDriveType.LINE_SOLID_SINGLE_WHITE
                     }
             elif MetaDriveType.is_road_edge(type):
                 ret[map_feat_id] = {

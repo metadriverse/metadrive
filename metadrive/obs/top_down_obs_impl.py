@@ -298,7 +298,7 @@ class LaneGraphics:
         :param two_side: draw two sides of the lane, or only one side
         """
         lane = waymo_poly_line
-        if MetaDriveType.is_yellow(type):
+        if MetaDriveType.is_yellow_line(type):
             color = (0, 80, 220)
         elif MetaDriveType.is_road_edge(type):
             color = (160, 160, 160)
@@ -313,7 +313,7 @@ class LaneGraphics:
             s_origin, _ = lane.local_coordinates(surface.origin)
             s0 = (int(s_origin) // cls.STRIPE_SPACING - stripes_count // 2) * cls.STRIPE_SPACING
 
-            if MetaDriveType.is_broken(type):
+            if MetaDriveType.is_broken_line(type):
                 starts = s0 + np.arange(stripes_count) * cls.STRIPE_SPACING
                 ends = s0 + np.arange(stripes_count) * cls.STRIPE_SPACING + cls.STRIPE_LENGTH
                 lats = [0 for s in starts]

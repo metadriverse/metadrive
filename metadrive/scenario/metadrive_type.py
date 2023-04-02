@@ -88,14 +88,14 @@ class MetaDriveType:
                                 cls.LINE_PASSING_DOUBLE_YELLOW] else False
 
     @classmethod
-    def is_yellow(cls, line):
+    def is_yellow_line(cls, line):
         return True if line in [
             cls.LINE_SOLID_DOUBLE_YELLOW, cls.LINE_PASSING_DOUBLE_YELLOW, cls.LINE_SOLID_SINGLE_YELLOW,
             cls.LINE_BROKEN_DOUBLE_YELLOW, cls.LINE_BROKEN_SINGLE_YELLOW
         ] else False
 
     @classmethod
-    def is_broken(cls, line):
+    def is_broken_line(cls, line):
         return True if line in [
             cls.LINE_BROKEN_DOUBLE_YELLOW, cls.LINE_BROKEN_SINGLE_YELLOW,
             cls.LINE_BROKEN_SINGLE_WHITE
