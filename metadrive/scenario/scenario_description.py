@@ -37,7 +37,6 @@ Example:
             "scenario_id": "dd0c8c27fdd6ef59",  # Used in Waymo dataset
             "seed": 512,
             "history_metadata": {},
-            "created_time": 1680132795.238,
 
             "sdc_id": "172",  # A key exists in tracks
 
@@ -136,8 +135,7 @@ class ScenarioDescription(dict):
     TIMESTEP = "ts"
     COORDINATE = "coordinate"
     SDC_ID = "sdc_id"  # Not necessary, but can be stored in metadata.
-    CREATED_TIME = "created_time"
-    METADATA_KEYS = {METADRIVE_PROCESSED, COORDINATE, TIMESTEP, CREATED_TIME}
+    METADATA_KEYS = {METADRIVE_PROCESSED, COORDINATE, TIMESTEP}
 
     ALLOW_TYPES = (int, float, str, np.ndarray, dict, list, tuple)
 
@@ -205,7 +203,7 @@ class ScenarioDescription(dict):
 
     def get_sdc_track(self):
         assert self.SDC_ID in self[self.METADATA]
-        sdc_id = self[self.METADATA][self.SDC_ID]
+        sdc_id = str(self[self.METADATA][self.SDC_ID])
         return self[self.TRACKS][sdc_id]
 
 
