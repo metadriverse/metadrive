@@ -36,6 +36,7 @@ if __name__ == "__main__":
             # "random_agent_model": True,
             "driving_reward": 1.0,
             "force_destroy": False,
+            # "window_size": (500, 800),
             # "camera_dist": -1,
             # "camera_pitch": 30,
             # "camera_height": 1,

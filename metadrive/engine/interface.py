@@ -1,4 +1,5 @@
 import time
+from metadrive.scenario.metadrive_type import MetaDriveType
 
 import math
 import numpy as np
@@ -150,12 +151,14 @@ class Interface:
             text_node = new_banner.node()
             text_node.setCardColor(color)
             text_node.setText(text)
-            text_node.setCardActual(-5 * self.engine.w_scale, 5.1 * self.engine.w_scale, -0.3, 1)
+            text_node.setTextScale(0.96)
+            text_node.setCardActual(-9, 9.1, -0.26, 1)
             text_node.setCardDecal(True)
             text_node.setTextColor(1, 1, 1, 1)
             text_node.setAlign(TextNode.A_center)
-            new_banner.setScale(0.05)
-            new_banner.setPos(-0.75 * self.engine.w_scale, 0, -0.8 * self.engine.h_scale)
+            new_banner.setScale(0.05 * 3 / 4 * self.engine.w_scale)
+            new_banner.setPos(-0.662 * self.engine.w_scale, 0, -0.987 * self.engine.h_scale)
+            # new_banner.setPos(-0.75 * self.engine.w_scale, 0, -0.8 * self.engine.h_scale)
             new_banner.reparentTo(self.contact_result_render)
             self.current_banner = new_banner
 
@@ -163,7 +166,8 @@ class Interface:
         contacts = sorted(list(contacts), key=lambda c: COLLISION_INFO_COLOR[COLOR[c]][0])
         text = contacts[0] if len(contacts) != 0 else None
         if text is None:
-            text = "Normal" if time.time() - self.engine._episode_start_time > 10 else "Press H to see help message"
+            text = MetaDriveType.LANE_SURFACE_STREET \
+                if time.time() - self.engine._episode_start_time > 10 else "Press H to see help message"
             self._render_banner(text, COLLISION_INFO_COLOR["green"][1])
         else:
             if text == BodyName.VEHICLE:

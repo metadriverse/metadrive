@@ -78,7 +78,7 @@ class WaymoMap(BaseMap):
                     ),
                     "type": MetaDriveType.BOUNDARY_LINE
                 }
-            elif type == MetaDriveType.LANE_CENTER_LINE:
+            elif type == MetaDriveType.LANE_SURFACE_STREET:
                 continue
             # else:
             # # for debug

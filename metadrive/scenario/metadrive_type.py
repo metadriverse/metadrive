@@ -7,7 +7,7 @@ class MetaDriveType:
     """
 
     # ===== Lane, Road =====
-    LANE_CENTER_LINE = "LANE_SURFACE_STREET"
+    LANE_SURFACE_STREET = "LANE_SURFACE_STREET"
     LANE_UNKNOWN = "LANE_UNKNOWN"
     LANE_FREEWAY = "LANE_FREEWAY"
     LANE_BIKE_LANE = "LANE_BIKE_LANE"
@@ -50,6 +50,8 @@ class MetaDriveType:
     TRAFFIC_LIGHT = "TRAFFIC_LIGHT"
     TRAFFIC_OBJECT = "TRAFFIC_OBJECT"
     TOLLGATE = "TOLLGATE"
+    GROUND = "GROUND"
+    INVISIBLE_WALL = "INVISIBLE_WALL"
 
     # ===== Coordinate system =====
     COORDINATE_METADRIVE = "metadrive"
@@ -71,7 +73,7 @@ class MetaDriveType:
 
     @classmethod
     def is_lane(cls, type):
-        return type in [cls.LANE_CENTER_LINE, cls.LANE_FREEWAY, cls.LANE_BIKE_LANE]
+        return type in [cls.LANE_SURFACE_STREET, cls.LANE_FREEWAY, cls.LANE_BIKE_LANE]
 
     @classmethod
     def is_road_line(cls, line):

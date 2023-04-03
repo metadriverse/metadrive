@@ -100,10 +100,10 @@ class BodyName:
     PEDESTRIAN = MetaDriveType.PEDESTRIAN
     CYCLIST = MetaDriveType.CYCLIST
 
-    LANE = "LANE"
-    SIDEWALK = "SIDEWALK"
-    GROUND = "GROUND"
-    INVISIBLE_WALL = "INVISIBLE_WALL"
+    LANE = MetaDriveType.LANE_SURFACE_STREET
+    SIDEWALK = MetaDriveType.BOUNDARY_LINE
+    GROUND = MetaDriveType.GROUND
+    INVISIBLE_WALL = MetaDriveType.INVISIBLE_WALL
 
 
 # Used for rendering the banner in Interface.

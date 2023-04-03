@@ -278,7 +278,7 @@ class NodeRoadNetwork(BaseRoadNetwork):
                 for k, lane in enumerate(lanes):
                     ret["{}".format(lane.index)] = {
                         "polyline": lane.get_polyline(interval),
-                        "type": MetaDriveType.LANE_CENTER_LINE,
+                        "type": MetaDriveType.LANE_SURFACE_STREET,
                         "speed_limit_kmh": lane.speed_limit
                     }
         return ret

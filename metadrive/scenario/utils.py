@@ -14,7 +14,7 @@ from metadrive.scenario import MetaDriveType, ScenarioDescription as SD
 def draw_map(map_features, show=False):
     figure(figsize=(8, 6), dpi=500)
     for key, value in map_features.items():
-        if value.get("type", None) == MetaDriveType.LANE_CENTER_LINE:
+        if value.get("type", None) == MetaDriveType.LANE_SURFACE_STREET:
             plt.scatter([x[0] for x in value["polyline"]], [y[1] for y in value["polyline"]], s=0.1)
         elif value.get("type", None) == "road_edge":
             plt.scatter([x[0] for x in value["polyline"]], [y[1] for y in value["polyline"]], s=0.1, c=(0, 0, 0))

@@ -104,7 +104,7 @@ class EdgeRoadNetwork(BaseRoadNetwork):
             assert id == lane_info.lane.index
             ret[id] = {
                 "polyline": lane_info.lane.get_polyline(interval),
-                "type": MetaDriveType.LANE_CENTER_LINE,
+                "type": MetaDriveType.LANE_SURFACE_STREET,
                 "speed_limit_kmh": lane_info.lane.speed_limit
             }
         return ret
