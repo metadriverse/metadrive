@@ -3,7 +3,7 @@ from metadrive.utils.waymo_utils.parse_object_state import parse_full_trajectory
 from collections import namedtuple, OrderedDict
 
 import numpy as np
-
+from metadrive.scenario.metadrive_type import MetaDriveType
 from metadrive.component.lane.waymo_lane import PointLane
 from metadrive.component.vehicle.vehicle_type import SVehicle
 from metadrive.manager.waymo_traffic_manager import WaymoTrafficManager
@@ -41,7 +41,7 @@ class WaymoIDMTrafficManager(WaymoTrafficManager):
         if self.engine.global_random_seed not in self.seed_trajs:
             traffic_traj_data = {}
             for v_id, type_traj in self.current_traffic_data.items():
-                if WaymoAgentType.is_vehicle(type_traj["type"]) and v_id != self.sdc_track_index:
+                if MetaDriveType.is_vehicle(type_traj["type"]) and v_id != self.sdc_track_index:
                     init_info = parse_vehicle_state(
                         type_traj,
                         self.engine.global_config["traj_start_index"],
@@ -76,7 +76,7 @@ class WaymoIDMTrafficManager(WaymoTrafficManager):
                         "is_sdc": False
                     }
 
-                elif WaymoAgentType.is_vehicle(type_traj["type"]) and v_id == self.sdc_track_index:
+                elif MetaDriveType.is_vehicle(type_traj["type"]) and v_id == self.sdc_track_index:
                     # set Ego V velocity
                     init_info = parse_vehicle_state(
                         type_traj,

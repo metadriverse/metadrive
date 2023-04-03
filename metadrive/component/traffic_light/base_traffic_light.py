@@ -28,7 +28,7 @@ class BaseTrafficLight(BaseObject):
             width,
             self.AIR_WALL_HEIGHT,
             object_id=self.id,
-            type_name=BodyName.TrafficLight,
+            type_name=BodyName.TRAFFIC_LIGHT,
             ghost_node=True,
         )
         self.add_body(air_wall, add_to_static_world=True)

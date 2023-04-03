@@ -10,7 +10,7 @@ from metadrive.component.road_network import Road
 from metadrive.component.road_network.node_road_network import NodeRoadNetwork
 from metadrive.component.vehicle_navigation_module.base_navigation import BaseNavigation
 from metadrive.utils import clip, norm, get_np_random
-from metadrive.utils.math_utils import panda_position
+from metadrive.utils.math_utils import panda_vector
 from metadrive.utils.pg_utils.utils import ray_localization
 
 
@@ -107,7 +107,7 @@ class NodeNetworkNavigation(BaseNavigation):
             ref_lane = final_lanes[0]
             later_middle = (float(self.get_current_lane_num()) / 2 - 0.5) * self.get_current_lane_width()
             check_point = ref_lane.position(ref_lane.length, later_middle)
-            self._dest_node_path.setPos(panda_position(check_point[0], check_point[1], 1.8))
+            self._dest_node_path.setPos(panda_vector(check_point[0], check_point[1], 1.8))
 
     def update_localization(self, ego_vehicle):
         position = ego_vehicle.position
@@ -152,7 +152,7 @@ class NodeNetworkNavigation(BaseNavigation):
         if self._show_navi_info:
             # Whether to visualize little boxes in the scene denoting the checkpoints
             pos_of_goal = checkpoint
-            self._goal_node_path.setPos(panda_position(pos_of_goal[0], pos_of_goal[1], 1.8))
+            self._goal_node_path.setPos(panda_vector(pos_of_goal[0], pos_of_goal[1], 1.8))
             self._goal_node_path.setH(self._goal_node_path.getH() + 3)
             self.navi_arrow_dir = [lanes_heading1, lanes_heading2]
             dest_pos = self._dest_node_path.getPos()

@@ -9,7 +9,7 @@ from metadrive.component.lane.abs_lane import AbstractLane
 from metadrive.component.vehicle_module.distance_detector import DistanceDetector
 from metadrive.constants import CamMask, CollisionGroup
 from metadrive.engine.engine_utils import get_engine
-from metadrive.utils.coordinates_shift import panda_position
+from metadrive.utils.coordinates_shift import panda_vector
 from metadrive.utils.math_utils import norm, clip
 from metadrive.utils.utils import get_object_from_node
 
@@ -137,7 +137,7 @@ class Lidar(DistanceDetector):
         return mask, objs
 
     def get_surrounding_objects(self, vehicle):
-        self.broad_detector.setPos(panda_position(vehicle.position))
+        self.broad_detector.setPos(panda_vector(vehicle.position))
         physics_world = vehicle.engine.physics_world.dynamic_world
         contact_results = physics_world.contactTest(self.broad_detector.node(), True).getContacts()
         objs = set()

@@ -14,7 +14,7 @@ from metadrive.component.road_network.road import Road
 from metadrive.constants import BodyName, CamMask, LineType, LineColor, DrivableAreaProperty
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.engine.core.physics_world import PhysicsWorld
-from metadrive.utils.coordinates_shift import panda_position, panda_heading
+from metadrive.utils.coordinates_shift import panda_vector, panda_heading
 from metadrive.utils.math_utils import norm
 
 logger = logging.getLogger(__name__)
@@ -285,9 +285,9 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
         raise DeprecationWarning("Useless, currently")
         length = norm(lane_end[0] - lane_start[0], lane_end[1] - lane_start[1])
         if LineType.prohibit(line_type):
-            node_name = BodyName.White_continuous_line if line_color == LineColor.GREY else BodyName.Yellow_continuous_line
+            node_name = BodyName.LINE_SOLID_SINGLE_WHITE if line_color == LineColor.GREY else BodyName.LINE_SOLID_SINGLE_YELLOW
         else:
-            node_name = BodyName.Broken_line
+            node_name = BodyName.BROKEN_LINE
         body_node = BulletGhostNode(node_name)
         body_node.set_active(False)
         body_node.setKinematic(False)
@@ -304,7 +304,7 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
         body_np.node().setIntoCollideMask(mask)
         self.static_nodes.append(body_np.node())
 
-        body_np.setPos(panda_position(middle, DrivableAreaProperty.LANE_LINE_GHOST_HEIGHT / 2))
+        body_np.setPos(panda_vector(middle, DrivableAreaProperty.LANE_LINE_GHOST_HEIGHT / 2))
         direction_v = lane_end - lane_start
         # theta = -numpy.arctan2(direction_v[1], direction_v[0])
         theta = panda_heading(math.atan2(direction_v[1], direction_v[0]))

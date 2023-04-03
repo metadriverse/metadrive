@@ -14,7 +14,7 @@ from metadrive.constants import Decoration, BodyName
 from metadrive.engine.core.engine_core import EngineCore
 from metadrive.engine.physics_node import BaseRigidBodyNode, BaseGhostBodyNode
 from metadrive.utils.coordinates_shift import panda_heading
-from metadrive.utils.coordinates_shift import panda_position
+from metadrive.utils.coordinates_shift import panda_vector
 from metadrive.utils.interpolating_line import InterpolatingLine
 from metadrive.utils.math_utils import get_points_bounding_box, norm
 from metadrive.utils.utils import get_object_from_node
@@ -173,13 +173,11 @@ def ray_localization(
     assert len(position) == 2
     assert len(heading) == 2
 
-    results = engine.physics_world.static_world.rayTestAll(
-        panda_position(position, 1.0), panda_position(position, -1.0)
-    )
+    results = engine.physics_world.static_world.rayTestAll(panda_vector(position, 1.0), panda_vector(position, -1.0))
     lane_index_dist = []
     if results.hasHits():
         for res in results.getHits():
-            if res.getNode().getName() == BodyName.Lane:
+            if res.getNode().getName() == BodyName.LANE:
                 on_lane = True
                 lane = get_object_from_node(res.getNode())
                 long, _ = lane.local_coordinates(position)
@@ -246,8 +244,8 @@ def rect_region_detection(
     :param in_static_world: execute detection in static world
     :return: detection result
     """
-    region_detect_start = panda_position(position, z=height)
-    region_detect_end = panda_position(position, z=-1)
+    region_detect_start = panda_vector(position, z=height)
+    region_detect_end = panda_vector(position, z=-1)
     tsFrom = TransformState.makePosHpr(region_detect_start, Vec3(panda_heading(heading), 0, 0))
     tsTo = TransformState.makePosHpr(region_detect_end, Vec3(panda_heading(heading), 0, 0))
 
@@ -272,8 +270,8 @@ def circle_region_detection(
     :param in_static_world: execute detection in static world
     :return: detection result
     """
-    region_detect_start = panda_position(position, z=height)
-    region_detect_end = panda_position(position, z=-1)
+    region_detect_start = panda_vector(position, z=height)
+    region_detect_end = panda_vector(position, z=-1)
     tsFrom = TransformState.makePos(region_detect_start)
     tsTo = TransformState.makePos(region_detect_end)
 
@@ -292,7 +290,7 @@ def generate_static_box_physics_body(
     height=10,
     ghost_node=False,
     object_id=None,
-    type_name=BodyName.InvisibleWall,
+    type_name=BodyName.INVISIBLE_WALL,
     collision_group=CollisionGroup.InvisibleWall
 ):
     """

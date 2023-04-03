@@ -9,8 +9,8 @@ from panda3d.core import NodePath
 from metadrive.constants import CamMask, CollisionGroup
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.engine.engine_utils import get_engine
-from metadrive.utils.coordinates_shift import panda_position
-from metadrive.utils.math_utils import panda_position, get_laser_end
+from metadrive.utils.coordinates_shift import panda_vector
+from metadrive.utils.math_utils import panda_vector, get_laser_end
 
 detect_result = namedtuple("detect_result", "cloud_points detected_objects")
 
@@ -30,7 +30,7 @@ def perceive(
     cloud_points.fill(1.0)
     detected_objects = []
     colors = []
-    pg_start_position = panda_position(vehicle_position_x, vehicle_position_y, height)
+    pg_start_position = panda_vector(vehicle_position_x, vehicle_position_y, height)
 
     for laser_index in range(num_lasers):
         if (detector_mask is not None) and (not detector_mask[laser_index]):
@@ -39,7 +39,7 @@ def perceive(
                 point_x, point_y = get_laser_end(
                     lidar_range, perceive_distance, laser_index, heading_theta, vehicle_position_x, vehicle_position_y
                 )
-                point_x, point_y, point_z = panda_position(point_x, point_y, height)
+                point_x, point_y, point_z = panda_vector(point_x, point_y, height)
                 colors.append(
                     add_cloud_point_vis(
                         point_x, point_y, height, num_lasers, laser_index, ANGLE_FACTOR, MARK_COLOR0, MARK_COLOR1,
@@ -52,7 +52,7 @@ def perceive(
         point_x, point_y = get_laser_end(
             lidar_range, perceive_distance, laser_index, heading_theta, vehicle_position_x, vehicle_position_y
         )
-        laser_end = panda_position(point_x, point_y, height)
+        laser_end = panda_vector(point_x, point_y, height)
         result = physics_world.rayTestClosest(pg_start_position, laser_end, mask)
         node = result.getNode()
         if node in extra_filter_node:
@@ -172,7 +172,7 @@ class DistanceDetector:
                   vehicle_position[0]
         point_y = self.perceive_distance * math.sin(self._lidar_range[laser_index] + heading_theta) + \
                   vehicle_position[1]
-        laser_end = panda_position((point_x, point_y), self.height)
+        laser_end = panda_vector((point_x, point_y), self.height)
         return laser_end
 
     def destroy(self):

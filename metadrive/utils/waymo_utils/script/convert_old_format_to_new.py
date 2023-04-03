@@ -44,14 +44,14 @@ class RoadLineType(Enum):
         return True if line.__class__ == RoadLineType else False
 
     @staticmethod
-    def is_yellow(line):
+    def is_yellow_line(line):
         return True if line in [
             RoadLineType.SOLID_DOUBLE_YELLOW, RoadLineType.PASSING_DOUBLE_YELLOW, RoadLineType.SOLID_SINGLE_YELLOW,
             RoadLineType.BROKEN_DOUBLE_YELLOW, RoadLineType.BROKEN_SINGLE_YELLOW
         ] else False
 
     @staticmethod
-    def is_broken(line):
+    def is_broken_line(line):
         return True if line in [
             RoadLineType.BROKEN_DOUBLE_YELLOW, RoadLineType.BROKEN_SINGLE_YELLOW, RoadLineType.BROKEN_SINGLE_WHITE
         ] else False
