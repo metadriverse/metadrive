@@ -5,7 +5,7 @@ from typing import Union, Optional
 import numpy as np
 import seaborn as sns
 from panda3d.bullet import BulletVehicle, BulletBoxShape, ZUp
-from panda3d.core import Material, Vec3, TransformState, LVector3
+from panda3d.core import Material, Vec3, TransformState
 from panda3d.core import NodePath
 
 from metadrive.base_class.base_object import BaseObject
@@ -115,12 +115,12 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     path = None
 
     def __init__(
-        self,
-        vehicle_config: Union[dict, Config] = None,
-        name: str = None,
-        random_seed=None,
-        position=None,
-        heading=None  # In degree!
+            self,
+            vehicle_config: Union[dict, Config] = None,
+            name: str = None,
+            random_seed=None,
+            position=None,
+            heading=None  # In degree!
     ):
         """
         This Vehicle Config is different from self.get_config(), and it is used to define which modules to use, and
@@ -347,14 +347,14 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         return step_energy, self.energy_consumption
 
     def reset(
-        self,
-        vehicle_config=None,
-        name=None,
-        random_seed=None,
-        position: np.ndarray = None,
-        heading: float = 0.0,  # In degree!
-        *args,
-        **kwargs
+            self,
+            vehicle_config=None,
+            name=None,
+            random_seed=None,
+            position: np.ndarray = None,
+            heading: float = 0.0,  # In degree!
+            *args,
+            **kwargs
     ):
         """
         pos is a 2-d array, and heading is a float (unit degree)
@@ -547,8 +547,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         if not lateral_norm * forward_direction_norm:
             return 0
         cos = (
-            (forward_direction[0] * lateral[0] + forward_direction[1] * lateral[1]) /
-            (lateral_norm * forward_direction_norm)
+                (forward_direction[0] * lateral[0] + forward_direction[1] * lateral[1]) /
+                (lateral_norm * forward_direction_norm)
         )
         # return cos
         # Normalize to 0, 1
@@ -777,14 +777,15 @@ class BaseVehicle(BaseObject, BaseVehicleState):
                 elif light.status == TrafficLightStatus.YELLOW:
                     self.yellow_light = True
                 name = TrafficLightStatus.semantics(light.status)
+            # they work with the function in collision_callback.py to double-check the collision
             elif name == MetaDriveType.VEHICLE:
-                pass
+                self.crash_vehicle = True
             elif name == MetaDriveType.BUILDING:
-                pass
+                self.crash_building = True
             elif name == MetaDriveType.TRAFFIC_OBJECT:
-                pass
+                self.crash_object = True
             elif name in [MetaDriveType.PEDESTRIAN, MetaDriveType.CYCLIST]:
-                pass
+                self.crash_human = True
             else:
                 # didn't add
                 continue
@@ -802,6 +803,21 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         if res.hasHit() and res.getNode().getName() == MetaDriveType.BOUNDARY_LINE:
             self.crash_sidewalk = True
             contacts.add(MetaDriveType.BOUNDARY_LINE)
+
+        # only for visualization detection
+        if self.render:
+            res = rect_region_detection(
+                self.engine,
+                self.position,
+                np.rad2deg(self.heading_theta),
+                self.LENGTH,
+                self.WIDTH,
+                CollisionGroup.LaneSurface,
+                in_static_world=True if not self.render else False
+            )
+            if not res.hasHit() or res.getNode().getName() != MetaDriveType.LANE_SURFACE_STREET:
+                contacts.add(MetaDriveType.GROUND)
+
         self.contact_results.update(contacts)
 
     def destroy(self):
@@ -912,7 +928,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             ckpt_idx = routing._target_checkpoints_index
             for surrounding_v in surrounding_vs:
                 if surrounding_v.lane_index[:-1] == (routing.checkpoints[ckpt_idx[0]], routing.checkpoints[ckpt_idx[1]
-                                                                                                           ]):
+                ]):
                     if self.lane.local_coordinates(self.position)[0] - \
                             self.lane.local_coordinates(surrounding_v.position)[0] < 0:
                         self.front_vehicles.add(surrounding_v)
@@ -949,9 +965,9 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     @property
     def replay_done(self):
         return self._replay_done if hasattr(self, "_replay_done") else (
-            self.crash_building or self.crash_vehicle or
-            # self.on_white_continuous_line or
-            self.on_yellow_continuous_line
+                self.crash_building or self.crash_vehicle or
+                # self.on_white_continuous_line or
+                self.on_yellow_continuous_line
         )
 
     @property
