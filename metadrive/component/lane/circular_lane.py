@@ -12,7 +12,7 @@ from metadrive.constants import BodyName
 from metadrive.constants import DrivableAreaProperty
 from metadrive.constants import LineType
 from metadrive.engine.physics_node import BaseRigidBodyNode
-from metadrive.utils.coordinates_shift import panda_position
+from metadrive.utils.coordinates_shift import panda_vector
 from metadrive.utils.math_utils import wrap_to_pi, norm, Vector
 
 

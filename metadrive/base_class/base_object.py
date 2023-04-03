@@ -16,7 +16,7 @@ from metadrive.engine.core.physics_world import PhysicsWorld
 from metadrive.engine.physics_node import BaseRigidBodyNode, BaseGhostBodyNode
 from metadrive.utils import Vector
 from metadrive.utils import get_np_random
-from metadrive.utils.coordinates_shift import panda_position, metadrive_position, panda_heading, metadrive_heading
+from metadrive.utils.coordinates_shift import panda_vector, metadrive_vector, panda_heading, metadrive_heading
 from metadrive.utils.math_utils import clip
 from metadrive.utils.math_utils import norm
 
@@ -274,11 +274,11 @@ class BaseObject(BaseRunnable):
         else:
             if height is None:
                 height = self.origin.getPos()[-1]
-        self.origin.setPos(panda_position(position, height))
+        self.origin.setPos(panda_vector(position, height))
 
     @property
     def position(self):
-        return metadrive_position(self.origin.getPos())
+        return metadrive_vector(self.origin.getPos())
 
     def set_velocity(self, direction: np.array, value=None, in_local_frame=False, offset_90_deg=False):
         """
@@ -287,6 +287,7 @@ class BaseObject(BaseRunnable):
         :param direction: 2d array or list
         :param value: speed [m/s]
         :param in_local_frame: True, apply speed to local fram
+        :param offset_90_deg: set to True, only if using vehicle which has a 90 degree offset
         """
         if in_local_frame:
             from metadrive.engine.engine_utils import get_engine
@@ -295,7 +296,7 @@ class BaseObject(BaseRunnable):
             direction[1] *= -1
             direction = engine.worldNP.getRelativeVector(self.origin, direction)
 
-            # For some reason, we need 90 degree offset for vehicle.
+            # Vehicle coordinates has 90 degrees offset as its heading is in the panda's - y-direction.
             if offset_90_deg:
                 direction = [-direction[1], -direction[0]]
 

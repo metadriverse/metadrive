@@ -11,7 +11,7 @@ from metadrive.utils.math_utils import norm
 
 class Pedestrian(BaseTrafficParticipant):
     MASS = 70  # kg
-    TYPE_NAME = BodyName.Pedestrian
+    TYPE_NAME = BodyName.PEDESTRIAN
 
     RADIUS = 0.35
     HEIGHT = 1.75

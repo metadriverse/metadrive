@@ -36,7 +36,7 @@ def test_original_lidar(render=False):
                                                   ).detected_objects
         yellow = 0
         for obj in objs:
-            if obj.getNode().getName() == BodyName.Yellow_continuous_line:
+            if obj.getNode().getName() == BodyName.LINE_SOLID_SINGLE_YELLOW:
                 yellow += 1
         assert yellow == 2, "side detector and lane detector broken"
         detect_traffic_vehicle = False
@@ -88,7 +88,7 @@ def test_lidar_with_mask(render=False):
                                                   ).detected_objects
         yellow = 0
         for obj in objs:
-            if obj.getNode().getName() == BodyName.Yellow_continuous_line:
+            if obj.getNode().getName() == BodyName.LINE_SOLID_SINGLE_YELLOW:
                 yellow += 1
         assert yellow == 2, "side detector and lane detector broken"
         detect_traffic_vehicle = False

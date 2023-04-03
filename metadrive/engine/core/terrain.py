@@ -16,7 +16,7 @@ class Terrain(BaseObject):
     def __init__(self, show_terrain):
         super(Terrain, self).__init__(random_seed=0)
         shape = BulletPlaneShape(Vec3(0, 0, 1), 0)
-        node = BulletRigidBodyNode(BodyName.Ground)
+        node = BulletRigidBodyNode(BodyName.GROUND)
         node.setFriction(.9)
         node.addShape(shape)
 

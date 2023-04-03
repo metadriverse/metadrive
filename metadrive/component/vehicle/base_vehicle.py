@@ -390,6 +390,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self.spawn_place = position
         self.set_heading_theta(heading)
         self.set_static(False)
+        # self.set_wheel_friction(self.config["wheel_friction"])
 
         if len(position) == 2:
             self.set_position(position, height=self.HEIGHT / 2)
@@ -600,7 +601,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         # assert self.LENGTH < BaseVehicle.MAX_LENGTH, "Vehicle is too large!"
         # assert self.WIDTH < BaseVehicle.MAX_WIDTH, "Vehicle is too large!"
 
-        chassis = BaseRigidBodyNode(self.name, BodyName.Vehicle)
+        chassis = BaseRigidBodyNode(self.name, BodyName.VEHICLE)
         self._node_path_list.append(chassis)
 
         chassis_shape = BulletBoxShape(Vec3(self.WIDTH / 2, self.LENGTH / 2, self.HEIGHT / 2))
@@ -758,15 +759,15 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         for contact in result_1.getContacts() + result_2.getContacts():
             node0 = contact.getNode0()
             node1 = contact.getNode1()
-            node = node0 if node1.getName() == BodyName.Vehicle else node1
+            node = node0 if node1.getName() == BodyName.VEHICLE else node1
             name = node.getName()
-            if name == BodyName.White_continuous_line:
+            if name == BodyName.LINE_SOLID_SINGLE_WHITE:
                 self.on_white_continuous_line = True
-            elif name == BodyName.Yellow_continuous_line:
+            elif name == BodyName.LINE_SOLID_SINGLE_YELLOW:
                 self.on_yellow_continuous_line = True
-            elif name == BodyName.Broken_line:
+            elif name == BodyName.LINE_BROKEN_SINGLE_YELLOW or name == BodyName.LINE_BROKEN_SINGLE_WHITE:
                 self.on_broken_line = True
-            elif name == BodyName.TrafficLight:
+            elif name == BodyName.TRAFFIC_LIGHT:
                 light = get_object_from_node(node)
                 if light.status == TrafficLightStatus.GREEN:
                     self.green_light = True
@@ -789,9 +790,9 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             CollisionGroup.Sidewalk,
             in_static_world=True if not self.render else False
         )
-        if res.hasHit() and res.getNode().getName() == BodyName.Sidewalk:
+        if res.hasHit() and res.getNode().getName() == BodyName.SIDEWALK:
             self.crash_sidewalk = True
-            contacts.add(BodyName.Sidewalk)
+            contacts.add(BodyName.SIDEWALK)
         self.contact_results = contacts
 
     def destroy(self):
@@ -929,7 +930,6 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         return self.navigation.current_ref_lanes
 
     def set_wheel_friction(self, new_friction):
-        raise DeprecationWarning("Bug exists here")
         for wheel in self.wheels:
             wheel.setFrictionSlip(new_friction)
 

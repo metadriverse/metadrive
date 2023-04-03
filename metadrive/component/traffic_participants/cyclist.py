@@ -13,7 +13,7 @@ from metadrive.engine.physics_node import BaseRigidBodyNode
 
 class Cyclist(BaseTrafficParticipant):
     MASS = 80  # kg
-    TYPE_NAME = BodyName.Cyclist
+    TYPE_NAME = BodyName.CYCLIST
     COLLISION_MASK = CollisionGroup.TrafficParticipants
 
     MODEL = None

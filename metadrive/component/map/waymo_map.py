@@ -52,13 +52,13 @@ class WaymoMap(BaseMap):
         for lane_id, data in self.blocks[-1].waymo_map_data.items():
             type = data.get("type", None)
             map_feat_id = str(lane_id)
-            if WaymoRoadLineType.is_road_line(type):
+            if MetaDriveType.is_road_line(type):
                 if len(data[WaymoLaneProperty.POLYLINE]) <= 1:
                     continue
-                if WaymoRoadLineType.is_broken(type):
+                if MetaDriveType.is_broken_line(type):
                     ret[map_feat_id] = {
-                        "type": MetaDriveType.BROKEN_YELLOW_LINE
-                        if WaymoRoadLineType.is_yellow(type) else MetaDriveType.BROKEN_GREY_LINE,
+                        "type": MetaDriveType.LINE_BROKEN_SINGLE_YELLOW
+                        if MetaDriveType.is_yellow_line(type) else MetaDriveType.LINE_BROKEN_SINGLE_WHITE,
                         "polyline": convert_polyline_to_metadrive(
                             data[WaymoLaneProperty.POLYLINE], coordinate_transform=self.coordinate_transform
                         )
@@ -68,15 +68,15 @@ class WaymoMap(BaseMap):
                         "polyline": convert_polyline_to_metadrive(
                             data[WaymoLaneProperty.POLYLINE], coordinate_transform=self.coordinate_transform
                         ),
-                        "type": MetaDriveType.CONTINUOUS_YELLOW_LINE
-                        if WaymoRoadLineType.is_yellow(type) else MetaDriveType.CONTINUOUS_GREY_LINE
+                        "type": MetaDriveType.LINE_SOLID_SINGLE_YELLOW
+                        if MetaDriveType.is_yellow_line(type) else MetaDriveType.LINE_SOLID_SINGLE_WHITE
                     }
-            elif WaymoRoadEdgeType.is_road_edge(type):
+            elif MetaDriveType.is_road_edge(type):
                 ret[map_feat_id] = {
                     "polyline": convert_polyline_to_metadrive(
                         data[WaymoLaneProperty.POLYLINE], coordinate_transform=self.coordinate_transform
                     ),
-                    "type": MetaDriveType.CONTINUOUS_GREY_LINE
+                    "type": MetaDriveType.BOUNDARY_LINE
                 }
             elif type == MetaDriveType.LANE_CENTER_LINE:
                 continue

@@ -21,7 +21,7 @@ from metadrive.utils.math_utils import wrap_to_pi
 #         y <---------|
 #                    Ego
 # Note: the models loaded in Panda3d are facing to y axis, and thus -90' is required to make it face to x axis
-def panda_position(position, z=0.0) -> Vec3:
+def panda_vector(position, z=0.0) -> Vec3:
     """
     Give a 2d or 3d position in MetaDrive, transform it to Panda3d world.
     If the position is a 2d array, height will be determined by the value of z.
@@ -35,7 +35,7 @@ def panda_position(position, z=0.0) -> Vec3:
     return Vec3(position[0], -position[1], z)
 
 
-def metadrive_position(position: Vec3) -> "Vector":
+def metadrive_vector(position: Vec3) -> "Vector":
     """
     Transform the position in Panda3d to MetaDrive world
     :param position: Vec3, position in Panda3d

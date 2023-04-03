@@ -10,7 +10,7 @@ from panda3d.core import WindowProperties
 
 from metadrive.constants import CollisionGroup
 from metadrive.engine.engine_utils import get_engine
-from metadrive.utils.coordinates_shift import panda_heading, panda_position
+from metadrive.utils.coordinates_shift import panda_heading, panda_vector
 from metadrive.utils.cuda import check_cudart_err
 
 _cuda_enable = True
@@ -142,7 +142,7 @@ class MainCamera:
     def set_bird_view_pos(self, position):
         if self.engine.task_manager.hasTaskNamed(self.TOP_DOWN_TASK_NAME):
             # adjust hpr
-            p_pos = panda_position(position)
+            p_pos = panda_vector(position)
             self.camera_x, self.camera_y = p_pos[0], p_pos[1]
             self.camera_rotate = 0
             self.engine.task_manager.add(self._top_down_task, self.TOP_DOWN_TASK_NAME, extraArgs=[], appendTask=True)

@@ -178,15 +178,15 @@ class NuPlanMap(BaseMap):
 
                 if type == LineType.BROKEN:
                     ret[map_feat_id] = {
-                        "type": MetaDriveType.BROKEN_YELLOW_LINE
-                        if boundary.color == LineColor.YELLOW else MetaDriveType.BROKEN_GREY_LINE,
+                        "type": MetaDriveType.LINE_BROKEN_SINGLE_YELLOW
+                        if boundary.color == LineColor.YELLOW else MetaDriveType.LINE_BROKEN_SINGLE_WHITE,
                         "polyline": boundary.points
                     }
                 else:
                     ret[map_feat_id] = {
                         "polyline": boundary.points,
-                        "type": MetaDriveType.CONTINUOUS_YELLOW_LINE
-                        if boundary.color == LineColor.YELLOW else MetaDriveType.CONTINUOUS_GREY_LINE
+                        "type": MetaDriveType.LINE_SOLID_SINGLE_YELLOW
+                        if boundary.color == LineColor.YELLOW else MetaDriveType.LINE_SOLID_SINGLE_WHITE
                     }
         return ret
 
