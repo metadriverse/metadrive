@@ -14,7 +14,6 @@ from metadrive.manager.waymo_idm_traffic_manager import WaymoIDMTrafficManager
 from metadrive.manager.scenario_map_manager import ScenarioMapManager
 from metadrive.manager.waymo_traffic_manager import WaymoTrafficManager
 from metadrive.obs.real_env_observation import ScenarioObservation
-from metadrive.obs.state_obs import LidarStateObservation
 from metadrive.policy.replay_policy import ReplayEgoCarPolicy
 from metadrive.utils.coordinates_shift import right_hand_to_left_vector
 from metadrive.utils import clip
@@ -68,7 +67,9 @@ SCENARIO_ENV_CONFIG = dict(
     relax_out_of_road_done=True,
 
     # ===== Coordinate system =====
-    coordinate_transform=True,  # If False, then don't do the coordinate transformation
+    # Don't set it, as it will be auto-filled by data_manager to do auto convert!
+    # If False, then don't do the coordinate transformation
+    coordinate_transform=True,
 )
 
 
