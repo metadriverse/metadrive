@@ -183,7 +183,7 @@ def test_export_metadrive_scenario_easy(num_scenarios=5, render_export_env=False
     env = WaymoEnv(
         dict(
             agent_policy=WaymoReplayEgoCarPolicy,
-            waymo_data_directory=dir1,
+            data_directory=dir1,
             use_render=render_load_env,
             num_scenarios=num_scenarios,
             force_reuse_object_name=True,
@@ -233,7 +233,7 @@ def test_export_metadrive_scenario_hard(start_seed=0, num_scenarios=3, render_ex
     env = WaymoEnv(
         dict(
             agent_policy=WaymoReplayEgoCarPolicy,
-            waymo_data_directory=dir1,
+            data_directory=dir1,
             use_render=render_load_env,
             num_scenarios=num_scenarios,
             start_scenario_index=start_seed,
@@ -283,7 +283,7 @@ def test_export_waymo_scenario(num_scenarios=3, render_export_env=False, render_
         env = WaymoEnv(
             dict(
                 agent_policy=WaymoReplayEgoCarPolicy,
-                waymo_data_directory=dir,
+                data_directory=dir,
                 use_render=render_load_env,
                 num_scenarios=num_scenarios,
                 force_reuse_object_name=True,

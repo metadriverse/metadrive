@@ -27,7 +27,7 @@ def test_export_metadrive_scenario(render_export_env=False, render_load_env=Fals
         env = WaymoEnv(
             dict(
                 agent_policy=WaymoReplayEgoCarPolicy,
-                waymo_data_directory=dir,
+                data_directory=dir,
                 use_render=render_load_env,
                 num_scenarios=num_scenarios
             )
@@ -68,7 +68,7 @@ def test_export_waymo_scenario(render_export_env=False, render_load_env=False):
         env = WaymoEnv(
             dict(
                 agent_policy=WaymoReplayEgoCarPolicy,
-                waymo_data_directory=dir,
+                data_directory=dir,
                 use_render=render_load_env,
                 num_scenarios=num_scenarios
             )

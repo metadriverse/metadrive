@@ -6,7 +6,7 @@ from metadrive.component.vehicle_navigation_module.trajectory_navigation import 
 from metadrive.constants import TerminationState
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.envs.base_env import BaseEnv
-from metadrive.manager.waymo_data_manager import WaymoDataManager
+from metadrive.manager.scenario_data_manager import ScenarioDataManager
 from metadrive.manager.waymo_idm_traffic_manager import WaymoIDMTrafficManager
 from metadrive.manager.scenario_map_manager import ScenarioMapManager
 from metadrive.manager.waymo_traffic_manager import WaymoTrafficManager
@@ -20,7 +20,7 @@ from metadrive.scenario.scenario_description import ScenarioDescription
 
 WAYMO_ENV_CONFIG = dict(
     # ===== Map Config =====
-    waymo_data_directory=AssetLoader.file_path("waymo", return_raw_style=False),
+    data_directory=AssetLoader.file_path("waymo", return_raw_style=False),
     start_scenario_index=0,
     num_scenarios=3,
     store_map=True,
@@ -122,7 +122,7 @@ class WaymoEnv(BaseEnv):
     def setup_engine(self):
         self.in_stop = False
         super(WaymoEnv, self).setup_engine()
-        self.engine.register_manager("data_manager", WaymoDataManager())
+        self.engine.register_manager("data_manager", ScenarioDataManager())
         self.engine.register_manager("map_manager", ScenarioMapManager())
         if not self.config["no_traffic"]:
             if not self.config['replay']:
@@ -366,7 +366,7 @@ if __name__ == "__main__":
             # "start_scenario_index": 192,
             # "start_scenario_index": 1000,
             "num_scenarios": 3,
-            # "waymo_data_directory": "/home/shady/Downloads/test_processed",
+            # "data_directory": "/home/shady/Downloads/test_processed",
             "horizon": 1000,
             "vehicle_config": dict(
                 # no_wheel_friction=True,

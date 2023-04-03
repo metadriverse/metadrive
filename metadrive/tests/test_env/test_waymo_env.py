@@ -19,7 +19,7 @@ def test_waymo_env(policy, render=False, num_scenarios=3):
                 "no_traffic": True if policy == WaymoIDMPolicy else False,
                 "use_render": render,
                 "agent_policy": policy,
-                "waymo_data_directory": AssetLoader.file_path(asset_path, "waymo", return_raw_style=False),
+                "data_directory": AssetLoader.file_path(asset_path, "waymo", return_raw_style=False),
                 "num_scenarios": num_scenarios
             }
         )
@@ -50,7 +50,7 @@ def test_store_map_memory_leakage(render=False):
             "store_map": True,
             "use_render": render,
             "agent_policy": WaymoReplayEgoCarPolicy,
-            "waymo_data_directory": AssetLoader.file_path(asset_path, "waymo", return_raw_style=False),
+            "data_directory": AssetLoader.file_path(asset_path, "waymo", return_raw_style=False),
             "num_scenarios": 3
         }
     )

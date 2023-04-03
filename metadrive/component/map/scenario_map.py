@@ -131,7 +131,7 @@ class ScenarioMap(BaseMap):
 if __name__ == "__main__":
     from metadrive.engine.engine_utils import initialize_engine
     from metadrive.envs.real_data_envs.waymo_env import WaymoEnv
-    from metadrive.manager.waymo_data_manager import WaymoDataManager
+    from metadrive.manager.scenario_data_manager import ScenarioDataManager
 
     # # touch these items so that pickle can work
 
@@ -143,12 +143,12 @@ if __name__ == "__main__":
     default_config["use_render"] = True
     default_config["debug"] = True
     default_config["debug_static_world"] = True
-    default_config["waymo_data_directory"] = AssetLoader.file_path("waymo", return_raw_style=False)
-    # default_config["waymo_data_directory"] = "/home/shady/Downloads/test_processed"
+    default_config["data_directory"] = AssetLoader.file_path("waymo", return_raw_style=False)
+    # default_config["data_directory"] = "/home/shady/Downloads/test_processed"
     default_config["num_scenarios"] = 1
     engine = initialize_engine(default_config)
 
-    engine.data_manager = WaymoDataManager()
+    engine.data_manager = ScenarioDataManager()
     map = ScenarioMap(map_index=0)
     map.attach_to_world()
     engine.enableMouse()

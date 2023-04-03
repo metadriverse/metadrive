@@ -19,7 +19,7 @@ def test_export_waymo_map(render=False):
             "replay": True,
             "no_traffic": True,
             "use_render": False,
-            "waymo_data_directory": AssetLoader.file_path(asset_path, "waymo", return_raw_style=False),
+            "data_directory": AssetLoader.file_path(asset_path, "waymo", return_raw_style=False),
             "num_scenarios": 3
         }
     )

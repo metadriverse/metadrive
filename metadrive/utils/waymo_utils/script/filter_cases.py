@@ -34,7 +34,7 @@ if __name__ == "__main__":
         {
             "use_render": False,
             "agent_policy": WaymoIDMPolicy,
-            "waymo_data_directory": scenario_data_path,
+            "data_directory": scenario_data_path,
             "start_scenario_index": start * 1000,
             "num_scenarios": num_scenarios,
             "store_map": False,
