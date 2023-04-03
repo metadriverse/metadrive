@@ -10,7 +10,7 @@ from panda3d.core import NodePath
 from metadrive.component.lane.metadrive_lane import MetaDriveLane
 from metadrive.constants import MetaDriveType
 from metadrive.constants import DrivableAreaProperty
-from metadrive.constants import LineType
+from metadrive.constants import PGLineType
 from metadrive.engine.physics_node import BaseRigidBodyNode
 from metadrive.utils.coordinates_shift import panda_vector
 from metadrive.utils.math_utils import wrap_to_pi, norm, Vector
@@ -29,7 +29,7 @@ class CircularLane(MetaDriveLane):
         end_phase: float,
         clockwise: bool = True,
         width: float = MetaDriveLane.DEFAULT_WIDTH,
-        line_types: Tuple[LineType, LineType] = (LineType.BROKEN, LineType.BROKEN),
+        line_types: Tuple[PGLineType, PGLineType] = (PGLineType.BROKEN, PGLineType.BROKEN),
         forbidden: bool = False,
         speed_limit: float = 1000,
         priority: int = 0

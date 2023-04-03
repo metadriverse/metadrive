@@ -256,7 +256,7 @@ AGENT_TO_OBJECT = "agent_to_object"
 BKG_COLOR = Vec3(1, 1, 1)
 
 
-class LineType:
+class PGLineType:
     """A lane side line type."""
 
     NONE = "none"
@@ -266,19 +266,18 @@ class LineType:
 
     @staticmethod
     def prohibit(line_type) -> bool:
-        if line_type in [LineType.CONTINUOUS, LineType.SIDE]:
+        if line_type in [PGLineType.CONTINUOUS, PGLineType.SIDE]:
             return True
         else:
             return False
 
 
-class LineColor:
+class PGLineColor:
     GREY = (1, 1, 1, 1)
     YELLOW = (255 / 255, 200 / 255, 0 / 255, 1)
 
 
 class DrivableAreaProperty:
-    CENTER_LINE_TYPE = LineType.CONTINUOUS
 
     # road network property
     ID = None  # each block must have a unique ID

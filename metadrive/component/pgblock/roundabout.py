@@ -5,7 +5,7 @@ from metadrive.component.lane.straight_lane import StraightLane
 from metadrive.component.pgblock.create_pg_block_utils import CreateAdverseRoad, CreateRoadFrom, create_bend_straight
 from metadrive.component.pgblock.pg_block import PGBlock, PGBlockSocket
 from metadrive.component.road_network import Road
-from metadrive.constants import LineType
+from metadrive.constants import PGLineType
 from metadrive.component.pg_space import ParameterSpace, Parameter, BlockParameterSpace
 
 
@@ -61,7 +61,7 @@ class Roundabout(PGBlock):
         lanes = road.get_lanes(self._global_network) if part_idx == 0 else road.get_lanes(self.block_network)
         right_lane = lanes[-1]
         bend, straight = create_bend_straight(
-            right_lane, 10, radius_exit, np.deg2rad(angle), True, self.lane_width, (LineType.BROKEN, LineType.SIDE)
+            right_lane, 10, radius_exit, np.deg2rad(angle), True, self.lane_width, (PGLineType.BROKEN, PGLineType.SIDE)
         )
         ignore_last_2_part_start = self.road_node((part_idx + 3) % 4, 0)
         ignore_last_2_part_end = self.road_node((part_idx + 3) % 4, 0)
@@ -79,9 +79,9 @@ class Roundabout(PGBlock):
         # set circular part 0 visualization
         for k, lane in enumerate(segment_road.get_lanes(self.block_network)):
             if k == self.positive_lane_num - 1:
-                lane.line_types = [LineType.NONE, LineType.SIDE]
+                lane.line_types = [PGLineType.NONE, PGLineType.SIDE]
             else:
-                lane.line_types = [LineType.NONE, LineType.NONE]
+                lane.line_types = [PGLineType.NONE, PGLineType.NONE]
 
         # circular part 1
         tool_lane_start = straight.position(-5, 0)
@@ -90,7 +90,7 @@ class Roundabout(PGBlock):
 
         bend, straight_to_next_iter_part = create_bend_straight(
             tool_lane, 10, radius_big, np.deg2rad(2 * angle - 90), False, self.lane_width,
-            (LineType.BROKEN, LineType.SIDE)
+            (PGLineType.BROKEN, PGLineType.SIDE)
         )
 
         segment_start_node = segment_end_node
@@ -115,7 +115,7 @@ class Roundabout(PGBlock):
         tool_lane = StraightLane(tool_lane_start, tool_lane_end)
 
         bend, straight = create_bend_straight(
-            tool_lane, length, radius_exit, np.deg2rad(angle), True, self.lane_width, (LineType.BROKEN, LineType.SIDE)
+            tool_lane, length, radius_exit, np.deg2rad(angle), True, self.lane_width, (PGLineType.BROKEN, PGLineType.SIDE)
         )
 
         segment_start_node = segment_end_node
@@ -134,9 +134,9 @@ class Roundabout(PGBlock):
         # set circular part 2 (curve) visualization
         for k, lane in enumerate(segment_road.get_lanes(self.block_network)):
             if k == self.positive_lane_num - 1:
-                lane.line_types = [LineType.NONE, LineType.SIDE]
+                lane.line_types = [PGLineType.NONE, PGLineType.SIDE]
             else:
-                lane.line_types = [LineType.NONE, LineType.NONE]
+                lane.line_types = [PGLineType.NONE, PGLineType.NONE]
 
         exit_start = segment_end_node
         exit_end = self.add_road_node()
@@ -166,7 +166,7 @@ class Roundabout(PGBlock):
 
         bend, _ = create_bend_straight(
             tool_lane, 5, radius_this_seg, np.deg2rad(180 - 2 * angle), False, self.lane_width,
-            (LineType.BROKEN, LineType.SIDE)
+            (PGLineType.BROKEN, PGLineType.SIDE)
         )
         CreateRoadFrom(
             bend,
@@ -181,11 +181,11 @@ class Roundabout(PGBlock):
         for k, lane in enumerate(segment_road.get_lanes(self.block_network)):
             if k == 0:
                 if self.positive_lane_num > 1:
-                    lane.line_types = [LineType.CONTINUOUS, LineType.BROKEN]
+                    lane.line_types = [PGLineType.CONTINUOUS, PGLineType.BROKEN]
                 else:
-                    lane.line_types = [LineType.CONTINUOUS, LineType.NONE]
+                    lane.line_types = [PGLineType.CONTINUOUS, PGLineType.NONE]
             else:
-                lane.line_types = [LineType.BROKEN, LineType.BROKEN]
+                lane.line_types = [PGLineType.BROKEN, PGLineType.BROKEN]
 
         return Road(exit_start, exit_end), none_cross
 

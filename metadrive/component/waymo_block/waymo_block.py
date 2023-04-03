@@ -4,7 +4,7 @@ from metadrive.component.block.base_block import BaseBlock
 from metadrive.component.lane.waymo_lane import WaymoLane
 from metadrive.component.road_network.edge_road_network import EdgeRoadNetwork
 from metadrive.constants import DrivableAreaProperty
-from metadrive.constants import LineType, LineColor
+from metadrive.constants import PGLineType, PGLineColor
 from metadrive.engine.engine_utils import get_engine
 from metadrive.scenario.metadrive_type import MetaDriveType
 from metadrive.utils.coordinates_shift import panda_heading
@@ -59,13 +59,13 @@ class WaymoBlock(BaseBlock):
                     self.construct_waymo_broken_line(
                         convert_polyline_to_metadrive(
                             data[WaymoLaneProperty.POLYLINE], coordinate_transform=self.coordinate_transform
-                        ), LineColor.YELLOW if MetaDriveType.is_yellow_line(type) else LineColor.GREY
+                        ), PGLineColor.YELLOW if MetaDriveType.is_yellow_line(type) else PGLineColor.GREY
                     )
                 else:
                     self.construct_waymo_continuous_line(
                         convert_polyline_to_metadrive(
                             data[WaymoLaneProperty.POLYLINE], coordinate_transform=self.coordinate_transform
-                        ), LineColor.YELLOW if MetaDriveType.is_yellow_line(type) else LineColor.GREY
+                        ), PGLineColor.YELLOW if MetaDriveType.is_yellow_line(type) else PGLineColor.GREY
                     )
             # elif MetaDriveType.is_road_edge(type) and MetaDriveType.is_sidewalk(type):
             #     self.construct_waymo_sidewalk(
@@ -77,7 +77,7 @@ class WaymoBlock(BaseBlock):
             #     self.construct_waymo_continuous_line(
             #         convert_polyline_to_metadrive(
             #             data[WaymoLaneProperty.POLYLINE], coordinate_transform=self.coordinate_transform
-            #         ), LineColor.GREY
+            #         ), PGLineColor.GREY
             #     )
             # else:
             #     raise ValueError("Can not build lane line type: {}".format(type))
@@ -97,7 +97,7 @@ class WaymoBlock(BaseBlock):
                 end = line.get_point(line.length)
             else:
                 end = line.get_point((segment + 1) * DrivableAreaProperty.STRIPE_LENGTH)
-            node_path_list = WaymoLane.construct_lane_line_segment(self, start, end, color, LineType.CONTINUOUS)
+            node_path_list = WaymoLane.construct_lane_line_segment(self, start, end, color, PGLineType.CONTINUOUS)
             self._node_path_list.extend(node_path_list)
 
     def construct_waymo_broken_line(self, polyline, color):
@@ -108,7 +108,7 @@ class WaymoBlock(BaseBlock):
             end = line.get_point(segment * DrivableAreaProperty.STRIPE_LENGTH * 2 + DrivableAreaProperty.STRIPE_LENGTH)
             if segment == segment_num - 1:
                 end = line.get_point(line.length - DrivableAreaProperty.STRIPE_LENGTH)
-            node_path_list = WaymoLane.construct_lane_line_segment(self, start, end, color, LineType.BROKEN)
+            node_path_list = WaymoLane.construct_lane_line_segment(self, start, end, color, PGLineType.BROKEN)
             self._node_path_list.extend(node_path_list)
 
     def construct_waymo_sidewalk(self, polyline):

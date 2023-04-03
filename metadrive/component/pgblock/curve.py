@@ -3,7 +3,7 @@ import numpy as np
 from metadrive.component.pgblock.create_pg_block_utils import CreateAdverseRoad, CreateRoadFrom, create_bend_straight
 from metadrive.component.pgblock.pg_block import PGBlock
 from metadrive.component.road_network import Road
-from metadrive.constants import LineType
+from metadrive.constants import PGLineType
 from metadrive.component.pg_space import ParameterSpace, Parameter, BlockParameterSpace
 
 
@@ -34,7 +34,7 @@ class Curve(PGBlock):
         radius = parameters[Parameter.radius]
         curve, straight = create_bend_straight(
             basic_lane, length, radius, np.deg2rad(angle), direction, basic_lane.width,
-            (LineType.BROKEN, LineType.SIDE)
+            (PGLineType.BROKEN, PGLineType.SIDE)
         )
         no_cross = CreateRoadFrom(
             curve,

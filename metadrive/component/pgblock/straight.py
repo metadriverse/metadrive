@@ -2,7 +2,7 @@ from metadrive.component.lane.straight_lane import StraightLane
 from metadrive.component.pgblock.create_pg_block_utils import ExtendStraightLane, CreateRoadFrom, CreateAdverseRoad
 from metadrive.component.pgblock.pg_block import PGBlock, PGBlockSocket
 from metadrive.component.road_network import Road
-from metadrive.constants import LineType
+from metadrive.constants import PGLineType
 from metadrive.component.pg_space import ParameterSpace, Parameter, BlockParameterSpace
 
 
@@ -23,7 +23,7 @@ class Straight(PGBlock):
         length = para[Parameter.length]
         basic_lane = self.positive_basic_lane
         assert isinstance(basic_lane, StraightLane), "Straight road can only connect straight type"
-        new_lane = ExtendStraightLane(basic_lane, length, [LineType.BROKEN, LineType.SIDE])
+        new_lane = ExtendStraightLane(basic_lane, length, [PGLineType.BROKEN, PGLineType.SIDE])
         start = self.pre_block_socket.positive_road.end_node
         end = self.add_road_node()
         socket = Road(start, end)

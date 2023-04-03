@@ -18,7 +18,7 @@ from metadrive.component.map.base_map import BaseMap
 from metadrive.component.nuplan_block.nuplan_block import LaneLineProperty
 from metadrive.component.nuplan_block.nuplan_block import NuPlanBlock
 from metadrive.component.road_network.edge_road_network import EdgeRoadNetwork
-from metadrive.constants import LineColor, LineType
+from metadrive.constants import PGLineColor, PGLineType
 from metadrive.engine.engine_utils import get_global_config
 from metadrive.engine.scene_cull import SceneCull
 from metadrive.utils.coordinates_shift import nuplan_to_metadrive_vector, metadrive_to_nuplan_vector
@@ -135,7 +135,7 @@ class NuPlanMap(BaseMap):
             block_points = nuplan_to_metadrive_vector(block_points, self.nuplan_center)
             id = "boundary_{}".format(idx)
             self.boundary_block.lines[id] = LaneLineProperty(
-                id, block_points, LineColor.GREY, LineType.CONTINUOUS, in_road_connector=False
+                id, block_points, PGLineColor.GREY, PGLineType.CONTINUOUS, in_road_connector=False
             )
         self.boundary_block.construct_block(self.engine.worldNP, self.engine.physics_world, attach_to_world=True)
         np.seterr(all='warn')
@@ -176,17 +176,17 @@ class NuPlanMap(BaseMap):
                 type = boundary.type
                 map_feat_id = str(boundary.id)
 
-                if type == LineType.BROKEN:
+                if type == PGLineType.BROKEN:
                     ret[map_feat_id] = {
                         "type": MetaDriveType.LINE_BROKEN_SINGLE_YELLOW
-                        if boundary.color == LineColor.YELLOW else MetaDriveType.LINE_BROKEN_SINGLE_WHITE,
+                        if boundary.color == PGLineColor.YELLOW else MetaDriveType.LINE_BROKEN_SINGLE_WHITE,
                         "polyline": boundary.points
                     }
                 else:
                     ret[map_feat_id] = {
                         "polyline": boundary.points,
                         "type": MetaDriveType.LINE_SOLID_SINGLE_YELLOW
-                        if boundary.color == LineColor.YELLOW else MetaDriveType.LINE_SOLID_SINGLE_WHITE
+                        if boundary.color == PGLineColor.YELLOW else MetaDriveType.LINE_SOLID_SINGLE_WHITE
                     }
         return ret
 

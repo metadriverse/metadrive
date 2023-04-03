@@ -7,7 +7,7 @@ from metadrive.component.pgblock.create_pg_block_utils import CreateRoadFrom, Cr
 from metadrive.component.pgblock.pg_block import PGBlock
 from metadrive.component.pgblock.ramp import Ramp
 from metadrive.component.road_network import Road
-from metadrive.constants import Decoration, LineType
+from metadrive.constants import Decoration, PGLineType
 from metadrive.utils.pg_utils.utils import check_lane_on_road
 from metadrive.component.pg_space import ParameterSpace, Parameter, BlockParameterSpace
 
@@ -37,7 +37,7 @@ class InFork(Fork):
         longitude_len = sin_angle * self.RADIUS * 2 + cos_angle * self.CONNECT_PART_LEN + self.RAMP_LEN
 
         extend_lane = ExtendStraightLane(
-            self.positive_basic_lane, longitude_len + self.EXTRA_PART, [LineType.BROKEN, LineType.CONTINUOUS]
+            self.positive_basic_lane, longitude_len + self.EXTRA_PART, [PGLineType.BROKEN, PGLineType.CONTINUOUS]
         )
         extend_road = Road(self.pre_block_socket.positive_road.end_node, self.add_road_node())
         no_cross = CreateRoadFrom(
@@ -46,7 +46,7 @@ class InFork(Fork):
             extend_road,
             self.block_network,
             self._global_network,
-            side_lane_line_type=LineType.CONTINUOUS,
+            side_lane_line_type=PGLineType.CONTINUOUS,
             ignore_intersection_checking=False
         ) and no_cross
         no_cross = CreateAdverseRoad(
@@ -54,7 +54,7 @@ class InFork(Fork):
         ) and no_cross
 
         acc_side_lane = ExtendStraightLane(
-            extend_lane, acc_lane_len + self.lane_width, [LineType.BROKEN, LineType.CONTINUOUS]
+            extend_lane, acc_lane_len + self.lane_width, [PGLineType.BROKEN, PGLineType.CONTINUOUS]
         )
         acc_road = Road(extend_road.end_node, self.add_road_node())
         no_cross = CreateRoadFrom(
@@ -68,7 +68,7 @@ class InFork(Fork):
         no_cross = CreateAdverseRoad(
             acc_road, self.block_network, self._global_network, ignore_intersection_checking=False
         ) and no_cross
-        acc_road.get_lanes(self.block_network)[-1].line_types = [LineType.BROKEN, LineType.BROKEN]
+        acc_road.get_lanes(self.block_network)[-1].line_types = [PGLineType.BROKEN, PGLineType.BROKEN]
 
         # ramp part, part 1
         self.set_part_idx(1)
@@ -125,7 +125,7 @@ class InFork(Fork):
             self.LANE_TYPE,
             speed_limit=self.SPEED_LIMIT
         )
-        acc_lane.line_types = [LineType.BROKEN, LineType.CONTINUOUS]
+        acc_lane.line_types = [PGLineType.BROKEN, PGLineType.CONTINUOUS]
         bend_2_road = Road(connect_road.end_node, self.road_node(0, 0))  # end at part1 road 0, extend road
         acc_road = Road(self.road_node(0, 0), self.road_node(0, 1))
         self.block_network.add_lane(bend_2_road.start_node, bend_2_road.end_node, bend_2)
@@ -136,7 +136,7 @@ class InFork(Fork):
             self.block_network,
             self._global_network,
             False,
-            inner_lane_line_type=LineType.BROKEN,
+            inner_lane_line_type=PGLineType.BROKEN,
             ignore_intersection_checking=False
         ) and no_cross
         no_cross = CreateRoadFrom(
@@ -146,7 +146,7 @@ class InFork(Fork):
             self.block_network,
             self._global_network,
             False,
-            inner_lane_line_type=LineType.BROKEN,
+            inner_lane_line_type=PGLineType.BROKEN,
             ignore_intersection_checking=False
         ) and no_cross
         self.add_sockets(PGBlock.create_socket_from_positive_road(acc_road))
@@ -159,7 +159,7 @@ class OutFork(Fork):
     def _get_deacc_lane(self, att_lane: StraightLane):
         start = att_lane.position(self.lane_width, self.lane_width)
         end = att_lane.position(att_lane.length, self.lane_width)
-        return StraightLane(start, end, self.lane_width, (LineType.BROKEN, LineType.CONTINUOUS))
+        return StraightLane(start, end, self.lane_width, (PGLineType.BROKEN, PGLineType.CONTINUOUS))
 
     def _get_merge_part(self, side_lane: StraightLane):
         tool_lane = StraightLane(side_lane.end, side_lane.start, side_lane.width)
@@ -170,7 +170,7 @@ class OutFork(Fork):
             np.pi / 2,
             True,
             width=self.lane_width,
-            line_types=(LineType.CONTINUOUS, LineType.BROKEN)
+            line_types=(PGLineType.CONTINUOUS, PGLineType.BROKEN)
         )
         return merge_part
 
@@ -185,7 +185,7 @@ class OutFork(Fork):
         # part 0 road 0
         dec_lane_len = self.get_config()[Parameter.length]
         dec_lane = ExtendStraightLane(
-            self.positive_basic_lane, dec_lane_len + self.lane_width, [LineType.BROKEN, LineType.CONTINUOUS]
+            self.positive_basic_lane, dec_lane_len + self.lane_width, [PGLineType.BROKEN, PGLineType.CONTINUOUS]
         )
         dec_road = Road(self.pre_block_socket.positive_road.end_node, self.add_road_node())
         no_cross = CreateRoadFrom(
@@ -200,10 +200,10 @@ class OutFork(Fork):
             dec_road, self.block_network, self._global_network, ignore_intersection_checking=False
         ) and no_cross
         dec_right_lane = dec_road.get_lanes(self.block_network)[-1]
-        dec_right_lane.line_types = [LineType.BROKEN, LineType.BROKEN]
+        dec_right_lane.line_types = [PGLineType.BROKEN, PGLineType.BROKEN]
 
         # part 0 road 1
-        extend_lane = ExtendStraightLane(dec_right_lane, longitude_len, [LineType.BROKEN, LineType.CONTINUOUS])
+        extend_lane = ExtendStraightLane(dec_right_lane, longitude_len, [PGLineType.BROKEN, PGLineType.CONTINUOUS])
         extend_road = Road(dec_road.end_node, self.add_road_node())
         no_cross = CreateRoadFrom(
             extend_lane,
