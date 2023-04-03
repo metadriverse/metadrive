@@ -115,7 +115,8 @@ class Roundabout(PGBlock):
         tool_lane = StraightLane(tool_lane_start, tool_lane_end)
 
         bend, straight = create_bend_straight(
-            tool_lane, length, radius_exit, np.deg2rad(angle), True, self.lane_width, (PGLineType.BROKEN, PGLineType.SIDE)
+            tool_lane, length, radius_exit, np.deg2rad(angle), True, self.lane_width,
+            (PGLineType.BROKEN, PGLineType.SIDE)
         )
 
         segment_start_node = segment_end_node

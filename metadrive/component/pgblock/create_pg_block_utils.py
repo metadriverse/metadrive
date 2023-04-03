@@ -160,7 +160,9 @@ def CreateRoadFrom(
     return no_cross
 
 
-def ExtendStraightLane(lane: "StraightLane", extend_length: float, line_types: (PGLineType, PGLineType)) -> "StraightLane":
+def ExtendStraightLane(
+    lane: "StraightLane", extend_length: float, line_types: (PGLineType, PGLineType)
+) -> "StraightLane":
     new_lane = copy.copy(lane)
     start_point = lane.end
     end_point = lane.position(lane.length + extend_length, 0)
