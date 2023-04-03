@@ -3,7 +3,7 @@ from metadrive.component.pgblock.bottleneck import PGBlock
 from metadrive.component.pgblock.create_pg_block_utils import CreateAdverseRoad, CreateRoadFrom, ExtendStraightLane
 from metadrive.component.pgblock.pg_block import PGBlockSocket
 from metadrive.component.road_network import Road
-from metadrive.constants import LineType, LineColor
+from metadrive.constants import PGLineType, PGLineColor
 from metadrive.engine.engine_utils import get_engine
 from metadrive.component.pg_space import ParameterSpace, Parameter, BlockParameterSpace
 
@@ -24,7 +24,7 @@ class TollGate(PGBlock):
         length = para[Parameter.length]
         self.BUILDING_LENGTH = length
         basic_lane = self.positive_basic_lane
-        new_lane = ExtendStraightLane(basic_lane, length, [LineType.CONTINUOUS, LineType.SIDE])
+        new_lane = ExtendStraightLane(basic_lane, length, [PGLineType.CONTINUOUS, PGLineType.SIDE])
         start = self.pre_block_socket.positive_road.end_node
         end = self.add_road_node()
         socket = Road(start, end)
@@ -37,10 +37,10 @@ class TollGate(PGBlock):
             socket,
             self.block_network,
             self._global_network,
-            center_line_color=LineColor.YELLOW,
-            center_line_type=LineType.CONTINUOUS,
-            inner_lane_line_type=LineType.CONTINUOUS,
-            side_lane_line_type=LineType.SIDE,
+            center_line_color=PGLineColor.YELLOW,
+            center_line_type=PGLineType.CONTINUOUS,
+            inner_lane_line_type=PGLineType.CONTINUOUS,
+            side_lane_line_type=PGLineType.SIDE,
             ignore_intersection_checking=self.ignore_intersection_checking
         )
 
@@ -49,10 +49,10 @@ class TollGate(PGBlock):
             socket,
             self.block_network,
             self._global_network,
-            center_line_color=LineColor.YELLOW,
-            center_line_type=LineType.CONTINUOUS,
-            inner_lane_line_type=LineType.CONTINUOUS,
-            side_lane_line_type=LineType.SIDE,
+            center_line_color=PGLineColor.YELLOW,
+            center_line_type=PGLineType.CONTINUOUS,
+            inner_lane_line_type=PGLineType.CONTINUOUS,
+            side_lane_line_type=PGLineType.SIDE,
             ignore_intersection_checking=self.ignore_intersection_checking
         ) and no_cross
 

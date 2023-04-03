@@ -8,13 +8,14 @@ from metadrive.component.traffic_participants.cyclist import Cyclist
 from metadrive.component.traffic_participants.pedestrian import Pedestrian
 from metadrive.component.vehicle.base_vehicle import BaseVehicle
 from metadrive.constants import DATA_VERSION, DEFAULT_AGENT
-from metadrive.scenario import MetaDriveType, ScenarioDescription as SD
+from metadrive.scenario import ScenarioDescription as SD
+from metadrive.type import MetaDriveType
 
 
 def draw_map(map_features, show=False):
     figure(figsize=(8, 6), dpi=500)
     for key, value in map_features.items():
-        if value.get("type", None) == MetaDriveType.LANE_CENTER_LINE:
+        if value.get("type", None) == MetaDriveType.LANE_SURFACE_STREET:
             plt.scatter([x[0] for x in value["polyline"]], [y[1] for y in value["polyline"]], s=0.1)
         elif value.get("type", None) == "road_edge":
             plt.scatter([x[0] for x in value["polyline"]], [y[1] for y in value["polyline"]], s=0.1, c=(0, 0, 0))

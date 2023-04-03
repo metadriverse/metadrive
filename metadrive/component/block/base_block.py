@@ -11,7 +11,7 @@ from metadrive.component.lane.abs_lane import AbstractLane
 from metadrive.component.lane.point_lane import PointLane
 from metadrive.component.road_network.node_road_network import NodeRoadNetwork
 from metadrive.component.road_network.road import Road
-from metadrive.constants import BodyName, CamMask, LineType, LineColor, DrivableAreaProperty
+from metadrive.constants import MetaDriveType, CamMask, PGLineType, PGLineColor, DrivableAreaProperty
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.engine.core.physics_world import PhysicsWorld
 from metadrive.utils.coordinates_shift import panda_vector, panda_heading
@@ -271,7 +271,7 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
             for c, i in enumerate([-1, 1]):
                 line_color = colors[c]
                 acc_length = 0
-                if lane.line_types[c] == LineType.CONTINUOUS:
+                if lane.line_types[c] == PGLineType.CONTINUOUS:
                     for segment in lane.segment_property:
                         lane_start = lane.position(acc_length, i * lane_width / 2)
                         acc_length += segment["length"]
@@ -284,10 +284,10 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
     def _add_box_body(self, lane_start, lane_end, middle, parent_np: NodePath, line_type, line_color):
         raise DeprecationWarning("Useless, currently")
         length = norm(lane_end[0] - lane_start[0], lane_end[1] - lane_start[1])
-        if LineType.prohibit(line_type):
-            node_name = BodyName.LINE_SOLID_SINGLE_WHITE if line_color == LineColor.GREY else BodyName.LINE_SOLID_SINGLE_YELLOW
+        if PGLineType.prohibit(line_type):
+            node_name = MetaDriveType.LINE_SOLID_SINGLE_WHITE if line_color == PGLineColor.GREY else MetaDriveType.LINE_SOLID_SINGLE_YELLOW
         else:
-            node_name = BodyName.BROKEN_LINE
+            node_name = MetaDriveType.BROKEN_LINE
         body_node = BulletGhostNode(node_name)
         body_node.set_active(False)
         body_node.setKinematic(False)
@@ -300,7 +300,7 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
             Vec3(length / 2, DrivableAreaProperty.LANE_LINE_WIDTH / 2, DrivableAreaProperty.LANE_LINE_GHOST_HEIGHT)
         )
         body_np.node().addShape(shape)
-        mask = DrivableAreaProperty.CONTINUOUS_COLLISION_MASK if line_type != LineType.BROKEN else DrivableAreaProperty.BROKEN_COLLISION_MASK
+        mask = DrivableAreaProperty.CONTINUOUS_COLLISION_MASK if line_type != PGLineType.BROKEN else DrivableAreaProperty.BROKEN_COLLISION_MASK
         body_np.node().setIntoCollideMask(mask)
         self.static_nodes.append(body_np.node())
 

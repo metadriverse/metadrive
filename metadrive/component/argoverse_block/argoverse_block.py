@@ -1,7 +1,7 @@
 from typing import Dict
 
 from metadrive.component.block.base_block import BaseBlock
-from metadrive.component.lane.abs_lane import LineColor, LineType
+from metadrive.component.lane.abs_lane import PGLineColor, PGLineType
 from metadrive.component.lane.argoverse_lane import ArgoverseLane
 from metadrive.component.road_network import Road
 from metadrive.component.road_network.node_road_network import NodeRoadNetwork
@@ -82,25 +82,25 @@ class ArgoverseBlock(BaseBlock):
             for idx, l in enumerate(lanes):
                 if l.is_intersection:
                     # if l.turn_direction == "RIGHT" and l.r_neighbor_id is None:
-                    #     l.line_types = [LineType.NONE, LineType.CONTINUOUS]
+                    #     l.line_types = [PGLineType.NONE, PGLineType.CONTINUOUS]
                     # else:
-                    #     l.line_types = [LineType.NONE, LineType.NONE]
+                    #     l.line_types = [PGLineType.NONE, PGLineType.NONE]
                     #
                     # if l.turn_direction == "LEFT" and l.l_neighbor_id is None:
-                    #     l.line_types = [LineType.CONTINUOUS, LineType.NONE]
+                    #     l.line_types = [PGLineType.CONTINUOUS, PGLineType.NONE]
                     # else:
-                    l.line_types = [LineType.NONE, LineType.NONE]
+                    l.line_types = [PGLineType.NONE, PGLineType.NONE]
                 else:
                     if l.r_neighbor_id is not None:
-                        right_type = LineType.BROKEN
+                        right_type = PGLineType.BROKEN
                     else:
-                        right_type = LineType.CONTINUOUS
+                        right_type = PGLineType.CONTINUOUS
                     if idx == 0:
-                        left_type = LineType.CONTINUOUS
+                        left_type = PGLineType.CONTINUOUS
                         if l.l_neighbor_id is not None:
-                            l.line_color = [LineColor.YELLOW, LineColor.GREY]
+                            l.line_color = [PGLineColor.YELLOW, PGLineColor.GREY]
                     else:
-                        left_type = LineType.BROKEN
+                        left_type = PGLineType.BROKEN
                     l.line_types = [left_type, right_type]
             # if not lane.is_intersection:
             _, right_lat = self.argo_lanes[lane.r_neighbor_id].local_coordinates(

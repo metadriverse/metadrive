@@ -10,7 +10,7 @@ from metadrive.component.pgblock.first_block import FirstPGBlock
 from metadrive.component.pgblock.parking_lot import ParkingLot
 from metadrive.component.pgblock.t_intersection import TInterSection
 from metadrive.component.road_network import Road
-from metadrive.constants import BodyName
+from metadrive.constants import MetaDriveType
 from metadrive.constants import CollisionGroup
 from metadrive.engine.engine_utils import get_engine
 from metadrive.envs.marl_envs.multi_agent_metadrive import MultiAgentMetaDrive
@@ -133,7 +133,7 @@ class ParkingLotSpawnManager(SpawnManager):
                 vis_body.node().setIntoCollideMask(CollisionGroup.AllOff)
                 bp.force_set("need_debug", False)
 
-            if not result.hasHit() or result.node.getName() != BodyName.VEHICLE:
+            if not result.hasHit() or result.node.getName() != MetaDriveType.VEHICLE:
                 new_bp = copy.deepcopy(bp).get_dict()
                 if randomize:
                     new_bp["config"] = self._randomize_position_in_slot(new_bp["config"])

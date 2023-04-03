@@ -5,7 +5,7 @@ from panda3d.bullet import BulletBoxShape
 from panda3d.bullet import BulletCylinderShape
 
 from metadrive.component.static_object.base_static_object import BaseStaticObject
-from metadrive.constants import BodyName
+from metadrive.constants import MetaDriveType
 from metadrive.constants import CollisionGroup
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.engine.physics_node import BaseRigidBodyNode
@@ -13,7 +13,7 @@ from metadrive.engine.physics_node import BaseRigidBodyNode
 
 class Cyclist(BaseTrafficParticipant):
     MASS = 80  # kg
-    TYPE_NAME = BodyName.CYCLIST
+    TYPE_NAME = MetaDriveType.CYCLIST
     COLLISION_MASK = CollisionGroup.TrafficParticipants
 
     MODEL = None

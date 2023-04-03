@@ -4,7 +4,7 @@ import math
 import numpy as np
 
 from metadrive.component.lane.metadrive_lane import MetaDriveLane
-from metadrive.constants import LineType
+from metadrive.constants import PGLineType
 from metadrive.utils.math_utils import norm
 
 
@@ -15,7 +15,7 @@ class StraightLane(MetaDriveLane):
         start: Union[np.ndarray, Sequence[float]],
         end: Union[np.ndarray, Sequence[float]],
         width: float = MetaDriveLane.DEFAULT_WIDTH,
-        line_types: Tuple[LineType, LineType] = (LineType.BROKEN, LineType.BROKEN),
+        line_types: Tuple[PGLineType, PGLineType] = (PGLineType.BROKEN, PGLineType.BROKEN),
         forbidden: bool = False,
         speed_limit: float = 1000,
         priority: int = 0
@@ -35,7 +35,7 @@ class StraightLane(MetaDriveLane):
         self.start = np.array(start)
         self.end = np.array(end)
         self.width = width
-        self.line_types = line_types or [LineType.BROKEN, LineType.BROKEN]
+        self.line_types = line_types or [PGLineType.BROKEN, PGLineType.BROKEN]
         self.forbidden = forbidden
         self.priority = priority
         self.length = norm((self.end - self.start)[0], (self.end - self.start)[1])

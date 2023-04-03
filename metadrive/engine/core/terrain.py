@@ -5,7 +5,7 @@ from panda3d.bullet import BulletRigidBodyNode, BulletPlaneShape
 from panda3d.core import Vec3, CardMaker, TextureStage, Texture, LQuaternionf, SamplerState
 
 from metadrive.base_class.base_object import BaseObject
-from metadrive.constants import BodyName, CamMask, CollisionGroup
+from metadrive.constants import MetaDriveType, CamMask, CollisionGroup
 from metadrive.engine.asset_loader import AssetLoader
 
 
@@ -16,7 +16,7 @@ class Terrain(BaseObject):
     def __init__(self, show_terrain):
         super(Terrain, self).__init__(random_seed=0)
         shape = BulletPlaneShape(Vec3(0, 0, 1), 0)
-        node = BulletRigidBodyNode(BodyName.GROUND)
+        node = BulletRigidBodyNode(MetaDriveType.GROUND)
         node.setFriction(.9)
         node.addShape(shape)
 

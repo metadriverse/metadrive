@@ -1,6 +1,6 @@
 from metadrive.component.vehicle.base_vehicle import BaseVehicle
 from metadrive.component.vehicle.vehicle_type import DefaultVehicle
-from metadrive.constants import BodyName
+from metadrive.constants import MetaDriveType
 from metadrive.constants import DEFAULT_AGENT
 from metadrive.envs.metadrive_env import MetaDriveEnv
 from metadrive.utils import setup_logger
@@ -36,7 +36,7 @@ def test_original_lidar(render=False):
                                                   ).detected_objects
         yellow = 0
         for obj in objs:
-            if obj.getNode().getName() == BodyName.LINE_SOLID_SINGLE_YELLOW:
+            if obj.getNode().getName() == MetaDriveType.LINE_SOLID_SINGLE_YELLOW:
                 yellow += 1
         assert yellow == 2, "side detector and lane detector broken"
         detect_traffic_vehicle = False
@@ -88,7 +88,7 @@ def test_lidar_with_mask(render=False):
                                                   ).detected_objects
         yellow = 0
         for obj in objs:
-            if obj.getNode().getName() == BodyName.LINE_SOLID_SINGLE_YELLOW:
+            if obj.getNode().getName() == MetaDriveType.LINE_SOLID_SINGLE_YELLOW:
                 yellow += 1
         assert yellow == 2, "side detector and lane detector broken"
         detect_traffic_vehicle = False

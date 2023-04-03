@@ -4,9 +4,9 @@ import numpy as np
 
 from metadrive.component.lane.circular_lane import CircularLane
 from metadrive.component.lane.straight_lane import StraightLane
-from metadrive.constants import LineType, LineColor
+from metadrive.constants import PGLineType, PGLineColor
 from metadrive.utils.utils import import_pygame
-from metadrive.scenario.metadrive_type import MetaDriveType
+from metadrive.type import MetaDriveType
 
 PositionType = Union[Tuple[float, float], np.ndarray]
 pygame = import_pygame()
@@ -264,26 +264,26 @@ class LaneGraphics:
         s0 = (int(s_origin) // cls.STRIPE_SPACING - stripes_count // 2) * cls.STRIPE_SPACING
         for side in range(side):
             if use_line_color:
-                if lane.line_colors[side] == LineColor.YELLOW and lane.line_types[side] == LineType.CONTINUOUS:
+                if lane.line_colors[side] == PGLineColor.YELLOW and lane.line_types[side] == PGLineType.CONTINUOUS:
                     color = (0, 80, 220)
-                elif lane.line_types[side] == LineType.SIDE:
+                elif lane.line_types[side] == PGLineType.SIDE:
                     color = (160, 160, 160)
                 else:
                     color = (80, 80, 80)
-            if lane.line_types[side] == LineType.BROKEN:
+            if lane.line_types[side] == PGLineType.BROKEN:
                 cls.striped_line(lane, surface, stripes_count, s0, side, color=color)
             # circular side or continuous, it is same now
-            elif lane.line_types[side] == LineType.CONTINUOUS and isinstance(lane, CircularLane):
+            elif lane.line_types[side] == PGLineType.CONTINUOUS and isinstance(lane, CircularLane):
                 cls.continuous_curve(lane, surface, stripes_count, s0, side, color=color)
-            elif lane.line_types[side] == LineType.SIDE and isinstance(lane, CircularLane):
+            elif lane.line_types[side] == PGLineType.SIDE and isinstance(lane, CircularLane):
                 cls.continuous_curve(lane, surface, stripes_count, s0, side, color=color)
             # the line of continuous straight and side straight is same now
-            elif (lane.line_types[side] == LineType.CONTINUOUS) and isinstance(lane, StraightLane):
+            elif (lane.line_types[side] == PGLineType.CONTINUOUS) and isinstance(lane, StraightLane):
                 cls.continuous_line(lane, surface, stripes_count, s0, side, color=color)
-            elif (lane.line_types[side] == LineType.SIDE) and isinstance(lane, StraightLane):
+            elif (lane.line_types[side] == PGLineType.SIDE) and isinstance(lane, StraightLane):
                 cls.continuous_line(lane, surface, stripes_count, s0, side, color=color)
             # special scenario
-            elif lane.line_types[side] == LineType.NONE:
+            elif lane.line_types[side] == PGLineType.NONE:
                 continue
             else:
                 raise ValueError("I don't know how to draw this line type: {}".format(lane.line_types[side]))
@@ -331,7 +331,7 @@ class LaneGraphics:
         Display a lane on a surface.
         """
         lane = poly_line
-        if color == LineColor.YELLOW:
+        if color == PGLineColor.YELLOW:
             color = (0, 80, 220)
         else:
             color = (80, 80, 80)
@@ -341,7 +341,7 @@ class LaneGraphics:
         s_origin, _ = lane.local_coordinates(surface.origin)
         s0 = (int(s_origin) // cls.STRIPE_SPACING - stripes_count // 2) * cls.STRIPE_SPACING
 
-        if type == LineType.BROKEN:
+        if type == PGLineType.BROKEN:
             starts = s0 + np.arange(stripes_count) * cls.STRIPE_SPACING
             ends = s0 + np.arange(stripes_count) * cls.STRIPE_SPACING + cls.STRIPE_LENGTH
             lats = [0 for s in starts]

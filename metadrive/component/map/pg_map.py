@@ -1,6 +1,6 @@
 import copy
-from metadrive.scenario.metadrive_type import MetaDriveType
-from metadrive.constants import LineType, LineColor
+from metadrive.type import MetaDriveType
+from metadrive.constants import PGLineType, PGLineColor
 from typing import List
 
 from panda3d.core import NodePath
@@ -137,7 +137,7 @@ class PGMap(BaseMap):
                     sides = 2 if l is map.road_network.graph[_from][_to][-1] or decoration else 1
                     for side in range(sides):
                         type = l.line_types[side]
-                        if type == LineType.NONE:
+                        if type == PGLineType.NONE:
                             continue
                         color = l.line_colors[side]
                         line_type = self.get_line_type(type, color)
@@ -152,15 +152,15 @@ class PGMap(BaseMap):
         return ret
 
     def get_line_type(self, type, color):
-        if type == LineType.CONTINUOUS and color == LineColor.YELLOW:
+        if type == PGLineType.CONTINUOUS and color == PGLineColor.YELLOW:
             return MetaDriveType.LINE_SOLID_SINGLE_YELLOW
-        elif type == LineType.BROKEN and color == LineColor.YELLOW:
+        elif type == PGLineType.BROKEN and color == PGLineColor.YELLOW:
             return MetaDriveType.LINE_BROKEN_SINGLE_YELLOW
-        elif type == LineType.CONTINUOUS and color == LineColor.GREY:
+        elif type == PGLineType.CONTINUOUS and color == PGLineColor.GREY:
             return MetaDriveType.LINE_SOLID_SINGLE_WHITE
-        elif type == LineType.BROKEN and color == LineColor.GREY:
+        elif type == PGLineType.BROKEN and color == PGLineColor.GREY:
             return MetaDriveType.LINE_BROKEN_SINGLE_WHITE
-        elif type == LineType.SIDE:
+        elif type == PGLineType.SIDE:
             return MetaDriveType.BOUNDARY_LINE
         else:
             # Unknown line type

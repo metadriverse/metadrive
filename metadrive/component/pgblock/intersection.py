@@ -8,7 +8,7 @@ from metadrive.component.pgblock.create_pg_block_utils import CreateAdverseRoad,
     create_bend_straight
 from metadrive.component.pgblock.pg_block import PGBlock, PGBlockSocket
 from metadrive.component.road_network import Road
-from metadrive.constants import LineType
+from metadrive.constants import PGLineType
 from metadrive.utils.pg_utils.utils import check_lane_on_road
 from metadrive.component.pg_space import ParameterSpace, Parameter, BlockParameterSpace
 
@@ -116,7 +116,7 @@ class InterSection(PGBlock):
         lanes_on_road = copy.copy(attach_lanes)
         straight_lane_len = 2 * radius + (2 * lane_num - 1) * lanes_on_road[0].width_at(0)
         for l in lanes_on_road:
-            next_lane = ExtendStraightLane(l, straight_lane_len, (LineType.NONE, LineType.NONE))
+            next_lane = ExtendStraightLane(l, straight_lane_len, (PGLineType.NONE, PGLineType.NONE))
             self.block_network.add_lane(attach_road.end_node, intersect_nodes[1], next_lane)
 
         # right part
@@ -125,7 +125,7 @@ class InterSection(PGBlock):
         assert isinstance(right_turn_lane, StraightLane), "Can't create a intersection following a circular lane"
         right_bend, right_straight = create_bend_straight(
             right_turn_lane, length, radius, np.deg2rad(self.ANGLE), True, right_turn_lane.width_at(0),
-            (LineType.NONE, LineType.SIDE)
+            (PGLineType.NONE, PGLineType.SIDE)
         )
 
         non_cross = (
@@ -140,14 +140,14 @@ class InterSection(PGBlock):
             self.block_network,
             self._global_network,
             toward_smaller_lane_index=True,
-            side_lane_line_type=LineType.SIDE,
-            inner_lane_line_type=LineType.NONE,
-            center_line_type=LineType.NONE,
+            side_lane_line_type=PGLineType.SIDE,
+            inner_lane_line_type=PGLineType.NONE,
+            center_line_type=PGLineType.NONE,
             ignore_intersection_checking=self.ignore_intersection_checking
         )
 
         intersect_nodes.rotate(-1)
-        right_straight.line_types = [LineType.BROKEN, LineType.SIDE]
+        right_straight.line_types = [PGLineType.BROKEN, PGLineType.SIDE]
         return right_straight, non_cross
 
     def get_socket(self, index: int) -> PGBlockSocket:
@@ -163,7 +163,7 @@ class InterSection(PGBlock):
             diff = abs(diff)
             left_bend, extra_part = create_bend_straight(
                 attach_left_lane, self.lane_width * diff, left_turn_radius, np.deg2rad(self.ANGLE), False,
-                attach_left_lane.width_at(0), (LineType.NONE, LineType.NONE)
+                attach_left_lane.width_at(0), (PGLineType.NONE, PGLineType.NONE)
             )
             left_road_start = intersect_nodes[2]
             pre_left_road_start = left_road_start + self.EXTRA_PART
@@ -174,9 +174,9 @@ class InterSection(PGBlock):
                 self.block_network,
                 self._global_network,
                 toward_smaller_lane_index=False,
-                center_line_type=LineType.NONE,
-                side_lane_line_type=LineType.NONE,
-                inner_lane_line_type=LineType.NONE,
+                center_line_type=PGLineType.NONE,
+                side_lane_line_type=PGLineType.NONE,
+                inner_lane_line_type=PGLineType.NONE,
                 ignore_intersection_checking=self.ignore_intersection_checking
             )
 
@@ -187,16 +187,16 @@ class InterSection(PGBlock):
                 self.block_network,
                 self._global_network,
                 toward_smaller_lane_index=False,
-                center_line_type=LineType.NONE,
-                side_lane_line_type=LineType.NONE,
-                inner_lane_line_type=LineType.NONE,
+                center_line_type=PGLineType.NONE,
+                side_lane_line_type=PGLineType.NONE,
+                inner_lane_line_type=PGLineType.NONE,
                 ignore_intersection_checking=self.ignore_intersection_checking
             )
 
         else:
             left_bend, _ = create_bend_straight(
                 attach_left_lane, self.EXIT_PART_LENGTH, left_turn_radius, np.deg2rad(self.ANGLE), False,
-                attach_left_lane.width_at(0), (LineType.NONE, LineType.NONE)
+                attach_left_lane.width_at(0), (PGLineType.NONE, PGLineType.NONE)
             )
             left_road_start = intersect_nodes[2]
             CreateRoadFrom(
@@ -206,22 +206,22 @@ class InterSection(PGBlock):
                 self.block_network,
                 self._global_network,
                 toward_smaller_lane_index=False,
-                center_line_type=LineType.NONE,
-                side_lane_line_type=LineType.NONE,
-                inner_lane_line_type=LineType.NONE,
+                center_line_type=PGLineType.NONE,
+                side_lane_line_type=PGLineType.NONE,
+                inner_lane_line_type=PGLineType.NONE,
                 ignore_intersection_checking=self.ignore_intersection_checking
             )
 
     def _create_u_turn(self, attach_road, part_idx):
         # set to CONTINUOUS to debug
-        line_type = LineType.NONE
+        line_type = PGLineType.NONE
         lanes = attach_road.get_lanes(self.block_network) if part_idx != 0 else self.positive_lanes
         attach_left_lane = lanes[0]
         lane_num = len(lanes)
         left_turn_radius = self.lane_width / 2
         left_bend, _ = create_bend_straight(
             attach_left_lane, 0.1, left_turn_radius, np.deg2rad(180), False, attach_left_lane.width_at(0),
-            (LineType.NONE, LineType.NONE)
+            (PGLineType.NONE, PGLineType.NONE)
         )
         left_road_start = (-attach_road).start_node
         CreateRoadFrom(
