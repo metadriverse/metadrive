@@ -9,7 +9,7 @@ if __name__ == "__main__":
             "manual_control": True,
             "num_scenarios": 100,
             "show_coordinates": True,
-            "map":"SSSS",
+            "map": "SSSS",
             "accident_prob": 1.0,
             "vehicle_config": {
                 "show_lidar": True

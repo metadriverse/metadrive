@@ -25,7 +25,7 @@ if __name__ == "__main__":
             # "show_coordinates": True,
             "manual_control": True,
             "use_render": True,
-            "accident_prob":1,
+            "accident_prob": 1,
             "decision_repeat": 5,
             "interface_panel": [MiniMap, VehiclePanel, RGBCamera],
             "need_inverse_traffic": False,
