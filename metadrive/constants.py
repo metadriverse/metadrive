@@ -84,39 +84,19 @@ class TrafficLightStatus:
             return [180, 180, 180]
 
 
-class BodyName:
-    LINE_SOLID_SINGLE_WHITE = MetaDriveType.LINE_SOLID_SINGLE_WHITE
-    LINE_SOLID_SINGLE_YELLOW = MetaDriveType.LINE_SOLID_SINGLE_YELLOW
-
-    LINE_BROKEN_SINGLE_YELLOW = MetaDriveType.LINE_BROKEN_SINGLE_YELLOW
-    LINE_BROKEN_SINGLE_WHITE = MetaDriveType.LINE_BROKEN_SINGLE_WHITE
-
-    TRAFFIC_LIGHT = MetaDriveType.TRAFFIC_LIGHT
-    VEHICLE = MetaDriveType.VEHICLE
-
-    TRAFFIC_OBJECT = MetaDriveType.TRAFFIC_OBJECT
-    TOLLGATE = MetaDriveType.TOLLGATE
-
-    PEDESTRIAN = MetaDriveType.PEDESTRIAN
-    CYCLIST = MetaDriveType.CYCLIST
-
-    LANE = MetaDriveType.LANE_SURFACE_STREET
-    SIDEWALK = MetaDriveType.BOUNDARY_LINE
-    GROUND = MetaDriveType.GROUND
-    INVISIBLE_WALL = MetaDriveType.INVISIBLE_WALL
-
-
 # Used for rendering the banner in Interface.
 COLOR = {
-    BodyName.SIDEWALK: "red",
-    BodyName.LINE_SOLID_SINGLE_WHITE: "orange",
-    BodyName.LINE_SOLID_SINGLE_YELLOW: "orange",
-    BodyName.LINE_BROKEN_SINGLE_YELLOW: "yellow",
-    BodyName.LINE_BROKEN_SINGLE_WHITE: "yellow",
-    BodyName.VEHICLE: "red",
-    BodyName.TRAFFIC_OBJECT: "orange",
-    BodyName.INVISIBLE_WALL: "red",
-    BodyName.TOLLGATE: "red",
+    MetaDriveType.BOUNDARY_LINE: "red",
+    MetaDriveType.LINE_SOLID_SINGLE_WHITE: "orange",
+    MetaDriveType.LINE_SOLID_SINGLE_YELLOW: "orange",
+    MetaDriveType.LINE_BROKEN_SINGLE_YELLOW: "yellow",
+    MetaDriveType.LINE_BROKEN_SINGLE_WHITE: "green",
+    MetaDriveType.VEHICLE: "red",
+    MetaDriveType.TRAFFIC_OBJECT: "yellow",
+    MetaDriveType.PEDESTRIAN: "red",
+    MetaDriveType.CYCLIST: "red",
+    MetaDriveType.INVISIBLE_WALL: "red",
+    MetaDriveType.BUILDING: "red",
     TrafficLightStatus.semantics(TrafficLightStatus.RED): "red",
     TrafficLightStatus.semantics(TrafficLightStatus.YELLOW): "orange",
     TrafficLightStatus.semantics(TrafficLightStatus.GREEN): "yellow",

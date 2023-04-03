@@ -22,7 +22,7 @@ from metadrive.component.vehicle_module.mini_map import MiniMap
 from metadrive.component.vehicle_module.rgb_camera import RGBCamera
 from metadrive.component.vehicle_navigation_module.edge_network_navigation import EdgeNetworkNavigation
 from metadrive.component.vehicle_navigation_module.node_network_navigation import NodeNetworkNavigation
-from metadrive.constants import BodyName, CollisionGroup
+from metadrive.constants import MetaDriveType, CollisionGroup
 from metadrive.constants import TrafficLightStatus
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.engine.core.image_buffer import ImageBuffer
@@ -46,6 +46,7 @@ class BaseVehicleState:
         Call this before reset()/step()
         """
         self.crash_vehicle = False
+        self.crash_human = False
         self.crash_object = False
         self.crash_sidewalk = False
         self.crash_building = False
@@ -601,7 +602,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         # assert self.LENGTH < BaseVehicle.MAX_LENGTH, "Vehicle is too large!"
         # assert self.WIDTH < BaseVehicle.MAX_WIDTH, "Vehicle is too large!"
 
-        chassis = BaseRigidBodyNode(self.name, BodyName.VEHICLE)
+        chassis = BaseRigidBodyNode(self.name, MetaDriveType.VEHICLE)
         self._node_path_list.append(chassis)
 
         chassis_shape = BulletBoxShape(Vec3(self.WIDTH / 2, self.LENGTH / 2, self.HEIGHT / 2))
@@ -759,15 +760,15 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         for contact in result_1.getContacts() + result_2.getContacts():
             node0 = contact.getNode0()
             node1 = contact.getNode1()
-            node = node0 if node1.getName() == BodyName.VEHICLE else node1
+            node = node0 if node1.getName() == MetaDriveType.VEHICLE else node1
             name = node.getName()
-            if name == BodyName.LINE_SOLID_SINGLE_WHITE:
+            if name == MetaDriveType.LINE_SOLID_SINGLE_WHITE:
                 self.on_white_continuous_line = True
-            elif name == BodyName.LINE_SOLID_SINGLE_YELLOW:
+            elif name == MetaDriveType.LINE_SOLID_SINGLE_YELLOW:
                 self.on_yellow_continuous_line = True
-            elif name == BodyName.LINE_BROKEN_SINGLE_YELLOW or name == BodyName.LINE_BROKEN_SINGLE_WHITE:
+            elif name == MetaDriveType.LINE_BROKEN_SINGLE_YELLOW or name == MetaDriveType.LINE_BROKEN_SINGLE_WHITE:
                 self.on_broken_line = True
-            elif name == BodyName.TRAFFIC_LIGHT:
+            elif name == MetaDriveType.TRAFFIC_LIGHT:
                 light = get_object_from_node(node)
                 if light.status == TrafficLightStatus.GREEN:
                     self.green_light = True
@@ -776,6 +777,14 @@ class BaseVehicle(BaseObject, BaseVehicleState):
                 elif light.status == TrafficLightStatus.YELLOW:
                     self.yellow_light = True
                 name = TrafficLightStatus.semantics(light.status)
+            elif name == MetaDriveType.VEHICLE:
+                pass
+            elif name == MetaDriveType.BUILDING:
+                pass
+            elif name == MetaDriveType.TRAFFIC_OBJECT:
+                pass
+            elif name in [MetaDriveType.PEDESTRIAN, MetaDriveType.CYCLIST]:
+                pass
             else:
                 # didn't add
                 continue
@@ -790,10 +799,10 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             CollisionGroup.Sidewalk,
             in_static_world=True if not self.render else False
         )
-        if res.hasHit() and res.getNode().getName() == BodyName.SIDEWALK:
+        if res.hasHit() and res.getNode().getName() == MetaDriveType.BOUNDARY_LINE:
             self.crash_sidewalk = True
-            contacts.add(BodyName.SIDEWALK)
-        self.contact_results = contacts
+            contacts.add(MetaDriveType.BOUNDARY_LINE)
+        self.contact_results.update(contacts)
 
     def destroy(self):
         super(BaseVehicle, self).destroy()

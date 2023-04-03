@@ -1,4 +1,5 @@
 from metadrive.component.buildings.base_building import BaseBuilding
+from metadrive.scenario.metadrive_type import MetaDriveType
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.utils.pg_utils.utils import generate_static_box_physics_body
 
@@ -12,7 +13,8 @@ class TollGateBuilding(BaseBuilding):
     def __init__(self, lane, position, heading_theta, random_seed):
         super(TollGateBuilding, self).__init__(lane, position, heading_theta, random_seed)
         air_wall = generate_static_box_physics_body(
-            self.BUILDING_LENGTH, lane.width, self.BUILDING_HEIGHT / 2, object_id=self.id
+            self.BUILDING_LENGTH, lane.width, self.BUILDING_HEIGHT / 2, object_id=self.id,
+            type_name=MetaDriveType.BUILDING
         )
         self.add_body(air_wall)
 

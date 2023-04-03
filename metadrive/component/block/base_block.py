@@ -11,7 +11,7 @@ from metadrive.component.lane.abs_lane import AbstractLane
 from metadrive.component.lane.point_lane import PointLane
 from metadrive.component.road_network.node_road_network import NodeRoadNetwork
 from metadrive.component.road_network.road import Road
-from metadrive.constants import BodyName, CamMask, LineType, LineColor, DrivableAreaProperty
+from metadrive.constants import MetaDriveType, CamMask, LineType, LineColor, DrivableAreaProperty
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.engine.core.physics_world import PhysicsWorld
 from metadrive.utils.coordinates_shift import panda_vector, panda_heading
@@ -285,9 +285,9 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
         raise DeprecationWarning("Useless, currently")
         length = norm(lane_end[0] - lane_start[0], lane_end[1] - lane_start[1])
         if LineType.prohibit(line_type):
-            node_name = BodyName.LINE_SOLID_SINGLE_WHITE if line_color == LineColor.GREY else BodyName.LINE_SOLID_SINGLE_YELLOW
+            node_name = MetaDriveType.LINE_SOLID_SINGLE_WHITE if line_color == LineColor.GREY else MetaDriveType.LINE_SOLID_SINGLE_YELLOW
         else:
-            node_name = BodyName.BROKEN_LINE
+            node_name = MetaDriveType.BROKEN_LINE
         body_node = BulletGhostNode(node_name)
         body_node.set_active(False)
         body_node.setKinematic(False)

@@ -8,7 +8,7 @@ from panda3d.core import LQuaternionf, CardMaker, TransparencyAttrib
 from panda3d.core import NodePath
 
 from metadrive.component.lane.metadrive_lane import MetaDriveLane
-from metadrive.constants import BodyName
+from metadrive.constants import MetaDriveType
 from metadrive.constants import DrivableAreaProperty
 from metadrive.constants import LineType
 from metadrive.engine.physics_node import BaseRigidBodyNode

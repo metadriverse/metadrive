@@ -6,7 +6,7 @@ import numpy as np
 from panda3d.core import NodePath, TextNode, LQuaternionf
 
 from metadrive.component.vehicle_module.vehicle_panel import VehiclePanel
-from metadrive.constants import COLLISION_INFO_COLOR, COLOR, BodyName, \
+from metadrive.constants import COLLISION_INFO_COLOR, COLOR, MetaDriveType, \
     CamMask, RENDER_MODE_NONE
 from metadrive.engine.asset_loader import AssetLoader
 
@@ -170,8 +170,8 @@ class Interface:
                 if time.time() - self.engine._episode_start_time > 10 else "Press H to see help message"
             self._render_banner(text, COLLISION_INFO_COLOR["green"][1])
         else:
-            if text == BodyName.VEHICLE:
-                text = BodyName.VEHICLE
+            if text == MetaDriveType.VEHICLE:
+                text = MetaDriveType.VEHICLE
             self._render_banner(text, COLLISION_INFO_COLOR[COLOR[text]][1])
 
     def destroy(self):

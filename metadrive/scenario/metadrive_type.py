@@ -49,9 +49,9 @@ class MetaDriveType:
     # ===== Object type =====
     TRAFFIC_LIGHT = "TRAFFIC_LIGHT"
     TRAFFIC_OBJECT = "TRAFFIC_OBJECT"
-    TOLLGATE = "TOLLGATE"
     GROUND = "GROUND"
     INVISIBLE_WALL = "INVISIBLE_WALL"
+    BUILDING = "BUILDING"
 
     # ===== Coordinate system =====
     COORDINATE_METADRIVE = "metadrive"

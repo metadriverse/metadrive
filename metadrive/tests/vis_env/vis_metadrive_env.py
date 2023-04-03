@@ -11,7 +11,7 @@ if __name__ == "__main__":
     env = MetaDriveEnv(
         {
             "num_scenarios": 10,
-            "traffic_density": 0.2,
+            "traffic_density": 0.,
             "traffic_mode": "hybrid",
             "start_seed": 22,
             # "_disable_detector_mask":True,
@@ -25,11 +25,12 @@ if __name__ == "__main__":
             # "show_coordinates": True,
             "manual_control": True,
             "use_render": True,
+            "accident_prob":1,
             "decision_repeat": 5,
             "interface_panel": [MiniMap, VehiclePanel, RGBCamera],
             "need_inverse_traffic": False,
             "rgb_clip": True,
-            "map": "SSS",
+            "map": "SSSSSS",
             # "agent_policy": IDMPolicy,
             "random_traffic": False,
             "random_lane_width": True,

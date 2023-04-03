@@ -1,5 +1,5 @@
 from metadrive.base_class.base_object import BaseObject
-from metadrive.constants import TrafficLightStatus, BodyName
+from metadrive.constants import TrafficLightStatus, MetaDriveType
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.utils.pg_utils.utils import generate_static_box_physics_body
 
@@ -28,7 +28,7 @@ class BaseTrafficLight(BaseObject):
             width,
             self.AIR_WALL_HEIGHT,
             object_id=self.id,
-            type_name=BodyName.TRAFFIC_LIGHT,
+            type_name=MetaDriveType.TRAFFIC_LIGHT,
             ghost_node=True,
         )
         self.add_body(air_wall, add_to_static_world=True)
