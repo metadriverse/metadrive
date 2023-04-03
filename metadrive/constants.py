@@ -4,7 +4,7 @@ import math
 from panda3d.bullet import BulletWorld
 from panda3d.core import Vec3
 from panda3d.core import Vec4, BitMask32
-from metadrive.scenario.metadrive_type import MetaDriveType
+from metadrive.metadrive_type import MetaDriveType, TrafficLightStatus
 
 EDITION = "MetaDrive v0.3.0.1"
 DATA_VERSION = EDITION  # Use MetaDrive version to mark the data version
@@ -53,36 +53,6 @@ COLLISION_INFO_COLOR = dict(
     yellow=(2, Vec4(218 / 255, 163 / 255, 0, 1)),
     green=(3, Vec4(65 / 255, 163 / 255, 0, 1))
 )
-
-
-class TrafficLightStatus:
-    GREEN = 1
-    RED = 2
-    YELLOW = 3
-    UNKNOWN = 4
-
-    @classmethod
-    def semantics(self, status):
-        if status == self.GREEN:
-            return "Traffic Light: Green"
-        if status == self.RED:
-            return "Traffic Light: Red"
-        if status == self.YELLOW:
-            return "Traffic Light: Yellow"
-        if status == self.UNKNOWN:
-            return "Traffic Light: Unknown"
-
-    @classmethod
-    def color(self, status):
-        if status == self.GREEN:
-            return [0, 255, 0]
-        if status == self.RED:
-            return [1, 255, 0]
-        if status == self.YELLOW:
-            return [255, 255, 0]
-        if status == self.UNKNOWN:
-            return [180, 180, 180]
-
 
 # Used for rendering the banner in Interface.
 COLOR = {

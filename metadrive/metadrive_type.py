@@ -124,3 +124,32 @@ class MetaDriveType:
     @classmethod
     def is_traffic_light_in_red(cls, light):
         return light in [cls.LANE_STATE_STOP, cls.LANE_STATE_ARROW_STOP, cls.LANE_STATE_FLASHING_STOP]
+
+
+class TrafficLightStatus:
+    GREEN = 1
+    RED = 2
+    YELLOW = 3
+    UNKNOWN = 4
+
+    @classmethod
+    def semantics(self, status):
+        if status == self.GREEN:
+            return "Traffic Light: Green"
+        if status == self.RED:
+            return "Traffic Light: Red"
+        if status == self.YELLOW:
+            return "Traffic Light: Yellow"
+        if status == self.UNKNOWN:
+            return "Traffic Light: Unknown"
+
+    @classmethod
+    def color(self, status):
+        if status == self.GREEN:
+            return [0, 255, 0]
+        if status == self.RED:
+            return [1, 255, 0]
+        if status == self.YELLOW:
+            return [255, 255, 0]
+        if status == self.UNKNOWN:
+            return [180, 180, 180]

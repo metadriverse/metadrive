@@ -1,5 +1,4 @@
 import time
-from metadrive.scenario.metadrive_type import MetaDriveType
 
 import math
 import numpy as np

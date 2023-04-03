@@ -1,5 +1,4 @@
 import logging
-from metadrive.scenario.metadrive_type import MetaDriveType
 
 from metadrive.base_class.base_runnable import BaseRunnable
 from metadrive.engine.engine_utils import get_global_config

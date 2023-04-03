@@ -110,7 +110,7 @@ Example:
 """
 import numpy as np
 
-from metadrive.scenario.metadrive_type import MetaDriveType
+from metadrive.metadrive_type import MetaDriveType
 
 
 class ScenarioDescription(dict):

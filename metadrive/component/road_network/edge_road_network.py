@@ -97,7 +97,7 @@ class EdgeRoadNetwork(BaseRoadNetwork):
         logging.debug("{} is released".format(self.__class__.__name__))
 
     def get_map_features(self, interval=2):
-        from metadrive.scenario.metadrive_type import MetaDriveType
+        from metadrive.metadrive_type import MetaDriveType
 
         ret = {}
         for id, lane_info in self.graph.items():

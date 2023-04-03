@@ -1,5 +1,5 @@
 from metadrive.component.buildings.base_building import BaseBuilding
-from metadrive.scenario.metadrive_type import MetaDriveType
+from metadrive.metadrive_type import MetaDriveType
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.utils.pg_utils.utils import generate_static_box_physics_body
 
