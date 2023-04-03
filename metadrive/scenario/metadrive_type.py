@@ -48,7 +48,8 @@ class MetaDriveType:
 
     # ===== Object type =====
     TRAFFIC_LIGHT = "TRAFFIC_LIGHT"
-    TRAFFIC_CONE = "TRAFFIC_CONE"
+    TRAFFIC_OBJECT = "TRAFFIC_OBJECT"
+    TOLLGATE = "TOLLGATE"
 
     # ===== Coordinate system =====
     COORDINATE_METADRIVE = "metadrive"

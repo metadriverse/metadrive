@@ -285,9 +285,9 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
         raise DeprecationWarning("Useless, currently")
         length = norm(lane_end[0] - lane_start[0], lane_end[1] - lane_start[1])
         if LineType.prohibit(line_type):
-            node_name = BodyName.White_continuous_line if line_color == LineColor.GREY else BodyName.Yellow_continuous_line
+            node_name = BodyName.LINE_SOLID_SINGLE_WHITE if line_color == LineColor.GREY else BodyName.LINE_SOLID_SINGLE_YELLOW
         else:
-            node_name = BodyName.Broken_line
+            node_name = BodyName.BROKEN_LINE
         body_node = BulletGhostNode(node_name)
         body_node.set_active(False)
         body_node.setKinematic(False)

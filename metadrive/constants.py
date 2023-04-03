@@ -4,6 +4,7 @@ import math
 from panda3d.bullet import BulletWorld
 from panda3d.core import Vec3
 from panda3d.core import Vec4, BitMask32
+from metadrive.scenario.metadrive_type import MetaDriveType
 
 EDITION = "MetaDrive v0.3.0.1"
 DATA_VERSION = EDITION  # Use MetaDrive version to mark the data version
@@ -84,30 +85,38 @@ class TrafficLightStatus:
 
 
 class BodyName:
-    White_continuous_line = "White Continuous Line"
-    Yellow_continuous_line = "Yellow Continuous Line"
-    Broken_line = "Broken Line"
-    Sidewalk = "Sidewalk"
-    Ground = "Ground"
-    InvisibleWall = "InvisibleWall"
-    TrafficLight = "Traffic Light"
-    Vehicle = "Vehicle"
-    Lane = "Lane"
-    Traffic_object = "Traffic Object"
-    TollGate = "Toll Gate"
-    Pedestrian = "Pedestrian"
-    Cyclist = "Cyclist"
+    LINE_SOLID_SINGLE_WHITE = MetaDriveType.LINE_SOLID_SINGLE_WHITE
+    LINE_SOLID_SINGLE_YELLOW = MetaDriveType.LINE_SOLID_SINGLE_YELLOW
+
+    LINE_BROKEN_SINGLE_YELLOW = MetaDriveType.LINE_BROKEN_SINGLE_YELLOW
+    LINE_BROKEN_SINGLE_WHITE = MetaDriveType.LINE_BROKEN_SINGLE_WHITE
+
+    TRAFFIC_LIGHT = MetaDriveType.TRAFFIC_LIGHT
+    VEHICLE = MetaDriveType.VEHICLE
+
+    TRAFFIC_OBJECT = MetaDriveType.TRAFFIC_OBJECT
+    TOLLGATE = MetaDriveType.TOLLGATE
+
+    PEDESTRIAN = MetaDriveType.PEDESTRIAN
+    CYCLIST = MetaDriveType.CYCLIST
+
+    LANE = "LANE"
+    SIDEWALK = "SIDEWALK"
+    GROUND = "GROUND"
+    INVISIBLE_WALL = "INVISIBLE_WALL"
 
 
+# Used for rendering the banner in Interface.
 COLOR = {
-    BodyName.Sidewalk: "red",
-    BodyName.White_continuous_line: "orange",
-    BodyName.Yellow_continuous_line: "orange",
-    BodyName.Broken_line: "yellow",
-    BodyName.Vehicle: "red",
-    BodyName.Traffic_object: "orange",
-    BodyName.InvisibleWall: "red",
-    BodyName.TollGate: "red",
+    BodyName.SIDEWALK: "red",
+    BodyName.LINE_SOLID_SINGLE_WHITE: "orange",
+    BodyName.LINE_SOLID_SINGLE_YELLOW: "orange",
+    BodyName.LINE_BROKEN_SINGLE_YELLOW: "yellow",
+    BodyName.LINE_BROKEN_SINGLE_WHITE: "yellow",
+    BodyName.VEHICLE: "red",
+    BodyName.TRAFFIC_OBJECT: "orange",
+    BodyName.INVISIBLE_WALL: "red",
+    BodyName.TOLLGATE: "red",
     TrafficLightStatus.semantics(TrafficLightStatus.RED): "red",
     TrafficLightStatus.semantics(TrafficLightStatus.YELLOW): "orange",
     TrafficLightStatus.semantics(TrafficLightStatus.GREEN): "yellow",

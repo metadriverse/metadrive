@@ -16,7 +16,7 @@ class TrafficObject(BaseStaticObject):
     """
     Common interface for objects that appear on the road, beside vehicles.
     """
-    CLASS_NAME = BodyName.Traffic_object
+    CLASS_NAME = BodyName.TRAFFIC_OBJECT
     COLLISION_MASK = CollisionGroup.TrafficObject
 
     COST_ONCE = True  # cost will give at the first time

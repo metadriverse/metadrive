@@ -200,7 +200,7 @@ class SpawnManager(BaseManager):
                 vis_body.node().setIntoCollideMask(CollisionGroup.AllOff)
                 bp.force_set("need_debug", False)
 
-            if not result.hasHit() or result.node.getName() != BodyName.Vehicle:
+            if not result.hasHit() or result.node.getName() != BodyName.VEHICLE:
                 new_bp = copy.deepcopy(bp).get_dict()
                 if randomize:
                     new_bp["config"] = self._randomize_position_in_slot(new_bp["config"])

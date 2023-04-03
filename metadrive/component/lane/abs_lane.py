@@ -220,7 +220,7 @@ class AbstractLane:
         if lane_index is not None:
             lane.index = lane_index
 
-        n = BaseRigidBodyNode(lane, BodyName.Lane)
+        n = BaseRigidBodyNode(lane, BodyName.LANE)
         segment_np = NodePath(n)
 
         self._node_path_list.append(segment_np)
@@ -271,9 +271,10 @@ class AbstractLane:
         if length <= 0:
             return []
         if LineType.prohibit(line_type):
-            node_name = BodyName.White_continuous_line if line_color == LineColor.GREY else BodyName.Yellow_continuous_line
+            node_name = BodyName.LINE_SOLID_SINGLE_WHITE if line_color == LineColor.GREY else BodyName.LINE_SOLID_SINGLE_YELLOW
         else:
-            node_name = BodyName.Broken_line
+            # node_name = BodyName.LINE_SOLID_SINGLE_WHITE if line_color == LineColor.GREY else BodyName.LINE_SOLID_SINGLE_YELLOW
+            node_name = BodyName.LINE_BROKEN_SINGLE_WHITE if line_color == LineColor.GREY else BodyName.LINE_BROKEN_SINGLE_YELLOW
 
         # add bullet body for it
         body_node = BulletGhostNode(node_name)
@@ -323,7 +324,7 @@ class AbstractLane:
         width = width or block.SIDEWALK_WIDTH
         middle = (lane_start + lane_end) / 2
         length = norm(lane_end[0] - lane_start[0], lane_end[1] - lane_start[1])
-        body_node = BulletRigidBodyNode(BodyName.Sidewalk)
+        body_node = BulletRigidBodyNode(BodyName.SIDEWALK)
         body_node.setKinematic(False)
         body_node.setStatic(True)
         side_np = block.sidewalk_node_path.attachNewNode(body_node)
@@ -356,7 +357,7 @@ class AbstractLane:
         This usually used with _construct_lane_only_vis_segment
         """
         lane = self
-        n = BaseRigidBodyNode(lane, BodyName.Lane)
+        n = BaseRigidBodyNode(lane, BodyName.LANE)
         segment_np = NodePath(n)
 
         self._node_path_list.append(segment_np)

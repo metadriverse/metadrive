@@ -177,7 +177,7 @@ def ray_localization(
     lane_index_dist = []
     if results.hasHits():
         for res in results.getHits():
-            if res.getNode().getName() == BodyName.Lane:
+            if res.getNode().getName() == BodyName.LANE:
                 on_lane = True
                 lane = get_object_from_node(res.getNode())
                 long, _ = lane.local_coordinates(position)
@@ -290,7 +290,7 @@ def generate_static_box_physics_body(
     height=10,
     ghost_node=False,
     object_id=None,
-    type_name=BodyName.InvisibleWall,
+    type_name=BodyName.INVISIBLE_WALL,
     collision_group=CollisionGroup.InvisibleWall
 ):
     """

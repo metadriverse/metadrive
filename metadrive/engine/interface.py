@@ -166,8 +166,8 @@ class Interface:
             text = "Normal" if time.time() - self.engine._episode_start_time > 10 else "Press H to see help message"
             self._render_banner(text, COLLISION_INFO_COLOR["green"][1])
         else:
-            if text == BodyName.Vehicle:
-                text = BodyName.Vehicle
+            if text == BodyName.VEHICLE:
+                text = BodyName.VEHICLE
             self._render_banner(text, COLLISION_INFO_COLOR[COLOR[text]][1])
 
     def destroy(self):
