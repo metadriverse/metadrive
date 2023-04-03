@@ -18,7 +18,7 @@ from metadrive.component.block.base_block import BaseBlock
 from metadrive.component.lane.nuplan_lane import NuPlanLane
 from metadrive.component.road_network.edge_road_network import EdgeRoadNetwork
 from metadrive.constants import DrivableAreaProperty
-from metadrive.constants import LineColor, LineType
+from metadrive.constants import PGLineColor, PGLineType
 from metadrive.utils.interpolating_line import InterpolatingLine
 from metadrive.utils.math_utils import wrap_to_pi, norm
 
@@ -27,8 +27,8 @@ from metadrive.utils.math_utils import wrap_to_pi, norm
 class LaneLineProperty:
     id: str
     points: list
-    color: LineColor
-    type: LineType
+    color: PGLineColor
+    type: PGLineType
     in_road_connector: bool
 
 
@@ -104,7 +104,7 @@ class NuPlanBlock(BaseBlock):
             block_points = np.array(list(i for i in zip(boundary.coords.xy[0], boundary.coords.xy[1])))
             block_points -= center
             self.lines["boundary_{}".format(idx)] = LaneLineProperty(
-                block_points, LineColor.GREY, LineType.CONTINUOUS, in_road_connector=False
+                block_points, PGLineColor.GREY, PGLineType.CONTINUOUS, in_road_connector=False
             )
 
     def create_in_world(self):
@@ -121,14 +121,14 @@ class NuPlanBlock(BaseBlock):
         #     self.construct_nuplan_continuous_line(line_prop.points, line_prop.color)
 
         for line_prop in self.lines.values():
-            if line_prop.type == LineType.CONTINUOUS:
+            if line_prop.type == PGLineType.CONTINUOUS:
                 self.construct_nuplan_continuous_line(line_prop.points, line_prop.color)
-            if line_prop.type == LineType.BROKEN:
+            if line_prop.type == PGLineType.BROKEN:
                 self.construct_nuplan_broken_line(line_prop.points, line_prop.color)
 
     def construct_nuplan_continuous_line(self, polyline, color):
         for start, end, in zip(polyline[:-1], polyline[1:]):
-            node_path_list = NuPlanLane.construct_lane_line_segment(self, start, end, color, LineType.CONTINUOUS)
+            node_path_list = NuPlanLane.construct_lane_line_segment(self, start, end, color, PGLineType.CONTINUOUS)
             self._node_path_list.extend(node_path_list)
 
     def construct_nuplan_broken_line(self, polyline, color):
@@ -139,7 +139,7 @@ class NuPlanBlock(BaseBlock):
             end = line.get_point(segment * DrivableAreaProperty.STRIPE_LENGTH * 2 + DrivableAreaProperty.STRIPE_LENGTH)
             if segment == segment_num - 1:
                 end = line.get_point(line.length - DrivableAreaProperty.STRIPE_LENGTH)
-            node_path_list = NuPlanLane.construct_lane_line_segment(self, start, end, color, LineType.BROKEN)
+            node_path_list = NuPlanLane.construct_lane_line_segment(self, start, end, color, PGLineType.BROKEN)
             self._node_path_list.extend(node_path_list)
 
     def construct_nuplan_sidewalk(self, polyline):
@@ -204,9 +204,9 @@ class NuPlanBlock(BaseBlock):
             left = lane.left_boundary
             if left.id not in self.lines:
                 line_type = self._metadrive_line_type(int(boundaries.loc[[str(left.id)]]["boundary_type_fid"]))
-                line_color = LineColor.YELLOW if lane.adjacent_edges[0] is None and lane.adjacent_edges[
-                    1] is not None else LineColor.GREY
-                if line_color == LineColor.YELLOW:
+                line_color = PGLineColor.YELLOW if lane.adjacent_edges[0] is None and lane.adjacent_edges[
+                    1] is not None else PGLineColor.GREY
+                if line_color == PGLineColor.YELLOW:
                     self.lines[left.id] = LaneLineProperty(
                         left.id,
                         self._get_points_from_boundary(left, center),
@@ -214,11 +214,11 @@ class NuPlanBlock(BaseBlock):
                         line_type,
                         in_road_connector=is_road_connector
                     )
-                elif line_type == LineType.BROKEN:
+                elif line_type == PGLineType.BROKEN:
                     self.lines[left.id] = LaneLineProperty(
                         left.id,
                         self._get_points_from_boundary(left, center),
-                        LineColor.GREY,
+                        PGLineColor.GREY,
                         line_type,
                         in_road_connector=is_road_connector
                     )
@@ -226,9 +226,9 @@ class NuPlanBlock(BaseBlock):
             # right = lane.right_boundary
             # if right.id not in self.lines:
             #     line_type = self._metadrive_line_type(int(boundaries.loc[[str(right.id)]]["boundary_type_fid"]))
-            #     if line_type == LineType.BROKEN:
+            #     if line_type == PGLineType.BROKEN:
             #         self.lines[right.id] = LaneLineProperty(
-            #             self._get_points_from_boundary(right, center), LineColor.GREY, line_type,
+            #             self._get_points_from_boundary(right, center), PGLineColor.GREY, line_type,
             #             in_road_connector=is_road_connector
             #         )
 
@@ -244,7 +244,7 @@ class NuPlanBlock(BaseBlock):
                 ]
             )
             self.lines[walkway.id] = LaneLineProperty(
-                walkway.id, points, LineColor.GREY, LineType.SIDE, in_road_connector=False
+                walkway.id, points, PGLineColor.GREY, PGLineType.SIDE, in_road_connector=False
             )
 
     def _get_lane_boundary(self, line):
@@ -252,10 +252,10 @@ class NuPlanBlock(BaseBlock):
 
     def _metadrive_line_type(self, nuplan_type):
         if nuplan_type == 2:
-            return LineType.CONTINUOUS
+            return PGLineType.CONTINUOUS
         elif nuplan_type == 0:
-            return LineType.BROKEN
+            return PGLineType.BROKEN
         elif nuplan_type == 3:
-            return LineType.NONE
+            return PGLineType.NONE
         else:
             raise ValueError("Unknown line tyep: {}".format(nuplan_type))

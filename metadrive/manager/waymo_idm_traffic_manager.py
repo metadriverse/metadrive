@@ -3,12 +3,11 @@ from metadrive.utils.waymo_utils.parse_object_state import parse_full_trajectory
 from collections import namedtuple, OrderedDict
 
 import numpy as np
-from metadrive.scenario.metadrive_type import MetaDriveType
+from metadrive.type import MetaDriveType
 from metadrive.component.lane.waymo_lane import PointLane
 from metadrive.component.vehicle.vehicle_type import SVehicle
 from metadrive.manager.waymo_traffic_manager import WaymoTrafficManager
 from metadrive.policy.idm_policy import WaymoIDMPolicy
-from metadrive.utils.waymo_utils.waymo_type import WaymoAgentType
 
 static_vehicle_info = namedtuple("static_vehicle_info", "position heading")
 

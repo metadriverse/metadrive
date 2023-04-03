@@ -5,7 +5,7 @@ from metadrive.component.pgblock.create_pg_block_utils import CreateRoadFrom, Cr
 from metadrive.component.pgblock.pg_block import PGBlock, PGBlockSocket
 from metadrive.component.road_network import Road
 from metadrive.component.road_network.node_road_network import NodeRoadNetwork
-from metadrive.constants import Decoration, LineType
+from metadrive.constants import Decoration, PGLineType
 from metadrive.engine.core.physics_world import PhysicsWorld
 from metadrive.component.pg_space import ParameterSpace
 
@@ -41,7 +41,7 @@ class FirstPGBlock(PGBlock):
         self._block_objects = []
         basic_lane = StraightLane(
             [0, lane_width * (lane_num - 1)], [self.ENTRANCE_LENGTH, lane_width * (lane_num - 1)],
-            line_types=(LineType.BROKEN, LineType.SIDE),
+            line_types=(PGLineType.BROKEN, PGLineType.SIDE),
             width=lane_width
         )
         ego_v_spawn_road = Road(self.NODE_1, self.NODE_2)
@@ -60,7 +60,7 @@ class FirstPGBlock(PGBlock):
             ignore_intersection_checking=self.ignore_intersection_checking
         )
 
-        next_lane = ExtendStraightLane(basic_lane, length - self.ENTRANCE_LENGTH, [LineType.BROKEN, LineType.SIDE])
+        next_lane = ExtendStraightLane(basic_lane, length - self.ENTRANCE_LENGTH, [PGLineType.BROKEN, PGLineType.SIDE])
         other_v_spawn_road = Road(self.NODE_2, self.NODE_3)
         CreateRoadFrom(
             next_lane,

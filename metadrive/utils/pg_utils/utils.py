@@ -10,7 +10,7 @@ from panda3d.core import Vec3
 from metadrive.component.lane.circular_lane import CircularLane
 from metadrive.component.lane.metadrive_lane import MetaDriveLane
 from metadrive.constants import CollisionGroup
-from metadrive.constants import Decoration, BodyName
+from metadrive.constants import Decoration, MetaDriveType
 from metadrive.engine.core.engine_core import EngineCore
 from metadrive.engine.physics_node import BaseRigidBodyNode, BaseGhostBodyNode
 from metadrive.utils.coordinates_shift import panda_heading
@@ -177,7 +177,7 @@ def ray_localization(
     lane_index_dist = []
     if results.hasHits():
         for res in results.getHits():
-            if res.getNode().getName() == BodyName.LANE:
+            if res.getNode().getName() == MetaDriveType.LANE_SURFACE_STREET:
                 on_lane = True
                 lane = get_object_from_node(res.getNode())
                 long, _ = lane.local_coordinates(position)
@@ -290,7 +290,7 @@ def generate_static_box_physics_body(
     height=10,
     ghost_node=False,
     object_id=None,
-    type_name=BodyName.INVISIBLE_WALL,
+    type_name=MetaDriveType.INVISIBLE_WALL,
     collision_group=CollisionGroup.InvisibleWall
 ):
     """

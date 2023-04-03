@@ -4,7 +4,7 @@ import math
 from panda3d.bullet import BulletWorld
 from panda3d.core import Vec3
 from panda3d.core import Vec4, BitMask32
-from metadrive.scenario.metadrive_type import MetaDriveType
+from metadrive.type import MetaDriveType, TrafficLightStatus
 
 EDITION = "MetaDrive v0.3.0.1"
 DATA_VERSION = EDITION  # Use MetaDrive version to mark the data version
@@ -54,69 +54,20 @@ COLLISION_INFO_COLOR = dict(
     green=(3, Vec4(65 / 255, 163 / 255, 0, 1))
 )
 
-
-class TrafficLightStatus:
-    GREEN = 1
-    RED = 2
-    YELLOW = 3
-    UNKNOWN = 4
-
-    @classmethod
-    def semantics(self, status):
-        if status == self.GREEN:
-            return "Traffic Light: Green"
-        if status == self.RED:
-            return "Traffic Light: Red"
-        if status == self.YELLOW:
-            return "Traffic Light: Yellow"
-        if status == self.UNKNOWN:
-            return "Traffic Light: Unknown"
-
-    @classmethod
-    def color(self, status):
-        if status == self.GREEN:
-            return [0, 255, 0]
-        if status == self.RED:
-            return [1, 255, 0]
-        if status == self.YELLOW:
-            return [255, 255, 0]
-        if status == self.UNKNOWN:
-            return [180, 180, 180]
-
-
-class BodyName:
-    LINE_SOLID_SINGLE_WHITE = MetaDriveType.LINE_SOLID_SINGLE_WHITE
-    LINE_SOLID_SINGLE_YELLOW = MetaDriveType.LINE_SOLID_SINGLE_YELLOW
-
-    LINE_BROKEN_SINGLE_YELLOW = MetaDriveType.LINE_BROKEN_SINGLE_YELLOW
-    LINE_BROKEN_SINGLE_WHITE = MetaDriveType.LINE_BROKEN_SINGLE_WHITE
-
-    TRAFFIC_LIGHT = MetaDriveType.TRAFFIC_LIGHT
-    VEHICLE = MetaDriveType.VEHICLE
-
-    TRAFFIC_OBJECT = MetaDriveType.TRAFFIC_OBJECT
-    TOLLGATE = MetaDriveType.TOLLGATE
-
-    PEDESTRIAN = MetaDriveType.PEDESTRIAN
-    CYCLIST = MetaDriveType.CYCLIST
-
-    LANE = "LANE"
-    SIDEWALK = "SIDEWALK"
-    GROUND = "GROUND"
-    INVISIBLE_WALL = "INVISIBLE_WALL"
-
-
 # Used for rendering the banner in Interface.
 COLOR = {
-    BodyName.SIDEWALK: "red",
-    BodyName.LINE_SOLID_SINGLE_WHITE: "orange",
-    BodyName.LINE_SOLID_SINGLE_YELLOW: "orange",
-    BodyName.LINE_BROKEN_SINGLE_YELLOW: "yellow",
-    BodyName.LINE_BROKEN_SINGLE_WHITE: "yellow",
-    BodyName.VEHICLE: "red",
-    BodyName.TRAFFIC_OBJECT: "orange",
-    BodyName.INVISIBLE_WALL: "red",
-    BodyName.TOLLGATE: "red",
+    MetaDriveType.BOUNDARY_LINE: "red",
+    MetaDriveType.LINE_SOLID_SINGLE_WHITE: "orange",
+    MetaDriveType.LINE_SOLID_SINGLE_YELLOW: "orange",
+    MetaDriveType.LINE_BROKEN_SINGLE_YELLOW: "yellow",
+    MetaDriveType.LINE_BROKEN_SINGLE_WHITE: "green",
+    MetaDriveType.VEHICLE: "red",
+    MetaDriveType.GROUND: "yellow",
+    MetaDriveType.TRAFFIC_OBJECT: "yellow",
+    MetaDriveType.PEDESTRIAN: "red",
+    MetaDriveType.CYCLIST: "red",
+    MetaDriveType.INVISIBLE_WALL: "red",
+    MetaDriveType.BUILDING: "red",
     TrafficLightStatus.semantics(TrafficLightStatus.RED): "red",
     TrafficLightStatus.semantics(TrafficLightStatus.YELLOW): "orange",
     TrafficLightStatus.semantics(TrafficLightStatus.GREEN): "yellow",
@@ -275,7 +226,7 @@ AGENT_TO_OBJECT = "agent_to_object"
 BKG_COLOR = Vec3(1, 1, 1)
 
 
-class LineType:
+class PGLineType:
     """A lane side line type."""
 
     NONE = "none"
@@ -285,19 +236,18 @@ class LineType:
 
     @staticmethod
     def prohibit(line_type) -> bool:
-        if line_type in [LineType.CONTINUOUS, LineType.SIDE]:
+        if line_type in [PGLineType.CONTINUOUS, PGLineType.SIDE]:
             return True
         else:
             return False
 
 
-class LineColor:
+class PGLineColor:
     GREY = (1, 1, 1, 1)
     YELLOW = (255 / 255, 200 / 255, 0 / 255, 1)
 
 
 class DrivableAreaProperty:
-    CENTER_LINE_TYPE = LineType.CONTINUOUS
 
     # road network property
     ID = None  # each block must have a unique ID

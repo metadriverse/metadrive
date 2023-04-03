@@ -10,9 +10,9 @@ from panda3d.core import LPoint3f
 from panda3d.core import Vec3, LQuaternionf, CardMaker, TransparencyAttrib, NodePath
 from panda3d.core import Vec4
 
-from metadrive.constants import BodyName
+from metadrive.constants import MetaDriveType
 from metadrive.constants import DrivableAreaProperty
-from metadrive.constants import LineType, LineColor
+from metadrive.constants import PGLineType, PGLineColor
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.engine.physics_node import BaseRigidBodyNode
 from metadrive.engine.physics_node import BulletRigidBodyNode
@@ -26,8 +26,8 @@ class AbstractLane:
 
     metaclass__ = ABCMeta
     DEFAULT_WIDTH: float = 4
-    line_types: Tuple[LineType, LineType]
-    line_colors = [LineColor.GREY, LineColor.GREY]
+    line_types: Tuple[PGLineType, PGLineType]
+    line_colors = [PGLineColor.GREY, PGLineColor.GREY]
     length = 0
     start = None
     end = None
@@ -146,14 +146,14 @@ class AbstractLane:
             if not need:
                 continue
             lateral = idx * self.width_at(0) / 2
-            if line_type == LineType.CONTINUOUS:
+            if line_type == PGLineType.CONTINUOUS:
                 self.construct_continuous_line(block, lateral, line_color, line_type)
-            elif line_type == LineType.BROKEN:
+            elif line_type == PGLineType.BROKEN:
                 self.construct_broken_line(block, lateral, line_color, line_type)
-            elif line_type == LineType.SIDE:
+            elif line_type == PGLineType.SIDE:
                 self.construct_continuous_line(block, lateral, line_color, line_type)
                 self.construct_sidewalk(block, lateral)
-            elif line_type == LineType.NONE:
+            elif line_type == PGLineType.NONE:
                 continue
             else:
                 raise ValueError(
@@ -220,7 +220,7 @@ class AbstractLane:
         if lane_index is not None:
             lane.index = lane_index
 
-        n = BaseRigidBodyNode(lane, BodyName.LANE)
+        n = BaseRigidBodyNode(lane, MetaDriveType.LANE_SURFACE_STREET)
         segment_np = NodePath(n)
 
         self._node_path_list.append(segment_np)
@@ -255,7 +255,7 @@ class AbstractLane:
             card.setTexture(block.ts_color, block.road_texture)
 
     @staticmethod
-    def construct_lane_line_segment(block, start_point, end_point, line_color: Vec4, line_type: LineType):
+    def construct_lane_line_segment(block, start_point, end_point, line_color: Vec4, line_type: PGLineType):
         node_path_list = []
         # static_node_list = []
         # dynamic_node_list = []
@@ -270,11 +270,11 @@ class AbstractLane:
         parent_np = block.lane_line_node_path
         if length <= 0:
             return []
-        if LineType.prohibit(line_type):
-            node_name = BodyName.LINE_SOLID_SINGLE_WHITE if line_color == LineColor.GREY else BodyName.LINE_SOLID_SINGLE_YELLOW
+        if PGLineType.prohibit(line_type):
+            node_name = MetaDriveType.LINE_SOLID_SINGLE_WHITE if line_color == PGLineColor.GREY else MetaDriveType.LINE_SOLID_SINGLE_YELLOW
         else:
-            # node_name = BodyName.LINE_SOLID_SINGLE_WHITE if line_color == LineColor.GREY else BodyName.LINE_SOLID_SINGLE_YELLOW
-            node_name = BodyName.LINE_BROKEN_SINGLE_WHITE if line_color == LineColor.GREY else BodyName.LINE_BROKEN_SINGLE_YELLOW
+            # node_name = MetaDriveType.LINE_SOLID_SINGLE_WHITE if line_color == PGLineColor.GREY else MetaDriveType.LINE_SOLID_SINGLE_YELLOW
+            node_name = MetaDriveType.LINE_BROKEN_SINGLE_WHITE if line_color == PGLineColor.GREY else MetaDriveType.LINE_BROKEN_SINGLE_YELLOW
 
         # add bullet body for it
         body_node = BulletGhostNode(node_name)
@@ -289,7 +289,7 @@ class AbstractLane:
         body_height = DrivableAreaProperty.LANE_LINE_GHOST_HEIGHT
         shape = BulletBoxShape(Vec3(length / 2, DrivableAreaProperty.LANE_LINE_WIDTH / 4, body_height))
         body_np.node().addShape(shape)
-        mask = DrivableAreaProperty.CONTINUOUS_COLLISION_MASK if line_type != LineType.BROKEN else DrivableAreaProperty.BROKEN_COLLISION_MASK
+        mask = DrivableAreaProperty.CONTINUOUS_COLLISION_MASK if line_type != PGLineType.BROKEN else DrivableAreaProperty.BROKEN_COLLISION_MASK
         body_np.node().setIntoCollideMask(mask)
         block.static_nodes.append(body_np.node())
 
@@ -306,7 +306,7 @@ class AbstractLane:
             lane_line.setScale(length, DrivableAreaProperty.LANE_LINE_WIDTH, DrivableAreaProperty.LANE_LINE_THICKNESS)
             height = 0
             lane_line.setTexture(block.ts_color, block.lane_line_texture)
-            height += 0.01 if line_color == LineColor.YELLOW else 0
+            height += 0.01 if line_color == PGLineColor.YELLOW else 0
             lane_line.setQuat(LQuaternionf(math.cos(theta / 2), 0, 0, math.sin(theta / 2)))
             lane_line.setPos(panda_vector(middle, height))
             lane_line.reparentTo(parent_np)
@@ -324,7 +324,7 @@ class AbstractLane:
         width = width or block.SIDEWALK_WIDTH
         middle = (lane_start + lane_end) / 2
         length = norm(lane_end[0] - lane_start[0], lane_end[1] - lane_start[1])
-        body_node = BulletRigidBodyNode(BodyName.SIDEWALK)
+        body_node = BulletRigidBodyNode(MetaDriveType.BOUNDARY_LINE)
         body_node.setKinematic(False)
         body_node.setStatic(True)
         side_np = block.sidewalk_node_path.attachNewNode(body_node)
@@ -357,7 +357,7 @@ class AbstractLane:
         This usually used with _construct_lane_only_vis_segment
         """
         lane = self
-        n = BaseRigidBodyNode(lane, BodyName.LANE)
+        n = BaseRigidBodyNode(lane, MetaDriveType.LANE_SURFACE_STREET)
         segment_np = NodePath(n)
 
         self._node_path_list.append(segment_np)

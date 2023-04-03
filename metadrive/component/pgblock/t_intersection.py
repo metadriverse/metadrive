@@ -1,7 +1,7 @@
 from metadrive.component.pgblock.intersection import InterSection
 from metadrive.component.pgblock.pg_block import PGBlockSocket
 from metadrive.component.road_network import Road
-from metadrive.constants import Goal, LineType, LineColor
+from metadrive.constants import Goal, PGLineType, PGLineColor
 from metadrive.component.pg_space import ParameterSpace, Parameter, BlockParameterSpace
 
 
@@ -40,15 +40,15 @@ class TInterSection(InterSection):
         for i, road in enumerate([Road(last_negative.end_node, next_positive.start_node),
                                   Road(next_negative.end_node, last_positive.start_node)]):
             lanes = road.get_lanes(self.block_network)
-            outside_type = LineType.SIDE if i == 0 else LineType.NONE
+            outside_type = PGLineType.SIDE if i == 0 else PGLineType.NONE
             for k, lane in enumerate(lanes):
-                line_types = [LineType.BROKEN, LineType.BROKEN
-                              ] if k != len(lanes) - 1 else [LineType.BROKEN, outside_type]
+                line_types = [PGLineType.BROKEN, PGLineType.BROKEN
+                              ] if k != len(lanes) - 1 else [PGLineType.BROKEN, outside_type]
                 lane.line_types = line_types
                 if k == 0:
-                    lane.line_colors = [LineColor.YELLOW, LineColor.GREY]
+                    lane.line_colors = [PGLineColor.YELLOW, PGLineColor.GREY]
                     if i == 1:
-                        lane.line_types[0] = LineType.NONE
+                        lane.line_types[0] = PGLineType.NONE
 
     def _exclude_lanes(self):
         para = self.get_config()

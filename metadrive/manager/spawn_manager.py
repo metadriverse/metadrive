@@ -8,7 +8,7 @@ from panda3d.core import Vec3
 from metadrive.component.lane.straight_lane import StraightLane
 from metadrive.component.pgblock.first_block import FirstPGBlock
 from metadrive.component.vehicle.base_vehicle import BaseVehicle
-from metadrive.constants import BodyName
+from metadrive.constants import MetaDriveType
 from metadrive.constants import CollisionGroup
 from metadrive.engine.engine_utils import get_engine
 from metadrive.manager.base_manager import BaseManager
@@ -200,7 +200,7 @@ class SpawnManager(BaseManager):
                 vis_body.node().setIntoCollideMask(CollisionGroup.AllOff)
                 bp.force_set("need_debug", False)
 
-            if not result.hasHit() or result.node.getName() != BodyName.VEHICLE:
+            if not result.hasHit() or result.node.getName() != MetaDriveType.VEHICLE:
                 new_bp = copy.deepcopy(bp).get_dict()
                 if randomize:
                     new_bp["config"] = self._randomize_position_in_slot(new_bp["config"])

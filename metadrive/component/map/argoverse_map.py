@@ -16,7 +16,7 @@ except ImportError:
 from metadrive.component.argoverse_block.argoverse_block import ArgoverseBlock
 from metadrive.component.lane.argoverse_lane import ArgoverseLane
 from metadrive.component.map.base_map import BaseMap
-from metadrive.constants import LineColor
+from metadrive.constants import PGLineColor
 
 logger = logging.getLogger(__name__)
 
@@ -87,7 +87,7 @@ class ArgoverseMap(BaseMap):
 
     def _post_process_lane(self, lane: ArgoverseLane):
         if lane.l_neighbor_id is not None and self.lane_id_lane[lane.l_neighbor_id].l_neighbor_id == lane.id:
-            lane.line_color = (LineColor.YELLOW, LineColor.GREY)
+            lane.line_color = (PGLineColor.YELLOW, PGLineColor.GREY)
 
     @staticmethod
     def extract_lane_segment_from_ET_element(child: ET.Element,

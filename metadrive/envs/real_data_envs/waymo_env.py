@@ -357,8 +357,8 @@ if __name__ == "__main__":
     env = WaymoEnv(
         {
             "use_render": True,
-            "agent_policy": WaymoReplayEgoCarPolicy,
-            "manual_control": False,
+            # "agent_policy": WaymoReplayEgoCarPolicy,
+            "manual_control": True,
             "replay": True,
             "no_traffic": True,
             # "debug":True,
@@ -369,7 +369,7 @@ if __name__ == "__main__":
             # "waymo_data_directory": "/home/shady/Downloads/test_processed",
             "horizon": 1000,
             "vehicle_config": dict(
-                no_wheel_friction=True,
+                # no_wheel_friction=True,
                 lidar=dict(num_lasers=120, distance=50, num_others=4),
                 lane_line_detector=dict(num_lasers=12, distance=50),
                 side_detector=dict(num_lasers=160, distance=50)
@@ -398,4 +398,4 @@ if __name__ == "__main__":
             if d:
                 if info["arrive_dest"]:
                     print("seed:{}, success".format(env.engine.global_random_seed))
-                break
+                # break

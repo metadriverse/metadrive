@@ -97,14 +97,14 @@ class EdgeRoadNetwork(BaseRoadNetwork):
         logging.debug("{} is released".format(self.__class__.__name__))
 
     def get_map_features(self, interval=2):
-        from metadrive.scenario.metadrive_type import MetaDriveType
+        from metadrive.type import MetaDriveType
 
         ret = {}
         for id, lane_info in self.graph.items():
             assert id == lane_info.lane.index
             ret[id] = {
                 "polyline": lane_info.lane.get_polyline(interval),
-                "type": MetaDriveType.LANE_CENTER_LINE,
+                "type": MetaDriveType.LANE_SURFACE_STREET,
                 "speed_limit_kmh": lane_info.lane.speed_limit
             }
         return ret

@@ -3,7 +3,7 @@ from typing import Tuple, Union
 import numpy as np
 
 from metadrive.component.lane.abs_lane import AbstractLane
-from metadrive.constants import LineType
+from metadrive.constants import PGLineType
 from metadrive.utils.interpolating_line import InterpolatingLine
 from metadrive.utils.math_utils import get_points_bounding_box
 from metadrive.utils.math_utils import wrap_to_pi
@@ -30,7 +30,7 @@ class PointLane(AbstractLane, InterpolatingLine):
         self.forbidden = forbidden
         self.priority = priority
         # waymo lane line will be processed separately
-        self.line_types = (LineType.NONE, LineType.NONE)
+        self.line_types = (PGLineType.NONE, PGLineType.NONE)
         self.is_straight = True if abs(self.heading_theta_at(0.1) -
                                        self.heading_theta_at(self.length - 0.1)) < np.deg2rad(10) else False
         self.start = self.position(0, 0)
