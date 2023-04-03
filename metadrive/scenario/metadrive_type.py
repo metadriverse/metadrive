@@ -94,9 +94,7 @@ class MetaDriveType:
 
     @classmethod
     def is_broken_line(cls, line):
-        return line in [
-            cls.LINE_BROKEN_DOUBLE_YELLOW, cls.LINE_BROKEN_SINGLE_YELLOW, cls.LINE_BROKEN_SINGLE_WHITE
-        ]
+        return line in [cls.LINE_BROKEN_DOUBLE_YELLOW, cls.LINE_BROKEN_SINGLE_YELLOW, cls.LINE_BROKEN_SINGLE_WHITE]
 
     @classmethod
     def is_road_edge(cls, edge):
