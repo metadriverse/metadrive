@@ -2,7 +2,7 @@ import copy
 
 import numpy as np
 
-from metadrive.metadrive_type import MetaDriveType
+from metadrive.type import MetaDriveType
 from metadrive.utils.coordinates_shift import waymo_to_metadrive_heading, waymo_to_metadrive_vector
 
 

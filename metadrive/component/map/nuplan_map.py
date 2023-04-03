@@ -3,7 +3,7 @@ import logging
 import numpy as np
 import tqdm
 
-from metadrive.metadrive_type import MetaDriveType
+from metadrive.type import MetaDriveType
 
 try:
     import geopandas as gpd

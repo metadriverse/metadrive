@@ -4,7 +4,7 @@ import math
 from panda3d.bullet import BulletWorld
 from panda3d.core import Vec3
 from panda3d.core import Vec4, BitMask32
-from metadrive.metadrive_type import MetaDriveType, TrafficLightStatus
+from metadrive.type import MetaDriveType, TrafficLightStatus
 
 EDITION = "MetaDrive v0.3.0.1"
 DATA_VERSION = EDITION  # Use MetaDrive version to mark the data version

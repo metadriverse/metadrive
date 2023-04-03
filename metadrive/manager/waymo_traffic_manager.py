@@ -4,7 +4,7 @@ from metadrive.component.vehicle.vehicle_type import SVehicle
 from metadrive.manager.base_manager import BaseManager
 from metadrive.scenario.scenario_description import ScenarioDescription as SD
 from metadrive.utils.waymo_utils.parse_object_state import parse_vehicle_state
-from metadrive.metadrive_type import MetaDriveType
+from metadrive.type import MetaDriveType
 
 
 class WaymoTrafficManager(BaseManager):

@@ -21,7 +21,7 @@ except ImportError:
     pass
 from metadrive.utils.waymo_utils.protos import scenario_pb2
 from metadrive.scenario import ScenarioDescription as SD
-from metadrive.metadrive_type import MetaDriveType
+from metadrive.type import MetaDriveType
 from metadrive.utils.waymo_utils.utils import extract_tracks, extract_dynamic_map_states, extract_map_features, compute_width
 import sys
 

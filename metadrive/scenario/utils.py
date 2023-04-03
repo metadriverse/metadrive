@@ -9,7 +9,7 @@ from metadrive.component.traffic_participants.pedestrian import Pedestrian
 from metadrive.component.vehicle.base_vehicle import BaseVehicle
 from metadrive.constants import DATA_VERSION, DEFAULT_AGENT
 from metadrive.scenario import ScenarioDescription as SD
-from metadrive.metadrive_type import MetaDriveType
+from metadrive.type import MetaDriveType
 
 
 def draw_map(map_features, show=False):

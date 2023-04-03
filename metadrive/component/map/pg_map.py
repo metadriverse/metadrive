@@ -1,5 +1,5 @@
 import copy
-from metadrive.metadrive_type import MetaDriveType
+from metadrive.type import MetaDriveType
 from metadrive.constants import PGLineType, PGLineColor
 from typing import List
 

@@ -270,7 +270,7 @@ class NodeRoadNetwork(BaseRoadNetwork):
         return next(self.bfs_paths(start_road_node, goal), [])
 
     def get_map_features(self, interval=2):
-        from metadrive.metadrive_type import MetaDriveType
+        from metadrive.type import MetaDriveType
 
         ret = {}
         for _from, _to_dict in self.graph.items():

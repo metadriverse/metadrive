@@ -6,7 +6,7 @@ from metadrive.component.lane.circular_lane import CircularLane
 from metadrive.component.lane.straight_lane import StraightLane
 from metadrive.constants import PGLineType, PGLineColor
 from metadrive.utils.utils import import_pygame
-from metadrive.metadrive_type import MetaDriveType
+from metadrive.type import MetaDriveType
 
 PositionType = Union[Tuple[float, float], np.ndarray]
 pygame = import_pygame()

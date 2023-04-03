@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import figure
 
-from metadrive.metadrive_type import MetaDriveType
+from metadrive.type import MetaDriveType
 from metadrive.utils.math_utils import mph_to_kmh
 from metadrive.utils.waymo_utils.waymo_type import WaymoLaneType, WaymoAgentType
 from metadrive.utils.waymo_utils.waymo_type import WaymoRoadLineType, WaymoRoadEdgeType
