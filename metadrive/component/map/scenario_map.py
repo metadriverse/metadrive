@@ -130,7 +130,7 @@ class ScenarioMap(BaseMap):
 
 if __name__ == "__main__":
     from metadrive.engine.engine_utils import initialize_engine
-    from metadrive.envs.real_data_envs.waymo_env import WaymoEnv
+    from metadrive.envs.scenario_env import ScenarioEnv
     from metadrive.manager.scenario_data_manager import ScenarioDataManager
 
     # # touch these items so that pickle can work
@@ -139,7 +139,7 @@ if __name__ == "__main__":
     # file_path = "/home/shady/Downloads/test_processed/60.pkl"
     data = read_scenario_data(file_path)
 
-    default_config = WaymoEnv.default_config()
+    default_config = ScenarioEnv.default_config()
     default_config["use_render"] = True
     default_config["debug"] = True
     default_config["debug_static_world"] = True

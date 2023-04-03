@@ -7,20 +7,48 @@ from metadrive.utils.math_utils import wrap_to_pi
 
 # In MetaDrive, the direction of y axis is adverse to Panda3d. It is required to use these function to transform when sync
 # the two coordinates.
-# MetaDrive:
+# MetaDrive (left handed):
 #                     ^ x
 #                     |
 #                     |
 #                     |----------> y
 #                    Ego
 #
-# Panda3d:
+# Panda3d (right handed):
 #                     ^ x
 #                     |
 #                     |
 #         y <---------|
 #                    Ego
 # Note: the models loaded in Panda3d are facing to y axis, and thus -90' is required to make it face to x axis
+
+
+def right_hand_to_left_vector(vector):
+    """
+    MetaDrive is in left-handed coordinate, while Panda3D and some dataset like Waymo is right-handed coordinate
+    """
+    vector = np.array(vector, copy=True)
+    if vector.ndim == 1:
+        vector[1] *= -1
+    elif vector.ndim == 2:
+        vector[:, 1] *= -1
+    else:
+        raise ValueError()
+    return vector
+
+
+def left_hand_to_right_hand_vector(vector):
+    return right_hand_to_left_vector(vector)
+
+
+def right_hand_to_left_hand_heading(heading):
+    return -heading
+
+
+def left_hand_to_right_hand_heading(heading):
+    return -heading
+
+
 def panda_vector(position, z=0.0) -> Vec3:
     """
     Give a 2d or 3d position in MetaDrive, transform it to Panda3d world.
@@ -65,14 +93,7 @@ def metadrive_heading(heading: float) -> float:
 
 
 def waymo_to_metadrive_vector(vector):
-    vector = np.array(vector, copy=True)
-    if vector.ndim == 1:
-        vector[1] *= -1
-    elif vector.ndim == 2:
-        vector[:, 1] *= -1
-    else:
-        raise ValueError()
-    return vector
+    return right_hand_to_left_vector(vector)
 
 
 # Compatibility
