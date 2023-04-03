@@ -8,7 +8,7 @@ from metadrive.engine.asset_loader import AssetLoader
 from metadrive.envs.base_env import BaseEnv
 from metadrive.manager.waymo_data_manager import WaymoDataManager
 from metadrive.manager.waymo_idm_traffic_manager import WaymoIDMTrafficManager
-from metadrive.manager.waymo_map_manager import WaymoMapManager
+from metadrive.manager.scenario_map_manager import ScenarioMapManager
 from metadrive.manager.waymo_traffic_manager import WaymoTrafficManager
 from metadrive.obs.real_env_observation import WaymoObservation
 from metadrive.obs.state_obs import LidarStateObservation
@@ -123,7 +123,7 @@ class WaymoEnv(BaseEnv):
         self.in_stop = False
         super(WaymoEnv, self).setup_engine()
         self.engine.register_manager("data_manager", WaymoDataManager())
-        self.engine.register_manager("map_manager", WaymoMapManager())
+        self.engine.register_manager("map_manager", ScenarioMapManager())
         if not self.config["no_traffic"]:
             if not self.config['replay']:
                 self.engine.register_manager("traffic_manager", WaymoIDMTrafficManager())

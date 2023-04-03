@@ -1,7 +1,7 @@
 import logging
 
 from metadrive.policy.base_policy import BasePolicy
-from metadrive.utils.waymo_utils.parse_object_state import parse_vehicle_state
+from metadrive.scenario.parse_object_state import parse_vehicle_state
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

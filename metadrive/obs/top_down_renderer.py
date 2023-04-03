@@ -5,7 +5,7 @@ from typing import Optional, Union, Iterable
 import numpy as np
 
 from metadrive.component.map.nuplan_map import NuPlanMap
-from metadrive.component.map.waymo_map import WaymoMap
+from metadrive.component.map.scenario_map import ScenarioMap
 from metadrive.constants import Decoration, TARGET_VEHICLES, ScenarioLaneProperty
 from metadrive.obs.top_down_obs_impl import WorldSurface, VehicleGraphics, LaneGraphics
 from metadrive.utils.interpolating_line import InterpolatingLine
@@ -45,12 +45,12 @@ def draw_top_down_map(
     centering_pos = ((b_box[0] + b_box[1]) / 2, (b_box[2] + b_box[3]) / 2)
     surface.move_display_window_to(centering_pos)
 
-    if isinstance(map, WaymoMap):
+    if isinstance(map, ScenarioMap):
         if draw_drivable_area:
             for lane_info in map.road_network.graph.values():
                 LaneGraphics.draw_drivable_area(lane_info.lane, surface, color=road_color)
         else:
-            for data in map.blocks[-1].waymo_map_data.values():
+            for data in map.blocks[-1].map_data.values():
                 if ScenarioLaneProperty.POLYLINE not in data:
                     continue
                 type = data.get("type", None)

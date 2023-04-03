@@ -1,10 +1,10 @@
 import copy
-from metadrive.utils.waymo_utils.parse_object_state import parse_full_trajectory, parse_vehicle_state
+from metadrive.scenario.parse_object_state import parse_full_trajectory, parse_vehicle_state
 from collections import namedtuple, OrderedDict
 
 import numpy as np
 from metadrive.type import MetaDriveType
-from metadrive.component.lane.waymo_lane import PointLane
+from metadrive.component.lane.point_lane import PointLane
 from metadrive.component.vehicle.vehicle_type import SVehicle
 from metadrive.manager.waymo_traffic_manager import WaymoTrafficManager
 from metadrive.policy.idm_policy import WaymoIDMPolicy

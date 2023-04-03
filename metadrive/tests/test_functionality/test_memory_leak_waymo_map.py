@@ -1,6 +1,6 @@
 import time
 
-from metadrive.component.map.waymo_map import WaymoMap
+from metadrive.component.map.scenario_map import ScenarioMap
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.engine.engine_utils import initialize_engine, close_engine
 from metadrive.envs.real_data_envs.waymo_env import WaymoEnv
@@ -54,7 +54,7 @@ def test_waymo_map_memory_leak():
         for t in range(10):
             lt = time.time()
 
-            map = WaymoMap(map_index=0)
+            map = ScenarioMap(map_index=0)
             del map
 
             # map.play()
