@@ -71,40 +71,56 @@ class MetaDriveType:
 
     @classmethod
     def is_lane(cls, type):
-        if type in [cls.LANE_CENTER_LINE, cls.LANE_FREEWAY, cls.LANE_BIKE_LANE]:
-            return True
-        else:
-            return False
+        return type in [cls.LANE_CENTER_LINE, cls.LANE_FREEWAY, cls.LANE_BIKE_LANE]
 
     @classmethod
     def is_road_line(cls, line):
-        return True if line in [
+        """
+        This function relates to is_road_edge. We will have different processing when treating a line that
+        is in the boundary or not.
+        """
+        return line in [
             cls.LINE_UNKNOWN, cls.LINE_BROKEN_SINGLE_WHITE, cls.LINE_SOLID_SINGLE_WHITE, cls.LINE_SOLID_DOUBLE_WHITE,
             cls.LINE_BROKEN_SINGLE_YELLOW, cls.LINE_BROKEN_DOUBLE_YELLOW, cls.LINE_SOLID_SINGLE_YELLOW,
             cls.LINE_SOLID_DOUBLE_YELLOW, cls.LINE_PASSING_DOUBLE_YELLOW
-        ] else False
+        ]
 
     @classmethod
     def is_yellow_line(cls, line):
-        return True if line in [
+        return line in [
             cls.LINE_SOLID_DOUBLE_YELLOW, cls.LINE_PASSING_DOUBLE_YELLOW, cls.LINE_SOLID_SINGLE_YELLOW,
             cls.LINE_BROKEN_DOUBLE_YELLOW, cls.LINE_BROKEN_SINGLE_YELLOW
-        ] else False
+        ]
 
     @classmethod
     def is_broken_line(cls, line):
-        return True if line in [
+        return line in [
             cls.LINE_BROKEN_DOUBLE_YELLOW, cls.LINE_BROKEN_SINGLE_YELLOW, cls.LINE_BROKEN_SINGLE_WHITE
-        ] else False
+        ]
 
     @classmethod
     def is_road_edge(cls, edge):
-        return True if edge in [cls.BOUNDARY_UNKNOWN, cls.BOUNDARY_LINE, cls.BOUNDARY_MEDIAN] else False
+        """
+        This function relates to is_road_line.
+        """
+        return edge in [cls.BOUNDARY_UNKNOWN, cls.BOUNDARY_LINE, cls.BOUNDARY_MEDIAN]
 
     @classmethod
     def is_sidewalk(cls, edge):
-        return True if edge == cls.BOUNDARY_LINE else False
+        return edge == cls.BOUNDARY_LINE
 
     @classmethod
     def is_vehicle(cls, type):
-        return True if type == cls.VEHICLE else False
+        return type == cls.VEHICLE
+
+    @classmethod
+    def is_traffic_light_in_yellow(cls, light):
+        return light in [cls.LANE_STATE_CAUTION, cls.LANE_STATE_ARROW_CAUTION, cls.LANE_STATE_FLASHING_CAUTION]
+
+    @classmethod
+    def is_traffic_light_in_green(cls, light):
+        return light in [cls.LANE_STATE_GO, cls.LANE_STATE_ARROW_GO]
+
+    @classmethod
+    def is_traffic_light_in_red(cls, light):
+        return light in [cls.LANE_STATE_STOP, cls.LANE_STATE_ARROW_STOP, cls.LANE_STATE_FLASHING_STOP]
