@@ -1,4 +1,5 @@
 import copy
+import pickle
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -9,6 +10,7 @@ from metadrive.component.traffic_participants.pedestrian import Pedestrian
 from metadrive.component.vehicle.base_vehicle import BaseVehicle
 from metadrive.constants import DATA_VERSION, DEFAULT_AGENT
 from metadrive.scenario import ScenarioDescription as SD
+from metadrive.scenario.scenario_description import ScenarioDescription
 from metadrive.type import MetaDriveType
 
 
@@ -182,3 +184,22 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
     SD.sanity_check(result, check_self_type=True)
 
     return result
+
+
+def read_scenario_data(file_path):
+    with open(file_path, "rb") as f:
+        # unpickler = CustomUnpickler(f)
+        data = pickle.load(f)
+    data = ScenarioDescription(data)
+    return data
+
+
+def convert_polyline_to_metadrive(polyline, coordinate_transform=True):
+    """
+    Convert a polyline to metadrive coordinate as np.array
+    """
+    polyline = np.asarray(polyline)
+    if coordinate_transform:
+        return np.stack([polyline[:, 0], -polyline[:, 1]], axis=1)
+    else:
+        return polyline

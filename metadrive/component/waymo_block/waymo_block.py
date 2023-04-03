@@ -3,7 +3,7 @@ import math
 from metadrive.component.block.base_block import BaseBlock
 from metadrive.component.lane.waymo_lane import WaymoLane
 from metadrive.component.road_network.edge_road_network import EdgeRoadNetwork
-from metadrive.constants import DrivableAreaProperty, WaymoLaneProperty
+from metadrive.constants import DrivableAreaProperty, ScenarioLaneProperty
 from metadrive.constants import PGLineType, PGLineColor
 from metadrive.engine.engine_utils import get_engine
 from metadrive.type import MetaDriveType
@@ -27,7 +27,7 @@ class WaymoBlock(BaseBlock):
     def _sample_topology(self) -> bool:
         for lane_id, data in self.waymo_map_data.items():
             if MetaDriveType.is_lane(data.get("type", False)):
-                if len(data[WaymoLaneProperty.POLYLINE]) <= 1:
+                if len(data[ScenarioLaneProperty.POLYLINE]) <= 1:
                     continue
                 waymo_lane = WaymoLane(
                     lane_id,
@@ -52,30 +52,30 @@ class WaymoBlock(BaseBlock):
         for lane_id, data in self.waymo_map_data.items():
             type = data.get("type", None)
             if MetaDriveType.is_road_line(type):
-                if len(data[WaymoLaneProperty.POLYLINE]) <= 1:
+                if len(data[ScenarioLaneProperty.POLYLINE]) <= 1:
                     continue
                 if MetaDriveType.is_broken_line(type):
                     self.construct_waymo_broken_line(
                         convert_polyline_to_metadrive(
-                            data[WaymoLaneProperty.POLYLINE], coordinate_transform=self.coordinate_transform
+                            data[ScenarioLaneProperty.POLYLINE], coordinate_transform=self.coordinate_transform
                         ), PGLineColor.YELLOW if MetaDriveType.is_yellow_line(type) else PGLineColor.GREY
                     )
                 else:
                     self.construct_waymo_continuous_line(
                         convert_polyline_to_metadrive(
-                            data[WaymoLaneProperty.POLYLINE], coordinate_transform=self.coordinate_transform
+                            data[ScenarioLaneProperty.POLYLINE], coordinate_transform=self.coordinate_transform
                         ), PGLineColor.YELLOW if MetaDriveType.is_yellow_line(type) else PGLineColor.GREY
                     )
             # elif MetaDriveType.is_road_edge(type) and MetaDriveType.is_sidewalk(type):
             #     self.construct_waymo_sidewalk(
             #         convert_polyline_to_metadrive(
-            #             data[WaymoLaneProperty.POLYLINE], coordinate_transform=self.coordinate_transform
+            #             data[ScenarioLaneProperty.POLYLINE], coordinate_transform=self.coordinate_transform
             #         )
             #     )
             # elif MetaDriveType.is_road_edge(type) and not MetaDriveType.is_sidewalk(type):
             #     self.construct_waymo_continuous_line(
             #         convert_polyline_to_metadrive(
-            #             data[WaymoLaneProperty.POLYLINE], coordinate_transform=self.coordinate_transform
+            #             data[ScenarioLaneProperty.POLYLINE], coordinate_transform=self.coordinate_transform
             #         ), PGLineColor.GREY
             #     )
             # else:
@@ -83,7 +83,7 @@ class WaymoBlock(BaseBlock):
             elif MetaDriveType.is_road_edge(type):
                 self.construct_waymo_sidewalk(
                     convert_polyline_to_metadrive(
-                        data[WaymoLaneProperty.POLYLINE], coordinate_transform=self.coordinate_transform
+                        data[ScenarioLaneProperty.POLYLINE], coordinate_transform=self.coordinate_transform
                     )
                 )
 

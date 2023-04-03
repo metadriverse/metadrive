@@ -6,7 +6,7 @@ from metadrive.component.waymo_block.waymo_block import WaymoBlock
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.type import MetaDriveType
 from metadrive.utils.waymo_utils.utils import convert_polyline_to_metadrive, read_waymo_data
-from metadrive.constants import WaymoLaneProperty
+from metadrive.constants import ScenarioLaneProperty
 
 
 class WaymoMap(BaseMap):
@@ -52,20 +52,20 @@ class WaymoMap(BaseMap):
             type = data.get("type", None)
             map_feat_id = str(lane_id)
             if MetaDriveType.is_road_line(type):
-                if len(data[WaymoLaneProperty.POLYLINE]) <= 1:
+                if len(data[ScenarioLaneProperty.POLYLINE]) <= 1:
                     continue
                 if MetaDriveType.is_broken_line(type):
                     ret[map_feat_id] = {
                         "type": MetaDriveType.LINE_BROKEN_SINGLE_YELLOW
                         if MetaDriveType.is_yellow_line(type) else MetaDriveType.LINE_BROKEN_SINGLE_WHITE,
                         "polyline": convert_polyline_to_metadrive(
-                            data[WaymoLaneProperty.POLYLINE], coordinate_transform=self.coordinate_transform
+                            data[ScenarioLaneProperty.POLYLINE], coordinate_transform=self.coordinate_transform
                         )
                     }
                 else:
                     ret[map_feat_id] = {
                         "polyline": convert_polyline_to_metadrive(
-                            data[WaymoLaneProperty.POLYLINE], coordinate_transform=self.coordinate_transform
+                            data[ScenarioLaneProperty.POLYLINE], coordinate_transform=self.coordinate_transform
                         ),
                         "type": MetaDriveType.LINE_SOLID_SINGLE_YELLOW
                         if MetaDriveType.is_yellow_line(type) else MetaDriveType.LINE_SOLID_SINGLE_WHITE
@@ -73,7 +73,7 @@ class WaymoMap(BaseMap):
             elif MetaDriveType.is_road_edge(type):
                 ret[map_feat_id] = {
                     "polyline": convert_polyline_to_metadrive(
-                        data[WaymoLaneProperty.POLYLINE], coordinate_transform=self.coordinate_transform
+                        data[ScenarioLaneProperty.POLYLINE], coordinate_transform=self.coordinate_transform
                     ),
                     "type": MetaDriveType.BOUNDARY_LINE
                 }

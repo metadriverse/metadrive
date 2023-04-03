@@ -313,7 +313,7 @@ class NuPlanLaneProperty:
     pass
 
 
-class WaymoLaneProperty:
+class ScenarioLaneProperty:
     POLYLINE = "polyline"
     LEFT_BOUNDARIES = "left_boundaries"
     RIGHT_BOUNDARIES = "right_boundaries"
