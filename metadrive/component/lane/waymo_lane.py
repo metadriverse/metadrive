@@ -2,11 +2,10 @@ import logging
 import math
 
 from metadrive.component.lane.point_lane import PointLane
-from metadrive.constants import DrivableAreaProperty
+from metadrive.constants import DrivableAreaProperty, WaymoLaneProperty
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.utils.math_utils import norm, mph_to_kmh
 from metadrive.utils.waymo_utils.utils import read_waymo_data, convert_polyline_to_metadrive
-from metadrive.utils.waymo_utils.waymo_type import WaymoLaneProperty
 
 
 class WaymoLane(PointLane):

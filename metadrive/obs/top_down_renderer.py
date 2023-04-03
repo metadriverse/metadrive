@@ -6,13 +6,12 @@ import numpy as np
 
 from metadrive.component.map.nuplan_map import NuPlanMap
 from metadrive.component.map.waymo_map import WaymoMap
-from metadrive.constants import Decoration, TARGET_VEHICLES
+from metadrive.constants import Decoration, TARGET_VEHICLES, WaymoLaneProperty
 from metadrive.obs.top_down_obs_impl import WorldSurface, VehicleGraphics, LaneGraphics
 from metadrive.utils.interpolating_line import InterpolatingLine
 from metadrive.utils.utils import import_pygame
 from metadrive.utils.utils import is_map_related_instance
 from metadrive.utils.waymo_utils.utils import convert_polyline_to_metadrive
-from metadrive.utils.waymo_utils.waymo_type import WaymoLaneProperty
 
 pygame = import_pygame()
 

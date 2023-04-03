@@ -85,14 +85,3 @@ class WaymoAgentType:
         return cls.ENUM_TO_STR[item]
 
 
-class WaymoLaneProperty:
-    LANE_TYPE = "center_lane"
-    LANE_LINE_TYPE = "road_line"
-    LANE_EDGE_TYPE = "road_edge"
-    POLYLINE = "polyline"
-    LEFT_BOUNDARIES = "left_boundaries"
-    RIGHT_BOUNDARIES = "right_boundaries"
-    LEFT_NEIGHBORS = "left_neighbor"
-    RIGHT_NEIGHBORS = "right_neighbor"
-    ENTRY = "entry_lanes"
-    EXIT = "exit_lanes"

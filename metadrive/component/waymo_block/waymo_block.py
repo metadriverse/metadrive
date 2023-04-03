@@ -3,14 +3,13 @@ import math
 from metadrive.component.block.base_block import BaseBlock
 from metadrive.component.lane.waymo_lane import WaymoLane
 from metadrive.component.road_network.edge_road_network import EdgeRoadNetwork
-from metadrive.constants import DrivableAreaProperty
+from metadrive.constants import DrivableAreaProperty, WaymoLaneProperty
 from metadrive.constants import PGLineType, PGLineColor
 from metadrive.engine.engine_utils import get_engine
 from metadrive.type import MetaDriveType
 from metadrive.utils.coordinates_shift import panda_heading
 from metadrive.utils.interpolating_line import InterpolatingLine
 from metadrive.utils.waymo_utils.utils import convert_polyline_to_metadrive
-from metadrive.utils.waymo_utils.waymo_type import WaymoLaneProperty
 
 
 class WaymoBlock(BaseBlock):

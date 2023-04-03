@@ -33,7 +33,6 @@ MIX_WAYMO_PG_ENV_CONFIG = dict(
 
     # ===== PG Map config =====
     start_seed=0,
-    num_scenarios=50,
     block_dist_config=PGBlockDistConfig,
 
     # ===== PG Map Config =====
