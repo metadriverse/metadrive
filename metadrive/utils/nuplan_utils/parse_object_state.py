@@ -1,6 +1,7 @@
 from metadrive.utils.coordinates_shift import nuplan_to_metadrive_heading, nuplan_to_metadrive_vector
 from metadrive.utils.math_utils import compute_angular_velocity
 
+
 def parse_ego_vehicle_state(state, nuplan_center):
     center = nuplan_center
     ret = {}

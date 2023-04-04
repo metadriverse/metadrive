@@ -7,6 +7,7 @@ from metadrive.utils.coordinates_shift import right_hand_to_left_hand_heading, r
 
 from metadrive.utils.math_utils import compute_angular_velocity
 
+
 def parse_vehicle_state(object_dict, time_idx, coordinate_transform, check_last_state=False, sim_time_interval=0.1):
     assert object_dict["type"] == MetaDriveType.VEHICLE
 
@@ -34,9 +35,8 @@ def parse_vehicle_state(object_dict, time_idx, coordinate_transform, check_last_
     else:
         ret["position"] = states["position"][time_idx]
         ret["velocity"] = states["velocity"][time_idx]
-    ret["heading_theta"] = right_hand_to_left_hand_heading(
-        states["heading"][time_idx]
-    ) if coordinate_transform else states["heading"][time_idx]
+    ret["heading_theta"] = right_hand_to_left_hand_heading(states["heading"][time_idx]
+                                                           ) if coordinate_transform else states["heading"][time_idx]
     ret["heading"] = ret["heading_theta"]
 
     ret["length"] = states["size"][time_idx][0]
