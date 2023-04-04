@@ -46,9 +46,11 @@ class ReplayTrafficParticipantPolicy(BasePolicy):
             return None  # Return None action so the base vehicle will not overwrite the steering & throttle
 
         if "throttle_brake" in info:
-            self.control_object.set_throttle_brake(float(info["throttle_brake"]))
+            if hasattr(self.control_object, "set_throttle_brake"):
+                self.control_object.set_throttle_brake(float(info["throttle_brake"]))
         if "steering" in info:
-            self.control_object.set_steering(float(info["steering"]))
+            if hasattr(self.control_object, "set_steering"):
+                self.control_object.set_steering(float(info["steering"]))
         self.control_object.set_position(info["position"])
         self.control_object.set_velocity(info["velocity"])
         self.control_object.set_heading_theta(info["heading"])
