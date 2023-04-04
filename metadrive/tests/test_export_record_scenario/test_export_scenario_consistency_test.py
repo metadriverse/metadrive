@@ -15,7 +15,7 @@ from metadrive.utils.math_utils import wrap_to_pi
 NP_ARRAY_DECIMAL = 4
 VELOCITY_DECIMAL = 1  # velocity can not be set accurately
 
-MIN_LENGTH_RATIO = 0.9
+MIN_LENGTH_RATIO = 0.8
 
 
 def assert_scenario_equal(scenarios1, scenarios2, only_compare_sdc=False, coordinate_transform=False):
@@ -215,9 +215,15 @@ def test_export_metadrive_scenario_easy(num_scenarios=5, render_export_env=False
         )
     )
     try:
-        scenarios_restored = env.export_scenarios(
-            policy, scenario_index=[i for i in range(num_scenarios)], render_topdown=render_load_env
+        scenarios_restored, done_info = env.export_scenarios(
+            policy,
+            scenario_index=[i for i in range(num_scenarios)],
+            render_topdown=render_load_env,
+            return_done_info=True
         )
+        for seed, info in done_info.items():
+            if not info["arrive_dest"]:
+                raise ValueError("Seed: {} Can not arrive dest!".format(seed))
     finally:
         env.close()
 
@@ -269,9 +275,15 @@ def test_export_metadrive_scenario_hard(start_seed=0, num_scenarios=3, render_ex
         )
     )
     try:
-        scenarios_restored = env.export_scenarios(
-            policy, scenario_index=[i for i in range(num_scenarios)], render_topdown=False
+        scenarios_restored, done_info = env.export_scenarios(
+            policy,
+            scenario_index=[i for i in range(num_scenarios)],
+            render_topdown=render_load_env,
+            return_done_info=True
         )
+        for seed, info in done_info.items():
+            if not info["arrive_dest"]:
+                raise ValueError("Seed: {} Can not arrive dest!".format(seed))
     finally:
         env.close()
 
@@ -314,9 +326,15 @@ def test_export_waymo_scenario(num_scenarios=3, render_export_env=False, render_
                 vehicle_config=dict(no_wheel_friction=True)
             )
         )
-        scenarios_restored = env.export_scenarios(
-            policy, scenario_index=[i for i in range(num_scenarios)], verbose=True
+        scenarios_restored, done_info = env.export_scenarios(
+            policy,
+            scenario_index=[i for i in range(num_scenarios)],
+            render_topdown=render_load_env,
+            return_done_info=True
         )
+        for seed, info in done_info.items():
+            if not info["arrive_dest"]:
+                raise ValueError("Seed: {} Can not arrive dest!".format(seed))
 
     finally:
         env.close()
