@@ -21,7 +21,7 @@ class WaymoTrafficManager(BaseManager):
                 info = parse_vehicle_state(
                     type_traj,
                     self.engine.global_config["traj_start_index"],
-                    coordinate_transform=self.engine.global_config["coordinate_transform"]
+                    coordinate_transform=self.engine.data_manager.coordinate_transform
                 )
                 if not info["valid"]:
                     continue
@@ -72,7 +72,7 @@ class WaymoTrafficManager(BaseManager):
                     vehicle = self.spawned_objects[self.vid_to_obj[v_id]]
 
                     info = parse_vehicle_state(
-                        type_traj, episode_step, coordinate_transform=self.engine.global_config["coordinate_transform"]
+                        type_traj, episode_step, coordinate_transform=self.engine.data_manager.coordinate_transform
                     )
                     time_end = episode_step > self.engine.global_config["traj_end_index"] and \
                                self.engine.global_config["traj_end_index"] != -1

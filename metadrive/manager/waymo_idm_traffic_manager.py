@@ -44,13 +44,13 @@ class WaymoIDMTrafficManager(WaymoTrafficManager):
                     init_info = parse_vehicle_state(
                         type_traj,
                         self.engine.global_config["traj_start_index"],
-                        coordinate_transform=self.engine.global_config["coordinate_transform"]
+                        coordinate_transform=self.engine.data_manager.coordinate_transform
                     )
                     dest_info = parse_vehicle_state(
                         type_traj,
                         self.engine.global_config["traj_end_index"],
                         check_last_state=True,
-                        coordinate_transform=self.engine.global_config["coordinate_transform"]
+                        coordinate_transform=self.engine.data_manager.coordinate_transform
                     )
                     if not init_info["valid"]:
                         continue
@@ -59,7 +59,7 @@ class WaymoIDMTrafficManager(WaymoTrafficManager):
                         static = True
                     else:
                         full_traj = parse_full_trajectory(
-                            type_traj, coordinate_transform=self.engine.global_config["coordinate_transform"]
+                            type_traj, coordinate_transform=self.engine.data_manager.coordinate_transform
                         )
                         if len(full_traj) < self.MIN_DURATION:
                             full_traj = static_vehicle_info(init_info["position"], init_info["heading"])
@@ -80,7 +80,7 @@ class WaymoIDMTrafficManager(WaymoTrafficManager):
                     init_info = parse_vehicle_state(
                         type_traj,
                         self.engine.global_config["traj_start_index"],
-                        coordinate_transform=self.engine.global_config["coordinate_transform"]
+                        coordinate_transform=self.engine.data_manager.coordinate_transform
                     )
                     traffic_traj_data["sdc"] = {
                         "traj": None,

@@ -157,7 +157,7 @@ class ScenarioBlock(BaseBlock):
 
     @property
     def coordinate_transform(self):
-        return self.engine.global_config["coordinate_transform"]
+        return self.engine.data_manager.coordinate_transform
 
     # @property
     # def map_data(self):

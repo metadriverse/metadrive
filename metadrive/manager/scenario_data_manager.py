@@ -14,7 +14,6 @@ class ScenarioDataManager(BaseManager):
 
     def __init__(self):
         super(ScenarioDataManager, self).__init__()
-
         from metadrive.engine.engine_utils import get_engine
         engine = get_engine()
 
@@ -26,7 +25,7 @@ class ScenarioDataManager(BaseManager):
 
         self.store_map = store_map
         self._scenario = DataBuffer(store_map_buffer_size if self.store_map else self.num_scenarios)
-
+        self._coordinate_transform = False
         for i in tqdm(range(self.start_scenario_index, self.start_scenario_index + self.num_scenarios),
                       desc="Check Scenario Data"):
             p = os.path.join(self.directory, "{}.pkl".format(i))
@@ -87,7 +86,7 @@ class ScenarioDataManager(BaseManager):
         # Data Manager is the first manager that accesses  data.
         # It is proper to let it validate the metadata and change the global config if needed.
         ret = self._scenario[i]
-        self.validate_data(ret)
+        self.transform_coordinate(ret)
 
         return ret
 
@@ -97,11 +96,19 @@ class ScenarioDataManager(BaseManager):
         state["raw_data"] = raw_data
         return state
 
-    def validate_data(self, scenario):
-        # It supports loading WaymoData or exported data in two coordinates
-        if scenario[SD.METADATA][SD.COORDINATE] == MetaDriveType.COORDINATE_WAYMO:
-            self.engine.global_config["coordinate_transform"] = True
-        elif scenario[SD.METADATA][SD.COORDINATE] == MetaDriveType.COORDINATE_METADRIVE:
-            self.engine.global_config["coordinate_transform"] = False
+    def transform_coordinate(self, scenario):
+        if not self.engine.global_config["allow_coordinate_transform"]:
+            assert scenario[SD.METADATA][SD.COORDINATE] == MetaDriveType.COORDINATE_METADRIVE, \
+                "Only support MetaDrive coordinate!"
         else:
-            raise ValueError()
+            # It supports loading WaymoData or exported data in two coordinates
+            if scenario[SD.METADATA][SD.COORDINATE] == MetaDriveType.COORDINATE_WAYMO:
+                self._coordinate_transform = True
+            elif scenario[SD.METADATA][SD.COORDINATE] == MetaDriveType.COORDINATE_METADRIVE:
+                self._coordinate_transform = False
+            else:
+                raise ValueError()
+
+    @property
+    def coordinate_transform(self):
+        return self._coordinate_transform

@@ -51,20 +51,20 @@ class ScenarioMapManager(BaseManager):
         sdc_track = data.get_sdc_track()
 
         sdc_traj = parse_full_trajectory(
-            sdc_track, coordinate_transform=self.engine.global_config["coordinate_transform"]
+            sdc_track, coordinate_transform=self.engine.data_manager.coordinate_transform
         )
 
         init_state = parse_vehicle_state(
             sdc_track,
             self.engine.global_config["traj_start_index"],
             check_last_state=False,
-            coordinate_transform=self.engine.global_config["coordinate_transform"]
+            coordinate_transform=self.engine.data_manager.coordinate_transform
         )
         last_state = parse_vehicle_state(
             sdc_track,
             self.engine.global_config["traj_end_index"],
             check_last_state=True,
-            coordinate_transform=self.engine.global_config["coordinate_transform"]
+            coordinate_transform=self.engine.data_manager.coordinate_transform
         )
         init_position = init_state["position"]
         init_yaw = init_state["heading"]

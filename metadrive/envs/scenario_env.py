@@ -67,9 +67,7 @@ SCENARIO_ENV_CONFIG = dict(
     relax_out_of_road_done=True,
 
     # ===== Coordinate system =====
-    # Don't set it, as it will be auto-filled by data_manager to do auto convert!
-    # If False, then don't do the coordinate transformation
-    coordinate_transform=True,
+    allow_coordinate_transform=False,
 )
 
 
@@ -276,7 +274,7 @@ class ScenarioEnv(BaseEnv):
                 if current_step == 0:
                     break
 
-            if self.engine.global_config["coordinate_transform"]:
+            if self.engine.data_manager.coordinate_transform:
                 expert_xy = right_hand_to_left_vector(expert_state_list["position"][current_step][:2])
             else:
                 expert_xy = expert_state_list["position"][current_step][:2]
@@ -284,7 +282,7 @@ class ScenarioEnv(BaseEnv):
             step_info["distance_error"] = dist
 
             last_state = expert_state_list["position"][largest_valid_index]
-            if self.engine.global_config["coordinate_transform"]:
+            if self.engine.data_manager.coordinate_transform:
                 last_expert_xy = right_hand_to_left_vector(last_state[:2])
             else:
                 last_expert_xy = last_state[:2]

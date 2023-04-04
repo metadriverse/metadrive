@@ -186,7 +186,7 @@ class TopDownRenderer:
         self._text_render_pos = [50, 50]
         self._font_size = 25
         self._text_render_interval = 20
-        self.coordinate_transform = self.engine.global_config.get("coordinate_transform", False)
+        self.coordinate_transform = self.engine.data_manager.coordinate_transform
 
         # Setup the canvas
         # (1) background is the underlying layer. It is fixed and will never change unless the map changes.

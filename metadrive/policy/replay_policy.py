@@ -70,7 +70,7 @@ class ReplayEgoCarPolicy(BasePolicy):
                 parse_vehicle_state(
                     trajectory_data[sdc_track_index],
                     i,
-                    coordinate_transform=self.engine.global_config["coordinate_transform"]
+                    coordinate_transform=self.engine.data_manager.coordinate_transform
                 )
             )
         return ret

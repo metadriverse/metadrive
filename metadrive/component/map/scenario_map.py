@@ -86,7 +86,7 @@ class ScenarioMap(BaseMap):
 
     @property
     def coordinate_transform(self):
-        return self.engine.global_config["coordinate_transform"]
+        return self.engine.data_manager.coordinate_transform
 
     def get_map_features(self, interval=2):
         map_features = super(ScenarioMap, self).get_map_features(interval=interval)
