@@ -51,7 +51,7 @@ if __name__ == "__main__":
     )
     success = []
     for i in range(3):
-        env.reset(force_seed=i)
+        env.reset(force_seed=0)
         while True:
             step_start = time.time()
             o, r, d, info = env.step([0, 0])
@@ -73,4 +73,4 @@ if __name__ == "__main__":
             if d:
                 if info["arrive_dest"]:
                     print("seed:{}, success".format(env.engine.global_random_seed))
-                # break
+                break

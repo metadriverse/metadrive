@@ -31,7 +31,11 @@ class ReplayTrafficParticipantPolicy(BasePolicy):
         return ret
 
     def act(self, *args, **kwargs):
-        info = self.traj_info[max(int(self.episode_step), 0)]
+        index = max(int(self.episode_step), 0)
+        if index >= len(self.traj_info):
+            return None
+
+        info = self.traj_info[index]
 
         # Before step
         # Warning by LQY: Don't call before step here! Before step should be called by manager

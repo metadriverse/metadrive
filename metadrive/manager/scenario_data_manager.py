@@ -1,4 +1,5 @@
 import copy
+from metadrive.constants import RENDER_MODE_NONE
 import os
 
 from tqdm import tqdm
@@ -116,3 +117,9 @@ class ScenarioDataManager(BaseManager):
     @property
     def scenario_length(self):
         return self.get_scenario(self.engine.global_random_seed)[SD.LENGTH]
+
+    def after_reset(self):
+        if self.engine.mode != RENDER_MODE_NONE:
+            center_p = self.engine.current_map.get_center_point()
+            self.engine.sky_box.set_position(center_p)
+            self.engine.terrain.set_position(center_p)
