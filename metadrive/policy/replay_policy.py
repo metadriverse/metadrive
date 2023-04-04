@@ -100,8 +100,8 @@ class ReplayEgoCarPolicy(BasePolicy):
         self.control_object.set_position(info["position"])
         self.control_object.set_velocity(info["velocity"])
         self.control_object.set_heading_theta(info["heading"])
-        if "angular_velocity" in info:
-            self.control_object.set_angular_velocity(info["angular_velocity"])
+        # if "angular_velocity" in info:
+        #     self.control_object.set_angular_velocity(info["angular_velocity"])
 
         # After step
         self.control_object.after_step()

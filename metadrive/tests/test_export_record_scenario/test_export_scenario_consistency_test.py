@@ -82,13 +82,13 @@ def assert_scenario_equal(scenarios1, scenarios2, only_compare_sdc=False, coordi
 
                     if state_k == "heading":
                         # error < 5.7 degree is acceptable
-                        broader_ratio = 0.98
+                        broader_ratio = 1
                         ret = abs(wrap_to_pi(state_array_1[:min_len] - state_array_2[:min_len])) < 1e-1
                         ratio = np.sum(np.asarray(ret, dtype=np.int8)) / len(ret)
                         if ratio < broader_ratio:
                             raise ValueError("Match ration: {}, Target: {}".format(ratio, broader_ratio))
 
-                        strict_ratio = 0.9
+                        strict_ratio = 0.98
                         ret = abs(wrap_to_pi(state_array_1[:min_len] - state_array_2[:min_len])) < 1e-4
                         ratio = np.sum(np.asarray(ret, dtype=np.int8)) / len(ret)
                         if ratio < strict_ratio:
@@ -323,5 +323,5 @@ def test_export_waymo_scenario(num_scenarios=3, render_export_env=False, render_
 if __name__ == "__main__":
     # test_export_metadrive_scenario_reproduction(num_scenarios=10)
     # test_export_metadrive_scenario_easy(num_scenarios=3, render_export_env=False, render_load_env=False)
-    test_export_metadrive_scenario_hard(num_scenarios=1, render_export_env=True, render_load_env=True)
+    test_export_metadrive_scenario_hard(num_scenarios=3, render_export_env=True, render_load_env=True)
     # test_export_waymo_scenario(num_scenarios=3, render_export_env=False, render_load_env=False)

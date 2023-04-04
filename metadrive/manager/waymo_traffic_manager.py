@@ -51,8 +51,8 @@ class WaymoTrafficManager(BaseManager):
                 )
                 self.vid_to_obj[v_id] = v.name
                 v.set_velocity(info["velocity"])
-                if "angular_velocity" in info:
-                    v.set_angular_velocity(info["angular_velocity"])
+                # if "angular_velocity" in info:
+                #     v.set_angular_velocity(info["angular_velocity"])
 
                 # v.set_static(True)
         # except:
@@ -88,8 +88,8 @@ class WaymoTrafficManager(BaseManager):
                         vehicle.set_throttle_brake(float(info["throttle_brake"]))
                     if "steering" in info:
                         vehicle.set_steering(float(info["steering"]))
-                    if "angular_velocity" in info:
-                        vehicle.set_angular_velocity(float(info["angular_velocity"]))
+                    # if "angular_velocity" in info:
+                    #     vehicle.set_angular_velocity(float(info["angular_velocity"]))
 
         except:
             raise ValueError("Can not UPDATE traffic for seed: {}".format(self.engine.global_random_seed))
