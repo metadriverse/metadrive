@@ -59,14 +59,7 @@ class TopDownNuScenes(TopDownObservation):
 
     CHANNEL_NAMES = CHANNEL_NAMES
 
-    def __init__(
-            self,
-            vehicle_config,
-            onscreen,
-            clip_rgb,
-            resolution,
-            max_distance
-    ):
+    def __init__(self, vehicle_config, onscreen, clip_rgb, resolution, max_distance):
         super(TopDownNuScenes, self).__init__(
             vehicle_config, clip_rgb, onscreen=onscreen, resolution=resolution, max_distance=max_distance
         )
@@ -156,9 +149,7 @@ class TopDownNuScenes(TopDownObservation):
 
         self.obs_window.render(
             canvas_dict=dict(
-                driveable_area=self.canvas_driveable_area,
-                lane_lines=self.canvas_lane_lines,
-                actors=self.canvas_actors
+                driveable_area=self.canvas_driveable_area, lane_lines=self.canvas_lane_lines, actors=self.canvas_actors
             ),
             position=pos,
             heading=vehicle.heading_theta
@@ -191,11 +182,7 @@ class TopDownNuScenes(TopDownObservation):
         # Gray scale
         img_dict = {k: self._transform(img) for k, img in img_dict.items()}
 
-        img = [
-            img_dict["driveable_area"],
-            img_dict["lane_lines"],
-            img_dict["actors"]
-        ]
+        img = [img_dict["driveable_area"], img_dict["lane_lines"], img_dict["actors"]]
 
         # Stack
         img = np.stack(img, axis=2)
@@ -207,7 +194,7 @@ class TopDownNuScenes(TopDownObservation):
 
     @property
     def observation_space(self):
-        shape = self.obs_shape + (self.num_stacks,)
+        shape = self.obs_shape + (self.num_stacks, )
         if self.rgb_clip:
             return gym.spaces.Box(-0.0, 1.0, shape=shape, dtype=np.float32)
         else:
