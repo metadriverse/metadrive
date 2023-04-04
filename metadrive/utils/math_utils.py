@@ -48,7 +48,7 @@ def time_me(fn):
 
 
 def norm(x, y):
-    return math.sqrt(x**2 + y**2)
+    return math.sqrt(x ** 2 + y ** 2)
 
 
 def clip(a, low, high):
@@ -65,7 +65,7 @@ def panda_vector(position_x, position_y, z=0.0):
 
 def distance_greater(vec1, vec2, length):
     """Return whether the distance between two vectors is greater than the given length."""
-    return ((vec1[0] - vec2[0])**2 + (vec1[1] - vec2[1])**2) > length**2
+    return ((vec1[0] - vec2[0]) ** 2 + (vec1[1] - vec2[1]) ** 2) > length ** 2
 
 
 def mph_to_kmh(speed_in_mph: float):
@@ -229,3 +229,28 @@ class Vector(tuple):
 
     def dot(self, other):
         return self[0] * other[0] + self[1] * other[1]
+
+
+def compute_angular_velocity(initial_heading, final_heading, dt):
+    """
+    Calculate the angular velocity between two headings given in radians.
+
+    Parameters:
+    initial_heading (float): The initial heading in radians.
+    final_heading (float): The final heading in radians.
+    dt (float): The time interval between the two headings in seconds.
+
+    Returns:
+    float: The angular velocity in radians per second.
+    """
+
+    # Calculate the difference in headings
+    delta_heading = final_heading - initial_heading
+
+    # Adjust the delta_heading to be in the range (-π, π]
+    delta_heading = (delta_heading + math.pi) % (2 * math.pi) - math.pi
+
+    # Compute the angular velocity
+    angular_vel = delta_heading / dt
+
+    return angular_vel

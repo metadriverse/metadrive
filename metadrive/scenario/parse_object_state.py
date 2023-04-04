@@ -5,6 +5,7 @@ import numpy as np
 from metadrive.type import MetaDriveType
 from metadrive.utils.coordinates_shift import right_hand_to_left_hand_heading, right_hand_to_left_vector
 
+from metadrive.utils.math_utils import compute_angular_velocity
 
 def parse_vehicle_state(object_dict, time_idx, coordinate_transform, check_last_state=False, sim_time_interval=0.1):
     assert object_dict["type"] == MetaDriveType.VEHICLE
@@ -33,8 +34,9 @@ def parse_vehicle_state(object_dict, time_idx, coordinate_transform, check_last_
     else:
         ret["position"] = states["position"][time_idx]
         ret["velocity"] = states["velocity"][time_idx]
-    ret["heading_theta"] = right_hand_to_left_hand_heading(states["heading"][time_idx]
-                                                           ) if coordinate_transform else states["heading"][time_idx]
+    ret["heading_theta"] = right_hand_to_left_hand_heading(
+        states["heading"][time_idx]
+    ) if coordinate_transform else states["heading"][time_idx]
     ret["heading"] = ret["heading_theta"]
 
     ret["length"] = states["size"][time_idx][0]
@@ -42,7 +44,11 @@ def parse_vehicle_state(object_dict, time_idx, coordinate_transform, check_last_
 
     ret["valid"] = states["valid"][time_idx]
     if time_idx < len(states["position"]) - 1:
-        angular_velocity = (states["heading"][time_idx + 1] - states["heading"][time_idx]) / sim_time_interval
+        angular_velocity = compute_angular_velocity(
+            initial_heading=states["heading"][time_idx],
+            final_heading=states["heading"][time_idx + 1],
+            dt=sim_time_interval
+        )
         ret["angular_velocity"] = right_hand_to_left_hand_heading(
             angular_velocity
         ) if coordinate_transform else angular_velocity

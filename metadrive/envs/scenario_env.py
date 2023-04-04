@@ -366,6 +366,7 @@ if __name__ == "__main__":
             "num_scenarios": 3,
             # "data_directory": "/home/shady/Downloads/test_processed",
             "horizon": 1000,
+            "allow_coordinate_transform": True,
             "vehicle_config": dict(
                 # no_wheel_friction=True,
                 lidar=dict(num_lasers=120, distance=50, num_others=4),
