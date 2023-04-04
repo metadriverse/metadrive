@@ -15,6 +15,8 @@ from metadrive.utils.math_utils import wrap_to_pi
 NP_ARRAY_DECIMAL = 4
 VELOCITY_DECIMAL = 1  # velocity can not be set accurately
 
+MIN_LENGTH_RATIO = 0.9
+
 
 def assert_scenario_equal(scenarios1, scenarios2, only_compare_sdc=False, coordinate_transform=False):
     # ===== These two set of data should align =====
@@ -34,6 +36,8 @@ def assert_scenario_equal(scenarios1, scenarios2, only_compare_sdc=False, coordi
             state_dict1 = old_scene[SD.TRACKS][sdc1]
             state_dict2 = new_scene[SD.TRACKS][sdc2]
             min_len = min(state_dict1[SD.STATE]["position"].shape[0], state_dict2[SD.STATE]["position"].shape[0])
+            max_len = max(state_dict1[SD.STATE]["position"].shape[0], state_dict2[SD.STATE]["position"].shape[0])
+            assert min_len / max_len > MIN_LENGTH_RATIO, "Replayed Scenario length ratio: {}".format(min_len / max_len)
             for k in state_dict1[SD.STATE].keys():
                 if k in ["action", "throttle_brake", "steering"]:
                     continue
@@ -68,6 +72,8 @@ def assert_scenario_equal(scenarios1, scenarios2, only_compare_sdc=False, coordi
                     state_array_1 = new_scene[SD.TRACKS][track_id][SD.STATE][state_k]
                     state_array_2 = track[SD.STATE][state_k]
                     min_len = min(state_array_1.shape[0], state_array_2.shape[0])
+                    max_len = max(state_array_1.shape[0], state_array_2.shape[0])
+                    assert min_len / max_len > MIN_LENGTH_RATIO, "Replayed Scenario length ratio: {}".format(min_len / max_len)
 
                     if state_k == "velocity":
                         decimal = VELOCITY_DECIMAL
@@ -89,7 +95,7 @@ def assert_scenario_equal(scenarios1, scenarios2, only_compare_sdc=False, coordi
                             raise ValueError("Match ration: {}, Target: {}".format(ratio, strict_ratio))
                     else:
                         strict_ratio = 0.99
-                        ret = abs(wrap_to_pi(state_array_1[:min_len] - state_array_2[:min_len])) < pow(10,-decimal)
+                        ret = abs(wrap_to_pi(state_array_1[:min_len] - state_array_2[:min_len])) < pow(10, -decimal)
                         ratio = np.sum(np.asarray(ret, dtype=np.int8)) / len(ret)
                         if ratio < strict_ratio:
                             raise ValueError("Match ration: {}, Target: {}".format(ratio, strict_ratio))
@@ -101,6 +107,8 @@ def assert_scenario_equal(scenarios1, scenarios2, only_compare_sdc=False, coordi
                 state_array_1 = new_scene.get_sdc_track()["state"][k]
                 state_array_2 = old_scene.get_sdc_track()["state"][k]
                 min_len = min(state_array_1.shape[0], state_array_2.shape[0])
+                max_len = max(state_array_1.shape[0], state_array_2.shape[0])
+                assert min_len / max_len > MIN_LENGTH_RATIO, "Replayed Scenario length ratio: {}".format(min_len / max_len)
 
                 if k == "velocity":
                     decimal = VELOCITY_DECIMAL
@@ -129,6 +137,8 @@ def assert_scenario_equal(scenarios1, scenarios2, only_compare_sdc=False, coordi
             assert set(new_state_dict.keys()) == set(old_state_dict.keys())
             for k in new_state_dict.keys():
                 min_len = min(new_state_dict[k].shape[0], old_state_dict[k].shape[0])
+                max_len = max(new_state_dict[k].shape[0], old_state_dict[k].shape[0])
+                assert min_len / max_len > MIN_LENGTH_RATIO, "Replayed Scenario length ratio: {}".format(min_len / max_len)
                 np.testing.assert_almost_equal(
                     new_state_dict[k][:min_len], old_state_dict[k][:min_len], decimal=NP_ARRAY_DECIMAL
                 )
@@ -313,5 +323,5 @@ def test_export_waymo_scenario(num_scenarios=3, render_export_env=False, render_
 if __name__ == "__main__":
     # test_export_metadrive_scenario_reproduction(num_scenarios=10)
     # test_export_metadrive_scenario_easy(num_scenarios=3, render_export_env=False, render_load_env=False)
-    test_export_metadrive_scenario_hard(num_scenarios=3, render_export_env=False, render_load_env=False)
+    test_export_metadrive_scenario_hard(num_scenarios=1, render_export_env=True, render_load_env=True)
     # test_export_waymo_scenario(num_scenarios=3, render_export_env=False, render_load_env=False)
