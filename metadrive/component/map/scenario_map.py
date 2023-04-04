@@ -5,7 +5,7 @@ from metadrive.component.road_network.edge_road_network import EdgeRoadNetwork
 from metadrive.component.scenario_block.scenario_block import ScenarioBlock
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.type import MetaDriveType
-from metadrive.scenario.utils import  convert_polyline_to_metadrive, read_scenario_data
+from metadrive.scenario.utils import convert_polyline_to_metadrive, read_scenario_data
 from metadrive.constants import ScenarioLaneProperty
 
 

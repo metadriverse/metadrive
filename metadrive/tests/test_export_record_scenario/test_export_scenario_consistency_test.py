@@ -73,7 +73,9 @@ def assert_scenario_equal(scenarios1, scenarios2, only_compare_sdc=False, coordi
                     state_array_2 = track[SD.STATE][state_k]
                     min_len = min(state_array_1.shape[0], state_array_2.shape[0])
                     max_len = max(state_array_1.shape[0], state_array_2.shape[0])
-                    assert min_len / max_len > MIN_LENGTH_RATIO, "Replayed Scenario length ratio: {}".format(min_len / max_len)
+                    assert min_len / max_len > MIN_LENGTH_RATIO, "Replayed Scenario length ratio: {}".format(
+                        min_len / max_len
+                    )
 
                     if state_k == "velocity":
                         decimal = VELOCITY_DECIMAL
@@ -108,7 +110,9 @@ def assert_scenario_equal(scenarios1, scenarios2, only_compare_sdc=False, coordi
                 state_array_2 = old_scene.get_sdc_track()["state"][k]
                 min_len = min(state_array_1.shape[0], state_array_2.shape[0])
                 max_len = max(state_array_1.shape[0], state_array_2.shape[0])
-                assert min_len / max_len > MIN_LENGTH_RATIO, "Replayed Scenario length ratio: {}".format(min_len / max_len)
+                assert min_len / max_len > MIN_LENGTH_RATIO, "Replayed Scenario length ratio: {}".format(
+                    min_len / max_len
+                )
 
                 if k == "velocity":
                     decimal = VELOCITY_DECIMAL
@@ -138,7 +142,9 @@ def assert_scenario_equal(scenarios1, scenarios2, only_compare_sdc=False, coordi
             for k in new_state_dict.keys():
                 min_len = min(new_state_dict[k].shape[0], old_state_dict[k].shape[0])
                 max_len = max(new_state_dict[k].shape[0], old_state_dict[k].shape[0])
-                assert min_len / max_len > MIN_LENGTH_RATIO, "Replayed Scenario length ratio: {}".format(min_len / max_len)
+                assert min_len / max_len > MIN_LENGTH_RATIO, "Replayed Scenario length ratio: {}".format(
+                    min_len / max_len
+                )
                 np.testing.assert_almost_equal(
                     new_state_dict[k][:min_len], old_state_dict[k][:min_len], decimal=NP_ARRAY_DECIMAL
                 )

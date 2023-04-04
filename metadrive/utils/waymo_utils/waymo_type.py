@@ -83,5 +83,3 @@ class WaymoAgentType:
     @classmethod
     def from_waymo(cls, item):
         return cls.ENUM_TO_STR[item]
-
-

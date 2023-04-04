@@ -4,7 +4,6 @@ from panda3d.core import Vec3
 from metadrive.utils.math_utils import Vector
 from metadrive.utils.math_utils import wrap_to_pi
 
-
 # In MetaDrive, the direction of y axis is adverse to Panda3d. It is required to use these function to transform when sync
 # the two coordinates.
 # MetaDrive (left handed):

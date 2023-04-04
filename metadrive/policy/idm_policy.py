@@ -446,10 +446,7 @@ class TrajectoryIDMPOlicy(IDMPolicy):
                 all_objects = self.control_object.lidar.get_surrounding_objects(self.control_object)
                 # can not find routing target lane
                 surrounding_objects = FrontBackObjects.get_find_front_back_objs_single_lane(
-                    all_objects,
-                    self.routing_target_lane,
-                    self.control_object.position,
-                    max_distance=self.IDM_MAX_DIST
+                    all_objects, self.routing_target_lane, self.control_object.position, max_distance=self.IDM_MAX_DIST
                 )
                 acc_front_obj = surrounding_objects.front_object()
                 acc_front_dist = surrounding_objects.front_min_distance()
@@ -523,5 +520,5 @@ class _EgoWaymoIDMPolicy(IDMPolicy):
 # Currently, all policies are the same
 EgoWaymoIDMPolicy = TrajectoryIDMPOlicy
 WaymoIDMPolicy = TrajectoryIDMPOlicy
-ScenarioIDMPolicy=TrajectoryIDMPOlicy
+ScenarioIDMPolicy = TrajectoryIDMPOlicy
 NuPlanIDMPolicy = TrajectoryIDMPOlicy

@@ -33,8 +33,8 @@ def parse_vehicle_state(object_dict, time_idx, coordinate_transform, check_last_
     else:
         ret["position"] = states["position"][time_idx]
         ret["velocity"] = states["velocity"][time_idx]
-    ret["heading_theta"] = right_hand_to_left_hand_heading(
-        states["heading"][time_idx]) if coordinate_transform else states["heading"][time_idx]
+    ret["heading_theta"] = right_hand_to_left_hand_heading(states["heading"][time_idx]
+                                                           ) if coordinate_transform else states["heading"][time_idx]
     ret["heading"] = ret["heading_theta"]
 
     ret["length"] = states["size"][time_idx][0]
@@ -44,7 +44,8 @@ def parse_vehicle_state(object_dict, time_idx, coordinate_transform, check_last_
     if time_idx < len(states["position"]) - 1:
         angular_velocity = (states["heading"][time_idx + 1] - states["heading"][time_idx]) / sim_time_interval
         ret["angular_velocity"] = right_hand_to_left_hand_heading(
-            angular_velocity) if coordinate_transform else angular_velocity
+            angular_velocity
+        ) if coordinate_transform else angular_velocity
     else:
         ret["angular_velocity"] = 0
 

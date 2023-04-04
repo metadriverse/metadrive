@@ -50,9 +50,7 @@ class ScenarioMapManager(BaseManager):
 
         sdc_track = data.get_sdc_track()
 
-        sdc_traj = parse_full_trajectory(
-            sdc_track, coordinate_transform=self.engine.data_manager.coordinate_transform
-        )
+        sdc_traj = parse_full_trajectory(sdc_track, coordinate_transform=self.engine.data_manager.coordinate_transform)
 
         init_state = parse_vehicle_state(
             sdc_track,

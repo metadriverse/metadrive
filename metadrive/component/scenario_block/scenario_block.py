@@ -30,10 +30,7 @@ class ScenarioBlock(BaseBlock):
                 if len(data[ScenarioLaneProperty.POLYLINE]) <= 1:
                     continue
                 lane = ScenarioLane(
-                    lane_id,
-                    self.map_data,
-                    self.need_lane_localization,
-                    coordinate_transform=self.coordinate_transform
+                    lane_id, self.map_data, self.need_lane_localization, coordinate_transform=self.coordinate_transform
                 )
                 self.block_network.add_lane(lane)
         return True
