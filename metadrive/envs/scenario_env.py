@@ -10,7 +10,6 @@ from metadrive.constants import TerminationState
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.envs.base_env import BaseEnv
 from metadrive.manager.scenario_data_manager import ScenarioDataManager
-from metadrive.manager.waymo_idm_traffic_manager import WaymoIDMTrafficManager
 from metadrive.manager.scenario_map_manager import ScenarioMapManager
 from metadrive.manager.waymo_traffic_manager import WaymoTrafficManager
 from metadrive.obs.real_env_observation import ScenarioObservation
@@ -31,8 +30,6 @@ SCENARIO_ENV_CONFIG = dict(
 
     # ===== Traffic =====
     no_traffic=False,
-    traj_start_index=0,
-    traj_end_index=-1,
     replay=True,
     no_static_traffic_vehicle=True,
 
@@ -123,10 +120,7 @@ class ScenarioEnv(BaseEnv):
         self.engine.register_manager("data_manager", ScenarioDataManager())
         self.engine.register_manager("map_manager", ScenarioMapManager())
         if not self.config["no_traffic"]:
-            if not self.config['replay']:
-                self.engine.register_manager("traffic_manager", WaymoIDMTrafficManager())
-            else:
-                self.engine.register_manager("traffic_manager", WaymoTrafficManager())
+            self.engine.register_manager("traffic_manager", WaymoTrafficManager())
         self.engine.accept("p", self.stop)
         self.engine.accept("q", self.switch_to_third_person_view)
         self.engine.accept("b", self.switch_to_top_down_view)
@@ -350,50 +344,3 @@ class ScenarioEnv(BaseEnv):
     def stop(self):
         self.in_stop = not self.in_stop
 
-
-if __name__ == "__main__":
-    env = ScenarioEnv(
-        {
-            "use_render": True,
-            # "agent_policy": ReplayEgoCarPolicy,
-            "manual_control": True,
-            "replay": True,
-            "no_traffic": True,
-            # "debug":True,
-            # "no_traffic":True,
-            # "start_scenario_index": 192,
-            # "start_scenario_index": 1000,
-            "num_scenarios": 3,
-            # "data_directory": "/home/shady/Downloads/test_processed",
-            "horizon": 1000,
-            "vehicle_config": dict(
-                # no_wheel_friction=True,
-                lidar=dict(num_lasers=120, distance=50, num_others=4),
-                lane_line_detector=dict(num_lasers=12, distance=50),
-                side_detector=dict(num_lasers=160, distance=50)
-            ),
-        }
-    )
-    success = []
-    for i in range(3):
-        env.reset(force_seed=i)
-        while True:
-            o, r, d, info = env.step([0, 0])
-            assert env.observation_space.contains(o)
-            c_lane = env.vehicle.lane
-            long, lat, = c_lane.local_coordinates(env.vehicle.position)
-            # if env.config["use_render"]:
-            env.render(
-                # text={
-                #     "obs_shape": len(o),
-                #     "lateral": env.observations["default_agent"].lateral_dist,
-                #     "seed": env.engine.global_seed + env.config["start_scenario_index"],
-                #     "reward": r,
-                # }
-                # mode="topdown"
-            )
-
-            if d:
-                if info["arrive_dest"]:
-                    print("seed:{}, success".format(env.engine.global_random_seed))
-                # break

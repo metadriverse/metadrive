@@ -2,13 +2,10 @@ import copy
 
 import numpy as np
 
-from metadrive.type import MetaDriveType
 from metadrive.utils.coordinates_shift import right_hand_to_left_hand_heading, right_hand_to_left_vector
 
 
-def parse_vehicle_state(object_dict, time_idx, coordinate_transform, check_last_state=False, sim_time_interval=0.1):
-    assert object_dict["type"] == MetaDriveType.VEHICLE
-
+def parse_object_state(object_dict, time_idx, coordinate_transform, check_last_state=False, sim_time_interval=0.1):
     states = object_dict["state"]
 
     epi_length = len(states["position"])

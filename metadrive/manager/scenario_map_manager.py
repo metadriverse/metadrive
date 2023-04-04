@@ -4,7 +4,7 @@ from metadrive.component.lane.point_lane import PointLane
 from metadrive.component.map.scenario_map import ScenarioMap
 from metadrive.constants import DEFAULT_AGENT
 from metadrive.manager.base_manager import BaseManager
-from metadrive.scenario.parse_object_state import parse_full_trajectory, parse_vehicle_state
+from metadrive.scenario.parse_object_state import parse_full_trajectory, parse_object_state
 
 
 class ScenarioMapManager(BaseManager):
@@ -52,15 +52,15 @@ class ScenarioMapManager(BaseManager):
 
         sdc_traj = parse_full_trajectory(sdc_track, coordinate_transform=self.engine.data_manager.coordinate_transform)
 
-        init_state = parse_vehicle_state(
+        init_state = parse_object_state(
             sdc_track,
-            self.engine.global_config["traj_start_index"],
+            0,
             check_last_state=False,
             coordinate_transform=self.engine.data_manager.coordinate_transform
         )
-        last_state = parse_vehicle_state(
+        last_state = parse_object_state(
             sdc_track,
-            self.engine.global_config["traj_end_index"],
+            -1,
             check_last_state=True,
             coordinate_transform=self.engine.data_manager.coordinate_transform
         )

@@ -112,3 +112,7 @@ class ScenarioDataManager(BaseManager):
     @property
     def coordinate_transform(self):
         return self._coordinate_transform
+
+    @property
+    def scenario_length(self):
+        return self.get_scenario(self.engine.global_random_seed)[SD.LENGTH]

@@ -54,6 +54,8 @@ class NuPlanTrafficManager(BaseManager):
                     continue
                 policy = self.get_policy(self.nuplan_id_to_obj_id[nuplan_id])
                 policy.act(state)
+                # TODO LQY: when using IDM policy, consider add after_step_call
+                # policy.control_object.after_step()
             else:
                 if obj_state.tracked_object_type == TrackedObjectType.VEHICLE:
                     self.spawn_vehicle(state, nuplan_id)

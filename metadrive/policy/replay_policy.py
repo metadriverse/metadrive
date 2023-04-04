@@ -1,88 +1,36 @@
 import logging
 
 from metadrive.policy.base_policy import BasePolicy
-from metadrive.scenario.parse_object_state import parse_vehicle_state
+from metadrive.scenario.parse_object_state import parse_object_state
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-has_rendered = False
 
-# class ReplayPolicy(BasePolicy):
-#     def __init__(self, control_object, locate_info):
-#         super(ReplayPolicy, self).__init__(control_object=control_object)
-#         self.traj_info = locate_info["traj"]
-#         self.start_index = min(self.traj_info.keys())
-#         self.init_pos = locate_info["init_pos"]
-#         self.heading = locate_info["heading"]
-#         self.episode_step = 0
-#         self.damp = 0
-#         # how many times the replay data is slowed down
-#         self.damp_interval = 1
-#
-#     def act(self, *args, **kwargs):
-#         self.damp += self.damp_interval
-#         if self.damp == self.damp_interval:
-#             self.episode_step += 1
-#             self.damp = 0
-#         else:
-#             return [0, 0]
-#
-#         if str(self.episode_step) == self.start_index:
-#             self.control_object.set_position(self.init_pos)
-#         elif str(self.episode_step) in self.traj_info.keys():
-#             self.control_object.set_position(self.traj_info[str(self.episode_step)])
-#
-#         if self.heading is None or str(self.episode_step - 1) not in self.heading.keys():
-#             pass
-#         else:
-#             this_heading = self.heading[str(self.episode_step - 1)]
-#             self.control_object.set_heading_theta(np.arctan2(this_heading[0], this_heading[1]) - np.pi / 2)
-#
-#         return [0, 0]
-
-
-class ReplayEgoCarPolicy(BasePolicy):
+class ReplayTrafficParticipantPolicy(BasePolicy):
     """
-    Replay policy from Real data. For adding new policy, overwrite get_trajectory_info()
-    This policy is designed for Waymo Policy by default
-    """
-    def __init__(self, control_object, random_seed):
-        super(ReplayEgoCarPolicy, self).__init__(control_object=control_object)
-        self.traj_info = self.get_trajectory_info()
+       Replay policy from Real data. For adding new policy, overwrite get_trajectory_info()
+       This policy is designed for Waymo Policy by default
+       """
+
+    def __init__(self, control_object, track, random_seed=None):
+        super(ReplayTrafficParticipantPolicy, self).__init__(control_object=control_object, random_seed=random_seed)
+        self.traj_info = self.get_trajectory_info(track)
         self.start_index = 0
-        self.init_pos = self.traj_info[0]["position"]
-        self.heading = self.traj_info[0]["heading"]
-        # self.episode_step = 0
-        # self.damp = 0
-        # how many times the replay data is slowed down
-        # self.damp_interval = 1
-        # self.control_object.disable_gravity()
 
-    def get_trajectory_info(self):
-        trajectory_data = self.engine.data_manager.get_scenario(self.engine.global_random_seed)["tracks"]
-        sdc_track_index = str(
-            self.engine.data_manager.get_scenario(self.engine.global_random_seed)["metadata"]["sdc_id"]
-        )
+    @property
+    def is_current_step_valid(self):
+        return bool(self.traj_info[self.episode_step]["valid"])
+
+    def get_trajectory_info(self, track):
         ret = []
-        for i in range(len(trajectory_data[sdc_track_index]["state"]["position"])):
-            ret.append(
-                parse_vehicle_state(
-                    trajectory_data[sdc_track_index],
-                    i,
-                    coordinate_transform=self.engine.data_manager.coordinate_transform
-                )
-            )
+        for i in range(self.engine.data_manager.scenario_length):
+            # a trick for saving computation
+            coordinate_transform = self.engine.data_manager.coordinate_transform
+            ret.append(None if i < self.episode_step else parse_object_state(track, i, coordinate_transform))
         return ret
 
     def act(self, *args, **kwargs):
-        # self.damp += self.damp_interval
-        # if self.damp == self.damp_interval:
-        #     self.episode_step += 1
-        #     self.damp = 0
-        # else:
-        #     return [0, 0]
-
         info = self.traj_info[max(int(self.episode_step), 0)]
 
         # Before step
@@ -100,13 +48,32 @@ class ReplayEgoCarPolicy(BasePolicy):
         self.control_object.set_position(info["position"])
         self.control_object.set_velocity(info["velocity"])
         self.control_object.set_heading_theta(info["heading"])
-        # if "angular_velocity" in info:
-        #     self.control_object.set_angular_velocity(info["angular_velocity"])
-
-        # After step
-        self.control_object.after_step()
 
         return None  # Return None action so the base vehicle will not overwrite the steering & throttle
+
+
+WaymoReplayTrafficParticipantPolicy = ReplayTrafficParticipantPolicy
+ScenarioReplayTrafficParticipantPolicy = ReplayTrafficParticipantPolicy
+
+
+class ReplayEgoCarPolicy(ReplayTrafficParticipantPolicy):
+
+    def get_trajectory_info(self, trajectory):
+        # Directly get trajectory from data manager
+        trajectory_data = self.engine.data_manager.get_scenario(self.engine.global_random_seed)["tracks"]
+        sdc_track_index = str(
+            self.engine.data_manager.get_scenario(self.engine.global_random_seed)["metadata"]["sdc_id"]
+        )
+        ret = []
+        for i in range(len(trajectory_data[sdc_track_index]["state"]["position"])):
+            ret.append(
+                parse_object_state(
+                    trajectory_data[sdc_track_index],
+                    i,
+                    coordinate_transform=self.engine.data_manager.coordinate_transform
+                )
+            )
+        return ret
 
 
 WaymoReplayEgoCarPolicy = ReplayEgoCarPolicy
@@ -120,20 +87,12 @@ class NuPlanReplayEgoCarPolicy(ReplayEgoCarPolicy):
         if not self.control_object.config["no_wheel_friction"]:
             logger.warning("\nNOTE:set no_wheel_friction in vehicle config can make the replay more smooth! \n")
 
-        # self.control_object.disable_gravity()
-
-    def get_trajectory_info(self):
+    def get_trajectory_info(self, *args, **kwargs):
         from metadrive.utils.nuplan_utils.parse_object_state import parse_ego_vehicle_state_trajectory
         scenario = self.engine.data_manager.current_scenario
         return parse_ego_vehicle_state_trajectory(scenario, self.engine.current_map.nuplan_center)
 
     def act(self, *args, **kwargs):
-        # self.damp += self.damp_interval
-        # if self.damp == self.damp_interval:
-        #     self.episode_step += 1
-        #     self.damp = 0
-        # else:
-        #     return [0, 0]
 
         if self.episode_step < len(self.traj_info):
             self.control_object.set_position(self.traj_info[int(self.episode_step)]["position"])
@@ -161,22 +120,12 @@ class NuPlanReplayTrafficParticipantPolicy(BasePolicy):
     """
     This policy should be used with TrafficParticipantManager Together
     """
+
     def __init__(self, control_object, fix_height=None, random_seed=None, config=None):
         super(NuPlanReplayTrafficParticipantPolicy, self).__init__(control_object, random_seed, config)
         self.fix_height = fix_height
-        # self.episode_step = 0
-        # self.damp = 0
-        # self.start_index = 0
-        # how many times the replay data is slowed down
-        # self.damp_interval = 1
 
     def act(self, obj_state, *args, **kwargs):
-        # self.damp += self.damp_interval
-        # if self.damp == self.damp_interval:
-        #     self.episode_step += 1
-        #     self.damp = 0
-        # else:
-        #     return [0, 0]
         self.control_object.set_position(obj_state["position"], self.fix_height)
         self.control_object.set_heading_theta(obj_state["heading"])
         self.control_object.set_velocity(obj_state["velocity"])
