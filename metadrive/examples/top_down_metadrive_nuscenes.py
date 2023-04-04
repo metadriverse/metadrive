@@ -1,25 +1,11 @@
 """
-This file illustrate how to use top-down renderer to provide observation in form of multiple channels of semantic maps.
-
-We let the target vehicle moving forward directly. You can also try to control the vehicle by yourself. See the config
-below for more information.
-
-This script will popup a Pygame window, but that is not the form of the observation. We will also popup a matplotlib
-window, which shows the details observation of the top-down pygame renderer.
-
-The detailed implementation of the Pygame renderer is in TopDownMultiChannel Class (a subclass of Observation Class)
-at: metadrive/obs/top_down_obs_multi_channel.py
-
-Please also refer to top_down_metadrive_nuscenes.py for a BEV renderer that resembles NuScenes dataset!
-
-We welcome contributions to propose a better representation of the top-down semantic observation!
+Compared to top_down_metadrive.py, this scripts demo the BEV renderer that resembles NuScenes dataset.
 """
-
 import random
 
 import matplotlib.pyplot as plt
 
-from metadrive import TopDownMetaDrive
+from metadrive import TopDownMetaDriveEnvV3
 from metadrive.constants import HELP_MESSAGE
 from metadrive.examples.ppo_expert.numpy_expert import expert
 
@@ -28,8 +14,7 @@ def draw_multi_channels_top_down_observation(obs, show_time=4):
     num_channels = obs.shape[-1]
     assert num_channels == 5
     channel_names = [
-        "Road and navigation", "Ego now and previous pos", "Neighbor at step t", "Neighbor at step t-1",
-        "Neighbor at step t-2"
+        "driveable_area", "lane_lines", "actors"
     ]
     fig, axs = plt.subplots(1, num_channels, figsize=(15, 4), dpi=80)
     count = 0
@@ -50,14 +35,14 @@ def draw_multi_channels_top_down_observation(obs, show_time=4):
         ax.set_yticks([])
         ax.set_title(name)
         # print("Drawing {}-th semantic map!".format(count))
-    fig.suptitle("Multi-channels Top-down Observation")
+    fig.suptitle("NuScenes BEV Observation")
     timer.start()
     plt.show()
 
 
 if __name__ == "__main__":
     print(HELP_MESSAGE)
-    env = TopDownMetaDrive(
+    env = TopDownMetaDriveEnvV3(
         dict(
             # We also support using two renderer (Panda3D renderer and Pygame renderer) simultaneously. You can
             # try this by uncommenting next line.
