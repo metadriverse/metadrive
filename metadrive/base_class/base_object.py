@@ -1,4 +1,5 @@
 import logging
+from metadrive.utils import random_string
 from metadrive.utils.math_utils import wrap_to_pi
 
 import math
@@ -463,3 +464,6 @@ class BaseObject(BaseRunnable):
         physics_node = self._body.getPythonTag(self._body.getName())
         if isinstance(physics_node, BaseRigidBodyNode) or isinstance(physics_node, BaseRigidBodyNode):
             physics_node.rename(new_name)
+
+    def random_rename(self):
+        self.rename(random_string())
