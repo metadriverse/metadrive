@@ -10,20 +10,54 @@ from metadrive.component.vehicle.base_vehicle import BaseVehicle
 from metadrive.constants import Decoration, DEFAULT_AGENT
 from metadrive.obs.top_down_obs import TopDownObservation
 from metadrive.obs.top_down_obs_impl import WorldSurface, COLOR_BLACK, VehicleGraphics, LaneGraphics, \
-    ObservationWindowMultiChannel
+    ObservationWindowMultiChannel, ObservationWindow
 from metadrive.utils import import_pygame
 
 pygame = import_pygame()
 COLOR_WHITE = pygame.Color("white")
+CHANNEL_NAMES = ["driveable_area", "lane_lines", "actors"]
+
+
+class ObservationWindowNuScenes(ObservationWindowMultiChannel):
+    CHANNEL_NAMES = CHANNEL_NAMES
+
+    def __init__(self, names, max_range, resolution):
+        """Overwrite the parent class."""
+        assert isinstance(names, list)
+        assert set(self.CHANNEL_NAMES)
+        self.sub_observations = {
+            k: ObservationWindow(max_range=max_range, resolution=resolution)
+            for k in ["driveable_area", "lane_lines", "actors"]
+        }
+        self.resolution = (resolution[0] * 2, resolution[1] * 2)
+        self.canvas_display = None
+
+    def get_screen_window(self):
+        canvas = self.get_canvas_display()
+        ret = self.get_observation_window()
+
+        # for k in ret.keys():
+        #     if k == "road_network":
+        #         continue
+        #     ret[k] = pygame.transform.scale2x(ret[k])
+
+        def _draw(canvas, key, color):
+            mask = pygame.mask.from_threshold(ret[key], (0, 0, 0, 0), (10, 10, 10, 255))
+            mask.to_surface(canvas, setcolor=None, unsetcolor=color)
+
+        # if "navigation" in ret:
+        #     _draw(canvas, "navigation", pygame.Color("Blue"))
+        _draw(canvas, "driveable_area", pygame.Color("White"))
+        _draw(canvas, "lane_lines", pygame.Color("Red"))
+        _draw(canvas, "actors", pygame.Color("Green"))
+        return canvas
 
 
 class TopDownNuScenes(TopDownObservation):
     RESOLUTION = (100, 100)  # pix x pix
     MAP_RESOLUTION = (2000, 2000)  # pix x pix
-    # MAX_RANGE = (50, 50)  # maximum detection distance = 50 M
 
-    # CHANNEL_NAMES = ["road_network", "traffic_flow", "target_vehicle", "navigation", "past_pos"]
-    CHANNEL_NAMES = ["driveable_area", "lane_lines", "actors"]
+    CHANNEL_NAMES = CHANNEL_NAMES
 
     def __init__(
             self,
@@ -42,7 +76,7 @@ class TopDownNuScenes(TopDownObservation):
 
     def init_obs_window(self):
         names = self.CHANNEL_NAMES.copy()
-        self.obs_window = ObservationWindowMultiChannel(names, (self.max_distance, self.max_distance), self.resolution)
+        self.obs_window = ObservationWindowNuScenes(names, (self.max_distance, self.max_distance), self.resolution)
 
     def init_canvas(self):
         self.canvas_actors = WorldSurface(self.MAP_RESOLUTION, 0, pygame.Surface(self.MAP_RESOLUTION))
@@ -89,7 +123,7 @@ class TopDownNuScenes(TopDownObservation):
                     l.line_types = list(map(lambda x: 'continuous' if x == 'broken' else x, l.line_types))
                     LaneGraphics.LANE_LINE_WIDTH = 0.5
                     LaneGraphics.display(l, self.canvas_lane_lines, False, color=(255, 255, 255))
-                    LaneGraphics.simple_draw(l, self.canvas_driveable_area, color=(255, 255, 255))
+                    LaneGraphics.draw_drivable_area(l, self.canvas_driveable_area, color=(255, 255, 255))
 
         self.obs_window.reset(self.canvas_actors)
         self._should_draw_map = False
