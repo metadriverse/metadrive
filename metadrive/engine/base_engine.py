@@ -11,7 +11,8 @@ from metadrive.base_class.randomizable import Randomizable
 from metadrive.engine.core.engine_core import EngineCore
 from metadrive.engine.interface import Interface
 from metadrive.manager.base_manager import BaseManager
-from metadrive.utils import concat_step_infos
+from metadrive.utils import concat_step_infos, random_string
+from metadrive.utils.utils import is_map_related_class
 
 logger = logging.getLogger(__name__)
 
@@ -124,6 +125,8 @@ class BaseEngine(EngineCore, Randomizable):
         else:
             obj = self._dying_objects[object_class.__name__].pop()
             obj.reset(**kwargs)
+            if not is_map_related_class(object_class) and ("name" not in kwargs or kwargs["name"] is None):
+                obj.random_rename()
 
         if "name" in kwargs and kwargs["name"] is not None:
             assert kwargs["name"] == obj.name == obj.id
@@ -241,7 +244,6 @@ class BaseEngine(EngineCore, Randomizable):
         _debug_memory_usage = False
 
         if _debug_memory_usage:
-
             def process_memory():
                 import psutil
                 import os

@@ -42,10 +42,14 @@ class RecordManager(BaseManager):
         self.current_frames = None
         self.current_frame_count = 0
         self.reset_frame = None
+        # for debug, we don't allow assign the same id to different vehicles
+        # previous recycling mechanism will bring such issue, which is fixed now
+        self._episode_obj_names = set()
 
     def before_reset(self):
         if self.engine.record_episode:
             self.episode_info = {}
+            self._episode_obj_names = set()
             self.reset_frame = FrameInfo(self.engine.episode_step)
 
     def after_reset(self):
@@ -124,6 +128,8 @@ class RecordManager(BaseManager):
         """
         if not is_map_related_class(object_class) and self.engine.record_episode:
             assert name not in self.current_frame.spawn_info, "Duplicated record!"
+            assert name not in self._episode_obj_names, "Duplicated name using!"
+            self._episode_obj_names.add(name)
             self.current_frame.spawn_info[name] = {
                 ObjectState.CLASS: object_class,
                 ObjectState.INIT_KWARGS: kwargs,
