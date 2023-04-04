@@ -109,11 +109,8 @@ class ReplayEgoCarPolicy(BasePolicy):
         return None  # Return None action so the base vehicle will not overwrite the steering & throttle
 
 
-class WaymoReplayEgoCarPolicy(ReplayEgoCarPolicy):
-    """
-    Replay policy is originally designed for waymo car, so no new changes is required for this class.
-    """
-    pass
+WaymoReplayEgoCarPolicy=ReplayEgoCarPolicy
+ScenarioReplayEgoCarPolicy=ReplayEgoCarPolicy
 
 
 class NuPlanReplayEgoCarPolicy(ReplayEgoCarPolicy):
