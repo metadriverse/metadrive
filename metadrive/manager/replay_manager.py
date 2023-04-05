@@ -82,7 +82,7 @@ class ReplayManager(BaseManager):
         self.replay_frame()
         if self.engine.only_reset_when_replay:
             # do not replay full trajectory! set state for managers for interaction
-            self.restore_manager_states(self.restore_episode_info["manager_states"])
+            self.restore_manager_states(self.current_frame.manager_info)
             # Do special treatment to map manager
             self.engine.map_manager.current_map = self.current_map
             self.engine.map_manager.maps[self.engine.global_seed] = self.current_map

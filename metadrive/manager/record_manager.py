@@ -19,6 +19,8 @@ class FrameInfo:
         self.step_info = {}
         # used to track the objects cleared
         self.clear_info = []
+        # manager state
+        self.manager_info = {}
         self.agents = []
         self._object_to_agent = None
         self._agent_to_object = None
@@ -57,7 +59,8 @@ class RecordManager(BaseManager):
         create a new log to record, note: after_step will be called after calling after_reset()
         """
         if self.engine.record_episode:
-            self._update_objects_states()
+            self.collect_objects_states()
+            self.collect_manager_states()
             self.episode_info = dict(
                 map_data=self.engine.current_map.get_meta_data(),
                 frame=[[self.reset_frame]],
@@ -67,20 +70,18 @@ class RecordManager(BaseManager):
                 coordinate="MetaDrive",
                 time=get_time_str()
             )
-            self.collect_manager_states()
 
             self.current_frames = None
             self.reset_frame = None
             self.current_frame_count = 0
 
     def collect_manager_states(self):
-        assert self.episode_step == 0, "This func can only be called after env.reset() without any env.step() called"
         ret = {}
         for manager in self.engine.managers.values():
             mgr_state = manager.get_state()
             assert mgr_state is not None, "No return value for manager.get_state()"
             ret[manager.class_name] = mgr_state
-        self.episode_info["manager_states"] = ret
+        self.current_frame.manager_info = ret
 
     def before_step(self, *args, **kwargs) -> dict:
         if self.engine.record_episode:
@@ -94,7 +95,8 @@ class RecordManager(BaseManager):
         # Note: Update object state must be written in step, because the simulator will step 5 times for each RL step.
         # We need to record the intermediate states.
         if self.engine.record_episode:
-            self._update_objects_states()
+            self.collect_objects_states()
+            self.collect_manager_states()
             self.current_frame_count += 1 if self.current_frame_count < len(self.current_frames) - 1 else 0
 
     def after_step(self, *args, **kwargs) -> dict:
@@ -105,7 +107,7 @@ class RecordManager(BaseManager):
             self.episode_info["frame"].append(self.current_frames)
         return {}
 
-    def _update_objects_states(self):
+    def collect_objects_states(self):
         policy_mapping = self.engine.get_policies()
         for name, obj in self.engine.get_objects().items():
             if not is_map_related_instance(obj):

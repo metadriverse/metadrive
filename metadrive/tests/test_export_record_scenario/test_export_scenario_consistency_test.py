@@ -358,7 +358,8 @@ def test_waymo_export_and_original_consistency(num_scenarios=3, render_export_en
             agent_policy=WaymoReplayEgoCarPolicy,
             use_render=render_export_env,
             start_scenario_index=0,
-            num_scenarios=num_scenarios
+            num_scenarios=num_scenarios,
+            force_reuse_object_name=True,
         )
     )
     policy = lambda x: [0, 1]
