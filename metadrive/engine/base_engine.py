@@ -11,7 +11,7 @@ from metadrive.base_class.randomizable import Randomizable
 from metadrive.engine.core.engine_core import EngineCore
 from metadrive.engine.interface import Interface
 from metadrive.manager.base_manager import BaseManager
-from metadrive.utils import concat_step_infos, random_string
+from metadrive.utils import concat_step_infos
 from metadrive.utils.utils import is_map_related_class
 
 logger = logging.getLogger(__name__)
@@ -134,7 +134,7 @@ class BaseEngine(EngineCore, Randomizable):
             assert kwargs["id"] == obj.id == obj.name
 
         if self.global_config["record_episode"] and not self.replay_episode:
-            self.record_manager.add_spawn_info(obj.name, object_class, kwargs)
+            self.record_manager.add_spawn_info(obj, object_class, kwargs)
         self._spawned_objects[obj.id] = obj
         obj.attach_to_world(self.pbr_worldNP if pbr_model else self.worldNP, self.physics_world)
         return obj
@@ -326,7 +326,8 @@ class BaseEngine(EngineCore, Randomizable):
                     manager.step()
             self.step_physics_world()
             # the recording should happen after step physics world
-            if "record_manager" in self.managers:
+            if "record_manager" in self.managers and i < step_num - 1:
+                # last recording should be finished in after_step, as some objects may be created in after_step
                 self.record_manager.step()
 
             if self.force_fps.real_time_simulation and i < step_num - 1:
@@ -343,6 +344,8 @@ class BaseEngine(EngineCore, Randomizable):
         """
 
         step_infos = {}
+        if self.record_episode:
+            assert list(self.managers.keys())[-1]=="record_manager", "Record Manager should have lowest priority"
         for manager in self.managers.values():
             new_step_info = manager.after_step(*args, **kwargs)
             step_infos = concat_step_infos([step_infos, new_step_info])

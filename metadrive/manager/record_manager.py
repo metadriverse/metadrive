@@ -98,8 +98,8 @@ class RecordManager(BaseManager):
             self.current_frame_count += 1 if self.current_frame_count < len(self.current_frames) - 1 else 0
 
     def after_step(self, *args, **kwargs) -> dict:
-
         if self.engine.record_episode and self.current_frame_count:
+            self.step()
             self.episode_info["frame"].append(self.current_frames)
         return {}
 
@@ -122,11 +122,12 @@ class RecordManager(BaseManager):
     def destroy(self):
         self.episode_info = None
 
-    def add_spawn_info(self, name, object_class, kwargs):
+    def add_spawn_info(self, obj, object_class, kwargs):
         """
         Call when spawn new objects, ignore map related things
         """
         if not is_map_related_class(object_class) and self.engine.record_episode:
+            name = obj.name
             assert name not in self.current_frame.spawn_info, "Duplicated record!"
             assert name not in self._episode_obj_names, "Duplicated name using!"
             self._episode_obj_names.add(name)
@@ -135,6 +136,13 @@ class RecordManager(BaseManager):
                 ObjectState.INIT_KWARGS: kwargs,
                 ObjectState.NAME: name
             }
+
+            # update step info in after step so exempt the requirement for adding info here
+            # self.current_frame.step_info[name] = obj.get_state()
+            # policy_mapping = self.engine.get_policies()
+            # if name in policy_mapping:
+            #     self.current_frame.policy_info[name] = policy_mapping[name].get_state()
+
 
     def add_policy_info(self, name, policy_class, *args, **kwargs):
         """
