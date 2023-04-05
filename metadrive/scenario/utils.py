@@ -123,14 +123,27 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
             if "throttle_brake" in state:
                 if "throttle_brake" not in tracks[id]["state"]:
                     tracks[id]["state"]["throttle_brake"] = np.zeros(shape=(episode_len, 1))
-                tracks[id]["state"]["throttle_brake"][frame_idx] = state.get("throttle_brake", 0)
+                tracks[id]["state"]["throttle_brake"][frame_idx] = state["throttle_brake"]
 
             if "steering" in state:
                 if "steering" not in tracks[id]["state"]:
                     tracks[id]["state"]["steering"] = np.zeros(shape=(episode_len, 1))
-                tracks[id]["state"]["steering"][frame_idx] = state.get("steering", 0)
+                tracks[id]["state"]["steering"][frame_idx] = state["steering"]
 
-            tracks[id]["state"]["size"][frame_idx] = state.get("size", [0, 0, 0])
+            if "length" in state:
+                if "length" not in tracks[id]["state"]:
+                    tracks[id]["state"]["length"] = np.zeros(shape=(episode_len, 1))
+                tracks[id]["state"]["length"][frame_idx] = state["length"]
+
+            if "width" in state:
+                if "width" not in tracks[id]["state"]:
+                    tracks[id]["state"]["width"] = np.zeros(shape=(episode_len, 1))
+                tracks[id]["state"]["width"][frame_idx] = state["width"]
+
+            if "height" in state:
+                if "height" not in tracks[id]["state"]:
+                    tracks[id]["state"]["height"] = np.zeros(shape=(episode_len, 1))
+                tracks[id]["state"]["height"][frame_idx] = state["height"]
 
             if id in frames[frame_idx]._object_to_agent:
                 tracks[id]["metadata"]["agent_name"] = frames[frame_idx]._object_to_agent[id]

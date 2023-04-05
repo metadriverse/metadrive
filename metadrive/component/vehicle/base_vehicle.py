@@ -889,7 +889,10 @@ class BaseVehicle(BaseObject, BaseVehicleState):
                 "crash_object": self.crash_object,
                 "crash_building": self.crash_building,
                 "crash_sidewalk": self.crash_sidewalk,
-                "size": (self.LENGTH, self.WIDTH, self.HEIGHT)
+                "size": (self.LENGTH, self.WIDTH, self.HEIGHT),
+                "length": self.LENGTH,
+                "width": self.WIDTH,
+                "height": self.HEIGHT,
             }
         )
         if self.navigation is not None:
