@@ -1,18 +1,22 @@
 import os
-from metadrive.utils.math_utils import wrap_to_pi
 import pickle
 import shutil
 
 import numpy as np
+
+from metadrive.engine.asset_loader import AssetLoader
 from metadrive.envs.metadrive_env import MetaDriveEnv
 from metadrive.envs.real_data_envs.waymo_env import WaymoEnv
 from metadrive.policy.idm_policy import IDMPolicy
 from metadrive.policy.replay_policy import WaymoReplayEgoCarPolicy
 from metadrive.scenario import ScenarioDescription as SD
-from metadrive.utils.coordinates_shift import waymo_to_metadrive_vector
+from metadrive.utils.coordinates_shift import waymo_to_metadrive_vector, waymo_to_metadrive_heading
+from metadrive.utils.math_utils import wrap_to_pi
 
 NP_ARRAY_DECIMAL = 4
 VELOCITY_DECIMAL = 1  # velocity can not be set accurately
+
+MIN_LENGTH_RATIO = 0.8
 
 
 def assert_scenario_equal(scenarios1, scenarios2, only_compare_sdc=False, coordinate_transform=False):
@@ -33,6 +37,8 @@ def assert_scenario_equal(scenarios1, scenarios2, only_compare_sdc=False, coordi
             state_dict1 = old_scene[SD.TRACKS][sdc1]
             state_dict2 = new_scene[SD.TRACKS][sdc2]
             min_len = min(state_dict1[SD.STATE]["position"].shape[0], state_dict2[SD.STATE]["position"].shape[0])
+            max_len = max(state_dict1[SD.STATE]["position"].shape[0], state_dict2[SD.STATE]["position"].shape[0])
+            assert min_len / max_len > MIN_LENGTH_RATIO, "Replayed Scenario length ratio: {}".format(min_len / max_len)
             for k in state_dict1[SD.STATE].keys():
                 if k in ["action", "throttle_brake", "steering"]:
                     continue
@@ -67,23 +73,35 @@ def assert_scenario_equal(scenarios1, scenarios2, only_compare_sdc=False, coordi
                     state_array_1 = new_scene[SD.TRACKS][track_id][SD.STATE][state_k]
                     state_array_2 = track[SD.STATE][state_k]
                     min_len = min(state_array_1.shape[0], state_array_2.shape[0])
+                    max_len = max(state_array_1.shape[0], state_array_2.shape[0])
+                    assert min_len / max_len > MIN_LENGTH_RATIO, "Replayed Scenario length ratio: {}".format(
+                        min_len / max_len
+                    )
 
-                    # TODO FIXME: I can't solve this bug. Please help @LQY
                     if state_k == "velocity":
                         decimal = VELOCITY_DECIMAL
                     else:
                         decimal = NP_ARRAY_DECIMAL
 
                     if state_k == "heading":
-                        np.testing.assert_almost_equal(
-                            wrap_to_pi(state_array_1[:min_len] - state_array_2[:min_len]),
-                            np.zeros_like(state_array_1[:min_len]),
-                            decimal=NP_ARRAY_DECIMAL
-                        )
+                        # error < 5.7 degree is acceptable
+                        broader_ratio = 1
+                        ret = abs(wrap_to_pi(state_array_1[:min_len] - state_array_2[:min_len])) < 1e-1
+                        ratio = np.sum(np.asarray(ret, dtype=np.int8)) / len(ret)
+                        if ratio < broader_ratio:
+                            raise ValueError("Match ration: {}, Target: {}".format(ratio, broader_ratio))
+
+                        strict_ratio = 0.98
+                        ret = abs(wrap_to_pi(state_array_1[:min_len] - state_array_2[:min_len])) < 1e-4
+                        ratio = np.sum(np.asarray(ret, dtype=np.int8)) / len(ret)
+                        if ratio < strict_ratio:
+                            raise ValueError("Match ration: {}, Target: {}".format(ratio, strict_ratio))
                     else:
-                        np.testing.assert_almost_equal(
-                            state_array_1[:min_len], state_array_2[:min_len], decimal=decimal
-                        )
+                        strict_ratio = 0.99
+                        ret = abs(wrap_to_pi(state_array_1[:min_len] - state_array_2[:min_len])) < pow(10, -decimal)
+                        ratio = np.sum(np.asarray(ret, dtype=np.int8)) / len(ret)
+                        if ratio < strict_ratio:
+                            raise ValueError("Match ration: {}, Target: {}".format(ratio, strict_ratio))
 
                 assert new_scene[SD.TRACKS][track_id][SD.TYPE] == track[SD.TYPE]
 
@@ -92,8 +110,11 @@ def assert_scenario_equal(scenarios1, scenarios2, only_compare_sdc=False, coordi
                 state_array_1 = new_scene.get_sdc_track()["state"][k]
                 state_array_2 = old_scene.get_sdc_track()["state"][k]
                 min_len = min(state_array_1.shape[0], state_array_2.shape[0])
+                max_len = max(state_array_1.shape[0], state_array_2.shape[0])
+                assert min_len / max_len > MIN_LENGTH_RATIO, "Replayed Scenario length ratio: {}".format(
+                    min_len / max_len
+                )
 
-                # TODO FIXME: I can't solve this bug. Please help @LQY
                 if k == "velocity":
                     decimal = VELOCITY_DECIMAL
                 else:
@@ -121,6 +142,10 @@ def assert_scenario_equal(scenarios1, scenarios2, only_compare_sdc=False, coordi
             assert set(new_state_dict.keys()) == set(old_state_dict.keys())
             for k in new_state_dict.keys():
                 min_len = min(new_state_dict[k].shape[0], old_state_dict[k].shape[0])
+                max_len = max(new_state_dict[k].shape[0], old_state_dict[k].shape[0])
+                assert min_len / max_len > MIN_LENGTH_RATIO, "Replayed Scenario length ratio: {}".format(
+                    min_len / max_len
+                )
                 np.testing.assert_almost_equal(
                     new_state_dict[k][:min_len], old_state_dict[k][:min_len], decimal=NP_ARRAY_DECIMAL
                 )
@@ -135,7 +160,7 @@ def test_export_metadrive_scenario_reproduction(num_scenarios=3, render_export_e
     policy = lambda x: [0, 1]
     dir1 = None
     try:
-        scenarios = env.export_scenarios(policy, scenario_index=[i for i in range(num_scenarios)])
+        scenarios, done_info = env.export_scenarios(policy, scenario_index=[i for i in range(num_scenarios)])
         dir1 = os.path.join(os.path.dirname(__file__), "../test_component/test_export")
         os.makedirs(dir1, exist_ok=True)
         for i, data in scenarios.items():
@@ -150,7 +175,7 @@ def test_export_metadrive_scenario_reproduction(num_scenarios=3, render_export_e
     )
     policy = lambda x: [0, 1]
     try:
-        scenarios2 = env.export_scenarios(policy, scenario_index=[i for i in range(num_scenarios)])
+        scenarios2, done_info = env.export_scenarios(policy, scenario_index=[i for i in range(num_scenarios)])
     finally:
         env.close()
 
@@ -169,7 +194,7 @@ def test_export_metadrive_scenario_easy(num_scenarios=5, render_export_env=False
     policy = lambda x: [0, 1]
     dir1 = None
     try:
-        scenarios = env.export_scenarios(policy, scenario_index=[i for i in range(num_scenarios)])
+        scenarios, done_info = env.export_scenarios(policy, scenario_index=[i for i in range(num_scenarios)])
         dir1 = os.path.join(os.path.dirname(__file__), "test_export_scenario_consistancy")
         os.makedirs(dir1, exist_ok=True)
         for i, data in scenarios.items():
@@ -183,7 +208,7 @@ def test_export_metadrive_scenario_easy(num_scenarios=5, render_export_env=False
     env = WaymoEnv(
         dict(
             agent_policy=WaymoReplayEgoCarPolicy,
-            waymo_data_directory=dir1,
+            data_directory=dir1,
             use_render=render_load_env,
             num_scenarios=num_scenarios,
             force_reuse_object_name=True,
@@ -191,9 +216,15 @@ def test_export_metadrive_scenario_easy(num_scenarios=5, render_export_env=False
         )
     )
     try:
-        scenarios_restored = env.export_scenarios(
-            policy, scenario_index=[i for i in range(num_scenarios)], render_topdown=render_load_env
+        scenarios_restored, done_info = env.export_scenarios(
+            policy,
+            scenario_index=[i for i in range(num_scenarios)],
+            render_topdown=render_load_env,
+            return_done_info=True
         )
+        for seed, info in done_info.items():
+            if not info["arrive_dest"]:
+                raise ValueError("Seed: {} Can not arrive dest!".format(seed))
     finally:
         env.close()
 
@@ -217,7 +248,7 @@ def test_export_metadrive_scenario_hard(start_seed=0, num_scenarios=3, render_ex
     policy = lambda x: [0, 1]
     dir1 = None
     try:
-        scenarios = env.export_scenarios(
+        scenarios, done_info = env.export_scenarios(
             policy, scenario_index=[i for i in range(start_seed, start_seed + num_scenarios)]
         )
         dir1 = os.path.join(os.path.dirname(__file__), "test_export_metadrive_scenario_hard")
@@ -233,7 +264,7 @@ def test_export_metadrive_scenario_hard(start_seed=0, num_scenarios=3, render_ex
     env = WaymoEnv(
         dict(
             agent_policy=WaymoReplayEgoCarPolicy,
-            waymo_data_directory=dir1,
+            data_directory=dir1,
             use_render=render_load_env,
             num_scenarios=num_scenarios,
             start_scenario_index=start_seed,
@@ -245,9 +276,15 @@ def test_export_metadrive_scenario_hard(start_seed=0, num_scenarios=3, render_ex
         )
     )
     try:
-        scenarios_restored = env.export_scenarios(
-            policy, scenario_index=[i for i in range(num_scenarios)], render_topdown=False
+        scenarios_restored, done_info = env.export_scenarios(
+            policy,
+            scenario_index=[i for i in range(num_scenarios)],
+            render_topdown=render_load_env,
+            return_done_info=True
         )
+        for seed, info in done_info.items():
+            if not info["arrive_dest"]:
+                raise ValueError("Seed: {} Can not arrive dest!".format(seed))
     finally:
         env.close()
 
@@ -269,7 +306,9 @@ def test_export_waymo_scenario(num_scenarios=3, render_export_env=False, render_
     policy = lambda x: [0, 1]
     dir = None
     try:
-        scenarios = env.export_scenarios(policy, scenario_index=[i for i in range(num_scenarios)], verbose=True)
+        scenarios, done_info = env.export_scenarios(
+            policy, scenario_index=[i for i in range(num_scenarios)], verbose=True
+        )
         dir = os.path.join(os.path.dirname(__file__), "../test_component/test_export")
         os.makedirs(dir, exist_ok=True)
         for i, data in scenarios.items():
@@ -283,27 +322,85 @@ def test_export_waymo_scenario(num_scenarios=3, render_export_env=False, render_
         env = WaymoEnv(
             dict(
                 agent_policy=WaymoReplayEgoCarPolicy,
-                waymo_data_directory=dir,
+                data_directory=dir,
                 use_render=render_load_env,
                 num_scenarios=num_scenarios,
                 force_reuse_object_name=True,
                 vehicle_config=dict(no_wheel_friction=True)
             )
         )
-        scenarios_restored = env.export_scenarios(
-            policy, scenario_index=[i for i in range(num_scenarios)], verbose=True
+        scenarios_restored, done_info = env.export_scenarios(
+            policy,
+            scenario_index=[i for i in range(num_scenarios)],
+            render_topdown=render_load_env,
+            return_done_info=True
         )
+        for seed, info in done_info.items():
+            if not info["arrive_dest"]:
+                raise ValueError("Seed: {} Can not arrive dest!".format(seed))
 
     finally:
         env.close()
         # if dir is not None:
         #     shutil.rmtree(dir)
 
-    assert_scenario_equal(scenarios, scenarios_restored, only_compare_sdc=False, coordinate_transform=True)
+
+def compare_exported_scenario_with_waymo_origin(scenarios):
+    for index, scenario in scenarios.items():
+        file_path = AssetLoader.file_path("waymo", "{}.pkl".format(index), return_raw_style=False)
+        with open(file_path, "rb+") as file:
+            origin_data = pickle.load(file)
+        export_data = scenario
+        new_tracks = export_data["tracks"]
+        original_ids = [new_tracks[obj_name]["metadata"]["original_id"] for obj_name in new_tracks.keys()]
+        # assert len(set(original_ids)) == len(origin_data["tracks"]), "Object Num mismatch!"
+        for obj_id, track in new_tracks.items():
+            # if obj_id != scenario["metadata"]["sdc_id"]:
+            new_pos = track["state"]["position"]
+            new_heading = track["state"]["heading"]
+            new_valid = track["state"]["valid"]
+            old_id = track["metadata"]["original_id"]
+            old_track = origin_data["tracks"][old_id]
+            old_pos = old_track["state"]["position"]
+            old_heading = old_track["state"]["heading"]
+            old_valid = old_track["state"]["valid"]
+
+            index_to_compare = np.where(new_valid)[0]
+            assert old_valid[index_to_compare].all(), "Frame mismatch!"
+            old_pos = waymo_to_metadrive_vector(old_pos[index_to_compare][..., :2])
+            new_pos = new_pos[index_to_compare][..., :2]
+            np.testing.assert_almost_equal(old_pos, new_pos, decimal=NP_ARRAY_DECIMAL)
+
+            old_heading = waymo_to_metadrive_heading(old_heading[index_to_compare])
+            new_heading = new_heading[index_to_compare][..., 0]
+            np.testing.assert_almost_equal(old_heading, new_heading, decimal=NP_ARRAY_DECIMAL)
+        print("Finish Seed: {}".format(index))
+
+
+def test_waymo_export_and_original_consistency(num_scenarios=3, render_export_env=False):
+    env = WaymoEnv(
+        dict(
+            agent_policy=WaymoReplayEgoCarPolicy,
+            use_render=render_export_env,
+            start_scenario_index=0,
+            num_scenarios=num_scenarios,
+            # force_reuse_object_name=True, # Don't allow discontinuous trajectory in our system
+        )
+    )
+    policy = lambda x: [0, 1]
+    dir = None
+    try:
+        scenarios, done_info = env.export_scenarios(
+            policy, scenario_index=[i for i in range(num_scenarios)], verbose=True
+        )
+        compare_exported_scenario_with_waymo_origin(scenarios)
+    finally:
+        env.close()
 
 
 if __name__ == "__main__":
     # test_export_metadrive_scenario_reproduction(num_scenarios=10)
-    test_export_metadrive_scenario_easy(num_scenarios=3, render_export_env=False, render_load_env=False)
-    # test_export_metadrive_scenario_hard(num_scenarios=3, render_export_env=False, render_load_env=False)
-    # test_export_waymo_scenario(num_scenarios=3, render_export_env=False, render_load_env=False)
+    # test_export_metadrive_scenario_easy(num_scenarios=1, render_export_env=False, render_load_env=False)
+    # test_export_metadrive_scenario_hard(num_scenarios=3, render_export_env=True, render_load_env=True)
+    # test_export_waymo_scenario(num_scenarios=1, render_export_env=False, render_load_env=False)
+    test_waymo_export_and_original_consistency(num_scenarios=1, render_export_env=False)

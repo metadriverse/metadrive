@@ -2,13 +2,12 @@ import copy
 
 import numpy as np
 
-from metadrive.type import MetaDriveType
-from metadrive.utils.coordinates_shift import waymo_to_metadrive_heading, waymo_to_metadrive_vector
+from metadrive.utils.coordinates_shift import right_hand_to_left_hand_heading, right_hand_to_left_vector
+
+from metadrive.utils.math_utils import compute_angular_velocity
 
 
-def parse_vehicle_state(object_dict, time_idx, coordinate_transform, check_last_state=False, sim_time_interval=0.1):
-    assert object_dict["type"] == MetaDriveType.VEHICLE
-
+def parse_object_state(object_dict, time_idx, coordinate_transform, check_last_state=False, sim_time_interval=0.1):
     states = object_dict["state"]
 
     epi_length = len(states["position"])
@@ -28,14 +27,13 @@ def parse_vehicle_state(object_dict, time_idx, coordinate_transform, check_last_
     ret = {k: v[time_idx] for k, v in states.items()}
 
     if coordinate_transform:
-        ret["position"] = waymo_to_metadrive_vector(states["position"][time_idx][:2])
-        ret["velocity"] = waymo_to_metadrive_vector(states["velocity"][time_idx])
+        ret["position"] = right_hand_to_left_vector(states["position"][time_idx][:2])
+        ret["velocity"] = right_hand_to_left_vector(states["velocity"][time_idx])
     else:
         ret["position"] = states["position"][time_idx]
         ret["velocity"] = states["velocity"][time_idx]
-    ret["heading_theta"] = waymo_to_metadrive_heading(
-        states["heading"][time_idx], coordinate_transform=coordinate_transform
-    )
+    ret["heading_theta"] = right_hand_to_left_hand_heading(states["heading"][time_idx]
+                                                           ) if coordinate_transform else states["heading"][time_idx]
     ret["heading"] = ret["heading_theta"]
 
     ret["length"] = states["size"][time_idx][0]
@@ -43,10 +41,14 @@ def parse_vehicle_state(object_dict, time_idx, coordinate_transform, check_last_
 
     ret["valid"] = states["valid"][time_idx]
     if time_idx < len(states["position"]) - 1:
-        angular_velocity = (states["heading"][time_idx + 1] - states["heading"][time_idx]) / sim_time_interval
-        ret["angular_velocity"] = waymo_to_metadrive_heading(
-            angular_velocity, coordinate_transform=coordinate_transform
+        angular_velocity = compute_angular_velocity(
+            initial_heading=states["heading"][time_idx],
+            final_heading=states["heading"][time_idx + 1],
+            dt=sim_time_interval
         )
+        ret["angular_velocity"] = right_hand_to_left_hand_heading(
+            angular_velocity
+        ) if coordinate_transform else angular_velocity
     else:
         ret["angular_velocity"] = 0
 
@@ -75,6 +77,6 @@ def parse_full_trajectory(object_dict, coordinate_transform):
     trajectory = copy.deepcopy(positions[:, :2])
     # convert to metadrive coordinate
     if coordinate_transform:
-        trajectory = waymo_to_metadrive_vector(trajectory)
+        trajectory = right_hand_to_left_vector(trajectory)
 
     return trajectory

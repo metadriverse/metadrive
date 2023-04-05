@@ -61,6 +61,14 @@ class BaseTrafficParticipant(BaseObject):
         self._body.set_friction(0.)
         self._body.set_anisotropic_friction(LVector3(0., 0., 0.))
 
+    def standup(self):
+        self.set_pitch(0)
+        self.set_roll(0)
+
+    def set_position(self, position, height=None):
+        super(BaseTrafficParticipant, self).set_position(position, height)
+        self.standup()
+
     def show_coordinates(self):
         if not self.need_show_coordinates:
             return

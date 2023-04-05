@@ -363,6 +363,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         """
         if name is not None:
             self.rename(name)
+
         if random_seed is not None:
             assert isinstance(random_seed, int)
             self.seed(random_seed)

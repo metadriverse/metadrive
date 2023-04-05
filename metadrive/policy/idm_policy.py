@@ -131,7 +131,7 @@ class FrontBackObjects:
         return cls(front_ret, back_ret, min_front_long, min_back_long)
 
     @classmethod
-    def get_find_front_back_objs_waymo(cls, objs, lane, position, max_distance):
+    def get_find_front_back_objs_single_lane(cls, objs, lane, position, max_distance):
         """
         Find objects in front of/behind the lane and its left lanes/right lanes, return objs, dist.
         If ref_lanes is None, return filter results of this lane
@@ -412,7 +412,7 @@ class ManualControllableIDMPolicy(IDMPolicy):
 class TrajectoryIDMPOlicy(IDMPolicy):
     """This policy is customized for the traffic car in Waymo environment. (Ego car is not included!)"""
     NORMAL_SPEED = 40
-    WAYMO_IDM_MAX_DIST = 20
+    IDM_MAX_DIST = 20
 
     def __init__(self, control_object, random_seed, traj_to_follow=None, policy_index=None):
         super(TrajectoryIDMPOlicy, self).__init__(control_object=control_object, random_seed=random_seed)
@@ -445,11 +445,8 @@ class TrajectoryIDMPOlicy(IDMPolicy):
             if do_speed_control:
                 all_objects = self.control_object.lidar.get_surrounding_objects(self.control_object)
                 # can not find routing target lane
-                surrounding_objects = FrontBackObjects.get_find_front_back_objs_waymo(
-                    all_objects,
-                    self.routing_target_lane,
-                    self.control_object.position,
-                    max_distance=self.WAYMO_IDM_MAX_DIST
+                surrounding_objects = FrontBackObjects.get_find_front_back_objs_single_lane(
+                    all_objects, self.routing_target_lane, self.control_object.position, max_distance=self.IDM_MAX_DIST
                 )
                 acc_front_obj = surrounding_objects.front_object()
                 acc_front_dist = surrounding_objects.front_min_distance()
@@ -459,7 +456,7 @@ class TrajectoryIDMPOlicy(IDMPolicy):
                 acc = self.last_action[-1]
         except:
             acc = 0
-            print("WaymoIDM Longitudinal Planning failed, acceleration fall back to 0")
+            print("TrajectoryIDM Policy longitudinal planning failed, acceleration fall back to 0")
 
         # if self.policy_index % 2 == 0:
         steering_target_lane = self.routing_target_lane
@@ -523,4 +520,5 @@ class _EgoWaymoIDMPolicy(IDMPolicy):
 # Currently, all policies are the same
 EgoWaymoIDMPolicy = TrajectoryIDMPOlicy
 WaymoIDMPolicy = TrajectoryIDMPOlicy
+ScenarioIDMPolicy = TrajectoryIDMPOlicy
 NuPlanIDMPolicy = TrajectoryIDMPOlicy

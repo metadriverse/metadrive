@@ -189,7 +189,7 @@ class CollisionGroup(Mask):
             (cls.Sidewalk, cls.Sidewalk, False),
             (cls.Sidewalk, cls.LidarBroadDetector, False),
             (cls.Sidewalk, cls.TrafficObject, True),
-            (cls.Sidewalk, cls.TrafficParticipants, True),
+            (cls.Sidewalk, cls.TrafficParticipants, False),  # don't allow sidewalk contact
 
             # LidarBroadDetector
             (cls.LidarBroadDetector, cls.LidarBroadDetector, False),
@@ -248,7 +248,6 @@ class PGLineColor:
 
 
 class DrivableAreaProperty:
-
     # road network property
     ID = None  # each block must have a unique ID
     SOCKET_NUM = None
@@ -311,3 +310,13 @@ REPLAY_DONE = "replay_done"
 
 class NuPlanLaneProperty:
     pass
+
+
+class ScenarioLaneProperty:
+    POLYLINE = "polyline"
+    LEFT_BOUNDARIES = "left_boundaries"
+    RIGHT_BOUNDARIES = "right_boundaries"
+    LEFT_NEIGHBORS = "left_neighbor"
+    RIGHT_NEIGHBORS = "right_neighbor"
+    ENTRY = "entry_lanes"
+    EXIT = "exit_lanes"

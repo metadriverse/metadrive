@@ -19,7 +19,7 @@ from metadrive.utils import get_np_random
 
 MIX_WAYMO_PG_ENV_CONFIG = dict(
     # ===== Waymo Map Config =====
-    waymo_data_directory=AssetLoader.file_path("waymo", return_raw_style=False),
+    data_directory=AssetLoader.file_path("waymo", return_raw_style=False),
     start_scenario_index=0,
     num_scenarios=50,
     store_map=True,
@@ -27,13 +27,10 @@ MIX_WAYMO_PG_ENV_CONFIG = dict(
 
     # ===== Waymo Traffic Config =====
     no_traffic=False,
-    traj_start_index=0,
-    traj_end_index=-1,
     replay=True,
 
     # ===== PG Map config =====
     start_seed=0,
-    num_scenarios=50,
     block_dist_config=PGBlockDistConfig,
 
     # ===== PG Map Config =====
@@ -206,7 +203,7 @@ class MixWaymoPGEnvWrapper(MixWaymoPGEnv):
     TOTAL_SCENARIO = 100  # default 100
 
     def __init__(self, config=None):
-        assert "waymo_data_directory" in config, "tell me waymo data path please"
+        assert "data_directory" in config, "tell me waymo data path please"
         assert "real_data_ratio" in config, "tell me waymo data path please"
         env_config = config.copy()
         ratio = config["real_data_ratio"]
@@ -227,7 +224,7 @@ if __name__ == "__main__":
         dict(
             manual_control=True,
             use_render=True,
-            waymo_data_directory=AssetLoader.file_path("waymo", return_raw_style=False),
+            data_directory=AssetLoader.file_path("waymo", return_raw_style=False),
             # # start_scenario=32,
             total_num_scenarios=10,
             real_data_ratio=0.3

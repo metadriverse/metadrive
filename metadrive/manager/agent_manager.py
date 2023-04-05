@@ -7,6 +7,7 @@ from metadrive.constants import DEFAULT_AGENT
 from metadrive.manager.base_manager import BaseManager
 from metadrive.policy.AI_protect_policy import AIProtectPolicy
 from metadrive.policy.manual_control_policy import ManualControlPolicy
+from metadrive.policy.replay_policy import ReplayTrafficParticipantPolicy
 
 
 class AgentManager(BaseManager):
@@ -221,16 +222,28 @@ class AgentManager(BaseManager):
     def set_allow_respawn(self, flag: bool):
         self._allow_respawn = flag
 
+    def try_actuate_agent(self, step_infos, stage="before_step"):
+        """
+        Some policies should make decision before physics world actuation, in particular, those need decision-making
+        But other policies like ReplayPolicy should be called in after_step, as they already know the final state and
+        exempt the requirement for rolling out the dynamic system to get it.
+        """
+        assert stage == "before_step" or stage == "after_step"
+        for agent_id in self.active_agents.keys():
+            policy = self.get_policy(self._agent_to_object[agent_id])
+            cond_1 = stage == "before_step" and not isinstance(policy, ReplayTrafficParticipantPolicy)
+            cond_2 = stage == "after_step" and isinstance(policy, ReplayTrafficParticipantPolicy)
+            if cond_2 or cond_1:
+                assert policy is not None, "No policy is set for agent {}".format(agent_id)
+                action = policy.act(agent_id)
+                step_infos[agent_id] = policy.get_action_info()
+                step_infos[agent_id].update(self.get_agent(agent_id).before_step(action))
+        return step_infos
+
     def before_step(self):
         # not in replay mode
         self._agents_finished_this_frame = dict()
-        step_infos = {}
-        for agent_id in self.active_agents.keys():
-            policy = self.get_policy(self._agent_to_object[agent_id])
-            assert policy is not None, "No policy is set for agent {}".format(agent_id)
-            action = policy.act(agent_id)
-            step_infos[agent_id] = policy.get_action_info()
-            step_infos[agent_id].update(self.get_agent(agent_id).before_step(action))
+        step_infos = self.try_actuate_agent(dict(), stage="before_step")
 
         finished = set()
         for v_name in self._dying_objects.keys():
@@ -245,6 +258,7 @@ class AgentManager(BaseManager):
 
     def after_step(self, *args, **kwargs):
         step_infos = self.for_each_active_agents(lambda v: v.after_step())
+        step_infos = self.try_actuate_agent(step_infos, stage="after_step")
         return step_infos
 
     def _translate(self, d):
