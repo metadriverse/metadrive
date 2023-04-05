@@ -65,10 +65,6 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
     if scenario_log_interval != 0.1:
         raise ValueError("We don't support varying the scenario log interval yet.")
 
-    # scenario_log_interval = scenario_log_interval or record_episode["global_config"]["physics_world_step_size"]
-
-    # frames_skip = int(scenario_log_interval / record_episode["global_config"]["physics_world_step_size"])
-
     frames = [step_frame_list[0] for step_frame_list in record_episode["frame"]]
 
     episode_len = len(frames)
@@ -97,12 +93,14 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
             type=MetaDriveType.UNSET,
             state=dict(
                 position=np.zeros(shape=(episode_len, 3)),
-                size=np.zeros(shape=(episode_len, 3)),
                 heading=np.zeros(shape=(episode_len, 1)),
                 velocity=np.zeros(shape=(episode_len, 2)),
                 valid=np.zeros(shape=(episode_len, 1)),
-                throttle_brake=np.zeros(shape=(episode_len, 1)),
-                steering=np.zeros(shape=(episode_len, 1)),
+
+                # Add these items when the object has them.
+                # throttle_brake=np.zeros(shape=(episode_len, 1)),
+                # steering=np.zeros(shape=(episode_len, 1)),
+                # size=np.zeros(shape=(episode_len, 3)),
             ),
             metadata=dict(track_length=episode_len, type=MetaDriveType.UNSET, object_id=k)
         )
@@ -121,8 +119,17 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
             tracks[id]["state"]["heading"][frame_idx] = state["heading_theta"]
             tracks[id]["state"]["velocity"][frame_idx] = state["velocity"]
             tracks[id]["state"]["valid"][frame_idx] = 1
-            tracks[id]["state"]["throttle_brake"][frame_idx] = state.get("throttle_brake", 0)
-            tracks[id]["state"]["steering"][frame_idx] = state.get("steering", 0)
+
+            if "throttle_brake" in state:
+                if "throttle_brake" not in tracks[id]["state"]:
+                    tracks[id]["state"]["throttle_brake"] = np.zeros(shape=(episode_len, 1))
+                tracks[id]["state"]["throttle_brake"][frame_idx] = state.get("throttle_brake", 0)
+
+            if "steering" in state:
+                if "steering" not in tracks[id]["state"]:
+                    tracks[id]["state"]["steering"] = np.zeros(shape=(episode_len, 1))
+                tracks[id]["state"]["steering"][frame_idx] = state.get("steering", 0)
+
             tracks[id]["state"]["size"][frame_idx] = state.get("size", [0, 0, 0])
 
             if id in frames[frame_idx]._object_to_agent:
