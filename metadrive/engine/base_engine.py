@@ -327,7 +327,13 @@ class BaseEngine(EngineCore, Randomizable):
             self.step_physics_world()
             # the recording should happen after step physics world
             if "record_manager" in self.managers and i < step_num - 1:
-                # last recording should be finished in after_step, as some objects may be created in after_step
+                # last recording should be finished in after_step(), as some objects may be created in after_step.
+                # We repeat run simulator ```step_num``` times, and record after each running. While the last time
+                # is actually finished when all managers finish the ```after_step()``` function. So the recording for
+                # the last time should be done after that. Like in ```PGTrafficManager``` we may create new vehicles in
+                # ```after_step()```. These new cars' states can be recorded only if we run ```record_managers.step()```
+                # after their creation. So the recording of the last running actually happens in
+                # ```record_manager.after_step()```
                 self.record_manager.step()
 
             if self.force_fps.real_time_simulation and i < step_num - 1:
@@ -345,7 +351,7 @@ class BaseEngine(EngineCore, Randomizable):
 
         step_infos = {}
         if self.record_episode:
-            assert list(self.managers.keys())[-1]=="record_manager", "Record Manager should have lowest priority"
+            assert list(self.managers.keys())[-1] == "record_manager", "Record Manager should have lowest priority"
         for manager in self.managers.values():
             new_step_info = manager.after_step(*args, **kwargs)
             step_infos = concat_step_infos([step_infos, new_step_info])

@@ -587,7 +587,7 @@ class BaseEnv(gym.Env):
         time_interval=0.1,
         verbose=False,
         render_topdown=False,
-        return_done_info=False
+        return_done_info=True
     ):
         """
         We export scenarios into a unified format with 10hz sample rate

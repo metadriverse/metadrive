@@ -159,7 +159,7 @@ def test_export_metadrive_scenario_reproduction(num_scenarios=3, render_export_e
     policy = lambda x: [0, 1]
     dir1 = None
     try:
-        scenarios = env.export_scenarios(policy, scenario_index=[i for i in range(num_scenarios)])
+        scenarios, done_info = env.export_scenarios(policy, scenario_index=[i for i in range(num_scenarios)])
         dir1 = os.path.join(os.path.dirname(__file__), "../test_component/test_export")
         os.makedirs(dir1, exist_ok=True)
         for i, data in scenarios.items():
@@ -174,7 +174,7 @@ def test_export_metadrive_scenario_reproduction(num_scenarios=3, render_export_e
     )
     policy = lambda x: [0, 1]
     try:
-        scenarios2 = env.export_scenarios(policy, scenario_index=[i for i in range(num_scenarios)])
+        scenarios2,  done_info = env.export_scenarios(policy, scenario_index=[i for i in range(num_scenarios)])
     finally:
         env.close()
 
@@ -193,7 +193,7 @@ def test_export_metadrive_scenario_easy(num_scenarios=5, render_export_env=False
     policy = lambda x: [0, 1]
     dir1 = None
     try:
-        scenarios = env.export_scenarios(policy, scenario_index=[i for i in range(num_scenarios)])
+        scenarios,  done_info = env.export_scenarios(policy, scenario_index=[i for i in range(num_scenarios)])
         dir1 = os.path.join(os.path.dirname(__file__), "test_export_scenario_consistancy")
         os.makedirs(dir1, exist_ok=True)
         for i, data in scenarios.items():
@@ -247,7 +247,7 @@ def test_export_metadrive_scenario_hard(start_seed=0, num_scenarios=3, render_ex
     policy = lambda x: [0, 1]
     dir1 = None
     try:
-        scenarios = env.export_scenarios(
+        scenarios,  done_info = env.export_scenarios(
             policy, scenario_index=[i for i in range(start_seed, start_seed + num_scenarios)]
         )
         dir1 = os.path.join(os.path.dirname(__file__), "test_export_metadrive_scenario_hard")
@@ -305,7 +305,7 @@ def test_export_waymo_scenario(num_scenarios=3, render_export_env=False, render_
     policy = lambda x: [0, 1]
     dir = None
     try:
-        scenarios = env.export_scenarios(policy, scenario_index=[i for i in range(num_scenarios)], verbose=True)
+        scenarios,  done_info = env.export_scenarios(policy, scenario_index=[i for i in range(num_scenarios)], verbose=True)
         dir = os.path.join(os.path.dirname(__file__), "../test_component/test_export")
         os.makedirs(dir, exist_ok=True)
         for i, data in scenarios.items():
