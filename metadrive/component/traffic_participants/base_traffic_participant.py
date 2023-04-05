@@ -62,8 +62,8 @@ class BaseTrafficParticipant(BaseObject):
         self._body.set_anisotropic_friction(LVector3(0., 0., 0.))
 
     def standup(self):
-        self.origin.setP(0)
-        self.origin.setR(0)
+        self.set_pitch(0)
+        self.set_roll(0)
 
     def set_position(self, position, height=None):
         super(BaseTrafficParticipant, self).set_position(position, height)
