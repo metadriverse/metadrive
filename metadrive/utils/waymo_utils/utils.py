@@ -228,7 +228,6 @@ def extract_dynamic_map_states(dynamic_map_states):
             )
         )
 
-    # FIXME: TODO: This function is not finished yet.
     for step_count, step_states in enumerate(dynamic_map_states):
         # Each step_states is the state of all objects in one time step
         lane_states = step_states.lane_states
