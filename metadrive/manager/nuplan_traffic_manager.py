@@ -40,7 +40,7 @@ class NuPlanTrafficManager(BaseManager):
             return dict(default_agent=dict(replay_done=True))
 
         vehicles_to_eliminate = self.nuplan_id_to_obj_id.keys() - self._episode_traffic_data[self.engine.episode_step
-        ].keys()
+                                                                                             ].keys()
 
         for nuplan_id, obj_state in self._episode_traffic_data[self.engine.episode_step].items():
             if obj_state.tracked_object_type not in self.available_type:
