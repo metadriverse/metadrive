@@ -1,9 +1,10 @@
 import copy
 import logging
-from metadrive.constants import DEFAULT_AGENT
+
 from metadrive.component.traffic_participants.cyclist import Cyclist
 from metadrive.component.traffic_participants.pedestrian import Pedestrian
-from metadrive.component.vehicle.vehicle_type import SVehicle
+from metadrive.component.vehicle.vehicle_type import get_vehicle_type
+from metadrive.constants import DEFAULT_AGENT
 from metadrive.manager.base_manager import BaseManager
 from metadrive.policy.replay_policy import ReplayTrafficParticipantPolicy
 from metadrive.scenario.parse_object_state import parse_object_state
@@ -103,7 +104,7 @@ class ScenarioTrafficManager(BaseManager):
         if state["vehicle_class"]:
             vehicle_class = state["vehicle_class"]
         else:
-            vehicle_class = SVehicle
+            vehicle_class = get_vehicle_type(state["size"][0], self.np_random)
         obj_name = v_id if self.engine.global_config["force_reuse_object_name"] else None
         v = self.spawn_object(
             vehicle_class, position=state["position"], heading=state["heading"], vehicle_config=v_config, name=obj_name

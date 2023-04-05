@@ -1,12 +1,11 @@
 import copy
-import numpy as np
 
+import numpy as np
 from nuplan.common.actor_state.tracked_objects_types import TrackedObjectType
-from metadrive.constants import DEFAULT_AGENT
+
 from metadrive.component.traffic_participants.cyclist import Cyclist
 from metadrive.component.traffic_participants.pedestrian import Pedestrian
-from metadrive.component.vehicle.vehicle_type import SVehicle
-from metadrive.component.vehicle.vehicle_type import XLVehicle, MVehicle, LVehicle
+from metadrive.component.vehicle.vehicle_type import get_vehicle_type
 from metadrive.manager.base_manager import BaseManager
 from metadrive.policy.replay_policy import NuPlanReplayTrafficParticipantPolicy
 from metadrive.utils.nuplan_utils.parse_object_state import parse_object_state
@@ -41,7 +40,7 @@ class NuPlanTrafficManager(BaseManager):
             return dict(default_agent=dict(replay_done=True))
 
         vehicles_to_eliminate = self.nuplan_id_to_obj_id.keys() - self._episode_traffic_data[self.engine.episode_step
-                                                                                             ].keys()
+        ].keys()
 
         for nuplan_id, obj_state in self._episode_traffic_data[self.engine.episode_step].items():
             if obj_state.tracked_object_type not in self.available_type:
@@ -106,7 +105,7 @@ class NuPlanTrafficManager(BaseManager):
             )
         )
         v = self.spawn_object(
-            self.get_vehicle_type(state["length"]),
+            get_vehicle_type(state["length"], self.np_random),
             position=state["position"],
             heading=state["heading"],
             vehicle_config=v_config,
@@ -143,11 +142,6 @@ class NuPlanTrafficManager(BaseManager):
         if self.need_pedestrian:
             ret += [TrackedObjectType.BICYCLE, TrackedObjectType.PEDESTRIAN]
         return ret
-
-    def get_vehicle_type(self, length):
-        if length <= 4:
-            return SVehicle
-        return [LVehicle, MVehicle, SVehicle, XLVehicle][self.np_random.randint(4)]
 
     def is_outlier(self, nuplan_id):
         obj = self.spawned_objects[self.nuplan_id_to_obj_id[nuplan_id]]

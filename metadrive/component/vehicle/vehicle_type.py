@@ -164,13 +164,13 @@ class VaryingDynamicsVehicle(DefaultVehicle):
         return self.config["mass"] if self.config["mass"] is not None else super(VaryingDynamicsVehicle, self).MASS
 
     def reset(
-        self,
-        random_seed=None,
-        vehicle_config=None,
-        position=None,
-        heading: float = 0.0,  # In degree!
-        *args,
-        **kwargs
+            self,
+            random_seed=None,
+            vehicle_config=None,
+            position=None,
+            heading: float = 0.0,  # In degree!
+            *args,
+            **kwargs
     ):
 
         assert "width" not in self.PARAMETER_SPACE
@@ -258,3 +258,12 @@ vehicle_type = {
 }
 
 VaryingShapeVehicle = VaryingDynamicsVehicle
+
+
+def get_vehicle_type(length, np_random):
+    if length <= 4:
+        return SVehicle
+    elif length <= 5.5:
+        return [LVehicle, MVehicle, SVehicle][np_random.randint(3)]
+    else:
+        return [LVehicle, XLVehicle][np_random.randint(2)]
