@@ -148,8 +148,8 @@ class NuPlanDataManager(BaseManager):
     def current_scenario_length(self):
         return self.current_scenario.get_number_of_iterations()
 
-    def get_state(self):
+    def get_metadata(self):
+        state = super(NuPlanDataManager, self).get_metadata()
         raw_data = self.get_scenario(self.engine.global_seed)
-        state = super(NuPlanDataManager, self).get_state()
         state["raw_data"] = raw_data
         return state

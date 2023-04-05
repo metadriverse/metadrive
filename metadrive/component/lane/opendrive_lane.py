@@ -112,7 +112,7 @@ class OpenDriveLane(AbstractLane, InterpolatingLine):
 
     def destroy(self):
         self.width = None
-        # waymo lane line will be processed separately
+        # lane line will be processed separately
         self.start = None
         self.end = None
         InterpolatingLine.destroy(self)

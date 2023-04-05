@@ -5,14 +5,13 @@ from typing import Optional, Union, Iterable
 import numpy as np
 
 from metadrive.component.map.nuplan_map import NuPlanMap
-from metadrive.component.map.waymo_map import WaymoMap
-from metadrive.constants import Decoration, TARGET_VEHICLES
+from metadrive.component.map.scenario_map import ScenarioMap
+from metadrive.constants import Decoration, TARGET_VEHICLES, ScenarioLaneProperty
 from metadrive.obs.top_down_obs_impl import WorldSurface, VehicleGraphics, LaneGraphics
 from metadrive.utils.interpolating_line import InterpolatingLine
 from metadrive.utils.utils import import_pygame
 from metadrive.utils.utils import is_map_related_instance
-from metadrive.utils.waymo_utils.utils import convert_polyline_to_metadrive
-from metadrive.utils.waymo_utils.waymo_type import WaymoLaneProperty
+from metadrive.scenario.utils import convert_polyline_to_metadrive
 
 pygame = import_pygame()
 
@@ -46,18 +45,18 @@ def draw_top_down_map(
     centering_pos = ((b_box[0] + b_box[1]) / 2, (b_box[2] + b_box[3]) / 2)
     surface.move_display_window_to(centering_pos)
 
-    if isinstance(map, WaymoMap):
+    if isinstance(map, ScenarioMap):
         if draw_drivable_area:
             for lane_info in map.road_network.graph.values():
                 LaneGraphics.draw_drivable_area(lane_info.lane, surface, color=road_color)
         else:
-            for data in map.blocks[-1].waymo_map_data.values():
-                if WaymoLaneProperty.POLYLINE not in data:
+            for data in map.blocks[-1].map_data.values():
+                if ScenarioLaneProperty.POLYLINE not in data:
                     continue
                 type = data.get("type", None)
                 waymo_line = InterpolatingLine(
                     convert_polyline_to_metadrive(
-                        data[WaymoLaneProperty.POLYLINE], coordinate_transform=coordinate_transform
+                        data[ScenarioLaneProperty.POLYLINE], coordinate_transform=coordinate_transform
                     )
                 )
                 LaneGraphics.display_waymo(waymo_line, type, surface)
@@ -187,7 +186,7 @@ class TopDownRenderer:
         self._text_render_pos = [50, 50]
         self._font_size = 25
         self._text_render_interval = 20
-        self.coordinate_transform = self.engine.global_config.get("coordinate_transform", False)
+        self.coordinate_transform = self.engine.data_manager.coordinate_transform
 
         # Setup the canvas
         # (1) background is the underlying layer. It is fixed and will never change unless the map changes.

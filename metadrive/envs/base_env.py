@@ -1,15 +1,14 @@
 import time
-from metadrive.scenario.utils import convert_recorded_scenario_exported
-
 from collections import defaultdict
 from typing import Union, Dict, AnyStr, Optional, Tuple, Callable
-from metadrive.component.vehicle_module.mini_map import MiniMap
-from metadrive.component.vehicle_module.rgb_camera import RGBCamera
-from metadrive.component.vehicle_module.vehicle_panel import VehiclePanel
+
 import gym
 import numpy as np
 from panda3d.core import PNMImage
 
+from metadrive.component.vehicle_module.mini_map import MiniMap
+from metadrive.component.vehicle_module.rgb_camera import RGBCamera
+from metadrive.component.vehicle_module.vehicle_panel import VehiclePanel
 from metadrive.constants import RENDER_MODE_NONE, DEFAULT_AGENT
 from metadrive.engine.engine_utils import initialize_engine, close_engine, \
     engine_initialized, set_global_random_seed, initialize_global_config, get_global_config
@@ -20,6 +19,7 @@ from metadrive.obs.image_obs import ImageStateObservation
 from metadrive.obs.observation_base import ObservationBase
 from metadrive.obs.state_obs import LidarStateObservation
 from metadrive.policy.env_input_policy import EnvInputPolicy
+from metadrive.scenario.utils import convert_recorded_scenario_exported
 from metadrive.utils import Config, merge_dicts, get_np_random, concat_step_infos
 
 BASE_DEFAULT_CONFIG = dict(
@@ -586,7 +586,8 @@ class BaseEnv(gym.Env):
         scenario_index: Union[list, int],
         time_interval=0.1,
         verbose=False,
-        render_topdown=False
+        render_topdown=False,
+        return_done_info=True
     ):
         """
         We export scenarios into a unified format with 10hz sample rate
@@ -609,10 +610,12 @@ class BaseEnv(gym.Env):
         if isinstance(scenario_index, int):
             scenario_index = [scenario_index]
         self.config["record_episode"] = True
+        done_info = {}
         for index in scenario_index:
             obs = self.reset(force_seed=index)
             done = False
             count = 0
+            info = None
             while not done:
                 obs, reward, done, info = self.step(_act(obs))
                 count += 1
@@ -622,8 +625,12 @@ class BaseEnv(gym.Env):
             if verbose:
                 print("Finish scenario {} with {} steps.".format(index, count))
             scenarios_to_export[index] = convert_recorded_scenario_exported(episode)
+            done_info[index] = info
         self.config["record_episode"] = False
-        return scenarios_to_export
+        if return_done_info:
+            return scenarios_to_export, done_info
+        else:
+            return scenarios_to_export
 
     def export_single_scenario(self):
         """

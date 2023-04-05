@@ -130,6 +130,8 @@ class ScenarioDescription(dict):
     STATE = "state"
     OBJECT_ID = "object_id"
     STATE_DICT_KEYS = {TYPE, STATE, METADATA}
+    ORIGINAL_ID_TO_OBJ_ID = "original_id_to_obj_id"
+    OBJ_ID_TO_ORIGINAL_ID = "obj_id_to_original_id"
 
     METADRIVE_PROCESSED = "metadrive_processed"
     TIMESTEP = "ts"
