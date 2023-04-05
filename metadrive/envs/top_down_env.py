@@ -78,7 +78,11 @@ class TopDownMetaDriveEnvV2(MetaDriveEnv):
 class TopDownMetaDriveEnvV3(MetaDriveEnv):
     def get_single_observation(self, _=None):
         return TopDownNuScenes(
-            self.config["vehicle_config"], self.config["use_render"], True, resolution=(256, 256), max_distance=80
+            self.config["vehicle_config"],
+            self.config["use_render"],
+            True,
+            resolution=(256, 256),
+            max_distance=80
         )
 
 

@@ -13,7 +13,9 @@ from metadrive.examples.ppo_expert.numpy_expert import expert
 def draw_multi_channels_top_down_observation(obs, show_time=4):
     num_channels = obs.shape[-1]
     assert num_channels == 3
-    channel_names = ["driveable_area", "lane_lines", "actors"]
+    channel_names = [
+        "driveable_area", "lane_lines", "actors"
+    ]
     fig, axs = plt.subplots(1, num_channels, figsize=(12, 4), dpi=80)
     count = 0
 
