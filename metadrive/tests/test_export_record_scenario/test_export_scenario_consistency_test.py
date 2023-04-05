@@ -402,5 +402,5 @@ if __name__ == "__main__":
     # test_export_metadrive_scenario_reproduction(num_scenarios=10)
     # test_export_metadrive_scenario_easy(num_scenarios=1, render_export_env=False, render_load_env=False)
     # test_export_metadrive_scenario_hard(num_scenarios=3, render_export_env=True, render_load_env=True)
-    # test_export_waymo_scenario(num_scenarios=1, render_export_env=False, render_load_env=False)
-    test_waymo_export_and_original_consistency(num_scenarios=1, render_export_env=False)
+    test_export_waymo_scenario(num_scenarios=13, render_export_env=False, render_load_env=False)
+    # test_waymo_export_and_original_consistency(num_scenarios=1, render_export_env=False)
