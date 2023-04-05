@@ -36,8 +36,9 @@ def parse_object_state(object_dict, time_idx, coordinate_transform, check_last_s
                                                            ) if coordinate_transform else states["heading"][time_idx]
     ret["heading"] = ret["heading_theta"]
 
-    ret["length"] = states["size"][time_idx][0]
-    ret["width"] = states["size"][time_idx][1]
+    ret["length"] = float(states["length"][time_idx])
+    ret["width"] = float(states["width"][time_idx])
+    ret["height"] = float(states["height"][time_idx])
 
     ret["valid"] = states["valid"][time_idx]
     if time_idx < len(states["position"]) - 1:
