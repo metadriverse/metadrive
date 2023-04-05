@@ -231,8 +231,8 @@ class AgentManager(BaseManager):
         assert stage == "before_step" or stage == "after_step"
         for agent_id in self.active_agents.keys():
             policy = self.get_policy(self._agent_to_object[agent_id])
-            cond_1 = stage=="before_step" and not isinstance(policy, ReplayTrafficParticipantPolicy)
-            cond_2 = stage=="after_step" and isinstance(policy, ReplayTrafficParticipantPolicy)
+            cond_1 = stage == "before_step" and not isinstance(policy, ReplayTrafficParticipantPolicy)
+            cond_2 = stage == "after_step" and isinstance(policy, ReplayTrafficParticipantPolicy)
             if cond_2 or cond_1:
                 assert policy is not None, "No policy is set for agent {}".format(agent_id)
                 action = policy.act(agent_id)

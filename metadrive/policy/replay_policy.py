@@ -12,7 +12,6 @@ class ReplayTrafficParticipantPolicy(BasePolicy):
        Replay policy from Real data. For adding new policy, overwrite get_trajectory_info()
        This policy is designed for Waymo Policy by default
        """
-
     def __init__(self, control_object, track, random_seed=None):
         super(ReplayTrafficParticipantPolicy, self).__init__(control_object=control_object, random_seed=random_seed)
         self.traj_info = self.get_trajectory_info(track)
@@ -70,7 +69,6 @@ ScenarioReplayTrafficParticipantPolicy = ReplayTrafficParticipantPolicy
 
 
 class ReplayEgoCarPolicy(ReplayTrafficParticipantPolicy):
-
     def get_trajectory_info(self, trajectory):
         # Directly get trajectory from data manager
         trajectory_data = self.engine.data_manager.get_scenario(self.engine.global_random_seed)["tracks"]
@@ -133,7 +131,6 @@ class NuPlanReplayTrafficParticipantPolicy(BasePolicy):
     """
     This policy should be used with TrafficParticipantManager Together
     """
-
     def __init__(self, control_object, fix_height=None, random_seed=None, config=None):
         super(NuPlanReplayTrafficParticipantPolicy, self).__init__(control_object, random_seed, config)
         self.fix_height = fix_height

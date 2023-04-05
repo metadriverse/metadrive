@@ -158,7 +158,6 @@ class RecordManager(BaseManager):
             # if name in policy_mapping:
             #     self.current_frame.policy_info[name] = policy_mapping[name].get_state()
 
-
     def add_policy_info(self, name, policy_class, *args, **kwargs):
         """
         Call when spawn new objects, ignore map related stuff

@@ -24,8 +24,10 @@ class WaymoIDMTrafficManager(WaymoTrafficManager):
     MAX_HORIZON = 100
 
     def __init__(self):
-        raise DeprecationWarning("This class is deprecated now, "
-                                 "it is merged into WaymoTrafficManager (ScenarioTrafficManager)")
+        raise DeprecationWarning(
+            "This class is deprecated now, "
+            "it is merged into WaymoTrafficManager (ScenarioTrafficManager)"
+        )
         super(WaymoIDMTrafficManager, self).__init__()
         self.seed_trajs = {}
         self.v_id_to_destination = OrderedDict()

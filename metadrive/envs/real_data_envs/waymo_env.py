@@ -58,7 +58,7 @@ if __name__ == "__main__":
             assert env.observation_space.contains(o)
             # c_lane = env.vehicle.lane
             # long, lat, = c_lane.local_coordinates(env.vehicle.position)
-            print("Step: {}, Time: {}".format(env.episode_step, time.time()-step_start))
+            print("Step: {}, Time: {}".format(env.episode_step, time.time() - step_start))
             # if env.config["use_render"]:
             env.render(
                 # text={

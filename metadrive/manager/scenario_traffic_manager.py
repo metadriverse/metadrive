@@ -106,11 +106,7 @@ class ScenarioTrafficManager(BaseManager):
             vehicle_class = SVehicle
         obj_name = v_id if self.engine.global_config["force_reuse_object_name"] else None
         v = self.spawn_object(
-            vehicle_class,
-            position=state["position"],
-            heading=state["heading"],
-            vehicle_config=v_config,
-            name=obj_name
+            vehicle_class, position=state["position"], heading=state["heading"], vehicle_config=v_config, name=obj_name
         )
         self.scenario_id_to_obj_id[v_id] = v.name
         self.obj_id_to_scenario_id[v.name] = v_id

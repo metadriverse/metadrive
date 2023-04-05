@@ -31,7 +31,7 @@ def test_save_recreate_scenario_respawn_traffic(vis=False):
         positions_1 = []
         o = env.reset()
 
-        for i in range(1,  1000):
+        for i in range(1, 1000):
             o, r, d, info = env.step([0, 0])
             positions_1.append({v.name: v.position for v in env.engine.traffic_manager.spawned_objects.values()})
         epi_info = env.engine.record_manager.get_episode_metadata()

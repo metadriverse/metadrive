@@ -53,16 +53,10 @@ class ScenarioMapManager(BaseManager):
         sdc_traj = parse_full_trajectory(sdc_track, coordinate_transform=self.engine.data_manager.coordinate_transform)
 
         init_state = parse_object_state(
-            sdc_track,
-            0,
-            check_last_state=False,
-            coordinate_transform=self.engine.data_manager.coordinate_transform
+            sdc_track, 0, check_last_state=False, coordinate_transform=self.engine.data_manager.coordinate_transform
         )
         last_state = parse_object_state(
-            sdc_track,
-            -1,
-            check_last_state=True,
-            coordinate_transform=self.engine.data_manager.coordinate_transform
+            sdc_track, -1, check_last_state=True, coordinate_transform=self.engine.data_manager.coordinate_transform
         )
         init_position = init_state["position"]
         init_yaw = init_state["heading"]

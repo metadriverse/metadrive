@@ -56,7 +56,9 @@ def test_export_waymo_scenario(render_export_env=False, render_load_env=False):
     policy = lambda x: [0, 1]
     dir = None
     try:
-        scenarios, done_info = env.export_scenarios(policy, scenario_index=[i for i in range(num_scenarios)], verbose=True)
+        scenarios, done_info = env.export_scenarios(
+            policy, scenario_index=[i for i in range(num_scenarios)], verbose=True
+        )
         dir = os.path.join(os.path.dirname(__file__), "../test_component/test_export")
         os.makedirs(dir, exist_ok=True)
         for i, data in scenarios.items():
