@@ -234,10 +234,10 @@ def extract_dynamic_map_states(dynamic_map_states):
 
         for object_state in lane_states:
             lane = object_state.lane
+            object_id = str(lane)  # Always use string to specify object id
 
             # We will use lane index to serve as the traffic light index.
             if lane not in processed_dynamics_map_states:
-                object_id = str(lane)  # Always use string to specify object id
                 processed_dynamics_map_states[object_id] = _traffic_light_state_template(object_id=object_id)
 
             processed_dynamics_map_states[object_id]["state"]["lane"][step_count] = lane
@@ -245,6 +245,15 @@ def extract_dynamic_map_states(dynamic_map_states):
             processed_dynamics_map_states[object_id]["state"]["stop_point"][step_count][0] = object_state.stop_point.x
             processed_dynamics_map_states[object_id]["state"]["stop_point"][step_count][1] = object_state.stop_point.y
             processed_dynamics_map_states[object_id]["state"]["stop_point"][step_count][2] = object_state.stop_point.z
+
+    # TODO FIXME BUG EZ!@!!!
+    # TODO FIXME BUG EZ!@!!!
+    # TODO FIXME BUG EZ!@!!!
+    # TODO FIXME BUG EZ!@!!!
+    # TODO FIXME BUG EZ!@!!!
+    # TODO FIXME BUG EZ!@!!!
+    # TODO FIXME BUG EZ!@!!!
+    # TODO FIXME BUG EZ!@!!!
 
     return processed_dynamics_map_states
 
