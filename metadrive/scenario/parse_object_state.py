@@ -32,8 +32,12 @@ def parse_object_state(object_dict, time_idx, coordinate_transform, check_last_s
     else:
         ret["position"] = states["position"][time_idx]
         ret["velocity"] = states["velocity"][time_idx]
-    ret["heading_theta"] = right_hand_to_left_hand_heading(states["heading"][time_idx]
-                                                           ) if coordinate_transform else states["heading"][time_idx]
+
+    if coordinate_transform:
+        ret["heading_theta"] = right_hand_to_left_hand_heading(states["heading"][time_idx])
+    else:
+        ret["heading_theta"] = states["heading"][time_idx]
+
     ret["heading"] = ret["heading_theta"]
 
     ret["length"] = float(states["length"][time_idx])
