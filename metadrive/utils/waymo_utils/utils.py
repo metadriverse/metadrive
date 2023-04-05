@@ -155,7 +155,10 @@ def extract_tracks(tracks, sdc_idx):
         l = [state.length for state in obj.states]
         w = [state.width for state in obj.states]
         h = [state.height for state in obj.states]
-        obj_state["state"]["size"] = np.stack([l, w, h], 1).astype("float32")
+        # obj_state["state"]["size"] = np.stack([l, w, h], 1).astype("float32")
+        obj_state["state"]["length"] = np.asarray(l).reshape(-1, 1)
+        obj_state["state"]["width"] = np.asarray(w).reshape(-1, 1)
+        obj_state["state"]["height"] = np.asarray(h).reshape(-1, 1)
 
         heading = [state.heading for state in obj.states]
         obj_state["state"]["heading"] = np.array(heading, dtype="float32")
