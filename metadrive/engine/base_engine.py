@@ -329,12 +329,13 @@ class BaseEngine(EngineCore, Randomizable):
             # the recording should happen after step physics world
             if "record_manager" in self.managers and i < step_num - 1:
                 # last recording should be finished in after_step(), as some objects may be created in after_step.
-                # We repeat run simulator ```step_num``` times, and record after each running. While the last time
-                # is actually finished when all managers finish the ```after_step()``` function. So the recording for
-                # the last time should be done after that. Like in ```PGTrafficManager``` we may create new vehicles in
-                # ```after_step()```. These new cars' states can be recorded only if we run ```record_managers.step()```
-                # after their creation. So the recording of the last running actually happens in
-                # ```record_manager.after_step()```
+                # We repeat run simulator ```step_num``` frames, and record after each frame.
+                # The recording of last frame is actually finished when all managers finish the ```after_step()```
+                # function. So the recording for the last time should be done after that.
+                # An example is that in ```PGTrafficManager``` we may create new vehicles in
+                # ```after_step()``` of the traffic manager. Therefore, we can't record the frame before that.
+                # These new cars' states can be recorded only if we run ```record_managers.step()```
+                # after the creation of new cars and then can be recorded in ```record_managers.after_step()```
                 self.record_manager.step()
 
             if self.force_fps.real_time_simulation and i < step_num - 1:
