@@ -107,7 +107,7 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
                 throttle_brake=np.zeros(shape=(episode_len, 1)),
                 steering=np.zeros(shape=(episode_len, 1)),
             ),
-            metadata=dict(track_length=episode_len, type=MetaDriveType.UNSET, object_id=k, original_id=None)
+            metadata=dict(track_length=episode_len, type=MetaDriveType.UNSET, object_id=k, original_id=k)
         )
         for k in list(all_objs)
     }
@@ -166,7 +166,7 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
         if "ScenarioTrafficManager" in frames[frame_idx].manager_info:
             for obj_name, step_info in frames[frame_idx].step_info.items():
                 origin_id = frames[frame_idx].manager_info["ScenarioTrafficManager"][SD.OBJ_ID_TO_ORIGINAL_ID][obj_name]
-                if tracks[obj_name]["metadata"]["original_id"] is None:
+                if tracks[obj_name]["metadata"]["original_id"] == obj_name:
                     tracks[obj_name]["metadata"]["original_id"] = origin_id
                 else:
                     assert tracks[obj_name]["metadata"]["original_id"] == origin_id
