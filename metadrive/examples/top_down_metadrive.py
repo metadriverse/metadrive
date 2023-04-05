@@ -10,8 +10,6 @@ window, which shows the details observation of the top-down pygame renderer.
 The detailed implementation of the Pygame renderer is in TopDownMultiChannel Class (a subclass of Observation Class)
 at: metadrive/obs/top_down_obs_multi_channel.py
 
-Please also refer to top_down_metadrive_nuscenes.py for a BEV renderer that resembles NuScenes dataset!
-
 We welcome contributions to propose a better representation of the top-down semantic observation!
 """
 

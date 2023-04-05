@@ -1,7 +1,6 @@
 from metadrive.envs.metadrive_env import MetaDriveEnv
 from metadrive.obs.top_down_obs import TopDownObservation
 from metadrive.obs.top_down_obs_multi_channel import TopDownMultiChannel
-from metadrive.obs.top_down_obs_nuscenes import TopDownNuScenes
 from metadrive.utils import Config
 
 
@@ -72,17 +71,6 @@ class TopDownMetaDriveEnvV2(MetaDriveEnv):
             frame_skip=self.config["frame_skip"],
             resolution=(self.config["resolution_size"], self.config["resolution_size"]),
             max_distance=self.config["distance"]
-        )
-
-
-class TopDownMetaDriveEnvV3(MetaDriveEnv):
-    def get_single_observation(self, _=None):
-        return TopDownNuScenes(
-            self.config["vehicle_config"],
-            self.config["use_render"],
-            True,
-            resolution=(256, 256),
-            max_distance=80
         )
 
 

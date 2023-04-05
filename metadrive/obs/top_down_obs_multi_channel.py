@@ -16,6 +16,10 @@ COLOR_WHITE = pygame.Color("white")
 
 
 class TopDownMultiChannel(TopDownObservation):
+    """
+    Most of the source code is from Highway-Env, we only optimize and integrate it in MetaDrive
+    See more information on its Github page: https://github.com/eleurent/highway-env
+    """
     RESOLUTION = (100, 100)  # pix x pix
     MAP_RESOLUTION = (2000, 2000)  # pix x pix
     # MAX_RANGE = (50, 50)  # maximum detection distance = 50 M
