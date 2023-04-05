@@ -98,7 +98,6 @@ class BaseManager(Randomizable):
 
     def get_state(self):
         """This function will be called by RecordManager to collect manager state, usually some mappings"""
-        # assert self.episode_step == 0, "This func can only be called after env.reset() without any env.step() called"
         return {"spawned_objects": {name: v.class_name for name, v in self.spawned_objects.items()}}
 
     def set_state(self, state: dict, old_name_to_current=None):
@@ -114,7 +113,7 @@ class BaseManager(Randomizable):
             current_name = old_name_to_current[name]
             name_obj = self.engine.get_objects([current_name])
             assert current_name in name_obj and name_obj[current_name
-                                                         ].class_name == class_name, "Can not restore mappings!"
+            ].class_name == class_name, "Can not restore mappings!"
             ret[current_name] = name_obj[current_name]
         self.spawned_objects = ret
 
@@ -126,3 +125,11 @@ class BaseManager(Randomizable):
     def engine(self):
         from metadrive.engine.engine_utils import get_engine
         return get_engine()
+
+    def get_metadata(self):
+        """
+        This function will store the metadata of each manager before the episode start, usually, we put some raw real
+        world data in it, so that we won't lose information
+        """
+        assert self.episode_step == 0, "This func can only be called after env.reset() without any env.step() called"
+        return {}

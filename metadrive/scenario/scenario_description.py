@@ -130,6 +130,8 @@ class ScenarioDescription(dict):
     STATE = "state"
     OBJECT_ID = "object_id"
     STATE_DICT_KEYS = {TYPE, STATE, METADATA}
+    ORIGINAL_ID_TO_OBJ_ID = "original_id_to_obj_id"
+    OBJ_ID_TO_ORIGINAL_ID = "obj_id_to_original_id"
 
     METADRIVE_PROCESSED = "metadrive_processed"
     TIMESTEP = "ts"
@@ -172,7 +174,7 @@ class ScenarioDescription(dict):
             "You lack these keys in metadata: {}".format(
                 cls.METADATA_KEYS.difference(set(scenario_dict[cls.METADATA].keys()))
             )
-        assert scenario_dict[cls.METADATA][cls.TIMESTEP].shape == (scenario_length, )
+        assert scenario_dict[cls.METADATA][cls.TIMESTEP].shape == (scenario_length,)
 
     @classmethod
     def _check_object_state_dict(cls, obj_state, scenario_length, object_id):

@@ -1,6 +1,6 @@
 import copy
 import logging
-
+from metadrive.constants import DEFAULT_AGENT
 from metadrive.component.traffic_participants.cyclist import Cyclist
 from metadrive.component.traffic_participants.pedestrian import Pedestrian
 from metadrive.component.vehicle.vehicle_type import SVehicle
@@ -17,9 +17,11 @@ class ScenarioTrafficManager(BaseManager):
     def __init__(self):
         super(ScenarioTrafficManager, self).__init__()
         self.scenario_id_to_obj_id = None
+        self.obj_id_to_scenario_id = None
 
     def after_reset(self):
-        self.scenario_id_to_obj_id = {}
+        self.scenario_id_to_obj_id = {self.sdc_track_index: self.engine.agent_manager.agent_to_object(DEFAULT_AGENT)}
+        self.obj_id_to_scenario_id = {self.engine.agent_manager.agent_to_object(DEFAULT_AGENT): self.sdc_track_index}
         for scenario_id, track in self.current_traffic_data.items():
             if scenario_id == self.sdc_track_index:
                 continue
@@ -59,8 +61,10 @@ class ScenarioTrafficManager(BaseManager):
                     vehicles_to_clean.append(scenario_id)
 
         for scenario_id in list(vehicles_to_clean):
-            self.clear_objects([self.scenario_id_to_obj_id[scenario_id]])
-            self.scenario_id_to_obj_id.pop(scenario_id)
+            obj_id = self.scenario_id_to_obj_id.pop(scenario_id)
+            _scenario_id = self.obj_id_to_scenario_id.pop(obj_id)
+            assert _scenario_id == scenario_id
+            self.clear_objects([obj_id])
 
         return dict(default_agent=dict(replay_done=False))
 
@@ -109,6 +113,7 @@ class ScenarioTrafficManager(BaseManager):
             name=obj_name
         )
         self.scenario_id_to_obj_id[v_id] = v.name
+        self.obj_id_to_scenario_id[v.name] = v_id
         if self.engine.global_config["replay"]:
             policy = self.add_policy(v.name, ReplayTrafficParticipantPolicy, v, track)
         else:
@@ -125,6 +130,7 @@ class ScenarioTrafficManager(BaseManager):
             heading_theta=state["heading"],
         )
         self.scenario_id_to_obj_id[scenario_id] = obj.name
+        self.obj_id_to_scenario_id[obj.name] = scenario_id
         policy = self.add_policy(obj.name, ReplayTrafficParticipantPolicy, obj, track)
         policy.act()
 
@@ -138,10 +144,13 @@ class ScenarioTrafficManager(BaseManager):
             heading_theta=state["heading"],
         )
         self.scenario_id_to_obj_id[scenario_id] = obj.name
+        self.obj_id_to_scenario_id[obj.name] = scenario_id
         policy = self.add_policy(obj.name, ReplayTrafficParticipantPolicy, obj, track)
         policy.act()
 
     def get_state(self):
         # Record mapping from original_id to new_id
-        ret = copy.deepcopy(self.scenario_id_to_obj_id)
+        ret = {}
+        ret[SD.ORIGINAL_ID_TO_OBJ_ID] = copy.deepcopy(self.scenario_id_to_obj_id)
+        ret[SD.OBJ_ID_TO_ORIGINAL_ID] = copy.deepcopy(self.obj_id_to_scenario_id)
         return ret

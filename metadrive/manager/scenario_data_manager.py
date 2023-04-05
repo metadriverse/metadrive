@@ -91,9 +91,9 @@ class ScenarioDataManager(BaseManager):
 
         return ret
 
-    def get_state(self):
+    def get_metadata(self):
+        state = super(ScenarioDataManager, self).get_metadata()
         raw_data = self.get_scenario(self.engine.global_seed)
-        state = super(ScenarioDataManager, self).get_state()
         state["raw_data"] = raw_data
         return state
 

@@ -59,21 +59,32 @@ class RecordManager(BaseManager):
         create a new log to record, note: after_step will be called after calling after_reset()
         """
         if self.engine.record_episode:
-            self.collect_objects_states()
-            self.collect_manager_states()
             self.episode_info = dict(
                 map_data=self.engine.current_map.get_meta_data(),
                 frame=[[self.reset_frame]],
                 scenario_index=self.engine.global_seed,
                 global_config=self.engine.global_config,
                 global_seed=self.engine.global_seed,
+                manager_metadata={},
                 coordinate="MetaDrive",
                 time=get_time_str()
             )
 
+            self.collect_objects_states()
+            self.collect_manager_states()
+            self.collect_manager_metadata()
             self.current_frames = None
             self.reset_frame = None
             self.current_frame_count = 0
+
+    def collect_manager_metadata(self):
+        assert self.episode_step == 0, "This func can only be called after env.reset() without any env.step() called"
+        ret = {}
+        for manager in self.engine.managers.values():
+            mgr_meta = manager.get_metadata()
+            assert mgr_meta is not None, "No return value for manager.get_state()"
+            ret[manager.class_name] = mgr_meta
+        self.episode_info["manager_metadata"] = ret
 
     def collect_manager_states(self):
         ret = {}

@@ -10,7 +10,7 @@ from metadrive.envs.real_data_envs.waymo_env import WaymoEnv
 from metadrive.policy.idm_policy import IDMPolicy
 from metadrive.policy.replay_policy import WaymoReplayEgoCarPolicy
 from metadrive.scenario import ScenarioDescription as SD
-from metadrive.utils.coordinates_shift import waymo_to_metadrive_vector
+from metadrive.utils.coordinates_shift import waymo_to_metadrive_vector, waymo_to_metadrive_heading
 from metadrive.utils.math_utils import wrap_to_pi
 
 NP_ARRAY_DECIMAL = 4
@@ -350,6 +350,30 @@ def compare_exported_scenario_with_waymo_origin(scenarios):
         with open(file_path, "rb+") as file:
             origin_data = pickle.load(file)
         export_data = scenario
+        new_tracks = export_data["tracks"]
+        original_ids = [new_tracks[obj_name]["metadata"]["original_id"] for obj_name in new_tracks.keys()]
+        # assert len(set(original_ids)) == len(origin_data["tracks"]), "Object Num mismatch!"
+        for obj_id, track in new_tracks.items():
+            # if obj_id != scenario["metadata"]["sdc_id"]:
+            new_pos = track["state"]["position"]
+            new_heading = track["state"]["heading"]
+            new_valid = track["state"]["valid"]
+            old_id = track["metadata"]["original_id"]
+            old_track = origin_data["tracks"][old_id]
+            old_pos = old_track["state"]["position"]
+            old_heading = old_track["state"]["heading"]
+            old_valid = old_track["state"]["valid"]
+
+            index_to_compare = np.where(new_valid)[0]
+            assert old_valid[index_to_compare].all(), "Frame mismatch!"
+            old_pos = waymo_to_metadrive_vector(old_pos[index_to_compare][..., :2])
+            new_pos = new_pos[index_to_compare][..., :2]
+            np.testing.assert_almost_equal(old_pos, new_pos, decimal=NP_ARRAY_DECIMAL)
+
+            old_heading = waymo_to_metadrive_heading(old_heading[index_to_compare])
+            new_heading = new_heading[index_to_compare][..., 0]
+            np.testing.assert_almost_equal(old_heading, new_heading, decimal=NP_ARRAY_DECIMAL)
+        print("Finish Seed: {}".format(index))
 
 
 def test_waymo_export_and_original_consistency(num_scenarios=3, render_export_env=False):
@@ -359,7 +383,7 @@ def test_waymo_export_and_original_consistency(num_scenarios=3, render_export_en
             use_render=render_export_env,
             start_scenario_index=0,
             num_scenarios=num_scenarios,
-            force_reuse_object_name=True,
+            # force_reuse_object_name=True, # Don't allow discontinuous trajectory in our system
         )
     )
     policy = lambda x: [0, 1]
