@@ -40,9 +40,10 @@ def parse_object_state(object_dict, time_idx, coordinate_transform, check_last_s
 
     ret["heading"] = ret["heading_theta"]
 
-    ret["length"] = float(states["length"][time_idx])
-    ret["width"] = float(states["width"][time_idx])
-    ret["height"] = float(states["height"][time_idx])
+    # optional keys with scalar value:
+    for k in ["length", "width", "height"]:
+        if k in states:
+            ret[k] = float(states[k][time_idx])
 
     ret["valid"] = states["valid"][time_idx]
     if time_idx < len(states["position"]) - 1:
