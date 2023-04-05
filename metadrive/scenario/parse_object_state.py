@@ -4,6 +4,8 @@ import numpy as np
 
 from metadrive.utils.coordinates_shift import right_hand_to_left_hand_heading, right_hand_to_left_vector
 
+from metadrive.utils.math_utils import compute_angular_velocity
+
 
 def parse_object_state(object_dict, time_idx, coordinate_transform, check_last_state=False, sim_time_interval=0.1):
     states = object_dict["state"]
@@ -39,7 +41,11 @@ def parse_object_state(object_dict, time_idx, coordinate_transform, check_last_s
 
     ret["valid"] = states["valid"][time_idx]
     if time_idx < len(states["position"]) - 1:
-        angular_velocity = (states["heading"][time_idx + 1] - states["heading"][time_idx]) / sim_time_interval
+        angular_velocity = compute_angular_velocity(
+            initial_heading=states["heading"][time_idx],
+            final_heading=states["heading"][time_idx + 1],
+            dt=sim_time_interval
+        )
         ret["angular_velocity"] = right_hand_to_left_hand_heading(
             angular_velocity
         ) if coordinate_transform else angular_velocity

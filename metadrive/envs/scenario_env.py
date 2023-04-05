@@ -179,8 +179,8 @@ class ScenarioEnv(BaseEnv):
         # for compatibility
         # crash almost equals to crashing with vehicles
         done_info[TerminationState.CRASH] = (
-            done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
-            or done_info[TerminationState.CRASH_BUILDING]
+                done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
+                or done_info[TerminationState.CRASH_BUILDING]
         )
         return done, done_info
 
@@ -338,9 +338,59 @@ class ScenarioEnv(BaseEnv):
             )
 
         assert self.config["start_scenario_index"] <= current_seed < \
-               self.config["start_scenario_index"] + self.config["num_scenarios"], "Force seed {} is out of range [{}, {}).".format(current_seed, self.config["start_scenario_index"], self.config["start_scenario_index"] + self.config["num_scenarios"])
+               self.config["start_scenario_index"] + self.config[
+                   "num_scenarios"], "Force seed {} is out of range [{}, {}).".format(current_seed, self.config[
+            "start_scenario_index"], self.config["start_scenario_index"] + self.config["num_scenarios"])
         self.seed(current_seed)
 
     def stop(self):
         self.in_stop = not self.in_stop
 
+
+if __name__ == "__main__":
+    env = ScenarioEnv(
+        {
+            "use_render": True,
+            # "agent_policy": ReplayEgoCarPolicy,
+            "manual_control": True,
+            "replay": True,
+            "no_traffic": True,
+            # "debug":True,
+            # "no_traffic":True,
+            # "start_scenario_index": 192,
+            # "start_scenario_index": 1000,
+            "num_scenarios": 3,
+            # "data_directory": "/home/shady/Downloads/test_processed",
+            "horizon": 1000,
+            "allow_coordinate_transform": True,
+            "vehicle_config": dict(
+                # no_wheel_friction=True,
+                lidar=dict(num_lasers=120, distance=50, num_others=4),
+                lane_line_detector=dict(num_lasers=12, distance=50),
+                side_detector=dict(num_lasers=160, distance=50)
+            ),
+        }
+    )
+    success = []
+    for i in range(3):
+        env.reset(force_seed=i)
+        while True:
+            o, r, d, info = env.step([0, 0])
+            assert env.observation_space.contains(o)
+            c_lane = env.vehicle.lane
+            long, lat, = c_lane.local_coordinates(env.vehicle.position)
+            # if env.config["use_render"]:
+            env.render(
+                # text={
+                #     "obs_shape": len(o),
+                #     "lateral": env.observations["default_agent"].lateral_dist,
+                #     "seed": env.engine.global_seed + env.config["start_scenario_index"],
+                #     "reward": r,
+                # }
+                # mode="topdown"
+            )
+
+            if d:
+                if info["arrive_dest"]:
+                    print("seed:{}, success".format(env.engine.global_random_seed))
+                # break
