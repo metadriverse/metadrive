@@ -98,8 +98,10 @@ class RecordManager(BaseManager):
             self.current_frame_count += 1 if self.current_frame_count < len(self.current_frames) - 1 else 0
 
     def after_step(self, *args, **kwargs) -> dict:
+        # frame count ==0 is the reset frame, so don't append
         if self.engine.record_episode and self.current_frame_count:
             self.step()
+            assert len(self.current_frames) == self.engine.global_config["decision_repeat"], "Number of Frame Mismatch!"
             self.episode_info["frame"].append(self.current_frames)
         return {}
 
