@@ -106,7 +106,7 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
                 throttle_brake=np.zeros(shape=(episode_len, 1)),
                 steering=np.zeros(shape=(episode_len, 1)),
             ),
-            metadata=dict(track_length=episode_len, type=MetaDriveType.UNSET, object_id=k)
+            metadata=dict(track_length=episode_len, type=MetaDriveType.UNSET, object_id=k, original_id=None)
         )
         for k in list(all_objs)
     }

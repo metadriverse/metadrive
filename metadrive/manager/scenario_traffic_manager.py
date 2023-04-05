@@ -140,3 +140,8 @@ class ScenarioTrafficManager(BaseManager):
         self.scenario_id_to_obj_id[scenario_id] = obj.name
         policy = self.add_policy(obj.name, ReplayTrafficParticipantPolicy, obj, track)
         policy.act()
+
+    def get_state(self):
+        # Record mapping from original_id to new_id
+        ret = copy.deepcopy(self.scenario_id_to_obj_id)
+        return ret
