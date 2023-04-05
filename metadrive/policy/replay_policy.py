@@ -20,14 +20,21 @@ class ReplayTrafficParticipantPolicy(BasePolicy):
 
     @property
     def is_current_step_valid(self):
-        return bool(self.traj_info[self.episode_step]["valid"])
+        return self.traj_info[self.episode_step] is not None
 
     def get_trajectory_info(self, track):
         ret = []
         for i in range(self.engine.data_manager.scenario_length):
             # a trick for saving computation
             coordinate_transform = self.engine.data_manager.coordinate_transform
-            ret.append(None if i < self.episode_step else parse_object_state(track, i, coordinate_transform))
+            if i < self.episode_step:
+                ret.append(None)
+            else:
+                state = parse_object_state(track, i, coordinate_transform)
+                if not state["valid"]:
+                    ret.append(None)
+                else:
+                    ret.append(state)
         return ret
 
     def act(self, *args, **kwargs):

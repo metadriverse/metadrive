@@ -16,7 +16,7 @@ from metadrive.utils import recursive_equal
 
 
 class ReplayManager(BaseManager):
-    PRIORITY = 100  # lowest
+    PRIORITY = 99  # lowest
 
     def __init__(self):
         super(ReplayManager, self).__init__()
