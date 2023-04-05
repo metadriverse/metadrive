@@ -65,7 +65,7 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
     if scenario_log_interval != 0.1:
         raise ValueError("We don't support varying the scenario log interval yet.")
 
-    frames = [step_frame_list[0] for step_frame_list in record_episode["frame"]]
+    frames = [step_frame_list[-1] for step_frame_list in record_episode["frame"]]
 
     episode_len = len(frames)
     assert frames[-1].episode_step == episode_len - 1, "Length mismatch"
