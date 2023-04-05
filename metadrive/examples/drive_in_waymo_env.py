@@ -30,7 +30,7 @@ if __name__ == "__main__":
                 "manual_control": True,
                 "replay": False if args.reactive_traffic else True,
                 "use_render": True,
-                "waymo_data_directory": AssetLoader.file_path(asset_path, "waymo", return_raw_style=False),
+                "data_directory": AssetLoader.file_path(asset_path, "waymo", return_raw_style=False),
                 "num_scenarios": 3
             }
         )

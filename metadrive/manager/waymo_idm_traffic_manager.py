@@ -1,10 +1,10 @@
 import copy
-from metadrive.utils.waymo_utils.parse_object_state import parse_full_trajectory, parse_vehicle_state
+from metadrive.scenario.parse_object_state import parse_full_trajectory, parse_object_state
 from collections import namedtuple, OrderedDict
 
 import numpy as np
 from metadrive.type import MetaDriveType
-from metadrive.component.lane.waymo_lane import PointLane
+from metadrive.component.lane.point_lane import PointLane
 from metadrive.component.vehicle.vehicle_type import SVehicle
 from metadrive.manager.waymo_traffic_manager import WaymoTrafficManager
 from metadrive.policy.idm_policy import WaymoIDMPolicy
@@ -24,6 +24,10 @@ class WaymoIDMTrafficManager(WaymoTrafficManager):
     MAX_HORIZON = 100
 
     def __init__(self):
+        raise DeprecationWarning(
+            "This class is deprecated now, "
+            "it is merged into WaymoTrafficManager (ScenarioTrafficManager)"
+        )
         super(WaymoIDMTrafficManager, self).__init__()
         self.seed_trajs = {}
         self.v_id_to_destination = OrderedDict()
@@ -41,16 +45,16 @@ class WaymoIDMTrafficManager(WaymoTrafficManager):
             traffic_traj_data = {}
             for v_id, type_traj in self.current_traffic_data.items():
                 if MetaDriveType.is_vehicle(type_traj["type"]) and v_id != self.sdc_track_index:
-                    init_info = parse_vehicle_state(
+                    init_info = parse_object_state(
                         type_traj,
                         self.engine.global_config["traj_start_index"],
-                        coordinate_transform=self.engine.global_config["coordinate_transform"]
+                        coordinate_transform=self.engine.data_manager.coordinate_transform
                     )
-                    dest_info = parse_vehicle_state(
+                    dest_info = parse_object_state(
                         type_traj,
                         self.engine.global_config["traj_end_index"],
                         check_last_state=True,
-                        coordinate_transform=self.engine.global_config["coordinate_transform"]
+                        coordinate_transform=self.engine.data_manager.coordinate_transform
                     )
                     if not init_info["valid"]:
                         continue
@@ -59,7 +63,7 @@ class WaymoIDMTrafficManager(WaymoTrafficManager):
                         static = True
                     else:
                         full_traj = parse_full_trajectory(
-                            type_traj, coordinate_transform=self.engine.global_config["coordinate_transform"]
+                            type_traj, coordinate_transform=self.engine.data_manager.coordinate_transform
                         )
                         if len(full_traj) < self.MIN_DURATION:
                             full_traj = static_vehicle_info(init_info["position"], init_info["heading"])
@@ -77,10 +81,10 @@ class WaymoIDMTrafficManager(WaymoTrafficManager):
 
                 elif MetaDriveType.is_vehicle(type_traj["type"]) and v_id == self.sdc_track_index:
                     # set Ego V velocity
-                    init_info = parse_vehicle_state(
+                    init_info = parse_object_state(
                         type_traj,
                         self.engine.global_config["traj_start_index"],
-                        coordinate_transform=self.engine.global_config["coordinate_transform"]
+                        coordinate_transform=self.engine.data_manager.coordinate_transform
                     )
                     traffic_traj_data["sdc"] = {
                         "traj": None,

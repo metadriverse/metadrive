@@ -16,7 +16,7 @@ from metadrive.utils import recursive_equal
 
 
 class ReplayManager(BaseManager):
-    PRIORITY = 100  # lowest
+    PRIORITY = 99  # lowest
 
     def __init__(self):
         super(ReplayManager, self).__init__()
@@ -82,7 +82,7 @@ class ReplayManager(BaseManager):
         self.replay_frame()
         if self.engine.only_reset_when_replay:
             # do not replay full trajectory! set state for managers for interaction
-            self.restore_manager_states(self.restore_episode_info["manager_states"])
+            self.restore_manager_states(self.current_frame.manager_info)
             # Do special treatment to map manager
             self.engine.map_manager.current_map = self.current_map
             self.engine.map_manager.maps[self.engine.global_seed] = self.current_map

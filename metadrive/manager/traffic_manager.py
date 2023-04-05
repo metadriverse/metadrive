@@ -102,17 +102,23 @@ class PGTrafficManager(BaseManager):
                 if self.mode == TrafficMode.Trigger:
                     v_to_remove.append(v)
                 elif self.mode == TrafficMode.Respawn or self.mode == TrafficMode.Hybrid:
-                    lane = self.respawn_lanes[self.np_random.randint(0, len(self.respawn_lanes))]
-                    lane_idx = lane.index
-                    long = self.np_random.rand() * lane.length / 2
-                    v.update_config({"spawn_lane_index": lane_idx, "spawn_longitude": long})
-                    v.reset(random_seed=v.random_seed)
-                    self.engine.get_policy(v.id).reset()
+                    v_to_remove.append(v)
                 else:
                     raise ValueError("Traffic mode error: {}".format(self.mode))
         for v in v_to_remove:
+            vehicle_type = type(v)
             self.clear_objects([v.id])
             self._traffic_vehicles.remove(v)
+            if self.mode == TrafficMode.Respawn or self.mode == TrafficMode.Hybrid:
+                lane = self.respawn_lanes[self.np_random.randint(0, len(self.respawn_lanes))]
+                lane_idx = lane.index
+                long = self.np_random.rand() * lane.length / 2
+                traffic_v_config = {"spawn_lane_index": lane_idx, "spawn_longitude": long}
+                new_v = self.spawn_object(vehicle_type, vehicle_config=traffic_v_config)
+                from metadrive.policy.idm_policy import IDMPolicy
+                self.add_policy(new_v.id, IDMPolicy, new_v, self.generate_seed())
+                self._traffic_vehicles.append(new_v)
+
         return dict()
 
     def before_reset(self) -> None:

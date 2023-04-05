@@ -34,11 +34,11 @@ class NuPlanObservation(LidarStateObservation):
         self.lateral_dist = 0
 
 
-class WaymoObservation(LidarStateObservation):
+class ScenarioObservation(LidarStateObservation):
     MAX_LATERAL_DIST = 20
 
     def __init__(self, *args, **kwargs):
-        super(WaymoObservation, self).__init__(*args, **kwargs)
+        super(ScenarioObservation, self).__init__(*args, **kwargs)
         self.lateral_dist = 0
 
     @property
@@ -54,10 +54,13 @@ class WaymoObservation(LidarStateObservation):
         return gym.spaces.Box(-0.0, 1.0, shape=tuple(shape), dtype=np.float32)
 
     def state_observe(self, vehicle):
-        ret = super(WaymoObservation, self).state_observe(vehicle)
+        ret = super(ScenarioObservation, self).state_observe(vehicle)
         lateral_obs = self.lateral_dist / self.MAX_LATERAL_DIST
         return np.concatenate([ret, [clip((lateral_obs + 1) / 2, 0.0, 1.0)]])
 
     def reset(self, env, vehicle=None):
-        super(WaymoObservation, self).reset(env, vehicle)
+        super(ScenarioObservation, self).reset(env, vehicle)
         self.lateral_dist = 0
+
+
+WaymoObservation = ScenarioObservation
