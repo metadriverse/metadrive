@@ -1,4 +1,6 @@
+import copy
 import logging
+from metadrive.utils import random_string
 from metadrive.utils.math_utils import wrap_to_pi
 
 import math
@@ -118,6 +120,7 @@ class BaseObject(BaseRunnable):
         Config is a static conception, which specified the parameters of one element.
         There parameters doesn't change, such as length of straight road, max speed of one vehicle, etc.
         """
+        config = copy.deepcopy(config)
         super(BaseObject, self).__init__(name, random_seed, config)
         if not escape_random_seed_assertion:
             assert random_seed is not None, "Please assign a random seed for {} class.".format(self.class_name)
@@ -463,3 +466,6 @@ class BaseObject(BaseRunnable):
         physics_node = self._body.getPythonTag(self._body.getName())
         if isinstance(physics_node, BaseRigidBodyNode) or isinstance(physics_node, BaseRigidBodyNode):
             physics_node.rename(new_name)
+
+    def random_rename(self):
+        self.rename(random_string())

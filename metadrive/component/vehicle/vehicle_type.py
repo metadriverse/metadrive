@@ -258,3 +258,12 @@ vehicle_type = {
 }
 
 VaryingShapeVehicle = VaryingDynamicsVehicle
+
+
+def get_vehicle_type(length, np_random):
+    if length <= 4:
+        return SVehicle
+    elif length <= 5.5:
+        return [LVehicle, MVehicle, SVehicle][np_random.randint(3)]
+    else:
+        return [LVehicle, XLVehicle][np_random.randint(2)]

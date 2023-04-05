@@ -1,6 +1,5 @@
-import numpy as np
-
 from metadrive.utils.coordinates_shift import nuplan_to_metadrive_heading, nuplan_to_metadrive_vector
+from metadrive.utils.math_utils import compute_angular_velocity
 
 
 def parse_ego_vehicle_state(state, nuplan_center):
@@ -22,7 +21,9 @@ def parse_ego_vehicle_state_trajectory(scenario, nuplan_center):
         for i in range(scenario.get_number_of_iterations())
     ]
     for i in range(len(data) - 1):
-        data[i]["angular_velocity"] = (data[i + 1]["heading"] - data[i]["heading"]) / scenario.database_interval
+        data[i]["angular_velocity"] = compute_angular_velocity(
+            initial_heading=data[i]["heading"], final_heading=data[i + 1]["heading"], dt=scenario.database_interval
+        )
     return data
 
 

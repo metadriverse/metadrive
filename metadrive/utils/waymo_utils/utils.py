@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+from metadrive.scenario.utils import read_scenario_data, convert_polyline_to_metadrive
 from matplotlib.pyplot import figure
 
 from metadrive.type import MetaDriveType
@@ -270,11 +271,7 @@ def read_waymo_data(file_path):
     """
     TODO: This function transform data again. We should remove it and let MetaDrive read native data completely.
     """
-    with open(file_path, "rb") as f:
-        # unpickler = CustomUnpickler(f)
-        data = pickle.load(f)
-    data = ScenarioDescription(data)
-    return data
+    return read_scenario_data(file_path)
 
 
 def draw_waymo_map(data):
@@ -340,13 +337,8 @@ def compute_width(map):
 
 # parse raw data from input path to output path
 
-
-def convert_polyline_to_metadrive(waymo_polyline, coordinate_transform=True):
-    """
-    Waymo lane is in a different coordinate system, using them after converting
-    """
-    waymo_polyline = np.asarray(waymo_polyline)
-    if coordinate_transform:
-        return np.stack([waymo_polyline[:, 0], -waymo_polyline[:, 1]], axis=1)
-    else:
-        return waymo_polyline
+# def convert_polyline_to_metadrive(waymo_polyline, coordinate_transform=True):
+#     """
+#     Waymo lane is in a different coordinate system, using them after converting
+#     """
+#     convert_polyline_to_metadrive(waymo_polyline, coordinate_transform)

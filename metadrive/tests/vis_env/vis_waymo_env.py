@@ -26,7 +26,7 @@ if __name__ == "__main__":
             "agent_policy": WaymoReplayEgoCarPolicy,
             "replay": True,
             "use_render": True,
-            "waymo_data_directory": AssetLoader.file_path(asset_path, "waymo", return_raw_style=False),
+            "data_directory": AssetLoader.file_path(asset_path, "waymo", return_raw_style=False),
             "num_scenarios": 3,
             "start_scenario_index": 0,
             "crash_vehicle_done": False,

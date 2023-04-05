@@ -45,7 +45,11 @@ class InterpolatingLine:
 
         We will use Option 1.
         """
-        ret = []  # ret_longitude, ret_lateral, sort_key
+        # Four elements:
+        #   accumulated longitude,
+        #   segment-related longitude,
+        #   segment-related lateral,
+        ret = []
         exclude_ret = []
         accumulate_len = 0
 
@@ -56,27 +60,28 @@ class InterpolatingLine:
             delta_y = position[1] - seg["start_point"][1]
             longitudinal = delta_x * seg["direction"][0] + delta_y * seg["direction"][1]
             lateral = delta_x * seg["lateral_direction"][0] + delta_y * seg["lateral_direction"][1]
-
             # _debug.append(longitudinal)
 
             if longitudinal < 0.0:
-                current_long = accumulate_len + longitudinal
-                current_lat = lateral
-                return current_long, current_lat
+                dist_square = norm(delta_x, delta_y)
+                if dist_square < seg["length"] * 2:
+                    current_long = accumulate_len + longitudinal
+                    current_lat = lateral
+                    return current_long, current_lat
 
             if not only_in_lane_point:
-                ret.append([accumulate_len + longitudinal, lateral])
+                ret.append([accumulate_len + longitudinal, longitudinal, lateral])
             else:
                 if abs(lateral) <= self.width / 2 and -1. <= accumulate_len + longitudinal <= self.length + 1:
-                    ret.append([accumulate_len + longitudinal, lateral])
+                    ret.append([accumulate_len + longitudinal, longitudinal, lateral])
                 else:
-                    exclude_ret.append([accumulate_len + longitudinal, lateral])
+                    exclude_ret.append([accumulate_len + longitudinal, longitudinal, lateral])
             accumulate_len += seg["length"]
         if len(ret) == 0:
             # for corner case
             ret = exclude_ret
         ret.sort(key=lambda seg: abs(seg[-1]))
-        return ret[0][0], ret[0][1]
+        return ret[0][0], ret[0][-1]
 
     def _get_properties(self, points):
         ret = []

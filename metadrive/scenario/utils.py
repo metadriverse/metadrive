@@ -1,4 +1,5 @@
 import copy
+import pickle
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -9,6 +10,7 @@ from metadrive.component.traffic_participants.pedestrian import Pedestrian
 from metadrive.component.vehicle.base_vehicle import BaseVehicle
 from metadrive.constants import DATA_VERSION, DEFAULT_AGENT
 from metadrive.scenario import ScenarioDescription as SD
+from metadrive.scenario.scenario_description import ScenarioDescription
 from metadrive.type import MetaDriveType
 
 
@@ -69,7 +71,8 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
 
     # frames_skip = int(scenario_log_interval / record_episode["global_config"]["physics_world_step_size"])
 
-    frames = [step_frame_list[0] for step_frame_list in record_episode["frame"]]
+    # should use last frame in each frame list, as all state set happens in after_state function
+    frames = [step_frame_list[-1] for step_frame_list in record_episode["frame"]]
 
     episode_len = len(frames)
     assert frames[-1].episode_step == episode_len - 1, "Length mismatch"
@@ -104,7 +107,7 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
                 throttle_brake=np.zeros(shape=(episode_len, 1)),
                 steering=np.zeros(shape=(episode_len, 1)),
             ),
-            metadata=dict(track_length=episode_len, type=MetaDriveType.UNSET, object_id=k)
+            metadata=dict(track_length=episode_len, type=MetaDriveType.UNSET, object_id=k, original_id=k)
         )
         for k in list(all_objs)
     }
@@ -159,11 +162,20 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
                 spawn_info.pop("config")
             tracks[obj_name]["metadata"]["spawn_info"] = spawn_info
 
+        # TODO for all real dataset, we can also put the original id into metadata
+        if "ScenarioTrafficManager" in frames[frame_idx].manager_info:
+            for obj_name, step_info in frames[frame_idx].step_info.items():
+                origin_id = frames[frame_idx].manager_info["ScenarioTrafficManager"][SD.OBJ_ID_TO_ORIGINAL_ID][obj_name]
+                if tracks[obj_name]["metadata"]["original_id"] == obj_name:
+                    tracks[obj_name]["metadata"]["original_id"] = origin_id
+                else:
+                    assert tracks[obj_name]["metadata"]["original_id"] == origin_id
+
     result[SD.TRACKS] = tracks
 
     # Traffic Light: Straight-through forward from original data
     result[SD.DYNAMIC_MAP_STATES] = {}  # old data has no traffic light info
-    for k, manager_state in record_episode["manager_states"].items():
+    for k, manager_state in record_episode["manager_metadata"].items():
         if "DataManager" in k:
             if "raw_data" in manager_state:
                 original_dynamic_map = copy.deepcopy(manager_state["raw_data"][SD.DYNAMIC_MAP_STATES])
@@ -182,3 +194,22 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
     SD.sanity_check(result, check_self_type=True)
 
     return result
+
+
+def read_scenario_data(file_path):
+    with open(file_path, "rb") as f:
+        # unpickler = CustomUnpickler(f)
+        data = pickle.load(f)
+    data = ScenarioDescription(data)
+    return data
+
+
+def convert_polyline_to_metadrive(polyline, coordinate_transform=True):
+    """
+    Convert a polyline to metadrive coordinate as np.array
+    """
+    polyline = np.asarray(polyline)
+    if coordinate_transform:
+        return np.stack([polyline[:, 0], -polyline[:, 1]], axis=1)
+    else:
+        return polyline

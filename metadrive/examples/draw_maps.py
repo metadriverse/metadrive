@@ -3,7 +3,7 @@ import random
 import matplotlib.pyplot as plt
 
 from metadrive import MetaDriveEnv
-from metadrive.envs.real_data_envs.waymo_env import WaymoEnv
+from metadrive.envs.scenario_env import ScenarioEnv
 from metadrive.utils.draw_top_down_map import draw_top_down_map
 
 if __name__ == '__main__':
@@ -14,7 +14,7 @@ if __name__ == '__main__':
     for i in range(2):
         if i == 1:
             env.close()
-            env = WaymoEnv(dict(start_scenario_index=0, num_scenarios=3))
+            env = ScenarioEnv(dict(start_scenario_index=0, num_scenarios=3))
         for j in range(3):
             count += 1
             env.reset(force_seed=j)
