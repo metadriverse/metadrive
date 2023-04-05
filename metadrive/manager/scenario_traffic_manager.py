@@ -104,7 +104,7 @@ class ScenarioTrafficManager(BaseManager):
         if state["vehicle_class"]:
             vehicle_class = state["vehicle_class"]
         else:
-            vehicle_class = get_vehicle_type(state["size"][0], self.np_random)
+            vehicle_class = get_vehicle_type(float(state["length"]), self.np_random)
         obj_name = v_id if self.engine.global_config["force_reuse_object_name"] else None
         v = self.spawn_object(
             vehicle_class, position=state["position"], heading=state["heading"], vehicle_config=v_config, name=obj_name

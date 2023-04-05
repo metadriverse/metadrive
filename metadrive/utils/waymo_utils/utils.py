@@ -156,7 +156,10 @@ def extract_tracks(tracks, sdc_idx):
         l = [state.length for state in obj.states]
         w = [state.width for state in obj.states]
         h = [state.height for state in obj.states]
-        obj_state["state"]["size"] = np.stack([l, w, h], 1).astype("float32")
+        # obj_state["state"]["size"] = np.stack([l, w, h], 1).astype("float32")
+        obj_state["state"]["length"] = np.asarray(l).reshape(-1, 1)
+        obj_state["state"]["width"] = np.asarray(w).reshape(-1, 1)
+        obj_state["state"]["height"] = np.asarray(h).reshape(-1, 1)
 
         heading = [state.heading for state in obj.states]
         obj_state["state"]["heading"] = np.array(heading, dtype="float32")
@@ -225,19 +228,17 @@ def extract_dynamic_map_states(dynamic_map_states):
             )
         )
 
-    # FIXME: TODO: This function is not finished yet.
     for step_count, step_states in enumerate(dynamic_map_states):
         # Each step_states is the state of all objects in one time step
         lane_states = step_states.lane_states
 
         for object_state in lane_states:
             lane = object_state.lane
+            object_id = str(lane)  # Always use string to specify object id
 
             # We will use lane index to serve as the traffic light index.
-            if lane not in processed_dynamics_map_states:
-                object_id = str(lane)  # Always use string to specify object id
+            if object_id not in processed_dynamics_map_states:
                 processed_dynamics_map_states[object_id] = _traffic_light_state_template(object_id=object_id)
-
             processed_dynamics_map_states[object_id]["state"]["lane"][step_count] = lane
             processed_dynamics_map_states[object_id]["state"]["object_state"][step_count] = object_state.state
             processed_dynamics_map_states[object_id]["state"]["stop_point"][step_count][0] = object_state.stop_point.x
