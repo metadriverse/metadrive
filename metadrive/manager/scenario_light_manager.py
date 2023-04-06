@@ -1,4 +1,5 @@
 import copy
+import numpy as np
 
 from metadrive.component.traffic_light.scenario_traffic_light import ScenarioTrafficLight
 from metadrive.utils.coordinates_shift import right_hand_to_left_vector
@@ -30,7 +31,7 @@ class ScenarioLightManager(BaseManager):
     def after_reset(self):
         for scenario_lane_id, light_info in self._episode_light_data.items():
             lane_info = self.engine.current_map.road_network.graph[str(scenario_lane_id)]
-            position = light_info[ScenarioDescription.TRAFFIC_LIGHT_POSITION][0]
+            position = self._get_light_position(light_info)
             name = scenario_lane_id if self.engine.global_config["force_reuse_object_name"] else None
             traffic_light = self.spawn_object(ScenarioTrafficLight, lane=lane_info.lane, position=position, name=name)
             self._scenario_id_to_obj_id[scenario_lane_id] = traffic_light.id
@@ -40,6 +41,10 @@ class ScenarioLightManager(BaseManager):
             self._lane_index_to_obj[lane_info.lane.index] = traffic_light
             status = light_info[ScenarioDescription.TRAFFIC_LIGHT_STATUS][self.episode_step]
             traffic_light.set_status(status, self.data_source)
+
+    def _get_light_position(self, light_info):
+        index = np.where(light_info[ScenarioDescription.TRAFFIC_LIGHT_LANE] > 0)[0][0]
+        return light_info[ScenarioDescription.TRAFFIC_LIGHT_POSITION][index]
 
     def after_step(self, *args, **kwargs):
         if self.episode_step >= self.current_scenario_length:

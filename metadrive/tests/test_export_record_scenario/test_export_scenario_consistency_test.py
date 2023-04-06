@@ -1,7 +1,7 @@
 import os
 import pickle
 import shutil
-
+from metadrive.type import MetaDriveType
 import numpy as np
 
 from metadrive.engine.asset_loader import AssetLoader
@@ -374,6 +374,20 @@ def compare_exported_scenario_with_waymo_origin(scenarios):
             old_heading = waymo_to_metadrive_heading(old_heading[index_to_compare])
             new_heading = new_heading[index_to_compare][..., 0]
             np.testing.assert_almost_equal(old_heading, new_heading, decimal=NP_ARRAY_DECIMAL)
+
+        for light_id, old_light in origin_data["dynamic_map_states"].items():
+            new_light = export_data["dynamic_map_states"][light_id]
+            old_pos = waymo_to_metadrive_vector(old_light["state"]["stop_point"])[..., :2]
+            old_pos = old_pos[np.where(old_pos > 0)[0][0]]
+            new_pos = new_light["state"]["stop_point"]
+            new_pos = new_pos[np.where(new_pos>0)[0][0]]
+            length = min(len(old_pos), len(new_pos))
+            np.testing.assert_almost_equal(old_pos, new_pos, decimal=NP_ARRAY_DECIMAL)
+            assert max(old_light["state"]["lane"]) == max(new_light["state"]["lane"])
+            for k, light_status in enumerate(old_light["state"]["object_state"][:length]):
+                assert MetaDriveType.parse_light_status(light_status, simplifying=True, data_source="waymo") == \
+                       new_light["state"]["object_state"][k]
+
         print("Finish Seed: {}".format(index))
 
 
@@ -402,5 +416,5 @@ if __name__ == "__main__":
     # test_export_metadrive_scenario_reproduction(num_scenarios=10)
     # test_export_metadrive_scenario_easy(num_scenarios=1, render_export_env=False, render_load_env=False)
     # test_export_metadrive_scenario_hard(num_scenarios=3, render_export_env=True, render_load_env=True)
-    test_export_waymo_scenario(num_scenarios=1, render_export_env=False, render_load_env=False)
-    # test_waymo_export_and_original_consistency(num_scenarios=1, render_export_env=False)
+    # test_export_waymo_scenario(num_scenarios=1, render_export_env=False, render_load_env=False)
+    test_waymo_export_and_original_consistency(num_scenarios=3, render_export_env=False)

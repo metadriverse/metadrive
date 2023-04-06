@@ -127,7 +127,7 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
             state={
                 ScenarioDescription.TRAFFIC_LIGHT_POSITION: np.zeros(shape=(episode_len, 2)),
                 ScenarioDescription.TRAFFIC_LIGHT_STATUS: np.array([MetaDriveType.LIGHT_UNKNOWN for _ in range(episode_len)]),
-                ScenarioDescription.TRAFFIC_LIGHT_LANE: np.zeros(shape=(episode_len, 1)),
+                ScenarioDescription.TRAFFIC_LIGHT_LANE: np.zeros(shape=(episode_len,)),
             },
             metadata=dict(track_length=episode_len,
                           type=MetaDriveType.TRAFFIC_LIGHT,
@@ -154,13 +154,14 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
 
                 lights[id]["type"] = type
                 lights[id][SD.METADATA]["type"] = lights[id]["type"]
+
                 # Introducing the state item
-                lights[id]["state"][ScenarioDescription.TRAFFIC_LIGHT_POSITION][frame_idx] = state[
-                    ScenarioDescription.TRAFFIC_LIGHT_POSITION]
                 light_status = state[ScenarioDescription.TRAFFIC_LIGHT_STATUS]
                 lights[id]["state"][ScenarioDescription.TRAFFIC_LIGHT_STATUS][frame_idx] = light_status
                 if light_status != MetaDriveType.LIGHT_UNKNOWN:
                     lights[id]["state"][ScenarioDescription.TRAFFIC_LIGHT_LANE][frame_idx] = int(id)
+                    lights[id]["state"][ScenarioDescription.TRAFFIC_LIGHT_POSITION][frame_idx] = state[
+                        ScenarioDescription.TRAFFIC_LIGHT_POSITION]
             else:
                 tracks[id]["type"] = type
                 tracks[id][SD.METADATA]["type"] = tracks[id]["type"]
