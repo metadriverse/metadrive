@@ -142,22 +142,23 @@ class MetaDriveType:
         return light in [cls.LANE_STATE_STOP, cls.LANE_STATE_ARROW_STOP, cls.LANE_STATE_FLASHING_STOP]
 
     @classmethod
-    def parse_light_status(cls, status: int, simplifying=True):
+    def parse_light_status(cls, status: int, simplifying=True, data_source=None):
         """
         Parse light status from ENUM to STR
         """
-        ret = cls.LIGHT_ENUM_TO_STR[status]
+        if data_source == "waymo":
+            status = cls.LIGHT_ENUM_TO_STR[status]
         if simplifying:
-            return cls.simplify_light_status(ret)
+            return cls.simplify_light_status(status)
         else:
-            return ret
+            return status
 
     @classmethod
     def simplify_light_status(cls, status: str):
         """
         Convert status to red/yellow/green/unknown
         """
-        if status is cls.LANE_STATE_UNKNOWN or status is cls.LIGHT_UNKNOWN:
+        if status == cls.LANE_STATE_UNKNOWN or status == cls.LIGHT_UNKNOWN:
             return cls.LIGHT_UNKNOWN
         elif status in [cls.LANE_STATE_ARROW_STOP, cls.LANE_STATE_STOP, cls.LANE_STATE_FLASHING_STOP, cls.LIGHT_RED]:
             return cls.LIGHT_RED

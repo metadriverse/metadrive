@@ -118,5 +118,7 @@ class BaseTrafficLight(BaseObject):
 
     def get_state(self):
         pos = self.position
-        state = {ScenarioDescription.TRAFFIC_LIGHT_POSITION: pos, ScenarioDescription.TRAFFIC_LIGHT_STATUS: self.status}
+        state = {ScenarioDescription.TRAFFIC_LIGHT_POSITION: pos,
+                 ScenarioDescription.TRAFFIC_LIGHT_STATUS: self.status,
+                 ScenarioDescription.TYPE: type(self)}
         return state

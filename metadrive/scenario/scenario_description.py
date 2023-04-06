@@ -134,6 +134,7 @@ class ScenarioDescription(dict):
     OBJ_ID_TO_ORIGINAL_ID = "obj_id_to_original_id"
     TRAFFIC_LIGHT_POSITION = "stop_point"
     TRAFFIC_LIGHT_STATUS = "object_state"
+    TRAFFIC_LIGHT_LANE = "lane"
 
     METADRIVE_PROCESSED = "metadrive_processed"
     TIMESTEP = "ts"
