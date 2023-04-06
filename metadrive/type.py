@@ -157,13 +157,14 @@ class MetaDriveType:
         """
         Convert status to red/yellow/green/unknown
         """
-        if status is cls.LANE_STATE_UNKNOWN:
+        if status is cls.LANE_STATE_UNKNOWN or status is cls.LIGHT_UNKNOWN:
             return cls.LIGHT_UNKNOWN
-        elif status in [cls.LANE_STATE_ARROW_STOP, cls.LANE_STATE_STOP, cls.LANE_STATE_FLASHING_STOP]:
+        elif status in [cls.LANE_STATE_ARROW_STOP, cls.LANE_STATE_STOP, cls.LANE_STATE_FLASHING_STOP, cls.LIGHT_RED]:
             return cls.LIGHT_RED
-        elif status in [cls.LANE_STATE_ARROW_CAUTION, cls.LANE_STATE_CAUTION, cls.LANE_STATE_FLASHING_CAUTION]:
+        elif status in [cls.LANE_STATE_ARROW_CAUTION, cls.LANE_STATE_CAUTION, cls.LANE_STATE_FLASHING_CAUTION,
+                        cls.LIGHT_YELLOW]:
             return cls.LIGHT_YELLOW
-        elif status in [cls.LANE_STATE_ARROW_GO, cls.LANE_STATE_GO]:
+        elif status in [cls.LANE_STATE_ARROW_GO, cls.LANE_STATE_GO, cls.LIGHT_GREEN]:
             return cls.LIGHT_GREEN
         else:
             raise ValueError("Status: {} is not MetaDriveType".format(status))

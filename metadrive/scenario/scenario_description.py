@@ -115,7 +115,7 @@ from metadrive.type import MetaDriveType
 
 class ScenarioDescription(dict):
     """
-    MetaDrive Scenario Description
+    MetaDrive Scenario Description. It stores keys of the data dict.
     """
     TRACKS = "tracks"
     VERSION = "version"
@@ -132,6 +132,8 @@ class ScenarioDescription(dict):
     STATE_DICT_KEYS = {TYPE, STATE, METADATA}
     ORIGINAL_ID_TO_OBJ_ID = "original_id_to_obj_id"
     OBJ_ID_TO_ORIGINAL_ID = "obj_id_to_original_id"
+    TRAFFIC_LIGHT_POSITION = "stop_point"
+    TRAFFIC_LIGHT_STATUS = "object_state"
 
     METADRIVE_PROCESSED = "metadrive_processed"
     TIMESTEP = "ts"

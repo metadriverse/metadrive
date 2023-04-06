@@ -1,4 +1,5 @@
 from metadrive.base_class.base_object import BaseObject
+from metadrive.scenario.scenario_description import ScenarioDescription
 from metadrive.constants import MetaDriveType
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.utils.pg_utils.utils import generate_static_box_physics_body
@@ -18,7 +19,7 @@ class BaseTrafficLight(BaseObject):
     PLACE_LONGITUDE = 5
 
     def __init__(
-        self, lane, position=None, name=None, random_seed=None, config=None, escape_random_seed_assertion=False
+            self, lane, position=None, name=None, random_seed=None, config=None, escape_random_seed_assertion=False
     ):
         super(BaseTrafficLight, self).__init__(name, random_seed, config, escape_random_seed_assertion)
         self.lane = lane
@@ -114,3 +115,11 @@ class BaseTrafficLight(BaseObject):
 
     def set_action(self, *args, **kwargs):
         return self.set_status(*args, **kwargs)
+
+    def get_state(self):
+        pos = self.position
+        state = {
+            ScenarioDescription.TRAFFIC_LIGHT_POSITION: pos,
+            ScenarioDescription.TRAFFIC_LIGHT_STATUS: self.status
+        }
+        return state
