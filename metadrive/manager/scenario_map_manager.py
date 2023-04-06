@@ -46,7 +46,7 @@ class ScenarioMapManager(BaseManager):
         self.update_route()
 
     def update_route(self):
-        data = self.engine.data_manager.get_scenario(self.engine.global_random_seed)
+        data = self.engine.data_manager.current_scenario
 
         sdc_track = data.get_sdc_track()
 

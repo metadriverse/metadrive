@@ -11,6 +11,7 @@ from metadrive.engine.asset_loader import AssetLoader
 from metadrive.envs.base_env import BaseEnv
 from metadrive.manager.scenario_data_manager import ScenarioDataManager
 from metadrive.manager.scenario_map_manager import ScenarioMapManager
+from metadrive.manager.scenario_light_manager import ScenarioLightManager
 from metadrive.manager.waymo_traffic_manager import WaymoTrafficManager
 from metadrive.obs.real_env_observation import ScenarioObservation
 from metadrive.policy.replay_policy import ReplayEgoCarPolicy
@@ -30,6 +31,7 @@ SCENARIO_ENV_CONFIG = dict(
 
     # ===== Traffic =====
     no_traffic=False,
+    no_light=False,
     replay=True,
     no_static_traffic_vehicle=True,
 
@@ -121,6 +123,8 @@ class ScenarioEnv(BaseEnv):
         self.engine.register_manager("map_manager", ScenarioMapManager())
         if not self.config["no_traffic"]:
             self.engine.register_manager("traffic_manager", WaymoTrafficManager())
+        if not self.config["no_light"]:
+            self.engine.register_manager("light_manager", ScenarioLightManager())
         self.engine.accept("p", self.stop)
         self.engine.accept("q", self.switch_to_third_person_view)
         self.engine.accept("b", self.switch_to_top_down_view)
@@ -245,7 +249,7 @@ class ScenarioEnv(BaseEnv):
         step_info["carsize"] = [vehicle.WIDTH, vehicle.LENGTH]
 
         # Compute state difference metrics
-        data = self.engine.data_manager.get_scenario(self.engine.global_seed)
+        data = self.engine.data_manager.current_scenario
         agent_xy = vehicle.position
         if vehicle_id == "sdc" or vehicle_id == "default_agent":
             native_vid = data[ScenarioDescription.METADATA][ScenarioDescription.SDC_ID]
