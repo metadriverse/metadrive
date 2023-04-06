@@ -120,7 +120,7 @@ class ScenarioDataManager(BaseManager):
 
     @property
     def current_scenario(self):
-        return self.current_scenario
+        return self.get_scenario(self.engine.global_random_seed)
 
     def after_reset(self):
         if self.engine.mode != RENDER_MODE_NONE:

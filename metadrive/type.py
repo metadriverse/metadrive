@@ -38,6 +38,22 @@ class MetaDriveType:
     LANE_STATE_GO = "LANE_STATE_GO"
     LANE_STATE_FLASHING_STOP = "LANE_STATE_FLASHING_STOP"
     LANE_STATE_FLASHING_CAUTION = "LANE_STATE_FLASHING_CAUTION"
+    LIGHT_ENUM_TO_STR = {
+        0: LANE_STATE_UNKNOWN,
+        1: LANE_STATE_ARROW_STOP,
+        2: LANE_STATE_ARROW_CAUTION,
+        3: LANE_STATE_ARROW_GO,
+        4: LANE_STATE_STOP,
+        5: LANE_STATE_CAUTION,
+        6: LANE_STATE_GO,
+        7: LANE_STATE_FLASHING_STOP,
+        8: LANE_STATE_FLASHING_CAUTION
+    }
+    # the light states above will be converted to the following 4 types
+    LIGHT_GREEN = "TRAFFIC_LIGHT_GREEN"
+    LIGHT_RED = "TRAFFIC_LIGHT_RED"
+    LIGHT_YELLOW = "TRAFFIC_LIGHT_YELLOW"
+    LIGHT_UNKNOWN = "TRAFFIC_LIGHT_UNKNOWN"
 
     # ===== Agent type =====
     UNSET = "UNSET"
@@ -125,31 +141,29 @@ class MetaDriveType:
     def is_traffic_light_in_red(cls, light):
         return light in [cls.LANE_STATE_STOP, cls.LANE_STATE_ARROW_STOP, cls.LANE_STATE_FLASHING_STOP]
 
-
-class TrafficLightStatus:
-    GREEN = 1
-    RED = 2
-    YELLOW = 3
-    UNKNOWN = 4
+    @classmethod
+    def parse_light_status(cls, status: int, simplifying=True):
+        """
+        Parse light status from ENUM to STR
+        """
+        ret = cls.LIGHT_ENUM_TO_STR[status]
+        if simplifying:
+            return
+        else:
+            return cls.simplify_light_status(ret)
 
     @classmethod
-    def semantics(self, status):
-        if status == self.GREEN:
-            return "Traffic Light: Green"
-        if status == self.RED:
-            return "Traffic Light: Red"
-        if status == self.YELLOW:
-            return "Traffic Light: Yellow"
-        if status == self.UNKNOWN:
-            return "Traffic Light: Unknown"
-
-    @classmethod
-    def color(self, status):
-        if status == self.GREEN:
-            return [0, 255, 0]
-        if status == self.RED:
-            return [1, 255, 0]
-        if status == self.YELLOW:
-            return [255, 255, 0]
-        if status == self.UNKNOWN:
-            return [180, 180, 180]
+    def simplify_light_status(cls, status: str):
+        """
+        Convert status to red/yellow/green/unknown
+        """
+        if status is cls.LANE_STATE_UNKNOWN:
+            return cls.LIGHT_UNKNOWN
+        elif status in [cls.LANE_STATE_ARROW_STOP, cls.LANE_STATE_STOP, cls.LANE_STATE_FLASHING_STOP]:
+            return cls.LIGHT_RED
+        elif status in [cls.LANE_STATE_ARROW_CAUTION, cls.LANE_STATE_CAUTION, cls.LANE_STATE_FLASHING_CAUTION]:
+            return cls.LIGHT_YELLOW
+        elif status in [cls.LANE_STATE_ARROW_GO, cls.LANE_STATE_GO]:
+            return cls.LIGHT_GREEN
+        else:
+            raise ValueError("Status: {} is not MetaDriveType".format(status))
