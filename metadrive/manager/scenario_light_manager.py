@@ -43,8 +43,8 @@ class ScenarioLightManager(BaseManager):
             return
 
         for scenario_light_id, light_obj in self._scenario_id_to_obj.items():
-            status = self._episode_light_data[scenario_light_id][
-                ScenarioDescription.TRAFFIC_LIGHT_STATUS][self.episode_step]
+            status = self._episode_light_data[scenario_light_id][ScenarioDescription.TRAFFIC_LIGHT_STATUS][
+                self.episode_step]
             light_obj.set_status(status)
 
     def has_traffic_light(self, lane_index):
@@ -64,8 +64,9 @@ class ScenarioLightManager(BaseManager):
             ret[lane_id] = copy.deepcopy(light_info[ScenarioDescription.STATE])
             if self.engine.data_manager.coordinate_transform:
                 # ignore height and convert coordinate, if necessary
-                ret[lane_id][ScenarioDescription.TRAFFIC_LIGHT_POSITION] = right_hand_to_left_vector(
-                    ret[lane_id][ScenarioDescription.TRAFFIC_LIGHT_POSITION])[..., :-1]
+                ret[lane_id][ScenarioDescription.TRAFFIC_LIGHT_POSITION
+                             ] = right_hand_to_left_vector(ret[lane_id][ScenarioDescription.TRAFFIC_LIGHT_POSITION]
+                                                           )[..., :-1]
             type = light_info[ScenarioDescription.TYPE]
             assert type == MetaDriveType.TRAFFIC_LIGHT, "Can not handle {}".format(type)
         return ret

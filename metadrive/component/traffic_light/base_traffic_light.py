@@ -19,7 +19,7 @@ class BaseTrafficLight(BaseObject):
     PLACE_LONGITUDE = 5
 
     def __init__(
-            self, lane, position=None, name=None, random_seed=None, config=None, escape_random_seed_assertion=False
+        self, lane, position=None, name=None, random_seed=None, config=None, escape_random_seed_assertion=False
     ):
         super(BaseTrafficLight, self).__init__(name, random_seed, config, escape_random_seed_assertion)
         self.lane = lane
@@ -118,8 +118,5 @@ class BaseTrafficLight(BaseObject):
 
     def get_state(self):
         pos = self.position
-        state = {
-            ScenarioDescription.TRAFFIC_LIGHT_POSITION: pos,
-            ScenarioDescription.TRAFFIC_LIGHT_STATUS: self.status
-        }
+        state = {ScenarioDescription.TRAFFIC_LIGHT_POSITION: pos, ScenarioDescription.TRAFFIC_LIGHT_STATUS: self.status}
         return state
