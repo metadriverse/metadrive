@@ -380,7 +380,7 @@ def compare_exported_scenario_with_waymo_origin(scenarios):
             old_pos = waymo_to_metadrive_vector(old_light["state"]["stop_point"])[..., :2]
             old_pos = old_pos[np.where(old_pos > 0)[0][0]]
             new_pos = new_light["state"]["stop_point"]
-            new_pos = new_pos[np.where(new_pos>0)[0][0]]
+            new_pos = new_pos[np.where(new_pos > 0)[0][0]]
             length = min(len(old_pos), len(new_pos))
             np.testing.assert_almost_equal(old_pos, new_pos, decimal=NP_ARRAY_DECIMAL)
             assert max(old_light["state"]["lane"]) == max(new_light["state"]["lane"])

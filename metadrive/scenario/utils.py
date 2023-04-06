@@ -126,13 +126,12 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
             type=MetaDriveType.TRAFFIC_LIGHT,
             state={
                 ScenarioDescription.TRAFFIC_LIGHT_POSITION: np.zeros(shape=(episode_len, 2)),
-                ScenarioDescription.TRAFFIC_LIGHT_STATUS: np.array([MetaDriveType.LIGHT_UNKNOWN for _ in range(episode_len)]),
-                ScenarioDescription.TRAFFIC_LIGHT_LANE: np.zeros(shape=(episode_len,)),
+                ScenarioDescription.TRAFFIC_LIGHT_STATUS: np.array(
+                    [MetaDriveType.LIGHT_UNKNOWN for _ in range(episode_len)]
+                ),
+                ScenarioDescription.TRAFFIC_LIGHT_LANE: np.zeros(shape=(episode_len, )),
             },
-            metadata=dict(track_length=episode_len,
-                          type=MetaDriveType.TRAFFIC_LIGHT,
-                          object_id=k,
-                          dataset="metadrive")
+            metadata=dict(track_length=episode_len, type=MetaDriveType.TRAFFIC_LIGHT, object_id=k, dataset="metadrive")
         )
         for k in list(all_lights)
     }

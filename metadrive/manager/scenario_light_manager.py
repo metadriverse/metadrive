@@ -75,12 +75,14 @@ class ScenarioLightManager(BaseManager):
             if self.engine.data_manager.coordinate_transform:
                 # ignore height and convert coordinate, if necessary
                 ret[lane_id][ScenarioDescription.TRAFFIC_LIGHT_POSITION
-                ] = right_hand_to_left_vector(ret[lane_id][ScenarioDescription.TRAFFIC_LIGHT_POSITION]
-                                              )[..., :-1]
+                             ] = right_hand_to_left_vector(ret[lane_id][ScenarioDescription.TRAFFIC_LIGHT_POSITION]
+                                                           )[..., :-1]
             type = light_info[ScenarioDescription.TYPE]
             assert type == MetaDriveType.TRAFFIC_LIGHT, "Can not handle {}".format(type)
         return ret
 
     def get_state(self):
-        return {ScenarioDescription.OBJ_ID_TO_ORIGINAL_ID: copy.deepcopy(self._obj_id_to_scenario_id),
-                ScenarioDescription.ORIGINAL_ID_TO_OBJ_ID: copy.deepcopy(self._scenario_id_to_obj_id)}
+        return {
+            ScenarioDescription.OBJ_ID_TO_ORIGINAL_ID: copy.deepcopy(self._obj_id_to_scenario_id),
+            ScenarioDescription.ORIGINAL_ID_TO_OBJ_ID: copy.deepcopy(self._scenario_id_to_obj_id)
+        }
