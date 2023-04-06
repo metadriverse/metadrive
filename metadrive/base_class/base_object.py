@@ -464,7 +464,7 @@ class BaseObject(BaseRunnable):
     def rename(self, new_name):
         super(BaseObject, self).rename(new_name)
         physics_node = self._body.getPythonTag(self._body.getName())
-        if isinstance(physics_node, BaseRigidBodyNode) or isinstance(physics_node, BaseRigidBodyNode):
+        if isinstance(physics_node, BaseGhostBodyNode) or isinstance(physics_node, BaseRigidBodyNode):
             physics_node.rename(new_name)
 
     def random_rename(self):

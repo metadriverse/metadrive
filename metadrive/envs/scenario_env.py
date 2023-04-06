@@ -355,15 +355,17 @@ if __name__ == "__main__":
     env = ScenarioEnv(
         {
             "use_render": True,
-            # "agent_policy": ReplayEgoCarPolicy,
-            "manual_control": True,
+            "agent_policy": ReplayEgoCarPolicy,
+            "manual_control": False,
             "replay": True,
-            "no_traffic": True,
+            # "no_traffic": False,
+            # "no_light": False,
             # "debug":True,
             # "no_traffic":True,
             # "start_scenario_index": 192,
             # "start_scenario_index": 1000,
             "num_scenarios": 3,
+            # "force_reuse_object_name": True,
             # "data_directory": "/home/shady/Downloads/test_processed",
             "horizon": 1000,
             "allow_coordinate_transform": True,
@@ -397,4 +399,4 @@ if __name__ == "__main__":
             if d:
                 if info["arrive_dest"]:
                     print("seed:{}, success".format(env.engine.global_random_seed))
-                # break
+                break

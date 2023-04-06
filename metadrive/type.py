@@ -148,9 +148,9 @@ class MetaDriveType:
         """
         ret = cls.LIGHT_ENUM_TO_STR[status]
         if simplifying:
-            return
-        else:
             return cls.simplify_light_status(ret)
+        else:
+            return ret
 
     @classmethod
     def simplify_light_status(cls, status: str):

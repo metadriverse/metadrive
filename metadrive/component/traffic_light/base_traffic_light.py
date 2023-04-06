@@ -36,9 +36,9 @@ class BaseTrafficLight(BaseObject):
 
         if position is None:
             # auto determining
-            position = lane.position(self.PLACE_LONGITUDE, 0), self.AIR_WALL_HEIGHT / 2
+            position = lane.position(self.PLACE_LONGITUDE, 0)
 
-        self.set_position(position)
+        self.set_position(position, self.AIR_WALL_HEIGHT / 2)
         self.set_heading_theta(lane.heading_theta_at(self.PLACE_LONGITUDE))
         self.current_light = None
 
@@ -52,6 +52,12 @@ class BaseTrafficLight(BaseObject):
                     model.setH(-90)
                     BaseTrafficLight.TRAFFIC_LIGHT_MODEL[color] = model
             self.origin.setScale(0.5, 1.2, 1.2)
+
+    def set_status(self, status):
+        """
+        People should overwrite this method to parse traffic light status and to determine which traffic light to set
+        """
+        pass
 
     def set_green(self):
         if self.render:
@@ -78,7 +84,7 @@ class BaseTrafficLight(BaseObject):
         if self.render:
             if self.current_light is not None:
                 self.current_light.detachNode()
-            self.current_light = BaseTrafficLight.TRAFFIC_LIGHT_MODEL["known"].instanceTo(self.origin)
+            self.current_light = BaseTrafficLight.TRAFFIC_LIGHT_MODEL["unknown"].instanceTo(self.origin)
         self.status = MetaDriveType.LIGHT_UNKNOWN
 
     def destroy(self):
@@ -87,7 +93,15 @@ class BaseTrafficLight(BaseObject):
 
     @property
     def top_down_color(self):
-        return self.color(self.status)
+        status = self.status
+        if status == MetaDriveType.LIGHT_GREEN:
+            return [0, 255, 0]
+        if status == MetaDriveType.LIGHT_RED:
+            return [1, 255, 0]
+        if status == MetaDriveType.LIGHT_YELLOW:
+            return [255, 255, 0]
+        if status == MetaDriveType.LIGHT_UNKNOWN:
+            return [180, 180, 180]
 
     @property
     def top_down_width(self):
@@ -97,13 +111,5 @@ class BaseTrafficLight(BaseObject):
     def top_down_length(self):
         return 1.5
 
-    @classmethod
-    def color(self, status):
-        if status == MetaDriveType.LIGHT_GREEN:
-            return [0, 255, 0]
-        if status == MetaDriveType.LIGHT_RED:
-            return [1, 255, 0]
-        if status == MetaDriveType.LIGHT_YELLOW:
-            return [255, 255, 0]
-        if status == MetaDriveType.LIGHT_UNKNOWN:
-            return [180, 180, 180]
+    def set_action(self, *args, **kwargs):
+        return self.set_status(*args, **kwargs)
