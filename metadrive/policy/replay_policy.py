@@ -72,9 +72,7 @@ class ReplayEgoCarPolicy(ReplayTrafficParticipantPolicy):
     def get_trajectory_info(self, trajectory):
         # Directly get trajectory from data manager
         trajectory_data = self.engine.data_manager.current_scenario["tracks"]
-        sdc_track_index = str(
-            self.engine.data_manager.current_scenario["metadata"]["sdc_id"]
-        )
+        sdc_track_index = str(self.engine.data_manager.current_scenario["metadata"]["sdc_id"])
         ret = []
         for i in range(len(trajectory_data[sdc_track_index]["state"]["position"])):
             ret.append(
