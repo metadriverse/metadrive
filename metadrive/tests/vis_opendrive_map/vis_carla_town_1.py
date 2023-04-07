@@ -12,10 +12,12 @@ if __name__ == "__main__":
     map = load_opendrive_map(AssetLoader.file_path("carla", "CARLA_town01.xodr", return_raw_style=False))
     global_network = OpenDriveRoadNetwork()
     i = 0
+    blocks = []
     for road in map.roads:
         for section in road.lanes.lane_sections:
             block = OpenDriveBlock(i, global_network, 0, section)
             block.construct_block(test.render, test.world)
+            blocks.append(block)
             i += 1
 
     test.show_bounding_box(global_network)
