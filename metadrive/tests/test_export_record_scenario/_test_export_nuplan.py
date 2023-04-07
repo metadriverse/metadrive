@@ -7,10 +7,8 @@ import numpy as np
 from metadrive.envs.real_data_envs.nuplan_env import NuPlanEnv
 from metadrive.envs.scenario_env import ScenarioEnv
 from metadrive.policy.replay_policy import NuPlanReplayEgoCarPolicy
-from metadrive.policy.replay_policy import WaymoReplayEgoCarPolicy
 from metadrive.scenario import ScenarioDescription as SD
 from metadrive.scenario.scenario_description import ScenarioDescription
-from metadrive.utils.coordinates_shift import waymo_to_metadrive_vector
 from metadrive.utils.math_utils import wrap_to_pi
 
 NP_ARRAY_DECIMAL = 4
@@ -128,9 +126,9 @@ def assert_scenario_equal(scenarios1, scenarios2, only_compare_sdc=False, coordi
 
         for map_id, map_feat in new_scene[SD.MAP_FEATURES].items():
             # It is possible that some line are not included in new scene but exist in old scene.
-            old_scene_polyline = map_feat["polyline"]
-            if coordinate_transform:
-                old_scene_polyline = waymo_to_metadrive_vector(old_scene_polyline)
+            # old_scene_polyline = map_feat["polyline"]
+            # if coordinate_transform:
+                # old_scene_polyline = waymo_to_metadrive_vector(old_scene_polyline)
             np.testing.assert_almost_equal(
                 new_scene[SD.MAP_FEATURES][map_id]["polyline"], map_feat["polyline"], decimal=NP_ARRAY_DECIMAL
             )
@@ -196,7 +194,7 @@ def _test_export_nuplan_scenario_hard(start_seed=0, num_scenarios=5, render_expo
     # ===== Save data of the restoring environment =====
     env = ScenarioEnv(
         dict(
-            agent_policy=WaymoReplayEgoCarPolicy,
+            agent_policy=NuPlanReplayEgoCarPolicy,
             data_directory=dir1,
             use_render=render_load_env,
             num_scenarios=num_scenarios,
