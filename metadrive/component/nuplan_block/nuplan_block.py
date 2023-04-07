@@ -186,7 +186,7 @@ class NuPlanBlock(BaseBlock):
     def __del__(self):
         self.destroy()
         super(NuPlanBlock, self).__del__()
-        print("NuPlan Block is being deleted.")
+        # print("NuPlan Block is being deleted.")
 
     @staticmethod
     def _get_points_from_boundary(boundary, center):

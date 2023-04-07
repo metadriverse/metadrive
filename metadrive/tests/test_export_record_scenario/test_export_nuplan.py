@@ -157,25 +157,26 @@ def assert_scenario_equal(scenarios1, scenarios2, only_compare_sdc=False, coordi
             assert new_scene[SD.DYNAMIC_MAP_STATES][obj_id][SD.TYPE] == obj_state[SD.TYPE]
 
 
-def _test_export_nuplan_scenario_hard(start_seed=10, num_scenarios=1, render_export_env=False, render_load_env=False):
+def _test_export_nuplan_scenario_hard(start_seed=0, num_scenarios=5, render_export_env=False, render_load_env=False):
     # ===== Save data =====
-    env = NuPlanEnv({
-        "use_render": render_export_env,
-        "agent_policy": NuPlanReplayEgoCarPolicy,
-        "replay": True,
-        "start_scenario_index": 0,
-        "load_city_map": True,
-        "num_scenarios": 400,
-        "vehicle_config": dict(
-            lidar=dict(num_lasers=120, distance=50, num_others=0),
-            lane_line_detector=dict(num_lasers=12, distance=50),
-            side_detector=dict(num_lasers=160, distance=50),
-            # show_lidar=True
-            show_navi_mark=False,
-            show_dest_mark=False,
-            no_wheel_friction=True,
-        ),
-    }
+    env = NuPlanEnv(
+        {
+            "use_render": render_export_env,
+            "agent_policy": NuPlanReplayEgoCarPolicy,
+            "replay": True,
+            "start_scenario_index": start_seed,
+            "load_city_map": True,
+            "num_scenarios": num_scenarios,
+            "vehicle_config": dict(
+                lidar=dict(num_lasers=120, distance=50, num_others=0),
+                lane_line_detector=dict(num_lasers=12, distance=50),
+                side_detector=dict(num_lasers=160, distance=50),
+                # show_lidar=True
+                show_navi_mark=False,
+                show_dest_mark=False,
+                no_wheel_friction=True,
+            ),
+        }
     )
     policy = lambda x: [0, 1]
     dir1 = None
@@ -209,10 +210,7 @@ def _test_export_nuplan_scenario_hard(start_seed=10, num_scenarios=1, render_exp
     )
     try:
         scenarios_restored, done_info = env.export_scenarios(
-            policy,
-            scenario_index=[i for i in range(num_scenarios)],
-            render_topdown=False,
-            return_done_info=True
+            policy, scenario_index=[i for i in range(num_scenarios)], render_topdown=False, return_done_info=True
         )
         for seed, info in done_info.items():
             if not info["arrive_dest"]:
