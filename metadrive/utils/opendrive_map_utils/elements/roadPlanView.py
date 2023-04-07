@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 from typing import Tuple
-
 import numpy as np
 
 from metadrive.utils.opendrive_map_utils.elements.geometry import (
