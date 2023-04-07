@@ -121,7 +121,7 @@ def assert_scenario_equal(scenarios1, scenarios2, only_compare_sdc=False, coordi
             # It is possible that some line are not included in new scene but exist in old scene.
             # old_scene_polyline = map_feat["polyline"]
             # if coordinate_transform:
-            # old_scene_polyline = waymo_to_metadrive_vector(old_scene_polyline)
+            #     old_scene_polyline = waymo_to_metadrive_vector(old_scene_polyline)
             np.testing.assert_almost_equal(
                 new_scene[SD.MAP_FEATURES][map_id]["polyline"], map_feat["polyline"], decimal=NP_ARRAY_DECIMAL
             )
