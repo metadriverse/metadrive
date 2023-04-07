@@ -9,6 +9,7 @@ from nuplan.planning.script.builders.scenario_filter_builder import build_scenar
 from nuplan.planning.script.utils import set_up_common_builder
 from dataclasses import dataclass
 from metadrive.manager.base_manager import BaseManager
+from metadrive.utils.utils import is_win
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -108,27 +109,25 @@ class NuPlanDataManager(BaseManager):
         DATASET_PARAMS = self.engine.global_config["DATASET_PARAMS"]
 
         # Compose the configuration
+        overrides = [
+            f'group={SAVE_DIR}',
+            'worker=sequential',
+            f'ego_controller={EGO_CONTROLLER}',
+            f'observation={OBSERVATION}',
+            f'hydra.searchpath=[{simulation_hydra_paths.common_dir}, {simulation_hydra_paths.experiment_dir}]',
+            'output_dir=${group}/${experiment}',
+            *DATASET_PARAMS,
+        ]
+        if is_win():
+            overrides.extend([
+                f'job_name=planner_tutorial',
+                'experiment=${experiment_name}/${job_name}/${experiment_time}',
+            ])
+        else:
+            overrides.append(f'experiment_name=planner_tutorial')
         cfg = hydra.compose(
             config_name=simulation_hydra_paths.config_name,
-            overrides=[
-                f'group={SAVE_DIR}',
-                'worker=sequential',
-                f'ego_controller={EGO_CONTROLLER}',
-                f'observation={OBSERVATION}',
-                f'hydra.searchpath=[{simulation_hydra_paths.common_dir}, {simulation_hydra_paths.experiment_dir}]',
-                'output_dir=${group}/${experiment}',
-                *DATASET_PARAMS,
-
-                # TODO: Check which one is correct.
-                # Option 1: LQY write:
-                f'experiment_name=planner_tutorial',
-
-                # Option 2: planning tutorial:
-                # # @PZH it doesn't work with the following lines
-                # Copied from tutorial
-                # f'job_name=planner_tutorial',
-                # 'experiment=${experiment_name}/${job_name}/${experiment_time}',
-            ]
+            overrides=overrides
         )
         return cfg
 
