@@ -1,5 +1,4 @@
 import os
-from metadrive.scenario.scenario_description import ScenarioDescription
 import pickle
 import shutil
 
@@ -10,6 +9,7 @@ from metadrive.envs.scenario_env import ScenarioEnv
 from metadrive.policy.replay_policy import NuPlanReplayEgoCarPolicy
 from metadrive.policy.replay_policy import WaymoReplayEgoCarPolicy
 from metadrive.scenario import ScenarioDescription as SD
+from metadrive.scenario.scenario_description import ScenarioDescription
 from metadrive.utils.coordinates_shift import waymo_to_metadrive_vector
 from metadrive.utils.math_utils import wrap_to_pi
 
