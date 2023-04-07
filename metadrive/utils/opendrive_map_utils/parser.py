@@ -4,29 +4,8 @@ These scripts are copied from https://github.com/liuyf5231/opendriveparser. Cred
 """
 import numpy as np
 from lxml import etree
-
-from metadrive.utils.opendrive_map_utils.elements.junction import (
-    Junction,
-    Connection as JunctionConnection,
-    LaneLink as JunctionConnectionLaneLink,
-)
 from metadrive.utils.opendrive_map_utils.elements.opendrive import OpenDrive, Header
 from metadrive.utils.opendrive_map_utils.elements.road import Road
-from metadrive.utils.opendrive_map_utils.elements.roadElevationProfile import (
-    ElevationRecord as RoadElevationProfile,
-)
-from metadrive.utils.opendrive_map_utils.elements.roadLanes import (
-    LaneOffset as RoadLanesLaneOffset,
-    Lane as RoadLaneSectionLane,
-    LaneSection as RoadLanesSection,
-    LaneWidth as RoadLaneSectionLaneWidth,
-    LaneBorder as RoadLaneSectionLaneBorder,
-)
-from metadrive.utils.opendrive_map_utils.elements.roadLateralProfile import (
-    Superelevation as RoadLateralProfileSuperelevation,
-    Crossfall as RoadLateralProfileCrossfall,
-    Shape as RoadLateralProfileShape,
-)
 from metadrive.utils.opendrive_map_utils.elements.roadLink import (
     Predecessor as RoadLinkPredecessor,
     Successor as RoadLinkSuccessor,
@@ -35,6 +14,26 @@ from metadrive.utils.opendrive_map_utils.elements.roadLink import (
 from metadrive.utils.opendrive_map_utils.elements.roadtype import (
     RoadType,
     Speed as RoadTypeSpeed,
+)
+from metadrive.utils.opendrive_map_utils.elements.roadElevationProfile import (
+    ElevationRecord as RoadElevationProfile,
+)
+from metadrive.utils.opendrive_map_utils.elements.roadLateralProfile import (
+    Superelevation as RoadLateralProfileSuperelevation,
+    Crossfall as RoadLateralProfileCrossfall,
+    Shape as RoadLateralProfileShape,
+)
+from metadrive.utils.opendrive_map_utils.elements.roadLanes import (
+    LaneOffset as RoadLanesLaneOffset,
+    Lane as RoadLaneSectionLane,
+    LaneSection as RoadLanesSection,
+    LaneWidth as RoadLaneSectionLaneWidth,
+    LaneBorder as RoadLaneSectionLaneBorder,
+)
+from metadrive.utils.opendrive_map_utils.elements.junction import (
+    Junction,
+    Connection as JunctionConnection,
+    LaneLink as JunctionConnectionLaneLink,
 )
 
 __author__ = "Benjamin Orthen, Stefan Urban"

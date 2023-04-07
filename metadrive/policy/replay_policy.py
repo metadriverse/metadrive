@@ -102,25 +102,24 @@ class NuPlanReplayEgoCarPolicy(ReplayEgoCarPolicy):
         return parse_ego_vehicle_state_trajectory(scenario, self.engine.current_map.nuplan_center)
 
     def act(self, *args, **kwargs):
+        if self.episode_step >= len(self.traj_info):
+            return
 
-        if self.episode_step < len(self.traj_info):
-            self.control_object.set_position(self.traj_info[int(self.episode_step)]["position"])
-            if self.episode_step < len(self.traj_info) - 1:
-                velocity = self.traj_info[int(self.episode_step +
-                                              1)]["position"] - self.traj_info[int(self.episode_step)]["position"]
-                velocity /= self.sim_time_interval
-                self.control_object.set_velocity(velocity, in_local_frame=False)
-            else:
-                velocity = self.traj_info[int(self.episode_step)]["velocity"]
-                self.control_object.set_velocity(velocity, in_local_frame=True)
-            # self.control_object.set_velocity(self.traj_info[int(self.episode_step)]["velocity"])
-        if self.heading is None or self.episode_step >= len(self.traj_info):
-            pass
+        self.control_object.set_position(self.traj_info[int(self.episode_step)]["position"])
+        if self.episode_step < len(self.traj_info) - 1:
+            velocity = self.traj_info[int(self.episode_step + 1)]["position"] - self.traj_info[int(self.episode_step
+                                                                                                   )]["position"]
+            velocity /= self.sim_time_interval
+            self.control_object.set_velocity(velocity, in_local_frame=False)
         else:
-            this_heading = self.traj_info[int(self.episode_step)]["heading"]
-            angular_v = self.traj_info[int(self.episode_step)]["angular_velocity"]
-            self.control_object.set_heading_theta(this_heading)
-            self.control_object.set_angular_velocity(angular_v)
+            velocity = self.traj_info[int(self.episode_step)]["velocity"]
+            self.control_object.set_velocity(velocity, in_local_frame=True)
+        # self.control_object.set_velocity(self.traj_info[int(self.episode_step)]["velocity"])
+
+        this_heading = self.traj_info[int(self.episode_step)]["heading"]
+        angular_v = self.traj_info[int(self.episode_step)]["angular_velocity"]
+        self.control_object.set_heading_theta(this_heading)
+        self.control_object.set_angular_velocity(angular_v)
 
         return [0, 0]
 
