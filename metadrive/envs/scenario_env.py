@@ -11,6 +11,7 @@ from metadrive.engine.asset_loader import AssetLoader
 from metadrive.envs.base_env import BaseEnv
 from metadrive.manager.scenario_data_manager import ScenarioDataManager
 from metadrive.manager.scenario_map_manager import ScenarioMapManager
+from metadrive.manager.scenario_light_manager import ScenarioLightManager
 from metadrive.manager.waymo_traffic_manager import WaymoTrafficManager
 from metadrive.obs.real_env_observation import ScenarioObservation
 from metadrive.policy.replay_policy import ReplayEgoCarPolicy
@@ -30,6 +31,7 @@ SCENARIO_ENV_CONFIG = dict(
 
     # ===== Traffic =====
     no_traffic=False,
+    no_light=False,
     replay=True,
     no_static_traffic_vehicle=True,
 
@@ -121,6 +123,8 @@ class ScenarioEnv(BaseEnv):
         self.engine.register_manager("map_manager", ScenarioMapManager())
         if not self.config["no_traffic"]:
             self.engine.register_manager("traffic_manager", WaymoTrafficManager())
+        if not self.config["no_light"]:
+            self.engine.register_manager("light_manager", ScenarioLightManager())
         self.engine.accept("p", self.stop)
         self.engine.accept("q", self.switch_to_third_person_view)
         self.engine.accept("b", self.switch_to_top_down_view)
@@ -245,7 +249,7 @@ class ScenarioEnv(BaseEnv):
         step_info["carsize"] = [vehicle.WIDTH, vehicle.LENGTH]
 
         # Compute state difference metrics
-        data = self.engine.data_manager.get_scenario(self.engine.global_seed)
+        data = self.engine.data_manager.current_scenario
         agent_xy = vehicle.position
         if vehicle_id == "sdc" or vehicle_id == "default_agent":
             native_vid = data[ScenarioDescription.METADATA][ScenarioDescription.SDC_ID]
@@ -351,15 +355,17 @@ if __name__ == "__main__":
     env = ScenarioEnv(
         {
             "use_render": True,
-            # "agent_policy": ReplayEgoCarPolicy,
-            "manual_control": True,
+            "agent_policy": ReplayEgoCarPolicy,
+            "manual_control": False,
             "replay": True,
-            "no_traffic": True,
+            # "no_traffic": False,
+            # "no_light": False,
             # "debug":True,
             # "no_traffic":True,
             # "start_scenario_index": 192,
             # "start_scenario_index": 1000,
             "num_scenarios": 3,
+            # "force_reuse_object_name": True,
             # "data_directory": "/home/shady/Downloads/test_processed",
             "horizon": 1000,
             "allow_coordinate_transform": True,
@@ -374,7 +380,7 @@ if __name__ == "__main__":
     success = []
     for i in range(3):
         env.reset(force_seed=i)
-        while True:
+        for t in range(10000):
             o, r, d, info = env.step([0, 0])
             assert env.observation_space.contains(o)
             c_lane = env.vehicle.lane
@@ -393,4 +399,4 @@ if __name__ == "__main__":
             if d:
                 if info["arrive_dest"]:
                     print("seed:{}, success".format(env.engine.global_random_seed))
-                # break
+                break

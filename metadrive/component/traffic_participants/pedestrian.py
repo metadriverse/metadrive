@@ -33,12 +33,12 @@ class Pedestrian(BaseTrafficParticipant):
         self._instance = None
         if self.render:
             if len(Pedestrian._MODEL) == 0:
-                self._init_pedestrian_model()
+                self.init_pedestrian_model()
             self._instance = Pedestrian._MODEL[self.current_speed_model].instanceTo(self.origin)
             self.show_coordinates()
 
     @classmethod
-    def _init_pedestrian_model(cls):
+    def init_pedestrian_model(cls):
         for idx, speed in enumerate(cls.SPEED_LIST):
             model = Actor(AssetLoader.file_path("models", "pedestrian", "scene.gltf"))
             # model: Actor = self._MODEL

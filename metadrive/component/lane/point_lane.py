@@ -22,6 +22,7 @@ class PointLane(AbstractLane, InterpolatingLine):
         speed_limit: float = 1000,
         priority: int = 0
     ):
+        center_line_points = np.array(center_line_points)[..., :2]
         AbstractLane.__init__(self)
         InterpolatingLine.__init__(self, center_line_points)
         self._bounding_box = get_points_bounding_box(center_line_points)

@@ -23,7 +23,7 @@ class ReplayTrafficParticipantPolicy(BasePolicy):
 
     def get_trajectory_info(self, track):
         ret = []
-        for i in range(self.engine.data_manager.scenario_length):
+        for i in range(self.engine.data_manager.current_scenario_length):
             # a trick for saving computation
             coordinate_transform = self.engine.data_manager.coordinate_transform
             if i < self.episode_step:
@@ -71,10 +71,8 @@ ScenarioReplayTrafficParticipantPolicy = ReplayTrafficParticipantPolicy
 class ReplayEgoCarPolicy(ReplayTrafficParticipantPolicy):
     def get_trajectory_info(self, trajectory):
         # Directly get trajectory from data manager
-        trajectory_data = self.engine.data_manager.get_scenario(self.engine.global_random_seed)["tracks"]
-        sdc_track_index = str(
-            self.engine.data_manager.get_scenario(self.engine.global_random_seed)["metadata"]["sdc_id"]
-        )
+        trajectory_data = self.engine.data_manager.current_scenario["tracks"]
+        sdc_track_index = str(self.engine.data_manager.current_scenario["metadata"]["sdc_id"])
         ret = []
         for i in range(len(trajectory_data[sdc_track_index]["state"]["position"])):
             ret.append(

@@ -79,8 +79,8 @@ NUPLAN_ENV_CONFIG = dict(
     out_of_route_done=False,
     crash_vehicle_done=True,
 
-    # others
-    interface_panel=[VehiclePanel]  # for boosting efficiency
+    # ===== others =====
+    interface_panel=[VehiclePanel],  # for boosting efficiency
 )
 
 

@@ -84,6 +84,7 @@ class InterpolatingLine:
         return ret[0][0], ret[0][-1]
 
     def _get_properties(self, points):
+        points = np.asarray(points)[..., :2]
         ret = []
         p_start_idx = 0
         while p_start_idx < len(points) - 1:
