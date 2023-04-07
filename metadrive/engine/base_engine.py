@@ -110,13 +110,15 @@ class BaseEngine(EngineCore, Randomizable):
     def has_task(self, object_id):
         return True if object_id in self._object_tasks else False
 
-    def spawn_object(self, object_class, pbr_model=True, force_spawn=False, auto_fill_random_seed=True, **kwargs):
+    def spawn_object(self, object_class, pbr_model=True, force_spawn=False, auto_fill_random_seed=True,
+                     record=True, **kwargs):
         """
         Call this func to spawn one object
         :param object_class: object class
         :param pbr_model: if the visualization model is pbr model
         :param force_spawn: spawn a new object instead of fetching from _dying_objects list
         :param auto_fill_random_seed: whether to set random seed using purely random integer
+        :param record: record the spawn information
         :param kwargs: class init parameters
         :return: object spawned
         """
@@ -136,7 +138,7 @@ class BaseEngine(EngineCore, Randomizable):
         if "id" in kwargs and kwargs["name"] is not None:
             assert kwargs["id"] == obj.id == obj.name
 
-        if self.global_config["record_episode"] and not self.replay_episode:
+        if self.global_config["record_episode"] and not self.replay_episode and record:
             self.record_manager.add_spawn_info(obj, object_class, kwargs)
         self._spawned_objects[obj.id] = obj
         obj.attach_to_world(self.pbr_worldNP if pbr_model else self.worldNP, self.physics_world)
@@ -172,7 +174,7 @@ class BaseEngine(EngineCore, Randomizable):
     def get_object(self, object_id):
         return self.get_objects([object_id])
 
-    def clear_objects(self, filter: Optional[Union[Callable, List]], force_destroy=False):
+    def clear_objects(self, filter: Optional[Union[Callable, List]], force_destroy=False, record=True):
         """
         Destroy all self-generated objects or objects satisfying the filter condition
         Since we don't expect a iterator, and the number of objects is not so large, we don't use built-in filter()
@@ -212,7 +214,7 @@ class BaseEngine(EngineCore, Randomizable):
                     self._dying_objects[obj.class_name].append(obj)
                 else:
                     obj.destroy()
-            if self.global_config["record_episode"] and not self.replay_episode:
+            if self.global_config["record_episode"] and not self.replay_episode and record:
                 self.record_manager.add_clear_info(obj)
         return exclude_objects.keys()
 
@@ -247,7 +249,6 @@ class BaseEngine(EngineCore, Randomizable):
         _debug_memory_usage = False
 
         if _debug_memory_usage:
-
             def process_memory():
                 import psutil
                 import os
@@ -609,7 +610,8 @@ class BaseEngine(EngineCore, Randomizable):
         if self.global_config["preload_pedestrian"]:
             from metadrive.component.traffic_participants.pedestrian import Pedestrian
             Pedestrian.init_pedestrian_model()
-            warm_up_pedestrian = self.spawn_object(Pedestrian, position=[0, 0], heading_theta=0)
+            warm_up_pedestrian = self.spawn_object(Pedestrian, position=[0, 0], heading_theta=0, record=False)
             for vel in Pedestrian.SPEED_LIST:
                 warm_up_pedestrian.set_velocity([1, 0], vel - 0.1)
                 self.taskMgr.step()
+            self.clear_objects([warm_up_pedestrian.id], record=False)
