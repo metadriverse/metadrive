@@ -211,7 +211,7 @@ def extract_dynamic_map_states(dynamic_map_states):
     processed_dynamics_map_states = {}
     track_length = len(dynamic_map_states)
 
-    def _traffic_light_state_template(object_id):
+    def _TRAFFIC_LIGHT_STATUS_template(object_id):
         return dict(
             type=MetaDriveType.TRAFFIC_LIGHT,
             state=dict(
@@ -238,7 +238,7 @@ def extract_dynamic_map_states(dynamic_map_states):
 
             # We will use lane index to serve as the traffic light index.
             if object_id not in processed_dynamics_map_states:
-                processed_dynamics_map_states[object_id] = _traffic_light_state_template(object_id=object_id)
+                processed_dynamics_map_states[object_id] = _TRAFFIC_LIGHT_STATUS_template(object_id=object_id)
             processed_dynamics_map_states[object_id]["state"]["lane"][step_count] = lane
             processed_dynamics_map_states[object_id]["state"]["object_state"][step_count] = object_state.state
             processed_dynamics_map_states[object_id]["state"]["stop_point"][step_count][0] = object_state.stop_point.x

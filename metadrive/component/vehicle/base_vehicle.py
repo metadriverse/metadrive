@@ -23,7 +23,6 @@ from metadrive.component.vehicle_module.rgb_camera import RGBCamera
 from metadrive.component.vehicle_navigation_module.edge_network_navigation import EdgeNetworkNavigation
 from metadrive.component.vehicle_navigation_module.node_network_navigation import NodeNetworkNavigation
 from metadrive.constants import MetaDriveType, CollisionGroup
-from metadrive.type import TrafficLightStatus
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.engine.core.image_buffer import ImageBuffer
 from metadrive.engine.engine_utils import get_engine, engine_initialized
@@ -771,13 +770,18 @@ class BaseVehicle(BaseObject, BaseVehicleState):
                 self.on_broken_line = True
             elif name == MetaDriveType.TRAFFIC_LIGHT:
                 light = get_object_from_node(node)
-                if light.status == TrafficLightStatus.GREEN:
+                if light.status == MetaDriveType.LIGHT_GREEN:
                     self.green_light = True
-                elif light.status == TrafficLightStatus.RED:
+                elif light.status == MetaDriveType.LIGHT_RED:
                     self.red_light = True
-                elif light.status == TrafficLightStatus.YELLOW:
+                elif light.status == MetaDriveType.LIGHT_YELLOW:
                     self.yellow_light = True
-                name = TrafficLightStatus.semantics(light.status)
+                elif light.status == MetaDriveType.LIGHT_UNKNOWN:
+                    # unknown didn't add
+                    continue
+                else:
+                    raise ValueError("Unknown light status: {}".format(light.status))
+                name = light.status
             # they work with the function in collision_callback.py to double-check the collision
             elif name == MetaDriveType.VEHICLE:
                 self.crash_vehicle = True

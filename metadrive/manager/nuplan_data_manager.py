@@ -150,6 +150,6 @@ class NuPlanDataManager(BaseManager):
 
     def get_metadata(self):
         state = super(NuPlanDataManager, self).get_metadata()
-        raw_data = self.get_scenario(self.engine.global_seed)
+        raw_data = self.current_scenario
         state["raw_data"] = raw_data
         return state

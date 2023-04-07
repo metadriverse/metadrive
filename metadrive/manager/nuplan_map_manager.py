@@ -106,7 +106,7 @@ class NuPlanMapManager(BaseManager):
         """
         Ego Route is placed in map manager
         """
-        scenario: NuPlanScenario = self.engine.data_manager.get_scenario(self.engine.global_random_seed)
+        scenario: NuPlanScenario = self.engine.data_manager.current_scenario
 
         sdc_traj = parse_ego_vehicle_trajectory(scenario.get_expert_ego_trajectory(), self.current_map.nuplan_center)
         self.current_sdc_route = PointLane(sdc_traj, 1.5)

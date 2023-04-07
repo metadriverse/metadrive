@@ -1,6 +1,7 @@
 from metadrive.base_class.base_object import BaseObject
+from metadrive.constants import CamMask
+from metadrive.scenario.scenario_description import ScenarioDescription
 from metadrive.constants import MetaDriveType
-from metadrive.type import TrafficLightStatus
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.utils.pg_utils.utils import generate_static_box_physics_body
 
@@ -18,10 +19,12 @@ class BaseTrafficLight(BaseObject):
     LIGHT_VIS_WIDTH = 0.8
     PLACE_LONGITUDE = 5
 
-    def __init__(self, lane, name=None, random_seed=None, config=None, escape_random_seed_assertion=False):
+    def __init__(
+        self, lane, position=None, name=None, random_seed=None, config=None, escape_random_seed_assertion=False
+    ):
         super(BaseTrafficLight, self).__init__(name, random_seed, config, escape_random_seed_assertion)
         self.lane = lane
-        self.status = TrafficLightStatus.UNKNOWN
+        self.status = MetaDriveType.LIGHT_UNKNOWN
 
         width = lane.width_at(0)
         air_wall = generate_static_box_physics_body(
@@ -34,7 +37,11 @@ class BaseTrafficLight(BaseObject):
         )
         self.add_body(air_wall, add_to_static_world=True)
 
-        self.set_position(lane.position(self.PLACE_LONGITUDE, 0), self.AIR_WALL_HEIGHT / 2)
+        if position is None:
+            # auto determining
+            position = lane.position(self.PLACE_LONGITUDE, 0)
+
+        self.set_position(position, self.AIR_WALL_HEIGHT / 2)
         self.set_heading_theta(lane.heading_theta_at(self.PLACE_LONGITUDE))
         self.current_light = None
 
@@ -46,36 +53,43 @@ class BaseTrafficLight(BaseObject):
                     )
                     model.setPos(0, 0, self.TRAFFIC_LIGHT_HEIGHT)
                     model.setH(-90)
+                    model.hide(CamMask.Shadow)
                     BaseTrafficLight.TRAFFIC_LIGHT_MODEL[color] = model
             self.origin.setScale(0.5, 1.2, 1.2)
+
+    def set_status(self, status):
+        """
+        People should overwrite this method to parse traffic light status and to determine which traffic light to set
+        """
+        pass
 
     def set_green(self):
         if self.render:
             if self.current_light is not None:
                 self.current_light.detachNode()
             self.current_light = BaseTrafficLight.TRAFFIC_LIGHT_MODEL["green"].instanceTo(self.origin)
-        self.status = TrafficLightStatus.GREEN
+        self.status = MetaDriveType.LIGHT_GREEN
 
     def set_red(self):
         if self.render:
             if self.current_light is not None:
                 self.current_light.detachNode()
             self.current_light = BaseTrafficLight.TRAFFIC_LIGHT_MODEL["red"].instanceTo(self.origin)
-        self.status = TrafficLightStatus.RED
+        self.status = MetaDriveType.LIGHT_RED
 
     def set_yellow(self):
         if self.render:
             if self.current_light is not None:
                 self.current_light.detachNode()
             self.current_light = BaseTrafficLight.TRAFFIC_LIGHT_MODEL["yellow"].instanceTo(self.origin)
-        self.status = TrafficLightStatus.YELLOW
+        self.status = MetaDriveType.LIGHT_YELLOW
 
     def set_unknown(self):
         if self.render:
             if self.current_light is not None:
                 self.current_light.detachNode()
-            self.current_light = BaseTrafficLight.TRAFFIC_LIGHT_MODEL["known"].instanceTo(self.origin)
-        self.status = TrafficLightStatus.UNKNOWN
+            self.current_light = BaseTrafficLight.TRAFFIC_LIGHT_MODEL["unknown"].instanceTo(self.origin)
+        self.status = MetaDriveType.LIGHT_UNKNOWN
 
     def destroy(self):
         super(BaseTrafficLight, self).destroy()
@@ -83,7 +97,15 @@ class BaseTrafficLight(BaseObject):
 
     @property
     def top_down_color(self):
-        return TrafficLightStatus.color(self.status)
+        status = self.status
+        if status == MetaDriveType.LIGHT_GREEN:
+            return [0, 255, 0]
+        if status == MetaDriveType.LIGHT_RED:
+            return [1, 255, 0]
+        if status == MetaDriveType.LIGHT_YELLOW:
+            return [255, 255, 0]
+        if status == MetaDriveType.LIGHT_UNKNOWN:
+            return [180, 180, 180]
 
     @property
     def top_down_width(self):
@@ -92,3 +114,15 @@ class BaseTrafficLight(BaseObject):
     @property
     def top_down_length(self):
         return 1.5
+
+    def set_action(self, *args, **kwargs):
+        return self.set_status(*args, **kwargs)
+
+    def get_state(self):
+        pos = self.position
+        state = {
+            ScenarioDescription.TRAFFIC_LIGHT_POSITION: pos,
+            ScenarioDescription.TRAFFIC_LIGHT_STATUS: self.status,
+            ScenarioDescription.TYPE: type(self)
+        }
+        return state

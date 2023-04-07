@@ -93,7 +93,7 @@ class ScenarioDataManager(BaseManager):
 
     def get_metadata(self):
         state = super(ScenarioDataManager, self).get_metadata()
-        raw_data = self.get_scenario(self.engine.global_seed)
+        raw_data = self.current_scenario
         state["raw_data"] = raw_data
         return state
 
@@ -115,8 +115,12 @@ class ScenarioDataManager(BaseManager):
         return self._coordinate_transform
 
     @property
-    def scenario_length(self):
-        return self.get_scenario(self.engine.global_random_seed)[SD.LENGTH]
+    def current_scenario_length(self):
+        return self.current_scenario[SD.LENGTH]
+
+    @property
+    def current_scenario(self):
+        return self.get_scenario(self.engine.global_random_seed)
 
     def after_reset(self):
         if self.engine.mode != RENDER_MODE_NONE:

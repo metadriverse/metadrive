@@ -36,7 +36,7 @@ class ScenarioTrafficManager(BaseManager):
                 logger.info("Do not support {}".format(track["type"]))
 
     def after_step(self, *args, **kwargs):
-        if self.episode_step >= self.scenario_length:
+        if self.episode_step >= self.current_scenario_length:
             return dict(default_agent=dict(replay_done=True))
 
         vehicles_to_clean = []
@@ -71,15 +71,15 @@ class ScenarioTrafficManager(BaseManager):
 
     @property
     def current_traffic_data(self):
-        return self.engine.data_manager.get_scenario(self.engine.global_random_seed)["tracks"]
+        return self.engine.data_manager.current_scenario["tracks"]
 
     @property
     def sdc_track_index(self):
-        return str(self.engine.data_manager.get_scenario(self.engine.global_random_seed)[SD.METADATA][SD.SDC_ID])
+        return str(self.engine.data_manager.current_scenario[SD.METADATA][SD.SDC_ID])
 
     @property
-    def scenario_length(self):
-        return self.engine.data_manager.get_scenario(self.engine.global_random_seed)[SD.LENGTH]
+    def current_scenario_length(self):
+        return self.engine.data_manager.current_scenario_length
 
     @property
     def coordinate_transform(self):
