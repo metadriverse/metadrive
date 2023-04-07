@@ -119,16 +119,15 @@ class NuPlanDataManager(BaseManager):
             *DATASET_PARAMS,
         ]
         if is_win():
-            overrides.extend([
-                f'job_name=planner_tutorial',
-                'experiment=${experiment_name}/${job_name}/${experiment_time}',
-            ])
+            overrides.extend(
+                [
+                    f'job_name=planner_tutorial',
+                    'experiment=${experiment_name}/${job_name}/${experiment_time}',
+                ]
+            )
         else:
             overrides.append(f'experiment_name=planner_tutorial')
-        cfg = hydra.compose(
-            config_name=simulation_hydra_paths.config_name,
-            overrides=overrides
-        )
+        cfg = hydra.compose(config_name=simulation_hydra_paths.config_name, overrides=overrides)
         return cfg
 
     def get_scenario(self, index, force_get_current_scenario=True):

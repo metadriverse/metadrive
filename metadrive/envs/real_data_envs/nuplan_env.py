@@ -300,7 +300,7 @@ if __name__ == "__main__":
             # "multi_thread_render_mode": "Cull/Draw",
             "start_scenario_index": 0,
             # "pstats": True,
-            "num_scenarios": 400,
+            "num_scenarios": 2,
             "show_coordinates": False,
             "horizon": 1000,
             # "show_fps": False,
