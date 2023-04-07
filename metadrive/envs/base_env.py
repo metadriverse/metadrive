@@ -174,6 +174,7 @@ BASE_DEFAULT_CONFIG = dict(
     show_coordinates=False,  # show coordinates for maps and objects for debug
     multi_thread_render=True,
     multi_thread_render_mode="Cull",  # or "Cull/Draw"
+    preload_pedestrian=True,  # preload pedestrian Object for avoiding lagging when creating it for the first time
 
     # record/replay metadata
     record_episode=False,  # when replay_episode is not None ,this option will be useless
@@ -581,17 +582,18 @@ class BaseEnv(gym.Env):
         return self.engine.episode_step if self.engine is not None else 0
 
     def export_scenarios(
-        self,
-        policies: Union[dict, Callable],
-        scenario_index: Union[list, int],
-        time_interval=0.1,
-        verbose=False,
-        render_topdown=False,
-        return_done_info=True
+            self,
+            policies: Union[dict, Callable],
+            scenario_index: Union[list, int],
+            time_interval=0.1,
+            verbose=False,
+            render_topdown=False,
+            return_done_info=True
     ):
         """
         We export scenarios into a unified format with 10hz sample rate
         """
+
         def _act(observation):
             if isinstance(policies, dict):
                 ret = {}

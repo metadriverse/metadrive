@@ -65,6 +65,9 @@ class BaseEngine(EngineCore, Randomizable):
         # lanes debug
         self.lane_coordinates_debug_node = None
 
+        # warm up
+        self.warmup()
+
         # for multi-thread rendering
         self.graphicsEngine.renderFrame()
         self.graphicsEngine.renderFrame()
@@ -244,7 +247,6 @@ class BaseEngine(EngineCore, Randomizable):
         _debug_memory_usage = False
 
         if _debug_memory_usage:
-
             def process_memory():
                 import psutil
                 import os
@@ -597,3 +599,16 @@ class BaseEngine(EngineCore, Randomizable):
         if self.lane_coordinates_debug_node is not None:
             self.lane_coordinates_debug_node.detachNode()
             self.lane_coordinates_debug_node.removeNode()
+
+    def warmup(self):
+        """
+        This function automatically initialize models/objects. It can prevent the lagging when creating some objects
+        for the first time.
+        """
+        if self.global_config["preload_pedestrian"]:
+            from metadrive.component.traffic_participants.pedestrian import Pedestrian
+            Pedestrian.init_pedestrian_model()
+            warm_up_pedestrian = self.spawn_object(Pedestrian, position=[0, 0], heading_theta=0)
+            for vel in Pedestrian.SPEED_LIST:
+                warm_up_pedestrian.set_velocity([1, 0], vel - 0.1)
+                self.taskMgr.step()

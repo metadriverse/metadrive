@@ -380,7 +380,7 @@ if __name__ == "__main__":
     success = []
     for i in range(3):
         env.reset(force_seed=i)
-        while True:
+        for t in range(10000):
             o, r, d, info = env.step([0, 0])
             assert env.observation_space.contains(o)
             c_lane = env.vehicle.lane

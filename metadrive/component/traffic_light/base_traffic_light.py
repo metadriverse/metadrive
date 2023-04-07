@@ -1,4 +1,5 @@
 from metadrive.base_class.base_object import BaseObject
+from metadrive.constants import CamMask
 from metadrive.scenario.scenario_description import ScenarioDescription
 from metadrive.constants import MetaDriveType
 from metadrive.engine.asset_loader import AssetLoader
@@ -52,6 +53,7 @@ class BaseTrafficLight(BaseObject):
                     )
                     model.setPos(0, 0, self.TRAFFIC_LIGHT_HEIGHT)
                     model.setH(-90)
+                    model.hide(CamMask.Shadow)
                     BaseTrafficLight.TRAFFIC_LIGHT_MODEL[color] = model
             self.origin.setScale(0.5, 1.2, 1.2)
 
