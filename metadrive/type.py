@@ -131,15 +131,19 @@ class MetaDriveType:
 
     @classmethod
     def is_traffic_light_in_yellow(cls, light):
-        return light in [cls.LANE_STATE_CAUTION, cls.LANE_STATE_ARROW_CAUTION, cls.LANE_STATE_FLASHING_CAUTION]
+        return cls.simplify_light_status(light) == cls.LIGHT_YELLOW
 
     @classmethod
     def is_traffic_light_in_green(cls, light):
-        return light in [cls.LANE_STATE_GO, cls.LANE_STATE_ARROW_GO]
+        return cls.simplify_light_status(light) == cls.LIGHT_GREEN
 
     @classmethod
     def is_traffic_light_in_red(cls, light):
-        return light in [cls.LANE_STATE_STOP, cls.LANE_STATE_ARROW_STOP, cls.LANE_STATE_FLASHING_STOP]
+        return cls.simplify_light_status(light) == cls.LIGHT_RED
+
+    @classmethod
+    def is_traffic_light_unknown(cls, light):
+        return cls.simplify_light_status(light) == cls.LIGHT_UNKNOWN
 
     @classmethod
     def parse_light_status(cls, status: int, simplifying=True, data_source=None):
@@ -158,9 +162,9 @@ class MetaDriveType:
         """
         Convert status to red/yellow/green/unknown
         """
-        if status == cls.LANE_STATE_UNKNOWN or status == cls.LIGHT_UNKNOWN:
+        if status in [cls.LANE_STATE_UNKNOWN, cls.LANE_STATE_FLASHING_STOP] or status == cls.LIGHT_UNKNOWN:
             return cls.LIGHT_UNKNOWN
-        elif status in [cls.LANE_STATE_ARROW_STOP, cls.LANE_STATE_STOP, cls.LANE_STATE_FLASHING_STOP, cls.LIGHT_RED]:
+        elif status in [cls.LANE_STATE_ARROW_STOP, cls.LANE_STATE_STOP, cls.LIGHT_RED]:
             return cls.LIGHT_RED
         elif status in [cls.LANE_STATE_ARROW_CAUTION, cls.LANE_STATE_CAUTION, cls.LANE_STATE_FLASHING_CAUTION,
                         cls.LIGHT_YELLOW]:
