@@ -6,15 +6,20 @@ from nuplan.common.actor_state.tracked_objects_types import TrackedObjectType
 from metadrive.component.traffic_participants.cyclist import Cyclist
 from metadrive.component.traffic_participants.pedestrian import Pedestrian
 from metadrive.component.vehicle.vehicle_type import get_vehicle_type
+from metadrive.constants import DEFAULT_AGENT
 from metadrive.manager.base_manager import BaseManager
 from metadrive.policy.replay_policy import NuPlanReplayTrafficParticipantPolicy
+from metadrive.scenario.scenario_description import ScenarioDescription as SD
 from metadrive.utils.nuplan_utils.parse_object_state import parse_object_state
 
 
 class NuPlanTrafficManager(BaseManager):
+    EGO_TOKEN = "ego"
+
     def __init__(self):
         super(NuPlanTrafficManager, self).__init__()
         self.nuplan_id_to_obj_id = {}
+        self.obj_id_to_nuplan_id = {}
         self.need_traffic = not self.engine.global_config["no_traffic"]
         self.need_pedestrian = not self.engine.global_config["no_pedestrian"]
         self._episode_traffic_data = None
@@ -23,7 +28,9 @@ class NuPlanTrafficManager(BaseManager):
     def after_reset(self):
         self._episode_traffic_data = self._get_episode_traffic_data()
         assert self.engine.episode_step == 0
-        self.nuplan_id_to_obj_id = {}
+        # according to scenario.initial_ego_state, the ego token is ego
+        self.nuplan_id_to_obj_id = {self.EGO_TOKEN: self.engine.agents[DEFAULT_AGENT].id}
+        self.obj_id_to_nuplan_id = {self.engine.agents[DEFAULT_AGENT].id: self.EGO_TOKEN}
         for nuplan_id, obj_state in self._episode_traffic_data[0].items():
             if obj_state.tracked_object_type == TrackedObjectType.VEHICLE and self.need_traffic:
                 state = parse_object_state(obj_state, self.engine.current_map.nuplan_center)
@@ -64,8 +71,12 @@ class NuPlanTrafficManager(BaseManager):
                     self.spawn_pedestrian(state, nuplan_id)
 
         for nuplan_id in list(vehicles_to_eliminate):
-            self.clear_objects([self.nuplan_id_to_obj_id[nuplan_id]])
-            self.nuplan_id_to_obj_id.pop(nuplan_id)
+            if nuplan_id != self.EGO_TOKEN:
+                self.clear_objects([self.nuplan_id_to_obj_id[nuplan_id]])
+                obj_id = self.nuplan_id_to_obj_id.pop(nuplan_id)
+                assert nuplan_id == self.obj_id_to_nuplan_id.pop(obj_id)
+
+        assert len(self.nuplan_id_to_obj_id) == len(self.obj_id_to_nuplan_id)
         return dict(default_agent=dict(replay_done=False))
 
     @property
@@ -111,6 +122,7 @@ class NuPlanTrafficManager(BaseManager):
             vehicle_config=v_config,
         )
         self.nuplan_id_to_obj_id[nuplan_id] = v.name
+        self.obj_id_to_nuplan_id[v.name] = nuplan_id
         v.set_velocity(state["velocity"])
         v.set_position(state["position"], 0.5)
         self.add_policy(v.name, NuPlanReplayTrafficParticipantPolicy, v)
@@ -122,6 +134,7 @@ class NuPlanTrafficManager(BaseManager):
             heading_theta=state["heading"],
         )
         self.nuplan_id_to_obj_id[nuplan_id] = obj.name
+        self.obj_id_to_nuplan_id[obj.name] = nuplan_id
         obj.set_velocity(state["velocity"])
         self.add_policy(obj.name, NuPlanReplayTrafficParticipantPolicy, obj)
 
@@ -132,6 +145,7 @@ class NuPlanTrafficManager(BaseManager):
             heading_theta=state["heading"],
         )
         self.nuplan_id_to_obj_id[nuplan_id] = obj.name
+        self.obj_id_to_nuplan_id[obj.name] = nuplan_id
         obj.set_velocity(state["velocity"])
         self.add_policy(obj.name, NuPlanReplayTrafficParticipantPolicy, obj)
 
@@ -149,3 +163,10 @@ class NuPlanTrafficManager(BaseManager):
             return True
         else:
             return False
+
+    def get_state(self):
+        # Record mapping from original_id to new_id
+        ret = {}
+        ret[SD.ORIGINAL_ID_TO_OBJ_ID] = copy.deepcopy(self.nuplan_id_to_obj_id)
+        ret[SD.OBJ_ID_TO_ORIGINAL_ID] = copy.deepcopy(self.obj_id_to_nuplan_id)
+        return ret

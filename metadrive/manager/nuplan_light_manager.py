@@ -1,5 +1,8 @@
+import copy
+
 from metadrive.component.traffic_light.nuplan_traffic_light import NuplanTrafficLight
 from metadrive.manager.base_manager import BaseManager
+from metadrive.scenario.scenario_description import ScenarioDescription as SD
 
 
 class NuPlanLightManager(BaseManager):
@@ -8,11 +11,17 @@ class NuPlanLightManager(BaseManager):
     def __init__(self):
         super(NuPlanLightManager, self).__init__()
         self._lane_to_lights = {}
+        self.nuplan_id_to_obj_id = {}
+        self.obj_id_to_nuplan_id = {}
+
         self._episode_light_data = None
 
     def before_reset(self):
         super(NuPlanLightManager, self).before_reset()
         self._lane_to_lights = {}
+        self.nuplan_id_to_obj_id = {}
+        self.obj_id_to_nuplan_id = {}
+
         self._episode_light_data = self._get_episode_light_data()
 
     def after_reset(self):
@@ -20,6 +29,8 @@ class NuPlanLightManager(BaseManager):
             lane_info = self.engine.current_map.road_network.graph[str(light.lane_connector_id)]
             traffic_light = self.spawn_object(NuplanTrafficLight, lane=lane_info.lane)
             self._lane_to_lights[lane_info.lane.index] = traffic_light
+            self.nuplan_id_to_obj_id[str(light.lane_connector_id)] = traffic_light.name
+            self.obj_id_to_nuplan_id[traffic_light.name] = str(light.lane_connector_id)
             traffic_light.set_status(light.status)
 
     def after_step(self, *args, **kwargs):
@@ -31,8 +42,11 @@ class NuPlanLightManager(BaseManager):
         if self.CLEAR_LIGHTS:
             light_to_eliminate = self._lane_to_lights.keys() - set([str(i.lane_connector_id) for i in step_data])
             for lane_id in light_to_eliminate:
-                self.clear_objects([self._lane_to_lights[lane_id].id])
-                self._lane_to_lights.pop(lane_id)
+                light = self._lane_to_lights.pop(lane_id)
+                nuplan_id = self.obj_id_to_nuplan_id.pop(light.id)
+                obj_id = self.nuplan_id_to_obj_id.pop(nuplan_id)
+                assert obj_id == light.name
+                self.clear_objects([obj_id])
 
         for light in self._episode_light_data[self.episode_step]:
             if str(light.lane_connector_id) in self._lane_to_lights:
@@ -45,7 +59,11 @@ class NuPlanLightManager(BaseManager):
                 traffic_light = self.spawn_object(NuplanTrafficLight, lane=lane_info.lane)
                 assert str(light.lane_connector_id) == lane_info.lane.index
                 self._lane_to_lights[lane_info.lane.index] = traffic_light
+                self.nuplan_id_to_obj_id[str(light.lane_connector_id)] = traffic_light.name
+                self.obj_id_to_nuplan_id[traffic_light.name] = str(light.lane_connector_id)
             traffic_light.set_status(light.status)
+
+        assert len(self._lane_to_lights) == len(self.nuplan_id_to_obj_id) == len(self.obj_id_to_nuplan_id)
 
     def has_traffic_light(self, lane_index):
         return True if lane_index in self._lane_to_lights else False
@@ -65,3 +83,9 @@ class NuPlanLightManager(BaseManager):
         length = self.engine.data_manager.current_scenario.get_number_of_iterations()
         ret = {i: [t for t in self.traffic_light_status_at(i)] for i in range(length)}
         return ret
+
+    def get_state(self):
+        return {
+            SD.OBJ_ID_TO_ORIGINAL_ID: copy.deepcopy(self.obj_id_to_nuplan_id),
+            SD.ORIGINAL_ID_TO_OBJ_ID: copy.deepcopy(self.nuplan_id_to_obj_id)
+        }

@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
+
 import abc
-import math
-
 import numpy as np
-
 from metadrive.utils.opendrive_map_utils.elements.eulerspiral import EulerSpiral
 
 __author__ = "Benjamin Orthen, Stefan Urban"
@@ -240,8 +238,8 @@ class ParamPoly3(Geometry):
         x = np.polynomial.polynomial.polyval(pos, coeffsU)
         y = np.polynomial.polynomial.polyval(pos, coeffsV)
 
-        xrot = x * math.cos(self.heading) - y * math.sin(self.heading)
-        yrot = x * math.sin(self.heading) + y * math.cos(self.heading)
+        xrot = x * np.cos(self.heading) - y * np.sin(self.heading)
+        yrot = x * np.sin(self.heading) + y * np.cos(self.heading)
 
         # Tangent is defined by derivation
         dCoeffsU = coeffsU[1:] * np.array(np.arange(1, len(coeffsU)))

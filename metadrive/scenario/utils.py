@@ -1,10 +1,10 @@
 import copy
-
 import pickle
 
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.pyplot import figure
+
 from metadrive.component.traffic_light.base_traffic_light import BaseTrafficLight
 from metadrive.component.traffic_participants.cyclist import Cyclist
 from metadrive.component.traffic_participants.pedestrian import Pedestrian
@@ -49,6 +49,26 @@ def _convert_type_to_string(nested):
     if isinstance(nested, dict):
         return {k: _convert_type_to_string(v) for k, v in nested.items()}
     return nested
+
+
+def find_light_manager_name(manager_info):
+    """
+    Find the light_manager in real data manager
+    """
+    for manager_name in manager_info:
+        if "LightManager" in manager_name:
+            return manager_name
+    return None
+
+
+def find_traffic_manager_name(manager_info):
+    """
+    Find the traffic_manager in real data manager
+    """
+    for manager_name in manager_info:
+        if "TrafficManager" in manager_name and manager_name != "PGTrafficManager":
+            return manager_name
+    return None
 
 
 def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1):
@@ -96,6 +116,9 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
     for frame in frames:
         all_objs.update(frame.step_info.keys())
 
+    traffic_manager_name = find_traffic_manager_name(record_episode["manager_metadata"])
+    light_manager_name = find_light_manager_name(record_episode["manager_metadata"])
+
     tracks = {
         k: dict(
             type=MetaDriveType.UNSET,
@@ -116,10 +139,9 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
     }
 
     all_lights = set()
-    # TODO LightManager may have different name
-    for frame in frames:
-        if "ScenarioLightManager" in frame.manager_info:
-            all_lights.update(frame.manager_info["ScenarioLightManager"][SD.ORIGINAL_ID_TO_OBJ_ID].keys())
+    if light_manager_name is not None:
+        for frame in frames:
+            all_lights.update(frame.manager_info[light_manager_name][SD.ORIGINAL_ID_TO_OBJ_ID].keys())
 
     lights = {
         k: dict(
@@ -146,10 +168,10 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
                 # pop id from tracks
                 if id in tracks:
                     tracks.pop(id)
-                assert "ScenarioLightManager" in frames[frame_idx].manager_info, "Can not find light manager info"
+                assert light_manager_name in frames[frame_idx].manager_info, "Can not find light manager info"
 
                 # convert to original id
-                id = frames[frame_idx].manager_info["ScenarioLightManager"][SD.OBJ_ID_TO_ORIGINAL_ID][id]
+                id = frames[frame_idx].manager_info[light_manager_name][SD.OBJ_ID_TO_ORIGINAL_ID][id]
 
                 lights[id]["type"] = type
                 lights[id][SD.METADATA]["type"] = lights[id]["type"]
@@ -199,9 +221,8 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
                 if id in frames[frame_idx]._object_to_agent:
                     tracks[id]["metadata"]["agent_name"] = frames[frame_idx]._object_to_agent[id]
 
-                # TODO Manager may have different name
-                if "ScenarioTrafficManager" in frames[frame_idx].manager_info:
-                    origin_id = frames[frame_idx].manager_info["ScenarioTrafficManager"][SD.OBJ_ID_TO_ORIGINAL_ID][id]
+                if traffic_manager_name is not None:
+                    origin_id = frames[frame_idx].manager_info[traffic_manager_name][SD.OBJ_ID_TO_ORIGINAL_ID][id]
                     if tracks[id]["metadata"]["original_id"] == id:
                         tracks[id]["metadata"]["original_id"] = origin_id
                     else:
