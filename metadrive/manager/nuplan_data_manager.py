@@ -121,12 +121,13 @@ class NuPlanDataManager(BaseManager):
 
                 # TODO: Check which one is correct.
                 # Option 1: LQY write:
-                # f'experiment_name=planner_tutorial',
+                f'experiment_name=planner_tutorial',
 
                 # Option 2: planning tutorial:
+                # # @PZH it doesn't work with the following lines
                 # Copied from tutorial
-                f'job_name=planner_tutorial',
-                'experiment=${experiment_name}/${job_name}/${experiment_time}',
+                # f'job_name=planner_tutorial',
+                # 'experiment=${experiment_name}/${job_name}/${experiment_time}',
             ]
         )
         return cfg
