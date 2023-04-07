@@ -300,7 +300,7 @@ if __name__ == "__main__":
             # "multi_thread_render_mode": "Cull/Draw",
             "start_scenario_index": 0,
             # "pstats": True,
-            "num_scenarios": 400,
+            "num_scenarios": 2,
             "show_coordinates": False,
             "horizon": 1000,
             # "show_fps": False,
@@ -317,20 +317,19 @@ if __name__ == "__main__":
             "show_logo": False,
             "force_render_fps": 40,
             "show_fps": True,
-            # "DATASET_PARAMS": [
-            #     'scenario_builder=nuplan_mini',
-            #     # use nuplan mini database (2.5h of 8 autolabeled logs in Las Vegas)
-            #     'scenario_filter=one_continuous_log',  # simulate only one log
-            #     "scenario_filter.log_names=['2021.09.16.15.12.03_veh-42_01037_01434']",
-            #     'scenario_filter.limit_total_scenarios=1000',  # use 2 total scenarios
-            # ],
+            "DATASET_PARAMS": [
+                'scenario_builder=nuplan_mini',  # use nuplan mini database (2.5h of 8 autolabeled logs in Las Vegas)
+                'scenario_filter=one_continuous_log',  # simulate only one log
+                "scenario_filter.log_names=['2021.05.12.22.00.38_veh-35_01008_01518']",
+                'scenario_filter.limit_total_scenarios=2',  # use 2 total scenarios
+            ],
             "show_mouse": True,
         }
     )
     success = []
-    env.reset(8)
+    env.reset()
     for seed in [8, 14] * 10:
-        env.reset(8)
+        env.reset()
         # env.reset(seed)
         for i in range(env.engine.data_manager.current_scenario_length * 10):
             o, r, d, info = env.step([0, 0])
