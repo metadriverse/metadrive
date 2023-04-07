@@ -188,8 +188,8 @@ class NuPlanEnv(BaseEnv):
         # for compatibility
         # crash almost equals to crashing with vehicles
         done_info[TerminationState.CRASH] = (
-            done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
-            or done_info[TerminationState.CRASH_BUILDING]
+                done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
+                or done_info[TerminationState.CRASH_BUILDING]
         )
         return done, done_info
 
@@ -317,20 +317,20 @@ if __name__ == "__main__":
             "show_logo": False,
             "force_render_fps": 40,
             "show_fps": True,
-            "DATASET_PARAMS": [
-                'scenario_builder=nuplan_mini',
-                # use nuplan mini database (2.5h of 8 autolabeled logs in Las Vegas)
-                'scenario_filter=one_continuous_log',  # simulate only one log
-                "scenario_filter.log_names=['2021.09.16.15.12.03_veh-42_01037_01434']",
-                'scenario_filter.limit_total_scenarios=1000',  # use 2 total scenarios
-            ],
+            # "DATASET_PARAMS": [
+            #     'scenario_builder=nuplan_mini',
+            #     # use nuplan mini database (2.5h of 8 autolabeled logs in Las Vegas)
+            #     'scenario_filter=one_continuous_log',  # simulate only one log
+            #     "scenario_filter.log_names=['2021.09.16.15.12.03_veh-42_01037_01434']",
+            #     'scenario_filter.limit_total_scenarios=1000',  # use 2 total scenarios
+            # ],
             "show_mouse": True,
         }
     )
     success = []
     env.reset(8)
     for seed in [8, 14] * 10:
-        env.reset(seed)
+        env.reset(8)
         # env.reset(seed)
         for i in range(env.engine.data_manager.current_scenario_length * 10):
             o, r, d, info = env.step([0, 0])
