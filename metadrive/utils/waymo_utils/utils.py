@@ -218,7 +218,11 @@ def extract_map_features(map_features):
 
         try:
             if lane_state.HasField("driveway"):
-                print(111111)
+                assert 1 == 0, "Oh! We find drive way!"
+
+            if lane_state.HasField("entrance"):
+                assert 1 == 0, "Oh! We find entrance!"
+
         except ValueError:
             pass
 

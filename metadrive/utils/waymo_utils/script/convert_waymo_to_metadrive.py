@@ -102,7 +102,11 @@ def parse_data(input, output_path, _selective=False):
                 continue
             md_scenario[SD.DYNAMIC_MAP_STATES] = dynamic_states
 
-            md_scenario[SD.MAP_FEATURES] = extract_map_features(scenario.map_features)
+            try:
+                md_scenario[SD.MAP_FEATURES] = extract_map_features(scenario.map_features)
+            except AssertionError as e:
+                print("FILE: ", file, j)
+                raise e
 
             compute_width(md_scenario[SD.MAP_FEATURES])
 
