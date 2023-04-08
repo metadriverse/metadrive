@@ -133,6 +133,14 @@ def extract_bump(f):
     return speed_bump_data
 
 
+def extract_driveway(f):
+    driveway_data = dict()
+    f = f.speed_bump
+    driveway_data["type"] = "DRIVEWAY"
+    driveway_data["polygon"] = extract_poly(f.polygon)
+    return driveway_data
+
+
 def extract_tracks(tracks, sdc_idx, track_length):
     ret = dict()
 
@@ -217,15 +225,9 @@ def extract_map_features(map_features):
         if lane_state.HasField("speed_bump"):
             ret[lane_id] = extract_bump(lane_state)
 
-        try:
-            if lane_state.HasField("driveway"):
-                assert 1 == 0, "Oh! We find drive way!"
-
-            if lane_state.HasField("entrance"):
-                assert 1 == 0, "Oh! We find entrance!"
-
-        except ValueError:
-            pass
+        # Supported only in Waymo dataset 1.2.0
+        if lane_state.HasField("driveway"):
+            ret[lane_id] = extract_bump(extract_driveway)
 
     return ret
 
