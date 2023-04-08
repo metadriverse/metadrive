@@ -23,7 +23,8 @@ except ImportError:
 from metadrive.utils.waymo_utils.protos import scenario_pb2
 from metadrive.scenario import ScenarioDescription as SD
 from metadrive.type import MetaDriveType
-from metadrive.utils.waymo_utils.utils import extract_tracks, extract_dynamic_map_states, extract_map_features, compute_width
+from metadrive.utils.waymo_utils.utils import extract_tracks, extract_dynamic_map_states, extract_map_features, \
+    compute_width
 import sys
 
 
@@ -54,6 +55,7 @@ def validate_sdc_track(sdc_state):
 
     return True
 
+
 def _get_agent_summary(state_dict, id):
     track = state_dict["position"]
     valid_track = track[state_dict["valid"], :2]
@@ -74,6 +76,15 @@ def _get_agent_summary(state_dict, id):
         "valid_length": int(valid_length),
         "continuous_valid_length": int(continuous_valid_length)
     }
+
+
+def _dict_recursive_remove_array(d):
+    if isinstance(d, np.ndarray):
+        return d.tolist()
+    if isinstance(d, dict):
+        for k in d.keys():
+            d[k] = _dict_recursive_remove_array(d[k])
+    return d
 
 
 def parse_data(input, output_path, _selective=False):
@@ -112,7 +123,6 @@ def parse_data(input, output_path, _selective=False):
             track_length = list(tracks.values())[0]["state"]["position"].shape[0]
 
             md_scenario[SD.LENGTH] = track_length
-
 
             num_agent_types = len(set(v["type"] for v in tracks.values()))
             if _selective and num_agent_types < 3:
@@ -181,13 +191,15 @@ def parse_data(input, output_path, _selective=False):
 
             SD.sanity_check(md_scenario, check_self_type=True)
 
-            # TODO: FIXME: Some thing more to be added.
-
             p = os.path.join(output_path, export_file_name)
             with open(p, "wb") as f:
                 pickle.dump(md_scenario, f)
             print("Scenario {} is saved at: {}".format(cnt, p))
             cnt += 1
+
+    with open(os.path.join(output_path, "dataset_summary.pkl"), "wb") as file:
+        pickle.dump(_dict_recursive_remove_array(metadata_recorder), file)
+
     return
 
 
