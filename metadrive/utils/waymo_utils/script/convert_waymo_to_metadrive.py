@@ -20,7 +20,17 @@ try:
     import tensorflow as tf
 except ImportError:
     pass
-from metadrive.utils.waymo_utils.protos import scenario_pb2
+
+try:
+    from waymo_open_dataset.protos import scenario_pb2
+except ImportError:
+    try:
+        from metadrive.utils.waymo_utils.protos import scenario_pb2  # Local files that only in PZH's computer.
+    except ImportError:
+        pass
+    else:
+        print("Please install waymo_open_dataset package through metadrive dependencies: pip install -e .[waymo]")
+
 from metadrive.scenario import ScenarioDescription as SD
 from metadrive.type import MetaDriveType
 from metadrive.utils.waymo_utils.utils import extract_tracks, extract_dynamic_map_states, extract_map_features, \
