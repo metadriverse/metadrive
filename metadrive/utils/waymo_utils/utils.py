@@ -158,9 +158,7 @@ def extract_tracks(tracks, sdc_idx, track_length):
                 velocity=np.zeros([track_length, 2], dtype=np.float32),
                 valid=np.zeros([track_length], dtype=bool),
             ),
-            metadata=dict(
-                track_length=track_length, type=None, object_id=object_id, dataset="waymo"
-            )
+            metadata=dict(track_length=track_length, type=None, object_id=object_id, dataset="waymo")
         )
 
     for obj in tracks:
@@ -238,11 +236,11 @@ def extract_dynamic_map_states(dynamic_map_states, track_length):
     def _traffic_light_state_template(object_id):
         return dict(
             type=MetaDriveType.TRAFFIC_LIGHT,
-            state=dict(
-                object_state=[None] * track_length
-            ),
+            state=dict(object_state=[None] * track_length),
             lane=None,
-            stop_point=np.zeros([3, ], dtype=np.float32),
+            stop_point=np.zeros([
+                3,
+            ], dtype=np.float32),
             metadata=dict(
                 track_length=track_length, type=MetaDriveType.TRAFFIC_LIGHT, object_id=object_id, dataset="waymo"
             )

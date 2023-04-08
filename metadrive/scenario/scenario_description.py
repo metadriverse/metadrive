@@ -179,7 +179,7 @@ class ScenarioDescription(dict):
             "You lack these keys in metadata: {}".format(
                 cls.METADATA_KEYS.difference(set(scenario_dict[cls.METADATA].keys()))
             )
-        assert scenario_dict[cls.METADATA][cls.TIMESTEP].shape == (scenario_length,)
+        assert scenario_dict[cls.METADATA][cls.TIMESTEP].shape == (scenario_length, )
 
     @classmethod
     def _check_object_state_dict(cls, obj_state, scenario_length, object_id):
@@ -201,7 +201,8 @@ class ScenarioDescription(dict):
 
             assert state_array.ndim in [1, 2], "Haven't implemented test array with dim {} yet".format(state_array.ndim)
             if state_array.ndim == 2:
-                assert state_array.shape[1] != 0, "Please convert all state with dim 1 to a 1D array instead of 2D array."
+                assert state_array.shape[
+                    1] != 0, "Please convert all state with dim 1 to a 1D array instead of 2D array."
 
         # Check metadata
         assert isinstance(obj_state[cls.METADATA], dict)

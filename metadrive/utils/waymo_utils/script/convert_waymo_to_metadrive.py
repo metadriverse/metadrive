@@ -184,7 +184,8 @@ def parse_data(input, output_path, _selective=False):
                     "track_id": id,
                     "difficulty": track_difficulty[count],
                     "object_type": track_obj_type[count]
-                } for count, id in enumerate(track_id)
+                }
+                for count, id in enumerate(track_id)
             }
 
             export_file_name = "sd_{}_{}.pkl".format(file, scenario.scenario_id)
