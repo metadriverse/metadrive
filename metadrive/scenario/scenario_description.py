@@ -144,7 +144,7 @@ class ScenarioDescription(dict):
     SDC_ID = "sdc_id"  # Not necessary, but can be stored in metadata.
     METADATA_KEYS = {METADRIVE_PROCESSED, COORDINATE, TIMESTEP}
 
-    ALLOW_TYPES = (int, float, str, np.ndarray, dict, list, tuple, NoneType)
+    ALLOW_TYPES = (int, float, str, np.ndarray, dict, list, tuple, NoneType, set)
 
     @classmethod
     def sanity_check(cls, scenario_dict, check_self_type=False):

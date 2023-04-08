@@ -66,7 +66,7 @@ def validate_sdc_track(sdc_state):
     return True
 
 
-def _get_agent_summary(state_dict, id):
+def _get_agent_summary(state_dict, id, type):
     track = state_dict["position"]
     valid_track = track[state_dict["valid"], :2]
     distance = float(sum(np.linalg.norm(valid_track[i] - valid_track[i + 1]) for i in range(valid_track.shape[0] - 1)))
@@ -80,6 +80,7 @@ def _get_agent_summary(state_dict, id):
             break
 
     return {
+        "type": type,
         "object_id": str(id),
         "track_length": int(len(track)),
         "distance": float(distance),
@@ -97,7 +98,7 @@ def _dict_recursive_remove_array(d):
     return d
 
 
-def parse_data(input, output_path, _selective=False):
+def parse_data(input, output_path):
     cnt = 0
     scenario = scenario_pb2.Scenario()
     file_list = os.listdir(input)
@@ -126,32 +127,18 @@ def parse_data(input, output_path, _selective=False):
 
             tracks, sdc_id = extract_tracks(scenario.tracks, scenario.sdc_track_index, track_length)
 
-            valid = validate_sdc_track(tracks[sdc_id][SD.STATE])
-            if not valid:
-                continue
-
             track_length = list(tracks.values())[0]["state"]["position"].shape[0]
 
             md_scenario[SD.LENGTH] = track_length
 
-            num_agent_types = len(set(v["type"] for v in tracks.values()))
-            if _selective and num_agent_types < 3:
-                print("Skip scenario {} because of lack of participant types {}.".format(j, num_agent_types))
-                continue
-
             md_scenario[SD.TRACKS] = tracks
 
             dynamic_states = extract_dynamic_map_states(scenario.dynamic_map_states, track_length)
-            if _selective and not dynamic_states:
-                print("Skip scenario {} because of lack of traffic light.".format(j))
-                continue
+
             md_scenario[SD.DYNAMIC_MAP_STATES] = dynamic_states
 
-            try:
-                md_scenario[SD.MAP_FEATURES] = extract_map_features(scenario.map_features)
-            except AssertionError as e:
-                print("FILE: ", file, j)
-                raise e
+            map_features = extract_map_features(scenario.map_features)
+            md_scenario[SD.MAP_FEATURES] = map_features
 
             compute_width(md_scenario[SD.MAP_FEATURES])
 
@@ -191,10 +178,22 @@ def parse_data(input, output_path, _selective=False):
             export_file_name = "sd_{}_{}.pkl".format(file, scenario.scenario_id)
 
             summary_dict = {}
-            summary_dict["sdc"] = _get_agent_summary(state_dict=md_scenario.get_sdc_track()["state"], id=sdc_id)
+            summary_dict["sdc"] = _get_agent_summary(
+                state_dict=md_scenario.get_sdc_track()["state"], id=sdc_id, type=md_scenario.get_sdc_track()["type"]
+            )
             for track_id, track in md_scenario[SD.TRACKS].items():
-                summary_dict[track_id] = _get_agent_summary(state_dict=track["state"], id=track_id)
-            md_scenario[SD.METADATA]["summary"] = summary_dict
+                summary_dict[track_id] = _get_agent_summary(state_dict=track["state"], id=track_id, type=track["type"])
+            md_scenario[SD.METADATA]["object_summary"] = summary_dict
+
+            number_summary_dict = {}
+            number_summary_dict["object"] = len(tracks)
+            number_summary_dict["dynamic_object_states"] = len(dynamic_states)
+            number_summary_dict["map_features"] = len(map_features)
+            number_summary_dict["object_types"] = set(v["type"] for v in tracks.values())
+            # Number of different dynamic object states
+            number_summary_dict["dynamic_object_states_types"] = \
+                set(vv for v in dynamic_states.values() for vv in set(v["state"]["object_state"]))
+            md_scenario[SD.METADATA]["number_summary"] = number_summary_dict
 
             metadata_recorder[export_file_name] = copy.deepcopy(md_scenario[SD.METADATA])
 
@@ -220,7 +219,6 @@ if __name__ == "__main__":
     parser.add_argument(
         "--output", default="processed_data", type=str, help="The data folder storing raw tfrecord from Waymo dataset."
     )
-    parser.add_argument("--selective", action="store_true", help="Whether select high-diversity valuable scenario.")
     args = parser.parse_args()
 
     scenario_data_path = args.input
@@ -233,7 +231,7 @@ if __name__ == "__main__":
 
     # parse raw data from input path to output path,
     # there is 1000 raw data in google cloud, each of them produce about 500 pkl file
-    parse_data(raw_data_path, output_path, _selective=args.selective)
+    parse_data(raw_data_path, output_path)
     sys.exit()
     # file_path = AssetLoader.file_path("waymo", "processed", "0.pkl", return_raw_style=False)
     # data = read_waymo_data(file_path)

@@ -135,7 +135,7 @@ def extract_bump(f):
 
 def extract_driveway(f):
     driveway_data = dict()
-    f = f.speed_bump
+    f = f.driveway
     driveway_data["type"] = "DRIVEWAY"
     driveway_data["polygon"] = extract_poly(f.polygon)
     return driveway_data
@@ -225,7 +225,7 @@ def extract_map_features(map_features):
 
         # Supported only in Waymo dataset 1.2.0
         if lane_state.HasField("driveway"):
-            ret[lane_id] = extract_bump(extract_driveway)
+            ret[lane_id] = extract_driveway(lane_state)
 
     return ret
 
