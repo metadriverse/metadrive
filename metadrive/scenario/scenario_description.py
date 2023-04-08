@@ -196,8 +196,9 @@ class ScenarioDescription(dict):
             assert isinstance(state_array, np.ndarray)
             assert len(state_array) == scenario_length
 
-            assert state_array.ndim == 2, "Haven't implemented test array with dim {} yet".format(state_array.ndim)
-            assert state_array.shape[1] != 0, "Please convert all state with dim 1 to a 1D array instead of 2D array."
+            assert state_array.ndim in [1, 2], "Haven't implemented test array with dim {} yet".format(state_array.ndim)
+            if state_array.ndim == 2:
+                assert state_array.shape[1] != 0, "Please convert all state with dim 1 to a 1D array instead of 2D array."
 
         # Check metadata
         assert isinstance(obj_state[cls.METADATA], dict)

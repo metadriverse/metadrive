@@ -125,7 +125,8 @@ def parse_data(input, output_path, _selective=False):
 
             SD.sanity_check(md_scenario, check_self_type=True)
 
-            p = os.path.join(output_path, f"{cnt}.pkl")
+            export_file_name = "sd_{}_{}.pkl".format(file, scenario.scenario_id)
+            p = os.path.join(output_path, export_file_name)
             with open(p, "wb") as f:
                 pickle.dump(md_scenario, f)
             print("Scenario {} is saved at: {}".format(cnt, p))
