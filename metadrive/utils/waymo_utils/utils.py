@@ -215,14 +215,12 @@ def extract_dynamic_map_states(dynamic_map_states):
         return dict(
             type=MetaDriveType.TRAFFIC_LIGHT,
             state=dict(
-                stop_point=np.zeros([track_length, 3], dtype=np.float32),
                 object_state=np.zeros([
                     track_length,
                 ], dtype=int),
-                lane=np.zeros([
-                    track_length,
-                ], dtype=int),
             ),
+            lane=None,
+            stop_point=np.zeros([3, ], dtype=np.float32),
             metadata=dict(
                 track_length=track_length, type=MetaDriveType.TRAFFIC_LIGHT, object_id=object_id, dataset="waymo"
             )
@@ -239,11 +237,18 @@ def extract_dynamic_map_states(dynamic_map_states):
             # We will use lane index to serve as the traffic light index.
             if object_id not in processed_dynamics_map_states:
                 processed_dynamics_map_states[object_id] = _TRAFFIC_LIGHT_STATUS_template(object_id=object_id)
-            processed_dynamics_map_states[object_id]["state"]["lane"][step_count] = lane
-            processed_dynamics_map_states[object_id]["state"]["object_state"][step_count] = object_state.state
-            processed_dynamics_map_states[object_id]["state"]["stop_point"][step_count][0] = object_state.stop_point.x
-            processed_dynamics_map_states[object_id]["state"]["stop_point"][step_count][1] = object_state.stop_point.y
-            processed_dynamics_map_states[object_id]["state"]["stop_point"][step_count][2] = object_state.stop_point.z
+
+            if processed_dynamics_map_states[object_id]["lane"] is not None:
+                assert lane == processed_dynamics_map_states[object_id]["lane"]
+            else:
+                processed_dynamics_map_states[object_id]["lane"] = lane
+
+            object_state_string = object_state.State.Name(object_state.state)
+            processed_dynamics_map_states[object_id]["state"]["object_state"][step_count] = object_state_string
+
+            processed_dynamics_map_states[object_id]["stop_point"][0] = object_state.stop_point.x
+            processed_dynamics_map_states[object_id]["stop_point"][1] = object_state.stop_point.y
+            processed_dynamics_map_states[object_id]["stop_point"][2] = object_state.stop_point.z
 
     return processed_dynamics_map_states
 
@@ -269,13 +274,13 @@ class CustomUnpickler(pickle.Unpickler):
 
 
 def read_waymo_data(file_path):
-    """
-    TODO: This function transform data again. We should remove it and let MetaDrive read native data completely.
-    """
     return read_scenario_data(file_path)
 
 
 def draw_waymo_map(data):
+    """
+    TODO: Need this function in future.
+    """
     figure(figsize=(8, 6), dpi=500)
     for key, value in data[ScenarioDescription.MAP_FEATURES].items():
         if value.get("type", None) == "center_lane":
