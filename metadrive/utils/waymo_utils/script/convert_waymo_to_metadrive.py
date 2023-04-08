@@ -7,6 +7,7 @@ This script will create the output folder "processed_data" sharing the same leve
 
 """
 import argparse
+import copy
 import os
 import pickle
 
@@ -58,6 +59,9 @@ def parse_data(input, output_path, _selective=False):
     cnt = 0
     scenario = scenario_pb2.Scenario()
     file_list = os.listdir(input)
+
+    metadata_recorder = {}
+
     for file in tqdm(file_list):
         file_path = os.path.join(input, file)
         if ("tfrecord" not in file_path) or (not os.path.isfile(file_path)):
@@ -120,12 +124,38 @@ def parse_data(input, output_path, _selective=False):
             md_scenario[SD.METADATA]["dataset"] = "waymo"
             md_scenario[SD.METADATA]["scenario_id"] = scenario.scenario_id
             md_scenario[SD.METADATA]["source_file"] = str(file)
+            md_scenario[SD.METADATA]["track_length"] = track_length
+
+            # === Waymo specific data. Storing them here ===
+            md_scenario[SD.METADATA]["current_time_index"] = scenario.current_time_index
+            md_scenario[SD.METADATA]["sdc_track_index"] = scenario.sdc_track_index
+
+            # obj id
+            md_scenario[SD.METADATA]["objects_of_interest"] = [str(obj) for obj in scenario.objects_of_interest]
+
+            track_index = [obj.track_index for obj in scenario.tracks_to_predict]
+            track_id = [str(scenario.tracks[ind].id) for ind in track_index]
+            track_difficulty = [obj.difficulty for obj in scenario.tracks_to_predict]
+            track_obj_type = [tracks[id]["type"] for id in track_id]
+            md_scenario[SD.METADATA]["tracks_to_predict"] = {
+                id: {
+                    "track_index": track_index[count],
+                    "track_id": id,
+                    "difficulty": track_difficulty[count],
+                    "object_type": track_obj_type[count]
+                } for count, id in enumerate(track_id)
+            }
 
             md_scenario = md_scenario.to_dict()
 
             SD.sanity_check(md_scenario, check_self_type=True)
 
             export_file_name = "sd_{}_{}.pkl".format(file, scenario.scenario_id)
+
+            metadata_recorder[export_file_name] = copy.deepcopy(md_scenario[SD.METADATA])
+
+            # TODO: FIXME: Some thing more to be added.
+
             p = os.path.join(output_path, export_file_name)
             with open(p, "wb") as f:
                 pickle.dump(md_scenario, f)

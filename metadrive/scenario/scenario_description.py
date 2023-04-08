@@ -193,8 +193,11 @@ class ScenarioDescription(dict):
         # Check state arrays temporal consistency
         assert isinstance(obj_state[cls.STATE], dict)
         for state_key, state_array in obj_state[cls.STATE].items():
-            assert isinstance(state_array, np.ndarray)
+            assert isinstance(state_array, (np.ndarray, list, tuple))
             assert len(state_array) == scenario_length
+
+            if not isinstance(state_array, np.ndarray):
+                continue
 
             assert state_array.ndim in [1, 2], "Haven't implemented test array with dim {} yet".format(state_array.ndim)
             if state_array.ndim == 2:
