@@ -75,13 +75,19 @@ def parse_data(input, output_path, _selective=False):
             # Please note that SDC track index is not identical to sdc_id.
             # sdc_id is a unique indicator to a track, while sdc_track_index is only the index of the sdc track
             # in the tracks datastructure.
-            tracks, sdc_id = extract_tracks(scenario.tracks, scenario.sdc_track_index)
+
+            track_length = len(scenario.dynamic_map_states)
+
+            tracks, sdc_id = extract_tracks(scenario.tracks, scenario.sdc_track_index, track_length)
 
             valid = validate_sdc_track(tracks[sdc_id][SD.STATE])
             if not valid:
                 continue
 
-            md_scenario[SD.LENGTH] = list(tracks.values())[0]["state"]["position"].shape[0]
+            track_length = list(tracks.values())[0]["state"]["position"].shape[0]
+
+            md_scenario[SD.LENGTH] = track_length
+
 
             num_agent_types = len(set(v["type"] for v in tracks.values()))
             if _selective and num_agent_types < 3:
@@ -90,7 +96,7 @@ def parse_data(input, output_path, _selective=False):
 
             md_scenario[SD.TRACKS] = tracks
 
-            dynamic_states = extract_dynamic_map_states(scenario.dynamic_map_states)
+            dynamic_states = extract_dynamic_map_states(scenario.dynamic_map_states, track_length)
             if _selective and not dynamic_states:
                 print("Skip scenario {} because of lack of traffic light.".format(j))
                 continue
