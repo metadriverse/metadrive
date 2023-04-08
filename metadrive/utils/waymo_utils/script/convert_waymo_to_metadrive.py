@@ -54,6 +54,27 @@ def validate_sdc_track(sdc_state):
 
     return True
 
+def _get_agent_summary(state_dict, id):
+    track = state_dict["position"]
+    valid_track = track[state_dict["valid"], :2]
+    distance = float(sum(np.linalg.norm(valid_track[i] - valid_track[i + 1]) for i in range(valid_track.shape[0] - 1)))
+    valid_length = int(sum(state_dict["valid"]))
+
+    continuous_valid_length = 0
+    for v in state_dict["valid"]:
+        if v:
+            continuous_valid_length += 1
+        if continuous_valid_length > 0 and not v:
+            break
+
+    return {
+        "object_id": str(id),
+        "track_length": int(len(track)),
+        "distance": float(distance),
+        "valid_length": int(valid_length),
+        "continuous_valid_length": int(continuous_valid_length)
+    }
+
 
 def parse_data(input, output_path, _selective=False):
     cnt = 0
@@ -146,13 +167,19 @@ def parse_data(input, output_path, _selective=False):
                 } for count, id in enumerate(track_id)
             }
 
+            export_file_name = "sd_{}_{}.pkl".format(file, scenario.scenario_id)
+
+            summary_dict = {}
+            summary_dict["sdc"] = _get_agent_summary(state_dict=md_scenario.get_sdc_track()["state"], id=sdc_id)
+            for track_id, track in md_scenario[SD.TRACKS].items():
+                summary_dict[track_id] = _get_agent_summary(state_dict=track["state"], id=track_id)
+            md_scenario[SD.METADATA]["summary"] = summary_dict
+
+            metadata_recorder[export_file_name] = copy.deepcopy(md_scenario[SD.METADATA])
+
             md_scenario = md_scenario.to_dict()
 
             SD.sanity_check(md_scenario, check_self_type=True)
-
-            export_file_name = "sd_{}_{}.pkl".format(file, scenario.scenario_id)
-
-            metadata_recorder[export_file_name] = copy.deepcopy(md_scenario[SD.METADATA])
 
             # TODO: FIXME: Some thing more to be added.
 
