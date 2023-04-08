@@ -81,7 +81,12 @@ class ScenarioLightManager(BaseManager):
             if ScenarioDescription.TRAFFIC_LIGHT_POSITION in ret[lane_id]:
                 # Old data format where position is a 2D array with shape [T, 2]
                 traffic_light_position = ret[lane_id][ScenarioDescription.TRAFFIC_LIGHT_POSITION]
-                first_pos = np.argwhere(ret[lane_id][ScenarioDescription.TRAFFIC_LIGHT_LANE] != 0)[0, 0]
+
+                if not np.any(ret[lane_id][ScenarioDescription.TRAFFIC_LIGHT_LANE].astype(bool)):
+                    # This traffic light has no effect.
+                    first_pos = -1
+                else:
+                    first_pos = np.argwhere(ret[lane_id][ScenarioDescription.TRAFFIC_LIGHT_LANE] != 0)[0, 0]
                 traffic_light_position = traffic_light_position[first_pos]
             else:
                 # New data format where position is a [3, ] array.
