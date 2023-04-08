@@ -89,6 +89,7 @@ def _get_agent_summary(state_dict, id, type):
         "continuous_valid_length": int(continuous_valid_length)
     }
 
+
 def _get_number_summary(scenario):
     number_summary_dict = {}
     number_summary_dict["object"] = len(scenario[SD.TRACKS])
@@ -114,7 +115,6 @@ def _get_number_summary(scenario):
     number_summary_dict["dynamic_object_states_counter"] = dict(dynamic_object_states_counter)
 
     return number_summary_dict
-
 
 
 def _dict_recursive_remove_array(d):
