@@ -120,8 +120,8 @@ def extract_stop(f):
 def extract_crosswalk(f):
     cross_walk = dict()
     f = f.crosswalk
-    cross_walk["type"] = "CROSS_WALK"
-    cross_walk["polyline"] = extract_poly(f.polygon)
+    cross_walk["type"] = "CROSSWALK"
+    cross_walk["polygon"] = extract_poly(f.polygon)
     return cross_walk
 
 
@@ -129,8 +129,7 @@ def extract_bump(f):
     speed_bump_data = dict()
     f = f.speed_bump
     speed_bump_data["type"] = "SPEED_BUMP"
-    speed_bump_data["polyline"] = extract_poly(f.polygon)
-
+    speed_bump_data["polygon"] = extract_poly(f.polygon)
     return speed_bump_data
 
 
@@ -141,13 +140,15 @@ def extract_tracks(tracks, sdc_idx, track_length):
         return dict(
             type=None,
             state=dict(
+
+                # Never add extra dim if the value is scalar.
                 position=np.zeros([track_length, 3], dtype=np.float32),
-                length=np.zeros([track_length, 1], dtype=np.float32),
-                width=np.zeros([track_length, 1], dtype=np.float32),
-                height=np.zeros([track_length, 1], dtype=np.float32),
-                heading=np.zeros([track_length, 1], dtype=np.float32),
+                length=np.zeros([track_length], dtype=np.float32),
+                width=np.zeros([track_length], dtype=np.float32),
+                height=np.zeros([track_length], dtype=np.float32),
+                heading=np.zeros([track_length], dtype=np.float32),
                 velocity=np.zeros([track_length, 2], dtype=np.float32),
-                valid=np.zeros([track_length, 1], dtype=int),
+                valid=np.zeros([track_length], dtype=bool),
             ),
             metadata=dict(
                 track_length=track_length, type=None, object_id=object_id, dataset="waymo"
