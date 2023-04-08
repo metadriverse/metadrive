@@ -43,8 +43,13 @@ class ScenarioLightManager(BaseManager):
             traffic_light.set_status(status, self.data_source)
 
     def _get_light_position(self, light_info):
-        index = np.where(light_info[ScenarioDescription.TRAFFIC_LIGHT_LANE] > 0)[0][0]
-        return light_info[ScenarioDescription.TRAFFIC_LIGHT_POSITION][index]
+        if ScenarioDescription.TRAFFIC_LIGHT_POSITION in light_info:
+            # New format where the position is a 3-dim vector.
+            return light_info[ScenarioDescription.TRAFFIC_LIGHT_POSITION]
+
+        else:
+            index = np.where(light_info[ScenarioDescription.TRAFFIC_LIGHT_LANE] > 0)[0][0]
+            return light_info[ScenarioDescription.TRAFFIC_LIGHT_POSITION][index]
 
     def after_step(self, *args, **kwargs):
         if self.episode_step >= self.current_scenario_length:
@@ -72,13 +77,25 @@ class ScenarioLightManager(BaseManager):
         for lane_id, light_info in self.current_scenario[ScenarioDescription.DYNAMIC_MAP_STATES].items():
             ret[lane_id] = copy.deepcopy(light_info[ScenarioDescription.STATE])
             ret[lane_id]["metadata"] = copy.deepcopy(light_info[ScenarioDescription.METADATA])
+
+
+
+            if ScenarioDescription.TRAFFIC_LIGHT_POSITION in ret[lane_id]:
+                # Old data format where position is a 2D array with shape [T, 2]
+                traffic_light_position = ret[lane_id][ScenarioDescription.TRAFFIC_LIGHT_POSITION]
+                first_pos = np.argwhere(ret[lane_id][ScenarioDescription.TRAFFIC_LIGHT_LANE] != 0)[0, 0]
+                traffic_light_position = traffic_light_position[first_pos]
+            else:
+                # New data format where position is a [3, ] array.
+                traffic_light_position = light_info[ScenarioDescription.TRAFFIC_LIGHT_POSITION][:2]
+
             if self.engine.data_manager.coordinate_transform:
                 # ignore height and convert coordinate, if necessary
-                ret[lane_id][ScenarioDescription.TRAFFIC_LIGHT_POSITION
-                             ] = right_hand_to_left_vector(ret[lane_id][ScenarioDescription.TRAFFIC_LIGHT_POSITION]
-                                                           )[..., :-1]
-            type = light_info[ScenarioDescription.TYPE]
-            assert type == MetaDriveType.TRAFFIC_LIGHT, "Can not handle {}".format(type)
+                 traffic_light_position = right_hand_to_left_vector(traffic_light_position)
+
+            ret[lane_id][ScenarioDescription.TRAFFIC_LIGHT_POSITION] = traffic_light_position
+
+            assert light_info[ScenarioDescription.TYPE] == MetaDriveType.TRAFFIC_LIGHT, "Can not handle {}".format(light_info[ScenarioDescription.TYPE])
         return ret
 
     def get_state(self):

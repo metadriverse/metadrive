@@ -1,4 +1,5 @@
 import copy
+import os
 import pickle
 
 import matplotlib.pyplot as plt
@@ -151,7 +152,7 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
                 ScenarioDescription.TRAFFIC_LIGHT_STATUS: np.array(
                     [MetaDriveType.LIGHT_UNKNOWN for _ in range(episode_len)]
                 ),
-                ScenarioDescription.TRAFFIC_LIGHT_LANE: np.zeros(shape=(episode_len, )),
+                ScenarioDescription.TRAFFIC_LIGHT_LANE: np.zeros(shape=(episode_len,)),
             },
             metadata=dict(track_length=episode_len, type=MetaDriveType.TRAFFIC_LIGHT, object_id=k, dataset="metadrive")
         )
@@ -292,6 +293,28 @@ def read_scenario_data(file_path):
         data = pickle.load(f)
     data = ScenarioDescription(data)
     return data
+
+
+def read_dataset_summary(file_folder):
+    """
+    We now support two methods to load pickle files.
+
+    The first is the old method where we store pickle files in 0.pkl, 1.pkl, ...
+
+    The second is the new method which use a summary file to record important metadata of each scenario.
+    """
+    summary_file = os.path.join(file_folder, "dataset_summary.pkl")
+    if os.path.isfile(summary_file):
+        with open(summary_file, "rb") as f:
+            summary_dict = pickle.load(f)
+
+    else:
+        files = os.listdir(file_folder)
+        files = sorted(files, key=lambda file_name: int(file_name.replace(".pkl", "")))
+        files = [os.path.join(file_folder, p) for p in files]
+        summary_dict = {f: {} for f in files}
+
+    return summary_dict, list(summary_dict.keys())
 
 
 def convert_polyline_to_metadrive(polyline, coordinate_transform=True):
