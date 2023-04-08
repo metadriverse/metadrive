@@ -108,6 +108,8 @@ Example:
         }
     }
 """
+from types import NoneType
+
 import numpy as np
 
 from metadrive.type import MetaDriveType
@@ -142,7 +144,7 @@ class ScenarioDescription(dict):
     SDC_ID = "sdc_id"  # Not necessary, but can be stored in metadata.
     METADATA_KEYS = {METADRIVE_PROCESSED, COORDINATE, TIMESTEP}
 
-    ALLOW_TYPES = (int, float, str, np.ndarray, dict, list, tuple)
+    ALLOW_TYPES = (int, float, str, np.ndarray, dict, list, tuple, NoneType)
 
     @classmethod
     def sanity_check(cls, scenario_dict, check_self_type=False):
@@ -177,12 +179,12 @@ class ScenarioDescription(dict):
             "You lack these keys in metadata: {}".format(
                 cls.METADATA_KEYS.difference(set(scenario_dict[cls.METADATA].keys()))
             )
-        assert scenario_dict[cls.METADATA][cls.TIMESTEP].shape == (scenario_length, )
+        assert scenario_dict[cls.METADATA][cls.TIMESTEP].shape == (scenario_length,)
 
     @classmethod
     def _check_object_state_dict(cls, obj_state, scenario_length, object_id):
         # Check keys
-        assert set(obj_state) == cls.STATE_DICT_KEYS
+        assert set(obj_state).issuperset(cls.STATE_DICT_KEYS)
 
         # Check type
         assert MetaDriveType.has_type(obj_state[cls.TYPE]
@@ -191,8 +193,8 @@ class ScenarioDescription(dict):
         # Check state arrays temporal consistency
         assert isinstance(obj_state[cls.STATE], dict)
         for state_key, state_array in obj_state[cls.STATE].items():
-            assert isinstance(state_array, np.ndarray)
-            assert state_array.shape[0] == scenario_length
+            assert isinstance(state_array, (np.ndarray, list, tuple))
+            assert len(state_array) == scenario_length
 
         # Check metadata
         assert isinstance(obj_state[cls.METADATA], dict)

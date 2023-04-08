@@ -204,6 +204,12 @@ def extract_map_features(map_features):
         if lane_state.HasField("speed_bump"):
             ret[lane_id] = extract_bump(lane_state)
 
+        try:
+            if lane_state.HasField("driveway"):
+                print(111111)
+        except ValueError:
+            pass
+
     return ret
 
 
@@ -215,7 +221,7 @@ def extract_dynamic_map_states(dynamic_map_states):
         return dict(
             type=MetaDriveType.TRAFFIC_LIGHT,
             state=dict(
-                object_state=[]
+                object_state=[None] * track_length
             ),
             lane=None,
             stop_point=np.zeros([3, ], dtype=np.float32),
@@ -242,7 +248,7 @@ def extract_dynamic_map_states(dynamic_map_states):
                 processed_dynamics_map_states[object_id]["lane"] = lane
 
             object_state_string = object_state.State.Name(object_state.state)
-            processed_dynamics_map_states[object_id]["state"]["object_state"].append(object_state_string)
+            processed_dynamics_map_states[object_id]["state"]["object_state"][step_count] = object_state_string
 
             processed_dynamics_map_states[object_id]["stop_point"][0] = object_state.stop_point.x
             processed_dynamics_map_states[object_id]["stop_point"][1] = object_state.stop_point.y
