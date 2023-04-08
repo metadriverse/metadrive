@@ -7,6 +7,7 @@ This script will create the output folder "processed_data" sharing the same leve
 
 """
 import argparse
+from collections import defaultdict
 import copy
 import os
 import pickle
@@ -87,6 +88,33 @@ def _get_agent_summary(state_dict, id, type):
         "valid_length": int(valid_length),
         "continuous_valid_length": int(continuous_valid_length)
     }
+
+def _get_number_summary(scenario):
+    number_summary_dict = {}
+    number_summary_dict["object"] = len(scenario[SD.TRACKS])
+    number_summary_dict["dynamic_object_states"] = len(scenario[SD.DYNAMIC_MAP_STATES])
+    number_summary_dict["map_features"] = len(scenario[SD.MAP_FEATURES])
+    number_summary_dict["object_types"] = set(v["type"] for v in scenario[SD.TRACKS].values())
+
+    object_types_counter = defaultdict(int)
+    for v in scenario[SD.TRACKS].values():
+        object_types_counter[v["type"]] += 1
+    number_summary_dict["object_types_counter"] = dict(object_types_counter)
+
+    # Number of different dynamic object states
+    dynamic_object_states_types = set()
+    dynamic_object_states_counter = defaultdict(int)
+    for v in scenario[SD.DYNAMIC_MAP_STATES].values():
+        for step_state in v["state"]["object_state"]:
+            if step_state is None:
+                continue
+            dynamic_object_states_types.add(step_state)
+            dynamic_object_states_counter[step_state] += 1
+    number_summary_dict["dynamic_object_states_types"] = dynamic_object_states_types
+    number_summary_dict["dynamic_object_states_counter"] = dict(dynamic_object_states_counter)
+
+    return number_summary_dict
+
 
 
 def _dict_recursive_remove_array(d):
@@ -185,15 +213,8 @@ def parse_data(input, output_path):
                 summary_dict[track_id] = _get_agent_summary(state_dict=track["state"], id=track_id, type=track["type"])
             md_scenario[SD.METADATA]["object_summary"] = summary_dict
 
-            number_summary_dict = {}
-            number_summary_dict["object"] = len(tracks)
-            number_summary_dict["dynamic_object_states"] = len(dynamic_states)
-            number_summary_dict["map_features"] = len(map_features)
-            number_summary_dict["object_types"] = set(v["type"] for v in tracks.values())
-            # Number of different dynamic object states
-            number_summary_dict["dynamic_object_states_types"] = \
-                set(vv for v in dynamic_states.values() for vv in set(v["state"]["object_state"]))
-            md_scenario[SD.METADATA]["number_summary"] = number_summary_dict
+            # Count some objects occurrence
+            md_scenario[SD.METADATA]["number_summary"] = _get_number_summary(md_scenario)
 
             metadata_recorder[export_file_name] = copy.deepcopy(md_scenario[SD.METADATA])
 
