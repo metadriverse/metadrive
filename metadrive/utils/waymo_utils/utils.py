@@ -215,9 +215,7 @@ def extract_dynamic_map_states(dynamic_map_states):
         return dict(
             type=MetaDriveType.TRAFFIC_LIGHT,
             state=dict(
-                object_state=np.zeros([
-                    track_length,
-                ], dtype=int),
+                object_state=[]
             ),
             lane=None,
             stop_point=np.zeros([3, ], dtype=np.float32),
@@ -244,11 +242,14 @@ def extract_dynamic_map_states(dynamic_map_states):
                 processed_dynamics_map_states[object_id]["lane"] = lane
 
             object_state_string = object_state.State.Name(object_state.state)
-            processed_dynamics_map_states[object_id]["state"]["object_state"][step_count] = object_state_string
+            processed_dynamics_map_states[object_id]["state"]["object_state"].append(object_state_string)
 
             processed_dynamics_map_states[object_id]["stop_point"][0] = object_state.stop_point.x
             processed_dynamics_map_states[object_id]["stop_point"][1] = object_state.stop_point.y
             processed_dynamics_map_states[object_id]["stop_point"][2] = object_state.stop_point.z
+
+    for obj in processed_dynamics_map_states.values():
+        assert len(obj["state"]["object_state"]) == obj["metadata"]["track_length"]
 
     return processed_dynamics_map_states
 
