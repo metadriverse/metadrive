@@ -1,4 +1,5 @@
 import math
+from metadrive.utils.coordinates_shift import panda_vector
 from abc import ABCMeta, abstractmethod
 from typing import Tuple
 
@@ -370,7 +371,7 @@ class AbstractLane:
         shape = BulletConvexHullShape()
         for point in polygon:
             # Panda coordinate is different from metadrive coordinate
-            point[1] *= -1
+            point = panda_vector(point)
             shape.addPoint(LPoint3f(*point))
         segment_node.addShape(shape)
         block.static_nodes.append(segment_node)

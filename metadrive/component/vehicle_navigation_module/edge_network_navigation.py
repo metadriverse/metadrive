@@ -142,7 +142,6 @@ class EdgeNetworkNavigation(BaseNavigation):
             ego_vehicle.heading,
             ego_vehicle.position,
             ego_vehicle.engine,
-            return_all_result=True,
             use_heading_filter=False,
             return_on_lane=True
         )

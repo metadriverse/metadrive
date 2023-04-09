@@ -203,7 +203,7 @@ class NodeNetworkNavigation(BaseNavigation):
               Called in update_localization to find current lane information
               """
         possible_lanes, on_lane = ray_localization(
-            ego_vehicle.heading, ego_vehicle.position, ego_vehicle.engine, return_all_result=True, return_on_lane=True
+            ego_vehicle.heading, ego_vehicle.position, ego_vehicle.engine, return_on_lane=True
         )
         for lane, index, l_1_dist in possible_lanes:
             if lane in self.current_ref_lanes:

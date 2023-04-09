@@ -19,6 +19,8 @@ def _evaluate(env_config, num_episode, has_traffic=True):
             action = expert(env.vehicle, deterministic=True)
             obs, reward, done, info = env.step(action)
             # double check lidar
+            if env.config["use_render"]:
+                env.render(text={"lane_index": env.vehicle.lane_index, "step": env.episode_step})
             lidar = [True if p == 1.0 else False for p in env.observations[DEFAULT_AGENT].cloud_points]
             if not all(lidar):
                 lidar_success = True
@@ -53,6 +55,8 @@ def test_expert_with_traffic(use_render=False):
             map="CCC",
             start_seed=2,
             random_traffic=False,
+            # debug_static_world=True,
+            # debug=True,
             use_render=use_render,
             vehicle_config=dict(show_lidar=True),
         ),
@@ -85,5 +89,5 @@ def test_expert_without_traffic():
 
 
 if __name__ == '__main__':
-    test_expert_without_traffic()
-    # test_expert_with_traffic(use_render=False)
+    # test_expert_without_traffic()
+    test_expert_with_traffic(use_render=True)

@@ -19,7 +19,7 @@ class ScenarioLane(PointLane):
         center_line_points = convert_polyline_to_metadrive(
             map_data[lane_id][ScenarioDescription.POLYLINE], coordinate_transform=coordinate_transform
         )
-        if ScenarioDescription.POLYGON in map_data[lane_id]:
+        if ScenarioDescription.POLYGON in map_data[lane_id] and len(map_data[lane_id][ScenarioDescription.POLYGON]) > 3:
             polygon = convert_polyline_to_metadrive(
                 map_data[lane_id][ScenarioDescription.POLYGON], coordinate_transform=coordinate_transform
             )
