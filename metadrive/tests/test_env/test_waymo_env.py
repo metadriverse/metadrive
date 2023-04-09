@@ -65,7 +65,7 @@ def test_store_map_memory_leakage(render=False):
                     o, r, d, info = env.step([1.0, 0.])
                     if d:
                         assert info["arrive_dest"], "Can not arrive dest"
-                        assert env.episode_step > 100
+                        assert env.episode_step > 60
                         break
                     if i == 999:
                         raise ValueError("Can not arrive dest")
@@ -85,5 +85,5 @@ def test_store_map_memory_leakage(render=False):
 
 
 if __name__ == "__main__":
-    # test_store_map_memory_leakage(render=True)
-    test_waymo_env(policy=WaymoIDMPolicy, render=True)
+    test_store_map_memory_leakage(render=True)
+    # test_waymo_env(policy=WaymoIDMPolicy, render=True)

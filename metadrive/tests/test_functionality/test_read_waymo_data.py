@@ -1,9 +1,10 @@
 from metadrive.engine.asset_loader import AssetLoader
-from metadrive.utils.waymo_utils.utils import read_waymo_data
+from metadrive.scenario.utils import read_dataset_summary, read_scenario_data
 
 
 def test_read_waymo_data():
-    for i in range(3):
-        file_path = AssetLoader.file_path("waymo", "{}.pkl".format(i), return_raw_style=False)
-        data = read_waymo_data(file_path)
-        # # print(data)
+    summary_dict, summary_list = read_dataset_summary(AssetLoader.file_path("waymo", return_raw_style=False))
+    for p in summary_list:
+        data = read_scenario_data(AssetLoader.file_path("waymo", p))
+        data.sanity_check(data, check_self_type=False)
+        print("Finish: ", p)
