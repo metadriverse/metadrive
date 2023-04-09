@@ -29,12 +29,12 @@ class NuPlanLane(PointLane):
             points = boundary[0][np.argmax(sizes)].xy
         elif isinstance(lane_meta_data.polygon.boundary, LineString):
             points = lane_meta_data.polygon.boundary.xy
-        self.polygon = [[points[0][i], points[1][i], 0.1] for i in range(len(points[0]))]
-        self.polygon += [[points[0][i], points[1][i], 0.] for i in range(len(points[0]))]
-        self.polygon = nuplan_to_metadrive_vector(self.polygon, nuplan_center=[nuplan_center[0], nuplan_center[1], 0])
+        polygon = [[points[0][i], points[1][i], 0.1] for i in range(len(points[0]))]
+        polygon += [[points[0][i], points[1][i], 0.] for i in range(len(points[0]))]
+        polygon = nuplan_to_metadrive_vector(polygon, nuplan_center=[nuplan_center[0], nuplan_center[1], 0])
         super(NuPlanLane, self).__init__(self._extract_centerline(lane_meta_data, nuplan_center),
                                          width=None,  # we use width_at to get width
-                                         polygon=self.polygon,
+                                         polygon=polygon,
                                          need_lane_localization=need_lane_localization)
 
         self.entry_lanes = lane_meta_data.incoming_edges,
@@ -69,6 +69,9 @@ class NuPlanLane(PointLane):
         path = boundary.discrete_path
         points = np.array([nuplan_to_metadrive_vector([pose.x, pose.y], nuplan_center=center) for pose in path])
         return points
+
+    # def get_polygon(self):
+    #     return np.asarray(self.polygon)
 
 
 if __name__ == "__main__":

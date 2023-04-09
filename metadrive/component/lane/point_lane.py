@@ -1,10 +1,10 @@
-from typing import Tuple, Union
 import math
-from metadrive.constants import DrivableAreaProperty
+from typing import Tuple, Union
 
 import numpy as np
 
 from metadrive.component.lane.abs_lane import AbstractLane
+from metadrive.constants import DrivableAreaProperty
 from metadrive.constants import PGLineType
 from metadrive.utils.interpolating_line import InterpolatingLine
 from metadrive.utils.math_utils import get_points_bounding_box
@@ -140,3 +140,6 @@ class PointLane(AbstractLane, InterpolatingLine):
     @property
     def has_polygon(self):
         return True if self.polygon is not None else False
+
+    def get_polygon(self):
+        return np.asarray(self.polygon if self.has_polygon else [])

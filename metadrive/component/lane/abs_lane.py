@@ -418,6 +418,9 @@ class AbstractLane:
         ret.append(self.position(self.length, lateral))
         return np.array(ret)
 
+    def get_polygon(self):
+        raise NotImplementedError
+
     @property
     def id(self):
         return self.index

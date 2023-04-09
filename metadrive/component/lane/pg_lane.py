@@ -1,8 +1,9 @@
 from metadrive.component.lane.abs_lane import AbstractLane
+import numpy as np
 from metadrive.constants import DrivableAreaProperty
 
 
-class MetaDriveLane(AbstractLane):
+class PGLane(AbstractLane):
     radius = 0.0
 
     def construct_sidewalk(self, block, lateral):
@@ -28,3 +29,6 @@ class MetaDriveLane(AbstractLane):
                 extra_thrust=DrivableAreaProperty.SIDEWALK_WIDTH / 2 + DrivableAreaProperty.SIDEWALK_LINE_DIST
             )
             self._node_path_list.extend(node_path_list)
+
+    def get_polygon(self, interval=2):
+        return np.asarray(self.polygon)

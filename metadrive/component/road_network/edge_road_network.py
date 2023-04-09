@@ -1,4 +1,5 @@
 import logging
+from metadrive.scenario.scenario_description import ScenarioDescription as SD
 from collections import namedtuple
 from typing import List
 
@@ -103,8 +104,9 @@ class EdgeRoadNetwork(BaseRoadNetwork):
         for id, lane_info in self.graph.items():
             assert id == lane_info.lane.index
             ret[id] = {
-                "polyline": lane_info.lane.get_polyline(interval),
-                "type": MetaDriveType.LANE_SURFACE_STREET,
+                SD.POLYLINE: lane_info.lane.get_polyline(interval),
+                SD.POLYGON: lane_info.get_polygon(),
+                SD.TYPE: MetaDriveType.LANE_SURFACE_STREET,
                 "speed_limit_kmh": lane_info.lane.speed_limit
             }
         return ret

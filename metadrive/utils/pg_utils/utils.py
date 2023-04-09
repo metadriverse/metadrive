@@ -8,7 +8,7 @@ from panda3d.core import TransformState
 from panda3d.core import Vec3
 
 from metadrive.component.lane.circular_lane import CircularLane
-from metadrive.component.lane.metadrive_lane import MetaDriveLane
+from metadrive.component.lane.pg_lane import PGLane
 from metadrive.constants import CollisionGroup
 from metadrive.constants import Decoration, MetaDriveType
 from metadrive.engine.core.engine_core import EngineCore
@@ -79,7 +79,7 @@ def get_lanes_bounding_box(lanes, extra_lateral=3) -> Tuple:
     :param extra_lateral: extra width in lateral direction, usually sidewalk width
     :return: x_max, x_min, y_max, y_min
     """
-    if isinstance(lanes[0], MetaDriveLane):
+    if isinstance(lanes[0], PGLane):
         line_points = get_curve_contour(lanes, extra_lateral) if isinstance(lanes[0], CircularLane) \
             else get_straight_contour(lanes, extra_lateral)
     else:

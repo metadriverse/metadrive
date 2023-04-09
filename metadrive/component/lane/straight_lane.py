@@ -3,18 +3,18 @@ from typing import Tuple, Sequence, Union
 import math
 import numpy as np
 
-from metadrive.component.lane.metadrive_lane import MetaDriveLane
+from metadrive.component.lane.pg_lane import PGLane
 from metadrive.constants import PGLineType
 from metadrive.utils.math_utils import norm
 
 
-class StraightLane(MetaDriveLane):
+class StraightLane(PGLane):
     """A lane going in straight line."""
     def __init__(
         self,
         start: Union[np.ndarray, Sequence[float]],
         end: Union[np.ndarray, Sequence[float]],
-        width: float = MetaDriveLane.DEFAULT_WIDTH,
+        width: float = PGLane.DEFAULT_WIDTH,
         line_types: Tuple[PGLineType, PGLineType] = (PGLineType.BROKEN, PGLineType.BROKEN),
         forbidden: bool = False,
         speed_limit: float = 1000,
