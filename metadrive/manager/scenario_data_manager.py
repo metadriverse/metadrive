@@ -1,12 +1,12 @@
 import copy
-from metadrive.constants import RENDER_MODE_NONE
 import os
 
 from tqdm import tqdm
 
+from metadrive.constants import RENDER_MODE_NONE
 from metadrive.manager.base_manager import BaseManager
 from metadrive.scenario.scenario_description import ScenarioDescription as SD, MetaDriveType
-from metadrive.scenario.utils import read_scenario_data
+from metadrive.scenario.utils import read_scenario_data, read_dataset_summary
 from metadrive.utils.data_buffer import DataBuffer
 
 
@@ -27,10 +27,13 @@ class ScenarioDataManager(BaseManager):
         self.store_map = store_map
         self._scenario = DataBuffer(store_map_buffer_size if self.store_map else self.num_scenarios)
         self._coordinate_transform = False
-        for i in tqdm(range(self.start_scenario_index, self.start_scenario_index + self.num_scenarios),
-                      desc="Check Scenario Data"):
-            p = os.path.join(self.directory, "{}.pkl".format(i))
-            assert os.path.exists(p), "No Data {} at path: {}".format(i, p)
+
+        # Read summary file first:
+        self.summary_dict, self.summary_lookup = read_dataset_summary(self.directory)
+
+        for p in self.summary_dict.keys():
+            p = os.path.join(self.directory, p)
+            assert os.path.exists(p), "No Data at path: {}".format(p)
 
             # if self.store_map:
             # If we wish to store map (which requires huge memory), we load data immediately to exchange effiency
@@ -40,7 +43,9 @@ class ScenarioDataManager(BaseManager):
     def _get_scenario(self, i):
         assert self.start_scenario_index <= i < self.start_scenario_index + self.num_scenarios, \
             "scenario ID exceeds range"
-        file_path = os.path.join(self.directory, "{}.pkl".format(i))
+        assert i < len(self.summary_lookup)
+
+        file_path = os.path.join(self.directory, self.summary_lookup[i])
         ret = read_scenario_data(file_path)
         assert isinstance(ret, SD)
         return ret

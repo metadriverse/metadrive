@@ -683,7 +683,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         wheel.setSuspensionStiffness(self.SUSPENSION_STIFFNESS)
         wheel.setWheelsDampingRelaxation(4.8)
         wheel.setWheelsDampingCompression(1.2)
-        wheel.setFrictionSlip(self.config["wheel_friction"] if not self.config["no_wheel_friction"] else 0)
+        wheel_friction = self.config["wheel_friction"] if not self.config["no_wheel_friction"] else 0
+        wheel.setFrictionSlip(wheel_friction)
         wheel.setRollInfluence(0.5)
         return wheel
 
@@ -830,7 +831,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         if self.navigation is not None:
             self.navigation.destroy()
         self.navigation = None
-
+        self.wheels = None
         if self.side_detector is not None:
             self.side_detector.destroy()
             self.side_detector = None
@@ -963,6 +964,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         return self.navigation.current_ref_lanes
 
     def set_wheel_friction(self, new_friction):
+        raise ValueError()
         for wheel in self.wheels:
             wheel.setFrictionSlip(new_friction)
 

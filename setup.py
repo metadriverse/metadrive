@@ -61,6 +61,13 @@ nuplan_requirement = [
     "pyarrow"
 ]
 
+
+# Or try:
+#   pip install git+https://github.com/waymo-research/waymo-open-dataset.git
+waymo_requirement = [
+    "waymo-open-dataset-tf-2.11.0==1.5.0"
+]
+
 cuda_requirement = [
     "cuda-python==12.0.0",
     "PyOpenGL==3.1.6",
@@ -82,6 +89,7 @@ setup(
     extras_require={
         "cuda": cuda_requirement,
         "nuplan": nuplan_requirement,
+        "waymo": waymo_requirement,
         "all": nuplan_requirement + cuda_requirement
     },
     include_package_data=True,

@@ -150,8 +150,8 @@ class MetaDriveType:
         """
         Parse light status from ENUM to STR
         """
-        if data_source == "waymo":
-            status = cls.LIGHT_ENUM_TO_STR[status]
+        # if data_source == "waymo":
+        #     status = cls.LIGHT_ENUM_TO_STR[status]
         if simplifying:
             return cls.simplify_light_status(status)
         else:
@@ -162,7 +162,7 @@ class MetaDriveType:
         """
         Convert status to red/yellow/green/unknown
         """
-        if status in [cls.LANE_STATE_UNKNOWN, cls.LANE_STATE_FLASHING_STOP] or status == cls.LIGHT_UNKNOWN:
+        if status in [cls.LANE_STATE_UNKNOWN, cls.LANE_STATE_FLASHING_STOP, cls.LIGHT_UNKNOWN, None]:
             return cls.LIGHT_UNKNOWN
         elif status in [cls.LANE_STATE_ARROW_STOP, cls.LANE_STATE_STOP, cls.LIGHT_RED]:
             return cls.LIGHT_RED
