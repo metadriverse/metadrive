@@ -117,7 +117,7 @@ def test_expert_in_intersection(render=False):
     # We change the ego vehicle dynamics! So the expert is not reliable anymore!
     assert success_rate == 1.0, success_rate
 
-    assert 300 <= ep_reward <= 350, ep_reward
+    assert ep_reward > 400, ep_reward
 
 
 if __name__ == '__main__':
