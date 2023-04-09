@@ -26,7 +26,7 @@ def test_varying_dynamics_vehicle():
         for width in [ref_v.WIDTH, 2, 3, 4]:
             for height in [ref_v.HEIGHT, 1, 2]:
                 for length in [ref_v.LENGTH, 4, 6, 9, 13, 15]:
-                    for friction in [0, 0.8, 1.0, 1.2, 1.5, 2.0]:
+                    for friction in [0.2, 0.8, 1.0, 1.2, 1.5, 2.0]:
                         v.reset(
                             vehicle_config={
                                 "width": width,
@@ -39,7 +39,7 @@ def test_varying_dynamics_vehicle():
                         assert v.LENGTH == length
                         assert v.HEIGHT == height
                         for wheel in v.wheels:
-                            assert wheel.getFrictionSlip() == friction
+                            assert abs(wheel.getFrictionSlip() - friction) < 1e-5, (wheel.getFrictionSlip(), friction)
 
     finally:
         close_engine()

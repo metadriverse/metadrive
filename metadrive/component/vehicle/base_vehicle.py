@@ -831,7 +831,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         if self.navigation is not None:
             self.navigation.destroy()
         self.navigation = None
-
+        self.wheels = None
         if self.side_detector is not None:
             self.side_detector.destroy()
             self.side_detector = None
@@ -964,6 +964,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         return self.navigation.current_ref_lanes
 
     def set_wheel_friction(self, new_friction):
+        raise ValueError()
         for wheel in self.wheels:
             wheel.setFrictionSlip(new_friction)
 
