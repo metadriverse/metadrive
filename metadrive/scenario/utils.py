@@ -156,17 +156,13 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
             all_lights.update(frame.manager_info[light_manager_name][SD.ORIGINAL_ID_TO_OBJ_ID].keys())
 
     lights = {
-        k: dict(
-            type=MetaDriveType.TRAFFIC_LIGHT,
-            state={
-                ScenarioDescription.TRAFFIC_LIGHT_POSITION: np.zeros(shape=(episode_len, 2)),
-                ScenarioDescription.TRAFFIC_LIGHT_STATUS: np.array(
-                    [MetaDriveType.LIGHT_UNKNOWN for _ in range(episode_len)]
-                ),
-                ScenarioDescription.TRAFFIC_LIGHT_LANE: np.zeros(shape=(episode_len, )),
-            },
-            metadata=dict(track_length=episode_len, type=MetaDriveType.TRAFFIC_LIGHT, object_id=k, dataset="metadrive")
-        )
+        k: {
+            "type": MetaDriveType.TRAFFIC_LIGHT,
+            "state": {ScenarioDescription.TRAFFIC_LIGHT_STATUS: [None] * episode_len},
+            ScenarioDescription.TRAFFIC_LIGHT_POSITION: np.zeros(shape=(3, ), dtype=np.float32),
+            ScenarioDescription.TRAFFIC_LIGHT_LANE: None,
+            "metadata": dict(track_length=episode_len, type=MetaDriveType.TRAFFIC_LIGHT, object_id=k, dataset="metadrive")
+        }
         for k in list(all_lights)
     }
 
@@ -191,10 +187,15 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
                 # Introducing the state item
                 light_status = state[ScenarioDescription.TRAFFIC_LIGHT_STATUS]
                 lights[id]["state"][ScenarioDescription.TRAFFIC_LIGHT_STATUS][frame_idx] = light_status
-                if light_status != MetaDriveType.LIGHT_UNKNOWN:
-                    lights[id]["state"][ScenarioDescription.TRAFFIC_LIGHT_LANE][frame_idx] = int(id)
-                    lights[id]["state"][ScenarioDescription.TRAFFIC_LIGHT_POSITION][frame_idx] = state[
-                        ScenarioDescription.TRAFFIC_LIGHT_POSITION]
+
+                # if light_status != MetaDriveType.LIGHT_UNKNOWN:
+                if lights[id][ScenarioDescription.TRAFFIC_LIGHT_LANE] is None:
+                    lights[id][ScenarioDescription.TRAFFIC_LIGHT_LANE] = str(id)
+                    lights[id][ScenarioDescription.TRAFFIC_LIGHT_POSITION] = state[ScenarioDescription.TRAFFIC_LIGHT_POSITION]
+                else:
+                    assert lights[id][ScenarioDescription.TRAFFIC_LIGHT_LANE] == str(id)
+                    assert lights[id][ScenarioDescription.TRAFFIC_LIGHT_POSITION] == state[ScenarioDescription.TRAFFIC_LIGHT_POSITION]
+
             else:
                 tracks[id]["type"] = type
                 tracks[id][SD.METADATA]["type"] = tracks[id]["type"]

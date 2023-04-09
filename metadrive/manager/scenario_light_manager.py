@@ -4,7 +4,7 @@ import numpy as np
 from metadrive.component.traffic_light.scenario_traffic_light import ScenarioTrafficLight
 from metadrive.utils.coordinates_shift import right_hand_to_left_vector
 from metadrive.type import MetaDriveType
-from metadrive.scenario.scenario_description import ScenarioDescription
+from metadrive.scenario.scenario_description import ScenarioDescription as SD
 from metadrive.manager.base_manager import BaseManager
 
 
@@ -39,17 +39,17 @@ class ScenarioLightManager(BaseManager):
             if self.engine.global_config["force_reuse_object_name"]:
                 assert scenario_lane_id == traffic_light.id, "Original id should be assigned to traffic lights"
             self._lane_index_to_obj[lane_info.lane.index] = traffic_light
-            status = light_info[ScenarioDescription.TRAFFIC_LIGHT_STATUS][self.episode_step]
+            status = light_info[SD.TRAFFIC_LIGHT_STATUS][self.episode_step]
             traffic_light.set_status(status, self.data_source)
 
     def _get_light_position(self, light_info):
-        if ScenarioDescription.TRAFFIC_LIGHT_POSITION in light_info:
+        if SD.TRAFFIC_LIGHT_POSITION in light_info:
             # New format where the position is a 3-dim vector.
-            return light_info[ScenarioDescription.TRAFFIC_LIGHT_POSITION]
+            return light_info[SD.TRAFFIC_LIGHT_POSITION]
 
         else:
-            index = np.where(light_info[ScenarioDescription.TRAFFIC_LIGHT_LANE] > 0)[0][0]
-            return light_info[ScenarioDescription.TRAFFIC_LIGHT_POSITION][index]
+            index = np.where(light_info[SD.TRAFFIC_LIGHT_LANE] > 0)[0][0]
+            return light_info[SD.TRAFFIC_LIGHT_POSITION][index]
 
     def after_step(self, *args, **kwargs):
         if self.episode_step >= self.current_scenario_length:
@@ -57,7 +57,7 @@ class ScenarioLightManager(BaseManager):
 
         for scenario_light_id, light_id, in self._scenario_id_to_obj_id.items():
             light_obj = self.spawned_objects[light_id]
-            status = self._episode_light_data[scenario_light_id][ScenarioDescription.TRAFFIC_LIGHT_STATUS][
+            status = self._episode_light_data[scenario_light_id][SD.TRAFFIC_LIGHT_STATUS][
                 self.episode_step]
             light_obj.set_status(status, self.data_source)
 
@@ -74,37 +74,37 @@ class ScenarioLightManager(BaseManager):
 
     def _get_episode_light_data(self):
         ret = dict()
-        for lane_id, light_info in self.current_scenario[ScenarioDescription.DYNAMIC_MAP_STATES].items():
-            ret[lane_id] = copy.deepcopy(light_info[ScenarioDescription.STATE])
-            ret[lane_id]["metadata"] = copy.deepcopy(light_info[ScenarioDescription.METADATA])
+        for lane_id, light_info in self.current_scenario[SD.DYNAMIC_MAP_STATES].items():
+            ret[lane_id] = copy.deepcopy(light_info[SD.STATE])
+            ret[lane_id]["metadata"] = copy.deepcopy(light_info[SD.METADATA])
 
-            if ScenarioDescription.TRAFFIC_LIGHT_POSITION in ret[lane_id]:
+            if SD.TRAFFIC_LIGHT_POSITION in ret[lane_id]:
                 # Old data format where position is a 2D array with shape [T, 2]
-                traffic_light_position = ret[lane_id][ScenarioDescription.TRAFFIC_LIGHT_POSITION]
+                traffic_light_position = ret[lane_id][SD.TRAFFIC_LIGHT_POSITION]
 
-                if not np.any(ret[lane_id][ScenarioDescription.TRAFFIC_LIGHT_LANE].astype(bool)):
+                if not np.any(ret[lane_id][SD.TRAFFIC_LIGHT_LANE].astype(bool)):
                     # This traffic light has no effect.
                     first_pos = -1
                 else:
-                    first_pos = np.argwhere(ret[lane_id][ScenarioDescription.TRAFFIC_LIGHT_LANE] != 0)[0, 0]
+                    first_pos = np.argwhere(ret[lane_id][SD.TRAFFIC_LIGHT_LANE] != 0)[0, 0]
                 traffic_light_position = traffic_light_position[first_pos]
             else:
                 # New data format where position is a [3, ] array.
-                traffic_light_position = light_info[ScenarioDescription.TRAFFIC_LIGHT_POSITION][:2]
+                traffic_light_position = light_info[SD.TRAFFIC_LIGHT_POSITION][:2]
 
             if self.engine.data_manager.coordinate_transform:
                 # ignore height and convert coordinate, if necessary
                 traffic_light_position = right_hand_to_left_vector(traffic_light_position)
 
-            ret[lane_id][ScenarioDescription.TRAFFIC_LIGHT_POSITION] = traffic_light_position
+            ret[lane_id][SD.TRAFFIC_LIGHT_POSITION] = traffic_light_position
 
-            assert light_info[ScenarioDescription.TYPE] == MetaDriveType.TRAFFIC_LIGHT, "Can not handle {}".format(
-                light_info[ScenarioDescription.TYPE]
+            assert light_info[SD.TYPE] == MetaDriveType.TRAFFIC_LIGHT, "Can not handle {}".format(
+                light_info[SD.TYPE]
             )
         return ret
 
     def get_state(self):
         return {
-            ScenarioDescription.OBJ_ID_TO_ORIGINAL_ID: copy.deepcopy(self._obj_id_to_scenario_id),
-            ScenarioDescription.ORIGINAL_ID_TO_OBJ_ID: copy.deepcopy(self._scenario_id_to_obj_id)
+            SD.OBJ_ID_TO_ORIGINAL_ID: copy.deepcopy(self._obj_id_to_scenario_id),
+            SD.ORIGINAL_ID_TO_OBJ_ID: copy.deepcopy(self._scenario_id_to_obj_id)
         }

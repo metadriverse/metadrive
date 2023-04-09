@@ -262,16 +262,16 @@ def compare_exported_scenario_with_waymo_origin(scenarios, data_manager):
             np.testing.assert_almost_equal(old_pos[:2], new_pos[:2], decimal=NP_ARRAY_DECIMAL)
 
             if "lane" in old_light["state"]:
-                old_light_lane = max(old_light["state"]["lane"])
+                old_light_lane = str(max(old_light["state"]["lane"]))
             else:
                 old_light_lane = old_light["lane"]
 
             if "lane" in new_light["state"]:
                 new_light_lane = max(new_light["state"]["lane"])
             else:
-                new_light_lane = old_light_lane["lane"]
+                new_light_lane = new_light["lane"]
 
-            assert old_light_lane == new_light_lane
+            assert str(old_light_lane) == str(new_light_lane)
 
             for k, light_status in enumerate(old_light["state"]["object_state"][:length]):
                 assert MetaDriveType.parse_light_status(light_status, simplifying=True, data_source="waymo") == \
@@ -302,8 +302,8 @@ def test_waymo_export_and_original_consistency(num_scenarios=3, render_export_en
 
 
 if __name__ == "__main__":
-    test_export_metadrive_scenario_reproduction(num_scenarios=10)
+    # test_export_metadrive_scenario_reproduction(num_scenarios=10)
     # test_export_metadrive_scenario_easy(num_scenarios=1, render_export_env=False, render_load_env=False)
     # test_export_metadrive_scenario_hard(num_scenarios=3, render_export_env=True, render_load_env=True)
     # test_export_waymo_scenario(num_scenarios=1, render_export_env=False, render_load_env=False)
-    # test_waymo_export_and_original_consistency(num_scenarios=2, render_export_env=False)
+    test_waymo_export_and_original_consistency(num_scenarios=3, render_export_env=False)
