@@ -240,9 +240,10 @@ def parse_data(file_list, input_path, output_path, worker_index=None):
                     f"{total} Scenarios. The last one is saved at: {p}"
                 )
 
-    with open(os.path.join(output_path, summary_file), "wb") as file:
+    summary_file = os.path.join(output_path, summary_file)
+    with open(summary_file, "wb") as file:
         pickle.dump(_dict_recursive_remove_array(metadata_recorder), file)
-    print("dataset_summary.pkl is saved at: {}".format(output_path))
+    print("Summary is saved at: {}".format(summary_file))
 
 
 if __name__ == "__main__":
