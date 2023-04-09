@@ -292,9 +292,10 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
     result[SD.METADATA]["agent_to_object"] = {str(k): str(v) for k, v in agent_to_object.items()}
     result[SD.METADATA]["object_to_agent"] = {str(k): str(v) for k, v in object_to_agent.items()}
 
-    data_manager_raw_data = record_episode["manager_metadata"][data_manager_name].get("raw_data", None)
-    if data_manager_raw_data:
-        result[SD.METADATA]["history_metadata"] = data_manager_raw_data["metadata"]
+    if data_manager_name is not None:
+        data_manager_raw_data = record_episode["manager_metadata"][data_manager_name].get("raw_data", None)
+        if data_manager_raw_data:
+            result[SD.METADATA]["history_metadata"] = data_manager_raw_data["metadata"]
 
     result = result.to_dict()
     SD.sanity_check(result, check_self_type=True)
