@@ -5,11 +5,12 @@ from metadrive.constants import DrivableAreaProperty
 
 
 class PGLane(AbstractLane):
-    POLYGON_SAMPLE_RATE = 2
+    POLYGON_SAMPLE_RATE = 1
     radius = 0.0
 
     def __init__(self):
         super(PGLane, self).__init__()
+        # one should implement how to get polygon in property def polygon(self)
         self._polygon = None
 
     def construct_sidewalk(self, block, lateral):
@@ -38,16 +39,10 @@ class PGLane(AbstractLane):
 
     @property
     def polygon(self):
-        if self._polygon is None:
-            polygon = []
-            longs = np.arange(0, self.length + 1., self.POLYGON_SAMPLE_RATE)
-            for lateral in [+self.width_at(0) / 2, -self.width_at(0) / 2]:
-                for longitude in longs:
-                    point = self.position(longitude, lateral)
-                    polygon.append([point[0], point[1], 0.1])
-                    polygon.append([point[0], point[1], 0.])
-            self._polygon = np.asarray(polygon)
-        return self._polygon
+        raise NotImplementedError("Overwrite this function to allow getting polygon for this lane")
 
     def get_polygon(self):
         return self.polygon
+
+    def has_polygon(self):
+        return True if self.polygon is not None else False
