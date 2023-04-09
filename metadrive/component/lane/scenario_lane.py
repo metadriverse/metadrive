@@ -1,4 +1,5 @@
 import logging
+from metadrive.constants import DrivableAreaProperty
 import math
 
 from metadrive.component.lane.point_lane import PointLane
@@ -18,9 +19,12 @@ class ScenarioLane(PointLane):
         center_line_points = convert_polyline_to_metadrive(
             map_data[lane_id][ScenarioDescription.POLYLINE], coordinate_transform=coordinate_transform
         )
-        polygon = convert_polyline_to_metadrive(
-            map_data[lane_id][ScenarioDescription.POLYGON], coordinate_transform=coordinate_transform
-        )
+        if ScenarioDescription.POLYGON in map_data[lane_id]:
+            polygon = convert_polyline_to_metadrive(
+                map_data[lane_id][ScenarioDescription.POLYGON], coordinate_transform=coordinate_transform
+            )
+        else:
+            polygon = None
         assert "speed_limit_kmh" in map_data[lane_id] or "speed_limit_mph" in map_data[lane_id]
         speed_limit_kmh = map_data[lane_id].get("speed_limit_kmh", None)
         if speed_limit_kmh is None:
@@ -78,36 +82,6 @@ class ScenarioLane(PointLane):
         self.left_lanes = None
         self.right_lanes = None
         super(ScenarioLane, self).destroy()
-
-    # def construct_lane_in_block(self, block, lane_index):
-    #     """
-    #     Modified from base class, the width is set to 6.5
-    #     """
-    #     # build physics contact
-    #     if self.need_lane_localization:
-    #         super(ScenarioLane, self).construct_lane_in_block(block, lane_index)
-    #     else:
-    #         lane = self
-    #         if lane_index is not None:
-    #             lane.index = lane_index
-    #
-    #         # build visualization
-    #         segment_num = int(self.length / DrivableAreaProperty.LANE_SEGMENT_LENGTH)
-    #         if segment_num == 0:
-    #             middle = self.position(self.length / 2, 0)
-    #             end = self.position(self.length, 0)
-    #             theta = self.heading_theta_at(self.length / 2)
-    #             self._construct_lane_only_vis_segment(block, middle, self.VIS_LANE_WIDTH, self.length, theta)
-    #
-    #         for i in range(segment_num):
-    #             middle = self.position(self.length * (i + .5) / segment_num, 0)
-    #             end = self.position(self.length * (i + 1) / segment_num, 0)
-    #             direction_v = end - middle
-    #             theta = math.atan2(direction_v[1], direction_v[0])
-    #             length = self.length
-    #             self._construct_lane_only_vis_segment(
-    #                 block, middle, self.VIS_LANE_WIDTH, length * 1.3 / segment_num, theta
-    #             )
 
 
 if __name__ == "__main__":

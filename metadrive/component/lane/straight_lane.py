@@ -72,7 +72,7 @@ class StraightLane(MetaDriveLane):
         self.end = end
         self.update_properties()
 
-    def construct_lane_in_block(self, block, lane_index=None):
+    def construct_lane_in_block(self, block, lane_index):
         """
         Straight lane can be represented by one segment
         """

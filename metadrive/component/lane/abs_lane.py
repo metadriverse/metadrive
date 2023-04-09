@@ -202,7 +202,7 @@ class AbstractLane:
         """
         pass
 
-    def construct_lane_segment(self, block, position, width, length, theta, lane_index=None):
+    def construct_lane_segment(self, block, position, width, length, theta, lane_index):
         """
         Construct a PART of this lane in block. The reason for using this is that we can use box shape to apporximate
         almost all shapes
@@ -417,3 +417,7 @@ class AbstractLane:
             ret.append(self.position(i, lateral))
         ret.append(self.position(self.length, lateral))
         return np.array(ret)
+
+    @property
+    def id(self):
+        return self.index

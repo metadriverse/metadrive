@@ -96,26 +96,47 @@ class PointLane(AbstractLane, InterpolatingLine):
         """
         Modified from base class, the width is set to 6.5
         """
-        lane = self
         if lane_index is not None:
-            lane.index = lane_index
+            self.index = lane_index
 
-        # build visualization
-        segment_num = int(self.length / DrivableAreaProperty.LANE_SEGMENT_LENGTH)
-        if segment_num == 0:
-            middle = self.position(self.length / 2, 0)
-            end = self.position(self.length, 0)
-            theta = self.heading_theta_at(self.length / 2)
-            self._construct_lane_only_vis_segment(block, middle, self.VIS_LANE_WIDTH, self.length, theta)
+        if self.has_polygon:
+            # build visualization
+            segment_num = int(self.length / DrivableAreaProperty.LANE_SEGMENT_LENGTH)
+            if segment_num == 0:
+                middle = self.position(self.length / 2, 0)
+                end = self.position(self.length, 0)
+                theta = self.heading_theta_at(self.length / 2)
+                self._construct_lane_only_vis_segment(block, middle, self.VIS_LANE_WIDTH, self.length, theta)
 
-        for i in range(segment_num):
-            middle = self.position(self.length * (i + .5) / segment_num, 0)
-            end = self.position(self.length * (i + 1) / segment_num, 0)
-            direction_v = end - middle
-            theta = math.atan2(direction_v[1], direction_v[0])
-            length = self.length
-            self._construct_lane_only_vis_segment(block, middle, self.VIS_LANE_WIDTH, length * 1.3 / segment_num, theta)
+            for i in range(segment_num):
+                middle = self.position(self.length * (i + .5) / segment_num, 0)
+                end = self.position(self.length * (i + 1) / segment_num, 0)
+                direction_v = end - middle
+                theta = math.atan2(direction_v[1], direction_v[0])
+                length = self.length
+                self._construct_lane_only_vis_segment(block, middle, self.VIS_LANE_WIDTH, length * 1.3 / segment_num,
+                                                      theta)
 
-        # build physics contact
-        if self.need_lane_localization:
-            self._construct_lane_only_physics_polygon(block, self.polygon)
+            # build physics contact
+            if self.need_lane_localization:
+                self._construct_lane_only_physics_polygon(block, self.polygon)
+        else:
+            segment_num = int(self.length / DrivableAreaProperty.LANE_SEGMENT_LENGTH)
+            if segment_num == 0:
+                middle = self.position(self.length / 2, 0)
+                end = self.position(self.length, 0)
+                theta = self.heading_theta_at(self.length / 2)
+                self.construct_lane_segment(block, middle, self.VIS_LANE_WIDTH, self.length, theta, self.index)
+
+            for i in range(segment_num):
+                middle = self.position(self.length * (i + .5) / segment_num, 0)
+                end = self.position(self.length * (i + 1) / segment_num, 0)
+                direction_v = end - middle
+                theta = math.atan2(direction_v[1], direction_v[0])
+                length = self.length
+                self.construct_lane_segment(
+                    block, middle, self.VIS_LANE_WIDTH, length * 1.3 / segment_num, theta, self.index)
+
+    @property
+    def has_polygon(self):
+        return True if self.polygon is not None else False

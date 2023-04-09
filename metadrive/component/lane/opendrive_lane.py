@@ -94,7 +94,7 @@ class OpenDriveLane(AbstractLane, InterpolatingLine):
         ret.sort(key=lambda seg: abs(seg[-1]))
         return ret[0][0], ret[0][1]
 
-    def construct_lane_in_block(self, block, lane_index=None):
+    def construct_lane_in_block(self, block, lane_index):
         """
         Straight lane can be represented by one segment
         """
