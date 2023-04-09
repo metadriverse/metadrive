@@ -28,15 +28,15 @@ except ImportError:
     try:
         from metadrive.utils.waymo_utils.protos import scenario_pb2  # Local files that only in PZH's computer.
     except ImportError:
-        pass
-    else:
-        print("Please install waymo_open_dataset package through metadrive dependencies: pip install -e .[waymo]")
+        print("Please install waymo_open_dataset package through metadrive dependencies: "
+              "pip install waymo-open-dataset-tf-2-11-0==1.5.0")
 
 from metadrive.scenario import ScenarioDescription as SD
 from metadrive.type import MetaDriveType
 from metadrive.utils.waymo_utils.utils import extract_tracks, extract_dynamic_map_states, extract_map_features, \
     compute_width
 import sys
+from tqdm.auto import tqdm
 
 
 def validate_sdc_track(sdc_state):
@@ -132,11 +132,16 @@ def parse_data(file_list, input_path, output_path):
 
     metadata_recorder = {}
 
-    for file in tqdm(file_list):
+    for file in tqdm(file_list, desc="File"):
         file_path = os.path.join(input_path, file)
         if ("tfrecord" not in file_path) or (not os.path.isfile(file_path)):
             continue
         dataset = tf.data.TFRecordDataset(file_path, compression_type="")
+
+        total = sum(1 for _ in dataset.as_numpy_iterator())
+
+        pbar = tqdm(total=total, desc="Scenario")
+
         for j, data in enumerate(dataset.as_numpy_iterator()):
             scenario.ParseFromString(data)
 
@@ -224,13 +229,17 @@ def parse_data(file_list, input_path, output_path):
             p = os.path.join(output_path, export_file_name)
             with open(p, "wb") as f:
                 pickle.dump(md_scenario, f)
-            print("Scenario {} is saved at: {}".format(cnt, p))
+
+            if cnt == 0:
+                print("Scenario {} is saved at: {}".format(cnt, p))
+            pbar.update(1)
             cnt += 1
+
+        pbar.close()
 
     with open(os.path.join(output_path, "dataset_summary.pkl"), "wb") as file:
         pickle.dump(_dict_recursive_remove_array(metadata_recorder), file)
-
-    return
+    print("dataset_summary.pkl is saved at: {}".format(output_path))
 
 
 if __name__ == "__main__":
