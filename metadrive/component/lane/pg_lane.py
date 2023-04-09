@@ -5,7 +5,7 @@ from metadrive.constants import DrivableAreaProperty
 
 
 class PGLane(AbstractLane):
-    POLYGON_SAMPLE_RATE = DrivableAreaProperty.LANE_SEGMENT_LENGTH
+    POLYGON_SAMPLE_RATE = 1
     radius = 0.0
 
     def __init__(self):
