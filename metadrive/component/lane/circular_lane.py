@@ -15,17 +15,17 @@ class CircularLane(PGLane):
     CIRCULAR_SEGMENT_LENGTH = 1
 
     def __init__(
-            self,
-            center: Vector,
-            radius: float,
-            start_phase: float,
-            end_phase: float,
-            clockwise: bool = True,
-            width: float = PGLane.DEFAULT_WIDTH,
-            line_types: Tuple[PGLineType, PGLineType] = (PGLineType.BROKEN, PGLineType.BROKEN),
-            forbidden: bool = False,
-            speed_limit: float = 1000,
-            priority: int = 0
+        self,
+        center: Vector,
+        radius: float,
+        start_phase: float,
+        end_phase: float,
+        clockwise: bool = True,
+        width: float = PGLane.DEFAULT_WIDTH,
+        line_types: Tuple[PGLineType, PGLineType] = (PGLineType.BROKEN, PGLineType.BROKEN),
+        forbidden: bool = False,
+        speed_limit: float = 1000,
+        priority: int = 0
     ) -> None:
         super().__init__()
         self.set_speed_limit(speed_limit)
@@ -105,8 +105,7 @@ class CircularLane(PGLane):
             end_dir = [math.cos(end_heading), math.sin(end_heading)]
             polygon = []
             longs = np.arange(0, self.length + self.CIRCULAR_SEGMENT_LENGTH, self.CIRCULAR_SEGMENT_LENGTH)
-            for k, lateral in enumerate([+self.width / 2,
-                                         -self.width / 2]):
+            for k, lateral in enumerate([+self.width / 2, -self.width / 2]):
                 if k == 1:
                     longs = longs[::-1]
                 for t, longitude in enumerate(longs):
@@ -119,10 +118,18 @@ class CircularLane(PGLane):
                             polygon.append([point[0], point[1], -0.5])
 
                         # extend
-                        polygon.append([point[0] - start_dir[0] * self.POLYGON_SAMPLE_RATE,
-                                        point[1] - start_dir[1] * self.POLYGON_SAMPLE_RATE, 0.0])
-                        polygon.append([point[0] - start_dir[0] * self.POLYGON_SAMPLE_RATE,
-                                        point[1] - start_dir[1] * self.POLYGON_SAMPLE_RATE, -0.5])
+                        polygon.append(
+                            [
+                                point[0] - start_dir[0] * self.POLYGON_SAMPLE_RATE,
+                                point[1] - start_dir[1] * self.POLYGON_SAMPLE_RATE, 0.0
+                            ]
+                        )
+                        polygon.append(
+                            [
+                                point[0] - start_dir[0] * self.POLYGON_SAMPLE_RATE,
+                                point[1] - start_dir[1] * self.POLYGON_SAMPLE_RATE, -0.5
+                            ]
+                        )
 
                         if k == 0:
                             # first point
@@ -135,10 +142,18 @@ class CircularLane(PGLane):
                             polygon.append([point[0], point[1], 0.0])
                             polygon.append([point[0], point[1], -0.5])
 
-                        polygon.append([point[0] + end_dir[0] * self.POLYGON_SAMPLE_RATE,
-                                        point[1] + end_dir[1] * self.POLYGON_SAMPLE_RATE, 0.0])
-                        polygon.append([point[0] + end_dir[0] * self.POLYGON_SAMPLE_RATE,
-                                        point[1] + end_dir[1] * self.POLYGON_SAMPLE_RATE, -0.5])
+                        polygon.append(
+                            [
+                                point[0] + end_dir[0] * self.POLYGON_SAMPLE_RATE,
+                                point[1] + end_dir[1] * self.POLYGON_SAMPLE_RATE, 0.0
+                            ]
+                        )
+                        polygon.append(
+                            [
+                                point[0] + end_dir[0] * self.POLYGON_SAMPLE_RATE,
+                                point[1] + end_dir[1] * self.POLYGON_SAMPLE_RATE, -0.5
+                            ]
+                        )
 
                         if k == 1:
                             # third point

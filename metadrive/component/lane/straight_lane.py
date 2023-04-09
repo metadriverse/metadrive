@@ -10,16 +10,15 @@ from metadrive.utils.math_utils import norm
 
 class StraightLane(PGLane):
     """A lane going in straight line."""
-
     def __init__(
-            self,
-            start: Union[np.ndarray, Sequence[float]],
-            end: Union[np.ndarray, Sequence[float]],
-            width: float = PGLane.DEFAULT_WIDTH,
-            line_types: Tuple[PGLineType, PGLineType] = (PGLineType.BROKEN, PGLineType.BROKEN),
-            forbidden: bool = False,
-            speed_limit: float = 1000,
-            priority: int = 0
+        self,
+        start: Union[np.ndarray, Sequence[float]],
+        end: Union[np.ndarray, Sequence[float]],
+        width: float = PGLane.DEFAULT_WIDTH,
+        line_types: Tuple[PGLineType, PGLineType] = (PGLineType.BROKEN, PGLineType.BROKEN),
+        forbidden: bool = False,
+        speed_limit: float = 1000,
+        priority: int = 0
     ) -> None:
         """
         New straight lane.

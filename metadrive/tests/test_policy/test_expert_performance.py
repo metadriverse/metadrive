@@ -36,8 +36,9 @@ def _evaluate(env_config, num_episode, has_traffic=True, need_on_same_lane=True)
                 reward_list.append(ep_reward)
                 ep_reward = 0
                 ep_len = 0
-                env.config["target_vehicle_configs"]["default_agent"]["spawn_lane_index"] = (">", ">>",
-                                                                                             len(reward_list) % 3)
+                env.config["target_vehicle_configs"]["default_agent"]["spawn_lane_index"] = (
+                    ">", ">>", len(reward_list) % 3
+                )
                 lane_idx_need_to_stay = len(reward_list) % 3
                 obs = env.reset()
                 if has_traffic:

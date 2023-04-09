@@ -15,7 +15,6 @@ from metadrive.utils.interpolating_line import InterpolatingLine
 
 
 class NuPlanLane(PointLane):
-
     def __init__(self, lane_meta_data, nuplan_center, need_lane_localization=False):
         """
         Extract the lane information of one waymo lane, and do coordinate shift
@@ -32,10 +31,12 @@ class NuPlanLane(PointLane):
         polygon = [[points[0][i], points[1][i], 0.1] for i in range(len(points[0]))]
         polygon += [[points[0][i], points[1][i], 0.] for i in range(len(points[0]))]
         polygon = nuplan_to_metadrive_vector(polygon, nuplan_center=[nuplan_center[0], nuplan_center[1], 0])
-        super(NuPlanLane, self).__init__(self._extract_centerline(lane_meta_data, nuplan_center),
-                                         width=None,  # we use width_at to get width
-                                         polygon=polygon,
-                                         need_lane_localization=need_lane_localization)
+        super(NuPlanLane, self).__init__(
+            self._extract_centerline(lane_meta_data, nuplan_center),
+            width=None,  # we use width_at to get width
+            polygon=polygon,
+            need_lane_localization=need_lane_localization
+        )
         self.index = lane_meta_data.id
         self.entry_lanes = lane_meta_data.incoming_edges,
         self.exit_lanes = lane_meta_data.outgoing_edges,

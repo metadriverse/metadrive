@@ -725,9 +725,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         """
         if not self.config["need_navigation"]:
             return
-        possible_lanes = ray_localization(
-            self.heading, self.spawn_place, self.engine, use_heading_filter=False
-        )
+        possible_lanes = ray_localization(self.heading, self.spawn_place, self.engine, use_heading_filter=False)
         possible_lane_indexes = [lane_index for lane, lane_index, dist in possible_lanes]
 
         if len(possible_lanes) == 0 and self.config["spawn_lane_index"] is None:

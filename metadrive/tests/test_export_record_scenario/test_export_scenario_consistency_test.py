@@ -50,7 +50,9 @@ def test_export_metadrive_scenario_reproduction(num_scenarios=3, render_export_e
 def test_export_metadrive_scenario_easy(num_scenarios=5, render_export_env=False, render_load_env=False):
     # ===== Save data =====
     env = MetaDriveEnv(
-        dict(start_seed=0, map="SCS", use_render=render_export_env, num_scenarios=num_scenarios, agent_policy=IDMPolicy)
+        dict(
+            start_seed=0, map="SCS", use_render=render_export_env, num_scenarios=num_scenarios, agent_policy=IDMPolicy
+        )
     )
     policy = lambda x: [0, 1]
     dir1 = None
