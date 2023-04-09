@@ -1,4 +1,5 @@
 import copy
+import os
 import pickle
 
 import matplotlib.pyplot as plt
@@ -71,6 +72,16 @@ def find_traffic_manager_name(manager_info):
     return None
 
 
+def find_data_manager_name(manager_info):
+    """
+    Find the data_manager
+    """
+    for manager_name in manager_info:
+        if "DataManager" in manager_name:
+            return manager_name
+    return None
+
+
 def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1):
     """
     This function utilizes the recorded data natively emerging from MetaDrive run.
@@ -118,15 +129,16 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
 
     traffic_manager_name = find_traffic_manager_name(record_episode["manager_metadata"])
     light_manager_name = find_light_manager_name(record_episode["manager_metadata"])
+    data_manager_name = find_data_manager_name(record_episode["manager_metadata"])
 
     tracks = {
         k: dict(
             type=MetaDriveType.UNSET,
             state=dict(
                 position=np.zeros(shape=(episode_len, 3)),
-                heading=np.zeros(shape=(episode_len, 1)),
+                heading=np.zeros(shape=(episode_len, )),
                 velocity=np.zeros(shape=(episode_len, 2)),
-                valid=np.zeros(shape=(episode_len, 1)),
+                valid=np.zeros(shape=(episode_len, )),
 
                 # Add these items when the object has them.
                 # throttle_brake=np.zeros(shape=(episode_len, 1)),
@@ -144,17 +156,17 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
             all_lights.update(frame.manager_info[light_manager_name][SD.ORIGINAL_ID_TO_OBJ_ID].keys())
 
     lights = {
-        k: dict(
-            type=MetaDriveType.TRAFFIC_LIGHT,
-            state={
-                ScenarioDescription.TRAFFIC_LIGHT_POSITION: np.zeros(shape=(episode_len, 2)),
-                ScenarioDescription.TRAFFIC_LIGHT_STATUS: np.array(
-                    [MetaDriveType.LIGHT_UNKNOWN for _ in range(episode_len)]
-                ),
-                ScenarioDescription.TRAFFIC_LIGHT_LANE: np.zeros(shape=(episode_len, )),
+        k: {
+            "type": MetaDriveType.TRAFFIC_LIGHT,
+            "state": {
+                ScenarioDescription.TRAFFIC_LIGHT_STATUS: [None] * episode_len
             },
-            metadata=dict(track_length=episode_len, type=MetaDriveType.TRAFFIC_LIGHT, object_id=k, dataset="metadrive")
-        )
+            ScenarioDescription.TRAFFIC_LIGHT_POSITION: np.zeros(shape=(3, ), dtype=np.float32),
+            ScenarioDescription.TRAFFIC_LIGHT_LANE: None,
+            "metadata": dict(
+                track_length=episode_len, type=MetaDriveType.TRAFFIC_LIGHT, object_id=k, dataset="metadrive"
+            )
+        }
         for k in list(all_lights)
     }
 
@@ -179,10 +191,17 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
                 # Introducing the state item
                 light_status = state[ScenarioDescription.TRAFFIC_LIGHT_STATUS]
                 lights[id]["state"][ScenarioDescription.TRAFFIC_LIGHT_STATUS][frame_idx] = light_status
-                if light_status != MetaDriveType.LIGHT_UNKNOWN:
-                    lights[id]["state"][ScenarioDescription.TRAFFIC_LIGHT_LANE][frame_idx] = int(id)
-                    lights[id]["state"][ScenarioDescription.TRAFFIC_LIGHT_POSITION][frame_idx] = state[
-                        ScenarioDescription.TRAFFIC_LIGHT_POSITION]
+
+                # if light_status != MetaDriveType.LIGHT_UNKNOWN:
+                if lights[id][ScenarioDescription.TRAFFIC_LIGHT_LANE] is None:
+                    lights[id][ScenarioDescription.TRAFFIC_LIGHT_LANE] = str(id)
+                    lights[id][ScenarioDescription.TRAFFIC_LIGHT_POSITION
+                               ] = state[ScenarioDescription.TRAFFIC_LIGHT_POSITION]
+                else:
+                    assert lights[id][ScenarioDescription.TRAFFIC_LIGHT_LANE] == str(id)
+                    assert lights[id][ScenarioDescription.TRAFFIC_LIGHT_POSITION
+                                      ] == state[ScenarioDescription.TRAFFIC_LIGHT_POSITION]
+
             else:
                 tracks[id]["type"] = type
                 tracks[id][SD.METADATA]["type"] = tracks[id]["type"]
@@ -280,6 +299,11 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
     result[SD.METADATA]["agent_to_object"] = {str(k): str(v) for k, v in agent_to_object.items()}
     result[SD.METADATA]["object_to_agent"] = {str(k): str(v) for k, v in object_to_agent.items()}
 
+    if data_manager_name is not None:
+        data_manager_raw_data = record_episode["manager_metadata"][data_manager_name].get("raw_data", None)
+        if data_manager_raw_data:
+            result[SD.METADATA]["history_metadata"] = data_manager_raw_data["metadata"]
+
     result = result.to_dict()
     SD.sanity_check(result, check_self_type=True)
 
@@ -292,6 +316,28 @@ def read_scenario_data(file_path):
         data = pickle.load(f)
     data = ScenarioDescription(data)
     return data
+
+
+def read_dataset_summary(file_folder):
+    """
+    We now support two methods to load pickle files.
+
+    The first is the old method where we store pickle files in 0.pkl, 1.pkl, ...
+
+    The second is the new method which use a summary file to record important metadata of each scenario.
+    """
+    summary_file = os.path.join(file_folder, "dataset_summary.pkl")
+    if os.path.isfile(summary_file):
+        with open(summary_file, "rb") as f:
+            summary_dict = pickle.load(f)
+
+    else:
+        files = os.listdir(file_folder)
+        files = sorted(files, key=lambda file_name: int(file_name.replace(".pkl", "")))
+        files = [os.path.join(file_folder, p) for p in files]
+        summary_dict = {f: {} for f in files}
+
+    return summary_dict, list(summary_dict.keys())
 
 
 def convert_polyline_to_metadrive(polyline, coordinate_transform=True):

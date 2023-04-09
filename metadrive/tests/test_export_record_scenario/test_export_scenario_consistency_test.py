@@ -206,9 +206,10 @@ def test_export_waymo_scenario(num_scenarios=3, render_export_env=False, render_
         #     shutil.rmtree(dir)
 
 
-def compare_exported_scenario_with_waymo_origin(scenarios):
+def compare_exported_scenario_with_waymo_origin(scenarios, data_manager):
     for index, scenario in scenarios.items():
-        file_path = AssetLoader.file_path("waymo", "{}.pkl".format(index), return_raw_style=False)
+        file_name = data_manager.summary_lookup[index]
+        file_path = AssetLoader.file_path("waymo", file_name, return_raw_style=False)
         with open(file_path, "rb+") as file:
             origin_data = pickle.load(file)
         export_data = scenario
@@ -232,19 +233,46 @@ def compare_exported_scenario_with_waymo_origin(scenarios):
             new_pos = new_pos[index_to_compare][..., :2]
             np.testing.assert_almost_equal(old_pos, new_pos, decimal=NP_ARRAY_DECIMAL)
 
-            old_heading = waymo_to_metadrive_heading(old_heading[index_to_compare])
-            new_heading = new_heading[index_to_compare][..., 0]
+            old_heading = waymo_to_metadrive_heading(old_heading[index_to_compare]).reshape(-1)
+            new_heading = new_heading[index_to_compare].reshape(-1)
             np.testing.assert_almost_equal(old_heading, new_heading, decimal=NP_ARRAY_DECIMAL)
 
         for light_id, old_light in origin_data["dynamic_map_states"].items():
             new_light = export_data["dynamic_map_states"][light_id]
-            old_pos = waymo_to_metadrive_vector(old_light["state"]["stop_point"])[..., :2]
-            old_pos = old_pos[np.where(old_pos > 0)[0][0]]
-            new_pos = new_light["state"]["stop_point"]
-            new_pos = new_pos[np.where(new_pos > 0)[0][0]]
+
+            if "stop_point" in old_light["state"]:
+                old_pos = waymo_to_metadrive_vector(old_light["state"]["stop_point"])[..., :2]
+                old_pos = old_pos[np.where(old_pos > 0)[0][0]]
+
+            else:
+                old_pos = waymo_to_metadrive_vector(old_light["stop_point"])
+
+            if "stop_point" in new_light["state"]:
+                new_pos = new_light["state"]["stop_point"]
+                ind = np.where(new_pos > 0)[0]
+                if ind.size > 0:
+                    ind = ind[0]
+                else:
+                    ind = 0
+                new_pos = new_pos[ind]
+            else:
+                new_pos = new_light["stop_point"]
+
             length = min(len(old_pos), len(new_pos))
-            np.testing.assert_almost_equal(old_pos, new_pos, decimal=NP_ARRAY_DECIMAL)
-            assert max(old_light["state"]["lane"]) == max(new_light["state"]["lane"])
+            np.testing.assert_almost_equal(old_pos[:2], new_pos[:2], decimal=NP_ARRAY_DECIMAL)
+
+            if "lane" in old_light["state"]:
+                old_light_lane = str(max(old_light["state"]["lane"]))
+            else:
+                old_light_lane = old_light["lane"]
+
+            if "lane" in new_light["state"]:
+                new_light_lane = max(new_light["state"]["lane"])
+            else:
+                new_light_lane = new_light["lane"]
+
+            assert str(old_light_lane) == str(new_light_lane)
+
             for k, light_status in enumerate(old_light["state"]["object_state"][:length]):
                 assert MetaDriveType.parse_light_status(light_status, simplifying=True, data_source="waymo") == \
                        new_light["state"]["object_state"][k]
@@ -268,14 +296,14 @@ def test_waymo_export_and_original_consistency(num_scenarios=3, render_export_en
         scenarios, done_info = env.export_scenarios(
             policy, scenario_index=[i for i in range(num_scenarios)], verbose=True
         )
-        compare_exported_scenario_with_waymo_origin(scenarios)
+        compare_exported_scenario_with_waymo_origin(scenarios, env.engine.data_manager)
     finally:
         env.close()
 
 
 if __name__ == "__main__":
     # test_export_metadrive_scenario_reproduction(num_scenarios=10)
-    test_export_metadrive_scenario_easy(num_scenarios=1, render_export_env=False, render_load_env=False)
+    # test_export_metadrive_scenario_easy(num_scenarios=1, render_export_env=False, render_load_env=False)
     # test_export_metadrive_scenario_hard(num_scenarios=3, render_export_env=True, render_load_env=True)
     # test_export_waymo_scenario(num_scenarios=1, render_export_env=False, render_load_env=False)
-    # test_waymo_export_and_original_consistency(num_scenarios=3, render_export_env=False)
+    test_waymo_export_and_original_consistency(num_scenarios=3, render_export_env=False)

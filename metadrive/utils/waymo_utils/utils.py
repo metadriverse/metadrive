@@ -120,8 +120,8 @@ def extract_stop(f):
 def extract_crosswalk(f):
     cross_walk = dict()
     f = f.crosswalk
-    cross_walk["type"] = "CROSS_WALK"
-    cross_walk["polyline"] = extract_poly(f.polygon)
+    cross_walk["type"] = "CROSSWALK"
+    cross_walk["polygon"] = extract_poly(f.polygon)
     return cross_walk
 
 
@@ -129,51 +129,70 @@ def extract_bump(f):
     speed_bump_data = dict()
     f = f.speed_bump
     speed_bump_data["type"] = "SPEED_BUMP"
-    speed_bump_data["polyline"] = extract_poly(f.polygon)
-
+    speed_bump_data["polygon"] = extract_poly(f.polygon)
     return speed_bump_data
 
 
-def extract_tracks(tracks, sdc_idx):
+def extract_driveway(f):
+    driveway_data = dict()
+    f = f.driveway
+    driveway_data["type"] = "DRIVEWAY"
+    driveway_data["polygon"] = extract_poly(f.polygon)
+    return driveway_data
+
+
+def extract_tracks(tracks, sdc_idx, track_length):
     ret = dict()
+
+    def _object_state_template(object_id):
+        return dict(
+            type=None,
+            state=dict(
+
+                # Never add extra dim if the value is scalar.
+                position=np.zeros([track_length, 3], dtype=np.float32),
+                length=np.zeros([track_length], dtype=np.float32),
+                width=np.zeros([track_length], dtype=np.float32),
+                height=np.zeros([track_length], dtype=np.float32),
+                heading=np.zeros([track_length], dtype=np.float32),
+                velocity=np.zeros([track_length, 2], dtype=np.float32),
+                valid=np.zeros([track_length], dtype=bool),
+            ),
+            metadata=dict(track_length=track_length, type=None, object_id=object_id, dataset="waymo")
+        )
 
     for obj in tracks:
         object_id = str(obj.id)
 
-        obj_state = dict()
+        obj_state = _object_state_template(object_id)
 
         waymo_string = WaymoAgentType.from_waymo(obj.object_type)  # Load waymo type string
         metadrive_type = MetaDriveType.from_waymo(waymo_string)  # Transform it to Waymo type string
         obj_state["type"] = metadrive_type
 
-        obj_state["state"] = {}
+        for step_count, state in enumerate(obj.states):
 
-        x = [state.center_x for state in obj.states]
-        y = [state.center_y for state in obj.states]
-        z = [state.center_z for state in obj.states]
-        obj_state["state"]["position"] = np.stack([x, y, z], 1).astype("float32")
+            obj_state["state"]["position"][step_count][0] = state.center_x
+            obj_state["state"]["position"][step_count][1] = state.center_y
+            obj_state["state"]["position"][step_count][2] = state.center_z
 
-        l = [state.length for state in obj.states]
-        w = [state.width for state in obj.states]
-        h = [state.height for state in obj.states]
-        # obj_state["state"]["size"] = np.stack([l, w, h], 1).astype("float32")
-        obj_state["state"]["length"] = np.asarray(l).reshape(-1, 1)
-        obj_state["state"]["width"] = np.asarray(w).reshape(-1, 1)
-        obj_state["state"]["height"] = np.asarray(h).reshape(-1, 1)
+            # l = [state.length for state in obj.states]
+            # w = [state.width for state in obj.states]
+            # h = [state.height for state in obj.states]
+            # obj_state["state"]["size"] = np.stack([l, w, h], 1).astype("float32")
+            obj_state["state"]["length"][step_count] = state.length
+            obj_state["state"]["width"][step_count] = state.width
+            obj_state["state"]["height"][step_count] = state.height
 
-        heading = [state.heading for state in obj.states]
-        obj_state["state"]["heading"] = np.array(heading, dtype="float32")
+            # heading = [state.heading for state in obj.states]
+            obj_state["state"]["heading"][step_count] = state.heading
 
-        vx = [state.velocity_x for state in obj.states]
-        vy = [state.velocity_y for state in obj.states]
-        obj_state["state"]["velocity"] = np.stack([vx, vy], 1).astype("float32")
+            obj_state["state"]["velocity"][step_count][0] = state.velocity_x
+            obj_state["state"]["velocity"][step_count][1] = state.velocity_y
 
-        valid = [state.valid for state in obj.states]
-        obj_state["state"]["valid"] = np.array(valid, dtype=bool)
+            obj_state["state"]["valid"][step_count] = state.valid
 
-        obj_state["metadata"] = dict(
-            track_length=obj_state["state"]["position"].shape[0], type=metadrive_type, object_id=object_id
-        )
+        obj_state["metadata"]["type"] = metadrive_type
 
         ret[object_id] = obj_state
 
@@ -204,25 +223,24 @@ def extract_map_features(map_features):
         if lane_state.HasField("speed_bump"):
             ret[lane_id] = extract_bump(lane_state)
 
+        # Supported only in Waymo dataset 1.2.0
+        if lane_state.HasField("driveway"):
+            ret[lane_id] = extract_driveway(lane_state)
+
     return ret
 
 
-def extract_dynamic_map_states(dynamic_map_states):
+def extract_dynamic_map_states(dynamic_map_states, track_length):
     processed_dynamics_map_states = {}
-    track_length = len(dynamic_map_states)
 
-    def _TRAFFIC_LIGHT_STATUS_template(object_id):
+    def _traffic_light_state_template(object_id):
         return dict(
             type=MetaDriveType.TRAFFIC_LIGHT,
-            state=dict(
-                stop_point=np.zeros([track_length, 3], dtype=np.float32),
-                object_state=np.zeros([
-                    track_length,
-                ], dtype=int),
-                lane=np.zeros([
-                    track_length,
-                ], dtype=int),
-            ),
+            state=dict(object_state=[None] * track_length),
+            lane=None,
+            stop_point=np.zeros([
+                3,
+            ], dtype=np.float32),
             metadata=dict(
                 track_length=track_length, type=MetaDriveType.TRAFFIC_LIGHT, object_id=object_id, dataset="waymo"
             )
@@ -232,18 +250,31 @@ def extract_dynamic_map_states(dynamic_map_states):
         # Each step_states is the state of all objects in one time step
         lane_states = step_states.lane_states
 
+        if step_count >= track_length:
+            break
+
         for object_state in lane_states:
             lane = object_state.lane
             object_id = str(lane)  # Always use string to specify object id
 
             # We will use lane index to serve as the traffic light index.
             if object_id not in processed_dynamics_map_states:
-                processed_dynamics_map_states[object_id] = _TRAFFIC_LIGHT_STATUS_template(object_id=object_id)
-            processed_dynamics_map_states[object_id]["state"]["lane"][step_count] = lane
-            processed_dynamics_map_states[object_id]["state"]["object_state"][step_count] = object_state.state
-            processed_dynamics_map_states[object_id]["state"]["stop_point"][step_count][0] = object_state.stop_point.x
-            processed_dynamics_map_states[object_id]["state"]["stop_point"][step_count][1] = object_state.stop_point.y
-            processed_dynamics_map_states[object_id]["state"]["stop_point"][step_count][2] = object_state.stop_point.z
+                processed_dynamics_map_states[object_id] = _traffic_light_state_template(object_id=object_id)
+
+            if processed_dynamics_map_states[object_id]["lane"] is not None:
+                assert lane == processed_dynamics_map_states[object_id]["lane"]
+            else:
+                processed_dynamics_map_states[object_id]["lane"] = lane
+
+            object_state_string = object_state.State.Name(object_state.state)
+            processed_dynamics_map_states[object_id]["state"]["object_state"][step_count] = object_state_string
+
+            processed_dynamics_map_states[object_id]["stop_point"][0] = object_state.stop_point.x
+            processed_dynamics_map_states[object_id]["stop_point"][1] = object_state.stop_point.y
+            processed_dynamics_map_states[object_id]["stop_point"][2] = object_state.stop_point.z
+
+    for obj in processed_dynamics_map_states.values():
+        assert len(obj["state"]["object_state"]) == obj["metadata"]["track_length"]
 
     return processed_dynamics_map_states
 
@@ -269,13 +300,13 @@ class CustomUnpickler(pickle.Unpickler):
 
 
 def read_waymo_data(file_path):
-    """
-    TODO: This function transform data again. We should remove it and let MetaDrive read native data completely.
-    """
     return read_scenario_data(file_path)
 
 
 def draw_waymo_map(data):
+    """
+    TODO: Need this function in future.
+    """
     figure(figsize=(8, 6), dpi=500)
     for key, value in data[ScenarioDescription.MAP_FEATURES].items():
         if value.get("type", None) == "center_lane":
