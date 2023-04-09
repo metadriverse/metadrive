@@ -70,7 +70,7 @@ class ScenarioLane(PointLane):
             start_on_boundary = nearest_point(start, boundary)
             end_on_boundary = nearest_point(end, boundary)
 
-            points = boundary[start_on_boundary: end_on_boundary]
+            points = boundary[start_on_boundary:end_on_boundary]
             left_boundary_points.append(points)
 
         left_boundary_points = np.concatenate(left_boundary_points, axis=0) if len(left_boundary_points) > 0 else []
@@ -84,7 +84,7 @@ class ScenarioLane(PointLane):
             start_on_boundary = nearest_point(start, boundary)
             end_on_boundary = nearest_point(end, boundary)
 
-            points = boundary[start_on_boundary: end_on_boundary]
+            points = boundary[start_on_boundary:end_on_boundary]
             right_boundary_points.append(points)
 
         right_boundary_points = np.concatenate(right_boundary_points, axis=0) if len(right_boundary_points) > 0 else []
