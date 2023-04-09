@@ -144,9 +144,6 @@ def extract_driveway(f):
 def extract_tracks(tracks, sdc_idx, track_length):
     ret = dict()
 
-    track_length2 = len(tracks[sdc_idx].states)
-    track_length = max(track_length2, track_length)
-
     def _object_state_template(object_id):
         return dict(
             type=None,

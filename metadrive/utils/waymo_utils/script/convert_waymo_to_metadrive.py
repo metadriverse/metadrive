@@ -158,9 +158,9 @@ def parse_data(file_list, input_path, output_path, worker_index=None):
             # sdc_id is a unique indicator to a track, while sdc_track_index is only the index of the sdc track
             # in the tracks datastructure.
 
-            track_length = len(scenario.dynamic_map_states)
+            track_length = len(list(scenario.timestamps_seconds))
 
-            tracks, sdc_id, track_length = extract_tracks(scenario.tracks, scenario.sdc_track_index, track_length)
+            tracks, sdc_id = extract_tracks(scenario.tracks, scenario.sdc_track_index, track_length)
 
             md_scenario[SD.LENGTH] = track_length
 
@@ -177,9 +177,7 @@ def parse_data(file_list, input_path, output_path, worker_index=None):
 
             md_scenario[SD.METADATA] = {}
             md_scenario[SD.METADATA][SD.COORDINATE] = MetaDriveType.COORDINATE_WAYMO
-            md_scenario[SD.METADATA][SD.TIMESTEP] = \
-                np.asarray([ts for ts in scenario.timestamps_seconds], np.float32)
-            md_scenario[SD.METADATA][SD.METADRIVE_PROCESSED] = False
+            md_scenario[SD.METADATA][SD.TIMESTEP] = np.asarray(list(scenario.timestamps_seconds), dtype=np.float32)
             md_scenario[SD.METADATA][SD.METADRIVE_PROCESSED] = False
             md_scenario[SD.METADATA][SD.SDC_ID] = str(sdc_id)
             md_scenario[SD.METADATA]["dataset"] = "waymo"
