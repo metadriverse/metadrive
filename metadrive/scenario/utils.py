@@ -158,10 +158,14 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
     lights = {
         k: {
             "type": MetaDriveType.TRAFFIC_LIGHT,
-            "state": {ScenarioDescription.TRAFFIC_LIGHT_STATUS: [None] * episode_len},
+            "state": {
+                ScenarioDescription.TRAFFIC_LIGHT_STATUS: [None] * episode_len
+            },
             ScenarioDescription.TRAFFIC_LIGHT_POSITION: np.zeros(shape=(3, ), dtype=np.float32),
             ScenarioDescription.TRAFFIC_LIGHT_LANE: None,
-            "metadata": dict(track_length=episode_len, type=MetaDriveType.TRAFFIC_LIGHT, object_id=k, dataset="metadrive")
+            "metadata": dict(
+                track_length=episode_len, type=MetaDriveType.TRAFFIC_LIGHT, object_id=k, dataset="metadrive"
+            )
         }
         for k in list(all_lights)
     }
@@ -191,10 +195,12 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
                 # if light_status != MetaDriveType.LIGHT_UNKNOWN:
                 if lights[id][ScenarioDescription.TRAFFIC_LIGHT_LANE] is None:
                     lights[id][ScenarioDescription.TRAFFIC_LIGHT_LANE] = str(id)
-                    lights[id][ScenarioDescription.TRAFFIC_LIGHT_POSITION] = state[ScenarioDescription.TRAFFIC_LIGHT_POSITION]
+                    lights[id][ScenarioDescription.TRAFFIC_LIGHT_POSITION
+                               ] = state[ScenarioDescription.TRAFFIC_LIGHT_POSITION]
                 else:
                     assert lights[id][ScenarioDescription.TRAFFIC_LIGHT_LANE] == str(id)
-                    assert lights[id][ScenarioDescription.TRAFFIC_LIGHT_POSITION] == state[ScenarioDescription.TRAFFIC_LIGHT_POSITION]
+                    assert lights[id][ScenarioDescription.TRAFFIC_LIGHT_POSITION
+                                      ] == state[ScenarioDescription.TRAFFIC_LIGHT_POSITION]
 
             else:
                 tracks[id]["type"] = type
