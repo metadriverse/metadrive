@@ -237,7 +237,7 @@ def parse_data(file_list, input_path, output_path, worker_index=None):
             if j == total - 1:
                 print(
                     f"{desc}Collected {total_scenarios} scenarios. File {file_count + 1}/{len(file_list)} has "
-                    f"{total} Scenarios. The last one is saved at: {p}."
+                    f"{total} Scenarios. The last one is saved at: {p}"
                 )
 
     with open(os.path.join(output_path, summary_file), "wb") as file:
