@@ -1,4 +1,5 @@
 import math
+from metadrive.utils.coordinates_shift import panda_vector
 from abc import ABCMeta, abstractmethod
 from typing import Tuple
 
@@ -202,7 +203,7 @@ class AbstractLane:
         """
         pass
 
-    def construct_lane_segment(self, block, position, width, length, theta, lane_index=None):
+    def construct_lane_segment(self, block, position, width, length, theta, lane_index):
         """
         Construct a PART of this lane in block. The reason for using this is that we can use box shape to apporximate
         almost all shapes
@@ -370,7 +371,7 @@ class AbstractLane:
         shape = BulletConvexHullShape()
         for point in polygon:
             # Panda coordinate is different from metadrive coordinate
-            point[1] *= -1
+            point = panda_vector(point)
             shape.addPoint(LPoint3f(*point))
         segment_node.addShape(shape)
         block.static_nodes.append(segment_node)
@@ -417,3 +418,10 @@ class AbstractLane:
             ret.append(self.position(i, lateral))
         ret.append(self.position(self.length, lateral))
         return np.array(ret)
+
+    def get_polygon(self):
+        raise NotImplementedError
+
+    @property
+    def id(self):
+        return self.index

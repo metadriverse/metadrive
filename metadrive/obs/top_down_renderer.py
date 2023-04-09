@@ -6,7 +6,8 @@ import numpy as np
 
 from metadrive.component.map.nuplan_map import NuPlanMap
 from metadrive.component.map.scenario_map import ScenarioMap
-from metadrive.constants import Decoration, TARGET_VEHICLES, ScenarioLaneProperty
+from metadrive.constants import Decoration, TARGET_VEHICLES
+from metadrive.scenario.scenario_description import ScenarioDescription
 from metadrive.obs.top_down_obs_impl import WorldSurface, VehicleGraphics, LaneGraphics
 from metadrive.utils.interpolating_line import InterpolatingLine
 from metadrive.utils.utils import import_pygame
@@ -51,12 +52,12 @@ def draw_top_down_map(
                 LaneGraphics.draw_drivable_area(lane_info.lane, surface, color=road_color)
         else:
             for data in map.blocks[-1].map_data.values():
-                if ScenarioLaneProperty.POLYLINE not in data:
+                if ScenarioDescription.POLYLINE not in data:
                     continue
                 type = data.get("type", None)
                 waymo_line = InterpolatingLine(
                     convert_polyline_to_metadrive(
-                        data[ScenarioLaneProperty.POLYLINE], coordinate_transform=coordinate_transform
+                        data[ScenarioDescription.POLYLINE], coordinate_transform=coordinate_transform
                     )
                 )
                 LaneGraphics.display_waymo(waymo_line, type, surface)

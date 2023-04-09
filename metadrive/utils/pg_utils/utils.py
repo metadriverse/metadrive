@@ -8,7 +8,7 @@ from panda3d.core import TransformState
 from panda3d.core import Vec3
 
 from metadrive.component.lane.circular_lane import CircularLane
-from metadrive.component.lane.metadrive_lane import MetaDriveLane
+from metadrive.component.lane.pg_lane import PGLane
 from metadrive.constants import CollisionGroup
 from metadrive.constants import Decoration, MetaDriveType
 from metadrive.engine.core.engine_core import EngineCore
@@ -79,7 +79,7 @@ def get_lanes_bounding_box(lanes, extra_lateral=3) -> Tuple:
     :param extra_lateral: extra width in lateral direction, usually sidewalk width
     :return: x_max, x_min, y_max, y_min
     """
-    if isinstance(lanes[0], MetaDriveLane):
+    if isinstance(lanes[0], PGLane):
         line_points = get_curve_contour(lanes, extra_lateral) if isinstance(lanes[0], CircularLane) \
             else get_straight_contour(lanes, extra_lateral)
     else:
@@ -153,7 +153,6 @@ def ray_localization(
     heading: tuple,
     position: tuple,
     engine: EngineCore,
-    return_all_result=False,
     use_heading_filter=True,
     return_on_lane=False,
 ) -> Union[List[Tuple], Tuple]:
@@ -196,20 +195,20 @@ def ray_localization(
                         lane_index_dist.append((lane, lane.index, lane.distance(position)))
                 else:
                     lane_index_dist.append((lane, lane.index, lane.distance(position)))
-    if return_all_result:
-        ret = []
-        if len(lane_index_dist) > 0:
-            for lane, index, dist in lane_index_dist:
-                ret.append((lane, index, dist))
-        sorted(ret, key=lambda k: k[2])
-        return (ret, on_lane) if return_on_lane else ret
-    else:
-        if len(lane_index_dist) > 0:
-            ret_index = np.argmin([d for _, _, d in lane_index_dist])
-            lane, index, dist = lane_index_dist[ret_index]
-        else:
-            lane, index, dist = None, None, None
-        return (lane, index) if not return_on_lane else (lane, index, on_lane)
+    # default return all result
+    ret = []
+    if len(lane_index_dist) > 0:
+        ret = sorted(lane_index_dist, key=lambda k: k[2])
+
+    # sorted(ret, key=lambda k: k[2]) what a stupid bug. sorted is not an inplace operation
+    return (ret, on_lane) if return_on_lane else ret
+    # else:
+    #     if len(lane_index_dist) > 0:
+    #         ret_index = np.argmin([d for _, _, d in lane_index_dist])
+    #         lane, index, dist = lane_index_dist[ret_index]
+    #     else:
+    #         lane, index, dist = None, None, None
+    #     return (lane, index) if not return_on_lane else (lane, index, on_lane)
 
 
 def rect_region_detection(

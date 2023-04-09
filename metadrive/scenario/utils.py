@@ -77,7 +77,8 @@ def find_data_manager_name(manager_info):
     Find the data_manager
     """
     for manager_name in manager_info:
-        if "DataManager" in manager_name:
+        if "DataManager" in manager_name and "NuPlan" not in manager_name:
+            # Raw data in NuplanDataManager can not be dumped
             return manager_name
     return None
 
