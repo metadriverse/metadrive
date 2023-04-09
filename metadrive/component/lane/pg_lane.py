@@ -1,10 +1,16 @@
-from metadrive.component.lane.abs_lane import AbstractLane
 import numpy as np
+
+from metadrive.component.lane.abs_lane import AbstractLane
 from metadrive.constants import DrivableAreaProperty
 
 
 class PGLane(AbstractLane):
+    POLYGON_SAMPLE_RATE = 2
     radius = 0.0
+
+    def __init__(self):
+        super(PGLane, self).__init__()
+        self._polygon = None
 
     def construct_sidewalk(self, block, lateral):
         radius = self.radius
@@ -30,5 +36,18 @@ class PGLane(AbstractLane):
             )
             self._node_path_list.extend(node_path_list)
 
-    def get_polygon(self, interval=2):
-        return np.asarray(self.polygon)
+    @property
+    def polygon(self):
+        if self._polygon is None:
+            polygon = []
+            longs = np.arange(0, self.length + 1., self.POLYGON_SAMPLE_RATE)
+            for lateral in [+self.width_at(0) / 2, -self.width_at(0) / 2]:
+                for longitude in longs:
+                    point = self.position(longitude, lateral)
+                    polygon.append([point[0], point[1], 0.1])
+                    polygon.append([point[0], point[1], 0.])
+            self._polygon = np.asarray(polygon)
+        return self._polygon
+
+    def get_polygon(self):
+        return self.polygon
