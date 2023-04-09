@@ -144,6 +144,9 @@ def extract_driveway(f):
 def extract_tracks(tracks, sdc_idx, track_length):
     ret = dict()
 
+    track_length2 = len(tracks[sdc_idx].states)
+    track_length = max(track_length2, track_length)
+
     def _object_state_template(object_id):
         return dict(
             type=None,
@@ -172,6 +175,9 @@ def extract_tracks(tracks, sdc_idx, track_length):
 
         for step_count, state in enumerate(obj.states):
 
+            if step_count >= track_length:
+                break
+
             obj_state["state"]["position"][step_count][0] = state.center_x
             obj_state["state"]["position"][step_count][1] = state.center_y
             obj_state["state"]["position"][step_count][2] = state.center_z
@@ -196,7 +202,7 @@ def extract_tracks(tracks, sdc_idx, track_length):
 
         ret[object_id] = obj_state
 
-    return ret, str(tracks[sdc_idx].id)
+    return ret, str(tracks[sdc_idx].id), track_length
 
 
 def extract_map_features(map_features):

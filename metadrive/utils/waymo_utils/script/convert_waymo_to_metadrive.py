@@ -160,9 +160,7 @@ def parse_data(file_list, input_path, output_path, worker_index=None):
 
             track_length = len(scenario.dynamic_map_states)
 
-            tracks, sdc_id = extract_tracks(scenario.tracks, scenario.sdc_track_index, track_length)
-
-            track_length = list(tracks.values())[0]["state"]["position"].shape[0]
+            tracks, sdc_id, track_length = extract_tracks(scenario.tracks, scenario.sdc_track_index, track_length)
 
             md_scenario[SD.LENGTH] = track_length
 
