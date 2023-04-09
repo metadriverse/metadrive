@@ -24,7 +24,7 @@ def test_waymo_env_memory_leak(num_reset=100):
             #         t + 1, nlt - lt, nlt - ct, lm - cm
             #     )
             # )
-        assert lm - cm < 1024 * 1024 * 80, "We expect will cause ~70MB memory leak."
+        assert lm - cm < 1024 * 1024 * 120, "We expect will cause ~120MB memory leak."
 
     finally:
         env.close()

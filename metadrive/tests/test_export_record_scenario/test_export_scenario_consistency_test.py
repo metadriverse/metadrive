@@ -247,8 +247,17 @@ def compare_exported_scenario_with_waymo_origin(scenarios, data_manager):
             else:
                 old_pos = waymo_to_metadrive_vector(old_light["stop_point"])
 
-            new_pos = new_light["state"]["stop_point"]
-            new_pos = new_pos[np.where(new_pos > 0)[0][0]]
+            if "stop_point" in new_light["state"]:
+                new_pos = new_light["state"]["stop_point"]
+                ind = np.where(new_pos > 0)[0]
+                if ind.size > 0:
+                    ind = ind[0]
+                else:
+                    ind = 0
+                new_pos = new_pos[ind]
+            else:
+                new_pos = new_light["stop_point"]
+
             length = min(len(old_pos), len(new_pos))
             np.testing.assert_almost_equal(old_pos[:2], new_pos[:2], decimal=NP_ARRAY_DECIMAL)
 
