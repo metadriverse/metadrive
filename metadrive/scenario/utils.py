@@ -72,6 +72,17 @@ def find_traffic_manager_name(manager_info):
     return None
 
 
+def find_data_manager_name(manager_info):
+    """
+    Find the data_manager
+    """
+    for manager_name in manager_info:
+        if "DataManager" in manager_name:
+            return manager_name
+    return None
+
+
+
 def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1):
     """
     This function utilizes the recorded data natively emerging from MetaDrive run.
@@ -119,15 +130,16 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
 
     traffic_manager_name = find_traffic_manager_name(record_episode["manager_metadata"])
     light_manager_name = find_light_manager_name(record_episode["manager_metadata"])
+    data_manager_name = find_data_manager_name(record_episode["manager_metadata"])
 
     tracks = {
         k: dict(
             type=MetaDriveType.UNSET,
             state=dict(
                 position=np.zeros(shape=(episode_len, 3)),
-                heading=np.zeros(shape=(episode_len, 1)),
+                heading=np.zeros(shape=(episode_len, )),
                 velocity=np.zeros(shape=(episode_len, 2)),
-                valid=np.zeros(shape=(episode_len, 1)),
+                valid=np.zeros(shape=(episode_len, )),
 
                 # Add these items when the object has them.
                 # throttle_brake=np.zeros(shape=(episode_len, 1)),
@@ -280,6 +292,10 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
     # Record agent2object, object2agent metadata
     result[SD.METADATA]["agent_to_object"] = {str(k): str(v) for k, v in agent_to_object.items()}
     result[SD.METADATA]["object_to_agent"] = {str(k): str(v) for k, v in object_to_agent.items()}
+
+    data_manager_raw_data = record_episode["manager_metadata"][data_manager_name].get("raw_data", None)
+    if data_manager_raw_data:
+        result[SD.METADATA]["history_metadata"] = data_manager_raw_data["metadata"]
 
     result = result.to_dict()
     SD.sanity_check(result, check_self_type=True)

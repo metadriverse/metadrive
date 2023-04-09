@@ -233,8 +233,8 @@ def compare_exported_scenario_with_waymo_origin(scenarios, data_manager):
             new_pos = new_pos[index_to_compare][..., :2]
             np.testing.assert_almost_equal(old_pos, new_pos, decimal=NP_ARRAY_DECIMAL)
 
-            old_heading = waymo_to_metadrive_heading(old_heading[index_to_compare])
-            new_heading = new_heading[index_to_compare][..., 0]
+            old_heading = waymo_to_metadrive_heading(old_heading[index_to_compare]).reshape(-1)
+            new_heading = new_heading[index_to_compare].reshape(-1)
             np.testing.assert_almost_equal(old_heading, new_heading, decimal=NP_ARRAY_DECIMAL)
 
         for light_id, old_light in origin_data["dynamic_map_states"].items():
@@ -306,4 +306,4 @@ if __name__ == "__main__":
     # test_export_metadrive_scenario_easy(num_scenarios=1, render_export_env=False, render_load_env=False)
     # test_export_metadrive_scenario_hard(num_scenarios=3, render_export_env=True, render_load_env=True)
     # test_export_waymo_scenario(num_scenarios=1, render_export_env=False, render_load_env=False)
-    test_waymo_export_and_original_consistency(num_scenarios=1, render_export_env=False)
+    test_waymo_export_and_original_consistency(num_scenarios=2, render_export_env=False)
