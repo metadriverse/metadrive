@@ -53,7 +53,8 @@ def create_bend_straight(
     length = 2 * radius * angle / 2
     bend_end = bend.position(length, 0)
     next_lane_heading = get_vertical_vector(bend_end - center)
-    nxt_dir = next_lane_heading[0] if not clockwise else next_lane_heading[1]
+    # nxt_dir = next_lane_heading[0] if not clockwise else next_lane_heading[1]
+    nxt_dir = next_lane_heading[1] if not clockwise else next_lane_heading[0]
     nxt_dir = np.asarray(nxt_dir)
     following_lane_end = nxt_dir * following_lane_length + bend_end
     following_lane = StraightLane(bend_end, following_lane_end, width, line_types, forbidden, speed_limit, priority)

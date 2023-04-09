@@ -15,25 +15,26 @@ class CircularLane(PGLane):
     CIRCULAR_SEGMENT_LENGTH = 1
 
     def __init__(
-        self,
-        center: Vector,
-        radius: float,
-        start_phase: float,
-        end_phase: float,
-        clockwise: bool = True,
-        width: float = PGLane.DEFAULT_WIDTH,
-        line_types: Tuple[PGLineType, PGLineType] = (PGLineType.BROKEN, PGLineType.BROKEN),
-        forbidden: bool = False,
-        speed_limit: float = 1000,
-        priority: int = 0
+            self,
+            center: Vector,
+            radius: float,
+            start_phase: float,
+            end_phase: float,
+            clockwise: bool = True,
+            width: float = PGLane.DEFAULT_WIDTH,
+            line_types: Tuple[PGLineType, PGLineType] = (PGLineType.BROKEN, PGLineType.BROKEN),
+            forbidden: bool = False,
+            speed_limit: float = 1000,
+            priority: int = 0
     ) -> None:
         super().__init__()
         self.set_speed_limit(speed_limit)
         self.center = Vector(center)
         self.radius = radius
         self.start_phase = start_phase
-        self.end_phase = end_phase
-        self.direction = 1 if clockwise else -1
+        self._clock_wise = clockwise
+        self.end_phase = -(end_phase + np.pi)
+        self.direction = -1 if clockwise else 1
         self.width = width
         self.line_types = line_types
         self.forbidden = forbidden
@@ -52,7 +53,8 @@ class CircularLane(PGLane):
     def position(self, longitudinal: float, lateral: float) -> Vector:
         phi = self.direction * longitudinal / self.radius + self.start_phase
         # return self.center + (self.radius - lateral * self.direction) * np.array([math.cos(phi), math.sin(phi)])
-        return self.center + (self.radius - lateral * self.direction) * Vector((math.cos(phi), math.sin(phi)))
+        # return self.center + (self.radius - lateral * self.direction) * Vector((math.cos(phi), math.sin(phi)))
+        return self.center + (self.radius + lateral * self.direction) * Vector((math.cos(phi), math.sin(phi)))
 
     def heading_theta_at(self, longitudinal: float) -> float:
         phi = self.direction * longitudinal / self.radius + self.start_phase
@@ -69,7 +71,8 @@ class CircularLane(PGLane):
         phi = self.start_phase + wrap_to_pi(phi - self.start_phase)
         r = norm(delta_x, delta_y)
         longitudinal = self.direction * (phi - self.start_phase) * self.radius
-        lateral = self.direction * (self.radius - r)
+        # lateral = self.direction * (self.radius - r)
+        lateral = -self.direction * (self.radius - r)
         return longitudinal, lateral
 
     def construct_lane_in_block(self, block, lane_index):
@@ -164,3 +167,6 @@ class CircularLane(PGLane):
                         polygon.append([point[0], point[1], -0.5])
             self._polygon = polygon
         return self._polygon
+
+    def is_clockwise(self):
+        return self._clock_wise
