@@ -156,9 +156,9 @@ class NodeNetworkNavigation(BaseNavigation):
             self._goal_node_path.setH(self._goal_node_path.getH() + 3)
             self.navi_arrow_dir = [lanes_heading1, lanes_heading2]
             dest_pos = self._dest_node_path.getPos()
-            self._draw_line_to_dest(start_position=ego_vehicle.position, end_position=(dest_pos[0], -dest_pos[1]))
+            self._draw_line_to_dest(start_position=ego_vehicle.position, end_position=(dest_pos[0], dest_pos[1]))
             navi_pos = self._goal_node_path.getPos()
-            self._draw_line_to_navi(start_position=ego_vehicle.position, end_position=(navi_pos[0], -navi_pos[1]))
+            self._draw_line_to_navi(start_position=ego_vehicle.position, end_position=(navi_pos[0], navi_pos[1]))
 
     def _update_target_checkpoints(self, ego_lane_index, ego_lane_longitude) -> bool:
         """

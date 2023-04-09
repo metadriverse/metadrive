@@ -206,7 +206,7 @@ class MainCamera:
 
         self.camera.setPos(*camera_pos)
         if self.engine.global_config["show_coordinates"]:
-            self.engine.set_coordinates_indicator_pos([chassis_pos[0], -chassis_pos[1]])
+            self.engine.set_coordinates_indicator_pos([chassis_pos[0], chassis_pos[1]])
         current_pos = vehicle.chassis.getPos()
         current_pos[2] += 2
 

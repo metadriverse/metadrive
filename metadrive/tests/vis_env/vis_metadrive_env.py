@@ -1,4 +1,5 @@
 import numpy as np
+from metadrive.utils.math_utils import clip, norm
 from metadrive.component.vehicle_module.mini_map import MiniMap
 from metadrive.component.vehicle_module.rgb_camera import RGBCamera
 from metadrive.component.vehicle_module.vehicle_panel import VehiclePanel
@@ -10,10 +11,10 @@ if __name__ == "__main__":
     setup_logger(True)
     env = MetaDriveEnv(
         {
-            "num_scenarios": 10,
+            "num_scenarios": 1,
             "traffic_density": 0.,
             "traffic_mode": "hybrid",
-            "start_seed": 22,
+            "start_seed": 2,
             # "_disable_detector_mask":True,
             # "debug_physics_world": True,
             "debug": False,
@@ -30,7 +31,7 @@ if __name__ == "__main__":
             "interface_panel": [MiniMap, VehiclePanel, RGBCamera],
             "need_inverse_traffic": False,
             "rgb_clip": True,
-            "map": "SSSSSS",
+            "map": "SC",
             # "agent_policy": IDMPolicy,
             "random_traffic": False,
             "random_lane_width": True,
@@ -43,6 +44,7 @@ if __name__ == "__main__":
             # "camera_height": 1,
             # "camera_smooth": False,
             # "camera_height": -1,
+            "show_coordinates": True,
             "vehicle_config": {
                 "enable_reverse": False,
                 # "vehicle_model": "xl",
@@ -89,12 +91,20 @@ if __name__ == "__main__":
         #     env.close()
         #     env.reset()
         # info["fuel"] = env.vehicle.energy_consumption
+        vehicle = env.vehicle
+        heading_dir_last = vehicle.last_heading_dir
+        heading_dir_now = vehicle.heading
+        cos_beta = heading_dir_now.dot(heading_dir_last) / (norm(*heading_dir_now) * norm(*heading_dir_last))
+        beta_diff = np.arccos(clip(cos_beta, 0.0, 1.0))
+        yaw_rate = beta_diff / 0.1
         env.render(
             text={
                 "heading_diff": env.vehicle.heading_diff(env.vehicle.lane),
-                "lane_width": env.vehicle.lane.width,
-                "lateral": env.vehicle.lane.local_coordinates(env.vehicle.position),
-                "current_seed": env.current_seed
+                "left_side, right_side": (env.vehicle.dist_to_left_side, env.vehicle.dist_to_right_side),
+                "position": env.vehicle.position,
+                "yaw_rate": yaw_rate,
+                "long, lateral": env.vehicle.lane.local_coordinates(env.vehicle.position),
+                # "current_seed": env.current_seed
             }
         )
         # if d:

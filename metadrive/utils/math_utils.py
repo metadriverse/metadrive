@@ -60,7 +60,7 @@ def point_distance(x, y):
 
 
 def panda_vector(position_x, position_y, z=0.0):
-    return position_x, -position_y, z
+    return position_x, position_y, z
 
 
 def distance_greater(vec1, vec2, length):

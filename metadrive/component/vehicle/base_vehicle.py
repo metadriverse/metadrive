@@ -1087,7 +1087,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         height = self.HEIGHT
         self.coordinates_debug_np = NodePath("debug coordinate")
         # 90 degree diff
-        x = self.engine.add_line([0, 0, height], [0, -2, height], [0, 1, 0, 1], 1)
+        x = self.engine.add_line([0, 0, height], [0, 2, height], [0, 1, 0, 1], 1)
         y = self.engine.add_line([0, 0, height], [1, 0, height], [0, 1, 0, 1], 1)
         z = self.engine.add_line([0, 0, height], [0, 0, height + 0.5], [0, 0, 1, 1], 2)
         x.reparentTo(self.coordinates_debug_np)
