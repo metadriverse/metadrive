@@ -6,7 +6,7 @@ from metadrive.component.scenario_block.scenario_block import ScenarioBlock
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.type import MetaDriveType
 from metadrive.scenario.utils import convert_polyline_to_metadrive, read_scenario_data
-from metadrive.constants import ScenarioLaneProperty
+from metadrive.scenario.scenario_description import ScenarioDescription
 
 
 class ScenarioMap(BaseMap):
@@ -52,20 +52,20 @@ class ScenarioMap(BaseMap):
             type = data.get("type", None)
             map_feat_id = str(lane_id)
             if MetaDriveType.is_road_line(type):
-                if len(data[ScenarioLaneProperty.POLYLINE]) <= 1:
+                if len(data[ScenarioDescription.POLYLINE]) <= 1:
                     continue
                 if MetaDriveType.is_broken_line(type):
                     ret[map_feat_id] = {
                         "type": MetaDriveType.LINE_BROKEN_SINGLE_YELLOW
                         if MetaDriveType.is_yellow_line(type) else MetaDriveType.LINE_BROKEN_SINGLE_WHITE,
                         "polyline": convert_polyline_to_metadrive(
-                            data[ScenarioLaneProperty.POLYLINE], coordinate_transform=self.coordinate_transform
+                            data[ScenarioDescription.POLYLINE], coordinate_transform=self.coordinate_transform
                         )
                     }
                 else:
                     ret[map_feat_id] = {
                         "polyline": convert_polyline_to_metadrive(
-                            data[ScenarioLaneProperty.POLYLINE], coordinate_transform=self.coordinate_transform
+                            data[ScenarioDescription.POLYLINE], coordinate_transform=self.coordinate_transform
                         ),
                         "type": MetaDriveType.LINE_SOLID_SINGLE_YELLOW
                         if MetaDriveType.is_yellow_line(type) else MetaDriveType.LINE_SOLID_SINGLE_WHITE
@@ -73,7 +73,7 @@ class ScenarioMap(BaseMap):
             elif MetaDriveType.is_road_edge(type):
                 ret[map_feat_id] = {
                     "polyline": convert_polyline_to_metadrive(
-                        data[ScenarioLaneProperty.POLYLINE], coordinate_transform=self.coordinate_transform
+                        data[ScenarioDescription.POLYLINE], coordinate_transform=self.coordinate_transform
                     ),
                     "type": MetaDriveType.BOUNDARY_LINE
                 }

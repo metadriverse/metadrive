@@ -308,15 +308,3 @@ class PolicyState:
 REPLAY_DONE = "replay_done"
 
 
-class NuPlanLaneProperty:
-    pass
-
-
-class ScenarioLaneProperty:
-    POLYLINE = "polyline"
-    LEFT_BOUNDARIES = "left_boundaries"
-    RIGHT_BOUNDARIES = "right_boundaries"
-    LEFT_NEIGHBORS = "left_neighbor"
-    RIGHT_NEIGHBORS = "right_neighbor"
-    ENTRY = "entry_lanes"
-    EXIT = "exit_lanes"

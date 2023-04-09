@@ -126,6 +126,16 @@ class ScenarioDescription(dict):
     METADATA = "metadata"
     FIRST_LEVEL_KEYS = {TRACKS, VERSION, ID, DYNAMIC_MAP_STATES, MAP_FEATURES, LENGTH, METADATA}
 
+    # lane keys
+    POLYLINE = "polyline"
+    POLYGON = "polygon"
+    LEFT_BOUNDARIES = "left_boundaries"
+    RIGHT_BOUNDARIES = "right_boundaries"
+    LEFT_NEIGHBORS = "left_neighbor"
+    RIGHT_NEIGHBORS = "right_neighbor"
+    ENTRY = "entry_lanes"
+    EXIT = "exit_lanes"
+
     TYPE = "type"
     STATE = "state"
     OBJECT_ID = "object_id"
@@ -177,7 +187,7 @@ class ScenarioDescription(dict):
             "You lack these keys in metadata: {}".format(
                 cls.METADATA_KEYS.difference(set(scenario_dict[cls.METADATA].keys()))
             )
-        assert scenario_dict[cls.METADATA][cls.TIMESTEP].shape == (scenario_length, )
+        assert scenario_dict[cls.METADATA][cls.TIMESTEP].shape == (scenario_length,)
 
     @classmethod
     def _check_object_state_dict(cls, obj_state, scenario_length, object_id):

@@ -1,4 +1,6 @@
 from typing import Tuple, Union
+import math
+from metadrive.constants import DrivableAreaProperty
 
 import numpy as np
 
@@ -12,20 +14,26 @@ from metadrive.utils.math_utils import wrap_to_pi
 class PointLane(AbstractLane, InterpolatingLine):
     """
     CenterLineLane is created by giving the center line points array or way points array.
-    By using this lane type, map can be constructed from Waymo/Argoverse/OpenstreetMap dataset
+    By using this lane type, map can be constructed from Waymo/nuPlan/OpenstreetMap dataset
     """
+    VIS_LANE_WIDTH = 6.5
+
     def __init__(
-        self,
-        center_line_points: Union[list, np.ndarray],
-        width: float,
-        forbidden: bool = False,
-        speed_limit: float = 1000,
-        priority: int = 0
+            self,
+            center_line_points: Union[list, np.ndarray],
+            width: float,
+            polygon=None,
+            forbidden: bool = False,
+            speed_limit: float = 1000,
+            priority: int = 0,
+            need_lane_localization=True,
     ):
         center_line_points = np.array(center_line_points)[..., :2]
         AbstractLane.__init__(self)
         InterpolatingLine.__init__(self, center_line_points)
         self._bounding_box = get_points_bounding_box(center_line_points)
+        self.polygon = polygon
+        self.need_lane_localization = need_lane_localization
         self.set_speed_limit(speed_limit)
         self.width = width
         self.forbidden = forbidden
@@ -83,3 +91,31 @@ class PointLane(AbstractLane, InterpolatingLine):
         self.end = None
         InterpolatingLine.destroy(self)
         super(PointLane, self).destroy()
+
+    def construct_lane_in_block(self, block, lane_index):
+        """
+        Modified from base class, the width is set to 6.5
+        """
+        lane = self
+        if lane_index is not None:
+            lane.index = lane_index
+
+        # build visualization
+        segment_num = int(self.length / DrivableAreaProperty.LANE_SEGMENT_LENGTH)
+        if segment_num == 0:
+            middle = self.position(self.length / 2, 0)
+            end = self.position(self.length, 0)
+            theta = self.heading_theta_at(self.length / 2)
+            self._construct_lane_only_vis_segment(block, middle, self.VIS_LANE_WIDTH, self.length, theta)
+
+        for i in range(segment_num):
+            middle = self.position(self.length * (i + .5) / segment_num, 0)
+            end = self.position(self.length * (i + 1) / segment_num, 0)
+            direction_v = end - middle
+            theta = math.atan2(direction_v[1], direction_v[0])
+            length = self.length
+            self._construct_lane_only_vis_segment(block, middle, self.VIS_LANE_WIDTH, length * 1.3 / segment_num, theta)
+
+        # build physics contact
+        if self.need_lane_localization:
+            self._construct_lane_only_physics_polygon(block, self.polygon)
