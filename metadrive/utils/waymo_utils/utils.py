@@ -199,7 +199,7 @@ def extract_tracks(tracks, sdc_idx, track_length):
 
         ret[object_id] = obj_state
 
-    return ret, str(tracks[sdc_idx].id), track_length
+    return ret, str(tracks[sdc_idx].id)
 
 
 def extract_map_features(map_features):
