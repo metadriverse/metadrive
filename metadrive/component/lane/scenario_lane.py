@@ -1,4 +1,7 @@
 import logging
+
+import numpy as np
+
 from metadrive.constants import DrivableAreaProperty
 import math
 
@@ -7,6 +10,13 @@ from metadrive.scenario.scenario_description import ScenarioDescription
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.utils.math_utils import norm, mph_to_kmh
 from metadrive.scenario.utils import read_scenario_data, convert_polyline_to_metadrive
+
+
+# return the nearest point"s index of the line
+def nearest_point(point, line):
+    dist = np.square(line - point)
+    dist = np.sqrt(dist[:, 0] + dist[:, 1])
+    return np.argmin(dist)
 
 
 class ScenarioLane(PointLane):
@@ -42,6 +52,47 @@ class ScenarioLane(PointLane):
         self.exit_lanes = map_data[lane_id].get(ScenarioDescription.EXIT, None)
         self.left_lanes = map_data[lane_id].get(ScenarioDescription.LEFT_NEIGHBORS, None)
         self.right_lanes = map_data[lane_id].get(ScenarioDescription.RIGHT_NEIGHBORS, None)
+
+    @staticmethod
+    def try_get_polygon(map_data, lane_id, coordinate_transform):
+        """
+        This method tries to infer polygon from the boundaries
+        """
+        raise DeprecationWarning("This function can not infer the polygon still")
+        lane_info = map_data[lane_id]
+        center_line = lane_info["polyline"]
+        left_boundary_points = []
+        for boundary_info in lane_info[ScenarioDescription.LEFT_BOUNDARIES]:
+            boundary = map_data[boundary_info["boundary_feature_id"]][ScenarioDescription.POLYLINE]
+            start = center_line[int(boundary_info["lane_start_index"])]
+            end = center_line[int(boundary_info["lane_end_index"])]
+
+            start_on_boundary = nearest_point(start, boundary)
+            end_on_boundary = nearest_point(end, boundary)
+
+            points = boundary[start_on_boundary: end_on_boundary]
+            left_boundary_points.append(points)
+
+        left_boundary_points = np.concatenate(left_boundary_points, axis=0) if len(left_boundary_points) > 0 else []
+
+        right_boundary_points = []
+        for boundary_info in lane_info[ScenarioDescription.RIGHT_BOUNDARIES]:
+            boundary = map_data[boundary_info["boundary_feature_id"]][ScenarioDescription.POLYLINE]
+            start = center_line[int(boundary_info["lane_start_index"])]
+            end = center_line[int(boundary_info["lane_end_index"])]
+
+            start_on_boundary = nearest_point(start, boundary)
+            end_on_boundary = nearest_point(end, boundary)
+
+            points = boundary[start_on_boundary: end_on_boundary]
+            right_boundary_points.append(points)
+
+        right_boundary_points = np.concatenate(right_boundary_points, axis=0) if len(right_boundary_points) > 0 else []
+        if len(left_boundary_points) == 0 or len(right_boundary_points) == 0:
+            return None
+        else:
+            polygon = np.concatenate([left_boundary_points, right_boundary_points], axis=0)[..., :2]
+            return convert_polyline_to_metadrive(polygon, coordinate_transform)
 
     def get_lane_width(self, lane_id, map_data):
         """
