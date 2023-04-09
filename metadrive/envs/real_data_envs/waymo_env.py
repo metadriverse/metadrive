@@ -35,6 +35,7 @@ if __name__ == "__main__":
             "replay": True,
             "no_traffic": False,
             # "debug":True,
+            # "debug_static_world": True,
             # "no_traffic":True,
             # "start_scenario_index": 192,
             # "start_scenario_index": 1000,

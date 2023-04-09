@@ -127,6 +127,16 @@ class ScenarioDescription(dict):
     METADATA = "metadata"
     FIRST_LEVEL_KEYS = {TRACKS, VERSION, ID, DYNAMIC_MAP_STATES, MAP_FEATURES, LENGTH, METADATA}
 
+    # lane keys
+    POLYLINE = "polyline"
+    POLYGON = "polygon"
+    LEFT_BOUNDARIES = "left_boundaries"
+    RIGHT_BOUNDARIES = "right_boundaries"
+    LEFT_NEIGHBORS = "left_neighbor"
+    RIGHT_NEIGHBORS = "right_neighbor"
+    ENTRY = "entry_lanes"
+    EXIT = "exit_lanes"
+
     TYPE = "type"
     STATE = "state"
     OBJECT_ID = "object_id"

@@ -4,7 +4,7 @@ import shutil
 
 from metadrive.envs.real_data_envs.nuplan_env import NuPlanEnv
 from metadrive.envs.scenario_env import ScenarioEnv
-from metadrive.policy.replay_policy import NuPlanReplayEgoCarPolicy
+from metadrive.policy.replay_policy import NuPlanReplayEgoCarPolicy, ReplayEgoCarPolicy
 from metadrive.utils.scene_export_utils.scene_export_utils import assert_scenario_equal
 
 
@@ -47,16 +47,15 @@ def _test_export_nuplan_scenario_hard(start_seed=0, num_scenarios=5, render_expo
     # ===== Save data of the restoring environment =====
     env = ScenarioEnv(
         dict(
-            agent_policy=NuPlanReplayEgoCarPolicy,
+            agent_policy=ReplayEgoCarPolicy,
             data_directory=dir1,
             use_render=render_load_env,
             num_scenarios=num_scenarios,
             start_scenario_index=start_seed,
-            debug=True,
             force_reuse_object_name=True,
+            # debug=True,
+            # debug_static_world=True,
             vehicle_config=dict(no_wheel_friction=True)
-            # debug_physics_world=True,
-            # debug_static_world=True5
         )
     )
     try:
@@ -76,4 +75,4 @@ def _test_export_nuplan_scenario_hard(start_seed=0, num_scenarios=5, render_expo
 
 
 if __name__ == "__main__":
-    _test_export_nuplan_scenario_hard(render_export_env=False, render_load_env=False)
+    _test_export_nuplan_scenario_hard(num_scenarios=5, render_export_env=False, render_load_env=True)
