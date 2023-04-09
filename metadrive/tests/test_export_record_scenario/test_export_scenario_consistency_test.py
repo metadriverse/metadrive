@@ -274,7 +274,7 @@ def compare_exported_scenario_with_waymo_origin(scenarios, data_manager):
             assert str(old_light_lane) == str(new_light_lane)
 
             for k, light_status in enumerate(old_light["state"]["object_state"][:length]):
-                assert MetaDriveType.parse_light_status(light_status, simplifying=True, data_source="waymo") == \
+                assert MetaDriveType.parse_light_status(light_status, simplifying=True) == \
                        new_light["state"]["object_state"][k]
 
         print("Finish Seed: {}".format(index))

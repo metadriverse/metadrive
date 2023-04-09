@@ -3,8 +3,8 @@ from metadrive.type import MetaDriveType
 
 
 class ScenarioTrafficLight(BaseTrafficLight):
-    def set_status(self, status, data_source="metadrive"):
-        status = MetaDriveType.parse_light_status(status, simplifying=True, data_source=data_source)
+    def set_status(self, status):
+        status = MetaDriveType.parse_light_status(status, simplifying=True)
         if status == MetaDriveType.LIGHT_GREEN:
             self.set_green()
         elif status == MetaDriveType.LIGHT_RED:
