@@ -24,7 +24,7 @@ class PGLane(AbstractLane):
             if radius == 0:
                 factor = 1
             else:
-                if self.direction == 1:
+                if self.is_clockwise():
                     factor = (1 - block.SIDEWALK_LINE_DIST / radius)
                 else:
                     factor = (1 + block.SIDEWALK_WIDTH / radius) * (1 + block.SIDEWALK_LINE_DIST / radius)

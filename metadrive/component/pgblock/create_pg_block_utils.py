@@ -98,12 +98,12 @@ def CreateRoadFrom(
             side_lane.start = start
             side_lane.end = end
         elif isinstance(lane, CircularLane):
-            clockwise = True if lane.direction == 1 else False
+            new_lane_clockwise = True if lane.is_clockwise() else False
             radius1 = lane.radius
             if not toward_smaller_lane_index:
-                radius2 = radius1 - lane_width if clockwise else radius1 + lane_width
+                radius2 = radius1 - lane_width if new_lane_clockwise else radius1 + lane_width
             else:
-                radius2 = radius1 + lane_width if clockwise else radius1 - lane_width
+                radius2 = radius1 + lane_width if new_lane_clockwise else radius1 - lane_width
             side_lane.radius = radius2
             side_lane.update_properties()
         if i == 1:
@@ -204,13 +204,13 @@ def CreateAdverseRoad(
     elif isinstance(reference_lane, CircularLane):
         start_phase = reference_lane.end_phase
         end_phase = reference_lane.start_phase
-        clockwise = False if reference_lane.direction == 1 else True
-        if not clockwise:
+        new_lane_clockwise = False if reference_lane.is_clockwise() else True
+        if not new_lane_clockwise:
             radius = reference_lane.radius + (num - 1) * width
         else:
             radius = reference_lane.radius - (num - 1) * width
         symmetric_lane = CircularLane(
-            reference_lane.center, radius, start_phase, end_phase, clockwise, width, reference_lane.line_types,
+            reference_lane.center, radius, start_phase, end_phase, new_lane_clockwise, width, reference_lane.line_types,
             reference_lane.forbidden, reference_lane.speed_limit, reference_lane.priority
         )
     else:
@@ -271,13 +271,13 @@ def CreateTwoWayRoad(
     elif isinstance(reference_lane, CircularLane):
         start_phase = reference_lane.end_phase
         end_phase = reference_lane.start_phase
-        clockwise = False if reference_lane.direction == 1 else True
-        if not clockwise:
+        new_lane_clockwise = False if reference_lane.is_clockwise() else True
+        if not new_lane_clockwise:
             radius = reference_lane.radius + (num - 1) * width
         else:
             radius = reference_lane.radius - (num - 1) * width
         symmetric_lane = CircularLane(
-            reference_lane.center, radius, start_phase, end_phase, clockwise, width, reference_lane.line_types,
+            reference_lane.center, radius, start_phase, end_phase, new_lane_clockwise, width, reference_lane.line_types,
             reference_lane.forbidden, reference_lane.speed_limit, reference_lane.priority
         )
     else:

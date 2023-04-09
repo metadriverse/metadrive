@@ -256,9 +256,9 @@ class NodeNetworkNavigation(BaseNavigation):
                 self.get_current_lane_num() * self.get_current_lane_width()
             )
             dir = ref_lane.direction
-            if dir == 1:
+            if ref_lane.is_clockwise():
                 angle = ref_lane.end_phase - ref_lane.start_phase
-            elif dir == -1:
+            elif not ref_lane.is_clockwise():
                 angle = ref_lane.start_phase - ref_lane.end_phase
 
         # Dim 3: The bending radius of current lane

@@ -533,7 +533,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         if isinstance(target_lane, StraightLane):
             lateral = np.asarray(get_vertical_vector(target_lane.end - target_lane.start)[1])
         elif isinstance(target_lane, CircularLane):
-            if target_lane.direction == -1:
+            if not target_lane.is_clockwise():
                 lateral = self.position - target_lane.center
             else:
                 lateral = target_lane.center - self.position
