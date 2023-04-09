@@ -82,7 +82,6 @@ def find_data_manager_name(manager_info):
     return None
 
 
-
 def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1):
     """
     This function utilizes the recorded data natively emerging from MetaDrive run.

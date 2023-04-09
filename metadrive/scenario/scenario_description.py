@@ -109,7 +109,6 @@ Example:
     }
 """
 
-
 import numpy as np
 
 from metadrive.type import MetaDriveType
