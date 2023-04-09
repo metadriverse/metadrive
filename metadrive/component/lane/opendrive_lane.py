@@ -1,3 +1,4 @@
+import logging
 from typing import Tuple
 
 import math
@@ -9,11 +10,13 @@ from metadrive.utils.opendrive_map_utils.elements.geometry import Line, Arc
 from metadrive.utils.opendrive_map_utils.map_load import get_lane_id
 
 
+
 class OpenDriveLane(AbstractLane, InterpolatingLine):
     ARC_SEGMENT_LENGTH = 1  # m
     """An OpenDrive Lane"""
     def __init__(self, width, lane_data) -> None:
         AbstractLane.__init__(self)
+        logging.warning("Refactor OpenDriveLane, make it inherit from PointLane!")
         self.lane_data = lane_data
         self.index = get_lane_id(lane_data)
         self._section_index = lane_data.lane_section.idx
@@ -81,18 +84,8 @@ class OpenDriveLane(AbstractLane, InterpolatingLine):
     def position(self, longitudinal: float, lateral: float) -> np.ndarray:
         return self.get_point(longitudinal, lateral)
 
-    def local_coordinates(self, position: Tuple[float, float]):
-        ret = []  # ret_longitude, ret_lateral, sort_key
-        accumulate_len = 0
-        for seg in self.segment_property:
-            delta_x = position[0] - seg["start_point"][0]
-            delta_y = position[1] - seg["start_point"][1]
-            longitudinal = delta_x * seg["direction"][0] + delta_y * seg["direction"][1]
-            lateral = delta_x * seg["lateral_direction"][0] + delta_y * seg["lateral_direction"][1]
-            ret.append([accumulate_len + longitudinal, lateral])
-            accumulate_len += seg["length"]
-        ret.sort(key=lambda seg: abs(seg[-1]))
-        return ret[0][0], ret[0][1]
+    def local_coordinates(self, position: Tuple[float, float], only_in_lane_point=False):
+        return InterpolatingLine.local_coordinates(self, position, only_in_lane_point)
 
     def construct_lane_in_block(self, block, lane_index):
         """

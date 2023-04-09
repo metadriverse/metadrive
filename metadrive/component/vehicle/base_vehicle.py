@@ -524,7 +524,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             "Deprecate it and make things easy"
         )
         direction = self.system.getForwardVector()
-        return np.asarray([direction[0], -direction[1]])
+        return np.asarray([direction[0], direction[1]])
 
     """---------------------------------------- some math tool ----------------------------------------------"""
 
