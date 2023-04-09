@@ -126,15 +126,14 @@ def _dict_recursive_remove_array(d):
     return d
 
 
-def parse_data(input, output_path):
+def parse_data(file_list, input_path, output_path):
     cnt = 0
     scenario = scenario_pb2.Scenario()
-    file_list = os.listdir(input)
 
     metadata_recorder = {}
 
     for file in tqdm(file_list):
-        file_path = os.path.join(input, file)
+        file_path = os.path.join(input_path, file)
         if ("tfrecord" not in file_path) or (not os.path.isfile(file_path)):
             continue
         dataset = tf.data.TFRecordDataset(file_path, compression_type="")
@@ -252,7 +251,8 @@ if __name__ == "__main__":
 
     # parse raw data from input path to output path,
     # there is 1000 raw data in google cloud, each of them produce about 500 pkl file
-    parse_data(raw_data_path, output_path)
+    file_list = os.listdir(raw_data_path)
+    parse_data(file_list, raw_data_path, output_path)
     sys.exit()
     # file_path = AssetLoader.file_path("waymo", "processed", "0.pkl", return_raw_style=False)
     # data = read_waymo_data(file_path)
