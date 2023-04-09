@@ -12,7 +12,8 @@ from metadrive.utils.math_utils import wrap_to_pi, norm, Vector
 class CircularLane(PGLane):
     """A lane going in circle arc."""
 
-    CIRCULAR_SEGMENT_LENGTH = 4
+    CIRCULAR_SEGMENT_LENGTH = 1
+    EXTRA_POLYGON_LENGTH = 1
 
     def __init__(
             self,
@@ -93,15 +94,55 @@ class CircularLane(PGLane):
             length = self.length
             self._construct_lane_only_vis_segment(block, middle, width, length * 1.3 / segment_num, theta)
 
+        start_heading = self.heading_theta_at(0)
+        start_dir = [math.cos(start_heading), math.sin(start_heading)]
+
+        end_heading = self.heading_theta_at(self.length)
+        end_dir = [math.cos(end_heading), math.sin(end_heading)]
+
         polygon = []
-        longs = np.arange(0.1, self.length + 1., 2)
+        longs = np.arange(0, self.length + self.CIRCULAR_SEGMENT_LENGTH, self.CIRCULAR_SEGMENT_LENGTH)
         for k, lateral in enumerate([+self.width / 2,
                                      -self.width / 2]):
             if k == 1:
                 longs = longs[::-1]
-            for longitude in longs:
+            for t, longitude in enumerate(longs):
                 point = self.position(longitude, lateral)
-                polygon.append([point[0], point[1], 0.0])
-                polygon.append([point[0], point[1], -0.5])
+                if (t == 0 and k == 0) or (t == len(longs) - 1 and k == 1):
+                    # control the adding sequence
+                    if k == 1:
+                        # last point
+                        polygon.append([point[0], point[1], 0.0])
+                        polygon.append([point[0], point[1], -0.5])
+
+                    # extend
+                    polygon.append([point[0] - start_dir[0] * self.EXTRA_POLYGON_LENGTH,
+                                    point[1] - start_dir[1] * self.EXTRA_POLYGON_LENGTH, 0.0])
+                    polygon.append([point[0] - start_dir[0] * self.EXTRA_POLYGON_LENGTH,
+                                    point[1] - start_dir[1] * self.EXTRA_POLYGON_LENGTH, -0.5])
+
+                    if k == 0:
+                        # first point
+                        polygon.append([point[0], point[1], 0.0])
+                        polygon.append([point[0], point[1], -0.5])
+                elif (t == 0 and k == 1) or (t == len(longs) - 1 and k == 0):
+
+                    if k == 0:
+                        # second point
+                        polygon.append([point[0], point[1], 0.0])
+                        polygon.append([point[0], point[1], -0.5])
+
+                    polygon.append([point[0] + end_dir[0] * self.EXTRA_POLYGON_LENGTH,
+                                    point[1] + end_dir[1] * self.EXTRA_POLYGON_LENGTH, 0.0])
+                    polygon.append([point[0] + end_dir[0] * self.EXTRA_POLYGON_LENGTH,
+                                    point[1] + end_dir[1] * self.EXTRA_POLYGON_LENGTH, -0.5])
+
+                    if k == 1:
+                        # third point
+                        polygon.append([point[0], point[1], 0.0])
+                        polygon.append([point[0], point[1], -0.5])
+                else:
+                    polygon.append([point[0], point[1], 0.0])
+                    polygon.append([point[0], point[1], -0.5])
 
         self._construct_lane_only_physics_polygon(block, polygon)
