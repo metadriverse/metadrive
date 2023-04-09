@@ -7,13 +7,12 @@ This script will create the output folder "processed_data" sharing the same leve
 
 """
 import argparse
-from collections import defaultdict
 import copy
 import os
 import pickle
+from collections import defaultdict
 
 import numpy as np
-from tqdm import tqdm
 
 from metadrive.constants import DATA_VERSION
 
@@ -36,7 +35,6 @@ from metadrive.type import MetaDriveType
 from metadrive.utils.waymo_utils.utils import extract_tracks, extract_dynamic_map_states, extract_map_features, \
     compute_width
 import sys
-from tqdm.auto import tqdm
 
 
 def validate_sdc_track(sdc_state):
@@ -126,21 +124,26 @@ def _dict_recursive_remove_array(d):
     return d
 
 
-def parse_data(file_list, input_path, output_path):
-    cnt = 0
+def parse_data(file_list, input_path, output_path, worker_index=None):
     scenario = scenario_pb2.Scenario()
 
     metadata_recorder = {}
 
-    for file in tqdm(file_list, desc="File"):
+    total_scenarios = 0
+
+    desc = ""
+    summary_file = "dataset_summary.pkl"
+    if worker_index is not None:
+        desc += "Worker {} ".format(worker_index)
+        summary_file = "dataset_summary_worker{}.pkl".format(worker_index)
+
+    for file_count, file in enumerate(file_list):
         file_path = os.path.join(input_path, file)
         if ("tfrecord" not in file_path) or (not os.path.isfile(file_path)):
             continue
         dataset = tf.data.TFRecordDataset(file_path, compression_type="")
 
         total = sum(1 for _ in dataset.as_numpy_iterator())
-
-        pbar = tqdm(total=total, desc="Scenario")
 
         for j, data in enumerate(dataset.as_numpy_iterator()):
             scenario.ParseFromString(data)
@@ -230,14 +233,14 @@ def parse_data(file_list, input_path, output_path):
             with open(p, "wb") as f:
                 pickle.dump(md_scenario, f)
 
-            if cnt == 0:
-                print("Scenario {} is saved at: {}".format(cnt, p))
-            pbar.update(1)
-            cnt += 1
+            total_scenarios += 1
+            if j == total - 1:
+                print(
+                    f"{desc}Collected {total_scenarios} scenarios. File {file_count + 1}/{len(file_list)} has "
+                    f"{total} Scenarios. The last one is saved at: {p}."
+                )
 
-        pbar.close()
-
-    with open(os.path.join(output_path, "dataset_summary.pkl"), "wb") as file:
+    with open(os.path.join(output_path, summary_file), "wb") as file:
         pickle.dump(_dict_recursive_remove_array(metadata_recorder), file)
     print("dataset_summary.pkl is saved at: {}".format(output_path))
 
