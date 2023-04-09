@@ -108,7 +108,7 @@ Example:
         }
     }
 """
-from types import NoneType
+
 
 import numpy as np
 
@@ -144,7 +144,7 @@ class ScenarioDescription(dict):
     SDC_ID = "sdc_id"  # Not necessary, but can be stored in metadata.
     METADATA_KEYS = {METADRIVE_PROCESSED, COORDINATE, TIMESTEP}
 
-    ALLOW_TYPES = (int, float, str, np.ndarray, dict, list, tuple, NoneType, set)
+    ALLOW_TYPES = (int, float, str, np.ndarray, dict, list, tuple, type(None), set)
 
     @classmethod
     def sanity_check(cls, scenario_dict, check_self_type=False):
