@@ -52,11 +52,10 @@ def _test_export_nuplan_scenario_hard(start_seed=0, num_scenarios=5, render_expo
             use_render=render_load_env,
             num_scenarios=num_scenarios,
             start_scenario_index=start_seed,
-            debug=True,
             force_reuse_object_name=True,
+            # debug=True,
+            # debug_static_world=True,
             vehicle_config=dict(no_wheel_friction=True)
-            # debug_physics_world=True,
-            # debug_static_world=True5
         )
     )
     try:
@@ -76,4 +75,4 @@ def _test_export_nuplan_scenario_hard(start_seed=0, num_scenarios=5, render_expo
 
 
 if __name__ == "__main__":
-    _test_export_nuplan_scenario_hard(render_export_env=False, render_load_env=False)
+    _test_export_nuplan_scenario_hard(2, render_export_env=False, render_load_env=True)

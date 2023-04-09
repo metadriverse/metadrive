@@ -21,6 +21,7 @@ class EdgeRoadNetwork(BaseRoadNetwork):
         self.graph = {}
 
     def add_lane(self, lane) -> None:
+        assert lane.index is not None, "Lane index can not be None"
         self.graph[lane.index] = lane_info(
             lane=lane,
             entry_lanes=lane.entry_lanes,
@@ -114,6 +115,7 @@ class EdgeRoadNetwork(BaseRoadNetwork):
 
 class OpenDriveRoadNetwork(EdgeRoadNetwork):
     def add_lane(self, lane) -> None:
+        assert lane.index is not None, "Lane index can not be None"
         self.graph[lane.index] = lane_info(
             lane=lane, entry_lanes=None, exit_lanes=None, left_lanes=None, right_lanes=None
         )

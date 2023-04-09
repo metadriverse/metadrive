@@ -20,7 +20,7 @@ class NuPlanLane(PointLane):
         """
         Extract the lane information of one waymo lane, and do coordinate shift
         """
-        self.index = lane_meta_data.id
+
         if isinstance(lane_meta_data.polygon.boundary, MultiLineString):
             boundary = gpd.GeoSeries(lane_meta_data.polygon.boundary).explode()
             sizes = []
@@ -36,7 +36,7 @@ class NuPlanLane(PointLane):
                                          width=None,  # we use width_at to get width
                                          polygon=polygon,
                                          need_lane_localization=need_lane_localization)
-
+        self.index = lane_meta_data.id
         self.entry_lanes = lane_meta_data.incoming_edges,
         self.exit_lanes = lane_meta_data.outgoing_edges,
         self.left_lanes = lane_meta_data.adjacent_edges[0],
