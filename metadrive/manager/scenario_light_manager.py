@@ -57,8 +57,7 @@ class ScenarioLightManager(BaseManager):
 
         for scenario_light_id, light_id, in self._scenario_id_to_obj_id.items():
             light_obj = self.spawned_objects[light_id]
-            status = self._episode_light_data[scenario_light_id][SD.TRAFFIC_LIGHT_STATUS][
-                self.episode_step]
+            status = self._episode_light_data[scenario_light_id][SD.TRAFFIC_LIGHT_STATUS][self.episode_step]
             light_obj.set_status(status, self.data_source)
 
     def has_traffic_light(self, lane_index):
@@ -98,9 +97,7 @@ class ScenarioLightManager(BaseManager):
 
             ret[lane_id][SD.TRAFFIC_LIGHT_POSITION] = traffic_light_position
 
-            assert light_info[SD.TYPE] == MetaDriveType.TRAFFIC_LIGHT, "Can not handle {}".format(
-                light_info[SD.TYPE]
-            )
+            assert light_info[SD.TYPE] == MetaDriveType.TRAFFIC_LIGHT, "Can not handle {}".format(light_info[SD.TYPE])
         return ret
 
     def get_state(self):
