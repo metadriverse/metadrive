@@ -1,4 +1,5 @@
 import logging
+from metadrive.scenario.scenario_description import ScenarioDescription as SD
 from collections import namedtuple
 from typing import List
 
@@ -20,6 +21,7 @@ class EdgeRoadNetwork(BaseRoadNetwork):
         self.graph = {}
 
     def add_lane(self, lane) -> None:
+        assert lane.index is not None, "Lane index can not be None"
         self.graph[lane.index] = lane_info(
             lane=lane,
             entry_lanes=lane.entry_lanes,
@@ -103,8 +105,9 @@ class EdgeRoadNetwork(BaseRoadNetwork):
         for id, lane_info in self.graph.items():
             assert id == lane_info.lane.index
             ret[id] = {
-                "polyline": lane_info.lane.get_polyline(interval),
-                "type": MetaDriveType.LANE_SURFACE_STREET,
+                SD.POLYLINE: lane_info.lane.get_polyline(interval),
+                SD.POLYGON: lane_info.lane.get_polygon(),
+                SD.TYPE: MetaDriveType.LANE_SURFACE_STREET,
                 "speed_limit_kmh": lane_info.lane.speed_limit
             }
         return ret
@@ -112,6 +115,7 @@ class EdgeRoadNetwork(BaseRoadNetwork):
 
 class OpenDriveRoadNetwork(EdgeRoadNetwork):
     def add_lane(self, lane) -> None:
+        assert lane.index is not None, "Lane index can not be None"
         self.graph[lane.index] = lane_info(
             lane=lane, entry_lanes=None, exit_lanes=None, left_lanes=None, right_lanes=None
         )

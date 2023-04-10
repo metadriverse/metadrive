@@ -17,7 +17,6 @@ class ScenarioLightManager(BaseManager):
         self._obj_id_to_scenario_id = {}
         self._lane_index_to_obj = {}
         self._episode_light_data = None
-        self.data_source = None
 
     def before_reset(self):
         super(ScenarioLightManager, self).before_reset()
@@ -25,8 +24,6 @@ class ScenarioLightManager(BaseManager):
         self._lane_index_to_obj = {}
         self._obj_id_to_scenario_id = {}
         self._episode_light_data = self._get_episode_light_data()
-        if len(self._episode_light_data) > 0:
-            self.data_source = list(self._episode_light_data.values())[0]["metadata"]["dataset"]
 
     def after_reset(self):
         for scenario_lane_id, light_info in self._episode_light_data.items():
@@ -40,7 +37,7 @@ class ScenarioLightManager(BaseManager):
                 assert scenario_lane_id == traffic_light.id, "Original id should be assigned to traffic lights"
             self._lane_index_to_obj[lane_info.lane.index] = traffic_light
             status = light_info[SD.TRAFFIC_LIGHT_STATUS][self.episode_step]
-            traffic_light.set_status(status, self.data_source)
+            traffic_light.set_status(status)
 
     def _get_light_position(self, light_info):
         if SD.TRAFFIC_LIGHT_POSITION in light_info:
@@ -58,7 +55,7 @@ class ScenarioLightManager(BaseManager):
         for scenario_light_id, light_id, in self._scenario_id_to_obj_id.items():
             light_obj = self.spawned_objects[light_id]
             status = self._episode_light_data[scenario_light_id][SD.TRAFFIC_LIGHT_STATUS][self.episode_step]
-            light_obj.set_status(status, self.data_source)
+            light_obj.set_status(status)
 
     def has_traffic_light(self, lane_index):
         return True if lane_index in self._lane_index_to_obj else False

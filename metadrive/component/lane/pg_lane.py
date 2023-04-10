@@ -1,9 +1,17 @@
+import numpy as np
+
 from metadrive.component.lane.abs_lane import AbstractLane
 from metadrive.constants import DrivableAreaProperty
 
 
-class MetaDriveLane(AbstractLane):
+class PGLane(AbstractLane):
+    POLYGON_SAMPLE_RATE = 1
     radius = 0.0
+
+    def __init__(self):
+        super(PGLane, self).__init__()
+        # one should implement how to get polygon in property def polygon(self)
+        self._polygon = None
 
     def construct_sidewalk(self, block, lateral):
         radius = self.radius
@@ -28,3 +36,13 @@ class MetaDriveLane(AbstractLane):
                 extra_thrust=DrivableAreaProperty.SIDEWALK_WIDTH / 2 + DrivableAreaProperty.SIDEWALK_LINE_DIST
             )
             self._node_path_list.extend(node_path_list)
+
+    @property
+    def polygon(self):
+        raise NotImplementedError("Overwrite this function to allow getting polygon for this lane")
+
+    def get_polygon(self):
+        return self.polygon
+
+    def has_polygon(self):
+        return True if self.polygon is not None else False

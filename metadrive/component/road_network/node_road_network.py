@@ -1,4 +1,5 @@
 import copy
+from metadrive.scenario.scenario_description import ScenarioDescription as SD
 import logging
 from typing import List, Tuple, Dict
 
@@ -277,8 +278,9 @@ class NodeRoadNetwork(BaseRoadNetwork):
             for _to, lanes in _to_dict.items():
                 for k, lane in enumerate(lanes):
                     ret["{}".format(lane.index)] = {
-                        "polyline": lane.get_polyline(interval),
-                        "type": MetaDriveType.LANE_SURFACE_STREET,
+                        SD.POLYLINE: lane.get_polyline(interval),
+                        SD.POLYGON: lane.get_polygon(),
+                        SD.TYPE: MetaDriveType.LANE_SURFACE_STREET,
                         "speed_limit_kmh": lane.speed_limit
                     }
         return ret

@@ -3,18 +3,18 @@ from typing import Tuple, Sequence, Union
 import math
 import numpy as np
 
-from metadrive.component.lane.metadrive_lane import MetaDriveLane
+from metadrive.component.lane.pg_lane import PGLane
 from metadrive.constants import PGLineType
 from metadrive.utils.math_utils import norm
 
 
-class StraightLane(MetaDriveLane):
+class StraightLane(PGLane):
     """A lane going in straight line."""
     def __init__(
         self,
         start: Union[np.ndarray, Sequence[float]],
         end: Union[np.ndarray, Sequence[float]],
-        width: float = MetaDriveLane.DEFAULT_WIDTH,
+        width: float = PGLane.DEFAULT_WIDTH,
         line_types: Tuple[PGLineType, PGLineType] = (PGLineType.BROKEN, PGLineType.BROKEN),
         forbidden: bool = False,
         speed_limit: float = 1000,
@@ -72,7 +72,7 @@ class StraightLane(MetaDriveLane):
         self.end = end
         self.update_properties()
 
-    def construct_lane_in_block(self, block, lane_index=None):
+    def construct_lane_in_block(self, block, lane_index):
         """
         Straight lane can be represented by one segment
         """
@@ -82,3 +82,18 @@ class StraightLane(MetaDriveLane):
         theta = math.atan2(direction_v[1], direction_v[0])
         width = self.width_at(0) + block.SIDEWALK_LINE_DIST * 2
         self.construct_lane_segment(block, middle, width, self.length, theta, lane_index)
+
+    @property
+    def polygon(self):
+        if self._polygon is None:
+            polygon = []
+            longs = np.arange(0, self.length + self.POLYGON_SAMPLE_RATE, self.POLYGON_SAMPLE_RATE)
+            for k, lateral in enumerate([+self.width_at(0) / 2, -self.width_at(0) / 2]):
+                if k == 1:
+                    longs = longs[::-1]
+                for longitude in longs:
+                    point = self.position(longitude, lateral)
+                    polygon.append([point[0], point[1], 0.1])
+                    polygon.append([point[0], point[1], 0.])
+            self._polygon = np.asarray(polygon)
+        return self._polygon

@@ -38,17 +38,7 @@ class MetaDriveType:
     LANE_STATE_GO = "LANE_STATE_GO"
     LANE_STATE_FLASHING_STOP = "LANE_STATE_FLASHING_STOP"
     LANE_STATE_FLASHING_CAUTION = "LANE_STATE_FLASHING_CAUTION"
-    LIGHT_ENUM_TO_STR = {
-        0: LANE_STATE_UNKNOWN,
-        1: LANE_STATE_ARROW_STOP,
-        2: LANE_STATE_ARROW_CAUTION,
-        3: LANE_STATE_ARROW_GO,
-        4: LANE_STATE_STOP,
-        5: LANE_STATE_CAUTION,
-        6: LANE_STATE_GO,
-        7: LANE_STATE_FLASHING_STOP,
-        8: LANE_STATE_FLASHING_CAUTION
-    }
+
     # the light states above will be converted to the following 4 types
     LIGHT_GREEN = "TRAFFIC_LIGHT_GREEN"
     LIGHT_RED = "TRAFFIC_LIGHT_RED"
@@ -72,6 +62,19 @@ class MetaDriveType:
     # ===== Coordinate system =====
     COORDINATE_METADRIVE = "metadrive"
     COORDINATE_WAYMO = "waymo"
+
+    # deprecated
+    # LIGHT_ENUM_TO_STR = {
+    #     0: LANE_STATE_UNKNOWN,
+    #     1: LANE_STATE_ARROW_STOP,
+    #     2: LANE_STATE_ARROW_CAUTION,
+    #     3: LANE_STATE_ARROW_GO,
+    #     4: LANE_STATE_STOP,
+    #     5: LANE_STATE_CAUTION,
+    #     6: LANE_STATE_GO,
+    #     7: LANE_STATE_FLASHING_STOP,
+    #     8: LANE_STATE_FLASHING_CAUTION
+    # }
 
     @classmethod
     def has_type(cls, type_string: str):
@@ -146,7 +149,7 @@ class MetaDriveType:
         return cls.simplify_light_status(light) == cls.LIGHT_UNKNOWN
 
     @classmethod
-    def parse_light_status(cls, status: int, simplifying=True, data_source=None):
+    def parse_light_status(cls, status: str, simplifying=True):
         """
         Parse light status from ENUM to STR
         """
