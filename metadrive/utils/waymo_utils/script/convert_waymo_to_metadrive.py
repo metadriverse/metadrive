@@ -27,8 +27,10 @@ except ImportError:
     try:
         from metadrive.utils.waymo_utils.protos import scenario_pb2  # Local files that only in PZH's computer.
     except ImportError:
-        print("Please install waymo_open_dataset package through metadrive dependencies: "
-              "pip install waymo-open-dataset-tf-2-11-0==1.5.0")
+        print(
+            "Please install waymo_open_dataset package through metadrive dependencies: "
+            "pip install waymo-open-dataset-tf-2-11-0==1.5.0"
+        )
 
 from metadrive.scenario import ScenarioDescription as SD
 from metadrive.type import MetaDriveType
