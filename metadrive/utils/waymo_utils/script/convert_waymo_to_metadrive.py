@@ -7,13 +7,12 @@ This script will create the output folder "processed_data" sharing the same leve
 
 """
 import argparse
-from collections import defaultdict
 import copy
 import os
 import pickle
+from collections import defaultdict
 
 import numpy as np
-from tqdm import tqdm
 
 from metadrive.constants import DATA_VERSION
 
@@ -28,9 +27,10 @@ except ImportError:
     try:
         from metadrive.utils.waymo_utils.protos import scenario_pb2  # Local files that only in PZH's computer.
     except ImportError:
-        pass
-    else:
-        print("Please install waymo_open_dataset package through metadrive dependencies: pip install -e .[waymo]")
+        print(
+            "Please install waymo_open_dataset package through metadrive dependencies: "
+            "pip install waymo-open-dataset-tf-2-11-0==1.5.0"
+        )
 
 from metadrive.scenario import ScenarioDescription as SD
 from metadrive.type import MetaDriveType
@@ -126,18 +126,27 @@ def _dict_recursive_remove_array(d):
     return d
 
 
-def parse_data(input, output_path):
-    cnt = 0
+def parse_data(file_list, input_path, output_path, worker_index=None):
     scenario = scenario_pb2.Scenario()
-    file_list = os.listdir(input)
 
     metadata_recorder = {}
 
-    for file in tqdm(file_list):
-        file_path = os.path.join(input, file)
+    total_scenarios = 0
+
+    desc = ""
+    summary_file = "dataset_summary.pkl"
+    if worker_index is not None:
+        desc += "Worker {} ".format(worker_index)
+        summary_file = "dataset_summary_worker{}.pkl".format(worker_index)
+
+    for file_count, file in enumerate(file_list):
+        file_path = os.path.join(input_path, file)
         if ("tfrecord" not in file_path) or (not os.path.isfile(file_path)):
             continue
         dataset = tf.data.TFRecordDataset(file_path, compression_type="")
+
+        total = sum(1 for _ in dataset.as_numpy_iterator())
+
         for j, data in enumerate(dataset.as_numpy_iterator()):
             scenario.ParseFromString(data)
 
@@ -151,11 +160,9 @@ def parse_data(input, output_path):
             # sdc_id is a unique indicator to a track, while sdc_track_index is only the index of the sdc track
             # in the tracks datastructure.
 
-            track_length = len(scenario.dynamic_map_states)
+            track_length = len(list(scenario.timestamps_seconds))
 
             tracks, sdc_id = extract_tracks(scenario.tracks, scenario.sdc_track_index, track_length)
-
-            track_length = list(tracks.values())[0]["state"]["position"].shape[0]
 
             md_scenario[SD.LENGTH] = track_length
 
@@ -172,9 +179,7 @@ def parse_data(input, output_path):
 
             md_scenario[SD.METADATA] = {}
             md_scenario[SD.METADATA][SD.COORDINATE] = MetaDriveType.COORDINATE_WAYMO
-            md_scenario[SD.METADATA][SD.TIMESTEP] = \
-                np.asarray([ts for ts in scenario.timestamps_seconds], np.float32)
-            md_scenario[SD.METADATA][SD.METADRIVE_PROCESSED] = False
+            md_scenario[SD.METADATA][SD.TIMESTEP] = np.asarray(list(scenario.timestamps_seconds), dtype=np.float32)
             md_scenario[SD.METADATA][SD.METADRIVE_PROCESSED] = False
             md_scenario[SD.METADATA][SD.SDC_ID] = str(sdc_id)
             md_scenario[SD.METADATA]["dataset"] = "waymo"
@@ -225,13 +230,18 @@ def parse_data(input, output_path):
             p = os.path.join(output_path, export_file_name)
             with open(p, "wb") as f:
                 pickle.dump(md_scenario, f)
-            print("Scenario {} is saved at: {}".format(cnt, p))
-            cnt += 1
 
-    with open(os.path.join(output_path, "dataset_summary.pkl"), "wb") as file:
+            total_scenarios += 1
+            if j == total - 1:
+                print(
+                    f"{desc}Collected {total_scenarios} scenarios. File {file_count + 1}/{len(file_list)} has "
+                    f"{total} Scenarios. The last one is saved at: {p}"
+                )
+
+    summary_file = os.path.join(output_path, summary_file)
+    with open(summary_file, "wb") as file:
         pickle.dump(_dict_recursive_remove_array(metadata_recorder), file)
-
-    return
+    print("Summary is saved at: {}".format(summary_file))
 
 
 if __name__ == "__main__":
@@ -252,7 +262,8 @@ if __name__ == "__main__":
 
     # parse raw data from input path to output path,
     # there is 1000 raw data in google cloud, each of them produce about 500 pkl file
-    parse_data(raw_data_path, output_path)
+    file_list = os.listdir(raw_data_path)
+    parse_data(file_list, raw_data_path, output_path)
     sys.exit()
     # file_path = AssetLoader.file_path("waymo", "processed", "0.pkl", return_raw_style=False)
     # data = read_waymo_data(file_path)
