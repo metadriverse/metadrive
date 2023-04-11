@@ -111,7 +111,7 @@ def extract_edge(f):
 def extract_stop(f):
     stop = dict()
     f = f.stop_sign
-    stop["type"] = "STOP_SIGN"
+    stop["type"] = MetaDriveType.STOP_SIGN
     stop["lane"] = [x for x in f.lane]
     stop["position"] = np.array([f.position.x, f.position.y, f.position.z], dtype="float32")
     return stop
@@ -120,7 +120,7 @@ def extract_stop(f):
 def extract_crosswalk(f):
     cross_walk = dict()
     f = f.crosswalk
-    cross_walk["type"] = "CROSSWALK"
+    cross_walk["type"] = MetaDriveType.CROSSWALK
     cross_walk["polygon"] = extract_poly(f.polygon)
     return cross_walk
 
@@ -128,7 +128,7 @@ def extract_crosswalk(f):
 def extract_bump(f):
     speed_bump_data = dict()
     f = f.speed_bump
-    speed_bump_data["type"] = "SPEED_BUMP"
+    speed_bump_data["type"] = MetaDriveType.SPEED_BUMP
     speed_bump_data["polygon"] = extract_poly(f.polygon)
     return speed_bump_data
 
@@ -136,7 +136,7 @@ def extract_bump(f):
 def extract_driveway(f):
     driveway_data = dict()
     f = f.driveway
-    driveway_data["type"] = "DRIVEWAY"
+    driveway_data["type"] = MetaDriveType.DRIVEWAY
     driveway_data["polygon"] = extract_poly(f.polygon)
     return driveway_data
 
@@ -171,6 +171,9 @@ def extract_tracks(tracks, sdc_idx, track_length):
         obj_state["type"] = metadrive_type
 
         for step_count, state in enumerate(obj.states):
+
+            if step_count >= track_length:
+                break
 
             obj_state["state"]["position"][step_count][0] = state.center_x
             obj_state["state"]["position"][step_count][1] = state.center_y
