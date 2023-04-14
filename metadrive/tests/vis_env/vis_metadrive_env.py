@@ -100,6 +100,8 @@ if __name__ == "__main__":
         env.render(
             text={
                 "heading_diff": env.vehicle.heading_diff(env.vehicle.lane),
+                "heading_theta": env.vehicle.heading_theta,
+                "lane": env.vehicle.lane_index,
                 "left_side, right_side": (env.vehicle.dist_to_left_side, env.vehicle.dist_to_right_side),
                 "position": env.vehicle.position,
                 "yaw_rate": yaw_rate,
