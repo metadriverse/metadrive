@@ -29,7 +29,7 @@ def test_coordinates_shift():
                 if len(pos) == 0:
                     break
                 p = pos.pop()
-            heading, side = env.vehicle.convert_to_vehicle_coordinates(p)
+            heading, side = env.vehicle.convert_to_local_coordinates(p)
             recover_pos = env.vehicle.convert_to_world_coordinates(heading, side)
             if abs(recover_pos[0] - p[0]) + abs(recover_pos[1] - p[1]) > 0.1:
                 raise ValueError("vehicle coordinates convert error!")

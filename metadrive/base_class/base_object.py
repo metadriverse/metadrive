@@ -296,7 +296,6 @@ class BaseObject(BaseRunnable):
             from metadrive.engine.engine_utils import get_engine
             engine = get_engine()
             direction = LVector3(*direction, 0.)
-            direction[1] *= -1
             direction = engine.worldNP.getRelativeVector(self.origin, direction)
 
             # Vehicle coordinates has 90 degrees offset as its heading is in the panda's - y-direction.
@@ -308,7 +307,7 @@ class BaseObject(BaseRunnable):
         else:
             norm_ratio = 1
         self._body.setLinearVelocity(
-            LVector3(direction[0] * norm_ratio, -direction[1] * norm_ratio,
+            LVector3(direction[0] * norm_ratio, direction[1] * norm_ratio,
                      self._body.getLinearVelocity()[-1])
         )
 
@@ -326,7 +325,7 @@ class BaseObject(BaseRunnable):
         Velocity, unit: m/s
         """
         velocity = self.body.get_linear_velocity()
-        return np.asarray([velocity[0], -velocity[1]])
+        return np.asarray([velocity[0], velocity[1]])
 
     @property
     def velocity_km_h(self):
@@ -469,3 +468,25 @@ class BaseObject(BaseRunnable):
 
     def random_rename(self):
         self.rename(random_string())
+
+    def convert_to_local_coordinates(self, vector):
+        """
+        Give a world position, and convert it to object coordinates
+        TODO(LQY): add test
+        """
+        vector = LVector3(*vector, 0.)
+        vector = self.origin.getRelativeVector(self.engine.origin, vector)
+        project_on_x = vector[0]
+        project_on_y = vector[1]
+        return project_on_x, project_on_y
+
+    def convert_to_world_coordinates(self, vector):
+        """
+        Give a position in world coordinates, and convert it to object coordinates
+        TODO(LQY): add test
+        """
+        vector = LVector3(*vector, 0.)
+        vector = self.engine.origin.getRelativeVector(self.origin, vector)
+        project_on_x = vector[0]
+        project_on_y = vector[1]
+        return project_on_x, project_on_y

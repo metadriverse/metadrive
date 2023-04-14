@@ -210,6 +210,7 @@ class EngineCore(ShowBase.ShowBase):
 
         # attach node to this root whose children nodes will be clear after calling clear_world()
         self.worldNP = self.render.attachNewNode("world_np")
+        self.origin = self.worldNP
 
         # same as worldNP, but this node is only used for render gltf model with pbr material
         self.pbr_worldNP = self.pbr_render.attachNewNode("pbrNP")

@@ -5,7 +5,7 @@ from typing import Union, Optional
 import numpy as np
 import seaborn as sns
 from panda3d.bullet import BulletVehicle, BulletBoxShape, ZUp
-from panda3d.core import Material, Vec3, TransformState
+from panda3d.core import Material, Vec3, TransformState, LVector3
 from panda3d.core import NodePath
 
 from metadrive.base_class.base_object import BaseObject
@@ -554,22 +554,26 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         # Normalize to 0, 1
         return clip(cos, -1.0, 1.0) / 2 + 0.5
 
-    def projection(self, vector):
-        # Projected to the heading of vehicle
-        # forward_vector = self.vehicle.get_forward_vector()
-        # forward_old = (forward_vector[0], -forward_vector[1])
-
-        forward = self.heading
-
-        # print(f"[projection] Old forward {forward_old}, new heading {forward}")
-
-        norm_velocity = norm(forward[0], forward[1]) + 1e-6
-        project_on_heading = (vector[0] * forward[0] + vector[1] * forward[1]) / norm_velocity
-
-        side_direction = get_vertical_vector(forward)[1]
-        side_norm = norm(side_direction[0], side_direction[1]) + 1e-6
-        project_on_side = (vector[0] * side_direction[0] + vector[1] * side_direction[1]) / side_norm
+    def convert_to_local_coordinates(self, vector):
+        """
+        Give a world position, and convert it to vehicle coordinates
+        """
+        vector = LVector3(*vector, 0.)
+        vector = self.origin.getRelativeVector(self.engine.origin, vector)
+        # TODO(LQY) It is in left-hand still! and 90 degree offset is still required
+        project_on_heading = vector[1]
+        project_on_side = vector[0]
         return project_on_heading, project_on_side
+
+    def convert_to_world_coordinates(self, vector):
+        """
+        Give a position in world coordinates, and convert it to vehicle coordinates
+        """
+        vector = LVector3(*vector, 0.)
+        vector = self.engine.origin.getRelativeVector(self.origin, vector)
+        project_on_x = vector[0]
+        project_on_y = vector[1]
+        return project_on_x, project_on_y
 
     def lane_distance_to(self, vehicle, lane: AbstractLane = None) -> float:
         assert self.navigation is not None, "a routing and localization module should be added " \
@@ -1012,37 +1016,6 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self.break_down = break_down
         # self.set_static(True)
 
-    def convert_to_vehicle_coordinates(self, position, ego_heading=None, ego_position=None):
-        """
-        Give a world position, and convert it to vehicle coordinates
-        The vehicle heading is X direction and right side is Y direction
-        """
-        # Projected to the heading of vehicle
-        pos = ego_heading if ego_position is not None else self.position
-        vector = position - pos
-        forward = self.heading if ego_heading is None else ego_position
-
-        norm_velocity = norm(forward[0], forward[1]) + 1e-6
-        project_on_heading = (vector[0] * forward[0] + vector[1] * forward[1]) / norm_velocity
-
-        side_direction = get_vertical_vector(forward)[1]
-        side_norm = norm(side_direction[0], side_direction[1]) + 1e-6
-        project_on_side = (vector[0] * side_direction[0] + vector[1] * side_direction[1]) / side_norm
-        return project_on_heading, project_on_side
-
-    def convert_to_world_coordinates(self, project_on_heading, project_on_side):
-        """
-        Give a position in vehicle coordinates, and convert it to world coordinates
-        The vehicle heading is X direction and right side is Y direction
-        """
-        theta = np.arctan2(project_on_side, project_on_heading)
-        theta = wrap_to_pi(self.heading_theta) + wrap_to_pi(theta)
-        norm_len = norm(project_on_heading, project_on_side)
-        position = self.position
-        heading = math.sin(theta) * norm_len
-        side = math.cos(theta) * norm_len
-        return position[0] + side, position[1] + heading
-
     @property
     def max_speed_km_h(self):
         return self.config["max_speed_km_h"]
@@ -1087,8 +1060,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         height = self.HEIGHT
         self.coordinates_debug_np = NodePath("debug coordinate")
         # 90 degree diff
-        x = self.engine.add_line([0, 0, height], [0, 2, height], [0, 1, 0, 1], 1)
-        y = self.engine.add_line([0, 0, height], [1, 0, height], [0, 1, 0, 1], 1)
+        x = self.engine.add_line([0, 0, height], [2, 0, height], [0, 1, 0, 1], 1)
+        y = self.engine.add_line([0, 0, height], [0, 1, height], [0, 1, 0, 1], 1)
         z = self.engine.add_line([0, 0, height], [0, 0, height + 0.5], [0, 0, 1, 1], 2)
         x.reparentTo(self.coordinates_debug_np)
         y.reparentTo(self.coordinates_debug_np)

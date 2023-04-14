@@ -152,7 +152,7 @@ class CommunicationObservation(LidarStateObservation):
 
             # assert isinstance(vehicle, IDMVehicle or Base), "Now MetaDrive Doesn't support other vehicle type"
 
-            relative_position = ego_vehicle.projection(vehicle.position - ego_position)
+            relative_position = ego_vehicle.convert_to_local_coordinates(vehicle.position - ego_position)
             relative_position = self._process_norm(relative_position, perceive_distance)
 
             # It is possible that the centroid of other vehicle is too far away from ego but lidar shed on it.
@@ -160,7 +160,7 @@ class CommunicationObservation(LidarStateObservation):
             res[slot_index * res_size + 1] = clip((relative_position[0] / perceive_distance + 1) / 2, 0.0, 1.0)
             res[slot_index * res_size + 2] = clip((relative_position[1] / perceive_distance + 1) / 2, 0.0, 1.0)
 
-            relative_velocity = ego_vehicle.projection(vehicle.velocity - ego_vehicle.velocity)
+            relative_velocity = ego_vehicle.convert_to_local_coordinates(vehicle.velocity - ego_vehicle.velocity)
             relative_velocity = self._process_norm(relative_velocity, speed_scale)
             res[slot_index * res_size + 3] = clip((relative_velocity[0] / speed_scale + 1) / 2, 0.0, 1.0)
             res[slot_index * res_size + 4] = clip((relative_velocity[1] / speed_scale + 1) / 2, 0.0, 1.0)

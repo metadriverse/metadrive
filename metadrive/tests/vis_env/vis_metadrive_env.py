@@ -1,4 +1,6 @@
 import numpy as np
+from metadrive.policy.idm_policy import IDMPolicy
+from metadrive.policy.expert_policy import ExpertPolicy
 from metadrive.component.vehicle_module.mini_map import MiniMap
 from metadrive.component.vehicle_module.rgb_camera import RGBCamera
 from metadrive.component.vehicle_module.vehicle_panel import VehiclePanel
@@ -24,16 +26,16 @@ if __name__ == "__main__":
             "random_lane_width": False,
             # "image_observation": True,
             # "controller": "joystick",
-            # "show_coordinates": True,
-            "manual_control": True,
+            "show_coordinates": True,
+            # "manual_control": True,
             "use_render": True,
             "accident_prob": 1,
             "decision_repeat": 5,
             "interface_panel": [MiniMap, VehiclePanel, RGBCamera],
             "need_inverse_traffic": False,
             "rgb_clip": True,
-            "map": "C",
-            # "agent_policy": IDMPolicy,
+            "map": "CCCC",
+            "agent_policy": ExpertPolicy,
             "random_traffic": False,
             # "random_lane_width": True,
             # "random_agent_model": True,
@@ -95,6 +97,7 @@ if __name__ == "__main__":
             text={
                 "heading_diff": env.vehicle.heading_diff(env.vehicle.lane),
                 "lane_width": env.vehicle.lane.width,
+                "lane_index": env.vehicle.lane_index,
                 "lateral": env.vehicle.lane.local_coordinates(env.vehicle.position),
                 "current_seed": env.current_seed
             }
