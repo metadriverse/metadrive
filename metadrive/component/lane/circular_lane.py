@@ -19,7 +19,7 @@ class CircularLane(PGLane):
             center: Vector,
             radius: float,
             start_phase: float,
-            end_phase: float,
+            angle: float,
             clockwise: bool = True,
             width: float = PGLane.DEFAULT_WIDTH,
             line_types: Tuple[PGLineType, PGLineType] = (PGLineType.BROKEN, PGLineType.BROKEN),
@@ -27,13 +27,15 @@ class CircularLane(PGLane):
             speed_limit: float = 1000,
             priority: int = 0
     ) -> None:
+        assert angle > 0, "Angle should be greater than 0"
         super().__init__()
         self.set_speed_limit(speed_limit)
         self.center = Vector(center)
         self.radius = radius
-        self.start_phase = start_phase
         self._clock_wise = clockwise
-        self.end_phase = -(end_phase + np.pi)
+        self.start_phase = start_phase
+        self.end_phase = self.start_phase + (-angle if self.is_clockwise() else angle)
+        self.angle = angle
         self.direction = -1 if clockwise else 1
         self.width = width
         self.line_types = line_types
@@ -41,11 +43,13 @@ class CircularLane(PGLane):
         self.priority = priority
 
         self.length = self.radius * (self.end_phase - self.start_phase) * self.direction
+        assert self.length > 0, "end_phase should > (<) start_phase if anti-clockwise (clockwise)"
         self.start = self.position(0, 0)
         self.end = self.position(self.length, 0)
 
     def update_properties(self):
         self.length = self.radius * (self.end_phase - self.start_phase) * self.direction
+        assert self.length > 0, "end_phase should > (<) start_phase if anti-clockwise (clockwise)"
         self.start = self.position(0, 0)
         self.end = self.position(self.length, 0)
 
@@ -89,9 +93,7 @@ class CircularLane(PGLane):
 
         for i in range(segment_num):
             middle = self.position(self.length * (i + .5) / segment_num, 0)
-            end = self.position(self.length * (i + 1) / segment_num, 0)
-            direction_v = end - middle
-            theta = math.atan2(direction_v[1], direction_v[0])
+            theta = self.heading_theta_at(self.length * (i + .5) / segment_num)
             width = self.width_at(0) + DrivableAreaProperty.SIDEWALK_LINE_DIST * 2
             length = self.length
             self._construct_lane_only_vis_segment(block, middle, width, length * 1.3 / segment_num, theta)

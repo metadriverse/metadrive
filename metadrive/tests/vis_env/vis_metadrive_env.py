@@ -11,15 +11,14 @@ if __name__ == "__main__":
     setup_logger(True)
     env = MetaDriveEnv(
         {
-            "num_scenarios": 1,
+            "num_scenarios": 10,
             "traffic_density": 0.,
             "traffic_mode": "hybrid",
-            "start_seed": 2,
+            "start_seed": 1,
             # "_disable_detector_mask":True,
             # "debug_physics_world": True,
-            "debug": False,
-            # "global_light": False,
-            # "debug_static_world": True,
+            "debug": True,
+            "debug_static_world": True,
             "cull_scene": False,
             # "image_observation": True,
             # "controller": "joystick",
@@ -31,7 +30,7 @@ if __name__ == "__main__":
             "interface_panel": [MiniMap, VehiclePanel, RGBCamera],
             "need_inverse_traffic": False,
             "rgb_clip": True,
-            "map": "SC",
+            "map": "CCCCCCC",
             # "agent_policy": IDMPolicy,
             "random_traffic": False,
             "random_lane_width": True,
