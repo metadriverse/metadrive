@@ -347,6 +347,6 @@ def convert_polyline_to_metadrive(polyline, coordinate_transform=True):
     """
     polyline = np.asarray(polyline)
     if coordinate_transform:
-        return np.stack([polyline[:, 0], -polyline[:, 1]], axis=1)
+        return np.stack([polyline[:, 0], polyline[:, 1]], axis=1)
     else:
         return polyline

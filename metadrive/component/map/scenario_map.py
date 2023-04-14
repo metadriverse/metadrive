@@ -135,14 +135,15 @@ if __name__ == "__main__":
 
     # # touch these items so that pickle can work
 
-    file_path = AssetLoader.file_path("waymo", "0.pkl", return_raw_style=False)
-    # file_path = "/home/shady/Downloads/test_processed/60.pkl"
-    data = read_scenario_data(file_path)
+    # file_path = AssetLoader.file_path("waymo", "0.pkl", return_raw_style=False)
+    # # file_path = "/home/shady/Downloads/test_processed/60.pkl"
+    # data = read_scenario_data(file_path)
 
     default_config = ScenarioEnv.default_config()
     default_config["use_render"] = True
     default_config["debug"] = True
     default_config["debug_static_world"] = True
+    default_config["allow_coordinate_transform"] = True
     default_config["data_directory"] = AssetLoader.file_path("waymo", return_raw_style=False)
     # default_config["data_directory"] = "/home/shady/Downloads/test_processed"
     default_config["num_scenarios"] = 1
