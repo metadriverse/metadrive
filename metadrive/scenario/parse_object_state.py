@@ -25,7 +25,7 @@ def parse_object_state(object_dict, time_idx, check_last_state=False, sim_time_i
 
     ret = {k: v[time_idx] for k, v in states.items()}
 
-    ret["position"] = states["position"][time_idx]
+    ret["position"] = states["position"][time_idx, :2]
     ret["velocity"] = states["velocity"][time_idx]
 
     ret["heading_theta"] = states["heading"][time_idx]
@@ -71,6 +71,5 @@ def parse_full_trajectory(object_dict):
             break
     positions = positions[:index]
     trajectory = copy.deepcopy(positions[:, :2])
-    # convert to metadrive coordinate
 
     return trajectory
