@@ -455,7 +455,6 @@ class BaseObject(BaseRunnable):
         return self.origin.getZ()
 
     def set_angular_velocity(self, angular_velocity, in_rad=True):
-        angular_velocity *= -1  # to panda coordinates
         if not in_rad:
             angular_velocity = angular_velocity / 180 * np.pi
         self._body.setAngularVelocity(LVector3(0, 0, angular_velocity))

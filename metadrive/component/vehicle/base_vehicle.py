@@ -563,17 +563,18 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         # TODO(LQY) It is in left-hand still! and 90 degree offset is still required
         project_on_heading = vector[1]
         project_on_side = vector[0]
-        return project_on_heading, project_on_side
+        return np.asarray([project_on_heading, project_on_side])
 
     def convert_to_world_coordinates(self, vector):
         """
         Give a position in world coordinates, and convert it to vehicle coordinates
         """
         vector = LVector3(*vector, 0.)
+        # TODO(LQY) It is in left-hand still! and 90 degree offset is still required
         vector = self.engine.origin.getRelativeVector(self.origin, vector)
         project_on_x = vector[0]
         project_on_y = vector[1]
-        return project_on_x, project_on_y
+        return np.asarray([project_on_x, project_on_y])
 
     def lane_distance_to(self, vehicle, lane: AbstractLane = None) -> float:
         assert self.navigation is not None, "a routing and localization module should be added " \
