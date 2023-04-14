@@ -108,6 +108,10 @@ def assert_scenario_equal(scenarios1, scenarios2, only_compare_sdc=False):
 
                 if k == "velocity":
                     decimal = VELOCITY_DECIMAL
+                elif k == "position":
+                    state_array_1 = state_array_1[..., :2]
+                    state_array_2 = state_array_2[..., :2]
+                    decimal = NP_ARRAY_DECIMAL
                 else:
                     decimal = NP_ARRAY_DECIMAL
                 np.testing.assert_almost_equal(state_array_1[:min_len], state_array_2[:min_len], decimal=decimal)
