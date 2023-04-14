@@ -21,17 +21,15 @@ class DemoWaymoEnv(WaymoEnv):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--reactive_traffic", action="store_true")
-    parser.add_argument("--top_down", action="store_true")
     args = parser.parse_args()
     asset_path = AssetLoader.asset_path
     print(HELP_MESSAGE)
-    extra_args = dict(mode="top_down", film_size=(800, 800)) if args.top_down else {}
     try:
         env = DemoWaymoEnv(
             {
                 "manual_control": True,
                 "replay": False if args.reactive_traffic else True,
-                "use_render": True if not args.top_down else False,
+                "use_render": True,
                 "data_directory": AssetLoader.file_path(asset_path, "waymo", return_raw_style=False),
                 "num_scenarios": 3
             }
@@ -40,7 +38,7 @@ if __name__ == "__main__":
 
         for i in range(1, 100000):
             o, r, d, info = env.step([1.0, 0.])
-            env.render(text={"Switch perspective": "Q or B", "Reset Episode": "R"}, **extra_args)
+            env.render(text={"Switch perspective": "Q or B", "Reset Episode": "R"})
     except Exception as e:
         raise e
     finally:

@@ -6,7 +6,7 @@ from metadrive.utils.math_utils import wrap_to_pi
 
 
 #
-# Now all coordinates in MetaDrive are the same, and are all right-handed
+# Now all coordinates are the same and are all in right-handed
 # MetaDrive (right handed):
 #                     ^ x
 #                     |
@@ -22,6 +22,7 @@ from metadrive.utils.math_utils import wrap_to_pi
 #                    Ego
 # Note: the models loaded in Panda3d are facing to y axis, and thus -90' is required to make it face to x axis
 # These APIs are still available for compatibility, but doesn't apply any operation to the input vector/heading
+
 
 def panda_vector(position, z=0.0) -> Vec3:
     """
@@ -75,7 +76,7 @@ def nuplan_to_metadrive_vector(vector, nuplan_center=(0, 0)):
     #     vector[1] *= -1
     # else:
     #     vector[:, 1] *= -1
-    vector -= nuplan_center
+    # vector -= nuplan_center
     return vector
 
 
