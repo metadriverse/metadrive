@@ -74,12 +74,10 @@ class ReplayEgoCarPolicy(ReplayTrafficParticipantPolicy):
         sdc_track_index = str(self.engine.data_manager.current_scenario["metadata"]["sdc_id"])
         ret = []
         for i in range(len(trajectory_data[sdc_track_index]["state"]["position"])):
-            ret.append(
-                parse_object_state(
-                    trajectory_data[sdc_track_index],
-                    i,
-                )
-            )
+            ret.append(parse_object_state(
+                trajectory_data[sdc_track_index],
+                i,
+            ))
         return ret
 
 

@@ -23,14 +23,14 @@ class FirstPGBlock(PGBlock):
     ENTRANCE_LENGTH = 10
 
     def __init__(
-            self,
-            global_network: NodeRoadNetwork,
-            lane_width: float,
-            lane_num: int,
-            render_root_np: NodePath,
-            physics_world: PhysicsWorld,
-            length: float = 30,
-            ignore_intersection_checking=False
+        self,
+        global_network: NodeRoadNetwork,
+        lane_width: float,
+        lane_num: int,
+        render_root_np: NodePath,
+        physics_world: PhysicsWorld,
+        length: float = 30,
+        ignore_intersection_checking=False
     ):
         place_holder = PGBlockSocket(Road(Decoration.start, Decoration.end), Road(Decoration.start, Decoration.end))
         super(FirstPGBlock, self).__init__(
@@ -40,9 +40,7 @@ class FirstPGBlock(PGBlock):
             print("Warning: first block length is two small", length, "<", self.ENTRANCE_LENGTH)
         self._block_objects = []
         basic_lane = StraightLane(
-            [0, 0], [self.ENTRANCE_LENGTH, 0],
-            line_types=(PGLineType.BROKEN, PGLineType.SIDE),
-            width=lane_width
+            [0, 0], [self.ENTRANCE_LENGTH, 0], line_types=(PGLineType.BROKEN, PGLineType.SIDE), width=lane_width
         )
         ego_v_spawn_road = Road(self.NODE_1, self.NODE_2)
         CreateRoadFrom(

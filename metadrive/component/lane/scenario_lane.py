@@ -26,8 +26,7 @@ class ScenarioLane(PointLane):
         """
         Extract the lane information of one lane, and do coordinate shift if required
         """
-        center_line_points = np.asarray(
-            map_data[lane_id][ScenarioDescription.POLYLINE])
+        center_line_points = np.asarray(map_data[lane_id][ScenarioDescription.POLYLINE])
         if ScenarioDescription.POLYGON in map_data[lane_id] and len(map_data[lane_id][ScenarioDescription.POLYGON]) > 3:
             polygon = np.asarray(map_data[lane_id][ScenarioDescription.POLYGON])
         else:

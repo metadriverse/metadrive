@@ -141,7 +141,9 @@ class TrajectoryNavigation(BaseNavigation):
         dir_norm = norm(dir_vec[0], dir_vec[1])
         if dir_norm > self.NAVI_POINT_DIST:  # if the checkpoint is too far then crop the direction vector
             dir_vec = dir_vec / dir_norm * self.NAVI_POINT_DIST
-        ckpt_in_heading, ckpt_in_rhs = ego_vehicle.convert_to_local_coordinates(dir_vec)  # project to ego vehicle's coordination
+        ckpt_in_heading, ckpt_in_rhs = ego_vehicle.convert_to_local_coordinates(
+            dir_vec
+        )  # project to ego vehicle's coordination
 
         # Dim 1: the relative position of the checkpoint in the target vehicle's heading direction.
         navi_information.append(clip((ckpt_in_heading / self.NAVI_POINT_DIST + 1) / 2, 0.0, 1.0))

@@ -285,7 +285,7 @@ def test_set_angular_v_and_set_v_no_friction_pedestrian(render=False):
             # 10 s , np.pi/10 per second
             obj_1.set_velocity([1, 0])
             o, r, d, info = env.step([0, 0])
-        assert abs(obj_1.position[0]-start_p) > 0.7
+        assert abs(obj_1.position[0] - start_p) > 0.7
         # print(obj_1.heading_theta / np.pi * 180)
         obj_1.destroy()
 

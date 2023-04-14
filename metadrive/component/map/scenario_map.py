@@ -59,20 +59,17 @@ class ScenarioMap(BaseMap):
                     ret[map_feat_id] = {
                         "type": MetaDriveType.LINE_BROKEN_SINGLE_YELLOW
                         if MetaDriveType.is_yellow_line(type) else MetaDriveType.LINE_BROKEN_SINGLE_WHITE,
-                        "polyline": np.asarray(
-                            data[ScenarioDescription.POLYLINE])
+                        "polyline": np.asarray(data[ScenarioDescription.POLYLINE])
                     }
                 else:
                     ret[map_feat_id] = {
-                        "polyline": np.asarray(
-                            data[ScenarioDescription.POLYLINE]),
+                        "polyline": np.asarray(data[ScenarioDescription.POLYLINE]),
                         "type": MetaDriveType.LINE_SOLID_SINGLE_YELLOW
                         if MetaDriveType.is_yellow_line(type) else MetaDriveType.LINE_SOLID_SINGLE_WHITE
                     }
             elif MetaDriveType.is_road_edge(type):
                 ret[map_feat_id] = {
-                    "polyline": np.asarray(
-                        data[ScenarioDescription.POLYLINE]),
+                    "polyline": np.asarray(data[ScenarioDescription.POLYLINE]),
                     "type": MetaDriveType.BOUNDARY_LINE
                 }
             elif type == MetaDriveType.LANE_SURFACE_STREET:

@@ -15,17 +15,17 @@ class CircularLane(PGLane):
     CIRCULAR_SEGMENT_LENGTH = 1
 
     def __init__(
-            self,
-            center: Vector,
-            radius: float,
-            start_phase: float,
-            angle: float,
-            clockwise: bool = True,
-            width: float = PGLane.DEFAULT_WIDTH,
-            line_types: Tuple[PGLineType, PGLineType] = (PGLineType.BROKEN, PGLineType.BROKEN),
-            forbidden: bool = False,
-            speed_limit: float = 1000,
-            priority: int = 0
+        self,
+        center: Vector,
+        radius: float,
+        start_phase: float,
+        angle: float,
+        clockwise: bool = True,
+        width: float = PGLane.DEFAULT_WIDTH,
+        line_types: Tuple[PGLineType, PGLineType] = (PGLineType.BROKEN, PGLineType.BROKEN),
+        forbidden: bool = False,
+        speed_limit: float = 1000,
+        priority: int = 0
     ) -> None:
         assert angle > 0, "Angle should be greater than 0"
         super().__init__()

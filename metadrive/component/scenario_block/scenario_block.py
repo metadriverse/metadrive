@@ -31,8 +31,7 @@ class ScenarioBlock(BaseBlock):
             if MetaDriveType.is_lane(data.get("type", False)):
                 if len(data[ScenarioDescription.POLYLINE]) <= 1:
                     continue
-                lane = ScenarioLane(
-                    lane_id, self.map_data, self.need_lane_localization)
+                lane = ScenarioLane(lane_id, self.map_data, self.need_lane_localization)
                 self.block_network.add_lane(lane)
         return True
 
@@ -54,14 +53,13 @@ class ScenarioBlock(BaseBlock):
                     continue
                 if MetaDriveType.is_broken_line(type):
                     self.construct_broken_line(
-                        np.asarray(
-                            data[ScenarioDescription.POLYLINE]
-                        ), PGLineColor.YELLOW if MetaDriveType.is_yellow_line(type) else PGLineColor.GREY
+                        np.asarray(data[ScenarioDescription.POLYLINE]),
+                        PGLineColor.YELLOW if MetaDriveType.is_yellow_line(type) else PGLineColor.GREY
                     )
                 else:
                     self.construct_continuous_line(
-                        np.asarray(
-                            data[ScenarioDescription.POLYLINE]), PGLineColor.YELLOW if MetaDriveType.is_yellow_line(type) else PGLineColor.GREY
+                        np.asarray(data[ScenarioDescription.POLYLINE]),
+                        PGLineColor.YELLOW if MetaDriveType.is_yellow_line(type) else PGLineColor.GREY
                     )
             # elif MetaDriveType.is_road_edge(type) and MetaDriveType.is_sidewalk(type):
             #     self.construct_sidewalk(
@@ -78,11 +76,7 @@ class ScenarioBlock(BaseBlock):
             # else:
             #     raise ValueError("Can not build lane line type: {}".format(type))
             elif MetaDriveType.is_road_edge(type):
-                self.construct_sidewalk(
-                    np.asarray(
-                        data[ScenarioDescription.POLYLINE]
-                    )
-                )
+                self.construct_sidewalk(np.asarray(data[ScenarioDescription.POLYLINE]))
 
     def construct_continuous_line(self, polyline, color):
         line = InterpolatingLine(polyline)
@@ -151,4 +145,3 @@ class ScenarioBlock(BaseBlock):
     def __del__(self):
         self.destroy()
         super(ScenarioBlock, self).__del__()
-

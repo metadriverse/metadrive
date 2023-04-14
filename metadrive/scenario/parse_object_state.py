@@ -2,7 +2,6 @@ import copy
 
 import numpy as np
 
-
 from metadrive.utils.math_utils import compute_angular_velocity
 
 

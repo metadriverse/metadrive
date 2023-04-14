@@ -10,7 +10,6 @@ from metadrive.utils.opendrive_map_utils.elements.geometry import Line, Arc
 from metadrive.utils.opendrive_map_utils.map_load import get_lane_id
 
 
-
 class OpenDriveLane(AbstractLane, InterpolatingLine):
     ARC_SEGMENT_LENGTH = 1  # m
     """An OpenDrive Lane"""

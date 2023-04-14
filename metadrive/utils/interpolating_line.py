@@ -8,7 +8,6 @@ class InterpolatingLine:
     """
     This class provides point set with interpolating function
     """
-
     def __init__(self, points):
         points = np.asarray(points)[..., :2]
         self.segment_property = self._get_properties(points)

@@ -53,11 +53,7 @@ def draw_top_down_map(
                 if ScenarioDescription.POLYLINE not in data:
                     continue
                 type = data.get("type", None)
-                waymo_line = InterpolatingLine(
-                    np.asarray(
-                        data[ScenarioDescription.POLYLINE]
-                    )
-                )
+                waymo_line = InterpolatingLine(np.asarray(data[ScenarioDescription.POLYLINE]))
                 LaneGraphics.display_waymo(waymo_line, type, surface)
 
     elif isinstance(map, NuPlanMap):
