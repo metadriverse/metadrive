@@ -6,7 +6,7 @@ from metadrive.utils.math_utils import wrap_to_pi
 
 
 #
-# Now the two coordinates are the same now
+# Now all coordinates in MetaDrive are the same, and are all right-handed
 # MetaDrive (right handed):
 #                     ^ x
 #                     |
@@ -22,35 +22,6 @@ from metadrive.utils.math_utils import wrap_to_pi
 #                    Ego
 # Note: the models loaded in Panda3d are facing to y axis, and thus -90' is required to make it face to x axis
 # These APIs are still available for compatibility, but doesn't apply any operation to the input vector/heading
-
-
-def right_hand_to_left_vector(vector):
-    """
-    MetaDrive is in left-handed coordinate, while Panda3D and some dataset like Waymo is right-handed coordinate
-    """
-    vector = np.array(vector, copy=True)
-    # if vector.ndim == 1:
-    #     vector[1] *= -1
-    # elif vector.ndim == 2:
-    #     vector[:, 1] *= -1
-    # else:
-    #     raise ValueError()
-    return vector
-
-
-def left_hand_to_right_hand_vector(vector):
-    return right_hand_to_left_vector(vector)
-
-
-def right_hand_to_left_hand_heading(heading):
-    # return -heading
-    return heading
-
-
-def left_hand_to_right_hand_heading(heading):
-    # return -heading
-    return heading
-
 
 def panda_vector(position, z=0.0) -> Vec3:
     """
@@ -97,27 +68,6 @@ def metadrive_heading(heading: float) -> float:
     return heading
 
 
-def waymo_to_metadrive_vector(vector):
-    return right_hand_to_left_vector(vector)
-
-
-# Compatibility
-waymo_2_metadrive_position = waymo_to_metadrive_vector
-
-
-def waymo_to_metadrive_heading(heading):
-    heading = wrap_to_pi(heading)
-    # if coordinate_transform:
-    #     return -heading
-    # else:
-    #     return heading
-    return heading
-
-
-# Compatibility
-waymo_2_metadrive_heading = waymo_to_metadrive_heading
-
-
 def nuplan_to_metadrive_vector(vector, nuplan_center=(0, 0)):
     "All vec in nuplan should be centered in (0,0) to avoid numerical explosion"
     vector = np.array(vector)
@@ -125,7 +75,7 @@ def nuplan_to_metadrive_vector(vector, nuplan_center=(0, 0)):
     #     vector[1] *= -1
     # else:
     #     vector[:, 1] *= -1
-    # vector -= nuplan_center
+    vector -= nuplan_center
     return vector
 
 

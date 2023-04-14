@@ -2,7 +2,6 @@ import copy
 
 import numpy as np
 
-from metadrive.utils.coordinates_shift import right_hand_to_left_hand_heading, right_hand_to_left_vector
 
 from metadrive.utils.math_utils import compute_angular_velocity
 

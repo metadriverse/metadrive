@@ -15,7 +15,6 @@ from metadrive.manager.scenario_light_manager import ScenarioLightManager
 from metadrive.manager.waymo_traffic_manager import WaymoTrafficManager
 from metadrive.obs.real_env_observation import ScenarioObservation
 from metadrive.policy.replay_policy import ReplayEgoCarPolicy
-from metadrive.utils.coordinates_shift import right_hand_to_left_vector
 from metadrive.utils import clip
 from metadrive.utils import get_np_random
 from metadrive.scenario.scenario_description import ScenarioDescription

@@ -2,7 +2,6 @@ import copy
 import numpy as np
 
 from metadrive.component.traffic_light.scenario_traffic_light import ScenarioTrafficLight
-from metadrive.utils.coordinates_shift import right_hand_to_left_vector
 from metadrive.type import MetaDriveType
 from metadrive.scenario.scenario_description import ScenarioDescription as SD
 from metadrive.manager.base_manager import BaseManager
