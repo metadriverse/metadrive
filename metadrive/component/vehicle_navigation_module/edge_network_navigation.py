@@ -190,12 +190,8 @@ class EdgeNetworkNavigation(BaseNavigation):
                 BlockParameterSpace.CURVE[Parameter.radius].max +
                 self.get_current_lane_num() * self.get_current_lane_width()
             )
-            dir = ref_lane.direction
-            if ref_lane.is_clockwise():
-                angle = ref_lane.end_phase - ref_lane.start_phase
-            elif not ref_lane.is_clockwise():
-                angle = ref_lane.start_phase - ref_lane.end_phase
-
+            dir = -ref_lane.direction
+            angle = ref_lane.angle
         # Dim 3: The bending radius of current lane
         navi_information.append(clip(bendradius, 0.0, 1.0))
 

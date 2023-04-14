@@ -10,7 +10,7 @@ if __name__ == "__main__":
     setup_logger(True)
     env = MetaDriveEnv(
         {
-            "num_scenarios": 10,
+            "num_scenarios": 1,
             "traffic_density": 0.,
             "traffic_mode": "hybrid",
             "start_seed": 22,
@@ -32,7 +32,7 @@ if __name__ == "__main__":
             "interface_panel": [MiniMap, VehiclePanel, RGBCamera],
             "need_inverse_traffic": False,
             "rgb_clip": True,
-            "map": "S",
+            "map": "C",
             # "agent_policy": IDMPolicy,
             "random_traffic": False,
             # "random_lane_width": True,
@@ -84,7 +84,7 @@ if __name__ == "__main__":
     # env.vehicle.set_velocity([5, 0], in_local_frame=True)
     for s in range(1, 10000):
         # env.vehicle.set_velocity([8.728615581032535, -2.24411703918728195], in_local_frame=True)
-        o, r, d, info = env.step(env.action_space.sample())
+        o, r, d, info = env.step([0, 1])
 
         # else:
         # if s % 100 == 0:
@@ -113,23 +113,7 @@ if __name__ == "__main__":
         # #     # env.close()
         # #     # print(len(env.engine._spawned_objects))
         # env.reset()
+# [0.09231525, 0.4910181, 0.470769, 0.7691619, 0.5, 0.5, 1.0, 0.0, 0.4803721,
 
-# [0.09722222 
-# 0.4861111  
-# 0.5        
-# 0.01234568 
-# 0.5        
-# 0.5, 
-# 0.5       
-# 0.         
-# 0.5 
-# 0.54999995
-# 0.46500003
-# 0.,
-# 0.5
-# 0.5
-# 0.9499996
-# 0.46500003 
-# 0.         
-# 0.5,
-# 0.5       ]
+# 0.81229913, 0.8904725, 0.7317231, 1.0, 0.85320455,
+# 0.6567526, 0.9747927, 0.0, 0.5, 0.5]
