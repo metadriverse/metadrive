@@ -37,7 +37,7 @@ if __name__ == "__main__":
     parser.add_argument("--pygame_render", action="store_true")
     args = parser.parse_args()
     env_cls_name = args.env
-    extra_args = dict(mode="top_down", film_size=(800, 800)) if args.pygame_render else {}
+    extra_args = dict(mode="top_down", film_size=(800, 800)) if args.top_down else {}
     assert env_cls_name in envs.keys(), "No environment named {}, argument accepted: \n" \
                                         "(1) roundabout\n" \
                                         "(2) intersection\n" \
@@ -48,7 +48,7 @@ if __name__ == "__main__":
         .format(env_cls_name)
     env = envs[env_cls_name](
         {
-            "use_render": True if not args.pygame_render else False,
+            "use_render": True if not args.top_down else False,
             "manual_control": False,
             "crash_done": False,
             "agent_policy": ManualControllableIDMPolicy
@@ -68,7 +68,7 @@ if __name__ == "__main__":
                     "Number of existing vehicles": len(env.vehicles),
                     "Tracked agent (Press Q)": env.engine.agent_manager.object_to_agent(env.current_track_vehicle.id),
                     "Auto-Drive (Switch mode: T)": "on" if env.current_track_vehicle.expert_takeover else "off",
-                } if not args.pygame_render else {}
+                } if not args.top_down else {}
             )
             if d["__all__"]:
                 env.reset()
