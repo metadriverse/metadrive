@@ -35,10 +35,11 @@ class BaseTrafficParticipant(BaseObject):
     @property
     def WIDTH(self):
         return None
-
+    @property
     def top_down_width(self):
         return self.WIDTH
 
+    @property
     def top_down_length(self):
         return self.LENGTH
 
