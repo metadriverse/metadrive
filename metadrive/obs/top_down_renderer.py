@@ -12,7 +12,6 @@ from metadrive.obs.top_down_obs_impl import WorldSurface, VehicleGraphics, LaneG
 from metadrive.utils.interpolating_line import InterpolatingLine
 from metadrive.utils.utils import import_pygame
 from metadrive.utils.utils import is_map_related_instance
-from metadrive.scenario.utils import convert_polyline_to_metadrive
 
 pygame = import_pygame()
 
@@ -28,7 +27,6 @@ def draw_top_down_map(
     film_size=None,
     reverse_color=False,
     road_color=color_white,
-    coordinate_transform=False  # Set to True for waymo map
 ) -> Optional[Union[np.ndarray, pygame.Surface]]:
     import cv2
     film_size = film_size or map.film_size
@@ -56,8 +54,8 @@ def draw_top_down_map(
                     continue
                 type = data.get("type", None)
                 waymo_line = InterpolatingLine(
-                    convert_polyline_to_metadrive(
-                        data[ScenarioDescription.POLYLINE], coordinate_transform=coordinate_transform
+                    np.asarray(
+                        data[ScenarioDescription.POLYLINE]
                     )
                 )
                 LaneGraphics.display_waymo(waymo_line, type, surface)
@@ -187,7 +185,6 @@ class TopDownRenderer:
         self._text_render_pos = [50, 50]
         self._font_size = 25
         self._text_render_interval = 20
-        self.coordinate_transform = self.engine.data_manager.coordinate_transform
 
         # Setup the canvas
         # (1) background is the underlying layer. It is fixed and will never change unless the map changes.
@@ -197,7 +194,6 @@ class TopDownRenderer:
             return_surface=True,
             film_size=film_size,
             road_color=road_color,
-            coordinate_transform=self.coordinate_transform
         )
         if self._light_background:
             pixels = pygame.surfarray.pixels2d(self._background_canvas)
@@ -306,7 +302,6 @@ class TopDownRenderer:
             return_surface=True,
             film_size=self._background_size,
             road_color=self.road_color,
-            coordinate_transform=self.coordinate_transform
         )
         self._light_background = self._light_background
         if self._light_background:

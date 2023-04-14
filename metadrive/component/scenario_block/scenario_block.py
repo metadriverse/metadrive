@@ -1,5 +1,7 @@
 import math
 
+import numpy as np
+
 from metadrive.component.block.base_block import BaseBlock
 from metadrive.component.lane.scenario_lane import ScenarioLane
 from metadrive.component.road_network.edge_road_network import EdgeRoadNetwork
@@ -7,7 +9,6 @@ from metadrive.constants import DrivableAreaProperty
 from metadrive.scenario.scenario_description import ScenarioDescription
 from metadrive.constants import PGLineType, PGLineColor
 from metadrive.engine.engine_utils import get_engine
-from metadrive.scenario.utils import convert_polyline_to_metadrive
 from metadrive.type import MetaDriveType
 from metadrive.utils.coordinates_shift import panda_heading
 from metadrive.utils.interpolating_line import InterpolatingLine
@@ -31,8 +32,7 @@ class ScenarioBlock(BaseBlock):
                 if len(data[ScenarioDescription.POLYLINE]) <= 1:
                     continue
                 lane = ScenarioLane(
-                    lane_id, self.map_data, self.need_lane_localization, coordinate_transform=self.coordinate_transform
-                )
+                    lane_id, self.map_data, self.need_lane_localization)
                 self.block_network.add_lane(lane)
         return True
 
@@ -54,15 +54,14 @@ class ScenarioBlock(BaseBlock):
                     continue
                 if MetaDriveType.is_broken_line(type):
                     self.construct_broken_line(
-                        convert_polyline_to_metadrive(
-                            data[ScenarioDescription.POLYLINE], coordinate_transform=self.coordinate_transform
+                        np.asarray(
+                            data[ScenarioDescription.POLYLINE]
                         ), PGLineColor.YELLOW if MetaDriveType.is_yellow_line(type) else PGLineColor.GREY
                     )
                 else:
                     self.construct_continuous_line(
-                        convert_polyline_to_metadrive(
-                            data[ScenarioDescription.POLYLINE], coordinate_transform=self.coordinate_transform
-                        ), PGLineColor.YELLOW if MetaDriveType.is_yellow_line(type) else PGLineColor.GREY
+                        np.asarray(
+                            data[ScenarioDescription.POLYLINE]), PGLineColor.YELLOW if MetaDriveType.is_yellow_line(type) else PGLineColor.GREY
                     )
             # elif MetaDriveType.is_road_edge(type) and MetaDriveType.is_sidewalk(type):
             #     self.construct_sidewalk(
@@ -80,8 +79,8 @@ class ScenarioBlock(BaseBlock):
             #     raise ValueError("Can not build lane line type: {}".format(type))
             elif MetaDriveType.is_road_edge(type):
                 self.construct_sidewalk(
-                    convert_polyline_to_metadrive(
-                        data[ScenarioDescription.POLYLINE], coordinate_transform=self.coordinate_transform
+                    np.asarray(
+                        data[ScenarioDescription.POLYLINE]
                     )
                 )
 
@@ -153,11 +152,3 @@ class ScenarioBlock(BaseBlock):
         self.destroy()
         super(ScenarioBlock, self).__del__()
 
-    @property
-    def coordinate_transform(self):
-        return self.engine.data_manager.coordinate_transform
-
-    # @property
-    # def map_data(self):
-    #     e = get_engine()
-    #     return e.data_manager.get_scenario(self.map_index)["map"]

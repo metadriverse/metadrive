@@ -25,11 +25,10 @@ class ReplayTrafficParticipantPolicy(BasePolicy):
         ret = []
         for i in range(self.engine.data_manager.current_scenario_length):
             # a trick for saving computation
-            coordinate_transform = self.engine.data_manager.coordinate_transform
             if i < self.episode_step:
                 ret.append(None)
             else:
-                state = parse_object_state(track, i, coordinate_transform)
+                state = parse_object_state(track, i)
                 if not state["valid"]:
                     ret.append(None)
                 else:
@@ -79,7 +78,6 @@ class ReplayEgoCarPolicy(ReplayTrafficParticipantPolicy):
                 parse_object_state(
                     trajectory_data[sdc_track_index],
                     i,
-                    coordinate_transform=self.engine.data_manager.coordinate_transform
                 )
             )
         return ret

@@ -7,7 +7,7 @@ from metadrive.utils.coordinates_shift import right_hand_to_left_hand_heading, r
 from metadrive.utils.math_utils import compute_angular_velocity
 
 
-def parse_object_state(object_dict, time_idx, coordinate_transform, check_last_state=False, sim_time_interval=0.1):
+def parse_object_state(object_dict, time_idx, check_last_state=False, sim_time_interval=0.1):
     states = object_dict["state"]
 
     epi_length = len(states["position"])
@@ -26,17 +26,10 @@ def parse_object_state(object_dict, time_idx, coordinate_transform, check_last_s
 
     ret = {k: v[time_idx] for k, v in states.items()}
 
-    if coordinate_transform:
-        ret["position"] = right_hand_to_left_vector(states["position"][time_idx][:2])
-        ret["velocity"] = right_hand_to_left_vector(states["velocity"][time_idx])
-    else:
-        ret["position"] = states["position"][time_idx]
-        ret["velocity"] = states["velocity"][time_idx]
+    ret["position"] = states["position"][time_idx]
+    ret["velocity"] = states["velocity"][time_idx]
 
-    if coordinate_transform:
-        ret["heading_theta"] = right_hand_to_left_hand_heading(states["heading"][time_idx])
-    else:
-        ret["heading_theta"] = states["heading"][time_idx]
+    ret["heading_theta"] = states["heading"][time_idx]
 
     ret["heading"] = ret["heading_theta"]
 
@@ -52,9 +45,7 @@ def parse_object_state(object_dict, time_idx, coordinate_transform, check_last_s
             final_heading=states["heading"][time_idx + 1],
             dt=sim_time_interval
         )
-        ret["angular_velocity"] = right_hand_to_left_hand_heading(
-            angular_velocity
-        ) if coordinate_transform else angular_velocity
+        ret["angular_velocity"] = angular_velocity
     else:
         ret["angular_velocity"] = 0
 
@@ -70,7 +61,7 @@ def parse_object_state(object_dict, time_idx, coordinate_transform, check_last_s
     return ret
 
 
-def parse_full_trajectory(object_dict, coordinate_transform):
+def parse_full_trajectory(object_dict):
     positions = object_dict["state"]["position"]
     index = len(positions)
     for current_idx in range(len(positions) - 1):
@@ -82,7 +73,5 @@ def parse_full_trajectory(object_dict, coordinate_transform):
     positions = positions[:index]
     trajectory = copy.deepcopy(positions[:, :2])
     # convert to metadrive coordinate
-    if coordinate_transform:
-        trajectory = right_hand_to_left_vector(trajectory)
 
     return trajectory

@@ -81,12 +81,8 @@ class ScenarioTrafficManager(BaseManager):
     def current_scenario_length(self):
         return self.engine.data_manager.current_scenario_length
 
-    @property
-    def coordinate_transform(self):
-        return self.engine.data_manager.coordinate_transform
-
     def spawn_vehicle(self, v_id, track):
-        state = parse_object_state(track, self.episode_step, self.coordinate_transform)
+        state = parse_object_state(track, self.episode_step)
         if not state["valid"]:
             return
         v_config = copy.deepcopy(self.engine.global_config["vehicle_config"])
@@ -118,7 +114,7 @@ class ScenarioTrafficManager(BaseManager):
         policy.act()
 
     def spawn_pedestrian(self, scenario_id, track):
-        state = parse_object_state(track, self.episode_step, self.coordinate_transform)
+        state = parse_object_state(track, self.episode_step)
         if not state["valid"]:
             return
         obj = self.spawn_object(
@@ -132,7 +128,7 @@ class ScenarioTrafficManager(BaseManager):
         policy.act()
 
     def spawn_cyclist(self, scenario_id, track):
-        state = parse_object_state(track, self.episode_step, self.coordinate_transform)
+        state = parse_object_state(track, self.episode_step)
         if not state["valid"]:
             return
         obj = self.spawn_object(

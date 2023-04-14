@@ -26,7 +26,6 @@ class ScenarioDataManager(BaseManager):
 
         self.store_map = store_map
         self._scenario = DataBuffer(store_map_buffer_size if self.store_map else self.num_scenarios)
-        self._coordinate_transform = False
 
         # Read summary file first:
         self.summary_dict, self.summary_lookup = read_dataset_summary(self.directory)
@@ -92,7 +91,6 @@ class ScenarioDataManager(BaseManager):
         # Data Manager is the first manager that accesses  data.
         # It is proper to let it validate the metadata and change the global config if needed.
         ret = self._scenario[i]
-        self.transform_coordinate(ret)
 
         return ret
 
@@ -103,6 +101,7 @@ class ScenarioDataManager(BaseManager):
         return state
 
     def transform_coordinate(self, scenario):
+        raise ValueError("Deprecated now as all coordinates is right-handed now")
         if not self.engine.global_config["allow_coordinate_transform"]:
             assert scenario[SD.METADATA][SD.COORDINATE] == MetaDriveType.COORDINATE_METADRIVE, \
                 "Only support MetaDrive coordinate!"
@@ -114,10 +113,6 @@ class ScenarioDataManager(BaseManager):
                 self._coordinate_transform = False
             else:
                 raise ValueError()
-
-    @property
-    def coordinate_transform(self):
-        return self._coordinate_transform
 
     @property
     def current_scenario_length(self):

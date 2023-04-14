@@ -88,10 +88,6 @@ class ScenarioLightManager(BaseManager):
                 # New data format where position is a [3, ] array.
                 traffic_light_position = light_info[SD.TRAFFIC_LIGHT_POSITION][:2]
 
-            if self.engine.data_manager.coordinate_transform:
-                # ignore height and convert coordinate, if necessary
-                traffic_light_position = right_hand_to_left_vector(traffic_light_position)
-
             ret[lane_id][SD.TRAFFIC_LIGHT_POSITION] = traffic_light_position
 
             assert light_info[SD.TYPE] == MetaDriveType.TRAFFIC_LIGHT, "Can not handle {}".format(light_info[SD.TYPE])

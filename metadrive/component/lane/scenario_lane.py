@@ -9,7 +9,7 @@ from metadrive.component.lane.point_lane import PointLane
 from metadrive.scenario.scenario_description import ScenarioDescription
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.utils.math_utils import norm, mph_to_kmh
-from metadrive.scenario.utils import read_scenario_data, convert_polyline_to_metadrive
+from metadrive.scenario.utils import read_scenario_data
 
 
 # return the nearest point"s index of the line
@@ -22,17 +22,14 @@ def nearest_point(point, line):
 class ScenarioLane(PointLane):
     VIS_LANE_WIDTH = 6
 
-    def __init__(self, lane_id: int, map_data: dict, need_lane_localization, coordinate_transform):
+    def __init__(self, lane_id: int, map_data: dict, need_lane_localization):
         """
         Extract the lane information of one lane, and do coordinate shift if required
         """
-        center_line_points = convert_polyline_to_metadrive(
-            map_data[lane_id][ScenarioDescription.POLYLINE], coordinate_transform=coordinate_transform
-        )
+        center_line_points = np.asarray(
+            map_data[lane_id][ScenarioDescription.POLYLINE])
         if ScenarioDescription.POLYGON in map_data[lane_id] and len(map_data[lane_id][ScenarioDescription.POLYGON]) > 3:
-            polygon = convert_polyline_to_metadrive(
-                map_data[lane_id][ScenarioDescription.POLYGON], coordinate_transform=coordinate_transform
-            )
+            polygon = np.asarray(map_data[lane_id][ScenarioDescription.POLYGON])
         else:
             polygon = None
         assert "speed_limit_kmh" in map_data[lane_id] or "speed_limit_mph" in map_data[lane_id]
@@ -54,7 +51,7 @@ class ScenarioLane(PointLane):
         self.right_lanes = map_data[lane_id].get(ScenarioDescription.RIGHT_NEIGHBORS, None)
 
     @staticmethod
-    def try_get_polygon(map_data, lane_id, coordinate_transform):
+    def try_get_polygon(map_data, lane_id):
         """
         This method tries to infer polygon from the boundaries
         """
@@ -92,7 +89,7 @@ class ScenarioLane(PointLane):
             return None
         else:
             polygon = np.concatenate([left_boundary_points, right_boundary_points], axis=0)[..., :2]
-            return convert_polyline_to_metadrive(polygon, coordinate_transform)
+            return np.asarray(polygon)
 
     def get_lane_width(self, lane_id, map_data):
         """
@@ -139,4 +136,4 @@ if __name__ == "__main__":
     file_path = AssetLoader.file_path("waymo", "test.pkl", return_raw_style=False)
     data = read_scenario_data(file_path)
     print(data)
-    lane = ScenarioLane(108, data["map_features"], coordinate_transform=True)
+    lane = ScenarioLane(108, data["map_features"])
