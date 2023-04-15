@@ -23,15 +23,15 @@ class ImageBuffer:
     line_borders = []
 
     def __init__(
-            self,
-            width: float,
-            height: float,
-            pos: Vec3,
-            bkg_color: Union[Vec4, Vec3],
-            parent_node: NodePath = None,
-            frame_buffer_property=None,
-            setup_pbr=False,
-            # engine=None
+        self,
+        width: float,
+        height: float,
+        pos: Vec3,
+        bkg_color: Union[Vec4, Vec3],
+        parent_node: NodePath = None,
+        frame_buffer_property=None,
+        setup_pbr=False,
+        # engine=None
     ):
 
         self._node_path_list = []
