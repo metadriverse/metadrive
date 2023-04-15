@@ -553,28 +553,6 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         # Normalize to 0, 1
         return clip(cos, -1.0, 1.0) / 2 + 0.5
 
-    def convert_to_local_coordinates(self, vector):
-        """
-        Give a world position, and convert it to vehicle coordinates
-        """
-        vector = LVector3(*vector, 0.)
-        vector = self.origin.getRelativeVector(self.engine.origin, vector)
-        # TODO(LQY) It is in left-hand still! and 90 degree offset is still required
-        project_on_heading = vector[0]
-        project_on_side = -vector[1]
-        return np.asarray([project_on_heading, project_on_side])
-
-    def convert_to_world_coordinates(self, vector):
-        """
-        Give a position in world coordinates, and convert it to vehicle coordinates
-        """
-        vector = LVector3(*vector, 0.)
-        # TODO(LQY) It is in left-hand still! and 90 degree offset is still required
-        vector = self.engine.origin.getRelativeVector(self.origin, vector)
-        project_on_x = vector[0]
-        project_on_y = vector[1]
-        return np.asarray([project_on_x, project_on_y])
-
     def lane_distance_to(self, vehicle, lane: AbstractLane = None) -> float:
         assert self.navigation is not None, "a routing and localization module should be added " \
                                             "to interact with other vehicles"

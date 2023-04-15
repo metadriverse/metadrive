@@ -472,7 +472,7 @@ class BaseObject(BaseRunnable):
         vector = self.origin.getRelativeVector(self.engine.origin, vector)
         project_on_x = vector[0]
         project_on_y = vector[1]
-        return project_on_x, project_on_y
+        return np.array([project_on_x, project_on_y])
 
     def convert_to_world_coordinates(self, vector):
         """
@@ -483,4 +483,4 @@ class BaseObject(BaseRunnable):
         vector = self.engine.origin.getRelativeVector(self.origin, vector)
         project_on_x = vector[0]
         project_on_y = vector[1]
-        return project_on_x, project_on_y
+        return np.array([project_on_x, project_on_y])

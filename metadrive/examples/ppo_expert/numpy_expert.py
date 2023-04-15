@@ -27,6 +27,13 @@ _expert_weights = None
 _expert_observation = None
 
 
+def obs_correction(obs):
+    # due to coordinate correction, this observation should be reversed
+    obs[15] = 1 - obs[15]
+    obs[10] = 1 - obs[10]
+    return obs
+
+
 def expert(vehicle, deterministic=False, need_obs=False):
     global _expert_weights
     global _expert_observation
@@ -42,6 +49,7 @@ def expert(vehicle, deterministic=False, need_obs=False):
         _expert_observation = LidarStateObservation(v_config)
         assert _expert_observation.observation_space.shape[0] == 275, "Observation not match"
     obs = _expert_observation.observe(vehicle)
+    obs = obs_correction(obs)
     weights = _expert_weights
     obs = obs.reshape(1, -1)
     x = np.matmul(obs, weights["default_policy/fc_1/kernel"]) + weights["default_policy/fc_1/bias"]
