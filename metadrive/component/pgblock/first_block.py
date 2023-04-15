@@ -40,9 +40,7 @@ class FirstPGBlock(PGBlock):
             print("Warning: first block length is two small", length, "<", self.ENTRANCE_LENGTH)
         self._block_objects = []
         basic_lane = StraightLane(
-            [0, lane_width * (lane_num - 1)], [self.ENTRANCE_LENGTH, lane_width * (lane_num - 1)],
-            line_types=(PGLineType.BROKEN, PGLineType.SIDE),
-            width=lane_width
+            [0, 0], [self.ENTRANCE_LENGTH, 0], line_types=(PGLineType.BROKEN, PGLineType.SIDE), width=lane_width
         )
         ego_v_spawn_road = Road(self.NODE_1, self.NODE_2)
         CreateRoadFrom(

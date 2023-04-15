@@ -19,6 +19,7 @@ class RGBCamera(BaseCamera):
         super(RGBCamera, self).__init__(True, cuda)
         cam = self.get_cam()
         lens = self.get_lens()
-        cam.lookAt(0, 2.4, 1.3)
+        self.origin.lookAt(2.4, 0, 1.3)
+
         lens.setFov(60)
         lens.setAspectRatio(2.0)

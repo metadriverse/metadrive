@@ -5,7 +5,7 @@ from typing import Tuple
 
 import numpy as np
 from direct.controls.InputState import InputState
-from panda3d.core import Vec3, Point3, PNMImage
+from panda3d.core import Vec3, Point3, PNMImage, NodePath
 from panda3d.core import WindowProperties
 
 from metadrive.constants import CollisionGroup
@@ -186,7 +186,8 @@ class MainCamera:
         self.camera_queue.put(chassis_pos)
         if not self.FOLLOW_LANE:
             forward_dir = vehicle.system.get_forward_vector()
-            current_forward_dir = [forward_dir[0], forward_dir[1]]
+            # camera is facing to y
+            current_forward_dir = [forward_dir[1], -forward_dir[0]]
         else:
             current_forward_dir = self._dir_of_lane(vehicle.navigation.current_ref_lanes[0], vehicle.position)
         self.direction_running_mean.append(current_forward_dir)
@@ -206,16 +207,18 @@ class MainCamera:
 
         self.camera.setPos(*camera_pos)
         if self.engine.global_config["show_coordinates"]:
-            self.engine.set_coordinates_indicator_pos([chassis_pos[0], -chassis_pos[1]])
+            self.engine.set_coordinates_indicator_pos([chassis_pos[0], chassis_pos[1]])
         current_pos = vehicle.chassis.getPos()
         current_pos[2] += 2
 
         if self.camera_pitch is None:
             self.camera.lookAt(current_pos)
-            self.camera.setH(vehicle.origin.getH() + np.rad2deg(self.mouse_rotate))
+            # camera is facing to y
+            self.camera.setH(vehicle.origin.getH() + np.rad2deg(self.mouse_rotate) - 90)
         else:
-            self.camera.setHpr(vehicle.origin.getHpr())
-            self.camera.setP(self.camera.getP() + self.camera_pitch)
+            # camera is facing to y
+            self.camera.setH(vehicle.origin.getH() - 90)
+            self.camera.setP(self.camera_pitch)
         if self.FOLLOW_LANE:
             self.camera.setH(
                 self._heading_of_lane(vehicle.navigation.current_ref_lanes[0], vehicle.position) / np.pi * 180 - 90

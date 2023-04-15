@@ -342,10 +342,10 @@ class AbstractLane:
 
         direction_v = lane_end - lane_start
         if extra_thrust != 0:
-            vertical_v = Vector((-direction_v[1], direction_v[0])) / norm(*direction_v)
+            vertical_v = Vector((direction_v[1], -direction_v[0])) / norm(*direction_v)
             middle += vertical_v * extra_thrust
         side_np.setPos(panda_vector(middle, 0))
-        theta = panda_heading(math.atan2(direction_v[1], direction_v[0]))
+        theta = math.atan2(direction_v[1], direction_v[0])
         side_np.setQuat(LQuaternionf(math.cos(theta / 2), 0, 0, math.sin(theta / 2)))
         side_np.setScale(length * length_multiply, width, block.SIDEWALK_THICKNESS * (1 + 0.1 * np.random.rand()))
         if block.render:

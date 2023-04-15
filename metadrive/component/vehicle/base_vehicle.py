@@ -5,7 +5,7 @@ from typing import Union, Optional
 import numpy as np
 import seaborn as sns
 from panda3d.bullet import BulletVehicle, BulletBoxShape, ZUp
-from panda3d.core import Material, Vec3, TransformState
+from panda3d.core import Material, Vec3, TransformState, LVector3
 from panda3d.core import NodePath
 
 from metadrive.base_class.base_object import BaseObject
@@ -28,7 +28,6 @@ from metadrive.engine.core.image_buffer import ImageBuffer
 from metadrive.engine.engine_utils import get_engine, engine_initialized
 from metadrive.engine.physics_node import BaseRigidBodyNode
 from metadrive.utils import Config, safe_clip_for_small_array
-from metadrive.utils.coordinates_shift import panda_heading, metadrive_heading
 from metadrive.utils.math_utils import get_vertical_vector, norm, clip
 from metadrive.utils.math_utils import wrap_to_pi
 from metadrive.utils.pg_utils.utils import ray_localization
@@ -501,13 +500,13 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         lateral_to_right = self.navigation.get_current_lateral_range(self.position, self.engine) - lateral_to_left
         return lateral_to_left, lateral_to_right
 
-    @property
-    def heading_theta(self):
-        """
-        Get the heading theta of vehicle, unit [rad]
-        :return:  heading in rad
-        """
-        return wrap_to_pi((metadrive_heading(self.origin.getH()) - 90) / 180 * math.pi)
+    # @property
+    # def heading_theta(self):
+    #     """
+    #     Get the heading theta of vehicle, unit [rad]
+    #     :return:  heading in rad
+    #     """
+    #     return wrap_to_pi(self.origin.getH() / 180 * math.pi)
 
     # @property
     # def velocity(self) -> np.ndarray:
@@ -524,7 +523,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             "Deprecate it and make things easy"
         )
         direction = self.system.getForwardVector()
-        return np.asarray([direction[0], -direction[1]])
+        return np.asarray([direction[0], direction[1]])
 
     """---------------------------------------- some math tool ----------------------------------------------"""
 
@@ -533,7 +532,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         if isinstance(target_lane, StraightLane):
             lateral = np.asarray(get_vertical_vector(target_lane.end - target_lane.start)[1])
         elif isinstance(target_lane, CircularLane):
-            if target_lane.direction == -1:
+            if not target_lane.is_clockwise():
                 lateral = self.position - target_lane.center
             else:
                 lateral = target_lane.center - self.position
@@ -553,23 +552,6 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         # return cos
         # Normalize to 0, 1
         return clip(cos, -1.0, 1.0) / 2 + 0.5
-
-    def projection(self, vector):
-        # Projected to the heading of vehicle
-        # forward_vector = self.vehicle.get_forward_vector()
-        # forward_old = (forward_vector[0], -forward_vector[1])
-
-        forward = self.heading
-
-        # print(f"[projection] Old forward {forward_old}, new heading {forward}")
-
-        norm_velocity = norm(forward[0], forward[1]) + 1e-6
-        project_on_heading = (vector[0] * forward[0] + vector[1] * forward[1]) / norm_velocity
-
-        side_direction = get_vertical_vector(forward)[1]
-        side_norm = norm(side_direction[0], side_direction[1]) + 1e-6
-        project_on_side = (vector[0] * side_direction[0] + vector[1] * side_direction[1]) / side_norm
-        return project_on_heading, project_on_side
 
     def lane_distance_to(self, vehicle, lane: AbstractLane = None) -> float:
         assert self.navigation is not None, "a routing and localization module should be added " \
@@ -605,7 +587,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         chassis = BaseRigidBodyNode(self.name, MetaDriveType.VEHICLE)
         self._node_path_list.append(chassis)
 
-        chassis_shape = BulletBoxShape(Vec3(self.WIDTH / 2, self.LENGTH / 2, self.HEIGHT / 2))
+        chassis_shape = BulletBoxShape(Vec3(self.LENGTH / 2, self.WIDTH / 2, self.HEIGHT / 2))
         ts = TransformState.makePos(Vec3(0, 0, self.HEIGHT / 2))
         chassis.addShape(chassis_shape, ts)
         chassis.setDeactivationEnabled(False)
@@ -619,14 +601,15 @@ class BaseVehicle(BaseObject, BaseVehicleState):
 
     def _add_visualization(self):
         if self.render:
-            [path, scale, x_y_z_offset, H] = self.path
+            [path, scale, offset, H] = self.path
             if path not in BaseVehicle.model_collection:
                 car_model = self.loader.loadModel(AssetLoader.file_path("models", path, "vehicle.gltf"))
                 BaseVehicle.model_collection[path] = car_model
                 car_model.setScale(scale)
-                car_model.setH(H)
-                car_model.setPos(x_y_z_offset)
-                car_model.setZ(-self.TIRE_RADIUS - self.CHASSIS_TO_WHEEL_AXIS + x_y_z_offset[-1])
+                # model default, face to y
+                car_model.setH(H - 90)
+                car_model.setPos(offset[1], offset[0], offset[-1])
+                car_model.setZ(-self.TIRE_RADIUS - self.CHASSIS_TO_WHEEL_AXIS + offset[-1])
             else:
                 car_model = BaseVehicle.model_collection[path]
             car_model.instanceTo(self.origin)
@@ -654,8 +637,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         axis_height = self.TIRE_RADIUS - self.CHASSIS_TO_WHEEL_AXIS
         radius = self.TIRE_RADIUS
         wheels = []
-        for k, pos in enumerate([Vec3(lateral, f_l, axis_height), Vec3(-lateral, f_l, axis_height),
-                                 Vec3(lateral, r_l, axis_height), Vec3(-lateral, r_l, axis_height)]):
+        for k, pos in enumerate([Vec3(f_l, lateral, axis_height), Vec3(f_l, -lateral, axis_height),
+                                 Vec3(r_l, lateral, axis_height), Vec3(r_l, -lateral, axis_height)]):
             wheel = self._add_wheel(pos, radius, True if k < 2 else False, True if k == 0 or k == 2 else False)
             wheels.append(wheel)
         return wheels
@@ -670,13 +653,13 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             wheel_model = self.loader.loadModel(model_path)
             wheel_model.setTwoSided(self.TIRE_TWO_SIDED)
             wheel_model.reparentTo(wheel_np)
-            wheel_model.set_scale(1 * self.TIRE_MODEL_CORRECT if left else -1 * self.TIRE_MODEL_CORRECT)
+            wheel_model.set_scale(1 * self.TIRE_MODEL_CORRECT if not left else -1 * self.TIRE_MODEL_CORRECT)
         wheel = self.system.create_wheel()
         wheel.setNode(wheel_np.node())
         wheel.setChassisConnectionPointCs(pos)
         wheel.setFrontWheel(front)
         wheel.setWheelDirectionCs(Vec3(0, 0, -1))
-        wheel.setWheelAxleCs(Vec3(1, 0, 0))
+        wheel.setWheelAxleCs(Vec3(0, -1, 0))
 
         wheel.setWheelRadius(radius)
         wheel.setMaxSuspensionTravelCm(self.SUSPENSION_LENGTH)
@@ -851,15 +834,11 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         :param heading_theta: float in rad
         :param in_rad: when set to True, heading theta should be in rad, otherwise, in degree
         """
-        h = panda_heading(heading_theta)
-        if in_rad:
-            h *= 180 / np.pi
-        self.origin.setH(h - 90)
-
+        super(BaseVehicle, self).set_heading_theta(heading_theta, in_rad)
         self.last_heading_dir = self.heading
 
     def set_velocity(self, direction, *args, **kwargs):
-        super(BaseVehicle, self).set_velocity(direction, *args, offset_90_deg=True, **kwargs)
+        super(BaseVehicle, self).set_velocity(direction, *args, **kwargs)
         self.last_velocity = self.velocity
         self.last_speed = self.speed
 
@@ -1012,37 +991,6 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self.break_down = break_down
         # self.set_static(True)
 
-    def convert_to_vehicle_coordinates(self, position, ego_heading=None, ego_position=None):
-        """
-        Give a world position, and convert it to vehicle coordinates
-        The vehicle heading is X direction and right side is Y direction
-        """
-        # Projected to the heading of vehicle
-        pos = ego_heading if ego_position is not None else self.position
-        vector = position - pos
-        forward = self.heading if ego_heading is None else ego_position
-
-        norm_velocity = norm(forward[0], forward[1]) + 1e-6
-        project_on_heading = (vector[0] * forward[0] + vector[1] * forward[1]) / norm_velocity
-
-        side_direction = get_vertical_vector(forward)[1]
-        side_norm = norm(side_direction[0], side_direction[1]) + 1e-6
-        project_on_side = (vector[0] * side_direction[0] + vector[1] * side_direction[1]) / side_norm
-        return project_on_heading, project_on_side
-
-    def convert_to_world_coordinates(self, project_on_heading, project_on_side):
-        """
-        Give a position in vehicle coordinates, and convert it to world coordinates
-        The vehicle heading is X direction and right side is Y direction
-        """
-        theta = np.arctan2(project_on_side, project_on_heading)
-        theta = wrap_to_pi(self.heading_theta) + wrap_to_pi(theta)
-        norm_len = norm(project_on_heading, project_on_side)
-        position = self.position
-        heading = math.sin(theta) * norm_len
-        side = math.cos(theta) * norm_len
-        return position[0] + side, position[1] + heading
-
     @property
     def max_speed_km_h(self):
         return self.config["max_speed_km_h"]
@@ -1083,12 +1031,12 @@ class BaseVehicle(BaseObject, BaseVehicleState):
 
     def show_coordinates(self):
         if self.coordinates_debug_np is not None:
+            self.coordinates_debug_np.reparentTo(self.origin)
             return
         height = self.HEIGHT
         self.coordinates_debug_np = NodePath("debug coordinate")
-        # 90 degree diff
-        x = self.engine.add_line([0, 0, height], [0, -2, height], [0, 1, 0, 1], 1)
-        y = self.engine.add_line([0, 0, height], [1, 0, height], [0, 1, 0, 1], 1)
+        x = self.engine.add_line([0, 0, height], [2, 0, height], [0, 1, 0, 1], 1)
+        y = self.engine.add_line([0, 0, height], [0, 1, height], [0, 1, 0, 1], 1)
         z = self.engine.add_line([0, 0, height], [0, 0, height + 0.5], [0, 0, 1, 1], 2)
         x.reparentTo(self.coordinates_debug_np)
         y.reparentTo(self.coordinates_debug_np)

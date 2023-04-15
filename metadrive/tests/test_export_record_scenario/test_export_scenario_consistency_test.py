@@ -1,7 +1,7 @@
 import os
 import pickle
 import shutil
-
+from metadrive.utils.math_utils import wrap_to_pi
 import numpy as np
 
 from metadrive.engine.asset_loader import AssetLoader
@@ -10,7 +10,6 @@ from metadrive.envs.real_data_envs.waymo_env import WaymoEnv
 from metadrive.policy.idm_policy import IDMPolicy
 from metadrive.policy.replay_policy import WaymoReplayEgoCarPolicy
 from metadrive.type import MetaDriveType
-from metadrive.utils.coordinates_shift import waymo_to_metadrive_vector, waymo_to_metadrive_heading
 from metadrive.utils.scene_export_utils.scene_export_utils import assert_scenario_equal, NP_ARRAY_DECIMAL
 
 
@@ -233,23 +232,23 @@ def compare_exported_scenario_with_waymo_origin(scenarios, data_manager):
 
             index_to_compare = np.where(new_valid)[0]
             assert old_valid[index_to_compare].all(), "Frame mismatch!"
-            old_pos = waymo_to_metadrive_vector(old_pos[index_to_compare][..., :2])
+            old_pos = old_pos[index_to_compare][..., :2]
             new_pos = new_pos[index_to_compare][..., :2]
             np.testing.assert_almost_equal(old_pos, new_pos, decimal=NP_ARRAY_DECIMAL)
 
-            old_heading = waymo_to_metadrive_heading(old_heading[index_to_compare]).reshape(-1)
-            new_heading = new_heading[index_to_compare].reshape(-1)
+            old_heading = wrap_to_pi(old_heading[index_to_compare].reshape(-1))
+            new_heading = wrap_to_pi(new_heading[index_to_compare].reshape(-1))
             np.testing.assert_almost_equal(old_heading, new_heading, decimal=NP_ARRAY_DECIMAL)
 
         for light_id, old_light in origin_data["dynamic_map_states"].items():
             new_light = export_data["dynamic_map_states"][light_id]
 
             if "stop_point" in old_light["state"]:
-                old_pos = waymo_to_metadrive_vector(old_light["state"]["stop_point"])[..., :2]
+                old_pos = old_light["state"]["stop_point"][..., :2]
                 old_pos = old_pos[np.where(old_pos > 0)[0][0]]
 
             else:
-                old_pos = waymo_to_metadrive_vector(old_light["stop_point"])
+                old_pos = old_light["stop_point"]
 
             if "stop_point" in new_light["state"]:
                 new_pos = new_light["state"]["stop_point"]
@@ -307,7 +306,7 @@ def test_waymo_export_and_original_consistency(num_scenarios=3, render_export_en
 
 if __name__ == "__main__":
     # test_export_metadrive_scenario_reproduction(num_scenarios=10)
-    test_export_metadrive_scenario_easy(num_scenarios=3, render_export_env=False, render_load_env=True)
+    # test_export_metadrive_scenario_easy(num_scenarios=3, render_export_env=False, render_load_env=False)
     # test_export_metadrive_scenario_hard(num_scenarios=3, render_export_env=True, render_load_env=True)
-    # test_export_waymo_scenario(num_scenarios=1, render_export_env=False, render_load_env=False)
-    # test_waymo_export_and_original_consistency(num_scenarios=3, render_export_env=False)
+    # test_export_waymo_scenario(num_scenarios=3, render_export_env=False, render_load_env=False)
+    test_waymo_export_and_original_consistency(num_scenarios=3, render_export_env=False)

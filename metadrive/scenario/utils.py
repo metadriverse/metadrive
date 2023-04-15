@@ -339,14 +339,3 @@ def read_dataset_summary(file_folder):
         summary_dict = {f: {} for f in files}
 
     return summary_dict, list(summary_dict.keys())
-
-
-def convert_polyline_to_metadrive(polyline, coordinate_transform=True):
-    """
-    Convert a polyline to metadrive coordinate as np.array
-    """
-    polyline = np.asarray(polyline)
-    if coordinate_transform:
-        return np.stack([polyline[:, 0], -polyline[:, 1]], axis=1)
-    else:
-        return polyline

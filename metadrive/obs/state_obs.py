@@ -85,6 +85,7 @@ class StateObservation(ObservationBase):
             info += [clip(lateral_to_left, 0.0, 1.0), clip(lateral_to_right, 0.0, 1.0)]
 
         if vehicle.navigation is None or vehicle.navigation.current_ref_lanes is None:
+            # TODO LQY, consider adding observations
             info += [0] * 5
         else:
             current_reference_lane = vehicle.navigation.current_ref_lanes[-1]

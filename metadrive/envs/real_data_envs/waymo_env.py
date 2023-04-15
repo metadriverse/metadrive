@@ -4,7 +4,6 @@ import time
 WAYMO_ENV_CONFIG = dict(
     # ===== Map Config =====
     waymo_data_directory=None,  # for compatibility
-    allow_coordinate_transform=True,  # for compatibility
 )
 
 
