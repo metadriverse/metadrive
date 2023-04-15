@@ -128,7 +128,7 @@ def get_curve_contour(lanes, extra_lateral) -> List:
             lane.position(lane.length - 0.1, lateral_dir * (lane.width / 2.0 + extra_lateral))
         ]
         start_phase = (lane.start_phase // pi_2) * pi_2
-        start_phase += pi_2 if lane.direction == 1 else 0
+        start_phase += pi_2 if lane.is_clockwise() else 0
         for phi_index in range(4):
             phi = start_phase + phi_index * pi_2 * lane.direction
             if lane.direction * phi > lane.direction * lane.end_phase:

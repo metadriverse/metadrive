@@ -210,6 +210,7 @@ class EngineCore(ShowBase.ShowBase):
 
         # attach node to this root whose children nodes will be clear after calling clear_world()
         self.worldNP = self.render.attachNewNode("world_np")
+        self.origin = self.worldNP
 
         # same as worldNP, but this node is only used for render gltf model with pbr material
         self.pbr_worldNP = self.pbr_render.attachNewNode("pbrNP")
@@ -415,8 +416,8 @@ class EngineCore(ShowBase.ShowBase):
         assert self.mode == RENDER_MODE_ONSCREEN, "Can not call this API in render mode: {}".format(self.mode)
         start_p = [*start_p]
         end_p = [*end_p]
-        start_p[1] *= -1
-        end_p[1] *= -1
+        start_p[1] *= 1
+        end_p[1] *= 1
         line_seg = LineSegs("interface")
         line_seg.setColor(*color)
         line_seg.moveTo(Vec3(*start_p))
@@ -430,10 +431,10 @@ class EngineCore(ShowBase.ShowBase):
         if len(self.coordinate_line) > 0:
             return
         # x direction = red
-        np_x = self.add_line(Vec3(0, 0, 0), Vec3(100, 0, 0), color=[1, 0, 0, 1], thickness=2)
+        np_x = self.add_line(Vec3(0, 0, 0.1), Vec3(100, 0, 0.1), color=[1, 0, 0, 1], thickness=2)
         np_x.reparentTo(self.render)
         # y direction = blue
-        np_y = self.add_line(Vec3(0, 0, 0), Vec3(0, 50, 0), color=[0, 1, 0, 1], thickness=2)
+        np_y = self.add_line(Vec3(0, 0, 0.1), Vec3(0, 50, 0.1), color=[0, 1, 0, 1], thickness=2)
         np_y.reparentTo(self.render)
         self.coordinate_line.append(np_x)
         self.coordinate_line.append(np_y)
@@ -447,7 +448,7 @@ class EngineCore(ShowBase.ShowBase):
         if len(self.coordinate_line) == 0:
             return
         for line in self.coordinate_line:
-            line.setPos(pos[0], -pos[1], 0)
+            line.setPos(pos[0], pos[1], 0)
 
 
 if __name__ == "__main__":

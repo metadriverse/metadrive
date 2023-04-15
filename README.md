@@ -82,7 +82,7 @@ You can also launch an instance of Multi-Agent scenario as follows
 python -m metadrive.examples.drive_in_multi_agent_env --env roundabout
 ```
 ```--env```  accepts following parmeters: `roundabout` (default), `intersection`, `tollgate`, `bottleneck`, `parkinglot`, `pgmap`.
-Adding ```--pygame_render``` can launch top-down pygame renderer. 
+Adding ```--top_down``` can launch top-down pygame renderer. 
 
 
 

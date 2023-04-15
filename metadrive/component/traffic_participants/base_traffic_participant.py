@@ -36,25 +36,27 @@ class BaseTrafficParticipant(BaseObject):
     def WIDTH(self):
         return None
 
+    @property
     def top_down_width(self):
         return self.WIDTH
 
+    @property
     def top_down_length(self):
         return self.LENGTH
 
-    def set_roll(self, roll):
-        self.origin.setP(roll)
-
-    def set_pitch(self, pitch):
-        self.origin.setR(pitch)
-
-    @property
-    def roll(self):
-        return np.deg2rad(self.origin.getP())
-
-    @property
-    def pitch(self):
-        return np.deg2rad(self.origin.getR())
+    # def set_roll(self, roll):
+    #     self.origin.setP(roll)
+    #
+    # def set_pitch(self, pitch):
+    #     self.origin.setR(pitch)
+    #
+    # @property
+    # def roll(self):
+    #     return np.deg2rad(self.origin.getP())
+    #
+    # @property
+    # def pitch(self):
+    #     return np.deg2rad(self.origin.getR())
 
     def add_body(self, physics_body):
         super(BaseTrafficParticipant, self).add_body(physics_body)

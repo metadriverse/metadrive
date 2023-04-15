@@ -10,7 +10,7 @@ VELOCITY_DECIMAL = 1  # velocity can not be set accurately
 MIN_LENGTH_RATIO = 0.8
 
 
-def assert_scenario_equal(scenarios1, scenarios2, only_compare_sdc=False, coordinate_transform=False):
+def assert_scenario_equal(scenarios1, scenarios2, only_compare_sdc=False):
     # ===== These two set of data should align =====
     assert set(scenarios1.keys()) == set(scenarios2.keys())
     for scenario_id in scenarios1.keys():
@@ -108,6 +108,10 @@ def assert_scenario_equal(scenarios1, scenarios2, only_compare_sdc=False, coordi
 
                 if k == "velocity":
                     decimal = VELOCITY_DECIMAL
+                elif k == "position":
+                    state_array_1 = state_array_1[..., :2]
+                    state_array_2 = state_array_2[..., :2]
+                    decimal = NP_ARRAY_DECIMAL
                 else:
                     decimal = NP_ARRAY_DECIMAL
                 np.testing.assert_almost_equal(state_array_1[:min_len], state_array_2[:min_len], decimal=decimal)

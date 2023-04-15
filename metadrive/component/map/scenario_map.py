@@ -1,11 +1,12 @@
 import logging
 
+import numpy as np
+
 from metadrive.component.map.base_map import BaseMap
 from metadrive.component.road_network.edge_road_network import EdgeRoadNetwork
 from metadrive.component.scenario_block.scenario_block import ScenarioBlock
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.type import MetaDriveType
-from metadrive.scenario.utils import convert_polyline_to_metadrive, read_scenario_data
 from metadrive.scenario.scenario_description import ScenarioDescription
 
 
@@ -58,23 +59,17 @@ class ScenarioMap(BaseMap):
                     ret[map_feat_id] = {
                         "type": MetaDriveType.LINE_BROKEN_SINGLE_YELLOW
                         if MetaDriveType.is_yellow_line(type) else MetaDriveType.LINE_BROKEN_SINGLE_WHITE,
-                        "polyline": convert_polyline_to_metadrive(
-                            data[ScenarioDescription.POLYLINE], coordinate_transform=self.coordinate_transform
-                        )
+                        "polyline": np.asarray(data[ScenarioDescription.POLYLINE])
                     }
                 else:
                     ret[map_feat_id] = {
-                        "polyline": convert_polyline_to_metadrive(
-                            data[ScenarioDescription.POLYLINE], coordinate_transform=self.coordinate_transform
-                        ),
+                        "polyline": np.asarray(data[ScenarioDescription.POLYLINE]),
                         "type": MetaDriveType.LINE_SOLID_SINGLE_YELLOW
                         if MetaDriveType.is_yellow_line(type) else MetaDriveType.LINE_SOLID_SINGLE_WHITE
                     }
             elif MetaDriveType.is_road_edge(type):
                 ret[map_feat_id] = {
-                    "polyline": convert_polyline_to_metadrive(
-                        data[ScenarioDescription.POLYLINE], coordinate_transform=self.coordinate_transform
-                    ),
+                    "polyline": np.asarray(data[ScenarioDescription.POLYLINE]),
                     "type": MetaDriveType.BOUNDARY_LINE
                 }
             elif type == MetaDriveType.LANE_SURFACE_STREET:
@@ -83,10 +78,6 @@ class ScenarioMap(BaseMap):
             # # for debug
             #     raise ValueError
         return ret
-
-    @property
-    def coordinate_transform(self):
-        return self.engine.data_manager.coordinate_transform
 
     def get_map_features(self, interval=2):
         map_features = super(ScenarioMap, self).get_map_features(interval=interval)
@@ -135,14 +126,15 @@ if __name__ == "__main__":
 
     # # touch these items so that pickle can work
 
-    file_path = AssetLoader.file_path("waymo", "0.pkl", return_raw_style=False)
-    # file_path = "/home/shady/Downloads/test_processed/60.pkl"
-    data = read_scenario_data(file_path)
+    # file_path = AssetLoader.file_path("waymo", "0.pkl", return_raw_style=False)
+    # # file_path = "/home/shady/Downloads/test_processed/60.pkl"
+    # data = read_scenario_data(file_path)
 
     default_config = ScenarioEnv.default_config()
     default_config["use_render"] = True
     default_config["debug"] = True
     default_config["debug_static_world"] = True
+    default_config["allow_coordinate_transform"] = True
     default_config["data_directory"] = AssetLoader.file_path("waymo", return_raw_style=False)
     # default_config["data_directory"] = "/home/shady/Downloads/test_processed"
     default_config["num_scenarios"] = 1

@@ -2,7 +2,6 @@ import copy
 import numpy as np
 
 from metadrive.component.traffic_light.scenario_traffic_light import ScenarioTrafficLight
-from metadrive.utils.coordinates_shift import right_hand_to_left_vector
 from metadrive.type import MetaDriveType
 from metadrive.scenario.scenario_description import ScenarioDescription as SD
 from metadrive.manager.base_manager import BaseManager
@@ -87,10 +86,6 @@ class ScenarioLightManager(BaseManager):
             else:
                 # New data format where position is a [3, ] array.
                 traffic_light_position = light_info[SD.TRAFFIC_LIGHT_POSITION][:2]
-
-            if self.engine.data_manager.coordinate_transform:
-                # ignore height and convert coordinate, if necessary
-                traffic_light_position = right_hand_to_left_vector(traffic_light_position)
 
             ret[lane_id][SD.TRAFFIC_LIGHT_POSITION] = traffic_light_position
 

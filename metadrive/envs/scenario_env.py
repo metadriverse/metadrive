@@ -15,7 +15,6 @@ from metadrive.manager.scenario_light_manager import ScenarioLightManager
 from metadrive.manager.waymo_traffic_manager import WaymoTrafficManager
 from metadrive.obs.real_env_observation import ScenarioObservation
 from metadrive.policy.replay_policy import ReplayEgoCarPolicy
-from metadrive.utils.coordinates_shift import right_hand_to_left_vector
 from metadrive.utils import clip
 from metadrive.utils import get_np_random
 from metadrive.scenario.scenario_description import ScenarioDescription
@@ -64,9 +63,6 @@ SCENARIO_ENV_CONFIG = dict(
     out_of_route_done=False,
     crash_vehicle_done=False,
     relax_out_of_road_done=True,
-
-    # ===== Coordinate system =====
-    allow_coordinate_transform=False,
 )
 
 
@@ -272,18 +268,12 @@ class ScenarioEnv(BaseEnv):
                 if current_step == 0:
                     break
 
-            if self.engine.data_manager.coordinate_transform:
-                expert_xy = right_hand_to_left_vector(expert_state_list["position"][current_step][:2])
-            else:
-                expert_xy = expert_state_list["position"][current_step][:2]
+            expert_xy = expert_state_list["position"][current_step][:2]
             dist = np.linalg.norm(agent_xy - expert_xy)
             step_info["distance_error"] = dist
 
             last_state = expert_state_list["position"][largest_valid_index]
-            if self.engine.data_manager.coordinate_transform:
-                last_expert_xy = right_hand_to_left_vector(last_state[:2])
-            else:
-                last_expert_xy = last_state[:2]
+            last_expert_xy = last_state[:2]
             last_dist = np.linalg.norm(agent_xy - last_expert_xy)
             step_info["distance_error_final"] = last_dist
 

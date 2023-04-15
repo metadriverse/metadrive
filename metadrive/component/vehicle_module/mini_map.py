@@ -20,5 +20,5 @@ class MiniMap(BaseCamera):
         lens = self.get_lens()
 
         cam.setZ(height)
-        cam.lookAt(Vec3(0, 20, 0))
+        cam.lookAt(Vec3(20, 0, 0))
         lens.setAspectRatio(2.0)

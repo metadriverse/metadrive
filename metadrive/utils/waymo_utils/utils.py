@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-from metadrive.scenario.utils import read_scenario_data, convert_polyline_to_metadrive
+from metadrive.scenario.utils import read_scenario_data
 from matplotlib.pyplot import figure
 
 from metadrive.type import MetaDriveType

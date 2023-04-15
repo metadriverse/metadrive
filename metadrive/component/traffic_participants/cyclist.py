@@ -35,8 +35,8 @@ class Cyclist(BaseTrafficParticipant):
                 Cyclist.MODEL = model
             Cyclist.MODEL.instanceTo(self.origin)
 
-    def set_velocity(self, direction, value=None, in_local_frame=False, offset_90_deg=False):
-        super(Cyclist, self).set_velocity(direction, value, in_local_frame, offset_90_deg)
+    def set_velocity(self, direction, value=None, in_local_frame=False):
+        super(Cyclist, self).set_velocity(direction, value, in_local_frame)
         self.standup()
 
     @property

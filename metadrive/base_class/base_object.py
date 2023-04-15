@@ -283,32 +283,26 @@ class BaseObject(BaseRunnable):
     def position(self):
         return metadrive_vector(self.origin.getPos())
 
-    def set_velocity(self, direction: np.array, value=None, in_local_frame=False, offset_90_deg=False):
+    def set_velocity(self, direction: np.array, value=None, in_local_frame=False):
         """
         Set velocity for object including the direction of velocity and the value (speed)
         The direction of velocity will be normalized automatically, value decided its scale
         :param direction: 2d array or list
         :param value: speed [m/s]
         :param in_local_frame: True, apply speed to local fram
-        :param offset_90_deg: set to True, only if using vehicle which has a 90 degree offset
         """
         if in_local_frame:
             from metadrive.engine.engine_utils import get_engine
             engine = get_engine()
             direction = LVector3(*direction, 0.)
-            direction[1] *= -1
             direction = engine.worldNP.getRelativeVector(self.origin, direction)
-
-            # Vehicle coordinates has 90 degrees offset as its heading is in the panda's - y-direction.
-            if offset_90_deg:
-                direction = [-direction[1], -direction[0]]
 
         if value is not None:
             norm_ratio = value / (norm(direction[0], direction[1]) + 1e-6)
         else:
             norm_ratio = 1
         self._body.setLinearVelocity(
-            LVector3(direction[0] * norm_ratio, -direction[1] * norm_ratio,
+            LVector3(direction[0] * norm_ratio, direction[1] * norm_ratio,
                      self._body.getLinearVelocity()[-1])
         )
 
@@ -326,7 +320,7 @@ class BaseObject(BaseRunnable):
         Velocity, unit: m/s
         """
         velocity = self.body.get_linear_velocity()
-        return np.asarray([velocity[0], -velocity[1]])
+        return np.asarray([velocity[0], velocity[1]])
 
     @property
     def velocity_km_h(self):
@@ -370,7 +364,7 @@ class BaseObject(BaseRunnable):
         Get the heading theta of this object, unit [rad]
         :return:  heading in rad
         """
-        return wrap_to_pi(metadrive_heading(self.origin.getH()) / 180 * math.pi)
+        return wrap_to_pi(self.origin.getH() / 180 * math.pi)
 
     @property
     def heading(self):
@@ -456,7 +450,6 @@ class BaseObject(BaseRunnable):
         return self.origin.getZ()
 
     def set_angular_velocity(self, angular_velocity, in_rad=True):
-        angular_velocity *= -1  # to panda coordinates
         if not in_rad:
             angular_velocity = angular_velocity / 180 * np.pi
         self._body.setAngularVelocity(LVector3(0, 0, angular_velocity))
@@ -469,3 +462,25 @@ class BaseObject(BaseRunnable):
 
     def random_rename(self):
         self.rename(random_string())
+
+    def convert_to_local_coordinates(self, vector):
+        """
+        Give a world position, and convert it to object coordinates
+        TODO(LQY): add test
+        """
+        vector = LVector3(*vector, 0.)
+        vector = self.origin.getRelativeVector(self.engine.origin, vector)
+        project_on_x = vector[0]
+        project_on_y = vector[1]
+        return np.array([project_on_x, project_on_y])
+
+    def convert_to_world_coordinates(self, vector):
+        """
+        Give a position in world coordinates, and convert it to object coordinates
+        TODO(LQY): add test
+        """
+        vector = LVector3(*vector, 0.)
+        vector = self.engine.origin.getRelativeVector(self.origin, vector)
+        project_on_x = vector[0]
+        project_on_y = vector[1]
+        return np.array([project_on_x, project_on_y])

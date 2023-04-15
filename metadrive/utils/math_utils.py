@@ -35,7 +35,8 @@ def wrap_to_pi(x: float) -> float:
 
 def get_vertical_vector(vector: np.array):
     length = norm(vector[0], vector[1])
-    return (vector[1] / length, -vector[0] / length), (-vector[1] / length, vector[0] / length)
+    # return (vector[1] / length, -vector[0] / length), (-vector[1] / length, vector[0] / length)
+    return (-vector[1] / length, vector[0] / length), (vector[1] / length, -vector[0] / length)
 
 
 def time_me(fn):
@@ -60,7 +61,7 @@ def point_distance(x, y):
 
 
 def panda_vector(position_x, position_y, z=0.0):
-    return position_x, -position_y, z
+    return position_x, position_y, z
 
 
 def distance_greater(vec1, vec2, length):

@@ -122,6 +122,6 @@ def test_expert_in_intersection(render=False):
 
 
 if __name__ == '__main__':
-    test_expert_in_intersection(True)
-    # test_expert_without_traffic(False)
+    # test_expert_in_intersection(True)
+    test_expert_without_traffic(True)
     # test_expert_with_traffic(use_render=True)
