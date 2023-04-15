@@ -1,7 +1,7 @@
 import os
 import pickle
 import shutil
-
+from metadrive.utils.math_utils import wrap_to_pi
 import numpy as np
 
 from metadrive.engine.asset_loader import AssetLoader
@@ -236,8 +236,8 @@ def compare_exported_scenario_with_waymo_origin(scenarios, data_manager):
             new_pos = new_pos[index_to_compare][..., :2]
             np.testing.assert_almost_equal(old_pos, new_pos, decimal=NP_ARRAY_DECIMAL)
 
-            old_heading = old_heading[index_to_compare].reshape(-1)
-            new_heading = new_heading[index_to_compare].reshape(-1)
+            old_heading = wrap_to_pi(old_heading[index_to_compare].reshape(-1))
+            new_heading = wrap_to_pi(new_heading[index_to_compare].reshape(-1))
             np.testing.assert_almost_equal(old_heading, new_heading, decimal=NP_ARRAY_DECIMAL)
 
         for light_id, old_light in origin_data["dynamic_map_states"].items():
@@ -306,7 +306,7 @@ def test_waymo_export_and_original_consistency(num_scenarios=3, render_export_en
 
 if __name__ == "__main__":
     # test_export_metadrive_scenario_reproduction(num_scenarios=10)
-    test_export_metadrive_scenario_easy(num_scenarios=3, render_export_env=False, render_load_env=False)
+    # test_export_metadrive_scenario_easy(num_scenarios=3, render_export_env=False, render_load_env=False)
     # test_export_metadrive_scenario_hard(num_scenarios=3, render_export_env=True, render_load_env=True)
     # test_export_waymo_scenario(num_scenarios=3, render_export_env=False, render_load_env=False)
-    # test_waymo_export_and_original_consistency(num_scenarios=3, render_export_env=False)
+    test_waymo_export_and_original_consistency(num_scenarios=3, render_export_env=False)
