@@ -3,6 +3,7 @@ from metadrive.policy.idm_policy import IDMPolicy
 from metadrive.policy.expert_policy import ExpertPolicy
 from metadrive.component.vehicle_module.mini_map import MiniMap
 from metadrive.component.vehicle_module.rgb_camera import RGBCamera
+from metadrive.component.vehicle_module.depth_camera import DepthCamera
 from metadrive.component.vehicle_module.vehicle_panel import VehiclePanel
 
 from metadrive.envs.metadrive_env import MetaDriveEnv
@@ -27,11 +28,11 @@ if __name__ == "__main__":
             # "image_observation": True,
             # "controller": "joystick",
             "show_coordinates": True,
-            "manual_control": True,
+            "manual_control": False,
             "use_render": True,
             "accident_prob": 1,
             "decision_repeat": 5,
-            "interface_panel": [MiniMap, VehiclePanel, RGBCamera],
+            "interface_panel": [MiniMap, VehiclePanel, DepthCamera],
             "need_inverse_traffic": False,
             "rgb_clip": True,
             "map": "CCCC",
@@ -89,7 +90,7 @@ if __name__ == "__main__":
         # env.vehicle.set_velocity([8.728615581032535, -2.24411703918728195], in_local_frame=True)
         o, r, d, info = env.step([0, 1])
         # env.vehicle.set_pitch(-np.pi/4)
-
+        # [0.09231533, 0.491018, 0.47076905, 0.7691619, 0.5, 0.5, 1.0, 0.0, 0.48037243, 0.8904728, 0.81229943, 0.7317231, 1.0, 0.85320455, 0.9747932, 0.65675277, 0.0, 0.5, 0.5]
         # else:
         # if s % 100 == 0:
         #     env.close()

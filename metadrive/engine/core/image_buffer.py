@@ -66,7 +66,7 @@ class ImageBuffer:
         # this takes care of setting up their camera properly
         self.cam = self.engine.makeCamera(self.buffer, clearColor=bkg_color)
         self.cam.reparentTo(self.origin)
-        self.cam.setH(-90)  # face to x
+        # self.cam.setH(-90)  # face to x
         self.lens = self.cam.node().getLens()
         self.cam.node().setCameraMask(self.CAM_MASK)
         if parent_node is not None:

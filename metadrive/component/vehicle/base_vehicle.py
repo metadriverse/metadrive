@@ -560,8 +560,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         vector = LVector3(*vector, 0.)
         vector = self.origin.getRelativeVector(self.engine.origin, vector)
         # TODO(LQY) It is in left-hand still! and 90 degree offset is still required
-        project_on_heading = vector[1]
-        project_on_side = vector[0]
+        project_on_heading = vector[0]
+        project_on_side = -vector[1]
         return np.asarray([project_on_heading, project_on_side])
 
     def convert_to_world_coordinates(self, vector):
