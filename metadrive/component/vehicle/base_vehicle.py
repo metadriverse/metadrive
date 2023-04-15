@@ -114,12 +114,12 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     path = None
 
     def __init__(
-        self,
-        vehicle_config: Union[dict, Config] = None,
-        name: str = None,
-        random_seed=None,
-        position=None,
-        heading=None  # In degree!
+            self,
+            vehicle_config: Union[dict, Config] = None,
+            name: str = None,
+            random_seed=None,
+            position=None,
+            heading=None  # In degree!
     ):
         """
         This Vehicle Config is different from self.get_config(), and it is used to define which modules to use, and
@@ -346,14 +346,14 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         return step_energy, self.energy_consumption
 
     def reset(
-        self,
-        vehicle_config=None,
-        name=None,
-        random_seed=None,
-        position: np.ndarray = None,
-        heading: float = 0.0,  # In degree!
-        *args,
-        **kwargs
+            self,
+            vehicle_config=None,
+            name=None,
+            random_seed=None,
+            position: np.ndarray = None,
+            heading: float = 0.0,  # In degree!
+            *args,
+            **kwargs
     ):
         """
         pos is a 2-d array, and heading is a float (unit degree)
@@ -501,13 +501,13 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         lateral_to_right = self.navigation.get_current_lateral_range(self.position, self.engine) - lateral_to_left
         return lateral_to_left, lateral_to_right
 
-    @property
-    def heading_theta(self):
-        """
-        Get the heading theta of vehicle, unit [rad]
-        :return:  heading in rad
-        """
-        return wrap_to_pi((metadrive_heading(self.origin.getH()) + 90) / 180 * math.pi)
+    # @property
+    # def heading_theta(self):
+    #     """
+    #     Get the heading theta of vehicle, unit [rad]
+    #     :return:  heading in rad
+    #     """
+    #     return wrap_to_pi(self.origin.getH() / 180 * math.pi)
 
     # @property
     # def velocity(self) -> np.ndarray:
@@ -547,8 +547,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         if not lateral_norm * forward_direction_norm:
             return 0
         cos = (
-            (forward_direction[0] * lateral[0] + forward_direction[1] * lateral[1]) /
-            (lateral_norm * forward_direction_norm)
+                (forward_direction[0] * lateral[0] + forward_direction[1] * lateral[1]) /
+                (lateral_norm * forward_direction_norm)
         )
         # return cos
         # Normalize to 0, 1
@@ -610,7 +610,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         chassis = BaseRigidBodyNode(self.name, MetaDriveType.VEHICLE)
         self._node_path_list.append(chassis)
 
-        chassis_shape = BulletBoxShape(Vec3(self.WIDTH / 2, self.LENGTH / 2, self.HEIGHT / 2))
+        chassis_shape = BulletBoxShape(Vec3(self.LENGTH / 2, self.WIDTH / 2, self.HEIGHT / 2))
         ts = TransformState.makePos(Vec3(0, 0, self.HEIGHT / 2))
         chassis.addShape(chassis_shape, ts)
         chassis.setDeactivationEnabled(False)
@@ -624,14 +624,15 @@ class BaseVehicle(BaseObject, BaseVehicleState):
 
     def _add_visualization(self):
         if self.render:
-            [path, scale, x_y_z_offset, H] = self.path
+            [path, scale, offset, H] = self.path
             if path not in BaseVehicle.model_collection:
                 car_model = self.loader.loadModel(AssetLoader.file_path("models", path, "vehicle.gltf"))
                 BaseVehicle.model_collection[path] = car_model
                 car_model.setScale(scale)
-                car_model.setH(H)
-                car_model.setPos(x_y_z_offset)
-                car_model.setZ(-self.TIRE_RADIUS - self.CHASSIS_TO_WHEEL_AXIS + x_y_z_offset[-1])
+                # model default, face to y
+                car_model.setH(H - 90)
+                car_model.setPos(offset[1], offset[0], offset[-1])
+                car_model.setZ(-self.TIRE_RADIUS - self.CHASSIS_TO_WHEEL_AXIS + offset[-1])
             else:
                 car_model = BaseVehicle.model_collection[path]
             car_model.instanceTo(self.origin)
@@ -659,8 +660,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         axis_height = self.TIRE_RADIUS - self.CHASSIS_TO_WHEEL_AXIS
         radius = self.TIRE_RADIUS
         wheels = []
-        for k, pos in enumerate([Vec3(lateral, f_l, axis_height), Vec3(-lateral, f_l, axis_height),
-                                 Vec3(lateral, r_l, axis_height), Vec3(-lateral, r_l, axis_height)]):
+        for k, pos in enumerate([Vec3(f_l, lateral, axis_height), Vec3(f_l, -lateral, axis_height),
+                                 Vec3(r_l, lateral, axis_height), Vec3(r_l, -lateral, axis_height)]):
             wheel = self._add_wheel(pos, radius, True if k < 2 else False, True if k == 0 or k == 2 else False)
             wheels.append(wheel)
         return wheels
@@ -675,13 +676,13 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             wheel_model = self.loader.loadModel(model_path)
             wheel_model.setTwoSided(self.TIRE_TWO_SIDED)
             wheel_model.reparentTo(wheel_np)
-            wheel_model.set_scale(1 * self.TIRE_MODEL_CORRECT if left else -1 * self.TIRE_MODEL_CORRECT)
+            wheel_model.set_scale(1 * self.TIRE_MODEL_CORRECT if not left else -1 * self.TIRE_MODEL_CORRECT)
         wheel = self.system.create_wheel()
         wheel.setNode(wheel_np.node())
         wheel.setChassisConnectionPointCs(pos)
         wheel.setFrontWheel(front)
         wheel.setWheelDirectionCs(Vec3(0, 0, -1))
-        wheel.setWheelAxleCs(Vec3(1, 0, 0))
+        wheel.setWheelAxleCs(Vec3(0, -1, 0))
 
         wheel.setWheelRadius(radius)
         wheel.setMaxSuspensionTravelCm(self.SUSPENSION_LENGTH)
@@ -856,15 +857,11 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         :param heading_theta: float in rad
         :param in_rad: when set to True, heading theta should be in rad, otherwise, in degree
         """
-        h = panda_heading(heading_theta)
-        if in_rad:
-            h *= 180 / np.pi
-        self.origin.setH(h - 90)
-
+        super(BaseVehicle, self).set_heading_theta(heading_theta, in_rad)
         self.last_heading_dir = self.heading
 
     def set_velocity(self, direction, *args, **kwargs):
-        super(BaseVehicle, self).set_velocity(direction, *args, offset_90_deg=True, **kwargs)
+        super(BaseVehicle, self).set_velocity(direction, *args, **kwargs)
         self.last_velocity = self.velocity
         self.last_speed = self.speed
 
@@ -940,7 +937,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             ckpt_idx = routing._target_checkpoints_index
             for surrounding_v in surrounding_vs:
                 if surrounding_v.lane_index[:-1] == (routing.checkpoints[ckpt_idx[0]], routing.checkpoints[ckpt_idx[1]
-                                                                                                           ]):
+                ]):
                     if self.lane.local_coordinates(self.position)[0] - \
                             self.lane.local_coordinates(surrounding_v.position)[0] < 0:
                         self.front_vehicles.add(surrounding_v)
@@ -978,9 +975,9 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     @property
     def replay_done(self):
         return self._replay_done if hasattr(self, "_replay_done") else (
-            self.crash_building or self.crash_vehicle or
-            # self.on_white_continuous_line or
-            self.on_yellow_continuous_line
+                self.crash_building or self.crash_vehicle or
+                # self.on_white_continuous_line or
+                self.on_yellow_continuous_line
         )
 
     @property
@@ -1057,10 +1054,10 @@ class BaseVehicle(BaseObject, BaseVehicleState):
 
     def show_coordinates(self):
         if self.coordinates_debug_np is not None:
+            self.coordinates_debug_np.reparentTo(self.origin)
             return
         height = self.HEIGHT
         self.coordinates_debug_np = NodePath("debug coordinate")
-        # 90 degree diff
         x = self.engine.add_line([0, 0, height], [2, 0, height], [0, 1, 0, 1], 1)
         y = self.engine.add_line([0, 0, height], [0, 1, height], [0, 1, 0, 1], 1)
         z = self.engine.add_line([0, 0, height], [0, 0, height + 0.5], [0, 0, 1, 1], 2)

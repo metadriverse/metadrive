@@ -5,7 +5,7 @@ from typing import Tuple
 
 import numpy as np
 from direct.controls.InputState import InputState
-from panda3d.core import Vec3, Point3, PNMImage
+from panda3d.core import Vec3, Point3, PNMImage, NodePath
 from panda3d.core import WindowProperties
 
 from metadrive.constants import CollisionGroup
@@ -49,7 +49,7 @@ class MainCamera:
         self.camera_queue = None
         self.camera_dist = camera_dist
         self.camera_pitch = -engine.global_config["camera_pitch"] if engine.global_config["camera_pitch"
-                                                                                          ] is not None else None
+                                                                     ] is not None else None
         self.camera_smooth = engine.global_config["camera_smooth"]
         self.direction_running_mean = deque(maxlen=20 if self.camera_smooth else 1)
         self.world_light = self.engine.world_light  # light chases the chase camera, when not using global light
@@ -186,7 +186,8 @@ class MainCamera:
         self.camera_queue.put(chassis_pos)
         if not self.FOLLOW_LANE:
             forward_dir = vehicle.system.get_forward_vector()
-            current_forward_dir = [forward_dir[0], forward_dir[1]]
+            # camera is facing to y
+            current_forward_dir = [forward_dir[1], -forward_dir[0]]
         else:
             current_forward_dir = self._dir_of_lane(vehicle.navigation.current_ref_lanes[0], vehicle.position)
         self.direction_running_mean.append(current_forward_dir)
@@ -212,10 +213,12 @@ class MainCamera:
 
         if self.camera_pitch is None:
             self.camera.lookAt(current_pos)
-            self.camera.setH(vehicle.origin.getH() + np.rad2deg(self.mouse_rotate))
+            # camera is facing to y
+            self.camera.setH(vehicle.origin.getH() + np.rad2deg(self.mouse_rotate) - 90)
         else:
-            self.camera.setHpr(vehicle.origin.getHpr())
-            self.camera.setP(self.camera.getP() + self.camera_pitch)
+            # camera is facing to y
+            self.camera.setH(vehicle.origin.getH() - 90)
+            self.camera.setP(self.camera_pitch)
         if self.FOLLOW_LANE:
             self.camera.setH(
                 self._heading_of_lane(vehicle.navigation.current_ref_lanes[0], vehicle.position) / np.pi * 180 - 90

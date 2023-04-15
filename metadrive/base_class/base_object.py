@@ -369,7 +369,7 @@ class BaseObject(BaseRunnable):
         Get the heading theta of this object, unit [rad]
         :return:  heading in rad
         """
-        return wrap_to_pi(metadrive_heading(self.origin.getH()) / 180 * math.pi)
+        return wrap_to_pi(self.origin.getH() / 180 * math.pi)
 
     @property
     def heading(self):

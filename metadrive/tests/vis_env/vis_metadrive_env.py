@@ -18,7 +18,7 @@ if __name__ == "__main__":
             "start_seed": 22,
             # "_disable_detector_mask":True,
             # "debug_physics_world": True,
-            "debug": False,
+            "debug": True,
             # "global_light": False,
             # "debug_static_world": True,
             "cull_scene": False,
@@ -27,7 +27,7 @@ if __name__ == "__main__":
             # "image_observation": True,
             # "controller": "joystick",
             "show_coordinates": True,
-            # "manual_control": True,
+            "manual_control": True,
             "use_render": True,
             "accident_prob": 1,
             "decision_repeat": 5,
@@ -35,7 +35,7 @@ if __name__ == "__main__":
             "need_inverse_traffic": False,
             "rgb_clip": True,
             "map": "CCCC",
-            "agent_policy": ExpertPolicy,
+            # "agent_policy": ExpertPolicy,
             "random_traffic": False,
             # "random_lane_width": True,
             # "random_agent_model": True,
@@ -80,6 +80,7 @@ if __name__ == "__main__":
     start = time.time()
     from metadrive.component.vehicle_module.rgb_camera import RGBCamera
     o = env.reset()
+    # env.main_camera.set_follow_lane(True)
     # env.vehicle.get_camera("rgb_camera").save_image(env.vehicle)
     # for line in env.engine.coordinate_line:
     #     line.reparentTo(env.vehicle.origin)
@@ -87,6 +88,7 @@ if __name__ == "__main__":
     for s in range(1, 10000):
         # env.vehicle.set_velocity([8.728615581032535, -2.24411703918728195], in_local_frame=True)
         o, r, d, info = env.step([0, 1])
+        # env.vehicle.set_pitch(-np.pi/4)
 
         # else:
         # if s % 100 == 0:

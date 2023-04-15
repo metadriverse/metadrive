@@ -23,15 +23,15 @@ class ImageBuffer:
     line_borders = []
 
     def __init__(
-        self,
-        width: float,
-        height: float,
-        pos: Vec3,
-        bkg_color: Union[Vec4, Vec3],
-        parent_node: NodePath = None,
-        frame_buffer_property=None,
-        setup_pbr=False,
-        # engine=None
+            self,
+            width: float,
+            height: float,
+            pos: Vec3,
+            bkg_color: Union[Vec4, Vec3],
+            parent_node: NodePath = None,
+            frame_buffer_property=None,
+            setup_pbr=False,
+            # engine=None
     ):
 
         self._node_path_list = []
@@ -60,10 +60,13 @@ class ImageBuffer:
             # now we have to setup a new scene graph to make this scene
 
         self.origin = NodePath("new render")
+        self.origin.setPos(pos)
+        # should put extrinsic parameters here
+
         # this takes care of setting up their camera properly
         self.cam = self.engine.makeCamera(self.buffer, clearColor=bkg_color)
         self.cam.reparentTo(self.origin)
-        self.cam.setPos(pos)
+        self.cam.setH(-90)  # face to x
         self.lens = self.cam.node().getLens()
         self.cam.node().setCameraMask(self.CAM_MASK)
         if parent_node is not None:
