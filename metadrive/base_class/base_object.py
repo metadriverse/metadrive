@@ -283,24 +283,19 @@ class BaseObject(BaseRunnable):
     def position(self):
         return metadrive_vector(self.origin.getPos())
 
-    def set_velocity(self, direction: np.array, value=None, in_local_frame=False, offset_90_deg=False):
+    def set_velocity(self, direction: np.array, value=None, in_local_frame=False):
         """
         Set velocity for object including the direction of velocity and the value (speed)
         The direction of velocity will be normalized automatically, value decided its scale
         :param direction: 2d array or list
         :param value: speed [m/s]
         :param in_local_frame: True, apply speed to local fram
-        :param offset_90_deg: set to True, only if using vehicle which has a 90 degree offset
         """
         if in_local_frame:
             from metadrive.engine.engine_utils import get_engine
             engine = get_engine()
             direction = LVector3(*direction, 0.)
             direction = engine.worldNP.getRelativeVector(self.origin, direction)
-
-            # Vehicle coordinates has 90 degrees offset as its heading is in the panda's - y-direction.
-            if offset_90_deg:
-                direction = [-direction[1], -direction[0]]
 
         if value is not None:
             norm_ratio = value / (norm(direction[0], direction[1]) + 1e-6)
