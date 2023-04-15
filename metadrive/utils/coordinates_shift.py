@@ -11,14 +11,23 @@ from metadrive.utils.math_utils import wrap_to_pi
 #                     |
 #                     |
 #         y<----------|
-#                    Ego
+#               EgoCar/Object/Pedestrian/Cyclist and so on
 #
 # Panda3d (right handed):
 #                     ^ x
 #                     |
 #                     |
 #         y <---------|
-#                    Ego
+#                world origin
+# Note: Camera is facing to y-axis:
+#                         ^ x
+#                         |
+#                         |
+#                  | \    |
+#         y <------|  |---|
+#                  | /    |
+#                camera origin
+
 # Note: the models loaded in Panda3d are facing to y axis, and thus -90' is required to make it face to x axis
 # These APIs are still available for compatibility, but doesn't apply any operation to the input vector/heading
 
