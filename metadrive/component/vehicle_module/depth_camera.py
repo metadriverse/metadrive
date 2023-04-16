@@ -28,7 +28,7 @@ class DepthCamera(BaseCamera):
         cam = self.get_cam()
         lens = self.get_lens()
 
-        self.origin.lookAt(2.4, 0, 1.3)
+        cam.lookAt(2.4, 0, 1.3)
 
         lens.setFov(60)
         lens.setAspectRatio(2.0)
