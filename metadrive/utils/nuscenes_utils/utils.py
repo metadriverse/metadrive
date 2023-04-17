@@ -7,11 +7,7 @@ from metadrive.scenario import ScenarioDescription as SD
 from metadrive.type import MetaDriveType
 
 EGO = "ego"
-
-
-def get_type_from_class(obj_class):
-    raise ValueError
-    type = {"noise": 'noise',
+ALL_TYPE = {"noise": 'noise',
             "human.pedestrian.adult": 'adult',
             "human.pedestrian.child": 'child',
             "human.pedestrian.wheelchair": 'wheelchair',
@@ -44,7 +40,73 @@ def get_type_from_class(obj_class):
             "static.other": 'static.other',
             "vehicle.ego": "ego"
             }
-    return MetaDriveType.UNSET
+
+NOISE_TYPE = {"noise": 'noise',
+              "animal": 'animal',
+              "static_object.bicycle_rack": 'bicycle racks',
+              "movable_object.pushable_pullable": 'push/pullable',
+              "movable_object.debris": 'debris',
+              "static.manmade": 'manmade',
+              "static.vegetation": 'vegetation',
+              "static.other": 'static.other',
+              }
+
+HUMAN_TYPE = {"human.pedestrian.adult": 'adult',
+              "human.pedestrian.child": 'child',
+              "human.pedestrian.wheelchair": 'wheelchair',
+              "human.pedestrian.stroller": 'stroller',
+              "human.pedestrian.personal_mobility": 'p.mobility',
+              "human.pedestrian.police_officer": 'police',
+              "human.pedestrian.construction_worker": 'worker',
+              }
+
+BICYCLE_TYPE = {
+    "vehicle.bicycle": 'bicycle',
+    "vehicle.motorcycle": 'motorcycle',
+}
+
+VEHICLE_TYPE = {
+    "vehicle.car": 'car',
+    "vehicle.bus.bendy": 'bus.bendy',
+    "vehicle.bus.rigid": 'bus.rigid',
+    "vehicle.truck": 'truck',
+    "vehicle.construction": 'constr. veh',
+    "vehicle.emergency.ambulance": 'ambulance',
+    "vehicle.emergency.police": 'police car',
+    "vehicle.trailer": 'trailer',
+    "vehicle.ego": "ego",
+}
+
+OBSTACLE_TYPE = {
+    "movable_object.barrier": 'barrier',
+    "movable_object.trafficcone": 'trafficcone',
+}
+
+TERRAIN_TYPE = {
+    "flat.driveable_surface": 'driveable',
+    "flat.sidewalk": 'sidewalk',
+    "flat.terrain": 'terrain',
+    "flat.other": 'flat.other'}
+
+
+def get_metadrive_type(obj_type):
+    meta_type = ALL_TYPE[obj_type]
+    md_type = None
+    if ALL_TYPE[obj_type] == "barrier":
+        md_type = MetaDriveType.TRAFFIC_BARRIER,
+    elif ALL_TYPE[obj_type] == "trafficcone":
+        md_type = MetaDriveType.TRAFFIC_CONE
+    elif obj_type in VEHICLE_TYPE:
+        md_type = MetaDriveType.VEHICLE
+    elif obj_type in HUMAN_TYPE:
+        md_type = MetaDriveType.PEDESTRIAN
+    elif obj_type in BICYCLE_TYPE:
+        md_type = MetaDriveType.CYCLIST
+    else:
+        print("Can not map type: {} to any MetaDrive Type".format(obj_type))
+
+    # assert meta_type != MetaDriveType.UNSET and meta_type != "noise"
+    return md_type, meta_type
 
 
 def parse_frame(frame, nuscenes: NuScenes):
@@ -66,7 +128,7 @@ def parse_frame(frame, nuscenes: NuScenes):
                 "obj_id": EGO,
                 "heading": quaternion_yaw(Quaternion(*ego_state["rotation"])),
                 "rotation": ego_state["rotation"],
-                "type": get_type_from_class("vehicle.car"),
+                "type": "vehicle.car",
                 # size https://en.wikipedia.org/wiki/Renault_Zoe
                 "size": [4.08, 1.73, 1.56],
                 }
@@ -100,10 +162,10 @@ def get_tracks_from_frames(frames):
         # Record all agents' states (position, velocity, ...)
         for id, state in frames[frame_idx].items():
             # Fill type
-            type = get_type_from_class(state["type"])
+            md_type, meta_type = get_metadrive_type(state["type"])
 
-            tracks[id]["type"] = type
-            tracks[id][SD.METADATA]["type"] = tracks[id]["type"]
+            tracks[id]["type"] = md_type
+            tracks[id][SD.METADATA]["type"] = meta_type
 
             # Introducing the state item
             tracks[id]["state"]["position"][frame_idx] = state["position"]

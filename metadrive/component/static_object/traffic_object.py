@@ -40,6 +40,7 @@ class TrafficCone(TrafficObject):
     RADIUS = 0.25
     HEIGHT = 1.2
     MASS = 1
+    CLASS_NAME = MetaDriveType.TRAFFIC_CONE
 
     def __init__(self, lane, longitude: float, lateral: float, static: bool = False, random_seed=None):
         super(TrafficCone, self).__init__(lane, longitude, lateral, random_seed)
@@ -122,6 +123,7 @@ class TrafficBarrier(TrafficObject):
     MASS = 10
     LENGTH = 2.0
     WIDTH = 0.3
+    CLASS_NAME = MetaDriveType.TRAFFIC_BARRIER
 
     def __init__(self, lane, longitude: float, lateral: float, static: bool = False, random_seed=None):
         super(TrafficBarrier, self).__init__(lane, longitude, lateral, random_seed)

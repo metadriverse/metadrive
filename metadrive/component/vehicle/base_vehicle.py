@@ -769,7 +769,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
                 self.crash_vehicle = True
             elif name == MetaDriveType.BUILDING:
                 self.crash_building = True
-            elif name == MetaDriveType.TRAFFIC_OBJECT:
+            elif MetaDriveType.is_traffic_object(name):
                 self.crash_object = True
             elif name in [MetaDriveType.PEDESTRIAN, MetaDriveType.CYCLIST]:
                 self.crash_human = True
