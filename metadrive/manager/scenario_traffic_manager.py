@@ -33,7 +33,7 @@ class ScenarioTrafficManager(BaseManager):
             elif track["type"] == MetaDriveType.PEDESTRIAN:
                 self.spawn_pedestrian(scenario_id, track)
             else:
-                logger.info("Do not support {}".format(track["type"]))
+                logger.warning("Do not support {}".format(track["type"]))
 
     def after_step(self, *args, **kwargs):
         if self.episode_step >= self.current_scenario_length:

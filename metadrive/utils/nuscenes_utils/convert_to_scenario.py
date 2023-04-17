@@ -22,3 +22,4 @@ if __name__ == "__main__":
     ret = {}
     for scene in tqdm.tqdm(scenes):
         ret[scene["token"]] = convert_one_scene(scene["token"], nusc)
+        # TODO sanity_check()

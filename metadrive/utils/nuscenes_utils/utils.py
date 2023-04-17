@@ -5,92 +5,13 @@ from pyquaternion import Quaternion
 
 from metadrive.scenario import ScenarioDescription as SD
 from metadrive.type import MetaDriveType
+from metadrive.utils.nuscenes_utils.detection_type import ALL_TYPE, HUMAN_TYPE, BICYCLE_TYPE, VEHICLE_TYPE
 
 EGO = "ego"
-ALL_TYPE = {"noise": 'noise',
-            "human.pedestrian.adult": 'adult',
-            "human.pedestrian.child": 'child',
-            "human.pedestrian.wheelchair": 'wheelchair',
-            "human.pedestrian.stroller": 'stroller',
-            "human.pedestrian.personal_mobility": 'p.mobility',
-            "human.pedestrian.police_officer": 'police',
-            "human.pedestrian.construction_worker": 'worker',
-            "animal": 'animal',
-            "vehicle.car": 'car',
-            "vehicle.motorcycle": 'motorcycle',
-            "vehicle.bicycle": 'bicycle',
-            "vehicle.bus.bendy": 'bus.bendy',
-            "vehicle.bus.rigid": 'bus.rigid',
-            "vehicle.truck": 'truck',
-            "vehicle.construction": 'constr. veh',
-            "vehicle.emergency.ambulance": 'ambulance',
-            "vehicle.emergency.police": 'police car',
-            "vehicle.trailer": 'trailer',
-            "movable_object.barrier": 'barrier',
-            "movable_object.trafficcone": 'trafficcone',
-            "movable_object.pushable_pullable": 'push/pullable',
-            "movable_object.debris": 'debris',
-            "static_object.bicycle_rack": 'bicycle racks',
-            "flat.driveable_surface": 'driveable',
-            "flat.sidewalk": 'sidewalk',
-            "flat.terrain": 'terrain',
-            "flat.other": 'flat.other',
-            "static.manmade": 'manmade',
-            "static.vegetation": 'vegetation',
-            "static.other": 'static.other',
-            "vehicle.ego": "ego"
-            }
-
-NOISE_TYPE = {"noise": 'noise',
-              "animal": 'animal',
-              "static_object.bicycle_rack": 'bicycle racks',
-              "movable_object.pushable_pullable": 'push/pullable',
-              "movable_object.debris": 'debris',
-              "static.manmade": 'manmade',
-              "static.vegetation": 'vegetation',
-              "static.other": 'static.other',
-              }
-
-HUMAN_TYPE = {"human.pedestrian.adult": 'adult',
-              "human.pedestrian.child": 'child',
-              "human.pedestrian.wheelchair": 'wheelchair',
-              "human.pedestrian.stroller": 'stroller',
-              "human.pedestrian.personal_mobility": 'p.mobility',
-              "human.pedestrian.police_officer": 'police',
-              "human.pedestrian.construction_worker": 'worker',
-              }
-
-BICYCLE_TYPE = {
-    "vehicle.bicycle": 'bicycle',
-    "vehicle.motorcycle": 'motorcycle',
-}
-
-VEHICLE_TYPE = {
-    "vehicle.car": 'car',
-    "vehicle.bus.bendy": 'bus.bendy',
-    "vehicle.bus.rigid": 'bus.rigid',
-    "vehicle.truck": 'truck',
-    "vehicle.construction": 'constr. veh',
-    "vehicle.emergency.ambulance": 'ambulance',
-    "vehicle.emergency.police": 'police car',
-    "vehicle.trailer": 'trailer',
-    "vehicle.ego": "ego",
-}
-
-OBSTACLE_TYPE = {
-    "movable_object.barrier": 'barrier',
-    "movable_object.trafficcone": 'trafficcone',
-}
-
-TERRAIN_TYPE = {
-    "flat.driveable_surface": 'driveable',
-    "flat.sidewalk": 'sidewalk',
-    "flat.terrain": 'terrain',
-    "flat.other": 'flat.other'}
 
 
 def get_metadrive_type(obj_type):
-    meta_type = ALL_TYPE[obj_type]
+    meta_type = obj_type
     md_type = None
     if ALL_TYPE[obj_type] == "barrier":
         md_type = MetaDriveType.TRAFFIC_BARRIER,
@@ -102,8 +23,6 @@ def get_metadrive_type(obj_type):
         md_type = MetaDriveType.PEDESTRIAN
     elif obj_type in BICYCLE_TYPE:
         md_type = MetaDriveType.CYCLIST
-    else:
-        print("Can not map type: {} to any MetaDrive Type".format(obj_type))
 
     # assert meta_type != MetaDriveType.UNSET and meta_type != "noise"
     return md_type, meta_type
@@ -158,11 +77,18 @@ def get_tracks_from_frames(frames):
         for k in list(all_objs)
     }
 
+    tracks_to_remove = set()
+
     for frame_idx in range(episode_len):
         # Record all agents' states (position, velocity, ...)
         for id, state in frames[frame_idx].items():
             # Fill type
             md_type, meta_type = get_metadrive_type(state["type"])
+            tracks[id]["type"] = md_type
+            tracks[id][SD.METADATA]["type"] = meta_type
+            if md_type is None or md_type==MetaDriveType.UNSET:
+                tracks_to_remove.add(id)
+                break
 
             tracks[id]["type"] = md_type
             tracks[id][SD.METADATA]["type"] = meta_type
@@ -179,6 +105,10 @@ def get_tracks_from_frames(frames):
 
             tracks[id]["metadata"]["original_id"] = id
             tracks[id]["metadata"]["object_id"] = id
+    for track in tracks_to_remove:
+        track_data = tracks.pop(track)
+        obj_type = track_data[SD.METADATA]["type"]
+        print("Can not map type: {} to any MetaDrive Type".format(obj_type))
     return tracks
 
 
