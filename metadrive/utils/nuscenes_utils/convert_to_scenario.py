@@ -8,6 +8,7 @@ import pickle
 
 import tqdm
 
+from metadrive.engine.asset_loader import AssetLoader
 from metadrive.scenario.scenario_description import ScenarioDescription
 from metadrive.utils.nuscenes_utils.utils import convert_one_scene
 from metadrive.utils.utils import dict_recursive_remove_array
@@ -48,7 +49,7 @@ def convert_scenarios(version, dataroot, output_path, worker_index=None, verbose
 
 
 if __name__ == "__main__":
-    output_path = ""
+    output_path = AssetLoader.file_path("nuscenes", return_raw_style=False)
     version = 'v1.0-mini'
     verbose = True
     dataroot = '/home/shady/data/nuscenes'

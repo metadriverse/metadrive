@@ -157,7 +157,9 @@ def get_map_features(scene_info, nuscenes: NuScenes, map_center, radius=250, sam
         boundary_polygon += [[boundary[0][i], boundary[1][i], 0.] for i in range(len(boundary[0]))]
         ret[id] = {SD.TYPE: MetaDriveType.LANE_SURFACE_STREET,
                    SD.POLYLINE: discretize_lane(map_api.arcline_path_3[id], resolution_meters=sampling_rate),
-                   SD.POLYGON: boundary_polygon}
+                   SD.POLYGON: boundary_polygon,
+                   # TODO Add speed limit if needed
+                   "speed_limit_kmh": 100}
     return ret
 
 
