@@ -140,7 +140,7 @@ def get_tracks_from_frames(frames, num_to_interpolate=5):
     for track in tracks_to_remove:
         track_data = tracks.pop(track)
         obj_type = track_data[SD.METADATA]["type"]
-        print("Can not map type: {} to any MetaDrive Type".format(obj_type))
+        print("\nWARNING: Can not map type: {} to any MetaDrive Type".format(obj_type))
 
     new_episode_len = (episode_len - 1) * num_to_interpolate + 1
     origin_x = np.asarray([i * num_to_interpolate for i in range(episode_len)])
@@ -159,7 +159,11 @@ def get_tracks_from_frames(frames, num_to_interpolate=5):
             new_valid[0] = 1
         for k, valid in enumerate(track["state"]["valid"][1:], start=1):
             if valid:
-                new_valid[(k - 1) * num_to_interpolate + 1:k * num_to_interpolate + 1] = 1
+                if abs(new_valid[(k - 1) * num_to_interpolate] - 1) < 1e-2:
+                    start_idx = (k - 1) * num_to_interpolate + 1
+                else:
+                    start_idx = k * num_to_interpolate
+                new_valid[start_idx:k * num_to_interpolate + 1] = 1
         interpolate_tracks[id]["state"]["valid"] = new_valid
 
         # then update position
@@ -173,7 +177,13 @@ def get_tracks_from_frames(frames, num_to_interpolate=5):
         interpolate_tracks[id]["state"]["velocity"][:-1] = vel[..., :2] / 0.1
         for k, valid in enumerate(new_valid[1:], start=1):
             if valid == 0 or not valid or abs(valid) < 1e-2:
+                interpolate_tracks[id]["state"]["velocity"][k] = np.array([0., 0.])
                 interpolate_tracks[id]["state"]["velocity"][k - 1] = np.array([0., 0.])
+        # outlier check
+        max_vel = np.max(np.linalg.norm(interpolate_tracks[id]["state"]["velocity"], axis=-1))
+        assert max_vel < 50, "Abnormal velocity!"
+        if max_vel > 30:
+            print("\nWARNING: Too large peed for {}: {}".format(id, max_vel))
 
         # heading
         # then update position
