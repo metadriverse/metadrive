@@ -229,7 +229,6 @@ if __name__ == "__main__":
     engine.accept("d", detach_map)
     engine.accept("a", attach_map)
 
-    # argoverse data set is as the same coordinates as panda3d
     pos = map.get_center_point()
     engine.main_camera.set_bird_view_pos(pos)
 
