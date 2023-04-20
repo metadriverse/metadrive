@@ -118,7 +118,7 @@ def get_tracks_from_frames(frames):
     return tracks
 
 
-def get_map_features(scene_info, nuscenes: NuScenes, map_center, radius=250, sampling_rate=2):
+def get_map_features(scene_info, nuscenes: NuScenes, map_center, radius=250, points_distance=1):
     """
     Extract map features from nuscenes data. The objects in specified region will be returned. Sampling rate determines
     the distance between 2 points when extracting lane center line.
@@ -185,7 +185,7 @@ def get_map_features(scene_info, nuscenes: NuScenes, map_center, radius=250, sam
         boundary_polygon = [[boundary[0][i], boundary[1][i], 0.1] for i in range(len(boundary[0]))]
         boundary_polygon += [[boundary[0][i], boundary[1][i], 0.] for i in range(len(boundary[0]))]
         ret[id] = {SD.TYPE: MetaDriveType.LANE_SURFACE_STREET,
-                   SD.POLYLINE: discretize_lane(map_api.arcline_path_3[id], resolution_meters=sampling_rate),
+                   SD.POLYLINE: discretize_lane(map_api.arcline_path_3[id], resolution_meters=points_distance),
                    SD.POLYGON: boundary_polygon,
                    # TODO Add speed limit if needed
                    "speed_limit_kmh": 100}
@@ -197,7 +197,7 @@ def get_map_features(scene_info, nuscenes: NuScenes, map_center, radius=250, sam
         boundary_polygon = [[boundary[0][i], boundary[1][i], 0.1] for i in range(len(boundary[0]))]
         boundary_polygon += [[boundary[0][i], boundary[1][i], 0.] for i in range(len(boundary[0]))]
         ret[id] = {SD.TYPE: MetaDriveType.LANE_SURFACE_STREET,
-                   SD.POLYLINE: discretize_lane(map_api.arcline_path_3[id], resolution_meters=sampling_rate),
+                   SD.POLYLINE: discretize_lane(map_api.arcline_path_3[id], resolution_meters=points_distance),
                    SD.POLYGON: boundary_polygon,
                    # TODO Add speed limit if needed
                    "speed_limit_kmh": 100}
