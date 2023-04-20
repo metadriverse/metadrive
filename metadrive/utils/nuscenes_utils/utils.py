@@ -1,4 +1,6 @@
 import numpy as np
+from nuscenes.map_expansion.arcline_path_utils import discretize_lane
+from nuscenes.map_expansion.map_api import NuScenesMap
 from nuscenes import NuScenes
 from nuscenes.eval.common.utils import quaternion_yaw
 from pyquaternion import Quaternion
@@ -14,7 +16,7 @@ def get_metadrive_type(obj_type):
     meta_type = obj_type
     md_type = None
     if ALL_TYPE[obj_type] == "barrier":
-        md_type = MetaDriveType.TRAFFIC_BARRIER,
+        md_type = MetaDriveType.TRAFFIC_BARRIER
     elif ALL_TYPE[obj_type] == "trafficcone":
         md_type = MetaDriveType.TRAFFIC_CONE
     elif obj_type in VEHICLE_TYPE:
@@ -86,9 +88,9 @@ def get_tracks_from_frames(frames):
             md_type, meta_type = get_metadrive_type(state["type"])
             tracks[id]["type"] = md_type
             tracks[id][SD.METADATA]["type"] = meta_type
-            if md_type is None or md_type==MetaDriveType.UNSET:
+            if md_type is None or md_type == MetaDriveType.UNSET:
                 tracks_to_remove.add(id)
-                break
+                continue
 
             tracks[id]["type"] = md_type
             tracks[id][SD.METADATA]["type"] = meta_type
@@ -112,6 +114,53 @@ def get_tracks_from_frames(frames):
     return tracks
 
 
+def get_map_features(scene_info, nuscenes: NuScenes, map_center, radius=250, sampling_rate=2):
+    """
+    Extract map features from nuscenes data. The objects in specified region will be returned. Sampling rate determines
+    the distance between 2 points when extracting lane center line.
+    """
+    ret = {}
+    map_name = nuscenes.get("log", scene_info["log_token"])["location"]
+    map_api = NuScenesMap(dataroot=nuscenes.dataroot, map_name=map_name)
+
+    layer_names = [
+        # "line",
+        # "polygon",
+        # "node",
+        # 'drivable_area',
+        # 'road_segment',
+        # 'road_block',
+        'lane',
+        # 'ped_crossing',
+        # 'walkway',
+        # 'stop_line',
+        # 'carpark_area',
+        'lane_connector',
+        'road_divider',
+        'lane_divider',
+        'traffic_light'
+    ]
+    map_objs = map_api.get_records_in_radius(map_center[0], map_center[1], radius, layer_names)
+
+    for id in map_objs["lane_divider"]:
+        line_info = map_api.get("lane_divider", id)
+        assert line_info["token"] == id
+        line = map_api.extract_line(line_info["line_token"]).coords.xy
+        line = [[line[0][i], line[1][i]] for i in range(len(line[0]))]
+        ret[id] = {SD.TYPE: MetaDriveType.LINE_BROKEN_SINGLE_WHITE,
+                   SD.POLYLINE: line}
+    for id in map_objs["lane"]:
+        lane_info = map_api.get("lane", id)
+        assert lane_info["token"] == id
+        boundary = map_api.extract_polygon(lane_info["polygon_token"]).boundary.xy
+        boundary_polygon = [[boundary[0][i], boundary[1][i], 0.1] for i in range(len(boundary[0]))]
+        boundary_polygon += [[boundary[0][i], boundary[1][i], 0.] for i in range(len(boundary[0]))]
+        ret[id] = {SD.TYPE: MetaDriveType.LANE_SURFACE_STREET,
+                   SD.POLYLINE: discretize_lane(map_api.arcline_path_3[id], resolution_meters=sampling_rate),
+                   SD.POLYGON: boundary_polygon}
+    return ret
+
+
 def convert_one_scene(scene_token: str, nuscenes: NuScenes, scenario_log_interval=0.5):
     scene_info = nuscenes.get("scene", scene_token)
     frames = []
@@ -125,14 +174,14 @@ def convert_one_scene(scene_token: str, nuscenes: NuScenes, scenario_log_interva
 
     result = SD()
     result[SD.ID] = scene_token
-    result[SD.VERSION] = nuscenes.version
+    result[SD.VERSION] = "nuscenes"+ nuscenes.version
     result[SD.LENGTH] = len(frames)
     result[SD.METADATA] = {}
     result[SD.METADATA][SD.METADRIVE_PROCESSED] = True
     result[SD.METADATA]["dataset"] = "nuscenes"
     result[SD.METADATA]["map"] = nuscenes.get("log", scene_info["log_token"])["location"]
     result[SD.METADATA]["date"] = nuscenes.get("log", scene_info["log_token"])["date_captured"]
-
+    result[SD.METADATA]["coordinate"] = "right-handed"
     result[SD.METADATA]["scenario_id"] = scene_token
     result[SD.METADATA]["sample_rate"] = scenario_log_interval
     result[SD.METADATA][SD.TIMESTEP] = \
@@ -140,6 +189,11 @@ def convert_one_scene(scene_token: str, nuscenes: NuScenes, scenario_log_interva
     result[SD.TRACKS] = get_tracks_from_frames(frames)
     result[SD.METADATA][SD.SDC_ID] = "ego"
 
-    # nuscenes.get("log", scene_info["log_token"])["map_token"]
+    # TODO Traffic Light
+    result[SD.DYNAMIC_MAP_STATES] = {}
+
+    # map
+    map_center = result[SD.TRACKS]["ego"]["state"]["position"][0]
+    result[SD.MAP_FEATURES] = get_map_features(scene_info, nuscenes, map_center, 250)
 
     return result

@@ -116,12 +116,12 @@ def merge_dicts(old_dict, new_dict, allow_new_keys=False, without_copy=False):
 
 
 def _deep_update(
-    original,
-    new_dict,
-    new_keys_allowed=False,
-    allow_new_subkey_list=None,
-    override_all_if_type_changes=None,
-    raise_error=True
+        original,
+        new_dict,
+        new_keys_allowed=False,
+        allow_new_subkey_list=None,
+        override_all_if_type_changes=None,
+        raise_error=True
 ):
     allow_new_subkey_list = allow_new_subkey_list or []
     override_all_if_type_changes = override_all_if_type_changes or []
@@ -197,3 +197,12 @@ def is_map_related_class(object_class):
     from metadrive.component.block.base_block import BaseBlock
     from metadrive.component.map.base_map import BaseMap
     return True if issubclass(object_class, BaseBlock) or issubclass(object_class, BaseMap) else False
+
+
+def dict_recursive_remove_array(d):
+    if isinstance(d, np.ndarray):
+        return d.tolist()
+    if isinstance(d, dict):
+        for k in d.keys():
+            d[k] = dict_recursive_remove_array(d[k])
+    return d
