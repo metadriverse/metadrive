@@ -149,6 +149,15 @@ def get_map_features(scene_info, nuscenes: NuScenes, map_center, radius=250, sam
         line = [[line[0][i], line[1][i]] for i in range(len(line[0]))]
         ret[id] = {SD.TYPE: MetaDriveType.LINE_BROKEN_SINGLE_WHITE,
                    SD.POLYLINE: line}
+
+    for id in map_objs["road_divider"]:
+        line_info = map_api.get("road_divider", id)
+        assert line_info["token"] == id
+        line = map_api.extract_line(line_info["line_token"]).coords.xy
+        line = [[line[0][i], line[1][i]] for i in range(len(line[0]))]
+        ret[id] = {SD.TYPE: MetaDriveType.LINE_SOLID_SINGLE_YELLOW,
+                   SD.POLYLINE: line}
+
     for id in map_objs["lane"]:
         lane_info = map_api.get("lane", id)
         assert lane_info["token"] == id
@@ -189,7 +198,7 @@ def convert_one_scene(scene_token: str, nuscenes: NuScenes, scenario_log_interva
 
     result = SD()
     result[SD.ID] = scene_token
-    result[SD.VERSION] = "nuscenes"+ nuscenes.version
+    result[SD.VERSION] = "nuscenes" + nuscenes.version
     result[SD.LENGTH] = len(frames)
     result[SD.METADATA] = {}
     result[SD.METADATA][SD.METADRIVE_PROCESSED] = True

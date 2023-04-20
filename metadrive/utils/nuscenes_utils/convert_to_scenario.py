@@ -12,6 +12,7 @@ from metadrive.engine.asset_loader import AssetLoader
 from metadrive.scenario.scenario_description import ScenarioDescription
 from metadrive.utils.nuscenes_utils.utils import convert_one_scene
 from metadrive.utils.utils import dict_recursive_remove_array
+import shutil
 
 try:
     from nuscenes import NuScenes
@@ -19,10 +20,13 @@ except ImportError:
     print("Can not find nuscenes-devkit")
 
 
-def convert_scenarios(version, dataroot, output_path, worker_index=None, verbose=True):
+def convert_scenarios(version, dataroot, output_path, worker_index=None, verbose=True, force_overwrite=False):
     # meta recorder and data summary
     if os.path.exists(output_path):
-        raise ValueError("Directory already exists! Abort")
+        if force_overwrite:
+            shutil.rmtree(output_path)
+        else:
+            raise ValueError("Directory already exists! Abort")
     os.makedirs(output_path, exist_ok=False)
 
     metadata_recorder = {}
@@ -58,4 +62,5 @@ if __name__ == "__main__":
     verbose = True
     dataroot = '/home/shady/data/nuscenes'
     worker_index = None
-    convert_scenarios(version, dataroot, output_path)
+    force_overwrite = True
+    convert_scenarios(version, dataroot, output_path, force_overwrite=force_overwrite)
