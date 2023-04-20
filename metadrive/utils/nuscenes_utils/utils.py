@@ -1,4 +1,8 @@
 import numpy as np
+
+import geopandas as gpd
+from shapely.ops import unary_union
+
 from nuscenes.map_expansion.arcline_path_utils import discretize_lane
 from nuscenes.map_expansion.map_api import NuScenesMap
 from nuscenes import NuScenes
@@ -127,9 +131,9 @@ def get_map_features(scene_info, nuscenes: NuScenes, map_center, radius=250, sam
         # "line",
         # "polygon",
         # "node",
-        # 'drivable_area',
-        # 'road_segment',
-        # 'road_block',
+        'drivable_area',
+        'road_segment',
+        'road_block',
         'lane',
         # 'ped_crossing',
         # 'walkway',
@@ -141,6 +145,22 @@ def get_map_features(scene_info, nuscenes: NuScenes, map_center, radius=250, sam
         'traffic_light'
     ]
     map_objs = map_api.get_records_in_radius(map_center[0], map_center[1], radius, layer_names)
+
+    # build map boundary
+    polygons = []
+    for id in map_objs["road_segment"]:
+        seg_info = map_api.get("road_segment", id)
+        assert seg_info["token"] == id
+        polygon = map_api.extract_polygon(seg_info["polygon_token"])
+        polygons.append(polygon)
+    # magic for bug fixing
+    geoms = [geom if geom.is_valid else geom.buffer(0) for geom in polygons]
+    boundaries = gpd.GeoSeries(unary_union(geoms)).boundary.explode()
+    for idx, boundary in enumerate(boundaries[0]):
+        block_points = np.array(list(i for i in zip(boundary.coords.xy[0], boundary.coords.xy[1])))
+        id = "boundary_{}".format(idx)
+        ret[id] = {SD.TYPE: MetaDriveType.LINE_SOLID_SINGLE_WHITE,
+                   SD.POLYLINE: block_points}
 
     for id in map_objs["lane_divider"]:
         line_info = map_api.get("lane_divider", id)

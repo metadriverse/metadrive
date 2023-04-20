@@ -55,6 +55,10 @@ class NuPlanBlock(BaseBlock):
         """
 
         return True
+        """
+        The following content is deprecated
+        """
+        # raise ValueError("Deprecated")
         # Deprecated
         map_api = self._nuplan_map_api
         # Center is Important !
