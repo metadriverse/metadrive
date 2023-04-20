@@ -21,6 +21,10 @@ except ImportError:
 
 def convert_scenarios(version, dataroot, output_path, worker_index=None, verbose=True):
     # meta recorder and data summary
+    if os.path.exists(output_path):
+        raise ValueError("Directory already exists! Abort")
+    os.makedirs(output_path, exist_ok=False)
+
     metadata_recorder = {}
     total_scenarios = 0
     desc = ""
