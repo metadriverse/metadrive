@@ -1,4 +1,5 @@
 import copy
+from metadrive.utils.math_utils import wrap_to_pi
 
 import geopandas as gpd
 import numpy as np
@@ -38,9 +39,9 @@ def parse_frame(frame, nuscenes: NuScenes):
     ret = {}
     for obj_id in frame["anns"]:
         obj = nuscenes.get("sample_annotation", obj_id)
-        velocity = nuscenes.box_velocity(obj_id)[:2]
-        if np.nan in velocity:
-            velocity = np.array([0.0, 0.0])
+        # velocity = nuscenes.box_velocity(obj_id)[:2]
+        # if np.nan in velocity:
+        velocity = np.array([0.0, 0.0])
         ret[obj["instance_token"]] = {"position": obj["translation"],
                                       "obj_id": obj["instance_token"],
                                       "heading": quaternion_yaw(Quaternion(*obj["rotation"])),
@@ -65,17 +66,17 @@ def parse_frame(frame, nuscenes: NuScenes):
     return ret
 
 
-def interpolate(origin_x, origin_y, x_to_interpolate):
+def interpolate(origin_x, origin_y, x_to_interpolate, valid):
     origin_x = np.asarray(origin_x)
     origin_y = np.asarray(origin_y)
     x_to_interpolate = np.asarray(x_to_interpolate)
 
     if len(origin_y.shape) == 1:
-        ret = np.interp(x_to_interpolate, origin_x, origin_y)
+        ret = np.interp(x_to_interpolate, origin_x, origin_y) * valid
     elif len(origin_y.shape) == 2:
         ret = []
         for dim in range(origin_y.shape[-1]):
-            new_y = np.interp(x_to_interpolate, origin_x, origin_y[..., dim])
+            new_y = np.interp(x_to_interpolate, origin_x, origin_y[..., dim]) * valid
             new_y = np.expand_dims(new_y, axis=-1)
             ret.append(new_y)
         ret = np.concatenate(ret, axis=-1)
@@ -151,20 +152,41 @@ def get_tracks_from_frames(frames, num_to_interpolate=5):
     for id, track, in tracks.items():
         interpolate_tracks[id] = copy.deepcopy(track)
         interpolate_tracks[id]["metadata"]["track_length"] = new_episode_len
+
+        # update valid first
+        new_valid = np.zeros(shape=(new_episode_len,))
+        if track["state"]["valid"][0]:
+            new_valid[0] = 1
+        for k, valid in enumerate(track["state"]["valid"][1:], start=1):
+            if valid:
+                new_valid[(k - 1) * num_to_interpolate + 1:k * num_to_interpolate + 1] = 1
+        interpolate_tracks[id]["state"]["valid"] = new_valid
+
+        # then update position
+        interpolate_tracks[id]["state"]["position"] = interpolate(origin_x, track["state"]["position"],
+                                                                  x_to_interpolate, new_valid)
+
+        # velocity
+        interpolate_tracks[id]["state"]["velocity"] = interpolate(origin_x, track["state"]["velocity"],
+                                                                  x_to_interpolate, new_valid)
+        vel = interpolate_tracks[id]["state"]["position"][1:] - interpolate_tracks[id]["state"]["position"][:-1]
+        interpolate_tracks[id]["state"]["velocity"][:-1] = vel[..., :2] / 0.1
+        for k, valid in enumerate(new_valid[1:], start=1):
+            if valid == 0 or not valid or abs(valid) < 1e-2:
+                interpolate_tracks[id]["state"]["velocity"][k - 1] = np.array([0., 0.])
+
+        # heading
+        # then update position
+        interpolate_tracks[id]["state"]["heading"] = interpolate(origin_x, track["state"]["heading"],
+                                                                 x_to_interpolate, new_valid)
+
         for k, v in track["state"].items():
-            if k == "valid":
-                new_valid = np.zeros(shape=(new_episode_len,))
-                if v[0]:
-                    new_valid[0] = 1
-                for k, valid in enumerate(v[1:], start=1):
-                    if valid:
-                        new_valid[(k - 1) * num_to_interpolate + 1:k * num_to_interpolate + 1] = 1
-                interpolate_tracks[id]["state"]["valid"] = new_valid
+            if k in ["valid", "heading", "position", "velocity"]:
+                continue
             else:
-                interpolate_tracks[id]["state"][k] = interpolate(origin_x, v, x_to_interpolate)
-        if id == "ego":
-            vel = interpolate_tracks[id]["state"]["position"][1:] - interpolate_tracks[id]["state"]["position"][:-1]
-            interpolate_tracks[id]["state"]["velocity"][:-1] = vel[..., :2] / 0.1
+                interpolate_tracks[id]["state"][k] = interpolate(origin_x, v, x_to_interpolate, new_valid)
+        # if id == "ego":
+        # ego is valid all time, so we can calculate the velocity in this way
 
     return interpolate_tracks
 
@@ -204,9 +226,13 @@ def get_map_features(scene_info, nuscenes: NuScenes, map_center, radius=250, poi
         assert seg_info["token"] == id
         polygon = map_api.extract_polygon(seg_info["polygon_token"])
         polygons.append(polygon)
-    # magic for bug fixing
-    geoms = [geom if geom.is_valid else geom.buffer(0) for geom in polygons]
-    boundaries = gpd.GeoSeries(unary_union(geoms)).boundary.explode()
+    for id in map_objs["road_block"]:
+        seg_info = map_api.get("road_block", id)
+        assert seg_info["token"] == id
+        polygon = map_api.extract_polygon(seg_info["polygon_token"])
+        polygons.append(polygon)
+
+    boundaries = gpd.GeoSeries(unary_union(polygon)).boundary.explode(index_parts=True)
     for idx, boundary in enumerate(boundaries[0]):
         block_points = np.array(list(i for i in zip(boundary.coords.xy[0], boundary.coords.xy[1])))
         id = "boundary_{}".format(idx)

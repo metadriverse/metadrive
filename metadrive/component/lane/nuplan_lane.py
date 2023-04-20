@@ -21,7 +21,7 @@ class NuPlanLane(PointLane):
         """
 
         if isinstance(lane_meta_data.polygon.boundary, MultiLineString):
-            boundary = gpd.GeoSeries(lane_meta_data.polygon.boundary).explode()
+            boundary = gpd.GeoSeries(lane_meta_data.polygon.boundary).explode(index_parts=True)
             sizes = []
             for idx, polygon in enumerate(boundary[0]):
                 sizes.append(len(polygon.xy[1]))

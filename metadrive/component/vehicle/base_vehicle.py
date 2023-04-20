@@ -373,7 +373,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self._add_modules_for_vehicle_when_reset()
 
         map = self.engine.current_map
-
+        self.set_pitch(0)
+        self.set_roll(0)
         if position is not None:
             # Highest priority
             pass

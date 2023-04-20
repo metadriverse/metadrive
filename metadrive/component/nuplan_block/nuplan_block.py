@@ -101,7 +101,7 @@ class NuPlanBlock(BaseBlock):
 
         # intersection road connector
         interpolygons = [block.polygon for block in nearest_vector_map[SemanticMapLayer.INTERSECTION]]
-        boundaries = gpd.GeoSeries(unary_union(interpolygons + block_polygons)).boundary.explode()
+        boundaries = gpd.GeoSeries(unary_union(interpolygons + block_polygons)).boundary.explode(index_parts=True)
         # boundaries.plot()
         # plt.show()
         for idx, boundary in enumerate(boundaries[0]):
