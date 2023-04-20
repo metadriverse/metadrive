@@ -1,13 +1,13 @@
-import numpy as np
+import copy
 
 import geopandas as gpd
-from shapely.ops import unary_union
-
-from nuscenes.map_expansion.arcline_path_utils import discretize_lane
-from nuscenes.map_expansion.map_api import NuScenesMap
+import numpy as np
 from nuscenes import NuScenes
 from nuscenes.eval.common.utils import quaternion_yaw
+from nuscenes.map_expansion.arcline_path_utils import discretize_lane
+from nuscenes.map_expansion.map_api import NuScenesMap
 from pyquaternion import Quaternion
+from shapely.ops import unary_union
 
 from metadrive.scenario import ScenarioDescription as SD
 from metadrive.type import MetaDriveType
@@ -38,29 +38,53 @@ def parse_frame(frame, nuscenes: NuScenes):
     ret = {}
     for obj_id in frame["anns"]:
         obj = nuscenes.get("sample_annotation", obj_id)
+        velocity = nuscenes.box_velocity(obj_id)[:2]
+        if np.nan in velocity:
+            velocity = np.array([0.0, 0.0])
         ret[obj["instance_token"]] = {"position": obj["translation"],
                                       "obj_id": obj["instance_token"],
                                       "heading": quaternion_yaw(Quaternion(*obj["rotation"])),
                                       "rotation": obj["rotation"],
+                                      "velocity": velocity,
                                       "size": obj["size"],
                                       "visible": obj["visibility_token"],
                                       "attribute": [nuscenes.get("attribute", i)["name"] for i in
                                                     obj["attribute_tokens"]],
                                       "type": obj["category_name"]}
-    ego_state = nuscenes.get("ego_pose", nuscenes.get("sample_data", frame["data"]["LIDAR_TOP"])["ego_pose_token"])
-
+    ego_token = nuscenes.get("sample_data", frame["data"]["LIDAR_TOP"])["ego_pose_token"]
+    ego_state = nuscenes.get("ego_pose", ego_token)
     ret[EGO] = {"position": ego_state["translation"],
                 "obj_id": EGO,
                 "heading": quaternion_yaw(Quaternion(*ego_state["rotation"])),
                 "rotation": ego_state["rotation"],
                 "type": "vehicle.car",
+                "velocity": np.array([0.0, 0.0]),
                 # size https://en.wikipedia.org/wiki/Renault_Zoe
                 "size": [4.08, 1.73, 1.56],
                 }
     return ret
 
 
-def get_tracks_from_frames(frames):
+def interpolate(origin_x, origin_y, x_to_interpolate):
+    origin_x = np.asarray(origin_x)
+    origin_y = np.asarray(origin_y)
+    x_to_interpolate = np.asarray(x_to_interpolate)
+
+    if len(origin_y.shape) == 1:
+        ret = np.interp(x_to_interpolate, origin_x, origin_y)
+    elif len(origin_y.shape) == 2:
+        ret = []
+        for dim in range(origin_y.shape[-1]):
+            new_y = np.interp(x_to_interpolate, origin_x, origin_y[..., dim])
+            new_y = np.expand_dims(new_y, axis=-1)
+            ret.append(new_y)
+        ret = np.concatenate(ret, axis=-1)
+    else:
+        raise ValueError("Y has shape {}, Can not interpolate".format(origin_y.shape))
+    return ret
+
+
+def get_tracks_from_frames(frames, num_to_interpolate=5):
     episode_len = len(frames)
     # Fill tracks
     all_objs = set()
@@ -102,7 +126,7 @@ def get_tracks_from_frames(frames):
             # Introducing the state item
             tracks[id]["state"]["position"][frame_idx] = state["position"]
             tracks[id]["state"]["heading"][frame_idx] = state["heading"]
-            # tracks[id]["state"]["velocity"][frame_idx] = state["velocity"]
+            tracks[id]["state"]["velocity"][frame_idx] = tracks[id]["state"]["velocity"][frame_idx]
             tracks[id]["state"]["valid"][frame_idx] = 1
 
             tracks[id]["state"]["length"][frame_idx] = state["size"][0]
@@ -111,11 +135,38 @@ def get_tracks_from_frames(frames):
 
             tracks[id]["metadata"]["original_id"] = id
             tracks[id]["metadata"]["object_id"] = id
+
     for track in tracks_to_remove:
         track_data = tracks.pop(track)
         obj_type = track_data[SD.METADATA]["type"]
         print("Can not map type: {} to any MetaDrive Type".format(obj_type))
-    return tracks
+
+    new_episode_len = (episode_len - 1) * num_to_interpolate + 1
+    origin_x = np.asarray([i * num_to_interpolate for i in range(episode_len)])
+    x_to_interpolate = np.asarray([i for i in range(origin_x[0], origin_x[-1] + 1)])
+    assert new_episode_len == len(x_to_interpolate)
+
+    # interpolate
+    interpolate_tracks = {}
+    for id, track, in tracks.items():
+        interpolate_tracks[id] = copy.deepcopy(track)
+        interpolate_tracks[id]["metadata"]["track_length"] = new_episode_len
+        for k, v in track["state"].items():
+            if k == "valid":
+                new_valid = np.zeros(shape=(new_episode_len,))
+                if v[0]:
+                    new_valid[0] = 1
+                for k, valid in enumerate(v[1:], start=1):
+                    if valid:
+                        new_valid[(k - 1) * num_to_interpolate + 1:k * num_to_interpolate + 1] = 1
+                interpolate_tracks[id]["state"]["valid"] = new_valid
+            else:
+                interpolate_tracks[id]["state"][k] = interpolate(origin_x, v, x_to_interpolate)
+        if id == "ego":
+            vel = interpolate_tracks[id]["state"]["position"][1:] - interpolate_tracks[id]["state"]["position"][:-1]
+            interpolate_tracks[id]["state"]["velocity"][:-1] = vel[..., :2] / 0.1
+
+    return interpolate_tracks
 
 
 def get_map_features(scene_info, nuscenes: NuScenes, map_center, radius=250, points_distance=1):
@@ -205,7 +256,11 @@ def get_map_features(scene_info, nuscenes: NuScenes, map_center, radius=250, poi
     return ret
 
 
-def convert_one_scene(scene_token: str, nuscenes: NuScenes, scenario_log_interval=0.5):
+def convert_one_scene(scene_token: str, nuscenes: NuScenes):
+    """
+    Data will be interpolated to 0.1s time interval, while the time interval of original key frames are 0.5s.
+    """
+    scenario_log_interval = 0.1
     scene_info = nuscenes.get("scene", scene_token)
     frames = []
     current_frame = nuscenes.get("sample", scene_info["first_sample_token"])
@@ -219,7 +274,7 @@ def convert_one_scene(scene_token: str, nuscenes: NuScenes, scenario_log_interva
     result = SD()
     result[SD.ID] = scene_token
     result[SD.VERSION] = "nuscenes" + nuscenes.version
-    result[SD.LENGTH] = len(frames)
+    result[SD.LENGTH] = (len(frames) - 1) * 5 + 1
     result[SD.METADATA] = {}
     result[SD.METADATA][SD.METADRIVE_PROCESSED] = True
     result[SD.METADATA]["dataset"] = "nuscenes"
@@ -228,9 +283,9 @@ def convert_one_scene(scene_token: str, nuscenes: NuScenes, scenario_log_interva
     result[SD.METADATA]["coordinate"] = "right-handed"
     result[SD.METADATA]["scenario_id"] = scene_token
     result[SD.METADATA]["sample_rate"] = scenario_log_interval
-    result[SD.METADATA][SD.TIMESTEP] = \
-        np.asarray([scenario_log_interval * i for i in range(len(frames))], dtype=np.float32)
-    result[SD.TRACKS] = get_tracks_from_frames(frames)
+    result[SD.METADATA][SD.TIMESTEP] = np.arange(0., (len(frames) - 1) * 0.5 + 0.1, 0.1)
+    # interpolating to 0.1s interval
+    result[SD.TRACKS] = get_tracks_from_frames(frames, num_to_interpolate=5)
     result[SD.METADATA][SD.SDC_ID] = "ego"
 
     # TODO Traffic Light
