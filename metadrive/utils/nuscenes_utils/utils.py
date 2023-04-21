@@ -66,6 +66,19 @@ def parse_frame(frame, nuscenes: NuScenes):
     return ret
 
 
+def interpolate_heading(heading_data, old_valid, new_valid, num_to_interpolate=5):
+    new_heading_theta = np.zeros_like(new_valid)
+    for k, valid in enumerate(old_valid[:-1]):
+        if abs(valid) > 1e-1 and abs(old_valid[k + 1])>1e-1:
+            diff = (heading_data[k + 1] - heading_data[k] + np.pi) % (2 * np.pi) - np.pi
+            # step = diff
+            interpolate_heading = np.linspace(heading_data[k], heading_data[k]+diff, 5)
+            new_heading_theta[k*num_to_interpolate:(k+1)*num_to_interpolate]=interpolate_heading
+        elif abs(valid) > 1e-1 and abs(old_valid[k + 1])<1e-1:
+            new_heading_theta[k * num_to_interpolate:(k + 1) * num_to_interpolate] = heading_data[k]
+    return new_heading_theta*new_valid
+
+
 def interpolate(origin_x, origin_y, x_to_interpolate, valid):
     origin_x = np.asarray(origin_x)
     origin_y = np.asarray(origin_y)
@@ -187,8 +200,8 @@ def get_tracks_from_frames(frames, num_to_interpolate=5):
 
         # heading
         # then update position
-        interpolate_tracks[id]["state"]["heading"] = interpolate(origin_x, track["state"]["heading"],
-                                                                 x_to_interpolate, new_valid)
+        new_heading = interpolate_heading(track["state"]["heading"], track["state"]["valid"], new_valid)
+        interpolate_tracks[id]["state"]["heading"] = new_heading
 
         for k, v in track["state"].items():
             if k in ["valid", "heading", "position", "velocity"]:
