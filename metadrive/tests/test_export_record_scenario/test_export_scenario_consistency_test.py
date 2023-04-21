@@ -10,7 +10,7 @@ from metadrive.envs.real_data_envs.waymo_env import WaymoEnv
 from metadrive.policy.idm_policy import IDMPolicy
 from metadrive.policy.replay_policy import WaymoReplayEgoCarPolicy
 from metadrive.type import MetaDriveType
-from metadrive.utils.scene_export_utils.scene_export_utils import NP_ARRAY_DECIMAL
+from metadrive.scenario.utils import NP_ARRAY_DECIMAL
 from metadrive.scenario.utils import assert_scenario_equal
 
 

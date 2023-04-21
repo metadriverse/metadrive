@@ -21,7 +21,7 @@ from metadrive.scenario.scenario_description import ScenarioDescription
 
 SCENARIO_ENV_CONFIG = dict(
     # ===== Map Config =====
-    data_directory=AssetLoader.file_path("nuscenes", return_raw_style=False),
+    data_directory=AssetLoader.file_path("waymo", return_raw_style=False),
     start_scenario_index=0,
     num_scenarios=3,
     store_map=True,
@@ -369,6 +369,7 @@ if __name__ == "__main__":
                 lane_line_detector=dict(num_lasers=12, distance=50),
                 side_detector=dict(num_lasers=160, distance=50)
             ),
+            "data_directory": AssetLoader.file_path("nuscenes", return_raw_style=False),
         }
     )
     success = []
