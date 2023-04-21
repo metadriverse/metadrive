@@ -30,6 +30,7 @@ SCENARIO_ENV_CONFIG = dict(
 
     # ===== Traffic =====
     no_traffic=False,
+    no_static_vehicles=False,
     no_light=False,
     replay=True,
     no_static_traffic_vehicle=True,
@@ -362,6 +363,7 @@ if __name__ == "__main__":
             # "force_reuse_object_name": True,
             # "data_directory": "/home/shady/Downloads/test_processed",
             "horizon": 1000,
+            "no_static_vehicles": True,
             "vehicle_config": dict(
                 show_navi_mark=False,
                 no_wheel_friction=True,
@@ -374,7 +376,7 @@ if __name__ == "__main__":
     )
     success = []
     for i in [0, 2, 3, 5, 6, 7, 8, 9]:
-        env.reset(force_seed=0)
+        env.reset(force_seed=i)
         for t in range(10000):
             o, r, d, info = env.step([0, 0])
             assert env.observation_space.contains(o)

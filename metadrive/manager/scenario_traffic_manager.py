@@ -1,4 +1,5 @@
 import copy
+import numpy as np
 import logging
 
 from metadrive.component.traffic_participants.cyclist import Cyclist
@@ -16,14 +17,20 @@ logger = logging.getLogger(__name__)
 
 
 class ScenarioTrafficManager(BaseManager):
+    STATIC_THRESHOLD = 5  # m, static if moving distnace < 5
+
     def __init__(self):
         super(ScenarioTrafficManager, self).__init__()
         self.scenario_id_to_obj_id = None
         self.obj_id_to_scenario_id = None
+        self._static_car_id = set()
+        self._moving_car_id = set()
 
     def after_reset(self):
         self.scenario_id_to_obj_id = {self.sdc_track_index: self.engine.agent_manager.agent_to_object(DEFAULT_AGENT)}
         self.obj_id_to_scenario_id = {self.engine.agent_manager.agent_to_object(DEFAULT_AGENT): self.sdc_track_index}
+        self._static_car_id = set()
+        self._moving_car_id = set()
         for scenario_id, track in self.current_traffic_data.items():
             if scenario_id == self.sdc_track_index:
                 continue
@@ -92,6 +99,15 @@ class ScenarioTrafficManager(BaseManager):
         state = parse_object_state(track, self.episode_step)
         if not state["valid"]:
             return
+        if self.engine.global_config["no_static_vehicles"]:
+            if v_id not in self._static_car_id and v_id not in self._moving_car_id:
+                valid_points = track["state"]["position"][np.where(track["state"]["valid"])]
+                moving = np.max(np.std(valid_points, axis=0)[:2]) > self.STATIC_THRESHOLD
+                set_to_add = self._moving_car_id if moving else self._static_car_id
+                set_to_add.add(v_id)
+            if v_id in self._static_car_id:
+                return
+
         v_config = copy.deepcopy(self.engine.global_config["vehicle_config"])
         v_config["need_navigation"] = False
         v_config.update(
