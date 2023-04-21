@@ -1,5 +1,5 @@
 import copy
-from metadrive.utils.math_utils import wrap_to_pi
+from nuscenes.can_bus.can_bus_api import NuScenesCanBus
 
 import geopandas as gpd
 import numpy as np
@@ -69,27 +69,38 @@ def parse_frame(frame, nuscenes: NuScenes):
 def interpolate_heading(heading_data, old_valid, new_valid, num_to_interpolate=5):
     new_heading_theta = np.zeros_like(new_valid)
     for k, valid in enumerate(old_valid[:-1]):
-        if abs(valid) > 1e-1 and abs(old_valid[k + 1])>1e-1:
+        if abs(valid) > 1e-1 and abs(old_valid[k + 1]) > 1e-1:
             diff = (heading_data[k + 1] - heading_data[k] + np.pi) % (2 * np.pi) - np.pi
             # step = diff
-            interpolate_heading = np.linspace(heading_data[k], heading_data[k]+diff, 5)
-            new_heading_theta[k*num_to_interpolate:(k+1)*num_to_interpolate]=interpolate_heading
-        elif abs(valid) > 1e-1 and abs(old_valid[k + 1])<1e-1:
+            interpolate_heading = np.linspace(heading_data[k], heading_data[k] + diff, 6)
+            new_heading_theta[k * num_to_interpolate:(k + 1) * num_to_interpolate] = interpolate_heading[:-1]
+        elif abs(valid) > 1e-1 and abs(old_valid[k + 1]) < 1e-1:
             new_heading_theta[k * num_to_interpolate:(k + 1) * num_to_interpolate] = heading_data[k]
-    return new_heading_theta*new_valid
+    new_heading_theta[-1] = heading_data[-1]
+    return new_heading_theta * new_valid
 
 
-def interpolate(origin_x, origin_y, x_to_interpolate, valid):
-    origin_x = np.asarray(origin_x)
-    origin_y = np.asarray(origin_y)
-    x_to_interpolate = np.asarray(x_to_interpolate)
+def _interpolate_one_dim(data, old_valid, new_valid, num_to_interpolate=5):
+    new_data = np.zeros_like(new_valid)
+    for k, valid in enumerate(old_valid[:-1]):
+        if abs(valid) > 1e-1 and abs(old_valid[k + 1]) > 1e-1:
+            diff = data[k + 1] - data[k]
+            # step = diff
+            interpolate_data = np.linspace(data[k], data[k] + diff, num_to_interpolate + 1)
+            new_data[k * num_to_interpolate:(k + 1) * num_to_interpolate] = interpolate_data[:-1]
+        elif abs(valid) > 1e-1 and abs(old_valid[k + 1]) < 1e-1:
+            new_data[k * num_to_interpolate:(k + 1) * num_to_interpolate] = data[k]
+    new_data[-1] = data[-1]
+    return new_data * new_valid
 
+
+def interpolate(origin_y, valid, new_valid):
     if len(origin_y.shape) == 1:
-        ret = np.interp(x_to_interpolate, origin_x, origin_y) * valid
+        ret = _interpolate_one_dim(origin_y, valid, new_valid)
     elif len(origin_y.shape) == 2:
         ret = []
         for dim in range(origin_y.shape[-1]):
-            new_y = np.interp(x_to_interpolate, origin_x, origin_y[..., dim]) * valid
+            new_y = _interpolate_one_dim(origin_y[..., dim], valid, new_valid)
             new_y = np.expand_dims(new_y, axis=-1)
             ret.append(new_y)
         ret = np.concatenate(ret, axis=-1)
@@ -98,7 +109,7 @@ def interpolate(origin_x, origin_y, x_to_interpolate, valid):
     return ret
 
 
-def get_tracks_from_frames(frames, num_to_interpolate=5):
+def get_tracks_from_frames(nuscenes: NuScenes, scene_info, frames, num_to_interpolate=5):
     episode_len = len(frames)
     # Fill tracks
     all_objs = set()
@@ -156,9 +167,6 @@ def get_tracks_from_frames(frames, num_to_interpolate=5):
         print("\nWARNING: Can not map type: {} to any MetaDrive Type".format(obj_type))
 
     new_episode_len = (episode_len - 1) * num_to_interpolate + 1
-    origin_x = np.asarray([i * num_to_interpolate for i in range(episode_len)])
-    x_to_interpolate = np.asarray([i for i in range(origin_x[0], origin_x[-1] + 1)])
-    assert new_episode_len == len(x_to_interpolate)
 
     # interpolate
     interpolate_tracks = {}
@@ -166,7 +174,7 @@ def get_tracks_from_frames(frames, num_to_interpolate=5):
         interpolate_tracks[id] = copy.deepcopy(track)
         interpolate_tracks[id]["metadata"]["track_length"] = new_episode_len
 
-        # update valid first
+        # valid first
         new_valid = np.zeros(shape=(new_episode_len,))
         if track["state"]["valid"][0]:
             new_valid[0] = 1
@@ -179,20 +187,27 @@ def get_tracks_from_frames(frames, num_to_interpolate=5):
                 new_valid[start_idx:k * num_to_interpolate + 1] = 1
         interpolate_tracks[id]["state"]["valid"] = new_valid
 
-        # then update position
-        interpolate_tracks[id]["state"]["position"] = interpolate(origin_x, track["state"]["position"],
-                                                                  x_to_interpolate, new_valid)
+        # position
+        interpolate_tracks[id]["state"]["position"] = interpolate(track["state"]["position"],
+                                                                  track["state"]["valid"],
+                                                                  new_valid)
+        if id == "ego":
+            # We can get it from canbus
+            canbus = NuScenesCanBus(dataroot=nuscenes.dataroot)
+            imu_pos = np.asarray([state["pos"] for state in canbus.get_messages(scene_info["name"], "pose")[::5]])
+            interpolate_tracks[id]["state"]["position"][:len(imu_pos)] = imu_pos
 
         # velocity
-        interpolate_tracks[id]["state"]["velocity"] = interpolate(origin_x, track["state"]["velocity"],
-                                                                  x_to_interpolate, new_valid)
+        interpolate_tracks[id]["state"]["velocity"] = interpolate(track["state"]["velocity"],
+                                                                  track["state"]["valid"],
+                                                                  new_valid)
         vel = interpolate_tracks[id]["state"]["position"][1:] - interpolate_tracks[id]["state"]["position"][:-1]
         interpolate_tracks[id]["state"]["velocity"][:-1] = vel[..., :2] / 0.1
         for k, valid in enumerate(new_valid[1:], start=1):
             if valid == 0 or not valid or abs(valid) < 1e-2:
                 interpolate_tracks[id]["state"]["velocity"][k] = np.array([0., 0.])
                 interpolate_tracks[id]["state"]["velocity"][k - 1] = np.array([0., 0.])
-        # outlier check
+        # speed outlier check
         max_vel = np.max(np.linalg.norm(interpolate_tracks[id]["state"]["velocity"], axis=-1))
         assert max_vel < 50, "Abnormal velocity!"
         if max_vel > 30:
@@ -202,12 +217,18 @@ def get_tracks_from_frames(frames, num_to_interpolate=5):
         # then update position
         new_heading = interpolate_heading(track["state"]["heading"], track["state"]["valid"], new_valid)
         interpolate_tracks[id]["state"]["heading"] = new_heading
+        if id == "ego":
+            # We can get it from canbus
+            canbus = NuScenesCanBus(dataroot=nuscenes.dataroot)
+            imu_heading = np.asarray([quaternion_yaw(Quaternion(state["orientation"])) for state in
+                                      canbus.get_messages(scene_info["name"], "pose")[::5]])
+            interpolate_tracks[id]["state"]["heading"][:len(imu_heading)] = imu_heading
 
         for k, v in track["state"].items():
             if k in ["valid", "heading", "position", "velocity"]:
                 continue
             else:
-                interpolate_tracks[id]["state"][k] = interpolate(origin_x, v, x_to_interpolate, new_valid)
+                interpolate_tracks[id]["state"][k] = interpolate(v, track["state"]["valid"], new_valid)
         # if id == "ego":
         # ego is valid all time, so we can calculate the velocity in this way
 
@@ -334,7 +355,7 @@ def convert_one_scene(scene_token: str, nuscenes: NuScenes):
     result[SD.METADATA]["sample_rate"] = scenario_log_interval
     result[SD.METADATA][SD.TIMESTEP] = np.arange(0., (len(frames) - 1) * 0.5 + 0.1, 0.1)
     # interpolating to 0.1s interval
-    result[SD.TRACKS] = get_tracks_from_frames(frames, num_to_interpolate=5)
+    result[SD.TRACKS] = get_tracks_from_frames(nuscenes, scene_info, frames, num_to_interpolate=5)
     result[SD.METADATA][SD.SDC_ID] = "ego"
 
     # TODO Traffic Light

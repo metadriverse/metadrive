@@ -21,13 +21,20 @@ except ImportError:
 
 
 def convert_scenarios(version, dataroot, output_path, worker_index=None, verbose=True, force_overwrite=False):
+    save_path = copy.deepcopy(output_path)
+    output_path = output_path + "_tmp"
     # meta recorder and data summary
     if os.path.exists(output_path):
+        shutil.rmtree(output_path)
+    os.makedirs(output_path, exist_ok=False)
+
+    # make real save dir
+    delay_remove = None
+    if os.path.exists(save_path):
         if force_overwrite:
-            shutil.rmtree(output_path)
+            delay_remove = save_path
         else:
             raise ValueError("Directory already exists! Abort")
-    os.makedirs(output_path, exist_ok=False)
 
     metadata_recorder = {}
     total_scenarios = 0
@@ -50,10 +57,15 @@ def convert_scenarios(version, dataroot, output_path, worker_index=None, verbose
         with open(p, "wb") as f:
             pickle.dump(sd_scene, f)
         metadata_recorder[export_file_name] = copy.deepcopy(sd_scene[ScenarioDescription.METADATA])
-    summary_file = os.path.join(output_path, summary_file)
+    # rename and save
+    if delay_remove is not None:
+        shutil.rmtree(delay_remove)
+    os.rename(output_path, save_path)
+    summary_file = os.path.join(save_path, summary_file)
     with open(summary_file, "wb") as file:
         pickle.dump(dict_recursive_remove_array(metadata_recorder), file)
     print("Summary is saved at: {}".format(summary_file))
+    assert delay_remove == save_path
 
 
 if __name__ == "__main__":

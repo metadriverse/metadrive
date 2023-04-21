@@ -59,7 +59,7 @@ class ReplayTrafficParticipantPolicy(BasePolicy):
         self.control_object.set_position(info["position"])
         self.control_object.set_velocity(info["velocity"])
         self.control_object.set_heading_theta(info["heading"])
-        # self.control_object.set_angular_velocity(info["angular_velocity"])
+        self.control_object.set_angular_velocity(info["angular_velocity"])
 
         return None  # Return None action so the base vehicle will not overwrite the steering & throttle
 
