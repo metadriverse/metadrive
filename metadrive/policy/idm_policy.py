@@ -1,5 +1,5 @@
 import numpy as np
-
+from metadrive.constants import DEFAULT_AGENT
 from metadrive.component.vehicle_module.PID_controller import PIDController
 from metadrive.policy.base_policy import BasePolicy
 from metadrive.policy.manual_control_policy import ManualControlPolicy
@@ -414,10 +414,10 @@ class TrajectoryIDMPOlicy(IDMPolicy):
     NORMAL_SPEED = 40
     IDM_MAX_DIST = 20
 
-    def __init__(self, control_object, random_seed, traj_to_follow=None, policy_index=None):
+    def __init__(self, control_object, random_seed, traj_to_follow, policy_index=None):
         super(TrajectoryIDMPOlicy, self).__init__(control_object=control_object, random_seed=random_seed)
         self.policy_index = policy_index
-        self.traj_to_follow = self.engine.map_manager.current_sdc_route if traj_to_follow is None else traj_to_follow
+        self.traj_to_follow = traj_to_follow
         self.target_speed = self.NORMAL_SPEED
         self.routing_target_lane = self.traj_to_follow
         self.available_routing_index_range = None
