@@ -35,7 +35,7 @@ class ScenarioTrafficManager(BaseManager):
                 self.spawn_pedestrian(scenario_id, track)
             elif track["type"] in [MetaDriveType.TRAFFIC_CONE, MetaDriveType.TRAFFIC_BARRIER]:
                 cls = TrafficBarrier if track["type"] == MetaDriveType.TRAFFIC_BARRIER else TrafficCone
-                self.spawn_stataic_object(cls, scenario_id, track)
+                self.spawn_static_object(cls, scenario_id, track)
             else:
                 logger.warning("Do not support {}".format(track["type"]))
 
@@ -56,7 +56,7 @@ class ScenarioTrafficManager(BaseManager):
                     self.spawn_pedestrian(scenario_id, track)
                 elif track["type"] in [MetaDriveType.TRAFFIC_CONE, MetaDriveType.TRAFFIC_BARRIER]:
                     cls = TrafficBarrier if track["type"] == MetaDriveType.TRAFFIC_BARRIER else TrafficCone
-                    self.spawn_stataic_object(cls, scenario_id, track)
+                    self.spawn_static_object(cls, scenario_id, track)
                 else:
                     logger.info("Do not support {}".format(track["type"]))
             elif self.has_policy(self.scenario_id_to_obj_id[scenario_id]):
@@ -148,7 +148,7 @@ class ScenarioTrafficManager(BaseManager):
         policy = self.add_policy(obj.name, ReplayTrafficParticipantPolicy, obj, track)
         policy.act()
 
-    def spawn_stataic_object(self, cls, scenario_id, track):
+    def spawn_static_object(self, cls, scenario_id, track):
         state = parse_object_state(track, self.episode_step)
         if not state["valid"]:
             return

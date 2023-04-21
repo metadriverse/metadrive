@@ -17,25 +17,29 @@ class PointLane(AbstractLane, InterpolatingLine):
     By using this lane type, map can be constructed from Waymo/nuPlan/OpenstreetMap dataset
     """
     VIS_LANE_WIDTH = 6.5
+    POLYGON_SAMPLE_RATE = 1
 
     def __init__(
-        self,
-        center_line_points: Union[list, np.ndarray],
-        width: float,
-        polygon=None,
-        forbidden: bool = False,
-        speed_limit: float = 1000,
-        priority: int = 0,
-        need_lane_localization=True,
+            self,
+            center_line_points: Union[list, np.ndarray],
+            width: float,
+            polygon=None,
+            forbidden: bool = False,
+            speed_limit: float = 1000,
+            priority: int = 0,
+            need_lane_localization=True,
+            auto_generate_polygon=True
     ):
         center_line_points = np.array(center_line_points)[..., :2]
         AbstractLane.__init__(self)
         InterpolatingLine.__init__(self, center_line_points)
         self._bounding_box = get_points_bounding_box(center_line_points)
         self.polygon = polygon
+        self.width = width if width else self.VIS_LANE_WIDTH
+        if self.polygon is None and auto_generate_polygon:
+            self.polygon = self.auto_generate_polygon()
         self.need_lane_localization = need_lane_localization
         self.set_speed_limit(speed_limit)
-        self.width = width
         self.forbidden = forbidden
         self.priority = priority
         # waymo lane line will be processed separately
@@ -46,6 +50,75 @@ class PointLane(AbstractLane, InterpolatingLine):
         assert np.linalg.norm(self.start - center_line_points[0]) < 0.1, "Start point error!"
         self.end = self.position(self.length, 0)
         assert np.linalg.norm(self.end - center_line_points[-1]) < 1, "End point error!"
+
+    def auto_generate_polygon(self):
+        start_heading = self.heading_theta_at(0)
+        start_dir = [math.cos(start_heading), math.sin(start_heading)]
+
+        end_heading = self.heading_theta_at(self.length)
+        end_dir = [math.cos(end_heading), math.sin(end_heading)]
+        polygon = []
+        longs = np.arange(0, self.length + self.POLYGON_SAMPLE_RATE, self.POLYGON_SAMPLE_RATE)
+        for k in range(2):
+            if k == 1:
+                longs = longs[::-1]
+            for t, longitude, in enumerate(longs):
+                lateral = self.width_at(longitude) / 2
+                lateral *= -1 if k == 0 else 1
+                point = self.position(longitude, lateral)
+                if (t == 0 and k == 0) or (t == len(longs) - 1 and k == 1):
+                    # control the adding sequence
+                    if k == 1:
+                        # last point
+                        polygon.append([point[0], point[1], 0.0])
+                        polygon.append([point[0], point[1], -0.5])
+
+                    # extend
+                    polygon.append(
+                        [
+                            point[0] - start_dir[0] * self.POLYGON_SAMPLE_RATE,
+                            point[1] - start_dir[1] * self.POLYGON_SAMPLE_RATE, 0.0
+                        ]
+                    )
+                    polygon.append(
+                        [
+                            point[0] - start_dir[0] * self.POLYGON_SAMPLE_RATE,
+                            point[1] - start_dir[1] * self.POLYGON_SAMPLE_RATE, -0.5
+                        ]
+                    )
+
+                    if k == 0:
+                        # first point
+                        polygon.append([point[0], point[1], 0.0])
+                        polygon.append([point[0], point[1], -0.5])
+                elif (t == 0 and k == 1) or (t == len(longs) - 1 and k == 0):
+
+                    if k == 0:
+                        # second point
+                        polygon.append([point[0], point[1], 0.0])
+                        polygon.append([point[0], point[1], -0.5])
+
+                    polygon.append(
+                        [
+                            point[0] + end_dir[0] * self.POLYGON_SAMPLE_RATE,
+                            point[1] + end_dir[1] * self.POLYGON_SAMPLE_RATE, 0.0
+                        ]
+                    )
+                    polygon.append(
+                        [
+                            point[0] + end_dir[0] * self.POLYGON_SAMPLE_RATE,
+                            point[1] + end_dir[1] * self.POLYGON_SAMPLE_RATE, -0.5
+                        ]
+                    )
+
+                    if k == 1:
+                        # third point
+                        polygon.append([point[0], point[1], 0.0])
+                        polygon.append([point[0], point[1], -0.5])
+                else:
+                    polygon.append([point[0], point[1], 0.0])
+                    polygon.append([point[0], point[1], -0.5])
+        return np.asarray(polygon)
 
     def width_at(self, longitudinal: float) -> float:
         return self.width

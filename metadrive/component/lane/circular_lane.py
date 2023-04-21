@@ -12,8 +12,6 @@ from metadrive.utils.math_utils import wrap_to_pi, norm, Vector
 class CircularLane(PGLane):
     """A lane going in circle arc."""
 
-    CIRCULAR_SEGMENT_LENGTH = 1
-
     def __init__(
         self,
         center: Vector,
@@ -109,7 +107,7 @@ class CircularLane(PGLane):
             end_heading = self.heading_theta_at(self.length)
             end_dir = [math.cos(end_heading), math.sin(end_heading)]
             polygon = []
-            longs = np.arange(0, self.length + self.CIRCULAR_SEGMENT_LENGTH, self.CIRCULAR_SEGMENT_LENGTH)
+            longs = np.arange(0, self.length + self.POLYGON_SAMPLE_RATE, self.POLYGON_SAMPLE_RATE)
             for k, lateral in enumerate([+self.width / 2, -self.width / 2]):
                 if k == 1:
                     longs = longs[::-1]

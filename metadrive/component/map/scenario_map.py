@@ -135,6 +135,7 @@ if __name__ == "__main__":
     default_config["debug"] = True
     default_config["debug_static_world"] = True
     default_config["data_directory"] = AssetLoader.file_path("waymo", return_raw_style=False)
+    # default_config["data_directory"] = AssetLoader.file_path("nuscenes", return_raw_style=False)
     # default_config["data_directory"] = "/home/shady/Downloads/test_processed"
     default_config["num_scenarios"] = 1
     engine = initialize_engine(default_config)
