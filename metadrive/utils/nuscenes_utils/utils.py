@@ -154,8 +154,8 @@ def get_tracks_from_frames(nuscenes: NuScenes, scene_info, frames, num_to_interp
             tracks[id]["state"]["velocity"][frame_idx] = tracks[id]["state"]["velocity"][frame_idx]
             tracks[id]["state"]["valid"][frame_idx] = 1
 
-            tracks[id]["state"]["length"][frame_idx] = state["size"][0]
-            tracks[id]["state"]["width"][frame_idx] = state["size"][1]
+            tracks[id]["state"]["length"][frame_idx] = state["size"][1]
+            tracks[id]["state"]["width"][frame_idx] = state["size"][0]
             tracks[id]["state"]["height"][frame_idx] = state["size"][2]
 
             tracks[id]["metadata"]["original_id"] = id
@@ -348,7 +348,7 @@ def convert_one_scene(scene_token: str, nuscenes: NuScenes):
     assert len(frames) == scene_info["nbr_samples"], "Number of sample mismatches! "
 
     result = SD()
-    result[SD.ID] = scene_token
+    result[SD.ID] = scene_info["name"]
     result[SD.VERSION] = "nuscenes" + nuscenes.version
     result[SD.LENGTH] = (len(frames) - 1) * 5 + 1
     result[SD.METADATA] = {}
@@ -357,7 +357,8 @@ def convert_one_scene(scene_token: str, nuscenes: NuScenes):
     result[SD.METADATA]["map"] = nuscenes.get("log", scene_info["log_token"])["location"]
     result[SD.METADATA]["date"] = nuscenes.get("log", scene_info["log_token"])["date_captured"]
     result[SD.METADATA]["coordinate"] = "right-handed"
-    result[SD.METADATA]["scenario_id"] = scene_token
+    result[SD.METADATA]["scenario_token"] = scene_token
+    result[SD.METADATA]["scenario_id"] = scene_info["name"]
     result[SD.METADATA]["sample_rate"] = scenario_log_interval
     result[SD.METADATA][SD.TIMESTEP] = np.arange(0., (len(frames) - 1) * 0.5 + 0.1, 0.1)
     # interpolating to 0.1s interval

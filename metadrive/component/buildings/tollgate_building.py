@@ -11,7 +11,7 @@ class TollGateBuilding(BaseBuilding):
     MASS = 0
 
     def __init__(self, lane, position, heading_theta, random_seed):
-        super(TollGateBuilding, self).__init__(lane, position, heading_theta, random_seed)
+        super(TollGateBuilding, self).__init__(position, heading_theta, lane, random_seed)
         air_wall = generate_static_box_physics_body(
             self.BUILDING_LENGTH,
             lane.width,

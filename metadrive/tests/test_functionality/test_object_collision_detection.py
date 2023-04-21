@@ -25,9 +25,13 @@ class ComplexObjectManager(TrafficObjectManager):
             }
         )
         self.engine.object_manager.accident_lanes.append(lane_)
-
+        lane = lane
+        longitude = 22
+        lateral = 0
         alert = self.engine.object_manager.spawn_object(
-            TrafficWarning, lane=lane, longitude=22, lateral=0, pbr_model=False
+            TrafficWarning, lane=lane, position=lane.position(longitude, lateral),
+            heading_theta=lane.heading_theta_at(longitude)
+            , pbr_model=False
         )
 
         # part 1
@@ -40,8 +44,11 @@ class ComplexObjectManager(TrafficObjectManager):
         ]
 
         for p in pos:
+            longitude = p[0]
+            lateral = p[1] + lane.width / 2
             cone = self.engine.object_manager.spawn_object(
-                TrafficCone, lane=lane, longitude=p[0], lateral=p[1] + lane.width / 2
+                TrafficCone, lane=lane, position=lane.position(longitude, lateral),
+                heading_theta=lane.heading_theta_at(longitude)
             )
         self.engine.object_manager.accident_lanes.append(lane)
         from metadrive.component.vehicle.vehicle_type import SVehicle, XLVehicle
@@ -67,8 +74,11 @@ class ComplexObjectManager(TrafficObjectManager):
 
         for p in pos:
             p_ = (p[0] + 5, -p[1])
+            longitude = p_[0]
+            lateral = -p[1] - lane.width / 2
             cone = self.engine.object_manager.spawn_object(
-                TrafficCone, lane=lane, longitude=p_[0], lateral=-p[1] - lane.width / 2
+                TrafficCone, lane=lane, position=lane.position(longitude, lateral),
+                heading_theta=lane.heading_theta_at(longitude)
             )
 
         v_pos = [14, 19]
@@ -80,10 +90,16 @@ class ComplexObjectManager(TrafficObjectManager):
                     "spawn_longitude": v_long
                 }
             )
-
-        alert = self.engine.object_manager.spawn_object(TrafficWarning, lane=lane, longitude=-35, lateral=0)
-
-        alert = self.engine.object_manager.spawn_object(TrafficWarning, lane=lane, longitude=-60, lateral=0)
+        longitude = -35
+        lateral = 0
+        alert = self.engine.object_manager.spawn_object(TrafficWarning, lane=lane,
+                                                        position=lane.position(longitude, lateral),
+                                                        heading_theta=lane.heading_theta_at(longitude))
+        longitude = -60
+        lateral = 0
+        alert = self.engine.object_manager.spawn_object(TrafficWarning, lane=lane,
+                                                        position=lane.position(longitude, lateral),
+                                                        heading_theta=lane.heading_theta_at(longitude))
 
         # part 3
         lane = self.engine.current_map.road_network.graph["4C0_0_"]["4C0_1_"][2]
@@ -96,8 +112,11 @@ class ComplexObjectManager(TrafficObjectManager):
 
         for p in pos:
             p_ = (p[0] + 5, p[1] * 3.5 / 3)
+            longitude = p_[0]
+            lateral = p[1] + lane.width / 2
             cone = self.engine.object_manager.spawn_object(
-                TrafficCone, lane=lane, longitude=p_[0], lateral=p[1] + lane.width / 2
+                TrafficCone, lane=lane, position=lane.position(longitude, lateral),
+                heading_theta=lane.heading_theta_at(longitude)
             )
 
         v_pos = [14, 19]
@@ -126,6 +145,7 @@ class ComplexEnv(SafeMetaDriveEnv):
     """
     now for test use and demo use only
     """
+
     def default_config(self):
         config = super(ComplexEnv, self).default_config()
         config.update(
@@ -162,12 +182,23 @@ def test_object_collision_detection(render=False):
     try:
         o = env.reset()
         lane_index = (">>", ">>>", 0)
+        lane = env.current_map.road_network.get_lane(lane_index)
+        longitude = 22
+        lateral = 0
         alert = env.engine.object_manager.spawn_object(
-            TrafficWarning, lane=env.current_map.road_network.get_lane(lane_index), longitude=22, lateral=0
+            TrafficWarning, lane=env.current_map.road_network.get_lane(lane_index),
+            position=lane.position(longitude, lateral),
+            heading_theta=lane.heading_theta_at(longitude)
         )
         lane_index = (">>", ">>>", 2)
+
+        longitude = 22
+        lateral = 0
+        lane = env.current_map.road_network.get_lane(lane_index)
         alert = env.engine.object_manager.spawn_object(
-            TrafficCone, lane=env.current_map.road_network.get_lane(lane_index), longitude=22, lateral=0
+            TrafficCone, lane=env.current_map.road_network.get_lane(lane_index),
+            position=lane.position(longitude, lateral),
+            heading_theta=lane.heading_theta_at(longitude)
         )
         crash_obj = False
         detect_obj = False
