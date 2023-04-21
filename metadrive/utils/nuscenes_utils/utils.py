@@ -42,27 +42,29 @@ def parse_frame(frame, nuscenes: NuScenes):
         # velocity = nuscenes.box_velocity(obj_id)[:2]
         # if np.nan in velocity:
         velocity = np.array([0.0, 0.0])
-        ret[obj["instance_token"]] = {"position": obj["translation"],
-                                      "obj_id": obj["instance_token"],
-                                      "heading": quaternion_yaw(Quaternion(*obj["rotation"])),
-                                      "rotation": obj["rotation"],
-                                      "velocity": velocity,
-                                      "size": obj["size"],
-                                      "visible": obj["visibility_token"],
-                                      "attribute": [nuscenes.get("attribute", i)["name"] for i in
-                                                    obj["attribute_tokens"]],
-                                      "type": obj["category_name"]}
+        ret[obj["instance_token"]] = {
+            "position": obj["translation"],
+            "obj_id": obj["instance_token"],
+            "heading": quaternion_yaw(Quaternion(*obj["rotation"])),
+            "rotation": obj["rotation"],
+            "velocity": velocity,
+            "size": obj["size"],
+            "visible": obj["visibility_token"],
+            "attribute": [nuscenes.get("attribute", i)["name"] for i in obj["attribute_tokens"]],
+            "type": obj["category_name"]
+        }
     ego_token = nuscenes.get("sample_data", frame["data"]["LIDAR_TOP"])["ego_pose_token"]
     ego_state = nuscenes.get("ego_pose", ego_token)
-    ret[EGO] = {"position": ego_state["translation"],
-                "obj_id": EGO,
-                "heading": quaternion_yaw(Quaternion(*ego_state["rotation"])),
-                "rotation": ego_state["rotation"],
-                "type": "vehicle.car",
-                "velocity": np.array([0.0, 0.0]),
-                # size https://en.wikipedia.org/wiki/Renault_Zoe
-                "size": [4.08, 1.73, 1.56],
-                }
+    ret[EGO] = {
+        "position": ego_state["translation"],
+        "obj_id": EGO,
+        "heading": quaternion_yaw(Quaternion(*ego_state["rotation"])),
+        "rotation": ego_state["rotation"],
+        "type": "vehicle.car",
+        "velocity": np.array([0.0, 0.0]),
+        # size https://en.wikipedia.org/wiki/Renault_Zoe
+        "size": [4.08, 1.73, 1.56],
+    }
     return ret
 
 
@@ -120,9 +122,9 @@ def get_tracks_from_frames(nuscenes: NuScenes, scene_info, frames, num_to_interp
             type=MetaDriveType.UNSET,
             state=dict(
                 position=np.zeros(shape=(episode_len, 3)),
-                heading=np.zeros(shape=(episode_len,)),
+                heading=np.zeros(shape=(episode_len, )),
                 velocity=np.zeros(shape=(episode_len, 2)),
-                valid=np.zeros(shape=(episode_len,)),
+                valid=np.zeros(shape=(episode_len, )),
                 length=np.zeros(shape=(episode_len, 1)),
                 width=np.zeros(shape=(episode_len, 1)),
                 height=np.zeros(shape=(episode_len, 1))
@@ -175,7 +177,7 @@ def get_tracks_from_frames(nuscenes: NuScenes, scene_info, frames, num_to_interp
         interpolate_tracks[id]["metadata"]["track_length"] = new_episode_len
 
         # valid first
-        new_valid = np.zeros(shape=(new_episode_len,))
+        new_valid = np.zeros(shape=(new_episode_len, ))
         if track["state"]["valid"][0]:
             new_valid[0] = 1
         for k, valid in enumerate(track["state"]["valid"][1:], start=1):
@@ -188,9 +190,9 @@ def get_tracks_from_frames(nuscenes: NuScenes, scene_info, frames, num_to_interp
         interpolate_tracks[id]["state"]["valid"] = new_valid
 
         # position
-        interpolate_tracks[id]["state"]["position"] = interpolate(track["state"]["position"],
-                                                                  track["state"]["valid"],
-                                                                  new_valid)
+        interpolate_tracks[id]["state"]["position"] = interpolate(
+            track["state"]["position"], track["state"]["valid"], new_valid
+        )
         if id == "ego":
             # We can get it from canbus
             canbus = NuScenesCanBus(dataroot=nuscenes.dataroot)
@@ -198,9 +200,9 @@ def get_tracks_from_frames(nuscenes: NuScenes, scene_info, frames, num_to_interp
             interpolate_tracks[id]["state"]["position"][:len(imu_pos)] = imu_pos
 
         # velocity
-        interpolate_tracks[id]["state"]["velocity"] = interpolate(track["state"]["velocity"],
-                                                                  track["state"]["valid"],
-                                                                  new_valid)
+        interpolate_tracks[id]["state"]["velocity"] = interpolate(
+            track["state"]["velocity"], track["state"]["valid"], new_valid
+        )
         vel = interpolate_tracks[id]["state"]["position"][1:] - interpolate_tracks[id]["state"]["position"][:-1]
         interpolate_tracks[id]["state"]["velocity"][:-1] = vel[..., :2] / 0.1
         for k, valid in enumerate(new_valid[1:], start=1):
@@ -220,8 +222,12 @@ def get_tracks_from_frames(nuscenes: NuScenes, scene_info, frames, num_to_interp
         if id == "ego":
             # We can get it from canbus
             canbus = NuScenesCanBus(dataroot=nuscenes.dataroot)
-            imu_heading = np.asarray([quaternion_yaw(Quaternion(state["orientation"])) for state in
-                                      canbus.get_messages(scene_info["name"], "pose")[::5]])
+            imu_heading = np.asarray(
+                [
+                    quaternion_yaw(Quaternion(state["orientation"]))
+                    for state in canbus.get_messages(scene_info["name"], "pose")[::5]
+                ]
+            )
             interpolate_tracks[id]["state"]["heading"][:len(imu_heading)] = imu_heading
 
         for k, v in track["state"].items():
@@ -286,24 +292,21 @@ def get_map_features(scene_info, nuscenes: NuScenes, map_center, radius=250, poi
     for idx, boundary in enumerate(boundaries[0]):
         block_points = np.array(list(i for i in zip(boundary.coords.xy[0], boundary.coords.xy[1])))
         id = "boundary_{}".format(idx)
-        ret[id] = {SD.TYPE: MetaDriveType.LINE_SOLID_SINGLE_WHITE,
-                   SD.POLYLINE: block_points}
+        ret[id] = {SD.TYPE: MetaDriveType.LINE_SOLID_SINGLE_WHITE, SD.POLYLINE: block_points}
 
     for id in map_objs["lane_divider"]:
         line_info = map_api.get("lane_divider", id)
         assert line_info["token"] == id
         line = map_api.extract_line(line_info["line_token"]).coords.xy
         line = [[line[0][i], line[1][i]] for i in range(len(line[0]))]
-        ret[id] = {SD.TYPE: MetaDriveType.LINE_BROKEN_SINGLE_WHITE,
-                   SD.POLYLINE: line}
+        ret[id] = {SD.TYPE: MetaDriveType.LINE_BROKEN_SINGLE_WHITE, SD.POLYLINE: line}
 
     for id in map_objs["road_divider"]:
         line_info = map_api.get("road_divider", id)
         assert line_info["token"] == id
         line = map_api.extract_line(line_info["line_token"]).coords.xy
         line = [[line[0][i], line[1][i]] for i in range(len(line[0]))]
-        ret[id] = {SD.TYPE: MetaDriveType.LINE_SOLID_SINGLE_YELLOW,
-                   SD.POLYLINE: line}
+        ret[id] = {SD.TYPE: MetaDriveType.LINE_SOLID_SINGLE_YELLOW, SD.POLYLINE: line}
 
     for id in map_objs["lane"]:
         lane_info = map_api.get("lane", id)
@@ -311,11 +314,13 @@ def get_map_features(scene_info, nuscenes: NuScenes, map_center, radius=250, poi
         boundary = map_api.extract_polygon(lane_info["polygon_token"]).boundary.xy
         boundary_polygon = [[boundary[0][i], boundary[1][i], 0.1] for i in range(len(boundary[0]))]
         boundary_polygon += [[boundary[0][i], boundary[1][i], 0.] for i in range(len(boundary[0]))]
-        ret[id] = {SD.TYPE: MetaDriveType.LANE_SURFACE_STREET,
-                   SD.POLYLINE: discretize_lane(map_api.arcline_path_3[id], resolution_meters=points_distance),
-                   SD.POLYGON: boundary_polygon,
-                   # TODO Add speed limit if needed
-                   "speed_limit_kmh": 100}
+        ret[id] = {
+            SD.TYPE: MetaDriveType.LANE_SURFACE_STREET,
+            SD.POLYLINE: discretize_lane(map_api.arcline_path_3[id], resolution_meters=points_distance),
+            SD.POLYGON: boundary_polygon,
+            # TODO Add speed limit if needed
+            "speed_limit_kmh": 100
+        }
 
     for id in map_objs["lane_connector"]:
         lane_info = map_api.get("lane_connector", id)
@@ -323,10 +328,12 @@ def get_map_features(scene_info, nuscenes: NuScenes, map_center, radius=250, poi
         # boundary = map_api.extract_polygon(lane_info["polygon_token"]).boundary.xy
         # boundary_polygon = [[boundary[0][i], boundary[1][i], 0.1] for i in range(len(boundary[0]))]
         # boundary_polygon += [[boundary[0][i], boundary[1][i], 0.] for i in range(len(boundary[0]))]
-        ret[id] = {SD.TYPE: MetaDriveType.LANE_SURFACE_STREET,
-                   SD.POLYLINE: discretize_lane(map_api.arcline_path_3[id], resolution_meters=points_distance),
-                   # SD.POLYGON: boundary_polygon,
-                   "speed_limit_kmh": 100}
+        ret[id] = {
+            SD.TYPE: MetaDriveType.LANE_SURFACE_STREET,
+            SD.POLYLINE: discretize_lane(map_api.arcline_path_3[id], resolution_meters=points_distance),
+            # SD.POLYGON: boundary_polygon,
+            "speed_limit_kmh": 100
+        }
 
     return ret
 

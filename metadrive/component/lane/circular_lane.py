@@ -11,7 +11,6 @@ from metadrive.utils.math_utils import wrap_to_pi, norm, Vector
 
 class CircularLane(PGLane):
     """A lane going in circle arc."""
-
     def __init__(
         self,
         center: Vector,

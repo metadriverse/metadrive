@@ -94,14 +94,22 @@ class TrafficObjectManager(BaseManager):
         breakdown_vehicle.set_break_down()
         longitude = longitude - self.ALERT_DIST
         lateral = 0
-        self.spawn_object(TrafficWarning, lane=lane, position=lane.position(longitude, lateral),
-                          heading_theta=lane.heading_theta_at(longitude))
+        self.spawn_object(
+            TrafficWarning,
+            lane=lane,
+            position=lane.position(longitude, lateral),
+            heading_theta=lane.heading_theta_at(longitude)
+        )
 
     def barrier_scene(self, lane, longitude):
         longitude = longitude
         lateral = 0
-        self.spawn_object(TrafficBarrier, lane=lane, position=lane.position(longitude, lateral),
-                          heading_theta=lane.heading_theta_at(longitude))
+        self.spawn_object(
+            TrafficBarrier,
+            lane=lane,
+            position=lane.position(longitude, lateral),
+            heading_theta=lane.heading_theta_at(longitude)
+        )
 
     def prohibit_scene(self, lane: AbstractLane, longitude_position: float, lateral_len: float, on_left=False):
         """
@@ -143,7 +151,7 @@ class TrafficObjectManager(BaseManager):
             current_name = old_name_to_current[name]
             name_obj = self.engine.get_objects([current_name])
             assert current_name in name_obj and name_obj[current_name
-            ].class_name == class_name, "Can not restore mappings!"
+                                                         ].class_name == class_name, "Can not restore mappings!"
             # Restore some internal states
             name_obj[current_name].lane = self.engine.current_map.road_network.get_lane(
                 name_obj[current_name].lane.index

@@ -117,6 +117,7 @@ def _get_number_summary(scenario):
 
     return number_summary_dict
 
+
 def parse_data(file_list, input_path, output_path, worker_index=None):
     scenario = scenario_pb2.Scenario()
 

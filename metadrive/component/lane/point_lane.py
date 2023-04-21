@@ -20,15 +20,15 @@ class PointLane(AbstractLane, InterpolatingLine):
     POLYGON_SAMPLE_RATE = 1
 
     def __init__(
-            self,
-            center_line_points: Union[list, np.ndarray],
-            width: float,
-            polygon=None,
-            forbidden: bool = False,
-            speed_limit: float = 1000,
-            priority: int = 0,
-            need_lane_localization=True,
-            auto_generate_polygon=True
+        self,
+        center_line_points: Union[list, np.ndarray],
+        width: float,
+        polygon=None,
+        forbidden: bool = False,
+        speed_limit: float = 1000,
+        priority: int = 0,
+        need_lane_localization=True,
+        auto_generate_polygon=True
     ):
         center_line_points = np.array(center_line_points)[..., :2]
         AbstractLane.__init__(self)
