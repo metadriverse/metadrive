@@ -7,6 +7,7 @@ This script will create the output folder "processed_data" sharing the same leve
 
 """
 import argparse
+from metadrive.utils.utils import dict_recursive_remove_array
 import copy
 import os
 import pickle
@@ -115,15 +116,6 @@ def _get_number_summary(scenario):
     number_summary_dict["dynamic_object_states_counter"] = dict(dynamic_object_states_counter)
 
     return number_summary_dict
-
-
-def _dict_recursive_remove_array(d):
-    if isinstance(d, np.ndarray):
-        return d.tolist()
-    if isinstance(d, dict):
-        for k in d.keys():
-            d[k] = _dict_recursive_remove_array(d[k])
-    return d
 
 
 def parse_data(file_list, input_path, output_path, worker_index=None):
@@ -240,7 +232,7 @@ def parse_data(file_list, input_path, output_path, worker_index=None):
 
     summary_file = os.path.join(output_path, summary_file)
     with open(summary_file, "wb") as file:
-        pickle.dump(_dict_recursive_remove_array(metadata_recorder), file)
+        pickle.dump(dict_recursive_remove_array(metadata_recorder), file)
     print("Summary is saved at: {}".format(summary_file))
 
 

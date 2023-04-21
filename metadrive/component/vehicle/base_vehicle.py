@@ -373,7 +373,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self._add_modules_for_vehicle_when_reset()
 
         map = self.engine.current_map
-
+        self.set_pitch(0)
+        self.set_roll(0)
         if position is not None:
             # Highest priority
             pass
@@ -713,7 +714,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
 
         if len(possible_lanes) == 0 and self.config["spawn_lane_index"] is None:
             from metadrive.utils.error_class import NavigationError
-            raise NavigationError("Can't find valid navigation for this car.")
+            raise NavigationError("Can't find valid lane for navigation.")
 
         if self.config["spawn_lane_index"] is not None and self.config["spawn_lane_index"] in possible_lane_indexes:
             idx = possible_lane_indexes.index(self.config["spawn_lane_index"])
@@ -769,7 +770,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
                 self.crash_vehicle = True
             elif name == MetaDriveType.BUILDING:
                 self.crash_building = True
-            elif name == MetaDriveType.TRAFFIC_OBJECT:
+            elif MetaDriveType.is_traffic_object(name):
                 self.crash_object = True
             elif name in [MetaDriveType.PEDESTRIAN, MetaDriveType.CYCLIST]:
                 self.crash_human = True

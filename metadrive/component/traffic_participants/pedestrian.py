@@ -19,7 +19,7 @@ class Pedestrian(BaseTrafficParticipant):
     _MODEL = {}
 
     # SPEED_LIST = [0.6, 1.2, 2.2] Too much speed choice jeopardise the performance
-    SPEED_LIST = [0.6, 1.2]
+    SPEED_LIST = [0.4, 1.2]
 
     def __init__(self, position, heading_theta, random_seed=None):
         super(Pedestrian, self).__init__(position, heading_theta, random_seed)

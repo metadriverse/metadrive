@@ -23,7 +23,7 @@ def collision_callback(contact):
             if another_node_name == MetaDriveType.VEHICLE:
                 obj_1.crash_vehicle = True
             # crash objects
-            elif another_node_name == MetaDriveType.TRAFFIC_OBJECT:
+            elif MetaDriveType.is_traffic_object(another_node_name):
                 if not obj_2.crashed:
                     obj_1.crash_object = True
                     if obj_2.COST_ONCE:

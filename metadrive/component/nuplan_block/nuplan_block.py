@@ -55,6 +55,10 @@ class NuPlanBlock(BaseBlock):
         """
 
         return True
+        """
+        The following content is deprecated
+        """
+        # raise ValueError("Deprecated")
         # Deprecated
         map_api = self._nuplan_map_api
         # Center is Important !
@@ -97,7 +101,7 @@ class NuPlanBlock(BaseBlock):
 
         # intersection road connector
         interpolygons = [block.polygon for block in nearest_vector_map[SemanticMapLayer.INTERSECTION]]
-        boundaries = gpd.GeoSeries(unary_union(interpolygons + block_polygons)).boundary.explode()
+        boundaries = gpd.GeoSeries(unary_union(interpolygons + block_polygons)).boundary.explode(index_parts=True)
         # boundaries.plot()
         # plt.show()
         for idx, boundary in enumerate(boundaries[0]):

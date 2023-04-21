@@ -96,6 +96,9 @@ class BaseManager(Randomizable):
     def get_policy(self, object_id):
         return self.engine.get_policy(object_id)
 
+    def has_policy(self, object_id):
+        return self.engine.has_policy(object_id)
+
     def get_state(self):
         """This function will be called by RecordManager to collect manager state, usually some mappings"""
         return {"spawned_objects": {name: v.class_name for name, v in self.spawned_objects.items()}}
