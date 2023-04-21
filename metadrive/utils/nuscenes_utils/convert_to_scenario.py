@@ -47,7 +47,6 @@ def convert_scenarios(version, dataroot, output_path, worker_index=None, verbose
     # Init.
     nusc = NuScenes(version=version, verbose=verbose, dataroot=dataroot)
     scenes = nusc.scene
-    ret = {}
     for scene in tqdm.tqdm(scenes):
         sd_scene = convert_one_scene(scene["token"], nusc)
         sd_scene = sd_scene.to_dict()

@@ -1,14 +1,14 @@
 import copy
-from nuscenes.can_bus.can_bus_api import NuScenesCanBus
 
 import geopandas as gpd
 import numpy as np
 from nuscenes import NuScenes
+from nuscenes.can_bus.can_bus_api import NuScenesCanBus
 from nuscenes.eval.common.utils import quaternion_yaw
 from nuscenes.map_expansion.arcline_path_utils import discretize_lane
 from nuscenes.map_expansion.map_api import NuScenesMap
 from pyquaternion import Quaternion
-from shapely.ops import unary_union
+from shapely.ops import unary_union, cascaded_union
 
 from metadrive.scenario import ScenarioDescription as SD
 from metadrive.type import MetaDriveType
@@ -265,6 +265,12 @@ def get_map_features(scene_info, nuscenes: NuScenes, map_center, radius=250, poi
 
     # build map boundary
     polygons = []
+    # for id in map_objs["drivable_area"]:
+    #     seg_info = map_api.get("drivable_area", id)
+    #     assert seg_info["token"] == id
+    #     for polygon_token in seg_info["polygon_tokens"]:
+    #         polygon = map_api.extract_polygon(polygon_token)
+    #         polygons.append(polygon)
     for id in map_objs["road_segment"]:
         seg_info = map_api.get("road_segment", id)
         assert seg_info["token"] == id
@@ -275,8 +281,8 @@ def get_map_features(scene_info, nuscenes: NuScenes, map_center, radius=250, poi
         assert seg_info["token"] == id
         polygon = map_api.extract_polygon(seg_info["polygon_token"])
         polygons.append(polygon)
-
-    boundaries = gpd.GeoSeries(unary_union(polygon)).boundary.explode(index_parts=True)
+    polygons = [geom if geom.is_valid else geom.buffer(0) for geom in polygons]
+    boundaries = gpd.GeoSeries(unary_union(polygons)).boundary.explode(index_parts=True)
     for idx, boundary in enumerate(boundaries[0]):
         block_points = np.array(list(i for i in zip(boundary.coords.xy[0], boundary.coords.xy[1])))
         id = "boundary_{}".format(idx)
