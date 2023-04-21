@@ -130,7 +130,7 @@ class ScenarioTrafficManager(BaseManager):
         )
         self.scenario_id_to_obj_id[v_id] = v.name
         self.obj_id_to_scenario_id[v.name] = v_id
-        if self.engine.global_config["replay"]:
+        if not self.engine.global_config["reactive_traffic"]:
             policy = self.add_policy(v.name, ReplayTrafficParticipantPolicy, v, track)
         else:
             raise ValueError("Do not support IDM policy currently")

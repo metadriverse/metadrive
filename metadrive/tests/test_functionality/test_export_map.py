@@ -16,7 +16,6 @@ def test_export_waymo_map(render=False):
     env = WaymoEnv(
         {
             "manual_control": False,
-            "replay": True,
             "no_traffic": True,
             "use_render": False,
             "data_directory": AssetLoader.file_path(asset_path, "waymo", return_raw_style=False),

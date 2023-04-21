@@ -32,8 +32,7 @@ SCENARIO_ENV_CONFIG = dict(
     no_traffic=False,
     no_static_vehicles=False,
     no_light=False,
-    replay=True,
-    no_static_traffic_vehicle=True,
+    reactive_traffic=False,
 
     # ===== Agent config =====
     vehicle_config=dict(
@@ -351,7 +350,6 @@ if __name__ == "__main__":
             "show_interface": False,
             "show_logo": False,
             "show_fps": False,
-            "replay": True,
             "debug": True,
             # "no_traffic": True,
             # "no_light": False,

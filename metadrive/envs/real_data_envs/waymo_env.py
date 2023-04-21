@@ -31,7 +31,6 @@ if __name__ == "__main__":
             "use_render": True,
             "agent_policy": ReplayEgoCarPolicy,
             "manual_control": False,
-            "replay": True,
             "no_traffic": False,
             # "debug":True,
             # "debug_static_world": True,
