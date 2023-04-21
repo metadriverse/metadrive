@@ -104,14 +104,18 @@ class BaseEngine(EngineCore, Randomizable):
         assert object_id in self._object_tasks, "Can not find the task for object(id: {})".format(object_id)
         return self._object_tasks[object_id]
 
-    def has_policy(self, object_id):
-        return True if object_id in self._object_policies else False
+    def has_policy(self, object_id, policy_cls=None):
+        if policy_cls is None:
+            return True if object_id in self._object_policies else False
+        else:
+            return True if object_id in self._object_policies and isinstance(self._object_policies[object_id],
+                                                                             policy_cls) else False
 
     def has_task(self, object_id):
         return True if object_id in self._object_tasks else False
 
     def spawn_object(
-        self, object_class, pbr_model=True, force_spawn=False, auto_fill_random_seed=True, record=True, **kwargs
+            self, object_class, pbr_model=True, force_spawn=False, auto_fill_random_seed=True, record=True, **kwargs
     ):
         """
         Call this func to spawn one object
@@ -250,7 +254,6 @@ class BaseEngine(EngineCore, Randomizable):
         _debug_memory_usage = False
 
         if _debug_memory_usage:
-
             def process_memory():
                 import psutil
                 import os

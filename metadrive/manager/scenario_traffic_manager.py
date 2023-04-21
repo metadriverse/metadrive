@@ -9,7 +9,8 @@ from metadrive.component.vehicle.vehicle_type import get_vehicle_type
 from metadrive.constants import DEFAULT_AGENT
 from metadrive.manager.base_manager import BaseManager
 from metadrive.policy.replay_policy import ReplayTrafficParticipantPolicy
-from metadrive.scenario.parse_object_state import parse_object_state
+from metadrive.policy.idm_policy import ScenarioIDMPolicy
+from metadrive.scenario.parse_object_state import parse_object_state, get_idm_route
 from metadrive.scenario.scenario_description import ScenarioDescription as SD
 from metadrive.type import MetaDriveType
 
@@ -17,7 +18,12 @@ logger = logging.getLogger(__name__)
 
 
 class ScenarioTrafficManager(BaseManager):
-    STATIC_THRESHOLD = 5  # m, static if moving distnace < 5
+    STATIC_THRESHOLD = 5  # m, static if moving distance < 5
+    IDM_ACT_FREQ = 5
+
+    # project cars to ego vehicle coordinates, only vehicles behind ego car and in a certain region can get IDM policy
+    IDM_CREATE_SIDE_CONSTRAINT = 20  # m
+    IDM_CREATE_FORWARD_CONSTRAINT = 0  # m
 
     def __init__(self):
         super(ScenarioTrafficManager, self).__init__()
@@ -25,12 +31,27 @@ class ScenarioTrafficManager(BaseManager):
         self.obj_id_to_scenario_id = None
         self._static_car_id = set()
         self._moving_car_id = set()
+        # an async trick for accelerating IDM policy
+        self.idm_policy_count = 0
+        self._vehicles_to_clean_this_frame = []
+
+    def before_step(self, *args, **kwargs):
+        self._vehicles_to_clean_this_frame = []
+        for v in self.spawned_objects.values():
+            if self.engine.has_policy(v.id, ScenarioIDMPolicy):
+                p = self.engine.get_policy(v.name)
+                if p.arrive_destination:
+                    self._vehicles_to_clean_this_frame.append(self.obj_id_to_scenario_id[v])
+                else:
+                    do_speed_control = (p.policy_index + self.idm_policy_count) % self.IDM_ACT_FREQ == 0
+                    v.before_step(p.act(do_speed_control))
 
     def after_reset(self):
         self.scenario_id_to_obj_id = {self.sdc_track_index: self.engine.agent_manager.agent_to_object(DEFAULT_AGENT)}
         self.obj_id_to_scenario_id = {self.engine.agent_manager.agent_to_object(DEFAULT_AGENT): self.sdc_track_index}
         self._static_car_id = set()
         self._moving_car_id = set()
+        self.idm_policy_count = 0
         for scenario_id, track in self.current_traffic_data.items():
             if scenario_id == self.sdc_track_index:
                 continue
@@ -50,7 +71,6 @@ class ScenarioTrafficManager(BaseManager):
         if self.episode_step >= self.current_scenario_length:
             return dict(default_agent=dict(replay_done=True))
 
-        vehicles_to_clean = []
         for scenario_id, track in self.current_traffic_data.items():
             if scenario_id == self.sdc_track_index:
                 continue
@@ -66,16 +86,14 @@ class ScenarioTrafficManager(BaseManager):
                     self.spawn_static_object(cls, scenario_id, track)
                 else:
                     logger.info("Do not support {}".format(track["type"]))
-            elif self.has_policy(self.scenario_id_to_obj_id[scenario_id]):
+            elif self.has_policy(self.scenario_id_to_obj_id[scenario_id], ReplayTrafficParticipantPolicy):
                 policy = self.get_policy(self.scenario_id_to_obj_id[scenario_id])
                 if policy.is_current_step_valid:
                     policy.act()
-                    # TODO LQY: when using IDM policy, consider add after_step_call
-                    # policy.control_object.after_step()
                 else:
-                    vehicles_to_clean.append(scenario_id)
+                    self._vehicles_to_clean_this_frame.append(scenario_id)
 
-        for scenario_id in list(vehicles_to_clean):
+        for scenario_id in list(self._vehicles_to_clean_this_frame):
             obj_id = self.scenario_id_to_obj_id.pop(scenario_id)
             _scenario_id = self.obj_id_to_scenario_id.pop(obj_id)
             assert _scenario_id == scenario_id
@@ -97,17 +115,19 @@ class ScenarioTrafficManager(BaseManager):
 
     def spawn_vehicle(self, v_id, track):
         state = parse_object_state(track, self.episode_step)
-        if not state["valid"]:
-            return
-        if self.engine.global_config["no_static_vehicles"]:
-            if v_id not in self._static_car_id and v_id not in self._moving_car_id:
-                valid_points = track["state"]["position"][np.where(track["state"]["valid"])]
-                moving = np.max(np.std(valid_points, axis=0)[:2]) > self.STATIC_THRESHOLD
-                set_to_add = self._moving_car_id if moving else self._static_car_id
-                set_to_add.add(v_id)
-            if v_id in self._static_car_id:
-                return
 
+        # for each vehicle, we would like to know if it is static
+        if v_id not in self._static_car_id and v_id not in self._moving_car_id:
+            valid_points = track["state"]["position"][np.where(track["state"]["valid"])]
+            moving = np.max(np.std(valid_points, axis=0)[:2]) > self.STATIC_THRESHOLD
+            set_to_add = self._moving_car_id if moving else self._static_car_id
+            set_to_add.add(v_id)
+
+        # don't create in these two conditions
+        if not state["valid"] or (self.engine.global_config["no_static_vehicles"] and v_id in self._static_car_id):
+            return
+
+        # create vehicle
         v_config = copy.deepcopy(self.engine.global_config["vehicle_config"])
         v_config["need_navigation"] = False
         v_config.update(
@@ -130,10 +150,21 @@ class ScenarioTrafficManager(BaseManager):
         )
         self.scenario_id_to_obj_id[v_id] = v.name
         self.obj_id_to_scenario_id[v.name] = v_id
-        if not self.engine.global_config["reactive_traffic"]:
+
+        # add policy
+        if not self.engine.global_config["reactive_traffic"] or v_id in self._static_car_id:
             policy = self.add_policy(v.name, ReplayTrafficParticipantPolicy, v, track)
         else:
-            raise ValueError("Do not support IDM policy currently")
+            side_dist, heading_dist = self.ego_vehicle.convert_to_local_coordinates(state["position"])
+            if heading_dist < self.IDM_CREATE_FORWARD_CONSTRAINT and abs(side_dist) < self.IDM_CREATE_SIDE_CONSTRAINT:
+                # only not static and behind ego car, it can get reactive policy
+                policy = self.add_policy(v.name, ScenarioIDMPolicy, v, self.generate_seed(),
+                                         get_idm_route(track, self.episode_step),
+                                         self.idm_policy_count % self.IDM_ACT_FREQ)
+                self.idm_policy_count += 1
+            else:
+                policy = self.add_policy(v.name, ReplayTrafficParticipantPolicy, v, track)
+
         policy.act()
 
     def spawn_pedestrian(self, scenario_id, track):
@@ -182,3 +213,7 @@ class ScenarioTrafficManager(BaseManager):
         ret[SD.ORIGINAL_ID_TO_OBJ_ID] = copy.deepcopy(self.scenario_id_to_obj_id)
         ret[SD.OBJ_ID_TO_ORIGINAL_ID] = copy.deepcopy(self.obj_id_to_scenario_id)
         return ret
+
+    @property
+    def ego_vehicle(self):
+        return self.engine.agents[DEFAULT_AGENT]
