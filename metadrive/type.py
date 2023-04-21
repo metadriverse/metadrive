@@ -58,6 +58,8 @@ class MetaDriveType:
 
     # ===== Object type =====
     TRAFFIC_LIGHT = "TRAFFIC_LIGHT"
+    TRAFFIC_BARRIER = "TRAFFIC_BARRIER"
+    TRAFFIC_CONE = "TRAFFIC_CONE"
     TRAFFIC_OBJECT = "TRAFFIC_OBJECT"
     GROUND = "GROUND"
     INVISIBLE_WALL = "INVISIBLE_WALL"
@@ -79,6 +81,10 @@ class MetaDriveType:
     #     7: LANE_STATE_FLASHING_STOP,
     #     8: LANE_STATE_FLASHING_CAUTION
     # }
+
+    @classmethod
+    def is_traffic_object(cls, type):
+        return type in [cls.TRAFFIC_CONE, cls.TRAFFIC_BARRIER, cls.TRAFFIC_OBJECT]
 
     @classmethod
     def has_type(cls, type_string: str):

@@ -9,7 +9,7 @@ class BaseStaticObject(BaseObject):
     MASS = 1
     HEIGHT = None
 
-    def __init__(self, lane, position: Sequence[float], heading_theta: float = 0., random_seed=None):
+    def __init__(self, position: Sequence[float], heading_theta: float = 0., lane=None, random_seed=None):
         """
         :param lane: the lane to spawn object
         :param position: cartesian position of object in the surface
@@ -18,8 +18,8 @@ class BaseStaticObject(BaseObject):
         super(BaseStaticObject, self).__init__(random_seed=random_seed)
         self.set_position(position, self.HEIGHT / 2 if hasattr(self, "HEIGHT") else 0)
         self.set_heading_theta(heading_theta)
-        self.lane_index = lane.index
         self.lane = lane
+        self.lane_index = lane.index if lane is not None else None
 
     def show_coordinates(self):
         if self.coordinates_debug_np is not None:

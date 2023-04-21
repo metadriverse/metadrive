@@ -261,6 +261,8 @@ VaryingShapeVehicle = VaryingDynamicsVehicle
 
 
 def get_vehicle_type(length, np_random):
+    # if abs(length-0) <= 0.001:
+    #     raise ValueError("Length Error")
     if length <= 4:
         return SVehicle
     elif length <= 5.5:

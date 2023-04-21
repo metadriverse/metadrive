@@ -56,7 +56,8 @@ Example:
                     ...
                 },
 
-                # The meta data dict. Store useful information about the object
+                # The meta data dict. Store useful information about the object. type in metadata could be those from
+                # different dataset
                 "metadata": {
                     "type": "VEHICLE",
                     "track_length": 200,
@@ -102,6 +103,8 @@ Example:
             "219": {
                 "type": "LANE_SURFACE_STREET",
                 "polyline": np.array in [21, 2],  # A set of 2D points describing a line segment
+                # optional, only works for lane
+                "polygon": np.array in [N, 2] # A set of 2D points representing convexhull
             },
             "182": ...
             ...

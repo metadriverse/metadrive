@@ -2,6 +2,7 @@ import copy
 import logging
 
 from metadrive.component.traffic_participants.cyclist import Cyclist
+from metadrive.component.static_object.traffic_object import TrafficCone, TrafficBarrier
 from metadrive.component.traffic_participants.pedestrian import Pedestrian
 from metadrive.component.vehicle.vehicle_type import get_vehicle_type
 from metadrive.constants import DEFAULT_AGENT
@@ -32,8 +33,11 @@ class ScenarioTrafficManager(BaseManager):
                 self.spawn_cyclist(scenario_id, track)
             elif track["type"] == MetaDriveType.PEDESTRIAN:
                 self.spawn_pedestrian(scenario_id, track)
+            elif track["type"] in [MetaDriveType.TRAFFIC_CONE, MetaDriveType.TRAFFIC_BARRIER]:
+                cls = TrafficBarrier if track["type"] == MetaDriveType.TRAFFIC_BARRIER else TrafficCone
+                self.spawn_static_object(cls, scenario_id, track)
             else:
-                logger.info("Do not support {}".format(track["type"]))
+                logger.warning("Do not support {}".format(track["type"]))
 
     def after_step(self, *args, **kwargs):
         if self.episode_step >= self.current_scenario_length:
@@ -50,9 +54,12 @@ class ScenarioTrafficManager(BaseManager):
                     self.spawn_cyclist(scenario_id, track)
                 elif track["type"] == MetaDriveType.PEDESTRIAN:
                     self.spawn_pedestrian(scenario_id, track)
+                elif track["type"] in [MetaDriveType.TRAFFIC_CONE, MetaDriveType.TRAFFIC_BARRIER]:
+                    cls = TrafficBarrier if track["type"] == MetaDriveType.TRAFFIC_BARRIER else TrafficCone
+                    self.spawn_static_object(cls, scenario_id, track)
                 else:
                     logger.info("Do not support {}".format(track["type"]))
-            else:
+            elif self.has_policy(self.scenario_id_to_obj_id[scenario_id]):
                 policy = self.get_policy(self.scenario_id_to_obj_id[scenario_id])
                 if policy.is_current_step_valid:
                     policy.act()
@@ -140,6 +147,18 @@ class ScenarioTrafficManager(BaseManager):
         self.obj_id_to_scenario_id[obj.name] = scenario_id
         policy = self.add_policy(obj.name, ReplayTrafficParticipantPolicy, obj, track)
         policy.act()
+
+    def spawn_static_object(self, cls, scenario_id, track):
+        state = parse_object_state(track, self.episode_step)
+        if not state["valid"]:
+            return
+        obj = self.spawn_object(
+            cls,
+            position=state["position"],
+            heading_theta=state["heading"],
+        )
+        self.scenario_id_to_obj_id[scenario_id] = obj.name
+        self.obj_id_to_scenario_id[obj.name] = scenario_id
 
     def get_state(self):
         # Record mapping from original_id to new_id

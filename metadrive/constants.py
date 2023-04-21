@@ -64,6 +64,8 @@ COLOR = {
     MetaDriveType.VEHICLE: "red",
     MetaDriveType.GROUND: "yellow",
     MetaDriveType.TRAFFIC_OBJECT: "yellow",
+    MetaDriveType.TRAFFIC_CONE: "yellow",
+    MetaDriveType.TRAFFIC_BARRIER: "yellow",
     MetaDriveType.PEDESTRIAN: "red",
     MetaDriveType.CYCLIST: "red",
     MetaDriveType.INVISIBLE_WALL: "red",

@@ -37,7 +37,7 @@ def parse_object_state(object_dict, time_idx, check_last_state=False, sim_time_i
             ret[k] = float(states[k][time_idx])
 
     ret["valid"] = states["valid"][time_idx]
-    if time_idx < len(states["position"]) - 1:
+    if time_idx < len(states["position"]) - 1 and states["valid"][time_idx] and states["valid"][time_idx + 1]:
         angular_velocity = compute_angular_velocity(
             initial_heading=states["heading"][time_idx],
             final_heading=states["heading"][time_idx + 1],

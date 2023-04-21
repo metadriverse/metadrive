@@ -197,3 +197,12 @@ def is_map_related_class(object_class):
     from metadrive.component.block.base_block import BaseBlock
     from metadrive.component.map.base_map import BaseMap
     return True if issubclass(object_class, BaseBlock) or issubclass(object_class, BaseMap) else False
+
+
+def dict_recursive_remove_array(d):
+    if isinstance(d, np.ndarray):
+        return d.tolist()
+    if isinstance(d, dict):
+        for k in d.keys():
+            d[k] = dict_recursive_remove_array(d[k])
+    return d

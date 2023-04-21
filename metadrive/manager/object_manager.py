@@ -92,10 +92,24 @@ class TrafficObjectManager(BaseManager):
             self.engine.traffic_manager.random_vehicle_type(), vehicle_config=v_config
         )
         breakdown_vehicle.set_break_down()
-        self.spawn_object(TrafficWarning, lane=lane, longitude=longitude - self.ALERT_DIST, lateral=0)
+        longitude = longitude - self.ALERT_DIST
+        lateral = 0
+        self.spawn_object(
+            TrafficWarning,
+            lane=lane,
+            position=lane.position(longitude, lateral),
+            heading_theta=lane.heading_theta_at(longitude)
+        )
 
     def barrier_scene(self, lane, longitude):
-        self.spawn_object(TrafficBarrier, lane=lane, longitude=longitude, lateral=0)
+        longitude = longitude
+        lateral = 0
+        self.spawn_object(
+            TrafficBarrier,
+            lane=lane,
+            position=lane.position(longitude, lateral),
+            heading_theta=lane.heading_theta_at(longitude)
+        )
 
     def prohibit_scene(self, lane: AbstractLane, longitude_position: float, lateral_len: float, on_left=False):
         """
@@ -120,7 +134,9 @@ class TrafficObjectManager(BaseManager):
         left = 1 if on_left else -1
         for p in pos:
             p_ = (p[0] + longitude_position, left * p[1])
-            self.spawn_object(TrafficCone, lane=lane, longitude=p_[0], lateral=p_[1])
+            position = lane.position(p_[0], p_[1])
+            heading_theta = lane.heading_theta_at(p_[0])
+            self.spawn_object(TrafficCone, lane=lane, position=position, heading_theta=heading_theta)
 
     def set_state(self, state: dict, old_name_to_current=None):
         """

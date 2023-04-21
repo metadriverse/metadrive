@@ -21,16 +21,12 @@ class TrafficObject(BaseStaticObject):
 
     COST_ONCE = True  # cost will give at the first time
 
-    def __init__(self, lane, longitude: float, lateral: float, random_seed):
+    def __init__(self, position, heading_theta, lane=None, random_seed=None):
         """
         :param lane: the lane to spawn object
-        :param longitude: use to calculate cartesian position of object in the surface
-        :param lateral: use to calculate the angle from positive direction of horizontal axis
         """
-        position = lane.position(longitude, lateral)
-        heading_theta = lane.heading_theta_at(longitude)
         assert self.CLASS_NAME is not None, "Assign a name for this class for finding it easily"
-        super(TrafficObject, self).__init__(lane, position, heading_theta, random_seed)
+        super(TrafficObject, self).__init__(position, heading_theta, lane, random_seed)
         self.crashed = False
 
 
@@ -40,9 +36,10 @@ class TrafficCone(TrafficObject):
     RADIUS = 0.25
     HEIGHT = 1.2
     MASS = 1
+    CLASS_NAME = MetaDriveType.TRAFFIC_CONE
 
-    def __init__(self, lane, longitude: float, lateral: float, static: bool = False, random_seed=None):
-        super(TrafficCone, self).__init__(lane, longitude, lateral, random_seed)
+    def __init__(self, position, heading_theta, lane=None, static: bool = False, random_seed=None):
+        super(TrafficCone, self).__init__(position, heading_theta, lane, random_seed)
 
         n = BaseRigidBodyNode(self.name, self.CLASS_NAME)
         self.add_body(n)
@@ -83,8 +80,8 @@ class TrafficWarning(TrafficObject):
     MASS = 1
     RADIUS = 0.5
 
-    def __init__(self, lane, longitude: float, lateral: float, static: bool = False, random_seed=None):
-        super(TrafficWarning, self).__init__(lane, longitude, lateral, random_seed)
+    def __init__(self, position, heading_theta, lane=None, static: bool = False, random_seed=None):
+        super(TrafficWarning, self).__init__(position, heading_theta, lane, random_seed)
 
         n = BaseRigidBodyNode(self.name, self.CLASS_NAME)
         self.add_body(n)
@@ -122,9 +119,10 @@ class TrafficBarrier(TrafficObject):
     MASS = 10
     LENGTH = 2.0
     WIDTH = 0.3
+    CLASS_NAME = MetaDriveType.TRAFFIC_BARRIER
 
-    def __init__(self, lane, longitude: float, lateral: float, static: bool = False, random_seed=None):
-        super(TrafficBarrier, self).__init__(lane, longitude, lateral, random_seed)
+    def __init__(self, position, heading_theta, lane=None, static: bool = False, random_seed=None):
+        super(TrafficBarrier, self).__init__(position, heading_theta, lane, random_seed)
         n = BaseRigidBodyNode(self.name, self.CLASS_NAME)
         self.add_body(n)
 
