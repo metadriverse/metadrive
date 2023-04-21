@@ -21,7 +21,7 @@ from metadrive.scenario.scenario_description import ScenarioDescription
 
 SCENARIO_ENV_CONFIG = dict(
     # ===== Map Config =====
-    data_directory=AssetLoader.file_path("waymo", return_raw_style=False),
+    data_directory=AssetLoader.file_path("nuscenes", return_raw_style=False),
     start_scenario_index=0,
     num_scenarios=3,
     store_map=True,
@@ -179,8 +179,8 @@ class ScenarioEnv(BaseEnv):
         # for compatibility
         # crash almost equals to crashing with vehicles
         done_info[TerminationState.CRASH] = (
-            done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
-            or done_info[TerminationState.CRASH_BUILDING]
+                done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
+                or done_info[TerminationState.CRASH_BUILDING]
         )
         return done, done_info
 
@@ -347,20 +347,24 @@ if __name__ == "__main__":
             "use_render": True,
             "agent_policy": ReplayEgoCarPolicy,
             "manual_control": False,
+            "show_interface": False,
+            "show_logo":False,
+            "show_fps": False,
             "replay": True,
-            # "no_traffic": False,
+            "debug": True,
+            # "no_traffic": True,
             # "no_light": False,
             # "debug":True,
             # "no_traffic":True,
             # "start_scenario_index": 192,
             # "start_scenario_index": 1000,
-            "num_scenarios": 3,
+            "num_scenarios": 10,
             # "force_reuse_object_name": True,
             # "data_directory": "/home/shady/Downloads/test_processed",
             "horizon": 1000,
-            "allow_coordinate_transform": True,
             "vehicle_config": dict(
-                # no_wheel_friction=True,
+                show_navi_mark=False,
+                no_wheel_friction=True,
                 lidar=dict(num_lasers=120, distance=50, num_others=4),
                 lane_line_detector=dict(num_lasers=12, distance=50),
                 side_detector=dict(num_lasers=160, distance=50)
@@ -368,8 +372,8 @@ if __name__ == "__main__":
         }
     )
     success = []
-    for i in range(3):
-        env.reset(force_seed=i)
+    for i in [0, 2, 3, 5, 6, 7, 8, 9]:
+        env.reset(force_seed=0)
         for t in range(10000):
             o, r, d, info = env.step([0, 0])
             assert env.observation_space.contains(o)
@@ -386,7 +390,6 @@ if __name__ == "__main__":
                 # mode="topdown"
             )
 
-            if d:
-                if info["arrive_dest"]:
-                    print("seed:{}, success".format(env.engine.global_random_seed))
+            if d and info["arrive_dest"]:
+                print("seed:{}, success".format(env.engine.global_random_seed))
                 break
