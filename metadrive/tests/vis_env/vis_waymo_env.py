@@ -24,7 +24,6 @@ if __name__ == "__main__":
         {
             "manual_control": False,
             "agent_policy": WaymoReplayEgoCarPolicy,
-            "replay": True,
             "use_render": True,
             "data_directory": AssetLoader.file_path(asset_path, "waymo", return_raw_style=False),
             "num_scenarios": 3,

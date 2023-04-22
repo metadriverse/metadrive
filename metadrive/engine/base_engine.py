@@ -104,8 +104,13 @@ class BaseEngine(EngineCore, Randomizable):
         assert object_id in self._object_tasks, "Can not find the task for object(id: {})".format(object_id)
         return self._object_tasks[object_id]
 
-    def has_policy(self, object_id):
-        return True if object_id in self._object_policies else False
+    def has_policy(self, object_id, policy_cls=None):
+        if policy_cls is None:
+            return True if object_id in self._object_policies else False
+        else:
+            return True if object_id in self._object_policies and isinstance(
+                self._object_policies[object_id], policy_cls
+            ) else False
 
     def has_task(self, object_id):
         return True if object_id in self._object_tasks else False
@@ -180,6 +185,8 @@ class BaseEngine(EngineCore, Randomizable):
         Destroy all self-generated objects or objects satisfying the filter condition
         Since we don't expect a iterator, and the number of objects is not so large, we don't use built-in filter()
         If force_destroy=True, we will destroy this element instead of storing them for next time using
+
+        filter: A list of object ids or a function returning a list of object id
         """
         force_destroy_this_obj = True if force_destroy or self.global_config["force_destroy"] else False
 
@@ -298,10 +305,14 @@ class BaseEngine(EngineCore, Randomizable):
         if self.main_camera is not None:
             self.main_camera.reset()
             if hasattr(self, "agent_manager"):
+                bev_cam = self.main_camera.is_bird_view_camera() and self.main_camera.current_track_vehicle is not None
                 vehicles = list(self.agents.values())
                 current_track_vehicle = vehicles[0]
                 self.main_camera.set_follow_lane(self.global_config["use_chase_camera_follow_lane"])
                 self.main_camera.track(current_track_vehicle)
+                if bev_cam:
+                    self.main_camera.stop_track()
+
                 # if self.global_config["is_multi_agent"]:
                 #     self.main_camera.stop_track(bird_view_on_current_position=False)
         self.taskMgr.step()

@@ -1,5 +1,5 @@
 """
-This script demonstrates how to use the environment where traffic and road map are loaded from argoverse dataset.
+This script demonstrates how to use the environment where traffic and road map are loaded from Waymo dataset.
 """
 import argparse
 import random
@@ -30,7 +30,7 @@ if __name__ == "__main__":
         env = DemoWaymoEnv(
             {
                 "manual_control": True,
-                "replay": False if args.reactive_traffic else True,
+                "reactive_traffic": True if args.reactive_traffic else False,
                 "use_render": True if not args.top_down else False,
                 "data_directory": AssetLoader.file_path(asset_path, "waymo", return_raw_style=False),
                 "num_scenarios": 3

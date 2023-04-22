@@ -1,5 +1,6 @@
 import numpy as np
 
+from metadrive.component.lane.point_lane import PointLane
 from metadrive.component.vehicle_module.PID_controller import PIDController
 from metadrive.policy.base_policy import BasePolicy
 from metadrive.policy.manual_control_policy import ManualControlPolicy
@@ -155,9 +156,14 @@ class FrontBackObjects:
             for obj in objs:
                 if np.linalg.norm(obj.position - position) > max_distance:
                     continue
-                long, lat = lane.local_coordinates(obj.position)
-                if abs(lat) > lane.width:
+                if hasattr(obj, "bounding_box") and all([not lane.point_on_lane(p) for p in obj.bounding_box]):
                     continue
+                elif not hasattr(obj, "bounding_box") and not lane.point_on_lane(obj.position):
+                    continue
+
+                long, _ = lane.local_coordinates(obj.position)
+                # if abs(lat) > lane.width / 2:
+                #     continue
                 long = long - current_long[i]
                 if min_front_long[i] > long > 0:
                     min_front_long[i] = long
@@ -171,6 +177,9 @@ class IDMPolicy(BasePolicy):
     """
     We implement this policy based on the HighwayEnv code base.
     """
+
+    DEBUG_MARK_COLOR = (219, 3, 252, 255)
+
     TAU_ACC = 0.6  # [s]
     TAU_HEADING = 0.3  # [s]
     TAU_LATERAL = 0.8  # [s]
@@ -413,13 +422,16 @@ class TrajectoryIDMPOlicy(IDMPolicy):
     """This policy is customized for the traffic car in Waymo environment. (Ego car is not included!)"""
     NORMAL_SPEED = 40
     IDM_MAX_DIST = 20
+    DEST_REGION_RADIUS = 2  # m
 
-    def __init__(self, control_object, random_seed, traj_to_follow=None, policy_index=None):
+    def __init__(self, control_object, random_seed, traj_to_follow, policy_index=None):
         super(TrajectoryIDMPOlicy, self).__init__(control_object=control_object, random_seed=random_seed)
         self.policy_index = policy_index
-        self.traj_to_follow = self.engine.map_manager.current_sdc_route if traj_to_follow is None else traj_to_follow
+        assert isinstance(traj_to_follow, PointLane), "Trajectory of IDM policy should be in PointLane Class"
+        self.traj_to_follow = traj_to_follow
         self.target_speed = self.NORMAL_SPEED
         self.routing_target_lane = self.traj_to_follow
+        self.destination = np.asarray(self.traj_to_follow.end)
         self.available_routing_index_range = None
         self.overtake_timer = self.np_random.randint(0, self.LANE_CHANGE_FREQ)
         self.enable_lane_change = False
@@ -428,6 +440,10 @@ class TrajectoryIDMPOlicy(IDMPolicy):
         self.lateral_pid = PIDController(0.3, .0, 0.0)
 
         self.last_action = [0, 0]
+
+    @property
+    def arrive_destination(self):
+        return np.linalg.norm(np.asarray(self.control_object.position) - self.destination) < self.DEST_REGION_RADIUS
 
     def steering_control(self, target_lane) -> float:
         # heading control following a lateral distance control

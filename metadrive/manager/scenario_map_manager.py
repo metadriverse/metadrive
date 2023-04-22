@@ -4,7 +4,7 @@ from metadrive.component.lane.point_lane import PointLane
 from metadrive.component.map.scenario_map import ScenarioMap
 from metadrive.constants import DEFAULT_AGENT
 from metadrive.manager.base_manager import BaseManager
-from metadrive.scenario.parse_object_state import parse_full_trajectory, parse_object_state
+from metadrive.scenario.parse_object_state import parse_full_trajectory, parse_object_state, get_idm_route
 
 
 class ScenarioMapManager(BaseManager):
@@ -59,7 +59,7 @@ class ScenarioMapManager(BaseManager):
         last_position = last_state["position"]
         last_yaw = last_state["heading"]
 
-        self.current_sdc_route = copy.copy(PointLane(sdc_traj, 1.5))
+        self.current_sdc_route = get_idm_route(sdc_traj)
 
         self.sdc_dest_point = copy.deepcopy(last_position)
 

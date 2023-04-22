@@ -72,6 +72,8 @@ class BaseManager(Randomizable):
     def clear_objects(self, *args, **kwargs):
         """
         Same as the function in engine, clear objects, Return exclude object ids
+
+        filter: A list of object ids or a function returning a list of object id
         """
         exclude_objects = self.engine.clear_objects(*args, **kwargs)
         for obj in exclude_objects:
@@ -96,8 +98,8 @@ class BaseManager(Randomizable):
     def get_policy(self, object_id):
         return self.engine.get_policy(object_id)
 
-    def has_policy(self, object_id):
-        return self.engine.has_policy(object_id)
+    def has_policy(self, object_id, policy_cls=None):
+        return self.engine.has_policy(object_id, policy_cls)
 
     def get_state(self):
         """This function will be called by RecordManager to collect manager state, usually some mappings"""

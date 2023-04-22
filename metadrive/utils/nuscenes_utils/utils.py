@@ -312,8 +312,8 @@ def get_map_features(scene_info, nuscenes: NuScenes, map_center, radius=250, poi
         lane_info = map_api.get("lane", id)
         assert lane_info["token"] == id
         boundary = map_api.extract_polygon(lane_info["polygon_token"]).boundary.xy
-        boundary_polygon = [[boundary[0][i], boundary[1][i], 0.1] for i in range(len(boundary[0]))]
-        boundary_polygon += [[boundary[0][i], boundary[1][i], 0.] for i in range(len(boundary[0]))]
+        boundary_polygon = [[boundary[0][i], boundary[1][i]] for i in range(len(boundary[0]))]
+        # boundary_polygon += [[boundary[0][i], boundary[1][i]] for i in range(len(boundary[0]))]
         ret[id] = {
             SD.TYPE: MetaDriveType.LANE_SURFACE_STREET,
             SD.POLYLINE: discretize_lane(map_api.arcline_path_3[id], resolution_meters=points_distance),

@@ -46,8 +46,7 @@ NUPLAN_ENV_CONFIG = dict(
     no_pedestrian=True,
     no_traffic=False,
     no_light=False,
-    replay=True,
-    no_static_traffic_vehicle=False,
+    reactive_traffic=False,
 
     # ===== Agent config =====
     vehicle_config=dict(
@@ -287,7 +286,6 @@ if __name__ == "__main__":
             "use_render": True,
             "agent_policy": NuPlanReplayEgoCarPolicy,
             # "manual_control": True,
-            "replay": True,
             "no_traffic": False,
             "no_pedestrian": False,
             "no_light": False,

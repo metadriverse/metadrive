@@ -14,7 +14,6 @@ def _test_export_nuplan_scenario_hard(start_seed=0, num_scenarios=5, render_expo
         {
             "use_render": render_export_env,
             "agent_policy": NuPlanReplayEgoCarPolicy,
-            "replay": True,
             "start_scenario_index": start_seed,
             "load_city_map": True,
             "num_scenarios": num_scenarios,

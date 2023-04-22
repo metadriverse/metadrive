@@ -44,7 +44,7 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
         self.block_network = self.block_network_type()
 
         # a bounding box used to improve efficiency x_min, x_max, y_min, y_max
-        self.bounding_box = None
+        self._bounding_box = None
 
         # used to spawn npc
         self._respawn_roads = []
@@ -227,11 +227,11 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
         self.lane_node_path.reparentTo(self.origin)
         self.lane_vis_node_path.reparentTo(self.origin)
         try:
-            self.bounding_box = self.block_network.get_bounding_box()
+            self._bounding_box = self.block_network.get_bounding_box()
         except:
             if len(self.block_network.graph) > 0:
                 logging.warning("Can not find bounding box for it")
-            self.bounding_box = None, None, None, None
+            self._bounding_box = None, None, None, None
 
         self._node_path_list.append(self.sidewalk_node_path)
         self._node_path_list.append(self.lane_line_node_path)
@@ -335,3 +335,7 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
     def __del__(self):
         self.destroy()
         logger.debug("{} is being deleted.".format(type(self)))
+
+    @property
+    def bounding_box(self):
+        return self._bounding_box

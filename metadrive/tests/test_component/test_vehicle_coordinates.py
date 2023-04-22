@@ -32,8 +32,8 @@ def test_coordinates_shift():
                     break
                 p = pos.pop()
             p = np.asarray(p)
-            heading, side = env.vehicle.convert_to_local_coordinates(p - env.vehicle.position)
-            recover_pos = env.vehicle.convert_to_world_coordinates([heading, side]) + env.vehicle.position
+            heading, side = env.vehicle.convert_to_local_coordinates(p, env.vehicle.position)
+            recover_pos = env.vehicle.convert_to_world_coordinates([heading, side], env.vehicle.position)
             if abs(recover_pos[0] - p[0]) + abs(recover_pos[1] - p[1]) > 0.1:
                 raise ValueError("vehicle coordinates convert error!")
     finally:

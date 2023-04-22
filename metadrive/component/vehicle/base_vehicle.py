@@ -118,7 +118,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         name: str = None,
         random_seed=None,
         position=None,
-        heading=None  # In degree!
+        heading=None
     ):
         """
         This Vehicle Config is different from self.get_config(), and it is used to define which modules to use, and
@@ -350,7 +350,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         name=None,
         random_seed=None,
         position: np.ndarray = None,
-        heading: float = 0.0,  # In degree!
+        heading: float = 0.0,
         *args,
         **kwargs
     ):
@@ -1038,7 +1038,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self.coordinates_debug_np = NodePath("debug coordinate")
         x = self.engine.add_line([0, 0, height], [2, 0, height], [0, 1, 0, 1], 1)
         y = self.engine.add_line([0, 0, height], [0, 1, height], [0, 1, 0, 1], 1)
-        z = self.engine.add_line([0, 0, height], [0, 0, height + 0.5], [0, 0, 1, 1], 2)
+        z = self.engine.add_line([0, 0, height], [0, 0, height + 0.5], [0, 0, 1, 1], 1)
         x.reparentTo(self.coordinates_debug_np)
         y.reparentTo(self.coordinates_debug_np)
         z.reparentTo(self.coordinates_debug_np)
