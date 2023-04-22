@@ -158,12 +158,12 @@ class FrontBackObjects:
                     continue
                 if hasattr(obj, "bounding_box") and all([not lane.point_on_lane(p) for p in obj.bounding_box]):
                     continue
-                elif not lane.point_on_lane(obj.position):
+                elif not hasattr(obj, "bounding_box") and not lane.point_on_lane(obj.position):
                     continue
 
-                long, lat = lane.local_coordinates(obj.position)
-                if abs(lat) > lane.width / 2:
-                    continue
+                long, _ = lane.local_coordinates(obj.position)
+                # if abs(lat) > lane.width / 2:
+                #     continue
                 long = long - current_long[i]
                 if min_front_long[i] > long > 0:
                     min_front_long[i] = long
