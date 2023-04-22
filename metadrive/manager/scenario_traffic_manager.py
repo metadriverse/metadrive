@@ -1,15 +1,16 @@
 import copy
-import numpy as np
 import logging
 
-from metadrive.component.traffic_participants.cyclist import Cyclist
+import numpy as np
+
 from metadrive.component.static_object.traffic_object import TrafficCone, TrafficBarrier
+from metadrive.component.traffic_participants.cyclist import Cyclist
 from metadrive.component.traffic_participants.pedestrian import Pedestrian
 from metadrive.component.vehicle.vehicle_type import get_vehicle_type
 from metadrive.constants import DEFAULT_AGENT
 from metadrive.manager.base_manager import BaseManager
-from metadrive.policy.replay_policy import ReplayTrafficParticipantPolicy
 from metadrive.policy.idm_policy import ScenarioIDMPolicy
+from metadrive.policy.replay_policy import ReplayTrafficParticipantPolicy
 from metadrive.scenario.parse_object_state import parse_object_state, get_idm_route, get_max_valid_indicis
 from metadrive.scenario.scenario_description import ScenarioDescription as SD
 from metadrive.type import MetaDriveType
@@ -22,8 +23,8 @@ class ScenarioTrafficManager(BaseManager):
     IDM_ACT_FREQ = 5
 
     # project cars to ego vehicle coordinates, only vehicles behind ego car and in a certain region can get IDM policy
-    IDM_CREATE_SIDE_CONSTRAINT = 20  # m
-    IDM_CREATE_FORWARD_CONSTRAINT = 0  # m
+    IDM_CREATE_SIDE_CONSTRAINT = 10  # m
+    IDM_CREATE_FORWARD_CONSTRAINT = -1  # m
     IDM_CREATE_MIN_LENGTH = 10  # indices
 
     # project cars to ego vehicle coordinates, only vehicles outside the region can be created
@@ -38,22 +39,22 @@ class ScenarioTrafficManager(BaseManager):
         self._moving_car_id = set()
         # an async trick for accelerating IDM policy
         self.idm_policy_count = 0
-        self._vehicles_to_clean_this_frame = []
+        self._obj_to_clean_this_frame = []
 
     def before_step(self, *args, **kwargs):
-        self._vehicles_to_clean_this_frame = []
+        self._obj_to_clean_this_frame = []
         for v in self.spawned_objects.values():
             if self.engine.has_policy(v.id, ScenarioIDMPolicy):
                 p = self.engine.get_policy(v.name)
                 if p.arrive_destination:
-                    self._vehicles_to_clean_this_frame.append(self.obj_id_to_scenario_id[v.id])
+                    self._obj_to_clean_this_frame.append(self.obj_id_to_scenario_id[v.id])
                 else:
                     do_speed_control = (p.policy_index + self.idm_policy_count) % self.IDM_ACT_FREQ == 0
                     v.before_step(p.act(do_speed_control))
 
     def before_reset(self):
         super(ScenarioTrafficManager, self).before_reset()
-        self._vehicles_to_clean_this_frame = []
+        self._obj_to_clean_this_frame = []
 
     def after_reset(self):
         self.scenario_id_to_obj_id = {self.sdc_track_index: self.engine.agent_manager.agent_to_object(DEFAULT_AGENT)}
@@ -77,38 +78,43 @@ class ScenarioTrafficManager(BaseManager):
                 logger.warning("Do not support {}".format(track["type"]))
 
     def after_step(self, *args, **kwargs):
-        if self.episode_step >= self.current_scenario_length:
-            return dict(default_agent=dict(replay_done=True))
+        if self.episode_step < self.current_scenario_length:
+            replay_done = False
+            for scenario_id, track in self.current_traffic_data.items():
+                if scenario_id == self.sdc_track_index:
+                    continue
+                if scenario_id not in self.scenario_id_to_obj_id:
+                    if track["type"] == MetaDriveType.VEHICLE:
+                        self.spawn_vehicle(scenario_id, track)
+                    elif track["type"] == MetaDriveType.CYCLIST:
+                        self.spawn_cyclist(scenario_id, track)
+                    elif track["type"] == MetaDriveType.PEDESTRIAN:
+                        self.spawn_pedestrian(scenario_id, track)
+                    elif track["type"] in [MetaDriveType.TRAFFIC_CONE, MetaDriveType.TRAFFIC_BARRIER]:
+                        cls = TrafficBarrier if track["type"] == MetaDriveType.TRAFFIC_BARRIER else TrafficCone
+                        self.spawn_static_object(cls, scenario_id, track)
+                    else:
+                        logger.info("Do not support {}".format(track["type"]))
+                elif self.has_policy(self.scenario_id_to_obj_id[scenario_id], ReplayTrafficParticipantPolicy):
+                    policy = self.get_policy(self.scenario_id_to_obj_id[scenario_id])
+                    if policy.is_current_step_valid:
+                        policy.act()
+                    else:
+                        self._obj_to_clean_this_frame.append(scenario_id)
+        else:
+            replay_done = True
+            # clean replay vehicle
+            for scenario_id, obj_id in self.scenario_id_to_obj_id.items():
+                if self.has_policy(obj_id, ReplayTrafficParticipantPolicy) and not self.is_static_object(obj_id):
+                    self._obj_to_clean_this_frame.append(scenario_id)
 
-        for scenario_id, track in self.current_traffic_data.items():
-            if scenario_id == self.sdc_track_index:
-                continue
-            if scenario_id not in self.scenario_id_to_obj_id:
-                if track["type"] == MetaDriveType.VEHICLE:
-                    self.spawn_vehicle(scenario_id, track)
-                elif track["type"] == MetaDriveType.CYCLIST:
-                    self.spawn_cyclist(scenario_id, track)
-                elif track["type"] == MetaDriveType.PEDESTRIAN:
-                    self.spawn_pedestrian(scenario_id, track)
-                elif track["type"] in [MetaDriveType.TRAFFIC_CONE, MetaDriveType.TRAFFIC_BARRIER]:
-                    cls = TrafficBarrier if track["type"] == MetaDriveType.TRAFFIC_BARRIER else TrafficCone
-                    self.spawn_static_object(cls, scenario_id, track)
-                else:
-                    logger.info("Do not support {}".format(track["type"]))
-            elif self.has_policy(self.scenario_id_to_obj_id[scenario_id], ReplayTrafficParticipantPolicy):
-                policy = self.get_policy(self.scenario_id_to_obj_id[scenario_id])
-                if policy.is_current_step_valid:
-                    policy.act()
-                else:
-                    self._vehicles_to_clean_this_frame.append(scenario_id)
-
-        for scenario_id in list(self._vehicles_to_clean_this_frame):
+        for scenario_id in list(self._obj_to_clean_this_frame):
             obj_id = self.scenario_id_to_obj_id.pop(scenario_id)
             _scenario_id = self.obj_id_to_scenario_id.pop(obj_id)
             assert _scenario_id == scenario_id
             self.clear_objects([obj_id])
 
-        return dict(default_agent=dict(replay_done=False))
+        return dict(default_agent=dict(replay_done=replay_done))
 
     @property
     def current_traffic_data(self):
@@ -232,3 +238,7 @@ class ScenarioTrafficManager(BaseManager):
     @property
     def ego_vehicle(self):
         return self.engine.agents[DEFAULT_AGENT]
+
+    def is_static_object(self, obj_id):
+        return isinstance(self.spawned_objects[obj_id], TrafficBarrier) \
+               or isinstance(self.spawned_objects[obj_id], TrafficCone)
