@@ -157,7 +157,7 @@ class FrontBackObjects:
                 if np.linalg.norm(obj.position - position) > max_distance:
                     continue
                 long, lat = lane.local_coordinates(obj.position)
-                if abs(lat) > lane.width:
+                if abs(lat) > lane.width / 2:
                     continue
                 long = long - current_long[i]
                 if min_front_long[i] > long > 0:

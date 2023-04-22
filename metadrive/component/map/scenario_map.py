@@ -16,6 +16,10 @@ class ScenarioMap(BaseMap):
         self.need_lane_localization = need_lane_localization
         super(ScenarioMap, self).__init__(dict(id=self.map_index), random_seed=random_seed)
 
+    def show_coordinates(self):
+        lanes = [lane_info.lane for lane_info in self.road_network.graph.values()]
+        self.engine.show_lane_coordinates(lanes)
+
     def _generate(self):
         block = ScenarioBlock(
             block_index=0,

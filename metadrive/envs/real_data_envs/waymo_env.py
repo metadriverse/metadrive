@@ -38,9 +38,11 @@ if __name__ == "__main__":
             # "debug":True,
             # "debug_static_world": True,
             # "no_traffic":True,
-            # "start_scenario_index": 192,
+            "start_scenario_index": 2,
+            "show_coordinates": True,
             # "start_scenario_index": 1000,
-            "num_scenarios": 3,
+            # "show_coordinates": True,
+            "num_scenarios": 1,
             # "data_directory": "/home/shady/Downloads/test_processed",
             "show_policy_mark": True,
             "no_static_vehicles": True,
@@ -55,8 +57,8 @@ if __name__ == "__main__":
         }
     )
     success = []
-    for i in range(3):
-        env.reset(force_seed=i)
+    for i in range(10):
+        env.reset(force_seed=2)
         while True:
             step_start = time.time()
             o, r, d, info = env.step([0, 0])

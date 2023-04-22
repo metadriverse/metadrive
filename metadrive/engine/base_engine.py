@@ -301,10 +301,14 @@ class BaseEngine(EngineCore, Randomizable):
         if self.main_camera is not None:
             self.main_camera.reset()
             if hasattr(self, "agent_manager"):
+                bev_cam = self.main_camera.is_bird_view_camera() and self.main_camera.current_track_vehicle is not None
                 vehicles = list(self.agents.values())
                 current_track_vehicle = vehicles[0]
                 self.main_camera.set_follow_lane(self.global_config["use_chase_camera_follow_lane"])
                 self.main_camera.track(current_track_vehicle)
+                if bev_cam:
+                    self.main_camera.stop_track()
+
                 # if self.global_config["is_multi_agent"]:
                 #     self.main_camera.stop_track(bird_view_on_current_position=False)
         self.taskMgr.step()

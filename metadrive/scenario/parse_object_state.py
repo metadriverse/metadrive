@@ -16,9 +16,9 @@ def get_max_valid_indicis(track, current_index):
     return current_index, end
 
 
-def get_idm_route(track, start_index, end_index):
+def get_idm_route(track, start_index, end_index, width=4):
     traj_points = track["state"]["position"][start_index:end_index][..., :2]
-    traj = PointLane(traj_points, 1.5)
+    traj = PointLane(traj_points, width)
     return traj
 
 
