@@ -29,7 +29,7 @@ class ScenarioTrafficManager(BaseManager):
 
     # project cars to ego vehicle coordinates, only vehicles outside the region can be created
     GENERATION_SIDE_CONSTRAINT = 2  # m
-    GENERATION_FORWARD_CONSTRAINT = 4  # m
+    GENERATION_FORWARD_CONSTRAINT = 8  # m
 
     def __init__(self):
         super(ScenarioTrafficManager, self).__init__()
@@ -145,7 +145,7 @@ class ScenarioTrafficManager(BaseManager):
         # if collision don't generate
         ego_pos = self.ego_vehicle.position
         heading_dist, side_dist = self.ego_vehicle.convert_to_local_coordinates(state["position"], ego_pos)
-        if abs(heading_dist) < self.GENERATION_FORWARD_CONSTRAINT or abs(side_dist) < self.GENERATION_SIDE_CONSTRAINT:
+        if abs(heading_dist) < self.GENERATION_FORWARD_CONSTRAINT and abs(side_dist) < self.GENERATION_SIDE_CONSTRAINT:
             return
 
         # create vehicle
