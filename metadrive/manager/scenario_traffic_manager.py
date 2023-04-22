@@ -184,8 +184,10 @@ class ScenarioTrafficManager(BaseManager):
         else:
             idm_route = get_idm_route(track["state"]["position"][start_index:end_index][..., :2])
             # only not static and behind ego car, it can get reactive policy
-            self.add_policy(v.name, ScenarioIDMPolicy, v, self.generate_seed(),
-                            idm_route, self.idm_policy_count % self.IDM_ACT_BATCH_SIZE)
+            self.add_policy(
+                v.name, ScenarioIDMPolicy, v, self.generate_seed(), idm_route,
+                self.idm_policy_count % self.IDM_ACT_BATCH_SIZE
+            )
             # no act() is required for IDMPolicy
             self.idm_policy_count += 1
 

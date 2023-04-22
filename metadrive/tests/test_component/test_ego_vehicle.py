@@ -80,7 +80,6 @@ def test_base_vehicle():
             [10 + w / 2, l / 2],
             [10 + w / 2, -l / 2],
             [10 - w / 2, -l / 2],
-
         ])
         np.testing.assert_almost_equal(bounding_box, points)
 

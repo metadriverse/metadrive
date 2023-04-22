@@ -46,7 +46,7 @@ def test_trajectory_idm(render=False):
                 )
             )
             v_list = []
-            list = [(25, 0, 0)] if seed!=0 else []
+            list = [(25, 0, 0)] if seed != 0 else []
             list += [(45, -3, np.pi / 2), (70, 3, -np.pi / 4)]
             for long, lat, heading in list:
                 position = sdc_route.position(long, lat)

@@ -127,7 +127,6 @@ class NuPlanReplayTrafficParticipantPolicy(BasePolicy):
     """
     This policy should be used with TrafficParticipantManager Together
     """
-
     def __init__(self, control_object, fix_height=None, random_seed=None, config=None):
         super(NuPlanReplayTrafficParticipantPolicy, self).__init__(control_object, random_seed, config)
         self.fix_height = fix_height
