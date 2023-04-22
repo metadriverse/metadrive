@@ -1,4 +1,6 @@
 import math
+from shapely import geometry
+
 from typing import Tuple, Union
 
 import numpy as np
@@ -20,15 +22,15 @@ class PointLane(AbstractLane, InterpolatingLine):
     POLYGON_SAMPLE_RATE = 1
 
     def __init__(
-        self,
-        center_line_points: Union[list, np.ndarray],
-        width: float,
-        polygon=None,
-        forbidden: bool = False,
-        speed_limit: float = 1000,
-        priority: int = 0,
-        need_lane_localization=True,
-        auto_generate_polygon=True
+            self,
+            center_line_points: Union[list, np.ndarray],
+            width: float,
+            polygon=None,
+            forbidden: bool = False,
+            speed_limit: float = 1000,
+            priority: int = 0,
+            need_lane_localization=True,
+            auto_generate_polygon=True
     ):
         center_line_points = np.array(center_line_points)[..., :2]
         AbstractLane.__init__(self)
@@ -38,6 +40,7 @@ class PointLane(AbstractLane, InterpolatingLine):
         self.width = width if width else self.VIS_LANE_WIDTH
         if self.polygon is None and auto_generate_polygon:
             self.polygon = self.auto_generate_polygon()
+        self.shapely_polygon = geometry.Polygon(geometry.LineString(polygon))
         self.need_lane_localization = need_lane_localization
         self.set_speed_limit(speed_limit)
         self.forbidden = forbidden
@@ -70,54 +73,37 @@ class PointLane(AbstractLane, InterpolatingLine):
                     # control the adding sequence
                     if k == 1:
                         # last point
-                        polygon.append([point[0], point[1], 0.0])
-                        polygon.append([point[0], point[1], -0.5])
+                        polygon.append([point[0], point[1]])
 
                     # extend
                     polygon.append(
                         [
                             point[0] - start_dir[0] * self.POLYGON_SAMPLE_RATE,
-                            point[1] - start_dir[1] * self.POLYGON_SAMPLE_RATE, 0.0
-                        ]
-                    )
-                    polygon.append(
-                        [
-                            point[0] - start_dir[0] * self.POLYGON_SAMPLE_RATE,
-                            point[1] - start_dir[1] * self.POLYGON_SAMPLE_RATE, -0.5
+                            point[1] - start_dir[1] * self.POLYGON_SAMPLE_RATE
                         ]
                     )
 
                     if k == 0:
                         # first point
-                        polygon.append([point[0], point[1], 0.0])
-                        polygon.append([point[0], point[1], -0.5])
+                        polygon.append([point[0], point[1]])
                 elif (t == 0 and k == 1) or (t == len(longs) - 1 and k == 0):
 
                     if k == 0:
                         # second point
-                        polygon.append([point[0], point[1], 0.0])
-                        polygon.append([point[0], point[1], -0.5])
+                        polygon.append([point[0], point[1]])
 
                     polygon.append(
                         [
                             point[0] + end_dir[0] * self.POLYGON_SAMPLE_RATE,
-                            point[1] + end_dir[1] * self.POLYGON_SAMPLE_RATE, 0.0
-                        ]
-                    )
-                    polygon.append(
-                        [
-                            point[0] + end_dir[0] * self.POLYGON_SAMPLE_RATE,
-                            point[1] + end_dir[1] * self.POLYGON_SAMPLE_RATE, -0.5
+                            point[1] + end_dir[1] * self.POLYGON_SAMPLE_RATE
                         ]
                     )
 
                     if k == 1:
                         # third point
-                        polygon.append([point[0], point[1], 0.0])
-                        polygon.append([point[0], point[1], -0.5])
+                        polygon.append([point[0], point[1]])
                 else:
-                    polygon.append([point[0], point[1], 0.0])
-                    polygon.append([point[0], point[1], -0.5])
+                    polygon.append([point[0], point[1]])
         return np.asarray(polygon)
 
     def width_at(self, longitudinal: float) -> float:
@@ -162,7 +148,7 @@ class PointLane(AbstractLane, InterpolatingLine):
         self.is_straight = None
         self.start = None
         self.end = None
-        self.polygon=None
+        self.polygon = None
         InterpolatingLine.destroy(self)
         super(PointLane, self).destroy()
 

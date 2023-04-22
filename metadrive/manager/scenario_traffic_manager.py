@@ -28,8 +28,8 @@ class ScenarioTrafficManager(BaseManager):
     IDM_CREATE_MIN_LENGTH = 10  # indices
 
     # project cars to ego vehicle coordinates, only vehicles outside the region can be created
-    GENERATION_SIDE_CONSTRAINT = 0.8  # m
-    GENERATION_FORWARD_CONSTRAINT = 2  # m
+    GENERATION_SIDE_CONSTRAINT = 2  # m
+    GENERATION_FORWARD_CONSTRAINT = 4  # m
 
     def __init__(self):
         super(ScenarioTrafficManager, self).__init__()

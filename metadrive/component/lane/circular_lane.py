@@ -116,54 +116,37 @@ class CircularLane(PGLane):
                         # control the adding sequence
                         if k == 1:
                             # last point
-                            polygon.append([point[0], point[1], 0.0])
-                            polygon.append([point[0], point[1], -0.5])
+                            polygon.append([point[0], point[1]])
 
                         # extend
                         polygon.append(
                             [
                                 point[0] - start_dir[0] * self.POLYGON_SAMPLE_RATE,
-                                point[1] - start_dir[1] * self.POLYGON_SAMPLE_RATE, 0.0
-                            ]
-                        )
-                        polygon.append(
-                            [
-                                point[0] - start_dir[0] * self.POLYGON_SAMPLE_RATE,
-                                point[1] - start_dir[1] * self.POLYGON_SAMPLE_RATE, -0.5
+                                point[1] - start_dir[1] * self.POLYGON_SAMPLE_RATE
                             ]
                         )
 
                         if k == 0:
                             # first point
-                            polygon.append([point[0], point[1], 0.0])
-                            polygon.append([point[0], point[1], -0.5])
+                            polygon.append([point[0], point[1]])
                     elif (t == 0 and k == 1) or (t == len(longs) - 1 and k == 0):
 
                         if k == 0:
                             # second point
-                            polygon.append([point[0], point[1], 0.0])
-                            polygon.append([point[0], point[1], -0.5])
+                            polygon.append([point[0], point[1]])
 
                         polygon.append(
                             [
                                 point[0] + end_dir[0] * self.POLYGON_SAMPLE_RATE,
-                                point[1] + end_dir[1] * self.POLYGON_SAMPLE_RATE, 0.0
-                            ]
-                        )
-                        polygon.append(
-                            [
-                                point[0] + end_dir[0] * self.POLYGON_SAMPLE_RATE,
-                                point[1] + end_dir[1] * self.POLYGON_SAMPLE_RATE, -0.5
+                                point[1] + end_dir[1] * self.POLYGON_SAMPLE_RATE
                             ]
                         )
 
                         if k == 1:
                             # third point
-                            polygon.append([point[0], point[1], 0.0])
-                            polygon.append([point[0], point[1], -0.5])
+                            polygon.append([point[0], point[1]])
                     else:
-                        polygon.append([point[0], point[1], 0.0])
-                        polygon.append([point[0], point[1], -0.5])
+                        polygon.append([point[0], point[1]])
             self._polygon = polygon
         return self._polygon
 
