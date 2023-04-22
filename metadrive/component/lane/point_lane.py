@@ -205,3 +205,7 @@ class PointLane(AbstractLane, InterpolatingLine):
 
     def get_polygon(self):
         return np.asarray(self.polygon if self.has_polygon else [])
+
+    def point_on_lane(self, point):
+        s_point = geometry.Point(point[0], point[1])
+        return self.shapely_polygon.contains(s_point)

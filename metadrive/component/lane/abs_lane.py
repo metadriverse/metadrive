@@ -426,3 +426,9 @@ class AbstractLane:
     @property
     def id(self):
         return self.index
+
+    def point_on_lane(self, point):
+        """
+        Return True if the point is in the lane polygon
+        """
+        raise NotImplementedError
