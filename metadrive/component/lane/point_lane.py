@@ -162,6 +162,7 @@ class PointLane(AbstractLane, InterpolatingLine):
         self.is_straight = None
         self.start = None
         self.end = None
+        self.polygon=None
         InterpolatingLine.destroy(self)
         super(PointLane, self).destroy()
 

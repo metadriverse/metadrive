@@ -41,10 +41,14 @@ class ScenarioTrafficManager(BaseManager):
             if self.engine.has_policy(v.id, ScenarioIDMPolicy):
                 p = self.engine.get_policy(v.name)
                 if p.arrive_destination:
-                    self._vehicles_to_clean_this_frame.append(self.obj_id_to_scenario_id[v])
+                    self._vehicles_to_clean_this_frame.append(self.obj_id_to_scenario_id[v.id])
                 else:
                     do_speed_control = (p.policy_index + self.idm_policy_count) % self.IDM_ACT_FREQ == 0
                     v.before_step(p.act(do_speed_control))
+
+    def before_reset(self):
+        super(ScenarioTrafficManager, self).before_reset()
+        self._vehicles_to_clean_this_frame = []
 
     def after_reset(self):
         self.scenario_id_to_obj_id = {self.sdc_track_index: self.engine.agent_manager.agent_to_object(DEFAULT_AGENT)}
@@ -154,18 +158,24 @@ class ScenarioTrafficManager(BaseManager):
         # add policy
         if not self.engine.global_config["reactive_traffic"] or v_id in self._static_car_id:
             policy = self.add_policy(v.name, ReplayTrafficParticipantPolicy, v, track)
+            policy.act()
         else:
-            side_dist, heading_dist = self.ego_vehicle.convert_to_local_coordinates(state["position"])
+            heading_dist, side_dist = self.ego_vehicle.convert_to_local_coordinates(state["position"],
+                                                                                    self.ego_vehicle.position)
             if heading_dist < self.IDM_CREATE_FORWARD_CONSTRAINT and abs(side_dist) < self.IDM_CREATE_SIDE_CONSTRAINT:
-                # only not static and behind ego car, it can get reactive policy
-                policy = self.add_policy(v.name, ScenarioIDMPolicy, v, self.generate_seed(),
-                                         get_idm_route(track, self.episode_step),
-                                         self.idm_policy_count % self.IDM_ACT_FREQ)
+                idm_route = get_idm_route(track, self.episode_step, min_moving_distance=self.STATIC_THRESHOLD)
+                if idm_route is None:
+                    policy = self.add_policy(v.name, ReplayTrafficParticipantPolicy, v, track)
+                    policy.act()
+                else:
+                    # only not static and behind ego car, it can get reactive policy
+                    self.add_policy(v.name, ScenarioIDMPolicy, v, self.generate_seed(),
+                                    idm_route, self.idm_policy_count % self.IDM_ACT_FREQ)
+                    # no act is required for IDMPolicy
                 self.idm_policy_count += 1
             else:
                 policy = self.add_policy(v.name, ReplayTrafficParticipantPolicy, v, track)
-
-        policy.act()
+                policy.act()
 
     def spawn_pedestrian(self, scenario_id, track):
         state = parse_object_state(track, self.episode_step)
