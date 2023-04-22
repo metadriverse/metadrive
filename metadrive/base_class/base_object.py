@@ -492,3 +492,23 @@ class BaseObject(BaseRunnable):
         project_on_x = vector[0]
         project_on_y = vector[1]
         return np.array([project_on_x, project_on_y]) + np.asarray(origin)
+
+    @property
+    def WIDTH(self):
+        raise NotImplementedError()
+
+    @property
+    def LENGTH(self):
+        raise NotImplementedError()
+
+    @property
+    def bounding_box(self):
+        """
+        This function will return the 2D bounding box of vehicle. Points are in clockwise sequence, first point is the
+        top-left point.
+        """
+        p1 = self.convert_to_world_coordinates([self.LENGTH / 2, self.WIDTH / 2], self.position)
+        p2 = self.convert_to_world_coordinates([self.LENGTH / 2, -self.WIDTH / 2], self.position)
+        p3 = self.convert_to_world_coordinates([-self.LENGTH / 2, -self.WIDTH / 2], self.position)
+        p4 = self.convert_to_world_coordinates([-self.LENGTH / 2, self.WIDTH / 2], self.position)
+        return [p1, p2, p3, p4]

@@ -1,15 +1,19 @@
+import logging
 from typing import Tuple
 
 from panda3d.bullet import BulletBoxShape
 from panda3d.bullet import BulletCylinderShape
 
 from metadrive.component.static_object.base_static_object import BaseStaticObject
-from metadrive.constants import MetaDriveType
 from metadrive.constants import CollisionGroup
+from metadrive.constants import MetaDriveType
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.engine.physics_node import BaseRigidBodyNode
 
 LaneIndex = Tuple[str, str, int]
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 class TrafficObject(BaseStaticObject):
@@ -117,8 +121,6 @@ class TrafficBarrier(TrafficObject):
 
     HEIGHT = 2.0
     MASS = 10
-    LENGTH = 2.0
-    WIDTH = 0.3
     CLASS_NAME = MetaDriveType.TRAFFIC_BARRIER
 
     def __init__(self, position, heading_theta, lane=None, static: bool = False, random_seed=None):
@@ -134,11 +136,21 @@ class TrafficBarrier(TrafficObject):
             model.reparentTo(self.origin)
 
     @property
+    def LENGTH(self):
+        return 2.0
+
+    @property
+    def WIDTH(self):
+        return 0.3
+
+    @property
     def width(self):
+        logger.warning("This API will be deprecated, Please use {}.WIDTH instead".format(self.class_name))
         return self.WIDTH
 
     @property
     def length(self):
+        logger.warning("This API will be deprecated, Please use {}.LENGTH instead".format(self.class_name))
         return self.LENGTH
 
     @property

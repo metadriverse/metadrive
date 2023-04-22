@@ -1,6 +1,6 @@
 import numpy as np
+
 from metadrive.component.lane.point_lane import PointLane
-from metadrive.constants import DEFAULT_AGENT
 from metadrive.component.vehicle_module.PID_controller import PIDController
 from metadrive.policy.base_policy import BasePolicy
 from metadrive.policy.manual_control_policy import ManualControlPolicy
@@ -156,6 +156,11 @@ class FrontBackObjects:
             for obj in objs:
                 if np.linalg.norm(obj.position - position) > max_distance:
                     continue
+                if hasattr(obj, "bounding_box") and all([not lane.point_on_lane(p) for p in obj.bounding_box]):
+                    continue
+                elif not lane.point_on_lane(obj.position):
+                    continue
+
                 long, lat = lane.local_coordinates(obj.position)
                 if abs(lat) > lane.width / 2:
                     continue

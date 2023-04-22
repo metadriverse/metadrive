@@ -70,6 +70,20 @@ def test_base_vehicle():
 
         _nan_speed(env)
 
+        v.reset(position=np.array([10, 0]))
+        v.set_heading_theta(np.pi / 2)
+        bounding_box = np.asarray(v.bounding_box)
+        l = v.LENGTH
+        w = v.WIDTH
+        points = np.asarray([
+            [10 - w / 2, l / 2],
+            [10 + w / 2, l / 2],
+            [10 + w / 2, -l / 2],
+            [10 - w / 2, -l / 2],
+
+        ])
+        np.testing.assert_almost_equal(bounding_box, points)
+
         v.destroy()
         del v
     finally:
