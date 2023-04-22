@@ -128,7 +128,7 @@ class TrafficBarrier(TrafficObject):
         n = BaseRigidBodyNode(self.name, self.CLASS_NAME)
         self.add_body(n)
 
-        self.body.addShape(BulletBoxShape((self.width / 2, self.length / 2, self.height / 2)))
+        self.body.addShape(BulletBoxShape((self.WIDTH / 2, self.LENGTH / 2, self.height / 2)))
         self.set_static(static)
         if self.render:
             model = self.loader.loadModel(AssetLoader.file_path("models", "barrier", "scene.gltf"))

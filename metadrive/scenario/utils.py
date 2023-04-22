@@ -9,6 +9,7 @@ from matplotlib.pyplot import figure
 from metadrive.component.traffic_light.base_traffic_light import BaseTrafficLight
 from metadrive.component.traffic_participants.cyclist import Cyclist
 from metadrive.component.traffic_participants.pedestrian import Pedestrian
+from metadrive.component.static_object.traffic_object import TrafficCone, TrafficBarrier
 from metadrive.component.vehicle.base_vehicle import BaseVehicle
 from metadrive.constants import DATA_VERSION, DEFAULT_AGENT
 from metadrive.scenario import ScenarioDescription as SD
@@ -43,6 +44,10 @@ def get_type_from_class(obj_class):
         return MetaDriveType.CYCLIST
     elif issubclass(obj_class, BaseTrafficLight) or obj_class is BaseTrafficLight:
         return MetaDriveType.TRAFFIC_LIGHT
+    elif issubclass(obj_class, TrafficBarrier) or obj_class is TrafficBarrier:
+        return MetaDriveType.TRAFFIC_BARRIER
+    elif issubclass(obj_class, TrafficCone) or obj_class is TrafficCone:
+        return MetaDriveType.TRAFFIC_CONE
     else:
         return MetaDriveType.OTHER
 
@@ -142,9 +147,9 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
             type=MetaDriveType.UNSET,
             state=dict(
                 position=np.zeros(shape=(episode_len, 3)),
-                heading=np.zeros(shape=(episode_len, )),
+                heading=np.zeros(shape=(episode_len,)),
                 velocity=np.zeros(shape=(episode_len, 2)),
-                valid=np.zeros(shape=(episode_len, )),
+                valid=np.zeros(shape=(episode_len,)),
 
                 # Add these items when the object has them.
                 # throttle_brake=np.zeros(shape=(episode_len, 1)),
@@ -167,7 +172,7 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
             "state": {
                 ScenarioDescription.TRAFFIC_LIGHT_STATUS: [None] * episode_len
             },
-            ScenarioDescription.TRAFFIC_LIGHT_POSITION: np.zeros(shape=(3, ), dtype=np.float32),
+            ScenarioDescription.TRAFFIC_LIGHT_POSITION: np.zeros(shape=(3,), dtype=np.float32),
             ScenarioDescription.TRAFFIC_LIGHT_LANE: None,
             "metadata": dict(
                 track_length=episode_len, type=MetaDriveType.TRAFFIC_LIGHT, object_id=k, dataset="metadrive"
@@ -202,11 +207,11 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
                 if lights[id][ScenarioDescription.TRAFFIC_LIGHT_LANE] is None:
                     lights[id][ScenarioDescription.TRAFFIC_LIGHT_LANE] = str(id)
                     lights[id][ScenarioDescription.TRAFFIC_LIGHT_POSITION
-                               ] = state[ScenarioDescription.TRAFFIC_LIGHT_POSITION]
+                    ] = state[ScenarioDescription.TRAFFIC_LIGHT_POSITION]
                 else:
                     assert lights[id][ScenarioDescription.TRAFFIC_LIGHT_LANE] == str(id)
                     assert lights[id][ScenarioDescription.TRAFFIC_LIGHT_POSITION
-                                      ] == state[ScenarioDescription.TRAFFIC_LIGHT_POSITION]
+                           ] == state[ScenarioDescription.TRAFFIC_LIGHT_POSITION]
 
             else:
                 tracks[id]["type"] = type

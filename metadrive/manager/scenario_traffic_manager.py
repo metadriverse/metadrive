@@ -19,13 +19,13 @@ logger = logging.getLogger(__name__)
 
 
 class ScenarioTrafficManager(BaseManager):
-    STATIC_THRESHOLD = 5  # m, static if moving distance < 5
+    STATIC_THRESHOLD = 3  # m, static if moving distance < 5
     IDM_ACT_BATCH_SIZE = 5
 
     # project cars to ego vehicle coordinates, only vehicles behind ego car and in a certain region can get IDM policy
     IDM_CREATE_SIDE_CONSTRAINT = 10  # m
     IDM_CREATE_FORWARD_CONSTRAINT = -1  # m
-    IDM_CREATE_MIN_LENGTH = 10  # indices
+    IDM_CREATE_MIN_LENGTH = 5  # m
 
     # project cars to ego vehicle coordinates, only vehicles outside the region can be created
     GENERATION_SIDE_CONSTRAINT = 2  # m
@@ -173,8 +173,9 @@ class ScenarioTrafficManager(BaseManager):
         self.obj_id_to_scenario_id[v.name] = v_id
 
         # add policy
-        start_index, end_index = get_max_valid_indicis(track, self.episode_step)
-        length_ok = (end_index - start_index) > self.IDM_CREATE_MIN_LENGTH
+        start_index, end_index = get_max_valid_indicis(track, self.episode_step)  # real end_index is end_index-1
+        moving = track["state"]["position"][start_index][..., :2] - track["state"]["position"][end_index - 1][..., :2]
+        length_ok = np.linalg.norm(moving) > self.IDM_CREATE_MIN_LENGTH
         idm_ok = heading_dist < self.IDM_CREATE_FORWARD_CONSTRAINT and abs(side_dist) < self.IDM_CREATE_SIDE_CONSTRAINT
         need_reactive_traffic = self.engine.global_config["reactive_traffic"]
         if not need_reactive_traffic or v_id in self._static_car_id or not idm_ok or not length_ok:

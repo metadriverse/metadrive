@@ -38,11 +38,11 @@ if __name__ == "__main__":
             # "debug":True,
             # "debug_static_world": True,
             # "no_traffic":True,
-            "start_scenario_index": 2,
+            "start_scenario_index": 0,
             "show_coordinates": True,
             # "start_scenario_index": 1000,
             # "show_coordinates": True,
-            "num_scenarios": 1,
+            "num_scenarios": 3,
             # "data_directory": "/home/shady/Downloads/test_processed",
             "show_policy_mark": True,
             "no_static_vehicles": True,
@@ -57,24 +57,25 @@ if __name__ == "__main__":
         }
     )
     success = []
-    for i in range(10):
-        env.reset(force_seed=2)
-        while True:
-            step_start = time.time()
-            o, r, d, info = env.step([0, 0])
-            assert env.observation_space.contains(o)
-            # c_lane = env.vehicle.lane
-            # long, lat, = c_lane.local_coordinates(env.vehicle.position)
-            print("Step: {}, Time: {}".format(env.episode_step, time.time() - step_start))
-            # if env.config["use_render"]:
-            env.render(
-                text={
-                    "seed": env.engine.global_seed + env.config["start_scenario_index"],
-                }
-                # mode="topdown"
-            )
+    while True:
+        for i in range(3):
+            env.reset(force_seed=i)
+            while True:
+                step_start = time.time()
+                o, r, d, info = env.step([0, 0])
+                assert env.observation_space.contains(o)
+                # c_lane = env.vehicle.lane
+                # long, lat, = c_lane.local_coordinates(env.vehicle.position)
+                print("Step: {}, Time: {}".format(env.episode_step, time.time() - step_start))
+                # if env.config["use_render"]:
+                env.render(
+                    text={
+                        "seed": env.engine.global_seed + env.config["start_scenario_index"],
+                    }
+                    # mode="topdown"
+                )
 
-            if d:
-                if info["arrive_dest"]:
-                    print("seed:{}, success".format(env.engine.global_random_seed))
-                break
+                if d:
+                    if info["arrive_dest"]:
+                        print("seed:{}, success".format(env.engine.global_random_seed))
+                    break
