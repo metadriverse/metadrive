@@ -370,10 +370,10 @@ class AbstractLane:
         shape = BulletConvexHullShape()
         for point in polygon:
             # Panda coordinate is different from metadrive coordinate
-            point = LPoint3f(*point, 0.0)
-            shape.addPoint(LPoint3f(*point))
-            point = LPoint3f(*point, -0.1)
-            shape.addPoint(LPoint3f(*point))
+            point_up = LPoint3f(*point, 0.0)
+            shape.addPoint(LPoint3f(*point_up))
+            point_down = LPoint3f(*point, -0.1)
+            shape.addPoint(LPoint3f(*point_down))
         segment_node.addShape(shape)
         block.static_nodes.append(segment_node)
         segment_np.reparentTo(block.lane_node_path)

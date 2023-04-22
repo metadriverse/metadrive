@@ -40,7 +40,7 @@ class PointLane(AbstractLane, InterpolatingLine):
         self.width = width if width else self.VIS_LANE_WIDTH
         if self.polygon is None and auto_generate_polygon:
             self.polygon = self.auto_generate_polygon()
-        self.shapely_polygon = geometry.Polygon(geometry.LineString(polygon))
+        self.shapely_polygon = geometry.Polygon(geometry.LineString(self.polygon))
         self.need_lane_localization = need_lane_localization
         self.set_speed_limit(speed_limit)
         self.forbidden = forbidden

@@ -21,7 +21,7 @@ if __name__ == "__main__":
             # "debug_physics_world": True,
             "debug": True,
             # "global_light": False,
-            # "debug_static_world": True,
+            "debug_static_world": True,
             "cull_scene": False,
             "random_spawn_lane_index": False,
             "random_lane_width": False,
