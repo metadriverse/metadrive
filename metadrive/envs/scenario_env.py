@@ -179,8 +179,8 @@ class ScenarioEnv(BaseEnv):
         # for compatibility
         # crash almost equals to crashing with vehicles
         done_info[TerminationState.CRASH] = (
-            done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
-            or done_info[TerminationState.CRASH_BUILDING]
+                done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
+                or done_info[TerminationState.CRASH_BUILDING]
         )
         return done, done_info
 
@@ -350,7 +350,7 @@ if __name__ == "__main__":
             "show_interface": False,
             "show_logo": False,
             "show_fps": False,
-            "debug": True,
+            "debug": False,
             # "no_traffic": True,
             # "no_light": False,
             # "debug":True,
@@ -362,6 +362,8 @@ if __name__ == "__main__":
             # "data_directory": "/home/shady/Downloads/test_processed",
             "horizon": 1000,
             "no_static_vehicles": True,
+            "show_policy_mark": True,
+            "show_coordinates": True,
             "vehicle_config": dict(
                 show_navi_mark=False,
                 no_wheel_friction=True,

@@ -172,6 +172,9 @@ class IDMPolicy(BasePolicy):
     """
     We implement this policy based on the HighwayEnv code base.
     """
+
+    DEBUG_MARK_COLOR = (219, 3, 252, 255)
+
     TAU_ACC = 0.6  # [s]
     TAU_HEADING = 0.3  # [s]
     TAU_LATERAL = 0.8  # [s]

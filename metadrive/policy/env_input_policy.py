@@ -7,6 +7,8 @@ from metadrive.utils.math_utils import clip
 
 
 class EnvInputPolicy(BasePolicy):
+    DEBUG_MARK_COLOR = (252, 119, 3, 255)
+
     def __init__(self, obj, seed):
         # Since control object may change
         super(EnvInputPolicy, self).__init__(control_object=obj, random_seed=seed)

@@ -10,7 +10,7 @@ from metadrive.constants import DEFAULT_AGENT
 from metadrive.manager.base_manager import BaseManager
 from metadrive.policy.replay_policy import ReplayTrafficParticipantPolicy
 from metadrive.policy.idm_policy import ScenarioIDMPolicy
-from metadrive.scenario.parse_object_state import parse_object_state, get_idm_route
+from metadrive.scenario.parse_object_state import parse_object_state, get_idm_route, get_max_valid_indicis
 from metadrive.scenario.scenario_description import ScenarioDescription as SD
 from metadrive.type import MetaDriveType
 
@@ -24,6 +24,11 @@ class ScenarioTrafficManager(BaseManager):
     # project cars to ego vehicle coordinates, only vehicles behind ego car and in a certain region can get IDM policy
     IDM_CREATE_SIDE_CONSTRAINT = 20  # m
     IDM_CREATE_FORWARD_CONSTRAINT = 0  # m
+    IDM_CREATE_MIN_LENGTH = 10  # indices
+
+    # project cars to ego vehicle coordinates, only vehicles outside the region can be created
+    GENERATION_SIDE_CONSTRAINT = 0.8  # m
+    GENERATION_FORWARD_CONSTRAINT = 2  # m
 
     def __init__(self):
         super(ScenarioTrafficManager, self).__init__()
@@ -131,6 +136,12 @@ class ScenarioTrafficManager(BaseManager):
         if not state["valid"] or (self.engine.global_config["no_static_vehicles"] and v_id in self._static_car_id):
             return
 
+        # if collision don't generate
+        ego_pos = self.ego_vehicle.position
+        heading_dist, side_dist = self.ego_vehicle.convert_to_local_coordinates(state["position"], ego_pos)
+        if abs(heading_dist) < self.GENERATION_FORWARD_CONSTRAINT or abs(side_dist) < self.GENERATION_SIDE_CONSTRAINT:
+            return
+
         # create vehicle
         v_config = copy.deepcopy(self.engine.global_config["vehicle_config"])
         v_config["need_navigation"] = False
@@ -156,26 +167,20 @@ class ScenarioTrafficManager(BaseManager):
         self.obj_id_to_scenario_id[v.name] = v_id
 
         # add policy
-        if not self.engine.global_config["reactive_traffic"] or v_id in self._static_car_id:
+        start_index, end_index = get_max_valid_indicis(track, self.episode_step)
+        length_ok = (end_index - start_index) > self.IDM_CREATE_MIN_LENGTH
+        idm_ok = heading_dist < self.IDM_CREATE_FORWARD_CONSTRAINT and abs(side_dist) < self.IDM_CREATE_SIDE_CONSTRAINT
+        need_reactive_traffic = self.engine.global_config["reactive_traffic"]
+        if not need_reactive_traffic or v_id in self._static_car_id or not idm_ok or not length_ok:
             policy = self.add_policy(v.name, ReplayTrafficParticipantPolicy, v, track)
             policy.act()
         else:
-            heading_dist, side_dist = self.ego_vehicle.convert_to_local_coordinates(state["position"],
-                                                                                    self.ego_vehicle.position)
-            if heading_dist < self.IDM_CREATE_FORWARD_CONSTRAINT and abs(side_dist) < self.IDM_CREATE_SIDE_CONSTRAINT:
-                idm_route = get_idm_route(track, self.episode_step, min_moving_distance=self.STATIC_THRESHOLD)
-                if idm_route is None:
-                    policy = self.add_policy(v.name, ReplayTrafficParticipantPolicy, v, track)
-                    policy.act()
-                else:
-                    # only not static and behind ego car, it can get reactive policy
-                    self.add_policy(v.name, ScenarioIDMPolicy, v, self.generate_seed(),
-                                    idm_route, self.idm_policy_count % self.IDM_ACT_FREQ)
-                    # no act is required for IDMPolicy
-                self.idm_policy_count += 1
-            else:
-                policy = self.add_policy(v.name, ReplayTrafficParticipantPolicy, v, track)
-                policy.act()
+            idm_route = get_idm_route(track, start_index, end_index)
+            # only not static and behind ego car, it can get reactive policy
+            self.add_policy(v.name, ScenarioIDMPolicy, v, self.generate_seed(),
+                            idm_route, self.idm_policy_count % self.IDM_ACT_FREQ)
+            # no act() is required for IDMPolicy
+            self.idm_policy_count += 1
 
     def spawn_pedestrian(self, scenario_id, track):
         state = parse_object_state(track, self.episode_step)

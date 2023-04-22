@@ -1038,7 +1038,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self.coordinates_debug_np = NodePath("debug coordinate")
         x = self.engine.add_line([0, 0, height], [2, 0, height], [0, 1, 0, 1], 1)
         y = self.engine.add_line([0, 0, height], [0, 1, height], [0, 1, 0, 1], 1)
-        z = self.engine.add_line([0, 0, height], [0, 0, height + 0.5], [0, 0, 1, 1], 2)
+        z = self.engine.add_line([0, 0, height], [0, 0, height + 0.5], [0, 0, 1, 1], 1)
         x.reparentTo(self.coordinates_debug_np)
         y.reparentTo(self.coordinates_debug_np)
         z.reparentTo(self.coordinates_debug_np)

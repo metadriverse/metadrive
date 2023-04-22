@@ -5,7 +5,7 @@ from metadrive.component.lane.point_lane import PointLane
 from metadrive.utils.math_utils import compute_angular_velocity
 
 
-def get_idm_route(track, current_index, min_moving_distance):
+def get_max_valid_indicis(track, current_index):
     states = track["state"]
     assert states["valid"][current_index], "Current index should be valid"
     end = len(states["valid"])
@@ -13,12 +13,12 @@ def get_idm_route(track, current_index, min_moving_distance):
         if not valid:
             end = i
             break
-    traj_points = states["position"][current_index:end][...,:2]
-    if len(traj_points) < 2:
-        return None
+    return current_index, end
+
+
+def get_idm_route(track, start_index, end_index):
+    traj_points = track["state"]["position"][start_index:end_index][..., :2]
     traj = PointLane(traj_points, 1.5)
-    if traj.length < min_moving_distance:
-        return None
     return traj
 
 
