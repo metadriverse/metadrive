@@ -184,6 +184,8 @@ class BaseEngine(EngineCore, Randomizable):
         Destroy all self-generated objects or objects satisfying the filter condition
         Since we don't expect a iterator, and the number of objects is not so large, we don't use built-in filter()
         If force_destroy=True, we will destroy this element instead of storing them for next time using
+
+        filter: A list of object ids or a function returning a list of object id
         """
         force_destroy_this_obj = True if force_destroy or self.global_config["force_destroy"] else False
 

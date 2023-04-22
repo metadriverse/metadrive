@@ -46,4 +46,4 @@ class TollGateBuilding(BaseBuilding):
 
     @property
     def LENGTH(self):
-        raise self.BUILDING_LENGTH
+        return self.BUILDING_LENGTH

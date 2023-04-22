@@ -72,6 +72,8 @@ class BaseManager(Randomizable):
     def clear_objects(self, *args, **kwargs):
         """
         Same as the function in engine, clear objects, Return exclude object ids
+
+        filter: A list of object ids or a function returning a list of object id
         """
         exclude_objects = self.engine.clear_objects(*args, **kwargs)
         for obj in exclude_objects:
@@ -116,7 +118,7 @@ class BaseManager(Randomizable):
             current_name = old_name_to_current[name]
             name_obj = self.engine.get_objects([current_name])
             assert current_name in name_obj and name_obj[current_name
-                                                         ].class_name == class_name, "Can not restore mappings!"
+            ].class_name == class_name, "Can not restore mappings!"
             ret[current_name] = name_obj[current_name]
         self.spawned_objects = ret
 

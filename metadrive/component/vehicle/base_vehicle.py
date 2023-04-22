@@ -118,7 +118,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             name: str = None,
             random_seed=None,
             position=None,
-            heading=None  # In degree!
+            heading=None
     ):
         """
         This Vehicle Config is different from self.get_config(), and it is used to define which modules to use, and
@@ -350,7 +350,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             name=None,
             random_seed=None,
             position: np.ndarray = None,
-            heading: float = 0.0,  # In degree!
+            heading: float = 0.0,
             *args,
             **kwargs
     ):
