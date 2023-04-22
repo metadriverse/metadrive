@@ -1,4 +1,5 @@
 import copy
+from metadrive.policy.idm_policy import TrajectoryIDMPOlicy
 from typing import Dict
 
 from gym.spaces import Box, Dict, MultiDiscrete, Discrete
@@ -70,7 +71,10 @@ class AgentManager(BaseManager):
             obj = self.spawn_object(v_type, vehicle_config=v_config, name=obj_name)
             ret[agent_id] = obj
             policy_cls = self.agent_policy
-            self.add_policy(obj.id, policy_cls, obj, self.generate_seed())
+            args = [obj, self.generate_seed()]
+            if policy_cls == TrajectoryIDMPOlicy or issubclass(policy_cls, TrajectoryIDMPOlicy):
+                args.append(self.engine.map_manager.current_sdc_route)
+            self.add_policy(obj.id, policy_cls, *args)
         return ret
 
     @property

@@ -27,7 +27,7 @@ MIX_WAYMO_PG_ENV_CONFIG = dict(
 
     # ===== Waymo Traffic Config =====
     no_traffic=False,
-    replay=True,
+    reactive_traffic=False,
 
     # ===== PG Map config =====
     start_seed=0,

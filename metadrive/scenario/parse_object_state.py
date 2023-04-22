@@ -1,8 +1,24 @@
 import copy
 
 import numpy as np
-
+from metadrive.component.lane.point_lane import PointLane
 from metadrive.utils.math_utils import compute_angular_velocity
+
+
+def get_max_valid_indicis(track, current_index):
+    states = track["state"]
+    assert states["valid"][current_index], "Current index should be valid"
+    end = len(states["valid"])
+    for i, valid in enumerate(states["valid"][current_index + 1:], current_index + 1):
+        if not valid:
+            end = i
+            break
+    return current_index, end
+
+
+def get_idm_route(traj_points, width=2):
+    traj = PointLane(traj_points, width)
+    return traj
 
 
 def parse_object_state(object_dict, time_idx, check_last_state=False, sim_time_interval=0.1):

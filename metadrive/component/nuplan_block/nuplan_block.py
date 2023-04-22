@@ -55,61 +55,61 @@ class NuPlanBlock(BaseBlock):
         """
 
         return True
-        """
-        The following content is deprecated
-        """
-        # raise ValueError("Deprecated")
-        # Deprecated
-        map_api = self._nuplan_map_api
-        # Center is Important !
-        center = self.nuplan_center
-        layer_names = [
-            SemanticMapLayer.LANE_CONNECTOR,
-            SemanticMapLayer.LANE,
-            SemanticMapLayer.CROSSWALK,
-            SemanticMapLayer.INTERSECTION,
-            SemanticMapLayer.STOP_LINE,
-            SemanticMapLayer.WALKWAYS,
-            SemanticMapLayer.CARPARK_AREA,
-            SemanticMapLayer.ROADBLOCK,
-            SemanticMapLayer.ROADBLOCK_CONNECTOR,
-
-            # unsupported yet
-            # SemanticMapLayer.STOP_SIGN,
-            # SemanticMapLayer.DRIVABLE_AREA,
-        ]
-
-        nearest_vector_map = map_api.get_proximal_map_objects(Point2D(*center), self._radius, layer_names)
-        # Filter out stop polygons in turn stop
-        if SemanticMapLayer.STOP_LINE in nearest_vector_map:
-            stop_polygons = nearest_vector_map[SemanticMapLayer.STOP_LINE]
-            nearest_vector_map[SemanticMapLayer.STOP_LINE] = [
-                stop_polygon for stop_polygon in stop_polygons if stop_polygon.stop_line_type != StopLineType.TURN_STOP
-            ]
-
-        block_polygons = []
-        # Lane and lane line
-        for layer in [SemanticMapLayer.ROADBLOCK, SemanticMapLayer.ROADBLOCK_CONNECTOR]:
-            for block in nearest_vector_map[layer]:
-                for lane in block.interior_edges:
-                    if hasattr(lane, "baseline_path"):
-                        self.block_network.add_lane(NuPlanLane(nuplan_center=center, lane_meta_data=lane))
-                        is_connector = True if layer == SemanticMapLayer.ROADBLOCK_CONNECTOR else False
-                        self._get_lane_line(lane, is_road_connector=is_connector, nuplan_center=center)
-                if layer == SemanticMapLayer.ROADBLOCK:
-                    block_polygons.append(block.polygon)
-
-        # intersection road connector
-        interpolygons = [block.polygon for block in nearest_vector_map[SemanticMapLayer.INTERSECTION]]
-        boundaries = gpd.GeoSeries(unary_union(interpolygons + block_polygons)).boundary.explode(index_parts=True)
-        # boundaries.plot()
-        # plt.show()
-        for idx, boundary in enumerate(boundaries[0]):
-            block_points = np.array(list(i for i in zip(boundary.coords.xy[0], boundary.coords.xy[1])))
-            block_points -= center
-            self.lines["boundary_{}".format(idx)] = LaneLineProperty(
-                block_points, PGLineColor.GREY, PGLineType.CONTINUOUS, in_road_connector=False
-            )
+        # """
+        # The following content is deprecated
+        # """
+        # # raise ValueError("Deprecated")
+        # # Deprecated
+        # map_api = self._nuplan_map_api
+        # # Center is Important !
+        # center = self.nuplan_center
+        # layer_names = [
+        #     SemanticMapLayer.LANE_CONNECTOR,
+        #     SemanticMapLayer.LANE,
+        #     SemanticMapLayer.CROSSWALK,
+        #     SemanticMapLayer.INTERSECTION,
+        #     SemanticMapLayer.STOP_LINE,
+        #     SemanticMapLayer.WALKWAYS,
+        #     SemanticMapLayer.CARPARK_AREA,
+        #     SemanticMapLayer.ROADBLOCK,
+        #     SemanticMapLayer.ROADBLOCK_CONNECTOR,
+        #
+        #     # unsupported yet
+        #     # SemanticMapLayer.STOP_SIGN,
+        #     # SemanticMapLayer.DRIVABLE_AREA,
+        # ]
+        #
+        # nearest_vector_map = map_api.get_proximal_map_objects(Point2D(*center), self._radius, layer_names)
+        # # Filter out stop polygons in turn stop
+        # if SemanticMapLayer.STOP_LINE in nearest_vector_map:
+        #     stop_polygons = nearest_vector_map[SemanticMapLayer.STOP_LINE]
+        #     nearest_vector_map[SemanticMapLayer.STOP_LINE] = [
+        #         stop_polygon for stop_polygon in stop_polygons if stop_polygon.stop_line_type != StopLineType.TURN_STOP
+        #     ]
+        #
+        # block_polygons = []
+        # # Lane and lane line
+        # for layer in [SemanticMapLayer.ROADBLOCK, SemanticMapLayer.ROADBLOCK_CONNECTOR]:
+        #     for block in nearest_vector_map[layer]:
+        #         for lane in block.interior_edges:
+        #             if hasattr(lane, "baseline_path"):
+        #                 self.block_network.add_lane(NuPlanLane(nuplan_center=center, lane_meta_data=lane))
+        #                 is_connector = True if layer == SemanticMapLayer.ROADBLOCK_CONNECTOR else False
+        #                 self._get_lane_line(lane, is_road_connector=is_connector, nuplan_center=center)
+        #         if layer == SemanticMapLayer.ROADBLOCK:
+        #             block_polygons.append(block.polygon)
+        #
+        # # intersection road connector
+        # interpolygons = [block.polygon for block in nearest_vector_map[SemanticMapLayer.INTERSECTION]]
+        # boundaries = gpd.GeoSeries(unary_union(interpolygons + block_polygons)).boundary.explode(index_parts=True)
+        # # boundaries.plot()
+        # # plt.show()
+        # for idx, boundary in enumerate(boundaries[0]):
+        #     block_points = np.array(list(i for i in zip(boundary.coords.xy[0], boundary.coords.xy[1])))
+        #     block_points -= center
+        #     self.lines["boundary_{}".format(idx)] = LaneLineProperty(
+        #         block_points, PGLineColor.GREY, PGLineType.CONTINUOUS, in_road_connector=False
+        #     )
 
     def create_in_world(self):
         """

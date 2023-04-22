@@ -1,10 +1,9 @@
 from typing import Tuple, Sequence
-import numpy as np
-from metadrive.constants import CollisionGroup
 
 from panda3d.core import LVector3, NodePath
 
 from metadrive.base_class.base_object import BaseObject
+from metadrive.constants import CollisionGroup
 
 LaneIndex = Tuple[str, str, int]
 
@@ -27,14 +26,6 @@ class BaseTrafficParticipant(BaseObject):
     # raise NotImplementedError(
     #     "Implement this func for rendering class {} in top down renderer".format(self.class_name)
     # )
-
-    @property
-    def LENGTH(self):
-        return None
-
-    @property
-    def WIDTH(self):
-        return None
 
     @property
     def top_down_width(self):
@@ -80,7 +71,7 @@ class BaseTrafficParticipant(BaseObject):
         self.coordinates_debug_np = NodePath("debug coordinate")
         x = self.engine.add_line([0, 0, height], [1, 0, height], [1, 0, 0, 1], 1)
         y = self.engine.add_line([0, 0, height], [0, 0.5, height], [1, 0, 0, 1], 1)
-        z = self.engine.add_line([0, 0, height], [0, 0, height + 0.25], [0, 0, 1, 1], 2)
+        z = self.engine.add_line([0, 0, height], [0, 0, height + 0.5], [0, 0, 1, 1], 1)
         x.reparentTo(self.coordinates_debug_np)
         y.reparentTo(self.coordinates_debug_np)
         z.reparentTo(self.coordinates_debug_np)

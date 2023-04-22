@@ -26,10 +26,10 @@ class BaseTrafficLight(BaseObject):
         self.lane = lane
         self.status = MetaDriveType.LIGHT_UNKNOWN
 
-        width = lane.width_at(0)
+        self.lane_width = lane.width_at(0)
         air_wall = generate_static_box_physics_body(
             self.AIR_WALL_LENGTH,
-            width,
+            self.lane_width,
             self.AIR_WALL_HEIGHT,
             object_id=self.id,
             type_name=MetaDriveType.TRAFFIC_LIGHT,
@@ -126,3 +126,11 @@ class BaseTrafficLight(BaseObject):
             ScenarioDescription.TYPE: type(self)
         }
         return state
+
+    @property
+    def LENGTH(self):
+        return self.AIR_WALL_LENGTH
+
+    @property
+    def WIDTH(self):
+        return self.lane_width

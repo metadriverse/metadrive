@@ -12,6 +12,8 @@ class ReplayTrafficParticipantPolicy(BasePolicy):
        Replay policy from Real data. For adding new policy, overwrite get_trajectory_info()
        This policy is designed for Waymo Policy by default
        """
+    DEBUG_MARK_COLOR = (3, 140, 252, 255)
+
     def __init__(self, control_object, track, random_seed=None):
         super(ReplayTrafficParticipantPolicy, self).__init__(control_object=control_object, random_seed=random_seed)
         self.traj_info = self.get_trajectory_info(track)

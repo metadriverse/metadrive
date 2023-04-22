@@ -1,5 +1,4 @@
 import math
-from metadrive.utils.coordinates_shift import panda_vector
 from abc import ABCMeta, abstractmethod
 from typing import Tuple
 
@@ -11,8 +10,8 @@ from panda3d.core import LPoint3f
 from panda3d.core import Vec3, LQuaternionf, CardMaker, TransparencyAttrib, NodePath
 from panda3d.core import Vec4
 
-from metadrive.constants import MetaDriveType
 from metadrive.constants import DrivableAreaProperty
+from metadrive.constants import MetaDriveType
 from metadrive.constants import PGLineType, PGLineColor
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.engine.physics_node import BaseRigidBodyNode
@@ -371,8 +370,10 @@ class AbstractLane:
         shape = BulletConvexHullShape()
         for point in polygon:
             # Panda coordinate is different from metadrive coordinate
-            point = panda_vector(point)
-            shape.addPoint(LPoint3f(*point))
+            point_up = LPoint3f(*point, 0.0)
+            shape.addPoint(LPoint3f(*point_up))
+            point_down = LPoint3f(*point, -0.1)
+            shape.addPoint(LPoint3f(*point_down))
         segment_node.addShape(shape)
         block.static_nodes.append(segment_node)
         segment_np.reparentTo(block.lane_node_path)
@@ -425,3 +426,9 @@ class AbstractLane:
     @property
     def id(self):
         return self.index
+
+    def point_on_lane(self, point):
+        """
+        Return True if the point is in the lane polygon
+        """
+        raise NotImplementedError

@@ -18,7 +18,6 @@ def benchmark_fps():
         {
             "use_render": False,
             "agent_policy": WaymoReplayEgoCarPolicy,
-            "replay": True,
             "no_traffic": False,
             "window_size": (1200, 800),
             "horizon": 1000,

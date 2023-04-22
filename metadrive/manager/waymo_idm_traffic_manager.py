@@ -88,7 +88,7 @@ class WaymoIDMTrafficManager(WaymoTrafficManager):
             self.seed_trajs[self.engine.global_random_seed] = traffic_traj_data
         policy_count = 0
         for v_traj_id, data in self.current_traffic_traj.items():
-            if data["static"] and self.engine.global_config["no_static_traffic_vehicle"]:
+            if data["static"] and self.engine.global_config["no_static_vehicles"]:
                 continue
             if v_traj_id == "sdc":
                 continue

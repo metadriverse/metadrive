@@ -1,6 +1,6 @@
 from nuplan.planning.scenario_builder.nuplan_db.nuplan_scenario import NuPlanScenario
 from metadrive.utils.coordinates_shift import nuplan_to_metadrive_vector
-
+from metadrive.scenario.parse_object_state import get_idm_route
 from metadrive.component.lane.point_lane import PointLane
 from metadrive.component.map.nuplan_map import NuPlanMap
 from metadrive.constants import DEFAULT_AGENT
@@ -109,7 +109,7 @@ class NuPlanMapManager(BaseManager):
         scenario: NuPlanScenario = self.engine.data_manager.current_scenario
 
         sdc_traj = parse_ego_vehicle_trajectory(scenario.get_expert_ego_trajectory(), self.current_map.nuplan_center)
-        self.current_sdc_route = PointLane(sdc_traj, 1.5)
+        self.current_sdc_route = get_idm_route(sdc_traj)
         init_state = parse_ego_vehicle_state(scenario.get_ego_state_at_iteration(0), self.current_map.nuplan_center)
         last_state = parse_ego_vehicle_state(
             scenario.get_ego_state_at_iteration(scenario.get_number_of_iterations() - 1), self.current_map.nuplan_center

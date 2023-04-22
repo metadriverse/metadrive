@@ -1,4 +1,5 @@
 import numpy as np
+from shapely import geometry
 
 from metadrive.component.lane.abs_lane import AbstractLane
 from metadrive.constants import DrivableAreaProperty
@@ -12,6 +13,14 @@ class PGLane(AbstractLane):
         super(PGLane, self).__init__()
         # one should implement how to get polygon in property def polygon(self)
         self._polygon = None
+        self._shapely_polygon = None
+
+    @property
+    def shapely_polygon(self):
+        if self._shapely_polygon is None:
+            assert self._polygon is not None
+            self._shapely_polygon = geometry.Polygon(geometry.LineString(self._polygon))
+        return self._shapely_polygon
 
     def construct_sidewalk(self, block, lateral):
         radius = self.radius
@@ -46,3 +55,7 @@ class PGLane(AbstractLane):
 
     def has_polygon(self):
         return True if self.polygon is not None else False
+
+    def point_on_lane(self, point):
+        s_point = geometry.Point(point[0], point[1])
+        return self.shapely_polygon.contains(s_point)

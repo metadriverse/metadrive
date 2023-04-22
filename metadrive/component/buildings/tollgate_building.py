@@ -19,6 +19,7 @@ class TollGateBuilding(BaseBuilding):
             object_id=self.id,
             type_name=MetaDriveType.BUILDING
         )
+        self.lane_width = lane.width
         self.add_body(air_wall)
 
         self.set_position(position, 0)
@@ -38,3 +39,11 @@ class TollGateBuilding(BaseBuilding):
     @property
     def top_down_width(self):
         return 3
+
+    @property
+    def WIDTH(self):
+        return self.lane_width
+
+    @property
+    def LENGTH(self):
+        return self.BUILDING_LENGTH

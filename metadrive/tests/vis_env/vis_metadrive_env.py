@@ -21,7 +21,7 @@ if __name__ == "__main__":
             # "debug_physics_world": True,
             "debug": True,
             # "global_light": False,
-            # "debug_static_world": True,
+            "debug_static_world": True,
             "cull_scene": False,
             "random_spawn_lane_index": False,
             "random_lane_width": False,
@@ -87,8 +87,9 @@ if __name__ == "__main__":
     #     line.reparentTo(env.vehicle.origin)
     # env.vehicle.set_velocity([5, 0], in_local_frame=True)
     for s in range(1, 10000):
-        env.vehicle.set_velocity([1, 0], in_local_frame=True)
-        o, r, d, info = env.step([0, 1])
+        # env.vehicle.set_velocity([1, 0], in_local_frame=True)
+        o, r, d, info = env.step([0, 0])
+
         # env.vehicle.set_pitch(-np.pi/4)
         # [0.09231533, 0.491018, 0.47076905, 0.7691619, 0.5, 0.5, 1.0, 0.0, 0.48037243, 0.8904728, 0.81229943, 0.7317231, 1.0, 0.85320455, 0.9747932, 0.65675277, 0.0, 0.5, 0.5]
         # else:

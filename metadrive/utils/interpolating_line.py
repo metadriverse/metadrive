@@ -1,7 +1,7 @@
 import math
 import numpy as np
 
-from metadrive.utils.math_utils import norm
+from metadrive.utils.math_utils import norm, get_vertical_vector
 
 
 class InterpolatingLine:
@@ -121,8 +121,8 @@ class InterpolatingLine:
 
     @staticmethod
     def points_lateral_direction(start_p, end_p):
-        direction = (end_p - start_p) / norm((end_p - start_p)[0], (end_p - start_p)[1])
-        return np.array([-direction[1], direction[0]])
+        # direction = (end_p - start_p) / norm((end_p - start_p)[0], (end_p - start_p)[1])
+        return np.asarray(get_vertical_vector(end_p - start_p)[1])
 
     @staticmethod
     def points_heading(start_p, end_p):

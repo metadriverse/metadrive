@@ -15,7 +15,6 @@ def test_waymo_env(policy, render=False, num_scenarios=3):
         env = WaymoEnv(
             {
                 "manual_control": False,
-                "replay": True,
                 "no_traffic": True if policy == WaymoIDMPolicy else False,
                 "use_render": render,
                 "agent_policy": policy,
@@ -45,7 +44,6 @@ def test_store_map_memory_leakage(render=False):
     env = WaymoEnv(
         {
             "manual_control": False,
-            "replay": True,
             "no_traffic": False,
             "store_map": True,
             "use_render": render,

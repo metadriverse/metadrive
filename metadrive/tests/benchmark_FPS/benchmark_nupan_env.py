@@ -18,7 +18,6 @@ def benchmark_fps():
         {
             "use_render": False,
             "agent_policy": NuPlanReplayEgoCarPolicy,
-            "replay": True,
             "no_traffic": False,
             "no_pedestrian": True,
             "load_city_map": True,
@@ -57,7 +56,6 @@ def benchmark_reset_5_map_1000_times(load_city_map=True):
         {
             "use_render": False,
             "agent_policy": NuPlanReplayEgoCarPolicy,
-            "replay": True,
             "no_traffic": True,
             "no_pedestrian": True,
             "load_city_map": load_city_map,
@@ -93,7 +91,6 @@ def benchmark_reset_1000(load_city_map=True):
         {
             "use_render": False,
             "agent_policy": NuPlanReplayEgoCarPolicy,
-            "replay": True,
             "no_traffic": True,
             "no_pedestrian": True,
             "load_city_map": load_city_map,

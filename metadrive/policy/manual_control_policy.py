@@ -8,6 +8,9 @@ class ManualControlPolicy(EnvInputPolicy):
     """
     Control the current track vehicle
     """
+
+    DEBUG_MARK_COLOR = (252, 244, 3, 255)
+
     def __init__(self, obj, seed):
         super(ManualControlPolicy, self).__init__(obj, seed)
         config = self.engine.global_config
