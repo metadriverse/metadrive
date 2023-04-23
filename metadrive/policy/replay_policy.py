@@ -16,8 +16,9 @@ class ReplayTrafficParticipantPolicy(BasePolicy):
 
     def __init__(self, control_object, track, random_seed=None):
         super(ReplayTrafficParticipantPolicy, self).__init__(control_object=control_object, random_seed=random_seed)
-        self.traj_info = self.get_trajectory_info(track)
         self.start_index = 0
+        self._velocity_local_frame = False
+        self.traj_info = self.get_trajectory_info(track)
 
     @property
     def is_current_step_valid(self):
@@ -59,7 +60,7 @@ class ReplayTrafficParticipantPolicy(BasePolicy):
             if hasattr(self.control_object, "set_steering"):
                 self.control_object.set_steering(float(info["steering"]))
         self.control_object.set_position(info["position"])
-        self.control_object.set_velocity(info["velocity"])
+        self.control_object.set_velocity(info["velocity"], in_local_frame=self._velocity_local_frame)
         self.control_object.set_heading_theta(info["heading"])
         self.control_object.set_angular_velocity(info["angular_velocity"])
 
@@ -75,6 +76,9 @@ class ReplayEgoCarPolicy(ReplayTrafficParticipantPolicy):
         # Directly get trajectory from data manager
         trajectory_data = self.engine.data_manager.current_scenario["tracks"]
         sdc_track_index = str(self.engine.data_manager.current_scenario["metadata"]["sdc_id"])
+        if self.engine.data_manager.current_scenario["metadata"]["dataset"] == "nuplan":
+            # nuplan local frame velocity
+            self._velocity_local_frame = True
         ret = []
         for i in range(len(trajectory_data[sdc_track_index]["state"]["position"])):
             ret.append(parse_object_state(
@@ -127,6 +131,7 @@ class NuPlanReplayTrafficParticipantPolicy(BasePolicy):
     """
     This policy should be used with TrafficParticipantManager Together
     """
+
     def __init__(self, control_object, fix_height=None, random_seed=None, config=None):
         super(NuPlanReplayTrafficParticipantPolicy, self).__init__(control_object, random_seed, config)
         self.fix_height = fix_height

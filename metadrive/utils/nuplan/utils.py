@@ -387,6 +387,7 @@ def extract_traffic(scenario: NuPlanScenario, center):
         ego_track[SD.TYPE] = obj_type
         if ego_track[SD.METADATA]["nuplan_type"] is None:
             ego_track[SD.METADATA]["nuplan_type"] = int(TrackedObjectType.EGO)
+            ego_track[SD.METADATA]["type"] = obj_type
         state = obj_state
         ego_track["state"]["position"][frame_idx] = [state["position"][0], state["position"][1], 0.0]
         ego_track["state"]["valid"][frame_idx] = 1

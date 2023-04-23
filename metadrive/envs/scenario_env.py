@@ -362,8 +362,8 @@ if __name__ == "__main__":
             # "data_directory": "/home/shady/Downloads/test_processed",
             "horizon": 1000,
             "no_static_vehicles": True,
-            "show_policy_mark": True,
-            "show_coordinates": True,
+            # "show_policy_mark": True,
+            # "show_coordinates": True,
             "vehicle_config": dict(
                 show_navi_mark=False,
                 no_wheel_friction=True,
@@ -371,11 +371,11 @@ if __name__ == "__main__":
                 lane_line_detector=dict(num_lasers=12, distance=50),
                 side_detector=dict(num_lasers=160, distance=50)
             ),
-            "data_directory": AssetLoader.file_path("nuscenes", return_raw_style=False),
+            "data_directory": AssetLoader.file_path("nuplan", return_raw_style=False),
         }
     )
     success = []
-    for i in [0, 2, 3, 5, 6, 7, 8, 9]:
+    for i in range(30):
         env.reset(force_seed=i)
         for t in range(10000):
             o, r, d, info = env.step([0, 0])
@@ -384,12 +384,12 @@ if __name__ == "__main__":
             long, lat, = c_lane.local_coordinates(env.vehicle.position)
             # if env.config["use_render"]:
             env.render(
-                # text={
-                #     "obs_shape": len(o),
-                #     "lateral": env.observations["default_agent"].lateral_dist,
-                #     "seed": env.engine.global_seed + env.config["start_scenario_index"],
-                #     "reward": r,
-                # }
+                text={
+                    # "obs_shape": len(o),
+                    # "lateral": env.observations["default_agent"].lateral_dist,
+                    "seed": env.engine.global_seed + env.config["start_scenario_index"],
+                    # "reward": r,
+                }
                 # mode="topdown"
             )
 
