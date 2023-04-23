@@ -3,7 +3,7 @@ import numpy as np
 from metadrive.component.vehicle_model.bicycle_model import BicycleModel
 from metadrive.envs.metadrive_env import MetaDriveEnv
 from metadrive.utils import setup_logger
-from metadrive.utils.math_utils import norm
+from metadrive.utils.math import norm
 
 
 def predict(current_state, actions, model):

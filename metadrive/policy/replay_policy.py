@@ -16,8 +16,9 @@ class ReplayTrafficParticipantPolicy(BasePolicy):
 
     def __init__(self, control_object, track, random_seed=None):
         super(ReplayTrafficParticipantPolicy, self).__init__(control_object=control_object, random_seed=random_seed)
-        self.traj_info = self.get_trajectory_info(track)
         self.start_index = 0
+        self._velocity_local_frame = False
+        self.traj_info = self.get_trajectory_info(track)
 
     @property
     def is_current_step_valid(self):
@@ -59,7 +60,7 @@ class ReplayTrafficParticipantPolicy(BasePolicy):
             if hasattr(self.control_object, "set_steering"):
                 self.control_object.set_steering(float(info["steering"]))
         self.control_object.set_position(info["position"])
-        self.control_object.set_velocity(info["velocity"])
+        self.control_object.set_velocity(info["velocity"], in_local_frame=self._velocity_local_frame)
         self.control_object.set_heading_theta(info["heading"])
         self.control_object.set_angular_velocity(info["angular_velocity"])
 
@@ -75,6 +76,9 @@ class ReplayEgoCarPolicy(ReplayTrafficParticipantPolicy):
         # Directly get trajectory from data manager
         trajectory_data = self.engine.data_manager.current_scenario["tracks"]
         sdc_track_index = str(self.engine.data_manager.current_scenario["metadata"]["sdc_id"])
+        # if self.engine.data_manager.current_scenario["metadata"]["dataset"] == "nuplan":
+        #     # nuplan local frame velocity
+        #     self._velocity_local_frame = True
         ret = []
         for i in range(len(trajectory_data[sdc_track_index]["state"]["position"])):
             ret.append(parse_object_state(
@@ -96,7 +100,7 @@ class NuPlanReplayEgoCarPolicy(ReplayEgoCarPolicy):
             logger.warning("\nNOTE:set no_wheel_friction in vehicle config can make the replay more smooth! \n")
 
     def get_trajectory_info(self, *args, **kwargs):
-        from metadrive.utils.nuplan_utils.parse_object_state import parse_ego_vehicle_state_trajectory
+        from metadrive.utils.nuplan.parse_object_state import parse_ego_vehicle_state_trajectory
         scenario = self.engine.data_manager.current_scenario
         return parse_ego_vehicle_state_trajectory(scenario, self.engine.current_map.nuplan_center)
 

@@ -15,7 +15,7 @@ from metadrive.constants import DATA_VERSION, DEFAULT_AGENT
 from metadrive.scenario import ScenarioDescription as SD
 from metadrive.scenario.scenario_description import ScenarioDescription
 from metadrive.type import MetaDriveType
-from metadrive.utils.math_utils import wrap_to_pi
+from metadrive.utils.math import wrap_to_pi
 
 NP_ARRAY_DECIMAL = 4
 VELOCITY_DECIMAL = 1  # velocity can not be set accurately
@@ -170,7 +170,7 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
         k: {
             "type": MetaDriveType.TRAFFIC_LIGHT,
             "state": {
-                ScenarioDescription.TRAFFIC_LIGHT_STATUS: [None] * episode_len
+                ScenarioDescription.TRAFFIC_LIGHT_STATUS: [MetaDriveType.LIGHT_UNKNOWN] * episode_len
             },
             ScenarioDescription.TRAFFIC_LIGHT_POSITION: np.zeros(shape=(3, ), dtype=np.float32),
             ScenarioDescription.TRAFFIC_LIGHT_LANE: None,

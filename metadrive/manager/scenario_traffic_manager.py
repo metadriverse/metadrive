@@ -10,6 +10,7 @@ from metadrive.component.vehicle.vehicle_type import get_vehicle_type
 from metadrive.constants import DEFAULT_AGENT
 from metadrive.manager.base_manager import BaseManager
 from metadrive.policy.idm_policy import ScenarioIDMPolicy
+from metadrive.policy.replay_policy import ReplayEgoCarPolicy
 from metadrive.policy.replay_policy import ReplayTrafficParticipantPolicy
 from metadrive.scenario.parse_object_state import parse_object_state, get_idm_route, get_max_valid_indicis
 from metadrive.scenario.scenario_description import ScenarioDescription as SD
@@ -31,15 +32,29 @@ class ScenarioTrafficManager(BaseManager):
     GENERATION_SIDE_CONSTRAINT = 2  # m
     GENERATION_FORWARD_CONSTRAINT = 8  # m
 
+    # filter noise static object: barrier and cone
+    MIN_VALID_FRAME_LEN = 20  # frames
+
     def __init__(self):
         super(ScenarioTrafficManager, self).__init__()
         self.scenario_id_to_obj_id = None
         self.obj_id_to_scenario_id = None
+
+        # for filtering some static cars
         self._static_car_id = set()
         self._moving_car_id = set()
+
+        # for filtering noisy static object
+        self._noise_object_id = set()
+        self._non_noise_object_id = set()
+
         # an async trick for accelerating IDM policy
         self.idm_policy_count = 0
         self._obj_to_clean_this_frame = []
+
+        # some flags
+        self.is_ego_vehicle_replay = self.engine.global_config["agent_policy"] == ReplayEgoCarPolicy
+        self._filter_overlapping_car = self.engine.global_config["filter_overlapping_car"]
 
     def before_step(self, *args, **kwargs):
         self._obj_to_clean_this_frame = []
@@ -61,6 +76,8 @@ class ScenarioTrafficManager(BaseManager):
         self.obj_id_to_scenario_id = {self.engine.agent_manager.agent_to_object(DEFAULT_AGENT): self.sdc_track_index}
         self._static_car_id = set()
         self._moving_car_id = set()
+        self._noise_object_id = set()
+        self._non_noise_object_id = set()
         self.idm_policy_count = 0
         for scenario_id, track in self.current_traffic_data.items():
             if scenario_id == self.sdc_track_index:
@@ -96,6 +113,7 @@ class ScenarioTrafficManager(BaseManager):
                     else:
                         logger.info("Do not support {}".format(track["type"]))
                 elif self.has_policy(self.scenario_id_to_obj_id[scenario_id], ReplayTrafficParticipantPolicy):
+                    # static object will not be cleaned!
                     policy = self.get_policy(self.scenario_id_to_obj_id[scenario_id])
                     if policy.is_current_step_valid:
                         policy.act()
@@ -142,10 +160,12 @@ class ScenarioTrafficManager(BaseManager):
         if not state["valid"] or (self.engine.global_config["no_static_vehicles"] and v_id in self._static_car_id):
             return
 
-        # if collision don't generate
+        # if collision don't generate, unless ego car is in replay mode
         ego_pos = self.ego_vehicle.position
         heading_dist, side_dist = self.ego_vehicle.convert_to_local_coordinates(state["position"], ego_pos)
-        if abs(heading_dist) < self.GENERATION_FORWARD_CONSTRAINT and abs(side_dist) < self.GENERATION_SIDE_CONSTRAINT:
+        if not self.is_ego_vehicle_replay and self._filter_overlapping_car and \
+                abs(heading_dist) < self.GENERATION_FORWARD_CONSTRAINT and \
+                abs(side_dist) < self.GENERATION_SIDE_CONSTRAINT:
             return
 
         # create vehicle
@@ -220,6 +240,14 @@ class ScenarioTrafficManager(BaseManager):
         policy.act()
 
     def spawn_static_object(self, cls, scenario_id, track):
+        # some
+        if scenario_id not in self._noise_object_id and scenario_id not in self._non_noise_object_id:
+            valid_length = np.sum(track["state"]["valid"])
+            set_to_add = self._noise_object_id if valid_length < self.MIN_VALID_FRAME_LEN else self._non_noise_object_id
+            set_to_add.add(scenario_id)
+        if scenario_id in self._noise_object_id:
+            return
+
         state = parse_object_state(track, self.episode_step)
         if not state["valid"]:
             return

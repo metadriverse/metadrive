@@ -6,7 +6,7 @@ from metadrive.component.road_network import Road
 from metadrive.envs.marl_envs.multi_agent_metadrive import MultiAgentMetaDrive
 from metadrive.manager.map_manager import PGMapManager
 from metadrive.utils import Config
-from metadrive.utils.math_utils import clip
+from metadrive.utils.math import clip
 
 MABidirectionConfig = dict(
     spawn_roads=[Road(FirstPGBlock.NODE_2, FirstPGBlock.NODE_3), -Road(Split.node(3, 0, 0), Split.node(3, 0, 1))],

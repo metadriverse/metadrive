@@ -1,6 +1,6 @@
 import numpy as np
 from metadrive.component.traffic_participants.pedestrian import Pedestrian
-from metadrive.utils.math_utils import wrap_to_pi
+from metadrive.utils.math import wrap_to_pi
 
 from metadrive.envs.metadrive_env import MetaDriveEnv
 

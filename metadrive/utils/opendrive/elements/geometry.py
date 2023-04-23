@@ -2,7 +2,7 @@
 
 import abc
 import numpy as np
-from metadrive.utils.opendrive_map_utils.elements.eulerspiral import EulerSpiral
+from metadrive.utils.opendrive.elements.eulerspiral import EulerSpiral
 
 __author__ = "Benjamin Orthen, Stefan Urban"
 __copyright__ = "TUM Cyber-Physical Systems Group"

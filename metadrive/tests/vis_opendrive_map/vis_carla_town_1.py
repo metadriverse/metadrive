@@ -3,7 +3,7 @@ from metadrive.component.road_network.edge_road_network import OpenDriveRoadNetw
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.engine.asset_loader import initialize_asset_loader
 from metadrive.tests.vis_block.vis_block_base import TestBlock
-from metadrive.utils.opendrive_map_utils.map_load import load_opendrive_map
+from metadrive.utils.opendrive.map_load import load_opendrive_map
 
 if __name__ == "__main__":
     test = TestBlock()

@@ -312,6 +312,7 @@ class BaseEngine(EngineCore, Randomizable):
                 self.main_camera.track(current_track_vehicle)
                 if bev_cam:
                     self.main_camera.stop_track()
+                    self.main_camera.set_bird_view_pos(current_track_vehicle.position)
 
                 # if self.global_config["is_multi_agent"]:
                 #     self.main_camera.stop_track(bird_view_on_current_position=False)
@@ -620,11 +621,21 @@ class BaseEngine(EngineCore, Randomizable):
         This function automatically initialize models/objects. It can prevent the lagging when creating some objects
         for the first time.
         """
-        if self.global_config["preload_pedestrian"]:
+        if self.global_config["preload_models"]:
             from metadrive.component.traffic_participants.pedestrian import Pedestrian
+            from metadrive.component.traffic_light.base_traffic_light import BaseTrafficLight
+            from metadrive.component.static_object.traffic_object import TrafficBarrier
+            from metadrive.component.static_object.traffic_object import TrafficCone
             Pedestrian.init_pedestrian_model()
             warm_up_pedestrian = self.spawn_object(Pedestrian, position=[0, 0], heading_theta=0, record=False)
+            warm_up_light = self.spawn_object(BaseTrafficLight, lane=None, position=[0, 0], record=False)
+            barrier = self.spawn_object(TrafficBarrier, position=[0, 0], heading_theta=0)
+            cone = self.spawn_object(TrafficCone, position=[0, 0], heading_theta=0)
             for vel in Pedestrian.SPEED_LIST:
                 warm_up_pedestrian.set_velocity([1, 0], vel - 0.1)
                 self.taskMgr.step()
-            self.clear_objects([warm_up_pedestrian.id], record=False)
+            self.clear_objects([warm_up_pedestrian.id, warm_up_light.id, barrier.id, cone.id], record=False)
+            warm_up_pedestrian = None
+            warm_up_light = None
+            barrier = None
+            cone = None

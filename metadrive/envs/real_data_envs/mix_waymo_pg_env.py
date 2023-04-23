@@ -100,7 +100,6 @@ class MixWaymoPGEnv(WaymoEnv):
         self.pg_map_manager = PGMapManager()
         self.pg_traffic_manager = PGTrafficManager()
 
-        self.in_stop = False
         super(WaymoEnv, self).setup_engine()
         if self.real_data_ratio > 0:
             self.is_current_real_data = True

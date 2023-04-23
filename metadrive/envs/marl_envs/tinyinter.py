@@ -8,7 +8,7 @@ from metadrive.manager.agent_manager import AgentManager
 from metadrive.obs.state_obs import LidarStateObservation
 from metadrive.policy.idm_policy import IDMPolicy
 from metadrive.utils import Config
-from metadrive.utils.math_utils import Vector, norm, clip
+from metadrive.utils.math import Vector, norm, clip
 
 
 class CommunicationObservation(LidarStateObservation):

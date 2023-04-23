@@ -10,8 +10,8 @@ from metadrive.component.lane.straight_lane import StraightLane
 from metadrive.component.road_network import Road
 from metadrive.component.road_network.node_road_network import NodeRoadNetwork
 from metadrive.constants import PGLineType, PGLineColor, DrivableAreaProperty
-from metadrive.utils.math_utils import get_vertical_vector
-from metadrive.utils.pg_utils.utils import check_lane_on_road
+from metadrive.utils.math import get_vertical_vector
+from metadrive.utils.pg.utils import check_lane_on_road
 
 
 def create_bend_straight(

@@ -5,8 +5,8 @@ from typing import List
 
 from metadrive.component.road_network.base_road_network import BaseRoadNetwork
 from metadrive.component.road_network.base_road_network import LaneIndex
-from metadrive.utils.math_utils import get_boxes_bounding_box
-from metadrive.utils.pg_utils.utils import get_lanes_bounding_box
+from metadrive.utils.math import get_boxes_bounding_box
+from metadrive.utils.pg.utils import get_lanes_bounding_box
 
 lane_info = namedtuple("neighbor_lanes", "lane entry_lanes exit_lanes left_lanes right_lanes")
 

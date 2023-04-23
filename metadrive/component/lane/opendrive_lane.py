@@ -6,8 +6,8 @@ import numpy as np
 
 from metadrive.component.lane.abs_lane import AbstractLane
 from metadrive.utils.interpolating_line import InterpolatingLine
-from metadrive.utils.opendrive_map_utils.elements.geometry import Line, Arc
-from metadrive.utils.opendrive_map_utils.map_load import get_lane_id
+from metadrive.utils.opendrive.elements.geometry import Line, Arc
+from metadrive.utils.opendrive.map_load import get_lane_id
 
 
 class OpenDriveLane(AbstractLane, InterpolatingLine):

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from metadrive.utils.opendrive_map_utils.elements.road_record import RoadRecord
+from metadrive.utils.opendrive.elements.road_record import RoadRecord
 
 __author__ = "Benjamin Orthen, Stefan Urban"
 __copyright__ = "TUM Cyber-Physical Systems Group"

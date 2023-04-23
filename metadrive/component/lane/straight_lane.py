@@ -5,7 +5,7 @@ import numpy as np
 
 from metadrive.component.lane.pg_lane import PGLane
 from metadrive.constants import PGLineType
-from metadrive.utils.math_utils import norm
+from metadrive.utils.math import norm
 
 
 class StraightLane(PGLane):

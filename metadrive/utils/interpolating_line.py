@@ -1,7 +1,7 @@
 import math
 import numpy as np
 
-from metadrive.utils.math_utils import norm, get_vertical_vector
+from metadrive.utils.math import norm, get_vertical_vector
 
 
 class InterpolatingLine:

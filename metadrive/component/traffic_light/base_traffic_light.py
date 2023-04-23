@@ -3,7 +3,7 @@ from metadrive.constants import CamMask
 from metadrive.scenario.scenario_description import ScenarioDescription
 from metadrive.constants import MetaDriveType
 from metadrive.engine.asset_loader import AssetLoader
-from metadrive.utils.pg_utils.utils import generate_static_box_physics_body
+from metadrive.utils.pg.utils import generate_static_box_physics_body
 
 
 class BaseTrafficLight(BaseObject):
@@ -26,7 +26,7 @@ class BaseTrafficLight(BaseObject):
         self.lane = lane
         self.status = MetaDriveType.LIGHT_UNKNOWN
 
-        self.lane_width = lane.width_at(0)
+        self.lane_width = lane.width_at(0) if lane else 4
         air_wall = generate_static_box_physics_body(
             self.AIR_WALL_LENGTH,
             self.lane_width,
@@ -42,7 +42,7 @@ class BaseTrafficLight(BaseObject):
             position = lane.position(self.PLACE_LONGITUDE, 0)
 
         self.set_position(position, self.AIR_WALL_HEIGHT / 2)
-        self.set_heading_theta(lane.heading_theta_at(self.PLACE_LONGITUDE))
+        self.set_heading_theta(lane.heading_theta_at(self.PLACE_LONGITUDE) if lane else 0)
         self.current_light = None
 
         if self.render:

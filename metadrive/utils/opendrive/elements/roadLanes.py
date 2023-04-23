@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from metadrive.utils.opendrive_map_utils.elements.road_record import RoadRecord
+from metadrive.utils.opendrive.elements.road_record import RoadRecord
 
 
 class Lanes:

@@ -12,7 +12,7 @@ from shapely.ops import unary_union, cascaded_union
 
 from metadrive.scenario import ScenarioDescription as SD
 from metadrive.type import MetaDriveType
-from metadrive.utils.nuscenes_utils.detection_type import ALL_TYPE, HUMAN_TYPE, BICYCLE_TYPE, VEHICLE_TYPE
+from metadrive.utils.nuscenes.detection_type import ALL_TYPE, HUMAN_TYPE, BICYCLE_TYPE, VEHICLE_TYPE
 
 EGO = "ego"
 
@@ -338,7 +338,7 @@ def get_map_features(scene_info, nuscenes: NuScenes, map_center, radius=250, poi
     return ret
 
 
-def convert_one_scene(scene_token: str, nuscenes: NuScenes):
+def convert_one_scenario(scene_token: str, nuscenes: NuScenes):
     """
     Data will be interpolated to 0.1s time interval, while the time interval of original key frames are 0.5s.
     """
@@ -358,8 +358,8 @@ def convert_one_scene(scene_token: str, nuscenes: NuScenes):
     result[SD.VERSION] = "nuscenes" + nuscenes.version
     result[SD.LENGTH] = (len(frames) - 1) * 5 + 1
     result[SD.METADATA] = {}
-    result[SD.METADATA][SD.METADRIVE_PROCESSED] = True
     result[SD.METADATA]["dataset"] = "nuscenes"
+    result[SD.METADATA][SD.METADRIVE_PROCESSED] = False
     result[SD.METADATA]["map"] = nuscenes.get("log", scene_info["log_token"])["location"]
     result[SD.METADATA]["date"] = nuscenes.get("log", scene_info["log_token"])["date_captured"]
     result[SD.METADATA]["coordinate"] = "right-handed"

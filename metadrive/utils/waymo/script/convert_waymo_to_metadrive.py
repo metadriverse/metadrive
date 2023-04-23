@@ -26,7 +26,7 @@ try:
     from waymo_open_dataset.protos import scenario_pb2
 except ImportError:
     try:
-        from metadrive.utils.waymo_utils.protos import scenario_pb2  # Local files that only in PZH's computer.
+        from metadrive.utils.waymo.protos import scenario_pb2  # Local files that only in PZH's computer.
     except ImportError:
         print(
             "Please install waymo_open_dataset package through metadrive dependencies: "
@@ -35,7 +35,7 @@ except ImportError:
 
 from metadrive.scenario import ScenarioDescription as SD
 from metadrive.type import MetaDriveType
-from metadrive.utils.waymo_utils.utils import extract_tracks, extract_dynamic_map_states, extract_map_features, \
+from metadrive.utils.waymo.utils import extract_tracks, extract_dynamic_map_states, extract_map_features, \
     compute_width
 import sys
 

@@ -1,4 +1,4 @@
-from metadrive.utils.random_utils import get_np_random
+from metadrive.utils.random import get_np_random
 
 
 class Randomizable:
