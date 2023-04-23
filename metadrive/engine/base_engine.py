@@ -312,6 +312,7 @@ class BaseEngine(EngineCore, Randomizable):
                 self.main_camera.track(current_track_vehicle)
                 if bev_cam:
                     self.main_camera.stop_track()
+                    self.main_camera.set_bird_view_pos(current_track_vehicle.position)
 
                 # if self.global_config["is_multi_agent"]:
                 #     self.main_camera.stop_track(bird_view_on_current_position=False)
