@@ -124,14 +124,20 @@ class ScenarioEnv(BaseEnv):
         self.engine.accept("p", self.stop)
         self.engine.accept("q", self.switch_to_third_person_view)
         self.engine.accept("b", self.switch_to_top_down_view)
-        # self.engine.accept("n", self.next_seed_reset)
-        # self.engine.accept("b", self.last_seed_reset)
+        self.engine.accept("]", self.next_seed_reset)
+        self.engine.accept("[", self.last_seed_reset)
 
     def next_seed_reset(self):
-        self.reset(self.current_seed + 1)
+        if self.current_seed + 1 < self.config["start_scenario_index"] + self.config["num_scenarios"]:
+            self.reset(self.current_seed + 1)
+        else:
+            logging.warning("Can't load next scenario! current seed is already the max scenario index")
 
     def last_seed_reset(self):
-        self.reset(self.current_seed - 1)
+        if self.current_seed - 1 >= self.config["start_scenario_index"]:
+            self.reset(self.current_seed - 1)
+        else:
+            logging.warning("Can't load last scenario! current seed is already the min scenario index")
 
     def step(self, actions):
         ret = super(ScenarioEnv, self).step(actions)
@@ -179,8 +185,8 @@ class ScenarioEnv(BaseEnv):
         # for compatibility
         # crash almost equals to crashing with vehicles
         done_info[TerminationState.CRASH] = (
-            done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
-            or done_info[TerminationState.CRASH_BUILDING]
+                done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
+                or done_info[TerminationState.CRASH_BUILDING]
         )
         return done, done_info
 
@@ -376,7 +382,7 @@ if __name__ == "__main__":
     )
     success = []
     for i in range(30):
-        env.reset(force_seed=i)
+        env.reset(force_seed=env.current_seed + 1)
         for t in range(10000):
             o, r, d, info = env.step([0, 0])
             assert env.observation_space.contains(o)

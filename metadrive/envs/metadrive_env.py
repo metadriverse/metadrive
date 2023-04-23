@@ -104,6 +104,7 @@ class MetaDriveEnv(BaseEnv):
         # map setting
         self.start_seed = self.config["start_seed"]
         self.env_num = self.config["num_scenarios"]
+        self.in_stop = False
 
     def _merge_extra_config(self, config: Union[dict, "Config"]) -> "Config":
         config = self.default_config().update(config, allow_add_new_key=False)
@@ -201,8 +202,8 @@ class MetaDriveEnv(BaseEnv):
         # for compatibility
         # crash almost equals to crashing with vehicles
         done_info[TerminationState.CRASH] = (
-            done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
-            or done_info[TerminationState.CRASH_BUILDING]
+                done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
+                or done_info[TerminationState.CRASH_BUILDING]
         )
         return done, done_info
 
@@ -221,8 +222,8 @@ class MetaDriveEnv(BaseEnv):
     def _is_arrive_destination(self, vehicle):
         long, lat = vehicle.navigation.final_lane.local_coordinates(vehicle.position)
         flag = (vehicle.navigation.final_lane.length - 5 < long < vehicle.navigation.final_lane.length + 5) and (
-            vehicle.navigation.get_current_lane_width() / 2 >= lat >=
-            (0.5 - vehicle.navigation.get_current_lane_num()) * vehicle.navigation.get_current_lane_width()
+                vehicle.navigation.get_current_lane_width() / 2 >= lat >=
+                (0.5 - vehicle.navigation.get_current_lane_num()) * vehicle.navigation.get_current_lane_width()
         )
         return flag
 
@@ -302,10 +303,34 @@ class MetaDriveEnv(BaseEnv):
     def switch_to_top_down_view(self):
         self.main_camera.stop_track()
 
+    def stop(self):
+        self.in_stop = not self.in_stop
+
+    def step(self, *args, **kwargs):
+        ret = super(MetaDriveEnv, self).step(*args, **kwargs)
+        while self.in_stop:
+            self.engine.taskMgr.step()
+        return ret
+
+    def next_seed_reset(self):
+        if self.current_seed + 1 < self.start_seed + self.env_num:
+            self.reset(self.current_seed + 1)
+        else:
+            logging.warning("Can't load next scenario! current seed is already the max scenario index")
+
+    def last_seed_reset(self):
+        if self.current_seed - 1 >= self.start_seed:
+            self.reset(self.current_seed - 1)
+        else:
+            logging.warning("Can't load last scenario! current seed is already the min scenario index")
+
     def setup_engine(self):
         super(MetaDriveEnv, self).setup_engine()
         self.engine.accept("b", self.switch_to_top_down_view)
         self.engine.accept("q", self.switch_to_third_person_view)
+        self.engine.accept("]", self.next_seed_reset)
+        self.engine.accept("[", self.last_seed_reset)
+        self.engine.accept("p", self.stop)
         from metadrive.manager.traffic_manager import PGTrafficManager
         from metadrive.manager.map_manager import PGMapManager
         self.engine.register_manager("map_manager", PGMapManager())
@@ -325,6 +350,7 @@ if __name__ == '__main__':
         assert env.observation_space.contains(obs)
         assert np.isscalar(reward)
         assert isinstance(info, dict)
+
 
     env = MetaDriveEnv()
     try:

@@ -146,10 +146,16 @@ class NuPlanEnv(BaseEnv):
         self.engine.accept("[", self.last_seed_reset)
 
     def next_seed_reset(self):
-        self.reset(self.current_seed + 1)
+        if self.current_seed + 1 < self.config["start_scenario_index"] + self.config["num_scenarios"]:
+            self.reset(self.current_seed + 1)
+        else:
+            logging.warning("Can't load next scenario! current seed is already the max scenario index")
 
     def last_seed_reset(self):
-        self.reset(self.current_seed - 1)
+        if self.current_seed - 1 >= self.config["start_scenario_index"]:
+            self.reset(self.current_seed - 1)
+        else:
+            logging.warning("Can't load last scenario! current seed is already the min scenario index")
 
     def step(self, actions):
         ret = super(NuPlanEnv, self).step(actions)
