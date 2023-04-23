@@ -184,17 +184,18 @@ def extract_map_features(map_api, center, radius=250):
                     points = lane_meta_data.polygon.boundary.xy
                 polygon = [[points[0][i], points[1][i]] for i in range(len(points[0]))]
                 polygon = nuplan_to_metadrive_vector(polygon, nuplan_center=[center[0], center[1]])
-                ret[lane_meta_data.id] = {SD.TYPE: MetaDriveType.LANE_SURFACE_STREET,
-                                          SD.POLYLINE: extract_centerline(lane_meta_data, center),
-                                          SD.POLYGON: polygon}
+                ret[lane_meta_data.id] = {
+                    SD.TYPE: MetaDriveType.LANE_SURFACE_STREET,
+                    SD.POLYLINE: extract_centerline(lane_meta_data, center),
+                    SD.POLYGON: polygon
+                }
                 if layer == SemanticMapLayer.ROADBLOCK_CONNECTOR:
                     continue
                 left = lane_meta_data.left_boundary
                 if left.id not in ret:
                     line_type = get_line_type(int(boundaries.loc[[str(left.id)]]["boundary_type_fid"]))
                     if line_type != MetaDriveType.LINE_UNKNOWN:
-                        ret[left.id] = {SD.TYPE: line_type,
-                                        SD.POLYLINE: get_points_from_boundary(left, center)}
+                        ret[left.id] = {SD.TYPE: line_type, SD.POLYLINE: get_points_from_boundary(left, center)}
 
             if layer == SemanticMapLayer.ROADBLOCK:
                 block_polygons.append(block.polygon)
@@ -207,8 +208,7 @@ def extract_map_features(map_api, center, radius=250):
         block_points = np.array(list(i for i in zip(boundary.coords.xy[0], boundary.coords.xy[1])))
         block_points = nuplan_to_metadrive_vector(block_points, center)
         id = "boundary_{}".format(idx)
-        ret[id] = {SD.TYPE: MetaDriveType.LINE_SOLID_SINGLE_WHITE,
-                   SD.POLYLINE: block_points}
+        ret[id] = {SD.TYPE: MetaDriveType.LINE_SOLID_SINGLE_WHITE, SD.POLYLINE: block_points}
     np.seterr(all='warn')
     return ret
 
@@ -241,8 +241,10 @@ def set_light_position(scenario, lane_id, center, target_position=8):
 def extract_traffic_light(scenario, center):
     length = scenario.get_number_of_iterations()
 
-    frames = [{str(t.lane_connector_id): t.status for t in scenario.get_traffic_light_status_at_iteration(i)} for i in
-              range(length)]
+    frames = [
+        {str(t.lane_connector_id): t.status
+         for t in scenario.get_traffic_light_status_at_iteration(i)} for i in range(length)
+    ]
     all_lights = set()
     for frame in frames:
         all_lights.update(frame.keys())
@@ -250,7 +252,9 @@ def extract_traffic_light(scenario, center):
     lights = {
         k: {
             "type": MetaDriveType.TRAFFIC_LIGHT,
-            "state": {SD.TRAFFIC_LIGHT_STATUS: [MetaDriveType.LIGHT_UNKNOWN] * length},
+            "state": {
+                SD.TRAFFIC_LIGHT_STATUS: [MetaDriveType.LIGHT_UNKNOWN] * length
+            },
             SD.TRAFFIC_LIGHT_POSITION: None,
             SD.TRAFFIC_LIGHT_LANE: str(k),
             "metadata": dict(track_length=length, type=None, object_id=str(k), lane_id=str(k), dataset="nuplan")
@@ -342,9 +346,9 @@ def extract_traffic(scenario: NuPlanScenario, center):
             type=MetaDriveType.UNSET,
             state=dict(
                 position=np.zeros(shape=(episode_len, 3)),
-                heading=np.zeros(shape=(episode_len,)),
+                heading=np.zeros(shape=(episode_len, )),
                 velocity=np.zeros(shape=(episode_len, 2)),
-                valid=np.zeros(shape=(episode_len,)),
+                valid=np.zeros(shape=(episode_len, )),
                 length=np.zeros(shape=(episode_len, 1)),
                 width=np.zeros(shape=(episode_len, 1)),
                 height=np.zeros(shape=(episode_len, 1))

@@ -39,7 +39,7 @@ if __name__ == "__main__":
         }
     )
     success = []
-    for i in [0,1,2, 3, 5, 6, 7, 8, 9]:
+    for i in [0, 1, 2, 3, 5, 6, 7, 8, 9]:
         env.reset(force_seed=i)
         for t in range(10000):
             o, r, d, info = env.step([0, 0])

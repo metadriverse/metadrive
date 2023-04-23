@@ -193,8 +193,8 @@ class NuPlanEnv(BaseEnv):
         # for compatibility
         # crash almost equals to crashing with vehicles
         done_info[TerminationState.CRASH] = (
-                done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
-                or done_info[TerminationState.CRASH_BUILDING]
+            done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
+            or done_info[TerminationState.CRASH_BUILDING]
         )
         return done, done_info
 
@@ -339,7 +339,6 @@ if __name__ == "__main__":
                 # "scenario_filter.expand_scenarios=true",
                 # "scenario_filter.limit_scenarios_per_type=10",  # use 10 scenarios per scenario type
                 "scenario_filter.timestamp_threshold_s=20",  # minial scenario duration (s)
-
             ],
             "show_mouse": True,
         }

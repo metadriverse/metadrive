@@ -98,7 +98,6 @@ if __name__ == "__main__":
         # "scenario_filter.expand_scenarios=true",
         # "scenario_filter.limit_scenarios_per_type=10",  # use 10 scenarios per scenario type
         "scenario_filter.timestamp_threshold_s=20",  # minial scenario duration (s)
-
     ]
     output_path = AssetLoader.file_path("nuplan", return_raw_style=False)
     worker_index = None
