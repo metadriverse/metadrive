@@ -290,7 +290,7 @@ def parse_object_state(obj_state, nuplan_center):
     ret["position"] = nuplan_to_metadrive_vector([obj_state.center.x, obj_state.center.y], nuplan_center)
     ret["heading"] = obj_state.center.heading
     ret["velocity"] = nuplan_to_metadrive_vector([obj_state.velocity.x, obj_state.velocity.y])
-    ret["valid"] = True
+    ret["valid"] = 1
     ret["length"] = obj_state.box.length
     ret["width"] = obj_state.box.width
     ret["height"] = obj_state.box.height
@@ -304,7 +304,7 @@ def parse_ego_vehicle_state(state, nuplan_center):
     ret["heading"] = state.waypoint.heading
     ret["velocity"] = nuplan_to_metadrive_vector([state.agent.velocity.x, state.agent.velocity.y])
     ret["angular_velocity"] = state.dynamic_car_state.angular_velocity
-    ret["valid"] = True
+    ret["valid"] = 1
     ret["length"] = state.agent.box.length
     ret["width"] = state.agent.box.width
     ret["height"] = state.agent.box.height
@@ -370,7 +370,7 @@ def extract_traffic(scenario: NuPlanScenario, center):
             tracks[nuplan_id]["state"]["position"][frame_idx] = [state["position"][0], state["position"][1], 0.0]
             tracks[nuplan_id]["state"]["heading"][frame_idx] = state["heading"]
             tracks[nuplan_id]["state"]["velocity"][frame_idx] = state["velocity"]
-
+            tracks[nuplan_id]["state"]["valid"][frame_idx] = 1
             tracks[nuplan_id]["state"]["length"][frame_idx] = state["length"]
             tracks[nuplan_id]["state"]["width"][frame_idx] = state["width"]
             tracks[nuplan_id]["state"]["height"][frame_idx] = state["height"]
@@ -389,6 +389,7 @@ def extract_traffic(scenario: NuPlanScenario, center):
             ego_track[SD.METADATA]["nuplan_type"] = int(TrackedObjectType.EGO)
         state = obj_state
         ego_track["state"]["position"][frame_idx] = [state["position"][0], state["position"][1], 0.0]
+        ego_track["state"]["valid"][frame_idx] = 1
         ego_track["state"]["heading"][frame_idx] = state["heading"]
         ego_track["state"]["velocity"][frame_idx] = state["velocity"]
         ego_track["state"]["length"][frame_idx] = state["length"]

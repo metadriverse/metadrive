@@ -58,7 +58,7 @@ def convert_scenarios(output_path, dataset_params, worker_index=None, force_over
     with open(summary_file, "wb") as file:
         pickle.dump(dict_recursive_remove_array(metadata_recorder), file)
     print("Summary is saved at: {}".format(summary_file))
-    assert delay_remove == save_path
+    assert delay_remove == save_path, delay_remove + " vs. " + save_path
 
 
 if __name__ == "__main__":
