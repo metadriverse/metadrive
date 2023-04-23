@@ -629,8 +629,8 @@ class BaseEngine(EngineCore, Randomizable):
             Pedestrian.init_pedestrian_model()
             warm_up_pedestrian = self.spawn_object(Pedestrian, position=[0, 0], heading_theta=0, record=False)
             warm_up_light = self.spawn_object(BaseTrafficLight, lane=None, position=[0, 0], record=False)
-            barrier = self.spawn_object(TrafficBarrier, position=[0, 0], heading_theta=0)
-            cone = self.spawn_object(TrafficCone, position=[0, 0], heading_theta=0)
+            barrier = self.spawn_object(TrafficBarrier, position=[0, 0], heading_theta=0, record=False)
+            cone = self.spawn_object(TrafficCone, position=[0, 0], heading_theta=0, record=False)
             for vel in Pedestrian.SPEED_LIST:
                 warm_up_pedestrian.set_velocity([1, 0], vel - 0.1)
                 self.taskMgr.step()

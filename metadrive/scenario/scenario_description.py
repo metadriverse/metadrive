@@ -159,7 +159,7 @@ class ScenarioDescription(dict):
     ALLOW_TYPES = (int, float, str, np.ndarray, dict, list, tuple, type(None), set)
 
     @classmethod
-    def sanity_check(cls, scenario_dict, check_self_type=False):
+    def sanity_check(cls, scenario_dict, check_self_type=False, valid_check=True):
 
         if check_self_type:
             assert isinstance(scenario_dict, dict)
@@ -178,7 +178,9 @@ class ScenarioDescription(dict):
         # Check tracks data
         assert isinstance(scenario_dict[cls.TRACKS], dict)
         for obj_id, obj_state in scenario_dict[cls.TRACKS].items():
-            cls._check_object_state_dict(obj_state, scenario_length=scenario_length, object_id=obj_id)
+            cls._check_object_state_dict(
+                obj_state, scenario_length=scenario_length, object_id=obj_id, valid_check=valid_check
+            )
 
         # Check dynamic_map_state
         assert isinstance(scenario_dict[cls.DYNAMIC_MAP_STATES], dict)
@@ -194,7 +196,7 @@ class ScenarioDescription(dict):
         assert scenario_dict[cls.METADATA][cls.TIMESTEP].shape == (scenario_length, )
 
     @classmethod
-    def _check_object_state_dict(cls, obj_state, scenario_length, object_id):
+    def _check_object_state_dict(cls, obj_state, scenario_length, object_id, valid_check=True):
         # Check keys
         assert set(obj_state).issuperset(cls.STATE_DICT_KEYS)
 
@@ -223,8 +225,9 @@ class ScenarioDescription(dict):
                 assert np.sum(state_array) >= 1, "No frame valid for this object. Consider removing it"
 
             # check valid
-            if "valid" in obj_state[cls.STATE]:
-                assert abs(np.sum(state_array[np.where(~obj_state[cls.STATE]["valid"].astype(np.bool))])) < 1e-2, \
+            if "valid" in obj_state[cls.STATE] and valid_check:
+                _array = state_array[..., :2] if state_key == "position" else state_array
+                assert abs(np.sum(_array[np.where(obj_state[cls.STATE]["valid"], False, True)])) < 1e-2, \
                     "Valid array mismatches with {} array, some frames in {} have non-zero values, " \
                     "so it might be valid".format(state_key, state_key)
 
