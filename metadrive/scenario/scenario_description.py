@@ -178,8 +178,9 @@ class ScenarioDescription(dict):
         # Check tracks data
         assert isinstance(scenario_dict[cls.TRACKS], dict)
         for obj_id, obj_state in scenario_dict[cls.TRACKS].items():
-            cls._check_object_state_dict(obj_state, scenario_length=scenario_length, object_id=obj_id,
-                                         valid_check=valid_check)
+            cls._check_object_state_dict(
+                obj_state, scenario_length=scenario_length, object_id=obj_id, valid_check=valid_check
+            )
 
         # Check dynamic_map_state
         assert isinstance(scenario_dict[cls.DYNAMIC_MAP_STATES], dict)
@@ -192,7 +193,7 @@ class ScenarioDescription(dict):
             "You lack these keys in metadata: {}".format(
                 cls.METADATA_KEYS.difference(set(scenario_dict[cls.METADATA].keys()))
             )
-        assert scenario_dict[cls.METADATA][cls.TIMESTEP].shape == (scenario_length,)
+        assert scenario_dict[cls.METADATA][cls.TIMESTEP].shape == (scenario_length, )
 
     @classmethod
     def _check_object_state_dict(cls, obj_state, scenario_length, object_id, valid_check=True):
@@ -218,7 +219,7 @@ class ScenarioDescription(dict):
             assert state_array.ndim in [1, 2], "Haven't implemented test array with dim {} yet".format(state_array.ndim)
             if state_array.ndim == 2:
                 assert state_array.shape[
-                           1] != 0, "Please convert all state with dim 1 to a 1D array instead of 2D array."
+                    1] != 0, "Please convert all state with dim 1 to a 1D array instead of 2D array."
 
             if state_key == "valid":
                 assert np.sum(state_array) >= 1, "No frame valid for this object. Consider removing it"
