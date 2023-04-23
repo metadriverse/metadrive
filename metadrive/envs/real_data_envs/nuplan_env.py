@@ -187,8 +187,8 @@ class NuPlanEnv(BaseEnv):
         # for compatibility
         # crash almost equals to crashing with vehicles
         done_info[TerminationState.CRASH] = (
-            done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
-            or done_info[TerminationState.CRASH_BUILDING]
+                done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
+                or done_info[TerminationState.CRASH_BUILDING]
         )
         return done, done_info
 
@@ -292,13 +292,13 @@ if __name__ == "__main__":
             # "debug": True,
             "debug_static_world": False,
             "debug_physics_world": False,
-            "load_city_map": False,
+            "load_city_map": True,
             # "global_light": False,
             "window_size": (1200, 800),
             # "multi_thread_render_mode": "Cull/Draw",
             "start_scenario_index": 0,
             # "pstats": True,
-            "num_scenarios": 2,
+            "num_scenarios": 30,
             "show_coordinates": False,
             "horizon": 1000,
             # "show_fps": False,
@@ -316,22 +316,36 @@ if __name__ == "__main__":
             "force_render_fps": 40,
             "show_fps": True,
             "DATASET_PARAMS": [
-                'scenario_builder=nuplan_mini',  # use nuplan mini database (2.5h of 8 autolabeled logs in Las Vegas)
-                'scenario_filter=one_continuous_log',  # simulate only one log
-                "scenario_filter.log_names=['2021.05.12.22.00.38_veh-35_01008_01518']",
-                'scenario_filter.limit_total_scenarios=2',  # use 2 total scenarios
+                # builder setting
+                "scenario_builder=nuplan_mini",
+                "scenario_builder.scenario_mapping.subsample_ratio_override=0.5",  # 10 hz
+
+                # filter
+                "scenario_filter=all_scenarios",  # simulate only one log
+                "scenario_filter.remove_invalid_goals=true",
+                "scenario_filter.shuffle=true",
+                "scenario_filter.log_names=['2021.07.16.20.45.29_veh-35_01095_01486']",
+                # "scenario_filter.scenario_types={}".format(all_scenario_types),
+                # "scenario_filter.scenario_tokens=[]",
+                # "scenario_filter.map_names=[]",
+                # "scenario_filter.num_scenarios_per_type=1",
+                # "scenario_filter.limit_total_scenarios=1000",
+                # "scenario_filter.expand_scenarios=true",
+                # "scenario_filter.limit_scenarios_per_type=10",  # use 10 scenarios per scenario type
+                "scenario_filter.timestamp_threshold_s=20",  # minial scenario duration (s)
+
             ],
             "show_mouse": True,
         }
     )
     success = []
     env.reset()
-    for seed in [8, 14] * 10:
+    for seed in range(len(env.engine.data_manager._nuplan_scenarios)):
         env.reset()
         # env.reset(seed)
         for i in range(env.engine.data_manager.current_scenario_length * 10):
             o, r, d, info = env.step([0, 0])
-            # env.render(mode="topdown")
+            env.render(text={"seed": env.current_seed})
             if info["replay_done"]:
                 break
     sys.exit()

@@ -122,9 +122,9 @@ def get_tracks_from_frames(nuscenes: NuScenes, scene_info, frames, num_to_interp
             type=MetaDriveType.UNSET,
             state=dict(
                 position=np.zeros(shape=(episode_len, 3)),
-                heading=np.zeros(shape=(episode_len, )),
+                heading=np.zeros(shape=(episode_len,)),
                 velocity=np.zeros(shape=(episode_len, 2)),
-                valid=np.zeros(shape=(episode_len, )),
+                valid=np.zeros(shape=(episode_len,)),
                 length=np.zeros(shape=(episode_len, 1)),
                 width=np.zeros(shape=(episode_len, 1)),
                 height=np.zeros(shape=(episode_len, 1))
@@ -177,7 +177,7 @@ def get_tracks_from_frames(nuscenes: NuScenes, scene_info, frames, num_to_interp
         interpolate_tracks[id]["metadata"]["track_length"] = new_episode_len
 
         # valid first
-        new_valid = np.zeros(shape=(new_episode_len, ))
+        new_valid = np.zeros(shape=(new_episode_len,))
         if track["state"]["valid"][0]:
             new_valid[0] = 1
         for k, valid in enumerate(track["state"]["valid"][1:], start=1):
@@ -359,6 +359,7 @@ def convert_one_scenario(scene_token: str, nuscenes: NuScenes):
     result[SD.LENGTH] = (len(frames) - 1) * 5 + 1
     result[SD.METADATA] = {}
     result[SD.METADATA]["dataset"] = "nuscenes"
+    result[SD.METADATA][SD.METADRIVE_PROCESSED] = False
     result[SD.METADATA]["map"] = nuscenes.get("log", scene_info["log_token"])["location"]
     result[SD.METADATA]["date"] = nuscenes.get("log", scene_info["log_token"])["date_captured"]
     result[SD.METADATA]["coordinate"] = "right-handed"

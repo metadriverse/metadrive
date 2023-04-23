@@ -170,7 +170,7 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
         k: {
             "type": MetaDriveType.TRAFFIC_LIGHT,
             "state": {
-                ScenarioDescription.TRAFFIC_LIGHT_STATUS: [None] * episode_len
+                ScenarioDescription.TRAFFIC_LIGHT_STATUS: [MetaDriveType.LIGHT_UNKNOWN] * episode_len
             },
             ScenarioDescription.TRAFFIC_LIGHT_POSITION: np.zeros(shape=(3, ), dtype=np.float32),
             ScenarioDescription.TRAFFIC_LIGHT_LANE: None,

@@ -84,7 +84,7 @@ def nuplan_to_metadrive_vector(vector, nuplan_center=(0, 0)):
     #     vector[1] *= -1
     # else:
     #     vector[:, 1] *= -1
-    vector -= nuplan_center
+    vector -= np.asarray(nuplan_center)
     return vector
 
 
