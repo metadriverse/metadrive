@@ -17,9 +17,9 @@ from metadrive.utils import Vector
 from metadrive.utils import get_np_random
 from metadrive.utils import random_string
 from metadrive.utils.coordinates_shift import panda_vector, metadrive_vector, panda_heading
-from metadrive.utils.math_utils import clip
-from metadrive.utils.math_utils import norm
-from metadrive.utils.math_utils import wrap_to_pi
+from metadrive.utils.math import clip
+from metadrive.utils.math import norm
+from metadrive.utils.math import wrap_to_pi
 
 logger = logging.getLogger(__name__)
 

@@ -96,7 +96,7 @@ class NuPlanReplayEgoCarPolicy(ReplayEgoCarPolicy):
             logger.warning("\nNOTE:set no_wheel_friction in vehicle config can make the replay more smooth! \n")
 
     def get_trajectory_info(self, *args, **kwargs):
-        from metadrive.utils.nuplan_utils.parse_object_state import parse_ego_vehicle_state_trajectory
+        from metadrive.utils.nuplan.parse_object_state import parse_ego_vehicle_state_trajectory
         scenario = self.engine.data_manager.current_scenario
         return parse_ego_vehicle_state_trajectory(scenario, self.engine.current_map.nuplan_center)
 

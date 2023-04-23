@@ -3,7 +3,7 @@ from nuplan.common.actor_state.tracked_objects_types import TrackedObjectType
 from metadrive.component.traffic_participants.cyclist import Cyclist
 from metadrive.component.traffic_participants.pedestrian import Pedestrian
 from metadrive.manager.base_manager import BaseManager
-from metadrive.utils.nuplan_utils.parse_object_state import parse_object_state
+from metadrive.utils.nuplan.parse_object_state import parse_object_state
 
 
 class NuplanParticipantManager(BaseManager):

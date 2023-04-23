@@ -10,8 +10,8 @@ from metadrive.component.road_network import Road
 from metadrive.component.road_network.node_road_network import NodeRoadNetwork
 from metadrive.component.vehicle_navigation_module.base_navigation import BaseNavigation
 from metadrive.utils import clip, norm, get_np_random
-from metadrive.utils.math_utils import panda_vector
-from metadrive.utils.pg_utils.utils import ray_localization
+from metadrive.utils.math import panda_vector
+from metadrive.utils.pg.utils import ray_localization
 
 
 class NodeNetworkNavigation(BaseNavigation):

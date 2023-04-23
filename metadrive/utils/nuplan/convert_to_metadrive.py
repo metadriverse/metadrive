@@ -10,7 +10,7 @@ import tqdm
 
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.scenario.scenario_description import ScenarioDescription
-from metadrive.utils.nuscenes_utils.utils import convert_one_scene
+from metadrive.utils.nuscenes.utils import convert_one_scene
 from metadrive.utils.utils import dict_recursive_remove_array
 import shutil
 

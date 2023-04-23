@@ -13,7 +13,7 @@ from metadrive.policy.replay_policy import ReplayEgoCarPolicy
 from metadrive.scenario.utils import NP_ARRAY_DECIMAL
 from metadrive.scenario.utils import assert_scenario_equal
 from metadrive.type import MetaDriveType
-from metadrive.utils.math_utils import wrap_to_pi
+from metadrive.utils.math import wrap_to_pi
 
 
 def test_export_metadrive_scenario_reproduction(num_scenarios=3, render_export_env=False, render_load_env=False):

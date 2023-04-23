@@ -3,16 +3,16 @@ from metadrive.scenario.utils import read_scenario_data
 from matplotlib.pyplot import figure
 
 from metadrive.type import MetaDriveType
-from metadrive.utils.math_utils import mph_to_kmh
-from metadrive.utils.waymo_utils.waymo_type import WaymoLaneType, WaymoAgentType
-from metadrive.utils.waymo_utils.waymo_type import WaymoRoadLineType, WaymoRoadEdgeType
+from metadrive.utils.math import mph_to_kmh
+from metadrive.utils.waymo.waymo_type import WaymoLaneType, WaymoAgentType
+from metadrive.utils.waymo.waymo_type import WaymoRoadLineType, WaymoRoadEdgeType
 
 try:
     import tensorflow as tf
 except ImportError:
     pass
 try:
-    from metadrive.utils.waymo_utils.protos import scenario_pb2
+    from metadrive.utils.waymo.protos import scenario_pb2
 except ImportError:
     pass
 import pickle

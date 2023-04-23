@@ -10,7 +10,7 @@ from metadrive.component.vehicle_module.distance_detector import DistanceDetecto
 from metadrive.constants import CamMask, CollisionGroup
 from metadrive.engine.engine_utils import get_engine
 from metadrive.utils.coordinates_shift import panda_vector
-from metadrive.utils.math_utils import norm, clip
+from metadrive.utils.math import norm, clip
 from metadrive.utils.utils import get_object_from_node
 
 

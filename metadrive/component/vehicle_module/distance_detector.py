@@ -10,7 +10,7 @@ from metadrive.constants import CamMask, CollisionGroup
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.engine.engine_utils import get_engine
 from metadrive.utils.coordinates_shift import panda_vector
-from metadrive.utils.math_utils import panda_vector, get_laser_end
+from metadrive.utils.math import panda_vector, get_laser_end
 
 detect_result = namedtuple("detect_result", "cloud_points detected_objects")
 

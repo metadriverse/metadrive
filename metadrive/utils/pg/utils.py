@@ -16,7 +16,7 @@ from metadrive.engine.physics_node import BaseRigidBodyNode, BaseGhostBodyNode
 from metadrive.utils.coordinates_shift import panda_heading
 from metadrive.utils.coordinates_shift import panda_vector
 from metadrive.utils.interpolating_line import InterpolatingLine
-from metadrive.utils.math_utils import get_points_bounding_box, norm
+from metadrive.utils.math import get_points_bounding_box, norm
 from metadrive.utils.utils import get_object_from_node
 
 if TYPE_CHECKING:

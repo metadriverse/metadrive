@@ -6,7 +6,7 @@ from metadrive.component.traffic_participants.base_traffic_participant import Ba
 from metadrive.constants import MetaDriveType
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.engine.physics_node import BaseRigidBodyNode
-from metadrive.utils.math_utils import norm
+from metadrive.utils.math import norm
 
 
 class Pedestrian(BaseTrafficParticipant):

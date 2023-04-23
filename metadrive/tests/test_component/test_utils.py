@@ -2,7 +2,7 @@ import numpy as np
 
 
 def test_utils():
-    from metadrive.utils.math_utils import safe_clip, safe_clip_for_small_array, get_vertical_vector, distance_greater
+    from metadrive.utils.math import safe_clip, safe_clip_for_small_array, get_vertical_vector, distance_greater
 
     arr = np.array([np.nan, np.inf, -np.inf, 1000000000000000000000000000, -10000000000000000, 0, 1])
     ans = np.array([0, 1, -1, 1, -1, 0, 1])

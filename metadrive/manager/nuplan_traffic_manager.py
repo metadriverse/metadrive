@@ -10,7 +10,7 @@ from metadrive.constants import DEFAULT_AGENT
 from metadrive.manager.base_manager import BaseManager
 from metadrive.policy.replay_policy import NuPlanReplayTrafficParticipantPolicy
 from metadrive.scenario.scenario_description import ScenarioDescription as SD
-from metadrive.utils.nuplan_utils.parse_object_state import parse_object_state
+from metadrive.utils.nuplan.parse_object_state import parse_object_state
 
 
 class NuPlanTrafficManager(BaseManager):

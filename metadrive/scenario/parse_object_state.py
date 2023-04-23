@@ -2,7 +2,7 @@ import copy
 
 import numpy as np
 from metadrive.component.lane.point_lane import PointLane
-from metadrive.utils.math_utils import compute_angular_velocity
+from metadrive.utils.math import compute_angular_velocity
 
 
 def get_max_valid_indicis(track, current_index):

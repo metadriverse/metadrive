@@ -15,7 +15,7 @@ from metadrive.constants import DATA_VERSION, DEFAULT_AGENT
 from metadrive.scenario import ScenarioDescription as SD
 from metadrive.scenario.scenario_description import ScenarioDescription
 from metadrive.type import MetaDriveType
-from metadrive.utils.math_utils import wrap_to_pi
+from metadrive.utils.math import wrap_to_pi
 
 NP_ARRAY_DECIMAL = 4
 VELOCITY_DECIMAL = 1  # velocity can not be set accurately

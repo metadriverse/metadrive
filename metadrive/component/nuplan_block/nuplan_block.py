@@ -20,7 +20,7 @@ from metadrive.component.road_network.edge_road_network import EdgeRoadNetwork
 from metadrive.constants import DrivableAreaProperty
 from metadrive.constants import PGLineColor, PGLineType
 from metadrive.utils.interpolating_line import InterpolatingLine
-from metadrive.utils.math_utils import wrap_to_pi, norm
+from metadrive.utils.math import wrap_to_pi, norm
 
 
 @dataclass

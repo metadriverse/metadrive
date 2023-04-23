@@ -12,7 +12,7 @@ from shapely.ops import unary_union, cascaded_union
 
 from metadrive.scenario import ScenarioDescription as SD
 from metadrive.type import MetaDriveType
-from metadrive.utils.nuscenes_utils.detection_type import ALL_TYPE, HUMAN_TYPE, BICYCLE_TYPE, VEHICLE_TYPE
+from metadrive.utils.nuscenes.detection_type import ALL_TYPE, HUMAN_TYPE, BICYCLE_TYPE, VEHICLE_TYPE
 
 EGO = "ego"
 

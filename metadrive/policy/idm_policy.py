@@ -4,7 +4,7 @@ from metadrive.component.lane.point_lane import PointLane
 from metadrive.component.vehicle_module.PID_controller import PIDController
 from metadrive.policy.base_policy import BasePolicy
 from metadrive.policy.manual_control_policy import ManualControlPolicy
-from metadrive.utils.math_utils import not_zero, wrap_to_pi
+from metadrive.utils.math import not_zero, wrap_to_pi
 
 
 class FrontBackObjects:
