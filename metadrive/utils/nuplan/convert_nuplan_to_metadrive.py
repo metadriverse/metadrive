@@ -46,8 +46,7 @@ def convert_scenarios(output_path, dataset_params, worker_index=None, force_over
         sd_scenario = convert_one_scenario(scenario)
         sd_scenario = sd_scenario.to_dict()
         ScenarioDescription.sanity_check(sd_scenario, check_self_type=True)
-        # TODO Naming
-        export_file_name = "sd_{}_{}.pkl".format("nuplan_", "test")
+        export_file_name = "sd_{}_{}.pkl".format("nuplan", scenario.scenario_name)
         p = os.path.join(output_path, export_file_name)
         with open(p, "wb") as f:
             pickle.dump(sd_scenario, f)

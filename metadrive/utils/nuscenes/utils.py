@@ -358,7 +358,6 @@ def convert_one_scenario(scene_token: str, nuscenes: NuScenes):
     result[SD.VERSION] = "nuscenes" + nuscenes.version
     result[SD.LENGTH] = (len(frames) - 1) * 5 + 1
     result[SD.METADATA] = {}
-    result[SD.METADATA][SD.METADRIVE_PROCESSED] = True
     result[SD.METADATA]["dataset"] = "nuscenes"
     result[SD.METADATA]["map"] = nuscenes.get("log", scene_info["log_token"])["location"]
     result[SD.METADATA]["date"] = nuscenes.get("log", scene_info["log_token"])["date_captured"]
