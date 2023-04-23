@@ -29,10 +29,11 @@ SCENARIO_ENV_CONFIG = dict(
     sequential_seed=False,  # Whether to set seed (the index of map) sequentially across episodes
 
     # ===== Traffic =====
-    no_traffic=False,
-    no_static_vehicles=False,
-    no_light=False,
-    reactive_traffic=False,
+    no_traffic=False,  # nothing will be generated including objects/pedestrian/vehicles
+    no_static_vehicles=False,  # static vehicle will be removed
+    no_light=False,  # no traffic light
+    reactive_traffic=False,  # turn on to enable idm traffic
+    filter_overlapping_car=True,  # If in one frame a traffic vehicle collides with ego car, it won't be created.
 
     # ===== Agent config =====
     vehicle_config=dict(
@@ -381,9 +382,9 @@ if __name__ == "__main__":
         }
     )
     success = []
-    env.reset()
+    env.reset(force_seed=0)
     while True:
-        env.reset(force_seed=21)
+        env.reset(force_seed=env.current_seed + 1)
         for t in range(10000):
             o, r, d, info = env.step([0, 0])
             assert env.observation_space.contains(o)

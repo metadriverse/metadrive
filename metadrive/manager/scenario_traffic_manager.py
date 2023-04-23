@@ -39,16 +39,22 @@ class ScenarioTrafficManager(BaseManager):
         super(ScenarioTrafficManager, self).__init__()
         self.scenario_id_to_obj_id = None
         self.obj_id_to_scenario_id = None
+
         # for filtering some static cars
         self._static_car_id = set()
         self._moving_car_id = set()
+
         # for filtering noisy static object
         self._noise_object_id = set()
         self._non_noise_object_id = set()
+
         # an async trick for accelerating IDM policy
         self.idm_policy_count = 0
         self._obj_to_clean_this_frame = []
-        self.is_ego_vehicle_replay = isinstance(self.engine.global_config["agent_policy"], ReplayEgoCarPolicy)
+
+        # some flags
+        self.is_ego_vehicle_replay = self.engine.global_config["agent_policy"] == ReplayEgoCarPolicy
+        self._filter_overlapping_car = self.engine.global_config["filter_overlapping_car"]
 
     def before_step(self, *args, **kwargs):
         self._obj_to_clean_this_frame = []
@@ -157,7 +163,8 @@ class ScenarioTrafficManager(BaseManager):
         # if collision don't generate, unless ego car is in replay mode
         ego_pos = self.ego_vehicle.position
         heading_dist, side_dist = self.ego_vehicle.convert_to_local_coordinates(state["position"], ego_pos)
-        if not self.is_ego_vehicle_replay and abs(heading_dist) < self.GENERATION_FORWARD_CONSTRAINT and \
+        if not self.is_ego_vehicle_replay and self._filter_overlapping_car and \
+                abs(heading_dist) < self.GENERATION_FORWARD_CONSTRAINT and \
                 abs(side_dist) < self.GENERATION_SIDE_CONSTRAINT:
             return
 
