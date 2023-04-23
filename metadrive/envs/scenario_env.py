@@ -10,14 +10,14 @@ from metadrive.constants import TerminationState
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.envs.base_env import BaseEnv
 from metadrive.manager.scenario_data_manager import ScenarioDataManager
-from metadrive.manager.scenario_map_manager import ScenarioMapManager
 from metadrive.manager.scenario_light_manager import ScenarioLightManager
+from metadrive.manager.scenario_map_manager import ScenarioMapManager
 from metadrive.manager.waymo_traffic_manager import WaymoTrafficManager
 from metadrive.obs.real_env_observation import ScenarioObservation
 from metadrive.policy.replay_policy import ReplayEgoCarPolicy
+from metadrive.scenario.scenario_description import ScenarioDescription
 from metadrive.utils import clip
 from metadrive.utils import get_np_random
-from metadrive.scenario.scenario_description import ScenarioDescription
 
 SCENARIO_ENV_CONFIG = dict(
     # ===== Map Config =====
@@ -363,7 +363,7 @@ if __name__ == "__main__":
             # "no_traffic":True,
             # "start_scenario_index": 192,
             # "start_scenario_index": 1000,
-            "num_scenarios": 10,
+            "num_scenarios": 30,
             # "force_reuse_object_name": True,
             # "data_directory": "/home/shady/Downloads/test_processed",
             "horizon": 1000,
@@ -381,8 +381,9 @@ if __name__ == "__main__":
         }
     )
     success = []
-    for i in range(30):
-        env.reset(force_seed=env.current_seed + 1)
+    env.reset()
+    while True:
+        env.reset(force_seed=21)
         for t in range(10000):
             o, r, d, info = env.step([0, 0])
             assert env.observation_space.contains(o)
