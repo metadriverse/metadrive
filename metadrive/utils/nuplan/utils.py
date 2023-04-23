@@ -128,6 +128,8 @@ def get_points_from_boundary(boundary, center):
 
 
 def get_line_type(nuplan_type):
+    return MetaDriveType.LINE_BROKEN_SINGLE_WHITE
+    # Always return broken line type
     if nuplan_type == 2:
         return MetaDriveType.LINE_SOLID_SINGLE_WHITE
     elif nuplan_type == 0:
