@@ -116,7 +116,7 @@ class BaseEngine(EngineCore, Randomizable):
         return True if object_id in self._object_tasks else False
 
     def spawn_object(
-            self, object_class, pbr_model=True, force_spawn=False, auto_fill_random_seed=True, record=True, **kwargs
+        self, object_class, pbr_model=True, force_spawn=False, auto_fill_random_seed=True, record=True, **kwargs
     ):
         """
         Call this func to spawn one object
@@ -257,6 +257,7 @@ class BaseEngine(EngineCore, Randomizable):
         _debug_memory_usage = False
 
         if _debug_memory_usage:
+
             def process_memory():
                 import psutil
                 import os
@@ -633,10 +634,7 @@ class BaseEngine(EngineCore, Randomizable):
             for vel in Pedestrian.SPEED_LIST:
                 warm_up_pedestrian.set_velocity([1, 0], vel - 0.1)
                 self.taskMgr.step()
-            self.clear_objects([warm_up_pedestrian.id,
-                                warm_up_light.id,
-                                barrier.id,
-                                cone.id], record=False)
+            self.clear_objects([warm_up_pedestrian.id, warm_up_light.id, barrier.id, cone.id], record=False)
             warm_up_pedestrian = None
             warm_up_light = None
             barrier = None
