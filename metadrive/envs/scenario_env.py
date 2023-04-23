@@ -362,7 +362,7 @@ if __name__ == "__main__":
             # "debug": True,
             # "debug_static_world": True,
             # "no_traffic": True,
-            # "no_light": False,
+            # "no_light": True,
             # "debug":True,
             # "no_traffic":True,
             # "start_scenario_index": 192,
