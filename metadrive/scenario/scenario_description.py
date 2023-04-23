@@ -227,7 +227,7 @@ class ScenarioDescription(dict):
             # check valid
             if "valid" in obj_state[cls.STATE] and valid_check:
                 _array = state_array[..., :2] if state_key == "position" else state_array
-                assert abs(np.sum(_array[np.where(~obj_state[cls.STATE]["valid"].astype(np.bool))])) < 1e-2, \
+                assert abs(np.sum(_array[np.where(~np.bool(obj_state[cls.STATE]["valid"]))])) < 1e-2, \
                     "Valid array mismatches with {} array, some frames in {} have non-zero values, " \
                     "so it might be valid".format(state_key, state_key)
 
