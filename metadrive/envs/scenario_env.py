@@ -352,13 +352,13 @@ if __name__ == "__main__":
     env = ScenarioEnv(
         {
             "use_render": True,
-            "agent_policy": ReplayEgoCarPolicy,
-            "manual_control": False,
+            # "agent_policy": ReplayEgoCarPolicy,
+            "manual_control": True,
             "show_interface": False,
             "show_logo": False,
             "show_fps": False,
             "debug": False,
-            # "no_traffic": True,
+            "no_traffic": True,
             # "no_light": False,
             # "debug":True,
             # "no_traffic":True,

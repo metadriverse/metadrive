@@ -394,10 +394,17 @@ def extract_traffic(scenario: NuPlanScenario, center):
         ego_track["state"]["position"][frame_idx] = [state["position"][0], state["position"][1], 0.0]
         ego_track["state"]["valid"][frame_idx] = 1
         ego_track["state"]["heading"][frame_idx] = state["heading"]
-        ego_track["state"]["velocity"][frame_idx] = state["velocity"]
+        # this velocity is in ego car frame, abort
+        # ego_track["state"]["velocity"][frame_idx] = state["velocity"]
+
         ego_track["state"]["length"][frame_idx] = state["length"]
         ego_track["state"]["width"][frame_idx] = state["width"]
         ego_track["state"]["height"][frame_idx] = state["height"]
+
+    # get velocity here
+    vel = ego_track["state"]["position"][1:] - ego_track["state"]["position"][:-1]
+    ego_track["state"]["velocity"][:-1] = vel[..., :2] / 0.1
+    ego_track["state"]["velocity"][-1] = ego_track["state"]["velocity"][-2]
 
     # check
     assert EGO in tracks

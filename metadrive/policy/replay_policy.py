@@ -76,9 +76,9 @@ class ReplayEgoCarPolicy(ReplayTrafficParticipantPolicy):
         # Directly get trajectory from data manager
         trajectory_data = self.engine.data_manager.current_scenario["tracks"]
         sdc_track_index = str(self.engine.data_manager.current_scenario["metadata"]["sdc_id"])
-        if self.engine.data_manager.current_scenario["metadata"]["dataset"] == "nuplan":
-            # nuplan local frame velocity
-            self._velocity_local_frame = True
+        # if self.engine.data_manager.current_scenario["metadata"]["dataset"] == "nuplan":
+        #     # nuplan local frame velocity
+        #     self._velocity_local_frame = True
         ret = []
         for i in range(len(trajectory_data[sdc_track_index]["state"]["position"])):
             ret.append(parse_object_state(
