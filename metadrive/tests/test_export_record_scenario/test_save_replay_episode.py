@@ -1,5 +1,5 @@
 import pickle
-from metadrive.utils.math_utils import wrap_to_pi
+from metadrive.utils.math import wrap_to_pi
 import numpy as np
 
 from metadrive import MultiAgentRoundaboutEnv

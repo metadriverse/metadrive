@@ -3,7 +3,7 @@ from metadrive.engine.engine_utils import get_global_config
 import numpy as np
 
 from metadrive.policy.base_policy import BasePolicy
-from metadrive.utils.math_utils import clip
+from metadrive.utils.math import clip
 
 
 class EnvInputPolicy(BasePolicy):

@@ -2,8 +2,8 @@ import numpy as np
 
 from metadrive.component.pg_space import BlockParameterSpace, Parameter
 from metadrive.component.vehicle_navigation_module.base_navigation import BaseNavigation
-from metadrive.utils.math_utils import norm, clip
-from metadrive.utils.math_utils import panda_vector
+from metadrive.utils.math import norm, clip
+from metadrive.utils.math import panda_vector
 
 
 class TrajectoryNavigation(BaseNavigation):

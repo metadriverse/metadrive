@@ -202,6 +202,9 @@ class ScenarioDescription(dict):
         assert MetaDriveType.has_type(obj_state[cls.TYPE]
                                       ), "MetaDrive doesn't have this type: {}".format(obj_state[cls.TYPE])
 
+        # Check set type
+        assert obj_state[cls.TYPE] != MetaDriveType.UNSET, "Types should be set for objects and traffic lights"
+
         # Check state arrays temporal consistency
         assert isinstance(obj_state[cls.STATE], dict)
         for state_key, state_array in obj_state[cls.STATE].items():
@@ -215,6 +218,15 @@ class ScenarioDescription(dict):
             if state_array.ndim == 2:
                 assert state_array.shape[
                     1] != 0, "Please convert all state with dim 1 to a 1D array instead of 2D array."
+
+            if state_key == "valid":
+                assert np.sum(state_array) >= 1, "No frame valid for this object. Consider removing it"
+
+            # check valid
+            if "valid" in obj_state[cls.STATE]:
+                assert abs(np.sum(state_array[np.where(~obj_state[cls.STATE]["valid"].astype(np.bool))])) < 1e-2, \
+                    "Valid array mismatches with {} array, some frames in {} have non-zero values, " \
+                    "so it might be valid".format(state_key, state_key)
 
         # Check metadata
         assert isinstance(obj_state[cls.METADATA], dict)

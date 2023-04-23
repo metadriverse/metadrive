@@ -15,7 +15,7 @@ from metadrive.constants import MetaDriveType, CamMask, PGLineType, PGLineColor,
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.engine.core.physics_world import PhysicsWorld
 from metadrive.utils.coordinates_shift import panda_vector, panda_heading
-from metadrive.utils.math_utils import norm
+from metadrive.utils.math import norm
 
 logger = logging.getLogger(__name__)
 

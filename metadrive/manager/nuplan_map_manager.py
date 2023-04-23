@@ -5,7 +5,7 @@ from metadrive.component.lane.point_lane import PointLane
 from metadrive.component.map.nuplan_map import NuPlanMap
 from metadrive.constants import DEFAULT_AGENT
 from metadrive.manager.base_manager import BaseManager
-from metadrive.utils.nuplan_utils.parse_object_state import parse_ego_vehicle_trajectory, parse_ego_vehicle_state
+from metadrive.utils.nuplan.parse_object_state import parse_ego_vehicle_trajectory, parse_ego_vehicle_state
 
 
 class NuPlanMapManager(BaseManager):

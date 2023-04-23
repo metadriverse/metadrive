@@ -4,7 +4,7 @@ from metadrive.envs.safe_metadrive_env import SafeMetaDriveEnv
 from metadrive.manager.traffic_manager import TrafficMode
 from metadrive.policy.idm_policy import IDMPolicy
 from metadrive.utils import setup_logger
-from metadrive.utils.math_utils import norm
+from metadrive.utils.math import norm
 
 
 def assert_equal_pos(data_1, data_2):

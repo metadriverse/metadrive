@@ -8,7 +8,7 @@ import math
 from metadrive.component.lane.point_lane import PointLane
 from metadrive.scenario.scenario_description import ScenarioDescription
 from metadrive.engine.asset_loader import AssetLoader
-from metadrive.utils.math_utils import norm, mph_to_kmh
+from metadrive.utils.math import norm, mph_to_kmh
 from metadrive.scenario.utils import read_scenario_data
 
 

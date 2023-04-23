@@ -1,7 +1,7 @@
 import logging
 from typing import List
 
-from metadrive.utils.math_utils import norm
+from metadrive.utils.math import norm
 
 logger = logging.getLogger(__name__)
 

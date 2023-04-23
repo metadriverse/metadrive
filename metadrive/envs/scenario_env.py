@@ -2,22 +2,21 @@
 This environment can load all scenarios exported from other environments via env.export_scenarios()
 """
 import logging
-
 import numpy as np
-
+from metadrive.component.vehicle_module.vehicle_panel import VehiclePanel
 from metadrive.component.vehicle_navigation_module.trajectory_navigation import TrajectoryNavigation
 from metadrive.constants import TerminationState
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.envs.base_env import BaseEnv
 from metadrive.manager.scenario_data_manager import ScenarioDataManager
-from metadrive.manager.scenario_map_manager import ScenarioMapManager
 from metadrive.manager.scenario_light_manager import ScenarioLightManager
+from metadrive.manager.scenario_map_manager import ScenarioMapManager
 from metadrive.manager.waymo_traffic_manager import WaymoTrafficManager
 from metadrive.obs.real_env_observation import ScenarioObservation
 from metadrive.policy.replay_policy import ReplayEgoCarPolicy
+from metadrive.scenario.scenario_description import ScenarioDescription
 from metadrive.utils import clip
 from metadrive.utils import get_np_random
-from metadrive.scenario.scenario_description import ScenarioDescription
 
 SCENARIO_ENV_CONFIG = dict(
     # ===== Map Config =====
@@ -29,10 +28,11 @@ SCENARIO_ENV_CONFIG = dict(
     sequential_seed=False,  # Whether to set seed (the index of map) sequentially across episodes
 
     # ===== Traffic =====
-    no_traffic=False,
-    no_static_vehicles=False,
-    no_light=False,
-    reactive_traffic=False,
+    no_traffic=False,  # nothing will be generated including objects/pedestrian/vehicles
+    no_static_vehicles=False,  # static vehicle will be removed
+    no_light=False,  # no traffic light
+    reactive_traffic=False,  # turn on to enable idm traffic
+    filter_overlapping_car=True,  # If in one frame a traffic vehicle collides with ego car, it won't be created.
 
     # ===== Agent config =====
     vehicle_config=dict(
@@ -63,6 +63,9 @@ SCENARIO_ENV_CONFIG = dict(
     out_of_route_done=False,
     crash_vehicle_done=False,
     relax_out_of_road_done=True,
+
+    # ===== others =====
+    interface_panel=[VehiclePanel],  # for boosting efficiency
 )
 
 
@@ -124,14 +127,20 @@ class ScenarioEnv(BaseEnv):
         self.engine.accept("p", self.stop)
         self.engine.accept("q", self.switch_to_third_person_view)
         self.engine.accept("b", self.switch_to_top_down_view)
-        # self.engine.accept("n", self.next_seed_reset)
-        # self.engine.accept("b", self.last_seed_reset)
+        self.engine.accept("]", self.next_seed_reset)
+        self.engine.accept("[", self.last_seed_reset)
 
     def next_seed_reset(self):
-        self.reset(self.current_seed + 1)
+        if self.current_seed + 1 < self.config["start_scenario_index"] + self.config["num_scenarios"]:
+            self.reset(self.current_seed + 1)
+        else:
+            logging.warning("Can't load next scenario! current seed is already the max scenario index")
 
     def last_seed_reset(self):
-        self.reset(self.current_seed - 1)
+        if self.current_seed - 1 >= self.config["start_scenario_index"]:
+            self.reset(self.current_seed - 1)
+        else:
+            logging.warning("Can't load last scenario! current seed is already the min scenario index")
 
     def step(self, actions):
         ret = super(ScenarioEnv, self).step(actions)
@@ -347,23 +356,24 @@ if __name__ == "__main__":
             "use_render": True,
             "agent_policy": ReplayEgoCarPolicy,
             "manual_control": False,
-            "show_interface": False,
+            "show_interface": True,
             "show_logo": False,
             "show_fps": False,
-            "debug": False,
+            # "debug": True,
+            # "debug_static_world": True,
             # "no_traffic": True,
-            # "no_light": False,
+            # "no_light": True,
             # "debug":True,
             # "no_traffic":True,
             # "start_scenario_index": 192,
             # "start_scenario_index": 1000,
-            "num_scenarios": 10,
+            "num_scenarios": 30,
             # "force_reuse_object_name": True,
             # "data_directory": "/home/shady/Downloads/test_processed",
             "horizon": 1000,
             "no_static_vehicles": True,
-            "show_policy_mark": True,
-            "show_coordinates": True,
+            # "show_policy_mark": True,
+            # "show_coordinates": True,
             "vehicle_config": dict(
                 show_navi_mark=False,
                 no_wheel_friction=True,
@@ -371,12 +381,13 @@ if __name__ == "__main__":
                 lane_line_detector=dict(num_lasers=12, distance=50),
                 side_detector=dict(num_lasers=160, distance=50)
             ),
-            "data_directory": AssetLoader.file_path("nuscenes", return_raw_style=False),
+            "data_directory": AssetLoader.file_path("nuplan", return_raw_style=False),
         }
     )
     success = []
-    for i in [0, 2, 3, 5, 6, 7, 8, 9]:
-        env.reset(force_seed=i)
+    env.reset(force_seed=0)
+    while True:
+        env.reset(force_seed=env.current_seed + 1)
         for t in range(10000):
             o, r, d, info = env.step([0, 0])
             assert env.observation_space.contains(o)
@@ -384,12 +395,12 @@ if __name__ == "__main__":
             long, lat, = c_lane.local_coordinates(env.vehicle.position)
             # if env.config["use_render"]:
             env.render(
-                # text={
-                #     "obs_shape": len(o),
-                #     "lateral": env.observations["default_agent"].lateral_dist,
-                #     "seed": env.engine.global_seed + env.config["start_scenario_index"],
-                #     "reward": r,
-                # }
+                text={
+                    # "obs_shape": len(o),
+                    # "lateral": env.observations["default_agent"].lateral_dist,
+                    "seed": env.engine.global_seed + env.config["start_scenario_index"],
+                    # "reward": r,
+                }
                 # mode="topdown"
             )
 

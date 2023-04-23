@@ -18,7 +18,7 @@ from metadrive.engine.physics_node import BaseRigidBodyNode
 from metadrive.engine.physics_node import BulletRigidBodyNode
 from metadrive.utils import norm
 from metadrive.utils.coordinates_shift import panda_vector, panda_heading
-from metadrive.utils.math_utils import Vector
+from metadrive.utils.math import Vector
 
 
 class AbstractLane:

@@ -175,7 +175,7 @@ BASE_DEFAULT_CONFIG = dict(
     interface_panel=[MiniMap, RGBCamera, VehiclePanel],
     multi_thread_render=True,
     multi_thread_render_mode="Cull",  # or "Cull/Draw"
-    preload_pedestrian=True,  # preload pedestrian Object for avoiding lagging when creating it for the first time
+    preload_models=True,  # preload pedestrian Object for avoiding lagging when creating it for the first time
 
     # record/replay metadata
     record_episode=False,  # when replay_episode is not None ,this option will be useless
@@ -546,7 +546,7 @@ class BaseEnv(gym.Env):
         Engine setting after launching
         """
         self.engine.accept("r", self.reset)
-        self.engine.accept("p", self.capture)
+        self.engine.accept("c", self.capture)
         self.engine.register_manager("agent_manager", self.agent_manager)
         self.engine.register_manager("record_manager", RecordManager())
         self.engine.register_manager("replay_manager", ReplayManager())

@@ -28,10 +28,10 @@ from metadrive.engine.core.image_buffer import ImageBuffer
 from metadrive.engine.engine_utils import get_engine, engine_initialized
 from metadrive.engine.physics_node import BaseRigidBodyNode
 from metadrive.utils import Config, safe_clip_for_small_array
-from metadrive.utils.math_utils import get_vertical_vector, norm, clip
-from metadrive.utils.math_utils import wrap_to_pi
-from metadrive.utils.pg_utils.utils import ray_localization
-from metadrive.utils.pg_utils.utils import rect_region_detection
+from metadrive.utils.math import get_vertical_vector, norm, clip
+from metadrive.utils.math import wrap_to_pi
+from metadrive.utils.pg.utils import ray_localization
+from metadrive.utils.pg.utils import rect_region_detection
 from metadrive.utils.utils import get_object_from_node
 
 
@@ -801,7 +801,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
                 self.LENGTH,
                 self.WIDTH,
                 CollisionGroup.LaneSurface,
-                in_static_world=True if not self.render else False
+                in_static_world=True if not self.engine.global_config["debug_static_world"] else False
             )
             if not res.hasHit() or res.getNode().getName() != MetaDriveType.LANE_SURFACE_STREET:
                 contacts.add(MetaDriveType.GROUND)
