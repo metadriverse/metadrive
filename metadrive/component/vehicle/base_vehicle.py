@@ -801,7 +801,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
                 self.LENGTH,
                 self.WIDTH,
                 CollisionGroup.LaneSurface,
-                in_static_world=True if not self.render else False
+                in_static_world=True if not self.engine.global_config["debug_static_world"] else False
             )
             if not res.hasHit() or res.getNode().getName() != MetaDriveType.LANE_SURFACE_STREET:
                 contacts.add(MetaDriveType.GROUND)

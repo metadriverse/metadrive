@@ -2,9 +2,8 @@
 This environment can load all scenarios exported from other environments via env.export_scenarios()
 """
 import logging
-
 import numpy as np
-
+from metadrive.component.vehicle_module.vehicle_panel import VehiclePanel
 from metadrive.component.vehicle_navigation_module.trajectory_navigation import TrajectoryNavigation
 from metadrive.constants import TerminationState
 from metadrive.engine.asset_loader import AssetLoader
@@ -64,6 +63,9 @@ SCENARIO_ENV_CONFIG = dict(
     out_of_route_done=False,
     crash_vehicle_done=False,
     relax_out_of_road_done=True,
+
+    # ===== others =====
+    interface_panel=[VehiclePanel],  # for boosting efficiency
 )
 
 
@@ -352,13 +354,14 @@ if __name__ == "__main__":
     env = ScenarioEnv(
         {
             "use_render": True,
-            # "agent_policy": ReplayEgoCarPolicy,
-            "manual_control": True,
-            "show_interface": False,
+            "agent_policy": ReplayEgoCarPolicy,
+            "manual_control": False,
+            "show_interface": True,
             "show_logo": False,
             "show_fps": False,
-            "debug": False,
-            "no_traffic": True,
+            # "debug": True,
+            # "debug_static_world": True,
+            # "no_traffic": True,
             # "no_light": False,
             # "debug":True,
             # "no_traffic":True,
