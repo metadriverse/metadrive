@@ -197,6 +197,7 @@ class EngineCore(ShowBase.ShowBase):
         if not self.global_config["debug_physics_world"] \
                 and (self.mode in [RENDER_MODE_ONSCREEN, RENDER_MODE_OFFSCREEN]):
             initialize_asset_loader(self)
+            gltf.patch_loader(self.loader)
             if not self.use_render_pipeline:
                 gltf.patch_loader(self.loader)
 

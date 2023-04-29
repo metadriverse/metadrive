@@ -80,16 +80,16 @@ fragment:
         uniform sampler2D detail_tex3;
         uniform sampler2D detail_tex4;
         uniform sampler2D road_normal;
-        uniform sampler2D grass_normal;
+        uniform sampler2D road_rough;
         uniform sampler2D attribute_tex;
 
     material: |
       
         // texture splatting, mixing ratio can be determined via rgba
-        vec3 diffuse = texture(detail_tex1, terrain_uv * 64.0).rgb * texture(attribute_tex, terrain_uv).r;
-        diffuse += texture(detail_tex2, terrain_uv * 64.0).rgb * texture(attribute_tex, terrain_uv).g;
-        diffuse += texture(detail_tex3, terrain_uv * 64.0).rgb * texture(attribute_tex, terrain_uv).b;
-        diffuse += texture(detail_tex4, terrain_uv * 64.0).rgb * texture(attribute_tex, terrain_uv).a; 
+        vec3 diffuse = texture(detail_tex1, terrain_uv * 32.0).rgb * texture(attribute_tex, terrain_uv).r;
+        diffuse += texture(detail_tex2, terrain_uv * 32.0).rgb * texture(attribute_tex, terrain_uv).g;
+        diffuse += texture(detail_tex3, terrain_uv * 32.0).rgb * texture(attribute_tex, terrain_uv).b;
+        diffuse += texture(detail_tex4, terrain_uv * 32.0).rgb * texture(attribute_tex, terrain_uv).a; 
         
         // Compute normal from the heightmap, this assumes the terrain is facing z-up
         const float terrain_height = 50.0;
@@ -101,7 +101,10 @@ fragment:
         vec3 tangent = normalize(vec3(1.0, 0, u1 - u0));
         vec3 binormal = normalize(vec3(0, 1.0, v1 - v0));
         
-        vec3 normal = normalize(texture(road_normal, terrain_uv * 64.0).rgb*2.0-1.0);
+        vec3 normal =  normalize(cross(tangent, binormal))*texture(attribute_tex, terrain_uv).r;
+        normal +=  + normalize(texture(road_normal, terrain_uv * 32.0).rgb*2.0-1.0)*texture(attribute_tex, terrain_uv).g;
+        normal +=  + normalize(texture(road_normal, terrain_uv * 32.0).rgb*2.0-1.0)*texture(attribute_tex, terrain_uv).b;
+        normal +=  + normalize(texture(road_normal, terrain_uv * 32.0).rgb*2.0-1.0)*texture(attribute_tex, terrain_uv).a;
         
         // Add some fake lighting - you usually want to use your own lighting code here
         vec3 fake_sun = normalize(vec3(0.7, 0.2, 0.6));
@@ -121,9 +124,9 @@ fragment:
         m.specular_ior = 1.51;
         m.metallic = 0.0;
         m.roughness = 1.0 * texture(attribute_tex, terrain_uv).r;
-        m.roughness += 0.6 * texture(attribute_tex, terrain_uv).g;
-        m.roughness += 0.6 * texture(attribute_tex, terrain_uv).b;
-        m.roughness += 0.6 *texture(attribute_tex, terrain_uv).a;
+        m.roughness += texture(road_rough, terrain_uv * 32.0).r * texture(attribute_tex, terrain_uv).g;
+        m.roughness += texture(road_rough, terrain_uv * 32.0).r * texture(attribute_tex, terrain_uv).b;
+        m.roughness += texture(road_rough, terrain_uv * 32.0).r *texture(attribute_tex, terrain_uv).a;
         m.shading_model_param0 = 0.0;
         m.normal = vec3(0);
         

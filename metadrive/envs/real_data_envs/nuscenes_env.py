@@ -20,7 +20,7 @@ if __name__ == "__main__":
             # "pstats": True,
             "render_pipeline": True,
             # "pstats": True,
-            "daytime": "18:30",
+            "daytime": "07:00",
             # "no_traffic": True,
             # "no_light": False,
             # "debug":True,

@@ -69,8 +69,20 @@ class Terrain(BaseObject):
 
         # Road surface
         # self.road_texture = self.loader.loadTexture(AssetLoader.file_path("textures", "sci", "new_color.png"))
-        self.road_texture = self.loader.loadTexture(AssetLoader.file_path("textures", "sci", "color.jpg"))
-        self.road_texture_normal = self.loader.loadTexture(AssetLoader.file_path("textures", "sci", "normal.jpg"))
+        self.road_texture = self.loader.loadTexture(AssetLoader.file_path("textures", "asphalt", "diff_2k.png"))
+        self.road_texture_normal = self.loader.loadTexture(AssetLoader.file_path("textures", "asphalt", "normal_2k.png"))
+        self.road_texture_rough = self.loader.loadTexture(AssetLoader.file_path("textures", "asphalt", "rough_2k.png"))
+        v_wrap = Texture.WMRepeat
+        u_warp = Texture.WMMirror
+        filter_type = Texture.FTLinearMipmapLinear
+        anisotropic_degree = 16
+        for tex in [self.road_texture_rough, self.road_texture, self.road_texture_normal]:
+            tex.set_wrap_u(u_warp)
+            tex.set_wrap_v(v_wrap)
+            tex.setMinfilter(filter_type)
+            tex.setMagfilter(filter_type)
+            tex.setAnisotropicDegree(anisotropic_degree)
+        # self.road_texture_displacement = self.loader.loadTexture(AssetLoader.file_path("textures", "sci", "normal.jpg"))
         # self.road_texture.setMinfilter(minfilter)
         # self.road_texture.setAnisotropicDegree(anisotropic_degree)
 
@@ -136,26 +148,19 @@ class Terrain(BaseObject):
         Note: you have to make sure you modified the terrain_effect.yaml and vert.glsl/frag.glsl together, as they are
         made for different render pipeline. We expect the same terrain generated from different pipelines.
         """
-        if self._terrain_shader_set:
-            return
-        if engine.use_render_pipeline:
+        if engine.use_render_pipeline and not self._terrain_shader_set:
             engine.render_pipeline.reload_shaders()
             terrain_effect = AssetLoader.file_path("effect", "terrain_effect.yaml")
             engine.render_pipeline.set_effect(self._mesh_terrain, terrain_effect, {}, 100)
-        else:
-            vert_shader = AssetLoader.file_path("shaders", "terrain.vert.glsl")
-            frag_shader = AssetLoader.file_path("shaders", "terrain.frag.glsl")
-            shader = Shader.load(Shader.SL_GLSL, vert_shader, frag_shader)
-            self._mesh_terrain.setShader(shader)
+            self._mesh_terrain.set_shader_input("camera", engine.camera)
+            self._mesh_terrain.set_shader_input("detail_tex1", self.grass_tex)
+            self._mesh_terrain.set_shader_input("detail_tex2", self.road_texture)
+            self._mesh_terrain.set_shader_input("detail_tex3", self.yellow_lane_line)
+            self._mesh_terrain.set_shader_input("detail_tex4", self.white_lane_line)
+            self._mesh_terrain.set_shader_input("road_normal", self.road_texture_normal)
+            self._mesh_terrain.set_shader_input("road_rough", self.road_texture_rough)
+            self._terrain_shader_set = True
         self._mesh_terrain.set_shader_input("attribute_tex", attribute_tex)
-        self._mesh_terrain.set_shader_input("camera", engine.camera)
-        self._mesh_terrain.set_shader_input("detail_tex1", self.grass_tex)
-        self._mesh_terrain.set_shader_input("detail_tex2", self.road_texture)
-        self._mesh_terrain.set_shader_input("detail_tex3", self.yellow_lane_line)
-        self._mesh_terrain.set_shader_input("detail_tex4", self.white_lane_line)
-        self._mesh_terrain.set_shader_input("road_normal", self.road_texture_normal)
-        self._mesh_terrain.set_shader_input("grass_normal", self.grass_tex_normal)
-        self._terrain_shader_set = True
 
     def update_terrain(self, center_position):
         """
@@ -166,7 +171,7 @@ class Terrain(BaseObject):
             return
         if self.use_render_pipeline:
             assert self.engine.current_map is not None, "Can not find current map"
-            semantics = self.engine.current_map.get_semantic_map(size=512, pixels_per_meter=16, polyline_thickness=1,
+            semantics = self.engine.current_map.get_semantic_map(size=512, pixels_per_meter=22, polyline_thickness=2,
                                                                  layer=["lane", "lane_line"])
             semantics = semantics.astype(np.float32)
             semantic_tex = Texture()

@@ -13,7 +13,7 @@ if __name__ == "__main__":
     setup_logger(True)
     env = MetaDriveEnv(
         {
-            "num_scenarios": 1,
+            "num_scenarios": 10,
             "traffic_density": 0.2,
             "traffic_mode": "hybrid",
             "start_seed": 22,
@@ -29,6 +29,7 @@ if __name__ == "__main__":
             # "image_observation": True,
             # "controller": "joystick",
             # "show_coordinates": True,
+            "random_agent_model": True,
             "manual_control": True,
             "use_render": True,
             "accident_prob": 1,
@@ -104,15 +105,15 @@ if __name__ == "__main__":
         #     env.close()
         #     env.reset()
         # info["fuel"] = env.vehicle.energy_consumption
-        env.render(
-            text={
-                "heading_diff": env.vehicle.heading_diff(env.vehicle.lane),
-                "lane_width": env.vehicle.lane.width,
-                "lane_index": env.vehicle.lane_index,
-                "lateral": env.vehicle.lane.local_coordinates(env.vehicle.position),
-                "current_seed": env.current_seed
-            }
-        )
+        # env.render(
+        #     text={
+        #         "heading_diff": env.vehicle.heading_diff(env.vehicle.lane),
+        #         "lane_width": env.vehicle.lane.width,
+        #         "lane_index": env.vehicle.lane_index,
+        #         "lateral": env.vehicle.lane.local_coordinates(env.vehicle.position),
+        #         "current_seed": env.current_seed
+        #     }
+        # )
         # if d:
         #     env.reset()
         # # assert env.observation_space.contains(o)
