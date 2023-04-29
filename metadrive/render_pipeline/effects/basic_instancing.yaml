@@ -1,0 +1,28 @@
+
+# Terrain effect
+# This effect uses prodecural shader splatting, you most likely want to modify
+# it with your own texture-map generation code.
+
+vertex:
+    inout: |
+        uniform samplerBuffer InstancingData;
+
+
+    transform: |
+
+        int data_index = gl_InstanceID * 4;
+    
+        vec4 data_0 = texelFetch(InstancingData, data_index);
+        vec4 data_1 = texelFetch(InstancingData, data_index + 1);
+        vec4 data_2 = texelFetch(InstancingData, data_index + 2);
+        vec4 data_3 = texelFetch(InstancingData, data_index + 3);
+
+        mat4 transform_mat = mat4(data_0, data_1, data_2, data_3);
+
+        vOutput.position = (transform_mat * p3d_Vertex).xyz;
+        // Also transform normal, not 100% correct but works out nicely
+        vOutput.normal = mat3(transform_mat) * vOutput.normal;
+
+
+fragment:
+

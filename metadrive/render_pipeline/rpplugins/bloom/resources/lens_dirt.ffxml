@@ -1,0 +1,702 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Filter>
+	<Components>
+		<Result id="result">
+			<Source source="levels2 01"/>
+			<FilterType value="0"/>
+			<Lighting>
+				<Height value="0.20000000000000001"/>
+				<Environment>
+					<Source value=""/>
+					<Brightness value="1"/>
+					<Saturation value="1"/>
+					<Rotation value="0"/>
+					<RotationAxis x="0" y="0" z="0"/>
+				</Environment>
+				<Ambience>
+					<AmbientLight red="0" green="0" blue="0"/>
+					<Shadowing value="0"/>
+					<CurrentOcclusionSettings>
+						<RayDirections value="4"/>
+						<TraceDistance value="0.20000000000000001"/>
+						<RayJittering value="true"/>
+						<RayBounce value="true"/>
+						<AvoidStreaks value="true"/>
+						<DirectSamples value="0"/>
+						<ROQuality value="3"/>
+					</CurrentOcclusionSettings>
+					<CustomOcclusionSettings>
+						<RayDirections value="16"/>
+						<TraceDistance value="0.29999999999999999"/>
+						<RayJittering value="true"/>
+						<RayBounce value="true"/>
+						<AvoidStreaks value="true"/>
+						<DirectSamples value="1"/>
+						<ROQuality value="10"/>
+					</CustomOcclusionSettings>
+					<ArtisticSettings>
+						<BlackPoint value="0"/>
+						<Midtones value="0.5"/>
+						<WhitePoint value="1"/>
+					</ArtisticSettings>
+				</Ambience>
+			</Lighting>
+		</Result>
+		<Add id="add 01">
+			<SourceA source="multiply 01" red="0.10000000000000001" green="0.5" blue="0.90000000000000002" alpha="1"/>
+			<SourceB source="multiply 02" red="0.90000000000000002" green="0.5" blue="0.10000000000000001" alpha="1"/>
+		</Add>
+		<Add id="add 02">
+			<SourceA source="multiply 04" red="0.10000000000000001" green="0.5" blue="0.90000000000000002" alpha="1"/>
+			<SourceB source="multiply 03" red="0.90000000000000002" green="0.5" blue="0.10000000000000001" alpha="1"/>
+		</Add>
+		<AssembleRGB3 id="assemblergb3 01">
+			<R source="refraction3 06" value="0.39215686274509803"/>
+			<G source="refraction3 04" value="0.5490196078431373"/>
+			<B source="refraction3 05" value="0.82352941176470584"/>
+		</AssembleRGB3>
+		<AssembleRGB3 id="assemblergb3 02">
+			<R source="refraction3 01" value="0.39215686274509803"/>
+			<G source="refraction3 02" value="0.5490196078431373"/>
+			<B source="refraction3 03" value="0.82352941176470584"/>
+		</AssembleRGB3>
+		<BiasCurve id="biascurve 01">
+			<Bias value="0"/>
+			<Start value="0.29999999999999999"/>
+			<End value="1"/>
+			<Minimum value="0.29999999999999999"/>
+			<Maximum value="1"/>
+			<Invert value="true"/>
+		</BiasCurve>
+		<BiasCurve id="biascurve 02">
+			<Bias value="0.17999999999999994"/>
+			<Start value="0.41000000000000003"/>
+			<End value="1"/>
+			<Minimum value="0.59999999999999998"/>
+			<Maximum value="1"/>
+			<Invert value="true"/>
+		</BiasCurve>
+		<BiasCurve id="biascurve 03">
+			<Bias value="0.69999999999999996"/>
+			<Start value="0"/>
+			<End value="1"/>
+			<Minimum value="0"/>
+			<Maximum value="1"/>
+			<Invert value="false"/>
+		</BiasCurve>
+		<BiasCurve id="biascurve 04">
+			<Bias value="0.10000000000000001"/>
+			<Start value="0"/>
+			<End value="1"/>
+			<Minimum value="0"/>
+			<Maximum value="0.45000000000000001"/>
+			<Invert value="false"/>
+		</BiasCurve>
+		<Blend5 id="blend5 01">
+			<Mode value="2"/>
+			<Foreground source="invert 01" red="1" green="1" blue="1" alpha="1"/>
+			<Background source="polygon2 01" red="0" green="0" blue="0" alpha="1"/>
+			<Opacity value="0.75"/>
+		</Blend5>
+		<Blend5 id="blend5 02">
+			<Mode value="2"/>
+			<Foreground source="perlinnoise2 01" red="1" green="1" blue="1" alpha="1"/>
+			<Background source="blur2 01" red="0" green="0" blue="0" alpha="1"/>
+			<Opacity value="0.80000000000000004"/>
+		</Blend5>
+		<Blend5 id="blend5 03">
+			<Mode value="2"/>
+			<Foreground source="perlinnoise2 02" red="1" green="1" blue="1" alpha="1"/>
+			<Background source="blur2 02" red="0" green="0" blue="0" alpha="1"/>
+			<Opacity value="0.80000000000000004"/>
+		</Blend5>
+		<Blend5 id="blend5 04">
+			<Mode value="9"/>
+			<Foreground source="blur2 04" red="1" green="1" blue="1" alpha="1"/>
+			<Background source="blend5 09" red="0" green="0" blue="0" alpha="1"/>
+			<Opacity value="0.050000000000000003"/>
+		</Blend5>
+		<Blend5 id="blend5 05">
+			<Mode value="6"/>
+			<Foreground source="blur2 03" red="1" green="1" blue="1" alpha="1"/>
+			<Background source="blend5 08" red="0" green="0" blue="0" alpha="1"/>
+			<Opacity value="0.45000000000000001"/>
+		</Blend5>
+		<Blend5 id="blend5 06">
+			<Mode value="6"/>
+			<Foreground source="assemblergb3 01" red="1" green="1" blue="1" alpha="1"/>
+			<Background source="assemblergb3 02" red="0" green="0" blue="0" alpha="1"/>
+			<Opacity value="1"/>
+		</Blend5>
+		<Blend5 id="blend5 07">
+			<Mode value="9"/>
+			<Foreground source="blur2 04" red="1" green="1" blue="1" alpha="1"/>
+			<Background source="perlinnoise2 03" red="0" green="0" blue="0" alpha="1"/>
+			<Opacity value="0.25"/>
+		</Blend5>
+		<Blend5 id="blend5 08">
+			<Mode value="2"/>
+			<Foreground source="tonecurve2 02" red="1" green="1" blue="1" alpha="1"/>
+			<Background source="tonecurve2 04" red="0" green="0" blue="0" alpha="1"/>
+			<Opacity value="1"/>
+		</Blend5>
+		<Blend5 id="blend5 09">
+			<Mode value="6"/>
+			<Foreground source="blend5 02" red="1" green="1" blue="1" alpha="1"/>
+			<Background source="blend5 03" red="0" green="0" blue="0" alpha="1"/>
+			<Opacity value="1"/>
+		</Blend5>
+		<Blur2 id="blur2 01">
+			<Source source="bomber3 01"/>
+			<Radius value="0.01"/>
+			<Gaussian value="true"/>
+		</Blur2>
+		<Blur2 id="blur2 02">
+			<Source source="bomber3 02"/>
+			<Radius value="0.0050000000000000001"/>
+			<Gaussian value="true"/>
+		</Blur2>
+		<Blur2 id="blur2 03">
+			<Source source="threshold2 01"/>
+			<Radius value="0.002"/>
+			<Gaussian value="true"/>
+		</Blur2>
+		<Blur2 id="blur2 04">
+			<Source source="stones2 02"/>
+			<Radius value="7.0000000000000010e-004"/>
+			<Gaussian value="true"/>
+		</Blur2>
+		<Bomber3 id="bomber3 01">
+			<Particle1 source="blend5 01" red="0" green="0.15686274509803921" blue="0.39215686274509803" alpha="1"/>
+			<Particle2 source="gamma2 01" red="0" green="0" blue="0" alpha="1"/>
+			<Particle3 source="gamma2 02" red="0" green="0" blue="0" alpha="1"/>
+			<Particle4 red="0" green="0" blue="0" alpha="1"/>
+			<Particle5 red="0" green="0" blue="0" alpha="1"/>
+			<Frequency1 value="0.20000000000000001"/>
+			<Frequency2 value="0.5"/>
+			<Frequency3 value="1"/>
+			<Frequency4 value="1"/>
+			<Frequency5 value="1"/>
+			<Background red="0" green="0" blue="0" alpha="1"/>
+			<Opacity source="tonecurve2 01" value="1"/>
+			<Size value="1"/>
+			<Rotation value="0"/>
+			<OffsetH value="0"/>
+			<OffsetV value="0"/>
+			<Squash value="0"/>
+			<OpacityChaos value="0.5"/>
+			<SizeChaos value="0.29999999999999999"/>
+			<RotationChaos value="1"/>
+			<OffsetChaosH value="1"/>
+			<OffsetChaosV value="1"/>
+			<SquashChaos value="0.14999999999999999"/>
+			<Tint red="1" green="1" blue="1" alpha="1"/>
+			<TintAmount value="0"/>
+			<Roughness value="0.050000000000000003"/>
+			<DepthMap/>
+			<ParticleMode value="6"/>
+			<TintMode value="17"/>
+			<OctavesScaleMode value="0"/>
+			<LayerOrder value="0"/>
+			<DepthSorting value="0"/>
+			<Details value="0.29999999999999999"/>
+			<ParticleRepeats value="9"/>
+			<ParticlePerCell value="1"/>
+			<Variation value="12"/>
+			<HDRMode value="false"/>
+		</Bomber3>
+		<Bomber3 id="bomber3 02">
+			<Particle1 source="blend5 01" red="0" green="0.15686274509803921" blue="0.39215686274509803" alpha="1"/>
+			<Particle2 source="gamma2 01" red="0" green="0" blue="0" alpha="1"/>
+			<Particle3 source="gamma2 02" red="0" green="0" blue="0" alpha="1"/>
+			<Particle4 red="0" green="0" blue="0" alpha="1"/>
+			<Particle5 red="0" green="0" blue="0" alpha="1"/>
+			<Frequency1 value="0.20000000000000001"/>
+			<Frequency2 value="0.5"/>
+			<Frequency3 value="1"/>
+			<Frequency4 value="1"/>
+			<Frequency5 value="1"/>
+			<Background red="0" green="0" blue="0" alpha="1"/>
+			<Opacity source="tonecurve2 01" value="1"/>
+			<Size value="0.40000000000000002"/>
+			<Rotation value="0"/>
+			<OffsetH value="0"/>
+			<OffsetV value="0"/>
+			<Squash value="0"/>
+			<OpacityChaos value="0.5"/>
+			<SizeChaos value="0.29999999999999999"/>
+			<RotationChaos value="1"/>
+			<OffsetChaosH value="1"/>
+			<OffsetChaosV value="1"/>
+			<SquashChaos value="0.14999999999999999"/>
+			<Tint red="1" green="1" blue="1" alpha="1"/>
+			<TintAmount value="0"/>
+			<Roughness value="0.050000000000000003"/>
+			<DepthMap/>
+			<ParticleMode value="6"/>
+			<TintMode value="17"/>
+			<OctavesScaleMode value="0"/>
+			<LayerOrder value="0"/>
+			<DepthSorting value="0"/>
+			<Details value="0.29999999999999999"/>
+			<ParticleRepeats value="10"/>
+			<ParticlePerCell value="1"/>
+			<Variation value="4"/>
+			<HDRMode value="false"/>
+		</Bomber3>
+		<Ellipse id="ellipse 01">
+			<Color red="1" green="1" blue="1" alpha="1"/>
+			<Background red="0" green="0" blue="0" alpha="1"/>
+			<Radius value="1"/>
+			<Rotation value="0"/>
+			<Squash value="0"/>
+			<BevelWidth value="1"/>
+			<BevelCurve value="0"/>
+		</Ellipse>
+		<Gamma2 id="gamma2 01">
+			<Source source="blend5 01"/>
+			<Gamma value="-0.20000000000000001"/>
+		</Gamma2>
+		<Gamma2 id="gamma2 02">
+			<Source source="blend5 01"/>
+			<Gamma value="-0.34999999999999998"/>
+		</Gamma2>
+		<Invert id="invert 01">
+			<Source source="polygon2 01"/>
+			<Invert value="true"/>
+		</Invert>
+		<Levels2 id="levels2 01">
+			<Source source="blend5 06"/>
+			<BlackPoint value="0.10000000000000001"/>
+			<Gamma value="-0.20000000000000001"/>
+			<WhitePoint value="0.45000000000000001"/>
+			<PreserveColor value="false"/>
+		</Levels2>
+		<Multiply id="multiply 01">
+			<SourceA source="slidercontrol 02" red="0.10000000000000001" green="0.29999999999999999" blue="0.5" alpha="1">
+				<Minimum red="0" green="0" blue="0" alpha="1"/>
+				<Maximum red="1" green="1" blue="1" alpha="1"/>
+			</SourceA>
+			<SourceB red="0.44573643410852715" green="0.44573643410852715" blue="0.44573643410852715" alpha="1"/>
+		</Multiply>
+		<Multiply id="multiply 02">
+			<SourceA source="slidercontrol 01" red="0.10000000000000001" green="0.29999999999999999" blue="0.5" alpha="1">
+				<Minimum red="0" green="0" blue="0" alpha="1"/>
+				<Maximum red="1" green="1" blue="1" alpha="1"/>
+			</SourceA>
+			<SourceB red="0.050000000000000003" green="0.050000000000000003" blue="0.050000000000000003" alpha="1"/>
+		</Multiply>
+		<Multiply id="multiply 03">
+			<SourceA source="slidercontrol 01" red="0.10000000000000001" green="0.29999999999999999" blue="0.5" alpha="1">
+				<Minimum red="0" green="0" blue="0" alpha="1"/>
+				<Maximum red="1" green="1" blue="1" alpha="1"/>
+			</SourceA>
+			<SourceB red="0.01" green="0.01" blue="0.01" alpha="1"/>
+		</Multiply>
+		<Multiply id="multiply 04">
+			<SourceA source="slidercontrol 02" red="0.10000000000000001" green="0.29999999999999999" blue="0.5" alpha="1">
+				<Minimum red="0" green="0" blue="0" alpha="1"/>
+				<Maximum red="1" green="1" blue="1" alpha="1"/>
+			</SourceA>
+			<SourceB red="0.44573643410852715" green="0.44573643410852715" blue="0.44573643410852715" alpha="1"/>
+		</Multiply>
+		<PerlinNoise2 id="perlinnoise2 01">
+			<Noise red="1" green="1" blue="1" alpha="1"/>
+			<Background red="0" green="0" blue="0" alpha="1"/>
+			<Roughness value="0.10000000000000001"/>
+			<Scale value="2"/>
+			<Stretch value="0"/>
+			<Angle value="0"/>
+			<Details value="1"/>
+			<Contrast value="0.59999999999999998"/>
+			<Variation value="1"/>
+			<OctaveCurve value="0"/>
+		</PerlinNoise2>
+		<PerlinNoise2 id="perlinnoise2 02">
+			<Noise red="1" green="1" blue="1" alpha="1"/>
+			<Background red="0" green="0" blue="0" alpha="1"/>
+			<Roughness value="0.10000000000000001"/>
+			<Scale value="1.7"/>
+			<Stretch value="0"/>
+			<Angle value="0"/>
+			<Details value="1"/>
+			<Contrast value="0.59999999999999998"/>
+			<Variation value="2"/>
+			<OctaveCurve value="0"/>
+		</PerlinNoise2>
+		<PerlinNoise2 id="perlinnoise2 03">
+			<Noise red="1" green="1" blue="1" alpha="1"/>
+			<Background red="0" green="0" blue="0" alpha="1"/>
+			<Roughness value="0.40000000000000002"/>
+			<Scale value="2.6000000000000001"/>
+			<Stretch value="0"/>
+			<Angle value="0"/>
+			<Details value="1"/>
+			<Contrast value="0.25"/>
+			<Variation value="4"/>
+			<OctaveCurve value="0"/>
+		</PerlinNoise2>
+		<Polygon2 id="polygon2 01">
+			<Color red="1" green="1" blue="1" alpha="1"/>
+			<Background red="0" green="0" blue="0" alpha="1"/>
+			<Radius value="1"/>
+			<StarFactor value="0"/>
+			<Rotation value="0"/>
+			<Squash value="0"/>
+			<OuterRadius value="1"/>
+			<InnerRadius value="0.54000000000000004"/>
+			<BevelWidth value="0.37"/>
+			<Sides value="5"/>
+			<CompensateRadius value="true"/>
+			<BevelCurve value="0"/>
+		</Polygon2>
+		<Refraction3 id="refraction3 01">
+			<Source source="blend5 04"/>
+			<Height source="tonecurve2 03"/>
+			<Refraction source="add 01" value="1"/>
+		</Refraction3>
+		<Refraction3 id="refraction3 02">
+			<Source source="blend5 04"/>
+			<Height source="tonecurve2 03"/>
+			<Refraction source="multiply 01" value="1"/>
+		</Refraction3>
+		<Refraction3 id="refraction3 03">
+			<Source source="blend5 04"/>
+			<Height source="tonecurve2 03"/>
+			<Refraction source="subtract 01" value="0"/>
+		</Refraction3>
+		<Refraction3 id="refraction3 04">
+			<Source source="blend5 05"/>
+			<Height source="tonecurve2 03"/>
+			<Refraction source="multiply 04" value="1"/>
+		</Refraction3>
+		<Refraction3 id="refraction3 05">
+			<Source source="blend5 05"/>
+			<Height source="tonecurve2 03"/>
+			<Refraction source="subtract 02" value="0"/>
+		</Refraction3>
+		<Refraction3 id="refraction3 06">
+			<Source source="blend5 05"/>
+			<Height source="tonecurve2 03"/>
+			<Refraction source="add 02" value="1"/>
+		</Refraction3>
+		<Scale id="scale 01">
+			<Source source="ellipse 01"/>
+			<Scale value="1.7"/>
+			<Squash value="0"/>
+			<OriginX value="0.5"/>
+			<OriginY value="0.5"/>
+			<Percentage value="1"/>
+			<Mode value="0"/>
+		</Scale>
+		<SliderControl id="slidercontrol 01">
+			<Name value-en="Distortion Dif"/>
+			<UseRemapping value="false"/>
+			<Value value="1"/>
+		</SliderControl>
+		<SliderControl id="slidercontrol 02">
+			<Name value-en="Lens Distortion"/>
+			<UseRemapping value="false"/>
+			<Value value="0.5"/>
+		</SliderControl>
+		<Stones2 id="stones2 01">
+			<Noise red="1" green="1" blue="1" alpha="1"/>
+			<Background red="0" green="0" blue="0" alpha="1"/>
+			<Roughness value="0.20000000000000001"/>
+			<Contrast value="0"/>
+			<Formula value="0"/>
+			<Scale value="1.6000000000000001"/>
+			<Stretch value="0"/>
+			<VerticalStretch value="false"/>
+			<Flat value="false"/>
+			<SolidFill value="false"/>
+			<Details value="0.40000000000000002"/>
+			<Variation value="1"/>
+			<OctaveCurve value="0"/>
+		</Stones2>
+		<Stones2 id="stones2 02">
+			<Noise red="1" green="1" blue="1" alpha="1"/>
+			<Background red="0" green="0" blue="0" alpha="1"/>
+			<Roughness value="1"/>
+			<Contrast value="0.20000000000000001"/>
+			<Formula value="0"/>
+			<Scale value="1.3"/>
+			<Stretch value="0"/>
+			<VerticalStretch value="false"/>
+			<Flat value="false"/>
+			<SolidFill value="false"/>
+			<Details value="1"/>
+			<Variation value="1"/>
+			<OctaveCurve value="0"/>
+		</Stones2>
+		<Subtract id="subtract 01">
+			<SourceA source="multiply 01" red="1" green="1" blue="1" alpha="1"/>
+			<SourceB source="multiply 02" red="0.10000000000000001" green="0.29999999999999999" blue="0.5" alpha="1"/>
+		</Subtract>
+		<Subtract id="subtract 02">
+			<SourceA source="multiply 04" red="1" green="1" blue="1" alpha="1"/>
+			<SourceB source="multiply 03" red="0.10000000000000001" green="0.29999999999999999" blue="0.5" alpha="1"/>
+		</Subtract>
+		<Threshold2 id="threshold2 01">
+			<Source source="stones2 01"/>
+			<Threshold value="0.83999999999999997"/>
+			<Smooth value="0.10000000000000001"/>
+			<Low red="0" green="0" blue="0" alpha="1"/>
+			<High red="1" green="1" blue="1" alpha="1"/>
+		</Threshold2>
+		<ToneCurve2 id="tonecurve2 01">
+			<Source source="scale 01"/>
+			<Curve source="biascurve 01"/>
+			<PreserveColor value="false"/>
+		</ToneCurve2>
+		<ToneCurve2 id="tonecurve2 02">
+			<Source source="scale 01"/>
+			<Curve source="biascurve 02"/>
+			<PreserveColor value="false"/>
+		</ToneCurve2>
+		<ToneCurve2 id="tonecurve2 03">
+			<Source source="scale 01"/>
+			<Curve source="biascurve 03"/>
+			<PreserveColor value="false"/>
+		</ToneCurve2>
+		<ToneCurve2 id="tonecurve2 04">
+			<Source source="blend5 07"/>
+			<Curve source="biascurve 04"/>
+			<PreserveColor value="false"/>
+		</ToneCurve2>
+	</Components>
+	<SettingsOverride>
+		<Size value="0"/>
+		<Variation value="0"/>
+		<Seamless value="0"/>
+		<ResultBlending value="0"/>
+	</SettingsOverride>
+	<Presets>
+		<DefaultPreset preview_image="LIFESAVER_OPAQUE">
+			<Settings size_factor="1" variation="1" seamless="false" antialiasing="2" map_type="0" edges_only="true" clip_hdr_for_result="true"/>
+			<Lighting>
+				<Height value="0.20000000000000001"/>
+				<Environment>
+					<Source value=""/>
+					<Brightness value="1"/>
+					<Saturation value="1"/>
+					<Rotation value="0"/>
+					<RotationAxis x="0" y="0" z="0"/>
+				</Environment>
+				<Ambience>
+					<AmbientLight red="0" green="0" blue="0"/>
+					<Shadowing value="0"/>
+					<CurrentOcclusionSettings>
+						<RayDirections value="4"/>
+						<TraceDistance value="0.20000000000000001"/>
+						<RayJittering value="true"/>
+						<RayBounce value="true"/>
+						<AvoidStreaks value="true"/>
+						<DirectSamples value="0"/>
+						<ROQuality value="3"/>
+					</CurrentOcclusionSettings>
+					<CustomOcclusionSettings>
+						<RayDirections value="16"/>
+						<TraceDistance value="0.29999999999999999"/>
+						<RayJittering value="true"/>
+						<RayBounce value="true"/>
+						<AvoidStreaks value="true"/>
+						<DirectSamples value="1"/>
+						<ROQuality value="10"/>
+					</CustomOcclusionSettings>
+					<ArtisticSettings>
+						<BlackPoint value="0"/>
+						<Midtones value="0.5"/>
+						<WhitePoint value="1"/>
+					</ArtisticSettings>
+				</Ambience>
+			</Lighting>
+			<Controls>
+				<SliderControl id="slidercontrol 01">
+					<Value value="1"/>
+				</SliderControl>
+				<SliderControl id="slidercontrol 02">
+					<Value value="0.5"/>
+				</SliderControl>
+			</Controls>
+		</DefaultPreset>
+	</Presets>
+	<Information author="Pluton" name-en="lens_dirt" url="" description="" keywords="" update_notes="" major_version="3" minor_version="6"/>
+	<ControlsOrder>
+		<Automatic value="true"/>
+	</ControlsOrder>
+	<FilterEditor>
+		<ThumbnailSize value="1"/>
+		<Canvas left="739" top="-2695" zoom_factor="0"/>
+		<Viewport left="50" top="0" zoom_factor="1"/>
+		<LockPreview>
+			<Locked value="true"/>
+			<LockedComponent name="levels2 01"/>
+		</LockPreview>
+		<Item id="add 01">
+			<Position left="-128" top="-464"/>
+		</Item>
+		<Item id="add 02">
+			<Position left="-80" top="-2464"/>
+		</Item>
+		<Item id="assemblergb3 01">
+			<Position left="-528" top="-2352"/>
+		</Item>
+		<Item id="assemblergb3 02">
+			<Position left="-576" top="-352"/>
+		</Item>
+		<Item id="biascurve 01">
+			<Position left="2640" top="-816"/>
+		</Item>
+		<Item id="biascurve 02">
+			<Position left="1504" top="-2064"/>
+		</Item>
+		<Item id="biascurve 03">
+			<Position left="208" top="-1088"/>
+		</Item>
+		<Item id="biascurve 04">
+			<Position left="1568" top="-2272"/>
+		</Item>
+		<Item id="blend5 01">
+			<Position left="2992" top="-432"/>
+		</Item>
+		<Item id="blend5 02">
+			<Position left="1472" top="-624"/>
+		</Item>
+		<Item id="blend5 03">
+			<Position left="1456" top="16"/>
+		</Item>
+		<Item id="blend5 04">
+			<Position left="784" top="-320"/>
+		</Item>
+		<Item id="blend5 05">
+			<Position left="800" top="-2560"/>
+		</Item>
+		<Item id="blend5 06">
+			<Position left="-944" top="-1232"/>
+		</Item>
+		<Item id="blend5 07">
+			<Position left="1840" top="-2384"/>
+		</Item>
+		<Item id="blend5 08">
+			<Position left="1056" top="-2384"/>
+		</Item>
+		<Item id="blend5 09">
+			<Position left="1088" top="-288"/>
+		</Item>
+		<Item id="blur2 01">
+			<Position left="1744" top="-640"/>
+		</Item>
+		<Item id="blur2 02">
+			<Position left="1728" top="32"/>
+		</Item>
+		<Item id="blur2 03">
+			<Position left="1552" top="-2848"/>
+		</Item>
+		<Item id="blur2 04">
+			<Position left="2624" top="-2176"/>
+		</Item>
+		<Item id="bomber3 01">
+			<Position left="1952" top="-640"/>
+		</Item>
+		<Item id="bomber3 02">
+			<Position left="1952" top="32"/>
+		</Item>
+		<Item id="ellipse 01">
+			<Position left="2960" top="-1600"/>
+		</Item>
+		<Item id="gamma2 01">
+			<Position left="2608" top="-192"/>
+		</Item>
+		<Item id="gamma2 02">
+			<Position left="2608" top="-32"/>
+		</Item>
+		<Item id="invert 01">
+			<Position left="3216" top="-592"/>
+		</Item>
+		<Item id="levels2 01">
+			<Position left="-1184" top="-1232"/>
+		</Item>
+		<Item id="multiply 01">
+			<Position left="208" top="-288"/>
+		</Item>
+		<Item id="multiply 02">
+			<Position left="208" top="-96"/>
+		</Item>
+		<Item id="multiply 03">
+			<Position left="256" top="-2096"/>
+		</Item>
+		<Item id="multiply 04">
+			<Position left="272" top="-2288"/>
+		</Item>
+		<Item id="perlinnoise2 01">
+			<Position left="1712" top="-864"/>
+		</Item>
+		<Item id="perlinnoise2 02">
+			<Position left="1696" top="-224"/>
+		</Item>
+		<Item id="perlinnoise2 03">
+			<Position left="2064" top="-2240"/>
+		</Item>
+		<Item id="polygon2 01">
+			<Position left="3408" top="-464"/>
+		</Item>
+		<Item id="refraction3 01">
+			<Position left="-368" top="-512"/>
+		</Item>
+		<Item id="refraction3 02">
+			<Position left="-368" top="-352"/>
+		</Item>
+		<Item id="refraction3 03">
+			<Position left="-368" top="-192"/>
+		</Item>
+		<Item id="refraction3 04">
+			<Position left="-320" top="-2352"/>
+		</Item>
+		<Item id="refraction3 05">
+			<Position left="-320" top="-2192"/>
+		</Item>
+		<Item id="refraction3 06">
+			<Position left="-320" top="-2512"/>
+		</Item>
+		<Item id="result">
+			<Position left="-1440" top="-1216"/>
+		</Item>
+		<Item id="scale 01">
+			<Position left="2736" top="-1600"/>
+		</Item>
+		<Item id="slidercontrol 01">
+			<Position left="896" top="-1008"/>
+		</Item>
+		<Item id="slidercontrol 02">
+			<Position left="896" top="-1200"/>
+		</Item>
+		<Item id="stones2 01">
+			<Position left="2128" top="-2976"/>
+		</Item>
+		<Item id="stones2 02">
+			<Position left="2864" top="-2224"/>
+		</Item>
+		<Item id="subtract 01">
+			<Position left="-128" top="0"/>
+		</Item>
+		<Item id="subtract 02">
+			<Position left="-80" top="-2000"/>
+		</Item>
+		<Item id="threshold2 01">
+			<Position left="1856" top="-2928"/>
+		</Item>
+		<Item id="tonecurve2 01">
+			<Position left="2384" top="-816"/>
+		</Item>
+		<Item id="tonecurve2 02">
+			<Position left="1264" top="-2160"/>
+		</Item>
+		<Item id="tonecurve2 03">
+			<Position left="-32" top="-1136"/>
+		</Item>
+		<Item id="tonecurve2 04">
+			<Position left="1328" top="-2368"/>
+		</Item>
+	</FilterEditor>
+</Filter>

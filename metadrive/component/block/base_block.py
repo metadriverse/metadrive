@@ -4,7 +4,7 @@ from typing import List, Dict
 
 from panda3d.bullet import BulletBoxShape, BulletGhostNode
 from panda3d.core import Vec3, LQuaternionf, Vec4, TextureStage, RigidBodyCombiner, \
-    SamplerState, NodePath, Texture
+    SamplerState, NodePath, Texture, Material
 
 from metadrive.base_class.base_object import BaseObject
 from metadrive.component.lane.abs_lane import AbstractLane
@@ -50,7 +50,7 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
         self._respawn_roads = []
         self._block_objects = None
 
-        if self.render:
+        if self.render and not self.use_render_pipeline:
             self.ts_color = TextureStage("color")
             self.ts_normal = TextureStage("normal")
             self.ts_normal.setMode(TextureStage.M_normal)
@@ -93,6 +93,7 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
             self.side_normal = self.loader.loadTexture(AssetLoader.file_path("textures", "sidewalk", "normal.png"))
             self.side_normal.set_format(Texture.F_srgb)
             self.sidewalk = self.loader.loadModel(AssetLoader.file_path("models", "box.bam"))
+            self.sidewalk.setTwoSided(False)
             self.sidewalk.setTexture(self.ts_color, self.side_texture)
             # self.sidewalk = self.loader.loadModel(AssetLoader.file_path("models", "output.egg"))
             # self.sidewalk.setTexture(self.ts_normal, self.side_normal)

@@ -1,0 +1,114 @@
+
+settings: !!omap
+
+    - enable_volumetric_shadows:
+        type: bool
+        default: true
+        label: Volumetric Shadows
+        description: >
+            Whether to enable volumetric shadows
+
+    - volumetric_shadow_intensity:
+        display_if: { enable_volumetric_shadows: true }
+        type: float
+        range: [0.1, 10.0]
+        default: 1.0
+        shader_runtime: true
+        label: Intensity
+        description: >
+          Controls the intensity/density of the volumetric shadows
+
+    - volumetric_shadow_brightness:
+        display_if: { enable_volumetric_shadows: true }
+        type: float
+        range: [0.1, 10.0]
+        default: 1.0
+        shader_runtime: true
+        label: Brightness
+        description: >
+            Controls the brightness of the volumetric shadows.
+    
+    - volumetric_shadow_pow:
+        display_if: { enable_volumetric_shadows: true }
+        type: float
+        range: [0.25, 4.0]
+        default: 1.0
+        shader_runtime: true
+        label: Detail
+        description: >
+            Decreases/Increases the detail of the volumetric shadows. The shadow is computed as pow(shadow, detail).
+
+    - volumetric_max_distance:
+        display_if: { enable_volumetric_shadows: true }
+        type: float
+        range: [1.0, 500.0]
+        default: 150.0
+        shader_runtime: true
+        label: Maximum distance
+        description: >
+            Maximum distance until volumetric shadows is computed, after that
+            distance no "godrays" are visible. Lower values provide more details.
+
+    - volumetric_shadow_fadein_distance:
+        display_if: { enable_volumetric_shadows: true }
+        type: float
+        range: [1.0, 100.0]
+        default: 15.0
+        shader_runtime: true
+        label: Fade-In Distance
+        description: >
+            Volumetric shadows are faded out near to the camera, this controls
+            the distance at which this happens.
+
+
+    - volumetric_num_steps:
+        display_if: { enable_volumetric_shadows: true}
+        type: int
+        range: [4, 128]
+        default: 32
+        shader_runtime: true
+        label: Sample count
+        description: >
+            Controls how many samples to take along the path, higher values require
+            more performance but produce more detailed results.
+
+
+daytime_settings: !!omap
+
+    - fog_ramp_size:
+        type: scalar
+        unit: meter
+        range: [0.5, 30000.0]
+        default: 2000
+        label: Fog Ramp
+        logarithmic_factor: 2.0
+        description: >
+            Size of the transition from no fog to fog in world space units.
+            Higher values produce a smoother transition from no fog to fog,
+            while lower values will produce a more sharp transition.
+
+    - fog_color:
+        type: color
+        default: [127, 127, 127]
+        label: Fog Color
+        description: >
+          Color of the fog, usually should match the atmosphere color
+
+    - fog_brightness:
+        type: scalar
+        unit: klux
+        range: [0.0, 20.0]
+        logarithmic_factor: 2.0
+        default: 12.0
+        label: Fog Brightness
+        description: >
+          Controls the brightness of the fog, should match the sun intensity.
+
+    - fog_intensity:
+        type: scalar
+        unit: none
+        range: [0.01, 50.0]
+        default: 30.0
+        label: Fog Intensity
+        description: >
+            Controls the intensity/amount of the volumetric height fog.

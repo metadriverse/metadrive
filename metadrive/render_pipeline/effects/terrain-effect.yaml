@@ -1,0 +1,142 @@
+
+# Terrain effect
+# This effect uses prodecural shader splatting, you most likely want to modify
+# it with your own texture-map generation code.
+
+vertex:
+    inout: |
+        uniform struct {
+            sampler2D data_texture;
+            sampler2D heightfield;
+            int view_index;
+            int terrain_size;
+            int chunk_size;
+        } ShaderTerrainMesh;
+        out vec2 terrain_uv;
+
+    transform: |
+        // Terrain data has the layout:
+        // x: x-pos, y: y-pos, z: size, w: clod
+        vec4 terrain_data = texelFetch(ShaderTerrainMesh.data_texture,
+        ivec2(gl_InstanceID, ShaderTerrainMesh.view_index), 0);
+
+        // Get initial chunk position in the (0, 0, 0), (1, 1, 0) range
+        vec3 chunk_position = p3d_Vertex.xyz;
+
+        // CLOD implementation
+        float clod_factor = smoothstep(0, 1, terrain_data.w);
+        chunk_position.xy -= clod_factor * fract(chunk_position.xy * ShaderTerrainMesh.chunk_size / 2.0)
+                              * 2.0 / ShaderTerrainMesh.chunk_size;
+
+        // Scale the chunk
+        chunk_position *= terrain_data.z * float(ShaderTerrainMesh.chunk_size)
+                        / float(ShaderTerrainMesh.terrain_size);
+        chunk_position.z *= ShaderTerrainMesh.chunk_size;
+
+        // Offset the chunk, it is important that this happens after the scale
+        chunk_position.xy += terrain_data.xy / float(ShaderTerrainMesh.terrain_size);
+
+        // Compute the terrain UV coordinates
+        terrain_uv = chunk_position.xy;
+
+        // Sample the heightfield and offset the terrain - we do not need to multiply
+        // the height with anything since the terrain transform is included in the
+        // model view projection matrix.
+        chunk_position.z += texture(ShaderTerrainMesh.heightfield, terrain_uv).x;
+
+        // Lower the terrain on the borders - this ensures the shadow map is generated
+        // correctly.
+        if ( min(terrain_uv.x, terrain_uv.y) < 8.0 / ShaderTerrainMesh.terrain_size ||
+           max(terrain_uv.x, terrain_uv.y) > 1 - 9.0 / ShaderTerrainMesh.terrain_size) {
+           chunk_position.z = 0;
+        }
+
+        vOutput.position = (p3d_ModelMatrix * vec4(chunk_position, 1)).xyz;
+
+fragment:
+    defines: |
+        #define DONT_FETCH_DEFAULT_TEXTURES 1
+        #define DONT_SET_MATERIAL_PROPERTIES 1
+
+    inout: |
+        layout(location=4) in vec2 terrain_uv;
+        layout(location=5) uniform struct {
+            sampler2D data_texture;
+            sampler2D heightfield;
+            int view_index;
+            int terrain_size;
+            int chunk_size;
+        } ShaderTerrainMesh;
+
+    material: |
+
+        // Compute terrain normal
+        const float terrain_height = 1000.0;
+        vec3 pixel_size = vec3(1.0, -1.0, 0) / textureSize(ShaderTerrainMesh.heightfield, 0).xxx;
+        float h_u0 = texture(ShaderTerrainMesh.heightfield, terrain_uv + pixel_size.yz).x * terrain_height;
+        float h_u1 = texture(ShaderTerrainMesh.heightfield, terrain_uv + pixel_size.xz).x * terrain_height;
+        float h_v0 = texture(ShaderTerrainMesh.heightfield, terrain_uv + pixel_size.zy).x * terrain_height;
+        float h_v1 = texture(ShaderTerrainMesh.heightfield, terrain_uv + pixel_size.zx).x * terrain_height;
+        vec3 tangent = normalize(vec3(1, 0, h_u1 - h_u0));
+        vec3 binormal = normalize(vec3(0, 1, h_v1 - h_v0));
+        vec3 normal = normalize(cross(tangent, binormal));
+
+        normal.x *= -1;
+        // normal.y *= -1;
+
+        // Material splatting
+        float height = (h_u0 + h_u1 + h_v0 + h_v1) / (4.0 * terrain_height); // xxx
+        float slope = 1.0 - normal.z;
+        float grass = 0.0;
+        float rock = 0.0;
+        float snow = 0.0;
+
+        { // Snow
+            snow = saturate(4.0 * (height-0.49));
+            snow *= saturate(pow(saturate(1.0 - slope), 2.0)) * 12.0;
+
+            //snow -= 0.6;
+            //snow *= 0.5;
+            snow = saturate(snow);
+            snow = pow(snow, 2.0);
+        }
+
+        { // Rock
+            rock = saturate((pow(slope, 1.2) * 12.0 - 0.02) * 4.5);
+        }
+
+        { // Grass
+            grass = 1.0 - saturate(rock + snow);
+        }
+
+
+        // Material definitions
+
+        MaterialShaderOutput grass_mat = make_default_material_output();
+        grass_mat.basecolor = vec3(0.1, 0.2, 0.1);
+        grass_mat.roughness = 0.8;
+
+        MaterialShaderOutput rock_mat = make_default_material_output();
+        rock_mat.basecolor = vec3(0.13);
+        rock_mat.roughness = 0.8;
+        rock_mat.specular_ior = 1.4;
+
+        MaterialShaderOutput snow_mat = make_default_material_output();
+        snow_mat.basecolor = vec3(0.6, 0.6, 0.9);
+        snow_mat.roughness = 0.5;
+        snow_mat.specular_ior = 1.7;
+
+        m.basecolor = vec3(0);
+        m.shading_model = SHADING_MODEL_DEFAULT;
+        m.specular_ior = 0.0;
+        m.metallic = 0.0;
+        m.roughness = 0.0;
+        m.shading_model_param0 = 0.0;
+        m.normal = vec3(0);
+
+        merge_material_output(m, grass_mat, grass);
+        merge_material_output(m, rock_mat, rock);
+        merge_material_output(m, snow_mat, snow);
+
+        m.normal = normal;
+

@@ -1,0 +1,201 @@
+
+# Render Pipeline Plugin Configuration
+# Instead of editing this file, prefer to use the Plugin Configurator
+# Any formatting and comments will be lost
+
+enabled:
+    - ao
+    - clouds
+    - color_correction
+    - dof
+    - forward_shading
+    - fxaa
+    - pssm
+    - scattering
+    - skin_shading
+    - sky_ao
+    - smaa
+# screen space reflection ssr is for a better reflection
+#    - ssr
+    # - bloom
+    - env_probes
+    # - motion_blur
+#    - volumetrics
+# vxgi is global illumination
+#    - vxgi
+
+
+overrides:
+    ao:
+        blur_quality: ULTRA
+        blur_normal_factor: 1.2
+        blur_depth_factor: 0.9
+        occlusion_strength: 1.6
+        clip_length: 2
+        technique: SSAO
+        ssao_sample_radius: 80.0
+        ssao_sequence: halton_3D_8
+        ssao_bias: 0.0333
+        ssao_max_distance: 6.9
+        hbao_sample_radius: 255.0
+        hbao_ray_count: 4
+        hbao_ray_steps: 3
+        hbao_tangent_bias: 0.65
+        hbao_max_distance: 11.5
+        ssvo_sequence: halton_2D_8
+        ssvo_sphere_radius: 18.0
+        ssvo_max_distance: 0.82
+        alchemy_sample_radius: 210.0
+        alchemy_sequence: halton_2D_8
+        alchemy_max_distance: 4.75
+        ue4ao_sample_radius: 110.5
+        ue4ao_sample_sequence: halton_2D_8
+        ue4ao_max_distance: 1.87
+
+    bloom:
+        num_mipmaps: 6
+        bloom_strength: 0.8003
+        remove_fireflies: False
+        lens_dirt_factor: 0.0
+
+    clouds:
+        raymarch_steps: 160
+
+    color_correction:
+        tonemap_operator: optimized
+        reinhard_version: rgb
+        exponential_factor: 1.23
+        uc2t_shoulder_strength: 0.3352
+        uc2t_linear_strength: 0.5339
+        uc2t_linear_angle: 0.1797
+        uc2t_toe_strength: 0.3919
+        uc2t_toe_numerator: 0.0029
+        uc2t_toe_denumerator: 0.2787
+        uc2t_reference_white: 10.05
+        vignette_strength: 0.07249
+        film_grain_strength: 0.1286
+        color_lut: film_luts/default_lut.png
+        use_chromatic_aberration: True
+        chromatic_aberration_strength: 0.019
+        chromatic_aberration_samples: 1
+        manual_camera_parameters: False
+        min_exposure_value: 0.01
+        max_exposure_value: 1.0
+        exposure_scale: 1.0
+        brightness_adaption_rate: 3.6
+        darkness_adaption_rate: 0.7
+        use_sharpen: True
+        sharpen_strength: 0.5
+        sharpen_twice: False
+
+    dof:
+        focal_point: 1000.0
+        focal_size: 994.0
+        blur_strength: 0.0
+        near_blur_strength: 0.4286
+
+    env_probes:
+        probe_resolution: 128
+        diffuse_probe_resolution: 2
+        max_probes: 16
+        max_probes_per_cell: 3
+
+    forward_shading:
+
+    fxaa:
+        quality: low
+        subpixel_quality: 0.5
+        edge_threshold: 0.1853
+        min_threshold: 0.833
+
+    motion_blur:
+        num_camera_samples: 6
+        camera_blur_factor: 0.4
+        enable_object_blur: False
+        blur_factor: 0.5
+        tile_size: 32
+        max_blur_radius: 10.0
+        num_samples: 12
+
+    pssm:
+        max_distance: 50.0
+        logarithmic_factor: 3.0
+        sun_distance: 100.0
+        split_count: 4
+        resolution: 1024
+        border_bias: 0.058
+        use_pcf: True
+        filter_sequence: halton_2D_32
+        filter_radius: 0.7
+        fixed_bias: 0.11429
+        slope_bias: 0.0
+        normal_bias: 0.67
+        use_pcss: False
+        pcss_sequence: halton_2D_16
+        pcss_penumbra_size: 2.38
+        pcss_min_penumbra_size: 7.0
+        use_distant_shadows: True
+        dist_shadow_resolution: 4096
+        dist_shadow_clipsize: 400.0
+        dist_shadow_sundist: 300.0
+        scene_shadow_resolution: 512
+        scene_shadow_sundist: 300.0
+
+    scattering:
+        scattering_method: eric_bruneton
+        ground_reflectance: 0.1231
+        rayleigh_factor: 0.5
+        rayleigh_height_scale: 8.0
+        mie_height_scale: 1.3
+        mie_phase_factor: 0.3
+        beta_mie_scattering: 4.0
+        enable_godrays: False
+        atmosphere_start: 549.61
+
+    skin_shading:
+        quality: medium
+        blur_scale: 0.43
+
+    sky_ao:
+        sample_radius: 10.75
+        max_radius: 500.0
+        resolution: 1024
+        sample_sequence: poisson_2D_32
+        ao_multiplier: 0.83
+        ao_bias: 0.0
+        blend_factor: 0.01
+        capture_height: 568.75
+
+    smaa:
+        use_reprojection: True
+        smaa_quality: ultra
+        jitter_pattern: halton8
+        history_length: 8
+        jitter_amount: 0.16143
+
+    ssr:
+        effect_scale: 1.0
+        trace_steps: 64
+        history_length: 16
+        abort_on_object_infront: True
+        intial_bias: 0.1
+        hit_tolerance: 0.1
+        roughness_fade: 0.72
+        skip_invalid_samples: False
+        border_fade: 0.005
+
+    volumetrics:
+        enable_volumetric_shadows: True
+        volumetric_shadow_intensity: 8.31
+        volumetric_shadow_brightness: 1.66
+        volumetric_shadow_pow: 1.15999
+        volumetric_max_distance: 79.41429
+        volumetric_shadow_fadein_distance: 9.49
+        volumetric_num_steps: 128
+
+    vxgi:
+        grid_resolution: 256
+        grid_ws_size: 100.0
+        diffuse_cone_steps: 32
+        specular_cone_steps: 150
+

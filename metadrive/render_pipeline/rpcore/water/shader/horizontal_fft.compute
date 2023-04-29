@@ -1,0 +1,23 @@
+#version 430
+
+layout (local_size_x = 16, local_size_y = 16) in;
+uniform sampler2D source;
+uniform sampler2D precomputedWeights;
+uniform writeonly image2D dest;
+uniform int butterflyIndex;
+uniform int N;
+
+void main() {
+    ivec2 texelCoords = ivec2(gl_GlobalInvocationID.xy);
+    vec4 weights      = texelFetch(precomputedWeights, ivec2(texelCoords.x, butterflyIndex), 0);
+    int sampleIndexA  = int(weights.x * N + 0.5);
+    int sampleIndexB  = int(weights.y * N + 0.5);
+    
+    vec2 sampledValA = texelFetch(source, ivec2(sampleIndexA, texelCoords.y), 0).xy;
+    vec2 sampledValB = texelFetch(source, ivec2(sampleIndexB, texelCoords.y), 0).xy;
+    
+    vec2 weight = weights.zw * 2.0 - 1.0;
+    vec2 weightedValB = weight * sampledValB.r + weight.gr * sampledValB.g * vec2(-1,1);
+    vec2 result = sampledValA + weightedValB;
+    imageStore(dest, texelCoords, vec4(result, 0, 1));
+}

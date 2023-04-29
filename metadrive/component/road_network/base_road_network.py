@@ -96,3 +96,10 @@ class BaseRoadNetwork:
 
     def get_map_features(self, interval=2):
         raise NotImplementedError
+
+    def get_all_lanes(self):
+        """
+        This function will return all lanes in the road network
+        :return: list of lanes
+        """
+        raise NotImplementedError

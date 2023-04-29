@@ -1,0 +1,280 @@
+
+settings: !!omap
+    
+    - blur_quality:
+        type: enum
+        values: ["LOW", "MEDIUM", "HIGH", "ULTRA"]
+        default: "MEDIUM"
+        label: Blur quality
+        description: >
+            Controls the quality of the post-ao blur, higher values produce smoother
+            ambient occlusion, but also cost more performance. 
+
+    # General settings
+    - blur_normal_factor:
+        type: float
+        range: [0.1, 10.0]
+        default: 1.2
+        shader_runtime: true
+        label: Bilateral Blur Normal Factor
+        description: >
+            This setting controls the normal influence for the bilateral blur.
+            A value of 0.0 means a normal blur, and a higher value will prevent
+            blurring over normals.
+
+    - blur_depth_factor:
+        type: float
+        range: [0.1, 10.0]
+        default: 0.9
+        shader_runtime: true
+        label: Biliteral Blur Depth Factor
+        description: >
+            This setting controls the depth influence for the bilateral blur.
+            If a pixel exceeds the distance to the mid pixel by this amount, it
+            will not get weighted.
+
+    - occlusion_strength:
+        type: float
+        range: [0.1, 6.0]
+        default: 1.6
+        shader_runtime: true
+        label: Occlusion Strength
+        description: >
+            This controls the strength of the occlusion. Higher values will make
+            the occlusion look darker, and lower values will make it less
+            noticeable. You most likely will have to adjust it differently for
+            every technique.
+
+    - clip_length:
+        type: int
+        range: [1, 16]
+        default: 2
+        shader_runtime: true
+        label: Clip length
+        description: >
+            Controls how long to keep AO samples in the history. Bigger values
+            will produce a smoother effect but might also produce artifacts,
+            especially when moving.
+
+    - technique:
+        type: enum
+        values: ["SSAO", "HBAO", "SSVO", "ALCHEMY", "UE4AO"]
+        default: SSAO
+        shader_runtime: true
+        label: Technique
+        description: >
+            The kernel to use for computing ambient occlusion. The settings below
+            depend on the kernel, so choose a kernel first!
+
+
+    # Settings for SSAO
+
+    - ssao_sample_radius:
+        display_if: {technique: "SSAO"}
+        type: float
+        range: [5, 400]
+        default: 80
+        shader_runtime: true
+        label: SSAO Sample Radius
+        description: >
+            Size of the sampling radius in pixels, higher values might look better,
+            but also perform worse due to less caching.
+
+    - ssao_sequence:
+        display_if: {technique: "SSAO"}
+        type: sample_sequence
+        dimension: 3
+        default: halton_3D_8
+        shader_runtime: true
+        label: SSAO Sample Sequence
+        description: >
+            Amount and type of samples to use. A higher amount of samples provides
+            a better quality but also a decrease in performance.
+
+    - ssao_bias:
+        display_if: {technique: "SSAO"}
+        type: float
+        range: [0.0, 0.5]
+        default: 0.0333
+        shader_runtime: true
+        label: SSAO Depth Bias
+        description: >
+            This is a small bias which prevents self-occlusion artifacts on
+            curved objects.
+
+    - ssao_max_distance:
+        display_if: {technique: "SSAO"}
+        type: float
+        range: [0.0, 15.0]
+        default: 6.9
+        shader_runtime: true
+        label: SSAO Max distance
+        description: >
+            Prevents halos by specifying the maximum distance between two
+            pixels to account for ambient occlusion. The distance should be
+            in world space.
+
+    # Settings for HBAO
+
+    - hbao_sample_radius:
+        display_if: {technique: "HBAO"}
+        type: float
+        range: [5, 400]
+        default: 255.0
+        shader_runtime: true
+        label: HBAO Sample Radius
+        description: >
+            Size of the sampling radius in pixels, higher values might look better,
+            but also perform worse due to less caching.
+
+    - hbao_ray_count:
+        display_if: {technique: "HBAO"}
+        type: int
+        range: [1, 8]
+        default: 4
+        shader_runtime: true
+        label: HBAO Ray count
+        description: >
+            Amount of rays to march from the pixel position.
+
+    - hbao_ray_steps:
+        display_if: {technique: "HBAO"}
+        type: int
+        range: [1, 16]
+        default: 3
+        shader_runtime: true
+        label: HBAO Ray steps
+        description: >
+            Amount of steps to perform for each ray.
+
+    - hbao_tangent_bias:
+        display_if: {technique: "HBAO"}
+        type: float
+        range: [0.0, 1.0]
+        default: 0.65
+        shader_runtime: true
+        label: HBAO Tangent bias
+        description: >
+            Used to prevent self-occlusion on curved objects, this increases the tangent angle
+            by a fixed value.
+
+    - hbao_max_distance:
+        display_if: {technique: "HBAO"}
+        type: float
+        range: [0.01, 25.0]
+        default: 11.5
+        shader_runtime: true
+        label: HBAO Max sample distance
+        description: >
+            Maximum distance of a sample to the pixel center in world space
+
+
+    # Settings for SSVO
+    - ssvo_sequence:
+        display_if: {technique: "SSVO"}
+        type: sample_sequence
+        dimension: 2
+        default: halton_2D_8
+        shader_runtime: true
+        label: SSVO Sample Sequence
+        description: >
+            Amount and type of samples to use. A higher amount of samples
+            provides a better quality but also a decrease in performance.
+
+    - ssvo_sphere_radius:
+        display_if: {technique: "SSVO"}
+        type: float
+        range: [0.1, 40.0]
+        default: 18.0
+        shader_runtime: true
+        label: SSVO Sphere sample radius
+        description: >
+            Size of the sphere in view space to integrate. High values may produce
+            artifacts.
+
+    - ssvo_max_distance:
+        display_if: {technique: "SSVO"}
+        type: float
+        range: [0.05, 10.0]
+        default: 0.82
+        shader_runtime: true
+        label: SSVO Max distance
+        description: >
+            Maximum distance until a sample gets rejected, in world space. This prevents halos arround objects.
+
+
+    # Settings for ALCHEMY
+
+
+    - alchemy_sample_radius:
+        display_if: {technique: "ALCHEMY"}
+        type: float
+        range: [5, 400]
+        default: 210.0
+        shader_runtime: true
+        label: ALCHEMY Sample Radius
+        description: >
+            Size of the sampling radius in pixels, higher values might look better,
+            but also perform worse due to less caching.
+
+    - alchemy_sequence:
+        display_if: {technique: "ALCHEMY"}
+        type: sample_sequence
+        dimension: 2
+        default: halton_2D_8
+        shader_runtime: true
+        label: ALCHEMY Sample Sequence
+        description: >
+            Amount and type of samples to use. A higher amount of samples provides
+            a better quality but also a decrease in performance.
+
+    - alchemy_max_distance:
+        display_if: {technique: "ALCHEMY"}
+        type: float
+        range: [0.1, 20.0]
+        default: 4.75
+        shader_runtime: true
+        label: ALCHEMY Maximum distance
+        description: >
+            Specifies the maximum distance between two samples until one sample
+            is rejected. This prevents halos arround objects.
+
+
+    # Settings for UE4AO
+
+    - ue4ao_sample_radius:
+        display_if: {technique: "UE4AO"}
+        type: float
+        range: [5, 400]
+        default: 110.5
+        shader_runtime: true
+        label: UE4AO Sample Radius
+        description: >
+            Size of the sampling radius in pixels, higher values might look better,
+            but also perform worse due to less caching.
+
+    - ue4ao_sample_sequence:
+        display_if: {technique: "UE4AO"}
+        type: sample_sequence
+        dimension: 2
+        default: halton_2D_8
+        shader_runtime: true
+        label: UE4AO Sample Sequence
+        description: >
+            Amount and type of samples to use. A higher amount of samples provides
+            a better quality but also a decrease in performance.
+
+    - ue4ao_max_distance:
+        display_if: {technique: "UE4AO"}
+        type: float
+        range: [0.1, 15.0]
+        default: 1.87
+        shader_runtime: true
+        label: UE4AO Maximum distance
+        description: >
+            Specifies the maximum distance between two samples until one sample
+            is rejected. This prevents halos arround objects.
+
+
+
+daytime_settings:

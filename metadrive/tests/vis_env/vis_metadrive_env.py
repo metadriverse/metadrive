@@ -14,7 +14,7 @@ if __name__ == "__main__":
     env = MetaDriveEnv(
         {
             "num_scenarios": 1,
-            "traffic_density": 0.,
+            "traffic_density": 0.2,
             "traffic_mode": "hybrid",
             "start_seed": 22,
             # "_disable_detector_mask":True,
@@ -22,17 +22,18 @@ if __name__ == "__main__":
             # "debug": True,
             # "global_light": False,
             # "debug_static_world": True,
+            "show_interface":False,
             "cull_scene": False,
             "random_spawn_lane_index": False,
             "random_lane_width": False,
             # "image_observation": True,
             # "controller": "joystick",
-            "show_coordinates": True,
+            # "show_coordinates": True,
             "manual_control": True,
             "use_render": True,
             "accident_prob": 1,
             "decision_repeat": 5,
-            "interface_panel": [MiniMap, VehiclePanel, DepthCamera],
+            "interface_panel": [],
             "need_inverse_traffic": False,
             "rgb_clip": True,
             "map": "CCCC",
@@ -41,8 +42,12 @@ if __name__ == "__main__":
             # "random_lane_width": True,
             # "random_agent_model": True,
             "driving_reward": 1.0,
+            # "pstats": True,
             "force_destroy": False,
-            # "window_size": (500, 800),
+            # "show_skybox": False,
+            "render_pipeline": True,
+            # "camera_dist": 8,
+            # "window_size": (1600, 900),
             # "camera_dist": -1,
             # "camera_pitch": 30,
             # "camera_height": 1,
@@ -63,9 +68,9 @@ if __name__ == "__main__":
                 # "show_lane_line_detector": True,
                 # "side_detector": dict(num_lasers=2, distance=50),
                 # "lane_line_detector": dict(num_lasers=2, distance=50),
-                "show_line_to_navi_mark": True,
-                "show_navi_mark": True,
-                "show_dest_mark": True
+                # "show_line_to_navi_mark": True,
+                "show_navi_mark": False,
+                # "show_dest_mark": True
             },
         }
     )
@@ -81,6 +86,8 @@ if __name__ == "__main__":
     start = time.time()
     from metadrive.component.vehicle_module.rgb_camera import RGBCamera
     o = env.reset()
+    if env.config["render_pipeline"]:
+        env.engine.accept("5", env.engine.render_pipeline.reload_shaders)
     # env.main_camera.set_follow_lane(True)
     # env.vehicle.get_camera("rgb_camera").save_image(env.vehicle)
     # for line in env.engine.coordinate_line:

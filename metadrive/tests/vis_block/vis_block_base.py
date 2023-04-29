@@ -20,6 +20,7 @@ class TestBlock(ShowBase.ShowBase):
             self.setFrameRateMeter(True)
             self.cam.setPos(0, 0, 300)
             self.cam.lookAt(0, 0, 0)
+        self.use_render_pipeline = False
         self.map = None
         self.worldNP = None
         self.world = None
@@ -34,8 +35,26 @@ class TestBlock(ShowBase.ShowBase):
         self.block_index = 1
         self.big = None
         self.accept("f4", self.render.analyze)
+        self.accept("4", self.render.analyze)
+        self.accept("f1", self.toggleDebug)
+        self.accept("1", self.toggleDebug)
         self.vehicle = None
         self.inputs = None
+
+    def toggleDebug(self):
+        if self.debugNP is None:
+            debugNode = BulletDebugNode('Debug')
+            debugNode.showWireframe(True)
+            debugNode.showConstraints(True)
+            debugNode.showBoundingBoxes(False)
+            debugNode.showNormals(True)
+            debugNP = self.render.attachNewNode(debugNode)
+            self.physics_world.static_world.setDebugNode(debugNP.node())
+            self.debugNP = debugNP
+        if self.debugNP.isHidden():
+            self.debugNP.show()
+        else:
+            self.debugNP.hide()
 
     def vis_big(self, big):
         # self.cam.setPos(200, 700, 1000)
@@ -54,19 +73,6 @@ class TestBlock(ShowBase.ShowBase):
         self.worldNP = self.render.attachNewNode('World')
         self.world = PhysicsWorld()
         self.physics_world = self.world
-
-        # World
-        if self.debug:
-            self.debugNP = self.worldNP.attachNewNode(BulletDebugNode('Debug'))
-            self.debugNP.show()
-            self.debugNP.node().showWireframe(True)
-            self.debugNP.node().showConstraints(True)
-            self.debugNP.node().showBoundingBoxes(True)
-            self.debugNP.node().showNormals(True)
-
-            self.debugNP.showTightBounds()
-            self.debugNP.showBounds()
-            self.world.dynamic_world.setDebugNode(self.debugNP.node())
 
         # Ground (static)
         shape = BulletPlaneShape(Vec3(0, 0, 1), 0)
@@ -112,7 +118,7 @@ class TestBlock(ShowBase.ShowBase):
 
     def show_bounding_box(self, road_network):
         bound_box = road_network.get_bounding_box()
-        points = [(x, -y) for x in bound_box[:2] for y in bound_box[2:]]
+        points = [(x, y) for x in bound_box[:2] for y in bound_box[2:]]
         for k, p in enumerate(points[:-1]):
             for p_ in points[k + 1:]:
                 self.add_line((*p, 2), (*p_, 2), (1, 0., 0., 1), 2)

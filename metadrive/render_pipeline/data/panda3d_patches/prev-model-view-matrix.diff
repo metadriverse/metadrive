@@ -1,0 +1,1452 @@
+From 47c83fce1f4a96954a5db33c6be875e17a4675cc Mon Sep 17 00:00:00 2001
+From: tobspr <tobias.springer1@googlemail.com>
+Date: Sat, 27 Feb 2016 17:35:53 +0100
+Subject: [PATCH] Support for p3d_PrevModelViewMatrix, populate previous
+ transform during cull stage
+
+---
+ panda/src/collide/collisionVisualizer.cxx          |  7 +-
+ panda/src/display/callbackGraphicsWindow.cxx       |  3 +-
+ panda/src/display/graphicsEngine.cxx               |  4 ++
+ panda/src/display/graphicsStateGuardian.I          |  9 +++
+ panda/src/display/graphicsStateGuardian.cxx        | 21 +++++-
+ panda/src/display/graphicsStateGuardian.h          |  9 +++
+ panda/src/dxgsg9/dxGraphicsStateGuardian9.cxx      |  8 ++-
+ panda/src/dxgsg9/dxGraphicsStateGuardian9.h        |  4 +-
+ panda/src/glstuff/glCgShaderContext_src.cxx        |  8 +++
+ panda/src/glstuff/glCgShaderContext_src.h          |  2 +
+ panda/src/glstuff/glGraphicsStateGuardian_src.cxx  | 13 ++--
+ panda/src/glstuff/glGraphicsStateGuardian_src.h    |  3 +-
+ panda/src/glstuff/glShaderContext_src.cxx          | 12 ++++
+ panda/src/glstuff/glShaderContext_src.h            |  2 +
+ panda/src/gobj/shader.cxx                          |  2 +
+ panda/src/gobj/shader.h                            |  4 ++
+ panda/src/gobj/shaderContext.h                     |  2 +-
+ panda/src/gsgbase/graphicsStateGuardianBase.h      |  4 ++
+ panda/src/parametrics/ropeNode.cxx                 | 12 ++--
+ panda/src/parametrics/sheetNode.cxx                |  3 +-
+ panda/src/pgraph/config_pgraph.cxx                 |  7 ++
+ panda/src/pgraph/config_pgraph.h                   |  1 +
+ panda/src/pgraph/cullTraverser.I                   |  3 +
+ panda/src/pgraph/cullTraverser.cxx                 | 10 ++-
+ panda/src/pgraph/cullTraverserData.I               | 22 ++++++
+ panda/src/pgraph/cullTraverserData.cxx             |  8 +++
+ panda/src/pgraph/cullTraverserData.h               |  5 ++
+ panda/src/pgraph/cullableObject.I                  | 29 ++++++--
+ panda/src/pgraph/cullableObject.h                  |  5 ++
+ panda/src/pgraph/geomNode.cxx                      |  5 +-
+ panda/src/pgraph/nodePath.cxx                      | 66 +++++++++++++-----
+ panda/src/pgraph/nodePath.h                        | 81 ++++++++++++++--------
+ panda/src/pgraph/occluderNode.cxx                  |  6 +-
+ panda/src/pgraph/planeNode.cxx                     |  3 +-
+ panda/src/pgraph/portalNode.cxx                    |  2 +
+ panda/src/pgraph/sceneSetup.I                      | 19 +++++
+ panda/src/pgraph/sceneSetup.h                      |  4 ++
+ panda/src/pgraphnodes/callbackNode.cxx             |  3 +-
+ panda/src/pgraphnodes/computeNode.cxx              |  3 +-
+ panda/src/pgraphnodes/lodNode.cxx                  |  2 +
+ panda/src/pgraphnodes/nodeCullCallbackData.cxx     |  3 +-
+ .../src/tinydisplay/tinyGraphicsStateGuardian.cxx  |  7 +-
+ panda/src/tinydisplay/tinyGraphicsStateGuardian.h  |  3 +-
+ 43 files changed, 349 insertions(+), 80 deletions(-)
+
+diff --git a/panda/src/collide/collisionVisualizer.cxx b/panda/src/collide/collisionVisualizer.cxx
+index 19699b9..cceb6c5 100644
+--- a/panda/src/collide/collisionVisualizer.cxx
++++ b/panda/src/collide/collisionVisualizer.cxx
+@@ -112,6 +112,7 @@ cull_callback(CullTraverser *trav, CullTraverserData &data) {
+     xform_data._net_transform = TransformState::make_identity();
+     xform_data._view_frustum = trav->get_view_frustum();
+     xform_data.apply_transform_and_state(trav, net_transform,
++                                         TransformState::make_identity(),
+                                          RenderState::make_empty(),
+                                          RenderEffects::make_empty(),
+                                          ClipPlaneAttrib::make());
+@@ -187,7 +188,8 @@ cull_callback(CullTraverser *trav, CullTraverserData &data) {
+ 
+           CullableObject *object =
+             new CullableObject(geom, point_state,
+-                               xform_data.get_internal_transform(trav));
++                               xform_data.get_internal_transform(trav),
++                               xform_data.get_prev_internal_transform(trav));
+ 
+           trav->get_cull_handler()->record_object(object, trav);
+         }
+@@ -216,7 +218,8 @@ cull_callback(CullTraverser *trav, CullTraverserData &data) {
+ 
+           CullableObject *object =
+             new CullableObject(geom, empty_state,
+-                               xform_data.get_internal_transform(trav));
++                               xform_data.get_internal_transform(trav),
++                               xform_data.get_prev_internal_transform(trav));
+ 
+           trav->get_cull_handler()->record_object(object, trav);
+         }
+diff --git a/panda/src/display/callbackGraphicsWindow.cxx b/panda/src/display/callbackGraphicsWindow.cxx
+index f9c2362..ebd5b37 100644
+--- a/panda/src/display/callbackGraphicsWindow.cxx
++++ b/panda/src/display/callbackGraphicsWindow.cxx
+@@ -108,7 +108,8 @@ end_frame(FrameMode mode, Thread *current_thread) {
+   if (_render_callback != NULL) {
+     // In case the callback or the application hosting the OpenGL context
+     // wants to do more rendering, let's give it a blank slate.
+-    _gsg->set_state_and_transform(RenderState::make_empty(), _gsg->get_internal_transform());
++    _gsg->set_state_and_transform(RenderState::make_empty(), _gsg->get_internal_transform(),
++                                  _gsg->get_prev_internal_transform());
+     _gsg->clear_before_callback();
+ 
+     RenderCallbackData data(this, RCT_end_frame, mode);
+diff --git a/panda/src/display/graphicsEngine.cxx b/panda/src/display/graphicsEngine.cxx
+index 41f6df5..7eed22f 100644
+--- a/panda/src/display/graphicsEngine.cxx
++++ b/panda/src/display/graphicsEngine.cxx
+@@ -1805,6 +1805,7 @@ setup_scene(GraphicsStateGuardian *gsg, DisplayRegionPipelineReader *dr) {
+   NodePath scene_parent = scene_root.get_parent(current_thread);
+   CPT(TransformState) camera_transform = camera.get_transform(scene_parent, current_thread);
+   CPT(TransformState) world_transform = scene_parent.get_transform(camera, current_thread);
++  CPT(TransformState) prev_world_transform = scene_parent.get_prev_transform(camera, current_thread);
+ 
+   if (camera_transform->is_invalid()) {
+     // There must be a singular transform over the scene.
+@@ -1857,6 +1858,9 @@ setup_scene(GraphicsStateGuardian *gsg, DisplayRegionPipelineReader *dr) {
+   CPT(TransformState) cs_world_transform = cs_transform->compose(world_transform);
+   scene_setup->set_cs_world_transform(cs_world_transform);
+ 
++  CPT(TransformState) prev_cs_world_transform = cs_transform->compose(prev_world_transform);
++  scene_setup->set_prev_cs_world_transform(prev_cs_world_transform);
++
+   // Make sure that the GSG has a ShaderGenerator for the munger to use.  We
+   // have to do this here because the ShaderGenerator needs a host window
+   // pointer.  Hopefully we'll be able to eliminate that requirement in the
+diff --git a/panda/src/display/graphicsStateGuardian.I b/panda/src/display/graphicsStateGuardian.I
+index db8e1f1..d330100 100644
+--- a/panda/src/display/graphicsStateGuardian.I
++++ b/panda/src/display/graphicsStateGuardian.I
+@@ -846,6 +846,15 @@ INLINE CPT(TransformState) GraphicsStateGuardian::
+ get_internal_transform() const {
+   return _internal_transform;
+ }
++/**
++ * Fetches the previous external net transform.  This transform is generally
++ * only set when geometry is about to be rendered.  Therefore, this "get"
++ * function is typically only meaningful during the geometry rendering process.
++ */
++INLINE CPT(TransformState) GraphicsStateGuardian::
++get_prev_internal_transform() const {
++  return _prev_internal_transform;
++}
+ 
+ /**
+  * Returns the current display region being rendered to, as set by the last
+diff --git a/panda/src/display/graphicsStateGuardian.cxx b/panda/src/display/graphicsStateGuardian.cxx
+index 6f5e873..c0b1cab 100644
+--- a/panda/src/display/graphicsStateGuardian.cxx
++++ b/panda/src/display/graphicsStateGuardian.cxx
+@@ -146,6 +146,7 @@ GraphicsStateGuardian(CoordinateSystem internal_coordinate_system,
+ {
+   _coordinate_system = CS_invalid;
+   _internal_transform = TransformState::make_identity();
++  _prev_internal_transform = _prev_internal_transform;
+ 
+   set_coordinate_system(get_default_coordinate_system());
+ 
+@@ -1189,6 +1190,9 @@ fetch_specified_part(Shader::ShaderMatInput part, InternalName *name,
+   case Shader::SMO_model_to_apiview: {
+     return &(get_internal_transform()->get_mat());
+   }
++  case Shader::SMO_prev_model_to_apiview: {
++    return &(get_prev_internal_transform()->get_mat());
++  }
+   case Shader::SMO_view_to_model: {
+     t = get_external_transform()->get_inverse()->get_mat();
+     return &t;
+@@ -1197,6 +1201,10 @@ fetch_specified_part(Shader::ShaderMatInput part, InternalName *name,
+     t = get_internal_transform()->get_inverse()->get_mat();
+     return &t;
+   }
++  case Shader::SMO_prev_apiview_to_model: {
++    t = get_prev_internal_transform()->get_inverse()->get_mat();
++    return &t;
++  }
+   case Shader::SMO_apiview_to_view: {
+     return &(_inv_cs_transform->get_mat());
+   }
+@@ -2308,6 +2316,15 @@ reset() {
+ }
+ 
+ /**
++ * @see set_state_and_transform(const RenderState*, const TransformState*, const TransformState*)
++ */
++void GraphicsStateGuardian::
++set_state_and_transform(const RenderState *state,
++                        const TransformState *trans) {
++  set_state_and_transform(state, trans, trans);
++}
++
++/**
+  * Simultaneously resets the render state and the transform state.
+  *
+  * This transform specified is the "internal" net transform, already converted
+@@ -2321,9 +2338,11 @@ reset() {
+  */
+ void GraphicsStateGuardian::
+ set_state_and_transform(const RenderState *state,
+-                        const TransformState *trans) {
++                        const TransformState *trans,
++                        const TransformState *prev_transform) {
+ }
+ 
++
+ /**
+  * Clears the framebuffer within the current DisplayRegion, according to the
+  * flags indicated by the given DrawableRegion object.
+diff --git a/panda/src/display/graphicsStateGuardian.h b/panda/src/display/graphicsStateGuardian.h
+index 401c538..ad81f17 100644
+--- a/panda/src/display/graphicsStateGuardian.h
++++ b/panda/src/display/graphicsStateGuardian.h
+@@ -320,6 +320,10 @@ public:
+   virtual void set_state_and_transform(const RenderState *state,
+                                        const TransformState *transform);
+ 
++  virtual void set_state_and_transform(const RenderState *state,
++                                       const TransformState *transform,
++                                       const TransformState *prev_transform);
++
+   virtual PN_stdfloat compute_distance_to(const LPoint3 &point) const;
+ 
+   virtual void clear(DrawableRegion *clearable);
+@@ -384,6 +388,7 @@ public:
+ 
+   INLINE CPT(TransformState) get_external_transform() const;
+   INLINE CPT(TransformState) get_internal_transform() const;
++  INLINE CPT(TransformState) get_prev_internal_transform() const;
+ 
+   RenderBuffer get_render_buffer(int buffer_type, const FrameBufferProperties &prop);
+ 
+@@ -473,6 +478,10 @@ protected:
+   // The current transform, as of the last call to set_state_and_transform().
+   CPT(TransformState) _internal_transform;
+ 
++  // The previous transform, as of the last call to the 3 parameter overload of
++  // set_state_and_transform()
++  CPT(TransformState) _prev_internal_transform;
++
+   // The current TextureAttrib is a special case; we may further restrict it
+   // (according to graphics cards limits) or extend it (according to
+   // ColorScaleAttribs in effect) beyond what is specifically requested in the
+diff --git a/panda/src/dxgsg9/dxGraphicsStateGuardian9.cxx b/panda/src/dxgsg9/dxGraphicsStateGuardian9.cxx
+index 5cc7d8d..da726f6 100644
+--- a/panda/src/dxgsg9/dxGraphicsStateGuardian9.cxx
++++ b/panda/src/dxgsg9/dxGraphicsStateGuardian9.cxx
+@@ -758,7 +758,7 @@ clear(DrawableRegion *clearable) {
+     return;
+   }
+ 
+-  set_state_and_transform(RenderState::make_empty(), _internal_transform);
++  set_state_and_transform(RenderState::make_empty(), _internal_transform, _prev_internal_transform);
+ 
+   D3DCOLOR color_clear_value = LColor_to_D3DCOLOR(clearable->get_clear_color());
+   PN_stdfloat depth_clear_value = clearable->get_clear_depth();
+@@ -3027,7 +3027,8 @@ do_issue_shade_model() {
+  */
+ void DXGraphicsStateGuardian9::
+ set_state_and_transform(const RenderState *target,
+-                        const TransformState *transform) {
++                        const TransformState *transform,
++                        const TransformState *prev_transform) {
+ #ifndef NDEBUG
+   if (gsg_cat.is_spam()) {
+     gsg_cat.spam() << "Setting GSG state to " << (void *)target << ":\n";
+@@ -3036,6 +3037,7 @@ set_state_and_transform(const RenderState *target,
+ #endif
+   _state_pcollector.add_level(1);
+   PStatTimer timer1(_draw_set_state_pcollector);
++  _prev_internal_transform = prev_transform;
+ 
+   if (transform != _internal_transform) {
+     // PStatTimer timer(_draw_set_state_transform_pcollector);
+@@ -3044,6 +3046,7 @@ set_state_and_transform(const RenderState *target,
+     do_issue_transform();
+   }
+ 
++
+   if (target == _state_rs && (_state_mask | _inv_state_mask).is_all_on()) {
+     return;
+   }
+@@ -3233,6 +3236,7 @@ set_state_and_transform(const RenderState *target,
+   _state_rs = _target_rs;
+ }
+ 
++
+ /**
+  * Called the first time a particular light has been bound to a given id
+  * within a frame, this should set up the associated hardware light with the
+diff --git a/panda/src/dxgsg9/dxGraphicsStateGuardian9.h b/panda/src/dxgsg9/dxGraphicsStateGuardian9.h
+index 4a51d21..b6afb00 100644
+--- a/panda/src/dxgsg9/dxGraphicsStateGuardian9.h
++++ b/panda/src/dxgsg9/dxGraphicsStateGuardian9.h
+@@ -150,7 +150,9 @@ public:
+   INLINE static DWORD LColor_to_D3DCOLOR(const LColor &cLColor);
+ 
+   virtual void set_state_and_transform(const RenderState *state,
+-                                       const TransformState *transform);
++                                       const TransformState *transform,
++                                       const TransformState *prev_transform);
++
+ 
+   bool check_dx_allocation (HRESULT result, int allocation_size, int attempts);
+ 
+diff --git a/panda/src/glstuff/glCgShaderContext_src.cxx b/panda/src/glstuff/glCgShaderContext_src.cxx
+index c857948..5a0aa4e 100644
+--- a/panda/src/glstuff/glCgShaderContext_src.cxx
++++ b/panda/src/glstuff/glCgShaderContext_src.cxx
+@@ -384,6 +384,7 @@ unbind() {
+ }
+ 
+ /**
++ *
+  * This function gets called whenever the RenderState or TransformState has
+  * changed, but the Shader itself has not changed.  It loads new values into
+  * the shader's parameters.
+@@ -391,6 +392,7 @@ unbind() {
+ void CLP(CgShaderContext)::
+ set_state_and_transform(const RenderState *target_rs,
+                         const TransformState *modelview_transform,
++                        const TransformState *prev_modelview_transform,
+                         const TransformState *projection_transform) {
+ 
+   if (!valid()) {
+@@ -404,6 +406,12 @@ set_state_and_transform(const RenderState *target_rs,
+     _modelview_transform = modelview_transform;
+     altered |= Shader::SSD_transform;
+   }
++
++  if (_prev_modelview_transform != prev_modelview_transform) {
++    _prev_modelview_transform = prev_modelview_transform;
++    altered |= Shader::SSD_transform;
++  }
++
+   if (_projection_transform != projection_transform) {
+     _projection_transform = projection_transform;
+     altered |= Shader::SSD_projection;
+diff --git a/panda/src/glstuff/glCgShaderContext_src.h b/panda/src/glstuff/glCgShaderContext_src.h
+index ae76989..c229444 100644
+--- a/panda/src/glstuff/glCgShaderContext_src.h
++++ b/panda/src/glstuff/glCgShaderContext_src.h
+@@ -39,6 +39,7 @@ public:
+ 
+   void set_state_and_transform(const RenderState *state,
+                                const TransformState *modelview_transform,
++                               const TransformState *prev_modelview_transform,
+                                const TransformState *projection_transform);
+ 
+   void issue_parameters(int altered) OVERRIDE;
+@@ -77,6 +78,7 @@ private:
+ 
+   WCPT(RenderState) _state_rs;
+   CPT(TransformState) _modelview_transform;
++  CPT(TransformState) _prev_modelview_transform;
+   CPT(TransformState) _projection_transform;
+   GLint _frame_number;
+ 
+diff --git a/panda/src/glstuff/glGraphicsStateGuardian_src.cxx b/panda/src/glstuff/glGraphicsStateGuardian_src.cxx
+index 2a9ace7..1fb4fcd 100644
+--- a/panda/src/glstuff/glGraphicsStateGuardian_src.cxx
++++ b/panda/src/glstuff/glGraphicsStateGuardian_src.cxx
+@@ -2869,7 +2869,8 @@ clear(DrawableRegion *clearable) {
+ 
+   // XXX rdb: Is this line really necessary?  Could we perhaps just reset the
+   // color write mask and other relevant attributes?
+-  set_state_and_transform(RenderState::make_empty(), _internal_transform);
++  set_state_and_transform(RenderState::make_empty(), _internal_transform,
++                          _prev_internal_transform);
+ 
+   int mask = 0;
+ 
+@@ -5889,7 +5890,8 @@ framebuffer_copy_to_ram(Texture *tex, int view, int z,
+   // Bug fix for RE, RE2, and VTX - need to disable texturing in order for
+   // glReadPixels() to work NOTE: reading the depth buffer is *much* slower
+   // than reading the color buffer
+-  set_state_and_transform(RenderState::make_empty(), _internal_transform);
++  set_state_and_transform(RenderState::make_empty(), _internal_transform,
++                          _prev_internal_transform);
+ 
+   int xo, yo, w, h;
+   dr->get_region_pixels(xo, yo, w, h);
+@@ -9486,7 +9488,8 @@ end_bind_clip_planes() {
+  */
+ void CLP(GraphicsStateGuardian)::
+ set_state_and_transform(const RenderState *target,
+-                        const TransformState *transform) {
++                        const TransformState *transform,
++                        const TransformState *prev_transform) {
+   report_my_gl_errors();
+ #ifndef NDEBUG
+   if (gsg_cat.is_spam()) {
+@@ -9498,6 +9501,8 @@ set_state_and_transform(const RenderState *target,
+   _state_pcollector.add_level(1);
+   PStatGPUTimer timer1(this, _draw_set_state_pcollector);
+ 
++  _prev_internal_transform = prev_transform;
++
+   if (transform != _internal_transform) {
+     // PStatGPUTimer timer(this, _draw_set_state_transform_pcollector);
+     _transform_state_pcollector.add_level(1);
+@@ -9529,7 +9534,7 @@ set_state_and_transform(const RenderState *target,
+ #endif
+ 
+   if (_current_shader_context != NULL) {
+-    _current_shader_context->set_state_and_transform(target, transform, _projection_mat);
++    _current_shader_context->set_state_and_transform(target, transform, prev_transform, _projection_mat);
+   }
+ #endif
+ 
+diff --git a/panda/src/glstuff/glGraphicsStateGuardian_src.h b/panda/src/glstuff/glGraphicsStateGuardian_src.h
+index c2909e3..b1267ba 100644
+--- a/panda/src/glstuff/glGraphicsStateGuardian_src.h
++++ b/panda/src/glstuff/glGraphicsStateGuardian_src.h
+@@ -375,7 +375,8 @@ public:
+   INLINE int get_gl_version_minor() const;
+ 
+   virtual void set_state_and_transform(const RenderState *state,
+-                                       const TransformState *transform);
++                                       const TransformState *transform,
++                                       const TransformState *prev_transform);
+ 
+   void bind_fbo(GLuint fbo);
+   virtual bool get_supports_cg_profile(const string &name) const;
+diff --git a/panda/src/glstuff/glShaderContext_src.cxx b/panda/src/glstuff/glShaderContext_src.cxx
+index 708347a..a7759af 100644
+--- a/panda/src/glstuff/glShaderContext_src.cxx
++++ b/panda/src/glstuff/glShaderContext_src.cxx
+@@ -769,6 +769,12 @@ reflect_uniform(int i, char *name_buffer, GLsizei name_buflen) {
+                                 : Shader::SMO_model_to_apiview;
+         bind._part[1] = Shader::SMO_identity;
+ 
++      } else if (matrix_name == "PrevModelViewMatrix") {
++        bind._func = Shader::SMF_first;
++        bind._part[0] = inverse ? Shader::SMO_prev_apiview_to_model
++                                : Shader::SMO_prev_model_to_apiview;
++        bind._part[1] = Shader::SMO_identity;
++
+       } else if (matrix_name == "ProjectionMatrix") {
+         bind._func = Shader::SMF_first;
+         bind._part[0] = inverse ? Shader::SMO_apiclip_to_apiview
+@@ -1789,6 +1795,7 @@ unbind() {
+ void CLP(ShaderContext)::
+ set_state_and_transform(const RenderState *target_rs,
+                         const TransformState *modelview_transform,
++                        const TransformState *prev_modelview_transform,
+                         const TransformState *projection_transform) {
+ 
+   // Find out which state properties have changed.
+@@ -1798,6 +1805,11 @@ set_state_and_transform(const RenderState *target_rs,
+     _modelview_transform = modelview_transform;
+     altered |= Shader::SSD_transform;
+   }
++  if (_prev_modelview_transform != prev_modelview_transform) {
++    _prev_modelview_transform = prev_modelview_transform;
++    altered |= Shader::SSD_transform;
++  }
++
+   if (_projection_transform != projection_transform) {
+     _projection_transform = projection_transform;
+     altered |= Shader::SSD_projection;
+diff --git a/panda/src/glstuff/glShaderContext_src.h b/panda/src/glstuff/glShaderContext_src.h
+index 4209ec6..b260f1c 100644
+--- a/panda/src/glstuff/glShaderContext_src.h
++++ b/panda/src/glstuff/glShaderContext_src.h
+@@ -48,6 +48,7 @@ public:
+ 
+   void set_state_and_transform(const RenderState *state,
+                                const TransformState *modelview_transform,
++                               const TransformState *prev_modelview_transform,
+                                const TransformState *projection_transform);
+ 
+   void issue_parameters(int altered);
+@@ -69,6 +70,7 @@ private:
+ 
+   WCPT(RenderState) _state_rs;
+   CPT(TransformState) _modelview_transform;
++  CPT(TransformState) _prev_modelview_transform;
+   CPT(TransformState) _projection_transform;
+ 
+ /*
+diff --git a/panda/src/gobj/shader.cxx b/panda/src/gobj/shader.cxx
+index 2905d54..552f665 100644
+--- a/panda/src/gobj/shader.cxx
++++ b/panda/src/gobj/shader.cxx
+@@ -390,6 +390,8 @@ cp_dependency(ShaderMatInput inp) {
+       (inp == SMO_view_to_model) ||
+       (inp == SMO_model_to_apiview) ||
+       (inp == SMO_apiview_to_model) ||
++      (inp == SMO_prev_model_to_apiview) ||
++      (inp == SMO_prev_apiview_to_model) ||
+       (inp == SMO_view_to_world) ||
+       (inp == SMO_world_to_view) ||
+       (inp == SMO_view_x_to_view) ||
+diff --git a/panda/src/gobj/shader.h b/panda/src/gobj/shader.h
+index dbdde6f..f517565 100644
+--- a/panda/src/gobj/shader.h
++++ b/panda/src/gobj/shader.h
+@@ -201,6 +201,10 @@ public:
+     // Hack for text rendering.  Don't use in user shaders.
+     SMO_tex_is_alpha_i,
+ 
++    // Previous frame transform
++    SMO_prev_apiview_to_model,
++    SMO_prev_model_to_apiview,
++
+     SMO_INVALID
+   };
+ 
+diff --git a/panda/src/gobj/shaderContext.h b/panda/src/gobj/shaderContext.h
+index 2b356ce..af2c81d 100644
+--- a/panda/src/gobj/shaderContext.h
++++ b/panda/src/gobj/shaderContext.h
+@@ -32,7 +32,7 @@ class EXPCL_PANDA_GOBJ ShaderContext: public SavedContext {
+ public:
+   INLINE ShaderContext(Shader *se);
+ 
+-  INLINE virtual void set_state_and_transform(const RenderState *, const TransformState *, const TransformState*) {};
++  INLINE virtual void set_state_and_transform(const RenderState *, const TransformState *, const TransformState *, const TransformState *) {};
+ 
+   INLINE virtual bool valid() { return false; }
+   INLINE virtual void bind() {};
+diff --git a/panda/src/gsgbase/graphicsStateGuardianBase.h b/panda/src/gsgbase/graphicsStateGuardianBase.h
+index 2fecf30..ace7f38 100644
+--- a/panda/src/gsgbase/graphicsStateGuardianBase.h
++++ b/panda/src/gsgbase/graphicsStateGuardianBase.h
+@@ -170,6 +170,10 @@ public:
+   virtual void set_state_and_transform(const RenderState *state,
+                                        const TransformState *transform)=0;
+ 
++  virtual void set_state_and_transform(const RenderState *state,
++                                       const TransformState *transform,
++                                       const TransformState *prev_transform)=0;
++
+   // This function may only be called during a render traversal; it will
+   // compute the distance to the indicated point, assumed to be in eye
+   // coordinates, from the camera plane.  This is a virtual function because
+diff --git a/panda/src/parametrics/ropeNode.cxx b/panda/src/parametrics/ropeNode.cxx
+index c799595..6705f66 100644
+--- a/panda/src/parametrics/ropeNode.cxx
++++ b/panda/src/parametrics/ropeNode.cxx
+@@ -334,7 +334,8 @@ render_thread(CullTraverser *trav, CullTraverserData &data,
+ 
+   CullableObject *object =
+     new CullableObject(geom, state,
+-                       data.get_internal_transform(trav));
++                       data.get_internal_transform(trav),
++                       data.get_prev_internal_transform(trav));
+   trav->get_cull_handler()->record_object(object, trav);
+ }
+ 
+@@ -380,7 +381,8 @@ render_tape(CullTraverser *trav, CullTraverserData &data,
+ 
+   CullableObject *object =
+     new CullableObject(geom, state,
+-                       data.get_internal_transform(trav));
++                       data.get_internal_transform(trav),
++                       data.get_prev_internal_transform(trav));
+   trav->get_cull_handler()->record_object(object, trav);
+ }
+ 
+@@ -433,7 +435,8 @@ render_billboard(CullTraverser *trav, CullTraverserData &data,
+ 
+   CullableObject *object =
+     new CullableObject(geom, state,
+-                       data.get_internal_transform(trav));
++                       data.get_internal_transform(trav),
++                       data.get_prev_internal_transform(trav));
+   trav->get_cull_handler()->record_object(object, trav);
+ }
+ 
+@@ -494,7 +497,8 @@ render_tube(CullTraverser *trav, CullTraverserData &data,
+ 
+   CullableObject *object =
+     new CullableObject(geom, state,
+-                       data.get_internal_transform(trav));
++                       data.get_internal_transform(trav),
++                       data.get_prev_internal_transform(trav));
+   trav->get_cull_handler()->record_object(object, trav);
+ }
+ 
+diff --git a/panda/src/parametrics/sheetNode.cxx b/panda/src/parametrics/sheetNode.cxx
+index 34496bc..f745d6e 100644
+--- a/panda/src/parametrics/sheetNode.cxx
++++ b/panda/src/parametrics/sheetNode.cxx
+@@ -331,7 +331,8 @@ render_sheet(CullTraverser *trav, CullTraverserData &data,
+ 
+   CullableObject *object =
+     new CullableObject(geom, state,
+-                       data.get_internal_transform(trav));
++                       data.get_internal_transform(trav),
++                       data.get_prev_internal_transform(trav));
+   trav->get_cull_handler()->record_object(object, trav);
+ }
+ 
+diff --git a/panda/src/pgraph/config_pgraph.cxx b/panda/src/pgraph/config_pgraph.cxx
+index d5427a6..1360bbf 100644
+--- a/panda/src/pgraph/config_pgraph.cxx
++++ b/panda/src/pgraph/config_pgraph.cxx
+@@ -369,6 +369,13 @@ ConfigVariableBool allow_live_flatten
+           "only has an effect when Panda is not compiled for a release "
+           "build."));
+ 
++
++ConfigVariableBool always_store_prev_transform
++("always-store-prev-transform", false,
++ PRC_DESC("When setting this to true, the previous transform is kept on "
++          "nodes. This makes NodePath::set_pos and all other transform changes "
++          "behave like their fluid variants, e.g. set_fluid_pos."));
++
+ /**
+  * Initializes the library.  This must be called at least once before any of
+  * the functions or classes in this library can be used.  Normally it will be
+diff --git a/panda/src/pgraph/config_pgraph.h b/panda/src/pgraph/config_pgraph.h
+index 988c9b1..4ba1ad5 100644
+--- a/panda/src/pgraph/config_pgraph.h
++++ b/panda/src/pgraph/config_pgraph.h
+@@ -72,6 +72,7 @@ extern ConfigVariableList load_file_type;
+ extern ConfigVariableString default_model_extension;
+ 
+ extern ConfigVariableBool allow_live_flatten;
++extern ConfigVariableBool always_store_prev_transform;
+ 
+ extern EXPCL_PANDA_PGRAPH void init_libpgraph();
+ 
+diff --git a/panda/src/pgraph/cullTraverser.I b/panda/src/pgraph/cullTraverser.I
+index 180b94b..8441ba0 100644
+--- a/panda/src/pgraph/cullTraverser.I
++++ b/panda/src/pgraph/cullTraverser.I
+@@ -227,6 +227,8 @@ do_traverse(CullTraverserData &data) {
+ 
+       data.apply_transform_and_state(this);
+ 
++#if defined(HAVE_CG) || defined(SUPPORT_FIXED_FUNCTION)
++      // Fog is only supported with the shader generator or the FFP.
+       const FogAttrib *fog = (const FogAttrib *)
+         node_reader->get_state()->get_attrib(FogAttrib::get_class_slot());
+ 
+@@ -237,6 +239,7 @@ do_traverse(CullTraverserData &data) {
+         // it.
+         fog->get_fog()->adjust_to_camera(get_camera_transform());
+       }
++#endif
+ 
+       if (fancy_bits & PandaNode::FB_cull_callback) {
+         PandaNode *node = data.node();
+diff --git a/panda/src/pgraph/cullTraverser.cxx b/panda/src/pgraph/cullTraverser.cxx
+index 5d08b4e..df8ae99 100644
+--- a/panda/src/pgraph/cullTraverser.cxx
++++ b/panda/src/pgraph/cullTraverser.cxx
+@@ -128,7 +128,9 @@ traverse(const NodePath &root) {
+     // Store this pointer in this
+     set_portal_clipper(&portal_viewer);
+ 
+-    CullTraverserData data(root, TransformState::make_identity(),
++    CullTraverserData data(root,
++                           TransformState::make_identity(),
++                           TransformState::make_identity(),
+                            _initial_state, _view_frustum,
+                            _current_thread);
+ 
+@@ -142,13 +144,17 @@ traverse(const NodePath &root) {
+     // Render the frustum relative to the cull center.
+     NodePath cull_center = _scene_setup->get_cull_center();
+     CPT(TransformState) transform = cull_center.get_transform(root);
++    CPT(TransformState) prev_transform = cull_center.get_prev_transform(root);
+ 
+     CullTraverserData my_data(data, portal_viewer._previous);
+     my_data._net_transform = my_data._net_transform->compose(transform);
++    my_data._prev_net_transform = my_data._prev_net_transform->compose(prev_transform);
+     traverse(my_data);
+ 
+   } else {
+-    CullTraverserData data(root, TransformState::make_identity(),
++    CullTraverserData data(root,
++                           TransformState::make_identity(),
++                           TransformState::make_identity(),
+                            _initial_state, _view_frustum,
+                            _current_thread);
+ 
+diff --git a/panda/src/pgraph/cullTraverserData.I b/panda/src/pgraph/cullTraverserData.I
+index 4367d16..7c1a79f 100644
+--- a/panda/src/pgraph/cullTraverserData.I
++++ b/panda/src/pgraph/cullTraverserData.I
+@@ -17,12 +17,14 @@
+ INLINE CullTraverserData::
+ CullTraverserData(const NodePath &start,
+                   const TransformState *net_transform,
++                  const TransformState *prev_net_transform,
+                   const RenderState *state,
+                   GeometricBoundingVolume *view_frustum,
+                   Thread *current_thread) :
+   _node_path(start),
+   _node_reader(start.node(), current_thread),
+   _net_transform(net_transform),
++  _prev_net_transform(prev_net_transform),
+   _state(state),
+   _view_frustum(view_frustum),
+   _cull_planes(CullPlanes::make_empty()),
+@@ -42,6 +44,7 @@ CullTraverserData(const CullTraverserData &copy) :
+   _node_path(copy._node_path),
+   _node_reader(copy._node_reader),
+   _net_transform(copy._net_transform),
++  _prev_net_transform(copy._prev_net_transform),
+   _state(copy._state),
+   _view_frustum(copy._view_frustum),
+   _cull_planes(copy._cull_planes),
+@@ -58,6 +61,7 @@ operator = (const CullTraverserData &copy) {
+   _node_path = copy._node_path;
+   _node_reader = copy._node_reader;
+   _net_transform = copy._net_transform;
++  _prev_net_transform = copy._prev_net_transform;
+   _state = copy._state;
+   _view_frustum = copy._view_frustum;
+   _cull_planes = copy._cull_planes;
+@@ -74,6 +78,7 @@ CullTraverserData(const CullTraverserData &parent, PandaNode *child) :
+   _node_path(parent._node_path, child),
+   _node_reader(child, parent._node_reader.get_current_thread()),
+   _net_transform(parent._net_transform),
++  _prev_net_transform(parent._prev_net_transform),
+   _state(parent._state),
+   _view_frustum(parent._view_frustum),
+   _cull_planes(parent._cull_planes),
+@@ -134,6 +139,14 @@ INLINE CPT(TransformState) CullTraverserData::
+ get_internal_transform(const CullTraverser *trav) const {
+   return trav->get_scene()->get_cs_world_transform()->compose(_net_transform);
+ }
++/**
++ * Returns the previous internal transform: the modelview transform in the GSG's
++ * internal coordinate system in the last frame.
++ */
++INLINE CPT(TransformState) CullTraverserData::
++get_prev_internal_transform(const CullTraverser *trav) const {
++  return trav->get_scene()->get_prev_cs_world_transform()->compose(_prev_net_transform);
++}
+ 
+ /**
+  * Returns the net transform: the relative transform from root of the scene
+@@ -145,6 +158,15 @@ get_net_transform(const CullTraverser *) const {
+ }
+ 
+ /**
++ * Returns the previous net transform: the relative transform from root of the scene
++ * graph to the current node in the last frame.
++ */
++INLINE const TransformState *CullTraverserData::
++get_prev_net_transform(const CullTraverser *) const {
++  return _prev_net_transform;
++}
++
++/**
+  * Returns true if the current node is within the view frustum, false
+  * otherwise.  If the node's bounding volume falls completely within the view
+  * frustum, this will also reset the view frustum pointer, saving some work
+diff --git a/panda/src/pgraph/cullTraverserData.cxx b/panda/src/pgraph/cullTraverserData.cxx
+index 186869c..e67d45d 100644
+--- a/panda/src/pgraph/cullTraverserData.cxx
++++ b/panda/src/pgraph/cullTraverserData.cxx
+@@ -47,6 +47,7 @@ apply_transform_and_state(CullTraverser *trav) {
+   _node_reader.compose_draw_mask(_draw_mask);
+ 
+   apply_transform_and_state(trav, _node_reader.get_transform(),
++                            _node_reader.get_prev_transform(),
+                             node_state, _node_reader.get_effects(),
+                             _node_reader.get_off_clip_planes());
+ }
+@@ -58,6 +59,7 @@ apply_transform_and_state(CullTraverser *trav) {
+ void CullTraverserData::
+ apply_transform_and_state(CullTraverser *trav,
+                           CPT(TransformState) node_transform,
++                          CPT(TransformState) prev_node_transform,
+                           CPT(RenderState) node_state,
+                           CPT(RenderEffects) node_effects,
+                           const RenderAttrib *off_clip_planes) {
+@@ -96,6 +98,12 @@ apply_transform_and_state(CullTraverser *trav,
+     }
+   }
+ 
++  if (_net_transform == _prev_net_transform && node_transform == prev_node_transform) {
++    _prev_net_transform = _net_transform;
++  } else if (!prev_node_transform->is_identity()) {
++    _prev_net_transform = _prev_net_transform->compose(prev_node_transform);
++  }
++
+   _state = _state->compose(node_state);
+ 
+   if (clip_plane_cull) {
+diff --git a/panda/src/pgraph/cullTraverserData.h b/panda/src/pgraph/cullTraverserData.h
+index 80d523f..30b8d68 100644
+--- a/panda/src/pgraph/cullTraverserData.h
++++ b/panda/src/pgraph/cullTraverserData.h
+@@ -41,6 +41,7 @@ class EXPCL_PANDA_PGRAPH CullTraverserData {
+ public:
+   INLINE CullTraverserData(const NodePath &start,
+                            const TransformState *net_transform,
++                           const TransformState *prev_net_transform,
+                            const RenderState *state,
+                            GeometricBoundingVolume *view_frustum,
+                            Thread *current_thread);
+@@ -60,7 +61,9 @@ public:
+ PUBLISHED:
+   INLINE CPT(TransformState) get_modelview_transform(const CullTraverser *trav) const;
+   INLINE CPT(TransformState) get_internal_transform(const CullTraverser *trav) const;
++  INLINE CPT(TransformState) get_prev_internal_transform(const CullTraverser *trav) const;
+   INLINE const TransformState *get_net_transform(const CullTraverser *trav) const;
++  INLINE const TransformState *get_prev_net_transform(const CullTraverser *trav) const;
+ 
+   INLINE bool is_in_view(const DrawMask &camera_mask);
+   INLINE bool is_this_node_hidden(const DrawMask &camera_mask) const;
+@@ -68,6 +71,7 @@ PUBLISHED:
+   void apply_transform_and_state(CullTraverser *trav);
+   void apply_transform_and_state(CullTraverser *trav,
+                                  CPT(TransformState) node_transform,
++                                 CPT(TransformState) prev_node_transform,
+                                  CPT(RenderState) node_state,
+                                  CPT(RenderEffects) node_effects,
+                                  const RenderAttrib *off_clip_planes);
+@@ -76,6 +80,7 @@ public:
+   WorkingNodePath _node_path;
+   PandaNodePipelineReader _node_reader;
+   CPT(TransformState) _net_transform;
++  CPT(TransformState) _prev_net_transform;
+   CPT(RenderState) _state;
+   PT(GeometricBoundingVolume) _view_frustum;
+   CPT(CullPlanes) _cull_planes;
+diff --git a/panda/src/pgraph/cullableObject.I b/panda/src/pgraph/cullableObject.I
+index 2424965..5fbe70c 100644
+--- a/panda/src/pgraph/cullableObject.I
++++ b/panda/src/pgraph/cullableObject.I
+@@ -23,6 +23,24 @@ CullableObject() {
+ 
+ /**
+  * Creates a CullableObject based the indicated geom, with the indicated
++ * render state, transform and previous transform.
++ */
++INLINE CullableObject::
++CullableObject(const Geom *geom, const RenderState *state,
++               const TransformState *internal_transform,
++               const TransformState *prev_internal_transform) :
++  _geom(geom),
++  _state(state),
++  _internal_transform(internal_transform),
++  _prev_internal_transform(prev_internal_transform)
++{
++#ifdef DO_MEMORY_USAGE
++  MemoryUsage::update_type(this, get_class_type());
++#endif
++}
++
++/**
++ * Creates a CullableObject based the indicated geom, with the indicated
+  * render state and transform.
+  */
+ INLINE CullableObject::
+@@ -30,7 +48,8 @@ CullableObject(const Geom *geom, const RenderState *state,
+                const TransformState *internal_transform) :
+   _geom(geom),
+   _state(state),
+-  _internal_transform(internal_transform)
++  _internal_transform(internal_transform),
++  _prev_internal_transform(internal_transform)
+ {
+ #ifdef DO_MEMORY_USAGE
+   MemoryUsage::update_type(this, get_class_type());
+@@ -46,7 +65,8 @@ CullableObject(const CullableObject &copy) :
+   _munger(copy._munger),
+   _munged_data(copy._munged_data),
+   _state(copy._state),
+-  _internal_transform(copy._internal_transform)
++  _internal_transform(copy._internal_transform),
++  _prev_internal_transform(copy._prev_internal_transform)
+ {
+ #ifdef DO_MEMORY_USAGE
+   MemoryUsage::update_type(this, get_class_type());
+@@ -63,6 +83,7 @@ operator = (const CullableObject &copy) {
+   _munged_data = copy._munged_data;
+   _state = copy._state;
+   _internal_transform = copy._internal_transform;
++  _prev_internal_transform = copy._prev_internal_transform;
+   _draw_callback = copy._draw_callback;
+ }
+ 
+@@ -75,7 +96,7 @@ draw(GraphicsStateGuardianBase *gsg, bool force, Thread *current_thread) {
+   if (_draw_callback != (CallbackObject *)NULL) {
+     // It has a callback associated.
+     gsg->clear_before_callback();
+-    gsg->set_state_and_transform(_state, _internal_transform);
++    gsg->set_state_and_transform(_state, _internal_transform, _prev_internal_transform);
+     GeomDrawCallbackData cbdata(this, gsg, force);
+     _draw_callback->do_callback(&cbdata);
+     if (cbdata.get_lost_state()) {
+@@ -85,7 +106,7 @@ draw(GraphicsStateGuardianBase *gsg, bool force, Thread *current_thread) {
+     // Now the callback has taken care of drawing.
+   } else {
+     nassertv(_geom != (Geom *)NULL);
+-    gsg->set_state_and_transform(_state, _internal_transform);
++    gsg->set_state_and_transform(_state, _internal_transform, _prev_internal_transform);
+     draw_inline(gsg, force, current_thread);
+   }
+ }
+diff --git a/panda/src/pgraph/cullableObject.h b/panda/src/pgraph/cullableObject.h
+index 82fd0df..f450cbc 100644
+--- a/panda/src/pgraph/cullableObject.h
++++ b/panda/src/pgraph/cullableObject.h
+@@ -49,6 +49,10 @@ public:
+   INLINE CullableObject(const Geom *geom, const RenderState *state,
+                         const TransformState *internal_transform);
+ 
++  INLINE CullableObject(const Geom *geom, const RenderState *state,
++                        const TransformState *internal_transform,
++                        const TransformState *prev_internal_transform);
++
+   INLINE CullableObject(const CullableObject &copy);
+   INLINE void operator = (const CullableObject &copy);
+ 
+@@ -74,6 +78,7 @@ public:
+   CPT(GeomVertexData) _munged_data;
+   CPT(RenderState) _state;
+   CPT(TransformState) _internal_transform;
++  CPT(TransformState) _prev_internal_transform;
+   PT(CallbackObject) _draw_callback;
+ 
+ private:
+diff --git a/panda/src/pgraph/geomNode.cxx b/panda/src/pgraph/geomNode.cxx
+index bfbd24f..5ea321e 100644
+--- a/panda/src/pgraph/geomNode.cxx
++++ b/panda/src/pgraph/geomNode.cxx
+@@ -512,7 +512,6 @@ add_for_draw(CullTraverser *trav, CullTraverserData &data) {
+   Geoms geoms = get_geoms(trav->get_current_thread());
+   int num_geoms = geoms.get_num_geoms();
+   trav->_geoms_pcollector.add_level(num_geoms);
+-  CPT(TransformState) internal_transform = data.get_internal_transform(trav);
+ 
+   for (int i = 0; i < num_geoms; i++) {
+     const Geom *geom = geoms.get_geom(i);
+@@ -558,7 +557,9 @@ add_for_draw(CullTraverser *trav, CullTraverserData &data) {
+     }
+ 
+     CullableObject *object =
+-      new CullableObject(geom, state, internal_transform);
++      new CullableObject(geom, state,
++        data.get_internal_transform(trav),
++        data.get_prev_internal_transform(trav));
+     trav->get_cull_handler()->record_object(object, trav);
+   }
+ }
+diff --git a/panda/src/pgraph/nodePath.cxx b/panda/src/pgraph/nodePath.cxx
+index c6bfff1..ecb8936 100644
+--- a/panda/src/pgraph/nodePath.cxx
++++ b/panda/src/pgraph/nodePath.cxx
+@@ -906,7 +906,9 @@ void NodePath::
+ set_pos(const LVecBase3 &pos) {
+   nassertv_always(!is_empty());
+   set_transform(get_transform()->set_pos(pos));
+-  node()->reset_prev_transform();
++  if (!always_store_prev_transform) {
++    node()->reset_prev_transform();
++  }
+ }
+ 
+ void NodePath::
+@@ -1173,7 +1175,10 @@ set_pos_hpr(const LVecBase3 &pos, const LVecBase3 &hpr) {
+   transform = TransformState::make_pos_hpr_scale_shear
+     (pos, hpr, transform->get_scale(), transform->get_shear());
+   set_transform(transform);
+-  node()->reset_prev_transform();
++
++  if (!always_store_prev_transform) {
++    node()->reset_prev_transform();
++  }
+ }
+ 
+ /**
+@@ -1187,7 +1192,10 @@ set_pos_quat(const LVecBase3 &pos, const LQuaternion &quat) {
+   transform = TransformState::make_pos_quat_scale_shear
+     (pos, quat, transform->get_scale(), transform->get_shear());
+   set_transform(transform);
+-  node()->reset_prev_transform();
++
++  if (!always_store_prev_transform) {
++    node()->reset_prev_transform();
++  }
+ }
+ 
+ /**
+@@ -1226,7 +1234,9 @@ set_pos_hpr_scale(const LVecBase3 &pos, const LVecBase3 &hpr,
+   nassertv_always(!is_empty());
+   set_transform(TransformState::make_pos_hpr_scale
+                 (pos, hpr, scale));
+-  node()->reset_prev_transform();
++  if (!always_store_prev_transform) {
++    node()->reset_prev_transform();
++  }
+ }
+ 
+ /**
+@@ -1239,7 +1249,9 @@ set_pos_quat_scale(const LVecBase3 &pos, const LQuaternion &quat,
+   nassertv_always(!is_empty());
+   set_transform(TransformState::make_pos_quat_scale
+                 (pos, quat, scale));
+-  node()->reset_prev_transform();
++  if (!always_store_prev_transform) {
++    node()->reset_prev_transform();
++  }
+ }
+ 
+ /**
+@@ -1252,7 +1264,9 @@ set_pos_hpr_scale_shear(const LVecBase3 &pos, const LVecBase3 &hpr,
+   nassertv_always(!is_empty());
+   set_transform(TransformState::make_pos_hpr_scale_shear
+                 (pos, hpr, scale, shear));
+-  node()->reset_prev_transform();
++  if (!always_store_prev_transform) {
++    node()->reset_prev_transform();
++  }
+ }
+ 
+ /**
+@@ -1265,7 +1279,9 @@ set_pos_quat_scale_shear(const LVecBase3 &pos, const LQuaternion &quat,
+   nassertv_always(!is_empty());
+   set_transform(TransformState::make_pos_quat_scale_shear
+                 (pos, quat, scale, shear));
+-  node()->reset_prev_transform();
++  if (!always_store_prev_transform) {
++    node()->reset_prev_transform();
++  }
+ }
+ 
+ /**
+@@ -1275,7 +1291,9 @@ void NodePath::
+ set_mat(const LMatrix4 &mat) {
+   nassertv_always(!is_empty());
+   set_transform(TransformState::make_mat(mat));
+-  node()->reset_prev_transform();
++  if (!always_store_prev_transform) {
++    node()->reset_prev_transform();
++  }
+ }
+ 
+ /**
+@@ -1334,7 +1352,9 @@ set_pos(const NodePath &other, const LVecBase3 &pos) {
+     // If we didn't have a componentwise transform already, never mind.
+     set_transform(other, rel_transform->set_pos(pos));
+   }
+-  node()->reset_prev_transform();
++  if (!always_store_prev_transform) {
++    node()->reset_prev_transform();
++  }
+ }
+ 
+ void NodePath::
+@@ -1712,7 +1732,9 @@ set_pos_hpr(const NodePath &other, const LVecBase3 &pos,
+     // If we didn't have a componentwise transform already, never mind.
+     set_transform(other, TransformState::make_pos_hpr_scale_shear
+                   (pos, hpr, rel_transform->get_scale(), rel_transform->get_shear()));
+-    node()->reset_prev_transform();
++    if (!always_store_prev_transform) {
++      node()->reset_prev_transform();
++    }
+   }
+ }
+ 
+@@ -1747,7 +1769,9 @@ set_pos_quat(const NodePath &other, const LVecBase3 &pos,
+     // If we didn't have a componentwise transform already, never mind.
+     set_transform(other, TransformState::make_pos_quat_scale_shear
+                   (pos, quat, rel_transform->get_scale(), rel_transform->get_shear()));
+-    node()->reset_prev_transform();
++    if (!always_store_prev_transform) {
++      node()->reset_prev_transform();
++    }
+   }
+ }
+ 
+@@ -1797,7 +1821,9 @@ set_pos_hpr_scale(const NodePath &other,
+   nassertv_always(!is_empty());
+   set_transform(other, TransformState::make_pos_hpr_scale
+                 (pos, hpr, scale));
+-  node()->reset_prev_transform();
++  if (!always_store_prev_transform) {
++    node()->reset_prev_transform();
++  }
+ }
+ 
+ /**
+@@ -1811,7 +1837,9 @@ set_pos_quat_scale(const NodePath &other,
+   nassertv_always(!is_empty());
+   set_transform(other, TransformState::make_pos_quat_scale
+                 (pos, quat, scale));
+-  node()->reset_prev_transform();
++  if (!always_store_prev_transform) {
++    node()->reset_prev_transform();
++  }
+ }
+ 
+ /**
+@@ -1825,7 +1853,9 @@ set_pos_hpr_scale_shear(const NodePath &other,
+   nassertv_always(!is_empty());
+   set_transform(other, TransformState::make_pos_hpr_scale_shear
+                 (pos, hpr, scale, shear));
+-  node()->reset_prev_transform();
++  if (!always_store_prev_transform) {
++    node()->reset_prev_transform();
++  }
+ }
+ 
+ /**
+@@ -1839,7 +1869,9 @@ set_pos_quat_scale_shear(const NodePath &other,
+   nassertv_always(!is_empty());
+   set_transform(other, TransformState::make_pos_quat_scale_shear
+                 (pos, quat, scale, shear));
+-  node()->reset_prev_transform();
++  if (!always_store_prev_transform) {
++    node()->reset_prev_transform();
++  }
+ }
+ 
+ /**
+@@ -1864,7 +1896,9 @@ void NodePath::
+ set_mat(const NodePath &other, const LMatrix4 &mat) {
+   nassertv_always(!is_empty());
+   set_transform(other, TransformState::make_mat(mat));
+-  node()->reset_prev_transform();
++  if (!always_store_prev_transform) {
++    node()->reset_prev_transform();
++  }
+ }
+ 
+ /**
+diff --git a/panda/src/pgraph/nodePath.h b/panda/src/pgraph/nodePath.h
+index 729bcf3..a9a8233 100644
+--- a/panda/src/pgraph/nodePath.h
++++ b/panda/src/pgraph/nodePath.h
+@@ -66,50 +66,73 @@ class ShaderInput;
+  * A NodePath is the fundamental unit of high-level interaction with the scene
+  * graph.  It encapsulates the complete path down to a node from some other
+  * node, usually the root of the scene graph.  This is used to resolve
+- * ambiguities associated with instancing.  NodePath also contains a number of
+- * handy high-level methods for common scene-graph manipulations, such as
+- * reparenting, and common state changes, such as repositioning.  There are
+- * also a number of NodePath methods for finding nodes deep within the tree by
+- * name or by type.  These take a path string, which at its simplest consists
+- * of a series of node names separated by slashes, like a directory pathname.
++ * ambiguities associated with instancing.
++ *
++ * NodePath also contains a number of handy high-level methods for common
++ * scene-graph manipulations, such as  reparenting, and common state changes,
++ * such as repositioning.  There are also a number of NodePath methods for
++ * finding nodes deep within the tree by name or by type.  These take a path
++ * string, which at its simplest consists  of a series of node names separated
++ * by slashes, like a directory pathname.
++ *
+  * Each component of the path string may optionally consist of one of the
+- * following special names, instead of a node name: *          -- matches
+- * exactly one node, with any name.  **         -- matches any sequence of
+- * zero or more nodes.  +typename  -- matches any node that is or derives from
+- * the given type.  -typename  -- matches any node that is the given type
+- * exactly.  =tag       -- matches any node that has the indicated tag.
+- * =tag=value -- matches any node whose tag matches the indicated value.
++ * following special names, instead of a node name:
++ *
++ *    *          -- matches exactly one node, with any name.
++ *    **         -- matches any sequence of zero or more nodes.
++ *    +typename  -- matches any node that is or derives from the given type.
++ *    -typename  -- matches any node that is the given type exactly.
++ *    =tag       -- matches any node that has the indicated tag.
++ *    =tag=value -- matches any node whose tag matches the indicated value.
++ *
+  * Furthermore, a node name may itself contain standard filename globbing
+  * characters, like *, ?, and [a-z], that will be accepted as a partial match.
+  * (In fact, the '*' special name may be seen as just a special case of this.)
+  * The globbing characters may not be used with the typename matches or with
+  * tag matches, but they may be used to match a tag's value in the =tag=value
+- * syntax.  The special characters "@@", appearing at the beginning of a node
++ * syntax.
++ *
++ * The special characters "@@", appearing at the beginning of a node
+  * name, indicate a stashed node.  Normally, stashed nodes are not returned by
+  * a find (but see the special flags, below), but a stashed node may be found
+  * if it is explicitly named with its leading @@ characters.  By extension,
+- * "@@*" may be used to identify any stashed node.  Examples: "roomgraph" will
+- * look for a node named "graph", which is a child of an unnamed node, which
+- * is a child of a node named "room", which is a child of the starting path.
+- * "**red*" will look for any node anywhere in the tree (below the starting
+- * path) with a name that begins with "red". "**+PartBundleNode**head" will
+- * look for a node named "head", somewhere below a PartBundleNode anywhere in
+- * the tree.  The search is always potentially ambiguous, even if the special
++ * "@@*" may be used to identify any stashed node.
++ *
++ * Examples:
++ *
++ *   "roomgraph" will look for a node named "graph", which is a child
++ *   of an unnamed node, which is a child of a node named "room", which is a
++ *   child of the starting path.
++ *
++ *   "**red*" will look for any node anywhere in the tree (below the starting
++ *   path) with a name that begins with "red".
++ *
++ *   "**+PartBundleNode**head" will  look for a node named "head", somewhere
++ *   below a PartBundleNode anywhere in the tree.
++ *
++ * The search is always potentially ambiguous, even if the special
+  * wildcard operators are not used, because there may be multiple nodes in the
+  * tree with the same name.  In general, in the case of an ambiguity, the
+  * shortest path is preferred; when a method (such as extend_by) must choose
+  * only only one of several possible paths, it will choose the shortest
+  * available; on the other hand, when a method (such as find_all_matches) is
+  * to return all of the matching paths, it will sort them so that the shortest
+- * paths appear first in the output.  Special flags.  The entire string may
+- * optionally be followed by the ";" character, followed by one or more of the
+- * following special control flags, with no intervening spaces or punctuation:
+- * -h    Do not return hidden nodes.  +h    Do return hidden nodes.  -s    Do
+- * not return stashed nodes unless explicitly referenced with @@. +s    Return
+- * stashed nodes even without any explicit @@ characters.  -i    Node name
+- * comparisons are not case insensitive: case must match exactly.  +i    Node
+- * name comparisons are case insensitive: case is not important.  This affects
+- * matches against the node name only; node type and tag strings are always
++ * paths appear first in the output.
++ *
++ * Special flags:
++ *
++ * The entire string may optionally be followed by the ";" character, followed
++ * by one or more of the following special control flags, with no intervening
++ * spaces or punctuation:
++ *
++ *    -h   Do not return hidden nodes.
++ *    +h   Do return hidden nodes.
++ *    -s   Do not return stashed nodes unless explicitly referenced with @@.
++ *    +s   Return stashed nodes even without any explicit @@ characters.
++ *    -i   Node name comparisons are not case insensitive: case must match exactly.
++ *    +i   Node name comparisons are case insensitive: case is not important.
++ *
++ * This affects matches against the node name only; node type and tag strings are always
+  * case sensitive.  The default flags are +h-s-i.
+  */
+ 
+diff --git a/panda/src/pgraph/occluderNode.cxx b/panda/src/pgraph/occluderNode.cxx
+index c1a4c4d..83695fb 100644
+--- a/panda/src/pgraph/occluderNode.cxx
++++ b/panda/src/pgraph/occluderNode.cxx
+@@ -142,14 +142,16 @@ cull_callback(CullTraverser *trav, CullTraverserData &data) {
+   // draw a visualization, a checkerboard-textured polygon.
+   CullableObject *occluder_viz =
+     new CullableObject(get_occluder_viz(trav, data), get_occluder_viz_state(trav, data),
+-                       data.get_internal_transform(trav));
++                       data.get_internal_transform(trav),
++                       data.get_prev_internal_transform(trav));
+   trav->get_cull_handler()->record_object(occluder_viz, trav);
+ 
+   // Also get the frame.
+   nassertr(_frame_viz != (Geom *)NULL, false);
+   CullableObject *frame_viz =
+     new CullableObject(_frame_viz, get_frame_viz_state(trav, data),
+-                       data.get_internal_transform(trav));
++                       data.get_internal_transform(trav),
++                       data.get_prev_internal_transform(trav));
+   trav->get_cull_handler()->record_object(frame_viz, trav);
+ 
+   // Now carry on to render our child nodes.
+diff --git a/panda/src/pgraph/planeNode.cxx b/panda/src/pgraph/planeNode.cxx
+index c096eae..a643862 100644
+--- a/panda/src/pgraph/planeNode.cxx
++++ b/panda/src/pgraph/planeNode.cxx
+@@ -141,7 +141,8 @@ cull_callback(CullTraverser *trav, CullTraverserData &data) {
+ 
+   CullableObject *plane_viz =
+     new CullableObject(get_viz(trav, data), data._state,
+-                       data.get_internal_transform(trav));
++                       data.get_internal_transform(trav),
++                       data.get_prev_internal_transform(trav));
+   trav->get_cull_handler()->record_object(plane_viz, trav);
+ 
+   // Now carry on to render our child nodes.
+diff --git a/panda/src/pgraph/portalNode.cxx b/panda/src/pgraph/portalNode.cxx
+index d70eacd..3e360fd 100644
+--- a/panda/src/pgraph/portalNode.cxx
++++ b/panda/src/pgraph/portalNode.cxx
+@@ -228,6 +228,7 @@ cull_callback(CullTraverser *trav, CullTraverserData &data) {
+ 
+         // Get the net trasform of the _cell_out as seen from the camera.
+         CPT(TransformState) cell_transform = _cell_out.get_net_transform();
++        CPT(TransformState) prev_cell_transform = _cell_out.get_net_prev_transform();
+         CPT(TransformState) frustum_transform = cell_transform ->invert_compose(portal_viewer->_scene_setup->get_cull_center().get_net_transform());
+ 
+         // transform to _cell_out space
+@@ -283,6 +284,7 @@ cull_callback(CullTraverser *trav, CullTraverserData &data) {
+ 
+         CullTraverserData next_data(_cell_out,
+                                     cell_transform,
++                                    prev_cell_transform,
+                                     next_state, new_bh,
+                                     current_thread);
+         next_data._portal_depth = data._portal_depth + 1;
+diff --git a/panda/src/pgraph/sceneSetup.I b/panda/src/pgraph/sceneSetup.I
+index 425c538..1b150ff 100644
+--- a/panda/src/pgraph/sceneSetup.I
++++ b/panda/src/pgraph/sceneSetup.I
+@@ -25,6 +25,7 @@ SceneSetup() {
+   _world_transform = TransformState::make_identity();
+   _cs_transform = TransformState::make_identity();
+   _cs_world_transform = TransformState::make_identity();
++  _prev_cs_world_transform = TransformState::make_identity();
+ }
+ 
+ /**
+@@ -268,3 +269,21 @@ INLINE const TransformState *SceneSetup::
+ get_cs_world_transform() const {
+   return _cs_world_transform;
+ }
++
++/**
++ * Specifies the position from the starting node relative to the camera, in
++ * the GSG's internal coordinate system.
++ */
++INLINE void SceneSetup::
++set_prev_cs_world_transform(const TransformState *prev_cs_world_transform) {
++  _prev_cs_world_transform = prev_cs_world_transform;
++}
++
++/**
++ * Returns the position from the starting node relative to the camera, in the
++ * GSG's internal coordinate system.
++ */
++INLINE const TransformState *SceneSetup::
++get_prev_cs_world_transform() const {
++  return _prev_cs_world_transform;
++}
+diff --git a/panda/src/pgraph/sceneSetup.h b/panda/src/pgraph/sceneSetup.h
+index d2ad0c0..72c0599 100644
+--- a/panda/src/pgraph/sceneSetup.h
++++ b/panda/src/pgraph/sceneSetup.h
+@@ -74,6 +74,9 @@ PUBLISHED:
+   INLINE void set_cs_world_transform(const TransformState *cs_world_transform);
+   INLINE const TransformState *get_cs_world_transform() const;
+ 
++  INLINE void set_prev_cs_world_transform(const TransformState *prev_cs_world_transform);
++  INLINE const TransformState *get_prev_cs_world_transform() const;
++
+ private:
+   DisplayRegion *_display_region;
+   int _viewport_width;
+@@ -88,6 +91,7 @@ private:
+   CPT(TransformState) _world_transform;
+   CPT(TransformState) _cs_transform;
+   CPT(TransformState) _cs_world_transform;
++  CPT(TransformState) _prev_cs_world_transform;
+ 
+ public:
+   static TypeHandle get_class_type() {
+diff --git a/panda/src/pgraphnodes/callbackNode.cxx b/panda/src/pgraphnodes/callbackNode.cxx
+index 17424d5..2ced441 100644
+--- a/panda/src/pgraphnodes/callbackNode.cxx
++++ b/panda/src/pgraphnodes/callbackNode.cxx
+@@ -133,7 +133,8 @@ add_for_draw(CullTraverser *trav, CullTraverserData &data) {
+   if (cbobj != (CallbackObject *)NULL) {
+     CullableObject *object =
+       new CullableObject(NULL, data._state,
+-                         data.get_internal_transform(trav));
++                         data.get_internal_transform(trav),
++                         data.get_prev_internal_transform(trav));
+     object->set_draw_callback(cbobj);
+     trav->get_cull_handler()->record_object(object, trav);
+   }
+diff --git a/panda/src/pgraphnodes/computeNode.cxx b/panda/src/pgraphnodes/computeNode.cxx
+index 7962378..2f40dd6 100644
+--- a/panda/src/pgraphnodes/computeNode.cxx
++++ b/panda/src/pgraphnodes/computeNode.cxx
+@@ -94,7 +94,8 @@ add_for_draw(CullTraverser *trav, CullTraverserData &data) {
+   // however.
+   CullableObject *object =
+     new CullableObject(NULL, data._state,
+-                       data.get_internal_transform(trav));
++                       data.get_internal_transform(trav),
++                       data.get_prev_internal_transform(trav));
+   object->set_draw_callback(_dispatcher);
+   trav->get_cull_handler()->record_object(object, trav);
+ }
+diff --git a/panda/src/pgraphnodes/lodNode.cxx b/panda/src/pgraphnodes/lodNode.cxx
+index 5936b06..2d52b41 100644
+--- a/panda/src/pgraphnodes/lodNode.cxx
++++ b/panda/src/pgraphnodes/lodNode.cxx
+@@ -394,6 +394,7 @@ show_switches_cull_callback(CullTraverser *trav, CullTraverserData &data) {
+         // And draw the spindle in this color.
+         CullTraverserData next_data2(data, sw.get_spindle_viz());
+         next_data2.apply_transform_and_state(trav, viz_transform,
++                                             TransformState::make_identity(),
+                                              RenderState::make_empty(),
+                                              RenderEffects::make_empty(),
+                                              ClipPlaneAttrib::make());
+@@ -404,6 +405,7 @@ show_switches_cull_callback(CullTraverser *trav, CullTraverserData &data) {
+       // the geometry and the spindle.
+       CullTraverserData next_data(data, sw.get_ring_viz());
+       next_data.apply_transform_and_state(trav, viz_transform,
++                                          TransformState::make_identity(),
+                                           RenderState::make_empty(),
+                                           RenderEffects::make_empty(),
+                                           ClipPlaneAttrib::make());
+diff --git a/panda/src/pgraphnodes/nodeCullCallbackData.cxx b/panda/src/pgraphnodes/nodeCullCallbackData.cxx
+index d0bf763..b89ac5f 100644
+--- a/panda/src/pgraphnodes/nodeCullCallbackData.cxx
++++ b/panda/src/pgraphnodes/nodeCullCallbackData.cxx
+@@ -50,7 +50,8 @@ upcall() {
+     if (cbobj != (CallbackObject *)NULL) {
+       CullableObject *object =
+         new CullableObject(NULL, _data._state,
+-                           _data.get_internal_transform(_trav));
++                           _data.get_internal_transform(_trav),
++                           _data.get_prev_internal_transform(_trav));
+       object->set_draw_callback(cbobj);
+       _trav->get_cull_handler()->record_object(object, _trav);
+     }
+diff --git a/panda/src/tinydisplay/tinyGraphicsStateGuardian.cxx b/panda/src/tinydisplay/tinyGraphicsStateGuardian.cxx
+index ba33377..af0a608 100644
+--- a/panda/src/tinydisplay/tinyGraphicsStateGuardian.cxx
++++ b/panda/src/tinydisplay/tinyGraphicsStateGuardian.cxx
+@@ -206,7 +206,7 @@ clear(DrawableRegion *clearable) {
+     return;
+   }
+ 
+-  set_state_and_transform(RenderState::make_empty(), _internal_transform);
++  set_state_and_transform(RenderState::make_empty(), _internal_transform, _prev_internal_transform);
+ 
+   bool clear_color = false;
+   PIXEL color = 0;
+@@ -1467,7 +1467,8 @@ framebuffer_copy_to_ram(Texture *tex, int view, int z,
+  */
+ void TinyGraphicsStateGuardian::
+ set_state_and_transform(const RenderState *target,
+-                        const TransformState *transform) {
++                        const TransformState *transform,
++                        const TransformState *prev_transform) {
+ #ifndef NDEBUG
+   if (tinydisplay_cat.is_spam()) {
+     tinydisplay_cat.spam()
+@@ -1480,6 +1481,8 @@ set_state_and_transform(const RenderState *target,
+   _state_pcollector.add_level(1);
+   PStatTimer timer1(_draw_set_state_pcollector);
+ 
++  _prev_internal_transform = prev_transform;
++
+   if (transform != _internal_transform) {
+     PStatTimer timer(_draw_set_state_transform_pcollector);
+     _state_pcollector.add_level(1);
+diff --git a/panda/src/tinydisplay/tinyGraphicsStateGuardian.h b/panda/src/tinydisplay/tinyGraphicsStateGuardian.h
+index 65e01d7..69f4ed9 100644
+--- a/panda/src/tinydisplay/tinyGraphicsStateGuardian.h
++++ b/panda/src/tinydisplay/tinyGraphicsStateGuardian.h
+@@ -82,7 +82,8 @@ public:
+   (Texture *tex, int view, int z, const DisplayRegion *dr, const RenderBuffer &rb);
+ 
+   virtual void set_state_and_transform(const RenderState *state,
+-                                       const TransformState *transform);
++                                       const TransformState *transform,
++                                       const TransformState *prev_transform);
+ 
+   virtual TextureContext *prepare_texture(Texture *tex, int view);
+   virtual bool update_texture(TextureContext *tc, bool force);
+-- 
+1.9.5.msysgit.0
+

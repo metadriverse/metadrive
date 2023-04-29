@@ -71,9 +71,6 @@ class NuPlanLane(PointLane):
         points = np.array([nuplan_to_metadrive_vector([pose.x, pose.y], nuplan_center=center) for pose in path])
         return points
 
-    # def get_polygon(self):
-    #     return np.asarray(self.polygon)
-
 
 if __name__ == "__main__":
     raise ValueError("Can not be run")

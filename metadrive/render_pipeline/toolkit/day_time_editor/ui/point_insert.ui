@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Dialog</class>
+ <widget class="QDialog" name="Dialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>342</width>
+    <height>197</height>
+   </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>342</width>
+    <height>197</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>342</width>
+    <height>197</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>Insert Point</string>
+  </property>
+  <widget class="QLabel" name="label">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>10</y>
+     <width>301</width>
+     <height>71</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Enter the values of the point you want to insert. 
+
+Did you know: If you dont want to enter concrete values, just click and drag anywhere on the curve to insert a new point.</string>
+   </property>
+   <property name="wordWrap">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_2">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>100</y>
+     <width>46</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Time:</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_3">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>130</y>
+     <width>46</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Value:</string>
+   </property>
+  </widget>
+  <widget class="QDoubleSpinBox" name="ipt_value">
+   <property name="geometry">
+    <rect>
+     <x>70</x>
+     <y>130</y>
+     <width>121</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <property name="maximum">
+    <double>99999.990000000005239</double>
+   </property>
+  </widget>
+  <widget class="QTimeEdit" name="ipt_time">
+   <property name="geometry">
+    <rect>
+     <x>70</x>
+     <y>100</y>
+     <width>121</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <property name="displayFormat">
+    <string>HH:mm</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="btn_insert">
+   <property name="geometry">
+    <rect>
+     <x>240</x>
+     <y>160</y>
+     <width>75</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="focusPolicy">
+    <enum>Qt::TabFocus</enum>
+   </property>
+   <property name="text">
+    <string>Insert</string>
+   </property>
+  </widget>
+ </widget>
+ <tabstops>
+  <tabstop>ipt_time</tabstop>
+  <tabstop>ipt_value</tabstop>
+  <tabstop>btn_insert</tabstop>
+ </tabstops>
+ <resources>
+  <include location="resources.qrc"/>
+ </resources>
+ <connections/>
+</ui>

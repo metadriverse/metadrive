@@ -1,0 +1,119 @@
+<?xml version='1.0' encoding='utf-8'?>
+
+<!--
+
+NOTE: Mitsuba uses a different coordinate system!
+Conversion is: Swap Y and Z and then negate X
+
+-->
+<scene version="0.5.0">
+	<integrator type="path">
+		<integer name="maxDepth" value="2" />
+
+	</integrator>
+
+	<shape type="sphere">
+		<float name="radius" value="1"/>
+
+
+		
+		<bsdf type="roughplastic">
+			<string name="distribution" value="ggx"/>
+			<rgb name="diffuseReflectance" value="1, 0, 0" />
+			<float name="intIOR" value="1.51"/>
+			<float name="alpha" value="0.01"/>
+		</bsdf>
+
+		
+
+		<!--
+
+		<bsdf type="roughconductor">
+			<string name="distribution" value="ggx" />
+			<float name="alpha" value="0.01" />
+			<string name="material" value="" />
+		</bsdf>
+
+		-->
+
+		<!--
+
+		<bsdf type="roughcoating">
+			<string name="distribution" value="ggx" />
+			<float name="alpha" value="0.0001" />
+			<float name="thickness" value="1.0" />
+			<float name="intIOR" value="1.51" />
+
+			<bsdf type="roughconductor">
+				<string name="distribution" value="ggx" />
+				<float name="alpha" value="0.01" />
+				<string name="material" value="" />
+			</bsdf>
+
+		</bsdf>
+
+		-->
+
+	</shape>
+
+	<!--
+	<emitter type="point">
+		<spectrum name="intensity" value="100.0" />
+		<point name="position" x="-10" z="-10" y="10" />
+	</emitter>
+
+	<emitter type="point">
+		<spectrum name="intensity" value="100.0" />
+		<point name="position" x="10" z="-10" y="10" />
+	</emitter>
+
+	-->
+
+	<shape type="sphere">
+		<point name="center" x="-10" z="-10" y="10" />
+		<float name="radius" value="4.0"/>
+		<emitter type="area">
+			<spectrum name="radiance" value="3.0" />
+		</emitter>
+	</shape>
+
+	<shape type="sphere">
+		<point name="center" x="10" z="-10" y="10" />
+		<float name="radius" value="4.0"/>
+		<emitter type="area">
+			<spectrum name="radiance" value="3.0" />
+		</emitter>
+	</shape>
+
+	<emitter type="envmap">
+		<string name="filename" value="tex/envmap.png" />
+		<!-- <string name="filename" value="tex/white.png" /> -->
+		<float name="gamma" value="1.0" />
+
+	</emitter>
+
+	<sensor type="perspective">
+		<float name="farClip" value="15"/>
+		<float name="focusDistance" value="3.0"/>
+		<!-- <float name="fov" value="40"/> -->
+		<float name="fov" value="40"/>
+		<string name="fovAxis" value="x"/>
+		<float name="nearClip" value="0.05"/>
+		<transform name="toWorld">
+			<lookat target="0, 0, 0" origin="0, 0, -3.5" up="0, 1, 0"/>
+		</transform>
+
+		<sampler type="ldsampler">
+			<integer name="sampleCount" value="32"/>
+		</sampler>
+
+		<film type="hdrfilm">
+			<boolean name="banner" value="false"/>
+
+			<integer name="height" value="512"/>
+			<integer name="width" value="512"/>
+
+			<rfilter type="box"/>
+		</film>
+	</sensor>
+</scene>

@@ -1,0 +1,609 @@
+From 098218a265d582bec22c0398ca9901fa770235ae Mon Sep 17 00:00:00 2001
+From: tobspr <tobias.springer1@googlemail.com>
+Date: Thu, 3 Mar 2016 10:10:24 +0100
+Subject: [PATCH] Add PrevModelMatrix - Part2
+
+---
+ panda/src/collide/collisionVisualizer.cxx           |  4 ++--
+ panda/src/display/callbackGraphicsWindow.cxx        |  2 +-
+ panda/src/display/graphicsEngine.cxx                |  4 ----
+ panda/src/display/graphicsStateGuardian.I           |  4 ++--
+ panda/src/display/graphicsStateGuardian.cxx         | 12 ++++++------
+ panda/src/display/graphicsStateGuardian.h           |  8 ++++----
+ panda/src/dxgsg9/dxGraphicsStateGuardian9.cxx       |  4 ++--
+ panda/src/glstuff/glGraphicsStateGuardian_src.cxx   |  6 +++---
+ panda/src/glstuff/glShaderContext_src.cxx           |  6 +++---
+ panda/src/gobj/shader.cxx                           |  4 ++--
+ panda/src/gobj/shader.h                             |  4 ++--
+ panda/src/parametrics/ropeNode.cxx                  |  8 ++++----
+ panda/src/parametrics/sheetNode.cxx                 |  2 +-
+ panda/src/pgraph/cullTraverserData.I                |  8 --------
+ panda/src/pgraph/cullTraverserData.cxx              |  4 ----
+ panda/src/pgraph/cullTraverserData.h                |  1 -
+ panda/src/pgraph/cullableObject.I                   | 14 +++++++-------
+ panda/src/pgraph/cullableObject.h                   |  4 ++--
+ panda/src/pgraph/geomNode.cxx                       |  2 +-
+ panda/src/pgraph/occluderNode.cxx                   |  4 ++--
+ panda/src/pgraph/planeNode.cxx                      |  2 +-
+ panda/src/pgraph/sceneSetup.I                       | 18 ------------------
+ panda/src/pgraph/sceneSetup.h                       |  3 ---
+ panda/src/pgraphnodes/callbackNode.cxx              |  2 +-
+ panda/src/pgraphnodes/computeNode.cxx               |  2 +-
+ panda/src/pgraphnodes/nodeCullCallbackData.cxx      |  2 +-
+ panda/src/tinydisplay/tinyGraphicsStateGuardian.cxx |  4 ++--
+ 27 files changed, 50 insertions(+), 88 deletions(-)
+
+diff --git a/panda/src/collide/collisionVisualizer.cxx b/panda/src/collide/collisionVisualizer.cxx
+index cceb6c5..da34f7f 100644
+--- a/panda/src/collide/collisionVisualizer.cxx
++++ b/panda/src/collide/collisionVisualizer.cxx
+@@ -189,7 +189,7 @@ cull_callback(CullTraverser *trav, CullTraverserData &data) {
+           CullableObject *object =
+             new CullableObject(geom, point_state,
+                                xform_data.get_internal_transform(trav),
+-                               xform_data.get_prev_internal_transform(trav));
++                               xform_data.get_prev_net_transform(trav));
+ 
+           trav->get_cull_handler()->record_object(object, trav);
+         }
+@@ -219,7 +219,7 @@ cull_callback(CullTraverser *trav, CullTraverserData &data) {
+           CullableObject *object =
+             new CullableObject(geom, empty_state,
+                                xform_data.get_internal_transform(trav),
+-                               xform_data.get_prev_internal_transform(trav));
++                               xform_data.get_prev_net_transform(trav));
+ 
+           trav->get_cull_handler()->record_object(object, trav);
+         }
+diff --git a/panda/src/display/callbackGraphicsWindow.cxx b/panda/src/display/callbackGraphicsWindow.cxx
+index ebd5b37..69dd9fb 100644
+--- a/panda/src/display/callbackGraphicsWindow.cxx
++++ b/panda/src/display/callbackGraphicsWindow.cxx
+@@ -109,7 +109,7 @@ end_frame(FrameMode mode, Thread *current_thread) {
+     // In case the callback or the application hosting the OpenGL context
+     // wants to do more rendering, let's give it a blank slate.
+     _gsg->set_state_and_transform(RenderState::make_empty(), _gsg->get_internal_transform(),
+-                                  _gsg->get_prev_internal_transform());
++                                  _gsg->get_prev_net_transform());
+     _gsg->clear_before_callback();
+ 
+     RenderCallbackData data(this, RCT_end_frame, mode);
+diff --git a/panda/src/display/graphicsEngine.cxx b/panda/src/display/graphicsEngine.cxx
+index 5578121..42ae88c 100644
+--- a/panda/src/display/graphicsEngine.cxx
++++ b/panda/src/display/graphicsEngine.cxx
+@@ -1806,7 +1806,6 @@ do_setup_scene(GraphicsStateGuardian *gsg, DisplayRegionPipelineReader *dr) {
+   NodePath scene_parent = scene_root.get_parent(current_thread);
+   CPT(TransformState) camera_transform = camera.get_transform(scene_parent, current_thread);
+   CPT(TransformState) world_transform = scene_parent.get_transform(camera, current_thread);
+-  CPT(TransformState) prev_world_transform = scene_parent.get_prev_transform(camera, current_thread);
+ 
+   if (camera_transform->is_invalid()) {
+     // There must be a singular transform over the scene.
+@@ -1859,9 +1858,6 @@ do_setup_scene(GraphicsStateGuardian *gsg, DisplayRegionPipelineReader *dr) {
+   CPT(TransformState) cs_world_transform = cs_transform->compose(world_transform);
+   scene_setup->set_cs_world_transform(cs_world_transform);
+ 
+-  CPT(TransformState) prev_cs_world_transform = cs_transform->compose(prev_world_transform);
+-  scene_setup->set_prev_cs_world_transform(prev_cs_world_transform);
+-
+   // Make sure that the GSG has a ShaderGenerator for the munger to use.  We
+   // have to do this here because the ShaderGenerator needs a host window
+   // pointer.  Hopefully we'll be able to eliminate that requirement in the
+diff --git a/panda/src/display/graphicsStateGuardian.I b/panda/src/display/graphicsStateGuardian.I
+index d330100..9fa45c6 100644
+--- a/panda/src/display/graphicsStateGuardian.I
++++ b/panda/src/display/graphicsStateGuardian.I
+@@ -852,8 +852,8 @@ get_internal_transform() const {
+  * function is typically only meaningful during the geometry rendering process.
+  */
+ INLINE CPT(TransformState) GraphicsStateGuardian::
+-get_prev_internal_transform() const {
+-  return _prev_internal_transform;
++get_prev_net_transform() const {
++  return _prev_net_transform;
+ }
+ 
+ /**
+diff --git a/panda/src/display/graphicsStateGuardian.cxx b/panda/src/display/graphicsStateGuardian.cxx
+index 8d3fbae..8663288 100644
+--- a/panda/src/display/graphicsStateGuardian.cxx
++++ b/panda/src/display/graphicsStateGuardian.cxx
+@@ -146,7 +146,7 @@ GraphicsStateGuardian(CoordinateSystem internal_coordinate_system,
+ {
+   _coordinate_system = CS_invalid;
+   _internal_transform = TransformState::make_identity();
+-  _prev_internal_transform = _prev_internal_transform;
++  _prev_net_transform = _prev_net_transform;
+ 
+   set_coordinate_system(get_default_coordinate_system());
+ 
+@@ -1208,9 +1208,6 @@ fetch_specified_part(Shader::ShaderMatInput part, InternalName *name,
+   case Shader::SMO_model_to_apiview: {
+     return &(get_internal_transform()->get_mat());
+   }
+-  case Shader::SMO_prev_model_to_apiview: {
+-    return &(get_prev_internal_transform()->get_mat());
+-  }
+   case Shader::SMO_view_to_model: {
+     t = get_external_transform()->get_inverse()->get_mat();
+     return &t;
+@@ -1219,8 +1216,11 @@ fetch_specified_part(Shader::ShaderMatInput part, InternalName *name,
+     t = get_internal_transform()->get_inverse()->get_mat();
+     return &t;
+   }
+-  case Shader::SMO_prev_apiview_to_model: {
+-    t = get_prev_internal_transform()->get_inverse()->get_mat();
++  case Shader::SMO_prev_net_transform: {
++    return &(get_prev_net_transform()->get_mat());
++  }
++  case Shader::SMO_prev_inv_net_transform: {
++    t = get_prev_net_transform()->get_inverse()->get_mat();
+     return &t;
+   }
+   case Shader::SMO_apiview_to_view: {
+diff --git a/panda/src/display/graphicsStateGuardian.h b/panda/src/display/graphicsStateGuardian.h
+index a1cc245..7233075 100644
+--- a/panda/src/display/graphicsStateGuardian.h
++++ b/panda/src/display/graphicsStateGuardian.h
+@@ -389,7 +389,7 @@ public:
+ 
+   INLINE CPT(TransformState) get_external_transform() const;
+   INLINE CPT(TransformState) get_internal_transform() const;
+-  INLINE CPT(TransformState) get_prev_internal_transform() const;
++  INLINE CPT(TransformState) get_prev_net_transform() const;
+ 
+   RenderBuffer get_render_buffer(int buffer_type, const FrameBufferProperties &prop);
+ 
+@@ -479,9 +479,9 @@ protected:
+   // The current transform, as of the last call to set_state_and_transform().
+   CPT(TransformState) _internal_transform;
+ 
+-  // The previous transform, as of the last call to the 3 parameter overload of
+-  // set_state_and_transform()
+-  CPT(TransformState) _prev_internal_transform;
++  // The previous net transform, as of the last call to the 3 parameter overload
++  // of set_state_and_transform()
++  CPT(TransformState) _prev_net_transform;
+ 
+   // The current TextureAttrib is a special case; we may further restrict it
+   // (according to graphics cards limits) or extend it (according to
+diff --git a/panda/src/dxgsg9/dxGraphicsStateGuardian9.cxx b/panda/src/dxgsg9/dxGraphicsStateGuardian9.cxx
+index 66d007d..7609cae 100644
+--- a/panda/src/dxgsg9/dxGraphicsStateGuardian9.cxx
++++ b/panda/src/dxgsg9/dxGraphicsStateGuardian9.cxx
+@@ -758,7 +758,7 @@ clear(DrawableRegion *clearable) {
+     return;
+   }
+ 
+-  set_state_and_transform(RenderState::make_empty(), _internal_transform, _prev_internal_transform);
++  set_state_and_transform(RenderState::make_empty(), _internal_transform, _prev_net_transform);
+ 
+   D3DCOLOR color_clear_value = LColor_to_D3DCOLOR(clearable->get_clear_color());
+   PN_stdfloat depth_clear_value = clearable->get_clear_depth();
+@@ -3037,7 +3037,7 @@ set_state_and_transform(const RenderState *target,
+ #endif
+   _state_pcollector.add_level(1);
+   PStatTimer timer1(_draw_set_state_pcollector);
+-  _prev_internal_transform = prev_transform;
++  _prev_net_transform = prev_transform;
+ 
+   if (transform != _internal_transform) {
+     // PStatTimer timer(_draw_set_state_transform_pcollector);
+diff --git a/panda/src/glstuff/glGraphicsStateGuardian_src.cxx b/panda/src/glstuff/glGraphicsStateGuardian_src.cxx
+index 3dca96f..b7ca084 100644
+--- a/panda/src/glstuff/glGraphicsStateGuardian_src.cxx
++++ b/panda/src/glstuff/glGraphicsStateGuardian_src.cxx
+@@ -2875,7 +2875,7 @@ clear(DrawableRegion *clearable) {
+   // XXX rdb: Is this line really necessary?  Could we perhaps just reset the
+   // color write mask and other relevant attributes?
+   set_state_and_transform(RenderState::make_empty(), _internal_transform,
+-                          _prev_internal_transform);
++                          _prev_net_transform);
+ 
+   int mask = 0;
+ 
+@@ -5897,7 +5897,7 @@ framebuffer_copy_to_ram(Texture *tex, int view, int z,
+   // glReadPixels() to work NOTE: reading the depth buffer is *much* slower
+   // than reading the color buffer
+   set_state_and_transform(RenderState::make_empty(), _internal_transform,
+-                          _prev_internal_transform);
++                          _prev_net_transform);
+ 
+   int xo, yo, w, h;
+   dr->get_region_pixels(xo, yo, w, h);
+@@ -9522,7 +9522,7 @@ set_state_and_transform(const RenderState *target,
+   _state_pcollector.add_level(1);
+   PStatGPUTimer timer1(this, _draw_set_state_pcollector);
+ 
+-  _prev_internal_transform = prev_transform;
++  _prev_net_transform = prev_transform;
+ 
+   if (transform != _internal_transform) {
+     // PStatGPUTimer timer(this, _draw_set_state_transform_pcollector);
+diff --git a/panda/src/glstuff/glShaderContext_src.cxx b/panda/src/glstuff/glShaderContext_src.cxx
+index a7759af..a7466bb 100644
+--- a/panda/src/glstuff/glShaderContext_src.cxx
++++ b/panda/src/glstuff/glShaderContext_src.cxx
+@@ -769,10 +769,10 @@ reflect_uniform(int i, char *name_buffer, GLsizei name_buflen) {
+                                 : Shader::SMO_model_to_apiview;
+         bind._part[1] = Shader::SMO_identity;
+ 
+-      } else if (matrix_name == "PrevModelViewMatrix") {
++      } else if (matrix_name == "PrevModelMatrix") {
+         bind._func = Shader::SMF_first;
+-        bind._part[0] = inverse ? Shader::SMO_prev_apiview_to_model
+-                                : Shader::SMO_prev_model_to_apiview;
++        bind._part[0] = inverse ? Shader::SMO_prev_inv_net_transform
++                                : Shader::SMO_prev_net_transform;
+         bind._part[1] = Shader::SMO_identity;
+ 
+       } else if (matrix_name == "ProjectionMatrix") {
+diff --git a/panda/src/gobj/shader.cxx b/panda/src/gobj/shader.cxx
+index 552f665..95bc136a 100644
+--- a/panda/src/gobj/shader.cxx
++++ b/panda/src/gobj/shader.cxx
+@@ -390,8 +390,8 @@ cp_dependency(ShaderMatInput inp) {
+       (inp == SMO_view_to_model) ||
+       (inp == SMO_model_to_apiview) ||
+       (inp == SMO_apiview_to_model) ||
+-      (inp == SMO_prev_model_to_apiview) ||
+-      (inp == SMO_prev_apiview_to_model) ||
++      (inp == SMO_prev_net_transform) ||
++      (inp == SMO_prev_inv_net_transform) ||
+       (inp == SMO_view_to_world) ||
+       (inp == SMO_world_to_view) ||
+       (inp == SMO_view_x_to_view) ||
+diff --git a/panda/src/gobj/shader.h b/panda/src/gobj/shader.h
+index f517565..e5d244d 100644
+--- a/panda/src/gobj/shader.h
++++ b/panda/src/gobj/shader.h
+@@ -202,8 +202,8 @@ public:
+     SMO_tex_is_alpha_i,
+ 
+     // Previous frame transform
+-    SMO_prev_apiview_to_model,
+-    SMO_prev_model_to_apiview,
++    SMO_prev_net_transform,
++    SMO_prev_inv_net_transform,
+ 
+     SMO_INVALID
+   };
+diff --git a/panda/src/parametrics/ropeNode.cxx b/panda/src/parametrics/ropeNode.cxx
+index 6705f66..28160b9 100644
+--- a/panda/src/parametrics/ropeNode.cxx
++++ b/panda/src/parametrics/ropeNode.cxx
+@@ -335,7 +335,7 @@ render_thread(CullTraverser *trav, CullTraverserData &data,
+   CullableObject *object =
+     new CullableObject(geom, state,
+                        data.get_internal_transform(trav),
+-                       data.get_prev_internal_transform(trav));
++                       data.get_prev_net_transform(trav));
+   trav->get_cull_handler()->record_object(object, trav);
+ }
+ 
+@@ -382,7 +382,7 @@ render_tape(CullTraverser *trav, CullTraverserData &data,
+   CullableObject *object =
+     new CullableObject(geom, state,
+                        data.get_internal_transform(trav),
+-                       data.get_prev_internal_transform(trav));
++                       data.get_prev_net_transform(trav));
+   trav->get_cull_handler()->record_object(object, trav);
+ }
+ 
+@@ -436,7 +436,7 @@ render_billboard(CullTraverser *trav, CullTraverserData &data,
+   CullableObject *object =
+     new CullableObject(geom, state,
+                        data.get_internal_transform(trav),
+-                       data.get_prev_internal_transform(trav));
++                       data.get_prev_net_transform(trav));
+   trav->get_cull_handler()->record_object(object, trav);
+ }
+ 
+@@ -498,7 +498,7 @@ render_tube(CullTraverser *trav, CullTraverserData &data,
+   CullableObject *object =
+     new CullableObject(geom, state,
+                        data.get_internal_transform(trav),
+-                       data.get_prev_internal_transform(trav));
++                       data.get_prev_net_transform(trav));
+   trav->get_cull_handler()->record_object(object, trav);
+ }
+ 
+diff --git a/panda/src/parametrics/sheetNode.cxx b/panda/src/parametrics/sheetNode.cxx
+index f745d6e..b950105 100644
+--- a/panda/src/parametrics/sheetNode.cxx
++++ b/panda/src/parametrics/sheetNode.cxx
+@@ -332,7 +332,7 @@ render_sheet(CullTraverser *trav, CullTraverserData &data,
+   CullableObject *object =
+     new CullableObject(geom, state,
+                        data.get_internal_transform(trav),
+-                       data.get_prev_internal_transform(trav));
++                       data.get_prev_net_transform(trav));
+   trav->get_cull_handler()->record_object(object, trav);
+ }
+ 
+diff --git a/panda/src/pgraph/cullTraverserData.I b/panda/src/pgraph/cullTraverserData.I
+index 7c1a79f..3ec4380 100644
+--- a/panda/src/pgraph/cullTraverserData.I
++++ b/panda/src/pgraph/cullTraverserData.I
+@@ -139,14 +139,6 @@ INLINE CPT(TransformState) CullTraverserData::
+ get_internal_transform(const CullTraverser *trav) const {
+   return trav->get_scene()->get_cs_world_transform()->compose(_net_transform);
+ }
+-/**
+- * Returns the previous internal transform: the modelview transform in the GSG's
+- * internal coordinate system in the last frame.
+- */
+-INLINE CPT(TransformState) CullTraverserData::
+-get_prev_internal_transform(const CullTraverser *trav) const {
+-  return trav->get_scene()->get_prev_cs_world_transform()->compose(_prev_net_transform);
+-}
+ 
+ /**
+  * Returns the net transform: the relative transform from root of the scene
+diff --git a/panda/src/pgraph/cullTraverserData.cxx b/panda/src/pgraph/cullTraverserData.cxx
+index e84a3d8..95b9013 100644
+--- a/panda/src/pgraph/cullTraverserData.cxx
++++ b/panda/src/pgraph/cullTraverserData.cxx
+@@ -47,12 +47,8 @@ apply_transform_and_state(CullTraverser *trav) {
+   _node_reader.compose_draw_mask(_draw_mask);
+ 
+   apply_transform_and_state(trav, _node_reader.get_transform(),
+-<<<<<<< HEAD
+                             _node_reader.get_prev_transform(),
+-                            node_state, _node_reader.get_effects(),
+-=======
+                             MOVE(node_state), _node_reader.get_effects(),
+->>>>>>> 2bf886fc5b086e92ef86b25c652f7257521365d7
+                             _node_reader.get_off_clip_planes());
+ }
+ 
+diff --git a/panda/src/pgraph/cullTraverserData.h b/panda/src/pgraph/cullTraverserData.h
+index 30b8d68..cb1e147 100644
+--- a/panda/src/pgraph/cullTraverserData.h
++++ b/panda/src/pgraph/cullTraverserData.h
+@@ -61,7 +61,6 @@ public:
+ PUBLISHED:
+   INLINE CPT(TransformState) get_modelview_transform(const CullTraverser *trav) const;
+   INLINE CPT(TransformState) get_internal_transform(const CullTraverser *trav) const;
+-  INLINE CPT(TransformState) get_prev_internal_transform(const CullTraverser *trav) const;
+   INLINE const TransformState *get_net_transform(const CullTraverser *trav) const;
+   INLINE const TransformState *get_prev_net_transform(const CullTraverser *trav) const;
+ 
+diff --git a/panda/src/pgraph/cullableObject.I b/panda/src/pgraph/cullableObject.I
+index 5fbe70c..7481f12 100644
+--- a/panda/src/pgraph/cullableObject.I
++++ b/panda/src/pgraph/cullableObject.I
+@@ -28,11 +28,11 @@ CullableObject() {
+ INLINE CullableObject::
+ CullableObject(const Geom *geom, const RenderState *state,
+                const TransformState *internal_transform,
+-               const TransformState *prev_internal_transform) :
++               const TransformState *prev_net_transform) :
+   _geom(geom),
+   _state(state),
+   _internal_transform(internal_transform),
+-  _prev_internal_transform(prev_internal_transform)
++  _prev_net_transform(prev_net_transform)
+ {
+ #ifdef DO_MEMORY_USAGE
+   MemoryUsage::update_type(this, get_class_type());
+@@ -49,7 +49,7 @@ CullableObject(const Geom *geom, const RenderState *state,
+   _geom(geom),
+   _state(state),
+   _internal_transform(internal_transform),
+-  _prev_internal_transform(internal_transform)
++  _prev_net_transform(internal_transform)
+ {
+ #ifdef DO_MEMORY_USAGE
+   MemoryUsage::update_type(this, get_class_type());
+@@ -66,7 +66,7 @@ CullableObject(const CullableObject &copy) :
+   _munged_data(copy._munged_data),
+   _state(copy._state),
+   _internal_transform(copy._internal_transform),
+-  _prev_internal_transform(copy._prev_internal_transform)
++  _prev_net_transform(copy._prev_net_transform)
+ {
+ #ifdef DO_MEMORY_USAGE
+   MemoryUsage::update_type(this, get_class_type());
+@@ -83,7 +83,7 @@ operator = (const CullableObject &copy) {
+   _munged_data = copy._munged_data;
+   _state = copy._state;
+   _internal_transform = copy._internal_transform;
+-  _prev_internal_transform = copy._prev_internal_transform;
++  _prev_net_transform = copy._prev_net_transform;
+   _draw_callback = copy._draw_callback;
+ }
+ 
+@@ -96,7 +96,7 @@ draw(GraphicsStateGuardianBase *gsg, bool force, Thread *current_thread) {
+   if (_draw_callback != (CallbackObject *)NULL) {
+     // It has a callback associated.
+     gsg->clear_before_callback();
+-    gsg->set_state_and_transform(_state, _internal_transform, _prev_internal_transform);
++    gsg->set_state_and_transform(_state, _internal_transform, _prev_net_transform);
+     GeomDrawCallbackData cbdata(this, gsg, force);
+     _draw_callback->do_callback(&cbdata);
+     if (cbdata.get_lost_state()) {
+@@ -106,7 +106,7 @@ draw(GraphicsStateGuardianBase *gsg, bool force, Thread *current_thread) {
+     // Now the callback has taken care of drawing.
+   } else {
+     nassertv(_geom != (Geom *)NULL);
+-    gsg->set_state_and_transform(_state, _internal_transform, _prev_internal_transform);
++    gsg->set_state_and_transform(_state, _internal_transform, _prev_net_transform);
+     draw_inline(gsg, force, current_thread);
+   }
+ }
+diff --git a/panda/src/pgraph/cullableObject.h b/panda/src/pgraph/cullableObject.h
+index f450cbc..5887ac9 100644
+--- a/panda/src/pgraph/cullableObject.h
++++ b/panda/src/pgraph/cullableObject.h
+@@ -51,7 +51,7 @@ public:
+ 
+   INLINE CullableObject(const Geom *geom, const RenderState *state,
+                         const TransformState *internal_transform,
+-                        const TransformState *prev_internal_transform);
++                        const TransformState *prev_net_transform);
+ 
+   INLINE CullableObject(const CullableObject &copy);
+   INLINE void operator = (const CullableObject &copy);
+@@ -78,7 +78,7 @@ public:
+   CPT(GeomVertexData) _munged_data;
+   CPT(RenderState) _state;
+   CPT(TransformState) _internal_transform;
+-  CPT(TransformState) _prev_internal_transform;
++  CPT(TransformState) _prev_net_transform;
+   PT(CallbackObject) _draw_callback;
+ 
+ private:
+diff --git a/panda/src/pgraph/geomNode.cxx b/panda/src/pgraph/geomNode.cxx
+index 5ea321e..1813431 100644
+--- a/panda/src/pgraph/geomNode.cxx
++++ b/panda/src/pgraph/geomNode.cxx
+@@ -559,7 +559,7 @@ add_for_draw(CullTraverser *trav, CullTraverserData &data) {
+     CullableObject *object =
+       new CullableObject(geom, state,
+         data.get_internal_transform(trav),
+-        data.get_prev_internal_transform(trav));
++        data.get_prev_net_transform(trav));
+     trav->get_cull_handler()->record_object(object, trav);
+   }
+ }
+diff --git a/panda/src/pgraph/occluderNode.cxx b/panda/src/pgraph/occluderNode.cxx
+index 83695fb..f41a220 100644
+--- a/panda/src/pgraph/occluderNode.cxx
++++ b/panda/src/pgraph/occluderNode.cxx
+@@ -143,7 +143,7 @@ cull_callback(CullTraverser *trav, CullTraverserData &data) {
+   CullableObject *occluder_viz =
+     new CullableObject(get_occluder_viz(trav, data), get_occluder_viz_state(trav, data),
+                        data.get_internal_transform(trav),
+-                       data.get_prev_internal_transform(trav));
++                       data.get_prev_net_transform(trav));
+   trav->get_cull_handler()->record_object(occluder_viz, trav);
+ 
+   // Also get the frame.
+@@ -151,7 +151,7 @@ cull_callback(CullTraverser *trav, CullTraverserData &data) {
+   CullableObject *frame_viz =
+     new CullableObject(_frame_viz, get_frame_viz_state(trav, data),
+                        data.get_internal_transform(trav),
+-                       data.get_prev_internal_transform(trav));
++                       data.get_prev_net_transform(trav));
+   trav->get_cull_handler()->record_object(frame_viz, trav);
+ 
+   // Now carry on to render our child nodes.
+diff --git a/panda/src/pgraph/planeNode.cxx b/panda/src/pgraph/planeNode.cxx
+index a643862..cfc098b 100644
+--- a/panda/src/pgraph/planeNode.cxx
++++ b/panda/src/pgraph/planeNode.cxx
+@@ -142,7 +142,7 @@ cull_callback(CullTraverser *trav, CullTraverserData &data) {
+   CullableObject *plane_viz =
+     new CullableObject(get_viz(trav, data), data._state,
+                        data.get_internal_transform(trav),
+-                       data.get_prev_internal_transform(trav));
++                       data.get_prev_net_transform(trav));
+   trav->get_cull_handler()->record_object(plane_viz, trav);
+ 
+   // Now carry on to render our child nodes.
+diff --git a/panda/src/pgraph/sceneSetup.I b/panda/src/pgraph/sceneSetup.I
+index 1b150ff..4a29d5a 100644
+--- a/panda/src/pgraph/sceneSetup.I
++++ b/panda/src/pgraph/sceneSetup.I
+@@ -269,21 +269,3 @@ INLINE const TransformState *SceneSetup::
+ get_cs_world_transform() const {
+   return _cs_world_transform;
+ }
+-
+-/**
+- * Specifies the position from the starting node relative to the camera, in
+- * the GSG's internal coordinate system.
+- */
+-INLINE void SceneSetup::
+-set_prev_cs_world_transform(const TransformState *prev_cs_world_transform) {
+-  _prev_cs_world_transform = prev_cs_world_transform;
+-}
+-
+-/**
+- * Returns the position from the starting node relative to the camera, in the
+- * GSG's internal coordinate system.
+- */
+-INLINE const TransformState *SceneSetup::
+-get_prev_cs_world_transform() const {
+-  return _prev_cs_world_transform;
+-}
+diff --git a/panda/src/pgraph/sceneSetup.h b/panda/src/pgraph/sceneSetup.h
+index 72c0599..180f4ba 100644
+--- a/panda/src/pgraph/sceneSetup.h
++++ b/panda/src/pgraph/sceneSetup.h
+@@ -74,9 +74,6 @@ PUBLISHED:
+   INLINE void set_cs_world_transform(const TransformState *cs_world_transform);
+   INLINE const TransformState *get_cs_world_transform() const;
+ 
+-  INLINE void set_prev_cs_world_transform(const TransformState *prev_cs_world_transform);
+-  INLINE const TransformState *get_prev_cs_world_transform() const;
+-
+ private:
+   DisplayRegion *_display_region;
+   int _viewport_width;
+diff --git a/panda/src/pgraphnodes/callbackNode.cxx b/panda/src/pgraphnodes/callbackNode.cxx
+index 2ced441..c6b3d9b 100644
+--- a/panda/src/pgraphnodes/callbackNode.cxx
++++ b/panda/src/pgraphnodes/callbackNode.cxx
+@@ -134,7 +134,7 @@ add_for_draw(CullTraverser *trav, CullTraverserData &data) {
+     CullableObject *object =
+       new CullableObject(NULL, data._state,
+                          data.get_internal_transform(trav),
+-                         data.get_prev_internal_transform(trav));
++                         data.get_prev_net_transform(trav));
+     object->set_draw_callback(cbobj);
+     trav->get_cull_handler()->record_object(object, trav);
+   }
+diff --git a/panda/src/pgraphnodes/computeNode.cxx b/panda/src/pgraphnodes/computeNode.cxx
+index 2f40dd6..b5efe4a 100644
+--- a/panda/src/pgraphnodes/computeNode.cxx
++++ b/panda/src/pgraphnodes/computeNode.cxx
+@@ -95,7 +95,7 @@ add_for_draw(CullTraverser *trav, CullTraverserData &data) {
+   CullableObject *object =
+     new CullableObject(NULL, data._state,
+                        data.get_internal_transform(trav),
+-                       data.get_prev_internal_transform(trav));
++                       data.get_prev_net_transform(trav));
+   object->set_draw_callback(_dispatcher);
+   trav->get_cull_handler()->record_object(object, trav);
+ }
+diff --git a/panda/src/pgraphnodes/nodeCullCallbackData.cxx b/panda/src/pgraphnodes/nodeCullCallbackData.cxx
+index b89ac5f..8542712 100644
+--- a/panda/src/pgraphnodes/nodeCullCallbackData.cxx
++++ b/panda/src/pgraphnodes/nodeCullCallbackData.cxx
+@@ -51,7 +51,7 @@ upcall() {
+       CullableObject *object =
+         new CullableObject(NULL, _data._state,
+                            _data.get_internal_transform(_trav),
+-                           _data.get_prev_internal_transform(_trav));
++                           _data.get_prev_net_transform(_trav));
+       object->set_draw_callback(cbobj);
+       _trav->get_cull_handler()->record_object(object, _trav);
+     }
+diff --git a/panda/src/tinydisplay/tinyGraphicsStateGuardian.cxx b/panda/src/tinydisplay/tinyGraphicsStateGuardian.cxx
+index ef6fcb7..fdfad22 100644
+--- a/panda/src/tinydisplay/tinyGraphicsStateGuardian.cxx
++++ b/panda/src/tinydisplay/tinyGraphicsStateGuardian.cxx
+@@ -206,7 +206,7 @@ clear(DrawableRegion *clearable) {
+     return;
+   }
+ 
+-  set_state_and_transform(RenderState::make_empty(), _internal_transform, _prev_internal_transform);
++  set_state_and_transform(RenderState::make_empty(), _internal_transform, _prev_net_transform);
+ 
+   bool clear_color = false;
+   PIXEL color = 0;
+@@ -1496,7 +1496,7 @@ set_state_and_transform(const RenderState *target,
+   _state_pcollector.add_level(1);
+   PStatTimer timer1(_draw_set_state_pcollector);
+ 
+-  _prev_internal_transform = prev_transform;
++  _prev_net_transform = prev_transform;
+ 
+   if (transform != _internal_transform) {
+     PStatTimer timer(_draw_set_state_transform_pcollector);
+-- 
+1.9.5.msysgit.0
+

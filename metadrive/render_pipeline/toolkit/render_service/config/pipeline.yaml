@@ -1,0 +1,19 @@
+
+pipeline:
+    display_debugger: false
+    use_r11_g11_b10: false
+    resolution_scale: 1.0
+    reference_mode: true
+
+lighting:
+    culling_grid_size_x: 32
+    culling_grid_size_y: 16
+    culling_grid_slices: 32
+    culling_max_distance: 50.0
+    culling_slice_width: 256
+    max_lights_per_cell: 64
+
+shadows:
+    atlas_size: 4096
+    max_updates: 40
+    max_update_distance: 150.0

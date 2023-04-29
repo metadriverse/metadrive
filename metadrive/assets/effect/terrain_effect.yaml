@@ -1,0 +1,133 @@
+# Author: @QuanyiLi. This terrain effect can texture road surface/road line. It is modified from:
+# terrain-effect by @tobspr: https://github.com/tobspr/RenderPipeline
+# Panda3D shader-terrain example: https://github.com/panda3d/panda3d/tree/master/samples/shader-terrain
+# texture splatting @wezu: https://gist.github.com/wezu/3892a0a61ae9ddfe57c0aa3f22825ac0#file-terrain_tex_f-glsl-L49
+
+vertex:
+    inout: |
+        uniform struct {
+            sampler2D data_texture;
+            sampler2D heightfield;
+            int view_index;
+            int terrain_size;
+            int chunk_size;
+        } ShaderTerrainMesh;
+        out vec2 terrain_uv;
+
+    transform: |
+        // Terrain data has the layout:
+        // x: x-pos, y: y-pos, z: size, w: clod
+        vec4 terrain_data = texelFetch(ShaderTerrainMesh.data_texture,
+        ivec2(gl_InstanceID, ShaderTerrainMesh.view_index), 0);
+
+        // Get initial chunk position in the (0, 0, 0), (1, 1, 0) range
+        vec3 chunk_position = p3d_Vertex.xyz;
+
+        // CLOD implementation
+        float clod_factor = smoothstep(0, 1, terrain_data.w);
+        chunk_position.xy -= clod_factor * fract(chunk_position.xy * ShaderTerrainMesh.chunk_size / 2.0)
+                              * 2.0 / ShaderTerrainMesh.chunk_size;
+
+        // Scale the chunk
+        chunk_position *= terrain_data.z * float(ShaderTerrainMesh.chunk_size)
+                        / float(ShaderTerrainMesh.terrain_size);
+        chunk_position.z *= ShaderTerrainMesh.chunk_size;
+
+        // Offset the chunk, it is important that this happens after the scale
+        chunk_position.xy += terrain_data.xy / float(ShaderTerrainMesh.terrain_size);
+
+        // Compute the terrain UV coordinates
+        terrain_uv = chunk_position.xy;
+
+        // Sample the heightfield and offset the terrain - we do not need to multiply
+        // the height with anything since the terrain transform is included in the
+        // model view projection matrix.
+        chunk_position.z += texture(ShaderTerrainMesh.heightfield, terrain_uv).x;
+
+        // Lower the terrain on the borders - this ensures the shadow map is generated
+        // correctly.
+        if ( min(terrain_uv.x, terrain_uv.y) < 8.0 / ShaderTerrainMesh.terrain_size ||
+           max(terrain_uv.x, terrain_uv.y) > 1 - 9.0 / ShaderTerrainMesh.terrain_size) {
+           chunk_position.z = 0;
+        }
+
+        vOutput.position = (p3d_ModelMatrix * vec4(chunk_position, 1)).xyz;
+
+fragment:
+    defines: |
+        #define DONT_FETCH_DEFAULT_TEXTURES 0
+        #define DONT_SET_MATERIAL_PROPERTIES 1
+
+    inout: |
+        layout(location=4) in vec2 terrain_uv;
+        
+        in vec3 vtx_pos;
+        
+        out vec4 color;
+        layout(location=5)  uniform struct {
+          sampler2D data_texture;
+          sampler2D heightfield;
+          int view_index;
+          int terrain_size;
+          int chunk_size;
+        } ShaderTerrainMesh;
+        
+        uniform vec3 wspos_camera;
+        
+        // texture for build road  
+        uniform sampler2D detail_tex1;
+        uniform sampler2D detail_tex2;
+        uniform sampler2D detail_tex3;
+        uniform sampler2D detail_tex4;
+        uniform sampler2D road_normal;
+        uniform sampler2D grass_normal;
+        uniform sampler2D attribute_tex;
+
+    material: |
+      
+        // texture splatting, mixing ratio can be determined via rgba
+        vec3 diffuse = texture(detail_tex1, terrain_uv * 64.0).rgb * texture(attribute_tex, terrain_uv).r;
+        diffuse += texture(detail_tex2, terrain_uv * 64.0).rgb * texture(attribute_tex, terrain_uv).g;
+        diffuse += texture(detail_tex3, terrain_uv * 64.0).rgb * texture(attribute_tex, terrain_uv).b;
+        diffuse += texture(detail_tex4, terrain_uv * 64.0).rgb * texture(attribute_tex, terrain_uv).a; 
+        
+        // Compute normal from the heightmap, this assumes the terrain is facing z-up
+        const float terrain_height = 50.0;
+        vec3 pixel_size = vec3(1.0, -1.0, 0) / textureSize(ShaderTerrainMesh.heightfield, 0).xxx;
+        float u0 = texture(ShaderTerrainMesh.heightfield, terrain_uv + pixel_size.yz).x * terrain_height;
+        float u1 = texture(ShaderTerrainMesh.heightfield, terrain_uv + pixel_size.xz).x * terrain_height;
+        float v0 = texture(ShaderTerrainMesh.heightfield, terrain_uv + pixel_size.zy).x * terrain_height;
+        float v1 = texture(ShaderTerrainMesh.heightfield, terrain_uv + pixel_size.zx).x * terrain_height;
+        vec3 tangent = normalize(vec3(1.0, 0, u1 - u0));
+        vec3 binormal = normalize(vec3(0, 1.0, v1 - v0));
+        
+        vec3 normal = normalize(texture(road_normal, terrain_uv * 64.0).rgb*2.0-1.0);
+        
+        // Add some fake lighting - you usually want to use your own lighting code here
+        vec3 fake_sun = normalize(vec3(0.7, 0.2, 0.6));
+        vec3 shading = max(0.0, dot(normal, fake_sun)) * diffuse;
+        shading += vec3(0.07, 0.07, 0.1);
+        
+        
+        // Fake fog
+        float dist = distance(vtx_pos, wspos_camera);
+        float fog_factor = smoothstep(0, 1, dist / 1000.0);
+        shading = mix(shading, vec3(0.7, 0.7, 0.8), fog_factor);
+        
+        color = vec4(shading, 1.0);
+        
+
+        m.shading_model = SHADING_MODEL_DEFAULT;
+        m.specular_ior = 1.51;
+        m.metallic = 0.0;
+        m.roughness = 1.0 * texture(attribute_tex, terrain_uv).r;
+        m.roughness += 0.6 * texture(attribute_tex, terrain_uv).g;
+        m.roughness += 0.6 * texture(attribute_tex, terrain_uv).b;
+        m.roughness += 0.6 *texture(attribute_tex, terrain_uv).a;
+        m.shading_model_param0 = 0.0;
+        m.normal = vec3(0);
+        
+        m.basecolor = diffuse.xyz;
+        m.normal = normal.xyz;
+        
+

@@ -45,7 +45,7 @@ class MainCamera:
         # self.engine = engine
 
         # vehicle chase camera
-        self.camera = engine.cam
+        self.camera = engine.camera
         self.camera_queue = None
         self.camera_dist = camera_dist
         self.camera_pitch = -engine.global_config["camera_pitch"] if engine.global_config["camera_pitch"
@@ -373,11 +373,11 @@ class MainCamera:
             pMouse = self.engine.mouseWatcherNode.getMouse()
             pFrom = Point3()
             pTo = Point3()
-            self.camera.node().getLens().extrude(pMouse, pFrom, pTo)
+            self.engine.cam.node().getLens().extrude(pMouse, pFrom, pTo)
 
             # Transform to global coordinates
-            pFrom = self.engine.render.getRelativePoint(self.camera, pFrom)
-            pTo = self.engine.render.getRelativePoint(self.camera, pTo)
+            pFrom = self.engine.render.getRelativePoint(self.engine.cam, pFrom)
+            pTo = self.engine.render.getRelativePoint(self.engine.cam, pTo)
             ret = self.engine.physics_world.dynamic_world.rayTestClosest(pFrom, pTo, CollisionGroup.Terrain)
             self.camera_x = ret.getHitPos()[0]
             self.camera_y = ret.getHitPos()[1]

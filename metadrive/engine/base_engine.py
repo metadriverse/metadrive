@@ -3,7 +3,7 @@ import pickle
 import time
 from collections import OrderedDict
 from typing import Callable, Optional, Union, List, Dict, AnyStr
-
+from metadrive.constants import RENDER_MODE_NONE
 import numpy as np
 from panda3d.core import NodePath, Vec3
 
@@ -116,7 +116,7 @@ class BaseEngine(EngineCore, Randomizable):
         return True if object_id in self._object_tasks else False
 
     def spawn_object(
-        self, object_class, pbr_model=True, force_spawn=False, auto_fill_random_seed=True, record=True, **kwargs
+            self, object_class, pbr_model=True, force_spawn=False, auto_fill_random_seed=True, record=True, **kwargs
     ):
         """
         Call this func to spawn one object
@@ -257,7 +257,6 @@ class BaseEngine(EngineCore, Randomizable):
         _debug_memory_usage = False
 
         if _debug_memory_usage:
-
             def process_memory():
                 import psutil
                 import os
@@ -316,6 +315,14 @@ class BaseEngine(EngineCore, Randomizable):
 
                 # if self.global_config["is_multi_agent"]:
                 #     self.main_camera.stop_track(bird_view_on_current_position=False)
+
+        # reset terrain
+        if self.mode != RENDER_MODE_NONE:
+            center_p = self.current_map.get_center_point()
+            self.terrain.update_terrain(center_p)
+            if self.sky_box is not None:
+                self.sky_box.set_position(center_p)
+
         self.taskMgr.step()
 
     def before_step(self, external_actions: Dict[AnyStr, np.array]):

@@ -1,0 +1,42 @@
+
+settings: !!omap
+
+    - num_mipmaps:
+        type: int
+        range: [2, 10]
+        default: 8
+        label: Mipmap count
+        description: >
+            Amount of mipmaps to use for downsampling the scene. A higher
+            amount of mipmaps will allow capturing wider blur radii.
+
+    - bloom_strength:
+        type: float
+        range: [0.01, 10.0]
+        default: 1.0
+        shader_runtime: true
+        label: Bloom Strength
+        description: >
+            Strength of the bloom, higher values will cause more bloom. Make sure
+            to not overuse this.
+
+    - remove_fireflies:
+        type: bool
+        default: false
+        label: Remove fireflies
+        description: >
+            Attempts to reduce flickering by darkening very small bright spots.
+            This uses the Karis average to reduce often called "fireflies", which are very
+            bright pixels, by weighting them by their brightness.
+
+    - lens_dirt_factor:
+        type: float
+        range: [0, 1]
+        default: 0.7
+        shader_runtime: true
+        label: Lens dirt factor
+        description: >
+            Amount of lens dirt to blend the bloom with. A value of 0 means
+            no lens dirt, whereas a value of 1 means very intense lens dirt.
+
+daytime_settings:

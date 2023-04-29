@@ -605,6 +605,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             [path, scale, offset, H] = self.path
             if path not in BaseVehicle.model_collection:
                 car_model = self.loader.loadModel(AssetLoader.file_path("models", path, "vehicle.gltf"))
+                car_model.setTwoSided(False)
                 BaseVehicle.model_collection[path] = car_model
                 car_model.setScale(scale)
                 # model default, face to y

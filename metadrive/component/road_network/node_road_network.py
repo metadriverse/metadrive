@@ -279,8 +279,19 @@ class NodeRoadNetwork(BaseRoadNetwork):
                 for k, lane in enumerate(lanes):
                     ret["{}".format(lane.index)] = {
                         SD.POLYLINE: lane.get_polyline(interval),
-                        SD.POLYGON: lane.get_polygon(),
+                        SD.POLYGON: lane.polygon,
                         SD.TYPE: MetaDriveType.LANE_SURFACE_STREET,
                         "speed_limit_kmh": lane.speed_limit
                     }
+        return ret
+
+    def get_all_lanes(self):
+        """
+        This function will return all lanes in the road network
+        :return: list of lanes
+        """
+        ret = []
+        for _from, _to_dict in self.graph.items():
+            for _to, lanes in _to_dict.items():
+                ret += lanes
         return ret

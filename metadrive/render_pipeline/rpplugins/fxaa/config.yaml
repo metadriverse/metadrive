@@ -1,0 +1,41 @@
+
+settings: !!omap
+
+    - quality:
+        type: enum
+        values: ["low", "medium", "high", "ultra"]
+        default: "ultra"
+        label: FXAA Quality
+        shader_runtime: true
+        description: >
+            This controls the quality of the FXAA algorithm, higher presets
+            produce better antialiasing but also consume more performance.
+
+    - subpixel_quality:
+        type: float
+        range: [0, 1]
+        default: 0.5
+        label: Subpixel quality
+        description: This controls the subpixel quality.
+        shader_runtime: true
+
+    - edge_threshold:
+        type: float
+        range: [0.063, 0.333]
+        default: 0.166
+        label: Edge threshold
+        shader_runtime: true
+        description: >
+            This controls the edge detection. Lower values lead to a better
+            detection, but also require more performace.
+
+    - min_threshold:
+        type: float
+        range: [0.312, 0.833]
+        default: 0.833
+        shader_runtime: true
+        label: Minimum threshold
+        description: >
+            Minimum edge threshold, improves detection in dark scenes.
+
+daytime_settings:

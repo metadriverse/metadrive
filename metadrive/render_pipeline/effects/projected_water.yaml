@@ -1,0 +1,144 @@
+# Projected Water effect.
+
+vertex:
+    inout: |
+        uniform vec3 cameraPosition;
+        uniform sampler2D waterHeightfield;
+        uniform float waterHeight;
+        uniform mat4 currentMVP;
+
+    includes: |
+        #pragma include "rpcore/water/shader/projected_water_func.inc.glsl"
+        #pragma include "rpcore/water/shader/position_reconstruction.inc.glsl"
+
+    transform: |
+        vec2 coord = vec2( (p3d_Vertex.xz * 1.1)  * 0.5 + 0.5);
+
+        // Compute ray start and direction
+        vec3 rayStart = cameraPosition;
+        vec3 rayDir = normalize(rayStart - calculateSurfacePos(1.0, coord));
+
+        // Intersect the ray with the water
+        float dist = (-rayStart.z+waterHeight) / rayDir.z;
+        vec3 intersectedPos = vec3(0);
+        float maxWaterDist = 25000.0;
+
+        // If plane is hit
+        if (dist < 0.0) {
+            intersectedPos = rayStart + rayDir * dist;
+        } else {
+            intersectedPos = vec3(rayStart.xy + rayDir.xy * -maxWaterDist, 0.0);
+        }
+
+        vOutput.position = vec3(intersectedPos);
+        vOutput.texcoord = vec2(vOutput.position.xy / WATER_COORD_FACTOR);
+
+        // Fade displacement at borders
+        float fade = 1.0;
+        float fadeArea = 0.12;
+
+        fade *= saturate(coord.x / fadeArea);
+        fade *= saturate( (1.0 - coord.y) / fadeArea);
+
+        fade *= saturate(coord.y / fadeArea);
+        fade *= saturate( (1.0 - coord.y) / fadeArea);
+        // fade = 1.0;
+        float displaceLod = 0.0;
+
+        vec3 displace = textureLod(waterHeightfield, vOutput.texcoord, displaceLod).xyz + textureLod(waterHeightfield,
+                                   vOutput.texcoord * WATER_LOWRES_FACTOR, displaceLod).xyz * 2.0 - 1.0;
+        float displaceFactor = 1.0 - saturate(distance(cameraPosition, intersectedPos) / WATER_DISPLACE_DIST);
+
+        vOutput.position += displace * WATER_DISPLACE * fade * displaceFactor;
+        vOutput.position = (currentMVP * vec4(vOutput.position.xyz, 1)).xyz;
+
+fragment:
+    inout: |
+        uniform sampler2D waterHeightfield;
+        uniform sampler2D waterNormal;
+        uniform sampler2D waterFoam;
+        uniform float waterHeight;
+        uniform vec3 cameraPosition;
+
+        uniform sampler2D terrainHeightmap;
+        uniform vec3 terrainScale;
+        uniform vec3 terrainOffset;
+
+    includes: |
+        #pragma include "rpcore/water/shader/projected_water_func.inc.glsl"
+
+    material: |
+            float hmapSize = textureSize(terrainHeightmap, 0).x;
+            // vec2 terrainCoord = vec2(vOutput.position.xy * terrainScale.xy + terrainOffset.xy) / hmapSize;
+            vec2 terrainCoord = vec2(vOutput.position.xy - terrainOffset.xy) / hmapSize / terrainScale.xy;
+            float terrainHeight = texture(terrainHeightmap, terrainCoord).x * terrainScale.z + terrainOffset.z;
+
+            float sampleLod = saturate( (distance(vOutput.position, cameraPosition)-10.0) / 500.0);
+            sampleLod = pow(log2(1.0 + sampleLod), 0.45);
+            sampleLod = clamp(sampleLod, 0.0, 0.55);
+            sampleLod = 0.0;
+
+            vec3 normalDetail = textureLod(waterNormal, vOutput.texcoord, sampleLod ).xyz;
+            vec3 normalLow = textureLod(waterNormal, vOutput.texcoord * WATER_LOWRES_FACTOR, sampleLod).xyz;
+            vec3 normal = (normalDetail + normalLow) * 0.5;
+
+            vec3 dispDetail = textureLod(waterHeightfield, vOutput.texcoord, sampleLod).xyz;
+            vec3 dispLow = textureLod(waterHeightfield, vOutput.texcoord * WATER_LOWRES_FACTOR, sampleLod).xyz;
+            vec3 disp = (dispDetail + dispLow) * 0.5;
+
+            float displaceFactor = saturate(distance(vOutput.position, cameraPosition) / WATER_DISPLACE_DIST);
+            // displaceFactor = 0.0;
+            normal = mix(normal, vec3(0,0,1), displaceFactor);
+            // normalDetail = mix(vec3(0, 0, 1), normalDetail, displaceFactor);
+
+            float heightDifference = abs(waterHeight - terrainHeight + disp.z * (WATER_DISPLACE).z );
+            float foamFactor = 1.0 - saturate(heightDifference * 0.1);
+
+            foamFactor = 0.0;
+
+            vec3 foam = textureLod(waterFoam, vOutput.texcoord * 0.1, sampleLod).xyz
+                        * textureLod(waterFoam, vOutput.texcoord * 0.2, sampleLod).xyz;
+            foam = pow(foam, vec3(3.0));
+            foam = foam.xxx;
+
+            float fold = max(0.0, pow( mix(normalLow.z * normalDetail.z * 25.0, normalDetail.z, 0.5), 2.1) * 0.2);
+
+            fold *= saturate(1.0 - displaceFactor * 1.0);
+
+            normal = normalize(vec3(normal.x, normal.y, 12.0 / 512.0));
+
+            // normal = vec3(0, 0, 1);
+
+            vec3 groundCol = vec3(0.12, 0.39, 0.5) * 0.05;
+
+            m.basecolor = groundCol;
+            m.basecolor += saturate(pow(disp.z, 0.8)) * vec3(0.18, 0.5, 0.6) * 0.05;
+
+            // m.basecolor *= 2.2;
+
+            // m.basecolor = vec3(0.1,0.2, 0.25) * 0.1;
+            // m.basecolor = vec3(0.0, 0.1, 0.02) * 0.1;
+            // m.basecolor = foam * vec3(1.5,1.0,1.0) * displaceFactor * 1.0;
+            m.basecolor += fold * vec3(1.0,1.0,1.0) * 4.0 * 0.0;
+
+            m.basecolor += foamFactor * foam * 1.0;
+
+            m.basecolor = pow(m.basecolor, vec3(2.0));
+            // m.basecolor *= 0.0;
+
+            #if !defined(IS_TRANSPARENT)
+            //m.translucency = 1.0;
+            #endif
+
+            m.basecolor *= 20.0;
+
+            m.normal = normal * (cameraPosition.z < waterHeight ? -1 : 1);
+            m.metallic = 1.0;
+            m.specular_ior = 1.0;
+            m.roughness = 0.25;
+
+            // if defined(IS_TRANSPARENT)
+            //m.alpha = 1.0 - saturate(foamFactor);
+            //m.alpha = 1.0;
+            // endif
+

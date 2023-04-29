@@ -157,6 +157,10 @@ BASE_DEFAULT_CONFIG = dict(
     # when possible. But it is possible that some classes of objects are always forcefully respawn
     # and thus those used objects are stored in the buffer and never be reused.
     num_buffering_objects=200,
+    # turn on to use render pipeline, which provides advanced rendering effects (Beta)
+    render_pipeline=False,
+    # daytime is only available when using render-pipeline
+    daytime="19:08",
 
     # ===== Others =====
     # The maximum distance used in PGLOD. Set to None will use the default values.
@@ -546,7 +550,7 @@ class BaseEnv(gym.Env):
         Engine setting after launching
         """
         self.engine.accept("r", self.reset)
-        self.engine.accept("c", self.capture)
+        # self.engine.accept("c", self.capture)
         self.engine.register_manager("agent_manager", self.agent_manager)
         self.engine.register_manager("record_manager", RecordManager())
         self.engine.register_manager("replay_manager", ReplayManager())
@@ -583,17 +587,18 @@ class BaseEnv(gym.Env):
         return self.engine.episode_step if self.engine is not None else 0
 
     def export_scenarios(
-        self,
-        policies: Union[dict, Callable],
-        scenario_index: Union[list, int],
-        time_interval=0.1,
-        verbose=False,
-        render_topdown=False,
-        return_done_info=True
+            self,
+            policies: Union[dict, Callable],
+            scenario_index: Union[list, int],
+            time_interval=0.1,
+            verbose=False,
+            render_topdown=False,
+            return_done_info=True
     ):
         """
         We export scenarios into a unified format with 10hz sample rate
         """
+
         def _act(observation):
             if isinstance(policies, dict):
                 ret = {}

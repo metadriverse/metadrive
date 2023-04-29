@@ -1,0 +1,142 @@
+
+settings: !!omap
+
+    - scattering_method:
+        type: enum
+        values: ["eric_bruneton", "hosek_wilkie"]
+        default: "eric_bruneton"
+        label: Scattering Method
+        description: >
+            Chooses the scattering algorithm. eric_bruneton is the Precomputed
+            Atmospheric Scattering method proposed by Eric Bruneton. hosek_wilkie
+            denotes the sky model proposed by Lukas Hosek and Alexander Wilkie.
+
+    - ground_reflectance:
+        display_if: {scattering_method: "eric_bruneton"}
+        type: float
+        range: [0.01, 1.0]
+        default: 0.1
+        shader_runtime: true
+        label: Ground Reflectance
+        description: >
+            Average ground reflectance, controls how much light the earth reflects.
+
+    - rayleigh_factor:
+        display_if: {scattering_method: "eric_bruneton"}
+        type: float
+        range: [0.05, 1.0]
+        default: 0.5
+        shader_runtime: true
+        label: Rayleigh factor
+        description: >
+            Controls the the rayleigh factor, lower values cause a more bluish sky.
+
+    - rayleigh_height_scale:
+        display_if: {scattering_method: "eric_bruneton"}
+        type: float
+        range: [1.0, 16.0]
+        default: 8.0
+        shader_runtime: true
+        label: Rayleigh height scale
+        description: >
+            Rayleigh height scale, higher values cause a more bluish sky.
+
+    - mie_height_scale:
+        display_if: {scattering_method: "eric_bruneton"}
+        type: float
+        range: [0.5, 5.0]
+        default: 1.3
+        shader_runtime: true
+        label: Mie height scale
+        description: >
+            Mie height scale, higher values cause a more reddish sky.
+
+    - mie_phase_factor:
+        display_if: {scattering_method: "eric_bruneton"}
+        type: float
+        range: [0.1, 0.9999]
+        default: 0.3
+        shader_runtime: true
+        label: Mie Phase
+        description: >
+            Mie phase factor, this controls the apperance of the sun highlight
+            in the sky, higher values produce a smaller (but brighter) sun-shape.
+
+    - beta_mie_scattering:
+        display_if: {scattering_method: "eric_bruneton"}
+        type: float
+        range: [1, 30]
+        default: 4
+        shader_runtime: true
+        label: Beta Mie Scattering
+        description: >
+            Beta Mie Scattering factor
+
+    - enable_godrays:
+        type: bool
+        default: false
+        label: Enable Godrays (experimental!)
+        description: >
+            This enables the experimental support for godrays.
+
+    - atmosphere_start:
+        type: float
+        range: [25.0, 2000.0]
+        default: 100
+        label: Atmosphere Start
+        shader_runtime: true
+        description: >
+            Start of the the atmosphere, this controls where
+            z = 0 lies inside the atmosphere. A value of 0 would mean
+            sea level for example.
+
+
+daytime_settings: !!omap
+
+    - sun_intensity:
+        type: scalar
+        unit: klux
+        range: [0.0, 150.0]
+        default: 100.0
+        label: Sun Intensity
+        description: >
+            Controls the intensity of the sun in K-LUX (1000 lux)
+
+    - sun_color:
+        type: color
+        default: [126, 255, 100]
+        label: Sun Color
+        description: >
+            Color of the sun, only affects direct lighting, has no impact on scattering.
+
+    - sun_azimuth:
+        type: scalar
+        unit: degree
+        range: [0.0, 360.0]
+        default: 180
+        label: Sun Azimuth
+        description: >
+            Horizontal angle of the sun, this basically controls from which
+            direction the sun comes
+
+    - sun_altitude:
+        type: scalar
+        unit: degree
+        range: [-60, 60.0]
+        default: 30
+        label: Sun Altidude
+        description: >
+            Vertical angle of the sun, this controls the height of the sun.
+
+    - extinction:
+        type: scalar
+        unit: meter
+        range: [0.5, 50000.0]
+        default: 2000
+        label: Extinction
+        logarithmic_factor: 2.0
+        description: >
+            Extinction factor, this controls how much the fog darkens the
+            objects in the distance.
+
+

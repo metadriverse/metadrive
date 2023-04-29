@@ -1,0 +1,42 @@
+
+settings: !!omap
+
+    - focal_point:
+        type: float
+        range: [0.0, 10000.0]
+        default: 10.0
+        shader_runtime: true
+        label: Focal point
+        description: >
+            The focal point distance to the camera.
+
+    - focal_size:
+        type: float
+        range: [0.0, 5000.0]
+        default: 2.5
+        label: Focal size
+        shader_runtime: true
+        description: >
+            Size of the focal region.
+
+    - blur_strength:
+        type: float
+        range: [0.0, 1.0]
+        default: 0.5
+        label: Blur strength
+        shader_runtime: true
+        description: >
+            Strength of the blur - Will get replaced by a physically based
+            parameter soon!
+
+    - near_blur_strength:
+        type: float
+        range: [0.0, 1.0]
+        default: 0.5
+        label: Near Blur strength
+        shader_runtime: true
+        description: >
+            Strength of the near-field blur - Will get replaced by a physically based
+            parameter soon!
+
+daytime_settings:

@@ -121,9 +121,3 @@ class ScenarioDataManager(BaseManager):
     @property
     def current_scenario(self):
         return self.get_scenario(self.engine.global_random_seed)
-
-    def after_reset(self):
-        if self.engine.mode != RENDER_MODE_NONE:
-            center_p = self.engine.current_map.get_center_point()
-            self.engine.sky_box.set_position(center_p)
-            self.engine.terrain.set_position(center_p)

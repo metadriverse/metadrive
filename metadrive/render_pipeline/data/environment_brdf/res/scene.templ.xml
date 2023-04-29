@@ -1,0 +1,62 @@
+<?xml version='1.0' encoding='utf-8'?>
+
+<scene version="0.5.0">
+	<integrator type="path">
+		<integer name="maxDepth" value="2"/>
+	</integrator>
+
+	<shape type="cylinder">
+		<float name="radius" value="1" />
+		<point name="p0" x="0" y="0.5" z="0" />
+		<point name="p1" x="0" y="-0.5" z="0" />
+
+		<bsdf type="roughplastic">
+			<!-- <string name="material" value="Cu"/> -->
+			<string name="distribution" value="ggx"/>
+			<rgb name="diffuseReflectance" value="0,1,0" />
+			<rgb name="specularReflectance" value="1,0,0" />
+			<float name="intIOR" value="%IOR%"/>
+
+			<texture name="alpha" type="bitmap">
+				<string name="filename" value="roughness.png"/>
+			</texture>
+
+
+		</bsdf>
+	</shape>
+
+	<emitter type="envmap">
+		<string name="filename" value="environment.png" />
+		<float name="gamma" value="1.0" />
+	</emitter>
+
+	<sensor type="orthographic">
+		<float name="nearClip" value="0.05"/>
+		<float name="farClip" value="15"/>
+
+		<!-- <float name="fov" value="40"/> -->
+
+		<string name="fovAxis" value="x"/>
+
+		<transform name="toWorld">
+			<scale x="0.5" y="128" />
+			<lookat origin="0.5, 0.0, -3.5" target="0.5, 0.0, 0" up="0, 1, 0"/>
+		</transform>
+
+		<sampler type="ldsampler">
+			<integer name="sampleCount" value="%SAMPLES%" />
+		</sampler>
+
+		<film type="hdrfilm">
+			<boolean name="banner" value="false"/>
+
+			<boolean name="attachLog" value="false" />
+			<!-- <boolean name="highQualityEdges" value="true" /> -->
+
+			<integer name="height" value="32"/>
+			<integer name="width" value="8192"/>
+
+			<!-- <rfilter type="box"/> -->
+		</film>
+	</sensor>
+</scene>

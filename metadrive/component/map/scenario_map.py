@@ -84,6 +84,9 @@ class ScenarioMap(BaseMap):
         return ret
 
     def get_map_features(self, interval=2):
+        """
+        TODO LQY: Consider removing it as I prefer a resampled one
+        """
         map_features = super(ScenarioMap, self).get_map_features(interval=interval)
 
         # Adding the information stored in original data to here

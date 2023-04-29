@@ -1,0 +1,103 @@
+
+settings: !!omap
+
+
+    - effect_scale:
+        type: float
+        range: [0.0, 1.0]
+        default: 1.0
+        label: SSR Strength
+        shader_runtime: true
+        description: >
+            Controls the strength of the reflections, lower values will reduce
+            the influence of ssr, increasing the influence of other plugins
+            like environment probes
+
+    - trace_steps:
+        type: int
+        range: [4, 512]
+        default: 64
+        label: Trace Steps
+        shader_runtime: true
+        description: >
+          Amount of trace steps. A higher amount will lead to less missed
+          details, although it will also be more computationally expensive.
+
+    - history_length:
+        type: int
+        range: [1, 32]
+        default: 16
+        shader_runtime: true
+        label: History Length
+        description: >
+            History buffer size. This controls how long pixels will stay
+            in the history buffer, greater values lead to smoother results
+            but also might produce more artifacts.
+
+    - abort_on_object_infront:
+        type: bool
+        default: true
+        label: Abort on invalid hit
+        shader_runtime: true
+        description: >
+            Aborts the trace when an object is found in front of the ray.
+            This might lead to artifacts on floating objects, but might
+            also improve the quality.
+
+    - intial_bias:
+        type: float
+        range: [0.05, 10.0]
+        default: 0.1
+        label: Initial ray bias
+        shader_runtime: true
+        description: >
+            Offsets the ray a bit in the tracing direction to avoid self-
+            intersection. A too small value will cause artifacts due to self
+            intersection, a too high value will miss details near to objects.
+
+    - hit_tolerance:
+        type: float
+        range: [0.05, 10.0]
+        default: 0.1
+        label: Hit tolerance
+        shader_runtime: true
+        description: >
+            Higher values will produce more intersections, but also produce
+            false positives. If you set this value too low, artifacts and noise
+            will occur.
+
+    - roughness_fade:
+        type: float
+        range: [0.1, 1.0]
+        default: 0.72
+        shader_runtime: true
+        label: Roughness Fade
+        description: >
+            Fades out the reflections at high roughness values, so that other
+            solutions like environment probes have more influence. This is
+            to prevent noise, and controls the maximum roughness where ssr is
+            active.
+
+    - skip_invalid_samples:
+        type: bool
+        default: false
+        shader_runtime: true
+        label: Skip Invalid Pixels
+        description: >
+            Whether to skip pixels which could not successfully be reprojected
+            from the last frames color texture. This affects the effect when
+            moving. Setting this to true will produce more accurate but also
+            more noisy results. Setting this to false might produce artifacts.
+
+    - border_fade:
+        type: float
+        range: [0.001, 1.0]
+        default: 0.005
+        shader_runtime: true
+        label: Border Fade
+        description: >
+            Fades out the effect at the screen borders to avoid rough transitions.
+            A value of 0.0 means no transitions while a value of 1.0 means a
+            very smooth transition.
+
+daytime_settings:

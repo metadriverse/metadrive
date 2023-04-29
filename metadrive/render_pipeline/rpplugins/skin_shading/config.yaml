@@ -1,0 +1,23 @@
+
+settings: !!omap
+
+    - quality:
+        type: enum
+        values: ["low", "medium", "high"]
+        default: "medium"
+        label: Quality
+        shader_runtime: true
+        description: >
+            Controls the quality of the subsurface scattering, higher
+            values provide smoother results but also consume more performance.
+
+    - blur_scale:
+        type: float
+        range: [0.1, 3.0]
+        default: 0.43
+        shader_runtime: true
+        label: Filter Radius
+        description: Radius of the subsurface scattering filter, higher values
+            produce smoother results but might also produce artifacts.
+
+daytime_settings:

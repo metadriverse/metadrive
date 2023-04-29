@@ -50,12 +50,6 @@ class PGLane(AbstractLane):
     def polygon(self):
         raise NotImplementedError("Overwrite this function to allow getting polygon for this lane")
 
-    def get_polygon(self):
-        return self.polygon
-
-    def has_polygon(self):
-        return True if self.polygon is not None else False
-
     def point_on_lane(self, point):
         s_point = geometry.Point(point[0], point[1])
         return self.shapely_polygon.contains(s_point)
