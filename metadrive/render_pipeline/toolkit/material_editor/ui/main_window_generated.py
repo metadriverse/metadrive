@@ -8,90 +8,93 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
+
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(262, 608)
         MainWindow.setMinimumSize(QtCore.QSize(262, 608))
         MainWindow.setMaximumSize(QtCore.QSize(262, 5560))
-        MainWindow.setStyleSheet("QMainWindow { background: #fff;}\n"
-"*, QLabel { font-family: Roboto; font-weight: 300; }\n"
-"\n"
-"QSlider::groove:horizontal {\n"
-"    border: 0;\n"
-"    height: 4px;\n"
-"    background: rgba(0, 0, 0, 15);\n"
-"}\n"
-"\n"
-"QSlider::handle:horizonal {\n"
-"    background: #666;\n"
-"    width: 8px;\n"
-"    margin: -6px 0;\n"
-"}\n"
-"\n"
-"QSlider::handle:horizontal:disabled {\n"
-"    background: #ccc;\n"
-"}\n"
-"QSlider::groove:horizontal:disabled {\n"
-"    background: rgba(0, 0, 0, 8);\n"
-"}\n"
-"\n"
-"QRadioButton {\n"
-"    background: #fafafa;\n"
-"    padding: 4px 6px 3px;\n"
-"   font-size: 12px;\n"
-"    color: #333;\n"
-"}\n"
-"\n"
-"QRadioButton::indicator {\n"
-"    width: 15px;\n"
-"    height: 15px;\n"
-"    margin-top: -1px;\n"
-"}\n"
-"\n"
-"QRadioButton:checked {\n"
-"background: #eee;\n"
-"}\n"
-"\n"
-"QRadioButton:hover {\n"
-"background: #eaeaea;\n"
-"}\n"
-"\n"
-"QComboBox {\n"
-"border: 0;\n"
-"background: #fff;\n"
-"padding: 7px 10px 3px;\n"
-"font-family: Roboto;\n"
-"color: #777;\n"
-"font-size: 12px;\n"
-"}\n"
-"\n"
-"QComboBox::down-arrow {\n"
-"    border: 0;\n"
-"    margin: -3px;\n"
-"    background: #ddd;\n"
-"    margin-left: -16px;\n"
-"margin-bottom: -4px;\n"
-"    image: url(\":/img/down-arrow.png\");\n"
-"}\n"
-"\n"
-"QCheckBox::indicator {\n"
-"    border: 1px solid #aaa;\n"
-"    background: #39f;\n"
-"    width: 14px;\n"
-"    height: 14px;\n"
-"    image: url(\":/img/checked.png\");\n"
-"}\n"
-"\n"
-"QCheckBox {\n"
-"text-transform: uppercase;\n"
-"color: #555;\n"
-"}\n"
-"\n"
-"QCheckBox::indicator:unchecked {\n"
-"    background: #fff;\n"
-"    image: none;\n"
-"}")
+        MainWindow.setStyleSheet(
+            "QMainWindow { background: #fff;}\n"
+            "*, QLabel { font-family: Roboto; font-weight: 300; }\n"
+            "\n"
+            "QSlider::groove:horizontal {\n"
+            "    border: 0;\n"
+            "    height: 4px;\n"
+            "    background: rgba(0, 0, 0, 15);\n"
+            "}\n"
+            "\n"
+            "QSlider::handle:horizonal {\n"
+            "    background: #666;\n"
+            "    width: 8px;\n"
+            "    margin: -6px 0;\n"
+            "}\n"
+            "\n"
+            "QSlider::handle:horizontal:disabled {\n"
+            "    background: #ccc;\n"
+            "}\n"
+            "QSlider::groove:horizontal:disabled {\n"
+            "    background: rgba(0, 0, 0, 8);\n"
+            "}\n"
+            "\n"
+            "QRadioButton {\n"
+            "    background: #fafafa;\n"
+            "    padding: 4px 6px 3px;\n"
+            "   font-size: 12px;\n"
+            "    color: #333;\n"
+            "}\n"
+            "\n"
+            "QRadioButton::indicator {\n"
+            "    width: 15px;\n"
+            "    height: 15px;\n"
+            "    margin-top: -1px;\n"
+            "}\n"
+            "\n"
+            "QRadioButton:checked {\n"
+            "background: #eee;\n"
+            "}\n"
+            "\n"
+            "QRadioButton:hover {\n"
+            "background: #eaeaea;\n"
+            "}\n"
+            "\n"
+            "QComboBox {\n"
+            "border: 0;\n"
+            "background: #fff;\n"
+            "padding: 7px 10px 3px;\n"
+            "font-family: Roboto;\n"
+            "color: #777;\n"
+            "font-size: 12px;\n"
+            "}\n"
+            "\n"
+            "QComboBox::down-arrow {\n"
+            "    border: 0;\n"
+            "    margin: -3px;\n"
+            "    background: #ddd;\n"
+            "    margin-left: -16px;\n"
+            "margin-bottom: -4px;\n"
+            "    image: url(\":/img/down-arrow.png\");\n"
+            "}\n"
+            "\n"
+            "QCheckBox::indicator {\n"
+            "    border: 1px solid #aaa;\n"
+            "    background: #39f;\n"
+            "    width: 14px;\n"
+            "    height: 14px;\n"
+            "    image: url(\":/img/checked.png\");\n"
+            "}\n"
+            "\n"
+            "QCheckBox {\n"
+            "text-transform: uppercase;\n"
+            "color: #555;\n"
+            "}\n"
+            "\n"
+            "QCheckBox::indicator:unchecked {\n"
+            "    background: #fff;\n"
+            "    image: none;\n"
+            "}"
+        )
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.verticalLayout = QtWidgets.QVBoxLayout(self.centralwidget)
@@ -106,14 +109,11 @@ class Ui_MainWindow(object):
         self.frame.setObjectName("frame")
         self.label = QtWidgets.QLabel(self.frame)
         self.label.setGeometry(QtCore.QRect(20, 26, 261, 31))
-        self.label.setStyleSheet("font-size: 20px; color: #03C03C;\n"
-"font-weight: 100;")
+        self.label.setStyleSheet("font-size: 20px; color: #03C03C;\n" "font-weight: 100;")
         self.label.setObjectName("label")
         self.label_9 = QtWidgets.QLabel(self.frame)
         self.label_9.setGeometry(QtCore.QRect(20, 6, 261, 31))
-        self.label_9.setStyleSheet("font-size: 13px;\n"
-"color: #aaa;\n"
-"font-weight: 600;")
+        self.label_9.setStyleSheet("font-size: 13px;\n" "color: #aaa;\n" "font-weight: 600;")
         self.label_9.setObjectName("label_9")
         self.verticalLayout.addWidget(self.frame)
         self.horizontalLayout = QtWidgets.QHBoxLayout()
@@ -122,7 +122,9 @@ class Ui_MainWindow(object):
         self.sidebar_material = QtWidgets.QFrame(self.centralwidget)
         self.sidebar_material.setMinimumSize(QtCore.QSize(0, 0))
         self.sidebar_material.setMaximumSize(QtCore.QSize(999999, 16777215))
-        self.sidebar_material.setStyleSheet("QFrame { background: #eee; } QFrame>QLabel { text-transform: uppercase; color: #888;  background: transparent; }")
+        self.sidebar_material.setStyleSheet(
+            "QFrame { background: #eee; } QFrame>QLabel { text-transform: uppercase; color: #888;  background: transparent; }"
+        )
         self.sidebar_material.setFrameShape(QtWidgets.QFrame.StyledPanel)
         self.sidebar_material.setFrameShadow(QtWidgets.QFrame.Raised)
         self.sidebar_material.setObjectName("sidebar_material")
@@ -356,5 +358,6 @@ class Ui_MainWindow(object):
         self.cb_rgb.setText(_translate("MainWindow", "RGB"))
         self.cb_srgb.setText(_translate("MainWindow", "SRGB"))
         self.cb_hsv.setText(_translate("MainWindow", "HSV"))
+
 
 from . import resources_rc

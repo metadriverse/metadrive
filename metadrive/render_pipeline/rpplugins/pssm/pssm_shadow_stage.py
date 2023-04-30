@@ -33,7 +33,6 @@ from metadrive.render_pipeline.rpcore.render_stage import RenderStage
 
 
 class PSSMShadowStage(RenderStage):
-
     """ This stage generates the depth-maps used for rendering PSSM """
 
     required_inputs = []
@@ -79,8 +78,8 @@ class PSSMShadowStage(RenderStage):
         # Prepare the display regions
         for i in range(self.num_splits):
             region = internal_buffer.make_display_region(
-                i / self.num_splits,
-                i / self.num_splits + 1 / self.num_splits, 0, 1)
+                i / self.num_splits, i / self.num_splits + 1 / self.num_splits, 0, 1
+            )
             region.set_sort(25 + i)
             region.disable_clears()
             region.set_active(True)

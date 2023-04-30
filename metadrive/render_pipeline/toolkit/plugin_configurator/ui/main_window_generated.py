@@ -8,6 +8,7 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
+
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
@@ -22,87 +23,91 @@ class Ui_MainWindow(object):
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(":/icon/res/icon.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         MainWindow.setWindowIcon(icon)
-        MainWindow.setStyleSheet("QMainWindow { background: #fff;}\n"
-"*, QLabel { font-family: Roboto; font-weight: 300; }\n"
-"\n"
-"QScrollBar {\n"
-"    background: #eee;\n"
-"}\n"
-"\n"
-"\n"
-"QScrollBar:vertical {\n"
-"                        width: 9px;\n"
-"    margin: 0;\n"
-"                      }\n"
-"\n"
-"                      QScrollBar::handle:vertical {\n"
-"                        min-height: 15px;\n"
-"                        background: #aaa;\n"
-"\n"
-"                      }\n"
-"\n"
-"\n"
-"                      QScrollBar::handle:vertical:hover {\n"
-"                        \n"
-"                        background: #999;\n"
-"\n"
-"                      }\n"
-"                      QScrollBar::add-line:vertical {\n"
-"                      }\n"
-"\n"
-"                      QScrollBar::sub-line:vertical {\n"
-"                      }\n"
-"\n"
-"\n"
-"                      QScrollBar::add-page:vertical {\n"
-"                        background: #ddd;\n"
-"\n"
-"                      }\n"
-"                      QScrollBar::sub-page:vertical {\n"
-"                        background: #ddd;\n"
-"                    }\n"
-"")
+        MainWindow.setStyleSheet(
+            "QMainWindow { background: #fff;}\n"
+            "*, QLabel { font-family: Roboto; font-weight: 300; }\n"
+            "\n"
+            "QScrollBar {\n"
+            "    background: #eee;\n"
+            "}\n"
+            "\n"
+            "\n"
+            "QScrollBar:vertical {\n"
+            "                        width: 9px;\n"
+            "    margin: 0;\n"
+            "                      }\n"
+            "\n"
+            "                      QScrollBar::handle:vertical {\n"
+            "                        min-height: 15px;\n"
+            "                        background: #aaa;\n"
+            "\n"
+            "                      }\n"
+            "\n"
+            "\n"
+            "                      QScrollBar::handle:vertical:hover {\n"
+            "                        \n"
+            "                        background: #999;\n"
+            "\n"
+            "                      }\n"
+            "                      QScrollBar::add-line:vertical {\n"
+            "                      }\n"
+            "\n"
+            "                      QScrollBar::sub-line:vertical {\n"
+            "                      }\n"
+            "\n"
+            "\n"
+            "                      QScrollBar::add-page:vertical {\n"
+            "                        background: #ddd;\n"
+            "\n"
+            "                      }\n"
+            "                      QScrollBar::sub-page:vertical {\n"
+            "                        background: #ddd;\n"
+            "                    }\n"
+            ""
+        )
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.lst_plugins = QtWidgets.QListWidget(self.centralwidget)
         self.lst_plugins.setGeometry(QtCore.QRect(20, 80, 251, 531))
-        self.lst_plugins.setStyleSheet("QListWidget::item {\n"
-"padding: 8px 7px 5px;\n"
-"background: #ddd;\n"
-"outline: 0 !important;\n"
-"margin-bottom: 1px;\n"
-"margin-right: 10px;\n"
-"color: #777;\n"
-"font-weight: 500;\n"
-"border: 0;\n"
-"border-radius: 0;\n"
-"}\n"
-"\n"
-"QListWidget::item:hover {\n"
-"background: #ccc;\n"
-"}\n"
-"\n"
-"QListWidget::item:selected {\n"
-"background: #555;\n"
-"color: #eee;\n"
-"}\n"
-"\n"
-"QListWidget {\n"
-"padding: 0;\n"
-"color: #eee;\n"
-"background: transparent;\n"
-"/*\n"
-"background: #222;\n"
-"padding: 5px 8px;\n"
-"border: 1px solid #444;\n"
-"*/\n"
-"}\n"
-"\n"
-"* {\n"
-"outline: 0;\n"
-"}\n"
-"\n"
-"")
+        self.lst_plugins.setStyleSheet(
+            "QListWidget::item {\n"
+            "padding: 8px 7px 5px;\n"
+            "background: #ddd;\n"
+            "outline: 0 !important;\n"
+            "margin-bottom: 1px;\n"
+            "margin-right: 10px;\n"
+            "color: #777;\n"
+            "font-weight: 500;\n"
+            "border: 0;\n"
+            "border-radius: 0;\n"
+            "}\n"
+            "\n"
+            "QListWidget::item:hover {\n"
+            "background: #ccc;\n"
+            "}\n"
+            "\n"
+            "QListWidget::item:selected {\n"
+            "background: #555;\n"
+            "color: #eee;\n"
+            "}\n"
+            "\n"
+            "QListWidget {\n"
+            "padding: 0;\n"
+            "color: #eee;\n"
+            "background: transparent;\n"
+            "/*\n"
+            "background: #222;\n"
+            "padding: 5px 8px;\n"
+            "border: 1px solid #444;\n"
+            "*/\n"
+            "}\n"
+            "\n"
+            "* {\n"
+            "outline: 0;\n"
+            "}\n"
+            "\n"
+            ""
+        )
         self.lst_plugins.setFrameShape(QtWidgets.QFrame.NoFrame)
         self.lst_plugins.setLineWidth(0)
         self.lst_plugins.setObjectName("lst_plugins")
@@ -354,13 +359,13 @@ class Ui_MainWindow(object):
         self.lbl_plugin_version.setFont(font)
         self.lbl_plugin_version.setStyleSheet("color: #ff9719; border: 0; border-radius: 4px; font-weight: bold;")
         self.lbl_plugin_version.setTextFormat(QtCore.Qt.PlainText)
-        self.lbl_plugin_version.setAlignment(QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft|QtCore.Qt.AlignVCenter)
+        self.lbl_plugin_version.setAlignment(QtCore.Qt.AlignLeading | QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
         self.lbl_plugin_version.setObjectName("lbl_plugin_version")
         self.lbl_plugin_desc = QtWidgets.QLabel(self.frame_details)
         self.lbl_plugin_desc.setGeometry(QtCore.QRect(20, 60, 441, 51))
         self.lbl_plugin_desc.setStyleSheet("color: #777; border: 0; font-size: 11px;")
         self.lbl_plugin_desc.setTextFormat(QtCore.Qt.PlainText)
-        self.lbl_plugin_desc.setAlignment(QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft|QtCore.Qt.AlignTop)
+        self.lbl_plugin_desc.setAlignment(QtCore.Qt.AlignLeading | QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
         self.lbl_plugin_desc.setWordWrap(True)
         self.lbl_plugin_desc.setObjectName("lbl_plugin_desc")
         self.table_plugin_settings = QtWidgets.QTableWidget(self.frame_details)
@@ -508,7 +513,9 @@ class Ui_MainWindow(object):
         font.setBold(False)
         font.setWeight(37)
         self.table_plugin_settings.setFont(font)
-        self.table_plugin_settings.setStyleSheet("QTableWidget { border: 1px solid #ccc; font-family: Roboto; font-size: 11px; }")
+        self.table_plugin_settings.setStyleSheet(
+            "QTableWidget { border: 1px solid #ccc; font-family: Roboto; font-size: 11px; }"
+        )
         self.table_plugin_settings.setFrameShape(QtWidgets.QFrame.StyledPanel)
         self.table_plugin_settings.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
         self.table_plugin_settings.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
@@ -529,14 +536,14 @@ class Ui_MainWindow(object):
         self.table_plugin_settings.setColumnCount(4)
         self.table_plugin_settings.setRowCount(2)
         item = QtWidgets.QTableWidgetItem()
-        item.setTextAlignment(QtCore.Qt.AlignHCenter|QtCore.Qt.AlignVCenter|QtCore.Qt.AlignCenter)
+        item.setTextAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter | QtCore.Qt.AlignCenter)
         self.table_plugin_settings.setVerticalHeaderItem(0, item)
         item = QtWidgets.QTableWidgetItem()
         self.table_plugin_settings.setVerticalHeaderItem(1, item)
         item = QtWidgets.QTableWidgetItem()
         self.table_plugin_settings.setHorizontalHeaderItem(0, item)
         item = QtWidgets.QTableWidgetItem()
-        item.setTextAlignment(QtCore.Qt.AlignHCenter|QtCore.Qt.AlignVCenter|QtCore.Qt.AlignCenter)
+        item.setTextAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter | QtCore.Qt.AlignCenter)
         self.table_plugin_settings.setHorizontalHeaderItem(1, item)
         item = QtWidgets.QTableWidgetItem()
         self.table_plugin_settings.setHorizontalHeaderItem(2, item)
@@ -579,19 +586,21 @@ class Ui_MainWindow(object):
         self.lbl_plugin_name.setObjectName("lbl_plugin_name")
         self.btn_reset_plugin_settings = QtWidgets.QPushButton(self.frame_details)
         self.btn_reset_plugin_settings.setGeometry(QtCore.QRect(520, 60, 180, 31))
-        self.btn_reset_plugin_settings.setStyleSheet("QPushButton {\n"
-"color: #eee;\n"
-"background: #666;\n"
-"border: 0; \n"
-"}\n"
-"\n"
-"QPushButton:hover {\n"
-"    background: #555;\n"
-"}\n"
-"\n"
-"QPushButton:pressed {\n"
-"    background: #111;\n"
-"}")
+        self.btn_reset_plugin_settings.setStyleSheet(
+            "QPushButton {\n"
+            "color: #eee;\n"
+            "background: #666;\n"
+            "border: 0; \n"
+            "}\n"
+            "\n"
+            "QPushButton:hover {\n"
+            "    background: #555;\n"
+            "}\n"
+            "\n"
+            "QPushButton:pressed {\n"
+            "    background: #111;\n"
+            "}"
+        )
         self.btn_reset_plugin_settings.setObjectName("btn_reset_plugin_settings")
         self.frame = QtWidgets.QFrame(self.centralwidget)
         self.frame.setGeometry(QtCore.QRect(0, 60, 281, 621))
@@ -666,7 +675,7 @@ class Ui_MainWindow(object):
         self.lbl_hint_restart.setStyleSheet("border-top: 1px dotted #aaa; color: #999; padding: 0;")
         self.lbl_hint_restart.setTextFormat(QtCore.Qt.PlainText)
         self.lbl_hint_restart.setScaledContents(False)
-        self.lbl_hint_restart.setAlignment(QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft|QtCore.Qt.AlignVCenter)
+        self.lbl_hint_restart.setAlignment(QtCore.Qt.AlignLeading | QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
         self.lbl_hint_restart.setWordWrap(True)
         self.lbl_hint_restart.setObjectName("lbl_hint_restart")
         self.lbl_restart_pipeline = QtWidgets.QLabel(self.centralwidget)
@@ -678,19 +687,18 @@ class Ui_MainWindow(object):
         font.setWeight(37)
         self.lbl_restart_pipeline.setFont(font)
         self.lbl_restart_pipeline.setAutoFillBackground(False)
-        self.lbl_restart_pipeline.setStyleSheet("background: #ff9719; color: #eee; padding: 5px; border: 0; font-size: 12px;")
+        self.lbl_restart_pipeline.setStyleSheet(
+            "background: #ff9719; color: #eee; padding: 5px; border: 0; font-size: 12px;"
+        )
         self.lbl_restart_pipeline.setAlignment(QtCore.Qt.AlignCenter)
         self.lbl_restart_pipeline.setObjectName("lbl_restart_pipeline")
         self.label = QtWidgets.QLabel(self.centralwidget)
         self.label.setGeometry(QtCore.QRect(20, 25, 261, 31))
-        self.label.setStyleSheet("font-size: 20px; color: #ff9719;\n"
-"font-weight: 100;")
+        self.label.setStyleSheet("font-size: 20px; color: #ff9719;\n" "font-weight: 100;")
         self.label.setObjectName("label")
         self.label_9 = QtWidgets.QLabel(self.centralwidget)
         self.label_9.setGeometry(QtCore.QRect(20, 6, 261, 31))
-        self.label_9.setStyleSheet("font-size: 13px;\n"
-"color: #aaa;\n"
-"font-weight: 600;")
+        self.label_9.setStyleSheet("font-size: 13px;\n" "color: #aaa;\n" "font-weight: 600;")
         self.label_9.setObjectName("label_9")
         self.frame.raise_()
         self.lst_plugins.raise_()
@@ -748,9 +756,13 @@ class Ui_MainWindow(object):
         item.setText(_translate("MainWindow", "Other Item to force scrollbars"))
         self.lst_plugins.setSortingEnabled(__sortingEnabled)
         self.lbl_plugin_version.setText(_translate("MainWindow", "version 0.1 by some author"))
-        self.lbl_plugin_desc.setText(_translate("MainWindow", "This is a fancy description\n"
-"It shows information about the plugin and maybe\n"
-"a website or so."))
+        self.lbl_plugin_desc.setText(
+            _translate(
+                "MainWindow", "This is a fancy description\n"
+                "It shows information about the plugin and maybe\n"
+                "a website or so."
+            )
+        )
         item = self.table_plugin_settings.verticalHeaderItem(0)
         item.setText(_translate("MainWindow", "Row"))
         item = self.table_plugin_settings.verticalHeaderItem(1)
@@ -778,13 +790,23 @@ class Ui_MainWindow(object):
         item = self.table_plugin_settings.item(1, 2)
         item.setText(_translate("MainWindow", "CurrentRow1"))
         item = self.table_plugin_settings.item(1, 3)
-        item.setText(_translate("MainWindow", "aasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfg"))
+        item.setText(
+            _translate(
+                "MainWindow",
+                "aasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfgaasd\\n\\nsdf\\n\\ndfdfG\\n\\nfg"
+            )
+        )
         self.table_plugin_settings.setSortingEnabled(__sortingEnabled)
         self.lbl_plugin_name.setText(_translate("MainWindow", "Ambient Occlusion"))
         self.btn_reset_plugin_settings.setText(_translate("MainWindow", "Reset Settings of this Plugin"))
-        self.lbl_hint_restart.setText(_translate("MainWindow", "Hint: Settings with a gray color require a pipeline restart when changed."))
-        self.lbl_restart_pipeline.setText(_translate("MainWindow", "Pipeline needs to be restarted to apply all changes!"))
+        self.lbl_hint_restart.setText(
+            _translate("MainWindow", "Hint: Settings with a gray color require a pipeline restart when changed.")
+        )
+        self.lbl_restart_pipeline.setText(
+            _translate("MainWindow", "Pipeline needs to be restarted to apply all changes!")
+        )
         self.label.setText(_translate("MainWindow", "PLUGIN CONFIGURATOR"))
         self.label_9.setText(_translate("MainWindow", "RENDER PIPELINE"))
+
 
 from . import resources_rc

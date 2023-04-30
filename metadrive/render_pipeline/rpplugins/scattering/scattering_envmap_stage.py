@@ -34,7 +34,6 @@ from metadrive.render_pipeline.rpcore.stages.gbuffer_stage import GBufferStage
 
 
 class ScatteringEnvmapStage(RenderStage):
-
     """ This stage uses the precomputed data to make a cubemap containing the
     scattering """
 

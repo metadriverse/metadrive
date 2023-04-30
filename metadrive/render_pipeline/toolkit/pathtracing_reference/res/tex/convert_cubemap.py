@@ -12,7 +12,8 @@ import direct.directbase.DirectStart  # noqa
 cubemap = loader.load_cube_map("../../../../data/default_cubemap/source/#.jpg")
 w, h = 4096, 2048
 
-cshader = Shader.make_compute(Shader.SL_GLSL, """
+cshader = Shader.make_compute(
+    Shader.SL_GLSL, """
 #version 430
 layout (local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
 
@@ -46,7 +47,8 @@ void main() {
     vec4 color = texture(SourceTex, v);
     imageStore(DestTex, coord, vec4(color));
 }
-""")
+"""
+)
 
 dest_tex = Texture("")
 dest_tex.setup_2d_texture(w, h, Texture.T_float, Texture.F_rgba16)

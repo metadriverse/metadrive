@@ -16,13 +16,16 @@ renderer_ip = ("127.0.0.1", 62360)
 pingback_port = 62500
 
 # Scene data
-payload = pickle.dumps({
-    "scene": "resources/preview.bam",
-    "dest": "demo-render.png",
-    "view_size_x": 512,
-    "view_size_y": 512,
-    "pingback_port": pingback_port
-}, protocol=0)
+payload = pickle.dumps(
+    {
+        "scene": "resources/preview.bam",
+        "dest": "demo-render.png",
+        "view_size_x": 512,
+        "view_size_y": 512,
+        "pingback_port": pingback_port
+    },
+    protocol=0
+)
 
 # Start rendering
 print("Sending payload ...")

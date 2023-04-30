@@ -8,6 +8,7 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
+
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
         Dialog.setObjectName("Dialog")
@@ -44,12 +45,17 @@ class Ui_Dialog(object):
     def retranslateUi(self, Dialog):
         _translate = QtCore.QCoreApplication.translate
         Dialog.setWindowTitle(_translate("Dialog", "Insert Point"))
-        self.label.setText(_translate("Dialog", "Enter the values of the point you want to insert. \n"
-"\n"
-"Did you know: If you dont want to enter concrete values, just click and drag anywhere on the curve to insert a new point."))
+        self.label.setText(
+            _translate(
+                "Dialog", "Enter the values of the point you want to insert. \n"
+                "\n"
+                "Did you know: If you dont want to enter concrete values, just click and drag anywhere on the curve to insert a new point."
+            )
+        )
         self.label_2.setText(_translate("Dialog", "Time:"))
         self.label_3.setText(_translate("Dialog", "Value:"))
         self.ipt_time.setDisplayFormat(_translate("Dialog", "HH:mm"))
         self.btn_insert.setText(_translate("Dialog", "Insert"))
+
 
 from . import resources_rc

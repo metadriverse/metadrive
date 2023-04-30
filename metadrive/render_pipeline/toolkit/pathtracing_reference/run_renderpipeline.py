@@ -12,7 +12,6 @@ from direct.showbase.ShowBase import ShowBase
 
 
 class Application(ShowBase):
-
     def __init__(self):
         sys.path.insert(0, "../../")
         load_prc_file_data("", "win-size 512 512")
@@ -87,6 +86,7 @@ class Application(ShowBase):
             self.taskMgr.step()
 
         self.win.save_screenshot("scene-rp.png")
+
 
 if len(sys.argv) <= 1:
     Application().run()

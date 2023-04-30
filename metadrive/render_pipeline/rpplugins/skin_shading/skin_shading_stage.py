@@ -31,7 +31,6 @@ from metadrive.render_pipeline.rpcore.render_stage import RenderStage
 
 
 class SkinShadingStage(RenderStage):
-
     """ This is the main stage used by the SkinShadingStage plugin """
 
     required_pipes = ["ShadedScene", "GBuffer"]

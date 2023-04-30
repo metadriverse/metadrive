@@ -34,11 +34,10 @@ from panda3d.core import Shader
 from metadrive.render_pipeline.rpcore.globals import Globals
 from metadrive.render_pipeline.rpcore.rpobject import RPObject
 
-__all__ = ("RPLoader",)
+__all__ = ("RPLoader", )
 
 
 class timed_loading_operation(object):  # noqa # pylint: disable=invalid-name,too-few-public-methods
-
     """ Context manager for a synchronous loading operation, keeping track
     on how much time elapsed during the loading process, and warning about
     long loading times. """
@@ -56,19 +55,15 @@ class timed_loading_operation(object):  # noqa # pylint: disable=invalid-name,to
     def __exit__(self, *args):
         duration = (time.process_time() - self.start_time) * 1000.0
         if duration > 80.0 and timed_loading_operation.WARNING_COUNT < 5:
-            RPObject.global_warn(
-                "RPLoader", "Loading '" + self.resource + "' took", round(duration, 2), "ms")
+            RPObject.global_warn("RPLoader", "Loading '" + self.resource + "' took", round(duration, 2), "ms")
             timed_loading_operation.WARNING_COUNT += 1
             if timed_loading_operation.WARNING_COUNT == 5:
-                RPObject.global_warn(
-                    "RPLoader", "Skipping further loading warnings (max warning count reached)")
+                RPObject.global_warn("RPLoader", "Skipping further loading warnings (max warning count reached)")
 
 
 class RPLoader(RPObject):
-
     """ Generic loader class used by the pipeline. All loading of assets happens
     here, which enables us to keep track of used resources """
-
     @classmethod
     def load_texture(cls, filename):
         """ Loads a 2D-texture from disk """
@@ -126,8 +121,7 @@ class RPLoader(RPObject):
 
         # Find slice properties
         num_cols = width // tile_size_x
-        temp_img = PNMImage(
-            tile_size_x, tile_size_y, source.get_num_channels(), source.get_maxval())
+        temp_img = PNMImage(tile_size_x, tile_size_y, source.get_num_channels(), source.get_maxval())
 
         # Construct a ramdisk to write the files to
         vfs = VirtualFileSystem.get_global_ptr()

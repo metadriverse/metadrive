@@ -1,4 +1,3 @@
-
 import os
 from os.path import dirname, realpath, isdir
 os.chdir(dirname(realpath(__file__)))

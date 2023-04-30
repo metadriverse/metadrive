@@ -30,7 +30,6 @@ from metadrive.render_pipeline.rpcore.render_stage import RenderStage
 
 
 class MotionBlurStage(RenderStage):
-
     """ This stage applies the motion blur, using the screen space velocity vectors """
 
     required_inputs = []
@@ -68,8 +67,8 @@ class MotionBlurStage(RenderStage):
             self.target.add_color_attachment(bits=16)
             self.target.prepare_buffer()
             self.target.set_shader_inputs(
-                NeighborMinMax=self.minmax_target.color_tex,
-                PackedSceneData=self.pack_target.color_tex)
+                NeighborMinMax=self.minmax_target.color_tex, PackedSceneData=self.pack_target.color_tex
+            )
 
             self.target.color_tex.set_wrap_u(SamplerState.WM_clamp)
             self.target.color_tex.set_wrap_v(SamplerState.WM_clamp)
@@ -83,15 +82,9 @@ class MotionBlurStage(RenderStage):
 
     def reload_shaders(self):
         if self.per_object_blur:
-            self.tile_target.shader = self.load_plugin_shader(
-                "fetch_dominant_velocity.frag.glsl")
-            self.tile_target_horiz.shader = self.load_plugin_shader(
-                "fetch_dominant_velocity_horiz.frag.glsl")
-            self.minmax_target.shader = self.load_plugin_shader(
-                "neighbor_minmax.frag.glsl")
-            self.pack_target.shader = self.load_plugin_shader(
-                "pack_blur_data.frag.glsl")
-            self.target.shader = self.load_plugin_shader(
-                "apply_motion_blur.frag.glsl")
-        self.target_cam_blur.shader = self.load_plugin_shader(
-            "camera_motion_blur.frag.glsl")
+            self.tile_target.shader = self.load_plugin_shader("fetch_dominant_velocity.frag.glsl")
+            self.tile_target_horiz.shader = self.load_plugin_shader("fetch_dominant_velocity_horiz.frag.glsl")
+            self.minmax_target.shader = self.load_plugin_shader("neighbor_minmax.frag.glsl")
+            self.pack_target.shader = self.load_plugin_shader("pack_blur_data.frag.glsl")
+            self.target.shader = self.load_plugin_shader("apply_motion_blur.frag.glsl")
+        self.target_cam_blur.shader = self.load_plugin_shader("camera_motion_blur.frag.glsl")

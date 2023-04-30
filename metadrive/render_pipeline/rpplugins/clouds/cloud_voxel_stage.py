@@ -31,7 +31,6 @@ from metadrive.render_pipeline.rpcore.image import Image
 
 
 class CloudVoxelStage(RenderStage):
-
     """ This stage generates the volumetric cloud voxel grid """
 
     required_pipes = ["ScatteringIBLDiffuse"]
@@ -47,15 +46,13 @@ class CloudVoxelStage(RenderStage):
 
     @property
     def produced_defines(self):
-        return {
-            "CLOUD_RES_XY": self._voxel_res_xy,
-            "CLOUD_RES_Z": self._voxel_res_z
-        }
+        return {"CLOUD_RES_XY": self._voxel_res_xy, "CLOUD_RES_Z": self._voxel_res_z}
 
     def create(self):
         # Construct the voxel texture
         self._cloud_voxels = Image.create_3d(
-            "CloudVoxels", self._voxel_res_xy, self._voxel_res_xy, self._voxel_res_z, "RGBA8")
+            "CloudVoxels", self._voxel_res_xy, self._voxel_res_xy, self._voxel_res_z, "RGBA8"
+        )
         self._cloud_voxels.set_wrap_u(SamplerState.WM_repeat)
         self._cloud_voxels.set_wrap_v(SamplerState.WM_repeat)
         self._cloud_voxels.set_wrap_w(SamplerState.WM_border_color)
@@ -73,14 +70,12 @@ class CloudVoxelStage(RenderStage):
         self._shade_target.size = self._voxel_res_xy, self._voxel_res_xy
         self._shade_target.prepare_buffer()
         self._shade_target.quad.set_instance_count(self._voxel_res_z)
-        self._shade_target.set_shader_inputs(
-            CloudVoxels=self._cloud_voxels,
-            CloudVoxelsDest=self._cloud_voxels)
+        self._shade_target.set_shader_inputs(CloudVoxels=self._cloud_voxels, CloudVoxelsDest=self._cloud_voxels)
 
     def reload_shaders(self):
         self._grid_target.shader = self.load_plugin_shader(
-            "/$$rp/shader/default_post_process_instanced.vert.glsl",
-            "generate_clouds.frag.glsl")
+            "/$$rp/shader/default_post_process_instanced.vert.glsl", "generate_clouds.frag.glsl"
+        )
         self._shade_target.shader = self.load_plugin_shader(
-            "/$$rp/shader/default_post_process_instanced.vert.glsl",
-            "shade_clouds.frag.glsl")
+            "/$$rp/shader/default_post_process_instanced.vert.glsl", "shade_clouds.frag.glsl"
+        )

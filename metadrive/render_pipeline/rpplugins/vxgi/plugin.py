@@ -39,8 +39,10 @@ class Plugin(BasePlugin):
 
     name = "Voxel Global Illumination"
     author = "tobspr <tobias.springer1@gmail.com>"
-    description = ("Provides Global Illumination using Voxel Cone Tracing. This "
-                   "technique is still very unoptimized and experimental!")
+    description = (
+        "Provides Global Illumination using Voxel Cone Tracing. This "
+        "technique is still very unoptimized and experimental!"
+    )
     version = "alpha (!)"
 
     def on_stage_setup(self):

@@ -29,7 +29,6 @@ from metadrive.render_pipeline.rpcore.render_stage import RenderStage
 
 
 class CollectUsedCellsStage(RenderStage):
-
     """ This stage collects the flagged cells from the FlagUsedCellsStage and
     makes a list of them """
 
@@ -50,9 +49,7 @@ class CollectUsedCellsStage(RenderStage):
         self.cell_list_buffer = Image.create_buffer("CellList", 0, "R32I")
         self.cell_index_buffer = Image.create_2d_array("CellIndices", 0, 0, 0, "R32I")
 
-        self.target.set_shader_inputs(
-            CellListBuffer=self.cell_list_buffer,
-            CellListIndices=self.cell_index_buffer)
+        self.target.set_shader_inputs(CellListBuffer=self.cell_list_buffer, CellListIndices=self.cell_index_buffer)
 
     def update(self):
         self.cell_list_buffer.clear_image()

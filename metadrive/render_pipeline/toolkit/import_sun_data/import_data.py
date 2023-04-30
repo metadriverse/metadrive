@@ -34,8 +34,10 @@ if __name__ == "__main__":
 
     url = API.format(**CONFIG)
 
-    query_str = ("Are you sure you want to import the data? This overrides your "
-                 "current sun azimuth, altitude and intensity settings! (y/n): ")
+    query_str = (
+        "Are you sure you want to import the data? This overrides your "
+        "current sun azimuth, altitude and intensity settings! (y/n): "
+    )
     if sys.version_info.major >= 3:
         query_result = input(query_str)
     else:

@@ -5,7 +5,6 @@ from metadrive.render_pipeline.rpcore.water.water_manager import WaterManager
 
 
 class ProjectedWater:
-
     def __init__(self, water_options):
         self.water_options = water_options
         self.water_level = 0.0
@@ -19,9 +18,7 @@ class ProjectedWater:
         self.model.clear_transform()
 
     def setup_water(self, pipeline, water_level):
-        if (pipeline and self.model
-                and isinstance(water_level, float)
-                and self.water_options):
+        if (pipeline and self.model and isinstance(water_level, float) and self.water_options):
 
             self.pipeline = pipeline
             foam = Globals.base.loader.load_texture("/$$rp/data/builtin_models/water/water_foam.png")
@@ -41,9 +38,7 @@ class ProjectedWater:
                 tex.set_minfilter(SamplerState.FTLinearMipmapLinear)
                 tex.set_magfilter(SamplerState.FTLinearMipmapLinear)
 
-            self.pipeline.set_effect(self.model, "/$$rp/effects/projected_water.yaml", {
-                "render_shadow": False
-            })
+            self.pipeline.set_effect(self.model, "/$$rp/effects/projected_water.yaml", {"render_shadow": False})
 
             self.water_level = water_level
             self.model.set_shader_input("waterHeight", self.water_level)

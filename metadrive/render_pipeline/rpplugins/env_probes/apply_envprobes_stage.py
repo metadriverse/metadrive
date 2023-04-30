@@ -29,7 +29,6 @@ from metadrive.render_pipeline.rpcore.stages.ambient_stage import AmbientStage
 
 
 class ApplyEnvprobesStage(RenderStage):
-
     """ This stage takes the per-cell environment probes and samples them """
 
     required_inputs = ["EnvProbes"]
@@ -37,10 +36,7 @@ class ApplyEnvprobesStage(RenderStage):
 
     @property
     def produced_pipes(self):
-        return {
-            "EnvmapAmbientSpec": self.target.color_tex,
-            "EnvmapAmbientDiff": self.target.aux_tex[0]
-        }
+        return {"EnvmapAmbientSpec": self.target.color_tex, "EnvmapAmbientDiff": self.target.aux_tex[0]}
 
     def create(self):
         self.target = self.create_target("ApplyEnvmap")

@@ -31,7 +31,6 @@ from metadrive.render_pipeline.rpcore.globals import Globals
 
 
 class ShadowStage(RenderStage):
-
     """ This is the stage which renders all shadows """
     required_inputs = []
 

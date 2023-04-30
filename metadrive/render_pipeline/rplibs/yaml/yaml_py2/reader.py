@@ -21,8 +21,8 @@ from error import YAMLError, Mark
 
 import codecs, re
 
-class ReaderError(YAMLError):
 
+class ReaderError(YAMLError):
     def __init__(self, name, position, character, encoding, reason):
         self.name = name
         self.character = character
@@ -41,6 +41,7 @@ class ReaderError(YAMLError):
                     "  in \"%s\", position %d"    \
                     % (self.character, self.reason,
                             self.name, self.position)
+
 
 class Reader(object):
     # Reader:
@@ -72,7 +73,7 @@ class Reader(object):
         if isinstance(stream, unicode):
             self.name = "<unicode string>"
             self.check_printable(stream)
-            self.buffer = stream+u'\0'
+            self.buffer = stream + u'\0'
         elif isinstance(stream, str):
             self.name = "<string>"
             self.raw_buffer = stream
@@ -86,19 +87,19 @@ class Reader(object):
 
     def peek(self, index=0):
         try:
-            return self.buffer[self.pointer+index]
+            return self.buffer[self.pointer + index]
         except IndexError:
-            self.update(index+1)
-            return self.buffer[self.pointer+index]
+            self.update(index + 1)
+            return self.buffer[self.pointer + index]
 
     def prefix(self, length=1):
-        if self.pointer+length >= len(self.buffer):
+        if self.pointer + length >= len(self.buffer):
             self.update(length)
-        return self.buffer[self.pointer:self.pointer+length]
+        return self.buffer[self.pointer:self.pointer + length]
 
     def forward(self, length=1):
-        if self.pointer+length+1 >= len(self.buffer):
-            self.update(length+1)
+        if self.pointer + length + 1 >= len(self.buffer):
+            self.update(length + 1)
         while length:
             ch = self.buffer[self.pointer]
             self.pointer += 1
@@ -113,11 +114,9 @@ class Reader(object):
 
     def get_mark(self):
         if self.stream is None:
-            return Mark(self.name, self.index, self.line, self.column,
-                    self.buffer, self.pointer)
+            return Mark(self.name, self.index, self.line, self.column, self.buffer, self.pointer)
         else:
-            return Mark(self.name, self.index, self.line, self.column,
-                    None, None)
+            return Mark(self.name, self.index, self.line, self.column, None, None)
 
     def determine_encoding(self):
         while not self.eof and len(self.raw_buffer) < 2:
@@ -135,13 +134,13 @@ class Reader(object):
         self.update(1)
 
     NON_PRINTABLE = re.compile(u'[^\x09\x0A\x0D\x20-\x7E\x85\xA0-\uD7FF\uE000-\uFFFD]')
+
     def check_printable(self, data):
         match = self.NON_PRINTABLE.search(data)
         if match:
             character = match.group()
-            position = self.index+(len(self.buffer)-self.pointer)+match.start()
-            raise ReaderError(self.name, position, ord(character),
-                    'unicode', "special characters are not allowed")
+            position = self.index + (len(self.buffer) - self.pointer) + match.start()
+            raise ReaderError(self.name, position, ord(character), 'unicode', "special characters are not allowed")
 
     def update(self, length):
         if self.raw_buffer is None:
@@ -153,16 +152,14 @@ class Reader(object):
                 self.update_raw()
             if self.raw_decode is not None:
                 try:
-                    data, converted = self.raw_decode(self.raw_buffer,
-                            'strict', self.eof)
+                    data, converted = self.raw_decode(self.raw_buffer, 'strict', self.eof)
                 except UnicodeDecodeError, exc:
                     character = exc.object[exc.start]
                     if self.stream is not None:
-                        position = self.stream_pointer-len(self.raw_buffer)+exc.start
+                        position = self.stream_pointer - len(self.raw_buffer) + exc.start
                     else:
                         position = exc.start
-                    raise ReaderError(self.name, position, character,
-                            exc.encoding, exc.reason)
+                    raise ReaderError(self.name, position, character, exc.encoding, exc.reason)
             else:
                 data = self.raw_buffer
                 converted = len(data)
@@ -182,9 +179,9 @@ class Reader(object):
         else:
             self.eof = True
 
+
 #try:
 #    import psyco
 #    psyco.bind(Reader)
 #except ImportError:
 #    pass
-

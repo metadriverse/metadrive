@@ -30,10 +30,8 @@ from panda3d.core import Vec3, CurveFitter
 
 
 class SmoothConnectedCurve(object):
-
     """ Interface to a curve which also manages connecting the end of the
     curve with the beginning. """
-
     def __init__(self):
         self._curve = None
         self._modified = False

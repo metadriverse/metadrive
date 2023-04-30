@@ -30,7 +30,6 @@ from metadrive.render_pipeline.rpcore.render_stage import RenderStage
 
 
 class GodrayStage(RenderStage):
-
     """ This stage renders the suns godrays """
 
     required_inputs = []

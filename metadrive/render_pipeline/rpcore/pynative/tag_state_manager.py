@@ -31,10 +31,8 @@ from metadrive.render_pipeline.rplibs.six import itervalues
 
 
 class TagStateManager(object):
-
     """ Please refer to the native C++ implementation for docstrings and comments.
     This is just the python implementation, which does not contain documentation! """
-
     class StateContainer(object):  # pylint: disable=too-few-public-methods
         def __init__(self, tag_name, mask, write_color):
             self.cameras = []

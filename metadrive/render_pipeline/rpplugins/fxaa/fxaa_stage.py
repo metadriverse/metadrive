@@ -28,7 +28,6 @@ from metadrive.render_pipeline.rpcore.render_stage import RenderStage
 
 
 class FXAAStage(RenderStage):
-
     """ This is the main stage used by the FXAA plugin """
 
     required_pipes = ["ShadedScene", "GBuffer"]

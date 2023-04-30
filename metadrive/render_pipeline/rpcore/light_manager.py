@@ -42,7 +42,6 @@ from metadrive.render_pipeline.rpcore.stages.shadow_stage import ShadowStage
 
 
 class LightManager(RPObject):
-
     """ This class is a wrapper around the InternalLightManager, and provides
     additional functionality like setting up all required stages and defines."""
 
@@ -95,8 +94,7 @@ class LightManager(RPObject):
 
     def update(self):
         """ Main update method to process the GPU commands """
-        self.internal_mgr.set_camera_pos(
-            Globals.base.camera.get_pos(Globals.base.render))
+        self.internal_mgr.set_camera_pos(Globals.base.camera.get_pos(Globals.base.render))
         self.internal_mgr.update()
         self.shadow_manager.update()
         self.cmd_queue.process_queue()
@@ -109,11 +107,13 @@ class LightManager(RPObject):
         """ Computes how many tiles there are on screen """
         self.tile_size = LVecBase2i(
             self.pipeline.settings["lighting.culling_grid_size_x"],
-            self.pipeline.settings["lighting.culling_grid_size_y"])
+            self.pipeline.settings["lighting.culling_grid_size_y"]
+        )
         num_tiles_x = int(math.ceil(Globals.resolution.x / float(self.tile_size.x)))
         num_tiles_y = int(math.ceil(Globals.resolution.y / float(self.tile_size.y)))
-        self.debug("Tile size =", self.tile_size.x, "x", self.tile_size.y,
-                   ", Num tiles =", num_tiles_x, "x", num_tiles_y)
+        self.debug(
+            "Tile size =", self.tile_size.x, "x", self.tile_size.y, ", Num tiles =", num_tiles_x, "x", num_tiles_y
+        )
         self.num_tiles = LVecBase2i(num_tiles_x, num_tiles_y)
 
     def init_command_queue(self):
@@ -142,13 +142,11 @@ class LightManager(RPObject):
     def init_internal_manager(self):
         """ Creates the light storage manager and the buffer to store the light data """
         self.internal_mgr = InternalLightManager()
-        self.internal_mgr.set_shadow_update_distance(
-            self.pipeline.settings["shadows.max_update_distance"])
+        self.internal_mgr.set_shadow_update_distance(self.pipeline.settings["shadows.max_update_distance"])
 
         # Storage for the Lights
         per_light_vec4s = 4
-        self.img_light_data = Image.create_buffer(
-            "LightData", self.MAX_LIGHTS * per_light_vec4s, "RGBA16")
+        self.img_light_data = Image.create_buffer("LightData", self.MAX_LIGHTS * per_light_vec4s, "RGBA16")
         self.img_light_data.clear_image()
 
         self.pta_max_light_index = PTAInt.empty_array(1)
@@ -159,8 +157,7 @@ class LightManager(RPObject):
 
         # IMPORTANT: RGBA32 is really required here. Otherwise artifacts and bad
         # shadow filtering occur due to precision issues
-        self.img_source_data = Image.create_buffer(
-            "ShadowSourceData", self.MAX_SOURCES * per_source_vec4s, "RGBA32")
+        self.img_source_data = Image.create_buffer("ShadowSourceData", self.MAX_SOURCES * per_source_vec4s, "RGBA32")
         self.img_light_data.clear_image()
 
         # Register the buffer

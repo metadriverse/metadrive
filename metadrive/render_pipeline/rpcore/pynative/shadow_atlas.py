@@ -31,10 +31,8 @@ from panda3d.core import LVecBase4i, LVecBase4
 
 
 class ShadowAtlas(object):
-
     """ Please refer to the native C++ implementation for docstrings and comments.
     This is just the python implementation, which does not contain documentation! """
-
     def __init__(self, size, tile_size=32):
         self._size = size
         self._tile_size = tile_size
@@ -46,6 +44,7 @@ class ShadowAtlas(object):
 
         def row():
             return [False for i in range(self._num_tiles)]  # pylint: disable=unused-variable
+
         self._flags = [row() for j in range(self._num_tiles)]  # pylint: disable=unused-variable
 
     def get_num_used_tiles(self):
@@ -54,7 +53,7 @@ class ShadowAtlas(object):
     num_used_tiles = property(get_num_used_tiles)
 
     def get_coverage(self):
-        return self._num_used_tiles / float(self._num_tiles ** 2)
+        return self._num_used_tiles / float(self._num_tiles**2)
 
     coverage = property(get_coverage)
 

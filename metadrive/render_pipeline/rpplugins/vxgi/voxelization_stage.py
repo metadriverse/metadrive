@@ -36,7 +36,6 @@ from panda3d.core import ColorWriteAttrib
 
 
 class VoxelizationStage(RenderStage):
-
     """ This stage voxelizes the whole scene """
 
     required_inputs = ["DefaultEnvmap", "AllLightsData", "maxLightIndex"]
@@ -74,17 +73,18 @@ class VoxelizationStage(RenderStage):
     def create(self):
         # Create the voxel grid used to generate the voxels
         self.voxel_temp_grid = Image.create_3d(
-            "VoxelsTemp", self.voxel_resolution, self.voxel_resolution,
-            self.voxel_resolution, "RGBA8")
+            "VoxelsTemp", self.voxel_resolution, self.voxel_resolution, self.voxel_resolution, "RGBA8"
+        )
         self.voxel_temp_grid.set_clear_color(Vec4(0))
         self.voxel_temp_nrm_grid = Image.create_3d(
-            "VoxelsTemp", self.voxel_resolution, self.voxel_resolution,
-            self.voxel_resolution, "R11G11B10")
+            "VoxelsTemp", self.voxel_resolution, self.voxel_resolution, self.voxel_resolution, "R11G11B10"
+        )
         self.voxel_temp_nrm_grid.set_clear_color(Vec4(0))
 
         # Create the voxel grid which is a copy of the temporary grid, but stable
         self.voxel_grid = Image.create_3d(
-            "Voxels", self.voxel_resolution, self.voxel_resolution, self.voxel_resolution, "RGBA8")
+            "Voxels", self.voxel_resolution, self.voxel_resolution, self.voxel_resolution, "RGBA8"
+        )
         self.voxel_grid.set_clear_color(Vec4(0))
         self.voxel_grid.set_minfilter(SamplerState.FT_linear_mipmap_linear)
 
@@ -92,8 +92,7 @@ class VoxelizationStage(RenderStage):
         self.voxel_cam = Camera("VoxelizeCam")
         self.voxel_cam.set_camera_mask(self._pipeline.tag_mgr.get_mask("voxelize"))
         self.voxel_cam_lens = OrthographicLens()
-        self.voxel_cam_lens.set_film_size(
-            -2.0 * self.voxel_world_size, 2.0 * self.voxel_world_size)
+        self.voxel_cam_lens.set_film_size(-2.0 * self.voxel_world_size, 2.0 * self.voxel_world_size)
         self.voxel_cam_lens.set_near_far(0.0, 2.0 * self.voxel_world_size)
         self.voxel_cam.set_lens(self.voxel_cam_lens)
         self.voxel_cam_np = Globals.base.render.attach_new_node(self.voxel_cam)
@@ -112,9 +111,7 @@ class VoxelizationStage(RenderStage):
         # TODO! Does not work with the new render target yet - maybe add option
         # to post process region for instances?
         self.copy_target.instance_count = self.voxel_resolution
-        self.copy_target.set_shader_inputs(
-            SourceTex=self.voxel_temp_grid,
-            DestTex=self.voxel_grid)
+        self.copy_target.set_shader_inputs(SourceTex=self.voxel_temp_grid, DestTex=self.voxel_grid)
 
         # Create the target which generates the mipmaps
         self.mip_targets = []
@@ -125,9 +122,7 @@ class VoxelizationStage(RenderStage):
             mip_target.size = mip_size
             mip_target.prepare_buffer()
             mip_target.instance_count = mip_size
-            mip_target.set_shader_inputs(
-                SourceTex=self.voxel_grid,
-                sourceMip=(mip - 1))
+            mip_target.set_shader_inputs(SourceTex=self.voxel_grid, sourceMip=(mip - 1))
             mip_target.set_shader_input("DestTex", self.voxel_grid, False, True, -1, mip, 0)
             self.mip_targets.append(mip_target)
 
@@ -139,8 +134,8 @@ class VoxelizationStage(RenderStage):
         self.voxel_cam.set_initial_state(initial_state.get_state())
 
         Globals.base.render.set_shader_inputs(
-            voxelGridPosition=self.pta_next_grid_pos,
-            VoxelGridDest=self.voxel_temp_grid)
+            voxelGridPosition=self.pta_next_grid_pos, VoxelGridDest=self.voxel_temp_grid
+        )
 
     def update(self):
         self.voxel_cam_np.show()
@@ -159,20 +154,17 @@ class VoxelizationStage(RenderStage):
         elif self.state == self.S_voxelize_x:
             # Clear voxel grid
             self.voxel_temp_grid.clear_image()
-            self.voxel_cam_np.set_pos(
-                self.pta_next_grid_pos[0] + Vec3(self.voxel_world_size, 0, 0))
+            self.voxel_cam_np.set_pos(self.pta_next_grid_pos[0] + Vec3(self.voxel_world_size, 0, 0))
             self.voxel_cam_np.look_at(self.pta_next_grid_pos[0])
 
         # Voxelization from Y-Axis
         elif self.state == self.S_voxelize_y:
-            self.voxel_cam_np.set_pos(
-                self.pta_next_grid_pos[0] + Vec3(0, self.voxel_world_size, 0))
+            self.voxel_cam_np.set_pos(self.pta_next_grid_pos[0] + Vec3(0, self.voxel_world_size, 0))
             self.voxel_cam_np.look_at(self.pta_next_grid_pos[0])
 
         # Voxelization from Z-Axis
         elif self.state == self.S_voxelize_z:
-            self.voxel_cam_np.set_pos(
-                self.pta_next_grid_pos[0] + Vec3(0, 0, self.voxel_world_size))
+            self.voxel_cam_np.set_pos(self.pta_next_grid_pos[0] + Vec3(0, 0, self.voxel_world_size))
             self.voxel_cam_np.look_at(self.pta_next_grid_pos[0])
 
         # Generate mipmaps
@@ -190,9 +182,11 @@ class VoxelizationStage(RenderStage):
 
     def reload_shaders(self):
         self.copy_target.shader = self.load_plugin_shader(
-            "/$$rp/shader/default_post_process_instanced.vert.glsl", "copy_voxels.frag.glsl")
+            "/$$rp/shader/default_post_process_instanced.vert.glsl", "copy_voxels.frag.glsl"
+        )
         mip_shader = self.load_plugin_shader(
-            "/$$rp/shader/default_post_process_instanced.vert.glsl", "generate_mipmaps.frag.glsl")
+            "/$$rp/shader/default_post_process_instanced.vert.glsl", "generate_mipmaps.frag.glsl"
+        )
         for target in self.mip_targets:
             target.shader = mip_shader
 

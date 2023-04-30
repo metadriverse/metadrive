@@ -21,6 +21,7 @@ else:
 
 __all__ = ["load_yaml_file", "load_yaml_file_flat"]
 
+
 def load_yaml_file(filename):
     """ This method is a wrapper arround yaml_load, and provides error checking """
 
@@ -46,6 +47,7 @@ def load_yaml_file(filename):
 
     return parsed_yaml
 
+
 def __flatten(d, parent_key=''):
     """ Internal method to flatten a dictionary """
     items = []
@@ -55,6 +57,7 @@ def __flatten(d, parent_key=''):
         except AttributeError:
             items.append(('{}{}'.format(parent_key, k), v))
     return dict(items)
+
 
 def load_yaml_file_flat(filename):
     """ Behaves like load_yaml_file, but instead of creating nested dictionaries

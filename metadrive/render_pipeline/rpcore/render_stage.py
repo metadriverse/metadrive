@@ -32,7 +32,6 @@ from metadrive.render_pipeline.rpcore.loader import RPLoader
 
 
 class RenderStage(RPObject):
-
     """ This class is the abstract class for all stages used in the pipeline.
     It represents a part of the pipeline render process. Each stage specifies
     which pipes it uses and which pipes it produces. A pipe can be seen as a

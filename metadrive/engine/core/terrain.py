@@ -62,11 +62,14 @@ class Terrain(BaseObject):
 
         # grass
         self.grass_tex = self.loader.loadTexture(
-            AssetLoader.file_path("textures", "grass2", "grass_path_2_diff_1k.png"))
+            AssetLoader.file_path("textures", "grass2", "grass_path_2_diff_1k.png")
+        )
         self.grass_normal = self.loader.loadTexture(
-            AssetLoader.file_path("textures", "grass2", "grass_path_2_nor_gl_1k.png"))
+            AssetLoader.file_path("textures", "grass2", "grass_path_2_nor_gl_1k.png")
+        )
         self.grass_rough = self.loader.loadTexture(
-            AssetLoader.file_path("textures", "grass2", "grass_path_2_rough_1k.png"))
+            AssetLoader.file_path("textures", "grass2", "grass_path_2_rough_1k.png")
+        )
 
         v_wrap = Texture.WMRepeat
         u_warp = Texture.WMMirror
@@ -81,11 +84,14 @@ class Terrain(BaseObject):
 
         # rock
         self.rock_tex = self.loader.loadTexture(
-            AssetLoader.file_path("textures", "rock", "brown_mud_leaves_01_diff_1k.png"))
+            AssetLoader.file_path("textures", "rock", "brown_mud_leaves_01_diff_1k.png")
+        )
         self.rock_normal = self.loader.loadTexture(
-            AssetLoader.file_path("textures", "rock", "brown_mud_leaves_01_nor_gl_1k.png"))
+            AssetLoader.file_path("textures", "rock", "brown_mud_leaves_01_nor_gl_1k.png")
+        )
         self.rock_rough = self.loader.loadTexture(
-            AssetLoader.file_path("textures", "rock", "brown_mud_leaves_01_rough_1k.png"))
+            AssetLoader.file_path("textures", "rock", "brown_mud_leaves_01_rough_1k.png")
+        )
 
         v_wrap = Texture.WMRepeat
         u_warp = Texture.WMMirror
@@ -102,7 +108,8 @@ class Terrain(BaseObject):
         # self.road_texture = self.loader.loadTexture(AssetLoader.file_path("textures", "sci", "new_color.png"))
         self.road_texture = self.loader.loadTexture(AssetLoader.file_path("textures", "asphalt", "diff_2k.png"))
         self.road_texture_normal = self.loader.loadTexture(
-            AssetLoader.file_path("textures", "asphalt", "normal_2k.png"))
+            AssetLoader.file_path("textures", "asphalt", "normal_2k.png")
+        )
         self.road_texture_rough = self.loader.loadTexture(AssetLoader.file_path("textures", "asphalt", "rough_2k.png"))
         v_wrap = Texture.WMRepeat
         u_warp = Texture.WMMirror
@@ -130,15 +137,16 @@ class Terrain(BaseObject):
         self.yellow_lane_line.load(yellow_lane_line)
 
     # @time_me
-    def _generate_mesh_vis_terrain(self,
-                                   size,
-                                   heightfield: Texture,
-                                   attribute_tex: Texture,
-                                   target_triangle_width=10,
-                                   height_scale=100,
-                                   height_offset=0.,
-                                   engine=None,
-                                   ):
+    def _generate_mesh_vis_terrain(
+        self,
+        size,
+        heightfield: Texture,
+        attribute_tex: Texture,
+        target_triangle_width=10,
+        height_scale=100,
+        height_offset=0.,
+        engine=None,
+    ):
         """
         Given a height field map to generate terrain and an attribute_tex to texture terrain, so we can get road/grass
         pixels_per_meter is determined by heightfield.size/size
@@ -238,9 +246,9 @@ class Terrain(BaseObject):
             height_scale = self.height_scale
             downsample_rate = 2
             assert self.engine.current_map is not None, "Can not find current map"
-            semantics = self.engine.current_map.get_semantic_map(size=texture_size, pixels_per_meter=22,
-                                                                 polyline_thickness=2,
-                                                                 layer=["lane", "lane_line"])
+            semantics = self.engine.current_map.get_semantic_map(
+                size=texture_size, pixels_per_meter=22, polyline_thickness=2, layer=["lane", "lane_line"]
+            )
             semantics = semantics.astype(np.float32)
             semantic_tex = Texture()
             semantic_tex.setup2dTexture(*semantics.shape[:2], Texture.TFloat, Texture.FRgba)
@@ -270,11 +278,9 @@ class Terrain(BaseObject):
             # # update collision every time!
             # TODO: I disabled online terrain collision mesh generation now, consider enabling it in the future
             # self._generate_collision_mesh(heightfield_img, self.height_scale)
-            self._generate_mesh_vis_terrain(terrain_size,
-                                            heightfield_tex,
-                                            semantic_tex,
-                                            height_scale=height_scale,
-                                            height_offset=0)
+            self._generate_mesh_vis_terrain(
+                terrain_size, heightfield_tex, semantic_tex, height_scale=height_scale, height_offset=0
+            )
             self.attach_to_world(self.engine.render, self.engine.physics_world)
 
         self.set_position(center_position)
@@ -353,13 +359,16 @@ class Terrain(BaseObject):
         min_height = 0
         roughness = 0.14
 
-        array_1 = diamond_square([height_1, width_1], min_height, max_height, roughness,
-                                 random_seed=self.generate_seed())
-        array_2 = diamond_square([height_2, width_2], min_height, max_height, roughness,
-                                 random_seed=self.generate_seed())
+        array_1 = diamond_square(
+            [height_1, width_1], min_height, max_height, roughness, random_seed=self.generate_seed()
+        )
+        array_2 = diamond_square(
+            [height_2, width_2], min_height, max_height, roughness, random_seed=self.generate_seed()
+        )
 
-        array_3 = diamond_square([height_3, width_3], min_height, max_height, roughness,
-                                 random_seed=self.generate_seed())
+        array_3 = diamond_square(
+            [height_3, width_3], min_height, max_height, roughness, random_seed=self.generate_seed()
+        )
 
         heightfield[:length, length:length + width] = array_1
         heightfield[-length:, length:length + width] = array_1
@@ -371,6 +380,7 @@ class Terrain(BaseObject):
         heightfield[-length:, :length] = array_3
         heightfield[:length, -length:] = array_3
         heightfield[-length:, -length:] = array_3
+
 
 # Some useful threads
 # GeoMipTerrain:

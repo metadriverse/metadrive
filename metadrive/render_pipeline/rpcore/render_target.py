@@ -53,7 +53,6 @@ class setter(object):  # noqa # pylint: disable=invalid-name,too-few-public-meth
 
 
 class RenderTarget(RPObject):
-
     """ Second version of the RenderTarget library, provides functions
     to easily setup buffers in Panda3D. """
 
@@ -281,8 +280,7 @@ class RenderTarget(RPObject):
     def _setup_textures(self):
         """ Prepares all bound textures """
         for i in range(self._aux_count):
-            self._targets["aux_{}".format(i)] = Texture(
-                self.debug_name + "_aux{}".format(i))
+            self._targets["aux_{}".format(i)] = Texture(self.debug_name + "_aux{}".format(i))
         for tex in itervalues(self._targets):
             tex.set_wrap_u(SamplerState.WM_clamp)
             tex.set_wrap_v(SamplerState.WM_clamp)
@@ -346,9 +344,9 @@ class RenderTarget(RPObject):
         window_props, buffer_props = self._make_properties()
 
         self._internal_buffer = self.engine.make_output(
-            self._source_window.get_pipe(), self.debug_name, 1,
-            buffer_props, window_props, GraphicsPipe.BF_refuse_window | GraphicsPipe.BF_resizeable,
-            self._source_window.gsg, self._source_window)
+            self._source_window.get_pipe(), self.debug_name, 1, buffer_props, window_props,
+            GraphicsPipe.BF_refuse_window | GraphicsPipe.BF_resizeable, self._source_window.gsg, self._source_window
+        )
 
         if not self._internal_buffer:
             self.error("Failed to create buffer")
@@ -356,13 +354,13 @@ class RenderTarget(RPObject):
 
         if self._depth_bits:
             self._internal_buffer.add_render_texture(
-                self.depth_tex, GraphicsOutput.RTM_bind_or_copy,
-                GraphicsOutput.RTP_depth)
+                self.depth_tex, GraphicsOutput.RTM_bind_or_copy, GraphicsOutput.RTP_depth
+            )
 
         if max(self._color_bits) > 0:
             self._internal_buffer.add_render_texture(
-                self.color_tex, GraphicsOutput.RTM_bind_or_copy,
-                GraphicsOutput.RTP_color)
+                self.color_tex, GraphicsOutput.RTM_bind_or_copy, GraphicsOutput.RTP_color
+            )
 
         aux_prefix = {
             8: "RTP_aux_rgba_{}",
@@ -372,8 +370,7 @@ class RenderTarget(RPObject):
 
         for i in range(self._aux_count):
             target_mode = getattr(GraphicsOutput, aux_prefix.format(i))
-            self._internal_buffer.add_render_texture(
-                self.aux_tex[i], GraphicsOutput.RTM_bind_or_copy, target_mode)
+            self._internal_buffer.add_render_texture(self.aux_tex[i], GraphicsOutput.RTM_bind_or_copy, target_mode)
 
         if not self.sort:
             RenderTarget.CURRENT_SORT += 20

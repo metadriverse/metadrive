@@ -7,7 +7,6 @@ from .ansi import AnsiFore, AnsiBack, AnsiStyle, Style
 from .winterm import WinTerm, WinColor, WinStyle
 from .win32 import windll, winapi_test
 
-
 winterm = None
 if windll is not None:
     winterm = WinTerm()
@@ -46,8 +45,8 @@ class AnsiToWin32(object):
     sequences from the text, and if outputting to a tty, will convert them into
     win32 function calls.
     '''
-    ANSI_CSI_RE = re.compile('\001?\033\[((?:\d|;)*)([a-zA-Z])\002?')     # Control Sequence Introducer
-    ANSI_OSC_RE = re.compile('\001?\033\]((?:.|;)*?)(\x07)\002?')         # Operating System Command
+    ANSI_CSI_RE = re.compile('\001?\033\[((?:\d|;)*)([a-zA-Z])\002?')  # Control Sequence Introducer
+    ANSI_OSC_RE = re.compile('\001?\033\]((?:.|;)*?)(\x07)\002?')  # Operating System Command
 
     def __init__(self, wrapped, convert=None, strip=None, autoreset=False):
         # The wrapped stream (normally sys.stdout or sys.stderr)
@@ -145,13 +144,11 @@ class AnsiToWin32(object):
         if self.autoreset:
             self.reset_all()
 
-
     def reset_all(self):
         if self.convert:
-            self.call_win32('m', (0,))
+            self.call_win32('m', (0, ))
         elif not self.strip and not is_stream_closed(self.wrapped):
             self.wrapped.write(Style.RESET_ALL)
-
 
     def write_and_convert(self, text):
         '''
@@ -168,36 +165,32 @@ class AnsiToWin32(object):
             cursor = end
         self.write_plain_text(text, cursor, len(text))
 
-
     def write_plain_text(self, text, start, end):
         if start < end:
             self.wrapped.write(text[start:end])
             self.wrapped.flush()
-
 
     def convert_ansi(self, paramstring, command):
         if self.convert:
             params = self.extract_params(command, paramstring)
             self.call_win32(command, params)
 
-
     def extract_params(self, command, paramstring):
         if command in 'Hf':
             params = tuple(int(p) if len(p) != 0 else 1 for p in paramstring.split(';'))
             while len(params) < 2:
                 # defaults:
-                params = params + (1,)
+                params = params + (1, )
         else:
             params = tuple(int(p) for p in paramstring.split(';') if len(p) != 0)
             if len(params) == 0:
                 # defaults:
                 if command in 'JKm':
-                    params = (0,)
+                    params = (0, )
                 elif command in 'ABCD':
-                    params = (1,)
+                    params = (1, )
 
         return params
-
 
     def call_win32(self, command, params):
         if command == 'm':
@@ -212,21 +205,20 @@ class AnsiToWin32(object):
             winterm.erase_screen(params[0], on_stderr=self.on_stderr)
         elif command in 'K':
             winterm.erase_line(params[0], on_stderr=self.on_stderr)
-        elif command in 'Hf':     # cursor position - absolute
+        elif command in 'Hf':  # cursor position - absolute
             winterm.set_cursor_position(params, on_stderr=self.on_stderr)
-        elif command in 'ABCD':   # cursor position - relative
+        elif command in 'ABCD':  # cursor position - relative
             n = params[0]
             # A - up, B - down, C - forward, D - back
             x, y = {'A': (0, -n), 'B': (0, n), 'C': (n, 0), 'D': (-n, 0)}[command]
             winterm.cursor_adjust(x, y, on_stderr=self.on_stderr)
-
 
     def convert_osc(self, text):
         for match in self.ANSI_OSC_RE.finditer(text):
             start, end = match.span()
             text = text[:start] + text[end:]
             paramstring, command = match.groups()
-            if command in '\x07':       # \x07 = BEL
+            if command in '\x07':  # \x07 = BEL
                 params = paramstring.split(";")
                 # 0 - change title and icon (we will only change title)
                 # 1 - change icon (we don't support this)

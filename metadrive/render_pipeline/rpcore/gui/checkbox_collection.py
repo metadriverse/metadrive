@@ -30,11 +30,9 @@ import direct.gui.DirectGuiGlobals as DGG
 
 
 class CheckboxCollection(RPObject):
-
     """ This is a container for multiple Checkboxes, controlling that
     only one checkbox of this collection is checked at one time
     (like a radio-button) """
-
     def __init__(self):
         RPObject.__init__(self)
         self._items = []
@@ -42,9 +40,7 @@ class CheckboxCollection(RPObject):
     def add(self, chb):
         """ Adds a Checkbox to this collection """
         if chb.collection is not None:
-            self.error(
-                "Can't add checkbox as it already belongs "
-                "to another collection!")
+            self.error("Can't add checkbox as it already belongs " "to another collection!")
             return
         chb.collection = self
         self._items.append(chb)
@@ -52,9 +48,7 @@ class CheckboxCollection(RPObject):
     def remove(self, chb):
         """ Removes a checkbox from this collection """
         if chb.collection is not self:
-            self.error(
-                "Can't remove the checkbox from this collection as it is not "
-                "attached to this collection!")
+            self.error("Can't remove the checkbox from this collection as it is not " "attached to this collection!")
             return
         chb.collection = None
         self._items.remove(chb)

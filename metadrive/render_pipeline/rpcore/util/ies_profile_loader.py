@@ -49,20 +49,14 @@ class InvalidIESProfileException(Exception):
 
 
 class IESProfileLoader(RPObject):
-
     """ Loader class to load .IES files and create an IESDataset from it.
     It generates a LUT for each loaded ies profile which is used by the lighting
     pipeline later on. """
 
     # Supported IES Profiles
     PROFILES = [
-        "IESNA:LM-63-1986",
-        "IESNA:LM-63-1991",
-        "IESNA91",
-        "IESNA:LM-63-1995",
-        "IESNA:LM-63-2002",
-        "ERCO Leuchten GmbH  BY: ERCO/LUM650/8701",
-        "ERCO Leuchten GmbH"
+        "IESNA:LM-63-1986", "IESNA:LM-63-1991", "IESNA91", "IESNA:LM-63-1995", "IESNA:LM-63-2002",
+        "ERCO Leuchten GmbH  BY: ERCO/LUM650/8701", "ERCO Leuchten GmbH"
     ]
 
     # Regexp for extracting keywords
@@ -98,8 +92,7 @@ class IESProfileLoader(RPObject):
 
         # Make filename unique
         fname = Filename.from_os_specific(filename)
-        if not VirtualFileSystem.get_global_ptr().resolve_filename(
-                fname, get_model_path().get_value(), "ies"):
+        if not VirtualFileSystem.get_global_ptr().resolve_filename(fname, get_model_path().get_value(), "ies"):
             self.error("Could not resolve", filename)
             return -1
         fname = fname.get_fullpath()

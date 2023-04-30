@@ -33,8 +33,10 @@ class Plugin(BasePlugin):
 
     name = "Forward Rendering"
     author = "tobspr <tobias.springer1@gmail.com>"
-    description = ("This plugin adds support for an additional forward rendering "
-                   "pass. This is mainly useful for transparency.")
+    description = (
+        "This plugin adds support for an additional forward rendering "
+        "pass. This is mainly useful for transparency."
+    )
     version = "0.1 alpha (!)"
 
     def on_stage_setup(self):

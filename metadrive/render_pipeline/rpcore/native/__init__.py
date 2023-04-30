@@ -64,10 +64,7 @@ classes_to_import = [
 ]
 
 # Classes which should get imported and renamed
-classes_to_import_and_rename = {
-    "RPPointLight": "PointLight",
-    "RPSpotLight": "SpotLight"
-}
+classes_to_import_and_rename = {"RPPointLight": "PointLight", "RPSpotLight": "SpotLight"}
 
 native_module = None
 

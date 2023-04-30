@@ -7,7 +7,6 @@ from .base import *
 
 
 class BoxMaker(ModelMaker):
-
     @property
     def center(self):
         return self._center
@@ -15,7 +14,6 @@ class BoxMaker(ModelMaker):
     @center.setter
     def center(self, pos):
         self._center = pos
-
 
     @property
     def width(self):
@@ -25,7 +23,6 @@ class BoxMaker(ModelMaker):
     def width(self, width):
         self._width = width
 
-
     @property
     def depth(self):
         return self._depth
@@ -33,7 +30,6 @@ class BoxMaker(ModelMaker):
     @depth.setter
     def depth(self, depth):
         self._depth = depth
-
 
     @property
     def height(self):
@@ -43,7 +39,6 @@ class BoxMaker(ModelMaker):
     def height(self, height):
         self._height = height
 
-
     @property
     def open_sides(self):
         return self._open_sides
@@ -51,7 +46,6 @@ class BoxMaker(ModelMaker):
     @open_sides.setter
     def open_sides(self, side_ids):
         self._open_sides = side_ids
-
 
     @property
     def thickness(self):
@@ -61,10 +55,23 @@ class BoxMaker(ModelMaker):
     def thickness(self, thickness):
         self._thickness = thickness
 
-    def __init__(self, center=None, width=1., depth=1., height=1., segments=None,
-                 open_sides=(), thickness=None, inverted=False, vertex_color=None,
-                 has_uvs=True, tex_units=None, tex_offset=None, tex_rotation=None,
-                 tex_scale=None):
+    def __init__(
+        self,
+        center=None,
+        width=1.,
+        depth=1.,
+        height=1.,
+        segments=None,
+        open_sides=(),
+        thickness=None,
+        inverted=False,
+        vertex_color=None,
+        has_uvs=True,
+        tex_units=None,
+        tex_offset=None,
+        tex_rotation=None,
+        tex_scale=None
+    ):
         """
         This class generates box model primitives with the given parameters:
 
@@ -112,14 +119,13 @@ class BoxMaker(ModelMaker):
         """
 
         surface_ids = (
-            "left", "right", "back", "front", "bottom",
-            "top", "inner_left", "inner_right", "inner_back",
-            "inner_front", "inner_bottom", "inner_top"
+            "left", "right", "back", "front", "bottom", "top", "inner_left", "inner_right", "inner_back", "inner_front",
+            "inner_bottom", "inner_top"
         )
 
-        ModelMaker.__init__(self, segments, inverted, vertex_color, has_uvs,
-                            tex_units, tex_offset, tex_rotation, tex_scale,
-                            surface_ids)
+        ModelMaker.__init__(
+            self, segments, inverted, vertex_color, has_uvs, tex_units, tex_offset, tex_rotation, tex_scale, surface_ids
+        )
 
         self._center = center
         self._width = width
@@ -127,14 +133,8 @@ class BoxMaker(ModelMaker):
         self._height = height
         self._open_sides = open_sides
         self._thickness = thickness
-        self._side_ids = {
-            "left": "-yz", "right": "yz", "back": "-zx",
-            "front": "zx", "bottom": "-xy", "top": "xy"
-        }
-        self._side_names = {
-            "-yz": "left", "yz": "right", "-zx": "back",
-            "zx": "front", "-xy": "bottom", "xy": "top"
-        }
+        self._side_ids = {"left": "-yz", "right": "yz", "back": "-zx", "front": "zx", "bottom": "-xy", "top": "xy"}
+        self._side_names = {"-yz": "left", "yz": "right", "-zx": "back", "zx": "front", "-xy": "bottom", "xy": "top"}
 
     def reset(self):
 
@@ -172,9 +172,10 @@ class BoxMaker(ModelMaker):
 
                 indices.extend(inds)
 
-    def __define_vertices(self, values, dims, dim1, dim2, c1, c2, sign, plane_id,
-                          direction, segs, pos, offset1, offset2, normal,
-                          axis1_index, axis2_index, primary_index, indices):
+    def __define_vertices(
+        self, values, dims, dim1, dim2, c1, c2, sign, plane_id, direction, segs, pos, offset1, offset2, normal,
+        axis1_index, axis2_index, primary_index, indices
+    ):
 
         stride = 8 if self._has_uvs else 6  # number of floats on each vertex data row
         index_offset = len(values) // stride
@@ -328,9 +329,18 @@ class BoxMaker(ModelMaker):
         tex_rotation = self._tex_rotation
         tex_scale = self._tex_scale
         self._vert_ranges = vert_ranges = {
-            "left": (), "right": (), "back": (), "front": (), "bottom": (),
-            "top": (), "inner_left": (), "inner_right": (), "inner_back": (),
-            "inner_front": (), "inner_bottom": (), "inner_top": ()
+            "left": (),
+            "right": (),
+            "back": (),
+            "front": (),
+            "bottom": (),
+            "top": (),
+            "inner_left": (),
+            "inner_right": (),
+            "inner_back": (),
+            "inner_front": (),
+            "inner_bottom": (),
+            "inner_top": ()
         }
         stride = 8 if has_uvs else 6  # number of floats on each vertex data row
         values = array.array("f", [])
@@ -375,18 +385,18 @@ class BoxMaker(ModelMaker):
                             if c1 > 0.:
                                 dim1 = dims[axis2_index]
                                 dim2 = inner_dims[axis2_id]
-                                self.__define_vertices(values, dims, dim1, dim2, c1, c2,
-                                                       sign, plane_id, direction, segs2, pos,
-                                                       offset1, offset2, normal, axis1_index,
-                                                       axis2_index, 1, indices)
+                                self.__define_vertices(
+                                    values, dims, dim1, dim2, c1, c2, sign, plane_id, direction, segs2, pos, offset1,
+                                    offset2, normal, axis1_index, axis2_index, 1, indices
+                                )
 
                             if c2 > 0.:
                                 dim1 = dims[axis1_index]
                                 dim2 = inner_dims[axis1_id]
-                                self.__define_vertices(values, dims, dim1, dim2, c1, c2,
-                                                       sign, plane_id, direction, segs1, pos,
-                                                       offset1, offset2, normal, axis1_index,
-                                                       axis2_index, 2, indices)
+                                self.__define_vertices(
+                                    values, dims, dim1, dim2, c1, c2, sign, plane_id, direction, segs1, pos, offset1,
+                                    offset2, normal, axis1_index, axis2_index, 2, indices
+                                )
 
                         side_name = side_names[side_id]
                         end = len(values) // stride
@@ -424,8 +434,7 @@ class BoxMaker(ModelMaker):
                             if has_uvs:
 
                                 u = (-b if plane_id == "zx" else a) * direction
-                                u += (1. if (direction > 0 if plane_id == "zx"
-                                      else direction < 0) else 0.)
+                                u += (1. if (direction > 0 if plane_id == "zx" else direction < 0) else 0.)
 
                                 if inverted:
                                     u = 1. - u
@@ -464,11 +473,7 @@ class BoxMaker(ModelMaker):
             x = (inner_corners["-x"] - inner_corners["x"]) * .5 + center[0]
             y = (inner_corners["-y"] - inner_corners["y"]) * .5 + center[1]
             z = (inner_corners["-z"] - inner_corners["z"]) * .5 + center[2]
-            segs = {
-                "width": segs_w,
-                "depth": segs_d,
-                "height": segs_h
-            }
+            segs = {"width": segs_w, "depth": segs_d, "height": segs_h}
             inner_tex_units = {} if tex_units else None
 
             if tex_units:
@@ -497,10 +502,20 @@ class BoxMaker(ModelMaker):
                     if "inner_" + side_name in tex_scale:
                         inner_tex_scale[side_name] = tex_scale["inner_" + side_name]
 
-            model_maker = BoxMaker((x, y, z), w, d, h, segs, self._open_sides,
-                                   inverted=not inverted, has_uvs=has_uvs,
-                                   tex_units=inner_tex_units, tex_offset=inner_tex_offset,
-                                   tex_rotation=inner_tex_rot, tex_scale=inner_tex_scale)
+            model_maker = BoxMaker(
+                (x, y, z),
+                w,
+                d,
+                h,
+                segs,
+                self._open_sides,
+                inverted=not inverted,
+                has_uvs=has_uvs,
+                tex_units=inner_tex_units,
+                tex_offset=inner_tex_offset,
+                tex_rotation=inner_tex_rot,
+                tex_scale=inner_tex_scale
+            )
             node = model_maker.generate()
 
             # Extend the geometry of the inner box with the data of the outer box
@@ -527,7 +542,7 @@ class BoxMaker(ModelMaker):
             old_row_count = tris_prim.get_num_vertices()
             new_row_count = old_row_count + len(indices)
 
-            if new_row_count < 2 ** 16:
+            if new_row_count < 2**16:
                 # make the array compatible with the default index format of the
                 # GeomPrimitive (16-bit) if the number of vertices allows it...
                 indices = array.array("H", indices)
@@ -582,7 +597,7 @@ class BoxMaker(ModelMaker):
 
             tris_prim = GeomTriangles(Geom.UH_static)
 
-            if len(indices) < 2 ** 16:
+            if len(indices) < 2**16:
                 indices = array.array("H", indices)
             else:
                 tris_prim.set_index_type(Geom.NT_uint32)

@@ -31,7 +31,6 @@ from metadrive.render_pipeline.rpcore.image import Image
 
 
 class CullLightsStage(RenderStage):
-
     """ This stage takes the list of used cells and creates a list of lights
     for each cell """
 
@@ -53,10 +52,7 @@ class CullLightsStage(RenderStage):
 
     @property
     def produced_pipes(self):
-        return {
-            "PerCellLights": self.grouped_cell_lights,
-            "PerCellLightsCounts": self.grouped_cell_lights_counts
-        }
+        return {"PerCellLights": self.grouped_cell_lights, "PerCellLightsCounts": self.grouped_cell_lights_counts}
 
     @property
     def produced_defines(self):
@@ -82,55 +78,49 @@ class CullLightsStage(RenderStage):
         self.target_group.prepare_buffer()
 
         self.frustum_lights_ctr = Image.create_counter("VisibleLightCount")
-        self.frustum_lights = Image.create_buffer(
-            "FrustumLights", self._pipeline.light_mgr.MAX_LIGHTS, "R16UI")
-        self.per_cell_lights = Image.create_buffer(
-            "PerCellLights", 0, "R16UI")
+        self.frustum_lights = Image.create_buffer("FrustumLights", self._pipeline.light_mgr.MAX_LIGHTS, "R16UI")
+        self.per_cell_lights = Image.create_buffer("PerCellLights", 0, "R16UI")
         self.per_cell_light_counts = Image.create_buffer(
-            "PerCellLightCounts", 0, "R32I") # Needs to be R32 for atomic add in cull stage
-        self.grouped_cell_lights = Image.create_buffer(
-            "GroupedPerCellLights", 0, "R16UI")
-        self.grouped_cell_lights_counts = Image.create_buffer(
-            "GroupedPerCellLightsCount", 0, "R16UI")
+            "PerCellLightCounts", 0, "R32I"
+        )  # Needs to be R32 for atomic add in cull stage
+        self.grouped_cell_lights = Image.create_buffer("GroupedPerCellLights", 0, "R16UI")
+        self.grouped_cell_lights_counts = Image.create_buffer("GroupedPerCellLightsCount", 0, "R16UI")
 
         self.target_visible.set_shader_inputs(
-            FrustumLights=self.frustum_lights,
-            FrustumLightsCount=self.frustum_lights_ctr)
+            FrustumLights=self.frustum_lights, FrustumLightsCount=self.frustum_lights_ctr
+        )
 
         self.target_cull.set_shader_inputs(
             PerCellLightsBuffer=self.per_cell_lights,
             PerCellLightCountsBuffer=self.per_cell_light_counts,
             FrustumLights=self.frustum_lights,
             FrustumLightsCount=self.frustum_lights_ctr,
-            threadCount=self.cull_threads)
+            threadCount=self.cull_threads
+        )
 
         self.target_group.set_shader_inputs(
             PerCellLightsBuffer=self.per_cell_lights,
             PerCellLightCountsBuffer=self.per_cell_light_counts,
             GroupedCellLightsBuffer=self.grouped_cell_lights,
             GroupedPerCellLightsCountBuffer=self.grouped_cell_lights_counts,
-            threadCount=1)
+            threadCount=1
+        )
 
     def reload_shaders(self):
-        self.target_cull.shader = self.load_shader(
-            "tiled_culling.vert.glsl", "cull_lights.frag.glsl")
-        self.target_group.shader = self.load_shader(
-            "tiled_culling.vert.glsl", "group_lights.frag.glsl")
-        self.target_visible.shader = self.load_shader(
-            "view_frustum_cull.frag.glsl")
+        self.target_cull.shader = self.load_shader("tiled_culling.vert.glsl", "cull_lights.frag.glsl")
+        self.target_group.shader = self.load_shader("tiled_culling.vert.glsl", "group_lights.frag.glsl")
+        self.target_visible.shader = self.load_shader("view_frustum_cull.frag.glsl")
 
     def update(self):
         self.frustum_lights_ctr.clear_image()
 
     def set_dimensions(self):
         max_cells = self._pipeline.light_mgr.total_tiles
-        num_rows_threaded = int(
-            math.ceil((max_cells * self.cull_threads) / float(self.slice_width)))
+        num_rows_threaded = int(math.ceil((max_cells * self.cull_threads) / float(self.slice_width)))
         num_rows = int(math.ceil(max_cells / float(self.slice_width)))
         self.per_cell_lights.set_x_size(max_cells * self.max_lights_per_cell)
         self.per_cell_light_counts.set_x_size(max_cells)
-        self.grouped_cell_lights.set_x_size(
-            max_cells * (self.max_lights_per_cell + self.num_light_classes))
+        self.grouped_cell_lights.set_x_size(max_cells * (self.max_lights_per_cell + self.num_light_classes))
         self.target_cull.size = self.slice_width, num_rows_threaded
         self.target_group.size = self.slice_width, num_rows
 

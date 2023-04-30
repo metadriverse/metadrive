@@ -48,7 +48,6 @@ for config_name in configs_to_run:
     if not os.path.isdir(config["out_dir"]):
         os.makedirs(config["out_dir"])
 
-
     for pass_index in config["sequence"]:
 
         ior = 1.01 + 0.2 * pass_index
@@ -58,7 +57,7 @@ for config_name in configs_to_run:
         dest = PNMImage(dest_size, dest_h)
 
         # run mitsuba
-        print("Running mitsuba for ior =", ior, "( index =", pass_index,")")
+        print("Running mitsuba for ior =", ior, "( index =", pass_index, ")")
         with open("res/scene" + config["template_suffix"] + ".templ.xml", "r") as handle:
             content = handle.read()
 
@@ -81,7 +80,7 @@ for config_name in configs_to_run:
         # Generate nonlinear NxV sequence
         for i in xrange(source_w):
             v = 1 - i / float(source_w)
-            NxV = math.sqrt(1 - v*v)
+            NxV = math.sqrt(1 - v * v)
             nxv_values.append(NxV)
 
         # Generate lerp indices and weights
@@ -109,7 +108,6 @@ for config_name in configs_to_run:
                 curr_v = img.get_xel(curr_i, y)
                 next_v = img.get_xel(next_i, y)
                 dest.set_xel(x, y, curr_v * (1 - lerp) + next_v * lerp)
-
 
         out_name = config["out_name"].replace("{}", str(pass_index))
         dest.write(config["out_dir"] + "/" + out_name)

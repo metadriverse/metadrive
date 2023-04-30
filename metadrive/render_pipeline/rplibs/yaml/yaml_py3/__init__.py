@@ -1,4 +1,3 @@
-
 from .error import *
 
 from .tokens import *
@@ -17,6 +16,7 @@ except ImportError:
 
 import io
 
+
 def scan(stream, Loader=Loader):
     """
     Scan a YAML stream and produce scanning tokens.
@@ -27,6 +27,7 @@ def scan(stream, Loader=Loader):
             yield loader.get_token()
     finally:
         loader.dispose()
+
 
 def parse(stream, Loader=Loader):
     """
@@ -39,6 +40,7 @@ def parse(stream, Loader=Loader):
     finally:
         loader.dispose()
 
+
 def compose(stream, Loader=Loader):
     """
     Parse the first YAML document in a stream
@@ -49,6 +51,7 @@ def compose(stream, Loader=Loader):
         return loader.get_single_node()
     finally:
         loader.dispose()
+
 
 def compose_all(stream, Loader=Loader):
     """
@@ -62,6 +65,7 @@ def compose_all(stream, Loader=Loader):
     finally:
         loader.dispose()
 
+
 def load(stream, Loader=Loader):
     """
     Parse the first YAML document in a stream
@@ -72,6 +76,7 @@ def load(stream, Loader=Loader):
         return loader.get_single_data()
     finally:
         loader.dispose()
+
 
 def load_all(stream, Loader=Loader):
     """
@@ -85,6 +90,7 @@ def load_all(stream, Loader=Loader):
     finally:
         loader.dispose()
 
+
 def safe_load(stream):
     """
     Parse the first YAML document in a stream
@@ -92,6 +98,7 @@ def safe_load(stream):
     Resolve only basic YAML tags.
     """
     return load(stream, SafeLoader)
+
 
 def safe_load_all(stream):
     """
@@ -101,9 +108,10 @@ def safe_load_all(stream):
     """
     return load_all(stream, SafeLoader)
 
-def emit(events, stream=None, Dumper=Dumper,
-        canonical=None, indent=None, width=None,
-        allow_unicode=None, line_break=None):
+
+def emit(
+    events, stream=None, Dumper=Dumper, canonical=None, indent=None, width=None, allow_unicode=None, line_break=None
+):
     """
     Emit YAML parsing events into a stream.
     If stream is None, return the produced string instead.
@@ -112,8 +120,9 @@ def emit(events, stream=None, Dumper=Dumper,
     if stream is None:
         stream = io.StringIO()
         getvalue = stream.getvalue
-    dumper = Dumper(stream, canonical=canonical, indent=indent, width=width,
-            allow_unicode=allow_unicode, line_break=line_break)
+    dumper = Dumper(
+        stream, canonical=canonical, indent=indent, width=width, allow_unicode=allow_unicode, line_break=line_break
+    )
     try:
         for event in events:
             dumper.emit(event)
@@ -122,11 +131,22 @@ def emit(events, stream=None, Dumper=Dumper,
     if getvalue:
         return getvalue()
 
-def serialize_all(nodes, stream=None, Dumper=Dumper,
-        canonical=None, indent=None, width=None,
-        allow_unicode=None, line_break=None,
-        encoding=None, explicit_start=None, explicit_end=None,
-        version=None, tags=None):
+
+def serialize_all(
+    nodes,
+    stream=None,
+    Dumper=Dumper,
+    canonical=None,
+    indent=None,
+    width=None,
+    allow_unicode=None,
+    line_break=None,
+    encoding=None,
+    explicit_start=None,
+    explicit_end=None,
+    version=None,
+    tags=None
+):
     """
     Serialize a sequence of representation trees into a YAML stream.
     If stream is None, return the produced string instead.
@@ -138,10 +158,19 @@ def serialize_all(nodes, stream=None, Dumper=Dumper,
         else:
             stream = io.BytesIO()
         getvalue = stream.getvalue
-    dumper = Dumper(stream, canonical=canonical, indent=indent, width=width,
-            allow_unicode=allow_unicode, line_break=line_break,
-            encoding=encoding, version=version, tags=tags,
-            explicit_start=explicit_start, explicit_end=explicit_end)
+    dumper = Dumper(
+        stream,
+        canonical=canonical,
+        indent=indent,
+        width=width,
+        allow_unicode=allow_unicode,
+        line_break=line_break,
+        encoding=encoding,
+        version=version,
+        tags=tags,
+        explicit_start=explicit_start,
+        explicit_end=explicit_end
+    )
     try:
         dumper.open()
         for node in nodes:
@@ -152,6 +181,7 @@ def serialize_all(nodes, stream=None, Dumper=Dumper,
     if getvalue:
         return getvalue()
 
+
 def serialize(node, stream=None, Dumper=Dumper, **kwds):
     """
     Serialize a representation tree into a YAML stream.
@@ -159,12 +189,24 @@ def serialize(node, stream=None, Dumper=Dumper, **kwds):
     """
     return serialize_all([node], stream, Dumper=Dumper, **kwds)
 
-def dump_all(documents, stream=None, Dumper=Dumper,
-        default_style=None, default_flow_style=None,
-        canonical=None, indent=None, width=None,
-        allow_unicode=None, line_break=None,
-        encoding=None, explicit_start=None, explicit_end=None,
-        version=None, tags=None):
+
+def dump_all(
+    documents,
+    stream=None,
+    Dumper=Dumper,
+    default_style=None,
+    default_flow_style=None,
+    canonical=None,
+    indent=None,
+    width=None,
+    allow_unicode=None,
+    line_break=None,
+    encoding=None,
+    explicit_start=None,
+    explicit_end=None,
+    version=None,
+    tags=None
+):
     """
     Serialize a sequence of Python objects into a YAML stream.
     If stream is None, return the produced string instead.
@@ -176,12 +218,21 @@ def dump_all(documents, stream=None, Dumper=Dumper,
         else:
             stream = io.BytesIO()
         getvalue = stream.getvalue
-    dumper = Dumper(stream, default_style=default_style,
-            default_flow_style=default_flow_style,
-            canonical=canonical, indent=indent, width=width,
-            allow_unicode=allow_unicode, line_break=line_break,
-            encoding=encoding, version=version, tags=tags,
-            explicit_start=explicit_start, explicit_end=explicit_end)
+    dumper = Dumper(
+        stream,
+        default_style=default_style,
+        default_flow_style=default_flow_style,
+        canonical=canonical,
+        indent=indent,
+        width=width,
+        allow_unicode=allow_unicode,
+        line_break=line_break,
+        encoding=encoding,
+        version=version,
+        tags=tags,
+        explicit_start=explicit_start,
+        explicit_end=explicit_end
+    )
     try:
         dumper.open()
         for data in documents:
@@ -192,12 +243,14 @@ def dump_all(documents, stream=None, Dumper=Dumper,
     if getvalue:
         return getvalue()
 
+
 def dump(data, stream=None, Dumper=Dumper, **kwds):
     """
     Serialize a Python object into a YAML stream.
     If stream is None, return the produced string instead.
     """
     return dump_all([data], stream, Dumper=Dumper, **kwds)
+
 
 def safe_dump_all(documents, stream=None, **kwds):
     """
@@ -207,6 +260,7 @@ def safe_dump_all(documents, stream=None, **kwds):
     """
     return dump_all(documents, stream, Dumper=SafeDumper, **kwds)
 
+
 def safe_dump(data, stream=None, **kwds):
     """
     Serialize a Python object into a YAML stream.
@@ -215,8 +269,8 @@ def safe_dump(data, stream=None, **kwds):
     """
     return dump_all([data], stream, Dumper=SafeDumper, **kwds)
 
-def add_implicit_resolver(tag, regexp, first=None,
-        Loader=Loader, Dumper=Dumper):
+
+def add_implicit_resolver(tag, regexp, first=None, Loader=Loader, Dumper=Dumper):
     """
     Add an implicit scalar detector.
     If an implicit scalar value matches the given regexp,
@@ -225,6 +279,7 @@ def add_implicit_resolver(tag, regexp, first=None,
     """
     Loader.add_implicit_resolver(tag, regexp, first)
     Dumper.add_implicit_resolver(tag, regexp, first)
+
 
 def add_path_resolver(tag, path, kind=None, Loader=Loader, Dumper=Dumper):
     """
@@ -236,6 +291,7 @@ def add_path_resolver(tag, path, kind=None, Loader=Loader, Dumper=Dumper):
     Loader.add_path_resolver(tag, path, kind)
     Dumper.add_path_resolver(tag, path, kind)
 
+
 def add_constructor(tag, constructor, Loader=Loader):
     """
     Add a constructor for the given tag.
@@ -243,6 +299,7 @@ def add_constructor(tag, constructor, Loader=Loader):
     and a node object and produces the corresponding Python object.
     """
     Loader.add_constructor(tag, constructor)
+
 
 def add_multi_constructor(tag_prefix, multi_constructor, Loader=Loader):
     """
@@ -253,6 +310,7 @@ def add_multi_constructor(tag_prefix, multi_constructor, Loader=Loader):
     """
     Loader.add_multi_constructor(tag_prefix, multi_constructor)
 
+
 def add_representer(data_type, representer, Dumper=Dumper):
     """
     Add a representer for the given type.
@@ -261,6 +319,7 @@ def add_representer(data_type, representer, Dumper=Dumper):
     and producing the corresponding representation node.
     """
     Dumper.add_representer(data_type, representer)
+
 
 def add_multi_representer(data_type, multi_representer, Dumper=Dumper):
     """
@@ -271,6 +330,7 @@ def add_multi_representer(data_type, multi_representer, Dumper=Dumper):
     """
     Dumper.add_multi_representer(data_type, multi_representer)
 
+
 class YAMLObjectMetaclass(type):
     """
     The metaclass for YAMLObject.
@@ -280,6 +340,7 @@ class YAMLObjectMetaclass(type):
         if 'yaml_tag' in kwds and kwds['yaml_tag'] is not None:
             cls.yaml_loader.add_constructor(cls.yaml_tag, cls.from_yaml)
             cls.yaml_dumper.add_representer(cls, cls.to_yaml)
+
 
 class YAMLObject(metaclass=YAMLObjectMetaclass):
     """
@@ -307,6 +368,4 @@ class YAMLObject(metaclass=YAMLObjectMetaclass):
         """
         Convert a Python object to a representation node.
         """
-        return dumper.represent_yaml_object(cls.yaml_tag, data, cls,
-                flow_style=cls.yaml_flow_style)
-
+        return dumper.represent_yaml_object(cls.yaml_tag, data, cls, flow_style=cls.yaml_flow_style)

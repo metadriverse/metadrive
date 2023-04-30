@@ -57,11 +57,11 @@ def color_from_temperature(temperature):
 
     return xyz_to_rgb.xform(xyz)
 
+
 __all__ = ["RPLight"]
 
 
 class RPLight(object):
-
     """ Please refer to the native C++ implementation for docstrings and comments.
     This is just the python implementation, which does not contain documentation! """
 
@@ -125,9 +125,7 @@ class RPLight(object):
 
     def set_color(self, *args):
         self._color = Vec3(*args)
-        self._color /= (0.2126 * self._color.x +
-                        0.7152 * self._color.y +
-                        0.0722 * self._color.z)
+        self._color /= (0.2126 * self._color.x + 0.7152 * self._color.y + 0.0722 * self._color.z)
         self.set_needs_update(True)
 
     def set_color_from_temperature(self, temperature):

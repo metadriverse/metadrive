@@ -30,7 +30,6 @@ from metadrive.render_pipeline.rpcore.render_stage import RenderStage
 
 
 class DownscaleZStage(RenderStage):
-
     """ This stage downscales the depth buffer """
 
     required_pipes = ["GBuffer"]

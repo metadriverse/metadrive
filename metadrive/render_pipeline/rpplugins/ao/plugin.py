@@ -34,8 +34,10 @@ class Plugin(BasePlugin):
 
     name = "Ambient Occlusion"
     author = "tobspr <tobias.springer1@gmail.com>"
-    description = ("A plugin to render ambient occlusion supporting multiple"
-                   "techniques such as SSAO, HBAO and much more ")
+    description = (
+        "A plugin to render ambient occlusion supporting multiple"
+        "techniques such as SSAO, HBAO and much more "
+    )
     version = "1.1"
 
     def on_stage_setup(self):

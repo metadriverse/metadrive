@@ -7,7 +7,6 @@ from .base import *
 
 
 class SphereMaker(ModelMaker):
-
     @property
     def center(self):
         return self._center
@@ -15,7 +14,6 @@ class SphereMaker(ModelMaker):
     @center.setter
     def center(self, pos):
         self._center = pos
-
 
     @property
     def radius(self):
@@ -25,7 +23,6 @@ class SphereMaker(ModelMaker):
     def radius(self, radius):
         self._radius = radius
 
-
     @property
     def smooth(self):
         return self._smooth
@@ -33,7 +30,6 @@ class SphereMaker(ModelMaker):
     @smooth.setter
     def smooth(self, smooth):
         self._smooth = smooth
-
 
     @property
     def bottom_clip(self):
@@ -43,7 +39,6 @@ class SphereMaker(ModelMaker):
     def bottom_clip(self, clip_height):
         self._bottom_clip = clip_height
 
-
     @property
     def top_clip(self):
         return self._top_clip
@@ -51,7 +46,6 @@ class SphereMaker(ModelMaker):
     @top_clip.setter
     def top_clip(self, clip_height):
         self._top_clip = clip_height
-
 
     @property
     def slice(self):
@@ -61,7 +55,6 @@ class SphereMaker(ModelMaker):
     def slice(self, angle):
         self._slice = angle
 
-
     @property
     def thickness(self):
         return self._thickness
@@ -70,11 +63,24 @@ class SphereMaker(ModelMaker):
     def thickness(self, thickness):
         self._thickness = thickness
 
-    def __init__(self, center=None, radius=1., segments=None,
-                 smooth=True, bottom_clip=-1., top_clip=1., slice=0.,
-                 thickness=None, inverted=False, vertex_color=None,
-                 has_uvs=True, tex_units=None, tex_offset=None,
-                 tex_rotation=None, tex_scale=None):
+    def __init__(
+        self,
+        center=None,
+        radius=1.,
+        segments=None,
+        smooth=True,
+        bottom_clip=-1.,
+        top_clip=1.,
+        slice=0.,
+        thickness=None,
+        inverted=False,
+        vertex_color=None,
+        has_uvs=True,
+        tex_units=None,
+        tex_offset=None,
+        tex_rotation=None,
+        tex_scale=None
+    ):
         """
         This class generates sphere model primitives with the given parameters:
 
@@ -138,13 +144,13 @@ class SphereMaker(ModelMaker):
         """
 
         surface_ids = (
-            "main", "bottom_cap", "top_cap", "slice_start_cap", "slice_end_cap",
-            "inner_main", "inner_bottom_cap", "inner_top_cap"
+            "main", "bottom_cap", "top_cap", "slice_start_cap", "slice_end_cap", "inner_main", "inner_bottom_cap",
+            "inner_top_cap"
         )
 
-        ModelMaker.__init__(self, segments, inverted, vertex_color, has_uvs,
-                            tex_units, tex_offset, tex_rotation, tex_scale,
-                            surface_ids)
+        ModelMaker.__init__(
+            self, segments, inverted, vertex_color, has_uvs, tex_units, tex_offset, tex_rotation, tex_scale, surface_ids
+        )
 
         self._center = center
         self._radius = radius
@@ -188,8 +194,7 @@ class SphereMaker(ModelMaker):
         top_angle = acos(top_height / radius)
         delta_angle_v = (pi - bottom_angle - top_angle) / segs_v
         thickness = radius if self._thickness is None else max(0., self._thickness)
-        inner_radius = radius - thickness if (top_height
-                       - bottom_height) * .5 > thickness else 0.
+        inner_radius = radius - thickness if (top_height - bottom_height) * .5 > thickness else 0.
 
         if inner_radius:
             inner_bottom_height = bottom_height + thickness
@@ -207,8 +212,13 @@ class SphereMaker(ModelMaker):
         tex_rotation = self._tex_rotation
         tex_scale = self._tex_scale
         self._vert_ranges = vert_ranges = {
-            "main": (), "bottom_cap": (), "top_cap": (), "slice_start_cap": (),
-            "slice_end_cap": (), "inner_main": (), "inner_bottom_cap": (),
+            "main": (),
+            "bottom_cap": (),
+            "top_cap": (),
+            "slice_start_cap": (),
+            "slice_end_cap": (),
+            "inner_main": (),
+            "inner_bottom_cap": (),
             "inner_top_cap": ()
         }
         stride = 8 if has_uvs else 6  # number of floats on each vertex data row
@@ -251,11 +261,7 @@ class SphereMaker(ModelMaker):
                 if has_uvs and mat:
                     u, v = mat.xform_point(Point2(u, v))
 
-                vert = {
-                    "pos": (0., 0., z),
-                    "normal": normal,
-                    "uv": (u, v)
-                }
+                vert = {"pos": (0., 0., z), "normal": normal, "uv": (u, v)}
                 verts.append(vert)
                 index_offset += segs_h + 2
                 r = radius_h / segs_bc
@@ -284,11 +290,7 @@ class SphereMaker(ModelMaker):
 
                         u = v = 0.
 
-                    vert = {
-                        "pos": (x, y, z),
-                        "normal": normal,
-                        "uv": (u, v)
-                    }
+                    vert = {"pos": (x, y, z), "normal": normal, "uv": (u, v)}
                     verts.append(vert)
 
                 # Define the vertex order of the bottom cap triangles
@@ -327,11 +329,7 @@ class SphereMaker(ModelMaker):
 
                             u = v = 0.
 
-                        vert = {
-                            "pos": (x, y, z),
-                            "normal": normal,
-                            "uv": (u, v)
-                        }
+                        vert = {"pos": (x, y, z), "normal": normal, "uv": (u, v)}
                         verts.append(vert)
 
                 # Define the vertex order of the bottom cap quads
@@ -380,11 +378,7 @@ class SphereMaker(ModelMaker):
                 else:
                     u = 0.
 
-                vert = {
-                    "pos": (x, y, z),
-                    "normal": normal if smooth else None,
-                    "uv": (u, v)
-                }
+                vert = {"pos": (x, y, z), "normal": normal if smooth else None, "uv": (u, v)}
                 verts.append(vert)
 
                 if not smooth and 0 < i < segs_h:
@@ -411,11 +405,7 @@ class SphereMaker(ModelMaker):
                 else:
                     u = v = 0.
 
-                vert = {
-                    "pos": (0., 0., -radius),
-                    "normal": normal if smooth else None,
-                    "uv": (u, v)
-                }
+                vert = {"pos": (0., 0., -radius), "normal": normal if smooth else None, "uv": (u, v)}
                 verts.append(vert)
 
         vertex_count = len(verts)
@@ -452,11 +442,7 @@ class SphereMaker(ModelMaker):
             else:
                 u = 0.
 
-            vert = {
-                "pos": (x, y, z),
-                "normal": normal if smooth else None,
-                "uv": (u, v)
-            }
+            vert = {"pos": (x, y, z), "normal": normal if smooth else None, "uv": (u, v)}
             verts.append(vert)
 
             if not smooth and 0 < i < segs_h:
@@ -540,11 +526,7 @@ class SphereMaker(ModelMaker):
                 else:
                     u = 0.
 
-                vert = {
-                    "pos": (x, y, z),
-                    "normal": normal if smooth else None,
-                    "uv": (u, v)
-                }
+                vert = {"pos": (x, y, z), "normal": normal if smooth else None, "uv": (u, v)}
                 verts.append(vert)
 
                 if not smooth and 0 < j < segs_h:
@@ -604,11 +586,7 @@ class SphereMaker(ModelMaker):
                 else:
                     u = 0.
 
-                vert = {
-                    "pos": (x, y, z),
-                    "normal": normal if smooth else None,
-                    "uv": (u, v)
-                }
+                vert = {"pos": (x, y, z), "normal": normal if smooth else None, "uv": (u, v)}
                 verts.append(vert)
 
                 if not smooth and 0 < i < segs_h:
@@ -634,11 +612,7 @@ class SphereMaker(ModelMaker):
                 else:
                     u = v = 0.
 
-                vert = {
-                    "pos": (0., 0., radius),
-                    "normal": normal if smooth else None,
-                    "uv": (u, v)
-                }
+                vert = {"pos": (0., 0., radius), "normal": normal if smooth else None, "uv": (u, v)}
                 verts.append(vert)
 
         index_offset = len(verts) - 1
@@ -708,11 +682,7 @@ class SphereMaker(ModelMaker):
                 if has_uvs and mat:
                     u, v = mat.xform_point(Point2(u, v))
 
-                vert = {
-                    "pos": (0., 0., z),
-                    "normal": normal,
-                    "uv": (u, v)
-                }
+                vert = {"pos": (0., 0., z), "normal": normal, "uv": (u, v)}
                 verts.append(vert)
                 r = radius_h / segs_tc
 
@@ -740,11 +710,7 @@ class SphereMaker(ModelMaker):
 
                         u = v = 0.
 
-                    vert = {
-                        "pos": (x, y, z),
-                        "normal": normal,
-                        "uv": (u, v)
-                    }
+                    vert = {"pos": (x, y, z), "normal": normal, "uv": (u, v)}
                     verts.append(vert)
 
                 # Define the vertex order of the top cap triangles
@@ -783,11 +749,7 @@ class SphereMaker(ModelMaker):
 
                             u = v = 0.
 
-                        vert = {
-                            "pos": (x, y, z),
-                            "normal": normal,
-                            "uv": (u, v)
-                        }
+                        vert = {"pos": (x, y, z), "normal": normal, "uv": (u, v)}
                         verts.append(vert)
 
                 # Define the vertex order of the top cap quads
@@ -918,11 +880,7 @@ class SphereMaker(ModelMaker):
                         else:
                             u = v = 0.
 
-                        vert = {
-                            "pos": pos,
-                            "normal": normal,
-                            "uv": (u, v)
-                        }
+                        vert = {"pos": pos, "normal": normal, "uv": (u, v)}
                         verts.append(vert)
                         index_offset += 1
 
@@ -948,11 +906,7 @@ class SphereMaker(ModelMaker):
                         else:
                             u = v = 0.
 
-                        vert = {
-                            "pos": pos,
-                            "normal": normal,
-                            "uv": (u, v)
-                        }
+                        vert = {"pos": pos, "normal": normal, "uv": (u, v)}
                         verts.append(vert)
 
                     index_offset += segs_v + 1
@@ -973,11 +927,7 @@ class SphereMaker(ModelMaker):
                         else:
                             u = v = 0.
 
-                        vert = {
-                            "pos": pos,
-                            "normal": normal,
-                            "uv": (u, v)
-                        }
+                        vert = {"pos": pos, "normal": normal, "uv": (u, v)}
                         verts.append(vert)
                         index_offset += 1
 
@@ -995,11 +945,7 @@ class SphereMaker(ModelMaker):
                     else:
                         u = v = 0.
 
-                    vert = {
-                        "pos": inner_pos,
-                        "normal": normal,
-                        "uv": (u, v)
-                    }
+                    vert = {"pos": inner_pos, "normal": normal, "uv": (u, v)}
                     verts.append(vert)
 
                 for i in range(segs_sc):
@@ -1021,11 +967,7 @@ class SphereMaker(ModelMaker):
                         else:
                             u = v = 0.
 
-                        vert = {
-                            "pos": pos,
-                            "normal": normal,
-                            "uv": (u, v)
-                        }
+                        vert = {"pos": pos, "normal": normal, "uv": (u, v)}
                         verts.append(vert)
 
                     # Define the main vertices of the slice cap polygons
@@ -1052,11 +994,7 @@ class SphereMaker(ModelMaker):
                         else:
                             u = v = 0.
 
-                        vert = {
-                            "pos": pos,
-                            "normal": normal,
-                            "uv": (u, v)
-                        }
+                        vert = {"pos": pos, "normal": normal, "uv": (u, v)}
                         verts.append(vert)
 
                     # Define the upper central vertices of the slice cap
@@ -1076,11 +1014,7 @@ class SphereMaker(ModelMaker):
                         else:
                             u = v = 0.
 
-                        vert = {
-                            "pos": pos,
-                            "normal": normal,
-                            "uv": (u, v)
-                        }
+                        vert = {"pos": pos, "normal": normal, "uv": (u, v)}
                         verts.append(vert)
 
                     if i == 0 and not inner_radius:
@@ -1179,13 +1113,21 @@ class SphereMaker(ModelMaker):
                     if "inner_" + surface_name in tex_scale:
                         inner_tex_scale[surface_name] = tex_scale["inner_" + surface_name]
 
-            model_maker = SphereMaker(None, inner_radius, segs, smooth,
-                                      inner_bottom_clip, inner_top_clip,
-                                      slice, inverted=not inverted,
-                                      has_uvs=has_uvs, tex_units=inner_tex_units,
-                                      tex_offset=inner_tex_offset,
-                                      tex_rotation=inner_tex_rot,
-                                      tex_scale=inner_tex_scale)
+            model_maker = SphereMaker(
+                None,
+                inner_radius,
+                segs,
+                smooth,
+                inner_bottom_clip,
+                inner_top_clip,
+                slice,
+                inverted=not inverted,
+                has_uvs=has_uvs,
+                tex_units=inner_tex_units,
+                tex_offset=inner_tex_offset,
+                tex_rotation=inner_tex_rot,
+                tex_scale=inner_tex_scale
+            )
             node = model_maker.generate()
 
             # Extend the geometry of the inner sphere with the data of the outer sphere
@@ -1216,7 +1158,7 @@ class SphereMaker(ModelMaker):
             old_row_count = tris_prim.get_num_vertices()
             new_row_count = old_row_count + len(indices)
 
-            if new_row_count < 2 ** 16:
+            if new_row_count < 2**16:
                 # make the array compatible with the default index format of the
                 # GeomPrimitive (16-bit) if the number of vertices allows it...
                 indices = array.array("H", indices)
@@ -1240,8 +1182,7 @@ class SphereMaker(ModelMaker):
                 if inner_range:
                     vert_ranges["inner_{}".format(surface_name)] = inner_range
 
-            for surface_name in ("main", "bottom_cap", "top_cap",
-                    "slice_start_cap", "slice_end_cap"):
+            for surface_name in ("main", "bottom_cap", "top_cap", "slice_start_cap", "slice_end_cap"):
 
                 vert_range = vert_ranges[surface_name]
 
@@ -1278,7 +1219,7 @@ class SphereMaker(ModelMaker):
 
             tris_prim = GeomTriangles(Geom.UH_static)
 
-            if len(indices) < 2 ** 16:
+            if len(indices) < 2**16:
                 indices = array.array("H", indices)
             else:
                 tris_prim.set_index_type(Geom.NT_uint32)

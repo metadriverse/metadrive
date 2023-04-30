@@ -33,7 +33,6 @@ from metadrive.render_pipeline.rpcore.util.generic import snap_shadow_map
 
 
 class PSSMSceneShadowStage(RenderStage):
-
     """ This stage creates the shadow map which covers the whole important part
     of the scene. This is required because the shadow cascades only cover the
     view frustum, but many plugins (VXGI, EnvMaps) require a shadow map. """
@@ -86,8 +85,7 @@ class PSSMSceneShadowStage(RenderStage):
 
                 self.cam_lens.set_near_far(0.0, 2 * (focus_size + self.sun_distance))
                 self.cam_lens.set_film_size(2 * focus_size, 2 * focus_size)
-                self.cam_node.set_pos(
-                    focus_point + self.sun_vector * (self.sun_distance + focus_size))
+                self.cam_node.set_pos(focus_point + self.sun_vector * (self.sun_distance + focus_size))
                 self.cam_node.look_at(focus_point)
 
                 snap_shadow_map(self.mvp, self.cam_node, self.resolution)

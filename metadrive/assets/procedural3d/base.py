@@ -10,7 +10,6 @@ import array
 
 
 class ModelMaker:
-
     @property
     def segments(self):
         return self._segments
@@ -18,7 +17,6 @@ class ModelMaker:
     @segments.setter
     def segments(self, segments):
         self._segments = segments
-
 
     @property
     def inverted(self):
@@ -28,7 +26,6 @@ class ModelMaker:
     def inverted(self, inverted):
         self._inverted = inverted
 
-
     @property
     def vertex_color(self):
         return self._vertex_color
@@ -36,7 +33,6 @@ class ModelMaker:
     @vertex_color.setter
     def vertex_color(self, vertex_color):
         self._vertex_color = vertex_color
-
 
     @property
     def has_uvs(self):
@@ -46,7 +42,6 @@ class ModelMaker:
     def has_uvs(self, has_uvs):
         self._has_uvs = has_uvs
 
-
     @property
     def tex_units(self):
         return self._tex_units
@@ -54,7 +49,6 @@ class ModelMaker:
     @tex_units.setter
     def tex_units(self, tex_units):
         self._tex_units = tex_units
-
 
     @property
     def tex_offset(self):
@@ -64,7 +58,6 @@ class ModelMaker:
     def tex_offset(self, tex_offset):
         self._tex_offset = tex_offset
 
-
     @property
     def tex_rotation(self):
         return self._tex_rotation
@@ -73,7 +66,6 @@ class ModelMaker:
     def tex_rotation(self, tex_rotation):
         self._tex_rotation = tex_rotation
 
-
     @property
     def tex_scale(self):
         return self._tex_scale
@@ -81,7 +73,6 @@ class ModelMaker:
     @tex_scale.setter
     def tex_scale(self, tex_scale):
         self._tex_scale = tex_scale
-
 
     @property
     def vertex_ranges(self):
@@ -95,8 +86,9 @@ class ModelMaker:
         """
         return self._vert_ranges
 
-    def __init__(self, segments, inverted, vertex_color, has_uvs, tex_units,
-                 tex_offset, tex_rotation, tex_scale, surface_ids):
+    def __init__(
+        self, segments, inverted, vertex_color, has_uvs, tex_units, tex_offset, tex_rotation, tex_scale, surface_ids
+    ):
         """
         This class generates model primitives with the given parameters, common to
         all primitive types:

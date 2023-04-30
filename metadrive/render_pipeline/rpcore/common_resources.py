@@ -38,10 +38,8 @@ from metadrive.render_pipeline.rpcore.util.shader_input_blocks import GroupedInp
 
 
 class CommonResources(RPObject):
-
     """ This class manages the loading and binding of commonly used resources,
     such as textures, models, but also shader inputs """
-
     def __init__(self, pipeline):
         RPObject.__init__(self)
         self._pipeline = pipeline
@@ -127,8 +125,7 @@ class CommonResources(RPObject):
     def _load_environment_cubemap(self):
         """ Loads the default cubemap used for the environment, which is used
         when no other environment data is available """
-        envmap = RPLoader.load_cube_map(
-            "/$$rp/data/default_cubemap/cubemap.txo", read_mipmaps=True)
+        envmap = RPLoader.load_cube_map("/$$rp/data/default_cubemap/cubemap.txo", read_mipmaps=True)
         envmap.set_minfilter(SamplerState.FT_linear_mipmap_linear)
         # envmap.set_format(Image.F_rgba16)
         envmap.set_magfilter(SamplerState.FT_linear)
@@ -140,9 +137,18 @@ class CommonResources(RPObject):
     def _load_prefilter_brdf(self):
         """ Loads the prefiltered brdf """
         luts = [
-            {"src": "slices/env_brdf_#.png", "input": "PrefilteredBRDF"},
-            {"src": "slices_metal/env_brdf.png", "input": "PrefilteredMetalBRDF"},
-            {"src": "slices_coat/env_brdf.png", "input": "PrefilteredCoatBRDF"},
+            {
+                "src": "slices/env_brdf_#.png",
+                "input": "PrefilteredBRDF"
+            },
+            {
+                "src": "slices_metal/env_brdf.png",
+                "input": "PrefilteredMetalBRDF"
+            },
+            {
+                "src": "slices_coat/env_brdf.png",
+                "input": "PrefilteredCoatBRDF"
+            },
         ]
 
         for config in luts:

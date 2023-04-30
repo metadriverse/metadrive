@@ -40,16 +40,12 @@ def make_daysetting_from_data(data):
     """ Constructs a new setting from a given dataset. This method will automatically
     instantiate a new class matching the type of the given dataset. It will fill
     all values provided by the dataset and then return the created instance """
-    factory = {
-        "color": ColorType,
-        "scalar": ScalarType
-    }
+    factory = {"color": ColorType, "scalar": ScalarType}
     return make_setting_from_factory(data, factory)
 
 
 class BaseType(RPObject):
     """ Base setting type for all setting types """
-
     def __init__(self, data):
         self.type = data.pop("type")
         self.label = data.pop("label").strip()
@@ -104,13 +100,7 @@ class ScalarType(BaseType):
 
     def format(self, value):
         """ Formats a given value, attaching the appropriate metric unit """
-        metric = {
-            "degree": u'\N{DEGREE SIGN}',
-            "percent": u'%',
-            "meter": u'm',
-            "klux": u' L',
-            "none": ''
-        }[self.unit]
+        metric = {"degree": u'\N{DEGREE SIGN}', "percent": u'%', "meter": u'm', "klux": u' L', "none": ''}[self.unit]
         if self.unit == "percent":
             value *= 100.0
         return u"{:3.1f}{}".format(value, metric)

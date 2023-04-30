@@ -29,13 +29,12 @@ from rplibs.six.moves import range  # pylint: disable=import-error
 
 import math
 
-from rplibs.pyqt_imports import * # noqa
+from rplibs.pyqt_imports import *  # noqa
+
 
 class CurveWidget(QWidget):
-
     """ This is a resizeable Widget which shows an editable curve which can
     be modified. """
-
     def __init__(self, parent):
         """ Constructs the CurveWidget, we start with an initial curve """
         QWidget.__init__(self, parent)
@@ -225,8 +224,7 @@ class CurveWidget(QWidget):
         for i in range(num_horiz_lines):
             line_pos = canvas_height - i * line_spacing_y + self._bar_h
             # painter.drawText(6, line_pos + 3, str(round(float(i) / (num_horiz_lines-1), 2)))
-            painter.drawText(
-                6, line_pos + 3, self._unit_processor(float(i) / (num_horiz_lines - 1)))
+            painter.drawText(6, line_pos + 3, self._unit_processor(float(i) / (num_horiz_lines - 1)))
 
         # Draw horizontal legend labels
         for i in range(num_vert_lines + 1):
@@ -250,8 +248,7 @@ class CurveWidget(QWidget):
                 if i == 0:
                     last_value = curve_height
 
-                painter.drawLine(
-                    self._legend_border + i - 1, last_value, self._legend_border + i, curve_height)
+                painter.drawLine(self._legend_border + i - 1, last_value, self._legend_border + i, curve_height)
                 last_value = curve_height
 
             # Draw the CV points of the curve
@@ -261,14 +258,14 @@ class CurveWidget(QWidget):
                 offs_x = x * canvas_width + self._legend_border
                 offs_y = (1 - y) * canvas_height + self._bar_h
 
-                if (self._selected_point and self._selected_point[0] == index and
-                   self._selected_point[1] == cv_index):
+                if (self._selected_point and self._selected_point[0] == index and self._selected_point[1] == cv_index):
                     painter.setPen(QColor(255, 0, 0))
                 else:
                     painter.setPen(QColor(100, 100, 100))
                 painter.drawRect(
-                    offs_x - self._cv_point_size, offs_y - self._cv_point_size,
-                    2 * self._cv_point_size, 2 * self._cv_point_size)
+                    offs_x - self._cv_point_size, offs_y - self._cv_point_size, 2 * self._cv_point_size,
+                    2 * self._cv_point_size
+                )
 
         # Draw bar background
         bar_half_height = 4
@@ -279,7 +276,8 @@ class CurveWidget(QWidget):
 
         painter.drawRect(
             self._legend_border - 1, bar_top_pos - 1,
-            self.width() - self._legend_border, 2 * bar_half_height + 2)
+            self.width() - self._legend_border, 2 * bar_half_height + 2
+        )
 
         # Draw bar
         if len(self._curves) == 0:
@@ -308,8 +306,7 @@ class CurveWidget(QWidget):
         if self._drag_point:
             painter.setBrush(QColor(200, 200, 200))
             painter.setPen(QColor(90, 90, 90))
-            offs_x = max(0, min(
-                canvas_width + 10, self._drag_time * canvas_width + self._legend_border - 19))
+            offs_x = max(0, min(canvas_width + 10, self._drag_time * canvas_width + self._legend_border - 19))
             offs_y = self.height() - self._legend_border
             minutes = int(self._drag_time * 24 * 60)
             hours = minutes / 60
@@ -318,8 +315,7 @@ class CurveWidget(QWidget):
             painter.drawText(offs_x + 7, offs_y + 20, "{:02}:{:02}".format(hours, minutes))
 
             painter.setPen(QColor(150, 150, 150))
-            painter.drawLine(
-                offs_x + 19, bar_top_pos + 15, offs_x + 19, self.height() - self._legend_border + 5)
+            painter.drawLine(offs_x + 19, bar_top_pos + 15, offs_x + 19, self.height() - self._legend_border + 5)
 
         # Display current time
         pen = QPen()
@@ -333,6 +329,7 @@ class CurveWidget(QWidget):
         # Draw usage hints
         painter.setPen(QColor(100, 100, 100))
         painter.drawText(
-            5, self.height() - 2,
-            "Click on the curve to add new control points, click and drag "
-            "existing points to move them.")
+            5,
+            self.height() - 2, "Click on the curve to add new control points, click and drag "
+            "existing points to move them."
+        )

@@ -7,7 +7,6 @@ from .base import *
 
 
 class TorusMaker(ModelMaker):
-
     @property
     def center(self):
         return self._center
@@ -15,7 +14,6 @@ class TorusMaker(ModelMaker):
     @center.setter
     def center(self, pos):
         self._center = pos
-
 
     @property
     def ring_radius(self):
@@ -25,7 +23,6 @@ class TorusMaker(ModelMaker):
     def ring_radius(self, radius):
         self._ring_radius = radius
 
-
     @property
     def section_radius(self):
         return self._section_radius
@@ -33,7 +30,6 @@ class TorusMaker(ModelMaker):
     @section_radius.setter
     def section_radius(self, radius):
         self._section_radius = radius
-
 
     @property
     def smooth_ring(self):
@@ -43,7 +39,6 @@ class TorusMaker(ModelMaker):
     def smooth_ring(self, smooth):
         self._smooth_ring = smooth
 
-
     @property
     def smooth_section(self):
         return self._smooth_section
@@ -51,7 +46,6 @@ class TorusMaker(ModelMaker):
     @smooth_section.setter
     def smooth_section(self, smooth):
         self._smooth_section = smooth
-
 
     @property
     def ring_slice(self):
@@ -61,7 +55,6 @@ class TorusMaker(ModelMaker):
     def ring_slice(self, angle):
         self._ring_slice = angle
 
-
     @property
     def section_slice(self):
         return self._section_slice
@@ -69,7 +62,6 @@ class TorusMaker(ModelMaker):
     @section_slice.setter
     def section_slice(self, angle):
         self._section_slice = angle
-
 
     @property
     def rotation(self):
@@ -79,7 +71,6 @@ class TorusMaker(ModelMaker):
     def rotation(self, angle):
         self._rotation = angle
 
-
     @property
     def twist(self):
         return self._twist
@@ -87,7 +78,6 @@ class TorusMaker(ModelMaker):
     @twist.setter
     def twist(self, angle):
         self._twist = angle
-
 
     @property
     def thickness(self):
@@ -97,12 +87,27 @@ class TorusMaker(ModelMaker):
     def thickness(self, thickness):
         self._thickness = thickness
 
-    def __init__(self, center=None, ring_radius=2., section_radius=1.,
-                 segments=None, smooth_ring=True, smooth_section=True,
-                 ring_slice=0., section_slice=0., rotation=0., twist=0.,
-                 thickness=None, inverted=False, vertex_color=None,
-                 has_uvs=True, tex_units=None, tex_offset=None,
-                 tex_rotation=None, tex_scale=None):
+    def __init__(
+        self,
+        center=None,
+        ring_radius=2.,
+        section_radius=1.,
+        segments=None,
+        smooth_ring=True,
+        smooth_section=True,
+        ring_slice=0.,
+        section_slice=0.,
+        rotation=0.,
+        twist=0.,
+        thickness=None,
+        inverted=False,
+        vertex_color=None,
+        has_uvs=True,
+        tex_units=None,
+        tex_offset=None,
+        tex_rotation=None,
+        tex_scale=None
+    ):
         """
         This class generates torus model primitives with the given parameters:
 
@@ -187,13 +192,13 @@ class TorusMaker(ModelMaker):
         """
 
         surface_ids = (
-            "main", "ring_slice_start_cap", "ring_slice_end_cap",
-            "section_slice_start_cap", "section_slice_end_cap", "inner_main"
+            "main", "ring_slice_start_cap", "ring_slice_end_cap", "section_slice_start_cap", "section_slice_end_cap",
+            "inner_main"
         )
 
-        ModelMaker.__init__(self, segments, inverted, vertex_color, has_uvs,
-                            tex_units, tex_offset, tex_rotation, tex_scale,
-                            surface_ids)
+        ModelMaker.__init__(
+            self, segments, inverted, vertex_color, has_uvs, tex_units, tex_offset, tex_rotation, tex_scale, surface_ids
+        )
 
         self._center = center
         self._ring_radius = ring_radius
@@ -221,8 +226,9 @@ class TorusMaker(ModelMaker):
         self._twist = 0.
         self._thickness = None
 
-    def __add_cap_data(self, segs, point, vec, points, uvs, has_uvs, u_start,
-                       mirror_v, tex_size, radius, ring_arc, section_arc, mat):
+    def __add_cap_data(
+        self, segs, point, vec, points, uvs, has_uvs, u_start, mirror_v, tex_size, radius, ring_arc, section_arc, mat
+    ):
 
         for i in range(segs + 1):
 
@@ -284,8 +290,12 @@ class TorusMaker(ModelMaker):
         tex_rotation = self._tex_rotation
         tex_scale = self._tex_scale
         self._vert_ranges = vert_ranges = {
-            "main": (), "ring_slice_start_cap": (), "ring_slice_end_cap": (),
-            "section_slice_start_cap": (), "section_slice_end_cap": (), "inner_main": ()
+            "main": (),
+            "ring_slice_start_cap": (),
+            "ring_slice_end_cap": (),
+            "section_slice_start_cap": (),
+            "section_slice_end_cap": (),
+            "inner_main": ()
         }
         stride = 8 if has_uvs else 6  # number of floats on each vertex data row
         values = array.array("f", [])
@@ -355,7 +365,7 @@ class TorusMaker(ModelMaker):
                 angle_v = rot + twist_angle + delta_angle_v * j + section_slice_radians
                 r = ring_radius - section_radius * cos(angle_v)
                 x = r * c
-                y = r * s 
+                y = r * s
                 z = section_radius * sin(angle_v)
                 nx = x - ring_radius * c
                 ny = y - ring_radius * s
@@ -372,11 +382,7 @@ class TorusMaker(ModelMaker):
                 else:
                     v = 0.
 
-                vert = {
-                    "pos": (x, y, z),
-                    "normal": normal if smooth else None,
-                    "uv": (u, v)
-                }
+                vert = {"pos": (x, y, z), "normal": normal if smooth else None, "uv": (u, v)}
                 verts.append(vert)
 
                 if j in (0, segs_s) and section_slice and (segs_sssc or segs_ssec) and thickness:
@@ -393,17 +399,19 @@ class TorusMaker(ModelMaker):
                     uvs = []
 
                     if j == 0:
-                        self.__add_cap_data(segs_sssc, p1, r_vec, points, uvs, has_uvs,
-                                            u_sc, False, tex_size_sssc, section_radius,
-                                            ring_arc, section_arc, mat_sssc)
+                        self.__add_cap_data(
+                            segs_sssc, p1, r_vec, points, uvs, has_uvs, u_sc, False, tex_size_sssc, section_radius,
+                            ring_arc, section_arc, mat_sssc
+                        )
 
                         n_vec *= 1. if inverted else -1.
                         cap_data["start"].append((points, uvs, n_vec))
 
                     elif j == segs_s:
-                        self.__add_cap_data(segs_ssec, p1, r_vec, points, uvs, has_uvs,
-                                            u_sc, True, tex_size_ssec, section_radius,
-                                            ring_arc, section_arc, mat_ssec)
+                        self.__add_cap_data(
+                            segs_ssec, p1, r_vec, points, uvs, has_uvs, u_sc, True, tex_size_ssec, section_radius,
+                            ring_arc, section_arc, mat_ssec
+                        )
 
                         n_vec *= -1. if inverted else 1.
                         cap_data["end"].append((points, uvs, n_vec))
@@ -494,11 +502,7 @@ class TorusMaker(ModelMaker):
                         if has_uvs and mat:
                             u, v = mat.xform_point(Point2(u, v))
 
-                        vert = {
-                            "pos": pos,
-                            "normal": normal,
-                            "uv": (u, v)
-                        }
+                        vert = {"pos": pos, "normal": normal, "uv": (u, v)}
                         verts.append(vert)
 
                         radius = section_radius / segs_sc
@@ -537,11 +541,7 @@ class TorusMaker(ModelMaker):
 
                                 u = v = 0.
 
-                            vert = {
-                                "pos": pos,
-                                "normal": normal,
-                                "uv": (u, v)
-                            }
+                            vert = {"pos": pos, "normal": normal, "uv": (u, v)}
                             verts.append(vert)
 
                         # Define the vertex order of the ring slice cap triangles
@@ -600,11 +600,7 @@ class TorusMaker(ModelMaker):
 
                                 u = v = 0.
 
-                            vert = {
-                                "pos": pos,
-                                "normal": normal,
-                                "uv": (u, v)
-                            }
+                            vert = {"pos": pos, "normal": normal, "uv": (u, v)}
                             verts.append(vert)
 
                     # Define the vertex order of the ring slice cap quads
@@ -641,11 +637,7 @@ class TorusMaker(ModelMaker):
 
                     for points, uvs, normal in cap_data[cap_id]:
                         for point, uv in zip(points, uvs):
-                            vert = {
-                                "pos": point,
-                                "normal": normal,
-                                "uv": uv
-                            }
+                            vert = {"pos": point, "normal": normal, "uv": uv}
                             verts.append(vert)
 
                     # Define the vertex order of the section slice cap quads
@@ -709,14 +701,24 @@ class TorusMaker(ModelMaker):
             if tex_scale and "inner_main" in tex_scale:
                 inner_tex_scale["main"] = tex_scale["inner_main"]
 
-            model_maker = TorusMaker(None, ring_radius, inner_radius, segs,
-                                     smooth_ring, smooth_section, ring_slice,
-                                     section_slice, rotation, twist,
-                                     inverted=not inverted, has_uvs=has_uvs,
-                                     tex_units=inner_tex_units,
-                                     tex_offset=inner_tex_offset,
-                                     tex_rotation=inner_tex_rot,
-                                     tex_scale=inner_tex_scale)
+            model_maker = TorusMaker(
+                None,
+                ring_radius,
+                inner_radius,
+                segs,
+                smooth_ring,
+                smooth_section,
+                ring_slice,
+                section_slice,
+                rotation,
+                twist,
+                inverted=not inverted,
+                has_uvs=has_uvs,
+                tex_units=inner_tex_units,
+                tex_offset=inner_tex_offset,
+                tex_rotation=inner_tex_rot,
+                tex_scale=inner_tex_scale
+            )
             node = model_maker.generate()
 
             # Extend the geometry of the inner torus with the data of the outer torus
@@ -747,7 +749,7 @@ class TorusMaker(ModelMaker):
             old_row_count = tris_prim.get_num_vertices()
             new_row_count = old_row_count + len(indices)
 
-            if new_row_count < 2 ** 16:
+            if new_row_count < 2**16:
                 # make the array compatible with the default index format of the
                 # GeomPrimitive (16-bit) if the number of vertices allows it...
                 indices = array.array("H", indices)
@@ -767,8 +769,8 @@ class TorusMaker(ModelMaker):
             if inner_range:
                 vert_ranges["inner_main"] = inner_range
 
-            for surface_name in ("main", "ring_slice_start_cap", "ring_slice_end_cap",
-                    "section_slice_start_cap", "section_slice_end_cap"):
+            for surface_name in ("main", "ring_slice_start_cap", "ring_slice_end_cap", "section_slice_start_cap",
+                                 "section_slice_end_cap"):
 
                 vert_range = vert_ranges[surface_name]
 
@@ -805,7 +807,7 @@ class TorusMaker(ModelMaker):
 
             tris_prim = GeomTriangles(Geom.UH_static)
 
-            if len(indices) < 2 ** 16:
+            if len(indices) < 2**16:
                 indices = array.array("H", indices)
             else:
                 tris_prim.set_index_type(Geom.NT_uint32)

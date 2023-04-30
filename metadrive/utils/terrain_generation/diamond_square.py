@@ -8,13 +8,15 @@ import math
 import numpy as np
 
 
-def diamond_square(shape: (int, int),
-                   min_height: [float or int],
-                   max_height: [float or int],
-                   roughness: [float or int],
-                   random_seed=None,
-                   uint16=True,
-                   minus_mean=True):
+def diamond_square(
+    shape: (int, int),
+    min_height: [float or int],
+    max_height: [float or int],
+    roughness: [float or int],
+    random_seed=None,
+    uint16=True,
+    minus_mean=True
+):
     """Runs a diamond square algorithm and returns an array (or list) with the landscape
 
         An important difference (possibly) between this, and other implementations of the
@@ -151,14 +153,14 @@ def _get_working_shape_and_iterations(requested_shape, max_power_of_two=13):
     largest_edge = max(requested_shape)
 
     for power in range(1, max_power_of_two + 1):
-        d = (2 ** power) + 1
+        d = (2**power) + 1
         if largest_edge <= d:
             return (d, d), power
 
     # failsafe: no values in the dimensions array were allowed, so print a warning and return
     # the maximum size.
-    d = 2 ** max_power_of_two + 1
-    print("DiamondSquare Warning: Requested size was too large. Grid of size {0} returned""".format(d))
+    d = 2**max_power_of_two + 1
+    print("DiamondSquare Warning: Requested size was too large. Grid of size {0} returned" "".format(d))
     return (d, d), max_power_of_two
 
 

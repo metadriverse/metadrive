@@ -38,12 +38,9 @@ from metadrive.render_pipeline.rpcore.gui.checkbox_collection import CheckboxCol
 
 
 class RenderModeSelector(DraggableWindow):
-
     """ Window which offers the user to select a render mode to apply """
-
     def __init__(self, pipeline, parent):
-        DraggableWindow.__init__(self, width=690, height=340, parent=parent,
-                                 title="Select render mode")
+        DraggableWindow.__init__(self, width=690, height=340, parent=parent, title="Select render mode")
         self._pipeline = pipeline
         self._selected_mode = ""
         self._create_components()
@@ -93,10 +90,18 @@ class RenderModeSelector(DraggableWindow):
                     enabled = False
 
             box = LabeledCheckbox(
-                parent=debugger_content, x=offs_x, y=offs_y, text=mode.upper(),
-                text_color=Vec3(0.4), radio=True, chb_checked=(mode_id == self._selected_mode),
+                parent=debugger_content,
+                x=offs_x,
+                y=offs_y,
+                text=mode.upper(),
+                text_color=Vec3(0.4),
+                radio=True,
+                chb_checked=(mode_id == self._selected_mode),
                 chb_callback=partial(self._set_render_mode, mode_id, special),
-                text_size=14, expand_width=230, enabled=enabled)
+                text_size=14,
+                expand_width=230,
+                enabled=enabled
+            )
             collection.add(box.checkbox)
 
     def _set_render_mode(self, mode_id, special, value):

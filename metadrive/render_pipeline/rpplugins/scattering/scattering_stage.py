@@ -30,7 +30,6 @@ from metadrive.render_pipeline.rpcore.render_stage import RenderStage
 
 
 class ScatteringStage(RenderStage):
-
     """ This stage uses the precomputed data to display the scattering """
 
     required_pipes = ["ShadedScene", "GBuffer"]

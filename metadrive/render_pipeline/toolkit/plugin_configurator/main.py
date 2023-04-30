@@ -44,7 +44,7 @@ sys.path.insert(0, os.getcwd())
 sys.path.insert(0, "../../")
 
 from rplibs.six import iteritems  # noqa
-from rplibs.pyqt_imports import * #noqa
+from rplibs.pyqt_imports import *  #noqa
 
 # Load the generated UI Layout
 from ui.main_window_generated import Ui_MainWindow  # noqa
@@ -55,11 +55,8 @@ from rpcore.mount_manager import MountManager  # noqa
 
 
 class PluginConfigurator(QMainWindow, Ui_MainWindow):
-
     """ Interface to change the plugin settings """
-
     def __init__(self):
-        
 
         # Init mounts
         self._mount_mgr = MountManager(None)
@@ -72,20 +69,15 @@ class PluginConfigurator(QMainWindow, Ui_MainWindow):
         Ui_MainWindow.__init__(self)
         self.setupUi(self)
 
-
-
         self._current_plugin = None
         self._current_plugin_instance = None
         self.lbl_restart_pipeline.hide()
         self._set_settings_visible(False)
         self._update_queue = list()
 
-        qt_connect(self.lst_plugins, "itemSelectionChanged()",
-                self.on_plugin_selected)
-        qt_connect(self.lst_plugins, "itemChanged(QListWidgetItem*)",
-                self.on_plugin_state_changed)
-        qt_connect(self.btn_reset_plugin_settings, "clicked()",
-                self.on_reset_plugin_settings)
+        qt_connect(self.lst_plugins, "itemSelectionChanged()", self.on_plugin_selected)
+        qt_connect(self.lst_plugins, "itemChanged(QListWidgetItem*)", self.on_plugin_state_changed)
+        qt_connect(self.btn_reset_plugin_settings, "clicked()", self.on_reset_plugin_settings)
 
         self._load_plugin_list()
 
@@ -110,13 +102,10 @@ class PluginConfigurator(QMainWindow, Ui_MainWindow):
         msg += self._current_plugin_instance.name + "'?\n"
         msg += "This does not reset the Time of Day settings of this plugin.\n\n"
         msg += "!! This cannot be undone !! They will be lost forever (a long time!)."
-        reply = QMessageBox.question(
-            self, "Warning", msg, QMessageBox.Yes, QMessageBox.No)
+        reply = QMessageBox.question(self, "Warning", msg, QMessageBox.Yes, QMessageBox.No)
         if reply == QMessageBox.Yes:
 
-            QMessageBox.information(
-                self, "Success",
-                "Settings have been reset! You may have to restart the pipeline.")
+            QMessageBox.information(self, "Success", "Settings have been reset! You may have to restart the pipeline.")
             self._plugin_mgr.reset_plugin_settings(self._current_plugin)
 
             # Save config
@@ -148,7 +137,7 @@ class PluginConfigurator(QMainWindow, Ui_MainWindow):
         selected_item = selected_item[0]
         self._current_plugin = selected_item._plugin_id
         self._current_plugin_instance = self._plugin_mgr.instances[self._current_plugin]
-        assert(self._current_plugin_instance is not None)
+        assert (self._current_plugin_instance is not None)
         self._render_current_plugin()
         self._set_settings_visible(True)
 
@@ -172,7 +161,10 @@ class PluginConfigurator(QMainWindow, Ui_MainWindow):
 
     def _render_current_plugin(self):
         """ Displays the currently selected plugin """
-        self.lbl_plugin_name.setText(self._current_plugin_instance.name.upper() + " <span style='color: #999; margin-left: 5px;'>[" + self._current_plugin_instance.plugin_id + "]</span>")
+        self.lbl_plugin_name.setText(
+            self._current_plugin_instance.name.upper() + " <span style='color: #999; margin-left: 5px;'>[" +
+            self._current_plugin_instance.plugin_id + "]</span>"
+        )
 
         version_str = "Version " + self._current_plugin_instance.version
         version_str += " by " + self._current_plugin_instance.author
@@ -216,7 +208,7 @@ class PluginConfigurator(QMainWindow, Ui_MainWindow):
             label.setWordWrap(True)
             label.setFont(label_font)
 
-            if not (handle.shader_runtime or handle.runtime ):
+            if not (handle.shader_runtime or handle.runtime):
                 label.setStyleSheet("color: #999;")
 
             if handle.display_conditions:
@@ -246,8 +238,7 @@ class PluginConfigurator(QMainWindow, Ui_MainWindow):
         """ Updates a setting of the current plugin """
 
         # Check whether the setting is a runtime setting
-        setting_handle = self._plugin_mgr.get_setting_handle(
-            self._current_plugin, setting_id)
+        setting_handle = self._plugin_mgr.get_setting_handle(self._current_plugin, setting_id)
 
         # Skip the setting in case the value is equal
         if setting_handle.value == value:
@@ -262,8 +253,7 @@ class PluginConfigurator(QMainWindow, Ui_MainWindow):
         else:
             # In case the setting is dynamic, notice the pipeline about it:
             # print("Sending reload packet ...")
-            self._update_queue.append("setval {}.{} {}".format(
-                self._current_plugin, setting_id, value))
+            self._update_queue.append("setval {}.{} {}".format(self._current_plugin, setting_id, value))
 
         # Update GUI, but only in case of enum and bool values, since they can trigger
         # display conditions:
@@ -335,12 +325,10 @@ class PluginConfigurator(QMainWindow, Ui_MainWindow):
         layout.setAlignment(Qt.AlignCenter)
         widget.setLayout(layout)
 
-
         if setting.type == "bool":
             box = QCheckBox()
             box.setChecked(Qt.Checked if setting.value else Qt.Unchecked)
-            qt_connect(box, "stateChanged(int)",
-                    partial(self._on_setting_bool_changed, setting_id))
+            qt_connect(box, "stateChanged(int)", partial(self._on_setting_bool_changed, setting_id))
             layout.addWidget(box)
 
         elif setting.type == "float" or setting.type == "int":
@@ -375,20 +363,22 @@ class PluginConfigurator(QMainWindow, Ui_MainWindow):
             layout.addWidget(box)
             layout.addWidget(slider)
 
-            qt_connect(slider, "valueChanged(int)",
-                    partial(self._on_setting_slider_changed, setting_id, setting.type, [box]))
+            qt_connect(
+                slider, "valueChanged(int)", partial(self._on_setting_slider_changed, setting_id, setting.type, [box])
+            )
 
             value_type = "int" if setting.type == "int" else "double"
 
-            qt_connect(box, "valueChanged(" + value_type + ")",
-                    partial(self._on_setting_spinbox_changed, setting_id, setting.type, [slider]))
+            qt_connect(
+                box, "valueChanged(" + value_type + ")",
+                partial(self._on_setting_spinbox_changed, setting_id, setting.type, [slider])
+            )
 
         elif setting.type == "enum":
             box = QComboBox()
             for value in setting.values:
                 box.addItem(value)
-            qt_connect(box, "currentIndexChanged(QString)",
-                    partial(self._on_setting_enum_changed, setting_id))
+            qt_connect(box, "currentIndexChanged(QString)", partial(self._on_setting_enum_changed, setting_id))
             box.setCurrentIndex(setting.values.index(setting.value))
             box.setMinimumWidth(145)
 
@@ -400,8 +390,7 @@ class PluginConfigurator(QMainWindow, Ui_MainWindow):
             resolutions = [str(2**i) for i in range(1, 32) if 2**i >= setting.minval and 2**i <= setting.maxval]
             for value in resolutions:
                 box.addItem(value)
-            qt_connect(box, "currentIndexChanged(QString)",
-                    partial(self._on_setting_power_of_two_changed, setting_id))
+            qt_connect(box, "currentIndexChanged(QString)", partial(self._on_setting_power_of_two_changed, setting_id))
             box.setCurrentIndex(resolutions.index(str(setting.value)))
             box.setMinimumWidth(145)
             layout.addWidget(box)
@@ -411,8 +400,7 @@ class PluginConfigurator(QMainWindow, Ui_MainWindow):
             box = QComboBox()
             for value in setting.sequences:
                 box.addItem(value)
-            qt_connect(box, "currentIndexChanged(QString)",
-                    partial(self._on_setting_enum_changed, setting_id))
+            qt_connect(box, "currentIndexChanged(QString)", partial(self._on_setting_enum_changed, setting_id))
             box.setCurrentIndex(setting.sequences.index(str(setting.value)))
             box.setMinimumWidth(145)
             layout.addWidget(box)
@@ -431,8 +419,7 @@ class PluginConfigurator(QMainWindow, Ui_MainWindow):
 
             button = QPushButton()
             button.setText("Choose File ...")
-            qt_connect(button, "clicked()", partial(
-                self._choose_path, setting_id, setting, (label,)))
+            qt_connect(button, "clicked()", partial(self._choose_path, setting_id, setting, (label, )))
 
             layout.addWidget(label)
             layout.addWidget(button)
@@ -465,7 +452,6 @@ class PluginConfigurator(QMainWindow, Ui_MainWindow):
         self.lst_plugins.clear()
         plugins = sorted(iteritems(self._plugin_mgr.instances), key=lambda plg: plg[1].name)
 
-
         item_font = QFont()
         item_font.setBold(False)
         item_font.setPointSize(10)
@@ -485,6 +471,7 @@ class PluginConfigurator(QMainWindow, Ui_MainWindow):
             self.lst_plugins.addItem(item)
 
         self.lst_plugins.setCurrentRow(0)
+
 
 # Start application
 app = QApplication(sys.argv)

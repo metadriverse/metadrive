@@ -64,9 +64,7 @@ def make_setting_from_data(data):
 
 
 class BaseType(RPObject):
-
     """ This is the base setting type, all setting types derive from this """
-
     def __init__(self, data):
         """ Fills in all settings from the given setting data """
         self.value = None
@@ -97,10 +95,8 @@ class BaseType(RPObject):
 
 
 class TemplatedType(BaseType):
-
     """ This setting stores a single type including a minimum and maximum value.
     It is shared between integer and floating point types. """
-
     def __init__(self, template_type, data):
         BaseType.__init__(self, data)
         self.template_type = template_type
@@ -121,13 +117,12 @@ class TemplatedType(BaseType):
 
 class IntType(TemplatedType):
     """ Template instantiation of TemplatedType using int """
-
     def __init__(self, data):
         TemplatedType.__init__(self, int, data)
 
+
 class PowerOfTwoType(IntType):
     """ Type for any power of two resolution """
-
     def __init__(self, data):
         IntType.__init__(self, data)
 
@@ -144,14 +139,12 @@ class PowerOfTwoType(IntType):
 
 class FloatType(TemplatedType):
     """ Template instantiation of TemplatedType using float """
-
     def __init__(self, data):
         TemplatedType.__init__(self, float, data)
 
 
 class BoolType(BaseType):
     """ Boolean setting type """
-
     def __init__(self, data):
         BaseType.__init__(self, data)
         self.default = bool(data.pop("default"))
@@ -185,6 +178,7 @@ class EnumType(BaseType):
 
         for i, val in enumerate(self.values):
             defines["enum_{}_{}_{}".format(plugin_id, setting_id, val)] = 1000 + i
+
 
 class SampleSequenceType(BaseType):
     """ Type for any 2D or 3D sample sequence """
@@ -221,6 +215,7 @@ class SampleSequenceType(BaseType):
         for dim in self.HALTON_SIZES:
             result.append("halton_" + str(self.dimension) + "D_" + str(dim))
         return result
+
 
 class PathType(BaseType):
     """ Path type to specify paths to files """

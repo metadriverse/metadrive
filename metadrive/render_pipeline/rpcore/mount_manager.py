@@ -35,13 +35,11 @@ from metadrive.render_pipeline.rpcore.rpobject import RPObject
 
 
 class MountManager(RPObject):
-
     """ This classes mounts the required directories for the pipeline to run.
     This is important if the pipeline is in a subdirectory for example. The
     mount manager also handles the lock, storing the current PID into a file
     named instance.pid and ensuring that there is only 1 instance of the
     pipeline running at one time. """
-
     def __init__(self, pipeline):
         """ Creates a new mount manager """
         RPObject.__init__(self)
@@ -274,6 +272,7 @@ class MountManager(RPObject):
 
         def convert_path(pth):
             return Filename.from_os_specific(pth).get_fullpath()
+
         vfs = VirtualFileSystem.get_global_ptr()
 
         # Mount config dir as $$rpconf

@@ -164,13 +164,13 @@ class VaryingDynamicsVehicle(DefaultVehicle):
         return self.config["mass"] if self.config["mass"] is not None else super(VaryingDynamicsVehicle, self).MASS
 
     def reset(
-            self,
-            random_seed=None,
-            vehicle_config=None,
-            position=None,
-            heading: float = 0.0,  # In degree!
-            *args,
-            **kwargs
+        self,
+        random_seed=None,
+        vehicle_config=None,
+        position=None,
+        heading: float = 0.0,  # In degree!
+        *args,
+        **kwargs
     ):
 
         assert "width" not in self.PARAMETER_SPACE

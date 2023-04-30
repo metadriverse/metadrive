@@ -29,7 +29,6 @@ from metadrive.render_pipeline.rpcore.render_stage import RenderStage
 
 
 class PSSMStage(RenderStage):
-
     """ This stage uses the PSSM Shadow map to render the shadows """
 
     required_inputs = []

@@ -41,12 +41,12 @@ def to_linear(v):
 def to_linear_inv(v):
     return 1 - to_linear(v)
 
+
 for r in range(lut_size):
     for g in range(lut_size):
         for b in range(lut_size):
             slice_offset_x = (b % lut_cols) * lut_size
             slice_offset_y = (b // lut_cols) * lut_size
-            img.set_xel(r + slice_offset_x, g + slice_offset_y,
-                        to_linear(r), to_linear_inv(g), to_linear(b))
+            img.set_xel(r + slice_offset_x, g + slice_offset_y, to_linear(r), to_linear_inv(g), to_linear(b))
 
 img.write("default_lut.png")

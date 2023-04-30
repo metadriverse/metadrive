@@ -17,7 +17,6 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-
 '''Default ProgressBar widgets'''
 
 from __future__ import division
@@ -31,12 +30,14 @@ except ImportError:
     AbstractWidget = object
     abstractmethod = lambda fn: fn
 else:
-    AbstractWidget = ABCMeta('AbstractWidget', (object,), {})
+    AbstractWidget = ABCMeta('AbstractWidget', (object, ), {})
 
 
 def format_updatable(updatable, pbar):
-    if hasattr(updatable, 'update'): return updatable.update(pbar)
-    else: return updatable
+    if hasattr(updatable, 'update'):
+        return updatable.update(pbar)
+    else:
+        return updatable
 
 
 class Widget(AbstractWidget):
@@ -67,7 +68,6 @@ class WidgetHFill(Widget):
     fill the line. You can use more than one in the same line, and they will
     all have the same width, and together will fill the line.
     '''
-
     @abstractmethod
     def update(self, pbar, width):
         '''Updates the widget providing the total width the widget must fill.
@@ -90,7 +90,6 @@ class Timer(Widget):
         'Formats time as the string "HH:MM:SS".'
 
         return str(datetime.timedelta(seconds=int(seconds)))
-
 
     def update(self, pbar):
         'Updates the widget to show the elapsed time.'
@@ -128,7 +127,7 @@ class FileTransferSpeed(Widget):
     def update(self, pbar):
         'Updates the widget with the current SI prefixed speed.'
 
-        if pbar.seconds_elapsed < 2e-6 or pbar.currval < 2e-6: # =~ 0
+        if pbar.seconds_elapsed < 2e-6 or pbar.currval < 2e-6:  # =~ 0
             scaled = power = 0
         else:
             speed = pbar.currval / pbar.seconds_elapsed
@@ -137,14 +136,14 @@ class FileTransferSpeed(Widget):
 
         return self.format % (scaled, self.prefixes[power], self.unit)
 
+
 class Rate(Widget):
     'Widget for showing the rate of entries per second'
 
     def update(self, pbar):
         'Updates the widget with the current SI prefixed speed.'
 
-
-        if pbar.seconds_elapsed < 2e-6 or pbar.currval < 2e-6: # =~ 0
+        if pbar.seconds_elapsed < 2e-6 or pbar.currval < 2e-6:  # =~ 0
             return "Rate: 0 /s"
         else:
             speed = pbar.currval / pbar.seconds_elapsed
@@ -157,7 +156,6 @@ class AnimatedMarker(Widget):
     '''An animated marker for the progress bar which defaults to appear as if
     it were rotating.
     '''
-
     def __init__(self, markers='|/-\\'):
         self.markers = markers
         self.curmark = -1
@@ -166,10 +164,12 @@ class AnimatedMarker(Widget):
         '''Updates the widget to show the next marker or the first marker when
         finished'''
 
-        if pbar.finished: return self.markers[0]
+        if pbar.finished:
+            return self.markers[0]
 
         self.curmark = (self.curmark + 1) % len(self.markers)
         return self.markers[self.curmark]
+
 
 # Alias for backwards compatibility
 RotatingMarker = AnimatedMarker
@@ -215,10 +215,11 @@ class FormatLabel(Timer):
                 value = getattr(pbar, key)
 
                 if transform is None:
-                   context[name] = value
+                    context[name] = value
                 else:
-                   context[name] = transform(value)
-            except: pass
+                    context[name] = transform(value)
+            except:
+                pass
 
         return self.format % context
 
@@ -236,8 +237,7 @@ class SimpleProgress(Widget):
 class Bar(WidgetHFill):
     'A progress bar which stretches to fill the line.'
 
-    def __init__(self, marker='#', left='|', right='|', fill=' ',
-                 fill_left=True):
+    def __init__(self, marker='#', left='|', right='|', fill=' ', fill_left=True):
         '''Creates a customizable progress bar.
 
         marker - string or updatable object to use as a marker
@@ -252,12 +252,10 @@ class Bar(WidgetHFill):
         self.fill = fill
         self.fill_left = fill_left
 
-
     def update(self, pbar, width):
         'Updates the progress bar and its subcomponents'
 
-        left, marker, right = (format_updatable(i, pbar) for i in
-                               (self.left, self.marker, self.right))
+        left, marker, right = (format_updatable(i, pbar) for i in (self.left, self.marker, self.right))
 
         width -= len(left) + len(right)
         # Marker must *always* have length of 1
@@ -272,8 +270,7 @@ class Bar(WidgetHFill):
 class ReverseBar(Bar):
     'A bar which has a marker which bounces from side to side.'
 
-    def __init__(self, marker='#', left='|', right='|', fill=' ',
-                 fill_left=False):
+    def __init__(self, marker='#', left='|', right='|', fill=' ', fill_left=False):
         '''Creates a customizable progress bar.
 
         marker - string or updatable object to use as a marker
@@ -293,19 +290,21 @@ class BouncingBar(Bar):
     def update(self, pbar, width):
         'Updates the progress bar and its subcomponents'
 
-        left, marker, right = (format_updatable(i, pbar) for i in
-                               (self.left, self.marker, self.right))
+        left, marker, right = (format_updatable(i, pbar) for i in (self.left, self.marker, self.right))
 
         width -= len(left) + len(right)
 
-        if pbar.finished: return '%s%s%s' % (left, width * marker, right)
+        if pbar.finished:
+            return '%s%s%s' % (left, width * marker, right)
 
         position = int(pbar.currval % (width * 2 - 1))
-        if position > width: position = width * 2 - position
+        if position > width:
+            position = width * 2 - position
         lpad = self.fill * (position - 1)
         rpad = self.fill * (width - len(marker) - len(lpad))
 
         # Swap if we want to bounce the other way
-        if not self.fill_left: rpad, lpad = lpad, rpad
+        if not self.fill_left:
+            rpad, lpad = lpad, rpad
 
         return '%s%s%s%s%s' % (left, lpad, marker, rpad, right)

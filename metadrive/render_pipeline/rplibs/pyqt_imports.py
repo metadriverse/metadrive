@@ -59,4 +59,3 @@ def qt_register_fonts():
         if f.endswith(".ttf"):
             fpath = os.path.relpath(os.path.join(font_dir, f))
             QFontDatabase.addApplicationFont(fpath)
-

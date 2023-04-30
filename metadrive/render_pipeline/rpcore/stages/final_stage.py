@@ -28,7 +28,6 @@ from metadrive.render_pipeline.rpcore.render_stage import RenderStage
 
 
 class FinalStage(RenderStage):
-
     """ This stage is the final stage and outputs the shaded scene to the
     screen """
 

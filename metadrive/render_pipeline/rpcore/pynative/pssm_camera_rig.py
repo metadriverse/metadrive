@@ -31,10 +31,8 @@ from metadrive.render_pipeline.rpcore.util.generic import snap_shadow_map
 
 
 class PSSMCameraRig(object):
-
     """ PSSM is not really supported in python yet (too slow), so this is a stub,
     supporting only one cascade """
-
     def __init__(self, num_splits):
         self._split_count = num_splits
         self._mvps = PTALMatrix4f.empty_array(num_splits)

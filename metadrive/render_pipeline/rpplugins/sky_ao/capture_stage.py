@@ -33,7 +33,6 @@ from metadrive.render_pipeline.rpcore.render_stage import RenderStage
 
 
 class SkyAOCaptureStage(RenderStage):
-
     """ This stage captures the sky ao by rendering the scene from above """
 
     required_inputs = []
@@ -74,9 +73,7 @@ class SkyAOCaptureStage(RenderStage):
         self.target_convert.add_color_attachment(bits=(16, 0, 0, 0))
         self.target_convert.prepare_buffer()
 
-        self.target_convert.set_shader_inputs(
-            DepthTex=self.target.depth_tex,
-            position=self.pta_position)
+        self.target_convert.set_shader_inputs(DepthTex=self.target.depth_tex, position=self.pta_position)
 
         # Register camera
         self._pipeline.tag_mgr.register_camera("shadow", self.camera)
@@ -85,9 +82,8 @@ class SkyAOCaptureStage(RenderStage):
         snap_size = self.max_radius / self.resolution
         cam_pos = Globals.base.camera.get_pos(Globals.base.render)
         self.cam_node.set_pos(
-            cam_pos.x - cam_pos.x % snap_size,
-            cam_pos.y - cam_pos.y % snap_size,
-            self.capture_height / 2.0)
+            cam_pos.x - cam_pos.x % snap_size, cam_pos.y - cam_pos.y % snap_size, self.capture_height / 2.0
+        )
         self.pta_position[0] = self.cam_node.get_pos()
 
     def reload_shaders(self):

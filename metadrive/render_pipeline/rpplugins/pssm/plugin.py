@@ -42,10 +42,9 @@ class Plugin(BasePlugin):
 
     name = "Sun Shadows"
     author = "tobspr <tobias.springer1@gmail.com>"
-    description = ("This plugin adds support for Parallel Split Shadow Maps "
-                   "(PSSM), and also sun lighting.")
+    description = ("This plugin adds support for Parallel Split Shadow Maps " "(PSSM), and also sun lighting.")
     version = "1.2"
-    required_plugins = ("scattering",)
+    required_plugins = ("scattering", )
 
     def on_stage_setup(self):
 
@@ -111,15 +110,14 @@ class Plugin(BasePlugin):
 
         # Set inputs
         self.pssm_stage.set_shader_inputs(
-            pssm_mvps=self.camera_rig.get_mvp_array(),
-            pssm_nearfar=self.camera_rig.get_nearfar_array())
+            pssm_mvps=self.camera_rig.get_mvp_array(), pssm_nearfar=self.camera_rig.get_nearfar_array()
+        )
 
         if self.is_plugin_enabled("volumetrics"):
             handle = self.get_plugin_instance("volumetrics")
             handle.stage.set_shader_inputs(
-                pssm_mvps=self.camera_rig.get_mvp_array(),
-                pssm_nearfar=self.camera_rig.get_nearfar_array())
-
+                pssm_mvps=self.camera_rig.get_mvp_array(), pssm_nearfar=self.camera_rig.get_nearfar_array()
+            )
 
     def on_pre_render_update(self):
         sun_vector = self.get_plugin_instance("scattering").sun_vector

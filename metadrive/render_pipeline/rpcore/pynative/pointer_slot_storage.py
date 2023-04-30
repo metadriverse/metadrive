@@ -28,10 +28,8 @@ from metadrive.render_pipeline.rplibs.six.moves import range  # pylint: disable=
 
 
 class PointerSlotStorage(object):
-
     """ Please refer to the native C++ implementation for docstrings and comments.
     This is just the python implementation, which does not contain documentation! """
-
     def __init__(self, max_size):
         self._data = [None] * max_size
         self._max_index = 0

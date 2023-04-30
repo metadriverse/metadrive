@@ -38,9 +38,11 @@ from .godray_stage import GodrayStage
 class Plugin(BasePlugin):
     name = "Atmospheric Scattering"
     author = "tobspr <tobias.springer1@gmail.com>"
-    description = ("This plugin adds support for Atmospheric Scattering, and a "
-                   "single sun, based on the work from Eric Bruneton. It also "
-                   "adds support for atmospheric fog.")
+    description = (
+        "This plugin adds support for Atmospheric Scattering, and a "
+        "single sun, based on the work from Eric Bruneton. It also "
+        "adds support for atmospheric fog."
+    )
     version = "1.2"
 
     def on_pipeline_created(self):
@@ -75,15 +77,11 @@ class Plugin(BasePlugin):
         sun_azimuth = self.get_daytime_setting("sun_azimuth")
         theta = (90 - sun_altitude) / 180.0 * math.pi
         phi = sun_azimuth / 180.0 * math.pi
-        sun_vector = Vec3(
-            math.sin(theta) * math.cos(phi),
-            math.sin(theta) * math.sin(phi),
-            math.cos(theta))
+        sun_vector = Vec3(math.sin(theta) * math.cos(phi), math.sin(theta) * math.sin(phi), math.cos(theta))
         return sun_vector
 
     def on_pre_render_update(self):
-        self.envmap_stage.active = self._pipeline.task_scheduler.is_scheduled(
-            "scattering_update_envmap")
+        self.envmap_stage.active = self._pipeline.task_scheduler.is_scheduled("scattering_update_envmap")
 
     def on_shader_reload(self):
         self.scattering_model.compute()

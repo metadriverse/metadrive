@@ -34,7 +34,8 @@ from direct.showbase.ShowBase import ShowBase
 
 class Application(ShowBase):
     def __init__(self):
-        load_prc_file_data("", """
+        load_prc_file_data(
+            "", """
             textures-power-2 none
             window-type offscreen
             win-size 100 100
@@ -42,7 +43,8 @@ class Application(ShowBase):
             notify-level-display error
             print-pipe-types #f
             gl-version 4 3
-        """)
+        """
+        )
 
         ShowBase.__init__(self)
 
@@ -60,8 +62,7 @@ class Application(ShowBase):
         node.set_shader(cshader)
         node.set_shader_input("DestTex", voxel_grid)
         attr = node.get_attrib(ShaderAttrib)
-        self.graphicsEngine.dispatch_compute(
-            ((w + 7) // 8, (h + 7) // 8, (d + 3) // 4), attr, self.win.gsg)
+        self.graphicsEngine.dispatch_compute(((w + 7) // 8, (h + 7) // 8, (d + 3) // 4), attr, self.win.gsg)
         self.graphicsEngine.extract_texture_data(voxel_grid, self.win.gsg)
 
         print("Writing data ..")
@@ -77,8 +78,7 @@ class Application(ShowBase):
         node.set_shader(cshader)
         node.set_shader_input("DestTex", voxel_grid)
         attr = node.get_attrib(ShaderAttrib)
-        self.graphicsEngine.dispatch_compute(
-            ((w + 7) // 8, (h + 7) // 8, (d + 3) // 4), attr, self.win.gsg)
+        self.graphicsEngine.dispatch_compute(((w + 7) // 8, (h + 7) // 8, (d + 3) // 4), attr, self.win.gsg)
         self.graphicsEngine.extract_texture_data(voxel_grid, self.win.gsg)
 
         print("Writing data ..")

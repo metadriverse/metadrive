@@ -28,7 +28,6 @@ from metadrive.render_pipeline.rpcore.render_stage import RenderStage
 
 
 class DoFStage(RenderStage):
-
     """ This stage does the DoF pass """
 
     required_inputs = []
@@ -69,8 +68,8 @@ class DoFStage(RenderStage):
         self.presort_target.add_color_attachment(bits=(11, 11, 10))
         self.presort_target.prepare_buffer()
         self.presort_target.set_shader_inputs(
-            TileMinMax=self.minmax_target.color_tex,
-            PrecomputedCoC=self.target_prefilter.color_tex)
+            TileMinMax=self.minmax_target.color_tex, PrecomputedCoC=self.target_prefilter.color_tex
+        )
 
         self.target = self.create_target("ComputeDoF")
         # self.target.size = -2
@@ -79,7 +78,8 @@ class DoFStage(RenderStage):
         self.target.set_shader_inputs(
             PresortResult=self.presort_target.color_tex,
             PrecomputedCoC=self.target_prefilter.color_tex,
-            TileMinMax=self.minmax_target.color_tex)
+            TileMinMax=self.minmax_target.color_tex
+        )
 
         self.target_merge = self.create_target("MergeDoF")
         self.target_merge.add_color_attachment(bits=16)

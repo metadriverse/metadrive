@@ -32,11 +32,10 @@ from metadrive.render_pipeline.rpcore.loader import RPLoader
 
 
 class Sprite(RPObject):
-
     """ Simple wrapper arround OnscreenImage, providing a simpler interface """
-
-    def __init__(self, image=None, parent=None, x=0, y=0, w=None, h=None,
-                 transparent=True, near_filter=True, any_filter=True):
+    def __init__(
+        self, image=None, parent=None, x=0, y=0, w=None, h=None, transparent=True, near_filter=True, any_filter=True
+    ):
         """ Creates a new image, taking (x,y) as topleft coordinates.
 
         When near_filter is set to true, a near filter will be set to the
@@ -65,8 +64,8 @@ class Sprite(RPObject):
         self._initial_pos = self._translate_pos(x, y)
 
         self.node = OnscreenImage(
-            image=image, parent=parent, pos=self._initial_pos,
-            scale=(self._width / 2.0, 1, self._height / 2.0))
+            image=image, parent=parent, pos=self._initial_pos, scale=(self._width / 2.0, 1, self._height / 2.0)
+        )
 
         if transparent:
             self.node.set_transparency(TransparencyAttrib.M_alpha)

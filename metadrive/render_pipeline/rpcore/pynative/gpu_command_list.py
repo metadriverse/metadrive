@@ -26,10 +26,8 @@ THE SOFTWARE.
 
 
 class GPUCommandList(object):
-
     """ Please refer to the native C++ implementation for docstrings and comments.
     This is just the python implementation, which does not contain documentation! """
-
     def __init__(self):
         self._commands = []
 

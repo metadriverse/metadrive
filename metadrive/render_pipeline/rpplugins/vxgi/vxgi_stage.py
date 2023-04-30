@@ -34,9 +34,10 @@ from metadrive.render_pipeline.rpcore.stages.ambient_stage import AmbientStage
 class VXGIStage(RenderStage):
 
     required_inputs = ["voxelGridPosition"]
-    required_pipes = ["ShadedScene", "SceneVoxels", "GBuffer", "ScatteringIBLSpecular",
-                      "ScatteringIBLDiffuse", "PreviousFrame::VXGIPostSample",
-                      "CombinedVelocity", "PreviousFrame::SceneDepth"]
+    required_pipes = [
+        "ShadedScene", "SceneVoxels", "GBuffer", "ScatteringIBLSpecular", "ScatteringIBLDiffuse",
+        "PreviousFrame::VXGIPostSample", "CombinedVelocity", "PreviousFrame::SceneDepth"
+    ]
 
     @property
     def produced_pipes(self):
@@ -82,8 +83,8 @@ class VXGIStage(RenderStage):
         self.target_upscale_diff.add_color_attachment(bits=16)
         self.target_upscale_diff.prepare_buffer()
         self.target_upscale_diff.set_shader_inputs(
-            SourceTex=self.target_blur_h.color_tex,
-            upscaleWeights=Vec2(0.0001, 0.001))
+            SourceTex=self.target_blur_h.color_tex, upscaleWeights=Vec2(0.0001, 0.001)
+        )
 
         self.target_resolve = self.create_target("ResolveVXGI")
         self.target_resolve.add_color_attachment(bits=16)
@@ -96,10 +97,8 @@ class VXGIStage(RenderStage):
     def reload_shaders(self):
         # self.target_spec.shader = self.load_plugin_shader("vxgi_specular.frag.glsl")
         self.target_diff.shader = self.load_plugin_shader("vxgi_diffuse.frag.glsl")
-        self.target_upscale_diff.shader = self.load_plugin_shader(
-            "/$$rp/shader/bilateral_upscale.frag.glsl")
-        blur_shader = self.load_plugin_shader(
-            "/$$rp/shader/bilateral_halfres_blur.frag.glsl")
+        self.target_upscale_diff.shader = self.load_plugin_shader("/$$rp/shader/bilateral_upscale.frag.glsl")
+        blur_shader = self.load_plugin_shader("/$$rp/shader/bilateral_halfres_blur.frag.glsl")
         self.target_blur_v.shader = blur_shader
         self.target_blur_h.shader = blur_shader
         self.target_resolve.shader = self.load_plugin_shader("resolve_vxgi.frag.glsl")

@@ -35,10 +35,8 @@ from metadrive.render_pipeline.rpcore.gui.text import Text
 
 
 class ErrorMessageDisplay(RPObject):
-
     """ This is a gui element which listens to the panda output stream
     and shows errors """
-
     def __init__(self):
         RPObject.__init__(self)
         self._num_errors = 0
@@ -80,8 +78,14 @@ class ErrorMessageDisplay(RPObject):
     def add_text(self, text, color):
         """ Internal method to add a new text to the output """
         Text(
-            x=Globals.native_resolution.x - 30, y=self._num_errors * 23,
-            align="right", text=text, size=12, parent=self._error_node, color=color)
+            x=Globals.native_resolution.x - 30,
+            y=self._num_errors * 23,
+            align="right",
+            text=text,
+            size=12,
+            parent=self._error_node,
+            color=color
+        )
 
         self._num_errors += 1
 

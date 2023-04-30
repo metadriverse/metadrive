@@ -1,6 +1,4 @@
-
-__all__ = ['BaseRepresenter', 'SafeRepresenter', 'Representer',
-    'RepresenterError']
+__all__ = ['BaseRepresenter', 'SafeRepresenter', 'Representer', 'RepresenterError']
 
 from error import *
 from nodes import *
@@ -9,8 +7,10 @@ import datetime
 
 import sys, copy_reg, types
 
+
 class RepresenterError(YAMLError):
     pass
+
 
 class BaseRepresenter(object):
 
@@ -52,7 +52,7 @@ class BaseRepresenter(object):
             self.object_keeper.append(data)
         data_types = type(data).__mro__
         if type(data) is types.InstanceType:
-            data_types = self.get_classobj_bases(data.__class__)+list(data_types)
+            data_types = self.get_classobj_bases(data.__class__) + list(data_types)
         if data_types[0] in self.yaml_representers:
             node = self.yaml_representers[data_types[0]](self, data)
         else:
@@ -75,12 +75,14 @@ class BaseRepresenter(object):
         if not 'yaml_representers' in cls.__dict__:
             cls.yaml_representers = cls.yaml_representers.copy()
         cls.yaml_representers[data_type] = representer
+
     add_representer = classmethod(add_representer)
 
     def add_multi_representer(cls, data_type, representer):
         if not 'yaml_multi_representers' in cls.__dict__:
             cls.yaml_multi_representers = cls.yaml_multi_representers.copy()
         cls.yaml_multi_representers[data_type] = representer
+
     add_multi_representer = classmethod(add_multi_representer)
 
     def represent_scalar(self, tag, value, style=None):
@@ -136,8 +138,8 @@ class BaseRepresenter(object):
     def ignore_aliases(self, data):
         return False
 
-class SafeRepresenter(BaseRepresenter):
 
+class SafeRepresenter(BaseRepresenter):
     def ignore_aliases(self, data):
         if data in [None, ()]:
             return True
@@ -145,8 +147,7 @@ class SafeRepresenter(BaseRepresenter):
             return True
 
     def represent_none(self, data):
-        return self.represent_scalar(u'tag:yaml.org,2002:null',
-                u'null')
+        return self.represent_scalar(u'tag:yaml.org,2002:null', u'null')
 
     def represent_str(self, data):
         tag = None
@@ -181,7 +182,7 @@ class SafeRepresenter(BaseRepresenter):
         return self.represent_scalar(u'tag:yaml.org,2002:int', unicode(data))
 
     inf_value = 1e300
-    while repr(inf_value) != repr(inf_value*inf_value):
+    while repr(inf_value) != repr(inf_value * inf_value):
         inf_value *= inf_value
 
     def represent_float(self, data):
@@ -212,12 +213,13 @@ class SafeRepresenter(BaseRepresenter):
         #            pairs = False
         #            break
         #if not pairs:
-            return self.represent_sequence(u'tag:yaml.org,2002:seq', data)
-        #value = []
-        #for item_key, item_value in data:
-        #    value.append(self.represent_mapping(u'tag:yaml.org,2002:map',
-        #        [(item_key, item_value)]))
-        #return SequenceNode(u'tag:yaml.org,2002:pairs', value)
+        return self.represent_sequence(u'tag:yaml.org,2002:seq', data)
+
+    #value = []
+    #for item_key, item_value in data:
+    #    value.append(self.represent_mapping(u'tag:yaml.org,2002:map',
+    #        [(item_key, item_value)]))
+    #return SequenceNode(u'tag:yaml.org,2002:pairs', value)
 
     def represent_dict(self, data):
         return self.represent_mapping(u'tag:yaml.org,2002:map', data)
@@ -246,50 +248,37 @@ class SafeRepresenter(BaseRepresenter):
     def represent_undefined(self, data):
         raise RepresenterError("cannot represent an object: %s" % data)
 
-SafeRepresenter.add_representer(type(None),
-        SafeRepresenter.represent_none)
 
-SafeRepresenter.add_representer(str,
-        SafeRepresenter.represent_str)
+SafeRepresenter.add_representer(type(None), SafeRepresenter.represent_none)
 
-SafeRepresenter.add_representer(unicode,
-        SafeRepresenter.represent_unicode)
+SafeRepresenter.add_representer(str, SafeRepresenter.represent_str)
 
-SafeRepresenter.add_representer(bool,
-        SafeRepresenter.represent_bool)
+SafeRepresenter.add_representer(unicode, SafeRepresenter.represent_unicode)
 
-SafeRepresenter.add_representer(int,
-        SafeRepresenter.represent_int)
+SafeRepresenter.add_representer(bool, SafeRepresenter.represent_bool)
 
-SafeRepresenter.add_representer(long,
-        SafeRepresenter.represent_long)
+SafeRepresenter.add_representer(int, SafeRepresenter.represent_int)
 
-SafeRepresenter.add_representer(float,
-        SafeRepresenter.represent_float)
+SafeRepresenter.add_representer(long, SafeRepresenter.represent_long)
 
-SafeRepresenter.add_representer(list,
-        SafeRepresenter.represent_list)
+SafeRepresenter.add_representer(float, SafeRepresenter.represent_float)
 
-SafeRepresenter.add_representer(tuple,
-        SafeRepresenter.represent_list)
+SafeRepresenter.add_representer(list, SafeRepresenter.represent_list)
 
-SafeRepresenter.add_representer(dict,
-        SafeRepresenter.represent_dict)
+SafeRepresenter.add_representer(tuple, SafeRepresenter.represent_list)
 
-SafeRepresenter.add_representer(set,
-        SafeRepresenter.represent_set)
+SafeRepresenter.add_representer(dict, SafeRepresenter.represent_dict)
 
-SafeRepresenter.add_representer(datetime.date,
-        SafeRepresenter.represent_date)
+SafeRepresenter.add_representer(set, SafeRepresenter.represent_set)
 
-SafeRepresenter.add_representer(datetime.datetime,
-        SafeRepresenter.represent_datetime)
+SafeRepresenter.add_representer(datetime.date, SafeRepresenter.represent_date)
 
-SafeRepresenter.add_representer(None,
-        SafeRepresenter.represent_undefined)
+SafeRepresenter.add_representer(datetime.datetime, SafeRepresenter.represent_datetime)
+
+SafeRepresenter.add_representer(None, SafeRepresenter.represent_undefined)
+
 
 class Representer(SafeRepresenter):
-
     def represent_str(self, data):
         tag = None
         style = None
@@ -337,11 +326,10 @@ class Representer(SafeRepresenter):
 
     def represent_name(self, data):
         name = u'%s.%s' % (data.__module__, data.__name__)
-        return self.represent_scalar(u'tag:yaml.org,2002:python/name:'+name, u'')
+        return self.represent_scalar(u'tag:yaml.org,2002:python/name:' + name, u'')
 
     def represent_module(self, data):
-        return self.represent_scalar(
-                u'tag:yaml.org,2002:python/module:'+data.__name__, u'')
+        return self.represent_scalar(u'tag:yaml.org,2002:python/module:' + data.__name__, u'')
 
     def represent_instance(self, data):
         # For instances of classic classes, we use __getinitargs__ and
@@ -372,17 +360,14 @@ class Representer(SafeRepresenter):
         else:
             state = data.__dict__
         if args is None and isinstance(state, dict):
-            return self.represent_mapping(
-                    u'tag:yaml.org,2002:python/object:'+class_name, state)
+            return self.represent_mapping(u'tag:yaml.org,2002:python/object:' + class_name, state)
         if isinstance(state, dict) and not state:
-            return self.represent_sequence(
-                    u'tag:yaml.org,2002:python/object/new:'+class_name, args)
+            return self.represent_sequence(u'tag:yaml.org,2002:python/object/new:' + class_name, args)
         value = {}
         if args:
             value['args'] = args
         value['state'] = state
-        return self.represent_mapping(
-                u'tag:yaml.org,2002:python/object/new:'+class_name, value)
+        return self.represent_mapping(u'tag:yaml.org,2002:python/object/new:' + class_name, value)
 
     def represent_object(self, data):
         # We use __reduce__ API to save the data. data.__reduce__ returns
@@ -410,7 +395,7 @@ class Representer(SafeRepresenter):
             reduce = data.__reduce__()
         else:
             raise RepresenterError("cannot represent object: %r" % data)
-        reduce = (list(reduce)+[None]*5)[:5]
+        reduce = (list(reduce) + [None] * 5)[:5]
         function, args, state, listitems, dictitems = reduce
         args = list(args)
         if state is None:
@@ -430,11 +415,10 @@ class Representer(SafeRepresenter):
         function_name = u'%s.%s' % (function.__module__, function.__name__)
         if not args and not listitems and not dictitems \
                 and isinstance(state, dict) and newobj:
-            return self.represent_mapping(
-                    u'tag:yaml.org,2002:python/object:'+function_name, state)
+            return self.represent_mapping(u'tag:yaml.org,2002:python/object:' + function_name, state)
         if not listitems and not dictitems  \
                 and isinstance(state, dict) and not state:
-            return self.represent_sequence(tag+function_name, args)
+            return self.represent_sequence(tag + function_name, args)
         value = {}
         if args:
             value['args'] = args
@@ -444,41 +428,29 @@ class Representer(SafeRepresenter):
             value['listitems'] = listitems
         if dictitems:
             value['dictitems'] = dictitems
-        return self.represent_mapping(tag+function_name, value)
+        return self.represent_mapping(tag + function_name, value)
 
-Representer.add_representer(str,
-        Representer.represent_str)
 
-Representer.add_representer(unicode,
-        Representer.represent_unicode)
+Representer.add_representer(str, Representer.represent_str)
 
-Representer.add_representer(long,
-        Representer.represent_long)
+Representer.add_representer(unicode, Representer.represent_unicode)
 
-Representer.add_representer(complex,
-        Representer.represent_complex)
+Representer.add_representer(long, Representer.represent_long)
 
-Representer.add_representer(tuple,
-        Representer.represent_tuple)
+Representer.add_representer(complex, Representer.represent_complex)
 
-Representer.add_representer(type,
-        Representer.represent_name)
+Representer.add_representer(tuple, Representer.represent_tuple)
 
-Representer.add_representer(types.ClassType,
-        Representer.represent_name)
+Representer.add_representer(type, Representer.represent_name)
 
-Representer.add_representer(types.FunctionType,
-        Representer.represent_name)
+Representer.add_representer(types.ClassType, Representer.represent_name)
 
-Representer.add_representer(types.BuiltinFunctionType,
-        Representer.represent_name)
+Representer.add_representer(types.FunctionType, Representer.represent_name)
 
-Representer.add_representer(types.ModuleType,
-        Representer.represent_module)
+Representer.add_representer(types.BuiltinFunctionType, Representer.represent_name)
 
-Representer.add_multi_representer(types.InstanceType,
-        Representer.represent_instance)
+Representer.add_representer(types.ModuleType, Representer.represent_module)
 
-Representer.add_multi_representer(object,
-        Representer.represent_object)
+Representer.add_multi_representer(types.InstanceType, Representer.represent_instance)
 
+Representer.add_multi_representer(object, Representer.represent_object)

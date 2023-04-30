@@ -8,6 +8,7 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
+
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
@@ -155,46 +156,48 @@ class Ui_MainWindow(object):
         icon.addPixmap(QtGui.QPixmap(":/res/res/icon.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         MainWindow.setWindowIcon(icon)
         MainWindow.setAutoFillBackground(False)
-        MainWindow.setStyleSheet("QMainWindow { background: #fff;}\n"
-"*, QLabel { font-family: Roboto; font-weight: 300; }\n"
-"\n"
-"QScrollBar {\n"
-"    background: #eee;\n"
-"}\n"
-"\n"
-"\n"
-"QScrollBar:vertical {\n"
-"                        width: 9px;\n"
-"    margin: 0;\n"
-"                      }\n"
-"\n"
-"                      QScrollBar::handle:vertical {\n"
-"                        min-height: 15px;\n"
-"                        background: #aaa;\n"
-"\n"
-"                      }\n"
-"\n"
-"\n"
-"                      QScrollBar::handle:vertical:hover {\n"
-"                        \n"
-"                        background: #999;\n"
-"\n"
-"                      }\n"
-"                      QScrollBar::add-line:vertical {\n"
-"                      }\n"
-"\n"
-"                      QScrollBar::sub-line:vertical {\n"
-"                      }\n"
-"\n"
-"\n"
-"                      QScrollBar::add-page:vertical {\n"
-"                        background: #ddd;\n"
-"\n"
-"                      }\n"
-"                      QScrollBar::sub-page:vertical {\n"
-"                        background: #ddd;\n"
-"                    }\n"
-"")
+        MainWindow.setStyleSheet(
+            "QMainWindow { background: #fff;}\n"
+            "*, QLabel { font-family: Roboto; font-weight: 300; }\n"
+            "\n"
+            "QScrollBar {\n"
+            "    background: #eee;\n"
+            "}\n"
+            "\n"
+            "\n"
+            "QScrollBar:vertical {\n"
+            "                        width: 9px;\n"
+            "    margin: 0;\n"
+            "                      }\n"
+            "\n"
+            "                      QScrollBar::handle:vertical {\n"
+            "                        min-height: 15px;\n"
+            "                        background: #aaa;\n"
+            "\n"
+            "                      }\n"
+            "\n"
+            "\n"
+            "                      QScrollBar::handle:vertical:hover {\n"
+            "                        \n"
+            "                        background: #999;\n"
+            "\n"
+            "                      }\n"
+            "                      QScrollBar::add-line:vertical {\n"
+            "                      }\n"
+            "\n"
+            "                      QScrollBar::sub-line:vertical {\n"
+            "                      }\n"
+            "\n"
+            "\n"
+            "                      QScrollBar::add-page:vertical {\n"
+            "                        background: #ddd;\n"
+            "\n"
+            "                      }\n"
+            "                      QScrollBar::sub-page:vertical {\n"
+            "                        background: #ddd;\n"
+            "                    }\n"
+            ""
+        )
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.frame_current_setting = QtWidgets.QFrame(self.centralwidget)
@@ -215,24 +218,25 @@ class Ui_MainWindow(object):
         self.lbl_current_setting.setObjectName("lbl_current_setting")
         self.btn_reset = QtWidgets.QPushButton(self.frame_current_setting)
         self.btn_reset.setGeometry(QtCore.QRect(500, 14, 101, 31))
-        self.btn_reset.setStyleSheet("QPushButton {\n"
-"color: #eee;\n"
-"background: #666;\n"
-"border: 0; \n"
-"}\n"
-"\n"
-"QPushButton:hover {\n"
-"    background: #555;\n"
-"}\n"
-"\n"
-"QPushButton:pressed {\n"
-"    background: #111;\n"
-"}")
+        self.btn_reset.setStyleSheet(
+            "QPushButton {\n"
+            "color: #eee;\n"
+            "background: #666;\n"
+            "border: 0; \n"
+            "}\n"
+            "\n"
+            "QPushButton:hover {\n"
+            "    background: #555;\n"
+            "}\n"
+            "\n"
+            "QPushButton:pressed {\n"
+            "    background: #111;\n"
+            "}"
+        )
         self.btn_reset.setObjectName("btn_reset")
         self.frame_3 = QtWidgets.QFrame(self.frame_current_setting)
         self.frame_3.setGeometry(QtCore.QRect(20, 94, 581, 441))
-        self.frame_3.setStyleSheet("QFrame {\n"
-"}")
+        self.frame_3.setStyleSheet("QFrame {\n" "}")
         self.frame_3.setFrameShape(QtWidgets.QFrame.StyledPanel)
         self.frame_3.setFrameShadow(QtWidgets.QFrame.Raised)
         self.frame_3.setObjectName("frame_3")
@@ -255,19 +259,21 @@ class Ui_MainWindow(object):
         self.lbl_setting_desc.setObjectName("lbl_setting_desc")
         self.btn_insert_point = QtWidgets.QPushButton(self.frame_current_setting)
         self.btn_insert_point.setGeometry(QtCore.QRect(368, 14, 131, 31))
-        self.btn_insert_point.setStyleSheet("QPushButton {\n"
-"color: #eee;\n"
-"background: #666;\n"
-"border: 0; \n"
-"}\n"
-"\n"
-"QPushButton:hover {\n"
-"    background: #555;\n"
-"}\n"
-"\n"
-"QPushButton:pressed {\n"
-"    background: #111;\n"
-"}")
+        self.btn_insert_point.setStyleSheet(
+            "QPushButton {\n"
+            "color: #eee;\n"
+            "background: #666;\n"
+            "border: 0; \n"
+            "}\n"
+            "\n"
+            "QPushButton:hover {\n"
+            "    background: #555;\n"
+            "}\n"
+            "\n"
+            "QPushButton:pressed {\n"
+            "    background: #111;\n"
+            "}"
+        )
         self.btn_insert_point.setObjectName("btn_insert_point")
         self.frame_2 = QtWidgets.QFrame(self.centralwidget)
         self.frame_2.setGeometry(QtCore.QRect(-1, 80, 351, 551))
@@ -277,38 +283,40 @@ class Ui_MainWindow(object):
         self.frame_2.setObjectName("frame_2")
         self.settings_tree = QtWidgets.QTreeWidget(self.frame_2)
         self.settings_tree.setGeometry(QtCore.QRect(14, 20, 311, 511))
-        self.settings_tree.setStyleSheet("QTreeWidget::item {\n"
-"padding: 7px 7px 6px;\n"
-"background: #ddd;\n"
-"outline: 0 !important;\n"
-"margin-bottom: 1px;\n"
-"margin-right: 0px;\n"
-"color: #777;\n"
-"border: 0;\n"
-"border-radius: 0;\n"
-"}\n"
-"\n"
-"QTreeWidget::item:hover {\n"
-"background: #ccc;\n"
-"}\n"
-"\n"
-"QTreeWidget::item:selected {\n"
-"background: #555;\n"
-"color: #eee;\n"
-"}\n"
-"\n"
-"QTreeWidget {\n"
-"padding: 0;\n"
-"color: #eee;\n"
-"background: transparent;\n"
-"\n"
-"}\n"
-"\n"
-"* {\n"
-"outline: 0;\n"
-"}\n"
-"\n"
-"")
+        self.settings_tree.setStyleSheet(
+            "QTreeWidget::item {\n"
+            "padding: 7px 7px 6px;\n"
+            "background: #ddd;\n"
+            "outline: 0 !important;\n"
+            "margin-bottom: 1px;\n"
+            "margin-right: 0px;\n"
+            "color: #777;\n"
+            "border: 0;\n"
+            "border-radius: 0;\n"
+            "}\n"
+            "\n"
+            "QTreeWidget::item:hover {\n"
+            "background: #ccc;\n"
+            "}\n"
+            "\n"
+            "QTreeWidget::item:selected {\n"
+            "background: #555;\n"
+            "color: #eee;\n"
+            "}\n"
+            "\n"
+            "QTreeWidget {\n"
+            "padding: 0;\n"
+            "color: #eee;\n"
+            "background: transparent;\n"
+            "\n"
+            "}\n"
+            "\n"
+            "* {\n"
+            "outline: 0;\n"
+            "}\n"
+            "\n"
+            ""
+        )
         self.settings_tree.setFrameShape(QtWidgets.QFrame.NoFrame)
         self.settings_tree.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
         self.settings_tree.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
@@ -331,7 +339,10 @@ class Ui_MainWindow(object):
         item_1 = QtWidgets.QTreeWidgetItem(item_0)
         item_1 = QtWidgets.QTreeWidgetItem(item_0)
         item_0 = QtWidgets.QTreeWidgetItem(self.settings_tree)
-        item_0.setFlags(QtCore.Qt.ItemIsSelectable|QtCore.Qt.ItemIsDragEnabled|QtCore.Qt.ItemIsUserCheckable|QtCore.Qt.ItemIsEnabled|QtCore.Qt.ItemIsTristate)
+        item_0.setFlags(
+            QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsUserCheckable
+            | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsTristate
+        )
         item_1 = QtWidgets.QTreeWidgetItem(item_0)
         self.settings_tree.header().setVisible(False)
         self.settings_tree.header().setCascadingSectionResizes(False)
@@ -339,10 +350,7 @@ class Ui_MainWindow(object):
         self.settings_tree.header().setStretchLastSection(False)
         self.frame_4 = QtWidgets.QFrame(self.centralwidget)
         self.frame_4.setGeometry(QtCore.QRect(420, 10, 551, 61))
-        self.frame_4.setStyleSheet("QFrame {\n"
-"    background: #fff;\n"
-"}\n"
-"")
+        self.frame_4.setStyleSheet("QFrame {\n" "    background: #fff;\n" "}\n" "")
         self.frame_4.setFrameShape(QtWidgets.QFrame.NoFrame)
         self.frame_4.setFrameShadow(QtWidgets.QFrame.Plain)
         self.frame_4.setObjectName("frame_4")
@@ -396,8 +404,7 @@ class Ui_MainWindow(object):
         self.label_8.setObjectName("label_8")
         self.label = QtWidgets.QLabel(self.centralwidget)
         self.label.setGeometry(QtCore.QRect(20, 35, 261, 31))
-        self.label.setStyleSheet("font-size: 20px; color: #2aa877;\n"
-"font-weight: 100;")
+        self.label.setStyleSheet("font-size: 20px; color: #2aa877;\n" "font-weight: 100;")
         self.label.setObjectName("label")
         self.time_float_label = QtWidgets.QLabel(self.centralwidget)
         self.time_float_label.setGeometry(QtCore.QRect(350, 47, 41, 18))
@@ -421,9 +428,7 @@ class Ui_MainWindow(object):
         self.time_label.setObjectName("time_label")
         self.label_9 = QtWidgets.QLabel(self.centralwidget)
         self.label_9.setGeometry(QtCore.QRect(20, 16, 261, 31))
-        self.label_9.setStyleSheet("font-size: 13px;\n"
-"color: #aaa;\n"
-"font-weight: 600;")
+        self.label_9.setStyleSheet("font-size: 13px;\n" "color: #aaa;\n" "font-weight: 600;")
         self.label_9.setObjectName("label_9")
         self.frame_2.raise_()
         self.frame_current_setting.raise_()
@@ -442,7 +447,12 @@ class Ui_MainWindow(object):
         MainWindow.setWindowTitle(_translate("MainWindow", "Day Time Editor"))
         self.lbl_current_setting.setText(_translate("MainWindow", "Occlusion Strength"))
         self.btn_reset.setText(_translate("MainWindow", "Reset curve"))
-        self.lbl_setting_desc.setText(_translate("MainWindow", "Description: Some Description about the setting, to give the user a rough idea what this does. This description may be so long, it can even go into the next line."))
+        self.lbl_setting_desc.setText(
+            _translate(
+                "MainWindow",
+                "Description: Some Description about the setting, to give the user a rough idea what this does. This description may be so long, it can even go into the next line."
+            )
+        )
         self.btn_insert_point.setText(_translate("MainWindow", "Insert point from data"))
         self.settings_tree.setSortingEnabled(False)
         self.settings_tree.headerItem().setText(0, _translate("MainWindow", "Setting"))
@@ -464,5 +474,6 @@ class Ui_MainWindow(object):
         self.time_float_label.setText(_translate("MainWindow", "0.486"))
         self.time_label.setText(_translate("MainWindow", "11:15"))
         self.label_9.setText(_translate("MainWindow", "RENDER PIPELINE"))
+
 
 from . import resources_rc

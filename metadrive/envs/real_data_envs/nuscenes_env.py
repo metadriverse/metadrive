@@ -28,7 +28,7 @@ if __name__ == "__main__":
             "window_size": (1600, 900),
             "camera_dist": -2.5,
             "camera_height": 0.5,
-            "camera_pitch": np.pi/3,
+            "camera_pitch": np.pi / 3,
             # "no_traffic":True,
             # "start_scenario_index": 192,
             # "start_scenario_index": 1000,

@@ -40,7 +40,6 @@ init_colorama()
 
 
 class RPObject(object):
-
     """ This is the base class for every object in the render pipeline. It
     provides the functions debug, warn, error and fatal for classes which
     inherit from this object, including the name of the class when printing out
@@ -64,9 +63,10 @@ class RPObject(object):
         all other arguments should be the message. """
         if RPObject._OUTPUT_LEVEL > 0:
             return
-        print(kwargs.get("color", Fore.GREEN) + "[>] " +
-              context.ljust(25) + " " + Style.RESET_ALL + Fore.WHITE +
-              ' '.join([str(i) for i in args]), Fore.RESET + Style.RESET_ALL)
+        print(
+            kwargs.get("color", Fore.GREEN) + "[>] " + context.ljust(25) + " " + Style.RESET_ALL + Fore.WHITE +
+            ' '.join([str(i) for i in args]), Fore.RESET + Style.RESET_ALL
+        )
 
     @staticmethod
     def global_warn(context, *args):
@@ -75,9 +75,10 @@ class RPObject(object):
         other arguments should be the message. """
         if RPObject._OUTPUT_LEVEL > 1:
             return
-        print(Fore.YELLOW + Style.BRIGHT + "[!] " + context.ljust(25) +
-              Fore.YELLOW + Style.BRIGHT + " " + ' '.join([str(i) for i in args]) +
-              Fore.RESET + Style.RESET_ALL)
+        print(
+            Fore.YELLOW + Style.BRIGHT + "[!] " + context.ljust(25) + Fore.YELLOW + Style.BRIGHT + " " +
+            ' '.join([str(i) for i in args]) + Fore.RESET + Style.RESET_ALL
+        )
 
     @staticmethod
     def global_error(context, *args):
@@ -86,9 +87,10 @@ class RPObject(object):
         other arguments should be the message. """
         if RPObject._OUTPUT_LEVEL > 2:
             return
-        print(Fore.RED + Style.BRIGHT + "\n[!!!] " +
-              context.ljust(23) + " " + ' '.join([str(i) for i in args]) +
-              "\n" + Fore.RESET + Style.RESET_ALL)
+        print(
+            Fore.RED + Style.BRIGHT + "\n[!!!] " + context.ljust(23) + " " + ' '.join([str(i) for i in args]) + "\n" +
+            Fore.RESET + Style.RESET_ALL
+        )
 
     def __init__(self, name=None):
         """ Initiates the RPObject with a given name. The name should be

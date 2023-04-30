@@ -1,4 +1,3 @@
-
 from __future__ import division, print_function
 
 from panda3d.core import PNMImage, Vec3
@@ -6,6 +5,7 @@ from panda3d.core import PNMImage, Vec3
 
 def approx(roughness):
     return 1.0 - 0.5 * roughness
+
 
 for i in range(11):
     r = i / 10.0

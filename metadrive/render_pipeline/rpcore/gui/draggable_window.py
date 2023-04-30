@@ -35,9 +35,7 @@ from metadrive.render_pipeline.rpcore.gui.text import Text
 
 
 class DraggableWindow(RPObject):
-
     """ This is a simple draggable but not resizeable window """
-
     def __init__(self, width=800, height=500, title="Window", parent=None):
         """ Constructs a new window with the given dimensions and title """
         RPObject.__init__(self, "Window-" + title)
@@ -55,8 +53,7 @@ class DraggableWindow(RPObject):
         self._context_scale = 1.0 / self._parent.get_sx()
         self._context_width = Globals.native_resolution.x * self._context_scale
         self._context_height = Globals.native_resolution.y * self._context_scale
-        self._set_pos(Vec2((self._context_width - self._width) / 2,
-                           (self._context_height - self._height) / 2))
+        self._set_pos(Vec2((self._context_width - self._width) / 2, (self._context_height - self._height) / 2))
 
     def set_title(self, title):
         """ Sets the window title """
@@ -86,29 +83,40 @@ class DraggableWindow(RPObject):
         self._node = self._parent.attach_new_node("Window")
         self._node.set_pos(self._pos.x, 1, -self._pos.y)
         border_px = 1
-        border_frame_size = (-border_px, self._width + border_px,
-                             border_px, -self._height - border_px)
+        border_frame_size = (-border_px, self._width + border_px, border_px, -self._height - border_px)
         self._border_frame = DirectFrame(
-            pos=(0, 1, 0), frameSize=border_frame_size,
+            pos=(0, 1, 0),
+            frameSize=border_frame_size,
             frameColor=(24 / 255.0, 131 / 255.0, 215 / 255.0, 1),
-            parent=self._node, state=DGG.NORMAL)
+            parent=self._node,
+            state=DGG.NORMAL
+        )
         self._background = DirectFrame(
-            pos=(0, 1, 0), frameSize=(0, self._width, 0, -self._height),
-            frameColor=(0.1, 0.1, 0.1, 1.0), parent=self._node)
+            pos=(0, 1, 0),
+            frameSize=(0, self._width, 0, -self._height),
+            frameColor=(0.1, 0.1, 0.1, 1.0),
+            parent=self._node
+        )
         self._title_bar = DirectFrame(
-            pos=(0, 1, 0), frameSize=(0, self._width, 0, -25),
+            pos=(0, 1, 0),
+            frameSize=(0, self._width, 0, -25),
             # frameColor=(0.058, 0.058, 0.058, 1),
             frameColor=(1, 1, 1, 1),
             parent=self._node,
-            state=DGG.NORMAL)
+            state=DGG.NORMAL
+        )
         self._window_title = Text(
-            parent=self._node, x=8, y=17, text=self._title, size=13,
-            color=Vec3(0.15), may_change=True)
+            parent=self._node, x=8, y=17, text=self._title, size=13, color=Vec3(0.15), may_change=True
+        )
         self._btn_close = DirectButton(
-            relief=DGG.FLAT, pressEffect=1, pos=(self._width - 22, 1, -12),
-            frameColor=(1.0, 0.2, 0.2, 0.5), parent=self._node,
+            relief=DGG.FLAT,
+            pressEffect=1,
+            pos=(self._width - 22, 1, -12),
+            frameColor=(1.0, 0.2, 0.2, 0.5),
+            parent=self._node,
             scale=(45 / 2, 1, 24 / 2),
-            image="/$$rp/data/gui/close_window.png")
+            image="/$$rp/data/gui/close_window.png"
+        )
 
         # Init bindings
         self._btn_close.set_transparency(TransparencyAttrib.M_alpha)
@@ -123,8 +131,7 @@ class DraggableWindow(RPObject):
         self._dragging = True
         self._node.detach_node()
         self._node.reparent_to(self._parent)
-        Globals.base.taskMgr.add(self._on_tick, "UIWindowDrag",
-                                 uponDeath=self._stop_drag)
+        Globals.base.taskMgr.add(self._on_tick, "UIWindowDrag", uponDeath=self._stop_drag)
         self._drag_offset = self._pos - self._get_mouse_pos()
 
     def _on_close_btn_hover(self, evt=None):  # pylint: disable=unused-argument
@@ -147,8 +154,7 @@ class DraggableWindow(RPObject):
     def _get_mouse_pos(self):
         """ Internal helper function to get the mouse position, scaled by
         the context scale """
-        mouse_x, mouse_y = (Globals.base.win.get_pointer(0).x,
-                            Globals.base.win.get_pointer(0).y)
+        mouse_x, mouse_y = (Globals.base.win.get_pointer(0).x, Globals.base.win.get_pointer(0).y)
         return Vec2(mouse_x, mouse_y) * self._context_scale
 
     def _set_pos(self, pos):

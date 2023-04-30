@@ -31,28 +31,32 @@ import sys
 from panda3d.core import *
 from direct.showbase.ShowBase import ShowBase
 
+
 def _error(msg):
     print("\n" * 4, file=sys.stderr)
     print("ERROR:", msg, file=sys.stderr)
     print("\n" * 4, file=sys.stderr)
     sys.exit(1)
 
+
 class Application(ShowBase):
     def __init__(self):
-        load_prc_file_data("", """
+        load_prc_file_data(
+            "", """
             window-type offscreen
             win-size 100 100
             color-bits 0
             depth-bits 0
             back-buffers 0
             print-pipe-types #f
-        """)
+        """
+        )
         ShowBase.__init__(self)
 
         if not self.win.gsg.supports_compute_shaders:
             _error("Compute shaders not supported! Please update your driver, or get a newer gpu.")
 
-
         print("All checks passed successfully")
+
 
 Application()

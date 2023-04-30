@@ -35,7 +35,6 @@ from metadrive.render_pipeline.rpcore.loader import RPLoader
 
 
 class Effect(RPObject):
-
     """ This class represents an instance of a compiled effect. It can be loaded
     from a file. """
 

@@ -22,15 +22,15 @@ class PointLane(AbstractLane, InterpolatingLine):
     POLYGON_SAMPLE_RATE = 1
 
     def __init__(
-            self,
-            center_line_points: Union[list, np.ndarray],
-            width: float,
-            polygon=None,
-            forbidden: bool = False,
-            speed_limit: float = 1000,
-            priority: int = 0,
-            need_lane_localization=True,
-            auto_generate_polygon=True
+        self,
+        center_line_points: Union[list, np.ndarray],
+        width: float,
+        polygon=None,
+        forbidden: bool = False,
+        speed_limit: float = 1000,
+        priority: int = 0,
+        need_lane_localization=True,
+        auto_generate_polygon=True
     ):
         center_line_points = np.array(center_line_points)[..., :2]
         AbstractLane.__init__(self)
@@ -173,9 +173,7 @@ class PointLane(AbstractLane, InterpolatingLine):
             direction_v = end - middle
             theta = math.atan2(direction_v[1], direction_v[0])
             length = self.length
-            self._construct_lane_only_vis_segment(
-                block, middle, self.VIS_LANE_WIDTH, length * 1.3 / segment_num, theta
-            )
+            self._construct_lane_only_vis_segment(block, middle, self.VIS_LANE_WIDTH, length * 1.3 / segment_num, theta)
 
         # build physics contact
         if self.need_lane_localization:

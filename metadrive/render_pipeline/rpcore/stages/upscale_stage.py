@@ -29,7 +29,6 @@ from metadrive.render_pipeline.rpcore.render_stage import RenderStage
 
 
 class UpscaleStage(RenderStage):
-
     """ This stage upscales the scene to native resolution, using a bicubic filter """
 
     required_inputs = []

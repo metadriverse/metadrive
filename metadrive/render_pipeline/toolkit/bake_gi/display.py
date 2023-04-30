@@ -18,8 +18,8 @@ from direct.showbase.ShowBase import ShowBase
 from rpcore.globals import Globals
 from rpcore.render_target import RenderTarget
 
-class Application(ShowBase):
 
+class Application(ShowBase):
     def __init__(self):
 
         load_prc_file_data("", """
@@ -36,12 +36,10 @@ class Application(ShowBase):
         model_center = (BAKE_MESH_START + BAKE_MESH_END) * 0.5
         sun_shadow_map_resolution = 8192
 
-
         # model = loader.load_model("resources/test-scene.bam")
         model = loader.load_model("scene/scene.bam")
         model.reparent_to(render)
         model.flatten_strong()
-
 
         print("Rendering sun shadow map ..")
         sun_shadow_cam = Camera("SunShadowCamera")
@@ -67,13 +65,10 @@ class Application(ShowBase):
         render.set_shader_input("GIDataTexture", dataset)
 
         # Load the display shader
-        shader = Shader.load(Shader.SL_GLSL, "resources/display.vert.glsl",  "resources/display.frag.glsl")
+        shader = Shader.load(Shader.SL_GLSL, "resources/display.vert.glsl", "resources/display.frag.glsl")
         render.set_shader(shader)
 
-        render.set_shader_inputs(
-            ShadowMap=sun_shadow_target.depth_tex,
-            shadowMVP=shadow_mvp,
-            sunVector=sun_vector)
+        render.set_shader_inputs(ShadowMap=sun_shadow_target.depth_tex, shadowMVP=shadow_mvp, sunVector=sun_vector)
 
         # Render spheres distributed over the mesh
         mesh_size = BAKE_MESH_END - BAKE_MESH_START
@@ -90,11 +85,9 @@ class Application(ShowBase):
                     sphere.set_scale(0.02)
                     sphere.set_pos(offs_x, offs_y, offs_z)
 
-
     def get_mvp(self, cam_node):
         """ Computes the view-projection matrix of a camera """
         return render.get_transform(cam_node).get_mat() * cam_node.node().get_lens().get_projection_mat()
 
 
 Application().run()
-

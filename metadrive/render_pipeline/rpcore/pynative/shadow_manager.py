@@ -34,10 +34,8 @@ from metadrive.render_pipeline.rpcore.pynative.shadow_atlas import ShadowAtlas
 
 
 class ShadowManager(object):
-
     """ Please refer to the native C++ implementation for docstrings and comments.
     This is just the python implementation, which does not contain documentation! """
-
     def __init__(self):
         self._max_updates = 10
         self._atlas = None

@@ -54,7 +54,6 @@ ALLOW_OUTDATED_MATERIALS = False
 
 
 class MaterialData:
-
     def __init__(self):
         self.name = ""
         self.shading_model = 0
@@ -70,7 +69,6 @@ class MaterialData:
 
 
 class MaterialEditor(QMainWindow, Ui_MainWindow):
-
     """ Interface to change the plugin settings """
 
     SHADING_MODELS = [
@@ -127,15 +125,14 @@ class MaterialEditor(QMainWindow, Ui_MainWindow):
         self.lbl_basecolor2.setText(labels[1])
         self.lbl_basecolor3.setText(labels[2])
 
-        a, b, c = (self.basecolor_1.value() / 100.0,
-                   self.basecolor_2.value() / 100.0,
-                   self.basecolor_3.value() / 100.0)
+        a, b, c = (self.basecolor_1.value() / 100.0, self.basecolor_2.value() / 100.0, self.basecolor_3.value() / 100.0)
         rgb = self.tuple_to_basecolor(a, b, c)
         self.lbl_basecolor_val1.setText("{:0.2f}".format(a))
         self.lbl_basecolor_val2.setText("{:0.2f}".format(b))
         self.lbl_basecolor_val3.setText("{:0.2f}".format(c))
-        self.lbl_color_preview.setStyleSheet("background: rgb({}, {}, {});".format(
-            int(rgb[0] * 255), int(rgb[1] * 255), int(rgb[2] * 255)))
+        self.lbl_color_preview.setStyleSheet(
+            "background: rgb({}, {}, {});".format(int(rgb[0] * 255), int(rgb[1] * 255), int(rgb[2] * 255))
+        )
 
         # Shading model
         self._update_shading_model()
@@ -191,9 +188,7 @@ class MaterialEditor(QMainWindow, Ui_MainWindow):
 
     def _get_ui_basecolor_rgb(self):
         """ Extracts the RGB color which is currently edited in the UI """
-        a, b, c = (self.basecolor_1.value() / 100.0,
-                   self.basecolor_2.value() / 100.0,
-                   self.basecolor_3.value() / 100.0)
+        a, b, c = (self.basecolor_1.value() / 100.0, self.basecolor_2.value() / 100.0, self.basecolor_3.value() / 100.0)
         return self.tuple_to_basecolor(a, b, c)
 
     def update_material_list(self):
@@ -210,7 +205,9 @@ class MaterialEditor(QMainWindow, Ui_MainWindow):
             time.sleep(0.5)
         if not os.path.isfile(temp_path):
             QMessageBox.critical(
-                self, "Error", "Render Pipeline not responding! Make sure a render pipeline application is running, and try again later.")
+                self, "Error",
+                "Render Pipeline not responding! Make sure a render pipeline application is running, and try again later."
+            )
             sys.exit(-1)
         if not ALLOW_OUTDATED_MATERIALS:
             time.sleep(0.5)
@@ -242,7 +239,9 @@ class MaterialEditor(QMainWindow, Ui_MainWindow):
         return material
 
     def basecolor_to_tuple(self, mat):
-        def to_srgb(v): return math.pow(v, 1.0 / 2.2)
+        def to_srgb(v):
+            return math.pow(v, 1.0 / 2.2)
+
         if self.cb_rgb.isChecked():
             return mat.basecolor_r, mat.basecolor_g, mat.basecolor_b
         elif self.cb_srgb.isChecked():
@@ -253,7 +252,9 @@ class MaterialEditor(QMainWindow, Ui_MainWindow):
             assert False
 
     def tuple_to_basecolor(self, a, b, c):
-        def from_srgb(v): return math.pow(v, 2.2)
+        def from_srgb(v):
+            return math.pow(v, 2.2)
+
         if self.cb_rgb.isChecked():
             return a, b, c
         elif self.cb_srgb.isChecked():
@@ -320,6 +321,7 @@ class MaterialEditor(QMainWindow, Ui_MainWindow):
         self.cb_shading_model.clear()
         for name, val, optional_param in self.SHADING_MODELS:
             self.cb_shading_model.addItem(name)
+
 
 # Start application
 app = QApplication(sys.argv)

@@ -32,7 +32,6 @@ from metadrive.render_pipeline.rpcore.render_target import RenderTarget
 
 
 class ImageFormatTypes(object):  # pylint: disable=too-few-public-methods
-
     """ This is a small helper class to prevent pylint errors about the Image
     class not defining the enums. This class just copies the enum properties
     from panda3d's builtin Texture class. """
@@ -55,7 +54,6 @@ class ImageFormatTypes(object):  # pylint: disable=too-few-public-methods
 
 
 class Image(RPObject, Texture, ImageFormatTypes):
-
     """ This is a wrapper arround the Texture class from Panda3D, which keeps
     track of all images and registers / unregisters them aswell as counting
     the memory used. This is used by all classes instead of pandas builtin

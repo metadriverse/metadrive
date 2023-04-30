@@ -24,7 +24,6 @@ THE SOFTWARE.
 
 """
 
-
 from __future__ import print_function
 
 import time
@@ -39,9 +38,9 @@ def rgb_from_string(text, min_brightness=0.6):
     ohash = hashlib.md5(text[::-1].encode("ascii")).hexdigest()
     r, g, b = int(ohash[0:2], 16), int(ohash[2:4], 16), int(ohash[4:6], 16)
     neg_inf = 1.0 - min_brightness
-    return (min_brightness + r / 255.0 * neg_inf,
-            min_brightness + g / 255.0 * neg_inf,
-            min_brightness + b / 255.0 * neg_inf)
+    return (
+        min_brightness + r / 255.0 * neg_inf, min_brightness + g / 255.0 * neg_inf, min_brightness + b / 255.0 * neg_inf
+    )
 
 
 def profile(func):
@@ -85,7 +84,6 @@ class profile_cpu(object):  # noqa # pylint: disable=invalid-name,too-few-public
 
     Duration of the process will be print out on the console later on.
     """
-
     def __init__(self, name):
         self.name = name
 
@@ -108,8 +106,9 @@ def snap_shadow_map(mvp, cam_node, resolution):
     offset_x = base_point.x % texel_size
     offset_y = base_point.y % texel_size
     mvp.invert_in_place()
-    new_base = mvp.xform(Point4(
-        (base_point.x - offset_x) * 2.0 - 1.0,
-        (base_point.y - offset_y) * 2.0 - 1.0,
-        (base_point.z) * 2.0 - 1.0, 1))
+    new_base = mvp.xform(
+        Point4(
+            (base_point.x - offset_x) * 2.0 - 1.0, (base_point.y - offset_y) * 2.0 - 1.0, (base_point.z) * 2.0 - 1.0, 1
+        )
+    )
     cam_node.set_pos(cam_node.get_pos() - Vec3(new_base.x, new_base.y, new_base.z))

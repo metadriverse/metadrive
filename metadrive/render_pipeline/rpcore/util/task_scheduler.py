@@ -29,12 +29,10 @@ from metadrive.render_pipeline.rpcore.rpobject import RPObject
 
 
 class TaskScheduler(RPObject):
-
     """ This class manages the scheduled tasks and splits them over multiple
     frames. Plugins can query whether their subtasks should be executed
     or queued for later frames. Also performs analysis on the task configuration
     to figure if tasks are distributed uniformly. """
-
     def __init__(self, pipeline):
         RPObject.__init__(self)
         self._pipeline = pipeline

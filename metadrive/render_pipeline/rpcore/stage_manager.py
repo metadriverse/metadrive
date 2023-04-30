@@ -37,10 +37,8 @@ from metadrive.render_pipeline.rpcore.stages.update_previous_pipes_stage import 
 
 
 class StageManager(RPObject):
-
     """ This manager takes a list of RenderStages and puts them into an order,
     while connecting the different pipes, inputs, ubos and defines. """
-
     def __init__(self, pipeline):
         """ Constructs the stage manager """
         RPObject.__init__(self)
@@ -71,8 +69,7 @@ class StageManager(RPObject):
     def add_stage(self, stage):
         """ Adds a new stage """
         if stage.stage_id not in self._stage_order:
-            self.error("The stage type", stage.debug_name,
-                       "is not registered yet! Please add it to the StageManager!")
+            self.error("The stage type", stage.debug_name, "is not registered yet! Please add it to the StageManager!")
             return
 
         if self.created:
@@ -200,8 +197,10 @@ class StageManager(RPObject):
             for prev_pipe, prev_tex in iteritems(self.previous_pipes):
 
                 if prev_pipe not in self.pipes:
-                    self.error("Attempted to use previous frame data from pipe",
-                               prev_pipe, "- however, that pipe was never created!")
+                    self.error(
+                        "Attempted to use previous frame data from pipe", prev_pipe,
+                        "- however, that pipe was never created!"
+                    )
                     return False
 
                 # Tell the stage to transfer the data from the current pipe to

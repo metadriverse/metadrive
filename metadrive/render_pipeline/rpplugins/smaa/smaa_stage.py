@@ -31,7 +31,6 @@ from metadrive.render_pipeline.rpcore.render_stage import RenderStage
 
 
 class SMAAStage(RenderStage):
-
     """ This stage does the actual SMAA """
 
     required_inputs = []
@@ -57,10 +56,7 @@ class SMAAStage(RenderStage):
     @property
     def produced_pipes(self):
         if self.use_reprojection:
-            return {
-                "ShadedScene": self.resolve_target.color_tex,
-                "SMAAPostResolve": self.resolve_target.color_tex
-            }
+            return {"ShadedScene": self.resolve_target.color_tex, "SMAAPostResolve": self.resolve_target.color_tex}
         else:
             return {"ShadedScene": self.neighbor_target.color_tex}
 
@@ -80,7 +76,8 @@ class SMAAStage(RenderStage):
             EdgeTex=self.edge_target.color_tex,
             AreaTex=self.area_tex,
             SearchTex=self.search_tex,
-            jitterIndex=self._jitter_index)
+            jitterIndex=self._jitter_index
+        )
 
         # Neighbor blending
         self.neighbor_target = self.create_target("NeighborBlending")
@@ -96,7 +93,8 @@ class SMAAStage(RenderStage):
             self.resolve_target.set_shader_inputs(
                 jitterIndex=self._jitter_index,
                 # Set initial textures
-                CurrentTex=self.neighbor_target.color_tex)
+                CurrentTex=self.neighbor_target.color_tex
+            )
 
     def reload_shaders(self):
         self.edge_target.shader = self.load_plugin_shader("edge_detection.frag.glsl")

@@ -39,11 +39,9 @@ from metadrive.render_pipeline.rpcore.pluginbase.day_setting_types import make_d
 
 
 class PluginManager(RPObject):
-
     """ This class manages all plugins. It provides functionality to load plugin
     settings, trigger callbacks on plugins, initialize the plugin instances
     and much more. """
-
     def __init__(self, pipeline):
         """ Constructs a new manager with no plugins loaded. To load settings
         and plugins, call load(). """
@@ -120,13 +118,13 @@ class PluginManager(RPObject):
         if config["settings"] and len(config["settings"][0]) != 2:
             self.fatal("Invalid plugin configuration, did you miss '!!omap'?")
 
-        settings = collections.OrderedDict(
-            [(k, make_setting_from_data(v)) for k, v in config["settings"]])
+        settings = collections.OrderedDict([(k, make_setting_from_data(v)) for k, v in config["settings"]])
         self.settings[plugin_id] = settings
 
         if self.requires_daytime_settings:
             daysettings = collections.OrderedDict(
-                [(k, make_daysetting_from_data(v)) for k, v in config["daytime_settings"]])
+                [(k, make_daysetting_from_data(v)) for k, v in config["daytime_settings"]]
+            )
             self.day_settings[plugin_id] = daysettings
 
     def load_setting_overrides(self, override_path):
@@ -202,8 +200,7 @@ class PluginManager(RPObject):
         for required_plugin in instance.required_plugins:
             if required_plugin not in self.enabled_plugins:
                 if plugin_id in self.enabled_plugins:
-                    self.warn("Cannot load {} since it requires {}".format(
-                        plugin_id, required_plugin))
+                    self.warn("Cannot load {} since it requires {}".format(plugin_id, required_plugin))
                     return False
                 break
         return instance
@@ -217,9 +214,9 @@ class PluginManager(RPObject):
 
         def sort_criteria(pid):
             return ("A" if self.is_plugin_enabled(pid) else "B") + pid
+
         for plugin_id in sorted(self.settings, key=sort_criteria):
-            output += "   {}- {}\n".format(
-                " # " if plugin_id not in self.enabled_plugins else " ", plugin_id)
+            output += "   {}- {}\n".format(" # " if plugin_id not in self.enabled_plugins else " ", plugin_id)
         output += "\n\noverrides:\n"
         for plugin_id, pluginsettings in sorted(iteritems(self.settings)):
             output += " " * 4 + plugin_id + ":\n"

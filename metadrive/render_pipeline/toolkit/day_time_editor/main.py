@@ -26,7 +26,6 @@ THE SOFTWARE.
 
 # This tool offers an interface to configure the time of day settings
 
-
 from __future__ import print_function, division
 
 import os
@@ -41,7 +40,7 @@ os.chdir(os.path.join(os.path.dirname(os.path.realpath(__file__))))
 sys.path.insert(0, "../../")
 
 from rplibs.six import iteritems  # noqa
-from rplibs.pyqt_imports import * # noqa
+from rplibs.pyqt_imports import *  # noqa
 
 from curve_widget import CurveWidget  # noqa
 
@@ -52,8 +51,8 @@ from rpcore.util.network_communication import NetworkCommunication  # noqa
 from ui.main_window_generated import Ui_MainWindow  # noqa
 from ui.point_insert_dialog_generated import Ui_Dialog as Ui_PointDialog  # noqa
 
-class PointDialog(QDialog, Ui_PointDialog):
 
+class PointDialog(QDialog, Ui_PointDialog):
     def __init__(self, parent):
         QDialog.__init__(self, parent)
         self.setupUi(self)
@@ -66,9 +65,7 @@ class PointDialog(QDialog, Ui_PointDialog):
 
 
 class DayTimeEditor(QMainWindow, Ui_MainWindow):
-
     """ This is the main editor class which handles the user interface """
-
     def __init__(self):
 
         # Init mounts
@@ -113,12 +110,12 @@ class DayTimeEditor(QMainWindow, Ui_MainWindow):
                 cmd = self._cmd_queue.pop()
                 if cmd == "settime":
                     NetworkCommunication.send_async(
-                        NetworkCommunication.DAYTIME_PORT, "settime " + str(self._current_time))
+                        NetworkCommunication.DAYTIME_PORT, "settime " + str(self._current_time)
+                    )
                     continue
                 elif cmd == "write_settings":
                     self._plugin_mgr.save_daytime_overrides("/$$rpconfig/daytime.yaml")
-                    NetworkCommunication.send_async(
-                        NetworkCommunication.DAYTIME_PORT, "loadconf")
+                    NetworkCommunication.send_async(NetworkCommunication.DAYTIME_PORT, "loadconf")
                 else:
                     print("Unkown cmd:", cmd)
 
@@ -150,8 +147,7 @@ class DayTimeEditor(QMainWindow, Ui_MainWindow):
         msg = "Are you sure you want to reset the control points of '" +\
               self._selected_setting_handle.label + "'?\n"
         msg += "!! This cannot be undone !! They will be lost forever (a long time!)."
-        reply = QMessageBox.question(
-            self, "Warning", msg, QMessageBox.Yes, QMessageBox.No)
+        reply = QMessageBox.question(self, "Warning", msg, QMessageBox.Yes, QMessageBox.No)
         if reply == QMessageBox.Yes:
 
             QMessageBox.information(self, "Success", "Control points have been reset!")
@@ -167,10 +163,8 @@ class DayTimeEditor(QMainWindow, Ui_MainWindow):
             time, val = dialog.get_value()
             minutes = (time.hour() * 60 + time.minute()) / (24 * 60)
 
-            if (val < self._selected_setting_handle.minvalue or
-               val > self._selected_setting_handle.maxvalue):
-                QMessageBox.information(
-                    self, "Invalid Value", "Value is out of setting range!", QMessageBox.Ok)
+            if (val < self._selected_setting_handle.minvalue or val > self._selected_setting_handle.maxvalue):
+                QMessageBox.information(self, "Invalid Value", "Value is out of setting range!", QMessageBox.Ok)
                 return
 
             val_linear = self._selected_setting_handle.get_linear_value(val)
@@ -218,8 +212,8 @@ class DayTimeEditor(QMainWindow, Ui_MainWindow):
                 self.btn_insert_point.hide()
             else:
                 self.edit_widget.set_unit_processor(
-                    lambda x: self._selected_setting_handle.format(
-                        self._selected_setting_handle.get_scaled_value(x)))
+                    lambda x: self._selected_setting_handle.format(self._selected_setting_handle.get_scaled_value(x))
+                )
                 self.btn_insert_point.show()
 
             self.set_settings_visible(True)
@@ -284,6 +278,7 @@ class DayTimeEditor(QMainWindow, Ui_MainWindow):
         self.settings_tree.expandAll()
         if first_item:
             self.settings_tree.setCurrentItem(first_item)
+
 
 # Start application
 app = QApplication(sys.argv)

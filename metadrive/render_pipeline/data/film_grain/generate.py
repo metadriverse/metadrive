@@ -39,9 +39,11 @@ from panda3d.core import PNMImage
 
 from direct.showbase.ShowBase import ShowBase
 
+
 class Application(ShowBase):
     def __init__(self):
-        load_prc_file_data("", """
+        load_prc_file_data(
+            "", """
             textures-power-2 none
             window-type offscreen
             win-size 100 100
@@ -49,7 +51,8 @@ class Application(ShowBase):
             notify-level-display error
             print-pipe-types #f
             gl-version 4 3
-        """)
+        """
+        )
 
         ShowBase.__init__(self)
 
@@ -60,8 +63,7 @@ class Application(ShowBase):
         node.set_shader(cshader)
         node.set_shader_input("DestTex", dest_tex)
         attr = node.get_attrib(ShaderAttrib)
-        self.graphicsEngine.dispatch_compute(
-            (2048 // 16, 2048 // 16, 1), attr, self.win.gsg)
+        self.graphicsEngine.dispatch_compute((2048 // 16, 2048 // 16, 1), attr, self.win.gsg)
 
         base.graphicsEngine.extract_texture_data(dest_tex, base.win.gsg)
 
@@ -73,5 +75,6 @@ class Application(ShowBase):
         tex = Texture()
         tex.load(img)
         tex.write("grain.txo.pz")
+
 
 Application()

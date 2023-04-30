@@ -32,7 +32,6 @@ from metadrive.render_pipeline.rpcore.rpobject import RPObject
 
 class EnvironmentProbe(RPObject):
     """ Simple class, representing an environment probe """
-
     def __init__(self):
         """ Inits a new environment probe """
         RPObject.__init__(self)
@@ -117,9 +116,7 @@ class EnvironmentProbe(RPObject):
         for i in range(4):
             for j in range(3):
                 data.append(mat.get_cell(i, j))
-        data += (float(self.index),
-                 1.0 if self._parallax_correction else 0.0,
-                 self._border_smoothness, 0)
+        data += (float(self.index), 1.0 if self._parallax_correction else 0.0, self._border_smoothness, 0)
         data.append(self._bounds.get_center().x)
         data.append(self._bounds.get_center().y)
         data.append(self._bounds.get_center().z)

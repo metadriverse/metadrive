@@ -32,9 +32,7 @@ from panda3d.core import TransparencyAttrib, OrthographicLens, Vec4
 
 
 class PostProcessRegion(RPObject):
-
     """ Simple wrapper class to create fullscreen triangles and quads """
-
     @classmethod
     def make(cls, internal_buffer, *args):
         return cls(internal_buffer, *args)

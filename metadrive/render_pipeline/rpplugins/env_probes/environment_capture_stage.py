@@ -36,7 +36,6 @@ from metadrive.render_pipeline.rpcore.render_stage import RenderStage
 
 
 class EnvironmentCaptureStage(RenderStage):
-
     """ This stage renders the scene to a cubemap """
 
     required_inputs = ["DefaultEnvmap", "AllLightsData", "maxLightIndex", "IESDatasetTex"]
@@ -72,13 +71,11 @@ class EnvironmentCaptureStage(RenderStage):
 
     def _setup_camera_rig(self):
         """ Setups the cameras to render a cubemap """
-        directions = (Vec3(1, 0, 0), Vec3(-1, 0, 0), Vec3(0, 1, 0),
-                      Vec3(0, -1, 0), Vec3(0, 0, 1), Vec3(0, 0, -1))
+        directions = (Vec3(1, 0, 0), Vec3(-1, 0, 0), Vec3(0, 1, 0), Vec3(0, -1, 0), Vec3(0, 0, 1), Vec3(0, 0, -1))
 
         # Prepare the display regions
         for i in range(6):
-            region = self.target.internal_buffer.make_display_region(
-                i / 6, i / 6 + 1 / 6, 0, 1)
+            region = self.target.internal_buffer.make_display_region(i / 6, i / 6 + 1 / 6, 0, 1)
             region.set_sort(25 + i)
             region.set_active(True)
             region.disable_clears()
@@ -114,18 +111,16 @@ class EnvironmentCaptureStage(RenderStage):
         self.target_store.size = self.resolution * 6, self.resolution
         self.target_store.prepare_buffer()
         self.target_store.set_shader_inputs(
-            SourceTex=self.target.color_tex,
-            DestTex=self.storage_tex,
-            currentIndex=self.pta_index)
+            SourceTex=self.target.color_tex, DestTex=self.storage_tex, currentIndex=self.pta_index
+        )
 
         self.temporary_diffuse_map = Image.create_cube("DiffuseTemp", self.resolution, "RGBA16")
         self.target_store_diff = self.create_target("StoreCubemapDiffuse")
         self.target_store_diff.size = self.resolution * 6, self.resolution
         self.target_store_diff.prepare_buffer()
         self.target_store_diff.set_shader_inputs(
-            SourceTex=self.target.color_tex,
-            DestTex=self.temporary_diffuse_map,
-            currentIndex=self.pta_index)
+            SourceTex=self.target.color_tex, DestTex=self.temporary_diffuse_map, currentIndex=self.pta_index
+        )
 
     def _create_filter_targets(self):
         """ Generates the targets which filter the specular cubemap """
@@ -138,10 +133,7 @@ class EnvironmentCaptureStage(RenderStage):
             target = self.create_target("FilterCubemap:{0}-{1}x{1}".format(mip, size))
             target.size = size * 6, size
             target.prepare_buffer()
-            target.set_shader_inputs(
-                currentIndex=self.pta_index,
-                currentMip=mip,
-                SourceTex=self.storage_tex)
+            target.set_shader_inputs(currentIndex=self.pta_index, currentMip=mip, SourceTex=self.storage_tex)
             target.set_shader_input("DestTex", self.storage_tex, False, True, -1, mip, 0)
             self.filter_targets.append(target)
 
@@ -150,9 +142,8 @@ class EnvironmentCaptureStage(RenderStage):
         self.filter_diffuse_target.size = self.diffuse_resolution * 6, self.diffuse_resolution
         self.filter_diffuse_target.prepare_buffer()
         self.filter_diffuse_target.set_shader_inputs(
-            SourceTex=self.temporary_diffuse_map,
-            DestTex=self.storage_tex_diffuse,
-            currentIndex=self.pta_index)
+            SourceTex=self.temporary_diffuse_map, DestTex=self.storage_tex_diffuse, currentIndex=self.pta_index
+        )
 
     def set_probe(self, probe):
         self.rig_node.set_mat(probe.matrix)
@@ -183,11 +174,8 @@ class EnvironmentCaptureStage(RenderStage):
         Globals.render.set_shader_inputs(**kwargs)
 
     def reload_shaders(self):
-        self.target_store.shader = self.load_plugin_shader(
-            "store_cubemap.frag.glsl")
-        self.target_store_diff.shader = self.load_plugin_shader(
-            "store_cubemap_diffuse.frag.glsl")
-        self.filter_diffuse_target.shader = self.load_plugin_shader(
-            "filter_cubemap_diffuse.frag.glsl")
+        self.target_store.shader = self.load_plugin_shader("store_cubemap.frag.glsl")
+        self.target_store_diff.shader = self.load_plugin_shader("store_cubemap_diffuse.frag.glsl")
+        self.filter_diffuse_target.shader = self.load_plugin_shader("filter_cubemap_diffuse.frag.glsl")
         for i, target in enumerate(self.filter_targets):
             target.shader = self.load_plugin_shader("mips/{}.autogen.glsl".format(i))

@@ -32,11 +32,9 @@ from metadrive.render_pipeline.rpcore.rpobject import RPObject
 
 
 class SimpleInputBlock(RPObject):
-
     """ Simplest possible uniform buffer which just stores a set of values.
     This does not use any fancy uniform buffer objects under the hood, and
     instead just sets every value as a shader input. """
-
     def __init__(self, name):
         """ Creates the ubo with the given name """
         RPObject.__init__(self)
@@ -53,7 +51,6 @@ class SimpleInputBlock(RPObject):
 
 
 class GroupedInputBlock(RPObject):
-
     """ Grouped uniform buffer which either uses PointerToArray's to efficiently
     store and update the shader inputs, or in case of uniform buffer object (UBO)
     support, uses these to pass the inputs to the shaders. """
@@ -150,14 +147,11 @@ class GroupedInputBlock(RPObject):
                 actual_input_name = parts[1]
                 if struct_name in structs:
                     # Struct is already defined, add member definition
-                    structs[struct_name].append(
-                        self.pta_to_glsl_type(handle) + " " + actual_input_name + ";")
+                    structs[struct_name].append(self.pta_to_glsl_type(handle) + " " + actual_input_name + ";")
                 else:
                     # Construct a new struct and add it to the list of inputs
                     inputs.append(struct_name + "_UBOSTRUCT " + struct_name + ";")
-                    structs[struct_name] = [
-                        self.pta_to_glsl_type(handle) + " " + actual_input_name + ";"
-                    ]
+                    structs[struct_name] = [self.pta_to_glsl_type(handle) + " " + actual_input_name + ";"]
 
             # Nested input, like scattering.some_setting.sun_color, not supported yet
             else:
@@ -176,8 +170,7 @@ class GroupedInputBlock(RPObject):
         else:
             if self.use_ubo:
 
-                content += "layout(shared, binding={}) uniform {}_UBO {{\n".format(
-                    self.bind_id, self.name)
+                content += "layout(shared, binding={}) uniform {}_UBO {{\n".format(self.bind_id, self.name)
                 for ipt in inputs:
                     content += " " * 4 + ipt + "\n"
                 content += "} " + self.name + ";\n"

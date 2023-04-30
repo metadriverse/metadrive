@@ -38,8 +38,7 @@ class Plugin(BasePlugin):
 
     name = "SMAA (Antialiasing)"
     author = "tobspr <tobias.springer1@gmail.com>"
-    description = ("This plugin adds support for SMAA, a post process "
-                   "antialiasing technique.")
+    description = ("This plugin adds support for SMAA, a post process " "antialiasing technique.")
     version = "1.5"
 
     def on_stage_setup(self):

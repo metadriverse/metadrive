@@ -28,12 +28,13 @@ from metadrive.render_pipeline.rpcore.render_stage import RenderStage
 
 
 class ApplyLightsStage(RenderStage):
-
     """ This stage applies the lights to the scene using the gbuffer """
 
     required_inputs = ["AllLightsData", "IESDatasetTex", "ShadowSourceData"]
-    required_pipes = ["GBuffer", "CellIndices", "PerCellLights", "ShadowAtlas",
-                      "ShadowAtlasPCF", "CombinedVelocity", "PerCellLightsCounts"]
+    required_pipes = [
+        "GBuffer", "CellIndices", "PerCellLights", "ShadowAtlas", "ShadowAtlasPCF", "CombinedVelocity",
+        "PerCellLightsCounts"
+    ]
 
     @property
     def produced_pipes(self):

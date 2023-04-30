@@ -28,17 +28,14 @@ from metadrive.render_pipeline.rpcore.render_stage import RenderStage
 
 
 class AmbientStage(RenderStage):
-
     """ This stage computes the ambient term """
 
-    required_inputs = ["DefaultEnvmap", "PrefilteredBRDF", "PrefilteredMetalBRDF",
-                       "PrefilteredCoatBRDF"]
+    required_inputs = ["DefaultEnvmap", "PrefilteredBRDF", "PrefilteredMetalBRDF", "PrefilteredCoatBRDF"]
     required_pipes = ["ShadedScene", "GBuffer"]
 
     @property
     def produced_pipes(self):
-        return {"ShadedScene": self._target.color_tex,
-                "PostAmbientScene": self._target.color_tex}
+        return {"ShadedScene": self._target.color_tex, "PostAmbientScene": self._target.color_tex}
 
     def create(self):
         self._target = self.create_target("AmbientStage")

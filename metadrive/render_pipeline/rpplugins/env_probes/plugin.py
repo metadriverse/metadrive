@@ -41,9 +41,11 @@ class Plugin(BasePlugin):
 
     name = "Environment Probes"
     author = "tobspr <tobias.springer1@gmail.com>"
-    description = ("This plugin adds support for environment probes, containing "
-                   "diffuse and specular information. This enables accurate "
-                   "reflections, and can also be used to simulate GI.")
+    description = (
+        "This plugin adds support for environment probes, containing "
+        "diffuse and specular information. This enables accurate "
+        "reflections, and can also be used to simulate GI."
+    )
     version = "beta (!)"
 
     def on_stage_setup(self):

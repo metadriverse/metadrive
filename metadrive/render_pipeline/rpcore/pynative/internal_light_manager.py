@@ -36,10 +36,8 @@ MAX_SHADOW_SOURCES = 2048
 
 
 class InternalLightManager(object):
-
     """ Please refer to the native C++ implementation for docstrings and comments.
     This is just the python implementation, which does not contain documentation! """
-
     def __init__(self):
         self._lights = PointerSlotStorage(MAX_LIGHT_COUNT)
         self._shadow_sources = PointerSlotStorage(MAX_SHADOW_SOURCES)
@@ -135,8 +133,7 @@ class InternalLightManager(object):
                     self._shadow_manager.get_atlas().free_region(source.get_region())
                     source.clear_region()
 
-            self.gpu_remove_consecutive_sources(
-                light.get_shadow_source(0), light.get_num_shadow_sources())
+            self.gpu_remove_consecutive_sources(light.get_shadow_source(0), light.get_num_shadow_sources())
 
             light.clear_shadow_sources()
 
@@ -176,7 +173,7 @@ class InternalLightManager(object):
 
         for source in self._shadow_sources.begin():
             # if source and source.get_needs_update():
-                # sources_to_update.append(source)
+            # sources_to_update.append(source)
             if source:
                 bounds = source.get_bounds()
                 distance_to_camera = (self._camera_pos - bounds.get_center()) - bounds.get_radius()
@@ -194,9 +191,7 @@ class InternalLightManager(object):
         sorted_sources = list(sorted(sources_to_update, key=get_source_score))
 
         atlas = self._shadow_manager.get_atlas()
-        update_slots = min(
-            len(sorted_sources),
-            self._shadow_manager.get_num_update_slots_left())
+        update_slots = min(len(sorted_sources), self._shadow_manager.get_num_update_slots_left())
 
         for i in range(update_slots):
             if sorted_sources[i].has_region():

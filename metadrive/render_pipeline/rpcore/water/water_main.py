@@ -48,10 +48,12 @@ class WaterOptions:
 class Application(ShowBase):
     def __init__(self):
         # Setup window size and title
-        load_prc_file_data("", """
+        load_prc_file_data(
+            "", """
             # win-size 1600 900
             window-title Render Pipeline - Projected Water Example
-        """)
+        """
+        )
 
         # Construct the render pipeline
         self.render_pipeline = RenderPipeline()
@@ -67,9 +69,7 @@ class Application(ShowBase):
         # to provide an improved camera control compared to Panda3Ds default
         # mouse controller.
         self.controller = MovementController(self)
-        self.controller.set_initial_position_hpr(
-            Vec3(-23.2, -32.5, 5.3),
-            Vec3(-33.8, -8.3, 0.0))
+        self.controller.set_initial_position_hpr(Vec3(-23.2, -32.5, 5.3), Vec3(-33.8, -8.3, 0.0))
         self.controller.setup()
 
 

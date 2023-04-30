@@ -139,12 +139,15 @@ class BaseMap(BaseRunnable):
         return {}
 
     # @time_me
-    def get_semantic_map(self, size=512,
-                         pixels_per_meter=8,
-                         color_setting=MapTerrainSemanticColor,
-                         line_sample_interval=2,
-                         polyline_thickness=1,
-                         layer=("lane_line", "lane")):
+    def get_semantic_map(
+        self,
+        size=512,
+        pixels_per_meter=8,
+        color_setting=MapTerrainSemanticColor,
+        line_sample_interval=2,
+        polyline_thickness=1,
+        layer=("lane_line", "lane")
+    ):
         """
         Get semantics of the map
         :param size: [m] length and width
@@ -164,13 +167,17 @@ class BaseMap(BaseRunnable):
             for obj in all_lanes.values():
                 if MetaDriveType.is_lane(obj["type"]) and "lane" in layer:
                     polygons.append((obj["polygon"], MapTerrainSemanticColor.get_color(obj["type"])))
-                elif "lane_line" in layer and (
-                        MetaDriveType.is_road_line(obj["type"]) or MetaDriveType.is_sidewalk(obj["type"])):
+                elif "lane_line" in layer and (MetaDriveType.is_road_line(obj["type"])
+                                               or MetaDriveType.is_sidewalk(obj["type"])):
                     if MetaDriveType.is_broken_line(obj["type"]):
                         for index in range(0, len(obj["polyline"]) - 1, points_to_skip * 2):
                             if index + points_to_skip < len(obj["polyline"]):
-                                polylines.append(([obj["polyline"][index], obj["polyline"][index + points_to_skip]],
-                                                  MapTerrainSemanticColor.get_color(obj["type"])))
+                                polylines.append(
+                                    (
+                                        [obj["polyline"][index], obj["polyline"][index + points_to_skip]],
+                                        MapTerrainSemanticColor.get_color(obj["type"])
+                                    )
+                                )
                     else:
                         polylines.append((obj["polyline"], MapTerrainSemanticColor.get_color(obj["type"])))
 
@@ -181,24 +188,31 @@ class BaseMap(BaseRunnable):
             # for idx in range(len(polygons)):
             center_p = self.get_center_point()
             for polygon, color in polygons:
-                points = [[int((x - center_p[0]) * pixels_per_meter + size / 2),
-                           int((y - center_p[1]) * pixels_per_meter) + size / 2]
-                          for x, y in polygon]
+                points = [
+                    [
+                        int((x - center_p[0]) * pixels_per_meter + size / 2),
+                        int((y - center_p[1]) * pixels_per_meter) + size / 2
+                    ] for x, y in polygon
+                ]
                 cv2.fillPoly(mask, np.array([points]).astype(np.int32), color=color)
             for line, color in polylines:
                 points = [
-                    [int((p[0] - center_p[0]) * pixels_per_meter + size / 2),
-                     int((p[1] - center_p[1]) * pixels_per_meter) + size / 2]
-                    for p in line]
+                    [
+                        int((p[0] - center_p[0]) * pixels_per_meter + size / 2),
+                        int((p[1] - center_p[1]) * pixels_per_meter) + size / 2
+                    ] for p in line
+                ]
                 cv2.polylines(mask, np.array([points]).astype(np.int32), False, color, polyline_thickness)
             self._semantic_map = mask
         return self._semantic_map
 
-    def get_height_map(self, size=2048,
-                       pixels_per_meter=1,
-                       extension=2,
-                       height=1,
-                       ):
+    def get_height_map(
+        self,
+        size=2048,
+        pixels_per_meter=1,
+        extension=2,
+        height=1,
+    ):
         """
         Get semantics of the map
         :param size: [m] length and width
@@ -225,13 +239,22 @@ class BaseMap(BaseRunnable):
                 if need_scale:
                     scaled_polygon = Polygon(polygon).buffer(extension, join_style=2)
                     points = [
-                        [int((scaled_polygon.exterior.coords.xy[0][index] - center_p[0]) * pixels_per_meter + size / 2),
-                         int((scaled_polygon.exterior.coords.xy[1][index] - center_p[1]) * pixels_per_meter) + size / 2]
-                        for index in range(len(scaled_polygon.exterior.coords.xy[0]))]
+                        [
+                            int(
+                                (scaled_polygon.exterior.coords.xy[0][index] - center_p[0]) * pixels_per_meter +
+                                size / 2
+                            ),
+                            int((scaled_polygon.exterior.coords.xy[1][index] - center_p[1]) * pixels_per_meter) +
+                            size / 2
+                        ] for index in range(len(scaled_polygon.exterior.coords.xy[0]))
+                    ]
                 else:
-                    points = [[int((x - center_p[0]) * pixels_per_meter + size / 2),
-                               int((y - center_p[1]) * pixels_per_meter) + size / 2]
-                              for x, y in polygon]
+                    points = [
+                        [
+                            int((x - center_p[0]) * pixels_per_meter + size / 2),
+                            int((y - center_p[1]) * pixels_per_meter) + size / 2
+                        ] for x, y in polygon
+                    ]
                 cv2.fillPoly(mask, np.asarray([points]).astype(np.int32), color=[height])
             self._height_map = mask
         return self._height_map

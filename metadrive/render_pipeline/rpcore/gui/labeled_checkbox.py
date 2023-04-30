@@ -33,13 +33,23 @@ from metadrive.render_pipeline.rpcore.gui.text import Text
 
 
 class LabeledCheckbox(RPObject):
-
     """ This is a checkbox, combined with a label. The arguments are
     equal to the Checkbox and OnscreenText arguments. """
-
-    def __init__(self, parent=None, x=0, y=0, chb_callback=None,
-                 chb_args=None, chb_checked=True, text="", text_size=16,
-                 radio=False, text_color=None, expand_width=100, enabled=True):
+    def __init__(
+        self,
+        parent=None,
+        x=0,
+        y=0,
+        chb_callback=None,
+        chb_args=None,
+        chb_checked=True,
+        text="",
+        text_size=16,
+        radio=False,
+        text_color=None,
+        expand_width=100,
+        enabled=True
+    ):
         """ Constructs a new checkbox, forwarding most of the elements to the
         underlying Checkbox and Text. """
         RPObject.__init__(self)
@@ -55,12 +65,26 @@ class LabeledCheckbox(RPObject):
         self.text_color = text_color
 
         self._checkbox = Checkbox(
-            parent=parent, x=x, y=y, enabled=enabled, callback=chb_callback,
-            extra_args=chb_args, checked=chb_checked, radio=radio,
-            expand_width=expand_width)
+            parent=parent,
+            x=x,
+            y=y,
+            enabled=enabled,
+            callback=chb_callback,
+            extra_args=chb_args,
+            checked=chb_checked,
+            radio=radio,
+            expand_width=expand_width
+        )
         self._text = Text(
-            x=x + 26, y=y + 9 + text_size // 4, text=text, align="left",
-            parent=parent, size=text_size, color=text_color, may_change=True)
+            x=x + 26,
+            y=y + 9 + text_size // 4,
+            text=text,
+            align="left",
+            parent=parent,
+            size=text_size,
+            color=text_color,
+            may_change=True
+        )
 
         if enabled:
             self._checkbox.node.bind(DGG.WITHIN, self._on_node_enter)
@@ -68,8 +92,7 @@ class LabeledCheckbox(RPObject):
 
     def _on_node_enter(self, *args):  # pylint: disable=unused-argument
         """ Internal callback when the node gets hovered """
-        self._text.node["fg"] = (self.text_color.x + 0.1, self.text_color.y + 0.1,
-                                 self.text_color.z + 0.1, 1.0)
+        self._text.node["fg"] = (self.text_color.x + 0.1, self.text_color.y + 0.1, self.text_color.z + 0.1, 1.0)
 
     def _on_node_leave(self, *args):  # pylint: disable=unused-argument
         """ Internal callback when the node gets no longer hovered """

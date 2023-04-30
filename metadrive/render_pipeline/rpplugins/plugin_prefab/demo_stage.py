@@ -28,7 +28,6 @@ from metadrive.render_pipeline.rpcore.render_stage import RenderStage
 
 
 class DemoStage(RenderStage):
-
     """ This is a demo stage which does .. nothing """
 
     required_inputs = []

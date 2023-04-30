@@ -34,10 +34,8 @@ from metadrive.render_pipeline.rpcore.loader import RPLoader
 
 
 class DisplayShaderBuilder(object):  # pylint: disable=too-few-public-methods
-
     """ Utility class to generate shaders on the fly to display texture previews
     and also buffers """
-
     @classmethod
     def build(cls, texture, view_width, view_height):
         """ Builds a shader to display <texture> in a view port with the size
@@ -45,13 +43,9 @@ class DisplayShaderBuilder(object):  # pylint: disable=too-few-public-methods
         view_width, view_height = int(view_width), int(view_height)
 
         cache_key = "/$$rptemp/$$TEXDISPLAY-X{}-Y{}-Z{}-TT{}-CT{}-VW{}-VH{}.frag.glsl".format(
-            texture.get_x_size(),
-            texture.get_y_size(),
-            texture.get_z_size(),
-            texture.get_texture_type(),
-            texture.get_component_type(),
-            view_width,
-            view_height)
+            texture.get_x_size(), texture.get_y_size(), texture.get_z_size(), texture.get_texture_type(),
+            texture.get_component_type(), view_width, view_height
+        )
 
         # Only regenerate the file when there is no cache entry for it
         if not isfile(cache_key) or True:
@@ -82,7 +76,9 @@ class DisplayShaderBuilder(object):  # pylint: disable=too-few-public-methods
             uniform """ + sampler_type + """ p3d_Texture0;
             void main() {
                 int view_width = """ + str(view_width) + """;
-                int view_height = """ + str(view_height) + """;
+                int view_height = """ + str(
+            view_height
+        ) + """;
                 ivec2 display_coord = ivec2(texcoord * vec2(view_width, view_height));
                 int int_index = display_coord.x + display_coord.y * view_width;
                 """ + sampling_code + """
@@ -115,8 +111,7 @@ class DisplayShaderBuilder(object):  # pylint: disable=too-few-public-methods
         result = "result = vec3(1, 0, 1);", "sampler2D"
 
         if comp_type not in float_types + int_types:
-            RPObject.global_warn(
-                "DisplayShaderBuilder", "Unkown texture component type:", comp_type)
+            RPObject.global_warn("DisplayShaderBuilder", "Unkown texture component type:", comp_type)
 
         # 2D Textures
         if texture_type == Image.TT_2d_texture:
@@ -137,7 +132,9 @@ class DisplayShaderBuilder(object):  # pylint: disable=too-few-public-methods
                 result = range_check("result = texelFetch(p3d_Texture0, int_index).xyz;"), "samplerBuffer"  # noqa
 
             elif comp_type in int_types:
-                result = range_check("result = texelFetch(p3d_Texture0, int_index).xyz / 10.0;"), "isamplerBuffer"  # noqa
+                result = range_check(
+                    "result = texelFetch(p3d_Texture0, int_index).xyz / 10.0;"
+                ), "isamplerBuffer"  # noqa
 
         # 3D Textures
         elif texture_type == Image.TT_3d_texture:

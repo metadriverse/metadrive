@@ -37,9 +37,7 @@ from metadrive.render_pipeline.rpcore.loader import RPLoader
 
 
 class FPSChart(RPObject):
-
     """ Widget to show the FPS as a chart """
-
     def __init__(self, pipeline, parent):
         """ Inits the widget """
         RPObject.__init__(self)
@@ -69,20 +67,17 @@ class FPSChart(RPObject):
         self._display_tex = Image.create_2d("FPSChartRender", 250, 120, "RGBA8")
         self._display_tex.set_clear_color(Vec4(0))
         self._display_tex.clear_image()
-        self._display_img = Sprite(
-            image=self._display_tex, parent=self._node, w=250, h=120, x=10, y=10)
+        self._display_img = Sprite(image=self._display_tex, parent=self._node, w=250, h=120, x=10, y=10)
 
         # Defer the further loading
         Globals.base.taskMgr.doMethodLater(0.3, self._late_init, "FPSChartInit")
 
     def _late_init(self, task):
         """ Gets called after the pipeline was initialized """
-        self._display_txt = Text(
-            text="40 ms", parent=self._node, x=20, y=25,
-            size=13, color=Vec3(1), may_change=True)
+        self._display_txt = Text(text="40 ms", parent=self._node, x=20, y=25, size=13, color=Vec3(1), may_change=True)
         self._display_txt_bottom = Text(
-            text="0 ms", parent=self._node, x=20, y=120,
-            size=13, color=Vec3(1), may_change=True)
+            text="0 ms", parent=self._node, x=20, y=120, size=13, color=Vec3(1), may_change=True
+        )
 
         # Create the shader which generates the visualization texture
         self._cshader_node = ComputeNode("FPSChartUpdateChart")
@@ -95,7 +90,8 @@ class FPSChart(RPObject):
             DestTex=self._display_tex,
             FPSValues=self._storage_buffer,
             index=self._store_index,
-            maxMs=self._chart_ms_max)
+            maxMs=self._chart_ms_max
+        )
 
         self._update_shader_node = ComputeNode("FPSChartUpdateValues")
         self._update_shader_node.add_dispatch(1, 1, 1)
@@ -103,9 +99,8 @@ class FPSChart(RPObject):
         self._ushader = RPLoader.load_shader("/$$rp/shader/fps_chart_update.compute.glsl")
         self._update_shader_np.set_shader(self._ushader)
         self._update_shader_np.set_shader_inputs(
-            DestTex=self._storage_buffer,
-            index=self._store_index,
-            currentData=self._current_ftime)
+            DestTex=self._storage_buffer, index=self._store_index, currentData=self._current_ftime
+        )
 
         Globals.base.addTask(self._update, "UpdateFPSChart", sort=-50)
 

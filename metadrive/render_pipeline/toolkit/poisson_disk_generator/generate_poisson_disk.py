@@ -26,7 +26,6 @@ THE SOFTWARE.
 
 import PoissonDiskGenerator
 
-
 # XXX: Read options from stdin
 sample_count = 64
 evaluations = 15000

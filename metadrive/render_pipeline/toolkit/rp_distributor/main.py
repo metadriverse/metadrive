@@ -44,7 +44,6 @@ rp_ignores = [
     "ies_profiles/PREVIEWS.jpg",
     "loading_screen_bg.png",
 
-
     # rpcore
     "native/scripts",
     "native/source",
@@ -67,9 +66,7 @@ rp_ignores = [
     "color_correction/resources/generate_",
     "plugin_prefab",
     "scattering/resources/hosek_wilkie_scattering",
-
     "toolkit",
-
 ]
 
 panda_ignores = [
@@ -79,10 +76,7 @@ panda_ignores = [
     "python/include",
 ]
 
-app_ignores = [
-    ".pyc",
-    ".blend"
-]
+app_ignores = [".pyc", ".blend"]
 
 
 def copy_tree(source_dir, dest_dir, ignorelist, tree_pth):
@@ -141,14 +135,14 @@ def distribute():
     shutil.copyfile(join(panda_pth, "LICENSE"), join(tmp_dir, "LICENSE.txt"))
 
     # Copy launcher script
-    shutil.copyfile(
-        join(base_dir, "launch.templ.bat"), join(base_dir, dist_folder_name, "launch.bat"))
+    shutil.copyfile(join(base_dir, "launch.templ.bat"), join(base_dir, dist_folder_name, "launch.bat"))
 
     # Copy application
     app_pth = join(base_dir, "../../../RenderPipeline-Samples/01-Material-Demo/")
     tmp_dir = join(base_dir, dist_folder_name, "application")
 
     copy_tree(app_pth, tmp_dir, app_ignores, ".")
+
 
 if __name__ == "__main__":
     distribute()

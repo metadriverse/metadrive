@@ -39,11 +39,13 @@ class Plugin(BasePlugin):
 
     name = "Volumetric Clouds"
     author = "tobspr <tobias.springer1@gmail.com>"
-    description = ("This Plugin adds support or volumetric, raytraced clouds. "
-                   "Right now this is pretty unoptimized and may consum a lot "
-                   "of performance.")
+    description = (
+        "This Plugin adds support or volumetric, raytraced clouds. "
+        "Right now this is pretty unoptimized and may consum a lot "
+        "of performance."
+    )
     version = "alpha (!)"
-    required_plugins = ("scattering",)
+    required_plugins = ("scattering", )
 
     def on_stage_setup(self):
         # self.generation_stage = self.create_stage(CloudVoxelStage)

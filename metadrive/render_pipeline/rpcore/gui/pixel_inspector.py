@@ -31,9 +31,7 @@ from metadrive.render_pipeline.rpcore.loader import RPLoader
 
 
 class PixelInspector(RPObject):
-
     """ Widget to analyze the rendered pixels, by zooming in """
-
     def __init__(self, pipeline):
         RPObject.__init__(self)
         self._pipeline = pipeline
@@ -48,8 +46,7 @@ class PixelInspector(RPObject):
         self._zoomer = self._node.attach_new_node(card_maker.generate())
 
         # Defer the further loading
-        Globals.base.taskMgr.doMethodLater(
-            1.0, self._late_init, "PixelInspectorLateInit")
+        Globals.base.taskMgr.doMethodLater(1.0, self._late_init, "PixelInspectorLateInit")
         Globals.base.accept("q", self.show)
         Globals.base.accept("q-up", self.hide)
 
@@ -64,9 +61,9 @@ class PixelInspector(RPObject):
     def _late_init(self, task):
         """ Gets called after the pipeline got initialized """
         scene_tex = self._pipeline.stage_mgr.pipes["ShadedScene"]
-        self._zoomer.set_shader(RPLoader.load_shader(
-            "/$$rp/shader/default_gui_shader.vert.glsl",
-            "/$$rp/shader/pixel_inspector.frag.glsl"))
+        self._zoomer.set_shader(
+            RPLoader.load_shader("/$$rp/shader/default_gui_shader.vert.glsl", "/$$rp/shader/pixel_inspector.frag.glsl")
+        )
         self._zoomer.set_shader_input("SceneTex", scene_tex)
         return task.done
 

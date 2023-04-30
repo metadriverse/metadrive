@@ -45,7 +45,6 @@ GOLD_F0 = (1, 0.867136, 0.358654)
 #         "material_src": "Au"
 #     })
 
-
 # materials_to_test.append({
 #         "name": "Test-R0",
 #         "basecolor": (0, 0, 0),
@@ -73,7 +72,6 @@ GOLD_F0 = (1, 0.867136, 0.358654)
 #         "ior": 2.5,
 #         "roughness": 0.0
 #     })
-
 
 # materials_to_test.append({
 #         "name": "Test-SpecOnly",
@@ -109,16 +107,17 @@ GOLD_F0 = (1, 0.867136, 0.358654)
 #         "roughness": 0.4
 #     })
 
-
 for i in range(11):
     roughness = i / 10.0
 
-    materials_to_test.append({
-        "name": "Plastic-R" + str(roughness),
-        "basecolor": (1, 0, 0),
-        "ior": 1.51,
-        "roughness": roughness
-    })
+    materials_to_test.append(
+        {
+            "name": "Plastic-R" + str(roughness),
+            "basecolor": (1, 0, 0),
+            "ior": 1.51,
+            "roughness": roughness
+        }
+    )
 
     # materials_to_test.append({
     #         "name": "Gold-R" + str(roughness),
@@ -143,7 +142,6 @@ for i in range(11):
     #         "ior": 1.16,
     #         "roughness": roughness
     #     })
-
 
 for material in materials_to_test:
 

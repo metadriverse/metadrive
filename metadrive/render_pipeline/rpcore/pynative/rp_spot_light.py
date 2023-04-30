@@ -32,10 +32,8 @@ from metadrive.render_pipeline.rpcore.pynative.rp_light import RPLight
 
 
 class RPSpotLight(RPLight):
-
     """ Please refer to the native C++ implementation for docstrings and comments.
     This is just the python implementation, which does not contain documentation! """
-
     def __init__(self):
         RPLight.__init__(self, RPLight.LT_spot_light)
         self._radius = 10.0
@@ -89,4 +87,5 @@ class RPSpotLight(RPLight):
     def update_shadow_sources(self):
         self._shadow_sources[0].set_resolution(self.get_shadow_map_resolution())
         self._shadow_sources[0].set_perspective_lens(
-            self._fov, self._near_plane, self._radius, self._position, self._direction)
+            self._fov, self._near_plane, self._radius, self._position, self._direction
+        )

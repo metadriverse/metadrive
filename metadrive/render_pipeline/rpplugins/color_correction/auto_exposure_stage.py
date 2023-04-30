@@ -39,8 +39,7 @@ class AutoExposureStage(RenderStage):
 
     @property
     def produced_pipes(self):
-        return {"ShadedScene": self.target_apply.color_tex,
-                "Exposure": self.tex_exposure}
+        return {"ShadedScene": self.target_apply.color_tex, "Exposure": self.tex_exposure}
 
     def create(self):
 

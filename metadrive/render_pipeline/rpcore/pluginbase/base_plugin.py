@@ -30,7 +30,6 @@ from metadrive.render_pipeline.rpcore.rpobject import RPObject
 
 
 class BasePlugin(RPObject):
-
     """ This is the base class for all plugins. All plugin classes derive from
     this class. Additionally there are a lot of helpful functions provided,
     such as creating render stages. """

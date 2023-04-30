@@ -38,6 +38,7 @@ from direct.extensions_native.extension_native_helpers import Dtool_funcToMethod
 from metadrive.render_pipeline.rplibs.six import iteritems
 
 if not hasattr(NodePath, 'set_shader_inputs'):
+
     def set_shader_inputs(self, **inputs):
         set_shader_input = self.set_shader_input
         for args in iteritems(inputs):

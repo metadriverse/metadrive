@@ -41,9 +41,11 @@ class Plugin(BasePlugin):
 
     name = "Color Correction"
     author = "tobspr <tobias.springer1@gmail.com>"
-    description = ("This plugin adds support for color correction, vignetting, "
-                   "chromatic abberation and tonemapping. It also controls the "
-                   "camera parameters.")
+    description = (
+        "This plugin adds support for color correction, vignetting, "
+        "chromatic abberation and tonemapping. It also controls the "
+        "camera parameters."
+    )
     version = "1.4"
 
     def on_stage_setup(self):
@@ -77,8 +79,7 @@ class Plugin(BasePlugin):
 
     def load_grain(self):
         """ Loads the precomputed film grain """
-        grain_tex = RPLoader.load_texture(
-            "/$$rp/data/film_grain/grain.txo")
+        grain_tex = RPLoader.load_texture("/$$rp/data/film_grain/grain.txo")
         grain_tex.set_minfilter(SamplerState.FT_linear)
         grain_tex.set_magfilter(SamplerState.FT_linear)
         grain_tex.set_wrap_u(SamplerState.WM_repeat)

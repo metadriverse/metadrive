@@ -28,7 +28,6 @@ from metadrive.render_pipeline.rpcore.render_stage import RenderStage
 
 
 class CombineVelocityStage(RenderStage):
-
     """ This stage combines the per-object velocity with the
     camera velocity """
 

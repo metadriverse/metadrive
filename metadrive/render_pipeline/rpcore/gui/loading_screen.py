@@ -33,11 +33,9 @@ from metadrive.render_pipeline.rpcore.globals import Globals
 
 
 class LoadingScreen(RPObject):
-
     """ This is the default loading screen used by the pipeline. It provides
     the ability to display a simple image during loading. The image should be
     in the format 16:9 and not too small, to avoid being blurred out. """
-
     def __init__(self, pipeline, image_source="/$$rp/data/gui/loading_screen_bg.txo"):
         """ Inits the loading screen with a given image source. By default,
         this is the pipeline loading screen, but it can be overridden. """
@@ -57,9 +55,14 @@ class LoadingScreen(RPObject):
         scale = max(scale_w, scale_h)
 
         self.fullscreen_bg = Sprite(
-            image=self.image_source, x=(screen_w - 1920.0 * scale) // 2,
-            y=(screen_h - 1080.0 * scale) // 2, w=int(1920 * scale),
-            h=int(1080 * scale), parent=self.fullscreen_node, near_filter=False)
+            image=self.image_source,
+            x=(screen_w - 1920.0 * scale) // 2,
+            y=(screen_h - 1080.0 * scale) // 2,
+            w=int(1920 * scale),
+            h=int(1080 * scale),
+            parent=self.fullscreen_node,
+            near_filter=False
+        )
 
         for _ in range(2):
             Globals.base.graphicsEngine.render_frame()

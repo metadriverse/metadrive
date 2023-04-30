@@ -33,24 +33,29 @@ from metadrive.render_pipeline.rpcore.loader import RPLoader
 
 
 class Checkbox(RPObject):
-
     """ This is a wrapper around DirectCheckBox, providing a simpler interface
     and better visuals """
-
-    def __init__(self, parent=None, x=0, y=0, callback=None, extra_args=None,
-                 radio=False, expand_width=100, checked=False, enabled=True):
+    def __init__(
+        self,
+        parent=None,
+        x=0,
+        y=0,
+        callback=None,
+        extra_args=None,
+        radio=False,
+        expand_width=100,
+        checked=False,
+        enabled=True
+    ):
         RPObject.__init__(self)
 
         prefix = "checkbox" if not radio else "radiobox"
 
         if enabled:
-            checked_img = RPLoader.load_texture(
-                "/$$rp/data/gui/" + prefix + "_checked.png")
-            unchecked_img = RPLoader.load_texture(
-                "/$$rp/data/gui/" + prefix + "_default.png")
+            checked_img = RPLoader.load_texture("/$$rp/data/gui/" + prefix + "_checked.png")
+            unchecked_img = RPLoader.load_texture("/$$rp/data/gui/" + prefix + "_default.png")
         else:
-            checked_img = RPLoader.load_texture(
-                "/$$rp/data/gui/" + prefix + "_disabled.png")
+            checked_img = RPLoader.load_texture("/$$rp/data/gui/" + prefix + "_disabled.png")
             unchecked_img = checked_img
 
         # Set near filter, otherwise textures look like crap
@@ -62,10 +67,17 @@ class Checkbox(RPObject):
             tex.set_anisotropic_degree(0)
 
         self._node = DirectCheckBox(
-            parent=parent, pos=(x + 11, 1, -y - 8), scale=(10 / 2.0, 1, 10 / 2.0),
-            checkedImage=checked_img, uncheckedImage=unchecked_img,
-            image=unchecked_img, extraArgs=extra_args, state=DGG.NORMAL,
-            relief=DGG.FLAT, command=self._update_status)
+            parent=parent,
+            pos=(x + 11, 1, -y - 8),
+            scale=(10 / 2.0, 1, 10 / 2.0),
+            checkedImage=checked_img,
+            uncheckedImage=unchecked_img,
+            image=unchecked_img,
+            extraArgs=extra_args,
+            state=DGG.NORMAL,
+            relief=DGG.FLAT,
+            command=self._update_status
+        )
 
         self._node["frameColor"] = (0, 0, 0, 0)
         self._node["frameSize"] = (-2.6, 2 + expand_width / 7.5, -2.35, 2.5)

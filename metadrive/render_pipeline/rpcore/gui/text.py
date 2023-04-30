@@ -32,11 +32,8 @@ from metadrive.render_pipeline.rpcore.rpobject import RPObject
 
 
 class Text(RPObject):
-
     """ Simple wrapper around OnscreenText, providing a simpler interface """
-
-    def __init__(self, text="", parent=None, x=0, y=0, size=10, align="left",
-                 color=None, may_change=False, font=None):
+    def __init__(self, text="", parent=None, x=0, y=0, size=10, align="left", color=None, may_change=False, font=None):
         """ Constructs a new text. The parameters are almost equal to the
         parameters of OnscreenText """
         RPObject.__init__(self)
@@ -58,9 +55,15 @@ class Text(RPObject):
 
         self._initial_pos = Vec2(x, -y)
         self._node = OnscreenText(
-            text=text, parent=parent, pos=self._initial_pos, scale=size,
-            align=align_mode, fg=Vec4(color.x, color.y, color.z, 1.0),
-            font=font, mayChange=may_change)
+            text=text,
+            parent=parent,
+            pos=self._initial_pos,
+            scale=size,
+            align=align_mode,
+            fg=Vec4(color.x, color.y, color.z, 1.0),
+            font=font,
+            mayChange=may_change
+        )
 
     @property
     def node(self):

@@ -312,7 +312,6 @@ REPLAY_DONE = "replay_done"
 
 
 class SemanticColor:
-
     @staticmethod
     def get_color(type):
         raise NotImplementedError
@@ -320,7 +319,6 @@ class SemanticColor:
 
 class MapSemanticColor(SemanticColor):
     """I didn't use it at this time and keep it the same as MapTerrainAttribute"""
-
     @staticmethod
     def get_color(type):
         if MetaDriveType.is_yellow_line(type):
@@ -341,7 +339,6 @@ class MapTerrainSemanticColor(SemanticColor):
     Do not modify this as it is for terrain generation. If you want your own palette, just add a new one or modify
     class lMapSemanticColor
     """
-
     @staticmethod
     def get_color(type):
         if MetaDriveType.is_yellow_line(type):

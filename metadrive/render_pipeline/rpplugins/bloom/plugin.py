@@ -34,8 +34,10 @@ class Plugin(BasePlugin):
 
     name = "Bloom"
     author = "tobspr <tobias.springer1@gmail.com>"
-    description = ("This plugin adds support for a technique called Bloom, which "
-                   "makes very bright objects like the sun have a halo.")
+    description = (
+        "This plugin adds support for a technique called Bloom, which "
+        "makes very bright objects like the sun have a halo."
+    )
     version = "1.2"
 
     def on_stage_setup(self):

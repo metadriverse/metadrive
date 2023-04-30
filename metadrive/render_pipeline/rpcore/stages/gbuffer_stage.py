@@ -30,7 +30,6 @@ from metadrive.render_pipeline.rpcore.util.shader_input_blocks import SimpleInpu
 
 
 class GBufferStage(RenderStage):
-
     """ This is the main pass stage, rendering the objects and creating the
     GBuffer which is used in later stages """
 
@@ -39,10 +38,7 @@ class GBufferStage(RenderStage):
 
     @property
     def produced_pipes(self):
-        return {
-            "GBuffer": self.make_gbuffer_ubo(),
-            "SceneDepth": self.target.depth_tex
-        }
+        return {"GBuffer": self.make_gbuffer_ubo(), "SceneDepth": self.target.depth_tex}
 
     def make_gbuffer_ubo(self):
         ubo = SimpleInputBlock("GBuffer")

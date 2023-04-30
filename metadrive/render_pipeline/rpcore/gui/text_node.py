@@ -24,7 +24,6 @@ THE SOFTWARE.
 
 """
 
-
 from panda3d.core import Vec2, Vec3, Vec4
 from panda3d.core import TextNode as TextNodeImpl
 
@@ -34,11 +33,16 @@ from metadrive.render_pipeline.rpcore.loader import RPLoader
 
 
 class TextNode(RPObject):
-
     """ Interface for the Panda3D TextNode. """
-
-    def __init__(self, font="/$$rp/data/font/Roboto-Bold.ttf", pixel_size=16, align="left",
-                 pos=Vec2(0), color=Vec3(1), parent=None):
+    def __init__(
+        self,
+        font="/$$rp/data/font/Roboto-Bold.ttf",
+        pixel_size=16,
+        align="left",
+        pos=Vec2(0),
+        color=Vec3(1),
+        parent=None
+    ):
         """ Constructs a new text node, forwaring the parameters to the internal
         panda3d implementation """
         RPObject.__init__(self)

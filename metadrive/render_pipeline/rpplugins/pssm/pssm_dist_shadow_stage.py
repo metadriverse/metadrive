@@ -34,7 +34,6 @@ from metadrive.render_pipeline.rpcore.util.generic import snap_shadow_map
 
 
 class PSSMDistShadowStage(RenderStage):
-
     """ This stage generates a depth map using Variance Shadow Maps for very
     distant objects. """
 
@@ -113,17 +112,13 @@ class PSSMDistShadowStage(RenderStage):
         self.target_blur_v.size = self.resolution
         self.target_blur_v.add_color_attachment(bits=(32, 0, 0, 0))
         self.target_blur_v.prepare_buffer()
-        self.target_blur_v.set_shader_inputs(
-            SourceTex=self.target_convert.color_tex,
-            direction=LVecBase2i(1, 0))
+        self.target_blur_v.set_shader_inputs(SourceTex=self.target_convert.color_tex, direction=LVecBase2i(1, 0))
 
         self.target_blur_h = self.create_target("BlurHoriz")
         self.target_blur_h.size = self.resolution
         self.target_blur_h.add_color_attachment(bits=(32, 0, 0, 0))
         self.target_blur_h.prepare_buffer()
-        self.target_blur_h.set_shader_inputs(
-            SourceTex=self.target_blur_v.color_tex,
-            direction=LVecBase2i(0, 1))
+        self.target_blur_h.set_shader_inputs(SourceTex=self.target_blur_v.color_tex, direction=LVecBase2i(0, 1))
 
         # Register shadow camera
         self._pipeline.tag_mgr.register_camera("shadow", self.camera)

@@ -34,8 +34,7 @@ class Plugin(BasePlugin):
 
     name = "Plugin Prefab"
     author = "tobspr <tobias.springer1@gmail.com>"
-    description = ("This is the most basic structure of a plugin. You can copy "
-                   "it to produce your own plugins")
+    description = ("This is the most basic structure of a plugin. You can copy " "it to produce your own plugins")
     version = "1.0"
 
     def on_stage_setup(self):

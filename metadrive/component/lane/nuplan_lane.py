@@ -14,6 +14,7 @@ from metadrive.component.lane.point_lane import PointLane
 from metadrive.utils.interpolating_line import InterpolatingLine
 logger = logging.getLogger(__name__)
 
+
 class NuPlanLane(PointLane):
     def __init__(self, lane_meta_data, nuplan_center, need_lane_localization=False):
         """

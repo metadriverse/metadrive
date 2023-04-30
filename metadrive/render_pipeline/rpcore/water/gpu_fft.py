@@ -9,7 +9,6 @@ import math
 class GPUFFT:
     """ This is a collection of compute shaders to generate the inverse
     fft efficiently on the gpu, with butterfly FFT and precomputed weights """
-
     def __init__(self, size, source_tex, normalization_factor):
         """ Creates a new fft instance. The source texture has to specified
         from the begining, as the shaderAttributes are pregenerated for
@@ -24,11 +23,9 @@ class GPUFFT:
         # behaviour, we could solve that by using an appropriate thread size,
         # but it works fine so far)
         self.ping_texture = Texture("FFTPing")
-        self.ping_texture.setup_2d_texture(
-            self.size, self.size, Texture.TFloat, Texture.FRgba32)
+        self.ping_texture.setup_2d_texture(self.size, self.size, Texture.TFloat, Texture.FRgba32)
         self.pong_texture = Texture("FFTPong")
-        self.pong_texture.setup_2d_texture(
-            self.size, self.size, Texture.TFloat, Texture.FRgba32)
+        self.pong_texture.setup_2d_texture(self.size, self.size, Texture.TFloat, Texture.FRgba32)
         self.source_tex = source_tex
 
         for tex in [self.ping_texture, self.pong_texture, source_tex]:
@@ -42,26 +39,23 @@ class GPUFFT:
 
         # Pre generate the shaders, we have 2 passes: Horizontal and Vertical
         # which both execute log2(N) times with varying radii
-        self.horizontal_fft_shader = Shader.load_compute(Shader.SLGLSL,
-                                                         "/$$rp/rpcore/water/shader/horizontal_fft.compute")
+        self.horizontal_fft_shader = Shader.load_compute(
+            Shader.SLGLSL, "/$$rp/rpcore/water/shader/horizontal_fft.compute"
+        )
         self.horizontal_fft = NodePath("HorizontalFFT")
         self.horizontal_fft.set_shader(self.horizontal_fft_shader)
-        self.horizontal_fft.set_shader_input(
-            "precomputedWeights", self.weights_lookup_tex)
+        self.horizontal_fft.set_shader_input("precomputedWeights", self.weights_lookup_tex)
         self.horizontal_fft.set_shader_input("N", LVecBase2i(self.size))
 
-        self.vertical_fft_shader = Shader.load_compute(Shader.SLGLSL,
-                                                       "/$$rp/rpcore/water/shader/vertical_fft.compute")
+        self.vertical_fft_shader = Shader.load_compute(Shader.SLGLSL, "/$$rp/rpcore/water/shader/vertical_fft.compute")
         self.vertical_fft = NodePath("VerticalFFT")
         self.vertical_fft.set_shader(self.vertical_fft_shader)
-        self.vertical_fft.set_shader_input(
-            "precomputedWeights", self.weights_lookup_tex)
+        self.vertical_fft.set_shader_input("precomputedWeights", self.weights_lookup_tex)
         self.vertical_fft.set_shader_input("N", LVecBase2i(self.size))
 
         # Create a texture where the result is stored
         self.result_texture = Texture("Result")
-        self.result_texture.setup2dTexture(
-            self.size, self.size, Texture.TFloat, Texture.FRgba16)
+        self.result_texture.setup2dTexture(self.size, self.size, Texture.TFloat, Texture.FRgba16)
         self.result_texture.set_minfilter(Texture.FTLinear)
         self.result_texture.set_magfilter(Texture.FTLinear)
 
@@ -114,10 +108,12 @@ class GPUFFT:
                     f_num_iter = float(num_iter)
                     weight_a = Vec2(
                         math.cos(2.0 * pi * fK * f_num_iter / resolution_float),
-                        -math.sin(2.0 * pi * fK * f_num_iter / resolution_float))
+                        -math.sin(2.0 * pi * fK * f_num_iter / resolution_float)
+                    )
                     weight_b = Vec2(
                         -math.cos(2.0 * pi * fK * f_num_iter / resolution_float),
-                        math.sin(2.0 * pi * fK * f_num_iter / resolution_float))
+                        math.sin(2.0 * pi * fK * f_num_iter / resolution_float)
+                    )
                     storage[i][k // 2] = weight_a
                     storage[i][k // 2 + num_k] = weight_b
                     K += 1
@@ -143,12 +139,9 @@ class GPUFFT:
 
     def _compute_weighting(self):
         """ Precomputes the weights & indices, and stores them in a texture """
-        indices_a = [[0 for i in range(self.size)]
-                     for k in range(self.log2_size)]
-        indices_b = [[0 for i in range(self.size)]
-                     for k in range(self.log2_size)]
-        weights = [[Vec2(0.0) for i in range(self.size)]
-                   for k in range(self.log2_size)]
+        indices_a = [[0 for i in range(self.size)] for k in range(self.log2_size)]
+        indices_b = [[0 for i in range(self.size)] for k in range(self.log2_size)]
+        weights = [[Vec2(0.0) for i in range(self.size)] for k in range(self.log2_size)]
 
         # Pre-Generating indices ..
         self._generate_indices(indices_a, indices_b)
@@ -160,7 +153,7 @@ class GPUFFT:
 
         # Create storage for the weights & indices
         self.weights_lookup = PNMImage(self.size, self.log2_size, 4)
-        self.weights_lookup.setMaxval((2 ** 16) - 1)
+        self.weights_lookup.setMaxval((2**16) - 1)
         self.weights_lookup.fill(0.0)
 
         # Populate storage
@@ -207,8 +200,7 @@ class GPUFFT:
             index = self.log2_size - step - 1
             self.horizontal_fft.set_shader_input("source", source)
             self.horizontal_fft.set_shader_input("dest", dest)
-            self.horizontal_fft.set_shader_input(
-                "butterflyIndex", LVecBase2i(index))
+            self.horizontal_fft.set_shader_input("butterflyIndex", LVecBase2i(index))
             self._queue_shader(self.horizontal_fft)
             current_index = 1 - current_index
 
@@ -222,12 +214,9 @@ class GPUFFT:
             index = self.log2_size - step - 1
             self.vertical_fft.set_shader_input("source", source)
             self.vertical_fft.set_shader_input("dest", dest)
-            self.vertical_fft.set_shader_input(
-                "isLastPass", is_last_pass)
-            self.vertical_fft.set_shader_input(
-                "normalizationFactor", self.normalization_factor)
-            self.vertical_fft.set_shader_input(
-                "butterflyIndex", LVecBase2i(index))
+            self.vertical_fft.set_shader_input("isLastPass", is_last_pass)
+            self.vertical_fft.set_shader_input("normalizationFactor", self.normalization_factor)
+            self.vertical_fft.set_shader_input("butterflyIndex", LVecBase2i(index))
             self._queue_shader(self.vertical_fft)
 
             current_index = 1 - current_index
@@ -246,6 +235,5 @@ class GPUFFT:
     def _execute_shader(self, sattr):
         """ Internal method to execute a shader by a given ShaderAttrib """
         Globals.base.graphicsEngine.dispatch_compute(
-            (self.size // 16, self.size // 16, 1),
-            sattr,
-            Globals.base.win.get_gsg())
+            (self.size // 16, self.size // 16, 1), sattr, Globals.base.win.get_gsg()
+        )

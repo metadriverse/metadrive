@@ -20,12 +20,13 @@ from rpcore.globals import Globals
 from rpcore.render_target import RenderTarget
 from rplibs.progressbar import ETA, ProgressBar, Percentage, Bar, Counter, Rate
 
-class Application(ShowBase):
 
+class Application(ShowBase):
     def __init__(self):
 
         # Load settings
-        load_prc_file_data("", """
+        load_prc_file_data(
+            "", """
             win-size 10 10
             window-type offscreen
             win-title GI Bake
@@ -38,7 +39,8 @@ class Application(ShowBase):
             multisamples 0
             gl-cube-map-seamless #t
             gl-force-fbo-color #f
-        """)
+        """
+        )
 
         ShowBase.__init__(self)
         Globals.load(self)
@@ -120,8 +122,7 @@ class Application(ShowBase):
             internal_buffer.get_overlay_display_region().disable_clears()
 
             # Setup the cubemap capture rig
-            directions = (Vec3(1, 0, 0), Vec3(-1, 0, 0), Vec3(0, 1, 0),
-                          Vec3(0, -1, 0), Vec3(0, 0, 1), Vec3(0, 0, -1))
+            directions = (Vec3(1, 0, 0), Vec3(-1, 0, 0), Vec3(0, 1, 0), Vec3(0, -1, 0), Vec3(0, 0, 1), Vec3(0, 0, -1))
             capture_regions = []
             capture_cams = []
             capture_rig = render.attach_new_node("CaptureRig")
@@ -129,8 +130,7 @@ class Application(ShowBase):
 
             # Prepare the display regions
             for i in range(6):
-                region = capture_target.internal_buffer.make_display_region(
-                    i / 6, i / 6 + 1 / 6, 0, 1)
+                region = capture_target.internal_buffer.make_display_region(i / 6, i / 6 + 1 / 6, 0, 1)
                 region.set_sort(25 + i)
                 region.set_active(True)
                 region.disable_clears()
@@ -163,9 +163,7 @@ class Application(ShowBase):
             target_store_cubemap = RenderTarget()
             target_store_cubemap.size = capture_resolution * 6, capture_resolution
             target_store_cubemap.prepare_buffer()
-            target_store_cubemap.set_shader_inputs(
-                SourceTex=capture_target.color_tex,
-                DestTex=destination_cubemap)
+            target_store_cubemap.set_shader_inputs(SourceTex=capture_target.color_tex, DestTex=destination_cubemap)
 
             target_store_cubemap.shader = store_shader
 
@@ -175,20 +173,13 @@ class Application(ShowBase):
             target_convolute.size = 6, 1
             # target_convolute.add_color_attachment(bits=16)
             target_convolute.prepare_buffer()
-            target_convolute.set_shader_inputs(
-                SourceTex=destination_cubemap,
-                DestTex=final_data,
-                storeCoord=store_pta)
+            target_convolute.set_shader_inputs(SourceTex=destination_cubemap, DestTex=final_data, storeCoord=store_pta)
             target_convolute.shader = convolute_shader
 
             # Set initial shader
-            shader = Shader.load(Shader.SL_GLSL,
-                "resources/first-bounce.vert.glsl", "resources/first-bounce.frag.glsl")
+            shader = Shader.load(Shader.SL_GLSL, "resources/first-bounce.vert.glsl", "resources/first-bounce.frag.glsl")
             render.set_shader(shader)
-            render.set_shader_inputs(
-                ShadowMap=sun_shadow_target.depth_tex,
-                shadowMVP=shadow_mvp,
-                sunVector=sun_vector)
+            render.set_shader_inputs(ShadowMap=sun_shadow_target.depth_tex, shadowMVP=shadow_mvp, sunVector=sun_vector)
 
             worker_handles.append((capture_rig, store_pta))
 
@@ -214,16 +205,14 @@ class Application(ShowBase):
                     work_queue.append((Vec3(offs_x, offs_y, offs_z), LVecBase2i(store_x, store_y)))
 
         for i, (pos, store) in enumerate(work_queue):
-            worker_handles[i%num_bakers][0].set_pos(pos)
-            worker_handles[i%num_bakers][1][0] = store
+            worker_handles[i % num_bakers][0].set_pos(pos)
+            worker_handles[i % num_bakers][1][0] = store
             if i % num_bakers == num_bakers - 1:
                 self.render_frame()
                 progressbar.update(i)
 
-
         progressbar.finish()
         self.render_frame()
-
 
         print("Writing out data ..")
         self.graphicsEngine.extract_texture_data(final_data, self.win.gsg)
@@ -260,5 +249,3 @@ class Application(ShowBase):
 
 
 Application()
-
-
