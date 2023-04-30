@@ -1,0 +1,89 @@
+
+
+# This effect blends 4 materials based on a material map
+# The textures should be setup like in the 04-Material-Blending sample.
+
+# The last material is the base material and thus has no blending. It will
+# be wherever no other material is.
+
+vertex:
+
+fragment:
+  inout: |
+    uniform sampler2D p3d_Texture0;      // Alpha -  Map
+
+    uniform sampler2D p3d_Texture1;      // M1 - Diffuse
+    uniform sampler2D p3d_Texture2;      // M1 - Normal
+    uniform sampler2D p3d_Texture3;      // M1 - Specular
+    uniform sampler2D p3d_Texture4;      // M1 - Blendmap
+
+    uniform sampler2D p3d_Texture5;      // M2 - Diffuse
+    uniform sampler2D p3d_Texture6;      // M2 - Normal
+    uniform sampler2D p3d_Texture7;      // M2 - Specular
+    uniform sampler2D p3d_Texture8;      // M2 - Blendmap
+
+    uniform sampler2D p3d_Texture9;      // M3 - Diffuse
+    uniform sampler2D p3d_Texture10;     // M3 - Normal
+    uniform sampler2D p3d_Texture11;     // M3 - Specular
+    uniform sampler2D p3d_Texture12;     // M3 - Blendmap
+
+    uniform sampler2D p3d_Texture13;     // M4 - Diffuse
+    uniform sampler2D p3d_Texture14;     // M4 - Normal
+    uniform sampler2D p3d_Texture15;     // M4 - Specular
+    uniform sampler2D p3d_Texture16;     // M4 - Blendmap
+
+    uniform float detail_scale_factor;
+
+    uniform float material_0_pow;
+    uniform float material_0_add;
+    uniform float material_1_pow;
+    uniform float material_1_add;
+    uniform float material_2_pow;
+    uniform float material_2_add;
+
+  defines: |
+    #define DONT_FETCH_DEFAULT_TEXTURES 1
+    #define DONT_SET_MATERIAL_PROPERTIES 1
+
+  material: |
+
+    // Get detail coordinate
+    vec2 detail_coord = texcoord * detail_scale_factor;
+    vec4 layers = texture(p3d_Texture0, texcoord);
+    layers.xyz *= layers.w;
+
+    // Blend all materials
+    layers.x = blend_material(layers.x, texture(p3d_Texture4,  detail_coord).x, material_0_add, material_0_pow);
+    layers.y = blend_material(layers.y, texture(p3d_Texture8,  detail_coord).x, material_1_add, material_1_pow);
+    layers.z = blend_material(layers.z, texture(p3d_Texture12, detail_coord).x, material_2_add, material_2_pow);
+    layers.w = saturate(1.0 - dot(layers.xyz, vec3(1))); // More inituitive
+
+    // Diffuse
+    vec3 m_base = vec3(0);
+    m_base  = texture(p3d_Texture1,  detail_coord).xyz * layers.x;
+    m_base += texture(p3d_Texture5,  detail_coord).xyz * layers.y;
+    m_base += texture(p3d_Texture9,  detail_coord).xyz * layers.z;
+    m_base += texture(p3d_Texture13, detail_coord).xyz * layers.w;
+
+    // Normal
+    vec3 m_nrm = vec3(0);
+    m_nrm += unpack_texture_normal(texture(p3d_Texture2,  detail_coord).xyz) * layers.x;
+    m_nrm += unpack_texture_normal(texture(p3d_Texture6,  detail_coord).xyz) * layers.y;
+    m_nrm += unpack_texture_normal(texture(p3d_Texture10, detail_coord).xyz) * layers.z;
+    m_nrm += unpack_texture_normal(texture(p3d_Texture14, detail_coord).xyz) * layers.w;
+
+    // Specular
+    float spec = 0.0;
+    spec  = texture(p3d_Texture3,  detail_coord).x * layers.x;
+    spec += texture(p3d_Texture7,  detail_coord).x * layers.y;
+    spec += texture(p3d_Texture11, detail_coord).x * layers.z;
+    spec += texture(p3d_Texture15, detail_coord).x * layers.w;
+
+    // Material properties
+    m.shading_model = mInput.shading_model;
+    m.basecolor = m_base * mInput.color;
+    m.normal = apply_normal_map(vOutput.normal, m_nrm, mInput.normalfactor);
+    m.specular_ior = blend_ior(mInput.specular_ior, spec);
+    m.roughness = mInput.roughness;
+    m.metallic = mInput.metallic;
+    m.shading_model_param0 = mInput.arbitrary0;

@@ -1,0 +1,333 @@
+
+name: Color Correction
+author: tobspr <tobias.springer1@gmail.com>
+version: 1.0
+description: >
+    This plugin adds support for color correction, vignetting and chromatic
+    abberation.
+
+settings: !!omap
+
+    - tonemap_operator:
+        type: enum
+        values: [optimized, reinhard, uncharted2, exponential, exponential2, none]
+        default: uncharted2
+        label: Tonemap Operator
+        shader_runtime: true
+        description: >
+            This specifies the tonemapping operator, all operators implement
+            sRGB color correction as well, except for the none operator which
+            just passes through the color. None is just for reference,
+            and should not be used.
+
+    # Reinhard Tonemapping settings
+
+    - reinhard_version:
+        display_if: {tonemap_operator: "reinhard"}
+        type: enum
+        values: [rgb, luminance, white_preserve, luminosity]
+        default: rgb
+        shader_runtime: true
+        label: Reinhard Version
+        description: >
+            Choose between different versions of the Reinhard Operator. rgb performs
+            the operator on the rgb value, luminance on the brightness of the color.
+            white_preserve also uses the luma value, but tries to preserve the whites.
+
+    # Exponential Tonemapping settings
+
+    - exponential_factor:
+        display_if: {tonemap_operator: "exponential"}
+        type: float
+        range: [0.01, 5.0]
+        default: 1.0
+        shader_runtime: true
+        label: Exponential factor
+        description: >
+            The factor for the exponential mapping. Assuming the factor is named
+            f, then the output color is computed with 1 - exp(-f*color).
+
+
+    # Uncharted 2 Tonemapping settings
+
+    - uc2t_shoulder_strength:
+        display_if: {tonemap_operator: "uncharted2"}
+        type: float
+        range: [0.01, 1.0]
+        default: 0.22
+        shader_runtime: true
+        label: UC2 Shoulder Strength
+        description: >
+            Shoulder Strength, controls the appearance of the bright parts
+            of the image (the last part of the color curve).
+
+    - uc2t_linear_strength:
+        display_if: {tonemap_operator: "uncharted2"}
+        type: float
+        range: [0.01, 1.0]
+        default: 0.3
+        shader_runtime: true
+        label: UC2 Linear Strength
+        description: >
+            Linear factor, higher values produce a more grayish image, while
+            lower values produce a more saturated image.
+
+    - uc2t_linear_angle:
+        display_if: {tonemap_operator: "uncharted2"}
+        type: float
+        range: [0.01, 1.0]
+        default: 0.1
+        shader_runtime: true
+        label: UC2 Linear Angle
+        description: >
+            Linear Angle, higher values produce a brighter but more grayish image,
+            lower values produce a more saturated image.
+
+
+    - uc2t_toe_strength:
+        display_if: {tonemap_operator: "uncharted2"}
+        type: float
+        range: [0.01, 1.0]
+        default: 0.2
+        shader_runtime: true
+        label: UC2 Toe Strength
+        description: >
+            Toe Strength, controls the appearance of the dark parts of the image,
+            (the first part of the color curve). Higher values mean more dark
+            spots, while lower values will cut-off less dark values.
+
+    - uc2t_toe_numerator:
+        display_if: {tonemap_operator: "uncharted2"}
+        type: float
+        range: [0.0001, 0.1]
+        default: 0.01
+        shader_runtime: true
+        label: UC2 Toe Numerator
+        description: >
+            Toe Numerator, controls the appearance of the dark parts similar to
+            the toe strength. This is a bias, values below this setting are
+            completely dark.
+
+    - uc2t_toe_denumerator:
+        display_if: {tonemap_operator: "uncharted2"}
+        type: float
+        range: [0.01, 1.0]
+        default: 0.3
+        shader_runtime: true
+        label: UC2 Toe Denumerator
+        description: >
+            Toe Denumerator, controls the appearance of the dark parts similar to
+            the toe strength, but instead of cutting of the dark values it
+            makes them brighter.
+
+    - uc2t_reference_white:
+        display_if: {tonemap_operator: "uncharted2"}
+        type: float
+        range: [0.1, 20.0]
+        default: 11.2
+        shader_runtime: true
+        label: UC2 Reference White
+        description: >
+            Reference White, higher values will produce a darker image, and
+            vice-versa. This basically just scales the color linear inverse.
+
+
+    - vignette_strength:
+        type: float
+        range: [0.0, 1.0]
+        default: 0.35
+        shader_runtime: true
+        label: Vignette Strength
+        description: >
+            Controls the strength of the vignette, which darkens the corners
+            of the image. A strength of 0 means no vignette, a strength of 1
+            means a almost completely black vignette.
+
+    - film_grain_strength:
+        type: float
+        range: [0.0, 1.0]
+        default: 0.125
+        shader_runtime: true
+        label: Film Grain Strength
+        description: >
+            Controls the strength of the film grain, which simulates the inaccuracies
+            on a film. This is also useful to add some more details to textures, however
+            care to not overdo the effect.
+
+
+    # Color LUT
+
+    - color_lut:
+        type: path
+        default: film_luts/default_lut.png
+        label: Color LUT
+        file_type: Color LUTs (*.png)
+        base_path: film_luts
+        runtime: true
+        description: >
+            Specifies a Color LUT (Look-Up-Table) to use. Have a look at the Render Pipeline
+            documentation for further information.
+
+    # Chromatic aberration
+
+    - use_chromatic_aberration:
+        type: bool
+        default: true
+        shader_runtime: true
+        label: Enable Chromatic Aberration
+        description: >
+            Enables chromatic aberration, a camera effect caused due to the
+            different refraction of the wavelengths through a lens.
+
+    - chromatic_aberration_strength:
+        display_if: {use_chromatic_aberration: true}
+        type: float
+        range: [0.009, 2.0]
+        default: 0.5
+        shader_runtime: true
+        label: Chromatic Aberration Strength
+        description: >
+            Strength of the chromatic abberation, you should not overdo this since
+            it can lead to very unrealistic results fast.
+
+    - chromatic_aberration_samples:
+        display_if: {use_chromatic_aberration: true}
+        type: int
+        range: [1, 5]
+        default: 2
+        shader_runtime: true
+        label: Chromatic Aberration Samples
+        description: >
+            Amount of samples to use for blurring the screen edges when using
+            chromatic abberation. A higher amount of samples produces a smoother
+            blur but also increases the performance cost by a lot.
+
+
+    # Automatic exposure settings
+
+    - manual_camera_parameters:
+        type: bool
+        default: false
+        label: Manual camera parameters
+        description: >
+            When set to true, enables you to set camera parameters such as
+            ISO, shutter and f-stops. If set to false, the average scene
+            luminance will be used to compute the exposure.
+
+    - min_exposure_value:
+        display_if: {manual_camera_parameters: false}
+        type: float
+        range: [0.0, 0.1]
+        default: 0.01
+        label: Minimum Exposure
+        shader_runtime: true
+        description: >
+            The minimum exposure value, this prevents the automatic exposure from overfitting
+            on bright areas
+
+    - max_exposure_value:
+        display_if: {manual_camera_parameters: false}
+        type: float
+        range: [0.0, 1.0]
+        default: 1.0
+        shader_runtime: true
+        label: Maximum Exposure
+        description: >
+            The maximum exposure value, this prevents the automatic exposure from overfitting
+            on dark areas.
+
+    - exposure_scale:
+        display_if: {manual_camera_parameters: false}
+        type: float
+        range: [0.0, 10.0]
+        default: 1.0
+        label: Exposure Scale
+        shader_runtime: true
+        description: >
+            This is a fixed value which gets added to the average brightness of the
+            scene. A value greater 1 will increase the scene brightness, while a value
+            smaller than 1 will increase it.
+
+    - brightness_adaption_rate:
+        display_if: {manual_camera_parameters: false}
+        type: float
+        range: [0.01, 5.0]
+        default: 3.6
+        shader_runtime: true
+        label: Brightness Adaption Rate
+        description: >
+            Adaption rate when moving from dark to bright areas.
+            Usually faster (= higher) than the rate when moving from bright to dark areas.
+
+    - darkness_adaption_rate:
+        display_if: {manual_camera_parameters: false}
+        type: float
+        range: [0.01, 5.0]
+        default: 0.7
+        shader_runtime: true
+        label: Darkness Adaption Rate
+        description: >
+            Adaption rate when moving from bright to dark areas.
+            Usually slower (= smaller) than the rate when moving from dark to bright areas.
+
+
+
+    # Sharpen filter
+    - use_sharpen:
+        type: bool
+        default: true
+        label: Sharpen Filter
+        description: >
+            Enables a sharpen filter, which tries to increase texture detail.
+
+    - sharpen_strength:
+        display_if: {use_sharpen: true}
+        type: float
+        range: [0.0, 5.0]
+        default: 0.5
+        shader_runtime: true
+        label: Sharpen Strength
+        description: >
+            Controls the strength of the sharpen filter.
+
+    - sharpen_twice:
+        display_if: {use_sharpen: true}
+        type: bool
+        default: false
+        label: Double-Sharpen
+        description: >
+            If this setting is true, the sharpen filter will be executed twice,
+            for an even stronger sharpen effect.
+
+
+daytime_settings: !!omap
+
+    - camera_iso:
+        type: scalar
+        unit: none
+        default: 100
+        range: [20, 4000]
+        label: Camera ISO
+        logarithmic_factor: 2.0
+        description: >
+            ISO value of the camera. Only has effect with manual camera parameters.
+
+    - camera_shutter:
+        type: scalar
+        unit: none
+        default: 125
+        range: [1, 200]
+        label: Camera Shutter Speed
+        description: >
+            The shutter speed of the camera. A value of 125 means a shutter
+            speed of 1 / 125 seconds. Only has effect with manual camera parameters.
+
+    - camera_aperture:
+        type: scalar
+        unit: none
+        default: 16
+        range: [1, 32]
+        label: Camera Aperture
+        description: >
+            Camera aperture, a value of 16 means an aperture of f/16.
+            Only has effect with manual camera parameters.

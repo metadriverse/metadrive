@@ -1,0 +1,29 @@
+
+# Render Pipeline Plugin Configuration
+# Instead of editing this file, prefer to use the Plugin Configurator
+# Any formatting and comments will be lost
+
+enabled:
+    # - ao
+    # - bloom
+    # - color_correction
+    # - env_probes
+    # - pssm
+    # - scattering
+    # - smaa
+    # - ssr
+    # - clouds
+    # - dof
+    - fxaa
+    # - motion_blur
+    # - skin_shading
+    # - volumetrics
+    # - vxgi
+
+
+overrides:
+    fxaa:
+        quality: ultra
+        subpixel_quality: 0.5
+        edge_threshold: 0.075
+        min_threshold: 0.7114

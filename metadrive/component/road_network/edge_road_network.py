@@ -106,10 +106,20 @@ class EdgeRoadNetwork(BaseRoadNetwork):
             assert id == lane_info.lane.index
             ret[id] = {
                 SD.POLYLINE: lane_info.lane.get_polyline(interval),
-                SD.POLYGON: lane_info.lane.get_polygon(),
+                SD.POLYGON: lane_info.lane.polygon,
                 SD.TYPE: MetaDriveType.LANE_SURFACE_STREET,
                 "speed_limit_kmh": lane_info.lane.speed_limit
             }
+        return ret
+
+    def get_all_lanes(self):
+        """
+        This function will return all lanes in the road network
+        :return: list of lanes
+        """
+        ret = []
+        for id, lane_info in self.graph.items():
+            ret.append(lane_info.lane)
         return ret
 
 

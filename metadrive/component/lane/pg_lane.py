@@ -23,6 +23,9 @@ class PGLane(AbstractLane):
         return self._shapely_polygon
 
     def construct_sidewalk(self, block, lateral):
+        if block.use_render_pipeline:
+            # donot construct sidewalk
+            return
         radius = self.radius
         segment_num = int(self.length / DrivableAreaProperty.SIDEWALK_LENGTH)
         for segment in range(segment_num):
@@ -49,12 +52,6 @@ class PGLane(AbstractLane):
     @property
     def polygon(self):
         raise NotImplementedError("Overwrite this function to allow getting polygon for this lane")
-
-    def get_polygon(self):
-        return self.polygon
-
-    def has_polygon(self):
-        return True if self.polygon is not None else False
 
     def point_on_lane(self, point):
         s_point = geometry.Point(point[0], point[1])

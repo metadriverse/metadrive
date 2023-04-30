@@ -1,0 +1,4 @@
+package: colorama
+version: 0.3.7
+downloaded: 17.03.2016
+url: https://github.com/tartley/colorama

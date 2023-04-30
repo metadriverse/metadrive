@@ -1,0 +1,48 @@
+
+settings: !!omap
+
+    - some_int_setting:
+        type: int
+        range: [0, 10]
+        default: 5
+        label: Some integer setting
+        description: Description of the setting.
+
+    - some_resolution_setting:
+        type: power_of_two
+        range: [4, 8192]
+        default: 32
+        label: Some resolution setting, must be power of two.
+        description: Description of the setting.
+
+    - some_float_setting:
+        type: float
+        range: [-5.3, 2.9]
+        default: 2.5
+        label: Some float setting
+        description: Description of the setting.
+        runtime: true
+
+    - some_enum:
+        type: enum
+        values: [value1, value2, value3]
+        default: value2
+        label: Some enum setting
+        description: Description of the setting.
+
+    - some_bool:
+        type: bool
+        default: false
+        label: Some boolean setting
+        description: Description of the setting.
+
+daytime_settings: !!omap
+
+    - some_scalar:
+        type: scalar
+        unit: percent
+        range: [0, 1]
+        default: 0.5
+        label: Some Scalar
+        description: Description of the scalar.
+

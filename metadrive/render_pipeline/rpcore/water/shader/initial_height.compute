@@ -1,0 +1,66 @@
+#version 430
+
+layout (local_size_x = 16, local_size_y = 16) in;
+ 
+const float M_PI = 3.14159265359;
+const float GRAV_ACCEL = 981.0;
+const float HALF_SQRT_2 = 0.7071068;
+
+uniform writeonly image2D dest;
+uniform int N;
+
+uniform float patchLength;
+uniform vec2 windDir;
+uniform float windSpeed;
+uniform float waveAmplitude;
+uniform float windDependency;
+
+
+uniform sampler2D randomTex;
+
+// Phillips Spectrum
+// K: normalized wave vector, W: wind direction, v: wind velocity, a: amplitude constant
+float Phillips(vec2 K, vec2 W, float v, float a, float dir_depend)
+{
+  // largest possible wave from constant wind of velocity v
+  float l = v * v / GRAV_ACCEL;
+  // damp out waves with very small length w << l
+  float w = l / 1000.0;
+  float Ksqr = K.x * K.x + K.y * K.y;
+  float Kcos = K.x * W.x + K.y * W.y;
+  float phillips = a * exp(-1.0 / (l * l * Ksqr)) / (Ksqr * Ksqr * Ksqr) * (Kcos * Kcos);
+
+  // filter out waves moving opposite to wind
+  if (Kcos < 0.0)
+    phillips *= dir_depend;
+
+  // damp out waves with very small length w << l
+  return phillips * exp(-Ksqr * w * w);
+}
+
+
+
+void main() {
+  ivec2 texelCoords = ivec2(gl_GlobalInvocationID.xy);
+  vec4 result = vec4(0,1,0,1);
+
+  vec4 gaussianRandom = texelFetch(randomTex, texelCoords, 0) * 10.0 - 5.0;
+  vec2 K = vec2(
+      (-float(N) / 2.0 + float(texelCoords.x)) * (2.0 * M_PI / patchLength),
+      (-float(N) / 2.0 + float(texelCoords.y)) * (2.0 * M_PI / patchLength)
+
+    );
+
+  float phil = (K.x == 0.0 && K.y == 0.0) ? 0.0 : sqrt(Phillips(K, windDir, windSpeed, waveAmplitude, windDependency));  
+
+  // H0 Real
+  result.x = phil * gaussianRandom.x * HALF_SQRT_2;
+
+  // H0 Imag
+  result.y = phil * gaussianRandom.y * HALF_SQRT_2;
+
+  // Omega
+  result.z = sqrt(GRAV_ACCEL * sqrt(K.x * K.x + K.y * K.y));
+
+  imageStore(dest, texelCoords, result);
+}

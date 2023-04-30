@@ -19,6 +19,7 @@ from metadrive.engine.core.onscreen_message import ScreenMessage
 from metadrive.engine.core.physics_world import PhysicsWorld
 from metadrive.engine.core.sky_box import SkyBox
 from metadrive.engine.core.terrain import Terrain
+from metadrive.render_pipeline.rpcore import RenderPipeline
 from metadrive.utils.utils import is_mac, setup_logger
 
 
@@ -104,14 +105,15 @@ class EngineCore(ShowBase.ShowBase):
             self.mode = RENDER_MODE_ONSCREEN
             # Warning it may cause memory leak, Pand3d Official has fixed this in their master branch.
             # You can enable it if your panda version is latest.
-            if self.global_config["multi_thread_render"]:
+            if self.global_config["multi_thread_render"] and not self.use_render_pipeline:
                 # multi-thread render, accelerate simulation
                 loadPrcFileData("", "threading-model {}".format(self.global_config["multi_thread_render_mode"]))
         else:
             self.global_config["show_coordinates"] = False
             if self.global_config["image_observation"]:
                 self.mode = RENDER_MODE_OFFSCREEN
-                if self.global_config["multi_thread_render"]:
+                if self.global_config["multi_thread_render"] and not self.use_render_pipeline:
+                    # render-pipeline can not work with multi-thread rendering
                     loadPrcFileData("", "threading-model {}".format(self.global_config["multi_thread_render_mode"]))
                 if self.global_config["vehicle_config"]["image_source"] != "main_camera":
                     # reduce size as we don't use the main camera content for improving efficiency
@@ -127,6 +129,13 @@ class EngineCore(ShowBase.ShowBase):
             self.mode = RENDER_MODE_ONSCREEN
 
         loadPrcFileData("", "win-size {} {}".format(*self.global_config["window_size"]))
+
+        if self.use_render_pipeline:
+            self.render_pipeline = RenderPipeline()
+            self.render_pipeline.pre_showbase_init()
+        else:
+            self.render_pipeline = None
+
         # Setup some debug options
         # if self.global_config["headless_machine_render"]:
         #     # headless machine support
@@ -150,12 +159,12 @@ class EngineCore(ShowBase.ShowBase):
                 self.accept('1', self.toggleDebug)
                 self.accept('4', self.toggleAnalyze)
 
-        if self.global_config["disable_model_compression"]:
-            pass
-        else:
+        if not self.global_config["disable_model_compression"] and not self.use_render_pipeline:
             loadPrcFileData("", "compressed-textures 1")  # Default to compress
 
         super(EngineCore, self).__init__(windowType=self.mode)
+        if self.use_render_pipeline and self.mode != RENDER_MODE_NONE:
+            self.render_pipeline.create(self)
 
         # main_window_position = (0, 0)
         if self.mode == RENDER_MODE_ONSCREEN:
@@ -186,21 +195,23 @@ class EngineCore(ShowBase.ShowBase):
         if self.mode == RENDER_MODE_ONSCREEN:
             self.disableMouse()
 
-        if not self.global_config["debug_physics_world"] and (self.mode in [RENDER_MODE_ONSCREEN, RENDER_MODE_OFFSCREEN
-                                                                            ]):
+        if not self.global_config["debug_physics_world"] \
+                and (self.mode in [RENDER_MODE_ONSCREEN, RENDER_MODE_OFFSCREEN]):
             initialize_asset_loader(self)
             gltf.patch_loader(self.loader)
+            if not self.use_render_pipeline:
+                gltf.patch_loader(self.loader)
 
-            # Display logo
-            if self.mode == RENDER_MODE_ONSCREEN and (not self.global_config["debug"]):
-                if self.global_config["show_logo"]:
-                    self._window_logo = attach_logo(self)
-                self._loading_logo = attach_cover_image(
-                    window_width=self.get_size()[0], window_height=self.get_size()[1]
-                )
-                for i in range(5):
-                    self.graphicsEngine.renderFrame()
-                self.taskMgr.add(self.remove_logo, "remove _loading_logo in first frame")
+                # Display logo
+                if self.mode == RENDER_MODE_ONSCREEN and (not self.global_config["debug"]):
+                    if self.global_config["show_logo"]:
+                        self._window_logo = attach_logo(self)
+                    self._loading_logo = attach_cover_image(
+                        window_width=self.get_size()[0], window_height=self.get_size()[1]
+                    )
+                    for i in range(5):
+                        self.graphicsEngine.renderFrame()
+                    self.taskMgr.add(self.remove_logo, "remove _loading_logo in first frame")
 
         self.closed = False
 
@@ -231,35 +242,51 @@ class EngineCore(ShowBase.ShowBase):
         self.force_fps = ForceFPS(self)
 
         # init terrain
-        self.terrain = Terrain(self.global_config["show_terrain"])
-        self.terrain.attach_to_world(self.render, self.physics_world)
+        self.terrain = Terrain(self.global_config["show_terrain"], self)
+        # self.terrain.attach_to_world(self.render, self.physics_world)
+
+        self.sky_box = None
 
         # init other world elements
         if self.mode != RENDER_MODE_NONE:
+            if self.use_render_pipeline:
+                self.pbrpipe = None
+                if self.global_config["daytime"] is not None:
+                    self.render_pipeline.daytime_mgr.time = self.global_config["daytime"]
+            else:
+                from metadrive.engine.core.our_pbr import OurPipeline
+                self.pbrpipe = OurPipeline(
+                    render_node=None,
+                    window=None,
+                    camera_node=None,
+                    msaa_samples=16,
+                    max_lights=8,
+                    use_normal_maps=False,
+                    use_emission_maps=True,
+                    exposure=1.0,
+                    enable_shadows=False,
+                    enable_fog=False,
+                    use_occlusion_maps=False
+                )
+                self.pbrpipe.render_node = self.pbr_render
+                self.pbrpipe.render_node.set_antialias(AntialiasAttrib.M_auto)
+                self.pbrpipe._recompile_pbr()
+                # self.pbrpipe.manager.cleanup()
+                #
+                # # filter
+                # from direct.filter.CommonFilters import CommonFilters
+                # self.common_filter = CommonFilters(self.win, self.cam)
+                # self.common_filter.set_gamma_adjust(0.8)
 
-            from metadrive.engine.core.our_pbr import OurPipeline
-            self.pbrpipe = OurPipeline(
-                render_node=None,
-                window=None,
-                camera_node=None,
-                msaa_samples=16,
-                max_lights=8,
-                use_normal_maps=False,
-                use_emission_maps=True,
-                exposure=1.0,
-                enable_shadows=False,
-                enable_fog=False,
-                use_occlusion_maps=False
-            )
-            self.pbrpipe.render_node = self.pbr_render
-            self.pbrpipe.render_node.set_antialias(AntialiasAttrib.M_auto)
-            self.pbrpipe._recompile_pbr()
-            # self.pbrpipe.manager.cleanup()
-            #
-            # # filter
-            # from direct.filter.CommonFilters import CommonFilters
-            # self.common_filter = CommonFilters(self.win, self.cam)
-            # self.common_filter.set_gamma_adjust(0.8)
+                self.sky_box = SkyBox(not self.global_config["show_skybox"])
+                self.sky_box.attach_to_world(self.render, self.physics_world)
+
+                self.world_light = Light(self.global_config)
+                self.world_light.attach_to_world(self.render, self.physics_world)
+                self.render.setLight(self.world_light.direction_np)
+                self.render.setLight(self.world_light.ambient_np)
+                self.render.setShaderAuto()
+                self.render.setAntialias(AntialiasAttrib.MAuto)
 
             # set main cam
             self.cam.node().setCameraMask(CamMask.MainCam)
@@ -267,17 +294,6 @@ class EngineCore(ShowBase.ShowBase):
             self.cam.node().getDisplayRegion(0).setClearColor(BKG_COLOR)
             lens = self.cam.node().getLens()
             lens.setFov(80)
-
-            self.sky_box = SkyBox(not self.global_config["show_skybox"])
-            self.sky_box.attach_to_world(self.render, self.physics_world)
-
-            self.world_light = Light(self.global_config)
-            self.world_light.attach_to_world(self.render, self.physics_world)
-            self.render.setLight(self.world_light.direction_np)
-            self.render.setLight(self.world_light.ambient_np)
-
-            self.render.setShaderAuto()
-            self.render.setAntialias(AntialiasAttrib.MAuto)
 
             # ui and render property
             if self.global_config["show_fps"]:
@@ -312,7 +328,7 @@ class EngineCore(ShowBase.ShowBase):
 
         if self.on_screen_message is not None:
             self.on_screen_message.render(text)
-        if self.mode == RENDER_MODE_ONSCREEN:
+        if self.mode != RENDER_MODE_NONE and self.sky_box is not None:
             self.sky_box.step()
 
     def step_physics_world(self):
@@ -449,6 +465,10 @@ class EngineCore(ShowBase.ShowBase):
             return
         for line in self.coordinate_line:
             line.setPos(pos[0], pos[1], 0)
+
+    @property
+    def use_render_pipeline(self):
+        return self.global_config["render_pipeline"] and not self.mode == RENDER_MODE_NONE
 
 
 if __name__ == "__main__":

@@ -157,6 +157,10 @@ BASE_DEFAULT_CONFIG = dict(
     # when possible. But it is possible that some classes of objects are always forcefully respawn
     # and thus those used objects are stored in the buffer and never be reused.
     num_buffering_objects=200,
+    # turn on to use render pipeline, which provides advanced rendering effects (Beta)
+    render_pipeline=False,
+    # daytime is only available when using render-pipeline
+    daytime=None,  # use string like "13:40", We usually set this by editor in toolkit
 
     # ===== Others =====
     # The maximum distance used in PGLOD. Set to None will use the default values.
@@ -546,7 +550,7 @@ class BaseEnv(gym.Env):
         Engine setting after launching
         """
         self.engine.accept("r", self.reset)
-        self.engine.accept("c", self.capture)
+        # self.engine.accept("c", self.capture)
         self.engine.register_manager("agent_manager", self.agent_manager)
         self.engine.register_manager("record_manager", RecordManager())
         self.engine.register_manager("replay_manager", ReplayManager())

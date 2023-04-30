@@ -124,6 +124,10 @@ class MetaDriveType:
         ]
 
     @classmethod
+    def is_white_line(cls, line):
+        return MetaDriveType.is_road_line(line) and not MetaDriveType.is_yellow_line(line)
+
+    @classmethod
     def is_broken_line(cls, line):
         return line in [cls.LINE_BROKEN_DOUBLE_YELLOW, cls.LINE_BROKEN_SINGLE_YELLOW, cls.LINE_BROKEN_SINGLE_WHITE]
 

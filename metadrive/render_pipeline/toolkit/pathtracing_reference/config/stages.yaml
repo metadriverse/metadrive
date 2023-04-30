@@ -1,0 +1,61 @@
+
+# This file controls the order of all render stages.
+# Usually you do not have to modify this, except if you are adding new plugins.
+# If you move stages, you should know what you do.
+# Commenting out a stage won't disable it, but instead produce an error when
+# it is created.
+
+global_stage_order:
+
+  # Shadows, Environment and Voxelization
+  - PSSMShadowStage
+  - PSSMDistShadowStage
+  - PSSMSceneShadowStage
+  - ScatteringEnvmapStage
+  - EnvironmentCaptureStage
+  - VoxelizationStage
+
+  # Main scene
+  - GBufferStage
+  - ShadowStage
+  - DownscaleZStage
+  - CombineVelocityStage
+
+  # Light(-culling)
+  - FlagUsedCellsStage
+  - CollectUsedCellsStage
+  - CullLightsStage
+  - CullProbesStage
+
+  # Plugins
+  - CloudVoxelStage
+  - AOStage
+  - ApplyLightsStage
+  - PSSMStage
+  - ScatteringStage
+  - ApplyEnvprobesStage
+  - VXGIStage
+  - SSRStage
+  - SSSRStage
+  - AmbientStage
+  - ApplyCloudsStage
+  - GodrayStage
+  - VolumetricsStage
+  - AutoExposureStage
+  - ManualExposureStage
+
+  # Post AA & Effects
+  - BloomStage
+  - TonemappingStage
+  - SMAAStage
+  - FXAAStage
+  - DoFStage
+  - MotionBlurStage
+  - SkinShadingStage
+  - SharpenStage
+  - ColorCorrectionStage
+
+  # Finishing stages, do not insert anything below
+  - UpscaleStage
+  - FinalStage
+  - UpdatePreviousPipesStage

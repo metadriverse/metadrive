@@ -512,3 +512,7 @@ class BaseObject(BaseRunnable):
         p3 = self.convert_to_world_coordinates([-self.LENGTH / 2, -self.WIDTH / 2], self.position)
         p4 = self.convert_to_world_coordinates([-self.LENGTH / 2, self.WIDTH / 2], self.position)
         return [p1, p2, p3, p4]
+
+    @property
+    def use_render_pipeline(self):
+        return self.engine is not None and self.engine.use_render_pipeline

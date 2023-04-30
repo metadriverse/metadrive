@@ -1,0 +1,48 @@
+#version 430
+
+layout (local_size_x = 16, local_size_y = 16) in;
+ 
+uniform writeonly image2D outH0x;
+uniform writeonly image2D outH0y;
+uniform writeonly image2D outH0z;
+
+uniform sampler2D initialHeight;
+
+uniform float time;
+uniform int N;
+
+void main() {
+  ivec2 texelCoords = ivec2(gl_GlobalInvocationID.xy);
+
+  vec3 sample0 = texelFetch(initialHeight, texelCoords, 0).xyz;
+  vec2 h0_k = sample0.xy;
+
+  vec2 h0_mk = texelFetch(initialHeight, ivec2(-texelCoords + N) , 0).xy;
+
+
+  float omega = sample0.z * time;
+  float sin_v = sin(omega);
+  float cos_v = cos(omega);
+
+  vec2 ht;
+  ht.x = (h0_k.x + h0_mk.x) * cos_v - (h0_k.y + h0_mk.y) * sin_v;
+  ht.y = (h0_k.x - h0_mk.x) * sin_v + (h0_k.y - h0_mk.y) * cos_v;
+
+  // H(t) -> Dx(t), Dy(t)
+  float kx = float(texelCoords.x - N * 0.5);
+  float ky = float(texelCoords.y - N * 0.5);
+  float sqr_k = kx * kx + ky * ky;
+  float rsqr_k = 0;
+  if (sqr_k > 1e-12)
+    rsqr_k = 1 / sqrt(sqr_k);
+
+  //float rsqr_k = 1 / sqrtf(kx * kx + ky * ky);
+  kx *= rsqr_k;
+  ky *= rsqr_k;
+  vec2 dt_x = vec2(ht.y * kx, -ht.x * kx);
+  vec2 dt_y = vec2(ht.y * ky, -ht.x * ky);
+
+  imageStore(outH0x, texelCoords, vec4(dt_x, 0, 0));
+  imageStore(outH0y, texelCoords, vec4(dt_y, 0, 0));
+  imageStore(outH0z, texelCoords, vec4(ht, 0, 0));
+}
