@@ -20,7 +20,7 @@ if __name__ == "__main__":
             # "pstats": True,
             "render_pipeline": True,
             # "pstats": True,
-            "daytime": "07:00",
+            "daytime": "06:00",
             # "no_traffic": True,
             # "no_light": False,
             # "debug":True,
@@ -54,7 +54,7 @@ if __name__ == "__main__":
     success = []
     while True:
         env.reset(force_seed=0)
-        env.engine.force_fps.disable()
+        # env.engine.force_fps.disable()
         for t in range(10000):
             o, r, d, info = env.step([0, 0])
             # env.capture("nuscenes_{:03d}.png".format(t))

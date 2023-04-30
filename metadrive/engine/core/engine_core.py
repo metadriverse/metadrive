@@ -6,6 +6,9 @@ from typing import Optional, Union, Tuple
 import gltf
 from direct.gui.OnscreenImage import OnscreenImage
 from direct.showbase import ShowBase
+from panda3d.bullet import BulletDebugNode
+from panda3d.core import AntialiasAttrib, loadPrcFileData, LineSegs, PythonCallbackObject, Vec3, NodePath
+
 from metadrive.constants import RENDER_MODE_OFFSCREEN, RENDER_MODE_NONE, RENDER_MODE_ONSCREEN, EDITION, CamMask, \
     BKG_COLOR
 from metadrive.engine.asset_loader import initialize_asset_loader, close_asset_loader, randomize_cover, get_logo_file
@@ -18,8 +21,6 @@ from metadrive.engine.core.sky_box import SkyBox
 from metadrive.engine.core.terrain import Terrain
 from metadrive.render_pipeline.rpcore import RenderPipeline
 from metadrive.utils.utils import is_mac, setup_logger
-from panda3d.bullet import BulletDebugNode
-from panda3d.core import AntialiasAttrib, loadPrcFileData, LineSegs, PythonCallbackObject, Vec3, NodePath
 
 
 def _suppress_warning():
@@ -162,7 +163,7 @@ class EngineCore(ShowBase.ShowBase):
             loadPrcFileData("", "compressed-textures 1")  # Default to compress
 
         super(EngineCore, self).__init__(windowType=self.mode)
-        if self.use_render_pipeline and self.mode!=RENDER_MODE_NONE:
+        if self.use_render_pipeline and self.mode != RENDER_MODE_NONE:
             self.render_pipeline.create(self)
 
         # main_window_position = (0, 0)
@@ -250,7 +251,8 @@ class EngineCore(ShowBase.ShowBase):
         if self.mode != RENDER_MODE_NONE:
             if self.use_render_pipeline:
                 self.pbrpipe = None
-                self.render_pipeline.daytime_mgr.time = self.global_config["daytime"]
+                if self.global_config["daytime"] is not None:
+                    self.render_pipeline.daytime_mgr.time = self.global_config["daytime"]
             else:
                 from metadrive.engine.core.our_pbr import OurPipeline
                 self.pbrpipe = OurPipeline(

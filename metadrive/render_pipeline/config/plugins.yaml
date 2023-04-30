@@ -8,29 +8,27 @@ enabled:
     - clouds
     - color_correction
     - dof
-    - forward_shading
+    - env_probes
     - fxaa
     - pssm
     - scattering
-    - skin_shading
     - sky_ao
     - smaa
-# screen space reflection ssr is for a better reflection
-#    - ssr
     # - bloom
-    - env_probes
+    # - forward_shading
     # - motion_blur
-#    - volumetrics
-# vxgi is global illumination
-#    - vxgi
+    # - skin_shading
+    # - ssr
+    # - volumetrics
+    # - vxgi
 
 
 overrides:
     ao:
         blur_quality: ULTRA
-        blur_normal_factor: 1.2
-        blur_depth_factor: 0.9
-        occlusion_strength: 1.6
+        blur_normal_factor: 2.08
+        blur_depth_factor: 2.34
+        occlusion_strength: 0.1
         clip_length: 2
         technique: SSAO
         ssao_sample_radius: 80.0
@@ -62,7 +60,7 @@ overrides:
         raymarch_steps: 160
 
     color_correction:
-        tonemap_operator: optimized
+        tonemap_operator: exponential
         reinhard_version: rgb
         exponential_factor: 1.23
         uc2t_shoulder_strength: 0.3352
@@ -79,13 +77,13 @@ overrides:
         chromatic_aberration_strength: 0.019
         chromatic_aberration_samples: 1
         manual_camera_parameters: False
-        min_exposure_value: 0.01
+        min_exposure_value: 0.0101
         max_exposure_value: 1.0
         exposure_scale: 1.0
         brightness_adaption_rate: 3.6
         darkness_adaption_rate: 0.7
         use_sharpen: True
-        sharpen_strength: 0.5
+        sharpen_strength: 0.99
         sharpen_twice: False
 
     dof:
@@ -103,7 +101,7 @@ overrides:
     forward_shading:
 
     fxaa:
-        quality: low
+        quality: medium
         subpixel_quality: 0.5
         edge_threshold: 0.1853
         min_threshold: 0.833
@@ -118,34 +116,34 @@ overrides:
         num_samples: 12
 
     pssm:
-        max_distance: 50.0
-        logarithmic_factor: 3.0
-        sun_distance: 100.0
+        max_distance: 200.0
+        logarithmic_factor: 2.37
+        sun_distance: 200.0
         split_count: 4
         resolution: 1024
-        border_bias: 0.058
+        border_bias: 0.0558
         use_pcf: True
         filter_sequence: halton_2D_32
-        filter_radius: 0.7
-        fixed_bias: 0.11429
-        slope_bias: 0.0
-        normal_bias: 0.67
+        filter_radius: 1.38
+        fixed_bias: 0.4928
+        slope_bias: 1.11
+        normal_bias: 0.43
         use_pcss: False
         pcss_sequence: halton_2D_16
         pcss_penumbra_size: 2.38
         pcss_min_penumbra_size: 7.0
         use_distant_shadows: True
-        dist_shadow_resolution: 4096
-        dist_shadow_clipsize: 400.0
+        dist_shadow_resolution: 1024
+        dist_shadow_clipsize: 1000.1
         dist_shadow_sundist: 300.0
         scene_shadow_resolution: 512
         scene_shadow_sundist: 300.0
 
     scattering:
         scattering_method: eric_bruneton
-        ground_reflectance: 0.1231
-        rayleigh_factor: 0.5
-        rayleigh_height_scale: 8.0
+        ground_reflectance: 0.1391
+        rayleigh_factor: 0.6007
+        rayleigh_height_scale: 9.0
         mie_height_scale: 1.3
         mie_phase_factor: 0.3
         beta_mie_scattering: 4.0
