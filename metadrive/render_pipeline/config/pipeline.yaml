@@ -8,7 +8,7 @@ pipeline:
     # it will also disable the hotkeys, and give a small performance boost.
     # Most likely you also don't want to show it in your own game, so set
     # it to false in that case.
-    display_debugger: true
+    display_debugger: false
 
     # Affects which debugging information is displayed. If this is set to false,
     # only frame time is displayed, otherwise much more information is visible.
@@ -52,12 +52,12 @@ lighting:
     # distance, no lights are rendered anymore. If you choose a lower
     # distance, this *can* positively impact performance, but you should not
     # set it too low, to avoid getting artifacts.
-    culling_max_distance: 1000
+    culling_max_distance: 500
 
     # Controls the size of a slice in culling. Lower values might produce
     # better performance for less amount of lights, but higher values should
     # be used when using many lights, e.g. > 1024, to get better coherency.
-    culling_slice_width: 2048
+    culling_slice_width: 1024
 
     # Controls the maximum amount of lights for each cell. If this value
     # is set too low, you might get artifacts when having many lights.
