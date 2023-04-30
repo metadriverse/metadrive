@@ -3,7 +3,7 @@ import pickle
 import time
 from collections import OrderedDict
 from typing import Callable, Optional, Union, List, Dict, AnyStr
-from metadrive.constants import RENDER_MODE_NONE
+
 import numpy as np
 from panda3d.core import NodePath, Vec3
 
@@ -317,11 +317,10 @@ class BaseEngine(EngineCore, Randomizable):
                 #     self.main_camera.stop_track(bird_view_on_current_position=False)
 
         # reset terrain
-        if self.mode != RENDER_MODE_NONE:
-            center_p = self.current_map.get_center_point()
-            self.terrain.update_terrain(center_p)
-            if self.sky_box is not None:
-                self.sky_box.set_position(center_p)
+        center_p = self.current_map.get_center_point()
+        self.terrain.reset(center_p)
+        if self.sky_box is not None:
+            self.sky_box.set_position(center_p)
 
         self.taskMgr.step()
 

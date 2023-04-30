@@ -4,6 +4,7 @@ import math
 
 import numpy as np
 from panda3d.bullet import BulletRigidBodyNode, BulletPlaneShape
+from panda3d.bullet import ZUp, BulletHeightfieldShape
 from panda3d.core import SamplerState, PNMImage, CardMaker, LQuaternionf
 from panda3d.core import Vec3, ShaderTerrainMesh, Texture, TextureStage
 
@@ -23,17 +24,12 @@ class Terrain(BaseObject):
     def __init__(self, show_terrain, engine):
         use_render_pipeline = engine.use_render_pipeline
         super(Terrain, self).__init__(random_seed=0)
-        shape = BulletPlaneShape(Vec3(0, 0, 1), -0.05)
-        node = BulletRigidBodyNode(MetaDriveType.GROUND)
-        node.setFriction(.9)
-        node.addShape(shape)
 
-        node.setIntoCollideMask(self.COLLISION_MASK)
-        self.dynamic_nodes.append(node)
+        # collision mesh
+        self.simple_terrain_collision_mesh = None  # a flat collision shape
+        self.terrain_collision_mesh = None  # a 3d mesh
 
-        np = self.origin.attachNewNode(node)
-        self._node_path_list.append(np)
-
+        # visualization mesh
         self._mesh_terrain = None
         self._mesh_terrain_height = None
         self._mesh_terrain_node = None
@@ -134,15 +130,15 @@ class Terrain(BaseObject):
         self.yellow_lane_line.load(yellow_lane_line)
 
     # @time_me
-    def _generate_mesh_terrain(self,
-                               size,
-                               heightfield: Texture,
-                               attribute_tex: Texture,
-                               target_triangle_width=10,
-                               height_scale=100,
-                               height_offset=0.,
-                               engine=None,
-                               ):
+    def _generate_mesh_vis_terrain(self,
+                                   size,
+                                   heightfield: Texture,
+                                   attribute_tex: Texture,
+                                   target_triangle_width=10,
+                                   height_scale=100,
+                                   height_offset=0.,
+                                   engine=None,
+                                   ):
         """
         Given a height field map to generate terrain and an attribute_tex to texture terrain, so we can get road/grass
         pixels_per_meter is determined by heightfield.size/size
@@ -211,14 +207,32 @@ class Terrain(BaseObject):
             self._terrain_shader_set = True
         self._mesh_terrain.set_shader_input("attribute_tex", attribute_tex)
 
-    def update_terrain(self, center_position):
+    def reset(self, center_position):
         """
         Update terrain according to current map
         """
         assert self.engine is not None, "Can not call this without initializing engine"
-        if not self.render:
-            return
+
+        # if not self.use_render_pipeline and self.simple_terrain_collision_mesh is None:
+        # TODO: I disabled online terrain collision mesh generation now, consider enabling it in the future
+        if self.simple_terrain_collision_mesh is None:
+            self.detach_from_world(self.engine.physics_world)
+            # If no render pipeline, we can only have 2d terrain. It will only be generated for once.
+            shape = BulletPlaneShape(Vec3(0, 0, 1), -0.05)
+            node = BulletRigidBodyNode(MetaDriveType.GROUND)
+            node.setFriction(.9)
+            node.addShape(shape)
+
+            node.setIntoCollideMask(self.COLLISION_MASK)
+            self.dynamic_nodes.append(node)
+
+            self.simple_terrain_collision_mesh = self.origin.attachNewNode(node)
+            self._node_path_list.append(np)
+            self.attach_to_world(self.engine.render, self.engine.physics_world)
+
+        # elif self.use_render_pipeline:
         if self.use_render_pipeline:
+            self.detach_from_world(self.engine.physics_world)
             texture_size = 512
             terrain_size = 2048
             height_scale = self.height_scale
@@ -252,13 +266,46 @@ class Terrain(BaseObject):
             heightfield_tex = Texture()
             heightfield_tex.setup2dTexture(*heightfield.shape[:2], Texture.TShort, Texture.FLuminance)
             heightfield_tex.setRamImage(heightfield)
-            self._generate_mesh_terrain(terrain_size,
-                                        heightfield_tex,
-                                        semantic_tex,
-                                        height_scale=height_scale,
-                                        height_offset=0)
+
+            # # update collision every time!
+            # TODO: I disabled online terrain collision mesh generation now, consider enabling it in the future
+            # self._generate_collision_mesh(heightfield_img, self.height_scale)
+            self._generate_mesh_vis_terrain(terrain_size,
+                                            heightfield_tex,
+                                            semantic_tex,
+                                            height_scale=height_scale,
+                                            height_offset=0)
+            self.attach_to_world(self.engine.render, self.engine.physics_world)
 
         self.set_position(center_position)
+
+    def _generate_collision_mesh(self, heightfield_img, height_scale):
+        # TODO we can do some optimization here, only update some regions
+        # clear previous mesh
+        self.dynamic_nodes.clear()
+        mesh = np.zeros([heightfield_img.shape[0] + 1, heightfield_img.shape[1] + 1, 1])
+        mesh[:heightfield_img.shape[0], :heightfield_img.shape[1]] = heightfield_img
+        mesh = mesh.astype(np.uint16)
+
+        heightfield_tex = Texture()
+        heightfield_tex.setup2dTexture(*mesh.shape[:2], Texture.TShort, Texture.FLuminance)
+        heightfield_tex.setRamImage(mesh)
+
+        p = PNMImage()
+        heightfield_tex.store(p)
+
+        shape = BulletHeightfieldShape(p, height_scale, ZUp)
+        shape.setUseDiamondSubdivision(True)
+
+        node = BulletRigidBodyNode(MetaDriveType.GROUND)
+        node.setFriction(.9)
+        node.addShape(shape)
+
+        node.setIntoCollideMask(CollisionGroup.Terrain)
+        self.dynamic_nodes.append(node)
+
+        self.terrain_collision_mesh = self.origin.attachNewNode(node)
+        self._node_path_list.append(np)
 
     def set_position(self, position, height=None):
         if self.render:

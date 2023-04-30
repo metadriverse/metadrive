@@ -242,7 +242,7 @@ class EngineCore(ShowBase.ShowBase):
 
         # init terrain
         self.terrain = Terrain(self.global_config["show_terrain"], self)
-        self.terrain.attach_to_world(self.render, self.physics_world)
+        # self.terrain.attach_to_world(self.render, self.physics_world)
 
         self.sky_box = None
 
