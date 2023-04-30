@@ -23,6 +23,9 @@ class PGLane(AbstractLane):
         return self._shapely_polygon
 
     def construct_sidewalk(self, block, lateral):
+        if block.use_render_pipeline:
+            # donot construct sidewalk
+            return
         radius = self.radius
         segment_num = int(self.length / DrivableAreaProperty.SIDEWALK_LENGTH)
         for segment in range(segment_num):

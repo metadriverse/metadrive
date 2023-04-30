@@ -21,7 +21,7 @@ if __name__ == "__main__":
             # "image_observation": True,
             # "controller": "joystick",
             # "show_coordinates": True,
-            "random_agent_model": True,
+            # "random_agent_model": True,
             "manual_control": True,
             "use_render": True,
             "accident_prob": 1,
@@ -116,7 +116,6 @@ if __name__ == "__main__":
     for s in range(1, 100000):
         # env.vehicle.set_velocity([1, 0], in_local_frame=True)
         o, r, d, info = env.step([0, 0])
-        print(env.engine.terrain._mesh_terrain.getPos())
 
         # env.vehicle.set_pitch(-np.pi/4)
         # [0.09231533, 0.491018, 0.47076905, 0.7691619, 0.5, 0.5, 1.0, 0.0, 0.48037243, 0.8904728, 0.81229943, 0.7317231, 1.0, 0.85320455, 0.9747932, 0.65675277, 0.0, 0.5, 0.5]
