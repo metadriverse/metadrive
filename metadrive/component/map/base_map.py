@@ -1,8 +1,12 @@
 import logging
+import geopandas as gpd
 import math
 
 import cv2
 import numpy as np
+from shapely import affinity
+from shapely.geometry import Polygon
+
 from metadrive.base_class.base_runnable import BaseRunnable
 from metadrive.constants import MapTerrainSemanticColor, MetaDriveType, DrivableAreaProperty
 from metadrive.engine.engine_utils import get_global_config
@@ -62,6 +66,7 @@ class BaseMap(BaseRunnable):
 
         # save a backup
         self._semantic_map = None
+        self._height_map = None
 
         if self.engine.global_config["show_coordinates"]:
             self.show_coordinates()
@@ -151,13 +156,12 @@ class BaseMap(BaseRunnable):
         :return: heightfield image
         """
         if self._semantic_map is None:
-            all_lenes = self.get_map_features(interval=line_sample_interval)
+            all_lanes = self.get_map_features(interval=line_sample_interval)
             polygons = []
             polylines = []
-            center_p = self.get_center_point()
 
             points_to_skip = math.floor(DrivableAreaProperty.STRIPE_LENGTH * 2 / line_sample_interval)
-            for obj in all_lenes.values():
+            for obj in all_lanes.values():
                 if MetaDriveType.is_lane(obj["type"]) and "lane" in layer:
                     polygons.append((obj["polygon"], MapTerrainSemanticColor.get_color(obj["type"])))
                 elif "lane_line" in layer and (
@@ -189,3 +193,45 @@ class BaseMap(BaseRunnable):
                 cv2.polylines(mask, np.array([points]).astype(np.int32), False, color, polyline_thickness)
             self._semantic_map = mask
         return self._semantic_map
+
+    def get_height_map(self, size=2048,
+                       pixels_per_meter=1,
+                       extension=2,
+                       height=1,
+                       ):
+        """
+        Get semantics of the map
+        :param size: [m] length and width
+        :param pixels_per_meter: the returned map will be in (size*pixels_per_meter * size*pixels_per_meter) size
+        :param extension: If > 1, the returned height map's drivable region will be enlarged.
+        :param height: height of drivable area.
+        :return: heightfield image in uint 16 nparray
+        """
+        if self._height_map is None:
+            extension = max(1, extension)
+            all_lanes = self.get_map_features()
+            polygons = []
+
+            for obj in all_lanes.values():
+                if MetaDriveType.is_lane(obj["type"]):
+                    polygons.append(obj["polygon"])
+
+            size = int(size * pixels_per_meter)
+            mask = np.zeros([size, size, 1])
+
+            center_p = self.get_center_point()
+            need_scale = abs(extension - 1) > 1e-1
+            for polygon in polygons:
+                if need_scale:
+                    scaled_polygon = Polygon(polygon).buffer(extension, join_style=2)
+                    points = [
+                        [int((scaled_polygon.exterior.coords.xy[0][index] - center_p[0]) * pixels_per_meter + size / 2),
+                         int((scaled_polygon.exterior.coords.xy[1][index] - center_p[1]) * pixels_per_meter) + size / 2]
+                        for index in range(len(scaled_polygon.exterior.coords.xy[0]))]
+                else:
+                    points = [[int((x - center_p[0]) * pixels_per_meter + size / 2),
+                               int((y - center_p[1]) * pixels_per_meter) + size / 2]
+                              for x, y in polygon]
+                cv2.fillPoly(mask, np.asarray([points]).astype(np.int32), color=[height])
+            self._height_map = mask
+        return self._height_map

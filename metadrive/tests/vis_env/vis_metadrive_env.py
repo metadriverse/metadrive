@@ -1,11 +1,3 @@
-import numpy as np
-from metadrive.policy.idm_policy import IDMPolicy
-from metadrive.policy.expert_policy import ExpertPolicy
-from metadrive.component.vehicle_module.mini_map import MiniMap
-from metadrive.component.vehicle_module.rgb_camera import RGBCamera
-from metadrive.component.vehicle_module.depth_camera import DepthCamera
-from metadrive.component.vehicle_module.vehicle_panel import VehiclePanel
-
 from metadrive.envs.metadrive_env import MetaDriveEnv
 from metadrive.utils import setup_logger
 
@@ -14,7 +6,7 @@ if __name__ == "__main__":
     env = MetaDriveEnv(
         {
             "num_scenarios": 10,
-            "traffic_density": 0.2,
+            "traffic_density": 0.,
             "traffic_mode": "hybrid",
             "start_seed": 22,
             # "_disable_detector_mask":True,
@@ -22,7 +14,7 @@ if __name__ == "__main__":
             # "debug": True,
             # "global_light": False,
             # "debug_static_world": True,
-            "show_interface":False,
+            "show_interface": False,
             "cull_scene": False,
             "random_spawn_lane_index": False,
             "random_lane_width": False,
@@ -77,6 +69,29 @@ if __name__ == "__main__":
     )
     import time
 
+    speed = 8
+
+
+    def acc_speed():
+        global speed
+        speed *= 2
+
+
+    def de_speed():
+        global speed
+        speed /= 2
+
+
+    def lower_terrain():
+        pos = env.engine.terrain._mesh_terrain.getPos()
+        env.engine.terrain._mesh_terrain.set_pos(pos[0], pos[1], pos[2] - speed)
+
+
+    def lift_terrain():
+        pos = env.engine.terrain._mesh_terrain.getPos()
+        env.engine.terrain._mesh_terrain.set_pos(pos[0], pos[1], pos[2] + speed)
+
+
     init_state = {
         'position': (40.82264362985734, -509.3641208712943),
         'heading': -89.41878393159747,
@@ -85,18 +100,23 @@ if __name__ == "__main__":
     }
 
     start = time.time()
-    from metadrive.component.vehicle_module.rgb_camera import RGBCamera
+
     o = env.reset()
     if env.config["render_pipeline"]:
         env.engine.accept("5", env.engine.render_pipeline.reload_shaders)
+        env.engine.accept("7", acc_speed)
+        env.engine.accept("8", de_speed)
+        env.engine.accept("9", lift_terrain)
+        env.engine.accept("0", lower_terrain)
     # env.main_camera.set_follow_lane(True)
     # env.vehicle.get_camera("rgb_camera").save_image(env.vehicle)
     # for line in env.engine.coordinate_line:
     #     line.reparentTo(env.vehicle.origin)
     # env.vehicle.set_velocity([5, 0], in_local_frame=True)
-    for s in range(1, 10000):
+    for s in range(1, 100000):
         # env.vehicle.set_velocity([1, 0], in_local_frame=True)
         o, r, d, info = env.step([0, 0])
+        print(env.engine.terrain._mesh_terrain.getPos())
 
         # env.vehicle.set_pitch(-np.pi/4)
         # [0.09231533, 0.491018, 0.47076905, 0.7691619, 0.5, 0.5, 1.0, 0.0, 0.48037243, 0.8904728, 0.81229943, 0.7317231, 1.0, 0.85320455, 0.9747932, 0.65675277, 0.0, 0.5, 0.5]

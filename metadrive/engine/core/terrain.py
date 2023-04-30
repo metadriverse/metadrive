@@ -1,15 +1,17 @@
 # import numpy
+
 import math
 
 import numpy as np
 from panda3d.bullet import BulletRigidBodyNode, BulletPlaneShape
-from panda3d.core import SamplerState, Shader, PNMImage, CardMaker, LQuaternionf
+from panda3d.core import SamplerState, PNMImage, CardMaker, LQuaternionf
 from panda3d.core import Vec3, ShaderTerrainMesh, Texture, TextureStage
 
 from metadrive.base_class.base_object import BaseObject
 from metadrive.constants import CamMask
 from metadrive.constants import MetaDriveType, CollisionGroup
 from metadrive.engine.asset_loader import AssetLoader
+from metadrive.utils.terrain_generation.diamond_square import diamond_square
 
 
 class Terrain(BaseObject):
@@ -33,6 +35,7 @@ class Terrain(BaseObject):
         self._node_path_list.append(np)
 
         self._mesh_terrain = None
+        self._mesh_terrain_height = None
         self._mesh_terrain_node = None
         self._terrain_shader_set = False
         self.probe = None
@@ -70,7 +73,8 @@ class Terrain(BaseObject):
         # Road surface
         # self.road_texture = self.loader.loadTexture(AssetLoader.file_path("textures", "sci", "new_color.png"))
         self.road_texture = self.loader.loadTexture(AssetLoader.file_path("textures", "asphalt", "diff_2k.png"))
-        self.road_texture_normal = self.loader.loadTexture(AssetLoader.file_path("textures", "asphalt", "normal_2k.png"))
+        self.road_texture_normal = self.loader.loadTexture(
+            AssetLoader.file_path("textures", "asphalt", "normal_2k.png"))
         self.road_texture_rough = self.loader.loadTexture(AssetLoader.file_path("textures", "asphalt", "rough_2k.png"))
         v_wrap = Texture.WMRepeat
         u_warp = Texture.WMMirror
@@ -104,6 +108,7 @@ class Terrain(BaseObject):
                                attribute_tex: Texture,
                                target_triangle_width=10,
                                height_scale=100,
+                               height_offset=0.,
                                engine=None,
                                ):
         """
@@ -138,7 +143,8 @@ class Terrain(BaseObject):
         # Attach the terrain to the main scene and set its scale. With no scale
         # set, the terrain ranges from (0, 0, 0) to (1, 1, 1)
         self._mesh_terrain.set_scale(size, size, height_scale)
-        self._mesh_terrain.set_pos(-size / 2, -size / 2, 0)
+        self._mesh_terrain_height = height_offset
+        self._mesh_terrain.set_pos(-size / 2, -size / 2, self._mesh_terrain_height)
 
     def _set_terrain_shader(self, engine, attribute_tex):
         """
@@ -170,22 +176,44 @@ class Terrain(BaseObject):
         if not self.render:
             return
         if self.use_render_pipeline:
+            texture_size = 512
+            terrain_size = 2048
+            height_scale = 100
+            downsample_rate = 2
             assert self.engine.current_map is not None, "Can not find current map"
-            semantics = self.engine.current_map.get_semantic_map(size=512, pixels_per_meter=22, polyline_thickness=2,
+            semantics = self.engine.current_map.get_semantic_map(size=texture_size, pixels_per_meter=22,
+                                                                 polyline_thickness=2,
                                                                  layer=["lane", "lane_line"])
             semantics = semantics.astype(np.float32)
             semantic_tex = Texture()
             semantic_tex.setup2dTexture(*semantics.shape[:2], Texture.TFloat, Texture.FRgba)
             semantic_tex.setRamImage(semantics)
-            #
-            # heightfield_tex = self.loader.loadTexture(AssetLoader.file_path("textures", "terrain", "heightfield.png"))
-            terrain_size = 512
-            heightfield = np.zeros([terrain_size, terrain_size]).astype(np.uint16)
-            # heightfield[:10, :10] = 512
+
+            # we will downsmaple the precision after this
+            heightfield = self.engine.current_map.get_height_map(terrain_size, 2, 6)
+
+            heightfield_tex = self.loader.loadTexture(AssetLoader.file_path("textures", "terrain", "heightfield.png"))
+            heightfield_img = np.frombuffer(heightfield_tex.getRamImage().getData(), dtype=np.uint16)
+            heightfield_img = heightfield_img.reshape((heightfield_tex.getYSize(), heightfield_tex.getXSize(), 1))
+
+            drivable_region_height = np.mean(heightfield_img[np.where(heightfield)]).astype(np.uint16)
+            heightfield_img = np.where(heightfield, drivable_region_height, heightfield_img)
+
+            # set to zero height
+            heightfield_img -= drivable_region_height
+
+            # down sample
+            heightfield_img = np.array(heightfield_img[::downsample_rate, ::downsample_rate])
+            heightfield = heightfield_img
+
             heightfield_tex = Texture()
             heightfield_tex.setup2dTexture(*heightfield.shape[:2], Texture.TShort, Texture.FLuminance)
             heightfield_tex.setRamImage(heightfield)
-            self._generate_mesh_terrain(terrain_size, heightfield_tex, semantic_tex, height_scale=600)
+            self._generate_mesh_terrain(terrain_size,
+                                        heightfield_tex,
+                                        semantic_tex,
+                                        height_scale=height_scale,
+                                        height_offset=0)
 
         self.set_position(center_position)
 
@@ -193,7 +221,7 @@ class Terrain(BaseObject):
         if self.render:
             if self.use_render_pipeline:
                 pos = (self._mesh_terrain.get_pos()[0] + position[0], self._mesh_terrain.get_pos()[1] + position[1])
-                self._mesh_terrain.set_pos(*pos, 0)
+                self._mesh_terrain.set_pos(*pos, self._mesh_terrain_height)
                 if self.probe is not None:
                     self.probe.set_pos(*pos, self.PROBE_HEIGHT)
             else:
@@ -227,6 +255,32 @@ class Terrain(BaseObject):
         self.terrain_texture.setMinfilter(SamplerState.FT_linear_mipmap_linear)
         self.terrain_texture.setAnisotropicDegree(8)
         card.setQuat(LQuaternionf(math.cos(-math.pi / 4), math.sin(-math.pi / 4), 0, 0))
+
+    def _make_random_terrain(self, texture_size, terrain_size, heightfield):
+        height_1 = width_2 = height_3 = width_3 = length = int((terrain_size - texture_size) / 2)
+        width_1 = height_2 = width = texture_size
+        max_height = 8192
+        min_height = 0
+        roughness = 0.14
+
+        array_1 = diamond_square([height_1, width_1], min_height, max_height, roughness,
+                                 random_seed=self.generate_seed())
+        array_2 = diamond_square([height_2, width_2], min_height, max_height, roughness,
+                                 random_seed=self.generate_seed())
+
+        array_3 = diamond_square([height_3, width_3], min_height, max_height, roughness,
+                                 random_seed=self.generate_seed())
+
+        heightfield[:length, length:length + width] = array_1
+        heightfield[-length:, length:length + width] = array_1
+
+        heightfield[length:length + width, :length] = array_2
+        heightfield[length:length + width, -length:] = array_2
+
+        heightfield[:length, :length] = array_3
+        heightfield[-length:, :length] = array_3
+        heightfield[:length, -length:] = array_3
+        heightfield[-length:, -length:] = array_3
 
 # Some useful threads
 # GeoMipTerrain:

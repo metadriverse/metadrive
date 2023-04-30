@@ -12,7 +12,7 @@ from metadrive.utils.coordinates_shift import nuplan_to_metadrive_vector
 from metadrive.component.lane.point_lane import PointLane
 
 from metadrive.utils.interpolating_line import InterpolatingLine
-
+logger = logging.getLogger(__name__)
 
 class NuPlanLane(PointLane):
     def __init__(self, lane_meta_data, nuplan_center, need_lane_localization=False):
@@ -21,6 +21,7 @@ class NuPlanLane(PointLane):
         """
 
         if isinstance(lane_meta_data.polygon.boundary, MultiLineString):
+            logger.warning("Stop using boundaries! Use exterior instead!")
             boundary = gpd.GeoSeries(lane_meta_data.polygon.boundary).explode(index_parts=True)
             sizes = []
             for idx, polygon in enumerate(boundary[0]):
