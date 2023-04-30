@@ -1,0 +1,84 @@
+
+
+# This file stores internal settings of the pipeline. It does not contain the
+# plugin settings, but just the basic settings of the internal pipeline components.
+pipeline:
+
+    # This controls whether to show or hide the onscreen debugger. Not showing
+    # it will also disable the hotkeys, and give a small performance boost.
+    # Most likely you also don't want to show it in your own game, so set
+    # it to false in that case.
+    display_debugger: false
+
+    # Affects which debugging information is displayed. If this is set to false,
+    # only frame time is displayed, otherwise much more information is visible.
+    # Has no effect when display_debugger is set to false.
+    advanced_debugging_info: true
+
+    # Whether to use the GL_R11F_G11F_B10F texture format to save memory
+    # and bandwidth. Usually you want to enable this, however it can
+    # cause banding sometimes, in which case you can disable this setting.
+    use_r11_g11_b10: false
+
+    # Enables to render at a higher or lower resolution than the window size.
+    # A value of 2.0 for example renders at twice the resolution (supoersampling)
+    # whereas a value of 0.5 would render at half resolution.
+    resolution_scale: 1.0
+
+    # Whether to render in a special reference mode, which displays the
+    # environment map as a background, and disable special effects like color
+    # grading and so on. This is used by the pathtracing reference.
+    reference_mode: false
+
+# This are the settings affecting the lighting part of the pipeline,
+# including builtin shadows and lights.
+lighting:
+
+    # The pipeline uses clustered deferred shading, this means that the
+    # screen gets divided into tiles, and for each tile, the lights affecting
+    # that tile are accumulated. You can adjust the tile size here (in pixels),
+    # optimal is a tile size which is not too big (to avoid unecessary shading),
+    # but also not too small (to avoid excessive culling).
+    culling_grid_size_x: 24
+    culling_grid_size_y: 16
+
+    # The view frustum is additionally divived into slices, to be able to do
+    # better culling. If you use a higher amount of slices, the culling will
+    # get more exact, but also more expensive. You have to find the optimal
+    # size depending on your scene.
+    culling_grid_slices: 32
+
+    # This controls the maximum culling distance in world space. After this
+    # distance, no lights are rendered anymore. If you choose a lower
+    # distance, this *can* positively impact performance, but you should not
+    # set it too low, to avoid getting artifacts.
+    culling_max_distance: 500
+
+    # Controls the size of a slice in culling. Lower values might produce
+    # better performance for less amount of lights, but higher values should
+    # be used when using many lights, e.g. > 1024, to get better coherency.
+    culling_slice_width: 1024
+
+    # Controls the maximum amount of lights for each cell. If this value
+    # is set too low, you might get artifacts when having many lights.
+    # In general, try to set this value as low as possible without getting
+    # artifacts
+    max_lights_per_cell: 64
+
+shadows:
+
+    # The size of the global shadow atlas, used for point and spot light
+    # shadows. This should be a power of 2.
+    atlas_size: 4096
+
+    # Maximum of shadow updates which may occur at one time. All updates
+    # which are beyond that count will get delayed to the next frame.
+    # If you set this too low, artifacts may occur because of shadows not
+    # getting updated fast enough. However, this also affects the performance
+    # quite a bit, since for every shadow map a part of the scene has
+    # to get re-rendered.
+    max_updates: 8
+
+    # Sets the maximum distance until which shadows are updated. If a shadow
+    # source is further away, it will no longer recieve updates
+    max_update_distance: 150.0

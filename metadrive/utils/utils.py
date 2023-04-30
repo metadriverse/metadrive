@@ -1,4 +1,6 @@
 import copy
+import time
+
 import numpy as np
 import datetime
 import logging
@@ -206,3 +208,13 @@ def dict_recursive_remove_array(d):
         for k in d.keys():
             d[k] = dict_recursive_remove_array(d[k])
     return d
+
+
+def time_me(fn):
+    def _wrapper(*args, **kwargs):
+        start = time.time()
+        ret = fn(*args, **kwargs)
+        print("function: %s cost %s second" % (fn.__name__, time.time() - start))
+        return ret
+
+    return _wrapper

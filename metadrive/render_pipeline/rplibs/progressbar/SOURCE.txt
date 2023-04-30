@@ -1,0 +1,6 @@
+package: progressbar
+version: 2.3
+downloaded: 07.04.2016
+url: https://pypi.python.org/pypi/progressbar
+
+!! MODIFIED __init__.py to use relative imports !!

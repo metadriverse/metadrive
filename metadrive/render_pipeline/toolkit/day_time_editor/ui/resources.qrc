@@ -1,0 +1,14 @@
+<RCC>
+  <qresource prefix="res">
+    <file>res/0_00.png</file>
+    <file>res/4_00.png</file>
+    <file>res/8_00.png</file>
+    <file>res/12_00.png</file>
+    <file>res/16_00.png</file>
+    <file>res/20_00.png</file>
+    <file>res/icon.png</file>
+    <file>res/12_00.png</file>
+    <file>res/daytime_editor_logo.png</file>
+    <file>res/icon.png</file>
+  </qresource>
+</RCC>

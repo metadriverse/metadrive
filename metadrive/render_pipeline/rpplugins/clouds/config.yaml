@@ -1,0 +1,35 @@
+
+settings: !!omap
+
+    # - cloud_decay:
+    #     type: float
+    #     range: [0.0, 10.0]
+    #     default: 3.0
+    #     label: Cloud Decay
+    #     description: >
+    #         Controls how the cloud intensity decays to the top.
+    #     shader_runtime: true
+
+    - raymarch_steps:
+        type: int
+        range: [16, 256]
+        default: 160
+        label: Raymarch Steps
+        shader_runtime: true
+        description: >
+            Controls how many steps should be taken through the cloud voxel grid
+            to integrate the cloud density. Higher values produce more accurate
+            result but also require more performance.
+
+daytime_settings: !!omap
+
+    - cloud_brightness:
+        type: scalar
+        unit: percent
+        range: [0, 2]
+        default: 1.0
+        logarithmic_factor: 2.0
+        label: Cloud brightness
+        description: >
+            Brightness of all cloud layers, controlls how bright the clouds are.
+            A value of zero causes no clouds.

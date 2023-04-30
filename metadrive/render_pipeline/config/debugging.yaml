@@ -1,0 +1,30 @@
+
+# This file contains all available debug modes.
+# You can add or remove debug modes here, aswell as
+# disable or enable them, whatever fits to you.
+
+# NOTICE: This file only has effect if debugging is enabled
+# in the pipeline.yaml (settings.pipeline.display_debuger == True)
+
+# Usually you don't have to touch this file, except when developing
+# new plugins or adding new features.
+
+render_modes:
+  - { name: "Shading Model", key: "SHADING_MODEL" }
+  - { name: "Diffuse", key: "DIFFUSE" }
+  - { name: "Roughness", key: "ROUGHNESS" }
+  - { name: "Specular", key: "SPECULAR" }
+  - { name: "Normal", key: "NORMAL" }
+  - { name: "Metallic", key: "METALLIC" }
+  - { name: "Translucency", key: "TRANSLUCENCY" }
+  - { name: "PSSM Splits",  key: "PSSM_SPLITS", requires: "pssm", cxx_only: true }
+  - { name: "Ambient Occlusion", key: "OCCLUSION", requires: "ao" }
+  - { name: "Sky AO", key: "SKY_AO", requires: "sky_ao" }
+  - { name: "Scattering", key: "SCATTERING", requires: "scattering" }
+  - { name: "Velocity", key: "VELOCITY" }
+  - { name: "Diffuse Ambient", key: "DIFFUSE_AMBIENT" }
+  - { name: "Specular Ambient", key: "SPECULAR_AMBIENT" }
+  - { name: "Luminance", key: "LUMINANCE", special: true }
+  - { name: "Probe Count", key: "ENVPROBE_COUNT", requires: "env_probes" }
+  - { name: "Light Count", key: "LIGHT_COUNT" }
+  - { name: "Light Tiles", key: "LIGHT_TILES", special: true }

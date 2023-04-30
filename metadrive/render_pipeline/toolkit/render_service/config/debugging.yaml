@@ -1,0 +1,17 @@
+
+# This file contains all available debug modes.
+# You can add or remove debug modes here, aswell as
+# disable or enable them, whatever fits to you.
+
+# NOTICE: This file only has effect if debugging is enabled
+# in the pipeline.yaml (settings.pipeline.display_debuger == True)
+
+render_modes:
+  - { name: "Diffuse", key: "DIFFUSE" }
+  - { name: "Roughness", key: "ROUGHNESS" }
+  - { name: "Specular", key: "SPECULAR" }
+  - { name: "Normal", key: "NORMAL" }
+  - { name: "Metallic", key: "METALLIC" }
+  - { name: "Translucency", key: "TRANSLUCENCY" }
+  - { name: "PSSM Splits",  key: "PSSM_SPLITS", requires: "pssm", cxx_only: true }
+  - { name: "Ambient Occlusion", key: "OCCLUSION", requires: "ao" }

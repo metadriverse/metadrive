@@ -1,0 +1,72 @@
+
+settings: !!omap
+
+    - probe_resolution:
+        type: power_of_two
+        range: [16, 512]
+        default: 128
+        label: Specular cubemap resolution
+        description: >
+            Resolution of the specular cubemaps in pixels. This heavily impacts
+            the VRAM usage, so you shouldn't set it too high.
+
+    - diffuse_probe_resolution:
+        type: power_of_two
+        range: [1, 32]
+        default: 2
+        label: Diffuse cubemap resolution
+        description: >
+            Resolution of the diffuse cubemap in pixels, this can usually be quite low.
+
+    - max_probes:
+        type: int
+        range: [1, 341]
+        default: 16
+        label: Maximum probe count
+        description: >
+            Maximum amount of enviroment probes, try to set this as low
+            as possible, since it affects VRAM usage by a lot. The maximum
+            limit of this setting is caused by hardware.
+
+    - max_probes_per_cell:
+        type: int
+        range: [1, 16]
+        default: 3
+        label: Max overlapping probes
+        description: >
+            Controlls how many probes can overlay at a given location.
+            If you get artifacts at probe transitions, try increasing this.
+
+daytime_settings: !!omap
+
+    - ambient_scale:
+        type: scalar
+        range: [0.0, 2.0]
+        default: 0.2
+        label: Ambient scale
+        description: >
+            Controls the ambient scale for the enviroment probes, since no
+            full rendering is performed, this is an approximation
+
+    - sky_ambient_scale:
+        type: scalar
+        range: [0.0, 2.0]
+        default: 0.1
+        label: Sky Ambient scale
+        description: >
+            Controls the sky ambient scale for the enviroment probes, since no
+            full rendering is performed, this is an approximation
+
+    - sun_ambient_scale:
+        type: scalar
+        range: [0.0, 2.0]
+        default: 0.1
+        label: Sun Ambient scale
+        description: >
+            Controls the sun ambient scale for the enviroment probes, since no
+            full rendering is performed, this is an approximation
+
+
+
+
+

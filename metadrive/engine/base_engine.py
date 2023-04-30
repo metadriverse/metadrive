@@ -316,6 +316,13 @@ class BaseEngine(EngineCore, Randomizable):
 
                 # if self.global_config["is_multi_agent"]:
                 #     self.main_camera.stop_track(bird_view_on_current_position=False)
+
+        # reset terrain
+        center_p = self.current_map.get_center_point()
+        self.terrain.reset(center_p)
+        if self.sky_box is not None:
+            self.sky_box.set_position(center_p)
+
         self.taskMgr.step()
 
     def before_step(self, external_actions: Dict[AnyStr, np.array]):

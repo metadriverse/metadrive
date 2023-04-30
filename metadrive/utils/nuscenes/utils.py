@@ -9,11 +9,11 @@ from nuscenes.map_expansion.arcline_path_utils import discretize_lane
 from nuscenes.map_expansion.map_api import NuScenesMap
 from pyquaternion import Quaternion
 from shapely.ops import unary_union, cascaded_union
-
+import logging
 from metadrive.scenario import ScenarioDescription as SD
 from metadrive.type import MetaDriveType
 from metadrive.utils.nuscenes.detection_type import ALL_TYPE, HUMAN_TYPE, BICYCLE_TYPE, VEHICLE_TYPE
-
+logger = logging.getLogger(__name__)
 EGO = "ego"
 
 
@@ -288,6 +288,7 @@ def get_map_features(scene_info, nuscenes: NuScenes, map_center, radius=250, poi
         polygon = map_api.extract_polygon(seg_info["polygon_token"])
         polygons.append(polygon)
     polygons = [geom if geom.is_valid else geom.buffer(0) for geom in polygons]
+    logger.warning("Stop using boundaries! Use exterior instead!")
     boundaries = gpd.GeoSeries(unary_union(polygons)).boundary.explode(index_parts=True)
     for idx, boundary in enumerate(boundaries[0]):
         block_points = np.array(list(i for i in zip(boundary.coords.xy[0], boundary.coords.xy[1])))

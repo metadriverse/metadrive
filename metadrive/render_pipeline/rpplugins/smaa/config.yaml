@@ -1,0 +1,61 @@
+
+settings: !!omap
+
+    - use_reprojection:
+        type: bool
+        default: true
+        label: Use temporal antialiasing (SMAA T2)
+        description: >
+            This setting enables temporal antialiasing, which increases the
+            antialiasing quality a lot. Basically the scene gets rendered a
+            little different every frame, and the results of the current and
+            the last frame get merged. This way, flickering is reduced by a lot,
+            and the image becomes more smooth.
+
+    - smaa_quality:
+        type: enum
+        default: ultra
+        values: ["low", "medium", "high", "ultra"]
+        label: SMAA Quality Preset
+        shader_runtime: true
+        description: >
+            The quality of the smaa algorithm. Usually you should choose "ultra",
+            since it does not have a significant higher cost, but provides way
+            better quality. However, on low-end systems, it might be desireable
+            to turn this value down.
+
+    - jitter_pattern:
+        type: enum
+        default: halton8
+        values: ["halton8", "skew_butterly", "uniform4", "halton256", "rotated4_helix2", "uniform2",
+                 "halton16", "still", "rotated4", "rotated4_helix", "poisson10", "halton32",
+                 "uniform4_helix", "uniform4_double_helix", "pentagram"]
+        runtime: true
+        label: Jitter sequence
+        description: >
+            Controls the jitter pattern to use
+
+    - history_length:
+        display_if: { use_reprojection: True }
+        type: int
+        range: [1, 16]
+        default: 8
+        shader_runtime: true
+        label: History Length
+        description: >
+            History buffer size. This controls how long pixels will stay
+            in the history buffer, greater values lead to smoother results
+            but also might produce more artifacts.
+
+    - jitter_amount:
+        display_if: { use_reprojection: True }
+        type: float
+        range: [0.05, 2.0]
+        default: 0.3
+        runtime: true
+        label: Jitter Amount
+        description: >
+            Controls how much each pixel is jittered, higher values might
+            preserve better details but also introduce flickering.
+
+daytime_settings:

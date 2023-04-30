@@ -1,0 +1,48 @@
+
+settings: !!omap
+
+    - grid_resolution:
+        type: power_of_two
+        range: [32, 384]
+        default: 256
+        label: Voxel Grid Resolution
+        description: >
+            Resolution of the voxel grid. This highly impacts performance and
+            memory requirements. A grid of 32^3 almost requires no memory, while
+            a grid of 512^3 requires about 1,0 GB of VRAM. However, the higher
+            the grid resolution, the more detail will be visible in the GI.
+            Power-of-two sizes are preferred.
+
+    - grid_ws_size:
+        type: float
+        range: [5.0, 150.0]
+        default: 100.0
+        label: Worlspace Grid Size
+        description: >
+            This controls the dimensions of the voxel grid. The voxel grid is
+            centered arround the camera, and has an equal size in each dimension.
+            This setting controls the size of the grid in world space. A size of
+            40.0 for example makes the grid 80x80x80 world-space units big.
+
+    - diffuse_cone_steps:
+        type: int
+        range: [2, 32]
+        default: 32
+        shader_runtime: true
+        label: Diffuse Cone Steps
+        description: >
+            Amount of steps to trace for each diffuse cone. A higher amount will
+            lead to more color bleeding, however it also affects performance.
+
+    - specular_cone_steps:
+        type: int
+        range: [2, 150]
+        default: 150
+        shader_runtime: true
+        label: Specular Cone Steps
+        description: >
+            Amount of steps to trace for the specular cone. A higher amount will
+            cause reflections to range further, however it also affects performance.
+
+
+daytime_settings:

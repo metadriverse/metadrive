@@ -1,0 +1,4 @@
+package: six
+version: 1.10
+downloaded: 01-06-2016
+url: https://pypi.python.org/pypi/six

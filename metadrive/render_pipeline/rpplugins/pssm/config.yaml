@@ -1,0 +1,254 @@
+
+settings: !!omap
+
+    - max_distance:
+        type: float
+        range: [2.0, 6000.0]
+        default: 100.0
+        runtime: true
+        shader_runtime: true
+        label: Maximum shadow distance
+        description: >
+            This controls the maximum distance up to where shadows
+            are rendered. A higher distance means further shadows,
+            but also a worse shadow quality.
+
+    - logarithmic_factor:
+        type: float
+        range: [0.01, 3.0]
+        default: 2.4
+        runtime: true
+        shader_runtime: true
+        label: Logarithmic Factor
+        description: >
+            Controls the logarithmic factor of the splitting scheme. Lower
+            values mean a more linear distribution, while higher values will
+            move the splits closer to the camera.
+
+    - sun_distance:
+        type: float
+        range: [100.0, 10000.0]
+        default: 100.0
+        label: Sun distance
+        runtime: true
+        description: >
+            This controls how far the sun is away from the scene, to avoid
+            clipping objects outside of the frustum which still cast shadows.
+            Basically you don't need to adjust this setting, but in
+            case you get artifacts, try increasing this setting.
+
+    - split_count:
+        type: int
+        range: [1, 20]
+        default: 5
+        label: Amount of PSSM Splits / Cascades
+        description: >
+            This controls how many splits are used for the PSSM.
+            A higher amount of splits increases the shadow map
+            detail and quality, but also increases the performance
+            cost by a lot. For every split, the scene has to get
+            rendered again, so be careful when choosing high amount
+            of splits.
+
+    - resolution:
+        type: power_of_two
+        range: [128, 4096]
+        default: 1024
+        label: Shadowmap resolution
+        description: >
+            This controls the resolution of the individual shadowmaps
+            of the splits. If you choose a resolution of 512 for example,
+            and you have 10 splits, then that makes a total resolution
+            of 5120 * 512 for the shadow map. Be careful when choosing high
+            defaults, the shadow map will soon take a huge amount of VRam.
+
+    - border_bias:
+        type: float
+        range: [0.0, 0.35]
+        default: 0.058
+        label: Border Padding
+        runtime: true
+        shader_runtime: true
+        description: >
+            Increases the shadow map size of each cascade by a small factor, to
+            ensure seamless filtering between cascades. If you encounter artifacts
+            between cascades, increase this value.
+
+    - use_pcf:
+        type: bool
+        default: true
+        label: Use hardware filtering (PCF)
+        description: >
+            This setting turns Percentage Closer Filtering on or off (A simple
+            2x2 bilinear filter provided by the GPU).
+            It provides a better shadow quality, and theoretically a better
+            performance. However, not all GPU's seem to support it.
+
+    - filter_sequence:
+        type: sample_sequence
+        dimension: 2
+        default: halton_2D_16
+        shader_runtime: true
+        label: Filtering sequence
+        description: >
+            Amount and Type of samples to take for filtering the shadow. Higher
+            values provide a better shadow quality, but also are more expensive.
+
+    - filter_radius:
+        type: float
+        range: [0.05, 10.0]
+        default: 0.55
+        shader_runtime: true
+        label: Filtering radius
+        description: >
+            This setting controls the filter size, higher values mean a more
+            smooth penumbra. Too high values might (and will) produce artifacts.
+            This setting has almost no measureable impact on performance.
+
+    - fixed_bias:
+        type: float
+        range: [0.0, 2.0]
+        default: 0.48
+        shader_runtime: true
+        label: Depth Bias
+        description: >
+            Depth-Based bias. This avoids self-shadowing issues (also known)
+            as Shadow-Acne. Too high values will produce gaps in the shadows,
+            so try to find the lowest possible value.
+
+    - slope_bias:
+        type: float
+        range: [0.0, 5.0]
+        default: 0.11
+        shader_runtime: true
+        label: Slope Bias
+        description: >
+            Slope-Based bias. This avoid self-shadowing issues as well, but instead
+            of the fixed bias it adds bias based on the angle between the light
+            and the surface.
+
+    - normal_bias:
+        type: float
+        range: [0.0, 5.0]
+        default: 0.39
+        shader_runtime: true
+        label: Normal Bias
+        description: >
+            Normal-Based bias. This moves the sample position by a small amount
+            into the direction of the surface normal, to avoid self shadowing.
+
+    # PCSS settings
+
+    - use_pcss:
+        type: bool
+        default: false
+        shader_runtime: true
+        label: Use PCSS
+        description: >
+            PCSS adds support for variable penumbra size shadows. Without PCSS,
+            all shadows have the same penumbra size at all places. With PCSS,
+            the shadow penumbra size increases based on the distance. However,
+            PCSS requires additionally computations, and thus is slower than
+            regular filtering.
+
+    - pcss_sequence:
+        display_if: {use_pcss: true}
+        type: sample_sequence
+        dimension: 2
+        default: halton_2D_16
+        shader_runtime: true
+        label: PCSS Penumbra Samples
+        description: >
+            Amount and Type of samples to take for finding the penumbra size.
+            Higher values might produce better results at the cost of performance.
+
+    - pcss_penumbra_size:
+        display_if: {use_pcss: true}
+        type: float
+        range: [0.1, 300.0]
+        default: 11.0
+        shader_runtime: true
+        label: PCSS Penumbra scale
+        description: >
+            Scales the penumbra by a fixed factor. This is an artistic setting,
+            and does not affect performance much. Lower settings will cause a
+            smaller penumbra, while higher settings produce a bigger one. Too
+            high values might cause artifacts in the filtering.
+
+    - pcss_min_penumbra_size:
+        display_if: {use_pcss: true}
+        type: float
+        range: [0.1, 20.0]
+        default: 5.0
+        shader_runtime: true
+        label: PCSS Min. Penumbra scale
+        description: >
+            Specifies the minimum penumbra/filter size to avoid blocky shadows.
+
+    - use_distant_shadows:
+        type: bool
+        default: true
+        label: Render distant shadows
+        description: >
+            When this setting is enabled, an additional shadow map is generated
+            to render distant shadows, e.g. for terrain. This makes it possible
+            to set the pssm distance very small, but still recieve shadows from
+            big objects. If your scene is not big, this may not be required.
+
+    - dist_shadow_resolution:
+        display_if: {use_distant_shadows: true}
+        type: power_of_two
+        range: [128, 8192]
+        default: 1024
+        label: Distant Shadow Resolution
+        description: >
+            Controls the size of distant shadow map in pixels.
+
+    - dist_shadow_clipsize:
+        display_if: {use_distant_shadows: true}
+        type: float
+        range: [100.0, 20000.0]
+        default: 1000.0
+        runtime: true
+        label: Distant Shadow Range
+        description: >
+            Controls the range of the distant shadow map. Bigger values cover
+            a bigger part of the scene, but also decrease the effective resolution.
+
+    - dist_shadow_sundist:
+        display_if: {use_distant_shadows: true}
+        type: float
+        range: [100.0, 20000.0]
+        default: 500.0
+        label: Distant Shadow Sun Distance
+        runtime: true
+        description: >
+            Same as the Sun Distance, but for the distant shadow map.
+
+    - scene_shadow_resolution:
+        type: power_of_two
+        range: [128, 4096]
+        default: 512
+        label: Scene shadow Resolution
+        description: >
+            Controls the size of the shadow map which is used when rendering
+            environment probes.
+
+    - scene_shadow_sundist:
+        type: float
+        range: [100.0, 20000.0]
+        default: 100.0
+        label: Scene Shadow Sun Distance
+        runtime: true
+        description: >
+            Same as the Sun Distance, but for the scene shadow map.
+
+daytime_settings:
+
+
+
+
+
+
+
+

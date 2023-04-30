@@ -1,0 +1,19 @@
+
+# Prefab gitignore which can be used by the user to ignore the files generated
+# by the module builder
+
+*.pyd
+*.pyc
+*.so
+*.pdb
+
+# Various output names
+win_*/
+linux_*/
+source/interrogate*
+
+# Source and script files
+scripts/
+CMakeLists.txt
+build.py
+LICENSE

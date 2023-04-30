@@ -1,0 +1,79 @@
+
+settings: !!omap
+
+    - sample_radius:
+        type: float
+        range: [0.1, 50.0]
+        default: 6.0
+        shader_runtime: true
+        label: Sample radius
+        description: >
+            Controls the ao sample radius, higher values produce blurrier results,
+            but might cost more performance, and cause more jittering.
+  
+    - max_radius:
+        type: float
+        range: [10, 2000.0]
+        default: 200.0
+        label: Maximum Radius
+        description: >
+            Controls how far the sky ao is computed, in world space. The higher
+            the maximum radius is, the further sky ao reaches, but it also reduces
+            the precision.
+
+    - resolution:
+        type: power_of_two
+        range: [32, 8192]
+        default: 1024
+        label: Resolution
+        description: >
+            A higher resolution provides more details, but also costs more
+            performance and memory.
+  
+    - sample_sequence:
+        type: sample_sequence
+        shader_runtime: true
+        dimension: 2
+        default: poisson_2D_32
+        label: Sample Sequence
+        description: >
+            Amout and Type of samples, higher values cost more performance
+            but provide smoother results.
+
+    - ao_multiplier:
+        type: float
+        shader_runtime: true
+        range: [0.05, 5.0]
+        default: 0.25
+        label: AO Multiplier
+        description: >
+            Controls the ao strength, higher values produce a darker ao.
+
+    - ao_bias:
+        shader_runtime: true
+        type: float
+        range: [0.0, 1.0]
+        default: 0.3
+        label: AO Bias
+        description: >
+            Miminum ambient occlusion term, to prevent total dark spots.
+
+    - blend_factor:
+        type: float
+        shader_runtime: true
+        range: [0.01, 0.5]
+        default: 0.05
+        label: Border Blending
+        description: >
+            Controls how smooth the sky ao fades out at distance (the maximum radius)
+
+    - capture_height:
+        type: float
+        range: [10, 1500.0]
+        default: 250.0
+        label: Capture height
+        description: >
+            Controls from which height the sky ao is captured. This should be the
+            height of your highest object, e.g. maximum terrain height.
+
+daytime_settings:

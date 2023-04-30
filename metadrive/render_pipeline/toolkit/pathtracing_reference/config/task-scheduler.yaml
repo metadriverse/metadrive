@@ -1,0 +1,33 @@
+
+# This file controls which tasks are allowed to run each frame.
+# Usually you do not have to edit this file, except when developing plugins.
+
+frame_cycles: !!omap
+
+  - frame1:
+    - envprobes_select_and_cull
+    - pssm_scene_shadows
+
+  - frame2:
+    - envprobes_capture_envmap_face0
+    - pssm_distant_shadows
+
+  - frame3:
+    - envprobes_capture_envmap_face1
+    - pssm_convert_distant_to_esm
+
+  - frame4:
+    - envprobes_capture_envmap_face2
+    - pssm_blur_distant_vert
+
+  - frame5:
+    - pssm_blur_distant_horiz
+    - envprobes_capture_envmap_face3
+    - envprobes_capture_envmap_face4
+
+  - frame6:
+    - envprobes_capture_envmap_face5
+    - scattering_update_envmap
+
+  - frame7:
+    - envprobes_filter_and_store_envmap

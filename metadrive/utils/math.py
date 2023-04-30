@@ -1,5 +1,4 @@
 import math
-import time
 from typing import Tuple
 
 import numpy as np
@@ -37,15 +36,6 @@ def get_vertical_vector(vector: np.array):
     length = norm(vector[0], vector[1])
     # return (vector[1] / length, -vector[0] / length), (-vector[1] / length, vector[0] / length)
     return (-vector[1] / length, vector[0] / length), (vector[1] / length, -vector[0] / length)
-
-
-def time_me(fn):
-    def _wrapper(*args, **kwargs):
-        start = time.clock()
-        fn(*args, **kwargs)
-        print("%s cost %s second" % (fn.__name__, time.clock() - start))
-
-    return _wrapper
 
 
 def norm(x, y):
