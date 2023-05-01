@@ -83,7 +83,7 @@ overrides:
         brightness_adaption_rate: 3.6
         darkness_adaption_rate: 0.7
         use_sharpen: True
-        sharpen_strength: 0.99
+        sharpen_strength: 0.8
         sharpen_twice: False
 
     dof:
@@ -116,7 +116,7 @@ overrides:
         num_samples: 12
 
     pssm:
-        max_distance: 200.0
+        max_distance: 300.0
         logarithmic_factor: 2.37
         sun_distance: 200.0
         split_count: 4
