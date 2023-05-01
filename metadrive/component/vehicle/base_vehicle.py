@@ -4,8 +4,9 @@ from typing import Union, Optional
 
 import numpy as np
 import seaborn as sns
+from panda3d._rplight import RPSpotLight
 from panda3d.bullet import BulletVehicle, BulletBoxShape, ZUp
-from panda3d.core import Material, Vec3, TransformState, LVector3
+from panda3d.core import Material, Vec3, TransformState
 from panda3d.core import NodePath
 
 from metadrive.base_class.base_object import BaseObject
@@ -29,7 +30,6 @@ from metadrive.engine.engine_utils import get_engine, engine_initialized
 from metadrive.engine.physics_node import BaseRigidBodyNode
 from metadrive.utils import Config, safe_clip_for_small_array
 from metadrive.utils.math import get_vertical_vector, norm, clip
-from metadrive.utils.math import wrap_to_pi
 from metadrive.utils.pg.utils import ray_localization
 from metadrive.utils.pg.utils import rect_region_detection
 from metadrive.utils.utils import get_object_from_node
@@ -113,12 +113,12 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     path = None
 
     def __init__(
-        self,
-        vehicle_config: Union[dict, Config] = None,
-        name: str = None,
-        random_seed=None,
-        position=None,
-        heading=None
+            self,
+            vehicle_config: Union[dict, Config] = None,
+            name: str = None,
+            random_seed=None,
+            position=None,
+            heading=None
     ):
         """
         This Vehicle Config is different from self.get_config(), and it is used to define which modules to use, and
@@ -143,6 +143,11 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self.system = vehicle_chassis
         self.chassis = self.origin
         self.wheels = self._create_wheel()
+
+        # light experimental!
+        self.light = None
+        self._light_direction_queue = None
+        self.light_name = None
 
         # powertrain config
         self.increment_steering = self.config["increment_steering"]
@@ -345,14 +350,14 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         return step_energy, self.energy_consumption
 
     def reset(
-        self,
-        vehicle_config=None,
-        name=None,
-        random_seed=None,
-        position: np.ndarray = None,
-        heading: float = 0.0,
-        *args,
-        **kwargs
+            self,
+            vehicle_config=None,
+            name=None,
+            random_seed=None,
+            position: np.ndarray = None,
+            heading: float = 0.0,
+            *args,
+            **kwargs
     ):
         """
         pos is a 2-d array, and heading is a float (unit degree)
@@ -434,7 +439,47 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         if self.config["spawn_velocity"] is not None:
             self.set_velocity(self.config["spawn_velocity"], in_local_frame=self.config["spawn_velocity_car_frame"])
 
+        # clean lights
+        if self.light is not None:
+            self.remove_light()
+
+        # self.add_light()
+
     """------------------------------------------- act -------------------------------------------------"""
+
+    def remove_light(self):
+        self.engine.render_pipeline.remove_light(self.light)
+        self.engine.taskMgr.remove(self.light_name)
+        self.light_name = None
+        self.light = None
+        self._light_direction_queue = None
+
+    def add_light(self):
+        """
+        Experimental feature
+        """
+        assert self.use_render_pipeline, "Can be Enabled when using render pipeline"
+        if self.light is None:
+            self.light_name = "light_{}".format(self.id)
+            self.light = RPSpotLight()
+            self.light.set_color_from_temperature(3 * 1000.0)
+            self.light.setRadius(500)
+            self.light.setFov(100)
+            self.light.energy = 600
+            self.light.casts_shadows = False
+            self.light.shadow_map_resolution = 128
+            self.engine.render_pipeline.add_light(self.light)
+            self.engine.taskMgr.add(self._update_light_pos, self.light_name)
+            self._light_direction_queue = []
+
+    def _update_light_pos(self, task):
+        pos = self.convert_to_world_coordinates([self.LENGTH / 2, 0], self.position)
+        self.light.set_pos(*pos, self.get_z())
+        self._light_direction_queue.append([*self.heading, 0])
+        idx = min(len(self._light_direction_queue), 50)
+        pos = np.mean(self._light_direction_queue[-idx:], axis=0)
+        self.light.set_direction(pos[0], pos[1], pos[2])
+        return task.cont
 
     def set_steering(self, steering):
         steering = float(steering)
@@ -547,8 +592,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         if not lateral_norm * forward_direction_norm:
             return 0
         cos = (
-            (forward_direction[0] * lateral[0] + forward_direction[1] * lateral[1]) /
-            (lateral_norm * forward_direction_norm)
+                (forward_direction[0] * lateral[0] + forward_direction[1] * lateral[1]) /
+                (lateral_norm * forward_direction_norm)
         )
         # return cos
         # Normalize to 0, 1
@@ -829,6 +874,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
                 if sensor is not self.engine.main_camera:
                     sensor.destroy()
         self.image_sensors = {}
+        if self.light is not None:
+            self.remove_light()
 
     def set_heading_theta(self, heading_theta, in_rad=True) -> None:
         """
@@ -916,7 +963,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             ckpt_idx = routing._target_checkpoints_index
             for surrounding_v in surrounding_vs:
                 if surrounding_v.lane_index[:-1] == (routing.checkpoints[ckpt_idx[0]], routing.checkpoints[ckpt_idx[1]
-                                                                                                           ]):
+                ]):
                     if self.lane.local_coordinates(self.position)[0] - \
                             self.lane.local_coordinates(surrounding_v.position)[0] < 0:
                         self.front_vehicles.add(surrounding_v)
@@ -954,9 +1001,9 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     @property
     def replay_done(self):
         return self._replay_done if hasattr(self, "_replay_done") else (
-            self.crash_building or self.crash_vehicle or
-            # self.on_white_continuous_line or
-            self.on_yellow_continuous_line
+                self.crash_building or self.crash_vehicle or
+                # self.on_white_continuous_line or
+                self.on_yellow_continuous_line
         )
 
     @property
