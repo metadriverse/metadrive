@@ -6,7 +6,7 @@ if __name__ == "__main__":
     env = MetaDriveEnv(
         {
             "num_scenarios": 10,
-            "traffic_density": 0.,
+            "traffic_density": 0.1,
             "traffic_mode": "hybrid",
             "start_seed": 22,
             # "_disable_detector_mask":True,

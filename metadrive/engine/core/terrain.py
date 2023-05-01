@@ -29,12 +29,21 @@ class Terrain(BaseObject):
         self.simple_terrain_collision_mesh = None  # a flat collision shape
         self.terrain_collision_mesh = None  # a 3d mesh
 
-        # visualization mesh
+        # visualization mesh feature
+        heightfield_image_size = 4096  # fixed image size 4096*4096
+        self._height_scale = 120  # [m] when changing this value, change the height in shader together!
+        self._terrain_size = 4096  # [m]
+        self._semantic_map_size = 512  # [m] it should include the whole map. Otherwise, road will have no texture!
+        self._semantic_map_pixel_per_meter = 22  # [m] how many pixels per meter
+        self._drivable_region_extention = 6  # [m] road will have a marin whose width is determined by this value
+        # pre calculate some variables
+        self._downsample_rate = int(heightfield_image_size / self._terrain_size)  # downsample to 2048 m
+        self._elevation_texture_ratio = self._terrain_size / self._semantic_map_size  # for shader
+
         self._mesh_terrain = None
         self._mesh_terrain_height = None
         self._mesh_terrain_node = None
-        self.height_scale = 120  # when changing this value, change the height in shader together!
-        self._terrain_shader_set = False
+        self._terrain_shader_set = False  # only set once
         self.probe = None
 
         if self.render and show_terrain:
@@ -138,14 +147,14 @@ class Terrain(BaseObject):
 
     # @time_me
     def _generate_mesh_vis_terrain(
-        self,
-        size,
-        heightfield: Texture,
-        attribute_tex: Texture,
-        target_triangle_width=10,
-        height_scale=100,
-        height_offset=0.,
-        engine=None,
+            self,
+            size,
+            heightfield: Texture,
+            attribute_tex: Texture,
+            target_triangle_width=10,
+            height_scale=100,
+            height_offset=0.,
+            engine=None,
     ):
         """
         Given a height field map to generate terrain and an attribute_tex to texture terrain, so we can get road/grass
@@ -194,8 +203,8 @@ class Terrain(BaseObject):
             engine.render_pipeline.reload_shaders()
             terrain_effect = AssetLoader.file_path("effect", "terrain_effect.yaml")
             engine.render_pipeline.set_effect(self._mesh_terrain, terrain_effect, {}, 100)
-            # height
-            self._mesh_terrain.set_shader_input("height_scale", self.height_scale)
+            # # height
+            self._mesh_terrain.set_shader_input("height_scale", self._height_scale)
 
             # grass
             self._mesh_terrain.set_shader_input("grass_tex", self.grass_tex)
@@ -212,6 +221,7 @@ class Terrain(BaseObject):
             self._mesh_terrain.set_shader_input("white_tex", self.white_lane_line)
             self._mesh_terrain.set_shader_input("road_normal", self.road_texture_normal)
             self._mesh_terrain.set_shader_input("road_rough", self.road_texture_rough)
+            self._mesh_terrain.set_shader_input("elevation_texture_ratio", self._elevation_texture_ratio)
             self._terrain_shader_set = True
         self._mesh_terrain.set_shader_input("attribute_tex", attribute_tex)
 
@@ -241,34 +251,30 @@ class Terrain(BaseObject):
         # elif self.use_render_pipeline:
         if self.use_render_pipeline:
             self.detach_from_world(self.engine.physics_world)
-            texture_size = 512
-            terrain_size = 2048
-            height_scale = self.height_scale
-            downsample_rate = 2
             assert self.engine.current_map is not None, "Can not find current map"
             semantics = self.engine.current_map.get_semantic_map(
-                size=texture_size, pixels_per_meter=22, polyline_thickness=2, layer=["lane", "lane_line"]
-            )
+                size=self._semantic_map_size, pixels_per_meter=self._semantic_map_pixel_per_meter,
+                polyline_thickness=int(1024 / self._semantic_map_size), layer=["lane", "lane_line"])
             semantics = semantics.astype(np.float32)
             semantic_tex = Texture()
             semantic_tex.setup2dTexture(*semantics.shape[:2], Texture.TFloat, Texture.FRgba)
             semantic_tex.setRamImage(semantics)
 
             # we will downsmaple the precision after this
-            heightfield = self.engine.current_map.get_height_map(terrain_size, 2, 6)
-
             heightfield_tex = self.loader.loadTexture(AssetLoader.file_path("textures", "terrain", "heightfield.png"))
             heightfield_img = np.frombuffer(heightfield_tex.getRamImage().getData(), dtype=np.uint16)
             heightfield_img = heightfield_img.reshape((heightfield_tex.getYSize(), heightfield_tex.getXSize(), 1))
-
-            drivable_region_height = np.mean(heightfield_img[np.where(heightfield)]).astype(np.uint16)
-            heightfield_img = np.where(heightfield, drivable_region_height, heightfield_img)
+            drivable_region = self.engine.current_map.get_height_map(self._terrain_size,
+                                                                     self._downsample_rate,
+                                                                     self._drivable_region_extention)
+            drivable_region_height = np.mean(heightfield_img[np.where(drivable_region)]).astype(np.uint16)
+            heightfield_img = np.where(drivable_region, drivable_region_height, heightfield_img)
 
             # set to zero height
             heightfield_img -= drivable_region_height
 
             # down sample
-            heightfield_img = np.array(heightfield_img[::downsample_rate, ::downsample_rate])
+            heightfield_img = np.array(heightfield_img[::self._downsample_rate, ::self._downsample_rate])
             heightfield = heightfield_img
 
             heightfield_tex = Texture()
@@ -279,7 +285,7 @@ class Terrain(BaseObject):
             # TODO: I disabled online terrain collision mesh generation now, consider enabling it in the future
             # self._generate_collision_mesh(heightfield_img, self.height_scale)
             self._generate_mesh_vis_terrain(
-                terrain_size, heightfield_tex, semantic_tex, height_scale=height_scale, height_offset=0
+                self._terrain_size, heightfield_tex, semantic_tex, height_scale=self._height_scale, height_offset=0
             )
             self.attach_to_world(self.engine.render, self.engine.physics_world)
 
@@ -380,7 +386,6 @@ class Terrain(BaseObject):
         heightfield[-length:, :length] = array_3
         heightfield[:length, -length:] = array_3
         heightfield[-length:, -length:] = array_3
-
 
 # Some useful threads
 # GeoMipTerrain:

@@ -89,27 +89,30 @@ fragment:
         uniform sampler2D rock_rough;
         
         uniform sampler2D attribute_tex;
+        
+        // just learned that uniform means the variable won't change in each stage, while in/out is able to do that : )
+        uniform float elevation_texture_ratio; 
+        uniform float height_scale; 
 
     material: |
-        float terrain_ratio = 4.0;
-        float road_tex_ratio = 32.0 * terrain_ratio;
-        float grass_tex_ratio = 128.0 * terrain_ratio;
+        float road_tex_ratio = 32.0 * elevation_texture_ratio;
+        float grass_tex_ratio = 128.0 * elevation_texture_ratio;
+        const float r_min = (1-1/elevation_texture_ratio)/2;
+        const float r_max = (1-1/elevation_texture_ratio)/2+1/elevation_texture_ratio;
+        vec4 attri = texture(attribute_tex, terrain_uv*elevation_texture_ratio+0.5);
         
-        vec4 attri = texture(attribute_tex, terrain_uv*terrain_ratio+0.5);
-        
-        const float terrain_height = 120.0;
         vec3 pixel_size = vec3(1.0, -1.0, 0) / textureSize(ShaderTerrainMesh.heightfield, 0).xxx;
-        float h_u0 = texture(ShaderTerrainMesh.heightfield, terrain_uv + pixel_size.yz).x * terrain_height;
-        float h_u1 = texture(ShaderTerrainMesh.heightfield, terrain_uv + pixel_size.xz).x * terrain_height;
-        float h_v0 = texture(ShaderTerrainMesh.heightfield, terrain_uv + pixel_size.zy).x * terrain_height;
-        float h_v1 = texture(ShaderTerrainMesh.heightfield, terrain_uv + pixel_size.zx).x * terrain_height;
+        float h_u0 = texture(ShaderTerrainMesh.heightfield, terrain_uv + pixel_size.yz).x * height_scale;
+        float h_u1 = texture(ShaderTerrainMesh.heightfield, terrain_uv + pixel_size.xz).x * height_scale;
+        float h_v0 = texture(ShaderTerrainMesh.heightfield, terrain_uv + pixel_size.zy).x * height_scale;
+        float h_v1 = texture(ShaderTerrainMesh.heightfield, terrain_uv + pixel_size.zx).x * height_scale;
         vec3 tangent = normalize(vec3(1, 0, h_u1 - h_u0));
         vec3 binormal = normalize(vec3(0, 1, h_v1 - h_v0));
         vec3 normal = normalize(cross(tangent, binormal));
         // normal.x *= -1;
         mat3 tbn = mat3(tangent, binormal, normal);
         
-        if ((attri.g > 0 || attri.a > 0 || attri.b > 0) && terrain_uv.x>0.375 && terrain_uv.y >0.375 && terrain_uv.x<0.625 && terrain_uv.y<0.625){
+        if ((attri.g > 0 || attri.a > 0 || attri.b > 0) && terrain_uv.x>r_min && terrain_uv.y > r_min && terrain_uv.x<r_max && terrain_uv.y<r_max){
             // texture splatting, mixing ratio can be determined via rgba, no grass here
             vec3 diffuse = texture(road_tex, terrain_uv * road_tex_ratio).rgb * attri.g;
             diffuse += texture(yellow_tex, terrain_uv * road_tex_ratio).rgb * attri.b;
@@ -127,7 +130,7 @@ fragment:
         }
         else{
             // Material splatting
-            float height = (h_u0 + h_u1 + h_v0 + h_v1) / (4.0 * terrain_height); // xxx
+            float height = (h_u0 + h_u1 + h_v0 + h_v1) / (4.0 * height_scale); // xxx
             float slope = 1.0 - normal.z;
             float grass = 0.0;
             float rock = 0.0;
