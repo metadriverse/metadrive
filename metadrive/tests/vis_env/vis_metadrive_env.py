@@ -5,10 +5,10 @@ if __name__ == "__main__":
     setup_logger(True)
     env = MetaDriveEnv(
         {
-            "num_scenarios": 10,
-            "traffic_density": 0.1,
+            "num_scenarios": 1,
+            "traffic_density": 0.05,
             "traffic_mode": "hybrid",
-            "start_seed": 22,
+            "start_seed": 24,
             # "_disable_detector_mask":True,
             # "debug_physics_world": True,
             # "debug": True,
@@ -35,7 +35,7 @@ if __name__ == "__main__":
             # "random_lane_width": True,
             # "random_agent_model": True,
             "driving_reward": 1.0,
-            # "pstats": True,
+            "pstats": True,
             "force_destroy": False,
             # "show_skybox": False,
             "render_pipeline": True,

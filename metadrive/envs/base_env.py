@@ -160,7 +160,7 @@ BASE_DEFAULT_CONFIG = dict(
     # turn on to use render pipeline, which provides advanced rendering effects (Beta)
     render_pipeline=False,
     # daytime is only available when using render-pipeline
-    daytime=None,  # use string like "13:40", We usually set this by editor in toolkit
+    daytime="19:00",  # use string like "13:40", We usually set this by editor in toolkit
 
     # ===== Others =====
     # The maximum distance used in PGLOD. Set to None will use the default values.
