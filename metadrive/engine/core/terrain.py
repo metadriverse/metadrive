@@ -32,7 +32,7 @@ class Terrain(BaseObject):
         # visualization mesh feature
         heightfield_image_size = 4096  # fixed image size 4096*4096
         self._height_scale = 120  # [m] when changing this value, change the height in shader together!
-        self._terrain_size = 4096  # [m]
+        self._terrain_size = 2048  # [m]
         self._semantic_map_size = 512  # [m] it should include the whole map. Otherwise, road will have no texture!
         self._semantic_map_pixel_per_meter = 22  # [m] how many pixels per meter
         self._drivable_region_extention = 6  # [m] road will have a marin whose width is determined by this value
