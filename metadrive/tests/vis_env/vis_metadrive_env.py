@@ -35,7 +35,7 @@ if __name__ == "__main__":
             # "random_lane_width": True,
             # "random_agent_model": True,
             "driving_reward": 1.0,
-            "pstats": True,
+            # "pstats": True,
             "force_destroy": False,
             # "show_skybox": False,
             "render_pipeline": True,
