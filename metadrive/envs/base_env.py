@@ -48,6 +48,7 @@ BASE_DEFAULT_CONFIG = dict(
     action_check=False,
 
     # ===== Rendering =====
+    main_camera_fov=65,
     use_render=False,  # pop a window to render or not
     debug=False,
     disable_model_compression=False,  # disable compression if you wish to launch the window quicker.
@@ -161,6 +162,12 @@ BASE_DEFAULT_CONFIG = dict(
     render_pipeline=False,
     # daytime is only available when using render-pipeline
     daytime="19:00",  # use string like "13:40", We usually set this by editor in toolkit
+
+    # ===== Mesh Terrain =====
+    # road will have a marin whose width is determined by this value, unit: [m]
+    drivable_region_extension=6,
+    # height scale for mountains, unit: [m]
+    height_scale=120,
 
     # ===== Others =====
     # The maximum distance used in PGLOD. Set to None will use the default values.
@@ -587,17 +594,18 @@ class BaseEnv(gym.Env):
         return self.engine.episode_step if self.engine is not None else 0
 
     def export_scenarios(
-        self,
-        policies: Union[dict, Callable],
-        scenario_index: Union[list, int],
-        time_interval=0.1,
-        verbose=False,
-        render_topdown=False,
-        return_done_info=True
+            self,
+            policies: Union[dict, Callable],
+            scenario_index: Union[list, int],
+            time_interval=0.1,
+            verbose=False,
+            render_topdown=False,
+            return_done_info=True
     ):
         """
         We export scenarios into a unified format with 10hz sample rate
         """
+
         def _act(observation):
             if isinstance(policies, dict):
                 ret = {}

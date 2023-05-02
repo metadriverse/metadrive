@@ -20,12 +20,11 @@ if __name__ == "__main__":
             # "pstats": True,
             "render_pipeline": True,
             "pstats": True,
-            "daytime": "22:00",
+            "daytime": "15:32",
             # "no_traffic": True,
             # "no_light": False,
             # "debug":True,
             # Make video
-            "no_static_vehicles": True,
             "window_size": (1600, 900),
             "camera_dist": -2.5,
             "camera_height": 0.5,
@@ -35,7 +34,6 @@ if __name__ == "__main__":
             # "start_scenario_index": 192,
             # "start_scenario_index": 1000,
             "num_scenarios": 10,
-            "force_destroy": True,
             # "force_reuse_object_name": True,
             # "data_directory": "/home/shady/Downloads/test_processed",
             "horizon": 1000,
@@ -57,7 +55,7 @@ if __name__ == "__main__":
 
     success = []
     while True:
-        env.reset(force_seed=7)
+        env.reset(force_seed=3)
         # env.engine.force_fps.disable()
         for t in range(10000):
             o, r, d, info = env.step([0, 0])

@@ -31,11 +31,11 @@ class Terrain(BaseObject):
 
         # visualization mesh feature
         heightfield_image_size = 4096  # fixed image size 4096*4096
-        self._height_scale = 120  # [m] when changing this value, change the height in shader together!
+        self._height_scale = engine.global_config["height_scale"]  # [m]
+        self._drivable_region_extension = engine.global_config["drivable_region_extension"]  # [m] road marin
         self._terrain_size = 2048  # [m]
         self._semantic_map_size = 512  # [m] it should include the whole map. Otherwise, road will have no texture!
         self._semantic_map_pixel_per_meter = 22  # [m] how many pixels per meter
-        self._drivable_region_extention = 6  # [m] road will have a marin whose width is determined by this value
         # pre calculate some variables
         self._downsample_rate = int(heightfield_image_size / self._terrain_size)  # downsample to 2048 m
         self._elevation_texture_ratio = self._terrain_size / self._semantic_map_size  # for shader
@@ -266,7 +266,7 @@ class Terrain(BaseObject):
             heightfield_img = heightfield_img.reshape((heightfield_tex.getYSize(), heightfield_tex.getXSize(), 1))
             drivable_region = self.engine.current_map.get_height_map(self._terrain_size,
                                                                      self._downsample_rate,
-                                                                     self._drivable_region_extention)
+                                                                     self._drivable_region_extension)
             drivable_region_height = np.mean(heightfield_img[np.where(drivable_region)]).astype(np.uint16)
             heightfield_img = np.where(drivable_region, drivable_region_height, heightfield_img)
 

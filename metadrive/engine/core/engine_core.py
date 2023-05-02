@@ -294,7 +294,7 @@ class EngineCore(ShowBase.ShowBase):
             self.cam.node().getDisplayRegion(0).setClearColor(BKG_COLOR)
             lens = self.cam.node().getLens()
 
-            lens.setFov(65)
+            lens.setFov(self.global_config["main_camera_fov"])
 
             # ui and render property
             if self.global_config["show_fps"]:
