@@ -175,7 +175,7 @@ def extract_map_features(map_api, center, radius=250):
                 if not hasattr(lane_meta_data, "baseline_path"):
                     continue
                 if isinstance(lane_meta_data.polygon.boundary, MultiLineString):
-                    logger.warning("Stop using boundaries! Use exterior instead!")
+                    # logger.warning("Stop using boundaries! Use exterior instead!")
                     boundary = gpd.GeoSeries(lane_meta_data.polygon.boundary).explode(index_parts=True)
                     sizes = []
                     for idx, polygon in enumerate(boundary[0]):
@@ -202,7 +202,7 @@ def extract_map_features(map_api, center, radius=250):
                 block_polygons.append(block.polygon)
 
     interpolygons = [block.polygon for block in nearest_vector_map[SemanticMapLayer.INTERSECTION]]
-    logger.warning("Stop using boundaries! Use exterior instead!")
+    # logger.warning("Stop using boundaries! Use exterior instead!")
     boundaries = gpd.GeoSeries(unary_union(interpolygons + block_polygons)).boundary.explode(index_parts=True)
     # boundaries.plot()
     # plt.show()

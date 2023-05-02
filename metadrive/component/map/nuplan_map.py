@@ -127,7 +127,7 @@ class NuPlanMap(BaseMap):
 
         self.boundary_block = NuPlanBlock(block_index, self.road_network, 0, self.map_name, self.nuplan_center)
         interpolygons = [block.polygon for block in nearest_vector_map[SemanticMapLayer.INTERSECTION]]
-        logger.warning("Stop using boundaries! Use exterior instead!")
+        # logger.warning("Stop using boundaries! Use exterior instead!")
         boundaries = gpd.GeoSeries(unary_union(interpolygons + block_polygons)).boundary.explode(index_parts=True)
         # boundaries.plot()
         # plt.show()

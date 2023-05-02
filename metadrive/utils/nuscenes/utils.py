@@ -288,7 +288,7 @@ def get_map_features(scene_info, nuscenes: NuScenes, map_center, radius=250, poi
         polygon = map_api.extract_polygon(seg_info["polygon_token"])
         polygons.append(polygon)
     polygons = [geom if geom.is_valid else geom.buffer(0) for geom in polygons]
-    logger.warning("Stop using boundaries! Use exterior instead!")
+    # logger.warning("Stop using boundaries! Use exterior instead!")
     boundaries = gpd.GeoSeries(unary_union(polygons)).boundary.explode(index_parts=True)
     for idx, boundary in enumerate(boundaries[0]):
         block_points = np.array(list(i for i in zip(boundary.coords.xy[0], boundary.coords.xy[1])))
