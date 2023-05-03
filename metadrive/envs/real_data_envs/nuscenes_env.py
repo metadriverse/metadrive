@@ -20,7 +20,7 @@ if __name__ == "__main__":
             # "pstats": True,
             "render_pipeline": True,
             "pstats": True,
-            "daytime": "15:32",
+            "daytime": "22:11",
             # "no_traffic": True,
             # "no_light": False,
             # "debug":True,
@@ -41,6 +41,7 @@ if __name__ == "__main__":
             # "show_policy_mark": True,
             # "show_coordinates": True,
             "vehicle_config": dict(
+                light=True,
                 show_navi_mark=False,
                 no_wheel_friction=True,
                 lidar=dict(num_lasers=120, distance=50, num_others=4),
@@ -55,7 +56,7 @@ if __name__ == "__main__":
 
     success = []
     while True:
-        env.reset(force_seed=3)
+        env.reset(force_seed=7)
         # env.engine.force_fps.disable()
         for t in range(10000):
             o, r, d, info = env.step([0, 0])

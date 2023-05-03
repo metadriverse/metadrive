@@ -124,6 +124,7 @@ BASE_DEFAULT_CONFIG = dict(
         rgb_to_grayscale=False,
         gaussian_noise=0.0,
         dropout_prob=0.0,
+        light=False,  # vehicle light, only available when enabling render-pipeline
     ),
 
     # ===== Agent config =====

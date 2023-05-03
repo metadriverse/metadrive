@@ -147,6 +147,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         # light experimental!
         self.light = None
         self._light_direction_queue = None
+        self._light_model = None
         self.light_name = None
 
         # powertrain config
@@ -440,7 +441,9 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             self.set_velocity(self.config["spawn_velocity"], in_local_frame=self.config["spawn_velocity_car_frame"])
 
         # clean lights
-        if self.light is not None:
+        if self.config["light"] and self.light is None:
+            self.add_light()
+        elif not self.config["light"] and self.light is not None:
             self.remove_light()
 
         # self.add_light()
@@ -451,6 +454,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self.engine.render_pipeline.remove_light(self.light)
         self.engine.taskMgr.remove(self.light_name)
         self.light_name = None
+        self._light_model.removeNode()
+        self._light_model = None
         self.light = None
         self._light_direction_queue = None
 
@@ -460,6 +465,17 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         """
         assert self.use_render_pipeline, "Can be Enabled when using render pipeline"
         if self.light is None:
+            for y in [-self.WIDTH / 2., self.WIDTH / 2]:
+                self._light_model = self.loader.loadModel(AssetLoader.file_path("models", "sphere.egg"))
+                self._light_model.reparentTo(self.origin)
+                self._light_model.setPos(self.LENGTH / 2 + 0.1, y, self.HEIGHT / 4)
+                self._light_model.setScale(0.2)
+                material = Material()
+                material.setBaseColor((1, 1, 1, 1))
+                material.setShininess(128)
+                material.setEmission((1, 1, 1, 1))
+                self._light_model.setMaterial(material, True)
+
             self.light_name = "light_{}".format(self.id)
             self.light = RPSpotLight()
             self.light.set_color_from_temperature(3 * 1000.0)
