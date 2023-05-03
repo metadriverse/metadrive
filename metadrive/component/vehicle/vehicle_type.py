@@ -47,6 +47,7 @@ class XLVehicle(BaseVehicle):
     CHASSIS_TO_WHEEL_AXIS = 0.3
     TIRE_WIDTH = 0.5
     MASS = 1600
+    LIGHT_POSITION = (2.65, -0.75, 0.2)
     path = ['vehicle/truck/', (factor, factor, factor), (0, 0.25, 0.04), 0]
 
     @property
@@ -73,6 +74,8 @@ class LVehicle(BaseVehicle):
     LATERAL_TIRE_TO_CENTER = 0.75
     TIRE_WIDTH = 0.35
     MASS = 1300
+    LIGHT_POSITION = (2.1, -0.65, 0.3)
+
     path = ['vehicle/lada/', (1.1, 1.1, 1.1), (0, -0.27, 0.07), 0]
 
     @property
@@ -99,6 +102,7 @@ class MVehicle(BaseVehicle):
     LATERAL_TIRE_TO_CENTER = 0.803
     TIRE_WIDTH = 0.3
     MASS = 1200
+    LIGHT_POSITION = (1.95, -0.67, 0.22)
 
     path = ['vehicle/130/', (factor, factor, factor), (0, -0.05, 0.07), 0]
 
@@ -127,6 +131,8 @@ class SVehicle(BaseVehicle):
     TIRE_RADIUS = 0.376
     TIRE_WIDTH = 0.25
     MASS = 800
+    LIGHT_POSITION = (1.85, -0.57, 0.23)
+
     path = ['vehicle/beetle/', (factor, factor, factor), (0, -0.26, 0.03), 0]
 
     @property
@@ -164,13 +170,13 @@ class VaryingDynamicsVehicle(DefaultVehicle):
         return self.config["mass"] if self.config["mass"] is not None else super(VaryingDynamicsVehicle, self).MASS
 
     def reset(
-        self,
-        random_seed=None,
-        vehicle_config=None,
-        position=None,
-        heading: float = 0.0,  # In degree!
-        *args,
-        **kwargs
+            self,
+            random_seed=None,
+            vehicle_config=None,
+            position=None,
+            heading: float = 0.0,  # In degree!
+            *args,
+            **kwargs
     ):
 
         assert "width" not in self.PARAMETER_SPACE

@@ -91,6 +91,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     TIRE_WIDTH = 0.4
     FRONT_WHEELBASE = None
     REAR_WHEELBASE = None
+    LIGHT_POSITION = (1.62, -0.67, 0.1)
 
     # MASS = None
 
@@ -147,7 +148,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         # light experimental!
         self.light = None
         self._light_direction_queue = None
-        self._light_model = None
+        self._light_models = None
         self.light_name = None
 
         # powertrain config
@@ -441,9 +442,9 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             self.set_velocity(self.config["spawn_velocity"], in_local_frame=self.config["spawn_velocity_car_frame"])
 
         # clean lights
-        if self.config["light"] and self.light is None:
+        if self.config["light"]:
             self.add_light()
-        elif not self.config["light"] and self.light is not None:
+        else:
             self.remove_light()
 
         # self.add_light()
@@ -451,42 +452,47 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     """------------------------------------------- act -------------------------------------------------"""
 
     def remove_light(self):
-        self.engine.render_pipeline.remove_light(self.light)
-        self.engine.taskMgr.remove(self.light_name)
-        self.light_name = None
-        self._light_model.removeNode()
-        self._light_model = None
-        self.light = None
-        self._light_direction_queue = None
+        if self.light is not None:
+            self.light_name = None
+            for m in self._light_models:
+                m.removeNode()
+            self._light_models = None
+            self.light = None
+            self._light_direction_queue = None
+            if self.use_render_pipeline:
+                self.engine.render_pipeline.remove_light(self.light)
+                self.engine.taskMgr.remove(self.light_name)
 
     def add_light(self):
         """
         Experimental feature
         """
-        assert self.use_render_pipeline, "Can be Enabled when using render pipeline"
+        # assert self.use_render_pipeline, "Can be Enabled when using render pipeline"
         if self.light is None:
-            for y in [-self.WIDTH / 2., self.WIDTH / 2]:
-                self._light_model = self.loader.loadModel(AssetLoader.file_path("models", "sphere.egg"))
-                self._light_model.reparentTo(self.origin)
-                self._light_model.setPos(self.LENGTH / 2 + 0.1, y, self.HEIGHT / 4)
-                self._light_model.setScale(0.2)
+            self._light_models = []
+            for y in [-1, 1]:
+                light_model = self.loader.loadModel(AssetLoader.file_path("models", "sphere.egg"))
+                light_model.reparentTo(self.origin)
+                light_model.setPos(self.LIGHT_POSITION[0], self.LIGHT_POSITION[1] * y, self.LIGHT_POSITION[2])
+                light_model.setScale(0.13)
                 material = Material()
                 material.setBaseColor((1, 1, 1, 1))
                 material.setShininess(128)
                 material.setEmission((1, 1, 1, 1))
-                self._light_model.setMaterial(material, True)
-
-            self.light_name = "light_{}".format(self.id)
-            self.light = RPSpotLight()
-            self.light.set_color_from_temperature(3 * 1000.0)
-            self.light.setRadius(500)
-            self.light.setFov(100)
-            self.light.energy = 600
-            self.light.casts_shadows = False
-            self.light.shadow_map_resolution = 128
-            self.engine.render_pipeline.add_light(self.light)
-            self.engine.taskMgr.add(self._update_light_pos, self.light_name)
-            self._light_direction_queue = []
+                light_model.setMaterial(material, True)
+                self._light_models.append(light_model)
+            if self.use_render_pipeline:
+                self.light_name = "light_{}".format(self.id)
+                self.light = RPSpotLight()
+                self.light.set_color_from_temperature(3 * 1000.0)
+                self.light.setRadius(500)
+                self.light.setFov(100)
+                self.light.energy = 600
+                self.light.casts_shadows = False
+                self.light.shadow_map_resolution = 128
+                self.engine.render_pipeline.add_light(self.light)
+                self.engine.taskMgr.add(self._update_light_pos, self.light_name)
+                self._light_direction_queue = []
 
     def _update_light_pos(self, task):
         pos = self.convert_to_world_coordinates([self.LENGTH / 2, 0], self.position)

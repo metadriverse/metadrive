@@ -3,6 +3,7 @@ import numpy as np
 from metadrive.envs.scenario_env import ScenarioEnv
 from metadrive.policy.replay_policy import ReplayEgoCarPolicy
 from metadrive.examples.generate_video_for_bev_and_interface import VideoRecorder
+
 NuScenesEnv = ScenarioEnv
 
 if __name__ == "__main__":
