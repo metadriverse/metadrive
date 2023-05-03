@@ -193,7 +193,7 @@ class ScenarioDescription(dict):
             "You lack these keys in metadata: {}".format(
                 cls.METADATA_KEYS.difference(set(scenario_dict[cls.METADATA].keys()))
             )
-        assert scenario_dict[cls.METADATA][cls.TIMESTEP].shape == (scenario_length, )
+        assert scenario_dict[cls.METADATA][cls.TIMESTEP].shape == (scenario_length,)
 
     @classmethod
     def _check_object_state_dict(cls, obj_state, scenario_length, object_id, valid_check=True):
@@ -219,7 +219,7 @@ class ScenarioDescription(dict):
             assert state_array.ndim in [1, 2], "Haven't implemented test array with dim {} yet".format(state_array.ndim)
             if state_array.ndim == 2:
                 assert state_array.shape[
-                    1] != 0, "Please convert all state with dim 1 to a 1D array instead of 2D array."
+                           1] != 0, "Please convert all state with dim 1 to a 1D array instead of 2D array."
 
             if state_key == "valid":
                 assert np.sum(state_array) >= 1, "No frame valid for this object. Consider removing it"
@@ -263,3 +263,107 @@ def _recursive_check_type(obj, allow_types, depth=0):
 
     if depth > 1000:
         raise ValueError()
+
+# TODO (LQY): Remove me after paper writing
+# {
+#     "map_features": {
+#         "map_object_id_1": {
+#             "center_line": [...],
+#             "polygon": [...],
+#             "from_lanes": [...],
+#             "to_lanes": [...],
+#             "neighbor_lanes": [...],
+#             "metadata": {...}
+#         },
+#         "map_object_id_2": {
+#             "polyline": [...],
+#             "type": "white_solid",
+#             "metadata": {...}
+#         }
+#     },
+#     "objects": {
+#         "object_id_1": {
+#             "position": [...],
+#             "velocity": [...],
+#             "heading": [...],
+#             "size": [l, w, h],
+#             "valid": [...],
+#             "type": "VEHICLE",
+#             "metadata": {...}
+#         }
+#     },
+#     "traffic light": {
+#         "light_id_1": {
+#             "states": [...],
+#             "position": [x, y, z],
+#             "heading": -np.pi,
+#             "lane_id": "lane_id_1",
+#             "metadata": {...}
+#         }
+#     },
+#     "metadata": {
+#         "dataset": "nuscenes",
+#         "episode_length": 198,
+#         "time_interval": 0.1,
+#         "sdc_id": "ego",
+#         "coordinates": "right-hand"
+#         ...
+#     }
+# }
+#
+# {
+#     "map_features": {
+#         "map_object_id_1": {
+#             "center_line": [...],
+#             "polygon": [...],
+#             "connectivity": {...}
+#         },
+#         "map_object_id_2": {
+#             "polyline": [...],
+#             "type": "white_solid",
+#         }
+#     },
+#     "objects": {
+#         "object_id_1": {
+#             "position": [...],
+#             "heading": [...],
+#             "type": "VEHICLE",
+#         }
+#     },
+#     "traffic light": {
+#         "light_id_1": {
+#             "states": [...],
+#             "lane_id": "lane_id_1",
+#         }
+#     },
+#     "metadata": {
+#         "dataset": "nuscenes",
+#         "time_interval": 0.1,
+#         "sdc_id": "ego",
+#     }
+# }
+#
+# {"map_features": {
+# "map_object_id_1": {
+#     "center_line": [...],
+#     "type": "lane",
+#     "connectivity": {...}},
+# "map_object_id_2": {
+#     "polyline": [...],
+#     "type": "white_solid_line"}
+# },
+# "objects": {
+#     "object_id_1": {
+#         "position": [...],
+#         "heading": [...],
+#         "type": "VEHICLE"}
+# },
+# "traffic light": {
+#     "light_id_1": {
+#         "states": [...],
+#         "lane": "map_object_id_1"}
+# },
+# "metadata": {
+#     "dataset": "nuscenes",
+#     "time_interval": 0.1
+# }}
