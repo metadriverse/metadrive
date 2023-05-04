@@ -91,7 +91,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     TIRE_WIDTH = 0.4
     FRONT_WHEELBASE = None
     REAR_WHEELBASE = None
-    LIGHT_POSITION = (1.62, -0.67, 0.1)
+    LIGHT_POSITION = (1.62, -0.67, 0.05)
 
     # MASS = None
 
@@ -453,15 +453,15 @@ class BaseVehicle(BaseObject, BaseVehicleState):
 
     def remove_light(self):
         if self.light is not None:
-            self.light_name = None
-            for m in self._light_models:
-                m.removeNode()
-            self._light_models = None
-            self.light = None
-            self._light_direction_queue = None
             if self.use_render_pipeline:
                 self.engine.render_pipeline.remove_light(self.light)
                 self.engine.taskMgr.remove(self.light_name)
+            self.light_name = None
+            self.light = None
+            for m in self._light_models:
+                m.removeNode()
+            self._light_models = None
+            self._light_direction_queue = None
 
     def add_light(self):
         """

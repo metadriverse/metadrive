@@ -31,7 +31,7 @@ if __name__ == "__main__":
             "camera_height": 0.5,
             "camera_pitch": np.pi / 3,
             # "no_traffic":True,
-            "force_render_fps": 15,
+            "force_render_fps": 10,
             # "start_scenario_index": 192,
             # "start_scenario_index": 1000,
             "num_scenarios": 10,
@@ -41,6 +41,7 @@ if __name__ == "__main__":
             # "no_static_vehicles": True,
             # "show_policy_mark": True,
             # "show_coordinates": True,
+            "force_destroy": True,
             "vehicle_config": dict(
                 light=True,
                 show_navi_mark=False,
