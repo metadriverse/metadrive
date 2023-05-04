@@ -22,7 +22,7 @@ try:
 except ImportError:
     from collections import Callable
 
-from kitsunetsuki.base.matrices import get_bone_matrix
+from metadrive.libs.kitsunetsuki.base.matrices import get_bone_matrix
 
 from panda3d.core import CS_zup_right
 from panda3d.egg import EggTable, EggXfmSAnim

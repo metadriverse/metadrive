@@ -84,7 +84,7 @@ def parse_args():
 def main():
     args = parse_args()
 
-    from kitsunetsuki.exporter.vrm import VRMExporter
+    from metadrive.libs.kitsunetsuki.exporter.vrm import VRMExporter
 
     e = VRMExporter(args)
     out, buf = e.convert()
@@ -104,7 +104,7 @@ def register(init_version):
     if init_version != version:
         raise Exception(f"Version mismatch: {init_version} != {version}")
 
-    from kitsunetsuki.exporter.vrm import VRMExporterOperator, export
+    from metadrive.libs.kitsunetsuki.exporter.vrm import VRMExporterOperator, export
     bpy.utils.register_class(VRMExporterOperator)
     bpy.types.TOPBAR_MT_file_export.append(export)
 
@@ -112,7 +112,7 @@ def register(init_version):
 def unregister():
     import bpy
 
-    from kitsunetsuki.exporter.vrm import VRMExporterOperator, export
+    from metadrive.libs.kitsunetsuki.exporter.vrm import VRMExporterOperator, export
     bpy.types.TOPBAR_MT_file_export.remove(export)
     bpy.utils.unregister_class(VRMExporterOperator)
 

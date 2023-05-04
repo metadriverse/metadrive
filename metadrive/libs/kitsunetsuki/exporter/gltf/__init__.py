@@ -22,16 +22,16 @@ import struct
 from bpy_extras.io_utils import ExportHelper
 from typing import Set, cast
 
-from kitsunetsuki.base.armature import get_armature
-from kitsunetsuki.base.context import Mode
-from kitsunetsuki.base.collections import get_object_collection
-from kitsunetsuki.base.matrices import (
+from metadrive.libs.kitsunetsuki.base.armature import get_armature
+from metadrive.libs.kitsunetsuki.base.context import Mode
+from metadrive.libs.kitsunetsuki.base.collections import get_object_collection
+from metadrive.libs.kitsunetsuki.base.matrices import (
     get_bone_matrix, get_object_matrix, get_inverse_bind_matrix,
     matrix_to_list, quat_to_list)
-from kitsunetsuki.base.objects import (
+from metadrive.libs.kitsunetsuki.base.objects import (
     is_collision, is_object_visible, get_object_properties, set_active_object)
 
-from kitsunetsuki.exporter.base import Exporter
+from metadrive.libs.kitsunetsuki.exporter.base import Exporter
 
 from . import spec
 from .buffer import GLTFBuffer

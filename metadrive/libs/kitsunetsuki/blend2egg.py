@@ -77,9 +77,7 @@ def parse_args():
 def main():
     args = parse_args()
     from panda3d.egg import EggData
-    from kitsunetsuki.exporter.egg import EggExporter
-    args.output = "test.egg"
-    args.inputs = ["test.blend"]
+    from metadrive.libs.kitsunetsuki.exporter.egg import EggExporter
     e = EggExporter(args)
     out = e.convert()
 

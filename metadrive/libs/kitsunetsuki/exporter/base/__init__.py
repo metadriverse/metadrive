@@ -16,8 +16,8 @@
 import bpy
 import os
 
-from kitsunetsuki.base.collections import get_object_collection
-from kitsunetsuki.base.objects import (
+from metadrive.libs.kitsunetsuki.base.collections import get_object_collection
+from metadrive.libs.kitsunetsuki.base.objects import (
     get_object_properties, is_collision, is_object_visible,
     set_active_object)
 

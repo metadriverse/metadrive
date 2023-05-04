@@ -23,7 +23,7 @@ try:
 except ImportError:
     from collections import Callable
 
-from kitsunetsuki.base.matrices import get_bone_matrix, quat_to_list
+from metadrive.libs.kitsunetsuki.base.matrices import get_bone_matrix, quat_to_list
 
 from . import spec
 

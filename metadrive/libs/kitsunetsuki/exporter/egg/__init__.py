@@ -21,13 +21,13 @@ import itertools
 from panda3d.core import CS_zup_right, LMatrix4d
 from panda3d.egg import EggComment, EggData, EggGroup, EggPolygon, EggTransform
 
-from kitsunetsuki.base.armature import get_armature
-from kitsunetsuki.base.collections import get_object_collection
-from kitsunetsuki.base.matrices import get_object_matrix, get_bone_matrix
-from kitsunetsuki.base.objects import (
+from metadrive.libs.kitsunetsuki.base.armature import get_armature
+from metadrive.libs.kitsunetsuki.base.collections import get_object_collection
+from metadrive.libs.kitsunetsuki.base.matrices import get_object_matrix, get_bone_matrix
+from metadrive.libs.kitsunetsuki.base.objects import (
     is_collision, get_object_properties, set_active_object)
 
-from kitsunetsuki.exporter.base import Exporter
+from metadrive.libs.kitsunetsuki.exporter.base import Exporter
 
 from .animation import AnimationMixin
 from .geom import GeomMixin

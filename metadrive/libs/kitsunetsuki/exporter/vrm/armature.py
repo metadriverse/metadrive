@@ -15,8 +15,8 @@
 
 import math
 
-from kitsunetsuki.base.armature import is_left_bone, is_bone_matches
-from kitsunetsuki.base.objects import get_parent
+from metadrive.libs.kitsunetsuki.base.armature import is_left_bone, is_bone_matches
+from metadrive.libs.kitsunetsuki.base.objects import get_parent
 
 
 class ArmatureMixin(object):
