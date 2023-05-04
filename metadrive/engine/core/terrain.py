@@ -12,7 +12,7 @@ from metadrive.base_class.base_object import BaseObject
 from metadrive.constants import CamMask
 from metadrive.constants import MetaDriveType, CollisionGroup
 from metadrive.engine.asset_loader import AssetLoader
-from metadrive.utils.terrain_generation.diamond_square import diamond_square
+from metadrive.external_libs.terrain_generation.diamond_square import diamond_square
 
 
 class Terrain(BaseObject):
