@@ -403,3 +403,6 @@ class Terrain(BaseObject):
 # use shaderterrain with bullet: https://discourse.panda3d.org/t/getting-shaderterrainmesh-and-bulletheightfieldshape-to-match/27512
 # shaderterrain+multi_texture: https://discourse.panda3d.org/t/alpha-texture-in-shaderterrainmesh-not-work/23715/3
 # shaderTerrain height texture https://discourse.panda3d.org/t/how-get-height-of-shader-terrain-mesh-for-add-grass-tree-in-map/23964
+
+# multi-thread pssm
+# https://discourse.panda3d.org/t/parallel-split-shadow-mapping-using-pssmcamerarig/27457/12
