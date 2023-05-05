@@ -30,6 +30,7 @@ class DefaultVehicle(BaseVehicle):
 
 # When using DefaultVehicle as traffic, please use this class.
 
+
 class TrafficDefaultVehicle(DefaultVehicle):
     pass
 
@@ -140,8 +141,9 @@ class SVehicle(BaseVehicle):
     @property
     def path(self):
         if self.use_render_pipeline:
-            return ['vehicle/beetle/vehicle.bam', (0.0077, 0.0077, 0.0077), (0.04512, -0.24 - 0.04512, 1.77),
-                    (-90, -90, 0)]
+            return [
+                'vehicle/beetle/vehicle.bam', (0.0077, 0.0077, 0.0077), (0.04512, -0.24 - 0.04512, 1.77), (-90, -90, 0)
+            ]
         else:
             factor = 1
             return ['vehicle/beetle/vehicle.gltf', (factor, factor, factor), (0, -0.2, 0.03), (0, 0, 0)]
@@ -181,13 +183,13 @@ class VaryingDynamicsVehicle(DefaultVehicle):
         return self.config["mass"] if self.config["mass"] is not None else super(VaryingDynamicsVehicle, self).MASS
 
     def reset(
-            self,
-            random_seed=None,
-            vehicle_config=None,
-            position=None,
-            heading: float = 0.0,  # In degree!
-            *args,
-            **kwargs
+        self,
+        random_seed=None,
+        vehicle_config=None,
+        position=None,
+        heading: float = 0.0,  # In degree!
+        *args,
+        **kwargs
     ):
 
         assert "width" not in self.PARAMETER_SPACE

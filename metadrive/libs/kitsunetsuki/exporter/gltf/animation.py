@@ -31,13 +31,15 @@ from . import spec
 class AnimationMixin(object):
     def _make_sampler(self, path, input_id, bone):
         # transforms
-        channel = self._buffer.add_channel({
-            'componentType': spec.TYPE_FLOAT,
-            'type': 'VEC4' if path == 'rotation' else 'VEC3',
-            'extras': {
-                'reference': path,
-            },
-        })
+        channel = self._buffer.add_channel(
+            {
+                'componentType': spec.TYPE_FLOAT,
+                'type': 'VEC4' if path == 'rotation' else 'VEC3',
+                'extras': {
+                    'reference': path,
+                },
+            }
+        )
 
         gltf_sampler = {
             'interpolation': 'LINEAR',
@@ -88,13 +90,15 @@ class AnimationMixin(object):
                 gltf_target['node'] = gltf_joint_id
 
             # time or animation frame
-            channel = self._buffer.add_channel({
-                'componentType': spec.TYPE_FLOAT,
-                'type': 'SCALAR',
-                'extras': {
-                    'reference': 'input',
-                },
-            })
+            channel = self._buffer.add_channel(
+                {
+                    'componentType': spec.TYPE_FLOAT,
+                    'type': 'SCALAR',
+                    'extras': {
+                        'reference': 'input',
+                    },
+                }
+            )
             input_id = channel['bufferView']
 
             for path in ('rotation', 'scale', 'translation'):

@@ -49,14 +49,8 @@ class Palette2LUT(object):
 
             for s in range(quality + 1):
                 for v in range(quality + 1):
-                    color_in = colorsys.hsv_to_rgb(
-                        h / quality,
-                        s / quality,
-                        v / quality)
-                    color_out = colorsys.hsv_to_rgb(
-                        h0,
-                        s / quality,
-                        v / quality)
+                    color_in = colorsys.hsv_to_rgb(h / quality, s / quality, v / quality)
+                    color_out = colorsys.hsv_to_rgb(h0, s / quality, v / quality)
                     self.set_color(color_in, color_out)
 
     def save(self, opath):

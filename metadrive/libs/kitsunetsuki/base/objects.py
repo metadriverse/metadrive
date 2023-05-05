@@ -68,11 +68,15 @@ def apply_modifiers(obj, triangulate=False, apply_scale=False):
         try:
             bpy.ops.object.modifier_apply(modifier=mod.name)
         except Exception as e:
-            print('FAILED TO APPLY MODIFIER {mod_name} [{mod_type}] ON OBJECT {obj_name}'.format(**{
-                'mod_name': mod.name,
-                'mod_type': mod.type,
-                'obj_name': obj.name,
-            }))
+            print(
+                'FAILED TO APPLY MODIFIER {mod_name} [{mod_type}] ON OBJECT {obj_name}'.format(
+                    **{
+                        'mod_name': mod.name,
+                        'mod_type': mod.type,
+                        'obj_name': obj.name,
+                    }
+                )
+            )
             raise e
 
     if apply_scale:

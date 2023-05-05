@@ -31,7 +31,7 @@ class ArmatureMixin(object):
         }
 
         def is_hips(bone):
-            return is_bone_matches(bone, ('hips',))
+            return is_bone_matches(bone, ('hips', ))
 
         def is_upper_leg(bone, strict=True):
             names = ['thigh']
@@ -52,7 +52,7 @@ class ArmatureMixin(object):
         side = 'left' if is_left_bone(bone) else 'right'
 
         parents = []
-        for i in range(1, 3+1):
+        for i in range(1, 3 + 1):
             parent = get_parent(bone, i)
             if parent:
                 parents.append(parent)
@@ -60,24 +60,24 @@ class ArmatureMixin(object):
         if is_hips(bone):
             vrm_bone['bone'] = 'hips'
 
-        elif (is_bone_matches(bone, ('upperchest',)) or
-                (is_bone_matches(bone, ('spine',)) and is_hips(get_parent(bone, 3)))):
+        elif (is_bone_matches(bone, ('upperchest', ))
+              or (is_bone_matches(bone, ('spine', )) and is_hips(get_parent(bone, 3)))):
             vrm_bone['bone'] = 'upperChest'
 
-        elif (is_bone_matches(bone, ('chest',)) or
-                (is_bone_matches(bone, ('spine',)) and is_hips(get_parent(bone, 2)))):
+        elif (is_bone_matches(bone, ('chest', )) or (is_bone_matches(bone,
+                                                                     ('spine', )) and is_hips(get_parent(bone, 2)))):
             vrm_bone['bone'] = 'chest'
 
-        elif is_bone_matches(bone, ('spine',)):
+        elif is_bone_matches(bone, ('spine', )):
             vrm_bone['bone'] = 'spine'
 
-        elif is_bone_matches(bone, ('neck',)):
+        elif is_bone_matches(bone, ('neck', )):
             vrm_bone['bone'] = 'neck'
 
-        elif is_bone_matches(bone, ('head',)):
+        elif is_bone_matches(bone, ('head', )):
             vrm_bone['bone'] = 'head'
 
-        elif is_bone_matches(bone, ('eye',)):
+        elif is_bone_matches(bone, ('eye', )):
             vrm_bone['bone'] = '{}Eye'.format(side)
 
         elif is_bone_matches(bone, ('foot', 'ankle')):
@@ -89,7 +89,7 @@ class ArmatureMixin(object):
         elif is_upper_leg(bone):
             vrm_bone['bone'] = '{}UpperLeg'.format(side)
 
-        elif is_bone_matches(bone, ('toe',)):
+        elif is_bone_matches(bone, ('toe', )):
             vrm_bone['bone'] = '{}Toes'.format(side)
 
         elif is_bone_matches(bone, ('shoulder', 'clavicle')):
@@ -109,16 +109,16 @@ class ArmatureMixin(object):
             else:  # 1 level deep parent - direct parent
                 part_name = 'Proximal'
 
-            if is_bone_matches(bone, ('thumb',)):
+            if is_bone_matches(bone, ('thumb', )):
                 vrm_bone['bone'] = '{}Thumb{}'.format(side, part_name)
 
-            elif is_bone_matches(bone, ('index',)):
+            elif is_bone_matches(bone, ('index', )):
                 vrm_bone['bone'] = '{}Index{}'.format(side, part_name)
 
-            elif is_bone_matches(bone, ('middle',)):
+            elif is_bone_matches(bone, ('middle', )):
                 vrm_bone['bone'] = '{}Middle{}'.format(side, part_name)
 
-            elif is_bone_matches(bone, ('ring',)):
+            elif is_bone_matches(bone, ('ring', )):
                 vrm_bone['bone'] = '{}Ring{}'.format(side, part_name)
 
             elif is_bone_matches(bone, ('pinky', 'little')):
@@ -185,28 +185,30 @@ class ArmatureMixin(object):
                     fp['extras'] = {'name': bone.name}
 
                 elif vrm_bone['bone'] == 'leftEye':
-                    fp.update({
-                        'lookAtHorizontalOuter': {
-                            'curve': [0, 0, 0, 1, 1, 1, 1, 0],
-                            'xRange': 90,
-                            'yRange': 10,
-                        },
-                        'lookAtHorizontalInner': {
-                            'curve': [0, 0, 0, 1, 1, 1, 1, 0],
-                            'xRange': 90,
-                            'yRange': 10,
-                        },
-                        'lookAtVerticalDown': {
-                            'curve': [0, 0, 0, 1, 1, 1, 1, 0],
-                            'xRange': 90,
-                            'yRange': 10,
-                        },
-                        'lookAtVerticalUp': {
-                            'curve': [0, 0, 0, 1, 1, 1, 1, 0],
-                            'xRange': 90,
-                            'yRange': 10,
-                        },
-                    })
+                    fp.update(
+                        {
+                            'lookAtHorizontalOuter': {
+                                'curve': [0, 0, 0, 1, 1, 1, 1, 0],
+                                'xRange': 90,
+                                'yRange': 10,
+                            },
+                            'lookAtHorizontalInner': {
+                                'curve': [0, 0, 0, 1, 1, 1, 1, 0],
+                                'xRange': 90,
+                                'yRange': 10,
+                            },
+                            'lookAtVerticalDown': {
+                                'curve': [0, 0, 0, 1, 1, 1, 1, 0],
+                                'xRange': 90,
+                                'yRange': 10,
+                            },
+                            'lookAtVerticalUp': {
+                                'curve': [0, 0, 0, 1, 1, 1, 1, 0],
+                                'xRange': 90,
+                                'yRange': 10,
+                            },
+                        }
+                    )
 
                     pose_bone = armature.pose.bones[bone_name]
                     for c in pose_bone.constraints:
@@ -223,8 +225,7 @@ class ArmatureMixin(object):
             # https://blenderartists.org/t/wiggle-bones-a-jiggle-bone-implementation-for-2-8/1154726
             if pose_bone.get('jiggle_enable', False):
                 # search for root bone
-                while (pose_bone.parent and
-                        pose_bone.parent.get('jiggle_enable', False)):
+                while (pose_bone.parent and pose_bone.parent.get('jiggle_enable', False)):
                     pose_bone = pose_bone.parent
 
                 if pose_bone.name not in vrm_springs:

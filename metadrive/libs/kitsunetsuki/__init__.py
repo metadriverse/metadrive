@@ -13,7 +13,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-
 bl_info = {
     'name': 'KITSUNETSUKI Asset Tools',
     'author': 'kitsune.ONE team',
@@ -34,9 +33,7 @@ def reload_package(module_dict_main):
     from pathlib import Path
     from typing import Any, Dict
 
-    def reload_package_recursive(
-        current_dir: Path, module_dict: Dict[str, Any]
-    ) -> None:
+    def reload_package_recursive(current_dir: Path, module_dict: Dict[str, Any]) -> None:
         for path in current_dir.iterdir():
             if '__init__' in str(path) or path.stem not in module_dict:
                 continue
@@ -62,7 +59,8 @@ def register():
         raise Exception(
             f"This add-on doesn't support Blender version less than {req_ver}. "
             f'Blender version {req_ver} or greater is recommended, '
-            f'but the current version is {cur_ver}')
+            f'but the current version is {cur_ver}'
+        )
 
     from . import blend2gltf, blend2vrm
     blend2gltf.register(bl_info['version'])

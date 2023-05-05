@@ -137,8 +137,7 @@ class GLTFBuffer(object):
             with open(buffer_fp, 'wb') as f:
                 f.write(data)
 
-            uri = os.path.relpath(
-                buffer_fp, os.path.dirname(self._filepath))
+            uri = os.path.relpath(buffer_fp, os.path.dirname(self._filepath))
 
         if len(data):
             gltf_buffer = {

@@ -23,16 +23,10 @@ class TextureMixin(object):
         if self._render_type == 'rp':  # custom texture order for RP
             return (
                 # p3d_Texture0 - baseColorTexture - RP Diffuse
-                (
-                    ('pbrMetallicRoughness', 'baseColorTexture'),
-                    self.get_diffuse(material, shader)
-                ),
+                (('pbrMetallicRoughness', 'baseColorTexture'), self.get_diffuse(material, shader)),
 
                 # p3d_Texture1 - metallicRoughnessTexture - RP Normal Map
-                (
-                    ('pbrMetallicRoughness', 'metallicRoughnessTexture'),
-                    self.get_normal_map(material, shader)
-                ),
+                (('pbrMetallicRoughness', 'metallicRoughnessTexture'), self.get_normal_map(material, shader)),
 
                 # p3d_Texture2 - normalTexture - RP IOR
                 ('normalTexture', self.get_specular_map(material, shader)),
@@ -45,14 +39,8 @@ class TextureMixin(object):
             )
         else:
             return (
-                (
-                    ('pbrMetallicRoughness', 'baseColorTexture'),
-                    self.get_diffuse(material, shader)
-                ),
-                (
-                    ('pbrMetallicRoughness', 'metallicRoughnessTexture'),
-                    self.get_roughness_map(material, shader)
-                ),
+                (('pbrMetallicRoughness', 'baseColorTexture'), self.get_diffuse(material, shader)),
+                (('pbrMetallicRoughness', 'metallicRoughnessTexture'), self.get_roughness_map(material, shader)),
                 ('normalTexture', self.get_normal_map(material, shader)),
                 ('emissiveTexture', self.get_emission_map(material, shader)),
                 (None, ''),  # put a placeholder, because all textures are required

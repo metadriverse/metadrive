@@ -35,40 +35,33 @@ def get_from_node(node_tree, type, to_node, from_socket_name, to_socket_name):
         if (link.to_node == to_node and link.to_socket.name == to_socket_name):
             # left side matched:
             # From Node [From Socket] ->
-            if (link.from_node.type == type and
-                    link.from_socket.name == from_socket_name):
+            if (link.from_node.type == type and link.from_socket.name == from_socket_name):
                 return link.from_node
 
             # through mix shader:
             # Mix Shader [Shader] ->
-            elif (link.from_node.type == 'MIX_SHADER' and
-                    link.from_socket.name == 'Shader'):
+            elif (link.from_node.type == 'MIX_SHADER' and link.from_socket.name == 'Shader'):
                 mix = link.from_node
                 for input_ in mix.inputs:
                     if input_.name == 'Shader':
-                        node = get_from_node(
-                            node_tree, type, mix, from_socket_name, 'Shader')
+                        node = get_from_node(node_tree, type, mix, from_socket_name, 'Shader')
                         if node:
                             return node
 
             # through math:
             # Math [Value] ->
-            elif (link.from_node.type == 'MATH' and
-                    link.from_socket.name == 'Value'):
+            elif (link.from_node.type == 'MATH' and link.from_socket.name == 'Value'):
                 math = link.from_node
                 for input_ in math.inputs:
                     if input_.name == 'Value':
-                        node = get_from_node(
-                            node_tree, type, math, from_socket_name, 'Value')
+                        node = get_from_node(node_tree, type, math, from_socket_name, 'Value')
                         if node:
                             return node
 
             # through separate RGB:
             # Separate RGB [Value] ->
-            elif (link.from_node.type == 'SEPRGB' and
-                    link.from_socket.name in ('R', 'G', 'B')):
+            elif (link.from_node.type == 'SEPRGB' and link.from_socket.name in ('R', 'G', 'B')):
                 seprgb = link.from_node
-                node = get_from_node(
-                    node_tree, type, seprgb, from_socket_name, 'Image')
+                node = get_from_node(node_tree, type, seprgb, from_socket_name, 'Image')
                 if node:
                     return node

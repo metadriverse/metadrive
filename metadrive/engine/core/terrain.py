@@ -147,14 +147,14 @@ class Terrain(BaseObject):
 
     # @time_me
     def _generate_mesh_vis_terrain(
-            self,
-            size,
-            heightfield: Texture,
-            attribute_tex: Texture,
-            target_triangle_width=10,
-            height_scale=100,
-            height_offset=0.,
-            engine=None,
+        self,
+        size,
+        heightfield: Texture,
+        attribute_tex: Texture,
+        target_triangle_width=10,
+        height_scale=100,
+        height_offset=0.,
+        engine=None,
     ):
         """
         Given a height field map to generate terrain and an attribute_tex to texture terrain, so we can get road/grass
@@ -253,8 +253,11 @@ class Terrain(BaseObject):
             self.detach_from_world(self.engine.physics_world)
             assert self.engine.current_map is not None, "Can not find current map"
             semantics = self.engine.current_map.get_semantic_map(
-                size=self._semantic_map_size, pixels_per_meter=self._semantic_map_pixel_per_meter,
-                polyline_thickness=int(1024 / self._semantic_map_size), layer=["lane", "lane_line"])
+                size=self._semantic_map_size,
+                pixels_per_meter=self._semantic_map_pixel_per_meter,
+                polyline_thickness=int(1024 / self._semantic_map_size),
+                layer=["lane", "lane_line"]
+            )
             semantics = semantics.astype(np.float32)
             semantic_tex = Texture()
             semantic_tex.setup2dTexture(*semantics.shape[:2], Texture.TFloat, Texture.FRgba)
@@ -264,9 +267,9 @@ class Terrain(BaseObject):
             heightfield_tex = self.loader.loadTexture(AssetLoader.file_path("textures", "terrain", "heightfield.png"))
             heightfield_img = np.frombuffer(heightfield_tex.getRamImage().getData(), dtype=np.uint16)
             heightfield_img = heightfield_img.reshape((heightfield_tex.getYSize(), heightfield_tex.getXSize(), 1))
-            drivable_region = self.engine.current_map.get_height_map(self._terrain_size,
-                                                                     self._downsample_rate,
-                                                                     self._drivable_region_extension)
+            drivable_region = self.engine.current_map.get_height_map(
+                self._terrain_size, self._downsample_rate, self._drivable_region_extension
+            )
             drivable_region_height = np.mean(heightfield_img[np.where(drivable_region)]).astype(np.uint16)
             heightfield_img = np.where(drivable_region, drivable_region_height, heightfield_img)
 
@@ -386,6 +389,7 @@ class Terrain(BaseObject):
         heightfield[-length:, :length] = array_3
         heightfield[:length, -length:] = array_3
         heightfield[-length:, -length:] = array_3
+
 
 # Some useful threads
 # GeoMipTerrain:

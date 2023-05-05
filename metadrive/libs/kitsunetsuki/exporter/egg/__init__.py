@@ -24,8 +24,7 @@ from panda3d.egg import EggComment, EggData, EggGroup, EggPolygon, EggTransform
 from metadrive.libs.kitsunetsuki.base.armature import get_armature
 from metadrive.libs.kitsunetsuki.base.collections import get_object_collection
 from metadrive.libs.kitsunetsuki.base.matrices import get_object_matrix, get_bone_matrix
-from metadrive.libs.kitsunetsuki.base.objects import (
-    is_collision, get_object_properties, set_active_object)
+from metadrive.libs.kitsunetsuki.base.objects import (is_collision, get_object_properties, set_active_object)
 
 from metadrive.libs.kitsunetsuki.exporter.base import Exporter
 
@@ -40,9 +39,7 @@ def matrix_to_panda(matrix):
     return LMatrix4d(*itertools.chain(*map(tuple, matrix.col)))
 
 
-class EggExporter(
-        AnimationMixin, GeomMixin, MaterialMixin, TextureMixin,
-        VertexMixin, Exporter):
+class EggExporter(AnimationMixin, GeomMixin, MaterialMixin, TextureMixin, VertexMixin, Exporter):
     """
     BLEND to EGG converter.
     """
@@ -56,7 +53,8 @@ class EggExporter(
 
         egg_comment = EggComment(
             '', 'KITSUNETSUKI Asset Tools by kitsune.ONE - '
-            'https://github.com/kitsune-ONE-team/KITSUNETSUKI-Asset-Tools')
+            'https://github.com/kitsune-ONE-team/KITSUNETSUKI-Asset-Tools'
+        )
         egg_root.add_child(egg_comment)
 
         return egg_root
@@ -93,9 +91,7 @@ class EggExporter(
             # custom shape
             if obj.rigid_body.collision_shape == 'CONVEX_HULL':
                 # trying to guess the best shape
-                polygons = list(filter(
-                    lambda x: isinstance(x, EggPolygon),
-                    node.get_children()))
+                polygons = list(filter(lambda x: isinstance(x, EggPolygon), node.get_children()))
                 if len(polygons) == 1 and polygons[0].is_planar():
                     # shape = EggGroup.CST_plane  # <- is it infinite?
                     shape = EggGroup.CST_polygon
@@ -178,8 +174,7 @@ class EggExporter(
             collection = get_object_collection(obj)
 
             for child in parent_node.get_children():
-                if (isinstance(child, EggGroup) and
-                        child.get_name() == collection.name):
+                if (isinstance(child, EggGroup) and child.get_name() == collection.name):
                     egg_group = child
                     break
             else:
@@ -211,14 +206,11 @@ class EggExporter(
 
         egg_group.set_tag('color', json.dumps(tuple(obj.data.color)))
         egg_group.set_tag('scale', json.dumps(tuple(obj.scale)))
-        egg_group.set_tag('energy', '{:.3f}'.format(
-            obj.data.energy))
-        egg_group.set_tag('far', '{:.3f}'.format(
-            obj.data.shadow_soft_size))
+        egg_group.set_tag('energy', '{:.3f}'.format(obj.data.energy))
+        egg_group.set_tag('far', '{:.3f}'.format(obj.data.shadow_soft_size))
 
         if obj.data.type == 'SPOT':
-            egg_group.set_tag('fov', '{:.3f}'.format(
-                math.degrees(obj.data.spot_size)))
+            egg_group.set_tag('fov', '{:.3f}'.format(math.degrees(obj.data.spot_size)))
 
         self._setup_node(egg_group, obj)
         parent_node.add_child(egg_group)

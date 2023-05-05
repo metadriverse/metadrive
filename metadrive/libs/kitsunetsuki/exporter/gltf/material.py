@@ -15,7 +15,6 @@
 
 from metadrive.libs.kitsunetsuki.base.material import get_root_node, get_from_node
 
-
 SHADING_MODEL_DEFAULT = 0
 SHADING_MODEL_EMISSIVE = 1
 SHADING_MODEL_CLEARCOAT = 2
@@ -50,8 +49,12 @@ class MaterialMixin(object):
             shader = None
             if output:
                 shader = get_from_node(
-                    material.node_tree, 'BSDF_PRINCIPLED', to_node=output,
-                    from_socket_name='BSDF', to_socket_name='Surface')
+                    material.node_tree,
+                    'BSDF_PRINCIPLED',
+                    to_node=output,
+                    from_socket_name='BSDF',
+                    to_socket_name='Surface'
+                )
 
         if not shader:
             return gltf_material
@@ -65,11 +68,13 @@ class MaterialMixin(object):
             normal_strength = self.get_normal_strength(material, shader)
 
             if sum(emission) > 0:  # emission
-                gltf_material['pbrMetallicRoughness'].update({
-                    'baseColorFactor': emission + (1,),
-                    'metallicFactor': 0,
-                    'roughnessFactor': 1,
-                })
+                gltf_material['pbrMetallicRoughness'].update(
+                    {
+                        'baseColorFactor': emission + (1, ),
+                        'metallicFactor': 0,
+                        'roughnessFactor': 1,
+                    }
+                )
                 gltf_material['pbrMetallicRoughness']['extras']['ior'] = 1.51
 
                 if alpha < 1:
@@ -79,11 +84,13 @@ class MaterialMixin(object):
                 gltf_material['emissiveFactor'] = tuple(emit)
 
             else:  # not emission
-                gltf_material['pbrMetallicRoughness'].update({
-                    'baseColorFactor': (1, 1, 1, 1),
-                    'metallicFactor': self.get_metallic(material, shader),
-                    'roughnessFactor': self.get_roughness(material, shader),
-                })
+                gltf_material['pbrMetallicRoughness'].update(
+                    {
+                        'baseColorFactor': (1, 1, 1, 1),
+                        'metallicFactor': self.get_metallic(material, shader),
+                        'roughnessFactor': self.get_roughness(material, shader),
+                    }
+                )
                 gltf_material['pbrMetallicRoughness']['extras']['ior'] = shader.inputs['IOR'].default_value
 
                 if alpha < 1:
@@ -97,11 +104,13 @@ class MaterialMixin(object):
         else:  # not RenderPipeline
             alpha = 1
 
-            gltf_material['pbrMetallicRoughness'].update({
-                'baseColorFactor': (1, 1, 1, alpha),
-                'metallicFactor': self.get_metallic(material, shader),
-                'roughnessFactor': self.get_roughness(material, shader),
-            })
+            gltf_material['pbrMetallicRoughness'].update(
+                {
+                    'baseColorFactor': (1, 1, 1, alpha),
+                    'metallicFactor': self.get_metallic(material, shader),
+                    'roughnessFactor': self.get_roughness(material, shader),
+                }
+            )
 
             gltf_material['emissiveFactor'] = tuple(self.get_emission(material, shader))[:3]
             # if alpha < 1:

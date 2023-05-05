@@ -26,10 +26,11 @@ from metadrive.libs.kitsunetsuki.base.armature import get_armature
 from metadrive.libs.kitsunetsuki.base.context import Mode
 from metadrive.libs.kitsunetsuki.base.collections import get_object_collection
 from metadrive.libs.kitsunetsuki.base.matrices import (
-    get_bone_matrix, get_object_matrix, get_inverse_bind_matrix,
-    matrix_to_list, quat_to_list)
+    get_bone_matrix, get_object_matrix, get_inverse_bind_matrix, matrix_to_list, quat_to_list
+)
 from metadrive.libs.kitsunetsuki.base.objects import (
-    is_collision, is_object_visible, get_object_properties, set_active_object)
+    is_collision, is_object_visible, get_object_properties, set_active_object
+)
 
 from metadrive.libs.kitsunetsuki.exporter.base import Exporter
 
@@ -42,8 +43,7 @@ from .vertex import VertexMixin
 from .texture import TextureMixin
 
 
-class GLTFExporter(AnimationMixin, GeomMixin, MaterialMixin,
-                   VertexMixin, TextureMixin, Exporter):
+class GLTFExporter(AnimationMixin, GeomMixin, MaterialMixin, VertexMixin, TextureMixin, Exporter):
     """
     BLEND to GLTF converter.
     """
@@ -84,10 +84,7 @@ class GLTFExporter(AnimationMixin, GeomMixin, MaterialMixin,
         if self._z_up:
             return x
         else:
-            return (
-                self._matrix.to_4x4() @
-                x @
-                self._matrix_inv.to_4x4())
+            return (self._matrix.to_4x4() @ x @ self._matrix_inv.to_4x4())
 
     def _freeze(self, matrix):
         """
@@ -101,21 +98,19 @@ class GLTFExporter(AnimationMixin, GeomMixin, MaterialMixin,
             'asset': {
                 'generator': (
                     'KITSUNETSUKI Asset Tools by kitsune.ONE - '
-                    'https://github.com/kitsune-ONE-team/KITSUNETSUKI-Asset-Tools'),
+                    'https://github.com/kitsune-ONE-team/KITSUNETSUKI-Asset-Tools'
+                ),
                 'version': '2.0',
             },
-
             'extensions': {
                 # 'BP_physics_engine': {'engine': 'bullet'},
             },
             'extensionsUsed': [],
-
             'scene': 0,
             'scenes': [{
                 'name': 'Scene',
                 'nodes': [],
             }],
-
             'nodes': [],
             'meshes': [],
             'materials': [{
@@ -124,11 +119,9 @@ class GLTFExporter(AnimationMixin, GeomMixin, MaterialMixin,
             }],
             'animations': [],
             'skins': [],
-
             'textures': [],  # links to samplers-images pair
             'samplers': [],
             'images': [],
-
             'accessors': [],
             'bufferViews': [],
             'buffers': [],
@@ -162,22 +155,26 @@ class GLTFExporter(AnimationMixin, GeomMixin, MaterialMixin,
 
         if not can_merge and not armature:
             if self._geom_scale == 1:
-                node.update({
-                    'rotation': quat_to_list(obj_matrix.to_quaternion()),
-                    'scale': list(obj_matrix.to_scale()),
-                    'translation': list(obj_matrix.to_translation()),
-                    # 'matrix': matrix_to_list(obj_matrix),
-                })
+                node.update(
+                    {
+                        'rotation': quat_to_list(obj_matrix.to_quaternion()),
+                        'scale': list(obj_matrix.to_scale()),
+                        'translation': list(obj_matrix.to_translation()),
+                        # 'matrix': matrix_to_list(obj_matrix),
+                    }
+                )
             else:
                 x, y, z = list(obj_matrix.to_translation())
                 x *= self._geom_scale
                 y *= self._geom_scale
                 z *= self._geom_scale
-                node.update({
-                    'rotation': quat_to_list(obj_matrix.to_quaternion()),
-                    'scale': list(obj_matrix.to_scale()),
-                    'translation': [x, y, z],
-                })
+                node.update(
+                    {
+                        'rotation': quat_to_list(obj_matrix.to_quaternion()),
+                        'scale': list(obj_matrix.to_scale()),
+                        'translation': [x, y, z],
+                    }
+                )
 
         # setup collisions
         if not can_merge and is_collision(obj) and obj_props.get('type') != 'Portal':
@@ -189,10 +186,7 @@ class GLTFExporter(AnimationMixin, GeomMixin, MaterialMixin,
             # collision shape
             shape = {
                 'shapeType': obj.rigid_body.collision_shape,
-                'boundingBox': [
-                    obj.dimensions[i] / obj_matrix.to_scale()[i] * self._geom_scale
-                    for i in range(3)
-                ],
+                'boundingBox': [obj.dimensions[i] / obj_matrix.to_scale()[i] * self._geom_scale for i in range(3)],
             }
             if obj.rigid_body.collision_shape == 'MESH':
                 shape['mesh'] = node.pop('mesh')
@@ -245,13 +239,15 @@ class GLTFExporter(AnimationMixin, GeomMixin, MaterialMixin,
         return gltf_node
 
     def make_armature(self, parent_node, armature):
-        channel = self._buffer.add_channel({
-            'componentType': spec.TYPE_FLOAT,
-            'type': 'MAT4',
-            'extras': {
-                'reference': 'inverseBindMatrices',
-            },
-        })
+        channel = self._buffer.add_channel(
+            {
+                'componentType': spec.TYPE_FLOAT,
+                'type': 'MAT4',
+                'extras': {
+                    'reference': 'inverseBindMatrices',
+                },
+            }
+        )
 
         gltf_armature = {
             'name': armature.name,
@@ -294,13 +290,11 @@ class GLTFExporter(AnimationMixin, GeomMixin, MaterialMixin,
         gltf_joints = {}
         for bone_name, bone in armature.data.bones.items():
             bone_matrix = self._transform(get_bone_matrix(bone, armature))
-            bone_tail_matrix = self._transform(
-                mathutils.Matrix.Translation(bone_tails_local[bone_name]))
+            bone_tail_matrix = self._transform(mathutils.Matrix.Translation(bone_tails_local[bone_name]))
 
             if self._pose_freeze:
                 bone_matrix = self._freeze(bone_matrix)
-                bone_tail_matrix = self._transform(
-                    mathutils.Matrix.Translation(bone_tails_off[bone_name]))
+                bone_tail_matrix = self._transform(mathutils.Matrix.Translation(bone_tails_off[bone_name]))
 
             # print(mathutils.Matrix.Translation(bone_tails[bone_name]).to_translation())
             # print((mathutils.Matrix.Translation(bone_tails[bone_name]) @
@@ -333,17 +327,14 @@ class GLTFExporter(AnimationMixin, GeomMixin, MaterialMixin,
             if self._pose_freeze:
                 ib_matrix = self._freeze(ib_matrix)
 
-            self._buffer.write(
-                gltf_skin['inverseBindMatrices'],
-                *matrix_to_list(ib_matrix))
+            self._buffer.write(gltf_skin['inverseBindMatrices'], *matrix_to_list(ib_matrix))
             gltf_skin['joints'].append(len(self._root['nodes']) - 1)
 
         self._setup_node(gltf_armature, armature)
         self._add_child(parent_node, gltf_armature)
 
         # no meshes or animation only
-        if (not list(filter(is_object_visible, armature.children)) or
-                self._export_type == 'animation'):
+        if (not list(filter(is_object_visible, armature.children)) or self._export_type == 'animation'):
             gltf_child_node = {
                 'name': '{}_EMPTY'.format(armature.name),
                 'skin': len(self._root['skins']) - 1,
@@ -423,8 +414,7 @@ class GLTFExporter(AnimationMixin, GeomMixin, MaterialMixin,
                     break
             else:  # glTF-node - glTF-mesh pair not found
                 # create new pair
-                gltf_node, gltf_mesh = self._make_node_mesh(
-                    parent_node, collection.name, obj, can_merge=True)
+                gltf_node, gltf_mesh = self._make_node_mesh(parent_node, collection.name, obj, can_merge=True)
 
             if gltf_mesh:
                 self.make_geom(gltf_node, gltf_mesh, obj, can_merge=True)
@@ -437,14 +427,15 @@ class GLTFExporter(AnimationMixin, GeomMixin, MaterialMixin,
                 vertices = [list(vertex.co) for vertex in obj.data.vertices]
                 gltf_node = {
                     'name': obj.name,
-                    'extras': {'vertices': json.dumps(vertices)},
+                    'extras': {
+                        'vertices': json.dumps(vertices)
+                    },
                 }
                 self._setup_node(gltf_node, obj, can_merge=False)
                 self._add_child(parent_node, gltf_node)
                 return gltf_node
 
-            gltf_node, gltf_mesh = self._make_node_mesh(
-                parent_node, obj.name, obj, can_merge=False)
+            gltf_node, gltf_mesh = self._make_node_mesh(parent_node, obj.name, obj, can_merge=False)
 
             if gltf_mesh:
                 self.make_geom(gltf_node, gltf_mesh, obj, can_merge=False)
@@ -473,8 +464,7 @@ class GLTFExporter(AnimationMixin, GeomMixin, MaterialMixin,
         }
 
         if obj.data.type == 'SPOT':
-            gltf_light['extras']['fov'] = '{:.3f}'.format(
-                math.degrees(obj.data.spot_size))
+            gltf_light['extras']['fov'] = '{:.3f}'.format(math.degrees(obj.data.spot_size))
 
         self._setup_node(gltf_light, obj)
         self._add_child(parent_node, gltf_light)
@@ -502,7 +492,8 @@ class GLTFExporter(AnimationMixin, GeomMixin, MaterialMixin,
                 size = (
                     4 + 4 + 4 +  # global headers
                     4 + 4 + len(chunk0) +  # chunk0 + headers
-                    4 + 4 + len(chunk1))  # chunk1 + headers
+                    4 + 4 + len(chunk1)
+                )  # chunk1 + headers
                 f.write(struct.pack('<I', size))  # full size
 
                 # write chunk0 with headers
@@ -551,7 +542,6 @@ class GLTFExporterOperator(bpy.types.Operator, ExportHelper):
             set_origin = None
             normalize_weights = None
 
-
         args = Args()
         e = GLTFExporter(args)
         out, buf = e.convert()
@@ -579,6 +569,4 @@ class GLTFExporterOperator(bpy.types.Operator, ExportHelper):
 
 
 def export(export_op, context):
-    export_op.layout.operator(
-        GLTFExporterOperator.bl_idname,
-        text='glTF using KITSUNETSUKI Asset Tools (.gltf)')
+    export_op.layout.operator(GLTFExporterOperator.bl_idname, text='glTF using KITSUNETSUKI Asset Tools (.gltf)')

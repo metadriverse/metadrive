@@ -44,8 +44,8 @@ class MaterialMixin(object):
     def get_roughness(self, material, shader):
         # Math [Value] -> [Roughness] Principled BSDF
         math_node = get_from_node(
-            material.node_tree, 'MATH', to_node=shader,
-            from_socket_name='Value', to_socket_name='Roughness')
+            material.node_tree, 'MATH', to_node=shader, from_socket_name='Value', to_socket_name='Roughness'
+        )
         if math_node:
             for input_ in math_node.inputs:
                 if input_.name == 'Value' and not input_.is_linked:
@@ -61,8 +61,8 @@ class MaterialMixin(object):
 
         # Mix RGB [Color] -> [Emission] Principled BSDF
         mix_node = get_from_node(
-            material.node_tree, 'MIX_RGB', to_node=shader,
-            from_socket_name='Color', to_socket_name='Emission')
+            material.node_tree, 'MIX_RGB', to_node=shader, from_socket_name='Color', to_socket_name='Emission'
+        )
         if mix_node:
             for input_ in mix_node.inputs:
                 if input_.name.startswith('Color') and not input_.is_linked:
@@ -73,8 +73,8 @@ class MaterialMixin(object):
     def get_normal_strength(self, material, shader):
         # Normal Map [Normal] -> [Normal] Principled BSDF
         normal_map = get_from_node(
-            material.node_tree, 'NORMAL_MAP', to_node=shader,
-            from_socket_name='Normal', to_socket_name='Normal')
+            material.node_tree, 'NORMAL_MAP', to_node=shader, from_socket_name='Normal', to_socket_name='Normal'
+        )
         if normal_map:
             return normal_map.inputs['Strength'].default_value
         else:

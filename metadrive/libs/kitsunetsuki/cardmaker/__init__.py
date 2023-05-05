@@ -17,14 +17,11 @@ import os
 import math
 
 from panda3d.core import CS_linear, PNMImage, PNMFileTypeRegistry, LMatrix4d
-from panda3d.egg import (
-    EggData, EggComment, EggGroup, EggPolygon,
-    EggVertex, EggVertexPool, EggTexture)
+from panda3d.egg import (EggData, EggComment, EggGroup, EggPolygon, EggVertex, EggVertexPool, EggTexture)
 
 
 class CardMaker(object):
-    def __init__(self, animations_frames, images, empty=None, prefix=None,
-                 fps=30, scale=1, type='png'):
+    def __init__(self, animations_frames, images, empty=None, prefix=None, fps=30, scale=1, type='png'):
         self.animations = {}
         for i, frames in enumerate(animations_frames):
             self.animations[i] = frames
@@ -46,8 +43,7 @@ class CardMaker(object):
             frames_total += 1
         return frames_total
 
-    def _add_polygon(self, name=None, group_main=None,
-                     egg_texture=None, egg_vertex_pool=None, is_empty=False):
+    def _add_polygon(self, name=None, group_main=None, egg_texture=None, egg_vertex_pool=None, is_empty=False):
         frames_total = self._get_frames_num()
         frames_rows = math.ceil(math.sqrt(frames_total))  # rows == columns
 
@@ -57,18 +53,10 @@ class CardMaker(object):
 
         size_tile = 1 / frames_rows
         coords_uvs = (
-            ((-1, 1, 0), (
-                x * size_tile,
-                (y + 1) * size_tile)),
-            ((-1, -1, 0), (
-                x * size_tile,
-                y * size_tile)),
-            ((1, -1, 0), (
-                (x + 1) * size_tile,
-                y * size_tile)),
-            ((1, 1, 0), (
-                (x + 1) * size_tile,
-                (y + 1) * size_tile)),
+            ((-1, 1, 0), (x * size_tile, (y + 1) * size_tile)),
+            ((-1, -1, 0), (x * size_tile, y * size_tile)),
+            ((1, -1, 0), ((x + 1) * size_tile, y * size_tile)),
+            ((1, 1, 0), ((x + 1) * size_tile, (y + 1) * size_tile)),
         )
         if not name:
             self.empty_uvs = coords_uvs
@@ -105,14 +93,12 @@ class CardMaker(object):
         egg_group.set_switch_fps(self.fps)  # animation fps
 
         for i in range(count):
-            self._add_polygon(
-                '{}_frame_{:04d}'.format(name, self.index_poly),
-                egg_group, egg_texture, egg_vertex_pool)
+            self._add_polygon('{}_frame_{:04d}'.format(name, self.index_poly), egg_group, egg_texture, egg_vertex_pool)
 
         if self.empty:
             self._add_polygon(
-                '{}_frame_{:04d}'.format(name, self.index_poly),
-                egg_group, egg_texture, egg_vertex_pool, is_empty=True)
+                '{}_frame_{:04d}'.format(name, self.index_poly), egg_group, egg_texture, egg_vertex_pool, is_empty=True
+            )
 
         return egg_group
 
@@ -147,9 +133,14 @@ class CardMaker(object):
 
             spritesheet.blend_sub_image(
                 image,
-                x * frame_size, y * frame_size,  # (x, y) to
-                0, 0,  # (x, y) from
-                frame_size, frame_size, 1)
+                x * frame_size,
+                y * frame_size,  # (x, y) to
+                0,
+                0,  # (x, y) from
+                frame_size,
+                frame_size,
+                1
+            )
 
             i += 1
 
@@ -161,7 +152,8 @@ class CardMaker(object):
 
         egg_comment = EggComment(
             '', 'KITSUNETSUKI Asset Tools by kitsune.ONE - '
-            'https://github.com/kitsune-ONE-team/KITSUNETSUKI-Asset-Tools')
+            'https://github.com/kitsune-ONE-team/KITSUNETSUKI-Asset-Tools'
+        )
 
         spritesheet = path.replace('.egg', '.{}'.format(self.type))
         self._make_spritesheet(spritesheet)
@@ -178,9 +170,7 @@ class CardMaker(object):
             self._add_polygon()
 
         for animation, frames in self.animations.items():
-            egg_group = self._add_geom(
-                'animation_{:04d}'.format(animation),
-                frames, egg_texture, egg_vertex_pool)
+            egg_group = self._add_geom('animation_{:04d}'.format(animation), frames, egg_texture, egg_vertex_pool)
             egg_group.add_matrix4(LMatrix4d.scale_mat(self.scale))
             egg_root.add_child(egg_group)
 

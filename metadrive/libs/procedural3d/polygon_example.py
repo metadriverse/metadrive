@@ -8,7 +8,6 @@ from panda3d.core import *
 
 
 class MyApp(ShowBase):
-
     def __init__(self):
 
         ShowBase.__init__(self)

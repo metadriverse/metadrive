@@ -187,9 +187,9 @@ class ScenarioTrafficManager(BaseManager):
         if state["vehicle_class"]:
             vehicle_class = state["vehicle_class"]
         else:
-            vehicle_class = get_vehicle_type(float(state["length"]),
-                                             None if self.even_sample_v else self.np_random,
-                                             self.need_default_vehicle)
+            vehicle_class = get_vehicle_type(
+                float(state["length"]), None if self.even_sample_v else self.np_random, self.need_default_vehicle
+            )
         obj_name = v_id if self.engine.global_config["force_reuse_object_name"] else None
         v = self.spawn_object(
             vehicle_class, position=state["position"], heading=state["heading"], vehicle_config=v_config, name=obj_name
@@ -203,7 +203,8 @@ class ScenarioTrafficManager(BaseManager):
         length_ok = np.linalg.norm(moving) > self.IDM_CREATE_MIN_LENGTH
         heading_ok = abs(wrap_to_pi(self.ego_vehicle.heading_theta - state["heading"])) < np.pi / 2
         idm_ok = heading_dist < self.IDM_CREATE_FORWARD_CONSTRAINT and abs(
-            side_dist) < self.IDM_CREATE_SIDE_CONSTRAINT and heading_ok
+            side_dist
+        ) < self.IDM_CREATE_SIDE_CONSTRAINT and heading_ok
         need_reactive_traffic = self.engine.global_config["reactive_traffic"]
         if not need_reactive_traffic or v_id in self._static_car_id or not idm_ok or not length_ok:
             policy = self.add_policy(v.name, ReplayTrafficParticipantPolicy, v, track)

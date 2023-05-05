@@ -18,14 +18,13 @@ import os
 
 from metadrive.libs.kitsunetsuki.base.collections import get_object_collection
 from metadrive.libs.kitsunetsuki.base.objects import (
-    get_object_properties, is_collision, is_object_visible,
-    set_active_object)
+    get_object_properties, is_collision, is_object_visible, set_active_object
+)
 
 from .geom import GeomMixin
 from .material import MaterialMixin
 from .texture import TextureMixin
 from .vertex import VertexMixin
-
 
 NOT_MERGED_TYPES = (
     'Portal',

@@ -54,9 +54,7 @@ class AnimationMixin(object):
             # h, p, r - rotation
             # x, y, z - location -> ?
             # egg_xfm_anim_s.set_order('shprxyz')
-            egg_xfm_anim_s.set_fps(
-                bpy.context.scene.render.fps /
-                bpy.context.scene.render.fps_base)
+            egg_xfm_anim_s.set_fps(bpy.context.scene.render.fps / bpy.context.scene.render.fps_base)
             egg_joint.add_child(egg_xfm_anim_s)
             egg_joints_anims[bone_name] = egg_xfm_anim_s
             # xfm_anim_s -->

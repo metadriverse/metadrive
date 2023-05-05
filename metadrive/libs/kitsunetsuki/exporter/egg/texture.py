@@ -43,8 +43,7 @@ class TextureMixin(object):
         filepath = image_texture.image.filepath.lstrip('/')
         path = os.path.dirname(self._output)
 
-        egg_texture = EggTexture(
-            image_texture.image.name, os.path.join(path, filepath))
+        egg_texture = EggTexture(image_texture.image.name, os.path.join(path, filepath))
 
         if image_texture.extension == 'CLIP':
             egg_texture.set_wrap_mode(EggTexture.WM_clamp)
@@ -89,8 +88,7 @@ class TextureMixin(object):
         filepath = 'textures/{}.png'.format(type_.lower())
         path = os.path.dirname(self._output)
 
-        egg_texture = EggTexture(
-            os.path.basename(filepath), os.path.join(path, filepath))
+        egg_texture = EggTexture(os.path.basename(filepath), os.path.join(path, filepath))
 
         egg_texture.set_wrap_mode(EggTexture.WM_clamp)
 

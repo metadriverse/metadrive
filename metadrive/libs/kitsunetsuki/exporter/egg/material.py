@@ -17,7 +17,6 @@ from panda3d.egg import EggMaterial
 
 from metadrive.libs.kitsunetsuki.base.material import get_root_node, get_from_node
 
-
 SHADING_MODEL_DEFAULT = 0
 SHADING_MODEL_EMISSIVE = 1
 SHADING_MODEL_CLEARCOAT = 2
@@ -37,8 +36,12 @@ class MaterialMixin(object):
             shader = None
             if output:
                 shader = get_from_node(
-                    material.node_tree, 'BSDF_PRINCIPLED', to_node=output,
-                    from_socket_name='BSDF', to_socket_name='Surface')
+                    material.node_tree,
+                    'BSDF_PRINCIPLED',
+                    to_node=output,
+                    from_socket_name='BSDF',
+                    to_socket_name='Surface'
+                )
 
         if not shader:
             return egg_material
@@ -52,7 +55,7 @@ class MaterialMixin(object):
             normal_strength = self.get_normal_strength(material, shader)
 
             if sum(emission) > 0:  # emission
-                egg_material.set_base(emission + (1,))
+                egg_material.set_base(emission + (1, ))
                 egg_material.set_metallic(0)
                 egg_material.set_roughness(1)
                 egg_material.set_ior(1.51)
@@ -65,10 +68,8 @@ class MaterialMixin(object):
 
             else:  # not emission
                 egg_material.set_base((1, 1, 1, 1))
-                egg_material.set_metallic(
-                    self.get_metallic(material, shader))
-                egg_material.set_roughness(
-                    self.get_roughness(material, shader))
+                egg_material.set_metallic(self.get_metallic(material, shader))
+                egg_material.set_roughness(self.get_roughness(material, shader))
                 egg_material.set_ior(shader.inputs['IOR'].default_value)
 
                 if alpha < 1:
@@ -84,10 +85,8 @@ class MaterialMixin(object):
             alpha = 1
 
             egg_material.set_base((1, 1, 1, alpha))
-            egg_material.set_metallic(
-                self.get_metallic(material, shader))
-            egg_material.set_roughness(
-                self.get_roughness(material, shader))
+            egg_material.set_metallic(self.get_metallic(material, shader))
+            egg_material.set_roughness(self.get_roughness(material, shader))
             egg_material.set_ior(shader.inputs['IOR'].default_value)
             egg_material.set_emit(emission)
 

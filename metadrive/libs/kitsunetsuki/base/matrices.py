@@ -47,10 +47,7 @@ def get_object_matrix(obj, armature=None):
     if armature is None:
         return obj.matrix_local
     else:  # skinned mesh/object
-        return (
-            obj.matrix_world @
-            armature.matrix_world @
-            armature.matrix_world.inverted())
+        return (obj.matrix_world @ armature.matrix_world @ armature.matrix_world.inverted())
 
 
 def get_inverse_bind_matrix(bone, armature):

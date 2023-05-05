@@ -24,7 +24,6 @@ from ..gltf import GLTFExporter
 from ..gltf import spec
 from .armature import ArmatureMixin
 
-
 BLENDSHAPE_PRESETS = (
     'neutral',
     'a',
@@ -94,7 +93,6 @@ class VRMExporter(ArmatureMixin, GLTFExporter):
         vrm_meta = {
             'exporterVersion': gltf_node['asset']['generator'],
             'specVersion': '0.0',
-
             'meta': {
                 'title': data['meta']['title'],
                 'version': data['meta']['version'],
@@ -110,7 +108,6 @@ class VRMExporter(ArmatureMixin, GLTFExporter):
                 'licenseName': data['meta'].get('licenseName', 'Redistribution_Prohibited'),
                 'otherLicenseUrl': data['meta'].get('otherLicenseUrl', ''),
             },
-
             'humanoid': {
                 'armStretch': 0.0,
                 'legStretch': 0.0,
@@ -122,7 +119,6 @@ class VRMExporter(ArmatureMixin, GLTFExporter):
                 'hasTranslationDoF': False,
                 'humanBones': [],
             },
-
             'firstPerson': {
                 'firstPersonBone': None,
                 'firstPersonBoneOffset': {
@@ -138,7 +134,6 @@ class VRMExporter(ArmatureMixin, GLTFExporter):
                 'lookAtVerticalDown': None,
                 'lookAtVerticalUp': None,
             },
-
             'blendShapeMaster': {
                 'blendShapeGroups': [],
             },
@@ -196,14 +191,12 @@ class VRMExporter(ArmatureMixin, GLTFExporter):
                 '_UvAnimScrollY': 0,
                 '_ZWrite': 1,
             },
-
             'keywordMap': {},
             'name': material.name,
             'renderQueue': 2000,
             'shader': 'VRM_USE_GLTFSHADER',
             'tagMap': {},
             'textureProperties': {},
-
             'vectorProperties': {
                 '_BumpMap': [0, 0, 1, 1],
                 '_Color': [1, 1, 1, 1],
@@ -295,7 +288,8 @@ class VRMExporter(ArmatureMixin, GLTFExporter):
                 vrm_material['shader'] = 'VRM/UnlitCutout'
 
             if gltf_material['pbrMetallicRoughness'].get('baseColorTexture'):
-                vrm_material['textureProperties']['_MainTex'] = gltf_material['pbrMetallicRoughness']['baseColorTexture']['index']
+                vrm_material['textureProperties']['_MainTex'] = gltf_material['pbrMetallicRoughness']['baseColorTexture'
+                                                                                                      ]['index']
 
             root['extensions']['VRM']['materialProperties'].append(vrm_material)
 
@@ -371,7 +365,6 @@ class VRMExporterOperator(bpy.types.Operator, ExportHelper):
             set_origin = None
             normalize_weights = None
 
-
         args = Args()
         e = VRMExporter(args)
         out, buf = e.convert()
@@ -391,6 +384,4 @@ class VRMExporterOperator(bpy.types.Operator, ExportHelper):
 
 
 def export(export_op, context):
-    export_op.layout.operator(
-        VRMExporterOperator.bl_idname,
-        text='VRM using KITSUNETSUKI Asset Tools (.vrm)')
+    export_op.layout.operator(VRMExporterOperator.bl_idname, text='VRM using KITSUNETSUKI Asset Tools (.vrm)')

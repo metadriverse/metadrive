@@ -37,11 +37,13 @@ class VertexMixin(object):
             mesh.calc_tangents(uvmap=uv_name)
             results[uv_name] = []
             for i, loop in mesh.loops.items():
-                results[uv_name].append((
-                    mathutils.Vector(loop.tangent),
-                    mathutils.Vector(loop.bitangent),
-                    loop.bitangent_sign,
-                ))
+                results[uv_name].append(
+                    (
+                        mathutils.Vector(loop.tangent),
+                        mathutils.Vector(loop.bitangent),
+                        loop.bitangent_sign,
+                    )
+                )
             mesh.free_tangents()
 
         return results

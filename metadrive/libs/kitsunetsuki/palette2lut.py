@@ -23,10 +23,8 @@ from panda3d.core import Filename, VirtualFileSystem, get_model_path
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        '--output', type=str, help='output file')
-    parser.add_argument(
-        '--input', type=str, help='input file', default=None)
+    parser.add_argument('--output', type=str, help='output file')
+    parser.add_argument('--input', type=str, help='input file', default=None)
     return parser.parse_args()
 
 
