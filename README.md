@@ -223,3 +223,15 @@ And more:
 [![Documentation](https://readthedocs.org/projects/metadrive/badge/?version=latest)](https://metadrive.readthedocs.io)
 [![GitHub license](https://img.shields.io/github/license/metadriverse/metadrive)](https://github.com/metadriverse/metadrive/blob/main/LICENSE.txt)
 [![GitHub contributors](https://img.shields.io/github/contributors/metadriverse/metadrive)](https://github.com/metadriverse/metadrive/graphs/contributors)
+
+
+## Acknowledgement
+
+The simulator can not be built without the help from Panda3D community and the following open-sourced projects:
+- panda3d-simplepbr: https://github.com/Moguri/panda3d-simplepbr
+- panda3d-gltf: https://github.com/Moguri/panda3d-gltf
+- RenderPipeline (RP): https://github.com/tobspr/RenderPipeline
+- Water effect for RP: https://github.com/kergalym/RenderPipeline 
+- procedural_panda3d_model_primitives: https://github.com/Epihaius/procedural_panda3d_model_primitives
+- DiamondSquare for terrain generation: https://github.com/buckinha/DiamondSquare
+- KITSUNETSUKI-Asset-Tools: https://github.com/kitsune-ONE-team/KITSUNETSUKI-Asset-Tools
