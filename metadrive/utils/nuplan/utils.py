@@ -68,8 +68,7 @@ def get_nuplan_scenarios(dataset_parameters, nuplan_package_path=NUPLAN_PACKAGE_
     ]
     overrides.extend(
         [
-            f'job_name=planner_tutorial',
-            'experiment=${experiment_name}/${job_name}',
+            f'job_name=planner_tutorial', 'experiment=${experiment_name}/${job_name}',
             f'experiment_name=planner_tutorial'
         ]
     )
