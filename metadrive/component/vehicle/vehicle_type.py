@@ -1,8 +1,6 @@
 from metadrive.component.pg_space import ParameterSpace, VehicleParameterSpace
 from metadrive.component.vehicle.base_vehicle import BaseVehicle
 
-factor = 1
-
 
 class DefaultVehicle(BaseVehicle):
     PARAMETER_SPACE = ParameterSpace(VehicleParameterSpace.DEFAULT_VEHICLE)
@@ -15,7 +13,7 @@ class DefaultVehicle(BaseVehicle):
     LATERAL_TIRE_TO_CENTER = 0.815
     FRONT_WHEELBASE = 1.05234
     REAR_WHEELBASE = 1.4166
-    path = ['vehicle/ferra/', (factor, factor, factor), (0, 0.075, 0.), 0]
+    path = ['vehicle/ferra/vehicle.gltf', (1, 1, 1), (0, 0.075, 0.), (0, 0, 0)]
 
     @property
     def LENGTH(self):
@@ -28,6 +26,13 @@ class DefaultVehicle(BaseVehicle):
     @property
     def WIDTH(self):
         return 1.852  # meters
+
+
+# When using DefaultVehicle as traffic, please use this class.
+
+
+class TrafficDefaultVehicle(DefaultVehicle):
+    pass
 
 
 class StaticDefaultVehicle(DefaultVehicle):
@@ -47,7 +52,8 @@ class XLVehicle(BaseVehicle):
     CHASSIS_TO_WHEEL_AXIS = 0.3
     TIRE_WIDTH = 0.5
     MASS = 1600
-    path = ['vehicle/truck/', (factor, factor, factor), (0, 0.25, 0.04), 0]
+    LIGHT_POSITION = (-0.75, 2.7, 0.2)
+    path = ['vehicle/truck/vehicle.gltf', (1, 1, 1), (0, 0.25, 0.04), (0, 0, 0)]
 
     @property
     def LENGTH(self):
@@ -73,7 +79,9 @@ class LVehicle(BaseVehicle):
     LATERAL_TIRE_TO_CENTER = 0.75
     TIRE_WIDTH = 0.35
     MASS = 1300
-    path = ['vehicle/lada/', (1.1, 1.1, 1.1), (0, -0.27, 0.07), 0]
+    LIGHT_POSITION = (-0.65, 2.13, 0.3)
+
+    path = ['vehicle/lada/vehicle.gltf', (1.1, 1.1, 1.1), (0, -0.27, 0.07), (0, 0, 0)]
 
     @property
     def LENGTH(self):
@@ -99,8 +107,9 @@ class MVehicle(BaseVehicle):
     LATERAL_TIRE_TO_CENTER = 0.803
     TIRE_WIDTH = 0.3
     MASS = 1200
+    LIGHT_POSITION = (-0.67, 1.86, 0.22)
 
-    path = ['vehicle/130/', (factor, factor, factor), (0, -0.05, 0.07), 0]
+    path = ['vehicle/130/vehicle.gltf', (1, 1, 1), (0, -0.05, 0.1), (0, 0, 0)]
 
     @property
     def LENGTH(self):
@@ -122,12 +131,22 @@ class SVehicle(BaseVehicle):
     # HEIGHT = 1.7
     LATERAL_TIRE_TO_CENTER = 0.7
     TIRE_TWO_SIDED = True
-    FRONT_WHEELBASE = 1.4126
-    REAR_WHEELBASE = 1.07
+    FRONT_WHEELBASE = 1.385
+    REAR_WHEELBASE = 1.11
     TIRE_RADIUS = 0.376
     TIRE_WIDTH = 0.25
     MASS = 800
-    path = ['vehicle/beetle/', (factor, factor, factor), (0, -0.26, 0.03), 0]
+    LIGHT_POSITION = (-0.57, 1.86, 0.23)
+
+    @property
+    def path(self):
+        if self.use_render_pipeline:
+            return [
+                'vehicle/beetle/vehicle.bam', (0.0077, 0.0077, 0.0077), (0.04512, -0.24 - 0.04512, 1.77), (-90, -90, 0)
+            ]
+        else:
+            factor = 1
+            return ['vehicle/beetle/vehicle.gltf', (factor, factor, factor), (0, -0.2, 0.03), (0, 0, 0)]
 
     @property
     def LENGTH(self):
@@ -259,13 +278,37 @@ vehicle_type = {
 
 VaryingShapeVehicle = VaryingDynamicsVehicle
 
+type_count = [0 for i in range(3)]
 
-def get_vehicle_type(length, np_random):
-    # if abs(length-0) <= 0.001:
-    #     raise ValueError("Length Error")
-    if length <= 4:
-        return SVehicle
-    elif length <= 5.5:
-        return [LVehicle, SVehicle, MVehicle][np_random.randint(3)]
+
+def reset_vehicle_type_count(np_random=None):
+    global type_count
+    if np_random is None:
+        type_count = [0 for i in range(3)]
     else:
-        return [LVehicle, XLVehicle][np_random.randint(2)]
+        type_count = [np_random.randint(100) for i in range(3)]
+
+
+def get_vehicle_type(length, np_random=None, need_default_vehicle=False):
+    if np_random is not None:
+        if length <= 4:
+            return SVehicle
+        elif length <= 5.5:
+            return [LVehicle, SVehicle, MVehicle][np_random.randint(3)]
+        else:
+            return [LVehicle, XLVehicle][np_random.randint(2)]
+    else:
+        global type_count
+        # evenly sample
+        if length <= 4:
+            return SVehicle
+        elif length <= 5.5:
+            type_count[1] += 1
+            vs = [MVehicle, LVehicle, SVehicle]
+            if need_default_vehicle:
+                vs.append(TrafficDefaultVehicle)
+            return vs[type_count[1] % len(vs)]
+        else:
+            type_count[2] += 1
+            vs = [LVehicle, XLVehicle]
+            return vs[type_count[2] % len(vs)]

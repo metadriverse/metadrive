@@ -7,17 +7,17 @@ enabled:
     - ao
     - clouds
     - color_correction
-    - dof
-    - env_probes
-    - fxaa
     - pssm
     - scattering
-    - sky_ao
     - smaa
     # - bloom
-    # - forward_shading
+    # - dof
+    # - env_probes
+#    - forward_shading
+    # - fxaa
     # - motion_blur
     # - skin_shading
+    # - sky_ao
     # - ssr
     # - volumetrics
     # - vxgi
@@ -57,7 +57,7 @@ overrides:
         lens_dirt_factor: 0.0
 
     clouds:
-        raymarch_steps: 160
+        raymarch_steps: 180
 
     color_correction:
         tonemap_operator: exponential
@@ -83,14 +83,14 @@ overrides:
         brightness_adaption_rate: 3.6
         darkness_adaption_rate: 0.7
         use_sharpen: True
-        sharpen_strength: 0.99
+        sharpen_strength: 0.8
         sharpen_twice: False
 
     dof:
-        focal_point: 1000.0
-        focal_size: 994.0
+        focal_point: 8.0
+        focal_size: 1269.83999
         blur_strength: 0.0
-        near_blur_strength: 0.4286
+        near_blur_strength: 0.0
 
     env_probes:
         probe_resolution: 128
@@ -101,9 +101,9 @@ overrides:
     forward_shading:
 
     fxaa:
-        quality: medium
+        quality: ultra
         subpixel_quality: 0.5
-        edge_threshold: 0.1853
+        edge_threshold: 0.063
         min_threshold: 0.833
 
     motion_blur:
@@ -116,11 +116,11 @@ overrides:
         num_samples: 12
 
     pssm:
-        max_distance: 200.0
+        max_distance: 512
         logarithmic_factor: 2.37
-        sun_distance: 200.0
+        sun_distance: 256
         split_count: 4
-        resolution: 1024
+        resolution: 2048
         border_bias: 0.0558
         use_pcf: True
         filter_sequence: halton_2D_32
@@ -168,8 +168,8 @@ overrides:
         use_reprojection: True
         smaa_quality: ultra
         jitter_pattern: halton8
-        history_length: 8
-        jitter_amount: 0.16143
+        history_length: 16
+        jitter_amount: 0.3044
 
     ssr:
         effect_scale: 1.0

@@ -63,17 +63,15 @@ def get_nuplan_scenarios(dataset_parameters, nuplan_package_path=NUPLAN_PACKAGE_
         f'observation={observation}',
         f'hydra.searchpath=[{simulation_hydra_paths.common_dir}, {simulation_hydra_paths.experiment_dir}]',
         'output_dir=${group}/${experiment}',
+        'metric_dir=${group}/${experiment}',
         *dataset_parameters,
     ]
-    if is_win():
-        overrides.extend(
-            [
-                f'job_name=planner_tutorial',
-                'experiment=${experiment_name}/${job_name}/${experiment_time}',
-            ]
-        )
-    else:
-        overrides.append(f'experiment_name=planner_tutorial')
+    overrides.extend(
+        [
+            f'job_name=planner_tutorial', 'experiment=${experiment_name}/${job_name}',
+            f'experiment_name=planner_tutorial'
+        ]
+    )
 
     # get config
     cfg = hydra.compose(config_name=simulation_hydra_paths.config_name, overrides=overrides)
@@ -175,7 +173,7 @@ def extract_map_features(map_api, center, radius=250):
                 if not hasattr(lane_meta_data, "baseline_path"):
                     continue
                 if isinstance(lane_meta_data.polygon.boundary, MultiLineString):
-                    logger.warning("Stop using boundaries! Use exterior instead!")
+                    # logger.warning("Stop using boundaries! Use exterior instead!")
                     boundary = gpd.GeoSeries(lane_meta_data.polygon.boundary).explode(index_parts=True)
                     sizes = []
                     for idx, polygon in enumerate(boundary[0]):
@@ -202,7 +200,7 @@ def extract_map_features(map_api, center, radius=250):
                 block_polygons.append(block.polygon)
 
     interpolygons = [block.polygon for block in nearest_vector_map[SemanticMapLayer.INTERSECTION]]
-    logger.warning("Stop using boundaries! Use exterior instead!")
+    # logger.warning("Stop using boundaries! Use exterior instead!")
     boundaries = gpd.GeoSeries(unary_union(interpolygons + block_polygons)).boundary.explode(index_parts=True)
     # boundaries.plot()
     # plt.show()

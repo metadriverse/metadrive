@@ -198,7 +198,7 @@ class Debugger(RPObject):
         Globals.base.accept("z", self.rm_selector.toggle)
         Globals.base.accept("f5", self.toggle_gui_visible)
         Globals.base.accept("f6", self.toggle_keybindings_visible)
-        Globals.base.accept("r", self.pipeline.reload_shaders)
+        Globals.base.accept("5", self.pipeline.reload_shaders)
         Globals.base.accept("m", self.start_material_editor)
 
     def start_material_editor(self):

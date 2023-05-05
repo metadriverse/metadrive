@@ -1,11 +1,13 @@
 import math
+import os
 from collections import deque
 from typing import Union, Optional
 
 import numpy as np
 import seaborn as sns
+from panda3d._rplight import RPSpotLight
 from panda3d.bullet import BulletVehicle, BulletBoxShape, ZUp
-from panda3d.core import Material, Vec3, TransformState, LVector3
+from panda3d.core import Material, Vec3, TransformState
 from panda3d.core import NodePath
 
 from metadrive.base_class.base_object import BaseObject
@@ -91,6 +93,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     TIRE_WIDTH = 0.4
     FRONT_WHEELBASE = None
     REAR_WHEELBASE = None
+    LIGHT_POSITION = (-0.67, 1.62, 0.05)
 
     # MASS = None
 
@@ -144,6 +147,12 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self.chassis = self.origin
         self.wheels = self._create_wheel()
 
+        # light experimental!
+        self.light = None
+        self._light_direction_queue = None
+        self._light_models = None
+        self.light_name = None
+
         # powertrain config
         self.increment_steering = self.config["increment_steering"]
         self.enable_reverse = self.config["enable_reverse"]
@@ -168,6 +177,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self.last_heading_dir = self.heading
         self.dist_to_left_side = None
         self.dist_to_right_side = None
+        self.last_velocity = 0
+        self.last_speed = 0
 
         # step info
         self.out_of_route = None
@@ -434,7 +445,67 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         if self.config["spawn_velocity"] is not None:
             self.set_velocity(self.config["spawn_velocity"], in_local_frame=self.config["spawn_velocity_car_frame"])
 
+        # clean lights
+        if self.config["light"]:
+            self.add_light()
+        else:
+            self.remove_light()
+
+        # self.add_light()
+
     """------------------------------------------- act -------------------------------------------------"""
+
+    def remove_light(self):
+        if self.light is not None:
+            if self.use_render_pipeline:
+                self.engine.render_pipeline.remove_light(self.light)
+                self.engine.taskMgr.remove(self.light_name)
+            self.light_name = None
+            self.light = None
+            for m in self._light_models:
+                m.removeNode()
+            self._light_models = None
+            self._light_direction_queue = None
+
+    def add_light(self):
+        """
+        Experimental feature
+        """
+        # assert self.use_render_pipeline, "Can be Enabled when using render pipeline"
+        if self.light is None:
+            self._light_models = []
+            for y in [-1, 1]:
+                light_model = self.loader.loadModel(AssetLoader.file_path("models", "sphere.egg"))
+                light_model.reparentTo(self.origin)
+                light_model.setPos(self.LIGHT_POSITION[0] * y, self.LIGHT_POSITION[1], self.LIGHT_POSITION[2])
+                light_model.setScale(0.13, 0.05, 0.13)
+                material = Material()
+                material.setBaseColor((1, 1, 1, 1))
+                material.setShininess(128)
+                material.setEmission((1, 1, 1, 1))
+                light_model.setMaterial(material, True)
+                self._light_models.append(light_model)
+            if self.use_render_pipeline:
+                self.light_name = "light_{}".format(self.id)
+                self.light = RPSpotLight()
+                self.light.set_color_from_temperature(3 * 1000.0)
+                self.light.setRadius(500)
+                self.light.setFov(100)
+                self.light.energy = 600
+                self.light.casts_shadows = False
+                self.light.shadow_map_resolution = 128
+                self.engine.render_pipeline.add_light(self.light)
+                self.engine.taskMgr.add(self._update_light_pos, self.light_name)
+                self._light_direction_queue = []
+
+    def _update_light_pos(self, task):
+        pos = self.convert_to_world_coordinates([self.LENGTH / 2, 0], self.position)
+        self.light.set_pos(*pos, self.get_z())
+        self._light_direction_queue.append([*self.heading, 0])
+        idx = min(len(self._light_direction_queue), 50)
+        pos = np.mean(self._light_direction_queue[-idx:], axis=0)
+        self.light.set_direction(pos[0], pos[1], pos[2])
+        return task.cont
 
     def set_steering(self, steering):
         steering = float(steering)
@@ -588,7 +659,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         chassis = BaseRigidBodyNode(self.name, MetaDriveType.VEHICLE)
         self._node_path_list.append(chassis)
 
-        chassis_shape = BulletBoxShape(Vec3(self.LENGTH / 2, self.WIDTH / 2, self.HEIGHT / 2))
+        chassis_shape = BulletBoxShape(Vec3(self.WIDTH / 2, self.LENGTH / 2, self.HEIGHT / 2))
         ts = TransformState.makePos(Vec3(0, 0, self.HEIGHT / 2))
         chassis.addShape(chassis_shape, ts)
         chassis.setDeactivationEnabled(False)
@@ -602,15 +673,15 @@ class BaseVehicle(BaseObject, BaseVehicleState):
 
     def _add_visualization(self):
         if self.render:
-            [path, scale, offset, H] = self.path
+            [path, scale, offset, HPR] = self.path
             if path not in BaseVehicle.model_collection:
-                car_model = self.loader.loadModel(AssetLoader.file_path("models", path, "vehicle.gltf"))
+                car_model = self.loader.loadModel(AssetLoader.file_path("models", path))
                 car_model.setTwoSided(False)
                 BaseVehicle.model_collection[path] = car_model
                 car_model.setScale(scale)
                 # model default, face to y
-                car_model.setH(H - 90)
-                car_model.setPos(offset[1], offset[0], offset[-1])
+                car_model.setHpr(*HPR)
+                car_model.setPos(offset[0], offset[1], offset[-1])
                 car_model.setZ(-self.TIRE_RADIUS - self.CHASSIS_TO_WHEEL_AXIS + offset[-1])
             else:
                 car_model = BaseVehicle.model_collection[path]
@@ -639,8 +710,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         axis_height = self.TIRE_RADIUS - self.CHASSIS_TO_WHEEL_AXIS
         radius = self.TIRE_RADIUS
         wheels = []
-        for k, pos in enumerate([Vec3(f_l, lateral, axis_height), Vec3(f_l, -lateral, axis_height),
-                                 Vec3(r_l, lateral, axis_height), Vec3(r_l, -lateral, axis_height)]):
+        for k, pos in enumerate([Vec3(lateral, f_l, axis_height), Vec3(-lateral, f_l, axis_height),
+                                 Vec3(lateral, r_l, axis_height), Vec3(-lateral, r_l, axis_height)]):
             wheel = self._add_wheel(pos, radius, True if k < 2 else False, True if k == 0 or k == 2 else False)
             wheels.append(wheel)
         return wheels
@@ -651,17 +722,17 @@ class BaseVehicle(BaseObject, BaseVehicleState):
 
         if self.render:
             model = 'right_tire_front.gltf' if front else 'right_tire_back.gltf'
-            model_path = AssetLoader.file_path("models", self.path[0], model)
+            model_path = AssetLoader.file_path("models", os.path.dirname(self.path[0]), model)
             wheel_model = self.loader.loadModel(model_path)
             wheel_model.setTwoSided(self.TIRE_TWO_SIDED)
             wheel_model.reparentTo(wheel_np)
-            wheel_model.set_scale(1 * self.TIRE_MODEL_CORRECT if not left else -1 * self.TIRE_MODEL_CORRECT)
+            wheel_model.set_scale(1 * self.TIRE_MODEL_CORRECT if left else -1 * self.TIRE_MODEL_CORRECT)
         wheel = self.system.create_wheel()
         wheel.setNode(wheel_np.node())
         wheel.setChassisConnectionPointCs(pos)
         wheel.setFrontWheel(front)
         wheel.setWheelDirectionCs(Vec3(0, 0, -1))
-        wheel.setWheelAxleCs(Vec3(0, -1, 0))
+        wheel.setWheelAxleCs(Vec3(1, 0, 0))
 
         wheel.setWheelRadius(radius)
         wheel.setMaxSuspensionTravelCm(self.SUSPENSION_LENGTH)
@@ -829,15 +900,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
                 if sensor is not self.engine.main_camera:
                     sensor.destroy()
         self.image_sensors = {}
-
-    def set_heading_theta(self, heading_theta, in_rad=True) -> None:
-        """
-        Set heading theta for this object. Vehicle local frame has a 90 degree offset
-        :param heading_theta: float in rad
-        :param in_rad: when set to True, heading theta should be in rad, otherwise, in degree
-        """
-        super(BaseVehicle, self).set_heading_theta(heading_theta, in_rad)
-        self.last_heading_dir = self.heading
+        if self.light is not None:
+            self.remove_light()
 
     def set_velocity(self, direction, *args, **kwargs):
         super(BaseVehicle, self).set_velocity(direction, *args, **kwargs)
@@ -1031,15 +1095,58 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             if obj is not None and hasattr(obj, "before_reset"):
                 obj.before_reset()
 
+    """------------------------------------------- overwrite -------------------------------------------------"""
+
+    def convert_to_world_coordinates(self, vector, origin):
+        return super(BaseVehicle, self).convert_to_world_coordinates([-vector[-1], vector[0]], origin)
+
+    def convert_to_local_coordinates(self, vector, origin):
+        ret = super(BaseVehicle, self).convert_to_local_coordinates(vector, origin)
+        return np.array([ret[1], -ret[0]])
+
+    @property
+    def heading_theta(self):
+        return wrap_to_pi(super(BaseVehicle, self).heading_theta + np.pi / 2)
+
+    def set_heading_theta(self, heading_theta, in_rad=True) -> None:
+        """
+        Set heading theta for this object. Vehicle local frame has a 90 degree offset
+        :param heading_theta: float in rad
+        :param in_rad: when set to True, heading theta should be in rad, otherwise, in degree
+        """
+        super(BaseVehicle, self).set_heading_theta(heading_theta - np.pi / 2, in_rad)
+        self.last_heading_dir = self.heading
+
+    @property
+    def roll(self):
+        """
+        Return the roll of this object
+        """
+        return np.deg2rad(self.origin.getR())
+
+    def set_roll(self, roll):
+        self.origin.setR(roll)
+
+    @property
+    def pitch(self):
+        """
+        Return the pitch of this object
+        """
+        return np.deg2rad(self.origin.getP())
+
+    def set_pitch(self, pitch):
+        self.origin.setP(pitch)
+
     def show_coordinates(self):
         if self.coordinates_debug_np is not None:
             self.coordinates_debug_np.reparentTo(self.origin)
             return
-        height = self.HEIGHT
+        height = self.HEIGHT + 0.2
         self.coordinates_debug_np = NodePath("debug coordinate")
-        x = self.engine.add_line([0, 0, height], [2, 0, height], [0, 1, 0, 1], 1)
-        y = self.engine.add_line([0, 0, height], [0, 1, height], [0, 1, 0, 1], 1)
-        z = self.engine.add_line([0, 0, height], [0, 0, height + 0.5], [0, 0, 1, 1], 1)
+        # 90 degrees offset
+        x = self.engine.add_line([0, 0, height], [0, 2, height], [1, 1, 1, 1], 2)
+        y = self.engine.add_line([0, 0, height], [-1, 0, height], [1, 1, 1, 1], 2)
+        z = self.engine.add_line([0, 0, height], [0, 0, height + 0.5], [1, 1, 1, 1], 2)
         x.reparentTo(self.coordinates_debug_np)
         y.reparentTo(self.coordinates_debug_np)
         z.reparentTo(self.coordinates_debug_np)

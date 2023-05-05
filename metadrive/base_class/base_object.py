@@ -291,10 +291,7 @@ class BaseObject(BaseRunnable):
         :param in_local_frame: True, apply speed to local fram
         """
         if in_local_frame:
-            from metadrive.engine.engine_utils import get_engine
-            engine = get_engine()
-            direction = LVector3(*direction, 0.)
-            direction = engine.worldNP.getRelativeVector(self.origin, direction)
+            direction = self.convert_to_world_coordinates(direction, [0, 0])
 
         if value is not None:
             norm_ratio = value / (norm(direction[0], direction[1]) + 1e-6)
@@ -378,22 +375,26 @@ class BaseObject(BaseRunnable):
     @property
     def roll(self):
         """
-        Return the roll of this object
+        Return the roll of this object. As it is facing to x, so roll is pitch
         """
-        return np.deg2rad(self.origin.getR())
+        return np.deg2rad(self.origin.getP())
 
     def set_roll(self, roll):
-        self.origin.setR(roll)
+        """
+        As it is facing to x, so roll is pitch
+        """
+        self.origin.setP(roll)
 
     @property
     def pitch(self):
         """
-        Return the pitch of this object
+        Return the pitch of this object, as it is facing to x, so pitch is roll
         """
-        return np.deg2rad(self.origin.getP())
+        return np.deg2rad(self.origin.getR())
 
     def set_pitch(self, pitch):
-        self.origin.setP(pitch)
+        """As it is facing to x, so pitch is roll"""
+        self.origin.setR(pitch)
 
     def set_static(self, flag):
         self.body.setStatic(flag)
