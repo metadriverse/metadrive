@@ -53,10 +53,11 @@ BASE_DEFAULT_CONFIG = dict(
     disable_model_compression=False,  # disable compression if you wish to launch the window quicker.
     cull_scene=True,  # only for debug use
     use_chase_camera_follow_lane=False,  # If true, then vision would be more stable.
-    camera_height=1.8,
-    camera_dist=6.5,
+    camera_height=2.2,
+    camera_dist=7.5,
     camera_pitch=None,  # degree
     camera_smooth=True,  # degree
+    camera_fov=65,
     prefer_track_agent=None,
     draw_map_resolution=1024,  # Drawing the map in a canvas of (x, x) pixels.
     top_down_camera_initial_x=0,
@@ -123,6 +124,7 @@ BASE_DEFAULT_CONFIG = dict(
         rgb_to_grayscale=False,
         gaussian_noise=0.0,
         dropout_prob=0.0,
+        light=False,  # vehicle light, only available when enabling render-pipeline
     ),
 
     # ===== Agent config =====
@@ -160,7 +162,13 @@ BASE_DEFAULT_CONFIG = dict(
     # turn on to use render pipeline, which provides advanced rendering effects (Beta)
     render_pipeline=False,
     # daytime is only available when using render-pipeline
-    daytime=None,  # use string like "13:40", We usually set this by editor in toolkit
+    daytime="19:00",  # use string like "13:40", We usually set this by editor in toolkit
+
+    # ===== Mesh Terrain =====
+    # road will have a marin whose width is determined by this value, unit: [m]
+    drivable_region_extension=6,
+    # height scale for mountains, unit: [m]
+    height_scale=120,
 
     # ===== Others =====
     # The maximum distance used in PGLOD. Set to None will use the default values.

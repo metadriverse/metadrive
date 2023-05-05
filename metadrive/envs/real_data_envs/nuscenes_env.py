@@ -1,8 +1,9 @@
-from metadrive.engine.asset_loader import AssetLoader
 import numpy as np
+
+from metadrive.engine.asset_loader import AssetLoader
 from metadrive.envs.scenario_env import ScenarioEnv
 from metadrive.policy.replay_policy import ReplayEgoCarPolicy
-from metadrive.examples.generate_video_for_bev_and_interface import VideoRecorder
+
 NuScenesEnv = ScenarioEnv
 
 if __name__ == "__main__":
@@ -19,8 +20,8 @@ if __name__ == "__main__":
             "debug": False,
             # "pstats": True,
             "render_pipeline": True,
-            # "pstats": True,
-            "daytime": "07:12",
+            "pstats": True,
+            "daytime": "22:01",
             # "no_traffic": True,
             # "no_light": False,
             # "debug":True,
@@ -29,7 +30,9 @@ if __name__ == "__main__":
             "camera_dist": -2.5,
             "camera_height": 0.5,
             "camera_pitch": np.pi / 3,
+            "camera_fov": 60,
             # "no_traffic":True,
+            # "force_render_fps": 10,
             # "start_scenario_index": 192,
             # "start_scenario_index": 1000,
             "num_scenarios": 10,
@@ -39,7 +42,10 @@ if __name__ == "__main__":
             # "no_static_vehicles": True,
             # "show_policy_mark": True,
             # "show_coordinates": True,
+            "force_destroy": True,
+            "default_vehicle_in_traffic": True,
             "vehicle_config": dict(
+                light=True,
                 show_navi_mark=False,
                 no_wheel_friction=True,
                 lidar=dict(num_lasers=120, distance=50, num_others=4),
@@ -54,7 +60,7 @@ if __name__ == "__main__":
 
     success = []
     while True:
-        env.reset(force_seed=0)
+        env.reset(force_seed=3)
         # env.engine.force_fps.disable()
         for t in range(10000):
             o, r, d, info = env.step([0, 0])

@@ -22,7 +22,7 @@ class NuPlanLane(PointLane):
         """
 
         if isinstance(lane_meta_data.polygon.boundary, MultiLineString):
-            logger.warning("Stop using boundaries! Use exterior instead!")
+            # logger.warning("Stop using boundaries! Use exterior instead!")
             boundary = gpd.GeoSeries(lane_meta_data.polygon.boundary).explode(index_parts=True)
             sizes = []
             for idx, polygon in enumerate(boundary[0]):

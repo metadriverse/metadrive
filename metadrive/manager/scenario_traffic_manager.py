@@ -1,12 +1,12 @@
 import copy
 import logging
-
+from metadrive.utils.math import wrap_to_pi
 import numpy as np
 
 from metadrive.component.static_object.traffic_object import TrafficCone, TrafficBarrier
 from metadrive.component.traffic_participants.cyclist import Cyclist
 from metadrive.component.traffic_participants.pedestrian import Pedestrian
-from metadrive.component.vehicle.vehicle_type import get_vehicle_type
+from metadrive.component.vehicle.vehicle_type import get_vehicle_type, reset_vehicle_type_count
 from metadrive.constants import DEFAULT_AGENT
 from metadrive.manager.base_manager import BaseManager
 from metadrive.policy.idm_policy import ScenarioIDMPolicy
@@ -24,7 +24,7 @@ class ScenarioTrafficManager(BaseManager):
     IDM_ACT_BATCH_SIZE = 5
 
     # project cars to ego vehicle coordinates, only vehicles behind ego car and in a certain region can get IDM policy
-    IDM_CREATE_SIDE_CONSTRAINT = 10  # m
+    IDM_CREATE_SIDE_CONSTRAINT = 15  # m
     IDM_CREATE_FORWARD_CONSTRAINT = -1  # m
     IDM_CREATE_MIN_LENGTH = 5  # m
 
@@ -53,6 +53,8 @@ class ScenarioTrafficManager(BaseManager):
         self._obj_to_clean_this_frame = []
 
         # some flags
+        self.even_sample_v = self.engine.global_config["even_sample_vehicle_class"]
+        self.need_default_vehicle = self.engine.global_config["default_vehicle_in_traffic"]
         self.is_ego_vehicle_replay = self.engine.global_config["agent_policy"] == ReplayEgoCarPolicy
         self._filter_overlapping_car = self.engine.global_config["filter_overlapping_car"]
 
@@ -70,6 +72,7 @@ class ScenarioTrafficManager(BaseManager):
     def before_reset(self):
         super(ScenarioTrafficManager, self).before_reset()
         self._obj_to_clean_this_frame = []
+        reset_vehicle_type_count(self.np_random)
 
     def after_reset(self):
         self.scenario_id_to_obj_id = {self.sdc_track_index: self.engine.agent_manager.agent_to_object(DEFAULT_AGENT)}
@@ -184,7 +187,9 @@ class ScenarioTrafficManager(BaseManager):
         if state["vehicle_class"]:
             vehicle_class = state["vehicle_class"]
         else:
-            vehicle_class = get_vehicle_type(float(state["length"]), self.np_random)
+            vehicle_class = get_vehicle_type(
+                float(state["length"]), None if self.even_sample_v else self.np_random, self.need_default_vehicle
+            )
         obj_name = v_id if self.engine.global_config["force_reuse_object_name"] else None
         v = self.spawn_object(
             vehicle_class, position=state["position"], heading=state["heading"], vehicle_config=v_config, name=obj_name
@@ -196,7 +201,10 @@ class ScenarioTrafficManager(BaseManager):
         start_index, end_index = get_max_valid_indicis(track, self.episode_step)  # real end_index is end_index-1
         moving = track["state"]["position"][start_index][..., :2] - track["state"]["position"][end_index - 1][..., :2]
         length_ok = np.linalg.norm(moving) > self.IDM_CREATE_MIN_LENGTH
-        idm_ok = heading_dist < self.IDM_CREATE_FORWARD_CONSTRAINT and abs(side_dist) < self.IDM_CREATE_SIDE_CONSTRAINT
+        heading_ok = abs(wrap_to_pi(self.ego_vehicle.heading_theta - state["heading"])) < np.pi / 2
+        idm_ok = heading_dist < self.IDM_CREATE_FORWARD_CONSTRAINT and abs(
+            side_dist
+        ) < self.IDM_CREATE_SIDE_CONSTRAINT and heading_ok
         need_reactive_traffic = self.engine.global_config["reactive_traffic"]
         if not need_reactive_traffic or v_id in self._static_car_id or not idm_ok or not length_ok:
             policy = self.add_policy(v.name, ReplayTrafficParticipantPolicy, v, track)

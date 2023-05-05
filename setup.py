@@ -58,7 +58,11 @@ nuplan_requirement = [
     "bokeh==2.4",
     "hydra-core",
     "chardet",
-    "pyarrow"
+    "pyarrow",
+    "aiofiles",
+    "retry",
+    "boto3",
+    "aioboto3"
 ]
 
 

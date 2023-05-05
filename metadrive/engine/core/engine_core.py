@@ -67,7 +67,7 @@ class EngineCore(ShowBase.ShowBase):
     loadPrcFileData("", "window-title {}".format(EDITION))
     loadPrcFileData("", "framebuffer-multisample 1")
     loadPrcFileData("", "multisamples 8")
-    loadPrcFileData("", 'bullet-filter-algorithm groups-mask')
+    loadPrcFileData("", "bullet-filter-algorithm groups-mask")
     loadPrcFileData("", "audio-library-name null")
     loadPrcFileData("", "model-cache-compressed-textures 1")
     loadPrcFileData("", "textures-power-2 none")
@@ -147,17 +147,18 @@ class EngineCore(ShowBase.ShowBase):
             EngineCore.DEBUG = True
             _free_warning()
             setup_logger(debug=True)
-            self.accept('1', self.toggleDebug)
-            self.accept('2', self.toggleWireframe)
-            self.accept('3', self.toggleTexture)
-            self.accept('4', self.toggleAnalyze)
+            self.accept("1", self.toggleDebug)
+            self.accept("2", self.toggleWireframe)
+            self.accept("3", self.toggleTexture)
+            self.accept("4", self.toggleAnalyze)
+            self.accept("5", self.reload_shader)
         else:
             # only report fatal error when debug is False
             _suppress_warning()
             # a special debug mode
             if self.global_config["debug_physics_world"]:
-                self.accept('1', self.toggleDebug)
-                self.accept('4', self.toggleAnalyze)
+                self.accept("1", self.toggleDebug)
+                self.accept("4", self.toggleAnalyze)
 
         if not self.global_config["disable_model_compression"] and not self.use_render_pipeline:
             loadPrcFileData("", "compressed-textures 1")  # Default to compress
@@ -200,8 +201,6 @@ class EngineCore(ShowBase.ShowBase):
             initialize_asset_loader(self)
             gltf.patch_loader(self.loader)
             if not self.use_render_pipeline:
-                gltf.patch_loader(self.loader)
-
                 # Display logo
                 if self.mode == RENDER_MODE_ONSCREEN and (not self.global_config["debug"]):
                     if self.global_config["show_logo"]:
@@ -293,7 +292,8 @@ class EngineCore(ShowBase.ShowBase):
             self.cam.node().getDisplayRegion(0).setClearColorActive(True)
             self.cam.node().getDisplayRegion(0).setClearColor(BKG_COLOR)
             lens = self.cam.node().getLens()
-            lens.setFov(80)
+
+            lens.setFov(self.global_config["camera_fov"])
 
             # ui and render property
             if self.global_config["show_fps"]:
@@ -311,7 +311,7 @@ class EngineCore(ShowBase.ShowBase):
             self.on_screen_message = None
 
         # task manager
-        self.taskMgr.remove('audioLoop')
+        self.taskMgr.remove("audioLoop")
 
         self.coordinate_line = []
         if self.global_config["show_coordinates"]:
@@ -336,7 +336,7 @@ class EngineCore(ShowBase.ShowBase):
         self.physics_world.dynamic_world.doPhysics(dt, 1, dt)
 
     def _debug_mode(self):
-        debugNode = BulletDebugNode('Debug')
+        debugNode = BulletDebugNode("Debug")
         debugNode.showWireframe(True)
         debugNode.showConstraints(True)
         debugNode.showBoundingBoxes(False)
@@ -389,7 +389,7 @@ class EngineCore(ShowBase.ShowBase):
             import builtins
         else:
             import __builtin__ as builtins
-        if hasattr(builtins, 'base'):
+        if hasattr(builtins, "base"):
             del builtins.base
 
     def clear_world(self):
@@ -469,6 +469,10 @@ class EngineCore(ShowBase.ShowBase):
     @property
     def use_render_pipeline(self):
         return self.global_config["render_pipeline"] and not self.mode == RENDER_MODE_NONE
+
+    def reload_shader(self):
+        if self.render_pipeline is not None:
+            self.render_pipeline.reload_shaders()
 
 
 if __name__ == "__main__":
