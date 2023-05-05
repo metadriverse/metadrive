@@ -63,17 +63,16 @@ def get_nuplan_scenarios(dataset_parameters, nuplan_package_path=NUPLAN_PACKAGE_
         f'observation={observation}',
         f'hydra.searchpath=[{simulation_hydra_paths.common_dir}, {simulation_hydra_paths.experiment_dir}]',
         'output_dir=${group}/${experiment}',
+        'metric_dir=${group}/${experiment}',
         *dataset_parameters,
     ]
-    if is_win():
-        overrides.extend(
-            [
-                f'job_name=planner_tutorial',
-                'experiment=${experiment_name}/${job_name}/${experiment_time}',
-            ]
-        )
-    else:
-        overrides.append(f'experiment_name=planner_tutorial')
+    overrides.extend(
+        [
+            f'job_name=planner_tutorial',
+            'experiment=${experiment_name}/${job_name}',
+            f'experiment_name=planner_tutorial'
+        ]
+    )
 
     # get config
     cfg = hydra.compose(config_name=simulation_hydra_paths.config_name, overrides=overrides)
