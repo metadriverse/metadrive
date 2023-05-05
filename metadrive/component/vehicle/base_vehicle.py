@@ -1,4 +1,5 @@
 import math
+import os
 from collections import deque
 from typing import Union, Optional
 
@@ -92,7 +93,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     TIRE_WIDTH = 0.4
     FRONT_WHEELBASE = None
     REAR_WHEELBASE = None
-    LIGHT_POSITION = (1.62, -0.67, 0.05)
+    LIGHT_POSITION = (-0.67, 1.62, 0.05)
 
     # MASS = None
 
@@ -476,8 +477,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             for y in [-1, 1]:
                 light_model = self.loader.loadModel(AssetLoader.file_path("models", "sphere.egg"))
                 light_model.reparentTo(self.origin)
-                light_model.setPos(self.LIGHT_POSITION[0], self.LIGHT_POSITION[1] * y, self.LIGHT_POSITION[2])
-                light_model.setScale(0.13)
+                light_model.setPos(self.LIGHT_POSITION[0]*y, self.LIGHT_POSITION[1], self.LIGHT_POSITION[2])
+                light_model.setScale(0.13, 0.05, 0.13)
                 material = Material()
                 material.setBaseColor((1, 1, 1, 1))
                 material.setShininess(128)
@@ -672,14 +673,14 @@ class BaseVehicle(BaseObject, BaseVehicleState):
 
     def _add_visualization(self):
         if self.render:
-            [path, scale, offset, H] = self.path
+            [path, scale, offset, HPR] = self.path
             if path not in BaseVehicle.model_collection:
-                car_model = self.loader.loadModel(AssetLoader.file_path("models", path, "vehicle.gltf"))
+                car_model = self.loader.loadModel(AssetLoader.file_path("models", path))
                 car_model.setTwoSided(False)
                 BaseVehicle.model_collection[path] = car_model
                 car_model.setScale(scale)
                 # model default, face to y
-                car_model.setH(H)
+                car_model.setHpr(*HPR)
                 car_model.setPos(offset[0], offset[1], offset[-1])
                 car_model.setZ(-self.TIRE_RADIUS - self.CHASSIS_TO_WHEEL_AXIS + offset[-1])
             else:
@@ -721,7 +722,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
 
         if self.render:
             model = 'right_tire_front.gltf' if front else 'right_tire_back.gltf'
-            model_path = AssetLoader.file_path("models", self.path[0], model)
+            model_path = AssetLoader.file_path("models", os.path.dirname(self.path[0]), model)
             wheel_model = self.loader.loadModel(model_path)
             wheel_model.setTwoSided(self.TIRE_TWO_SIDED)
             wheel_model.reparentTo(wheel_np)

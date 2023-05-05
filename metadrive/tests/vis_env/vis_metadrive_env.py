@@ -5,13 +5,13 @@ if __name__ == "__main__":
     setup_logger(True)
     env = MetaDriveEnv(
         {
-            "num_scenarios": 10,
-            "traffic_density": 0.05,
+            "num_scenarios": 1,
+            "traffic_density": 0.0,
             "traffic_mode": "hybrid",
-            "start_seed": 24,
+            "start_seed": 71,
             # "_disable_detector_mask":True,
             # "debug_physics_world": True,
-            "debug": True,
+            # "debug": True,
             # "global_light": False,
             # "debug_static_world": True,
             "show_interface": False,
@@ -29,7 +29,7 @@ if __name__ == "__main__":
             "interface_panel": [],
             "need_inverse_traffic": False,
             "rgb_clip": True,
-            "map": "CCCC",
+            "map": "S",
             # "agent_policy": ExpertPolicy,
             "random_traffic": False,
             # "random_lane_width": True,
@@ -119,15 +119,15 @@ if __name__ == "__main__":
         #     env.close()
         #     env.reset()
         # info["fuel"] = env.vehicle.energy_consumption
-        # env.render(
-        #     text={
-        #         "heading_diff": env.vehicle.heading_diff(env.vehicle.lane),
-        #         "lane_width": env.vehicle.lane.width,
-        #         "lane_index": env.vehicle.lane_index,
-        #         "lateral": env.vehicle.lane.local_coordinates(env.vehicle.position),
-        #         "current_seed": env.current_seed
-        #     }
-        # )
+        env.render(
+            text={
+                # "heading_diff": env.vehicle.heading_diff(env.vehicle.lane),
+                # "lane_width": env.vehicle.lane.width,
+                # "lane_index": env.vehicle.lane_index,
+                # "lateral": env.vehicle.lane.local_coordinates(env.vehicle.position),
+                "current_seed": env.current_seed
+            }
+        )
         # if d:
         #     env.reset()
         # # assert env.observation_space.contains(o)

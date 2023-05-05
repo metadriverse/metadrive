@@ -1,8 +1,6 @@
 from metadrive.component.pg_space import ParameterSpace, VehicleParameterSpace
 from metadrive.component.vehicle.base_vehicle import BaseVehicle
 
-factor = 1
-
 
 class DefaultVehicle(BaseVehicle):
     PARAMETER_SPACE = ParameterSpace(VehicleParameterSpace.DEFAULT_VEHICLE)
@@ -15,7 +13,7 @@ class DefaultVehicle(BaseVehicle):
     LATERAL_TIRE_TO_CENTER = 0.815
     FRONT_WHEELBASE = 1.05234
     REAR_WHEELBASE = 1.4166
-    path = ['vehicle/ferra/', (factor, factor, factor), (0, 0.075, 0.), 0]
+    path = ['vehicle/ferra/vehicle.gltf', (1, 1, 1), (0, 0.075, 0.), (0, 0, 0)]
 
     @property
     def LENGTH(self):
@@ -47,8 +45,8 @@ class XLVehicle(BaseVehicle):
     CHASSIS_TO_WHEEL_AXIS = 0.3
     TIRE_WIDTH = 0.5
     MASS = 1600
-    LIGHT_POSITION = (2.65, -0.75, 0.2)
-    path = ['vehicle/truck/', (factor, factor, factor), (0, 0.25, 0.04), 0]
+    LIGHT_POSITION = ( -0.75, 2.7, 0.2)
+    path = ['vehicle/truck/vehicle.gltf', (1, 1, 1), (0, 0.25, 0.04), (0, 0, 0)]
 
     @property
     def LENGTH(self):
@@ -74,9 +72,9 @@ class LVehicle(BaseVehicle):
     LATERAL_TIRE_TO_CENTER = 0.75
     TIRE_WIDTH = 0.35
     MASS = 1300
-    LIGHT_POSITION = (2.1, -0.65, 0.3)
+    LIGHT_POSITION = (-0.65, 2.13,  0.3)
 
-    path = ['vehicle/lada/', (1.1, 1.1, 1.1), (0, -0.27, 0.07), 0]
+    path = ['vehicle/lada/vehicle.gltf', (1.1, 1.1, 1.1), (0, -0.27, 0.07), (0, 0, 0)]
 
     @property
     def LENGTH(self):
@@ -102,9 +100,9 @@ class MVehicle(BaseVehicle):
     LATERAL_TIRE_TO_CENTER = 0.803
     TIRE_WIDTH = 0.3
     MASS = 1200
-    LIGHT_POSITION = (1.95, -0.67, 0.22)
+    LIGHT_POSITION = (-0.67, 1.86,  0.22)
 
-    path = ['vehicle/130/', (factor, factor, factor), (0, -0.05, 0.07), 0]
+    path = ['vehicle/130/vehicle.gltf', (1, 1, 1), (0, -0.05, 0.1), (0, 0, 0)]
 
     @property
     def LENGTH(self):
@@ -126,14 +124,14 @@ class SVehicle(BaseVehicle):
     # HEIGHT = 1.7
     LATERAL_TIRE_TO_CENTER = 0.7
     TIRE_TWO_SIDED = True
-    FRONT_WHEELBASE = 1.4126
-    REAR_WHEELBASE = 1.07
+    FRONT_WHEELBASE = 1.385
+    REAR_WHEELBASE = 1.11
     TIRE_RADIUS = 0.376
     TIRE_WIDTH = 0.25
     MASS = 800
-    LIGHT_POSITION = (1.85, -0.57, 0.23)
+    LIGHT_POSITION = (-0.57, 1.86,  0.23)
 
-    path = ['vehicle/beetle/', (factor, factor, factor), (0, -0.26, 0.03), 0]
+    path = ['vehicle/beetle/vehicle.bam', (0.0077, 0.0077, 0.0077), (0.04512, -0.24 - 0.04512, 1.77), (-90, -90, 0)]
 
     @property
     def LENGTH(self):

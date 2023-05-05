@@ -217,7 +217,7 @@ class MainCamera:
             self.camera.setH(vehicle.origin.getH() + np.rad2deg(self.mouse_rotate))
         else:
             # camera is facing to y
-            self.camera.setH(vehicle.origin.getH() - 90)
+            self.camera.setH(vehicle.origin.getH())
             self.camera.setP(self.camera_pitch)
         if self.FOLLOW_LANE:
             self.camera.setH(
