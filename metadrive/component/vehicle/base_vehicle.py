@@ -903,15 +903,6 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         if self.light is not None:
             self.remove_light()
 
-    def set_heading_theta(self, heading_theta, in_rad=True) -> None:
-        """
-        Set heading theta for this object. Vehicle local frame has a 90 degree offset
-        :param heading_theta: float in rad
-        :param in_rad: when set to True, heading theta should be in rad, otherwise, in degree
-        """
-        super(BaseVehicle, self).set_heading_theta(heading_theta, in_rad)
-        self.last_heading_dir = self.heading
-
     def set_velocity(self, direction, *args, **kwargs):
         super(BaseVehicle, self).set_velocity(direction, *args, **kwargs)
         self.last_velocity = self.velocity

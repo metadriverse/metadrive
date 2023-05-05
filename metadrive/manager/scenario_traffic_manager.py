@@ -1,6 +1,6 @@
 import copy
 import logging
-
+from metadrive.utils.math import wrap_to_pi
 import numpy as np
 
 from metadrive.component.static_object.traffic_object import TrafficCone, TrafficBarrier
@@ -24,7 +24,7 @@ class ScenarioTrafficManager(BaseManager):
     IDM_ACT_BATCH_SIZE = 5
 
     # project cars to ego vehicle coordinates, only vehicles behind ego car and in a certain region can get IDM policy
-    IDM_CREATE_SIDE_CONSTRAINT = 10  # m
+    IDM_CREATE_SIDE_CONSTRAINT = 15  # m
     IDM_CREATE_FORWARD_CONSTRAINT = -1  # m
     IDM_CREATE_MIN_LENGTH = 5  # m
 
@@ -201,7 +201,9 @@ class ScenarioTrafficManager(BaseManager):
         start_index, end_index = get_max_valid_indicis(track, self.episode_step)  # real end_index is end_index-1
         moving = track["state"]["position"][start_index][..., :2] - track["state"]["position"][end_index - 1][..., :2]
         length_ok = np.linalg.norm(moving) > self.IDM_CREATE_MIN_LENGTH
-        idm_ok = heading_dist < self.IDM_CREATE_FORWARD_CONSTRAINT and abs(side_dist) < self.IDM_CREATE_SIDE_CONSTRAINT
+        heading_ok = abs(wrap_to_pi(self.ego_vehicle.heading_theta - state["heading"])) < np.pi / 2
+        idm_ok = heading_dist < self.IDM_CREATE_FORWARD_CONSTRAINT and abs(
+            side_dist) < self.IDM_CREATE_SIDE_CONSTRAINT and heading_ok
         need_reactive_traffic = self.engine.global_config["reactive_traffic"]
         if not need_reactive_traffic or v_id in self._static_car_id or not idm_ok or not length_ok:
             policy = self.add_policy(v.name, ReplayTrafficParticipantPolicy, v, track)
