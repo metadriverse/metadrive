@@ -48,7 +48,6 @@ BASE_DEFAULT_CONFIG = dict(
     action_check=False,
 
     # ===== Rendering =====
-    main_camera_fov=65,
     use_render=False,  # pop a window to render or not
     debug=False,
     disable_model_compression=False,  # disable compression if you wish to launch the window quicker.
@@ -58,6 +57,7 @@ BASE_DEFAULT_CONFIG = dict(
     camera_dist=7.5,
     camera_pitch=None,  # degree
     camera_smooth=True,  # degree
+    camera_fov=65,
     prefer_track_agent=None,
     draw_map_resolution=1024,  # Drawing the map in a canvas of (x, x) pixels.
     top_down_camera_initial_x=0,

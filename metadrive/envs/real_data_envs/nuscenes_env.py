@@ -60,7 +60,7 @@ if __name__ == "__main__":
 
     success = []
     while True:
-        env.reset(force_seed=7)
+        env.reset(force_seed=3)
         # env.engine.force_fps.disable()
         for t in range(10000):
             o, r, d, info = env.step([0, 0])
