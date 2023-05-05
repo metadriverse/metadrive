@@ -33,6 +33,7 @@ SCENARIO_ENV_CONFIG = dict(
     no_light=False,  # no traffic light
     reactive_traffic=False,  # turn on to enable idm traffic
     filter_overlapping_car=True,  # If in one frame a traffic vehicle collides with ego car, it won't be created.
+    even_sample_vehicle_class=True,  # to make the scene more diverse
 
     # ===== Agent config =====
     vehicle_config=dict(
@@ -188,8 +189,8 @@ class ScenarioEnv(BaseEnv):
         # for compatibility
         # crash almost equals to crashing with vehicles
         done_info[TerminationState.CRASH] = (
-            done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
-            or done_info[TerminationState.CRASH_BUILDING]
+                done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
+                or done_info[TerminationState.CRASH_BUILDING]
         )
         return done, done_info
 

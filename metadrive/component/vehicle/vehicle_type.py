@@ -28,6 +28,10 @@ class DefaultVehicle(BaseVehicle):
         return 1.852  # meters
 
 
+# When using DefaultVehicle as traffic, please use this class.
+TrafficDefaultVehicle = DefaultVehicle
+
+
 class StaticDefaultVehicle(DefaultVehicle):
     PARAMETER_SPACE = ParameterSpace(VehicleParameterSpace.STATIC_DEFAULT_VEHICLE)
 
@@ -45,7 +49,7 @@ class XLVehicle(BaseVehicle):
     CHASSIS_TO_WHEEL_AXIS = 0.3
     TIRE_WIDTH = 0.5
     MASS = 1600
-    LIGHT_POSITION = ( -0.75, 2.7, 0.2)
+    LIGHT_POSITION = (-0.75, 2.7, 0.2)
     path = ['vehicle/truck/vehicle.gltf', (1, 1, 1), (0, 0.25, 0.04), (0, 0, 0)]
 
     @property
@@ -72,7 +76,7 @@ class LVehicle(BaseVehicle):
     LATERAL_TIRE_TO_CENTER = 0.75
     TIRE_WIDTH = 0.35
     MASS = 1300
-    LIGHT_POSITION = (-0.65, 2.13,  0.3)
+    LIGHT_POSITION = (-0.65, 2.13, 0.3)
 
     path = ['vehicle/lada/vehicle.gltf', (1.1, 1.1, 1.1), (0, -0.27, 0.07), (0, 0, 0)]
 
@@ -100,7 +104,7 @@ class MVehicle(BaseVehicle):
     LATERAL_TIRE_TO_CENTER = 0.803
     TIRE_WIDTH = 0.3
     MASS = 1200
-    LIGHT_POSITION = (-0.67, 1.86,  0.22)
+    LIGHT_POSITION = (-0.67, 1.86, 0.22)
 
     path = ['vehicle/130/vehicle.gltf', (1, 1, 1), (0, -0.05, 0.1), (0, 0, 0)]
 
@@ -129,7 +133,7 @@ class SVehicle(BaseVehicle):
     TIRE_RADIUS = 0.376
     TIRE_WIDTH = 0.25
     MASS = 800
-    LIGHT_POSITION = (-0.57, 1.86,  0.23)
+    LIGHT_POSITION = (-0.57, 1.86, 0.23)
 
     path = ['vehicle/beetle/vehicle.bam', (0.0077, 0.0077, 0.0077), (0.04512, -0.24 - 0.04512, 1.77), (-90, -90, 0)]
 
@@ -263,13 +267,35 @@ vehicle_type = {
 
 VaryingShapeVehicle = VaryingDynamicsVehicle
 
+type_count = [0 for i in range(3)]
 
-def get_vehicle_type(length, np_random):
-    # if abs(length-0) <= 0.001:
-    #     raise ValueError("Length Error")
-    if length <= 4:
-        return SVehicle
-    elif length <= 5.5:
-        return [LVehicle, SVehicle, MVehicle][np_random.randint(3)]
+
+def reset_vehicle_type_count(np_random=None):
+    global type_count
+    if np_random is None:
+        type_count = [0 for i in range(3)]
     else:
-        return [LVehicle, XLVehicle][np_random.randint(2)]
+        type_count = [np_random.randint(100) for i in range(3)]
+
+
+def get_vehicle_type(length, np_random=None):
+    if np_random is not None:
+        if length <= 4:
+            return SVehicle
+        elif length <= 5.5:
+            return [LVehicle, SVehicle, MVehicle][np_random.randint(3)]
+        else:
+            return [LVehicle, XLVehicle][np_random.randint(2)]
+    else:
+        global type_count
+        # evenly sample
+        if length <= 4:
+            return SVehicle
+        elif length <= 5.5:
+            type_count[1] += 1
+            vs = [MVehicle, LVehicle, SVehicle, TrafficDefaultVehicle]
+            return vs[type_count[1] % len(vs)]
+        else:
+            type_count[2] += 1
+            vs = [LVehicle, XLVehicle]
+            return vs[type_count[2] % len(vs)]

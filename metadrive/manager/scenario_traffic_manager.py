@@ -6,7 +6,7 @@ import numpy as np
 from metadrive.component.static_object.traffic_object import TrafficCone, TrafficBarrier
 from metadrive.component.traffic_participants.cyclist import Cyclist
 from metadrive.component.traffic_participants.pedestrian import Pedestrian
-from metadrive.component.vehicle.vehicle_type import get_vehicle_type
+from metadrive.component.vehicle.vehicle_type import get_vehicle_type, reset_vehicle_type_count
 from metadrive.constants import DEFAULT_AGENT
 from metadrive.manager.base_manager import BaseManager
 from metadrive.policy.idm_policy import ScenarioIDMPolicy
@@ -53,6 +53,7 @@ class ScenarioTrafficManager(BaseManager):
         self._obj_to_clean_this_frame = []
 
         # some flags
+        self.even_sample_v = self.engine.global_config["even_sample_vehicle_class"]
         self.is_ego_vehicle_replay = self.engine.global_config["agent_policy"] == ReplayEgoCarPolicy
         self._filter_overlapping_car = self.engine.global_config["filter_overlapping_car"]
 
@@ -70,6 +71,7 @@ class ScenarioTrafficManager(BaseManager):
     def before_reset(self):
         super(ScenarioTrafficManager, self).before_reset()
         self._obj_to_clean_this_frame = []
+        reset_vehicle_type_count(self.np_random)
 
     def after_reset(self):
         self.scenario_id_to_obj_id = {self.sdc_track_index: self.engine.agent_manager.agent_to_object(DEFAULT_AGENT)}
@@ -184,7 +186,7 @@ class ScenarioTrafficManager(BaseManager):
         if state["vehicle_class"]:
             vehicle_class = state["vehicle_class"]
         else:
-            vehicle_class = get_vehicle_type(float(state["length"]), self.np_random)
+            vehicle_class = get_vehicle_type(float(state["length"]), None if self.even_sample_v else self.np_random)
         obj_name = v_id if self.engine.global_config["force_reuse_object_name"] else None
         v = self.spawn_object(
             vehicle_class, position=state["position"], heading=state["heading"], vehicle_config=v_config, name=obj_name
