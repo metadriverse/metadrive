@@ -116,11 +116,11 @@ overrides:
         num_samples: 12
 
     pssm:
-        max_distance: 300.0
+        max_distance: 512
         logarithmic_factor: 2.37
-        sun_distance: 200.0
+        sun_distance: 256
         split_count: 4
-        resolution: 1024
+        resolution: 2048
         border_bias: 0.0558
         use_pcf: True
         filter_sequence: halton_2D_32

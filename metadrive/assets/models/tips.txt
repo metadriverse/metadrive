@@ -6,3 +6,4 @@ If a gltf model lacks normal when using RenderPipeline, try:
 4. cd to egg file dir
 5. egg2bam ./beetle.egg -o vehicle.bam
 6. compress textures
+7. https://discourse.panda3d.org/t/exporting-from-blender-a-quick-reference/27511
