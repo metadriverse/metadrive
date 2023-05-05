@@ -1,8 +1,8 @@
-from metadrive.engine.asset_loader import AssetLoader
 import numpy as np
+
+from metadrive.engine.asset_loader import AssetLoader
 from metadrive.envs.scenario_env import ScenarioEnv
 from metadrive.policy.replay_policy import ReplayEgoCarPolicy
-from metadrive.examples.generate_video_for_bev_and_interface import VideoRecorder
 
 NuScenesEnv = ScenarioEnv
 
@@ -30,6 +30,7 @@ if __name__ == "__main__":
             "camera_dist": -2.5,
             "camera_height": 0.5,
             "camera_pitch": np.pi / 3,
+            "camera_fov": 60,
             # "no_traffic":True,
             # "force_render_fps": 10,
             # "start_scenario_index": 192,
@@ -42,6 +43,7 @@ if __name__ == "__main__":
             # "show_policy_mark": True,
             # "show_coordinates": True,
             "force_destroy": True,
+            "default_vehicle_in_traffic": True,
             "vehicle_config": dict(
                 light=True,
                 show_navi_mark=False,

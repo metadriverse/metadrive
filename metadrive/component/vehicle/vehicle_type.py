@@ -29,7 +29,9 @@ class DefaultVehicle(BaseVehicle):
 
 
 # When using DefaultVehicle as traffic, please use this class.
-TrafficDefaultVehicle = DefaultVehicle
+
+class TrafficDefaultVehicle(DefaultVehicle):
+    pass
 
 
 class StaticDefaultVehicle(DefaultVehicle):
@@ -135,7 +137,14 @@ class SVehicle(BaseVehicle):
     MASS = 800
     LIGHT_POSITION = (-0.57, 1.86, 0.23)
 
-    path = ['vehicle/beetle/vehicle.bam', (0.0077, 0.0077, 0.0077), (0.04512, -0.24 - 0.04512, 1.77), (-90, -90, 0)]
+    @property
+    def path(self):
+        if self.use_render_pipeline:
+            return ['vehicle/beetle/vehicle.bam', (0.0077, 0.0077, 0.0077), (0.04512, -0.24 - 0.04512, 1.77),
+                    (-90, -90, 0)]
+        else:
+            factor = 1
+            return ['vehicle/beetle/vehicle.gltf', (factor, factor, factor), (0, -0.2, 0.03), (0, 0, 0)]
 
     @property
     def LENGTH(self):
@@ -278,7 +287,7 @@ def reset_vehicle_type_count(np_random=None):
         type_count = [np_random.randint(100) for i in range(3)]
 
 
-def get_vehicle_type(length, np_random=None):
+def get_vehicle_type(length, np_random=None, need_default_vehicle=False):
     if np_random is not None:
         if length <= 4:
             return SVehicle
@@ -293,7 +302,9 @@ def get_vehicle_type(length, np_random=None):
             return SVehicle
         elif length <= 5.5:
             type_count[1] += 1
-            vs = [MVehicle, LVehicle, SVehicle, TrafficDefaultVehicle]
+            vs = [MVehicle, LVehicle, SVehicle]
+            if need_default_vehicle:
+                vs.append(TrafficDefaultVehicle)
             return vs[type_count[1] % len(vs)]
         else:
             type_count[2] += 1

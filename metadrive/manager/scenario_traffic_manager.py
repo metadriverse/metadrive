@@ -54,6 +54,7 @@ class ScenarioTrafficManager(BaseManager):
 
         # some flags
         self.even_sample_v = self.engine.global_config["even_sample_vehicle_class"]
+        self.need_default_vehicle = self.engine.global_config["default_vehicle_in_traffic"]
         self.is_ego_vehicle_replay = self.engine.global_config["agent_policy"] == ReplayEgoCarPolicy
         self._filter_overlapping_car = self.engine.global_config["filter_overlapping_car"]
 
@@ -186,7 +187,9 @@ class ScenarioTrafficManager(BaseManager):
         if state["vehicle_class"]:
             vehicle_class = state["vehicle_class"]
         else:
-            vehicle_class = get_vehicle_type(float(state["length"]), None if self.even_sample_v else self.np_random)
+            vehicle_class = get_vehicle_type(float(state["length"]),
+                                             None if self.even_sample_v else self.np_random,
+                                             self.need_default_vehicle)
         obj_name = v_id if self.engine.global_config["force_reuse_object_name"] else None
         v = self.spawn_object(
             vehicle_class, position=state["position"], heading=state["heading"], vehicle_config=v_config, name=obj_name
