@@ -2,6 +2,13 @@ import pickle
 
 from metadrive.engine.asset_loader import AssetLoader
 
+import logging
+
+logger = logging.getLogger(__name__)
+
+logger.warning("This converters will de deprecated. "
+               "Use tools in ScenarioNet instead: https://github.com/metadriverse/ScenarioNet.")
+
 if __name__ == '__main__':
 
     with open("waymo120/0408_output_final/dataset_summary.pkl", "rb") as f:

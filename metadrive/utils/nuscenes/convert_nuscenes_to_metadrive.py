@@ -13,6 +13,12 @@ from metadrive.scenario.scenario_description import ScenarioDescription
 from metadrive.utils.nuscenes.utils import convert_one_scenario
 from metadrive.utils.utils import dict_recursive_remove_array
 import shutil
+import logging
+
+logger = logging.getLogger(__name__)
+
+logger.warning("This converters will de deprecated. "
+               "Use tools in ScenarioNet instead: https://github.com/metadriverse/ScenarioNet.")
 
 try:
     from nuscenes import NuScenes
