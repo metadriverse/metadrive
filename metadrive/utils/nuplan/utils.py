@@ -36,8 +36,10 @@ try:
 except ImportError:
     logger.warning("Can not import nuplan-devkit")
 
-logger.warning("This converters will de deprecated. "
-               "Use tools in ScenarioNet instead: https://github.com/metadriverse/ScenarioNet.")
+logger.warning(
+    "This converters will de deprecated. "
+    "Use tools in ScenarioNet instead: https://github.com/metadriverse/ScenarioNet."
+)
 
 NUPLAN_PACKAGE_PATH = os.path.dirname(nuplan.__file__)
 EGO = "ego"
@@ -349,9 +351,9 @@ def extract_traffic(scenario: NuPlanScenario, center):
             type=MetaDriveType.UNSET,
             state=dict(
                 position=np.zeros(shape=(episode_len, 3)),
-                heading=np.zeros(shape=(episode_len,)),
+                heading=np.zeros(shape=(episode_len, )),
                 velocity=np.zeros(shape=(episode_len, 2)),
-                valid=np.zeros(shape=(episode_len,)),
+                valid=np.zeros(shape=(episode_len, )),
                 length=np.zeros(shape=(episode_len, 1)),
                 width=np.zeros(shape=(episode_len, 1)),
                 height=np.zeros(shape=(episode_len, 1))

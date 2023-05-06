@@ -18,8 +18,10 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-logger.warning("This converters will de deprecated. "
-               "Use tools in ScenarioNet instead: https://github.com/metadriverse/ScenarioNet.")
+logger.warning(
+    "This converters will de deprecated. "
+    "Use tools in ScenarioNet instead: https://github.com/metadriverse/ScenarioNet."
+)
 
 
 def convert_scenarios(output_path, dataset_params, worker_index=None, force_overwrite=False):

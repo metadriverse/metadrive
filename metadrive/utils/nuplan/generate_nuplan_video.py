@@ -14,8 +14,10 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-logger.warning("This converters will de deprecated. "
-               "Use tools in ScenarioNet instead: https://github.com/metadriverse/ScenarioNet.")
+logger.warning(
+    "This converters will de deprecated. "
+    "Use tools in ScenarioNet instead: https://github.com/metadriverse/ScenarioNet."
+)
 
 if __name__ == '__main__':
     raise ValueError("It seems the sensor data is not ready yet")

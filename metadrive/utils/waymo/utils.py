@@ -19,13 +19,15 @@ import pickle
 import numpy as np
 from metadrive.scenario.scenario_description import ScenarioDescription
 
-
 import logging
 
 logger = logging.getLogger(__name__)
 
-logger.warning("This converters will de deprecated. "
-               "Use tools in ScenarioNet instead: https://github.com/metadriverse/ScenarioNet.")
+logger.warning(
+    "This converters will de deprecated. "
+    "Use tools in ScenarioNet instead: https://github.com/metadriverse/ScenarioNet."
+)
+
 
 def extract_poly(message):
     x = [i.x for i in message]

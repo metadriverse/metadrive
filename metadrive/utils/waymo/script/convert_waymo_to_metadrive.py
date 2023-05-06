@@ -39,13 +39,15 @@ from metadrive.utils.waymo.utils import extract_tracks, extract_dynamic_map_stat
     compute_width
 import sys
 
-
 import logging
 
 logger = logging.getLogger(__name__)
 
-logger.warning("This converters will de deprecated. "
-               "Use tools in ScenarioNet instead: https://github.com/metadriverse/ScenarioNet.")
+logger.warning(
+    "This converters will de deprecated. "
+    "Use tools in ScenarioNet instead: https://github.com/metadriverse/ScenarioNet."
+)
+
 
 def validate_sdc_track(sdc_state):
     """
