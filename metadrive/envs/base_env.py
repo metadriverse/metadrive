@@ -1,3 +1,4 @@
+import logging
 import time
 from collections import defaultdict
 from typing import Union, Dict, AnyStr, Optional, Tuple, Callable
@@ -216,6 +217,7 @@ class BaseEnv(gym.Env):
 
         self.config = global_config
         initialize_global_config(self.config)
+        self.logger = logging.getLogger(self.logger_name)
 
         # agent check
         self.num_agents = self.config["num_agents"]
@@ -595,18 +597,19 @@ class BaseEnv(gym.Env):
         return self.engine.episode_step if self.engine is not None else 0
 
     def export_scenarios(
-        self,
-        policies: Union[dict, Callable],
-        scenario_index: Union[list, int],
-        time_interval=0.1,
-        verbose=False,
-        render_topdown=False,
-        return_done_info=True,
-        to_dict=True
+            self,
+            policies: Union[dict, Callable],
+            scenario_index: Union[list, int],
+            time_interval=0.1,
+            verbose=False,
+            render_topdown=False,
+            return_done_info=True,
+            to_dict=True
     ):
         """
         We export scenarios into a unified format with 10hz sample rate
         """
+
         def _act(observation):
             if isinstance(policies, dict):
                 ret = {}
@@ -654,3 +657,7 @@ class BaseEnv(gym.Env):
         """
         episode = self.engine.dump_episode()
         return convert_recorded_scenario_exported(episode)
+
+    @property
+    def logger_name(self):
+        return __file__
