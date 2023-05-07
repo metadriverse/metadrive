@@ -112,6 +112,7 @@ Example:
     }
 """
 
+import os
 from collections import defaultdict
 
 import numpy as np
@@ -305,6 +306,13 @@ class ScenarioDescription(dict):
     @staticmethod
     def get_export_file_name(dataset, dataset_version, scenario_name):
         return "sd_{}_{}_{}.pkl".format(dataset, dataset_version, scenario_name)
+
+    @staticmethod
+    def is_scenario_file(file_name):
+        file_name = os.path.basename(file_name)
+        assert file_name[-4:] == ".pkl", "{} is not .pkl file".format(file_name)
+        file_name = file_name.replace(".pkl", "")
+        return os.path.basename(file_name)[:3] == "sd_" or all(char.isdigit() for char in file_name)
 
     @staticmethod
     def get_number_summary(scenario):

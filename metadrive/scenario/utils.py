@@ -323,6 +323,7 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
 
 
 def read_scenario_data(file_path):
+    assert SD.is_scenario_file(file_path), "File: {} is not scenario file".format(file_path)
     with open(file_path, "rb") as f:
         # unpickler = CustomUnpickler(f)
         data = pickle.load(f)
@@ -362,6 +363,10 @@ def read_dataset_summary(file_folder):
     else:
         # Create a fake one
         mapping = {k: "" for k in summary_dict}
+
+    for file in summary_dict:
+        assert file in mapping, "FileName in mapping mismatch with summary"
+        assert SD.is_scenario_file(file), file
 
     return summary_dict, list(summary_dict.keys()), mapping
 
