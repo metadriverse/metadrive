@@ -371,6 +371,11 @@ def read_dataset_summary(file_folder):
     return summary_dict, list(summary_dict.keys()), mapping
 
 
+def get_number_of_scenarios(dataset_path):
+    _, files, _ = read_dataset_summary(dataset_path)
+    return len(files)
+
+
 def assert_scenario_equal(scenarios1, scenarios2, only_compare_sdc=False):
     # ===== These two set of data should align =====
     assert set(scenarios1.keys()) == set(scenarios2.keys())

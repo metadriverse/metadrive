@@ -13,8 +13,8 @@ class BaseTrafficParticipant(BaseObject):
     COLLISION_MASK = CollisionGroup.TrafficParticipants
     HEIGHT = None
 
-    def __init__(self, position: Sequence[float], heading_theta: float = 0., random_seed=None):
-        super(BaseTrafficParticipant, self).__init__(random_seed=random_seed)
+    def __init__(self, position: Sequence[float], heading_theta: float = 0., random_seed=None, name=None):
+        super(BaseTrafficParticipant, self).__init__(random_seed=random_seed, name=name)
         self.set_position(position, self.HEIGHT / 2 if hasattr(self, "HEIGHT") else 0)
         self.set_heading_theta(heading_theta)
         assert self.MASS is not None, "No mass for {}".format(self.class_name)

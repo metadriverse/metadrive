@@ -36,6 +36,9 @@ class ScenarioDataManager(BaseManager):
             # later
             # self._scenario[i] = self._get_scenario(i)
 
+    def current_scenario_summary(self):
+        return self.current_scenario[SD.METADATA]
+
     def _get_scenario(self, i):
         assert self.start_scenario_index <= i < self.start_scenario_index + self.num_scenarios, \
             "scenario ID exceeds range"

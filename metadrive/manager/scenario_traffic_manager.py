@@ -223,8 +223,10 @@ class ScenarioTrafficManager(BaseManager):
         state = parse_object_state(track, self.episode_step)
         if not state["valid"]:
             return
+        obj_name = scenario_id if self.engine.global_config["force_reuse_object_name"] else None
         obj = self.spawn_object(
             Pedestrian,
+            name=obj_name,
             position=state["position"],
             heading_theta=state["heading"],
         )
@@ -237,8 +239,10 @@ class ScenarioTrafficManager(BaseManager):
         state = parse_object_state(track, self.episode_step)
         if not state["valid"]:
             return
+        obj_name = scenario_id if self.engine.global_config["force_reuse_object_name"] else None
         obj = self.spawn_object(
             Cyclist,
+            name=obj_name,
             position=state["position"],
             heading_theta=state["heading"],
         )
@@ -259,8 +263,10 @@ class ScenarioTrafficManager(BaseManager):
         state = parse_object_state(track, self.episode_step)
         if not state["valid"]:
             return
+        obj_name = scenario_id if self.engine.global_config["force_reuse_object_name"] else None
         obj = self.spawn_object(
             cls,
+            name=obj_name,
             position=state["position"],
             heading_theta=state["heading"],
         )

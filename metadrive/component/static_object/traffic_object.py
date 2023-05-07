@@ -25,12 +25,12 @@ class TrafficObject(BaseStaticObject):
 
     COST_ONCE = True  # cost will give at the first time
 
-    def __init__(self, position, heading_theta, lane=None, random_seed=None):
+    def __init__(self, position, heading_theta, lane=None, random_seed=None, name=None):
         """
         :param lane: the lane to spawn object
         """
         assert self.CLASS_NAME is not None, "Assign a name for this class for finding it easily"
-        super(TrafficObject, self).__init__(position, heading_theta, lane, random_seed)
+        super(TrafficObject, self).__init__(position, heading_theta, lane, random_seed, name=name)
         self.crashed = False
 
 

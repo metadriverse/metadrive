@@ -9,13 +9,13 @@ class BaseStaticObject(BaseObject):
     MASS = 1
     HEIGHT = None
 
-    def __init__(self, position: Sequence[float], heading_theta: float = 0., lane=None, random_seed=None):
+    def __init__(self, position: Sequence[float], heading_theta: float = 0., lane=None, random_seed=None, name=None):
         """
         :param lane: the lane to spawn object
         :param position: cartesian position of object in the surface
         :param heading_theta: the angle from positive direction of horizontal axis
         """
-        super(BaseStaticObject, self).__init__(random_seed=random_seed)
+        super(BaseStaticObject, self).__init__(random_seed=random_seed, name=name)
         self.set_position(position, self.HEIGHT / 2 if hasattr(self, "HEIGHT") else 0)
         self.set_heading_theta(heading_theta)
         self.lane = lane
