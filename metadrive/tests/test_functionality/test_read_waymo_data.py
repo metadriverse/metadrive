@@ -22,14 +22,16 @@ def test_read_data_no_summary():
     #  make fake dataset
     copy_tree(dir, new_dir)
     os.remove(os.path.join("test_read_copy_waymo", ScenarioDescription.DATASET.SUMMARY_FILE))
-    env = ScenarioEnv({
-        "manual_control": True,
-        "no_traffic": False,
-        "start_scenario_index": 0,
-        "show_coordinates": True,
-        "num_scenarios": 3,
-        "data_directory": new_dir,
-    })
+    env = ScenarioEnv(
+        {
+            "manual_control": True,
+            "no_traffic": False,
+            "start_scenario_index": 0,
+            "show_coordinates": True,
+            "num_scenarios": 3,
+            "data_directory": new_dir,
+        }
+    )
     try:
         env.reset()
     finally:

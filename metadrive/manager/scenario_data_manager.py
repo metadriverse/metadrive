@@ -9,6 +9,7 @@ from metadrive.utils.data_buffer import DataBuffer
 
 class ScenarioDataManager(BaseManager):
     DEFAULT_DATA_BUFFER_SIZE = 100
+    PRIORITY = -10
 
     def __init__(self):
         super(ScenarioDataManager, self).__init__()

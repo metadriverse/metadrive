@@ -136,7 +136,9 @@ class ScenarioTrafficManager(BaseManager):
 
     @property
     def current_traffic_data(self):
-        return self.engine.data_manager.current_scenario["tracks"]
+        data = copy.deepcopy(self.engine.data_manager.current_scenario["tracks"])
+        data.pop(self.sdc_scenario_id)
+        return data
 
     @property
     def sdc_track_index(self):
