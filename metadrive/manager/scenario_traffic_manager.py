@@ -281,8 +281,8 @@ class ScenarioTrafficManager(BaseManager):
     def get_state(self):
         # Record mapping from original_id to new_id
         ret = {}
-        ret[SD.ORIGINAL_ID_TO_OBJ_ID] = copy.deepcopy(self._scenario_id_to_obj_id)
-        ret[SD.OBJ_ID_TO_ORIGINAL_ID] = copy.deepcopy(self._obj_id_to_scenario_id)
+        ret[SD.ORIGINAL_ID_TO_OBJ_ID] = self.scenario_id_to_obj_id
+        ret[SD.OBJ_ID_TO_ORIGINAL_ID] = self.obj_id_to_scenario_id
         return ret
 
     @property
