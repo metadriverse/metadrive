@@ -37,6 +37,12 @@ class Pedestrian(BaseTrafficParticipant):
             self._instance = Pedestrian._MODEL[self.current_speed_model].instanceTo(self.origin)
             self.show_coordinates()
 
+    def reset(self, position, heading_theta: float = 0., random_seed=None, name=None, *args, **kwargs):
+        super(Pedestrian, self).reset(position, heading_theta, random_seed, name, *args, **kwargs)
+        self.current_speed_model = self.SPEED_LIST[0]
+        self._instance.detachNode()
+        self._instance = Pedestrian._MODEL[self.current_speed_model].instanceTo(self.origin)
+
     @classmethod
     def init_pedestrian_model(cls):
         for idx, speed in enumerate(cls.SPEED_LIST):
