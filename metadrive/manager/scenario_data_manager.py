@@ -37,6 +37,7 @@ class ScenarioDataManager(BaseManager):
             # later
             # self._scenario[i] = self._get_scenario(i)
 
+    @property
     def current_scenario_summary(self):
         return self.current_scenario[SD.METADATA]
 

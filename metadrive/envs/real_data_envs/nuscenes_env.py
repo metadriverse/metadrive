@@ -19,9 +19,9 @@ if __name__ == "__main__":
             "show_fps": False,
             "debug": False,
             # "pstats": True,
-            "render_pipeline": True,
+            # "render_pipeline": True,
             "pstats": True,
-            "daytime": "22:01",
+            # "daytime": "22:01",
             # "no_traffic": True,
             # "no_light": False,
             # "debug":True,
@@ -60,7 +60,7 @@ if __name__ == "__main__":
 
     success = []
     while True:
-        env.reset(force_seed=3)
+        env.reset(force_seed=env.current_seed + 1 if env.engine is not None else 0)
         # env.engine.force_fps.disable()
         for t in range(10000):
             o, r, d, info = env.step([0, 0])
