@@ -6,9 +6,7 @@ This script will create the output folder "processed_data" sharing the same leve
 -- processed_data
 
 """
-from metadrive.scenario.scenario_description import ScenarioDescription
 import argparse
-from metadrive.utils.utils import dict_recursive_remove_array
 import copy
 import os
 import pickle
@@ -17,6 +15,8 @@ from collections import defaultdict
 import numpy as np
 
 from metadrive.constants import DATA_VERSION
+from metadrive.scenario.scenario_description import ScenarioDescription
+from metadrive.utils.utils import dict_recursive_remove_array
 
 try:
     import tensorflow as tf
@@ -210,7 +210,7 @@ def parse_data(file_list, input_path, output_path, worker_index=None):
                 for count, id in enumerate(track_id)
             }
 
-            export_file_name = "sd_{}_{}.pkl".format(file, scenario.scenario_id)
+            export_file_name = SD.get_export_file_name("waymo", "v1.2" + file, scenario.scenario_id)
 
             summary_dict = {}
             summary_dict["sdc"] = _get_agent_summary(

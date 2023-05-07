@@ -303,6 +303,10 @@ class ScenarioDescription(dict):
         }
 
     @staticmethod
+    def get_export_file_name(dataset, dataset_version, scenario_name):
+        return "sd_{}_{}_{}.pkl".format(dataset, dataset_version, scenario_name)
+
+    @staticmethod
     def get_number_summary(scenario):
         number_summary_dict = {}
         # object

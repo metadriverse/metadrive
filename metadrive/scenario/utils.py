@@ -347,6 +347,8 @@ def read_dataset_summary(file_folder):
     else:
         # Create a fake one
         files = os.listdir(file_folder)
+        if ScenarioDescription.DATASET.MAPPING_FILE in files:
+            files.remove(ScenarioDescription.DATASET.MAPPING_FILE)
         try:
             files = sorted(files, key=lambda file_name: int(file_name.replace(".pkl", "")))
         except ValueError:
