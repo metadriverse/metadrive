@@ -281,7 +281,7 @@ class ScenarioDescription(dict):
     @staticmethod
     def get_object_summary(state_dict, id, type):
         track = state_dict["position"]
-        valid_track = track[state_dict["valid"].astype(int), :2]
+        valid_track = track[np.where(state_dict["valid"].astype(int))][..., :2]
         distance = float(
             sum(np.linalg.norm(valid_track[i] - valid_track[i + 1]) for i in range(valid_track.shape[0] - 1))
         )
