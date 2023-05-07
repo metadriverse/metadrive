@@ -338,7 +338,7 @@ def read_dataset_summary(file_folder):
 
     The second is the new method which use a summary file to record important metadata of each scenario.
     """
-    summary_file = os.path.join(file_folder, "dataset_summary.pkl")
+    summary_file = os.path.join(file_folder, SD.SUMMARY.DATASET_SUMMARY_FILE)
     if os.path.isfile(summary_file):
         with open(summary_file, "rb") as f:
             summary_dict = pickle.load(f)

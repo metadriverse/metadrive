@@ -6,6 +6,7 @@ This script will create the output folder "processed_data" sharing the same leve
 -- processed_data
 
 """
+from metadrive.scenario.scenario_description import ScenarioDescription
 import argparse
 from metadrive.utils.utils import dict_recursive_remove_array
 import copy
@@ -135,7 +136,7 @@ def parse_data(file_list, input_path, output_path, worker_index=None):
     total_scenarios = 0
 
     desc = ""
-    summary_file = "dataset_summary.pkl"
+    summary_file = ScenarioDescription.SUMMARY.DATASET_SUMMARY_FILE
     if worker_index is not None:
         desc += "Worker {} ".format(worker_index)
         summary_file = "dataset_summary_worker{}.pkl".format(worker_index)
