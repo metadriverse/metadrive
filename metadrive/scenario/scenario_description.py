@@ -161,7 +161,6 @@ class ScenarioDescription(dict):
     ALLOW_TYPES = (int, float, str, np.ndarray, dict, list, tuple, type(None), set)
 
     class SUMMARY:
-        DATASET_SUMMARY_FILE = "dataset_summary.pkl"  # dataset summary file name
         OBJECT_SUMMARY = "object_summary"
         NUMBER_SUMMARY = "number_summary"
 
@@ -183,6 +182,10 @@ class ScenarioDescription(dict):
         NUM_TRAFFIC_LIGHTS_EACH_STEP = "num_traffic_light_each_step"
 
         NUM_MAP_FEATURES = "num_map_features"
+
+    class DATASET:
+        SUMMARY_FILE = "dataset_summary.pkl"  # dataset summary file name
+        MAPPING_FILE = "dataset_mapping.pkl"  # store the relative path of summary file and each scenario
 
     @classmethod
     def sanity_check(cls, scenario_dict, check_self_type=False, valid_check=False):

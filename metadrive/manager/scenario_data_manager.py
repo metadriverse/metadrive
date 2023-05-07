@@ -1,9 +1,6 @@
 import copy
 import os
 
-from tqdm import tqdm
-
-from metadrive.constants import RENDER_MODE_NONE
 from metadrive.manager.base_manager import BaseManager
 from metadrive.scenario.scenario_description import ScenarioDescription as SD, MetaDriveType
 from metadrive.scenario.utils import read_scenario_data, read_dataset_summary
@@ -28,10 +25,10 @@ class ScenarioDataManager(BaseManager):
         self._scenario = DataBuffer(store_map_buffer_size if self.store_map else self.num_scenarios)
 
         # Read summary file first:
-        self.summary_dict, self.summary_lookup = read_dataset_summary(self.directory)
+        self.summary_dict, self.summary_lookup, self.mapping = read_dataset_summary(self.directory)
 
         for p in self.summary_dict.keys():
-            p = os.path.join(self.directory, p)
+            p = os.path.join(self.directory, self.mapping[p], p)
             assert os.path.exists(p), "No Data at path: {}".format(p)
 
             # if self.store_map:
@@ -43,8 +40,8 @@ class ScenarioDataManager(BaseManager):
         assert self.start_scenario_index <= i < self.start_scenario_index + self.num_scenarios, \
             "scenario ID exceeds range"
         assert i < len(self.summary_lookup)
-
-        file_path = os.path.join(self.directory, self.summary_lookup[i])
+        scenario_id = self.summary_lookup[i]
+        file_path = os.path.join(self.directory, self.mapping[scenario_id], scenario_id)
         ret = read_scenario_data(file_path)
         assert isinstance(ret, SD)
         return ret

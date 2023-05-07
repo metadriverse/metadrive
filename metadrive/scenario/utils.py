@@ -338,18 +338,27 @@ def read_dataset_summary(file_folder):
 
     The second is the new method which use a summary file to record important metadata of each scenario.
     """
-    summary_file = os.path.join(file_folder, SD.SUMMARY.DATASET_SUMMARY_FILE)
+    summary_file = os.path.join(file_folder, SD.DATASET.SUMMARY_FILE)
+    mapping_file = os.path.join(file_folder, SD.DATASET.MAPPING_FILE)
     if os.path.isfile(summary_file):
         with open(summary_file, "rb") as f:
             summary_dict = pickle.load(f)
 
     else:
+        # Create a fake one
         files = os.listdir(file_folder)
         files = sorted(files, key=lambda file_name: int(file_name.replace(".pkl", "")))
         files = [os.path.join(file_folder, p) for p in files]
         summary_dict = {f: {} for f in files}
 
-    return summary_dict, list(summary_dict.keys())
+    if os.path.exists(mapping_file):
+        with open(mapping_file, "rb") as f:
+            mapping = pickle.load(f)
+    else:
+        # Create a fake one
+        mapping = {k: "" for k in summary_dict}
+
+    return summary_dict, list(summary_dict.keys()), mapping
 
 
 def assert_scenario_equal(scenarios1, scenarios2, only_compare_sdc=False):

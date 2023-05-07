@@ -47,7 +47,7 @@ def convert_scenarios(version, dataroot, output_path, worker_index=None, verbose
     metadata_recorder = {}
     total_scenarios = 0
     desc = ""
-    summary_file = ScenarioDescription.SUMMARY.DATASET_SUMMARY_FILE
+    summary_file = ScenarioDescription.DATASET.SUMMARY_FILE
     if worker_index is not None:
         desc += "Worker {} ".format(worker_index)
         summary_file = "dataset_summary_worker{}.pkl".format(worker_index)
