@@ -65,6 +65,8 @@ if __name__ == "__main__":
         for t in range(10000):
             o, r, d, info = env.step([0, 0])
             # env.capture("nuscenes_{:03d}.png".format(t))
+            if env.config["use_render"]:
+                env.render(text={"seed": env.current_seed})
             if d and info["arrive_dest"]:
                 print("seed:{}, success".format(env.engine.global_random_seed))
                 break
