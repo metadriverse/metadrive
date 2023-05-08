@@ -148,9 +148,9 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
             type=MetaDriveType.UNSET,
             state=dict(
                 position=np.zeros(shape=(episode_len, 3)),
-                heading=np.zeros(shape=(episode_len, )),
+                heading=np.zeros(shape=(episode_len,)),
                 velocity=np.zeros(shape=(episode_len, 2)),
-                valid=np.zeros(shape=(episode_len, )),
+                valid=np.zeros(shape=(episode_len,)),
 
                 # Add these items when the object has them.
                 # throttle_brake=np.zeros(shape=(episode_len, 1)),
@@ -173,7 +173,7 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
             "state": {
                 ScenarioDescription.TRAFFIC_LIGHT_STATUS: [MetaDriveType.LIGHT_UNKNOWN] * episode_len
             },
-            ScenarioDescription.TRAFFIC_LIGHT_POSITION: np.zeros(shape=(3, ), dtype=np.float32),
+            ScenarioDescription.TRAFFIC_LIGHT_POSITION: np.zeros(shape=(3,), dtype=np.float32),
             ScenarioDescription.TRAFFIC_LIGHT_LANE: None,
             "metadata": dict(
                 track_length=episode_len, type=MetaDriveType.TRAFFIC_LIGHT, object_id=k, dataset="metadrive"
@@ -208,11 +208,11 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
                 if lights[id][ScenarioDescription.TRAFFIC_LIGHT_LANE] is None:
                     lights[id][ScenarioDescription.TRAFFIC_LIGHT_LANE] = str(id)
                     lights[id][ScenarioDescription.TRAFFIC_LIGHT_POSITION
-                               ] = state[ScenarioDescription.TRAFFIC_LIGHT_POSITION]
+                    ] = state[ScenarioDescription.TRAFFIC_LIGHT_POSITION]
                 else:
                     assert lights[id][ScenarioDescription.TRAFFIC_LIGHT_LANE] == str(id)
                     assert lights[id][ScenarioDescription.TRAFFIC_LIGHT_POSITION
-                                      ] == state[ScenarioDescription.TRAFFIC_LIGHT_POSITION]
+                           ] == state[ScenarioDescription.TRAFFIC_LIGHT_POSITION]
 
             else:
                 tracks[id]["type"] = type
@@ -347,9 +347,10 @@ def read_dataset_summary(file_folder):
 
     else:
         # Create a fake one
-        files = os.listdir(file_folder)
-        if ScenarioDescription.DATASET.MAPPING_FILE in files:
-            files.remove(ScenarioDescription.DATASET.MAPPING_FILE)
+        files = []
+        for file in os.listdir(file_folder):
+            if SD.is_scenario_file(os.path.basename(file)):
+                files.append(file)
         try:
             files = sorted(files, key=lambda file_name: int(file_name.replace(".pkl", "")))
         except ValueError:
