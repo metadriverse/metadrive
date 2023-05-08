@@ -367,7 +367,9 @@ def read_dataset_summary(file_folder):
 
     for file in summary_dict:
         assert file in mapping, "FileName in mapping mismatch with summary"
-        assert SD.is_scenario_file(file), file
+        assert SD.is_scenario_file(file), "File:{} is not sd scenario file".format(file)
+        file_path = os.path.join(file_folder, mapping[file], file)
+        assert os.path.exists(file_path), "Can not find file: {}".format(file_path)
 
     return summary_dict, list(summary_dict.keys()), mapping
 
