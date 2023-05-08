@@ -1,6 +1,6 @@
 import copy
 import logging
-from metadrive.utils.math import wrap_to_pi
+
 import numpy as np
 
 from metadrive.component.static_object.traffic_object import TrafficCone, TrafficBarrier
@@ -15,6 +15,7 @@ from metadrive.policy.replay_policy import ReplayTrafficParticipantPolicy
 from metadrive.scenario.parse_object_state import parse_object_state, get_idm_route, get_max_valid_indicis
 from metadrive.scenario.scenario_description import ScenarioDescription as SD
 from metadrive.type import MetaDriveType
+from metadrive.utils.math import wrap_to_pi
 
 logger = logging.getLogger(__name__)
 
@@ -37,8 +38,8 @@ class ScenarioTrafficManager(BaseManager):
 
     def __init__(self):
         super(ScenarioTrafficManager, self).__init__()
-        self.scenario_id_to_obj_id = None
-        self.obj_id_to_scenario_id = None
+        self._scenario_id_to_obj_id = None
+        self._obj_id_to_scenario_id = None
 
         # for filtering some static cars
         self._static_car_id = set()
@@ -64,7 +65,7 @@ class ScenarioTrafficManager(BaseManager):
             if self.engine.has_policy(v.id, ScenarioIDMPolicy):
                 p = self.engine.get_policy(v.name)
                 if p.arrive_destination:
-                    self._obj_to_clean_this_frame.append(self.obj_id_to_scenario_id[v.id])
+                    self._obj_to_clean_this_frame.append(self._obj_id_to_scenario_id[v.id])
                 else:
                     do_speed_control = self.episode_step % self.IDM_ACT_BATCH_SIZE == p.policy_index
                     v.before_step(p.act(do_speed_control))
@@ -75,16 +76,14 @@ class ScenarioTrafficManager(BaseManager):
         reset_vehicle_type_count(self.np_random)
 
     def after_reset(self):
-        self.scenario_id_to_obj_id = {self.sdc_track_index: self.engine.agent_manager.agent_to_object(DEFAULT_AGENT)}
-        self.obj_id_to_scenario_id = {self.engine.agent_manager.agent_to_object(DEFAULT_AGENT): self.sdc_track_index}
+        self._scenario_id_to_obj_id = {}
+        self._obj_id_to_scenario_id = {}
         self._static_car_id = set()
         self._moving_car_id = set()
         self._noise_object_id = set()
         self._non_noise_object_id = set()
         self.idm_policy_count = 0
         for scenario_id, track in self.current_traffic_data.items():
-            if scenario_id == self.sdc_track_index:
-                continue
             if track["type"] == MetaDriveType.VEHICLE:
                 self.spawn_vehicle(scenario_id, track)
             elif track["type"] == MetaDriveType.CYCLIST:
@@ -101,9 +100,7 @@ class ScenarioTrafficManager(BaseManager):
         if self.episode_step < self.current_scenario_length:
             replay_done = False
             for scenario_id, track in self.current_traffic_data.items():
-                if scenario_id == self.sdc_track_index:
-                    continue
-                if scenario_id not in self.scenario_id_to_obj_id:
+                if scenario_id not in self._scenario_id_to_obj_id:
                     if track["type"] == MetaDriveType.VEHICLE:
                         self.spawn_vehicle(scenario_id, track)
                     elif track["type"] == MetaDriveType.CYCLIST:
@@ -115,9 +112,9 @@ class ScenarioTrafficManager(BaseManager):
                         self.spawn_static_object(cls, scenario_id, track)
                     else:
                         logger.info("Do not support {}".format(track["type"]))
-                elif self.has_policy(self.scenario_id_to_obj_id[scenario_id], ReplayTrafficParticipantPolicy):
+                elif self.has_policy(self._scenario_id_to_obj_id[scenario_id], ReplayTrafficParticipantPolicy):
                     # static object will not be cleaned!
-                    policy = self.get_policy(self.scenario_id_to_obj_id[scenario_id])
+                    policy = self.get_policy(self._scenario_id_to_obj_id[scenario_id])
                     if policy.is_current_step_valid:
                         policy.act()
                     else:
@@ -125,13 +122,13 @@ class ScenarioTrafficManager(BaseManager):
         else:
             replay_done = True
             # clean replay vehicle
-            for scenario_id, obj_id in self.scenario_id_to_obj_id.items():
+            for scenario_id, obj_id in self._scenario_id_to_obj_id.items():
                 if self.has_policy(obj_id, ReplayTrafficParticipantPolicy) and not self.is_static_object(obj_id):
                     self._obj_to_clean_this_frame.append(scenario_id)
 
         for scenario_id in list(self._obj_to_clean_this_frame):
-            obj_id = self.scenario_id_to_obj_id.pop(scenario_id)
-            _scenario_id = self.obj_id_to_scenario_id.pop(obj_id)
+            obj_id = self._scenario_id_to_obj_id.pop(scenario_id)
+            _scenario_id = self._obj_id_to_scenario_id.pop(obj_id)
             assert _scenario_id == scenario_id
             self.clear_objects([obj_id])
 
@@ -139,11 +136,21 @@ class ScenarioTrafficManager(BaseManager):
 
     @property
     def current_traffic_data(self):
-        return self.engine.data_manager.current_scenario["tracks"]
+        data = copy.deepcopy(self.engine.data_manager.current_scenario["tracks"])
+        data.pop(self.sdc_scenario_id)
+        return data
 
     @property
     def sdc_track_index(self):
         return str(self.engine.data_manager.current_scenario[SD.METADATA][SD.SDC_ID])
+
+    @property
+    def sdc_scenario_id(self):
+        return self.sdc_track_index
+
+    @property
+    def sdc_object_id(self):
+        return self.engine.agent_manager.agent_to_object(DEFAULT_AGENT)
 
     @property
     def current_scenario_length(self):
@@ -194,8 +201,8 @@ class ScenarioTrafficManager(BaseManager):
         v = self.spawn_object(
             vehicle_class, position=state["position"], heading=state["heading"], vehicle_config=v_config, name=obj_name
         )
-        self.scenario_id_to_obj_id[v_id] = v.name
-        self.obj_id_to_scenario_id[v.name] = v_id
+        self._scenario_id_to_obj_id[v_id] = v.name
+        self._obj_id_to_scenario_id[v.name] = v_id
 
         # add policy
         start_index, end_index = get_max_valid_indicis(track, self.episode_step)  # real end_index is end_index-1
@@ -223,13 +230,15 @@ class ScenarioTrafficManager(BaseManager):
         state = parse_object_state(track, self.episode_step)
         if not state["valid"]:
             return
+        obj_name = scenario_id if self.engine.global_config["force_reuse_object_name"] else None
         obj = self.spawn_object(
             Pedestrian,
+            name=obj_name,
             position=state["position"],
             heading_theta=state["heading"],
         )
-        self.scenario_id_to_obj_id[scenario_id] = obj.name
-        self.obj_id_to_scenario_id[obj.name] = scenario_id
+        self._scenario_id_to_obj_id[scenario_id] = obj.name
+        self._obj_id_to_scenario_id[obj.name] = scenario_id
         policy = self.add_policy(obj.name, ReplayTrafficParticipantPolicy, obj, track)
         policy.act()
 
@@ -237,13 +246,15 @@ class ScenarioTrafficManager(BaseManager):
         state = parse_object_state(track, self.episode_step)
         if not state["valid"]:
             return
+        obj_name = scenario_id if self.engine.global_config["force_reuse_object_name"] else None
         obj = self.spawn_object(
             Cyclist,
+            name=obj_name,
             position=state["position"],
             heading_theta=state["heading"],
         )
-        self.scenario_id_to_obj_id[scenario_id] = obj.name
-        self.obj_id_to_scenario_id[obj.name] = scenario_id
+        self._scenario_id_to_obj_id[scenario_id] = obj.name
+        self._obj_id_to_scenario_id[obj.name] = scenario_id
         policy = self.add_policy(obj.name, ReplayTrafficParticipantPolicy, obj, track)
         policy.act()
 
@@ -259,19 +270,21 @@ class ScenarioTrafficManager(BaseManager):
         state = parse_object_state(track, self.episode_step)
         if not state["valid"]:
             return
+        obj_name = scenario_id if self.engine.global_config["force_reuse_object_name"] else None
         obj = self.spawn_object(
             cls,
+            name=obj_name,
             position=state["position"],
             heading_theta=state["heading"],
         )
-        self.scenario_id_to_obj_id[scenario_id] = obj.name
-        self.obj_id_to_scenario_id[obj.name] = scenario_id
+        self._scenario_id_to_obj_id[scenario_id] = obj.name
+        self._obj_id_to_scenario_id[obj.name] = scenario_id
 
     def get_state(self):
         # Record mapping from original_id to new_id
         ret = {}
-        ret[SD.ORIGINAL_ID_TO_OBJ_ID] = copy.deepcopy(self.scenario_id_to_obj_id)
-        ret[SD.OBJ_ID_TO_ORIGINAL_ID] = copy.deepcopy(self.obj_id_to_scenario_id)
+        ret[SD.ORIGINAL_ID_TO_OBJ_ID] = self.scenario_id_to_obj_id
+        ret[SD.OBJ_ID_TO_ORIGINAL_ID] = self.obj_id_to_scenario_id
         return ret
 
     @property
@@ -281,3 +294,17 @@ class ScenarioTrafficManager(BaseManager):
     def is_static_object(self, obj_id):
         return isinstance(self.spawned_objects[obj_id], TrafficBarrier) \
                or isinstance(self.spawned_objects[obj_id], TrafficCone)
+
+    @property
+    def obj_id_to_scenario_id(self):
+        # For outside access, we return traffic vehicles and ego car
+        ret = copy.copy(self._obj_id_to_scenario_id)
+        ret[self.sdc_object_id] = self.sdc_scenario_id
+        return ret
+
+    @property
+    def scenario_id_to_obj_id(self):
+        # For outside access, we return traffic vehicles and ego car
+        ret = copy.copy(self._scenario_id_to_obj_id)
+        ret[self.sdc_scenario_id] = self.sdc_object_id
+        return ret

@@ -13,6 +13,14 @@ from metadrive.scenario.scenario_description import ScenarioDescription
 from metadrive.utils.nuscenes.utils import convert_one_scenario
 from metadrive.utils.utils import dict_recursive_remove_array
 import shutil
+import logging
+
+logger = logging.getLogger(__name__)
+
+logger.warning(
+    "This converters will de deprecated. "
+    "Use tools in ScenarioNet instead: https://github.com/metadriverse/ScenarioNet."
+)
 
 try:
     from nuscenes import NuScenes
@@ -39,7 +47,7 @@ def convert_scenarios(version, dataroot, output_path, worker_index=None, verbose
     metadata_recorder = {}
     total_scenarios = 0
     desc = ""
-    summary_file = "dataset_summary.pkl"
+    summary_file = ScenarioDescription.DATASET.SUMMARY_FILE
     if worker_index is not None:
         desc += "Worker {} ".format(worker_index)
         summary_file = "dataset_summary_worker{}.pkl".format(worker_index)
@@ -51,7 +59,7 @@ def convert_scenarios(version, dataroot, output_path, worker_index=None, verbose
         sd_scene = convert_one_scenario(scene["token"], nusc)
         sd_scene = sd_scene.to_dict()
         ScenarioDescription.sanity_check(sd_scene, check_self_type=True)
-        export_file_name = "sd_{}_{}.pkl".format("nuscenes_" + version, scene["token"])
+        export_file_name = ScenarioDescription.get_export_file_name("nuscenes", version, scene["token"])
         p = os.path.join(output_path, export_file_name)
         with open(p, "wb") as f:
             pickle.dump(sd_scene, f)

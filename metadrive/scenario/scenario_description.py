@@ -112,6 +112,9 @@ Example:
     }
 """
 
+import os
+from collections import defaultdict
+
 import numpy as np
 
 from metadrive.type import MetaDriveType
@@ -158,8 +161,35 @@ class ScenarioDescription(dict):
 
     ALLOW_TYPES = (int, float, str, np.ndarray, dict, list, tuple, type(None), set)
 
+    class SUMMARY:
+        OBJECT_SUMMARY = "object_summary"
+        NUMBER_SUMMARY = "number_summary"
+
+        # for each object summary
+        TYPE = "type"
+        OBJECT_ID = "object_id"
+        TRACK_LENGTH = "track_length"
+        MOVING_DIST = "moving_distance"
+        VALID_LENGTH = "valid_length"
+        CONTINUOUS_VALID_LENGTH = "continuous_valid_length"
+
+        # for number summary:
+        NUM_OBJECTS = "num_objects"
+        NUM_OBJECT_TYPES = "num_object_types"
+        NUM_OBJECTS_EACH_TYPE = "num_objects_each_type"
+
+        NUM_TRAFFIC_LIGHTS = "num_traffic_lights"
+        NUM_TRAFFIC_LIGHT_TYPES = "num_traffic_light_types"
+        NUM_TRAFFIC_LIGHTS_EACH_STEP = "num_traffic_light_each_step"
+
+        NUM_MAP_FEATURES = "num_map_features"
+
+    class DATASET:
+        SUMMARY_FILE = "dataset_summary.pkl"  # dataset summary file name
+        MAPPING_FILE = "dataset_mapping.pkl"  # store the relative path of summary file and each scenario
+
     @classmethod
-    def sanity_check(cls, scenario_dict, check_self_type=False, valid_check=True):
+    def sanity_check(cls, scenario_dict, check_self_type=False, valid_check=False):
 
         if check_self_type:
             assert isinstance(scenario_dict, dict)
@@ -221,7 +251,7 @@ class ScenarioDescription(dict):
                 assert state_array.shape[
                     1] != 0, "Please convert all state with dim 1 to a 1D array instead of 2D array."
 
-            if state_key == "valid":
+            if state_key == "valid" and valid_check:
                 assert np.sum(state_array) >= 1, "No frame valid for this object. Consider removing it"
 
             # check valid
@@ -247,6 +277,74 @@ class ScenarioDescription(dict):
         assert self.SDC_ID in self[self.METADATA]
         sdc_id = str(self[self.METADATA][self.SDC_ID])
         return self[self.TRACKS][sdc_id]
+
+    @staticmethod
+    def get_object_summary(state_dict, id, type):
+        track = state_dict["position"]
+        valid_track = track[np.where(state_dict["valid"].astype(int))][..., :2]
+        distance = float(
+            sum(np.linalg.norm(valid_track[i] - valid_track[i + 1]) for i in range(valid_track.shape[0] - 1))
+        )
+        valid_length = int(sum(state_dict["valid"]))
+
+        continuous_valid_length = 0
+        for v in state_dict["valid"]:
+            if v:
+                continuous_valid_length += 1
+            if continuous_valid_length > 0 and not v:
+                break
+
+        return {
+            ScenarioDescription.SUMMARY.TYPE: type,
+            ScenarioDescription.SUMMARY.OBJECT_ID: str(id),
+            ScenarioDescription.SUMMARY.TRACK_LENGTH: int(len(track)),
+            ScenarioDescription.SUMMARY.MOVING_DIST: float(distance),
+            ScenarioDescription.SUMMARY.VALID_LENGTH: int(valid_length),
+            ScenarioDescription.SUMMARY.CONTINUOUS_VALID_LENGTH: int(continuous_valid_length)
+        }
+
+    @staticmethod
+    def get_export_file_name(dataset, dataset_version, scenario_name):
+        return "sd_{}_{}_{}.pkl".format(dataset, dataset_version, scenario_name)
+
+    @staticmethod
+    def is_scenario_file(file_name):
+        file_name = os.path.basename(file_name)
+        assert file_name[-4:] == ".pkl", "{} is not .pkl file".format(file_name)
+        file_name = file_name.replace(".pkl", "")
+        return os.path.basename(file_name)[:3] == "sd_" or all(char.isdigit() for char in file_name)
+
+    @staticmethod
+    def get_number_summary(scenario):
+        number_summary_dict = {}
+        # object
+        number_summary_dict[ScenarioDescription.SUMMARY.NUM_OBJECTS] = len(scenario[ScenarioDescription.TRACKS])
+        number_summary_dict[ScenarioDescription.SUMMARY.NUM_OBJECT_TYPES
+                            ] = set(v["type"] for v in scenario[ScenarioDescription.TRACKS].values())
+        object_types_counter = defaultdict(int)
+        for v in scenario[ScenarioDescription.TRACKS].values():
+            object_types_counter[v["type"]] += 1
+        number_summary_dict[ScenarioDescription.SUMMARY.NUM_OBJECTS_EACH_TYPE] = dict(object_types_counter)
+
+        # Number of different dynamic object states
+        dynamic_object_states_types = set()
+        dynamic_object_states_counter = defaultdict(int)
+        for v in scenario[ScenarioDescription.DYNAMIC_MAP_STATES].values():
+            for step_state in v["state"]["object_state"]:
+                if step_state is None:
+                    continue
+                dynamic_object_states_types.add(step_state)
+                dynamic_object_states_counter[step_state] += 1
+        number_summary_dict[ScenarioDescription.SUMMARY.NUM_TRAFFIC_LIGHTS
+                            ] = len(scenario[ScenarioDescription.DYNAMIC_MAP_STATES])
+        number_summary_dict[ScenarioDescription.SUMMARY.NUM_TRAFFIC_LIGHT_TYPES] = dynamic_object_states_types
+        number_summary_dict[ScenarioDescription.SUMMARY.NUM_TRAFFIC_LIGHTS_EACH_STEP
+                            ] = dict(dynamic_object_states_counter)
+
+        # map
+        number_summary_dict[ScenarioDescription.SUMMARY.NUM_MAP_FEATURES
+                            ] = len(scenario[ScenarioDescription.MAP_FEATURES])
+        return number_summary_dict
 
 
 def _recursive_check_type(obj, allow_types, depth=0):

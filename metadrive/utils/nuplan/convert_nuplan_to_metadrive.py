@@ -14,6 +14,15 @@ from metadrive.scenario.scenario_description import ScenarioDescription
 from metadrive.utils.nuplan.utils import get_nuplan_scenarios, convert_one_scenario
 from metadrive.utils.utils import dict_recursive_remove_array
 
+import logging
+
+logger = logging.getLogger(__name__)
+
+logger.warning(
+    "This converters will de deprecated. "
+    "Use tools in ScenarioNet instead: https://github.com/metadriverse/ScenarioNet."
+)
+
 
 def convert_scenarios(output_path, dataset_params, worker_index=None, force_overwrite=False):
     save_path = copy.deepcopy(output_path)
@@ -34,7 +43,7 @@ def convert_scenarios(output_path, dataset_params, worker_index=None, force_over
     metadata_recorder = {}
     total_scenarios = 0
     desc = ""
-    summary_file = "dataset_summary.pkl"
+    summary_file = ScenarioDescription.DATASET.SUMMARY_FILE
     if worker_index is not None:
         desc += "Worker {} ".format(worker_index)
         summary_file = "dataset_summary_worker{}.pkl".format(worker_index)
@@ -45,7 +54,7 @@ def convert_scenarios(output_path, dataset_params, worker_index=None, force_over
         sd_scenario = convert_one_scenario(scenario)
         sd_scenario = sd_scenario.to_dict()
         ScenarioDescription.sanity_check(sd_scenario, check_self_type=True)
-        export_file_name = "sd_{}_{}.pkl".format("nuplan", scenario.scenario_name)
+        export_file_name = ScenarioDescription.get_export_file_name("nuplan", "v1.1", scenario.scenario_name)
         p = os.path.join(output_path, export_file_name)
         with open(p, "wb") as f:
             pickle.dump(sd_scenario, f)

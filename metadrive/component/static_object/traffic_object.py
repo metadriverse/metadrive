@@ -25,13 +25,17 @@ class TrafficObject(BaseStaticObject):
 
     COST_ONCE = True  # cost will give at the first time
 
-    def __init__(self, position, heading_theta, lane=None, random_seed=None):
+    def __init__(self, position, heading_theta, lane=None, random_seed=None, name=None):
         """
         :param lane: the lane to spawn object
         """
         assert self.CLASS_NAME is not None, "Assign a name for this class for finding it easily"
-        super(TrafficObject, self).__init__(position, heading_theta, lane, random_seed)
+        super(TrafficObject, self).__init__(position, heading_theta, lane, random_seed, name=name)
         self.crashed = False
+
+    def reset(self, position, heading_theta, lane=None, random_seed=None, name=None, *args, **kwargs):
+        self.crashed = False
+        super(TrafficObject, self).reset(position, heading_theta, lane, random_seed, name, *args, **kwargs)
 
 
 class TrafficCone(TrafficObject):
@@ -42,8 +46,8 @@ class TrafficCone(TrafficObject):
     MASS = 1
     CLASS_NAME = MetaDriveType.TRAFFIC_CONE
 
-    def __init__(self, position, heading_theta, lane=None, static: bool = False, random_seed=None):
-        super(TrafficCone, self).__init__(position, heading_theta, lane, random_seed)
+    def __init__(self, position, heading_theta, lane=None, static: bool = False, random_seed=None, name=None):
+        super(TrafficCone, self).__init__(position, heading_theta, lane, random_seed, name)
 
         n = BaseRigidBodyNode(self.name, self.CLASS_NAME)
         self.add_body(n)
@@ -84,8 +88,8 @@ class TrafficWarning(TrafficObject):
     MASS = 1
     RADIUS = 0.5
 
-    def __init__(self, position, heading_theta, lane=None, static: bool = False, random_seed=None):
-        super(TrafficWarning, self).__init__(position, heading_theta, lane, random_seed)
+    def __init__(self, position, heading_theta, lane=None, static: bool = False, random_seed=None, name=None):
+        super(TrafficWarning, self).__init__(position, heading_theta, lane, random_seed, name)
 
         n = BaseRigidBodyNode(self.name, self.CLASS_NAME)
         self.add_body(n)
@@ -123,8 +127,8 @@ class TrafficBarrier(TrafficObject):
     MASS = 10
     CLASS_NAME = MetaDriveType.TRAFFIC_BARRIER
 
-    def __init__(self, position, heading_theta, lane=None, static: bool = False, random_seed=None):
-        super(TrafficBarrier, self).__init__(position, heading_theta, lane, random_seed)
+    def __init__(self, position, heading_theta, lane=None, static: bool = False, random_seed=None, name=None):
+        super(TrafficBarrier, self).__init__(position, heading_theta, lane, random_seed, name)
         n = BaseRigidBodyNode(self.name, self.CLASS_NAME)
         self.add_body(n)
 

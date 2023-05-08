@@ -1,3 +1,4 @@
+import logging
 import time
 from collections import defaultdict
 from typing import Union, Dict, AnyStr, Optional, Tuple, Callable
@@ -216,6 +217,7 @@ class BaseEnv(gym.Env):
 
         self.config = global_config
         initialize_global_config(self.config)
+        self.logger = logging.getLogger(self.logger_name)
 
         # agent check
         self.num_agents = self.config["num_agents"]
@@ -601,7 +603,8 @@ class BaseEnv(gym.Env):
         time_interval=0.1,
         verbose=False,
         render_topdown=False,
-        return_done_info=True
+        return_done_info=True,
+        to_dict=True
     ):
         """
         We export scenarios into a unified format with 10hz sample rate
@@ -638,7 +641,7 @@ class BaseEnv(gym.Env):
             episode = self.engine.dump_episode()
             if verbose:
                 print("Finish scenario {} with {} steps.".format(index, count))
-            scenarios_to_export[index] = convert_recorded_scenario_exported(episode)
+            scenarios_to_export[index] = convert_recorded_scenario_exported(episode, to_dict=to_dict)
             done_info[index] = info
         self.config["record_episode"] = False
         if return_done_info:
@@ -653,3 +656,7 @@ class BaseEnv(gym.Env):
         """
         episode = self.engine.dump_episode()
         return convert_recorded_scenario_exported(episode)
+
+    @property
+    def logger_name(self):
+        return __file__

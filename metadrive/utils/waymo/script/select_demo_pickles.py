@@ -1,6 +1,16 @@
 import pickle
 
 from metadrive.engine.asset_loader import AssetLoader
+from metadrive.scenario.scenario_description import ScenarioDescription
+
+import logging
+
+logger = logging.getLogger(__name__)
+
+logger.warning(
+    "This converters will de deprecated. "
+    "Use tools in ScenarioNet instead: https://github.com/metadriverse/ScenarioNet."
+)
 
 if __name__ == '__main__':
 
@@ -28,7 +38,7 @@ if __name__ == '__main__':
         if len(new_summary) >= 3:
             break
 
-    file_path = AssetLoader.file_path("waymo", "dataset_summary.pkl", return_raw_style=False)
+    file_path = AssetLoader.file_path("waymo", ScenarioDescription.DATASET.SUMMARY_FILE, return_raw_style=False)
     with open(file_path, "wb") as f:
         pickle.dump(new_summary, f)
 

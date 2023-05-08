@@ -6,10 +6,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.pyplot import figure
 
+from metadrive.component.static_object.traffic_object import TrafficCone, TrafficBarrier
 from metadrive.component.traffic_light.base_traffic_light import BaseTrafficLight
 from metadrive.component.traffic_participants.cyclist import Cyclist
 from metadrive.component.traffic_participants.pedestrian import Pedestrian
-from metadrive.component.static_object.traffic_object import TrafficCone, TrafficBarrier
 from metadrive.component.vehicle.base_vehicle import BaseVehicle
 from metadrive.constants import DATA_VERSION, DEFAULT_AGENT
 from metadrive.scenario import ScenarioDescription as SD
@@ -93,7 +93,7 @@ def find_data_manager_name(manager_info):
     return None
 
 
-def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1):
+def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1, to_dict=True):
     """
     This function utilizes the recorded data natively emerging from MetaDrive run.
     The output data structure follows MetaDrive data format, but some changes might happen compared to original data.
@@ -122,6 +122,7 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
 
     result[SD.METADATA] = {}
     result[SD.METADATA][SD.METADRIVE_PROCESSED] = True
+    result[SD.METADATA][SD.ID] = result[SD.ID]
     result[SD.METADATA]["dataset"] = "metadrive"
     result[SD.METADATA]["seed"] = record_episode["global_seed"]
     result[SD.METADATA]["scenario_id"] = record_episode["scenario_index"]
@@ -314,14 +315,15 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
         data_manager_raw_data = record_episode["manager_metadata"][data_manager_name].get("raw_data", None)
         if data_manager_raw_data:
             result[SD.METADATA]["history_metadata"] = data_manager_raw_data["metadata"]
-
-    result = result.to_dict()
-    SD.sanity_check(result, check_self_type=True)
+    if to_dict:
+        result = result.to_dict()
+        SD.sanity_check(result, check_self_type=True)
 
     return result
 
 
 def read_scenario_data(file_path):
+    assert SD.is_scenario_file(file_path), "File: {} is not scenario file".format(file_path)
     with open(file_path, "rb") as f:
         # unpickler = CustomUnpickler(f)
         data = pickle.load(f)
@@ -337,18 +339,44 @@ def read_dataset_summary(file_folder):
 
     The second is the new method which use a summary file to record important metadata of each scenario.
     """
-    summary_file = os.path.join(file_folder, "dataset_summary.pkl")
+    summary_file = os.path.join(file_folder, SD.DATASET.SUMMARY_FILE)
+    mapping_file = os.path.join(file_folder, SD.DATASET.MAPPING_FILE)
     if os.path.isfile(summary_file):
         with open(summary_file, "rb") as f:
             summary_dict = pickle.load(f)
 
     else:
-        files = os.listdir(file_folder)
-        files = sorted(files, key=lambda file_name: int(file_name.replace(".pkl", "")))
-        files = [os.path.join(file_folder, p) for p in files]
+        # Create a fake one
+        files = []
+        for file in os.listdir(file_folder):
+            if SD.is_scenario_file(os.path.basename(file)):
+                files.append(file)
+        try:
+            files = sorted(files, key=lambda file_name: int(file_name.replace(".pkl", "")))
+        except ValueError:
+            files = sorted(files, key=lambda file_name: file_name.replace(".pkl", ""))
+        files = [p for p in files]
         summary_dict = {f: {} for f in files}
 
-    return summary_dict, list(summary_dict.keys())
+    if os.path.exists(mapping_file):
+        with open(mapping_file, "rb") as f:
+            mapping = pickle.load(f)
+    else:
+        # Create a fake one
+        mapping = {k: "" for k in summary_dict}
+
+    for file in summary_dict:
+        assert file in mapping, "FileName in mapping mismatch with summary"
+        assert SD.is_scenario_file(file), "File:{} is not sd scenario file".format(file)
+        file_path = os.path.join(file_folder, mapping[file], file)
+        assert os.path.exists(file_path), "Can not find file: {}".format(file_path)
+
+    return summary_dict, list(summary_dict.keys()), mapping
+
+
+def get_number_of_scenarios(dataset_path):
+    _, files, _ = read_dataset_summary(dataset_path)
+    return len(files)
 
 
 def assert_scenario_equal(scenarios1, scenarios2, only_compare_sdc=False):

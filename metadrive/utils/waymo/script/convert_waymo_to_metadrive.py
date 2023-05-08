@@ -7,7 +7,6 @@ This script will create the output folder "processed_data" sharing the same leve
 
 """
 import argparse
-from metadrive.utils.utils import dict_recursive_remove_array
 import copy
 import os
 import pickle
@@ -16,6 +15,8 @@ from collections import defaultdict
 import numpy as np
 
 from metadrive.constants import DATA_VERSION
+from metadrive.scenario.scenario_description import ScenarioDescription
+from metadrive.utils.utils import dict_recursive_remove_array
 
 try:
     import tensorflow as tf
@@ -38,6 +39,15 @@ from metadrive.type import MetaDriveType
 from metadrive.utils.waymo.utils import extract_tracks, extract_dynamic_map_states, extract_map_features, \
     compute_width
 import sys
+
+import logging
+
+logger = logging.getLogger(__name__)
+
+logger.warning(
+    "This converters will de deprecated. "
+    "Use tools in ScenarioNet instead: https://github.com/metadriverse/ScenarioNet."
+)
 
 
 def validate_sdc_track(sdc_state):
@@ -126,7 +136,7 @@ def parse_data(file_list, input_path, output_path, worker_index=None):
     total_scenarios = 0
 
     desc = ""
-    summary_file = "dataset_summary.pkl"
+    summary_file = ScenarioDescription.DATASET.SUMMARY_FILE
     if worker_index is not None:
         desc += "Worker {} ".format(worker_index)
         summary_file = "dataset_summary_worker{}.pkl".format(worker_index)
@@ -200,7 +210,7 @@ def parse_data(file_list, input_path, output_path, worker_index=None):
                 for count, id in enumerate(track_id)
             }
 
-            export_file_name = "sd_{}_{}.pkl".format(file, scenario.scenario_id)
+            export_file_name = SD.get_export_file_name("waymo", "v1.2" + file, scenario.scenario_id)
 
             summary_dict = {}
             summary_dict["sdc"] = _get_agent_summary(
