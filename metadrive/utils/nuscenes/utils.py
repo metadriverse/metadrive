@@ -16,6 +16,11 @@ from metadrive.utils.nuscenes.detection_type import ALL_TYPE, HUMAN_TYPE, BICYCL
 logger = logging.getLogger(__name__)
 EGO = "ego"
 
+logger.warning(
+    "This converters will de deprecated. "
+    "Use tools in ScenarioNet instead: https://github.com/metadriverse/ScenarioNet."
+)
+
 
 def get_metadrive_type(obj_type):
     meta_type = obj_type

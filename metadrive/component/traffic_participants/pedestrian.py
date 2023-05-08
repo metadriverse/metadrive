@@ -21,8 +21,8 @@ class Pedestrian(BaseTrafficParticipant):
     # SPEED_LIST = [0.6, 1.2, 2.2] Too much speed choice jeopardise the performance
     SPEED_LIST = [0.4, 1.2]
 
-    def __init__(self, position, heading_theta, random_seed=None):
-        super(Pedestrian, self).__init__(position, heading_theta, random_seed)
+    def __init__(self, position, heading_theta, random_seed=None, name=None):
+        super(Pedestrian, self).__init__(position, heading_theta, random_seed, name=name)
         # self.origin.setDepthOffset(1)
         n = BaseRigidBodyNode(self.name, self.TYPE_NAME)
         self.add_body(n)
@@ -36,6 +36,13 @@ class Pedestrian(BaseTrafficParticipant):
                 self.init_pedestrian_model()
             self._instance = Pedestrian._MODEL[self.current_speed_model].instanceTo(self.origin)
             self.show_coordinates()
+
+    def reset(self, position, heading_theta: float = 0., random_seed=None, name=None, *args, **kwargs):
+        super(Pedestrian, self).reset(position, heading_theta, random_seed, name, *args, **kwargs)
+        self.current_speed_model = self.SPEED_LIST[0]
+        if self._instance is not None:
+            self._instance.detachNode()
+        self._instance = Pedestrian._MODEL[self.current_speed_model].instanceTo(self.origin)
 
     @classmethod
     def init_pedestrian_model(cls):

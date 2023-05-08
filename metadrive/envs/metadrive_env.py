@@ -1,5 +1,4 @@
 import copy
-import logging
 from typing import Union
 
 import numpy as np
@@ -115,12 +114,12 @@ class MetaDriveEnv(BaseEnv):
     def _post_process_config(self, config):
         config = super(MetaDriveEnv, self)._post_process_config(config)
         if not config["rgb_clip"]:
-            logging.warning(
+            self.logger.warning(
                 "You have set rgb_clip = False, which means the observation will be uint8 values in [0, 255]. "
                 "Please make sure you have parsed them later before feeding them to network!"
             )
         if config["environment_num"] != -1:
-            logging.warning("environment_num is deprecated. Use num_scenarios instead!")
+            self.logger.warning("environment_num is deprecated. Use num_scenarios instead!")
             assert config["num_scenarios"] == 1
             config["num_scenarios"] = config["environment_num"]
 
@@ -168,36 +167,36 @@ class MetaDriveEnv(BaseEnv):
         }
         if self._is_arrive_destination(vehicle):
             done = True
-            logging.info("Episode ended! Reason: arrive_dest.")
+            self.logger.info("Episode ended! Reason: arrive_dest.")
             done_info[TerminationState.SUCCESS] = True
         if self._is_out_of_road(vehicle):
             done = True
-            logging.info("Episode ended! Reason: out_of_road.")
+            self.logger.info("Episode ended! Reason: out_of_road.")
             done_info[TerminationState.OUT_OF_ROAD] = True
         if vehicle.crash_vehicle and self.config["crash_vehicle_done"]:
             done = True
-            logging.info("Episode ended! Reason: crash vehicle ")
+            self.logger.info("Episode ended! Reason: crash vehicle ")
             done_info[TerminationState.CRASH_VEHICLE] = True
         if vehicle.crash_object:
             done = True
             done_info[TerminationState.CRASH_OBJECT] = True
-            logging.info("Episode ended! Reason: crash object ")
+            self.logger.info("Episode ended! Reason: crash object ")
         if vehicle.crash_building:
             done = True
             done_info[TerminationState.CRASH_BUILDING] = True
-            logging.info("Episode ended! Reason: crash building ")
+            self.logger.info("Episode ended! Reason: crash building ")
         if self.config["max_step_per_agent"] is not None and \
                 self.episode_lengths[vehicle_id] >= self.config["max_step_per_agent"]:
             done = True
             done_info[TerminationState.MAX_STEP] = True
-            logging.info("Episode ended! Reason: max step ")
+            self.logger.info("Episode ended! Reason: max step ")
 
         if self.config["horizon"] is not None and \
                 self.episode_lengths[vehicle_id] >= self.config["horizon"] and not self.is_multi_agent:
             # single agent horizon has the same meaning as max_step_per_agent
             done = True
             done_info[TerminationState.MAX_STEP] = True
-            logging.info("Episode ended! Reason: max step ")
+            self.logger.info("Episode ended! Reason: max step ")
 
         # for compatibility
         # crash almost equals to crashing with vehicles
@@ -316,13 +315,13 @@ class MetaDriveEnv(BaseEnv):
         if self.current_seed + 1 < self.start_seed + self.env_num:
             self.reset(self.current_seed + 1)
         else:
-            logging.warning("Can't load next scenario! current seed is already the max scenario index")
+            self.logger.warning("Can't load next scenario! current seed is already the max scenario index")
 
     def last_seed_reset(self):
         if self.current_seed - 1 >= self.start_seed:
             self.reset(self.current_seed - 1)
         else:
-            logging.warning("Can't load last scenario! current seed is already the min scenario index")
+            self.logger.warning("Can't load last scenario! current seed is already the min scenario index")
 
     def setup_engine(self):
         super(MetaDriveEnv, self).setup_engine()

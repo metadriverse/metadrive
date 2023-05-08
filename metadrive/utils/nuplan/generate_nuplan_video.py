@@ -10,6 +10,15 @@ from metadrive.utils.nuplan.utils import get_nuplan_scenarios
 #
 # os.environ["NUPLAN_DATA_STORE"] = "s3"
 
+import logging
+
+logger = logging.getLogger(__name__)
+
+logger.warning(
+    "This converters will de deprecated. "
+    "Use tools in ScenarioNet instead: https://github.com/metadriverse/ScenarioNet."
+)
+
 if __name__ == '__main__':
     raise ValueError("It seems the sensor data is not ready yet")
     from nuplan.common.actor_state.vehicle_parameters import get_pacifica_parameters

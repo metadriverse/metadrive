@@ -303,7 +303,8 @@ class ScenarioEnv(BaseEnv):
         current_distance = long
 
         route_completion = current_distance / total_length
-        if route_completion > 0.95:  # Route Completion ~= 1.0
+        if route_completion > 0.95 or vehicle.navigation.reference_trajectory.length < 1:
+            # Route Completion ~= 1.0 or vehicle is static!
             return True
         else:
             return False
