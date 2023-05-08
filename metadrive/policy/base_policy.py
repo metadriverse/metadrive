@@ -80,10 +80,10 @@ class BasePolicy(Randomizable, Configurable):
         """
         It defines the input space of this class of policy
         """
-        logging.info(
-            "No input space set for this policy! If you are querying an action space, "
-            "the agent policy may not take any external input from env.step() and thus the env.action_space is None"
-        )
+        # logging.info(
+        #     "No input space set for this policy! If you are querying an action space, "
+        #     "the agent policy may not take any external input from env.step() and thus the env.action_space is None"
+        # )
         return gym.spaces.Box(-1.0, 1.0, shape=(2, ), dtype=np.float32)
 
     def get_state(self):
