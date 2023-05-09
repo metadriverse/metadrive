@@ -31,6 +31,7 @@ METADRIVE_DEFAULT_CONFIG = dict(
         BaseMap.LANE_NUM: 3,
         "exit_length": 50,
     },
+    store_map=True,
 
     # ===== Traffic =====
     traffic_density=0.1,
