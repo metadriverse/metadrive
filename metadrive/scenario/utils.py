@@ -423,9 +423,9 @@ def assert_scenario_equal(scenarios1, scenarios2, only_compare_sdc=False):
             assert state_dict1[SD.TYPE] == state_dict2[SD.TYPE]
 
         else:
-            assert set(old_scene[SD.TRACKS].keys()).issuperset(set(new_scene[SD.TRACKS].keys()) - {"default_agent"})
+            assert set(old_scene[SD.TRACKS].keys()).issuperset(set(new_scene[SD.TRACKS].keys()) - {new_scene[SD.METADATA][SD.SDC_ID]})
             for track_id, track in old_scene[SD.TRACKS].items():
-                if track_id == "default_agent":
+                if track_id == new_scene[SD.METADATA][SD.SDC_ID]:
                     continue
                 if track_id not in new_scene[SD.TRACKS]:
                     continue
@@ -465,7 +465,7 @@ def assert_scenario_equal(scenarios1, scenarios2, only_compare_sdc=False):
 
                 assert new_scene[SD.TRACKS][track_id][SD.TYPE] == track[SD.TYPE]
 
-            track_id = "default_agent"
+            track_id = new_scene[SD.METADATA][SD.SDC_ID]
             for k in new_scene.get_sdc_track()["state"]:
                 state_array_1 = new_scene.get_sdc_track()["state"][k]
                 state_array_2 = old_scene.get_sdc_track()["state"][k]
