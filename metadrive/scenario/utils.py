@@ -17,7 +17,7 @@ from metadrive.scenario.scenario_description import ScenarioDescription
 from metadrive.type import MetaDriveType
 from metadrive.utils.math import wrap_to_pi
 
-NP_ARRAY_DECIMAL = 4
+NP_ARRAY_DECIMAL = 3
 VELOCITY_DECIMAL = 1  # velocity can not be set accurately
 MIN_LENGTH_RATIO = 0.8
 
