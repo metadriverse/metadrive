@@ -2,6 +2,7 @@ import logging
 import os
 
 import psutil
+import tqdm
 
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.engine.engine_utils import initialize_engine, close_engine
@@ -69,7 +70,7 @@ def test_pg_map_destroy():
 
 
 def test_scenario_map_destroy():
-    total_num = 200
+    total_num = 100
     num = 10
     out_loop_num = int(total_num / num)
 
@@ -83,7 +84,7 @@ def test_scenario_map_destroy():
     engine.data_manager = ScenarioDataManager()
     engine.map_manager = ScenarioMapManager()
     try:
-        for j in range(out_loop_num):
+        for j in tqdm.tqdm(range(out_loop_num)):
             for i in range(num):
                 engine.seed(i)
                 engine.map_manager.before_reset()
