@@ -21,25 +21,6 @@ def process_memory():
     return mem_info.rss / 1024 / 1024  # mb
 
 
-def _test_pgdrive_env_memory_leak():
-    raise DeprecationWarning("use next one instead")
-    total_num = 200
-    num = 1
-    out_loop_num = int(total_num / num)
-    env = MetaDriveEnv(dict(store_map=False,
-                            num_scenarios=num,
-                            traffic_density=0.))
-    start_memory = process_memory()
-    try:
-        for i in range(out_loop_num):
-            for i in range(num):
-                obs = env.reset(force_seed=i)
-        end_memory = process_memory()
-        print("Start: {}, End: {}".format(start_memory, end_memory))
-    finally:
-        env.close()
-
-
 def test_pg_map_destroy():
     default_config = MetaDriveEnv.default_config()
 
@@ -64,18 +45,18 @@ def test_pg_map_destroy():
         engine.current_map.destroy()
         end_memory = process_memory()
         print("Start: {}, End: {}, No Map: {}".format(start_memory, end_memory, no_map_memory))
-        assert start_memory - end_memory < 10
+        assert abs(start_memory - end_memory) < 10
     finally:
         close_engine()
 
 
 def test_scenario_map_destroy():
-    total_num = 100
-    num = 10
+    total_num = 90
+    num = 3
     out_loop_num = int(total_num / num)
 
     default_config = ScenarioEnv.default_config()
-    default_config["data_directory"] = AssetLoader.file_path("nuscenes", return_raw_style=False)
+    default_config["data_directory"] = AssetLoader.file_path("waymo", return_raw_style=False)
     default_config["num_scenarios"] = num
     default_config["store_map"] = False
 
@@ -94,7 +75,7 @@ def test_scenario_map_destroy():
         engine.current_map.destroy()
         end_memory = process_memory()
         print("Start: {}, End: {}, No Map: {}".format(start_memory, end_memory, no_map_memory))
-        assert start_memory - end_memory < 10
+        assert abs(start_memory - end_memory) < 20
     finally:
         close_engine()
 
