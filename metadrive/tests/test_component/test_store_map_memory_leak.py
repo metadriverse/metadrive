@@ -29,8 +29,14 @@ def test_pg_map_destroy():
     out_loop_num = int(total_num / num)
     default_config["num_scenarios"] = num
     default_config["store_map"] = False
-    default_config["map_config"] = {'type': 'block_num', 'config': 3, 'lane_width': 3.5, 'lane_num': 3,
-                                    'exit_length': 50, 'seed': 0}
+    default_config["map_config"] = {
+        'type': 'block_num',
+        'config': 3,
+        'lane_width': 3.5,
+        'lane_num': 3,
+        'exit_length': 50,
+        'seed': 0
+    }
     no_map_memory = process_memory()
     engine = initialize_engine(default_config)
     engine.map_manager = PGMapManager()
