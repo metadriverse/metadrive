@@ -35,6 +35,8 @@ class PGMapManager(BaseManager):
     def unload_map(self, map):
         map.detach_from_world()
         self.current_map = None
+        if not self.engine.global_config["store_map"]:
+            map.destroy()
 
     def destroy(self):
         self.maps = None
@@ -45,8 +47,6 @@ class PGMapManager(BaseManager):
         if self.current_map is not None:
             map = self.current_map
             self.unload_map(map)
-            if not self.engine.global_config["store_map"]:
-                map.destroy()
 
     def reset(self):
         config = self.engine.global_config.copy()

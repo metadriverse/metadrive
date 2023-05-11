@@ -3,8 +3,12 @@ import os
 
 import psutil
 
+from metadrive.engine.asset_loader import AssetLoader
 from metadrive.engine.engine_utils import initialize_engine, close_engine
+from metadrive.envs.scenario_env import ScenarioEnv
 from metadrive.manager.pg_map_manager import PGMapManager
+from metadrive.manager.scenario_data_manager import ScenarioDataManager
+from metadrive.manager.scenario_map_manager import ScenarioMapManager
 
 logging.basicConfig(level=logging.DEBUG)
 from metadrive import MetaDriveEnv
@@ -16,7 +20,8 @@ def process_memory():
     return mem_info.rss / 1024 / 1024  # mb
 
 
-def test_pgdrive_env_memory_leak():
+def _test_pgdrive_env_memory_leak():
+    raise DeprecationWarning("use next one instead")
     total_num = 200
     num = 1
     out_loop_num = int(total_num / num)
@@ -63,6 +68,37 @@ def test_pg_map_destroy():
         close_engine()
 
 
+def test_scenario_map_destroy():
+    total_num = 200
+    num = 10
+    out_loop_num = int(total_num / num)
+
+    default_config = ScenarioEnv.default_config()
+    default_config["data_directory"] = AssetLoader.file_path("nuscenes", return_raw_style=False)
+    default_config["num_scenarios"] = num
+    default_config["store_map"] = False
+
+    no_map_memory = process_memory()
+    engine = initialize_engine(default_config)
+    engine.data_manager = ScenarioDataManager()
+    engine.map_manager = ScenarioMapManager()
+    try:
+        for j in range(out_loop_num):
+            for i in range(num):
+                engine.seed(i)
+                engine.map_manager.before_reset()
+                engine.map_manager.reset()
+                if j == 0 and i == 0:
+                    start_memory = process_memory()
+        engine.current_map.destroy()
+        end_memory = process_memory()
+        print("Start: {}, End: {}, No Map: {}".format(start_memory, end_memory, no_map_memory))
+        assert start_memory - end_memory < 10
+    finally:
+        close_engine()
+
+
 if __name__ == '__main__':
-    test_pg_map_destroy()
+    test_scenario_map_destroy()
+    # test_pg_map_destroy()
     # test_pgdrive_env_memory_leak()
