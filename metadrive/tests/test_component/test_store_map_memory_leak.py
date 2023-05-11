@@ -1,12 +1,12 @@
+import logging
 import os
+
+import psutil
+
 from metadrive.engine.engine_utils import initialize_engine, close_engine
 from metadrive.manager.pg_map_manager import PGMapManager
-import tqdm
-import psutil
-import logging
 
 logging.basicConfig(level=logging.DEBUG)
-from metadrive.component.map.pg_map import PGMap
 from metadrive import MetaDriveEnv
 
 
@@ -36,33 +36,35 @@ def test_pgdrive_env_memory_leak():
 
 def test_map_destroy():
     default_config = MetaDriveEnv.default_config()
-    default_config["num_scenarios"] = 1
-    default_config["store_map"] = False
 
     total_num = 200
     num = 1
     out_loop_num = int(total_num / num)
     default_config["num_scenarios"] = num
     default_config["store_map"] = False
-
-    start_memory = process_memory()
+    default_config["map_config"] = {'type': 'block_num', 'config': 3, 'lane_width': 3.5, 'lane_num': 3,
+                                    'exit_length': 50, 'seed': 0}
+    no_map_memory = process_memory()
     engine = initialize_engine(default_config)
+    engine.map_manager = PGMapManager()
     try:
-        for i in range(out_loop_num):
+        for j in range(out_loop_num):
             for i in range(num):
                 engine.seed(i)
-                engine.map_manager = PGMapManager()
                 engine.map_manager.before_reset()
                 engine.map_manager.reset()
+                if j == 0 and i == 0:
+                    start_memory = process_memory()
+        engine.current_map.destroy()
         end_memory = process_memory()
-        print("Start: {}, End: {}".format(start_memory, end_memory))
+        print("Start: {}, End: {}, No Map: {}".format(start_memory, end_memory, no_map_memory))
     finally:
         close_engine()
 
-
-    # map = PGMap({'type': 'block_num', 'config': 3, 'lane_width': 3.5, 'lane_num': 3, 'exit_length': 50, 'seed': 0})
+    # map = PGMap()
     # map.attach_to_world()
 
 
 if __name__ == '__main__':
-    test_pgdrive_env_memory_leak()
+    test_map_destroy()
+    # test_pgdrive_env_memory_leak()
