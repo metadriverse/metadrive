@@ -3,7 +3,7 @@ import pickle
 
 from metadrive.component.map.argoverse_map import ArgoverseMap
 from metadrive.envs.metadrive_env import MetaDriveEnv
-from metadrive.manager.map_manager import PGMapManager
+from metadrive.manager.pg_map_manager import PGMapManager
 from metadrive.utils import is_win
 
 argoverse_city = "PIT"

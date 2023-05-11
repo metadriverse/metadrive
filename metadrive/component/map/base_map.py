@@ -121,7 +121,7 @@ class BaseMap(BaseRunnable):
 
     def __del__(self):
         # self.destroy()
-        logger.debug("{} is being deleted.".format(type(self)))
+        logger.debug("{} 2is being deleted.".format(type(self)))
 
     def show_coordinates(self):
         pass

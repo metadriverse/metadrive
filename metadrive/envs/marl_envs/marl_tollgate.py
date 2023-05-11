@@ -8,7 +8,7 @@ from metadrive.component.pgblock.tollgate import TollGate
 from metadrive.component.road_network import Road
 from metadrive.constants import TerminationState
 from metadrive.envs.marl_envs.multi_agent_metadrive import MultiAgentMetaDrive
-from metadrive.manager.map_manager import PGMapManager
+from metadrive.manager.pg_map_manager import PGMapManager
 from metadrive.obs.state_obs import LidarStateObservation, StateObservation
 from metadrive.utils import Config, clip
 
