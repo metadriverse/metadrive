@@ -8,7 +8,7 @@ from panda3d.bullet import BulletConvexHullShape
 from panda3d.bullet import BulletGhostNode
 from panda3d.core import LPoint3f
 from panda3d.core import Vec3, LQuaternionf, CardMaker, NodePath
-from panda3d.core import Vec4, Material
+from panda3d.core import Vec4
 
 from metadrive.constants import DrivableAreaProperty
 from metadrive.constants import MetaDriveType
@@ -220,7 +220,7 @@ class AbstractLane:
         if lane_index is not None:
             lane.index = lane_index
 
-        n = BaseRigidBodyNode(MetaDriveType.LANE_SURFACE_STREET)
+        n = BaseRigidBodyNode(lane.index, MetaDriveType.LANE_SURFACE_STREET)
         segment_np = NodePath(n)
 
         self._node_path_list.append(segment_np)
@@ -358,7 +358,7 @@ class AbstractLane:
         This usually used with _construct_lane_only_vis_segment
         """
         lane = self
-        n = BaseRigidBodyNode(MetaDriveType.LANE_SURFACE_STREET)
+        n = BaseRigidBodyNode(lane.id, MetaDriveType.LANE_SURFACE_STREET)
         segment_np = NodePath(n)
 
         self._node_path_list.append(segment_np)

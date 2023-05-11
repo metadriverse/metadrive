@@ -1,14 +1,14 @@
 import copy
-import time
-
-import numpy as np
 import datetime
 import logging
 import os
 import sys
+import time
 
 import numpy as np
 from panda3d.bullet import BulletBodyNode
+
+from metadrive.constants import MetaDriveType
 
 
 def import_pygame():
@@ -118,12 +118,12 @@ def merge_dicts(old_dict, new_dict, allow_new_keys=False, without_copy=False):
 
 
 def _deep_update(
-    original,
-    new_dict,
-    new_keys_allowed=False,
-    allow_new_subkey_list=None,
-    override_all_if_type_changes=None,
-    raise_error=True
+        original,
+        new_dict,
+        new_keys_allowed=False,
+        allow_new_subkey_list=None,
+        override_all_if_type_changes=None,
+        raise_error=True
 ):
     allow_new_subkey_list = allow_new_subkey_list or []
     override_all_if_type_changes = override_all_if_type_changes or []
@@ -182,11 +182,13 @@ def get_object_from_node(node: BulletBodyNode):
     if node.getPythonTag(node.getName()) is None:
         return None
     from metadrive.engine.engine_utils import get_object
+    from metadrive.engine.engine_utils import get_engine
     ret = node.getPythonTag(node.getName()).base_object_name
-    if isinstance(ret, str):
-        return get_object(ret)[ret]
+    is_road = node.getPythonTag(node.getName()).type_name == MetaDriveType.LANE_SURFACE_STREET
+    if is_road:
+        return get_engine().current_map.road_network.get_lane(ret)
     else:
-        return ret
+        return get_object(ret)[ret]
 
 
 def is_map_related_instance(obj):
