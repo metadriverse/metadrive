@@ -220,7 +220,7 @@ class AbstractLane:
         if lane_index is not None:
             lane.index = lane_index
 
-        n = BaseRigidBodyNode(lane, MetaDriveType.LANE_SURFACE_STREET)
+        n = BaseRigidBodyNode(MetaDriveType.LANE_SURFACE_STREET)
         segment_np = NodePath(n)
 
         self._node_path_list.append(segment_np)
@@ -358,7 +358,7 @@ class AbstractLane:
         This usually used with _construct_lane_only_vis_segment
         """
         lane = self
-        n = BaseRigidBodyNode(lane, MetaDriveType.LANE_SURFACE_STREET)
+        n = BaseRigidBodyNode(MetaDriveType.LANE_SURFACE_STREET)
         segment_np = NodePath(n)
 
         self._node_path_list.append(segment_np)

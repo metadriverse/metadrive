@@ -34,11 +34,11 @@ def test_pgdrive_env_memory_leak():
         env.close()
 
 
-def test_map_destroy():
+def test_pg_map_destroy():
     default_config = MetaDriveEnv.default_config()
 
     total_num = 200
-    num = 1
+    num = 20
     out_loop_num = int(total_num / num)
     default_config["num_scenarios"] = num
     default_config["store_map"] = False
@@ -58,13 +58,11 @@ def test_map_destroy():
         engine.current_map.destroy()
         end_memory = process_memory()
         print("Start: {}, End: {}, No Map: {}".format(start_memory, end_memory, no_map_memory))
+        assert start_memory - end_memory < 10
     finally:
         close_engine()
 
-    # map = PGMap()
-    # map.attach_to_world()
-
 
 if __name__ == '__main__':
-    test_map_destroy()
+    test_pg_map_destroy()
     # test_pgdrive_env_memory_leak()
