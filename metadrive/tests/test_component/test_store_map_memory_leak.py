@@ -21,6 +21,27 @@ def process_memory():
     return mem_info.rss / 1024 / 1024  # mb
 
 
+def test_pgdrive_env_memory_leak():
+    total_num = 400
+    num = 20
+    out_loop_num = int(total_num / num)
+    env = MetaDriveEnv(dict(store_map=False,
+                            num_scenarios=num,
+                            # traffic_density=0.
+                            ))
+    try:
+        for j in tqdm.tqdm(range(out_loop_num)):
+            for i in range(num):
+                obs = env.reset(force_seed=i)
+                if j == 0 and i == 0:
+                    start_memory = process_memory()
+        end_memory = process_memory()
+        print("Start: {}, End: {}".format(start_memory, end_memory))
+        assert abs(start_memory - end_memory) < 15
+    finally:
+        env.close()
+
+
 def test_pg_map_destroy():
     default_config = MetaDriveEnv.default_config()
 
@@ -87,6 +108,6 @@ def test_scenario_map_destroy():
 
 
 if __name__ == '__main__':
-    test_scenario_map_destroy()
+    # test_scenario_map_destroy()
     # test_pg_map_destroy()
-    # test_pgdrive_env_memory_leak()
+    test_pgdrive_env_memory_leak()
