@@ -19,7 +19,7 @@ if __name__ == "__main__":
             "show_fps": False,
             "debug": False,
             # "pstats": True,
-            # "render_pipeline": True,
+            "render_pipeline": True,
             "pstats": True,
             # "daytime": "22:01",
             # "no_traffic": True,
@@ -45,7 +45,7 @@ if __name__ == "__main__":
             "force_destroy": True,
             "default_vehicle_in_traffic": True,
             "vehicle_config": dict(
-                light=True,
+                # light=True,
                 show_navi_mark=False,
                 no_wheel_friction=True,
                 lidar=dict(num_lasers=120, distance=50, num_others=4),

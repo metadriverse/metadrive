@@ -13,7 +13,7 @@ enabled:
     # - bloom
     # - dof
     # - env_probes
-#    - forward_shading
+    - forward_shading
     # - fxaa
     # - motion_blur
     # - skin_shading
