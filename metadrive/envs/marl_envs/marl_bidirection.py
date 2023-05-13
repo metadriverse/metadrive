@@ -4,7 +4,7 @@ from metadrive.component.pgblock.bottleneck import Merge, Split
 from metadrive.component.pgblock.first_block import FirstPGBlock
 from metadrive.component.road_network import Road
 from metadrive.envs.marl_envs.multi_agent_metadrive import MultiAgentMetaDrive
-from metadrive.manager.map_manager import PGMapManager
+from metadrive.manager.pg_map_manager import PGMapManager
 from metadrive.utils import Config
 from metadrive.utils.math import clip
 

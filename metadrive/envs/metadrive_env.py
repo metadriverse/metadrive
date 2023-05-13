@@ -31,6 +31,7 @@ METADRIVE_DEFAULT_CONFIG = dict(
         BaseMap.LANE_NUM: 3,
         "exit_length": 50,
     },
+    store_map=True,
 
     # ===== Traffic =====
     traffic_density=0.1,
@@ -331,7 +332,7 @@ class MetaDriveEnv(BaseEnv):
         self.engine.accept("[", self.last_seed_reset)
         self.engine.accept("p", self.stop)
         from metadrive.manager.traffic_manager import PGTrafficManager
-        from metadrive.manager.map_manager import PGMapManager
+        from metadrive.manager.pg_map_manager import PGMapManager
         self.engine.register_manager("map_manager", PGMapManager())
         self.engine.register_manager("traffic_manager", PGTrafficManager())
 
