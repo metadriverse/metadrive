@@ -17,8 +17,8 @@ enabled:
     # - fxaa
     # - motion_blur
     # - skin_shading
-    # - sky_ao
-    # - ssr
+    - sky_ao
+    - ssr
     # - volumetrics
     # - vxgi
 

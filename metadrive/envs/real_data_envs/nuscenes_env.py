@@ -27,10 +27,10 @@ if __name__ == "__main__":
             # "debug":True,
             # Make video
             "window_size": (1600, 900),
-            "camera_dist": -2.5,
-            "camera_height": 0.5,
-            "camera_pitch": np.pi / 3,
-            "camera_fov": 60,
+            "camera_dist": 9,
+            # "camera_height": 0.5,
+            # "camera_pitch": np.pi / 3,
+            # "camera_fov": 60,
             # "no_traffic":True,
             # "force_render_fps": 10,
             # "start_scenario_index": 192,
@@ -43,9 +43,10 @@ if __name__ == "__main__":
             # "show_policy_mark": True,
             # "show_coordinates": True,
             "force_destroy": True,
-            "default_vehicle_in_traffic": True,
+            # "default_vehicle_in_traffic": True,
             "vehicle_config": dict(
                 # light=True,
+                random_color=True,
                 show_navi_mark=False,
                 no_wheel_friction=True,
                 lidar=dict(num_lasers=120, distance=50, num_others=4),
@@ -72,8 +73,8 @@ if __name__ == "__main__":
             for t in range(10000):
                 o, r, d, info = env.step([0, 0])
                 # env.capture("nuscenes_{:03d}.png".format(t))
-                if env.config["use_render"]:
-                    env.render(text={"seed": env.current_seed})
+                # if env.config["use_render"]:
+                #     env.render(text={"seed": env.current_seed})
                 if d and info["arrive_dest"]:
                     print("seed:{}, success".format(env.engine.global_random_seed))
                     print(env.engine.data_manager.current_scenario_summary)
