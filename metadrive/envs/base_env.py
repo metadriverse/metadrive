@@ -11,6 +11,7 @@ from metadrive.component.vehicle_module.mini_map import MiniMap
 from metadrive.component.vehicle_module.rgb_camera import RGBCamera
 from metadrive.component.vehicle_module.vehicle_panel import VehiclePanel
 from metadrive.constants import RENDER_MODE_NONE, DEFAULT_AGENT
+from metadrive.constants import TerminationState
 from metadrive.engine.engine_utils import initialize_engine, close_engine, \
     engine_initialized, set_global_random_seed, initialize_global_config, get_global_config
 from metadrive.manager.agent_manager import AgentManager
@@ -600,8 +601,9 @@ class BaseEnv(gym.Env):
         self,
         policies: Union[dict, Callable],
         scenario_index: Union[list, int],
-        time_interval=0.1,
+        max_episode_length=None,
         verbose=False,
+        suppress_warning=False,
         render_topdown=False,
         return_done_info=True,
         to_dict=True
@@ -636,11 +638,19 @@ class BaseEnv(gym.Env):
             while not done:
                 obs, reward, done, info = self.step(_act(obs))
                 count += 1
+                if max_episode_length is not None and count > max_episode_length:
+                    done = True
+                    info[TerminationState.MAX_STEP] = True
+                if count > 10000 and not suppress_warning:
+                    logging.warning(
+                        "Episode length is too long! If this behavior is intended, "
+                        "set suppress_warning=True to disable this message"
+                    )
                 if render_topdown:
                     self.render("topdown")
             episode = self.engine.dump_episode()
             if verbose:
-                print("Finish scenario {} with {} steps.".format(index, count))
+                logging.info("Finish scenario {} with {} steps.".format(index, count))
             scenarios_to_export[index] = convert_recorded_scenario_exported(episode, to_dict=to_dict)
             done_info[index] = info
         self.config["record_episode"] = False

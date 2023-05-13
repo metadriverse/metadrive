@@ -1,6 +1,5 @@
 import copy
 
-from metadrive.component.lane.point_lane import PointLane
 from metadrive.component.map.scenario_map import ScenarioMap
 from metadrive.constants import DEFAULT_AGENT
 from metadrive.manager.base_manager import BaseManager
@@ -14,7 +13,6 @@ class ScenarioMapManager(BaseManager):
     def __init__(self):
         super(ScenarioMapManager, self).__init__()
         self.store_map = self.engine.global_config.get("store_map", False)
-        # store_map_buffer_size = self.engine.global_config.get("store_map_buffer_size", self.DEFAULT_DATA_BUFFER_SIZE)
         self.current_map = None
         self.map_num = self.engine.global_config["num_scenarios"]
         self.start_scenario_index = self.engine.global_config["start_scenario_index"]
@@ -36,13 +34,13 @@ class ScenarioMapManager(BaseManager):
         self.current_sdc_route = None
         self.sdc_dest_point = None
 
-        if self._stored_maps[seed] is None and self.store_map:
+        if self._stored_maps[seed] is None:
             new_map = ScenarioMap(map_index=seed)
-            self._stored_maps[seed] = new_map
+            if self.store_map:
+                self._stored_maps[seed] = new_map
         else:
             new_map = self._stored_maps[seed]
         self.load_map(new_map)
-
         self.update_route()
 
     def update_route(self):
@@ -96,9 +94,9 @@ class ScenarioMapManager(BaseManager):
     def unload_map(self, map):
         map.detach_from_world()
         self.current_map = None
-        # if not self.engine.global_config["store_map"]:
-        #     self.clear_objects([map.id])
-        #     assert len(self.spawned_objects) == 0
+        if not self.engine.global_config["store_map"]:
+            map.destroy()
+            assert len(self.spawned_objects) == 0
 
     def destroy(self):
         self.maps = None

@@ -45,7 +45,7 @@
 17. disable all s_frgb
 
 
-### Performance Bossting related configure (The lower the better) Not complete
+### Performance Bossting related configure (The lower the better, List not complete)
 1. culling_max_distance
 2. culling_slice_width
 

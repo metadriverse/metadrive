@@ -14,7 +14,7 @@ from metadrive.constants import MetaDriveType
 from metadrive.constants import CollisionGroup
 from metadrive.engine.engine_utils import get_engine
 from metadrive.envs.marl_envs.multi_agent_metadrive import MultiAgentMetaDrive
-from metadrive.manager.map_manager import PGMapManager
+from metadrive.manager.pg_map_manager import PGMapManager
 from metadrive.utils import get_np_random, Config
 from metadrive.utils.coordinates_shift import panda_vector, panda_heading
 from metadrive.utils.pg.utils import rect_region_detection
