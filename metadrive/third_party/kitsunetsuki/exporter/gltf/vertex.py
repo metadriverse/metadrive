@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from metadrive.libs.kitsunetsuki.base.matrices import get_object_matrix
+from metadrive.third_party.kitsunetsuki.base.matrices import get_object_matrix
 
 from . import spec
 

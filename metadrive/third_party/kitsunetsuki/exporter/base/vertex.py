@@ -16,7 +16,7 @@
 import bpy
 import mathutils  # make sure to "import bpy" before
 
-from metadrive.libs.kitsunetsuki.base.vertex import uv_equals, normal_equals
+from metadrive.third_party.kitsunetsuki.base.vertex import uv_equals, normal_equals
 
 
 class VertexMixin(object):

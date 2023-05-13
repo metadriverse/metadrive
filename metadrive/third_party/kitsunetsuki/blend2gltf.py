@@ -68,7 +68,7 @@ def parse_args():
 def main():
     args = parse_args()
 
-    from metadrive.libs.kitsunetsuki.exporter.gltf import GLTFExporter
+    from metadrive.third_party.kitsunetsuki.exporter.gltf import GLTFExporter
 
     e = GLTFExporter(args)
     out, buf = e.convert()
@@ -96,7 +96,7 @@ def register(init_version):
     if init_version != version:
         raise Exception(f"Version mismatch: {init_version} != {version}")
 
-    from metadrive.libs.kitsunetsuki.exporter.gltf import GLTFExporterOperator, export
+    from metadrive.third_party.kitsunetsuki.exporter.gltf import GLTFExporterOperator, export
     bpy.utils.register_class(GLTFExporterOperator)
     bpy.types.TOPBAR_MT_file_export.append(export)
 
@@ -104,7 +104,7 @@ def register(init_version):
 def unregister():
     import bpy
 
-    from metadrive.libs.kitsunetsuki.exporter.gltf import GLTFExporterOperator, export
+    from metadrive.third_party.kitsunetsuki.exporter.gltf import GLTFExporterOperator, export
     bpy.types.TOPBAR_MT_file_export.remove(export)
     bpy.utils.unregister_class(GLTFExporterOperator)
 
