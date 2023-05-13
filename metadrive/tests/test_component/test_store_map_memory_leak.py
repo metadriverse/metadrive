@@ -25,10 +25,11 @@ def test_pgdrive_env_memory_leak():
     total_num = 400
     num = 20
     out_loop_num = int(total_num / num)
-    env = MetaDriveEnv(dict(store_map=False,
-                            num_scenarios=num,
-                            # traffic_density=0.
-                            ))
+    env = MetaDriveEnv(dict(
+        store_map=False,
+        num_scenarios=num,
+        # traffic_density=0.
+    ))
     try:
         for j in tqdm.tqdm(range(out_loop_num)):
             for i in range(num):
