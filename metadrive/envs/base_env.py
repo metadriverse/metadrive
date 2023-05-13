@@ -638,7 +638,7 @@ class BaseEnv(gym.Env):
             while not done:
                 obs, reward, done, info = self.step(_act(obs))
                 count += 1
-                if count > max_episode_length:
+                if max_episode_length is not None and count > max_episode_length:
                     done = True
                     info[TerminationState.MAX_STEP] = True
                 if count > 10000 and not suppress_warning:
