@@ -1,6 +1,7 @@
 import copy
 from metadrive.component.vehicle_module.vehicle_panel import VehiclePanel
 import logging
+import typing
 
 from metadrive.component.pgblock.first_block import FirstPGBlock
 from metadrive.component.road_network import Road
@@ -141,8 +142,8 @@ class MultiAgentMetaDrive(MetaDriveEnv):
         return done, done_info
 
     def step(self, actions):
-        o, r, d, i = super(MultiAgentMetaDrive, self).step(actions)
-        o, r, d, i = self._after_vehicle_done(o, r, d, i)
+        o, r, tm, tc, i = super(MultiAgentMetaDrive, self).step(actions)
+        o, r, tm, tc, i = self._after_vehicle_done(o, r, tm, tc, i)
 
         # Update respawn manager
         if self.episode_step >= self.config["horizon"]:
@@ -153,37 +154,39 @@ class MultiAgentMetaDrive(MetaDriveEnv):
                 o[new_id] = new_obs
                 r[new_id] = 0.0
                 i[new_id] = new_info_dict[new_id]
-                d[new_id] = False
+                tm[new_id] = False
+                tc[new_id] = False
+
 
         # Update __all__
         d_all = False
         if self.config["horizon"] is not None:  # No agent alive or a too long episode happens
-            if (self.episode_step >= self.config["horizon"] and all(d.values())) or \
+            if self.episode_step >= self.config["horizon"] and (all(tc.values()) or all(tm.values())) or \
                     (self.episode_step >= 5 * self.config["horizon"]):
                 d_all = True
         if len(self.vehicles) == 0:  # No agent alive
             d_all = True
-        d["__all__"] = d_all
-        if d["__all__"]:
-            for k in d.keys():
-                d[k] = True
+        tm["__all__"] = d_all
+        if tm["__all__"]:
+            for k in tm.keys():
+                tm[k] = True
 
-        return o, r, d, i
+        return o, r, tm, tc, i
 
-    def _after_vehicle_done(self, obs=None, reward=None, dones: dict = None, info=None):
+    def _after_vehicle_done(self, obs:dict[str, typing.Any], reward:dict[str, float], terminated: dict[str, bool], truncated: dict[str, bool], info:dict[str, typing.Any]):
         for v_id, v_info in info.items():
             if v_info.get("episode_length", 0) >= self.config["horizon"]:
-                if dones[v_id] is not None:
+                if terminated[v_id] is not None:
                     info[v_id][TerminationState.MAX_STEP] = True
-                    dones[v_id] = True
+                    terminated[v_id] = True
                     self.dones[v_id] = True
-        for dead_vehicle_id, done in dones.items():
-            if done:
+        for dead_vehicle_id, termed in terminated.items():
+            if termed:
                 self.agent_manager.finish(
                     dead_vehicle_id, ignore_delay_done=info[dead_vehicle_id].get(TerminationState.SUCCESS, False)
                 )
                 self._update_camera_after_finish()
-        return obs, reward, dones, info
+        return obs, reward, terminated, truncated, info
 
     def _update_camera_after_finish(self):
         if self.main_camera is not None and self.current_track_vehicle.id not in self.engine.agent_manager._active_objects \
@@ -253,12 +256,13 @@ def _test():
     o = env.reset()
     total_r = 0
     for i in range(1, 100000):
-        # o, r, d, info = env.step(env.action_space.sample())
-        o, r, d, info = env.step({v_id: [0, 1] for v_id in env.vehicles.keys()})
+        # o, r, tm, tc, info = env.step(env.action_space.sample())
+        o, r, tm, tc, info = env.step({v_id: [0, 1] for v_id in env.vehicles.keys()})
         for r_ in r.values():
             total_r += r_
-        # o, r, d, info = env.step([0,1])
-        d.update({"total_r": total_r})
+        # o, r, tm, tc, info = env.step([0,1])
+        # TODO: why does this make sense? total_r is not a vehicle id.
+        # d.update({"total_r": total_r})
         # env.render(text=d)
         env.render(mode="top_down")
         if len(env.vehicles) == 0:
@@ -299,7 +303,7 @@ def _vis():
     total_r = 0
     for i in range(1, 100000):
         # o, r, d, info = env.step(env.action_space.sample())
-        o, r, d, info = env.step({v_id: [0.0, 0.0] for v_id in env.vehicles.keys()})
+        o, r, tm, tc, info = env.step({v_id: [0.0, 0.0] for v_id in env.vehicles.keys()})
         for r_ in r.values():
             total_r += r_
         # o, r, d, info = env.step([0,1])
@@ -326,7 +330,7 @@ def pygame_replay(name, env_class, save=False, other_traj=None, film_size=(1000,
     env.main_camera.set_follow_lane(True)
     frame_count = 0
     while True:
-        o, r, d, i = env.step(env.action_space.sample())
+        o, r, tm, tc, i = env.step(env.action_space.sample())
         env.engine.force_fps.toggle()
         env.render(mode="top_down", num_stack=50, film_size=film_size, history_smooth=0)
         if save:
@@ -349,7 +353,7 @@ def panda_replay(name, env_class, save=False, other_traj=None, extra_config={}):
     env.main_camera.set_follow_lane(True)
     frame_count = 0
     while True:
-        o, r, d, i = env.step(env.action_space.sample())
+        o, r, tm, tc, i = env.step(env.action_space.sample())
         env.engine.force_fps.toggle()
         if save:
             pygame.image.save(env._top_down_renderer._runtime_canvas, "{}_{}.png".format(name, frame_count))

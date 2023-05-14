@@ -64,7 +64,7 @@ def get_result(env):
                     rotate_displacement = np.asarray(env.vehicle.position) - np.asarray(rotate_start_pos)
                     reported_rotation = True
 
-        o, r, d, i = env.step(action)
+        o, r, tm, tc, i = env.step(action)
 
         if reported_max_speed and reported_start and reported_end and reported_rotation:
             break

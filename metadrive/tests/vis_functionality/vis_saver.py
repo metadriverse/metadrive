@@ -20,7 +20,7 @@ if __name__ == "__main__":
     o = env.reset()
     # env.engine.force_fps.toggle()
     for i in range(1, 100000):
-        o, r, d, info = env.step([0, 1])
+        o, r, tm, tc, info = env.step([0, 1])
         text = {"save": env.save_mode}
         env.render(text=text)
         # if d:

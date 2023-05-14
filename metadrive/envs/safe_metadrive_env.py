@@ -93,7 +93,7 @@ if __name__ == "__main__":
     o = env.reset()
     total_cost = 0
     for i in range(1, 100000):
-        o, r, d, info = env.step([0, 0])
+        o, r, tm, tc, info = env.step([0, 0])
         total_cost += info["cost"]
         env.render(
             text={

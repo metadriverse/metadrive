@@ -3,8 +3,6 @@ This file provide a RemoteMetaDrive environment which can be easily ran in singl
 """
 
 import gymnasium as gym
-from gymnasium.wrappers.compatibility import LegacyEnv
-
 
 from metadrive.envs.metadrive_env import MetaDriveEnv
 
@@ -24,7 +22,7 @@ def get_remote_metadrive():
     return _RemoteMetaDrive
 
 
-class RemoteMetaDrive(LegacyEnv):
+class RemoteMetaDrive(gym.Env):
     def __init__(self, env_config):
         assert ray is not None, "Please install ray via: pip install ray " \
                                 "if you wish to use multiple MetaDrive in single process."
@@ -59,8 +57,6 @@ class RemoteMetaDrive(LegacyEnv):
     def render(self, *args, **kwargs):
         raise NotImplementedError("Not implemented for remote MetaDrive!")
 
-    def seed(self, seed: int|None = None):
-         return super().seed(seed)
 
 
 if __name__ == '__main__':

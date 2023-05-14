@@ -19,7 +19,7 @@ def vis_top_down_render_with_panda_render():
     o = env.reset()
     s = time.time()
     for i in range(1, 100000):
-        o, r, d, info = env.step(env.action_space.sample())
+        o, r, tm, tc, info = env.step(env.action_space.sample())
         env.render(
             text={
                 "vehicle_num": len(env.engine.traffic_manager.vehicles),

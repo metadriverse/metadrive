@@ -4,7 +4,6 @@ from collections import defaultdict
 from typing import Union, Dict, AnyStr, Optional, Tuple, Callable
 
 import gymnasium as gym
-from gymnasium.wrappers.compatibility import LegacyEnv
 
 import numpy as np
 from panda3d.core import PNMImage
@@ -52,7 +51,7 @@ BASE_DEFAULT_CONFIG = dict(
     action_check=False,
 
     # ===== Rendering =====
-    use_render=False,  # pop a window to render or not
+    render_mode=None,  # if "human" pop a window to render, if "rgb", return numpy array, if None, do neither
     debug=False,
     disable_model_compression=False,  # disable compression if you wish to launch the window quicker.
     cull_scene=True,  # only for debug use
@@ -201,7 +200,7 @@ BASE_DEFAULT_CONFIG = dict(
 )
 
 
-class BaseEnv(LegacyEnv):
+class BaseEnv(gym.Env):
     # Force to use this seed if necessary. Note that the recipient of the forced seed should be explicitly implemented.
     _DEBUG_RANDOM_SEED = None
     DEFAULT_AGENT = DEFAULT_AGENT
@@ -211,7 +210,7 @@ class BaseEnv(LegacyEnv):
         return Config(BASE_DEFAULT_CONFIG)
 
     # ===== Intialization =====
-    def __init__(self, config: dict = None):
+    def __init__(self, config: dict|None = None):
         if config is None:
             config = {}
         merged_config = self._merge_extra_config(config)
@@ -238,7 +237,6 @@ class BaseEnv(LegacyEnv):
         # self.engine: Optional[BaseEngine] = None
 
         # In MARL envs with respawn mechanism, varying episode lengths might happen.
-        self.dones = None
         self.episode_rewards = defaultdict(float)
         self.episode_lengths = defaultdict(int)
 
@@ -296,8 +294,7 @@ class BaseEnv(LegacyEnv):
     def step(self, actions: Union[np.ndarray, Dict[AnyStr, np.ndarray], int]):
         actions = self._preprocess_actions(actions)
         engine_info = self._step_simulator(actions)
-        o, r, d, i = self._get_step_return(actions, engine_info=engine_info)
-        return o, r, d, i
+        return self._get_step_return(actions, engine_info=engine_info)
 
     def _preprocess_actions(self, actions: Union[np.ndarray, Dict[AnyStr, np.ndarray], int]) \
             -> Union[np.ndarray, Dict[AnyStr, np.ndarray], int]:
@@ -345,22 +342,24 @@ class BaseEnv(LegacyEnv):
         raise NotImplementedError()
 
     def render(self,
-               mode='human',
                text: Optional[Union[dict, str]] = None,
                return_bytes=False,
                *args,
                **kwargs) -> Optional[np.ndarray]:
         """
         This is a pseudo-render function, only used to update onscreen message when using panda3d backend
-        :param mode: 'rgb'/'human'
         :param text:text to show
         :return: when mode is 'rgb', image array is returned
         """
+        
+        # render mode is set at environment creation time
+        mode = self.config['render_mode']
+
         if mode in ["top_down", "topdown", "bev", "birdview"]:
             ret = self._render_topdown(text=text, *args, **kwargs)
             return ret
-        assert self.config["use_render"] or self.engine.mode != RENDER_MODE_NONE, \
-            ("Panda Renderring is off now, can not render. Please set config['use_render'] = True!")
+        assert mode is not None or self.engine.mode != RENDER_MODE_NONE, \
+            ("Panda Renderring is off now, can not render. Please set config['render_mode'] != None!")
 
         self.engine.render_frame(text)
 
@@ -369,7 +368,6 @@ class BaseEnv(LegacyEnv):
             return self.vehicle.observations.img_obs.get_image()
 
         if mode == "rgb_array":
-            assert self.config["use_render"], "You should create a Panda3d window before rendering images!"
             # if not hasattr(self, "temporary_img_obs"):
             #     from metadrive.obs.image_obs import ImageObservation
             #     image_source = "rgb_camera"
@@ -413,12 +411,30 @@ class BaseEnv(LegacyEnv):
         return self._get_reset_return()
 
     def _get_reset_return(self):
-        ret = {}
-        self.engine.after_step()
+        # TODO: figure out how to get the information of the before step
+        scene_manager_before_step_infos = {}
+        scene_manager_after_step_infos = self.engine.after_step()
+
+        obses = {}
+        done_infos = {}
+        cost_infos = {}
+        reward_infos = {}
+        engine_info = merge_dicts(
+            scene_manager_after_step_infos, scene_manager_before_step_infos, allow_new_keys=True, without_copy=True
+        )
         for v_id, v in self.vehicles.items():
             self.observations[v_id].reset(self, v)
-            ret[v_id] = self.observations[v_id].observe(v)
-        return ret if self.is_multi_agent else self._wrap_as_single_agent(ret)
+            obses[v_id] = self.observations[v_id].observe(v)
+            _, reward_infos[v_id] = self.reward_function(v_id)
+            _, done_infos[v_id] = self.done_function(v_id)
+            _, cost_infos[v_id] = self.cost_function(v_id)
+
+        step_infos = concat_step_infos([engine_info, done_infos, reward_infos, cost_infos])
+
+        if self.is_multi_agent:
+            return (obses, step_infos)
+        else:
+            return (self._wrap_as_single_agent(obses), self._wrap_as_single_agent(step_infos))
 
     def _get_step_return(self, actions, engine_info):
         # update obs, dones, rewards, costs, calculate done at first !
@@ -446,7 +462,9 @@ class BaseEnv(LegacyEnv):
             for k in self.dones:
                 self.dones[k] = True
 
-        dones = {k: self.dones[k] for k in self.vehicles.keys()}
+        terminateds = {k: self.dones[k] for k in self.vehicles.keys()}
+        truncateds = {k: False for k in self.vehicles.keys()}
+
         for v_id, r in rewards.items():
             self.episode_rewards[v_id] += r
             step_infos[v_id]["episode_reward"] = self.episode_rewards[v_id]
@@ -455,9 +473,9 @@ class BaseEnv(LegacyEnv):
 
         if not self.is_multi_agent:
             return self._wrap_as_single_agent(obses), self._wrap_as_single_agent(rewards), \
-                   self._wrap_as_single_agent(dones), self._wrap_as_single_agent(step_infos)
+                   self._wrap_as_single_agent(terminateds), self._wrap_as_single_agent(truncateds), self._wrap_as_single_agent(step_infos)
         else:
-            return obses, rewards, dones, step_infos
+            return obses, rewards, terminateds, truncateds, step_infos
 
     def close(self):
         if self.engine is not None:

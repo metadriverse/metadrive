@@ -104,7 +104,7 @@ if __name__ == '__main__':
         o, *_ = env.step([-0.00, 0.2])
         assert env.observation_space.contains(o)
     for _ in range(10000):
-        o, r, d, i = env.step([0.0, 1])
+        o, r, tm, tc, i = env.step([0.0, 1])
         print("Velocity: ", i["velocity"])
 
         fig, axes = plt.subplots(1, o.shape[-1], figsize=(15, 3))
