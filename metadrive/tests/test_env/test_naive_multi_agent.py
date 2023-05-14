@@ -1,4 +1,4 @@
-import gym
+import gymnasium as gym
 
 from metadrive.envs.marl_envs.multi_agent_metadrive import MultiAgentMetaDrive
 

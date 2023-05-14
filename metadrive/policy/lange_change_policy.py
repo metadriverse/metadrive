@@ -1,4 +1,4 @@
-import gym
+import gymnasium as gym
 
 from metadrive.component.vehicle_module.PID_controller import PIDController
 from metadrive.engine.engine_utils import get_global_config

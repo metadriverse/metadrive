@@ -1,6 +1,5 @@
-from gym.envs.registration import register, registry
+from gymnasium.envs.registration import register, registry
 from packaging import version
-import gym
 from metadrive.envs import MetaDriveEnv
 from metadrive.envs import MultiAgentTollgateEnv, MultiAgentBottleneckEnv, MultiAgentRoundaboutEnv, \
     MultiAgentIntersectionEnv, MultiAgentParkingLotEnv, MultiAgentMetaDrive
@@ -70,19 +69,18 @@ marl_env = {
 }
 
 envs = []
-existing_space = registry.env_specs if version.parse(gym.__version__) < version.parse("0.24.0") else registry
 for env_name, env_config in metadrive_environment_dict.items():
-    if env_name not in existing_space:
+    if env_name not in registry:
         envs.append(env_name)
-        register(id=env_name, entry_point=MetaDriveEnv, kwargs=dict(config=env_config))
+        register(id=env_name, entry_point=MetaDriveEnv, kwargs=dict(config=env_config), apply_api_compatibility=True)
 
 for env_name, env_config in safe_metadrive_environment_dict.items():
-    if env_name not in existing_space:
+    if env_name not in registry:
         envs.append(env_name)
-        register(id=env_name, entry_point=SafeMetaDriveEnv, kwargs=dict(config=env_config))
+        register(id=env_name, entry_point=SafeMetaDriveEnv, kwargs=dict(config=env_config), apply_api_compatibility=True)
 
 for env_name, entry in marl_env.items():
-    if env_name not in existing_space:
+    if env_name not in registry:
         envs.append(env_name)
         register(id=env_name, entry_point=entry, kwargs=dict(config={}))
 

@@ -3,7 +3,9 @@ import time
 from collections import defaultdict
 from typing import Union, Dict, AnyStr, Optional, Tuple, Callable
 
-import gym
+import gymnasium as gym
+from gymnasium.wrappers.compatibility import LegacyEnv
+
 import numpy as np
 from panda3d.core import PNMImage
 
@@ -199,7 +201,7 @@ BASE_DEFAULT_CONFIG = dict(
 )
 
 
-class BaseEnv(gym.Env):
+class BaseEnv(LegacyEnv):
     # Force to use this seed if necessary. Note that the recipient of the forced seed should be explicitly implemented.
     _DEBUG_RANDOM_SEED = None
     DEFAULT_AGENT = DEFAULT_AGENT

@@ -1,4 +1,4 @@
-import gym.spaces
+import gymnasium as gym
 
 from metadrive.envs.metadrive_env import MetaDriveEnv
 from metadrive.utils import setup_logger
