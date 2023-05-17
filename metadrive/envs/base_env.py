@@ -474,6 +474,7 @@ class BaseEnv(gym.Env):
         if file_name is None:
             file_name = "main_{}.png".format(time.time())
         self._capture_img.write(file_name)
+        self.logger.info("Image is saved at: {}".format(file_name))
 
     def for_each_vehicle(self, func, *args, **kwargs):
         return self.agent_manager.for_each_active_agents(func, *args, **kwargs)
