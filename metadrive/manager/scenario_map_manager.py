@@ -22,7 +22,7 @@ class ScenarioMapManager(BaseManager):
         }
 
         # we put the route searching function here
-        self.sdc_start = None
+        self.sdc_start_point = None
         self.sdc_destinations = []
         self.sdc_dest_point = None
         self.current_sdc_route = None
@@ -58,7 +58,7 @@ class ScenarioMapManager(BaseManager):
         last_yaw = last_state["heading"]
 
         self.current_sdc_route = get_idm_route(sdc_traj)
-
+        self.sdc_start_point = copy.deepcopy(init_position)
         self.sdc_dest_point = copy.deepcopy(last_position)
 
         self.engine.global_config.update(
@@ -102,7 +102,7 @@ class ScenarioMapManager(BaseManager):
         self.maps = None
         self.current_map = None
 
-        self.sdc_start = None
+        self.sdc_start_point = None
         self.sdc_destinations = []
         self.sdc_dest_point = None
         self.current_sdc_route = None
@@ -114,7 +114,7 @@ class ScenarioMapManager(BaseManager):
         if self.current_map is not None:
             self.unload_map(self.current_map)
 
-        self.sdc_start = None
+        self.sdc_start_point = None
         self.sdc_destinations = []
         self.sdc_dest_point = None
         self.current_sdc_route = None

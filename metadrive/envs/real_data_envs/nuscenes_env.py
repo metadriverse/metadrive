@@ -11,7 +11,7 @@ if __name__ == "__main__":
         {
             "use_render": True,
             "agent_policy": ReplayEgoCarPolicy,
-            "manual_control": True,
+            # "manual_control": True,
             "show_interface": False,
             # "need_lane_localization": False,
             "show_logo": False,
