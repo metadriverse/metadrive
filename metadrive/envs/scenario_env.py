@@ -19,6 +19,7 @@ from metadrive.policy.replay_policy import ReplayEgoCarPolicy
 from metadrive.scenario.scenario_description import ScenarioDescription
 from metadrive.utils import clip
 from metadrive.utils import get_np_random
+from metadrive.utils.math import norm
 
 SCENARIO_ENV_CONFIG = dict(
     # ===== Scenario Config =====
@@ -164,8 +165,6 @@ class ScenarioEnv(BaseEnv):
 
         route_completion = vehicle.navigation.route_completion
 
-        # if np.linalg.norm(vehicle.position - self.engine.map_manager.sdc_dest_point) < 5 \
-        #         or vehicle.lane.index in self.engine.map_manager.sdc_destinations:
         if self._is_arrive_destination(vehicle):
             done = True
             logging.info("Episode ended! Reason: arrive_dest.")
@@ -279,12 +278,14 @@ class ScenarioEnv(BaseEnv):
                     break
 
             expert_xy = expert_state_list["position"][current_step][:2]
-            dist = np.linalg.norm(agent_xy - expert_xy)
+            diff = agent_xy - expert_xy
+            dist = norm(diff[0], diff[1])
             step_info["distance_error"] = dist
 
             last_state = expert_state_list["position"][largest_valid_index]
             last_expert_xy = last_state[:2]
-            last_dist = np.linalg.norm(agent_xy - last_expert_xy)
+            diff = agent_xy - last_expert_xy
+            last_dist = norm(diff[0], diff[1])
             step_info["distance_error_final"] = last_dist
 
             # reward = reward - self.config["distance_penalty"] * dist

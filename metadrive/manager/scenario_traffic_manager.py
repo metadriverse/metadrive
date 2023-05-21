@@ -1,6 +1,6 @@
 import copy
 import logging
-
+from metadrive.utils.math import norm
 import numpy as np
 
 from metadrive.component.static_object.traffic_object import TrafficCone, TrafficBarrier
@@ -59,6 +59,9 @@ class ScenarioTrafficManager(BaseManager):
         self.is_ego_vehicle_replay = self.engine.global_config["agent_policy"] == ReplayEgoCarPolicy
         self._filter_overlapping_car = self.engine.global_config["filter_overlapping_car"]
 
+        # config
+        self._traffic_v_config = self.get_traffic_v_config()
+
     def before_step(self, *args, **kwargs):
         self._obj_to_clean_this_frame = []
         for v in self.spawned_objects.values():
@@ -84,6 +87,8 @@ class ScenarioTrafficManager(BaseManager):
         self._non_noise_object_id = set()
         self.idm_policy_count = 0
         for scenario_id, track in self.current_traffic_data.items():
+            if scenario_id == self.sdc_scenario_id:
+                continue
             if track["type"] == MetaDriveType.VEHICLE:
                 self.spawn_vehicle(scenario_id, track)
             elif track["type"] == MetaDriveType.CYCLIST:
@@ -100,6 +105,8 @@ class ScenarioTrafficManager(BaseManager):
         if self.episode_step < self.current_scenario_length:
             replay_done = False
             for scenario_id, track in self.current_traffic_data.items():
+                if scenario_id == self.sdc_scenario_id:
+                    continue
                 if scenario_id not in self._scenario_id_to_obj_id:
                     if track["type"] == MetaDriveType.VEHICLE:
                         self.spawn_vehicle(scenario_id, track)
@@ -136,8 +143,7 @@ class ScenarioTrafficManager(BaseManager):
 
     @property
     def current_traffic_data(self):
-        data = copy.deepcopy(self.engine.data_manager.current_scenario["tracks"])
-        data.pop(self.sdc_scenario_id)
+        data = self.engine.data_manager.current_scenario["tracks"]
         return data
 
     @property
@@ -179,18 +185,6 @@ class ScenarioTrafficManager(BaseManager):
             return
 
         # create vehicle
-        v_config = copy.deepcopy(self.engine.global_config["vehicle_config"])
-        v_config["need_navigation"] = False
-        v_config.update(
-            dict(
-                show_navi_mark=False,
-                show_dest_mark=False,
-                enable_reverse=False,
-                show_lidar=False,
-                show_lane_line_detector=False,
-                show_side_detector=False,
-            )
-        )
         if state["vehicle_class"]:
             vehicle_class = state["vehicle_class"]
         else:
@@ -199,7 +193,8 @@ class ScenarioTrafficManager(BaseManager):
             )
         obj_name = v_id if self.engine.global_config["force_reuse_object_name"] else None
         v = self.spawn_object(
-            vehicle_class, position=state["position"], heading=state["heading"], vehicle_config=v_config, name=obj_name
+            vehicle_class, position=state["position"], heading=state["heading"], vehicle_config=self._traffic_v_config,
+            name=obj_name
         )
         self._scenario_id_to_obj_id[v_id] = v.name
         self._obj_id_to_scenario_id[v.name] = v_id
@@ -207,7 +202,7 @@ class ScenarioTrafficManager(BaseManager):
         # add policy
         start_index, end_index = get_max_valid_indicis(track, self.episode_step)  # real end_index is end_index-1
         moving = track["state"]["position"][start_index][..., :2] - track["state"]["position"][end_index - 1][..., :2]
-        length_ok = np.linalg.norm(moving) > self.IDM_CREATE_MIN_LENGTH
+        length_ok = norm(moving[0], moving[1]) > self.IDM_CREATE_MIN_LENGTH
         heading_ok = abs(wrap_to_pi(self.ego_vehicle.heading_theta - state["heading"])) < np.pi / 2
         idm_ok = heading_dist < self.IDM_CREATE_FORWARD_CONSTRAINT and abs(
             side_dist
@@ -293,7 +288,7 @@ class ScenarioTrafficManager(BaseManager):
 
     def is_static_object(self, obj_id):
         return isinstance(self.spawned_objects[obj_id], TrafficBarrier) \
-               or isinstance(self.spawned_objects[obj_id], TrafficCone)
+            or isinstance(self.spawned_objects[obj_id], TrafficCone)
 
     @property
     def obj_id_to_scenario_id(self):
@@ -308,3 +303,18 @@ class ScenarioTrafficManager(BaseManager):
         ret = copy.copy(self._scenario_id_to_obj_id)
         ret[self.sdc_scenario_id] = self.sdc_object_id
         return ret
+
+    def get_traffic_v_config(self):
+        v_config = copy.deepcopy(self.engine.global_config["vehicle_config"])
+        v_config["need_navigation"] = False
+        v_config.update(
+            dict(
+                show_navi_mark=False,
+                show_dest_mark=False,
+                enable_reverse=False,
+                show_lidar=False,
+                show_lane_line_detector=False,
+                show_side_detector=False,
+            )
+        )
+        return v_config

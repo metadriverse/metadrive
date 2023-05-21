@@ -1,5 +1,4 @@
 import math
-
 import numpy as np
 
 from metadrive.utils.math import norm, get_vertical_vector
@@ -109,12 +108,14 @@ class InterpolatingLine:
         p_start_idx = 0
         while p_start_idx < len(points) - 1:
             for p_end_idx in range(p_start_idx + 1, len(points)):
-                if np.linalg.norm(points[p_start_idx] - points[p_end_idx]) > 1:
+                _p = points[p_start_idx] - points[p_end_idx]
+                if norm(_p[0], _p[1]) > 1:
                     break
             p_start = points[p_start_idx]
             p_end = points[p_end_idx]
 
-            if np.linalg.norm(p_start - p_end) < 1e-6:
+            _p = p_start - p_end
+            if norm(_p[0], _p[1]) < 1e-6:
                 p_start_idx = p_end_idx  # next
                 continue
 
