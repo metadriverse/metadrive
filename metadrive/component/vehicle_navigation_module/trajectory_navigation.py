@@ -34,15 +34,12 @@ class TrajectoryNavigation(BaseNavigation):
         )
         self._route_completion = 0
 
-    def reset(self, map=None, current_lane=None, destination=None, random_seed=None):
-
+    def reset(self, vehicle):
         # We do not want to store map within the navigation module!
         # TODO(PZH): In future, we can let all navigation module get latest map on-the-fly instead of
         #  caching a class local variable.
-        super(TrajectoryNavigation, self).reset(map=map, current_lane=current_lane)
-        # self.reference_trajectory = self.get_trajectory()
-        if self.reference_trajectory is not None:
-            self.set_route(None, None)
+        super(TrajectoryNavigation, self).reset(current_lane=self.reference_trajectory)
+        self.set_route()
 
     @property
     def reference_trajectory(self):
@@ -52,7 +49,7 @@ class TrajectoryNavigation(BaseNavigation):
     def current_ref_lanes(self):
         return [self.reference_trajectory]
 
-    def set_route(self, current_lane_index: str, destination: str):
+    def set_route(self):
         self.checkpoints = self.discretize_reference_trajectory()
         self._target_checkpoints_index = [0, 1] if len(self.checkpoints) >= 2 else [0, 0]
         # update routing info
@@ -178,7 +175,6 @@ class TrajectoryNavigation(BaseNavigation):
         return navi_information, lanes_heading
 
     def destroy(self):
-        self.map = None
         self.checkpoints = None
         # self.current_ref_lanes = None
         self.next_ref_lanes = None
@@ -188,7 +184,6 @@ class TrajectoryNavigation(BaseNavigation):
         super(TrajectoryNavigation, self).destroy()
 
     def before_reset(self):
-        self.map = None
         self.checkpoints = None
         # self.current_ref_lanes = None
         self.next_ref_lanes = None

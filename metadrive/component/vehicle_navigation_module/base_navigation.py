@@ -3,7 +3,6 @@ import logging
 import numpy as np
 from panda3d.core import TransparencyAttrib, LineSegs, NodePath
 
-from metadrive.component.map.base_map import BaseMap
 from metadrive.component.pgblock.first_block import FirstPGBlock
 from metadrive.constants import RENDER_MODE_ONSCREEN, CamMask
 from metadrive.engine.asset_loader import AssetLoader
@@ -25,14 +24,14 @@ class BaseNavigation:
     LINE_TO_DEST_HEIGHT = 0.6
 
     def __init__(
-        self,
-        show_navi_mark: bool = False,
-        random_navi_mark_color=False,
-        show_dest_mark=False,
-        show_line_to_dest=False,
-        panda_color=None,
-        name=None,
-        vehicle_config=None
+            self,
+            show_navi_mark: bool = False,
+            random_navi_mark_color=False,
+            show_dest_mark=False,
+            show_line_to_dest=False,
+            panda_color=None,
+            name=None,
+            vehicle_config=None
     ):
         """
         This class define a helper for localizing vehicles and retrieving navigation information.
@@ -41,7 +40,6 @@ class BaseNavigation:
         self.name = name
 
         # Make sure these variables are filled when making new subclass
-        # self.map = None
         # self.checkpoints = None
         # self.current_ref_lanes = None
         # self.next_ref_lanes = None
@@ -51,11 +49,11 @@ class BaseNavigation:
         self.vehicle_config = vehicle_config
 
         self._target_checkpoints_index = None
-        self._navi_info = np.zeros((self.navigation_info_dim, ), dtype=np.float32)  # navi information res
+        self._navi_info = np.zeros((self.navigation_info_dim,), dtype=np.float32)  # navi information res
 
         # Vis
         self._show_navi_info = (
-            self.engine.mode == RENDER_MODE_ONSCREEN and not self.engine.global_config["debug_physics_world"]
+                self.engine.mode == RENDER_MODE_ONSCREEN and not self.engine.global_config["debug_physics_world"]
         )
         self.origin = NodePath("navigation_sign") if self._show_navi_info else None
         self.navi_mark_color = (0.6, 0.8, 0.5) if not random_navi_mark_color else get_np_random().rand(3)
@@ -126,11 +124,14 @@ class BaseNavigation:
             self._dest_node_path.show(CamMask.MainCam)
         logging.debug("Load Vehicle Module: {}".format(self.__class__.__name__))
 
-    def reset(self, map: BaseMap, current_lane, vehicle_config=None):
-        self.map = map
+    def reset(self, current_lane, vehicle_config=None):
         self._current_lane = current_lane
         if vehicle_config is not None:
             self.vehicle_config = vehicle_config
+
+    @property
+    def map(self):
+        return self.engine.current_map
 
     @property
     def current_lane(self):

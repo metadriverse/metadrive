@@ -32,7 +32,6 @@ from metadrive.engine.physics_node import BaseRigidBodyNode
 from metadrive.utils import Config, safe_clip_for_small_array
 from metadrive.utils.math import get_vertical_vector, norm, clip
 from metadrive.utils.math import wrap_to_pi
-from metadrive.utils.pg.utils import ray_localization
 from metadrive.utils.pg.utils import rect_region_detection
 from metadrive.utils.utils import get_object_from_node
 
@@ -411,7 +410,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         else:
             raise ValueError()
 
-        self.update_map_info(map)
+        self.reset_navigation()
         self.body.clearForces()
         self.body.setLinearVelocity(Vec3(0, 0, 0))
         self.body.setAngularVelocity(Vec3(0, 0, 0))
@@ -767,7 +766,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             vehicle_config=self.config
         )
 
-    def update_map_info(self, map):
+    def reset_navigation(self):
         """
         Update map information that are used by this vehicle, after reset()
         This function will query the map about the spawn position and destination of current vehicle,
@@ -779,31 +778,9 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         :param map: new map
         :return: None
         """
-        if not self.config["need_navigation"]:
-            return
-        possible_lanes = ray_localization(self.heading, self.spawn_place, self.engine, use_heading_filter=False)
-        possible_lane_indexes = [lane_index for lane, lane_index, dist in possible_lanes]
-
-        if len(possible_lanes) == 0 and self.config["spawn_lane_index"] is None:
-            from metadrive.utils.error_class import NavigationError
-            raise NavigationError("Can't find valid lane for navigation.")
-
-        if self.config["spawn_lane_index"] is not None and self.config["spawn_lane_index"] in possible_lane_indexes:
-            idx = possible_lane_indexes.index(self.config["spawn_lane_index"])
-            lane, new_l_index = possible_lanes[idx][:-1]
-        else:
-            assert len(possible_lanes) > 0
-            lane, new_l_index = possible_lanes[0][:-1]
-
-        dest = self.config["destination"]
-        self.navigation.reset(
-            map,
-            current_lane=lane,
-            destination=dest if dest is not None else None,
-            random_seed=self.engine.global_random_seed
-        )
-        assert lane is not None, "spawn place is not on road!"
-        self.navigation.update_localization(self)
+        if self.navigation is not None and self.config["need_navigation"]:
+            self.navigation.reset(self)
+            self.navigation.update_localization(self)
 
     def _state_check(self):
         """

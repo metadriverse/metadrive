@@ -2,7 +2,6 @@ import numpy as np
 
 from metadrive.component.lane.circular_lane import CircularLane
 from metadrive.component.lane.straight_lane import StraightLane
-from metadrive.component.map.base_map import BaseMap
 from metadrive.component.pg_space import Parameter, BlockParameterSpace
 from metadrive.component.pgblock.bottleneck import Merge, Split
 from metadrive.component.pgblock.first_block import FirstPGBlock
@@ -16,14 +15,14 @@ from metadrive.utils.pg.utils import ray_localization
 
 class NodeNetworkNavigation(BaseNavigation):
     def __init__(
-        self,
-        show_navi_mark: bool = False,
-        random_navi_mark_color=False,
-        show_dest_mark=False,
-        show_line_to_dest=False,
-        panda_color=None,
-        name=None,
-        vehicle_config=None
+            self,
+            show_navi_mark: bool = False,
+            random_navi_mark_color=False,
+            show_dest_mark=False,
+            show_line_to_dest=False,
+            panda_color=None,
+            name=None,
+            vehicle_config=None
     ):
         """
         This class define a helper for localizing vehicles and retrieving navigation information.
@@ -43,10 +42,33 @@ class NodeNetworkNavigation(BaseNavigation):
         self.current_road = None
         self.next_road = None
 
-    def reset(self, map: BaseMap, current_lane, destination=None, random_seed=None):
-        super(NodeNetworkNavigation, self).reset(map, current_lane)
+    def reset(self, vehicle):
+        if not vehicle.config["need_navigation"]:
+            return
+        possible_lanes = ray_localization(vehicle.heading, vehicle.spawn_place, self.engine, use_heading_filter=False)
+        possible_lane_indexes = [lane_index for lane, lane_index, dist in possible_lanes]
+
+        if len(possible_lanes) == 0 and vehicle.config["spawn_lane_index"] is None:
+            from metadrive.utils.error_class import NavigationError
+            raise NavigationError("Can't find valid lane for navigation.")
+
+        if vehicle.config["spawn_lane_index"] is not None and vehicle.config[
+            "spawn_lane_index"] in possible_lane_indexes:
+            idx = possible_lane_indexes.index(vehicle.config["spawn_lane_index"])
+            lane, new_l_index = possible_lanes[idx][:-1]
+        else:
+            assert len(possible_lanes) > 0
+            lane, new_l_index = possible_lanes[0][:-1]
+
+        dest = vehicle.config["destination"]
+
+        current_lane = lane
+        destination = dest if dest is not None else None,
+        random_seed = self.engine.global_random_seed
+        assert current_lane is not None, "spawn place is not on road!"
+        super(NodeNetworkNavigation, self).reset(current_lane)
         assert self.map.road_network_type == NodeRoadNetwork, "This Navigation module only support NodeRoadNetwork type"
-        destination = self.auto_assign_task(map, current_lane.index, destination, random_seed)
+        destination = self.auto_assign_task(self.map, current_lane.index, destination, random_seed)
         self.set_route(current_lane.index, destination)
 
     @staticmethod
@@ -100,7 +122,7 @@ class NodeNetworkNavigation(BaseNavigation):
             assert l.index is not None, self.current_ref_lanes
 
         self.next_ref_lanes = self.map.road_network.graph[self.checkpoints[1]][self.checkpoints[2]
-                                                                               ] if len(self.checkpoints) > 2 else None
+        ] if len(self.checkpoints) > 2 else None
         self.current_road = Road(target_road_1_start, target_road_1_end)
         self.next_road = Road(self.checkpoints[1], self.checkpoints[2]) if len(self.checkpoints) > 2 else None
         if self._dest_node_path is not None:
@@ -200,8 +222,8 @@ class NodeNetworkNavigation(BaseNavigation):
 
     def _get_current_lane(self, ego_vehicle):
         """
-              Called in update_localization to find current lane information
-              """
+        Called in update_localization to find current lane information
+        """
         possible_lanes, on_lane = ray_localization(
             ego_vehicle.heading, ego_vehicle.position, ego_vehicle.engine, return_on_lane=True
         )
@@ -254,8 +276,8 @@ class NodeNetworkNavigation(BaseNavigation):
         angle = 0.0
         if isinstance(ref_lane, CircularLane):
             bendradius = ref_lane.radius / (
-                BlockParameterSpace.CURVE[Parameter.radius].max +
-                self.get_current_lane_num() * self.get_current_lane_width()
+                    BlockParameterSpace.CURVE[Parameter.radius].max +
+                    self.get_current_lane_num() * self.get_current_lane_width()
             )
             dir = -ref_lane.direction
             angle = ref_lane.angle
