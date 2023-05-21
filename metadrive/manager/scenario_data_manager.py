@@ -123,3 +123,22 @@ class ScenarioDataManager(BaseManager):
     @property
     def current_scenario(self):
         return self.get_scenario(self.engine.global_random_seed)
+
+    @staticmethod
+    def sort_scenarios(scenarios):
+        """
+        TODO(LQY): consider exposing this API to config
+        Sort scenarios to support curriculum training. You are encouraged to customize your own sort method
+        :return: sorted scenario list
+        """
+        def _score_pg(scenario):
+            sdc_info = metadata[SD.SUMMARY.OBJECT_SUMMARY][metadata[SD.SDC_ID]]
+            moving_dist = sdc_info[SD.SUMMARY.MOVING_DIST]
+            if moving_dist > target_dist and condition == ScenarioFilter.GREATER:
+                return True
+            if moving_dist < target_dist and condition == ScenarioFilter.SMALLER:
+                return True
+            return False
+
+
+

@@ -19,13 +19,16 @@ from metadrive.utils import clip
 from metadrive.utils import get_np_random
 
 SCENARIO_ENV_CONFIG = dict(
-    # ===== Map Config =====
+    # ===== Scenario Config =====
     data_directory=AssetLoader.file_path("waymo", return_raw_style=False),
     start_scenario_index=0,
     num_scenarios=3,
+    sequential_seed=False,  # Whether to set seed (the index of map) sequentially across episodes
+    curriculum_sort=False,  # Scenarios will be sorted according to difficulty. It works only sequential_seed=True
+
+    # ===== Map Config =====
     store_map=True,
     store_map_buffer_size=2000,
-    sequential_seed=False,  # Whether to set seed (the index of map) sequentially across episodes
 
     # ===== Traffic =====
     no_traffic=False,  # nothing will be generated including objects/pedestrian/vehicles
@@ -190,8 +193,8 @@ class ScenarioEnv(BaseEnv):
         # for compatibility
         # crash almost equals to crashing with vehicles
         done_info[TerminationState.CRASH] = (
-            done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
-            or done_info[TerminationState.CRASH_BUILDING]
+                done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
+                or done_info[TerminationState.CRASH_BUILDING]
         )
         return done, done_info
 

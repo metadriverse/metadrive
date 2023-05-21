@@ -174,9 +174,11 @@ class ScenarioDescription(dict):
         CONTINUOUS_VALID_LENGTH = "continuous_valid_length"
 
         # for number summary:
+        OBJECT_TYPES = "object_types"
         NUM_OBJECTS = "num_objects"
-        NUM_OBJECT_TYPES = "num_object_types"
+        NUM_MOVING_OBJECTS = "num_moving_objects"
         NUM_OBJECTS_EACH_TYPE = "num_objects_each_type"
+        NUM_MOVING_OBJECTS_EACH_TYPE = "num_moving_objects_each_type"
 
         NUM_TRAFFIC_LIGHTS = "num_traffic_lights"
         NUM_TRAFFIC_LIGHT_TYPES = "num_traffic_light_types"
@@ -223,7 +225,7 @@ class ScenarioDescription(dict):
             "You lack these keys in metadata: {}".format(
                 cls.METADATA_KEYS.difference(set(scenario_dict[cls.METADATA].keys()))
             )
-        assert scenario_dict[cls.METADATA][cls.TIMESTEP].shape == (scenario_length, )
+        assert scenario_dict[cls.METADATA][cls.TIMESTEP].shape == (scenario_length,)
 
     @classmethod
     def _check_object_state_dict(cls, obj_state, scenario_length, object_id, valid_check=True):
@@ -249,7 +251,7 @@ class ScenarioDescription(dict):
             assert state_array.ndim in [1, 2], "Haven't implemented test array with dim {} yet".format(state_array.ndim)
             if state_array.ndim == 2:
                 assert state_array.shape[
-                    1] != 0, "Please convert all state with dim 1 to a 1D array instead of 2D array."
+                           1] != 0, "Please convert all state with dim 1 to a 1D array instead of 2D array."
 
             if state_key == "valid" and valid_check:
                 assert np.sum(state_array) >= 1, "No frame valid for this object. Consider removing it"
@@ -279,7 +281,9 @@ class ScenarioDescription(dict):
         return self[self.TRACKS][sdc_id]
 
     @staticmethod
-    def get_object_summary(state_dict, id, type):
+    def get_object_summary(state_dict, id):
+        type = state_dict["type"]
+        state_dict = state_dict["state"]
         track = state_dict["position"]
         valid_track = track[np.where(state_dict["valid"].astype(int))][..., :2]
         distance = float(
@@ -319,12 +323,20 @@ class ScenarioDescription(dict):
         number_summary_dict = {}
         # object
         number_summary_dict[ScenarioDescription.SUMMARY.NUM_OBJECTS] = len(scenario[ScenarioDescription.TRACKS])
-        number_summary_dict[ScenarioDescription.SUMMARY.NUM_OBJECT_TYPES
-                            ] = set(v["type"] for v in scenario[ScenarioDescription.TRACKS].values())
+        number_summary_dict[ScenarioDescription.SUMMARY.OBJECT_TYPES
+        ] = set(v["type"] for v in scenario[ScenarioDescription.TRACKS].values())
         object_types_counter = defaultdict(int)
         for v in scenario[ScenarioDescription.TRACKS].values():
             object_types_counter[v["type"]] += 1
         number_summary_dict[ScenarioDescription.SUMMARY.NUM_OBJECTS_EACH_TYPE] = dict(object_types_counter)
+
+        # moving object
+        number_summary_dict[ScenarioDescription.SUMMARY.NUM_MOVING_OBJECTS] = 0
+        number_summary_dict[ScenarioDescription.SUMMARY.NUM_MOVING_OBJECTS_EACH_TYPE] = defaultdict(int)
+        for v in scenario[ScenarioDescription.METADATA][ScenarioDescription.SUMMARY.OBJECT_SUMMARY].values():
+            if v[ScenarioDescription.SUMMARY.MOVING_DIST] > 1:
+                number_summary_dict[ScenarioDescription.SUMMARY.NUM_MOVING_OBJECTS] += 1
+                number_summary_dict[ScenarioDescription.SUMMARY.NUM_MOVING_OBJECTS_EACH_TYPE][v["type"]] += 1
 
         # Number of different dynamic object states
         dynamic_object_states_types = set()
@@ -336,14 +348,14 @@ class ScenarioDescription(dict):
                 dynamic_object_states_types.add(step_state)
                 dynamic_object_states_counter[step_state] += 1
         number_summary_dict[ScenarioDescription.SUMMARY.NUM_TRAFFIC_LIGHTS
-                            ] = len(scenario[ScenarioDescription.DYNAMIC_MAP_STATES])
+        ] = len(scenario[ScenarioDescription.DYNAMIC_MAP_STATES])
         number_summary_dict[ScenarioDescription.SUMMARY.NUM_TRAFFIC_LIGHT_TYPES] = dynamic_object_states_types
         number_summary_dict[ScenarioDescription.SUMMARY.NUM_TRAFFIC_LIGHTS_EACH_STEP
-                            ] = dict(dynamic_object_states_counter)
+        ] = dict(dynamic_object_states_counter)
 
         # map
         number_summary_dict[ScenarioDescription.SUMMARY.NUM_MAP_FEATURES
-                            ] = len(scenario[ScenarioDescription.MAP_FEATURES])
+        ] = len(scenario[ScenarioDescription.MAP_FEATURES])
         return number_summary_dict
 
 
@@ -361,7 +373,6 @@ def _recursive_check_type(obj, allow_types, depth=0):
 
     if depth > 1000:
         raise ValueError()
-
 
 # TODO (LQY): Remove me after paper writing
 # {

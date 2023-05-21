@@ -148,9 +148,9 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
             type=MetaDriveType.UNSET,
             state=dict(
                 position=np.zeros(shape=(episode_len, 3)),
-                heading=np.zeros(shape=(episode_len, )),
+                heading=np.zeros(shape=(episode_len,)),
                 velocity=np.zeros(shape=(episode_len, 2)),
-                valid=np.zeros(shape=(episode_len, )),
+                valid=np.zeros(shape=(episode_len,)),
 
                 # Add these items when the object has them.
                 # throttle_brake=np.zeros(shape=(episode_len, 1)),
@@ -173,7 +173,7 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
             "state": {
                 ScenarioDescription.TRAFFIC_LIGHT_STATUS: [MetaDriveType.LIGHT_UNKNOWN] * episode_len
             },
-            ScenarioDescription.TRAFFIC_LIGHT_POSITION: np.zeros(shape=(3, ), dtype=np.float32),
+            ScenarioDescription.TRAFFIC_LIGHT_POSITION: np.zeros(shape=(3,), dtype=np.float32),
             ScenarioDescription.TRAFFIC_LIGHT_LANE: None,
             "metadata": dict(
                 track_length=episode_len, type=MetaDriveType.TRAFFIC_LIGHT, object_id=k, dataset="metadrive"
@@ -208,11 +208,11 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
                 if lights[id][ScenarioDescription.TRAFFIC_LIGHT_LANE] is None:
                     lights[id][ScenarioDescription.TRAFFIC_LIGHT_LANE] = str(id)
                     lights[id][ScenarioDescription.TRAFFIC_LIGHT_POSITION
-                               ] = state[ScenarioDescription.TRAFFIC_LIGHT_POSITION]
+                    ] = state[ScenarioDescription.TRAFFIC_LIGHT_POSITION]
                 else:
                     assert lights[id][ScenarioDescription.TRAFFIC_LIGHT_LANE] == str(id)
                     assert lights[id][ScenarioDescription.TRAFFIC_LIGHT_POSITION
-                                      ] == state[ScenarioDescription.TRAFFIC_LIGHT_POSITION]
+                           ] == state[ScenarioDescription.TRAFFIC_LIGHT_POSITION]
 
             else:
                 tracks[id]["type"] = type
@@ -521,3 +521,22 @@ def assert_scenario_equal(scenarios1, scenarios2, only_compare_sdc=False):
                     )
 
             assert new_scene[SD.DYNAMIC_MAP_STATES][obj_id][SD.TYPE] == obj_state[SD.TYPE]
+
+
+def sdc_moving_dist(scenario):
+    metadata = scenario[SD.METADATA]
+    sdc_info = metadata[SD.SUMMARY.OBJECT_SUMMARY][metadata[SD.SDC_ID]]
+    moving_dist = sdc_info[SD.SUMMARY.MOVING_DIST]
+    return moving_dist
+
+
+def num_object(scenario, object_type=None):
+    metadata = scenario[SD.METADATA]
+    if object_type is None:
+        return metadata[SD.SUMMARY.NUMBER_SUMMARY][SD.SUMMARY.NUM_OBJECTS]
+    else:
+        num = metadata[SD.SUMMARY.NUMBER_SUMMARY][SD.SUMMARY.NUM_OBJECTS_EACH_TYPE].get(object_type, 0)
+
+
+def num_moving_object(scenario, object_type=None):
+    pass

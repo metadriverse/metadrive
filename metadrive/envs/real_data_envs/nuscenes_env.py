@@ -1,5 +1,3 @@
-import numpy as np
-
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.envs.scenario_env import ScenarioEnv
 from metadrive.policy.replay_policy import ReplayEgoCarPolicy
@@ -19,7 +17,7 @@ if __name__ == "__main__":
             "show_fps": False,
             "debug": False,
             # "pstats": True,
-            "render_pipeline": True,
+            # "render_pipeline": True,
             "pstats": True,
             # "daytime": "22:01",
             # "no_traffic": True,
@@ -46,7 +44,7 @@ if __name__ == "__main__":
             # "default_vehicle_in_traffic": True,
             "vehicle_config": dict(
                 # light=True,
-                random_color=True,
+                # random_color=True,
                 show_navi_mark=False,
                 no_wheel_friction=True,
                 lidar=dict(num_lasers=120, distance=50, num_others=4),
@@ -58,24 +56,14 @@ if __name__ == "__main__":
     )
 
     # 0,1,3,4,5,6
-    from metadrive.type import MetaDriveType
 
     success = []
     while True:
-        for i in range(10):
-            env.reset(force_seed=i)
-            # env.engine.force_fps.disable()
-            human_num = 0
-            for t in env.engine.data_manager.current_scenario["tracks"].values():
-                if t["type"] == MetaDriveType.PEDESTRIAN:
-                    human_num += 1
-            print("seed: {}, num human: {}".format(i, human_num))
-            for t in range(10000):
-                o, r, d, info = env.step([0, 0])
-                # env.capture("nuscenes_{:03d}.png".format(t))
-                # if env.config["use_render"]:
-                #     env.render(text={"seed": env.current_seed})
-                if d and info["arrive_dest"]:
-                    print("seed:{}, success".format(env.engine.global_random_seed))
-                    print(env.engine.data_manager.current_scenario_summary)
-                    break
+        # for i in range(10):
+        env.reset(force_seed=env.current_seed if env.engine is not None else 0)
+        for t in range(10000):
+            o, r, d, info = env.step([0, 0])
+            # if d and info["arrive_dest"]:
+            #     print("seed:{}, success".format(env.engine.global_random_seed))
+            #     print(env.engine.data_manager.current_scenario_summary)
+            #     break
