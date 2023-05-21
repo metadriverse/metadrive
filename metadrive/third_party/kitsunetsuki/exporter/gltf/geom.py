@@ -13,10 +13,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from metadrive.libs.kitsunetsuki.base.armature import get_armature
-from metadrive.libs.kitsunetsuki.base.matrices import get_object_matrix
-from metadrive.libs.kitsunetsuki.base.mesh import obj2mesh
-from metadrive.libs.kitsunetsuki.base.objects import apply_modifiers, is_collision
+from metadrive.third_party.kitsunetsuki.base.armature import get_armature
+from metadrive.third_party.kitsunetsuki.base.matrices import get_object_matrix
+from metadrive.third_party.kitsunetsuki.base.mesh import obj2mesh
+from metadrive.third_party.kitsunetsuki.base.objects import apply_modifiers, is_collision
 
 from . import spec
 

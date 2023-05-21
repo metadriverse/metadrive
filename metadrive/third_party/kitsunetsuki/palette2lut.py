@@ -16,7 +16,7 @@
 
 import argparse
 
-from metadrive.libs.kitsunetsuki.lut import Palette2LUT
+from metadrive.third_party.kitsunetsuki.lut import Palette2LUT
 
 from panda3d.core import Filename, VirtualFileSystem, get_model_path
 
