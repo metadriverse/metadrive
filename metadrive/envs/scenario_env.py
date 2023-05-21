@@ -4,7 +4,7 @@ This environment can load all scenarios exported from other environments via env
 import logging
 
 import numpy as np
-
+from metadrive.manager.scenario_curriculum_manager import ScenarioCurriculumManager
 from metadrive.component.vehicle_module.vehicle_panel import VehiclePanel
 from metadrive.component.vehicle_navigation_module.trajectory_navigation import TrajectoryNavigation
 from metadrive.constants import TerminationState
@@ -27,11 +27,14 @@ SCENARIO_ENV_CONFIG = dict(
     start_scenario_index=0,
     num_scenarios=3,
     sequential_seed=False,  # Whether to set seed (the index of map) sequentially across episodes
+
+    # ===== Curriculum Config =====
     curriculum_level=1,  # i.e. set to 5 to split the data into 5 difficulty level
+    episodes_to_evaluate_curriculum=100,
+    target_success_rate=0.85,
 
     # ===== Map Config =====
     store_map=True,
-    store_map_buffer_size=2000,
     need_lane_localization=True,
 
     # ===== Traffic =====
@@ -133,6 +136,7 @@ class ScenarioEnv(BaseEnv):
             self.engine.register_manager("traffic_manager", WaymoTrafficManager())
         if not self.config["no_light"]:
             self.engine.register_manager("light_manager", ScenarioLightManager())
+        self.engine.register_manager("curriculum_manager", ScenarioCurriculumManager())
         self.engine.accept("p", self.stop)
         self.engine.accept("q", self.switch_to_third_person_view)
         self.engine.accept("b", self.switch_to_top_down_view)
@@ -193,6 +197,9 @@ class ScenarioEnv(BaseEnv):
                 done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
                 or done_info[TerminationState.CRASH_BUILDING]
         )
+
+        # log data to curriculum manager
+        self.engine.curriculum_manager.log_episode(done_info[TerminationState.SUCCESS], route_completion)
         return done, done_info
 
     def cost_function(self, vehicle_id: str):

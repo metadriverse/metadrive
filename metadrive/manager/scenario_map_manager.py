@@ -125,3 +125,11 @@ class ScenarioMapManager(BaseManager):
         As Map instance should not be recycled, we will forcefully destroy useless map instances.
         """
         return super(ScenarioMapManager, self).clear_objects(force_destroy=True, *args, **kwargs)
+
+    def clear_stored_maps(self):
+        for m in self._stored_maps.values():
+            if m is not None:
+                m.detach_from_world()
+                m.destroy()
+        self._stored_maps = {i: None for i in range(self.start_scenario_index, self.start_scenario_index + self.map_num)
+                             }

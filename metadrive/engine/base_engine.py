@@ -487,6 +487,10 @@ class BaseEngine(EngineCore, Randomizable):
     def current_level(self):
         return self._current_level
 
+    def level_up(self):
+        self._current_level = min(self._current_level + 1, self._total_level - 1)
+        self.seed(self._current_level * self._num_scenarios_per_level)
+
     @property
     def num_scenarios_per_level(self):
         return self._num_scenarios_per_level

@@ -19,12 +19,11 @@ class ScenarioDataManager(BaseManager):
         engine = get_engine()
 
         self.store_map = engine.global_config.get("store_map", False)
-        store_map_buffer_size = engine.global_config.get("store_map_buffer_size", self.DEFAULT_DATA_BUFFER_SIZE)
         self.directory = engine.global_config["data_directory"]
         self.num_scenarios = engine.global_config["num_scenarios"]
         self.start_scenario_index = engine.global_config["start_scenario_index"]
 
-        self._scenario = DataBuffer(store_map_buffer_size if self.store_map else self.num_scenarios)
+        self._scenarios = {}
 
         # Read summary file first:
         self.summary_dict, self.summary_lookup, self.mapping = read_dataset_summary(self.directory)
@@ -55,7 +54,7 @@ class ScenarioDataManager(BaseManager):
 
         _debug_memory_leak = False
 
-        if i not in self._scenario:
+        if i not in self._scenarios:
 
             if _debug_memory_leak:
                 # inner psutil function
@@ -68,7 +67,7 @@ class ScenarioDataManager(BaseManager):
 
                 cm = process_memory()
 
-            self._scenario.clear_if_necessary()
+            # self._scenarios.clear_if_necessary()
 
             if _debug_memory_leak:
                 lm = process_memory()
@@ -76,7 +75,7 @@ class ScenarioDataManager(BaseManager):
                 cm = lm
 
             # print("===Getting new scenario: ", i)
-            self._scenario[i] = self._get_scenario(i)
+            self._scenarios[i] = self._get_scenario(i)
 
             if _debug_memory_leak:
                 lm = process_memory()
@@ -88,11 +87,11 @@ class ScenarioDataManager(BaseManager):
             # print("===Don't need to get new scenario. Just return: ", i)
 
         if should_copy:
-            return copy.deepcopy(self._scenario[i])
+            return copy.deepcopy(self._scenarios[i])
 
         # Data Manager is the first manager that accesses  data.
         # It is proper to let it validate the metadata and change the global config if needed.
-        ret = self._scenario[i]
+        ret = self._scenarios[i]
 
         return ret
 
@@ -154,3 +153,6 @@ class ScenarioDataManager(BaseManager):
             return sdc_moving_dist * curvature + num_moving_objs * obj_weight
 
         self.summary_lookup = sorted(self.summary_lookup, key=lambda scenario_id: _score(scenario_id))
+    
+    def clear_stored_scenarios(self):
+        self._scenarios = {}
