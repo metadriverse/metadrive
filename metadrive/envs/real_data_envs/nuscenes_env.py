@@ -9,7 +9,7 @@ NuScenesEnv = ScenarioEnv
 if __name__ == "__main__":
     env = NuScenesEnv(
         {
-            "use_render": True,
+            "use_render": False,
             "agent_policy": ReplayEgoCarPolicy,
             # "manual_control": True,
             "show_interface": False,
@@ -18,7 +18,6 @@ if __name__ == "__main__":
             "sequential_seed": True,
             # "debug_static_world": True,
             "curriculum_sort": True,
-            # "no_traffic": True,
             "reactive_traffic": False,
             "show_fps": False,
             # "debug": True,
@@ -35,7 +34,6 @@ if __name__ == "__main__":
             # "camera_height": 0.5,
             # "camera_pitch": np.pi / 3,
             # "camera_fov": 60,
-            # "no_traffic":True,
             # "force_render_fps": 10,
             # "start_scenario_index": 192,
             # "start_scenario_index": 1000,
@@ -43,7 +41,7 @@ if __name__ == "__main__":
             # "force_reuse_object_name": True,
             # "data_directory": "/home/shady/Downloads/test_processed",
             "horizon": 1000,
-            # "no_static_vehicles": True,
+            "no_static_vehicles": True,
             # "show_policy_mark": True,
             # "show_coordinates": True,
             # "force_destroy": True,
