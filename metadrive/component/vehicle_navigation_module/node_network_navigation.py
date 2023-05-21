@@ -63,7 +63,7 @@ class NodeNetworkNavigation(BaseNavigation):
         dest = vehicle.config["destination"]
 
         current_lane = lane
-        destination = dest if dest is not None else None,
+        destination = dest if dest is not None else None
         random_seed = self.engine.global_random_seed
         assert current_lane is not None, "spawn place is not on road!"
         super(NodeNetworkNavigation, self).reset(current_lane)

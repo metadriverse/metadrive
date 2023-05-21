@@ -55,7 +55,7 @@ class EdgeNetworkNavigation(BaseNavigation):
         dest = vehicle.config["destination"]
 
         current_lane = lane
-        destination = dest if dest is not None else None,
+        destination = dest if dest is not None else None
         assert current_lane is not None, "spawn place is not on road!"
 
         super(EdgeNetworkNavigation, self).reset(current_lane)

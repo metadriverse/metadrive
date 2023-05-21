@@ -1,6 +1,6 @@
 import numpy as np
 from panda3d.core import Vec3
-
+from metadrive.utils.math import Vector
 from metadrive.utils.math import wrap_to_pi
 
 
@@ -54,7 +54,7 @@ def metadrive_vector(position):
     """
     # return np.array([position[0], -position[1]])
     # return position[0], -position[1]
-    return position[0], position[1]
+    return Vector([position[0], position[1]])
 
 
 def panda_heading(heading: float) -> float:
