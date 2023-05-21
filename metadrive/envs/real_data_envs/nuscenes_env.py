@@ -9,7 +9,7 @@ NuScenesEnv = ScenarioEnv
 if __name__ == "__main__":
     env = NuScenesEnv(
         {
-            "use_render": False,
+            "use_render": True,
             "agent_policy": ReplayEgoCarPolicy,
             # "manual_control": True,
             "show_interface": False,
@@ -68,12 +68,14 @@ if __name__ == "__main__":
     while True:
         # for i in range(10):
         start_reset = time.time()
-        env.reset(force_seed=env.current_seed if env.engine is not None else 7)
+        env.reset(force_seed=env.current_seed if env.engine is not None else 0)
         reset_used_time += time.time() - start_reset
         reset_num += 1
         for t in range(10000):
             o, r, d, info = env.step([0, 0])
             s += 1
+            if env.config["use_render"]:
+                env.render(text={"seed": env.current_seed})
             if d and info["arrive_dest"]:
                 print(
                     "Time elapse: {:.4f}. Average FPS: {:.4f}, AVG_Reset_time: {:.4f}".format(

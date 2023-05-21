@@ -25,6 +25,9 @@ class ScenarioDataManager(BaseManager):
         self.start_scenario_index = engine.global_config["start_scenario_index"]
 
         self._scenario = DataBuffer(store_map_buffer_size if self.store_map else self.num_scenarios)
+        self._total_level = self.engine.global_config["curriculum_level"]
+        self._current_level = 0
+        self.num_scenarios_per_level = int(self.num_scenarios / self._total_level)
 
         # Read summary file first:
         self.summary_dict, self.summary_lookup, self.mapping = read_dataset_summary(self.directory)
@@ -121,7 +124,8 @@ class ScenarioDataManager(BaseManager):
 
     @property
     def current_scenario(self):
-        return self.get_scenario(self.engine.global_random_seed)
+        seed = self.engine.global_random_seed % self.num_scenarios_per_level
+        return self.get_scenario(seed + self._current_level * self.num_scenarios_per_level)
 
     def sort_scenarios(self):
         """
@@ -129,7 +133,7 @@ class ScenarioDataManager(BaseManager):
         Sort scenarios to support curriculum training. You are encouraged to customize your own sort method
         :return: sorted scenario list
         """
-        if self.engine.global_config["curriculum_level"] == 1:
+        if self._total_level == 1:
             return
 
         def _score(scenario_id):
