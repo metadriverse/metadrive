@@ -9,17 +9,19 @@ NuScenesEnv = ScenarioEnv
 if __name__ == "__main__":
     env = NuScenesEnv(
         {
-            "use_render": False,
+            "use_render": True,
             "agent_policy": ReplayEgoCarPolicy,
-            # "manual_control": True,
+            "manual_control": True,
             "show_interface": False,
+            # "need_lane_localization": False,
             "show_logo": False,
             "sequential_seed": True,
+            # "debug_static_world": True,
             "curriculum_sort": True,
             # "no_traffic": True,
             "reactive_traffic": False,
             "show_fps": False,
-            "debug": False,
+            # "debug": True,
             # "no_static_vehicles": True,
             # "pstats": True,
             # "render_pipeline": True,
