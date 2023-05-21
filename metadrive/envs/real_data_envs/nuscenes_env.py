@@ -9,7 +9,7 @@ if __name__ == "__main__":
         {
             "use_render": True,
             "agent_policy": ReplayEgoCarPolicy,
-            "manual_control": False,
+            "manual_control": True,
             "show_interface": False,
             "show_logo": False,
             "sequential_seed": True,
@@ -48,7 +48,7 @@ if __name__ == "__main__":
                 # light=True,
                 # random_color=True,
                 show_navi_mark=False,
-                no_wheel_friction=True,
+                # no_wheel_friction=True,
                 lidar=dict(num_lasers=120, distance=50, num_others=4),
                 lane_line_detector=dict(num_lasers=12, distance=50),
                 side_detector=dict(num_lasers=160, distance=50)
@@ -62,9 +62,11 @@ if __name__ == "__main__":
     success = []
     while True:
         # for i in range(10):
-        env.reset(force_seed=env.current_seed if env.engine is not None else 0)
+        env.reset(force_seed=env.current_seed if env.engine is not None else 7)
         for t in range(10000):
             o, r, d, info = env.step([0, 0])
+            long, lat = env.vehicle.navigation.reference_trajectory.local_coordinates(env.vehicle.position)
+            env.render(text={"route_completion": info["route_completion"], "long": long, "lat": lat, "reward": r})
             if d and info["arrive_dest"]:
                 print("seed:{}, success".format(env.engine.global_random_seed))
                 print(env.engine.data_manager.current_scenario_summary)
