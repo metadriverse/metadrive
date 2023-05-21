@@ -20,6 +20,7 @@ if __name__ == "__main__":
             "reactive_traffic": False,
             "show_fps": False,
             "debug": False,
+            # "no_static_vehicles": True,
             # "pstats": True,
             # "render_pipeline": True,
             # "daytime": "22:01",
@@ -50,7 +51,7 @@ if __name__ == "__main__":
                 # random_color=True,
                 show_navi_mark=False,
                 # no_wheel_friction=True,
-                lidar=dict(num_lasers=120, distance=50, num_others=4),
+                lidar=dict(num_lasers=120, distance=50),
                 lane_line_detector=dict(num_lasers=0, distance=50),
                 side_detector=dict(num_lasers=12, distance=50)
             ),

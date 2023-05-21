@@ -46,7 +46,7 @@ SCENARIO_ENV_CONFIG = dict(
     vehicle_config=dict(
         lidar=dict(num_lasers=120, distance=50),
         lane_line_detector=dict(num_lasers=0, distance=50),
-        side_detector=dict(num_lasers=4, distance=50),
+        side_detector=dict(num_lasers=12, distance=50),
         show_dest_mark=True,
         navigation_module=TrajectoryNavigation,
     ),
