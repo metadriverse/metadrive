@@ -522,21 +522,3 @@ def assert_scenario_equal(scenarios1, scenarios2, only_compare_sdc=False):
 
             assert new_scene[SD.DYNAMIC_MAP_STATES][obj_id][SD.TYPE] == obj_state[SD.TYPE]
 
-
-def sdc_moving_dist(scenario):
-    metadata = scenario[SD.METADATA]
-    sdc_info = metadata[SD.SUMMARY.OBJECT_SUMMARY][metadata[SD.SDC_ID]]
-    moving_dist = sdc_info[SD.SUMMARY.MOVING_DIST]
-    return moving_dist
-
-
-def num_object(scenario, object_type=None):
-    metadata = scenario[SD.METADATA]
-    if object_type is None:
-        return metadata[SD.SUMMARY.NUMBER_SUMMARY][SD.SUMMARY.NUM_OBJECTS]
-    else:
-        num = metadata[SD.SUMMARY.NUMBER_SUMMARY][SD.SUMMARY.NUM_OBJECTS_EACH_TYPE].get(object_type, 0)
-
-
-def num_moving_object(scenario, object_type=None):
-    pass

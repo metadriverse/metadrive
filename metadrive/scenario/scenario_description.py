@@ -358,6 +358,32 @@ class ScenarioDescription(dict):
         ] = len(scenario[ScenarioDescription.MAP_FEATURES])
         return number_summary_dict
 
+    @staticmethod
+    def sdc_moving_dist(scenario):
+        SD = ScenarioDescription
+        metadata = scenario[SD.METADATA]
+        sdc_info = metadata[SD.SUMMARY.OBJECT_SUMMARY][metadata[SD.SDC_ID]]
+        moving_dist = sdc_info[SD.SUMMARY.MOVING_DIST]
+        return moving_dist
+
+    @staticmethod
+    def num_object(scenario, object_type=None):
+        SD = ScenarioDescription
+        metadata = scenario[SD.METADATA]
+        if object_type is None:
+            return metadata[SD.SUMMARY.NUMBER_SUMMARY][SD.SUMMARY.NUM_OBJECTS]
+        else:
+            return metadata[SD.SUMMARY.NUMBER_SUMMARY][SD.SUMMARY.NUM_OBJECTS_EACH_TYPE].get(object_type, 0)
+
+    @staticmethod
+    def num_moving_object(scenario, object_type=None):
+        SD = ScenarioDescription
+        metadata = scenario[SD.METADATA]
+        if object_type is None:
+            return metadata[SD.SUMMARY.NUMBER_SUMMARY][SD.SUMMARY.NUM_MOVING_OBJECTS]
+        else:
+            return metadata[SD.SUMMARY.NUMBER_SUMMARY][SD.SUMMARY.NUM_MOVING_OBJECTS_EACH_TYPE].get(object_type, 0)
+
 
 def _recursive_check_type(obj, allow_types, depth=0):
     if isinstance(obj, dict):
