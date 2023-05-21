@@ -1,4 +1,5 @@
 import math
+
 import numpy as np
 
 from metadrive.utils.math import norm, get_vertical_vector
@@ -48,7 +49,8 @@ class InterpolatingLine:
 
         We will use Option 1.
         """
-        target_segment_idx = self.min_lineseg_index(position, self._start_points, self._end_points, self._distance_b_a)
+        min_dists = self.min_lineseg_dist(position, self._start_points, self._end_points, self._distance_b_a)
+        target_segment_idx = np.argmin(min_dists)
 
         long = 0
         for idx, seg in enumerate(self.segment_property):
@@ -215,7 +217,7 @@ class InterpolatingLine:
         self.length = None
 
     @staticmethod
-    def min_lineseg_index(p, a, b, d_ba=None):
+    def min_lineseg_dist(p, a, b, d_ba=None):
         """Cartesian distance from point to line segment
         Edited to support arguments as series, from:
         https://stackoverflow.com/a/54442561/11208892
@@ -245,6 +247,58 @@ class InterpolatingLine:
         d_pa = p - a
         c = d_pa[:, 0] * d[:, 1] - d_pa[:, 1] * d[:, 0]
         min_dists = np.hypot(h, c)
+        return min_dists
 
-        # get index
-        return np.argmin(min_dists)
+
+if __name__ == '__main__':
+    test_p = [(611.5277397744468, 1829.6026943481352), (611.9289393579008, 1830.4997828926864),
+              (612.330138941355, 1831.3968714372377), (612.7313385248092, 1832.293959981789),
+              (613.1325381082634, 1833.1910485263402), (613.5337376917175, 1834.0881370708914),
+              (613.9349372751717, 1834.985225615443), (614.3361368586259, 1835.8823141599942),
+              (614.73733644208, 1836.7794027045454), (615.1385360255342, 1837.6764912490967),
+              (615.5397446694475, 1838.573575740269), (615.9442295025767, 1839.4691858535757),
+              (616.3546178958309, 1840.362106243068), (616.7708919643475, 1841.2522979949786),
+              (617.1930335667643, 1842.1397223144547), (617.6210243060098, 1843.02434052725),
+              (618.0548455301055, 1843.9061140814083), (618.494478332978, 1844.7850045489452),
+              (618.9399035552839, 1845.660973627522), (619.3911017852438, 1846.533983142115),
+              (619.8480533594889, 1847.4039950466793), (620.3107383639176, 1848.2709714258071),
+              (620.3107383639176, 1848.2709714258071), (620.7713311311863, 1849.086333109443),
+              (621.2652449066546, 1849.8819520853385), (621.7916348376419, 1850.656467426024),
+              (622.3496005201381, 1851.4085543023612), (622.938187538968, 1852.1369262496978),
+              (623.5563891003444, 1852.8403373683998), (624.2031477540157, 1853.5175844549963),
+              (624.8773572020626, 1854.16750906029), (625.5778641912499, 1854.7889994709174),
+              (626.3034704856974, 1855.3809926109623), (627.0430244723732, 1855.9555751328883),
+              (627.7826528334156, 1856.5300621160332), (628.522281194458, 1857.1045490991783),
+              (629.2619095555023, 1857.6790360823206)]
+
+    import matplotlib.pyplot as plt
+
+    plt.gca().set_aspect('equal')
+
+
+    def draw_polyline(polyline, colors, points, point_colors):
+        for i in range(len(polyline) - 1):
+            segment = [polyline[i], polyline[i + 1]]
+            plt.plot(*zip(*segment), color=colors[i])
+
+        for i, point in enumerate(points):
+            plt.scatter(*point, color=point_colors[i])
+
+        plt.show()
+
+
+    line = InterpolatingLine(test_p)
+    point = (619.8480533594889+10, 1847.4039950466793-4.5)
+    dist = line.min_lineseg_dist(point, line._start_points, line._end_points, line._distance_b_a)
+    min_seg = np.argmin(dist)
+
+    # Example usage:
+    polyline = np.concatenate([line._start_points, line._end_points[-1:]], axis=0)
+    colors = ["blue"] * len(line._start_points)
+    colors[min_seg] = "red"
+
+    long, lat = line.local_coordinates(point)
+    cross = line.position(long, 0)
+    draw_polyline(polyline, colors=colors,
+                  points=[point, cross, line._end_points[min_seg], line._start_points[min_seg]],
+                  point_colors=["red", "green", "blue", "blue"])
