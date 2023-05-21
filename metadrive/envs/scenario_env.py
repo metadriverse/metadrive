@@ -2,7 +2,9 @@
 This environment can load all scenarios exported from other environments via env.export_scenarios()
 """
 import logging
+
 import numpy as np
+
 from metadrive.component.vehicle_module.vehicle_panel import VehiclePanel
 from metadrive.component.vehicle_navigation_module.trajectory_navigation import TrajectoryNavigation
 from metadrive.constants import TerminationState
@@ -160,16 +162,11 @@ class ScenarioEnv(BaseEnv):
             crash_vehicle=False, crash_object=False, crash_building=False, out_of_road=False, arrive_dest=False
         )
 
-        long, lat = vehicle.navigation.reference_trajectory.local_coordinates(vehicle.position)
-
-        total_length = vehicle.navigation.reference_trajectory.length
-        current_distance = long
-
-        route_completion = current_distance / total_length
+        route_completion = vehicle.navigation.route_completion
 
         # if np.linalg.norm(vehicle.position - self.engine.map_manager.sdc_dest_point) < 5 \
         #         or vehicle.lane.index in self.engine.map_manager.sdc_destinations:
-        if self._is_arrive_destination(vehicle) or route_completion > 1.0:
+        if self._is_arrive_destination(vehicle):
             done = True
             logging.info("Episode ended! Reason: arrive_dest.")
             done_info[TerminationState.SUCCESS] = True
@@ -254,10 +251,7 @@ class ScenarioEnv(BaseEnv):
             reward = -self.config["crash_object_penalty"]
 
         step_info["track_length"] = vehicle.navigation.reference_trajectory.length
-        step_info["current_distance"] = vehicle.navigation.reference_trajectory.local_coordinates(vehicle.position)[0]
-        rc = step_info["current_distance"] / step_info["track_length"]
-        step_info["route_completion"] = rc
-
+        step_info["route_completion"] = vehicle.navigation.route_completion
         step_info["carsize"] = [vehicle.WIDTH, vehicle.LENGTH]
 
         # Compute state difference metrics
@@ -302,13 +296,8 @@ class ScenarioEnv(BaseEnv):
 
     def _is_arrive_destination(self, vehicle):
         # Use RC as the only criterion to determine arrival in Scenario env.
-        long, lat = vehicle.navigation.reference_trajectory.local_coordinates(vehicle.position)
-
-        total_length = vehicle.navigation.reference_trajectory.length
-        current_distance = long
-
-        route_completion = current_distance / total_length
-        if route_completion > 0.95 or vehicle.navigation.reference_trajectory.length < 1:
+        route_completion = vehicle.navigation.route_completion
+        if route_completion > 0.95 or vehicle.navigation.reference_trajectory.length < 2:
             # Route Completion ~= 1.0 or vehicle is static!
             return True
         else:

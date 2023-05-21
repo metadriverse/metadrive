@@ -14,14 +14,14 @@ class TrajectoryNavigation(BaseNavigation):
     DISCRETE_LEN = 8  # m
 
     def __init__(
-        self,
-        show_navi_mark: bool = False,
-        random_navi_mark_color=False,
-        show_dest_mark=False,
-        show_line_to_dest=False,
-        panda_color=None,
-        name=None,
-        vehicle_config=None
+            self,
+            show_navi_mark: bool = False,
+            random_navi_mark_color=False,
+            show_dest_mark=False,
+            show_line_to_dest=False,
+            panda_color=None,
+            name=None,
+            vehicle_config=None
     ):
         super(TrajectoryNavigation, self).__init__(
             show_navi_mark=show_navi_mark,
@@ -32,7 +32,7 @@ class TrajectoryNavigation(BaseNavigation):
             name=name,
             vehicle_config=vehicle_config
         )
-        # self.reference_trajectory = None
+        self._route_completion = 0
 
     def reset(self, map=None, current_lane=None, destination=None, random_seed=None):
 
@@ -112,6 +112,12 @@ class TrajectoryNavigation(BaseNavigation):
 
         self._navi_info[half:], lanes_heading2, = self._get_info_for_checkpoint(ckpt_2, ego_vehicle, long)
 
+        # Use RC as the only criterion to determine arrival in Scenario env.
+        long, lat = self.reference_trajectory.local_coordinates(ego_vehicle.position)
+        total_length = self.reference_trajectory.length
+        current_distance = long
+        self._route_completion = current_distance / total_length
+
         if self._show_navi_info:
             # Whether to visualize little boxes in the scene denoting the checkpoints
             pos_of_goal = ckpt_1
@@ -189,6 +195,10 @@ class TrajectoryNavigation(BaseNavigation):
         self.final_lane = None
         self._current_lane = None
         # self.reference_trajectory = None
+
+    @property
+    def route_completion(self):
+        return self._route_completion
 
 
 WaymoTrajectoryNavigation = TrajectoryNavigation
