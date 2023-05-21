@@ -319,8 +319,20 @@ class ScenarioDescription(dict):
         return os.path.basename(file_name)[:3] == "sd_" or all(char.isdigit() for char in file_name)
 
     @staticmethod
+    def _calculate_num_moving_objects(scenario):
+        # moving object
+        number_summary_dict = {ScenarioDescription.SUMMARY.NUM_MOVING_OBJECTS: 0,
+                               ScenarioDescription.SUMMARY.NUM_MOVING_OBJECTS_EACH_TYPE: defaultdict(int)}
+        for v in scenario[ScenarioDescription.METADATA][ScenarioDescription.SUMMARY.OBJECT_SUMMARY].values():
+            if v[ScenarioDescription.SUMMARY.MOVING_DIST] > 1:
+                number_summary_dict[ScenarioDescription.SUMMARY.NUM_MOVING_OBJECTS] += 1
+                number_summary_dict[ScenarioDescription.SUMMARY.NUM_MOVING_OBJECTS_EACH_TYPE][v["type"]] += 1
+        return number_summary_dict
+
+    @staticmethod
     def get_number_summary(scenario):
         number_summary_dict = {}
+
         # object
         number_summary_dict[ScenarioDescription.SUMMARY.NUM_OBJECTS] = len(scenario[ScenarioDescription.TRACKS])
         number_summary_dict[ScenarioDescription.SUMMARY.OBJECT_TYPES
@@ -331,12 +343,7 @@ class ScenarioDescription(dict):
         number_summary_dict[ScenarioDescription.SUMMARY.NUM_OBJECTS_EACH_TYPE] = dict(object_types_counter)
 
         # moving object
-        number_summary_dict[ScenarioDescription.SUMMARY.NUM_MOVING_OBJECTS] = 0
-        number_summary_dict[ScenarioDescription.SUMMARY.NUM_MOVING_OBJECTS_EACH_TYPE] = defaultdict(int)
-        for v in scenario[ScenarioDescription.METADATA][ScenarioDescription.SUMMARY.OBJECT_SUMMARY].values():
-            if v[ScenarioDescription.SUMMARY.MOVING_DIST] > 1:
-                number_summary_dict[ScenarioDescription.SUMMARY.NUM_MOVING_OBJECTS] += 1
-                number_summary_dict[ScenarioDescription.SUMMARY.NUM_MOVING_OBJECTS_EACH_TYPE][v["type"]] += 1
+        number_summary_dict.update(ScenarioDescription._calculate_num_moving_objects(scenario))
 
         # Number of different dynamic object states
         dynamic_object_states_types = set()
@@ -379,10 +386,15 @@ class ScenarioDescription(dict):
     def num_moving_object(scenario, object_type=None):
         SD = ScenarioDescription
         metadata = scenario[SD.METADATA]
-        if object_type is None:
-            return metadata[SD.SUMMARY.NUMBER_SUMMARY][SD.SUMMARY.NUM_MOVING_OBJECTS]
+        if SD.SUMMARY.NUM_MOVING_OBJECTS not in metadata[SD.SUMMARY.NUMBER_SUMMARY]:
+            num_summary = SD._calculate_num_moving_objects(scenario)
         else:
-            return metadata[SD.SUMMARY.NUMBER_SUMMARY][SD.SUMMARY.NUM_MOVING_OBJECTS_EACH_TYPE].get(object_type, 0)
+            num_summary = metadata[SD.SUMMARY.NUMBER_SUMMARY]
+
+        if object_type is None:
+            return num_summary[SD.SUMMARY.NUM_MOVING_OBJECTS]
+        else:
+            return num_summary[SD.SUMMARY.NUM_MOVING_OBJECTS_EACH_TYPE].get(object_type, 0)
 
 
 def _recursive_check_type(obj, allow_types, depth=0):
