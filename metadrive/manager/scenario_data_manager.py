@@ -18,29 +18,23 @@ class ScenarioDataManager(BaseManager):
         from metadrive.engine.engine_utils import get_engine
         engine = get_engine()
 
-        store_map = engine.global_config.get("store_map", False)
+        self.store_map = engine.global_config.get("store_map", False)
         store_map_buffer_size = engine.global_config.get("store_map_buffer_size", self.DEFAULT_DATA_BUFFER_SIZE)
         self.directory = engine.global_config["data_directory"]
         self.num_scenarios = engine.global_config["num_scenarios"]
         self.start_scenario_index = engine.global_config["start_scenario_index"]
 
-        self.store_map = store_map
         self._scenario = DataBuffer(store_map_buffer_size if self.store_map else self.num_scenarios)
 
         # Read summary file first:
         self.summary_dict, self.summary_lookup, self.mapping = read_dataset_summary(self.directory)
 
-        if self.engine.global_config["sequential_seed"] and self.engine.global_config["curriculum_sort"]:
-            self.sort_scenarios()
+        self.sort_scenarios()
 
+        # existence check
         for p in self.summary_dict.keys():
             p = os.path.join(self.directory, self.mapping[p], p)
             assert os.path.exists(p), "No Data at path: {}".format(p)
-
-            # if self.store_map:
-            # If we wish to store map (which requires huge memory), we load data immediately to exchange effiency
-            # later
-            # self._scenario[i] = self._get_scenario(i)
 
     @property
     def current_scenario_summary(self):
@@ -135,6 +129,8 @@ class ScenarioDataManager(BaseManager):
         Sort scenarios to support curriculum training. You are encouraged to customize your own sort method
         :return: sorted scenario list
         """
+        if self.engine.global_config["curriculum_level"] == 1:
+            return
 
         def _score(scenario_id):
             file_path = os.path.join(self.directory, self.mapping[scenario_id], scenario_id)

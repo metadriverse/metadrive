@@ -17,7 +17,6 @@ if __name__ == "__main__":
             "show_logo": False,
             "sequential_seed": True,
             # "debug_static_world": True,
-            "curriculum_sort": True,
             "reactive_traffic": False,
             "show_fps": False,
             # "debug": True,

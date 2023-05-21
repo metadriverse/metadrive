@@ -27,7 +27,7 @@ SCENARIO_ENV_CONFIG = dict(
     start_scenario_index=0,
     num_scenarios=3,
     sequential_seed=False,  # Whether to set seed (the index of map) sequentially across episodes
-    curriculum_sort=False,  # Scenarios will be sorted according to difficulty. It works only sequential_seed=True
+    curriculum_level=1,  # i.e. set to 5 to split the data into 5 difficulty level
 
     # ===== Map Config =====
     store_map=True,
