@@ -43,7 +43,7 @@ if __name__ == "__main__":
             # "no_static_vehicles": True,
             # "show_policy_mark": True,
             # "show_coordinates": True,
-            "force_destroy": True,
+            # "force_destroy": True,
             # "default_vehicle_in_traffic": True,
             "vehicle_config": dict(
                 # light=True,
@@ -51,8 +51,8 @@ if __name__ == "__main__":
                 show_navi_mark=False,
                 # no_wheel_friction=True,
                 lidar=dict(num_lasers=120, distance=50, num_others=4),
-                lane_line_detector=dict(num_lasers=12, distance=50),
-                side_detector=dict(num_lasers=160, distance=50)
+                lane_line_detector=dict(num_lasers=0, distance=50),
+                side_detector=dict(num_lasers=12, distance=50)
             ),
             "data_directory": AssetLoader.file_path("nuscenes", return_raw_style=False),
         }
