@@ -12,6 +12,8 @@ if __name__ == "__main__":
             "manual_control": False,
             "show_interface": False,
             "show_logo": False,
+            "sequential_seed": True,
+            "curriculum_sort": True,
             # "no_traffic": True,
             "reactive_traffic": False,
             "show_fps": False,

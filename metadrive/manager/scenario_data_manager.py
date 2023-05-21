@@ -1,6 +1,8 @@
 import copy
 import os
 
+import numpy as np
+
 from metadrive.manager.base_manager import BaseManager
 from metadrive.scenario.scenario_description import ScenarioDescription as SD, MetaDriveType
 from metadrive.scenario.utils import read_scenario_data, read_dataset_summary
@@ -27,6 +29,9 @@ class ScenarioDataManager(BaseManager):
 
         # Read summary file first:
         self.summary_dict, self.summary_lookup, self.mapping = read_dataset_summary(self.directory)
+
+        if self.engine.global_config["sequential_seed"] and self.engine.global_config["curriculum_sort"]:
+            self.sort_scenarios()
 
         for p in self.summary_dict.keys():
             p = os.path.join(self.directory, self.mapping[p], p)
@@ -124,21 +129,29 @@ class ScenarioDataManager(BaseManager):
     def current_scenario(self):
         return self.get_scenario(self.engine.global_random_seed)
 
-    @staticmethod
-    def sort_scenarios(scenarios):
+    def sort_scenarios(self):
         """
         TODO(LQY): consider exposing this API to config
         Sort scenarios to support curriculum training. You are encouraged to customize your own sort method
         :return: sorted scenario list
         """
-        def _score_pg(scenario):
-            sdc_info = metadata[SD.SUMMARY.OBJECT_SUMMARY][metadata[SD.SDC_ID]]
-            moving_dist = sdc_info[SD.SUMMARY.MOVING_DIST]
-            if moving_dist > target_dist and condition == ScenarioFilter.GREATER:
-                return True
-            if moving_dist < target_dist and condition == ScenarioFilter.SMALLER:
-                return True
-            return False
 
+        def _score(scenario_id):
+            file_path = os.path.join(self.directory, self.mapping[scenario_id], scenario_id)
+            scenario = read_scenario_data(file_path)
+            obj_weight = 5
 
+            # calculate curvature
+            ego_car_id = scenario[SD.METADATA][SD.SDC_ID]
+            state_dict = scenario["tracks"][ego_car_id]["state"]
+            valid_track = state_dict["position"][np.where(state_dict["valid"].astype(int))][..., :2]
 
+            dir = valid_track[1:] - valid_track[:-1]
+            dir = np.arctan(dir[..., 1] / dir[..., 0])
+            curvature = abs(dir[1:] - dir[:-1]) / np.pi + 1
+
+            sdc_moving_dist = SD.sdc_moving_dist(scenario)
+            num_moving_objs = SD.num_moving_object(scenario, object_type=MetaDriveType.VEHICLE)
+            return sdc_moving_dist * curvature + num_moving_objs * obj_weight
+
+        self.summary_lookup = sorted(self.summary_lookup, key=lambda scenario_id: _score(scenario_id))
