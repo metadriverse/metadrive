@@ -72,6 +72,11 @@ class BaseEngine(EngineCore, Randomizable):
         self.graphicsEngine.renderFrame()
         self.graphicsEngine.renderFrame()
 
+        # curriculum reset
+        self._total_level = self.global_config["curriculum_level"]
+        self._current_level = 0
+        self._num_scenarios_per_level = int(self.global_config["num_scenarios"] / self._total_level)
+
     def add_policy(self, object_id, policy_class, *args, **kwargs):
         policy = policy_class(*args, **kwargs)
         self._object_policies[object_id] = policy
@@ -116,7 +121,7 @@ class BaseEngine(EngineCore, Randomizable):
         return True if object_id in self._object_tasks else False
 
     def spawn_object(
-        self, object_class, pbr_model=True, force_spawn=False, auto_fill_random_seed=True, record=True, **kwargs
+            self, object_class, pbr_model=True, force_spawn=False, auto_fill_random_seed=True, record=True, **kwargs
     ):
         """
         Call this func to spawn one object
@@ -257,7 +262,6 @@ class BaseEngine(EngineCore, Randomizable):
         _debug_memory_usage = False
 
         if _debug_memory_usage:
-
             def process_memory():
                 import psutil
                 import os
@@ -468,10 +472,24 @@ class BaseEngine(EngineCore, Randomizable):
         self._managers = OrderedDict(sorted(self._managers.items(), key=lambda k_v: k_v[-1].PRIORITY))
 
     def seed(self, random_seed):
+        random_seed = random_seed % self._num_scenarios_per_level
+        random_seed += self._current_level * self._num_scenarios_per_level
         self.global_random_seed = random_seed
         super(BaseEngine, self).seed(random_seed)
         for mgr in self._managers.values():
             mgr.seed(random_seed)
+
+    @property
+    def total_level(self):
+        return self._total_level
+
+    @property
+    def current_level(self):
+        return self._current_level
+
+    @property
+    def num_scenarios_per_level(self):
+        return self._num_scenarios_per_level
 
     @property
     def current_map(self):
