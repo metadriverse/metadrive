@@ -1,8 +1,8 @@
 import numpy as np
 from panda3d.core import Vec3
 
-from metadrive.utils.math import Vector
 from metadrive.utils.math import wrap_to_pi
+
 
 #
 # Now all coordinates are the same and are all in right-handed
@@ -46,7 +46,7 @@ def panda_vector(position, z=0.0) -> Vec3:
     return Vec3(position[0], position[1], z)
 
 
-def metadrive_vector(position: Vec3) -> "Vector":
+def metadrive_vector(position):
     """
     Transform the position in Panda3d to MetaDrive world
     :param position: Vec3, position in Panda3d
@@ -54,7 +54,7 @@ def metadrive_vector(position: Vec3) -> "Vector":
     """
     # return np.array([position[0], -position[1]])
     # return position[0], -position[1]
-    return Vector((position[0], position[1]))
+    return position[0], position[1]
 
 
 def panda_heading(heading: float) -> float:

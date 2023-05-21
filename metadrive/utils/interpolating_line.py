@@ -1,7 +1,6 @@
 import math
 
 import numpy as np
-from scipy.spatial import distance
 
 from metadrive.utils.math import norm, get_vertical_vector
 
@@ -13,7 +12,8 @@ class InterpolatingLine:
 
     def __init__(self, points):
         points = np.asarray(points)[..., :2]
-        self.segment_property = self._get_properties(points)
+        self.segment_property, self._start_points, self._end_points = self._get_properties(points)
+        self._distance_b_a = self._end_points - self._start_points
         self.length = sum([seg["length"] for seg in self.segment_property])
 
     def position(self, longitudinal: float, lateral: float) -> np.ndarray:
@@ -49,9 +49,7 @@ class InterpolatingLine:
 
         We will use Option 1.
         """
-        key = lambda seg: self.point_to_line_dist(position, [self.segment_property[seg]["start_point"],
-                                                             self.segment_property[seg]["end_point"]])
-        target_segment_idx = sorted(range(len(self.segment_property)), key=key)[0]
+        target_segment_idx = self.min_lineseg_index(position, self._start_points, self._end_points, self._distance_b_a)
 
         long = 0
         for idx, seg in enumerate(self.segment_property):
@@ -65,10 +63,10 @@ class InterpolatingLine:
                 return long, lateral
 
         # deprecated content
-        # # Four elements:
-        # #   accumulated longitude,
-        # #   segment-related longitude,
-        # #   segment-related lateral,
+        # Four elements:
+        #   accumulated longitude,
+        #   segment-related longitude,
+        #   segment-related lateral,
         # ret = []
         # exclude_ret = []
         # accumulate_len = 0
@@ -106,6 +104,8 @@ class InterpolatingLine:
     def _get_properties(self, points):
         points = np.asarray(points)[..., :2]
         ret = []
+        start_points = []
+        end_points = []
         p_start_idx = 0
         while p_start_idx < len(points) - 1:
             for p_end_idx in range(p_start_idx + 1, len(points)):
@@ -127,6 +127,8 @@ class InterpolatingLine:
                 "end_point": p_end
             }
             ret.append(seg_property)
+            start_points.append(seg_property["start_point"])
+            end_points.append(seg_property["end_point"])
             p_start_idx = p_end_idx  # next
         if len(ret) == 0:
             # static, length=zero
@@ -139,8 +141,9 @@ class InterpolatingLine:
                 "end_point": np.asarray([points[0][0] + 0.1, points[0][1]])
             }
             ret.append(seg_property)
-
-        return ret
+            start_points.append(seg_property["start_point"])
+            end_points.append(seg_property["end_point"])
+        return ret, np.asarray(start_points), np.asarray(end_points)
 
     @staticmethod
     def points_distance(start_p, end_p):
@@ -211,52 +214,36 @@ class InterpolatingLine:
         self.length = None
 
     @staticmethod
-    def point_to_line_dist(point, line):
-        """Calculate the distance between a point and a line segment.
+    def min_lineseg_index(p, a, b, d_ba=None):
+        """Cartesian distance from point to line segment
+        Edited to support arguments as series, from:
+        https://stackoverflow.com/a/54442561/11208892
 
-        To calculate the closest distance to a line segment, we first need to check
-        if the point projects onto the line segment. If it does, then we calculate
-        the orthogonal distance from the point to the line.
-        If the point does not project to the line segment, we calculate the
-        distance to both endpoints and take the shortest distance.
-
-        :param point: Numpy array of form [x,y], describing the point.
-        :param line: List of endpoint arrays of form [P1, P2]
-        :return: The minimum distance to a point.
+        Args:
+            - p: np.array of single point, shape (2,) or 2D array, shape (x, 2)
+            - a: np.array of shape (x, 2)
+            - b: np.array of shape (x, 2)
         """
-        # unit vector
-        unit_line = np.array(line[1]) - np.array(line[0])
-        norm_unit_line = unit_line / np.linalg.norm(unit_line)
+        # normalized tangent vectors
+        p = np.asarray(p)
+        if d_ba is None:
+            d_ba = b - a
+        d = np.divide(d_ba, (np.hypot(d_ba[:, 0], d_ba[:, 1])
+                             .reshape(-1, 1)))
 
-        # compute the perpendicular distance to the theoretical infinite line
-        segment_dist = (
-                np.linalg.norm(np.cross(np.array(line[1]) - np.array(line[0]), np.array(line[0]) - point)) /
-                np.linalg.norm(unit_line)
-        )
+        # signed parallel distance components
+        # rowwise dot products of 2D vectors
+        s = np.multiply(a - p, d).sum(axis=1)
+        t = np.multiply(p - b, d).sum(axis=1)
 
-        diff = (
-                (norm_unit_line[0] * (point[0] - line[0][0])) +
-                (norm_unit_line[1] * (point[1] - line[0][1]))
-        )
+        # clamped parallel distance
+        h = np.maximum.reduce([s, t, np.zeros(len(s))])
 
-        x_seg = (norm_unit_line[0] * diff) + line[0][0]
-        y_seg = (norm_unit_line[1] * diff) + line[0][1]
+        # perpendicular distance component
+        # rowwise cross products of 2D vectors
+        d_pa = p - a
+        c = d_pa[:, 0] * d[:, 1] - d_pa[:, 1] * d[:, 0]
+        min_dists = np.hypot(h, c)
 
-        endpoint_dist = min(
-            distance.euclidean(point, line[0]),
-            distance.euclidean(point, line[1])
-        )
-
-        # decide if the intersection point falls on the line segment
-        lp1_x = line[0][0]  # line point 1 x
-        lp1_y = line[0][1]  # line point 1 y
-        lp2_x = line[1][0]  # line point 2 x
-        lp2_y = line[1][1]  # line point 2 y
-        is_betw_x = lp1_x <= x_seg <= lp2_x or lp2_x <= x_seg <= lp1_x
-        is_betw_y = lp1_y <= y_seg <= lp2_y or lp2_y <= y_seg <= lp1_y
-
-        if is_betw_x and is_betw_y:
-            return segment_dist
-        else:
-            # if not, then return the minimum distance to the segment endpoints
-            return endpoint_dist
+        # get index
+        return np.argmin(min_dists)

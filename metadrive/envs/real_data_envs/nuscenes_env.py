@@ -1,3 +1,5 @@
+import time
+
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.envs.scenario_env import ScenarioEnv
 from metadrive.policy.replay_policy import ReplayEgoCarPolicy
@@ -7,9 +9,9 @@ NuScenesEnv = ScenarioEnv
 if __name__ == "__main__":
     env = NuScenesEnv(
         {
-            "use_render": True,
+            "use_render": False,
             "agent_policy": ReplayEgoCarPolicy,
-            "manual_control": True,
+            # "manual_control": True,
             "show_interface": False,
             "show_logo": False,
             "sequential_seed": True,
@@ -20,7 +22,6 @@ if __name__ == "__main__":
             "debug": False,
             # "pstats": True,
             # "render_pipeline": True,
-            "pstats": True,
             # "daytime": "22:01",
             # "no_traffic": True,
             # "no_light": False,
@@ -60,14 +61,25 @@ if __name__ == "__main__":
     # 0,1,3,4,5,6
 
     success = []
+    reset_num = 0
+    start = time.time()
+    reset_used_time = 0
+    s = 0
     while True:
         # for i in range(10):
+        start_reset = time.time()
         env.reset(force_seed=env.current_seed if env.engine is not None else 7)
+        reset_used_time += time.time() - start_reset
+        reset_num += 1
         for t in range(10000):
             o, r, d, info = env.step([0, 0])
-            long, lat = env.vehicle.navigation.reference_trajectory.local_coordinates(env.vehicle.position)
-            env.render(text={"route_completion": info["route_completion"], "long": long, "lat": lat, "reward": r})
+            s += 1
             if d and info["arrive_dest"]:
+                print(
+                    "Time elapse: {:.4f}. Average FPS: {:.4f}, AVG_Reset_time: {:.4f}".format(
+                        time.time() - start, s / (time.time() - start - reset_used_time),
+                        reset_used_time / reset_num
+                    )
+                )
                 print("seed:{}, success".format(env.engine.global_random_seed))
-                print(env.engine.data_manager.current_scenario_summary)
                 break
