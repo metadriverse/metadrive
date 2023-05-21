@@ -65,7 +65,7 @@ if __name__ == "__main__":
         env.reset(force_seed=env.current_seed if env.engine is not None else 0)
         for t in range(10000):
             o, r, d, info = env.step([0, 0])
-            # if d and info["arrive_dest"]:
-            #     print("seed:{}, success".format(env.engine.global_random_seed))
-            #     print(env.engine.data_manager.current_scenario_summary)
-            #     break
+            if d and info["arrive_dest"]:
+                print("seed:{}, success".format(env.engine.global_random_seed))
+                print(env.engine.data_manager.current_scenario_summary)
+                break

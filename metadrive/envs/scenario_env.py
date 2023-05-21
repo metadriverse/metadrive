@@ -173,19 +173,19 @@ class ScenarioEnv(BaseEnv):
             done = True
             logging.info("Episode ended! Reason: arrive_dest.")
             done_info[TerminationState.SUCCESS] = True
-        if self._is_out_of_road(vehicle) or route_completion < -0.1:
+        elif self._is_out_of_road(vehicle) or route_completion < -0.1:
             done = True
             logging.info("Episode ended! Reason: out_of_road.")
             done_info[TerminationState.OUT_OF_ROAD] = True
-        if vehicle.crash_vehicle and self.config["crash_vehicle_done"]:
+        elif vehicle.crash_vehicle and self.config["crash_vehicle_done"]:
             done = True
             logging.info("Episode ended! Reason: crash vehicle ")
             done_info[TerminationState.CRASH_VEHICLE] = True
-        if vehicle.crash_object:
+        elif vehicle.crash_object:
             done = True
             done_info[TerminationState.CRASH_OBJECT] = True
             logging.info("Episode ended! Reason: crash object ")
-        if vehicle.crash_building:
+        elif vehicle.crash_building:
             done = True
             done_info[TerminationState.CRASH_BUILDING] = True
             logging.info("Episode ended! Reason: crash building ")
@@ -237,9 +237,11 @@ class ScenarioEnv(BaseEnv):
         else:
             lateral_factor = 1.0
 
+        # dense reward
         reward = 0
         reward += self.config["driving_reward"] * (long_now - long_last) * lateral_factor
-
+        if vehicle.on_yellow_continuous_line or vehicle.crash_sidewalk:
+            reward -= 1.0
         step_info["step_reward"] = reward
 
         if self._is_arrive_destination(vehicle):
@@ -319,8 +321,8 @@ class ScenarioEnv(BaseEnv):
             # We prefer using this out of road termination criterion.
             agent_name = self.agent_manager.object_to_agent(vehicle.name)
             lat = abs(self.observations[agent_name].lateral_dist)
-            done = lat > 10
-            done = done or vehicle.on_yellow_continuous_line or vehicle.crash_sidewalk
+            done = lat > 5
+            done = done
             return done
 
         done = vehicle.crash_sidewalk or vehicle.on_yellow_continuous_line or vehicle.on_white_continuous_line

@@ -139,7 +139,7 @@ class ScenarioDataManager(BaseManager):
         def _score(scenario_id):
             file_path = os.path.join(self.directory, self.mapping[scenario_id], scenario_id)
             scenario = read_scenario_data(file_path)
-            obj_weight = 5
+            obj_weight = 0
 
             # calculate curvature
             ego_car_id = scenario[SD.METADATA][SD.SDC_ID]
@@ -148,7 +148,7 @@ class ScenarioDataManager(BaseManager):
 
             dir = valid_track[1:] - valid_track[:-1]
             dir = np.arctan(dir[..., 1] / dir[..., 0])
-            curvature = abs(dir[1:] - dir[:-1]) / np.pi + 1
+            curvature = sum(abs(dir[1:] - dir[:-1]) / np.pi) + 1
 
             sdc_moving_dist = SD.sdc_moving_dist(scenario)
             num_moving_objs = SD.num_moving_object(scenario, object_type=MetaDriveType.VEHICLE)
