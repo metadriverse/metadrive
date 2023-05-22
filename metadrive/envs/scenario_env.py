@@ -27,6 +27,7 @@ SCENARIO_ENV_CONFIG = dict(
     start_scenario_index=0,
     num_scenarios=3,
     sequential_seed=False,  # Whether to set seed (the index of map) sequentially across episodes
+    random_sequential_seed_start=True,  # If using sequential seed, random assign a start index
 
     # ===== Curriculum Config =====
     curriculum_level=1,  # i.e. set to 5 to split the data into 5 difficulty level
@@ -272,6 +273,7 @@ class ScenarioEnv(BaseEnv):
         step_info["track_length"] = vehicle.navigation.reference_trajectory.length
         step_info["route_completion"] = vehicle.navigation.route_completion
         step_info["curriculum_level"] = self.engine.current_level
+        step_info["scenario_index"] = self.engine.current_seed
         step_info["carsize"] = [vehicle.WIDTH, vehicle.LENGTH]
 
         # Compute state difference metrics
@@ -348,7 +350,9 @@ class ScenarioEnv(BaseEnv):
         elif self.config["sequential_seed"]:
             current_seed = self.engine.global_seed
             if current_seed is None:
-                current_seed = self.config["start_scenario_index"]
+                current_seed = self.engine.np_random.randint(int(self.config["start_scenario_index"]),
+                                                             int(self.config["start_scenario_index"]) + int(
+                                                                 self.config["num_scenarios"]))
             else:
                 current_seed += 1
             if current_seed >= self.config["start_scenario_index"] + int(self.config["num_scenarios"]):
