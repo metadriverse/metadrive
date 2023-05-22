@@ -513,7 +513,7 @@ class BaseEngine(EngineCore, Randomizable):
             if hasattr(self, "map_manager"):
                 return self.map_manager.current_map
             else:
-                return None
+                raise ValueError("No mapmanager in {}".format(self.managers))
 
     @property
     def current_track_vehicle(self):
