@@ -64,12 +64,12 @@ SCENARIO_ENV_CONFIG = dict(
     driving_reward=1.0,
     speed_reward=0.1,
     use_lateral_reward=False,
-    horizon=500,
 
     # ===== Cost Scheme =====
     crash_vehicle_cost=1.0,
     crash_object_cost=1.0,
     out_of_road_cost=1.0,
+    crash_human_cost=1.0,
 
     # ===== Termination Scheme =====
     out_of_route_done=False,
@@ -78,6 +78,7 @@ SCENARIO_ENV_CONFIG = dict(
 
     # ===== others =====
     interface_panel=[VehiclePanel],  # for boosting efficiency
+    horizon=400,
 )
 
 
@@ -214,6 +215,8 @@ class ScenarioEnv(BaseEnv):
             step_info["cost"] = self.config["crash_vehicle_cost"]
         elif vehicle.crash_object:
             step_info["cost"] = self.config["crash_object_cost"]
+        elif vehicle.crash_human:
+            step_info["cost"] = self.config["crash_human_cost"]
         return step_info['cost'], step_info
 
     def reward_function(self, vehicle_id: str):
@@ -261,6 +264,7 @@ class ScenarioEnv(BaseEnv):
 
         step_info["track_length"] = vehicle.navigation.reference_trajectory.length
         step_info["route_completion"] = vehicle.navigation.route_completion
+        step_info["curriculum_level"] = self.engine.current_level
         step_info["carsize"] = [vehicle.WIDTH, vehicle.LENGTH]
 
         # Compute state difference metrics
