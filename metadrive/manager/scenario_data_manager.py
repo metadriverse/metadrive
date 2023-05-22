@@ -148,7 +148,7 @@ class ScenarioDataManager(BaseManager):
             valid_track = state_dict["position"][np.where(state_dict["valid"].astype(int))][..., :2]
 
             dir = valid_track[1:] - valid_track[:-1]
-            dir = np.arctan(dir[..., 1] / dir[..., 0])
+            dir = np.arctan2(dir[..., 1], dir[..., 0])
             curvature = sum(abs(dir[1:] - dir[:-1]) / np.pi) + 1
 
             sdc_moving_dist = SD.sdc_moving_dist(scenario)
