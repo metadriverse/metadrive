@@ -59,13 +59,45 @@ def test_curriculum_level_up(render=False, level=5):
         }
     )
     try:
-        scenario_id = set()
+        scenario_id = []
         for i in tqdm(range(10), desc=str(level)):
             env.reset(force_seed=i)
             for i in range(250):
                 o, r, d, _ = env.step([0, 0])
-            scenario_id.add(env.engine.data_manager.current_scenario_summary["id"])
-        assert len(scenario_id) == 10
+            scenario_id.append(env.engine.data_manager.current_scenario_summary["id"])
+        assert len(set(scenario_id)) == 10
+        ids = [env.engine.data_manager.summary_dict[f]["id"] for f in env.engine.data_manager.summary_lookup]
+        assert scenario_id == ids
+    finally:
+        env.close()
+
+
+def test_curriculum_up_1_level(render=False, level=5):
+    env = NuScenesEnv(
+        {
+            "use_render": render,
+            "agent_policy": ReplayEgoCarPolicy,
+            "sequential_seed": True,
+            "reactive_traffic": False,
+            "window_size": (1600, 900),
+            "num_scenarios": 10,
+            "episodes_to_evaluate_curriculum": 2,
+            "horizon": 1000,
+            "curriculum_level": level,
+            "no_static_vehicles": True,
+            "data_directory": AssetLoader.file_path("nuscenes", return_raw_style=False),
+        }
+    )
+    try:
+        scenario_id = []
+        for i in tqdm(range(10), desc=str(level)):
+            env.reset(force_seed=i)
+            for i in range(10):
+                o, r, d, _ = env.step([0, 0])
+            scenario_id.append(env.engine.data_manager.current_scenario_summary["id"])
+        assert len(set(scenario_id)) == 4
+        ids = [env.engine.data_manager.summary_dict[f]["id"] for f in env.engine.data_manager.summary_lookup]
+        assert set(scenario_id) == set(ids[:4])
     finally:
         env.close()
 

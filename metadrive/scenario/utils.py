@@ -356,7 +356,7 @@ def read_dataset_summary(file_folder):
         except ValueError:
             files = sorted(files, key=lambda file_name: file_name.replace(".pkl", ""))
         files = [p for p in files]
-        summary_dict = {f: {} for f in files}
+        summary_dict = {f: read_scenario_data(os.path.join(file_folder, f))["metadata"] for f in files}
 
     if os.path.exists(mapping_file):
         with open(mapping_file, "rb") as f:
