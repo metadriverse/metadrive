@@ -29,6 +29,7 @@ class ScenarioDataManager(BaseManager):
         self.summary_dict, self.summary_lookup, self.mapping = read_dataset_summary(self.directory)
 
         # sort scenario for curriculum training
+        self.scenario_difficulty = None
         self.sort_scenarios()
 
         # existence check
@@ -155,10 +156,18 @@ class ScenarioDataManager(BaseManager):
             num_moving_objs = SD.num_moving_object(scenario, object_type=MetaDriveType.VEHICLE)
             return sdc_moving_dist * curvature + num_moving_objs * obj_weight
 
-        self.summary_lookup = sorted(self.summary_lookup, key=lambda scenario_id: _score(scenario_id))
+        id_scores = [(s_id, _score(s_id)) for s_id in self.summary_lookup]
+        id_scores = sorted(id_scores, key=lambda scenario: scenario[-1])
+        self.summary_lookup = [id_score[0] for id_score in id_scores]
+        self.scenario_difficulty = {id_score[0]: id_score[1] for id_score in id_scores}
 
     def clear_stored_scenarios(self):
         self._scenarios = {}
+
+    @property
+    def current_scenario_difficulty(self):
+        return self.scenario_difficulty[
+            self.summary_lookup[self.engine.global_random_seed]] if self.scenario_difficulty is not None else 0
 
     @property
     def current_scenario_id(self):

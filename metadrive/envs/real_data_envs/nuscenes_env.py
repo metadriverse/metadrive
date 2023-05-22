@@ -18,6 +18,7 @@ if __name__ == "__main__":
             "sequential_seed": True,
             # "debug_static_world": True,
             "reactive_traffic": False,
+            "curriculum_level": 2,
             "show_fps": False,
             # "debug": True,
             # "no_static_vehicles": True,
@@ -75,7 +76,7 @@ if __name__ == "__main__":
             o, r, d, info = env.step([0, 0])
             s += 1
             if env.config["use_render"]:
-                env.render(text={"seed": env.current_seed, "num_map": info["num_stored_maps"]})
+                env.render(text={"seed": env.current_seed, "num_map": info["num_stored_maps"], "difficulty": info["scenario_difficulty"]})
             if d and info["arrive_dest"]:
                 print(
                     "Time elapse: {:.4f}. Average FPS: {:.4f}, AVG_Reset_time: {:.4f}".format(
