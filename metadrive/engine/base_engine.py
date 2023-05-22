@@ -73,7 +73,7 @@ class BaseEngine(EngineCore, Randomizable):
         self.graphicsEngine.renderFrame()
 
         # curriculum reset
-        self._max_level = self.global_config["curriculum_level"]
+        self._max_level = self.global_config.get("curriculum_level", 1)
         self._current_level = 0
         self._num_scenarios_per_level = int(self.global_config["num_scenarios"] / self._max_level)
 
