@@ -25,7 +25,10 @@ def _test_level(level=1, render=False):
         for i in tqdm(range(10), desc=str(level)):
             env.reset(force_seed=i)
             for i in range(10):
-                env.step([0, 0])
+                o, r, d, _ = env.step([0, 0])
+                if d:
+                    break
+
             scenario_id.add(env.engine.data_manager.current_scenario_summary["id"])
         assert len(scenario_id) == int(10 / level)
     finally:
@@ -39,5 +42,34 @@ def test_curriculum_seed():
     _test_level(level=3)
 
 
+def test_curriculum_level_up(render=False, level=5):
+    env = NuScenesEnv(
+        {
+            "use_render": render,
+            "agent_policy": ReplayEgoCarPolicy,
+            "sequential_seed": True,
+            "reactive_traffic": False,
+            "window_size": (1600, 900),
+            "num_scenarios": 10,
+            "episodes_to_evaluate_curriculum": 2,
+            "horizon": 1000,
+            "curriculum_level": level,
+            "no_static_vehicles": True,
+            "data_directory": AssetLoader.file_path("nuscenes", return_raw_style=False),
+        }
+    )
+    try:
+        scenario_id = set()
+        for i in tqdm(range(10), desc=str(level)):
+            env.reset(force_seed=i)
+            for i in range(250):
+                o, r, d, _ = env.step([0, 0])
+            scenario_id.add(env.engine.data_manager.current_scenario_summary["id"])
+        assert len(scenario_id) == 10
+    finally:
+        env.close()
+
+
 if __name__ == '__main__':
-    test_curriculum_seed()
+    # test_curriculum_seed()
+    test_curriculum_level_up()

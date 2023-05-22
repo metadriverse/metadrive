@@ -73,9 +73,9 @@ class BaseEngine(EngineCore, Randomizable):
         self.graphicsEngine.renderFrame()
 
         # curriculum reset
-        self._total_level = self.global_config["curriculum_level"]
+        self._max_level = self.global_config["curriculum_level"]
         self._current_level = 0
-        self._num_scenarios_per_level = int(self.global_config["num_scenarios"] / self._total_level)
+        self._num_scenarios_per_level = int(self.global_config["num_scenarios"] / self._max_level)
 
     def add_policy(self, object_id, policy_class, *args, **kwargs):
         policy = policy_class(*args, **kwargs)
@@ -480,15 +480,15 @@ class BaseEngine(EngineCore, Randomizable):
             mgr.seed(random_seed)
 
     @property
-    def total_level(self):
-        return self._total_level
+    def max_level(self):
+        return self._max_level
 
     @property
     def current_level(self):
         return self._current_level
 
     def level_up(self):
-        self._current_level = min(self._current_level + 1, self._total_level - 1)
+        self._current_level = min(self._current_level + 1, self._max_level - 1)
         self.seed(self._current_level * self._num_scenarios_per_level)
 
     @property

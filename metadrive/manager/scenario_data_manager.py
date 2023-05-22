@@ -129,9 +129,9 @@ class ScenarioDataManager(BaseManager):
         Sort scenarios to support curriculum training. You are encouraged to customize your own sort method
         :return: sorted scenario list
         """
-        if self.engine.total_level == 0:
+        if self.engine.max_level == 0:
             raise ValueError("Curriculum Level should be greater than 1")
-        elif self.engine.total_level == 1:
+        elif self.engine.max_level == 1:
             return
 
         def _score(scenario_id):
@@ -153,6 +153,10 @@ class ScenarioDataManager(BaseManager):
             return sdc_moving_dist * curvature + num_moving_objs * obj_weight
 
         self.summary_lookup = sorted(self.summary_lookup, key=lambda scenario_id: _score(scenario_id))
-    
+
     def clear_stored_scenarios(self):
         self._scenarios = {}
+
+    @property
+    def current_scenario_id(self):
+        return self.current_scenario_summary["id"]

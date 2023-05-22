@@ -174,6 +174,10 @@ class ScenarioEnv(BaseEnv):
             done = True
             logging.info("Episode ended! Reason: arrive_dest.")
             done_info[TerminationState.SUCCESS] = True
+
+            # log data to curriculum manager
+            self.engine.curriculum_manager.log_episode(True, route_completion)
+
         elif self._is_out_of_road(vehicle) or route_completion < -0.1:
             done = True
             logging.info("Episode ended! Reason: out_of_road.")
@@ -198,8 +202,6 @@ class ScenarioEnv(BaseEnv):
                 or done_info[TerminationState.CRASH_BUILDING]
         )
 
-        # log data to curriculum manager
-        self.engine.curriculum_manager.log_episode(done_info[TerminationState.SUCCESS], route_completion)
         return done, done_info
 
     def cost_function(self, vehicle_id: str):
