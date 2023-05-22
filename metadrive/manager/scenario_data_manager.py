@@ -2,11 +2,9 @@ import copy
 import os
 
 import numpy as np
-
 from metadrive.manager.base_manager import BaseManager
 from metadrive.scenario.scenario_description import ScenarioDescription as SD, MetaDriveType
 from metadrive.scenario.utils import read_scenario_data, read_dataset_summary
-from metadrive.utils.data_buffer import DataBuffer
 
 
 class ScenarioDataManager(BaseManager):
@@ -40,6 +38,9 @@ class ScenarioDataManager(BaseManager):
             p = os.path.join(self.directory, self.mapping[p], p)
             assert os.path.exists(p), "No Data at path: {}".format(p)
 
+        # stat
+        self.coverage = [0 for _ in range(len(self.summary_lookup))]
+
     @property
     def current_scenario_summary(self):
         return self.current_scenario[SD.METADATA]
@@ -52,6 +53,7 @@ class ScenarioDataManager(BaseManager):
         file_path = os.path.join(self.directory, self.mapping[scenario_id], scenario_id)
         ret = read_scenario_data(file_path)
         assert isinstance(ret, SD)
+        self.coverage[i] = 1
         return ret
 
     def get_scenario(self, i, should_copy=False):
@@ -172,3 +174,7 @@ class ScenarioDataManager(BaseManager):
     @property
     def current_scenario_id(self):
         return self.current_scenario_summary["scenario_id"]
+
+    @property
+    def data_coverage(self):
+        return sum(self.coverage)

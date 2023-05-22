@@ -11,7 +11,7 @@ if __name__ == "__main__":
         {
             "use_render": True,
             "agent_policy": ReplayEgoCarPolicy,
-            # "manual_control": True,
+            "manual_control": True,
             "show_interface": False,
             # "need_lane_localization": False,
             "show_logo": False,
@@ -76,8 +76,10 @@ if __name__ == "__main__":
             o, r, d, info = env.step([0, 0])
             s += 1
             if env.config["use_render"]:
-                env.render(text={"seed": env.current_seed, "num_map": info["num_stored_maps"], "difficulty": info["scenario_difficulty"]})
-            if d and info["arrive_dest"]:
+                env.render(text={"seed": env.current_seed,
+                                 "num_map": info["num_stored_maps"],
+                                 "data_coverage": info["data_coverage"]})
+            if d:
                 print(
                     "Time elapse: {:.4f}. Average FPS: {:.4f}, AVG_Reset_time: {:.4f}".format(
                         time.time() - start, s / (time.time() - start - reset_used_time),

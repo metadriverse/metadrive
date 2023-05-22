@@ -271,12 +271,14 @@ class ScenarioEnv(BaseEnv):
             reward = -self.config["crash_object_penalty"]
 
         step_info["track_length"] = vehicle.navigation.reference_trajectory.length
+        step_info["carsize"] = [vehicle.WIDTH, vehicle.LENGTH]
+        # add some new and informative keys
         step_info["route_completion"] = vehicle.navigation.route_completion
         step_info["curriculum_level"] = self.engine.current_level
         step_info["scenario_index"] = self.engine.current_seed
         step_info["num_stored_maps"] = self.engine.map_manager.num_stored_maps
-        step_info["carsize"] = [vehicle.WIDTH, vehicle.LENGTH]
         step_info["scenario_difficulty"] = self.engine.data_manager.current_scenario_difficulty
+        step_info["data_coverage"] = self.engine.data_manager.data_coverage
 
         # Compute state difference metrics
         data = self.engine.data_manager.current_scenario
