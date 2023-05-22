@@ -35,13 +35,15 @@ class GymnasiumEnvWrapper:
 
 
 if __name__ == '__main__':
-    from metadrive.envs.metadrive_env import MetaDriveEnv
+    from metadrive.envs.scenario_env import ScenarioEnv
 
-    env = GymnasiumEnvWrapper.build(MetaDriveEnv)()
+    env = GymnasiumEnvWrapper.build(ScenarioEnv)({"manual_control": True})
     o, i = env.reset()
     assert isinstance(env.observation_space, gymnasium.Space)
     assert isinstance(env.action_space, gymnasium.Space)
-    while True:
-        o, r, d, t, i = env.step([0, 0])
+    for s in range(600):
+        o, r, d, t, i = env.step([0, -1])
+        env.vehicle.set_velocity([0, 0])
         if d:
-            env.reset()
+            assert s == env.config["horizon"] and i["max_step"] and t
+            break

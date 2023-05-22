@@ -166,7 +166,8 @@ class ScenarioEnv(BaseEnv):
         vehicle = self.vehicles[vehicle_id]
         done = False
         done_info = dict(
-            crash_vehicle=False, crash_object=False, crash_building=False, out_of_road=False, arrive_dest=False
+            crash_vehicle=False, crash_object=False, crash_building=False, out_of_road=False, arrive_dest=False,
+            max_step=False,
         )
 
         route_completion = vehicle.navigation.route_completion
@@ -195,6 +196,12 @@ class ScenarioEnv(BaseEnv):
             done = True
             done_info[TerminationState.CRASH_BUILDING] = True
             logging.info("Episode ended! Reason: crash building ")
+
+        elif self.config["horizon"] is not None and \
+                self.episode_lengths[vehicle_id] >= self.config["horizon"] and not self.is_multi_agent:
+            done = True
+            done_info[TerminationState.MAX_STEP] = True
+            logging.info("Episode ended! Reason: max step ")
 
         # for compatibility
         # crash almost equals to crashing with vehicles

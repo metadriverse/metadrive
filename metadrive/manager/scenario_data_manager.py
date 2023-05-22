@@ -159,4 +159,4 @@ class ScenarioDataManager(BaseManager):
 
     @property
     def current_scenario_id(self):
-        return self.current_scenario_summary["id"]
+        return self.current_scenario_summary["scenario_id"]
