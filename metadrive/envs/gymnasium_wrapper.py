@@ -26,7 +26,7 @@ class GymnasiumEnvWrapper:
         return Box(low=space.low, high=space.high, shape=space.shape)
 
     def reset(self, *, seed=None, options=None):
-        return super(GymnasiumEnvWrapper, self).reset(force_seed=seed), {}
+        return super(GymnasiumEnvWrapper, self).reset(), {}
 
     @classmethod
     def build(cls, base_class):
