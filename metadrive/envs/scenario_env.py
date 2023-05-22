@@ -274,6 +274,7 @@ class ScenarioEnv(BaseEnv):
         step_info["route_completion"] = vehicle.navigation.route_completion
         step_info["curriculum_level"] = self.engine.current_level
         step_info["scenario_index"] = self.engine.current_seed
+        step_info["num_maps"] = self.engine.map_manager.num_stored_maps
         step_info["carsize"] = [vehicle.WIDTH, vehicle.LENGTH]
 
         # Compute state difference metrics

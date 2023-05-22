@@ -133,3 +133,7 @@ class ScenarioMapManager(BaseManager):
                 m.destroy()
         self._stored_maps = {i: None for i in range(self.start_scenario_index, self.start_scenario_index + self.map_num)
                              }
+
+    @property
+    def num_stored_maps(self):
+        return sum([1 if m is not None else 0 for m in self.engine.map_manager._stored_maps.values()])
