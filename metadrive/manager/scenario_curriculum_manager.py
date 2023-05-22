@@ -44,6 +44,7 @@ class ScenarioCurriculumManager(BaseManager):
         self.recent_route_completion = QueueDict(max_length=self._episodes_to_eval)
         self.recent_success = QueueDict(max_length=self._episodes_to_eval)
         self.target_success_rate = self.engine.global_config["target_success_rate"]
+        # assert self.engine.global_config["start_scenario_index"] ==0, "For curriculum training, start_index should be 0"
 
     def log_episode(self, success, route_completion):
         self.recent_route_completion.put(self.engine.data_manager.current_scenario_id, route_completion)

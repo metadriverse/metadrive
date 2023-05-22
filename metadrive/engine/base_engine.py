@@ -5,14 +5,13 @@ from collections import OrderedDict
 from typing import Callable, Optional, Union, List, Dict, AnyStr
 
 import numpy as np
-from panda3d.core import NodePath, Vec3
-
 from metadrive.base_class.randomizable import Randomizable
 from metadrive.engine.core.engine_core import EngineCore
 from metadrive.engine.interface import Interface
 from metadrive.manager.base_manager import BaseManager
 from metadrive.utils import concat_step_infos
 from metadrive.utils.utils import is_map_related_class
+from panda3d.core import NodePath, Vec3
 
 logger = logging.getLogger(__name__)
 
@@ -472,12 +471,23 @@ class BaseEngine(EngineCore, Randomizable):
         self._managers = OrderedDict(sorted(self._managers.items(), key=lambda k_v: k_v[-1].PRIORITY))
 
     def seed(self, random_seed):
-        random_seed = random_seed % self._num_scenarios_per_level
+        start_seed = self.gets_start_indxe()
+        random_seed = ((random_seed - start_seed) % self._num_scenarios_per_level) + start_seed
         random_seed += self._current_level * self._num_scenarios_per_level
         self.global_random_seed = random_seed
         super(BaseEngine, self).seed(random_seed)
         for mgr in self._managers.values():
             mgr.seed(random_seed)
+
+    def gets_start_indxe(self):
+        start_seed = self.global_config.get("start_seed", None)
+        start_scenario_index = self.global_config.get("start_scenario_index", None)
+        if start_seed is None:
+            assert start_scenario_index is not None
+            return start_scenario_index
+        else:
+            assert start_seed is not None
+            return start_seed
 
     @property
     def max_level(self):
