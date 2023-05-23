@@ -186,33 +186,37 @@ class ScenarioEnv(BaseEnv):
 
         route_completion = vehicle.navigation.route_completion
 
+        def msg(reason):
+            return "Scenario {}: {} ended! Reason: {}.".format(self.current_seed,
+                                                               self.engine.data_manager.current_scenario_id, reason)
+
         if self._is_arrive_destination(vehicle):
             done = True
-            logging.info("Episode ended! Reason: arrive_dest.")
+            logging.info(msg("arrive_dest"))
             done_info[TerminationState.SUCCESS] = True
 
         elif self._is_out_of_road(vehicle) or route_completion < -0.1:
             done = True
-            logging.info("Episode ended! Reason: out_of_road.")
+            logging.info(msg("out_of_road"))
             done_info[TerminationState.OUT_OF_ROAD] = True
         elif vehicle.crash_vehicle and self.config["crash_vehicle_done"]:
             done = True
-            logging.info("Episode ended! Reason: crash vehicle ")
+            logging.info(msg("crash vehicle"))
             done_info[TerminationState.CRASH_VEHICLE] = True
         elif vehicle.crash_object:
             done = True
             done_info[TerminationState.CRASH_OBJECT] = True
-            logging.info("Episode ended! Reason: crash object ")
+            logging.info(msg("crash object"))
         elif vehicle.crash_building:
             done = True
             done_info[TerminationState.CRASH_BUILDING] = True
-            logging.info("Episode ended! Reason: crash building ")
+            logging.info(msg("crash building"))
 
         elif self.config["horizon"] is not None and \
                 self.episode_lengths[vehicle_id] >= self.config["horizon"] and not self.is_multi_agent:
             done = True
             done_info[TerminationState.MAX_STEP] = True
-            logging.info("Episode ended! Reason: max step ")
+            logging.info(msg("max step"))
 
         # for compatibility
         # crash almost equals to crashing with vehicles
