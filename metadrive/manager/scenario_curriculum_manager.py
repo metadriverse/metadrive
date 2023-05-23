@@ -40,10 +40,14 @@ class ScenarioCurriculumManager(BaseManager):
 
     def __init__(self):
         super().__init__()
-        if self.engine.global_config["curriculum_level"] > 1:
+        curriculum_level = self.engine.global_config["curriculum_level"]
+        if curriculum_level > 1:
             assert self.engine.global_config["sequential_seed"], \
                 "Sort and sequential seed is required for curriculum seed"
-        self._episodes_to_eval = self.engine.global_config["episodes_to_evaluate_curriculum"]
+        if self.engine.global_config["episodes_to_evaluate_curriculum"] is None:
+            self._episodes_to_eval = int(self.engine.global_config["num_scenarios"] / curriculum_level)
+        else:
+            self._episodes_to_eval = self.engine.global_config["episodes_to_evaluate_curriculum"]
         assert self._episodes_to_eval != 0, "episodes_to_evaluate_curriculum can not be 0"
         assert self._episodes_to_eval % self.engine.global_config[
             "num_workers"] == 0, "Can not be divisible by num_workers"
@@ -51,7 +55,6 @@ class ScenarioCurriculumManager(BaseManager):
         self.recent_route_completion = QueueDict(max_length=self._episodes_to_eval)
         self.recent_success = QueueDict(max_length=self._episodes_to_eval)
         self.target_success_rate = self.engine.global_config["target_success_rate"]
-        # assert self.engine.global_config["start_scenario_index"] ==0, "For curriculum training, start_index should be 0"
 
     def log_episode(self, success, route_completion):
         self.recent_route_completion.put(self.engine.data_manager.current_scenario_id, route_completion)

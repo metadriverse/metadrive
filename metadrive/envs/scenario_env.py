@@ -33,7 +33,7 @@ SCENARIO_ENV_CONFIG = dict(
 
     # ===== Curriculum Config =====
     curriculum_level=1,  # i.e. set to 5 to split the data into 5 difficulty level
-    episodes_to_evaluate_curriculum=100,
+    episodes_to_evaluate_curriculum=None,
     target_success_rate=0.85,
 
     # ===== Map Config =====
@@ -100,6 +100,9 @@ class ScenarioEnv(BaseEnv):
             if self.config["num_workers"] > 1:
                 num = int(self.config["num_scenarios"] / self.config["curriculum_level"])
                 assert num % self.config["num_workers"] == 0
+        if self.config["num_workers"] > 1:
+            assert self.config["sequential_seed"], \
+                "If using > 1 workers, you have to allow sequential_seed for consistency!"
 
     def _merge_extra_config(self, config):
         # config = self.default_config().update(config, allow_add_new_key=True)
