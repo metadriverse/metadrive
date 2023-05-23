@@ -35,10 +35,10 @@ class NuPlanObservation(LidarStateObservation):
 
 
 class ScenarioObservation(LidarStateObservation):
-    MAX_LATERAL_DIST = 20
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, max_lateral_dist, *args, **kwargs):
         super(ScenarioObservation, self).__init__(*args, **kwargs)
+        self.MAX_LATERAL_DIST = max_lateral_dist
         self.lateral_dist = 0
 
     @property

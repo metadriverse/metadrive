@@ -62,11 +62,13 @@ SCENARIO_ENV_CONFIG = dict(
     # See: https://github.com/metadriverse/metadrive/issues/283
     success_reward=10.0,
     out_of_road_penalty=10.0,
+    on_lane_line_penalty=1,
     crash_vehicle_penalty=1,
     crash_object_penalty=1.0,
     driving_reward=1.0,
     speed_reward=0.1,
     use_lateral_reward=False,
+    max_lateral_dist=3,
 
     # ===== Cost Scheme =====
     crash_vehicle_cost=1.0,
@@ -113,7 +115,7 @@ class ScenarioEnv(BaseEnv):
         return {self.DEFAULT_AGENT: self.get_single_observation(self.config["vehicle_config"])}
 
     def get_single_observation(self, vehicle_config):
-        o = ScenarioObservation(vehicle_config)
+        o = ScenarioObservation(self.config["max_lateral_dist"], vehicle_config)
         return o
 
     def switch_to_top_down_view(self):
@@ -189,9 +191,6 @@ class ScenarioEnv(BaseEnv):
             logging.info("Episode ended! Reason: arrive_dest.")
             done_info[TerminationState.SUCCESS] = True
 
-            # log data to curriculum manager
-            self.engine.curriculum_manager.log_episode(True, route_completion)
-
         elif self._is_out_of_road(vehicle) or route_completion < -0.1:
             done = True
             logging.info("Episode ended! Reason: out_of_road.")
@@ -222,6 +221,9 @@ class ScenarioEnv(BaseEnv):
                 or done_info[TerminationState.CRASH_BUILDING]
         )
 
+        # log data to curriculum manager
+        self.engine.curriculum_manager.log_episode(done_info[TerminationState.SUCCESS], route_completion)
+
         return done, done_info
 
     def cost_function(self, vehicle_id: str):
@@ -248,16 +250,12 @@ class ScenarioEnv(BaseEnv):
         step_info = dict()
 
         # Reward for moving forward in current lane
-        if vehicle.lane in vehicle.navigation.current_ref_lanes:
-            current_lane = vehicle.lane
-        else:
-            current_lane = vehicle.navigation.current_ref_lanes[0]
+        current_lane = vehicle.lane
         long_last, _ = current_lane.local_coordinates(vehicle.last_position)
         long_now, lateral_now = current_lane.local_coordinates(vehicle.position)
 
         # update obs
-        self.observations[vehicle_id].lateral_dist = \
-            self.engine.map_manager.current_sdc_route.local_coordinates(vehicle.position)[-1]
+        self.observations[vehicle_id].lateral_dist = lateral_now
 
         # reward for lane keeping, without it vehicle can learn to overtake but fail to keep in lane
         if self.config["use_lateral_reward"]:
@@ -268,8 +266,8 @@ class ScenarioEnv(BaseEnv):
         # dense reward
         reward = 0
         reward += self.config["driving_reward"] * (long_now - long_last) * lateral_factor
-        if vehicle.on_yellow_continuous_line or vehicle.crash_sidewalk:
-            reward -= 1.0
+        if vehicle.on_yellow_continuous_line or vehicle.crash_sidewalk or vehicle.on_white_continuous_line:
+            reward -= self.config["on_lane_line_penalty"]
         step_info["step_reward"] = reward
 
         if self._is_arrive_destination(vehicle):
@@ -293,6 +291,7 @@ class ScenarioEnv(BaseEnv):
         step_info["data_coverage"] = self.engine.data_manager.data_coverage
         step_info["curriculum_success"] = self.engine.curriculum_manager.current_success_rate
         step_info["curriculum_route_completion"] = self.engine.curriculum_manager.current_route_completion
+        step_info["lateral_dist"] = lateral_now
 
         # Compute state difference metrics
         data = self.engine.data_manager.current_scenario
@@ -352,7 +351,7 @@ class ScenarioEnv(BaseEnv):
             # We prefer using this out of road termination criterion.
             agent_name = self.agent_manager.object_to_agent(vehicle.name)
             lat = abs(self.observations[agent_name].lateral_dist)
-            done = lat > 5
+            done = lat > self.config["max_lateral_dist"]
             done = done
             return done
 
