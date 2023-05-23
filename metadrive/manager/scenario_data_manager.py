@@ -177,4 +177,4 @@ class ScenarioDataManager(BaseManager):
 
     @property
     def data_coverage(self):
-        return sum(self.coverage)
+        return sum(self.coverage)/len(self.coverage)
