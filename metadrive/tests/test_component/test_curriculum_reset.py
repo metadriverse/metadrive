@@ -30,7 +30,7 @@ def _test_level(level=1, render=False):
                     break
 
             scenario_id.add(env.engine.data_manager.current_scenario_summary["id"])
-        assert len(scenario_id) == int(10 / level)
+        assert len(scenario_id) == (env.engine.current_level+1) * int(10 / level)
     finally:
         env.close()
 
@@ -134,7 +134,7 @@ def _worker_env(render, worker_index, level_up=False):
                 o, r, d, _ = env.step([0, 0])
             scenario_id.append(env.engine.data_manager.current_scenario_summary["id"])
             print(env.current_seed)
-        all_scenario = [env.engine.data_manager.summary_dict[f]["id"] for f in env.engine.data_manager.summary_lookup]
+        all_scenario = [env.engine.data_manager.summary_dict[f]["id"] for f in env.engine.data_manager.summary_lookup[:8]]
         assert len(set(scenario_id)) == 2
         assert env.engine.data_manager.data_coverage == 0.6 if level_up else 0.4
     finally:
@@ -150,7 +150,7 @@ def test_curriculum_multi_worker(render=False):
     all_scenario_id.extend(set_1)
 
     ids = all_scenario
-    assert set(all_scenario_id) == set(ids[-6:-2])
+    assert set(all_scenario_id) == set(ids[-4:])
     # 2
     all_scenario_id = []
     set_1, all_scenario = _worker_env(render, 0)
@@ -187,7 +187,7 @@ def level_up_worker(render, worker_index):
                 o, r, d, _ = env.step([0, 0])
             scenario_id.append(env.engine.data_manager.current_scenario_summary["id"])
         assert len(set(scenario_id)) == 4
-        ids = [env.engine.data_manager.summary_dict[f]["id"] for f in env.engine.data_manager.summary_lookup][:8]
+        ids = [env.engine.data_manager.summary_dict[f]["id"] for f in env.engine.data_manager.summary_lookup[:8]]
         assert scenario_id[:4] == ids[worker_index::2]
         assert scenario_id[-5:] == [ids[-2] if worker_index == 0 else ids[-1]] * 5 == scenario_id[-10:-5]
     finally:
@@ -279,8 +279,8 @@ def test_start_seed_1_9(render=False, worker_index=0):
 
 if __name__ == '__main__':
     # test_curriculum_multi_worker()
-    # test_curriculum_seed()
+    test_curriculum_seed()
     # test_curriculum_level_up()
     # test_curriculum_worker_level_up()
     # test_start_seed_not_0()
-    test_start_seed_1_9()
+    # test_start_seed_1_9()
