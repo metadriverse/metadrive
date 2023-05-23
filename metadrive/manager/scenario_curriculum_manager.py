@@ -40,6 +40,9 @@ class ScenarioCurriculumManager(BaseManager):
 
     def __init__(self):
         super().__init__()
+        if self.engine.global_config["curriculum_level"] > 1:
+            assert self.engine.global_config["sequential_seed"], \
+                "Sort and sequential seed is required for curriculum seed"
         self._episodes_to_eval = self.engine.global_config["episodes_to_evaluate_curriculum"]
         assert self._episodes_to_eval != 0, "episodes_to_evaluate_curriculum can not be 0"
         assert self._episodes_to_eval % self.engine.global_config[

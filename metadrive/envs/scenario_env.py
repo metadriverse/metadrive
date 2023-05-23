@@ -81,7 +81,7 @@ SCENARIO_ENV_CONFIG = dict(
 
     # ===== others =====
     interface_panel=[VehiclePanel],  # for boosting efficiency
-    horizon=400,
+    horizon=None,
 )
 
 
