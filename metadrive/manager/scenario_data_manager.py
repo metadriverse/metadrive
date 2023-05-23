@@ -25,9 +25,9 @@ class ScenarioDataManager(BaseManager):
 
         # Read summary file first:
         self.summary_dict, self.summary_lookup, self.mapping = read_dataset_summary(self.directory)
-        for i in self.summary_lookup[self.num_scenarios:]:
-            self.mapping.pop(i)
-        self.summary_lookup = self.summary_lookup[:self.num_scenarios]
+        self.summary_lookup[:self.start_scenario_index] = [None] * self.start_scenario_index
+        end_idx = self.start_scenario_index + self.num_scenarios
+        self.summary_lookup[end_idx:] = [None] * (len(self.summary_lookup) - end_idx)
 
         # sort scenario for curriculum training
         self.scenario_difficulty = None
@@ -37,7 +37,7 @@ class ScenarioDataManager(BaseManager):
         assert self.start_scenario_index < len(self.summary_lookup), "Insufficient scenarios!"
         assert self.start_scenario_index + self.num_scenarios <= len(self.summary_lookup), "Insufficient scenarios!"
 
-        for p in self.summary_lookup:
+        for p in self.summary_lookup[self.start_scenario_index:end_idx]:
             p = os.path.join(self.directory, self.mapping[p], p)
             assert os.path.exists(p), "No Data at path: {}".format(p)
 
@@ -161,9 +161,11 @@ class ScenarioDataManager(BaseManager):
             num_moving_objs = SD.num_moving_object(scenario, object_type=MetaDriveType.VEHICLE)
             return sdc_moving_dist * curvature + num_moving_objs * obj_weight
 
-        id_scores = [(s_id, _score(s_id)) for s_id in self.summary_lookup]
+        start = self.start_scenario_index
+        end = self.start_scenario_index + self.num_scenarios
+        id_scores = [(s_id, _score(s_id)) for s_id in self.summary_lookup[start: end]]
         id_scores = sorted(id_scores, key=lambda scenario: scenario[-1])
-        self.summary_lookup = [id_score[0] for id_score in id_scores]
+        self.summary_lookup[start: end] = [id_score[0] for id_score in id_scores]
         self.scenario_difficulty = {id_score[0]: id_score[1] for id_score in id_scores}
 
     def clear_stored_scenarios(self):
@@ -180,4 +182,4 @@ class ScenarioDataManager(BaseManager):
 
     @property
     def data_coverage(self):
-        return sum(self.coverage)/len(self.coverage) * self.engine.global_config["num_workers"]
+        return sum(self.coverage) / len(self.coverage) * self.engine.global_config["num_workers"]

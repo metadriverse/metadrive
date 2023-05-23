@@ -201,8 +201,86 @@ def test_curriculum_worker_level_up(render=False):
     assert scenario_id_1[:4] + scenario_id_2[:4] == all_id[::2] + all_id[1::2]
 
 
+def test_start_seed_not_0(render=False, worker_index=0):
+    env = NuScenesEnv(
+        {
+            "use_render": render,
+            "agent_policy": ReplayEgoCarPolicy,
+            "sequential_seed": True,
+            "reactive_traffic": False,
+            "window_size": (1600, 900),
+            "num_scenarios": 8,
+            "start_scenario_index": 2,
+            "episodes_to_evaluate_curriculum": 2,
+            "horizon": 1000,
+            "curriculum_level": 4,
+            "no_static_vehicles": True,
+            "num_workers": 2,
+            "worker_index": worker_index,
+            "data_directory": AssetLoader.file_path("nuscenes", return_raw_style=False),
+        }
+    )
+    try:
+        scenario_id = []
+        for i in tqdm(range(20), desc=str(2)):
+            env.reset()
+            for i in range(250):
+                o, r, d, _ = env.step([0, 0])
+            scenario_id.append(env.engine.data_manager.current_scenario_summary["id"])
+        all_scenarios = sorted(list(env.engine.data_manager.summary_dict.keys()))[2:]
+        summary_lookup = env.engine.data_manager.summary_lookup[2:]
+        assert set(all_scenarios) == set(summary_lookup)
+        assert len(set(scenario_id)) == 4
+        ids = [env.engine.data_manager.summary_dict[f]["id"] for f in summary_lookup]
+        assert scenario_id[:4] == ids[worker_index::2]
+        assert scenario_id[-5:] == [ids[-2] if worker_index == 0 else ids[-1]] * 5 == scenario_id[-10:-5]
+    finally:
+        env.close()
+    return scenario_id, ids
+
+
+def test_start_seed_1_9(render=False, worker_index=0):
+    env = NuScenesEnv(
+        {
+            "use_render": render,
+            "agent_policy": ReplayEgoCarPolicy,
+            "sequential_seed": True,
+            "reactive_traffic": False,
+            "window_size": (1600, 900),
+            "num_scenarios": 8,
+            "start_scenario_index": 1,
+            "episodes_to_evaluate_curriculum": 2,
+            "horizon": 1000,
+            "curriculum_level": 4,
+            "no_static_vehicles": True,
+            "num_workers": 2,
+            "worker_index": worker_index,
+            "data_directory": AssetLoader.file_path("nuscenes", return_raw_style=False),
+        }
+    )
+    try:
+        scenario_id = []
+        for i in tqdm(range(20), desc=str(2)):
+            env.reset()
+            for i in range(250):
+                o, r, d, _ = env.step([0, 0])
+            scenario_id.append(env.engine.data_manager.current_scenario_summary["id"])
+        all_scenarios = sorted(list(env.engine.data_manager.summary_dict.keys()))[1:9]
+        summary_lookup = env.engine.data_manager.summary_lookup[1:9]
+        assert set(all_scenarios) == set(summary_lookup)
+        assert len(set(scenario_id)) == 4
+        ids = [env.engine.data_manager.summary_dict[f]["id"] for f in summary_lookup]
+        assert scenario_id[:4] == ids[worker_index::2]
+        assert scenario_id[-5:] == [ids[-2] if worker_index == 0 else ids[-1]] * 5 == scenario_id[-10:-5]
+    finally:
+        env.close()
+    return scenario_id, ids
+
+
 if __name__ == '__main__':
     # test_curriculum_multi_worker()
     # test_curriculum_seed()
     # test_curriculum_level_up()
-    test_curriculum_worker_level_up()
+    # test_curriculum_worker_level_up()
+    # test_start_seed_not_0()
+    test_start_seed_1_9()
