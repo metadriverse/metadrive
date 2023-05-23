@@ -9,7 +9,7 @@ from metadrive.tests.test_functionality.test_memory_leak_engine import process_m
 
 
 def test_waymo_env_memory_leak(num_reset=100):
-    env = WaymoEnv(dict(num_scenarios=2, sequential_seed=True, store_map=True, store_map_buffer_size=1))
+    env = WaymoEnv(dict(num_scenarios=2, sequential_seed=True, store_map=True))
 
     try:
         ct = time.time()
@@ -46,6 +46,7 @@ def test_waymo_map_memory_leak():
         lt = time.time()
 
         engine.data_manager = WaymoDataManager()
+        engine.seed(0)
 
         lm = process_memory()
         nlt = time.time()

@@ -47,7 +47,7 @@ class ScenarioDataManager(BaseManager):
 
     def _get_scenario(self, i):
         assert self.start_scenario_index <= i < self.start_scenario_index + self.num_scenarios, \
-            "scenario ID exceeds range"
+            "scenario index exceeds range, scenario index: {}".format(i)
         assert i < len(self.summary_lookup)
         scenario_id = self.summary_lookup[i]
         file_path = os.path.join(self.directory, self.mapping[scenario_id], scenario_id)
@@ -177,4 +177,4 @@ class ScenarioDataManager(BaseManager):
 
     @property
     def data_coverage(self):
-        return sum(self.coverage)/len(self.coverage)
+        return sum(self.coverage)/len(self.coverage) * self.engine.global_config["num_workers"]

@@ -471,7 +471,7 @@ class BaseEngine(EngineCore, Randomizable):
         self._managers = OrderedDict(sorted(self._managers.items(), key=lambda k_v: k_v[-1].PRIORITY))
 
     def seed(self, random_seed):
-        start_seed = self.gets_start_indxe()
+        start_seed = self.gets_start_index()
         random_seed = ((random_seed - start_seed) % self._num_scenarios_per_level) + start_seed
         random_seed += self._current_level * self._num_scenarios_per_level
         self.global_random_seed = random_seed
@@ -479,7 +479,7 @@ class BaseEngine(EngineCore, Randomizable):
         for mgr in self._managers.values():
             mgr.seed(random_seed)
 
-    def gets_start_indxe(self):
+    def gets_start_index(self):
         start_seed = self.global_config.get("start_seed", None)
         start_scenario_index = self.global_config.get("start_scenario_index", None)
         if start_seed is None:
@@ -499,7 +499,7 @@ class BaseEngine(EngineCore, Randomizable):
 
     def level_up(self):
         self._current_level = min(self._current_level + 1, self._max_level - 1)
-        self.seed(self._current_level * self._num_scenarios_per_level)
+        # self.seed(self._current_level * self._num_scenarios_per_level)
 
     @property
     def num_scenarios_per_level(self):

@@ -41,6 +41,10 @@ class ScenarioCurriculumManager(BaseManager):
     def __init__(self):
         super().__init__()
         self._episodes_to_eval = self.engine.global_config["episodes_to_evaluate_curriculum"]
+        assert self._episodes_to_eval != 0, "episodes_to_evaluate_curriculum can not be 0"
+        assert self._episodes_to_eval % self.engine.global_config[
+            "num_workers"] == 0, "Can not be divisible by num_workers"
+        self._episodes_to_eval = int(self._episodes_to_eval / self.engine.global_config["num_workers"])
         self.recent_route_completion = QueueDict(max_length=self._episodes_to_eval)
         self.recent_success = QueueDict(max_length=self._episodes_to_eval)
         self.target_success_rate = self.engine.global_config["target_success_rate"]
@@ -56,11 +60,14 @@ class ScenarioCurriculumManager(BaseManager):
         """
         if self.current_success_rate > self.target_success_rate \
                 and self.engine.current_level < self.engine.max_level - 1:
-            self.engine.level_up()
-            self.recent_route_completion = QueueDict(max_length=self._episodes_to_eval)
-            self.recent_success = QueueDict(max_length=self._episodes_to_eval)
-            self.engine.map_manager.clear_stored_maps()
-            self.engine.data_manager.clear_stored_scenarios()
+            self._level_up()
+
+    def _level_up(self):
+        self.engine.level_up()
+        self.recent_route_completion = QueueDict(max_length=self._episodes_to_eval)
+        self.recent_success = QueueDict(max_length=self._episodes_to_eval)
+        self.engine.map_manager.clear_stored_maps()
+        self.engine.data_manager.clear_stored_scenarios()
 
     @property
     def current_success_rate(self):
