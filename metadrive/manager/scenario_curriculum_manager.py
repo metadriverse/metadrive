@@ -54,10 +54,18 @@ class ScenarioCurriculumManager(BaseManager):
         """
         It should be called before reseting all managers
         """
-        if sum(self.recent_success.dict.values()) / self._episodes_to_eval > self.target_success_rate \
+        if self.current_success_rate > self.target_success_rate \
                 and self.engine.current_level < self.engine.max_level - 1:
             self.engine.level_up()
             self.recent_route_completion = QueueDict(max_length=self._episodes_to_eval)
             self.recent_success = QueueDict(max_length=self._episodes_to_eval)
             self.engine.map_manager.clear_stored_maps()
             self.engine.data_manager.clear_stored_scenarios()
+
+    @property
+    def current_success_rate(self):
+        return sum(self.recent_success.dict.values()) / self._episodes_to_eval
+
+    @property
+    def current_route_completion(self):
+        return sum(self.recent_route_completion.dict.values()) / self._episodes_to_eval

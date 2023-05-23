@@ -4,12 +4,12 @@ This environment can load all scenarios exported from other environments via env
 import logging
 
 import numpy as np
-from metadrive.manager.scenario_curriculum_manager import ScenarioCurriculumManager
 from metadrive.component.vehicle_module.vehicle_panel import VehiclePanel
 from metadrive.component.vehicle_navigation_module.trajectory_navigation import TrajectoryNavigation
 from metadrive.constants import TerminationState
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.envs.base_env import BaseEnv
+from metadrive.manager.scenario_curriculum_manager import ScenarioCurriculumManager
 from metadrive.manager.scenario_data_manager import ScenarioDataManager
 from metadrive.manager.scenario_light_manager import ScenarioLightManager
 from metadrive.manager.scenario_map_manager import ScenarioMapManager
@@ -270,6 +270,7 @@ class ScenarioEnv(BaseEnv):
         elif vehicle.crash_object:
             reward = -self.config["crash_object_penalty"]
 
+        # TODO LQY: all a callback to process these keys
         step_info["track_length"] = vehicle.navigation.reference_trajectory.length
         step_info["carsize"] = [vehicle.WIDTH, vehicle.LENGTH]
         # add some new and informative keys
@@ -279,6 +280,8 @@ class ScenarioEnv(BaseEnv):
         step_info["num_stored_maps"] = self.engine.map_manager.num_stored_maps
         step_info["scenario_difficulty"] = self.engine.data_manager.current_scenario_difficulty
         step_info["data_coverage"] = self.engine.data_manager.data_coverage
+        step_info["curriculum_success"] = self.engine.curriculum_manager.current_success_rate
+        step_info["curriculum_route_completion"] = self.engine.curriculum_manager.current_route_completion
 
         # Compute state difference metrics
         data = self.engine.data_manager.current_scenario
@@ -354,9 +357,12 @@ class ScenarioEnv(BaseEnv):
         elif self.config["sequential_seed"]:
             current_seed = self.engine.global_seed
             if current_seed is None:
-                current_seed = self.engine.np_random.randint(int(self.config["start_scenario_index"]),
-                                                             int(self.config["start_scenario_index"]) + int(
-                                                                 self.config["num_scenarios"]))
+                if self.config["random_sequential_seed_start"]:
+                    current_seed = self.engine.np_random.randint(int(self.config["start_scenario_index"]),
+                                                                 int(self.config["start_scenario_index"]) + int(
+                                                                     self.config["num_scenarios"]))
+                else:
+                    current_seed = int(self.config["start_scenario_index"])
             else:
                 current_seed += 1
             if current_seed >= self.config["start_scenario_index"] + int(self.config["num_scenarios"]):
