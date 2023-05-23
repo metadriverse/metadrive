@@ -27,7 +27,6 @@ class ScenarioDataManager(BaseManager):
         self.summary_dict, self.summary_lookup, self.mapping = read_dataset_summary(self.directory)
         self.summary_lookup = self.summary_lookup[:self.num_scenarios]
         for i in self.summary_lookup:
-            self.summary_dict.pop(i)
             self.mapping.pop(i)
 
         # sort scenario for curriculum training
