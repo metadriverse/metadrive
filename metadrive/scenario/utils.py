@@ -379,12 +379,12 @@ def get_number_of_scenarios(dataset_path):
     return len(files)
 
 
-def assert_scenario_equal(scenarios1, scenarios2, only_compare_sdc=False):
+def assert_scenario_equal(scenarios1, scenarios2, only_compare_sdc=False, check_self_type=True):
     # ===== These two set of data should align =====
     assert set(scenarios1.keys()) == set(scenarios2.keys())
     for scenario_id in scenarios1.keys():
-        SD.sanity_check(scenarios1[scenario_id], check_self_type=True)
-        SD.sanity_check(scenarios2[scenario_id], check_self_type=True)
+        SD.sanity_check(scenarios1[scenario_id], check_self_type=check_self_type)
+        SD.sanity_check(scenarios2[scenario_id], check_self_type=check_self_type)
         old_scene = SD(scenarios1[scenario_id])
         new_scene = SD(scenarios2[scenario_id])
         SD.sanity_check(old_scene)
