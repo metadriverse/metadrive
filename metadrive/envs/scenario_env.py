@@ -48,6 +48,7 @@ SCENARIO_ENV_CONFIG = dict(
     filter_overlapping_car=True,  # If in one frame a traffic vehicle collides with ego car, it won't be created.
     even_sample_vehicle_class=True,  # to make the scene more diverse
     default_vehicle_in_traffic=False,
+    skip_missing_light=False,
 
     # ===== Agent config =====
     vehicle_config=dict(

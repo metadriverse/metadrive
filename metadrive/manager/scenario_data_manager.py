@@ -35,7 +35,9 @@ class ScenarioDataManager(BaseManager):
 
         # existence check
         assert self.start_scenario_index < len(self.summary_lookup), "Insufficient scenarios!"
-        assert self.start_scenario_index + self.num_scenarios <= len(self.summary_lookup), "Insufficient scenarios!"
+        assert self.start_scenario_index + self.num_scenarios <= len(self.summary_lookup), \
+            "Insufficient scenarios! Need: {} Has: {}".format(self.num_scenarios,
+                                                              len(self.summary_lookup) - self.start_scenario_index)
 
         for p in self.summary_lookup[self.start_scenario_index:end_idx]:
             p = os.path.join(self.directory, self.mapping[p], p)
