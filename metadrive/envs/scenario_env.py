@@ -20,7 +20,7 @@ from metadrive.policy.replay_policy import ReplayEgoCarPolicy
 from metadrive.scenario.scenario_description import ScenarioDescription
 from metadrive.utils import clip
 from metadrive.utils import get_np_random
-from metadrive.utils.math import norm
+from metadrive.utils.math import wrap_to_pi
 
 SCENARIO_ENV_CONFIG = dict(
     # ===== Scenario Config =====
@@ -70,6 +70,7 @@ SCENARIO_ENV_CONFIG = dict(
     speed_reward=0.1,
     action_smooth_reward=0.1,
     use_lateral_reward=False,
+    use_heading_reward=False,
     max_lateral_dist=3,
 
     # ===== Cost Scheme =====
@@ -274,11 +275,20 @@ class ScenarioEnv(BaseEnv):
         reward += self.config["driving_reward"] * (long_now - long_last) * lateral_factor
         if vehicle.on_yellow_continuous_line or vehicle.crash_sidewalk or vehicle.on_white_continuous_line:
             reward -= self.config["on_lane_line_penalty"]
-        step_info["step_reward"] = reward
+        # action_rate
         last_action = vehicle.last_current_action[0]
         current_action = vehicle.last_current_action[1]
-        diff = (last_action[0] - current_action[0]) ** 2 + (last_action[1] - current_action[1]) ** 2
+        diff = (last_action[0] - current_action[0]) ** 2
+        # diff += (last_action[1] - current_action[1]) ** 2 don't penalize throttle
         reward -= diff * self.config["action_smooth_reward"]
+
+        # heading diff
+        if self.config["use_heading_reward"]:
+            ref_line_heading = current_lane.heading_theta_at(long_now)
+            heading_diff = (1 - wrap_to_pi(abs(vehicle.heading - ref_line_heading)) / np.pi)
+            reward *= heading_diff
+
+        step_info["step_reward"] = reward
 
         # termination reward
         if self._is_arrive_destination(vehicle):
