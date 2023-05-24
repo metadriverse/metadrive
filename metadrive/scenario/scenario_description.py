@@ -185,6 +185,7 @@ class ScenarioDescription(dict):
         NUM_TRAFFIC_LIGHTS_EACH_STEP = "num_traffic_light_each_step"
 
         NUM_MAP_FEATURES = "num_map_features"
+        MAP_HEIGHT_DIFF = "map_height_diff"
 
     class DATASET:
         SUMMARY_FILE = "dataset_summary.pkl"  # dataset summary file name
@@ -363,6 +364,8 @@ class ScenarioDescription(dict):
         # map
         number_summary_dict[ScenarioDescription.SUMMARY.NUM_MAP_FEATURES
         ] = len(scenario[ScenarioDescription.MAP_FEATURES])
+        number_summary_dict[ScenarioDescription.SUMMARY.MAP_HEIGHT_DIFF
+        ] = ScenarioDescription.map_height_diff(scenario[ScenarioDescription.MAP_FEATURES])
         return number_summary_dict
 
     @staticmethod
@@ -395,6 +398,22 @@ class ScenarioDescription(dict):
             return num_summary[SD.SUMMARY.NUM_MOVING_OBJECTS]
         else:
             return num_summary[SD.SUMMARY.NUM_MOVING_OBJECTS_EACH_TYPE].get(object_type, 0)
+
+    @staticmethod
+    def map_height_diff(map_features):
+        max = 0
+        min = 0
+        for feature in map_features.values():
+            polyline = feature[ScenarioDescription.POLYLINE]
+            if len(polyline[0]) == 3:
+                z = polyline[..., -1]
+                z_max = np.max(z)
+                if z_max > max:
+                    max = z_max
+                z_min = np.min(z)
+                if z_min < min:
+                    min = z_min
+        return max - min
 
 
 def _recursive_check_type(obj, allow_types, depth=0):
