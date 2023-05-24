@@ -9,16 +9,18 @@ NuScenesEnv = ScenarioEnv
 if __name__ == "__main__":
     env = NuScenesEnv(
         {
-            "use_render": False,
+            "use_render": True,
             "agent_policy": ReplayEgoCarPolicy,
             "manual_control": True,
             "show_interface": False,
+            "use_heading_reward": True,
             # "need_lane_localization": False,
             "show_logo": False,
+            "no_traffic": True,
             "sequential_seed": True,
             # "debug_static_world": True,
             "reactive_traffic": False,
-            "curriculum_level": 2,
+            "curriculum_level": 1,
             "show_fps": False,
             # "debug": True,
             # "no_static_vehicles": True,
@@ -48,7 +50,7 @@ if __name__ == "__main__":
             "vehicle_config": dict(
                 # light=True,
                 # random_color=True,
-                show_navi_mark=False,
+                show_navi_mark=True,
                 # no_wheel_friction=True,
                 lidar=dict(num_lasers=120, distance=50),
                 lane_line_detector=dict(num_lasers=0, distance=50),
@@ -77,13 +79,15 @@ if __name__ == "__main__":
             if env.config["use_render"]:
                 env.render(text={"seed": env.current_seed,
                                  "num_map": info["num_stored_maps"],
-                                 "data_coverage": info["data_coverage"]})
-            if d:
-                print(
-                    "Time elapse: {:.4f}. Average FPS: {:.4f}, AVG_Reset_time: {:.4f}".format(
-                        time.time() - start, s / (time.time() - start - reset_used_time),
-                        reset_used_time / reset_num
-                    )
-                )
-                print("seed:{}, success".format(env.engine.global_random_seed))
-                break
+                                 "data_coverage": info["data_coverage"],
+                                 "reward": r,
+                                 "heading_diff": env.vehicle.heading_diff(env.vehicle.navigation.reference_trajectory)})
+            # if d:
+            #     print(
+            #         "Time elapse: {:.4f}. Average FPS: {:.4f}, AVG_Reset_time: {:.4f}".format(
+            #             time.time() - start, s / (time.time() - start - reset_used_time),
+            #             reset_used_time / reset_num
+            #         )
+            #     )
+            #     print("seed:{}, success".format(env.engine.global_random_seed))
+            #     break

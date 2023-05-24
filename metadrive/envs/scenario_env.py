@@ -17,7 +17,6 @@ from metadrive.manager.scenario_map_manager import ScenarioMapManager
 from metadrive.manager.waymo_traffic_manager import WaymoTrafficManager
 from metadrive.obs.real_env_observation import ScenarioObservation
 from metadrive.policy.replay_policy import ReplayEgoCarPolicy
-from metadrive.scenario.scenario_description import ScenarioDescription
 from metadrive.utils import clip
 from metadrive.utils import get_np_random
 from metadrive.utils.math import wrap_to_pi
@@ -71,7 +70,7 @@ SCENARIO_ENV_CONFIG = dict(
     action_smooth_reward=0.1,
     use_lateral_reward=False,
     use_heading_reward=False,
-    max_lateral_dist=3,
+    max_lateral_dist=5,
 
     # ===== Cost Scheme =====
     crash_vehicle_cost=1.0,
@@ -264,17 +263,23 @@ class ScenarioEnv(BaseEnv):
         # update obs
         self.observations[vehicle_id].lateral_dist = lateral_now
 
+        # dense driving reward
+        reward = 0
+        reward += self.config["driving_reward"] * (long_now - long_last)
+
         # reward for lane keeping, without it vehicle can learn to overtake but fail to keep in lane
         if self.config["use_lateral_reward"]:
             lateral_factor = clip(1 - 2 * abs(lateral_now) / 6, 0.0, 1.0)
         else:
             lateral_factor = 1.0
+        reward *= lateral_factor
 
-        # dense reward
-        reward = 0
-        reward += self.config["driving_reward"] * (long_now - long_last) * lateral_factor
-        if vehicle.on_yellow_continuous_line or vehicle.crash_sidewalk or vehicle.on_white_continuous_line:
-            reward -= self.config["on_lane_line_penalty"]
+        # heading diff
+        if self.config["use_heading_reward"]:
+            ref_line_heading = current_lane.heading_theta_at(long_now)
+            heading_diff = (1 - wrap_to_pi(abs(vehicle.heading_theta - ref_line_heading)) / np.pi)
+            reward *= heading_diff
+
         # action_rate
         last_action = vehicle.last_current_action[0]
         current_action = vehicle.last_current_action[1]
@@ -282,11 +287,9 @@ class ScenarioEnv(BaseEnv):
         # diff += (last_action[1] - current_action[1]) ** 2 don't penalize throttle
         reward -= diff * self.config["action_smooth_reward"]
 
-        # heading diff
-        if self.config["use_heading_reward"]:
-            ref_line_heading = current_lane.heading_theta_at(long_now)
-            heading_diff = (1 - wrap_to_pi(abs(vehicle.heading - ref_line_heading)) / np.pi)
-            reward *= heading_diff
+        # lane line penalty
+        if vehicle.on_yellow_continuous_line or vehicle.crash_sidewalk or vehicle.on_white_continuous_line:
+            reward -= self.config["on_lane_line_penalty"]
 
         step_info["step_reward"] = reward
 
