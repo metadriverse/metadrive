@@ -404,9 +404,11 @@ class ScenarioDescription(dict):
         max = 0
         min = 0
         for feature in map_features.values():
+            if ScenarioDescription.POLYLINE not in feature:
+                continue
             polyline = feature[ScenarioDescription.POLYLINE]
             if len(polyline[0]) == 3:
-                z = polyline[..., -1]
+                z = np.asarray(polyline)[..., -1]
                 z_max = np.max(z)
                 if z_max > max:
                     max = z_max
