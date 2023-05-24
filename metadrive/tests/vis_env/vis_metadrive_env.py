@@ -5,7 +5,7 @@ if __name__ == "__main__":
     setup_logger(True)
     env = MetaDriveEnv(
         {
-            "num_scenarios": 1,
+            "num_scenarios": 10,
             "traffic_density": 0.0,
             "traffic_mode": "hybrid",
             "start_seed": 71,
@@ -96,7 +96,7 @@ if __name__ == "__main__":
 
     start = time.time()
 
-    o = env.reset()
+    o = env.reset(force_seed=0)
     if env.config["render_pipeline"]:
         env.engine.accept("5", env.engine.render_pipeline.reload_shaders)
         env.engine.accept("7", acc_speed)
@@ -128,8 +128,8 @@ if __name__ == "__main__":
                 "current_seed": env.current_seed
             }
         )
-        # if d:
-        #     env.reset()
+        if d:
+            env.reset(force_seed=0)
         # # assert env.observation_space.contains(o)
         # if (s + 1) % 100 == 0:
         #     # print(

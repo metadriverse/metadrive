@@ -202,8 +202,8 @@ class MetaDriveEnv(BaseEnv):
         # for compatibility
         # crash almost equals to crashing with vehicles
         done_info[TerminationState.CRASH] = (
-            done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
-            or done_info[TerminationState.CRASH_BUILDING]
+                done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
+                or done_info[TerminationState.CRASH_BUILDING]
         )
         return done, done_info
 
@@ -222,8 +222,8 @@ class MetaDriveEnv(BaseEnv):
     def _is_arrive_destination(self, vehicle):
         long, lat = vehicle.navigation.final_lane.local_coordinates(vehicle.position)
         flag = (vehicle.navigation.final_lane.length - 5 < long < vehicle.navigation.final_lane.length + 5) and (
-            vehicle.navigation.get_current_lane_width() / 2 >= lat >=
-            (0.5 - vehicle.navigation.get_current_lane_num()) * vehicle.navigation.get_current_lane_width()
+                vehicle.navigation.get_current_lane_width() / 2 >= lat >=
+                (0.5 - vehicle.navigation.get_current_lane_num()) * vehicle.navigation.get_current_lane_width()
         )
         return flag
 
@@ -339,6 +339,8 @@ class MetaDriveEnv(BaseEnv):
     def _reset_global_seed(self, force_seed=None):
         current_seed = force_seed if force_seed is not None else \
             get_np_random(self._DEBUG_RANDOM_SEED).randint(self.start_seed, self.start_seed + self.env_num)
+        assert self.start_seed <= current_seed < self.start_seed + self.env_num, \
+            "scenario_index (seed) should be in [{}:{})".format(self.start_seed, self.start_seed + self.env_num)
         self.seed(current_seed)
 
 
@@ -350,6 +352,7 @@ if __name__ == '__main__':
         assert env.observation_space.contains(obs)
         assert np.isscalar(reward)
         assert isinstance(info, dict)
+
 
     env = MetaDriveEnv()
     try:

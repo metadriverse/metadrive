@@ -181,5 +181,9 @@ class ScenarioDataManager(BaseManager):
         return self.current_scenario_summary["scenario_id"]
 
     @property
+    def current_scenario_file_name(self):
+        return self.summary_lookup[self.engine.global_random_seed]
+
+    @property
     def data_coverage(self):
         return sum(self.coverage) / len(self.coverage) * self.engine.global_config["num_workers"]

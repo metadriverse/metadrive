@@ -389,10 +389,10 @@ class ScenarioEnv(BaseEnv):
                 self.config["start_scenario_index"] + int(self.config["num_scenarios"])
             )
 
-        assert self.config["start_scenario_index"] <= current_seed < \
-               self.config["start_scenario_index"] + self.config[
-                   "num_scenarios"], "Force seed {} is out of range [{}, {}).".format(current_seed, self.config[
-            "start_scenario_index"], self.config["start_scenario_index"] + self.config["num_scenarios"])
+        assert self.config["start_scenario_index"] <= current_seed < self.config["start_scenario_index"] + \
+               self.config["num_scenarios"], "Scenario Index (force seed) {} is out of range [{}, {}).".format(
+            current_seed, self.config["start_scenario_index"],
+            self.config["start_scenario_index"] + self.config["num_scenarios"])
         self.seed(current_seed)
 
     def stop(self):
