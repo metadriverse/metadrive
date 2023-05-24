@@ -67,7 +67,7 @@ SCENARIO_ENV_CONFIG = dict(
     crash_object_penalty=1.0,
     driving_reward=1.0,
     speed_reward=0.1,
-    action_smooth_reward=0.25,
+    action_smooth_reward=0.1,
     use_lateral_reward=False,
     max_lateral_dist=3,
 

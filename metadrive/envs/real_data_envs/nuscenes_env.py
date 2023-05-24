@@ -9,7 +9,7 @@ NuScenesEnv = ScenarioEnv
 if __name__ == "__main__":
     env = NuScenesEnv(
         {
-            "use_render": True,
+            "use_render": False,
             "agent_policy": ReplayEgoCarPolicy,
             "manual_control": True,
             "show_interface": False,
