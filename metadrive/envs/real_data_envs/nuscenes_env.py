@@ -73,7 +73,7 @@ if __name__ == "__main__":
         reset_used_time += time.time() - start_reset
         reset_num += 1
         for t in range(10000):
-            o, r, d, info = env.step([0, 0])
+            o, r, d, info = env.step([1, 0.88])
             s += 1
             if env.config["use_render"]:
                 env.render(text={"seed": env.current_seed,

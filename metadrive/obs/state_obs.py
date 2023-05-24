@@ -101,8 +101,8 @@ class StateObservation(ObservationBase):
                 clip((vehicle.steering / vehicle.MAX_STEERING + 1) / 2, 0.0, 1.0),
 
                 # The normalized actions at last steps
-                clip((vehicle.last_current_action[0][0] + 1) / 2, 0.0, 1.0),
-                clip((vehicle.last_current_action[0][1] + 1) / 2, 0.0, 1.0)
+                clip((vehicle.last_current_action[1][0] + 1) / 2, 0.0, 1.0),
+                clip((vehicle.last_current_action[1][1] + 1) / 2, 0.0, 1.0)
             ]
 
         # Current angular acceleration (yaw rate)
