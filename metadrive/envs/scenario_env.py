@@ -33,7 +33,7 @@ SCENARIO_ENV_CONFIG = dict(
     # ===== Curriculum Config =====
     curriculum_level=1,  # i.e. set to 5 to split the data into 5 difficulty level
     episodes_to_evaluate_curriculum=None,
-    target_success_rate=0.85,
+    target_success_rate=0.8,
 
     # ===== Map Config =====
     store_map=True,
@@ -70,7 +70,7 @@ SCENARIO_ENV_CONFIG = dict(
     action_smooth_reward=0.1,
     use_lateral_reward=False,
     use_heading_reward=False,
-    max_lateral_dist=5,
+    max_lateral_dist=4,
 
     # ===== Cost Scheme =====
     crash_vehicle_cost=1.0,
