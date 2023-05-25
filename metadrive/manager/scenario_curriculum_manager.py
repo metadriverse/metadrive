@@ -64,7 +64,7 @@ class ScenarioCurriculumManager(BaseManager):
         """
         It should be called before reseting all managers
         """
-        if self.current_success_rate >= self.target_success_rate \
+        if self.current_success_rate >= (self.target_success_rate-0.001) \
                 and self.engine.current_level < self.engine.max_level - 1:
             self._level_up()
 
