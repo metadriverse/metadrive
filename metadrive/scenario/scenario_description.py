@@ -111,7 +111,7 @@ Example:
         }
     }
 """
-
+import math
 import os
 from collections import defaultdict
 
@@ -400,11 +400,11 @@ class ScenarioDescription(dict):
             return num_summary[SD.SUMMARY.NUM_MOVING_OBJECTS_EACH_TYPE].get(object_type, 0)
 
     @staticmethod
-    def map_height_diff(map_features):
-        max = 0
-        min = 0
+    def map_height_diff(map_features, target=10):
+        max = -math.inf
+        min = math.inf
         for feature in map_features.values():
-            if ScenarioDescription.POLYLINE not in feature:
+            if not MetaDriveType.is_road_line(feature[ScenarioDescription.TYPE]):
                 continue
             polyline = feature[ScenarioDescription.POLYLINE]
             if len(polyline[0]) == 3:
@@ -415,6 +415,8 @@ class ScenarioDescription(dict):
                 z_min = np.min(z)
                 if z_min < min:
                     min = z_min
+            if max - min > target:
+                break
         return max - min
 
 
