@@ -67,10 +67,11 @@ SCENARIO_ENV_CONFIG = dict(
     crash_object_penalty=1.0,
     driving_reward=1.0,
     speed_reward=0.1,
-    action_smooth_reward=0.1,
+    action_smooth_reward=0.2,
     use_lateral_reward=False,
     use_heading_reward=False,
     max_lateral_dist=4,
+    no_negative_reward=True,
 
     # ===== Cost Scheme =====
     crash_vehicle_cost=1.0,
@@ -284,13 +285,15 @@ class ScenarioEnv(BaseEnv):
         last_action = vehicle.last_current_action[0]
         current_action = vehicle.last_current_action[1]
         diff = (last_action[0] - current_action[0]) ** 2
-        # diff += (last_action[1] - current_action[1]) ** 2 don't penalize throttle
+        diff += (last_action[1] - current_action[1]) ** 2
         reward -= diff * self.config["action_smooth_reward"]
 
         # lane line penalty
         if vehicle.on_yellow_continuous_line or vehicle.crash_sidewalk or vehicle.on_white_continuous_line:
             reward -= self.config["on_lane_line_penalty"]
 
+        if self.config["no_negative_reward"]:
+            reward = max(reward, 0)
         step_info["step_reward"] = reward
 
         # termination reward
