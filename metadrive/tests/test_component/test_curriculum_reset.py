@@ -82,6 +82,7 @@ def test_curriculum_level_up(render=False):
             "window_size": (1600, 900),
             "num_scenarios": 10,
             "episodes_to_evaluate_curriculum": 5,
+            "target_success_rate": 1.,
             "horizon": 1000,
             "curriculum_level": 2,
             "no_static_vehicles": True,
