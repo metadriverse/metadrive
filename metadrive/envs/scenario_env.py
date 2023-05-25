@@ -65,6 +65,7 @@ SCENARIO_ENV_CONFIG = dict(
     on_lane_line_penalty=1,
     crash_vehicle_penalty=1,
     crash_object_penalty=1.0,
+    crash_human_penalty=1.0,
     driving_reward=1.0,
     speed_reward=0.1,
     action_smooth_reward=0.2,
@@ -292,6 +293,14 @@ class ScenarioEnv(BaseEnv):
         if vehicle.on_yellow_continuous_line or vehicle.crash_sidewalk or vehicle.on_white_continuous_line:
             reward -= self.config["on_lane_line_penalty"]
 
+        # crash penalty
+        if vehicle.crash_vehicle:
+            reward = -self.config["crash_vehicle_penalty"]
+        if vehicle.crash_object:
+            reward = -self.config["crash_object_penalty"]
+        if vehicle.crash_human:
+            reward = -self.config["crash_human_penalty"]
+
         if self.config["no_negative_reward"]:
             reward = max(reward, 0)
         step_info["step_reward"] = reward
@@ -301,10 +310,6 @@ class ScenarioEnv(BaseEnv):
             reward = +self.config["success_reward"]
         elif self._is_out_of_road(vehicle):
             reward = -self.config["out_of_road_penalty"]
-        elif vehicle.crash_vehicle:
-            reward = -self.config["crash_vehicle_penalty"]
-        elif vehicle.crash_object:
-            reward = -self.config["crash_object_penalty"]
 
         # TODO LQY: all a callback to process these keys
         step_info["track_length"] = vehicle.navigation.reference_trajectory.length
