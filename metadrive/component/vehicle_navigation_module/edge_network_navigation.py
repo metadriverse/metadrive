@@ -104,7 +104,7 @@ class EdgeNetworkNavigation(BaseNavigation):
                 self.next_ref_lanes = None
 
         self._navi_info.fill(0.0)
-        half = self.navigation_info_dim // 2
+        half = self.CHECK_POINT_INFO_DIM
         self._navi_info[:half], lanes_heading1, checkpoint = self._get_info_for_checkpoint(
             lanes_id=0,
             ref_lane=self.map.road_network.get_lane(self.current_checkpoint_lane_index),

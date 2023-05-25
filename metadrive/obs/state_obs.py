@@ -17,7 +17,7 @@ class StateObservation(ObservationBase):
     @property
     def observation_space(self):
         # Navi info + Other states
-        shape = self.ego_state_obs_dim + NodeNetworkNavigation.navigation_info_dim + self.get_line_detector_dim()
+        shape = self.ego_state_obs_dim + NodeNetworkNavigation.get_navigation_info_dim() + self.get_line_detector_dim()
         if self.config["random_agent_model"]:
             shape += 2
         return gym.spaces.Box(-0.0, 1.0, shape=(shape, ), dtype=np.float32)

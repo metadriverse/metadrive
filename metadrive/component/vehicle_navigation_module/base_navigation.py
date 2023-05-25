@@ -15,7 +15,8 @@ class BaseNavigation:
     Implement all NotImplemented method for customizing a new navigation module.
     This module interact with the map for finding lanes or expected positions
     """
-    navigation_info_dim = 10
+    NUM_WAY_POINT = 2
+    CHECK_POINT_INFO_DIM = 5
     NAVI_POINT_DIST = 50
     PRE_NOTIFY_DIST = 40
     MIN_ALPHA = 0.15
@@ -49,9 +50,9 @@ class BaseNavigation:
         self.vehicle_config = vehicle_config
 
         self._target_checkpoints_index = None
-        self._navi_info = np.zeros((self.navigation_info_dim,), dtype=np.float32)  # navi information res
+        self._navi_info = np.zeros((self.get_navigation_info_dim(),), dtype=np.float32)  # navi information res
 
-        # Vis
+        # Vis TODO make it beautiful!
         self._show_navi_info = (
                 self.engine.mode == RENDER_MODE_ONSCREEN and not self.engine.global_config["debug_physics_world"]
         )
@@ -259,3 +260,7 @@ class BaseNavigation:
 
     def get_state(self):
         return {}
+
+    @classmethod
+    def get_navigation_info_dim(cls):
+        return cls.NUM_WAY_POINT * cls.CHECK_POINT_INFO_DIM

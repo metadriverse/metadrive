@@ -160,7 +160,7 @@ class NodeNetworkNavigation(BaseNavigation):
                 self.next_ref_lanes = target_lanes_2
 
         self._navi_info.fill(0.0)
-        half = self.navigation_info_dim // 2
+        half = self.CHECK_POINT_INFO_DIM
         self._navi_info[:half], lanes_heading1, checkpoint = self._get_info_for_checkpoint(
             lanes_id=0, ref_lane=self.current_ref_lanes[0], ego_vehicle=ego_vehicle
         )
