@@ -73,10 +73,12 @@ if __name__ == "__main__":
         # for i in range(10):
         start_reset = time.time()
         env.reset()
+
         reset_used_time += time.time() - start_reset
         reset_num += 1
         for t in range(10000):
             o, r, d, info = env.step([1, 0.88])
+            assert env.observation_space.contains(o)
             s += 1
             if env.config["use_render"]:
                 env.render(text={"seed": env.current_seed,

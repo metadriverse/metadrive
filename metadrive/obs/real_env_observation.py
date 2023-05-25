@@ -1,6 +1,6 @@
 import gym
 import numpy as np
-
+from metadrive.component.vehicle_navigation_module.trajectory_navigation import TrajectoryNavigation
 from metadrive.obs.state_obs import LidarStateObservation
 from metadrive.utils import clip
 
@@ -37,7 +37,8 @@ class NuPlanObservation(LidarStateObservation):
 class ScenarioObservation(LidarStateObservation):
 
     def __init__(self, max_lateral_dist, *args, **kwargs):
-        super(ScenarioObservation, self).__init__(*args, **kwargs)
+        super(ScenarioObservation, self).__init__(*args, **kwargs,
+                                                  navi_dim=TrajectoryNavigation.get_navigation_info_dim())
         self.MAX_LATERAL_DIST = max_lateral_dist
         self.lateral_dist = 0
 

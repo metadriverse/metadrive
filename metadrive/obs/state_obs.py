@@ -11,16 +11,18 @@ class StateObservation(ObservationBase):
     """
     Use vehicle state info, navigation info and lidar point clouds info as input
     """
-    def __init__(self, config):
+
+    def __init__(self, config, navi_dim=None):
+        self.navi_dim = navi_dim or NodeNetworkNavigation.get_navigation_info_dim()
         super(StateObservation, self).__init__(config)
 
     @property
     def observation_space(self):
         # Navi info + Other states
-        shape = self.ego_state_obs_dim + NodeNetworkNavigation.get_navigation_info_dim() + self.get_line_detector_dim()
+        shape = self.ego_state_obs_dim + self.navi_dim + self.get_line_detector_dim()
         if self.config["random_agent_model"]:
             shape += 2
-        return gym.spaces.Box(-0.0, 1.0, shape=(shape, ), dtype=np.float32)
+        return gym.spaces.Box(-0.0, 1.0, shape=(shape,), dtype=np.float32)
 
     def observe(self, vehicle):
         """
@@ -63,7 +65,6 @@ class StateObservation(ObservationBase):
         # update out of road
         info = []
         if self.config["random_agent_model"]:
-
             # The length of the target vehicle
             info.append(clip(vehicle.LENGTH / vehicle.MAX_LENGTH, 0.0, 1.0))
 
@@ -139,8 +140,8 @@ class StateObservation(ObservationBase):
 
 
 class LidarStateObservation(ObservationBase):
-    def __init__(self, vehicle_config):
-        self.state_obs = StateObservation(vehicle_config)
+    def __init__(self, vehicle_config, navi_dim=None):
+        self.state_obs = StateObservation(vehicle_config, navi_dim=navi_dim)
         super(LidarStateObservation, self).__init__(vehicle_config)
         self.cloud_points = None
         self.detected_objects = None
