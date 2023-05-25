@@ -9,7 +9,7 @@ NuScenesEnv = ScenarioEnv
 if __name__ == "__main__":
     env = NuScenesEnv(
         {
-            "use_render": True,
+            "use_render": False,
             "agent_policy": ReplayEgoCarPolicy,
             "manual_control": True,
             "show_interface": False,
@@ -19,6 +19,7 @@ if __name__ == "__main__":
             "no_traffic": True,
             "sequential_seed": True,
             # "debug_static_world": True,
+            # "sequential_seed": True,
             "reactive_traffic": False,
             "curriculum_level": 1,
             "show_fps": False,
@@ -31,6 +32,7 @@ if __name__ == "__main__":
             # "no_light": False,
             # "debug":True,
             # Make video
+            # "episodes_to_evaluate_curriculum": 5,
             "window_size": (1600, 900),
             "camera_dist": 9,
             # "camera_height": 0.5,
@@ -70,7 +72,7 @@ if __name__ == "__main__":
     while True:
         # for i in range(10):
         start_reset = time.time()
-        env.reset(force_seed=env.current_seed if env.engine is not None else 0)
+        env.reset()
         reset_used_time += time.time() - start_reset
         reset_num += 1
         for t in range(10000):
@@ -82,12 +84,13 @@ if __name__ == "__main__":
                                  "data_coverage": info["data_coverage"],
                                  "reward": r,
                                  "heading_diff": env.vehicle.heading_diff(env.vehicle.navigation.reference_trajectory)})
-            # if d:
-            #     print(
-            #         "Time elapse: {:.4f}. Average FPS: {:.4f}, AVG_Reset_time: {:.4f}".format(
-            #             time.time() - start, s / (time.time() - start - reset_used_time),
-            #             reset_used_time / reset_num
-            #         )
-            #     )
-            #     print("seed:{}, success".format(env.engine.global_random_seed))
-            #     break
+            if d:
+                print(
+                    "Time elapse: {:.4f}. Average FPS: {:.4f}, AVG_Reset_time: {:.4f}".format(
+                        time.time() - start, s / (time.time() - start - reset_used_time),
+                        reset_used_time / reset_num
+                    )
+                )
+                print("seed:{}, success".format(env.engine.global_random_seed))
+                print(list(env.engine.curriculum_manager.recent_success.dict.values()))
+                break
