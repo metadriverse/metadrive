@@ -293,6 +293,7 @@ class BaseEngine(EngineCore, Randomizable):
                 cm = lm
 
         for manager_name, manager in self.managers.items():
+            print(manager)
             manager.after_reset()
 
             if _debug_memory_usage:

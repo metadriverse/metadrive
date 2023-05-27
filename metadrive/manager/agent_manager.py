@@ -2,7 +2,7 @@ import copy
 from metadrive.policy.idm_policy import TrajectoryIDMPOlicy
 from typing import Dict
 
-from gym.spaces import Box, Dict, MultiDiscrete, Discrete
+from gymnasium.spaces import Box, Dict, MultiDiscrete, Discrete
 
 from metadrive.constants import DEFAULT_AGENT
 from metadrive.manager.base_manager import BaseManager
