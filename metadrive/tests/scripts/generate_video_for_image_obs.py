@@ -5,7 +5,7 @@ import subprocess
 import time
 
 import numpy as np
-from gym import logger, error
+from gymnasium import logger, error
 from panda3d.core import PNMImage
 
 from metadrive.component.algorithm.BIG import BigGenerateMethod

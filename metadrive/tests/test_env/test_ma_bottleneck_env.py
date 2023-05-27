@@ -3,7 +3,7 @@ from metadrive.envs.marl_envs.multi_agent_metadrive import MULTI_AGENT_METADRIVE
 
 MULTI_AGENT_METADRIVE_DEFAULT_CONFIG["force_seed_spawn_manager"] = True
 import numpy as np
-from gym.spaces import Box, Dict
+from gymnasium.spaces import Box, Dict
 
 from metadrive.envs.marl_envs.marl_bottleneck import MultiAgentBottleneckEnv
 from metadrive.utils import distance_greater, norm
