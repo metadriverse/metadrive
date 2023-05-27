@@ -17,7 +17,6 @@ from metadrive.manager.scenario_map_manager import ScenarioMapManager
 from metadrive.manager.waymo_traffic_manager import WaymoTrafficManager
 from metadrive.obs.real_env_observation import ScenarioObservation
 from metadrive.policy.replay_policy import ReplayEgoCarPolicy
-from metadrive.utils import clip
 from metadrive.utils import get_np_random
 from metadrive.utils.math import wrap_to_pi
 
@@ -60,16 +59,16 @@ SCENARIO_ENV_CONFIG = dict(
 
     # ===== Reward Scheme =====
     # See: https://github.com/metadriverse/metadrive/issues/283
-    success_reward=10.0,
-    out_of_road_penalty=10.0,
+    success_reward=5.0,
+    out_of_road_penalty=5.0,
     on_lane_line_penalty=1.,
     crash_vehicle_penalty=1.,
     crash_object_penalty=1.0,
     crash_human_penalty=1.0,
     driving_reward=1.0,
-    action_smooth_penalty=0.2,
-    heading_reward=1.,
-    lateral_reward=1.,
+    action_smooth_penalty=0.5,
+    heading_penalty=1.0,
+    lateral_penalty=.5,
     max_lateral_dist=4,
     no_negative_reward=True,
 
@@ -273,22 +272,24 @@ class ScenarioEnv(BaseEnv):
         reward += self.config["driving_reward"] * (long_now - long_last)
 
         # reward for lane keeping, without it vehicle can learn to overtake but fail to keep in lane
-        # if self.config["use_lateral_reward"]:
-        lateral_factor = clip(1 - abs(lateral_now) / self.config["max_lateral_dist"], 0.0, 1.0)
-        reward += lateral_factor * self.config["lateral_reward"]
+        lateral_factor = abs(lateral_now) / self.config["max_lateral_dist"]
+        lateral_penalty = -lateral_factor * self.config["lateral_penalty"]
+        reward += lateral_penalty
 
         # heading diff
-        # if self.config["use_heading_reward"]:
-        ref_line_heading = current_lane.heading_theta_at(long_now)
-        heading_diff = (1 - wrap_to_pi(abs(vehicle.heading_theta - ref_line_heading)) / np.pi)
-        reward += heading_diff * self.config["heading_reward"]
+        ref_line_heading = vehicle.navigation.current_heading_theta_at_long
+        heading_diff = wrap_to_pi(abs(vehicle.heading_theta - ref_line_heading)) / np.pi
+        heading_penalty = -heading_diff * self.config["heading_penalty"]
+        reward += heading_penalty
 
         # action_rate
         last_action = vehicle.last_action
         current_action = vehicle.current_action
         diff = (last_action[0] - current_action[0]) ** 2
         diff += (last_action[1] - current_action[1]) ** 2
-        reward -= diff * self.config["action_smooth_penalty"]
+        diff /= 8  # normalize
+        action_rate_penalty = diff * self.config["action_smooth_penalty"]
+        reward -= action_rate_penalty
 
         if self.config["no_negative_reward"]:
             reward = max(reward, 0)
@@ -325,6 +326,10 @@ class ScenarioEnv(BaseEnv):
         step_info["curriculum_success"] = self.engine.curriculum_manager.current_success_rate
         step_info["curriculum_route_completion"] = self.engine.curriculum_manager.current_route_completion
         step_info["lateral_dist"] = lateral_now
+
+        step_info["step_reward_lateral"] = lateral_penalty
+        step_info["step_reward_heading"] = heading_penalty
+        step_info["step_reward_action_smooth"] = action_rate_penalty
 
         # Compute state difference metrics
         # TODO LQY: Shall we use state difference as reward?
@@ -380,19 +385,16 @@ class ScenarioEnv(BaseEnv):
 
     def _is_out_of_road(self, vehicle):
         # A specified function to determine whether this vehicle should be done.
-
         if self.config["relax_out_of_road_done"]:
             # We prefer using this out of road termination criterion.
-            agent_name = self.agent_manager.object_to_agent(vehicle.name)
-            lat = abs(self.observations[agent_name].lateral_dist)
+            lat = abs(vehicle.navigation.current_lateral)
             done = lat > self.config["max_lateral_dist"]
             done = done
             return done
 
         done = vehicle.crash_sidewalk or vehicle.on_yellow_continuous_line or vehicle.on_white_continuous_line
         if self.config["out_of_route_done"]:
-            agent_name = self.agent_manager.object_to_agent(vehicle.name)
-            done = done or abs(self.observations[agent_name].lateral_dist) > 10
+            done = done or abs(vehicle.navigation.current_lateral) > 10
         return done
 
     def _reset_global_seed(self, force_seed=None):
@@ -469,7 +471,6 @@ if __name__ == "__main__":
             env.render(
                 text={
                     # "obs_shape": len(o),
-                    # "lateral": env.observations["default_agent"].lateral_dist,
                     "seed": env.engine.global_seed + env.config["start_scenario_index"],
                     # "reward": r,
                 }

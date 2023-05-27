@@ -13,10 +13,9 @@ if __name__ == "__main__":
             "agent_policy": ReplayEgoCarPolicy,
             "manual_control": True,
             "show_interface": False,
-            "use_heading_reward": True,
             # "need_lane_localization": False,
             "show_logo": False,
-            "no_traffic": False,
+            "no_traffic": True,
             "sequential_seed": True,
             # "debug_static_world": True,
             # "sequential_seed": True,
@@ -72,7 +71,7 @@ if __name__ == "__main__":
     while True:
         # for i in range(10):
         start_reset = time.time()
-        env.reset()
+        env.reset(force_seed=4)
 
         reset_used_time += time.time() - start_reset
         reset_num += 1
@@ -85,7 +84,9 @@ if __name__ == "__main__":
                                  "num_map": info["num_stored_maps"],
                                  "data_coverage": info["data_coverage"],
                                  "reward": r,
-                                 "heading_diff": env.vehicle.heading_diff(env.vehicle.navigation.reference_trajectory)})
+                                 "heading_r": info["step_reward_heading"],
+                                 "lateral_r": info["step_reward_lateral"],
+                                 "smooth_action_r": info["step_reward_action_smooth"]})
             if d:
                 print(
                     "Time elapse: {:.4f}. Average FPS: {:.4f}, AVG_Reset_time: {:.4f}".format(

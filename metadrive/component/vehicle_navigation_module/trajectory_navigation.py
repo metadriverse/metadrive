@@ -131,8 +131,9 @@ class TrajectoryNavigation(BaseNavigation):
                 self._ckpt_vis_models[k].setPos(panda_vector(pos_of_goal[0], pos_of_goal[1], 1.8))
                 self._ckpt_vis_models[k].setH(self._goal_node_path.getH() + 3)
 
-        self._navi_info[end] = (lat / self.engine.global_config["max_lateral_dist"] + 1) / 2
-        self._navi_info[end + 1] = (wrap_to_pi(heading_theta_at_long - ego_vehicle.heading_theta) / np.pi + 1) / 2
+        self._navi_info[end] = clip((lat / self.engine.global_config["max_lateral_dist"] + 1) / 2, 0.0, 1.0)
+        self._navi_info[end + 1] = clip((wrap_to_pi(heading_theta_at_long - ego_vehicle.heading_theta) / np.pi + 1) / 2,
+                                        0.0, 1.0)
 
         # Use RC as the only criterion to determine arrival in Scenario env.
         self._route_completion = long / self.reference_trajectory.length

@@ -1005,7 +1005,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         return self.last_current_action[-1]
 
     @property
-    def last_current(self):
+    def last_action(self):
         return self.last_current_action[0]
 
     def detach_from_world(self, physics_world):
