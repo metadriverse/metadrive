@@ -236,16 +236,22 @@ class ScenarioEnv(BaseEnv):
 
     def cost_function(self, vehicle_id: str):
         vehicle = self.vehicles[vehicle_id]
-        step_info = dict()
+        step_info = dict(num_crash_object=0,
+                         num_crash_human=0,
+                         num_crash_vehicle=0)
         step_info["cost"] = 0
         if self._is_out_of_road(vehicle):
-            step_info["cost"] = self.config["out_of_road_cost"]
-        elif vehicle.crash_vehicle:
-            step_info["cost"] = self.config["crash_vehicle_cost"]
-        elif vehicle.crash_object:
-            step_info["cost"] = self.config["crash_object_cost"]
-        elif vehicle.crash_human:
-            step_info["cost"] = self.config["crash_human_cost"]
+            step_info["cost"] += self.config["out_of_road_cost"]
+        if vehicle.crash_vehicle:
+            step_info["cost"] += self.config["crash_vehicle_cost"]
+            step_info["crash_vehicle_cost"] = self.config["crash_vehicle_cost"]
+            step_info["num_crash_vehicle"] = 1
+        if vehicle.crash_object:
+            step_info["cost"] += self.config["crash_object_cost"]
+            step_info["num_crash_object"] = 1
+        if vehicle.crash_human:
+            step_info["cost"] += self.config["crash_human_cost"]
+            step_info["num_crash_human"] = 1
         return step_info['cost'], step_info
 
     def reward_function(self, vehicle_id: str):
