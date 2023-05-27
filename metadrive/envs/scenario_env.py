@@ -288,8 +288,8 @@ class ScenarioEnv(BaseEnv):
         diff = (last_action[0] - current_action[0]) ** 2
         diff += (last_action[1] - current_action[1]) ** 2
         diff /= 8  # normalize
-        action_rate_penalty = diff * self.config["action_smooth_penalty"]
-        reward -= action_rate_penalty
+        action_rate_penalty = -diff * self.config["action_smooth_penalty"]
+        reward += action_rate_penalty
 
         if self.config["no_negative_reward"]:
             reward = max(reward, 0)
@@ -301,15 +301,15 @@ class ScenarioEnv(BaseEnv):
             reward = -self.config["crash_object_penalty"]
         if vehicle.crash_human:
             reward = -self.config["crash_human_penalty"]
-            # lane line penalty
+        # lane line penalty
         if vehicle.on_yellow_continuous_line or vehicle.crash_sidewalk or vehicle.on_white_continuous_line:
-            reward -= self.config["on_lane_line_penalty"]
+            reward = -self.config["on_lane_line_penalty"]
 
         step_info["step_reward"] = reward
 
         # termination reward
         if self._is_arrive_destination(vehicle):
-            reward = +self.config["success_reward"]
+            reward = self.config["success_reward"]
         elif self._is_out_of_road(vehicle):
             reward = -self.config["out_of_road_penalty"]
 
