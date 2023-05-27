@@ -59,14 +59,13 @@ The following scripts is a minimal example for instantiating a MetaDrive environ
 .. code-block:: python
 
     import metadrive  # Import this package to register the environment!
-    import gym
+    import gymnasium as gym
 
-    env = gym.make("MetaDrive-v0", config=dict(use_render=True))
+    env = gym.make("MetaDrive-validation-v0", config={"render_mode": "human"})
     env.reset()
     for i in range(1000):
-        obs, reward, done, info = env.step(env.action_space.sample())
-        env.render()
-        if done:
+        obs, reward, terminated, truncated, info = env.step(env.action_space.sample())
+        if terminated or truncated:
             env.reset()
     env.close()
 

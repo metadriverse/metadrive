@@ -231,7 +231,7 @@ if __name__ == "__main__":
     )
     env.reset()
     while True:
-        o, r, d, i = env.step(env.action_space.sample())
+        o, r, tm, tc, i = env.step(env.action_space.sample())
         env.render(text={"ts": env.episode_step})
-        if d:
+        if tm or tc:
             env.reset()

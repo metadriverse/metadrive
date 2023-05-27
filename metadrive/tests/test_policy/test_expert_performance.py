@@ -19,7 +19,7 @@ def _evaluate(env_config, num_episode, has_traffic=True, need_on_same_lane=True)
         success_list, reward_list, ep_reward, ep_len, ep_count = [], [], 0, 0, 0
         while ep_count < num_episode:
             action = expert(env.vehicle, deterministic=True)
-            obs, reward, done, info = env.step(action)
+            obs, reward, terminated, truncated, info = env.step(action)
             if need_on_same_lane:
                 assert lane_idx_need_to_stay == env.vehicle.lane_index[-1], "Not one the same lane"
             # double check lidar
@@ -30,7 +30,7 @@ def _evaluate(env_config, num_episode, has_traffic=True, need_on_same_lane=True)
                 lidar_success = True
             ep_reward += reward
             ep_len += 1
-            if done:
+            if terminated or truncated:
                 ep_count += 1
                 success_list.append(1 if get_terminal_state(info) == "Success" else 0)
                 reward_list.append(ep_reward)

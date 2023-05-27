@@ -44,7 +44,7 @@ assert "__init__.py" not in os.listdir(os.path.dirname(__file__)), "Please remov
 
 def _act(env, action):
     assert env.action_space.contains(action)
-    obs, reward, done, info = env.step(action)
+    obs, reward, terminated, truncated, info = env.step(action)
     assert env.observation_space.contains(obs)
     assert np.isscalar(reward)
     assert isinstance(info, dict)

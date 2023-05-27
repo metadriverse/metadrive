@@ -273,9 +273,9 @@ class MultiAgentTollgateEnv(MultiAgentMetaDrive):
         return o
 
     def step(self, actions):
-        o, r, d, i = super(MultiAgentTollgateEnv, self).step(actions)
+        o, r, te, tr, i = super(MultiAgentTollgateEnv, self).step(actions)
         self.stay_time_manager.record(self.agent_manager.active_agents, self.episode_step)
-        return o, r, d, i
+        return o, r, te, tr, i
 
     def setup_engine(self):
         super(MultiAgentTollgateEnv, self).setup_engine()
@@ -317,13 +317,13 @@ def _expert():
     total_r = 0
     ep_s = 0
     for i in range(1, 100000):
-        o, r, d, info = env.step(env.action_space.sample())
+        o, r, te, tr, info = env.step(env.action_space.sample())
         for r_ in r.values():
             total_r += r_
         ep_s += 1
-        d.update({"total_r": total_r, "episode length": ep_s})
+        te.update({"total_r": total_r, "episode length": ep_s})
         # env.render(text=d)
-        if d["__all__"]:
+        if te["__all__"]:
             print(
                 "Finish! Current step {}. Group Reward: {}. Average reward: {}".format(
                     i, total_r, total_r / env.agent_manager.next_agent_count
@@ -361,7 +361,7 @@ def _vis_debug_respawn():
     ep_s = 0
     for i in range(1, 100000):
         action = {k: [.0, 1.0] for k in env.vehicles.keys()}
-        o, r, d, info = env.step(action)
+        o, r, te, tr, info = env.step(action)
         for r_ in r.values():
             total_r += r_
         ep_s += 1
@@ -374,7 +374,7 @@ def _vis_debug_respawn():
             "cam_z": env.main_camera.top_down_camera_height
         }
         env.render(text=render_text)
-        if d["__all__"]:
+        if te["__all__"]:
             print(
                 "Finish! Current step {}. Group Reward: {}. Average reward: {}".format(
                     i, total_r, total_r / env.agent_manager.next_agent_count
@@ -415,7 +415,7 @@ def _vis():
     total_r = 0
     ep_s = 0
     for i in range(1, 100000):
-        o, r, d, info = env.step({k: [0, 1] for k in env.vehicles.keys()})
+        o, r, te, tr, info = env.step({k: [0, 1] for k in env.vehicles.keys()})
         for r_ in r.values():
             total_r += r_
         ep_s += 1
@@ -436,7 +436,7 @@ def _vis():
         render_text["lane"] = env.current_track_vehicle.lane_index
         render_text["block"] = env.current_track_vehicle.navigation.current_road.block_ID()
         env.render(text=render_text)
-        if d["__all__"]:
+        if te["__all__"]:
             print(info)
             print(
                 "Finish! Current step {}. Group Reward: {}. Average reward: {}".format(
@@ -457,12 +457,12 @@ def _profile():
     obs = env.reset()
     start = time.time()
     for s in range(10000):
-        o, r, d, i = env.step(env.action_space.sample())
+        o, r, te, tr, i = env.step(env.action_space.sample())
 
         # mask_ratio = env.engine.detector_mask.get_mask_ratio()
         # print("Mask ratio: ", mask_ratio)
 
-        if all(d.values()):
+        if all(te.values()):
             env.reset()
         if (s + 1) % 100 == 0:
             print(
@@ -500,30 +500,30 @@ def _long_run():
         assert env.observation_space.contains(obs)
         for step in range(10000):
             act = env.action_space.sample()
-            o, r, d, i = env.step(act)
+            o, r, te, tr, i = env.step(act)
             if step == 0:
-                assert not any(d.values())
+                assert not any(te.values())
 
-            if any(d.values()):
-                print("Current Done: {}\nReward: {}".format(d, r))
-                for kkk, ddd in d.items():
+            if any(te.values()):
+                print("Current Done: {}\nReward: {}".format(te, r))
+                for kkk, ddd in te.items():
                     if ddd and kkk != "__all__":
                         print("Info {}: {}\n".format(kkk, i[kkk]))
                 print("\n")
 
             for kkk, rrr in r.items():
                 if rrr == -_out_of_road_penalty:
-                    assert d[kkk]
+                    assert te[kkk]
 
             if (step + 1) % 200 == 0:
                 print(
                     "{}/{} Agents: {} {}\nO: {}\nR: {}\nD: {}\nI: {}\n\n".format(
                         step + 1, 10000, len(env.vehicles), list(env.vehicles.keys()),
                         {k: (oo.shape, oo.mean(), oo.min(), oo.max())
-                         for k, oo in o.items()}, r, d, i
+                         for k, oo in o.items()}, r, te, i
                     )
                 )
-            if d["__all__"]:
+            if te["__all__"]:
                 print('Current step: ', step)
                 break
     finally:

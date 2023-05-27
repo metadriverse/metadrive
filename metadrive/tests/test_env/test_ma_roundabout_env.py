@@ -58,17 +58,19 @@ def _check_space(env):
 
 def _act(env, action):
     assert env.action_space.contains(action)
-    obs, reward, done, info = env.step(action)
+    obs, reward, terminated, truncated, info = env.step(action)
     _check_shape(env)
-    if not done["__all__"]:
+    if not terminated["__all__"]:
         assert len(env.vehicles) > 0
     if not (set(obs.keys()) == set(reward.keys()) == set(env.observation_space.spaces.keys())):
         raise ValueError
     assert env.observation_space.contains(obs)
     assert isinstance(reward, dict)
     assert isinstance(info, dict)
-    assert isinstance(done, dict)
-    return obs, reward, done, info
+    assert isinstance(terminated, dict)
+    assert isinstance(truncated, dict)
+
+    return obs, reward, terminated, truncated, info
 
 
 def test_ma_roundabout_env():
@@ -89,9 +91,10 @@ def test_ma_roundabout_env():
             assert env.observation_space.contains(obs)
             for step in range(100):
                 act = {k: [1, 1] for k in env.vehicles.keys()}
-                o, r, d, i = _act(env, act)
+                o, r, te, tr, i = _act(env, act)
                 if step == 0:
-                    assert not any(d.values())
+                    assert not any(te.values())
+                    assert not any(tr.values())
         finally:
             env.close()
 
@@ -121,33 +124,34 @@ def test_ma_roundabout_horizon():
             last_keys = set(env.vehicles.keys())
             for step in range(1, 1000):
                 act = {k: [1, 1] for k in env.vehicles.keys()}
-                o, r, d, i = _act(env, act)
+                o, r, te, tr, i = _act(env, act)
                 new_keys = set(env.vehicles.keys())
                 if step == 0:
-                    assert not any(d.values())
-                if any(d.values()):
+                    assert not any(te.values())
+                    assert not any(tr.values())
+                if any(te.values()):
                     assert len(last_keys) <= 4  # num of agents
                     assert len(new_keys) <= 4  # num of agents
                     for k in new_keys.difference(last_keys):
                         assert k in o
-                        assert k in d
+                        assert k in te
                     # print("Step {}, Done: {}".format(step, d))
 
                 for kkk, rrr in r.items():
                     if rrr == -777:
-                        assert d[kkk]
+                        assert te[kkk]
                         assert i[kkk]["cost"] == 778
                         assert i[kkk][TerminationState.OUT_OF_ROAD]
 
                 for kkk, iii in i.items():
                     if (TerminationState.OUT_OF_ROAD in iii and iii[TerminationState.OUT_OF_ROAD]) or \
                             ("cost" in iii and iii["cost"] == 778):
-                        assert d[kkk]
+                        assert te[kkk]
                         assert i[kkk]["cost"] == 778
                         assert i[kkk][TerminationState.OUT_OF_ROAD]
                         #assert r[kkk] == -777
 
-                if d["__all__"]:
+                if te["__all__"]:
                     break
                 last_keys = new_keys
         finally:
@@ -163,10 +167,10 @@ def test_ma_roundabout_reset():
         assert env.observation_space.contains(obs)
         for step in range(1000):
             act = {k: [1, 1] for k in env.vehicles.keys()}
-            o, r, d, i = _act(env, act)
+            o, r, te, tr, i = _act(env, act)
             if step == 0:
-                assert not any(d.values())
-            if d["__all__"]:
+                assert not any(te.values())
+            if te["__all__"]:
                 obs = env.reset()
                 assert env.observation_space.contains(obs)
 
@@ -194,7 +198,7 @@ def test_ma_roundabout_reset():
                 #
                 # for _ in range(2):
                 #     act = {k: [1, 1] for k in env.vehicles.keys()}
-                #     o, r, d, i = _act(env, act)
+                #     o, r, te, tr, i = _act(env, act)
 
                 # Force vehicle to success!
                 for v_id, v in env.vehicles.items():
@@ -215,7 +219,7 @@ def test_ma_roundabout_reset():
                     assert env._is_arrive_destination(v)
 
                 act = {k: [0, 0] for k in env.vehicles.keys()}
-                o, r, d, i = _act(env, act)
+                o, r, te, tr, i = _act(env, act)
 
                 for v in env.vehicles.values():
                     assert len(v.navigation.checkpoints) > 2
@@ -225,16 +229,16 @@ def test_ma_roundabout_reset():
                         # # print("{} success!".format(kkk))
                         success_count += 1
 
-                for kkk, ddd in d.items():
+                for kkk, ddd in te.items():
                     if ddd and kkk != "__all__":
                         assert i[kkk][TerminationState.SUCCESS]
                         agent_count += 1
 
                 for kkk, rrr in r.items():
-                    if d[kkk]:
+                    if te[kkk]:
                         assert rrr == 777
 
-                if d["__all__"]:
+                if te["__all__"]:
                     # print("Finish {} agents. Success {} agents.".format(agent_count, success_count))
                     o = env.reset()
                     assert env.observation_space.contains(o)
@@ -262,8 +266,8 @@ def test_ma_roundabout_close_spawn():
             obs = env.reset()
             _check_spaces_after_reset(env)
             for _ in range(10):
-                o, r, d, i = env.step({k: [0, 0] for k in env.vehicles.keys()})
-                assert not any(d.values())
+                o, r, te, tr, i = env.step({k: [0, 0] for k in env.vehicles.keys()})
+                assert not any(te.values())
             _no_close_spawn(env.vehicles)
             # print('Finish {} resets.'.format(num_r))
     finally:
@@ -282,18 +286,18 @@ def test_ma_roundabout_reward_done_alignment():
         for action in [-1, 1]:
             for step in range(5000):
                 act = {k: [action, 1] for k in env.vehicles.keys()}
-                o, r, d, i = _act(env, act)
-                for kkk, ddd in d.items():
+                o, r, te, tr, i = _act(env, act)
+                for kkk, ddd in te.items():
                     if ddd and kkk != "__all__":
                         #assert r[kkk] == -777
                         assert i[kkk][TerminationState.OUT_OF_ROAD]
                         # # print('{} done passed!'.format(kkk))
                 for kkk, rrr in r.items():
                     if rrr == -777:
-                        assert d[kkk]
+                        assert te[kkk]
                         assert i[kkk][TerminationState.OUT_OF_ROAD]
                         # # print('{} reward passed!'.format(kkk))
-                if d["__all__"]:
+                if te["__all__"]:
                     env.reset()
                     break
     finally:
@@ -324,24 +328,24 @@ def test_ma_roundabout_reward_done_alignment_1():
         _check_spaces_after_reset(env, obs)
         for step in range(5):
             act = {k: [0, 0] for k in env.vehicles.keys()}
-            o, r, d, i = _act(env, act)
+            o, r, te, tr, i = _act(env, act)
         env.vehicles["agent0"].set_position(env.vehicles["agent1"].position, height=1.2)
         for step in range(5000):
             act = {k: [0, 0] for k in env.vehicles.keys()}
-            o, r, d, i = _act(env, act)
+            o, r, te, tr, i = _act(env, act)
 
-            if not any(d.values()):
+            if not any(te.values()):
                 continue
 
-            assert sum(d.values()) == 2
+            assert sum(te.values()) == 2
 
             for kkk in ['agent0', 'agent1']:
                 iii = i[kkk]
                 assert iii[TerminationState.CRASH_VEHICLE]
                 assert iii[TerminationState.CRASH]
                 #assert r[kkk] == -1.7777
-                # for kkk, ddd in d.items():
-                ddd = d[kkk]
+                # for kkk, ddd in te.items():
+                ddd = te[kkk]
                 if ddd and kkk != "__all__":
                     #assert r[kkk] == -1.7777
                     assert i[kkk][TerminationState.CRASH_VEHICLE]
@@ -350,12 +354,12 @@ def test_ma_roundabout_reward_done_alignment_1():
                 # for kkk, rrr in r.items():
                 rrr = r[kkk]
                 if rrr == -1.7777:
-                    assert d[kkk]
+                    assert te[kkk]
                     assert i[kkk][TerminationState.CRASH_VEHICLE]
                     assert i[kkk][TerminationState.CRASH]
                     # # print('{} reward passed!'.format(kkk))
-            # assert d["__all__"]
-            # if d["__all__"]:
+            # assert te["__all__"]
+            # if te["__all__"]:
             break
     finally:
         env._DEBUG_RANDOM_SEED = None
@@ -384,7 +388,7 @@ def test_ma_roundabout_reward_done_alignment_1():
         _check_spaces_after_reset(env, obs)
         for step in range(1):
             act = {k: [0, 0] for k in env.vehicles.keys()}
-            o, r, d, i = _act(env, act)
+            o, r, te, tr, i = _act(env, act)
 
         for v_id, v in env.vehicles.items():
             if v_id != "agent0":
@@ -392,7 +396,7 @@ def test_ma_roundabout_reward_done_alignment_1():
 
         for step in range(5000):
             act = {k: [0, 1] for k in env.vehicles.keys()}
-            o, r, d, i = _act(env, act)
+            o, r, te, tr, i = _act(env, act)
             for kkk, iii in i.items():
                 if iii[TerminationState.CRASH]:
                     assert iii[TerminationState.CRASH_VEHICLE]
@@ -404,9 +408,9 @@ def test_ma_roundabout_reward_done_alignment_1():
                     assert i[kkk][TerminationState.CRASH_VEHICLE]
                     assert i[kkk][TerminationState.CRASH]
                     # # print('{} reward passed!'.format(kkk))
-            if d["agent0"]:
+            if te["agent0"]:
                 break
-            if d["__all__"]:
+            if te["__all__"]:
                 break
     finally:
         env.close()
@@ -429,18 +433,18 @@ def test_ma_roundabout_reward_done_alignment_1():
         assert env.observation_space.contains(obs)
         for step in range(5000):
             act = {k: [0, 0] for k in env.vehicles.keys()}
-            o, r, d, i = _act(env, act)
-            if d["__all__"]:
+            o, r, te, tr, i = _act(env, act)
+            if te["__all__"]:
                 break
             kkk = "agent0"
             #assert r[kkk] == 999
             assert i[kkk][TerminationState.SUCCESS]
-            assert d[kkk]
+            assert te[kkk]
 
             kkk = "agent1"
             #assert r[kkk] != 999
             assert not i[kkk][TerminationState.SUCCESS]
-            assert not d[kkk]
+            assert not te[kkk]
             break
     finally:
         env.close()
@@ -470,16 +474,16 @@ def test_ma_roundabout_reward_sign():
         ep_reward = 0.0
         for step in range(1000):
             act = {k: [0, 1] for k in env.vehicles.keys()}
-            o, r, d, i = env.step(act)
+            o, r, te, tr, i = env.step(act)
             ep_reward += next(iter(r.values()))
-            if any(d.values()):
+            if any(te.values()):
                 # print("Finish respawn count: {}, reward {}".format(env._respawn_count, ep_reward))
                 env._respawn_count += 1
                 assert ep_reward > 10, ep_reward
                 ep_reward = 0
             if env._respawn_count >= len(env._safe_places):
                 break
-            if d["__all__"]:
+            if te["__all__"]:
                 break
     finally:
         env.close()
@@ -528,22 +532,22 @@ def test_ma_roundabout_no_short_episode():
         _check_spaces_after_reset(env, o)
         actions = [[0, 1], [1, 1], [-1, 1]]
         start = time.time()
-        d_count = 0
-        d = {"__all__": False}
+        te_count = 0
+        te = {"__all__": False}
         for step in range(2000):
             # act = {k: actions[np.random.choice(len(actions))] for k in o.keys()}
             act = {k: actions[np.random.choice(len(actions))] for k in env.vehicles.keys()}
             o_keys = set(o.keys()).union({"__all__"})
             a_keys = set(env.action_space.spaces.keys()).union(set(d.keys()))
             assert o_keys == a_keys
-            o, r, d, i = _act(env, act)
+            o, r, te, tr, i = _act(env, act)
             for kkk, iii in i.items():
-                if d[kkk]:
+                if te[kkk]:
                     assert iii["episode_length"] >= 1
-                    d_count += 1
-            if d["__all__"]:
+                    te_count += 1
+            if te["__all__"]:
                 o = env.reset()
-                d = {"__all__": False}
+                te = {"__all__": False}
             # if (step + 1) % 100 == 0:
             #     # print(
             #         "Finish {}/2000 simulation steps. Time elapse: {:.4f}. Average FPS: {:.4f}".format(
@@ -551,7 +555,7 @@ def test_ma_roundabout_no_short_episode():
             #             time.time() - start, (step + 1) / (time.time() - start)
             #         )
             #     )
-            if d_count > 200:
+            if te_count > 200:
                 break
     finally:
         env.close()
@@ -576,19 +580,22 @@ def test_ma_roundabout_horizon_termination():
                     else:
                         if v_id in env.vehicles:
                             env.vehicles[v_id].set_static(True)
-                obs, r, d, i = _act(env, act)
+                obs, r, te, tr, i = _act(env, act)
                 if step == 0 or step == 1:
-                    assert not any(d.values())
+                    assert not any(te.values())
+                    assert not any(tr.values())
+
 
                 if should_respawn:
                     for kkk in should_respawn:
                         assert kkk not in obs, "It seems the max_step agents is not respawn!"
                         assert kkk not in r
-                        assert kkk not in d
+                        assert kkk not in te
+                        assert kkk not in tr
                         assert kkk not in i
                     should_respawn.clear()
 
-                for kkk, ddd in d.items():
+                for kkk, ddd in te.items():
                     if ddd and kkk == "__all__":
                         # print("Current: ", step)
                         continue
@@ -599,7 +606,7 @@ def test_ma_roundabout_horizon_termination():
                         assert not i[kkk][TerminationState.CRASH_VEHICLE]
                         should_respawn.add(kkk)
 
-                if d["__all__"]:
+                if te["__all__"]:
                     obs = env.reset()
                     should_respawn.clear()
                     break
@@ -660,8 +667,8 @@ def test_ma_no_reset_error():
         assert env.observation_space.contains(obs)
         for step in range(300):
             check_pos(list(env.vehicles.values()))
-            o, r, d, i = env.step({k: [0, 1] for k in env.vehicles.keys()})
-            if d["__all__"]:
+            o, r, te, tr, i = env.step({k: [0, 1] for k in env.vehicles.keys()})
+            if te["__all__"]:
                 break
     finally:
         env.close()
@@ -675,7 +682,7 @@ def test_randomize_spawn_place():
         for step in range(100):
             act = {k: [1, 1] for k in env.vehicles.keys()}
             last_pos = {kkk: v.position for kkk, v in env.vehicles.items()}
-            o, r, d, i = env.step(act)
+            o, r, te, tr, i = env.step(act)
             obs = env.reset()
             new_pos = {kkk: v.position for kkk, v in env.vehicles.items()}
             for kkk, new_p in new_pos.items():

@@ -121,19 +121,21 @@ Press key ```r``` for loading a new scenario, and ```b``` or ```q``` for switchi
 [comment]: <> (```)
 
 ### Basic Usage
-To build the RL environment in python script, you can simply code in the OpenAI gym format as:
+To build the RL environment in python script, you can simply code in the Farama Gymnasium format as:
 
 ```python
 import metadrive  # Import this package to register the environment!
-import gym
+import gymnasium as gym
 
-env = gym.make("MetaDrive-v0", config=dict(use_render=True))
-# env = metadrive.MetaDriveEnv(config=dict(environment_num=100))  # Or build environment from class
+env = gym.make("MetaDrive-validation-v0", config={"render_mode": "human"})
+
+# Alternatively, you can instantiate using the class
+# env = metadrive.MetaDriveEnv(config={"render_mode": "human", "num_scenarios": 100})
+
 env.reset()
 for i in range(1000):
-    obs, reward, done, info = env.step(env.action_space.sample())  # Use random policy
-    env.render()
-    if done:
+    obs, reward, terminated, truncated, info = env.step(env.action_space.sample())  # Use random policy
+    if terminated or truncated:
         env.reset()
 env.close()
 ```

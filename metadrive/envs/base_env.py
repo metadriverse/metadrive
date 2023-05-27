@@ -656,7 +656,7 @@ class BaseEnv(gym.Env):
             count = 0
             info = None
             while not done:
-                obs, reward, done, info = self.step(_act(obs))
+                obs, reward, terminated, truncated, info = self.step(_act(obs))
                 count += 1
                 if max_episode_length is not None and count > max_episode_length:
                     done = True
