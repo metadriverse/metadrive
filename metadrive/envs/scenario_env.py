@@ -62,15 +62,14 @@ SCENARIO_ENV_CONFIG = dict(
     # See: https://github.com/metadriverse/metadrive/issues/283
     success_reward=10.0,
     out_of_road_penalty=10.0,
-    on_lane_line_penalty=1,
-    crash_vehicle_penalty=1,
+    on_lane_line_penalty=1.,
+    crash_vehicle_penalty=1.,
     crash_object_penalty=1.0,
     crash_human_penalty=1.0,
     driving_reward=1.0,
-    speed_reward=0.1,
-    action_smooth_reward=0.2,
-    use_lateral_reward=False,
-    use_heading_reward=False,
+    action_smooth_penalty=0.2,
+    heading_reward=1.,
+    lateral_reward=1.,
     max_lateral_dist=4,
     no_negative_reward=True,
 
@@ -119,7 +118,7 @@ class ScenarioEnv(BaseEnv):
         return {self.DEFAULT_AGENT: self.get_single_observation(self.config["vehicle_config"])}
 
     def get_single_observation(self, vehicle_config):
-        o = ScenarioObservation(self.config["max_lateral_dist"], vehicle_config)
+        o = ScenarioObservation(vehicle_config)
         return o
 
     def switch_to_top_down_view(self):
@@ -265,39 +264,34 @@ class ScenarioEnv(BaseEnv):
 
         # Reward for moving forward in current lane
         current_lane = vehicle.lane
-        long_last, _ = current_lane.local_coordinates(vehicle.last_position)
-        long_now, lateral_now = current_lane.local_coordinates(vehicle.position)
-
-        # update obs
-        self.observations[vehicle_id].lateral_dist = lateral_now
+        long_last = vehicle.navigation.last_longitude
+        long_now = vehicle.navigation.current_longitude
+        lateral_now = vehicle.navigation.current_lateral
 
         # dense driving reward
         reward = 0
         reward += self.config["driving_reward"] * (long_now - long_last)
 
         # reward for lane keeping, without it vehicle can learn to overtake but fail to keep in lane
-        if self.config["use_lateral_reward"]:
-            lateral_factor = clip(1 - 2 * abs(lateral_now) / 6, 0.0, 1.0)
-        else:
-            lateral_factor = 1.0
-        reward *= lateral_factor
+        # if self.config["use_lateral_reward"]:
+        lateral_factor = clip(1 - abs(lateral_now) / self.config["max_lateral_dist"], 0.0, 1.0)
+        reward += lateral_factor * self.config["lateral_reward"]
 
         # heading diff
-        if self.config["use_heading_reward"]:
-            ref_line_heading = current_lane.heading_theta_at(long_now)
-            heading_diff = (1 - wrap_to_pi(abs(vehicle.heading_theta - ref_line_heading)) / np.pi)
-            reward *= heading_diff
+        # if self.config["use_heading_reward"]:
+        ref_line_heading = current_lane.heading_theta_at(long_now)
+        heading_diff = (1 - wrap_to_pi(abs(vehicle.heading_theta - ref_line_heading)) / np.pi)
+        reward += heading_diff * self.config["heading_reward"]
 
         # action_rate
-        last_action = vehicle.last_current_action[0]
-        current_action = vehicle.last_current_action[1]
+        last_action = vehicle.last_action
+        current_action = vehicle.current_action
         diff = (last_action[0] - current_action[0]) ** 2
         diff += (last_action[1] - current_action[1]) ** 2
-        reward -= diff * self.config["action_smooth_reward"]
+        reward -= diff * self.config["action_smooth_penalty"]
 
-        # lane line penalty
-        if vehicle.on_yellow_continuous_line or vehicle.crash_sidewalk or vehicle.on_white_continuous_line:
-            reward -= self.config["on_lane_line_penalty"]
+        if self.config["no_negative_reward"]:
+            reward = max(reward, 0)
 
         # crash penalty
         if vehicle.crash_vehicle:
@@ -306,9 +300,10 @@ class ScenarioEnv(BaseEnv):
             reward = -self.config["crash_object_penalty"]
         if vehicle.crash_human:
             reward = -self.config["crash_human_penalty"]
+            # lane line penalty
+        if vehicle.on_yellow_continuous_line or vehicle.crash_sidewalk or vehicle.on_white_continuous_line:
+            reward -= self.config["on_lane_line_penalty"]
 
-        if self.config["no_negative_reward"]:
-            reward = max(reward, 0)
         step_info["step_reward"] = reward
 
         # termination reward

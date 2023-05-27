@@ -1,5 +1,7 @@
 import logging
+from collections import deque
 
+import numpy as np
 from panda3d.core import NodePath
 
 from metadrive.component.vehicle_navigation_module.base_navigation import BaseNavigation
@@ -7,6 +9,7 @@ from metadrive.engine.asset_loader import AssetLoader
 from metadrive.utils.coordinates_shift import panda_vector
 from metadrive.utils.math import norm, clip
 from metadrive.utils.math import panda_vector
+from metadrive.utils.math import wrap_to_pi
 
 logger = logging.getLogger(__file__)
 
@@ -58,6 +61,11 @@ class TrajectoryNavigation(BaseNavigation):
                 self._navi_point_model.instanceTo(model)
                 model.reparentTo(self.origin)
 
+        # should be updated every step after calling update_localization
+        self.last_current_long = deque([0.0, 0.0], maxlen=2)
+        self.last_current_lat = deque([0.0, 0.0], maxlen=2)
+        self.last_current_heading_theta_at_long = deque([0.0, 0.0], maxlen=2)
+
     def reset(self, vehicle):
         super(TrajectoryNavigation, self).reset(current_lane=self.reference_trajectory)
         self.set_route()
@@ -97,7 +105,12 @@ class TrajectoryNavigation(BaseNavigation):
             return
 
         # Update ckpt index
-        long, _ = self.reference_trajectory.local_coordinates(ego_vehicle.position)
+        long, lat = self.reference_trajectory.local_coordinates(ego_vehicle.position)
+        heading_theta_at_long = self.reference_trajectory.heading_theta_at(long)
+        self.last_current_heading_theta_at_long.append(heading_theta_at_long)
+        self.last_current_long.append(long)
+        self.last_current_lat.append(lat)
+
         next_idx = max(int(long / self.DISCRETE_LEN) + 1, 0)
         next_idx = min(next_idx, len(self.checkpoints) - 1)
         end_idx = min(next_idx + self.NUM_WAY_POINT, len(self.checkpoints))
@@ -117,6 +130,9 @@ class TrajectoryNavigation(BaseNavigation):
                 pos_of_goal = ckpt
                 self._ckpt_vis_models[k].setPos(panda_vector(pos_of_goal[0], pos_of_goal[1], 1.8))
                 self._ckpt_vis_models[k].setH(self._goal_node_path.getH() + 3)
+
+        self._navi_info[end] = (lat / self.engine.global_config["max_lateral_dist"] + 1) / 2
+        self._navi_info[end + 1] = (wrap_to_pi(heading_theta_at_long - ego_vehicle.heading_theta) / np.pi + 1) / 2
 
         # Use RC as the only criterion to determine arrival in Scenario env.
         self._route_completion = long / self.reference_trajectory.length
@@ -171,6 +187,34 @@ class TrajectoryNavigation(BaseNavigation):
     @property
     def route_completion(self):
         return self._route_completion
+
+    @classmethod
+    def get_navigation_info_dim(cls):
+        return cls.NUM_WAY_POINT * cls.CHECK_POINT_INFO_DIM + 2
+
+    @property
+    def last_longitude(self):
+        return self.last_current_long[0]
+
+    @property
+    def current_longitude(self):
+        return self.last_current_long[1]
+
+    @property
+    def last_lateral(self):
+        return self.last_current_lat[0]
+
+    @property
+    def current_lateral(self):
+        return self.last_current_lat[1]
+
+    @property
+    def last_heading_theta_at_long(self):
+        return self.last_current_heading_theta_at_long[0]
+
+    @property
+    def current_heading_theta_at_long(self):
+        return self.last_current_heading_theta_at_long[1]
 
 
 WaymoTrajectoryNavigation = TrajectoryNavigation
