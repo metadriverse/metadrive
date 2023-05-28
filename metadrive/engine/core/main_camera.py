@@ -131,7 +131,7 @@ class MainCamera:
             self.engine.graphicsEngine.renderFrame()
             self.engine.graphicsEngine.renderFrame()
             self.engine.graphicsEngine.renderFrame()
-            self.camera.node().getDisplayRegion(0).setDrawCallback(_callback_func)
+            self.engine.cam.node().getDisplayRegion(0).setDrawCallback(_callback_func)
 
             self.gsg = GraphicsStateGuardianBase.getDefaultGsg()
             self.texture_context_future = self.cuda_texture.prepare(self.gsg.prepared_objects)
