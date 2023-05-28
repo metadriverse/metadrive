@@ -285,9 +285,9 @@ class ScenarioEnv(BaseEnv):
         # action_rate
         last_action = vehicle.last_action
         current_action = vehicle.current_action
-        diff = (last_action[0] - current_action[0]) ** 2
-        diff += (last_action[1] - current_action[1]) ** 2
-        diff /= 8  # normalize
+        diff = (last_action[0] - current_action[0]) ** 2  # penalize steering
+        # diff += (last_action[1] - current_action[1]) ** 2
+        diff /= 4  # normalize
         action_rate_penalty = -diff * self.config["action_smooth_penalty"]
         reward += action_rate_penalty
 
