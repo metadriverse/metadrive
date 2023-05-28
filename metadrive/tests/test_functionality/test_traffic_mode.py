@@ -22,7 +22,7 @@ def test_traffic_mode(render=False):
             elif mode == "hybrid" or mode == "trigger":
                 assert len(env.engine.traffic_manager._traffic_vehicles) == 0
             for s in range(1, 300):
-                o, r, d, info = env.step(env.action_space.sample())
+                o, r, tm, tc, info = env.step(env.action_space.sample())
             if mode == "hybrid" or mode == "respawn":
                 assert len(env.engine.traffic_manager._traffic_vehicles) != 0
             elif mode == "trigger":

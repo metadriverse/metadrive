@@ -54,7 +54,7 @@ def test_navigation(vis=False):
     acc_error = env.vehicles[env.DEFAULT_AGENT].speed_km_h - target.speed_km_h
     acc = acc_controller.get_result(acc_error)
     for i in range(1, 1000000 if vis else 2000):
-        o, r, d, info = env.step([-steering, acc])
+        o, r, tm, tc, info = env.step([-steering, acc])
         # calculate new action
 
         steering_error = o[0] - target.lateral
@@ -77,7 +77,7 @@ def test_navigation(vis=False):
                 env.engine.on_screen_message.data.clear()
             else:
                 env.render()
-        if d:
+        if tm or tc:
             # print("Reset")
             o = env.reset()
 

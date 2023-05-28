@@ -19,7 +19,7 @@ def test_infinite_agents():
         env._DEBUG_RANDOM_SEED = 100
         max_num = old_num_of_vehicles = len(env.vehicles)
         for i in range(1, 1000):
-            o, r, d, info = env.step({k: [1, 1] for k in env.vehicles})
+            o, r, tm, tc, info = env.step({k: [1, 1] for k in env.vehicles})
             # # print(
             #     "{} Current active agents: ".format(i), len(env.vehicles), ". Objects: ",
             #     len(env.agent_manager._object_to_agent)
@@ -27,9 +27,9 @@ def test_infinite_agents():
             max_num = max(len(env.vehicles), max_num)
             # env.render(mode="top_down")
             for kkk, iii in info.items():
-                if d[kkk]:
+                if tm[kkk] or tc[kkk]:
                     assert iii["episode_length"] >= 1
-            if d["__all__"]:
+            if tm["__all__"]:
                 o = env.reset()
                 # # print("Finish {} steps.".format(i))
     finally:
@@ -41,15 +41,15 @@ def test_infinite_agents():
         o = env.reset()
         max_num = old_num_of_vehicles = len(env.vehicles)
         for i in range(1, 300):
-            o, r, d, info = env.step({k: [0, 1] for k in env.vehicles})
+            o, r, tm, tc, info = env.step({k: [0, 1] for k in env.vehicles})
             # # print("Current active agents: ", len(env.vehicles),
             #       ". Objects: ", len(env.agent_manager._object_to_agent))
             max_num = max(len(env.vehicles), max_num)
             # env.render(mode="top_down")
             for kkk, iii in info.items():
-                if d[kkk]:
+                if tm[kkk] or tc[kkk]:
                     assert iii["episode_length"] >= 1
-            if d["__all__"]:
+            if tm["__all__"]:
                 o = env.reset()
                 # print("Finish {} steps.".format(i))
     finally:

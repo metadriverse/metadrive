@@ -18,8 +18,8 @@ def _test_fps():
         total_steps = 5000
         vehicle_num = [len(env.engine.traffic_manager.vehicles)]
         for s in range(total_steps):
-            o, r, d, i = env.step(action)
-            if d:
+            o, r, tm, tc, i = env.step(action)
+            if tm or tc:
                 env.reset()
                 vehicle_num.append(len(env.engine.traffic_manager.vehicles))
         assert total_steps / (time.time() - start) > 200

@@ -8,8 +8,8 @@ def local_test_apply_action():
         for act in [-1, 1]:
             for _ in range(300):
                 assert env.observation_space.contains(o)
-                o, r, d, i = env.step([act, 1])
-                if d:
+                o, r, tm, tc, i = env.step([act, 1])
+                if tm or tc:
                     o = env.reset()
                     break
         env.close()

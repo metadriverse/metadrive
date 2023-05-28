@@ -29,8 +29,8 @@ if __name__ == "__main__":
     o = env.reset()
     # print("vehicle num", len(env.engine.traffic_manager.vehicles))
     for i in range(1, 100000):
-        o, r, d, info = env.step(env.action_space.sample())
-        if True in d.values():
+        o, r, tm, tc, info = env.step(env.action_space.sample())
+        if True in tm.values() or True in tc.values():
             print("Somebody Done. ", info)
             # env.reset()
     env.close()

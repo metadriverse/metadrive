@@ -53,7 +53,7 @@ def _test_bicycle_model():
                 model=bicycle_model
             )
         )
-        o, r, d, info = env.step(actions[s])
+        o, r, tm, tc, info = env.step(actions[s])
         index = s - horizon
         if index >= 0:
             state = predict_states[index]

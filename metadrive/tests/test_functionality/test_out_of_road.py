@@ -19,8 +19,8 @@ def test_out_of_road():
                 obs = env.reset()
                 tolerance = math.sqrt(env.vehicle.WIDTH**2 + env.vehicle.LENGTH**2) / distance
                 for _ in range(100000000):
-                    o, r, d, i = env.step([steering, 1])
-                    if d:
+                    o, r, tm, tc, i = env.step([steering, 1])
+                    if tm or tc:
                         points = \
                             env.vehicle.side_detector.perceive(env.vehicle,
                                                                env.vehicle.engine.physics_world.static_world).cloud_points
@@ -46,7 +46,7 @@ def useless_left_right_distance_printing():
         )
         try:
             for _ in range(100000000):
-                o, r, d, i = env.step([steering, 1])
+                o, r, tm, tc, i = env.step([steering, 1])
                 vehicle = env.vehicle
                 l, r = vehicle.dist_to_left_side, vehicle.dist_to_right_side
                 total_width = float(

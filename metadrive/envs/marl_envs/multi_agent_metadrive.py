@@ -157,7 +157,6 @@ class MultiAgentMetaDrive(MetaDriveEnv):
                 tm[new_id] = False
                 tc[new_id] = False
 
-
         # Update __all__
         d_all = False
         if self.config["horizon"] is not None:  # No agent alive or a too long episode happens
@@ -173,7 +172,10 @@ class MultiAgentMetaDrive(MetaDriveEnv):
 
         return o, r, tm, tc, i
 
-    def _after_vehicle_done(self, obs:dict[str, typing.Any], reward:dict[str, float], terminated: dict[str, bool], truncated: dict[str, bool], info:dict[str, typing.Any]):
+    def _after_vehicle_done(
+        self, obs: dict[str, typing.Any], reward: dict[str, float], terminated: dict[str, bool],
+        truncated: dict[str, bool], info: dict[str, typing.Any]
+    ):
         for v_id, v_info in info.items():
             if v_info.get("episode_length", 0) >= self.config["horizon"]:
                 if terminated[v_id] is not None:
@@ -302,12 +304,12 @@ def _vis():
     o = env.reset()
     total_r = 0
     for i in range(1, 100000):
-        # o, r, d, info = env.step(env.action_space.sample())
+        # o, r, tm, tc, info = env.step(env.action_space.sample())
         o, r, tm, tc, info = env.step({v_id: [0.0, 0.0] for v_id in env.vehicles.keys()})
         for r_ in r.values():
             total_r += r_
-        # o, r, d, info = env.step([0,1])
-        # d.update({"total_r": total_r})
+        # o, r, tm, tc, info = env.step([0,1])
+        # tm.update({"total_r": total_r})
         env.render(mode="top_down")
         # env.reset()
         if len(env.vehicles) == 0:

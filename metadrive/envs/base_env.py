@@ -202,7 +202,7 @@ BASE_DEFAULT_CONFIG = dict(
 
 class BaseEnv(gym.Env):
     # Force to use this seed if necessary. Note that the recipient of the forced seed should be explicitly implemented.
-    _DEBUG_RANDOM_SEED = None
+    _DEBUG_RANDOM_SEED:None|int = None
     DEFAULT_AGENT = DEFAULT_AGENT
 
     @classmethod
@@ -210,7 +210,7 @@ class BaseEnv(gym.Env):
         return Config(BASE_DEFAULT_CONFIG)
 
     # ===== Intialization =====
-    def __init__(self, config: dict|None = None):
+    def __init__(self, config: dict | None = None):
         if config is None:
             config = {}
         merged_config = self._merge_extra_config(config)
@@ -351,7 +351,7 @@ class BaseEnv(gym.Env):
         :param text:text to show
         :return: when mode is 'rgb', image array is returned
         """
-        
+
         # render mode is set at environment creation time
         mode = self.config['render_mode']
 

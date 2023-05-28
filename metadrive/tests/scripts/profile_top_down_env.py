@@ -9,8 +9,8 @@ if __name__ == '__main__':
     action = [0.0, 0.1]
     # print(o.shape)
     for s in range(10000):
-        o, r, d, i = env.step(action)
-        if d:
+        o, r, tm, tc, i = env.step(action)
+        if tm or tc:
             env.reset()
         if (s + 1) % 100 == 0:
             print(

@@ -35,9 +35,9 @@ def benchmark_fps():
         env.reset(force_seed=seed % env.config["num_scenarios"])
         start = time.time()
         for i in range(100):
-            o, r, d, info = env.step([0, 0])
+            o, r, tm, tc, info = env.step([0, 0])
             total_steps += 1
-            if d:
+            if tm or tc:
                 break
         total_time += time.time() - start
         if (seed + 300) % 20 == 0:

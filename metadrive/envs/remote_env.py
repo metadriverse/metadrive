@@ -58,7 +58,6 @@ class RemoteMetaDrive(gym.Env):
         raise NotImplementedError("Not implemented for remote MetaDrive!")
 
 
-
 if __name__ == '__main__':
     # Test and also show scenarios!
     envs = [RemoteMetaDrive(dict(map=7)) for _ in range(3)]

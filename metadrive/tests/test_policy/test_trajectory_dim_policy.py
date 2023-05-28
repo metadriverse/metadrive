@@ -54,7 +54,7 @@ def test_trajectory_idm(render=False):
                 v_list.append(v)
 
             for s in range(1000):
-                o, r, d, info = env.step(env.action_space.sample())
+                o, r, tm, tc, info = env.step(env.action_space.sample())
                 if s == 100:
                     v = v_list.pop(0)
                     env.engine.clear_objects([v.id])
@@ -70,7 +70,7 @@ def test_trajectory_idm(render=False):
 
                 assert not info["crash"]
 
-                if d:
+                if tm or tc:
                     assert info["arrive_dest"]
                     break
     finally:

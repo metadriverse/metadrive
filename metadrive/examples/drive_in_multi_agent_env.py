@@ -61,7 +61,7 @@ if __name__ == "__main__":
         print(HELP_MESSAGE)
         env.switch_to_third_person_view()  # Default is in Top-down view, we switch to Third-person view.
         for i in range(1, 10000000000):
-            o, r, d, info = env.step({agent_id: [0, 0] for agent_id in env.vehicles.keys()})
+            o, r, tm, tc, info = env.step({agent_id: [0, 0] for agent_id in env.vehicles.keys()})
             env.render(
                 **extra_args,
                 text={
@@ -70,7 +70,7 @@ if __name__ == "__main__":
                     "Auto-Drive (Switch mode: T)": "on" if env.current_track_vehicle.expert_takeover else "off",
                 } if not args.top_down else {}
             )
-            if d["__all__"]:
+            if tm["__all__"]:
                 env.reset()
                 if env.current_track_vehicle:
                     env.current_track_vehicle.expert_takeover = True

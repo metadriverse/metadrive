@@ -585,7 +585,6 @@ def test_ma_roundabout_horizon_termination():
                     assert not any(te.values())
                     assert not any(tr.values())
 
-
                 if should_respawn:
                     for kkk in should_respawn:
                         assert kkk not in obs, "It seems the max_step agents is not respawn!"

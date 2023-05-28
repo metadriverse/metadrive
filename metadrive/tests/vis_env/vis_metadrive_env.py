@@ -110,7 +110,7 @@ if __name__ == "__main__":
     # env.vehicle.set_velocity([5, 0], in_local_frame=True)
     for s in range(1, 100000):
         # env.vehicle.set_velocity([1, 0], in_local_frame=True)
-        o, r, d, info = env.step([0, 0])
+        o, r, tm, tc, info = env.step([0, 0])
 
         # env.vehicle.set_pitch(-np.pi/4)
         # [0.09231533, 0.491018, 0.47076905, 0.7691619, 0.5, 0.5, 1.0, 0.0, 0.48037243, 0.8904728, 0.81229943, 0.7317231, 1.0, 0.85320455, 0.9747932, 0.65675277, 0.0, 0.5, 0.5]
@@ -128,7 +128,7 @@ if __name__ == "__main__":
                 "current_seed": env.current_seed
             }
         )
-        # if d:
+        # if tm or tc:
         #     env.reset()
         # # assert env.observation_space.contains(o)
         # if (s + 1) % 100 == 0:
@@ -138,7 +138,7 @@ if __name__ == "__main__":
         #             time.time() - start, (s + 1) / (time.time() - start)
         #         )
         #     )
-        # if d:
+        # if tm or tc:
         # #     # env.close()
         # #     # print(len(env.engine._spawned_objects))
         # env.reset()

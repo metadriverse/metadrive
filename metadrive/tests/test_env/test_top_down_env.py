@@ -32,8 +32,8 @@ def _vis_top_down_with_panda_render():
     try:
         o = env.reset()
         for i in range(1000):
-            o, r, d, i = env.step([0, 1])
-            if d:
+            o, r, tm, tc, i = env.step([0, 1])
+            if tm or tc:
                 break
     finally:
         env.close()
@@ -44,8 +44,8 @@ def _vis_top_down_with_panda_render_and_top_down_visualization():
     try:
         o = env.reset()
         for i in range(2000):
-            o, r, d, i = env.step([0, 1])
-            if d:
+            o, r, tm, tc, i = env.step([0, 1])
+            if tm or tc:
                 break
             env.render(mode="topdown")
     finally:

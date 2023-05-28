@@ -15,10 +15,10 @@ def test_safe_env(vis=False):
         total_cost = 0
         for ep in range(5):
             for i in range(1, 100):
-                o, r, d, info = env.step([0, 1])
+                o, r, tm, tc, info = env.step([0, 1])
                 total_cost += info["cost"]
                 assert env.observation_space.contains(o)
-                if d:
+                if tm or tc:
                     total_cost = 0
                     # print("Reset")
                     env.reset()

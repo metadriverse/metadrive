@@ -82,7 +82,7 @@ if __name__ == '__main__':
         video_interface = VideoRecorder(video_name=video_name_interface, height=1200, width=1600, code="avc1")
 
     while True:
-        o, r, d, info = env.step(env.action_space.sample())
+        o, r, tm, tc, info = env.step(env.action_space.sample())
 
         img_interface = env.render("rgb_array")
         img_bev = env.render(
@@ -113,7 +113,7 @@ if __name__ == '__main__':
         frame_count += 1
         step_count += 1
 
-        if d or step_count > 1000:
+        if tm or tc or step_count > 1000:
             ep_count += 1
             step_count = 0
 

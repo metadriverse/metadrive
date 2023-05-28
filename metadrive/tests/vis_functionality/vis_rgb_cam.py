@@ -26,7 +26,7 @@ if __name__ == "__main__":
     import cv2
 
     for i in range(1, 100000):
-        o, r, d, info = env.step([0, 1])
+        o, r, tm, tc, info = env.step([0, 1])
         assert env.observation_space.contains(o)
         # save
         rgb_cam = env.vehicle.get_camera(env.vehicle.config["image_source"])

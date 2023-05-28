@@ -41,11 +41,11 @@ def test_scenario_randomness(vis=False):
         o = env.reset()
         positions_1.append([env.vehicle.position] + [v.position for v in env.engine.traffic_manager.traffic_vehicles])
         for i in range(1, 100000 if vis else 2000):
-            o, r, d, info = env.step([0, 1])
+            o, r, tm, tc, info = env.step([0, 1])
             positions_1.append(
                 [env.vehicle.position] + [v.position for v in env.engine.traffic_manager.traffic_vehicles]
             )
-            if d:
+            if tm or tc:
                 break
         env.close()
         positions_1.reverse()
@@ -55,11 +55,11 @@ def test_scenario_randomness(vis=False):
         new_position = [env.vehicle.position] + [v.position for v in env.engine.traffic_manager.traffic_vehicles]
         assert_equal_pos(old_position, new_position)
         for i in range(1, 100000 if vis else 2000):
-            o, r, d, info = env.step([0, 1])
+            o, r, tm, tc, info = env.step([0, 1])
             old_position = positions_1.pop()
             new_position = [env.vehicle.position] + [v.position for v in env.engine.traffic_manager.traffic_vehicles]
             assert_equal_pos(old_position, new_position)
-            if d:
+            if tm or tc:
                 break
     finally:
         env.close()

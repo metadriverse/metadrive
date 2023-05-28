@@ -70,7 +70,7 @@ if __name__ == "__main__":
     env.engine.accept("l", decrease_y)
 
     for s in range(1, 10000):
-        o, r, d, info = env.step([0, 0])
+        o, r, tm, tc, i = env.step([0, 0])
         env.render(
             text={
                 "heading_diff": env.vehicle.heading_diff(env.vehicle.lane),

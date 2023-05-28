@@ -196,7 +196,7 @@ def test_ma_intersection_reset():
 
                 # for _ in range(2):
                 #     act = {k: [1, 1] for k in env.vehicles.keys()}
-                #     o, r, d, i = _act(env, act)
+                #     o, r, tm, tc, i = _act(env, act)
 
                 # Force vehicle to success!
                 for v_id, v in env.vehicles.items():

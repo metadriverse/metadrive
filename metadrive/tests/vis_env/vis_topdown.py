@@ -54,7 +54,7 @@ if __name__ == "__main__":
     # print(env.vehicle.speed)
 
     for s in range(1, 10000):
-        o, r, d, info = env.step([1, 0.5])
+        o, r, tm, tc, info = env.step([1, 0.5])
         # print("heading: {} forward_direction: {}".format(env.vehicle.heading, env.vehicle.velocity_direction))
 
         # env.vehicle.set_velocity([1, 10], 10)

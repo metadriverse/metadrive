@@ -39,9 +39,9 @@ if __name__ == "__main__":
         o = env.reset()
 
         for i in range(1, 100000):
-            o, r, d, info = env.step([1.0, 0.])
+            o, r, tm, tc, info = env.step([1.0, 0.])
             env.render(text={"Switch perspective": "Q or B", "Reset Episode": "R"}, **extra_args)
-            if d:
+            if tm or tc:
                 env.reset()
     except Exception as e:
         raise e

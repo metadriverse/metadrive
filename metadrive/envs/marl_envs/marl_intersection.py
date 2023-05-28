@@ -141,13 +141,13 @@ def _expert():
     total_r = 0
     ep_s = 0
     for i in range(1, 100000):
-        o, r, d, info = env.step(env.action_space.sample())
+        o, r, tm, tc, info = env.step(env.action_space.sample())
         for r_ in r.values():
             total_r += r_
         ep_s += 1
-        d.update({"total_r": total_r, "episode length": ep_s})
+        tm.update({"total_r": total_r, "episode length": ep_s})
         # env.render(text=d)
-        if d["__all__"]:
+        if tm["__all__"]:
             print(
                 "Finish! Current step {}. Group Reward: {}. Average reward: {}".format(
                     i, total_r, total_r / env.agent_manager.next_agent_count
@@ -185,7 +185,7 @@ def _vis_debug_respawn():
     ep_s = 0
     for i in range(1, 100000):
         action = {k: [0.0, .0] for k in env.vehicles.keys()}
-        o, r, d, info = env.step(action)
+        o, r, tm, tc, info = env.step(action)
         for r_ in r.values():
             total_r += r_
         ep_s += 1
@@ -198,7 +198,7 @@ def _vis_debug_respawn():
             "cam_z": env.main_camera.top_down_camera_height
         }
         env.render(text=render_text)
-        if d["__all__"]:
+        if tm["__all__"]:
             print(
                 "Finish! Current step {}. Group Reward: {}. Average reward: {}".format(
                     i, total_r, total_r / env.agent_manager.next_agent_count
@@ -240,7 +240,7 @@ def _vis():
         actions = {k: [0.0, 1.0] for k in env.vehicles.keys()}
         if len(env.vehicles) == 1:
             actions = {k: [-0, 1.0] for k in env.vehicles.keys()}
-        o, r, d, info = env.step(actions)
+        o, r, tm, tc, info = env.step(actions)
         for r_ in r.values():
             total_r += r_
         ep_s += 1
@@ -255,7 +255,7 @@ def _vis():
         # }
         # env.render(text=render_text)
         # env.render(mode="top_down")
-        if d["__all__"]:
+        if tm["__all__"]:
             print(
                 "Finish! Current step {}. Group Reward: {}. Average reward: {}".format(
                     i, total_r, total_r / env.agent_manager.next_agent_count

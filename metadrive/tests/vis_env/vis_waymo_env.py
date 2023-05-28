@@ -40,10 +40,10 @@ if __name__ == "__main__":
     o = env.reset(force_seed=0)
 
     for i in range(1, 100000):
-        o, r, d, info = env.step([1.0, 0.])
+        o, r, tm, tc, info = env.step([1.0, 0.])
         # print(env.vehicle.height)
         env.render(text={"seed": env.current_seed, "reward": r})
-        if d:
+        if tm or tc:
             # print(info["arrive_dest"])
             env.reset()
     env.close()

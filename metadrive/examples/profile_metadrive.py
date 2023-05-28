@@ -25,8 +25,8 @@ if __name__ == '__main__':
     total_steps = args.num_steps
     vehicle_num = [len(env.engine.traffic_manager.vehicles)]
     for s in range(total_steps):
-        o, r, d, i = env.step(action)
-        if d:
+        o, r, tm, tc, i = env.step(action)
+        if tm or tc:
             start_reset = time.time()
             env.reset()
             vehicle_num.append(len(env.engine.traffic_manager.vehicles))

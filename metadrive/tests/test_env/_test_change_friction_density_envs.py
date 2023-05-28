@@ -10,8 +10,8 @@ def _run(env):
             obs = env.reset()
             for s in range(100):
                 action = np.array([0.0, 1.0])
-                o, r, d, i = env.step(action)
-                if d:
+                o, r, tm, tc, i = env.step(action)
+                if tm or tc:
                     env.reset()
     finally:
         env.close()

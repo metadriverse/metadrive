@@ -40,7 +40,7 @@ if __name__ == "__main__":
     o = env.reset()
     # print("vehicle num", len(env.engine.traffic_manager.vehicles))
     for i in range(1, 100000):
-        o, r, d, info = env.step([0, 1])
+        o, r, tm, tc, info = env.step([0, 1])
         info["fuel"] = env.vehicle.energy_consumption
         env.render(
             text={
@@ -49,7 +49,7 @@ if __name__ == "__main__":
                 "white_lane_line": env.vehicle.on_white_continuous_line
             }
         )
-        if d:
+        if tm or tc:
             # print("Reset")
             env.reset()
     env.close()

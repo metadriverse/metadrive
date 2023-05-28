@@ -155,7 +155,7 @@ if __name__ == '__main__':
     env.reset()
     frames = []
     for num_frames in range(30):
-        o, r, d, info = env.step([0, 1])
+        o, r, tm, tc, info = env.step([0, 1])
         img = PNMImage()
         env.engine.win.getScreenshot(img)
         frame = np.zeros([1200, 900, 4], dtype=np.uint8)

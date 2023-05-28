@@ -67,9 +67,9 @@ The following is a minimal script to use Top-down observation.
     env = TopDownMetaDrive()
     o = env.reset()
     for i in range(1, 100000):
-        o, r, d, info = env.step([0, 1])
+        o, r, tm, tc, info = env.step([0, 1])
         env.render(mode="top_down")
-        if d:
+        if tm or tc:
             env.reset()
     env.close()
 

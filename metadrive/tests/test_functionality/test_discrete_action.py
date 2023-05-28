@@ -56,7 +56,7 @@ def test_discrete_action():
         assert policy.convert_to_continuous_action(14) == (1, 1)
 
         for _ in range(20):
-            o, r, d, i = env.step(env.action_space.sample())
+            o, r, tm, tc, i = env.step(env.action_space.sample())
 
     finally:
         env.close()
@@ -87,7 +87,7 @@ def test_multi_discrete_action():
         assert policy.convert_to_continuous_action([2, 4]) == (1, 1)
 
         for _ in range(20):
-            o, r, d, i = env.step(env.action_space.sample())
+            o, r, tm, tc, i = env.step(env.action_space.sample())
 
     finally:
         env.close()

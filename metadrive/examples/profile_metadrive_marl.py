@@ -21,8 +21,8 @@ if __name__ == '__main__':
     total_steps = args.num_steps
     vehicle_num = [len(env.vehicles)]
     for s in range(total_steps):
-        o, r, d, i = env.step({k: action for k in env.vehicles})
-        if d["__all__"]:
+        o, r, tm, tc, i = env.step({k: action for k in env.vehicles})
+        if tm["__all__"]:
             start_reset = time.time()
             env.reset()
             vehicle_num.append(len(env.vehicles))
