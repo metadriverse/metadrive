@@ -202,7 +202,7 @@ BASE_DEFAULT_CONFIG = dict(
 
 class BaseEnv(gym.Env):
     # Force to use this seed if necessary. Note that the recipient of the forced seed should be explicitly implemented.
-    _DEBUG_RANDOM_SEED:None|int = None
+    _DEBUG_RANDOM_SEED: None | int = None
     DEFAULT_AGENT = DEFAULT_AGENT
 
     @classmethod
