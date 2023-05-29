@@ -7,7 +7,7 @@ if __name__ == '__main__':
     pcds = []
     # for h in range(-180, 180, 20):
     h = 0
-    raw_depth = o3d.io.read_image('debug_{}.jpg'.format(h))
+    raw_depth = o3d.io.read_image('depth_{}.jpg'.format(h))
     raw_depth = np.array(raw_depth)[..., 0]
     raw_depth *= 255
     raw_depth = raw_depth.astype(np.uint16)
@@ -22,7 +22,7 @@ if __name__ == '__main__':
                                                           ,
                                                           extrinsic=extrinsic,
                                                           project_valid_depth_only=False,
-                                                          stride=8
+                                                          # stride=8
                                                           # depth_scale=1000.0,
                                                           # depth_trunc=1000.0
                                                           )

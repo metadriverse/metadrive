@@ -5,12 +5,16 @@ from metadrive.envs.metadrive_env import MetaDriveEnv
 if __name__ == "__main__":
 
     def get_image(env):
-        camera = env.vehicle.get_camera(env.vehicle.config["image_source"])
+        depth_cam = env.vehicle.get_camera(env.vehicle.config["image_source"])
+        rgb_cam = env.vehicle.get_camera("rgb_camera")
         for h in range(-180, 180, 20):
             env.engine.graphicsEngine.renderFrame()
-            camera.get_cam().setH(h)
-            camera.save_image(env.vehicle, "debug_{}.jpg".format(h))
+            depth_cam.get_cam().setH(h)
+            rgb_cam.get_cam().setH(h)
+            depth_cam.save_image(env.vehicle, "depth_{}.jpg".format(h))
+            rgb_cam.save_image(env.vehicle, "rgb_{}.jpg".format(h))
         # env.engine.screenshot()
+
 
     env = MetaDriveEnv(
         {
@@ -22,7 +26,7 @@ if __name__ == "__main__":
             "use_render": True,
             "image_observation": True,
             "rgb_clip": True,
-            "vehicle_config": dict(depth_camera=(800, 600, True), image_source="depth_camera"),
+            "vehicle_config": dict(depth_camera=(800, 600, True), rgb_camera=(800, 600), image_source="depth_camera"),
             # "map_config": {
             #     BaseMap.GENERATE_TYPE: MapGenerateMethod.BIG_BLOCK_NUM,
             #     BaseMap.GENERATE_CONFIG: 12,
