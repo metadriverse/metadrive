@@ -236,7 +236,8 @@ class ScenarioEnv(BaseEnv):
         vehicle = self.vehicles[vehicle_id]
         step_info = dict(num_crash_object=0,
                          num_crash_human=0,
-                         num_crash_vehicle=0)
+                         num_crash_vehicle=0,
+                         num_on_line=0)
         step_info["cost"] = 0
         if vehicle.on_yellow_continuous_line or vehicle.crash_sidewalk or vehicle.on_white_continuous_line:
             # step_info["cost"] += self.config["out_of_road_cost"]
