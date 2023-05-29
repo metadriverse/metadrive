@@ -5,25 +5,30 @@ from metadrive.envs.metadrive_env import MetaDriveEnv
 if __name__ == "__main__":
 
     def get_image(env):
-        env.vehicle.get_camera(env.vehicle.config["image_source"]).save_image(env.vehicle, "debug.jpg")
-        env.engine.screenshot()
+        camera = env.vehicle.get_camera(env.vehicle.config["image_source"])
+        for h in range(-180, 180, 20):
+            env.engine.graphicsEngine.renderFrame()
+            camera.get_cam().setH(h)
+            camera.save_image(env.vehicle, "debug_{}.jpg".format(h))
+        # env.engine.screenshot()
 
     env = MetaDriveEnv(
         {
             "num_scenarios": 1,
-            "traffic_density": 0.1,
+            "traffic_density": 0.3,
             "start_seed": 4,
+            "map": "SSS",
             "manual_control": True,
             "use_render": True,
             "image_observation": True,
             "rgb_clip": True,
-            "vehicle_config": dict(depth_camera=(200, 88, True), image_source="depth_camera"),
-            "map_config": {
-                BaseMap.GENERATE_TYPE: MapGenerateMethod.BIG_BLOCK_NUM,
-                BaseMap.GENERATE_CONFIG: 12,
-                BaseMap.LANE_WIDTH: 3.5,
-                BaseMap.LANE_NUM: 3,
-            }
+            "vehicle_config": dict(depth_camera=(800, 600, True), image_source="depth_camera"),
+            # "map_config": {
+            #     BaseMap.GENERATE_TYPE: MapGenerateMethod.BIG_BLOCK_NUM,
+            #     BaseMap.GENERATE_CONFIG: 12,
+            #     BaseMap.LANE_WIDTH: 3.5,
+            #     BaseMap.LANE_NUM: 3,
+            # }
         }
     )
     env.reset()
