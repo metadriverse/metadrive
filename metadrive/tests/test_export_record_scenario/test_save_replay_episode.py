@@ -140,7 +140,7 @@ def test_save_episode_marl(vis=False):
             o, r, tm, tc, info = env.step({agent_id: [0, 0.1] for agent_id in env.vehicles.keys()})
             if vis:
                 env.render()
-            if d["__all__"]:
+            if tm["__all__"]:
                 break
     finally:
         env.close()
