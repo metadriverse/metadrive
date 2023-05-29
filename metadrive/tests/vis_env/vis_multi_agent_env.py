@@ -23,7 +23,7 @@ if __name__ == "__main__":
     setup_logger(True)
     env = TestEnv()
 
-    o = env.reset()
+    o, _ = env.reset()
     # print("vehicle num", len(env.engine.traffic_manager.vehicles))
     for i in range(1, 100000):
         o, r, tm, tc, info = env.step({key: [0, 0] for key in env.action_space.sample()})

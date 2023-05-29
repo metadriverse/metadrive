@@ -39,7 +39,7 @@ if __name__ == "__main__":
         #      ObservationType.show_gray_scale_array(o["image"][:, :, i])
         # image = env.render(mode="any str except human", text={"can you see me": i})
         # ObservationType.show_gray_scale_array(image)
-        if d:
+        if tm or tc:
             # print("Reset")
             env.reset()
     env.close()

@@ -18,7 +18,7 @@ if __name__ == '__main__':
         start_seed=1010,
         traffic_density=0.05,
     ))
-    obs = env.reset()
+    obs, _ = env.reset()
     start = time.time()
     reset_used_time = 0
     action = [0.0, 1.]

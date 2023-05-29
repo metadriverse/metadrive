@@ -22,7 +22,7 @@ def _act(env, action):
 def test_metadrive_env_rgb():
     env = MetaDriveEnv(dict(image_observation=True))
     try:
-        obs = env.reset()
+        obs, _ = env.reset()
         assert env.observation_space.contains(obs)
         _act(env, env.action_space.sample())
         for x in [-1, 0, 1]:

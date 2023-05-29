@@ -66,7 +66,7 @@ if __name__ == '__main__':
     step_count = 0
     frame_count = 0
 
-    o = env.reset(force_seed=start_seed)
+    o, _ = env.reset(force_seed=start_seed)
     env.vehicle.expert_takeover = True
     env.engine.force_fps.disable()
 
@@ -139,7 +139,7 @@ if __name__ == '__main__':
                 video_bev = VideoRecorder(video_name=video_name_bev, height=3000, width=3000, code="avc1")
                 video_interface = VideoRecorder(video_name=video_name_interface, height=1200, width=1600, code="avc1")
 
-            o = env.reset(force_seed=ep_count + start_seed)
+            o, _ = env.reset(force_seed=ep_count + start_seed)
             env.vehicle.expert_takeover = True
             env.engine.force_fps.disable()
 

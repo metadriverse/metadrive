@@ -26,7 +26,7 @@ class TestEnv(MultiAgentTinyInter):
 
 if __name__ == "__main__":
     env = TestEnv()
-    o = env.reset()
+    o, _ = env.reset()
     # print("vehicle num", len(env.engine.traffic_manager.vehicles))
     for i in range(1, 100000):
         o, r, tm, tc, info = env.step(env.action_space.sample())

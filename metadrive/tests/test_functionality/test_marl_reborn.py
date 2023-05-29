@@ -21,7 +21,7 @@ def test_respawn():
         assert set(env.config["target_vehicle_configs"].keys()) == {"agent0", "agent1"}
         assert set(env.vehicles.keys()) == set()  # Not initialized yet!
 
-        o = env.reset()
+        o, _ = env.reset()
 
         assert set(env.observations.keys()) == {"agent0", "agent1"}
 
@@ -39,7 +39,7 @@ def test_respawn():
         for i in range(1, 1000):
             o, r, tm, tc, info = env.step({v_id_0: [-1, 1], v_id_1: [1, 1]})
             assert set(o.keys()) == set(r.keys()) == set(info.keys())
-            assert set(o.keys()).union({"__all__"}) == set(d.keys())
+            assert set(o.keys()).union({"__all__"}) == set(tm.keys())
             tracks.append(tm)
             if tm[v_id_0]:
                 assert info[v_id_0][TerminationState.OUT_OF_ROAD]
@@ -61,7 +61,7 @@ def test_respawn():
                 v_id_0 = "agent0"
                 v_id_1 = "agent1"
                 count = 2
-                o = env.reset()
+                o, _ = env.reset()
                 assert set(o.keys()) == {"agent0", "agent1"}
                 assert set(env.observations.keys()) == {"agent0", "agent1"}
                 assert set(env.action_space.spaces.keys()) == {"agent0", "agent1"}
@@ -102,7 +102,7 @@ def test_delay_done(render=False):
     try:
         agent0_done = False
         agent1_already_hit = False
-        o = env.reset()
+        o, _ = env.reset()
         for i in range(1, 300):
             actions = {"agent0": [1, 1], "agent1": [1, 1]}
             if "agent0" not in env.vehicles:

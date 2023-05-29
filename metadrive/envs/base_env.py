@@ -51,7 +51,8 @@ BASE_DEFAULT_CONFIG = dict(
     action_check=False,
 
     # ===== Rendering =====
-    render_mode=None,  # if "human" pop a window to render, if "rgb", return numpy array, if None, do neither
+    use_render=False,  # if true pop a window to render
+    render_mode=None,  # if "human", then use_render must be true, if "rgb", return numpy array, if None, do neither
     debug=False,
     disable_model_compression=False,  # disable compression if you wish to launch the window quicker.
     cull_scene=True,  # only for debug use
@@ -202,15 +203,15 @@ BASE_DEFAULT_CONFIG = dict(
 
 class BaseEnv(gym.Env):
     # Force to use this seed if necessary. Note that the recipient of the forced seed should be explicitly implemented.
-    _DEBUG_RANDOM_SEED: None | int = None
+    _DEBUG_RANDOM_SEED: Union[int, None] = None
     DEFAULT_AGENT = DEFAULT_AGENT
 
     @classmethod
-    def default_config(cls) -> "Config":
+    def default_config(cls) -> Config:
         return Config(BASE_DEFAULT_CONFIG)
 
     # ===== Intialization =====
-    def __init__(self, config: dict | None = None):
+    def __init__(self, config: Union[dict, None] = None):
         if config is None:
             config = {}
         merged_config = self._merge_extra_config(config)
@@ -240,7 +241,7 @@ class BaseEnv(gym.Env):
         self.episode_rewards = defaultdict(float)
         self.episode_lengths = defaultdict(int)
 
-    def _merge_extra_config(self, config: Union[dict, "Config"]) -> "Config":
+    def _merge_extra_config(self, config: Union[dict, Config]) -> Config:
         """Check, update, sync and overwrite some config."""
         return config
 
@@ -352,14 +353,13 @@ class BaseEnv(gym.Env):
         :return: when mode is 'rgb', image array is returned
         """
 
-        # render mode is set at environment creation time
-        mode = self.config['render_mode']
+        mode = self.config["render_mode"]
 
         if mode in ["top_down", "topdown", "bev", "birdview"]:
             ret = self._render_topdown(text=text, *args, **kwargs)
             return ret
-        assert mode is not None or self.engine.mode != RENDER_MODE_NONE, \
-            ("Panda Renderring is off now, can not render. Please set config['render_mode'] != None!")
+        assert self.config["use_render"] or self.engine.mode != RENDER_MODE_NONE, \
+            ("Panda Renderring is off now, can not render. Please set config['use_render'] = True!")
 
         self.engine.render_frame(text)
 
@@ -368,6 +368,7 @@ class BaseEnv(gym.Env):
             return self.vehicle.observations.img_obs.get_image()
 
         if mode == "rgb_array":
+            assert self.config["use_render"], "You should create a Panda3d window before rendering images!"
             # if not hasattr(self, "temporary_img_obs"):
             #     from metadrive.obs.image_obs import ImageObservation
             #     image_source = "rgb_camera"

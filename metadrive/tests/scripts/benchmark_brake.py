@@ -8,7 +8,7 @@ from metadrive.envs import MetaDriveEnv
 
 
 def get_result(env):
-    obs = env.reset()
+    obs, _ = env.reset()
     start = time.time()
     max_speed_km_h = 0.0
     reported_max_speed = None

@@ -35,7 +35,7 @@ if __name__ == "__main__":
         config.update(dict(image_observation=True))
     env = MetaDriveEnv(config)
     try:
-        o = env.reset()
+        o, _ = env.reset()
         print(HELP_MESSAGE)
         env.vehicle.expert_takeover = True
         if args.observation == "rgb_camera":

@@ -15,7 +15,7 @@ class DemoWaymoEnv(WaymoEnv):
             seeds = [i for i in range(self.config["num_scenarios"])]
             seeds.remove(self.current_seed)
             force_seed = random.choice(seeds)
-        super(DemoWaymoEnv, self).reset(force_seed=force_seed)
+        return super(DemoWaymoEnv, self).reset(force_seed=force_seed)
 
 
 if __name__ == "__main__":
@@ -23,7 +23,7 @@ if __name__ == "__main__":
     parser.add_argument("--reactive_traffic", action="store_true")
     parser.add_argument("--top_down", action="store_true")
     args = parser.parse_args()
-    extra_args = dict(mode="top_down", film_size=(800, 800)) if args.top_down else {}
+    extra_args = dict(film_size=(800, 800)) if args.top_down else {}
     asset_path = AssetLoader.asset_path
     print(HELP_MESSAGE)
     try:
@@ -32,11 +32,12 @@ if __name__ == "__main__":
                 "manual_control": True,
                 "reactive_traffic": True if args.reactive_traffic else False,
                 "use_render": True if not args.top_down else False,
+                "render_mode": "top_down" if args.top_down else None,
                 "data_directory": AssetLoader.file_path(asset_path, "waymo", return_raw_style=False),
                 "num_scenarios": 3
             }
         )
-        o = env.reset()
+        o, _ = env.reset()
 
         for i in range(1, 100000):
             o, r, tm, tc, info = env.step([1.0, 0.])

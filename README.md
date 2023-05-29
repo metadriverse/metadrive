@@ -127,10 +127,10 @@ To build the RL environment in python script, you can simply code in the Farama 
 import metadrive  # Import this package to register the environment!
 import gymnasium as gym
 
-env = gym.make("MetaDrive-validation-v0", config={"render_mode": "human"})
+env = gym.make("MetaDrive-validation-v0", config={"use_render": True})
 
 # Alternatively, you can instantiate using the class
-# env = metadrive.MetaDriveEnv(config={"render_mode": "human", "num_scenarios": 100})
+# env = metadrive.MetaDriveEnv(config={"use_render": True, "num_scenarios": 100})
 
 env.reset()
 for i in range(1000):

@@ -6,7 +6,7 @@ def test_collision_with_vehicle(use_render=False):
         env = MetaDriveEnv({"traffic_density": 1.0, "map": "SSS"})
     else:
         env = MetaDriveEnv({"traffic_density": 1.0, "map": "SSS", "use_render": True})
-    o = env.reset()
+    o, _ = env.reset()
     pass_test = False
     try:
         for i in range(1, 500):
@@ -21,7 +21,7 @@ def test_collision_with_vehicle(use_render=False):
 
 def test_collision_with_sidewalk():
     env = MetaDriveEnv({"traffic_density": .0})
-    o = env.reset()
+    o, _ = env.reset()
     pass_test = False
     try:
         for i in range(1, 100):
@@ -36,7 +36,7 @@ def test_collision_with_sidewalk():
 
 def test_line_contact():
     env = MetaDriveEnv({"traffic_density": .0})
-    o = env.reset()
+    o, _ = env.reset()
     on_broken_line = False
     on_continuous_line = False
     try:

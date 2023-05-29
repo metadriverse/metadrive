@@ -12,7 +12,7 @@ def _a(env, action):
 
 def _step(env):
     try:
-        obs = env.reset()
+        obs, _ = env.reset()
         assert env.observation_space.contains(obs)
         for _ in range(5):
             _a(env, env.action_space.sample())
@@ -38,7 +38,7 @@ def test_naive_multi_agent_metadrive():
     )
     try:
         assert isinstance(env.action_space, gym.spaces.Dict)
-        obs = env.reset()
+        obs, _ = env.reset()
         assert isinstance(obs, dict)
         env.action_space.seed(0)
         for step in range(100):

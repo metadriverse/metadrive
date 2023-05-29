@@ -82,7 +82,7 @@ def test_fixed_traffic():
     try:
         last_pos = None
         for i in range(20):
-            obs = env.reset()
+            obs, _ = env.reset()
             assert env.engine.traffic_manager.random_seed == env.current_seed
             new_pos = [v.position for v in env.engine.traffic_manager.vehicles]
             if last_pos is not None and len(new_pos) == len(last_pos):
@@ -109,7 +109,7 @@ def test_random_traffic():
     try:
         last_pos = None
         for i in range(10):
-            obs = env.reset(force_seed=5)
+            obs, _ = env.reset(force_seed=5)
             assert env.engine.traffic_manager.random_traffic
             new_pos = [v.position for v in env.engine.traffic_manager.traffic_vehicles]
             if len(new_pos) > 0:
@@ -135,7 +135,7 @@ def test_random_lane_width():
         }
     )
     try:
-        o = env.reset(force_seed=12)
+        o, _ = env.reset(force_seed=12)
         old_config_1 = env.vehicle.lane.width
         env.reset(force_seed=15)
         old_config_2 = env.vehicle.lane.width
@@ -162,7 +162,7 @@ def test_random_lane_num():
         }
     )
     try:
-        o = env.reset(force_seed=12)
+        o, _ = env.reset(force_seed=12)
         old_config_1 = env.vehicle.navigation.get_current_lane_num()
         env.reset(force_seed=15)
         old_config_2 = env.vehicle.navigation.get_current_lane_num()
@@ -193,7 +193,7 @@ def test_random_vehicle_parameter():
         }
     )
     try:
-        o = env.reset(force_seed=12)
+        o, _ = env.reset(force_seed=12)
         old_config_1 = env.vehicle.get_config(True)
         env.reset(force_seed=15)
         old_config_2 = env.vehicle.get_config(True)

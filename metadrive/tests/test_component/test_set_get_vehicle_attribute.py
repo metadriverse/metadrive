@@ -16,7 +16,7 @@ def test_set_get_vehicle_attribute(render=False):
         }
     )
     try:
-        o = env.reset()
+        o, _ = env.reset()
         for _ in range(10):
             env.vehicle.set_velocity([5, 0], in_local_frame=False)
             o, r, tm, tc, info = env.step([0, 0])
@@ -79,7 +79,7 @@ def test_coordinates(render=False):
         }
     )
     try:
-        o = env.reset()
+        o, _ = env.reset()
         assert abs(env.vehicle.heading_theta) == 0
         assert np.isclose(env.vehicle.heading, [1.0, 0]).all()
         env.vehicle.set_velocity([5, 0], in_local_frame=True)
@@ -88,7 +88,7 @@ def test_coordinates(render=False):
             o, r, tm, tc, info = env.step([0, 0])
         assert abs(env.vehicle.velocity[0] - 5.) < 1e-2 and abs(env.vehicle.velocity[1]) < 0.001
 
-        o = env.reset()
+        o, _ = env.reset()
         assert abs(env.vehicle.heading_theta) == 0
         assert np.isclose(env.vehicle.heading, [1.0, 0]).all()
         env.vehicle.set_velocity([5, 0], in_local_frame=False)
@@ -179,7 +179,7 @@ def test_set_angular_v_and_set_v_no_friction(render=False):
         }
     )
     try:
-        o = env.reset()
+        o, _ = env.reset()
         for _ in range(100):
             # 10 s , np.pi/10 per second
             env.vehicle.set_angular_velocity(np.pi / 10)
@@ -187,7 +187,7 @@ def test_set_angular_v_and_set_v_no_friction(render=False):
         assert abs(wrap_to_pi(env.vehicle.heading_theta) - np.pi) < 1e-2, env.vehicle.heading_theta
         # print(env.vehicle.heading_theta / np.pi * 180)
 
-        o = env.reset()
+        o, _ = env.reset()
         for _ in range(100):
             # 10 s , np.pi/10 per second
             env.vehicle.set_angular_velocity(18, in_rad=False)
@@ -195,7 +195,7 @@ def test_set_angular_v_and_set_v_no_friction(render=False):
         assert abs(wrap_to_pi(env.vehicle.heading_theta) - np.pi) < 1e-2, env.vehicle.heading_theta
         # print(env.vehicle.heading_theta / np.pi * 180)
 
-        o = env.reset()
+        o, _ = env.reset()
         start = env.vehicle.position[0]
         for _ in range(100):
             # 10 s
@@ -203,7 +203,7 @@ def test_set_angular_v_and_set_v_no_friction(render=False):
             o, r, tm, tc, info = env.step([0, 0])
         assert abs(env.vehicle.position[0] - start - 10) < 5e-2, env.vehicle.position
 
-        o = env.reset()
+        o, _ = env.reset()
         start = env.vehicle.position[0]
         for _ in range(100):
             # 10 s
@@ -211,7 +211,7 @@ def test_set_angular_v_and_set_v_no_friction(render=False):
             o, r, tm, tc, info = env.step([0, 0])
         assert abs(env.vehicle.position[0] - start - 10) < 5e-2, env.vehicle.position
 
-        o = env.reset()
+        o, _ = env.reset()
         start = env.vehicle.position[1]
         for _ in range(10):
             # 10 s
@@ -219,7 +219,7 @@ def test_set_angular_v_and_set_v_no_friction(render=False):
             o, r, tm, tc, info = env.step([0, 0])
         assert abs(env.vehicle.position[1] - start - 1) < 5e-2, env.vehicle.position
 
-        o = env.reset()
+        o, _ = env.reset()
         start = env.vehicle.position[0]
         env.vehicle.set_heading_theta(-np.pi / 2)
         for _ in range(100):
@@ -228,7 +228,7 @@ def test_set_angular_v_and_set_v_no_friction(render=False):
             o, r, tm, tc, info = env.step([0, 0])
         assert abs(env.vehicle.position[0] - start - 10) < 5e-2, env.vehicle.position
 
-        o = env.reset()
+        o, _ = env.reset()
         start = env.vehicle.position[0]
         env.vehicle.set_heading_theta(-np.pi / 2)
         for _ in range(100):
@@ -254,7 +254,7 @@ def test_set_angular_v_and_set_v_no_friction_pedestrian(render=False):
         }
     )
     try:
-        o = env.reset()
+        o, _ = env.reset()
         env.engine.terrain.dynamic_nodes[0].setFriction(0.)
         obj_1 = env.engine.spawn_object(Pedestrian, position=[10, 3], heading_theta=0, random_seed=1)
         for _ in range(10):
@@ -264,7 +264,7 @@ def test_set_angular_v_and_set_v_no_friction_pedestrian(render=False):
         assert abs(wrap_to_pi(obj_1.heading_theta) - np.pi / 10) < 1e-2, obj_1.heading_theta
         obj_1.destroy()
 
-        o = env.reset()
+        o, _ = env.reset()
         env.engine.terrain.dynamic_nodes[0].setFriction(0.)
         obj_1 = env.engine.spawn_object(Pedestrian, position=[10, 3], heading_theta=0, random_seed=1)
         for _ in range(10):
@@ -276,7 +276,7 @@ def test_set_angular_v_and_set_v_no_friction_pedestrian(render=False):
         # print(obj_1.heading_theta / np.pi * 180)
         obj_1.destroy()
 
-        o = env.reset()
+        o, _ = env.reset()
         env.engine.terrain.dynamic_nodes[0].setFriction(0.)
         obj_1 = env.engine.spawn_object(Pedestrian, position=[10, 3], heading_theta=0, random_seed=1)
         start_p = obj_1.position[0]
@@ -289,7 +289,7 @@ def test_set_angular_v_and_set_v_no_friction_pedestrian(render=False):
         # print(obj_1.heading_theta / np.pi * 180)
         obj_1.destroy()
 
-        o = env.reset()
+        o_ = env.reset()
         env.engine.terrain.dynamic_nodes[0].setFriction(0.)
         obj_1 = env.engine.spawn_object(Pedestrian, position=[10, 3], heading_theta=0, random_seed=1)
         start_p = obj_1.position[1]

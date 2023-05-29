@@ -4,7 +4,7 @@ from metadrive.envs.top_down_env import TopDownMetaDriveEnvV2
 
 if __name__ == '__main__':
     env = TopDownMetaDriveEnvV2(dict(num_scenarios=10))
-    o = env.reset()
+    o, _ = env.reset()
     start = time.time()
     action = [0.0, 0.1]
     # print(o.shape)

@@ -21,7 +21,7 @@ if __name__ == "__main__":
     import time
 
     start = time.time()
-    o = env.reset()
+    o, _ = env.reset()
     a = [.0, 1.]
     for s in range(1, 100000):
         o, r, tm, tc, info = env.step(a)

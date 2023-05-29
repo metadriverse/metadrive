@@ -21,7 +21,7 @@ def test_check_discrete_space(render=False):
     )
     assert not env.config["use_multi_discrete"]
     try:
-        o = env.reset()
+        o, _ = env.reset()
         for s in range(1, 30):
             o, r, tm, tc, info = env.step(env.action_space.sample())
             assert env.action_space.n == env.config["discrete_throttle_dim"] * 3
@@ -48,7 +48,7 @@ def test_check_multi_discrete_space(render=False):
     )
     assert env.config["use_multi_discrete"]
     try:
-        o = env.reset()
+        o, _ = env.reset()
         for s in range(1, 30):
             o, r, tm, tc, info = env.step(env.action_space.sample())
             assert env.action_space.nvec[0] == 3 and env.action_space.nvec[1] == env.config["discrete_throttle_dim"]
@@ -76,7 +76,7 @@ def test_lane_change(render=False):
         }
     )
     try:
-        o = env.reset()
+        o, _ = env.reset()
         for s in range(1, 60):
             o, r, tm, tc, info = env.step([2, 3])
         assert env.vehicle.lane.index[-1] == 0

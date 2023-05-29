@@ -7,7 +7,7 @@ from metadrive.envs.generation_envs.change_friction_env import ChangeFrictionEnv
 def _run(env):
     try:
         for _ in range(5):
-            obs = env.reset()
+            obs, _ = env.reset()
             for s in range(100):
                 action = np.array([0.0, 1.0])
                 o, r, tm, tc, i = env.step(action)

@@ -30,7 +30,7 @@ if __name__ == '__main__':
         }
     )
     try:
-        obs = env.reset()
+        obs, _ = env.reset()
         obs_space = env.observation_space
         assert obs_space.contains(obs)
         for _ in range(100000):
@@ -38,7 +38,7 @@ if __name__ == '__main__':
             o, r, tm, tc, i = env.step(env.action_space.sample())
             assert obs_space.contains(o)
             if tm or tc:
-                o = env.reset()
+                o, _ = env.reset()
                 assert obs_space.contains(o)
     finally:
         env.close()

@@ -141,7 +141,7 @@ class MultiAgentBottleneckEnv(MultiAgentMetaDrive):
 
 def _draw():
     env = MultiAgentBottleneckEnv()
-    o = env.reset()
+    o, _ = env.reset()
     from metadrive.utils.draw_top_down_map import draw_top_down_map
     import matplotlib.pyplot as plt
 
@@ -170,7 +170,7 @@ def _expert():
             "num_agents": 4,
         }
     )
-    o = env.reset()
+    o, _ = env.reset()
     total_r = 0
     ep_s = 0
     for i in range(1, 100000):
@@ -213,7 +213,7 @@ def _vis_debug_respawn():
             "num_agents": 20,
         }
     )
-    o = env.reset()
+    o, _ = env.reset()
     total_r = 0
     ep_s = 0
     for i in range(1, 100000):
@@ -263,7 +263,7 @@ def _vis():
             "num_agents": 20,
         }
     )
-    o = env.reset()
+    o, _ = env.reset()
     total_r = 0
     ep_s = 0
     for i in range(1, 100000):
@@ -302,7 +302,7 @@ def _vis():
 def _profile():
     import time
     env = MultiAgentBottleneckEnv({"num_agents": 8})
-    obs = env.reset()
+    obs, _ = env.reset()
     start = time.time()
     for s in range(10000):
         o, r, tm, tc, i = env.step(env.action_space.sample())
@@ -344,7 +344,7 @@ def _long_run():
         }
     )
     try:
-        obs = env.reset()
+        obs, _ = env.reset()
         assert env.observation_space.contains(obs)
         for step in range(10000):
             act = env.action_space.sample()

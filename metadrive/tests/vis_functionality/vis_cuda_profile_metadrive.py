@@ -22,11 +22,11 @@ def _test_depth_camera_as_obs(render=False):
             show_fps=False,
         )
     )
-    obs = env.reset()
+    obs, _ = env.reset()
     action = [0.0, 0.1]
     start = time.time()
     for i in range(20000):
-        o, r, d, _ = env.step(action)
+        o, r, tm, tc, _ = env.step(action)
         if render:
             ret = o["image"].get()[..., -1] if env.config["image_on_cuda"] else o["image"][..., -1]
             cv2.imshow("window", ret)
@@ -53,17 +53,17 @@ def _test_main_rgb_camera_as_obs_with_interface(render=False):
             show_fps=False,
         )
     )
-    obs = env.reset()
+    obs, _ = env.reset()
     action = [0.0, 0.1]
     start = time.time()
     reset_time = 0
     for i in range(20000):
-        o, r, d, _ = env.step(action)
+        o, r, tm, tc, _ = env.step(action)
         if render:
             ret = o["image"].get()[..., -1] if env.config["image_on_cuda"] else o["image"][..., -1]
             cv2.imshow("window", ret)
             cv2.waitKey(1)
-        if d:
+        if tm or tc:
             current = time.time()
             # env.reset()
             # reset_time += time.time()-current
@@ -87,16 +87,16 @@ def _test_main_rgb_camera_no_interface(render=False):
             show_fps=False,
         )
     )
-    obs = env.reset()
+    obs, _ = env.reset()
     action = [0.0, 0.1]
     start = time.time()
     for i in range(20000):
-        o, r, d, _ = env.step(action)
+        o, r, tm, tc, _ = env.step(action)
         if render:
             ret = o["image"].get()[..., -1] if env.config["image_on_cuda"] else o["image"][..., -1]
             cv2.imshow("window", ret)
             cv2.waitKey(1)
-        if d:
+        if tm or tc:
             # print("FPS: {}".format(i / (time.time() - start)))
             # env.reset()
             break
@@ -118,16 +118,16 @@ def _test_rgb_camera_as_obs(render=False):
             show_fps=False,
         )
     )
-    obs = env.reset()
+    obs, _ = env.reset()
     action = [0.0, 0.1]
     start = time.time()
     for i in range(20000):
-        o, r, d, _ = env.step(action)
+        o, r, tm, tc, _ = env.step(action)
         if render:
             ret = o["image"].get()[..., -1] if env.config["image_on_cuda"] else o["image"][..., -1]
             cv2.imshow("window", ret)
             cv2.waitKey(1)
-        if d:
+        if tm or tc:
             # print("FPS: {}".format(i / (time.time() - start)))
             env.reset()
             # break

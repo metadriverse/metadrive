@@ -15,7 +15,7 @@ def test_traffic_mode(render=False):
                 }
             )
 
-            o = env.reset()
+            o, _ = env.reset()
             env.vehicle.set_velocity([1, 0.1], 10)
             if mode == "respawn":
                 assert len(env.engine.traffic_manager._traffic_vehicles) != 0

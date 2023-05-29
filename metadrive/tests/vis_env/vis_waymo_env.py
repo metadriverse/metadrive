@@ -37,7 +37,7 @@ if __name__ == "__main__":
             }
         }
     )
-    o = env.reset(force_seed=0)
+    o, _ = env.reset(force_seed=0)
 
     for i in range(1, 100000):
         o, r, tm, tc, info = env.step([1.0, 0.])

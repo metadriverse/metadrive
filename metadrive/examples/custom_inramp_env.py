@@ -22,7 +22,7 @@ if __name__ == "__main__":
 
     env = MetaDriveEnv(config)
     try:
-        o = env.reset()
+        o, _ = env.reset()
         env.vehicle.expert_takeover = True
         assert isinstance(o, np.ndarray)
         print("The observation is an numpy array with shape: ", o.shape)

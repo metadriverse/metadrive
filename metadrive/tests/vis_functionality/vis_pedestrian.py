@@ -61,7 +61,7 @@ if __name__ == "__main__":
     import time
 
     start = time.time()
-    o = env.reset()
+    o, _ = env.reset()
     obj_1 = env.engine.spawn_object(Pedestrian, position=[30, 0], heading_theta=0, random_seed=1)
     obj_2 = env.engine.spawn_object(Pedestrian, position=[30, 6], heading_theta=0, random_seed=1)
     c_1 = env.engine.spawn_object(Cyclist, position=[30, 8], heading_theta=0, random_seed=1)

@@ -39,7 +39,7 @@ if __name__ == "__main__":
     import time
 
     start = time.time()
-    o = env.reset()
+    o, _ = env.reset()
 
     def get_v_path():
         return BaseVehicle.model_collection[env.vehicle.path[0]]

@@ -12,7 +12,7 @@ def _test_fps():
             num_scenarios=1000,
             start_seed=1010,
         ))
-        obs = env.reset()
+        obs, _ = env.reset()
         start = time.time()
         action = [0.0, 1.]
         total_steps = 5000

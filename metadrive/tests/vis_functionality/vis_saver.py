@@ -17,7 +17,7 @@ if __name__ == "__main__":
         }
     )
 
-    o = env.reset()
+    o, _ = env.reset()
     # env.engine.force_fps.toggle()
     for i in range(1, 100000):
         o, r, tm, tc, info = env.step([0, 1])

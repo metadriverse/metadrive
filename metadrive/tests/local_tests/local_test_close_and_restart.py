@@ -5,7 +5,7 @@ def local_test_close_and_restart():
     try:
         for m in ["X", "O", "C", "S", "R", "r", "T"]:
             env = MetaDriveEnv({"map": m, "use_render": True})
-            o = env.reset()
+            o, _ = env.reset()
             for _ in range(300):
                 assert env.observation_space.contains(o)
                 o, r, tm, tc, i = env.step([1, 1])

@@ -90,7 +90,7 @@ if __name__ == "__main__":
         }
     )
 
-    o = env.reset()
+    o, _ = env.reset()
     total_cost = 0
     for i in range(1, 100000):
         o, r, tm, tc, info = env.step([0, 0])

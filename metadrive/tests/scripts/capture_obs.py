@@ -45,7 +45,7 @@ if __name__ == "__main__":
             }
         }
     )
-    o = env.reset()
+    o, _ = env.reset()
 
     depth_camera = env.config["vehicle_config"]["depth_camera"]
     depth_camera = DepthCamera(*depth_camera, chassis_np=env.vehicle.chassis, engine=env.engine)

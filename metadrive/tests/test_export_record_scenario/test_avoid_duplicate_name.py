@@ -29,7 +29,7 @@ def test_save_recreate_scenario_respawn_traffic(vis=False):
     env = SafeMetaDriveEnv(cfg)
     try:
         positions_1 = []
-        o = env.reset()
+        o, _ = env.reset()
 
         for i in range(1, 1000):
             o, r, tm, tc, info = env.step([0, 0])
@@ -39,7 +39,7 @@ def test_save_recreate_scenario_respawn_traffic(vis=False):
         env = SafeMetaDriveEnv(cfg)
         env.config["replay_episode"] = epi_info
         env.config["record_episode"] = False
-        o = env.reset()
+        o, _ = env.reset()
         positions_1.reverse()
         for i in range(0, 1000):
             o, r, tm, tc, info = env.step([0, 1])

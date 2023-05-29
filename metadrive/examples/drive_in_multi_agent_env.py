@@ -37,7 +37,7 @@ if __name__ == "__main__":
     parser.add_argument("--pygame_render", action="store_true")
     args = parser.parse_args()
     env_cls_name = args.env
-    extra_args = dict(mode="top_down", film_size=(800, 800)) if args.top_down else {}
+    extra_args = dict(film_size=(800, 800)) if args.top_down else {}
     assert env_cls_name in envs.keys(), "No environment named {}, argument accepted: \n" \
                                         "(1) roundabout\n" \
                                         "(2) intersection\n" \
@@ -49,6 +49,7 @@ if __name__ == "__main__":
     env = envs[env_cls_name](
         {
             "use_render": True if not args.top_down else False,
+            "render_mode": "top_down" if args.top_down else None,
             "manual_control": False,
             "crash_done": False,
             "agent_policy": ManualControllableIDMPolicy

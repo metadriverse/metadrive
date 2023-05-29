@@ -101,7 +101,7 @@ class EngineCore(ShowBase.ShowBase):
             loadPrcFileData("", "want-pstats 1")
 
         # Setup onscreen render
-        if self.global_config["render_mode"] != None:
+        if self.global_config["use_render"]:
             self.mode = RENDER_MODE_ONSCREEN
             # Warning it may cause memory leak, Pand3d Official has fixed this in their master branch.
             # You can enable it if your panda version is latest.

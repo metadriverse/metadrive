@@ -14,7 +14,7 @@ def _evaluate(env_config, num_episode, has_traffic=True, need_on_same_lane=True)
     env = MetaDriveEnv(env_config)
     lane_idx_need_to_stay = 0
     try:
-        obs = env.reset()
+        obs, _ = env.reset()
         lidar_success = False
         success_list, reward_list, ep_reward, ep_len, ep_count = [], [], 0, 0, 0
         while ep_count < num_episode:
@@ -40,7 +40,7 @@ def _evaluate(env_config, num_episode, has_traffic=True, need_on_same_lane=True)
                     ">", ">>", len(reward_list) % 3
                 )
                 lane_idx_need_to_stay = len(reward_list) % 3
-                obs = env.reset()
+                obs, _ = env.reset()
                 if has_traffic:
                     assert lidar_success
                 lidar_success = False

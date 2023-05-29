@@ -293,7 +293,6 @@ class BaseEngine(EngineCore, Randomizable):
                 cm = lm
 
         for manager_name, manager in self.managers.items():
-            print(manager)
             manager.after_reset()
 
             if _debug_memory_usage:
@@ -503,7 +502,7 @@ class BaseEngine(EngineCore, Randomizable):
     def setup_main_camera(self):
         from metadrive.engine.core.main_camera import MainCamera
         # Not we should always enable main camera if image obs is required! Or RGBCamera will return incorrect result
-        if self.global_config["render_mode"] is not None or self.global_config["image_observation"]:
+        if self.global_config["use_render"] or self.global_config["image_observation"]:
             return MainCamera(self, self.global_config["camera_height"], self.global_config["camera_dist"])
         else:
             return None

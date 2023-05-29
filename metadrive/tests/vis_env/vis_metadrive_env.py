@@ -96,7 +96,7 @@ if __name__ == "__main__":
 
     start = time.time()
 
-    o = env.reset()
+    o, _ = env.reset()
     if env.config["render_pipeline"]:
         env.engine.accept("5", env.engine.render_pipeline.reload_shaders)
         env.engine.accept("7", acc_speed)

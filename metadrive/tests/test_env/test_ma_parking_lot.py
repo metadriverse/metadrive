@@ -85,7 +85,7 @@ def test_ma_parking_lot_env():
                                          "vehicle_config": {"lidar": {"num_others": 0}}})]:
         try:
             _check_spaces_before_reset(env)
-            obs = env.reset()
+            obs, _ = env.reset()
             _check_spaces_after_reset(env, obs)
             assert env.observation_space.contains(obs)
             for step in range(100):
@@ -118,7 +118,7 @@ def test_ma_parking_lot_horizon():
         )
         try:
             _check_spaces_before_reset(env)
-            obs = env.reset()
+            obs, _ = env.reset()
             _check_spaces_after_reset(env, obs)
             assert env.observation_space.contains(obs)
             last_keys = set(env.vehicles.keys())
@@ -161,7 +161,7 @@ def test_ma_parking_lot_reset():
     env = MultiAgentParkingLotEnv({"horizon": 50, "num_agents": 11})
     try:
         _check_spaces_before_reset(env)
-        obs = env.reset()
+        obs, _ = env.reset()
         _check_spaces_after_reset(env, obs)
         assert env.observation_space.contains(obs)
         for step in range(1000):
@@ -171,7 +171,7 @@ def test_ma_parking_lot_reset():
                 assert not any(te.values())
                 assert not any(tr.values())
             if te["__all__"]:
-                obs = env.reset()
+                obs, _ = env.reset()
                 assert env.observation_space.contains(obs)
 
                 _check_spaces_after_reset(env, obs)
@@ -189,7 +189,7 @@ def test_ma_parking_lot_reset():
         _check_spaces_before_reset(env)
         success_count = 0
         agent_count = 0
-        obs = env.reset()
+        obs, _ = env.reset()
         _check_spaces_after_reset(env, obs)
         assert env.observation_space.contains(obs)
 
@@ -241,7 +241,7 @@ def test_ma_parking_lot_reset():
 
                 if te["__all__"]:
                     # print("Finish {} agents. Success {} agents.".format(agent_count, success_count))
-                    o = env.reset()
+                    o, _ = env.reset()
                     assert env.observation_space.contains(o)
                     _check_spaces_after_reset(env, o)
                     break
@@ -268,7 +268,7 @@ def test_ma_parking_lot_close_spawn():
     try:
         _check_spaces_before_reset(env)
         for num_r in range(10):
-            obs = env.reset()
+            obs, _ = env.reset()
             _check_spaces_after_reset(env)
             for _ in range(10):
                 o, r, te, tr, i = env.step({k: [0, 0] for k in env.vehicles.keys()})
@@ -286,7 +286,7 @@ def test_ma_parking_lot_reward_done_alignment():
     env = MultiAgentParkingLotEnv({"horizon": 200, "num_agents": 11, "out_of_road_penalty": 777, "crash_done": False})
     try:
         _check_spaces_before_reset(env)
-        obs = env.reset(force_seed=0)
+        obs, _ = env.reset(force_seed=0)
         _check_spaces_after_reset(env, obs)
         assert env.observation_space.contains(obs)
         out_num = 0
@@ -332,7 +332,7 @@ def test_ma_parking_lot_reward_done_alignment():
     env._DEBUG_RANDOM_SEED = 1
     try:
         _check_spaces_before_reset(env)
-        obs = env.reset()
+        obs, _ = env.reset()
         _check_spaces_after_reset(env, obs)
         for step in range(5):
             act = {k: [0, 0] for k in env.vehicles.keys()}
@@ -393,9 +393,9 @@ def test_ma_parking_lot_reward_done_alignment():
     )
     try:
         _check_spaces_before_reset(env)
-        obs = env.reset()
+        obs, _ = env.reset()
         env.engine.spawn_manager.np_random = np.random.RandomState(0)
-        obs = env.reset(force_seed=3)
+        obs, _ = env.reset(force_seed=3)
         _check_spaces_after_reset(env, obs)
         for step in range(1):
             act = {k: [0, 0] for k in env.vehicles.keys()}
@@ -446,24 +446,24 @@ def test_ma_parking_lot_reward_done_alignment():
     )
     try:
         _check_spaces_before_reset(env)
-        obs = env.reset()
+        obs, _ = env.reset()
         _check_spaces_after_reset(env)
         env.vehicles["agent0"].set_position(env.vehicles["agent0"].navigation.final_lane.end)
         assert env.observation_space.contains(obs)
         for step in range(5000):
             act = {k: [0, 0] for k in env.vehicles.keys()}
-            o, r, te, tr, i = _act(env, act)
-            if te["__all__"]:
+            o, r, tm, tc, i = _act(env, act)
+            if tm["__all__"]:
                 break
             kkk = "agent0"
             #assert r[kkk] == 999
             assert i[kkk]["arrive_dest"]
-            assert te[kkk]
+            assert tm[kkk]
 
             kkk = "agent1"
             #assert r[kkk] != 999
             assert not i[kkk]["arrive_dest"]
-            assert not te[kkk]
+            assert not tm[kkk]
             break
     finally:
         env.close()
@@ -509,26 +509,26 @@ def test_ma_parking_lot_no_short_episode():
     })
     try:
         _check_spaces_before_reset(env)
-        o = env.reset()
+        o, _ = env.reset()
         _check_spaces_after_reset(env, o)
         actions = [[0, 1], [1, 1], [-1, 1]]
         start = time.time()
-        d_count = 0
-        te = {"__all__": False}
+        tm_count = 0
+        tm = {"__all__": False}
         for step in range(2000):
             # act = {k: actions[np.random.choice(len(actions))] for k in o.keys()}
             act = {k: actions[np.random.choice(len(actions))] for k in env.vehicles.keys()}
             o_keys = set(o.keys()).union({"__all__"})
-            a_keys = set(env.action_space.spaces.keys()).union(set(d.keys()))
+            a_keys = set(env.action_space.spaces.keys()).union(set(tm.keys()))
             assert o_keys == a_keys
-            o, r, te, tr, i = _act(env, act)
+            o, r, tm, tc, i = _act(env, act)
             for kkk, iii in i.items():
-                if te[kkk]:
+                if tm[kkk]:
                     assert iii["episode_length"] >= 1
-                    d_count += 1
-            if te["__all__"]:
-                o = env.reset()
-                te = {"__all__": False}
+                    tm_count += 1
+            if tm["__all__"]:
+                o, _ = env.reset()
+                tm = {"__all__": False}
             # if (step + 1) % 100 == 0:
             #     # print(
             #         "Finish {}/2000 simulation steps. Time elapse: {:.4f}. Average FPS: {:.4f}".format(
@@ -536,7 +536,7 @@ def test_ma_parking_lot_no_short_episode():
             #             time.time() - start, (step + 1) / (time.time() - start)
             #         )
             #     )
-            if d_count > 200:
+            if tm_count > 200:
                 break
     finally:
         env.close()
@@ -548,7 +548,7 @@ def test_ma_parking_lot_horizon_termination():
     try:
         for _ in range(3):  # This function is really easy to break, repeat multiple times!
             _check_spaces_before_reset(env)
-            obs = env.reset()
+            obs, _ = env.reset()
             _check_spaces_after_reset(env, obs)
             assert env.observation_space.contains(obs)
             should_respawn = set()
@@ -583,7 +583,7 @@ def test_ma_parking_lot_horizon_termination():
                         should_respawn.add(kkk)
 
                 if te["__all__"]:
-                    obs = env.reset()
+                    obs, _ = env.reset()
                     should_respawn.clear()
                     break
     finally:
@@ -606,7 +606,7 @@ def test_ma_parking_lot_40_agent_reset_after_respawn():
     env = MultiAgentParkingLotEnv({"horizon": 50, "num_agents": 32, "parking_space_num": 32, "use_render": False})
     try:
         _check_spaces_before_reset(env)
-        obs = env.reset()
+        obs, _ = env.reset()
         _check_spaces_after_reset(env, obs)
         assert env.observation_space.contains(obs)
         for step in range(50):
@@ -640,7 +640,7 @@ def test_ma_no_reset_error():
     env = MultiAgentParkingLotEnv({"horizon": 300, "num_agents": 11, "delay_done": 0, "use_render": False})
     try:
         _check_spaces_before_reset(env)
-        obs = env.reset()
+        obs, _ = env.reset()
         _check_spaces_after_reset(env, obs)
         assert env.observation_space.contains(obs)
         for step in range(50):
@@ -657,12 +657,12 @@ def test_randomize_spawn_place():
     last_pos = {}
     env = MultiAgentParkingLotEnv({"num_agents": 4, "use_render": False, "force_seed_spawn_manager": False})
     try:
-        obs = env.reset()
+        obs, _ = env.reset()
         for step in range(100):
             act = {k: [1, 1] for k in env.vehicles.keys()}
             last_pos = {kkk: v.position for kkk, v in env.vehicles.items()}
             o, r, te, tr, i = env.step(act)
-            obs = env.reset()
+            obs, _ = env.reset()
             new_pos = {kkk: v.position for kkk, v in env.vehicles.items()}
             for kkk, new_p in new_pos.items():
                 assert not np.all(new_p == last_pos[kkk]), (new_p, last_pos[kkk], kkk)

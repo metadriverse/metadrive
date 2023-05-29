@@ -12,7 +12,7 @@ def test_get_lane_index(use_render=False):
         }
     )
     try:
-        o = env.reset()
+        o, _ = env.reset()
         for i in range(1, 500):
             o, r, tm, tc, info = env.step([0, 0])
             for v in env.engine.traffic_manager.vehicles:

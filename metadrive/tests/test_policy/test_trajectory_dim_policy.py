@@ -31,7 +31,7 @@ def test_trajectory_idm(render=False):
     )
     try:
         for seed in [0, 1, 2]:
-            o = env.reset(force_seed=seed)
+            o, _ = env.reset(force_seed=seed)
             sdc_route = env.engine.map_manager.current_sdc_route
             v_config = copy.deepcopy(env.engine.global_config["vehicle_config"])
             v_config.update(

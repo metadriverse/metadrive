@@ -23,7 +23,7 @@ def _act(env, action):
 def test_obs_noise():
     env = MetaDriveEnv({"vehicle_config": {"lidar": {"gaussian_noise": 1.0, "dropout_prob": 1.0}}})
     try:
-        obs = env.reset()
+        obs, _ = env.reset()
         obs_cls = env.observations[env.DEFAULT_AGENT]
         assert isinstance(obs_cls, LidarStateObservation)
         ret = obs_cls._add_noise_to_cloud_points([0.5, 0.5, 0.5], gaussian_noise=1.0, dropout_prob=1.0)
@@ -38,7 +38,7 @@ def test_obs_noise():
         env.close()
     env = MetaDriveEnv({"vehicle_config": {"lidar": {"gaussian_noise": 0.0, "dropout_prob": 0.0}}})
     try:
-        obs = env.reset()
+        obs, _ = env.reset()
         obs_cls = env.observations[env.DEFAULT_AGENT]
         assert isinstance(obs_cls, LidarStateObservation)
         ret = obs_cls._add_noise_to_cloud_points([0.5, 0.5, 0.5], gaussian_noise=0.0, dropout_prob=0.0)

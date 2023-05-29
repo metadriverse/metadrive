@@ -38,7 +38,7 @@ def test_navigation(vis=False):
         }
     )
     target = Target(0.375, 30)
-    o = env.reset()
+    o, _ = env.reset()
     if vis:
         env.engine.accept('d', target.go_right)
         env.engine.accept('a', target.go_left)
@@ -79,7 +79,7 @@ def test_navigation(vis=False):
                 env.render()
         if tm or tc:
             # print("Reset")
-            o = env.reset()
+            o, _ = env.reset()
 
             steering_controller.reset()
             steering_error = o[0] - target.lateral

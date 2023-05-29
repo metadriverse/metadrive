@@ -4,7 +4,7 @@ from metadrive import MetaDriveEnv
 
 if __name__ == '__main__':
     env = MetaDriveEnv(dict(num_scenarios=1000, traffic_density=0.1, start_seed=5000))
-    obs = env.reset()
+    obs, _ = env.reset()
     start = time.time()
     vc = []
     for s in range(1000):

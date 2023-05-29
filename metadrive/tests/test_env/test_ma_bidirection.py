@@ -18,7 +18,7 @@ def test_ma_bidirection_idm(render=False):
     )
     index = ('1y0_1_', '2B0_0_', 0)
     try:
-        o = env.reset()
+        o, _ = env.reset()
         env.vehicle.set_velocity([1, 0.1], 10)
         # print(env.vehicle.speed)
         pass_test = False

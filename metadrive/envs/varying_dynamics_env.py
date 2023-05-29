@@ -67,7 +67,7 @@ if __name__ == '__main__':
         "num_scenarios": 10,  # Allow 10 random envs.
     })
     for ep in range(3):
-        obs = env.reset()
+        obs, _ = env.reset()
         print("Current Dynamics Parameters:", env.vehicle.get_dynamics_parameters())
         for step in range(1000):
             o, r, tm, tc, i = env.step(env.action_space.sample())

@@ -11,7 +11,7 @@ def test_safe_env(vis=False):
 
     env = SafeMetaDriveEnv(config)
     try:
-        o = env.reset()
+        o, _ = env.reset()
         total_cost = 0
         for ep in range(5):
             for i in range(1, 100):

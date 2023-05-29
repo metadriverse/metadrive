@@ -356,7 +356,7 @@ class ScenarioEnv(BaseEnv):
 if __name__ == "__main__":
     env = ScenarioEnv(
         {
-            "render_mode": "human",
+            "use_render": True,
             "agent_policy": ReplayEgoCarPolicy,
             "manual_control": False,
             "show_interface": True,

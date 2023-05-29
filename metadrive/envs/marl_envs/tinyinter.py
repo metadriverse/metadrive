@@ -436,7 +436,7 @@ if __name__ == '__main__':
             # "debug_static_world": True,
         }
     )
-    o = env.reset()
+    o, _ = env.reset()
     # env.engine.force_fps.toggle()
     print("vehicle num", len(env.engine.traffic_manager.vehicles))
     print("RL agent num", len(o))

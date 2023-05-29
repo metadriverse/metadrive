@@ -193,7 +193,7 @@ def test_object_collision_detection(render=False):
         }
     )
     try:
-        o = env.reset()
+        o, _ = env.reset()
         lane_index = (">>", ">>>", 0)
         lane = env.current_map.road_network.get_lane(lane_index)
         longitude = 22

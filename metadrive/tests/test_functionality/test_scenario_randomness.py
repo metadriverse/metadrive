@@ -38,7 +38,7 @@ def test_scenario_randomness(vis=False):
     env = SafeMetaDriveEnv(cfg)
     try:
         positions_1 = []
-        o = env.reset()
+        o, _ = env.reset()
         positions_1.append([env.vehicle.position] + [v.position for v in env.engine.traffic_manager.traffic_vehicles])
         for i in range(1, 100000 if vis else 2000):
             o, r, tm, tc, info = env.step([0, 1])
@@ -50,7 +50,7 @@ def test_scenario_randomness(vis=False):
         env.close()
         positions_1.reverse()
         env = SafeMetaDriveEnv(cfg)
-        o = env.reset()
+        o, _ = env.reset()
         old_position = positions_1.pop()
         new_position = [env.vehicle.position] + [v.position for v in env.engine.traffic_manager.traffic_vehicles]
         assert_equal_pos(old_position, new_position)

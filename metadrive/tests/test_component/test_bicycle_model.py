@@ -29,7 +29,7 @@ def _test_bicycle_model():
         }
     )
     bicycle_model = BicycleModel()
-    o = env.reset()
+    o, _ = env.reset()
     vehicle = env.current_track_vehicle
     v_dir = vehicle.velocity_direction
     bicycle_model.reset(*vehicle.position, vehicle.speed, vehicle.heading_theta, np.arctan2(v_dir[1], v_dir[0]))
