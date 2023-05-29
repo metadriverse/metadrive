@@ -238,6 +238,9 @@ class ScenarioEnv(BaseEnv):
                          num_crash_human=0,
                          num_crash_vehicle=0)
         step_info["cost"] = 0
+        if vehicle.on_yellow_continuous_line or vehicle.crash_sidewalk or vehicle.on_white_continuous_line:
+            # step_info["cost"] += self.config["out_of_road_cost"]
+            step_info["num_on_line"] = 1
         if self._is_out_of_road(vehicle):
             step_info["cost"] += self.config["out_of_road_cost"]
         if vehicle.crash_vehicle:
