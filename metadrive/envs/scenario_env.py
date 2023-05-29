@@ -66,7 +66,7 @@ SCENARIO_ENV_CONFIG = dict(
     crash_object_penalty=1.0,
     crash_human_penalty=1.0,
     driving_reward=1.0,
-    action_smooth_penalty=0.5,
+    steering_range_penalty=0.5,
     heading_penalty=1.0,
     lateral_penalty=.5,
     max_lateral_dist=4,
@@ -282,14 +282,12 @@ class ScenarioEnv(BaseEnv):
         heading_penalty = -heading_diff * self.config["heading_penalty"]
         reward += heading_penalty
 
-        # action_rate
-        last_action = vehicle.last_action
-        current_action = vehicle.current_action
-        diff = (last_action[0] - current_action[0]) ** 2  # penalize steering
-        # diff += (last_action[1] - current_action[1]) ** 2
-        diff /= 4  # normalize
-        action_rate_penalty = -diff * self.config["action_smooth_penalty"]
-        reward += action_rate_penalty
+        # steering_range
+        steering = abs(vehicle.current_action[0])
+        allowed_steering = (1 / max(vehicle.speed, 1e-2)) * vehicle.max_steering
+        overflowed_steering = min((allowed_steering - steering), 0) / vehicle.max_steering
+        steering_range_penalty = overflowed_steering * self.config["steering_range_penalty"]
+        reward += steering_range_penalty
 
         if self.config["no_negative_reward"]:
             reward = max(reward, 0)
@@ -329,7 +327,7 @@ class ScenarioEnv(BaseEnv):
 
         step_info["step_reward_lateral"] = lateral_penalty
         step_info["step_reward_heading"] = heading_penalty
-        step_info["step_reward_action_smooth"] = action_rate_penalty
+        step_info["step_reward_action_smooth"] = steering_range_penalty
 
         # Compute state difference metrics
         # TODO LQY: Shall we use state difference as reward?
