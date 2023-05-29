@@ -284,8 +284,8 @@ class ScenarioEnv(BaseEnv):
 
         # steering_range
         steering = abs(vehicle.current_action[0])
-        allowed_steering = (1 / max(vehicle.speed, 1e-2)) * vehicle.max_steering
-        overflowed_steering = min((allowed_steering - steering), 0) / vehicle.max_steering
+        allowed_steering = (1 / max(vehicle.speed, 1e-2))
+        overflowed_steering = min((allowed_steering - steering), 0)
         steering_range_penalty = overflowed_steering * self.config["steering_range_penalty"]
         reward += steering_range_penalty
 
