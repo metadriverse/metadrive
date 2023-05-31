@@ -80,7 +80,10 @@ class StateObservation(ObservationBase):
 
             # If the side detector is turn off, then add the distance to left and right road borders as state.
             lateral_to_left, lateral_to_right, = vehicle.dist_to_left_side, vehicle.dist_to_right_side
-            total_width = float((vehicle.navigation.map.MAX_LANE_NUM + 1) * vehicle.navigation.map.MAX_LANE_WIDTH)
+            if vehicle.navigation.map:
+                total_width = float((vehicle.navigation.map.MAX_LANE_NUM + 1) * vehicle.navigation.map.MAX_LANE_WIDTH)
+            else:
+                total_width = 100
             lateral_to_left /= total_width
             lateral_to_right /= total_width
             info += [clip(lateral_to_left, 0.0, 1.0), clip(lateral_to_right, 0.0, 1.0)]
