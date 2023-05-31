@@ -196,8 +196,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self.front_vehicles = set()
         self.back_vehicles = set()
 
-        if self.engine.current_map is not None:
-            self.reset(position=position, heading=heading)
+        # if self.engine.current_map is not None:
+        self.reset(position=position, heading=heading)
 
     def _add_modules_for_vehicle(self, ):
         """
@@ -382,7 +382,6 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         # Update some modules that might not be initialized before
         self._add_modules_for_vehicle_when_reset()
 
-        map = self.engine.current_map
         self.set_pitch(0)
         self.set_roll(0)
         if position is not None:
@@ -390,6 +389,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             pass
         elif self.config["spawn_position_heading"] is None:
             # spawn_lane_index has second priority
+            map = self.engine.current_map
+            assert map, "Map should not be None"
             lane = map.road_network.get_lane(self.config["spawn_lane_index"])
             position = lane.position(self.config["spawn_longitude"], self.config["spawn_lateral"])
             heading = lane.heading_theta_at(self.config["spawn_longitude"])
@@ -774,9 +775,6 @@ class BaseVehicle(BaseObject, BaseVehicleState):
 
         For the spawn position, if it is not specify in the config["spawn_lane_index"], we will automatically
         select one lane based on the localization results.
-
-        :param map: new map
-        :return: None
         """
         if self.navigation is not None and self.config["need_navigation"]:
             self.navigation.reset(self)

@@ -5,13 +5,14 @@ from collections import OrderedDict
 from typing import Callable, Optional, Union, List, Dict, AnyStr
 
 import numpy as np
+from panda3d.core import NodePath, Vec3
+
 from metadrive.base_class.randomizable import Randomizable
 from metadrive.engine.core.engine_core import EngineCore
 from metadrive.engine.interface import Interface
 from metadrive.manager.base_manager import BaseManager
 from metadrive.utils import concat_step_infos
 from metadrive.utils.utils import is_map_related_class
-from panda3d.core import NodePath, Vec3
 
 logger = logging.getLogger(__name__)
 
@@ -321,7 +322,7 @@ class BaseEngine(EngineCore, Randomizable):
                 #     self.main_camera.stop_track(bird_view_on_current_position=False)
 
         # reset terrain
-        center_p = self.current_map.get_center_point()
+        center_p = self.current_map.get_center_point() if self.current_map else [0, 0]
         self.terrain.reset(center_p)
         if self.sky_box is not None:
             self.sky_box.set_position(center_p)

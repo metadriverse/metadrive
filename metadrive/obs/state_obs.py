@@ -126,7 +126,8 @@ class StateObservation(ObservationBase):
             # against the central of current lane to the state. If vehicle is centered in the lane, then the offset
             # is 0 and vice versa.
             _, lateral = vehicle.lane.local_coordinates(vehicle.position)
-            info.append(clip((lateral * 2 / vehicle.navigation.map.MAX_LANE_WIDTH + 1.0) / 2.0, 0.0, 1.0))
+            max_lane_width = vehicle.navigation.map.MAX_LANE_WIDTH if vehicle.navigation.map else 10
+            info.append(clip((lateral * 2 / max_lane_width + 1.0) / 2.0, 0.0, 1.0))
 
         return info
 

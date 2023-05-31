@@ -14,6 +14,7 @@ class ScenarioMapManager(BaseManager):
         super(ScenarioMapManager, self).__init__()
         self.store_map = self.engine.global_config.get("store_map", False)
         self.current_map = None
+        self._no_map = self.engine.global_config["no_map"]
         self.map_num = self.engine.global_config["num_scenarios"]
         self.start_scenario_index = self.engine.global_config["start_scenario_index"]
         self._stored_maps = {
@@ -28,19 +29,20 @@ class ScenarioMapManager(BaseManager):
         self.current_sdc_route = None
 
     def reset(self):
-        seed = self.engine.global_random_seed
-        assert self.start_scenario_index <= seed < self.start_scenario_index + self.map_num
+        if not self._no_map:
+            seed = self.engine.global_random_seed
+            assert self.start_scenario_index <= seed < self.start_scenario_index + self.map_num
 
-        self.current_sdc_route = None
-        self.sdc_dest_point = None
+            self.current_sdc_route = None
+            self.sdc_dest_point = None
 
-        if self._stored_maps[seed] is None:
-            new_map = ScenarioMap(map_index=seed)
-            if self.store_map:
-                self._stored_maps[seed] = new_map
-        else:
-            new_map = self._stored_maps[seed]
-        self.load_map(new_map)
+            if self._stored_maps[seed] is None:
+                new_map = ScenarioMap(map_index=seed)
+                if self.store_map:
+                    self._stored_maps[seed] = new_map
+            else:
+                new_map = self._stored_maps[seed]
+            self.load_map(new_map)
         self.update_route()
 
     def update_route(self):
