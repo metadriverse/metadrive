@@ -12,8 +12,9 @@ class StateObservation(ObservationBase):
     Use vehicle state info, navigation info and lidar point clouds info as input
     """
 
-    def __init__(self, config, navi_dim=None):
-        self.navi_dim = navi_dim or NodeNetworkNavigation.get_navigation_info_dim()
+    def __init__(self, config):
+        navi_dim = config["navigation_module"].get_navigation_info_dim()
+        self.navi_dim = navi_dim
         super(StateObservation, self).__init__(config)
 
     @property
@@ -144,8 +145,8 @@ class StateObservation(ObservationBase):
 
 
 class LidarStateObservation(ObservationBase):
-    def __init__(self, vehicle_config, navi_dim=None):
-        self.state_obs = StateObservation(vehicle_config, navi_dim=navi_dim)
+    def __init__(self, vehicle_config):
+        self.state_obs = StateObservation(vehicle_config)
         super(LidarStateObservation, self).__init__(vehicle_config)
         self.cloud_points = None
         self.detected_objects = None

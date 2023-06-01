@@ -15,7 +15,8 @@ from metadrive.manager.scenario_data_manager import ScenarioDataManager
 from metadrive.manager.scenario_light_manager import ScenarioLightManager
 from metadrive.manager.scenario_map_manager import ScenarioMapManager
 from metadrive.manager.waymo_traffic_manager import WaymoTrafficManager
-from metadrive.obs.real_env_observation import ScenarioObservation
+from metadrive.obs.state_obs import LidarStateObservation
+from metadrive.obs.image_obs import ImageStateObservation
 from metadrive.policy.replay_policy import ReplayEgoCarPolicy
 from metadrive.utils import get_np_random
 from metadrive.utils.math import wrap_to_pi
@@ -117,8 +118,11 @@ class ScenarioEnv(BaseEnv):
     def _get_observations(self):
         return {self.DEFAULT_AGENT: self.get_single_observation(self.config["vehicle_config"])}
 
-    def get_single_observation(self, vehicle_config):
-        o = ScenarioObservation(vehicle_config)
+    def get_single_observation(self, vehicle_config: "Config"):
+        if self.config["image_observation"]:
+            o = ImageStateObservation(vehicle_config)
+        else:
+            o = LidarStateObservation(vehicle_config)
         return o
 
     def switch_to_top_down_view(self):

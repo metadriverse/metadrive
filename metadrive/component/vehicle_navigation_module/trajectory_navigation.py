@@ -126,7 +126,7 @@ class TrajectoryNavigation(BaseNavigation):
             start = k * self.CHECK_POINT_INFO_DIM
             end = (k + 1) * self.CHECK_POINT_INFO_DIM
             self._navi_info[start: end], lanes_heading = self._get_info_for_checkpoint(ckpt, ego_vehicle)
-            if self._show_navi_info:
+            if self._show_navi_info and self._ckpt_vis_models is not None:
                 pos_of_goal = ckpt
                 self._ckpt_vis_models[k].setPos(panda_vector(pos_of_goal[0], pos_of_goal[1], 1.8))
                 self._ckpt_vis_models[k].setH(self._goal_node_path.getH() + 3)

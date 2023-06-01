@@ -1,7 +1,6 @@
 import gym
 import numpy as np
 
-from metadrive.component.vehicle_navigation_module.trajectory_navigation import TrajectoryNavigation
 from metadrive.obs.state_obs import LidarStateObservation
 from metadrive.utils import clip
 
@@ -33,13 +32,3 @@ class NuPlanObservation(LidarStateObservation):
     def reset(self, env, vehicle=None):
         super(NuPlanObservation, self).reset(env, vehicle)
         self.lateral_dist = 0
-
-
-class ScenarioObservation(LidarStateObservation):
-
-    def __init__(self, *args, **kwargs):
-        super(ScenarioObservation, self).__init__(*args, **kwargs,
-                                                  navi_dim=TrajectoryNavigation.get_navigation_info_dim())
-
-
-WaymoObservation = ScenarioObservation

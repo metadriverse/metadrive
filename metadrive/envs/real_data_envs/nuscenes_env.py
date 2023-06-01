@@ -10,11 +10,12 @@ if __name__ == "__main__":
     env = NuScenesEnv(
         {
             "use_render": True,
-            "no_map": True,
+            "no_map": False,
             "agent_policy": ReplayEgoCarPolicy,
             # "manual_control": True,
             "show_interface": False,
             # "need_lane_localization": False,
+            # "image_observation": True,
             "show_logo": False,
             "no_traffic": False,
             "sequential_seed": True,
@@ -45,14 +46,16 @@ if __name__ == "__main__":
             # "data_directory": "/home/shady/Downloads/test_processed",
             "horizon": 1000,
             "no_static_vehicles": True,
-            "show_policy_mark": True,
+            # "show_policy_mark": True,
             # "show_coordinates": True,
             # "force_destroy": True,
             # "default_vehicle_in_traffic": True,
             "vehicle_config": dict(
                 # light=True,
                 # random_color=True,
-                show_navi_mark=True,
+                show_navi_mark=False,
+                image_source="rgb_camera",
+                rgb_camera=(1600, 900),
                 # no_wheel_friction=True,
                 lidar=dict(num_lasers=120, distance=50),
                 lane_line_detector=dict(num_lasers=0, distance=50),
@@ -72,11 +75,13 @@ if __name__ == "__main__":
     while True:
         # for i in range(10):
         start_reset = time.time()
-        env.reset(force_seed=4)
+        env.reset(force_seed=0)
 
         reset_used_time += time.time() - start_reset
         reset_num += 1
         for t in range(10000):
+            if t==30:
+                env.in_stop = True
             o, r, d, info = env.step([1, 0.88])
             assert env.observation_space.contains(o)
             s += 1
