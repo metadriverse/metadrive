@@ -27,7 +27,7 @@ if __name__ == "__main__":
             # "debug": True,
             # "no_static_vehicles": True,
             # "pstats": True,
-            # "render_pipeline": True,
+            "render_pipeline": True,
             # "daytime": "22:01",
             # "no_traffic": True,
             # "no_light": False,
@@ -80,8 +80,6 @@ if __name__ == "__main__":
         reset_used_time += time.time() - start_reset
         reset_num += 1
         for t in range(10000):
-            if t==30:
-                env.in_stop = True
             o, r, d, info = env.step([1, 0.88])
             assert env.observation_space.contains(o)
             s += 1

@@ -137,6 +137,8 @@ class TrafficBarrier(TrafficObject):
         if self.render:
             model = self.loader.loadModel(AssetLoader.file_path("models", "barrier", "scene.gltf"))
             model.setH(-90)
+            model.setPos(0, 0, -0.93)
+            model.setScale(0.7)
             model.reparentTo(self.origin)
 
     @property
