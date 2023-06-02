@@ -13,7 +13,10 @@ class StateObservation(ObservationBase):
     """
 
     def __init__(self, config):
-        navi_dim = config["navigation_module"].get_navigation_info_dim()
+        if config["navigation_module"]:
+            navi_dim = config["navigation_module"].get_navigation_info_dim()
+        else:
+            navi_dim = NodeNetworkNavigation.get_navigation_info_dim()
         self.navi_dim = navi_dim
         super(StateObservation, self).__init__(config)
 
