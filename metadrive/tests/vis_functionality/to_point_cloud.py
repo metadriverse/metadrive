@@ -7,7 +7,7 @@ if __name__ == '__main__':
     pcds = []
     # for h in range(-180, 180, 20):
     h = 0
-    raw_depth = o3d.io.read_image('depth_{}.jpg'.format(h))
+    raw_depth = o3d.io.read_image("D:\\code\\scenarionet\\scenarionet\\tests\\script\\camera_depth.jpg")
     raw_depth = np.array(raw_depth)[..., 0]
     raw_depth *= 255
     raw_depth = raw_depth.astype(np.uint16)
@@ -21,14 +21,14 @@ if __name__ == '__main__':
                                                               o3d.camera.PinholeCameraIntrinsicParameters.PrimeSenseDefault)
                                                           ,
                                                           extrinsic=extrinsic,
-                                                          project_valid_depth_only=False,
-                                                          # stride=8
+                                                          project_valid_depth_only=True,
+                                                          stride=4
                                                           # depth_scale=1000.0,
                                                           # depth_trunc=1000.0
                                                           )
-    pcd.transform([[1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]])
-    # r = pcd.get_rotation_matrix_from_xyz((0, 0, np.pi))
-    # pcd = pcd.rotate(r, center=(0, 0, 0))
+    # pcd.transform([[1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]])
+    r = pcd.get_rotation_matrix_from_xyz((0, 0, np.pi))
+    pcd = pcd.rotate(r, center=(0, 0, 0))
     pcds.append(pcd)
 
     o3d.visualization.draw_geometries(pcds)

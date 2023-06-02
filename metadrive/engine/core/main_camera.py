@@ -226,6 +226,9 @@ class MainCamera:
 
         if self.world_light is not None:
             self.world_light.step(current_pos)
+        # self.camera.reparentTo(vehicle.origin)
+        # self.camera.setPost(0., 0.8, 1.5)
+        # self.camera.lookAt(0, 2.4, 1.3)
         return task.cont
 
     @staticmethod

@@ -164,7 +164,7 @@ class TrafficBarrier(TrafficObject):
     @property
     def top_down_length(self):
         # reverse the direction
-        return self.WIDTH
+        return self.WIDTH * 2
 
     @property
     def top_down_width(self):

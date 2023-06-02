@@ -92,7 +92,7 @@ if __name__ == "__main__":
                                  "reward": r,
                                  "heading_r": info["step_reward_heading"],
                                  "lateral_r": info["step_reward_lateral"],
-                                 "smooth_action_r": info["step_reward_action_smooth"]})
+                                 "smooth_action_r": info["step_reward_action_smooth"]}, mode="topdown")
             if d:
                 print(
                     "Time elapse: {:.4f}. Average FPS: {:.4f}, AVG_Reset_time: {:.4f}".format(
