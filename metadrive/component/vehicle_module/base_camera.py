@@ -145,10 +145,9 @@ class BaseCamera(ImageBuffer):
     def get_lens(self):
         return type(self)._singleton.lens
 
-    # following functions are for onscreen render
-    def add_display_region(self, display_region):
-        self.track(self.attached_object)
-        super(BaseCamera, self).add_display_region(display_region)
+    # # following functions are for onscreen render
+    # def add_display_region(self, display_region):
+    #     super(BaseCamera, self).add_display_region(display_region)
 
     def remove_display_region(self):
         super(BaseCamera, self).remove_display_region()
