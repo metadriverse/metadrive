@@ -13,7 +13,7 @@ class DepthCamera(BaseCamera):
     # shape(dim_1, dim_2)
     CAM_MASK = CamMask.DepthCam
 
-    GROUND_HEIGHT = -0.4
+    GROUND_HEIGHT = -0.5
     VIEW_GROUND = False
     GROUND = None
     GROUND_MODEL = None
@@ -58,7 +58,7 @@ class DepthCamera(BaseCamera):
             # # model to enable the depth information of terrain
             self.GROUND_MODEL = self.GROUND.getRoot()
             self.GROUND_MODEL.setPos(-128, -128, self.GROUND_HEIGHT)
-            self.GROUND_MODEL.reparentTo(type(self)._singleton.origin)
+            self.GROUND_MODEL.reparentTo(type(self)._singleton.engine.render)
             self.GROUND_MODEL.hide(CamMask.AllOn)
             self.GROUND_MODEL.show(CamMask.DepthCam)
             self.GROUND.generate()
@@ -66,7 +66,7 @@ class DepthCamera(BaseCamera):
     def track(self, base_object):
         if self.VIEW_GROUND:
             pos = base_object.origin.getPos()
-            type(self)._singleton.GROUND_MODEL.setZ(-pos[-1] + self.GROUND_HEIGHT)
+            type(self)._singleton.GROUND_MODEL.setPos(pos[0], pos[1], self.GROUND_HEIGHT)
             # type(self)._singleton.GROUND_MODEL.setP(-base_object.origin.getR())
             # type(self)._singleton.GROUND_MODEL.setR(-base_object.origin.getR())
         return super(DepthCamera, self).track(base_object)
