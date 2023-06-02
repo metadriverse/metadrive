@@ -83,6 +83,8 @@ SCENARIO_ENV_CONFIG = dict(
     # ===== Termination Scheme =====
     out_of_route_done=False,
     crash_vehicle_done=False,
+    crash_object_done=False,
+    crash_human_done=False,
     relax_out_of_road_done=True,
 
     # ===== others =====
@@ -206,15 +208,19 @@ class ScenarioEnv(BaseEnv):
             done = True
             logging.info(msg("out_of_road"))
             done_info[TerminationState.OUT_OF_ROAD] = True
+        elif vehicle.crash_human and self.config["crash_human_done"]:
+            done = True
+            logging.info(msg("crash human"))
+            done_info[TerminationState.CRASH_HUMAN] = True
         elif vehicle.crash_vehicle and self.config["crash_vehicle_done"]:
             done = True
             logging.info(msg("crash vehicle"))
             done_info[TerminationState.CRASH_VEHICLE] = True
-        elif vehicle.crash_object:
+        elif vehicle.crash_object and self.config["crash_object_done"]:
             done = True
             done_info[TerminationState.CRASH_OBJECT] = True
             logging.info(msg("crash object"))
-        elif vehicle.crash_building:
+        elif vehicle.crash_building and self.config["crash_object_done"]:
             done = True
             done_info[TerminationState.CRASH_BUILDING] = True
             logging.info(msg("crash building"))
