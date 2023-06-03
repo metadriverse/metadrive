@@ -41,9 +41,9 @@ class TrafficObject(BaseStaticObject):
 class TrafficCone(TrafficObject):
     """Placed near the construction section to indicate that traffic is prohibited"""
 
-    RADIUS = 0.25
-    HEIGHT = 1.2
-    MASS = 1
+    RADIUS = 0.2
+    HEIGHT = 2
+    MASS = 2
     CLASS_NAME = MetaDriveType.TRAFFIC_CONE
 
     def __init__(self, position, heading_theta, lane=None, static: bool = False, random_seed=None, name=None):

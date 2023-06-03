@@ -271,6 +271,7 @@ class ScenarioTrafficManager(BaseManager):
             name=obj_name,
             position=state["position"],
             heading_theta=state["heading"],
+            static=True if self.engine.global_config["static_traffic_object"] else False,
         )
         self._scenario_id_to_obj_id[scenario_id] = obj.name
         self._obj_id_to_scenario_id[obj.name] = scenario_id
@@ -288,7 +289,7 @@ class ScenarioTrafficManager(BaseManager):
 
     def is_static_object(self, obj_id):
         return isinstance(self.spawned_objects[obj_id], TrafficBarrier) \
-            or isinstance(self.spawned_objects[obj_id], TrafficCone)
+               or isinstance(self.spawned_objects[obj_id], TrafficCone)
 
     @property
     def obj_id_to_scenario_id(self):
