@@ -2,6 +2,7 @@ import copy
 import os
 
 import numpy as np
+
 from metadrive.manager.base_manager import BaseManager
 from metadrive.scenario.scenario_description import ScenarioDescription as SD, MetaDriveType
 from metadrive.scenario.utils import read_scenario_data, read_dataset_summary
@@ -16,7 +17,7 @@ class ScenarioDataManager(BaseManager):
         from metadrive.engine.engine_utils import get_engine
         engine = get_engine()
 
-        self.store_map = engine.global_config.get("store_map", False)
+        self.store_data = engine.global_config["store_data"]
         self.directory = engine.global_config["data_directory"]
         self.num_scenarios = engine.global_config["num_scenarios"]
         self.start_scenario_index = engine.global_config["start_scenario_index"]
@@ -85,8 +86,9 @@ class ScenarioDataManager(BaseManager):
                 print("{}:  Reset! Mem Change {:.3f}MB".format("data manager clear scenario", (lm - cm) / 1e6))
                 cm = lm
 
-            # print("===Getting new scenario: ", i)
-            self._scenarios[i] = self._get_scenario(i)
+            ret = self._get_scenario(i)
+            if self.store_data:
+                self._scenarios[i] = ret
 
             if _debug_memory_leak:
                 lm = process_memory()
@@ -94,7 +96,7 @@ class ScenarioDataManager(BaseManager):
                 cm = lm
 
         else:
-            pass
+            ret = self._scenarios[i]
             # print("===Don't need to get new scenario. Just return: ", i)
 
         if should_copy:
@@ -102,7 +104,6 @@ class ScenarioDataManager(BaseManager):
 
         # Data Manager is the first manager that accesses  data.
         # It is proper to let it validate the metadata and change the global config if needed.
-        ret = self._scenarios[i]
 
         return ret
 

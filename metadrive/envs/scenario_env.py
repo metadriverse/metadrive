@@ -37,6 +37,7 @@ SCENARIO_ENV_CONFIG = dict(
 
     # ===== Map Config =====
     store_map=True,
+    store_data=True,
     need_lane_localization=True,
     no_map=False,
 
