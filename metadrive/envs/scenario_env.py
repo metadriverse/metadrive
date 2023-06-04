@@ -50,7 +50,7 @@ SCENARIO_ENV_CONFIG = dict(
     even_sample_vehicle_class=True,  # to make the scene more diverse
     default_vehicle_in_traffic=False,
     skip_missing_light=False,
-    static_traffic_object=False,
+    static_traffic_object=True,
 
     # ===== Agent config =====
     vehicle_config=dict(
