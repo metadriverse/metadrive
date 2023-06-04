@@ -92,6 +92,7 @@ SCENARIO_ENV_CONFIG = dict(
     # ===== others =====
     interface_panel=[VehiclePanel],  # for boosting efficiency
     horizon=None,
+    allowed_more_steps=None,
 )
 
 
@@ -229,6 +230,13 @@ class ScenarioEnv(BaseEnv):
 
         elif self.config["horizon"] is not None and \
                 self.episode_lengths[vehicle_id] >= self.config["horizon"] and not self.is_multi_agent:
+            done = True
+            done_info[TerminationState.MAX_STEP] = True
+            logging.info(msg("max step"))
+
+        elif self.config["allowed_more_steps"] is not None and \
+                self.episode_lengths[vehicle_id] >= self.engine.data_manager.current_scenario_length + self.config[
+            "allowed_more_steps"] and not self.is_multi_agent:
             done = True
             done_info[TerminationState.MAX_STEP] = True
             logging.info(msg("max step"))
