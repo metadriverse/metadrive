@@ -239,7 +239,7 @@ class ScenarioEnv(BaseEnv):
             "allowed_more_steps"] and not self.is_multi_agent:
             done = True
             done_info[TerminationState.MAX_STEP] = True
-            logging.info(msg("max step"))
+            logging.info(msg("more step than original episode"))
 
         # for compatibility
         # crash almost equals to crashing with vehicles
