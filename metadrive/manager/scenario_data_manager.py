@@ -62,6 +62,11 @@ class ScenarioDataManager(BaseManager):
         self.coverage[i] = 1
         return ret
 
+    def before_reset(self):
+        if not self.store_data:
+            assert len(self._scenarios) == 1, "It seems you access multiple scenarios in one episode"
+            self._scenarios = {}
+
     def get_scenario(self, i, should_copy=False):
 
         _debug_memory_leak = False
@@ -87,8 +92,7 @@ class ScenarioDataManager(BaseManager):
                 cm = lm
 
             ret = self._get_scenario(i)
-            if self.store_data:
-                self._scenarios[i] = ret
+            self._scenarios[i] = ret
 
             if _debug_memory_leak:
                 lm = process_memory()

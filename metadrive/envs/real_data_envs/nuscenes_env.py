@@ -18,6 +18,7 @@ if __name__ == "__main__":
             # "image_observation": True,
             "show_logo": False,
             "no_traffic": False,
+            # "store_data": False,
             "sequential_seed": True,
             # "debug_static_world": True,
             # "sequential_seed": True,
@@ -27,7 +28,7 @@ if __name__ == "__main__":
             # "debug": True,
             # "no_static_vehicles": True,
             # "pstats": True,
-            "render_pipeline": True,
+            "render_pipeline": False,
             # "daytime": "22:01",
             # "no_traffic": True,
             # "no_light": False,
@@ -90,7 +91,9 @@ if __name__ == "__main__":
                                  "reward": r,
                                  "heading_r": info["step_reward_heading"],
                                  "lateral_r": info["step_reward_lateral"],
-                                 "smooth_action_r": info["step_reward_action_smooth"]}, mode="topdown")
+                                 "smooth_action_r": info["step_reward_action_smooth"]},
+                           # mode="topdown"
+                           )
             if d:
                 print(
                     "Time elapse: {:.4f}. Average FPS: {:.4f}, AVG_Reset_time: {:.4f}".format(
