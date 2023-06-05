@@ -100,7 +100,6 @@ class ScenarioDataManager(BaseManager):
                 cm = lm
 
         else:
-            assert self.store_data, "Store data is False! Don't allow get data from buffer"
             ret = self._scenarios[i]
             # print("===Don't need to get new scenario. Just return: ", i)
 
