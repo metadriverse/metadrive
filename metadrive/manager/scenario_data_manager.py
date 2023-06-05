@@ -64,7 +64,7 @@ class ScenarioDataManager(BaseManager):
 
     def before_reset(self):
         if not self.store_data:
-            assert len(self._scenarios) == 1, "It seems you access multiple scenarios in one episode"
+            assert len(self._scenarios) <= 1, "It seems you access multiple scenarios in one episode"
             self._scenarios = {}
 
     def get_scenario(self, i, should_copy=False):

@@ -18,7 +18,7 @@ if __name__ == "__main__":
             # "image_observation": True,
             "show_logo": False,
             "no_traffic": False,
-            # "store_data": False,
+            "store_data": False,
             "sequential_seed": True,
             # "debug_static_world": True,
             # "sequential_seed": True,
