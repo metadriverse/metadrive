@@ -38,7 +38,7 @@ if __name__ == "__main__":
             # "pstats": True,
             "force_destroy": False,
             # "show_skybox": False,
-            # "render_pipeline": True,
+            "render_pipeline": True,
             # "camera_dist": 8,
             # "window_size": (1600, 900),
             # "camera_dist": -1,
@@ -96,7 +96,7 @@ if __name__ == "__main__":
 
     start = time.time()
 
-    o = env.reset(force_seed=0)
+    o = env.reset(force_seed=77)
     if env.config["render_pipeline"]:
         env.engine.accept("5", env.engine.render_pipeline.reload_shaders)
         env.engine.accept("7", acc_speed)
@@ -129,7 +129,7 @@ if __name__ == "__main__":
             }
         )
         if d:
-            env.reset(force_seed=0)
+            env.reset(force_seed=77)
         # # assert env.observation_space.contains(o)
         # if (s + 1) % 100 == 0:
         #     # print(
