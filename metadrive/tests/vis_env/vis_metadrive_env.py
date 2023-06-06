@@ -5,13 +5,13 @@ if __name__ == "__main__":
     setup_logger(True)
     env = MetaDriveEnv(
         {
-            "num_scenarios": 10,
-            "traffic_density": 0.0,
+            "num_scenarios": 100,
+            "traffic_density": 1.0,
             "traffic_mode": "hybrid",
             "start_seed": 71,
             # "_disable_detector_mask":True,
             # "debug_physics_world": True,
-            # "debug": True,
+            "debug": True,
             # "global_light": False,
             # "debug_static_world": True,
             "show_interface": False,
@@ -128,8 +128,8 @@ if __name__ == "__main__":
                 "current_seed": env.current_seed
             }
         )
-        if d:
-            env.reset(force_seed=77)
+        # if d:
+        #     env.reset(force_seed=77)
         # # assert env.observation_space.contains(o)
         # if (s + 1) % 100 == 0:
         #     # print(
