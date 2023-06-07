@@ -5,10 +5,10 @@ if __name__ == "__main__":
     setup_logger(True)
     env = MetaDriveEnv(
         {
-            "num_scenarios": 10,
-            "traffic_density": 0.0,
+            "num_scenarios": 1,
+            "traffic_density": 0.15,
             "traffic_mode": "hybrid",
-            "start_seed": 71,
+            "start_seed": 74,
             # "_disable_detector_mask":True,
             # "debug_physics_world": True,
             # "debug": True,
@@ -20,8 +20,8 @@ if __name__ == "__main__":
             "random_lane_width": False,
             # "image_observation": True,
             # "controller": "joystick",
-            "show_coordinates": True,
-            # "random_agent_model": True,
+            # "show_coordinates": True,
+            "random_agent_model":False,
             "manual_control": True,
             "use_render": True,
             "accident_prob": 1,
@@ -29,19 +29,19 @@ if __name__ == "__main__":
             "interface_panel": [],
             "need_inverse_traffic": False,
             "rgb_clip": True,
-            "map": "S",
+            "map": "CX",
             # "agent_policy": ExpertPolicy,
             "random_traffic": False,
             # "random_lane_width": True,
-            "random_agent_model": True,
             "driving_reward": 1.0,
             # "pstats": True,
             "force_destroy": False,
             # "show_skybox": False,
-            # "render_pipeline": True,
+            "show_fps": False,
+            "render_pipeline": True,
             # "camera_dist": 8,
-            # "window_size": (1600, 900),
-            # "camera_dist": -1,
+            "window_size": (1600, 900),
+            "camera_dist": 9,
             # "camera_pitch": 30,
             # "camera_height": 1,
             # "camera_smooth": False,
@@ -96,7 +96,7 @@ if __name__ == "__main__":
 
     start = time.time()
 
-    o = env.reset(force_seed=0)
+    o = env.reset()
     if env.config["render_pipeline"]:
         env.engine.accept("5", env.engine.render_pipeline.reload_shaders)
         env.engine.accept("7", acc_speed)
@@ -119,17 +119,17 @@ if __name__ == "__main__":
         #     env.close()
         #     env.reset()
         # info["fuel"] = env.vehicle.energy_consumption
-        env.render(
-            text={
-                # "heading_diff": env.vehicle.heading_diff(env.vehicle.lane),
-                # "lane_width": env.vehicle.lane.width,
-                # "lane_index": env.vehicle.lane_index,
-                # "lateral": env.vehicle.lane.local_coordinates(env.vehicle.position),
-                "current_seed": env.current_seed
-            }
-        )
-        if d:
-            env.reset(force_seed=0)
+        # env.render(
+        #     text={
+        #         # "heading_diff": env.vehicle.heading_diff(env.vehicle.lane),
+        #         # "lane_width": env.vehicle.lane.width,
+        #         # "lane_index": env.vehicle.lane_index,
+        #         # "lateral": env.vehicle.lane.local_coordinates(env.vehicle.position),
+        #         "current_seed": env.current_seed
+        #     }
+        # )
+        # if d:
+        #     env.reset()
         # # assert env.observation_space.contains(o)
         # if (s + 1) % 100 == 0:
         #     # print(

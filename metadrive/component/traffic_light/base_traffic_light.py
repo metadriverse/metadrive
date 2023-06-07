@@ -101,7 +101,7 @@ class BaseTrafficLight(BaseObject):
         if status == MetaDriveType.LIGHT_GREEN:
             return [0, 255, 0]
         if status == MetaDriveType.LIGHT_RED:
-            return [1, 255, 0]
+            return [255, 0, 0]
         if status == MetaDriveType.LIGHT_YELLOW:
             return [255, 255, 0]
         if status == MetaDriveType.LIGHT_UNKNOWN:
